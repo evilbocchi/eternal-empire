@@ -1,0 +1,19 @@
+import Difficulty from "@antivivi/jjt-difficulties";
+import CurrencyBundle from "shared/currency/CurrencyBundle";
+import Droplet from "shared/item/Droplet";
+import Dropper from "shared/item/traits/Dropper";
+import Item from "shared/item/Item";
+
+export = new Item(script.Name)
+    .setName("Quadruple Coin Miner")
+    .setDescription("Produces %val% droplets per second. You really like producing Bitcoin, huh?")
+    .setDifficulty(Difficulty.JustAir)
+    .setPrice(new CurrencyBundle().set("Funds", 8e30).set("Skill", 20), 1)
+    .addPlaceableArea("BarrenIslands", "SlamoVillage")
+    .persists("Skillification")
+
+    .trait(Dropper)
+    .setDroplet(Droplet.QuadrupleCoin)
+    .setDropRate(1)
+
+    .exit();

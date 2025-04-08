@@ -1,0 +1,18 @@
+import Difficulty from "@antivivi/jjt-difficulties";
+import Condenser from "shared/item/traits/Condenser";
+import Droplet from "shared/item/Droplet";
+import Item from "shared/item/Item";
+import CurrencyBundle from "shared/currency/CurrencyBundle";
+
+export = new Item(script.Name)
+    .setName("Basic Condenser")
+    .setDescription("The successor to the Recycling Dropper. Produces %val% droplets when %quota% of those values are processed through the attached furnace.")
+    .setDifficulty(Difficulty.FelixTheA)
+    .setPrice(new CurrencyBundle().set("Funds", 256e12), 1)
+    .addPlaceableArea("BarrenIslands")
+
+    .trait(Condenser)
+    .addDroplets(Droplet.LiquidFundsDroplet, Droplet.LiquidPowerDroplet)
+    .setQuota(0.5)
+
+    .exit();

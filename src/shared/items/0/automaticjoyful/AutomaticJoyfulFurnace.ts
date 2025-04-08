@@ -1,0 +1,25 @@
+import Difficulty from "@antivivi/jjt-difficulties";
+import Furnace from "shared/item/traits/Furnace";
+import Item from "shared/item/Item";
+import CurrencyBundle from "shared/currency/CurrencyBundle";
+import Formula from "shared/currency/Formula";
+import { GameUtils } from "shared/item/ItemUtils";
+import RoboticCauldron from "shared/items/0/walkthrough/RoboticCauldron";
+
+const mul = new CurrencyBundle().set("Power", 1);
+
+export = new Item(script.Name)
+    .setName("Automatic Joyful Furnace")
+    .setDescription(`Could be better than the ${RoboticCauldron.name} depending on your use case.`)
+    .setDifficulty(Difficulty.AutomaticJoyful)
+    .setPrice(new CurrencyBundle().set("Purifier Clicks", 1e21), 1)
+    .addPlaceableArea("BarrenIslands")
+
+    .setFormula(new Formula().add(1).log(5).mul(16.4).add(5))
+    .setFormulaX("power")
+    .setFormulaXCap(new CurrencyBundle().set("Power", 10e24))
+
+    .trait(Furnace)
+    .applyFormula((v, item) => item.setMul(mul.set("Power", v)), () => GameUtils.currencyService.get("Power"))
+
+    .exit();

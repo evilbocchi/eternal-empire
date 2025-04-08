@@ -1,0 +1,27 @@
+import HarvestingTool from "shared/item/traits/HarvestingTool";
+import Item from "shared/item/Item";
+import ExcavationStone from "shared/items/excavation/ExcavationStone";
+import MagicalWood from "shared/items/excavation/harvestable/MagicalWood";
+import WhiteGem from "shared/items/excavation/WhiteGem";
+import CopperAxe from "shared/items/tools/CopperAxe";
+import CurrencyBundle from "shared/currency/CurrencyBundle";
+import TierDifficulty from "shared/item/TierDifficulty";
+
+export = new Item(script.Name)
+    .setName("Reinforced Axe")
+    .setDescription("Harvests wood at a slow rate. Used by professional woodcutters who need more efficiency.")
+    .setDifficulty(TierDifficulty.Tier2)
+    .setPrice(new CurrencyBundle().set("Funds", 1e12), 1)
+    .setRequiredItemAmount(WhiteGem, 3)
+    .setRequiredItemAmount(ExcavationStone, 9)
+    .setRequiredItemAmount(MagicalWood, 2)
+    .setRequiredItemAmount(CopperAxe, 1)
+    .setImage(125688985856246)
+    .setLevelReq(4)
+
+    .trait(HarvestingTool)
+    .setToolType("Axe")
+    .setSpeed(18)
+    .setDamage(2)
+
+    .exit();

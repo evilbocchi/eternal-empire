@@ -1,0 +1,263 @@
+import { OnInit, OnStart, Service } from "@flamework/core";
+import { RunService, TweenService, Workspace } from "@rbxts/services";
+import { DataService } from "server/services/serverdata/DataService";
+import { ItemsService } from "server/services/serverdata/ItemsService";
+import { LevelService } from "server/services/serverdata/LevelService";
+import { UnlockedAreasService } from "server/services/serverdata/UnlockedAreasService";
+import { SOUND_EFFECTS_GROUP } from "shared/constants";
+import { getSound } from "shared/GameAssets";
+import { ASSETS } from "shared/GameAssets";
+import { AREAS } from "shared/Area";
+import Item from "shared/item/Item";
+import Crystal from "shared/items/excavation/Crystal";
+import ExcavationStone from "shared/items/excavation/ExcavationStone";
+import Gold from "shared/items/excavation/Gold";
+import EnchantedGrass from "shared/items/excavation/harvestable/EnchantedGrass";
+import Iron from "shared/items/excavation/Iron";
+import Quartz from "shared/items/excavation/Quartz";
+import WhiteGem from "shared/items/excavation/WhiteGem";
+import Items from "shared/items/Items";
+import Packets from "shared/Packets";
+import { weldModel } from "@antivivi/vrldk";
+import { convertToMMSS } from "@antivivi/vrldk";
+
+declare global {
+    type ChestModel = Model & {
+        Lid: Model,
+        Base: Model,
+        Hitbox: BasePart & {
+            CooldownGui: CooldownGui;
+        };
+    };
+
+    type CooldownGui = BillboardGui & {
+        CooldownLabel: TextLabel;
+    };
+
+    interface Assets {
+        Chest: ChestModel;
+    }
+}
+
+interface Loot {
+    item?: Item;
+    harvestable?: HarvestableId;
+    xp?: number;
+}
+
+class LootPool {
+    static readonly RANDOM = new Random(tick());
+    pool = new Map<Loot, number>();
+
+    addItem(item: Item, weight: number) {
+        this.pool.set({ item: item }, weight);
+        return this;
+    }
+
+    addHarvestable(harvestable: HarvestableId, weight: number) {
+        this.pool.set({ harvestable: harvestable }, weight);
+        return this;
+    }
+
+    addXP(xp: number, weight: number) {
+        this.pool.set({ xp: xp }, weight);
+        return this;
+    }
+
+    getTotalWeight() {
+        let totalWeight = 0;
+        for (const [_piece, weight] of this.pool) {
+            totalWeight += weight;
+        }
+        return totalWeight;
+    }
+
+    pull(amount = 5) {
+        const totalWeight = this.getTotalWeight();
+        const get = () => {
+            const chance = LootPool.RANDOM.NextInteger(1, totalWeight);
+            let counter = 0;
+            for (const [piece, weight] of this.pool) {
+                counter += weight;
+                if (chance < counter) {
+                    return piece;
+                }
+            }
+        };
+        const loot = new Array<Loot>();
+        for (let i = 0; i < amount; i++) {
+            const got = get();
+            if (got !== undefined)
+                loot.push(got);
+        }
+        return loot;
+    }
+}
+
+@Service()
+export class ChestService implements OnInit, OnStart {
+
+    poolPerLevel = new Map<number, LootPool>();
+    cooldown = 900;
+    chestPerChestLocation = new Map<Vector3, ChestModel>();
+    openTweenInfo = new TweenInfo(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out);
+
+    constructor(private dataService: DataService, private levelService: LevelService, private itemsService: ItemsService, private unlockedAreasService: UnlockedAreasService) {
+
+    }
+
+    round(vector3: Vector3) {
+        return new Vector3(math.round(vector3.X), math.round(vector3.Y), math.round(vector3.Z));
+    }
+
+    markLastOpen(chestLocation: Vector3, lastOpen: number) {
+        const chest = this.chestPerChestLocation.get(chestLocation);
+        if (chest === undefined)
+            return false;
+        const bindableEvent = chest.FindFirstChild("MarkLastOpen") as BindableEvent;
+        if (bindableEvent === undefined)
+            error("Wtf");
+        bindableEvent.Fire(lastOpen);
+        return true;
+    }
+
+
+    rewardLoot(...loots: Loot[]) {
+        let totalXp = 0;
+        const items = new Map<string, number>();
+        const addItem = (item: Item) => {
+            const itemId = item.id;
+            this.itemsService.setItemAmount(itemId, this.itemsService.getItemAmount(itemId) + 1);
+            items.set(itemId, (items.get(itemId) ?? 0) + 1);
+        };
+        for (const loot of loots) {
+            if (loot.xp !== undefined)
+                totalXp += loot.xp;
+            if (loot.item !== undefined)
+                addItem(loot.item);
+            if (loot.harvestable !== undefined)
+                addItem(Items.getItem(loot.harvestable)!);
+        }
+        const current = this.levelService.getXp();
+        if (totalXp > 0) {
+            this.levelService.setXp(current + totalXp);
+            Packets.xpReceived.fireAll(totalXp);
+        }
+
+        Packets.itemsReceived.fireAll(items);
+    }
+
+    onInit() {
+        this.poolPerLevel.set(1, new LootPool()
+            .addXP(1, 2000)
+            .addXP(3, 1000)
+            .addXP(5, 500)
+            .addHarvestable("Grass", 1000)
+            .addHarvestable("StaleWood", 1000)
+            .addItem(ExcavationStone, 1000)
+            .addItem(WhiteGem, 200)
+            .addItem(EnchantedGrass, 100)
+            .addHarvestable("MagicalWood", 50)
+            .addItem(Crystal, 50)
+            .addItem(Iron, 10)
+            .addItem(Gold, 1)
+        );
+        this.poolPerLevel.set(2, new LootPool()
+            .addXP(1, 500)
+            .addXP(3, 1500)
+            .addXP(5, 1000)
+            .addXP(9, 500)
+            .addHarvestable("Grass", 600)
+            .addHarvestable("StaleWood", 600)
+            .addItem(ExcavationStone, 600)
+            .addItem(WhiteGem, 400)
+            .addItem(EnchantedGrass, 200)
+            .addHarvestable("MagicalWood", 150)
+            .addItem(Crystal, 150)
+            .addItem(Iron, 70)
+            .addItem(Gold, 30)
+            .addItem(Quartz, 1)
+        );
+    }
+
+    onStart() {
+        for (const [_id, area] of pairs(AREAS)) {
+            const chestsFolder = area.areaFolder.FindFirstChild("Chests");
+            if (chestsFolder === undefined)
+                continue;
+            const chestLocations = chestsFolder.GetChildren();
+            for (const chestLocationMarker of chestLocations) {
+                if (!chestLocationMarker.IsA("BasePart"))
+                    continue;
+                chestLocationMarker.FrontSurface = Enum.SurfaceType.Smooth;
+                chestLocationMarker.Transparency = 1;
+                const chestModel = ASSETS.Chest.Clone();
+                chestModel.PivotTo(chestLocationMarker.CFrame);
+                const sound = getSound("ChestOpen").Clone();
+                sound.SoundGroup = SOUND_EFFECTS_GROUP;
+                sound.Parent = chestModel.PrimaryPart;
+
+                const prompt = new ProximityPrompt();
+                prompt.ActionText = "Open";
+                prompt.ObjectText = "Chest";
+                prompt.RequiresLineOfSight = false;
+                prompt.MaxActivationDistance = 6;
+                const bp = weldModel(chestModel.Lid);
+                const originalLidPivot = bp.CFrame;
+                let lastOpen = 0;
+                let isOpened = false;
+                const markLastOpen = (lo: number) => {
+                    lastOpen = lo;
+                    isOpened = tick() - lastOpen < this.cooldown;
+                    TweenService.Create(bp, this.openTweenInfo, { CFrame: isOpened ? originalLidPivot.mul(CFrame.Angles(-1, 0, 0)) : originalLidPivot }).Play();
+                    prompt.Enabled = !isOpened;
+                    chestModel.Hitbox.CooldownGui.Enabled = isOpened;
+                };
+                task.spawn(() => {
+                    while (task.wait(1)) {
+                        const elapsed = tick() - lastOpen;
+                        if (elapsed > this.cooldown && isOpened === true) {
+                            isOpened = false;
+                            markLastOpen(lastOpen);
+                        }
+                        if (isOpened) {
+                            chestModel.Hitbox.CooldownGui.CooldownLabel.Text = convertToMMSS(math.floor(this.cooldown - elapsed));
+                        }
+                    }
+                });
+                const bindableEvent = new BindableEvent();
+                bindableEvent.Name = "MarkLastOpen";
+                bindableEvent.Event.Connect((lastOpen: number) => markLastOpen(lastOpen));
+                bindableEvent.Parent = chestModel;
+                const chestLocation = this.round(chestLocationMarker.Position);
+                this.chestPerChestLocation.set(chestLocation, chestModel);
+                prompt.Triggered.Connect(() => {
+                    if (!prompt.Enabled)
+                        return;
+                    if (this.dataService.empireData.unlockedAreas.has(area.name as AreaId))
+                        return;
+                    sound.Play();
+                    const t = tick();
+                    const amount = lastOpen === 0 ? math.random(10, 14) : math.random(5, 8);
+                    this.dataService.empireData.openedChests.set(`${chestLocation.X}_${chestLocation.Y}_${chestLocation.Z}`, t);
+                    markLastOpen(t);
+                    task.spawn(() => {
+                        task.wait(0.25);
+                        this.rewardLoot(...this.poolPerLevel.get(tonumber(chestLocationMarker.Name) ?? 1)!.pull(amount));
+                    });
+                });
+
+                prompt.Parent = chestModel.PrimaryPart;
+                chestModel.Parent = Workspace;
+            }
+        }
+
+        const lastOpenPerLocation = this.dataService.empireData.openedChests;
+        for (const [location, lastOpen] of lastOpenPerLocation) {
+            const [xString, yString, zString] = location.split("_");
+            if (this.markLastOpen(new Vector3(tonumber(xString), tonumber(yString), tonumber(zString)), lastOpen) === false) {
+                lastOpenPerLocation.delete(location);
+            }
+        }
+    }
+}

@@ -1,0 +1,8 @@
+import NPC from "shared/NPC";
+
+export = new NPC()
+.createDefaultMonologue("Isn't today such a great day to set sail out to the great oceans?")
+.monologue("I'd love to bring you aboard, though it seems my map's missing, and I don't really want to travel to the middle of nowhere.")
+.monologue("Maybe you can help me out... once the creator of the game decides to give me a proper quest.")
+//.monologue("Come back when you're Level 5 and maybe you can help me out.")
+.npc;

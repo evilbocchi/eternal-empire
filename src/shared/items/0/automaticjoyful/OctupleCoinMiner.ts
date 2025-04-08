@@ -1,0 +1,19 @@
+import Difficulty from "@antivivi/jjt-difficulties";
+import CurrencyBundle from "shared/currency/CurrencyBundle";
+import Droplet from "shared/item/Droplet";
+import Dropper from "shared/item/traits/Dropper";
+import Item from "shared/item/Item";
+
+export = new Item(script.Name)
+    .setName("Octuple Coin Miner")
+    .setDescription("Produces %val% droplets per second. We love Bitcoin.")
+    .setDifficulty(Difficulty.AutomaticJoyful)
+    .setPrice(new CurrencyBundle().set("Funds", 8e36).set("Skill", 2000).set("Bitcoin", 20000000), 1)
+    .addPlaceableArea("BarrenIslands", "SlamoVillage")
+    .persists("Skillification")
+
+    .trait(Dropper)
+    .setDroplet(Droplet.OctupleCoin)
+    .setDropRate(1)
+
+    .exit();

@@ -1,0 +1,21 @@
+import Difficulty from "@antivivi/jjt-difficulties";
+import Conveyor from "shared/item/traits/Conveyor";
+import Item from "shared/item/Item";
+import Upgrader from "shared/item/traits/Upgrader";
+import CurrencyBundle from "shared/currency/CurrencyBundle";
+
+export = new Item(script.Name)
+    .setName("Baseplate")
+    .setDescription("Stop wasting time rebuilding everything from scratch. Provides a %mul% boost to droplets passing through.")
+    .setDifficulty(Difficulty.Placid)
+    .setPrice(new CurrencyBundle().set("Wins", 1), 1, 3)
+    .setCreator("CoPKaDT")
+    .addPlaceableArea("BarrenIslands")
+
+    .trait(Upgrader)
+    .setMul(new CurrencyBundle().set("Funds", 1.2).set("Power", 1.2).set("Skill", 1.2))
+
+    .trait(Conveyor)
+    .setSpeed(4)
+
+    .exit();

@@ -1,0 +1,15 @@
+import Difficulty from "@antivivi/jjt-difficulties";
+import CurrencyBundle from "shared/currency/CurrencyBundle";
+import Furnace from "shared/item/traits/Furnace";
+import Item from "shared/item/Item";
+
+export = new Item(script.Name)
+    .setName("Improved Furnace")
+    .setDescription("An upgraded version of The First Furnace. Processes droplets for %mul% more value.")
+    .setDifficulty(Difficulty.TheLowerGap)
+    .setPrice(new CurrencyBundle().set("Funds", 160), 1)
+    .addPlaceableArea("BarrenIslands")
+
+    .trait(Furnace)
+    .setMul(new CurrencyBundle().set("Funds", 2))
+    .exit();

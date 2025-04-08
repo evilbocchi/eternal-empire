@@ -1,0 +1,25 @@
+import Difficulty from "@antivivi/jjt-difficulties";
+import Item from "shared/item/Item";
+import Upgrader from "shared/item/traits/Upgrader";
+import AdvancedBlankEssence from "shared/items/0/ifinitude/AdvancedBlankEssence";
+import CurrencyBundle from "shared/currency/CurrencyBundle";
+import Formula from "shared/currency/Formula";
+import { GameUtils } from "shared/item/ItemUtils";
+
+const mul = new CurrencyBundle();
+
+export = new Item(script.Name)
+    .setName("Chromatic Maze")
+    .setDescription("Boosts Funds and Power gain by Bitcoin! Pass droplets through each ring with an elevated conveyor to compound the boost. Though, this is easier said than done...")
+    .setDifficulty(Difficulty.Ifinitude)
+    .setPrice(new CurrencyBundle().set("Bitcoin", 1e6).set("Skill", 15), 1)
+    .setRequiredItemAmount(AdvancedBlankEssence, 1)
+    .addPlaceableArea("BarrenIslands")
+
+    .setFormula(new Formula().pow(0.01))
+    .setFormulaX("bitcoin")
+
+    .trait(Upgrader)
+    .applyFormula((v, item) => item.setMul(mul.set("Funds", v).set("Power", v)), () => GameUtils.currencyService.get("Bitcoin"))
+
+    .exit();
