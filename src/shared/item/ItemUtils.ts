@@ -8,7 +8,11 @@ import type Item from "shared/item/Item";
 declare global {
     interface DropletAssets {
         DropletGui: BillboardGui & {
-            ValueLabel: TextLabel;
+            Frame: Frame & {
+                ValueLabel: TextLabel & {
+                    UIStroke: UIStroke;
+                };
+            };
         };
     }
 }
@@ -45,13 +49,11 @@ namespace ItemUtils {
         return items;
     };
 
-    export const loadDropletGui = (host?: PVInstance | Attachment, amountPerCurrency?: Map<Currency, BaseOnoeNum>, overrideText?: string, sizeMulti?: number) => {
+    export const loadDropletGui = (amountPerCurrency?: Map<Currency, BaseOnoeNum>, overrideText?: string) => {
         const dropletGui = ASSETS.Droplet.DropletGui.Clone();
-        const labels = new Array<TextLabel>();
+        const labels = new Array<typeof dropletGui.Frame.ValueLabel>();
         if (overrideText !== undefined) {
-            const label = dropletGui.ValueLabel;
-            if (sizeMulti !== undefined)
-                label.Size = new UDim2(1, 0, 0.125 * sizeMulti, 0);
+            const label = dropletGui.Frame.ValueLabel;
             label.Text = overrideText;
             labels.push(label);
         }
@@ -65,25 +67,31 @@ namespace ItemUtils {
                 if (i > 0) {
                     builder.append("\n");
                 }
-                const label = dropletGui.ValueLabel.Clone();
-                label.TextColor3 = details.color ?? Color3.fromRGB(255, 255, 255);
+                const label = dropletGui.Frame.ValueLabel.Clone();
+                label.TextColor3 = details.color;
+                label.UIStroke.Color = details.color;
                 label.Text = CurrencyBundle.getFormatted(currency, new OnoeNum(amount));
-                label.Parent = dropletGui;
+                label.Parent = dropletGui.Frame;
                 labels.push(label);
                 ++i;
             }
-            dropletGui.ValueLabel.Visible = false;
-            //dropletGui.ValueLabel.Size = new UDim2(1, 0, 0.125 * i, 0);
-            //dropletGui.ValueLabel.Text = builder.toString();
+            dropletGui.Frame.ValueLabel.Visible = false;
         }
 
         dropletGui.StudsOffset = (new Vector3(math.random(-25, 25), math.random(-25, 25), math.random(-25, 25))).mul(0.01);
-        for (const label of labels)
-            task.delay(1, () => TweenService.Create(label, new TweenInfo(0.4), { TextTransparency: 1, TextStrokeTransparency: 1 }).Play());
-        TweenService.Create(dropletGui, dropletGuiTween, { StudsOffset: dropletGui.StudsOffset.add(new Vector3(0, 0.6, 0)) }).Play();
-        dropletGui.Adornee = host;
+
+        const tweenInfo = new TweenInfo(0.85, Enum.EasingStyle.Quart, Enum.EasingDirection.In);
+        for (const label of labels) {
+            TweenService.Create(label, tweenInfo, { TextTransparency: 1, TextStrokeTransparency: 1 }).Play();
+            TweenService.Create(label.UIStroke, tweenInfo, { Transparency: 1 }).Play();
+        }
+        const transitioningPosition = dropletGui.Frame.Position.add(new UDim2(0, 0, 0, 50));
+        TweenService.Create(dropletGui.Frame, tweenInfo, {
+            Position: transitioningPosition,
+            Rotation: dropletGui.Frame.Rotation + math.random(-45, 45)
+        }).Play();
+
         dropletGui.Enabled = true;
-        dropletGui.Parent = host;
         Debris.AddItem(dropletGui, 3);
 
         return dropletGui;

@@ -157,9 +157,10 @@ export class EffectController implements OnInit {
             playSoundAtPart(droplet, burnSound);
             TweenService.Create(droplet, new TweenInfo(0.5), { Color: new Color3(), Transparency: 1 }).Play();
 
-
             Debris.AddItem(droplet, 6);
-            ItemUtils.loadDropletGui(droplet, cpc);
+            const gui = ItemUtils.loadDropletGui(cpc);
+            gui.Adornee = droplet;
+            gui.Parent = droplet;
             droplet.Anchored = true;
 
             this.delay = (((tick() - t) / 4) + this.delay) * 0.8;

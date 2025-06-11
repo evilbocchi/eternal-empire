@@ -71,6 +71,10 @@ const CHANGELOGS = [
         "You can now change your empire name with in-game currency or Robux",
         "Softcaps are now introduced at high amounts of each currency"
     ]),
+    new Changelog("1.0 - Full Release", [
+        "Added difficulties and items Automatic to x",
+        
+    ]),
 ];
 
 const UPDATE_LIST = AREAS.BarrenIslands.areaFolder.FindFirstChild("UpdateBoard")?.FindFirstChild("GuiPart")?.FindFirstChild("SurfaceGui")?.FindFirstChild("ScrollingFrame");

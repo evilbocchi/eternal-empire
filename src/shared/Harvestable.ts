@@ -33,6 +33,12 @@ const RawHarvestable = {
         name: "Apple Tree",
         gives: new Map([["StaleWood", [3, 7]], ["Apple", [2, 6]]]),
     },
+    MagicalTree: {
+        health: 300,
+        tool: "Axe",
+        name: "Magical Tree",
+        gives: new Map([["MagicalWood", [2, 4]]]),
+    },
 
     Grass: {
         health: 3,
@@ -45,9 +51,20 @@ const RawHarvestable = {
         name: "Quality Grass",
         gives: new Map([["Grass", [3, 7]]]),
     },
+    GrassPack: {
+        health: 60,
+        tool: "Scythe",
+        name: "Grass Pack",
+        gives: new Map([["Grass", [6, 26]]]),
+    },
     EnchantedGrass: {
         health: 120,
         tool: "Scythe",
+    },
+    CorruptedGrass: {
+        health: 9999,
+        tool: "Scythe",
+        name: "Corrupted Grass",
     },
     WinsomeSpeck: {
         health: 160,
@@ -98,6 +115,23 @@ const RawHarvestable = {
         tool: "Pickaxe",
         name: "Gold",
     },
+    Quartz: {
+        health: 4160,
+        tool: "Pickaxe",
+        name: "Quartz",
+    },
+    PureCrystal: {
+        health: 2200,
+        tool: "Pickaxe",
+        name: "Pure Crystal",
+        gives: new Map([["Crystal", [2, 4]]]),
+    },
+    PureIron: {
+        health: 6000,
+        tool: "Pickaxe",
+        name: "Pure Iron",
+        gives: new Map([["Iron", [2, 4]]]),
+    }
 }
 
 const Harvestable = RawHarvestable as {[id: string]: HarvestableData};

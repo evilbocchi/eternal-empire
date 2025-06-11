@@ -5,7 +5,9 @@ import BuildBounds from "shared/placement/BuildBounds";
 declare global {
     type Bar = Frame & {
         UIStroke: UIStroke;
-        Fill: Frame;
+        Fill: Frame & {
+            UIStroke: UIStroke;
+        };
         BarLabel: TextLabel;
     };
     type BoardGui = SurfaceGui & {
@@ -138,7 +140,9 @@ export const AREAS = {
     BarrenIslands: createArea("BarrenIslands", true),
     MagicalHideout: createArea("MagicalHideout", false),
     SecretLab: createArea("SecretLab", false),
-    SkyPavilion: createArea("SkyPavilion", true),
     SlamoVillage: createArea("SlamoVillage", true),
     ToxicWaterfall: createArea("ToxicWaterfall", false),
+
+    SkyPavilion: createArea("SkyPavilion", true),
+    Eden: createArea("Eden", false),
 };

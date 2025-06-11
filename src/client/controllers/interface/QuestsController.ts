@@ -1,18 +1,18 @@
 import Signal from "@antivivi/lemon-signal";
+import { combineHumanReadable } from "@antivivi/vrldk";
 import { Controller, OnInit, OnPhysics } from "@flamework/core";
 import { Debris, ReplicatedStorage, TweenService, Workspace } from "@rbxts/services";
 import { LOCAL_PLAYER } from "client/constants";
 import { EffectController } from "client/controllers/EffectController";
 import { HotkeysController } from "client/controllers/HotkeysController";
 import { ADAPTIVE_TAB, ADAPTIVE_TAB_MAIN_WINDOW, AdaptiveTabController, SIDEBAR_BUTTONS } from "client/controllers/interface/AdaptiveTabController";
-import ItemSlot from "client/ItemSlot";
 import { INTERFACE, UIController } from "client/controllers/UIController";
-import { getDisplayName, getMaxXp } from "shared/constants";
+import ItemSlot from "client/ItemSlot";
+import { getMaxXp } from "shared/constants";
 import { ASSETS } from "shared/GameAssets";
 import Items from "shared/items/Items";
 import NamedUpgrades from "shared/namedupgrade/NamedUpgrades";
 import Packets from "shared/Packets";
-import { combineHumanReadable } from "@antivivi/vrldk";
 
 declare global {
     type QuestOption = Frame & {
@@ -188,8 +188,6 @@ export class QuestsController implements OnInit, OnPhysics {
         if (position !== undefined) {
             desc = desc.gsub("%%coords%%", `(${math.round(position.X)}, ${math.round(position.Y)}, ${math.round(position.Z)})`)[0];
         }
-        if (stage.npcHumanoid !== undefined)
-            desc = desc.gsub("%%npc%%", getDisplayName(stage.npcHumanoid))[0];
         return desc;
     }
 

@@ -3,8 +3,7 @@ import { Controller, OnInit } from "@flamework/core";
 import CameraShaker from "@rbxts/camera-shaker";
 import { TweenService, Workspace } from "@rbxts/services";
 import { UIController } from "client/controllers/UIController";
-import Area from "shared/Area";
-import { AREAS } from "shared/Area";
+import Area, { AREAS } from "shared/Area";
 import Packets from "shared/Packets";
 
 @Controller()
@@ -41,6 +40,9 @@ export class AreaController implements OnInit {
         TweenService.Create(bar.Fill, this.BAR_UPDATE_TWEENINFO, {
             Size: new UDim2(perc, 0, 1, 0),
             BackgroundColor3: color
+        }).Play();
+        TweenService.Create(bar.Fill.UIStroke, this.BAR_UPDATE_TWEENINFO, {
+            Color: color
         }).Play();
         bar.BarLabel.Text = tostring(current) + "/" + tostring(max);
     }

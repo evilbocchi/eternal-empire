@@ -1,9 +1,9 @@
 import Quest, { Stage } from "server/Quest";
+import { GameUtils } from "shared/item/ItemUtils";
 import { Dialogue } from "shared/NPC";
 import CaptainBacon from "shared/npcs/Captain Bacon";
 import Prest from "shared/npcs/Prest";
 import Tria from "shared/npcs/Tria";
-import { GameUtils } from "shared/item/ItemUtils";
 
 
 export = new Quest(script.Name)
@@ -12,7 +12,7 @@ export = new Quest(script.Name)
     .setLevel(999)
     .setOrder(1)
     .addStage(new Stage()
-        .setDescription(`Meet %npc% at %coords%.`)
+        .setDescription(`Meet Captain Bacon at %coords%.`)
         .setNPC("Captain Bacon", true)
         .setDialogue(new Dialogue(CaptainBacon, "Welcome aboard my glorious ship, stranger!")
             .monologue("Let's go far and wide across the world and search for hidden treasures that will make us rich!")
@@ -31,7 +31,7 @@ export = new Quest(script.Name)
         })
     )
     .addStage(new Stage()
-        .setDescription(`Find %npc%'s map.`)
+        .setDescription(`Find Captain Bacon's map.`)
         .setNPC("Captain Bacon")
         .setDialogue(new Dialogue(CaptainBacon, "Have you found my map yet?"))
         .onStart((stage) => {

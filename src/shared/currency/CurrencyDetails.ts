@@ -42,8 +42,8 @@ const details = {
     },
     Wins: {
         layoutOrder: 101,
-        color: Color3.fromRGB(71, 99, 252),
-        image: 139933162211869,
+        color: Color3.fromRGB(80, 57, 255),
+        image: 83031811545708,
         page: CURRENCY_CATEGORIES.Main
     },
 

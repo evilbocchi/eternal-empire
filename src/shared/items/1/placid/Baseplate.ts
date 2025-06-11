@@ -10,7 +10,7 @@ export = new Item(script.Name)
     .setDifficulty(Difficulty.Placid)
     .setPrice(new CurrencyBundle().set("Wins", 1), 1, 3)
     .setCreator("CoPKaDT")
-    .addPlaceableArea("BarrenIslands")
+    .addPlaceableArea("BarrenIslands", "SlamoVillage")
 
     .trait(Upgrader)
     .setMul(new CurrencyBundle().set("Funds", 1.2).set("Power", 1.2).set("Skill", 1.2))

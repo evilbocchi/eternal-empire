@@ -1,5 +1,5 @@
 <p align="center">
-  <img width="350" src="assets/icon.png">
+  <img width="350" src="assets/Logo.png">
 </p>
 
 # JJT Money Empire
@@ -9,9 +9,9 @@
 [![CodeFactor](https://www.codefactor.io/repository/github/evilbocchi/jme/badge)](https://www.codefactor.io/repository/github/evilbocchi/jme)
 [![Discord](https://discordapp.com/api/guilds/1217488177862938654/widget.png?style=shield)](https://discord.gg/haPBmCSvXt)
 
-["JJT Money Empire"](https://www.roblox.com/games/16438564807/JJT-Money-Empire) is a Roblox game where players can build their own money-making empire.
+[JJT Money Empire](https://www.roblox.com/games/16438564807/JJT-Money-Empire) is a Roblox game where players can build their own money-making empire.
 
-## Installation
+## Setup
 
 To set up the development environment for JJT Money Empire, follow these steps:
 
@@ -26,16 +26,16 @@ To set up the development environment for JJT Money Empire, follow these steps:
     npm install
     ```
 
-3. Configure the project:
-    - Ensure you have the required Roblox Studio and other development tools installed.
-    - Update the configuration files as needed.
+3. Install Rojo:
+    - Rojo is bundled with this project, accessible with `npx rojo`. For operating systems that do not support the existing pre-built binaries, follow the [crates.io installation](https://rojo.space/docs/v7/getting-started/installation/) of Rojo.
+    - However, you will need to install the Roblox Studio plugin for Rojo yourself. To do so, either try running `npx rojo plugin install` or follow the [official documentation](https://rojo.space/docs/v7/getting-started/installation/).
 
-## Usage
+4. Run the environment:
+    ```sh
+    npm run dev
+    ```
 
-To run the game locally for development purposes:
-
-1. Open Roblox Studio.
-2. 
+5. Connect to the Rojo server with the Roblox Studio plugin. Changes made to files in your code editor should now sync with Roblox Studio.
 
 ## Contributing
 
@@ -49,4 +49,13 @@ We welcome contributions to improve JJT Money Empire. To contribute:
 
 ## License
 
-This project is licensed under the terms of the Apache 2.0 License. See the [LICENSE](http://_vscodecontentref_/6) file for details.
+This project is licensed under the Creative Commons Attribution-NonCommercial 4.0 International License.
+
+**You are free to:**
+- Use, share, and modify the code for personal or non-commercial purposes.
+- Create and distribute mods or derivative works, as long as they are not for commercial use.
+
+**You may not:**
+- Use any part of this project or its derivatives for commercial purposes.
+
+See the [LICENSE](LICENSE) file for full details.

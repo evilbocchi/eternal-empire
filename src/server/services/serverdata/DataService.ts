@@ -5,7 +5,7 @@ import Difficulty from "@antivivi/jjt-difficulties";
 import { BaseOnoeNum, OnoeNum } from "@antivivi/serikanum";
 import { ProfileManager } from "@antivivi/vrldk";
 import { OnInit, Service } from "@flamework/core";
-import { Profile } from "@rbxts/profileservice/globals";
+import { Profile } from "@antivivi/profileservice/globals";
 import { DataStoreService, HttpService, MarketplaceService, Players, RunService, TeleportService, Workspace } from "@rbxts/services";
 import { OnPlayerJoined } from "server/services/ModdingService";
 import { IS_SERVER, IS_SINGLE_SERVER, getNameFromUserId, getStartCamera, isStartScreenEnabled } from "shared/constants";
@@ -140,8 +140,8 @@ const START_SCREEN_ENABLED = isStartScreenEnabled();
 @Service()
 export class DataService implements OnInit, OnPlayerJoined {
 
-    empireProfileManager = new ProfileManager("EmpireData", EmpireProfileTemplate);
-    playerProfileManager = new ProfileManager("PlayerData", PlayerProfileTemplate);
+    readonly empireProfileManager = new ProfileManager("EmpireData", EmpireProfileTemplate);
+    readonly playerProfileManager = new ProfileManager("PlayerData", PlayerProfileTemplate);
 
     availableEmpiresStore = DataStoreService.GetDataStore("AvailableEmpires");
     availableEmpiresPerPlayer = new Map<number, Map<string, EmpireInfo>>();

@@ -1,6 +1,6 @@
 {
-	"recommendations": [
-		"roblox-ts.vscode-roblox-ts",
-		"dbaeumer.vscode-eslint"
-	]
+    "recommendations": [
+        "dbaeumer.vscode-eslint",
+        "tacheometrist.testez-companion"
+    ]
 }

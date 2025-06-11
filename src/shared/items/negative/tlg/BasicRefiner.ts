@@ -11,7 +11,6 @@ export = new Item(script.Name)
     .setPrice(new CurrencyBundle().set("Funds", 3600), 2)
     .setPrice(new CurrencyBundle().set("Funds", 12200), 3)
     .setPrice(new CurrencyBundle().set("Funds", 50000), 4)
-    .setPrice(new CurrencyBundle().set("Funds", 225000), 5, 10)
     .addPlaceableArea("BarrenIslands")
 
     .trait(Upgrader)

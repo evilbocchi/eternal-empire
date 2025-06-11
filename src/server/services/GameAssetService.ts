@@ -7,7 +7,7 @@ import { OnInit, OnPhysics, OnStart, Service } from "@flamework/core";
 import { AnalyticsService, MarketplaceService, PathfindingService, PhysicsService, Players, ProximityPromptService, ReplicatedStorage, RunService, TweenService, Workspace } from "@rbxts/services";
 import Quest, { Stage } from "server/Quest";
 import { DarkMatterService } from "server/services/DarkMatterService";
-import { NPCService } from "server/services/NPCService";
+import { DialogueService } from "server/services/npc/DialogueService";
 import { ResetService } from "server/services/ResetService";
 import { RevenueService } from "server/services/RevenueService";
 import { CurrencyService } from "server/services/serverdata/CurrencyService";
@@ -103,9 +103,9 @@ export class GameAssetService implements OnInit, OnStart, OnPhysics {
 
             buyUpgrade: (upgradeId: string, to?: number, player?: Player, isFree?: boolean) => this.upgradeBoardService.buyUpgrade(upgradeId, to, player, isFree),
             checkPermLevel: (player: Player, action: PermissionKey) => this.dataService.checkPermLevel(player, action),
-            dialogueFinished: this.npcService.dialogueFinished,
-            playNPCAnimation: (npc: NPC, animType: NPCAnimationType) => this.npcService.playAnimation(npc, animType),
-            stopNPCAnimation: (npc: NPC, animType: NPCAnimationType) => this.npcService.stopAnimation(npc, animType),
+            dialogueFinished: this.dialogueService.dialogueFinished,
+            playNPCAnimation: (npc: NPC, animType: NPCAnimationType) => this.dialogueService.playAnimation(npc, animType),
+            stopNPCAnimation: (npc: NPC, animType: NPCAnimationType) => this.dialogueService.stopAnimation(npc, animType),
             onStageReached: (stage: Stage, callback: () => void) => {
                 return this.stageReached.connect((s) => {
                     if (stage === s) {
@@ -113,9 +113,9 @@ export class GameAssetService implements OnInit, OnStart, OnPhysics {
                     }
                 });
             },
-            addDialogue: (dialogue: Dialogue, priority?: number) => this.npcService.addDialogue(dialogue.npc, dialogue, priority),
-            removeDialogue: (dialogue: Dialogue) => this.npcService.removeDialogue(dialogue.npc, dialogue),
-            talk: (dialogue: Dialogue, requireInteraction?: boolean) => this.npcService.talk(dialogue, requireInteraction),
+            addDialogue: (dialogue: Dialogue, priority?: number) => this.dialogueService.addDialogue(dialogue.npc, dialogue, priority),
+            removeDialogue: (dialogue: Dialogue) => this.dialogueService.removeDialogue(dialogue.npc, dialogue),
+            talk: (dialogue: Dialogue, requireInteraction?: boolean) => this.dialogueService.talk(dialogue, requireInteraction),
             onEventCompleted: (event: string, callback: (isCompleted: boolean) => void) => {
                 if (this.eventService.isEventCompleted(event))
                     callback(true);
@@ -162,7 +162,7 @@ export class GameAssetService implements OnInit, OnStart, OnPhysics {
                 this.runningPathfinds.set(npcHumanoid, connection);
                 return connection;
             },
-            getDefaultLocation: (npc: NPC) => this.npcService.defaultLocationsPerNPC.get(npc),
+            getDefaultLocation: (npc: NPC) => this.dialogueService.defaultLocationsPerNPC.get(npc),
             giveQuestItem: (itemId: string, amount: number) => {
                 this.itemsService.setItemAmount(itemId, this.itemsService.getItemAmount(itemId) + amount);
                 this.questItemGiven.fire(itemId, amount);
@@ -198,7 +198,7 @@ export class GameAssetService implements OnInit, OnStart, OnPhysics {
     constructor(private dataService: DataService, private itemsService: ItemsService, private currencyService: CurrencyService,
         private upgradeBoardService: UpgradeBoardService, private questsService: QuestsService, private levelService: LevelService,
         private unlockedAreasService: UnlockedAreasService, private darkMatterService: DarkMatterService, private revenueService: RevenueService,
-        private npcService: NPCService, private eventService: EventService, private setupService: SetupService, private resetService: ResetService,
+        private dialogueService: DialogueService, private eventService: EventService, private setupService: SetupService, private resetService: ResetService,
         private playtimeService: PlaytimeService) {
 
     }
@@ -260,8 +260,9 @@ export class GameAssetService implements OnInit, OnStart, OnPhysics {
 
     onQuestComplete(quest: Quest) {
         const completionDialogue = quest.completionDialogue;
-        if (completionDialogue !== undefined && completionDialogue.npc !== undefined)
-            this.npcService.addDialogue(completionDialogue.npc, completionDialogue);
+        if (completionDialogue !== undefined && completionDialogue.npc !== undefined) {
+            this.dialogueService.addDialogue(completionDialogue.npc, completionDialogue);
+        }
     }
 
     loadAvailableQuests(level?: number) {
@@ -356,12 +357,12 @@ export class GameAssetService implements OnInit, OnStart, OnPhysics {
 
     onInit() {
         ProximityPromptService.PromptTriggered.Connect((prompt, player) => {
-            if (this.npcService.isInteractionEnabled === false || prompt.Parent === undefined)
+            if (this.dialogueService.isInteractionEnabled === false || prompt.Parent === undefined)
                 return;
             const interactableObject = InteractableObject.REGISTRY.get(prompt.Parent.Name);
             if (interactableObject === undefined)
                 return;
-            this.npcService.proximityPrompts.add(prompt);
+            this.dialogueService.proximityPrompts.add(prompt);
             interactableObject.interacted.fire(this.GameUtils, player);
         });
 
@@ -386,7 +387,7 @@ export class GameAssetService implements OnInit, OnStart, OnPhysics {
                     const onPositionChanged = (position?: Vector3) => ReplicatedStorage.SetAttribute(`${questId}${index}`, position);
                     onPositionChanged(stage.position);
                     stage.positionChanged.connect((position) => onPositionChanged(position));
-                    questInfo.stages.push({ description: stage.description!, npcHumanoid: stage.npcHumanoid });
+                    questInfo.stages.push({ description: stage.description! });
                 });
                 questInfos.set(questId, questInfo);
             });

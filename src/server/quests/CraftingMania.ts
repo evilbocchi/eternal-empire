@@ -3,6 +3,7 @@ import Quest, { Stage } from "server/Quest";
 import EarningCapital from "server/quests/EarningCapital";
 import { Dialogue } from "shared/NPC";
 import { getNPCModel, getWaypoint, WAYPOINTS } from "shared/constants";
+import { GameUtils } from "shared/item/ItemUtils";
 import Shop from "shared/item/traits/Shop";
 import Items from "shared/items/Items";
 import CraftingTable from "shared/items/bonuses/CraftingTable";
@@ -16,7 +17,6 @@ import OverengineeredGenerator from "shared/items/miscellaneous/OverengineeredGe
 import Wool from "shared/items/miscellaneous/Wool";
 import Chuck from "shared/npcs/Chuck";
 import Ricarg from "shared/npcs/Ricarg";
-import { GameUtils } from "shared/item/ItemUtils";
 
 const waypoint2 = getWaypoint("CraftingMania2");
 const craftingTableModel = WAYPOINTS.WaitForChild("CraftingTable")!;
@@ -31,7 +31,7 @@ export = new Quest(script.Name)
     .setLevel(3)
     .setOrder(6)
     .addStage(new Stage()
-        .setDescription(`Wake up the %npc% at %coords%.`)
+        .setDescription(`Wake up the blacksmith at %coords%.`)
         .setNPC("Chuck", true)
         .setDialogue(
             new Dialogue(Chuck, "zzz... zzzzz.... zzzzzzz...")
@@ -64,7 +64,7 @@ export = new Quest(script.Name)
         })
     )
     .addStage(new Stage()
-        .setDescription(`Collect 1 ${Wool.id} and 3 ${Grass.id}. Ask Ricarg how to collect the grass. Return to Chuck with the resources.`)
+        .setDescription(`Collect 1 ${Wool.id} and 3 ${Grass.id}. Ask Ricarg how to collect the grass. Return to the blacksmith with the resources.`)
         .setNPC("Ricarg", true)
         .setDialogue(
             new Dialogue(Chuck, "You got the stuff?")
@@ -109,7 +109,7 @@ export = new Quest(script.Name)
 
     )
     .addStage(new Stage()
-        .setDescription(`Head to the Crafting Table at %coords% with the %npc%.`)
+        .setDescription(`Head to the Crafting Table at %coords% with the blacksmith.`)
         .setNPC("Chuck")
         .setFocus(craftingTableModel)
         .setDialogue(
@@ -123,7 +123,7 @@ export = new Quest(script.Name)
         })
     )
     .addStage(new Stage()
-        .setDescription(`Learn how to craft from the %npc%.`)
+        .setDescription(`Learn how to craft from the blacksmith.`)
         .setNPC("Chuck")
         .setFocus(craftingTableModel)
         .setDialogue(
@@ -166,7 +166,7 @@ export = new Quest(script.Name)
         })
     )
     .addStage(new Stage()
-        .setDescription(`Show %npc% what you crafted.`)
+        .setDescription(`Show the blacksmith what you crafted.`)
         .setNPC("Chuck")
         .setFocus(waypoint2)
         .setDialogue(

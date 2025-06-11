@@ -411,7 +411,7 @@ export class ShopController implements OnInit, OnStart {
                     if (!hitbox.IsA("Part"))
                         continue;
                     const model = hitbox.Parent;
-                    if (model === undefined)
+                    if (model === undefined || model.GetAttribute("Selected"))
                         continue;
 
                     const shopGuiPart = model.FindFirstChild("ShopGuiPart") as Part | undefined;

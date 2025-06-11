@@ -31,7 +31,7 @@ export class Stage {
 
     setNPC(npcName: string, setAsFocus?: boolean) {
         this.npcModel = getNPCModel(npcName);
-        this.npcHumanoid = this.npcModel.FindFirstChildOfClass("Humanoid");
+        this.npcHumanoid = this.npcModel.WaitForChild("Humanoid") as Humanoid;
         if (setAsFocus === true)
             return this.setFocus(this.npcHumanoid?.RootPart);
         return this;

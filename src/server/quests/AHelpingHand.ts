@@ -1,15 +1,13 @@
-import { Debris, TweenService } from "@rbxts/services";
-import { Dialogue } from "shared/NPC";
+import { TweenService } from "@rbxts/services";
 import Quest, { Stage } from "server/Quest";
-import { getNPCModel, getWaypoint } from "shared/constants";
-import { getSound } from "shared/GameAssets";
-import { emitEffect } from "shared/GameAssets";
-import { ASSETS } from "shared/GameAssets";
 import { AREAS } from "shared/Area";
+import { getNPCModel, getWaypoint } from "shared/constants";
+import { emitEffect, getSound } from "shared/GameAssets";
+import { GameUtils } from "shared/item/ItemUtils";
 import FreddysUpgrader from "shared/items/miscellaneous/FreddysUpgrader";
 import LostPendant from "shared/items/miscellaneous/LostPendant";
+import { Dialogue } from "shared/NPC";
 import Freddy from "shared/npcs/Freddy";
-import { GameUtils } from "shared/item/ItemUtils";
 
 const waypoint2 = getWaypoint("AHelpingHand2");
 const freddyModel = getNPCModel("Freddy");
@@ -30,7 +28,7 @@ export = new Quest(script.Name)
     .setLevel(3)
     .setOrder(6)
     .addStage(new Stage()
-        .setDescription(`Talk to %npc% at %coords%.`)
+        .setDescription(`Talk to the Sad Noob at %coords%.`)
         .setNPC("Freddy", true)
         .setDialogue(
             new Dialogue(Freddy, "I hate this place... It's dreary, and nothing ever goes my way. Oh, hey.")
@@ -54,7 +52,7 @@ export = new Quest(script.Name)
         })
     )
     .addStage(new Stage()
-        .setDescription(`Follow %npc% to %coords%.`)
+        .setDescription(`Follow the Sad Noob to %coords%.`)
         .setNPC("Freddy")
         .setFocus(waypoint2)
         .setDialogue(
@@ -68,11 +66,11 @@ export = new Quest(script.Name)
         })
     )
     .addStage(new Stage()
-        .setDescription(`Help %npc% out.`)
+        .setDescription(`Talk to the Sad Noob to help him out.`)
         .setNPC("Freddy")
         .setDialogue(
             new Dialogue(Freddy, "Rumors say that someone left a valuable item above these pillars for some reason. Weird, right? Who would leave something valuable up there?")
-                .monologue("It sounds strange, but you never know - rumors often have a grain of truth to them.")
+                .monologue("It sounds strange, but you never know. Rumors often have a grain of truth to them.")
                 .monologue("I've been thinking about it a lot, but I'm not Skilled enough to navigate the obstacles up there. The pillars are tricky, and it takes a certain level of agility and bravery to get through.")
                 .monologue("Here's what we'll do: I'll make the ladder for you to climb up. It won't be easy, but I have faith in your abilities.")
                 .monologue("Once you're up there, keep your eyes peeled for the item on top of the mountain formed from the pillars.")
@@ -121,11 +119,10 @@ export = new Quest(script.Name)
         })
     )
     .addStage(new Stage()
-        .setDescription(`Report back to %npc%.`)
+        .setDescription(`Report back to the Sad Noob.`)
         .setNPC("Freddy", true)
         .setDialogue(
             new Dialogue(Freddy, "I see you have the item. Nice work! I knew you could do it.")
-                .monologue("To tell you the truth, my brother was the one who lost that item years ago. It holds a lot of sentimental value to me.")
                 .monologue("Thanks for returning it back to me. As a token of my gratitude, I'll give you something else worth your time.")
                 .monologue("Here's an item that'll boost your Funds gain by quite a bit. It's not just a reward, but a way for you to keep prospering in your adventures.")
                 .monologue("Enjoy, and may it bring you as much fortune as you've brought me today. Thanks again!")
@@ -142,7 +139,7 @@ export = new Quest(script.Name)
             return () => connection.disconnect();
         })
     )
-    .onInit((utils) => {
+    .onInit(() => {
         for (const handle of ladderHandles) {
             handle.Transparency = 1;
             handle.CanCollide = false;
@@ -163,7 +160,7 @@ export = new Quest(script.Name)
         });
     })
     .setCompletionDialogue(
-        new Dialogue(Freddy, "Thanks a lot for your work!")
+        new Dialogue(Freddy, "Thanks a lot for your work! My name is Freddy, by the way.")
     )
     .setReward({
         xp: 180,

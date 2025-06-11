@@ -126,7 +126,13 @@ export class ToolController implements OnInit, OnStart {
                 const multi = -drop / harvestingTool.damage!;
                 effect.Brightness = multi;
                 const color = multi > 1 ? Color3.fromRGB(217, 0, (multi - 1) * 120) : Color3.fromRGB(217, 0, 0);
-                ItemUtils.loadDropletGui(model, undefined, `<font color="#${color.ToHex()}">${OnoeNum.toString(drop)}</font>`, math.max(multi, 1) / 2 + 0.5);
+                const gui = ItemUtils.loadDropletGui(undefined, OnoeNum.toString(drop));
+                const valueLabel = gui.Frame.ValueLabel;
+                valueLabel.Size = new UDim2(1, 0, 0.125 * (math.max(multi, 1) / 2 + 0.5), 0);
+                valueLabel.TextColor3 = color;
+                valueLabel.UIStroke.Color = color;
+                gui.Adornee = model;
+                gui.Parent = model;
                 if (multi > 1.5) {
                     this.uiController.playSound("Critical");
                 }

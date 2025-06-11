@@ -1,17 +1,16 @@
-import { OnoeNum } from "@antivivi/serikanum";
+import { BaseOnoeNum, OnoeNum } from "@antivivi/serikanum";
+import { paintObjects } from "@antivivi/vrldk";
 import { Controller, OnInit } from "@flamework/core";
 import { Debris, TweenService } from "@rbxts/services";
 import StringBuilder from "@rbxts/stringbuilder";
 import { HotkeysController } from "client/controllers/HotkeysController";
 import { INTERFACE, UIController } from "client/controllers/UIController";
 import { TooltipController } from "client/controllers/interface/TooltipController";
+import { ASSETS } from "shared/GameAssets";
 import Packets from "shared/Packets";
 import Softcaps, { performSoftcap } from "shared/Softcaps";
-import { ASSETS } from "shared/GameAssets";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import { CURRENCY_DETAILS } from "shared/currency/CurrencyDetails";
-import { paintObjects } from "@antivivi/vrldk";
-import CurrencyMap from "shared/currency/CurrencyMap";
 
 declare global {
     type BalanceOption = Frame & {
@@ -55,7 +54,6 @@ export const BALANCE_WINDOW = INTERFACE.WaitForChild("BalanceWindow") as Frame &
 @Controller()
 export class BalanceWindowController implements OnInit {
 
-    private lastBalance = Packets.balance.get();
     originalBalanceWindowPosition = BALANCE_WINDOW.Position;
     page = 1;
     maxPage = 1;
@@ -88,6 +86,36 @@ export class BalanceWindowController implements OnInit {
             currencyOption.Parent = BALANCE_WINDOW.Balances;
         }
         return currencyOption;
+    }
+
+    showDifference(currency: Currency, diff: BaseOnoeNum) {
+        const currencyOption = this.getCurrencyOption(currency);
+        const difference = new OnoeNum(diff);
+        const labels = currencyOption.Amount;
+        const diffLabel = labels.Income.IncomeLabel.Clone();
+        diffLabel.AnchorPoint = new Vector2(0.5, 0.5);
+
+        const position = currencyOption.AbsolutePosition.sub(INTERFACE.AbsolutePosition);
+        const x = position.X + currencyOption.ImageLabel.AbsoluteSize.X / 2;
+        const y = position.Y + currencyOption.AbsoluteSize.Y + 10;
+        diffLabel.Position = UDim2.fromOffset(x, y);
+        diffLabel.Size = new UDim2(0, 0, 0, 0);
+        diffLabel.AutomaticSize = Enum.AutomaticSize.XY;
+        diffLabel.TextSize = 20;
+        diffLabel.TextScaled = false;
+        diffLabel.Text = `${difference.moreThan(0) ? "+" : "-"}${this.format(currency, difference)}`;
+        diffLabel.Rotation = math.random(-10, 10);
+        diffLabel.ZIndex = 3;
+        const tweenInfo = new TweenInfo(1, Enum.EasingStyle.Quart, Enum.EasingDirection.In);
+        const transitioningPosition = diffLabel.Position.add(new UDim2(0, 0, 0, 50));
+        TweenService.Create(diffLabel, tweenInfo, {
+            Position: transitioningPosition,
+            TextTransparency: 1,
+            Rotation: diffLabel.Rotation + math.random(-45, 45)
+        }).Play();
+        TweenService.Create(diffLabel.UIStroke, tweenInfo, { Transparency: 1 }).Play();
+        diffLabel.Parent = INTERFACE;
+        Debris.AddItem(diffLabel, 6);
     }
 
     refreshBalanceWindow(balance = Packets.balance.get()) {
@@ -137,35 +165,6 @@ export class BalanceWindowController implements OnInit {
                 }
             }
 
-            const last = this.lastBalance.get(currency);
-            const difference = last === undefined ? undefined : amount.sub(last);
-            if (isVisible && difference !== undefined && !difference.equals(0)) {
-                const diffLabel = labels.Income.IncomeLabel.Clone();
-                diffLabel.AnchorPoint = new Vector2(0.5, 0.5);
-
-                const position = currencyOption.AbsolutePosition.sub(INTERFACE.AbsolutePosition);
-                const x = position.X + currencyOption.ImageLabel.AbsoluteSize.X / 2;
-                const y = position.Y + currencyOption.AbsoluteSize.Y + 10;
-                diffLabel.Position = UDim2.fromOffset(x, y);
-                diffLabel.Size = new UDim2(0, 0, 0, 0);
-                diffLabel.AutomaticSize = Enum.AutomaticSize.XY;
-                diffLabel.TextSize = 20;
-                diffLabel.TextScaled = false;
-                diffLabel.Text = `${difference.moreThan(0) ? "+" : "-"}${this.format(currency, difference)}`;
-                diffLabel.Rotation = math.random(-10, 10);
-                diffLabel.ZIndex = 3;
-                const tweenInfo = new TweenInfo(1, Enum.EasingStyle.Quart, Enum.EasingDirection.In);
-                const transitioningPosition = diffLabel.Position.add(new UDim2(0, 0, 0, 50));
-                TweenService.Create(diffLabel, tweenInfo, {
-                    Position: transitioningPosition,
-                    TextTransparency: 1,
-                    Rotation: diffLabel.Rotation + math.random(-45, 45)
-                }).Play();
-                TweenService.Create(diffLabel.UIStroke, tweenInfo, { Transparency: 1 }).Play();
-                diffLabel.Parent = INTERFACE;
-                Debris.AddItem(diffLabel, 6);
-            }
-
             labels.Income.SoftcapLabel.Visible = capped;
 
             this.tooltipController.setMessage(currencyOption, tooltipBuilder.toString());
@@ -176,7 +175,6 @@ export class BalanceWindowController implements OnInit {
             }
         }
         this.maxPage = maxPage;
-        this.lastBalance = balance;
 
         if (this.maxPage === 1 && this.page > 1) {
             this.page = 1;
@@ -246,6 +244,11 @@ export class BalanceWindowController implements OnInit {
         });
 
         Packets.balance.observe((value) => this.refreshBalanceWindow(value));
+        Packets.showDifference.connect((differencePerCurrency) => {
+            for (const [currency, diff] of differencePerCurrency) {
+                this.showDifference(currency, diff);
+            }
+        });
 
         Packets.revenue.observe((revenue) => {
             for (const [currency, amount] of revenue) {

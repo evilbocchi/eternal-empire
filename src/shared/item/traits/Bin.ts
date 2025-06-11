@@ -4,6 +4,7 @@ import Item from "shared/item/Item";
 import Operative from "shared/item/traits/Operative";
 import { GameUtils } from "shared/item/ItemUtils";
 import { playSoundAtPart, weldModel } from "@antivivi/vrldk";
+import Packets from "shared/Packets";
 
 declare global {
     interface PlacedItem {
@@ -64,6 +65,7 @@ export default class Bin extends Operative {
             updateHeight();
             print(`Collected ${revenue} from ${item.name}`);
             CurrencyService.incrementAll(revenue.amountPerCurrency);
+            Packets.showDifference.fireAll(revenue.amountPerCurrency);
             playSoundAtPart(clickPart, getSound("GiantPress"));
             TweenService.Create(clickPart, new TweenInfo(0.2), { CFrame: unclickedCFrame.mul(new CFrame(0, 0, 0.5)) }).Play();
             task.wait(0.2);

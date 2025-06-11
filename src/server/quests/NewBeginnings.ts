@@ -1,13 +1,13 @@
 import { ReplicatedStorage, RunService, TweenService } from "@rbxts/services";
 import Quest, { Stage } from "server/Quest";
 import { getNPCModel, getWaypoint } from "shared/constants";
+import { GameUtils } from "shared/item/ItemUtils";
 import TheFirstDropper from "shared/items/negative/tfd/TheFirstDropper";
 import TheFirstFurnace from "shared/items/negative/tfd/TheFirstFurnace";
-import Packets from "shared/Packets";
 import { Dialogue } from "shared/NPC";
 import NameChanger from "shared/npcs/Name Changer";
 import Tria from "shared/npcs/Tria";
-import { GameUtils } from "shared/item/ItemUtils";
+import Packets from "shared/Packets";
 
 const waypoint1 = getWaypoint("NewBeginnings1");
 const triaModel = getNPCModel("Tria");
@@ -21,7 +21,7 @@ export = new Quest(script.Name)
     .setLevel(1)
     .setOrder(1)
     .addStage(new Stage()
-        .setDescription(`You seem to be lost. Talk to the %npc% next to you.`)
+        .setDescription(`You seem to be lost. Talk to the Friendly Noob next to you.`)
         .setNPC("Tria")
         .setFocus(triaRootPart)
         .setDialogue(new Dialogue(Tria, "You're awake! That was quick. It was moments ago you were out cold, barely clinging to consciousness.")
@@ -46,7 +46,7 @@ export = new Quest(script.Name)
         })
     )
     .addStage(new Stage()
-        .setDescription(`Follow %npc%.`)
+        .setDescription(`Follow Tria.`)
         .setNPC("Tria")
         .setFocus(getWaypoint("NewBeginnings1"))
         .setDialogue(new Dialogue(Tria, "Follow me!"))
@@ -59,7 +59,7 @@ export = new Quest(script.Name)
         })
     )
     .addStage(new Stage()
-        .setDescription("Figure how to purchase items with %npc%.")
+        .setDescription("Figure how to purchase items with Tria.")
         .setNPC("Tria")
         .setDialogue(new Dialogue(Tria, "Here we are, your new mine. It's not much to look at now, huh.")
             .monologue("With some hard work, though, it'll be thriving in no time.")
@@ -93,7 +93,7 @@ export = new Quest(script.Name)
         })
     )
     .addStage(new Stage()
-        .setDescription("Interact with %npc% to learn how to start making money.")
+        .setDescription("Interact with Tria to learn how to start making money.")
         .setNPC("Tria")
         .setDialogue(
             new Dialogue(Tria, "See that backpack on the left-hand corner of your screen? Click it to open your Inventory!")

@@ -26,5 +26,24 @@ export const RESET_LAYERS = {
             };
         },
         tpLocation: AREAS.BarrenIslands.getSpawnLocation(),
+    },
+    Winification: {
+        order: 2,
+        area: AREAS.SlamoVillage,
+        formula: new Formula().add(1).div(1e+12).log(18).pow(1.7).add(1),
+        minimum: new OnoeNum(1e+12),
+        scalesWith: "Skill" as Currency,
+        gives: "Wins" as Currency,
+        resettingCurrencies: ["Skill", "Bitcoin", "Dark Matter"] as Currency[],
+        resettingUpgrades: ["CryptographicFunds", "CryptographicPower", "SkilledMining", "ArtOfPurification", "DarkerMatter", "EfficientLearning"],
+        badgeId: 645025346348557,
+
+        gainLabel: AREAS.Eden.areaFolder.FindFirstChild("WinifyBoard")?.FindFirstChild("SurfaceGui")?.FindFirstChild("DifficultyLabel")?.FindFirstChild("Frame")?.FindFirstChild("GainLabel") as TextLabel,
+        touchPart: AREAS.Eden.areaFolder.FindFirstChild("Winification") as BasePart & {
+            BillboardGui: BillboardGui & {
+                TextLabel: TextLabel;
+            };
+        },
+        tpLocation: AREAS.SkyPavilion.getSpawnLocation(),
     }
 };

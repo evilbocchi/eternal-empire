@@ -1,11 +1,11 @@
+import { getAllInstanceInfo } from "@antivivi/vrldk";
 import { Players } from "@rbxts/services";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
+import ItemUtils, { GameUtils } from "shared/item/ItemUtils";
 import Boostable from "shared/item/traits/Boostable";
 import Operative from "shared/item/traits/Operative";
 import NamedUpgrades from "shared/namedupgrade/NamedUpgrades";
-import { getAllInstanceInfo } from "@antivivi/vrldk";
-import ItemUtils, { GameUtils } from "shared/item/ItemUtils";
 
 declare global {
     interface ItemTraits {
@@ -84,8 +84,10 @@ export default class Generator extends Boostable {
             const remoteEvent = model.WaitForChild("UnreliableRemoteEvent") as UnreliableRemoteEvent;
             const part = model.FindFirstChild("Marker");
             remoteEvent.OnClientEvent.Connect((amountPerCurrency?: CurrencyMap) => {
-                if (amountPerCurrency !== undefined)
-                    ItemUtils.loadDropletGui(part as BasePart ?? model.PrimaryPart, amountPerCurrency);
+                if (amountPerCurrency === undefined)
+                    return;
+                const gui = ItemUtils.loadDropletGui(amountPerCurrency);
+                gui.Parent = part ?? model.PrimaryPart;
             });
         });
     }

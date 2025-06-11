@@ -23,8 +23,7 @@ declare global {
     }
     
     type StageInfo = {
-        description: string,
-        npcHumanoid?: Humanoid
+        description: string
     }
 
     type PlacingInfo = {
@@ -66,6 +65,7 @@ class Packets {
     static readonly balance = property<Map<Currency, BaseOnoeNum>>(new Map(), true);
     static readonly mostBalance = property<Map<Currency, BaseOnoeNum>>(new Map(), true);
     static readonly revenue = property<Map<Currency, BaseOnoeNum>>(new Map(), true);
+    static readonly showDifference = signal<(differencePerCurrency: Map<Currency, BaseOnoeNum>) => void>();
 
     // upgrade board
     static readonly upgrades = property<Map<string, DataType.i32>>(new Map());
@@ -88,7 +88,6 @@ class Packets {
 
     // quests
     static readonly questInfo = property<Map<string, DataType.Packed<QuestInfo>>>();
-    static readonly stageInfo = property<Map<string, Map<number, StageInfo>>>();
     static readonly quests = property<Map<string, DataType.i32>>(new Map());
     static readonly questCompleted = signal<(questId: string) => void>();
     static readonly remainingLevelPoints = property<DataType.i32>(-1);

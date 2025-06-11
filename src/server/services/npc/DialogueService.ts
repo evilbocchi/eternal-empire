@@ -1,13 +1,12 @@
 import Signal from "@antivivi/lemon-signal";
-import { OnInit, Service } from "@flamework/core";
-import { Players, RunService, TweenService, Workspace } from "@rbxts/services";
-import { DataService } from "server/services/serverdata/DataService";
-import NPC, { Dialogue, NPCAnimationType } from "shared/NPC";
-import { NPCS, NPC_MODELS, getDisplayName } from "shared/constants";
-import { getSound } from "shared/GameAssets";
-import { ASSETS } from "shared/GameAssets";
-import Packets from "shared/Packets";
 import { loadAnimation } from "@antivivi/vrldk";
+import { OnInit, Service } from "@flamework/core";
+import { Players, TweenService, Workspace } from "@rbxts/services";
+import { DataService } from "server/services/serverdata/DataService";
+import { NPCS, NPC_MODELS, getDisplayName } from "shared/constants";
+import { ASSETS, getSound } from "shared/GameAssets";
+import NPC, { Dialogue, NPCAnimationType } from "shared/NPC";
+import Packets from "shared/Packets";
 
 declare global {
     interface Assets {
@@ -18,7 +17,7 @@ declare global {
 }
 
 @Service()
-export class NPCService implements OnInit {
+export class DialogueService implements OnInit {
 
     dialogueFinished = new Signal<(dialogue: Dialogue) => void>();
     npcPerName = new Map<string, NPC>();
@@ -148,100 +147,104 @@ export class NPCService implements OnInit {
         const npcModels = NPC_MODELS.GetChildren();
 
         for (const npcModel of npcModels) {
-            if (npcModel.IsA("Model")) {
-                const humanoid = npcModel.FindFirstChildOfClass("Humanoid");
-                if (humanoid === undefined) {
-                    warn(npcModel.Name + " does not have Humanoid");
-                    continue;
-                }
-                humanoid.RootPart!.Anchored = true;
-                const indicator = ASSETS.NPCNotification.Clone();
-                indicator.Enabled = true;
-                indicator.Parent = npcModel.WaitForChild("Head");
-                const showIndicator = TweenService.Create(indicator.ImageLabel, new TweenInfo(0.3), { ImageTransparency: 0 });
-                const hideIndicator = TweenService.Create(indicator.ImageLabel, new TweenInfo(0.15), { ImageTransparency: 1 });
-                const prompt = new ProximityPrompt();
-                prompt.GetPropertyChangedSignal("Enabled").Connect(() => {
-                    if (prompt.Enabled)
-                        showIndicator.Play();
-                    else
-                        hideIndicator.Play();
-                });
-                prompt.ObjectText = getDisplayName(humanoid);
-                prompt.ActionText = "Interact";
-                prompt.Enabled = true;
-                prompt.MaxActivationDistance = 6.5;
-                prompt.RequiresLineOfSight = false;
-                prompt.Parent = npcModel;
-                getSound("Ding").Clone().Parent = npcModel.PrimaryPart;
-
-                const npcScript = NPCS.FindFirstChild(npcModel.Name);
-                if (npcScript === undefined) {
-                    warn(npcModel.Name + " does not have a script");
-                    continue;
-                }
-                const npc = require(npcScript as ModuleScript) as NPC;
-                this.npcPerName.set(npcScript.Name, npc);
-                this.animationsPerNPC.set(npc, new Map());
-
-                if (npc === undefined) {
-                    warn("Cannot find NPC for " + npcModel.Name);
-                    continue;
-                }
-                this.modelPerNPC.set(npc, npcModel);
-                this.runningAnimationsPerNPC.set(npc, new Map());
-                this.dialoguePerNPC.set(npc, new Map());
-
-                prompt.Triggered.Connect((player) => {
-                    print(`${player.Name} interacted`);
-                    if (npc.interact !== undefined) {
-                        npc.interact();
-                        return;
-                    }
-                    const availableDialogues = this.dialoguePerNPC.get(npc)!;
-                    let highestPriority: number | undefined, highestDialogue: Dialogue | undefined;
-                    for (const [dialogue, priority] of availableDialogues) {
-                        if (highestPriority === undefined || priority > highestPriority) {
-                            highestDialogue = dialogue;
-                            highestPriority = priority;
-                        }
-                    }
-                    this.talk(highestDialogue ?? npc.defaultDialogue);
-                });
-                this.proximityPrompts.add(prompt);
-
-                const parts = npcModel.GetDescendants();
-                for (const part of parts) {
-                    if (part.IsA("BasePart")) {
-                        part.CollisionGroup = "NPC";
-                    }
-                }
-                humanoid.RootPart!.CustomPhysicalProperties = new PhysicalProperties(100, 0.3, 0.5);
-                this.defaultLocationsPerNPC.set(npc, humanoid.RootPart!.CFrame);
-                this.playAnimation(npc, "Default");
-                humanoid.Running.Connect((speed) => {
-                    if (speed > 0)
-                        this.playAnimation(npc, "Walk");
-                    else
-                        this.stopAnimation(npc, "Walk");
-                });
-                let last = humanoid.RootPart!.Position;
-                task.spawn(() => {
-                    while (task.wait(1)) {
-                        const newPosition = humanoid.RootPart!.Position;
-                        if (newPosition.sub(last).Magnitude < 1) {
-                            last = newPosition;
-                            this.stopAnimation(npc, "Walk");
-                        }
-                    }
-                });
-                humanoid.Jumping.Connect((active) => {
-                    if (active)
-                        this.playAnimation(npc, "Jump");
-                    else
-                        this.stopAnimation(npc, "Jump");
-                });
+            if (!npcModel.IsA("Model")) {
+                continue;
             }
+
+            const humanoid = npcModel.FindFirstChildOfClass("Humanoid");
+            if (humanoid === undefined) {
+                warn(npcModel.Name + " does not have Humanoid");
+                continue;
+            }
+            humanoid.RootPart!.Anchored = true;
+            const indicator = ASSETS.NPCNotification.Clone();
+            indicator.Enabled = true;
+            indicator.Parent = npcModel.WaitForChild("Head");
+            const showIndicator = TweenService.Create(indicator.ImageLabel, new TweenInfo(0.3), { ImageTransparency: 0 });
+            const hideIndicator = TweenService.Create(indicator.ImageLabel, new TweenInfo(0.15), { ImageTransparency: 1 });
+
+            
+            const prompt = new ProximityPrompt();
+            prompt.GetPropertyChangedSignal("Enabled").Connect(() => {
+                if (prompt.Enabled)
+                    showIndicator.Play();
+                else
+                    hideIndicator.Play();
+            });
+            prompt.ObjectText = getDisplayName(humanoid);
+            prompt.ActionText = "Interact";
+            prompt.Enabled = true;
+            prompt.MaxActivationDistance = 6.5;
+            prompt.RequiresLineOfSight = false;
+            prompt.Parent = npcModel;
+            getSound("Ding").Clone().Parent = npcModel.PrimaryPart;
+
+            const npcScript = NPCS.FindFirstChild(npcModel.Name);
+            if (npcScript === undefined) {
+                warn(npcModel.Name + " does not have a script");
+                continue;
+            }
+            const npc = require(npcScript as ModuleScript) as NPC;
+            this.npcPerName.set(npcScript.Name, npc);
+            this.animationsPerNPC.set(npc, new Map());
+
+            if (npc === undefined) {
+                warn("Cannot find NPC for " + npcModel.Name);
+                continue;
+            }
+            this.modelPerNPC.set(npc, npcModel);
+            this.runningAnimationsPerNPC.set(npc, new Map());
+            this.dialoguePerNPC.set(npc, new Map());
+
+            prompt.Triggered.Connect((player) => {
+                print(`${player.Name} interacted`);
+                if (npc.interact !== undefined) {
+                    npc.interact();
+                    return;
+                }
+                const availableDialogues = this.dialoguePerNPC.get(npc)!;
+                let highestPriority: number | undefined, highestDialogue: Dialogue | undefined;
+                for (const [dialogue, priority] of availableDialogues) {
+                    if (highestPriority === undefined || priority > highestPriority) {
+                        highestDialogue = dialogue;
+                        highestPriority = priority;
+                    }
+                }
+                this.talk(highestDialogue ?? npc.defaultDialogue);
+            });
+            this.proximityPrompts.add(prompt);
+
+            const parts = npcModel.GetDescendants();
+            for (const part of parts) {
+                if (part.IsA("BasePart")) {
+                    part.CollisionGroup = "NPC";
+                }
+            }
+            humanoid.RootPart!.CustomPhysicalProperties = new PhysicalProperties(100, 0.3, 0.5);
+            this.defaultLocationsPerNPC.set(npc, humanoid.RootPart!.CFrame);
+            this.playAnimation(npc, "Default");
+            humanoid.Running.Connect((speed) => {
+                if (speed > 0)
+                    this.playAnimation(npc, "Walk");
+                else
+                    this.stopAnimation(npc, "Walk");
+            });
+            let last = humanoid.RootPart!.Position;
+            task.spawn(() => {
+                while (task.wait(1)) {
+                    const newPosition = humanoid.RootPart!.Position;
+                    if (newPosition.sub(last).Magnitude < 1) {
+                        last = newPosition;
+                        this.stopAnimation(npc, "Walk");
+                    }
+                }
+            });
+            humanoid.Jumping.Connect((active) => {
+                if (active)
+                    this.playAnimation(npc, "Jump");
+                else
+                    this.stopAnimation(npc, "Jump");
+            });
         }
     }
 }
