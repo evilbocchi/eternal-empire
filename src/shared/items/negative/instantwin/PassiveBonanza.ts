@@ -11,6 +11,6 @@ export = new Item(script.Name)
     .addPlaceableArea("BarrenIslands")
 
     .trait(Generator)
-    .setPassiveGain(new CurrencyBundle().set("Power", 50000000))
+    .setPassiveGain(new CurrencyBundle().set("Power", 100000000))
 
     .exit();
