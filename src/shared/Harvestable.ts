@@ -131,6 +131,13 @@ const RawHarvestable = {
         tool: "Pickaxe",
         name: "Pure Iron",
         gives: new Map([["Iron", [2, 4]]]),
+    },
+
+    CorruptedStone: {
+        health: 9999,
+        tool: "Pickaxe",
+        name: "Corrupted Stone",
+        gives: new Map([["ExcavationStone", [2, 4]]]),
     }
 }
 

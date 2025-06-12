@@ -111,7 +111,7 @@ export = new Quest(script.Name)
             GameUtils.talk(new Dialogue(Freddy, "Off you go!"));
             task.wait(1);
 
-            const connection = GameUtils.onEventCompleted("AHelpingHandPendant", (isCompleted) => {
+            const connection = GameUtils.addCompletionListener("AHelpingHandPendant", (isCompleted) => {
                 if (isCompleted)
                     stage.completed.fire();
             });
@@ -150,11 +150,11 @@ export = new Quest(script.Name)
             GameUtils.setEventCompleted("AHelpingHandPendant", true);
 
         });
-        GameUtils.onEventCompleted("AHelpingHandPendant", (isCompleted) => {
+        GameUtils.addCompletionListener("AHelpingHandPendant", (isCompleted) => {
             if (isCompleted)
                 lostPendantModel.Destroy();
         });
-        GameUtils.onEventCompleted("FreddyReveal", (isCompleted) => {
+        GameUtils.addCompletionListener("FreddyReveal", (isCompleted) => {
             if (isCompleted)
                 freddyHumanoid.DisplayName = "";
         });

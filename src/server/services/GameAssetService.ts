@@ -96,6 +96,7 @@ export class GameAssetService implements OnInit, OnStart, OnPhysics {
             resetService: this.resetService,
             revenueService: this.revenueService,
             setupService: this.setupService,
+            eventService: this.eventService,
             gameAssetService: this,
             items: Items,
 
@@ -116,13 +117,8 @@ export class GameAssetService implements OnInit, OnStart, OnPhysics {
             addDialogue: (dialogue: Dialogue, priority?: number) => this.dialogueService.addDialogue(dialogue.npc, dialogue, priority),
             removeDialogue: (dialogue: Dialogue) => this.dialogueService.removeDialogue(dialogue.npc, dialogue),
             talk: (dialogue: Dialogue, requireInteraction?: boolean) => this.dialogueService.talk(dialogue, requireInteraction),
-            onEventCompleted: (event: string, callback: (isCompleted: boolean) => void) => {
-                if (this.eventService.isEventCompleted(event))
-                    callback(true);
-                return this.eventService.eventCompleted.connect((e, isCompleted) => {
-                    if (event === e)
-                        callback(isCompleted);
-                });
+            addCompletionListener: (event: string, callback: (isCompleted: boolean) => void) => {
+                return this.eventService.addCompletionListener(event, callback);
             },
             isEventCompleted: (event: string) => this.eventService.isEventCompleted(event),
             setEventCompleted: (event: string, isCompleted: boolean) => this.eventService.setEventCompleted(event, isCompleted),

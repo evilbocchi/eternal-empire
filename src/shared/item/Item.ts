@@ -3,15 +3,15 @@
 
 import Difficulty from "@antivivi/jjt-difficulties";
 import { OnoeNum } from "@antivivi/serikanum";
+import { getAllInstanceInfo } from "@antivivi/vrldk";
 import { RunService } from "@rbxts/services";
 import Area, { AREAS } from "shared/Area";
 import GameSpeed from "shared/GameSpeed";
 import Packets from "shared/Packets";
 import { RESET_LAYERS } from "shared/ResetLayer";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
-import { ITEM_MODELS } from "shared/item/ItemModels";
 import Formula from "shared/currency/Formula";
-import { getAllInstanceInfo } from "@antivivi/vrldk";
+import { ITEM_MODELS } from "shared/item/ItemModels";
 import ItemUtils, { GameUtils } from "shared/item/ItemUtils";
 
 declare global {
@@ -688,18 +688,22 @@ export default class Item {
         return str;
     }
 
-    static {
+    static init() {
+        const start = tick();
+
         ItemUtils.REPEATS.set(() => {
             const formulaResults = new Map<string, OnoeNum>();
             for (const [_id, item] of ItemUtils.itemsPerId) {                
                 formulaResults.set(item.id, item.performFormula()!);
             }
-            Packets.boostChanged.fireAll(formulaResults);
+            if (tick() - start > 4) { // simple delay to ensure clients are ready
+                Packets.boostChanged.fireAll(formulaResults);
+            }
         }, {
             delta: 1,
             lastCall: 0
         });
-        const connection = RunService.Heartbeat.Connect((dt) => {
+        RunService.Heartbeat.Connect((dt) => {
             if (GameUtils.ready === false)
                 return;
 
@@ -718,5 +722,11 @@ export default class Item {
                 }
             }
         });
+    }
+
+    static {
+        if (RunService.IsServer()) {
+            this.init();
+        }
     }
 }

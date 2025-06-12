@@ -20,6 +20,7 @@ import Items from "shared/items/Items";
 import Packets from "shared/Packets";
 import { weldModel } from "@antivivi/vrldk";
 import { convertToMMSS } from "@antivivi/vrldk";
+import CorruptedGrass from "shared/items/excavation/harvestable/CorruptedGrass";
 
 declare global {
     type ChestModel = Model & {
@@ -178,6 +179,20 @@ export class ChestService implements OnInit, OnStart {
             .addItem(Gold, 30)
             .addItem(Quartz, 1)
         );
+        this.poolPerLevel.set(2, new LootPool()
+            .addXP(4, 500)
+            .addXP(6, 1500)
+            .addXP(9, 1000)
+            .addXP(15, 500)
+            .addItem(WhiteGem, 400)
+            .addItem(EnchantedGrass, 200)
+            .addItem(CorruptedGrass, 2)
+            .addItem(Crystal, 200)
+            .addItem(Iron, 70)
+            .addItem(Gold, 30)
+            .addItem(Quartz, 2)
+        );
+
     }
 
     onStart() {

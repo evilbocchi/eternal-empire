@@ -305,7 +305,7 @@ export = new Quest(script.Name)
                     GameUtils.setEventCompleted("SimpulGone", true);
                 }
             });
-            const connection3 = GameUtils.onEventCompleted("SimpulGone", (isCompleted) => {
+            const connection3 = GameUtils.addCompletionListener("SimpulGone", (isCompleted) => {
                 if (!isCompleted)
                     return;
                 GameUtils.leadToPoint(slamoReceptionistHumanoid, getWaypoint("LudicrousEscape3").CFrame, () => { });
@@ -336,11 +336,11 @@ export = new Quest(script.Name)
     )
     .onInit(() => {
         const CurrencyService = GameUtils.currencyService;
-        GameUtils.onEventCompleted("SimpulReveal", (isCompleted) => {
+        GameUtils.addCompletionListener("SimpulReveal", (isCompleted) => {
             if (isCompleted)
                 simpulHumanoid.DisplayName = "";
         });
-        GameUtils.onEventCompleted("FlimsyBarsDestroyed", (isCompleted) => {
+        GameUtils.addCompletionListener("FlimsyBarsDestroyed", (isCompleted) => {
             if (!isCompleted)
                 return;
 
@@ -352,7 +352,7 @@ export = new Quest(script.Name)
                 bar.Destroy();
             }
         });
-        GameUtils.onEventCompleted("SimpulGone", (isCompleted) => {
+        GameUtils.addCompletionListener("SimpulGone", (isCompleted) => {
             if (!isCompleted)
                 return;
             simpulRootPart.CFrame = new CFrame(0, -200, 0);

@@ -4,8 +4,7 @@ import { Debris, ReplicatedStorage, RunService, TextChatService, TweenService } 
 import { HotkeysController } from "client/controllers/HotkeysController";
 import { INTERFACE, UIController } from "client/controllers/UIController";
 import { getDisplayName, getTextChannels } from "shared/constants";
-import { getSound } from "shared/GameAssets";
-import { ASSETS } from "shared/GameAssets";
+import { ASSETS, getSound } from "shared/GameAssets";
 import Packets from "shared/Packets";
 
 declare global {
@@ -15,6 +14,7 @@ declare global {
 }
 
 export const DIALOGUE_WINDOW = INTERFACE.WaitForChild("DialogueWindow") as TextButton & {
+    UIStroke: UIStroke,
     NameLabel: TextLabel,
     TextLabel: TextLabel,
     HintLabel: TextLabel,
@@ -35,12 +35,16 @@ export class NPCController implements OnStart {
 
     }
 
-    async showDialogueWindow(name: string | undefined, text: string) {
-        DIALOGUE_WINDOW.NameLabel.Text = name ?? "";
+    async showDialogueWindow(name = "", text: string) {
+        DIALOGUE_WINDOW.NameLabel.Text = name;
 
         if (DIALOGUE_WINDOW.Visible === false) {
             DIALOGUE_WINDOW.Position = new UDim2(0.5, 0, 1.2, 100);
         }
+        const color = ComputeNameColor(name).Lerp(new Color3(), 0.3);
+        DIALOGUE_WINDOW.BackgroundColor3 = color;
+        DIALOGUE_WINDOW.UIStroke.Color = color;
+
         DIALOGUE_WINDOW.Visible = true;
         TweenService.Create(DIALOGUE_WINDOW, new TweenInfo(0.25, Enum.EasingStyle.Quad), { Position: new UDim2(0.5, 0, 0.975, -30) }).Play();
         this.text = text;

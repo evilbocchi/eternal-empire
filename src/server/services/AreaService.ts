@@ -1,6 +1,7 @@
 //!native
 //!optimize 2
 
+import { getAllInstanceInfo, isInside, playSoundAtPart } from "@antivivi/vrldk";
 import { OnInit, Service } from "@flamework/core";
 import { Players } from "@rbxts/services";
 import { GameAssetService } from "server/services/GameAssetService";
@@ -14,8 +15,6 @@ import { getSound } from "shared/GameAssets";
 import { DROPLET_STORAGE } from "shared/item/Droplet";
 import NamedUpgrades from "shared/namedupgrade/NamedUpgrades";
 import Packets from "shared/Packets";
-import { getAllInstanceInfo } from "@antivivi/vrldk";
-import { isInside, playSoundAtPart } from "@antivivi/vrldk";
 
 const GRID_SIZE_UPGRADES = NamedUpgrades.getUpgrades("GridSize");
 const AREA_CHECK_PARAMS = new OverlapParams();
@@ -143,25 +142,35 @@ export class AreaService implements OnInit, OnPlayerJoined {
         }
     }
 
+    propagateDropletCountChange(id: AreaId, newCount: number) {
+        const dropletCountPerArea = this.gameAssetService.GameUtils.dropletCountPerArea;
+        dropletCountPerArea.set(id, newCount);
+
+        if (os.clock() < 4) { // don't propagate changes too early after server start
+            return;
+        }
+        Packets.dropletCountChanged.fireAll(id, newCount);
+    }
+
     loadBoardGui(id: AreaId, area: Area) {
         const dropletCountPerArea = this.gameAssetService.GameUtils.dropletCountPerArea;
         dropletCountPerArea.set(id, 0);
-        area.dropletLimit.Changed.Connect(() => Packets.dropletCountChanged.fireAll(id, dropletCountPerArea.get(id)!));
+        area.dropletLimit.Changed.Connect(() => this.propagateDropletCountChange(id, dropletCountPerArea.get(id)!));
         DROPLET_STORAGE.ChildAdded.Connect((d) => {
             const info = getAllInstanceInfo(d);
             if (info.Incinerated !== true && info.Area === id) {
                 const newCurrent = dropletCountPerArea.get(id)! + 1;
-                Packets.dropletCountChanged.fireAll(id, newCurrent);
+                this.propagateDropletCountChange(id, newCurrent);
                 dropletCountPerArea.set(id, newCurrent);
 
                 d.Destroying.Once(() => {
                     const newCurrent = dropletCountPerArea.get(id)! - 1;
-                    Packets.dropletCountChanged.fireAll(id, newCurrent);
+                    this.propagateDropletCountChange(id, newCurrent);
                     dropletCountPerArea.set(id, newCurrent);
                 });
             }
         });
-        // recalibrate
+        // recalibrate in case of external desync
         task.spawn(() => {
             while (task.wait(5)) {
                 let i = 0;
@@ -171,8 +180,7 @@ export class AreaService implements OnInit, OnPlayerJoined {
                         ++i;
                     }
                 }
-                dropletCountPerArea.set(id, i);
-                Packets.dropletCountChanged.fireAll(id, i);
+                this.propagateDropletCountChange(id, i);
             }
         });
     }

@@ -29,4 +29,13 @@ export class EventService {
     isEventCompleted(event: string) {
         return this.dataService.empireData.completedEvents.has(event) === true;
     }
+
+    addCompletionListener(event: string, callback: (isCompleted: boolean) => void) {
+        if (this.isEventCompleted(event))
+            callback(true);
+        return this.eventCompleted.connect((e, isCompleted) => {
+            if (event === e)
+                callback(isCompleted);
+        });
+    }
 }

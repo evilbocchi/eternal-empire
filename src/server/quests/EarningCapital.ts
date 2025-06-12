@@ -1,12 +1,11 @@
 import { RunService } from "@rbxts/services";
 import Quest, { Stage } from "server/Quest";
-import RustyFactory from "shared/items/miscellaneous/RustyFactory";
-import ToolShop from "shared/items/tools/ToolShop";
-import { Dialogue } from "shared/NPC";
-import Ricarg from "shared/npcs/Ricarg";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import ItemCounter from "shared/item/ItemCounter";
 import { GameUtils } from "shared/item/ItemUtils";
+import RustyFactory from "shared/items/miscellaneous/RustyFactory";
+import { Dialogue } from "shared/NPC";
+import Ricarg from "shared/npcs/Ricarg";
 
 const minFundsAmount = 10000;
 const req = new CurrencyBundle().set("Funds", minFundsAmount);

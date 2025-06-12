@@ -1,4 +1,5 @@
 import Difficulty from "@antivivi/jjt-difficulties";
+import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
 import Shop from "shared/item/traits/Shop";
 import SphericalDropper from "shared/items/0/automatic/SphericalDropper";
@@ -23,6 +24,8 @@ import LostHeaven from "shared/items/miscellaneous/LostHeaven";
 export = new Item(script.Name)
     .setName("Magical Crafting Table")
     .setDifficulty(Difficulty.Bonuses)
+    .setDescription("A variant of the Crafting Table with more latent power, allowing you to craft more powerful items.")
+    .setPrice(new CurrencyBundle().set("Funds", 1e60), 1)
 
     .trait(Shop)
     .setItems([

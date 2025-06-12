@@ -3,7 +3,7 @@
 
 import Signal from "@antivivi/lemon-signal";
 import { OnoeNum } from "@antivivi/serikanum";
-import { OnInit, Service } from "@flamework/core";
+import { OnInit, OnStart, Service } from "@flamework/core";
 import { DataService } from "server/services/serverdata/DataService";
 import Packets from "shared/Packets";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
@@ -14,7 +14,7 @@ import Queue from "shared/currency/Queue";
 const ZERO = new OnoeNum(0);
 
 @Service()
-export class CurrencyService implements OnInit {
+export class CurrencyService implements OnInit, OnStart {
 
     private readonly currencies: CurrencyMap;
     private readonly mostCurrencies: CurrencyMap;
@@ -104,18 +104,10 @@ export class CurrencyService implements OnInit {
     }
 
     onInit() {
-        Packets.balance.set(this.currencies);
-
         const queuePerCurrency = new Map<Currency, Queue>();
         for (const currency of CURRENCIES) {
             queuePerCurrency.set(currency, new Queue());
         }
-
-        task.spawn(() => {
-            while (task.wait(0.1)) {
-                this.propagate();
-            }
-        });
 
         task.spawn(() => {
             while (task.wait(1)) {
@@ -145,6 +137,14 @@ export class CurrencyService implements OnInit {
                 }
                 Packets.mostBalance.set(this.mostCurrencies);
                 Packets.revenue.set(revenue);
+            }
+        });
+    }
+
+    onStart() {
+        task.spawn(() => {
+            while (task.wait(0.1)) {
+                this.propagate();
             }
         });
     }

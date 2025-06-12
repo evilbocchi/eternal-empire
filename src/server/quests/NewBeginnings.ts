@@ -124,7 +124,7 @@ export = new Quest(script.Name)
         })
     )
     .onInit((utils) => {
-        GameUtils.onEventCompleted("TriaReveal", (isCompleted) => {
+        GameUtils.addCompletionListener("TriaReveal", (isCompleted) => {
             if (isCompleted)
                 triaHumanoid.DisplayName = "";
         });

@@ -1,10 +1,11 @@
+import { playSoundAtPart, spawnExplosion } from "@antivivi/vrldk";
 import { RunService, TweenService, Workspace } from "@rbxts/services";
 import Quest, { Stage } from "server/Quest";
-import { getNPCModel, getWaypoint } from "shared/constants";
-import { getSound } from "shared/GameAssets";
-import { emitEffect } from "shared/GameAssets";
 import { AREAS } from "shared/Area";
+import { getNPCModel, getWaypoint } from "shared/constants";
+import { emitEffect, getSound } from "shared/GameAssets";
 import InteractableObject from "shared/InteractableObject";
+import { GameUtils } from "shared/item/ItemUtils";
 import ExcavationStone from "shared/items/excavation/ExcavationStone";
 import IrregularlyShapedKey from "shared/items/miscellaneous/IrregularlyShapedKey";
 import { Dialogue, EMPTY_NPC } from "shared/NPC";
@@ -13,8 +14,6 @@ import LibraryNoob1 from "shared/npcs/Library Noob 1";
 import LibraryNoob2 from "shared/npcs/Library Noob 2";
 import OldNoob from "shared/npcs/Old Noob";
 import Pasal from "shared/npcs/Pasal";
-import { GameUtils } from "shared/item/ItemUtils";
-import { playSoundAtPart, spawnExplosion } from "@antivivi/vrldk";
 
 const pasalModel = getNPCModel("Pasal");
 const pasalHumanoid = pasalModel.FindFirstChildOfClass("Humanoid")!;
@@ -245,7 +244,7 @@ export = new Quest(script.Name)
                     });
                 }
             });
-            const connection2 = GameUtils.onEventCompleted("SuspiciousWallOpened", (isCompleted) => {
+            const connection2 = GameUtils.addCompletionListener("SuspiciousWallOpened", (isCompleted) => {
                 if (isCompleted) {
                     stage.completed.fire();
                 }
@@ -260,8 +259,9 @@ export = new Quest(script.Name)
         .setDescription(`Discover the depths of the hidden cave.`)
         .onStart((stage) => {
             task.wait(0.5);
-            if (GameUtils.isEventCompleted("SuspiciousWallOpened") === false)
+            if (GameUtils.isEventCompleted("SuspiciousWallOpened") === false) {
                 unlockWall();
+            }
             GameUtils.stopNPCAnimation(OldNoob, "Default");
             GameUtils.stopNPCAnimation(Pasal, "Default");
             oldNoobModel.FindFirstChildOfClass("Tool")?.Destroy();
@@ -323,13 +323,13 @@ export = new Quest(script.Name)
             return () => connection.disconnect();
         }))
     .setCompletionDialogue(new Dialogue(Pasal, "I'm still kinda bewildered from what just happened, but I think I should just stop thinking about whatever that was."))
-    .onInit((utils) => {
+    .onInit(() => {
         const keyUsed = new Dialogue(EMPTY_NPC, "You place the key in the keyhole.");
-        GameUtils.onEventCompleted("PasalReveal", (isCompleted) => {
+        GameUtils.addCompletionListener("PasalReveal", (isCompleted) => {
             if (isCompleted)
                 pasalHumanoid.DisplayName = "";
         });
-        GameUtils.onEventCompleted("IrregularlyShapedKeyUsable", (isCompleted) => {
+        GameUtils.addCompletionListener("IrregularlyShapedKeyUsable", (isCompleted) => {
             if (!isCompleted)
                 return;
             InteractableObject.SuspiciousWall.dialogueUponInteract(keyUsed);
