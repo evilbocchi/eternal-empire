@@ -484,7 +484,9 @@ export class DataService implements OnInit, OnPlayerJoined {
         const profile = this.loadEmpireProfile(empireId, true);
         if (profile && profile.Data.accessCode) {
             TeleportService.TeleportToPrivateServer(game.PlaceId, profile.Data.accessCode, [player], undefined, empireId);
+            return true;
         }
+        return false;
     }
 
     getAvailableEmpires(userId: number): Map<string, EmpireInfo> {
@@ -668,6 +670,6 @@ export class DataService implements OnInit, OnPlayerJoined {
         }
 
         Packets.createNewEmpire.onInvoke((player: Player) => this.createNewEmpire(player));
-        Packets.teleportToEmpire.listen((player, empireId) => this.teleportToEmpire(player, empireId));
+        Packets.teleportToEmpire.onInvoke((player, empireId) => this.teleportToEmpire(player, empireId));
     }
 }

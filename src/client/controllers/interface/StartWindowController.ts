@@ -205,8 +205,15 @@ export class StartWindowController implements OnInit {
             const empireOption = ASSETS.EmpiresWindow.EmpireOption.Clone();
             empireOption.Activated.Connect(() => {
                 this.uiController.playSound("Click");
-                this.loadingWindowController.showLoadingWindow("Loading server");
-                Packets.teleportToEmpire.inform(availableEmpire);
+                const success = Packets.teleportToEmpire.invoke(availableEmpire);
+                if (success) {
+                    this.loadingWindowController.showLoadingWindow("Loading server");
+                }
+                else {
+                    this.uiController.playSound("Error");
+                    warn(`Failed to teleport to empire ${availableEmpire}. It may not exist or is not available.`);
+                    print("Player ID: " + LOCAL_PLAYER.UserId);
+                }
             });
             empireOption.Name = availableEmpire;
             empireOption.EmpireIDLabel.Text = availableEmpire;

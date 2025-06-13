@@ -57,7 +57,7 @@ export class DialogueService implements OnInit {
             const talkingModel = current.npc === undefined ? undefined : this.modelPerNPC.get(current.npc);
             this.disableInteraction();
             if (talkingModel === undefined) {
-                Packets.npcMessage.fireAll(talkingModel ?? Workspace, current.text, currentIndex, size, true);
+                Packets.npcMessage.fireAll(current.text, currentIndex, size, true, Workspace);
             }
             else {
                 let playersPrompted = 0;
@@ -70,7 +70,7 @@ export class DialogueService implements OnInit {
                     if (isPrompt === true) {
                         ++playersPrompted;
                     }
-                    Packets.npcMessage.fire(player, talkingModel ?? Workspace, current.text, currentIndex, size, isPrompt);
+                    Packets.npcMessage.fire(player, current.text, currentIndex, size, isPrompt, talkingModel);
                 }
                 task.delay(current.text.size() / 11 + 1, () => {
                     if (i === currentIndex)

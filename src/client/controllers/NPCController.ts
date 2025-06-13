@@ -1,6 +1,6 @@
 import ComputeNameColor from "@antivivi/rbxnamecolor";
-import { Controller, OnStart } from "@flamework/core";
-import { Debris, ReplicatedStorage, RunService, TextChatService, TweenService } from "@rbxts/services";
+import { Controller, OnInit, OnStart } from "@flamework/core";
+import { Debris, ReplicatedStorage, RunService, TextChatService, TweenService, Workspace } from "@rbxts/services";
 import { HotkeysController } from "client/controllers/HotkeysController";
 import { INTERFACE, UIController } from "client/controllers/UIController";
 import { getDisplayName, getTextChannels } from "shared/constants";
@@ -14,6 +14,7 @@ declare global {
 }
 
 export const DIALOGUE_WINDOW = INTERFACE.WaitForChild("DialogueWindow") as TextButton & {
+    ViewportFrame: ViewportFrame,
     UIStroke: UIStroke,
     NameLabel: TextLabel,
     TextLabel: TextLabel,
@@ -21,7 +22,7 @@ export const DIALOGUE_WINDOW = INTERFACE.WaitForChild("DialogueWindow") as TextB
 };
 
 @Controller()
-export class NPCController implements OnStart {
+export class NPCController implements OnInit, OnStart {
 
     npcTagColor = Color3.fromRGB(201, 255, 13).ToHex();
     emptyColor = Color3.fromRGB(0, 181, 28).ToHex();
@@ -35,15 +36,45 @@ export class NPCController implements OnStart {
 
     }
 
-    async showDialogueWindow(name = "", text: string) {
-        DIALOGUE_WINDOW.NameLabel.Text = name;
+    showHeadshot(model: Model) {
+        const viewportFrame = DIALOGUE_WINDOW.ViewportFrame;
+        viewportFrame.ClearAllChildren();
+        const camera = new Camera();
+        camera.Parent = viewportFrame;
+        viewportFrame.CurrentCamera = camera;
+        const clone = model.Clone();
+
+        // Anchor the model
+        for (const part of clone.GetChildren()) {
+            if (part.IsA("BasePart")) {
+                part.Anchored = true;
+            }
+        }
+
+        clone.PivotTo(new CFrame(0, 0, 0));
+
+        // Set camera CFrame to focus on the head of the model
+        const headCFrame = (clone.FindFirstChild("Head") as BasePart ?? clone.PrimaryPart).CFrame ?? clone.GetPivot();
+        camera.CFrame = headCFrame.mul(CFrame.fromEulerAnglesXYZ(0, math.pi, 0)).mul(new CFrame(0, 0, 2));
+
+        // Set the camera's field of view
+        camera.FieldOfView = 70;
+        clone.Parent = viewportFrame;
+    }
+
+    async showDialogueWindow(name: string | undefined, text: string, model?: Model) {
+        DIALOGUE_WINDOW.NameLabel.Text = name ?? "";
 
         if (DIALOGUE_WINDOW.Visible === false) {
             DIALOGUE_WINDOW.Position = new UDim2(0.5, 0, 1.2, 100);
         }
-        const color = ComputeNameColor(name).Lerp(new Color3(), 0.3);
+        const color = name === undefined ? Color3.fromRGB(165, 165, 165) : ComputeNameColor(name).Lerp(new Color3(), 0.3);
         DIALOGUE_WINDOW.BackgroundColor3 = color;
         DIALOGUE_WINDOW.UIStroke.Color = color;
+
+        if (model !== undefined && model.IsA("Model") && model !== Workspace) {
+            this.showHeadshot(model);
+        }
 
         DIALOGUE_WINDOW.Visible = true;
         TweenService.Create(DIALOGUE_WINDOW, new TweenInfo(0.25, Enum.EasingStyle.Quad), { Position: new UDim2(0.5, 0, 0.975, -30) }).Play();
@@ -59,11 +90,12 @@ export class NPCController implements OnStart {
             if (DIALOGUE_WINDOW.Position === position)
                 DIALOGUE_WINDOW.Visible = false;
         });
+        DIALOGUE_WINDOW.ViewportFrame.ClearAllChildren();
     }
 
-    onStart() {
+    onInit() {
         const channel = getTextChannels().WaitForChild("RBXGeneral") as TextChannel;
-        Packets.npcMessage.connect((model, message, pos, endPos, prompt) => {
+        Packets.npcMessage.connect((message, pos, endPos, prompt, model) => {
             const humanoid = model?.FindFirstChildOfClass("Humanoid");
             let name = undefined as string | undefined;
 
@@ -83,8 +115,11 @@ export class NPCController implements OnStart {
             }
             this.textSound = model === undefined ? undefined : ASSETS.NPCTextSounds.FindFirstChild(model.Name) as Sound | undefined;
             if (prompt === true)
-                this.showDialogueWindow(name, message);
+                this.showDialogueWindow(name, message, model as Model);
         });
+    }
+
+    onStart() {
         const dialogueWindowClicked = () => {
             if (this.i < this.size)
                 this.i = this.size - 1;

@@ -35,106 +35,141 @@ declare global {
 
 type PackedInventory = DataType.Packed<Inventory>;
 type PackedPlacedItem = DataType.Packed<PlacedItem>;
-class Packets {
+namespace Packets {
 
-    // data management
-    static readonly savingEmpire = signal<(status: DataType.u16) => void>();
-    static readonly availableEmpires = property<Map<string, EmpireInfo>>(new Map<string, EmpireInfo>());
-    static readonly createNewEmpire = request<() => boolean>();
-    static readonly teleportToEmpire = signal<(empireId: string) => void>();
-    static readonly promptRename = request<(name: string, method: string) => boolean>();
-    static readonly renameCost = property<BaseOnoeNum>();
-    static readonly empireName = property<string>();
+    /**
+     * Fired when the server completed saving empire data.
+     * @param status 100 for continue, 200 for success, 500 for failure.
+     */
+    export const savingEmpire = signal<(status: DataType.u16) => void>();
+
+    /**
+     * The empires that are available to the player.
+     */
+    export const availableEmpires = property<Map<string, EmpireInfo>>(new Map<string, EmpireInfo>());
+
+    /**
+     * Request the server to create a new empire.
+     * @returns `true` if the request was successful, `false` otherwise.
+     */
+    export const createNewEmpire = request<() => boolean>();
+
+    /**
+     * Request the server to enter a specific empire through Roblox's teleport service.
+     * @param empireId The ID of the empire to teleport to.
+     * @returns `true` if the request was successful, `false` otherwise.
+     */
+    export const teleportToEmpire = request<(empireId: string) => boolean>();
+
+    /**
+     * Request the server to *prompt* a rename the current empire.
+     * This does not immediately rename the empire if method is "robux".
+     * 
+     * @param name The new name for the empire.
+     * @param method The method of renaming, either "robux" or "funds".
+     * @returns `true` if the request was successful, `false` otherwise.
+     */
+    export const promptRename = request<(name: string, method: string) => boolean>();
+
+    /**
+     * The cost of renaming the empire in Funds.
+     */
+    export const renameCost = property<BaseOnoeNum>();
+
+    /**
+     * The name of the current empire.
+     */
+    export const empireName = property<string>();
 
     // items
-    static readonly inventory = property<PackedInventory>();
-    static readonly bought = property<PackedInventory>();
-    static readonly placedItems = property<Map<string, PackedPlacedItem>>();
-    static readonly buyItem = request<(itemId: string) => boolean>();
-    static readonly buyAllItems = request<(itemIds: string[]) => boolean>();
-    static readonly placeItems = request<(items: PlacingInfo[]) => number>();
+    export const inventory = property<PackedInventory>();
+    export const bought = property<PackedInventory>();
+    export const placedItems = property<Map<string, PackedPlacedItem>>();
+    export const buyItem = request<(itemId: string) => boolean>();
+    export const buyAllItems = request<(itemIds: string[]) => boolean>();
+    export const placeItems = request<(items: PlacingInfo[]) => number>();
     
-    static readonly unplaceItems = signal<(placementIds: string[]) => void>();
-    static readonly boostChanged = signal<(boostPerItem: Map<string, BaseOnoeNum>) => void>(true);
+    export const unplaceItems = signal<(placementIds: string[]) => void>();
+    export const boostChanged = signal<(boostPerItem: Map<string, BaseOnoeNum>) => void>(true);
 
     // droplets
-    static readonly dropletAdded = signal<(drop: BasePart) => void>(true);
-    static readonly dropletBurnt = signal<(dropletModelId: string, amountPerCurrency: Map<Currency, BaseOnoeNum>) => void>(true);
+    export const dropletAdded = signal<(drop: BasePart) => void>(true);
+    export const dropletBurnt = signal<(dropletModelId: string, amountPerCurrency: Map<Currency, BaseOnoeNum>) => void>(true);
 
     // currencies
-    static readonly balance = property<Map<Currency, BaseOnoeNum>>(new Map(), true);
-    static readonly mostBalance = property<Map<Currency, BaseOnoeNum>>(new Map(), true);
-    static readonly revenue = property<Map<Currency, BaseOnoeNum>>(new Map(), true);
-    static readonly showDifference = signal<(differencePerCurrency: Map<Currency, BaseOnoeNum>) => void>();
+    export const balance = property<Map<Currency, BaseOnoeNum>>(new Map(), true);
+    export const mostBalance = property<Map<Currency, BaseOnoeNum>>(new Map(), true);
+    export const revenue = property<Map<Currency, BaseOnoeNum>>(new Map(), true);
+    export const showDifference = signal<(differencePerCurrency: Map<Currency, BaseOnoeNum>) => void>();
 
     // upgrade board
-    static readonly upgrades = property<Map<string, DataType.i32>>(new Map());
-    static readonly buyUpgrade = request<(upgradeId: string, to: DataType.i32 | undefined) => boolean>();
+    export const upgrades = property<Map<string, DataType.i32>>(new Map());
+    export const buyUpgrade = request<(upgradeId: string, to: DataType.i32 | undefined) => boolean>();
 
     // resets
-    static readonly reset = signal<(layer: ResetLayerId, amount: BaseOnoeNum) => void>();
-    static readonly printedSetups = property<Array<Setup>>();
-    static readonly renameSetup = signal<(currentName: string, renameTo: string) => void>();
-    static readonly autoloadSetup = signal<(name: string) => void>();
-    static readonly startChallenge = signal<(challenge: string) => void>();
-    static readonly quitChallenge = signal<() => void>();
-    static readonly currentChallenge = property<{name: string, r1: DataType.f32, g1: DataType.f32, b1: DataType.f32, r2: DataType.f32, g2: DataType.f32, b2: DataType.f32, description: string}>();
-    static readonly challengeCompleted = signal<(challenge: string, rewardLabel: string) => void>();
+    export const reset = signal<(layer: ResetLayerId, amount: BaseOnoeNum) => void>();
+    export const printedSetups = property<Array<Setup>>();
+    export const renameSetup = signal<(currentName: string, renameTo: string) => void>();
+    export const autoloadSetup = signal<(name: string) => void>();
+    export const startChallenge = signal<(challenge: string) => void>();
+    export const quitChallenge = signal<() => void>();
+    export const currentChallenge = property<{name: string, r1: DataType.f32, g1: DataType.f32, b1: DataType.f32, r2: DataType.f32, g2: DataType.f32, b2: DataType.f32, description: string}>();
+    export const challengeCompleted = signal<(challenge: string, rewardLabel: string) => void>();
 
     // areas
-    static readonly tpToArea = request<(area: AreaId) => boolean>();
-    static readonly areaUnlocked = signal<(area: AreaId) => void>();
-    static readonly dropletCountChanged = signal<(area: AreaId, current: number) => void>(true);
+    export const tpToArea = request<(area: AreaId) => boolean>();
+    export const areaUnlocked = signal<(area: AreaId) => void>();
+    export const dropletCountChanged = signal<(area: AreaId, current: number) => void>(true);
 
     // quests
-    static readonly questInfo = property<Map<string, DataType.Packed<QuestInfo>>>();
-    static readonly quests = property<Map<string, DataType.i32>>(new Map());
-    static readonly questCompleted = signal<(questId: string) => void>();
-    static readonly remainingLevelPoints = property<DataType.i32>(-1);
-    static readonly level = property<DataType.i32>(-1);
-    static readonly xp = property<DataType.i32>(-1);
-    static readonly getUpgrade = request<(upgradeId: string, amount: DataType.i32) => boolean>();
+    export const questInfo = property<Map<string, DataType.Packed<QuestInfo>>>();
+    export const quests = property<Map<string, DataType.i32>>(new Map());
+    export const questCompleted = signal<(questId: string) => void>();
+    export const remainingLevelPoints = property<DataType.i32>(-1);
+    export const level = property<DataType.i32>(-1);
+    export const xp = property<DataType.i32>(-1);
+    export const getUpgrade = request<(upgradeId: string, amount: DataType.i32) => boolean>();
 
     // playtime
-    static readonly longestSessionTime = property<DataType.i32>(0, true);
-    static readonly sessionTime = property<DataType.i32>(0, true);
-    static readonly empirePlaytime = property<DataType.i32>(0, true);
-    static readonly playerPlaytime = property<DataType.i32>(0, true);
+    export const longestSessionTime = property<DataType.i32>(0, true);
+    export const sessionTime = property<DataType.i32>(0, true);
+    export const empirePlaytime = property<DataType.i32>(0, true);
+    export const playerPlaytime = property<DataType.i32>(0, true);
 
     // permissions
-    static readonly permLevels = property<{[key in PermissionKey]?: number}>({});
-    static readonly getLogs = request<() => Log[]>();
-    static readonly systemMessageSent = signal<(channel: string, message: string, metadata: string) => void>();
-    static readonly codeReceived = signal<(code: string) => void>();
-    static readonly tabOpened = signal<(tab: string) => void>();
-    static readonly donationGiven = signal<() => void>();
-    static readonly promptDonation = signal<(donationId: DataType.i32) => void>();
-    static readonly logAdded = signal<(log: Log) => void>();
+    export const permLevels = property<{[key in PermissionKey]?: number}>({});
+    export const getLogs = request<() => Log[]>();
+    export const systemMessageSent = signal<(channel: string, message: string, metadata: string) => void>();
+    export const codeReceived = signal<(code: string) => void>();
+    export const tabOpened = signal<(tab: string) => void>();
+    export const donationGiven = signal<() => void>();
+    export const promptDonation = signal<(donationId: DataType.i32) => void>();
+    export const logAdded = signal<(log: Log) => void>();
 
     // settings
-    static readonly settings = property<DataType.Packed<typeof PlayerProfileTemplate.settings>>();
-    static readonly setSetting = signal<<T extends keyof Settings>(setting: T, value: Settings[T]) => void>();
-    static readonly setHotkey = signal<(name: string, key: DataType.i32) => void>();
+    export const settings = property<DataType.Packed<typeof PlayerProfileTemplate.settings>>();
+    export const setSetting = signal<<T extends keyof Settings>(setting: T, value: Settings[T]) => void>();
+    export const setHotkey = signal<(name: string, key: DataType.i32) => void>();
 
     // npcs
-    static readonly nextDialogue = request<() => boolean>();
-    static readonly npcMessage = signal<(npc: Instance, message: string, pos: number, end: number, prompt: boolean) => void>();
+    export const nextDialogue = request<() => boolean>();
+    export const npcMessage = signal<(message: string, pos: number, end: number, prompt: boolean, npc: Instance) => void>();
 
     // chests
-    static readonly itemsReceived = signal<(items: Map<string, number>) => void>();
-    static readonly xpReceived = signal<(xp: number) => void>();
+    export const itemsReceived = signal<(items: Map<string, number>) => void>();
+    export const xpReceived = signal<(xp: number) => void>();
 
     // bombs
-    static readonly useBomb = request<(bombType: Currency) => boolean>();
+    export const useBomb = request<(bombType: Currency) => boolean>();
 
     // tools
-    static readonly useTool = signal<(harvestable: Instance) => void>(true);
+    export const useTool = signal<(harvestable: Instance) => void>(true);
 
     // visual
-    static readonly camShake = signal<() => void>();
+    export const camShake = signal<() => void>();
 
     // admin
-    static readonly modifyGame = signal<(param: string) => void>();
+    export const modifyGame = signal<(param: string) => void>();
 }
 
 export = Packets;
