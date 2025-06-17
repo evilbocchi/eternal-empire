@@ -37,6 +37,10 @@ export default class Sandbox {
         npcModels.Name = "NPCs";
         npcModels.Parent = Workspace;
 
+        const wanderers = new Folder();
+        wanderers.Name = "Wanderers";
+        wanderers.Parent = Workspace;
+
         const waypoints = new Folder();
         waypoints.Name = "Waypoints";
         waypoints.Parent = Workspace;

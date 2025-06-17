@@ -312,9 +312,9 @@ export = new Quest(script.Name)
                     oldNoobHumanoid.MoveTo(suspiciousWall.Position);
                 }
                 else if (dialogue === ending) {
-                    GameUtils.leadToPoint(oldNoobHumanoid, getWaypoint("LearningThePastEnterCave").CFrame, () => {
-                        task.delay(0.1, () => oldNoobHumanoid.RootPart!.CFrame = GameUtils.getDefaultLocation(OldNoob)!);
-                    }, false);
+                    GameUtils.gameAssetService.pathfind(oldNoobHumanoid, getWaypoint("LearningThePastEnterCave").Position, () => {
+                        oldNoobHumanoid.RootPart!.CFrame = GameUtils.getDefaultLocation(OldNoob)!;
+                    });
                     GameUtils.addDialogue(new Dialogue(Pasal, "What am I witnessing..."), 69);
                     task.delay(1, () => GameUtils.talk(new Dialogue(Pasal, "I'll stay back for a bit. I'm just... shocked...")));
                     stage.completed.fire();

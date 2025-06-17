@@ -1,5 +1,5 @@
 import { playSoundAtPart } from "@antivivi/vrldk";
-import { ReplicatedStorage, TweenService, Workspace } from "@rbxts/services";
+import { TweenService, Workspace } from "@rbxts/services";
 import Quest, { Stage } from "server/Quest";
 import { AREAS } from "shared/Area";
 import { getNPCModel, getWaypoint } from "shared/constants";
@@ -117,7 +117,7 @@ export = new Quest(script.Name)
                 .root;
 
             refugee.FindFirstChild("FishingRod")?.Destroy();
-            GameUtils.leadToPoint(refugee.WaitForChild("Humanoid"), getWaypoint("ToTheVillage2").CFrame, () => { });
+            const moving = GameUtils.leadToPoint(refugee.WaitForChild("Humanoid"), getWaypoint("ToTheVillage2").CFrame, () => { }, false);
             task.spawn(() => {
                 while (!GameUtils.isQuestCompleted("AHelpingHand")) {
                     task.wait(0.1);
@@ -130,7 +130,10 @@ export = new Quest(script.Name)
                     stage.completed.fire();
                 }
             });
-            return () => connection.disconnect();
+            return () => {
+                connection.disconnect();
+                moving.Disconnect();
+            };
         })
     )
     .addStage(new Stage()
@@ -138,8 +141,8 @@ export = new Quest(script.Name)
         .setFocus(cauldron.PrimaryPart!)
         .onStart((stage) => {
             const refugee = getNPCModel("Slamo Refugee");
-            refugee.WaitForChild("FishingRod").Destroy();
-            GameUtils.leadToPoint(refugee.WaitForChild("Humanoid"), getWaypoint("ToTheVillage3").CFrame, () => { });
+            refugee.FindFirstChild("FishingRod")?.Destroy();
+            const moving = GameUtils.leadToPoint(refugee.WaitForChild("Humanoid"), getWaypoint("ToTheVillage3").CFrame, () => { }, false);
 
             const proximityPrompt = cauldron.WaitForChild("ProximityPrompt") as ProximityPrompt;
             proximityPrompt.Enabled = true;
@@ -153,7 +156,10 @@ export = new Quest(script.Name)
                 stage.completed.fire();
             });
 
-            return () => connection.Disconnect();
+            return () => {
+                connection.Disconnect();
+                moving.Disconnect();
+            };
         })
     )
     .addStage(new Stage()
@@ -167,46 +173,44 @@ export = new Quest(script.Name)
             refugee.FindFirstChild("FishingRod")?.Destroy();
 
             GameUtils.talk(new Dialogue(SlamoRefugee, "Let me handle this."));
-            GameUtils.leadToPoint(refugee.WaitForChild("Humanoid"), getWaypoint("ToTheVillage3").CFrame, () => {
-                const wool = XLWool.MODEL!.Clone();
-                const parts = new Array<BasePart>();
-                for (const part of wool.GetDescendants()) {
-                    if (part.IsA("BasePart")) {
-                        part.CanCollide = false;
-                        part.Anchored = true;
-                        parts.push(part);
-                    }
-                }
-                wool.PivotTo(cauldron.PrimaryPart!.CFrame.add(new Vector3(0, 5, 0)));
-                wool.Parent = Workspace;
-
-                task.wait(1);
-                for (const part of parts) {
-                    TweenService.Create(part, new TweenInfo(1), {
-                        CFrame: part.CFrame.add(new Vector3(0, -4, 0))
-                    }).Play();
-                }
-                task.wait(1);
-                playSoundAtPart(cauldron.PrimaryPart, getSound("SpellCardAttack"));
-                wool.Destroy();
-                const effect = explosionEffect.Clone();
-                effect.Parent = instantWinBlock;
-                effect.Emit(4);
-                for (const effect of instantWinEffects) {
-                    effect.Transparency = 1;
-                }
-                showInstantWinBlock();
-                task.wait(1);
-                GameUtils.talk(continuation);
-            });
-
             const continuation = new Dialogue(SlamoRefugee, "Wow... it's raw Instant Win energy. It's so potent!")
                 .monologue("Now, I can infuse the Empowered Brick with this energy. Just give me a moment.")
                 .root;
-
             const continuation2 = new Dialogue(SlamoRefugee, "It's beautiful! I can feel the power radiating from it.")
                 .monologue("Let's go repair the linkway to Slamo Village. I can't wait to get back home!")
                 .root;
+
+            refugee.PivotTo(getWaypoint("ToTheVillage3").CFrame);
+            const wool = XLWool.MODEL!.Clone();
+            const parts = new Array<BasePart>();
+            for (const part of wool.GetDescendants()) {
+                if (part.IsA("BasePart")) {
+                    part.CanCollide = false;
+                    part.Anchored = true;
+                    parts.push(part);
+                }
+            }
+            wool.PivotTo(cauldron.PrimaryPart!.CFrame.add(new Vector3(0, 5, 0)));
+            wool.Parent = Workspace;
+
+            task.wait(1);
+            for (const part of parts) {
+                TweenService.Create(part, new TweenInfo(1), {
+                    CFrame: part.CFrame.add(new Vector3(0, -4, 0))
+                }).Play();
+            }
+            task.wait(1);
+            playSoundAtPart(cauldron.PrimaryPart, getSound("SpellCardAttack"));
+            wool.Destroy();
+            const effect = explosionEffect.Clone();
+            effect.Parent = instantWinBlock;
+            effect.Emit(4);
+            for (const effect of instantWinEffects) {
+                effect.Transparency = 1;
+            }
+            showInstantWinBlock();
+            task.wait(1);
+            GameUtils.talk(continuation);
 
             const empoweredBrick = EmpoweredBrick.MODEL!.Clone();
             const connection = GameUtils.dialogueFinished.connect((dialogue) => {
@@ -248,7 +252,9 @@ export = new Quest(script.Name)
                     empoweredBrick.Destroy();
                 }
             });
-            return () => connection.disconnect();
+            return () => {
+                connection.disconnect();
+            };
         })
     )
     .addStage(new Stage()
@@ -263,10 +269,7 @@ export = new Quest(script.Name)
             linkwayEffect.Enabled = false;
             linkwayEffect.Parent = particlePart.WaitForChild("Attachment");
 
-            const dialogue = new Dialogue(SlamoRefugee, "We're here. All you need to do is place the Charged Empowered Brick down.")
-                .monologue("Once you do that, the linkway will be repaired and we can finally go home.")
-                .root;
-            GameUtils.leadToPoint(refugee.WaitForChild("Humanoid"), getWaypoint("ToTheVillage4").CFrame, () => {
+            const dialogue = new Dialogue(SlamoRefugee, "We're here. All you need to do is place the Charged Empowered Brick down. Once you do that, the linkway will be repaired and we can finally go home."); const moving = GameUtils.leadToPoint(refugee.WaitForChild("Humanoid"), getWaypoint("ToTheVillage4").CFrame, () => {
                 GameUtils.talk(dialogue);
             });
 
@@ -298,7 +301,10 @@ export = new Quest(script.Name)
                 stage.completed.fire();
             });
 
-            return () => connection.disconnect();
+            return () => {
+                connection.disconnect();
+                moving.Disconnect();
+            };
         })
     )
     .addStage(new Stage()
@@ -309,28 +315,44 @@ export = new Quest(script.Name)
             refugee.FindFirstChild("FishingRod")?.Destroy();
             refugee.PivotTo(getWaypoint("ToTheVillage4").CFrame);
 
-            GameUtils.leadToPoint(refugee.WaitForChild("Humanoid"), getWaypoint("ToTheVillage5").CFrame, () => {
-                GameUtils.talk(new Dialogue(SlamoRefugee, "Hey.")
-                    .monologue("I bet you're wondering why I was in the Barren Islands in the first place.")
-                    .monologue("To tell you the truth, I was exiled from Slamo Village for being too... different.")
-                    .monologue("And now that I'm back... It's time to take my revenge.")
-                    .root
-                );
-                const humanoid = refugee.WaitForChild("Humanoid") as Humanoid;
-                humanoid.WalkSpeed = 40;
-                GameUtils.leadToPoint(humanoid, getWaypoint("ToTheVillage6").CFrame, () => {
-                    humanoid.RootPart!.Anchored = true;
-                    stage.completed.fire();
-                });
+            const continuation = new Dialogue(SlamoRefugee, "Hey.")
+                .monologue("I bet you're wondering why I was in the Barren Islands in the first place.")
+                .monologue("To tell you the truth, I was exiled from Slamo Village for being too... different.")
+                .monologue("And now that I'm back... It's time to take my revenge.")
+                .root;
+
+            const moving = GameUtils.leadToPoint(refugee.WaitForChild("Humanoid"), getWaypoint("ToTheVillage5").CFrame, () => {
+                GameUtils.talk(continuation);
             });
             task.wait(2);
             GameUtils.talk(new Dialogue(SlamoRefugee, "Finally! The linkway is repaired!"), false);
             task.wait(6);
-            GameUtils.talk(new Dialogue(SlamoRefugee, "It's just as I remembered it... Small, cozy, and full of life."), false);
+            GameUtils.talk(new Dialogue(SlamoRefugee, "After all these years, I can finally see home again."), false);
             task.wait(6);
+            GameUtils.talk(new Dialogue(SlamoRefugee, "The village is right up ahead!"), false);
+            task.wait(6);
+            GameUtils.talk(new Dialogue(SlamoRefugee, "It's just as I remembered it... Small, cozy, and full of life."), false);
+            task.wait(10);
             GameUtils.talk(new Dialogue(SlamoRefugee, "..."), false);
 
-            return () => { /* No cleanup needed */ };
+            const connection = GameUtils.dialogueFinished.connect((dialogue) => {
+                if (dialogue !== continuation) {
+                    return;
+                }
+
+                const humanoid = refugee.WaitForChild("Humanoid") as Humanoid;
+                humanoid.WalkSpeed = 30;
+                GameUtils.gameAssetService.pathfind(humanoid, getWaypoint("ToTheVillage6").Position, () => {
+                    refugee.PivotTo(getWaypoint("ToTheVillage7").CFrame);
+                    humanoid.RootPart!.Anchored = true;
+                    stage.completed.fire();
+                });
+            });
+
+            return () => {
+                connection.disconnect();
+                moving.Disconnect();
+            };
         })
     )
     .addStage(new Stage()

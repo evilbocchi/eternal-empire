@@ -1,6 +1,6 @@
+import { getAllInstanceInfo, getInstanceInfo } from "@antivivi/vrldk";
 import Item from "shared/item/Item";
 import ItemTrait from "shared/item/traits/ItemTrait";
-import { getAllInstanceInfo, getInstanceInfo } from "@antivivi/vrldk";
 
 declare global {
     interface StatusEffectAssets {
@@ -25,8 +25,13 @@ declare global {
  */
 export default abstract class StatusEffect extends ItemTrait {
 
+    active = true;
+
     static load(model: Model, statusEffect: StatusEffect) {
         getInstanceInfo(model, "OnUpgraded")!.connect((dropletModel) => {
+            if (statusEffect.active === false) {
+                return;
+            }
             const dropletInfo = getAllInstanceInfo(dropletModel);
             const statusEffects = dropletInfo.StatusEffects ?? new Map<StatusEffect, StatusEffectInfo>();
             if (statusEffects.has(statusEffect)) {
@@ -41,6 +46,11 @@ export default abstract class StatusEffect extends ItemTrait {
     constructor(item: Item) {
         super(item);
         item.onLoad((model) => StatusEffect.load(model, this));
+    }
+
+    setActive(active: boolean) {
+        this.active = active;
+        return this;
     }
 
     abstract decorate(dropletModel: BasePart): StatusEffectInfo;

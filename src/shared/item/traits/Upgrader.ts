@@ -44,6 +44,7 @@ const ONES = CurrencyBundle.ones();
 
 export default class Upgrader extends Operative {
 
+    requirement?: (dropletInfo: InstanceInfo) => boolean;
     sky?: boolean;
     isStacks?: boolean;
 
@@ -67,6 +68,8 @@ export default class Upgrader extends Operative {
             if (droplet.Parent !== DROPLET_STORAGE || getInstanceInfo(droplet, "Incinerated") === true)
                 return;
             const instanceInfo = getAllInstanceInfo(droplet);
+            if (upgrader.requirement !== undefined && !upgrader.requirement(instanceInfo))
+                return;
 
             if (laserInfo.Sky === true)
                 instanceInfo.Sky = true;
@@ -115,13 +118,36 @@ export default class Upgrader extends Operative {
         item.onLoad((model) => Upgrader.load(model, this));
     }
 
+    /**
+     * Set whether droplets passing through this upgrader will reach the skyline after being upgraded.
+     * 
+     * @param sky Whether the upgrader makes droplets reach the skyline.
+     * @returns The upgrader instance for chaining.
+     */
     setSky(sky: boolean) {
         this.sky = sky;
         return this;
     }
 
+    /**
+     * Set whether this upgrader has multiple lasers that each independently upgrade droplets.
+     * 
+     * @param isStacks Whether the upgrader has multiple lasers that upgrade droplets independently. Defaults to true.
+     * @returns The upgrader instance for chaining.
+     */
     stacks(isStacks: boolean) {
         this.isStacks = isStacks;
+        return this;
+    }
+
+    /**
+     * Sets a requirement for droplets to be upgraded by this upgrader.
+     * 
+     * @param requirement A function that takes the droplet's instance information and returns whether it should be upgraded.
+     * @returns The upgrader instance for chaining.
+     */
+    setRequirement(requirement: (dropletInfo: InstanceInfo) => boolean) {
+        this.requirement = requirement;
         return this;
     }
 

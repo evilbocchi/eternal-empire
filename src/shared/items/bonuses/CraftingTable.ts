@@ -23,6 +23,7 @@ export = new Item(script.Name)
     .setDifficulty(Difficulty.Bonuses)
     .setDescription("A table that allows you to craft items.")
     .setPrice(new CurrencyBundle().set("Funds", 1e42), 1)
+    .placeableEverywhere()
 
     .trait(Shop)
     .setItems([

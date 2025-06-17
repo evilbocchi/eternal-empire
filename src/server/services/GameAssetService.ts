@@ -223,12 +223,9 @@ export class GameAssetService implements OnInit, OnStart, OnPhysics {
                 if (nextWaypoint.Action === Enum.PathWaypointAction.Jump) {
                     humanoid.Jump = true;
                     playSoundAtPart(rootPart, getSound("Jump"));
-                    doNextWaypoint();
                 }
-                else if (nextWaypoint.Action === Enum.PathWaypointAction.Walk) {
-                    newPos = nextWaypoint.Position;
-                    humanoid.MoveTo(newPos);
-                }
+                newPos = nextWaypoint.Position;
+                humanoid.MoveTo(newPos);
             }
             else {
                 connection.Disconnect();
@@ -241,7 +238,7 @@ export class GameAssetService implements OnInit, OnStart, OnPhysics {
                 return;
             t += dt;
             const dist = rootPart.Position.sub(newPos).mul(new Vector3(1, 0, 1)).Magnitude;
-            if (dist < 3) {
+            if (dist < humanoid.WalkSpeed * 0.1875) { // allow more leeway for higher speeds
                 t = 0;
                 newPos = undefined;
                 doNextWaypoint();

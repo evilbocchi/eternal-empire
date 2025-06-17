@@ -105,7 +105,11 @@ export class AreaController implements OnInit, OnStart {
     }
 
     onStart() {
-        const slamoVillageConnection = AREAS.IntermittentIsles.areaFolder.WaitForChild("SlamoVillageConnection");
+        const slamoVillageConnection = AREAS.IntermittentIsles.areaFolder.WaitForChild("SlamoVillageConnection", 10);
+        if (slamoVillageConnection === undefined) {
+            return;
+        }
+        
         const unlockedValue = AREAS.SlamoVillage.unlocked;
         if (!unlockedValue.Value) {
             slamoVillageConnection.Parent = ReplicatedStorage;

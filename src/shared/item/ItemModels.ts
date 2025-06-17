@@ -100,7 +100,6 @@ for (const model of served) {
             instance.CollisionGroup = "Decoration";
             instance.CanQuery = true;
             instance.AddTag("Unhoverable");
-            model.PrimaryPart?.AddTag("Shop");
             continue;
         }
 

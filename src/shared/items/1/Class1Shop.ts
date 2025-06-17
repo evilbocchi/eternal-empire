@@ -1,12 +1,15 @@
 import Difficulty from "@antivivi/jjt-difficulties";
+import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
 import Shop from "shared/item/traits/Shop";
+import DropletCoaster from "shared/items/1/coasterifying/DropletCoaster";
+import SilentMemory from "shared/items/1/dosomething/SilentMemory";
+import AbruptBridge from "shared/items/1/joyful/AbruptBridge";
+import AntiGravityConverter from "shared/items/1/joyful/AntiGravityConverter";
 import ChildhoodSlide from "shared/items/1/joyful/ChildhoodSlide";
 import JoyfulPark from "shared/items/1/joyful/JoyfulPark";
-import CurrencyBundle from "shared/currency/CurrencyBundle";
-import AbruptBridge from "shared/items/1/joyful/AbruptBridge";
-import SilentMemory from "shared/items/1/dosomething/SilentMemory";
 import Baseplate from "shared/items/1/placid/Baseplate";
+import FullConversionRamp from "shared/items/1/walkaslope/FullConversionRamp";
 
 export = new Item(script.Name)
     .setName("Class 1 Shop")
@@ -21,12 +24,15 @@ export = new Item(script.Name)
         JoyfulPark,
         ChildhoodSlide,
         AbruptBridge,
+        AntiGravityConverter,
 
         SilentMemory,
 
         Baseplate,
 
-        
+        FullConversionRamp,
+
+        DropletCoaster
     ])
 
     .exit();

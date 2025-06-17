@@ -15,6 +15,7 @@ import FoolsTribute from "shared/items/excavation/harvestable/FoolsTribute";
 import CrimsonCemetery from "shared/items/miscellaneous/CrimsonCemetery";
 import CrystalDrill from "shared/items/miscellaneous/CrystalDrill";
 import ElevatedCoinKiller from "shared/items/miscellaneous/ElevatedCoinKiller";
+import FlamingConveyor from "shared/items/miscellaneous/FlamingConveyor";
 import FrostSnow from "shared/items/miscellaneous/FrostSnow";
 import GildedStaircase from "shared/items/miscellaneous/GildedStaircase";
 import GoldDiggersHaven from "shared/items/miscellaneous/GoldDiggersHaven";
@@ -26,9 +27,11 @@ export = new Item(script.Name)
     .setDifficulty(Difficulty.Bonuses)
     .setDescription("A variant of the Crafting Table with more latent power, allowing you to craft more powerful items.")
     .setPrice(new CurrencyBundle().set("Funds", 1e60), 1)
+    .placeableEverywhere()
 
     .trait(Shop)
     .setItems([
+        FlamingConveyor,
         HeavyFoundry,
         GoldDiggersHaven,
         FrostSnow,

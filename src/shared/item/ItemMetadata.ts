@@ -5,8 +5,10 @@ import { RESET_LAYERS } from "shared/ResetLayer";
 import Item from "shared/item/Item";
 import Packets from "shared/Packets";
 import { combineHumanReadable, formatRichText } from "@antivivi/vrldk";
+import Sandbox from "shared/Sandbox";
 
 const RESET_LAYERS_UNLOCKED = AREAS.SlamoVillage.unlocked;
+const SANDBOX_ENABLED = Sandbox.getEnabled();
 
 export default class ItemMetadata {
 
@@ -74,7 +76,7 @@ export default class ItemMetadata {
     placeableAreas(color = Color3.fromRGB(248, 255, 221)) {
         const item = this.item;
         const isEmpty = item.placeableAreas.isEmpty();
-        if (item.bounds !== undefined || (!RESET_LAYERS_UNLOCKED.Value && !isEmpty)) {
+        if (item.bounds !== undefined || (!RESET_LAYERS_UNLOCKED.Value && !isEmpty && !SANDBOX_ENABLED)) {
             this.builder[ItemMetadata.INDICES.PLACEABLE_AREAS] = "";
             return;
         }
@@ -86,10 +88,11 @@ export default class ItemMetadata {
 
         const builder = new StringBuilder("Placeable in ");
         const vals = new Array<string>();
-        this.item.placeableAreas.forEach((area) => {
-            if (!area.hidden)
-                vals.push(area.name);
-        });
+        for (const area of item.placeableAreas) {
+            if (area.hidden && !SANDBOX_ENABLED)
+                continue;
+            vals.push(area.name);
+        }
         builder.append(combineHumanReadable(...vals));
 
         this.builder[ItemMetadata.INDICES.PLACEABLE_AREAS] = `\n${formatRichText(builder.toString(), color, this.size, this.weight)}`;

@@ -423,7 +423,14 @@ export class ShopController implements OnInit, OnStart {
                         shopGuiPart.SetAttribute("ClientLoaded", true);
                     }
 
-                    if (!hitbox.GetTouchingParts().includes(primaryPart))
+                    let isInside = false;
+                    for (const touchingPart of hitbox.GetTouchingParts()) {
+                        if (touchingPart.Parent === LOCAL_PLAYER.Character) {
+                            isInside = true;
+                            break;
+                        }
+                    }
+                    if (!isInside)
                         continue;
 
                     const itemId = model.GetAttribute("ItemId") as string | undefined;
