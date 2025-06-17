@@ -4,9 +4,9 @@
 
 # JJT Money Empire
 
-[![Build](https://github.com/evilbocchi/jme/actions/workflows/ci.yml/badge.svg?branch=master&event=push)](https://github.com/evilbocchi/jme/actions/workflows/ci.yml)
-[![GitHub](https://img.shields.io/github/release/evilbocchi/jme.svg)](https://github.com/evilbocchi/jme/releases/latest)
-[![CodeFactor](https://www.codefactor.io/repository/github/evilbocchi/jme/badge)](https://www.codefactor.io/repository/github/evilbocchi/jme)
+[![Build](https://github.com/Unreal-Works/jme/actions/workflows/build-and-release.yml/badge.svg?branch=master&event=push)](https://github.com/Unreal-Works/jme/actions/workflows/build-and-release.yml)
+[![GitHub](https://img.shields.io/github/release/Unreal-Works/jme.svg)](https://github.com/Unreal-Works/jme/releases/latest)
+[![CodeFactor](https://www.codefactor.io/repository/github/Unreal-Works/jme/badge)](https://www.codefactor.io/repository/github/Unreal-Works/jme)
 [![Discord](https://discordapp.com/api/guilds/1217488177862938654/widget.png?style=shield)](https://discord.gg/haPBmCSvXt)
 
 [JJT Money Empire](https://www.roblox.com/games/16438564807/JJT-Money-Empire) is a Roblox game where players can build their own money-making empire.
@@ -17,7 +17,7 @@ To set up the development environment for JJT Money Empire, follow these steps:
 
 1. Clone the repository:
     ```sh
-    git clone https://github.com/evilbocchi/jme.git
+    git clone https://github.com/Unreal-Works/jme.git
     cd jme
     ```
 

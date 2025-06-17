@@ -25,6 +25,10 @@ jobs:
   build-and-release:
     runs-on: ubuntu-latest
     
+    # Set permissions needed for creating releases
+    permissions:
+      contents: write
+      
     # Set outputs for later use
     outputs:
       version: ${{ steps.get-version.outputs.version }}
@@ -93,5 +97,4 @@ jobs:
           _Please manually update this section with the relevant changes._
         draft: true
         prerelease: false
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        token: ${{ github.token }}
