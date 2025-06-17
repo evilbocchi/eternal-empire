@@ -1,13 +1,13 @@
 import { OnoeNum } from "@antivivi/serikanum";
-import { Controller, OnInit } from "@flamework/core";
+import { Controller, OnInit, OnStart } from "@flamework/core";
 import CameraShaker from "@rbxts/camera-shaker";
-import { TweenService, Workspace } from "@rbxts/services";
+import { ReplicatedStorage, TweenService, Workspace } from "@rbxts/services";
 import { UIController } from "client/controllers/UIController";
 import Area, { AREAS } from "shared/Area";
 import Packets from "shared/Packets";
 
 @Controller()
-export class AreaController implements OnInit {
+export class AreaController implements OnInit, OnStart {
 
     readonly AREA_UNLOCK_SHAKE = new CameraShaker(
         Enum.RenderPriority.Camera.Value,
@@ -96,11 +96,27 @@ export class AreaController implements OnInit {
     onInit() {
         this.AREA_UNLOCK_SHAKE.Start();
 
-
-        for (const [id, area] of pairs(AREAS))
+        for (const [id, area] of pairs(AREAS)) {
             this.loadArea(id, area);
+        }
 
         Packets.areaUnlocked.connect((area) => this.onAreaUnlocked(area));
         Packets.dropletCountChanged.connect((area, current) => this.UPDATE_PER_AREA.get(area)!(current));
+    }
+
+    onStart() {
+        const slamoVillageConnection = AREAS.IntermittentIsles.areaFolder.WaitForChild("SlamoVillageConnection");
+        const unlockedValue = AREAS.SlamoVillage.unlocked;
+        if (!unlockedValue.Value) {
+            slamoVillageConnection.Parent = ReplicatedStorage;
+        }
+
+        unlockedValue.Changed.Connect((value) => {
+            if (value) {
+                slamoVillageConnection.Parent = AREAS.IntermittentIsles.areaFolder;
+            } else {
+                slamoVillageConnection.Parent = ReplicatedStorage;
+            }
+        });
     }
 }

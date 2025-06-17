@@ -73,8 +73,14 @@ export default class ItemMetadata {
 
     placeableAreas(color = Color3.fromRGB(248, 255, 221)) {
         const item = this.item;
-        if (item.bounds !== undefined || (!RESET_LAYERS_UNLOCKED.Value && !item.placeableAreas.isEmpty())) {
+        const isEmpty = item.placeableAreas.isEmpty();
+        if (item.bounds !== undefined || (!RESET_LAYERS_UNLOCKED.Value && !isEmpty)) {
             this.builder[ItemMetadata.INDICES.PLACEABLE_AREAS] = "";
+            return;
+        }
+
+        if (isEmpty) {
+            this.builder[ItemMetadata.INDICES.PLACEABLE_AREAS] = `\n${formatRichText("This item is not placeable.", color, this.size, this.weight)}`;
             return;
         }
 

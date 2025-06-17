@@ -131,12 +131,11 @@ export class GameAssetService implements OnInit, OnStart, OnPhysics {
                     cached.Disconnect();
                 npcHumanoid.RootPart!.Anchored = false;
                 const tween = TweenService.Create(npcHumanoid.RootPart!, new TweenInfo(1), { CFrame: point });
-                let called = false;
+                let toCall = false;
                 this.pathfind(npcHumanoid, point.Position, () => {
                     tween.Play();
-                    if (requiresPlayer === false && called === false) {
-                        callback();
-                        called = true;
+                    if (requiresPlayer === false) {
+                        toCall = true;
                     }
                 }, agentParams);
                 const connection = RunService.Heartbeat.Connect(() => {
@@ -147,12 +146,19 @@ export class GameAssetService implements OnInit, OnStart, OnPhysics {
                             continue;
                         if (point.Position.sub(playerRootPart.Position).Magnitude < 10) {
                             tween.Play();
-                            if (called === false)
-                                callback();
-                            called = true;
+                            toCall = true;
                             connection.Disconnect();
                             return;
                         }
+                    }
+                });
+                task.spawn(() => {
+                    while (!toCall) {
+                        RunService.Heartbeat.Wait();
+                    }
+                    print("Reached point", npcHumanoid.Name, point.Position);
+                    if (callback !== undefined) {
+                        callback();
                     }
                 });
                 this.runningPathfinds.set(npcHumanoid, connection);
@@ -278,6 +284,7 @@ export class GameAssetService implements OnInit, OnStart, OnPhysics {
             quest.stages.forEach((stage, index) => {
                 task.spawn(() => {
                     // loading
+                    const reached = new Set<Stage>();
                     if (!this.loadedStages.has(stage)) {
                         const load = stage.load;
                         if (load !== undefined) {
@@ -297,14 +304,16 @@ export class GameAssetService implements OnInit, OnStart, OnPhysics {
                                     this.completeQuest(quest);
                                 }
                                 else {
-                                    this.stageReached.fire(quest.stages[newStage]);
+                                    const nextStage = quest.stages[newStage];
+                                    this.stageReached.fire(nextStage);
+                                    reached.add(nextStage);
                                 }
                                 this.loadedStages.delete(stage);
                                 connection.disconnect();
                             });
                         }
                     }
-                    if (current === index) {
+                    if (current === index && !reached.has(stage)) {
                         this.stageReached.fire(stage);
                     }
                 });

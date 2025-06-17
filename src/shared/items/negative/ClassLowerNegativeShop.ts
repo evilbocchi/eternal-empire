@@ -1,6 +1,7 @@
 import Difficulty from "@antivivi/jjt-difficulties";
 import Item from "shared/item/Item";
 import Shop from "shared/item/traits/Shop";
+import MVisitsTrophy from "shared/items/bonuses/1MVisitsTrophy";
 import AdvancedRefiner from "shared/items/negative/a/AdvancedRefiner";
 import DropDropper from "shared/items/negative/a/DropDropper";
 import DualDropper from "shared/items/negative/a/DualDropper";
@@ -94,6 +95,8 @@ export = new Item(script.Name)
 
     .trait(Shop)
     .setItems([
+        MVisitsTrophy,
+
         TheFirstDropper,
         TheFirstFurnace,
         TheFirstConveyor,

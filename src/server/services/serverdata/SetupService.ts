@@ -22,7 +22,7 @@ export class SetupService implements OnInit {
     }
 
     saveSetup(player: Player, area: AreaId, name: string) {
-        if (!this.dataService.checkPermLevel(player, "build") || name.size() > 32) {
+        if (!this.dataService.checkPermLevel(player, "build")) {
             return;
         }
         const data = this.dataService.empireData;
@@ -53,6 +53,11 @@ export class SetupService implements OnInit {
             existingSetup.calculatedPrice = totalPrice.amountPerCurrency;
         }
         else {
+            // truncate name to 32 characters
+            if (name.size() > 32) {
+                name = name.sub(1, 32);
+            }
+
             data.printedSetups.push({
                 name: name,
                 area: area,

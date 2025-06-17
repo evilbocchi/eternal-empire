@@ -457,7 +457,8 @@ export class ProgressionEstimationService implements OnInit {
         };
 
         const response = HttpService.PostAsync(pasteUrl, this.encode(data), Enum.HttpContentType.ApplicationUrlEncoded);
-
+        print(`Progression estimation report posted to ${response}`);
+        
         const quotes = [
             `i love boxing`,
             `i glove boxing`,
@@ -475,7 +476,7 @@ export class ProgressionEstimationService implements OnInit {
             content: quotes[math.random(0, quotes.size() - 1)],
             embeds: [{
                 title: "Progression Estimation Report",
-                description: `Report dumped at ${response}`,
+                description: `Report dumped at ${response}-preview`,
                 color: 0xFF0000,
                 timestamp: timestamp,
             }],

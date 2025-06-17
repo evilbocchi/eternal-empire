@@ -1,5 +1,5 @@
 import { OnInit, OnStart, Service } from "@flamework/core";
-import { Players } from "@rbxts/services";
+import { Workspace } from "@rbxts/services";
 import { NPC_MODELS } from "shared/constants";
 
 type TrackingDetails = {
@@ -41,18 +41,21 @@ export class EyeContactService implements OnInit, OnStart {
     }
 
     /**
-     * Returns the closest target to the given model, which is the character of a player.
+     * Returns the closest target to the given model, which is expected to be a character model.
      * 
-     * @param model The model to find the closest player to.
-     * @returns The closest player's character model, or undefined if no players are close enough.
+     * @param model The model to find the closest character to.
+     * @returns The closest character model, or undefined if no characters are close enough.
      */
     getClosestTarget(model: Model) {
         let closest: Model | undefined;
         let closestDistance = 20;
-        for (const player of Players.GetPlayers()) {
-            const character = player.Character;
-            if (character === undefined)
-                continue;
+        for (const character of Workspace.GetChildren()) {
+            if (!character.IsA("Model") || !character.FindFirstChild("Humanoid")) {
+                continue; // Skip non-character models
+            }
+            if (character === model) {
+                continue; // Skip the model itself
+            }
             const primaryPart = character.PrimaryPart;
             if (primaryPart === undefined)
                 continue;

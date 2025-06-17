@@ -22,7 +22,7 @@ export const DIALOGUE_WINDOW = INTERFACE.WaitForChild("DialogueWindow") as TextB
 };
 
 @Controller()
-export class NPCController implements OnInit, OnStart {
+export class DialogueController implements OnInit, OnStart {
 
     npcTagColor = Color3.fromRGB(201, 255, 13).ToHex();
     emptyColor = Color3.fromRGB(0, 181, 28).ToHex();
@@ -54,8 +54,14 @@ export class NPCController implements OnInit, OnStart {
         clone.PivotTo(new CFrame(0, 0, 0));
 
         // Set camera CFrame to focus on the head of the model
-        const headCFrame = (clone.FindFirstChild("Head") as BasePart ?? clone.PrimaryPart).CFrame ?? clone.GetPivot();
-        camera.CFrame = headCFrame.mul(CFrame.fromEulerAnglesXYZ(0, math.pi, 0)).mul(new CFrame(0, 0, 2));
+        const head = (clone.FindFirstChild("Head") as BasePart ?? clone.PrimaryPart);
+        if (head === undefined) {
+            warn("NPC model does not have a Head or PrimaryPart.");
+            return;
+        }
+        const headCFrame = head.CFrame;
+        const distance = 1 + head.Size.Y;
+        camera.CFrame = headCFrame.mul(CFrame.fromEulerAnglesXYZ(0, math.pi, 0)).mul(new CFrame(0, 0, distance));
 
         // Set the camera's field of view
         camera.FieldOfView = 70;
@@ -100,7 +106,7 @@ export class NPCController implements OnInit, OnStart {
             let name = undefined as string | undefined;
 
             if (model !== undefined && humanoid !== undefined) {
-                if (Packets.settings.get().SoundEffects)
+                if (Packets.settings.get()?.SoundEffects)
                     (humanoid.RootPart?.FindFirstChild("DingSound") as Sound | undefined)?.Play();
                 name = getDisplayName(humanoid);
                 channel.DisplaySystemMessage(

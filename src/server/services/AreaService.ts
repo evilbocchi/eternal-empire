@@ -146,7 +146,7 @@ export class AreaService implements OnInit, OnPlayerJoined {
         const dropletCountPerArea = this.gameAssetService.GameUtils.dropletCountPerArea;
         dropletCountPerArea.set(id, newCount);
 
-        if (os.clock() < 4) { // don't propagate changes too early after server start
+        if (os.clock() < 6) { // don't propagate changes too early after server start
             return;
         }
         Packets.dropletCountChanged.fireAll(id, newCount);

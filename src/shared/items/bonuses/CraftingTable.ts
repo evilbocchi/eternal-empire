@@ -7,6 +7,7 @@ import HopefulRose from "shared/items/excavation/harvestable/HopefulRose";
 import MagicalWood from "shared/items/excavation/harvestable/MagicalWood";
 import DropletDiverger from "shared/items/miscellaneous/DropletDiverger";
 import ElectroshockedCoil from "shared/items/miscellaneous/ElectroshockedCoil";
+import EmpoweredBrick from "shared/items/miscellaneous/EmpoweredBrick";
 import IndustrialOverpass from "shared/items/miscellaneous/IndustrialOverpass";
 import Lamp from "shared/items/miscellaneous/Lamp";
 import LegPoweredDropper from "shared/items/miscellaneous/LegPoweredDropper";
@@ -40,7 +41,8 @@ export = new Item(script.Name)
 
         EnchantedGrass,
         MagicalWood,
-        HopefulRose
+        HopefulRose,
+        EmpoweredBrick
     ])
 
     .exit();

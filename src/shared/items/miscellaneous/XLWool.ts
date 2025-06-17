@@ -3,7 +3,7 @@ import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
 
 export = new Item(script.Name)
-    .setName("Wool")
-    .setDescription("Wool for the masses.")
+    .setName("XL Wool")
+    .setDescription("Wool but for people who need a lot of it.")
     .setDifficulty(Difficulty.Miscellaneous)
-    .setPrice(new CurrencyBundle().set("Funds", 24e12).set("Power", 100));
+    .setPrice(new CurrencyBundle().set("Funds", 24e18).set("Power", 1000000));

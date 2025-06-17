@@ -1,8 +1,8 @@
+import { findBaseParts, getAllInstanceInfo } from "@antivivi/vrldk";
+import { CollectionService, RunService } from "@rbxts/services";
 import GameSpeed from "shared/GameSpeed";
 import Item from "shared/item/Item";
 import ItemTrait from "shared/item/traits/ItemTrait";
-import { getAllInstanceInfo } from "@antivivi/vrldk";
-import { findBaseParts } from "@antivivi/vrldk";
 
 declare global {
     interface ItemTraits {
@@ -27,7 +27,7 @@ export default class Conveyor extends ItemTrait {
      * @param conveyor The conveyor instance to which the part belongs.
      * @returns The Beam instance representing the conveyor arrow.
      */
-    static loadConveyorArrow(part: BasePart, conveyor: Conveyor) {
+    static loadConveyorArrow(part: BasePart, conveyor?: Conveyor) {
         const width = part.Size.X;
         const beam = new Beam();
         beam.Name = "ConveyorArrow";
@@ -56,10 +56,18 @@ export default class Conveyor extends ItemTrait {
         }
 
         const updateSpeed = () => {
-            const speed = part.GetAttribute("Speed") as number | undefined;
-            beam.TextureSpeed = (speed ?? conveyor.getSpeed()) / beam.TextureLength;
+            let speed = part.GetAttribute("Speed") as number | undefined;
+            if (speed === undefined) {
+                speed = conveyor?.getSpeed() ?? 1;
+            }
+            beam.TextureSpeed = speed / beam.TextureLength;
         };
-        part.GetAttributeChangedSignal("Speed").Connect(updateSpeed);
+        const connection = part.GetAttributeChangedSignal("Speed").Connect(updateSpeed);
+        part.AncestryChanged.Connect((_, parent) => {
+            if (parent === undefined) {
+                connection.Disconnect();
+            }
+        });
         updateSpeed();
         beam.Parent = part;
         return beam;
@@ -86,17 +94,12 @@ export default class Conveyor extends ItemTrait {
                 let speed = part.GetAttribute("BaseSpeed") as number;
                 speed += speedBoost;
                 part.SetAttribute("Speed", speed);
+                part.AddTag("Conveyor");
                 part.AssemblyLinearVelocity = part.CFrame.LookVector.mul((part.GetAttribute("Inverted") ? -1 : 1) * speed);
             }
         };
         updateSpeed();
         instanceInfo.UpdateSpeed = updateSpeed;
-    }
-
-    static clientLoad(model: Model, conveyor: Conveyor) {
-        for (const part of findBaseParts(model, "Conveyor")) {
-            this.loadConveyorArrow(part, conveyor);
-        }
     }
 
     /**
@@ -134,7 +137,6 @@ export default class Conveyor extends ItemTrait {
             }
         });
         item.onLoad((model) => Conveyor.load(model, this));
-        item.onClientLoad((model) => Conveyor.clientLoad(model, this));
     }
 
     /**
@@ -155,5 +157,13 @@ export default class Conveyor extends ItemTrait {
      */
     getSpeed() {
         return this.speed * GameSpeed.speed;
+    }
+
+    static {
+        if (RunService.IsClient()) {
+            CollectionService.GetInstanceAddedSignal("Conveyor").Connect((part) => {
+                this.loadConveyorArrow(part as BasePart);
+            });
+        }
     }
 }

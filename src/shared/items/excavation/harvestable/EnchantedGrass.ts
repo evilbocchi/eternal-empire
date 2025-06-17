@@ -5,7 +5,7 @@ import CurrencyBundle from "shared/currency/CurrencyBundle";
 
 export = new Item(script.Name)
     .setName("Enchanted Grass")
-    .setDescription("Nevermind, maybe you can expect something out of grass! Boosts Funds by a whopping... %mul%. Doesn't stack with more of the same item. Nevermind, don't expect much.")
+    .setDescription("Grass but better. Boosts Funds by a whopping... %mul%. Doesn't stack with more of the same item. Don't expect much.")
     .setDifficulty(Difficulty.Excavation)
     .setPrice(new CurrencyBundle().set("Funds", 100))
     .setRequiredHarvestableAmount("Grass", 25)

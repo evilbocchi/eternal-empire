@@ -13,6 +13,11 @@ export class UnlockedAreasService implements OnInit {
 
     }
 
+    isAreaUnlocked(area: AreaId) {
+        const areas = this.dataService.empireData.unlockedAreas;
+        return areas.has(area);
+    }
+
     unlockArea(area: AreaId) {
         const areas = this.dataService.empireData.unlockedAreas;
         areas.add(area);

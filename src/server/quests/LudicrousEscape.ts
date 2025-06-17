@@ -96,7 +96,7 @@ export = new Quest(script.Name)
                     .monologue("He was a good friend of mine until I realised what he was doing to make money. It gives me the shivers to know that our poor community was being leeched off by him.")
                     .monologue("...You want to know where the keys are? Don't tell me you're planning on setting him free or something.")
                     .monologue("They're totally not behind a secret wall near those crates or anything. Why would they be?")
-                    .monologue("Anyways, just give it up. Our security is pretty high here, so we'll catch you if you do anything suspicious, anyways.")
+                    .monologue("Anyways, just give it up. Our security is pretty high here, so we'll catch you if you do anything suspicious.")
                     .root
             ];
             for (const dialogue of dialogues)

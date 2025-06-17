@@ -222,33 +222,34 @@ export default class Area {
  * Uses different initialization strategies depending on whether sandbox mode is enabled.
  * 
  * @param name Name of the area folder in Workspace
- * @param isUnlocked Whether the area should start unlocked
+ * @param buildable Whether items can be placed in this area
  * @returns A new Area instance
  */
-function createArea(name: string, isUnlocked: boolean) {
+function createArea(name: string, buildable: boolean) {
     if (Sandbox.getEnabled() && IS_SERVER) {
         // In sandbox mode on the server, create a new folder
         const folder = new Folder();
         folder.Name = name;
         folder.Parent = Workspace;
-        return new Area(folder, isUnlocked);
+        return new Area(folder, buildable);
     }
     // Otherwise use existing folder from Workspace
-    return new Area(Workspace.WaitForChild(name), isUnlocked);
+    return new Area(Workspace.WaitForChild(name), buildable);
 }
 
 /**
  * Collection of all game areas.
  * Provides easy access to all areas for other systems.
- * The boolean in createArea represents whether the area starts unlocked.
+ * The boolean in createArea indicates if the area is buildable (items can be placed).
  */
 export const AREAS = {
-    BarrenIslands: createArea("BarrenIslands", true),
+    ToxicWaterfall: createArea("ToxicWaterfall", false),
     MagicalHideout: createArea("MagicalHideout", false),
     SecretLab: createArea("SecretLab", false),
-    SlamoVillage: createArea("SlamoVillage", true),
-    ToxicWaterfall: createArea("ToxicWaterfall", false),
-
-    SkyPavilion: createArea("SkyPavilion", true),
+    IntermittentIsles: createArea("IntermittentIsles", true),
     Eden: createArea("Eden", false),
+
+    BarrenIslands: createArea("BarrenIslands", true),
+    SlamoVillage: createArea("SlamoVillage", true),
+    SkyPavilion: createArea("SkyPavilion", true),
 };

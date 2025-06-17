@@ -8,6 +8,11 @@ export class AtmosphereController implements OnInit, OnPhysics {
     lights = new Map<Light, number>();
 
     findLight(lightSourceContainer: Instance) {
+        const light = lightSourceContainer.FindFirstChildOfClass("Light");
+        if (light !== undefined) {
+            return light;
+        }
+
         return lightSourceContainer.FindFirstChild("LightSource")?.FindFirstChildWhichIsA("Light");
     }
 
