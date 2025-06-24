@@ -1,5 +1,5 @@
 import { getAllInstanceInfo } from "@antivivi/vrldk";
-import { Players } from "@rbxts/services";
+import { Players, TweenService } from "@rbxts/services";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
 import ItemUtils, { GameUtils } from "shared/item/ItemUtils";
@@ -74,7 +74,7 @@ export default class Generator extends Boostable {
                 }
             }
             GameUtils.currencyService.incrementAll(amountPerCurrency);
-        }, 0.5);
+        }, 1);
     }
 
     constructor(item: Item) {
@@ -83,11 +83,30 @@ export default class Generator extends Boostable {
         item.onClientLoad((model) => {
             const remoteEvent = model.WaitForChild("UnreliableRemoteEvent") as UnreliableRemoteEvent;
             const part = model.FindFirstChild("Marker");
+            const positions = new Map<BasePart, Vector3>();
+            for (const part of model.GetDescendants()) {
+                if (!part.IsA("BasePart") || part.Name === "Base")
+                    continue;
+                positions.set(part, part.Position);
+            }
+            const tween1 = new TweenInfo(0.1, Enum.EasingStyle.Quad, Enum.EasingDirection.In);
+            const tween2 = new TweenInfo(0.4, Enum.EasingStyle.Quad, Enum.EasingDirection.Out);
+
             remoteEvent.OnClientEvent.Connect((amountPerCurrency?: CurrencyMap) => {
                 if (amountPerCurrency === undefined)
                     return;
                 const gui = ItemUtils.loadDropletGui(amountPerCurrency);
                 gui.Parent = part ?? model.PrimaryPart;
+                for (const [part, position] of positions) {
+                    TweenService.Create(part, tween1, {
+                        Position: position.sub(new Vector3(0, 0.125, 0))
+                    }).Play();
+                    task.delay(0.1, () => {
+                        TweenService.Create(part, tween2, {
+                            Position: position
+                        }).Play();
+                    });
+                }
             });
         });
     }

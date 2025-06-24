@@ -1,3 +1,4 @@
+import { weldModel } from "@antivivi/vrldk";
 import { Controller, OnInit, OnStart } from "@flamework/core";
 import { HttpService, TweenService, UserInputService, Workspace } from "@rbxts/services";
 import { LOCAL_PLAYER, MOUSE, NONCOLLISION_COLOR } from "client/constants";
@@ -10,10 +11,9 @@ import { PLACED_ITEMS_FOLDER } from "shared/constants";
 import Item from "shared/item/Item";
 import Items from "shared/items/Items";
 import Packets from "shared/Packets";
-import Sandbox from "shared/Sandbox";
 import BuildBounds from "shared/placement/BuildBounds";
 import ItemPlacement from "shared/placement/ItemPlacement";
-import { weldModel } from "@antivivi/vrldk";
+import Sandbox from "shared/Sandbox";
 
 export type BuildOption = TextButton & {
     UIScale: UIScale,
@@ -63,19 +63,11 @@ export class BuildController implements OnInit, OnStart {
     debounce = 0;
     readonly MOVETWEENINFO = new TweenInfo(0.25, Enum.EasingStyle.Back, Enum.EasingDirection.Out);
     readonly OPTIONSTWEENINFO = new TweenInfo(0.3, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out);
-    private lastCFrame = new CFrame();
+    private lastSelectingCFrame = new CFrame();
+    private lastCameraCFrame = new CFrame();
 
     constructor(private uiController: UIController, private hotkeysController: HotkeysController, private adaptiveTabController: AdaptiveTabController) {
 
-    }
-
-    getSwipeMode() {
-        return Workspace.GetAttribute("SwipeMode") as boolean | undefined ?? false;
-    }
-
-    setSwipeMode(value: boolean) {
-        Workspace.SetAttribute("SwipeMode", value);
-        BUILD_WINDOW.Options.Place.ImageLabel.ImageColor3 = value || UserInputService.TouchEnabled ? new Color3(0.67, 1, 0.5) : new Color3(1, 0.43, 0.43);
     }
 
     /**
@@ -124,7 +116,7 @@ export class BuildController implements OnInit, OnStart {
         refreshButton(BUILD_WINDOW.Deselect);
         refreshButton(BUILD_WINDOW.Options.Rotate);
         refreshButton(BUILD_WINDOW.Options.Delete);
-        BUILD_WINDOW.Options.Place.TextLabel.Text = UserInputService.TouchEnabled === true ? "Place" : "Swipe Mode";
+        BUILD_WINDOW.Options.Place.Visible = UserInputService.TouchEnabled;
         refreshButton(BUILD_WINDOW.Options.Place);
     }
 
@@ -335,33 +327,35 @@ export class BuildController implements OnInit, OnStart {
 
         MOUSE.TargetFilter = PLACED_ITEMS_FOLDER;
 
+        const mainSelected = this.mainSelected!;
+        const rotation = this.rotationValue.Value;
+        let cframe: CFrame | undefined;
         if (changePos === true) {
-            const mainSelected = this.mainSelected!;
-            const rotation = this.rotationValue.Value;
-            const cframe = buildBounds.snap(mainSelected.PrimaryPart!.Size, MOUSE.Hit.Position, math.rad(rotation), rotation % 90 !== 0);
-            if (cframe === undefined)
-                return;
-
-            for (const [selected, offset] of this.selected) {
-                const primaryPart = selected.PrimaryPart;
-                if (primaryPart === undefined)
-                    continue;
-                const indicator = primaryPart.FindFirstChild("Indicator");
-                if (indicator === undefined)
-                    continue;
-
-                const relative = cframe.mul(offset);
-                (indicator as BasePart).CFrame = relative;
-
-                if (animationsEnabled === true)
-                    TweenService.Create(primaryPart, this.MOVETWEENINFO, { CFrame: relative }).Play();
-                else
-                    primaryPart.CFrame = relative;
-            }
+            cframe = MOUSE.Hit;
+        }
+        else {
+            cframe = mainSelected.PrimaryPart!.CFrame;
         }
 
-        if (this.clicking === true && this.getSwipeMode() === true) {
-            this.onMouseUp();
+        cframe = buildBounds.snap(mainSelected.PrimaryPart!.Size, cframe.Position, math.rad(rotation), rotation % 90 !== 0);
+        if (cframe === undefined)
+            return;
+
+        for (const [selected, offset] of this.selected) {
+            const primaryPart = selected.PrimaryPart;
+            if (primaryPart === undefined)
+                continue;
+            const indicator = primaryPart.FindFirstChild("Indicator");
+            if (indicator === undefined)
+                continue;
+
+            const relative = cframe.mul(offset);
+            (indicator as BasePart).CFrame = relative;
+
+            if (animationsEnabled === true)
+                TweenService.Create(primaryPart, this.MOVETWEENINFO, { CFrame: relative }).Play();
+            else
+                primaryPart.CFrame = relative;
         }
     }
 
@@ -370,6 +364,12 @@ export class BuildController implements OnInit, OnStart {
             return;
 
         this.clicking = true;
+
+        const cameraCFrame = Workspace.CurrentCamera?.CFrame ?? new CFrame();
+        if (UserInputService.TouchEnabled && !this.lastCameraCFrame.FuzzyEq(cameraCFrame)) {
+            this.onMouseMove();
+        }
+        this.lastCameraCFrame = cameraCFrame;
     }
 
     onMouseUp(useCurrentPos?: boolean) {
@@ -407,7 +407,7 @@ export class BuildController implements OnInit, OnStart {
         }
 
         const selectingCFrame = (this.mainSelected!.PrimaryPart!.FindFirstChild("Indicator") as BasePart).CFrame;
-        if (UserInputService.TouchEnabled === false || useCurrentPos === true || this.lastCFrame === selectingCFrame) {
+        if (UserInputService.TouchEnabled === false || useCurrentPos === true || this.lastSelectingCFrame === selectingCFrame) {
             for (const [selected] of this.selected) {
                 const primaryPart = selected.PrimaryPart;
                 if (primaryPart === undefined)
@@ -418,14 +418,20 @@ export class BuildController implements OnInit, OnStart {
                 primaryPart.CFrame = indicator.CFrame; // snap to indicator
             }
             this.uiController.playSound(this.placeSelected() === true ? "Place" : "Error");
+            this.lastSelectingCFrame = selectingCFrame;
+            return;
         }
-        this.lastCFrame = selectingCFrame;
+        this.lastSelectingCFrame = selectingCFrame;
     }
 
     onInit() {
         Packets.settings.observe((value) => this.animationsEnabled = value.BuildAnimation);
 
-        Workspace.CurrentCamera?.GetPropertyChangedSignal("CFrame").Connect(() => this.onMouseMove());
+        Workspace.CurrentCamera?.GetPropertyChangedSignal("CFrame").Connect(() => {
+            if (UserInputService.TouchEnabled === true && !this.selected.isEmpty())
+                return;
+            this.onMouseMove();
+        });
 
         UserInputService.InputBegan.Connect((input, gameProcessed) => {
             if (gameProcessed === true)
@@ -443,16 +449,13 @@ export class BuildController implements OnInit, OnStart {
                 return;
             this.onMouseUp();
         });
-        UserInputService.TouchMoved.Connect((_touch, gameProcessed) => {
-            if (gameProcessed === true)
-                return;
-            this.onMouseMove();
-        });
+
         UserInputService.InputChanged.Connect((input, gameProcessed) => {
             if (gameProcessed === true)
                 return;
-            if (input.UserInputType === Enum.UserInputType.MouseMovement)
+            if (input.UserInputType === Enum.UserInputType.MouseMovement) {
                 this.onMouseMove();
+            }
         });
         UserInputService.InputEnded.Connect((input, gameProcessed) => {
             if (gameProcessed === true)
@@ -492,22 +495,14 @@ export class BuildController implements OnInit, OnStart {
             this.deselectAll();
             return true;
         }, "Unplace");
-        this.hotkeysController.setHotkey(BUILD_WINDOW.Options.Place, UserInputService.TouchEnabled === true ? undefined : Enum.KeyCode.LeftControl, () => {
+        this.hotkeysController.setHotkey(BUILD_WINDOW.Options.Place, undefined, () => {
             if (this.selected.isEmpty() || this.getRestricted() === true)
                 return false;
-            if (UserInputService.TouchEnabled === true)
-                this.onMouseUp(true);
-            else
-                this.setSwipeMode(!this.getSwipeMode());
-            return true;
-        }, UserInputService.TouchEnabled === true ? "Place" : "Toggle Swipe", 1, () => {
-            if (this.selected.isEmpty() || this.getRestricted() === true)
-                return false;
-            this.setSwipeMode(false);
-            return true;
-        });
 
-        this.setSwipeMode(false);
+            this.onMouseUp(true);
+            return true;
+        }, "Place");
+
 
         this.hotkeysController.bindKey(Enum.KeyCode.LeftShift, () => {
             this.multiselecting = true;

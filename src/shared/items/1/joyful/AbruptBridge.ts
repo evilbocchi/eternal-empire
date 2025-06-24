@@ -7,7 +7,7 @@ import CurrencyBundle from "shared/currency/CurrencyBundle";
 
 export = new Item(script.Name)
     .setName("Abrupt Bridge")
-    .setDescription("A bridge in the sky and a river, cutting off like nothing was ever there. ")
+    .setDescription("A bridge in the sky and a river, cutting off like nothing was ever there.")
     .setDifficulty(Difficulty.Joyful)
     .setPrice(new CurrencyBundle().set("Skill", 20e9), 1)
     .setCreator("CoPKaDT")

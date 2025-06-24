@@ -12,7 +12,7 @@ export = new Item(script.Name)
     .addPlaceableArea("BarrenIslands")
 
     .trait(Upgrader)
-    .setMul(new CurrencyBundle().set("Funds", 1.6).set("Power", 1.8).set("Bitcoin", 1.35))
+    .setMul(new CurrencyBundle().set("Funds", 1.6).set("Power", 1.8).set("Bitcoin", 1.35).set("Skill", 1.6))
 
     .trait(Damager)
     .setDamage(55)

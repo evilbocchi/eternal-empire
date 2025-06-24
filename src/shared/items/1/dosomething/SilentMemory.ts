@@ -9,6 +9,7 @@ export = new Item(script.Name)
     .setDifficulty(Difficulty.DoSomething)
     .setPrice(new CurrencyBundle().set("Funds", 3e45), 1)
     .addPlaceableArea("SkyPavilion")
+    .setCreator("CoPKaDT")
 
     .trait(Furnace)
     .setMul(new CurrencyBundle().set("Funds", 1))

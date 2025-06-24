@@ -1,0 +1,46 @@
+import Difficulty from "@antivivi/jjt-difficulties";
+import { OnoeNum } from "@antivivi/serikanum";
+import CurrencyBundle from "shared/currency/CurrencyBundle";
+import Formula from "shared/currency/Formula";
+import Item from "shared/item/Item";
+import { GameUtils } from "shared/item/ItemUtils";
+import Generator from "shared/item/traits/Generator";
+import CorruptedBonanza from "shared/items/0/ifinitude/CorruptedBonanza";
+import TimelostDesert from "shared/items/0/vibeness/TimelostDesert";
+import CanisteringGenerator from "shared/items/0/vintage/CanisteringGenerator";
+import TransientTesseract from "shared/items/0/winsome/TransientTesseract";
+import HandCrankGenerator from "shared/items/negative/a/HandCrankGenerator";
+import TheFirstGenerator from "shared/items/negative/friendliness/TheFirstGenerator";
+import PeripheralGenerator from "shared/items/negative/reversedperipherality/PeripheralGenerator";
+import UpgradedGenerator from "shared/items/negative/trueease/UpgradedGenerator";
+
+const amt = new OnoeNum(100e12);
+const base = new CurrencyBundle().set("Power", amt);
+
+export = new Item(script.Name)
+    .setName("Octahedral Temple")
+    .setDescription("The shape for optimal power generation. It is said that this temple was built by worshippers of the octahedron as a symbol of balance and harmony. Produces %gain%.")
+    .setDifficulty(Difficulty.Spontaneous)
+    .setPrice(new CurrencyBundle().set("Funds", 55e42), 1)
+    .setRequiredItemAmount(TheFirstGenerator, TheFirstGenerator.pricePerIteration.size())
+    .setRequiredItemAmount(UpgradedGenerator, UpgradedGenerator.pricePerIteration.size())
+    .setRequiredItemAmount(HandCrankGenerator, HandCrankGenerator.pricePerIteration.size())
+    .setRequiredItemAmount(PeripheralGenerator, PeripheralGenerator.pricePerIteration.size())
+    .setRequiredItemAmount(TransientTesseract, TransientTesseract.pricePerIteration.size())
+    .setRequiredItemAmount(CanisteringGenerator, CanisteringGenerator.pricePerIteration.size())
+    .setRequiredItemAmount(CorruptedBonanza, CorruptedBonanza.pricePerIteration.size())
+    .setRequiredItemAmount(TimelostDesert, TimelostDesert.pricePerIteration.size())
+
+    .addPlaceableArea("BarrenIslands")
+    .setCreator("emoronq2k")
+
+    .setFormula(new Formula().pow(0.25))
+    .setFormulaX("skill")
+
+    .trait(Generator)
+    .setPassiveGain(base)
+    .applyFormula((v, item) => {
+        return item.setPassiveGain(base.set("Power", amt.mul(v)));
+    }, () => GameUtils.currencyService.get("Skill"))
+
+    .exit();

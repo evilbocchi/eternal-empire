@@ -1,0 +1,27 @@
+import Difficulty from "@antivivi/jjt-difficulties";
+import CurrencyBundle from "shared/currency/CurrencyBundle";
+import Droplet from "shared/item/Droplet";
+import Item from "shared/item/Item";
+import Dropper from "shared/item/traits/Dropper";
+import ExcavationStone from "shared/items/excavation/ExcavationStone";
+import Gold from "shared/items/excavation/Gold";
+import WhiteGem from "shared/items/excavation/WhiteGem";
+
+export = new Item(script.Name)
+    .setName("Energy Powered Dropper")
+    .setDescription("Produces %val% droplets per second but drains a considerable %drain%.")
+    .setDifficulty(Difficulty.A)
+    .setPrice(new CurrencyBundle().set("Funds", 3e12), 1)
+    .setRequiredItemAmount(ExcavationStone, 15)
+    .setRequiredItemAmount(WhiteGem, 5)
+    .setRequiredItemAmount(Gold, 1)
+    .setRequiredHarvestableAmount("Grass", 25)
+    .addPlaceableArea("BarrenIslands")
+    .persists()
+
+    .trait(Dropper)
+    .setDroplet(Droplet.EnergyPoweredDroplet)
+    .setDropRate(1)
+    .exit()
+
+    .setDrain(new CurrencyBundle().set("Power", 20));

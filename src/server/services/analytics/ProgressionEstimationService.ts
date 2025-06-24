@@ -2,7 +2,8 @@
 //!optimize 2
 
 import { OnoeNum } from "@antivivi/serikanum";
-import { OnInit, Service } from "@flamework/core";
+import { getAllInstanceInfo } from "@antivivi/vrldk";
+import { OnStart, Service } from "@flamework/core";
 import { HttpService, Workspace } from "@rbxts/services";
 import StringBuilder from "@rbxts/stringbuilder";
 import { $env } from "rbxts-transform-env";
@@ -21,7 +22,6 @@ import Furnace from "shared/item/traits/Furnace";
 import Items from "shared/items/Items";
 import AwesomeManumaticPurifier from "shared/items/negative/felixthea/AwesomeManumaticPurifier";
 import { RESET_LAYERS } from "shared/ResetLayer";
-import { getAllInstanceInfo } from "@antivivi/vrldk";
 
 declare global {
     interface Assets {
@@ -32,10 +32,11 @@ type ItemProgressionStats = {
     revenue: CurrencyBundle;
     item?: Item;
     timeToObtain?: OnoeNum;
+    limitingCurrency?: Currency;
 };
 
 @Service()
-export class ProgressionEstimationService implements OnInit {
+export class ProgressionEstimationService implements OnStart {
 
     readonly MODEL_PER_DROPLET = (function () {
         const modelPerDroplet = new Map<Droplet, BasePart>();
@@ -77,26 +78,29 @@ export class ProgressionEstimationService implements OnInit {
      * 
      * @param revenue The revenue that is being generated every second.
      * @param price The price that needs to be obtained.
-     * @return The time to obtain the price with the revenue, or undefined if it is impossible to obtain, in seconds.
+     * @return A tuple containing the maximum time to reach the price and the currency that limits the time, or undefined if the revenue cannot generate the required currency.
      */
     getTimeToReachPrice(revenue: CurrencyBundle, price: CurrencyBundle) {
         let maxTime = new OnoeNum(0);
+        let limitingCurrency: Currency | undefined;
         for (const [currency, amount] of price.amountPerCurrency) {
             const revenueAmount = revenue.get(currency);
             if (revenueAmount === undefined || revenueAmount.lessEquals(0))
-                return undefined; // revenue cannot generate this currency, impossible to obtain
+                return $tuple(undefined, undefined); // revenue cannot generate this currency, impossible to obtain
 
             const t = amount.div(revenueAmount);
             if (t.moreThan(maxTime)) {
                 maxTime = t;
+                limitingCurrency = currency;
             }
         }
-        return maxTime;
+        return $tuple(maxTime, limitingCurrency);
     }
 
     getNextItem(inventory: Map<Item, number>, bought: Map<Item, number>, revenue: CurrencyBundle): ItemProgressionStats {
         let nextItem: Item | undefined;
         let timeToObtain: OnoeNum | undefined;
+        let limitingCurrency: Currency | undefined;
         revenue = this.calculateRevenue(inventory, revenue.mul(500));
 
         // find time to obtain other items
@@ -124,15 +128,16 @@ export class ProgressionEstimationService implements OnInit {
             if (!canObtain)
                 continue;
 
-            const t = this.getTimeToReachPrice(revenue, nextPrice);
+            const [t, limiting] = this.getTimeToReachPrice(revenue, nextPrice);
             if (t === undefined || t.moreThan(1e6))
                 continue;
+            limitingCurrency = limiting;
             if (timeToObtain === undefined || t.lessThan(timeToObtain)) {
                 timeToObtain = t;
                 nextItem = item;
             }
         }
-        return { revenue, item: nextItem, timeToObtain };
+        return { revenue, item: nextItem, timeToObtain, limitingCurrency };
     }
 
     maxUpgradeBoard(upgrades: string[]) {
@@ -310,7 +315,7 @@ export class ProgressionEstimationService implements OnInit {
             const condenser = item.findTrait("Condenser");
             if (condenser !== undefined) {
                 for (const [currency, _] of condenser.totalValue.amountPerCurrency) {
-                    const previous = condension.get(currency) ?? new OnoeNum(100);
+                    const previous = condension.get(currency) ?? new OnoeNum(1);
                     if (previous.moreThan(condenser.quota)) {
                         condension.set(currency, condenser.quota);
                     }
@@ -354,11 +359,11 @@ export class ProgressionEstimationService implements OnInit {
             instanceInfo.Health = 100; // override health check to make our own damage calculations
 
             let [upgradedValue] = this.revenueService.calculateDropletValue(dropletModel, true, true);
-            for (const [currency, amount] of upgradedValue.amountPerCurrency) {
-                let damage = (baseHealth - (damagePerCurrency.get(currency) ?? 0)) / 100;
-                damage = math.clamp(damage, 0.25, 1); // assume player wont degrade droplet more than 75%
-                upgradedValue.set(currency, amount.mul(damage));
-            }
+            // for (const [currency, amount] of upgradedValue.amountPerCurrency) {
+            //     let damage = (baseHealth - (damagePerCurrency.get(currency) ?? 0)) / 100;
+            //     damage = math.clamp(damage, 0.25, 1); // assume player wont degrade droplet more than 75%
+            //     upgradedValue.set(currency, amount.mul(damage));
+            // }
 
 
             let [unupgradedValue] = this.revenueService.calculateDropletValue(dropletModel, true, false);
@@ -374,7 +379,7 @@ export class ProgressionEstimationService implements OnInit {
                 value.set(currency, OnoeNum.max(furnaceValue, cauldronValue));
             }
 
-            revenue = revenue.add(value.mul(condension).mul(dropRate));
+            revenue = revenue.add(value.div(condension).mul(dropRate));
         }
         for (let [currency, amount] of generatorRevenue.amountPerCurrency) {
             const chargers = bestChargersPerCurrency.get(currency);
@@ -399,7 +404,7 @@ export class ProgressionEstimationService implements OnInit {
         return revenue;
     }
 
-    onInit() {
+    onStart() {
         if (this.dataService.empireId !== "PROGRESSION")
             return;
 
@@ -417,8 +422,31 @@ export class ProgressionEstimationService implements OnInit {
             const timeToObtain = stats.timeToObtain;
             if (item === undefined || timeToObtain === undefined)
                 continue;
-            builder.append(`${itemIteration}. **${item.name}** from ${item.difficulty.name}.\n`);
-            builder.append(`\t> **${timeToObtain.toString()}s** TTO at revenue ${revenue.toString()}\n`);
+            builder.append(itemIteration);
+            builder.append(". **");
+            builder.append(item.name);
+            builder.append("** from ");
+            builder.append(item.difficulty.name);
+            builder.append("\n\t> **");
+            builder.append(timeToObtain.toString());
+            builder.append("s** TTO at revenue ");
+            builder.append(revenue.toString());
+            builder.append(". (Limiting: **");
+            builder.append(stats.limitingCurrency);
+            builder.append("**)");
+            if (timeToObtain.moreThan(1000)) {
+                builder.append(`\n\t> **LONG**`);
+            }
+
+            if (item.formula !== undefined) {
+                builder.append(`\n\t> Formula Result = ${item.formulaResult}`);
+                const upgrader = item.findTrait("Upgrader");
+                if (upgrader !== undefined) {
+                    builder.append(`\n\t> Upgrader = ${upgrader.mul}`);
+                }
+            }
+
+            builder.append("\n");
             itemIteration++;
         }
         builder.append(`\n\n`);
@@ -440,7 +468,16 @@ export class ProgressionEstimationService implements OnInit {
         return str.sub(2);
     }
 
+    private postOffline(message: string) {
+        const stringValue = new StringValue();
+        stringValue.Name = "ProgressionEstimationReport";
+        stringValue.Value = message;
+        stringValue.Parent = Workspace;
+    }
+
     post(message: string) {
+        this.postOffline(message); // post to Workspace for offline usage
+
         const webhookUrl = $env.string("PROGRESSION_WEBHOOK");
         if (webhookUrl === undefined) {
             warn("PROGRESSION_WEBHOOK is not set, skipping posting to Discord.");
@@ -458,7 +495,7 @@ export class ProgressionEstimationService implements OnInit {
 
         const response = HttpService.PostAsync(pasteUrl, this.encode(data), Enum.HttpContentType.ApplicationUrlEncoded);
         print(`Progression estimation report posted to ${response}`);
-        
+
         const quotes = [
             `i love boxing`,
             `i glove boxing`,
@@ -473,10 +510,10 @@ export class ProgressionEstimationService implements OnInit {
         ];
 
         HttpService.PostAsync(webhookUrl, HttpService.JSONEncode({
-            content: quotes[math.random(0, quotes.size() - 1)],
+            content: `${quotes[math.random(0, quotes.size() - 1)]}\n${response.sub(1, -2)}-preview`,
             embeds: [{
                 title: "Progression Estimation Report",
-                description: `Report dumped at ${response}-preview`,
+                description: `Report dumped at ${response}`,
                 color: 0xFF0000,
                 timestamp: timestamp,
             }],

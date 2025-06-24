@@ -1,4 +1,5 @@
 import { BaseOnoeNum, OnoeNum } from "@antivivi/serikanum";
+import { convertToHHMMSS, playSoundAtPart, spawnExplosion } from "@antivivi/vrldk";
 import { OnInit, Service } from "@flamework/core";
 import { Debris, Lighting, MarketplaceService, MessagingService, Players, ReplicatedStorage, RunService, ServerStorage, TeleportService, TextChatService, TextService, Workspace } from "@rbxts/services";
 import Quest from "server/Quest";
@@ -35,8 +36,6 @@ import BasicCharger from "shared/items/negative/trueease/BasicCharger";
 import Packets from "shared/Packets";
 import { RESET_LAYERS } from "shared/ResetLayer";
 import Sandbox from "shared/Sandbox";
-import { playSoundAtPart, spawnExplosion } from "@antivivi/vrldk";
-import { convertToHHMMSS } from "@antivivi/vrldk";
 
 declare global {
     type Log = {
@@ -968,10 +967,19 @@ export class PermissionsService implements OnInit, OnPlayerJoined {
         this.createCommand("economyset", "ecoset",
             "<currency> <first> <second> : Set balance for a currency. You can type _ as a replacement for spaces.",
             (_o, currency, first, second) => {
+                const amount = second === undefined ? new OnoeNum(tonumber(first) ?? 0) : OnoeNum.fromSerika(tonumber(first) ?? 0, tonumber(second) ?? 0);
+
+                if (currency === "all") {
+                    for (const [c, _] of pairs(CURRENCY_DETAILS)) {
+                        this.currencyService.set(c as Currency, amount);
+                        this.dataService.empireData.mostCurrencies.set(c as Currency, amount);
+                    }
+                    return;
+                }
+                
                 currency = currency.gsub("_", " ")[0];
                 if (CURRENCY_DETAILS[currency as Currency] === undefined)
                     return;
-                const amount = second === undefined ? new OnoeNum(tonumber(first) ?? 0) : OnoeNum.fromSerika(tonumber(first) ?? 0, tonumber(second) ?? 0);
                 this.currencyService.set(currency as Currency, amount);
                 this.dataService.empireData.mostCurrencies.set(currency as Currency, amount);
             }, 4);

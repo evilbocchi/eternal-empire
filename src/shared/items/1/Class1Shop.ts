@@ -6,7 +6,11 @@ import DropletCoaster from "shared/items/1/coasterifying/DropletCoaster";
 import SilentMemory from "shared/items/1/dosomething/SilentMemory";
 import AbruptBridge from "shared/items/1/joyful/AbruptBridge";
 import AntiGravityConverter from "shared/items/1/joyful/AntiGravityConverter";
+import AntiGravityConveyor from "shared/items/1/joyful/AntiGravityConveyor";
+import AntiGravityUpgrader from "shared/items/1/joyful/AntiGravityUpgrader";
 import ChildhoodSlide from "shared/items/1/joyful/ChildhoodSlide";
+import DropletAscender from "shared/items/1/joyful/DropletAscender";
+import GravityGrounder from "shared/items/1/joyful/GravityGrounder";
 import JoyfulPark from "shared/items/1/joyful/JoyfulPark";
 import Baseplate from "shared/items/1/placid/Baseplate";
 import FullConversionRamp from "shared/items/1/walkaslope/FullConversionRamp";
@@ -21,10 +25,14 @@ export = new Item(script.Name)
 
     .trait(Shop)
     .setItems([
+        AntiGravityConverter,
+        AntiGravityConveyor,
+        AntiGravityUpgrader,
+        GravityGrounder,
+        DropletAscender,
         JoyfulPark,
         ChildhoodSlide,
         AbruptBridge,
-        AntiGravityConverter,
 
         SilentMemory,
 

@@ -4,8 +4,8 @@ import { AREAS } from "shared/Area";
 import { getNPCModel, getWaypoint } from "shared/constants";
 import { emitEffect, getSound } from "shared/GameAssets";
 import { GameUtils } from "shared/item/ItemUtils";
-import FreddysUpgrader from "shared/items/miscellaneous/FreddysUpgrader";
-import LostPendant from "shared/items/miscellaneous/LostPendant";
+import FreddysUpgrader from "shared/items/negative/friendliness/FreddysUpgrader";
+import LostPendant from "shared/items/0/winsome/LostPendant";
 import { Dialogue } from "shared/NPC";
 import Freddy from "shared/npcs/Freddy";
 

@@ -10,7 +10,7 @@ export = new Item(script.Name)
     .setName("Ring Of Despair")
     .setDescription("Is it still fate? Pass droplets through the correct ring for... why even bother. You're not getting through THAT.")
     .setDifficulty(Difficulty.Frivolous)
-    .setPrice(new CurrencyBundle().set("Funds", 2e39), 1)
+    .setPrice(new CurrencyBundle().set("Funds", 4.44e39).set("Bitcoin", 2e9), 1)
     .addPlaceableArea("BarrenIslands")
 
     .trait(Upgrader)

@@ -2,7 +2,7 @@
 //!optimize 2
 
 import { OnoeNum } from "@antivivi/serikanum";
-import { OnInit, Service } from "@flamework/core";
+import { OnStart, Service } from "@flamework/core";
 import { toNumeral } from "@rbxts/roman-numerals";
 import StringBuilder from "@rbxts/stringbuilder";
 import { CHALLENGE_UPGRADES, CHALLENGES, REWARD_UPGRADES } from "server/Challenges";
@@ -41,7 +41,7 @@ declare global {
 
 
 @Service()
-export class ChallengeService implements OnInit {
+export class ChallengeService implements OnStart {
 
     debounce = 0;
     lastCompletion = 0;
@@ -323,7 +323,7 @@ export class ChallengeService implements OnInit {
         this.refreshCurrentChallenge();
     }
 
-    onInit() {
+    onStart() {
         if (Sandbox.getEnabled())
             return;
 

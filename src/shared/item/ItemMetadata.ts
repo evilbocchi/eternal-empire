@@ -1,11 +1,12 @@
 import { BaseOnoeNum, OnoeNum } from "@antivivi/serikanum";
+import { buildRichText, combineHumanReadable, formatRichText } from "@antivivi/vrldk";
 import StringBuilder from "@rbxts/stringbuilder";
 import { AREAS } from "shared/Area";
-import { RESET_LAYERS } from "shared/ResetLayer";
-import Item from "shared/item/Item";
 import Packets from "shared/Packets";
-import { combineHumanReadable, formatRichText } from "@antivivi/vrldk";
+import { RESET_LAYERS } from "shared/ResetLayer";
 import Sandbox from "shared/Sandbox";
+import CurrencyBundle from "shared/currency/CurrencyBundle";
+import Item from "shared/item/Item";
 
 const RESET_LAYERS_UNLOCKED = AREAS.SlamoVillage.unlocked;
 const SANDBOX_ENABLED = Sandbox.getEnabled();
@@ -66,11 +67,43 @@ export default class ItemMetadata {
             return;
         }
 
-        let text = `Formula: &lt;${formula.tostring(item.formulaX ?? "x")}&gt;`;
-        if (result !== undefined)
-            text += ` (Currently ${this.formulaOperation}${OnoeNum.toString(result)})`;
+        const builder = new StringBuilder();
+        builder.append("Formula:  &lt;");
+        builder.append(formula.tostring(item.formulaX ?? "x"));
+        builder.append("&gt;");
 
-        this.builder[ItemMetadata.INDICES.FORMULA] = `\n${formatRichText(text, color, this.size, this.weight)}`;
+        if (result !== undefined) {
+            builder.append(" = ");
+            builder.append(this.formulaOperation);
+            builder.append(OnoeNum.toString(result));
+        }
+        const formulaBundled = item.findTrait("FormulaBundled");
+        if (formulaBundled !== undefined) {
+            builder.append("\nBoost Ratio: ");
+            for (const [currency, details] of CurrencyBundle.SORTED_DETAILS) {
+                const ratio = formulaBundled.ratio.get(currency);
+                if (ratio === undefined || ratio === 0) {
+                    continue;
+                }
+                const formatted = CurrencyBundle.getFormatted(currency, new OnoeNum(ratio));
+                const colored = new StringBuilder(formatted);
+
+                if (result !== undefined) {
+                    const value = new OnoeNum(result).mul(ratio);
+                    colored.append(" (");
+                    colored.append(this.formulaOperation);
+                    colored.append(value.toString());
+                    colored.append(")");
+                }
+                buildRichText(builder, colored.toString(), details.color, this.size, this.weight);
+
+                builder.append(" : ");
+            }
+            builder.pop(); // Remove the last " : "
+        }
+
+        const display = formatRichText(builder.toString(), color, this.size, this.weight);
+        this.builder[ItemMetadata.INDICES.FORMULA] = display;
     }
 
     placeableAreas(color = Color3.fromRGB(248, 255, 221)) {

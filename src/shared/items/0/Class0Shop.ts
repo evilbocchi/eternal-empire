@@ -69,6 +69,9 @@ import ShatteredBabass from "shared/items/0/shatteredbabass/ShatteredBabass";
 import AnotherWorld from "shared/items/0/sleepful/AnotherWorld";
 import HeavenGarden from "shared/items/0/sleepful/HeavenGarden";
 import EmeraldProcessor from "shared/items/0/spontaneous/EmeraldProcessor";
+import LightOfAttrition from "shared/items/0/spontaneous/LightOfAttrition";
+import OctahedralTemple from "shared/items/0/spontaneous/OctahedralTemple";
+import SpontaneousRefiner from "shared/items/0/spontaneous/SpontaneousRefiner";
 import XLayerAgglomerate from "shared/items/0/spontaneous/XLayerAgglomerate";
 import InstantiationDelimiterV from "shared/items/0/unlosable/InstantiationDelimiterV";
 import ReinforcedCondenser from "shared/items/0/unlosable/ReinforcedCondenser";
@@ -90,6 +93,7 @@ import InstantiationDelimiterIV from "shared/items/0/walkthrough/InstantiationDe
 import LaserTurbine from "shared/items/0/walkthrough/LaserTurbine";
 import RoboticCauldron from "shared/items/0/walkthrough/RoboticCauldron";
 import AdvancedHealthPack from "shared/items/0/win/AdvancedHealthPack";
+import ColorStrictConveyor from "shared/items/0/win/ColorStrictConveyor";
 import EfficientKillingUpgrader from "shared/items/0/win/EfficientKillingUpgrader";
 import HydratingDropper from "shared/items/0/win/HydratingDropper";
 import ImprovedTesseract from "shared/items/0/win/ImprovedTesseract";
@@ -124,6 +128,7 @@ export = new Item(script.Name)
         EfficientKillingUpgrader,
         AdvancedHealthPack,
         HydratingDropper,
+        ColorStrictConveyor,
 
         SubHydratingFurnace,
         TransientTesseract,
@@ -223,7 +228,10 @@ export = new Item(script.Name)
         TwoStoreyUpgrader,
 
         EmeraldProcessor,
-        XLayerAgglomerate
+        XLayerAgglomerate,
+        SpontaneousRefiner,
+        OctahedralTemple,
+        LightOfAttrition
     ])
 
     .exit();

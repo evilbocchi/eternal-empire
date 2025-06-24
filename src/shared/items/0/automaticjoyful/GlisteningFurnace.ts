@@ -9,7 +9,7 @@ const mul = new CurrencyBundle();
 
 export = new Item(script.Name)
     .setName("Glistening Furnace")
-    .setDescription("The far successor to the Energised Furnace. Was that nostalgic? Boost Skill with Power. Maxes out at %cap%.")
+    .setDescription("The far successor to the Energised Furnace. Was that nostalgic? Boosts Skill with Power, maxes out at %cap%.")
     .setDifficulty(Difficulty.AutomaticJoyful)
     .setPrice(new CurrencyBundle().set("Power", 4e21).set("Skill", 6000), 1)
     .addPlaceableArea("BarrenIslands", "SlamoVillage")

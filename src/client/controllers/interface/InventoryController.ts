@@ -102,7 +102,6 @@ export class InventoryController implements OnInit, OnStart {
         this.loadItemSlots();
 
         Packets.inventory.observe((inventory) => this.refreshInventoryWindow(inventory));
-        this.recalibrate();
         INTERFACE.GetPropertyChangedSignal("AbsoluteSize").Connect(() => this.recalibrate());
 
         for (const traitOption of INVENTORY_WINDOW.Page.FilterOptions.TraitOptions.GetChildren()) {
@@ -113,6 +112,16 @@ export class InventoryController implements OnInit, OnStart {
     }
 
     onStart() {
+        let firstLoad = true;
+        const connection = INVENTORY_WINDOW.GetPropertyChangedSignal("Visible").Connect(() => {
+            if (!firstLoad) {
+                connection.Disconnect();
+                return;
+            }
 
+            firstLoad = false;
+            this.recalibrate();
+            connection.Disconnect();
+        });
     }
 }

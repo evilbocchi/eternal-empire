@@ -79,7 +79,6 @@ function onModelAdded(model: Instance) {
             for (const child of children) {
                 if (child.IsA("BasePart")) {
                     child.CanCollide = false;
-                    child.Anchored = true;
                 }
             }
         }

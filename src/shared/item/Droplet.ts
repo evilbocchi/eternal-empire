@@ -190,6 +190,18 @@ export default class Droplet {
             .setValue(new CurrencyBundle().set("Funds", 4000).set("Power", 3))
     );
 
+    static EnergyPoweredDroplet = Droplet.registerDroplet(
+        new Droplet("EnergyPoweredDroplet")
+            .setModel(() => {
+                const droplet = new Part();
+                droplet.Size = new Vector3(1.25, 1.25, 1.25);
+                droplet.Color = Color3.fromRGB(255, 89, 89);
+                droplet.Material = Enum.Material.Slate;
+                return droplet;
+            })
+            .setValue(new CurrencyBundle().set("Funds", 12000))
+    );
+
     static LegDayDroplet = Droplet.registerDroplet(
         new Droplet("LegDayDroplet")
             .setModel(() => {
@@ -576,6 +588,18 @@ export default class Droplet {
             .setValue(new CurrencyBundle().set("Power", 100000000))
     );
 
+    static LiquidesterBitcoinDroplet = Droplet.registerDroplet(
+        new Droplet("LiquidesterBitcoinDroplet")
+            .setModel(() => {
+                const droplet = new Part();
+                droplet.Size = new Vector3(1.25, 1.25, 1.25);
+                droplet.Color = Color3.fromRGB(71, 5, 255);
+                droplet.Material = Enum.Material.Cardboard;
+                return droplet;
+            })
+            .setValue(new CurrencyBundle().set("Bitcoin", 10000))
+    );
+
     static SexdecupleCoin = Droplet.registerDroplet(
         new Droplet("SexdecupleCoin")
             .setModel(() => {
@@ -826,7 +850,7 @@ export default class Droplet {
                 if (instanceInfo.Health === undefined)
                     continue;
 
-                if (instanceInfo.Health <= 0) {
+                if (instanceInfo.Health <= 0 || dropletModel.Position.Y > 1000) {
                     this.SPAWNED_DROPLETS.delete(dropletModel);
                     dropletModel.Anchored = true;
                     dropletModel.Transparency = 1;

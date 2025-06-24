@@ -10,7 +10,7 @@ const mul = new CurrencyBundle().set("Power", 1);
 
 export = new Item(script.Name)
     .setName("Automatic Joyful Furnace")
-    .setDescription(`Could be better than the ${RoboticCauldron.name} depending on your use case.`)
+    .setDescription(`Processes Power at a higher value, boost increasing with Power. Could be better than the ${RoboticCauldron.name} depending on your use case.`)
     .setDifficulty(Difficulty.AutomaticJoyful)
     .setPrice(new CurrencyBundle().set("Purifier Clicks", 1e21), 1)
     .addPlaceableArea("BarrenIslands")

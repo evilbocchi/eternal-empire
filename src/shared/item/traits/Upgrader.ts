@@ -1,12 +1,11 @@
 import Signal from "@antivivi/lemon-signal";
+import { findBaseParts, getAllInstanceInfo, getInstanceInfo, setInstanceInfo } from "@antivivi/vrldk";
 import { RunService } from "@rbxts/services";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import { DROPLET_STORAGE } from "shared/item/Droplet";
 import Item from "shared/item/Item";
 import Operative, { IOperative } from "shared/item/traits/Operative";
 import type OmniUpgrader from "shared/item/traits/special/OmniUpgrader";
-import { getAllInstanceInfo, getInstanceInfo, setInstanceInfo } from "@antivivi/vrldk";
-import { findBaseParts } from "@antivivi/vrldk";
 
 declare global {
     interface ItemTraits {
@@ -40,14 +39,31 @@ declare global {
     }
 }
 
-const ONES = CurrencyBundle.ones();
-
+/**
+ * An upgrader is an item that has lasers that upgrade droplets that pass through them.
+ */
 export default class Upgrader extends Operative {
 
+    /**
+     * A function that checks whether a droplet meets the requirements to be upgraded.
+     */
     requirement?: (dropletInfo: InstanceInfo) => boolean;
+
+    /**
+     * Whether the upgrader makes droplets reach the skyline after being upgraded.
+     */
     sky?: boolean;
+
+    /**
+     * Whether the lasers in this upgrader upgrade droplets independently.
+     */
     isStacks?: boolean;
 
+    /**
+     * A map of lasers that have been spawned by this upgrader class.
+     * 
+     * The key is the laser part, and the value is its instance information.
+     */
     static readonly SPAWNED_LASERS = new Map<BasePart, InstanceInfo>();
 
     /**

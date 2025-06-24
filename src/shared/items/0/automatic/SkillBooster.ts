@@ -9,7 +9,7 @@ export = new Item(script.Name)
     .setName("Skill Booster")
     .setDescription("A convoluted piece of machinery that has one purpose: to boost droplets by %mul%.")
     .setDifficulty(Difficulty.Automatic)
-    .setPrice(new CurrencyBundle().set("Funds", 10e39).set("Skill", 6000000), 1)
+    .setPrice(new CurrencyBundle().set("Funds", 10e39).set("Power", 500e21).set("Skill", 6000000), 1)
     .addPlaceableArea("BarrenIslands", "SlamoVillage")
     .setCreator("CoPKaDT")
 

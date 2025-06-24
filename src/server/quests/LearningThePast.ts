@@ -7,7 +7,7 @@ import { emitEffect, getSound } from "shared/GameAssets";
 import InteractableObject from "shared/InteractableObject";
 import { GameUtils } from "shared/item/ItemUtils";
 import ExcavationStone from "shared/items/excavation/ExcavationStone";
-import IrregularlyShapedKey from "shared/items/miscellaneous/IrregularlyShapedKey";
+import IrregularlyShapedKey from "shared/items/negative/skip/IrregularlyShapedKey";
 import { Dialogue, EMPTY_NPC } from "shared/NPC";
 import Librarian from "shared/npcs/Librarian";
 import LibraryNoob1 from "shared/npcs/Library Noob 1";

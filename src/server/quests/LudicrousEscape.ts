@@ -13,8 +13,8 @@ import WinsomeBucket from "shared/items/0/winsome/WinsomeBucket";
 import Crystal from "shared/items/excavation/Crystal";
 import Gold from "shared/items/excavation/Gold";
 import Iron from "shared/items/excavation/Iron";
-import SkillPod from "shared/items/miscellaneous/SkillPod";
-import SlamoStatue from "shared/items/miscellaneous/SlamoStatue";
+import SkillPod from "shared/items/0/millisecondless/SkillPod";
+import SlamoStatue from "shared/items/0/millisecondless/SlamoStatue";
 import { Dialogue, EMPTY_NPC } from "shared/NPC";
 import Andy from "shared/npcs/Andy";
 import PoliceOfficer from "shared/npcs/Police Officer";
@@ -24,6 +24,8 @@ import { RESET_LAYERS } from "shared/ResetLayer";
 import { GameUtils } from "shared/item/ItemUtils";
 import { playSoundAtPart, spawnExplosion } from "@antivivi/vrldk";
 import { convertToMMSS } from "@antivivi/vrldk";
+import EnchantedGrass from "shared/items/excavation/harvestable/EnchantedGrass";
+import ExcavationStone from "shared/items/excavation/ExcavationStone";
 
 const simpulModel = getNPCModel("Simpul");
 const simpulHumanoid = simpulModel.FindFirstChildOfClass("Humanoid")!;
@@ -386,8 +388,17 @@ export = new Quest(script.Name)
                     CurrencyService.increment("Funds Bombs", new OnoeNum(1));
                 }
                 else if (rng === 2) {
+                    const amount = GameUtils.resetService.getResetReward(RESET_LAYERS.Skillification).div(5);
+                    const skill = amount.get("Skill");
+                    if (skill === undefined || skill.equals(0)) {
+                        GameUtils.talk(new Dialogue(Andy, "As your reward, I wanted to give you some Skill... but I'm all out. Here's some resources instead!"));
+                        GameUtils.giveQuestItem(EnchantedGrass.id, 3);
+                        GameUtils.giveQuestItem(ExcavationStone.id, 15);
+                        return;
+                    }
+
                     GameUtils.talk(new Dialogue(Andy, "As your reward, I gave you a bit of my Skill. Hopefully, it'll help you out!"));
-                    CurrencyService.incrementAll(GameUtils.resetService.getResetReward(RESET_LAYERS.Skillification).div(5).amountPerCurrency);
+                    CurrencyService.incrementAll(amount.amountPerCurrency);
                 }
                 else if (rng === 3) {
                     GameUtils.talk(new Dialogue(Andy, "As your reward, I gave you some pretty cool resources. Use them wisely!"));

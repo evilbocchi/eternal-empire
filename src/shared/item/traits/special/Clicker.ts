@@ -1,3 +1,4 @@
+import { OnoeNum } from "@antivivi/serikanum";
 import { formatRichText, getAllInstanceInfo, Streaming } from "@antivivi/vrldk";
 import { RunService } from "@rbxts/services";
 import { CURRENCY_DETAILS } from "shared/currency/CurrencyDetails";
@@ -104,6 +105,6 @@ export default class Clicker extends ItemTrait {
     }
 
     format(str: string) {
-        return str.gsub("%cps%", formatRichText(`${this.getCPS()} CPS`, CURRENCY_DETAILS["Purifier Clicks"].color))[0];
+        return str.gsub("%%cps%%", formatRichText(`${OnoeNum.toString(this.getCPS())} CPS`, CURRENCY_DETAILS["Purifier Clicks"].color))[0];
     }
 }

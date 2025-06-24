@@ -11,7 +11,7 @@ export = new Item(script.Name)
     .setPrice(new CurrencyBundle().set("Skill", 4000000), 1)
     .setCreator("GIDS214")
 
-    .addPlaceableArea("BarrenIslands")
+    .addPlaceableArea("BarrenIslands", "SlamoVillage")
     .persists()
 
     .trait(Dropper)

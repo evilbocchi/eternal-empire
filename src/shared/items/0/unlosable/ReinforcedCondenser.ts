@@ -12,7 +12,7 @@ export = new Item(script.Name)
     .addPlaceableArea("BarrenIslands")
 
     .trait(Condenser)
-    .addDroplets(Droplet.LiquidesterFundsDroplet, Droplet.LiquidesterPowerDroplet)
+    .addDroplets(Droplet.LiquidesterFundsDroplet, Droplet.LiquidesterPowerDroplet, Droplet.LiquidesterBitcoinDroplet)
     .setQuota(0.35)
 
     .exit();

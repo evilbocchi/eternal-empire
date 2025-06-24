@@ -140,17 +140,27 @@ export default class Operative extends ItemTrait implements IOperative {
      * @param mul Multiplication term.
      * @param pow Power term.
      * @param inverse Whether to apply the inverse of the operations.
+     * @param repeats Number of times to repeat the operations. Default is 1, which means no repetition.
      * @returns The resulting addition, multiplication, and power terms.
      */
     static applyOperative(totalAdd: CurrencyBundle, totalMul: CurrencyBundle, totalPow: CurrencyBundle,
-        add?: CurrencyBundle, mul?: CurrencyBundle, pow?: CurrencyBundle, inverse?: boolean) {
+        add?: CurrencyBundle, mul?: CurrencyBundle, pow?: CurrencyBundle, inverse?: boolean, repeats?: number) {
+        if (repeats !== undefined) {
+            if (add !== undefined)
+                add = add.mul(repeats);
+            if (mul !== undefined)
+                mul = mul.pow(repeats);
+            if (pow !== undefined)
+                pow = pow.pow(repeats);
+        }
+
         if (inverse === true) {
             if (add !== undefined)
                 totalAdd = totalAdd.sub(add);
             if (mul !== undefined)
                 totalMul = totalMul.div(mul);
             if (pow !== undefined)
-                totalPow = totalPow.pow(ONES.div(pow));
+                totalPow = totalPow.mul(ONES.div(pow));
         }
         else {
             if (add !== undefined)
@@ -158,7 +168,7 @@ export default class Operative extends ItemTrait implements IOperative {
             if (mul !== undefined)
                 totalMul = totalMul.mul(mul);
             if (pow !== undefined)
-                totalPow = totalPow.pow(pow);
+                totalPow = totalPow.mul(pow);
         }
         return $tuple(totalAdd, totalMul, totalPow);
     }
@@ -179,18 +189,23 @@ export default class Operative extends ItemTrait implements IOperative {
      * @returns The value after all operations.
      */
     apply(value: CurrencyBundle): CurrencyBundle;
-    apply(add: CurrencyBundle, mul?: CurrencyBundle, pow?: CurrencyBundle) {
+    apply(add: CurrencyBundle, mul?: CurrencyBundle, pow?: CurrencyBundle, repeats?: number) {
         if (mul !== undefined && pow !== undefined) {
-            return Operative.applyOperative(add, mul, pow, this.add, this.mul, this.pow, false);
+            return Operative.applyOperative(add, mul, pow, this.add, this.mul, this.pow, false, repeats);
         }
 
-        if (this.add !== undefined)
-            add = add.add(this.add);
-        if (this.mul !== undefined)
-            add = add.mul(this.mul);
-        if (this.pow !== undefined)
-            add = add.pow(this.pow);
-        return add;
+        let totalAdd = this.add;
+        let totalMul = this.mul;
+        let totalPow = this.pow;
+        if (repeats !== undefined) {
+            if (totalAdd !== undefined)
+                totalAdd = totalAdd.mul(repeats);
+            if (totalMul !== undefined)
+                totalMul = totalMul.pow(repeats);
+            if (totalPow !== undefined)
+                totalPow = totalPow.pow(repeats);
+        }
+        return Operative.coalesce(add, totalAdd, totalMul, totalPow);
     }
 
     /**
@@ -211,33 +226,42 @@ export default class Operative extends ItemTrait implements IOperative {
      * @param totalPow Total power term.
      * @returns The value after all operations.
      */
-    static coalesce(value: CurrencyBundle, totalAdd: CurrencyBundle, totalMul: CurrencyBundle, totalPow: CurrencyBundle) {
+    static coalesce(value: CurrencyBundle, totalAdd?: CurrencyBundle, totalMul?: CurrencyBundle, totalPow?: CurrencyBundle) {
         const newCurrencies = new Map<Currency, OnoeNum>();
         const base = value.amountPerCurrency;
-        const adds = totalAdd.amountPerCurrency;
-        const muls = totalMul.amountPerCurrency;
-        const pows = totalPow.amountPerCurrency;
+        const adds = totalAdd?.amountPerCurrency;
+        const muls = totalMul?.amountPerCurrency;
+        const pows = totalPow?.amountPerCurrency;
         for (const currency of CURRENCIES) {
             let amount = base.get(currency);
 
-            const add = adds.get(currency);
-            if (add !== undefined)
-                amount = amount === undefined ? add : amount.add(add);
+            if (adds !== undefined) {
+                const add = adds.get(currency);
+                if (add !== undefined)
+                    amount = amount === undefined ? add : amount.add(add);
+            }
 
-            if (amount !== undefined) {
+            if (amount === undefined) {
+                continue;
+            }
+
+            if (muls !== undefined) {
                 const mul = muls.get(currency);
                 if (mul !== undefined)
                     amount = amount.mul(mul);
+            }
+
+            if (pows !== undefined) {
                 const pow = pows.get(currency);
                 if (pow !== undefined)
                     amount = amount.pow(pow);
-
-                if (amount.lessThan(ZERO)) {
-                    amount = ZERO;
-                }
-
-                newCurrencies.set(currency, amount);
             }
+
+            if (amount.lessThan(ZERO)) {
+                amount = ZERO;
+            }
+
+            newCurrencies.set(currency, amount);
         }
 
         return new CurrencyBundle(newCurrencies);

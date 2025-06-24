@@ -1,7 +1,7 @@
 import Difficulty from "@antivivi/jjt-difficulties";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
-import SkillPod from "shared/items/miscellaneous/SkillPod";
+import SkillPod from "shared/items/0/millisecondless/SkillPod";
 
 export = new Item(script.Name)
     .setName("Winsome Bucket")

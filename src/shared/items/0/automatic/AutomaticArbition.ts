@@ -8,7 +8,7 @@ export = new Item(script.Name)
     .setName("Automatic Arbition")
     .setDescription("Does ??? damage to droplets for a %mul% boost. Automatic arbitration was never a good idea.")
     .setDifficulty(Difficulty.Automatic)
-    .setPrice(new CurrencyBundle().set("Dark Matter", 1e30).set("Skill", 2200000), 1)
+    .setPrice(new CurrencyBundle().set("Dark Matter", 800e24).set("Skill", 2200000), 1)
     .setCreator("GIDS214")
 
     .addPlaceableArea("BarrenIslands")

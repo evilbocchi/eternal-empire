@@ -1,6 +1,6 @@
 import { RunService } from "@rbxts/services";
 import Quest, { Stage } from "server/Quest";
-import SkillPod from "shared/items/miscellaneous/SkillPod";
+import SkillPod from "shared/items/0/millisecondless/SkillPod";
 import GrassConveyor from "shared/items/negative/friendliness/GrassConveyor";
 import { Dialogue } from "shared/NPC";
 import Prest from "shared/npcs/Prest";

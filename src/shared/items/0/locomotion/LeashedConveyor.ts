@@ -12,7 +12,7 @@ export = new Item(script.Name)
     .setPrice(new CurrencyBundle().set("Funds", 1e27), 1, 5)
     .setRequiredItemAmount(Crystal, 2)
     .addPlaceableArea("BarrenIslands", "SlamoVillage")
-    .persists("Skillification")
+    .persists()
 
     .trait(Conveyor)
     .setSpeed(9)

@@ -1,5 +1,6 @@
 import { Connection } from "@antivivi/lemon-signal";
 import { OnoeNum } from "@antivivi/serikanum";
+import { buildRichText } from "@antivivi/vrldk";
 import { Controller, OnInit, OnStart } from "@flamework/core";
 import { CollectionService, RunService, TweenService } from "@rbxts/services";
 import ItemFilter from "client/ItemFilter";
@@ -9,16 +10,15 @@ import { HotkeysController } from "client/controllers/HotkeysController";
 import { UIController } from "client/controllers/UIController";
 import { ADAPTIVE_TAB_MAIN_WINDOW, AdaptiveTabController } from "client/controllers/interface/AdaptiveTabController";
 import { TooltipController } from "client/controllers/interface/TooltipController";
-import Packets from "shared/Packets";
 import { ASSETS } from "shared/GameAssets";
+import Packets from "shared/Packets";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import { CURRENCY_DETAILS } from "shared/currency/CurrencyDetails";
 import Item from "shared/item/Item";
+import ItemCounter from "shared/item/ItemCounter";
 import ItemMetadata from "shared/item/ItemMetadata";
 import Shop from "shared/item/traits/Shop";
 import Items from "shared/items/Items";
-import ItemCounter from "shared/item/ItemCounter";
-import { buildRichText } from "@antivivi/vrldk";
 
 declare global {
     type DifficultyLabel = Frame & {
@@ -48,11 +48,14 @@ export const PURCHASE_WINDOW = ADAPTIVE_TAB_MAIN_WINDOW.WaitForChild("Purchase")
     DescriptionFrame: ScrollingFrame & {
         DescriptionLabel: TextLabel;
         CreatorLabel: TextLabel;
+        PurchaseContainer: Frame & {
+            Purchase: TextButton & {
+                Price: Frame;
+                HeadingLabel: TextLabel;
+            };
+        };
     };
-    Purchase: TextButton & {
-        Price: Frame;
-        HeadingLabel: TextLabel;
-    };
+
 };
 
 const METADATA_PER_ITEM = new Map<Item, ItemMetadata>();
@@ -163,13 +166,15 @@ export class ShopController implements OnInit, OnStart {
     }
 
     assignContainer(priceOption: typeof ASSETS.ShopWindow.PriceOption) {
-        priceOption.Parent = PURCHASE_WINDOW.Purchase.Price;
+        const purchaseButton = PURCHASE_WINDOW.DescriptionFrame.PurchaseContainer.Purchase;
+
+        priceOption.Parent = purchaseButton.Price;
         const size = priceOption.AbsoluteSize.X + 5;
-        let currentContainer = PURCHASE_WINDOW.Purchase.Price.FindFirstChild(this.currentContainerId) as typeof ASSETS.ShopWindow.PriceOptionsContainer | undefined;
+        let currentContainer = purchaseButton.Price.FindFirstChild(this.currentContainerId) as typeof ASSETS.ShopWindow.PriceOptionsContainer | undefined;
         if (currentContainer === undefined || this.currentContainerSpace < size) {
             currentContainer = ASSETS.ShopWindow.PriceOptionsContainer.Clone();
             currentContainer.Name = tostring(++this.currentContainerId);
-            currentContainer.Parent = PURCHASE_WINDOW.Purchase.Price;
+            currentContainer.Parent = purchaseButton.Price;
             this.currentContainerSpace = currentContainer.AbsoluteSize.X + 5;
         }
         this.currentContainerSpace -= size;
@@ -177,6 +182,7 @@ export class ShopController implements OnInit, OnStart {
     }
 
     refreshPurchaseWindow(item: Item) {
+        const purchaseButton = PURCHASE_WINDOW.DescriptionFrame.PurchaseContainer.Purchase;
         const itemSlot = PURCHASE_WINDOW.ItemSlot;
         const identification = itemSlot.Contents.Identification;
         const viewportFrame = itemSlot.Contents.ViewportFrame;
@@ -199,7 +205,7 @@ export class ShopController implements OnInit, OnStart {
 
         viewportFrame.ClearAllChildren();
         ItemSlot.loadViewportFrame(viewportFrame, item);
-        for (const option of PURCHASE_WINDOW.Purchase.Price.GetChildren()) {
+        for (const option of purchaseButton.Price.GetChildren()) {
             if (option.IsA("Frame"))
                 option.Destroy();
         }
@@ -216,10 +222,10 @@ export class ShopController implements OnInit, OnStart {
             for (const [requiredItem, amount] of item.requiredItems)
                 this.createPriceOption(amount, undefined, requiredItem);
 
-            PURCHASE_WINDOW.Purchase.Visible = true;
+            purchaseButton.Visible = true;
         }
         else {
-            PURCHASE_WINDOW.Purchase.Visible = false;
+            purchaseButton.Visible = false;
         }
 
         PURCHASE_WINDOW.DescriptionFrame.CreatorLabel.Text = `Creator: ${item.creator}`;
@@ -227,8 +233,7 @@ export class ShopController implements OnInit, OnStart {
         const builder = buildRichText(undefined, item.format(item.description), this.descColor, 21, "Medium");
         builder.appendAll(METADATA_PER_ITEM.get(item)!.builder);
         PURCHASE_WINDOW.DescriptionFrame.DescriptionLabel.Text = builder.toString();
-        PURCHASE_WINDOW.DescriptionFrame.Size = new UDim2(1, 0, 0.8, -PURCHASE_WINDOW.Purchase.AbsoluteSize.Y - 40);
-        PURCHASE_WINDOW.Purchase.Visible = price !== undefined;
+        purchaseButton.Visible = price !== undefined;
         PURCHASE_WINDOW.DescriptionFrame.CreatorLabel.Visible = item.creator !== undefined;
     }
 
@@ -326,7 +331,8 @@ export class ShopController implements OnInit, OnStart {
             this.refreshPurchaseWindow(this.selected);
         });
 
-        this.hotkeysController.setHotkey(PURCHASE_WINDOW.Purchase, Enum.KeyCode.E, () => {
+        const purchaseButton = PURCHASE_WINDOW.DescriptionFrame.PurchaseContainer.Purchase;
+        this.hotkeysController.setHotkey(purchaseButton, Enum.KeyCode.E, () => {
             if (!SHOP_GUI.Enabled) {
                 return false;
             }
@@ -373,11 +379,12 @@ export class ShopController implements OnInit, OnStart {
         });
 
         task.spawn(() => {
-            const headingLabel = PURCHASE_WINDOW.Purchase.HeadingLabel;
+            const purchaseButton = PURCHASE_WINDOW.DescriptionFrame.PurchaseContainer.Purchase;
+            const headingLabel = purchaseButton.HeadingLabel;
 
             while (task.wait(1 / 20)) {
                 const amountLabels = new Array<TextLabel>();
-                for (const descendant of PURCHASE_WINDOW.Purchase.Price.GetDescendants()) {
+                for (const descendant of purchaseButton.Price.GetDescendants()) {
                     if (descendant.Name === "PriceOption") {
                         amountLabels.push((descendant as typeof ASSETS.ShopWindow.PriceOption).AmountLabel);
                     }

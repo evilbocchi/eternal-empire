@@ -30,9 +30,6 @@ export default class Manumatic extends ItemTrait {
         event.Parent = model;
     }
 
-    debounce = 0.1;
-    onClick: ((model: Model, item: Item, player: Player | undefined, value: number) => void) | undefined;
-
     constructor(item: Item) {
         super(item);
         item.onLoad((model) => Manumatic.load(model, this));

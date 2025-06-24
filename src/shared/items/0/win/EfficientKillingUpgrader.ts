@@ -5,7 +5,7 @@ import Conveyor from "shared/item/traits/Conveyor";
 import Upgrader from "shared/item/traits/Upgrader";
 import Damager from "shared/item/traits/special/Damager";
 
-export = new Item("EfficientKillingUpgrader")
+export = new Item(script.Name)
     .setName("Efficient Killing Upgrader")
     .setDescription("Small yet deadly. Does %hp_add% to droplets, but boosts Funds and Power by 1.95x.")
     .setDifficulty(Difficulty.Win)

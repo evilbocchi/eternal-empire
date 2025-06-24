@@ -73,7 +73,7 @@ export default class Area {
      * This is used for UI elements and identification.
      */
 
-    readonly name = "" as string;
+    readonly name: string;
     /**
      * The map instance representing the area in the game world.
      * This is where all the area-specific models and parts are located.
@@ -174,11 +174,14 @@ export default class Area {
         if (!areaFolder.IsA("Folder")) {
             error(areaFolder.Name + " is not a folder.");
         }
-        this.id = areaFolder.Name as AreaId;
+        const id = areaFolder.Name as AreaId;
+        this.id = id;
 
         // Skip further initialization in sandbox mode
-        if (Sandbox.getEnabled())
+        if (Sandbox.getEnabled()) {
+            this.name = id;
             return;
+        }
 
         // Initialize area properties from children in the area folder
         this.name = (areaFolder.WaitForChild("Name") as StringValue).Value;

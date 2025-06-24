@@ -38,8 +38,9 @@ export class SetupService implements OnInit {
                 continue;
             let currentItemCount = (itemCount.get(item) ?? 0) + 1;
             const price = item.pricePerIteration.get(currentItemCount);
-            if (price !== undefined)
+            if (price !== undefined && item.getResetLayer() < 100) {
                 totalPrice = totalPrice.add(price);
+            }
             itemCount.set(item, currentItemCount);
         }
         let existingSetup: Setup | undefined;
@@ -109,12 +110,12 @@ export class SetupService implements OnInit {
         this.setupLoaded.fire(player, setup.area);
         return this.itemsService.waitInQueue(() => {
             return this.itemsService.placeItems(player, items);
-        })
+        });
     }
 
     onInit() {
         Packets.printedSetups.set(this.dataService.empireData.printedSetups);
-        
+
         Packets.renameSetup.listen((player, currentName, renameTo) => {
             if (!this.dataService.checkPermLevel(player, "build"))
                 return;

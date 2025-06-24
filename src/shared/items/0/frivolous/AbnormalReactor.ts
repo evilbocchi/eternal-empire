@@ -6,7 +6,7 @@ import Upgrader from "shared/item/traits/Upgrader";
 
 export = new Item(script.Name)
     .setName("Abnormal Reactor")
-    .setDescription("This reactor has two entrances, each giving a %mul% boost. I wish you the best of luck in configuring this.")
+    .setDescription("This reactor has two entrances, each giving a %mul% boost. It is said that this machine was made solely to piss off its users.")
     .setDifficulty(Difficulty.Frivolous)
     .setPrice(new CurrencyBundle().set("Skill", 2454000), 1)
     .addPlaceableArea("SlamoVillage")

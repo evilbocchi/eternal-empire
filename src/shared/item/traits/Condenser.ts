@@ -34,7 +34,7 @@ export default class Condenser extends ItemTrait {
     droplets = new Array<Droplet>();
     totalValue = new CurrencyBundle();
 
-    quota = 100;
+    quota = 1;
 
     static load(model: Model, condenser: Condenser) {
         const item = condenser.item;

@@ -81,7 +81,7 @@ const details = {
     "Funds Bombs": {
         layoutOrder: 10000,
         color: Color3.fromRGB(0, 140, 97),
-        image: 13623679087,
+        image: 123336077524280,
         page: CURRENCY_CATEGORIES.Misc
     },
 };

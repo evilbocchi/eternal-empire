@@ -3,7 +3,7 @@ import Quest, { Stage } from "server/Quest";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import ItemCounter from "shared/item/ItemCounter";
 import { GameUtils } from "shared/item/ItemUtils";
-import RustyFactory from "shared/items/miscellaneous/RustyFactory";
+import RustyFactory from "shared/items/negative/negativity/RustyFactory";
 import { Dialogue } from "shared/NPC";
 import Ricarg from "shared/npcs/Ricarg";
 

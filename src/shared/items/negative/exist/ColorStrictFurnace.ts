@@ -1,9 +1,10 @@
 import Difficulty from "@antivivi/jjt-difficulties";
+import { getAllInstanceInfo, getInstanceInfo, playSoundAtPart, setInstanceInfo } from "@antivivi/vrldk";
 import { ReplicatedStorage, RunService } from "@rbxts/services";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
+import { getSound } from "shared/GameAssets";
 import Item from "shared/item/Item";
 import Furnace from "shared/item/traits/Furnace";
-import { getAllInstanceInfo, getInstanceInfo, setInstanceInfo } from "@antivivi/vrldk";
 
 declare global {
     interface InstanceInfo {
@@ -71,7 +72,6 @@ export = new Item(script.Name)
         const boostLabel = model.WaitForChild("BoostGuiPart").WaitForChild("SurfaceGui").WaitForChild("BoostLabel") as TextLabel;
         const hitbox = model.WaitForChild("Hitbox");
         const alertSound = hitbox.WaitForChild("AlertSound") as Sound;
-        const sound = hitbox.WaitForChild("Sound") as Sound;
         const border = model.WaitForChild("Border") as UnionOperation;
         let color = 0;
         item.repeat(model, () => fill.Size = new UDim2((tick() - (getInstanceInfo(ReplicatedStorage, "ColorStrictTime") ?? 0)) / 300, 0, 1, 0));
@@ -103,7 +103,7 @@ export = new Item(script.Name)
             if (colorSwitch.IsA("Part") && colorSwitch.Material === Enum.Material.Neon) {
                 const clickDetector = new ClickDetector();
                 clickDetector.MouseClick.Connect(() => {
-                    sound.Play();
+                    playSoundAtPart(colorSwitch, getSound("SwitchFlick"));
                     color = tonumber(colorSwitch.Name) ?? 0;
                     updateColor();
                 });

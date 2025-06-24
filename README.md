@@ -13,6 +13,8 @@
 
 ## Setup
 
+> If you are using VS Code, an [automatic task](.vscode/tasks.json) is run when opening the project folder that sets up the development environment for you.
+
 To set up the development environment for JJT Money Empire, follow these steps:
 
 1. Clone the repository:
@@ -39,7 +41,7 @@ To set up the development environment for JJT Money Empire, follow these steps:
 
 ## Contributing
 
-We welcome contributions to improve JJT Money Empire. To contribute:
+We warmly welcome contributions to improve JJT Money Empire! To contribute:
 
 1. Fork the repository.
 2. Create a new branch for your feature or bugfix.

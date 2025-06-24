@@ -8,7 +8,7 @@ export = new Item(script.Name)
     .setName("Two-Storey Upgrader")
     .setDescription("This upgrader has two layers; how are you going to use them both? Each laser boosts their respective currency by x1.8.")
     .setDifficulty(Difficulty.Automatic)
-    .setPrice(new CurrencyBundle().set("Skill", 3000000).set("Dark Matter", 1e24), 1)
+    .setPrice(new CurrencyBundle().set("Skill", 10000000).set("Dark Matter", 1e30), 1)
     .setCreator("fartmcfly2")
     .addPlaceableArea("BarrenIslands", "SlamoVillage")
 

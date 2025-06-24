@@ -7,7 +7,7 @@ export = new Item(script.Name)
     .setName("Money Bin")
     .setDescription("A bin that collects money while you are offline. ")
     .setDifficulty(Difficulty.Automatic)
-    .setPrice(new CurrencyBundle().set("Funds", 39e39), 1)
+    .setPrice(new CurrencyBundle().set("Funds", 90e39), 1)
     .addPlaceableArea("BarrenIslands", "SlamoVillage", "SkyPavilion")
     .setCreator("simple13579")
 

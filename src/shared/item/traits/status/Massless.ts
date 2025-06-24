@@ -1,18 +1,23 @@
 import { formatGradient, getAllInstanceInfo } from "@antivivi/vrldk";
 import { Workspace } from "@rbxts/services";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
-import { ASSETS } from "shared/GameAssets";
+import Droplet from "shared/item/Droplet";
 import Item from "shared/item/Item";
 import StatusEffect from "shared/item/traits/status/StatusEffect";
 
 declare global {
     interface ItemTraits {
         Massless: Massless;
+        Grounder: Grounder;
     }
 
     interface StatusEffectAssets {
         Fire: ParticleEmitter;
     }
+}
+
+const format = (str: string) => {
+    return str.gsub("%%massless%%", formatGradient("Massless", new Color3(0.16, 0.96, 0.69), new Color3(0, 1, 0.53)))[0];
 }
 
 export default class Massless extends StatusEffect {
@@ -33,12 +38,30 @@ export default class Massless extends StatusEffect {
                 mul: Massless.BOOST,
             }
         });
-        ASSETS.StatusEffect.Fire.Clone().Parent = dropletModel;
 
         return {};
     }
 
-    format(str: string): string {
-        return str.gsub("%%massless%%", formatGradient("Massless", new Color3(0.16, 0.96, 0.69), new Color3(0, 1, 0.53)))[0];
+    format(str: string) {
+        return format(str);
+    }
+}
+
+export class Grounder extends StatusEffect {
+
+    constructor(item: Item) {
+        super(item);
+        item.onLoad((model) => Grounder.load(model, this));
+    }
+
+    decorate(dropletModel: BasePart) {
+        const dropletInfo = getAllInstanceInfo(dropletModel);
+        dropletModel.CustomPhysicalProperties = Droplet.PHYSICAL_PROPERTIES;
+        dropletInfo.Upgrades!.delete("Massless");
+        return {};
+    }
+
+    format(str: string) {
+        return format(str);
     }
 }
