@@ -51,9 +51,9 @@ export default class Printer extends ItemTrait {
     static load(model: Model, printer: Printer) {
         const SetupService = GameUtils.setupService;
 
-        const saveEvent = new RemoteFunction();
+        const saveEvent = new Instance("RemoteFunction");
         saveEvent.Name = "Save";
-        const loadEvent = new RemoteFunction();
+        const loadEvent = new Instance("RemoteFunction");
         loadEvent.Name = "Load";
         if (printer.area === undefined)
             error("No area");

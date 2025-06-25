@@ -101,7 +101,7 @@ export = new Item(script.Name)
         };
         for (const colorSwitch of model.GetChildren()) {
             if (colorSwitch.IsA("Part") && colorSwitch.Material === Enum.Material.Neon) {
-                const clickDetector = new ClickDetector();
+                const clickDetector = new Instance("ClickDetector");
                 clickDetector.MouseClick.Connect(() => {
                     playSoundAtPart(colorSwitch, getSound("SwitchFlick"));
                     color = tonumber(colorSwitch.Name) ?? 0;

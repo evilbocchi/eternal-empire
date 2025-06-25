@@ -4,6 +4,7 @@ import StringBuilder from "@rbxts/stringbuilder";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import { ASSETS } from "shared/GameAssets";
 import type Item from "shared/item/Item";
+import Packets from "shared/Packets";
 
 declare global {
     interface DropletAssets {
@@ -95,6 +96,14 @@ namespace ItemUtils {
         Debris.AddItem(dropletGui, 3);
 
         return dropletGui;
+    };
+
+    export const applyImpulse = (part: BasePart, impulse: Vector3) => {
+        const networkOwner = part.GetNetworkOwner();
+        if (networkOwner !== undefined)
+            Packets.applyImpulse.fire(networkOwner, part.Name, impulse);
+        else
+            part.ApplyImpulse(impulse);
     };
 }
 

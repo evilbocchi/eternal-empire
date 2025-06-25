@@ -237,7 +237,7 @@ export = new Quest(script.Name)
                     effect.Emit(2);
                     hideInstantWinBlock();
 
-                    const light = new PointLight();
+                    const light = new Instance("PointLight");
                     light.Color = new Color3(0, 0.27, 1);
                     light.Brightness = 2;
                     light.Range = 10;
@@ -285,7 +285,7 @@ export = new Quest(script.Name)
                 }
 
                 // Show the linkway
-                const light = new PointLight();
+                const light = new Instance("PointLight");
                 light.Color = new Color3(0, 0.27, 1);
                 light.Brightness = 5;
                 light.Range = 60;

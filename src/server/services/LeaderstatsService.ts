@@ -5,7 +5,7 @@ export class LeaderstatsService {
     getLeaderstats(player: Player) {
         let leaderstats = player.FindFirstChild("leaderstats");
         if (leaderstats === undefined) {
-            leaderstats = new Folder();
+            leaderstats = new Instance("Folder");
             leaderstats.Name = "leaderstats";
             leaderstats.Parent = player;
         }

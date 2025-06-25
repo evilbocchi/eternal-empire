@@ -166,6 +166,12 @@ export class EffectController implements OnInit {
             this.delay = (((tick() - t) / 4) + this.delay) * 0.8;
             STATS_WINDOW.StatList.CurrentPing.AmountLabel.Text = math.floor(this.delay * 1000) + "ms";
         });
+        Packets.applyImpulse.connect((dropletModelId, impulse) => {
+            const model = DROPLET_STORAGE.FindFirstChild(dropletModelId) as BasePart | undefined;
+            if (model === undefined) // streamed out
+                return;
+            model.ApplyImpulse(impulse);
+        });
 
         const defaultLighting = {
             Ambient: Lighting.Ambient,

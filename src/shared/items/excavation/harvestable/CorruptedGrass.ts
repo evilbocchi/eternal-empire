@@ -12,6 +12,7 @@ export = new Item(script.Name)
     .setRequiredItemAmount(EnchantedGrass, 10)
     .addPlaceableArea("BarrenIslands")
     .setLevelReq(5)
+    .persists()
 
     .trait(Upgrader)
     .setMul(new CurrencyBundle().set("Funds", 1.05))

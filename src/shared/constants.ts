@@ -10,7 +10,7 @@ export const IS_SINGLE_SERVER = game.PlaceId === 17479698702;
 
 function createFolder(name: string) {
     if (IS_SERVER) {
-        const folder = new Folder();
+        const folder = new Instance("Folder");
         folder.Name = name;
         folder.Parent = Workspace;
         return folder;

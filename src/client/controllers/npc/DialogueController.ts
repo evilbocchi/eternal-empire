@@ -39,7 +39,7 @@ export class DialogueController implements OnInit, OnStart {
     showHeadshot(model: Model) {
         const viewportFrame = DIALOGUE_WINDOW.ViewportFrame;
         viewportFrame.ClearAllChildren();
-        const camera = new Camera();
+        const camera = new Instance("Camera");
         camera.Parent = viewportFrame;
         viewportFrame.CurrentCamera = camera;
         const clone = model.Clone();

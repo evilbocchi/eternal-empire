@@ -2,8 +2,8 @@ import Difficulty from "@antivivi/jjt-difficulties";
 import Item from "shared/item/Item";
 
 export = new Item(script.Name)
-    .setName("Iron")
-    .setDescription("Commonly found in abandoned caves, but nowadays harvested using advanced mining technology to prevent chance of falls.")
+    .setName("Stale Wood")
+    .setDescription("Apparently, wood can go stale too, and these logs have been through tough times to be in such a rotted state.")
     .setDifficulty(Difficulty.Excavation)
     .placeableEverywhere()
     .persists();

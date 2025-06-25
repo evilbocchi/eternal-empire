@@ -132,7 +132,7 @@ export class PermissionsController implements OnInit {
                 if (c !== undefined) {
                     text = `<font color="#${c.ToHex()}">${text}</font>`;
                 }
-                const overrideProperties = new TextChatMessageProperties();
+                const overrideProperties = new Instance("TextChatMessageProperties");
                 if (c !== undefined)
                     overrideProperties.Text = text;
                 return overrideProperties;

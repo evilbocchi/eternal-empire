@@ -36,7 +36,7 @@ export = new Item(script.Name)
                 if (getInstanceInfo(otherPart, "DropletId") !== undefined) {
                     debounce = true;
                     task.delay(1, () => debounce = false);
-                    const explosion = new Explosion();
+                    const explosion = new Instance("Explosion");
                     explosion.ExplosionType = Enum.ExplosionType.NoCraters;
                     explosion.BlastRadius = 50;
                     explosion.BlastPressure = 2500000;

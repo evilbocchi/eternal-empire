@@ -5,7 +5,7 @@ export namespace HandCrank {
     export function load(model: Model, callback: (timeSinceCrank: number) => void) {
         let t = 0;
         const crank = model.WaitForChild("Crank") as Model;
-        const v = new IntValue();
+        const v = new Instance("IntValue");
         const bp = weldModel(crank);
         const o = bp.CFrame;
         v.Value = 0;

@@ -106,7 +106,7 @@ export class ToolController implements OnInit, OnStart {
             if (currentTool === undefined)
                 return;
 
-            const highlight = new Highlight();
+            const highlight = new Instance("Highlight");
             TweenService.Create(highlight, this.tweenInfo, { FillTransparency: 1, OutlineTransparency: 1 }).Play();
             highlight.Adornee = model;
 

@@ -6,7 +6,7 @@ import { CURRENCY_DETAILS } from "shared/currency/CurrencyDetails";
 import { getSound } from "shared/GameAssets";
 import Droplet from "shared/item/Droplet";
 import Item from "shared/item/Item";
-import { GameUtils } from "shared/item/ItemUtils";
+import ItemUtils, { GameUtils } from "shared/item/ItemUtils";
 import Conveyor from "shared/item/traits/Conveyor";
 
 declare global {
@@ -27,9 +27,9 @@ export = new Item(script.Name)
     .exit()
 
     .onLoad((model) => {
+        const forward = model.PrimaryPart!.CFrame.LookVector.Unit;
         const sortingPoint = model.WaitForChild("SortingPoint") as BasePart;
         sortingPoint.CanTouch = true;
-        const secondaryPoint = sortingPoint.WaitForChild("Secondary") as Attachment;
 
         const modeButton = model.WaitForChild("Mode") as BasePart;
         const placedItem = GameUtils.itemsService.getPlacedItem(model.Name)!;
@@ -74,9 +74,9 @@ export = new Item(script.Name)
                 }
             }
 
-            if (bestCurrency === placedItem.currency)
+            if (bestCurrency !== placedItem.currency)
                 return;
 
-            part.Position = secondaryPoint.WorldPosition.add(part.Size.mul(new Vector3(0, 0.5, 0)));
+            ItemUtils.applyImpulse(part, forward.mul(part.Mass).mul(40));
         });
     });

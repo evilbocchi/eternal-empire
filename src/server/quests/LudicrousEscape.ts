@@ -296,7 +296,7 @@ export = new Quest(script.Name)
                     model.Parent = Workspace;
                 }
                 else if (dialogue === simpulSad) {
-                    const part = new Part();
+                    const part = new Instance("Part");
                     part.Transparency = 1;
                     part.Anchored = true;
                     part.CanCollide = false;

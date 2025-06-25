@@ -22,7 +22,7 @@ export default class InstantiationDelimiter extends ItemTrait {
         if (area === undefined)
             throw `InstantiationDelimiter: ${model.Name} is not in an area`;
 
-        const indicator = new IntValue();
+        const indicator = new Instance("IntValue");
         indicator.Name = model.Name;
         indicator.Parent = AREAS[area].dropletLimit;
         item.repeat(model, () => {

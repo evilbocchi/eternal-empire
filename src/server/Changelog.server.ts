@@ -73,7 +73,7 @@ const CHANGELOGS = [
     ]),
     new Changelog("1.0 - Full Release", [
         "Added difficulties and items Automatic to x",
-        
+
     ]),
 ];
 
@@ -81,13 +81,13 @@ const UPDATE_LIST = AREAS.BarrenIslands.areaFolder.FindFirstChild("UpdateBoard")
 
 let i = 9999;
 for (const changelog of CHANGELOGS) {
-    const frame = new Frame();
+    const frame = new Instance("Frame");
     frame.Size = new UDim2(1, 0, 0, 0);
     frame.AutomaticSize = Enum.AutomaticSize.Y;
     frame.BackgroundTransparency = 1;
     frame.LayoutOrder = --i;
 
-    const uiListLayout = new UIListLayout();
+    const uiListLayout = new Instance("UIListLayout");
     uiListLayout.SortOrder = Enum.SortOrder.LayoutOrder;
     uiListLayout.Parent = frame;
 

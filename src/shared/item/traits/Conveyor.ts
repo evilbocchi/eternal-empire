@@ -29,7 +29,7 @@ export default class Conveyor extends ItemTrait {
      */
     static loadConveyorArrow(part: BasePart, conveyor?: Conveyor) {
         const width = part.Size.X;
-        const beam = new Beam();
+        const beam = new Instance("Beam");
         beam.Name = "ConveyorArrow";
         beam.Texture = "rbxassetid://93089838595739";
         beam.Segments = 10;

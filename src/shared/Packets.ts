@@ -33,9 +33,9 @@ declare global {
     }
 }
 
-type PackedInventory = DataType.Packed<Inventory>;
-type PackedPlacedItem = DataType.Packed<PlacedItem>;
 namespace Packets {
+
+    // data management
 
     /**
      * Fired when the server completed saving empire data.
@@ -82,9 +82,13 @@ namespace Packets {
     export const empireName = property<string>();
 
     // items
-    export const inventory = property<PackedInventory>();
-    export const bought = property<PackedInventory>();
-    export const placedItems = property<Map<string, PackedPlacedItem>>();
+    /**
+     * The inventory of the empire, containing owned items and their quantities.
+     * Some items may not be present in the inventory if they are not owned.
+     */
+    export const inventory = property<DataType.Packed<Inventory>>();
+    export const bought = property<DataType.Packed<Inventory>>();
+    export const placedItems = property<Map<string, DataType.Packed<PlacedItem>>>();
     export const buyItem = request<(itemId: string) => boolean>();
     export const buyAllItems = request<(itemIds: string[]) => boolean>();
     export const placeItems = request<(items: PlacingInfo[]) => number>();
@@ -95,6 +99,7 @@ namespace Packets {
     // droplets
     export const dropletAdded = signal<(drop: BasePart) => void>(true);
     export const dropletBurnt = signal<(dropletModelId: string, amountPerCurrency: Map<Currency, BaseOnoeNum>) => void>(true);
+    export const applyImpulse = signal<(dropletModelId: string, impulse: Vector3) => void>(true);
 
     // currencies
     export const balance = property<Map<Currency, BaseOnoeNum>>(new Map(), true);

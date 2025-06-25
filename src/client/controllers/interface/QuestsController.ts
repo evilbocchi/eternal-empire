@@ -128,7 +128,7 @@ export class QuestsController implements OnInit, OnPhysics {
     lastXp = -1;
     xpTweenConnection: RBXScriptConnection | undefined = undefined;
     beam = ASSETS.ArrowBeam.Clone();
-    beamContainer = new Part();
+    beamContainer = new Instance("Part");
     availableQuests = new Set<string>();
 
     constructor(private uiController: UIController, private adaptiveTabController: AdaptiveTabController, private hotkeysController: HotkeysController,

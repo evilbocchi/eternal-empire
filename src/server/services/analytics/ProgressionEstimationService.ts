@@ -469,7 +469,7 @@ export class ProgressionEstimationService implements OnStart {
     }
 
     private postOffline(message: string) {
-        const stringValue = new StringValue();
+        const stringValue = new Instance("StringValue");
         stringValue.Name = "ProgressionEstimationReport";
         stringValue.Value = message;
         stringValue.Parent = Workspace;

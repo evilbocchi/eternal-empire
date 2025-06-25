@@ -6,7 +6,7 @@
     "scripts": {
         "build": "rbxtsc",
         "watch": "rbxtsc -w",
-        "dev": "concurrently \"rbxtsc -w --writeTransformedFiles\" \"npx rojo serve\""
+        "dev": "concurrently \"rbxtsc -w --writeTransformedFiles --optimizedLoops\" \"npx rojo serve\""
     },
     "repository": {
         "type": "git",
@@ -29,7 +29,6 @@
         "prettier": "^3.1.1",
         "rbxts-transform-env": "^3.0.0",
         "rbxts-transformer-flamework": "^1.2.3",
-        "rbxts-transformer-instances": "^1.0.1",
         "rbxts-transformer-services": "^1.1.1",
         "roblox-ts": "^3.0.0",
         "rojo": "^1.0.1",

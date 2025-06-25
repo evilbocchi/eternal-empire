@@ -13,8 +13,6 @@ const RawHarvestable = {
     StaleWood: {
         health: 4,
         tool: "Axe",
-        name: "Stale Wood",
-        description: "Apparently, wood can go stale too, and these logs have been through tough times to be in such a rotted state."
     },
     Tree: {
         health: 30,
@@ -43,7 +41,6 @@ const RawHarvestable = {
     Grass: {
         health: 3,
         tool: "Scythe",
-        description: "Literally just grass. A source of nutrition for those residing in Barren Islands, but serves no other actual purpose... maybe."
     },
     QualityGrass: {
         health: 30,
@@ -87,7 +84,6 @@ const RawHarvestable = {
     ExcavationStone: {
         health: 4,
         tool: "Pickaxe",
-        name: "Stone",
     },
     StonePillar: {
         health: 25,
@@ -98,27 +94,26 @@ const RawHarvestable = {
     WhiteGem: {
         health: 80,
         tool: "Pickaxe",
-        name: "White Gem",
     },
     Crystal: {
         health: 200,
         tool: "Pickaxe",
-        name: "Crystal",
     },
     Iron: {
         health: 480,
         tool: "Pickaxe",
-        name: "Iron",
     },
     Gold: {
         health: 1260,
         tool: "Pickaxe",
-        name: "Gold",
     },
     Quartz: {
         health: 4160,
         tool: "Pickaxe",
-        name: "Quartz",
+    },
+    Jade: {
+        health: 17520,
+        tool: "Pickaxe",
     },
     PureCrystal: {
         health: 2200,

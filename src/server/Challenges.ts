@@ -62,7 +62,7 @@ namespace Challenges {
             meteor.CanTouch = false;
             meteor.CanQuery = false;
             const reverb = () => {
-                const part = new Part();
+                const part = new Instance("Part");
                 part.Anchored = true;
                 part.CanCollide = false;
                 part.Shape = Enum.PartType.Ball;
@@ -78,7 +78,7 @@ namespace Challenges {
             reverb();
             task.delay(0.1, reverb);
             task.delay(0.2, reverb);
-            const explosion = new Explosion();
+            const explosion = new Instance("Explosion");
             explosion.ExplosionType = Enum.ExplosionType.NoCraters;
             explosion.BlastRadius = 150;
             explosion.BlastPressure = 500000;

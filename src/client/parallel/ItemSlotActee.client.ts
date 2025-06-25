@@ -56,7 +56,7 @@ RunService.BindToRenderStep("ItemSlot Creation", 0, (dt) => {
 });
 
 script.GetActor()!.BindToMessage("LoadViewportFrame", (viewportFrame: ViewportFrame, itemId: string) => {
-    const camera = new Camera();
+    const camera = new Instance("Camera");
     camera.CameraType = Enum.CameraType.Scriptable;
     viewportFrame.CurrentCamera = camera;
     const m = Items.getItem(itemId)?.MODEL;

@@ -147,7 +147,7 @@ export class PermissionsService implements OnInit, OnPlayerJoined {
     }
 
     createCommand(primary: string, secondary: string, description: string, callback: (sender: Player, ...parmas: string[]) => void, permLevel: number) {
-        const command = new TextChatCommand();
+        const command = new Instance("TextChatCommand");
         command.PrimaryAlias = "/" + primary;
         command.SecondaryAlias = "/" + secondary;
         command.Name = primary + "Command";
@@ -243,7 +243,7 @@ export class PermissionsService implements OnInit, OnPlayerJoined {
         if (this.dataService.empireData.banned.includes(player.UserId)) {
             player.Kick("You are banned from this empire.");
         }
-        const plrChannel = new TextChannel();
+        const plrChannel = new Instance("TextChannel");
         plrChannel.Name = player.Name;
         plrChannel.Parent = getTextChannels();
         plrChannel.AddUserAsync(player.UserId);
@@ -486,7 +486,7 @@ export class PermissionsService implements OnInit, OnPlayerJoined {
                     }
                     const requirement = math.round(playerCount * 2 / 3);
                     this.sendServerMessage(`${votes}/${requirement} votes needed.`, "color:138,255,138");
-                    const voteToken = new NumberValue();
+                    const voteToken = new Instance("NumberValue");
                     voteToken.Value = tick();
                     voteToken.Name = tostring(userId);
                     voteToken.Parent = o;
@@ -750,14 +750,14 @@ export class PermissionsService implements OnInit, OnPlayerJoined {
                     this.sendPrivateMessage(o, `Banned player ${target.Name}`, "color:138,255,138");
                     const h = target.Character?.FindFirstChildOfClass("Humanoid");
                     if (h !== undefined && h.RootPart !== undefined) {
-                        const smoke = new Smoke();
+                        const smoke = new Instance("Smoke");
                         smoke.Size = 5;
                         smoke.TimeScale = 20;
                         smoke.Parent = h.RootPart;
                         const attachment = h.RootPart.FindFirstChild("LVAttachment") as Attachment ?? new Instance("Attachment", h.RootPart);
                         attachment.Name = "LVAttachment";
                         const vector = new Vector3(0, 300, 0);
-                        const linearVelocity = new LinearVelocity();
+                        const linearVelocity = new Instance("LinearVelocity");
                         linearVelocity.MaxForce = vector.Magnitude * 20000;
                         linearVelocity.VectorVelocity = vector;
                         linearVelocity.Attachment0 = attachment;
@@ -976,7 +976,7 @@ export class PermissionsService implements OnInit, OnPlayerJoined {
                     }
                     return;
                 }
-                
+
                 currency = currency.gsub("_", " ")[0];
                 if (CURRENCY_DETAILS[currency as Currency] === undefined)
                     return;

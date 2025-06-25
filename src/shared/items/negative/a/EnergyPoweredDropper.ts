@@ -5,6 +5,7 @@ import Item from "shared/item/Item";
 import Dropper from "shared/item/traits/Dropper";
 import ExcavationStone from "shared/items/excavation/ExcavationStone";
 import Gold from "shared/items/excavation/Gold";
+import Grass from "shared/items/excavation/harvestable/Grass";
 import WhiteGem from "shared/items/excavation/WhiteGem";
 
 export = new Item(script.Name)
@@ -15,7 +16,7 @@ export = new Item(script.Name)
     .setRequiredItemAmount(ExcavationStone, 15)
     .setRequiredItemAmount(WhiteGem, 5)
     .setRequiredItemAmount(Gold, 1)
-    .setRequiredHarvestableAmount("Grass", 25)
+    .setRequiredItemAmount(Grass, 25)
     .addPlaceableArea("BarrenIslands")
     .persists()
 

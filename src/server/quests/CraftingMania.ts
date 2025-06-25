@@ -5,16 +5,16 @@ import { Dialogue } from "shared/NPC";
 import { getNPCModel, getWaypoint, WAYPOINTS } from "shared/constants";
 import { GameUtils } from "shared/item/ItemUtils";
 import Shop from "shared/item/traits/Shop";
-import Items from "shared/items/Items";
-import CraftingTable from "shared/items/negative/tfd/CraftingTable";
 import ExcavationStone from "shared/items/excavation/ExcavationStone";
 import WhiteGem from "shared/items/excavation/WhiteGem";
+import Grass from "shared/items/excavation/harvestable/Grass";
+import Wool from "shared/items/negative/a/Wool";
 import IndustrialOverpass from "shared/items/negative/exist/IndustrialOverpass";
-import Lamp from "shared/items/negative/negativity/Lamp";
 import LegPoweredDropper from "shared/items/negative/felixthea/LegPoweredDropper";
 import LimitBreaker from "shared/items/negative/friendliness/LimitBreaker";
+import Lamp from "shared/items/negative/negativity/Lamp";
+import CraftingTable from "shared/items/negative/tfd/CraftingTable";
 import OverengineeredGenerator from "shared/items/negative/trueease/OverengineeredGenerator";
-import Wool from "shared/items/negative/a/Wool";
 import Chuck from "shared/npcs/Chuck";
 import Ricarg from "shared/npcs/Ricarg";
 
@@ -23,7 +23,6 @@ const craftingTableModel = WAYPOINTS.WaitForChild("CraftingTable")!;
 const chuckModel = getNPCModel("Chuck");
 const chuckHumanoid = chuckModel.FindFirstChildOfClass("Humanoid")!;
 const chuckRootPart = chuckHumanoid.RootPart!;
-const Grass = Items.getItem("Grass")!;
 
 export = new Quest(script.Name)
     .setName("Crafting Introductions")

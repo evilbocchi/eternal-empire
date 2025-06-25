@@ -48,7 +48,7 @@ export class AreaService implements OnInit, OnPlayerJoined {
         // area bounds for music prep
         const areaBounds = area.getAreaBounds();
         if (areaBounds !== undefined) {
-            const areaSoundGroup = new SoundGroup();
+            const areaSoundGroup = new Instance("SoundGroup");
             areaSoundGroup.Name = id;
             areaSoundGroup.Volume = 1;
             areaSoundGroup.Parent = MUSIC_GROUP;

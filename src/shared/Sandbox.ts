@@ -29,33 +29,33 @@ export default class Sandbox {
             return false;
         }
 
-        const leaderboards = new Folder();
+        const leaderboards = new Instance("Folder");
         leaderboards.Name = "Leaderboards";
         leaderboards.Parent = Workspace;
 
-        const npcModels = new Folder();
+        const npcModels = new Instance("Folder");
         npcModels.Name = "NPCs";
         npcModels.Parent = Workspace;
 
-        const wanderers = new Folder();
+        const wanderers = new Instance("Folder");
         wanderers.Name = "Wanderers";
         wanderers.Parent = Workspace;
 
-        const waypoints = new Folder();
+        const waypoints = new Instance("Folder");
         waypoints.Name = "Waypoints";
         waypoints.Parent = Workspace;
 
-        const startCamera = new Part();
+        const startCamera = new Instance("Part");
         startCamera.Name = "StartCamera";
         startCamera.Anchored = true;
         startCamera.Parent = Workspace;
 
-        const startScreen = new BoolValue();
+        const startScreen = new Instance("BoolValue");
         startScreen.Name = "StartScreen";
         startScreen.Value = false;
         startScreen.Parent = startCamera;
 
-        const startId = new StringValue();
+        const startId = new Instance("StringValue");
         startId.Name = "Id";
         startId.Value = this.sandboxValue?.GetAttribute("Id") as string ?? "";
         startId.Parent = startCamera;

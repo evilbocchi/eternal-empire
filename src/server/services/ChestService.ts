@@ -1,26 +1,26 @@
+import { convertToMMSS, weldModel } from "@antivivi/vrldk";
 import { OnInit, OnStart, Service } from "@flamework/core";
-import { RunService, TweenService, Workspace } from "@rbxts/services";
+import { TweenService, Workspace } from "@rbxts/services";
 import { DataService } from "server/services/serverdata/DataService";
 import { ItemsService } from "server/services/serverdata/ItemsService";
 import { LevelService } from "server/services/serverdata/LevelService";
 import { UnlockedAreasService } from "server/services/serverdata/UnlockedAreasService";
-import { SOUND_EFFECTS_GROUP } from "shared/constants";
-import { getSound } from "shared/GameAssets";
-import { ASSETS } from "shared/GameAssets";
 import { AREAS } from "shared/Area";
+import { SOUND_EFFECTS_GROUP } from "shared/constants";
+import { ASSETS, getSound } from "shared/GameAssets";
 import Item from "shared/item/Item";
 import Crystal from "shared/items/excavation/Crystal";
 import ExcavationStone from "shared/items/excavation/ExcavationStone";
 import Gold from "shared/items/excavation/Gold";
+import CorruptedGrass from "shared/items/excavation/harvestable/CorruptedGrass";
 import EnchantedGrass from "shared/items/excavation/harvestable/EnchantedGrass";
+import Grass from "shared/items/excavation/harvestable/Grass";
+import StaleWood from "shared/items/excavation/harvestable/StaleWood";
 import Iron from "shared/items/excavation/Iron";
 import Quartz from "shared/items/excavation/Quartz";
 import WhiteGem from "shared/items/excavation/WhiteGem";
 import Items from "shared/items/Items";
 import Packets from "shared/Packets";
-import { weldModel } from "@antivivi/vrldk";
-import { convertToMMSS } from "@antivivi/vrldk";
-import CorruptedGrass from "shared/items/excavation/harvestable/CorruptedGrass";
 
 declare global {
     type ChestModel = Model & {
@@ -153,8 +153,8 @@ export class ChestService implements OnInit, OnStart {
             .addXP(1, 2000)
             .addXP(3, 1000)
             .addXP(5, 500)
-            .addHarvestable("Grass", 1000)
-            .addHarvestable("StaleWood", 1000)
+            .addItem(Grass, 1000)
+            .addItem(StaleWood, 1000)
             .addItem(ExcavationStone, 1000)
             .addItem(WhiteGem, 200)
             .addItem(EnchantedGrass, 100)
@@ -168,8 +168,8 @@ export class ChestService implements OnInit, OnStart {
             .addXP(3, 1500)
             .addXP(5, 1000)
             .addXP(9, 500)
-            .addHarvestable("Grass", 600)
-            .addHarvestable("StaleWood", 600)
+            .addItem(Grass, 600)
+            .addItem(StaleWood, 600)
             .addItem(ExcavationStone, 600)
             .addItem(WhiteGem, 400)
             .addItem(EnchantedGrass, 200)
@@ -212,7 +212,7 @@ export class ChestService implements OnInit, OnStart {
                 sound.SoundGroup = SOUND_EFFECTS_GROUP;
                 sound.Parent = chestModel.PrimaryPart;
 
-                const prompt = new ProximityPrompt();
+                const prompt = new Instance("ProximityPrompt");
                 prompt.ActionText = "Open";
                 prompt.ObjectText = "Chest";
                 prompt.RequiresLineOfSight = false;
@@ -240,7 +240,7 @@ export class ChestService implements OnInit, OnStart {
                         }
                     }
                 });
-                const bindableEvent = new BindableEvent();
+                const bindableEvent = new Instance("BindableEvent");
                 bindableEvent.Name = "MarkLastOpen";
                 bindableEvent.Event.Connect((lastOpen: number) => markLastOpen(lastOpen));
                 bindableEvent.Parent = chestModel;

@@ -46,7 +46,7 @@ export default class Area {
      * Created as an IntValue for game-wide tracking.
      */
     static readonly globalDropletLimit = (function () {
-        const globalDropletLimit = new IntValue();
+        const globalDropletLimit = new Instance("IntValue");
         globalDropletLimit.Name = "GlobalDropletLimit";
         globalDropletLimit.Value = 500;
         return globalDropletLimit;
@@ -57,7 +57,7 @@ export default class Area {
      * Created as a BoolValue for game-wide tracking.
      */
     static readonly globalUnlocked = (function () {
-        const globalUnlocked = new BoolValue();
+        const globalUnlocked = new Instance("BoolValue");
         globalUnlocked.Name = "GlobalUnlocked";
         globalUnlocked.Value = false;
         return globalUnlocked;
@@ -231,7 +231,7 @@ export default class Area {
 function createArea(name: string, buildable: boolean) {
     if (Sandbox.getEnabled() && IS_SERVER) {
         // In sandbox mode on the server, create a new folder
-        const folder = new Folder();
+        const folder = new Instance("Folder");
         folder.Name = name;
         folder.Parent = Workspace;
         return new Area(folder, buildable);

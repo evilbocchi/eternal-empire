@@ -5,6 +5,7 @@ import Droplet from "shared/item/Droplet";
 import Item from "shared/item/Item";
 import Conveyor from "shared/item/traits/Conveyor";
 import Dropper from "shared/item/traits/Dropper";
+import StaleWood from "shared/items/excavation/harvestable/StaleWood";
 import WhiteGem from "shared/items/excavation/WhiteGem";
 
 export = new Item(script.Name)
@@ -13,7 +14,7 @@ export = new Item(script.Name)
     .setDifficulty(Difficulty.FelixTheA)
     .setPrice(new CurrencyBundle().set("Funds", 5e12))
     .setRequiredItemAmount(WhiteGem, 18)
-    .setRequiredHarvestableAmount("StaleWood", 10)
+    .setRequiredItemAmount(StaleWood, 10)
     .setCreator("taptap71")
     .addPlaceableArea("BarrenIslands", "SlamoVillage")
     .persists()

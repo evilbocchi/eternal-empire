@@ -163,8 +163,8 @@ export class DialogueService implements OnInit {
             const showIndicator = TweenService.Create(indicator.ImageLabel, new TweenInfo(0.3), { ImageTransparency: 0 });
             const hideIndicator = TweenService.Create(indicator.ImageLabel, new TweenInfo(0.15), { ImageTransparency: 1 });
 
-            
-            const prompt = new ProximityPrompt();
+
+            const prompt = new Instance("ProximityPrompt");
             prompt.GetPropertyChangedSignal("Enabled").Connect(() => {
                 if (prompt.Enabled)
                     showIndicator.Play();

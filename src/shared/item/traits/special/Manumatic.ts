@@ -7,7 +7,7 @@ export default class Manumatic extends ItemTrait {
     static load(model: Model, manumatic: Manumatic) {
         const clickable = manumatic.item.trait(Clickable);
 
-        const clickDetector = new ClickDetector();
+        const clickDetector = new Instance("ClickDetector");
         let last = 0;
         const click = (player: Player | undefined, value: number) => {
             const onClick = clickable.onClick;
@@ -24,7 +24,7 @@ export default class Manumatic extends ItemTrait {
             last = now;
         });
         clickDetector.Parent = model.WaitForChild("ClickArea");
-        const event = new BindableEvent();
+        const event = new Instance("BindableEvent");
         event.Name = "Click";
         event.Event.Connect((clickValue: number) => click(undefined, clickValue));
         event.Parent = model;

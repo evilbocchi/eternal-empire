@@ -39,14 +39,10 @@
             },
             {
                 "transform": "rbxts-transformer-services"
-            },
-            {
-                "transform": "rbxts-transformer-instances"
             }
         ]
     },
     "include": [
-        "src/**/*",
-        "node_modules/rbxts-transformer-instances"
+        "src/**/*"
     ],
 }

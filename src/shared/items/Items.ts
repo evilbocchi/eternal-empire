@@ -1,81 +1,95 @@
 import Difficulty from "@antivivi/jjt-difficulties";
 import Harvestable from "shared/Harvestable";
-import Charm from "shared/item/traits/Charm";
 import Item from "shared/item/Item";
 import ItemUtils from "shared/item/ItemUtils";
+import type Charm from "shared/item/traits/Charm";
 
 /**
  * Utility class to manage all items.
  */
 abstract class Items {
-    static readonly itemsPerId = new Map<string, Item>();
-    static readonly charms = new Set<Charm>();
-
-    static readonly sortedItems = (function () {
+    static readonly itemsPerId = (function () {
         const folder = script.Parent;
         if (folder === undefined)
             throw "No folder specified";
 
-        const itemsPerId = Items.itemsPerId;
-        const regItem = (item: Item) => {
-            const shop = item.findTrait("Shop");
-            if (shop !== undefined) {
-                for (const i of shop.items) {
-                    sortMap.get(i.difficulty!)?.push(i);
-                }
-            }
-
-            const charm = item.findTrait("Charm");
-            if (charm !== undefined) {
-                Items.charms.add(charm);
-            }
-            itemsPerId.set(item.id, item);
-        };
-        for (const [i, harvestable] of pairs(Harvestable)) {
-            if (harvestable.description === undefined)
-                continue;
-            const id = i as string;
-            const item = new Item(id).setName(harvestable.name ?? id).setDescription(harvestable.description).setDifficulty(Difficulty.Excavation);
-            regItem(item);
-        }
-        ItemUtils.itemsPerId = itemsPerId;
-
-        const toSort = new Array<{ diff: Difficulty, items: Array<Item>; }>();
-        const sortMap = new Map<Difficulty, Array<Item>>();
-        for (const [_, diff] of Difficulty.DIFFICULTIES) {
-            const array = new Array<Item>();
-            toSort.push({ diff: diff, items: array });
-            sortMap.set(diff, array);
-        }
+        const itemsPerId = new Map<string, Item>();
         for (const moduleScript of folder.GetDescendants()) {
             if (moduleScript.IsA("ModuleScript") && moduleScript !== script) {
                 const i = require(moduleScript);
                 if (i !== undefined) {
                     const item = i as Item;
-                    regItem(item);
+                    itemsPerId.set(item.id, item);
                 }
             }
         }
-        for (const [_, item] of itemsPerId) {
-            const array = sortMap.get(item.difficulty);
-            if (array !== undefined && !array.includes(item)) {
-                array.push(item);
+        for (const [i, harvestable] of pairs(Harvestable)) {
+            if (harvestable.description === undefined)
+                continue;
+            const id = i as string;
+            const item = new Item(id).setName(harvestable.name ?? id).setDescription(harvestable.description).setDifficulty(Difficulty.Excavation);
+            itemsPerId.set(id, item);
+        }
+        ItemUtils.itemsPerId = itemsPerId;
+        return itemsPerId;
+    })();
+
+    static readonly charms = (function () {
+        const charms = new Set<Charm>();
+        for (const [_, item] of Items.itemsPerId) {
+            const charm = item.findTrait("Charm");
+            if (charm !== undefined) {
+                charms.add(charm);
+            }
+        }
+        return charms;
+    })();
+
+    /**
+     * Ordered list of all items by:
+     * 1. Difficulty rating
+     * 2. Index in the shop they appear in
+     * 3. Layout order
+     * 4. Name
+     */
+    static readonly sortedItems = (function () {
+        const indexesInShop = new Map<Item, number>();
+        for (const [_, item] of Items.itemsPerId) {
+            const shop = item.findTrait("Shop");
+            if (shop !== undefined) {
+                for (let i = 0; i < shop.items.size(); i++) {
+                    indexesInShop.set(shop.items[i], i);
+                }
             }
         }
 
-        const sorted = toSort.sort((a, b) => a.diff.rating! < b.diff.rating!);
-        let i = 0;
-        for (const obj of sorted) {
-            for (const item of obj.items) {
-                if (item.layoutOrder === -100000)
-                    item.layoutOrder = ++i;
-            }
-        }
-        const sortedItems = new Array<Item>();
-        for (const [_, item] of itemsPerId) {
+        let sortedItems = new Array<Item>(Items.itemsPerId.size());
+        for (const [_, item] of Items.itemsPerId) {
             sortedItems.push(item);
         }
-        sortedItems.sort((a, b) => a.layoutOrder < b.layoutOrder);
+        sortedItems = sortedItems.sort((a, b) => {
+            if (a.difficulty.rating !== undefined && b.difficulty.rating !== undefined) {
+                if (a.difficulty.rating !== b.difficulty.rating) {
+                    return a.difficulty.rating < b.difficulty.rating!;
+                }
+            }
+            const aIndex = indexesInShop.get(a);
+            const bIndex = indexesInShop.get(b);
+            if (aIndex !== undefined && bIndex !== undefined) {
+                if (aIndex !== bIndex) {
+                    return aIndex < bIndex;
+                }
+            }
+
+            if (a.layoutOrder !== b.layoutOrder) {
+                return a.layoutOrder < b.layoutOrder;
+            }
+
+            if (a.name !== b.name) {
+                return a.name < b.name;
+            }
+            return a.id < b.id; // Fallback to ID comparison
+        });
         return sortedItems;
     })();
 

@@ -10,7 +10,9 @@ import WhiteGem from "shared/items/excavation/WhiteGem";
 const ExcavationStone = new Item(script.Name)
     .setName("Stone")
     .setDescription("A basic crafting resource, found littered everywhere around the world.")
-    .setDifficulty(Difficulty.Excavation);
+    .setDifficulty(Difficulty.Excavation)
+    .placeableEverywhere()
+    .persists();
 
 ExcavationStone.trait(Shop).setItems([
     ExcavationStone,

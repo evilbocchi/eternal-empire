@@ -4,10 +4,10 @@
 import { Controller, OnInit, OnStart } from "@flamework/core";
 import { ADAPTIVE_TAB_MAIN_WINDOW, AdaptiveTabController } from "client/controllers/interface/AdaptiveTabController";
 import { BuildController } from "client/controllers/interface/BuildController";
-import ItemSlot from "client/ItemSlot";
 import { Tooltip, TooltipController } from "client/controllers/interface/TooltipController";
 import { INTERFACE, UIController } from "client/controllers/UIController";
 import ItemFilter from "client/ItemFilter";
+import ItemSlot from "client/ItemSlot";
 import { ASSETS } from "shared/GameAssets";
 import Item from "shared/item/Item";
 import Items from "shared/items/Items";
@@ -21,9 +21,10 @@ export const INVENTORY_WINDOW = ADAPTIVE_TAB_MAIN_WINDOW.WaitForChild("Inventory
     };
 };
 
-const reverseSortedItems = new Array<Item>();
-for (const item of Items.sortedItems) {
-    reverseSortedItems.unshift(item);
+const sortedItemsSize = Items.sortedItems.size();
+const reverseSortedItems = new Array<Item>(sortedItemsSize);
+for (let i = 0; i < sortedItemsSize; i++) {
+    reverseSortedItems[i] = Items.sortedItems[sortedItemsSize - 1 - i];
 }
 
 @Controller()

@@ -1,8 +1,9 @@
 import Difficulty from "@antivivi/jjt-difficulties";
+import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
 import Upgrader from "shared/item/traits/Upgrader";
 import EnchantedGrass from "shared/items/excavation/harvestable/EnchantedGrass";
-import CurrencyBundle from "shared/currency/CurrencyBundle";
+import StaleWood from "shared/items/excavation/harvestable/StaleWood";
 
 export = new Item(script.Name)
     .setName("Magical Wood")
@@ -10,7 +11,7 @@ export = new Item(script.Name)
     .setDifficulty(Difficulty.Excavation)
     .setPrice(new CurrencyBundle().set("Power", 100))
     .setRequiredItemAmount(EnchantedGrass, 1)
-    .setRequiredHarvestableAmount("StaleWood", 15)
+    .setRequiredItemAmount(StaleWood, 15)
     .addPlaceableArea("BarrenIslands")
     .setLevelReq(2)
 

@@ -40,7 +40,7 @@ export class BuildController implements OnInit, OnStart {
     readonly selected = new Map<Model, CFrame>();
     mainSelected: Model | undefined;
 
-    rotationValue = new IntValue();
+    rotationValue = new Instance("IntValue");
 
     /**
      * CFrame of the main model in {@link selected} before it was selected.
@@ -207,7 +207,7 @@ export class BuildController implements OnInit, OnStart {
         weldModel(itemModel); // we are using tweens on primarypart
 
         const primaryPart = itemModel.PrimaryPart!;
-        const indicator = new Part();
+        const indicator = new Instance("Part");
         indicator.Transparency = 1;
         indicator.CanCollide = false;
         indicator.Anchored = true;
@@ -215,7 +215,7 @@ export class BuildController implements OnInit, OnStart {
         indicator.Size = primaryPart.Size;
         indicator.Name = "Indicator";
 
-        const selectionBox = new SelectionBox();
+        const selectionBox = new Instance("SelectionBox");
         selectionBox.Adornee = indicator;
         selectionBox.Transparency = 0.35;
         selectionBox.SurfaceTransparency = 0.75;

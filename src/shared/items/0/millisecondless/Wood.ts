@@ -7,4 +7,5 @@ export = new Item(script.Name)
     .setDescription("Joke wood. It's not real wood.")
     .setDifficulty(Difficulty.Millisecondless)
     .addPlaceableArea("SlamoVillage")
-    .setPrice(new CurrencyBundle().set("Funds", 1e24));
+    .setPrice(new CurrencyBundle().set("Funds", 1e24))
+    .persists();

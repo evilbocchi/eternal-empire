@@ -43,7 +43,7 @@ export class AdaptiveTabController implements OnInit {
     currentWindow = undefined as Frame | undefined;
     hotkeys = new Map<string, Enum.KeyCode>();
     blur = (function () {
-        const blur = new BlurEffect();
+        const blur = new Instance("BlurEffect");
         blur.Size = 0;
         blur.Enabled = false;
         blur.Parent = Lighting;

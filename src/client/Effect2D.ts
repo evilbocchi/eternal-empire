@@ -11,7 +11,7 @@ namespace Effect2D {
     /**
      * The masking GUI that will be used to mask elements.
      */
-    export const MASKING_GUI = new ScreenGui();
+    export const MASKING_GUI = new Instance("ScreenGui");
     MASKING_GUI.Name = "MaskingGui";
     MASKING_GUI.ResetOnSpawn = false;
     MASKING_GUI.DisplayOrder = 10;
@@ -27,7 +27,7 @@ namespace Effect2D {
      * @returns The created mask.
      */
     export function createMask(element?: GuiObject, lifetime = 5) {
-        const mask = new Frame();
+        const mask = new Instance("Frame");
         if (element !== undefined) {
             const absPosition = element.AbsolutePosition;
             const absSize = element.AbsoluteSize;
@@ -62,8 +62,8 @@ namespace Effect2D {
         const mask = createMask(element);
         mask.ClipsDescendants = true;
 
-        const circle = new Frame();
-        const uiCorner = new UICorner();
+        const circle = new Instance("Frame");
+        const uiCorner = new Instance("UICorner");
         uiCorner.CornerRadius = new UDim(1, 0);
         uiCorner.Parent = circle;
 
