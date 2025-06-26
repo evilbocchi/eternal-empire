@@ -69,9 +69,9 @@ function loadWanderer(character: Model) {
     const rootPart = humanoid.RootPart ?? character.WaitForChild("HumanoidRootPart") as BasePart;
 
     const wander = () => {
-        let randX = math.random(-100, 100);
+        let randX = math.random(-60, 60);
         randX += math.sign(randX) * 10; // Ensure it's not too close to zero
-        let randZ = math.random(-100, 100);
+        let randZ = math.random(-60, 60);
         randZ += math.sign(randZ) * 10;
         const goal = rootPart.Position.add(new Vector3(randX, 0, randZ));
         pathToLocation(goal);
@@ -80,14 +80,20 @@ function loadWanderer(character: Model) {
     task.spawn(() => {
         while (task.wait()) {
             wander();
-            task.wait(math.random(15, 30)); // Make this massive to avoid performance issues
+            task.wait(math.random(30, 60)); // Make this massive to avoid performance issues
         }
     });
 }
 
+const enabled = false;
 for (const startPos of Workspace.WaitForChild("Wanderers").GetChildren()) {
     if (!startPos.IsA("BasePart"))
         continue;
+
+    startPos.Transparency = 1;
+    if (!enabled) {
+        continue; // Skip loading wanderers if not enabled
+    }
 
     const name = startPos.Name;
     const character = ASSETS.Wanderers.WaitForChild(name).Clone() as Model;
