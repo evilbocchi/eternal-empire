@@ -1,13 +1,14 @@
 import { OnoeNum } from "@antivivi/serikanum";
+import { getAllInstanceInfo, setInstanceInfo } from "@antivivi/vrldk";
 import { AREAS } from "shared/Area";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
+import { CURRENCY_DETAILS } from "shared/currency/CurrencyDetails";
 import Item from "shared/item/Item";
+import { GameUtils } from "shared/item/ItemUtils";
 import Dropper from "shared/item/traits/Dropper";
 import Furnace from "shared/item/traits/Furnace";
 import ItemTrait from "shared/item/traits/ItemTrait";
 import Packets from "shared/Packets";
-import { getAllInstanceInfo, setInstanceInfo } from "@antivivi/vrldk";
-import { GameUtils } from "shared/item/ItemUtils";
 import Droplet from "../Droplet";
 
 declare global {
@@ -189,9 +190,15 @@ export default class Condenser extends ItemTrait {
     }
 
     addDroplets(...droplets: Droplet[]) {
+        const furnace = this.item.trait(Furnace);
         for (const droplet of droplets) {
             this.droplets.push(droplet);
             this.totalValue = this.totalValue.add(droplet.value);
+            for (const [currency, _] of pairs(CURRENCY_DETAILS)) {
+                const inTotalValue = this.totalValue.get(currency);
+                const includes = inTotalValue === undefined || inTotalValue.equals(0);
+                furnace.setMul((furnace.mul ?? new CurrencyBundle()).set(currency, includes ? 0 : 1));
+            }
         }
         return this;
     }

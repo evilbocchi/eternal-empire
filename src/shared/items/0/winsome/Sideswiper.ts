@@ -3,6 +3,8 @@ import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
 import OmniUpgrader from "shared/item/traits/special/OmniUpgrader";
 import ExcavationStone from "shared/items/excavation/ExcavationStone";
+import Gold from "shared/items/excavation/Gold";
+import MagicalWood from "shared/items/excavation/harvestable/MagicalWood";
 import WhiteGem from "shared/items/excavation/WhiteGem";
 
 export = new Item(script.Name)
@@ -12,6 +14,8 @@ export = new Item(script.Name)
     .setPrice(new CurrencyBundle().set("Bitcoin", 200))
     .setRequiredItemAmount(ExcavationStone, 30)
     .setRequiredItemAmount(WhiteGem, 25)
+    .setRequiredItemAmount(Gold, 1)
+    .setRequiredItemAmount(MagicalWood, 2)
     .setRequiredHarvestableAmount("WinsomeSpeck", 2)
     .addPlaceableArea("BarrenIslands")
     .setCreator("goog_als")

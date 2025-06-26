@@ -1,16 +1,16 @@
+//!native
+//!optimize 2
 import Difficulty from "@antivivi/jjt-difficulties";
 import { OnoeNum } from "@antivivi/serikanum";
+import { formatRichText, getAllInstanceInfo, getInstanceInfo, Streaming } from "@antivivi/vrldk";
 import StringBuilder from "@rbxts/stringbuilder";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import { CURRENCY_DETAILS } from "shared/currency/CurrencyDetails";
 import Droplet from "shared/item/Droplet";
 import Item from "shared/item/Item";
+import { GameUtils } from "shared/item/ItemUtils";
 import Upgrader from "shared/item/traits/Upgrader";
 import NamedUpgrades from "shared/namedupgrade/NamedUpgrades";
-import { getAllInstanceInfo, getInstanceInfo } from "@antivivi/vrldk";
-import { GameUtils } from "shared/item/ItemUtils";
-import { Streaming } from "@antivivi/vrldk";
-import { formatRichText } from "@antivivi/vrldk";
 
 export = new Item(script.Name)
     .setName("Droplet Scanner")

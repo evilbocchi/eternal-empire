@@ -9,7 +9,8 @@ declare global {
     }
     interface UpgradeInfo {
         /**
-         * Whether the upgrade comes from an {@link OmniUpgrader}.
+         * Defined if the upgrade comes from an {@link OmniUpgrader}.
+         * This is used to determine the laser of the upgrade.
          */
         Omni?: string;
     }
