@@ -88,7 +88,8 @@ export class ToolController implements OnInit, OnStart {
         const harvestable = Harvestable[model.Name as HarvestableId];
         if (harvestable === undefined)
             return;
-        gui.NameLabel.Text = harvestable.name ?? model.Name;
+        const item = Items.getItem(model.Name);
+        gui.NameLabel.Text = item?.name ?? harvestable.name ?? model.Name;
         let isNew = true;
         let prevHealth = 0;
         const updateHealth = () => {
