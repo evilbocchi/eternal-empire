@@ -85,27 +85,30 @@ export default class Generator extends Boostable {
             const part = model.FindFirstChild("Marker");
             const positions = new Map<BasePart, Vector3>();
             for (const part of model.GetDescendants()) {
-                if (!part.IsA("BasePart") || part.Name === "Base")
+                if (!part.IsA("BasePart") || part.Name === "Base" || part.Parent!.Name === "Base")
                     continue;
                 positions.set(part, part.Position);
             }
             const tween1 = new TweenInfo(0.1, Enum.EasingStyle.Quad, Enum.EasingDirection.In);
             const tween2 = new TweenInfo(0.4, Enum.EasingStyle.Quad, Enum.EasingDirection.Out);
 
+
             remoteEvent.OnClientEvent.Connect((amountPerCurrency?: CurrencyMap) => {
                 if (amountPerCurrency === undefined)
                     return;
                 const gui = ItemUtils.loadDropletGui(amountPerCurrency);
                 gui.Parent = part ?? model.PrimaryPart;
-                for (const [part, position] of positions) {
-                    TweenService.Create(part, tween1, {
-                        Position: position.sub(new Vector3(0, 0.125, 0))
-                    }).Play();
-                    task.delay(0.1, () => {
-                        TweenService.Create(part, tween2, {
-                            Position: position
+                if (ItemUtils.UserGameSettings!.SavedQualityLevel.Value > 5) {
+                    for (const [part, position] of positions) {
+                        TweenService.Create(part, tween1, {
+                            Position: position.sub(new Vector3(0, 0.125, 0))
                         }).Play();
-                    });
+                        task.delay(0.1, () => {
+                            TweenService.Create(part, tween2, {
+                                Position: position
+                            }).Play();
+                        });
+                    }
                 }
             });
         });

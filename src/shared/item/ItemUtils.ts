@@ -1,5 +1,5 @@
 import { BaseOnoeNum, OnoeNum } from "@antivivi/serikanum";
-import { Debris, TweenService } from "@rbxts/services";
+import { Debris, RunService, TweenService } from "@rbxts/services";
 import StringBuilder from "@rbxts/stringbuilder";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import { ASSETS } from "shared/GameAssets";
@@ -25,6 +25,8 @@ namespace ItemUtils {
     export const GameUtils = {
         ready: false
     } as GameUtils;
+
+    export const UserGameSettings = RunService.IsClient() ? UserSettings().GetService("UserGameSettings") : undefined;
 
     export const REPEATS = new Map<(dt: number) => void, { delta?: number, lastCall?: number; }>();
     export const dropletGuiTween = new TweenInfo(1.4, Enum.EasingStyle.Quad, Enum.EasingDirection.Out);
@@ -86,11 +88,13 @@ namespace ItemUtils {
             TweenService.Create(label, tweenInfo, { TextTransparency: 1, TextStrokeTransparency: 1 }).Play();
             TweenService.Create(label.UIStroke, tweenInfo, { Transparency: 1 }).Play();
         }
-        const transitioningPosition = dropletGui.Frame.Position.add(new UDim2(0, 0, 0, 50));
-        TweenService.Create(dropletGui.Frame, tweenInfo, {
-            Position: transitioningPosition,
-            Rotation: dropletGui.Frame.Rotation + math.random(-45, 45)
-        }).Play();
+        if (UserGameSettings !== undefined && UserGameSettings.SavedQualityLevel.Value > 5) {
+            const transitioningPosition = dropletGui.Frame.Position.add(new UDim2(0, 0, 0, 50));
+            TweenService.Create(dropletGui.Frame, tweenInfo, {
+                Position: transitioningPosition,
+                Rotation: dropletGui.Frame.Rotation + math.random(-45, 45)
+            }).Play();
+        }
 
         dropletGui.Enabled = true;
         Debris.AddItem(dropletGui, 3);
