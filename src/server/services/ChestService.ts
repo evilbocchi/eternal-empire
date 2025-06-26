@@ -98,7 +98,7 @@ class LootPool {
 @Service()
 export class ChestService implements OnInit, OnStart {
 
-    poolPerLevel = new Map<number, LootPool>();
+    poolPerLevel = new Map<string, LootPool>();
     cooldown = 900;
     chestPerChestLocation = new Map<Vector3, ChestModel>();
     openTweenInfo = new TweenInfo(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out);
@@ -117,7 +117,7 @@ export class ChestService implements OnInit, OnStart {
             return false;
         const bindableEvent = chest.FindFirstChild("MarkLastOpen") as BindableEvent;
         if (bindableEvent === undefined)
-            error("Wtf");
+            throw `Chest at ${chestLocation} does not have a MarkLastOpen BindableEvent`;
         bindableEvent.Fire(lastOpen);
         return true;
     }
@@ -149,7 +149,7 @@ export class ChestService implements OnInit, OnStart {
     }
 
     onInit() {
-        this.poolPerLevel.set(1, new LootPool()
+        this.poolPerLevel.set("1", new LootPool()
             .addXP(1, 2000)
             .addXP(3, 1000)
             .addXP(5, 500)
@@ -163,7 +163,7 @@ export class ChestService implements OnInit, OnStart {
             .addItem(Iron, 10)
             .addItem(Gold, 1)
         );
-        this.poolPerLevel.set(2, new LootPool()
+        this.poolPerLevel.set("2", new LootPool()
             .addXP(1, 500)
             .addXP(3, 1500)
             .addXP(5, 1000)
@@ -179,7 +179,7 @@ export class ChestService implements OnInit, OnStart {
             .addItem(Gold, 30)
             .addItem(Quartz, 1)
         );
-        this.poolPerLevel.set(2, new LootPool()
+        this.poolPerLevel.set("3", new LootPool()
             .addXP(4, 500)
             .addXP(6, 1500)
             .addXP(9, 1000)
@@ -256,9 +256,11 @@ export class ChestService implements OnInit, OnStart {
                     const amount = lastOpen === 0 ? math.random(10, 14) : math.random(5, 8);
                     this.dataService.empireData.openedChests.set(`${chestLocation.X}_${chestLocation.Y}_${chestLocation.Z}`, t);
                     markLastOpen(t);
-                    task.spawn(() => {
-                        task.wait(0.25);
-                        this.rewardLoot(...this.poolPerLevel.get(tonumber(chestLocationMarker.Name) ?? 1)!.pull(amount));
+                    task.delay(0.25, () => {
+                        const pool = this.poolPerLevel.get(chestLocationMarker.Name);
+                        if (pool === undefined)
+                            throw `No loot pool found for chest at ${chestLocationMarker.Name}`;
+                        this.rewardLoot(...pool.pull(amount));
                     });
                 });
 
