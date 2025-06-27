@@ -2,6 +2,7 @@ import Difficulty from "@antivivi/jjt-difficulties";
 import { getInstanceInfo } from "@antivivi/vrldk";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
+import ItemUtils from "shared/item/ItemUtils";
 import Conveyor from "shared/item/traits/Conveyor";
 import Upgrader from "shared/item/traits/Upgrader";
 import MagicalWood from "shared/items/excavation/harvestable/MagicalWood";
@@ -31,7 +32,8 @@ export = new Item(script.Name)
     .exit()
 
     .onLoad((model) => {
+        const forward = model.GetPivot().LookVector.Unit;
         getInstanceInfo(model, "OnUpgraded")!.connect((droplet) => {
-            droplet.Position = droplet.Position.add(droplet.AssemblyLinearVelocity.add(new Vector3(0, 4, 0)));
+            ItemUtils.applyImpulse(droplet, forward.mul(4).add(new Vector3(0, 49, 0)).mul(droplet.Mass));
         });
     });

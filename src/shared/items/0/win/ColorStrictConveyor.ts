@@ -27,7 +27,7 @@ export = new Item(script.Name)
     .exit()
 
     .onLoad((model) => {
-        const forward = model.PrimaryPart!.CFrame.LookVector.Unit;
+        const forward = model.GetPivot().LookVector.Unit;
         const sortingPoint = model.WaitForChild("SortingPoint") as BasePart;
         sortingPoint.CanTouch = true;
 
