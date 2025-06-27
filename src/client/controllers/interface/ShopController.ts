@@ -86,6 +86,7 @@ export class ShopController implements OnInit, OnStart {
     currentContainerId = 0;
     currentContainerSpace = 0;
     hideMaxedItems: boolean | undefined;
+    purchaseable = false;
 
     constructor(private hotkeysController: HotkeysController, private uiController: UIController,
         private adaptiveTabController: AdaptiveTabController, private tooltipController: TooltipController) {
@@ -143,7 +144,8 @@ export class ShopController implements OnInit, OnStart {
                     return;
                 }
                 const inBalance = balance.get(currency);
-                option.AmountLabel.TextColor3 = inBalance !== undefined && (amount as OnoeNum).lessEquals(inBalance) ? this.sufficientColor : this.insufficientColor;
+                const affordable = inBalance !== undefined && (amount as OnoeNum).lessEquals(inBalance);
+                option.AmountLabel.TextColor3 = affordable ? this.sufficientColor : this.insufficientColor;
             });
         }
         else if (item !== undefined) {
@@ -158,11 +160,13 @@ export class ShopController implements OnInit, OnStart {
                     return;
                 }
                 const inInventory = inventory.get(item.id);
-                option.AmountLabel.TextColor3 = inInventory === undefined || inInventory < (amount as number) ? this.insufficientColor : this.sufficientColor;
+                const affordable = inInventory !== undefined && inInventory >= (amount as number)
+                option.AmountLabel.TextColor3 = affordable ? this.sufficientColor : this.insufficientColor;
             });
         }
         option.Destroying.Once(() => connection.disconnect());
         this.assignContainer(option);
+        return option;
     }
 
     assignContainer(priceOption: typeof ASSETS.ShopWindow.PriceOption) {

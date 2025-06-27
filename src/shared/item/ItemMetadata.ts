@@ -68,9 +68,8 @@ export default class ItemMetadata {
         }
 
         const builder = new StringBuilder();
-        builder.append("Formula:  &lt;");
+        builder.append("Formula: ");
         builder.append(formula.tostring(item.formulaX ?? "x"));
-        builder.append("&gt;");
 
         if (result !== undefined) {
             builder.append(" = ");
@@ -131,7 +130,7 @@ export default class ItemMetadata {
         this.builder[ItemMetadata.INDICES.PLACEABLE_AREAS] = `\n${formatRichText(builder.toString(), color, this.size, this.weight)}`;
     }
 
-    resetLayer(color = Color3.fromRGB(255, 99, 99)) {
+    resetLayer(color = Color3.fromRGB(255, 156, 99)) {
         if (RESET_LAYERS_UNLOCKED.Value === false) {
             this.builder[ItemMetadata.INDICES.RESET_LAYER] = "";
             return;

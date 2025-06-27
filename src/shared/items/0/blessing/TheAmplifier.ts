@@ -1,9 +1,9 @@
 import Difficulty from "@antivivi/jjt-difficulties";
-import Conveyor from "shared/item/traits/Conveyor";
+import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
+import Conveyor from "shared/item/traits/Conveyor";
 import Upgrader from "shared/item/traits/Upgrader";
 import InclinedRefiner from "shared/items/0/win/InclinedRefiner";
-import CurrencyBundle from "shared/currency/CurrencyBundle";
 
 export = new Item(script.Name)
     .setName("The Amplifier")
@@ -12,9 +12,7 @@ export = new Item(script.Name)
     .setPrice(new CurrencyBundle().set("Skill", 30), 1)
     .setRequiredItemAmount(InclinedRefiner, 1)
     .setCreator("butterman_toast")
-    .addPlaceableArea("BarrenIslands")
-    .addPlaceableArea("SlamoVillage")
-    .persists("Skillification")
+    .addPlaceableArea("BarrenIslands", "SlamoVillage")
 
     .trait(Upgrader)
     .setMul(new CurrencyBundle().set("Bitcoin", 2).set("Power", 1.25))

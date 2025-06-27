@@ -148,6 +148,13 @@ export class ChestService implements OnInit, OnStart {
         Packets.itemsReceived.fireAll(items);
     }
 
+    openChest(chestId: string, amount: number) {
+        const pool = this.poolPerLevel.get(chestId);
+        if (pool === undefined)
+            throw `No loot pool found for chest ${chestId}`;
+        this.rewardLoot(...pool.pull(amount));
+    }
+
     onInit() {
         this.poolPerLevel.set("1", new LootPool()
             .addXP(1, 2000)
@@ -257,10 +264,7 @@ export class ChestService implements OnInit, OnStart {
                     this.dataService.empireData.openedChests.set(`${chestLocation.X}_${chestLocation.Y}_${chestLocation.Z}`, t);
                     markLastOpen(t);
                     task.delay(0.25, () => {
-                        const pool = this.poolPerLevel.get(chestLocationMarker.Name);
-                        if (pool === undefined)
-                            throw `No loot pool found for chest at ${chestLocationMarker.Name}`;
-                        this.rewardLoot(...pool.pull(amount));
+                        this.openChest(chestLocationMarker.Name, amount);
                     });
                 });
 

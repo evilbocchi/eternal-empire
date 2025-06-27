@@ -5,6 +5,7 @@ import { Debris, Lighting, MarketplaceService, MessagingService, Players, Replic
 import Quest from "server/Quest";
 import { AreaService } from "server/services/AreaService";
 import { BombsService } from "server/services/BombsService";
+import { ChestService } from "server/services/ChestService";
 import { DonationService } from "server/services/DonationService";
 import { GameAssetService } from "server/services/GameAssetService";
 import { LeaderboardService } from "server/services/LeaderboardService";
@@ -73,7 +74,7 @@ export class PermissionsService implements OnInit, OnPlayerJoined {
         private currencyService: CurrencyService, private leaderboardService: LeaderboardService, private upgradeBoardService: UpgradeBoardService,
         private itemsService: ItemsService, private playtimeService: PlaytimeService, private areaService: AreaService, private levelService: LevelService,
         private questsService: QuestsService, private unlockedAreasService: UnlockedAreasService, private resetService: ResetService,
-        private bombsService: BombsService, private setupService: SetupService) {
+        private bombsService: BombsService, private setupService: SetupService, private chestService: ChestService) {
 
     }
 
@@ -1012,6 +1013,12 @@ export class PermissionsService implements OnInit, OnPlayerJoined {
 
                     this.itemsService.serverPlace(id, primaryPart.Position, 0);
                 }
+            }, 4);
+
+        this.createCommand("chestopen", "chop",
+            "<id> <amount> : Open a chest by its ID. Specify amount to roll a specific amount of times.",
+            (_o, id, amount) => {
+                this.chestService.openChest(id, tonumber(amount) ?? 5);
             }, 4);
 
         this.createCommand("levelset", "lset",
