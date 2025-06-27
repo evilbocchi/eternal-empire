@@ -9,7 +9,7 @@ import Packets from "shared/Packets";
 declare global {
     interface DropletAssets {
         DropletGui: BillboardGui & {
-            Frame: Frame & {
+            Frame: CanvasGroup & {
                 ValueLabel: TextLabel & {
                     UIStroke: UIStroke;
                 };
@@ -65,7 +65,7 @@ namespace ItemUtils {
             let i = 0;
             for (const [currency, details] of CurrencyBundle.SORTED_DETAILS) {
                 const amount = amountPerCurrency.get(currency);
-                if (amount === undefined)
+                if (amount === undefined || new OnoeNum(0).equals(amount))
                     continue;
                 if (i > 0) {
                     builder.append("\n");
@@ -84,17 +84,11 @@ namespace ItemUtils {
         dropletGui.StudsOffset = (new Vector3(math.random(-25, 25), math.random(-25, 25), math.random(-25, 25))).mul(0.01);
 
         const tweenInfo = new TweenInfo(0.85, Enum.EasingStyle.Quart, Enum.EasingDirection.In);
-        for (const label of labels) {
-            TweenService.Create(label, tweenInfo, { TextTransparency: 1, TextStrokeTransparency: 1 }).Play();
-            TweenService.Create(label.UIStroke, tweenInfo, { Transparency: 1 }).Play();
-        }
-        if (UserGameSettings !== undefined && UserGameSettings.SavedQualityLevel.Value > 5) {
-            const transitioningPosition = dropletGui.Frame.Position.add(new UDim2(0, 0, 0, 50));
-            TweenService.Create(dropletGui.Frame, tweenInfo, {
-                Position: transitioningPosition,
-                Rotation: dropletGui.Frame.Rotation + math.random(-45, 45)
-            }).Play();
-        }
+        TweenService.Create(dropletGui.Frame, tweenInfo, {
+            GroupTransparency: 1,
+            Position: dropletGui.Frame.Position.add(new UDim2(0, 0, 0, 50)),
+            Rotation: dropletGui.Frame.Rotation + math.random(-45, 45)
+        }).Play();
 
         dropletGui.Enabled = true;
         Debris.AddItem(dropletGui, 3);

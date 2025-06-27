@@ -194,11 +194,11 @@ export default class Condenser extends ItemTrait {
         for (const droplet of droplets) {
             this.droplets.push(droplet);
             this.totalValue = this.totalValue.add(droplet.value);
-            for (const [currency, _] of pairs(CURRENCY_DETAILS)) {
-                const inTotalValue = this.totalValue.get(currency);
-                const includes = inTotalValue === undefined || inTotalValue.equals(0);
-                furnace.setMul((furnace.mul ?? new CurrencyBundle()).set(currency, includes ? 0 : 1));
-            }
+        }
+        for (const [currency, _] of pairs(CURRENCY_DETAILS)) {
+            const inTotalValue = this.totalValue.get(currency);
+            const isCondensed = inTotalValue !== undefined && inTotalValue.moreThan(0);
+            furnace.setMul((furnace.mul ?? new CurrencyBundle()).set(currency, isCondensed ? 0 : 1));
         }
         return this;
     }

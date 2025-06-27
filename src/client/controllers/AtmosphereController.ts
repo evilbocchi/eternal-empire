@@ -1,9 +1,10 @@
-import { Controller, OnInit, OnPhysics } from "@flamework/core";
+import { Controller, OnInit, OnStart } from "@flamework/core";
 import { Lighting } from "@rbxts/services";
 import { AREAS } from "shared/Area";
+import ItemUtils from "shared/item/ItemUtils";
 
 @Controller()
-export class AtmosphereController implements OnInit, OnPhysics {
+export class AtmosphereController implements OnInit, OnStart {
 
     lights = new Map<Light, number>();
 
@@ -14,12 +15,6 @@ export class AtmosphereController implements OnInit, OnPhysics {
         }
 
         return lightSourceContainer.FindFirstChild("LightSource")?.FindFirstChildWhichIsA("Light");
-    }
-
-    onPhysics() {
-        for (const [light, base] of this.lights) {
-            light.Brightness = (math.abs(Lighting.ClockTime - 12) / 8 - 0.25) * base * 2;
-        }
     }
 
     onInit() {
@@ -34,5 +29,24 @@ export class AtmosphereController implements OnInit, OnPhysics {
                 }
             }
         }
+    }
+
+    onStart() {
+        const UserGameSettings = ItemUtils.UserGameSettings!;
+        let oldQualityLevel = UserGameSettings.SavedQualityLevel.Value;
+        task.spawn(() => {
+            while (true) {
+                const qualityLevel = UserGameSettings.SavedQualityLevel.Value;
+                task.wait(qualityLevel >= 5 ? 1 / 60 : 1);
+
+                for (const [light, base] of this.lights) {
+                    if (oldQualityLevel !== qualityLevel) {
+                        light.Shadows = qualityLevel === 10;
+                    }
+                    light.Brightness = qualityLevel === 1 ? 0 : (math.abs(Lighting.ClockTime - 12) / 8 - 0.25) * base * 2;
+                }
+                oldQualityLevel = qualityLevel;
+            }
+        });
     }
 }
