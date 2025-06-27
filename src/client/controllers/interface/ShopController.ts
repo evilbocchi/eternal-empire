@@ -430,14 +430,8 @@ export class ShopController implements OnInit, OnStart {
                         shopGuiPart.SetAttribute("ClientLoaded", true);
                     }
 
-                    let isInside = false;
-                    for (const touchingPart of hitbox.GetTouchingParts()) {
-                        if (touchingPart.Parent === LOCAL_PLAYER.Character) {
-                            isInside = true;
-                            break;
-                        }
-                    }
-                    if (!isInside)
+                    const v3 = hitbox.CFrame.PointToObjectSpace(primaryPart.Position);
+                    if (math.abs(v3.X) > hitbox.Size.X / 2 || math.abs(v3.Z) > hitbox.Size.Z / 2)
                         continue;
 
                     const itemId = model.GetAttribute("ItemId") as string | undefined;

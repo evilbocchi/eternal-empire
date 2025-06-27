@@ -379,7 +379,7 @@ export class BuildController implements OnInit, OnStart {
         this.clicking = false;
 
         const size = this.selected.size();
-        if (size === 0) { // nothing selected
+        if (size === 0) { // nothing selected, handle dragging
             const hovering = this.hovering;
             const dragging = this.dragging;
             if (hovering !== undefined) {
