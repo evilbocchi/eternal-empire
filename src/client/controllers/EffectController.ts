@@ -114,9 +114,10 @@ export class EffectController implements OnInit {
             if (originalSize === undefined)
                 return;
 
-            drop.Size = originalSize.add(new Vector3(0.15, 0.825, 0.15));
-
-            TweenService.Create(drop, new TweenInfo(0.3), { Size: originalSize }).Play();
+            if (ItemUtils.UserGameSettings!.SavedQualityLevel.Value > 1) {
+                drop.Size = originalSize.add(new Vector3(0.15, 0.825, 0.15));
+                TweenService.Create(drop, new TweenInfo(0.3), { Size: originalSize }).Play();
+            }
         });
 
     }
