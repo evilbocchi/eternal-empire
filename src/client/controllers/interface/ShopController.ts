@@ -21,12 +21,18 @@ import Shop from "shared/item/traits/Shop";
 import Items from "shared/items/Items";
 
 declare global {
+    /**
+     * Represents the label for the difficulty of an item in the shop GUI.
+     */
     type DifficultyLabel = Frame & {
         ImageLabel: ImageLabel;
         TextLabel: TextLabel;
     };
 }
 
+/**
+ * The main GUI for the shop, containing a filter tab and an item list container.
+ */
 export const SHOP_GUI = (function () {
     const shopGui = ASSETS.ShopWindow.ShopGui.Clone();
     shopGui.ResetOnSpawn = false;
@@ -34,6 +40,9 @@ export const SHOP_GUI = (function () {
     return shopGui;
 })();
 
+/**
+ * The main purchase window for the shop, which displays item details and allows purchasing.
+ */
 export const PURCHASE_WINDOW = ADAPTIVE_TAB_MAIN_WINDOW.WaitForChild("Purchase") as Frame & {
     ItemSlot: ItemSlot & {
         Contents: Frame & {
@@ -52,12 +61,16 @@ export const PURCHASE_WINDOW = ADAPTIVE_TAB_MAIN_WINDOW.WaitForChild("Purchase")
             Purchase: TextButton & {
                 Price: Frame;
                 HeadingLabel: TextLabel;
+                UIStroke: UIStroke;
             };
         };
     };
 
 };
 
+/**
+ * The metadata for each item in the shop, used to display additional information.
+ */
 const METADATA_PER_ITEM = new Map<Item, ItemMetadata>();
 for (const item of Items.sortedItems) {
     METADATA_PER_ITEM.set(item, new ItemMetadata(item, 21, "Medium"));
@@ -68,25 +81,25 @@ export class ShopController implements OnInit, OnStart {
 
     readonly sufficientColor = Color3.fromRGB(255, 255, 255);
     readonly insufficientColor = Color3.fromRGB(255, 80, 80);
-    readonly descColor = PURCHASE_WINDOW.DescriptionFrame.DescriptionLabel.TextColor3;
+    readonly descriptionColor = PURCHASE_WINDOW.DescriptionFrame.DescriptionLabel.TextColor3;
 
     readonly filterItems = ItemFilter.loadFilterOptions(SHOP_GUI.FilterOptions, (query, whitelistedTraits) => {
-        const items = this.lastShop?.items;
+        const items = this.currentShop?.items;
         if (items === undefined)
             return;
         ItemSlot.filterItems(this.itemSlotsPerItem, items, query, whitelistedTraits);
     });
 
     itemSlotsPerItem = new Map<Item, ItemSlot>();
-    selected = undefined as Item | undefined;
+    selectedItem = undefined as Item | undefined;
 
     shopGuiPart: Part | undefined;
-    lastShop: Shop | undefined;
-    indexPerItem = new Map<Item, number>();
-    currentContainerId = 0;
-    currentContainerSpace = 0;
+    currentShop: Shop | undefined;
+    currencyIndexPerItem = new Map<Item, number>();
+    priceContainerCounter = 0;
+    availableContainerSpace = 0;
     hideMaxedItems: boolean | undefined;
-    purchaseable = false;
+    switchDebounce = 0;
 
     constructor(private hotkeysController: HotkeysController, private uiController: UIController,
         private adaptiveTabController: AdaptiveTabController, private tooltipController: TooltipController) {
@@ -101,13 +114,13 @@ export class ShopController implements OnInit, OnStart {
         if (shopGuiPart !== undefined && this.shopGuiPart === shopGuiPart)
             return;
 
-        const old = this.shopGuiPart;
-        if (old !== undefined && old !== shopGuiPart) {
-            this.hideShopGuiPart(old);
+        const previousShopGuiPart = this.shopGuiPart;
+        if (previousShopGuiPart !== undefined && previousShopGuiPart !== shopGuiPart) {
+            this.hideShopGuiPart(previousShopGuiPart);
         }
 
         this.shopGuiPart = shopGuiPart;
-        this.lastShop = shop;
+        this.currentShop = shop;
 
         SHOP_GUI.Adornee = shopGuiPart;
         if (shopGuiPart === undefined || shop === undefined) {
@@ -130,6 +143,11 @@ export class ShopController implements OnInit, OnStart {
 
     createPriceOption(amount: OnoeNum | number, currency: Currency | undefined, item: Item | undefined) {
         const option = ASSETS.ShopWindow.PriceOption.Clone();
+        const update = (affordable: boolean) => {
+            option.AmountLabel.TextColor3 = affordable ? this.sufficientColor : this.insufficientColor;
+            option.SetAttribute("Affordable", affordable);
+        };
+
         let connection: Connection;
         if (currency !== undefined) {
             const details = CURRENCY_DETAILS[currency];
@@ -144,8 +162,7 @@ export class ShopController implements OnInit, OnStart {
                     return;
                 }
                 const inBalance = balance.get(currency);
-                const affordable = inBalance !== undefined && (amount as OnoeNum).lessEquals(inBalance);
-                option.AmountLabel.TextColor3 = affordable ? this.sufficientColor : this.insufficientColor;
+                update(inBalance !== undefined && (amount as OnoeNum).lessEquals(inBalance));
             });
         }
         else if (item !== undefined) {
@@ -160,8 +177,7 @@ export class ShopController implements OnInit, OnStart {
                     return;
                 }
                 const inInventory = inventory.get(item.id);
-                const affordable = inInventory !== undefined && inInventory >= (amount as number)
-                option.AmountLabel.TextColor3 = affordable ? this.sufficientColor : this.insufficientColor;
+                update(inInventory !== undefined && inInventory >= (amount as number));
             });
         }
         option.Destroying.Once(() => connection.disconnect());
@@ -174,14 +190,14 @@ export class ShopController implements OnInit, OnStart {
 
         priceOption.Parent = purchaseButton.Price;
         const size = priceOption.AbsoluteSize.X + 5;
-        let currentContainer = purchaseButton.Price.FindFirstChild(this.currentContainerId) as typeof ASSETS.ShopWindow.PriceOptionsContainer | undefined;
-        if (currentContainer === undefined || this.currentContainerSpace < size) {
+        let currentContainer = purchaseButton.Price.FindFirstChild(this.priceContainerCounter) as typeof ASSETS.ShopWindow.PriceOptionsContainer | undefined;
+        if (currentContainer === undefined || this.availableContainerSpace < size) {
             currentContainer = ASSETS.ShopWindow.PriceOptionsContainer.Clone();
-            currentContainer.Name = tostring(++this.currentContainerId);
+            currentContainer.Name = tostring(++this.priceContainerCounter);
             currentContainer.Parent = purchaseButton.Price;
-            this.currentContainerSpace = currentContainer.AbsoluteSize.X + 5;
+            this.availableContainerSpace = currentContainer.AbsoluteSize.X + 5;
         }
-        this.currentContainerSpace -= size;
+        this.availableContainerSpace -= size;
         priceOption.Parent = currentContainer;
     }
 
@@ -197,7 +213,7 @@ export class ShopController implements OnInit, OnStart {
         if (inventory === undefined || bought === undefined || placed === undefined)
             return;
 
-        this.selected = item;
+        this.selectedItem = item;
 
         identification.TitleLabel.Text = item.name ?? "error";
 
@@ -234,11 +250,12 @@ export class ShopController implements OnInit, OnStart {
 
         PURCHASE_WINDOW.DescriptionFrame.CreatorLabel.Text = `Creator: ${item.creator}`;
 
-        const builder = buildRichText(undefined, item.format(item.description), this.descColor, 21, "Medium");
+        const builder = buildRichText(undefined, item.format(item.description), this.descriptionColor, 21, "Medium");
         builder.appendAll(METADATA_PER_ITEM.get(item)!.builder);
         PURCHASE_WINDOW.DescriptionFrame.DescriptionLabel.Text = builder.toString();
         purchaseButton.Visible = price !== undefined;
         PURCHASE_WINDOW.DescriptionFrame.CreatorLabel.Visible = item.creator !== undefined;
+        this.switchDebounce = tick();
     }
 
     hidePurchaseWindow() {
@@ -246,7 +263,7 @@ export class ShopController implements OnInit, OnStart {
             return false;
 
         this.adaptiveTabController.hideAdaptiveTab();
-        this.selected = undefined;
+        this.selectedItem = undefined;
         return true;
     }
 
@@ -292,26 +309,26 @@ export class ShopController implements OnInit, OnStart {
             let amount: OnoeNum | undefined = undefined;
             let firstCurrency: Currency | undefined;
             let firstAmount: OnoeNum | undefined;
-            const loop = () => {
-                let i = 0;
-                const index = this.indexPerItem.get(item);
+            const getCurrencyAtIndex = () => {
+                let currencyIndex = 0;
+                const index = this.currencyIndexPerItem.get(item);
                 for (const [iCurrency, iAmount] of price.amountPerCurrency) {
-                    if (i === 0) {
+                    if (currencyIndex === 0) {
                         firstCurrency = iCurrency;
                         firstAmount = iAmount;
                     }
-                    if (index === undefined || i === index + 1) {
-                        this.indexPerItem.set(item, i);
+                    if (index === undefined || currencyIndex === index + 1) {
+                        this.currencyIndexPerItem.set(item, currencyIndex);
                         amount = iAmount;
                         return iCurrency;
                     }
-                    ++i;
+                    ++currencyIndex;
                 }
-                this.indexPerItem.set(item, 0);
+                this.currencyIndexPerItem.set(item, 0);
                 amount = firstAmount;
                 return firstCurrency;
             };
-            const currency = loop();
+            const currency = getCurrencyAtIndex();
             if (currency !== undefined) {
                 itemSlot.AmountLabel.Text = CurrencyBundle.getFormatted(currency, amount);
                 TweenService.Create(itemSlot.AmountLabel, new TweenInfo(0.5), { TextColor3: CURRENCY_DETAILS[currency].color }).Play();
@@ -330,9 +347,9 @@ export class ShopController implements OnInit, OnStart {
         });
 
         Packets.inventory.observe(() => {
-            if (this.selected === undefined)
+            if (this.selectedItem === undefined)
                 return;
-            this.refreshPurchaseWindow(this.selected);
+            this.refreshPurchaseWindow(this.selectedItem);
         });
 
         const purchaseButton = PURCHASE_WINDOW.DescriptionFrame.PurchaseContainer.Purchase;
@@ -340,12 +357,12 @@ export class ShopController implements OnInit, OnStart {
             if (!SHOP_GUI.Enabled) {
                 return false;
             }
-            this.uiController.playSound(this.selected !== undefined && Packets.buyItem.invoke(this.selected.id) ? "Coins" : "Error");
+            this.uiController.playSound(this.selectedItem !== undefined && Packets.buyItem.invoke(this.selectedItem.id) ? "Coins" : "Error");
             return true;
         }, "Buy", 1);
 
         this.hotkeysController.setHotkey(SHOP_GUI.ItemList.BuyAll.Button, Enum.KeyCode.O, () => {
-            if (SHOP_GUI.Enabled && this.lastShop !== undefined) {
+            if (SHOP_GUI.Enabled && this.currentShop !== undefined) {
                 const items = new Array<string>();
                 for (const [item, slot] of this.itemSlotsPerItem) {
                     if (slot.Visible === false)
@@ -372,13 +389,13 @@ export class ShopController implements OnInit, OnStart {
     }
 
     onStart() {
-        let t = 0;
+        let elapsedTime = 0;
         RunService.BindToRenderStep("Shop CurrencyBundle Cycle", 1, (dt) => {
-            t += dt;
-            if (t < 2) {
+            elapsedTime += dt;
+            if (elapsedTime < 2) {
                 return;
             }
-            t = 0;
+            elapsedTime = 0;
             this.priceCycle();
         });
 
@@ -386,26 +403,19 @@ export class ShopController implements OnInit, OnStart {
             const purchaseButton = PURCHASE_WINDOW.DescriptionFrame.PurchaseContainer.Purchase;
             const headingLabel = purchaseButton.HeadingLabel;
 
-            while (task.wait(1 / 20)) {
-                const amountLabels = new Array<TextLabel>();
-                for (const descendant of purchaseButton.Price.GetDescendants()) {
-                    if (descendant.Name === "PriceOption") {
-                        amountLabels.push((descendant as typeof ASSETS.ShopWindow.PriceOption).AmountLabel);
-                    }
-                }
-
-                if (amountLabels.size() === 0) {
-                    continue;
-                }
-
+            while (task.wait(1 / 60)) {
                 let affordable = true;
-                for (const amountLabel of amountLabels) {
-                    if (amountLabel.TextColor3 === this.insufficientColor) {
+                for (const descendant of purchaseButton.Price.GetDescendants()) {
+                    if (descendant.Name === "PriceOption" && descendant.GetAttribute("Affordable") === false) {
                         affordable = false;
                         break;
                     }
                 }
 
+                const color = affordable ? Color3.fromRGB(85, 255, 127) : Color3.fromRGB(56, 176, 84);
+                const tweenInfo = new TweenInfo(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out);
+                TweenService.Create(purchaseButton, tweenInfo, { BackgroundColor3: color }).Play();
+                TweenService.Create(purchaseButton.UIStroke, tweenInfo, { Color: color }).Play();
                 headingLabel.Text = affordable ? "PURCHASE" : "UNAFFORDABLE";
             }
         });
@@ -417,15 +427,15 @@ export class ShopController implements OnInit, OnStart {
                     continue;
 
                 const shopHitboxes = CollectionService.GetTagged("Shop");
-                let found = false;
-                for (const hitbox of shopHitboxes) {
-                    if (!hitbox.IsA("Part"))
+                let shopFound = false;
+                for (const shopHitbox of shopHitboxes) {
+                    if (!shopHitbox.IsA("Part"))
                         continue;
-                    const model = hitbox.Parent;
-                    if (model === undefined || model.GetAttribute("Selected"))
+                    const shopModel = shopHitbox.Parent;
+                    if (shopModel === undefined || shopModel.GetAttribute("Selected"))
                         continue;
 
-                    const shopGuiPart = model.FindFirstChild("ShopGuiPart") as Part | undefined;
+                    const shopGuiPart = shopModel.FindFirstChild("ShopGuiPart") as Part | undefined;
                     if (shopGuiPart === undefined)
                         continue;
 
@@ -434,11 +444,11 @@ export class ShopController implements OnInit, OnStart {
                         shopGuiPart.SetAttribute("ClientLoaded", true);
                     }
 
-                    const v3 = hitbox.CFrame.PointToObjectSpace(primaryPart.Position);
-                    if (math.abs(v3.X) > hitbox.Size.X / 2 || math.abs(v3.Z) > hitbox.Size.Z / 2)
+                    const localPosition = shopHitbox.CFrame.PointToObjectSpace(primaryPart.Position);
+                    if (math.abs(localPosition.X) > shopHitbox.Size.X / 2 || math.abs(localPosition.Z) > shopHitbox.Size.Z / 2)
                         continue;
 
-                    const itemId = model.GetAttribute("ItemId") as string | undefined;
+                    const itemId = shopModel.GetAttribute("ItemId") as string | undefined;
                     if (itemId === undefined)
                         continue;
 
@@ -447,11 +457,11 @@ export class ShopController implements OnInit, OnStart {
                         continue;
 
                     this.refreshShop(shopGuiPart, item.trait(Shop));
-                    found = true;
+                    shopFound = true;
                     break;
                 }
 
-                if (found === false) {
+                if (shopFound === false) {
                     this.refreshShop();
                 }
             }

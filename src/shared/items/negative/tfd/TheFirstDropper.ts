@@ -6,7 +6,7 @@ import Item from "shared/item/Item";
 
 export = new Item(script.Name)
     .setName("The First Dropper")
-    .setDescription("Produces droplets. Place this dropper above a furnace to start earning some Funds.")
+    .setDescription("Produces droplets. Place this dropper above a furnace to start earning Funds.")
     .setDifficulty(Difficulty.TheFirstDifficulty)
     .setPrice(new CurrencyBundle().set("Funds", 0), 1)
     .setPrice(new CurrencyBundle().set("Funds", 10), 2)

@@ -5,7 +5,7 @@ import CurrencyBundle from "shared/currency/CurrencyBundle";
 
 export = new Item(script.Name)
     .setName("Basic Cauldron")
-    .setDescription("Able to process droplets for %mul% more Funds, but must be directly dropped into.")
+    .setDescription("Processes droplets for %mul% more Funds, but must be directly dropped into.")
     .setDifficulty(Difficulty.TheLowerGap)
     .setPrice(new CurrencyBundle().set("Funds", 5000), 1)
     .addPlaceableArea("BarrenIslands")

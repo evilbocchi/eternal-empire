@@ -1,0 +1,30 @@
+import Difficulty from "@antivivi/jjt-difficulties";
+import CurrencyBundle from "shared/currency/CurrencyBundle";
+import Item from "shared/item/Item";
+import Damager from "shared/item/traits/special/Damager";
+import Upgrader from "shared/item/traits/Upgrader";
+import CorruptedGrass from "shared/items/excavation/harvestable/CorruptedGrass";
+import EnchantedGrass from "shared/items/excavation/harvestable/EnchantedGrass";
+import Jade from "shared/items/excavation/Jade";
+
+export = new Item(script.Name)
+    .setName("Moss Upgrader")
+    .setDescription(
+        `%add% but deals %hp_add% damage to droplets passing through this mossy mess.`
+    )
+    .setDifficulty(Difficulty.Joyful)
+    .setPrice(new CurrencyBundle().set("Skill", 1), 1)
+    .setRequiredItemAmount(EnchantedGrass, 20)
+    .setRequiredItemAmount(CorruptedGrass, 5)
+    .setRequiredItemAmount(Jade, 1)
+    .setCreator("supergirlygamer8o")
+    .addPlaceableArea("BarrenIslands", "SlamoVillage")
+    .persists()
+
+    .trait(Upgrader)
+    .setAdd(new CurrencyBundle().set("Dark Matter", 987654321))
+
+    .trait(Damager)
+    .setDamage(80)
+
+    .exit();

@@ -5,7 +5,7 @@ import CurrencyBundle from "shared/currency/CurrencyBundle";
 
 export = new Item(script.Name)
     .setName("The First Furnace")
-    .setDescription("Processes droplets, turning them into liquid currency.")
+    .setDescription("Processes droplets, converting them into liquid currency.")
     .setDifficulty(Difficulty.TheFirstDifficulty)
     .setPrice(new CurrencyBundle().set("Funds", 0), 1)
     .addPlaceableArea("BarrenIslands")

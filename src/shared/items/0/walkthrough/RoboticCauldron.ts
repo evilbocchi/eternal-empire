@@ -9,8 +9,9 @@ import FormulaBundled from "shared/item/traits/special/FormulaBundled";
 export = new Item(script.Name)
     .setName("Robotic Cauldron")
     .setDescription(`When Move-Your-Droplets™ tried branching out from producing conveyors, they experimented with all sorts of different machinery.
-        Their final creation before going back to their ways was this abomination of a cauldron on legs.
-        Scales with Power, maxing out at %cap%. Also provides a flat %flat% boost.`)
+Their final creation before going back to their ways was this abomination of a cauldron on legs.
+Scales with Power, maxing out at %cap%. Also provides a flat %flat% boost.`
+    )
     .setDifficulty(Difficulty.Walkthrough)
     .setPrice(new CurrencyBundle().set("Funds", 600e33).set("Power", 6e18), 1)
     .addPlaceableArea("BarrenIslands")
