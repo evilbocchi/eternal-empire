@@ -10,7 +10,7 @@ export = new Item(script.Name)
     .setPrice(new CurrencyBundle().set("Skill", 100000), 1)
     .addPlaceableArea("SlamoVillage")
 
-    .setDrain(new CurrencyBundle().set("Skill", 3))
+    .setDrain(new CurrencyBundle().set("Skill", 50))
 
     .trait(InstantiationDelimiter)
     .setDropletIncrease(15)

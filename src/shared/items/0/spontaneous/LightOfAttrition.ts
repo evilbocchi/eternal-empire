@@ -6,9 +6,11 @@ import Furnace from "shared/item/traits/Furnace";
 
 export = new Item(script.Name)
     .setName("Light of Attrition")
-    .setDescription(`A self-sustaining light that only concerns itself with sucking the life out of anything it touches. Processes droplets at %mul% value.`)
+    .setDescription(`A self-sustaining light that only concerns itself with sucking the life out of anything it touches.
+Processes droplets at %mul% value.`
+    )
     .setDifficulty(Difficulty.Spontaneous)
-    .setPrice(new CurrencyBundle().set("Funds", 600e45).set("Bitcoin", ), 1)
+    .setPrice(new CurrencyBundle().set("Funds", 100e42).set("Bitcoin", 1e12), 1)
     .addPlaceableArea("BarrenIslands")
     .setCreator("sanjay2133")
 

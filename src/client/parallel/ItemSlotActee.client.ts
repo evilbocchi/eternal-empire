@@ -29,8 +29,17 @@ for (const [id, item] of Items.itemsPerId) {
     if (model === undefined)
         continue;
     model.PivotTo(new CFrame(0, -500, 0));
-    const [pos, size] = model.GetBoundingBox();
-    relsPerItem.set(id, [pos.Position.sub(model.GetPivot().Position), (math.max(size.X, size.Y, size.Z) * 0.8) + 1]);
+    let cframe: CFrame;
+    let size: Vector3;
+    const hitbox = model.PrimaryPart;
+    if (hitbox !== undefined && hitbox.HasTag("Bounding")) {
+        cframe = hitbox.CFrame;
+        size = hitbox.Size;
+    }
+    else {
+        [cframe, size] = model.GetBoundingBox();
+    }
+    relsPerItem.set(id, [cframe.Position.sub(model.GetPivot().Position), (math.max(size.X, size.Y, size.Z) * 0.8) + 1]);
 }
 
 

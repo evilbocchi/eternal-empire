@@ -17,6 +17,7 @@ export = new Item(script.Name)
     .setDroplet(Droplet.ShatteredDroplet)
 
     .trait(Furnace)
+    .setMul(CurrencyBundle.ones().mul(0))
     .exit()
 
     .onLoad((model) => {

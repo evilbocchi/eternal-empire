@@ -14,14 +14,17 @@ import TheFirstGenerator from "shared/items/negative/friendliness/TheFirstGenera
 import PeripheralGenerator from "shared/items/negative/reversedperipherality/PeripheralGenerator";
 import UpgradedGenerator from "shared/items/negative/trueease/UpgradedGenerator";
 
-const amt = new OnoeNum(100e12);
+const amt = new OnoeNum(1e18);
 const base = new CurrencyBundle().set("Power", amt);
 
 export = new Item(script.Name)
     .setName("Octahedral Temple")
-    .setDescription("The shape for optimal power generation. It is said that this temple was built by worshippers of the octahedron as a symbol of balance and harmony. Produces %gain%.")
+    .setDescription(`The shape for optimal power generation. It is said that this temple was built by worshippers of the octahedron as a symbol of balance and harmony.
+Now, it has been reduced to a mere generator, corrupted by the greed of those who seek to harness its power.
+Produces %gain%, this amount increasing with Skill.`
+    )
     .setDifficulty(Difficulty.Spontaneous)
-    .setPrice(new CurrencyBundle().set("Funds", 55e42), 1)
+    .setPrice(new CurrencyBundle().set("Funds", 2e45).set("Power", 1e30).set("Purifier Clicks", 1e30), 1)
     .setRequiredItemAmount(TheFirstGenerator, TheFirstGenerator.pricePerIteration.size())
     .setRequiredItemAmount(UpgradedGenerator, UpgradedGenerator.pricePerIteration.size())
     .setRequiredItemAmount(HandCrankGenerator, HandCrankGenerator.pricePerIteration.size())

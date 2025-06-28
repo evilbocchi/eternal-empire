@@ -24,8 +24,8 @@ const Softcaps = {
     },
     Skill: {
         div: {
-            starts: new OnoeNum(10000),
-            formula: (amount: OnoeNum) => amount.div(10000).pow(0.2),
+            starts: new OnoeNum(100000),
+            formula: (amount: OnoeNum) => amount.div(100000).pow(0.2),
         },
         recippow: {
             starts: new OnoeNum(1e42),

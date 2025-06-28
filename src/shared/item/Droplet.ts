@@ -2,14 +2,14 @@
 //!optimize 2
 
 import Difficulty from "@antivivi/jjt-difficulties";
+import { getAllInstanceInfo, getInstanceInfo } from "@antivivi/vrldk";
 import { Debris, RunService, TweenService, Workspace } from "@rbxts/services";
 import { IS_SERVER } from "shared/constants";
-import { ASSETS } from "shared/GameAssets";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
+import { ASSETS } from "shared/GameAssets";
+import { GameUtils } from "shared/item/ItemUtils";
 import Operative from "shared/item/traits/Operative";
 import Packets from "shared/Packets";
-import { getAllInstanceInfo, getInstanceInfo } from "@antivivi/vrldk";
-import { GameUtils } from "shared/item/ItemUtils";
 
 declare global {
     interface InstanceInfo {
@@ -564,6 +564,18 @@ export default class Droplet {
             .setValue(new CurrencyBundle().set("Bitcoin", 8))
     );
 
+    static SkillestDroplet = Droplet.registerDroplet(
+        new Droplet("SkillestDroplet")
+            .setModel(() => {
+                const droplet = new Instance("Part");
+                droplet.Size = new Vector3(0.875, 0.875, 0.875);
+                droplet.Color = Difficulty.Unlosable.color!;
+                droplet.Material = Enum.Material.Slate;
+                return droplet;
+            })
+            .setValue(new CurrencyBundle().set("Skill", 0.12))
+    );
+
     static LiquidesterFundsDroplet = Droplet.registerDroplet(
         new Droplet("LiquidesterFundsDroplet")
             .setModel(() => {
@@ -609,7 +621,7 @@ export default class Droplet {
                 droplet.Material = Enum.Material.Ice;
                 return droplet;
             })
-            .setValue(new CurrencyBundle().set("Bitcoin", 16).set("Skill", 0.04))
+            .setValue(new CurrencyBundle().set("Bitcoin", 16).set("Skill", 0.15))
     );
 
     static SphericalDroplet = Droplet.registerDroplet(
@@ -635,6 +647,18 @@ export default class Droplet {
                 return droplet;
             })
             .setValue(new CurrencyBundle().set("Power", 200000))
+    );
+
+    static TotalityDroplet = Droplet.registerDroplet(
+        new Droplet("TotalityDroplet")
+            .setModel(() => {
+                const droplet = new Instance("Part");
+                droplet.Size = new Vector3(2, 2, 2);
+                droplet.Color = Difficulty.Spontaneous.color!;
+                droplet.Material = Enum.Material.Neon;
+                return droplet;
+            })
+            .setValue(new CurrencyBundle().set("Funds", 10000000).set("Power", 10000000).set("Skill", 1))
     );
 
     /**

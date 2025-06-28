@@ -8,7 +8,7 @@ import Iron from "shared/items/excavation/Iron";
 
 export = new Item(script.Name)
     .setName("Sacred Baptism")
-    .setDescription("That's right. You need to baptise your droplets to make them stronger. %mul% droplet value.")
+    .setDescription("That's right. You need to baptise your droplets to make them stronger. %add% droplet value.")
     .setDifficulty(Difficulty.Sleepful)
     .setPrice(new CurrencyBundle().set("Funds", 3e27).set("Skill", 10), 1)
     .setRequiredItemAmount(Iron, 10)
@@ -17,7 +17,7 @@ export = new Item(script.Name)
     .setCreator("CoPKaDT")
 
     .trait(Upgrader)
-    .setMul(new CurrencyBundle().set("Funds", 25))
+    .setAdd(new CurrencyBundle().set("Funds", 250000))
 
     .trait(Conveyor)
     .setSpeed(4)

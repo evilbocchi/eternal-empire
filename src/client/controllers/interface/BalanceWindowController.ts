@@ -1,7 +1,7 @@
 import { BaseOnoeNum, OnoeNum } from "@antivivi/serikanum";
 import { paintObjects } from "@antivivi/vrldk";
 import { Controller, OnInit } from "@flamework/core";
-import { Debris, TweenService } from "@rbxts/services";
+import { Debris, TweenService, Workspace } from "@rbxts/services";
 import StringBuilder from "@rbxts/stringbuilder";
 import { HotkeysController } from "client/controllers/HotkeysController";
 import { INTERFACE, UIController } from "client/controllers/UIController";
@@ -11,6 +11,8 @@ import Packets from "shared/Packets";
 import Softcaps, { performSoftcap } from "shared/Softcaps";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import { CURRENCY_DETAILS } from "shared/currency/CurrencyDetails";
+import { DROPLET_STORAGE } from "shared/item/Droplet";
+import ItemUtils from "shared/item/ItemUtils";
 
 declare global {
     type BalanceOption = Frame & {
@@ -36,6 +38,12 @@ declare global {
     interface Assets {
         BalanceWindow: Folder & {
             BalanceOption: BalanceOption;
+        };
+        CurrencyGain: Frame & {
+            ImageLabel: ImageLabel;
+            TextLabel: TextLabel & {
+                UIStroke: UIStroke;
+            };
         };
     }
 }
@@ -213,6 +221,68 @@ export class BalanceWindowController implements OnInit {
         }, label, priority);
     }
 
+    showCurrencyGain(at: Vector3, amountPerCurrency: Map<Currency, BaseOnoeNum>) {
+        if (!Packets.settings.get()?.CurrencyGainAnimation) {
+            const part = new Instance("Part");
+            part.Size = new Vector3(1, 1, 1);
+            part.Position = at;
+            part.Anchored = true;
+            part.CanCollide = false;
+            part.Transparency = 1;
+            part.Parent = Workspace;
+            ItemUtils.loadDropletGui(amountPerCurrency).Parent = part;
+            Debris.AddItem(part, 2);
+            return;
+        }
+
+        const camera = Workspace.CurrentCamera;
+        if (camera === undefined)
+            return;
+        if (at.sub(camera.CFrame.Position).Magnitude > 50) {
+            return;
+        }
+        const [location, withinBounds] = camera.WorldToScreenPoint(at);
+        if (!withinBounds)
+            return;
+
+        const tweenInfo = new TweenInfo(1, Enum.EasingStyle.Quart, Enum.EasingDirection.In);
+        const ySize = ASSETS.CurrencyGain.AbsoluteSize.Y;
+        let i = 0;
+        const qualityLevel = ItemUtils.UserGameSettings!.SavedQualityLevel;
+        for (const [currency, amount] of amountPerCurrency) {
+            const details = CURRENCY_DETAILS[currency];
+            if (details === undefined)
+                continue;
+            const currencyOption = this.getCurrencyOption(currency);
+            if (!currencyOption.Visible)
+                continue;
+
+            const gainWindow = ASSETS.CurrencyGain.Clone();
+            gainWindow.ImageLabel.Image = "rbxassetid://" + details.image;
+            gainWindow.TextLabel.Text = this.format(currency, new OnoeNum(amount));
+            gainWindow.TextLabel.TextColor3 = details.color;
+            const elementTo = currencyOption.ImageLabel;
+            const destination = elementTo.AbsolutePosition.sub(INTERFACE.AbsolutePosition).add(elementTo.AbsoluteSize.div(2));
+
+            TweenService.Create(gainWindow, tweenInfo, {
+                Position: UDim2.fromOffset(destination.X, destination.Y),
+                Rotation: gainWindow.Rotation + math.random(-45, 45),
+            }).Play();
+
+            if (qualityLevel.Value > 5) {
+                TweenService.Create(gainWindow.ImageLabel, tweenInfo, { ImageTransparency: 1 }).Play();
+                TweenService.Create(gainWindow.TextLabel, tweenInfo, { TextTransparency: 1 }).Play();
+                TweenService.Create(gainWindow.TextLabel.UIStroke, tweenInfo, { Transparency: 1 }).Play();
+            }
+
+            Debris.AddItem(gainWindow, 1);
+            gainWindow.Parent = INTERFACE;
+            const size = gainWindow.AbsoluteSize;
+            gainWindow.Position = UDim2.fromOffset(location.X - (size.X / 2), location.Y + (i * ySize) + (size.Y / 2));
+            i++;
+        }
+    }
+
     format(currency: Currency, amount: OnoeNum) {
         if (this.isFormatCurrencies)
             return CurrencyBundle.getFormatted(currency, amount, true);
@@ -221,6 +291,10 @@ export class BalanceWindowController implements OnInit {
     }
 
     onInit() {
+        ItemUtils.showCurrencyGain = (at: Vector3, amountPerCurrency: Map<Currency, BaseOnoeNum>) => {
+            this.showCurrencyGain(at, amountPerCurrency);
+        };
+
         this.loadNavigationOption(BALANCE_WINDOW.Balances.NavigationOptions.Left, Enum.KeyCode.Z, "Previous Page", () => {
             if (this.page === 1) {
                 this.page = this.maxPage;
@@ -248,6 +322,14 @@ export class BalanceWindowController implements OnInit {
             for (const [currency, diff] of differencePerCurrency) {
                 this.showDifference(currency, diff);
             }
+        });
+
+        Packets.dropletBurnt.connect((dropletModelId, amountPerCurrency) => {
+            const dropletModel = DROPLET_STORAGE.FindFirstChild(dropletModelId) as BasePart | undefined;
+            if (dropletModel === undefined) {
+                return;
+            }
+            this.showCurrencyGain(dropletModel.Position, amountPerCurrency);
         });
 
         Packets.revenue.observe((revenue) => {

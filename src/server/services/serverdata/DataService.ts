@@ -124,6 +124,7 @@ export const PlayerProfileTemplate = {
         hotkeys: {} as { [key: string]: number; },
         ResetAnimation: true,
         BuildAnimation: true,
+        CurrencyGainAnimation: true,
         FormatCurrencies: true,
         Music: true,
         SoundEffects: true,

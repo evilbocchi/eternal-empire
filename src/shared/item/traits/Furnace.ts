@@ -8,6 +8,7 @@ import Packets from "shared/Packets";
 import { getAllInstanceInfo, getInstanceInfo } from "@antivivi/vrldk";
 import { GameUtils } from "shared/item/ItemUtils";
 import { findBaseParts } from "@antivivi/vrldk";
+import { OnoeNum } from "@antivivi/serikanum";
 
 declare global {
     interface ItemTraits {
@@ -17,6 +18,8 @@ declare global {
         Incinerated?: boolean;
     }
 }
+
+const ZERO = new OnoeNum(0);
 
 export default class Furnace extends Operative {
 
@@ -58,6 +61,10 @@ export default class Furnace extends Operative {
                         result = result.mul(varianceResult);
                     }
                     CurrencyService.incrementAll(result.amountPerCurrency);
+                }
+                for (const [currency, amount] of result.amountPerCurrency) {
+                    if (amount.equals(ZERO))
+                        result.amountPerCurrency.delete(currency);
                 }
                 Packets.dropletBurnt.fireAll(droplet.Name, result.amountPerCurrency);
                 instanceInfo.OnProcessed?.(result, worth, droplet);

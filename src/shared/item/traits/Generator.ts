@@ -82,7 +82,7 @@ export default class Generator extends Boostable {
         item.onLoad((model) => Generator.load(model, this));
         item.onClientLoad((model) => {
             const remoteEvent = model.WaitForChild("UnreliableRemoteEvent") as UnreliableRemoteEvent;
-            const part = model.FindFirstChild("Marker");
+            const part = (model.FindFirstChild("Marker") ?? model.PrimaryPart) as BasePart;
             const positions = new Map<BasePart, Vector3>();
             for (const part of model.GetDescendants()) {
                 if (!part.IsA("BasePart") || part.Name === "Base" || part.Parent!.Name === "Base")
@@ -92,12 +92,11 @@ export default class Generator extends Boostable {
             const tween1 = new TweenInfo(0.1, Enum.EasingStyle.Quad, Enum.EasingDirection.In);
             const tween2 = new TweenInfo(0.4, Enum.EasingStyle.Quad, Enum.EasingDirection.Out);
 
-
             remoteEvent.OnClientEvent.Connect((amountPerCurrency?: CurrencyMap) => {
                 if (amountPerCurrency === undefined)
                     return;
-                const gui = ItemUtils.loadDropletGui(amountPerCurrency);
-                gui.Parent = part ?? model.PrimaryPart;
+                ItemUtils.showCurrencyGain?.(part.Position, amountPerCurrency);
+
                 if (ItemUtils.UserGameSettings!.SavedQualityLevel.Value > 5) {
                     for (const [part, position] of positions) {
                         TweenService.Create(part, tween1, {

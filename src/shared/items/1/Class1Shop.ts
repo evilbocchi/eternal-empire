@@ -3,6 +3,7 @@ import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
 import Shop from "shared/item/traits/Shop";
 import DropletCoaster from "shared/items/1/coasterifying/DropletCoaster";
+import CompressedObbyUpgrader from "shared/items/1/dosomething/CompressedObbyUpgrader";
 import SilentMemory from "shared/items/1/dosomething/SilentMemory";
 import AbruptBridge from "shared/items/1/joyful/AbruptBridge";
 import AntiGravityConverter from "shared/items/1/joyful/AntiGravityConverter";
@@ -37,6 +38,7 @@ export = new Item(script.Name)
         TheAmplified,
 
         SilentMemory,
+        CompressedObbyUpgrader,
 
         Baseplate,
 

@@ -2,7 +2,6 @@ import { OnoeNum } from "@antivivi/serikanum";
 import { getAllInstanceInfo, setInstanceInfo } from "@antivivi/vrldk";
 import { AREAS } from "shared/Area";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
-import { CURRENCY_DETAILS } from "shared/currency/CurrencyDetails";
 import Item from "shared/item/Item";
 import { GameUtils } from "shared/item/ItemUtils";
 import Dropper from "shared/item/traits/Dropper";
@@ -112,7 +111,10 @@ export default class Condenser extends ItemTrait {
             pricePerDroplet.forEach((price) => {
                 for (const [currency, amount] of pairs(price.amountPerCurrency)) {
                     const progress = current.get(currency)?.div(amount).revert() ?? 0;
-                    const bar = surfaceGui.WaitForChild(currency + "Bar");
+                    const bar = surfaceGui.WaitForChild(currency + "Bar", 1);
+                    if (bar === undefined) {
+                        return;
+                    }
                     (bar.WaitForChild("Fill") as Frame).Size = new UDim2(math.min(progress, 1), 0, 1, 0);
                     (bar.WaitForChild("PercentageLabel") as TextLabel).Text = math.floor(progress * 100) + "%";
                 }
@@ -174,6 +176,7 @@ export default class Condenser extends ItemTrait {
         const furnace = item.trait(Furnace);
         const dropper = item.trait(Dropper);
         furnace.acceptsGlobalBoosts(false);
+        furnace.setMul(CurrencyBundle.ones().mul(0));
         dropper.dropRate = 0;
         item.onLoad((model) => Condenser.load(model, this));
     }
@@ -190,15 +193,9 @@ export default class Condenser extends ItemTrait {
     }
 
     addDroplets(...droplets: Droplet[]) {
-        const furnace = this.item.trait(Furnace);
         for (const droplet of droplets) {
             this.droplets.push(droplet);
             this.totalValue = this.totalValue.add(droplet.value);
-        }
-        for (const [currency, _] of pairs(CURRENCY_DETAILS)) {
-            const inTotalValue = this.totalValue.get(currency);
-            const isCondensed = inTotalValue !== undefined && inTotalValue.moreThan(0);
-            furnace.setMul((furnace.mul ?? new CurrencyBundle()).set(currency, isCondensed ? 0 : 1));
         }
         return this;
     }

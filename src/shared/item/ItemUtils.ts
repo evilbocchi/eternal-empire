@@ -96,6 +96,8 @@ namespace ItemUtils {
         return dropletGui;
     };
 
+    export let showCurrencyGain: ((at: Vector3, amountPerCurrency: Map<Currency, BaseOnoeNum>) => void) | undefined = undefined;
+
     export const applyImpulse = (part: BasePart, impulse: Vector3) => {
         const networkOwner = part.GetNetworkOwner();
         if (networkOwner !== undefined)

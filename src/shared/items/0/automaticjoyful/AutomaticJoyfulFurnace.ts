@@ -15,7 +15,7 @@ export = new Item(script.Name)
     .setPrice(new CurrencyBundle().set("Purifier Clicks", 1e21), 1)
     .addPlaceableArea("BarrenIslands")
 
-    .setFormula(new Formula().add(1).log(5).mul(16.4).add(5))
+    .setFormula(new Formula().add(1).log(5).mul(32.8).add(5))
     .setFormulaX("power")
     .setFormulaXCap(new CurrencyBundle().set("Power", 10e24))
 

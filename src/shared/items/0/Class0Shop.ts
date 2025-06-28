@@ -68,7 +68,9 @@ import DropletShatterer from "shared/items/0/shatteredbabass/DropletShatterer";
 import ShatteredBabass from "shared/items/0/shatteredbabass/ShatteredBabass";
 import AnotherWorld from "shared/items/0/sleepful/AnotherWorld";
 import HeavenGarden from "shared/items/0/sleepful/HeavenGarden";
+import CruelBlankEssence from "shared/items/0/spontaneous/CruelBlankEssence";
 import EmeraldProcessor from "shared/items/0/spontaneous/EmeraldProcessor";
+import FocalPoint from "shared/items/0/spontaneous/FocalPoint";
 import LightOfAttrition from "shared/items/0/spontaneous/LightOfAttrition";
 import OctahedralTemple from "shared/items/0/spontaneous/OctahedralTemple";
 import SpontaneousRefiner from "shared/items/0/spontaneous/SpontaneousRefiner";
@@ -78,6 +80,7 @@ import ReinforcedCondenser from "shared/items/0/unlosable/ReinforcedCondenser";
 import ReinforcedTesseract from "shared/items/0/unlosable/ReinforcedTesseract";
 import RingOfFortune from "shared/items/0/unlosable/RingOfFortune";
 import SexdecupleCoinMiner from "shared/items/0/unlosable/SexdecupleCoinMiner";
+import StrongSkillFactory from "shared/items/0/unlosable/StrongSkillFactory";
 import TimelostDesert from "shared/items/0/vibeness/TimelostDesert";
 import VibePillar from "shared/items/0/vibeness/VibePillar";
 import AdvancedTesseract from "shared/items/0/vintage/AdvancedTesseract";
@@ -207,6 +210,7 @@ export = new Item(script.Name)
         SexdecupleCoinMiner,
         ReinforcedTesseract,
         InstantiationDelimiterV,
+        StrongSkillFactory,
 
         ShatteredBabass,
         DropletShatterer,
@@ -230,8 +234,10 @@ export = new Item(script.Name)
         EmeraldProcessor,
         XLayerAgglomerate,
         SpontaneousRefiner,
+        LightOfAttrition,
+        FocalPoint,
         OctahedralTemple,
-        LightOfAttrition
+        CruelBlankEssence
     ])
 
     .exit();

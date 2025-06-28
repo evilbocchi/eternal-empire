@@ -1,17 +1,17 @@
 import Difficulty from "@antivivi/jjt-difficulties";
 import { OnoeNum } from "@antivivi/serikanum";
+import { Streaming } from "@antivivi/vrldk";
 import PartCacheModule from "@rbxts/partcache";
 import { PartCache } from "@rbxts/partcache/out/class";
 import { TweenService, Workspace } from "@rbxts/services";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
+import ItemUtils, { GameUtils } from "shared/item/ItemUtils";
 import Operative from "shared/item/traits/Operative";
 import Upgrader from "shared/item/traits/Upgrader";
 import Clickable from "shared/item/traits/special/Clickable";
 import Manumatic from "shared/item/traits/special/Manumatic";
 import NamedUpgrades from "shared/namedupgrade/NamedUpgrades";
-import { GameUtils } from "shared/item/ItemUtils";
-import { Streaming } from "@antivivi/vrldk";
 
 export = new Item(script.Name)
     .setName("Awesome Manumatic Purifier")
@@ -59,7 +59,6 @@ export = new Item(script.Name)
 
         // Fortunately this is a singleton
         clickable.setOnClick((_model, _item, player, value) => {
-            fireClickedRemote();
             if (player !== undefined) {
                 player.SetAttribute("RawPurifierClicks", (player.GetAttribute("RawPurifierClicks") as number ?? 0) + 1);
             }
@@ -67,7 +66,9 @@ export = new Item(script.Name)
             [totalAdd, totalMul, totalPow] = RevenueService.applyGlobal(totalAdd, totalMul, totalPow, PURIFIER_UPGRADES);
             const valuePrice = new CurrencyBundle().set("Purifier Clicks", cpc.mul(value));
             const worth = Operative.coalesce(valuePrice, totalAdd, totalMul, totalPow);
-            CurrencyService.incrementAll(RevenueService.performSoftcaps(worth.amountPerCurrency));
+            const final = RevenueService.performSoftcaps(worth.amountPerCurrency);
+            CurrencyService.incrementAll(final);
+            fireClickedRemote(final);
             update();
         });
         item.repeat(model, () => update(), 0.5);
@@ -80,7 +81,8 @@ export = new Item(script.Name)
         let shadowSize: Vector3;
         let newSize: Vector3;
 
-        Streaming.onStreamableRemote(model, () => {
+        Streaming.onStreamableRemote(model, (amountPerCurrency) => {
+            ItemUtils.showCurrencyGain?.(model.PrimaryPart!.Position, amountPerCurrency);
             model.PrimaryPart!.FindFirstChildOfClass("Sound")?.Play();
 
             if (shadow === undefined) {

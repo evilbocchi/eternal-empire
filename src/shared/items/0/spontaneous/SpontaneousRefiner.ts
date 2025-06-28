@@ -49,9 +49,11 @@ totalDamage -= 10;
 
 const SpontaneousRefiner = new Item(script.Name)
     .setName("Spontaneous Refiner")
-    .setDescription("Suddenly, profit. %add%, %mul%, %hp_add%.")
+    .setDescription(`Suddenly, profit.
+%add%, %mul%, %hp_add%.`
+    )
     .setDifficulty(Difficulty.Spontaneous)
-    .setPrice(new CurrencyBundle().set("Funds", 55e42), 1)
+    .setPrice(new CurrencyBundle().set("Funds", 20e42).set("Power", 5e27), 1)
 
     .addPlaceableArea("BarrenIslands")
     .setCreator("simple13579")
