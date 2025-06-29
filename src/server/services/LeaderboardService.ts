@@ -1,3 +1,15 @@
+/**
+ * @fileoverview LeaderboardService - Manages all leaderboard logic and display in the game.
+ *
+ * This service handles:
+ * - Updating and displaying leaderboards for time played, donations, and all currencies
+ * - Interfacing with DataStores for persistent leaderboard data
+ * - Resetting and updating leaderboard UI elements
+ * - Filtering banned users and handling debug/test modes
+ *
+ * @since 1.0.0
+ */
+
 import { OnoeNum } from "@antivivi/serikanum";
 import { OnStart, Service } from "@flamework/core";
 import { DataStoreService, Players, RunService } from "@rbxts/services";
@@ -28,19 +40,37 @@ declare global {
     }
 }
 
+/**
+ * Service that manages all leaderboard logic, including updating DataStores and UI.
+ */
 @Service()
 export class LeaderboardService implements OnStart {
-
+    /** OrderedDataStore for total time leaderboard. */
     totalTimeStore = DataStoreService.GetOrderedDataStore("TotalTime1");
+    /** OrderedDataStore for donations leaderboard. */
     donatedStore = DataStoreService.GetOrderedDataStore("Donated");
+    /** List of banned user IDs (excluded from leaderboards). */
     banned = [1900444407];
+    /** Debug flag for verbose output and studio testing. */
     debug = false;
+    /** Set of DataStores that have been flushed (for deletion). */
     flushed = new Set<OrderedDataStore>();
 
+    /**
+     * Constructs the LeaderboardService.
+     * @param dataService DataService for accessing empire data
+     * @param leaderstatsService LeaderstatsService for player stats
+     */
     constructor(private dataService: DataService, private leaderstatsService: LeaderstatsService) {
-
     }
 
+    /**
+     * Creates a leaderboard slot UI element for a given place, name, and amount.
+     * @param place The leaderboard position
+     * @param name The player's name
+     * @param amount The leaderboard value
+     * @returns The leaderboard slot UI element
+     */
     getLeaderboardSlot(place: number, name: string, amount: number) {
         const lbSlot = ASSETS.LeaderboardSlot.Clone();
         lbSlot.ServerLabel.Text = name;
@@ -50,6 +80,10 @@ export class LeaderboardService implements OnStart {
         return lbSlot;
     }
 
+    /**
+     * Removes all leaderboard slot UI elements from a leaderboard.
+     * @param leaderboard The leaderboard model
+     */
     resetLeaderboard(leaderboard: Leaderboard) {
         for (const l of leaderboard.GuiPart.SurfaceGui.Display.GetChildren()) {
             if (l.Name === "LeaderboardSlot") {
@@ -58,6 +92,11 @@ export class LeaderboardService implements OnStart {
         }
     }
 
+    /**
+     * Deletes an entry from a DataStore, optionally by name.
+     * @param store The OrderedDataStore
+     * @param name The name to delete (optional)
+     */
     deleteEntry(store: OrderedDataStore, name?: string) {
         if (!this.flushed.has(store)) {
             task.spawn(() => {
@@ -73,6 +112,13 @@ export class LeaderboardService implements OnStart {
             store.RemoveAsync(name);
     }
 
+    /**
+     * Updates a leaderboard DataStore with a new value, or removes it if amount is undefined.
+     * @param store The OrderedDataStore
+     * @param name The name to update
+     * @param amount The value to set (optional)
+     * @returns The current page of sorted leaderboard data
+     */
     updateLeaderboardStore(store: OrderedDataStore, name?: string, amount?: number) {
         if (name !== undefined && (!RunService.IsStudio() || this.debug === true)) {
             if (amount === undefined)
@@ -84,6 +130,11 @@ export class LeaderboardService implements OnStart {
         return data.GetCurrentPage();
     }
 
+    /**
+     * Updates the leaderboard UI with new data.
+     * @param leaderboard The leaderboard model
+     * @param lbDatas The leaderboard data array
+     */
     updateLeaderboard(leaderboard: Leaderboard, lbDatas: { key: string, value: unknown; }[]) {
         this.resetLeaderboard(leaderboard);
         let i = 1;
@@ -99,6 +150,10 @@ export class LeaderboardService implements OnStart {
         }
     }
 
+    /**
+     * Updates all leaderboards, optionally deleting entries.
+     * @param deleteEntries The name to delete (optional)
+     */
     updateLeaderboards(deleteEntries?: string) {
         const profile = this.dataService.empireData;
         if (this.banned.includes(profile.owner)) {
@@ -138,6 +193,9 @@ export class LeaderboardService implements OnStart {
             }));
     }
 
+    /**
+     * Starts the leaderboard update loop and initializes leaderboards.
+     */
     onStart() {
         if (Sandbox.getEnabled())
             return;

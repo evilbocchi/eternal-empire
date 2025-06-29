@@ -1,10 +1,9 @@
 /**
- * @fileoverview EyeContactService - Handles NPC head tracking and eye contact with nearby players/characters.
+ * @fileoverview EyeContactService - Handles NPC eye contact and gaze tracking for immersion.
  *
- * This service manages:
- * - Tracking NPC head/neck joints for eye contact
- * - Continuously updating NPC neck orientation to look at the closest player/character
- * - Resetting neck orientation when no target is nearby
+ * This service provides:
+ * - NPC eye contact logic
+ * - Gaze tracking and player focus
  *
  * @since 1.0.0
  */
@@ -38,7 +37,7 @@ interface TrackingDetails {
 };
 
 /**
- * Service that manages NPC eye contact by tracking head and neck joints.
+ * Service that manages NPC eye contact and gaze tracking for immersive interactions.
  * Updates neck orientation to look at the closest player/character within a specified distance.
  */
 @Service()

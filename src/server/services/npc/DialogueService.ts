@@ -1,3 +1,18 @@
+/**
+ * @fileoverview DialogueService - Manages NPC dialogue, interactions, and cutscenes.
+ *
+ * This service provides:
+ * - Dialogue system for NPCs
+ * - Cutscene and animation management
+ * - Player interaction with dialogue prompts
+ *
+ * @since 1.0.0
+ */
+
+/**
+ * Service that manages all NPC dialogue, cutscenes, and related player interactions.
+ */
+
 import Signal from "@antivivi/lemon-signal";
 import { loadAnimation } from "@antivivi/vrldk";
 import { OnInit, Service } from "@flamework/core";
@@ -49,7 +64,7 @@ export class DialogueService implements OnInit {
      * Map of NPC to their model instance.
      */
     private readonly modelPerNPC = new Map<NPC, Model>();
-    
+
     /**
      * Map of NPC to their currently running animations.
      */
