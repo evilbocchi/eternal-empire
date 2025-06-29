@@ -21,6 +21,7 @@ export = new Item(script.Name)
     .setName("Octahedral Temple")
     .setDescription(`The shape for optimal power generation. It is said that this temple was built by worshippers of the octahedron as a symbol of balance and harmony.
 Now, it has been reduced to a mere generator, corrupted by the greed of those who seek to harness its power.
+
 Produces %gain%, this amount increasing with Skill.`
     )
     .setDifficulty(Difficulty.Spontaneous)

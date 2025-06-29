@@ -9,7 +9,6 @@ export = new Item(script.Name)
     .setDifficulty(Difficulty.Winsome)
     .setPrice(new CurrencyBundle().set("Dark Matter", 36000), 1)
     .addPlaceableArea("BarrenIslands")
-    .persists("Skillification")
 
     .trait(Furnace)
     .setMul(new CurrencyBundle().set("Purifier Clicks", 26))

@@ -73,6 +73,7 @@ import EmeraldProcessor from "shared/items/0/spontaneous/EmeraldProcessor";
 import FocalPoint from "shared/items/0/spontaneous/FocalPoint";
 import LightOfAttrition from "shared/items/0/spontaneous/LightOfAttrition";
 import OctahedralTemple from "shared/items/0/spontaneous/OctahedralTemple";
+import Solitude from "shared/items/0/spontaneous/Solitude";
 import SpontaneousRefiner from "shared/items/0/spontaneous/SpontaneousRefiner";
 import XLayerAgglomerate from "shared/items/0/spontaneous/XLayerAgglomerate";
 import InstantiationDelimiterV from "shared/items/0/unlosable/InstantiationDelimiterV";
@@ -237,7 +238,8 @@ export = new Item(script.Name)
         LightOfAttrition,
         FocalPoint,
         OctahedralTemple,
-        CruelBlankEssence
+        CruelBlankEssence,
+        Solitude
     ])
 
     .exit();

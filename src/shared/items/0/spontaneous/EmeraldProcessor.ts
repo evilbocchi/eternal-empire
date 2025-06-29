@@ -15,13 +15,13 @@ Expect to spend a lot of time here, and good luck clearing Spontaneous.
 The Emerald Reactor is a modified version of the ${NormalReactor.name}, each entrance giving a %mul% boost but deals %hp_add% to droplets.`
     )
     .setDifficulty(Difficulty.Spontaneous)
-    .setPrice(new CurrencyBundle().set("Funds", 1e42).set("Power", 100e24), 1)
+    .setPrice(new CurrencyBundle().set("Funds", 5e42).set("Power", 1e27), 1)
     .setRequiredItemAmount(NormalReactor, 1)
     .addPlaceableArea("BarrenIslands")
     .setCreator("sanjay2133")
 
     .trait(Upgrader)
-    .setMul(new CurrencyBundle().set("Funds", 6).set("Power", 1.8))
+    .setMul(new CurrencyBundle().set("Funds", 6).set("Power", 2))
 
     .trait(Damager)
     .setDamage(20)

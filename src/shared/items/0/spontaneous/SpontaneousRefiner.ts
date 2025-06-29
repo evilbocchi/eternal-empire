@@ -39,7 +39,7 @@ for (const item of combining) {
     }
 }
 totalAdd = totalAdd.add(new CurrencyBundle().set("Funds", 200000).set("Power", 200000).set("Bitcoin", 16));
-totalMul = totalMul.mul(new CurrencyBundle().set("Funds", 2.5).set("Power", 3));
+totalMul = totalMul.mul(new CurrencyBundle().set("Funds", 3).set("Power", 3));
 for (const [currency, amount] of totalMul.amountPerCurrency) {
     if (amount.equals(1)) {
         totalMul.amountPerCurrency.delete(currency);
@@ -50,10 +50,11 @@ totalDamage -= 10;
 const SpontaneousRefiner = new Item(script.Name)
     .setName("Spontaneous Refiner")
     .setDescription(`Suddenly, profit.
+
 %add%, %mul%, %hp_add%.`
     )
     .setDifficulty(Difficulty.Spontaneous)
-    .setPrice(new CurrencyBundle().set("Funds", 20e42).set("Power", 5e27), 1)
+    .setPrice(new CurrencyBundle().set("Funds", 45e42).set("Power", 10e27), 1)
 
     .addPlaceableArea("BarrenIslands")
     .setCreator("simple13579")

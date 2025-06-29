@@ -8,9 +8,11 @@ import TwoStoreyUpgrader from "shared/items/0/automatic/TwoStoreyUpgrader";
 
 export = new Item(script.Name)
     .setName("x-layer Agglomerate")
-    .setDescription("Your limit is the sky. This upgrader has multiple layers; how are you going to use them all? Each laser boosts their respective currency by x2.2.")
+    .setDescription(`Your limit is the sky. This upgrader has multiple layers; how are you going to use them all?
+        
+Each laser boosts their respective currency by x2.2.`)
     .setDifficulty(Difficulty.Spontaneous)
-    .setPrice(new CurrencyBundle().set("Funds", 9e42).set("Skill", 15000000), 1)
+    .setPrice(new CurrencyBundle().set("Funds", 15e42).set("Skill", 15000000), 1)
     .setRequiredItemAmount(TwoStoreyUpgrader, 1)
     .addPlaceableArea("BarrenIslands", "SlamoVillage")
     .setCreator("eeeesdfew")

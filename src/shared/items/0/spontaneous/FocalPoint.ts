@@ -29,7 +29,8 @@ The structure of the Focal Point is said to be the exoskeleton of what was once 
 ...
 Scientists also don't know what is going on in Spontaneous.
 
-Produces a %val% droplet every 4 seconds.`)
+Produces a %val% droplet every 4 seconds.`
+    )
     .setDifficulty(Difficulty.Spontaneous)
     .setPrice(new CurrencyBundle().set("Funds", 600e42).set("Skill", 20000000).set("Dark Matter", 1e30), 1)
     .setRequiredItemAmount(TheFirstDropper, TheFirstDropper.pricePerIteration.size())
@@ -53,6 +54,6 @@ Produces a %val% droplet every 4 seconds.`)
 
     .trait(Dropper)
     .setDroplet(Droplet.TotalityDroplet)
-    .setDropRate(4)
+    .setDropRate(0.25)
 
     .exit();

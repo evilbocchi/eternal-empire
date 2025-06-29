@@ -107,6 +107,13 @@ export default class Item {
     description: string;
 
     /**
+     * The description of the item that will be shown in the tooltip when hovering over the item in the inventory.
+     * 
+     * If not set, the {@link description} will be used as the tooltip description.
+     */
+    tooltipDescription?: string;
+
+    /**
      * The difficulty of the item.
      */
     difficulty = EMPTY_DIFFICULTY;
@@ -232,6 +239,18 @@ export default class Item {
      */
     setDescription(description: string) {
         this.description = description;
+        return this;
+    }
+
+    /**
+     * Set the tooltip description of the item.
+     * This description will be shown in the tooltip when hovering over the item in the inventory.
+     * 
+     * @param description The tooltip description of the item.
+     * @returns The item instance.
+     */
+    setTooltipDescription(description: string) {
+        this.tooltipDescription = description;
         return this;
     }
 

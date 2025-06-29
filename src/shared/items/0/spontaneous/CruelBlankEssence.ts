@@ -10,7 +10,7 @@ But entropy doesn't like being ignored.
 
 One stormy night, during a transfer between cores, something refused to render. Not just in the simulation. Like, in reality. The space it occupied... vanished. Not empty. Just blank. The devs joked it was "Blank Blank Essence." And they kept it.
 
-They shouldn't have.
+<b>They shouldn't have.</b>
 
 Each subsequent machine tried to patch, to correct, to fix the anomaly. Instead, the machines began mutating. Code started compiling with missing logic trees, producing structures that worked but shouldn't. Machines that ran on paradox. Logic gates built from anti-input.
 
@@ -31,8 +31,9 @@ People moved on. They destroyed the machines, the servers, the backups, rotting 
 But the Essence remained.
 Watching.
 Whispering,
-return null;`
+<font color="rgb(255,0,0)" weight="heavy">return null;</font>`
     )
+    .setTooltipDescription("It remembers what you forgot.")
     .setDifficulty(Difficulty.Spontaneous)
     .setPrice(new CurrencyBundle().set("Funds", 1e48).set("Power", 1e33).set("Bitcoin", 1e15).set("Skill", 1e9).set("Purifier Clicks", 1e33).set("Dark Matter", 1e33), 1)
     .addPlaceableArea("BarrenIslands");
