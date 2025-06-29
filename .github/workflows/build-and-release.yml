@@ -18,8 +18,8 @@ on:
         default: true
   
   # Optionally trigger on pushes to specific branches (commented out by default)
-  # push:
-  #   branches: [ main ]
+  push:
+    branches: [ main ]
 
 jobs:
   build-and-release:
