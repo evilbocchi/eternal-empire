@@ -1,6 +1,7 @@
 /node_modules
 /out
 /include
+/docsout
 *.tsbuildinfo
 flamework.build
 *.build
