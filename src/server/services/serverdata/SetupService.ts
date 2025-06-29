@@ -1,26 +1,52 @@
 //!native
 //!optimize 2
 
+/**
+ * @fileoverview SetupService - Handles saving, loading, and managing item setups for areas.
+ *
+ * This service provides:
+ * - Saving the current placed items as a named setup
+ * - Loading setups and placing items for a player
+ * - Renaming and toggling autoload for setups
+ * - Synchronizing setup data with clients
+ *
+ * @since 1.0.0
+ */
+
 import Signal from "@antivivi/lemon-signal";
 import { OnInit, Service } from "@flamework/core";
 import { TextService } from "@rbxts/services";
 import { DataService } from "server/services/serverdata/DataService";
 import { ItemsService } from "server/services/serverdata/ItemsService";
+import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
 import Items from "shared/items/Items";
 import Packets from "shared/Packets";
-import CurrencyBundle from "shared/currency/CurrencyBundle";
 
+/**
+ * Service that manages saving and loading of item setups for different areas.
+ */
 @Service()
 export class SetupService implements OnInit {
 
+    /** Signal fired when a setup is saved. */
     setupSaved = new Signal<(player: Player, area: AreaId) => void>();
+
+    /** Signal fired when a setup is loaded. */
     setupLoaded = new Signal<(player: Player, area: AreaId) => void>();
 
     constructor(private dataService: DataService, private itemsService: ItemsService) {
-
     }
 
+    /**
+     * Saves the current placed items in an area as a setup with the given name.
+     * Updates or creates the setup, calculates total price, and syncs with clients.
+     *
+     * @param player The player saving the setup.
+     * @param area The area ID for the setup.
+     * @param name The name of the setup.
+     * @returns Map of items and their counts in the setup.
+     */
     saveSetup(player: Player, area: AreaId, name: string) {
         if (!this.dataService.checkPermLevel(player, "build")) {
             return;
@@ -74,6 +100,13 @@ export class SetupService implements OnInit {
         return itemCount;
     }
 
+    /**
+     * Loads a setup by name for a player, placing items as needed.
+     *
+     * @param player The player loading the setup.
+     * @param name The name of the setup to load.
+     * @returns True if loaded successfully, false otherwise.
+     */
     loadSetup(player: Player, name: string) {
         if (!this.dataService.checkPermLevel(player, "build") || !this.dataService.checkPermLevel(player, "purchase")) {
             return false;
@@ -113,6 +146,9 @@ export class SetupService implements OnInit {
         });
     }
 
+    /**
+     * Initializes the SetupService, sets up packet listeners for renaming and autoload toggling.
+     */
     onInit() {
         Packets.printedSetups.set(this.dataService.empireData.printedSetups);
 

@@ -1,19 +1,57 @@
+/**
+ * @fileoverview EyeContactService - Handles NPC head tracking and eye contact with nearby players/characters.
+ *
+ * This service manages:
+ * - Tracking NPC head/neck joints for eye contact
+ * - Continuously updating NPC neck orientation to look at the closest player/character
+ * - Resetting neck orientation when no target is nearby
+ *
+ * @since 1.0.0
+ */
 import { OnInit, OnStart, Service } from "@flamework/core";
 import { Workspace } from "@rbxts/services";
 import { NPC_MODELS } from "shared/constants";
 
-type TrackingDetails = {
+/**
+ * Details for tracking an NPC's head and neck for eye contact.
+ */
+interface TrackingDetails {
+    /**
+     * The NPC model being tracked.
+     */
     model: Model;
+
+    /**
+     * The head part of the NPC.
+     */
     head: BasePart;
+
+    /**
+     * The neck joint of the NPC.
+     */
     neck: Motor6D;
+
+    /**
+     * The original C0 of the neck joint, used for resetting.
+     */
     originalNeckC0: CFrame;
 };
 
+/**
+ * Service that manages NPC eye contact by tracking head and neck joints.
+ * Updates neck orientation to look at the closest player/character within a specified distance.
+ */
 @Service()
 export class EyeContactService implements OnInit, OnStart {
-
+    /**
+     * Map of NPC models to their tracking details (head, neck, original C0).
+     */
     tracking = new Map<Model, TrackingDetails>();
 
+    /**
+     * Initializes tracking for all NPC models with a neck joint.
+     * Stores original neck C0 for smooth resetting.
+     */
     onInit() {
         const npcModels = NPC_MODELS.GetChildren();
 
@@ -41,10 +79,10 @@ export class EyeContactService implements OnInit, OnStart {
     }
 
     /**
-     * Returns the closest target to the given model, which is expected to be a character model.
+     * Finds the closest character model to the given NPC model within 20 studs.
      * 
-     * @param model The model to find the closest character to.
-     * @returns The closest character model, or undefined if no characters are close enough.
+     * @param model The NPC model to check from.
+     * @returns The closest character model, or undefined if none are close enough.
      */
     getClosestTarget(model: Model) {
         let closest: Model | undefined;
@@ -68,6 +106,12 @@ export class EyeContactService implements OnInit, OnStart {
         return closest;
     }
 
+    /**
+     * Rotates the NPC's neck to look at the given part, or resets if no part is provided.
+     * 
+     * @param model The NPC model to rotate.
+     * @param partToLookAt The part to look at (usually a player's head), or undefined to reset.
+     */
     lookAt(model: Model, partToLookAt: BasePart | undefined) {
         const details = this.tracking.get(model);
         if (details === undefined) {
@@ -88,10 +132,15 @@ export class EyeContactService implements OnInit, OnStart {
         const dist = difference.Magnitude;
         const yDiff = difference.Y;
 
+        // Calculate new neck C0 to look at the target
         const dest = details.originalNeckC0.mul(CFrame.Angles(math.atan(yDiff / dist) * 0.5, 0, (((headCFrame.Position.sub(lookAtPart.Position)).Unit).Cross(headCFrame.LookVector)).Y * 0.8));
         neck.C0 = neck.C0.Lerp(dest, 0.3);
     }
 
+    /**
+     * Starts the continuous update loop for NPC eye contact.
+     * Every 0.05s, updates each tracked NPC to look at the closest player/character.
+     */
     onStart() {
         task.spawn(() => {
             while (task.wait(0.05)) {

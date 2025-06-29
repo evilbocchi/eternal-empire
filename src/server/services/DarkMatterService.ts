@@ -1,23 +1,52 @@
+/**
+ * @fileoverview DarkMatterService - Handles Dark Matter boosts and GUI updates.
+ *
+ * This service provides:
+ * - Calculating currency boosts based on Dark Matter amount
+ * - Updating the in-game GUI to reflect current boosts
+ * - Periodically refreshing the GUI for real-time feedback
+ *
+ * @since 1.0.0
+ */
+
 import { OnoeNum } from "@antivivi/serikanum";
 import { OnInit, Service } from "@flamework/core";
-import { DataService } from "server/services/serverdata/DataService";
 import { AREAS } from "shared/Area";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import { CurrencyService } from "./serverdata/CurrencyService";
 
+/**
+ * Service that manages Dark Matter boosts and GUI updates.
+ */
 @Service()
 export class DarkMatterService implements OnInit {
 
+    /** CurrencyBundle storing calculated boosts. */
     boost = new CurrencyBundle();
+
+    /** Reference to the SurfaceGui for Dark Matter display. */
     gui = AREAS.SlamoVillage.areaFolder.FindFirstChild("DarkMatter")?.FindFirstChild("SurfaceGui") as SurfaceGui | undefined;
+
+    /** Label displaying the current Dark Matter amount. */
     darkMatterLabel = this.gui?.WaitForChild("DarkMatterLabel") as TextLabel | undefined;
+
+    /** Label displaying the current Funds boost. */
     fundsLabel = this.gui?.WaitForChild("FundsLabel") as TextLabel | undefined;
+
+    /** Label displaying the current Power boost. */
     powerLabel = this.gui?.WaitForChild("PowerLabel") as TextLabel | undefined;
 
     constructor(private currencyService: CurrencyService) {
 
     }
 
+    /**
+     * Calculates the boost values for Funds and Power based on Dark Matter.
+     * Uses logarithmic scaling for diminishing returns.
+     *
+     * @param balance The currency bundle to use (defaults to current balance).
+     * @returns Tuple of (boost bundle, dark matter amount).
+     */
     getBoost(balance = this.currencyService.balance) {
         const darkMatter = balance.get("Dark Matter") ?? new OnoeNum(0);
         const boost = this.boost;
@@ -26,6 +55,11 @@ export class DarkMatterService implements OnInit {
         return $tuple(boost, darkMatter);
     }
 
+    /**
+     * Updates the GUI labels to reflect current Dark Matter and boosts.
+     *
+     * @param balance The currency bundle to use (defaults to current balance).
+     */
     refreshGui(balance = this.currencyService.balance) {
         const [boost, darkMatter] = this.getBoost(balance);
         this.darkMatterLabel!.Text = tostring(darkMatter);
@@ -39,6 +73,9 @@ export class DarkMatterService implements OnInit {
         this.powerLabel!.TextSize = powerUnlocked ? 50 : 70;
     }
 
+    /**
+     * Initializes the service and starts periodic GUI refresh if the GUI exists.
+     */
     onInit() {
         if (this.gui === undefined) // if the GUI is not found, do not continue
             return;

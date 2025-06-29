@@ -57,7 +57,8 @@ export class Tooltip {
             const difficulty = item.difficulty;
             itemSlot.TitleLabel.Text = item.name;
 
-            const builder = buildRichText(undefined, item.format(item.description), Color3.fromRGB(195, 195, 195), 18, "Medium");
+            const description = item.tooltipDescription ?? item.description;
+            const builder = buildRichText(undefined, item.format(description), Color3.fromRGB(195, 195, 195), 18, "Medium");
             builder.appendAll(this.metadata!.builder);
             itemSlot.MessageLabel.Text = builder.toString();
 

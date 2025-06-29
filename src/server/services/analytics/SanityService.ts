@@ -1,3 +1,14 @@
+/**
+ * @fileoverview SanityService - Validates game content for logical consistency.
+ *
+ * This service provides:
+ * - Checks for item and harvestable configuration issues
+ * - Warns about missing models, PrimaryParts, and inconsistent reset layers
+ * - Ensures harvestables have enough craftable uses
+ *
+ * @since 1.0.0
+ */
+
 import Difficulty from "@antivivi/jjt-difficulties";
 import { OnStart, Service } from "@flamework/core";
 import Harvestable from "shared/Harvestable";
@@ -10,7 +21,15 @@ import Items from "shared/items/Items";
 @Service()
 export class SanityService implements OnStart {
 
+    /**
+     * Checks an item for common configuration mistakes.
+     * Warns if the item is a crafting item with a low reset layer,
+     * if required items have mismatched reset layers, or if the model is missing.
+     * 
+     * @param item The item to check.
+     */
     checkItem(item: Item) {
+        // Check if the item is a shop with crafting items
         const shop = item.findTrait("Shop");
         if (shop !== undefined) {
             let isCrafting = false;
@@ -21,6 +40,7 @@ export class SanityService implements OnStart {
                 }
             }
 
+            // Warn if crafting items have a reset layer < 100
             if (isCrafting) {
                 for (const item of shop.items) {
                     const resetLayer = item.getResetLayer();
@@ -31,6 +51,7 @@ export class SanityService implements OnStart {
             }
         }
 
+        // Check for mismatched reset layers between item and its requirements
         const a = item.getResetLayer();
         for (const [requiredItem, _] of item.requiredItems) {
             const b = requiredItem.getResetLayer();
@@ -39,6 +60,7 @@ export class SanityService implements OnStart {
             }
         }
 
+        // Check for missing model or PrimaryPart
         const model = item.MODEL;
         if (model === undefined) {
             warn(`Item ${item.name} (${item.id}) has no model. This is likely a mistake.`);
@@ -51,6 +73,11 @@ export class SanityService implements OnStart {
         }
     }
 
+    /**
+     * Checks a harvestable for craftable uses and warns if too few.
+     * 
+     * @param harvestableId The harvestable's ID.
+     */
     checkHarvestable(harvestableId: string) {
         const harvestable = Harvestable[harvestableId];
         if (harvestable === undefined) {
@@ -63,6 +90,7 @@ export class SanityService implements OnStart {
             return;
         }
 
+        // Count how many items can be crafted using this harvestable
         let craftables = 0;
         for (const [_, craftable] of Items.itemsPerId) {
             if (craftable.requiredItems.has(item)) {
@@ -74,11 +102,16 @@ export class SanityService implements OnStart {
         }
     }
 
+    /**
+     * Runs all sanity checks on items and harvestables at startup.
+     */
     onStart() {
+        // Check all items for configuration issues
         for (const [_, item] of Items.itemsPerId) {
             this.checkItem(item);
         }
 
+        // Check all harvestables for craftable uses
         for (const [id] of pairs(Harvestable)) {
             this.checkHarvestable(id as string);
         }

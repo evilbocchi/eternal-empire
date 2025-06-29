@@ -1,6 +1,18 @@
 //!native
 //!optimize 2
 
+/**
+ * @fileoverview BombsService - Manages bomb-related game events and boosts.
+ *
+ * This service handles:
+ * - Bomb activation and timing
+ * - Bomb usage permissions and debouncing
+ * - Global bomb state synchronization via MessagingService
+ * - Currency deduction for bomb usage
+ *
+ * @since 1.0.0
+ */
+
 import Signal from "@antivivi/lemon-signal";
 import { OnInit, OnStart, Service } from "@flamework/core";
 import { DataStoreService, MessagingService, Workspace } from "@rbxts/services";
@@ -9,32 +21,66 @@ import CurrencyBundle from "shared/currency/CurrencyBundle";
 import { CurrencyService } from "./serverdata/CurrencyService";
 import { DataService } from "./serverdata/DataService";
 
-type BombMessage = {
-    bombType: Currency,
-    player: number,
+/**
+ * Structure for bomb event messages sent via MessagingService.
+ */
+interface BombMessage {
+    /**
+     * Type of the bomb being used. 
+     */
+    bombType: Currency;
+
+    /**
+     * ID of the player using the bomb.
+     */
+    player: number;
+
+    /**
+     * End time for the bomb effect.
+     */
     endTime: number;
 };
 
+/**
+ * Service that manages bomb boosts, usage, and global bomb state.
+ */
 @Service()
 export class BombsService implements OnInit, OnStart {
 
+    /** Global DataStore for bomb timing. */
     globalDataStore = DataStoreService.GetGlobalDataStore();
+
+    /** Signal fired when a bomb is used. */
     bombUsed = new Signal<(player: Player, bombType: Currency) => void>();
+
+    /** Signal fired when a bomb becomes active. */
     bombActive = new Signal<(endTime: number, bombType: Currency, player: number) => void>();
-    fundsBombEnabled = false;
-    fundsBombBoost = new CurrencyBundle().set("Funds", 2);
+
+    /** Debounce timer to prevent rapid bomb usage. */
     debounce = 0;
 
-    constructor(private dataService: DataService, private currencyService: CurrencyService) {
+    /** Whether the Funds Bomb is currently enabled. */
+    fundsBombEnabled = false;
+    /** Currency boost applied when Funds Bomb is active. */
+    fundsBombBoost = new CurrencyBundle().set("Funds", 2);
 
+    constructor(private dataService: DataService, private currencyService: CurrencyService) {
+        // ...existing code...
     }
 
+    /**
+     * Refreshes the enabled state of the Funds Bomb based on current time and stored end time.
+     */
     refreshBombsEnabled() {
         const currentTime = os.time();
         const fundsBombTime = Workspace.GetAttribute("FundsBombTime") as number | undefined;
         this.fundsBombEnabled = fundsBombTime !== undefined && fundsBombTime > currentTime;
     }
 
+    /**
+     * Initializes bomb usage packet handler and permissions.
+     * Handles bomb activation, debouncing, and currency deduction.
+     */
     onInit() {
         Packets.useBomb.onInvoke((player, bombType) => {
             if (!this.dataService.checkPermLevel(player, "purchase")) {
@@ -82,6 +128,11 @@ export class BombsService implements OnInit, OnStart {
         });
     }
 
+    /**
+     * Updates the global bomb state and notifies listeners.
+     *
+     * @param data Bomb message containing type, player, and end time.
+     */
     updateBomb(data: BombMessage) {
         if (data.bombType === "Funds Bombs") {
             Workspace.SetAttribute("FundsBombTime", data.endTime);
@@ -89,6 +140,11 @@ export class BombsService implements OnInit, OnStart {
             this.refreshBombsEnabled();
         }
     }
+
+    /**
+     * Starts bomb state synchronization and periodic refresh.
+     * Subscribes to bomb events and updates bomb enabled state every second.
+     */
     onStart() {
         Workspace.SetAttribute("FundsBombTime", this.globalDataStore.GetAsync("Funds")[0] as number | undefined);
         task.spawn(() => {

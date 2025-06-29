@@ -8,7 +8,23 @@ import { ASSETS, getSound } from "shared/GameAssets";
 import NPC, { Dialogue, NPCAnimationType } from "shared/NPC";
 import Packets from "shared/Packets";
 
+/**
+ * @fileoverview DialogueService - Handles NPC dialogue, interaction, and animation logic.
+ *
+ * This service manages:
+ * - Dialogue state and progression for NPCs
+ * - Proximity prompt setup and interaction
+ * - Animation control for NPCs
+ * - Dialogue priority and extraction
+ * - Enabling/disabling player interaction with NPCs
+ *
+ * @since 1.0.0
+ */
+
 declare global {
+    /**
+     * BillboardGui asset for NPC notifications.
+     */
     interface Assets {
         NPCNotification: BillboardGui & {
             ImageLabel: ImageLabel;
@@ -18,30 +34,88 @@ declare global {
 
 @Service()
 export class DialogueService implements OnInit {
+    /**
+     * Signal fired when a dialogue sequence finishes.
+     * @param dialogue The dialogue that finished.
+     */
+    readonly dialogueFinished = new Signal<(dialogue: Dialogue) => void>();
 
-    dialogueFinished = new Signal<(dialogue: Dialogue) => void>();
-    npcPerName = new Map<string, NPC>();
-    modelPerNPC = new Map<NPC, Model>();
-    runningAnimationsPerNPC = new Map<NPC, Map<string, AnimationTrack>>();
-    dialoguePerNPC = new Map<NPC, Map<Dialogue, number>>();
-    animationsPerNPC = new Map<NPC, Map<NPCAnimationType, AnimationTrack>>();
-    defaultLocationsPerNPC = new Map<NPC, CFrame>();
-    proximityPrompts = new Set<ProximityPrompt>();
+    /**
+     * Map of NPC name to NPC object.
+     */
+    private readonly npcPerName = new Map<string, NPC>();
+
+    /**
+     * Map of NPC to their model instance.
+     */
+    private readonly modelPerNPC = new Map<NPC, Model>();
+    
+    /**
+     * Map of NPC to their currently running animations.
+     */
+    private readonly runningAnimationsPerNPC = new Map<NPC, Map<string, AnimationTrack>>();
+
+    /**
+     * Map of NPC to their available dialogues and priorities.
+     */
+    private readonly dialoguePerNPC = new Map<NPC, Map<Dialogue, number>>();
+
+    /**
+     * Map of NPC to their loaded animation tracks by type.
+     */
+    private readonly animationsPerNPC = new Map<NPC, Map<NPCAnimationType, AnimationTrack>>();
+
+    /**
+     * Map of NPC to their default CFrame location.
+     */
+    readonly defaultLocationsPerNPC = new Map<NPC, CFrame>();
+
+    /**
+     * Set of all active proximity prompts for NPCs.
+     */
+    readonly proximityPrompts = new Set<ProximityPrompt>();
+
+    /**
+     * The currently active dialogue, if any.
+     */
     currentDialogue: Dialogue | undefined;
+
+    /**
+     * Whether player interaction with NPCs is enabled.
+     */
     isInteractionEnabled = true;
 
     constructor(private dataService: DataService) {
 
     }
 
+    /**
+     * Adds a dialogue to an NPC with an optional priority.
+     * 
+     * @param npc The NPC to add the dialogue to.
+     * @param dialogue The dialogue to add.
+     * @param priority The priority of the dialogue (higher = more important).
+     */
     addDialogue(npc: NPC, dialogue: Dialogue, priority?: number) {
         this.dialoguePerNPC.get(npc)!.set(dialogue, priority ?? 1);
     }
 
+    /**
+     * Removes a dialogue from an NPC.
+     * 
+     * @param npc The NPC to remove the dialogue from.
+     * @param dialogue The dialogue to remove.
+     */
     removeDialogue(npc: NPC, dialogue: Dialogue) {
         this.dialoguePerNPC.get(npc)!.delete(dialogue);
     }
 
+    /**
+     * Begins a dialogue sequence, handling progression and player prompts.
+     * 
+     * @param dialogue The starting dialogue.
+     * @param requireInteraction If true, requires proximity for prompt.
+     */
     talk(dialogue: Dialogue, requireInteraction?: boolean) {
         const dialogues = this.extractDialogue(dialogue);
         const size = dialogues.size();
@@ -83,6 +157,9 @@ export class DialogueService implements OnInit {
         nextDialogue();
     }
 
+    /**
+     * Enables all proximity prompts and allows player interaction.
+     */
     enableInteraction() {
         for (const proximityPrompt of this.proximityPrompts) {
             proximityPrompt.Enabled = true;
@@ -90,6 +167,9 @@ export class DialogueService implements OnInit {
         this.isInteractionEnabled = true;
     }
 
+    /**
+     * Disables all proximity prompts and blocks player interaction.
+     */
     disableInteraction() {
         for (const proximityPrompt of this.proximityPrompts) {
             proximityPrompt.Enabled = false;
@@ -97,6 +177,12 @@ export class DialogueService implements OnInit {
         this.isInteractionEnabled = false;
     }
 
+    /**
+     * Extracts a sequence of dialogues starting from the given dialogue.
+     * 
+     * @param dialogue The starting dialogue.
+     * @returns An array of dialogues in sequence.
+     */
     extractDialogue(dialogue: Dialogue) {
         let current = dialogue;
         const dialogues = [dialogue];
@@ -110,6 +196,13 @@ export class DialogueService implements OnInit {
         return dialogues;
     }
 
+    /**
+     * Plays an animation of a given type on an NPC.
+     * 
+     * @param npc The NPC to animate.
+     * @param animType The type of animation to play.
+     * @returns True if the animation was played, false otherwise.
+     */
     playAnimation(npc: NPC, animType: NPCAnimationType) {
         const anim = npc.animationsPerType.get(animType);
         if (anim === undefined)
@@ -131,6 +224,13 @@ export class DialogueService implements OnInit {
         return true;
     }
 
+    /**
+     * Stops a running animation of a given type on an NPC.
+     * 
+     * @param npc The NPC to stop animating.
+     * @param animType The type of animation to stop.
+     * @returns True if the animation was stopped, false otherwise.
+     */
     stopAnimation(npc: NPC, animType: NPCAnimationType) {
         const animTrack = this.runningAnimationsPerNPC.get(npc)!.get(animType);
         if (animTrack !== undefined) {
@@ -140,6 +240,10 @@ export class DialogueService implements OnInit {
         return false;
     }
 
+    /**
+     * Initializes the DialogueService, setting up NPCs, prompts, and animations.
+     * Destroys the name changer NPC in public servers.
+     */
     onInit() {
         if (this.dataService.isPublicServer)
             NPC_MODELS.WaitForChild("Name Changer").Destroy();
@@ -164,6 +268,7 @@ export class DialogueService implements OnInit {
             const hideIndicator = TweenService.Create(indicator.ImageLabel, new TweenInfo(0.15), { ImageTransparency: 1 });
 
 
+            // Set up proximity prompt for NPC interaction
             const prompt = new Instance("ProximityPrompt");
             prompt.GetPropertyChangedSignal("Enabled").Connect(() => {
                 if (prompt.Enabled)

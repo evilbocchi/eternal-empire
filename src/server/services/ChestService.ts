@@ -1,3 +1,15 @@
+/**
+ * @fileoverview ChestService - Manages chest spawning, loot pools, and chest interactions.
+ *
+ * This service provides:
+ * - Chest model spawning and initialization in all areas
+ * - Loot pool management and random loot selection
+ * - Handling chest opening, cooldowns, and rewards
+ * - Synchronizing chest state and rewards with clients
+ *
+ * @since 1.0.0
+ */
+
 import { convertToMMSS, weldModel } from "@antivivi/vrldk";
 import { OnInit, OnStart, Service } from "@flamework/core";
 import { TweenService, Workspace } from "@rbxts/services";
@@ -40,31 +52,75 @@ declare global {
     }
 }
 
+/**
+ * Represents a possible loot drop from a chest.
+ * Can be an item, a harvestable, or XP.
+ */
 interface Loot {
+    /**
+     * The item that was dropped.
+     */
     item?: Item;
+
+    /**
+     * The harvestable ID that was dropped.
+     */
     harvestable?: HarvestableId;
+
+    /**
+     * The amount of XP that was dropped.
+     */
     xp?: number;
 }
 
+/**
+ * LootPool manages weighted random selection of loot for chests.
+ * Supports adding items, harvestables, and XP with weights.
+ */
 class LootPool {
+
+    /** Static random instance for consistent pulls. */
     static readonly RANDOM = new Random(tick());
+
+    /** Map of loot objects to their weights. */
     pool = new Map<Loot, number>();
 
+    /**
+     * Adds an item to the loot pool with a given weight.
+     * 
+     * @param item The item to add.
+     * @param weight The weight for random selection.
+     */
     addItem(item: Item, weight: number) {
         this.pool.set({ item: item }, weight);
         return this;
     }
 
+    /**
+     * Adds a harvestable to the loot pool with a given weight.
+     * 
+     * @param harvestable The harvestable ID.
+     * @param weight The weight for random selection.
+     */
     addHarvestable(harvestable: HarvestableId, weight: number) {
         this.pool.set({ harvestable: harvestable }, weight);
         return this;
     }
 
+    /**
+     * Adds XP to the loot pool with a given weight.
+     * 
+     * @param xp The XP amount.
+     * @param weight The weight for random selection.
+     */
     addXP(xp: number, weight: number) {
         this.pool.set({ xp: xp }, weight);
         return this;
     }
 
+    /**
+     * Calculates the total weight of all loot in the pool.
+     */
     getTotalWeight() {
         let totalWeight = 0;
         for (const [_piece, weight] of this.pool) {
@@ -73,18 +129,28 @@ class LootPool {
         return totalWeight;
     }
 
+    /**
+     * Pulls a number of loot items from the pool using weighted random selection.
+     * 
+     * @param amount The number of loot items to pull (default 5).
+     * @returns An array of selected loot objects.
+     */
     pull(amount = 5) {
+        // Selects a loot item based on weights.
         const totalWeight = this.getTotalWeight();
         const get = () => {
+            // Generate a random number between 1 and totalWeight.
             const chance = LootPool.RANDOM.NextInteger(1, totalWeight);
             let counter = 0;
             for (const [piece, weight] of this.pool) {
                 counter += weight;
+                // If the random number falls within this weight, select this loot.
                 if (chance < counter) {
                     return piece;
                 }
             }
         };
+        // Pull the requested number of loot items.
         const loot = new Array<Loot>();
         for (let i = 0; i < amount; i++) {
             const got = get();
@@ -95,22 +161,42 @@ class LootPool {
     }
 }
 
+/**
+ * Service that manages chest spawning, loot, and interactions.
+ */
 @Service()
 export class ChestService implements OnInit, OnStart {
 
+    /** Loot pools per chest level. */
     poolPerLevel = new Map<string, LootPool>();
+
+    /** Chest cooldown in seconds. */
     cooldown = 900;
+
+    /** Map of chest locations to chest models. */
     chestPerChestLocation = new Map<Vector3, ChestModel>();
+
+    /** Tween info for chest lid animation. */
     openTweenInfo = new TweenInfo(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out);
 
     constructor(private dataService: DataService, private levelService: LevelService, private itemsService: ItemsService, private unlockedAreasService: UnlockedAreasService) {
 
     }
 
+    /**
+     * Rounds a Vector3 to integer values.
+     * @param vector3 The vector to round.
+     */
     round(vector3: Vector3) {
         return new Vector3(math.round(vector3.X), math.round(vector3.Y), math.round(vector3.Z));
     }
 
+    /**
+     * Marks the last open time for a chest and updates its state.
+     * 
+     * @param chestLocation The chest's location.
+     * @param lastOpen The last open timestamp.
+     */
     markLastOpen(chestLocation: Vector3, lastOpen: number) {
         const chest = this.chestPerChestLocation.get(chestLocation);
         if (chest === undefined)
@@ -123,6 +209,11 @@ export class ChestService implements OnInit, OnStart {
     }
 
 
+    /**
+     * Rewards loot to the player, updating items and XP.
+     * 
+     * @param loots The loot objects to reward.
+     */
     rewardLoot(...loots: Loot[]) {
         let totalXp = 0;
         const items = new Map<string, number>();
@@ -148,6 +239,11 @@ export class ChestService implements OnInit, OnStart {
         Packets.itemsReceived.fireAll(items);
     }
 
+    /**
+     * Opens a chest by ID and rewards loot.
+     * @param chestId The chest ID.
+     * @param amount The amount of loot to pull.
+     */
     openChest(chestId: string, amount: number) {
         const pool = this.poolPerLevel.get(chestId);
         if (pool === undefined)
@@ -155,6 +251,9 @@ export class ChestService implements OnInit, OnStart {
         this.rewardLoot(...pool.pull(amount));
     }
 
+    /**
+     * Initializes loot pools for each chest level.
+     */
     onInit() {
         this.poolPerLevel.set("1", new LootPool()
             .addXP(1, 2000)
@@ -202,6 +301,9 @@ export class ChestService implements OnInit, OnStart {
 
     }
 
+    /**
+     * Spawns chests in all areas, sets up chest logic, and restores previous state.
+     */
     onStart() {
         for (const [_id, area] of pairs(AREAS)) {
             const chestsFolder = area.areaFolder.FindFirstChild("Chests");

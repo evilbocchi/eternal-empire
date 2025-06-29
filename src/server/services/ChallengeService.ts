@@ -1,6 +1,18 @@
 //!native
 //!optimize 2
 
+/**
+ * @fileoverview ChallengeService - Manages challenge gameplay, UI, and progression.
+ *
+ * This service handles:
+ * - Starting and ending challenges
+ * - Challenge requirements, rewards, and effects
+ * - Challenge UI updates and synchronization
+ * - Challenge state persistence and backup
+ *
+ * @since 1.0.0
+ */
+
 import { OnoeNum } from "@antivivi/serikanum";
 import { OnStart, Service } from "@flamework/core";
 import { toNumeral } from "@rbxts/roman-numerals";
@@ -39,12 +51,23 @@ declare global {
     }
 }
 
-
+/**
+ * Service that manages challenge logic, UI, and progression.
+ */
 @Service()
 export class ChallengeService implements OnStart {
 
+    /** Debounce timer for challenge actions. */
     debounce = 0;
+
+    /** Last completion timestamp for challenge effect throttling. */
     lastCompletion = 0;
+
+    /**
+     * Forces the end of a challenge and sends a server message.
+     * 
+     * @param message The message to send to the server.
+     */
     forceEnd = (message: string) => {
         this.endChallenge(false);
         this.permissionsService.sendServerMessage(message);
@@ -56,6 +79,13 @@ export class ChallengeService implements OnStart {
 
     }
 
+    /**
+     * Starts a challenge for the player, performing resets and backups as needed.
+     * 
+     * @param player The player starting the challenge.
+     * @param challengeId The ID of the challenge to start.
+     * @returns The challenge details if started, otherwise undefined.
+     */
     startChallenge(player: Player, challengeId: ChallengeId) {
         const t = tick();
         if (t - this.debounce < 1) {
@@ -99,6 +129,11 @@ export class ChallengeService implements OnStart {
         return challengeDetails;
     }
 
+    /**
+     * Returns a notice string for the given challenge.
+     * 
+     * @param challenge The challenge details.
+     */
     getNotice(challenge: ChallengeDetails) {
         switch (challenge.resets) {
             case "Skillification":
@@ -108,6 +143,13 @@ export class ChallengeService implements OnStart {
         }
     }
 
+    /**
+     * Returns the formatted title label for a challenge.
+     * 
+     * @param challenge The challenge details.
+     * @param id The challenge ID.
+     * @param level The challenge level (optional).
+     */
     getTitleLabel(challenge: ChallengeDetails, id?: string, level?: number) {
         if (level === undefined) {
             if (id === undefined)
@@ -117,6 +159,10 @@ export class ChallengeService implements OnStart {
         return `${challenge.name} ${(toNumeral(level))}`;
     }
 
+    /**
+     * Returns the requirement label for a challenge.
+     * @param challenge The challenge details.
+     */
     getRequirementLabel(challenge: ChallengeDetails) {
         if (typeOf(challenge.goal) === "table") {
             const builder = new StringBuilder("Get ");
@@ -126,6 +172,12 @@ export class ChallengeService implements OnStart {
         return "No requirement";
     }
 
+    /**
+     * Returns the reward label for a challenge at the given level.
+     * 
+     * @param challenge The challenge details.
+     * @param currentLevel The current challenge level.
+     */
     getRewardLabel(challenge: ChallengeDetails, currentLevel: number) {
         const upgrade = challenge.rewardUpgrade;
         if (upgrade !== undefined) {
@@ -134,6 +186,9 @@ export class ChallengeService implements OnStart {
         return "No reward";
     }
 
+    /**
+     * Updates the current challenge UI and synchronizes state with the client.
+     */
     refreshCurrentChallenge() {
         const challengeId = this.dataService.empireData.currentChallenge as ChallengeId | undefined;
         const gui = getChallengeGui();
@@ -187,6 +242,12 @@ export class ChallengeService implements OnStart {
         }
     }
 
+    /**
+     * Ends the current challenge, restoring backups and updating stats.
+     * 
+     * @param cleared Whether the challenge was cleared.
+     * @returns Tuple of challenge, challengeId, and new clears count.
+     */
     endChallenge(cleared: boolean) {
         const t = tick();
         if (t - this.debounce < 1) {
@@ -242,11 +303,18 @@ export class ChallengeService implements OnStart {
         return $tuple(challenge, challengeId, newClears);
     }
 
+    /**
+     * Returns the current level for a given challenge ID.
+     * @param challengeId The challenge ID.
+     */
     getChallengeLevel(challengeId: string) {
         const clears = this.dataService.empireData.challenges.get(challengeId);
         return clears === undefined ? 1 : clears + 1;
     }
 
+    /**
+     * Applies the effect of the current challenge, checking for completion and running challenge logic.
+     */
     challengeEffect() {
         const data = this.dataService.empireData;
         const challengeId = data.currentChallenge;
@@ -288,6 +356,9 @@ export class ChallengeService implements OnStart {
         }
     }
 
+    /**
+     * Refreshes the list of available challenges and updates the UI.
+     */
     refreshChallenges() {
         let i = 0;
         const gui = getChallengeGui();
@@ -323,6 +394,9 @@ export class ChallengeService implements OnStart {
         this.refreshCurrentChallenge();
     }
 
+    /**
+     * Starts the challenge service, sets up listeners, and begins challenge effect loop.
+     */
     onStart() {
         if (Sandbox.getEnabled())
             return;

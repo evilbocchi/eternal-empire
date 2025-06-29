@@ -1,11 +1,28 @@
 //!native
 //!optimize 2
 
+/**
+ * @fileoverview DataService - Core data management service for empires and players.
+ * 
+ * This service handles:
+ * - Empire and player data loading/saving via ProfileService
+ * - Empire creation and management
+ * - Player teleportation between empires
+ * - Data validation and corruption fixes
+ * - Permission checking
+ * - DataStore management for available empires
+ * 
+ * The service supports both public servers and private empire servers,
+ * with different initialization logic for each type.
+ * 
+ * @since 1.0.0
+ */
+
 import Difficulty from "@antivivi/jjt-difficulties";
+import { Profile } from "@antivivi/profileservice/globals";
 import { BaseOnoeNum, OnoeNum } from "@antivivi/serikanum";
 import { ProfileManager } from "@antivivi/vrldk";
 import { OnInit, Service } from "@flamework/core";
-import { Profile } from "@antivivi/profileservice/globals";
 import { DataStoreService, HttpService, MarketplaceService, Players, RunService, TeleportService, Workspace } from "@rbxts/services";
 import { OnPlayerJoined } from "server/services/ModdingService";
 import { IS_SERVER, IS_SINGLE_SERVER, getNameFromUserId, getStartCamera, isStartScreenEnabled } from "shared/constants";
@@ -13,60 +30,202 @@ import CurrencyBundle from "shared/currency/CurrencyBundle";
 import { CURRENCY_DETAILS } from "shared/currency/CurrencyDetails";
 import Item from "shared/item/Item";
 import ItemCounter from "shared/item/ItemCounter";
+import type Shop from "shared/item/traits/Shop";
 import Items from "shared/items/Items";
 import Packets from "shared/Packets";
 import Sandbox from "shared/Sandbox";
 
 declare global {
+    /**
+     * Represents an item that has been placed in the world.
+     */
     interface PlacedItem {
-        item: string,
-        posX: number,
-        posY: number,
-        posZ: number,
-        rotX: number,
-        rotY: number,
-        rotZ: number,
-        rawRotation?: number,
+        /**
+         * The ID of the item that has been placed.
+         */
+        item: string;
+
+        /**
+         * The X value of the position in the world.
+         */
+        posX: number;
+
+        /**
+         * The Y value of the position in the world.
+         */
+        posY: number;
+
+        /**
+         * The Z value of the position in the world.
+         */
+        posZ: number;
+
+        /**
+         * The rotation value around the X axis in degrees.
+         */
+        rotX: number;
+
+        /**
+         * The rotation value around the Y axis in degrees.
+         */
+        rotY: number;
+
+        /**
+         * The rotation value around the Z axis in degrees.
+         */
+        rotZ: number;
+
+        /**
+         * The rotation value in degrees.
+         */
+        rawRotation?: number;
+
+        /**
+         * The ID of the placement, used to identify the item in the world.
+         * 
+         * This is automatically generated when the item is placed.
+         */
         area?: string;
+
+        /**
+         * The ID of the placement, used to identify the item in the world.
+         * 
+         * This is automatically generated when the item is placed.
+         */
+        meta?: PlacedItemMetadata;
+    }
+
+    /**
+     * Metadata for a placed item.
+     * 
+     * Use this to store additional information about the item, such as its state or configuration.
+     */
+    interface PlacedItemMetadata {
+
     }
 
     type Inventory = Map<string, number>;
 
-    type ItemsData = {
-        inventory: Inventory,
-        bought: Inventory,
-        /** @deprecated */
-        placed: PlacedItem[],
+    /**
+     * Represents the data structure of a player's items.
+     */
+    interface ItemsData {
+        /**
+         * The inventory of the player, containing item IDs and their respective amounts.
+         */
+        inventory: Inventory;
 
-        worldPlaced: Map<string, PlacedItem>,
-        nextId: number,
-    };
+        /**
+         * The items that the player has bought. Used to fetch the price of items in {@link Shop} items.
+         */
+        bought: Inventory;
 
-    type EmpireInfo = {
-        name: string,
-        owner: number,
-        items: number,
-        created: number,
-        playtime: number,
-    };
+        /**
+         * The items that the player has placed in the world.
+         * @deprecated Use `worldPlaced` instead.
+        */
+        placed: PlacedItem[];
 
+        /**
+         * The items that the player has placed in the world, mapped by their placement ID.
+         * 
+         * This is used to identify items in the world and allows for easy access to their properties.
+         */
+        worldPlaced: Map<string, PlacedItem>;
+
+        /**
+         * The next ID to use for a placed item.
+         */
+        nextId: number;
+    }
+
+    /**
+     * Represents the information about an empire that is exposed to the client.
+     */
+    interface EmpireInfo {
+        /**
+         * The name of the empire.
+         */
+        name: string;
+        /**
+         * The ID of the owner of the empire.
+         */
+        owner: number;
+        /**
+         * The number of placed items in the empire.
+         */
+        items: number;
+        /**
+         * The UNIX timestamp when the empire was created.
+         */
+        created: number;
+        /**
+         * The total playtime of the empire in seconds.
+         */
+        playtime: number;
+    }
+
+    /**
+     * Client-side settings for the player.
+     */
     type Settings = typeof PlayerProfileTemplate.settings;
 
+    /**
+     * Represents the data structure of an empire profile.
+     */
     type EmpireData = typeof EmpireProfileTemplate;
+
+    /**
+     * Represents the keys for each permission to manage an empire.
+     */
     type PermissionKey = keyof EmpireData["permLevels"];
 }
 
+/**
+ * Default empire profile. Use this to create new empire profiles.
+ */
 export const EmpireProfileTemplate = {
     // General
+
+    /**
+     * The name of the empire.
+     */
     name: "no name",
+
+    /**
+     * The ID of the owner of the empire.
+     */
     owner: 0,
+
+    /**
+     * The UNIX timestamp when the empire was created.
+     */
     created: 0,
+
+    /**
+     * The total playtime of the empire in seconds.
+     */
     playtime: 0,
+
+    /**
+     * The longest session that the empire has had, in seconds.
+     */
     longestSession: 0,
+
+    /**
+     * The last session that the empire has had in UNIX timestamp.
+     */
     lastSession: 0,
+
+    /**
+     * The code that can be used to access the reserved server of this empire.
+     * 
+     * @see {@link TeleportService.TeleportToPrivateServer} for using the access code.
+     */
     accessCode: "",
 
     // Management
+
     managers: new Array<number>(),
     trusted: new Array<number>(),
     restricted: new Map<number, number>(),
@@ -117,8 +276,20 @@ export const EmpireProfileTemplate = {
 };
 
 export const PlayerProfileTemplate = {
+    /**
+     * List of empire IDs that this player has access to.
+     * @deprecated Use DataStore-based available empires instead.
+     */
     availableEmpires: undefined as Array<string> | undefined,
+
+    /**
+     * List of empire IDs that this player owns.
+     */
     ownedEmpires: new Array<string>(),
+
+    /**
+     * Player's client-side settings and preferences.
+     */
     settings: {
         ScientificNotation: false,
         hotkeys: {} as { [key: string]: number; },
@@ -130,33 +301,101 @@ export const PlayerProfileTemplate = {
         SoundEffects: true,
         HideMaxedItems: false
     },
+
+    /**
+     * Whether the player has used the portal feature.
+     */
     usedPortal: false,
+
+    /**
+     * Raw number of purifier clicks the player has made.
+     */
     rawPurifierClicks: 0,
+
+    /**
+     * Amount the player has donated (in Robux).
+     */
     donated: 0,
 };
 
+/**
+ * Default player profile template. Use this to create new player profiles.
+ * Contains player-specific settings and data that persist across empires.
+ */
+
+// Cache start camera and screen state for performance
 const START_CAMERA = getStartCamera();
 const START_SCREEN_ENABLED = isStartScreenEnabled();
 
+/**
+ * Main data service responsible for managing empire and player data.
+ * Handles data loading, saving, empire creation, teleportation, and permissions.
+ */
 @Service()
 export class DataService implements OnInit, OnPlayerJoined {
 
+    // Profile Managers
+
+    /**
+     * Manages empire data profiles using ProfileService.
+     */
     readonly empireProfileManager = new ProfileManager("EmpireData", EmpireProfileTemplate);
+
+    /**
+     * Manages player data profiles using ProfileService.
+     */
     readonly playerProfileManager = new ProfileManager("PlayerData", PlayerProfileTemplate);
 
+    // Data Stores and Caches
+
+    /**
+     * DataStore for tracking which empires each player has access to.
+     */
     availableEmpiresStore = DataStoreService.GetDataStore("AvailableEmpires");
+
+    /**
+     * Cache of available empires per player to reduce DataStore calls.
+     */
     availableEmpiresPerPlayer = new Map<number, Map<string, EmpireInfo>>();
+
+    /**
+     * Cache of loaded empire profiles to prevent duplicate loads.
+     */
     cachedEmpireProfiles = new Map<string, Profile<EmpireData>>();
+
+    // Server State
+
+    /**
+     * Whether this server is a public server (not private/reserved).
+     */
     isPublicServer = IS_SERVER && game.PrivateServerId === "" && (!RunService.IsStudio() || START_SCREEN_ENABLED === true);
+
+    /**
+     * Debounce timer for empire creation to prevent spam.
+     */
     debounce = 0;
+
+    /**
+     * Whether this is the testing environment.
+     */
     testing = game.PlaceId === 16438564807;
+
+    /**
+     * Cache of maximum item amounts for dupe checking.
+     */
     maxItemAmounts = new Map<string, number>();
 
     /** Empire profile for the current server. */
     empireProfile!: Profile<EmpireData>;
+
+    /**
+     * Lazy-loaded information about the current empire and server state.
+     * Initializes empire profile, performs data migrations, and fixes data corruption.
+     */
     readonly loadedInformation = (() => {
         let empireId: string;
 
+        // Determine empire ID based on server type and environment
         if (!RunService.IsStudio() || START_SCREEN_ENABLED === true) { // production protocol
             if (IS_SINGLE_SERVER) {
                 empireId = "SingleServer";
@@ -165,6 +404,7 @@ export class DataService implements OnInit, OnPlayerJoined {
                 empireId = game.JobId;
             }
             else {
+                // Wait for at least one player to join to get teleport data
                 while (Players.GetPlayers().size() < 1) {
                     task.wait();
                 }
@@ -174,6 +414,7 @@ export class DataService implements OnInit, OnPlayerJoined {
             }
         }
         else {
+            // Studio environment - get ID from start camera
             empireId = (START_CAMERA.WaitForChild("Id") as StringValue).Value;
         }
 
@@ -185,9 +426,12 @@ export class DataService implements OnInit, OnPlayerJoined {
             throw "Could not load empire";
 
         const empireData = empireProfile.Data;
+
+        // Set default names for public servers
         if (this.isPublicServer === true)
             empireData.name = IS_SINGLE_SERVER ? "Single Server" : "Public Server";
 
+        // Initialize empire name if not set
         if (empireData.previousNames.size() === 0 && IS_SERVER) {
             if (game.PrivateServerOwnerId === 0) {
                 empireData.name = getNameFromUserId(empireData.owner) + "'s Empire";
@@ -198,10 +442,10 @@ export class DataService implements OnInit, OnPlayerJoined {
             }
         }
 
-
-        // infinitemath to onoenum
+        // Migration: Convert old InfiniteMath to OnoeNum currency system
         for (const [currency, value] of empireData.currencies) {
             if (CURRENCY_DETAILS[currency] === undefined) {
+                // Remove currencies that no longer exist
                 empireData.currencies.delete(currency);
                 empireData.mostCurrencies.delete(currency);
                 continue;
@@ -218,13 +462,14 @@ export class DataService implements OnInit, OnPlayerJoined {
                 empireData.currencies.set(currency, fixed);
             }
         }
+        // Convert most currencies as well
         for (const [currency, value] of empireData.mostCurrencies) {
             const v = value as OnoeNum & { first?: number, second?: number; };
             if (v.first !== undefined && v.second !== undefined)
                 empireData.mostCurrencies.set(currency, OnoeNum.fromSerika(v.first, v.second));
         }
 
-        // convert old setups
+        // Migration: Convert old placed items array to new worldPlaced map
         const items = empireData.items;
         if (items.placed !== undefined) {
             for (const placedItem of items.placed) {
@@ -233,10 +478,11 @@ export class DataService implements OnInit, OnPlayerJoined {
             items.placed = [];
         }
 
+        // Perform dupe checking unless in sandbox mode
         if (!Sandbox.getEnabled()) // ignore sandbox for dupes
             this.dupeCheck(items);
 
-        // convert legacy printer
+        // Migration: Convert legacy printer setups to new system
         const old = empireData.savedItems.get("SlamoVillage");
         if (old !== undefined) {
             empireData.savedItems.delete("SlamoVillage");
@@ -262,7 +508,7 @@ export class DataService implements OnInit, OnPlayerJoined {
             });
         }
 
-        // fix no shop
+        // Data integrity: Ensure every empire has a shop
         let hasShop = false;
         const placedItems = items.worldPlaced;
         for (const [_, placedItem] of placedItems)
@@ -288,7 +534,7 @@ export class DataService implements OnInit, OnPlayerJoined {
             }
         }
 
-        // remove illegal runs
+        // Data cleanup: Remove illegal challenge runs
         if (!empireData.completedEvents.has("RemoveIllegalChallenges")) {
             let removed = false;
             const a1 = empireData.challenges.get("MeltingEconomy");
@@ -310,7 +556,7 @@ export class DataService implements OnInit, OnPlayerJoined {
             empireData.completedEvents.add("RemoveIllegalChallenges");
         }
 
-        // trim
+        // Data limits: Trim excessive printed setups and logs
         if (empireData.printedSetups.size() > 50) {
             const newPrintedSetups = new Array<Setup>();
             for (let i = 0; i < 50; i++) {
@@ -331,7 +577,11 @@ export class DataService implements OnInit, OnPlayerJoined {
         this.empireProfile = empireProfile;
         return { empireData, empireId };
     })();
+
+    /** The loaded empire data for the current server. */
     readonly empireData = this.loadedInformation.empireData;
+
+    /** The empire ID for the current server. */
     readonly empireId = this.loadedInformation.empireId;
 
     /**
@@ -424,20 +674,46 @@ export class DataService implements OnInit, OnPlayerJoined {
         return items;
     }
 
+    /**
+     * Saves an empire profile to the DataStore.
+     * 
+     * @param empireId The ID of the empire to save.
+     * @returns Whether the save was successful.
+     */
     saveEmpireProfile(empireId: string) {
         const key = "Empire_" + empireId;
         return this.empireProfileManager.save(key);
     }
 
+    /**
+     * Loads an empire profile from the DataStore.
+     * 
+     * @param empireId The ID of the empire to load.
+     * @param view Whether to load in view-only mode (read-only).
+     * @returns The loaded empire profile, or undefined if not found.
+     */
     loadEmpireProfile(empireId: string, view?: boolean) {
         const key = "Empire_" + empireId;
         return view ? this.empireProfileManager.view(key) : this.empireProfileManager.load(key);
     }
 
+    /**
+     * Unloads an empire profile from memory.
+     * 
+     * @param empireId The ID of the empire to unload.
+     * @returns Whether the unload was successful.
+     */
     unloadEmpireProfile(empireId: string) {
         return this.empireProfileManager.unload("Empire_" + empireId);
     }
 
+    /**
+     * Creates a new empire for a player.
+     * Checks permissions, gamepass ownership, and generates a new empire with reserved server.
+     * 
+     * @param player The player requesting to create an empire.
+     * @returns Whether the empire was successfully created.
+     */
     createNewEmpire(player: Player) {
         if (tick() - this.debounce < 0.5 || IS_SINGLE_SERVER) {
             return false;
@@ -481,6 +757,13 @@ export class DataService implements OnInit, OnPlayerJoined {
         return false;
     }
 
+    /**
+     * Teleports a player to their empire's private server.
+     * 
+     * @param player The player to teleport.
+     * @param empireId The ID of the empire to teleport to.
+     * @returns Whether the teleport was successful.
+     */
     teleportToEmpire(player: Player, empireId: string) {
         const profile = this.loadEmpireProfile(empireId, true);
         if (profile && profile.Data.accessCode) {
@@ -490,6 +773,13 @@ export class DataService implements OnInit, OnPlayerJoined {
         return false;
     }
 
+    /**
+     * Gets the list of empires a player has access to.
+     * Uses caching to reduce DataStore calls.
+     * 
+     * @param userId The user ID to get available empires for.
+     * @returns Map of empire IDs to empire information.
+     */
     getAvailableEmpires(userId: number): Map<string, EmpireInfo> {
         const cached = this.availableEmpiresPerPlayer.get(userId);
         if (cached !== undefined) {
@@ -513,6 +803,12 @@ export class DataService implements OnInit, OnPlayerJoined {
         return data as Map<string, EmpireInfo>;
     }
 
+    /**
+     * Updates the available empires for a player both in cache and client.
+     * 
+     * @param userId The user ID to update.
+     * @param availableEmpires The new available empires map.
+     */
     updateAvailableEmpires(userId: number, availableEmpires: Map<string, EmpireInfo>) {
         this.availableEmpiresPerPlayer.set(userId, availableEmpires);
         const plr = Players.GetPlayerByUserId(userId);
@@ -521,6 +817,12 @@ export class DataService implements OnInit, OnPlayerJoined {
         }
     }
 
+    /**
+     * Adds an empire to a player's available empires list.
+     * 
+     * @param userId The user ID to add the empire for.
+     * @param empire The empire ID to add.
+     */
     addAvailableEmpire(userId: number, empire: string) {
         const [availableEmpires] = this.availableEmpiresStore.UpdateAsync("Player_" + userId, (oldValue: Map<string, EmpireInfo> | undefined) => {
             if (oldValue === undefined) {
@@ -537,6 +839,12 @@ export class DataService implements OnInit, OnPlayerJoined {
         }
     }
 
+    /**
+     * Removes an empire from a player's available empires list.
+     * 
+     * @param userId The user ID to remove the empire for.
+     * @param empire The empire ID to remove.
+     */
     removeAvailableEmpire(userId: number, empire: string) {
         const [availableEmpires] = this.availableEmpiresStore.UpdateAsync("Player_" + userId, (oldValue: Map<string, EmpireInfo> | undefined) => {
             if (oldValue === undefined) {
@@ -553,6 +861,12 @@ export class DataService implements OnInit, OnPlayerJoined {
         }
     }
 
+    /**
+     * Gets basic information about an empire.
+     * 
+     * @param empireId The ID of the empire to get info for.
+     * @returns Empire information object.
+     */
     getInfo(empireId: string) {
         const empire = this.loadEmpireProfile(empireId, true);
         if (empire === undefined)
@@ -567,15 +881,35 @@ export class DataService implements OnInit, OnPlayerJoined {
         };
     }
 
+    /**
+     * Loads a player profile from the DataStore.
+     * 
+     * @param userId The user ID to load the profile for.
+     * @param view Whether to load in view-only mode (read-only).
+     * @returns The loaded player profile, or undefined if not found.
+     */
     loadPlayerProfile(userId: number, view?: boolean) {
         const key = "Player_" + userId;
         return view ? this.playerProfileManager.view(key) : this.playerProfileManager.load(key);
     }
 
+    /**
+     * Unloads a player profile from memory.
+     * 
+     * @param userId The user ID to unload the profile for.
+     * @returns Whether the unload was successful.
+     */
     unloadPlayerProfile(userId: number) {
         return this.playerProfileManager.unload("Player_" + userId);
     }
 
+    /**
+     * Checks if a player has the required permission level for an action.
+     * 
+     * @param player The player to check permissions for.
+     * @param action The action requiring permission.
+     * @returns Whether the player has sufficient permissions.
+     */
     checkPermLevel(player: Player, action: PermissionKey) {
         const minimumPerm = this.empireData.permLevels[action];
         const permLevel = player.GetAttribute("PermissionLevel") as number;
@@ -585,6 +919,12 @@ export class DataService implements OnInit, OnPlayerJoined {
         return true;
     }
 
+    /**
+     * Handles player joining logic.
+     * Sets up player data, available empires, and player attributes.
+     * 
+     * @param player The player that joined.
+     */
     onPlayerJoined(player: Player) {
         let availableEmpires = this.getAvailableEmpires(player.UserId);
         pcall(() => {
@@ -649,6 +989,10 @@ export class DataService implements OnInit, OnPlayerJoined {
         }
     }
 
+    /**
+     * Initializes the DataService.
+     * Sets up server attributes, event connections, and packet handlers.
+     */
     onInit() {
         Workspace.SetAttribute("IsSingleServer", IS_SINGLE_SERVER);
         Workspace.SetAttribute("IsPublicServer", this.isPublicServer);

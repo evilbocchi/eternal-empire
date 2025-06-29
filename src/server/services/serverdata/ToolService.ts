@@ -1,6 +1,18 @@
 //!native
 //!optimize 2
 
+/**
+ * @fileoverview ToolService - Manages player tools, harvesting logic, and harvestable objects.
+ *
+ * This service provides:
+ * - Assigning best tools to players and removing worse tools
+ * - Handling tool usage and harvestable interactions
+ * - Managing harvestable health, rewards, and respawn
+ * - Initializing harvestable objects in all areas
+ *
+ * @since 1.0.0
+ */
+
 import { OnInit, Service } from "@flamework/core";
 import { Players, Workspace } from "@rbxts/services";
 import { OnPlayerJoined } from "server/services/ModdingService";
@@ -12,16 +24,27 @@ import HarvestingTool from "shared/item/traits/HarvestingTool";
 import Items from "shared/items/Items";
 import Packets from "shared/Packets";
 
+/**
+ * Service that manages player tools and harvestable object interactions.
+ */
 @Service()
 export class ToolService implements OnInit, OnPlayerJoined, OnPlayerJoined {
 
+    /** Last tool use timestamp per player for cooldowns. */
     lastUsePerPlayer = new Map<Player, number>();
+
+    /** Original position of each harvestable for respawn logic. */
     originalPosPerHarvestable = new Map<Instance, Vector3>();
 
     constructor(private itemsService: ItemsService, private dataService: DataService) {
-
+        // ...existing code...
     }
 
+    /**
+     * Moves a harvestable instance to a new position.
+     * @param harvestable The harvestable instance.
+     * @param pos The new position.
+     */
     moveHarvestable(harvestable: Instance, pos: Vector3) {
         if (harvestable.IsA("Model"))
             harvestable.PivotTo(new CFrame(pos));
@@ -29,6 +52,9 @@ export class ToolService implements OnInit, OnPlayerJoined, OnPlayerJoined {
             harvestable.Position = pos;
     }
 
+    /**
+     * Returns the best tools per tool type and a list of worse tools.
+     */
     getBestTools() {
         const items = this.dataService.empireData.items.inventory;
         const tools = new Map<ToolType, HarvestingTool>();
@@ -51,6 +77,10 @@ export class ToolService implements OnInit, OnPlayerJoined, OnPlayerJoined {
         return $tuple(tools, worse);
     }
 
+    /**
+     * Refreshes the player's tools, giving best tools and removing worse ones.
+     * @param player The player whose tools are refreshed.
+     */
     refreshTools(player: Player) {
         const [tools, worse] = this.getBestTools();
         const backpack = player.FindFirstChildOfClass("Backpack");
@@ -78,6 +108,11 @@ export class ToolService implements OnInit, OnPlayerJoined, OnPlayerJoined {
         }
     }
 
+    /**
+     * Checks if a tool is within range of a harvestable.
+     * @param tool The tool model.
+     * @param harvestable The harvestable instance.
+     */
     isWithin(tool: Model, harvestable: Instance) {
         let position: Vector3;
         if (harvestable.IsA("Model") && harvestable.PrimaryPart !== undefined)
@@ -94,6 +129,10 @@ export class ToolService implements OnInit, OnPlayerJoined, OnPlayerJoined {
             return true;
     }
 
+    /**
+     * Calculates the critical hit chance for a harvesting tool.
+     * @param _item The harvesting tool.
+     */
     getCritChance(_item: HarvestingTool) {
         let critChance = 5;
         const inventory = this.dataService.empireData.items.inventory;
@@ -107,6 +146,10 @@ export class ToolService implements OnInit, OnPlayerJoined, OnPlayerJoined {
         return critChance / 100;
     }
 
+    /**
+     * Handles player join events, refreshing tools and clearing backpack on death.
+     * @param player The player who joined.
+     */
     onPlayerJoined(player: Player) {
         player.CharacterAdded.Connect((character) => {
             (character.WaitForChild("Humanoid") as Humanoid).Died.Once(() => {
@@ -116,6 +159,9 @@ export class ToolService implements OnInit, OnPlayerJoined, OnPlayerJoined {
         });
     }
 
+    /**
+     * Initializes the ToolService, sets up listeners and harvestable objects.
+     */
     onInit() {
         this.itemsService.itemsBought.connect((_player, items) => {
             for (const item of items) {
