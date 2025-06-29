@@ -1,21 +1,27 @@
 <p align="center">
-  <img width="350" src="assets/Logo.png">
+  <img width="350" src="assets/Logo.png" href="https://www.roblox.com/games/16438564807/JJT-Money-Empire">
 </p>
 
-# JJT Money Empire
+# JME
 
 [![Build](https://github.com/evilbocchi/jme/actions/workflows/build-and-release.yml/badge.svg?branch=master&event=push)](https://github.com/evilbocchi/jme/actions/workflows/build-and-release.yml)
 [![GitHub](https://img.shields.io/github/release/evilbocchi/jme.svg)](https://github.com/evilbocchi/jme/releases/latest)
 [![CodeFactor](https://www.codefactor.io/repository/github/evilbocchi/jme/badge)](https://www.codefactor.io/repository/github/evilbocchi/jme)
 [![Discord](https://discordapp.com/api/guilds/1217488177862938654/widget.png?style=shield)](https://discord.gg/haPBmCSvXt)
 
-[JJT Money Empire](https://www.roblox.com/games/16438564807/JJT-Money-Empire) is a Roblox game where players can build their own money-making empire.
+Build your money-making empire. Uncover the world of Obbysia.
+
+## Status
+
+This project is under constant development, and will not stop until the completion of the [EJT Difficulty Chart](https://jtohs-joke-towers.fandom.com/wiki/Eternal_Joke_Towers_(EJT)_Wiki) (at an arbitrary point).
+
+However, note that we strive to maintain things in a stable state. As such, changes in this repository may not impact the main distribution of this project on Roblox immediately.
 
 ## Setup
 
 > If you are using VS Code, an [automatic task](.vscode/tasks.json) is run when opening the project folder that sets up the development environment for you.
 
-To set up the development environment for JJT Money Empire, follow these steps:
+To set up the development environment for JME, follow these steps:
 
 1. Clone the repository:
     ```sh
@@ -41,7 +47,7 @@ To set up the development environment for JJT Money Empire, follow these steps:
 
 ## Contributing
 
-We warmly welcome contributions to improve JJT Money Empire! To contribute:
+We warmly welcome contributions to improve JME! To contribute:
 
 1. Fork the repository.
 2. Create a new branch for your feature or bugfix.
@@ -60,4 +66,4 @@ This project is licensed under the Creative Commons Attribution-NonCommercial 4.
 **You may not:**
 - Use any part of this project or its derivatives for commercial purposes.
 
-See the [LICENSE](LICENSE) file for full details.
+See the [LICENSE](LICENSE) file for full details, and thank you for respecting the work that was put into this project.

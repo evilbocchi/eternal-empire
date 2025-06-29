@@ -13,6 +13,7 @@
         "forceConsistentCasingInFileNames": true,
         "moduleDetection": "force",
         "strict": true,
+        "skipLibCheck": true,
         "target": "ESNext",
         "typeRoots": [
             "node_modules/@rbxts",
@@ -45,4 +46,7 @@
     "include": [
         "src/**/*"
     ],
+    "exclude": [
+        "node_modules"
+    ]
 }

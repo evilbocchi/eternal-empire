@@ -8,7 +8,8 @@
         "project": "./tsconfig.json"
     },
     "ignorePatterns": [
-        "/out"
+        "/out",
+        "/node_modules"
     ],
     "plugins": [
         "@typescript-eslint",

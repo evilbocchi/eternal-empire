@@ -1,6 +1,6 @@
-# Contributing to JJT Money Empire
+# Contributing to JME
 
-Thank you for your interest in contributing! We welcome all contributions that help improve JJT Money Empire.
+Thank you for your interest in contributing! We welcome all contributions that help improve JME.
 
 ## Getting Started
 
@@ -51,4 +51,4 @@ Please be respectful and follow our [Code of Conduct](CODE_OF_CONDUCT.md).
 
 ---
 
-Thank you for helping make JJT Money Empire better!
+Thank you for helping make JME better!
