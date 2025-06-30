@@ -1,6 +1,22 @@
 //!native
 //!optimize 2
 
+/**
+ * @fileoverview RevenueService - Handles all revenue, value, and boost calculations for items and droplets.
+ *
+ * This service manages:
+ * - Global and upgrade-based revenue multipliers (e.g., Dark Matter, Funds Bombs, named upgrades)
+ * - Application of additive, multiplicative, and exponential boosts to all revenue sources
+ * - Calculation of droplet values, including all relevant boosts and nerfs
+ * - Integration with softcap logic and currency balancing
+ *
+ * RevenueService acts as the central authority for all value and boost calculations
+ * related to item and droplet revenue, ensuring consistent and extensible logic for
+ * upgrades, boosts, and special mechanics.
+ *
+ * @since 1.0.0
+ */
+
 import { Service } from "@flamework/core";
 import { BombsService } from "server/services/BombsService";
 import { DarkMatterService } from "server/services/DarkMatterService";
@@ -16,21 +32,28 @@ import { performSoftcaps } from "shared/Softcaps";
 import { getAllInstanceInfo } from "@antivivi/vrldk";
 
 const FURNACE_UPGRADES = NamedUpgrades.getUpgrades("Furnace");
-const ONES = CurrencyBundle.ones();
 
+/**
+ * Service for managing all revenue, value, and boost calculations for items and droplets.
+ * Handles global and upgrade-based multipliers, softcaps, and value computation.
+ */
 @Service()
 export class RevenueService {
 
+    /**
+     * Constructs the RevenueService with all required dependencies.
+     */
     constructor(private dataService: DataService, private darkMatterService: DarkMatterService, private bombsService: BombsService,
         private currencyService: CurrencyService) {
 
     }
 
     /**
-     * Get the global boosts that are applied to all revenue sources.
-     * 
+     * Gets the global additive, multiplicative, and exponential boosts applied to all revenue sources.
+     * Includes boosts from dark matter, bombs, and named upgrades.
+     *
      * @param upgrades Upgrades for the revenue source
-     * @returns Global boosts
+     * @returns Tuple of (add, mul, pow) boosts
      */
     getGlobal(upgrades?: Map<string, PriceUpgrade>) {
         let [add, mul, pow] = Operative.template();
@@ -62,13 +85,13 @@ export class RevenueService {
     }
 
     /**
-     * Apply boosts that are globally put upon every revenue source.
-     * 
-     * @param add Addition term to apply.
-     * @param mul Multiplication term to apply.
-     * @param pow Power term to apply.
+     * Applies global boosts to the provided add, mul, and pow terms.
+     *
+     * @param add Addition term to apply
+     * @param mul Multiplication term to apply
+     * @param pow Power term to apply
      * @param upgrades Upgrades for the revenue source
-     * @returns Boosts
+     * @returns Tuple of (add, mul, pow) with global boosts applied
      */
     applyGlobal(add: CurrencyBundle, mul: CurrencyBundle, pow: CurrencyBundle, upgrades?: Map<string, PriceUpgrade>) {
         const [globalAdd, globalMul, globalPow] = this.getGlobal(upgrades);
@@ -78,19 +101,24 @@ export class RevenueService {
         return $tuple(add, mul, pow);
     }
 
+    /**
+     * Applies softcaps to the provided value, using the current balance as context.
+     *
+     * @param value The value to apply softcaps to
+     * @returns The softcapped value
+     */
     performSoftcaps(value: CurrencyMap) {
         return performSoftcaps(this.currencyService.balance.amountPerCurrency, value);
     }
 
     /**
-     * Gives the total value of the specified droplet.
-     * Accounts for all boosts.
-     * 
+     * Calculates the total value of a droplet, including all relevant boosts and nerfs.
+     *
      * @param dropletModel Droplet to calculate
-     * @param includesGlobalBoosts Whether to include global boosts e.g. Dark Matter, Funds bombs. This is useful for {@link Condenser}
-     * @param includesUpgrades Whether to include upgrades introduced by {@link Upgrader} items
-     * @param enforce Whether to enforce the includesUpgrades parameter. This is useful for {@link SkyDroplet}
-     * @returns The value of the droplet, and the nerf applied to it.
+     * @param includesGlobalBoosts Whether to include global boosts (e.g., Dark Matter, Funds bombs)
+     * @param includesUpgrades Whether to include upgrades from Upgrader items
+     * @param enforce Whether to enforce the includesUpgrades parameter (for special cases)
+     * @returns Tuple of (droplet value, nerf applied)
      */
     calculateDropletValue(dropletModel: BasePart, includesGlobalBoosts: boolean, includesUpgrades: boolean, enforce?: boolean) {
         const instanceInfo = getAllInstanceInfo(dropletModel);

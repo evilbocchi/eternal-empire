@@ -1,3 +1,19 @@
+/**
+ * @fileoverview ResetService - Handles all logic related to game resets and prestige layers.
+ *
+ * This service manages:
+ * - Determining which items, currencies, and upgrades are reset or kept per layer
+ * - Performing the reset process, including inventory and world item management
+ * - Calculating reset rewards based on player progress and upgrades
+ * - Integrating with UI and touch interactions for reset triggers
+ * - Firing signals and coordinating with other services on reset events
+ *
+ * The ResetService acts as the central authority for all reset-related mechanics,
+ * ensuring a consistent and fair reset experience for players, and providing hooks
+ * for other systems to respond to resets.
+ *
+ * @since 1.0.0
+ */
 import Signal from "@antivivi/lemon-signal";
 import { OnoeNum } from "@antivivi/serikanum";
 import { OnInit, Service } from "@flamework/core";
@@ -19,11 +35,27 @@ import { ItemsService } from "./serverdata/ItemsService";
 const RESET_UPGRADES = NamedUpgrades.getUpgrades("Reset");
 
 @Service()
+/**
+ * Service for managing all reset and prestige layer logic.
+ * Handles item, currency, and upgrade resets, reward calculation, and reset triggers.
+ */
 export class ResetService implements OnInit {
 
+    /**
+     * Signal fired when a player completes a reset.
+     * @param player The player who reset
+     * @param layer The reset layer id
+     * @param amount The amount of reward given
+     */
     reset = new Signal<(player: Player, layer: ResetLayerId, amount: OnoeNum) => void>();
+    /**
+     * Tracks whether a reset is currently in progress per layer.
+     */
     resettingPerLayer = new Map<ResetLayerId, boolean>();
 
+    /**
+     * Constructs the ResetService with all required dependencies.
+     */
     constructor(private dataService: DataService, private itemsService: ItemsService,
         private currencyService: CurrencyService, private upgradeBoardService: UpgradeBoardService,
         private revenueService: RevenueService) {
@@ -31,12 +63,11 @@ export class ResetService implements OnInit {
     }
 
     /**
-     * Whether the specified item should be kept, unplaced or reset from the server.
-     * 
+     * Determines if an item should be kept, unplaced, or reset for a given layer.
      * @param itemId Item id to check
      * @param resetLayer Reset layer to reset on
      * @param placedIn Where the item is placed
-     * @returns 0 if the item should be kept, 1 if the item should be unplaced and 2 if the item should be reset
+     * @returns 0 if kept, 1 if unplaced, 2 if reset
      */
     shouldRemove(itemId: string, resetLayer: ResetLayer, placedIn?: AreaId) {
         const item = Items.getItem(itemId);
@@ -49,6 +80,12 @@ export class ResetService implements OnInit {
             return placedIn === resetLayer.area.id ? 1 : 0;
     }
 
+    /**
+     * Removes from inventory any items that should be reset for the given layer.
+     * @param inventory The inventory to filter
+     * @param resetLayer The reset layer
+     * @returns The filtered inventory
+     */
     filterExcludeInventory(inventory: Inventory, resetLayer: ResetLayer) {
         for (const [itemId] of inventory) {
             if (this.shouldRemove(itemId, resetLayer) === 2) {
@@ -58,6 +95,12 @@ export class ResetService implements OnInit {
         return inventory;
     }
 
+    /**
+     * Unplaces world items that should be unplaced or reset for the given layer.
+     * @param resetLayer The reset layer
+     * @param items The items data
+     * @returns The updated inventory
+     */
     unplaceItems(resetLayer: ResetLayer, items: ItemsData) {
         const inventory = items.inventory;
         for (const [placementId, placedItem] of items.worldPlaced) {
@@ -73,6 +116,11 @@ export class ResetService implements OnInit {
         return inventory;
     }
 
+    /**
+     * Removes and unplaces all items as required for the given reset layer.
+     * Updates inventory and placed items, and performs dupe checks.
+     * @param resetLayer The reset layer
+     */
     removeItems(resetLayer: ResetLayer) {
         const items = this.dataService.empireData.items;
         // Remove placed items
@@ -84,6 +132,12 @@ export class ResetService implements OnInit {
         this.itemsService.setItems(items);
     }
 
+    /**
+     * Sets up a touch interaction for triggering a reset, with countdown and permission checks.
+     * @param touchPart The part to detect touches on
+     * @param required The required currency bundle to reset
+     * @param action Callback for when players are touching and countdown updates
+     */
     hookTouch(touchPart: BasePart, required: CurrencyBundle, action: (touching: Set<Player>, countdown: number) => void) {
         const players = new Set<Player>();
         let t = 0;
@@ -127,6 +181,10 @@ export class ResetService implements OnInit {
         });
     }
 
+    /**
+     * Performs the full reset process for the given layer: removes items, resets currencies and upgrades, updates empire data.
+     * @param resetLayer The reset layer
+     */
     performReset(resetLayer: ResetLayer) {
         this.removeItems(resetLayer);
         this.itemsService.fullUpdatePlacedItemsModels();
@@ -141,8 +199,8 @@ export class ResetService implements OnInit {
     }
 
     /**
-     * Get the reward for resetting at the specified layer.
-     * 
+     * Calculates the reward for resetting at the specified layer.
+     * Applies all relevant upgrades and softcaps.
      * @param resetLayer Reset layer to get the reward for
      * @param balance Balance to use for the reward calculation. Defaults to the current balance
      * @returns Reward for resetting at the specified layer
@@ -165,6 +223,10 @@ export class ResetService implements OnInit {
         return worth;
     }
 
+    /**
+     * Initializes the ResetService, sets up UI, signals, and touch handlers for all reset layers.
+     * Integrates with currency changes and triggers reset logic as needed.
+     */
     onInit() {
         if (Sandbox.getEnabled())
             return;

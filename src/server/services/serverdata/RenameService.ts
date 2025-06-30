@@ -27,7 +27,7 @@ import { OnInit, Service } from "@flamework/core";
 import { MarketplaceService, TextService, Workspace } from "@rbxts/services";
 import { GameAssetService } from "server/services/GameAssetService";
 import { LeaderboardService } from "server/services/LeaderboardService";
-import { PermissionsService } from "server/services/PermissionsService";
+import { PermissionsService } from "server/services/permissions/PermissionsService";
 import { CurrencyService } from "server/services/serverdata/CurrencyService";
 import { DataService } from "server/services/serverdata/DataService";
 import { getNameFromUserId } from "shared/constants";

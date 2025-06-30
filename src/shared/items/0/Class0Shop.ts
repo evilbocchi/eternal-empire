@@ -68,6 +68,7 @@ import DropletShatterer from "shared/items/0/shatteredbabass/DropletShatterer";
 import ShatteredBabass from "shared/items/0/shatteredbabass/ShatteredBabass";
 import AnotherWorld from "shared/items/0/sleepful/AnotherWorld";
 import HeavenGarden from "shared/items/0/sleepful/HeavenGarden";
+import Ame from "shared/items/0/spontaneous/Ame";
 import CruelBlankEssence from "shared/items/0/spontaneous/CruelBlankEssence";
 import EmeraldProcessor from "shared/items/0/spontaneous/EmeraldProcessor";
 import FocalPoint from "shared/items/0/spontaneous/FocalPoint";
@@ -239,7 +240,8 @@ export = new Item(script.Name)
         FocalPoint,
         OctahedralTemple,
         CruelBlankEssence,
-        Solitude
+        Solitude,
+        Ame
     ])
 
     .exit();

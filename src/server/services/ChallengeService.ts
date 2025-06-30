@@ -18,7 +18,7 @@ import { OnStart, Service } from "@flamework/core";
 import { toNumeral } from "@rbxts/roman-numerals";
 import StringBuilder from "@rbxts/stringbuilder";
 import { CHALLENGE_UPGRADES, CHALLENGES, REWARD_UPGRADES } from "server/Challenges";
-import { PermissionsService } from "server/services/PermissionsService";
+import { PermissionsService } from "server/services/permissions/PermissionsService";
 import { ResetService } from "server/services/ResetService";
 import { CurrencyService } from "server/services/serverdata/CurrencyService";
 import { DataService } from "server/services/serverdata/DataService";
