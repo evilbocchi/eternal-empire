@@ -23,7 +23,7 @@ import { Profile } from "@antivivi/profileservice/globals";
 import { BaseOnoeNum, OnoeNum } from "@antivivi/serikanum";
 import { ProfileManager } from "@antivivi/vrldk";
 import { OnInit, Service } from "@flamework/core";
-import { DataStoreService, HttpService, MarketplaceService, Players, RunService, TeleportService, Workspace } from "@rbxts/services";
+import { BadgeService, DataStoreService, HttpService, MarketplaceService, Players, RunService, TeleportService, Workspace } from "@rbxts/services";
 import { OnPlayerJoined } from "server/services/ModdingService";
 import { IS_SERVER, IS_SINGLE_SERVER, getNameFromUserId, getStartCamera, isStartScreenEnabled } from "shared/constants";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
@@ -938,6 +938,9 @@ export class DataService implements OnInit, OnPlayerJoined {
                 availableEmpires.set(this.empireId, this.getInfo(this.empireId));
             }
         });
+        pcall(() => {
+            BadgeService.AwardBadge(player.UserId, 3498765777753358); // join badge
+        })
 
         const playerProfile = this.loadPlayerProfile(player.UserId);
         if (playerProfile === undefined)

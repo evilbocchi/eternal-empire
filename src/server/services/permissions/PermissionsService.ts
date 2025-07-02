@@ -21,7 +21,7 @@ import { OnInit, Service } from "@flamework/core";
 import { Debris, Lighting, MarketplaceService, MessagingService, Players, ReplicatedStorage, RunService, ServerStorage, TeleportService, TextChatService, TextService, Workspace } from "@rbxts/services";
 import Quest from "server/Quest";
 import { AreaService } from "server/services/world/AreaService";
-import { BombsService } from "server/services/BombsService";
+import { BombsService } from "server/services/boosts/BombsService";
 import { ChestService } from "server/services/world/ChestService";
 import { DonationService } from "server/services/DonationService";
 import { GameAssetService } from "server/services/GameAssetService";
@@ -54,6 +54,7 @@ import BasicCharger from "shared/items/negative/trueease/BasicCharger";
 import Packets from "shared/Packets";
 import { RESET_LAYERS } from "shared/ResetLayer";
 import Sandbox from "shared/Sandbox";
+import ProductService from "server/services/product/ProductService";
 
 declare global {
     interface Log {
@@ -95,11 +96,24 @@ export class PermissionsService implements OnInit, OnPlayerJoined {
     /**
      * Constructs the PermissionsService with all required dependencies.
      */
-    constructor(private dataService: DataService, private gameAssetService: GameAssetService, private donationService: DonationService,
-        private currencyService: CurrencyService, private leaderboardService: LeaderboardService, private upgradeBoardService: UpgradeBoardService,
-        private itemsService: ItemsService, private playtimeService: PlaytimeService, private areaService: AreaService, private levelService: LevelService,
-        private questsService: QuestsService, private unlockedAreasService: UnlockedAreasService, private resetService: ResetService,
-        private bombsService: BombsService, private setupService: SetupService, private chestService: ChestService) {
+    constructor(private dataService: DataService,
+        private gameAssetService: GameAssetService,
+        private donationService: DonationService,
+        private currencyService: CurrencyService,
+        private leaderboardService: LeaderboardService,
+        private upgradeBoardService: UpgradeBoardService,
+        private itemsService: ItemsService,
+        private playtimeService: PlaytimeService,
+        private areaService: AreaService,
+        private levelService: LevelService,
+        private questsService: QuestsService,
+        private unlockedAreasService: UnlockedAreasService,
+        private resetService: ResetService,
+        private bombsService: BombsService,
+        private setupService: SetupService,
+        private chestService: ChestService,
+        private productService: ProductService
+    ) {
 
     }
 
@@ -319,7 +333,7 @@ export class PermissionsService implements OnInit, OnPlayerJoined {
 
         Packets.promptDonation.listen((player, dp) => MarketplaceService.PromptProductPurchase(player, dp));
         for (const donationProduct of DONATION_PRODUCTS) {
-            this.gameAssetService.setProductFunction(donationProduct.id, (_receipt, player) => {
+            this.productService.setProductFunction(donationProduct.id, (_receipt, player) => {
                 this.donationService.setDonated(player, this.donationService.getDonated(player) + donationProduct.amount);
                 this.sendServerMessage(player.Name + " JUST DONATED " + donationProduct.amount + " ROBUX!");
                 if (donationProduct.amount >= 100) {
@@ -329,7 +343,7 @@ export class PermissionsService implements OnInit, OnPlayerJoined {
             });
         }
         for (const [currency, bombProduct] of pairs(BOMBS_PRODUCTS)) {
-            this.gameAssetService.setProductFunction(bombProduct, () => {
+            this.productService.setProductFunction(bombProduct, () => {
                 this.currencyService.increment(currency + " Bombs" as Currency, new OnoeNum(4));
                 return Enum.ProductPurchaseDecision.PurchaseGranted;
             });

@@ -13,7 +13,7 @@ import { OnoeNum } from "@antivivi/serikanum";
 import { OnInit, Service } from "@flamework/core";
 import { AREAS } from "shared/Area";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
-import { CurrencyService } from "./serverdata/CurrencyService";
+import { CurrencyService } from "../serverdata/CurrencyService";
 
 /**
  * Service that manages Dark Matter boosts and GUI updates.

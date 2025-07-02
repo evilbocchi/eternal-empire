@@ -18,8 +18,8 @@ import { OnInit, OnStart, Service } from "@flamework/core";
 import { DataStoreService, MessagingService, Workspace } from "@rbxts/services";
 import Packets from "shared/Packets";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
-import { CurrencyService } from "./serverdata/CurrencyService";
-import { DataService } from "./serverdata/DataService";
+import { CurrencyService } from "../serverdata/CurrencyService";
+import { DataService } from "../serverdata/DataService";
 
 /**
  * Structure for bomb event messages sent via MessagingService.

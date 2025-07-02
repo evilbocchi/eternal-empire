@@ -1,29 +1,4 @@
 /**
- * @fileoverview DialogueService - Manages NPC dialogue, interactions, and cutscenes.
- *
- * This service provides:
- * - Dialogue system for NPCs
- * - Cutscene and animation management
- * - Player interaction with dialogue prompts
- *
- * @since 1.0.0
- */
-
-/**
- * Service that manages all NPC dialogue, cutscenes, and related player interactions.
- */
-
-import Signal from "@antivivi/lemon-signal";
-import { loadAnimation } from "@antivivi/vrldk";
-import { OnInit, Service } from "@flamework/core";
-import { Players, TweenService, Workspace } from "@rbxts/services";
-import { DataService } from "server/services/serverdata/DataService";
-import { NPCS, NPC_MODELS, getDisplayName } from "shared/constants";
-import { ASSETS, getSound } from "shared/GameAssets";
-import NPC, { Dialogue, NPCAnimationType } from "shared/NPC";
-import Packets from "shared/Packets";
-
-/**
  * @fileoverview DialogueService - Handles NPC dialogue, interaction, and animation logic.
  *
  * This service manages:
@@ -36,6 +11,18 @@ import Packets from "shared/Packets";
  * @since 1.0.0
  */
 
+import Signal from "@antivivi/lemon-signal";
+import { loadAnimation } from "@antivivi/vrldk";
+import { OnInit, OnStart, Service } from "@flamework/core";
+import { Players, ProximityPromptService, TweenService, Workspace } from "@rbxts/services";
+import { DataService } from "server/services/serverdata/DataService";
+import { NPCS, NPC_MODELS, getDisplayName } from "shared/constants";
+import { ASSETS, getSound } from "shared/GameAssets";
+import InteractableObject from "shared/InteractableObject";
+import { GameUtils } from "shared/item/ItemUtils";
+import NPC, { Dialogue, NPCAnimationType } from "shared/NPC";
+import Packets from "shared/Packets";
+
 declare global {
     /**
      * BillboardGui asset for NPC notifications.
@@ -47,8 +34,11 @@ declare global {
     }
 }
 
+/**
+ * Service that manages all NPC dialogue, cutscenes, and related player interactions.
+ */
 @Service()
-export class DialogueService implements OnInit {
+export class DialogueService implements OnInit, OnStart {
     /**
      * Signal fired when a dialogue sequence finishes.
      * @param dialogue The dialogue that finished.
@@ -366,5 +356,17 @@ export class DialogueService implements OnInit {
                     this.stopAnimation(npc, "Jump");
             });
         }
+    }
+
+    onStart() {
+        ProximityPromptService.PromptTriggered.Connect((prompt, player) => {
+            if (this.isInteractionEnabled === false || prompt.Parent === undefined)
+                return;
+            const interactableObject = InteractableObject.REGISTRY.get(prompt.Parent.Name);
+            if (interactableObject === undefined)
+                return;
+            this.proximityPrompts.add(prompt);
+            interactableObject.interacted.fire(GameUtils, player);
+        });
     }
 }

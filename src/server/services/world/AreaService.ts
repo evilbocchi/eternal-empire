@@ -50,6 +50,11 @@ AREA_CHECK_PARAMS.CollisionGroup = "PlayerHitbox";
 @Service()
 export class AreaService implements OnInit, OnPlayerJoined {
 
+    /**
+     * Maps area IDs to the number of droplets currently present in that area.
+     */
+    dropletCountPerArea = new Map<AreaId, number>();
+
     /** 
      * Stores bounding box information for each area to enable efficient player position checks.
      * Maps area ID to a tuple of [CFrame, Vector3] representing the area's bounds.
@@ -61,7 +66,7 @@ export class AreaService implements OnInit, OnPlayerJoined {
         private dataService: DataService,
         private leaderstatsService: LeaderstatsService,
         private upgradeBoardService: UpgradeBoardService,
-        private gameAssetService: GameAssetService
+        private gameAssetService: GameAssetService,
     ) { }
 
     /**
@@ -266,8 +271,7 @@ export class AreaService implements OnInit, OnPlayerJoined {
      * @param newCount The new droplet count for the area
      */
     propagateDropletCountChange(id: AreaId, newCount: number) {
-        const dropletCountPerArea = this.gameAssetService.GameUtils.dropletCountPerArea;
-        dropletCountPerArea.set(id, newCount);
+        this.dropletCountPerArea.set(id, newCount);
 
         // Prevent network spam during server initialization
         if (os.clock() < 6) { // don't propagate changes too early after server start
@@ -289,7 +293,7 @@ export class AreaService implements OnInit, OnPlayerJoined {
      * @param area The Area object containing droplet limit configuration
      */
     loadBoardGui(id: AreaId, area: Area) {
-        const dropletCountPerArea = this.gameAssetService.GameUtils.dropletCountPerArea;
+        const dropletCountPerArea = this.dropletCountPerArea;
 
         // Initialize droplet count for this area
         dropletCountPerArea.set(id, 0);

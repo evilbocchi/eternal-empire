@@ -23,18 +23,18 @@
  */
 
 import { OnoeNum } from "@antivivi/serikanum";
+import { playSoundAtPart } from "@antivivi/vrldk";
 import { OnInit, Service } from "@flamework/core";
 import { MarketplaceService, TextService, Workspace } from "@rbxts/services";
-import { GameAssetService } from "server/services/GameAssetService";
 import { LeaderboardService } from "server/services/LeaderboardService";
 import { PermissionsService } from "server/services/permissions/PermissionsService";
+import ProductService from "server/services/product/ProductService";
 import { CurrencyService } from "server/services/serverdata/CurrencyService";
 import { DataService } from "server/services/serverdata/DataService";
 import { getNameFromUserId } from "shared/constants";
+import CurrencyBundle from "shared/currency/CurrencyBundle";
 import { getSound } from "shared/GameAssets";
 import Packets from "shared/Packets";
-import CurrencyBundle from "shared/currency/CurrencyBundle";
-import { playSoundAtPart } from "@antivivi/vrldk";
 
 /**
  * Service for managing empire name changes with validation and payment processing.
@@ -55,17 +55,11 @@ export class RenameService implements OnInit {
     /** Temporary storage for player names during Robux purchase flow. */
     namesPerPlayer = new Map<Player, string>();
 
-    /**
-     * Initializes the RenameService with required dependencies.
-     * 
-     * @param dataService Service providing persistent empire data.
-     * @param gameAssetService Service for registering product purchase handlers.
-     * @param leaderboardService Service for name uniqueness checking and updates.
-     * @param currencyService Service for in-game currency transactions.
-     * @param permissionsService Service for player messaging and permission checks.
-     */
-    constructor(private dataService: DataService, private gameAssetService: GameAssetService,
-        private leaderboardService: LeaderboardService, private currencyService: CurrencyService, private permissionsService: PermissionsService) {
+    constructor(private dataService: DataService,
+        private productService: ProductService,
+        private leaderboardService: LeaderboardService,
+        private currencyService: CurrencyService,
+        private permissionsService: PermissionsService) {
 
     }
 
@@ -196,7 +190,7 @@ export class RenameService implements OnInit {
         });
 
         // Set up Robux product purchase handler
-        this.gameAssetService.setProductFunction(this.PRODUCT_ID, (_receiptInfo, player) => {
+        this.productService.setProductFunction(this.PRODUCT_ID, (_receiptInfo, player) => {
             const name = this.namesPerPlayer.get(player);
 
             // Validate stored name

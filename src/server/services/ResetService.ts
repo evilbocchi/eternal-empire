@@ -34,11 +34,11 @@ import { ItemsService } from "./serverdata/ItemsService";
 
 const RESET_UPGRADES = NamedUpgrades.getUpgrades("Reset");
 
-@Service()
 /**
  * Service for managing all reset and prestige layer logic.
  * Handles item, currency, and upgrade resets, reward calculation, and reset triggers.
  */
+@Service()
 export class ResetService implements OnInit {
 
     /**

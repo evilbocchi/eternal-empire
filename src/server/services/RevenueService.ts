@@ -18,8 +18,8 @@
  */
 
 import { Service } from "@flamework/core";
-import { BombsService } from "server/services/BombsService";
-import { DarkMatterService } from "server/services/DarkMatterService";
+import { BombsService } from "server/services/boosts/BombsService";
+import { DarkMatterService } from "server/services/boosts/DarkMatterService";
 import { CurrencyService } from "server/services/serverdata/CurrencyService";
 import { DataService } from "server/services/serverdata/DataService";
 import CurrencyBundle from "shared/currency/CurrencyBundle";

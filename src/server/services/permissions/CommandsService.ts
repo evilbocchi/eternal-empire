@@ -4,7 +4,7 @@ import { OnInit, Service } from "@flamework/core";
 import { Debris, Lighting, Players, ReplicatedStorage, RunService, ServerStorage, TeleportService, TextChatService, Workspace } from "@rbxts/services";
 import Quest from "server/Quest";
 import { AreaService } from "server/services/world/AreaService";
-import { BombsService } from "server/services/BombsService";
+import { BombsService } from "server/services/boosts/BombsService";
 import { ChestService } from "server/services/world/ChestService";
 import { DonationService } from "server/services/DonationService";
 import { GameAssetService } from "server/services/GameAssetService";

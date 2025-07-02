@@ -23,9 +23,9 @@
 import Signal from "@antivivi/lemon-signal";
 import { getInstanceInfo, getRootPart, playSoundAtPart } from "@antivivi/vrldk";
 import { OnInit, OnPhysics, OnStart, Service } from "@flamework/core";
-import { AnalyticsService, MarketplaceService, PathfindingService, PhysicsService, Players, ProximityPromptService, ReplicatedStorage, RunService, TweenService, Workspace } from "@rbxts/services";
+import { AnalyticsService, PathfindingService, Players, ProximityPromptService, ReplicatedStorage, RunService, TweenService, Workspace } from "@rbxts/services";
 import Quest, { Stage } from "server/Quest";
-import { DarkMatterService } from "server/services/DarkMatterService";
+import { DarkMatterService } from "server/services/boosts/DarkMatterService";
 import { DialogueService } from "server/services/npc/DialogueService";
 import { ResetService } from "server/services/ResetService";
 import { RevenueService } from "server/services/RevenueService";
@@ -40,13 +40,11 @@ import { SetupService } from "server/services/serverdata/SetupService";
 import { UnlockedAreasService } from "server/services/serverdata/UnlockedAreasService";
 import { UpgradeBoardService } from "server/services/serverdata/UpgradeBoardService";
 import { getNPCPosition, getWaypoint, PLACED_ITEMS_FOLDER } from "shared/constants";
-import CurrencyBundle from "shared/currency/CurrencyBundle";
 import { getSound } from "shared/GameAssets";
 import GameSpeed from "shared/GameSpeed";
 import InteractableObject from "shared/InteractableObject";
 import ItemUtils from "shared/item/ItemUtils";
 import Items from "shared/items/Items";
-import NamedUpgrades from "shared/namedupgrade/NamedUpgrades";
 import NPC, { Dialogue, NPCAnimationType } from "shared/NPC";
 import Packets from "shared/Packets";
 import Sandbox from "shared/Sandbox";
@@ -54,46 +52,8 @@ import Sandbox from "shared/Sandbox";
 declare global {
     /** Function type for handling product purchases. */
     type ProductFunction = (receiptInfo: ReceiptInfo, player: Player) => Enum.ProductPurchaseDecision;
-    /** Global type alias for the GameUtils API. */
-    type GameUtils = GameAssetService['GameUtils'];
 }
 
-// Physics Collision Group Setup
-// Initialize all collision groups before any physics interactions occur
-
-PhysicsService.RegisterCollisionGroup("Decoration");
-PhysicsService.RegisterCollisionGroup("ItemHitbox");
-PhysicsService.RegisterCollisionGroup("Item");
-PhysicsService.RegisterCollisionGroup("QueryableGhost");
-PhysicsService.RegisterCollisionGroup("Antighost");
-PhysicsService.RegisterCollisionGroup("Droplet");
-PhysicsService.RegisterCollisionGroup("Player");
-PhysicsService.RegisterCollisionGroup("PlayerHitbox");
-PhysicsService.RegisterCollisionGroup("NPC");
-
-// Configure collision interactions for droplets
-PhysicsService.CollisionGroupSetCollidable("Droplet", "Default", false);
-PhysicsService.CollisionGroupSetCollidable("Droplet", "Droplet", false);
-PhysicsService.CollisionGroupSetCollidable("Droplet", "QueryableGhost", false);
-PhysicsService.CollisionGroupSetCollidable("Droplet", "Decoration", false);
-PhysicsService.CollisionGroupSetCollidable("Droplet", "Item", true);
-
-// Configure item hitbox interactions
-PhysicsService.CollisionGroupSetCollidable("ItemHitbox", "Droplet", false);
-PhysicsService.CollisionGroupSetCollidable("ItemHitbox", "Item", false);
-
-// Configure special ghost groups for selective collision
-for (const group of PhysicsService.GetRegisteredCollisionGroups()) {
-    PhysicsService.CollisionGroupSetCollidable("QueryableGhost", group.name, group.name === "QueryableGhost");
-    PhysicsService.CollisionGroupSetCollidable("Antighost", group.name, group.name === "Droplet");
-    PhysicsService.CollisionGroupSetCollidable("NPC", group.name, group.name === "Default");
-}
-
-// Constants and Cached Values
-/** Cached furnace upgrades for performance. */
-const FURNACE_UPGRADES = NamedUpgrades.getUpgrades("Furnace");
-/** Cached currency bundle of ones for calculations. */
-const ONES = CurrencyBundle.ones();
 
 /** Previous game speed value for change detection. */
 let oldSpeed = 1;
@@ -138,11 +98,6 @@ export class GameAssetService implements OnInit, OnStart, OnPhysics {
     loadedStages = new Set<Stage>();
 
     /**
-     * Map of product IDs to their purchase handling functions.
-     */
-    productFunctions = new Map<number, ProductFunction>();
-
-    /**
      * Map of active pathfinding operations for NPCs.
      */
     runningPathfinds = new Map<Humanoid, RBXScriptConnection>();
@@ -151,114 +106,6 @@ export class GameAssetService implements OnInit, OnStart, OnPhysics {
      * Whether the service is in rendering mode.
      */
     isRendering = false;
-
-    /**
-     * Comprehensive game utilities API exposed to items and other systems.
-     * Provides access to all major game services and common operations.
-     */
-    readonly GameUtils = (() => {
-        const t = {
-            /** Whether the GameUtils object is ready for use */
-            ready: true,
-            /** The mutable empire data table */
-            empireData: this.dataService.empireData,
-
-            itemsService: this.itemsService,
-            currencyService: this.currencyService,
-            unlockedAreasService: this.unlockedAreasService,
-            playtimeService: this.playtimeService,
-            resetService: this.resetService,
-            revenueService: this.revenueService,
-            setupService: this.setupService,
-            eventService: this.eventService,
-            gameAssetService: this,
-            items: Items,
-
-            dropletCountPerArea: new Map<AreaId, number>(),
-
-            buyUpgrade: (upgradeId: string, to?: number, player?: Player, isFree?: boolean) => this.upgradeBoardService.buyUpgrade(upgradeId, to, player, isFree),
-            checkPermLevel: (player: Player, action: PermissionKey) => this.dataService.checkPermLevel(player, action),
-            dialogueFinished: this.dialogueService.dialogueFinished,
-            playNPCAnimation: (npc: NPC, animType: NPCAnimationType) => this.dialogueService.playAnimation(npc, animType),
-            stopNPCAnimation: (npc: NPC, animType: NPCAnimationType) => this.dialogueService.stopAnimation(npc, animType),
-            onStageReached: (stage: Stage, callback: () => void) => {
-                return this.stageReached.connect((s) => {
-                    if (stage === s) {
-                        callback();
-                    }
-                });
-            },
-            addDialogue: (dialogue: Dialogue, priority?: number) => this.dialogueService.addDialogue(dialogue.npc, dialogue, priority),
-            removeDialogue: (dialogue: Dialogue) => this.dialogueService.removeDialogue(dialogue.npc, dialogue),
-            talk: (dialogue: Dialogue, requireInteraction?: boolean) => this.dialogueService.talk(dialogue, requireInteraction),
-            addCompletionListener: (event: string, callback: (isCompleted: boolean) => void) => {
-                return this.eventService.addCompletionListener(event, callback);
-            },
-            isEventCompleted: (event: string) => this.eventService.isEventCompleted(event),
-            setEventCompleted: (event: string, isCompleted: boolean) => this.eventService.setEventCompleted(event, isCompleted),
-            isQuestCompleted: (questId: string) => this.dataService.empireData.quests.get(questId) === -1,
-            leadToPoint: (npcHumanoid: Instance, point: CFrame, callback: () => unknown, requiresPlayer?: boolean, agentParams?: AgentParameters) => {
-                if (!npcHumanoid.IsA("Humanoid"))
-                    throw npcHumanoid.Name + " is not a Humanoid";
-                const cached = this.runningPathfinds.get(npcHumanoid);
-                if (cached !== undefined)
-                    cached.Disconnect();
-                npcHumanoid.RootPart!.Anchored = false;
-                const tween = TweenService.Create(npcHumanoid.RootPart!, new TweenInfo(1), { CFrame: point });
-                let toCall = false;
-                this.pathfind(npcHumanoid, point.Position, () => {
-                    tween.Play();
-                    if (requiresPlayer === false) {
-                        toCall = true;
-                    }
-                }, agentParams);
-                const connection = RunService.Heartbeat.Connect(() => {
-                    const players = Players.GetPlayers();
-                    for (const player of players) {
-                        const playerRootPart = getRootPart(player);
-                        if (playerRootPart === undefined)
-                            continue;
-                        if (point.Position.sub(playerRootPart.Position).Magnitude < 10) {
-                            tween.Play();
-                            toCall = true;
-                            connection.Disconnect();
-                            return;
-                        }
-                    }
-                });
-                task.spawn(() => {
-                    while (!toCall) {
-                        RunService.Heartbeat.Wait();
-                    }
-                    print("Reached point", npcHumanoid.Name, point.Position);
-                    if (callback !== undefined) {
-                        callback();
-                    }
-                });
-                this.runningPathfinds.set(npcHumanoid, connection);
-                return connection;
-            },
-            getDefaultLocation: (npc: NPC) => this.dialogueService.defaultLocationsPerNPC.get(npc),
-            giveQuestItem: (itemId: string, amount: number) => {
-                this.itemsService.setItemAmount(itemId, this.itemsService.getItemAmount(itemId) + amount);
-                this.questItemGiven.fire(itemId, amount);
-            },
-            takeQuestItem: (itemId: string, amount: number) => {
-                const currentAmount = this.itemsService.getItemAmount(itemId);
-                if (currentAmount < amount)
-                    return false;
-                this.itemsService.setItemAmount(itemId, currentAmount - amount);
-                this.questItemTaken.fire(itemId, amount);
-                return true;
-            },
-        };
-        type noChecking = { [k: string]: unknown; };
-
-        for (const [k, v] of pairs(t))
-            (ItemUtils.GameUtils as noChecking)[k] = v;
-
-        return t;
-    })();
 
     // Pathfinding Configuration
 
@@ -281,28 +128,18 @@ export class GameAssetService implements OnInit, OnStart, OnPhysics {
         WaypointSpacing: 6
     };
 
-    /**
-     * Initializes the GameAssetService with all required dependencies.
-     * 
-     * @param dataService Empire and player data management
-     * @param itemsService Item inventory and placement management
-     * @param currencyService Currency tracking and transactions
-     * @param upgradeBoardService Upgrade purchases and management
-     * @param questsService Quest progression tracking
-     * @param levelService Level and experience management
-     * @param unlockedAreasService Area unlock tracking
-     * @param darkMatterService Dark matter system management
-     * @param revenueService Revenue calculation and tracking
-     * @param dialogueService NPC dialogue system
-     * @param eventService Event completion tracking
-     * @param setupService Setup management system
-     * @param resetService Game reset functionality
-     * @param playtimeService Playtime tracking
-     */
-    constructor(private dataService: DataService, private itemsService: ItemsService, private currencyService: CurrencyService,
-        private upgradeBoardService: UpgradeBoardService, private questsService: QuestsService, private levelService: LevelService,
-        private unlockedAreasService: UnlockedAreasService, private darkMatterService: DarkMatterService, private revenueService: RevenueService,
-        private dialogueService: DialogueService, private eventService: EventService, private setupService: SetupService, private resetService: ResetService,
+    constructor(private dataService: DataService,
+        private itemsService: ItemsService,
+        private currencyService: CurrencyService,
+        private upgradeBoardService: UpgradeBoardService,
+        private questsService: QuestsService,
+        private levelService: LevelService,
+        private unlockedAreasService: UnlockedAreasService,
+        private revenueService: RevenueService,
+        private dialogueService: DialogueService,
+        private eventService: EventService,
+        private setupService: SetupService,
+        private resetService: ResetService,
         private playtimeService: PlaytimeService) {
 
     }
@@ -508,17 +345,6 @@ export class GameAssetService implements OnInit, OnStart, OnPhysics {
         this.onQuestComplete(quest);
     }
 
-    // Product Purchase Management
-
-    /**
-     * Registers a function to handle purchases for a specific product ID.
-     * 
-     * @param productID The Roblox product ID to handle.
-     * @param productFunction The function to call when this product is purchased.
-     */
-    setProductFunction(productID: number, productFunction: ProductFunction) {
-        this.productFunctions.set(productID, productFunction);
-    }
 
     // Lifecycle Methods
 
@@ -544,17 +370,6 @@ export class GameAssetService implements OnInit, OnStart, OnPhysics {
      * Sets up interaction handlers, quest system, and product purchase processing.
      */
     onInit() {
-        // Set up proximity prompt interactions
-        ProximityPromptService.PromptTriggered.Connect((prompt, player) => {
-            if (this.dialogueService.isInteractionEnabled === false || prompt.Parent === undefined)
-                return;
-            const interactableObject = InteractableObject.REGISTRY.get(prompt.Parent.Name);
-            if (interactableObject === undefined)
-                return;
-            this.dialogueService.proximityPrompts.add(prompt);
-            interactableObject.interacted.fire(this.GameUtils, player);
-        });
-
         // Initialize quest system (skip in sandbox mode)
         if (!Sandbox.getEnabled()) {
             const questInfos = new Map<string, QuestInfo>();
@@ -593,17 +408,6 @@ export class GameAssetService implements OnInit, OnStart, OnPhysics {
             this.loadAvailableQuests();
             this.levelService.levelChanged.connect(() => this.loadAvailableQuests());
         }
-
-        // Set up product purchase processing
-        MarketplaceService.ProcessReceipt = (receiptInfo: ReceiptInfo) => {
-            const productFunction = this.productFunctions.get(receiptInfo.ProductId);
-            const player = Players.GetPlayerByUserId(receiptInfo.PlayerId);
-            if (productFunction === undefined || player === undefined) {
-                print(receiptInfo);
-                return Enum.ProductPurchaseDecision.NotProcessedYet;
-            }
-            return productFunction(receiptInfo, player);
-        };
     }
 
     /**
