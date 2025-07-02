@@ -110,10 +110,10 @@ import TransientTesseract from "shared/items/0/winsome/TransientTesseract";
 
 export = new Item(script.Name)
     .setName("Class 0 Shop")
-    .setDescription("Buy your favorite Millisecondless to Spontaneous items here! You can get two of this shop.")
+    .setDescription("Buy your favorite Millisecondless to Spontaneous items here!")
     .setDifficulty(Difficulty.Millisecondless)
     .addPlaceableArea("BarrenIslands", "SlamoVillage")
-    .setPrice(new CurrencyBundle().set("Skill", 0), 1, 2)
+    .setPrice(new CurrencyBundle().set("Skill", 0.1), 1, 5)
     .persists()
 
     .trait(Shop)

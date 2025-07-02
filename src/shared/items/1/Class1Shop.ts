@@ -3,6 +3,7 @@ import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
 import Shop from "shared/item/traits/Shop";
 import DropletCoaster from "shared/items/1/coasterifying/DropletCoaster";
+import AquaticFurnace from "shared/items/1/dosomething/AquaticFurnace";
 import CompressedObbyUpgrader from "shared/items/1/dosomething/CompressedObbyUpgrader";
 import SilentMemory from "shared/items/1/dosomething/SilentMemory";
 import AbruptBridge from "shared/items/1/joyful/AbruptBridge";
@@ -19,10 +20,10 @@ import FullConversionRamp from "shared/items/1/walkaslope/FullConversionRamp";
 
 export = new Item(script.Name)
     .setName("Class 1 Shop")
-    .setDescription("Buy your favorite Joyful to Effortlessless items here! You can get three of this shop.")
+    .setDescription("Buy your favorite Joyful to Effortlessless items here!")
     .setDifficulty(Difficulty.Joyful)
-    .addPlaceableArea("BarrenIslands", "SlamoVillage")
-    .setPrice(new CurrencyBundle().set("Skill", 0), 1, 2)
+    .addPlaceableArea("BarrenIslands", "SlamoVillage", "SkyPavilion")
+    .setPrice(new CurrencyBundle().set("Wins", 0.1), 1, 5)
     .persists()
 
     .trait(Shop)
@@ -37,6 +38,7 @@ export = new Item(script.Name)
         AbruptBridge,
         TheAmplified,
 
+        AquaticFurnace,
         SilentMemory,
         CompressedObbyUpgrader,
 

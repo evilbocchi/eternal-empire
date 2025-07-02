@@ -11,7 +11,7 @@ export = new Item(script.Name)
     .setDescription("A conveyor with a built-in obby that has some pretty cool upgrades if you complete it!")
     .setDifficulty(Difficulty.DoSomething)
     .setPrice(new CurrencyBundle().set("Funds", 3e54), 1)
-    .addPlaceableArea("SkyPavilion")
+    .addPlaceableArea("BarrenIslands", "SlamoVillage", "SkyPavilion")
     .setCreator("sanjay2133")
 
     .trait(Conveyor)
