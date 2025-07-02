@@ -1,17 +1,15 @@
 //!native
 //!optimize 2
 
+import { findBaseParts, formatRichText, getAllInstanceInfo } from "@antivivi/vrldk";
 import { Players, RunService } from "@rbxts/services";
 import Area, { AREAS } from "shared/Area";
 import { CURRENCY_DETAILS } from "shared/currency/CurrencyDetails";
 import GameSpeed from "shared/GameSpeed";
 import Droplet, { DROPLET_STORAGE } from "shared/item/Droplet";
 import Item from "shared/item/Item";
-import ItemTrait from "shared/item/traits/ItemTrait";
-import { getAllInstanceInfo } from "@antivivi/vrldk";
 import { GameUtils } from "shared/item/ItemUtils";
-import { findBaseParts } from "@antivivi/vrldk";
-import { formatRichText } from "@antivivi/vrldk";
+import ItemTrait from "shared/item/traits/ItemTrait";
 
 declare global {
     interface ItemTraits {
@@ -154,7 +152,7 @@ export default class Dropper extends ItemTrait {
                 if (dropRate === 0)
                     continue;
                 if (t > info.LastDrop + 1 / dropRate / speed) {
-                    const dropletCount = GameUtils.dropletCountPerArea.get(info.Area!);
+                    const dropletCount = GameUtils.areaService.dropletCountPerArea.get(info.Area!);
                     if (dropletCount !== undefined && dropletCount > info.DropletLimitValue!.Value)
                         continue;
                     info.LastDrop = t;

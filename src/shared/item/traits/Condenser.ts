@@ -44,7 +44,7 @@ export default class Condenser extends ItemTrait {
             return;
         const area = AREAS[areaId as AreaId];
         const dropletLimit = area.dropletLimit;
-        const dropletCountPerArea = GameUtils.dropletCountPerArea;
+        const dropletCountPerArea = GameUtils.areaService.dropletCountPerArea;
         const instantiatorsPerDroplet = new Map<Droplet, () => BasePart>();
         const pricePerDroplet = new Map<Droplet, CurrencyBundle>();
         const maxCosts = new Map<Currency, OnoeNum>();

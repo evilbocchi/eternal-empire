@@ -132,6 +132,36 @@ namespace NamedUpgrades {
         .setPriceFormula((amount) => new CurrencyBundle().set("Skill", new OnoeNum(4).mul(new OnoeNum(4).pow(amount))))
         .setMul(x => new CurrencyBundle().set("Skill", new OnoeNum(1.05).pow(x)));
 
+    export const GreedOfTheObbyI = new GainUpgrade()
+        .setName("Greed of the Obby I")
+        .setDescription("Increase the Funds gain of this upgrader by 10% per upgrade additively.")
+        .setCap(10)
+        .setImage(99168281301378)
+        .setPriceFormula((amount) => new CurrencyBundle().set("Obby Points", new OnoeNum(1).mul(new OnoeNum(2).pow(amount))));
+
+    export const PowerOfTheObbyI = new GainUpgrade()
+        .setName("Power of the Obby I")
+        .setDescription("Increase the Power gain of this upgrader by 10% per upgrade additively.")
+        .setCap(10)
+        .setImage(126029413609380)
+        .setPriceFormula((amount) => new CurrencyBundle().set("Obby Points", new OnoeNum(2).mul(new OnoeNum(2).pow(amount))));
+
+    export const DecentralityOfTheObbyI = new GainUpgrade()
+        .setName("Decentrality of the Obby I")
+        .setDescription("Increase the Bitcoin gain of this upgrader by 10% per upgrade additively.")
+        .setCap(10)
+        .setImage(86736020041508)
+        .setPriceFormula((amount) => new CurrencyBundle().set("Obby Points", new OnoeNum(2).mul(new OnoeNum(2).pow(amount))));
+
+    export const MasteryOfTheObbyI = new GainUpgrade()
+        .setName("Mastery of the Obby I")
+        .setDescription("Increase the Skill gain of this upgrader by 10% per upgrade additively.")
+        .setCap(10)
+        .setImage(116098981386646)
+        .setPriceFormula((amount) => new CurrencyBundle().set("Obby Points", new OnoeNum(3).mul(new OnoeNum(2).pow(amount))));
+
+
+
     export const [UPGRADES_PER_TYPE, ALL_UPGRADES, register] = (function () {
         const upgrades = {
             Furnace: new Map<string, FurnaceUpgrade>(),

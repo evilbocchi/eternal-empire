@@ -65,6 +65,12 @@ const details = {
         image: 114592102522331,
         page: CURRENCY_CATEGORIES.Misc
     },
+    "Obby Points": {
+        layoutOrder: 1003,
+        color: Color3.fromRGB(255, 128, 0),
+        image: 74689986345234,
+        page: CURRENCY_CATEGORIES.Misc
+    },
     Health: {
         layoutOrder: 1003,
         color: Color3.fromRGB(255, 0, 0),
