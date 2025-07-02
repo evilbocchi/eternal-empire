@@ -76,9 +76,9 @@ export default class APIExposeService implements OnInit {
             setupService: this.setupService,
             eventService: this.eventService,
             npcNavigationService: this.npcNavigationService,
+            upgradeBoardService: this.upgradeBoardService,
             items: Items,
 
-            buyUpgrade: (upgradeId: string, to?: number, player?: Player, isFree?: boolean) => this.upgradeBoardService.buyUpgrade(upgradeId, to, player, isFree),
             checkPermLevel: (player: Player, action: PermissionKey) => this.dataService.checkPermLevel(player, action),
             dialogueFinished: this.dialogueService.dialogueFinished,
             playNPCAnimation: (npc: NPC, animType: NPCAnimationType) => this.dialogueService.playAnimation(npc, animType),

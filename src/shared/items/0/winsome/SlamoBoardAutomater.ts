@@ -1,10 +1,10 @@
 import Difficulty from "@antivivi/jjt-difficulties";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
-import Generator from "shared/item/traits/Generator";
 import Item from "shared/item/Item";
+import { GameAPI } from "shared/item/ItemUtils";
+import Generator from "shared/item/traits/Generator";
 import UpgradeBoard from "shared/item/traits/UpgradeBoard";
 import UpgradeBoardI from "shared/items/negative/trueease/UpgradeBoardI";
-import { GameAPI } from "shared/item/ItemUtils";
 
 export = new Item(script.Name)
     .setName("Slamo Board Automater")
@@ -23,7 +23,7 @@ export = new Item(script.Name)
 
         item.repeat(model, () => {
             for (const upgrade of upgrades) {
-                GameAPI.buyUpgrade(upgrade.id, undefined, undefined, true);
+                GameAPI.upgradeBoardService.buyUpgrade(upgrade.id, undefined, undefined, true);
             }
         }, 0.1);
     });
