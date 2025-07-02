@@ -21,7 +21,7 @@ import { OnInit, Service } from "@flamework/core";
 import { MarketplaceService, MessagingService, Players, TeleportService, TextService } from "@rbxts/services";
 import { BombsService } from "server/services/boosts/BombsService";
 import { DonationService } from "server/services/DonationService";
-import { GameAssetService } from "server/services/GameAssetService";
+import NPCNavigationService from "server/services/npc/NPCNavigationService";
 import { OnPlayerJoined } from "server/services/ModdingService";
 import ChatHookService from "server/services/permissions/ChatHookService";
 import ProductService from "server/services/product/ProductService";
@@ -85,7 +85,7 @@ export class PermissionsService implements OnInit, OnPlayerJoined {
      * Constructs the PermissionsService with all required dependencies.
      */
     constructor(private dataService: DataService,
-        private gameAssetService: GameAssetService,
+        private npcNavigationService: NPCNavigationService,
         private donationService: DonationService,
         private currencyService: CurrencyService,
         private upgradeBoardService: UpgradeBoardService,

@@ -342,7 +342,7 @@ export = new Quest(script.Name)
 
                 const humanoid = refugee.WaitForChild("Humanoid") as Humanoid;
                 humanoid.WalkSpeed = 30;
-                GameAPI.gameAssetService.pathfind(humanoid, getWaypoint("ToTheVillage6").Position, () => {
+                GameAPI.npcNavigationService.pathfind(humanoid, getWaypoint("ToTheVillage6").Position, () => {
                     refugee.PivotTo(getWaypoint("ToTheVillage7").CFrame);
                     humanoid.RootPart!.Anchored = true;
                     stage.completed.fire();

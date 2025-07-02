@@ -23,7 +23,7 @@
 import { getAllInstanceInfo, isInside, playSoundAtPart } from "@antivivi/vrldk";
 import { OnInit, Service } from "@flamework/core";
 import { Players } from "@rbxts/services";
-import { GameAssetService } from "server/services/GameAssetService";
+import NPCNavigationService from "server/services/npc/NPCNavigationService";
 import { LeaderstatsService } from "server/services/LeaderstatsService";
 import { OnPlayerJoined } from "server/services/ModdingService";
 import { DataService } from "server/services/serverdata/DataService";
@@ -66,7 +66,7 @@ export class AreaService implements OnInit, OnPlayerJoined {
         private dataService: DataService,
         private leaderstatsService: LeaderstatsService,
         private upgradeBoardService: UpgradeBoardService,
-        private gameAssetService: GameAssetService,
+        private npcNavigationService: NPCNavigationService,
     ) { }
 
     /**

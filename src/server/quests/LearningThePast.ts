@@ -312,7 +312,7 @@ export = new Quest(script.Name)
                     oldNoobHumanoid.MoveTo(suspiciousWall.Position);
                 }
                 else if (dialogue === ending) {
-                    GameAPI.gameAssetService.pathfind(oldNoobHumanoid, getWaypoint("LearningThePastEnterCave").Position, () => {
+                    GameAPI.npcNavigationService.pathfind(oldNoobHumanoid, getWaypoint("LearningThePastEnterCave").Position, () => {
                         oldNoobHumanoid.RootPart!.CFrame = GameAPI.getDefaultLocation(OldNoob)!;
                     });
                     GameAPI.addDialogue(new Dialogue(Pasal, "What am I witnessing..."), 69);

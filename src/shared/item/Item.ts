@@ -68,7 +68,7 @@ export default class Item {
     readonly MODEL?: Model;
 
     /**
-     * Called when {@link GameAssetService} is initialized. 
+     * Called when {@link NPCNavigationService} is initialized. 
      */
     readonly INITALIZES = new Array<<T extends this>(item: T) => void>();
 

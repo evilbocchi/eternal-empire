@@ -19,7 +19,7 @@ import { OnStart, Service } from "@flamework/core";
 import { HttpService, Workspace } from "@rbxts/services";
 import StringBuilder from "@rbxts/stringbuilder";
 import { $env } from "rbxts-transform-env";
-import { GameAssetService } from "server/services/GameAssetService";
+import NPCNavigationService from "server/services/npc/NPCNavigationService";
 import { OnGameAPILoaded } from "server/services/ModdingService";
 import { ResetService } from "server/services/ResetService";
 import { RevenueService } from "server/services/RevenueService";
@@ -59,7 +59,7 @@ export class ProgressionEstimationService implements OnGameAPILoaded, OnStart {
      */
     readonly MODEL_PER_DROPLET = new Map<Droplet, BasePart>();
 
-    constructor(private revenueService: RevenueService, private gameAssetService: GameAssetService,
+    constructor(private revenueService: RevenueService, private npcNavigationService: NPCNavigationService,
         private currencyService: CurrencyService, private upgradeBoardService: UpgradeBoardService,
         private dataService: DataService, private resetService: ResetService) {
     }

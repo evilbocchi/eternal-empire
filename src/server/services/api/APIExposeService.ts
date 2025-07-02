@@ -2,7 +2,7 @@ import { getRootPart } from "@antivivi/vrldk";
 import { OnInit, Service } from "@flamework/core";
 import { Players, RunService, TweenService } from "@rbxts/services";
 import { Stage } from "server/Quest";
-import { GameAssetService } from "server/services/GameAssetService";
+import NPCNavigationService from "server/services/npc/NPCNavigationService";
 import { ModdingService } from "server/services/ModdingService";
 import { DialogueService } from "server/services/npc/DialogueService";
 import ChatHookService from "server/services/permissions/ChatHookService";
@@ -47,7 +47,7 @@ export default class APIExposeService implements OnInit {
         private readonly eventService: EventService,
         private readonly dialogueService: DialogueService,
         private readonly upgradeBoardService: UpgradeBoardService,
-        private readonly gameAssetService: GameAssetService,
+        private readonly npcNavigationService: NPCNavigationService,
         private readonly questsService: QuestsService,
         private readonly moddingService: ModdingService
     ) {
@@ -75,7 +75,7 @@ export default class APIExposeService implements OnInit {
             revenueService: this.revenueService,
             setupService: this.setupService,
             eventService: this.eventService,
-            gameAssetService: this.gameAssetService,
+            npcNavigationService: this.npcNavigationService,
             items: Items,
 
             buyUpgrade: (upgradeId: string, to?: number, player?: Player, isFree?: boolean) => this.upgradeBoardService.buyUpgrade(upgradeId, to, player, isFree),
@@ -102,13 +102,13 @@ export default class APIExposeService implements OnInit {
             leadToPoint: (npcHumanoid: Instance, point: CFrame, callback: () => unknown, requiresPlayer?: boolean, agentParams?: AgentParameters) => {
                 if (!npcHumanoid.IsA("Humanoid"))
                     throw npcHumanoid.Name + " is not a Humanoid";
-                const cached = this.gameAssetService.runningPathfinds.get(npcHumanoid);
+                const cached = this.npcNavigationService.runningPathfinds.get(npcHumanoid);
                 if (cached !== undefined)
                     cached.Disconnect();
                 npcHumanoid.RootPart!.Anchored = false;
                 const tween = TweenService.Create(npcHumanoid.RootPart!, new TweenInfo(1), { CFrame: point });
                 let toCall = false;
-                this.gameAssetService.pathfind(npcHumanoid, point.Position, () => {
+                this.npcNavigationService.pathfind(npcHumanoid, point.Position, () => {
                     tween.Play();
                     if (requiresPlayer === false) {
                         toCall = true;
@@ -137,7 +137,7 @@ export default class APIExposeService implements OnInit {
                         callback();
                     }
                 });
-                this.gameAssetService.runningPathfinds.set(npcHumanoid, connection);
+                this.npcNavigationService.runningPathfinds.set(npcHumanoid, connection);
                 return connection;
             },
             getDefaultLocation: (npc: NPC) => this.dialogueService.defaultLocationsPerNPC.get(npc),

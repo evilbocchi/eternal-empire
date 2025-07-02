@@ -1,47 +1,12 @@
 //!optimize 2
 //!native
 
-/**
- * @fileoverview GameAssetService - Central coordination service for game systems.
- * 
- * This is the main orchestrator service that handles:
- * - Physics collision group setup and management
- * - Quest system coordination and stage tracking
- * - NPC pathfinding and navigation
- * - Product purchase handling (Robux transactions)
- * - Game utility API for items and other systems
- * - Physics speed adjustments and gravity scaling
- * - Interactable object management
- * - Service integration and coordination
- * 
- * The service acts as a central hub that connects multiple game systems
- * and provides utilities for items, quests, and other game mechanics.
- * 
- * @since 1.0.0
- */
-
-import Signal from "@antivivi/lemon-signal";
 import { getInstanceInfo, playSoundAtPart } from "@antivivi/vrldk";
 import { OnInit, OnPhysics, OnStart, Service } from "@flamework/core";
-import { AnalyticsService, PathfindingService, Players, ReplicatedStorage, RunService, Workspace } from "@rbxts/services";
-import Quest, { Stage } from "server/Quest";
-import { DialogueService } from "server/services/npc/DialogueService";
-import { ResetService } from "server/services/ResetService";
-import { RevenueService } from "server/services/RevenueService";
-import { CurrencyService } from "server/services/serverdata/CurrencyService";
-import { DataService } from "server/services/serverdata/DataService";
-import { EventService } from "server/services/serverdata/EventService";
-import { ItemsService } from "server/services/serverdata/ItemsService";
-import { LevelService } from "server/services/serverdata/LevelService";
-import { PlaytimeService } from "server/services/serverdata/PlaytimeService";
-import { QuestsService } from "server/services/serverdata/QuestsService";
-import { SetupService } from "server/services/serverdata/SetupService";
-import { UnlockedAreasService } from "server/services/serverdata/UnlockedAreasService";
-import { UpgradeBoardService } from "server/services/serverdata/UpgradeBoardService";
+import { PathfindingService, RunService, Workspace } from "@rbxts/services";
 import { getNPCPosition, getWaypoint, PLACED_ITEMS_FOLDER } from "shared/constants";
 import { getSound } from "shared/GameAssets";
 import GameSpeed from "shared/GameSpeed";
-import Packets from "shared/Packets";
 import Sandbox from "shared/Sandbox";
 
 declare global {
@@ -53,15 +18,8 @@ declare global {
 /** Previous game speed value for change detection. */
 let oldSpeed = 1;
 
-/**
- * Central coordination service that manages core game systems and provides utilities.
- * 
- * Acts as the main orchestrator for quest management, physics interactions,
- * NPC pathfinding, product purchases, and inter-service communication.
- * Also provides the GameAPI API used throughout the game.
- */
 @Service()
-export class GameAssetService implements OnInit, OnStart, OnPhysics {
+export default class NPCNavigationService implements OnInit, OnStart, OnPhysics {
 
     /**
      * Map of active pathfinding operations for NPCs.
@@ -195,7 +153,7 @@ export class GameAssetService implements OnInit, OnStart, OnPhysics {
     }
 
     /**
-     * Starts the GameAssetService.
+     * Starts the NPCNavigationService.
      * Performs initial pathfinding setup and validation.
      */
     onStart() {
