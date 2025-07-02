@@ -20,6 +20,7 @@ import { HttpService, Workspace } from "@rbxts/services";
 import StringBuilder from "@rbxts/stringbuilder";
 import { $env } from "rbxts-transform-env";
 import { GameAssetService } from "server/services/GameAssetService";
+import { OnGameAPILoaded } from "server/services/ModdingService";
 import { ResetService } from "server/services/ResetService";
 import { RevenueService } from "server/services/RevenueService";
 import { CurrencyService } from "server/services/serverdata/CurrencyService";
@@ -51,18 +52,12 @@ type ItemProgressionStats = {
  * Service that estimates progression, calculates optimal paths, and posts reports.
  */
 @Service()
-export class ProgressionEstimationService implements OnStart {
+export class ProgressionEstimationService implements OnGameAPILoaded, OnStart {
     /**
      * Map of Droplet to their corresponding model instance in Workspace.
      * Used for simulating droplet upgrades and value calculations.
      */
-    readonly MODEL_PER_DROPLET = (function () {
-        const modelPerDroplet = new Map<Droplet, BasePart>();
-        for (const droplet of Droplet.DROPLETS) {
-            modelPerDroplet.set(droplet, droplet.getInstantiator(Workspace)());
-        }
-        return modelPerDroplet;
-    })();
+    readonly MODEL_PER_DROPLET = new Map<Droplet, BasePart>();
 
     constructor(private revenueService: RevenueService, private gameAssetService: GameAssetService,
         private currencyService: CurrencyService, private upgradeBoardService: UpgradeBoardService,
@@ -443,6 +438,12 @@ export class ProgressionEstimationService implements OnStart {
         }
 
         return revenue;
+    }
+
+    onGameAPILoaded() {
+        for (const droplet of Droplet.DROPLETS) {
+            this.MODEL_PER_DROPLET.set(droplet, droplet.getInstantiator(Workspace)());
+        }
     }
 
     /**

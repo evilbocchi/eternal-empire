@@ -22,6 +22,7 @@ import Signal from "@antivivi/lemon-signal";
 import { OnInit, OnStart, Service } from "@flamework/core";
 import { CollectionService, Workspace } from "@rbxts/services";
 import { CHALLENGES } from "server/Challenges";
+import { OnGameAPILoaded } from "server/services/ModdingService";
 import { CurrencyService } from "server/services/serverdata/CurrencyService";
 import { DataService } from "server/services/serverdata/DataService";
 import { AREAS } from "shared/Area";
@@ -54,7 +55,7 @@ const queue = new Array<() => void>();
  * including 3D model management and world synchronization.
  */
 @Service()
-export class ItemsService implements OnInit, OnStart {
+export class ItemsService implements OnInit, OnStart, OnGameAPILoaded {
 
     // Event Signals
 
@@ -682,6 +683,15 @@ export class ItemsService implements OnInit, OnStart {
             });
         });
 
+        // Set up automatic model creation for new placed items
+        this.placedItemsUpdated.connect((placedItems) => {
+            for (const [placementId, placedItem] of placedItems) {
+                this.addItemModel(placementId, placedItem);
+            }
+        });
+    }
+
+    onGameAPILoaded() {
         // Initialize all items and their callbacks
         let itemCount = 0;
         Items.itemsPerId.forEach((item) => {
@@ -692,13 +702,6 @@ export class ItemsService implements OnInit, OnStart {
 
         // Ensure all placed items have models
         this.fullUpdatePlacedItemsModels();
-
-        // Set up automatic model creation for new placed items
-        this.placedItemsUpdated.connect((placedItems) => {
-            for (const [placementId, placedItem] of placedItems) {
-                this.addItemModel(placementId, placedItem);
-            }
-        });
     }
 
     /**

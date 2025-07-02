@@ -3,12 +3,10 @@ import { playSoundAtPart, spawnExplosion } from "@antivivi/vrldk";
 import { OnInit, Service } from "@flamework/core";
 import { Debris, Lighting, Players, ReplicatedStorage, RunService, ServerStorage, TeleportService, TextChatService, Workspace } from "@rbxts/services";
 import Quest from "server/Quest";
-import { AreaService } from "server/services/world/AreaService";
 import { BombsService } from "server/services/boosts/BombsService";
-import { ChestService } from "server/services/world/ChestService";
 import { DonationService } from "server/services/DonationService";
-import { GameAssetService } from "server/services/GameAssetService";
 import { LeaderboardService } from "server/services/LeaderboardService";
+import ChatHookService from "server/services/permissions/ChatHookService";
 import { PermissionsService } from "server/services/permissions/PermissionsService";
 import { ResetService } from "server/services/ResetService";
 import { CurrencyService } from "server/services/serverdata/CurrencyService";
@@ -20,6 +18,8 @@ import { QuestsService } from "server/services/serverdata/QuestsService";
 import { SetupService } from "server/services/serverdata/SetupService";
 import { UnlockedAreasService } from "server/services/serverdata/UnlockedAreasService";
 import { UpgradeBoardService } from "server/services/serverdata/UpgradeBoardService";
+import { AreaService } from "server/services/world/AreaService";
+import { ChestService } from "server/services/world/ChestService";
 import { AREAS } from "shared/Area";
 import { IS_SINGLE_SERVER } from "shared/constants";
 import { CURRENCY_DETAILS } from "shared/currency/CurrencyDetails";
@@ -37,7 +37,7 @@ export class CommandsService implements OnInit {
 
     constructor(
         private dataService: DataService,
-        private gameAssetService: GameAssetService,
+        private chatHookService: ChatHookService,
         private donationService: DonationService,
         private currencyService: CurrencyService,
         private leaderboardService: LeaderboardService,
@@ -60,11 +60,11 @@ export class CommandsService implements OnInit {
     }
 
     private sendPrivateMessage(player: Player, message: string, color?: string) {
-        return this.permissionService.sendPrivateMessage(player, message, color);
+        return this.chatHookService.sendPrivateMessage(player, message, color);
     }
 
     private sendServerMessage(message: string, color?: string) {
-        return this.permissionService.sendServerMessage(message, color);
+        return this.chatHookService.sendServerMessage(message, color);
     }
 
     private updatePermissionLevel(userId: number) {
@@ -231,6 +231,28 @@ export class CommandsService implements OnInit {
                     }
                 }
             }, 0);
+
+        this.createCommand("walkspeed", "ws",
+            "<amount> : Sets your walk speed to the specified amount. If higher than the limit, it will be capped to the maximum allowed speed.",
+            (o, amount) => {
+                let walkspeed = tonumber(amount) ?? 0;
+                if (walkspeed < 0) {
+                    this.sendPrivateMessage(o, "Walk speed cannot be negative.", "color:255,43,43");
+                    return;
+                }
+                const maxWalkSpeed = Workspace.GetAttribute("WalkSpeed") as number ?? 16;
+                if (walkspeed > maxWalkSpeed) {
+                    this.sendPrivateMessage(o, `Walk speed capped at ${maxWalkSpeed}.`, "color:255,43,43");
+                }
+                walkspeed = math.min(walkspeed, maxWalkSpeed);
+                const humanoid = o.Character?.FindFirstChildOfClass("Humanoid");
+                if (humanoid === undefined) {
+                    return;
+                }
+                humanoid.WalkSpeed = walkspeed;
+                this.sendPrivateMessage(o, `Walk speed set to ${walkspeed}.`, "color:138,255,138");
+            }, 0);
+
 
         // PERM LEVEL 1
 
@@ -646,7 +668,7 @@ export class CommandsService implements OnInit {
                 ASSETS.ClassicSword.Clone().Parent = o.FindFirstChildOfClass("Backpack");
             }, 4);
 
-        this.createCommand("walkspeed", "ws",
+        this.createCommand("devwalkspeed", "dws",
             "<player> <amount> : Speeed.",
             (o, p, a) => {
                 const walkspeed = tonumber(a) ?? 0;
@@ -759,7 +781,7 @@ export class CommandsService implements OnInit {
                 }
                 stagePerQuest.set(questId, tonumber(amount) ?? 0);
                 this.questsService.setStagePerQuest(stagePerQuest);
-                this.gameAssetService.loadAvailableQuests();
+                this.questsService.loadAvailableQuests();
             }, 4);
 
         this.createCommand("completequest", "cq",
@@ -769,7 +791,7 @@ export class CommandsService implements OnInit {
                 if (quest === undefined) {
                     return;
                 }
-                this.gameAssetService.completeQuest(quest);
+                this.questsService.completeQuest(quest);
             }, 4);
 
         this.createCommand("unlockarea", "ula",

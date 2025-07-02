@@ -27,7 +27,7 @@ import { playSoundAtPart } from "@antivivi/vrldk";
 import { OnInit, Service } from "@flamework/core";
 import { MarketplaceService, TextService, Workspace } from "@rbxts/services";
 import { LeaderboardService } from "server/services/LeaderboardService";
-import { PermissionsService } from "server/services/permissions/PermissionsService";
+import ChatHookService from "server/services/permissions/ChatHookService";
 import ProductService from "server/services/product/ProductService";
 import { CurrencyService } from "server/services/serverdata/CurrencyService";
 import { DataService } from "server/services/serverdata/DataService";
@@ -59,7 +59,7 @@ export class RenameService implements OnInit {
         private productService: ProductService,
         private leaderboardService: LeaderboardService,
         private currencyService: CurrencyService,
-        private permissionsService: PermissionsService) {
+        private chatHookService: ChatHookService) {
 
     }
 
@@ -90,20 +90,20 @@ export class RenameService implements OnInit {
     check(name: string, player: Player) {
         // Check if name is the same as current
         if (name === this.dataService.empireData.name) {
-            this.permissionsService.sendPrivateMessage(player, "Rename is same as current name. Please change it.");
+            this.chatHookService.sendPrivateMessage(player, "Rename is same as current name. Please change it.");
             return false;
         }
 
         // Check content filtering
         const filtered = TextService.FilterStringAsync(name, player.UserId).GetNonChatStringForBroadcastAsync();
         if (filtered !== name) {
-            this.permissionsService.sendPrivateMessage(player, "Rename is filtered. Output: " + filtered);
+            this.chatHookService.sendPrivateMessage(player, "Rename is filtered. Output: " + filtered);
             return false;
         }
 
         // Check uniqueness via leaderboard
         if (this.leaderboardService.totalTimeStore.GetAsync(name) !== undefined) {
-            this.permissionsService.sendPrivateMessage(player, "This name is already in use.");
+            this.chatHookService.sendPrivateMessage(player, "This name is already in use.");
             return false;
         }
 
@@ -125,7 +125,7 @@ export class RenameService implements OnInit {
         // Play rename effects
         playSoundAtPart(Workspace, getSound("SpellCardAttack"));
         Packets.camShake.fireAll();
-        this.permissionsService.sendServerMessage("The empire has been renamed to: " + name);
+        this.chatHookService.sendServerMessage("The empire has been renamed to: " + name);
 
         // Update empire data
         const prev = this.dataService.empireData.name;

@@ -3,7 +3,9 @@ import { OnInit, Service } from "@flamework/core";
 import { Players, RunService, TweenService } from "@rbxts/services";
 import { Stage } from "server/Quest";
 import { GameAssetService } from "server/services/GameAssetService";
+import { ModdingService } from "server/services/ModdingService";
 import { DialogueService } from "server/services/npc/DialogueService";
+import ChatHookService from "server/services/permissions/ChatHookService";
 import { ResetService } from "server/services/ResetService";
 import { RevenueService } from "server/services/RevenueService";
 import { CurrencyService } from "server/services/serverdata/CurrencyService";
@@ -11,6 +13,7 @@ import { DataService } from "server/services/serverdata/DataService";
 import { EventService } from "server/services/serverdata/EventService";
 import { ItemsService } from "server/services/serverdata/ItemsService";
 import { PlaytimeService } from "server/services/serverdata/PlaytimeService";
+import { QuestsService } from "server/services/serverdata/QuestsService";
 import { SetupService } from "server/services/serverdata/SetupService";
 import { UnlockedAreasService } from "server/services/serverdata/UnlockedAreasService";
 import { UpgradeBoardService } from "server/services/serverdata/UpgradeBoardService";
@@ -26,10 +29,12 @@ declare global {
     type GameAPI = APIExposeService['GameAPI'];
 }
 
+
 @Service()
 export default class APIExposeService implements OnInit {
 
     constructor(
+        private readonly chatHookService: ChatHookService,
         private readonly areaService: AreaService,
         private readonly dataService: DataService,
         private readonly itemsService: ItemsService,
@@ -43,6 +48,8 @@ export default class APIExposeService implements OnInit {
         private readonly dialogueService: DialogueService,
         private readonly upgradeBoardService: UpgradeBoardService,
         private readonly gameAssetService: GameAssetService,
+        private readonly questsService: QuestsService,
+        private readonly moddingService: ModdingService
     ) {
 
     }
@@ -77,7 +84,7 @@ export default class APIExposeService implements OnInit {
             playNPCAnimation: (npc: NPC, animType: NPCAnimationType) => this.dialogueService.playAnimation(npc, animType),
             stopNPCAnimation: (npc: NPC, animType: NPCAnimationType) => this.dialogueService.stopAnimation(npc, animType),
             onStageReached: (stage: Stage, callback: () => void) => {
-                return this.gameAssetService.stageReached.connect((s) => {
+                return this.questsService.stageReached.connect((s) => {
                     if (stage === s) {
                         callback();
                     }
@@ -136,14 +143,14 @@ export default class APIExposeService implements OnInit {
             getDefaultLocation: (npc: NPC) => this.dialogueService.defaultLocationsPerNPC.get(npc),
             giveQuestItem: (itemId: string, amount: number) => {
                 this.itemsService.setItemAmount(itemId, this.itemsService.getItemAmount(itemId) + amount);
-                this.gameAssetService.questItemGiven.fire(itemId, amount);
+                this.chatHookService.sendServerMessage(`[+${amount} ${Items.getItem(itemId)?.name}]`, "tag:hidden;color:255,170,255");
             },
             takeQuestItem: (itemId: string, amount: number) => {
                 const currentAmount = this.itemsService.getItemAmount(itemId);
                 if (currentAmount < amount)
                     return false;
                 this.itemsService.setItemAmount(itemId, currentAmount - amount);
-                this.gameAssetService.questItemTaken.fire(itemId, amount);
+                this.chatHookService.sendServerMessage(`[-${amount} ${Items.getItem(itemId)?.name}]`, "tag:hidden;color:255,170,255");
                 return true;
             },
         };
@@ -151,6 +158,8 @@ export default class APIExposeService implements OnInit {
 
         for (const [k, v] of pairs(t))
             (ItemUtils.GameAPI as noChecking)[k] = v;
+
+        this.moddingService.gameAPILoaded.fire();
 
         return t;
     })();

@@ -6,8 +6,10 @@
  *
  * @since 1.0.0
  */
+import Signal from "@antivivi/lemon-signal";
 import { Modding, OnInit, Service } from "@flamework/core";
 import { Players } from "@rbxts/services";
+import { GameAPI } from "shared/item/ItemUtils";
 
 export interface OnPlayerJoined {
     /**
@@ -17,12 +19,20 @@ export interface OnPlayerJoined {
     onPlayerJoined(player: Player): void;
 }
 
+export interface OnGameAPILoaded {
+    /**
+     * Called when the game API is loaded.
+     * This can be used to initialize any game-related logic that depends on the API.
+     */
+    onGameAPILoaded(): void;
+}
+
 @Service()
 export class ModdingService implements OnInit {
-    /**
-     * Initializes the modding service and sets up player join listeners.
-     */
-    onInit() {
+
+    readonly gameAPILoaded = new Signal();
+
+    private hookPlayerJoined() {
         const listeners = new Set<OnPlayerJoined>();
         Modding.onListenerAdded<OnPlayerJoined>((object) => listeners.add(object));
         Modding.onListenerRemoved<OnPlayerJoined>((object) => listeners.delete(object));
@@ -38,5 +48,29 @@ export class ModdingService implements OnInit {
                 task.spawn(() => listener.onPlayerJoined(player));
             }
         }
+    }
+
+    private hookGameAPILoaded() {
+        const listeners = new Set<OnGameAPILoaded>();
+        Modding.onListenerAdded<OnGameAPILoaded>((object) => listeners.add(object));
+        Modding.onListenerRemoved<OnGameAPILoaded>((object) => listeners.delete(object));
+        this.gameAPILoaded.connect(() => {
+            for (const listener of listeners) {
+                task.spawn(() => listener.onGameAPILoaded());
+            }
+        });
+        if (GameAPI.ready) {
+            this.gameAPILoaded.fire();
+        }
+    }
+
+    
+
+    /**
+     * Initializes the modding service and sets up player join listeners.
+     */
+    onInit() {
+        this.hookPlayerJoined();
+        this.hookGameAPILoaded();
     }
 }

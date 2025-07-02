@@ -18,6 +18,7 @@ import { OnStart, Service } from "@flamework/core";
 import { toNumeral } from "@rbxts/roman-numerals";
 import StringBuilder from "@rbxts/stringbuilder";
 import { CHALLENGE_UPGRADES, CHALLENGES, REWARD_UPGRADES } from "server/Challenges";
+import ChatHookService from "server/services/permissions/ChatHookService";
 import { PermissionsService } from "server/services/permissions/PermissionsService";
 import { ResetService } from "server/services/ResetService";
 import { CurrencyService } from "server/services/serverdata/CurrencyService";
@@ -70,12 +71,17 @@ export class ChallengeService implements OnStart {
      */
     forceEnd = (message: string) => {
         this.endChallenge(false);
-        this.permissionsService.sendServerMessage(message);
+        this.chatHookService.sendServerMessage(message);
     };
 
-    constructor(private dataService: DataService, private resetService: ResetService, private itemsService: ItemsService,
-        private currencyService: CurrencyService, private upgradeBoardService: UpgradeBoardService,
-        private setupService: SetupService, private permissionsService: PermissionsService) {
+    constructor(private dataService: DataService,
+        private resetService: ResetService,
+        private itemsService: ItemsService,
+        private currencyService: CurrencyService,
+        private upgradeBoardService: UpgradeBoardService,
+        private setupService: SetupService,
+        private permissionsService: PermissionsService,
+        private chatHookService: ChatHookService) {
 
     }
 
@@ -340,7 +346,7 @@ export class ChallengeService implements OnStart {
         if (challengeCompleted === true && t - this.lastCompletion > 2 && data.playtime - data.currentChallengeStartTime > 2) {
             this.lastCompletion = t;
             const title = this.getTitleLabel(challenge, challengeId);
-            this.permissionsService.sendServerMessage(`Challenge ${title} has been cleared!`);
+            this.chatHookService.sendServerMessage(`Challenge ${title} has been cleared!`);
             const [_challenge, _id, clears] = this.endChallenge(true);
             Packets.challengeCompleted.fireAll(title, this.getRewardLabel(challenge, clears!));
         }
@@ -407,7 +413,7 @@ export class ChallengeService implements OnStart {
             const challenge = this.startChallenge(player, challengeId as ChallengeId);
             if (challenge === undefined)
                 return;
-            this.permissionsService.sendServerMessage(`Challenge ${this.getTitleLabel(challenge, challengeId)} has been started by ${player.Name}. The original setup has been saved, called "Autosaved", in a printer.`);
+            this.chatHookService.sendServerMessage(`Challenge ${this.getTitleLabel(challenge, challengeId)} has been started by ${player.Name}. The original setup has been saved, called "Autosaved", in a printer.`);
 
         });
         Packets.quitChallenge.listen((player) => {
@@ -416,7 +422,7 @@ export class ChallengeService implements OnStart {
             const [challenge, challengeId] = this.endChallenge(false);
             if (challenge === undefined)
                 return;
-            this.permissionsService.sendServerMessage(`Challenge ${this.getTitleLabel(challenge, challengeId)} has been stopped by ${player.Name}.`);
+            this.chatHookService.sendServerMessage(`Challenge ${this.getTitleLabel(challenge, challengeId)} has been stopped by ${player.Name}.`);
         });
         this.refreshChallenges();
 

@@ -15,7 +15,7 @@
 
 import Signal from "@antivivi/lemon-signal";
 import { OnInit, Service } from "@flamework/core";
-import { Players, StarterPlayer } from "@rbxts/services";
+import { Players, StarterPlayer, Workspace } from "@rbxts/services";
 import { CurrencyService } from "server/services/serverdata/CurrencyService";
 import { DataService } from "server/services/serverdata/DataService";
 import Sandbox from "shared/Sandbox";
@@ -127,23 +127,11 @@ export class UpgradeBoardService implements OnInit {
             return this.buyUpgrade(upgradeId, to, player);
         });
 
-        if (Sandbox.getEnabled()) {
-            return;
-        }
-
         const wsUpgs = NamedUpgrades.getUpgrades("WalkSpeed");
         this.upgradesChanged.connect((data) => {
             let ws = 16;
             wsUpgs.forEach((value, key) => ws = value.apply(ws, data.get(key)!));
-            StarterPlayer.CharacterWalkSpeed = ws;
-
-            for (const player of Players.GetPlayers()) {
-                if (player.Character !== undefined) {
-                    const hum = player.Character.FindFirstChildOfClass("Humanoid");
-                    if (hum !== undefined)
-                        hum.WalkSpeed = StarterPlayer.CharacterWalkSpeed;
-                }
-            }
+            Workspace.SetAttribute("WalkSpeed", ws);
         });
         this.upgradesChanged.fire(this.upgrades);
     }

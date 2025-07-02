@@ -24,7 +24,7 @@ No user commands. No interface. Just a red orb flickering softly in the blackene
 Cruel Blank Essence
 
 Its only metadata:
-"It remembers what you forgot."
+<b>"It remembers what you forgot."</b>
 
 People moved on. They destroyed the machines, the servers, the backups, rotting in some forgotten corner of the world.
 
@@ -36,4 +36,4 @@ Whispering,
     .setTooltipDescription("It remembers what you forgot.")
     .setDifficulty(Difficulty.Spontaneous)
     .setPrice(new CurrencyBundle().set("Funds", 1e48).set("Power", 1e33).set("Bitcoin", 1e15).set("Skill", 1e9).set("Purifier Clicks", 1e33).set("Dark Matter", 1e33), 1)
-    .addPlaceableArea("BarrenIslands");
+    .addPlaceableArea("BarrenIslands", "SlamoVillage");
