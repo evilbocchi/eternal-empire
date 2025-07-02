@@ -103,7 +103,7 @@ for (const model of served) {
             continue;
         }
 
-        if (instance.IsA("BasePart")) {
+        if (instance.IsA("BasePart") && instance.CollisionGroup === "Default") {
             instance.CollisionGroup = "Item";
             instance.CanTouch = false;
             continue;

@@ -2,11 +2,11 @@ import Signal from "@antivivi/lemon-signal";
 import { combineHumanReadable } from "@antivivi/vrldk";
 import { Controller, OnInit, OnPhysics } from "@flamework/core";
 import { Debris, ReplicatedStorage, TweenService, Workspace } from "@rbxts/services";
-import { LOCAL_PLAYER } from "client/constants";
-import EffectController from "client/controllers/EffectController";
 import HotkeysController from "client/controllers/HotkeysController";
 import AdaptiveTabController, { ADAPTIVE_TAB, ADAPTIVE_TAB_MAIN_WINDOW, SIDEBAR_BUTTONS } from "client/controllers/interface/AdaptiveTabController";
+import { OnCharacterAdded } from "client/controllers/ModdingController";
 import UIController, { INTERFACE } from "client/controllers/UIController";
+import EffectController from "client/controllers/world/EffectController";
 import ItemSlot from "client/ItemSlot";
 import { getMaxXp } from "shared/constants";
 import { ASSETS } from "shared/GameAssets";
@@ -118,7 +118,7 @@ export const QUESTS_WINDOW = ADAPTIVE_TAB_MAIN_WINDOW.WaitForChild("Quests") as 
 };
 
 @Controller()
-export default class QuestsController implements OnInit, OnPhysics {
+export default class QuestsController implements OnInit, OnPhysics, OnCharacterAdded {
 
     oldIndex = -2;
     indexer: string | undefined = undefined;
@@ -305,6 +305,10 @@ export default class QuestsController implements OnInit, OnPhysics {
         this.beam.Enabled = false;
     }
 
+    onCharacterAdded(character: Model) {
+        this.beam.Attachment1 = new Instance("Attachment", character.WaitForChild("HumanoidRootPart"));
+    }
+
     onInit() {
         this.beamContainer.CanCollide = false;
         this.beamContainer.Anchored = true;
@@ -313,11 +317,6 @@ export default class QuestsController implements OnInit, OnPhysics {
         this.beam.Parent = this.beamContainer;
         this.beamContainer.Parent = Workspace;
         this.beam.Attachment0 = new Instance("Attachment", this.beamContainer);
-        const onCharacterAdded = (character: Model) => this.beam.Attachment1 = new Instance("Attachment", character.WaitForChild("HumanoidRootPart"));
-        if (LOCAL_PLAYER.Character !== undefined) {
-            onCharacterAdded(LOCAL_PLAYER.Character);
-        }
-        LOCAL_PLAYER.CharacterAdded.Connect((character) => onCharacterAdded(character));
 
         QUESTS_WINDOW.Level.Current.Activated.Connect(() => {
             this.uiController.playSound("Flip");

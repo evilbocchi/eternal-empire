@@ -3,11 +3,12 @@ import { loadAnimation } from "@antivivi/vrldk";
 import { Controller, OnInit, OnStart } from "@flamework/core";
 import { Debris, RunService, StarterGui, TweenService, UserInputService, Workspace } from "@rbxts/services";
 import { LOCAL_PLAYER } from "client/constants";
-import AreaController from "client/controllers/AreaController";
 import { ADAPTIVE_TAB } from "client/controllers/interface/AdaptiveTabController";
 import BuildController from "client/controllers/interface/BuildController";
 import TooltipController, { Tooltip } from "client/controllers/interface/TooltipController";
+import { OnCharacterAdded } from "client/controllers/ModdingController";
 import UIController, { INTERFACE } from "client/controllers/UIController";
+import AreaController from "client/controllers/world/AreaController";
 import { AREAS } from "shared/Area";
 import { ASSETS, emitEffect } from "shared/GameAssets";
 import Harvestable from "shared/Harvestable";
@@ -35,7 +36,7 @@ export const BACKPACK_WINDOW = INTERFACE.WaitForChild("BackpackWindow") as Frame
 };
 
 @Controller()
-export default class ToolController implements OnInit, OnStart {
+export default class ToolController implements OnInit, OnStart, OnCharacterAdded {
 
     swingAnimation?: AnimationTrack;
     harvestables = new Map<Instance, typeof ASSETS.HarvestableGui>();
@@ -245,81 +246,15 @@ export default class ToolController implements OnInit, OnStart {
         return sorted;
     }
 
-    onStart() {
-        const refreshVisibility = () => BACKPACK_WINDOW.Visible = !ADAPTIVE_TAB.Visible && this.buildController.selected.isEmpty();
-        RunService.BindToRenderStep("Tool Backpack", 0, () => refreshVisibility());
-        const onToolAdded = (tool: Instance) => {
-            if (!tool.IsA("Tool") || this.tools.has(tool) === true)
-                return;
-            const item = Items.getItem(tool.Name);
-            if (item === undefined)
-                return;
-            const harvestingTool = item.findTrait("HarvestingTool");
-            if (harvestingTool === undefined)
-                return;
-
-            const toolOption = ASSETS.ToolOption.Clone();
-            toolOption.ImageLabel.Image = tool.TextureId;
-            this.tools.set(tool, toolOption);
-            let layoutOrder: number;
-            switch (harvestingTool.toolType) {
-                case "Pickaxe":
-                    layoutOrder = 1;
-                    break;
-                case "Axe":
-                    layoutOrder = 2;
-                    break;
-                case "Scythe":
-                    layoutOrder = 3;
-                    break;
-                case "Rod":
-                    layoutOrder = 4;
-                    break;
-                case "None":
-                default:
-                    layoutOrder = item.layoutOrder;
-                    break;
-            }
-            toolOption.LayoutOrder = layoutOrder;
-            toolOption.Name = tool.Name;
-
-            const connection = tool.AncestryChanged.Connect(() => {
-                if (tool.Parent === undefined || toolOption.Parent === undefined) {
-                    pcall(() => toolOption.Destroy());
-                    connection.Disconnect();
-                    return;
-                }
-                const color = tool.Parent === LOCAL_PLAYER.FindFirstChildOfClass("Backpack") ? Color3.fromRGB(255, 255, 255) : Color3.fromRGB(0, 184, 255);
-                toolOption.BackgroundColor3 = color;
-                toolOption.UIStroke.Color = color;
-            });
-            if (item !== undefined) {
-                this.tooltipController.setTooltip(toolOption, Tooltip.fromItem(item));
-            }
-            toolOption.Activated.Connect(() => {
-                const backpack = LOCAL_PLAYER.FindFirstChildOfClass("Backpack");
-                this.uiController.playSound("Equip");
-                if (tool.Parent === backpack) {
-                    const currentTool = LOCAL_PLAYER.Character?.FindFirstChildOfClass("Tool");
-                    if (currentTool !== undefined)
-                        currentTool.Parent = backpack;
-                    tool.Parent = LOCAL_PLAYER.Character;
-                }
-                else {
-                    tool.Parent = backpack;
-                }
-            });
-            toolOption.Parent = BACKPACK_WINDOW;
-            this.recalculateIndex();
-        };
-        const onCharacterAdded = (character: Model) => {
+    onCharacterAdded(character: Model): void {
+        {
             const humanoid = character.WaitForChild("Humanoid") as Humanoid;
             this.swingAnimation = loadAnimation(humanoid, 16920778613);
             const backpack = LOCAL_PLAYER.WaitForChild("Backpack");
             for (const tool of backpack.GetChildren())
-                onToolAdded(tool);
+                this.onToolAdded(tool);
             backpack.ChildAdded.Connect((tool) => {
-                onToolAdded(tool);
+                this.onToolAdded(tool);
             });
 
             humanoid.Died.Once(() => {
@@ -344,10 +279,76 @@ export default class ToolController implements OnInit, OnStart {
                         gui.Enabled = false;
                 }
             });
-        };
+        }
+    }
 
-        LOCAL_PLAYER.CharacterAdded.Connect((character) => onCharacterAdded(character));
-        if (LOCAL_PLAYER.Character !== undefined)
-            onCharacterAdded(LOCAL_PLAYER.Character);
+    onToolAdded(tool: Instance) {
+        if (!tool.IsA("Tool") || this.tools.has(tool) === true)
+            return;
+        const item = Items.getItem(tool.Name);
+        if (item === undefined)
+            return;
+        const harvestingTool = item.findTrait("HarvestingTool");
+        if (harvestingTool === undefined)
+            return;
+
+        const toolOption = ASSETS.ToolOption.Clone();
+        toolOption.ImageLabel.Image = tool.TextureId;
+        this.tools.set(tool, toolOption);
+        let layoutOrder: number;
+        switch (harvestingTool.toolType) {
+            case "Pickaxe":
+                layoutOrder = 1;
+                break;
+            case "Axe":
+                layoutOrder = 2;
+                break;
+            case "Scythe":
+                layoutOrder = 3;
+                break;
+            case "Rod":
+                layoutOrder = 4;
+                break;
+            case "None":
+            default:
+                layoutOrder = item.layoutOrder;
+                break;
+        }
+        toolOption.LayoutOrder = layoutOrder;
+        toolOption.Name = tool.Name;
+
+        const connection = tool.AncestryChanged.Connect(() => {
+            if (tool.Parent === undefined || toolOption.Parent === undefined) {
+                pcall(() => toolOption.Destroy());
+                connection.Disconnect();
+                return;
+            }
+            const color = tool.Parent === LOCAL_PLAYER.FindFirstChildOfClass("Backpack") ? Color3.fromRGB(255, 255, 255) : Color3.fromRGB(0, 184, 255);
+            toolOption.BackgroundColor3 = color;
+            toolOption.UIStroke.Color = color;
+        });
+        if (item !== undefined) {
+            this.tooltipController.setTooltip(toolOption, Tooltip.fromItem(item));
+        }
+        toolOption.Activated.Connect(() => {
+            const backpack = LOCAL_PLAYER.FindFirstChildOfClass("Backpack");
+            this.uiController.playSound("Equip");
+            if (tool.Parent === backpack) {
+                const currentTool = LOCAL_PLAYER.Character?.FindFirstChildOfClass("Tool");
+                if (currentTool !== undefined)
+                    currentTool.Parent = backpack;
+                tool.Parent = LOCAL_PLAYER.Character;
+            }
+            else {
+                tool.Parent = backpack;
+            }
+        });
+        toolOption.Parent = BACKPACK_WINDOW;
+        this.recalculateIndex();
+    }
+
+    onStart() {
+        const refreshVisibility = () => BACKPACK_WINDOW.Visible = !ADAPTIVE_TAB.Visible && this.buildController.selected.isEmpty();
+        RunService.BindToRenderStep("Tool Backpack", 0, () => refreshVisibility());
     }
 }

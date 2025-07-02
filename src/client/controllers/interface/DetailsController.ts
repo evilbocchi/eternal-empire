@@ -1,6 +1,6 @@
 import { Controller, OnInit } from "@flamework/core";
 import { RunService } from "@rbxts/services";
-import { LOCAL_PLAYER } from "client/constants";
+import { OnCharacterAdded } from "client/controllers/ModdingController";
 import { INTERFACE } from "client/controllers/UIController";
 import TooltipController from "client/controllers/interface/TooltipController";
 
@@ -16,7 +16,7 @@ export const POSITION_WINDOW = INTERFACE.WaitForChild("PositionWindow") as Frame
 };
 
 @Controller()
-export default class DetailsController implements OnInit {
+export default class DetailsController implements OnInit, OnCharacterAdded {
 
     constructor(private tooltipController: TooltipController) {
 
@@ -37,10 +37,6 @@ export default class DetailsController implements OnInit {
     }
 
     onInit() {
-        if (LOCAL_PLAYER.Character !== undefined) {
-            this.onCharacterAdded(LOCAL_PLAYER.Character);
-        }
-        LOCAL_PLAYER.CharacterAdded.Connect((model) => this.onCharacterAdded(model));
         const msg = `Position of your character.\n<font color="rgb(200, 200, 200)" size="16">Use these coordinates to search your way through the world.</font>`;
         this.tooltipController.setMessage(POSITION_WINDOW.ImageLabel, msg);
     }

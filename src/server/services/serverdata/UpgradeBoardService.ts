@@ -15,7 +15,7 @@
 
 import Signal from "@antivivi/lemon-signal";
 import { OnInit, Service } from "@flamework/core";
-import { Workspace } from "@rbxts/services";
+import { Players, StarterPlayer, Workspace } from "@rbxts/services";
 import CurrencyService from "server/services/serverdata/CurrencyService";
 import DataService from "server/services/serverdata/DataService";
 import NamedUpgrades from "shared/namedupgrade/NamedUpgrades";
@@ -128,9 +128,22 @@ export default class UpgradeBoardService implements OnInit {
 
         const wsUpgs = NamedUpgrades.getUpgrades("WalkSpeed");
         this.upgradesChanged.connect((data) => {
+            const oldWs = Workspace.GetAttribute("WalkSpeed") as number | undefined;
             let ws = 16;
             wsUpgs.forEach((value, key) => ws = value.apply(ws, data.get(key)!));
             Workspace.SetAttribute("WalkSpeed", ws);
+            StarterPlayer.CharacterWalkSpeed = ws;
+            for (const player of Players.GetPlayers()) {
+                const character = player.Character;
+                if (character === undefined)
+                    continue;
+                const humanoid = character.FindFirstChildOfClass("Humanoid");
+                if (humanoid === undefined)
+                    continue;
+                if (humanoid.WalkSpeed === oldWs) {
+                    humanoid.WalkSpeed = ws;
+                }
+            }
         });
         this.upgradesChanged.fire(this.upgrades);
     }

@@ -25,19 +25,66 @@ export default class ObbyUpgrader extends ItemTrait {
     }
 
     static load(model: Model, obbyUpgrader: ObbyUpgrader) {
+        const item = obbyUpgrader.item;
         const obbyPointsGuiPart = model.WaitForChild("ObbyPointsGuiPart") as BasePart;
         const label = obbyPointsGuiPart.FindFirstChildOfClass("SurfaceGui")?.FindFirstChild("TextLabel") as TextLabel | undefined;
         if (label === undefined)
             throw "ObbyPointsGuiPart does not have a TextLabel in its SurfaceGui";
-        obbyUpgrader.item.repeat(model, () => {
+        item.repeat(model, () => {
             label.Text = `OBBY POINTS: ${GameAPI.currencyService.get("Obby Points").toString()}`;
         }, 1);
+
+        for (const part of model.GetChildren()) {
+            if (!part.IsA("BasePart"))
+                continue;
+            switch (part.Name) {
+                case "ObbyZone":
+                case "ReturnPart":
+                    part.Transparency = 1;
+                    part.CanTouch = true;
+                    part.CanCollide = false;
+                    break;
+                case "WinPart":
+                    part.CanTouch = true;
+                    part.CanCollide = false;
+                default:
+                    break;
+            }
+        }
+        const winPart = model.WaitForChild("WinPart") as BasePart;
+        const returnPart = model.WaitForChild("ReturnPart") as BasePart;
+        let debounce = false;
+        winPart.Touched.Connect((hit) => {
+            if (debounce)
+                return;
+            const parent = hit.Parent;
+            if (parent === undefined || !parent.IsA("Model"))
+                return;
+            parent.PivotTo(returnPart.CFrame);
+            const reward = obbyUpgrader.reward;
+            GameAPI.currencyService.increment("Obby Points", reward);
+            const color = item.difficulty.color ?? new Color3(1, 1, 1);
+            const r = color.R * 255;
+            const g = color.G * 255;
+            const b = color.B * 255;
+            GameAPI.chatHookService.sendServerMessage(
+                `${parent.Name} has completed the ${item.name} and earned ${reward.toString()} Obby Points!`,
+                `tag:hidden;color:${r},${g},${b}`
+            );
+            print(item.name, "completed");
+            debounce = true;
+            task.delay(0.1, () => {
+                debounce = false;
+            });
+        });
     }
 
     readonly boosts = new Map<NamedUpgrade, {
         currency: Currency;
         formula: Formula;
     }>();
+
+    reward = new OnoeNum(0);
 
     constructor(item: Item) {
         super(item);
@@ -49,6 +96,11 @@ export default class ObbyUpgrader extends ItemTrait {
     setBoost(upgrade: NamedUpgrade, currency: Currency, formula: Formula) {
         this.trait(UpgradeBoard).addUpgrade(upgrade);
         this.boosts.set(upgrade, { currency, formula });
+        return this;
+    }
+
+    setReward(reward: OnoeNum | number) {
+        this.reward = new OnoeNum(reward);
         return this;
     }
 }

@@ -363,7 +363,6 @@ export default class AreaService implements OnInit, OnPlayerJoined {
 
             const rootPart = character.WaitForChild("HumanoidRootPart") as BasePart;
 
-            // === COLLISION GROUP SETUP ===
             // Configure collision groups for proper interaction with area systems
             for (const part of character.GetChildren()) {
                 if (part.IsA("BasePart")) {

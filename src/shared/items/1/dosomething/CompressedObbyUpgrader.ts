@@ -18,6 +18,7 @@ export = new Item(script.Name)
     .setSpeed(5)
 
     .trait(ObbyUpgrader)
+    .setReward(1)
     .setBoost(NamedUpgrades.GreedOfTheObbyI, "Funds", new Formula().mul(0.1).add(1))
     .setBoost(NamedUpgrades.PowerOfTheObbyI, "Power", new Formula().mul(0.1).add(1))
     .setBoost(NamedUpgrades.DecentralityOfTheObbyI, "Bitcoin", new Formula().mul(0.1).add(1))

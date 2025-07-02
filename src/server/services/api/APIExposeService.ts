@@ -67,6 +67,7 @@ export default class APIExposeService implements OnInit {
             empireData: this.dataService.empireData,
 
             areaService: this.areaService,
+            chatHookService: this.chatHookService,
             itemsService: this.itemsService,
             currencyService: this.currencyService,
             unlockedAreasService: this.unlockedAreasService,
