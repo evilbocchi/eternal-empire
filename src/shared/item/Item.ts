@@ -12,7 +12,7 @@ import { RESET_LAYERS } from "shared/ResetLayer";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Formula from "shared/currency/Formula";
 import { ITEM_MODELS } from "shared/item/ItemModels";
-import ItemUtils, { GameUtils } from "shared/item/ItemUtils";
+import ItemUtils, { GameAPI } from "shared/item/ItemUtils";
 
 declare global {
 
@@ -32,7 +32,7 @@ declare global {
         Maintained?: boolean;
     }
 
-    type ClientGameUtils = Partial<GameUtils>;
+    type ClientGameUtils = Partial<GameAPI>;
     type Toggleable = ParticleEmitter | Beam | Script;
 
     type OmitConstructorSignature<T> = { [K in keyof T]: T[K] } & (T extends (...args: infer R) => infer S
@@ -153,7 +153,7 @@ export default class Item {
     /**
      * A function that will return the value of the variable that will be used in the {@link formula}.
      */
-    formulaXGet?: (utils: GameUtils) => OnoeNum;
+    formulaXGet?: (utils: GameAPI) => OnoeNum;
 
     /**
      * The maximum value that {@link formulaXGet} can return.
@@ -171,7 +171,7 @@ export default class Item {
     /**
      * A callback function that will be called every second with the result of the {@link formula}.
      */
-    formulaCallback?: <T extends this>(value: OnoeNum, item: T, utils: GameUtils) => unknown;
+    formulaCallback?: <T extends this>(value: OnoeNum, item: T, utils: GameAPI) => unknown;
 
     /**
      * The result of the {@link formula} applied to the value of {@link formulaXGet}.
@@ -498,7 +498,7 @@ export default class Item {
             let affordable = true;
 
             if (drain !== undefined)
-                affordable = GameUtils.currencyService.purchase(drain);
+                affordable = GameAPI.currencyService.purchase(drain);
 
             if (model === undefined)
                 return;
@@ -563,7 +563,7 @@ export default class Item {
         if (this.formula === undefined || this.formulaXGet === undefined || this.formulaCallback === undefined)
             return;
 
-        let value = this.formulaXGet(GameUtils);
+        let value = this.formulaXGet(GameAPI);
         const cap = this.formulaXCapValue;
         if (cap !== undefined && value.moreThan(cap) === true) {
             value = cap;
@@ -571,7 +571,7 @@ export default class Item {
 
         const result = this.formula.apply(value);
         this.formulaResult = result;
-        this.formulaCallback(result, this, GameUtils);
+        this.formulaCallback(result, this, GameAPI);
         return result;
     }
 
@@ -723,7 +723,7 @@ export default class Item {
             lastCall: 0
         });
         RunService.Heartbeat.Connect((dt) => {
-            if (GameUtils.ready === false)
+            if (GameAPI.ready === false)
                 return;
 
             const t = tick();

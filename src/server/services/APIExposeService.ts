@@ -20,8 +20,10 @@ import Items from "shared/items/Items";
 import NPC, { Dialogue, NPCAnimationType } from "shared/NPC";
 
 declare global {
-    /** Global type alias for the GameUtils API. */
-    type GameUtils = APIExposeService['GameUtils'];
+    /**
+     * Global type alias for the game's API used by items, challenges, quests, and other related content.
+     */
+    type GameAPI = APIExposeService['GameAPI'];
 }
 
 @Service()
@@ -46,12 +48,13 @@ export default class APIExposeService implements OnInit {
     }
 
     /**
-     * Comprehensive game utilities API exposed to items and other systems.
+     * Comprehensive game utilities API exposed to items, challenges, quests, and other related content.
+     * 
      * Provides access to all major game services and common operations.
      */
-    readonly GameUtils = (() => {
+    readonly GameAPI = (() => {
         const t = {
-            /** Whether the GameUtils object is ready for use */
+            /** Whether the GameAPI object is ready for use */
             ready: true,
             /** The mutable empire data table */
             empireData: this.dataService.empireData,
@@ -65,7 +68,7 @@ export default class APIExposeService implements OnInit {
             revenueService: this.revenueService,
             setupService: this.setupService,
             eventService: this.eventService,
-            gameAssetService: this,
+            gameAssetService: this.gameAssetService,
             items: Items,
 
             buyUpgrade: (upgradeId: string, to?: number, player?: Player, isFree?: boolean) => this.upgradeBoardService.buyUpgrade(upgradeId, to, player, isFree),
@@ -147,7 +150,7 @@ export default class APIExposeService implements OnInit {
         type noChecking = { [k: string]: unknown; };
 
         for (const [k, v] of pairs(t))
-            (ItemUtils.GameUtils as noChecking)[k] = v;
+            (ItemUtils.GameAPI as noChecking)[k] = v;
 
         return t;
     })();

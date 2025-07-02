@@ -11,7 +11,7 @@ import { GainUpgrade } from "shared/namedupgrade/NamedUpgrade";
 import NamedUpgrades from "shared/namedupgrade/NamedUpgrades";
 import Packets from "shared/Packets";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
-import { GameUtils } from "shared/item/ItemUtils";
+import { GameAPI } from "shared/item/ItemUtils";
 import { playSoundAtPart } from "@antivivi/vrldk";
 
 declare global {
@@ -96,7 +96,7 @@ namespace Challenges {
         cap: 3,
         challengeEffectInterval: 1,
         challengeEffect: (dt: number, level: number, forceEnd: (message: string) => void) => {
-            const empireData = GameUtils.empireData;
+            const empireData = GameAPI.empireData;
             const challengeStart = empireData.currentChallengeStartTime;
             const questMetadata = empireData.questMetadata;
             let meteorCooldown = questMetadata.get("CataclysmicWorldCooldown") as number | undefined;

@@ -1,6 +1,6 @@
 import { TweenService } from "@rbxts/services";
 import Item from "shared/item/Item";
-import { GameUtils } from "shared/item/ItemUtils";
+import { GameAPI } from "shared/item/ItemUtils";
 import { weldModel } from "@antivivi/vrldk";
 
 declare global {
@@ -15,7 +15,7 @@ export namespace LaserFan {
         const bp = weldModel(motor);
         const o = bp.CFrame;
         let v = 0;
-        const ItemsService = GameUtils.itemsService;
+        const ItemsService = GameAPI.itemsService;
         let d = ItemsService.getPlacedItem(model.Name)?.direction === true;
         const tweenInfo = new TweenInfo(0.1, Enum.EasingStyle.Linear);
         item.repeat(model, () => {

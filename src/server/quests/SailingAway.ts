@@ -1,5 +1,5 @@
 import Quest, { Stage } from "server/Quest";
-import { GameUtils } from "shared/item/ItemUtils";
+import { GameAPI } from "shared/item/ItemUtils";
 import { Dialogue } from "shared/NPC";
 import CaptainBacon from "shared/npcs/Captain Bacon";
 import Prest from "shared/npcs/Prest";
@@ -22,7 +22,7 @@ export = new Quest(script.Name)
             .root
         )
         .onStart((stage) => {
-            const connection = GameUtils.dialogueFinished.connect((dialogue) => {
+            const connection = GameAPI.dialogueFinished.connect((dialogue) => {
                 if (dialogue === stage.dialogue) {
                     stage.completed.fire();
                 }
@@ -46,12 +46,12 @@ export = new Quest(script.Name)
                     .root,
             ];
             for (const dialogue of dialogues)
-                GameUtils.addDialogue(dialogue);
+                GameAPI.addDialogue(dialogue);
             stage.completed.once(() => {
                 for (const dialogue of dialogues)
-                    GameUtils.removeDialogue(dialogue);
+                    GameAPI.removeDialogue(dialogue);
             });
-            const connection = GameUtils.dialogueFinished.connect((dialogue) => {
+            const connection = GameAPI.dialogueFinished.connect((dialogue) => {
 
             });
             return () => connection.disconnect();

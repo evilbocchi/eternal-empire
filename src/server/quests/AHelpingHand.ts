@@ -3,7 +3,7 @@ import Quest, { Stage } from "server/Quest";
 import { AREAS } from "shared/Area";
 import { getNPCModel, getWaypoint } from "shared/constants";
 import { emitEffect, getSound } from "shared/GameAssets";
-import { GameUtils } from "shared/item/ItemUtils";
+import { GameAPI } from "shared/item/ItemUtils";
 import FreddysUpgrader from "shared/items/negative/friendliness/FreddysUpgrader";
 import LostPendant from "shared/items/0/winsome/LostPendant";
 import { Dialogue } from "shared/NPC";
@@ -40,10 +40,10 @@ export = new Quest(script.Name)
         .onStart((stage) => {
             const continuation = new Dialogue(Freddy, "My name's Freddy. Follow me, I have something to show you.");
             freddyRootPart.Position = stage.position!;
-            const connection = GameUtils.dialogueFinished.connect((dialogue) => {
+            const connection = GameAPI.dialogueFinished.connect((dialogue) => {
                 if (dialogue === stage.dialogue) {
-                    GameUtils.setEventCompleted("FreddyReveal", true);
-                    GameUtils.talk(continuation);
+                    GameAPI.setEventCompleted("FreddyReveal", true);
+                    GameAPI.talk(continuation);
                 }
                 else if (dialogue === continuation)
                     stage.completed.fire();
@@ -59,9 +59,9 @@ export = new Quest(script.Name)
             new Dialogue(Freddy, "Follow me, I have something to show you.")
         )
         .onStart((stage) => {
-            GameUtils.stopNPCAnimation(Freddy, "Default");
+            GameAPI.stopNPCAnimation(Freddy, "Default");
             task.wait(2);
-            const connection = GameUtils.leadToPoint(stage.npcHumanoid!, waypoint2.CFrame, () => stage.completed.fire());
+            const connection = GameAPI.leadToPoint(stage.npcHumanoid!, waypoint2.CFrame, () => stage.completed.fire());
             return () => connection.Disconnect();
         })
     )
@@ -79,9 +79,9 @@ export = new Quest(script.Name)
                 .root
         )
         .onStart((stage) => {
-            GameUtils.stopNPCAnimation(Freddy, "Default");
+            GameAPI.stopNPCAnimation(Freddy, "Default");
             characterTween.Play();
-            const connection = GameUtils.dialogueFinished.connect((dialogue) => {
+            const connection = GameAPI.dialogueFinished.connect((dialogue) => {
                 if (stage.dialogue === dialogue)
                     stage.completed.fire();
             });
@@ -95,7 +95,7 @@ export = new Quest(script.Name)
             new Dialogue(Freddy, "What are you waiting for? Go get it!")
         )
         .onStart((stage) => {
-            GameUtils.stopNPCAnimation(Freddy, "Default");
+            GameAPI.stopNPCAnimation(Freddy, "Default");
             characterTween.Play();
 
             const hitSound = getSound("Hit");
@@ -108,10 +108,10 @@ export = new Quest(script.Name)
                 hs.Play();
                 task.wait(0.25);
             }
-            GameUtils.talk(new Dialogue(Freddy, "Off you go!"));
+            GameAPI.talk(new Dialogue(Freddy, "Off you go!"));
             task.wait(1);
 
-            const connection = GameUtils.addCompletionListener("AHelpingHandPendant", (isCompleted) => {
+            const connection = GameAPI.addCompletionListener("AHelpingHandPendant", (isCompleted) => {
                 if (isCompleted)
                     stage.completed.fire();
             });
@@ -129,10 +129,10 @@ export = new Quest(script.Name)
                 .root
         )
         .onStart((stage) => {
-            GameUtils.stopNPCAnimation(Freddy, "Default");
+            GameAPI.stopNPCAnimation(Freddy, "Default");
             characterTween.Play();
-            const connection = GameUtils.dialogueFinished.connect((dialogue) => {
-                GameUtils.takeQuestItem(LostPendant.id, 1);
+            const connection = GameAPI.dialogueFinished.connect((dialogue) => {
+                GameAPI.takeQuestItem(LostPendant.id, 1);
                 if (dialogue === stage.dialogue)
                     stage.completed.fire();
             });
@@ -146,15 +146,15 @@ export = new Quest(script.Name)
         }
         const lostPendantModel = obstacleCourse.WaitForChild("LostPendant");
         lostPendantModel.FindFirstChildOfClass("ProximityPrompt")!.Triggered.Connect(() => {
-            GameUtils.giveQuestItem(LostPendant.id, 1);
-            GameUtils.setEventCompleted("AHelpingHandPendant", true);
+            GameAPI.giveQuestItem(LostPendant.id, 1);
+            GameAPI.setEventCompleted("AHelpingHandPendant", true);
 
         });
-        GameUtils.addCompletionListener("AHelpingHandPendant", (isCompleted) => {
+        GameAPI.addCompletionListener("AHelpingHandPendant", (isCompleted) => {
             if (isCompleted)
                 lostPendantModel.Destroy();
         });
-        GameUtils.addCompletionListener("FreddyReveal", (isCompleted) => {
+        GameAPI.addCompletionListener("FreddyReveal", (isCompleted) => {
             if (isCompleted)
                 freddyHumanoid.DisplayName = "";
         });

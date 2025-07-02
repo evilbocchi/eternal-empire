@@ -4,7 +4,7 @@ import Item from "shared/item/Item";
 import Upgrader from "shared/item/traits/Upgrader";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Formula from "shared/currency/Formula";
-import { GameUtils } from "shared/item/ItemUtils";
+import { GameAPI } from "shared/item/ItemUtils";
 
 export = new Item(script.Name)
     .setName("Slamo Upgrader")
@@ -19,7 +19,7 @@ export = new Item(script.Name)
     .setFormulaX("pclicks")
 
     .trait(Upgrader)
-    .applyFormula((v, item) => item.setMul(new CurrencyBundle().set("Funds", v).set("Bitcoin", v)), () => GameUtils.currencyService.get("Purifier Clicks"))
+    .applyFormula((v, item) => item.setMul(new CurrencyBundle().set("Funds", v).set("Bitcoin", v)), () => GameAPI.currencyService.get("Purifier Clicks"))
 
     .trait(Conveyor)
     .setSpeed(8)

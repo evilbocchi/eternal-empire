@@ -1,7 +1,7 @@
 import Difficulty from "@antivivi/jjt-difficulties";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
-import { GameUtils } from "shared/item/ItemUtils";
+import { GameAPI } from "shared/item/ItemUtils";
 import Conveyor from "shared/item/traits/Conveyor";
 import Upgrader from "shared/item/traits/Upgrader";
 import Crystal from "shared/items/excavation/Crystal";
@@ -31,7 +31,7 @@ export = new Item(script.Name)
     .onInit((item) => {
         const upgrader = item.trait(Upgrader);
 
-        GameUtils.currencyService.balanceChanged.connect((balance) => {
+        GameAPI.currencyService.balanceChanged.connect((balance) => {
             const power = balance.get("Power");
             if (power === undefined || power.lessThan(1000000)) {
                 upgrader.setAdd(first);

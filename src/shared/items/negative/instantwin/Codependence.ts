@@ -4,7 +4,7 @@ import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Charger from "shared/item/traits/Charger";
 import Item from "shared/item/Item";
 import Formula from "shared/currency/Formula";
-import { GameUtils } from "shared/item/ItemUtils";
+import { GameAPI } from "shared/item/ItemUtils";
 import BasicBlankEssence from "./BasicBlankEssence";
 
 const div = OnoeNum.fromSerika(5, 12);
@@ -25,6 +25,6 @@ export = new Item(script.Name)
     .trait(Charger)
     .ignoresLimit(true)
     .setRadius(999)
-    .applyFormula((v, item) => item.setMul(mul.set("Funds", v).set("Power", v)), () => GameUtils.currencyService.get("Power"))
+    .applyFormula((v, item) => item.setMul(mul.set("Funds", v).set("Power", v)), () => GameAPI.currencyService.get("Power"))
 
     .exit();

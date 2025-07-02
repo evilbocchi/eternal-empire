@@ -4,7 +4,7 @@ import Generator from "shared/item/traits/Generator";
 import Item from "shared/item/Item";
 import UpgradeBoard from "shared/item/traits/UpgradeBoard";
 import UpgradeBoardI from "shared/items/negative/trueease/UpgradeBoardI";
-import { GameUtils } from "shared/item/ItemUtils";
+import { GameAPI } from "shared/item/ItemUtils";
 
 export = new Item(script.Name)
     .setName("Slamo Board Automater")
@@ -23,7 +23,7 @@ export = new Item(script.Name)
 
         item.repeat(model, () => {
             for (const upgrade of upgrades) {
-                GameUtils.buyUpgrade(upgrade.id, undefined, undefined, true);
+                GameAPI.buyUpgrade(upgrade.id, undefined, undefined, true);
             }
         }, 0.1);
     });

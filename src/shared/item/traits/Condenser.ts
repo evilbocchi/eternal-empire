@@ -3,7 +3,7 @@ import { getAllInstanceInfo, setInstanceInfo } from "@antivivi/vrldk";
 import { AREAS } from "shared/Area";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
-import { GameUtils } from "shared/item/ItemUtils";
+import { GameAPI } from "shared/item/ItemUtils";
 import Dropper from "shared/item/traits/Dropper";
 import Furnace from "shared/item/traits/Furnace";
 import ItemTrait from "shared/item/traits/ItemTrait";
@@ -39,12 +39,12 @@ export default class Condenser extends ItemTrait {
     static load(model: Model, condenser: Condenser) {
         const item = condenser.item;
         const dropper = item.trait(Dropper);
-        const areaId = GameUtils.itemsService.getPlacedItem(model.Name)?.area;
+        const areaId = GameAPI.itemsService.getPlacedItem(model.Name)?.area;
         if (areaId === undefined)
             return;
         const area = AREAS[areaId as AreaId];
         const dropletLimit = area.dropletLimit;
-        const dropletCountPerArea = GameUtils.areaService.dropletCountPerArea;
+        const dropletCountPerArea = GameAPI.areaService.dropletCountPerArea;
         const instantiatorsPerDroplet = new Map<Droplet, () => BasePart>();
         const pricePerDroplet = new Map<Droplet, CurrencyBundle>();
         const maxCosts = new Map<Currency, OnoeNum>();
@@ -122,8 +122,8 @@ export default class Condenser extends ItemTrait {
         };
         update();
         const ZERO = new OnoeNum(0);
-        const CurrencyService = GameUtils.currencyService;
-        const RevenueService = GameUtils.revenueService;
+        const CurrencyService = GameAPI.currencyService;
+        const RevenueService = GameAPI.revenueService;
         setInstanceInfo(model, "OnProcessed", (result, raw, dropletModel) => {
             const instanceInfo = getAllInstanceInfo(dropletModel);
             if (instanceInfo.DropletId === undefined || instanceInfo.Condensed === true) {

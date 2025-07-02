@@ -1,7 +1,7 @@
 import Signal from "@antivivi/lemon-signal";
 import { getNPCModel } from "shared/constants";
 import { Dialogue } from "shared/NPC";
-import { GameUtils } from "shared/item/ItemUtils";
+import { GameAPI } from "shared/item/ItemUtils";
 
 export class Stage {
     description: string | undefined;
@@ -55,10 +55,10 @@ export class Stage {
             const callback = load(stage);
             const dialogue = this.dialogue;
             if (dialogue !== undefined) {
-                GameUtils.onStageReached(this, () => {
-                    GameUtils.addDialogue(dialogue);
+                GameAPI.onStageReached(this, () => {
+                    GameAPI.addDialogue(dialogue);
                 });
-                stage.completed.connect(() => GameUtils.removeDialogue(dialogue));
+                stage.completed.connect(() => GameAPI.removeDialogue(dialogue));
                 return callback;
             }
             return callback;
@@ -71,7 +71,7 @@ export class Stage {
         return this.onLoad((stage) => {
             const mainCallback = load === undefined ? undefined : load(stage);
             let callback: () => void;
-            GameUtils.onStageReached(this, () => {
+            GameAPI.onStageReached(this, () => {
                 callback = start(stage);
             });
             return () => {

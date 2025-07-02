@@ -63,7 +63,7 @@ let oldSpeed = 1;
  * 
  * Acts as the main orchestrator for quest management, physics interactions,
  * NPC pathfinding, product purchases, and inter-service communication.
- * Also provides the GameUtils API used throughout the game.
+ * Also provides the GameAPI API used throughout the game.
  */
 @Service()
 export class GameAssetService implements OnInit, OnStart, OnPhysics {

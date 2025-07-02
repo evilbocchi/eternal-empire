@@ -7,7 +7,7 @@ import { Debris, RunService, TweenService, Workspace } from "@rbxts/services";
 import { IS_SERVER } from "shared/constants";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import { ASSETS } from "shared/GameAssets";
-import { GameUtils } from "shared/item/ItemUtils";
+import { GameAPI } from "shared/item/ItemUtils";
 import Operative from "shared/item/traits/Operative";
 import Packets from "shared/Packets";
 
@@ -734,7 +734,7 @@ export default class Droplet {
         }
         const health = this.health;
         const itemId = dropperModel.GetAttribute("ItemId") as string;
-        const areaId = GameUtils.itemsService.getPlacedItem(dropperModel.Name)?.area as AreaId | undefined;
+        const areaId = GameAPI.itemsService.getPlacedItem(dropperModel.Name)?.area as AreaId | undefined;
 
         return () => {
             const clone = model.Clone();

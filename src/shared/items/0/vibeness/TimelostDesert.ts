@@ -4,7 +4,7 @@ import Generator from "shared/item/traits/Generator";
 import Item from "shared/item/Item";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Formula from "shared/currency/Formula";
-import { GameUtils } from "shared/item/ItemUtils";
+import { GameAPI } from "shared/item/ItemUtils";
 
 const amt = new OnoeNum(100e12);
 const base = new CurrencyBundle().set("Power", amt);
@@ -24,6 +24,6 @@ export = new Item(script.Name)
     .setPassiveGain(base)
     .applyFormula((v, item) => {
         return item.setPassiveGain(base.set("Power", amt.mul(v)));
-    }, () => GameUtils.currencyService.get("Skill").mul(GameUtils.empireData.playtime))
+    }, () => GameAPI.currencyService.get("Skill").mul(GameAPI.empireData.playtime))
 
     .exit();

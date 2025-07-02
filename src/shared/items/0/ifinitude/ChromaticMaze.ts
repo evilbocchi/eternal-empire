@@ -4,7 +4,7 @@ import Upgrader from "shared/item/traits/Upgrader";
 import AdvancedBlankEssence from "shared/items/0/ifinitude/AdvancedBlankEssence";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Formula from "shared/currency/Formula";
-import { GameUtils } from "shared/item/ItemUtils";
+import { GameAPI } from "shared/item/ItemUtils";
 
 const mul = new CurrencyBundle();
 
@@ -20,6 +20,6 @@ export = new Item(script.Name)
     .setFormulaX("bitcoin")
 
     .trait(Upgrader)
-    .applyFormula((v, item) => item.setMul(mul.set("Funds", v).set("Power", v)), () => GameUtils.currencyService.get("Bitcoin"))
+    .applyFormula((v, item) => item.setMul(mul.set("Funds", v).set("Power", v)), () => GameAPI.currencyService.get("Bitcoin"))
 
     .exit();

@@ -3,7 +3,7 @@ import Furnace from "shared/item/traits/Furnace";
 import Item from "shared/item/Item";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Formula from "shared/currency/Formula";
-import { GameUtils } from "shared/item/ItemUtils";
+import { GameAPI } from "shared/item/ItemUtils";
 import RoboticCauldron from "shared/items/0/walkthrough/RoboticCauldron";
 
 const mul = new CurrencyBundle().set("Power", 1);
@@ -20,6 +20,6 @@ export = new Item(script.Name)
     .setFormulaXCap(new CurrencyBundle().set("Power", 10e24))
 
     .trait(Furnace)
-    .applyFormula((v, item) => item.setMul(mul.set("Power", v)), () => GameUtils.currencyService.get("Power"))
+    .applyFormula((v, item) => item.setMul(mul.set("Power", v)), () => GameAPI.currencyService.get("Power"))
 
     .exit();

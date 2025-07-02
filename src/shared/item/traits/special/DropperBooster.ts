@@ -1,7 +1,7 @@
 import { getAllInstanceInfo } from "@antivivi/vrldk";
 import { RunService } from "@rbxts/services";
 import Item from "shared/item/Item";
-import { GameUtils, getPlacedItemsInArea } from "shared/item/ItemUtils";
+import { GameAPI, getPlacedItemsInArea } from "shared/item/ItemUtils";
 import ItemTrait from "shared/item/traits/ItemTrait";
 
 declare global {
@@ -20,7 +20,7 @@ export default class DropperBooster extends ItemTrait {
         clickArea.CanTouch = true;
         clickArea.CollisionGroup = "ItemHitbox";
         clickArea.Touched.Connect(() => { });
-        const Items = GameUtils.items;
+        const Items = GameAPI.items;
         let target: BasePart | undefined;
         let targetInfo: InstanceInfo | undefined;
         const modifier = { multi: booster.mul };

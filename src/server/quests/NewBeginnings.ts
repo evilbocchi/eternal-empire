@@ -1,7 +1,7 @@
 import { ReplicatedStorage, RunService, TweenService } from "@rbxts/services";
 import Quest, { Stage } from "server/Quest";
 import { getNPCModel, getWaypoint } from "shared/constants";
-import { GameUtils } from "shared/item/ItemUtils";
+import { GameAPI } from "shared/item/ItemUtils";
 import TheFirstDropper from "shared/items/negative/tfd/TheFirstDropper";
 import TheFirstFurnace from "shared/items/negative/tfd/TheFirstFurnace";
 import { Dialogue } from "shared/NPC";
@@ -34,10 +34,10 @@ export = new Quest(script.Name)
         .onStart((stage) => {
             ReplicatedStorage.SetAttribute("Intro", true);
             const continuation = new Dialogue(Tria, "I'm Tria! Come with me, let's get you started on making yourself some money.");
-            const connection = GameUtils.dialogueFinished.connect((dialogue) => {
+            const connection = GameAPI.dialogueFinished.connect((dialogue) => {
                 if (dialogue === stage.dialogue) {
-                    GameUtils.setEventCompleted("TriaReveal", true);
-                    GameUtils.talk(continuation);
+                    GameAPI.setEventCompleted("TriaReveal", true);
+                    GameAPI.talk(continuation);
                 }
                 else if (dialogue === continuation)
                     stage.completed.fire();
@@ -52,9 +52,9 @@ export = new Quest(script.Name)
         .setDialogue(new Dialogue(Tria, "Follow me!"))
         .onStart((stage) => {
             ReplicatedStorage.SetAttribute("Intro", false);
-            GameUtils.stopNPCAnimation(Tria, "Default");
+            GameAPI.stopNPCAnimation(Tria, "Default");
             task.wait(2);
-            const connection = GameUtils.leadToPoint(triaHumanoid, stage.focus!.CFrame, () => stage.completed.fire());
+            const connection = GameAPI.leadToPoint(triaHumanoid, stage.focus!.CFrame, () => stage.completed.fire());
             return () => connection.Disconnect();
         })
     )
@@ -69,10 +69,10 @@ export = new Quest(script.Name)
             .root
         )
         .onStart((stage) => {
-            GameUtils.stopNPCAnimation(Tria, "Default");
+            GameAPI.stopNPCAnimation(Tria, "Default");
             characterTween.Play();
             let t = 0;
-            const ItemsService = GameUtils.itemsService;
+            const ItemsService = GameAPI.itemsService;
             const connection = RunService.Heartbeat.Connect((dt) => {
                 t += dt;
                 if (t < 0.5)
@@ -80,7 +80,7 @@ export = new Quest(script.Name)
                 t = 0;
                 if (ItemsService.getBoughtAmount(TheFirstDropper.id) > 0 && ItemsService.getBoughtAmount(TheFirstFurnace.id) > 0) {
                     stage.completed.fire();
-                    GameUtils.talk(new Dialogue(Tria, "Well done!")
+                    GameAPI.talk(new Dialogue(Tria, "Well done!")
                         .monologue("Now, go ahead and place those items down.")
                         .monologue("Make sure to align them so that the dropper head is above the furnace.")
                         .monologue("Let's see you make some money!")
@@ -99,37 +99,37 @@ export = new Quest(script.Name)
             new Dialogue(Tria, "See that backpack on the left-hand corner of your screen? Click it to open your Inventory!")
         )
         .onStart((stage) => {
-            GameUtils.stopNPCAnimation(Tria, "Default");
+            GameAPI.stopNPCAnimation(Tria, "Default");
             characterTween.Play();
             const continuation = new Dialogue(Tria, "Nice job!")
                 .monologue("I'd like to teach you more, but I'm afraid I'm going back home.")
                 .monologue("I'll see you again when you make a bit more money!")
                 .root;
             let completed = false;
-            const connection = GameUtils.currencyService.balanceChanged.connect((balance) => {
+            const connection = GameAPI.currencyService.balanceChanged.connect((balance) => {
                 const funds = balance.get("Funds");
                 if (completed === false && funds !== undefined && !funds.lessEquals(0)) {
                     completed = true;
-                    const c2 = GameUtils.dialogueFinished.connect((dialogue) => {
+                    const c2 = GameAPI.dialogueFinished.connect((dialogue) => {
                         if (dialogue === continuation) {
                             c2.disconnect();
-                            GameUtils.leadToPoint(triaHumanoid, getWaypoint("NewBeginningsEnd").CFrame, () => GameUtils.playNPCAnimation(Tria, "Default"));
+                            GameAPI.leadToPoint(triaHumanoid, getWaypoint("NewBeginningsEnd").CFrame, () => GameAPI.playNPCAnimation(Tria, "Default"));
                             stage.completed.fire();
                         }
                     });
-                    GameUtils.talk(continuation);
+                    GameAPI.talk(continuation);
                 }
             });
             return () => connection.disconnect();
         })
     )
     .onInit((utils) => {
-        GameUtils.addCompletionListener("TriaReveal", (isCompleted) => {
+        GameAPI.addCompletionListener("TriaReveal", (isCompleted) => {
             if (isCompleted)
                 triaHumanoid.DisplayName = "";
         });
 
-        GameUtils.dialogueFinished.connect((dialogue) => {
+        GameAPI.dialogueFinished.connect((dialogue) => {
             if (dialogue === NameChanger.defaultDialogue) {
                 Packets.tabOpened.fireAll("Rename");
             }
