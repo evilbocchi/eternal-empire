@@ -362,7 +362,7 @@ export class ChestService implements OnInit, OnStart {
                         return;
                     sound.Play();
                     const t = tick();
-                    const amount = lastOpen === 0 ? math.random(10, 14) : math.random(5, 8);
+                    const amount = lastOpen === 0 ? math.random(10, 14) : math.random(3, 7);
                     this.dataService.empireData.openedChests.set(`${chestLocation.X}_${chestLocation.Y}_${chestLocation.Z}`, t);
                     markLastOpen(t);
                     task.delay(0.25, () => {
