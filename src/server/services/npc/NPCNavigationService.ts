@@ -1,6 +1,18 @@
 //!optimize 2
 //!native
 
+/**
+ * @fileoverview NPCNavigationService - Handles NPC pathfinding, navigation, and game speed effects.
+ *
+ * This service manages:
+ * - NPC pathfinding and movement using Roblox's PathfindingService
+ * - Waypoint following, jump actions, and stuck recovery
+ * - Gravity and speed adjustments based on game speed
+ * - Notifying placed items of speed changes
+ *
+ * @since 1.0.0
+ */
+
 import { getInstanceInfo, playSoundAtPart } from "@antivivi/vrldk";
 import { OnInit, OnPhysics, OnStart, Service } from "@flamework/core";
 import { PathfindingService, RunService, Workspace } from "@rbxts/services";
@@ -14,29 +26,24 @@ declare global {
     type ProductFunction = (receiptInfo: ReceiptInfo, player: Player) => Enum.ProductPurchaseDecision;
 }
 
-
 /** Previous game speed value for change detection. */
 let oldSpeed = 1;
 
+/**
+ * Service that manages NPC pathfinding, navigation, and speed effects.
+ */
 @Service()
 export default class NPCNavigationService implements OnInit, OnStart, OnPhysics {
 
-    /**
-     * Map of active pathfinding operations for NPCs.
-     */
+    /** Map of active pathfinding operations for NPCs. */
     runningPathfinds = new Map<Humanoid, RBXScriptConnection>();
 
-    /**
-     * Whether the service is in rendering mode.
-     */
+    /** Whether the service is in rendering mode. */
     isRendering = false;
 
     // Pathfinding Configuration
 
-    /**
-     * Material costs for pathfinding calculations.
-     * Higher costs make NPCs avoid certain materials.
-     */
+    /** Material costs for pathfinding calculations. Higher costs make NPCs avoid certain materials. */
     readonly PATHFINDING_COSTS = {
         Water: 20,
         SmoothPlastic: 10,
@@ -44,9 +51,7 @@ export default class NPCNavigationService implements OnInit, OnStart, OnPhysics 
         Plastic: 2
     };
 
-    /**
-     * Default parameters for NPC pathfinding operations.
-     */
+    /** Default parameters for NPC pathfinding operations. */
     readonly PATHFINDING_PARAMS = {
         Costs: this.PATHFINDING_COSTS,
         WaypointSpacing: 6
@@ -59,7 +64,7 @@ export default class NPCNavigationService implements OnInit, OnStart, OnPhysics 
     /**
      * Makes an NPC navigate to a specific position using Roblox pathfinding.
      * Handles waypoint following, jump actions, and failure recovery.
-     * 
+     *
      * @param humanoid The NPC's humanoid to move.
      * @param position The target position to navigate to.
      * @param endCallback Function called when navigation completes.
@@ -67,7 +72,13 @@ export default class NPCNavigationService implements OnInit, OnStart, OnPhysics 
      * @param iterations Number of retry attempts remaining.
      * @returns Connection object for the pathfinding operation.
      */
-    pathfind(humanoid: Humanoid, position: Vector3, endCallback: () => unknown, params: AgentParameters = this.PATHFINDING_PARAMS, iterations?: number) {
+    pathfind(
+        humanoid: Humanoid,
+        position: Vector3,
+        endCallback: () => unknown,
+        params: AgentParameters = this.PATHFINDING_PARAMS,
+        iterations?: number
+    ) {
         if (iterations !== undefined && iterations <= 0) {
             return;
         }
@@ -148,7 +159,9 @@ export default class NPCNavigationService implements OnInit, OnStart, OnPhysics 
         }
     }
 
-
+    /**
+     * Initializes the NPCNavigationService.
+     */
     onInit() {
     }
 
