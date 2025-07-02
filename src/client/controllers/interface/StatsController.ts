@@ -1,12 +1,12 @@
 import { OnoeNum } from "@antivivi/serikanum";
+import { convertToHHMMSS } from "@antivivi/vrldk";
 import { Controller, OnInit } from "@flamework/core";
 import { LOCAL_PLAYER } from "client/constants";
 import { ADAPTIVE_TAB_MAIN_WINDOW } from "client/controllers/interface/AdaptiveTabController";
-import { ASSETS } from "shared/GameAssets";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import { CURRENCY_DETAILS } from "shared/currency/CurrencyDetails";
+import { ASSETS } from "shared/GameAssets";
 import Packets from "shared/Packets";
-import { convertToHHMMSS } from "@antivivi/vrldk";
 
 declare global {
     interface Assets {
@@ -33,7 +33,7 @@ export const STATS_WINDOW = ADAPTIVE_TAB_MAIN_WINDOW.WaitForChild("Stats") as Fr
 };
 
 @Controller()
-export class StatsController implements OnInit {
+export default class StatsController implements OnInit {
 
     refreshRawPurifierClicks() {
         STATS_WINDOW.StatList.RawPurifierClicks.AmountLabel.Text = tostring(LOCAL_PLAYER.GetAttribute("RawPurifierClicks") as number ?? 0);

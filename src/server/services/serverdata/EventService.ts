@@ -21,7 +21,7 @@
 
 import Signal from "@antivivi/lemon-signal";
 import { Service } from "@flamework/core";
-import { DataService } from "server/services/serverdata/DataService";
+import DataService from "server/services/serverdata/DataService";
 
 /**
  * Service for tracking and managing completion status of game events.
@@ -31,7 +31,7 @@ import { DataService } from "server/services/serverdata/DataService";
  * The service provides both immediate status checking and reactive listening.
  */
 @Service()
-export class EventService {
+export default class EventService {
 
     /**
      * Signal fired when an event's completion status changes.

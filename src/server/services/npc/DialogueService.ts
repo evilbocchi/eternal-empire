@@ -15,7 +15,7 @@ import Signal from "@antivivi/lemon-signal";
 import { loadAnimation } from "@antivivi/vrldk";
 import { OnInit, OnStart, Service } from "@flamework/core";
 import { Players, ProximityPromptService, TweenService, Workspace } from "@rbxts/services";
-import { DataService } from "server/services/serverdata/DataService";
+import DataService from "server/services/serverdata/DataService";
 import { NPCS, NPC_MODELS, getDisplayName } from "shared/constants";
 import { ASSETS, getSound } from "shared/GameAssets";
 import InteractableObject from "shared/InteractableObject";
@@ -38,7 +38,7 @@ declare global {
  * Service that manages all NPC dialogue, cutscenes, and related player interactions.
  */
 @Service()
-export class DialogueService implements OnInit, OnStart {
+export default class DialogueService implements OnInit, OnStart {
     /**
      * Signal fired when a dialogue sequence finishes.
      * @param dialogue The dialogue that finished.

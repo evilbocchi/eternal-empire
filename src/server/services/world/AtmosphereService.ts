@@ -30,7 +30,7 @@ declare global {
  * Service that manages atmospheric effects such as lighting and sound setup.
  */
 @Service()
-export class AtmosphereService implements OnInit, OnPhysics {
+export default class AtmosphereService implements OnInit, OnPhysics {
 
     /**
      * Advances the in-game clock time to simulate day/night cycles.

@@ -22,8 +22,8 @@
 
 import Signal from "@antivivi/lemon-signal";
 import { OnInit, Service } from "@flamework/core";
-import { DataService } from "server/services/serverdata/DataService";
-import { UpgradeBoardService } from "server/services/serverdata/UpgradeBoardService";
+import DataService from "server/services/serverdata/DataService";
+import UpgradeBoardService from "server/services/serverdata/UpgradeBoardService";
 import { getMaxXp } from "shared/constants";
 import NamedUpgrades from "shared/namedupgrade/NamedUpgrades";
 import Packets from "shared/Packets";
@@ -35,7 +35,7 @@ import Packets from "shared/Packets";
  * level point earning, and spending those points on permanent upgrades.
  */
 @Service()
-export class LevelService implements OnInit {
+export default class LevelService implements OnInit {
 
     /**
      * Signal fired when the player's level changes.

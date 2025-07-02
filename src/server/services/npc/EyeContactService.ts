@@ -41,7 +41,7 @@ interface TrackingDetails {
  * Updates neck orientation to look at the closest player/character within a specified distance.
  */
 @Service()
-export class EyeContactService implements OnInit, OnStart {
+export default class EyeContactService implements OnInit, OnStart {
     /**
      * Map of NPC models to their tracking details (head, neck, original C0).
      */

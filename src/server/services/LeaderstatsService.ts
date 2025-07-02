@@ -8,10 +8,12 @@
  *
  * @since 1.0.0
  */
+
 import { Service } from "@flamework/core";
 
 @Service()
-export class LeaderstatsService {
+export default class LeaderstatsService {
+    
     /**
      * Gets or creates the leaderstats folder for a player.
      * @param player The player to get leaderstats for

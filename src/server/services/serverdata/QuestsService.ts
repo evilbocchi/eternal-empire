@@ -24,10 +24,10 @@ import Signal from "@antivivi/lemon-signal";
 import { OnInit, Service } from "@flamework/core";
 import { AnalyticsService, Players, ReplicatedStorage } from "@rbxts/services";
 import Quest, { Stage } from "server/Quest";
-import { DialogueService } from "server/services/npc/DialogueService";
-import { DataService } from "server/services/serverdata/DataService";
-import { ItemsService } from "server/services/serverdata/ItemsService";
-import { LevelService } from "server/services/serverdata/LevelService";
+import DialogueService from "server/services/npc/DialogueService";
+import DataService from "server/services/serverdata/DataService";
+import ItemsService from "server/services/serverdata/ItemsService";
+import LevelService from "server/services/serverdata/LevelService";
 import { WAYPOINTS } from "shared/constants";
 import Packets from "shared/Packets";
 import Sandbox from "shared/Sandbox";
@@ -39,7 +39,7 @@ import Sandbox from "shared/Sandbox";
  * completion validation, and waypoint management for navigation.
  */
 @Service()
-export class QuestsService implements OnInit {
+export default class QuestsService implements OnInit {
 
     /**
      * Signal fired when a quest stage is reached.

@@ -17,7 +17,7 @@ import Sandbox from "shared/Sandbox";
  * Removes chests from all areas when sandbox mode is enabled.
  */
 @Service()
-export class SandboxService implements OnInit {
+export default class SandboxService implements OnInit {
 
     /**
      * Initializes the SandboxService. If sandbox mode is enabled, removes all chests from areas.

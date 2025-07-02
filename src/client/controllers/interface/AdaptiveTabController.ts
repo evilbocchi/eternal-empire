@@ -2,8 +2,8 @@ import Signal from "@antivivi/lemon-signal";
 import { Controller, OnInit } from "@flamework/core";
 import { Lighting, TweenService, Workspace } from "@rbxts/services";
 import { LOCAL_PLAYER } from "client/constants";
-import { HotkeysController } from "client/controllers/HotkeysController";
-import { INTERFACE, UIController } from "client/controllers/UIController";
+import HotkeysController from "client/controllers/HotkeysController";
+import UIController, { INTERFACE } from "client/controllers/UIController";
 
 declare global {
     type SidebarOption = Frame & {
@@ -34,7 +34,7 @@ export const SIDEBAR_BUTTONS = INTERFACE.WaitForChild("SidebarButtons") as Frame
 };
 
 @Controller()
-export class AdaptiveTabController implements OnInit {
+export default class AdaptiveTabController implements OnInit {
 
     tabHidden = new Signal<string>();
     originalSidebarPosition = SIDEBAR_BUTTONS.Position;

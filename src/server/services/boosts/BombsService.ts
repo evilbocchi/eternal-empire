@@ -16,10 +16,10 @@
 import Signal from "@antivivi/lemon-signal";
 import { OnInit, OnStart, Service } from "@flamework/core";
 import { DataStoreService, MessagingService, Workspace } from "@rbxts/services";
+import CurrencyService from "server/services/serverdata/CurrencyService";
+import DataService from "server/services/serverdata/DataService";
 import Packets from "shared/Packets";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
-import { CurrencyService } from "../serverdata/CurrencyService";
-import { DataService } from "../serverdata/DataService";
 
 /**
  * Structure for bomb event messages sent via MessagingService.
@@ -45,7 +45,7 @@ interface BombMessage {
  * Service that manages bomb boosts, usage, and global bomb state.
  */
 @Service()
-export class BombsService implements OnInit, OnStart {
+export default class BombsService implements OnInit, OnStart {
 
     /** Global DataStore for bomb timing. */
     globalDataStore = DataStoreService.GetGlobalDataStore();
@@ -64,8 +64,8 @@ export class BombsService implements OnInit, OnStart {
     /** Currency boost applied when Funds Bomb is active. */
     fundsBombBoost = new CurrencyBundle().set("Funds", 2);
 
-    constructor(private dataService: DataService, private currencyService: CurrencyService) {
-        // ...existing code...
+    constructor(private dataService: DataService,
+        private currencyService: CurrencyService) {
     }
 
     /**

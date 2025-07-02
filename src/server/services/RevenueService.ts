@@ -17,11 +17,12 @@
  * @since 1.0.0
  */
 
+import { getAllInstanceInfo } from "@antivivi/vrldk";
 import { Service } from "@flamework/core";
-import { BombsService } from "server/services/boosts/BombsService";
-import { DarkMatterService } from "server/services/boosts/DarkMatterService";
-import { CurrencyService } from "server/services/serverdata/CurrencyService";
-import { DataService } from "server/services/serverdata/DataService";
+import BombsService from "server/services/boosts/BombsService";
+import DarkMatterService from "server/services/boosts/DarkMatterService";
+import CurrencyService from "server/services/serverdata/CurrencyService";
+import DataService from "server/services/serverdata/DataService";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Droplet from "shared/item/Droplet";
 import Operative from "shared/item/traits/Operative";
@@ -29,7 +30,6 @@ import Upgrader from "shared/item/traits/Upgrader";
 import { PriceUpgrade } from "shared/namedupgrade/NamedUpgrade";
 import NamedUpgrades from "shared/namedupgrade/NamedUpgrades";
 import { performSoftcaps } from "shared/Softcaps";
-import { getAllInstanceInfo } from "@antivivi/vrldk";
 
 const FURNACE_UPGRADES = NamedUpgrades.getUpgrades("Furnace");
 
@@ -38,7 +38,7 @@ const FURNACE_UPGRADES = NamedUpgrades.getUpgrades("Furnace");
  * Handles global and upgrade-based multipliers, softcaps, and value computation.
  */
 @Service()
-export class RevenueService {
+export default class RevenueService {
 
     /**
      * Constructs the RevenueService with all required dependencies.

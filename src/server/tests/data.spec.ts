@@ -1,9 +1,9 @@
 /// <reference types="@rbxts/testez/globals" />
 
 import { OnoeNum } from "@antivivi/serikanum";
-import { CurrencyService } from "server/services/serverdata/CurrencyService";
-import { DataService } from "server/services/serverdata/DataService";
-import { ItemsService } from "server/services/serverdata/ItemsService";
+import CurrencyService from "server/services/serverdata/CurrencyService";
+import DataService from "server/services/serverdata/DataService";
+import ItemsService from "server/services/serverdata/ItemsService";
 
 export = function () {
     const dataService = new DataService();

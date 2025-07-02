@@ -16,8 +16,8 @@
 import Signal from "@antivivi/lemon-signal";
 import { OnInit, Service } from "@flamework/core";
 import { Workspace } from "@rbxts/services";
-import { CurrencyService } from "server/services/serverdata/CurrencyService";
-import { DataService } from "server/services/serverdata/DataService";
+import CurrencyService from "server/services/serverdata/CurrencyService";
+import DataService from "server/services/serverdata/DataService";
 import NamedUpgrades from "shared/namedupgrade/NamedUpgrades";
 import Packets from "shared/Packets";
 
@@ -25,7 +25,7 @@ import Packets from "shared/Packets";
  * Service that manages upgrades for the current empire, including purchase and effects.
  */
 @Service()
-export class UpgradeBoardService implements OnInit {
+export default class UpgradeBoardService implements OnInit {
 
     /** Map of upgrade IDs to their current amounts. */
     readonly upgrades: Map<string, number>;

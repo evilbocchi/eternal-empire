@@ -1,7 +1,7 @@
 import { OnoeNum } from "@antivivi/serikanum";
 import { Controller, OnInit, OnStart } from "@flamework/core";
 import { ADAPTIVE_TAB_MAIN_WINDOW } from "client/controllers/interface/AdaptiveTabController";
-import { BalanceWindowController } from "client/controllers/interface/BalanceWindowController";
+import BalanceWindowController from "client/controllers/interface/BalanceWindowController";
 import { getNameFromUserId } from "shared/constants";
 import { ASSETS } from "shared/GameAssets";
 import { AREAS } from "shared/Area";
@@ -30,7 +30,7 @@ export const LOGS_WINDOW = ADAPTIVE_TAB_MAIN_WINDOW.WaitForChild("Logs") as Fram
 };
 
 @Controller()
-export class LogController implements OnInit, OnStart {
+export default class LogController implements OnInit, OnStart {
 
     logsLength = 0;
     logs = new Array<Log>();

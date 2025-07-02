@@ -3,23 +3,23 @@ import { playSoundAtPart, spawnExplosion } from "@antivivi/vrldk";
 import { OnInit, Service } from "@flamework/core";
 import { Debris, Lighting, Players, ReplicatedStorage, RunService, ServerStorage, TeleportService, TextChatService, Workspace } from "@rbxts/services";
 import Quest from "server/Quest";
-import { BombsService } from "server/services/boosts/BombsService";
+import BombsService from "server/services/boosts/BombsService";
 import { DonationService } from "server/services/DonationService";
 import { LeaderboardService } from "server/services/LeaderboardService";
 import ChatHookService from "server/services/permissions/ChatHookService";
-import { PermissionsService } from "server/services/permissions/PermissionsService";
-import { ResetService } from "server/services/ResetService";
-import { CurrencyService } from "server/services/serverdata/CurrencyService";
-import { DataService } from "server/services/serverdata/DataService";
-import { ItemsService } from "server/services/serverdata/ItemsService";
-import { LevelService } from "server/services/serverdata/LevelService";
-import { PlaytimeService } from "server/services/serverdata/PlaytimeService";
-import { QuestsService } from "server/services/serverdata/QuestsService";
-import { SetupService } from "server/services/serverdata/SetupService";
-import { UnlockedAreasService } from "server/services/serverdata/UnlockedAreasService";
-import { UpgradeBoardService } from "server/services/serverdata/UpgradeBoardService";
-import { AreaService } from "server/services/world/AreaService";
-import { ChestService } from "server/services/world/ChestService";
+import PermissionsService from "server/services/permissions/PermissionsService";
+import ResetService from "server/services/ResetService";
+import CurrencyService from "server/services/serverdata/CurrencyService";
+import DataService from "server/services/serverdata/DataService";
+import ItemsService from "server/services/serverdata/ItemsService";
+import LevelService from "server/services/serverdata/LevelService";
+import PlaytimeService from "server/services/serverdata/PlaytimeService";
+import QuestsService from "server/services/serverdata/QuestsService";
+import SetupService from "server/services/serverdata/SetupService";
+import UnlockedAreasService from "server/services/serverdata/UnlockedAreasService";
+import UpgradeBoardService from "server/services/serverdata/UpgradeBoardService";
+import AreaService from "server/services/world/AreaService";
+import ChestService from "server/services/world/ChestService";
 import { AREAS } from "shared/Area";
 import { IS_SINGLE_SERVER } from "shared/constants";
 import { CURRENCY_DETAILS } from "shared/currency/CurrencyDetails";
@@ -31,7 +31,7 @@ import Packets from "shared/Packets";
 import Sandbox from "shared/Sandbox";
 
 @Service()
-export class CommandsService implements OnInit {
+export default class CommandsService implements OnInit {
 
     commands = TextChatService.WaitForChild("TextChatCommands");
 

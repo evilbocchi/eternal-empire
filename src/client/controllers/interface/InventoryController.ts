@@ -2,10 +2,10 @@
 //!optimize 2
 
 import { Controller, OnInit, OnStart } from "@flamework/core";
-import { ADAPTIVE_TAB_MAIN_WINDOW, AdaptiveTabController } from "client/controllers/interface/AdaptiveTabController";
-import { BuildController } from "client/controllers/interface/BuildController";
-import { Tooltip, TooltipController } from "client/controllers/interface/TooltipController";
-import { INTERFACE, UIController } from "client/controllers/UIController";
+import AdaptiveTabController, { ADAPTIVE_TAB_MAIN_WINDOW } from "client/controllers/interface/AdaptiveTabController";
+import BuildController from "client/controllers/interface/BuildController";
+import TooltipController, { Tooltip } from "client/controllers/interface/TooltipController";
+import UIController, { INTERFACE } from "client/controllers/UIController";
 import ItemFilter from "client/ItemFilter";
 import ItemSlot from "client/ItemSlot";
 import { ASSETS } from "shared/GameAssets";
@@ -28,7 +28,7 @@ for (let i = 0; i < sortedItemsSize; i++) {
 }
 
 @Controller()
-export class InventoryController implements OnInit, OnStart {
+export default class InventoryController implements OnInit, OnStart {
 
     readonly itemSlotsPerItem = new Map<Item, ItemSlot>();
     readonly items = new Array<Item>();

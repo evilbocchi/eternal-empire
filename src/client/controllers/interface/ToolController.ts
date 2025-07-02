@@ -1,20 +1,19 @@
 import { OnoeNum } from "@antivivi/serikanum";
+import { loadAnimation } from "@antivivi/vrldk";
 import { Controller, OnInit, OnStart } from "@flamework/core";
 import { Debris, RunService, StarterGui, TweenService, UserInputService, Workspace } from "@rbxts/services";
 import { LOCAL_PLAYER } from "client/constants";
-import { AreaController } from "client/controllers/AreaController";
+import AreaController from "client/controllers/AreaController";
 import { ADAPTIVE_TAB } from "client/controllers/interface/AdaptiveTabController";
-import { BuildController } from "client/controllers/interface/BuildController";
-import { Tooltip, TooltipController } from "client/controllers/interface/TooltipController";
-import { INTERFACE, UIController } from "client/controllers/UIController";
+import BuildController from "client/controllers/interface/BuildController";
+import TooltipController, { Tooltip } from "client/controllers/interface/TooltipController";
+import UIController, { INTERFACE } from "client/controllers/UIController";
 import { AREAS } from "shared/Area";
-import { emitEffect } from "shared/GameAssets";
-import { ASSETS } from "shared/GameAssets";
+import { ASSETS, emitEffect } from "shared/GameAssets";
 import Harvestable from "shared/Harvestable";
+import ItemUtils from "shared/item/ItemUtils";
 import Items from "shared/items/Items";
 import Packets from "shared/Packets";
-import ItemUtils from "shared/item/ItemUtils";
-import { loadAnimation } from "@antivivi/vrldk";
 
 declare global {
     type ToolOption = ItemSlot & {
@@ -36,7 +35,7 @@ export const BACKPACK_WINDOW = INTERFACE.WaitForChild("BackpackWindow") as Frame
 };
 
 @Controller()
-export class ToolController implements OnInit, OnStart {
+export default class ToolController implements OnInit, OnStart {
 
     swingAnimation?: AnimationTrack;
     harvestables = new Map<Instance, typeof ASSETS.HarvestableGui>();

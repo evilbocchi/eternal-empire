@@ -9,7 +9,7 @@ import { ASSETS } from "shared/GameAssets";
 import Packets from "shared/Packets";
 
 @Controller()
-export class SoundController implements OnStart {
+export default class SoundController implements OnStart {
 
     startMusic = ASSETS.WaitForChild("JJT Money Empire!") as Sound;
     currentlyPlayingLabel = SETTINGS_WINDOW.InteractionOptions.WaitForChild("CurrentlyPlaying").WaitForChild("Title") as TextLabel;

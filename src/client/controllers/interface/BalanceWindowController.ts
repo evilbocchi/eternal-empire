@@ -3,9 +3,9 @@ import { paintObjects } from "@antivivi/vrldk";
 import { Controller, OnInit } from "@flamework/core";
 import { Debris, TweenService, Workspace } from "@rbxts/services";
 import StringBuilder from "@rbxts/stringbuilder";
-import { HotkeysController } from "client/controllers/HotkeysController";
-import { INTERFACE, UIController } from "client/controllers/UIController";
-import { TooltipController } from "client/controllers/interface/TooltipController";
+import HotkeysController from "client/controllers/HotkeysController";
+import UIController, { INTERFACE } from "client/controllers/UIController";
+import TooltipController from "client/controllers/interface/TooltipController";
 import { ASSETS } from "shared/GameAssets";
 import Packets from "shared/Packets";
 import Softcaps, { performSoftcap } from "shared/Softcaps";
@@ -60,7 +60,7 @@ export const BALANCE_WINDOW = INTERFACE.WaitForChild("BalanceWindow") as Frame &
 };
 
 @Controller()
-export class BalanceWindowController implements OnInit {
+export default class BalanceWindowController implements OnInit {
 
     originalBalanceWindowPosition = BALANCE_WINDOW.Position;
     page = 1;

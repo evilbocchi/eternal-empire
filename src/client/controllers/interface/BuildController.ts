@@ -2,10 +2,10 @@ import { weldModel } from "@antivivi/vrldk";
 import { Controller, OnInit, OnStart } from "@flamework/core";
 import { HttpService, TweenService, UserInputService, Workspace } from "@rbxts/services";
 import { LOCAL_PLAYER, MOUSE, NONCOLLISION_COLOR } from "client/constants";
-import { HotkeysController } from "client/controllers/HotkeysController";
-import { AdaptiveTabController } from "client/controllers/interface/AdaptiveTabController";
+import HotkeysController from "client/controllers/HotkeysController";
+import AdaptiveTabController from "client/controllers/interface/AdaptiveTabController";
 import { SHOP_GUI } from "client/controllers/interface/ShopController";
-import { INTERFACE, UIController } from "client/controllers/UIController";
+import UIController, { INTERFACE } from "client/controllers/UIController";
 import { AREAS } from "shared/Area";
 import { PLACED_ITEMS_FOLDER } from "shared/constants";
 import Item from "shared/item/Item";
@@ -31,7 +31,7 @@ export const BUILD_WINDOW = INTERFACE.WaitForChild("BuildWindow") as Frame & {
 };
 
 @Controller()
-export class BuildController implements OnInit, OnStart {
+export default class BuildController implements OnInit, OnStart {
 
     /**
      * Offset of the selected models from the mouse.

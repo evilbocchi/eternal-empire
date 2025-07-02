@@ -19,7 +19,7 @@ import Items from "shared/items/Items";
  * Ensures that game content is logical and consistent.
  */
 @Service()
-export class SanityService implements OnStart {
+export default class SanityService implements OnStart {
 
     /**
      * Checks an item for common configuration mistakes.

@@ -11,7 +11,7 @@ import { ASSETS } from "shared/GameAssets";
 export const INTERFACE = PLAYER_GUI.WaitForChild("Interface") as ScreenGui;
 
 @Controller()
-export class UIController implements OnInit, OnStart {
+export default class UIController implements OnInit, OnStart {
     preloadedAsset = new Signal<string>();
 
     playSound(soundName: string) {

@@ -16,7 +16,7 @@ import Items from "shared/items/Items";
 import Packets from "shared/Packets";
 
 @Controller()
-export class EffectController implements OnInit {
+export default class EffectController implements OnInit {
 
     camShake = new CameraShaker(
         Enum.RenderPriority.Camera.Value,

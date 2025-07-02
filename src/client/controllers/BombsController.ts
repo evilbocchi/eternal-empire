@@ -1,12 +1,12 @@
 import { OnoeNum } from "@antivivi/serikanum";
+import { convertToHHMMSS } from "@antivivi/vrldk";
 import { Controller, OnStart } from "@flamework/core";
 import { CollectionService, MarketplaceService, Workspace } from "@rbxts/services";
 import { LOCAL_PLAYER } from "client/constants";
-import { DETAILS_WINDOW } from "./interface/DetailsController";
-import { UIController } from "client/controllers/UIController";
+import { DETAILS_WINDOW } from "client/controllers/interface/DetailsController";
+import UIController from "client/controllers/UIController";
 import { BOMBS_PRODUCTS } from "shared/devproducts/BombsProducts";
 import Packets from "shared/Packets";
-import { convertToHHMMSS } from "@antivivi/vrldk";
 
 declare global {
     type BombsBoardGui = SurfaceGui & {
@@ -17,7 +17,7 @@ declare global {
 }
 
 @Controller()
-export class BombsController implements OnStart {
+export default class BombsController implements OnStart {
 
     guis = new Map<BombsBoardGui, Currency>();
 

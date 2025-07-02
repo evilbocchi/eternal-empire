@@ -3,10 +3,10 @@ import { combineHumanReadable } from "@antivivi/vrldk";
 import { Controller, OnInit, OnPhysics } from "@flamework/core";
 import { Debris, ReplicatedStorage, TweenService, Workspace } from "@rbxts/services";
 import { LOCAL_PLAYER } from "client/constants";
-import { EffectController } from "client/controllers/EffectController";
-import { HotkeysController } from "client/controllers/HotkeysController";
-import { ADAPTIVE_TAB, ADAPTIVE_TAB_MAIN_WINDOW, AdaptiveTabController, SIDEBAR_BUTTONS } from "client/controllers/interface/AdaptiveTabController";
-import { INTERFACE, UIController } from "client/controllers/UIController";
+import EffectController from "client/controllers/EffectController";
+import HotkeysController from "client/controllers/HotkeysController";
+import AdaptiveTabController, { ADAPTIVE_TAB, ADAPTIVE_TAB_MAIN_WINDOW, SIDEBAR_BUTTONS } from "client/controllers/interface/AdaptiveTabController";
+import UIController, { INTERFACE } from "client/controllers/UIController";
 import ItemSlot from "client/ItemSlot";
 import { getMaxXp } from "shared/constants";
 import { ASSETS } from "shared/GameAssets";
@@ -118,7 +118,7 @@ export const QUESTS_WINDOW = ADAPTIVE_TAB_MAIN_WINDOW.WaitForChild("Quests") as 
 };
 
 @Controller()
-export class QuestsController implements OnInit, OnPhysics {
+export default class QuestsController implements OnInit, OnPhysics {
 
     oldIndex = -2;
     indexer: string | undefined = undefined;

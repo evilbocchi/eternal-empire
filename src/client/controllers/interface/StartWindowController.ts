@@ -1,23 +1,20 @@
 import ComputeNameColor from "@antivivi/rbxnamecolor";
+import { combineHumanReadable, convertToHHMMSS, getHumanoid, paintObjects } from "@antivivi/vrldk";
 import { Controller, OnInit } from "@flamework/core";
 import { Players, ReplicatedFirst, RunService, TweenService, Workspace } from "@rbxts/services";
 import { LOCAL_PLAYER, PLAYER_GUI } from "client/constants";
-import { HotkeysController } from "client/controllers/HotkeysController";
-import { AdaptiveTabController } from "client/controllers/interface/AdaptiveTabController";
-import { BalanceWindowController } from "client/controllers/interface/BalanceWindowController";
-import { IntroController } from "client/controllers/interface/IntroController";
-import { LoadingWindowController } from "client/controllers/interface/LoadingWindowController";
+import HotkeysController from "client/controllers/HotkeysController";
+import AdaptiveTabController from "client/controllers/interface/AdaptiveTabController";
+import BalanceWindowController from "client/controllers/interface/BalanceWindowController";
+import IntroController from "client/controllers/interface/IntroController";
+import LoadingWindowController from "client/controllers/interface/LoadingWindowController";
 import { SETTINGS_WINDOW } from "client/controllers/interface/SettingsController";
-import { SoundController } from "client/controllers/interface/SoundController";
-import { UIController } from "client/controllers/UIController";
+import SoundController from "client/controllers/interface/SoundController";
+import UIController from "client/controllers/UIController";
 import { getNameFromUserId, getStartCamera, isStartScreenEnabled } from "shared/constants";
 import { ASSETS } from "shared/GameAssets";
 import Items from "shared/items/Items";
 import Packets from "shared/Packets";
-import { convertToHHMMSS } from "@antivivi/vrldk";
-import { getHumanoid } from "@antivivi/vrldk";
-import { combineHumanReadable } from "@antivivi/vrldk";
-import { paintObjects } from "@antivivi/vrldk";
 
 declare global {
     type PlayerSlot = Frame & {
@@ -85,7 +82,7 @@ export const START_WINDOW = ReplicatedFirst.WaitForChild("StartScreen") as Scree
 
 
 @Controller()
-export class StartWindowController implements OnInit {
+export default class StartWindowController implements OnInit {
     constructor(private uiController: UIController, private adaptiveTabController: AdaptiveTabController, private balanceWindowController: BalanceWindowController,
         private loadingWindowController: LoadingWindowController, private introController: IntroController, private soundController: SoundController, private hotkeysController: HotkeysController) {
     }

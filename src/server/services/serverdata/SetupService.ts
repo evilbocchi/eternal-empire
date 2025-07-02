@@ -16,8 +16,8 @@
 import Signal from "@antivivi/lemon-signal";
 import { OnInit, Service } from "@flamework/core";
 import { TextService } from "@rbxts/services";
-import { DataService } from "server/services/serverdata/DataService";
-import { ItemsService } from "server/services/serverdata/ItemsService";
+import DataService from "server/services/serverdata/DataService";
+import ItemsService from "server/services/serverdata/ItemsService";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
 import Items from "shared/items/Items";
@@ -27,7 +27,7 @@ import Packets from "shared/Packets";
  * Service that manages saving and loading of item setups for different areas.
  */
 @Service()
-export class SetupService implements OnInit {
+export default class SetupService implements OnInit {
 
     /** Signal fired when a setup is saved. */
     setupSaved = new Signal<(player: Player, area: AreaId) => void>();

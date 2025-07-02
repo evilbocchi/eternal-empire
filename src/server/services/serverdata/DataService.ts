@@ -332,7 +332,7 @@ const START_SCREEN_ENABLED = isStartScreenEnabled();
  * Handles data loading, saving, empire creation, teleportation, and permissions.
  */
 @Service()
-export class DataService implements OnInit, OnPlayerJoined {
+export default class DataService implements OnInit, OnPlayerJoined {
 
     // Profile Managers
 

@@ -23,8 +23,8 @@ import { OnInit, OnStart, Service } from "@flamework/core";
 import { CollectionService, Workspace } from "@rbxts/services";
 import { CHALLENGES } from "server/Challenges";
 import { OnGameAPILoaded } from "server/services/ModdingService";
-import { CurrencyService } from "server/services/serverdata/CurrencyService";
-import { DataService } from "server/services/serverdata/DataService";
+import CurrencyService from "server/services/serverdata/CurrencyService";
+import DataService from "server/services/serverdata/DataService";
 import { AREAS } from "shared/Area";
 import { PLACED_ITEMS_FOLDER } from "shared/constants";
 import Item from "shared/item/Item";
@@ -55,7 +55,7 @@ const queue = new Array<() => void>();
  * including 3D model management and world synchronization.
  */
 @Service()
-export class ItemsService implements OnInit, OnStart, OnGameAPILoaded {
+export default class ItemsService implements OnInit, OnStart, OnGameAPILoaded {
 
     // Event Signals
 

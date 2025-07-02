@@ -4,7 +4,7 @@ import { AREAS } from "shared/Area";
 import ItemUtils from "shared/item/ItemUtils";
 
 @Controller()
-export class AtmosphereController implements OnInit, OnStart {
+export default class AtmosphereController implements OnInit, OnStart {
 
     lights = new Map<Light, number>();
 

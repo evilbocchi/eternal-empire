@@ -23,11 +23,11 @@
 import { getAllInstanceInfo, isInside, playSoundAtPart } from "@antivivi/vrldk";
 import { OnInit, Service } from "@flamework/core";
 import { Players } from "@rbxts/services";
-import NPCNavigationService from "server/services/npc/NPCNavigationService";
-import { LeaderstatsService } from "server/services/LeaderstatsService";
+import LeaderstatsService from "server/services/LeaderstatsService";
 import { OnPlayerJoined } from "server/services/ModdingService";
-import { DataService } from "server/services/serverdata/DataService";
-import { UpgradeBoardService } from "server/services/serverdata/UpgradeBoardService";
+import NPCNavigationService from "server/services/npc/NPCNavigationService";
+import DataService from "server/services/serverdata/DataService";
+import UpgradeBoardService from "server/services/serverdata/UpgradeBoardService";
 import Area, { AREAS } from "shared/Area";
 import { MUSIC_GROUP } from "shared/constants";
 import { getSound } from "shared/GameAssets";
@@ -48,7 +48,7 @@ AREA_CHECK_PARAMS.CollisionGroup = "PlayerHitbox";
  * teleportation, and droplet management.
  */
 @Service()
-export class AreaService implements OnInit, OnPlayerJoined {
+export default class AreaService implements OnInit, OnPlayerJoined {
 
     /**
      * Maps area IDs to the number of droplets currently present in that area.

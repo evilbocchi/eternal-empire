@@ -21,7 +21,7 @@
 import Signal from "@antivivi/lemon-signal";
 import { OnoeNum } from "@antivivi/serikanum";
 import { OnInit, OnStart, Service } from "@flamework/core";
-import { DataService } from "server/services/serverdata/DataService";
+import DataService from "server/services/serverdata/DataService";
 import Packets from "shared/Packets";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import { CURRENCIES, CURRENCY_DETAILS } from "shared/currency/CurrencyDetails";
@@ -38,7 +38,7 @@ const ZERO = new OnoeNum(0);
  * calculates revenue rates, and synchronizes currency data with clients.
  */
 @Service()
-export class CurrencyService implements OnInit, OnStart {
+export default class CurrencyService implements OnInit, OnStart {
 
     // Core Currency Data
 

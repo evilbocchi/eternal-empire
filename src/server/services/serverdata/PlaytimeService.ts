@@ -19,7 +19,7 @@
 
 import { OnInit, Service } from "@flamework/core";
 import { RunService } from "@rbxts/services";
-import { DataService } from "server/services/serverdata/DataService";
+import DataService from "server/services/serverdata/DataService";
 import Packets from "shared/Packets";
 
 /**
@@ -29,7 +29,7 @@ import Packets from "shared/Packets";
  * all sessions, with automatic persistence and client synchronization.
  */
 @Service()
-export class PlaytimeService implements OnInit {
+export default class PlaytimeService implements OnInit {
 
     /**
      * Current session time in seconds.

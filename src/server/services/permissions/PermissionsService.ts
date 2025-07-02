@@ -15,30 +15,30 @@
  * @since 1.0.0
  */
 
+
 import { BaseOnoeNum, OnoeNum } from "@antivivi/serikanum";
 import { convertToHHMMSS } from "@antivivi/vrldk";
 import { OnInit, Service } from "@flamework/core";
 import { MarketplaceService, MessagingService, Players, TeleportService, TextService } from "@rbxts/services";
-import { BombsService } from "server/services/boosts/BombsService";
+import BombsService from "server/services/boosts/BombsService";
 import { DonationService } from "server/services/DonationService";
-import NPCNavigationService from "server/services/npc/NPCNavigationService";
 import { OnPlayerJoined } from "server/services/ModdingService";
+import NPCNavigationService from "server/services/npc/NPCNavigationService";
 import ChatHookService from "server/services/permissions/ChatHookService";
 import ProductService from "server/services/product/ProductService";
-import { ResetService } from "server/services/ResetService";
-import { CurrencyService } from "server/services/serverdata/CurrencyService";
-import { DataService } from "server/services/serverdata/DataService";
-import { ItemsService } from "server/services/serverdata/ItemsService";
-import { LevelService } from "server/services/serverdata/LevelService";
-import { SetupService } from "server/services/serverdata/SetupService";
-import { UpgradeBoardService } from "server/services/serverdata/UpgradeBoardService";
+import ResetService from "server/services/ResetService";
+import CurrencyService from "server/services/serverdata/CurrencyService";
+import DataService from "server/services/serverdata/DataService";
+import ItemsService from "server/services/serverdata/ItemsService";
+import LevelService from "server/services/serverdata/LevelService";
+import SetupService from "server/services/serverdata/SetupService";
+import UpgradeBoardService from "server/services/serverdata/UpgradeBoardService";
 import { IS_SINGLE_SERVER, getNameFromUserId } from "shared/constants";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import { CURRENCY_DETAILS } from "shared/currency/CurrencyDetails";
 import { BOMBS_PRODUCTS } from "shared/devproducts/BombsProducts";
 import { DONATION_PRODUCTS } from "shared/devproducts/DonationProducts";
 import Item from "shared/item/Item";
-import Items from "shared/items/Items";
 import BasicCondenser from "shared/items/negative/felixthea/BasicCondenser";
 import AdvancedCondenser from "shared/items/negative/skip/AdvancedCondenser";
 import BasicCharger from "shared/items/negative/trueease/BasicCharger";
@@ -78,7 +78,7 @@ type PermissionList = "banned" | "trusted" | "managers";
  * Integrates with other services for data, items, upgrades, and messaging.
  */
 @Service()
-export class PermissionsService implements OnInit, OnPlayerJoined {
+export default class PermissionsService implements OnInit, OnPlayerJoined {
 
 
     /**

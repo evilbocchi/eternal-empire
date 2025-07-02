@@ -28,7 +28,7 @@ export interface OnGameAPILoaded {
 }
 
 @Service()
-export class ModdingService implements OnInit {
+export default class ModdingService implements OnInit {
 
     readonly gameAPILoaded = new Signal();
 
@@ -64,7 +64,7 @@ export class ModdingService implements OnInit {
         }
     }
 
-    
+
 
     /**
      * Initializes the modding service and sets up player join listeners.

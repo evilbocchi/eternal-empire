@@ -16,10 +16,14 @@
  */
 import Signal from "@antivivi/lemon-signal";
 import { OnoeNum } from "@antivivi/serikanum";
+import { getPlayer } from "@antivivi/vrldk";
 import { OnInit, Service } from "@flamework/core";
 import { BadgeService, Players, RunService } from "@rbxts/services";
-import { RevenueService } from "server/services/RevenueService";
-import { UpgradeBoardService } from "server/services/serverdata/UpgradeBoardService";
+import RevenueService from "server/services/RevenueService";
+import CurrencyService from "server/services/serverdata/CurrencyService";
+import DataService from "server/services/serverdata/DataService";
+import ItemsService from "server/services/serverdata/ItemsService";
+import UpgradeBoardService from "server/services/serverdata/UpgradeBoardService";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Operative from "shared/item/traits/Operative";
 import Items from "shared/items/Items";
@@ -27,10 +31,6 @@ import NamedUpgrades from "shared/namedupgrade/NamedUpgrades";
 import Packets from "shared/Packets";
 import { RESET_LAYERS } from "shared/ResetLayer";
 import Sandbox from "shared/Sandbox";
-import { getPlayer } from "@antivivi/vrldk";
-import { CurrencyService } from "./serverdata/CurrencyService";
-import { DataService } from "./serverdata/DataService";
-import { ItemsService } from "./serverdata/ItemsService";
 
 const RESET_UPGRADES = NamedUpgrades.getUpgrades("Reset");
 
@@ -39,7 +39,7 @@ const RESET_UPGRADES = NamedUpgrades.getUpgrades("Reset");
  * Handles item, currency, and upgrade resets, reward calculation, and reset triggers.
  */
 @Service()
-export class ResetService implements OnInit {
+export default class ResetService implements OnInit {
 
     /**
      * Signal fired when a player completes a reset.

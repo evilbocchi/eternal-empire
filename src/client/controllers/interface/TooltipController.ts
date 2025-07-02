@@ -72,7 +72,7 @@ export class Tooltip {
 }
 
 @Controller()
-export class TooltipController implements OnInit, OnPhysics {
+export default class TooltipController implements OnInit, OnPhysics {
 
     tooltipsPerObject = new Map<GuiObject, Tooltip>();
 

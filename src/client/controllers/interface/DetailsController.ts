@@ -2,7 +2,7 @@ import { Controller, OnInit } from "@flamework/core";
 import { RunService } from "@rbxts/services";
 import { LOCAL_PLAYER } from "client/constants";
 import { INTERFACE } from "client/controllers/UIController";
-import { TooltipController } from "client/controllers/interface/TooltipController";
+import TooltipController from "client/controllers/interface/TooltipController";
 
 export const DETAILS_WINDOW = INTERFACE.WaitForChild("DetailsWindow") as Frame & {
     FundsBombLabel: TextLabel;
@@ -16,7 +16,7 @@ export const POSITION_WINDOW = INTERFACE.WaitForChild("PositionWindow") as Frame
 };
 
 @Controller()
-export class DetailsController implements OnInit {
+export default class DetailsController implements OnInit {
 
     constructor(private tooltipController: TooltipController) {
 

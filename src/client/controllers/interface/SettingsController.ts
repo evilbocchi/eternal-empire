@@ -1,9 +1,9 @@
 import SerikaNum from "@antivivi/serikanum";
 import { Controller, OnStart } from "@flamework/core";
 import { UserInputService } from "@rbxts/services";
-import { HotkeysController } from "client/controllers/HotkeysController";
+import HotkeysController from "client/controllers/HotkeysController";
 import { ADAPTIVE_TAB_MAIN_WINDOW } from "client/controllers/interface/AdaptiveTabController";
-import { UIController } from "client/controllers/UIController";
+import UIController from "client/controllers/UIController";
 import { ASSETS } from "shared/GameAssets";
 import Packets from "shared/Packets";
 import { paintObjects } from "@antivivi/vrldk";
@@ -30,7 +30,7 @@ export const SETTINGS_WINDOW = ADAPTIVE_TAB_MAIN_WINDOW.WaitForChild("Settings")
 };
 
 @Controller()
-export class SettingsController implements OnStart {
+export default class SettingsController implements OnStart {
 
     selectedOption: HotkeyOption | undefined = undefined;
 

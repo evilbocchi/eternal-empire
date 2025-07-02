@@ -13,12 +13,12 @@
 import { OnoeNum } from "@antivivi/serikanum";
 import { OnStart, Service } from "@flamework/core";
 import { DataStoreService, Players, RunService } from "@rbxts/services";
+import LeaderstatsService from "server/services/LeaderstatsService";
+import DataService from "server/services/serverdata/DataService";
+import { ASSETS } from "shared/GameAssets";
 import Sandbox from "shared/Sandbox";
 import { LEADERBOARDS, getNameFromUserId } from "shared/constants";
-import { ASSETS } from "shared/GameAssets";
 import { CURRENCIES } from "shared/currency/CurrencyDetails";
-import { LeaderstatsService } from "./LeaderstatsService";
-import { DataService } from "./serverdata/DataService";
 
 declare global {
     type LeaderboardSlot = Frame & {
@@ -45,23 +45,24 @@ declare global {
  */
 @Service()
 export class LeaderboardService implements OnStart {
+
     /** OrderedDataStore for total time leaderboard. */
     totalTimeStore = DataStoreService.GetOrderedDataStore("TotalTime1");
+
     /** OrderedDataStore for donations leaderboard. */
     donatedStore = DataStoreService.GetOrderedDataStore("Donated");
+
     /** List of banned user IDs (excluded from leaderboards). */
     banned = [1900444407];
+
     /** Debug flag for verbose output and studio testing. */
     debug = false;
+
     /** Set of DataStores that have been flushed (for deletion). */
     flushed = new Set<OrderedDataStore>();
 
-    /**
-     * Constructs the LeaderboardService.
-     * @param dataService DataService for accessing empire data
-     * @param leaderstatsService LeaderstatsService for player stats
-     */
-    constructor(private dataService: DataService, private leaderstatsService: LeaderstatsService) {
+    constructor(private dataService: DataService,
+        private leaderstatsService: LeaderstatsService) {
     }
 
     /**

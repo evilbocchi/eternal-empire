@@ -3,9 +3,9 @@ import { Controller, OnInit } from "@flamework/core";
 import CameraShaker from "@rbxts/camera-shaker";
 import { TextChatService } from "@rbxts/services";
 import { LOCAL_PLAYER } from "client/constants";
-import { EffectController } from "client/controllers/EffectController";
-import { ADAPTIVE_TAB_MAIN_WINDOW, AdaptiveTabController } from "client/controllers/interface/AdaptiveTabController";
-import { UIController } from "client/controllers/UIController";
+import EffectController from "client/controllers/EffectController";
+import AdaptiveTabController, { ADAPTIVE_TAB_MAIN_WINDOW } from "client/controllers/interface/AdaptiveTabController";
+import UIController from "client/controllers/UIController";
 import { getTextChannels } from "shared/constants";
 import { ASSETS } from "shared/GameAssets";
 import Items from "shared/items/Items";
@@ -36,7 +36,7 @@ export const COMMANDS_WINDOW = ADAPTIVE_TAB_MAIN_WINDOW.WaitForChild("Commands")
 };
 
 @Controller()
-export class PermissionsController implements OnInit {
+export default class PermissionsController implements OnInit {
 
     systemColor = new Color3(0.05, 0.75, 0.05).ToHex();
 

@@ -2,9 +2,9 @@ import { OnoeNum } from "@antivivi/serikanum";
 import { Controller, OnInit } from "@flamework/core";
 import CameraShaker from "@rbxts/camera-shaker";
 import { Debris, TweenService, Workspace } from "@rbxts/services";
-import { EffectController } from "client/controllers/EffectController";
-import { SoundController } from "client/controllers/interface/SoundController";
-import { UIController } from "client/controllers/UIController";
+import EffectController from "client/controllers/EffectController";
+import SoundController from "client/controllers/interface/SoundController";
+import UIController from "client/controllers/UIController";
 import { ASSETS } from "shared/GameAssets";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Packets from "shared/Packets";
@@ -18,7 +18,7 @@ declare global {
 }
 
 @Controller()
-export class ResetController implements OnInit {
+export default class ResetController implements OnInit {
 
     constructor(private uiController: UIController, private effectController: EffectController, private SoundController: SoundController) {
 

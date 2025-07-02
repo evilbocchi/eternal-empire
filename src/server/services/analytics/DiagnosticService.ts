@@ -2,7 +2,7 @@ import { OnStart, Service } from "@flamework/core";
 import { RunService, Workspace } from "@rbxts/services";
 
 @Service()
-export class DiagnosticService implements OnStart {
+export default class DiagnosticService implements OnStart {
 
     isStudio = RunService.IsStudio();
 

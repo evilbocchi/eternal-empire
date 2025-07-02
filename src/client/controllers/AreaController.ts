@@ -2,12 +2,12 @@ import { OnoeNum } from "@antivivi/serikanum";
 import { Controller, OnInit, OnStart } from "@flamework/core";
 import CameraShaker from "@rbxts/camera-shaker";
 import { ReplicatedStorage, TweenService, Workspace } from "@rbxts/services";
-import { UIController } from "client/controllers/UIController";
+import UIController from "client/controllers/UIController";
 import Area, { AREAS } from "shared/Area";
 import Packets from "shared/Packets";
 
 @Controller()
-export class AreaController implements OnInit, OnStart {
+export default class AreaController implements OnInit, OnStart {
 
     readonly AREA_UNLOCK_SHAKE = new CameraShaker(
         Enum.RenderPriority.Camera.Value,
@@ -109,7 +109,7 @@ export class AreaController implements OnInit, OnStart {
         if (slamoVillageConnection === undefined) {
             return;
         }
-        
+
         const unlockedValue = AREAS.SlamoVillage.unlocked;
         if (!unlockedValue.Value) {
             slamoVillageConnection.Parent = ReplicatedStorage;

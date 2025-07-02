@@ -1,18 +1,18 @@
+import { loadAnimation } from "@antivivi/vrldk";
 import { Controller, OnInit } from "@flamework/core";
 import { ReplicatedStorage, TweenService, Workspace } from "@rbxts/services";
 import { LOCAL_PLAYER } from "client/constants";
-import { INTERFACE, UIController } from "client/controllers/UIController";
-import { AdaptiveTabController } from "client/controllers/interface/AdaptiveTabController";
-import { BalanceWindowController } from "client/controllers/interface/BalanceWindowController";
-import { QuestsController } from "client/controllers/interface/QuestsController";
-import { SoundController } from "client/controllers/interface/SoundController";
+import UIController, { INTERFACE } from "client/controllers/UIController";
+import AdaptiveTabController from "client/controllers/interface/AdaptiveTabController";
+import BalanceWindowController from "client/controllers/interface/BalanceWindowController";
+import QuestsController from "client/controllers/interface/QuestsController";
+import SoundController from "client/controllers/interface/SoundController";
 import { getWaypoint } from "shared/constants";
-import { loadAnimation } from "@antivivi/vrldk";
 
 export const INTRO_WINDOW = INTERFACE.WaitForChild("IntroWindow") as Frame;
 
 @Controller()
-export class IntroController implements OnInit {
+export default class IntroController implements OnInit {
 
     isIntroSequenceDone = false;
     isCurrentlyInIntroSequence = false;

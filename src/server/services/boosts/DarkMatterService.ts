@@ -11,15 +11,15 @@
 
 import { OnoeNum } from "@antivivi/serikanum";
 import { OnInit, Service } from "@flamework/core";
+import CurrencyService from "server/services/serverdata/CurrencyService";
 import { AREAS } from "shared/Area";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
-import { CurrencyService } from "../serverdata/CurrencyService";
 
 /**
  * Service that manages Dark Matter boosts and GUI updates.
  */
 @Service()
-export class DarkMatterService implements OnInit {
+export default class DarkMatterService implements OnInit {
 
     /** CurrencyBundle storing calculated boosts. */
     boost = new CurrencyBundle();

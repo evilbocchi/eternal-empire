@@ -6,10 +6,10 @@ import { CollectionService, RunService, TweenService } from "@rbxts/services";
 import ItemFilter from "client/ItemFilter";
 import ItemSlot from "client/ItemSlot";
 import { LOCAL_PLAYER, PLAYER_GUI } from "client/constants";
-import { HotkeysController } from "client/controllers/HotkeysController";
-import { UIController } from "client/controllers/UIController";
-import { ADAPTIVE_TAB_MAIN_WINDOW, AdaptiveTabController } from "client/controllers/interface/AdaptiveTabController";
-import { TooltipController } from "client/controllers/interface/TooltipController";
+import HotkeysController from "client/controllers/HotkeysController";
+import UIController from "client/controllers/UIController";
+import AdaptiveTabController, { ADAPTIVE_TAB_MAIN_WINDOW } from "client/controllers/interface/AdaptiveTabController";
+import TooltipController from "client/controllers/interface/TooltipController";
 import { ASSETS } from "shared/GameAssets";
 import Packets from "shared/Packets";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
@@ -77,7 +77,7 @@ for (const item of Items.sortedItems) {
 }
 
 @Controller()
-export class ShopController implements OnInit, OnStart {
+export default class ShopController implements OnInit, OnStart {
 
     readonly sufficientColor = Color3.fromRGB(255, 255, 255);
     readonly insufficientColor = Color3.fromRGB(255, 80, 80);

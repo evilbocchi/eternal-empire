@@ -14,14 +14,14 @@
 import { OnInit, Service } from "@flamework/core";
 import { OnPlayerJoined } from "server/services/ModdingService";
 import Packets from "shared/Packets";
-import { DataService } from "./serverdata/DataService";
+import DataService from "server/services/serverdata/DataService";
 
 /**
  * Service for managing player settings and hotkeys.
  * Loads settings on player join and listens for updates from the client.
  */
 @Service()
-export class SettingsService implements OnInit, OnPlayerJoined {
+export default class SettingsService implements OnInit, OnPlayerJoined {
 
     /**
      * Constructs the SettingsService with required dependencies.

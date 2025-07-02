@@ -21,11 +21,11 @@ import StringBuilder from "@rbxts/stringbuilder";
 import { $env } from "rbxts-transform-env";
 import NPCNavigationService from "server/services/npc/NPCNavigationService";
 import { OnGameAPILoaded } from "server/services/ModdingService";
-import { ResetService } from "server/services/ResetService";
-import { RevenueService } from "server/services/RevenueService";
-import { CurrencyService } from "server/services/serverdata/CurrencyService";
-import { DataService } from "server/services/serverdata/DataService";
-import { UpgradeBoardService } from "server/services/serverdata/UpgradeBoardService";
+import ResetService from "server/services/ResetService";
+import RevenueService from "server/services/RevenueService";
+import CurrencyService from "server/services/serverdata/CurrencyService";
+import DataService from "server/services/serverdata/DataService";
+import UpgradeBoardService from "server/services/serverdata/UpgradeBoardService";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import { CURRENCIES } from "shared/currency/CurrencyDetails";
 import Droplet from "shared/item/Droplet";
@@ -52,7 +52,7 @@ type ItemProgressionStats = {
  * Service that estimates progression, calculates optimal paths, and posts reports.
  */
 @Service()
-export class ProgressionEstimationService implements OnGameAPILoaded, OnStart {
+export default class ProgressionEstimationService implements OnGameAPILoaded, OnStart {
     /**
      * Map of Droplet to their corresponding model instance in Workspace.
      * Used for simulating droplet upgrades and value calculations.

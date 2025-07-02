@@ -13,10 +13,10 @@
 import { convertToMMSS, weldModel } from "@antivivi/vrldk";
 import { OnInit, OnStart, Service } from "@flamework/core";
 import { TweenService, Workspace } from "@rbxts/services";
-import { DataService } from "server/services/serverdata/DataService";
-import { ItemsService } from "server/services/serverdata/ItemsService";
-import { LevelService } from "server/services/serverdata/LevelService";
-import { UnlockedAreasService } from "server/services/serverdata/UnlockedAreasService";
+import DataService from "server/services/serverdata/DataService";
+import ItemsService from "server/services/serverdata/ItemsService";
+import LevelService from "server/services/serverdata/LevelService";
+import UnlockedAreasService from "server/services/serverdata/UnlockedAreasService";
 import { AREAS } from "shared/Area";
 import { SOUND_EFFECTS_GROUP } from "shared/constants";
 import { ASSETS, getSound } from "shared/GameAssets";
@@ -165,7 +165,7 @@ class LootPool {
  * Service that manages chest spawning, loot, and interactions.
  */
 @Service()
-export class ChestService implements OnInit, OnStart {
+export default class ChestService implements OnInit, OnStart {
 
     /** Loot pools per chest level. */
     poolPerLevel = new Map<string, LootPool>();

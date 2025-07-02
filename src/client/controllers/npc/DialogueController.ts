@@ -1,8 +1,8 @@
 import ComputeNameColor from "@antivivi/rbxnamecolor";
 import { Controller, OnInit, OnStart } from "@flamework/core";
 import { Debris, ReplicatedStorage, RunService, TextChatService, TweenService, Workspace } from "@rbxts/services";
-import { HotkeysController } from "client/controllers/HotkeysController";
-import { INTERFACE, UIController } from "client/controllers/UIController";
+import HotkeysController from "client/controllers/HotkeysController";
+import UIController, { INTERFACE } from "client/controllers/UIController";
 import { getDisplayName, getTextChannels } from "shared/constants";
 import { ASSETS, getSound } from "shared/GameAssets";
 import Packets from "shared/Packets";
@@ -22,7 +22,7 @@ export const DIALOGUE_WINDOW = INTERFACE.WaitForChild("DialogueWindow") as TextB
 };
 
 @Controller()
-export class DialogueController implements OnInit, OnStart {
+export default class DialogueController implements OnInit, OnStart {
 
     npcTagColor = Color3.fromRGB(201, 255, 13).ToHex();
     emptyColor = Color3.fromRGB(0, 181, 28).ToHex();

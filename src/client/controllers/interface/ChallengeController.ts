@@ -1,7 +1,7 @@
 import { Controller, OnInit, OnPhysics } from "@flamework/core";
 import { RunService } from "@rbxts/services";
-import { QuestsController } from "client/controllers/interface/QuestsController";
-import { UIController } from "client/controllers/UIController";
+import QuestsController from "client/controllers/interface/QuestsController";
+import UIController from "client/controllers/UIController";
 import { getChallengeGui } from "shared/constants";
 import { ASSETS } from "shared/GameAssets";
 import Packets from "shared/Packets";
@@ -28,7 +28,7 @@ export const CHALLENGE_TASK_WINDOW = TRACKED_QUEST_WINDOW.WaitForChild("Challeng
 };
 
 @Controller()
-export class ChallengeController implements OnPhysics, OnInit {
+export default class ChallengeController implements OnPhysics, OnInit {
 
     confirmationLabel = "Are you sure?";
     leaveConnection?: RBXScriptConnection;

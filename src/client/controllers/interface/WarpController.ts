@@ -1,7 +1,7 @@
 import { Controller, OnInit } from "@flamework/core";
-import { HotkeysController } from "client/controllers/HotkeysController";
-import { ADAPTIVE_TAB_MAIN_WINDOW, AdaptiveTabController } from "client/controllers/interface/AdaptiveTabController";
-import { UIController } from "client/controllers/UIController";
+import HotkeysController from "client/controllers/HotkeysController";
+import AdaptiveTabController, { ADAPTIVE_TAB_MAIN_WINDOW } from "client/controllers/interface/AdaptiveTabController";
+import UIController from "client/controllers/UIController";
 import { AREAS } from "shared/Area";
 import Packets from "shared/Packets";
 
@@ -10,7 +10,7 @@ export const WARP_WINDOW = ADAPTIVE_TAB_MAIN_WINDOW.WaitForChild("Warp") as Fram
 };
 
 @Controller()
-export class WarpController implements OnInit {
+export default class WarpController implements OnInit {
 
     constructor(private uiController: UIController, private adaptiveTabController: AdaptiveTabController, private hotkeysController: HotkeysController) {
 

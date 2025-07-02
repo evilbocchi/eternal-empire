@@ -12,8 +12,8 @@
 import Signal from "@antivivi/lemon-signal";
 import { OnStart, Service } from "@flamework/core";
 import { Players } from "@rbxts/services";
-import { LeaderstatsService } from "server/services/LeaderstatsService";
-import { DataService } from "server/services/serverdata/DataService";
+import LeaderstatsService from "server/services/LeaderstatsService";
+import DataService from "server/services/serverdata/DataService";
 
 /**
  * Service that manages player donation stats and leaderboard updates.
