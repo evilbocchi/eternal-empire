@@ -23,9 +23,9 @@ import PermissionsService from "server/services/permissions/PermissionsService";
 import ResetService from "server/services/ResetService";
 import CurrencyService from "server/services/serverdata/CurrencyService";
 import DataService from "server/services/serverdata/DataService";
-import ItemsService from "server/services/serverdata/ItemsService";
+import ItemService from "server/services/serverdata/ItemService";
 import SetupService from "server/services/serverdata/SetupService";
-import UpgradeBoardService from "server/services/serverdata/UpgradeBoardService";
+import NamedUpgradeService from "server/services/serverdata/NamedUpgradeService";
 import { getChallengeGui } from "shared/constants";
 import { ASSETS } from "shared/GameAssets";
 import Item from "shared/item/Item";
@@ -76,9 +76,9 @@ export class ChallengeService implements OnStart {
 
     constructor(private dataService: DataService,
         private resetService: ResetService,
-        private itemsService: ItemsService,
+        private itemService: ItemService,
         private currencyService: CurrencyService,
-        private upgradeBoardService: UpgradeBoardService,
+        private namedUpgradeService: NamedUpgradeService,
         private setupService: SetupService,
         private permissionsService: PermissionsService,
         private chatHookService: ChatHookService) {
@@ -217,7 +217,7 @@ export class ChallengeService implements OnStart {
                 description: ""
             });
             for (const [_, id] of CHALLENGE_UPGRADES)
-                this.upgradeBoardService.setUpgradeAmount(id, 0);
+                this.namedUpgradeService.setUpgradeAmount(id, 0);
         }
         else {
             currentChallengeWindow.Visible = true;
@@ -244,7 +244,7 @@ export class ChallengeService implements OnStart {
                 description: challenge.description(currentLevel) + "\n" + requirement
             });
             for (const [id, upgId] of CHALLENGE_UPGRADES)
-                this.upgradeBoardService.setUpgradeAmount(upgId, id === challengeId ? currentLevel : 0);
+                this.namedUpgradeService.setUpgradeAmount(upgId, id === challengeId ? currentLevel : 0);
         }
     }
 
@@ -287,8 +287,8 @@ export class ChallengeService implements OnStart {
 
         if (data.backup.upgrades !== undefined) {
             data.backup.upgrades.forEach((amount, id) => {
-                if (this.upgradeBoardService.getUpgradeAmount(id) < amount) {
-                    this.upgradeBoardService.setUpgradeAmount(id, amount);
+                if (this.namedUpgradeService.getUpgradeAmount(id) < amount) {
+                    this.namedUpgradeService.setUpgradeAmount(id, amount);
                 }
             });
             data.backup.upgrades = undefined;
@@ -393,7 +393,7 @@ export class ChallengeService implements OnStart {
             if (currentLevel > 1) {
                 const upgradeId = REWARD_UPGRADES.get(key);
                 if (upgradeId !== undefined)
-                    this.upgradeBoardService.setUpgradeAmount(upgradeId, currentLevel - 1);
+                    this.namedUpgradeService.setUpgradeAmount(upgradeId, currentLevel - 1);
             }
             ++i;
         }

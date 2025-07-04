@@ -17,7 +17,7 @@ import { OnInit, Service } from "@flamework/core";
 import { Players, Workspace } from "@rbxts/services";
 import { OnPlayerJoined } from "server/services/ModdingService";
 import DataService from "server/services/serverdata/DataService";
-import ItemsService from "server/services/serverdata/ItemsService";
+import ItemService from "server/services/serverdata/ItemService";
 import { AREAS } from "shared/Area";
 import Harvestable from "shared/Harvestable";
 import HarvestingTool from "shared/item/traits/HarvestingTool";
@@ -36,7 +36,7 @@ export class ToolService implements OnInit, OnPlayerJoined, OnPlayerJoined {
     /** Original position of each harvestable for respawn logic. */
     originalPosPerHarvestable = new Map<Instance, Vector3>();
 
-    constructor(private itemsService: ItemsService, private dataService: DataService) {
+    constructor(private itemService: ItemService, private dataService: DataService) {
         // ...existing code...
     }
 
@@ -163,7 +163,7 @@ export class ToolService implements OnInit, OnPlayerJoined, OnPlayerJoined {
      * Initializes the ToolService, sets up listeners and harvestable objects.
      */
     onInit() {
-        this.itemsService.itemsBought.connect((_player, items) => {
+        this.itemService.itemsBought.connect((_player, items) => {
             for (const item of items) {
                 if (item.isA("HarvestingTool")) {
                     for (const player of Players.GetPlayers())
@@ -215,7 +215,7 @@ export class ToolService implements OnInit, OnPlayerJoined, OnPlayerJoined {
                     receiving.set(harvestable.Name, math.random(1, 2));
                 }
                 for (const [id, amount] of receiving)
-                    this.itemsService.setItemAmount(id, this.itemsService.getItemAmount(id) + amount);
+                    this.itemService.setItemAmount(id, this.itemService.getItemAmount(id) + amount);
                 Packets.itemsReceived.fireAll(receiving);
 
                 this.moveHarvestable(harvestable, this.originalPosPerHarvestable.get(harvestable)!.sub(new Vector3(0, -500, 0)));

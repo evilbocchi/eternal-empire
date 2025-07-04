@@ -1,7 +1,7 @@
 import Difficulty from "@antivivi/jjt-difficulties";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
-import { ServerAPI } from "shared/item/ItemUtils";
+import { Server } from "shared/item/ItemUtils";
 import Generator from "shared/item/traits/Generator";
 import UpgradeBoard from "shared/item/traits/UpgradeBoard";
 import UpgradeBoardI from "shared/items/negative/trueease/UpgradeBoardI";
@@ -23,7 +23,7 @@ export = new Item(script.Name)
 
         item.repeat(model, () => {
             for (const upgrade of upgrades) {
-                ServerAPI.upgradeBoardService.buyUpgrade(upgrade.id, undefined, undefined, true);
+                Server.NamedUpgrade.buyUpgrade(upgrade.id, undefined, undefined, true);
             }
         }, 0.1);
     });

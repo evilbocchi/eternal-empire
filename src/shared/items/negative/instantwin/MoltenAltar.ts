@@ -2,7 +2,7 @@ import Difficulty from "@antivivi/jjt-difficulties";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Formula from "shared/currency/Formula";
 import Item from "shared/item/Item";
-import { ServerAPI } from "shared/item/ItemUtils";
+import { Server } from "shared/item/ItemUtils";
 import Furnace from "shared/item/traits/Furnace";
 import FormulaBundled from "shared/item/traits/special/FormulaBundled";
 
@@ -22,7 +22,7 @@ export = new Item(script.Name)
     .trait(FormulaBundled)
     .setRatio("Power", 1)
     .setRatio("Funds", 400)
-    .setX(() => ServerAPI.currencyService.get("Power"))
+    .setX(() => Server.Currency.get("Power"))
     .apply(Furnace)
 
     .exit();

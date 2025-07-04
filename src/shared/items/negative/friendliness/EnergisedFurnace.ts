@@ -3,7 +3,7 @@ import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Furnace from "shared/item/traits/Furnace";
 import Item from "shared/item/Item";
 import Formula from "shared/currency/Formula";
-import { ServerAPI } from "shared/item/ItemUtils";
+import { Server } from "shared/item/ItemUtils";
 
 const mul = new CurrencyBundle().set("Funds", 0);
 
@@ -20,5 +20,5 @@ export = new Item(script.Name)
     .setDrain(new CurrencyBundle().set("Power", 0.5))
 
     .trait(Furnace)
-    .applyFormula((v, item) => item.setMul(mul.set("Funds", v)), () => ServerAPI.currencyService.get("Power"))
+    .applyFormula((v, item) => item.setMul(mul.set("Funds", v)), () => Server.Currency.get("Power"))
     .exit();

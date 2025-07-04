@@ -3,7 +3,7 @@ import { OnoeNum } from "@antivivi/serikanum";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Formula from "shared/currency/Formula";
 import Item from "shared/item/Item";
-import { ServerAPI } from "shared/item/ItemUtils";
+import { Server } from "shared/item/ItemUtils";
 import Conveyor from "shared/item/traits/Conveyor";
 import FormulaBundled from "shared/item/traits/special/FormulaBundled";
 import Upgrader from "shared/item/traits/Upgrader";
@@ -26,7 +26,7 @@ export = new Item(script.Name)
     .setSpeed(3)
 
     .trait(FormulaBundled)
-    .setX(() => ServerAPI.currencyService.get("Skill"))
+    .setX(() => Server.Currency.get("Skill"))
     .setRatio("Power", 99.99)
     .setRatio("Bitcoin", 99.99)
     .apply(Upgrader)

@@ -1,7 +1,7 @@
 import Signal from "@antivivi/lemon-signal";
 import { getNPCModel } from "shared/constants";
 import { Dialogue } from "shared/NPC";
-import { ServerAPI } from "shared/item/ItemUtils";
+import { Server } from "shared/item/ItemUtils";
 
 export class Stage {
     description: string | undefined;
@@ -55,10 +55,10 @@ export class Stage {
             const callback = load(stage);
             const dialogue = this.dialogue;
             if (dialogue !== undefined) {
-                ServerAPI.questsService.onStageReached(this, () => {
-                    ServerAPI.dialogueService.addDialogue(dialogue);
+                Server.Quest.onStageReached(this, () => {
+                    Server.Dialogue.addDialogue(dialogue);
                 });
-                stage.completed.connect(() => ServerAPI.dialogueService.removeDialogue(dialogue));
+                stage.completed.connect(() => Server.Dialogue.removeDialogue(dialogue));
                 return callback;
             }
             return callback;
@@ -71,7 +71,7 @@ export class Stage {
         return this.onLoad((stage) => {
             const mainCallback = load === undefined ? undefined : load(stage);
             let callback: () => void;
-            ServerAPI.questsService.onStageReached(this, () => {
+            Server.Quest.onStageReached(this, () => {
                 callback = start(stage);
             });
             return () => {

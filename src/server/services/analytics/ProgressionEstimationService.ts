@@ -25,7 +25,7 @@ import ResetService from "server/services/ResetService";
 import RevenueService from "server/services/RevenueService";
 import CurrencyService from "server/services/serverdata/CurrencyService";
 import DataService from "server/services/serverdata/DataService";
-import UpgradeBoardService from "server/services/serverdata/UpgradeBoardService";
+import NamedUpgradeService from "server/services/serverdata/NamedUpgradeService";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import { CURRENCIES } from "shared/currency/CurrencyDetails";
 import Droplet from "shared/item/Droplet";
@@ -60,7 +60,7 @@ export default class ProgressionEstimationService implements OnGameAPILoaded, On
     readonly MODEL_PER_DROPLET = new Map<Droplet, BasePart>();
 
     constructor(private revenueService: RevenueService, private npcNavigationService: NPCNavigationService,
-        private currencyService: CurrencyService, private upgradeBoardService: UpgradeBoardService,
+        private currencyService: CurrencyService, private namedUpgradeService: NamedUpgradeService,
         private dataService: DataService, private resetService: ResetService) {
     }
 
@@ -177,7 +177,7 @@ export default class ProgressionEstimationService implements OnGameAPILoaded, On
      */
     maxUpgradeBoard(upgrades: string[]) {
         for (const id of upgrades) {
-            const purchase = () => this.upgradeBoardService.buyUpgrade(id, undefined, undefined, true);
+            const purchase = () => this.namedUpgradeService.buyUpgrade(id, undefined, undefined, true);
             while (purchase()) { }
         }
     }
@@ -455,7 +455,7 @@ export default class ProgressionEstimationService implements OnGameAPILoaded, On
 
         const startingBalance = this.currencyService.balance.clone();
         this.currencyService.setAll(new Map());
-        this.upgradeBoardService.setAmountPerUpgrade(new Map());
+        this.namedUpgradeService.setAmountPerUpgrade(new Map());
 
         const t = tick();
         const progression = this.getProgression();

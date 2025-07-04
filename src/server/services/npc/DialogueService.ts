@@ -19,7 +19,7 @@ import DataService from "server/services/serverdata/DataService";
 import { NPC_MODELS, getDisplayName } from "shared/constants";
 import { ASSETS, getSound } from "shared/GameAssets";
 import InteractableObject from "shared/InteractableObject";
-import { ServerAPI } from "shared/item/ItemUtils";
+import { Server } from "shared/item/ItemUtils";
 import NPC, { Dialogue } from "shared/NPC";
 import Packets from "shared/Packets";
 
@@ -239,7 +239,7 @@ export default class DialogueService implements OnInit, OnStart, OnNPCLoad {
             if (interactableObject === undefined)
                 return;
             this.proximityPrompts.add(prompt);
-            interactableObject.interacted.fire(ServerAPI, player);
+            interactableObject.interacted.fire(Server, player);
         });
     }
 }

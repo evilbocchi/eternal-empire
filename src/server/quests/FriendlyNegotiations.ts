@@ -6,7 +6,7 @@ import { Dialogue } from "shared/NPC";
 import Prest from "shared/npcs/Prest";
 import Tria from "shared/npcs/Tria";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
-import { ServerAPI } from "shared/item/ItemUtils";
+import { Server } from "shared/item/ItemUtils";
 
 const prestAnnoyance = new Dialogue(Prest, "If you don't want to purchase anything, then scram. I have other customers waiting for me.");
 
@@ -26,14 +26,14 @@ export = new Quest(script.Name)
         )
         .onStart((stage) => {
             const replacement = new Dialogue(Prest, "Buy your crates and logs here! Wait, nevermind. We're out of stock.");
-            ServerAPI.dialogueService.addDialogue(replacement);
-            const connection = ServerAPI.dialogueService.dialogueFinished.connect((dialogue) => {
+            Server.Dialogue.addDialogue(replacement);
+            const connection = Server.Dialogue.dialogueFinished.connect((dialogue) => {
                 if (dialogue === stage.dialogue)
                     stage.completed.fire();
             });
             return () => {
                 connection.disconnect();
-                ServerAPI.dialogueService.removeDialogue(replacement);
+                Server.Dialogue.removeDialogue(replacement);
             };
         })
     )
@@ -48,14 +48,14 @@ export = new Quest(script.Name)
         )
         .onStart((stage) => {
             const replacement = new Dialogue(Tria, "Find a way to make him change his prices for good!");
-            ServerAPI.dialogueService.addDialogue(replacement);
-            const connection = ServerAPI.dialogueService.dialogueFinished.connect((dialogue) => {
+            Server.Dialogue.addDialogue(replacement);
+            const connection = Server.Dialogue.dialogueFinished.connect((dialogue) => {
                 if (dialogue === stage.dialogue)
                     stage.completed.fire();
             });
             return () => {
                 connection.disconnect();
-                ServerAPI.dialogueService.removeDialogue(replacement);
+                Server.Dialogue.removeDialogue(replacement);
             };
         })
     )
@@ -67,21 +67,21 @@ export = new Quest(script.Name)
             .root
         )
         .onStart((stage) => {
-            ServerAPI.dialogueService.addDialogue(prestAnnoyance);
+            Server.Dialogue.addDialogue(prestAnnoyance);
             let t = 0;
-            const ItemsService = ServerAPI.itemsService;
+            const ItemService = Server.Item;
             const connection = RunService.Heartbeat.Connect((dt) => {
                 t += dt;
                 if (t < 0.5)
                     return;
                 t = 0;
-                if (ItemsService.getBoughtAmount(GrassConveyor.id) > 0) {
+                if (ItemService.getBoughtAmount(GrassConveyor.id) > 0) {
                     stage.completed.fire();
                 }
             });
             return () => {
                 connection.Disconnect();
-                ServerAPI.dialogueService.removeDialogue(prestAnnoyance);
+                Server.Dialogue.removeDialogue(prestAnnoyance);
             };
         })
     )
@@ -93,7 +93,7 @@ export = new Quest(script.Name)
         .setNPC("Prest", true)
         .onStart((stage) => {
             const replacement = new Dialogue(Tria, "Find a way to make him change his prices for good!");
-            ServerAPI.dialogueService.addDialogue(replacement);
+            Server.Dialogue.addDialogue(replacement);
             const continuation = new Dialogue(Prest, "Wait... Is that actually it?")
                 .monologue("...")
                 .monologue("......")
@@ -101,15 +101,15 @@ export = new Quest(script.Name)
                 .monologue(`I know you don't have a ${SkillPod.name}, but I'm gonna be nice and hold onto your ${GrassConveyor.name} for you.`)
                 .monologue("See you again never!")
                 .root;
-            const connection = ServerAPI.dialogueService.dialogueFinished.connect((dialogue) => {
-                if (dialogue === stage.dialogue && ServerAPI.questsService.takeQuestItem(GrassConveyor.id, 1) === true) {
-                    ServerAPI.dialogueService.talk(continuation);
+            const connection = Server.Dialogue.dialogueFinished.connect((dialogue) => {
+                if (dialogue === stage.dialogue && Server.Quest.takeQuestItem(GrassConveyor.id, 1) === true) {
+                    Server.Dialogue.talk(continuation);
                     stage.completed.fire();
                 }
             });
             return () => {
                 connection.disconnect();
-                ServerAPI.dialogueService.removeDialogue(replacement);
+                Server.Dialogue.removeDialogue(replacement);
             };
         })
     )
@@ -122,17 +122,17 @@ export = new Quest(script.Name)
             .root
         )
         .onStart((stage) => {
-            ServerAPI.dialogueService.addDialogue(prestAnnoyance);
-            const connection = ServerAPI.dialogueService.dialogueFinished.connect((dialogue) => {
+            Server.Dialogue.addDialogue(prestAnnoyance);
+            const connection = Server.Dialogue.dialogueFinished.connect((dialogue) => {
                 if (dialogue === stage.dialogue) {
-                    ServerAPI.questsService.giveQuestItem(SkillPod.id, 1);
+                    Server.Quest.giveQuestItem(SkillPod.id, 1);
                     stage.completed.fire();
                 }
 
             });
             return () => {
                 connection.disconnect();
-                ServerAPI.dialogueService.removeDialogue(prestAnnoyance);
+                Server.Dialogue.removeDialogue(prestAnnoyance);
             };
         })
     )
@@ -148,16 +148,16 @@ export = new Quest(script.Name)
         )
         .onStart((stage) => {
             const replacement = new Dialogue(Tria, `Use that ${SkillPod.name} to help with your negotiations!`);
-            ServerAPI.dialogueService.addDialogue(replacement);
-            const connection = ServerAPI.dialogueService.dialogueFinished.connect((dialogue) => {
+            Server.Dialogue.addDialogue(replacement);
+            const connection = Server.Dialogue.dialogueFinished.connect((dialogue) => {
                 if (dialogue === stage.dialogue) {
-                    ServerAPI.questsService.takeQuestItem(SkillPod.id, 1);
+                    Server.Quest.takeQuestItem(SkillPod.id, 1);
                     stage.completed.fire();
                 }
             });
             return () => {
                 connection.disconnect();
-                ServerAPI.dialogueService.removeDialogue(replacement);
+                Server.Dialogue.removeDialogue(replacement);
             };
         })
     )

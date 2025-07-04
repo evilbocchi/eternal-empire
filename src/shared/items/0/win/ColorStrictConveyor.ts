@@ -6,7 +6,7 @@ import { CURRENCY_DETAILS } from "shared/currency/CurrencyDetails";
 import { getSound } from "shared/GameAssets";
 import Droplet from "shared/item/Droplet";
 import Item from "shared/item/Item";
-import ItemUtils, { ServerAPI } from "shared/item/ItemUtils";
+import ItemUtils, { Server } from "shared/item/ItemUtils";
 import Conveyor from "shared/item/traits/Conveyor";
 
 declare global {
@@ -32,7 +32,7 @@ export = new Item(script.Name)
         sortingPoint.CanTouch = true;
 
         const modeButton = model.WaitForChild("Mode") as BasePart;
-        const placedItem = ServerAPI.itemsService.getPlacedItem(model.Name)!;
+        const placedItem = Server.Item.getPlacedItem(model.Name)!;
         placedItem.currency ??= "Funds";
         const updateMode = () => modeButton.Color = CURRENCY_DETAILS[placedItem.currency!].color;
         updateMode();

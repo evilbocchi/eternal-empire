@@ -6,7 +6,7 @@ import Item from "shared/item/Item";
 import Operative from "shared/item/traits/Operative";
 import Packets from "shared/Packets";
 import { getAllInstanceInfo, getInstanceInfo } from "@antivivi/vrldk";
-import { ServerAPI } from "shared/item/ItemUtils";
+import { Server } from "shared/item/ItemUtils";
 import { findBaseParts } from "@antivivi/vrldk";
 import { OnoeNum } from "@antivivi/serikanum";
 
@@ -24,8 +24,8 @@ const ZERO = new OnoeNum(0);
 export default class Furnace extends Operative {
 
     static load(model: Model, furnace: Furnace) {
-        const RevenueService = ServerAPI.revenueService;
-        const CurrencyService = ServerAPI.currencyService;
+        const RevenueService = Server.Revenue;
+        const CurrencyService = Server.Currency;
         const instanceInfo = getAllInstanceInfo(model);
         const item = furnace.item;
 

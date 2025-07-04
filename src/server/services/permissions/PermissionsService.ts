@@ -29,10 +29,10 @@ import ProductService from "server/services/product/ProductService";
 import ResetService from "server/services/ResetService";
 import CurrencyService from "server/services/serverdata/CurrencyService";
 import DataService from "server/services/serverdata/DataService";
-import ItemsService from "server/services/serverdata/ItemsService";
+import ItemService from "server/services/serverdata/ItemService";
 import LevelService from "server/services/serverdata/LevelService";
 import SetupService from "server/services/serverdata/SetupService";
-import UpgradeBoardService from "server/services/serverdata/UpgradeBoardService";
+import NamedUpgradeService from "server/services/serverdata/NamedUpgradeService";
 import { IS_SINGLE_SERVER, getNameFromUserId } from "shared/constants";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import { CURRENCY_DETAILS } from "shared/currency/CurrencyDetails";
@@ -88,8 +88,8 @@ export default class PermissionsService implements OnInit, OnPlayerJoined {
         private npcNavigationService: NPCNavigationService,
         private donationService: DonationService,
         private currencyService: CurrencyService,
-        private upgradeBoardService: UpgradeBoardService,
-        private itemsService: ItemsService,
+        private namedUpgradeService: NamedUpgradeService,
+        private itemService: ItemService,
         private levelService: LevelService,
         private resetService: ResetService,
         private bombsService: BombsService,
@@ -313,11 +313,11 @@ export default class PermissionsService implements OnInit, OnPlayerJoined {
                 if (placedItem.item === item.id)
                     ++placed;
             }
-            const inInv = this.itemsService.getItemAmount(item.id);
-            const bought = this.itemsService.getBoughtAmount(item.id);
+            const inInv = this.itemService.getItemAmount(item.id);
+            const bought = this.itemService.getBoughtAmount(item.id);
             if (bought > inInv + placed) {
                 const given = bought - placed;
-                this.itemsService.setItemAmount(item.id, inInv + given);
+                this.itemService.setItemAmount(item.id, inInv + given);
                 this.chatHookService.sendServerMessage("You have been given " + given + " " + item.name + "(s) in return for item cost changes.");
                 print("gave " + given + " " + item.id);
             }
@@ -343,7 +343,7 @@ export default class PermissionsService implements OnInit, OnPlayerJoined {
         //
         // Logs
         //
-        this.itemsService.itemsBought.connect((player, items) => this.log({
+        this.itemService.itemsBought.connect((player, items) => this.log({
             time: tick(),
             type: "Purchase",
             player: player?.UserId,
@@ -356,7 +356,7 @@ export default class PermissionsService implements OnInit, OnPlayerJoined {
             currency: bombType,
             amount: 1
         }));
-        this.itemsService.itemsPlaced.connect((player, placedItems) => {
+        this.itemService.itemsPlaced.connect((player, placedItems) => {
             const time = tick();
             let i = 0;
             for (const placedItem of placedItems) {
@@ -371,7 +371,7 @@ export default class PermissionsService implements OnInit, OnPlayerJoined {
                 });
             }
         });
-        this.itemsService.itemsUnplaced.connect((player, placedItems) => {
+        this.itemService.itemsUnplaced.connect((player, placedItems) => {
             const time = tick();
             let i = 0;
             for (const placedItem of placedItems) {
@@ -386,7 +386,7 @@ export default class PermissionsService implements OnInit, OnPlayerJoined {
                 });
             }
         });
-        this.upgradeBoardService.upgradeBought.connect((player, upgrade, to) => this.log({
+        this.namedUpgradeService.upgradeBought.connect((player, upgrade, to) => this.log({
             time: tick(),
             type: "Upgrade",
             player: player.UserId,

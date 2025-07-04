@@ -27,7 +27,7 @@ import LeaderstatsService from "server/services/LeaderstatsService";
 import { OnPlayerJoined } from "server/services/ModdingService";
 import NPCNavigationService from "server/services/npc/NPCNavigationService";
 import DataService from "server/services/serverdata/DataService";
-import UpgradeBoardService from "server/services/serverdata/UpgradeBoardService";
+import NamedUpgradeService from "server/services/serverdata/NamedUpgradeService";
 import Area, { AREAS } from "shared/Area";
 import { MUSIC_GROUP } from "shared/constants";
 import { getSound } from "shared/GameAssets";
@@ -65,7 +65,7 @@ export default class AreaService implements OnInit, OnPlayerJoined {
     constructor(
         private dataService: DataService,
         private leaderstatsService: LeaderstatsService,
-        private upgradeBoardService: UpgradeBoardService,
+        private namedUpgradeService: NamedUpgradeService,
         private npcNavigationService: NPCNavigationService,
     ) { }
 
@@ -151,7 +151,7 @@ export default class AreaService implements OnInit, OnPlayerJoined {
         this.loadBoardGui(id, area);
 
         // Connect to upgrade changes to dynamically resize the building grid
-        this.upgradeBoardService.upgradesChanged.connect((data) => {
+        this.namedUpgradeService.upgradesChanged.connect((data) => {
             if (grid === undefined)
                 return;
 
@@ -174,7 +174,7 @@ export default class AreaService implements OnInit, OnPlayerJoined {
         });
 
         // Trigger initial upgrade application (hacky but functional)
-        this.upgradeBoardService.upgradesChanged.fire(this.dataService.empireData.upgrades);
+        this.namedUpgradeService.upgradesChanged.fire(this.dataService.empireData.upgrades);
 
         // Configure all portals in this area for teleportation mechanics
         const instances = area.areaFolder.GetChildren();

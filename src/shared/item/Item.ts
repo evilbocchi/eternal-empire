@@ -12,7 +12,7 @@ import { RESET_LAYERS } from "shared/ResetLayer";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Formula from "shared/currency/Formula";
 import { ITEM_MODELS } from "shared/item/ItemModels";
-import ItemUtils, { ServerAPI } from "shared/item/ItemUtils";
+import ItemUtils, { Server } from "shared/item/ItemUtils";
 
 declare global {
 
@@ -152,7 +152,7 @@ export default class Item {
     /**
      * A function that will return the value of the variable that will be used in the {@link formula}.
      */
-    formulaXGet?: (utils: ServerAPI) => OnoeNum;
+    formulaXGet?: (utils: Server) => OnoeNum;
 
     /**
      * The maximum value that {@link formulaXGet} can return.
@@ -170,7 +170,7 @@ export default class Item {
     /**
      * A callback function that will be called every second with the result of the {@link formula}.
      */
-    formulaCallback?: <T extends this>(value: OnoeNum, item: T, utils: ServerAPI) => unknown;
+    formulaCallback?: <T extends this>(value: OnoeNum, item: T, utils: Server) => unknown;
 
     /**
      * The result of the {@link formula} applied to the value of {@link formulaXGet}.
@@ -497,7 +497,7 @@ export default class Item {
             let affordable = true;
 
             if (drain !== undefined)
-                affordable = ServerAPI.currencyService.purchase(drain);
+                affordable = Server.Currency.purchase(drain);
 
             if (model === undefined)
                 return;
@@ -562,7 +562,7 @@ export default class Item {
         if (this.formula === undefined || this.formulaXGet === undefined || this.formulaCallback === undefined)
             return;
 
-        let value = this.formulaXGet(ServerAPI);
+        let value = this.formulaXGet(Server);
         const cap = this.formulaXCapValue;
         if (cap !== undefined && value.moreThan(cap) === true) {
             value = cap;
@@ -570,7 +570,7 @@ export default class Item {
 
         const result = this.formula.apply(value);
         this.formulaResult = result;
-        this.formulaCallback(result, this, ServerAPI);
+        this.formulaCallback(result, this, Server);
         return result;
     }
 
@@ -722,7 +722,7 @@ export default class Item {
             lastCall: 0
         });
         RunService.Heartbeat.Connect((dt) => {
-            if (ServerAPI.ready === false)
+            if (Server.ready === false)
                 return;
 
             const t = tick();

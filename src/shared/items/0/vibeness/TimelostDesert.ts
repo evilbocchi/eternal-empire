@@ -4,7 +4,7 @@ import Generator from "shared/item/traits/Generator";
 import Item from "shared/item/Item";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Formula from "shared/currency/Formula";
-import { ServerAPI } from "shared/item/ItemUtils";
+import { Server } from "shared/item/ItemUtils";
 
 const amt = new OnoeNum(100e12);
 const base = new CurrencyBundle().set("Power", amt);
@@ -24,6 +24,6 @@ export = new Item(script.Name)
     .setPassiveGain(base)
     .applyFormula((v, item) => {
         return item.setPassiveGain(base.set("Power", amt.mul(v)));
-    }, () => ServerAPI.currencyService.get("Skill").mul(ServerAPI.empireData.playtime))
+    }, () => Server.Currency.get("Skill").mul(Server.empireData.playtime))
 
     .exit();

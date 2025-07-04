@@ -2,7 +2,7 @@ import { getAllInstanceInfo } from "@antivivi/vrldk";
 import { Players, TweenService } from "@rbxts/services";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
-import ItemUtils, { ServerAPI } from "shared/item/ItemUtils";
+import ItemUtils, { Server } from "shared/item/ItemUtils";
 import Boostable from "shared/item/traits/Boostable";
 import Operative from "shared/item/traits/Operative";
 import NamedUpgrades from "shared/namedupgrade/NamedUpgrades";
@@ -25,8 +25,8 @@ export default class Generator extends Boostable {
         const centre = model.PrimaryPart!.Position;
         const remoteEvent = new Instance("UnreliableRemoteEvent", model);
 
-        const ItemsService = ServerAPI.itemsService;
-        const RevenueService = ServerAPI.revenueService;
+        const ItemService = Server.Item;
+        const RevenueService = Server.Revenue;
 
         const instanceInfo = getAllInstanceInfo(model);
         const boosts = instanceInfo.Boosts!;
@@ -41,7 +41,7 @@ export default class Generator extends Boostable {
 
             for (const [id, boost] of boosts) {
                 // redundant check to prevent exploits with infinite charging
-                const placedItem = ItemsService.getPlacedItem(id);
+                const placedItem = ItemService.getPlacedItem(id);
                 if (placedItem === undefined) {
                     boosts.delete(id);
                     continue;
@@ -73,7 +73,7 @@ export default class Generator extends Boostable {
                     remoteEvent.FireClient(player, amountPerCurrency);
                 }
             }
-            ServerAPI.currencyService.incrementAll(amountPerCurrency);
+            Server.Currency.incrementAll(amountPerCurrency);
         }, 1);
     }
 

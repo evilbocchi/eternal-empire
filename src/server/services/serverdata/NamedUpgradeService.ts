@@ -2,7 +2,7 @@
 //!optimize 2
 
 /**
- * @fileoverview UpgradeBoardService - Manages upgrades, their purchase, and synchronization.
+ * @fileoverview NamedUpgradeService - Manages upgrades, their purchase, and synchronization.
  *
  * This service provides:
  * - Tracking and updating upgrade amounts
@@ -25,7 +25,7 @@ import Packets from "shared/Packets";
  * Service that manages upgrades for the current empire, including purchase and effects.
  */
 @Service()
-export default class UpgradeBoardService implements OnInit {
+export default class NamedUpgradeService implements OnInit {
 
     /** Map of upgrade IDs to their current amounts. */
     readonly upgrades: Map<string, number>;
@@ -115,7 +115,7 @@ export default class UpgradeBoardService implements OnInit {
     }
 
     /**
-     * Initializes the UpgradeBoardService, sets up listeners and applies upgrade effects.
+     * Initializes the NamedUpgradeService, sets up listeners and applies upgrade effects.
      */
     onInit() {
         Packets.upgrades.set(this.upgrades);

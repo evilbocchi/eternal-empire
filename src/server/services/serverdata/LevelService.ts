@@ -23,7 +23,7 @@
 import Signal from "@antivivi/lemon-signal";
 import { OnInit, Service } from "@flamework/core";
 import DataService from "server/services/serverdata/DataService";
-import UpgradeBoardService from "server/services/serverdata/UpgradeBoardService";
+import NamedUpgradeService from "server/services/serverdata/NamedUpgradeService";
 import { getMaxXp } from "shared/constants";
 import NamedUpgrades from "shared/namedupgrade/NamedUpgrades";
 import Packets from "shared/Packets";
@@ -53,9 +53,9 @@ export default class LevelService implements OnInit {
      * Initializes the LevelService with required dependencies.
      * 
      * @param dataService Service providing persistent empire data.
-     * @param upgradeBoardService Service for managing upgrade purchases and amounts.
+     * @param namedUpgradeService Service for managing upgrade purchases and amounts.
      */
-    constructor(private dataService: DataService, private upgradeBoardService: UpgradeBoardService) {
+    constructor(private dataService: DataService, private namedUpgradeService: NamedUpgradeService) {
 
     }
 
@@ -153,9 +153,9 @@ export default class LevelService implements OnInit {
         //     if (!this.dataService.checkPermLevel(player, "purchase")) {
         //         return false;
         //     }
-        //     this.upgradeBoardService.setUpgradeAmount(NamedUpgrade.Stone.id, 0);
-        //     this.upgradeBoardService.setUpgradeAmount(NamedUpgrade.WhiteGem.id, 0);
-        //     this.upgradeBoardService.setUpgradeAmount(NamedUpgrade.Crystal.id, 0);
+        //     this.namedUpgradeService.setUpgradeAmount(NamedUpgrade.Stone.id, 0);
+        //     this.namedUpgradeService.setUpgradeAmount(NamedUpgrade.WhiteGem.id, 0);
+        //     this.namedUpgradeService.setUpgradeAmount(NamedUpgrade.Crystal.id, 0);
         //     this.respected.fire(player);
         //     Packets.remainingLevelPoints.set(this.getRemainingLevelPoints()!);
         // });
@@ -179,7 +179,7 @@ export default class LevelService implements OnInit {
             }
 
             // Purchase the upgrade
-            this.upgradeBoardService.setUpgradeAmount(upgradeId, this.upgradeBoardService.getUpgradeAmount(upgradeId) + amount);
+            this.namedUpgradeService.setUpgradeAmount(upgradeId, this.namedUpgradeService.getUpgradeAmount(upgradeId) + amount);
 
             // Update remaining level points display
             Packets.remainingLevelPoints.set(this.getRemainingLevelPoints()!);

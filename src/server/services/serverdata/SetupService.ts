@@ -17,7 +17,7 @@ import Signal from "@antivivi/lemon-signal";
 import { OnInit, Service } from "@flamework/core";
 import { TextService } from "@rbxts/services";
 import DataService from "server/services/serverdata/DataService";
-import ItemsService from "server/services/serverdata/ItemsService";
+import ItemService from "server/services/serverdata/ItemService";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
 import Items from "shared/items/Items";
@@ -35,7 +35,7 @@ export default class SetupService implements OnInit {
     /** Signal fired when a setup is loaded. */
     setupLoaded = new Signal<(player: Player, area: AreaId) => void>();
 
-    constructor(private dataService: DataService, private itemsService: ItemsService) {
+    constructor(private dataService: DataService, private itemService: ItemService) {
     }
 
     /**
@@ -131,7 +131,7 @@ export default class SetupService implements OnInit {
         const items = new Array<PlacingInfo>();
         for (const savedItem of savedItems) {
             const itemId = savedItem.item;
-            if (this.itemsService.getItemAmount(itemId) === 0 && this.itemsService.serverBuy(Items.getItem(itemId)!, true) === false) {
+            if (this.itemService.getItemAmount(itemId) === 0 && this.itemService.serverBuy(Items.getItem(itemId)!, true) === false) {
                 continue;
             }
             items.push({
@@ -141,8 +141,8 @@ export default class SetupService implements OnInit {
             });
         }
         this.setupLoaded.fire(player, setup.area);
-        return this.itemsService.waitInQueue(() => {
-            return this.itemsService.placeItems(player, items);
+        return this.itemService.waitInQueue(() => {
+            return this.itemService.placeItems(player, items);
         });
     }
 

@@ -4,7 +4,7 @@ import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
 import Upgrader from "shared/item/traits/Upgrader";
 import Formula from "shared/currency/Formula";
-import { ServerAPI } from "shared/item/ItemUtils";
+import { Server } from "shared/item/ItemUtils";
 import BasicBlankEssence from "./BasicBlankEssence";
 
 const div = OnoeNum.fromSerika(5, 12);
@@ -23,6 +23,6 @@ export = new Item(script.Name)
     .setFormulaXCap(new CurrencyBundle().set("Power", 1e33))
 
     .trait(Upgrader)
-    .applyFormula((v, item) => item.setMul(mul.set("Funds", v).set("Power", v)), () => ServerAPI.currencyService.get("Power"))
+    .applyFormula((v, item) => item.setMul(mul.set("Funds", v).set("Power", v)), () => Server.Currency.get("Power"))
 
     .exit();

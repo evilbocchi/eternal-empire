@@ -2,7 +2,7 @@
 //!optimize 2
 
 /**
- * @fileoverview QuestsService - Quest progression and stage management system.
+ * @fileoverview QuestService - Quest progression and stage management system.
  * 
  * This service handles:
  * - Quest stage progression tracking
@@ -27,7 +27,7 @@ import Quest, { Stage } from "server/Quest";
 import DialogueService from "server/services/npc/DialogueService";
 import ChatHookService from "server/services/permissions/ChatHookService";
 import DataService from "server/services/serverdata/DataService";
-import ItemsService from "server/services/serverdata/ItemsService";
+import ItemService from "server/services/serverdata/ItemService";
 import LevelService from "server/services/serverdata/LevelService";
 import { WAYPOINTS } from "shared/constants";
 import Items from "shared/items/Items";
@@ -41,7 +41,7 @@ import Sandbox from "shared/Sandbox";
  * completion validation, and waypoint management for navigation.
  */
 @Service()
-export default class QuestsService implements OnInit {
+export default class QuestService implements OnInit {
 
     /**
      * Signal fired when a quest stage is reached.
@@ -57,7 +57,7 @@ export default class QuestsService implements OnInit {
     constructor(private readonly chatHookService: ChatHookService,
         private readonly dataService: DataService,
         private readonly levelService: LevelService,
-        private readonly itemsService: ItemsService,
+        private readonly itemService: ItemService,
         private readonly dialogueService: DialogueService) {
 
     }
@@ -235,7 +235,7 @@ export default class QuestsService implements OnInit {
         // Award items
         if (reward.items !== undefined) {
             for (const [item, amount] of reward.items) {
-                this.itemsService.setItemAmount(item, this.itemsService.getItemAmount(item) + amount);
+                this.itemService.setItemAmount(item, this.itemService.getItemAmount(item) + amount);
             }
         }
 
@@ -260,7 +260,7 @@ export default class QuestsService implements OnInit {
      * @param amount The amount to give.
      */
     giveQuestItem(itemId: string, amount: number) {
-        this.itemsService.setItemAmount(itemId, this.itemsService.getItemAmount(itemId) + amount);
+        this.itemService.setItemAmount(itemId, this.itemService.getItemAmount(itemId) + amount);
         this.chatHookService.sendServerMessage(`[+${amount} ${Items.getItem(itemId)?.name}]`, "tag:hidden;color:255,170,255");
     }
 
@@ -272,17 +272,17 @@ export default class QuestsService implements OnInit {
      * @returns True if successful, false otherwise.
      */
     takeQuestItem(itemId: string, amount: number) {
-        const currentAmount = this.itemsService.getItemAmount(itemId);
+        const currentAmount = this.itemService.getItemAmount(itemId);
         if (currentAmount < amount)
             return false;
-        this.itemsService.setItemAmount(itemId, currentAmount - amount);
+        this.itemService.setItemAmount(itemId, currentAmount - amount);
         this.chatHookService.sendServerMessage(`[-${amount} ${Items.getItem(itemId)?.name}]`, "tag:hidden;color:255,170,255");
         return true;
     }
 
 
     /**
-     * Initializes the QuestsService.
+     * Initializes the QuestService.
      * Sets up waypoints and synchronizes quest data with clients.
      */
     onInit() {

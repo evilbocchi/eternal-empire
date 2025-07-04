@@ -22,8 +22,8 @@ import { BadgeService, Players, RunService } from "@rbxts/services";
 import RevenueService from "server/services/RevenueService";
 import CurrencyService from "server/services/serverdata/CurrencyService";
 import DataService from "server/services/serverdata/DataService";
-import ItemsService from "server/services/serverdata/ItemsService";
-import UpgradeBoardService from "server/services/serverdata/UpgradeBoardService";
+import ItemService from "server/services/serverdata/ItemService";
+import NamedUpgradeService from "server/services/serverdata/NamedUpgradeService";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Operative from "shared/item/traits/Operative";
 import Items from "shared/items/Items";
@@ -56,8 +56,8 @@ export default class ResetService implements OnInit {
     /**
      * Constructs the ResetService with all required dependencies.
      */
-    constructor(private dataService: DataService, private itemsService: ItemsService,
-        private currencyService: CurrencyService, private upgradeBoardService: UpgradeBoardService,
+    constructor(private dataService: DataService, private itemService: ItemService,
+        private currencyService: CurrencyService, private namedUpgradeService: NamedUpgradeService,
         private revenueService: RevenueService) {
 
     }
@@ -129,7 +129,7 @@ export default class ResetService implements OnInit {
         items.inventory = this.filterExcludeInventory(inventory, resetLayer);
 
         this.dataService.dupeCheck(items);
-        this.itemsService.setItems(items);
+        this.itemService.setItems(items);
     }
 
     /**
@@ -187,11 +187,11 @@ export default class ResetService implements OnInit {
      */
     performReset(resetLayer: ResetLayer) {
         this.removeItems(resetLayer);
-        this.itemsService.fullUpdatePlacedItemsModels();
+        this.itemService.fullUpdatePlacedItemsModels();
         for (const resettingCurrency of resetLayer.resettingCurrencies)
             this.currencyService.set(resettingCurrency, new OnoeNum(0));
         for (const resettingUpgrade of resetLayer.resettingUpgrades)
-            this.upgradeBoardService.setUpgradeAmount(resettingUpgrade, 0);
+            this.namedUpgradeService.setUpgradeAmount(resettingUpgrade, 0);
 
         const empireData = this.dataService.empireData;
         empireData.lastReset = tick();

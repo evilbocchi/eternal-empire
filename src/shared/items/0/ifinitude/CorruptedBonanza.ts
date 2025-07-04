@@ -6,7 +6,7 @@ import AdvancedBlankEssence from "shared/items/0/ifinitude/AdvancedBlankEssence"
 import PassiveBonanza from "shared/items/negative/instantwin/PassiveBonanza";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Formula from "shared/currency/Formula";
-import { ServerAPI } from "shared/item/ItemUtils";
+import { Server } from "shared/item/ItemUtils";
 
 const amt = new OnoeNum(4e9);
 const base = new CurrencyBundle().set("Power", amt);
@@ -26,6 +26,6 @@ export = new Item(script.Name)
 
     .trait(Generator)
     .setPassiveGain(base)
-    .applyFormula((v, item) => item.setPassiveGain(base.set("Power", amt.mul(v))), () => ServerAPI.currencyService.get("Skill"))
+    .applyFormula((v, item) => item.setPassiveGain(base.set("Power", amt.mul(v))), () => Server.Currency.get("Skill"))
 
     .exit();

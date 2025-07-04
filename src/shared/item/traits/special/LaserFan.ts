@@ -1,6 +1,6 @@
 import { TweenService } from "@rbxts/services";
 import Item from "shared/item/Item";
-import { ServerAPI } from "shared/item/ItemUtils";
+import { Server } from "shared/item/ItemUtils";
 import { weldModel } from "@antivivi/vrldk";
 
 declare global {
@@ -15,8 +15,8 @@ export namespace LaserFan {
         const bp = weldModel(motor);
         const o = bp.CFrame;
         let v = 0;
-        const ItemsService = ServerAPI.itemsService;
-        let d = ItemsService.getPlacedItem(model.Name)?.direction === true;
+        const ItemService = Server.Item;
+        let d = ItemService.getPlacedItem(model.Name)?.direction === true;
         const tweenInfo = new TweenInfo(0.1, Enum.EasingStyle.Linear);
         item.repeat(model, () => {
             v += (d ? 1 : -1) * (speed ?? 3);
@@ -24,7 +24,7 @@ export namespace LaserFan {
         }, 0.1);
         (bp.FindFirstChild("ProximityPrompt") as ProximityPrompt | undefined)?.Triggered.Connect(() => {
             d = !d;
-            const pi = ItemsService.getPlacedItem(model.Name);
+            const pi = ItemService.getPlacedItem(model.Name);
             if (pi === undefined) {
                 return;
             }

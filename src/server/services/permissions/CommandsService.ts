@@ -35,13 +35,13 @@ import PermissionsService from "server/services/permissions/PermissionsService";
 import ResetService from "server/services/ResetService";
 import CurrencyService from "server/services/serverdata/CurrencyService";
 import DataService from "server/services/serverdata/DataService";
-import ItemsService from "server/services/serverdata/ItemsService";
+import ItemService from "server/services/serverdata/ItemService";
 import LevelService from "server/services/serverdata/LevelService";
 import PlaytimeService from "server/services/serverdata/PlaytimeService";
-import QuestsService from "server/services/serverdata/QuestsService";
+import QuestService from "server/services/serverdata/QuestService";
 import SetupService from "server/services/serverdata/SetupService";
-import UnlockedAreasService from "server/services/serverdata/UnlockedAreasService";
-import UpgradeBoardService from "server/services/serverdata/UpgradeBoardService";
+import UnlockedAreasService from "server/services/world/UnlockedAreasService";
+import NamedUpgradeService from "server/services/serverdata/NamedUpgradeService";
 import AreaService from "server/services/world/AreaService";
 import ChestService from "server/services/world/ChestService";
 import { AREAS } from "shared/Area";
@@ -74,12 +74,12 @@ export default class CommandsService implements OnInit {
      * @param donationService Player donation tracking
      * @param currencyService Currency management and transactions
      * @param leaderboardService Leaderboard management and updates
-     * @param upgradeBoardService Upgrade purchase and management
-     * @param itemsService Item inventory and placement management
+     * @param namedUpgradeService Upgrade purchase and management
+     * @param itemService Item inventory and placement management
      * @param playtimeService Playtime tracking and statistics
      * @param areaService Area management and teleportation
      * @param levelService Level and experience management
-     * @param questsService Quest progression tracking
+     * @param questService Quest progression tracking
      * @param unlockedAreasService Area unlock management
      * @param resetService Game reset and prestige functionality
      * @param bombsService Bomb effects and management
@@ -93,12 +93,12 @@ export default class CommandsService implements OnInit {
         private donationService: DonationService,
         private currencyService: CurrencyService,
         private leaderboardService: LeaderboardService,
-        private upgradeBoardService: UpgradeBoardService,
-        private itemsService: ItemsService,
+        private namedUpgradeService: NamedUpgradeService,
+        private itemService: ItemService,
         private playtimeService: PlaytimeService,
         private areaService: AreaService,
         private levelService: LevelService,
-        private questsService: QuestsService,
+        private questService: QuestService,
         private unlockedAreasService: UnlockedAreasService,
         private resetService: ResetService,
         private bombsService: BombsService,
@@ -425,7 +425,7 @@ export default class CommandsService implements OnInit {
                     if (area === undefined || placedItem.area === area)
                         toRemove.push(id);
 
-                this.itemsService.unplaceItems(o, toRemove);
+                this.itemService.unplaceItems(o, toRemove);
                 this.sendPrivateMessage(o, `Unplaced all items in ${area === undefined ? "all" : AREAS[area].name}`, "color:138,255,138");
             }, 1);
 
@@ -659,7 +659,7 @@ export default class CommandsService implements OnInit {
                 const empireData = this.dataService.empireData;
                 const newSetting = !empireData.particlesEnabled;
                 empireData.particlesEnabled = newSetting;
-                this.itemsService.refreshEffects();
+                this.itemService.refreshEffects();
                 this.sendServerMessage(`Particles for newly placed items have been ${newSetting === true ? "enabled" : "disabled"}`);
             }, 2);
 
@@ -810,15 +810,15 @@ export default class CommandsService implements OnInit {
         this.createCommand("upgradeset", "upgset",
             "<upgrade> <amount> : Set the quantity for an upgrade.",
             (_o, upgrade, amount) => {
-                this.upgradeBoardService.setUpgradeAmount(upgrade, tonumber(amount) ?? 0);
+                this.namedUpgradeService.setUpgradeAmount(upgrade, tonumber(amount) ?? 0);
             }, 4);
 
         this.createCommand("itemset", "iset",
             "<item> <amount> : Set the quantity for an item.",
             (_o, item, amount) => {
                 const a = tonumber(amount) ?? 0;
-                this.itemsService.setItemAmount(item, a);
-                this.itemsService.setBoughtAmount(item, a);
+                this.itemService.setItemAmount(item, a);
+                this.itemService.setBoughtAmount(item, a);
             }, 4);
 
         this.createCommand("itemall", "ia",
@@ -826,14 +826,14 @@ export default class CommandsService implements OnInit {
             (_o) => {
                 // spawn all item models
                 for (const [id, item] of Items.itemsPerId) {
-                    this.itemsService.setBoughtAmount(id, 0, true);
-                    this.itemsService.setItemAmount(id, 99, true);
+                    this.itemService.setBoughtAmount(id, 0, true);
+                    this.itemService.setItemAmount(id, 99, true);
 
                     const primaryPart = item.MODEL?.PrimaryPart;
                     if (primaryPart === undefined)
                         continue;
 
-                    this.itemsService.serverPlace(id, primaryPart.Position, 0);
+                    this.itemService.serverPlace(id, primaryPart.Position, 0);
                 }
             }, 4);
 
@@ -865,8 +865,8 @@ export default class CommandsService implements OnInit {
                     return;
                 }
                 stagePerQuest.set(questId, tonumber(amount) ?? 0);
-                this.questsService.setStagePerQuest(stagePerQuest);
-                this.questsService.loadAvailableQuests();
+                this.questService.setStagePerQuest(stagePerQuest);
+                this.questService.loadAvailableQuests();
             }, 4);
 
         this.createCommand("completequest", "cq",
@@ -876,7 +876,7 @@ export default class CommandsService implements OnInit {
                 if (quest === undefined) {
                     return;
                 }
-                this.questsService.completeQuest(quest);
+                this.questService.completeQuest(quest);
             }, 4);
 
         this.createCommand("unlockarea", "ula",
@@ -936,16 +936,16 @@ export default class CommandsService implements OnInit {
         this.createCommand("trueresetdata", "truewipedata",
             "Reset all data like no progress was ever made.",
             (_o) => {
-                this.itemsService.setPlacedItems(new Map());
-                this.itemsService.setBought(new Map());
-                this.itemsService.setInventory(new Map([["ClassLowerNegativeShop", 1]]));
-                this.itemsService.fullUpdatePlacedItemsModels();
+                this.itemService.setPlacedItems(new Map());
+                this.itemService.setBought(new Map());
+                this.itemService.setInventory(new Map([["ClassLowerNegativeShop", 1]]));
+                this.itemService.fullUpdatePlacedItemsModels();
                 this.currencyService.setAll(new Map());
-                this.upgradeBoardService.setAmountPerUpgrade(new Map());
+                this.namedUpgradeService.setAmountPerUpgrade(new Map());
                 this.playtimeService.setPlaytime(0);
                 this.levelService.setLevel(1);
                 this.levelService.setXp(0);
-                this.questsService.setStagePerQuest(new Map());
+                this.questService.setStagePerQuest(new Map());
                 this.sendServerMessage("True reset complete. The shop is in your inventory.");
             }, 4);
 
@@ -972,8 +972,8 @@ export default class CommandsService implements OnInit {
             (_player) => {
                 const items = this.dataService.dupeCheck(this.dataService.empireData.items);
 
-                this.itemsService.setItems(items);
-                this.itemsService.fullUpdatePlacedItemsModels();
+                this.itemService.setItems(items);
+                this.itemService.fullUpdatePlacedItemsModels();
             }, 4);
 
         this.createCommand("timeofday", "time",

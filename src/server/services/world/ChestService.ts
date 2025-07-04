@@ -14,9 +14,9 @@ import { convertToMMSS, weldModel } from "@antivivi/vrldk";
 import { OnInit, OnStart, Service } from "@flamework/core";
 import { TweenService, Workspace } from "@rbxts/services";
 import DataService from "server/services/serverdata/DataService";
-import ItemsService from "server/services/serverdata/ItemsService";
+import ItemService from "server/services/serverdata/ItemService";
 import LevelService from "server/services/serverdata/LevelService";
-import UnlockedAreasService from "server/services/serverdata/UnlockedAreasService";
+import UnlockedAreasService from "server/services/world/UnlockedAreasService";
 import { AREAS } from "shared/Area";
 import { SOUND_EFFECTS_GROUP } from "shared/constants";
 import { ASSETS, getSound } from "shared/GameAssets";
@@ -179,7 +179,7 @@ export default class ChestService implements OnInit, OnStart {
     /** Tween info for chest lid animation. */
     openTweenInfo = new TweenInfo(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out);
 
-    constructor(private dataService: DataService, private levelService: LevelService, private itemsService: ItemsService, private unlockedAreasService: UnlockedAreasService) {
+    constructor(private dataService: DataService, private levelService: LevelService, private itemService: ItemService, private unlockedAreasService: UnlockedAreasService) {
 
     }
 
@@ -219,7 +219,7 @@ export default class ChestService implements OnInit, OnStart {
         const items = new Map<string, number>();
         const addItem = (item: Item) => {
             const itemId = item.id;
-            this.itemsService.setItemAmount(itemId, this.itemsService.getItemAmount(itemId) + 1);
+            this.itemService.setItemAmount(itemId, this.itemService.getItemAmount(itemId) + 1);
             items.set(itemId, (items.get(itemId) ?? 0) + 1);
         };
         for (const loot of loots) {

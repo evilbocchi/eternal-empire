@@ -3,7 +3,7 @@ import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
 import Upgrader from "shared/item/traits/Upgrader";
 import Formula from "shared/currency/Formula";
-import { ServerAPI } from "shared/item/ItemUtils";
+import { Server } from "shared/item/ItemUtils";
 
 const mul = new CurrencyBundle().set("Funds", 0);
 
@@ -19,6 +19,6 @@ export = new Item(script.Name)
     .setFormulaXCap(new CurrencyBundle().set("Power", 1e303))
 
     .trait(Upgrader)
-    .applyFormula((v, item) => item.setMul(mul.set("Funds", v)), () => ServerAPI.currencyService.get("Power"))
+    .applyFormula((v, item) => item.setMul(mul.set("Funds", v)), () => Server.Currency.get("Power"))
 
     .exit();

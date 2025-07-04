@@ -2,7 +2,7 @@
 //!optimize 2
 
 /**
- * @fileoverview ItemsService - Core item management system for the game.
+ * @fileoverview ItemService - Core item management system for the game.
  * 
  * This service handles:
  * - Item inventory management (buying, placing, unplacing)
@@ -55,7 +55,7 @@ const queue = new Array<() => void>();
  * including 3D model management and world synchronization.
  */
 @Service()
-export default class ItemsService implements OnInit, OnStart, OnGameAPILoaded {
+export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
 
     // Event Signals
 
@@ -106,7 +106,7 @@ export default class ItemsService implements OnInit, OnStart, OnGameAPILoaded {
     })();
 
     /**
-     * Initializes the ItemsService with required dependencies.
+     * Initializes the ItemService with required dependencies.
      * 
      * @param dataService Service providing persistent empire and player data.
      * @param currencyService Service handling currency transactions for purchases.
@@ -655,7 +655,7 @@ export default class ItemsService implements OnInit, OnStart, OnGameAPILoaded {
     // Lifecycle Methods
 
     /**
-     * Initializes the ItemsService.
+     * Initializes the ItemService.
      * Sets up packet handlers, initializes all items, and synchronizes world state.
      */
     onInit() {
@@ -705,7 +705,7 @@ export default class ItemsService implements OnInit, OnStart, OnGameAPILoaded {
     }
 
     /**
-     * Starts the ItemsService.
+     * Starts the ItemService.
      * Adds map items to the world after initialization is complete.
      */
     onStart() {

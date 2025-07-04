@@ -3,7 +3,7 @@ import { ReplicatedStorage } from "@rbxts/services";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
 import Upgrader from "shared/item/traits/Upgrader";
-import { ServerAPI } from "shared/item/ItemUtils";
+import { Server } from "shared/item/ItemUtils";
 
 export = new Item(script.Name)
     .setName("Automatic Radiowave Connector")
@@ -25,14 +25,14 @@ export = new Item(script.Name)
             laser.Size = new Vector3(1, 1, 1);
             laser.Position = model.PrimaryPart!.Position;
         };
-        const ItemsService = ServerAPI.itemsService;
+        const ItemService = Server.Item;
         item.repeat(model, () => {
             const otherId = ReplicatedStorage.GetAttribute(script.Name);
             if (otherId === undefined) {
                 removeConnection(model.Name);
             }
             else if (otherId !== model.Name) {
-                const other = ItemsService.getPlacedItem(otherId as string);
+                const other = ItemService.getPlacedItem(otherId as string);
                 if (other === undefined) {
                     removeConnection();
                     return;

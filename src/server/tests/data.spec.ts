@@ -3,12 +3,12 @@
 import { OnoeNum } from "@antivivi/serikanum";
 import CurrencyService from "server/services/serverdata/CurrencyService";
 import DataService from "server/services/serverdata/DataService";
-import ItemsService from "server/services/serverdata/ItemsService";
+import ItemService from "server/services/serverdata/ItemService";
 
 export = function () {
     const dataService = new DataService();
     const currencyService = new CurrencyService(dataService);
-    const itemsService = new ItemsService(dataService, currencyService);
+    const itemService = new ItemService(dataService, currencyService);
 
     describe("loading", () => {
 
@@ -95,28 +95,28 @@ export = function () {
 
         it("should buy a free item", () => {
             const itemId = "TheFirstDropper";
-            itemsService.setItemAmount(itemId, 0, true);
-            itemsService.setBoughtAmount(itemId, 0, true);
-            expect(itemsService.buyItem(undefined, itemId, true)).to.equal(true);
-            expect(itemsService.getItemAmount(itemId)).to.be.equal(1);
+            itemService.setItemAmount(itemId, 0, true);
+            itemService.setBoughtAmount(itemId, 0, true);
+            expect(itemService.buyItem(undefined, itemId, true)).to.equal(true);
+            expect(itemService.getItemAmount(itemId)).to.be.equal(1);
         });
 
         it("should buy a non-free item", () => {
             const itemId = "BulkyDropper";
-            itemsService.setItemAmount(itemId, 1, true);
-            itemsService.setBoughtAmount(itemId, 0, true);
+            itemService.setItemAmount(itemId, 1, true);
+            itemService.setBoughtAmount(itemId, 0, true);
             currencyService.set("Funds", new OnoeNum(1e6));
-            expect(itemsService.buyItem(undefined, itemId, true)).to.equal(true);
-            expect(itemsService.getItemAmount(itemId)).to.be.equal(2);
+            expect(itemService.buyItem(undefined, itemId, true)).to.equal(true);
+            expect(itemService.getItemAmount(itemId)).to.be.equal(2);
         });
 
         it("should not buy an item with insufficient funds", () => {
             const itemId = "BulkyDropper";
-            itemsService.setItemAmount(itemId, 1, true);
-            itemsService.setBoughtAmount(itemId, 0, true);
+            itemService.setItemAmount(itemId, 1, true);
+            itemService.setBoughtAmount(itemId, 0, true);
             currencyService.set("Funds", new OnoeNum(0));
-            expect(itemsService.buyItem(undefined, itemId, true)).to.equal(false);
-            expect(itemsService.getItemAmount(itemId)).to.be.equal(1);
+            expect(itemService.buyItem(undefined, itemId, true)).to.equal(false);
+            expect(itemService.getItemAmount(itemId)).to.be.equal(1);
         });
     });
 };

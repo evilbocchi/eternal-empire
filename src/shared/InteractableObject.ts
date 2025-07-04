@@ -1,7 +1,7 @@
 import Signal, { Connection } from "@antivivi/lemon-signal";
 import { Keyed, SimpleRegistry } from "@antivivi/unnamespaced-keyed";
 import { Dialogue, EMPTY_NPC } from "shared/NPC";
-import { ServerAPI } from "shared/item/ItemUtils";
+import { Server } from "shared/item/ItemUtils";
 
 class InteractableObject implements Keyed {
 
@@ -77,7 +77,7 @@ class InteractableObject implements Keyed {
                 .root
         );
 
-    readonly interacted = new Signal<(utils: ServerAPI, player: Player) => void>();
+    readonly interacted = new Signal<(utils: Server, player: Player) => void>();
     key!: string;
     dialogue?: Dialogue;
     dialogueInteractConnection?: Connection;
@@ -91,12 +91,12 @@ class InteractableObject implements Keyed {
         if (this.dialogueInteractConnection === undefined)
             this.dialogueInteractConnection = this.interacted.connect((utils) => {
                 if (this.dialogue !== undefined)
-                    ServerAPI.dialogueService.talk(this.dialogue);
+                    Server.Dialogue.talk(this.dialogue);
             });
         return this;
     }
 
-    onInteract(callback: (utils: ServerAPI, player: Player, object: this) => void) {
+    onInteract(callback: (utils: Server, player: Player, object: this) => void) {
         this.interacted.connect((utils, player) => callback(utils, player, this));
         return this;
     }

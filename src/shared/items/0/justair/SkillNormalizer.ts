@@ -6,7 +6,7 @@ import Item from "shared/item/Item";
 import Conveyor from "shared/item/traits/Conveyor";
 import Upgrader from "shared/item/traits/Upgrader";
 import Formula from "shared/currency/Formula";
-import { ServerAPI } from "shared/item/ItemUtils";
+import { Server } from "shared/item/ItemUtils";
 
 const mul = new CurrencyBundle().set("Skill", 0);
 
@@ -22,7 +22,7 @@ export = new Item(script.Name)
 
     .trait(Upgrader)
     .applyFormula((v, item) => item.setMul(mul.set("Skill", v.mul(1))), () => {
-        const amount = ServerAPI.resetService.getResetReward(RESET_LAYERS.Skillification)?.get("Skill");
+        const amount = Server.Reset.getResetReward(RESET_LAYERS.Skillification)?.get("Skill");
         return amount === undefined ? new OnoeNum(1) : amount;
     })
 

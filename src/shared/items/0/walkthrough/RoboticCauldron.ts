@@ -2,7 +2,7 @@ import Difficulty from "@antivivi/jjt-difficulties";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Formula from "shared/currency/Formula";
 import Item from "shared/item/Item";
-import { ServerAPI } from "shared/item/ItemUtils";
+import { Server } from "shared/item/ItemUtils";
 import Furnace from "shared/item/traits/Furnace";
 import FormulaBundled from "shared/item/traits/special/FormulaBundled";
 
@@ -24,7 +24,7 @@ Scales with Power, maxing out at %cap%. Also provides a flat %flat% boost.`
     .setRatio("Power", 1)
     .setRatio("Funds", 1200)
     .setFlat("Skill", 5)
-    .setX(() => ServerAPI.currencyService.get("Power"))
+    .setX(() => Server.Currency.get("Power"))
     .apply(Furnace)
     .acceptsUpgrades(false)
 
