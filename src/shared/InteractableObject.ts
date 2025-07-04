@@ -91,7 +91,7 @@ class InteractableObject implements Keyed {
         if (this.dialogueInteractConnection === undefined)
             this.dialogueInteractConnection = this.interacted.connect((utils) => {
                 if (this.dialogue !== undefined)
-                    GameAPI.talk(this.dialogue);
+                    GameAPI.dialogueService.talk(this.dialogue);
             });
         return this;
     }

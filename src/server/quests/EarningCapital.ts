@@ -23,7 +23,7 @@ export = new Quest(script.Name)
             .root
         )
         .onStart((stage) => {
-            const connection = GameAPI.dialogueFinished.connect((dialogue) => {
+            const connection = GameAPI.dialogueService.dialogueFinished.connect((dialogue) => {
                 if (dialogue === stage.dialogue)
                     stage.completed.fire();
             });
@@ -52,15 +52,15 @@ export = new Quest(script.Name)
                 t = 0;
                 const funds = CurrencyService.get("Funds");
                 if (funds.lessThan(minFundsAmount)) {
-                    GameAPI.addDialogue(unmetDialogue);
-                    GameAPI.removeDialogue(metDialogue);
+                    GameAPI.dialogueService.addDialogue(unmetDialogue);
+                    GameAPI.dialogueService.removeDialogue(metDialogue);
                 }
                 else {
-                    GameAPI.addDialogue(metDialogue);
-                    GameAPI.removeDialogue(unmetDialogue);
+                    GameAPI.dialogueService.addDialogue(metDialogue);
+                    GameAPI.dialogueService.removeDialogue(unmetDialogue);
                 }
             });
-            const c2 = GameAPI.dialogueFinished.connect((dialogue) => {
+            const c2 = GameAPI.dialogueService.dialogueFinished.connect((dialogue) => {
                 if (dialogue !== metDialogue)
                     return;
                 if (CurrencyService.purchase(req))
@@ -74,12 +74,12 @@ export = new Quest(script.Name)
     )
     .setCompletionDialogue(new Dialogue(Ricarg, `What's up? I don't have another ${RustyFactory.name}, but I do have some tools that might be useful to you!`))
     .onInit((quest) => {
-        GameAPI.dialogueFinished.connect((dialogue) => {
+        GameAPI.dialogueService.dialogueFinished.connect((dialogue) => {
             if (dialogue === quest.completionDialogue) {
                 const items = GameAPI.empireData.items;
                 const [invCount, placedCount] = ItemCounter.getAmounts(items.inventory, items.worldPlaced, RustyFactory.id);
                 if (invCount + placedCount === 0)
-                    GameAPI.giveQuestItem(RustyFactory.id, 1);
+                    GameAPI.questsService.giveQuestItem(RustyFactory.id, 1);
             }
         });
     })

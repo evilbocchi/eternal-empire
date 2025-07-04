@@ -1,31 +1,29 @@
 import { OnoeNum } from "@antivivi/serikanum";
+import { convertToMMSS, playSoundAtPart, spawnExplosion } from "@antivivi/vrldk";
 import { RunService, TweenService, Workspace } from "@rbxts/services";
 import Quest, { Stage } from "server/Quest";
 import { AREAS } from "shared/Area";
 import { getNPCModel, getWaypoint, PLACED_ITEMS_FOLDER } from "shared/constants";
-import { getSound } from "shared/GameAssets";
-import { emitEffect } from "shared/GameAssets";
+import { emitEffect, getSound } from "shared/GameAssets";
 import InteractableObject from "shared/InteractableObject";
+import { GameAPI } from "shared/item/ItemUtils";
+import SkillPod from "shared/items/0/millisecondless/SkillPod";
+import SlamoStatue from "shared/items/0/millisecondless/SlamoStatue";
 import Stone from "shared/items/0/millisecondless/Stone";
 import Wood from "shared/items/0/millisecondless/Wood";
 import SlamoBoardAutomater from "shared/items/0/winsome/SlamoBoardAutomater";
 import WinsomeBucket from "shared/items/0/winsome/WinsomeBucket";
 import Crystal from "shared/items/excavation/Crystal";
+import ExcavationStone from "shared/items/excavation/ExcavationStone";
 import Gold from "shared/items/excavation/Gold";
+import EnchantedGrass from "shared/items/excavation/harvestable/EnchantedGrass";
 import Iron from "shared/items/excavation/Iron";
-import SkillPod from "shared/items/0/millisecondless/SkillPod";
-import SlamoStatue from "shared/items/0/millisecondless/SlamoStatue";
 import { Dialogue, EMPTY_NPC } from "shared/NPC";
 import Andy from "shared/npcs/Andy";
 import PoliceOfficer from "shared/npcs/Police Officer";
 import Simpul from "shared/npcs/Simpul";
 import SlamoReceptionist from "shared/npcs/Slamo Receptionist";
 import { RESET_LAYERS } from "shared/ResetLayer";
-import { GameAPI } from "shared/item/ItemUtils";
-import { playSoundAtPart, spawnExplosion } from "@antivivi/vrldk";
-import { convertToMMSS } from "@antivivi/vrldk";
-import EnchantedGrass from "shared/items/excavation/harvestable/EnchantedGrass";
-import ExcavationStone from "shared/items/excavation/ExcavationStone";
 
 const simpulModel = getNPCModel("Simpul");
 const simpulHumanoid = simpulModel.FindFirstChildOfClass("Humanoid")!;
@@ -74,9 +72,9 @@ export = new Quest(script.Name)
         )
         .onStart((stage) => {
             simpulRootPart.Position = stage.position!;
-            const connection = GameAPI.dialogueFinished.connect((dialogue) => {
+            const connection = GameAPI.dialogueService.dialogueFinished.connect((dialogue) => {
                 if (dialogue === stage.dialogue) {
-                    GameAPI.setEventCompleted("SimpulReveal", true);
+                    GameAPI.eventService.setEventCompleted("SimpulReveal", true);
                     stage.completed.fire();
                 }
             });
@@ -102,12 +100,12 @@ export = new Quest(script.Name)
                     .root
             ];
             for (const dialogue of dialogues)
-                GameAPI.addDialogue(dialogue);
+                GameAPI.dialogueService.addDialogue(dialogue);
             stage.completed.once(() => {
                 for (const dialogue of dialogues)
-                    GameAPI.removeDialogue(dialogue);
+                    GameAPI.dialogueService.removeDialogue(dialogue);
             });
-            const connection = GameAPI.dialogueFinished.connect((dialogue) => {
+            const connection = GameAPI.dialogueService.dialogueFinished.connect((dialogue) => {
                 if (dialogue === InteractableObject.SlamoBook.dialogue)
                     stage.completed.fire();
             });
@@ -127,11 +125,11 @@ export = new Quest(script.Name)
         .onStart((stage) => {
             const continuation = new Dialogue(Simpul, "You thought these puny bars could stop me? Yeah, right. See you never!");
 
-            const connection = GameAPI.dialogueFinished.connect((dialogue) => {
+            const connection = GameAPI.dialogueService.dialogueFinished.connect((dialogue) => {
                 if (dialogue === stage.dialogue) {
-                    GameAPI.setEventCompleted("FlimsyBarsDestroyed", true);
+                    GameAPI.eventService.setEventCompleted("FlimsyBarsDestroyed", true);
                     task.delay(1, () => {
-                        GameAPI.leadToPoint(simpulHumanoid, waypoint1, () => GameAPI.talk(continuation));
+                        GameAPI.npcNavigationService.leadToPoint(simpulHumanoid, waypoint1, () => GameAPI.dialogueService.talk(continuation));
                     });
                 }
                 else if (dialogue === continuation) {
@@ -175,41 +173,41 @@ export = new Quest(script.Name)
             const ending = new Dialogue(SlamoReceptionist, "Now that is actually perfect. Well, let's head to the village centre and try to catch that monster!");
             if (ItemsService.getItemAmount(SlamoStatue.id) > 0) {
                 if (ItemsService.getItemAmount(WinsomeBucket.id) > 0) {
-                    GameAPI.talk(ending);
+                    GameAPI.dialogueService.talk(ending);
                 }
                 else {
-                    GameAPI.addDialogue(checking2);
+                    GameAPI.dialogueService.addDialogue(checking2);
                 }
             }
             else {
-                GameAPI.addDialogue(start);
+                GameAPI.dialogueService.addDialogue(start);
             }
-            const connection = GameAPI.dialogueFinished.connect((dialogue) => {
+            const connection = GameAPI.dialogueService.dialogueFinished.connect((dialogue) => {
                 if (dialogue === start) {
-                    GameAPI.removeDialogue(start);
-                    GameAPI.addDialogue(checking);
+                    GameAPI.dialogueService.removeDialogue(start);
+                    GameAPI.dialogueService.addDialogue(checking);
                 }
                 else if (dialogue === checking && ItemsService.getItemAmount(Wood.id) >= 5 && ItemsService.getItemAmount(Stone.id) >= 3) {
-                    GameAPI.talk(getStatue);
+                    GameAPI.dialogueService.talk(getStatue);
                 }
                 else if (dialogue === getStatue) {
-                    GameAPI.takeQuestItem(Wood.id, 5);
-                    GameAPI.takeQuestItem(Stone.id, 3);
-                    GameAPI.giveQuestItem(SlamoStatue.id, 1);
-                    GameAPI.removeDialogue(checking);
-                    GameAPI.addDialogue(checking2);
+                    GameAPI.questsService.takeQuestItem(Wood.id, 5);
+                    GameAPI.questsService.takeQuestItem(Stone.id, 3);
+                    GameAPI.questsService.giveQuestItem(SlamoStatue.id, 1);
+                    GameAPI.dialogueService.removeDialogue(checking);
+                    GameAPI.dialogueService.addDialogue(checking2);
                 }
                 else if (dialogue === checking2 && ItemsService.getItemAmount("WinsomeSpeck") >= 10) {
-                    GameAPI.talk(fetchBucket);
-                    GameAPI.removeDialogue(checking2);
-                    GameAPI.addDialogue(checking3);
+                    GameAPI.dialogueService.talk(fetchBucket);
+                    GameAPI.dialogueService.removeDialogue(checking2);
+                    GameAPI.dialogueService.addDialogue(checking3);
                 }
                 else if (dialogue === fetchBucket) {
-                    GameAPI.giveQuestItem(SkillPod.id, 1);
+                    GameAPI.questsService.giveQuestItem(SkillPod.id, 1);
                 }
                 else if (dialogue === checking3 && ItemsService.getItemAmount(WinsomeBucket.id) >= 1) {
-                    GameAPI.removeDialogue(checking3);
-                    GameAPI.talk(ending);
+                    GameAPI.dialogueService.removeDialogue(checking3);
+                    GameAPI.dialogueService.talk(ending);
                 }
                 else if (dialogue === ending) {
                     stage.completed.fire();
@@ -229,14 +227,14 @@ export = new Quest(script.Name)
         .onStart((stage) => {
             toggleRing(true);
             const hint = new Dialogue(SlamoReceptionist, "Come on, get in front of me and place the statue down where Simpul can easily spot it.");
-            GameAPI.leadToPoint(getNPCModel("Slamo Receptionist").WaitForChild("Humanoid"), waypoint2.CFrame, () => GameAPI.talk(
+            GameAPI.npcNavigationService.leadToPoint(getNPCModel("Slamo Receptionist").WaitForChild("Humanoid"), waypoint2.CFrame, () => GameAPI.dialogueService.talk(
                 new Dialogue(SlamoReceptionist, "Alright. I'll stay here and hide to make sure nothing happens. You go in front and place the statue down.")), false);
 
             let statue: Model | undefined;
 
-            GameAPI.addDialogue(hint);
+            GameAPI.dialogueService.addDialogue(hint);
             const poured = new Dialogue(EMPTY_NPC, "You pour the bucket on Simpul.");
-            Simpul.onInteract(() => GameAPI.talk(poured));
+            Simpul.onInteract(() => GameAPI.dialogueService.talk(poured));
             const simpulSad = new Dialogue(Simpul, "This can't be... No... NOO!!!");
             let initiated = false;
             const update = (placementId: string) => {
@@ -250,8 +248,8 @@ export = new Quest(script.Name)
 
                 simpulRootPart.CFrame = statueCFrame.add(new Vector3(0, 100, 0));
                 TweenService.Create(simpulRootPart, new TweenInfo(4), { CFrame: statueCFrame.add(statueCFrame.LookVector.mul(12)).mul(CFrame.Angles(0, math.pi, 0)) }).Play();
-                task.delay(1.5, () => GameAPI.talk(new Dialogue(Simpul, "Oh my god... You're the perfect Slamo! Come with me, please."), false));
-                task.delay(5, () => GameAPI.talk(new Dialogue(SlamoReceptionist, "Alright, pour the bucket on him!"), false));
+                task.delay(1.5, () => GameAPI.dialogueService.talk(new Dialogue(Simpul, "Oh my god... You're the perfect Slamo! Come with me, please."), false));
+                task.delay(5, () => GameAPI.dialogueService.talk(new Dialogue(SlamoReceptionist, "Alright, pour the bucket on him!"), false));
             };
             const placedItems = GameAPI.empireData.items.worldPlaced;
             for (const [placementId, placedItem] of placedItems)
@@ -267,7 +265,7 @@ export = new Quest(script.Name)
                         break;
                     }
             });
-            const connection2 = GameAPI.dialogueFinished.connect((dialogue) => {
+            const connection2 = GameAPI.dialogueService.dialogueFinished.connect((dialogue) => {
                 if (dialogue === poured) {
                     const model = WinsomeBucket.MODEL?.Clone();
                     if (model === undefined)
@@ -292,7 +290,7 @@ export = new Quest(script.Name)
                         trap.FindFirstChildOfClass("Decal")!.Transparency = 0;
                         decal.Texture = sadDecal;
                     });
-                    task.delay(2.5, () => GameAPI.talk(simpulSad));
+                    task.delay(2.5, () => GameAPI.dialogueService.talk(simpulSad));
                     model.Parent = Workspace;
                 }
                 else if (dialogue === simpulSad) {
@@ -304,13 +302,13 @@ export = new Quest(script.Name)
                     part.Parent = Workspace;
                     spawnExplosion(part.Position, part);
                     playSoundAtPart(part, getSound("Explosion"));
-                    GameAPI.setEventCompleted("SimpulGone", true);
+                    GameAPI.eventService.setEventCompleted("SimpulGone", true);
                 }
             });
-            const connection3 = GameAPI.addCompletionListener("SimpulGone", (isCompleted) => {
+            const connection3 = GameAPI.eventService.addCompletionListener("SimpulGone", (isCompleted) => {
                 if (!isCompleted)
                     return;
-                GameAPI.leadToPoint(slamoReceptionistHumanoid, getWaypoint("LudicrousEscape3").CFrame, () => { });
+                GameAPI.npcNavigationService.leadToPoint(slamoReceptionistHumanoid, getWaypoint("LudicrousEscape3").CFrame, () => { });
                 stage.completed.fire();
             });
             return () => {
@@ -324,11 +322,14 @@ export = new Quest(script.Name)
         .setDescription(`Serve justice to Simpul.`)
         .setNPC("Simpul")
         .onStart((stage) => {
-            GameAPI.talk(finishing);
+            GameAPI.dialogueService.talk(finishing);
 
-            const connection = GameAPI.dialogueFinished.connect((dialogue) => {
+            const connection = GameAPI.dialogueService.dialogueFinished.connect((dialogue) => {
                 if (dialogue === finishing) {
-                    GameAPI.leadToPoint(slamoReceptionistHumanoid, GameAPI.getDefaultLocation(SlamoReceptionist)!, () => { });
+                    const defaultLocation = GameAPI.npcStateService.getInfo(SlamoReceptionist)?.defaultLocation;
+                    if (defaultLocation === undefined)
+                        throw "Slamo Receptionist default location not found!";
+                    GameAPI.npcNavigationService.leadToPoint(slamoReceptionistHumanoid, defaultLocation, () => { });
                     toggleRing(false);
                     stage.completed.fire();
                 }
@@ -338,11 +339,11 @@ export = new Quest(script.Name)
     )
     .onInit(() => {
         const CurrencyService = GameAPI.currencyService;
-        GameAPI.addCompletionListener("SimpulReveal", (isCompleted) => {
+        GameAPI.eventService.addCompletionListener("SimpulReveal", (isCompleted) => {
             if (isCompleted)
                 simpulHumanoid.DisplayName = "";
         });
-        GameAPI.addCompletionListener("FlimsyBarsDestroyed", (isCompleted) => {
+        GameAPI.eventService.addCompletionListener("FlimsyBarsDestroyed", (isCompleted) => {
             if (!isCompleted)
                 return;
 
@@ -354,7 +355,7 @@ export = new Quest(script.Name)
                 bar.Destroy();
             }
         });
-        GameAPI.addCompletionListener("SimpulGone", (isCompleted) => {
+        GameAPI.eventService.addCompletionListener("SimpulGone", (isCompleted) => {
             if (!isCompleted)
                 return;
             simpulRootPart.CFrame = new CFrame(0, -200, 0);
@@ -365,46 +366,46 @@ export = new Quest(script.Name)
         const start = new Dialogue(Andy, `It would be great if you could help me out with harvesting these apples. Say, if you bring me 40 Apples, I'll reward you handsomely. Deal?`);
         const done = new Dialogue(Andy, "Wow! Those are some really cool looking apples. Don't mind if I do.");
 
-        GameAPI.dialogueFinished.connect((dialogue) => {
+        GameAPI.dialogueService.dialogueFinished.connect((dialogue) => {
             if (dialogue === Andy.defaultDialogue) {
                 const last = questMetadata.get("Andy") as number | undefined;
                 if (last === undefined || last + 3600 < tick()) {
-                    if (GameAPI.takeQuestItem("Apple", 40)) {
-                        GameAPI.talk(done);
+                    if (GameAPI.questsService.takeQuestItem("Apple", 40)) {
+                        GameAPI.dialogueService.talk(done);
                     }
                     else {
-                        GameAPI.talk(start);
+                        GameAPI.dialogueService.talk(start);
                     }
                 }
                 else {
-                    GameAPI.talk(new Dialogue(Andy, "You can talk with me again in " + convertToMMSS(math.floor(((questMetadata.get("Andy") as number) ?? 0) - tick() + 3600)) + " to help me out again!"));
+                    GameAPI.dialogueService.talk(new Dialogue(Andy, "You can talk with me again in " + convertToMMSS(math.floor(((questMetadata.get("Andy") as number) ?? 0) - tick() + 3600)) + " to help me out again!"));
                 }
             }
             else if (dialogue === done) {
                 questMetadata.set("Andy", tick());
                 const rng = math.random(1, 3);
                 if (rng === 1) {
-                    GameAPI.talk(new Dialogue(Andy, "As your reward, here's a Funds Bomb! Enjoy!"));
+                    GameAPI.dialogueService.talk(new Dialogue(Andy, "As your reward, here's a Funds Bomb! Enjoy!"));
                     CurrencyService.increment("Funds Bombs", new OnoeNum(1));
                 }
                 else if (rng === 2) {
                     const amount = GameAPI.resetService.getResetReward(RESET_LAYERS.Skillification).div(5);
                     const skill = amount.get("Skill");
                     if (skill === undefined || skill.equals(0)) {
-                        GameAPI.talk(new Dialogue(Andy, "As your reward, I wanted to give you some Skill... but I'm all out. Here's some resources instead!"));
-                        GameAPI.giveQuestItem(EnchantedGrass.id, 3);
-                        GameAPI.giveQuestItem(ExcavationStone.id, 15);
+                        GameAPI.dialogueService.talk(new Dialogue(Andy, "As your reward, I wanted to give you some Skill... but I'm all out. Here's some resources instead!"));
+                        GameAPI.questsService.giveQuestItem(EnchantedGrass.id, 3);
+                        GameAPI.questsService.giveQuestItem(ExcavationStone.id, 15);
                         return;
                     }
 
-                    GameAPI.talk(new Dialogue(Andy, "As your reward, I gave you a bit of my Skill. Hopefully, it'll help you out!"));
+                    GameAPI.dialogueService.talk(new Dialogue(Andy, "As your reward, I gave you a bit of my Skill. Hopefully, it'll help you out!"));
                     CurrencyService.incrementAll(amount.amountPerCurrency);
                 }
                 else if (rng === 3) {
-                    GameAPI.talk(new Dialogue(Andy, "As your reward, I gave you some pretty cool resources. Use them wisely!"));
-                    GameAPI.giveQuestItem(Gold.id, 1);
-                    GameAPI.giveQuestItem(Iron.id, 4);
-                    GameAPI.giveQuestItem(Crystal.id, 10);
+                    GameAPI.dialogueService.talk(new Dialogue(Andy, "As your reward, I gave you some pretty cool resources. Use them wisely!"));
+                    GameAPI.questsService.giveQuestItem(Gold.id, 1);
+                    GameAPI.questsService.giveQuestItem(Iron.id, 4);
+                    GameAPI.questsService.giveQuestItem(Crystal.id, 10);
                 }
             }
         });

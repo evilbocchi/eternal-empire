@@ -27,7 +27,7 @@ export = new Item(script.Name)
         let prevCount = questMetadata.get("CrystalDrillCount") as number ?? 0;
         prevCount += 1;
         if (math.random(1, 60 * math.pow(prevCount, 2)) === 1) { // XD
-            GameAPI.giveQuestItem(Crystal.id, 1);
+            GameAPI.questsService.giveQuestItem(Crystal.id, 1);
             questMetadata.set("CrystalDrillCount", prevCount);
         }
     })

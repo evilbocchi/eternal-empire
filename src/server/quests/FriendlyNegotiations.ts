@@ -26,14 +26,14 @@ export = new Quest(script.Name)
         )
         .onStart((stage) => {
             const replacement = new Dialogue(Prest, "Buy your crates and logs here! Wait, nevermind. We're out of stock.");
-            GameAPI.addDialogue(replacement);
-            const connection = GameAPI.dialogueFinished.connect((dialogue) => {
+            GameAPI.dialogueService.addDialogue(replacement);
+            const connection = GameAPI.dialogueService.dialogueFinished.connect((dialogue) => {
                 if (dialogue === stage.dialogue)
                     stage.completed.fire();
             });
             return () => {
                 connection.disconnect();
-                GameAPI.removeDialogue(replacement);
+                GameAPI.dialogueService.removeDialogue(replacement);
             };
         })
     )
@@ -48,14 +48,14 @@ export = new Quest(script.Name)
         )
         .onStart((stage) => {
             const replacement = new Dialogue(Tria, "Find a way to make him change his prices for good!");
-            GameAPI.addDialogue(replacement);
-            const connection = GameAPI.dialogueFinished.connect((dialogue) => {
+            GameAPI.dialogueService.addDialogue(replacement);
+            const connection = GameAPI.dialogueService.dialogueFinished.connect((dialogue) => {
                 if (dialogue === stage.dialogue)
                     stage.completed.fire();
             });
             return () => {
                 connection.disconnect();
-                GameAPI.removeDialogue(replacement);
+                GameAPI.dialogueService.removeDialogue(replacement);
             };
         })
     )
@@ -67,7 +67,7 @@ export = new Quest(script.Name)
             .root
         )
         .onStart((stage) => {
-            GameAPI.addDialogue(prestAnnoyance);
+            GameAPI.dialogueService.addDialogue(prestAnnoyance);
             let t = 0;
             const ItemsService = GameAPI.itemsService;
             const connection = RunService.Heartbeat.Connect((dt) => {
@@ -81,7 +81,7 @@ export = new Quest(script.Name)
             });
             return () => {
                 connection.Disconnect();
-                GameAPI.removeDialogue(prestAnnoyance);
+                GameAPI.dialogueService.removeDialogue(prestAnnoyance);
             };
         })
     )
@@ -93,7 +93,7 @@ export = new Quest(script.Name)
         .setNPC("Prest", true)
         .onStart((stage) => {
             const replacement = new Dialogue(Tria, "Find a way to make him change his prices for good!");
-            GameAPI.addDialogue(replacement);
+            GameAPI.dialogueService.addDialogue(replacement);
             const continuation = new Dialogue(Prest, "Wait... Is that actually it?")
                 .monologue("...")
                 .monologue("......")
@@ -101,15 +101,15 @@ export = new Quest(script.Name)
                 .monologue(`I know you don't have a ${SkillPod.name}, but I'm gonna be nice and hold onto your ${GrassConveyor.name} for you.`)
                 .monologue("See you again never!")
                 .root;
-            const connection = GameAPI.dialogueFinished.connect((dialogue) => {
-                if (dialogue === stage.dialogue && GameAPI.takeQuestItem(GrassConveyor.id, 1) === true) {
-                    GameAPI.talk(continuation);
+            const connection = GameAPI.dialogueService.dialogueFinished.connect((dialogue) => {
+                if (dialogue === stage.dialogue && GameAPI.questsService.takeQuestItem(GrassConveyor.id, 1) === true) {
+                    GameAPI.dialogueService.talk(continuation);
                     stage.completed.fire();
                 }
             });
             return () => {
                 connection.disconnect();
-                GameAPI.removeDialogue(replacement);
+                GameAPI.dialogueService.removeDialogue(replacement);
             };
         })
     )
@@ -122,17 +122,17 @@ export = new Quest(script.Name)
             .root
         )
         .onStart((stage) => {
-            GameAPI.addDialogue(prestAnnoyance);
-            const connection = GameAPI.dialogueFinished.connect((dialogue) => {
+            GameAPI.dialogueService.addDialogue(prestAnnoyance);
+            const connection = GameAPI.dialogueService.dialogueFinished.connect((dialogue) => {
                 if (dialogue === stage.dialogue) {
-                    GameAPI.giveQuestItem(SkillPod.id, 1);
+                    GameAPI.questsService.giveQuestItem(SkillPod.id, 1);
                     stage.completed.fire();
                 }
 
             });
             return () => {
                 connection.disconnect();
-                GameAPI.removeDialogue(prestAnnoyance);
+                GameAPI.dialogueService.removeDialogue(prestAnnoyance);
             };
         })
     )
@@ -148,16 +148,16 @@ export = new Quest(script.Name)
         )
         .onStart((stage) => {
             const replacement = new Dialogue(Tria, `Use that ${SkillPod.name} to help with your negotiations!`);
-            GameAPI.addDialogue(replacement);
-            const connection = GameAPI.dialogueFinished.connect((dialogue) => {
+            GameAPI.dialogueService.addDialogue(replacement);
+            const connection = GameAPI.dialogueService.dialogueFinished.connect((dialogue) => {
                 if (dialogue === stage.dialogue) {
-                    GameAPI.takeQuestItem(SkillPod.id, 1);
+                    GameAPI.questsService.takeQuestItem(SkillPod.id, 1);
                     stage.completed.fire();
                 }
             });
             return () => {
                 connection.disconnect();
-                GameAPI.removeDialogue(replacement);
+                GameAPI.dialogueService.removeDialogue(replacement);
             };
         })
     )

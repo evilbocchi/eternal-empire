@@ -41,7 +41,7 @@ const unlockWall = () => {
         spawnExplosion(suspiciousWall.Position);
         emitEffect("Sparks", suspiciousWall, 2);
         playSoundAtPart(suspiciousWall, getSound("ExplosiveUnlock"));
-        GameAPI.setEventCompleted("SuspiciousWallOpened", true);
+        GameAPI.eventService.setEventCompleted("SuspiciousWallOpened", true);
     });
 };
 
@@ -60,7 +60,7 @@ export = new Quest(script.Name)
             .root
         )
         .onStart((stage) => {
-            const connection = GameAPI.dialogueFinished.connect((dialogue) => {
+            const connection = GameAPI.dialogueService.dialogueFinished.connect((dialogue) => {
                 if (dialogue === stage.dialogue) {
                     stage.completed.fire();
                 }
@@ -72,7 +72,7 @@ export = new Quest(script.Name)
         .setDescription("Find details about the history of Barren Islands in the library at %coords%.")
         .setFocus(getWaypoint("LearningThePast2"))
         .onStart((stage) => {
-            const connection = GameAPI.dialogueFinished.connect((dialogue) => {
+            const connection = GameAPI.dialogueService.dialogueFinished.connect((dialogue) => {
                 if (dialogue === InteractableObject.OldBooks1.dialogue) {
                     stage.completed.fire();
                 }
@@ -126,29 +126,29 @@ export = new Quest(script.Name)
                 .root;
 
             for (const dialogue of dialogues) {
-                GameAPI.addDialogue(dialogue);
+                GameAPI.dialogueService.addDialogue(dialogue);
             }
-            GameAPI.addDialogue(librarianDialogue);
-            GameAPI.addDialogue(pasalDialogue);
-            const connection = GameAPI.dialogueFinished.connect((dialogue) => {
+            GameAPI.dialogueService.addDialogue(librarianDialogue);
+            GameAPI.dialogueService.addDialogue(pasalDialogue);
+            const connection = GameAPI.dialogueService.dialogueFinished.connect((dialogue) => {
                 if (dialogue === librarianDialogue) {
-                    GameAPI.takeQuestItem(IrregularlyShapedKey.id, 1);
-                    GameAPI.giveQuestItem(IrregularlyShapedKey.id, 1);
-                    GameAPI.removeDialogue(librarianDialogue);
+                    GameAPI.questsService.takeQuestItem(IrregularlyShapedKey.id, 1);
+                    GameAPI.questsService.giveQuestItem(IrregularlyShapedKey.id, 1);
+                    GameAPI.dialogueService.removeDialogue(librarianDialogue);
                 }
-                else if (dialogue === pasalDialogue && GameAPI.takeQuestItem(IrregularlyShapedKey.id, 1) === true) {
-                    GameAPI.talk(continuation);
+                else if (dialogue === pasalDialogue && GameAPI.questsService.takeQuestItem(IrregularlyShapedKey.id, 1) === true) {
+                    GameAPI.dialogueService.talk(continuation);
                 }
                 else if (dialogue === continuation) {
                     stage.completed.fire();
-                    GameAPI.setEventCompleted("PasalReveal", true);
-                    GameAPI.giveQuestItem(IrregularlyShapedKey.id, 1);
+                    GameAPI.eventService.setEventCompleted("PasalReveal", true);
+                    GameAPI.questsService.giveQuestItem(IrregularlyShapedKey.id, 1);
                 }
             });
             return () => {
                 connection.disconnect();
                 for (const dialogue of dialogues) {
-                    GameAPI.removeDialogue(dialogue);
+                    GameAPI.dialogueService.removeDialogue(dialogue);
                 }
             };
         })
@@ -164,7 +164,7 @@ export = new Quest(script.Name)
             .root
         )
         .onStart((stage) => {
-            const connection = GameAPI.dialogueFinished.connect((dialogue) => {
+            const connection = GameAPI.dialogueService.dialogueFinished.connect((dialogue) => {
                 if (dialogue === stage.dialogue) {
                     stage.completed.fire();
                 }
@@ -197,10 +197,10 @@ export = new Quest(script.Name)
         .setDialogue(new Dialogue(OldNoob, `Do you have 20 ${ExcavationStone.name}?`))
         .onStart((stage) => {
             const continuation = new Dialogue(OldNoob, "Yup, sure do. Alright, let's get going. I won't waste either of our time.");
-            const connection = GameAPI.dialogueFinished.connect((dialogue) => {
-                if (dialogue === stage.dialogue && GameAPI.takeQuestItem(ExcavationStone.id, 20) === true) {
+            const connection = GameAPI.dialogueService.dialogueFinished.connect((dialogue) => {
+                if (dialogue === stage.dialogue && GameAPI.questsService.takeQuestItem(ExcavationStone.id, 20) === true) {
                     stage.completed.fire();
-                    GameAPI.talk(continuation);
+                    GameAPI.dialogueService.talk(continuation);
                 }
             });
             return () => connection.disconnect();
@@ -222,29 +222,29 @@ export = new Quest(script.Name)
                 .next(new Dialogue(Pasal, "The fact that you have to say that it's safe kinda concerns me... Whatever. Come on, let's see something happen!"))
                 .root;
 
-            GameAPI.stopNPCAnimation(OldNoob, "Default");
+            GameAPI.npcStateService.stopAnimation(OldNoob, "Default");
             task.wait(1);
-            GameAPI.leadToPoint(oldNoobHumanoid, getWaypoint("LearningThePastOldNoob1").CFrame, () => {
-                GameAPI.talk(intro);
+            GameAPI.npcNavigationService.leadToPoint(oldNoobHumanoid, getWaypoint("LearningThePastOldNoob1").CFrame, () => {
+                GameAPI.dialogueService.talk(intro);
             });
 
             const oldNoobAwaiting = new Dialogue(OldNoob, "Just stick that key in and see what happens.");
             const pasalAwaiting = new Dialogue(Pasal, "Come on, let's see something happen!");
 
-            const connection1 = GameAPI.dialogueFinished.connect((dialogue) => {
+            const connection1 = GameAPI.dialogueService.dialogueFinished.connect((dialogue) => {
                 if (dialogue === intro) {
-                    GameAPI.stopNPCAnimation(Pasal, "Default");
+                    GameAPI.npcStateService.stopAnimation(Pasal, "Default");
                     task.wait(0.5);
-                    GameAPI.leadToPoint(pasalHumanoid, getWaypoint("LearningThePastPasal1").CFrame, () => { });
-                    GameAPI.leadToPoint(oldNoobHumanoid, getWaypoint("LearningThePastOldNoob2").CFrame, () => {
-                        GameAPI.talk(teaching);
-                        GameAPI.setEventCompleted("IrregularlyShapedKeyUsable", true);
-                        GameAPI.addDialogue(oldNoobAwaiting);
-                        GameAPI.addDialogue(pasalAwaiting);
+                    GameAPI.npcNavigationService.leadToPoint(pasalHumanoid, getWaypoint("LearningThePastPasal1").CFrame, () => { });
+                    GameAPI.npcNavigationService.leadToPoint(oldNoobHumanoid, getWaypoint("LearningThePastOldNoob2").CFrame, () => {
+                        GameAPI.dialogueService.talk(teaching);
+                        GameAPI.eventService.setEventCompleted("IrregularlyShapedKeyUsable", true);
+                        GameAPI.dialogueService.addDialogue(oldNoobAwaiting);
+                        GameAPI.dialogueService.addDialogue(pasalAwaiting);
                     });
                 }
             });
-            const connection2 = GameAPI.addCompletionListener("SuspiciousWallOpened", (isCompleted) => {
+            const connection2 = GameAPI.eventService.addCompletionListener("SuspiciousWallOpened", (isCompleted) => {
                 if (isCompleted) {
                     stage.completed.fire();
                 }
@@ -259,11 +259,11 @@ export = new Quest(script.Name)
         .setDescription(`Discover the depths of the hidden cave.`)
         .onStart((stage) => {
             task.wait(0.5);
-            if (GameAPI.isEventCompleted("SuspiciousWallOpened") === false) {
+            if (GameAPI.eventService.isEventCompleted("SuspiciousWallOpened") === false) {
                 unlockWall();
             }
-            GameAPI.stopNPCAnimation(OldNoob, "Default");
-            GameAPI.stopNPCAnimation(Pasal, "Default");
+            GameAPI.npcStateService.stopAnimation(OldNoob, "Default");
+            GameAPI.npcStateService.stopAnimation(Pasal, "Default");
             oldNoobModel.FindFirstChildOfClass("Tool")?.Destroy();
             pasalHumanoid.RootPart!.Anchored = false;
             oldNoobHumanoid.RootPart!.Anchored = false;
@@ -274,7 +274,7 @@ export = new Quest(script.Name)
                 .monologue("Let's get in before anyone else notices.")
                 .next(new Dialogue(Pasal, "I must be tripping... I don't know what I'm seeing..."))
                 .root;
-            GameAPI.talk(intro);
+            GameAPI.dialogueService.talk(intro);
 
             const continuation = new Dialogue(OldNoob, "Well? Surprised?")
                 .next(new Dialogue(Pasal, "This was beneath us the whole time? How did no one find this?"))
@@ -292,7 +292,7 @@ export = new Quest(script.Name)
                 .monologue("There, you can hopefully get better items, which can help you progress faster than you ever would here.")
                 .monologue("I wish you the best of luck. See you again.")
                 .root;
-            const connection = GameAPI.dialogueFinished.connect((dialogue) => {
+            const connection = GameAPI.dialogueService.dialogueFinished.connect((dialogue) => {
                 if (dialogue === intro) {
                     pasalHumanoid.MoveToFinished.Once(() => {
                         pasalHumanoid.RootPart!.CFrame = getWaypoint("LearningThePastEnterCave").CFrame;
@@ -300,23 +300,23 @@ export = new Quest(script.Name)
                     });
                     oldNoobHumanoid.MoveToFinished.Once(() => {
                         oldNoobHumanoid.RootPart!.CFrame = getWaypoint("LearningThePastEnterCave").CFrame;
-                        GameAPI.leadToPoint(oldNoobHumanoid, getWaypoint("LearningThePastOldNoob3").CFrame, () => {
-                            GameAPI.talk(continuation, false);
-                            GameAPI.leadToPoint(oldNoobHumanoid, getWaypoint("LearningThePastOldNoob4").CFrame, () => {
-                                GameAPI.talk(ending);
+                        GameAPI.npcNavigationService.leadToPoint(oldNoobHumanoid, getWaypoint("LearningThePastOldNoob3").CFrame, () => {
+                            GameAPI.dialogueService.talk(continuation, false);
+                            GameAPI.npcNavigationService.leadToPoint(oldNoobHumanoid, getWaypoint("LearningThePastOldNoob4").CFrame, () => {
+                                GameAPI.dialogueService.talk(ending);
                             });
                         });
-                        GameAPI.leadToPoint(pasalHumanoid, getWaypoint("LearningThePastPasal3").CFrame, () => { });
+                        GameAPI.npcNavigationService.leadToPoint(pasalHumanoid, getWaypoint("LearningThePastPasal3").CFrame, () => { });
                     });
                     pasalHumanoid.MoveTo(suspiciousWall.Position);
                     oldNoobHumanoid.MoveTo(suspiciousWall.Position);
                 }
                 else if (dialogue === ending) {
                     GameAPI.npcNavigationService.pathfind(oldNoobHumanoid, getWaypoint("LearningThePastEnterCave").Position, () => {
-                        oldNoobHumanoid.RootPart!.CFrame = GameAPI.getDefaultLocation(OldNoob)!;
+                        oldNoobHumanoid.RootPart!.CFrame = GameAPI.npcStateService.getInfo(OldNoob)!.defaultLocation;
                     });
-                    GameAPI.addDialogue(new Dialogue(Pasal, "What am I witnessing..."), 69);
-                    task.delay(1, () => GameAPI.talk(new Dialogue(Pasal, "I'll stay back for a bit. I'm just... shocked...")));
+                    GameAPI.dialogueService.addDialogue(new Dialogue(Pasal, "What am I witnessing..."), 69);
+                    task.delay(1, () => GameAPI.dialogueService.talk(new Dialogue(Pasal, "I'll stay back for a bit. I'm just... shocked...")));
                     stage.completed.fire();
                 }
             });
@@ -325,17 +325,17 @@ export = new Quest(script.Name)
     .setCompletionDialogue(new Dialogue(Pasal, "I'm still kinda bewildered from what just happened, but I think I should just stop thinking about whatever that was."))
     .onInit(() => {
         const keyUsed = new Dialogue(EMPTY_NPC, "You place the key in the keyhole.");
-        GameAPI.addCompletionListener("PasalReveal", (isCompleted) => {
+        GameAPI.eventService.addCompletionListener("PasalReveal", (isCompleted) => {
             if (isCompleted)
                 pasalHumanoid.DisplayName = "";
         });
-        GameAPI.addCompletionListener("IrregularlyShapedKeyUsable", (isCompleted) => {
+        GameAPI.eventService.addCompletionListener("IrregularlyShapedKeyUsable", (isCompleted) => {
             if (!isCompleted)
                 return;
             InteractableObject.SuspiciousWall.dialogueUponInteract(keyUsed);
         });
-        GameAPI.setEventCompleted("SuspiciousWallOpened", false);
-        GameAPI.dialogueFinished.connect((dialogue) => {
+        GameAPI.eventService.setEventCompleted("SuspiciousWallOpened", false);
+        GameAPI.dialogueService.dialogueFinished.connect((dialogue) => {
             if (dialogue === keyUsed) {
                 unlockWall();
             }

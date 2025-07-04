@@ -25,10 +25,12 @@ import { OnInit, Service } from "@flamework/core";
 import { AnalyticsService, Players, ReplicatedStorage } from "@rbxts/services";
 import Quest, { Stage } from "server/Quest";
 import DialogueService from "server/services/npc/DialogueService";
+import ChatHookService from "server/services/permissions/ChatHookService";
 import DataService from "server/services/serverdata/DataService";
 import ItemsService from "server/services/serverdata/ItemsService";
 import LevelService from "server/services/serverdata/LevelService";
 import { WAYPOINTS } from "shared/constants";
+import Items from "shared/items/Items";
 import Packets from "shared/Packets";
 import Sandbox from "shared/Sandbox";
 
@@ -52,14 +54,24 @@ export default class QuestsService implements OnInit {
      */
     readonly loadedStages = new Set<Stage>();
 
-    constructor(private dataService: DataService,
+    constructor(private readonly chatHookService: ChatHookService,
+        private readonly dataService: DataService,
         private readonly levelService: LevelService,
         private readonly itemsService: ItemsService,
         private readonly dialogueService: DialogueService) {
 
     }
 
-    // Quest Management Methods
+    /**
+     * Checks if a quest is completed.
+     * 
+     * @param questId The quest ID.
+     * @return True if the quest is completed, false otherwise.
+     */
+    isQuestCompleted(questId: string) {
+        return this.dataService.empireData.quests.get(questId) === -1;
+    }
+
 
     /**
      * Updates the quest stage data and synchronizes with clients.
@@ -69,6 +81,20 @@ export default class QuestsService implements OnInit {
     setStagePerQuest(quests: Map<string, number>) {
         this.dataService.empireData.quests = quests;
         Packets.quests.set(quests);
+    }
+
+    /**
+     * Registers a callback for when a quest stage is reached.
+     * 
+     * @param stage The quest stage.
+     * @param callback The function to call.
+     */
+    onStageReached(stage: Stage, callback: () => void) {
+        return this.stageReached.connect((s) => {
+            if (stage === s) {
+                callback();
+            }
+        });
     }
 
     /**
@@ -224,8 +250,34 @@ export default class QuestsService implements OnInit {
     onQuestComplete(quest: Quest) {
         const completionDialogue = quest.completionDialogue;
         if (completionDialogue !== undefined && completionDialogue.npc !== undefined) {
-            this.dialogueService.addDialogue(completionDialogue.npc, completionDialogue);
+            this.dialogueService.addDialogue(completionDialogue);
         }
+    }
+
+    /**
+     * Gives a quest item and notifies the player.
+     * @param itemId The item ID.
+     * @param amount The amount to give.
+     */
+    giveQuestItem(itemId: string, amount: number) {
+        this.itemsService.setItemAmount(itemId, this.itemsService.getItemAmount(itemId) + amount);
+        this.chatHookService.sendServerMessage(`[+${amount} ${Items.getItem(itemId)?.name}]`, "tag:hidden;color:255,170,255");
+    }
+
+    /**
+     * Takes a quest item if available and notifies the player.
+     * 
+     * @param itemId The item ID.
+     * @param amount The amount to take.
+     * @returns True if successful, false otherwise.
+     */
+    takeQuestItem(itemId: string, amount: number) {
+        const currentAmount = this.itemsService.getItemAmount(itemId);
+        if (currentAmount < amount)
+            return false;
+        this.itemsService.setItemAmount(itemId, currentAmount - amount);
+        this.chatHookService.sendServerMessage(`[-${amount} ${Items.getItem(itemId)?.name}]`, "tag:hidden;color:255,170,255");
+        return true;
     }
 
 

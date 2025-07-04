@@ -578,7 +578,10 @@ export default class DataService implements OnInit, OnPlayerJoined {
         return { empireData, empireId };
     })();
 
-    /** The loaded empire data for the current server. */
+    /**
+     * The loaded empire data for the current server.
+     * Directly references the empire profile data, so changes will affect the profile.
+     */
     readonly empireData = this.loadedInformation.empireData;
 
     /** The empire ID for the current server. */

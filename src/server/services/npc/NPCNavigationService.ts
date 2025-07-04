@@ -13,9 +13,9 @@
  * @since 1.0.0
  */
 
-import { getInstanceInfo, playSoundAtPart } from "@antivivi/vrldk";
+import { getInstanceInfo, getRootPart, playSoundAtPart } from "@antivivi/vrldk";
 import { OnInit, OnPhysics, OnStart, Service } from "@flamework/core";
-import { PathfindingService, RunService, Workspace } from "@rbxts/services";
+import { PathfindingService, Players, RunService, TweenService, Workspace } from "@rbxts/services";
 import { getNPCPosition, getWaypoint, PLACED_ITEMS_FOLDER } from "shared/constants";
 import { getSound } from "shared/GameAssets";
 import GameSpeed from "shared/GameSpeed";
@@ -137,6 +137,63 @@ export default class NPCNavigationService implements OnInit, OnStart, OnPhysics 
         }
 
         doNextWaypoint();
+        return connection;
+    }
+
+    /**
+     * Guides an NPC humanoid to a point, optionally requiring a player.
+     * 
+     * @param npcHumanoid The humanoid instance.
+     * @param point The target CFrame.
+     * @param callback Called when reached.
+     * @param requiresPlayer If true, waits for player proximity.
+     * @param agentParams Optional pathfinding parameters.
+     */
+    leadToPoint(
+        npcHumanoid: Instance,
+        point: CFrame,
+        callback: () => unknown,
+        requiresPlayer?: boolean,
+        agentParams?: AgentParameters
+    ) {
+        if (!npcHumanoid.IsA("Humanoid"))
+            throw npcHumanoid.Name + " is not a Humanoid";
+        const cached = this.runningPathfinds.get(npcHumanoid);
+        if (cached !== undefined)
+            cached.Disconnect();
+        npcHumanoid.RootPart!.Anchored = false;
+        const tween = TweenService.Create(npcHumanoid.RootPart!, new TweenInfo(1), { CFrame: point });
+        let toCall = false;
+        this.pathfind(npcHumanoid, point.Position, () => {
+            tween.Play();
+            if (requiresPlayer === false) {
+                toCall = true;
+            }
+        }, agentParams);
+        const connection = RunService.Heartbeat.Connect(() => {
+            const players = Players.GetPlayers();
+            for (const player of players) {
+                const playerRootPart = getRootPart(player);
+                if (playerRootPart === undefined)
+                    continue;
+                if (point.Position.sub(playerRootPart.Position).Magnitude < 10) {
+                    tween.Play();
+                    toCall = true;
+                    connection.Disconnect();
+                    return;
+                }
+            }
+        });
+        task.spawn(() => {
+            while (!toCall) {
+                RunService.Heartbeat.Wait();
+            }
+            print("Reached point", npcHumanoid.Name, point.Position);
+            if (callback !== undefined) {
+                callback();
+            }
+        });
+        this.runningPathfinds.set(npcHumanoid, connection);
         return connection;
     }
 

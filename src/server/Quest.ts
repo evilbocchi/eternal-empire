@@ -55,10 +55,10 @@ export class Stage {
             const callback = load(stage);
             const dialogue = this.dialogue;
             if (dialogue !== undefined) {
-                GameAPI.onStageReached(this, () => {
-                    GameAPI.addDialogue(dialogue);
+                GameAPI.questsService.onStageReached(this, () => {
+                    GameAPI.dialogueService.addDialogue(dialogue);
                 });
-                stage.completed.connect(() => GameAPI.removeDialogue(dialogue));
+                stage.completed.connect(() => GameAPI.dialogueService.removeDialogue(dialogue));
                 return callback;
             }
             return callback;
@@ -71,7 +71,7 @@ export class Stage {
         return this.onLoad((stage) => {
             const mainCallback = load === undefined ? undefined : load(stage);
             let callback: () => void;
-            GameAPI.onStageReached(this, () => {
+            GameAPI.questsService.onStageReached(this, () => {
                 callback = start(stage);
             });
             return () => {

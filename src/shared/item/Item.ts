@@ -32,7 +32,6 @@ declare global {
         Maintained?: boolean;
     }
 
-    type ClientGameUtils = Partial<GameAPI>;
     type Toggleable = ParticleEmitter | Beam | Script;
 
     type OmitConstructorSignature<T> = { [K in keyof T]: T[K] } & (T extends (...args: infer R) => infer S

@@ -22,7 +22,7 @@ export = new Quest(script.Name)
             .root
         )
         .onStart((stage) => {
-            const connection = GameAPI.dialogueFinished.connect((dialogue) => {
+            const connection = GameAPI.dialogueService.dialogueFinished.connect((dialogue) => {
                 if (dialogue === stage.dialogue) {
                     stage.completed.fire();
                 }
@@ -46,12 +46,12 @@ export = new Quest(script.Name)
                     .root,
             ];
             for (const dialogue of dialogues)
-                GameAPI.addDialogue(dialogue);
+                GameAPI.dialogueService.addDialogue(dialogue);
             stage.completed.once(() => {
                 for (const dialogue of dialogues)
-                    GameAPI.removeDialogue(dialogue);
+                    GameAPI.dialogueService.removeDialogue(dialogue);
             });
-            const connection = GameAPI.dialogueFinished.connect((dialogue) => {
+            const connection = GameAPI.dialogueService.dialogueFinished.connect((dialogue) => {
 
             });
             return () => connection.disconnect();

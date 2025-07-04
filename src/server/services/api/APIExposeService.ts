@@ -1,3 +1,14 @@
+/**
+ * @fileoverview APIExposeService - Exposes a unified GameAPI for use by items, challenges, quests, and related content.
+ *
+ * This service:
+ * - Aggregates and exposes core game services and utility functions
+ * - Provides a single GameAPI object for scripting and modding
+ * - Integrates with the modding system for API readiness events
+ *
+ * @since 1.0.0
+ */
+
 import { getRootPart } from "@antivivi/vrldk";
 import { OnInit, Service } from "@flamework/core";
 import { Players, RunService, TweenService } from "@rbxts/services";
@@ -5,6 +16,7 @@ import { Stage } from "server/Quest";
 import ModdingService from "server/services/ModdingService";
 import DialogueService from "server/services/npc/DialogueService";
 import NPCNavigationService from "server/services/npc/NPCNavigationService";
+import NPCStateService from "server/services/npc/NPCStateService";
 import ChatHookService from "server/services/permissions/ChatHookService";
 import ResetService from "server/services/ResetService";
 import RevenueService from "server/services/RevenueService";
@@ -29,7 +41,9 @@ declare global {
     type GameAPI = APIExposeService['GameAPI'];
 }
 
-
+/**
+ * Service that exposes a unified GameAPI for use by game content and modding.
+ */
 @Service()
 export default class APIExposeService implements OnInit {
 
@@ -48,6 +62,7 @@ export default class APIExposeService implements OnInit {
         private readonly dialogueService: DialogueService,
         private readonly upgradeBoardService: UpgradeBoardService,
         private readonly npcNavigationService: NPCNavigationService,
+        private readonly npcStateService: NPCStateService,
         private readonly questsService: QuestsService,
         private readonly moddingService: ModdingService
     ) {
@@ -61,99 +76,143 @@ export default class APIExposeService implements OnInit {
      */
     readonly GameAPI = (() => {
         const t = {
+
             /** Whether the GameAPI object is ready for use */
             ready: true,
-            /** The mutable empire data table */
+
+            /**
+             * The mutable empire data table.
+             * 
+             * @see {@link DataService.loadedInformation} for information on how this is loaded.
+             */
             empireData: this.dataService.empireData,
 
+            /**
+             * Area management service.
+             * 
+             * @borrows AreaService as areaService
+             * @see {@link AreaService} for more details.
+             */
             areaService: this.areaService,
-            chatHookService: this.chatHookService,
-            itemsService: this.itemsService,
-            currencyService: this.currencyService,
-            unlockedAreasService: this.unlockedAreasService,
-            playtimeService: this.playtimeService,
-            resetService: this.resetService,
-            revenueService: this.revenueService,
-            setupService: this.setupService,
-            eventService: this.eventService,
-            npcNavigationService: this.npcNavigationService,
-            upgradeBoardService: this.upgradeBoardService,
-            items: Items,
 
-            checkPermLevel: (player: Player, action: PermissionKey) => this.dataService.checkPermLevel(player, action),
-            dialogueFinished: this.dialogueService.dialogueFinished,
-            playNPCAnimation: (npc: NPC, animType: NPCAnimationType) => this.dialogueService.playAnimation(npc, animType),
-            stopNPCAnimation: (npc: NPC, animType: NPCAnimationType) => this.dialogueService.stopAnimation(npc, animType),
-            onStageReached: (stage: Stage, callback: () => void) => {
-                return this.questsService.stageReached.connect((s) => {
-                    if (stage === s) {
-                        callback();
-                    }
-                });
-            },
-            addDialogue: (dialogue: Dialogue, priority?: number) => this.dialogueService.addDialogue(dialogue.npc, dialogue, priority),
-            removeDialogue: (dialogue: Dialogue) => this.dialogueService.removeDialogue(dialogue.npc, dialogue),
-            talk: (dialogue: Dialogue, requireInteraction?: boolean) => this.dialogueService.talk(dialogue, requireInteraction),
-            addCompletionListener: (event: string, callback: (isCompleted: boolean) => void) => {
-                return this.eventService.addCompletionListener(event, callback);
-            },
-            isEventCompleted: (event: string) => this.eventService.isEventCompleted(event),
-            setEventCompleted: (event: string, isCompleted: boolean) => this.eventService.setEventCompleted(event, isCompleted),
-            isQuestCompleted: (questId: string) => this.dataService.empireData.quests.get(questId) === -1,
-            leadToPoint: (npcHumanoid: Instance, point: CFrame, callback: () => unknown, requiresPlayer?: boolean, agentParams?: AgentParameters) => {
-                if (!npcHumanoid.IsA("Humanoid"))
-                    throw npcHumanoid.Name + " is not a Humanoid";
-                const cached = this.npcNavigationService.runningPathfinds.get(npcHumanoid);
-                if (cached !== undefined)
-                    cached.Disconnect();
-                npcHumanoid.RootPart!.Anchored = false;
-                const tween = TweenService.Create(npcHumanoid.RootPart!, new TweenInfo(1), { CFrame: point });
-                let toCall = false;
-                this.npcNavigationService.pathfind(npcHumanoid, point.Position, () => {
-                    tween.Play();
-                    if (requiresPlayer === false) {
-                        toCall = true;
-                    }
-                }, agentParams);
-                const connection = RunService.Heartbeat.Connect(() => {
-                    const players = Players.GetPlayers();
-                    for (const player of players) {
-                        const playerRootPart = getRootPart(player);
-                        if (playerRootPart === undefined)
-                            continue;
-                        if (point.Position.sub(playerRootPart.Position).Magnitude < 10) {
-                            tween.Play();
-                            toCall = true;
-                            connection.Disconnect();
-                            return;
-                        }
-                    }
-                });
-                task.spawn(() => {
-                    while (!toCall) {
-                        RunService.Heartbeat.Wait();
-                    }
-                    print("Reached point", npcHumanoid.Name, point.Position);
-                    if (callback !== undefined) {
-                        callback();
-                    }
-                });
-                this.npcNavigationService.runningPathfinds.set(npcHumanoid, connection);
-                return connection;
-            },
-            getDefaultLocation: (npc: NPC) => this.dialogueService.defaultLocationsPerNPC.get(npc),
-            giveQuestItem: (itemId: string, amount: number) => {
-                this.itemsService.setItemAmount(itemId, this.itemsService.getItemAmount(itemId) + amount);
-                this.chatHookService.sendServerMessage(`[+${amount} ${Items.getItem(itemId)?.name}]`, "tag:hidden;color:255,170,255");
-            },
-            takeQuestItem: (itemId: string, amount: number) => {
-                const currentAmount = this.itemsService.getItemAmount(itemId);
-                if (currentAmount < amount)
-                    return false;
-                this.itemsService.setItemAmount(itemId, currentAmount - amount);
-                this.chatHookService.sendServerMessage(`[-${amount} ${Items.getItem(itemId)?.name}]`, "tag:hidden;color:255,170,255");
-                return true;
-            },
+            /**
+             * Chat hook service for sending messages and managing channels.
+             * 
+             * @borrows ChatHookService as chatHookService
+             * @see {@link ChatHookService} for more details.
+             */
+            chatHookService: this.chatHookService,
+
+            /**
+             * Currency and balance management service.
+             * 
+             * @borrows CurrencyService as currencyService
+             * @see {@link CurrencyService} for more details.
+             */
+            currencyService: this.currencyService,
+
+            /**
+             * Dialogue service for managing NPC dialogues and interactions.
+             * 
+             * @borrows DialogueService as dialogueService
+             * @see {@link DialogueService} for more details.
+             */
+            dialogueService: this.dialogueService,
+
+            /**
+             * Event tracking and completion service.
+             * 
+             * @borrows EventService as eventService
+             * @see {@link EventService} for more details.
+             */
+            eventService: this.eventService,
+
+            /**
+             * Item inventory and management service.
+             * 
+             * @borrows ItemsService as itemsService
+             * @see {@link ItemsService} for more details.
+             */
+            itemsService: this.itemsService,
+
+            /**
+             * NPC navigation/pathfinding service.
+             * 
+             * @borrows NPCNavigationService as npcNavigationService
+             * @see {@link NPCNavigationService} for more details.
+             */
+            npcNavigationService: this.npcNavigationService,
+
+            /**
+             * NPC state management service.
+             * 
+             * @borrows NPCStateService as npcStateService
+             * @see {@link NPCStateService} for more details.
+             */
+            npcStateService: this.npcStateService,
+
+            /**
+             * Playtime tracking service.
+             * 
+             * @borrows PlaytimeService as playtimeService
+             * @see {@link PlaytimeService} for more details.
+             */
+            playtimeService: this.playtimeService,
+
+            /**
+             * Quest management service.
+             * 
+             * @borrows QuestsService as questsService
+             * @see {@link QuestsService} for more details.
+             */
+            questsService: this.questsService,
+
+            /**
+             * Handles player resets and related logic.
+             * 
+             * @borrows ResetService as resetService
+             * @see {@link ResetService} for more details.
+             */
+            resetService: this.resetService,
+
+            /**
+             * Revenue and purchase tracking service.
+             * 
+             * @borrows RevenueService as revenueService
+             * @see {@link RevenueService} for more details.
+             */
+            revenueService: this.revenueService,
+
+            /**
+             * Setup and configuration management service.
+             * 
+             * @borrows SetupService as setupService
+             * @see {@link SetupService} for more details.
+             */
+            setupService: this.setupService,
+
+            /**
+             * Service for unlocking and tracking areas.
+             * 
+             * @borrows UnlockedAreasService as unlockedAreasService
+             * @see {@link UnlockedAreasService} for more details.
+             */
+            unlockedAreasService: this.unlockedAreasService,
+
+            /**
+             * Upgrade board and upgrade state management.
+             * 
+             * @borrows UpgradeBoardService as upgradeBoardService
+             * @see {@link UpgradeBoardService} for more details.
+             */
+            upgradeBoardService: this.upgradeBoardService,
+
+            /**
+             * Reference to all registered items.
+             * 
+             * @see {@link Items} for more details.
+             */
+            items: Items,
         };
         type noChecking = { [k: string]: unknown; };
 

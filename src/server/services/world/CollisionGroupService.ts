@@ -1,8 +1,26 @@
+/**
+ * @fileoverview CollisionGroupService - Configures and manages Roblox physics collision groups.
+ *
+ * This service:
+ * - Registers all required collision groups for the game world
+ * - Sets up collision rules between groups for gameplay logic
+ * - Ensures collision groups are initialized before any physics interactions
+ *
+ * @since 1.0.0
+ */
+
 import { OnInit, Service } from "@flamework/core";
 import { PhysicsService } from "@rbxts/services";
 
+/**
+ * Service that sets up and manages collision groups and their interactions.
+ */
 @Service()
 export default class CollisionGroupService implements OnInit {
+    /**
+     * Initializes collision groups and configures their interactions.
+     * Called automatically on service initialization.
+     */
     onInit() {
         // Physics Collision Group Setup
         // Initialize all collision groups before any physics interactions occur

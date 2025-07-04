@@ -1,6 +1,20 @@
+/**
+ * @fileoverview ProductService - Handles Roblox developer product purchases and processing.
+ *
+ * This service:
+ * - Registers product purchase handlers for specific product IDs
+ * - Processes receipts and delegates to the correct handler
+ * - Ensures product purchases are handled securely and robustly
+ *
+ * @since 1.0.0
+ */
+
 import { OnInit, Service } from "@flamework/core";
 import { MarketplaceService, Players } from "@rbxts/services";
 
+/**
+ * Service that manages developer product purchase handling.
+ */
 @Service()
 export default class ProductService implements OnInit {
     /**
@@ -18,6 +32,9 @@ export default class ProductService implements OnInit {
         this.productFunctions.set(productID, productFunction);
     }
 
+    /**
+     * Initializes the product service and sets up receipt processing.
+     */
     onInit() {
         // Set up product purchase processing
         MarketplaceService.ProcessReceipt = (receiptInfo: ReceiptInfo) => {

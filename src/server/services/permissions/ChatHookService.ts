@@ -1,7 +1,21 @@
+/**
+ * @fileoverview ChatHookService - Manages system and private chat messaging for players.
+ *
+ * This service:
+ * - Sends private and server system messages
+ * - Creates and manages private chat channels for players
+ * - Integrates with shared chat packet system
+ *
+ * @since 1.0.0
+ */
+
 import { Service } from "@flamework/core";
 import { getTextChannels } from "shared/constants";
 import Packets from "shared/Packets";
 
+/**
+ * Service for sending system and private chat messages to players.
+ */
 @Service()
 export default class ChatHookService {
 
