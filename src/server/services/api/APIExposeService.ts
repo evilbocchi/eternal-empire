@@ -1,18 +1,15 @@
 /**
- * @fileoverview APIExposeService - Exposes a unified GameAPI for use by items, challenges, quests, and related content.
+ * @fileoverview APIExposeService - Exposes a unified ServerAPI for use by items, challenges, quests, and related content.
  *
  * This service:
  * - Aggregates and exposes core game services and utility functions
- * - Provides a single GameAPI object for scripting and modding
+ * - Provides a single ServerAPI object for scripting and modding
  * - Integrates with the modding system for API readiness events
  *
  * @since 1.0.0
  */
 
-import { getRootPart } from "@antivivi/vrldk";
 import { OnInit, Service } from "@flamework/core";
-import { Players, RunService, TweenService } from "@rbxts/services";
-import { Stage } from "server/Quest";
 import ModdingService from "server/services/ModdingService";
 import DialogueService from "server/services/npc/DialogueService";
 import NPCNavigationService from "server/services/npc/NPCNavigationService";
@@ -32,17 +29,16 @@ import UpgradeBoardService from "server/services/serverdata/UpgradeBoardService"
 import AreaService from "server/services/world/AreaService";
 import ItemUtils from "shared/item/ItemUtils";
 import Items from "shared/items/Items";
-import NPC, { Dialogue, NPCAnimationType } from "shared/NPC";
 
 declare global {
     /**
      * Global type alias for the game's API used by items, challenges, quests, and other related content.
      */
-    type GameAPI = APIExposeService['GameAPI'];
+    type ServerAPI = APIExposeService['ServerAPI'];
 }
 
 /**
- * Service that exposes a unified GameAPI for use by game content and modding.
+ * Service that exposes a unified ServerAPI for use by game content and modding.
  */
 @Service()
 export default class APIExposeService implements OnInit {
@@ -74,10 +70,10 @@ export default class APIExposeService implements OnInit {
      * 
      * Provides access to all major game services and common operations.
      */
-    readonly GameAPI = (() => {
+    readonly ServerAPI = (() => {
         const t = {
 
-            /** Whether the GameAPI object is ready for use */
+            /** Whether the ServerAPI object is ready for use */
             ready: true,
 
             /**
@@ -217,7 +213,7 @@ export default class APIExposeService implements OnInit {
         type noChecking = { [k: string]: unknown; };
 
         for (const [k, v] of pairs(t))
-            (ItemUtils.GameAPI as noChecking)[k] = v;
+            (ItemUtils.ServerAPI as noChecking)[k] = v;
 
         this.moddingService.gameAPILoaded.fire();
 

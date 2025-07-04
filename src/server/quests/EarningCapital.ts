@@ -2,7 +2,7 @@ import { RunService } from "@rbxts/services";
 import Quest, { Stage } from "server/Quest";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import ItemCounter from "shared/item/ItemCounter";
-import { GameAPI } from "shared/item/ItemUtils";
+import { ServerAPI } from "shared/item/ItemUtils";
 import RustyFactory from "shared/items/negative/negativity/RustyFactory";
 import { Dialogue } from "shared/NPC";
 import Ricarg from "shared/npcs/Ricarg";
@@ -23,7 +23,7 @@ export = new Quest(script.Name)
             .root
         )
         .onStart((stage) => {
-            const connection = GameAPI.dialogueService.dialogueFinished.connect((dialogue) => {
+            const connection = ServerAPI.dialogueService.dialogueFinished.connect((dialogue) => {
                 if (dialogue === stage.dialogue)
                     stage.completed.fire();
             });
@@ -37,7 +37,7 @@ export = new Quest(script.Name)
         .setDescription(`Get ${req.toString()} and give it to Ricarg.`)
         .setNPC("Ricarg", true)
         .onStart((stage) => {
-            const CurrencyService = GameAPI.currencyService;
+            const CurrencyService = ServerAPI.currencyService;
             const unmetDialogue = new Dialogue(Ricarg, `Please... I need ${req.toString()}...`);
             const metDialogue = new Dialogue(Ricarg, "You actually have the money!?")
                 .monologue("Thank you so much! You know what? I'll give you my most prized possession.")
@@ -52,15 +52,15 @@ export = new Quest(script.Name)
                 t = 0;
                 const funds = CurrencyService.get("Funds");
                 if (funds.lessThan(minFundsAmount)) {
-                    GameAPI.dialogueService.addDialogue(unmetDialogue);
-                    GameAPI.dialogueService.removeDialogue(metDialogue);
+                    ServerAPI.dialogueService.addDialogue(unmetDialogue);
+                    ServerAPI.dialogueService.removeDialogue(metDialogue);
                 }
                 else {
-                    GameAPI.dialogueService.addDialogue(metDialogue);
-                    GameAPI.dialogueService.removeDialogue(unmetDialogue);
+                    ServerAPI.dialogueService.addDialogue(metDialogue);
+                    ServerAPI.dialogueService.removeDialogue(unmetDialogue);
                 }
             });
-            const c2 = GameAPI.dialogueService.dialogueFinished.connect((dialogue) => {
+            const c2 = ServerAPI.dialogueService.dialogueFinished.connect((dialogue) => {
                 if (dialogue !== metDialogue)
                     return;
                 if (CurrencyService.purchase(req))
@@ -74,12 +74,12 @@ export = new Quest(script.Name)
     )
     .setCompletionDialogue(new Dialogue(Ricarg, `What's up? I don't have another ${RustyFactory.name}, but I do have some tools that might be useful to you!`))
     .onInit((quest) => {
-        GameAPI.dialogueService.dialogueFinished.connect((dialogue) => {
+        ServerAPI.dialogueService.dialogueFinished.connect((dialogue) => {
             if (dialogue === quest.completionDialogue) {
-                const items = GameAPI.empireData.items;
+                const items = ServerAPI.empireData.items;
                 const [invCount, placedCount] = ItemCounter.getAmounts(items.inventory, items.worldPlaced, RustyFactory.id);
                 if (invCount + placedCount === 0)
-                    GameAPI.questsService.giveQuestItem(RustyFactory.id, 1);
+                    ServerAPI.questsService.giveQuestItem(RustyFactory.id, 1);
             }
         });
     })

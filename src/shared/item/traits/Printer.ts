@@ -6,7 +6,7 @@ import Item from "shared/item/Item";
 import ItemTrait from "shared/item/traits/ItemTrait";
 import Packets from "shared/Packets";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
-import { GameAPI } from "shared/item/ItemUtils";
+import { ServerAPI } from "shared/item/ItemUtils";
 import { playSoundAtPart } from "@antivivi/vrldk";
 
 declare global {
@@ -49,7 +49,7 @@ declare global {
 export default class Printer extends ItemTrait {
 
     static load(model: Model, printer: Printer) {
-        const SetupService = GameAPI.setupService;
+        const SetupService = ServerAPI.setupService;
 
         const saveEvent = new Instance("RemoteFunction");
         saveEvent.Name = "Save";

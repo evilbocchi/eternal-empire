@@ -8,7 +8,7 @@ import CurrencyBundle from "shared/currency/CurrencyBundle";
 import { CURRENCY_DETAILS } from "shared/currency/CurrencyDetails";
 import Droplet from "shared/item/Droplet";
 import Item from "shared/item/Item";
-import { GameAPI } from "shared/item/ItemUtils";
+import { ServerAPI } from "shared/item/ItemUtils";
 import Upgrader from "shared/item/traits/Upgrader";
 import NamedUpgrades from "shared/namedupgrade/NamedUpgrades";
 
@@ -26,7 +26,7 @@ export = new Item(script.Name)
     .onLoad((model, item) => {
         const fireTextRemote = Streaming.createStreamableRemote(model);
 
-        const RevenueService = GameAPI.revenueService;
+        const RevenueService = ServerAPI.revenueService;
         const removeOnes = (price: CurrencyBundle) => {
             const newPrice = new CurrencyBundle();
             for (const [currency, amount] of price.amountPerCurrency) {

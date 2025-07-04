@@ -8,7 +8,7 @@ import { CURRENCY_DETAILS } from "shared/currency/CurrencyDetails";
 import GameSpeed from "shared/GameSpeed";
 import Droplet, { DROPLET_STORAGE } from "shared/item/Droplet";
 import Item from "shared/item/Item";
-import { GameAPI } from "shared/item/ItemUtils";
+import { ServerAPI } from "shared/item/ItemUtils";
 import ItemTrait from "shared/item/traits/ItemTrait";
 
 declare global {
@@ -37,7 +37,7 @@ export default class Dropper extends ItemTrait {
             const droplet = instantiator();
             droplet.Parent = DROPLET_STORAGE;
 
-            const player = Players.GetPlayerByUserId(GameAPI.empireData.owner) ?? Players.GetPlayers()[0];
+            const player = Players.GetPlayerByUserId(ServerAPI.empireData.owner) ?? Players.GetPlayers()[0];
             if (player !== undefined) {
                 droplet.SetNetworkOwner(player);
             }
@@ -61,7 +61,7 @@ export default class Dropper extends ItemTrait {
             drop.AddTag("Drop");
             drop.SetAttribute("OriginalSize", drop.Size);
             let instantiator = dropper.getDroplet(drop.Name)?.getInstantiator(model, drop);
-            const areaId = GameAPI.itemsService.getPlacedItem(model.Name)?.area as AreaId | undefined;
+            const areaId = ServerAPI.itemsService.getPlacedItem(model.Name)?.area as AreaId | undefined;
             const info = getAllInstanceInfo(drop);
             info.Area = areaId;
 
@@ -152,7 +152,7 @@ export default class Dropper extends ItemTrait {
                 if (dropRate === 0)
                     continue;
                 if (t > info.LastDrop + 1 / dropRate / speed) {
-                    const dropletCount = GameAPI.areaService.dropletCountPerArea.get(info.Area!);
+                    const dropletCount = ServerAPI.areaService.dropletCountPerArea.get(info.Area!);
                     if (dropletCount !== undefined && dropletCount > info.DropletLimitValue!.Value)
                         continue;
                     info.LastDrop = t;

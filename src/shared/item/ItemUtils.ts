@@ -22,16 +22,16 @@ namespace ItemUtils {
     /** Shared access to id-item object map. Initialized by Items */
     export let itemsPerId: Map<string, Item>;
     /** Shared access to game utilities. Initalized by server service */
-    export const GameAPI = {
+    export const ServerAPI = {
         ready: false
-    } as GameAPI;
+    } as ServerAPI;
 
     export const UserGameSettings = RunService.IsClient() ? UserSettings().GetService("UserGameSettings") : undefined;
 
     export const REPEATS = new Map<(dt: number) => void, { delta?: number, lastCall?: number; }>();
     export const dropletGuiTween = new TweenInfo(1.4, Enum.EasingStyle.Quad, Enum.EasingDirection.Out);
 
-    export const getPlacedItemsInArea = (area: BasePart, Items = GameAPI.items) => {
+    export const getPlacedItemsInArea = (area: BasePart, Items = ServerAPI.items) => {
         const array = area.GetTouchingParts();
         const items = new Map<Model, Item>();
         for (const touching of array) {

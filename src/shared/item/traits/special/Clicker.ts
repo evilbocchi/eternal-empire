@@ -3,7 +3,7 @@ import { formatRichText, getAllInstanceInfo, Streaming } from "@antivivi/vrldk";
 import { RunService } from "@rbxts/services";
 import { CURRENCY_DETAILS } from "shared/currency/CurrencyDetails";
 import Item from "shared/item/Item";
-import { GameAPI, getPlacedItemsInArea } from "shared/item/ItemUtils";
+import { ServerAPI, getPlacedItemsInArea } from "shared/item/ItemUtils";
 import ItemTrait from "shared/item/traits/ItemTrait";
 
 declare global {
@@ -20,7 +20,7 @@ declare global {
 export default class Clicker extends ItemTrait {
 
     static load(model: Model, clicker: Clicker) {
-        const Items = GameAPI.items;
+        const Items = ServerAPI.items;
 
         const instanceInfo = getAllInstanceInfo(model);
         const modifiers = new Set<Modifier>();

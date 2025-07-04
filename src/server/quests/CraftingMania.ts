@@ -3,7 +3,7 @@ import Quest, { Stage } from "server/Quest";
 import EarningCapital from "server/quests/EarningCapital";
 import { Dialogue } from "shared/NPC";
 import { getNPCModel, getWaypoint, WAYPOINTS } from "shared/constants";
-import { GameAPI } from "shared/item/ItemUtils";
+import { ServerAPI } from "shared/item/ItemUtils";
 import Shop from "shared/item/traits/Shop";
 import ExcavationStone from "shared/items/excavation/ExcavationStone";
 import WhiteGem from "shared/items/excavation/WhiteGem";
@@ -49,11 +49,11 @@ export = new Quest(script.Name)
                 .monologue("I'll be waiting for you. Now, hurry!")
                 .root;
 
-            const connection = GameAPI.dialogueService.dialogueFinished.connect((dialogue) => {
+            const connection = ServerAPI.dialogueService.dialogueFinished.connect((dialogue) => {
                 if (dialogue === stage.dialogue) {
-                    GameAPI.npcStateService.stopAnimation(Chuck, "Default");
+                    ServerAPI.npcStateService.stopAnimation(Chuck, "Default");
                     task.wait(1);
-                    GameAPI.dialogueService.talk(continuation);
+                    ServerAPI.dialogueService.talk(continuation);
                 }
                 else if (dialogue === continuation) {
                     stage.completed.fire();
@@ -69,11 +69,11 @@ export = new Quest(script.Name)
             new Dialogue(Chuck, "You got the stuff?")
         )
         .onStart((stage) => {
-            const ItemsService = GameAPI.itemsService;
+            const ItemsService = ServerAPI.itemsService;
             const ricargDialogue = new Dialogue(Ricarg, "Hahah... money... haah...")
                 .monologue("Wait, who are you again?")
                 .root;
-            GameAPI.dialogueService.addDialogue(ricargDialogue, 69);
+            ServerAPI.dialogueService.addDialogue(ricargDialogue, 69);
             const noHelped = new Dialogue(Ricarg, "I don't really remember, but that weird blacksmith Noob referred me, didn't he?")
                 .monologue("Well, if you're looking for tools, just ask me anytime. Though... if you can in the future, spare me $10K? Haha, nevermind...")
                 .monologue(`You're gonna need a Scythe in order to cut some ${Grass.id}. You can find ${Grass.id} all over this area, but the Scythe is something you'll need to get from me. I'm the only one who sells those kinds of things here, unfortunately.`)
@@ -87,19 +87,19 @@ export = new Quest(script.Name)
                 .monologue("Alright, thanks for getting me my groceries. It's about time I taught you something. Come with me.")
                 .root;
             const shopOpen = new Dialogue(Ricarg, "Here's what I have on me right now. You'll need to procure your own stuff for the more valuable tools.");
-            const connection = GameAPI.dialogueService.dialogueFinished.connect((dialogue) => {
+            const connection = ServerAPI.dialogueService.dialogueFinished.connect((dialogue) => {
                 if (dialogue === ricargDialogue) {
-                    GameAPI.dialogueService.removeDialogue(ricargDialogue);
-                    GameAPI.dialogueService.talk(GameAPI.questsService.isQuestCompleted(EarningCapital.id) === true ? helped : noHelped);
+                    ServerAPI.dialogueService.removeDialogue(ricargDialogue);
+                    ServerAPI.dialogueService.talk(ServerAPI.questsService.isQuestCompleted(EarningCapital.id) === true ? helped : noHelped);
                 }
                 else if (dialogue === noHelped || dialogue === helped) {
-                    GameAPI.dialogueService.addDialogue(shopOpen);
-                    GameAPI.dialogueService.talk(shopOpen);
+                    ServerAPI.dialogueService.addDialogue(shopOpen);
+                    ServerAPI.dialogueService.talk(shopOpen);
                 }
                 else if (dialogue === stage.dialogue) {
-                    GameAPI.dialogueService.talk(ItemsService.getItemAmount(Wool.id) >= 1 && ItemsService.getItemAmount(Grass.id) >= 3 ? itemed : noItemed);
+                    ServerAPI.dialogueService.talk(ItemsService.getItemAmount(Wool.id) >= 1 && ItemsService.getItemAmount(Grass.id) >= 3 ? itemed : noItemed);
                 }
-                else if (dialogue === itemed && GameAPI.questsService.takeQuestItem(Wool.id, 1) && GameAPI.questsService.takeQuestItem(Grass.id, 3)) {
+                else if (dialogue === itemed && ServerAPI.questsService.takeQuestItem(Wool.id, 1) && ServerAPI.questsService.takeQuestItem(Grass.id, 3)) {
                     stage.completed.fire();
                 }
             });
@@ -115,9 +115,9 @@ export = new Quest(script.Name)
             new Dialogue(Chuck, "Come with me.")
         )
         .onStart((stage) => {
-            GameAPI.npcStateService.stopAnimation(Chuck, "Default");
+            ServerAPI.npcStateService.stopAnimation(Chuck, "Default");
             chuckRootPart.Anchored = false;
-            const connection = GameAPI.npcNavigationService.leadToPoint(chuckHumanoid, waypoint2.CFrame, () => stage.completed.fire());
+            const connection = ServerAPI.npcNavigationService.leadToPoint(chuckHumanoid, waypoint2.CFrame, () => stage.completed.fire());
             return () => connection.Disconnect();
         })
     )
@@ -131,12 +131,12 @@ export = new Quest(script.Name)
                 .monologue("I'll give you some resources. Go ahead and craft something. Let's see what you can do.")
         )
         .onStart((stage) => {
-            GameAPI.npcStateService.stopAnimation(Chuck, "Default");
+            ServerAPI.npcStateService.stopAnimation(Chuck, "Default");
             chuckRootPart.CFrame = waypoint2.CFrame;
-            const connection = GameAPI.dialogueService.dialogueFinished.connect((dialogue) => {
+            const connection = ServerAPI.dialogueService.dialogueFinished.connect((dialogue) => {
                 if (dialogue === stage.dialogue) {
-                    GameAPI.questsService.giveQuestItem(ExcavationStone.id, 50);
-                    GameAPI.questsService.giveQuestItem(WhiteGem.id, 15);
+                    ServerAPI.questsService.giveQuestItem(ExcavationStone.id, 50);
+                    ServerAPI.questsService.giveQuestItem(WhiteGem.id, 15);
                     stage.completed.fire();
                 }
             });
@@ -150,9 +150,9 @@ export = new Quest(script.Name)
             new Dialogue(Chuck, "Let's see what you're capable of.")
         )
         .onStart((stage) => {
-            GameAPI.npcStateService.stopAnimation(Chuck, "Default");
+            ServerAPI.npcStateService.stopAnimation(Chuck, "Default");
             chuckRootPart.CFrame = waypoint2.CFrame;
-            const connection = GameAPI.itemsService.itemsBought.connect((_player, items) => {
+            const connection = ServerAPI.itemsService.itemsBought.connect((_player, items) => {
                 for (const item of items) {
                     const craftingItems = CraftingTable.trait(Shop).items;
 
@@ -172,8 +172,8 @@ export = new Quest(script.Name)
             new Dialogue(Chuck, "Hmm... Let's see...")
         )
         .onStart((stage) => {
-            const ItemsService = GameAPI.itemsService;
-            GameAPI.npcStateService.stopAnimation(Chuck, "Default");
+            const ItemsService = ServerAPI.itemsService;
+            ServerAPI.npcStateService.stopAnimation(Chuck, "Default");
             chuckRootPart.CFrame = waypoint2.CFrame;
 
             let continuation: Dialogue;
@@ -205,9 +205,9 @@ export = new Quest(script.Name)
                 .monologue("I'm excited to see what you can craft in the future. You should find a better Crafting Table and work your way up.")
                 .monologue("I won't charge you for those resources, so enjoy!")
                 .root;
-            const connection = GameAPI.dialogueService.dialogueFinished.connect((dialogue) => {
+            const connection = ServerAPI.dialogueService.dialogueFinished.connect((dialogue) => {
                 if (dialogue === stage.dialogue) {
-                    GameAPI.dialogueService.talk(continuation);
+                    ServerAPI.dialogueService.talk(continuation);
                 }
                 else if (dialogue === continuation) {
                     stage.completed.fire();

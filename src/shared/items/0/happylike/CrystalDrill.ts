@@ -2,7 +2,7 @@ import Difficulty from "@antivivi/jjt-difficulties";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Droplet from "shared/item/Droplet";
 import Item from "shared/item/Item";
-import { GameAPI } from "shared/item/ItemUtils";
+import { ServerAPI } from "shared/item/ItemUtils";
 import Conveyor from "shared/item/traits/Conveyor";
 import Dropper from "shared/item/traits/Dropper";
 import Crystal from "shared/items/excavation/Crystal";
@@ -23,11 +23,11 @@ export = new Item(script.Name)
     .setDroplet(Droplet.CrystalDroplet)
     .setDropRate(1)
     .onDropletProduced(() => {
-        const questMetadata = GameAPI.empireData.questMetadata;
+        const questMetadata = ServerAPI.empireData.questMetadata;
         let prevCount = questMetadata.get("CrystalDrillCount") as number ?? 0;
         prevCount += 1;
         if (math.random(1, 60 * math.pow(prevCount, 2)) === 1) { // XD
-            GameAPI.questsService.giveQuestItem(Crystal.id, 1);
+            ServerAPI.questsService.giveQuestItem(Crystal.id, 1);
             questMetadata.set("CrystalDrillCount", prevCount);
         }
     })

@@ -2,7 +2,7 @@ import { TweenService } from "@rbxts/services";
 import { getSound } from "shared/GameAssets";
 import Item from "shared/item/Item";
 import Operative from "shared/item/traits/Operative";
-import { GameAPI } from "shared/item/ItemUtils";
+import { ServerAPI } from "shared/item/ItemUtils";
 import { playSoundAtPart, weldModel } from "@antivivi/vrldk";
 import Packets from "shared/Packets";
 
@@ -20,8 +20,8 @@ export default class Bin extends Operative {
 
     static load(model: Model, bin: Bin) {
         const item = bin.item;
-        const CurrencyService = GameAPI.currencyService;
-        const ItemsService = GameAPI.itemsService;
+        const CurrencyService = ServerAPI.currencyService;
+        const ItemsService = ServerAPI.itemsService;
         const placedItem = ItemsService.getPlacedItem(model.Name);
         if (placedItem === undefined)
             return;

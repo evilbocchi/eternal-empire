@@ -3,7 +3,7 @@ import { OnoeNum } from "@antivivi/serikanum";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Formula from "shared/currency/Formula";
 import Item from "shared/item/Item";
-import { GameAPI } from "shared/item/ItemUtils";
+import { ServerAPI } from "shared/item/ItemUtils";
 import Generator from "shared/item/traits/Generator";
 import CorruptedBonanza from "shared/items/0/ifinitude/CorruptedBonanza";
 import TimelostDesert from "shared/items/0/vibeness/TimelostDesert";
@@ -45,6 +45,6 @@ Produces %gain%, this amount increasing with Skill.`
     .setPassiveGain(base)
     .applyFormula((v, item) => {
         return item.setPassiveGain(base.set("Power", amt.mul(v)));
-    }, () => GameAPI.currencyService.get("Skill"))
+    }, () => ServerAPI.currencyService.get("Skill"))
 
     .exit();

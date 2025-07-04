@@ -2,7 +2,7 @@ import Difficulty from "@antivivi/jjt-difficulties";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Formula from "shared/currency/Formula";
 import Item from "shared/item/Item";
-import { GameAPI } from "shared/item/ItemUtils";
+import { ServerAPI } from "shared/item/ItemUtils";
 import Conveyor from "shared/item/traits/Conveyor";
 import FormulaBundled from "shared/item/traits/special/FormulaBundled";
 import Upgrader from "shared/item/traits/Upgrader";
@@ -26,7 +26,7 @@ The more Power you have, the better the boost this spray applies to Funds and Po
     .trait(FormulaBundled)
     .setRatio("Power", 2)
     .setRatio("Funds", 1)
-    .setX(() => GameAPI.currencyService.get("Power"))
+    .setX(() => ServerAPI.currencyService.get("Power"))
     .apply(Upgrader)
 
     .trait(Conveyor)

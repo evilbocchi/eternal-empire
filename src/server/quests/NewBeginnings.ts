@@ -1,7 +1,7 @@
 import { ReplicatedStorage, RunService, TweenService } from "@rbxts/services";
 import Quest, { Stage } from "server/Quest";
 import { getNPCModel, getWaypoint } from "shared/constants";
-import { GameAPI } from "shared/item/ItemUtils";
+import { ServerAPI } from "shared/item/ItemUtils";
 import TheFirstDropper from "shared/items/negative/tfd/TheFirstDropper";
 import TheFirstFurnace from "shared/items/negative/tfd/TheFirstFurnace";
 import { Dialogue } from "shared/NPC";
@@ -34,10 +34,10 @@ export = new Quest(script.Name)
         .onStart((stage) => {
             ReplicatedStorage.SetAttribute("Intro", true);
             const continuation = new Dialogue(Tria, "I'm Tria! Come with me, let's get you started on making yourself some money.");
-            const connection = GameAPI.dialogueService.dialogueFinished.connect((dialogue) => {
+            const connection = ServerAPI.dialogueService.dialogueFinished.connect((dialogue) => {
                 if (dialogue === stage.dialogue) {
-                    GameAPI.eventService.setEventCompleted("TriaReveal", true);
-                    GameAPI.dialogueService.talk(continuation);
+                    ServerAPI.eventService.setEventCompleted("TriaReveal", true);
+                    ServerAPI.dialogueService.talk(continuation);
                 }
                 else if (dialogue === continuation)
                     stage.completed.fire();
@@ -52,9 +52,9 @@ export = new Quest(script.Name)
         .setDialogue(new Dialogue(Tria, "Follow me!"))
         .onStart((stage) => {
             ReplicatedStorage.SetAttribute("Intro", false);
-            GameAPI.npcStateService.stopAnimation(Tria, "Default");
+            ServerAPI.npcStateService.stopAnimation(Tria, "Default");
             task.wait(2);
-            const connection = GameAPI.npcNavigationService.leadToPoint(triaHumanoid, stage.focus!.CFrame, () => stage.completed.fire());
+            const connection = ServerAPI.npcNavigationService.leadToPoint(triaHumanoid, stage.focus!.CFrame, () => stage.completed.fire());
             return () => connection.Disconnect();
         })
     )
@@ -69,10 +69,10 @@ export = new Quest(script.Name)
             .root
         )
         .onStart((stage) => {
-            GameAPI.npcStateService.stopAnimation(Tria, "Default");
+            ServerAPI.npcStateService.stopAnimation(Tria, "Default");
             characterTween.Play();
             let t = 0;
-            const ItemsService = GameAPI.itemsService;
+            const ItemsService = ServerAPI.itemsService;
             const connection = RunService.Heartbeat.Connect((dt) => {
                 t += dt;
                 if (t < 0.5)
@@ -80,7 +80,7 @@ export = new Quest(script.Name)
                 t = 0;
                 if (ItemsService.getBoughtAmount(TheFirstDropper.id) > 0 && ItemsService.getBoughtAmount(TheFirstFurnace.id) > 0) {
                     stage.completed.fire();
-                    GameAPI.dialogueService.talk(new Dialogue(Tria, "Well done!")
+                    ServerAPI.dialogueService.talk(new Dialogue(Tria, "Well done!")
                         .monologue("Now, go ahead and place those items down.")
                         .monologue("Make sure to align them so that the dropper head is above the furnace.")
                         .monologue("Let's see you make some money!")
@@ -99,39 +99,39 @@ export = new Quest(script.Name)
             new Dialogue(Tria, "See that backpack on the left-hand corner of your screen? Click it to open your Inventory!")
         )
         .onStart((stage) => {
-            GameAPI.npcStateService.stopAnimation(Tria, "Default");
+            ServerAPI.npcStateService.stopAnimation(Tria, "Default");
             characterTween.Play();
             const continuation = new Dialogue(Tria, "Nice job!")
                 .monologue("I'd like to teach you more, but I'm afraid I'm going back home.")
                 .monologue("I'll see you again when you make a bit more money!")
                 .root;
             let completed = false;
-            const connection = GameAPI.currencyService.balanceChanged.connect((balance) => {
+            const connection = ServerAPI.currencyService.balanceChanged.connect((balance) => {
                 const funds = balance.get("Funds");
                 if (completed === false && funds !== undefined && !funds.lessEquals(0)) {
                     completed = true;
-                    const c2 = GameAPI.dialogueService.dialogueFinished.connect((dialogue) => {
+                    const c2 = ServerAPI.dialogueService.dialogueFinished.connect((dialogue) => {
                         if (dialogue === continuation) {
                             c2.disconnect();
-                            GameAPI.npcNavigationService.leadToPoint(triaHumanoid, getWaypoint("NewBeginningsEnd").CFrame, () => {
-                                GameAPI.npcStateService.playAnimation(Tria, "Default");
+                            ServerAPI.npcNavigationService.leadToPoint(triaHumanoid, getWaypoint("NewBeginningsEnd").CFrame, () => {
+                                ServerAPI.npcStateService.playAnimation(Tria, "Default");
                             });
                             stage.completed.fire();
                         }
                     });
-                    GameAPI.dialogueService.talk(continuation);
+                    ServerAPI.dialogueService.talk(continuation);
                 }
             });
             return () => connection.disconnect();
         })
     )
     .onInit((utils) => {
-        GameAPI.eventService.addCompletionListener("TriaReveal", (isCompleted) => {
+        ServerAPI.eventService.addCompletionListener("TriaReveal", (isCompleted) => {
             if (isCompleted)
                 triaHumanoid.DisplayName = "";
         });
 
-        GameAPI.dialogueService.dialogueFinished.connect((dialogue) => {
+        ServerAPI.dialogueService.dialogueFinished.connect((dialogue) => {
             if (dialogue === NameChanger.defaultDialogue) {
                 Packets.tabOpened.fireAll("Rename");
             }

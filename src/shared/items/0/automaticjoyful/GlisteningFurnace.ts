@@ -3,7 +3,7 @@ import Furnace from "shared/item/traits/Furnace";
 import Item from "shared/item/Item";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Formula from "shared/currency/Formula";
-import { GameAPI } from "shared/item/ItemUtils";
+import { ServerAPI } from "shared/item/ItemUtils";
 
 const mul = new CurrencyBundle();
 
@@ -20,6 +20,6 @@ export = new Item(script.Name)
     .setFormulaXCap(new CurrencyBundle().set("Power", 1e27))
 
     .trait(Furnace)
-    .applyFormula((v, item) => item.setMul(mul.set("Skill", v)), () => GameAPI.currencyService.get("Power"))
+    .applyFormula((v, item) => item.setMul(mul.set("Skill", v)), () => ServerAPI.currencyService.get("Power"))
 
     .exit();

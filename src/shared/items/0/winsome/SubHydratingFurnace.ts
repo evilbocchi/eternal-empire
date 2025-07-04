@@ -3,7 +3,7 @@ import { OnoeNum } from "@antivivi/serikanum";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Furnace from "shared/item/traits/Furnace";
 import Item from "shared/item/Item";
-import { GameAPI } from "shared/item/ItemUtils";
+import { ServerAPI } from "shared/item/ItemUtils";
 
 let meetsRequirement = false;
 const requirement = new OnoeNum(10);
@@ -21,7 +21,7 @@ export = new Item(script.Name)
     .onInit((item) => {
         const furnace = item.trait(Furnace);
 
-        const CurrencyService = GameAPI.currencyService;
+        const CurrencyService = ServerAPI.currencyService;
         item.repeat(undefined, () => {
             const skill = CurrencyService.get("Skill");
             meetsRequirement = skill !== undefined && !skill.lessThan(requirement);

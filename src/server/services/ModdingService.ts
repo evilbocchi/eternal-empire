@@ -9,7 +9,7 @@
 import Signal from "@antivivi/lemon-signal";
 import { Modding, OnInit, Service } from "@flamework/core";
 import { Players } from "@rbxts/services";
-import { GameAPI } from "shared/item/ItemUtils";
+import { ServerAPI } from "shared/item/ItemUtils";
 
 export interface OnPlayerJoined {
     /**
@@ -59,7 +59,7 @@ export default class ModdingService implements OnInit {
                 task.spawn(() => listener.onGameAPILoaded());
             }
         });
-        if (GameAPI.ready) {
+        if (ServerAPI.ready) {
             this.gameAPILoaded.fire();
         }
     }

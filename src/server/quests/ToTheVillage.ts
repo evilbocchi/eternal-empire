@@ -4,7 +4,7 @@ import Quest, { Stage } from "server/Quest";
 import { AREAS } from "shared/Area";
 import { getNPCModel, getWaypoint } from "shared/constants";
 import { getEffect, getSound } from "shared/GameAssets";
-import { GameAPI } from "shared/item/ItemUtils";
+import { ServerAPI } from "shared/item/ItemUtils";
 import ChargedEmpoweredBrick from "shared/items/negative/instantwin/ChargedEmpoweredBrick";
 import EmpoweredBrick from "shared/items/negative/instantwin/EmpoweredBrick";
 import XLWool from "shared/items/negative/relax/XLWool";
@@ -56,7 +56,7 @@ export = new Quest(script.Name)
             .root
         )
         .onStart((stage) => {
-            const connection = GameAPI.dialogueService.dialogueFinished.connect((dialogue) => {
+            const connection = ServerAPI.dialogueService.dialogueFinished.connect((dialogue) => {
                 if (dialogue === stage.dialogue) {
                     stage.completed.fire();
                 }
@@ -73,11 +73,11 @@ export = new Quest(script.Name)
                 .monologue("In order to fully manifest the power of the Empowered Brick, I need to infuse it with Instant Win energy.")
                 .monologue("To start, can you obtain 2 XL Wool? You can get it from that guy selling wool in the marketplace.")
                 .root;
-            const connection = GameAPI.dialogueService.dialogueFinished.connect((dialogue) => {
-                if (dialogue === stage.dialogue && GameAPI.itemsService.getItemAmount(EmpoweredBrick.id) >= 1) {
-                    GameAPI.dialogueService.talk(continuation);
+            const connection = ServerAPI.dialogueService.dialogueFinished.connect((dialogue) => {
+                if (dialogue === stage.dialogue && ServerAPI.itemsService.getItemAmount(EmpoweredBrick.id) >= 1) {
+                    ServerAPI.dialogueService.talk(continuation);
                 }
-                if (dialogue === continuation && GameAPI.questsService.takeQuestItem(EmpoweredBrick.id, 1)) {
+                if (dialogue === continuation && ServerAPI.questsService.takeQuestItem(EmpoweredBrick.id, 1)) {
                     stage.completed.fire();
                 }
             });
@@ -92,11 +92,11 @@ export = new Quest(script.Name)
                 .monologue("I know Freddy has a cauldron that has a bunch of Instant Win energy, but he won't let me use it. I hope you can convince him to let us borrow it.")
                 .root;
 
-            const connection = GameAPI.dialogueService.dialogueFinished.connect((dialogue) => {
-                if (dialogue === stage.dialogue && GameAPI.itemsService.getItemAmount("XLWool") >= 2) {
-                    GameAPI.dialogueService.talk(continuation);
+            const connection = ServerAPI.dialogueService.dialogueFinished.connect((dialogue) => {
+                if (dialogue === stage.dialogue && ServerAPI.itemsService.getItemAmount("XLWool") >= 2) {
+                    ServerAPI.dialogueService.talk(continuation);
                 }
-                if (dialogue === continuation && GameAPI.questsService.takeQuestItem("XLWool", 2)) {
+                if (dialogue === continuation && ServerAPI.questsService.takeQuestItem("XLWool", 2)) {
                     stage.completed.fire();
                 }
             });
@@ -117,15 +117,15 @@ export = new Quest(script.Name)
                 .root;
 
             refugee.FindFirstChild("FishingRod")?.Destroy();
-            const moving = GameAPI.npcNavigationService.leadToPoint(refugee.WaitForChild("Humanoid"), getWaypoint("ToTheVillage2").CFrame, () => { }, false);
+            const moving = ServerAPI.npcNavigationService.leadToPoint(refugee.WaitForChild("Humanoid"), getWaypoint("ToTheVillage2").CFrame, () => { }, false);
             task.spawn(() => {
-                while (!GameAPI.questsService.isQuestCompleted("AHelpingHand")) {
+                while (!ServerAPI.questsService.isQuestCompleted("AHelpingHand")) {
                     task.wait(0.1);
                 }
-                GameAPI.dialogueService.addDialogue(continuation, 4);
+                ServerAPI.dialogueService.addDialogue(continuation, 4);
             });
 
-            const connection = GameAPI.dialogueService.dialogueFinished.connect((dialogue) => {
+            const connection = ServerAPI.dialogueService.dialogueFinished.connect((dialogue) => {
                 if (dialogue === continuation) {
                     stage.completed.fire();
                 }
@@ -142,7 +142,7 @@ export = new Quest(script.Name)
         .onStart((stage) => {
             const refugee = getNPCModel("Slamo Refugee");
             refugee.FindFirstChild("FishingRod")?.Destroy();
-            const moving = GameAPI.npcNavigationService.leadToPoint(refugee.WaitForChild("Humanoid"), getWaypoint("ToTheVillage3").CFrame, () => { }, false);
+            const moving = ServerAPI.npcNavigationService.leadToPoint(refugee.WaitForChild("Humanoid"), getWaypoint("ToTheVillage3").CFrame, () => { }, false);
 
             const proximityPrompt = cauldron.WaitForChild("ProximityPrompt") as ProximityPrompt;
             proximityPrompt.Enabled = true;
@@ -172,7 +172,7 @@ export = new Quest(script.Name)
             const refugee = getNPCModel("Slamo Refugee");
             refugee.FindFirstChild("FishingRod")?.Destroy();
 
-            GameAPI.dialogueService.talk(new Dialogue(SlamoRefugee, "Let me handle this."));
+            ServerAPI.dialogueService.talk(new Dialogue(SlamoRefugee, "Let me handle this."));
             const continuation = new Dialogue(SlamoRefugee, "Wow... it's raw Instant Win energy. It's so potent!")
                 .monologue("Now, I can infuse the Empowered Brick with this energy. Just give me a moment.")
                 .root;
@@ -210,10 +210,10 @@ export = new Quest(script.Name)
             }
             showInstantWinBlock();
             task.wait(1);
-            GameAPI.dialogueService.talk(continuation);
+            ServerAPI.dialogueService.talk(continuation);
 
             const empoweredBrick = EmpoweredBrick.MODEL!.Clone();
-            const connection = GameAPI.dialogueService.dialogueFinished.connect((dialogue) => {
+            const connection = ServerAPI.dialogueService.dialogueFinished.connect((dialogue) => {
                 if (dialogue === continuation) {
                     empoweredBrick.PivotTo(getWaypoint("ToTheVillageEmpoweredBrick").CFrame);
                     empoweredBrick.Parent = Workspace;
@@ -244,11 +244,11 @@ export = new Quest(script.Name)
                     light.Parent = empoweredBrick.PrimaryPart;
 
                     task.wait(1);
-                    GameAPI.dialogueService.talk(continuation2);
+                    ServerAPI.dialogueService.talk(continuation2);
                 }
                 else if (dialogue === continuation2) {
                     stage.completed.fire();
-                    GameAPI.questsService.giveQuestItem(ChargedEmpoweredBrick.id, 1);
+                    ServerAPI.questsService.giveQuestItem(ChargedEmpoweredBrick.id, 1);
                     empoweredBrick.Destroy();
                 }
             });
@@ -269,11 +269,11 @@ export = new Quest(script.Name)
             linkwayEffect.Enabled = false;
             linkwayEffect.Parent = particlePart.WaitForChild("Attachment");
 
-            const dialogue = new Dialogue(SlamoRefugee, "We're here. All you need to do is place the Charged Empowered Brick down. Once you do that, the linkway will be repaired and we can finally go home."); const moving = GameAPI.npcNavigationService.leadToPoint(refugee.WaitForChild("Humanoid"), getWaypoint("ToTheVillage4").CFrame, () => {
-                GameAPI.dialogueService.talk(dialogue);
+            const dialogue = new Dialogue(SlamoRefugee, "We're here. All you need to do is place the Charged Empowered Brick down. Once you do that, the linkway will be repaired and we can finally go home."); const moving = ServerAPI.npcNavigationService.leadToPoint(refugee.WaitForChild("Humanoid"), getWaypoint("ToTheVillage4").CFrame, () => {
+                ServerAPI.dialogueService.talk(dialogue);
             });
 
-            const connection = GameAPI.itemsService.itemsPlaced.connect((_, placedItems) => {
+            const connection = ServerAPI.itemsService.itemsPlaced.connect((_, placedItems) => {
                 let placed = false;
                 for (const item of placedItems) {
                     if (item.item === ChargedEmpoweredBrick.id) {
@@ -297,7 +297,7 @@ export = new Quest(script.Name)
 
                 linkwayEffect.Emit(4);
                 playSoundAtPart(particlePart, getSound("MagicExplosion"), 2);
-                GameAPI.unlockedAreasService.unlockArea("SlamoVillage");
+                ServerAPI.unlockedAreasService.unlockArea("SlamoVillage");
                 stage.completed.fire();
             });
 
@@ -321,28 +321,28 @@ export = new Quest(script.Name)
                 .monologue("And now that I'm back... It's time to take my revenge.")
                 .root;
 
-            const moving = GameAPI.npcNavigationService.leadToPoint(refugee.WaitForChild("Humanoid"), getWaypoint("ToTheVillage5").CFrame, () => {
-                GameAPI.dialogueService.talk(continuation);
+            const moving = ServerAPI.npcNavigationService.leadToPoint(refugee.WaitForChild("Humanoid"), getWaypoint("ToTheVillage5").CFrame, () => {
+                ServerAPI.dialogueService.talk(continuation);
             });
             task.wait(2);
-            GameAPI.dialogueService.talk(new Dialogue(SlamoRefugee, "Finally! The linkway is repaired!"), false);
+            ServerAPI.dialogueService.talk(new Dialogue(SlamoRefugee, "Finally! The linkway is repaired!"), false);
             task.wait(6);
-            GameAPI.dialogueService.talk(new Dialogue(SlamoRefugee, "After all these years, I can finally see home again."), false);
+            ServerAPI.dialogueService.talk(new Dialogue(SlamoRefugee, "After all these years, I can finally see home again."), false);
             task.wait(6);
-            GameAPI.dialogueService.talk(new Dialogue(SlamoRefugee, "The village is right up ahead!"), false);
+            ServerAPI.dialogueService.talk(new Dialogue(SlamoRefugee, "The village is right up ahead!"), false);
             task.wait(6);
-            GameAPI.dialogueService.talk(new Dialogue(SlamoRefugee, "It's just as I remembered it... Small, cozy, and full of life."), false);
+            ServerAPI.dialogueService.talk(new Dialogue(SlamoRefugee, "It's just as I remembered it... Small, cozy, and full of life."), false);
             task.wait(10);
-            GameAPI.dialogueService.talk(new Dialogue(SlamoRefugee, "..."), false);
+            ServerAPI.dialogueService.talk(new Dialogue(SlamoRefugee, "..."), false);
 
-            const connection = GameAPI.dialogueService.dialogueFinished.connect((dialogue) => {
+            const connection = ServerAPI.dialogueService.dialogueFinished.connect((dialogue) => {
                 if (dialogue !== continuation) {
                     return;
                 }
 
                 const humanoid = refugee.WaitForChild("Humanoid") as Humanoid;
                 humanoid.WalkSpeed = 30;
-                GameAPI.npcNavigationService.pathfind(humanoid, getWaypoint("ToTheVillage6").Position, () => {
+                ServerAPI.npcNavigationService.pathfind(humanoid, getWaypoint("ToTheVillage6").Position, () => {
                     refugee.PivotTo(getWaypoint("ToTheVillage7").CFrame);
                     humanoid.RootPart!.Anchored = true;
                     stage.completed.fire();
@@ -365,9 +365,9 @@ export = new Quest(script.Name)
             .root
         )
         .onStart((stage) => {
-            GameAPI.eventService.setEventCompleted("ImprisonedSlamoRefugee", true);
+            ServerAPI.eventService.setEventCompleted("ImprisonedSlamoRefugee", true);
 
-            const connection = GameAPI.dialogueService.dialogueFinished.connect((dialogue) => {
+            const connection = ServerAPI.dialogueService.dialogueFinished.connect((dialogue) => {
                 if (dialogue === stage.dialogue) {
                     stage.completed.fire();
                 }
@@ -387,7 +387,7 @@ export = new Quest(script.Name)
             .root
         )
         .onStart((stage) => {
-            const connection = GameAPI.dialogueService.dialogueFinished.connect((dialogue) => {
+            const connection = ServerAPI.dialogueService.dialogueFinished.connect((dialogue) => {
                 if (dialogue === stage.dialogue) {
                     stage.completed.fire();
                 }
@@ -403,7 +403,7 @@ export = new Quest(script.Name)
         explosionEffect.Enabled = false;
         hideInstantWinBlock();
         instantWinBlock.CanCollide = false;
-        GameAPI.eventService.addCompletionListener("ImprisonedSlamoRefugee", () => {
+        ServerAPI.eventService.addCompletionListener("ImprisonedSlamoRefugee", () => {
             const refugee = getNPCModel("Slamo Refugee");
             refugee.FindFirstChild("FishingRod")?.Destroy();
             const humanoid = refugee.WaitForChild("Humanoid") as Humanoid;

@@ -2,7 +2,7 @@ import { OnoeNum } from "@antivivi/serikanum";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Formula from "shared/currency/Formula";
 import Item from "shared/item/Item";
-import { GameAPI } from "shared/item/ItemUtils";
+import { ServerAPI } from "shared/item/ItemUtils";
 import ItemTrait from "shared/item/traits/ItemTrait";
 import UpgradeBoard from "shared/item/traits/UpgradeBoard";
 import Upgrader from "shared/item/traits/Upgrader";
@@ -17,7 +17,7 @@ export default class ObbyUpgrader extends ItemTrait {
         item.repeat(undefined, () => {
             const mul = new CurrencyBundle();
             for (const [upgrade, { currency, formula }] of obbyUpgrader.boosts) {
-                const amount = GameAPI.upgradeBoardService.getUpgradeAmount(upgrade.id);
+                const amount = ServerAPI.upgradeBoardService.getUpgradeAmount(upgrade.id);
                 mul.set(currency, formula.apply(new OnoeNum(amount)));
             }
             upgrader.setMul(mul);
@@ -31,7 +31,7 @@ export default class ObbyUpgrader extends ItemTrait {
         if (label === undefined)
             throw "ObbyPointsGuiPart does not have a TextLabel in its SurfaceGui";
         item.repeat(model, () => {
-            label.Text = `OBBY POINTS: ${GameAPI.currencyService.get("Obby Points").toString()}`;
+            label.Text = `OBBY POINTS: ${ServerAPI.currencyService.get("Obby Points").toString()}`;
         }, 1);
 
         for (const part of model.GetChildren()) {
@@ -62,12 +62,12 @@ export default class ObbyUpgrader extends ItemTrait {
                 return;
             parent.PivotTo(returnPart.CFrame);
             const reward = obbyUpgrader.reward;
-            GameAPI.currencyService.increment("Obby Points", reward);
+            ServerAPI.currencyService.increment("Obby Points", reward);
             const color = item.difficulty.color ?? new Color3(1, 1, 1);
             const r = color.R * 255;
             const g = color.G * 255;
             const b = color.B * 255;
-            GameAPI.chatHookService.sendServerMessage(
+            ServerAPI.chatHookService.sendServerMessage(
                 `${parent.Name} has completed the ${item.name} and earned ${reward.toString()} Obby Points!`,
                 `tag:hidden;color:${r},${g},${b}`
             );

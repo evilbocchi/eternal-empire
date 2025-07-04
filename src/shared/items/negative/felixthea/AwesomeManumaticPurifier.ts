@@ -6,7 +6,7 @@ import { PartCache } from "@rbxts/partcache/out/class";
 import { TweenService, Workspace } from "@rbxts/services";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
-import ItemUtils, { GameAPI } from "shared/item/ItemUtils";
+import ItemUtils, { ServerAPI } from "shared/item/ItemUtils";
 import Operative from "shared/item/traits/Operative";
 import Upgrader from "shared/item/traits/Upgrader";
 import Clickable from "shared/item/traits/special/Clickable";
@@ -34,8 +34,8 @@ export = new Item(script.Name)
         const fundsLabel = billboardGui.WaitForChild("FundsLabel") as TextLabel;
         const cpcLabel = billboardGui.WaitForChild("CPCLabel") as TextLabel;
         let cpc = new OnoeNum(1);
-        const CurrencyService = GameAPI.currencyService;
-        const RevenueService = GameAPI.revenueService;
+        const CurrencyService = ServerAPI.currencyService;
+        const RevenueService = ServerAPI.revenueService;
         const PURIFIER_UPGRADES = NamedUpgrades.getUpgrades("Purifier");
 
         const update = () => {

@@ -6,7 +6,7 @@ import Item from "shared/item/Item";
 import Upgrader from "shared/item/traits/Upgrader";
 import Formula from "shared/currency/Formula";
 import { getAllInstanceInfo, getInstanceInfo } from "@antivivi/vrldk";
-import { GameAPI } from "shared/item/ItemUtils";
+import { ServerAPI } from "shared/item/ItemUtils";
 import { findBaseParts, playSoundAtPart } from "@antivivi/vrldk";
 
 const mul = new CurrencyBundle().set("Funds", 0);
@@ -22,7 +22,7 @@ export = new Item(script.Name)
     .setFormulaX("skill")
 
     .trait(Upgrader)
-    .applyFormula((v, item) => item.setMul(mul.set("Funds", v)), () => GameAPI.currencyService.get("Skill"))
+    .applyFormula((v, item) => item.setMul(mul.set("Funds", v)), () => ServerAPI.currencyService.get("Skill"))
     .exit()
 
     .onLoad((model) => {
