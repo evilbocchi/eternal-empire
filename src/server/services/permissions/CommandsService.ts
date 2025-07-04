@@ -1,3 +1,27 @@
+/**
+ * @fileoverview CommandsService - Comprehensive chat command system with permission-based access control.
+ * 
+ * This service handles:
+ * - Registration and management of all chat commands in the game
+ * - Permission-based command access control (levels 0-4)
+ * - Player and empire management commands
+ * - Moderation and administrative tools
+ * - Game state manipulation and debugging utilities
+ * - Server navigation and teleportation commands
+ * 
+ * Commands are organized by permission levels:
+ * - Level 0: Basic player commands (help, join, logs, voting)
+ * - Level 1: Trusted player commands (block, invite, empire tools)
+ * - Level 2: Moderator commands (kick, restrict, teleport)
+ * - Level 3: Manager commands (ban, currency/item management)
+ * - Level 4: Owner commands (admin tools, server management)
+ * 
+ * The service integrates with multiple game systems including permissions,
+ * currency, items, areas, quests, and player data management.
+ * 
+ * @since 1.0.0
+ */
+
 import { OnoeNum } from "@antivivi/serikanum";
 import { playSoundAtPart, spawnExplosion } from "@antivivi/vrldk";
 import { OnInit, Service } from "@flamework/core";
@@ -30,11 +54,39 @@ import Items from "shared/items/Items";
 import Packets from "shared/Packets";
 import Sandbox from "shared/Sandbox";
 
+/**
+ * Service that provides comprehensive chat command functionality with permission-based access control.
+ * 
+ * Manages the complete command system including registration, permission checking,
+ * and integration with all major game systems for moderation and administration.
+ */
 @Service()
 export default class CommandsService implements OnInit {
 
+    /** Reference to the TextChatCommands container for command registration. */
     commands = TextChatService.WaitForChild("TextChatCommands");
 
+    /**
+     * Initializes the CommandsService with all required game service dependencies.
+     * 
+     * @param dataService Empire and player data management
+     * @param gameAssetService Game utilities and asset management
+     * @param donationService Player donation tracking
+     * @param currencyService Currency management and transactions
+     * @param leaderboardService Leaderboard management and updates
+     * @param upgradeBoardService Upgrade purchase and management
+     * @param itemsService Item inventory and placement management
+     * @param playtimeService Playtime tracking and statistics
+     * @param areaService Area management and teleportation
+     * @param levelService Level and experience management
+     * @param questsService Quest progression tracking
+     * @param unlockedAreasService Area unlock management
+     * @param resetService Game reset and prestige functionality
+     * @param bombsService Bomb effects and management
+     * @param setupService Item setup saving and loading
+     * @param chestService Chest management and loot
+     * @param permissionService Permission checking and messaging
+     */
     constructor(
         private dataService: DataService,
         private chatHookService: ChatHookService,
@@ -55,18 +107,38 @@ export default class CommandsService implements OnInit {
         private permissionService: PermissionsService,
     ) { }
 
+    /**
+     * Gets the permission level for a user.
+     * @param userId The user ID to check.
+     * @returns The permission level (0-4).
+     */
     private getPermissionLevel(userId: number) {
         return this.permissionService.getPermissionLevel(userId);
     }
 
+    /**
+     * Sends a private message to a specific player.
+     * @param player The player to send the message to.
+     * @param message The message content.
+     * @param color Optional color formatting for the message.
+     */
     private sendPrivateMessage(player: Player, message: string, color?: string) {
         return this.chatHookService.sendPrivateMessage(player, message, color);
     }
 
+    /**
+     * Sends a server-wide message to all players.
+     * @param message The message content.
+     * @param color Optional color formatting for the message.
+     */
     private sendServerMessage(message: string, color?: string) {
         return this.chatHookService.sendServerMessage(message, color);
     }
 
+    /**
+     * Updates the permission level for a user.
+     * @param userId The user ID to update.
+     */
     private updatePermissionLevel(userId: number) {
         return this.permissionService.updatePermissionLevel(userId);
     }
@@ -149,6 +221,19 @@ export default class CommandsService implements OnInit {
         command.Parent = this.commands;
     }
 
+    /**
+     * Initializes the CommandsService and registers all chat commands.
+     * 
+     * Creates and registers commands organized by permission levels:
+     * - Level 0: Basic player commands (help, join, logs, voting)
+     * - Level 1: Trusted player commands (block, invite, empire management)
+     * - Level 2: Moderator commands (kick, restrict, player management)
+     * - Level 3: Manager commands (ban, currency/item management, admin tools)
+     * - Level 4: Owner commands (server management, advanced debugging)
+     * 
+     * Each command includes automatic permission checking and appropriate
+     * error messages for unauthorized access attempts.
+     */
     onInit() {
         // PERM LEVEL 0
 
