@@ -3,7 +3,7 @@ import { Controller, OnInit, OnStart } from "@flamework/core";
 import { ADAPTIVE_TAB_MAIN_WINDOW } from "client/controllers/interface/AdaptiveTabController";
 import BalanceWindowController from "client/controllers/interface/BalanceWindowController";
 import { getNameFromUserId } from "shared/constants";
-import { ASSETS } from "shared/GameAssets";
+import { ASSETS } from "shared/asset/GameAssets";
 import { AREAS } from "shared/Area";
 import Items from "shared/items/Items";
 import NamedUpgrades from "shared/namedupgrade/NamedUpgrades";

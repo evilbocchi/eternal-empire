@@ -9,7 +9,7 @@ import UIController, { INTERFACE } from "client/controllers/UIController";
 import EffectController from "client/controllers/world/EffectController";
 import ItemSlot from "client/ItemSlot";
 import { getMaxXp } from "shared/constants";
-import { ASSETS } from "shared/GameAssets";
+import { ASSETS } from "shared/asset/GameAssets";
 import Items from "shared/items/Items";
 import NamedUpgrades from "shared/namedupgrade/NamedUpgrades";
 import Packets from "shared/Packets";

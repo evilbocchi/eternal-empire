@@ -4,7 +4,7 @@ import { UserInputService } from "@rbxts/services";
 import HotkeysController from "client/controllers/HotkeysController";
 import { ADAPTIVE_TAB_MAIN_WINDOW } from "client/controllers/interface/AdaptiveTabController";
 import UIController from "client/controllers/UIController";
-import { ASSETS } from "shared/GameAssets";
+import { ASSETS } from "shared/asset/GameAssets";
 import Packets from "shared/Packets";
 import { paintObjects } from "@antivivi/vrldk";
 
@@ -113,9 +113,11 @@ export default class SettingsController implements OnStart {
             const toggle = settingOption.FindFirstChild("Toggle") as TextButton;
             if (toggle !== undefined) {
                 toggle.Activated.Connect(() => {
-                    this.uiController.playSound("Click");
                     const setting = settingOption.Name as keyof Settings;
-                    Packets.setSetting.inform(setting, !Packets.settings.get()[setting]);
+                    const updated = !Packets.settings.get()[setting];
+                    this.uiController.playSound(updated === true ? "SwitchFlick" : "SwitchFlickLowPitch");
+
+                    Packets.setSetting.inform(setting, updated);
                 });
             }
         }

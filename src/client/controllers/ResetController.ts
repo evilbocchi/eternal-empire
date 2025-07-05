@@ -5,7 +5,7 @@ import { Debris, TweenService, Workspace } from "@rbxts/services";
 import EffectController from "client/controllers/world/EffectController";
 import SoundController from "client/controllers/interface/SoundController";
 import UIController from "client/controllers/UIController";
-import { ASSETS } from "shared/GameAssets";
+import { ASSETS } from "shared/asset/GameAssets";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Packets from "shared/Packets";
 import { RESET_LAYERS } from "shared/ResetLayer";

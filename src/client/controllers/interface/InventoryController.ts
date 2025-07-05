@@ -8,7 +8,7 @@ import TooltipController, { Tooltip } from "client/controllers/interface/Tooltip
 import UIController, { INTERFACE } from "client/controllers/UIController";
 import ItemFilter from "client/ItemFilter";
 import ItemSlot from "client/ItemSlot";
-import { ASSETS } from "shared/GameAssets";
+import { ASSETS } from "shared/asset/GameAssets";
 import Item from "shared/item/Item";
 import Items from "shared/items/Items";
 import Packets from "shared/Packets";

@@ -3,7 +3,7 @@ import { OnoeNum } from "@antivivi/serikanum";
 import { getAllInstanceInfo, playSoundAtPart } from "@antivivi/vrldk";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import { CURRENCY_DETAILS } from "shared/currency/CurrencyDetails";
-import { getSound } from "shared/GameAssets";
+import { getSound } from "shared/asset/GameAssets";
 import Droplet from "shared/item/Droplet";
 import Item from "shared/item/Item";
 import ItemUtils, { Server } from "shared/item/ItemUtils";

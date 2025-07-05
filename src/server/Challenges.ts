@@ -1,7 +1,7 @@
 import { OnoeNum } from "@antivivi/serikanum";
 import { TweenService, Workspace, Debris } from "@rbxts/services";
-import { getSound } from "shared/GameAssets";
-import { ASSETS } from "shared/GameAssets";
+import { getSound } from "shared/asset/GameAssets";
+import { ASSETS } from "shared/asset/GameAssets";
 import { AREAS } from "shared/Area";
 import Item from "shared/item/Item";
 import Upgrader from "shared/item/traits/Upgrader";

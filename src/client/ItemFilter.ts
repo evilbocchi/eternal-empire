@@ -1,5 +1,6 @@
 import { TweenService } from "@rbxts/services";
 import { FILTERABLE_TRAITS } from "client/ItemSlot";
+import { getAsset } from "shared/asset/AssetMap";
 
 declare global {
     type FilterOptions = Frame & {
@@ -41,10 +42,10 @@ namespace ItemFilter {
         search.GetPropertyChangedSignal("Text").Connect(() => {
             const text = search.Text;
             if (text === "") {
-                searchAction.Image = "rbxassetid://5492253050"; // search
+                searchAction.Image = getAsset("assets/Search.png");
             }
             else {
-                searchAction.Image = "rbxassetid://9545003266"; // clear
+                searchAction.Image = getAsset("assets/Clear.png");
             }
             filterItems();
         });

@@ -1,6 +1,6 @@
 import Difficulty from "@antivivi/jjt-difficulties";
 import { CollectionService } from "@rbxts/services";
-import { getSound } from "shared/GameAssets";
+import { getSound } from "shared/asset/GameAssets";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
 import Upgrader from "shared/item/traits/Upgrader";

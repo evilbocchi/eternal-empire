@@ -5,7 +5,7 @@ import { LOCAL_PLAYER } from "client/constants";
 import AdaptiveTabController, { ADAPTIVE_TAB_MAIN_WINDOW } from "client/controllers/interface/AdaptiveTabController";
 import UIController from "client/controllers/UIController";
 import EffectController from "client/controllers/world/EffectController";
-import { ASSETS } from "shared/GameAssets";
+import { ASSETS } from "shared/asset/GameAssets";
 import Items from "shared/items/Items";
 import Packets from "shared/Packets";
 

@@ -19,11 +19,15 @@ export const ASSETS = StarterGui.WaitForChild("Assets") as Assets;
 /**
  * Returns a sound from the Assets folder.
  * 
- * @param soundName The name of the sound to retrieve, without the "Sound" suffix.
+ * @param soundName The name of the sound to retrieve.
  * @returns The sound instance from the Assets folder.
  */
 export function getSound(soundName: string) {
-    return ASSETS.Sounds.WaitForChild(soundName + "Sound") as Sound;
+    const sound = ASSETS.Sounds.FindFirstChild(soundName) as Sound | undefined;
+    if (sound === undefined) {
+        throw "Sound not found: " + soundName;
+    }
+    return sound;
 }
 
 /**

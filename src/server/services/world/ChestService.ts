@@ -19,7 +19,7 @@ import LevelService from "server/services/serverdata/LevelService";
 import UnlockedAreasService from "server/services/world/UnlockedAreasService";
 import { AREAS } from "shared/Area";
 import { SOUND_EFFECTS_GROUP } from "shared/constants";
-import { ASSETS, getSound } from "shared/GameAssets";
+import { ASSETS, getSound } from "shared/asset/GameAssets";
 import Item from "shared/item/Item";
 import Crystal from "shared/items/excavation/Crystal";
 import ExcavationStone from "shared/items/excavation/ExcavationStone";

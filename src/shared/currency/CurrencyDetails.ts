@@ -1,3 +1,5 @@
+import { getAsset } from "shared/asset/AssetMap";
+
 declare global {
     type Currency = keyof (typeof details);
     type CurrencyDetails = Combine<typeof details[Currency]>;
@@ -16,78 +18,78 @@ const details = {
         layoutOrder: 1,
         format: "$%s",
         color: Color3.fromRGB(0, 200, 0),
-        image: 17574921441,
+        image: getAsset("assets/Funds.png"),
         page: CURRENCY_CATEGORIES.Main
     },
     Power: {
         layoutOrder: 2,
         format: "%s W",
         color: Color3.fromRGB(255, 102, 0),
-        image: 17574930060,
+        image: getAsset("assets/Power.png"),
         page: CURRENCY_CATEGORIES.Main
     },
     Bitcoin: {
         layoutOrder: 3,
         format: "%s BTC",
         color: Color3.fromRGB(10, 207, 255),
-        image: 17574930341,
+        image: getAsset("assets/Bitcoin.png"),
         page: CURRENCY_CATEGORIES.Main
     },
 
     Skill: {
         layoutOrder: 100,
         color: Color3.fromRGB(138, 255, 128),
-        image: 17574929706,
+        image: getAsset("assets/Skill.png"),
         page: CURRENCY_CATEGORIES.Main
     },
     Wins: {
         layoutOrder: 101,
         color: Color3.fromRGB(80, 57, 255),
-        image: 83031811545708,
+        image: getAsset("assets/Wins.png"),
         page: CURRENCY_CATEGORIES.Main
     },
 
     "Purifier Clicks": {
         layoutOrder: 1000,
         color: Color3.fromRGB(156, 217, 255),
-        image: 17574929896,
+        image: getAsset("assets/PurifierClicks.png"),
         page: CURRENCY_CATEGORIES.Misc
     },
     "Dark Matter": {
         layoutOrder: 1001,
         color: Color3.fromRGB(125, 0, 130),
-        image: 17574930185,
+        image: getAsset("assets/DarkMatter.png"),
         page: CURRENCY_CATEGORIES.Misc
     },
     Parts: {
         layoutOrder: 1002,
         color: Color3.fromRGB(237, 255, 69),
-        image: 114592102522331,
+        image: getAsset("assets/Part.png"),
         page: CURRENCY_CATEGORIES.Misc
     },
     "Obby Points": {
         layoutOrder: 1003,
         color: Color3.fromRGB(255, 128, 0),
-        image: 74689986345234,
+        image: getAsset("assets/ObbyPoint.png"),
         page: CURRENCY_CATEGORIES.Misc
     },
     Health: {
         layoutOrder: 1003,
         color: Color3.fromRGB(255, 0, 0),
-        image: 17574930668,
+        image: "rbxassetid://17574930668",
         page: CURRENCY_CATEGORIES.Misc
     },
     Stamina: {
         layoutOrder: 1004,
         color: Color3.fromRGB(255, 222, 74),
-        image: 111761735343897,
+        image: getAsset("assets/Stamina.png"),
         page: CURRENCY_CATEGORIES.Misc
     },
 
     "Funds Bombs": {
         layoutOrder: 10000,
         color: Color3.fromRGB(0, 140, 97),
-        image: 123336077524280,
+        image: getAsset("assets/FundsBomb.png"),
         page: CURRENCY_CATEGORIES.Misc
     },
 };

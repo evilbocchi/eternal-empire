@@ -15,7 +15,7 @@ import { OnStart, Service } from "@flamework/core";
 import { DataStoreService, Players, RunService } from "@rbxts/services";
 import LeaderstatsService from "server/services/LeaderstatsService";
 import DataService from "server/services/serverdata/DataService";
-import { ASSETS } from "shared/GameAssets";
+import { ASSETS } from "shared/asset/GameAssets";
 import Sandbox from "shared/Sandbox";
 import { LEADERBOARDS, getNameFromUserId } from "shared/constants";
 import { CURRENCIES } from "shared/currency/CurrencyDetails";

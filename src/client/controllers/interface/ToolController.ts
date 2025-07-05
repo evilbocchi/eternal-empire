@@ -10,7 +10,7 @@ import { OnCharacterAdded } from "client/controllers/ModdingController";
 import UIController, { INTERFACE } from "client/controllers/UIController";
 import AreaController from "client/controllers/world/AreaController";
 import { AREAS } from "shared/Area";
-import { ASSETS, emitEffect } from "shared/GameAssets";
+import { ASSETS, emitEffect } from "shared/asset/GameAssets";
 import Harvestable from "shared/Harvestable";
 import ItemUtils from "shared/item/ItemUtils";
 import Items from "shared/items/Items";

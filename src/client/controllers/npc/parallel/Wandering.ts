@@ -1,5 +1,5 @@
 import { PathfindingService, Workspace } from "@rbxts/services";
-import { ASSETS } from "shared/GameAssets";
+import { ASSETS } from "shared/asset/GameAssets";
 
 declare global {
     interface Assets {

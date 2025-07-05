@@ -33,7 +33,7 @@ import CurrencyService from "server/services/serverdata/CurrencyService";
 import DataService from "server/services/serverdata/DataService";
 import { getNameFromUserId } from "shared/constants";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
-import { getSound } from "shared/GameAssets";
+import { getSound } from "shared/asset/GameAssets";
 import Packets from "shared/Packets";
 
 /**

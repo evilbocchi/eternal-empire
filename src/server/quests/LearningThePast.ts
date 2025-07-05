@@ -3,7 +3,7 @@ import { RunService, TweenService, Workspace } from "@rbxts/services";
 import Quest, { Stage } from "server/Quest";
 import { AREAS } from "shared/Area";
 import { getNPCModel, getWaypoint } from "shared/constants";
-import { emitEffect, getSound } from "shared/GameAssets";
+import { emitEffect, getSound } from "shared/asset/GameAssets";
 import InteractableObject from "shared/InteractableObject";
 import { Server } from "shared/item/ItemUtils";
 import ExcavationStone from "shared/items/excavation/ExcavationStone";

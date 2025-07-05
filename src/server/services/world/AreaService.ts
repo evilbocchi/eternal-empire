@@ -30,7 +30,7 @@ import DataService from "server/services/serverdata/DataService";
 import NamedUpgradeService from "server/services/serverdata/NamedUpgradeService";
 import Area, { AREAS } from "shared/Area";
 import { MUSIC_GROUP } from "shared/constants";
-import { getSound } from "shared/GameAssets";
+import { getSound } from "shared/asset/GameAssets";
 import { DROPLET_STORAGE } from "shared/item/Droplet";
 import NamedUpgrades from "shared/namedupgrade/NamedUpgrades";
 import Packets from "shared/Packets";

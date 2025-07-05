@@ -14,7 +14,7 @@
 import { OnInit, OnPhysics, Service } from "@flamework/core";
 import { Lighting } from "@rbxts/services";
 import { SOUND_EFFECTS_GROUP } from "shared/constants";
-import { ASSETS } from "shared/GameAssets";
+import { ASSETS } from "shared/asset/GameAssets";
 
 // Extend the global Assets interface to include a Sounds folder
 // containing all sound assets used in the game.

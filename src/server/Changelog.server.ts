@@ -1,4 +1,4 @@
-import { ASSETS } from "shared/GameAssets";
+import { ASSETS } from "shared/asset/GameAssets";
 import { AREAS } from "shared/Area";
 
 declare global {

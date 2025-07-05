@@ -2,7 +2,7 @@ import { TweenService } from "@rbxts/services";
 import Quest, { Stage } from "server/Quest";
 import { AREAS } from "shared/Area";
 import { getNPCModel, getWaypoint } from "shared/constants";
-import { emitEffect, getSound } from "shared/GameAssets";
+import { emitEffect, getSound } from "shared/asset/GameAssets";
 import { Server } from "shared/item/ItemUtils";
 import FreddysUpgrader from "shared/items/negative/friendliness/FreddysUpgrader";
 import LostPendant from "shared/items/0/winsome/LostPendant";

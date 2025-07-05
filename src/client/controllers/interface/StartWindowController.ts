@@ -12,7 +12,7 @@ import { SETTINGS_WINDOW } from "client/controllers/interface/SettingsController
 import SoundController from "client/controllers/interface/SoundController";
 import UIController from "client/controllers/UIController";
 import { getNameFromUserId, getStartCamera, isStartScreenEnabled } from "shared/constants";
-import { ASSETS } from "shared/GameAssets";
+import { ASSETS } from "shared/asset/GameAssets";
 import Items from "shared/items/Items";
 import Packets from "shared/Packets";
 

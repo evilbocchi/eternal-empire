@@ -6,7 +6,7 @@ import StringBuilder from "@rbxts/stringbuilder";
 import HotkeysController from "client/controllers/HotkeysController";
 import UIController, { INTERFACE } from "client/controllers/UIController";
 import TooltipController from "client/controllers/interface/TooltipController";
-import { ASSETS } from "shared/GameAssets";
+import { ASSETS } from "shared/asset/GameAssets";
 import Packets from "shared/Packets";
 import Softcaps, { performSoftcap } from "shared/Softcaps";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
@@ -84,11 +84,14 @@ export default class BalanceWindowController implements OnInit {
         if (currencyOption === undefined) {
             currencyOption = ASSETS.BalanceWindow.BalanceOption.Clone();
             const details = CURRENCY_DETAILS[currency];
-            const backgroundColor = details?.color ?? new Color3(1, 1, 1);
+            if (details === undefined) {
+                throw `No details found for currency: ${currency}`;
+            }
+            const backgroundColor = details.color;
             paintObjects(currencyOption, backgroundColor);
             currencyOption.Amount.Income.SoftcapLabel.UIStroke.Color = new Color3(0.4, 0, 0);
             currencyOption.Name = currency;
-            currencyOption.ImageLabel.Image = "rbxassetid://" + details?.image;
+            currencyOption.ImageLabel.Image = details.image;
             currencyOption.Amount.BalanceLabel.Text = this.format(currency, new OnoeNum(0));
             currencyOption.Amount.Income.Visible = false;
             currencyOption.Parent = BALANCE_WINDOW.Balances;
@@ -258,7 +261,7 @@ export default class BalanceWindowController implements OnInit {
                 continue;
 
             const gainWindow = ASSETS.CurrencyGain.Clone();
-            gainWindow.ImageLabel.Image = "rbxassetid://" + details.image;
+            gainWindow.ImageLabel.Image = details.image;
             gainWindow.TextLabel.Text = this.format(currency, new OnoeNum(amount));
             gainWindow.TextLabel.TextColor3 = details.color;
             const elementTo = currencyOption.ImageLabel;

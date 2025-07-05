@@ -9,7 +9,7 @@ const mul = new CurrencyBundle().set("Funds", 0);
 
 export = new Item(script.Name)
     .setName(Difficulty.ShatteredBabass.name!)
-    .setDescription("Shattered Babass is here to charge up your setup. Boosts Funds with Power. Maxes out at %cap%.")
+    .setDescription("Shattered Babass is here to charge up your setup. Boosts Funds with Power.")
     .setDifficulty(Difficulty.ShatteredBabass)
     .setPrice(new CurrencyBundle().set("Funds", 200e36).set("Power", 10e21).set("Skill", 200000), 1)
     .addPlaceableArea("BarrenIslands")

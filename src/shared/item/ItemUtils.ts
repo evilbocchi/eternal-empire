@@ -2,7 +2,7 @@ import { BaseOnoeNum, OnoeNum } from "@antivivi/serikanum";
 import { Debris, RunService, TweenService } from "@rbxts/services";
 import StringBuilder from "@rbxts/stringbuilder";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
-import { ASSETS } from "shared/GameAssets";
+import { ASSETS } from "shared/asset/GameAssets";
 import type Item from "shared/item/Item";
 import Packets from "shared/Packets";
 

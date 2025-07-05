@@ -17,7 +17,7 @@ import { getInstanceInfo, getRootPart, playSoundAtPart } from "@antivivi/vrldk";
 import { OnInit, OnPhysics, OnStart, Service } from "@flamework/core";
 import { PathfindingService, Players, RunService, TweenService, Workspace } from "@rbxts/services";
 import { getNPCPosition, getWaypoint, PLACED_ITEMS_FOLDER } from "shared/constants";
-import { getSound } from "shared/GameAssets";
+import { getSound } from "shared/asset/GameAssets";
 import GameSpeed from "shared/GameSpeed";
 import Sandbox from "shared/Sandbox";
 

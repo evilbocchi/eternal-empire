@@ -8,7 +8,7 @@ import UIController, { INTERFACE } from "client/controllers/UIController";
 declare global {
     type SidebarOption = Frame & {
         Button: ImageButton;
-        Glow: ImageLabel;
+        Glow: Frame;
     };
 }
 
@@ -78,7 +78,6 @@ export default class AdaptiveTabController implements OnInit {
     }
 
     showAdaptiveTab(windowName: string) {
-
         const tweenInfo = new TweenInfo(0.3, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out);
 
         if (this.currentWindow !== undefined && this.currentWindow.Name !== windowName) {

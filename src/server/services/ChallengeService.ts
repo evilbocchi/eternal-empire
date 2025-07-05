@@ -27,7 +27,7 @@ import ItemService from "server/services/serverdata/ItemService";
 import SetupService from "server/services/serverdata/SetupService";
 import NamedUpgradeService from "server/services/serverdata/NamedUpgradeService";
 import { getChallengeGui } from "shared/constants";
-import { ASSETS } from "shared/GameAssets";
+import { ASSETS } from "shared/asset/GameAssets";
 import Item from "shared/item/Item";
 import Packets from "shared/Packets";
 import { RESET_LAYERS } from "shared/ResetLayer";

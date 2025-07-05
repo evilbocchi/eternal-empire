@@ -2,7 +2,7 @@ import Difficulty from "@antivivi/jjt-difficulties";
 import { getAllInstanceInfo, getInstanceInfo, playSoundAtPart, setInstanceInfo } from "@antivivi/vrldk";
 import { ReplicatedStorage, RunService } from "@rbxts/services";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
-import { getSound } from "shared/GameAssets";
+import { getSound } from "shared/asset/GameAssets";
 import Item from "shared/item/Item";
 import Furnace from "shared/item/traits/Furnace";
 

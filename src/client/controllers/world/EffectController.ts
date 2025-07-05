@@ -9,7 +9,7 @@ import { LOCAL_PLAYER } from "client/constants";
 import { STATS_WINDOW } from "client/controllers/interface/StatsController";
 import { AREAS } from "shared/Area";
 import { PLACED_ITEMS_FOLDER } from "shared/constants";
-import { getSound } from "shared/GameAssets";
+import { getSound } from "shared/asset/GameAssets";
 import { DROPLET_STORAGE } from "shared/item/Droplet";
 import ItemUtils from "shared/item/ItemUtils";
 import Items from "shared/items/Items";
@@ -27,7 +27,6 @@ export default class EffectController implements OnInit {
         }
     );
     sizePerDrop = new Map<BasePart, Vector3>();
-    burnSound = getSound("Burn");
     delay = 0.2;
 
     load(model: Instance) {
@@ -146,7 +145,7 @@ export default class EffectController implements OnInit {
         });
 
         const userId = LOCAL_PLAYER.UserId;
-        const burnSound = getSound("Burn");
+        const burnSound = getSound("DropletBurn");
         Packets.dropletBurnt.connect((dropletModelId, cpc) => {
             const droplet = DROPLET_STORAGE.FindFirstChild(dropletModelId) as BasePart | undefined;
             if (droplet === undefined) // streamed out

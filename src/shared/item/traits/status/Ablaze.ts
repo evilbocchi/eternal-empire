@@ -1,7 +1,7 @@
 import { formatGradient, getAllInstanceInfo } from "@antivivi/vrldk";
 import { Workspace } from "@rbxts/services";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
-import { ASSETS } from "shared/GameAssets";
+import { ASSETS } from "shared/asset/GameAssets";
 import Item from "shared/item/Item";
 import StatusEffect from "shared/item/traits/status/StatusEffect";
 

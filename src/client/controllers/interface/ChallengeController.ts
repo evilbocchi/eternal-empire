@@ -3,7 +3,7 @@ import { RunService } from "@rbxts/services";
 import QuestsController from "client/controllers/interface/QuestsController";
 import UIController from "client/controllers/UIController";
 import { getChallengeGui } from "shared/constants";
-import { ASSETS } from "shared/GameAssets";
+import { ASSETS } from "shared/asset/GameAssets";
 import Packets from "shared/Packets";
 import { TRACKED_QUEST_WINDOW } from "./QuestsController";
 

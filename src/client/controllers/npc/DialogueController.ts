@@ -4,7 +4,7 @@ import { Debris, ReplicatedStorage, RunService, TextChatService, TweenService, W
 import HotkeysController from "client/controllers/HotkeysController";
 import UIController, { INTERFACE } from "client/controllers/UIController";
 import { getDisplayName, getTextChannels } from "shared/constants";
-import { ASSETS, getSound } from "shared/GameAssets";
+import { ASSETS, getSound } from "shared/asset/GameAssets";
 import Packets from "shared/Packets";
 
 declare global {

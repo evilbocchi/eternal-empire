@@ -1,7 +1,7 @@
 import { BaseOnoeNum, OnoeNum } from "@antivivi/serikanum";
 import { TweenService } from "@rbxts/services";
-import { getSound } from "shared/GameAssets";
-import { ASSETS } from "shared/GameAssets";
+import { getSound } from "shared/asset/GameAssets";
+import { ASSETS } from "shared/asset/GameAssets";
 import Item from "shared/item/Item";
 import ItemTrait from "shared/item/traits/ItemTrait";
 import Packets from "shared/Packets";

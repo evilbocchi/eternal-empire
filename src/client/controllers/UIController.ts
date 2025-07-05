@@ -2,8 +2,8 @@ import Signal from "@antivivi/lemon-signal";
 import { Controller, OnInit, OnStart } from "@flamework/core";
 import { ContentProvider } from "@rbxts/services";
 import { LOCAL_PLAYER, PLAYER_GUI } from "client/constants";
-import { getSound } from "shared/GameAssets";
-import { ASSETS } from "shared/GameAssets";
+import { getSound } from "shared/asset/GameAssets";
+import { ASSETS } from "shared/asset/GameAssets";
 
 /**
  * The {@link ScreenGui} that contains the main interface for the {@link LOCAL_PLAYER}.

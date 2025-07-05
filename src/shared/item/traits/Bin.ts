@@ -1,5 +1,5 @@
 import { TweenService } from "@rbxts/services";
-import { getSound } from "shared/GameAssets";
+import { getSound } from "shared/asset/GameAssets";
 import Item from "shared/item/Item";
 import Operative from "shared/item/traits/Operative";
 import { Server } from "shared/item/ItemUtils";
