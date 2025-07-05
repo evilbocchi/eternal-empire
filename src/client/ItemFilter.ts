@@ -1,6 +1,6 @@
 import { TweenService } from "@rbxts/services";
 import { FILTERABLE_TRAITS } from "client/ItemSlot";
-import { getAsset } from "shared/asset/AssetMap";
+import { assets, getAsset } from "shared/asset/AssetMap";
 
 declare global {
     type FilterOptions = Frame & {
@@ -27,7 +27,7 @@ namespace ItemFilter {
     export function loadFilterOptions(filterOptions: FilterOptions, callback: (query: string, whitelistedTraits: { [trait in TraitFilterId]: boolean }) => void) {
         const filterItems = () => {
             for (const [trait, enabled] of pairs(whitelistedTraits)) {
-                const traitOption = filterOptions.TraitOptions.FindFirstChild(trait) as GuiButton | undefined;
+                const traitOption = filterOptions.TraitOptions.FindFirstChild(trait) as ImageButton | undefined;
                 if (traitOption === undefined)
                     continue;
                 traitOption.SetAttribute("Selected", enabled);
@@ -42,10 +42,10 @@ namespace ItemFilter {
         search.GetPropertyChangedSignal("Text").Connect(() => {
             const text = search.Text;
             if (text === "") {
-                searchAction.Image = getAsset("assets/Search.png");
+                searchAction.Image = getAsset("assets/indexing/Search.png");
             }
             else {
-                searchAction.Image = getAsset("assets/Clear.png");
+                searchAction.Image = getAsset("assets/indexing/Clear.png");
             }
             filterItems();
         });
