@@ -1,5 +1,6 @@
 import { findBaseParts, getAllInstanceInfo } from "@antivivi/vrldk";
 import { CollectionService, RunService } from "@rbxts/services";
+import { getAsset } from "shared/asset/AssetMap";
 import GameSpeed from "shared/GameSpeed";
 import Item from "shared/item/Item";
 import ItemTrait from "shared/item/traits/ItemTrait";
@@ -31,7 +32,7 @@ export default class Conveyor extends ItemTrait {
         const width = part.Size.X;
         const beam = new Instance("Beam");
         beam.Name = "ConveyorArrow";
-        beam.Texture = "rbxassetid://93089838595739";
+        beam.Texture = getAsset("assets/ConveyorArrow.png");
         beam.Segments = 10;
         beam.Width0 = width;
         beam.Width1 = width;

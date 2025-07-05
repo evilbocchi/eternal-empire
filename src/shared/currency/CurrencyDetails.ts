@@ -76,7 +76,7 @@ const details = {
     Health: {
         layoutOrder: 1003,
         color: Color3.fromRGB(255, 0, 0),
-        image: "rbxassetid://17574930668",
+        image: getAsset("assets/Health.png"),
         page: CURRENCY_CATEGORIES.Misc
     },
     Stamina: {
