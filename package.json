@@ -4,6 +4,7 @@
     "description": "",
     "main": "index.js",
     "scripts": {
+        "asset-sync": "npx npx rbxts-asset-sync --output=src/shared/asset/AssetMap.ts",
         "build": "rbxtsc",
         "watch": "rbxtsc -w",
         "docs": "npx typedoc",
@@ -62,6 +63,7 @@
         "@rbxts/rparticle": "^1.0.0",
         "@rbxts/services": "^1.5.1",
         "@rbxts/stringbuilder": "^1.1.0",
-        "@rbxts/testez": "^0.4.2-ts.0"
+        "@rbxts/testez": "^0.4.2-ts.0",
+        "rbxts-asset-sync": "^0.0.1"
     }
 }
