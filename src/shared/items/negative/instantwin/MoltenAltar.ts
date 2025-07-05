@@ -6,8 +6,6 @@ import { Server } from "shared/item/ItemUtils";
 import Furnace from "shared/item/traits/Furnace";
 import FormulaBundled from "shared/item/traits/special/FormulaBundled";
 
-const mul = new CurrencyBundle().set("Funds", 0).set("Power", 0);
-
 export = new Item(script.Name)
     .setName("Molten Altar")
     .setDescription("Burn the sacrifice. Boost increases with Power, maxing out at %cap%.")
