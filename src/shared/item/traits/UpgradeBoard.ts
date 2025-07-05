@@ -90,7 +90,7 @@ export default class UpgradeBoard extends ItemTrait {
             upgradeActionsGui.TitleLabel.Text = upgrade?.name ?? "<no upgrade selected>";
             upgradeActionsGui.DescriptionLabel.Text = upgrade?.description ?? "Select an upgrade to get started.";
             const image = upgrade?.image;
-            upgradeActionsGui.ImageLabel.Image = image === undefined ? "" : "rbxassetid://" + image;
+            upgradeActionsGui.ImageLabel.Image = image === undefined ? "" : image;
             updateCosts(upgrade);
             selected = upgrade;
         };
@@ -112,7 +112,7 @@ export default class UpgradeBoard extends ItemTrait {
         };
         for (const upgrade of upgradeBoard.upgrades) {
             const upgradeOption = ASSETS.UpgradeBoard.UpgradeOption.Clone();
-            upgradeOption.ImageButton.Image = "rbxassetid://" + upgrade.image;
+            upgradeOption.ImageButton.Image = upgrade.image ?? "";
             upgradeOption.Name = upgrade.id;
             upgradeOption.ImageButton.Activated.Connect(() => selectUpgrade(upgrade));
             upgradeOption.Parent = upgradeOptionsGui;

@@ -94,7 +94,6 @@ export const TRACKED_QUEST_WINDOW = INTERFACE.WaitForChild("TrackedQuestWindow")
 export const QUESTS_WINDOW = ADAPTIVE_TAB_MAIN_WINDOW.WaitForChild("Quests") as Frame & {
     Level: Frame & {
         Current: TextButton & {
-            NotificationLabel: ImageLabel,
             LevelLabel: TextLabel;
         },
         ProgressBar: Bar;

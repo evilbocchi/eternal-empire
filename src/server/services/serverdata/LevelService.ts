@@ -70,7 +70,6 @@ export default class LevelService implements OnInit {
     setLevel(level: number) {
         this.dataService.empireData.level = level;
         Packets.level.set(level);
-        Packets.remainingLevelPoints.set(this.getRemainingLevelPoints()!);
         this.levelChanged.fire(level);
     }
 
@@ -107,34 +106,6 @@ export default class LevelService implements OnInit {
         }
     }
 
-    // Level Points Management Methods
-
-    /**
-     * Calculates the total number of level points earned based on current level.
-     * Players earn 1 level point for every 4 levels (rounded down).
-     * 
-     * @returns The total number of level points earned.
-     */
-    getTotalLevelPoints() {
-        return math.floor(this.dataService.empireData.level / 4);
-    }
-
-    /**
-     * Calculates the number of unspent level points available for upgrades.
-     * Takes total earned level points and subtracts points spent on upgrades.
-     * 
-     * @returns The number of level points available to spend.
-     */
-    getRemainingLevelPoints() {
-        const totalLP = this.getTotalLevelPoints();
-        const upgrades = this.dataService.empireData.upgrades;
-
-        // Subtract points spent on each upgrade type
-        return totalLP
-            - (upgrades.get(NamedUpgrades.Stone.id) ?? 0)
-            - (upgrades.get(NamedUpgrades.WhiteGem.id) ?? 0)
-            - (upgrades.get(NamedUpgrades.Crystal.id) ?? 0);
-    }
 
     // Service Lifecycle
 
@@ -146,44 +117,5 @@ export default class LevelService implements OnInit {
         // Send initial level data to clients
         Packets.level.set(this.dataService.empireData.level);
         Packets.xp.set(this.dataService.empireData.xp);
-        Packets.remainingLevelPoints.set(this.getRemainingLevelPoints()!);
-
-        // Commented out respec functionality
-        // Packets.respec.connect((player) => {
-        //     if (!this.dataService.checkPermLevel(player, "purchase")) {
-        //         return false;
-        //     }
-        //     this.namedUpgradeService.setUpgradeAmount(NamedUpgrade.Stone.id, 0);
-        //     this.namedUpgradeService.setUpgradeAmount(NamedUpgrade.WhiteGem.id, 0);
-        //     this.namedUpgradeService.setUpgradeAmount(NamedUpgrade.Crystal.id, 0);
-        //     this.respected.fire(player);
-        //     Packets.remainingLevelPoints.set(this.getRemainingLevelPoints()!);
-        // });
-
-        // Handle level point upgrade purchases
-        Packets.getUpgrade.onInvoke((player, upgradeId, amount) => {
-            // Check purchase permissions
-            if (!this.dataService.checkPermLevel(player, "purchase")) {
-                return false;
-            }
-
-            // Verify player has enough level points
-            const remainingLevelPoints = this.getRemainingLevelPoints();
-            if (remainingLevelPoints === undefined || remainingLevelPoints < amount) {
-                return false;
-            }
-
-            // Verify upgrade is a valid level point upgrade
-            if (NamedUpgrades.Stone.id !== upgradeId && NamedUpgrades.WhiteGem.id !== upgradeId && NamedUpgrades.Crystal.id !== upgradeId) {
-                return false;
-            }
-
-            // Purchase the upgrade
-            this.namedUpgradeService.setUpgradeAmount(upgradeId, this.namedUpgradeService.getUpgradeAmount(upgradeId) + amount);
-
-            // Update remaining level points display
-            Packets.remainingLevelPoints.set(this.getRemainingLevelPoints()!);
-            return true;
-        });
     }
 }
