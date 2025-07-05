@@ -130,10 +130,8 @@ namespace Packets {
     export const questInfo = property<Map<string, DataType.Packed<QuestInfo>>>();
     export const quests = property<Map<string, DataType.i32>>(new Map());
     export const questCompleted = signal<(questId: string) => void>();
-    export const remainingLevelPoints = property<DataType.i32>(-1);
     export const level = property<DataType.i32>(-1);
     export const xp = property<DataType.i32>(-1);
-    export const getUpgrade = request<(upgradeId: string, amount: DataType.i32) => boolean>();
 
     // playtime
     export const longestSessionTime = property<DataType.i32>(0, true);

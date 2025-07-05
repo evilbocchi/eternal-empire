@@ -9,7 +9,7 @@ export default abstract class NamedUpgrade<T = any> {
     name: string | undefined = undefined;
     description: string | undefined = undefined;
     cap: number | undefined = undefined;
-    image: number | undefined = undefined;
+    image: string | undefined = undefined;
     step: number | undefined = undefined;
     priceFormula: ((amount: number) => CurrencyBundle) | undefined = undefined;
     stepFormula?: (value: T, effectiveSteps: number) => T;
@@ -64,7 +64,7 @@ export default abstract class NamedUpgrade<T = any> {
         return this;
     }
 
-    setImage(image: number) {
+    setImage(image: string) {
         this.image = image;
         return this;
     }

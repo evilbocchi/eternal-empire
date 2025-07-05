@@ -3,15 +3,14 @@ import { combineHumanReadable } from "@antivivi/vrldk";
 import { Controller, OnInit, OnPhysics } from "@flamework/core";
 import { Debris, ReplicatedStorage, TweenService, Workspace } from "@rbxts/services";
 import HotkeysController from "client/controllers/HotkeysController";
-import AdaptiveTabController, { ADAPTIVE_TAB, ADAPTIVE_TAB_MAIN_WINDOW, SIDEBAR_BUTTONS } from "client/controllers/interface/AdaptiveTabController";
+import AdaptiveTabController, { ADAPTIVE_TAB_MAIN_WINDOW, SIDEBAR_BUTTONS } from "client/controllers/interface/AdaptiveTabController";
 import { OnCharacterAdded } from "client/controllers/ModdingController";
 import UIController, { INTERFACE } from "client/controllers/UIController";
 import EffectController from "client/controllers/world/EffectController";
 import ItemSlot from "client/ItemSlot";
-import { getMaxXp } from "shared/constants";
 import { ASSETS } from "shared/asset/GameAssets";
+import { getMaxXp } from "shared/constants";
 import Items from "shared/items/Items";
-import NamedUpgrades from "shared/namedupgrade/NamedUpgrades";
 import Packets from "shared/Packets";
 
 declare global {
@@ -68,18 +67,6 @@ export type LPUpgradeOption = Frame & {
         ValueLabel: TextLabel;
     },
     DescriptionLabel: TextLabel;
-};
-
-export const LEVELS_WINDOW = ADAPTIVE_TAB_MAIN_WINDOW.WaitForChild("Levels") as Frame & {
-    LevelPointOptions: Frame & {
-        Respec: TextButton,
-        LevelPointsLabel: TextLabel;
-    },
-    UpgradeOptions: Frame & {
-        Stone: LPUpgradeOption,
-        WhiteGem: LPUpgradeOption,
-        Crystal: LPUpgradeOption;
-    };
 };
 
 export const TRACKED_QUEST_WINDOW = INTERFACE.WaitForChild("TrackedQuestWindow") as Frame & {
@@ -322,26 +309,7 @@ export default class QuestsController implements OnInit, OnPhysics, OnCharacterA
             this.uiController.playSound("Flip");
             this.adaptiveTabController.showAdaptiveTab("Levels");
         });
-        // LEVELS_WINDOW.LevelPointOptions.Respec.Activated.Connect(() => {
-        //     this.uiController.playSound("Charge");
-        //     Packets.respec.fire();
-        // });
-        for (const uo of LEVELS_WINDOW.UpgradeOptions.GetChildren()) {
-            if (uo.IsA("Frame")) {
-                const upgradeOption = uo as LPUpgradeOption;
-                const upgrade = NamedUpgrades.ALL_UPGRADES.get(upgradeOption.Name);
-                if (upgrade === undefined) {
-                    warn("What id win?");
-                    continue;
-                }
-                upgradeOption.DescriptionLabel.Text = upgrade.description ?? "<no description provided>";
-                upgradeOption.Button.Transparency = 0.1;
-                upgradeOption.Button.Activated.Connect(() => {
-                    this.uiController.playSound(Packets.getUpgrade.invoke(upgradeOption.Name, 1) ? "Charge" : "Error");
-                });
-                Packets.upgrades.observe((value) => upgradeOption.Button.ValueLabel.Text = tostring(value.get(upgradeOption.Name) ?? 0));
-            }
-        }
+
         let lastLevel = -1;
         Packets.level.observe((level) => {
             QUESTS_WINDOW.Level.Current.LevelLabel.Text = `Lv. ${level}`;
@@ -353,18 +321,6 @@ export default class QuestsController implements OnInit, OnPhysics, OnCharacterA
             lastLevel = level;
         });
         Packets.xp.observe((xp) => this.refreshXp(xp));
-        Packets.remainingLevelPoints.observe((val) => {
-            QUESTS_WINDOW.Level.Current.NotificationLabel.Visible = val > 0;
-            LEVELS_WINDOW.LevelPointOptions.LevelPointsLabel.Text = tostring(val);
-        });
-        this.hotkeysController.setHotkey(ADAPTIVE_TAB.CloseButton, Enum.KeyCode.X, () => {
-            if (LEVELS_WINDOW.Visible === true) {
-                this.uiController.playSound("Flip");
-                this.adaptiveTabController.showAdaptiveTab("Quests");
-                return true;
-            }
-            return false;
-        }, "Close", 2);
         const questInfoObservation = Packets.questInfo.observe((value) => {
             for (const [id, questInfo] of value)
                 onQuestReceived(id, questInfo);
