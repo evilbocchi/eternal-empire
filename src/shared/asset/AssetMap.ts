@@ -50,6 +50,7 @@ export const assets = {
   "assets/Miscellaneous.png": "rbxassetid://91609325112055",
   "assets/MoreEmpires.png": "rbxassetid://98518635975537",
   "assets/MoreFunds.png": "rbxassetid://107339252280369",
+  "assets/MorePower.png": "rbxassetid://139696893249443",
   "assets/Mul.png": "rbxassetid://93733101486583",
   "assets/ObbyPoint.png": "rbxassetid://100304339946501",
   "assets/Part.png": "rbxassetid://85141489706173",

@@ -93,7 +93,7 @@ export const TRACKED_QUEST_WINDOW = INTERFACE.WaitForChild("TrackedQuestWindow")
 
 export const QUESTS_WINDOW = ADAPTIVE_TAB_MAIN_WINDOW.WaitForChild("Quests") as Frame & {
     Level: Frame & {
-        Current: TextButton & {
+        Current: Frame & {
             LevelLabel: TextLabel;
         },
         ProgressBar: Bar;
@@ -303,11 +303,6 @@ export default class QuestsController implements OnInit, OnPhysics, OnCharacterA
         this.beam.Parent = this.beamContainer;
         this.beamContainer.Parent = Workspace;
         this.beam.Attachment0 = new Instance("Attachment", this.beamContainer);
-
-        QUESTS_WINDOW.Level.Current.Activated.Connect(() => {
-            this.uiController.playSound("Flip");
-            this.adaptiveTabController.showAdaptiveTab("Levels");
-        });
 
         let lastLevel = -1;
         Packets.level.observe((level) => {

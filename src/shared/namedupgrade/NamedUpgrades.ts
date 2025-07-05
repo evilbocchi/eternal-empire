@@ -17,7 +17,7 @@ namespace NamedUpgrades {
         .setName("Improved Droplet Technology")
         .setDescription("Increases Funds gain by 4% per upgrade compounding. Every 10 upgrades multiplies the upgrade by x1.2.")
         .setCap(100)
-        .setImage(getAsset("assets/Funds.png"))
+        .setImage(getAsset("assets/MoreFunds.png"))
         .setPriceFormula((amount) => new CurrencyBundle().set("Funds", OnoeNum.fromSerika(1, 9).mul(new OnoeNum(1.55).pow(amount))))
         .setStepMul(10, (x) => new CurrencyBundle().set("Funds", __1_2.pow(x)))
         .setMul(x => new CurrencyBundle().set("Funds", __1_04.pow(x)));
@@ -26,7 +26,7 @@ namespace NamedUpgrades {
         .setName("Better Networking")
         .setDescription("Increases Power gain by 3% per upgrade compounding. Every 10 upgrades multiplies the upgrade by x1.2.")
         .setCap(100)
-        .setImage(getAsset("assets/Power.png"))
+        .setImage(getAsset("assets/MorePower.png"))
         .setPriceFormula((amount) => new CurrencyBundle().set("Power", OnoeNum.fromSerika(4, 1).mul(new OnoeNum(1.45).pow(amount))))
         .setStepMul(10, (x) => new CurrencyBundle().set("Power", __1_2.pow(x)))
         .setMul(x => new CurrencyBundle().set("Power", __1_03.pow(x)));
