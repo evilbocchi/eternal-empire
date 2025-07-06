@@ -22,10 +22,12 @@
             "runOptions": {
                 "runOn": "folderOpen"
             },
+            "isBackground": true,
             "presentation": {
-                "reveal": "always",
+                "reveal": "never",
+                "group": "watchers",
                 "panel": "dedicated"
-            }
+            },
         }
     ]
 }
