@@ -84,6 +84,8 @@ export const assets = {
   "assets/sounds/CrystalDink.mp3": "rbxassetid://133502359334647",
   "assets/sounds/DropletBurn.mp3": "rbxassetid://84207997594508",
   "assets/sounds/Error.mp3": "rbxassetid://82595288353440",
+  "assets/sounds/IntermissionEnd.mp3": "rbxassetid://127577234072706",
+  "assets/sounds/IntermissionEnter.mp3": "rbxassetid://119094414551118",
   "assets/sounds/ItemPurchase.mp3": "rbxassetid://123977475153335",
   "assets/sounds/Jump.mp3": "rbxassetid://103418598526088",
   "assets/sounds/MenuClick.mp3": "rbxassetid://89464798897151",
@@ -99,7 +101,10 @@ export const assets = {
   "assets/Winification.png": "rbxassetid://89833078760947",
   "assets/Wins.png": "rbxassetid://105073626469266",
   "assets/YouJoined.png": "rbxassetid://99376557633527",
-  "assets/sounds/IntermissionEnter.mp3": "rbxassetid://119094414551118",
+  "assets/sounds/Explosion.mp3": "rbxassetid://70897479507470",
+  "assets/sounds/ExplosiveUnlock.mp3": "rbxassetid://133857531731059",
+  "assets/sounds/Rocket.mp3": "rbxassetid://137711511581134",
+  "assets/sounds/FabricRustle.mp3": "rbxassetid://72429645813951",
 } as const;
 
 export function getAsset(path: keyof typeof assets): string {

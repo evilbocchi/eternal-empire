@@ -506,7 +506,7 @@ export default class CommandsService implements OnInit {
             const h = player.Character?.FindFirstChildOfClass("Humanoid");
             if (h !== undefined && h.RootPart !== undefined) {
                 spawnExplosion(h.RootPart.Position);
-                playSoundAtPart(h.RootPart, getSound("Explosion"));
+                playSoundAtPart(h.RootPart, getSound("Explosion.mp3"));
                 h.TakeDamage(99999999);
             }
         };
@@ -585,7 +585,7 @@ export default class CommandsService implements OnInit {
                         linearVelocity.VectorVelocity = vector;
                         linearVelocity.Attachment0 = attachment;
                         linearVelocity.Parent = attachment;
-                        playSoundAtPart(h.RootPart, getSound("Rocket"));
+                        playSoundAtPart(h.RootPart, getSound("Rocket.mp3"));
                     }
                     this.permissionService.add("banned", target.UserId);
                     task.delay(1, () => {
