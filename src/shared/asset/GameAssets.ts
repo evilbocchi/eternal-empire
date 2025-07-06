@@ -1,4 +1,4 @@
-import { Debris, StarterGui } from "@rbxts/services";
+import { Debris, ReplicatedStorage, SoundService, StarterGui } from "@rbxts/services";
 import { assets } from "shared/asset/AssetMap";
 
 declare global {
@@ -25,15 +25,29 @@ declare global {
 export const ASSETS = StarterGui.WaitForChild("Assets") as Assets;
 
 /**
+ * The sound group for sound effects.
+ * 
+ * This group is used to categorize and manage sound effects in the game.
+ */
+export const SOUND_EFFECTS_GROUP = SoundService.WaitForChild("SoundEffectsGroup") as SoundGroup;
+
+/**
  * Returns a sound from the Assets folder.
  * 
  * @param soundName The name of the sound to retrieve.
  * @returns The sound instance from the Assets folder.
  */
 export function getSound(path: Filename<SoundAssetPath>) {
+    const fullPath = "assets/sounds/" + path as AssetPath;
+    const cached = ReplicatedStorage.FindFirstChild(fullPath) as Sound | undefined;
+    if (cached !== undefined) {
+        return cached;
+    }
     const sound = new Instance("Sound");
-    sound.Name = path;
-    sound.SoundId = assets["assets/sounds/" + path as AssetPath];
+    sound.Name = fullPath;
+    sound.SoundId = assets[fullPath];
+    sound.SoundGroup = SOUND_EFFECTS_GROUP;
+    sound.Parent = ReplicatedStorage;
     return sound;
 }
 

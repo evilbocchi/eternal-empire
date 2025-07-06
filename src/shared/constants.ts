@@ -76,8 +76,6 @@ export const NPCS = script.Parent?.WaitForChild("npcs") as Folder;
 
 export const PLACED_ITEMS_FOLDER = createFolder("PlacedItems");
 
-export const SOUND_EFFECTS_GROUP = SoundService.WaitForChild("SoundEffectsGroup") as SoundGroup;
-
 /**
  * Returns the folder automatically created containing all the text channels.
  * This is a function to prevent yielding when running tests.

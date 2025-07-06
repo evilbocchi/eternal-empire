@@ -1,6 +1,7 @@
-import { CollectionService, ReplicatedStorage } from "@rbxts/services";
-import { IS_SERVER, SOUND_EFFECTS_GROUP } from "shared/constants";
 import { findModels } from "@antivivi/vrldk";
+import { CollectionService, ReplicatedStorage } from "@rbxts/services";
+import { SOUND_EFFECTS_GROUP } from "shared/asset/GameAssets";
+import { IS_SERVER } from "shared/constants";
 
 const itemModels = new Map<string, Model>();
 const folder = ReplicatedStorage.WaitForChild("ItemModels");
@@ -36,7 +37,7 @@ for (const model of served) {
 
     if (!IS_SERVER)
         continue;
-    
+
     for (const instance of model.GetDescendants()) {
         const name = instance.Name;
 

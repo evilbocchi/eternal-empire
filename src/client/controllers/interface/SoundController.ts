@@ -3,9 +3,8 @@ import { Lighting, ReplicatedStorage, SoundService, TweenService, Workspace } fr
 import { LOCAL_PLAYER, PLAYER_GUI } from "client/constants";
 import { SETTINGS_WINDOW } from "client/controllers/interface/SettingsController";
 import { START_WINDOW } from "client/controllers/interface/StartWindowController";
-import { MUSIC_GROUP, SOUND_EFFECTS_GROUP } from "shared/constants";
-import { getSound } from "shared/asset/GameAssets";
-import { ASSETS } from "shared/asset/GameAssets";
+import { ASSETS, getSound, SOUND_EFFECTS_GROUP } from "shared/asset/GameAssets";
+import { MUSIC_GROUP } from "shared/constants";
 import Packets from "shared/Packets";
 
 @Controller()

@@ -1,6 +1,7 @@
 import { TweenService } from "@rbxts/services";
 import { FILTERABLE_TRAITS } from "client/ItemSlot";
-import { assets, getAsset } from "shared/asset/AssetMap";
+import { getAsset } from "shared/asset/AssetMap";
+import { getSound } from "shared/asset/GameAssets";
 
 declare global {
     type FilterOptions = Frame & {
@@ -39,8 +40,29 @@ namespace ItemFilter {
         const search = filterOptions.Search;
         const searchAction = search.Action;
 
+        let previousText = search.Text;
         search.GetPropertyChangedSignal("Text").Connect(() => {
             const text = search.Text;
+            if (text.size() > previousText.size()) {
+                switch (math.random(1, 4)) {
+                    case 1:
+                        getSound("KeyPress1.mp3").Play();
+                        break;
+                    case 2:
+                        getSound("KeyPress2.mp3").Play();
+                        break;
+                    case 3:
+                        getSound("KeyPress3.mp3").Play();
+                        break;
+                    case 4:
+                        getSound("KeyPress4.mp3").Play();
+                        break;
+                }
+            }
+            else {
+                getSound("KeyDelete.mp3").Play();
+            }
+
             if (text === "") {
                 searchAction.Image = getAsset("assets/indexing/Search.png");
             }
@@ -59,6 +81,7 @@ namespace ItemFilter {
         searchAction.Activated.Connect(() => {
             search.Text = "";
             search.CaptureFocus();
+            getSound("Click.mp3").Play();
         });
 
         for (const traitOption of filterOptions.TraitOptions.GetChildren()) {
@@ -81,6 +104,7 @@ namespace ItemFilter {
                 update();
             });
             traitOption.Activated.Connect(() => {
+                getSound("MenuClick.mp3").Play();
                 const trait = traitOption.Name as TraitFilterId;
                 if ((trait as string) === "Clear") {
                     for (const [trait, _enabled] of pairs(whitelistedTraits)) {
