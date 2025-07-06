@@ -661,6 +661,18 @@ export default class Droplet {
             .setValue(new CurrencyBundle().set("Funds", 10000000).set("Power", 10000000).set("Skill", 1))
     );
 
+    static DiamondDroplet = Droplet.registerDroplet(
+        new Droplet("DiamondDroplet")
+            .setModel(() => {
+                const droplet = new Instance("Part");
+                droplet.Size = new Vector3(1, 1, 1);
+                droplet.Color = Color3.fromRGB(140, 255, 245);
+                droplet.Material = Enum.Material.Neon;
+                return droplet;
+            })
+            .setValue(new CurrencyBundle().set("Diamonds", 1))
+    );
+
     /**
      * Registers a droplet to the droplet list.
      * 

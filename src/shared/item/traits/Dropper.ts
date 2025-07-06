@@ -31,7 +31,7 @@ declare global {
 
 export default class Dropper extends ItemTrait {
 
-    static wrapInstantiator(instantiator: () => BasePart, dropper: Dropper) {
+    static wrapInstantiator(instantiator: () => BasePart, dropper: Dropper, model: Model, drop: BasePart) {
         const callback = dropper.dropletProduced;
         return () => {
             const droplet = instantiator();
@@ -42,6 +42,17 @@ export default class Dropper extends ItemTrait {
                 droplet.SetNetworkOwner(player);
             }
 
+            // Lucky droplet chance: 1/1000 chance to spawn a Diamond Droplet
+            if (math.random(1, 1000) === 1) {
+                const luckyDropletInstantiator = Droplet.DiamondDroplet.getInstantiator(model, drop);
+                if (luckyDropletInstantiator !== undefined) {
+                    const luckyDroplet = luckyDropletInstantiator();
+                    luckyDroplet.Parent = DROPLET_STORAGE;
+                    if (player !== undefined) {
+                        luckyDroplet.SetNetworkOwner(player);
+                    }
+                }
+            }
 
             if (callback !== undefined)
                 callback(droplet, dropper);
@@ -70,7 +81,7 @@ export default class Dropper extends ItemTrait {
             info.DropRate = dropper.dropRate;
 
             if (instantiator !== undefined) {
-                info.Instantiator = Dropper.wrapInstantiator(instantiator, dropper);
+                info.Instantiator = Dropper.wrapInstantiator(instantiator, dropper, model, drop);
             }
 
             Dropper.SPAWNED_DROPS.set(drop, info);
