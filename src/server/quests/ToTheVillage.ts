@@ -151,7 +151,7 @@ export = new Quest(script.Name)
                     effect.Transparency = 0;
                 }
                 explosionEffect.Emit(2);
-                playSoundAtPart(cauldron.PrimaryPart, getSound("MagicSprinkle"));
+                playSoundAtPart(cauldron.PrimaryPart, getSound("MagicSprinkle.mp3"));
                 proximityPrompt.Enabled = false;
                 stage.completed.fire();
             });
@@ -200,7 +200,7 @@ export = new Quest(script.Name)
                 }).Play();
             }
             task.wait(1);
-            playSoundAtPart(cauldron.PrimaryPart, getSound("SpellCardAttack"));
+            playSoundAtPart(cauldron.PrimaryPart, getSound("MagicPowerUp.mp3"));
             wool.Destroy();
             const effect = explosionEffect.Clone();
             effect.Parent = instantWinBlock;
@@ -231,7 +231,7 @@ export = new Quest(script.Name)
                         }
                     }
                     task.wait(2);
-                    playSoundAtPart(instantWinBlock, getSound("MagicSprinkle"));
+                    playSoundAtPart(instantWinBlock, getSound("MagicSprinkle.mp3"));
                     const effect = explosionEffect.Clone();
                     effect.Parent = instantWinBlock;
                     effect.Emit(2);
@@ -296,7 +296,7 @@ export = new Quest(script.Name)
                 }).Play();
 
                 linkwayEffect.Emit(4);
-                playSoundAtPart(particlePart, getSound("MagicExplosion"), 2);
+                playSoundAtPart(particlePart, getSound("LaserExplosion.mp3"), 2);
                 Server.UnlockedAreas.unlockArea("SlamoVillage");
                 stage.completed.fire();
             });

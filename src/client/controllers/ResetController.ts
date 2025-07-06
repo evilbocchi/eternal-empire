@@ -41,7 +41,7 @@ export default class ResetController implements OnInit {
             const toCframe = (instance as BasePart).CFrame;
             TweenService.Create(currentCamera, new TweenInfo(1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), { CFrame: toCframe }).Play();
             task.delay(1, () => {
-                this.uiController.playSound("Thunder");
+                this.uiController.playSound("Thunder.mp3");
                 const lightning = ASSETS.Resets.WaitForChild("SkillificationLightning").Clone() as BasePart;
                 lightning.Parent = Workspace;
                 TweenService.Create(lightning, new TweenInfo(1), { Transparency: 1 }).Play();
@@ -67,7 +67,7 @@ export default class ResetController implements OnInit {
             const resetLayer = RESET_LAYERS[layer];
             TRACKED_QUEST_WINDOW.Reset.AmountLabel.Text = CurrencyBundle.getFormatted(resetLayer.gives, new OnoeNum(amount)).upper();
             this.moveCamera(resetLayer.area.areaFolder.WaitForChild("ResetCamera"));
-            this.uiController.playSound("MagicWoosh");
+            this.uiController.playSound("MagicCast.mp3");
         });
     }
 }

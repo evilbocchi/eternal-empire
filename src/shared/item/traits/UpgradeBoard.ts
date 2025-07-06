@@ -72,7 +72,10 @@ export default class UpgradeBoard extends ItemTrait {
         const buyMax = newPurchaseOption("MAX");
         let selected: NamedUpgrade | undefined = undefined;
 
-        const sound = (success: boolean) => playSoundAtPart(model.PrimaryPart, getSound(success ? "Coins" : "Error"));
+        const sound = (success: boolean) => {
+            const sound = success ? getSound("UpgradeBought.mp3") : getSound("Error.mp3");
+            playSoundAtPart(model.PrimaryPart, sound);
+        };
         buy1.Button.Activated.Connect(() => {
             if (selected !== undefined)
                 sound(Packets.buyUpgrade.invoke(selected.id, getUpgradeAmount(selected) + 1));

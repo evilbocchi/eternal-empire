@@ -198,7 +198,7 @@ export default class QuestsController implements OnInit, OnPhysics, OnCharacterA
         TRACKED_QUEST_WINDOW.DescriptionLabel.Text = this.getFormattedDescription(questId, quest, index) ?? "<no description provided>";
         this.beam.Color = new ColorSequence(color);
         if (this.oldIndex !== index && (questId !== "NewBeginnings" || index !== 0)) {
-            this.uiController.playSound("Notification");
+            this.uiController.playSound("QuestNextStage.mp3");
         }
         this.oldIndex = index;
         this.indexer = questId + index;
@@ -218,7 +218,7 @@ export default class QuestsController implements OnInit, OnPhysics, OnCharacterA
     }
 
     showCompletion(completionFrame: CompletionFrame, message: string) {
-        this.uiController.playSound("Unlock");
+        this.uiController.playSound("QuestComplete.mp3");
         completionFrame.RewardLabel.Text = message;
         this.effectController.showQuestMessage(completionFrame);
     }
@@ -309,7 +309,7 @@ export default class QuestsController implements OnInit, OnPhysics, OnCharacterA
             QUESTS_WINDOW.Level.Current.LevelLabel.Text = `Lv. ${level}`;
             QUESTS_WINDOW.Level.ProgressBar.SetAttribute("Level", level);
             if (lastLevel > -1) {
-                this.uiController.playSound("LevelUp");
+                this.uiController.playSound("LevelUp.mp3");
             }
             this.refreshXp(Packets.xp.get());
             lastLevel = level;
@@ -341,9 +341,15 @@ export default class QuestsController implements OnInit, OnPhysics, OnCharacterA
             questOption.Content.GetPropertyChangedSignal("Visible").Connect(() => refreshDropdownLabel());
             refreshDropdownLabel();
             questOption.Dropdown.Activated.Connect(() => {
-                questOption.Content.Visible = !questOption.Content.Visible;
+                const visible = !questOption.Content.Visible;
+                questOption.Content.Visible = visible;
                 moved = true;
-                this.uiController.playSound("Flip");
+                if (visible) {
+                    this.uiController.playSound("CheckOn.mp3");
+                }
+                else {
+                    this.uiController.playSound("CheckOff.mp3");
+                }
             });
             const updateTrack = (q: string | undefined) => {
                 const color = id === q ? Color3.fromRGB(85, 255, 127) : Color3.fromRGB(255, 52, 52);
@@ -415,7 +421,7 @@ export default class QuestsController implements OnInit, OnPhysics, OnCharacterA
         });
         Packets.xpReceived.connect((xp) => {
             const lootItemSlot = ASSETS.LootTableItemSlot.Clone();
-            this.uiController.playSound("ItemGet");
+            this.uiController.playSound("UnlockItem.mp3");
             lootItemSlot.Background.ImageLabel.ImageColor3 = TRACKED_QUEST_WINDOW.Background.Frame.BackgroundColor3;
             lootItemSlot.ViewportFrame.Visible = false;
             lootItemSlot.TitleLabel.Text = `+${xp} XP`;
@@ -423,7 +429,7 @@ export default class QuestsController implements OnInit, OnPhysics, OnCharacterA
             task.delay(3, () => this.phaseOutLootTableItemSlot(lootItemSlot));
         });
         Packets.itemsReceived.connect((items) => {
-            this.uiController.playSound("ItemGet");
+            this.uiController.playSound("UnlockItem.mp3");
             for (const [itemId, amount] of items) {
                 const item = Items.getItem(itemId);
                 if (item === undefined)

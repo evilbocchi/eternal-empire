@@ -98,7 +98,7 @@ export = new Quest(script.Name)
             Server.NPC.State.stopAnimation(Freddy, "Default");
             characterTween.Play();
 
-            const hitSound = getSound("Hit");
+            const hitSound = getSound("QuestConstruct.mp3");
             for (const handle of ladderHandles) {
                 emitEffect("Strike", handle, 2);
                 handle.Transparency = 0;

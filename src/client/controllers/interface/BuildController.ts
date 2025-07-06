@@ -417,7 +417,12 @@ export default class BuildController implements OnInit, OnStart {
                     continue;
                 primaryPart.CFrame = indicator.CFrame; // snap to indicator
             }
-            this.uiController.playSound(this.placeSelected() === true ? "Place" : "Error");
+            if (this.placeSelected() === true) {
+                this.uiController.playSound("Place.mp3");
+            }
+            else {
+                this.uiController.playSound("Error.mp3");
+            }
             this.lastSelectingCFrame = selectingCFrame;
             return;
         }
@@ -476,7 +481,7 @@ export default class BuildController implements OnInit, OnStart {
         }, "Deselect");
         this.hotkeysController.setHotkey(BUILD_WINDOW.Options.Rotate, Enum.KeyCode.R, () => {
             if (!this.selected.isEmpty() || this.getRestricted() === true) {
-                this.uiController.playSound("Woosh");
+                this.uiController.playSound("ItemRotate.mp3");
                 if (this.rotationValue.Value >= 270) {
                     this.rotationValue.Value = 0;
                 }

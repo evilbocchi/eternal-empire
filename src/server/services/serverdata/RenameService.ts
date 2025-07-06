@@ -123,7 +123,7 @@ export class RenameService implements OnInit {
         name = getNameFromUserId(this.dataService.empireData.owner) + "'s " + name;
 
         // Play rename effects
-        playSoundAtPart(Workspace, getSound("SpellCardAttack"));
+        playSoundAtPart(Workspace, getSound("MagicPowerUp.mp3"));
         Packets.camShake.fireAll();
         this.chatHookService.sendServerMessage("The empire has been renamed to: " + name);
 

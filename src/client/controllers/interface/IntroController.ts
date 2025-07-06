@@ -51,7 +51,7 @@ export default class IntroController implements OnInit {
         INTRO_WINDOW.Visible = true;
         this.balanceWindowController.hideBalanceWindow();
         this.adaptiveTabController.hideSidebarButtons();
-        const fabricRustle = () => this.uiController.playSound("FabricRustle");
+        const fabricRustle = () => this.uiController.playSound("FabricRustle.mp3");
         task.delay(2, () => {
             fabricRustle();
             TweenService.Create(camera, new TweenInfo(0.5), { CFrame: getWaypoint("NewBeginningsCamera1").CFrame }).Play();
@@ -66,7 +66,7 @@ export default class IntroController implements OnInit {
             TweenService.Create(camera, new TweenInfo(0.5), { CFrame: getWaypoint("NewBeginningsCamera3").CFrame }).Play();
         });
         task.delay(5, () => {
-            this.uiController.playSound("Swish");
+            this.uiController.playSound("JumpSwish.mp3");
             sleepingAnimation?.Stop();
             camera.CFrame = getWaypoint("NewBeginningsCamera4").CFrame;
             camera.CameraType = Enum.CameraType.Custom;
@@ -76,7 +76,6 @@ export default class IntroController implements OnInit {
             }
         });
         task.delay(7.5, () => {
-            this.uiController.playSound("Ding");
             this.questsController.trackedQuest = "NewBeginnings";
             this.questsController.trackedQuestChanged.fire("NewBeginnings");
             this.isCurrentlyInIntroSequence = false;

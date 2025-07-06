@@ -207,7 +207,7 @@ export default class StartWindowController implements OnInit {
                     this.loadingWindowController.showLoadingWindow("Loading server");
                 }
                 else {
-                    this.uiController.playSound("Error");
+                    this.uiController.playSound("Error.mp3");
                     warn(`Failed to teleport to empire ${availableEmpire}. It may not exist or is not available.`);
                     print("Player ID: " + LOCAL_PLAYER.UserId);
                 }
@@ -268,7 +268,7 @@ export default class StartWindowController implements OnInit {
                 return false;
             }
 
-            this.uiController.playSound("Flip");
+            this.uiController.playSound("MenuClose.mp3");
             const tween = TweenService.Create(START_WINDOW.AboutWindow, new TweenInfo(0.25), { Position: new UDim2(0, 0, -0.5, 0) });
             tween.Play();
             tween.Completed.Once(() => START_WINDOW.AboutWindow.Visible = false);
@@ -276,11 +276,11 @@ export default class StartWindowController implements OnInit {
             return true;
         }, "Close");
         const registerOption = (option: typeof START_WINDOW.MainOptions.Play, callback: () => void) => {
-            option.Button.MouseEnter.Connect(() => this.uiController.playSound("Hover"));
+            option.Button.MouseEnter.Connect(() => this.uiController.playSound("ButtonHover.mp3"));
             option.Button.MouseMoved.Connect(() => option.Button.ImageColor3 = new Color3(0.75, 0.75, 0.75));
             option.Button.MouseLeave.Connect(() => option.Button.ImageColor3 = new Color3(1, 1, 1));
             option.Button.Activated.Connect(() => {
-                this.uiController.playSound("MagicalSelect");
+                this.uiController.playSound("MenuSelect.mp3");
                 callback();
             });
         };

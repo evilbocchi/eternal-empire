@@ -49,7 +49,7 @@ export default class ChallengeController implements OnPhysics, OnInit {
                 this.uiController.playSound("MenuClick.mp3");
                 const t = tick();
                 if (t - (startButton.GetAttribute("LastClick") as number ?? 0) < 3) {
-                    this.uiController.playSound("MagicWoosh");
+                    this.uiController.playSound("MagicCast.mp3");
                     Packets.startChallenge.inform(challengeOption.Name);
                 }
                 else {
@@ -83,7 +83,7 @@ export default class ChallengeController implements OnPhysics, OnInit {
                     return;
                 this.debounce = t;
 
-                this.uiController.playSound("MagicWoosh");
+                this.uiController.playSound("MagicCast.mp3");
                 Packets.quitChallenge.inform();
             });
         }

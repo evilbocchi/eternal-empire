@@ -255,7 +255,7 @@ export default class AreaService implements OnInit, OnPlayerJoined {
                 // Teleport player back to safety with effects
                 rootPart.CFrame = spawnLocation.CFrame;
                 Packets.camShake.fire(player); // Visual feedback
-                playSoundAtPart(rootPart, getSound("Splash")); // Audio feedback
+                playSoundAtPart(rootPart, getSound("Splash.mp3")); // Audio feedback
             });
         }
     }
@@ -372,7 +372,7 @@ export default class AreaService implements OnInit, OnPlayerJoined {
             }
 
             // Clone teleportation sound to the character for portal usage
-            getSound("Teleport").Clone().Parent = rootPart;
+            getSound("Teleport.mp3").Clone().Parent = rootPart;
         };
 
         // Set up character handling for current and future character spawns

@@ -3,8 +3,8 @@ import { Controller, OnInit, OnStart } from "@flamework/core";
 import { Debris, ReplicatedStorage, RunService, TextChatService, TweenService, Workspace } from "@rbxts/services";
 import HotkeysController from "client/controllers/HotkeysController";
 import UIController, { INTERFACE } from "client/controllers/UIController";
-import { getDisplayName, getTextChannels } from "shared/constants";
 import { ASSETS, getSound } from "shared/asset/GameAssets";
+import { getDisplayName, getTextChannels } from "shared/constants";
 import Packets from "shared/Packets";
 
 declare global {
@@ -26,7 +26,7 @@ export default class DialogueController implements OnInit, OnStart {
 
     npcTagColor = Color3.fromRGB(201, 255, 13).ToHex();
     emptyColor = Color3.fromRGB(0, 181, 28).ToHex();
-    defaultTextSound = getSound("Text");
+    defaultTextSound = getSound("DefaultText.mp3");
     textSound = undefined as Sound | undefined;
     text = "";
     size = 0;
@@ -106,8 +106,6 @@ export default class DialogueController implements OnInit, OnStart {
             let name = undefined as string | undefined;
 
             if (model !== undefined && humanoid !== undefined) {
-                if (Packets.settings.get()?.SoundEffects)
-                    (humanoid.RootPart?.FindFirstChild("DingSound") as Sound | undefined)?.Play();
                 name = getDisplayName(humanoid);
                 channel.DisplaySystemMessage(
                     `<font color="#${this.npcTagColor}">[${pos}/${endPos}]</font> <font color="#${ComputeNameColor(name).ToHex()}">${name}:</font> ${message}`
@@ -115,7 +113,6 @@ export default class DialogueController implements OnInit, OnStart {
                 TextChatService.DisplayBubble(model.WaitForChild("Head") as BasePart, message);
             }
             else {
-                this.uiController.playSound("Ding");
                 channel.DisplaySystemMessage(
                     `<font color="#${this.emptyColor}">${message}</font>`, "tag:hidden");
             }

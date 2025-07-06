@@ -103,7 +103,7 @@ export default class Printer extends ItemTrait {
         templateSetupOption.Heading.NameLabel.Text = "Setup " + (printedSetups === undefined ? "1" : (printedSetups.size() + 1));
         templateSetupOption.Body.SaveButton.Activated.Connect(() => {
             if (saveEvent.InvokeServer(templateSetupOption.Heading.NameLabel.Text) as unknown === true)
-                playSoundAtPart(model.PrimaryPart, getSound("MagicSprinkle"));
+                playSoundAtPart(model.PrimaryPart, getSound("MagicSprinkle.mp3"));
         });
         templateSetupOption.Parent = setupOptions;
 
@@ -126,11 +126,11 @@ export default class Printer extends ItemTrait {
                     setupOption.LayoutOrder = i;
                     setupOption.Body.SaveButton.Activated.Connect(() => {
                         if (saveEvent.InvokeServer(name) as unknown === true)
-                            playSoundAtPart(model.PrimaryPart, getSound("MagicSprinkle"));
+                            playSoundAtPart(model.PrimaryPart, getSound("MagicSprinkle.mp3"));
                     });
                     setupOption.Body.LoadButton.Activated.Connect(() => {
                         if (loadEvent.InvokeServer(name) as unknown === true)
-                            playSoundAtPart(model.PrimaryPart, getSound("MagicSprinkle"));
+                            playSoundAtPart(model.PrimaryPart, getSound("MagicSprinkle.mp3"));
                     });
                     const toggleEditable = (isEditable = !setupOption.Heading.NameLabel.TextEditable) => {
                         setupOption.Heading.NameLabel.TextEditable = isEditable;

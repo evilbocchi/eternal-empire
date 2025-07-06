@@ -90,7 +90,7 @@ export default class AreaController implements OnInit, OnStart {
             }
         }
         this.AREA_UNLOCK_SHAKE.Shake(CameraShaker.Presets.Bump);
-        this.uiController.playSound("Thunder");
+        this.uiController.playSound("Thunder.mp3");
     }
 
     onInit() {

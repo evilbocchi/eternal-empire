@@ -208,7 +208,6 @@ export default class DialogueService implements OnInit, OnStart, OnNPCLoad {
         prompt.Enabled = true;
         prompt.MaxActivationDistance = 6.5;
         prompt.RequiresLineOfSight = false;
-        getSound("Ding").Clone().Parent = model.PrimaryPart;
 
         prompt.Triggered.Connect((player) => {
             print(`${player.Name} interacted`);
