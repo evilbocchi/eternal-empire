@@ -4,7 +4,7 @@
 
 # JME
 
-[![Build](https://github.com/evilbocchi/jme/actions/workflows/build-and-release.yml/badge.svg?branch=master&event=push)](https://github.com/evilbocchi/jme/actions/workflows/build-and-release.yml)
+[![Build](https://github.com/evilbocchi/jme/actions/workflows/build-and-release.yml/badge.svg?branch=main&event=push)](https://github.com/evilbocchi/jme/actions/workflows/build-and-release.yml)
 [![GitHub](https://img.shields.io/github/release/evilbocchi/jme.svg)](https://github.com/evilbocchi/jme/releases/latest)
 [![CodeFactor](https://www.codefactor.io/repository/github/evilbocchi/jme/badge)](https://www.codefactor.io/repository/github/evilbocchi/jme)
 [![Discord](https://discordapp.com/api/guilds/1217488177862938654/widget.png?style=shield)](https://discord.gg/haPBmCSvXt)
