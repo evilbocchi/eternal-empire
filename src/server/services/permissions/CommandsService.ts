@@ -51,6 +51,7 @@ import { ASSETS, getSound } from "shared/asset/GameAssets";
 import GameSpeed from "shared/GameSpeed";
 import { DROPLET_STORAGE } from "shared/item/Droplet";
 import Items from "shared/items/Items";
+import LuckyDroplets from "shared/LuckyDroplets";
 import Packets from "shared/Packets";
 import Sandbox from "shared/Sandbox";
 
@@ -965,6 +966,18 @@ export default class CommandsService implements OnInit {
                 const speed = tonumber(newSpeed) ?? 1;
                 this.sendServerMessage(`Changed speed to ${speed}. Old speed: ${GameSpeed.speed}`);
                 GameSpeed.speed = speed;
+            }, 4);
+
+        this.createCommand("luckychance", "lc",
+            "<chance> : Set the lucky droplet chance. 1000 = 1/1000 chance, 1 = every droplet is lucky, 0 = disabled.",
+            (_player, newChance) => {
+                const chance = tonumber(newChance) ?? 1000;
+                if (chance < 0) {
+                    this.sendServerMessage("Lucky droplet chance cannot be negative. Use 0 to disable.");
+                    return;
+                }
+                this.sendServerMessage(`Changed lucky droplet chance to 1/${chance === 0 ? "disabled" : chance}. Old chance: 1/${LuckyDroplets.chance === 0 ? "disabled" : LuckyDroplets.chance}`);
+                LuckyDroplets.chance = chance;
             }, 4);
 
         this.createCommand("fix", "fix",

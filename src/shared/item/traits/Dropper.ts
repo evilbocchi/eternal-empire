@@ -6,6 +6,7 @@ import { Players, RunService } from "@rbxts/services";
 import Area, { AREAS } from "shared/Area";
 import { CURRENCY_DETAILS } from "shared/currency/CurrencyDetails";
 import GameSpeed from "shared/GameSpeed";
+import LuckyDroplets from "shared/LuckyDroplets";
 import Droplet, { DROPLET_STORAGE } from "shared/item/Droplet";
 import Item from "shared/item/Item";
 import { Server } from "shared/item/ItemUtils";
@@ -42,8 +43,8 @@ export default class Dropper extends ItemTrait {
                 droplet.SetNetworkOwner(player);
             }
 
-            // Lucky droplet chance: 1/1000 chance to spawn a Diamond Droplet
-            if (math.random(1, 1000) === 1) {
+            // Lucky droplet chance: configurable chance to spawn a Diamond Droplet
+            if (LuckyDroplets.chance > 0 && math.random(1, LuckyDroplets.chance) === 1) {
                 const luckyDropletInstantiator = Droplet.DiamondDroplet.getInstantiator(model, drop);
                 if (luckyDropletInstantiator !== undefined) {
                     const luckyDroplet = luckyDropletInstantiator();
