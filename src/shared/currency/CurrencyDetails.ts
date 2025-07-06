@@ -86,6 +86,12 @@ const details = {
         page: CURRENCY_CATEGORIES.Misc
     },
 
+    Diamonds: {
+        layoutOrder: 1005,
+        color: Color3.fromRGB(140, 255, 245),
+        image: getAsset("assets/Diamond.png"),
+        page: CURRENCY_CATEGORIES.Misc
+    },
     "Funds Bombs": {
         layoutOrder: 10000,
         color: Color3.fromRGB(0, 140, 97),
