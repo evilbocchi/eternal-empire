@@ -93,6 +93,52 @@ declare global {
          * This is automatically generated when the item is placed.
          */
         meta?: PlacedItemMetadata;
+
+        /**
+         * The UUID of the unique item instance, if this placed item is a unique item.
+         */
+        uniqueItemId?: string;
+    }
+
+    /**
+     * Represents a unique item instance with its randomly generated pots.
+     */
+    interface UniqueItemInstance {
+        /**
+         * The base item ID that this unique item is based on.
+         */
+        baseItemId: string;
+
+        /**
+         * The pots (unique stats) for this item instance.
+         * Key is the pot name, value is the generated stat value.
+         */
+        pots: Map<string, number>;
+
+        /**
+         * The timestamp when this unique item was created.
+         */
+        created: number;
+    }
+
+    /**
+     * Configuration for a pot (unique stat) that can be generated for a unique item.
+     */
+    interface PotConfig {
+        /**
+         * The minimum value for this pot.
+         */
+        min: number;
+
+        /**
+         * The maximum value for this pot.
+         */
+        max: number;
+
+        /**
+         * Whether this value should be an integer (default: false).
+         */
+        integer?: boolean;
     }
 
     /**
@@ -137,6 +183,11 @@ declare global {
          * The next ID to use for a placed item.
          */
         nextId: number;
+
+        /**
+         * The unique items that the player owns, mapped by their UUID.
+         */
+        uniqueItems: Map<string, UniqueItemInstance>;
     }
 
     /**
@@ -262,6 +313,7 @@ export const EmpireProfileTemplate = {
         bought: new Map<string, number>(),
         worldPlaced: new Map<string, PlacedItem>(),
         nextId: 0,
+        uniqueItems: new Map<string, UniqueItemInstance>(),
     } as ItemsData,
     backup: {
         currencies: undefined as CurrencyMap | undefined,
