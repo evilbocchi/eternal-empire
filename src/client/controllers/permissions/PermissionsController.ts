@@ -42,7 +42,7 @@ export default class PermissionsController implements OnInit {
 
     onInit() {
         Packets.donationGiven.connect(() => {
-            this.uiController.playSound("PowerUp");
+            this.uiController.playSound("PowerUp.mp3");
             this.effectController.camShake.Shake(CameraShaker.Presets.Bump);
         });
         Packets.tabOpened.connect((tab) => {

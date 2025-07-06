@@ -129,12 +129,12 @@ export default class SoundController implements OnStart {
                 this.refreshMusic(true);
         });
 
-        const oceanWaves = getSound("OceanWaves");
+        const oceanWaves = getSound("OceanWaves.mp3");
         oceanWaves.Volume = 0;
         oceanWaves.Play();
         Workspace.CurrentCamera!.GetPropertyChangedSignal("CFrame").Connect(() => {
             const y = Workspace.CurrentCamera!.CFrame.Y;
-            oceanWaves.Volume = (1 - (math.abs(y) / 100)) / 7;
+            oceanWaves.Volume = (1 - (math.abs(y) / 100)) / 14;
         });
 
         // debug

@@ -57,7 +57,7 @@ namespace Challenges {
         task.delay(0.5, () => {
             meteor.Transparency = 1;
             meteor.ClearAllChildren();
-            playSoundAtPart(meteor, getSound("Explosion"));
+            playSoundAtPart(meteor, getSound("Explosion.mp3"));
             meteor.CanCollide = false;
             meteor.CanTouch = false;
             meteor.CanQuery = false;

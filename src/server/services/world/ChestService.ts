@@ -317,7 +317,7 @@ export default class ChestService implements OnInit, OnStart {
                 chestLocationMarker.Transparency = 1;
                 const chestModel = ASSETS.Chest.Clone();
                 chestModel.PivotTo(chestLocationMarker.CFrame);
-                const sound = getSound("ChestOpen").Clone();
+                const sound = getSound("ChestOpen.mp3").Clone();
                 sound.SoundGroup = SOUND_EFFECTS_GROUP;
                 sound.Parent = chestModel.PrimaryPart;
 

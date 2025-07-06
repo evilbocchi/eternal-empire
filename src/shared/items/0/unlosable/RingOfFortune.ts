@@ -42,7 +42,7 @@ export = new Item(script.Name)
                     explosion.BlastPressure = 2500000;
                     explosion.DestroyJointRadiusPercent = 0;
                     explosion.Position = part.Position;
-                    playSoundAtPart(part, getSound("Explosion"));
+                    playSoundAtPart(part, getSound("Explosion.mp3"));
                     explosion.Parent = part;
                 }
             };

@@ -30,11 +30,11 @@ export default class WarpController implements OnInit {
                 if (WARP_WINDOW.Visible) {
                     const success = Packets.tpToArea.invoke(areaId);
                     if (success) {
-                        this.uiController.playSound("Teleport");
+                        this.uiController.playSound("Teleport.mp3");
                         this.adaptiveTabController.hideAdaptiveTab();
                     }
                     else {
-                        this.uiController.playSound("Error");
+                        this.uiController.playSound("Error.mp3");
                     }
                     return true;
                 }

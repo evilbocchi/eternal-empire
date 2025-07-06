@@ -40,7 +40,7 @@ const unlockWall = () => {
         suspiciousWall.CanCollide = false;
         spawnExplosion(suspiciousWall.Position);
         emitEffect("Sparks", suspiciousWall, 2);
-        playSoundAtPart(suspiciousWall, getSound("ExplosiveUnlock"));
+        playSoundAtPart(suspiciousWall, getSound("ExplosiveUnlock.mp3"));
         Server.Event.setEventCompleted("SuspiciousWallOpened", true);
     });
 };

@@ -145,7 +145,7 @@ export default class EffectController implements OnInit {
         });
 
         const userId = LOCAL_PLAYER.UserId;
-        const burnSound = getSound("DropletBurn");
+        const burnSound = getSound("DropletBurn.mp3");
         Packets.dropletBurnt.connect((dropletModelId, cpc) => {
             const droplet = DROPLET_STORAGE.FindFirstChild(dropletModelId) as BasePart | undefined;
             if (droplet === undefined) // streamed out

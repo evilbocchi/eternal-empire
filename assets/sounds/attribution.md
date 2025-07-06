@@ -6,3 +6,4 @@ Game sound, wooden treasure chest unlock, also good for level up, bonus, award e
 Level Up #4 by Universfield -- https://freesound.org/s/758816/ -- License: Attribution 4.0
 Sound assets from osu!lazer -- ppy/osu repo at https://github.com/ppy/osu -- License: MIT
 writing-short-3 by newagesoup -- https://freesound.org/s/335510/ -- License: Creative Commons 0
+Wood Tumble by DiscordantScraps -- https://freesound.org/s/767432/ -- License: Attribution 4.0

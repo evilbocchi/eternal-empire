@@ -139,7 +139,7 @@ export default class ToolController implements OnInit, OnStart, OnCharacterAdded
                 }
             }
 
-            this.uiController.playSound("Harvest");
+            this.uiController.playSound("Harvest.mp3");
 
             highlight.Parent = model;
             Debris.AddItem(highlight, 2);
@@ -178,7 +178,7 @@ export default class ToolController implements OnInit, OnStart, OnCharacterAdded
                     return;
                 anim.Stopped.Once(() => Packets.useTool.inform(this.checkHarvestable(currentTool) ?? Workspace));
                 anim.Play();
-                this.uiController.playSound("Swing");
+                this.uiController.playSound("ToolSwing.mp3");
             }
             else if (ADAPTIVE_TAB.Visible === false) {
                 for (const [i, v] of this.KEY_CODES) {
@@ -199,7 +199,7 @@ export default class ToolController implements OnInit, OnStart, OnCharacterAdded
                         return;
 
                     const backpack = LOCAL_PLAYER.FindFirstChildOfClass("Backpack");
-                    this.uiController.playSound("Equip");
+                    this.uiController.playSound("Equip.mp3");
                     if (tool.Parent === backpack) {
                         const currentTool = LOCAL_PLAYER.Character?.FindFirstChildOfClass("Tool");
                         if (currentTool !== undefined)
@@ -332,7 +332,7 @@ export default class ToolController implements OnInit, OnStart, OnCharacterAdded
         }
         toolOption.Activated.Connect(() => {
             const backpack = LOCAL_PLAYER.FindFirstChildOfClass("Backpack");
-            this.uiController.playSound("Equip");
+            this.uiController.playSound("Equip.mp3");
             if (tool.Parent === backpack) {
                 const currentTool = LOCAL_PLAYER.Character?.FindFirstChildOfClass("Tool");
                 if (currentTool !== undefined)

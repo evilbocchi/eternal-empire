@@ -383,7 +383,7 @@ export default class BuildController implements OnInit, OnStart {
             const hovering = this.hovering;
             const dragging = this.dragging;
             if (hovering !== undefined) {
-                this.uiController.playSound("Pickup");
+                this.uiController.playSound("Pickup.mp3");
                 const names = new Array<string>();
                 for (const model of dragging) {
                     names.push(model.Name);
@@ -496,7 +496,7 @@ export default class BuildController implements OnInit, OnStart {
         this.hotkeysController.setHotkey(BUILD_WINDOW.Options.Delete, Enum.KeyCode.Delete, () => {
             if (this.selected.isEmpty() || this.getRestricted() === true)
                 return false;
-            this.uiController.playSound("Delete");
+            this.uiController.playSound("Unplace.mp3");
             this.deselectAll();
             return true;
         }, "Unplace");

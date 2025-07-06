@@ -284,7 +284,7 @@ export = new Quest(script.Name)
                     task.delay(1, () => {
                         emitEffect("ExpandingWhirls", simpulRootPart, 4);
                         model.Destroy();
-                        playSoundAtPart(simpulRootPart, getSound("Splash"));
+                        playSoundAtPart(simpulRootPart, getSound("Splash.mp3"));
                         const trap = simpulModel.WaitForChild("Part") as BasePart;
                         trap.Transparency = 0;
                         trap.FindFirstChildOfClass("Decal")!.Transparency = 0;
@@ -301,7 +301,7 @@ export = new Quest(script.Name)
                     part.Position = simpulRootPart.Position;
                     part.Parent = Workspace;
                     spawnExplosion(part.Position, part);
-                    playSoundAtPart(part, getSound("Explosion"));
+                    playSoundAtPart(part, getSound("Explosion.mp3"));
                     Server.Event.setEventCompleted("SimpulGone", true);
                 }
             });

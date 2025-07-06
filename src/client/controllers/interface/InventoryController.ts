@@ -83,7 +83,7 @@ export default class InventoryController implements OnInit, OnStart {
             itemSlot.Activated.Connect(() => {
                 const isPlaceable = item.placeableAreas.size() > 0 || item.bounds !== undefined;
                 if (this.buildController.getRestricted() === true || isPlaceable === false || (item.levelReq !== undefined && item.levelReq > Packets.level.get())) {
-                    this.uiController.playSound("Error");
+                    this.uiController.playSound("Error.mp3");
                     return;
                 }
                 this.adaptiveTabController.hideAdaptiveTab();

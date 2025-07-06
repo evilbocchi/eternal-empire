@@ -10,8 +10,8 @@ import HotkeysController from "client/controllers/HotkeysController";
 import UIController from "client/controllers/UIController";
 import AdaptiveTabController, { ADAPTIVE_TAB, ADAPTIVE_TAB_MAIN_WINDOW } from "client/controllers/interface/AdaptiveTabController";
 import TooltipController from "client/controllers/interface/TooltipController";
-import { ASSETS } from "shared/asset/GameAssets";
 import Packets from "shared/Packets";
+import { ASSETS } from "shared/asset/GameAssets";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import { CURRENCY_DETAILS } from "shared/currency/CurrencyDetails";
 import Item from "shared/item/Item";
@@ -358,7 +358,12 @@ export default class ShopController implements OnInit, OnStart {
             if (!SHOP_GUI.Enabled) {
                 return false;
             }
-            this.uiController.playSound(this.selectedItem !== undefined && Packets.buyItem.invoke(this.selectedItem.id) ? "Coins" : "Error");
+            if (this.selectedItem !== undefined && Packets.buyItem.invoke(this.selectedItem.id)) {
+                this.uiController.playSound("ItemPurchase.mp3");
+            }
+            else {
+                this.uiController.playSound("Error.mp3");
+            }
             return true;
         }, "Buy", 1);
 
@@ -370,7 +375,12 @@ export default class ShopController implements OnInit, OnStart {
                         continue;
                     items.push(item.id);
                 }
-                this.uiController.playSound(Packets.buyAllItems.invoke(items) ? "Coins" : "Error");
+                if (Packets.buyAllItems.invoke(items)) {
+                    this.uiController.playSound("ItemPurchase.mp3");
+                }
+                else {
+                    this.uiController.playSound("Error.mp3");
+                }
                 return true;
             }
             return false;
