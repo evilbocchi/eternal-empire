@@ -1,4 +1,5 @@
 import { Debris, StarterGui } from "@rbxts/services";
+import { assets } from "shared/asset/AssetMap";
 
 declare global {
     /**
@@ -9,6 +10,13 @@ declare global {
     interface Assets extends Folder {
         Effects: Folder;
     }
+
+    type AssetPath = keyof typeof assets;
+
+    // Only asset paths that start with "assets/sounds/"
+    type SoundAssetPath = Extract<AssetPath, `assets/sounds/${string}`>;
+
+    type Filename<T extends string> = T extends `${string}/${infer Rest}` ? Filename<Rest> : T;
 }
 
 /**
@@ -22,11 +30,10 @@ export const ASSETS = StarterGui.WaitForChild("Assets") as Assets;
  * @param soundName The name of the sound to retrieve.
  * @returns The sound instance from the Assets folder.
  */
-export function getSound(soundName: string) {
-    const sound = ASSETS.Sounds.FindFirstChild(soundName) as Sound | undefined;
-    if (sound === undefined) {
-        throw "Sound not found: " + soundName;
-    }
+export function getSound(path: Filename<SoundAssetPath>) {
+    const sound = new Instance("Sound");
+    sound.Name = path;
+    sound.SoundId = assets["assets/sounds/" + path as AssetPath];
     return sound;
 }
 

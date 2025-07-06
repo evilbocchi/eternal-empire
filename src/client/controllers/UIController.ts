@@ -14,8 +14,8 @@ export const INTERFACE = PLAYER_GUI.WaitForChild("Interface") as ScreenGui;
 export default class UIController implements OnInit, OnStart {
     preloadedAsset = new Signal<string>();
 
-    playSound(soundName: string) {
-        getSound(soundName).Play();
+    playSound(path: Filename<SoundAssetPath>) {
+        getSound(path).Play();
     }
 
     preloadAssets() {

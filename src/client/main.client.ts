@@ -1,16 +1,15 @@
 import { Flamework } from "@flamework/core";
-import { LOCAL_PLAYER } from "client/constants";
-import { LEADERBOARDS } from "shared/constants";
 import { getSound } from "shared/asset/GameAssets";
+import { LEADERBOARDS } from "shared/constants";
 import { DONATION_PRODUCTS } from "shared/devproducts/DonationProducts";
-import Sandbox from "shared/Sandbox";
 import Packets from "shared/Packets";
+import Sandbox from "shared/Sandbox";
 
 Flamework.addPaths("src/client/controllers");
 Flamework.ignite();
 
 if (!Sandbox.getEnabled()) {
-    const clickSound = getSound("Click").Clone();
+    const clickSound = getSound("MenuClick.mp3").Clone();
     clickSound.Parent = LEADERBOARDS.Donated.DonationPart;
     for (const donationOption of LEADERBOARDS.Donated.DonationPart.SurfaceGui.Display.GetChildren()) {
         if (donationOption.IsA("TextButton")) {

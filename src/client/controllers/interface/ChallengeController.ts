@@ -46,7 +46,7 @@ export default class ChallengeController implements OnPhysics, OnInit {
 
             const startButton = (challengeOption as typeof ASSETS.ChallengeOption).StartButton;
             startButton.Activated.Connect(() => {
-                this.uiController.playSound("Click");
+                this.uiController.playSound("MenuClick.mp3");
                 const t = tick();
                 if (t - (startButton.GetAttribute("LastClick") as number ?? 0) < 3) {
                     this.uiController.playSound("MagicWoosh");

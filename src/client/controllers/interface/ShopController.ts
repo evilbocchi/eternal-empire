@@ -276,7 +276,7 @@ export default class ShopController implements OnInit, OnStart {
             }
             itemSlot.Visible = false;
             itemSlot.Activated.Connect(() => {
-                this.uiController.playSound("Click");
+                this.uiController.playSound("MenuClick.mp3");
                 this.refreshPurchaseWindow(item);
                 this.adaptiveTabController.showAdaptiveTab("Purchase");
                 ADAPTIVE_TAB.UIStroke.Color = diff.color ?? Color3.fromRGB(255, 255, 255);

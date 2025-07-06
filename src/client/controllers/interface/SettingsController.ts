@@ -114,10 +114,10 @@ export default class SettingsController implements OnStart {
             if (toggle !== undefined) {
                 toggle.Activated.Connect(() => {
                     const setting = settingOption.Name as keyof Settings;
-                    const updated = !Packets.settings.get()[setting];
-                    this.uiController.playSound(updated === true ? "SwitchFlick" : "SwitchFlickLowPitch");
+                    const enabled = !Packets.settings.get()[setting];
+                    this.uiController.playSound(enabled === true ? "CheckOn.mp3" : "CheckOff.mp3");
 
-                    Packets.setSetting.inform(setting, updated);
+                    Packets.setSetting.inform(setting, enabled);
                 });
             }
         }

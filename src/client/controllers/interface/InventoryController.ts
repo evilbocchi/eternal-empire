@@ -87,7 +87,7 @@ export default class InventoryController implements OnInit, OnStart {
                     return;
                 }
                 this.adaptiveTabController.hideAdaptiveTab();
-                this.uiController.playSound("Click");
+                this.uiController.playSound("MenuClick.mp3");
                 this.buildController.mainSelect(this.buildController.addPlacingModel(item));
             });
 

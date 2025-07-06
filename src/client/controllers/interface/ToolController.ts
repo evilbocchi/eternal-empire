@@ -135,7 +135,7 @@ export default class ToolController implements OnInit, OnStart, OnCharacterAdded
                 gui.Adornee = model;
                 gui.Parent = model;
                 if (multi > 1.5) {
-                    this.uiController.playSound("Critical");
+                    this.uiController.playSound("Critical.mp3");
                 }
             }
 

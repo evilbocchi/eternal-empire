@@ -25,7 +25,7 @@ export default class Manumatic extends ItemTrait {
         });
         clickDetector.Parent = model.WaitForChild("ClickArea");
         const event = new Instance("BindableEvent");
-        event.Name = "Click";
+        event.Name = "MenuClick.mp3";
         event.Event.Connect((clickValue: number) => click(undefined, clickValue));
         event.Parent = model;
     }

@@ -201,7 +201,7 @@ export default class StartWindowController implements OnInit {
             }
             const empireOption = ASSETS.EmpiresWindow.EmpireOption.Clone();
             empireOption.Activated.Connect(() => {
-                this.uiController.playSound("Click");
+                this.uiController.playSound("MenuClick.mp3");
                 const success = Packets.teleportToEmpire.invoke(availableEmpire);
                 if (success) {
                     this.loadingWindowController.showLoadingWindow("Loading server");
@@ -238,7 +238,7 @@ export default class StartWindowController implements OnInit {
         const newEmpireOption = ASSETS.EmpiresWindow.NewEmpireOption.Clone();
         const ogText = newEmpireOption.MessageLabel.Text;
         newEmpireOption.Activated.Connect(() => {
-            this.uiController.playSound("Click");
+            this.uiController.playSound("MenuClick.mp3");
             newEmpireOption.MessageLabel.Text = "Creating empire...";
             const success = Packets.createNewEmpire.invoke();
             if (!success) {
@@ -256,7 +256,7 @@ export default class StartWindowController implements OnInit {
                 return false;
             }
 
-            this.uiController.playSound("Click");
+            this.uiController.playSound("MenuClick.mp3");
             const tween = TweenService.Create(START_WINDOW.EmpiresWindow, new TweenInfo(1), { Position: new UDim2(0.5, 0, 1.4, 0) });
             tween.Play();
             tween.Completed.Once(() => START_WINDOW.EmpiresWindow.Visible = false);
@@ -306,7 +306,7 @@ export default class StartWindowController implements OnInit {
         });
 
         START_WINDOW.EmpiresWindow.PublicEmpireWindow.JoinPublicEmpire.Activated.Connect(() => {
-            this.uiController.playSound("Click");
+            this.uiController.playSound("MenuClick.mp3");
             this.hideStartWindow();
             task.delay(0.9, () => this.introController.onIntroMarkerChanged());
         });

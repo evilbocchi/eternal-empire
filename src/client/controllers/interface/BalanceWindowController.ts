@@ -219,7 +219,7 @@ export default class BalanceWindowController implements OnInit {
             const success = action();
             navOption.ImageButton.Size = new UDim2(1.15, 0, 1.15, 0);
             TweenService.Create(navOption.ImageButton, new TweenInfo(0.3), { Size: new UDim2(1, 0, 1, 0) }).Play();
-            this.uiController.playSound("Click");
+            this.uiController.playSound("MenuClick.mp3");
             return success;
         }, label, priority);
     }

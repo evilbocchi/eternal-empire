@@ -27,15 +27,15 @@ export default class BombsController implements OnStart {
 
     loadGui(bombsCurrency: Currency, boosting: Currency, gui: BombsBoardGui) {
         gui.BuyButton.Activated.Connect(() => {
-            this.uiController.playSound("Click");
+            this.uiController.playSound("MenuClick.mp3");
             MarketplaceService.PromptProductPurchase(LOCAL_PLAYER, BOMBS_PRODUCTS[boosting as keyof (typeof BOMBS_PRODUCTS)]);
         });
         gui.UseButton.Activated.Connect(() => {
             if (Packets.useBomb.invoke(bombsCurrency) === true) {
-                this.uiController.playSound("Coins");
+                this.uiController.playSound("ItemPurchase.mp3");
             }
             else {
-                this.uiController.playSound("Error");
+                this.uiController.playSound("Error.mp3");
             }
         });
         gui.Destroying.Once(() => this.guis.delete(gui));

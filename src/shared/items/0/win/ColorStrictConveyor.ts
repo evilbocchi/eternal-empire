@@ -49,7 +49,7 @@ export = new Item(script.Name)
             const nextIndex = (currentIndex + 1) % modes.size();
             placedItem.currency = modes[nextIndex];
             updateMode();
-            playSoundAtPart(modeButton, getSound("SwitchFlick"));
+            playSoundAtPart(modeButton, getSound("SwitchFlick.mp3"));
         });
 
         const touched = new Set<BasePart>();

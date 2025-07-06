@@ -52,7 +52,7 @@ export default class Clicker extends ItemTrait {
             else if (t > 1 / (clicker.clickRate ?? 999)) {
                 t = 0;
                 if (event === undefined || event.Parent === undefined) {
-                    event = target.WaitForChild("Click") as BindableEvent;
+                    event = target.WaitForChild("MenuClick.mp3") as BindableEvent;
                 }
 
                 let rate = 1;
