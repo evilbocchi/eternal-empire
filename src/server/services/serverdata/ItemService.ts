@@ -25,6 +25,7 @@ import { CHALLENGES } from "server/Challenges";
 import { OnGameAPILoaded } from "server/services/ModdingService";
 import CurrencyService from "server/services/serverdata/CurrencyService";
 import DataService from "server/services/serverdata/DataService";
+import UniqueItemService from "server/services/serverdata/UniqueItemService";
 import { AREAS } from "shared/Area";
 import { PLACED_ITEMS_FOLDER } from "shared/constants";
 import Item from "shared/item/Item";
@@ -111,7 +112,11 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
      * @param dataService Service providing persistent empire and player data.
      * @param currencyService Service handling currency transactions for purchases.
      */
-    constructor(private dataService: DataService, private currencyService: CurrencyService) {
+    constructor(
+        private dataService: DataService, 
+        private currencyService: CurrencyService,
+        private uniqueItemService: UniqueItemService
+    ) {
 
     }
 
@@ -567,6 +572,127 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
         }
         this.itemsBought.fire(player, bought);
         return oneSucceeded;
+    }
+
+    /**
+     * Handles purchasing and creating a unique item instance.
+     * 
+     * @param player The player making the purchase.
+     * @param itemId The base item ID to create a unique instance from.
+     * @param silent Whether to suppress client notifications.
+     * @returns The UUID of the created unique item instance, or undefined if purchase failed.
+     */
+    buyUniqueItem(player: Player | undefined, itemId: string, silent?: boolean): string | undefined {
+        if (player !== undefined && !this.dataService.checkPermLevel(player, "purchase")) {
+            return undefined;
+        }
+        
+        const item = Items.getItem(itemId);
+        if (item === undefined) {
+            return undefined;
+        }
+
+        // Check if the item supports unique instances
+        const uniqueTrait = item.findTrait("UniqueItem");
+        if (!uniqueTrait) {
+            warn(`Item ${itemId} does not support unique instances`);
+            return undefined;
+        }
+
+        // Buy the base item first
+        const success = this.serverBuy(item, silent);
+        if (!success) {
+            return undefined;
+        }
+
+        // Create the unique instance
+        const uuid = this.uniqueItemService.createUniqueInstance(itemId);
+        if (uuid) {
+            this.itemsBought.fire(player, [item]);
+        }
+        
+        return uuid;
+    }
+
+    /**
+     * Places a unique item in the world using its UUID.
+     * 
+     * @param player The player placing the item.
+     * @param uniqueItemId The UUID of the unique item instance.
+     * @param placementInfo The placement information (position, rotation, area).
+     * @returns The placement ID if successful, undefined otherwise.
+     */
+    placeUniqueItem(player: Player, uniqueItemId: string, placementInfo: Omit<PlacedItem, "item" | "uniqueItemId">): string | undefined {
+        if (!this.dataService.checkPermLevel(player, "build")) {
+            return undefined;
+        }
+
+        const uniqueInstance = this.uniqueItemService.getUniqueInstance(uniqueItemId);
+        if (!uniqueInstance) {
+            warn(`Unique item instance ${uniqueItemId} not found`);
+            return undefined;
+        }
+
+        const baseItem = this.uniqueItemService.getBaseItem(uniqueItemId);
+        if (!baseItem) {
+            warn(`Base item not found for unique instance ${uniqueItemId}`);
+            return undefined;
+        }
+
+        // Check if we have the item in inventory
+        const inventory = this.dataService.empireData.items.inventory;
+        const currentAmount = inventory.get(uniqueInstance.baseItemId) ?? 0;
+        if (currentAmount < 1) {
+            warn(`Not enough ${uniqueInstance.baseItemId} in inventory to place unique item`);
+            return undefined;
+        }
+
+        // Create placement data
+        const placementId = this.nextId();
+        const placedItem: PlacedItem = {
+            item: uniqueInstance.baseItemId,
+            uniqueItemId: uniqueItemId,
+            ...placementInfo
+        };
+
+        // Add to placed items
+        this.dataService.empireData.items.worldPlaced.set(placementId, placedItem);
+        
+        // Remove from inventory
+        inventory.set(uniqueInstance.baseItemId, currentAmount - 1);
+
+        // Create the model in the world
+        const model = this.addItemModel(placementId, placedItem);
+        if (model) {
+            model.Parent = PLACED_ITEMS_FOLDER;
+            
+            // Apply unique item properties if applicable
+            this.applyUniqueItemProperties(model, uniqueInstance);
+        }
+
+        // Sync to clients
+        Packets.inventory.set(inventory);
+        Packets.placedItems.set(this.dataService.empireData.items.worldPlaced);
+
+        return placementId;
+    }
+
+    /**
+     * Applies unique item properties to a placed model.
+     * This method can be extended to apply pot values to the model's traits.
+     * 
+     * @param model The placed item model.
+     * @param instance The unique item instance with pot values.
+     */
+    private applyUniqueItemProperties(model: Model, instance: UniqueItemInstance) {
+        // Store unique item data in model attributes for easy access
+        model.SetAttribute("UniqueItemId", instance.baseItemId);
+        model.SetAttribute("Created", instance.created);
+        
+        // Store pot values as attributes for traits to access
+        for (const [potName, value] of instance.pots) {
+            model.SetAttribute(`Pot_${potName}`, value);
+        }
     }
 
     // Utility Methods

@@ -4,11 +4,13 @@ import { OnoeNum } from "@antivivi/serikanum";
 import CurrencyService from "server/services/serverdata/CurrencyService";
 import DataService from "server/services/serverdata/DataService";
 import ItemService from "server/services/serverdata/ItemService";
+import UniqueItemService from "server/services/serverdata/UniqueItemService";
 
 export = function () {
     const dataService = new DataService();
     const currencyService = new CurrencyService(dataService);
-    const itemService = new ItemService(dataService, currencyService);
+    const uniqueItemService = new UniqueItemService(dataService);
+    const itemService = new ItemService(dataService, currencyService, uniqueItemService);
 
     describe("loading", () => {
 
@@ -46,7 +48,8 @@ export = function () {
                     ["TheFirstDropper", 3]
                 ]),
                 worldPlaced: new Map<string, PlacedItem>(),
-                nextId: 0
+                nextId: 0,
+                uniqueItems: new Map<string, UniqueItemInstance>(),
             } as ItemsData;
 
             const unduped = {
@@ -58,7 +61,8 @@ export = function () {
                     ["TheFirstDropper", 2]
                 ]),
                 worldPlaced: new Map<string, PlacedItem>(),
-                nextId: 0
+                nextId: 0,
+                uniqueItems: new Map<string, UniqueItemInstance>(),
             } as ItemsData;
 
             dataService.dupeCheck(duped);
@@ -80,7 +84,8 @@ export = function () {
                     ["TheFirstDropper", 1]
                 ]),
                 worldPlaced: new Map<string, PlacedItem>(),
-                nextId: 0
+                nextId: 0,
+                uniqueItems: new Map<string, UniqueItemInstance>(),
             } as ItemsData;
 
             dataService.dupeCheck(duped);
@@ -117,6 +122,60 @@ export = function () {
             currencyService.set("Funds", new OnoeNum(0));
             expect(itemService.buyItem(undefined, itemId, true)).to.equal(false);
             expect(itemService.getItemAmount(itemId)).to.be.equal(1);
+        });
+    });
+
+    describe("unique items", () => {
+
+        it("should create a unique item instance", () => {
+            const itemId = "TheFirstDropperBooster";
+            const uuid = uniqueItemService.createUniqueInstance(itemId);
+            expect(uuid).to.be.ok();
+            
+            const instance = uniqueItemService.getUniqueInstance(uuid!);
+            expect(instance).to.be.ok();
+            expect(instance!.baseItemId).to.equal(itemId);
+            expect(instance!.pots.size() > 0).to.equal(true);
+        });
+
+        it("should validate pot values are within range", () => {
+            const itemId = "TheFirstDropperBooster";
+            const uuid = uniqueItemService.createUniqueInstance(itemId);
+            const instance = uniqueItemService.getUniqueInstance(uuid!);
+            
+            expect(instance).to.be.ok();
+            
+            // Check drop rate multiplier is between 1.1 and 3.0
+            const dropRateMultiplier = instance!.pots.get("dropRateMultiplier");
+            expect(dropRateMultiplier).to.be.ok();
+            expect(dropRateMultiplier! >= 1.1).to.equal(true);
+            expect(dropRateMultiplier! <= 3.0).to.equal(true);
+            
+            // Check value multiplier is between 1.05 and 2.5
+            const valueMultiplier = instance!.pots.get("valueMultiplier");
+            expect(valueMultiplier).to.be.ok();
+            expect(valueMultiplier! >= 1.05).to.equal(true);
+            expect(valueMultiplier! <= 2.5).to.equal(true);
+            
+            // Check radius is integer between 8 and 16
+            const radius = instance!.pots.get("radius");
+            expect(radius).to.be.ok();
+            expect(radius! >= 8).to.equal(true);
+            expect(radius! <= 16).to.equal(true);
+            expect(radius! % 1).to.equal(0); // Should be integer
+        });
+
+        it("should format description with pot values", () => {
+            const itemId = "TheFirstDropperBooster";
+            const uuid = uniqueItemService.createUniqueInstance(itemId);
+            const formattedDescription = uniqueItemService.getFormattedDescription(uuid!);
+            
+            expect(formattedDescription).to.be.ok();
+            expect(string.find(formattedDescription!, "stud radius")[0]).to.be.ok();
+            // The description should contain the actual pot values, not placeholders
+            expect(string.find(formattedDescription!, "%%dropRateMultiplier%%")[0]).to.equal(undefined);
+            expect(string.find(formattedDescription!, "%%valueMultiplier%%")[0]).to.equal(undefined);
+            expect(string.find(formattedDescription!, "%%radius%%")[0]).to.equal(undefined);
         });
     });
 };
