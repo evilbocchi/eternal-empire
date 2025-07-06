@@ -4,11 +4,11 @@
     "description": "",
     "main": "index.js",
     "scripts": {
-        "asset-sync": "npx npx rbxts-asset-sync --output=src/shared/asset/AssetMap.ts",
-        "build": "rbxtsc",
-        "watch": "rbxtsc -w",
+        "asset-sync": "npx rbxts-asset-sync --output=src/shared/asset/AssetMap.ts",
+        "asset-watch": "npx rbxts-asset-sync --watch --output=src/shared/asset/AssetMap.ts",
+        "build": "npm run asset-sync & rbxtsc",
         "docs": "npx typedoc",
-        "dev": "concurrently \"rbxtsc -w --writeTransformedFiles --optimizedLoops\" \"npx rojo serve\""
+        "dev": "concurrently \"rbxtsc -w --writeTransformedFiles --optimizedLoops\" \"npx rojo serve\" \"npm run asset-watch\""
     },
     "repository": {
         "type": "git",

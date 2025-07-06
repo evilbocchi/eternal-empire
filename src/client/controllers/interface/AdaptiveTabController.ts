@@ -145,9 +145,9 @@ export default class AdaptiveTabController implements OnInit {
                 TweenService.Create(sidebarButton, tweenInfo, { Size: new UDim2(1, 0, 1, 0) }).Play();
                 const result = this.toggleAdaptiveTab(optionName);
                 if (result === true)
-                    this.uiController.playSound("GravityIn");
+                    this.uiController.playSound("MenuOpen.mp3");
                 else
-                    this.uiController.playSound("GravityOut");
+                    this.uiController.playSound("MenuClose.mp3");
 
                 return true;
             }, optionName);

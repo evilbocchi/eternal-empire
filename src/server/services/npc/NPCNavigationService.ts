@@ -97,7 +97,7 @@ export default class NPCNavigationService implements OnInit, OnStart, OnPhysics 
                 // Handle jump waypoints
                 if (nextWaypoint.Action === Enum.PathWaypointAction.Jump) {
                     humanoid.Jump = true;
-                    playSoundAtPart(rootPart, getSound("Jump"));
+                    playSoundAtPart(rootPart, getSound("Jump.mp3"));
                 }
                 newPos = nextWaypoint.Position;
                 humanoid.MoveTo(newPos);
