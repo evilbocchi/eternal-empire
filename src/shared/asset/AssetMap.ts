@@ -99,6 +99,7 @@ export const assets = {
   "assets/Winification.png": "rbxassetid://89833078760947",
   "assets/Wins.png": "rbxassetid://105073626469266",
   "assets/YouJoined.png": "rbxassetid://99376557633527",
+  "assets/sounds/IntermissionEnter.mp3": "rbxassetid://119094414551118",
 } as const;
 
 export function getAsset(path: keyof typeof assets): string {

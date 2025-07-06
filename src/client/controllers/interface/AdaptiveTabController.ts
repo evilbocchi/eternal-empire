@@ -162,7 +162,7 @@ export default class AdaptiveTabController implements OnInit {
     onInit() {
         this.hotkeysController.setHotkey(ADAPTIVE_TAB.CloseButton, Enum.KeyCode.X, () => {
             if (ADAPTIVE_TAB.Visible === true) {
-                this.uiController.playSound("Flip");
+                this.uiController.playSound("MenuClose.mp3");
                 this.hideAdaptiveTab();
                 return true;
             }

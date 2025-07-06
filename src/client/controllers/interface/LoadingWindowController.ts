@@ -25,7 +25,7 @@ export default class LoadingWindowController implements OnInit {
         });
 
         if (LOADING_WINDOW.Visible === true)
-            this.uiController.playSound("Woosh");
+            this.uiController.playSound("IntermissionEnd.mp3");
     }
 
     showLoadingWindow(message?: string) {
@@ -35,7 +35,7 @@ export default class LoadingWindowController implements OnInit {
         LOADING_WINDOW.Position = new UDim2(0, 0, -1.1, 0);
         TweenService.Create(LOADING_WINDOW, new TweenInfo(0.25), { Position: new UDim2(0, 0, 0, 0) }).Play();
         LOADING_WINDOW.Visible = true;
-        this.uiController.playSound("Woosh");
+        this.uiController.playSound("IntermissionEnter.mp3");
     }
 
     refreshLoadingWindow(message: string) {

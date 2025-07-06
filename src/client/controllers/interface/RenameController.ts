@@ -27,7 +27,9 @@ export default class RenameController implements OnInit {
 
     onInit() {
         RENAME_WINDOW.PurchaseOptions.Robux.Activated.Connect(() => Packets.promptRename.invoke(RENAME_WINDOW.Input.InputBox.Text, "robux"));
-        RENAME_WINDOW.PurchaseOptions.Funds.Activated.Connect(() => this.uiController.playSound(Packets.promptRename.invoke(RENAME_WINDOW.Input.InputBox.Text, "funds") === true ? "Coins" : "Error"));
+        RENAME_WINDOW.PurchaseOptions.Funds.Activated.Connect(() => {
+            this.uiController.playSound(Packets.promptRename.invoke(RENAME_WINDOW.Input.InputBox.Text, "funds") === true ? "ItemPurchase.mp3" : "Error.mp3");
+        });
         RENAME_WINDOW.Input.InputBox.FocusLost.Connect(() => {
             [RENAME_WINDOW.Input.InputBox.Text] = RENAME_WINDOW.Input.InputBox.Text.gsub('[^%w_ ]', '');
         });
