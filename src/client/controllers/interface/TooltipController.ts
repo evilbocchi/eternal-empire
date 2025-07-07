@@ -3,6 +3,7 @@ import { TweenService, Workspace } from "@rbxts/services";
 import { MOUSE } from "client/constants";
 import { INTERFACE } from "client/controllers/UIController";
 import ItemSlot from "client/ItemSlot";
+import UniqueItemClientService from "client/services/UniqueItemClientService";
 import { CURRENCY_DETAILS } from "shared/currency/CurrencyDetails";
 import Item from "shared/item/Item";
 import ItemMetadata from "shared/item/ItemMetadata";
@@ -33,6 +34,7 @@ export class Tooltip {
     message = "";
     item: Item | undefined;
     metadata: ItemMetadata | undefined;
+    uniqueItemUUID: string | undefined;
 
     static fromMessage(message: string) {
         const tooltip = new Tooltip();
@@ -40,14 +42,15 @@ export class Tooltip {
         return tooltip;
     }
 
-    static fromItem(item: Item) {
+    static fromItem(item: Item, uniqueItemUUID?: string) {
         const tooltip = new Tooltip();
         tooltip.item = item;
         tooltip.metadata = METADATA_PER_ITEM.get(item);
+        tooltip.uniqueItemUUID = uniqueItemUUID;
         return tooltip;
     }
 
-    display() {
+    display(uniqueItemClientService?: UniqueItemClientService) {
         const item = this.item;
         const itemSlot = TOOLTIP_WINDOW.ItemSlot;
         TOOLTIP_WINDOW.MessageLabel.Visible = item === undefined;
@@ -57,7 +60,16 @@ export class Tooltip {
             const difficulty = item.difficulty;
             itemSlot.TitleLabel.Text = item.name;
 
-            const description = item.tooltipDescription ?? item.description;
+            let description = item.tooltipDescription ?? item.description;
+            
+            // Use unique item description if this is a unique item
+            if (this.uniqueItemUUID !== undefined && uniqueItemClientService !== undefined) {
+                const uniqueDescription = uniqueItemClientService.getFormattedDescription(this.uniqueItemUUID);
+                if (uniqueDescription !== undefined) {
+                    description = uniqueDescription;
+                }
+            }
+
             const builder = buildRichText(undefined, item.format(description), Color3.fromRGB(195, 195, 195), 18, "Medium");
             builder.appendAll(this.metadata!.builder);
             itemSlot.MessageLabel.Text = builder.toString();
@@ -75,6 +87,8 @@ export class Tooltip {
 export default class TooltipController implements OnInit, OnPhysics {
 
     tooltipsPerObject = new Map<GuiObject, Tooltip>();
+
+    constructor(private uniqueItemClientService: UniqueItemClientService) {}
 
     hideTooltipWindow() {
         const tweenInfo = new TweenInfo(0.1, Enum.EasingStyle.Linear, Enum.EasingDirection.In);
@@ -118,7 +132,7 @@ export default class TooltipController implements OnInit, OnPhysics {
             });
             guiObject.MouseEnter.Connect(() => {
                 this.showTooltipWindow();
-                this.getTooltip(guiObject).display();
+                this.getTooltip(guiObject).display(this.uniqueItemClientService);
             });
             guiObject.MouseLeave.Connect(() => {
                 this.hideTooltipWindow();

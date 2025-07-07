@@ -133,7 +133,27 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
         if (silent !== true) {
             Packets.inventory.set(itemsData.inventory);
             Packets.bought.set(itemsData.bought);
+            this.syncUniqueItems();
         }
+    }
+
+    /**
+     * Syncs unique item instances and their formatted descriptions to clients.
+     */
+    private syncUniqueItems() {
+        const uniqueItems = this.dataService.empireData.items.uniqueItems;
+        const uniqueItemDescriptions = new Map<string, string>();
+
+        // Generate formatted descriptions for all unique items
+        for (const [uuid, instance] of uniqueItems) {
+            const formattedDescription = this.uniqueItemService.getFormattedDescription(uuid);
+            if (formattedDescription !== undefined) {
+                uniqueItemDescriptions.set(uuid, formattedDescription);
+            }
+        }
+
+        Packets.uniqueItems.set(uniqueItems);
+        Packets.uniqueItemDescriptions.set(uniqueItemDescriptions);
     }
 
     /**
@@ -795,6 +815,7 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
         Packets.inventory.set(this.dataService.empireData.items.inventory);
         Packets.bought.set(this.dataService.empireData.items.bought);
         Packets.placedItems.set(this.dataService.empireData.items.worldPlaced);
+        this.syncUniqueItems();
 
         // Set up placement handlers with queue protection
         Packets.placeItems.onInvoke((player, items) => {
