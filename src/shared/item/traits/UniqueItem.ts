@@ -12,8 +12,12 @@ declare global {
  * Trait for items that can be generated as unique instances with randomized pots.
  * 
  * Unique items have randomly generated stats (called "pots") that vary between instances
- * of the same item type. For example, an "Admirer" unique item might boost Admiration
- * from 5% to 100% depending on its pot value.
+ * of the same item type. Pot values are stored as raw percentages (0-100) and scaled
+ * to the configured min-max ranges when accessed. This ensures that changing pot ranges
+ * after publication won't cause inconsistency for existing items.
+ * 
+ * For example, an "Admirer" unique item might boost Admiration from 5% to 100% depending
+ * on its pot value, but the raw percentage is always stored as 0-100.
  */
 export default class UniqueItem extends ItemTrait {
     
@@ -63,16 +67,17 @@ export default class UniqueItem extends ItemTrait {
 
     /**
      * Generates a new unique item instance with randomly generated pot values.
+     * Pot values are generated as percentages (0-100) and scaled when accessed.
      * 
      * @returns A unique item instance with generated pots.
      */
     generateInstance(): UniqueItemInstance {
         const pots = new Map<string, number>();
         
-        for (const [potName, config] of this.potConfigs) {
-            const randomValue = config.min + math.random() * (config.max - config.min);
-            const finalValue = config.integer ? math.floor(randomValue) : randomValue;
-            pots.set(potName, finalValue);
+        for (const [potName] of this.potConfigs) {
+            // Generate a random percentage from 0 to 100
+            const randomPercentage = math.random() * 100;
+            pots.set(potName, randomPercentage);
         }
 
         return {
@@ -80,6 +85,42 @@ export default class UniqueItem extends ItemTrait {
             pots,
             created: tick()
         };
+    }
+
+    /**
+     * Scales a raw pot percentage value to the actual value based on the pot configuration.
+     * 
+     * @param potName The name of the pot.
+     * @param rawValue The raw percentage value (0-100).
+     * @returns The scaled value according to the pot configuration.
+     */
+    scalePotValue(potName: string, rawValue: number): number {
+        const config = this.potConfigs.get(potName);
+        if (!config) {
+            warn(`Pot configuration for '${potName}' not found`);
+            return rawValue;
+        }
+
+        // Scale from 0-100 percentage to min-max range
+        const scaledValue = config.min + (rawValue / 100) * (config.max - config.min);
+        return config.integer ? math.floor(scaledValue) : scaledValue;
+    }
+
+    /**
+     * Gets all scaled pot values for a unique item instance.
+     * 
+     * @param instance The unique item instance.
+     * @returns A map of pot names to their scaled values.
+     */
+    getScaledPots(instance: UniqueItemInstance): Map<string, number> {
+        const scaledPots = new Map<string, number>();
+        
+        for (const [potName, rawValue] of instance.pots) {
+            const scaledValue = this.scalePotValue(potName, rawValue);
+            scaledPots.set(potName, scaledValue);
+        }
+        
+        return scaledPots;
     }
 
     /**
@@ -98,14 +139,18 @@ export default class UniqueItem extends ItemTrait {
 
     /**
      * Formats a string with pot values from a unique item instance.
+     * Uses scaled pot values based on the current pot configurations.
      * 
      * @param str The string to format with pot placeholders (e.g., "%admirationBoost%").
      * @param instance The unique item instance to get pot values from.
+     * @param uniqueTrait The unique item trait to use for scaling (required for accessing pot configs).
      * @returns The formatted string.
      */
-    static formatWithPots(str: string, instance: UniqueItemInstance): string {
+    static formatWithPots(str: string, instance: UniqueItemInstance, uniqueTrait: UniqueItem): string {
         let formatted = str;
-        for (const [potName, value] of instance.pots) {
+        const scaledPots = uniqueTrait.getScaledPots(instance);
+        
+        for (const [potName, value] of scaledPots) {
             const placeholder = `%${potName}%`;
             const formattedValue = typeIs(value, "number") ? 
                 (value % 1 === 0 ? tostring(value) : string.format("%.2f", value)) : 

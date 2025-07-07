@@ -111,7 +111,8 @@ declare global {
 
         /**
          * The pots (unique stats) for this item instance.
-         * Key is the pot name, value is the generated stat value.
+         * Key is the pot name, value is the raw percentage value (0-100).
+         * These values are scaled to actual ranges when accessed via the UniqueItem trait.
          */
         pots: Map<string, number>;
 
@@ -123,20 +124,21 @@ declare global {
 
     /**
      * Configuration for a pot (unique stat) that can be generated for a unique item.
+     * Defines the scaling range for converting raw 0-100 percentage values to actual values.
      */
     interface PotConfig {
         /**
-         * The minimum value for this pot.
+         * The minimum value for this pot when scaling from 0%.
          */
         min: number;
 
         /**
-         * The maximum value for this pot.
+         * The maximum value for this pot when scaling from 100%.
          */
         max: number;
 
         /**
-         * Whether this value should be an integer (default: false).
+         * Whether the scaled value should be an integer (default: false).
          */
         integer?: boolean;
     }

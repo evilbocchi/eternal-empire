@@ -145,20 +145,30 @@ export = function () {
             
             expect(instance).to.be.ok();
             
+            // Check raw pot values are stored as 0-100 percentages
+            for (const [potName, rawValue] of instance!.pots) {
+                expect(rawValue >= 0).to.equal(true);
+                expect(rawValue <= 100).to.equal(true);
+            }
+            
+            // Check scaled values are within the expected ranges
+            const scaledPots = uniqueItemService.getScaledPots(uuid!);
+            expect(scaledPots).to.be.ok();
+            
             // Check drop rate multiplier is between 1.1 and 3.0
-            const dropRateMultiplier = instance!.pots.get("dropRateMultiplier");
+            const dropRateMultiplier = scaledPots!.get("dropRateMultiplier");
             expect(dropRateMultiplier).to.be.ok();
             expect(dropRateMultiplier! >= 1.1).to.equal(true);
             expect(dropRateMultiplier! <= 3.0).to.equal(true);
             
             // Check value multiplier is between 1.05 and 2.5
-            const valueMultiplier = instance!.pots.get("valueMultiplier");
+            const valueMultiplier = scaledPots!.get("valueMultiplier");
             expect(valueMultiplier).to.be.ok();
             expect(valueMultiplier! >= 1.05).to.equal(true);
             expect(valueMultiplier! <= 2.5).to.equal(true);
             
             // Check radius is integer between 8 and 16
-            const radius = instance!.pots.get("radius");
+            const radius = scaledPots!.get("radius");
             expect(radius).to.be.ok();
             expect(radius! >= 8).to.equal(true);
             expect(radius! <= 16).to.equal(true);
@@ -176,6 +186,33 @@ export = function () {
             expect(string.find(formattedDescription!, "%%dropRateMultiplier%%")[0]).to.equal(undefined);
             expect(string.find(formattedDescription!, "%%valueMultiplier%%")[0]).to.equal(undefined);
             expect(string.find(formattedDescription!, "%%radius%%")[0]).to.equal(undefined);
+        });
+
+        it("should scale raw percentage values correctly", () => {
+            const itemId = "TheFirstDropperBooster";
+            const uuid = uniqueItemService.createUniqueInstance(itemId);
+            const instance = uniqueItemService.getUniqueInstance(uuid!);
+            const scaledPots = uniqueItemService.getScaledPots(uuid!);
+            
+            expect(instance).to.be.ok();
+            expect(scaledPots).to.be.ok();
+            
+            // Verify that scaling works correctly for each pot
+            for (const [potName, rawValue] of instance!.pots) {
+                const scaledValue = scaledPots!.get(potName);
+                expect(scaledValue).to.be.ok();
+                
+                // The scaled value should be different from the raw value (unless coincidentally equal)
+                // and should be within the expected ranges
+                if (potName === "dropRateMultiplier") {
+                    expect(scaledValue! >= 1.1 && scaledValue! <= 3.0).to.equal(true);
+                } else if (potName === "valueMultiplier") {
+                    expect(scaledValue! >= 1.05 && scaledValue! <= 2.5).to.equal(true);
+                } else if (potName === "radius") {
+                    expect(scaledValue! >= 8 && scaledValue! <= 16).to.equal(true);
+                    expect(scaledValue! % 1).to.equal(0); // Should be integer
+                }
+            }
         });
     });
 };

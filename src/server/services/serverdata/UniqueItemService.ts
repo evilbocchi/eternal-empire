@@ -132,9 +132,15 @@ export default class UniqueItemService implements OnInit {
 
         // Validate that all pots exist in the configuration
         const potConfigs = uniqueTrait.getPotConfigs();
-        for (const [potName] of instance.pots) {
+        for (const [potName, rawValue] of instance.pots) {
             if (!potConfigs.has(potName)) {
                 warn(`Invalid pot ${potName} found in unique item instance ${uuid}`);
+                return false;
+            }
+            
+            // Validate that raw value is within 0-100 range
+            if (rawValue < 0 || rawValue > 100) {
+                warn(`Raw pot value ${rawValue} for ${potName} is outside 0-100 range in instance ${uuid}`);
                 return false;
             }
         }
@@ -156,7 +162,50 @@ export default class UniqueItemService implements OnInit {
             return undefined;
         }
 
-        return UniqueItem.formatWithPots(baseItem.description, instance);
+        const uniqueTrait = baseItem.findTrait("UniqueItem");
+        if (!uniqueTrait) {
+            return undefined;
+        }
+
+        return UniqueItem.formatWithPots(baseItem.description, instance, uniqueTrait);
+    }
+
+    /**
+     * Gets the scaled pot values for a unique item instance.
+     * 
+     * @param uuid The UUID of the unique item instance.
+     * @returns A map of scaled pot values, or undefined if the instance is not found.
+     */
+    getScaledPots(uuid: string): Map<string, number> | undefined {
+        const instance = this.getUniqueInstance(uuid);
+        const baseItem = this.getBaseItem(uuid);
+        
+        if (!instance || !baseItem) {
+            return undefined;
+        }
+
+        const uniqueTrait = baseItem.findTrait("UniqueItem");
+        if (!uniqueTrait) {
+            return undefined;
+        }
+
+        return uniqueTrait.getScaledPots(instance);
+    }
+
+    /**
+     * Gets a specific scaled pot value for a unique item instance.
+     * 
+     * @param uuid The UUID of the unique item instance.
+     * @param potName The name of the pot to get.
+     * @returns The scaled pot value, or undefined if not found.
+     */
+    getScaledPot(uuid: string, potName: string): number | undefined {
+        const scaledPots = this.getScaledPots(uuid);
+        if (!scaledPots) {
+            return undefined;
+        }
+
+        return scaledPots.get(potName);
     }
 
     /**
