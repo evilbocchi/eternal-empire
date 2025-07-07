@@ -73,7 +73,7 @@ export default class ObbyUpgrader extends ItemTrait {
             );
             print(item.name, "completed");
             debounce = true;
-            task.delay(0.1, () => {
+            task.delay(1, () => {
                 debounce = false;
             });
         });
