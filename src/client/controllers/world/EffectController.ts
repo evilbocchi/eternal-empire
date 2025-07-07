@@ -145,16 +145,18 @@ export default class EffectController implements OnInit {
         });
 
         const userId = LOCAL_PLAYER.UserId;
-        const burnSound = getSound("DropletBurn.mp3");
-        Packets.dropletBurnt.connect((dropletModelId, cpc) => {
+        Packets.dropletBurnt.connect((dropletModelId) => {
             const droplet = DROPLET_STORAGE.FindFirstChild(dropletModelId) as BasePart | undefined;
             if (droplet === undefined) // streamed out
                 return;
 
             const t = tick();
             task.wait(droplet.GetAttribute("Owner") === userId ? 0.1 : 0.3);
+            const burnSound = getSound("DropletBurn.mp3");
+            burnSound.PlaybackSpeed = math.random() * 0.3 + 0.85;
+            burnSound.Parent = droplet;
+            burnSound.Play();
 
-            playSoundAtPart(droplet, burnSound);
             TweenService.Create(droplet, new TweenInfo(0.5), { Color: new Color3(), Size: new Vector3() }).Play();
 
             Debris.AddItem(droplet, 6);
