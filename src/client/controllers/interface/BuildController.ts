@@ -1,12 +1,13 @@
 import { weldModel } from "@antivivi/vrldk";
 import { Controller, OnInit, OnStart } from "@flamework/core";
-import { HttpService, TweenService, UserInputService, Workspace } from "@rbxts/services";
+import { Debris, HttpService, ReplicatedStorage, TweenService, UserInputService, Workspace } from "@rbxts/services";
 import { LOCAL_PLAYER, MOUSE, NONCOLLISION_COLOR } from "client/constants";
 import HotkeysController from "client/controllers/HotkeysController";
 import AdaptiveTabController from "client/controllers/interface/AdaptiveTabController";
 import { SHOP_GUI } from "client/controllers/interface/ShopController";
 import UIController, { INTERFACE } from "client/controllers/UIController";
 import { AREAS } from "shared/Area";
+import { getSound } from "shared/asset/GameAssets";
 import { PLACED_ITEMS_FOLDER } from "shared/constants";
 import Item from "shared/item/Item";
 import Items from "shared/items/Items";
@@ -63,6 +64,9 @@ export default class BuildController implements OnInit, OnStart {
     debounce = 0;
     readonly MOVETWEENINFO = new TweenInfo(0.25, Enum.EasingStyle.Back, Enum.EasingDirection.Out);
     readonly OPTIONSTWEENINFO = new TweenInfo(0.3, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out);
+    private lastRotate = 0;
+    private lastMovedTo = 0;
+    private lastMovedToCFrame = new CFrame();
     private lastSelectingCFrame = new CFrame();
     private lastCameraCFrame = new CFrame();
 
@@ -338,8 +342,9 @@ export default class BuildController implements OnInit, OnStart {
         }
 
         cframe = buildBounds.snap(mainSelected.PrimaryPart!.Size, cframe.Position, math.rad(rotation), rotation % 90 !== 0);
-        if (cframe === undefined)
+        if (cframe === undefined || cframe.FuzzyEq(this.lastMovedToCFrame)) {
             return;
+        }
 
         for (const [selected, offset] of this.selected) {
             const primaryPart = selected.PrimaryPart;
@@ -357,6 +362,18 @@ export default class BuildController implements OnInit, OnStart {
             else
                 primaryPart.CFrame = relative;
         }
+        const lastSound = tick() - this.lastMovedTo;
+        if (lastSound > 0.05) {
+            const moveSound = getSound("ItemMove.mp3").Clone();
+            const pitchDecrement = math.min(lastSound, 0.5) * 0.25;
+            this.lastMovedTo = tick();
+            moveSound.PlaybackSpeed = 1 + 0.25 - pitchDecrement;
+            moveSound.Volume = 0.35;
+            moveSound.Parent = ReplicatedStorage;
+            moveSound.Play();
+            Debris.AddItem(moveSound, 1.5);
+        }
+        this.lastMovedToCFrame = cframe;
     }
 
     onMouseDown() {
@@ -418,7 +435,7 @@ export default class BuildController implements OnInit, OnStart {
                 primaryPart.CFrame = indicator.CFrame; // snap to indicator
             }
             if (this.placeSelected() === true) {
-                this.uiController.playSound("Place.mp3");
+                this.uiController.playSound("Place.mp3", 0.7);
             }
             else {
                 this.uiController.playSound("Error.mp3");
@@ -481,7 +498,14 @@ export default class BuildController implements OnInit, OnStart {
         }, "Deselect");
         this.hotkeysController.setHotkey(BUILD_WINDOW.Options.Rotate, Enum.KeyCode.R, () => {
             if (!this.selected.isEmpty() || this.getRestricted() === true) {
-                this.uiController.playSound("ItemRotate.mp3");
+                const rotateSound = getSound("ItemRotate.mp3").Clone();
+                const pitchDecrement = math.min(tick() - this.lastRotate, 0.5) * 0.25;
+                rotateSound.PlaybackSpeed = 1 + 0.25 - pitchDecrement;
+                rotateSound.Parent = ReplicatedStorage;
+                rotateSound.Play();
+                Debris.AddItem(rotateSound, 1.5);
+                this.lastRotate = tick();
+
                 if (this.rotationValue.Value >= 270) {
                     this.rotationValue.Value = 0;
                 }

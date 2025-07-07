@@ -2,7 +2,7 @@ import { Connection } from "@antivivi/lemon-signal";
 import { OnoeNum } from "@antivivi/serikanum";
 import { buildRichText } from "@antivivi/vrldk";
 import { Controller, OnInit, OnStart } from "@flamework/core";
-import { CollectionService, RunService, TweenService } from "@rbxts/services";
+import { CollectionService, Debris, RunService, TweenService } from "@rbxts/services";
 import ItemFilter from "client/ItemFilter";
 import ItemSlot from "client/ItemSlot";
 import { LOCAL_PLAYER, PLAYER_GUI } from "client/constants";
@@ -11,7 +11,7 @@ import UIController from "client/controllers/UIController";
 import AdaptiveTabController, { ADAPTIVE_TAB, ADAPTIVE_TAB_MAIN_WINDOW } from "client/controllers/interface/AdaptiveTabController";
 import TooltipController from "client/controllers/interface/TooltipController";
 import Packets from "shared/Packets";
-import { ASSETS } from "shared/asset/GameAssets";
+import { ASSETS, getSound } from "shared/asset/GameAssets";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import { CURRENCY_DETAILS } from "shared/currency/CurrencyDetails";
 import Item from "shared/item/Item";
@@ -108,6 +108,11 @@ export default class ShopController implements OnInit, OnStart {
 
     hideShopGuiPart(shopGuiPart: Part) {
         TweenService.Create(shopGuiPart, new TweenInfo(0.3), { LocalTransparencyModifier: 1 }).Play();
+
+        const sound = getSound("ShopClose.mp3");
+        sound.Play();
+        sound.Parent = shopGuiPart;
+        Debris.AddItem(sound, 5);
     }
 
     refreshShop(shopGuiPart?: Part, shop?: Shop) {
@@ -127,6 +132,11 @@ export default class ShopController implements OnInit, OnStart {
             SHOP_GUI.Enabled = false;
             return;
         }
+
+        const sound = getSound("ShopOpen.mp3");
+        sound.Play();
+        sound.Parent = shopGuiPart;
+        Debris.AddItem(sound, 5);
 
         TweenService.Create(shopGuiPart, new TweenInfo(0.3), { LocalTransparencyModifier: 0 }).Play();
         SHOP_GUI.Enabled = true;

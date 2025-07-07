@@ -45,14 +45,16 @@ export default class Dropper extends ItemTrait {
 
             // Lucky droplet chance: configurable chance to spawn a Diamond Droplet
             if (LuckyDroplets.chance > 0 && math.random(1, LuckyDroplets.chance) === 1) {
-                const luckyDropletInstantiator = Droplet.DiamondDroplet.getInstantiator(model, drop);
-                if (luckyDropletInstantiator !== undefined) {
-                    const luckyDroplet = luckyDropletInstantiator();
-                    luckyDroplet.Parent = DROPLET_STORAGE;
-                    if (player !== undefined) {
-                        luckyDroplet.SetNetworkOwner(player);
+                task.delay(0.25, () => {
+                    const luckyDropletInstantiator = Droplet.LuckyDroplet.getInstantiator(model, drop);
+                    if (luckyDropletInstantiator !== undefined) {
+                        const luckyDroplet = luckyDropletInstantiator();
+                        luckyDroplet.Parent = DROPLET_STORAGE;
+                        if (player !== undefined) {
+                            luckyDroplet.SetNetworkOwner(player);
+                        }
                     }
-                }
+                });
             }
 
             if (callback !== undefined)

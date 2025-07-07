@@ -661,13 +661,21 @@ export default class Droplet {
             .setValue(new CurrencyBundle().set("Funds", 10000000).set("Power", 10000000).set("Skill", 1))
     );
 
-    static DiamondDroplet = Droplet.registerDroplet(
-        new Droplet("DiamondDroplet")
+    static LuckyDroplet = Droplet.registerDroplet(
+        new Droplet("LuckyDroplet")
             .setModel(() => {
                 const droplet = new Instance("Part");
                 droplet.Size = new Vector3(1, 1, 1);
                 droplet.Color = Color3.fromRGB(140, 255, 245);
                 droplet.Material = Enum.Material.Neon;
+
+                const light = new Instance("PointLight");
+                light.Color = new Color3(0.5, 1, 0.87);
+                light.Shadows = false;
+                light.Range = 10;
+                light.Brightness = 0.5;
+                light.Parent = droplet;
+                
                 return droplet;
             })
             .setValue(new CurrencyBundle().set("Diamonds", 1))

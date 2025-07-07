@@ -152,8 +152,18 @@ export default class EffectController implements OnInit {
 
             const t = tick();
             task.wait(droplet.GetAttribute("Owner") === userId ? 0.1 : 0.3);
-            const burnSound = getSound("DropletBurn.mp3");
+            let burnSound: Sound;
             const sizeMagnitude = droplet.Size.Magnitude / 2;
+            const tweenInfo = new TweenInfo(sizeMagnitude / 2);
+
+            const light = droplet.FindFirstChildOfClass("PointLight") as PointLight | undefined;
+            if (light !== undefined) {
+                TweenService.Create(light, tweenInfo, { Range: 0 }).Play();
+                burnSound = getSound("LuckyDropletBurn.mp3");
+            }
+            else {
+                burnSound = getSound("DropletBurn.mp3");
+            }
 
             burnSound.PlaybackSpeed = (math.random() * 0.3 + 0.85) / sizeMagnitude;
             if (sizeMagnitude > 0.666) {
@@ -166,7 +176,7 @@ export default class EffectController implements OnInit {
             burnSound.SoundGroup = SOUND_EFFECTS_GROUP;
             burnSound.Parent = droplet;
             burnSound.Play();
-            TweenService.Create(droplet, new TweenInfo(sizeMagnitude / 2), { Color: new Color3(), Size: new Vector3() }).Play();
+            TweenService.Create(droplet, tweenInfo, { Color: new Color3(), Size: new Vector3() }).Play();
 
             Debris.AddItem(droplet, 6);
             droplet.Anchored = true;

@@ -8,7 +8,7 @@
         "asset-watch": "npx rbxts-asset-sync --watch --output=src/shared/asset/AssetMap.ts",
         "build": "npm run asset-sync & rbxtsc",
         "docs": "npx typedoc",
-        "dev": "concurrently \"rbxtsc -w --writeTransformedFiles --optimizedLoops\" \"npx rojo serve\" \"npm run asset-watch\""
+        "dev": "concurrently \"rbxtsc -w --writeTransformedFiles --optimizedLoops\" \"npx rojo serve\""
     },
     "repository": {
         "type": "git",

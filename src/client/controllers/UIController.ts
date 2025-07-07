@@ -2,8 +2,7 @@ import Signal from "@antivivi/lemon-signal";
 import { Controller, OnInit, OnStart } from "@flamework/core";
 import { ContentProvider } from "@rbxts/services";
 import { LOCAL_PLAYER, PLAYER_GUI } from "client/constants";
-import { getSound } from "shared/asset/GameAssets";
-import { ASSETS } from "shared/asset/GameAssets";
+import { ASSETS, getSound } from "shared/asset/GameAssets";
 
 /**
  * The {@link ScreenGui} that contains the main interface for the {@link LOCAL_PLAYER}.
@@ -14,8 +13,11 @@ export const INTERFACE = PLAYER_GUI.WaitForChild("Interface") as ScreenGui;
 export default class UIController implements OnInit, OnStart {
     preloadedAsset = new Signal<string>();
 
-    playSound(path: Filename<SoundAssetPath>) {
-        getSound(path).Play();
+    playSound(path: Filename<SoundAssetPath>, volume = 0.5) {
+        const sound = getSound(path);
+        sound.Volume = volume;
+        sound.Play();
+        return sound;
     }
 
     preloadAssets() {
