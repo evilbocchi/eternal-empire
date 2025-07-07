@@ -1,10 +1,11 @@
-import HarvestingTool from "shared/item/traits/HarvestingTool";
+import { getAsset } from "shared/asset/AssetMap";
+import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
+import TierDifficulty from "shared/item/TierDifficulty";
+import HarvestingTool from "shared/item/traits/HarvestingTool";
 import Crystal from "shared/items/excavation/Crystal";
 import MagicalWood from "shared/items/excavation/harvestable/MagicalWood";
 import ReinforcedPickaxe from "shared/items/tools/ReinforcedPickaxe";
-import CurrencyBundle from "shared/currency/CurrencyBundle";
-import TierDifficulty from "shared/item/TierDifficulty";
 
 export = new Item(script.Name)
     .setName("Crystal Pickaxe")
@@ -15,7 +16,7 @@ export = new Item(script.Name)
     .setRequiredItemAmount(MagicalWood, 4)
     .setRequiredItemAmount(ReinforcedPickaxe, 1)
     .setLevelReq(8)
-    .setImage(75418375441578)
+    .setImage(getAsset("assets/CrystalPickaxe.png"))
 
     .trait(HarvestingTool)
     .setToolType("Pickaxe")

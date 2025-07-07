@@ -63,7 +63,7 @@ namespace ItemSlot {
         colorItemSlot(itemSlot, difficulty);
         itemSlot.LayoutOrder = difficulty.rating ?? 0;
         if (item.image !== undefined)
-            itemSlot.ImageLabel.Image = "rbxassetid://" + item.image;
+            itemSlot.ImageLabel.Image = item.image;
         else
             loadViewportFrame(itemSlot.ViewportFrame, item);
         itemSlot.Name = item.id;

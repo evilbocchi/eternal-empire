@@ -5,6 +5,7 @@ import Shop from "shared/item/traits/Shop";
 import SpatialDropper from "shared/items/0/astronomical/SpatialDropper";
 import SpatialFurnace from "shared/items/0/astronomical/SpatialFurnace";
 import AutomaticArbition from "shared/items/0/automatic/AutomaticArbition";
+import AutomaticRailgun from "shared/items/0/automatic/AutomaticRailgun";
 import IllusionaryPortal from "shared/items/0/automatic/IllusionaryPortal";
 import MoneyBin from "shared/items/0/automatic/MoneyBin";
 import SkillBooster from "shared/items/0/automatic/SkillBooster";
@@ -232,6 +233,7 @@ export = new Item(script.Name)
         AutomaticArbition,
         MoneyBin,
         TwoStoreyUpgrader,
+        AutomaticRailgun,
 
         EmeraldProcessor,
         XLayerAgglomerate,

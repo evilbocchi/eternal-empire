@@ -2,6 +2,7 @@ import HarvestingTool from "shared/item/traits/HarvestingTool";
 import Item from "shared/item/Item";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import TierDifficulty from "shared/item/TierDifficulty";
+import { getAsset } from "shared/asset/AssetMap";
 
 export = new Item(script.Name)
     .setName("Copper Scythe")
@@ -9,7 +10,7 @@ export = new Item(script.Name)
     .setDifficulty(TierDifficulty.Tier1)
     .setPrice(new CurrencyBundle().set("Funds", 1e9), 1)
     .setLevelReq(1)
-    .setImage(110401457158030)
+    .setImage(getAsset("assets/CopperScythe.png"))
 
     .trait(HarvestingTool)
     .setToolType("Scythe")

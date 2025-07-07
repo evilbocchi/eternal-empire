@@ -205,7 +205,7 @@ export default class Item {
     /**
      * The image ID of the item.
      */
-    image?: number;
+    image?: string;
 
     /**
      * Define a new item with the specified ID and name.
@@ -628,7 +628,7 @@ export default class Item {
      * @param image The image ID of the item.
      * @returns The item instance.
      */
-    setImage(image: number) {
+    setImage(image: string) {
         this.image = image;
         return this;
     }

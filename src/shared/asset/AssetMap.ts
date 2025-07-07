@@ -118,6 +118,7 @@ export const assets = {
   "assets/sounds/MenuSelect.mp3": "rbxassetid://82786649807475",
   "assets/sounds/MineClose.mp3": "rbxassetid://85632455171535",
   "assets/sounds/MineNormal.mp3": "rbxassetid://83916357486602",
+  "assets/sounds/ObbyPointGet.mp3": "rbxassetid://74526367172251",
   "assets/sounds/OceanWaves.mp3": "rbxassetid://131555464068075",
   "assets/sounds/Pickup.mp3": "rbxassetid://128660465642944",
   "assets/sounds/Place.mp3": "rbxassetid://100197616256815",

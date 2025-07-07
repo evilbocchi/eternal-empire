@@ -161,7 +161,7 @@ export default class ShopController implements OnInit, OnStart {
         let connection: Connection;
         if (currency !== undefined) {
             const details = CURRENCY_DETAILS[currency];
-            option.ImageLabel.Image = "rbxassetid://" + details.image;
+            option.ImageLabel.Image = details.image;
             option.LayoutOrder = details.layoutOrder;
             option.ImageLabel.Visible = true;
             option.ViewportFrame.Visible = false;

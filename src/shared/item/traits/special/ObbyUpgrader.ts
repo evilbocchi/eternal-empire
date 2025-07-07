@@ -1,4 +1,6 @@
 import { OnoeNum } from "@antivivi/serikanum";
+import { Debris } from "@rbxts/services";
+import { getSound } from "shared/asset/GameAssets";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Formula from "shared/currency/Formula";
 import Item from "shared/item/Item";
@@ -71,6 +73,11 @@ export default class ObbyUpgrader extends ItemTrait {
                 `${parent.Name} has completed the ${item.name} and earned ${reward.toString()} Obby Points!`,
                 `tag:hidden;color:${r},${g},${b}`
             );
+            const sound = getSound("ObbyPointGet.mp3");
+            sound.Play();
+            sound.Parent = parent;
+            Debris.AddItem(sound, 5);
+
             print(item.name, "completed");
             debounce = true;
             task.delay(1, () => {

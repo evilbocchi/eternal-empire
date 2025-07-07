@@ -93,7 +93,7 @@ export class ToolService implements OnInit, OnPlayerJoined, OnPlayerJoined {
                 continue;
             const toolModel = item.MODEL?.Clone();
             if (toolModel !== undefined) {
-                (toolModel as Tool).TextureId = "rbxassetid://" + item.image; // Updated to use item.image
+                (toolModel as Tool).TextureId = item.image ?? "";
                 toolModel.Parent = backpack;
             }
         }

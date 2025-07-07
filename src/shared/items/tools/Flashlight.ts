@@ -1,10 +1,11 @@
-import HarvestingTool from "shared/item/traits/HarvestingTool";
+import { getAsset } from "shared/asset/AssetMap";
+import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
+import TierDifficulty from "shared/item/TierDifficulty";
+import HarvestingTool from "shared/item/traits/HarvestingTool";
 import Crystal from "shared/items/excavation/Crystal";
 import EnchantedGrass from "shared/items/excavation/harvestable/EnchantedGrass";
 import MagicalWood from "shared/items/excavation/harvestable/MagicalWood";
-import CurrencyBundle from "shared/currency/CurrencyBundle";
-import TierDifficulty from "shared/item/TierDifficulty";
 
 export = new Item(script.Name)
     .setName("Flashlight")
@@ -15,7 +16,7 @@ export = new Item(script.Name)
     .setRequiredItemAmount(EnchantedGrass, 9)
     .setRequiredItemAmount(Crystal, 1)
     .setLevelReq(4)
-    .setImage(138746161403760)
+    .setImage(getAsset("assets/Flashlight.png"))
     .setLayoutOrder(5)
 
     .trait(HarvestingTool)

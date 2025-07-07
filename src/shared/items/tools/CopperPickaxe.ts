@@ -1,7 +1,8 @@
-import HarvestingTool from "shared/item/traits/HarvestingTool";
-import Item from "shared/item/Item";
+import { getAsset } from "shared/asset/AssetMap";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
+import Item from "shared/item/Item";
 import TierDifficulty from "shared/item/TierDifficulty";
+import HarvestingTool from "shared/item/traits/HarvestingTool";
 
 export = new Item(script.Name)
     .setName("Copper Pickaxe")
@@ -9,7 +10,7 @@ export = new Item(script.Name)
     .setDifficulty(TierDifficulty.Tier1)
     .setPrice(new CurrencyBundle().set("Funds", 1e9), 1)
     .setLevelReq(1)
-    .setImage(88369108808255)
+    .setImage(getAsset("assets/CopperPickaxe.png"))
 
     .trait(HarvestingTool)
     .setToolType("Pickaxe")
