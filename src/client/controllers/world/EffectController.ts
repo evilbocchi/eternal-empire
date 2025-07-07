@@ -1,15 +1,15 @@
 //!native
 //!optimize 2
 
-import { observeTagAdded, playSoundAtPart, rainbowEffect } from "@antivivi/vrldk";
+import { observeTagAdded, rainbowEffect } from "@antivivi/vrldk";
 import { Controller, OnInit } from "@flamework/core";
 import CameraShaker from "@rbxts/camera-shaker";
 import { Debris, Lighting, TweenService, Workspace } from "@rbxts/services";
 import { LOCAL_PLAYER } from "client/constants";
 import { STATS_WINDOW } from "client/controllers/interface/StatsController";
 import { AREAS } from "shared/Area";
+import { getSound, SOUND_EFFECTS_GROUP } from "shared/asset/GameAssets";
 import { PLACED_ITEMS_FOLDER } from "shared/constants";
-import { getSound } from "shared/asset/GameAssets";
 import { DROPLET_STORAGE } from "shared/item/Droplet";
 import ItemUtils from "shared/item/ItemUtils";
 import Items from "shared/items/Items";
@@ -153,11 +153,20 @@ export default class EffectController implements OnInit {
             const t = tick();
             task.wait(droplet.GetAttribute("Owner") === userId ? 0.1 : 0.3);
             const burnSound = getSound("DropletBurn.mp3");
-            burnSound.PlaybackSpeed = math.random() * 0.3 + 0.85;
+            const sizeMagnitude = droplet.Size.Magnitude / 2;
+
+            burnSound.PlaybackSpeed = (math.random() * 0.3 + 0.85) / sizeMagnitude;
+            if (sizeMagnitude > 0.666) {
+                const reverb = new Instance("ReverbSoundEffect");
+                reverb.DecayTime = sizeMagnitude / 2;
+                reverb.DryLevel = 0.5;
+                reverb.WetLevel = 0.5;
+                reverb.Parent = burnSound;
+            }
+            burnSound.SoundGroup = SOUND_EFFECTS_GROUP;
             burnSound.Parent = droplet;
             burnSound.Play();
-            const duration = droplet.Size.Magnitude / 2;
-            TweenService.Create(droplet, new TweenInfo(duration), { Color: new Color3(), Size: new Vector3() }).Play();
+            TweenService.Create(droplet, new TweenInfo(sizeMagnitude / 2), { Color: new Color3(), Size: new Vector3() }).Play();
 
             Debris.AddItem(droplet, 6);
             droplet.Anchored = true;
