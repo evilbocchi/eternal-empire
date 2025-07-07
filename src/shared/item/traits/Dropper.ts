@@ -6,6 +6,7 @@ import { Players, RunService } from "@rbxts/services";
 import Area, { AREAS } from "shared/Area";
 import { CURRENCY_DETAILS } from "shared/currency/CurrencyDetails";
 import GameSpeed from "shared/GameSpeed";
+import LuckyDroplets from "shared/LuckyDroplets";
 import Droplet, { DROPLET_STORAGE } from "shared/item/Droplet";
 import Item from "shared/item/Item";
 import { Server } from "shared/item/ItemUtils";
@@ -31,7 +32,7 @@ declare global {
 
 export default class Dropper extends ItemTrait {
 
-    static wrapInstantiator(instantiator: () => BasePart, dropper: Dropper) {
+    static wrapInstantiator(instantiator: () => BasePart, dropper: Dropper, model: Model, drop: BasePart) {
         const callback = dropper.dropletProduced;
         return () => {
             const droplet = instantiator();
@@ -42,6 +43,17 @@ export default class Dropper extends ItemTrait {
                 droplet.SetNetworkOwner(player);
             }
 
+            // Lucky droplet chance: configurable chance to spawn a Diamond Droplet
+            if (LuckyDroplets.chance > 0 && math.random(1, LuckyDroplets.chance) === 1) {
+                const luckyDropletInstantiator = Droplet.DiamondDroplet.getInstantiator(model, drop);
+                if (luckyDropletInstantiator !== undefined) {
+                    const luckyDroplet = luckyDropletInstantiator();
+                    luckyDroplet.Parent = DROPLET_STORAGE;
+                    if (player !== undefined) {
+                        luckyDroplet.SetNetworkOwner(player);
+                    }
+                }
+            }
 
             if (callback !== undefined)
                 callback(droplet, dropper);
@@ -70,7 +82,7 @@ export default class Dropper extends ItemTrait {
             info.DropRate = dropper.dropRate;
 
             if (instantiator !== undefined) {
-                info.Instantiator = Dropper.wrapInstantiator(instantiator, dropper);
+                info.Instantiator = Dropper.wrapInstantiator(instantiator, dropper, model, drop);
             }
 
             Dropper.SPAWNED_DROPS.set(drop, info);

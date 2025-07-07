@@ -58,7 +58,7 @@ export default class Condenser extends ItemTrait {
                 maxCosts.set(currency, amount.mul(10));
             }
             const drop = model.WaitForChild("Drop") as BasePart;
-            instantiatorsPerDroplet.set(droplet, Dropper.wrapInstantiator(droplet.getInstantiator(model, drop), dropper));
+            instantiatorsPerDroplet.set(droplet, Dropper.wrapInstantiator(droplet.getInstantiator(model, drop), dropper, model, drop));
         }
         const surfaceGui = model.WaitForChild("GuiPart").FindFirstChildOfClass("SurfaceGui");
         const lava = model.WaitForChild("Lava");
