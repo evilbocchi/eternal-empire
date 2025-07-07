@@ -1,13 +1,12 @@
 import Difficulty from "@antivivi/jjt-difficulties";
+import { findBaseParts, getAllInstanceInfo, getInstanceInfo, playSoundAtPart } from "@antivivi/vrldk";
 import { CollectionService } from "@rbxts/services";
 import { getSound } from "shared/asset/GameAssets";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
-import Item from "shared/item/Item";
-import Upgrader from "shared/item/traits/Upgrader";
 import Formula from "shared/currency/Formula";
-import { getAllInstanceInfo, getInstanceInfo } from "@antivivi/vrldk";
+import Item from "shared/item/Item";
 import { Server } from "shared/item/ItemUtils";
-import { findBaseParts, playSoundAtPart } from "@antivivi/vrldk";
+import Upgrader from "shared/item/traits/Upgrader";
 
 const mul = new CurrencyBundle().set("Funds", 0);
 
