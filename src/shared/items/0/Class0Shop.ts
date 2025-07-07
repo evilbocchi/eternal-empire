@@ -8,6 +8,7 @@ import AutomaticArbition from "shared/items/0/automatic/AutomaticArbition";
 import AutomaticRailgun from "shared/items/0/automatic/AutomaticRailgun";
 import IllusionaryPortal from "shared/items/0/automatic/IllusionaryPortal";
 import MoneyBin from "shared/items/0/automatic/MoneyBin";
+import ReinforcedReactor from "shared/items/0/automatic/ReinforcedReactor";
 import SkillBooster from "shared/items/0/automatic/SkillBooster";
 import TwoStoreyUpgrader from "shared/items/0/automatic/TwoStoreyUpgrader";
 import AutomaticJoyfulFurnace from "shared/items/0/automaticjoyful/AutomaticJoyfulFurnace";
@@ -234,6 +235,7 @@ export = new Item(script.Name)
         MoneyBin,
         TwoStoreyUpgrader,
         AutomaticRailgun,
+        ReinforcedReactor,
 
         EmeraldProcessor,
         XLayerAgglomerate,

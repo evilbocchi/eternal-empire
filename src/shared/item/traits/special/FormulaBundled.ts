@@ -34,6 +34,17 @@ export default class FormulaBundled extends ItemTrait {
     }
 
     /**
+     * Set the ratios for multiple currencies in the formula.
+     * 
+     * @param ratios A map of Currency to ratio values.
+     * @returns The FormulaBundled instance for chaining.
+     */
+    setRatios(ratios: Map<Currency, number>) {
+        this.ratio = ratios;
+        return this;
+    }
+
+    /**
      * Set how much the value of a profit will be multiplied by for a specific currency in the formula.
      * 
      * @param currency The currency to set the ratio for.

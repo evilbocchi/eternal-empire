@@ -7,8 +7,6 @@ import Conveyor from "shared/item/traits/Conveyor";
 import FormulaBundled from "shared/item/traits/special/FormulaBundled";
 import Upgrader from "shared/item/traits/Upgrader";
 
-const mul = new CurrencyBundle().set("Funds", 0).set("Power", 0);
-
 export = new Item(script.Name)
     .setName("Effervescent Droplet Spray")
     .setDescription(`Rinses droplets to make them sparkling clean! Just put droplets above the mystical veil for an enchanting experience.

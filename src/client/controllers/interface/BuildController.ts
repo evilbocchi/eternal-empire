@@ -365,9 +365,9 @@ export default class BuildController implements OnInit, OnStart {
         const lastSound = tick() - this.lastMovedTo;
         if (lastSound > 0.05) {
             const moveSound = getSound("ItemMove.mp3").Clone();
-            const pitchDecrement = math.min(lastSound, 0.5) * 0.25;
+            const pitchDecrement = math.min(lastSound, 0.5) * 0.5;
             this.lastMovedTo = tick();
-            moveSound.PlaybackSpeed = 1 + 0.25 - pitchDecrement;
+            moveSound.PlaybackSpeed = 1 + 0.5 - pitchDecrement;
             moveSound.Volume = 0.35;
             moveSound.Parent = ReplicatedStorage;
             moveSound.Play();
