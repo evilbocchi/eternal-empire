@@ -156,8 +156,8 @@ export default class EffectController implements OnInit {
             burnSound.PlaybackSpeed = math.random() * 0.3 + 0.85;
             burnSound.Parent = droplet;
             burnSound.Play();
-
-            TweenService.Create(droplet, new TweenInfo(0.5), { Color: new Color3(), Size: new Vector3() }).Play();
+            const duration = droplet.Size.Magnitude / 2;
+            TweenService.Create(droplet, new TweenInfo(duration), { Color: new Color3(), Size: new Vector3() }).Play();
 
             Debris.AddItem(droplet, 6);
             droplet.Anchored = true;
