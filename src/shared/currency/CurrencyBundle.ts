@@ -2,10 +2,10 @@
 //!optimize 2
 
 import { BaseOnoeNum, OnoeNum } from "@antivivi/serikanum";
+import { buildRichText } from "@antivivi/vrldk";
 import StringBuilder from "@rbxts/stringbuilder";
 import { CURRENCIES, CURRENCY_CATEGORIES, CURRENCY_DETAILS } from "shared/currency/CurrencyDetails";
 import CurrencyMap from "shared/currency/CurrencyMap";
-import { buildRichText } from "@antivivi/vrldk";
 
 declare global {
     type PropertyKey = string | number | symbol;
@@ -203,7 +203,7 @@ class CurrencyBundle {
             this.amountPerCurrency.delete(currency);
             return this;
         }
-        this.amountPerCurrency.set(currency, typeOf(amount) === "number" ? new OnoeNum(amount) : (amount as OnoeNum));
+        this.amountPerCurrency.set(currency, typeIs(amount, "number") ? new OnoeNum(amount) : (amount as OnoeNum));
         return this;
     }
 
@@ -277,7 +277,7 @@ class CurrencyBundle {
      */
     mul(value: CurrencyBundle | number, inplace?: boolean) {
         let result: CurrencyMap;
-        if (typeOf(value) === "number") {
+        if (typeIs(value, "number")) {
             result = CurrencyMap.mulConstant(this.amountPerCurrency, new OnoeNum(value as number), inplace);
         }
         else {
@@ -295,7 +295,7 @@ class CurrencyBundle {
      */
     div(value: CurrencyBundle | number, inplace?: boolean) {
         let result: CurrencyMap;
-        if (typeOf(value) === "number") {
+        if (typeIs(value, "number")) {
             result = CurrencyMap.divConstant(this.amountPerCurrency, new OnoeNum(value as number), inplace);
         }
         else {
@@ -313,7 +313,7 @@ class CurrencyBundle {
      */
     pow(value: CurrencyBundle | number, inplace?: boolean) {
         let result: CurrencyMap;
-        if (typeOf(value) === "number") {
+        if (typeIs(value, "number")) {
             result = CurrencyMap.powConstant(this.amountPerCurrency, new OnoeNum(value as number), inplace);
         }
         else {

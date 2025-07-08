@@ -152,7 +152,7 @@ export default class Unique extends ItemTrait {
         const scaledPots = this.getScaledPots(instance);
 
         for (const [potName, value] of scaledPots) {
-            const placeholder = `%${potName}%`;
+            const placeholder = `%%${potName}%%`;
             const formattedValue = typeIs(value, "number") ?
                 (value % 1 === 0 ? tostring(value) : string.format("%.2f", value)) :
                 tostring(value);

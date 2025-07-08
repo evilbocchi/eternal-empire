@@ -170,7 +170,7 @@ export class ChallengeService implements OnStart {
      * @param challenge The challenge details.
      */
     getRequirementLabel(challenge: ChallengeDetails) {
-        if (typeOf(challenge.goal) === "table") {
+        if (typeIs(challenge.goal, "table")) {
             const builder = new StringBuilder("Get ");
             (challenge.goal as Item[]).forEach((item, i) => builder.append(i === 0 ? item.name : "/" + item.name));
             return builder.toString();
@@ -331,7 +331,7 @@ export class ChallengeService implements OnStart {
             return;
 
         let challengeCompleted = false;
-        if (typeOf(challenge.goal) === "table") {
+        if (typeIs(challenge.goal, "table")) {
             const items = challenge.goal as Item[];
             for (const item of items) {
                 const amount = data.items.inventory.get(item.id);
