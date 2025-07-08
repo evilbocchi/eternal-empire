@@ -13,8 +13,8 @@
 import { convertToMMSS, weldModel } from "@antivivi/vrldk";
 import { OnInit, OnStart, Service } from "@flamework/core";
 import { TweenService, Workspace } from "@rbxts/services";
-import DataService from "server/services/serverdata/DataService";
 import ItemService from "server/services/item/ItemService";
+import DataService from "server/services/serverdata/DataService";
 import LevelService from "server/services/serverdata/LevelService";
 import UnlockedAreasService from "server/services/world/UnlockedAreasService";
 import { AREAS } from "shared/Area";
@@ -218,7 +218,7 @@ export default class ChestService implements OnInit, OnStart {
         const items = new Map<string, number>();
         const addItem = (item: Item) => {
             const itemId = item.id;
-            this.itemService.setItemAmount(itemId, this.itemService.getItemAmount(itemId) + 1);
+            this.itemService.giveItem(itemId, 1);
             items.set(itemId, (items.get(itemId) ?? 0) + 1);
         };
         for (const loot of loots) {

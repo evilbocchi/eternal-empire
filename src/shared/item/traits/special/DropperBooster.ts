@@ -15,7 +15,13 @@ export default class DropperBooster extends ItemTrait {
 
     mul = 1;
 
-    static load(model: Model, booster: DropperBooster) {
+    /**
+     * Creates a modifier for the drop rate of droppers in the area of the model.
+     * 
+     * @param model The model to create the modifier for.
+     * @returns A modifier object that can be used to adjust the drop rate.
+     */
+    static createModifier(model: Model) {
         const clickArea = model.WaitForChild("ClickArea") as BasePart;
         clickArea.CanTouch = true;
         clickArea.CollisionGroup = "ItemHitbox";
@@ -23,7 +29,7 @@ export default class DropperBooster extends ItemTrait {
         const Items = Server.items;
         let target: BasePart | undefined;
         let targetInfo: InstanceInfo | undefined;
-        const modifier = { multi: booster.mul };
+        const modifier = { multi: 1 };
 
         let t = 0;
         const connection = RunService.Heartbeat.Connect((dt) => {
@@ -48,6 +54,7 @@ export default class DropperBooster extends ItemTrait {
                 targetInfo?.DropRateModifiers?.delete(modifier);
             }
             else {
+                print(targetInfo?.DropRateModifiers);
                 targetInfo?.DropRateModifiers?.add(modifier);
             }
         });
@@ -55,6 +62,18 @@ export default class DropperBooster extends ItemTrait {
             targetInfo?.DropRateModifiers?.delete(modifier);
             connection.Disconnect();
         });
+        return modifier;
+    }
+
+    /**
+     * Loads the drop rate multiplier for the booster from the model.
+     * 
+     * @param model The model to load the booster from.
+     * @param booster The booster instance to apply the multiplier to.
+     */
+    static load(model: Model, booster: DropperBooster) {
+        const modifier = DropperBooster.createModifier(model);
+        modifier.multi = booster.mul;
     }
 
     constructor(item: Item) {

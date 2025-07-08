@@ -20,9 +20,8 @@
 
 import Signal from "@antivivi/lemon-signal";
 import { OnInit, OnStart, Service } from "@flamework/core";
-import { CollectionService, Workspace } from "@rbxts/services";
+import { CollectionService, HttpService, Workspace } from "@rbxts/services";
 import { CHALLENGES } from "server/Challenges";
-import UniqueItemService from "server/services/item/UniqueItemService";
 import { OnGameAPILoaded } from "server/services/ModdingService";
 import CurrencyService from "server/services/serverdata/CurrencyService";
 import DataService from "server/services/serverdata/DataService";
@@ -57,6 +56,11 @@ const queue = new Array<() => void>();
  */
 @Service()
 export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
+
+    private hasInventoryChanged = false;
+    private hasUniqueChanged = false;
+    private hasBoughtChanged = false;
+    private hasPlacedChanged = false;
 
     // Event Signals
 
@@ -114,40 +118,12 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
      */
     constructor(
         private dataService: DataService,
-        private currencyService: CurrencyService,
-        private uniqueItemService: UniqueItemService
+        private currencyService: CurrencyService
     ) {
 
     }
 
     // Data Management Methods
-
-    /**
-     * Updates the complete items data structure and syncs to clients.
-     * 
-     * @param itemsData The new items data to set.
-     * @param silent Whether to suppress client notifications.
-     */
-    setItems(itemsData: ItemsData, silent?: boolean) {
-        this.dataService.empireData.items = itemsData;
-        if (silent !== true) {
-            Packets.inventory.set(itemsData.inventory);
-            Packets.bought.set(itemsData.bought);
-            Packets.uniqueInstances.set(itemsData.uniqueInstances);
-        }
-    }
-
-    /**
-     * Updates the inventory and syncs to clients.
-     * 
-     * @param inventory The new inventory to set.
-     * @param silent Whether to suppress client notifications.
-     */
-    setInventory(inventory: Inventory, silent?: boolean) {
-        const items = this.dataService.empireData.items;
-        items.inventory = inventory;
-        this.setItems(items, silent);
-    }
 
     /**
      * Gets the current amount of an item in inventory.
@@ -164,25 +140,12 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
      * 
      * @param itemId The ID of the item to set.
      * @param amount The new amount to set.
-     * @param silent Whether to suppress client notifications.
      */
-    setItemAmount(itemId: string, amount: number, silent?: boolean) {
-        const inventory = this.dataService.empireData.items.inventory;
-        inventory.set(itemId, amount);
-        this.setInventory(inventory, silent);
+    setItemAmount(itemId: string, amount: number) {
+        this.dataService.empireData.items.inventory.set(itemId, amount);
+        this.hasInventoryChanged = true;
     }
 
-    /**
-     * Updates the bought items tracking and syncs to clients.
-     * 
-     * @param bought The new bought items map to set.
-     * @param silent Whether to suppress client notifications.
-     */
-    setBought(bought: Inventory, silent?: boolean) {
-        const items = this.dataService.empireData.items;
-        items.bought = bought;
-        this.setItems(items, silent);
-    }
 
     /**
      * Gets the number of times an item has been bought.
@@ -199,28 +162,71 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
      * 
      * @param itemId The ID of the item to set.
      * @param amount The new bought amount.
-     * @param silent Whether to suppress client notifications.
      */
-    setBoughtAmount(itemId: string, amount: number, silent?: boolean) {
-        const bought = this.dataService.empireData.items.bought;
-        bought.set(itemId, amount);
-        if (silent !== true)
-            this.setBought(bought);
+    setBoughtAmount(itemId: string, amount: number) {
+        this.dataService.empireData.items.bought.set(itemId, amount);
+        this.hasBoughtChanged = true;
     }
 
     /**
      * Updates the placed items collection and syncs to clients.
      * 
      * @param placedItems The new placed items map to set.
-     * @param silent Whether to suppress client notifications and signals.
      */
-    setPlacedItems(placedItems: Map<string, PlacedItem>, silent?: boolean) {
-        const items = this.dataService.empireData.items;
-        items.worldPlaced = placedItems;
-        this.setItems(items, silent);
-        if (silent !== true) {
-            this.placedItemsUpdated.fire(placedItems);
-            Packets.placedItems.set(placedItems);
+    setPlacedItems(placedItems: Map<string, PlacedItem>) {
+        this.dataService.empireData.items.worldPlaced = placedItems;
+        this.hasPlacedChanged = true;
+    }
+
+    /**
+     * Creates a new unique item instance from the given base item.
+     * 
+     * @param baseItemId The ID of the base item to create a unique instance from.
+     * @param allPots Optional parameter to specify a fixed value for all pots (0-100).
+     * @returns The UUID of the created unique item instance, or undefined if the item doesn't support unique instances.
+     */
+    createUniqueInstance(baseItemId: string, allPots?: number): string | undefined {
+        const baseItem = Items.getItem(baseItemId);
+        if (!baseItem) {
+            warn(`Base item with ID ${baseItemId} not found.`);
+            return undefined;
+        }
+
+        const uniqueTrait = baseItem.findTrait("Unique");
+        if (!uniqueTrait) {
+            warn(`Item ${baseItemId} does not support unique instances.`);
+            return undefined;
+        }
+
+        const instance = uniqueTrait.generateInstance(allPots);
+        const uuid = HttpService.GenerateGUID(false);
+        this.dataService.empireData.items.uniqueInstances.set(uuid, instance);
+        this.hasUniqueChanged = true;
+
+        return uuid;
+    }
+
+    /**
+     * Gives an item to the empire, either as a unique instance or as a normal item.
+     * 
+     * @param itemId The ID of the item to give.
+     * @param amount The amount of the item to give (default is 1).
+     */
+    giveItem(itemId: string, amount = 1) {
+        const item = Items.getItem(itemId);
+        if (item === undefined) {
+            warn(`Item ${itemId} not found.`);
+            return;
+        }
+
+        if (item.isA("Unique")) {
+            for (let i = 0; i < amount; i++) {
+                this.createUniqueInstance(itemId);
+            }
+        }
+        else {
+            const currentAmount = this.getItemAmount(itemId);
+            this.setItemAmount(itemId, currentAmount + amount);
         }
     }
 
@@ -265,10 +271,12 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
                 this.setItemAmount(item, this.getItemAmount(item) + 1);
             }
             else {
-                const uniqueItem = itemsData.uniqueInstances.get(uuid);
+                const uniqueInstances = itemsData.uniqueInstances;
+                const uniqueItem = uniqueInstances.get(uuid);
                 if (uniqueItem === undefined)
                     throw `Unique item ${uuid} not found.`;
                 uniqueItem.placed = undefined; // Clear the placement ID
+                this.hasUniqueChanged = true;
             }
 
         }
@@ -343,11 +351,17 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
         let i = 0;
         let totalAmount = 0;
         const placedItems = new Array<IdPlacedItem>();
+        let inventoryChanged = false;
+        let uniqueInstancesChanged = false;
         for (const item of items) {
             let [placedItem, amount] = this.serverPlace(item.id, item.position, item.rotation, area);
             if (placedItem !== undefined) {
-                if (amount !== undefined) {
+                if (amount !== undefined) { // if this is a normal item
                     totalAmount += amount;
+                    inventoryChanged = true;
+                }
+                else {
+                    uniqueInstancesChanged = true;
                 }
                 placedItems.push(placedItem);
             }
@@ -356,11 +370,6 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
             i++;
         }
         this.itemsPlaced.fire(player, placedItems);
-        const itemsData = this.dataService.empireData.items;
-        Packets.inventory.set(itemsData.inventory);
-        Packets.placedItems.set(itemsData.worldPlaced);
-        Packets.uniqueInstances.set(itemsData.uniqueInstances);
-
         if (i === 0 || overallSuccess === false)
             return 0;
         if (i === 1)
@@ -486,17 +495,18 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
         if (uniqueInstance !== undefined) {
             placedItem.uniqueItemId = id; // Link unique item UUID
             uniqueInstance.placed = nextId; // Set the placement ID for the unique item
+            this.hasUniqueChanged = true;
         }
 
         // Update data and create model
         placedItems.set(nextId, placedItem);
         this.addItemModel(nextId, placedItem);
-        this.setPlacedItems(placedItems, true);
+        this.setPlacedItems(placedItems);
         if (uniqueInstance !== undefined) {
             return $tuple(placedItem);
         }
         else {
-            this.setItemAmount(itemId, itemAmount! - 1, true);
+            this.setItemAmount(itemId, itemAmount! - 1);
             return $tuple(placedItem, itemAmount! - 1);
         }
     }
@@ -528,10 +538,9 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
      * Purchases the item, spending currency.
      * 
      * @param item Item to purchase.
-     * @param silent Whether to suppress changes to the client.
      * @returns Whether the purchase was successful.
      */
-    serverBuy(item: Item, silent?: boolean) {
+    serverBuy(item: Item) {
         // Check required items
         for (const [required, amount] of item.requiredItems) {
             if (this.getItemAmount(required.id) < amount) {
@@ -554,11 +563,11 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
         if (success === true) {
             // Consume required items
             for (const [required, amount] of item.requiredItems) {
-                this.setItemAmount(required.id, this.getItemAmount(required.id) - amount, silent);
+                this.setItemAmount(required.id, this.getItemAmount(required.id) - amount);
             }
-            this.setBoughtAmount(itemId, nextBought, silent);
+            this.setBoughtAmount(itemId, nextBought);
             // Add item to inventory
-            this.setItemAmount(itemId, this.getItemAmount(itemId) + 1, silent);
+            this.setItemAmount(itemId, this.getItemAmount(itemId) + 1);
         }
         return success;
     }
@@ -568,10 +577,9 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
      * 
      * @param player The player making the purchase (undefined for system purchases).
      * @param itemId The ID of the item to buy.
-     * @param silent Whether to suppress client notifications.
      * @returns Whether the purchase was successful.
      */
-    buyItem(player: Player | undefined, itemId: string, silent?: boolean) {
+    buyItem(player: Player | undefined, itemId: string) {
         if (player !== undefined && !this.dataService.checkPermLevel(player, "purchase")) {
             return false;
         }
@@ -579,7 +587,7 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
         if (item === undefined)
             return false;
 
-        const success = this.serverBuy(item, silent);
+        const success = this.serverBuy(item);
         if (success) {
             this.itemsBought.fire(player, [item]);
         }
@@ -698,6 +706,40 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
     // Lifecycle Methods
 
     /**
+     * Requests changes to be propagated to clients.
+     * Marks all change flags as true to ensure data is sent in the next update cycle.
+     */
+    requestChanges() {
+        this.hasInventoryChanged = true;
+        this.hasUniqueChanged = true;
+        this.hasBoughtChanged = true;
+        this.hasPlacedChanged = true;
+    }
+
+    /**
+     * Propagates changes to clients by sending updated data packets.
+     * This is called periodically to ensure all changes are synchronized.
+     */
+    propagateChanges() {
+        if (this.hasInventoryChanged) {
+            Packets.inventory.set(this.dataService.empireData.items.inventory);
+            this.hasInventoryChanged = false;
+        }
+        if (this.hasUniqueChanged) {
+            Packets.uniqueInstances.set(this.dataService.empireData.items.uniqueInstances);
+            this.hasUniqueChanged = false;
+        }
+        if (this.hasBoughtChanged) {
+            Packets.bought.set(this.dataService.empireData.items.bought);
+            this.hasBoughtChanged = false;
+        }
+        if (this.hasPlacedChanged) {
+            Packets.placedItems.set(this.dataService.empireData.items.worldPlaced);
+            this.hasPlacedChanged = false;
+        }
+    }
+
+    /**
      * Initializes the ItemService.
      * Sets up packet handlers, initializes all items, and synchronizes world state.
      */
@@ -707,12 +749,6 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
         // Set up packet handlers for item operations
         Packets.buyItem.onInvoke((player, itemId) => this.buyItem(player, itemId));
         Packets.buyAllItems.onInvoke((player, itemIds) => this.buyAllItems(player, itemIds));
-
-        // Sync initial data to clients
-        Packets.inventory.set(this.dataService.empireData.items.inventory);
-        Packets.bought.set(this.dataService.empireData.items.bought);
-        Packets.placedItems.set(this.dataService.empireData.items.worldPlaced);
-        Packets.uniqueInstances.set(this.dataService.empireData.items.uniqueInstances);
 
         // Set up placement handlers with queue protection
         Packets.placeItems.onInvoke((player, items) => {
@@ -754,5 +790,12 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
      */
     onStart() {
         this.addMapItems();
+
+        this.requestChanges();
+        task.spawn(() => {
+            while (task.wait(0.1)) {
+                this.propagateChanges();
+            }
+        });
     }
 }

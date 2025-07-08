@@ -36,8 +36,7 @@ namespace ItemUtils {
     placedItemOverlapParams.CollisionGroup = "ItemHitbox";
 
     export const getPlacedItemsInArea = (area: BasePart, Items = Server.items) => {
-        const array = Workspace.GetPartBoundsInBox(area.CFrame, area.Size, placedItemOverlapParams);
-
+        const array = area.GetTouchingParts();
         const items = new Map<Model, Item>();
         for (const touching of array) {
             const target = touching.Parent as Model;

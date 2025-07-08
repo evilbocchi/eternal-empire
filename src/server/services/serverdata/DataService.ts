@@ -754,7 +754,6 @@ export default class DataService implements OnInit, OnPlayerJoined {
                 items.bought.set(itemId, amount);
             }
         }
-        return items;
     }
 
     /**

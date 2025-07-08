@@ -131,7 +131,7 @@ export default class SetupService implements OnInit {
         const items = new Array<PlacingInfo>();
         for (const savedItem of savedItems) {
             const itemId = savedItem.item;
-            if (this.itemService.getItemAmount(itemId) === 0 && this.itemService.serverBuy(Items.getItem(itemId)!, true) === false) {
+            if (this.itemService.getItemAmount(itemId) === 0 && this.itemService.serverBuy(Items.getItem(itemId)!) === false) {
                 continue;
             }
             const id = savedItem.uniqueItemId ?? itemId;

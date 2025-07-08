@@ -214,8 +214,9 @@ export class ToolService implements OnInit, OnPlayerJoined, OnPlayerJoined {
                 else {
                     receiving.set(harvestable.Name, math.random(1, 2));
                 }
-                for (const [id, amount] of receiving)
-                    this.itemService.setItemAmount(id, this.itemService.getItemAmount(id) + amount);
+                for (const [id, amount] of receiving) {
+                    this.itemService.giveItem(id, amount);
+                }
                 Packets.itemsReceived.fireAll(receiving);
 
                 this.moveHarvestable(harvestable, this.originalPosPerHarvestable.get(harvestable)!.sub(new Vector3(0, -500, 0)));

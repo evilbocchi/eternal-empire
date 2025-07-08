@@ -838,8 +838,8 @@ export default class CommandsService implements OnInit {
             (_o) => {
                 // spawn all item models
                 for (const [id, item] of Items.itemsPerId) {
-                    this.itemService.setBoughtAmount(id, 0, true);
-                    this.itemService.setItemAmount(id, 99, true);
+                    this.itemService.setBoughtAmount(id, 0);
+                    this.itemService.setItemAmount(id, 99);
 
                     const primaryPart = item.MODEL?.PrimaryPart;
                     if (primaryPart === undefined)
@@ -852,7 +852,7 @@ export default class CommandsService implements OnInit {
         this.createCommand("uniqueitem", "ui",
             "<item> <pot> : Give a unique item to the player. Specify pot value (0-100) to set a specific value for all pots.",
             (_o, item, pot) => {
-                this.uniqueItemService.createUniqueInstance(item, tonumber(pot));
+                this.itemService.createUniqueInstance(item, tonumber(pot));
             }, 4);
 
         this.createCommand("chestopen", "chop",
@@ -955,8 +955,9 @@ export default class CommandsService implements OnInit {
             "Reset all data like no progress was ever made.",
             (_o) => {
                 this.itemService.setPlacedItems(new Map());
-                this.itemService.setBought(new Map());
-                this.itemService.setInventory(new Map([["ClassLowerNegativeShop", 1]]));
+                this.dataService.empireData.items.bought.clear();
+                this.dataService.empireData.items.inventory.clear();
+                this.dataService.empireData.items.inventory.set("ClassLowerNegativeShop", 1);
                 this.itemService.fullUpdatePlacedItemsModels();
                 this.currencyService.setAll(new Map());
                 this.namedUpgradeService.setAmountPerUpgrade(new Map());
@@ -997,12 +998,10 @@ export default class CommandsService implements OnInit {
                 LuckyDroplets.chance = chance;
             }, 4);
 
-        this.createCommand("fix", "fix",
-            "debug command",
+        this.createCommand("unduplicate", "undupe",
+            "Unduplicate all items in the world.",
             (_player) => {
-                const items = this.dataService.dupeCheck(this.dataService.empireData.items);
-
-                this.itemService.setItems(items);
+                this.dataService.dupeCheck(this.dataService.empireData.items);
                 this.itemService.fullUpdatePlacedItemsModels();
             }, 4);
 

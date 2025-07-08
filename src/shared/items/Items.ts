@@ -45,6 +45,16 @@ abstract class Items {
         return charms;
     })();
 
+    static readonly uniqueItems = (function () {
+        const uniqueItems = new Set<Item>();
+        for (const [_, item] of Items.itemsPerId) {
+            if (item.isA("Unique")) {
+                uniqueItems.add(item);
+            }
+        }
+        return uniqueItems;
+    })();
+
     /**
      * Ordered list of all items by:
      * 1. Difficulty rating

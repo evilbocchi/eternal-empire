@@ -19,10 +19,10 @@ import { OnoeNum } from "@antivivi/serikanum";
 import { getPlayer } from "@antivivi/vrldk";
 import { OnInit, Service } from "@flamework/core";
 import { BadgeService, Players, RunService } from "@rbxts/services";
+import ItemService from "server/services/item/ItemService";
 import RevenueService from "server/services/RevenueService";
 import CurrencyService from "server/services/serverdata/CurrencyService";
 import DataService from "server/services/serverdata/DataService";
-import ItemService from "server/services/item/ItemService";
 import NamedUpgradeService from "server/services/serverdata/NamedUpgradeService";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Operative from "shared/item/traits/Operative";
@@ -127,9 +127,8 @@ export default class ResetService implements OnInit {
         const inventory = this.unplaceItems(resetLayer, items);
         items.bought = this.filterExcludeInventory(items.bought, resetLayer);
         items.inventory = this.filterExcludeInventory(inventory, resetLayer);
-
         this.dataService.dupeCheck(items);
-        this.itemService.setItems(items);
+        this.itemService.requestChanges();
     }
 
     /**

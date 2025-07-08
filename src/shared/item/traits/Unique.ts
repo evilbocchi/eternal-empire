@@ -71,15 +71,29 @@ export default class Unique extends ItemTrait {
             throw `Unique item instance for UUID ${uuid} not found.`;
         }
 
-        const dropRateMultiplier = uniqueInstance.pots.get("dropRateMultiplier");
+        const aura = model.FindFirstChild("Aura") as BasePart | undefined;
+        if (aura !== undefined) {
+            aura.CanCollide = false;
+            let maxValue = 0;
+            let totalValue = 0;
+            for (const [_, potValue] of uniqueInstance.pots) {
+                maxValue += 100;
+                totalValue += potValue;
+            }
+            aura.Color = unique.MIN_COLOR.Lerp(unique.MAX_COLOR, totalValue / maxValue);
+        }
+
+        const scaledPots = unique.getScaledPots(uniqueInstance);
+
+        const dropRateMultiplier = scaledPots.get("dropRateMultiplier");
         if (dropRateMultiplier !== undefined) {
-            DropperBooster.load(model, new DropperBooster(item).setDropRateMultiplier(dropRateMultiplier));
+            DropperBooster.createModifier(model).multi = dropRateMultiplier;
         }
     }
 
-
     constructor(item: Item) {
         super(item);
+        item.onLoad((model) => Unique.load(model, this));
     }
 
     /**

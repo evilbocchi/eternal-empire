@@ -6,7 +6,6 @@ import AdaptiveTabController, { ADAPTIVE_TAB_MAIN_WINDOW } from "client/controll
 import BuildController from "client/controllers/interface/BuildController";
 import TooltipController, { Tooltip } from "client/controllers/interface/TooltipController";
 import UIController, { INTERFACE } from "client/controllers/UIController";
-import UniqueItemController from "client/controllers/UniqueItemController";
 import ItemFilter from "client/ItemFilter";
 import ItemSlot from "client/ItemSlot";
 import { ASSETS } from "shared/asset/GameAssets";
@@ -24,13 +23,8 @@ export const INVENTORY_WINDOW = ADAPTIVE_TAB_MAIN_WINDOW.WaitForChild("Inventory
 
 const sortedItemsSize = Items.sortedItems.size();
 const reverseSortedItems = new Array<Item>(sortedItemsSize);
-const uniqueItems = new Set<Item>();
 for (let i = 0; i < sortedItemsSize; i++) {
-    const item = Items.sortedItems[sortedItemsSize - 1 - i];
-    reverseSortedItems[i] = item;
-    if (item.isA("Unique")) {
-        uniqueItems.add(item);
-    }
+    reverseSortedItems[i] = Items.sortedItems[sortedItemsSize - 1 - i];
 }
 
 @Controller()
@@ -44,22 +38,65 @@ export default class InventoryController implements OnInit, OnStart {
     });
 
 
-    constructor(private uiController: UIController, private adaptiveTabController: AdaptiveTabController, private buildController: BuildController, private tooltipController: TooltipController, private uniqueItemController: UniqueItemController) {
+    constructor(private uiController: UIController, private adaptiveTabController: AdaptiveTabController, private buildController: BuildController, private tooltipController: TooltipController) {
 
     }
 
-    refreshInventoryWindow(inventory = Packets.inventory.get()) {
+    /**
+     * Find the best unique item instance for a given base item ID based on its average pot.
+     * 
+     * @param baseItemId The ID of the base item to find the best unique instance for.
+     * @returns The best unique item instance, or undefined if no instances found.
+     */
+    getBest(baseItemId: string) {
+        // Find the best unique item instance for the given base item ID
+        let bestUuid: string | undefined;
+        let bestInstance: UniqueItemInstance | undefined;
+        const uniqueInstances = Packets.uniqueInstances.get();
+        if (uniqueInstances === undefined) {
+            return undefined;
+        }
+        for (const [uuid, instance] of uniqueInstances) {
+            if (instance.placed)
+                continue; // Skip placed instances
+            if (instance.baseItemId === baseItemId) {
+                let thisPots = 0;
+                for (const [_, potValue] of instance.pots) {
+                    thisPots += potValue;
+                }
+
+                let otherPots = 0;
+                if (bestInstance) {
+                    for (const [_, potValue] of bestInstance.pots) {
+                        otherPots += potValue;
+                    }
+                }
+
+                if (thisPots > otherPots) {
+                    bestInstance = instance;
+                    bestUuid = uuid;
+                }
+            }
+        }
+        return bestUuid;
+    }
+
+    refreshInventoryWindow(inventory = Packets.inventory.get(), uniqueInstances = Packets.uniqueInstances.get()) {
         let isEmpty = true;
         const items = this.items;
         items.clear();
-        const uniqueInstances = Packets.uniqueInstances.get();
+        const amounts = new Map<string, number>();
         if (uniqueInstances !== undefined) {
             for (const [_, uniqueInstance] of uniqueInstances) {
-                if (uniqueInstance.placed !== undefined)
+                const itemId = uniqueInstance.baseItemId;
+                if (itemId === undefined || uniqueInstance.placed)
                     continue;
-                inventory.set(uniqueInstance.baseItemId, (inventory.get(uniqueInstance.baseItemId) ?? 0) + 1);
+
+                const amount = amounts.get(itemId) ?? 0;
+                amounts.set(itemId, amount + 1);
             }
         }
+
 
         for (const item of reverseSortedItems) {
             const itemSlot = this.itemSlotsPerItem.get(item);
@@ -67,14 +104,19 @@ export default class InventoryController implements OnInit, OnStart {
                 continue;
 
             const itemId = item.id;
-            const amount = inventory.get(itemId);
-            const hasItem = amount !== undefined && amount > 0;
+            let amount = inventory.get(itemId) ?? 0;
+            const uniques = amounts.get(itemId);
+            if (uniques !== undefined) {
+                amount += uniques;
+            }
+
+            const hasItem = amount > 0;
             if (hasItem) {
                 isEmpty = false;
                 items.push(item);
             }
-            if (uniqueItems.has(item)) {
-                const bestUuid = this.uniqueItemController.getBest(itemId);
+            if (Items.uniqueItems.has(item)) {
+                const bestUuid = this.getBest(itemId);
                 this.tooltipController.getTooltip(itemSlot).uuid = bestUuid;
             }
 
@@ -109,8 +151,8 @@ export default class InventoryController implements OnInit, OnStart {
                 this.adaptiveTabController.hideAdaptiveTab();
                 this.uiController.playSound("MenuClick.mp3");
                 let bestUuid: string | undefined;
-                if (item.isA("Unique")) {
-                    bestUuid = this.uniqueItemController.getBest(item.id);
+                if (Items.uniqueItems.has(item)) {
+                    bestUuid = this.getBest(item.id);
                 }
 
                 this.buildController.mainSelect(this.buildController.addPlacingModel(item, bestUuid));
@@ -128,7 +170,6 @@ export default class InventoryController implements OnInit, OnStart {
     onInit() {
         this.loadItemSlots();
 
-        Packets.inventory.observe((inventory) => this.refreshInventoryWindow(inventory));
         INTERFACE.GetPropertyChangedSignal("AbsoluteSize").Connect(() => this.recalibrate());
 
         for (const traitOption of INVENTORY_WINDOW.Page.FilterOptions.TraitOptions.GetChildren()) {
@@ -139,6 +180,13 @@ export default class InventoryController implements OnInit, OnStart {
     }
 
     onStart() {
+        Packets.inventory.observe((inventory) => {
+            this.refreshInventoryWindow(inventory);
+        });
+        Packets.uniqueInstances.observe((uniqueInstances) => {
+            this.refreshInventoryWindow(undefined, uniqueInstances);
+        });
+
         let firstLoad = true;
         const connection = INVENTORY_WINDOW.GetPropertyChangedSignal("Visible").Connect(() => {
             if (!firstLoad) {

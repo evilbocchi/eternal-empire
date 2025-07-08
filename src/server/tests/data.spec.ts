@@ -2,15 +2,13 @@
 
 import { OnoeNum } from "@antivivi/serikanum";
 import ItemService from "server/services/item/ItemService";
-import UniqueItemService from "server/services/item/UniqueItemService";
 import CurrencyService from "server/services/serverdata/CurrencyService";
 import DataService from "server/services/serverdata/DataService";
 
 export = function () {
     const dataService = new DataService();
     const currencyService = new CurrencyService(dataService);
-    const uniqueItemService = new UniqueItemService(dataService);
-    const itemService = new ItemService(dataService, currencyService, uniqueItemService);
+    const itemService = new ItemService(dataService, currencyService);
 
     describe("loading", () => {
 
@@ -100,27 +98,27 @@ export = function () {
 
         it("should buy a free item", () => {
             const itemId = "TheFirstDropper";
-            itemService.setItemAmount(itemId, 0, true);
-            itemService.setBoughtAmount(itemId, 0, true);
-            expect(itemService.buyItem(undefined, itemId, true)).to.equal(true);
+            itemService.setItemAmount(itemId, 0);
+            itemService.setBoughtAmount(itemId, 0);
+            expect(itemService.buyItem(undefined, itemId)).to.equal(true);
             expect(itemService.getItemAmount(itemId)).to.be.equal(1);
         });
 
         it("should buy a non-free item", () => {
             const itemId = "BulkyDropper";
-            itemService.setItemAmount(itemId, 1, true);
-            itemService.setBoughtAmount(itemId, 0, true);
+            itemService.setItemAmount(itemId, 1);
+            itemService.setBoughtAmount(itemId, 0);
             currencyService.set("Funds", new OnoeNum(1e6));
-            expect(itemService.buyItem(undefined, itemId, true)).to.equal(true);
+            expect(itemService.buyItem(undefined, itemId)).to.equal(true);
             expect(itemService.getItemAmount(itemId)).to.be.equal(2);
         });
 
         it("should not buy an item with insufficient funds", () => {
             const itemId = "BulkyDropper";
-            itemService.setItemAmount(itemId, 1, true);
-            itemService.setBoughtAmount(itemId, 0, true);
+            itemService.setItemAmount(itemId, 1);
+            itemService.setBoughtAmount(itemId, 0);
             currencyService.set("Funds", new OnoeNum(0));
-            expect(itemService.buyItem(undefined, itemId, true)).to.equal(false);
+            expect(itemService.buyItem(undefined, itemId)).to.equal(false);
             expect(itemService.getItemAmount(itemId)).to.be.equal(1);
         });
     });
@@ -128,7 +126,7 @@ export = function () {
     describe("unique items", () => {
         it("should create a unique item instance", () => {
             const itemId = "TheFirstDropperBooster";
-            const uuid = uniqueItemService.createUniqueInstance(itemId);
+            const uuid = itemService.createUniqueInstance(itemId);
             expect(uuid).to.be.ok();
 
             const instance = dataService.empireData.items.uniqueInstances.get(uuid!);
@@ -139,7 +137,7 @@ export = function () {
 
         it("should validate pot values are within range", () => {
             const itemId = "TheFirstDropperBooster";
-            const uuid = uniqueItemService.createUniqueInstance(itemId);
+            const uuid = itemService.createUniqueInstance(itemId);
             const instance = dataService.empireData.items.uniqueInstances.get(uuid!);
 
             expect(instance).to.be.ok();
