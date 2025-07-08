@@ -1,3 +1,4 @@
+import { OnoeNum } from "@antivivi/serikanum";
 import Item from "shared/item/Item";
 import ItemTrait from "shared/item/traits/ItemTrait";
 import UUID from "shared/utils/UUID";
@@ -153,9 +154,7 @@ export default class Unique extends ItemTrait {
 
         for (const [potName, value] of scaledPots) {
             const placeholder = `%%${potName}%%`;
-            const formattedValue = typeIs(value, "number") ?
-                (value % 1 === 0 ? tostring(value) : string.format("%.2f", value)) :
-                tostring(value);
+            const formattedValue = new OnoeNum(value).toString();
             formatted = formatted.gsub(placeholder, formattedValue)[0];
         }
         return formatted;
