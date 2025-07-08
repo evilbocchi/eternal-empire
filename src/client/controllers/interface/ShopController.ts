@@ -10,7 +10,7 @@ import HotkeysController from "client/controllers/HotkeysController";
 import UIController from "client/controllers/UIController";
 import AdaptiveTabController, { ADAPTIVE_TAB, ADAPTIVE_TAB_MAIN_WINDOW } from "client/controllers/interface/AdaptiveTabController";
 import TooltipController from "client/controllers/interface/TooltipController";
-import UniqueItemClientService from "client/services/UniqueItemClientService";
+import UniqueItemClientService from "client/controllers/UniqueItemController";
 import Packets from "shared/Packets";
 import { ASSETS, getSound } from "shared/asset/GameAssets";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
@@ -266,7 +266,7 @@ export default class ShopController implements OnInit, OnStart {
         if (uniqueInstances.size() > 0) {
             let description = item.description;
             description += `\n\n[UNIQUE ITEM] You own ${uniqueInstances.size()} unique instance(s) with randomized stats.`;
-            
+
             const builder = buildRichText(undefined, item.format(description), this.descriptionColor, 21, "Medium");
             builder.appendAll(METADATA_PER_ITEM.get(item)!.builder);
             PURCHASE_WINDOW.DescriptionFrame.DescriptionLabel.Text = builder.toString();

@@ -143,12 +143,11 @@ export default class UniqueItem extends ItemTrait {
      * 
      * @param str The string to format with pot placeholders (e.g., "%admirationBoost%").
      * @param instance The unique item instance to get pot values from.
-     * @param uniqueTrait The unique item trait to use for scaling (required for accessing pot configs).
      * @returns The formatted string.
      */
-    static formatWithPots(str: string, instance: UniqueItemInstance, uniqueTrait: UniqueItem): string {
+    formatWithPots(str: string, instance: UniqueItemInstance): string {
         let formatted = str;
-        const scaledPots = uniqueTrait.getScaledPots(instance);
+        const scaledPots = this.getScaledPots(instance);
         
         for (const [potName, value] of scaledPots) {
             const placeholder = `%${potName}%`;

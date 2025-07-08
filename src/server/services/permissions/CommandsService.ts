@@ -818,8 +818,17 @@ export default class CommandsService implements OnInit {
             "<item> <amount> : Set the quantity for an item.",
             (_o, item, amount) => {
                 const a = tonumber(amount) ?? 0;
-                this.itemService.setItemAmount(item, a);
-                this.itemService.setBoughtAmount(item, a);
+                const giveItem = (id: string) => {
+                    this.itemService.setItemAmount(id, a);
+                    this.itemService.setBoughtAmount(id, a);
+                };
+                if (item === "all") {
+                    for (const [id, _] of Items.itemsPerId) {
+                        giveItem(id);
+                    }
+                    return;
+                }
+                giveItem(item);
             }, 4);
 
         this.createCommand("itemall", "ia",

@@ -8,7 +8,7 @@ import TooltipController, { Tooltip } from "client/controllers/interface/Tooltip
 import UIController, { INTERFACE } from "client/controllers/UIController";
 import ItemFilter from "client/ItemFilter";
 import ItemSlot from "client/ItemSlot";
-import UniqueItemClientService from "client/services/UniqueItemClientService";
+import UniqueItemClientService from "client/controllers/UniqueItemController";
 import { ASSETS } from "shared/asset/GameAssets";
 import Item from "shared/item/Item";
 import Items from "shared/items/Items";
@@ -109,7 +109,7 @@ export default class InventoryController implements OnInit, OnStart {
     createTooltipForItem(item: Item): Tooltip {
         // Check if this item has unique instances
         const uniqueInstances = this.uniqueItemClientService.getInstancesOfType(item.id);
-        
+
         if (uniqueInstances.size() > 0) {
             // Create a custom message showing unique item information
             const uniqueTrait = item.findTrait("UniqueItem");
@@ -117,13 +117,13 @@ export default class InventoryController implements OnInit, OnStart {
                 let message = `${item.name} (Unique Item)\n\n`;
                 message += `You own ${uniqueInstances.size()} unique instance(s) of this item.\n\n`;
                 message += "Each instance has randomly generated stats:\n";
-                
+
                 // Show pot configurations
                 const potConfigs = uniqueTrait.getPotConfigs();
                 for (const [potName, config] of potConfigs) {
                     message += `• ${potName}: ${config.min} - ${config.max}${config.integer ? " (integer)" : ""}\n`;
                 }
-                
+
                 if (uniqueInstances.size() > 0) {
                     message += "\nFirst instance stats:\n";
                     const [firstUUID, firstInstance] = uniqueInstances[0];
@@ -133,11 +133,11 @@ export default class InventoryController implements OnInit, OnStart {
                         message += `• ${potName}: ${formattedValue}\n`;
                     }
                 }
-                
+
                 return Tooltip.fromMessage(message);
             }
         }
-        
+
         // Regular item tooltip
         return Tooltip.fromItem(item);
     }

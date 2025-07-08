@@ -1,8 +1,8 @@
-import { Service } from "@flamework/core";
+import { Controller, OnInit } from "@flamework/core";
 import Packets from "shared/Packets";
 
 /**
- * Client-side service for managing unique item data and formatted descriptions.
+ * Controller for managing unique item data and formatted descriptions.
  * 
  * This service:
  * - Receives unique item instances from the server
@@ -10,20 +10,13 @@ import Packets from "shared/Packets";
  * - Provides utilities for checking if an item is unique
  * - Manages client-side unique item state
  */
-@Service()
-export default class UniqueItemClientService {
+@Controller()
+export default class UniqueItemController implements OnInit {
     private uniqueItems = new Map<string, UniqueItemInstance>();
     private uniqueItemDescriptions = new Map<string, string>();
 
     constructor() {
-        // Listen for unique item updates from server
-        Packets.uniqueItems.observe((uniqueItems) => {
-            this.uniqueItems = uniqueItems;
-        });
 
-        Packets.uniqueItemDescriptions.observe((descriptions) => {
-            this.uniqueItemDescriptions = descriptions;
-        });
     }
 
     /**
@@ -54,13 +47,13 @@ export default class UniqueItemClientService {
      */
     getInstancesOfType(baseItemId: string): Array<[string, UniqueItemInstance]> {
         const instances: Array<[string, UniqueItemInstance]> = [];
-        
+
         for (const [uuid, instance] of this.uniqueItems) {
             if (instance.baseItemId === baseItemId) {
                 instances.push([uuid, instance]);
             }
         }
-        
+
         return instances;
     }
 
@@ -99,5 +92,16 @@ export default class UniqueItemClientService {
             uuids.push(uuid);
         }
         return uuids;
+    }
+
+    onInit() {
+        // Listen for unique item updates from server
+        Packets.uniqueItems.observe((uniqueItems) => {
+            this.uniqueItems = uniqueItems;
+        });
+
+        Packets.uniqueItemDescriptions.observe((descriptions) => {
+            this.uniqueItemDescriptions = descriptions;
+        });
     }
 }

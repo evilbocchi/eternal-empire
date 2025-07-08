@@ -1,7 +1,6 @@
 import { OnInit, Service } from "@flamework/core";
 import Item from "shared/item/Item";
 import Items from "shared/items/Items";
-import UniqueItem from "shared/item/traits/UniqueItem";
 import UUID from "shared/utils/UUID";
 import DataService from "./DataService";
 
@@ -16,7 +15,7 @@ export default class UniqueItemService implements OnInit {
 
     constructor(
         private readonly dataService: DataService
-    ) {}
+    ) { }
 
     onInit() {
         // Service initialization if needed
@@ -137,7 +136,7 @@ export default class UniqueItemService implements OnInit {
                 warn(`Invalid pot ${potName} found in unique item instance ${uuid}`);
                 return false;
             }
-            
+
             // Validate that raw value is within 0-100 range
             if (rawValue < 0 || rawValue > 100) {
                 warn(`Raw pot value ${rawValue} for ${potName} is outside 0-100 range in instance ${uuid}`);
@@ -157,7 +156,7 @@ export default class UniqueItemService implements OnInit {
     getFormattedDescription(uuid: string): string | undefined {
         const instance = this.getUniqueInstance(uuid);
         const baseItem = this.getBaseItem(uuid);
-        
+
         if (!instance || !baseItem) {
             return undefined;
         }
@@ -167,7 +166,7 @@ export default class UniqueItemService implements OnInit {
             return undefined;
         }
 
-        return UniqueItem.formatWithPots(baseItem.description, instance, uniqueTrait);
+        return uniqueTrait.formatWithPots(baseItem.description, instance);
     }
 
     /**
@@ -179,7 +178,7 @@ export default class UniqueItemService implements OnInit {
     getScaledPots(uuid: string): Map<string, number> | undefined {
         const instance = this.getUniqueInstance(uuid);
         const baseItem = this.getBaseItem(uuid);
-        
+
         if (!instance || !baseItem) {
             return undefined;
         }

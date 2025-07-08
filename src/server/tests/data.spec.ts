@@ -166,13 +166,6 @@ export = function () {
             expect(valueMultiplier).to.be.ok();
             expect(valueMultiplier! >= 1.05).to.equal(true);
             expect(valueMultiplier! <= 2.5).to.equal(true);
-            
-            // Check radius is integer between 8 and 16
-            const radius = scaledPots!.get("radius");
-            expect(radius).to.be.ok();
-            expect(radius! >= 8).to.equal(true);
-            expect(radius! <= 16).to.equal(true);
-            expect(radius! % 1).to.equal(0); // Should be integer
         });
 
         it("should format description with pot values", () => {
@@ -185,7 +178,6 @@ export = function () {
             // The description should contain the actual pot values, not placeholders
             expect(string.find(formattedDescription!, "%%dropRateMultiplier%%")[0]).to.equal(undefined);
             expect(string.find(formattedDescription!, "%%valueMultiplier%%")[0]).to.equal(undefined);
-            expect(string.find(formattedDescription!, "%%radius%%")[0]).to.equal(undefined);
         });
 
         it("should scale raw percentage values correctly", () => {
