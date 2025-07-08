@@ -1,11 +1,34 @@
 import { OnoeNum } from "@antivivi/serikanum";
+import { formatRichText } from "@antivivi/vrldk";
 import Item from "shared/item/Item";
+import { Server } from "shared/item/ItemUtils";
 import ItemTrait from "shared/item/traits/ItemTrait";
-import UUID from "shared/utils/UUID";
+import DropperBooster from "shared/item/traits/special/DropperBooster";
 
 declare global {
     interface ItemTraits {
         Unique: Unique;
+    }
+
+    /**
+     * Configuration for a pot (unique stat) that can be generated for a unique item.
+     * Defines the scaling range for converting raw 0-100 percentage values to actual values.
+     */
+    interface PotConfig {
+        /**
+         * The minimum value for this pot when scaling from 0%.
+         */
+        min: number;
+
+        /**
+         * The maximum value for this pot when scaling from 100%.
+         */
+        max: number;
+
+        /**
+         * Whether the scaled value should be an integer (default: false).
+         */
+        integer?: boolean;
     }
 }
 
@@ -27,6 +50,33 @@ export default class Unique extends ItemTrait {
      * Key is the pot name, value is the configuration for that pot.
      */
     private readonly potConfigs = new Map<string, PotConfig>();
+
+    private readonly MIN_COLOR = Color3.fromRGB(255, 0, 0);
+    private readonly MAX_COLOR = Color3.fromRGB(0, 255, 255);
+
+    static load(model: Model, unique: Unique) {
+        const item = unique.item;
+        const placedItem = Server.Item.getPlacedItem(model.Name);
+        if (placedItem === undefined) {
+            throw `Unique item model ${model.Name} not found in placed items.`;
+        }
+
+        const uuid = placedItem.uniqueItemId;
+        if (uuid === undefined) {
+            throw `Unique item model ${model.Name} does not have a unique item UUID.`;
+        }
+
+        const uniqueInstance = Server.empireData.items.uniqueInstances.get(uuid);
+        if (uniqueInstance === undefined) {
+            throw `Unique item instance for UUID ${uuid} not found.`;
+        }
+
+        const dropRateMultiplier = uniqueInstance.pots.get("dropRateMultiplier");
+        if (dropRateMultiplier !== undefined) {
+            DropperBooster.load(model, new DropperBooster(item).setDropRateMultiplier(dropRateMultiplier));
+        }
+    }
+
 
     constructor(item: Item) {
         super(item);
@@ -90,25 +140,6 @@ export default class Unique extends ItemTrait {
     }
 
     /**
-     * Scales a raw pot percentage value to the actual value based on the pot configuration.
-     * 
-     * @param potName The name of the pot.
-     * @param rawValue The raw percentage value (0-100).
-     * @returns The scaled value according to the pot configuration.
-     */
-    scalePotValue(potName: string, rawValue: number): number {
-        const config = this.potConfigs.get(potName);
-        if (!config) {
-            warn(`Pot configuration for '${potName}' not found`);
-            return rawValue;
-        }
-
-        // Scale from 0-100 percentage to min-max range
-        const scaledValue = config.min + (rawValue / 100) * (config.max - config.min);
-        return config.integer ? math.floor(scaledValue) : scaledValue;
-    }
-
-    /**
      * Gets all scaled pot values for a unique item instance.
      * 
      * @param instance The unique item instance.
@@ -117,27 +148,21 @@ export default class Unique extends ItemTrait {
     getScaledPots(instance: UniqueItemInstance): Map<string, number> {
         const scaledPots = new Map<string, number>();
 
-        for (const [potName, rawValue] of instance.pots) {
-            const scaledValue = this.scalePotValue(potName, rawValue);
+        for (const [potName, config] of this.potConfigs) {
+            let rawValue = instance.pots.get(potName);
+            if (rawValue === undefined) {
+                warn(`Pot ${potName} not found in unique item instance for ${instance.baseItemId}`);
+                instance.pots.set(potName, 0);
+                rawValue = 0;
+            }
+            let scaledValue = config.min + (rawValue / 100) * (config.max - config.min);
+            if (config.integer) {
+                scaledValue = math.floor(scaledValue);
+            }
             scaledPots.set(potName, scaledValue);
         }
 
         return scaledPots;
-    }
-
-    /**
-     * Creates a new unique item instance and returns its UUID.
-     * This is a convenience method that generates the instance and stores it.
-     * 
-     * @param storage The storage map to add the instance to.
-     * @param allPots Optional parameter to specify a fixed value for all pots (0-100).
-     * @returns The UUID of the created unique item instance.
-     */
-    createInstance(storage: Map<string, UniqueItemInstance>, allPots?: number): string {
-        const uuid = UUID.generate();
-        const instance = this.generateInstance(allPots);
-        storage.set(uuid, instance);
-        return uuid;
     }
 
     /**
@@ -149,14 +174,18 @@ export default class Unique extends ItemTrait {
      * @returns The formatted string.
      */
     formatWithPots(str: string, instance: UniqueItemInstance): string {
-        let formatted = str;
         const scaledPots = this.getScaledPots(instance);
 
-        for (const [potName, value] of scaledPots) {
+        for (const [potName, config] of this.potConfigs) {
+            const value = scaledPots.get(potName);
+            if (value === undefined)
+                continue;
             const placeholder = `%%${potName}%%`;
-            const formattedValue = new OnoeNum(value).toString();
-            formatted = formatted.gsub(placeholder, formattedValue)[0];
+            let formatted = new OnoeNum(value).toString();
+            const alpha = (value - config.min) / (config.max - config.min);
+            formatted = formatRichText(formatted, this.MIN_COLOR.Lerp(this.MAX_COLOR, alpha));
+            str = str.gsub(placeholder, formatted)[0];
         }
-        return formatted;
+        return str;
     }
 }

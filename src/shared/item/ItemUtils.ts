@@ -1,8 +1,8 @@
 import { BaseOnoeNum, OnoeNum } from "@antivivi/serikanum";
-import { Debris, RunService, TweenService } from "@rbxts/services";
+import { Debris, RunService, TweenService, Workspace } from "@rbxts/services";
 import StringBuilder from "@rbxts/stringbuilder";
-import CurrencyBundle from "shared/currency/CurrencyBundle";
 import { ASSETS } from "shared/asset/GameAssets";
+import CurrencyBundle from "shared/currency/CurrencyBundle";
 import type Item from "shared/item/Item";
 import Packets from "shared/Packets";
 
@@ -31,21 +31,23 @@ namespace ItemUtils {
     export const REPEATS = new Map<(dt: number) => void, { delta?: number, lastCall?: number; }>();
     export const dropletGuiTween = new TweenInfo(1.4, Enum.EasingStyle.Quad, Enum.EasingDirection.Out);
 
+    const placedItemOverlapParams = new OverlapParams();
+    placedItemOverlapParams.FilterType = Enum.RaycastFilterType.Include;
+    placedItemOverlapParams.CollisionGroup = "ItemHitbox";
+
     export const getPlacedItemsInArea = (area: BasePart, Items = Server.items) => {
-        const array = area.GetTouchingParts();
+        const array = Workspace.GetPartBoundsInBox(area.CFrame, area.Size, placedItemOverlapParams);
+
         const items = new Map<Model, Item>();
         for (const touching of array) {
-            const target = touching.FindFirstAncestorOfClass("Model");
-            if (target === undefined) {
-                continue;
-            }
+            const target = touching.Parent as Model;
             const itemId = target.GetAttribute("ItemId") as string;
             if (itemId === undefined) {
                 continue;
             }
             const item = Items.getItem(itemId);
             if (item === undefined) {
-                error();
+                throw `Item with id ${itemId} not found in items map.`;
             }
             items.set(target, item);
         }

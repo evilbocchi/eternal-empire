@@ -120,27 +120,11 @@ declare global {
          * The timestamp when this unique item was created.
          */
         created: number;
-    }
-
-    /**
-     * Configuration for a pot (unique stat) that can be generated for a unique item.
-     * Defines the scaling range for converting raw 0-100 percentage values to actual values.
-     */
-    interface PotConfig {
-        /**
-         * The minimum value for this pot when scaling from 0%.
-         */
-        min: number;
 
         /**
-         * The maximum value for this pot when scaling from 100%.
+         * The ID of the placement in the world, if this unique item is placed.
          */
-        max: number;
-
-        /**
-         * Whether the scaled value should be an integer (default: false).
-         */
-        integer?: boolean;
+        placed?: string;
     }
 
     /**
@@ -188,8 +172,10 @@ declare global {
 
         /**
          * The unique items that the player owns, mapped by their UUID.
+         * 
+         * Unique items that are placed will *not* be removed from this map.
          */
-        uniqueItems: Map<string, UniqueItemInstance>;
+        uniqueInstances: Map<string, UniqueItemInstance>;
     }
 
     /**
@@ -315,7 +301,7 @@ export const EmpireProfileTemplate = {
         bought: new Map<string, number>(),
         worldPlaced: new Map<string, PlacedItem>(),
         nextId: 0,
-        uniqueItems: new Map<string, UniqueItemInstance>(),
+        uniqueInstances: new Map<string, UniqueItemInstance>(),
     } as ItemsData,
     backup: {
         currencies: undefined as CurrencyMap | undefined,

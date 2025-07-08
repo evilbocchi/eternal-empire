@@ -27,7 +27,7 @@ declare global {
     }
 
     type PlacingInfo = {
-        itemId: string,
+        id: string,
         position: Vector3,
         rotation: DataType.u16
     }
@@ -92,10 +92,7 @@ namespace Packets {
     export const buyItem = request<(itemId: string) => boolean>();
     export const buyAllItems = request<(itemIds: string[]) => boolean>();
     export const placeItems = request<(items: PlacingInfo[]) => number>();
-    
-    // unique items
-    export const uniqueItems = property<Map<string, DataType.Packed<UniqueItemInstance>>>();
-    export const uniqueItemDescriptions = property<Map<string, string>>();
+    export const uniqueInstances = property<Map<string, DataType.Packed<UniqueItemInstance>>>();
     
     export const unplaceItems = signal<(placementIds: string[]) => void>();
     export const boostChanged = signal<(boostPerItem: Map<string, BaseOnoeNum>) => void>(true);

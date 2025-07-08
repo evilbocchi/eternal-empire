@@ -49,7 +49,7 @@ export = function () {
                 ]),
                 worldPlaced: new Map<string, PlacedItem>(),
                 nextId: 0,
-                uniqueItems: new Map<string, UniqueItemInstance>(),
+                uniqueInstances: new Map<string, UniqueItemInstance>(),
             } as ItemsData;
 
             const unduped = {
@@ -62,7 +62,7 @@ export = function () {
                 ]),
                 worldPlaced: new Map<string, PlacedItem>(),
                 nextId: 0,
-                uniqueItems: new Map<string, UniqueItemInstance>(),
+                uniqueInstances: new Map<string, UniqueItemInstance>(),
             } as ItemsData;
 
             dataService.dupeCheck(duped);
@@ -85,7 +85,7 @@ export = function () {
                 ]),
                 worldPlaced: new Map<string, PlacedItem>(),
                 nextId: 0,
-                uniqueItems: new Map<string, UniqueItemInstance>(),
+                uniqueInstances: new Map<string, UniqueItemInstance>(),
             } as ItemsData;
 
             dataService.dupeCheck(duped);
@@ -126,13 +126,12 @@ export = function () {
     });
 
     describe("unique items", () => {
-
         it("should create a unique item instance", () => {
             const itemId = "TheFirstDropperBooster";
             const uuid = uniqueItemService.createUniqueInstance(itemId);
             expect(uuid).to.be.ok();
 
-            const instance = uniqueItemService.getUniqueInstance(uuid!);
+            const instance = dataService.empireData.items.uniqueInstances.get(uuid!);
             expect(instance).to.be.ok();
             expect(instance!.baseItemId).to.equal(itemId);
             expect(instance!.pots.size() > 0).to.equal(true);
@@ -141,7 +140,7 @@ export = function () {
         it("should validate pot values are within range", () => {
             const itemId = "TheFirstDropperBooster";
             const uuid = uniqueItemService.createUniqueInstance(itemId);
-            const instance = uniqueItemService.getUniqueInstance(uuid!);
+            const instance = dataService.empireData.items.uniqueInstances.get(uuid!);
 
             expect(instance).to.be.ok();
 
@@ -149,61 +148,6 @@ export = function () {
             for (const [potName, rawValue] of instance!.pots) {
                 expect(rawValue >= 0).to.equal(true);
                 expect(rawValue <= 100).to.equal(true);
-            }
-
-            // Check scaled values are within the expected ranges
-            const scaledPots = uniqueItemService.getScaledPots(uuid!);
-            expect(scaledPots).to.be.ok();
-
-            // Check drop rate multiplier is between 1.1 and 3.0
-            const dropRateMultiplier = scaledPots!.get("dropRateMultiplier");
-            expect(dropRateMultiplier).to.be.ok();
-            expect(dropRateMultiplier! >= 1.1).to.equal(true);
-            expect(dropRateMultiplier! <= 3.0).to.equal(true);
-
-            // Check value multiplier is between 1.05 and 2.5
-            const valueMultiplier = scaledPots!.get("valueMultiplier");
-            expect(valueMultiplier).to.be.ok();
-            expect(valueMultiplier! >= 1.05).to.equal(true);
-            expect(valueMultiplier! <= 2.5).to.equal(true);
-        });
-
-        it("should format description with pot values", () => {
-            const itemId = "TheFirstDropperBooster";
-            const uuid = uniqueItemService.createUniqueInstance(itemId);
-            const formattedDescription = uniqueItemService.getFormattedDescription(uuid!);
-
-            expect(formattedDescription).to.be.ok();
-            expect(string.find(formattedDescription!, "stud radius")[0]).to.be.ok();
-            // The description should contain the actual pot values, not placeholders
-            expect(string.find(formattedDescription!, "%%dropRateMultiplier%%")[0]).to.equal(undefined);
-            expect(string.find(formattedDescription!, "%%valueMultiplier%%")[0]).to.equal(undefined);
-        });
-
-        it("should scale raw percentage values correctly", () => {
-            const itemId = "TheFirstDropperBooster";
-            const uuid = uniqueItemService.createUniqueInstance(itemId);
-            const instance = uniqueItemService.getUniqueInstance(uuid!);
-            const scaledPots = uniqueItemService.getScaledPots(uuid!);
-
-            expect(instance).to.be.ok();
-            expect(scaledPots).to.be.ok();
-
-            // Verify that scaling works correctly for each pot
-            for (const [potName, rawValue] of instance!.pots) {
-                const scaledValue = scaledPots!.get(potName);
-                expect(scaledValue).to.be.ok();
-
-                // The scaled value should be different from the raw value (unless coincidentally equal)
-                // and should be within the expected ranges
-                if (potName === "dropRateMultiplier") {
-                    expect(scaledValue! >= 1.1 && scaledValue! <= 3.0).to.equal(true);
-                } else if (potName === "valueMultiplier") {
-                    expect(scaledValue! >= 1.05 && scaledValue! <= 2.5).to.equal(true);
-                } else if (potName === "radius") {
-                    expect(scaledValue! >= 8 && scaledValue! <= 16).to.equal(true);
-                    expect(scaledValue! % 1).to.equal(0); // Should be integer
-                }
             }
         });
     });

@@ -1,14 +1,15 @@
+import { buildRichText } from "@antivivi/vrldk";
 import { Controller, OnInit, OnPhysics } from "@flamework/core";
 import { TweenService, Workspace } from "@rbxts/services";
+import ItemSlot from "client/ItemSlot";
 import { MOUSE } from "client/constants";
 import { INTERFACE } from "client/controllers/UIController";
-import ItemSlot from "client/ItemSlot";
-import UniqueItemController from "client/controllers/UniqueItemController";
+import Packets from "shared/Packets";
 import { CURRENCY_DETAILS } from "shared/currency/CurrencyDetails";
 import Item from "shared/item/Item";
 import ItemMetadata from "shared/item/ItemMetadata";
+import Unique from "shared/item/traits/Unique";
 import Items from "shared/items/Items";
-import { buildRichText } from "@antivivi/vrldk";
 
 export const TOOLTIP_WINDOW = INTERFACE.WaitForChild("TooltipWindow") as Frame & {
     UIStroke: UIStroke;
@@ -34,7 +35,7 @@ export class Tooltip {
     message = "";
     item: Item | undefined;
     metadata: ItemMetadata | undefined;
-    uniqueItemUUID: string | undefined;
+    uuid?: string;
 
     static fromMessage(message: string) {
         const tooltip = new Tooltip();
@@ -42,15 +43,14 @@ export class Tooltip {
         return tooltip;
     }
 
-    static fromItem(item: Item, uniqueItemUUID?: string) {
+    static fromItem(item: Item) {
         const tooltip = new Tooltip();
         tooltip.item = item;
         tooltip.metadata = METADATA_PER_ITEM.get(item);
-        tooltip.uniqueItemUUID = uniqueItemUUID;
         return tooltip;
     }
 
-    display(uniqueItemController?: UniqueItemController) {
+    display() {
         const item = this.item;
         const itemSlot = TOOLTIP_WINDOW.ItemSlot;
         TOOLTIP_WINDOW.MessageLabel.Visible = item === undefined;
@@ -63,10 +63,10 @@ export class Tooltip {
             let description = item.tooltipDescription ?? item.description;
 
             // Use unique item description if this is a unique item
-            if (this.uniqueItemUUID !== undefined && uniqueItemController !== undefined) {
-                const uniqueDescription = uniqueItemController.getFormattedDescription(this.uniqueItemUUID);
-                if (uniqueDescription !== undefined) {
-                    description = uniqueDescription;
+            if (this.uuid !== undefined) {
+                const uniqueInstance = Packets.uniqueInstances.get()?.get(this.uuid);
+                if (uniqueInstance !== undefined) {
+                    description = item.trait(Unique).formatWithPots(description, uniqueInstance);
                 }
             }
 
@@ -87,8 +87,6 @@ export class Tooltip {
 export default class TooltipController implements OnInit, OnPhysics {
 
     tooltipsPerObject = new Map<GuiObject, Tooltip>();
-
-    constructor(private uniqueItemController: UniqueItemController) { }
 
     hideTooltipWindow() {
         const tweenInfo = new TweenInfo(0.1, Enum.EasingStyle.Linear, Enum.EasingDirection.In);
@@ -132,7 +130,7 @@ export default class TooltipController implements OnInit, OnPhysics {
             });
             guiObject.MouseEnter.Connect(() => {
                 this.showTooltipWindow();
-                this.getTooltip(guiObject).display(this.uniqueItemController);
+                this.getTooltip(guiObject).display();
             });
             guiObject.MouseLeave.Connect(() => {
                 this.hideTooltipWindow();

@@ -16,8 +16,8 @@
 import Signal from "@antivivi/lemon-signal";
 import { OnInit, Service } from "@flamework/core";
 import { TextService } from "@rbxts/services";
-import DataService from "server/services/serverdata/DataService";
 import ItemService from "server/services/item/ItemService";
+import DataService from "server/services/serverdata/DataService";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
 import Items from "shared/items/Items";
@@ -134,8 +134,9 @@ export default class SetupService implements OnInit {
             if (this.itemService.getItemAmount(itemId) === 0 && this.itemService.serverBuy(Items.getItem(itemId)!, true) === false) {
                 continue;
             }
+            const id = savedItem.uniqueItemId ?? itemId;
             items.push({
-                itemId,
+                id,
                 position: new Vector3(savedItem.posX, savedItem.posY, savedItem.posZ),
                 rotation: savedItem.rawRotation ?? 0
             });

@@ -29,6 +29,7 @@ import NamedUpgradeService from "server/services/serverdata/NamedUpgradeService"
 import AreaService from "server/services/world/AreaService";
 import ItemUtils from "shared/item/ItemUtils";
 import Items from "shared/items/Items";
+import UniqueItemService from "server/services/item/UniqueItemService";
 
 declare global {
     /**
@@ -48,6 +49,7 @@ export default class APIExposeService implements OnInit {
         private readonly areaService: AreaService,
         private readonly dataService: DataService,
         private readonly itemService: ItemService,
+        private readonly uniqueItemService: UniqueItemService,
         private readonly currencyService: CurrencyService,
         private readonly unlockedAreasService: UnlockedAreasService,
         private readonly playtimeService: PlaytimeService,
@@ -130,6 +132,14 @@ export default class APIExposeService implements OnInit {
              * @see {@link ItemService} for more details.
              */
             Item: this.itemService,
+
+            /**
+             * Unique item management service.
+             * 
+             * @borrows UniqueItemService as uniqueItemService
+             * @see {@link UniqueItemService} for more details.
+             */
+            Unique: this.uniqueItemService,
 
             /**
              * NPC-related services for managing NPCs in the game.

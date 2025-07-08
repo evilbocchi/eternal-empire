@@ -191,12 +191,12 @@ export default class BuildController implements OnInit, OnStart {
             if (rotation === undefined)
                 continue;
 
-            data.push({ itemId: selected.GetAttribute("ItemId") as string, position, rotation });
+            data.push({ id: (selected.GetAttribute("UUID") ?? selected.GetAttribute("ItemId")) as string, position, rotation });
         }
         Packets.placeItems.invoke(data);
     }
 
-    addPlacingModel(item: Item, initialPosition?: Vector3, initialRotation?: number) {
+    addPlacingModel(item: Item, uuid?: string, initialPosition?: Vector3, initialRotation?: number) {
         this.debounce = tick();
         const itemModel = item.MODEL?.Clone();
         if (itemModel === undefined)
@@ -208,6 +208,9 @@ export default class BuildController implements OnInit, OnStart {
         itemModel.SetAttribute("ItemId", item.id);
         itemModel.SetAttribute("InitialPosition", initialPosition);
         itemModel.SetAttribute("InitialRotation", initialRotation);
+        if (uuid !== undefined) {
+            itemModel.SetAttribute("UUID", uuid);
+        }
         weldModel(itemModel); // we are using tweens on primarypart
 
         const primaryPart = itemModel.PrimaryPart!;
@@ -278,7 +281,9 @@ export default class BuildController implements OnInit, OnStart {
             let rotation = math.floor(math.deg(math.atan2(-lookVector.X, -lookVector.Z)) - gridRotation + 180); // angle of look vector in xz plane (0-360)
             rotation %= 360;
 
-            data.push({ itemId, position, rotation });
+            const id = (selected.GetAttribute("UUID") as string | undefined) ?? item.id;
+
+            data.push({ id, position, rotation });
         }
         this.debounce = tick();
 
@@ -404,8 +409,12 @@ export default class BuildController implements OnInit, OnStart {
                 const names = new Array<string>();
                 for (const model of dragging) {
                     names.push(model.Name);
-                    const placingModel = this.addPlacingModel(Items.getItem(model.GetAttribute("ItemId") as string)!,
-                        model.PrimaryPart?.Position, (model.GetAttribute("Rotation") as number | undefined) ?? 0);
+                    const placingModel = this.addPlacingModel(
+                        Items.getItem(model.GetAttribute("ItemId") as string)!,
+                        model.GetAttribute("UUID") as string | undefined,
+                        model.PrimaryPart?.Position,
+                        (model.GetAttribute("Rotation") as number | undefined) ?? 0
+                    );
                     if (model === hovering) {
                         this.mainSelect(placingModel);
                     }
