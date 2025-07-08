@@ -27,7 +27,7 @@ import Quest, { Stage } from "server/Quest";
 import DialogueService from "server/services/npc/DialogueService";
 import ChatHookService from "server/services/permissions/ChatHookService";
 import DataService from "server/services/serverdata/DataService";
-import ItemService from "server/services/serverdata/ItemService";
+import ItemService from "server/services/item/ItemService";
 import LevelService from "server/services/serverdata/LevelService";
 import { WAYPOINTS } from "shared/constants";
 import Items from "shared/items/Items";

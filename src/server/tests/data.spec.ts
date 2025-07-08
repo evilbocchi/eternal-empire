@@ -1,10 +1,10 @@
 /// <reference types="@rbxts/testez/globals" />
 
 import { OnoeNum } from "@antivivi/serikanum";
+import ItemService from "server/services/item/ItemService";
+import UniqueItemService from "server/services/item/UniqueItemService";
 import CurrencyService from "server/services/serverdata/CurrencyService";
 import DataService from "server/services/serverdata/DataService";
-import ItemService from "server/services/serverdata/ItemService";
-import UniqueItemService from "server/services/serverdata/UniqueItemService";
 
 export = function () {
     const dataService = new DataService();
@@ -131,7 +131,7 @@ export = function () {
             const itemId = "TheFirstDropperBooster";
             const uuid = uniqueItemService.createUniqueInstance(itemId);
             expect(uuid).to.be.ok();
-            
+
             const instance = uniqueItemService.getUniqueInstance(uuid!);
             expect(instance).to.be.ok();
             expect(instance!.baseItemId).to.equal(itemId);
@@ -142,25 +142,25 @@ export = function () {
             const itemId = "TheFirstDropperBooster";
             const uuid = uniqueItemService.createUniqueInstance(itemId);
             const instance = uniqueItemService.getUniqueInstance(uuid!);
-            
+
             expect(instance).to.be.ok();
-            
+
             // Check raw pot values are stored as 0-100 percentages
             for (const [potName, rawValue] of instance!.pots) {
                 expect(rawValue >= 0).to.equal(true);
                 expect(rawValue <= 100).to.equal(true);
             }
-            
+
             // Check scaled values are within the expected ranges
             const scaledPots = uniqueItemService.getScaledPots(uuid!);
             expect(scaledPots).to.be.ok();
-            
+
             // Check drop rate multiplier is between 1.1 and 3.0
             const dropRateMultiplier = scaledPots!.get("dropRateMultiplier");
             expect(dropRateMultiplier).to.be.ok();
             expect(dropRateMultiplier! >= 1.1).to.equal(true);
             expect(dropRateMultiplier! <= 3.0).to.equal(true);
-            
+
             // Check value multiplier is between 1.05 and 2.5
             const valueMultiplier = scaledPots!.get("valueMultiplier");
             expect(valueMultiplier).to.be.ok();
@@ -172,7 +172,7 @@ export = function () {
             const itemId = "TheFirstDropperBooster";
             const uuid = uniqueItemService.createUniqueInstance(itemId);
             const formattedDescription = uniqueItemService.getFormattedDescription(uuid!);
-            
+
             expect(formattedDescription).to.be.ok();
             expect(string.find(formattedDescription!, "stud radius")[0]).to.be.ok();
             // The description should contain the actual pot values, not placeholders
@@ -185,15 +185,15 @@ export = function () {
             const uuid = uniqueItemService.createUniqueInstance(itemId);
             const instance = uniqueItemService.getUniqueInstance(uuid!);
             const scaledPots = uniqueItemService.getScaledPots(uuid!);
-            
+
             expect(instance).to.be.ok();
             expect(scaledPots).to.be.ok();
-            
+
             // Verify that scaling works correctly for each pot
             for (const [potName, rawValue] of instance!.pots) {
                 const scaledValue = scaledPots!.get(potName);
                 expect(scaledValue).to.be.ok();
-                
+
                 // The scaled value should be different from the raw value (unless coincidentally equal)
                 // and should be within the expected ranges
                 if (potName === "dropRateMultiplier") {

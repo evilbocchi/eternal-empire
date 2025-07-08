@@ -1,7 +1,7 @@
 import Difficulty from "@antivivi/jjt-difficulties";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
-import UniqueItem from "shared/item/traits/UniqueItem";
+import Unique from "shared/item/traits/Unique";
 
 export = new Item(script.Name)
     .setName("The First Dropper Booster")
@@ -11,7 +11,7 @@ export = new Item(script.Name)
     .addPlaceableArea("BarrenIslands")
     .setCreator("System")
 
-    .trait(UniqueItem)
+    .trait(Unique)
     .addPot("dropRateMultiplier", 1.1, 3.0)
     .addPot("valueMultiplier", 1.05, 2.5)
 

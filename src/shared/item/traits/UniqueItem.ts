@@ -4,7 +4,7 @@ import UUID from "shared/utils/UUID";
 
 declare global {
     interface ItemTraits {
-        UniqueItem: UniqueItem;
+        Unique: Unique;
     }
 }
 
@@ -19,8 +19,8 @@ declare global {
  * For example, an "Admirer" unique item might boost Admiration from 5% to 100% depending
  * on its pot value, but the raw percentage is always stored as 0-100.
  */
-export default class UniqueItem extends ItemTrait {
-    
+export default class Unique extends ItemTrait {
+
     /**
      * Configuration for the pots that can be generated for this unique item.
      * Key is the pot name, value is the configuration for that pot.
@@ -42,7 +42,7 @@ export default class UniqueItem extends ItemTrait {
      * 
      * @example
      * ```ts
-     * item.trait(UniqueItem)
+     * item.trait(Unique)
      *     .addPot("admirationBoost", 0.05, 1.0)
      *     .addPot("dropRateMultiplier", 1.1, 2.5);
      * ```
@@ -69,14 +69,15 @@ export default class UniqueItem extends ItemTrait {
      * Generates a new unique item instance with randomly generated pot values.
      * Pot values are generated as percentages (0-100) and scaled when accessed.
      * 
+     * @param allPots Optional parameter to specify a fixed value for all pots (0-100).
      * @returns A unique item instance with generated pots.
      */
-    generateInstance(): UniqueItemInstance {
+    generateInstance(allPots?: number): UniqueItemInstance {
         const pots = new Map<string, number>();
-        
+
         for (const [potName] of this.potConfigs) {
             // Generate a random percentage from 0 to 100
-            const randomPercentage = math.random() * 100;
+            const randomPercentage = (allPots ?? math.random()) * 100;
             pots.set(potName, randomPercentage);
         }
 
@@ -114,12 +115,12 @@ export default class UniqueItem extends ItemTrait {
      */
     getScaledPots(instance: UniqueItemInstance): Map<string, number> {
         const scaledPots = new Map<string, number>();
-        
+
         for (const [potName, rawValue] of instance.pots) {
             const scaledValue = this.scalePotValue(potName, rawValue);
             scaledPots.set(potName, scaledValue);
         }
-        
+
         return scaledPots;
     }
 
@@ -128,11 +129,12 @@ export default class UniqueItem extends ItemTrait {
      * This is a convenience method that generates the instance and stores it.
      * 
      * @param storage The storage map to add the instance to.
+     * @param allPots Optional parameter to specify a fixed value for all pots (0-100).
      * @returns The UUID of the created unique item instance.
      */
-    createInstance(storage: Map<string, UniqueItemInstance>): string {
+    createInstance(storage: Map<string, UniqueItemInstance>, allPots?: number): string {
         const uuid = UUID.generate();
-        const instance = this.generateInstance();
+        const instance = this.generateInstance(allPots);
         storage.set(uuid, instance);
         return uuid;
     }
@@ -148,11 +150,11 @@ export default class UniqueItem extends ItemTrait {
     formatWithPots(str: string, instance: UniqueItemInstance): string {
         let formatted = str;
         const scaledPots = this.getScaledPots(instance);
-        
+
         for (const [potName, value] of scaledPots) {
             const placeholder = `%${potName}%`;
-            const formattedValue = typeIs(value, "number") ? 
-                (value % 1 === 0 ? tostring(value) : string.format("%.2f", value)) : 
+            const formattedValue = typeIs(value, "number") ?
+                (value % 1 === 0 ? tostring(value) : string.format("%.2f", value)) :
                 tostring(value);
             formatted = formatted.gsub(placeholder, formattedValue)[0];
         }

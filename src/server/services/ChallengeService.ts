@@ -23,7 +23,7 @@ import PermissionsService from "server/services/permissions/PermissionsService";
 import ResetService from "server/services/ResetService";
 import CurrencyService from "server/services/serverdata/CurrencyService";
 import DataService from "server/services/serverdata/DataService";
-import ItemService from "server/services/serverdata/ItemService";
+import ItemService from "server/services/item/ItemService";
 import SetupService from "server/services/serverdata/SetupService";
 import NamedUpgradeService from "server/services/serverdata/NamedUpgradeService";
 import { getChallengeGui } from "shared/constants";

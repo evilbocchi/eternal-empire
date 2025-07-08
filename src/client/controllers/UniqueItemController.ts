@@ -12,6 +12,7 @@ import Packets from "shared/Packets";
  */
 @Controller()
 export default class UniqueItemController implements OnInit {
+    
     private uniqueItems = new Map<string, UniqueItemInstance>();
     private uniqueItemDescriptions = new Map<string, string>();
 

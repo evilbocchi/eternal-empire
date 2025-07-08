@@ -22,7 +22,7 @@ import { BadgeService, Players, RunService } from "@rbxts/services";
 import RevenueService from "server/services/RevenueService";
 import CurrencyService from "server/services/serverdata/CurrencyService";
 import DataService from "server/services/serverdata/DataService";
-import ItemService from "server/services/serverdata/ItemService";
+import ItemService from "server/services/item/ItemService";
 import NamedUpgradeService from "server/services/serverdata/NamedUpgradeService";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Operative from "shared/item/traits/Operative";

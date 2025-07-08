@@ -22,10 +22,10 @@ import Signal from "@antivivi/lemon-signal";
 import { OnInit, OnStart, Service } from "@flamework/core";
 import { CollectionService, Workspace } from "@rbxts/services";
 import { CHALLENGES } from "server/Challenges";
+import UniqueItemService from "server/services/item/UniqueItemService";
 import { OnGameAPILoaded } from "server/services/ModdingService";
 import CurrencyService from "server/services/serverdata/CurrencyService";
 import DataService from "server/services/serverdata/DataService";
-import UniqueItemService from "server/services/serverdata/UniqueItemService";
 import { AREAS } from "shared/Area";
 import { PLACED_ITEMS_FOLDER } from "shared/constants";
 import Item from "shared/item/Item";
@@ -113,7 +113,7 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
      * @param currencyService Service handling currency transactions for purchases.
      */
     constructor(
-        private dataService: DataService, 
+        private dataService: DataService,
         private currencyService: CurrencyService,
         private uniqueItemService: UniqueItemService
     ) {
@@ -606,14 +606,14 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
         if (player !== undefined && !this.dataService.checkPermLevel(player, "purchase")) {
             return undefined;
         }
-        
+
         const item = Items.getItem(itemId);
         if (item === undefined) {
             return undefined;
         }
 
         // Check if the item supports unique instances
-        const uniqueTrait = item.findTrait("UniqueItem");
+        const uniqueTrait = item.findTrait("Unique");
         if (!uniqueTrait) {
             warn(`Item ${itemId} does not support unique instances`);
             return undefined;
@@ -630,7 +630,7 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
         if (uuid) {
             this.itemsBought.fire(player, [item]);
         }
-        
+
         return uuid;
     }
 
@@ -677,7 +677,7 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
 
         // Add to placed items
         this.dataService.empireData.items.worldPlaced.set(placementId, placedItem);
-        
+
         // Remove from inventory
         inventory.set(uniqueInstance.baseItemId, currentAmount - 1);
 
@@ -685,7 +685,7 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
         const model = this.addItemModel(placementId, placedItem);
         if (model) {
             model.Parent = PLACED_ITEMS_FOLDER;
-            
+
             // Apply unique item properties if applicable
             this.applyUniqueItemProperties(model, uniqueInstance);
         }
@@ -708,7 +708,7 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
         // Store unique item data in model attributes for easy access
         model.SetAttribute("UniqueItemId", instance.baseItemId);
         model.SetAttribute("Created", instance.created);
-        
+
         // Store pot values as attributes for traits to access
         for (const [potName, value] of instance.pots) {
             model.SetAttribute(`Pot_${potName}`, value);

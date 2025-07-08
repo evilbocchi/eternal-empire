@@ -112,7 +112,7 @@ declare global {
         /**
          * The pots (unique stats) for this item instance.
          * Key is the pot name, value is the raw percentage value (0-100).
-         * These values are scaled to actual ranges when accessed via the UniqueItem trait.
+         * These values are scaled to actual ranges when accessed via the Unique trait.
          */
         pots: Map<string, number>;
 
@@ -1037,7 +1037,7 @@ export default class DataService implements OnInit, OnPlayerJoined {
         });
         pcall(() => {
             BadgeService.AwardBadge(player.UserId, 3498765777753358); // join badge
-        })
+        });
 
         const playerProfile = this.loadPlayerProfile(player.UserId);
         if (playerProfile === undefined)

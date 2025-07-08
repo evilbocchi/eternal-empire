@@ -14,7 +14,7 @@ import { convertToMMSS, weldModel } from "@antivivi/vrldk";
 import { OnInit, OnStart, Service } from "@flamework/core";
 import { TweenService, Workspace } from "@rbxts/services";
 import DataService from "server/services/serverdata/DataService";
-import ItemService from "server/services/serverdata/ItemService";
+import ItemService from "server/services/item/ItemService";
 import LevelService from "server/services/serverdata/LevelService";
 import UnlockedAreasService from "server/services/world/UnlockedAreasService";
 import { AREAS } from "shared/Area";

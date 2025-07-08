@@ -29,25 +29,26 @@ import { Debris, Lighting, Players, ReplicatedStorage, RunService, ServerStorage
 import Quest from "server/Quest";
 import BombsService from "server/services/boosts/BombsService";
 import { DonationService } from "server/services/DonationService";
+import ItemService from "server/services/item/ItemService";
+import UniqueItemService from "server/services/item/UniqueItemService";
 import { LeaderboardService } from "server/services/LeaderboardService";
 import ChatHookService from "server/services/permissions/ChatHookService";
 import PermissionsService from "server/services/permissions/PermissionsService";
 import ResetService from "server/services/ResetService";
 import CurrencyService from "server/services/serverdata/CurrencyService";
 import DataService from "server/services/serverdata/DataService";
-import ItemService from "server/services/serverdata/ItemService";
 import LevelService from "server/services/serverdata/LevelService";
+import NamedUpgradeService from "server/services/serverdata/NamedUpgradeService";
 import PlaytimeService from "server/services/serverdata/PlaytimeService";
 import QuestService from "server/services/serverdata/QuestService";
 import SetupService from "server/services/serverdata/SetupService";
-import UnlockedAreasService from "server/services/world/UnlockedAreasService";
-import NamedUpgradeService from "server/services/serverdata/NamedUpgradeService";
 import AreaService from "server/services/world/AreaService";
 import ChestService from "server/services/world/ChestService";
+import UnlockedAreasService from "server/services/world/UnlockedAreasService";
 import { AREAS } from "shared/Area";
+import { ASSETS, getSound } from "shared/asset/GameAssets";
 import { IS_SINGLE_SERVER } from "shared/constants";
 import { CURRENCY_DETAILS } from "shared/currency/CurrencyDetails";
-import { ASSETS, getSound } from "shared/asset/GameAssets";
 import GameSpeed from "shared/GameSpeed";
 import { DROPLET_STORAGE } from "shared/item/Droplet";
 import Items from "shared/items/Items";
@@ -96,6 +97,7 @@ export default class CommandsService implements OnInit {
         private leaderboardService: LeaderboardService,
         private namedUpgradeService: NamedUpgradeService,
         private itemService: ItemService,
+        private uniqueItemService: UniqueItemService,
         private playtimeService: PlaytimeService,
         private areaService: AreaService,
         private levelService: LevelService,
@@ -845,6 +847,12 @@ export default class CommandsService implements OnInit {
 
                     this.itemService.serverPlace(id, primaryPart.Position, 0);
                 }
+            }, 4);
+
+        this.createCommand("uniqueitem", "ui",
+            "<item> <pot> : Give a unique item to the player. Specify pot value (0-100) to set a specific value for all pots.",
+            (_o, item, pot) => {
+                this.uniqueItemService.createUniqueInstance(item, tonumber(pot));
             }, 4);
 
         this.createCommand("chestopen", "chop",

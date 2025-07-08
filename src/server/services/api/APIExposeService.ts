@@ -20,7 +20,7 @@ import RevenueService from "server/services/RevenueService";
 import CurrencyService from "server/services/serverdata/CurrencyService";
 import DataService from "server/services/serverdata/DataService";
 import EventService from "server/services/serverdata/EventService";
-import ItemService from "server/services/serverdata/ItemService";
+import ItemService from "server/services/item/ItemService";
 import PlaytimeService from "server/services/serverdata/PlaytimeService";
 import QuestService from "server/services/serverdata/QuestService";
 import SetupService from "server/services/serverdata/SetupService";

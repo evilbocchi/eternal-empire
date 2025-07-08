@@ -112,7 +112,7 @@ export default class InventoryController implements OnInit, OnStart {
 
         if (uniqueInstances.size() > 0) {
             // Create a custom message showing unique item information
-            const uniqueTrait = item.findTrait("UniqueItem");
+            const uniqueTrait = item.findTrait("Unique");
             if (uniqueTrait !== undefined) {
                 let message = `${item.name} (Unique Item)\n\n`;
                 message += `You own ${uniqueInstances.size()} unique instance(s) of this item.\n\n`;

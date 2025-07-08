@@ -29,7 +29,7 @@ import ProductService from "server/services/product/ProductService";
 import ResetService from "server/services/ResetService";
 import CurrencyService from "server/services/serverdata/CurrencyService";
 import DataService from "server/services/serverdata/DataService";
-import ItemService from "server/services/serverdata/ItemService";
+import ItemService from "server/services/item/ItemService";
 import LevelService from "server/services/serverdata/LevelService";
 import SetupService from "server/services/serverdata/SetupService";
 import NamedUpgradeService from "server/services/serverdata/NamedUpgradeService";
