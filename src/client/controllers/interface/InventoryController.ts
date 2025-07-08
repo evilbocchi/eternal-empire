@@ -8,7 +8,7 @@ import TooltipController, { Tooltip } from "client/controllers/interface/Tooltip
 import UIController, { INTERFACE } from "client/controllers/UIController";
 import ItemFilter from "client/ItemFilter";
 import ItemSlot from "client/ItemSlot";
-import UniqueItemClientService from "client/controllers/UniqueItemController";
+import UniqueItemController from "client/controllers/UniqueItemController";
 import { ASSETS } from "shared/asset/GameAssets";
 import Item from "shared/item/Item";
 import Items from "shared/items/Items";
@@ -39,7 +39,7 @@ export default class InventoryController implements OnInit, OnStart {
     });
 
 
-    constructor(private uiController: UIController, private adaptiveTabController: AdaptiveTabController, private buildController: BuildController, private tooltipController: TooltipController, private uniqueItemClientService: UniqueItemClientService) {
+    constructor(private uiController: UIController, private adaptiveTabController: AdaptiveTabController, private buildController: BuildController, private tooltipController: TooltipController, private uniqueItemController: UniqueItemController) {
 
     }
 
@@ -108,7 +108,7 @@ export default class InventoryController implements OnInit, OnStart {
      */
     createTooltipForItem(item: Item): Tooltip {
         // Check if this item has unique instances
-        const uniqueInstances = this.uniqueItemClientService.getInstancesOfType(item.id);
+        const uniqueInstances = this.uniqueItemController.getInstancesOfType(item.id);
 
         if (uniqueInstances.size() > 0) {
             // Create a custom message showing unique item information

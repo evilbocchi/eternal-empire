@@ -3,7 +3,7 @@ import { TweenService, Workspace } from "@rbxts/services";
 import { MOUSE } from "client/constants";
 import { INTERFACE } from "client/controllers/UIController";
 import ItemSlot from "client/ItemSlot";
-import UniqueItemClientService from "client/controllers/UniqueItemController";
+import UniqueItemController from "client/controllers/UniqueItemController";
 import { CURRENCY_DETAILS } from "shared/currency/CurrencyDetails";
 import Item from "shared/item/Item";
 import ItemMetadata from "shared/item/ItemMetadata";
@@ -50,7 +50,7 @@ export class Tooltip {
         return tooltip;
     }
 
-    display(uniqueItemClientService?: UniqueItemClientService) {
+    display(uniqueItemController?: UniqueItemController) {
         const item = this.item;
         const itemSlot = TOOLTIP_WINDOW.ItemSlot;
         TOOLTIP_WINDOW.MessageLabel.Visible = item === undefined;
@@ -63,8 +63,8 @@ export class Tooltip {
             let description = item.tooltipDescription ?? item.description;
 
             // Use unique item description if this is a unique item
-            if (this.uniqueItemUUID !== undefined && uniqueItemClientService !== undefined) {
-                const uniqueDescription = uniqueItemClientService.getFormattedDescription(this.uniqueItemUUID);
+            if (this.uniqueItemUUID !== undefined && uniqueItemController !== undefined) {
+                const uniqueDescription = uniqueItemController.getFormattedDescription(this.uniqueItemUUID);
                 if (uniqueDescription !== undefined) {
                     description = uniqueDescription;
                 }
@@ -88,7 +88,7 @@ export default class TooltipController implements OnInit, OnPhysics {
 
     tooltipsPerObject = new Map<GuiObject, Tooltip>();
 
-    constructor(private uniqueItemClientService: UniqueItemClientService) { }
+    constructor(private uniqueItemController: UniqueItemController) { }
 
     hideTooltipWindow() {
         const tweenInfo = new TweenInfo(0.1, Enum.EasingStyle.Linear, Enum.EasingDirection.In);
@@ -132,7 +132,7 @@ export default class TooltipController implements OnInit, OnPhysics {
             });
             guiObject.MouseEnter.Connect(() => {
                 this.showTooltipWindow();
-                this.getTooltip(guiObject).display(this.uniqueItemClientService);
+                this.getTooltip(guiObject).display(this.uniqueItemController);
             });
             guiObject.MouseLeave.Connect(() => {
                 this.hideTooltipWindow();

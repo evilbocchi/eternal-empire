@@ -10,7 +10,7 @@ import HotkeysController from "client/controllers/HotkeysController";
 import UIController from "client/controllers/UIController";
 import AdaptiveTabController, { ADAPTIVE_TAB, ADAPTIVE_TAB_MAIN_WINDOW } from "client/controllers/interface/AdaptiveTabController";
 import TooltipController from "client/controllers/interface/TooltipController";
-import UniqueItemClientService from "client/controllers/UniqueItemController";
+import UniqueItemController from "client/controllers/UniqueItemController";
 import Packets from "shared/Packets";
 import { ASSETS, getSound } from "shared/asset/GameAssets";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
@@ -103,7 +103,7 @@ export default class ShopController implements OnInit, OnStart {
     switchDebounce = 0;
 
     constructor(private hotkeysController: HotkeysController, private uiController: UIController,
-        private adaptiveTabController: AdaptiveTabController, private tooltipController: TooltipController, private uniqueItemClientService?: UniqueItemClientService) {
+        private adaptiveTabController: AdaptiveTabController, private tooltipController: TooltipController, private uniqueItemController?: UniqueItemController) {
 
     }
 
@@ -262,7 +262,7 @@ export default class ShopController implements OnInit, OnStart {
         PURCHASE_WINDOW.DescriptionFrame.CreatorLabel.Text = `Creator: ${item.creator}`;
 
         // Check if this item has unique instances and show special description
-        const uniqueInstances = this.uniqueItemClientService?.getInstancesOfType(item.id) ?? [];
+        const uniqueInstances = this.uniqueItemController?.getInstancesOfType(item.id) ?? [];
         if (uniqueInstances.size() > 0) {
             let description = item.description;
             description += `\n\n[UNIQUE ITEM] You own ${uniqueInstances.size()} unique instance(s) with randomized stats.`;
