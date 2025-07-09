@@ -3,7 +3,7 @@ import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Formula from "shared/currency/Formula";
 import Item from "shared/item/Item";
 import Conveyor from "shared/item/traits/conveyor/Conveyor";
-import ObbyUpgrader from "shared/item/traits/special/ObbyUpgrader";
+import ObbyUpgrader from "shared/item/traits/upgrader/ObbyUpgrader";
 import NamedUpgrades from "shared/namedupgrade/NamedUpgrades";
 
 export = new Item(script.Name)
