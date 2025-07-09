@@ -66,8 +66,8 @@ export = new Item(script.Name)
             if (upgrades !== undefined) {
                 for (const [upgradeId, upgradeInfo] of upgrades) {
                     upgraded = true;
-                    const upgraderId = upgradeInfo.Stats?.item.id ?? upgradeId;
-                    if (upgraderId === item.id)
+                    const upgraderId = Server.Item.getPlacedItem(upgradeInfo.Upgrader.Name)?.item;
+                    if (upgraderId === undefined || upgraderId === item.id)
                         continue;
 
                     const [add, mul, pow, inverse] = Upgrader.getUpgrade(upgradeInfo);

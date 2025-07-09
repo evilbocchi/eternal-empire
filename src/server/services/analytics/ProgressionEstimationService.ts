@@ -287,7 +287,7 @@ export default class ProgressionEstimationService implements OnGameAPILoaded, On
                 for (let i = 0; i < amount; i++) {
                     upgrades.add({
                         Upgrader: Workspace,
-                        Stats: upgrader,
+                        Boost: upgrader,
                     });
                 }
             }

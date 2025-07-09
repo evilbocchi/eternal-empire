@@ -14,7 +14,6 @@ declare global {
 
     interface UpgradeInfo {
         Upgrader: Model;
-        Stats?: Upgrader;
         Boost?: IOperative;
         EmptyUpgrade?: boolean;
     }
@@ -97,7 +96,7 @@ export default class Upgrader extends Operative {
 
             const upgrade: UpgradeInfo = {
                 Upgrader: model,
-                Stats: upgrader,
+                Boost: upgrader
             };
             if (deco !== undefined)
                 deco(upgrade);
@@ -174,15 +173,15 @@ export default class Upgrader extends Operative {
      * @returns Boosts
      */
     static getUpgrade(upgradeInfo: UpgradeInfo): LuaTuple<[CurrencyBundle?, CurrencyBundle?, CurrencyBundle?, boolean?]> {
-        const stats = upgradeInfo.Stats ?? upgradeInfo.Boost;
-        if (stats === undefined)
+        const boost = upgradeInfo.Boost;
+        if (boost === undefined)
             return $tuple();
 
         const omni = upgradeInfo.Omni;
         const isNotOmni = omni === undefined;
-        const toAdd = isNotOmni ? stats.add : (stats as OmniUpgrader).addsPerLaser.get(omni);
-        const toMul = isNotOmni ? stats.mul : (stats as OmniUpgrader).mulsPerLaser.get(omni);
-        const toPow = stats.pow;
+        const toAdd = isNotOmni ? boost.add : (boost as OmniUpgrader).addsPerLaser.get(omni);
+        const toMul = isNotOmni ? boost.mul : (boost as OmniUpgrader).mulsPerLaser.get(omni);
+        const toPow = boost.pow;
         const isGone = upgradeInfo.Upgrader === undefined || upgradeInfo.Upgrader.Parent === undefined;
         const isEmpty = upgradeInfo.EmptyUpgrade === true;
         if (isGone || isEmpty) {
