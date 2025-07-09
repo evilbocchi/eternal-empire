@@ -31,6 +31,17 @@ declare global {
 
 export default class Dropper extends ItemTrait {
 
+    /**
+     * Wraps an instantiator function to create a droplet.
+     * This function will set the parent of the droplet to the DROPLET_STORAGE,
+     * set the network owner to the player, and handle lucky droplet spawning.
+     * 
+     * @param instantiator The function that creates the droplet.
+     * @param dropper The dropper item that produced the droplet.
+     * @param model The model of the item.
+     * @param drop The drop part that the droplet is associated with.
+     * @returns A new instantiator function that produces a droplet.
+     */
     static wrapInstantiator(instantiator: () => BasePart, dropper: Dropper, model: Model, drop: BasePart) {
         const callback = dropper.dropletProduced;
         return () => {
@@ -62,6 +73,14 @@ export default class Dropper extends ItemTrait {
         };
     }
 
+    /**
+     * Loads the dropper item into the model.
+     * This function finds all drop parts in the model, sets their attributes,
+     * and initializes the instance info for each drop part.
+     * 
+     * @param model The model to load the dropper into.
+     * @param dropper The dropper item to load.
+     */
     static load(model: Model, dropper: Dropper) {
         const drops = findBaseParts(model, "Drop");
         for (const [drop, _droplet] of dropper.dropletPerDrop) {
@@ -91,13 +110,45 @@ export default class Dropper extends ItemTrait {
         }
     }
 
+    /**
+     * A map of all spawned drops.
+     * The key is the drop part, and the value is the instance info.
+     */
     static readonly SPAWNED_DROPS = new Map<BasePart, InstanceInfo>();
+    
+    /**
+     * Whether there is a lucky droplet window open.
+     * This window changes every second, and if it is open, only one lucky droplet can spawn.
+     */
     private static hasLuckyWindow = false;
-    static luckyChance = 1000;
 
+    /**
+     * Chance to spawn a lucky droplet every second.
+     */
+    static luckyChance = 200;
+
+    /**
+     * A map of droplet parts to their droplet instances.
+     * This allows for different droplet types per drop part.
+     */
     readonly dropletPerDrop = new Map<string, Droplet>();
+
+    /**
+     * Callback that is called when a droplet is produced.
+     * The callback receives the droplet and the dropper item.
+     */
     dropletProduced: ((droplet: BasePart, item: this) => void) | undefined;
+
+    /**
+     * The droplet that is produced by this dropper.
+     * If a droplet is set for a specific drop part, it will be used instead.
+     */
     droplet: Droplet | undefined;
+    
+    /**
+     * The drop rate of this dropper.
+     * This is the number of droplets produced per second.
+     */
     dropRate = 0;
 
     constructor(item: Item) {
@@ -105,6 +156,13 @@ export default class Dropper extends ItemTrait {
         item.onLoad((model) => Dropper.load(model, this));
     }
 
+    /**
+     * Gets the droplet for a specific drop part.
+     * If no droplet is set for the drop part, it returns the default droplet.
+     * 
+     * @param dropPart The name of the drop part to get the droplet for.
+     * @returns The droplet for the specified drop part, or the default droplet if not set.
+     */
     getDroplet(dropPart?: string) {
         if (dropPart !== undefined) {
             const cached = this.dropletPerDrop.get(dropPart);
@@ -115,6 +173,13 @@ export default class Dropper extends ItemTrait {
         return this.droplet;
     }
 
+    /**
+     * Sets the droplet for a specific drop part or the default droplet.
+     * 
+     * @param droplet The droplet to set.
+     * @param dropPart The name of the drop part to set the droplet for. If undefined, sets the default droplet.
+     * @returns The Dropper instance for chaining.
+     */
     setDroplet(droplet: Droplet, dropPart?: string) {
         if (dropPart !== undefined) {
             this.dropletPerDrop.set(dropPart, droplet);
@@ -124,11 +189,23 @@ export default class Dropper extends ItemTrait {
         return this;
     }
 
+    /**
+     * Sets the drop rate of this dropper.
+     * 
+     * @param dropRate The drop rate to set, in droplets per second.
+     * @returns The Dropper instance for chaining.
+     */
     setDropRate(dropRate: number) {
         this.dropRate = dropRate;
         return this;
     }
 
+    /**
+     * Sets a callback that is called when a droplet is produced.
+     * 
+     * @param callback The callback to set. It receives the droplet and the dropper item.
+     * @returns The Dropper instance for chaining.
+     */
     onDropletProduced(callback: (droplet: BasePart, item: this) => void) {
         this.dropletProduced = callback;
         return this;
@@ -150,10 +227,7 @@ export default class Dropper extends ItemTrait {
     static {
         task.spawn(() => {
             while (task.wait(1)) {
-                const isLucky = this.luckyChance > 0 && math.random(1, this.luckyChance) === 1;
-                if (isLucky) {
-                    this.hasLuckyWindow = true;
-                }
+                this.hasLuckyWindow = this.luckyChance > 0 && math.random(1, this.luckyChance) === 1;
             }
         });
 
