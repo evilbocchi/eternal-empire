@@ -1,5 +1,5 @@
 import Difficulty from "@antivivi/jjt-difficulties";
-import Generator from "shared/item/traits/Generator";
+import Generator from "shared/item/traits/generator/Generator";
 import Item from "shared/item/Item";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 

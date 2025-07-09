@@ -1,6 +1,6 @@
 import Difficulty from "@antivivi/jjt-difficulties";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
-import Charger from "shared/item/traits/Charger";
+import Charger from "shared/item/traits/generator/Charger";
 import Item from "shared/item/Item";
 
 export = new Item(script.Name)

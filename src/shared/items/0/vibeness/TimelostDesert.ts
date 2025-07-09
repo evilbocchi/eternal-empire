@@ -1,6 +1,6 @@
 import Difficulty from "@antivivi/jjt-difficulties";
 import { OnoeNum } from "@antivivi/serikanum";
-import Generator from "shared/item/traits/Generator";
+import Generator from "shared/item/traits/generator/Generator";
 import Item from "shared/item/Item";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Formula from "shared/currency/Formula";

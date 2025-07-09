@@ -30,7 +30,7 @@ import CurrencyBundle from "shared/currency/CurrencyBundle";
 import { CURRENCIES } from "shared/currency/CurrencyDetails";
 import Droplet from "shared/item/Droplet";
 import Item from "shared/item/Item";
-import Charger from "shared/item/traits/Charger";
+import Charger from "shared/item/traits/generator/Charger";
 import Furnace from "shared/item/traits/Furnace";
 import Items from "shared/items/Items";
 import AwesomeManumaticPurifier from "shared/items/negative/felixthea/AwesomeManumaticPurifier";

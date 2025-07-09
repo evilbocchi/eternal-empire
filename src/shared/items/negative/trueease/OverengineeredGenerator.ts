@@ -1,7 +1,7 @@
 import Difficulty from "@antivivi/jjt-difficulties";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
-import Generator from "shared/item/traits/Generator";
+import Generator from "shared/item/traits/generator/Generator";
 import ExcavationStone from "shared/items/excavation/ExcavationStone";
 import WhiteGem from "shared/items/excavation/WhiteGem";
 

@@ -1,6 +1,6 @@
 import Difficulty from "@antivivi/jjt-difficulties";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
-import Charger from "shared/item/traits/Charger";
+import Charger from "shared/item/traits/generator/Charger";
 import Item from "shared/item/Item";
 import MiniDropletSlayer from "shared/items/negative/relax/MiniDropletSlayer";
 

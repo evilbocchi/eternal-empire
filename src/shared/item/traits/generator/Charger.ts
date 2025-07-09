@@ -1,7 +1,7 @@
 import { Debris } from "@rbxts/services";
 import { PLACED_ITEMS_FOLDER } from "shared/constants";
 import Item from "shared/item/Item";
-import Generator from "shared/item/traits/Generator";
+import Generator from "shared/item/traits/generator/Generator";
 import Operative from "shared/item/traits/Operative";
 import { getAllInstanceInfo, getInstanceInfo } from "@antivivi/vrldk";
 

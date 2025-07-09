@@ -1,6 +1,6 @@
 import Difficulty from "@antivivi/jjt-difficulties";
 import Item from "shared/item/Item";
-import Generator from "shared/item/traits/Generator";
+import Generator from "shared/item/traits/generator/Generator";
 import { HandCrank } from "shared/item/traits/special/HandCrank";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 

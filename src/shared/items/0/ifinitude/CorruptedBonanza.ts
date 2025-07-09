@@ -1,6 +1,6 @@
 import Difficulty from "@antivivi/jjt-difficulties";
 import { OnoeNum } from "@antivivi/serikanum";
-import Generator from "shared/item/traits/Generator";
+import Generator from "shared/item/traits/generator/Generator";
 import Item from "shared/item/Item";
 import AdvancedBlankEssence from "shared/items/0/ifinitude/AdvancedBlankEssence";
 import PassiveBonanza from "shared/items/negative/instantwin/PassiveBonanza";
