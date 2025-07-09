@@ -351,17 +351,11 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
         let i = 0;
         let totalAmount = 0;
         const placedItems = new Array<IdPlacedItem>();
-        let inventoryChanged = false;
-        let uniqueInstancesChanged = false;
         for (const item of items) {
             let [placedItem, amount] = this.serverPlace(item.id, item.position, item.rotation, area);
             if (placedItem !== undefined) {
                 if (amount !== undefined) { // if this is a normal item
                     totalAmount += amount;
-                    inventoryChanged = true;
-                }
-                else {
-                    uniqueInstancesChanged = true;
                 }
                 placedItems.push(placedItem);
             }
@@ -401,9 +395,14 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
                 warn(`Item ${id} not found in inventory or unique items.`);
                 return $tuple(undefined);
             }
-            if (uniqueInstance.placed !== undefined) {
-                return $tuple(undefined);
+            const itemId = uniqueInstance.baseItemId;
+            for (const [uuid, instance] of itemsData.uniqueInstances) {
+                if (instance.baseItemId === itemId && instance.placed !== undefined) {
+                    warn(`${itemId} is already placed under ${uuid}. Cannot place again.`);
+                    return $tuple(undefined);
+                }
             }
+
         }
         else if (itemAmount < 1 || rotation % 90 !== 0) { // Validate item requirements
             return $tuple(undefined);
