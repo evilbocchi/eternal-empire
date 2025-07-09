@@ -34,7 +34,7 @@
         "rbxts-transformer-services": "^1.1.1",
         "roblox-ts": "^3.0.0",
         "rojo": "^1.0.1",
-        "typedoc": "^0.26.5",
+        "typedoc": "^0.28.7",
         "typedoc-material-theme": "^1.1.0",
         "typedoc-plugin-extras": "^4.0.0",
         "typedoc-plugin-missing-exports": "^3.0.0",
