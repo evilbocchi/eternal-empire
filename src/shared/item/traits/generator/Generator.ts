@@ -4,7 +4,7 @@ import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
 import ItemUtils, { Server } from "shared/item/ItemUtils";
 import Boostable from "shared/item/traits/boost/Boostable";
-import Operative from "shared/item/traits/Operative";
+import Operative, { IOperative } from "shared/item/traits/Operative";
 import NamedUpgrades from "shared/namedupgrade/NamedUpgrades";
 
 declare global {
@@ -47,11 +47,18 @@ export default class Generator extends Boostable {
                     continue;
                 }
 
-                const charger = boost.item.findTrait("Charger");
-                if (charger === undefined)
+                const charger = boost.charger;
+                if (charger === undefined) {
                     continue;
+                }
 
-                [totalAdd, totalMul, totalPow] = charger.apply(totalAdd, totalMul, totalPow);
+                let add = charger.add;
+                let mul = charger.mul;
+                let pow = charger.pow;
+                [add, mul, pow] = Operative.applyOperative(totalAdd, totalMul, totalPow, add, mul, pow);
+                totalAdd = add ?? totalAdd;
+                totalMul = mul ?? totalMul;
+                totalPow = pow ?? totalPow;
             }
             const boost = model.GetAttribute("GeneratorBoost") as number | undefined;
             if (boost !== undefined) {

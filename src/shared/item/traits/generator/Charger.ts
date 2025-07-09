@@ -1,13 +1,20 @@
+import { getAllInstanceInfo } from "@antivivi/vrldk";
 import { Debris } from "@rbxts/services";
 import { PLACED_ITEMS_FOLDER } from "shared/constants";
 import Item from "shared/item/Item";
 import Generator from "shared/item/traits/generator/Generator";
 import Operative from "shared/item/traits/Operative";
-import { getAllInstanceInfo, getInstanceInfo } from "@antivivi/vrldk";
 
 declare global {
     interface ItemTraits {
         Charger: Charger;
+    }
+
+    interface ItemBoost {
+        /**
+         * The charger that is boosting the generator.
+         */
+        charger: Charger;
     }
 }
 
@@ -81,8 +88,8 @@ export default class Charger extends Operative {
             charging.add(generatorModel);
             Generator.addBoost(generatorInfo, {
                 placementId: placementId,
-                item: charger.item,
                 ignoresLimitations: charger.ignoreLimit,
+                charger,
             });
 
             if (connection !== undefined) {

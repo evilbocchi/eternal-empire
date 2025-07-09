@@ -94,10 +94,25 @@ export default class Upgrader extends Operative {
             else if (upgrades.has(laserId) || modelInfo.Maintained === false || laserInfo.Enabled === false)
                 return;
 
+            let [totalAdd, totalMul, totalPow] = [upgrader.add, upgrader.mul, upgrader.pow];
+
+            const boosts = modelInfo.Boosts;
+            if (boosts !== undefined) {
+                for (const [_, boost] of boosts) {
+                    const stats = boost.charger;
+                    [totalAdd, totalMul, totalPow] = Operative.applyOperative(totalAdd, totalMul, totalPow, stats.add, stats.mul, stats.pow);
+                }
+            }
+
             const upgrade: UpgradeInfo = {
                 Upgrader: model,
-                Boost: upgrader
+                Boost: {
+                    add: totalAdd,
+                    mul: totalMul,
+                    pow: totalPow
+                }
             };
+
             if (deco !== undefined)
                 deco(upgrade);
             upgrades.set(laserId, upgrade);
@@ -205,8 +220,11 @@ export default class Upgrader extends Operative {
      */
     static applyUpgrades(totalAdd: CurrencyBundle, totalMul: CurrencyBundle, totalPow: CurrencyBundle, instanceInfo: InstanceInfo) {
         for (const [_id, upgradeInfo] of instanceInfo.Upgrades!) {
-            const [add, mul, pow, inverse] = this.getUpgrade(upgradeInfo);
-            [totalAdd, totalMul, totalPow] = this.applyOperative(totalAdd, totalMul, totalPow, add, mul, pow, inverse);
+            let [add, mul, pow, inverse] = this.getUpgrade(upgradeInfo);
+            [add, mul, pow] = this.applyOperative(totalAdd, totalMul, totalPow, add, mul, pow, inverse);
+            totalAdd = add ?? totalAdd;
+            totalMul = mul ?? totalMul;
+            totalPow = pow ?? totalPow;
         }
         return $tuple(totalAdd, totalMul, totalPow);
     }

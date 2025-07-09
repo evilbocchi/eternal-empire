@@ -88,7 +88,7 @@ export default class Conveyor extends ItemTrait {
             const boosts = instanceInfo.Boosts;
             if (boosts !== undefined) {
                 for (const [_, boost] of boosts) {
-                    speedBoost += boost.item.findTrait("Accelerator")?.boost ?? 0;
+                    speedBoost += boost.charger?.item.findTrait("Accelerator")?.boost ?? 0;
                 }
             }
             for (const part of conveyors) {

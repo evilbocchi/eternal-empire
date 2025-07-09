@@ -1,6 +1,7 @@
+import { getAllInstanceInfo } from "@antivivi/vrldk";
 import Item from "shared/item/Item";
 import ItemTrait from "shared/item/traits/ItemTrait";
-import { getAllInstanceInfo } from "@antivivi/vrldk";
+import { IOperative } from "shared/item/traits/Operative";
 
 declare global {
     interface ItemTraits {
@@ -15,11 +16,6 @@ declare global {
          * The unique identifier for the boost placement.
          */
         placementId: string;
-
-        /**
-         * The item of the boost.
-         */
-        item: Item;
 
         /**
          * Whether the boost ignores the restrictions boosts usually have.

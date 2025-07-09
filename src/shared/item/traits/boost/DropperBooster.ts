@@ -16,13 +16,13 @@ export default class DropperBooster extends ItemTrait {
     mul = 1;
 
     /**
-     * Creates a modifier for the drop rate of droppers in the area of the model.
+     * Creates a modifier token for the drop rate of droppers in the area of the model.
      * 
      * @param model The model to create the modifier for.
      * @param whitelist Optional function to filter items that should be affected by the modifier.
      * @returns A modifier object that can be used to adjust the drop rate.
      */
-    static createModifier(model: Model, whitelist?: (model: Model, item: Item) => boolean) {
+    static createToken(model: Model, whitelist?: (model: Model, item: Item) => boolean) {
         const clickArea = model.WaitForChild("ClickArea") as BasePart;
         clickArea.CanTouch = true;
         clickArea.CollisionGroup = "ItemHitbox";
@@ -79,7 +79,7 @@ export default class DropperBooster extends ItemTrait {
      * @param booster The booster instance to apply the multiplier to.
      */
     static load(model: Model, booster: DropperBooster) {
-        const modifier = DropperBooster.createModifier(model);
+        const modifier = DropperBooster.createToken(model);
         modifier.multi = booster.mul;
     }
 

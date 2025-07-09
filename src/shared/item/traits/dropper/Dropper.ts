@@ -115,7 +115,7 @@ export default class Dropper extends ItemTrait {
      * The key is the drop part, and the value is the instance info.
      */
     static readonly SPAWNED_DROPS = new Map<BasePart, InstanceInfo>();
-    
+
     /**
      * Whether there is a lucky droplet window open.
      * This window changes every second, and if it is open, only one lucky droplet can spawn.
@@ -144,7 +144,7 @@ export default class Dropper extends ItemTrait {
      * If a droplet is set for a specific drop part, it will be used instead.
      */
     droplet: Droplet | undefined;
-    
+
     /**
      * The drop rate of this dropper.
      * This is the number of droplets produced per second.

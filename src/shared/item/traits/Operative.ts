@@ -143,7 +143,7 @@ export default class Operative extends ItemTrait implements IOperative {
      * @param repeats Number of times to repeat the operations. Default is 1, which means no repetition.
      * @returns The resulting addition, multiplication, and power terms.
      */
-    static applyOperative(totalAdd: CurrencyBundle, totalMul: CurrencyBundle, totalPow: CurrencyBundle,
+    static applyOperative(totalAdd?: CurrencyBundle, totalMul?: CurrencyBundle, totalPow?: CurrencyBundle,
         add?: CurrencyBundle, mul?: CurrencyBundle, pow?: CurrencyBundle, inverse?: boolean, repeats?: number) {
         if (repeats !== undefined) {
             if (add !== undefined)
@@ -156,19 +156,19 @@ export default class Operative extends ItemTrait implements IOperative {
 
         if (inverse === true) {
             if (add !== undefined)
-                totalAdd = totalAdd.sub(add);
+                totalAdd = totalAdd?.sub(add);
             if (mul !== undefined)
-                totalMul = totalMul.div(mul);
+                totalMul = totalMul?.div(mul);
             if (pow !== undefined)
-                totalPow = totalPow.mul(ONES.div(pow));
+                totalPow = totalPow?.mul(ONES.div(pow));
         }
         else {
             if (add !== undefined)
-                totalAdd = totalAdd.add(add);
+                totalAdd = totalAdd?.add(add);
             if (mul !== undefined)
-                totalMul = totalMul.mul(mul);
+                totalMul = totalMul?.mul(mul);
             if (pow !== undefined)
-                totalPow = totalPow.mul(pow);
+                totalPow = totalPow?.mul(pow);
         }
         return $tuple(totalAdd, totalMul, totalPow);
     }
@@ -210,6 +210,9 @@ export default class Operative extends ItemTrait implements IOperative {
 
     /**
      * Generate `totalAdd`, `totalMul`, and `totalPow` for calculation.
+     * - `totalAdd` is a zeroed {@link CurrencyBundle}.
+     * - `totalMul` is a `CurrencyBundle` with all currencies set to 1.
+     * - `totalPow` is a `CurrencyBundle` with all currencies set to 1.
      * 
      * @returns A tuple containing `totalAdd`, `totalMul`, and `totalPow`.
      */
