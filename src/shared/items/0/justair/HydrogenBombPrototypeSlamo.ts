@@ -1,6 +1,6 @@
 import Difficulty from "@antivivi/jjt-difficulties";
 import Item from "shared/item/Item";
-import Clicker from "shared/item/traits/special/Clicker";
+import Clicker from "shared/item/traits/action/Clicker";
 import SlamoClicker from "shared/items/0/millisecondless/SlamoClicker";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 

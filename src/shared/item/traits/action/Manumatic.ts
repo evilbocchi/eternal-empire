@@ -1,6 +1,6 @@
 import Item from "shared/item/Item";
 import ItemTrait from "shared/item/traits/ItemTrait";
-import Clickable from "shared/item/traits/special/Clickable";
+import Clickable from "shared/item/traits/action/Clickable";
 
 export default class Manumatic extends ItemTrait {
 

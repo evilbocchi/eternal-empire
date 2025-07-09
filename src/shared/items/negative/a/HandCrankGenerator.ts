@@ -1,7 +1,7 @@
 import Difficulty from "@antivivi/jjt-difficulties";
 import Item from "shared/item/Item";
 import Generator from "shared/item/traits/generator/Generator";
-import { HandCrank } from "shared/item/traits/special/HandCrank";
+import { HandCrank } from "shared/item/traits/action/HandCrank";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 
 export = new Item(script.Name)

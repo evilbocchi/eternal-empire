@@ -2,7 +2,7 @@ import Difficulty from "@antivivi/jjt-difficulties";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
 import Boostable from "shared/item/traits/Boostable";
-import Clicker from "shared/item/traits/special/Clicker";
+import Clicker from "shared/item/traits/action/Clicker";
 import { getAllInstanceInfo } from "@antivivi/vrldk";
 import { Streaming } from "@antivivi/vrldk";
 import { loadAnimation } from "@antivivi/vrldk";

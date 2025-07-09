@@ -2,7 +2,7 @@ import Difficulty from "@antivivi/jjt-difficulties";
 import { loadAnimation, Streaming } from "@antivivi/vrldk";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
-import Clicker from "shared/item/traits/special/Clicker";
+import Clicker from "shared/item/traits/action/Clicker";
 
 
 export = new Item(script.Name)
