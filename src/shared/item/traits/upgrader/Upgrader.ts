@@ -4,6 +4,7 @@ import { RunService } from "@rbxts/services";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import { DROPLET_STORAGE } from "shared/item/Droplet";
 import Item from "shared/item/Item";
+import Boostable from "shared/item/traits/boost/Boostable";
 import Operative, { IOperative } from "shared/item/traits/Operative";
 import type OmniUpgrader from "shared/item/traits/upgrader/OmniUpgrader";
 
@@ -35,6 +36,15 @@ declare global {
          * This property exists to prevent exploits in which droplets that have not reached the skyline are dropped into cauldrons.
          */
         Sky?: boolean;
+    }
+
+    interface ItemBoost {
+        /**
+         * The operative that upgrades the {@link Upgrader} that is boosted.
+         * 
+         * This is used to apply the boost to the upgrader's lasers.
+         */
+        upgradeCompound?: IOperative;
     }
 }
 
@@ -99,7 +109,9 @@ export default class Upgrader extends Operative {
             const boosts = modelInfo.Boosts;
             if (boosts !== undefined) {
                 for (const [_, boost] of boosts) {
-                    const stats = boost.charger;
+                    const stats = boost.upgradeCompound;
+                    if (stats === undefined)
+                        continue;
                     [totalAdd, totalMul, totalPow] = Operative.applyOperative(totalAdd, totalMul, totalPow, stats.add, stats.mul, stats.pow);
                 }
             }
@@ -145,6 +157,7 @@ export default class Upgrader extends Operative {
 
     constructor(item: Item) {
         super(item);
+        item.trait(Boostable).addToWhitelist("dummy"); // Enable whitelist to stop charger connection
         item.onLoad((model) => Upgrader.load(model, this));
     }
 

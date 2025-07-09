@@ -2,73 +2,64 @@ import { getAllInstanceInfo } from "@antivivi/vrldk";
 import { RunService } from "@rbxts/services";
 import Item from "shared/item/Item";
 import { Server, getPlacedItemsInArea } from "shared/item/ItemUtils";
+import Booster from "shared/item/traits/boost/Booster";
 import ItemTrait from "shared/item/traits/ItemTrait";
+import { IOperative } from "shared/item/traits/Operative";
 
 declare global {
     interface ItemTraits {
         DropperBooster: DropperBooster;
     }
+
+    interface ItemBoost {
+        dropRateMultiplier?: number;
+    }
 }
 
+export default class DropperBooster extends Booster {
 
-export default class DropperBooster extends ItemTrait {
-
-    mul = 1;
+    dropRateMultiplier = 1;
 
     /**
      * Creates a modifier token for the drop rate of droppers in the area of the model.
      * 
-     * @param model The model to create the modifier for.
-     * @param whitelist Optional function to filter items that should be affected by the modifier.
+     * @param model The model of the dropper booster.
      * @returns A modifier object that can be used to adjust the drop rate.
      */
-    static createToken(model: Model, whitelist?: (model: Model, item: Item) => boolean) {
-        const clickArea = model.WaitForChild("ClickArea") as BasePart;
-        clickArea.CanTouch = true;
-        clickArea.CollisionGroup = "ItemHitbox";
-        clickArea.Touched.Connect(() => { });
-        const Items = Server.items;
+    createToken(model: Model) {
+        const key = this.item.id;
+        const modifier: ItemBoost = {
+            placementId: model.Name,
+            ignoresLimitations: false,
+            dropRateMultiplier: this.dropRateMultiplier
+        };
+
         let target: BasePart | undefined;
         let targetInfo: InstanceInfo | undefined;
-        const modifier = { multi: 1 };
 
-        let t = 0;
-        const connection = RunService.Heartbeat.Connect((dt) => {
-            t += dt;
-            if (target === undefined) {
-                if (t > 0.05) {
-                    t = 0;
-
-                    const found = getPlacedItemsInArea(clickArea, Items);
-                    for (const [model, item] of found) {
-                        if (!item.isA("Dropper")) {
-                            continue;
-                        }
-                        if (whitelist !== undefined && !whitelist(model, item)) {
-                            continue;
-                        }
-
-                        const drop = model.FindFirstChild("Drop");
-                        if (drop === undefined)
-                            continue;
-
-                        target = drop as BasePart;
-                        targetInfo = getAllInstanceInfo(target);
-                        return;
-                    }
-                }
+        this.observeTarget(model, (model, item) => {
+            if (model === undefined || item === undefined) {
+                targetInfo?.Boosts?.delete(key);
+                target = undefined;
+                targetInfo = undefined;
+                return false;
             }
-            else if (target.Parent === undefined) {
-                targetInfo?.DropRateModifiers?.delete(modifier);
+
+            if (!item.isA("Dropper")) {
+                return false;
             }
-            else {
-                targetInfo?.DropRateModifiers?.add(modifier);
+
+            const drop = model.FindFirstChild("Drop");
+            if (drop === undefined || !drop.IsA("BasePart")) {
+                return false;
             }
+
+            target = drop as BasePart;
+            targetInfo = getAllInstanceInfo(target);
+            targetInfo.Boosts?.set(key, modifier);
+            return true;
         });
-        model.Destroying.Once(() => {
-            targetInfo?.DropRateModifiers?.delete(modifier);
-            connection.Disconnect();
-        });
+
         return modifier;
     }
 
@@ -79,8 +70,7 @@ export default class DropperBooster extends ItemTrait {
      * @param booster The booster instance to apply the multiplier to.
      */
     static load(model: Model, booster: DropperBooster) {
-        const modifier = DropperBooster.createToken(model);
-        modifier.multi = booster.mul;
+        booster.createToken(model);
     }
 
     constructor(item: Item) {
@@ -88,8 +78,8 @@ export default class DropperBooster extends ItemTrait {
         item.onLoad((model) => DropperBooster.load(model, this));
     }
 
-    setDropRateMultiplier(mul: number) {
-        this.mul = mul;
+    setDropRateMultiplier(dropRateMultiplier: number) {
+        this.dropRateMultiplier = dropRateMultiplier;
         return this;
     }
 }

@@ -11,6 +11,10 @@ declare global {
         Clicker: Clicker;
     }
 
+    interface Modifier {
+        multi: number;
+    }
+
     interface InstanceInfo {
         ClickRateModifiers?: Set<Modifier>;
     }

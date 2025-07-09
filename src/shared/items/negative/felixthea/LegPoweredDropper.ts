@@ -34,8 +34,12 @@ export = new Item(script.Name)
 
         const drop = model.WaitForChild("Drop");
         const instanceInfo = getAllInstanceInfo(drop);
-        const modifier = { multi: 0 };
-        instanceInfo.DropRateModifiers!.add(modifier);
+        const modifier: ItemBoost = {
+            placementId: model.Name,
+            ignoresLimitations: false,
+            dropRateMultiplier: 0
+        };
+        instanceInfo.Boosts!.set("Treadmill", modifier);
 
         item.repeat(model, () => {
             const touchingParts = thitbox.GetTouchingParts();
@@ -47,6 +51,6 @@ export = new Item(script.Name)
                     break;
                 }
             }
-            modifier.multi = hasCharacter === true ? 1 : 0;
+            modifier.dropRateMultiplier = hasCharacter === true ? 1 : 0;
         }, 0.5);
     });

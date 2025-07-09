@@ -14,7 +14,7 @@ declare global {
         /**
          * The charger that is boosting the generator.
          */
-        charger: Charger;
+        charger?: Charger;
     }
 }
 

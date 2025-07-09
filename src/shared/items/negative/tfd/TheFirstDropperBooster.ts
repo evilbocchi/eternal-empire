@@ -14,8 +14,11 @@ export = new Item(script.Name)
 
     .trait(Unique)
     .addPot("dropRateMultiplier", 1.1, 3.0)
-    .onLoad((model, _unique, scaledPots) => {
-        DropperBooster.createToken(model, (_, item) => item === TheFirstDropper).multi = scaledPots.get("dropRateMultiplier") ?? 1;
+    .onLoad((_, unique, scaledPots) => {
+        unique.trait(DropperBooster).setDropRateMultiplier(scaledPots.get("dropRateMultiplier")!);
     })
+
+    .trait(DropperBooster)
+    .setWhitelist((_, item) => item === TheFirstDropper)
 
     .exit();

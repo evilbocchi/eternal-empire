@@ -1,10 +1,10 @@
 import Difficulty from "@antivivi/jjt-difficulties";
+import { getAllInstanceInfo } from "@antivivi/vrldk";
 import { Lighting } from "@rbxts/services";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Droplet from "shared/item/Droplet";
 import Item from "shared/item/Item";
 import Dropper from "shared/item/traits/dropper/Dropper";
-import { getAllInstanceInfo } from "@antivivi/vrldk";
 
 export = new Item(script.Name)
     .setName("Solar Powered Dropper")
@@ -23,9 +23,13 @@ export = new Item(script.Name)
     .onLoad((model, item) => {
         const drop = model.WaitForChild("Drop");
         const instanceInfo = getAllInstanceInfo(drop);
-        const modifier = { multi: 1 };
-        instanceInfo.DropRateModifiers!.add(modifier);
+        const modifier: ItemBoost = {
+            placementId: model.Name,
+            ignoresLimitations: false,
+            dropRateMultiplier: 1, // Default multiplier
+        };
+        instanceInfo.Boosts!.set("Solar", modifier);
         item.repeat(model, () => {
-            modifier.multi = (12 - math.abs(Lighting.ClockTime - 12)) / 6 + 1;
+            modifier.dropRateMultiplier = (12 - math.abs(Lighting.ClockTime - 12)) / 6 + 1;
         }, 1);
     });

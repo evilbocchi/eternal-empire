@@ -16,13 +16,8 @@ declare global {
         Dropper: Dropper;
     }
 
-    interface Modifier {
-        multi: number;
-    }
-
     interface InstanceInfo {
         DropRate?: number;
-        DropRateModifiers?: Set<Modifier>;
         LastDrop?: number;
         DropletLimitValue?: IntValue;
         Instantiator?: () => void;
@@ -98,7 +93,7 @@ export default class Dropper extends ItemTrait {
             info.Area = areaId;
 
             info.DropletLimitValue = areaId === undefined ? Area.globalDropletLimit : AREAS[areaId].dropletLimit;
-            info.DropRateModifiers = new Set();
+            info.Boosts = new Map<string, ItemBoost>();
             info.DropRate = dropper.dropRate;
 
             if (instantiator !== undefined) {
@@ -235,20 +230,25 @@ export default class Dropper extends ItemTrait {
             const speed = GameSpeed.speed;
             const t = tick();
             for (const [_d, info] of this.SPAWNED_DROPS) {
-                const modifiers = info.DropRateModifiers;
-                if (modifiers === undefined)
+                const boosts = info.Boosts;
+                if (boosts === undefined)
                     continue;
+                
                 if (info.LastDrop === undefined) {
                     info.LastDrop = t;
                     continue;
                 }
+
                 let dropRate = info.DropRate;
                 if (dropRate === undefined)
                     continue;
-                for (const modifier of modifiers)
-                    dropRate *= modifier.multi;
+
+                for (const [_, boost] of boosts)
+                    dropRate *= boost.dropRateMultiplier ?? 1;
+
                 if (dropRate === 0)
                     continue;
+
                 if (t > info.LastDrop + 1 / dropRate / speed) {
                     const dropletCount = Server.Area.dropletCountPerArea.get(info.Area!);
                     if (dropletCount !== undefined && dropletCount > info.DropletLimitValue!.Value)

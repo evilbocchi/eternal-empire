@@ -3,7 +3,7 @@ import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
 import DropperBooster from "shared/item/traits/boost/DropperBooster";
 import Unique from "shared/item/traits/Unique";
-import TheFirstDropper from "shared/items/negative/tfd/TheFirstDropper";
+import BulkyDropper from "shared/items/negative/tlg/BulkyDropper";
 
 export = new Item(script.Name)
     .setName("Bulky Dropper Booster")
@@ -14,8 +14,11 @@ export = new Item(script.Name)
 
     .trait(Unique)
     .addPot("dropRateMultiplier", 1.1, 1.6)
-    .onLoad((model, _unique, scaledPots) => {
-        DropperBooster.createToken(model, (_, item) => item === TheFirstDropper).multi = scaledPots.get("dropRateMultiplier") ?? 1;
+    .onLoad((_, unique, scaledPots) => {
+        unique.trait(DropperBooster).setDropRateMultiplier(scaledPots.get("dropRateMultiplier")!);
     })
+
+    .trait(DropperBooster)
+    .setWhitelist((_, item) => item === BulkyDropper)
 
     .exit();
