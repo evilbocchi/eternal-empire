@@ -2,7 +2,7 @@ import Difficulty from "@antivivi/jjt-difficulties";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Droplet from "shared/item/Droplet";
 import Item from "shared/item/Item";
-import Dropper from "shared/item/traits/Dropper";
+import Dropper from "shared/item/traits/dropper/Dropper";
 import ExcavationStone from "shared/items/excavation/ExcavationStone";
 import Gold from "shared/items/excavation/Gold";
 import Grass from "shared/items/excavation/harvestable/Grass";

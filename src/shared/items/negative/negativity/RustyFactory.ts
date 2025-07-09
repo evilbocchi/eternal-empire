@@ -2,7 +2,7 @@ import Difficulty from "@antivivi/jjt-difficulties";
 import Droplet from "shared/item/Droplet";
 import Item from "shared/item/Item";
 import Conveyor from "shared/item/traits/Conveyor";
-import Dropper from "shared/item/traits/Dropper";
+import Dropper from "shared/item/traits/dropper/Dropper";
 
 export = new Item(script.Name)
     .setName("Rusty Factory")

@@ -3,7 +3,7 @@ import { Lighting } from "@rbxts/services";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Droplet from "shared/item/Droplet";
 import Item from "shared/item/Item";
-import Dropper from "shared/item/traits/Dropper";
+import Dropper from "shared/item/traits/dropper/Dropper";
 import { getAllInstanceInfo } from "@antivivi/vrldk";
 
 export = new Item(script.Name)

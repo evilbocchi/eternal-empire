@@ -4,11 +4,11 @@ import { AREAS } from "shared/Area";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
 import { Server } from "shared/item/ItemUtils";
-import Dropper from "shared/item/traits/Dropper";
+import Dropper from "shared/item/traits/dropper/Dropper";
 import Furnace from "shared/item/traits/Furnace";
 import ItemTrait from "shared/item/traits/ItemTrait";
 import Packets from "shared/Packets";
-import Droplet from "../Droplet";
+import Droplet from "../../Droplet";
 
 declare global {
     interface ItemTraits {

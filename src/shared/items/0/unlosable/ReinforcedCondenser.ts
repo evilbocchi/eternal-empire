@@ -1,6 +1,6 @@
 import Difficulty from "@antivivi/jjt-difficulties";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
-import Condenser from "shared/item/traits/Condenser";
+import Condenser from "shared/item/traits/dropper/Condenser";
 import Droplet from "shared/item/Droplet";
 import Item from "shared/item/Item";
 

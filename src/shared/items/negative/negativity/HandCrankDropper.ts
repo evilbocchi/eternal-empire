@@ -2,7 +2,7 @@ import Difficulty from "@antivivi/jjt-difficulties";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Droplet from "shared/item/Droplet";
 import Item from "shared/item/Item";
-import Dropper from "shared/item/traits/Dropper";
+import Dropper from "shared/item/traits/dropper/Dropper";
 import { HandCrank } from "shared/item/traits/special/HandCrank";
 import { getAllInstanceInfo } from "@antivivi/vrldk";
 
