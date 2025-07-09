@@ -1,7 +1,7 @@
 import Difficulty from "@antivivi/jjt-difficulties";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
-import NoobDropletSlayer from "shared/item/traits/special/NoobDropletSlayer";
+import NoobDropletSlayer from "shared/item/traits/other/NoobDropletSlayer";
 import DropletSlayerMkI from "../negativity/DropletSlayerMkI";
 import Upgrader from "shared/item/traits/upgrader/Upgrader";
 
