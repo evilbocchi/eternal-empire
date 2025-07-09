@@ -1,8 +1,8 @@
 import Difficulty from "@antivivi/jjt-difficulties";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
-import Conveyor from "shared/item/traits/Conveyor";
-import OmniUpgrader from "shared/item/traits/special/OmniUpgrader";
+import Conveyor from "shared/item/traits/conveyor/Conveyor";
+import OmniUpgrader from "shared/item/traits/upgrader/OmniUpgrader";
 import TwoStoreyUpgrader from "shared/items/0/automatic/TwoStoreyUpgrader";
 
 

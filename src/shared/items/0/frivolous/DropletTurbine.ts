@@ -1,6 +1,6 @@
 import Difficulty from "@antivivi/jjt-difficulties";
 import Item from "shared/item/Item";
-import Conveyor from "shared/item/traits/Conveyor";
+import Conveyor from "shared/item/traits/conveyor/Conveyor";
 import { LaserFan } from "shared/item/traits/special/LaserFan";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 

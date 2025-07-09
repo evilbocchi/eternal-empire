@@ -2,8 +2,8 @@ import Difficulty from "@antivivi/jjt-difficulties";
 import { getInstanceInfo } from "@antivivi/vrldk";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
-import Conveyor from "shared/item/traits/Conveyor";
-import Upgrader from "shared/item/traits/Upgrader";
+import Conveyor from "shared/item/traits/conveyor/Conveyor";
+import Upgrader from "shared/item/traits/upgrader/Upgrader";
 import Jade from "shared/items/excavation/Jade";
 import Quartz from "shared/items/excavation/Quartz";
 
@@ -20,7 +20,7 @@ export = new Item(script.Name)
 
     .trait(Conveyor)
     .setSpeed(5)
-    
+
     .trait(Upgrader)
     .setMul(CurrencyBundle.ones().mul(0.9))
     .exit()

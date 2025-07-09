@@ -7,7 +7,7 @@ import { getSound } from "shared/asset/GameAssets";
 import Droplet from "shared/item/Droplet";
 import Item from "shared/item/Item";
 import ItemUtils, { Server } from "shared/item/ItemUtils";
-import Conveyor from "shared/item/traits/Conveyor";
+import Conveyor from "shared/item/traits/conveyor/Conveyor";
 
 declare global {
     interface PlacedItem {

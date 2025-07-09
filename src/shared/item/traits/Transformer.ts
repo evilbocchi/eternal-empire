@@ -1,6 +1,6 @@
 import Droplet from "shared/item/Droplet";
 import Item from "shared/item/Item";
-import Conveyor from "shared/item/traits/Conveyor";
+import Conveyor from "shared/item/traits/conveyor/Conveyor";
 import { getAllInstanceInfo } from "@antivivi/vrldk";
 import { findBaseParts } from "@antivivi/vrldk";
 

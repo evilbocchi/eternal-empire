@@ -1,7 +1,7 @@
 import Difficulty from "@antivivi/jjt-difficulties";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
-import Upgrader from "shared/item/traits/Upgrader";
+import Upgrader from "shared/item/traits/upgrader/Upgrader";
 import Grass from "shared/items/excavation/harvestable/Grass";
 
 export = new Item(script.Name)

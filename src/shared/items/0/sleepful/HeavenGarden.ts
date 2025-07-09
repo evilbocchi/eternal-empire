@@ -1,8 +1,8 @@
 import Difficulty from "@antivivi/jjt-difficulties";
 import Item from "shared/item/Item";
-import Conveyor from "shared/item/traits/Conveyor";
-import Damager from "shared/item/traits/special/Damager";
-import Upgrader from "shared/item/traits/Upgrader";
+import Conveyor from "shared/item/traits/conveyor/Conveyor";
+import Damager from "shared/item/traits/upgrader/Damager";
+import Upgrader from "shared/item/traits/upgrader/Upgrader";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 
 export = new Item("HeavenGarden")

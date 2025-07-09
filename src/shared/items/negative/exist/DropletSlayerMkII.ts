@@ -3,7 +3,7 @@ import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
 import NoobDropletSlayer from "shared/item/traits/special/NoobDropletSlayer";
 import DropletSlayerMkI from "../negativity/DropletSlayerMkI";
-import Upgrader from "shared/item/traits/Upgrader";
+import Upgrader from "shared/item/traits/upgrader/Upgrader";
 
 export = new Item(script.Name)
     .setName("Droplet Slayer Mk. II")

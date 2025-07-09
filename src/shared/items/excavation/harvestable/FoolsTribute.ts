@@ -1,6 +1,6 @@
 import Difficulty from "@antivivi/jjt-difficulties";
 import Item from "shared/item/Item";
-import Upgrader from "shared/item/traits/Upgrader";
+import Upgrader from "shared/item/traits/upgrader/Upgrader";
 import Gold from "shared/items/excavation/Gold";
 import EnchantedGrass from "shared/items/excavation/harvestable/EnchantedGrass";
 import MagicalWood from "shared/items/excavation/harvestable/MagicalWood";

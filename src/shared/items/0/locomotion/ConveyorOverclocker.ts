@@ -1,5 +1,5 @@
 import Difficulty from "@antivivi/jjt-difficulties";
-import Accelerator from "shared/item/traits/Accelerator";
+import Accelerator from "shared/item/traits/conveyor/Accelerator";
 import Item from "shared/item/Item";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Charger from "shared/item/traits/Charger";

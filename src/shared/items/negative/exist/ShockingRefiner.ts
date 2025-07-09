@@ -1,6 +1,6 @@
 import Difficulty from "@antivivi/jjt-difficulties";
 import Item from "shared/item/Item";
-import Upgrader from "shared/item/traits/Upgrader";
+import Upgrader from "shared/item/traits/upgrader/Upgrader";
 import EnergisedRefiner from "shared/items/negative/friendliness/EnergisedRefiner";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Formula from "shared/currency/Formula";

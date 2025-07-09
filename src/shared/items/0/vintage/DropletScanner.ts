@@ -9,7 +9,7 @@ import { CURRENCY_DETAILS } from "shared/currency/CurrencyDetails";
 import Droplet from "shared/item/Droplet";
 import Item from "shared/item/Item";
 import { Server } from "shared/item/ItemUtils";
-import Upgrader from "shared/item/traits/Upgrader";
+import Upgrader from "shared/item/traits/upgrader/Upgrader";
 import NamedUpgrades from "shared/namedupgrade/NamedUpgrades";
 
 export = new Item(script.Name)

@@ -1,7 +1,7 @@
 import Difficulty from "@antivivi/jjt-difficulties";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
-import DropperBooster from "shared/item/traits/special/DropperBooster";
+import DropperBooster from "shared/item/traits/dropper/DropperBooster";
 import Unique from "shared/item/traits/Unique";
 import TheFirstDropper from "shared/items/negative/tfd/TheFirstDropper";
 

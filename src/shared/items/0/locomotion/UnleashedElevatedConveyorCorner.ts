@@ -1,8 +1,8 @@
 import Difficulty from "@antivivi/jjt-difficulties";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
-import Conveyor from "shared/item/traits/Conveyor";
-import UnleashedConveyor from "shared/item/traits/special/UnleashedConveyor";
+import Conveyor from "shared/item/traits/conveyor/Conveyor";
+import UnleashedConveyor from "shared/item/traits/conveyor/UnleashedConveyor";
 
 export = new Item(script.Name)
     .setName("Unleashed Elevated Conveyor Corner")

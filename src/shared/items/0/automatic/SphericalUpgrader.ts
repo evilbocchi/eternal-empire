@@ -1,9 +1,9 @@
 import Difficulty from "@antivivi/jjt-difficulties";
 import Item from "shared/item/Item";
-import Conveyor from "shared/item/traits/Conveyor";
-import Damager from "shared/item/traits/special/Damager";
+import Conveyor from "shared/item/traits/conveyor/Conveyor";
+import Damager from "shared/item/traits/upgrader/Damager";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
-import Upgrader from "shared/item/traits/Upgrader";
+import Upgrader from "shared/item/traits/upgrader/Upgrader";
 
 export = new Item(script.Name)
     .setName("Spherical Healer")
@@ -15,7 +15,7 @@ export = new Item(script.Name)
     .persists()
 
     .trait(Upgrader)
-    
+
     .trait(Damager)
     .setDamage(-20)
 

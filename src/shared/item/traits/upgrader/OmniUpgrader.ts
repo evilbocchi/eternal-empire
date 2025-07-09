@@ -1,6 +1,6 @@
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
-import Upgrader from "shared/item/traits/Upgrader";
+import Upgrader from "shared/item/traits/upgrader/Upgrader";
 import { getAllInstanceInfo, setInstanceInfo } from "@antivivi/vrldk";
 
 declare global {

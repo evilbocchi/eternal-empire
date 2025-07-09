@@ -1,8 +1,8 @@
 import Difficulty from "@antivivi/jjt-difficulties";
 import { TweenService } from "@rbxts/services";
-import Conveyor from "shared/item/traits/Conveyor";
+import Conveyor from "shared/item/traits/conveyor/Conveyor";
 import Item from "shared/item/Item";
-import Upgrader from "shared/item/traits/Upgrader";
+import Upgrader from "shared/item/traits/upgrader/Upgrader";
 import SmallReactor from "shared/items/negative/unimpossible/SmallReactor";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 

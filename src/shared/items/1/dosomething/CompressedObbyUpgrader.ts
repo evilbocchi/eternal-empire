@@ -2,7 +2,7 @@ import Difficulty from "@antivivi/jjt-difficulties";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Formula from "shared/currency/Formula";
 import Item from "shared/item/Item";
-import Conveyor from "shared/item/traits/Conveyor";
+import Conveyor from "shared/item/traits/conveyor/Conveyor";
 import ObbyUpgrader from "shared/item/traits/special/ObbyUpgrader";
 import NamedUpgrades from "shared/namedupgrade/NamedUpgrades";
 

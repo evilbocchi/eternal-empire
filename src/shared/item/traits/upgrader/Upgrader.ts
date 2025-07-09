@@ -5,7 +5,7 @@ import CurrencyBundle from "shared/currency/CurrencyBundle";
 import { DROPLET_STORAGE } from "shared/item/Droplet";
 import Item from "shared/item/Item";
 import Operative, { IOperative } from "shared/item/traits/Operative";
-import type OmniUpgrader from "shared/item/traits/special/OmniUpgrader";
+import type OmniUpgrader from "shared/item/traits/upgrader/OmniUpgrader";
 
 declare global {
     interface ItemTraits {

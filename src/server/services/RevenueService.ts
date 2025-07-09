@@ -26,7 +26,7 @@ import DataService from "server/services/serverdata/DataService";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Droplet from "shared/item/Droplet";
 import Operative from "shared/item/traits/Operative";
-import Upgrader from "shared/item/traits/Upgrader";
+import Upgrader from "shared/item/traits/upgrader/Upgrader";
 import { PriceUpgrade } from "shared/namedupgrade/NamedUpgrade";
 import NamedUpgrades from "shared/namedupgrade/NamedUpgrades";
 import { performSoftcaps } from "shared/Softcaps";

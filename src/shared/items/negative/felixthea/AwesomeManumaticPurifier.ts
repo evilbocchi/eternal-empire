@@ -8,7 +8,7 @@ import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
 import ItemUtils, { Server } from "shared/item/ItemUtils";
 import Operative from "shared/item/traits/Operative";
-import Upgrader from "shared/item/traits/Upgrader";
+import Upgrader from "shared/item/traits/upgrader/Upgrader";
 import Clickable from "shared/item/traits/special/Clickable";
 import Manumatic from "shared/item/traits/special/Manumatic";
 import NamedUpgrades from "shared/namedupgrade/NamedUpgrades";

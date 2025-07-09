@@ -1,8 +1,8 @@
 import Difficulty from "@antivivi/jjt-difficulties";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
-import Upgrader from "shared/item/traits/Upgrader";
-import Damager from "shared/item/traits/special/Damager";
+import Upgrader from "shared/item/traits/upgrader/Upgrader";
+import Damager from "shared/item/traits/upgrader/Damager";
 
 export = new Item(script.Name)
     .setName("Arbiters' Killbricks")

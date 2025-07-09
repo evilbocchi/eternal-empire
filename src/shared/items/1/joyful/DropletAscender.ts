@@ -3,8 +3,8 @@ import { getInstanceInfo } from "@antivivi/vrldk";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
 import ItemUtils from "shared/item/ItemUtils";
-import Conveyor from "shared/item/traits/Conveyor";
-import Upgrader from "shared/item/traits/Upgrader";
+import Conveyor from "shared/item/traits/conveyor/Conveyor";
+import Upgrader from "shared/item/traits/upgrader/Upgrader";
 import MagicalWood from "shared/items/excavation/harvestable/MagicalWood";
 import Quartz from "shared/items/excavation/Quartz";
 

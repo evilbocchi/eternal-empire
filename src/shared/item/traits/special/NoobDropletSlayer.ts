@@ -2,7 +2,7 @@ import { HttpService, TweenService } from "@rbxts/services";
 import Item from "shared/item/Item";
 import Boostable from "shared/item/traits/Boostable";
 import ItemTrait from "shared/item/traits/ItemTrait";
-import Upgrader from "shared/item/traits/Upgrader";
+import Upgrader from "shared/item/traits/upgrader/Upgrader";
 import { getAllInstanceInfo, setInstanceInfo } from "@antivivi/vrldk";
 import { Streaming } from "@antivivi/vrldk";
 import { loadAnimation } from "@antivivi/vrldk";

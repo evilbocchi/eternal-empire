@@ -3,7 +3,7 @@ import { getAllInstanceInfo } from "@antivivi/vrldk";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Droplet from "shared/item/Droplet";
 import Item from "shared/item/Item";
-import Conveyor from "shared/item/traits/Conveyor";
+import Conveyor from "shared/item/traits/conveyor/Conveyor";
 import Dropper from "shared/item/traits/dropper/Dropper";
 import StaleWood from "shared/items/excavation/harvestable/StaleWood";
 import WhiteGem from "shared/items/excavation/WhiteGem";

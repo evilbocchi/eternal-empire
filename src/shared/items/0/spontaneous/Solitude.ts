@@ -4,9 +4,9 @@ import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Formula from "shared/currency/Formula";
 import Item from "shared/item/Item";
 import { Server } from "shared/item/ItemUtils";
-import Conveyor from "shared/item/traits/Conveyor";
+import Conveyor from "shared/item/traits/conveyor/Conveyor";
 import FormulaBundled from "shared/item/traits/special/FormulaBundled";
-import Upgrader from "shared/item/traits/Upgrader";
+import Upgrader from "shared/item/traits/upgrader/Upgrader";
 import CruelBlankEssence from "shared/items/0/spontaneous/CruelBlankEssence";
 
 export = new Item(script.Name)

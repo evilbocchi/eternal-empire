@@ -2,7 +2,7 @@ import Difficulty from "@antivivi/jjt-difficulties";
 import { TweenService } from "@rbxts/services";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
-import Upgrader from "shared/item/traits/Upgrader";
+import Upgrader from "shared/item/traits/upgrader/Upgrader";
 import { getAllInstanceInfo } from "@antivivi/vrldk";
 
 export = new Item(script.Name)

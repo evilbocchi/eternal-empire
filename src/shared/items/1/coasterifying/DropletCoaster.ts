@@ -1,7 +1,7 @@
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
-import Conveyor from "shared/item/traits/Conveyor";
-import Upgrader from "shared/item/traits/Upgrader";
+import Conveyor from "shared/item/traits/conveyor/Conveyor";
+import Upgrader from "shared/item/traits/upgrader/Upgrader";
 
 export = new Item(script.Name)
     .setName("Droplet Coaster")

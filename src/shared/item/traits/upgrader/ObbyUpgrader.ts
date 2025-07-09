@@ -7,7 +7,7 @@ import Item from "shared/item/Item";
 import { Server } from "shared/item/ItemUtils";
 import ItemTrait from "shared/item/traits/ItemTrait";
 import UpgradeBoard from "shared/item/traits/UpgradeBoard";
-import Upgrader from "shared/item/traits/Upgrader";
+import Upgrader from "shared/item/traits/upgrader/Upgrader";
 import NamedUpgrade from "shared/namedupgrade/NamedUpgrade";
 
 export default class ObbyUpgrader extends ItemTrait {

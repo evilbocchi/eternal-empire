@@ -2,7 +2,7 @@ import Difficulty from "@antivivi/jjt-difficulties";
 import { getSound } from "shared/asset/GameAssets";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
-import Upgrader from "shared/item/traits/Upgrader";
+import Upgrader from "shared/item/traits/upgrader/Upgrader";
 import { getAllInstanceInfo, getInstanceInfo } from "@antivivi/vrldk";
 import { findBaseParts, playSoundAtPart } from "@antivivi/vrldk";
 

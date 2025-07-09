@@ -3,7 +3,7 @@ import { formatRichText } from "@antivivi/vrldk";
 import Item from "shared/item/Item";
 import { Server } from "shared/item/ItemUtils";
 import ItemTrait from "shared/item/traits/ItemTrait";
-import DropperBooster from "shared/item/traits/special/DropperBooster";
+import DropperBooster from "shared/item/traits/dropper/DropperBooster";
 
 declare global {
     interface ItemTraits {

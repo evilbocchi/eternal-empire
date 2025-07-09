@@ -1,5 +1,5 @@
 import Difficulty from "@antivivi/jjt-difficulties";
-import Conveyor from "shared/item/traits/Conveyor";
+import Conveyor from "shared/item/traits/conveyor/Conveyor";
 import Item from "shared/item/Item";
 import ExcavationStone from "shared/items/excavation/ExcavationStone";
 import WhiteGem from "shared/items/excavation/WhiteGem";

@@ -4,7 +4,7 @@ import { getSound } from "shared/asset/GameAssets";
 import { ASSETS } from "shared/asset/GameAssets";
 import { AREAS } from "shared/Area";
 import Item from "shared/item/Item";
-import Upgrader from "shared/item/traits/Upgrader";
+import Upgrader from "shared/item/traits/upgrader/Upgrader";
 import Admiration from "shared/items/negative/instantwin/Admiration";
 import Codependence from "shared/items/negative/instantwin/Codependence";
 import { GainUpgrade } from "shared/namedupgrade/NamedUpgrade";

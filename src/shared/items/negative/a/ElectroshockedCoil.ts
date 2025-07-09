@@ -2,8 +2,8 @@ import Difficulty from "@antivivi/jjt-difficulties";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
 import { Server } from "shared/item/ItemUtils";
-import Conveyor from "shared/item/traits/Conveyor";
-import Upgrader from "shared/item/traits/Upgrader";
+import Conveyor from "shared/item/traits/conveyor/Conveyor";
+import Upgrader from "shared/item/traits/upgrader/Upgrader";
 import Crystal from "shared/items/excavation/Crystal";
 import WhiteGem from "shared/items/excavation/WhiteGem";
 

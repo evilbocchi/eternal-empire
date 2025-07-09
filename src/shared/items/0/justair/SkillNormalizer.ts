@@ -3,8 +3,8 @@ import { OnoeNum } from "@antivivi/serikanum";
 import { RESET_LAYERS } from "shared/ResetLayer";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
-import Conveyor from "shared/item/traits/Conveyor";
-import Upgrader from "shared/item/traits/Upgrader";
+import Conveyor from "shared/item/traits/conveyor/Conveyor";
+import Upgrader from "shared/item/traits/upgrader/Upgrader";
 import Formula from "shared/currency/Formula";
 import { Server } from "shared/item/ItemUtils";
 

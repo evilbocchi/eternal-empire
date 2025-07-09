@@ -2,7 +2,7 @@ import Difficulty from "@antivivi/jjt-difficulties";
 import { OnoeNum } from "@antivivi/serikanum";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
-import Upgrader from "shared/item/traits/Upgrader";
+import Upgrader from "shared/item/traits/upgrader/Upgrader";
 import Formula from "shared/currency/Formula";
 import { Server } from "shared/item/ItemUtils";
 import BasicBlankEssence from "./BasicBlankEssence";

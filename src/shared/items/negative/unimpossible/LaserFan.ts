@@ -1,7 +1,7 @@
 import Difficulty from "@antivivi/jjt-difficulties";
 import Item from "shared/item/Item";
 import { LaserFan } from "shared/item/traits/special/LaserFan";
-import Upgrader from "shared/item/traits/Upgrader";
+import Upgrader from "shared/item/traits/upgrader/Upgrader";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 
 export = new Item(script.Name)
