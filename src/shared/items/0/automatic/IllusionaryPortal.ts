@@ -2,7 +2,7 @@ import Difficulty from "@antivivi/jjt-difficulties";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
 import Conveyor from "shared/item/traits/conveyor/Conveyor";
-import Portal from "shared/item/traits/Portal";
+import Portal from "shared/item/traits/upgrader/Portal";
 
 
 export = new Item(script.Name)
