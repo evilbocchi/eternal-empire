@@ -6,7 +6,6 @@ import { Players, RunService } from "@rbxts/services";
 import Area, { AREAS } from "shared/Area";
 import { CURRENCY_DETAILS } from "shared/currency/CurrencyDetails";
 import GameSpeed from "shared/GameSpeed";
-import LuckyDroplets from "shared/LuckyDroplets";
 import Droplet, { DROPLET_STORAGE } from "shared/item/Droplet";
 import Item from "shared/item/Item";
 import { Server } from "shared/item/ItemUtils";
@@ -43,8 +42,8 @@ export default class Dropper extends ItemTrait {
                 droplet.SetNetworkOwner(player);
             }
 
-            // Lucky droplet chance: configurable chance to spawn a Diamond Droplet
-            if (LuckyDroplets.chance > 0 && math.random(1, LuckyDroplets.chance) === 1) {
+            if (this.hasLuckyWindow) {
+                this.hasLuckyWindow = false;
                 task.delay(0.25, () => {
                     const luckyDropletInstantiator = Droplet.LuckyDroplet.getInstantiator(model, drop);
                     if (luckyDropletInstantiator !== undefined) {
@@ -93,6 +92,8 @@ export default class Dropper extends ItemTrait {
     }
 
     static readonly SPAWNED_DROPS = new Map<BasePart, InstanceInfo>();
+    private static hasLuckyWindow = false;
+    static luckyChance = 1000;
 
     readonly dropletPerDrop = new Map<string, Droplet>();
     dropletProduced: ((droplet: BasePart, item: this) => void) | undefined;
@@ -147,6 +148,15 @@ export default class Dropper extends ItemTrait {
     }
 
     static {
+        task.spawn(() => {
+            while (task.wait(1)) {
+                const isLucky = this.luckyChance > 0 && math.random(1, this.luckyChance) === 1;
+                if (isLucky) {
+                    this.hasLuckyWindow = true;
+                }
+            }
+        });
+
         RunService.Heartbeat.Connect(() => {
             const speed = GameSpeed.speed;
             const t = tick();

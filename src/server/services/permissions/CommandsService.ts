@@ -51,8 +51,8 @@ import { IS_SINGLE_SERVER } from "shared/constants";
 import { CURRENCY_DETAILS } from "shared/currency/CurrencyDetails";
 import GameSpeed from "shared/GameSpeed";
 import { DROPLET_STORAGE } from "shared/item/Droplet";
+import Dropper from "shared/item/traits/dropper/Dropper";
 import Items from "shared/items/Items";
-import LuckyDroplets from "shared/LuckyDroplets";
 import Packets from "shared/Packets";
 import Sandbox from "shared/Sandbox";
 
@@ -994,8 +994,8 @@ export default class CommandsService implements OnInit {
                     this.sendServerMessage("Lucky droplet chance cannot be negative. Use 0 to disable.");
                     return;
                 }
-                this.sendServerMessage(`Changed lucky droplet chance to 1/${chance === 0 ? "disabled" : chance}. Old chance: 1/${LuckyDroplets.chance === 0 ? "disabled" : LuckyDroplets.chance}`);
-                LuckyDroplets.chance = chance;
+                this.sendServerMessage(`Changed lucky droplet chance to 1/${chance === 0 ? "disabled" : chance}. Old chance: 1/${Dropper.luckyChance === 0 ? "disabled" : Dropper.luckyChance}`);
+                Dropper.luckyChance = chance;
             }, 4);
 
         this.createCommand("unduplicate", "undupe",
