@@ -19,14 +19,6 @@ See the [README](README.md) for local setup instructions.
 - Reference related issues in your PR description (e.g., `Closes #123`).
 - Test your changes before submitting.
 
-## Commit Message Format
-
-- Use the [Conventional Commits](https://www.conventionalcommits.org/) style:
-  - `feat: add new feature`
-  - `fix: correct a bug`
-  - `docs: update documentation`
-  - `refactor: code change that neither fixes a bug nor adds a feature`
-
 ## Pull Request Process
 
 1. **Push your branch**  
