@@ -3,7 +3,7 @@ import { Players, TweenService } from "@rbxts/services";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
 import ItemUtils, { Server } from "shared/item/ItemUtils";
-import Boostable from "shared/item/traits/Boostable";
+import Boostable from "shared/item/traits/boost/Boostable";
 import Operative from "shared/item/traits/Operative";
 import NamedUpgrades from "shared/namedupgrade/NamedUpgrades";
 

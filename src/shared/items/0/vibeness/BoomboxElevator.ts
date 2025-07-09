@@ -2,7 +2,7 @@ import Difficulty from "@antivivi/jjt-difficulties";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
 import Conveyor from "shared/item/traits/conveyor/Conveyor";
-import DropperBooster from "shared/item/traits/dropper/DropperBooster";
+import DropperBooster from "shared/item/traits/boost/DropperBooster";
 import Gold from "shared/items/excavation/Gold";
 import CorruptedGrass from "shared/items/excavation/harvestable/CorruptedGrass";
 import Quartz from "shared/items/excavation/Quartz";

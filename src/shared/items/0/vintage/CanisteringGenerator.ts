@@ -2,7 +2,7 @@ import Difficulty from "@antivivi/jjt-difficulties";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
 import Generator from "shared/item/traits/generator/Generator";
-import DropperBooster from "shared/item/traits/dropper/DropperBooster";
+import DropperBooster from "shared/item/traits/boost/DropperBooster";
 
 export = new Item(script.Name)
     .setName("Canistering Generator")

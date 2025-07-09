@@ -1,5 +1,5 @@
 import Item from "shared/item/Item";
-import Boostable from "shared/item/traits/Boostable";
+import Boostable from "shared/item/traits/boost/Boostable";
 import ItemTrait from "shared/item/traits/ItemTrait";
 import { getAllInstanceInfo } from "@antivivi/vrldk";
 

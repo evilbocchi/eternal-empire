@@ -7,9 +7,23 @@ declare global {
         Boostable: Boostable;
     }
 
+    /**
+     * Represents a boost that can be applied to an item.
+     */
     interface ItemBoost {
+        /**
+         * The unique identifier for the boost placement.
+         */
         placementId: string;
+
+        /**
+         * The item of the boost.
+         */
         item: Item;
+
+        /**
+         * Whether the boost ignores the restrictions boosts usually have.
+         */
         ignoresLimitations: boolean;
     }
 
