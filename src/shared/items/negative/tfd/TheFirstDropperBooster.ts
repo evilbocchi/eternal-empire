@@ -1,7 +1,9 @@
 import Difficulty from "@antivivi/jjt-difficulties";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
+import DropperBooster from "shared/item/traits/special/DropperBooster";
 import Unique from "shared/item/traits/Unique";
+import TheFirstDropper from "shared/items/negative/tfd/TheFirstDropper";
 
 export = new Item(script.Name)
     .setName("The First Dropper Booster")
@@ -9,9 +11,11 @@ export = new Item(script.Name)
     .setDifficulty(Difficulty.TheFirstDifficulty)
     .setPrice(new CurrencyBundle().set("Funds", 500), 1)
     .addPlaceableArea("BarrenIslands")
-    .setCreator("System")
 
     .trait(Unique)
     .addPot("dropRateMultiplier", 1.1, 3.0)
+    .onLoad((model, _unique, scaledPots) => {
+        DropperBooster.createModifier(model, (_, item) => item === TheFirstDropper).multi = scaledPots.get("dropRateMultiplier") ?? 1;
+    })
 
     .exit();

@@ -51,11 +51,16 @@ export default class Unique extends ItemTrait {
      */
     private readonly potConfigs = new Map<string, PotConfig>();
 
+    /**
+     * Callback to be called when the unique item is loaded.
+     * This can be used to apply effects based on the generated pot values.
+     */
+    private loadCallback: ((model: Model, unique: Unique, scaledPots: Map<string, number>) => void) | undefined;
+
     private readonly MIN_COLOR = Color3.fromRGB(255, 0, 0);
     private readonly MAX_COLOR = Color3.fromRGB(0, 255, 255);
 
     static load(model: Model, unique: Unique) {
-        const item = unique.item;
         const placedItem = Server.Item.getPlacedItem(model.Name);
         if (placedItem === undefined) {
             throw `Unique item model ${model.Name} not found in placed items.`;
@@ -84,16 +89,19 @@ export default class Unique extends ItemTrait {
         }
 
         const scaledPots = unique.getScaledPots(uniqueInstance);
-
-        const dropRateMultiplier = scaledPots.get("dropRateMultiplier");
-        if (dropRateMultiplier !== undefined) {
-            DropperBooster.createModifier(model).multi = dropRateMultiplier;
+        if (unique.loadCallback !== undefined) {
+            unique.loadCallback(model, unique, scaledPots);
         }
     }
 
     constructor(item: Item) {
         super(item);
         item.onLoad((model) => Unique.load(model, this));
+    }
+
+    onLoad(callback: (model: Model, unique: Unique, scaledPots: Map<string, number>) => void) {
+        this.loadCallback = callback;
+        return this;
     }
 
     /**

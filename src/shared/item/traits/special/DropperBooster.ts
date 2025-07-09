@@ -19,9 +19,10 @@ export default class DropperBooster extends ItemTrait {
      * Creates a modifier for the drop rate of droppers in the area of the model.
      * 
      * @param model The model to create the modifier for.
+     * @param whitelist Optional function to filter items that should be affected by the modifier.
      * @returns A modifier object that can be used to adjust the drop rate.
      */
-    static createModifier(model: Model) {
+    static createModifier(model: Model, whitelist?: (model: Model, item: Item) => boolean) {
         const clickArea = model.WaitForChild("ClickArea") as BasePart;
         clickArea.CanTouch = true;
         clickArea.CollisionGroup = "ItemHitbox";
@@ -37,16 +38,23 @@ export default class DropperBooster extends ItemTrait {
             if (target === undefined) {
                 if (t > 0.05) {
                     t = 0;
+
                     const found = getPlacedItemsInArea(clickArea, Items);
                     for (const [model, item] of found) {
-                        if (item.isA("Dropper")) {
-                            const drop = model.FindFirstChild("Drop");
-                            if (drop === undefined)
-                                continue;
-                            target = drop as BasePart;
-                            targetInfo = getAllInstanceInfo(target);
-                            return;
+                        if (!item.isA("Dropper")) {
+                            continue;
                         }
+                        if (whitelist !== undefined && !whitelist(model, item)) {
+                            continue;
+                        }
+
+                        const drop = model.FindFirstChild("Drop");
+                        if (drop === undefined)
+                            continue;
+
+                        target = drop as BasePart;
+                        targetInfo = getAllInstanceInfo(target);
+                        return;
                     }
                 }
             }
@@ -54,7 +62,6 @@ export default class DropperBooster extends ItemTrait {
                 targetInfo?.DropRateModifiers?.delete(modifier);
             }
             else {
-                print(targetInfo?.DropRateModifiers);
                 targetInfo?.DropRateModifiers?.add(modifier);
             }
         });
