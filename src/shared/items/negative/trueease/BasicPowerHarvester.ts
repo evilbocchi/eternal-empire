@@ -4,7 +4,7 @@ import Formula from "shared/currency/Formula";
 import Item from "shared/item/Item";
 import { Server } from "shared/item/ItemUtils";
 import Furnace from "shared/item/traits/Furnace";
-import FormulaBundled from "shared/item/traits/special/FormulaBundled";
+import FormulaBundled from "shared/item/traits/FormulaBundled";
 
 const mul = new CurrencyBundle().set("Funds", 0).set("Power", 0);
 

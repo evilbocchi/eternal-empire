@@ -2,7 +2,7 @@ import Difficulty from "@antivivi/jjt-difficulties";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
 import Conveyor from "shared/item/traits/conveyor/Conveyor";
-import FormulaBundled from "shared/item/traits/special/FormulaBundled";
+import FormulaBundled from "shared/item/traits/FormulaBundled";
 import Upgrader from "shared/item/traits/upgrader/Upgrader";
 import EffervescentDropletSpray from "shared/items/negative/exist/EffervescentDropletSpray";
 

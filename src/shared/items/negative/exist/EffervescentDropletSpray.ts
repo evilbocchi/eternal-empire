@@ -4,7 +4,7 @@ import Formula from "shared/currency/Formula";
 import Item from "shared/item/Item";
 import { Server } from "shared/item/ItemUtils";
 import Conveyor from "shared/item/traits/conveyor/Conveyor";
-import FormulaBundled from "shared/item/traits/special/FormulaBundled";
+import FormulaBundled from "shared/item/traits/FormulaBundled";
 import Upgrader from "shared/item/traits/upgrader/Upgrader";
 
 export = new Item(script.Name)
