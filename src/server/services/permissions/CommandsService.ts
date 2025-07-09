@@ -30,7 +30,6 @@ import Quest from "server/Quest";
 import BombsService from "server/services/boosts/BombsService";
 import { DonationService } from "server/services/DonationService";
 import ItemService from "server/services/item/ItemService";
-import UniqueItemService from "server/services/item/UniqueItemService";
 import { LeaderboardService } from "server/services/LeaderboardService";
 import ChatHookService from "server/services/permissions/ChatHookService";
 import PermissionsService from "server/services/permissions/PermissionsService";
@@ -97,7 +96,6 @@ export default class CommandsService implements OnInit {
         private leaderboardService: LeaderboardService,
         private namedUpgradeService: NamedUpgradeService,
         private itemService: ItemService,
-        private uniqueItemService: UniqueItemService,
         private playtimeService: PlaytimeService,
         private areaService: AreaService,
         private levelService: LevelService,

@@ -10,6 +10,7 @@
  */
 
 import { OnInit, Service } from "@flamework/core";
+import ItemService from "server/services/item/ItemService";
 import ModdingService from "server/services/ModdingService";
 import DialogueService from "server/services/npc/DialogueService";
 import NPCNavigationService from "server/services/npc/NPCNavigationService";
@@ -20,16 +21,14 @@ import RevenueService from "server/services/RevenueService";
 import CurrencyService from "server/services/serverdata/CurrencyService";
 import DataService from "server/services/serverdata/DataService";
 import EventService from "server/services/serverdata/EventService";
-import ItemService from "server/services/item/ItemService";
+import NamedUpgradeService from "server/services/serverdata/NamedUpgradeService";
 import PlaytimeService from "server/services/serverdata/PlaytimeService";
 import QuestService from "server/services/serverdata/QuestService";
 import SetupService from "server/services/serverdata/SetupService";
-import UnlockedAreasService from "server/services/world/UnlockedAreasService";
-import NamedUpgradeService from "server/services/serverdata/NamedUpgradeService";
 import AreaService from "server/services/world/AreaService";
+import UnlockedAreasService from "server/services/world/UnlockedAreasService";
 import ItemUtils from "shared/item/ItemUtils";
 import Items from "shared/items/Items";
-import UniqueItemService from "server/services/item/UniqueItemService";
 
 declare global {
     /**
@@ -49,7 +48,6 @@ export default class APIExposeService implements OnInit {
         private readonly areaService: AreaService,
         private readonly dataService: DataService,
         private readonly itemService: ItemService,
-        private readonly uniqueItemService: UniqueItemService,
         private readonly currencyService: CurrencyService,
         private readonly unlockedAreasService: UnlockedAreasService,
         private readonly playtimeService: PlaytimeService,
@@ -132,14 +130,6 @@ export default class APIExposeService implements OnInit {
              * @see {@link ItemService} for more details.
              */
             Item: this.itemService,
-
-            /**
-             * Unique item management service.
-             * 
-             * @borrows UniqueItemService as uniqueItemService
-             * @see {@link UniqueItemService} for more details.
-             */
-            Unique: this.uniqueItemService,
 
             /**
              * NPC-related services for managing NPCs in the game.
