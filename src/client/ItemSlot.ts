@@ -1,3 +1,10 @@
+/**
+ * @fileoverview Provides utility functions and types for managing item slots in the Roblox game's inventory UI.
+ * Includes logic for loading item visuals, filtering and coloring slots, and handling trait-based item filtering.
+ * 
+ * @since 1.0.0
+ */
+
 import Difficulty from "@antivivi/jjt-difficulties";
 import { FuzzySearch } from "@rbxts/fuzzy-search";
 import { PARALLEL } from "client/constants";
@@ -32,6 +39,10 @@ declare global {
     type TraitFilterId = keyof (typeof FILTERABLE_TRAITS);
 }
 
+/**
+ * A map of traits that can be used to filter items in the item slot container.
+ * The keys are the trait names, and the values are booleans indicating whether the trait is enabled for filtering.
+ */
 export const FILTERABLE_TRAITS = {
     Dropper: false,
     Furnace: false,
@@ -42,8 +53,15 @@ export const FILTERABLE_TRAITS = {
     Miscellaneous: false,
 };
 
+/**
+ * A namespace for item slot related functions and types.
+ */
 namespace ItemSlot {
 
+    /**
+     * A map that associates item names with their corresponding Item instances.
+     * This is used to quickly access items by their name.
+     */
     const ITEM_PER_NAME = (function () {
         const itemPerName = new Map<string, Item>();
         for (const [_, item] of Items.itemsPerId) {
@@ -191,7 +209,7 @@ namespace ItemSlot {
         else {
             imageLabel.BackgroundTransparency = 1;
         }
-        
+
         difficultyLabel.TextLabel.TextColor3 = color === undefined ? new Color3() : color.Lerp(new Color3(1, 1, 1), 0.5);
         difficultyLabel.TextLabel.Text = difficulty.name ?? "error";
     }
