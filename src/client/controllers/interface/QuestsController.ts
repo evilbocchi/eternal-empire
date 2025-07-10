@@ -1,3 +1,16 @@
+/**
+ * @fileoverview QuestsController - Client controller for managing quest UI, tracking, and notifications.
+ *
+ * Handles:
+ * - Displaying and updating quest progress and tracked quest information
+ * - Managing quest completion, XP, and item rewards
+ * - Integrating with UIController, EffectController, and AdaptiveTabController
+ * - Handling quest notifications, sidebar integration, and quest list filtering
+ *
+ * The controller manages quest state, UI updates, and player feedback for quest-related events and progress.
+ *
+ * @since 1.0.0
+ */
 import Signal from "@antivivi/lemon-signal";
 import { combineHumanReadable } from "@antivivi/vrldk";
 import { Controller, OnInit, OnPhysics } from "@flamework/core";
@@ -103,6 +116,11 @@ export const QUESTS_WINDOW = ADAPTIVE_TAB_MAIN_WINDOW.WaitForChild("Quests") as 
     };
 };
 
+/**
+ * Controller responsible for managing quest UI, tracking, notifications, and quest-related player feedback.
+ *
+ * Handles quest progress, completion, XP/item rewards, and integrates with other controllers for UI and effects.
+ */
 @Controller()
 export default class QuestsController implements OnInit, OnPhysics, OnCharacterAdded {
 
@@ -122,6 +140,10 @@ export default class QuestsController implements OnInit, OnPhysics, OnCharacterA
 
     }
 
+    /**
+     * Returns the human-readable name for a quest length value.
+     * @param length The quest length value.
+     */
     getLengthName(length: number) {
         switch (length) {
             case 0:
@@ -139,6 +161,10 @@ export default class QuestsController implements OnInit, OnPhysics, OnCharacterA
         }
     }
 
+    /**
+     * Returns the color associated with a quest length value.
+     * @param length The quest length value.
+     */
     getLengthColor(length: number) {
         switch (length) {
             case 0:
@@ -156,11 +182,20 @@ export default class QuestsController implements OnInit, OnPhysics, OnCharacterA
         }
     }
 
+    /**
+     * Shows the tracked quest UI elements.
+     */
     showTrackedQuest() {
         TRACKED_QUEST_WINDOW.TitleLabel.Visible = true;
         TRACKED_QUEST_WINDOW.DescriptionLabel.Visible = true;
     }
 
+    /**
+     * Returns the formatted quest description for a given quest and stage.
+     * @param id The quest ID.
+     * @param quest The quest info.
+     * @param stageNum The stage number.
+     */
     getFormattedDescription(id: string, quest: QuestInfo, stageNum: number) {
         if (stageNum < 0) {
             return "Quest complete.";
@@ -177,6 +212,11 @@ export default class QuestsController implements OnInit, OnPhysics, OnCharacterA
         return desc;
     }
 
+    /**
+     * Updates the tracked quest window with the current quest and stage.
+     * @param questId The quest ID.
+     * @param index The quest stage index (optional).
+     */
     refreshTrackedQuestWindow(questId: string | undefined, index?: number) {
         const hasQuest = questId !== undefined && (index === undefined || index > -1);
         TRACKED_QUEST_WINDOW.DescriptionLabel.Visible = hasQuest;
