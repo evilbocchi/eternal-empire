@@ -1,3 +1,16 @@
+/**
+ * @fileoverview ResetController - Client controller for handling reset events, animations, and camera effects.
+ *
+ * Handles:
+ * - Listening for reset events and updating UI
+ * - Playing reset animations, sounds, and camera transitions
+ * - Integrating with EffectController and SoundController for feedback
+ * - Displaying quest messages and updating tracked quest window
+ *
+ * The controller coordinates reset-related effects, UI, and sound, ensuring a smooth player experience during resets.
+ *
+ * @since 1.0.0
+ */
 import { OnoeNum } from "@antivivi/serikanum";
 import { Controller, OnInit } from "@flamework/core";
 import CameraShaker from "@rbxts/camera-shaker";
@@ -17,6 +30,11 @@ declare global {
     }
 }
 
+/**
+ * Controller responsible for handling reset events, animations, and camera effects.
+ *
+ * Integrates with EffectController, SoundController, and UIController to provide feedback and UI updates during resets.
+ */
 @Controller()
 export default class ResetController implements OnInit {
 
@@ -24,6 +42,10 @@ export default class ResetController implements OnInit {
 
     }
 
+    /**
+     * Moves the camera to a given instance and plays reset effects and sounds.
+     * @param instance The instance to move the camera to.
+     */
     moveCamera(instance: Instance) {
         const currentCamera = Workspace.CurrentCamera;
         if (currentCamera === undefined) {
@@ -60,6 +82,9 @@ export default class ResetController implements OnInit {
         }
     }
 
+    /**
+     * Initializes the ResetController, sets up reset event listeners and UI updates.
+     */
     onInit() {
         Packets.reset.connect((layer, amount) => {
             if (Packets.settings.get().ResetAnimation === false)
