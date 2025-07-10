@@ -4,8 +4,9 @@
 
 If you find a security issue, please **DO NOT** open a public issue or drop an exploit video on YouTube before talking to us. Instead, help us keep the game fun and fair:
 
-- DM `antivivi` on Discord (`antivivi` or through the [server](https://discord.gg/haPBmCSvXt))
-- Or, open a GitHub issue with the `security` label and set it to **private** (if available)
+- DM `antivivi` on Discord at `@antivivi` or through the [server](https://discord.gg/haPBmCSvXt) (fastest)
+- Email us at [unrealworks@mail.com](mailto:unrealworks@mail.com)
+- 
 
 We're chill and will give you credit if you find something major.
 
