@@ -1,3 +1,19 @@
+//!native
+/**
+ * @fileoverview ShopController - Client controller responsible for managing the in-game shop interface and item purchasing logic.
+ *
+ * Handles:
+ * - Displaying and filtering shop items
+ * - Managing the purchase window and item details
+ * - Animating shop GUI elements and purchase feedback
+ * - Handling hotkeys for buying items
+ * - Observing inventory, settings, and shop state for live updates
+ *
+ * The controller maintains mappings between items and their GUI slots, manages price cycling for multi-currency items, and coordinates with other controllers for UI and hotkey integration.
+ *
+ * @since 1.0.0
+ */
+
 import { Connection } from "@antivivi/lemon-signal";
 import { OnoeNum } from "@antivivi/serikanum";
 import { buildRichText } from "@antivivi/vrldk";
@@ -76,13 +92,22 @@ for (const item of Items.sortedItems) {
     METADATA_PER_ITEM.set(item, new ItemMetadata(item, 21, "Medium"));
 }
 
+/**
+ * Controller responsible for managing the in-game shop interface, item display, and purchase logic.
+ *
+ * Handles shop GUI state, item slot management, purchase window updates, price cycling, and hotkey integration.
+ * Observes inventory and settings for live updates, and coordinates with other controllers for UI and hotkey actions.
+ */
 @Controller()
 export default class ShopController implements OnInit, OnStart {
-
+    /** Color for sufficient funds. */
     readonly sufficientColor = Color3.fromRGB(255, 255, 255);
+    /** Color for insufficient funds. */
     readonly insufficientColor = Color3.fromRGB(255, 80, 80);
+    /** Default description label color. */
     readonly descriptionColor = PURCHASE_WINDOW.DescriptionFrame.DescriptionLabel.TextColor3;
 
+    /** Item filter logic for the shop GUI. */
     readonly filterItems = ItemFilter.loadFilterOptions(SHOP_GUI.FilterOptions, (query, whitelistedTraits) => {
         const items = this.currentShop?.items;
         if (items === undefined)
@@ -90,22 +115,41 @@ export default class ShopController implements OnInit, OnStart {
         ItemSlot.filterItems(this.itemSlotsPerItem, items, query, whitelistedTraits);
     });
 
+    /** Mapping of items to their GUI slots. */
     itemSlotsPerItem = new Map<Item, ItemSlot>();
+    /** Currently selected item in the shop. */
     selectedItem = undefined as Item | undefined;
 
+    /** The current shop GUI part being displayed. */
     shopGuiPart: Part | undefined;
+    /** The current shop data. */
     currentShop: Shop | undefined;
+    /** Tracks which currency index is shown for each item. */
     currencyIndexPerItem = new Map<Item, number>();
+    /** Counter for price containers. */
     priceContainerCounter = 0;
+    /** Remaining space in the current price container. */
     availableContainerSpace = 0;
+    /** Whether to hide maxed items. */
     hideMaxedItems: boolean | undefined;
+    /** Debounce for switching items. */
     switchDebounce = 0;
 
+    /**
+     * Constructs the ShopController.
+     * @param hotkeysController Controller for hotkey management.
+     * @param uiController Controller for general UI actions.
+     * @param adaptiveTabController Controller for adaptive tab UI.
+     * @param tooltipController Controller for tooltips.
+     */
     constructor(private hotkeysController: HotkeysController, private uiController: UIController,
         private adaptiveTabController: AdaptiveTabController, private tooltipController: TooltipController) {
-
     }
 
+    /**
+     * Animates and hides the shop GUI part.
+     * @param shopGuiPart The shop GUI part to hide.
+     */
     hideShopGuiPart(shopGuiPart: Part) {
         TweenService.Create(shopGuiPart, new TweenInfo(0.3), { LocalTransparencyModifier: 1 }).Play();
 
@@ -115,6 +159,11 @@ export default class ShopController implements OnInit, OnStart {
         Debris.AddItem(sound, 5);
     }
 
+    /**
+     * Refreshes the shop interface and updates the displayed shop and items.
+     * @param shopGuiPart The shop GUI part to display.
+     * @param shop The shop data to display.
+     */
     refreshShop(shopGuiPart?: Part, shop?: Shop) {
         if (shopGuiPart !== undefined && this.shopGuiPart === shopGuiPart)
             return;
@@ -151,6 +200,13 @@ export default class ShopController implements OnInit, OnStart {
         this.priceCycle();
     }
 
+    /**
+     * Creates a price option UI element for a given currency or required item.
+     * @param amount The amount required.
+     * @param currency The currency type, if any.
+     * @param item The required item, if any.
+     * @returns The created price option UI element.
+     */
     createPriceOption(amount: OnoeNum | number, currency: Currency | undefined, item: Item | undefined) {
         const option = ASSETS.ShopWindow.PriceOption.Clone();
         const update = (affordable: boolean) => {
@@ -195,6 +251,10 @@ export default class ShopController implements OnInit, OnStart {
         return option;
     }
 
+    /**
+     * Assigns a price option to a container in the purchase window.
+     * @param priceOption The price option UI element to assign.
+     */
     assignContainer(priceOption: typeof ASSETS.ShopWindow.PriceOption) {
         const purchaseButton = PURCHASE_WINDOW.DescriptionFrame.PurchaseContainer.Purchase;
 
@@ -211,6 +271,10 @@ export default class ShopController implements OnInit, OnStart {
         priceOption.Parent = currentContainer;
     }
 
+    /**
+     * Updates the purchase window with details for the selected item.
+     * @param item The item to display in the purchase window.
+     */
     refreshPurchaseWindow(item: Item) {
         const purchaseButton = PURCHASE_WINDOW.DescriptionFrame.PurchaseContainer.Purchase;
         const itemSlot = PURCHASE_WINDOW.ItemSlot;
@@ -268,6 +332,10 @@ export default class ShopController implements OnInit, OnStart {
         this.switchDebounce = tick();
     }
 
+    /**
+     * Hides the purchase window if visible.
+     * @returns True if the window was hidden, false otherwise.
+     */
     hidePurchaseWindow() {
         if (PURCHASE_WINDOW.Visible === false)
             return false;
@@ -277,6 +345,9 @@ export default class ShopController implements OnInit, OnStart {
         return true;
     }
 
+    /**
+     * Loads item slots for all items in the shop.
+     */
     loadItemSlots() {
         for (const [_id, item] of Items.itemsPerId) {
             const itemSlot = ItemSlot.loadItemSlot(ASSETS.ShopWindow.ItemSlot.Clone(), item);
@@ -347,6 +418,9 @@ export default class ShopController implements OnInit, OnStart {
         }
     }
 
+    /**
+     * Initializes the ShopController, sets up observers, and loads item slots.
+     */
     onInit() {
         this.refreshShop();
         this.hidePurchaseWindow();
@@ -409,6 +483,9 @@ export default class ShopController implements OnInit, OnStart {
         this.loadItemSlots();
     }
 
+    /**
+     * Starts the ShopController, binds render steps for price cycling and shop detection.
+     */
     onStart() {
         let elapsedTime = 0;
         RunService.BindToRenderStep("Shop CurrencyBundle Cycle", 1, (dt) => {
