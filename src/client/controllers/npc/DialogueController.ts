@@ -1,3 +1,16 @@
+/**
+ * @fileoverview DialogueController - Client controller for managing NPC dialogue windows and chat integration.
+ *
+ * Handles:
+ * - Displaying NPC dialogue windows and headshots
+ * - Animating dialogue text and playing text sounds
+ * - Integrating with chat channels and TextChatService for NPC messages
+ * - Handling hotkeys and UI for progressing dialogue
+ *
+ * The controller manages dialogue UI, text animation, sound feedback, and chat integration for NPC interactions.
+ *
+ * @since 1.0.0
+ */
 import ComputeNameColor from "@antivivi/rbxnamecolor";
 import { Controller, OnInit, OnStart } from "@flamework/core";
 import { Debris, ReplicatedStorage, RunService, TextChatService, TweenService, Workspace } from "@rbxts/services";
@@ -21,6 +34,11 @@ export const DIALOGUE_WINDOW = INTERFACE.WaitForChild("DialogueWindow") as TextB
     HintLabel: TextLabel,
 };
 
+/**
+ * Controller responsible for managing NPC dialogue windows, text animation, and chat integration.
+ *
+ * Handles dialogue UI, text effects, sound, and chat for NPC interactions.
+ */
 @Controller()
 export default class DialogueController implements OnInit, OnStart {
 
@@ -36,6 +54,10 @@ export default class DialogueController implements OnInit, OnStart {
 
     }
 
+    /**
+     * Displays a headshot of the given model in the dialogue window's viewport.
+     * @param model The NPC model to display.
+     */
     showHeadshot(model: Model) {
         const viewportFrame = DIALOGUE_WINDOW.ViewportFrame;
         viewportFrame.ClearAllChildren();
@@ -68,6 +90,12 @@ export default class DialogueController implements OnInit, OnStart {
         clone.Parent = viewportFrame;
     }
 
+    /**
+     * Shows the dialogue window with the given name, text, and optional model headshot.
+     * @param name The NPC's name.
+     * @param text The dialogue text.
+     * @param model The NPC model for headshot (optional).
+     */
     async showDialogueWindow(name: string | undefined, text: string, model?: Model) {
         DIALOGUE_WINDOW.NameLabel.Text = name ?? "";
 
@@ -89,6 +117,9 @@ export default class DialogueController implements OnInit, OnStart {
         this.i = 0;
     }
 
+    /**
+     * Hides the dialogue window and clears the viewport.
+     */
     hideDialogueWindow() {
         const position = new UDim2(0.5, 0, 1.2, 100);
         TweenService.Create(DIALOGUE_WINDOW, new TweenInfo(0.25, Enum.EasingStyle.Quad), { Position: position }).Play();
@@ -99,6 +130,9 @@ export default class DialogueController implements OnInit, OnStart {
         DIALOGUE_WINDOW.ViewportFrame.ClearAllChildren();
     }
 
+    /**
+     * Initializes the DialogueController, sets up NPC message listeners and chat integration.
+     */
     onInit() {
         const channel = getTextChannels().WaitForChild("RBXGeneral") as TextChannel;
         Packets.npcMessage.connect((message, pos, endPos, prompt, model) => {
@@ -122,6 +156,9 @@ export default class DialogueController implements OnInit, OnStart {
         });
     }
 
+    /**
+     * Starts the DialogueController, sets up hotkeys and text animation for dialogue progression.
+     */
     onStart() {
         const dialogueWindowClicked = () => {
             if (this.i < this.size)
