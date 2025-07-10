@@ -1,6 +1,20 @@
 //!native
 //!optimize 2
 
+/**
+ * @fileoverview EffectController - Client controller for managing world effects, item visuals, and area lighting.
+ *
+ * Handles:
+ * - Loading and applying item and droplet effects
+ * - Animating quest messages and UI feedback
+ * - Managing tag-based effects (rainbow, spinner, rotation)
+ * - Integrating with area lighting and droplet events
+ *
+ * The controller manages visual effects for items, droplets, and world elements, providing feedback and polish for gameplay actions.
+ *
+ * @since 1.0.0
+ */
+
 import { observeTagAdded, rainbowEffect } from "@antivivi/vrldk";
 import { Controller, OnInit } from "@flamework/core";
 import CameraShaker from "@rbxts/camera-shaker";
@@ -15,9 +29,15 @@ import ItemUtils from "shared/item/ItemUtils";
 import Items from "shared/items/Items";
 import Packets from "shared/Packets";
 
+/**
+ * Controller responsible for managing world effects, item visuals, and area lighting.
+ *
+ * Handles tag-based effects, droplet/item visuals, quest message animation, and area lighting changes.
+ */
 @Controller()
 export default class EffectController implements OnInit {
 
+    /** Camera shaker instance for world effects. */
     camShake = new CameraShaker(
         Enum.RenderPriority.Camera.Value,
         shakeCFrame => {
@@ -26,9 +46,15 @@ export default class EffectController implements OnInit {
                 cam.CFrame = cam.CFrame.mul(shakeCFrame);
         }
     );
+    /** Map of droplet parts to their original size. */
     sizePerDrop = new Map<BasePart, Vector3>();
+    /** Delay value for ping calculation. */
     delay = 0.2;
 
+    /**
+     * Loads item effects for a given model instance.
+     * @param model The item model instance.
+     */
     load(model: Instance) {
         if (!model.IsA("Model") || model.GetAttribute("Selected") === true || model.GetAttribute("applied") === true) {
             return;
@@ -45,6 +71,10 @@ export default class EffectController implements OnInit {
         task.spawn(() => item.CLIENT_LOADS.forEach((callback) => callback(model, item, LOCAL_PLAYER)));
     }
 
+    /**
+     * Animates and displays a quest message frame.
+     * @param frame The quest message frame to show.
+     */
     showQuestMessage(frame: Frame) {
         const imageLabel = frame.FindFirstChildOfClass("ImageLabel");
         if (imageLabel === undefined)
@@ -68,6 +98,9 @@ export default class EffectController implements OnInit {
         frame.Visible = true;
     }
 
+    /**
+     * Loads tag-based effects for items and droplets.
+     */
     loadTags() {
         observeTagAdded("Rainbow", (instance) => rainbowEffect(instance as BasePart, 2), true);
         observeTagAdded("Spinner", (instance) => {
@@ -121,6 +154,9 @@ export default class EffectController implements OnInit {
 
     }
 
+    /**
+     * Initializes the EffectController, sets up effect listeners and area lighting changes.
+     */
     onInit() {
         task.spawn(() => {
             while (task.wait(2)) {
