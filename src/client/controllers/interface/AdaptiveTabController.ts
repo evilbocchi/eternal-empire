@@ -1,3 +1,17 @@
+/**
+ * @fileoverview AdaptiveTabController - Client controller responsible for managing the adaptive tab UI and sidebar navigation.
+ *
+ * Handles:
+ * - Showing and hiding the adaptive tab and its windows
+ * - Animating tab and sidebar transitions
+ * - Managing hotkeys for tab and sidebar navigation
+ * - Integrating with UI and hotkey controllers
+ * - Tracking and updating the current window and sidebar state
+ *
+ * The controller maintains mappings between window names and their colors/images, manages blur and camera effects, and coordinates with other controllers for UI and hotkey actions.
+ *
+ * @since 1.0.0
+ */
 import Signal from "@antivivi/lemon-signal";
 import { Controller, OnInit } from "@flamework/core";
 import { Lighting, TweenService, Workspace } from "@rbxts/services";
@@ -33,15 +47,26 @@ export const SIDEBAR_BUTTONS = INTERFACE.WaitForChild("SidebarButtons") as Frame
     };
 };
 
+/**
+ * Controller responsible for managing the adaptive tab UI, sidebar navigation, and related animations.
+ *
+ * Handles tab/window transitions, sidebar button setup, and integration with hotkeys and UI controllers.
+ */
 @Controller()
 export default class AdaptiveTabController implements OnInit {
-
+    /** Signal fired when a tab is hidden. */
     tabHidden = new Signal<string>();
+    /** The original position of the sidebar buttons. */
     originalSidebarPosition = SIDEBAR_BUTTONS.Position;
+    /** Mapping of window names to their color. */
     colorsPerWindow = new Map<string, Color3>();
+    /** Mapping of window names to their image. */
     imagePerWindow = new Map<string, string>();
+    /** The currently active window. */
     currentWindow = undefined as Frame | undefined;
+    /** Mapping of window names to their hotkey. */
     hotkeys = new Map<string, Enum.KeyCode>();
+    /** Blur effect instance for tab transitions. */
     blur = (function () {
         const blur = new Instance("BlurEffect");
         blur.Size = 0;
@@ -50,10 +75,17 @@ export default class AdaptiveTabController implements OnInit {
         return blur;
     })();
 
+    /**
+     * Constructs the AdaptiveTabController.
+     * @param hotkeysController Controller for hotkey management.
+     * @param uiController Controller for general UI actions.
+     */
     constructor(private hotkeysController: HotkeysController, private uiController: UIController) {
-
     }
 
+    /**
+     * Animates and hides the adaptive tab window.
+     */
     hideAdaptiveTab() {
         const tweenInfo = new TweenInfo(0.1, Enum.EasingStyle.Linear, Enum.EasingDirection.In);
 
@@ -77,6 +109,10 @@ export default class AdaptiveTabController implements OnInit {
         TweenService.Create(this.blur, tweenInfo, { Size: 0 }).Play();
     }
 
+    /**
+     * Animates and shows the adaptive tab window for a given window name.
+     * @param windowName The name of the window to show.
+     */
     showAdaptiveTab(windowName: string) {
         const tweenInfo = new TweenInfo(0.3, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out);
 
@@ -96,6 +132,10 @@ export default class AdaptiveTabController implements OnInit {
         this.blur.Enabled = true;
     }
 
+    /**
+     * Refreshes the adaptive tab UI for a given window name.
+     * @param windowName The name of the window to refresh.
+     */
     refreshAdaptiveTab(windowName: string) {
         const window = (ADAPTIVE_TAB_MAIN_WINDOW.FindFirstChild(windowName) as Frame);
         if (window === undefined) {
@@ -108,6 +148,11 @@ export default class AdaptiveTabController implements OnInit {
         this.currentWindow = window;
     }
 
+    /**
+     * Toggles the adaptive tab window for a given window name.
+     * @param windowName The name of the window to toggle (optional).
+     * @returns True if the tab was shown, false if hidden or unchanged.
+     */
     toggleAdaptiveTab(windowName?: string) {
         if (ADAPTIVE_TAB.Active && windowName === this.currentWindow?.Name) {
             this.hideAdaptiveTab();
@@ -119,18 +164,31 @@ export default class AdaptiveTabController implements OnInit {
         }
     }
 
+    /**
+     * Animates and hides the sidebar buttons.
+     */
     hideSidebarButtons() {
         TweenService.Create(SIDEBAR_BUTTONS, new TweenInfo(0.5), { Position: new UDim2(-0.015, -50, 0.5, 0) }).Play();
     }
 
+    /**
+     * Animates and shows the sidebar buttons.
+     */
     showSidebarButtons() {
         TweenService.Create(SIDEBAR_BUTTONS, new TweenInfo(0.5), { Position: this.originalSidebarPosition }).Play();
     }
 
+    /**
+     * Refreshes the sidebar buttons based on player state.
+     */
     refreshSidebarButtons() {
         //(SIDEBAR_BUTTONS.WaitForChild("Warp") as GuiObject).Visible = LOCAL_PLAYER.GetAttribute("UsedPortal") === true;
     }
 
+    /**
+     * Loads a sidebar button, sets up hotkey and color/image mapping.
+     * @param sidebarButton The sidebar button GUI element.
+     */
     loadSidebarButton(sidebarButton: GuiButton) {
         const optionName = sidebarButton.Name === "Button" ? sidebarButton.Parent?.Name : sidebarButton.Name;
         if (optionName === undefined)
@@ -159,6 +217,9 @@ export default class AdaptiveTabController implements OnInit {
         this.colorsPerWindow.set(optionName, sidebarButton.BackgroundColor3);
     }
 
+    /**
+     * Initializes the AdaptiveTabController, sets up hotkeys and loads sidebar buttons.
+     */
     onInit() {
         this.hotkeysController.setHotkey(ADAPTIVE_TAB.CloseButton, Enum.KeyCode.X, () => {
             if (ADAPTIVE_TAB.Visible === true) {

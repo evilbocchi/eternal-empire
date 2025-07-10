@@ -1,9 +1,23 @@
 //!native
 //!optimize 2
 
+/**
+ * @fileoverview InventoryController - Client controller responsible for managing the player inventory interface.
+ *
+ * Handles:
+ * - Displaying and filtering inventory items
+ * - Managing item slot activation and placement
+ * - Integrating with build, tooltip, and adaptive tab controllers
+ * - Observing inventory and unique item state for live updates
+ *
+ * The controller maintains mappings between items and their GUI slots, manages filtering, and coordinates with other controllers for UI and build actions.
+ *
+ * @since 1.0.0
+ */
+
 import { Controller, OnInit, OnStart } from "@flamework/core";
-import AdaptiveTabController, { ADAPTIVE_TAB_MAIN_WINDOW } from "client/controllers/interface/AdaptiveTabController";
 import BuildController from "client/controllers/BuildController";
+import AdaptiveTabController, { ADAPTIVE_TAB_MAIN_WINDOW } from "client/controllers/interface/AdaptiveTabController";
 import TooltipController, { Tooltip } from "client/controllers/interface/TooltipController";
 import UIController, { INTERFACE } from "client/controllers/UIController";
 import ItemFilter from "client/ItemFilter";
@@ -27,26 +41,40 @@ for (let i = 0; i < sortedItemsSize; i++) {
     reverseSortedItems[i] = Items.sortedItems[sortedItemsSize - 1 - i];
 }
 
+/**
+ * Controller responsible for managing the player inventory interface, item slot activation, and integration with build and tooltip systems.
+ *
+ * Handles inventory display, filtering, and updates in response to game state changes.
+ */
 @Controller()
 export default class InventoryController implements OnInit, OnStart {
-
+    /** Mapping of items to their GUI slots. */
     readonly itemSlotsPerItem = new Map<Item, ItemSlot>();
+    /** List of items currently in the inventory. */
     readonly items = new Array<Item>();
 
+    /**
+     * Item filter logic for the inventory GUI.
+     */
     readonly filterItems = ItemFilter.loadFilterOptions(INVENTORY_WINDOW.Page.FilterOptions, (query, whitelistedTraits) => {
         ItemSlot.filterItems(this.itemSlotsPerItem, this.items, query, whitelistedTraits);
     });
 
-
+    /**
+     * Constructs the InventoryController.
+     * @param uiController Controller for general UI actions.
+     * @param adaptiveTabController Controller for adaptive tab UI.
+     * @param buildController Controller for build/placement actions.
+     * @param tooltipController Controller for tooltips.
+     */
     constructor(private uiController: UIController, private adaptiveTabController: AdaptiveTabController, private buildController: BuildController, private tooltipController: TooltipController) {
-
     }
 
     /**
      * Find the best unique item instance for a given base item ID based on its average pot.
-     * 
+     *
      * @param baseItemId The ID of the base item to find the best unique instance for.
-     * @returns The best unique item instance, or undefined if no instances found.
+     * @returns The best unique item instance UUID, or undefined if no instances found.
      */
     getBest(baseItemId: string) {
         // Find the best unique item instance for the given base item ID
@@ -81,6 +109,11 @@ export default class InventoryController implements OnInit, OnStart {
         return bestUuid;
     }
 
+    /**
+     * Refreshes the inventory window, updating item slots and amounts.
+     * @param inventory The current inventory map (optional).
+     * @param uniqueInstances The current unique item instances map (optional).
+     */
     refreshInventoryWindow(inventory = Packets.inventory.get(), uniqueInstances = Packets.uniqueInstances.get()) {
         let isEmpty = true;
         const items = this.items;
@@ -128,11 +161,17 @@ export default class InventoryController implements OnInit, OnStart {
         this.filterItems();
     }
 
+    /**
+     * Recalibrates the item grid layout based on window size.
+     */
     recalibrate() {
         const itemList = INVENTORY_WINDOW.Page.ItemList;
         itemList.UIGridLayout.CellSize = new UDim2(1 / ItemSlot.calculateOptimalCellCount(itemList.AbsoluteSize.X), -12, 1, 0);
     }
 
+    /**
+     * Loads item slots for all items in the inventory, sets up activation and tooltips.
+     */
     loadItemSlots() {
         for (const [_id, item] of Items.itemsPerId) {
             if (item.isA("HarvestingTool"))
@@ -167,6 +206,9 @@ export default class InventoryController implements OnInit, OnStart {
     }
 
 
+    /**
+     * Initializes the InventoryController, loads item slots, and sets up event listeners.
+     */
     onInit() {
         this.loadItemSlots();
 
@@ -179,6 +221,9 @@ export default class InventoryController implements OnInit, OnStart {
         }
     }
 
+    /**
+     * Starts the InventoryController, observes inventory and unique item changes, and recalibrates layout on first open.
+     */
     onStart() {
         Packets.inventory.observe((inventory) => {
             this.refreshInventoryWindow(inventory);

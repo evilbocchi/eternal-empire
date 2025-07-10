@@ -1,3 +1,17 @@
+/**
+ * @fileoverview BalanceWindowController - Client controller responsible for managing the balance window UI and currency display.
+ *
+ * Handles:
+ * - Displaying player currency balances and income
+ * - Animating balance changes and currency gain effects
+ * - Managing navigation between currency categories/pages
+ * - Integrating with hotkeys, tooltips, and UI controllers
+ * - Observing balance, revenue, and settings for live updates
+ *
+ * The controller maintains mappings between currencies and their UI elements, formats currency values, and coordinates with other controllers for UI and hotkey actions.
+ *
+ * @since 1.0.0
+ */
 import { BaseOnoeNum, OnoeNum } from "@antivivi/serikanum";
 import { paintObjects } from "@antivivi/vrldk";
 import { Controller, OnInit } from "@flamework/core";
@@ -59,26 +73,50 @@ export const BALANCE_WINDOW = INTERFACE.WaitForChild("BalanceWindow") as Frame &
     TitleLabel: TextLabel;
 };
 
+/**
+ * Controller responsible for managing the balance window UI, currency display, and related animations.
+ *
+ * Handles balance updates, navigation, and integration with hotkeys and tooltips.
+ */
 @Controller()
 export default class BalanceWindowController implements OnInit {
-
+    /** The original position of the balance window. */
     originalBalanceWindowPosition = BALANCE_WINDOW.Position;
+    /** The current page/category being displayed. */
     page = 1;
+    /** The maximum number of pages/categories. */
     maxPage = 1;
+    /** Whether to format currencies with symbols and separators. */
     isFormatCurrencies = true;
 
+    /**
+     * Constructs the BalanceWindowController.
+     * @param uiController Controller for general UI actions.
+     * @param hotkeysController Controller for hotkey management.
+     * @param tooltipController Controller for tooltips.
+     */
     constructor(private uiController: UIController, private hotkeysController: HotkeysController, private tooltipController: TooltipController) {
-
     }
 
+    /**
+     * Animates and hides the balance window.
+     */
     hideBalanceWindow() {
         TweenService.Create(BALANCE_WINDOW, new TweenInfo(0.5), { Position: new UDim2(0.5, 0, -0.045, -50) }).Play();
     }
 
+    /**
+     * Animates and shows the balance window.
+     */
     showBalanceWindow() {
         TweenService.Create(BALANCE_WINDOW, new TweenInfo(0.5), { Position: this.originalBalanceWindowPosition }).Play();
     }
 
+    /**
+     * Gets or creates the UI option for a given currency.
+     * @param currency The currency to get the option for.
+     * @returns The BalanceOption UI element for the currency.
+     */
     getCurrencyOption(currency: Currency) {
         let currencyOption = BALANCE_WINDOW.Balances.FindFirstChild(currency) as BalanceOption;
         if (currencyOption === undefined) {
@@ -99,6 +137,11 @@ export default class BalanceWindowController implements OnInit {
         return currencyOption;
     }
 
+    /**
+     * Shows a floating difference label for a currency change.
+     * @param currency The currency that changed.
+     * @param diff The amount of change.
+     */
     showDifference(currency: Currency, diff: BaseOnoeNum) {
         const currencyOption = this.getCurrencyOption(currency);
         const difference = new OnoeNum(diff);
@@ -129,6 +172,10 @@ export default class BalanceWindowController implements OnInit {
         Debris.AddItem(diffLabel, 6);
     }
 
+    /**
+     * Refreshes the balance window, updating all currency displays.
+     * @param balance The current balance map (optional).
+     */
     refreshBalanceWindow(balance = Packets.balance.get()) {
         let size = 100;
         let maxPage = 1;
@@ -200,6 +247,14 @@ export default class BalanceWindowController implements OnInit {
 
     }
 
+    /**
+     * Loads navigation option UI and hotkey for a given navigation button.
+     * @param navOption The navigation option UI element.
+     * @param hotkey The hotkey to bind.
+     * @param label The label for the hotkey.
+     * @param action The action to perform on navigation.
+     * @param priority Optional hotkey priority.
+     */
     loadNavigationOption(navOption: NavigationOption, hotkey: Enum.KeyCode, label: string, action: () => boolean, priority?: number) {
         const highlight = () => {
             TweenService.Create(navOption.ImageButton, new TweenInfo(0.3), { ImageTransparency: 0 }).Play();
@@ -224,6 +279,11 @@ export default class BalanceWindowController implements OnInit {
         }, label, priority);
     }
 
+    /**
+     * Shows animated currency gain at a world position.
+     * @param at The world position to show the gain.
+     * @param amountPerCurrency Map of currency to amount gained.
+     */
     showCurrencyGain(at: Vector3, amountPerCurrency: Map<Currency, BaseOnoeNum>) {
         if (!Packets.settings.get()?.CurrencyGainAnimation) {
             const part = new Instance("Part");
@@ -286,6 +346,12 @@ export default class BalanceWindowController implements OnInit {
         }
     }
 
+    /**
+     * Formats a currency value for display.
+     * @param currency The currency type.
+     * @param amount The amount to format.
+     * @returns The formatted string.
+     */
     format(currency: Currency, amount: OnoeNum) {
         if (this.isFormatCurrencies)
             return CurrencyBundle.getFormatted(currency, amount, true);
@@ -293,6 +359,9 @@ export default class BalanceWindowController implements OnInit {
             return tostring(amount);
     }
 
+    /**
+     * Initializes the BalanceWindowController, sets up event listeners and navigation.
+     */
     onInit() {
         ItemUtils.showCurrencyGain = (at: Vector3, amountPerCurrency: Map<Currency, BaseOnoeNum>) => {
             this.showCurrencyGain(at, amountPerCurrency);
