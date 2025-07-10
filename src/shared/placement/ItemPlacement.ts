@@ -5,7 +5,15 @@ import Item from "shared/item/Item";
 const overlapParams = new OverlapParams();
 overlapParams.CollisionGroup = "ItemHitbox";
 
+/**
+ * Namespace for item placement utility functions, including collision checks and area validation.
+ */
 namespace ItemPlacement {
+    /**
+     * Checks if the given item model is touching any other placed item's hitbox.
+     * @param itemModel The model of the item to check.
+     * @returns True if touching another placed item, false otherwise.
+     */
     export function isTouchingPlacedItem(itemModel: Model) {
         const children = itemModel.GetChildren();
         for (const hitbox of children) {
@@ -27,6 +35,12 @@ namespace ItemPlacement {
         return false;
     }
 
+    /**
+     * Gets the Area that contains the given position, if any.
+     * @param position The position to check.
+     * @param placeableAreas The list of placeable areas.
+     * @returns The Area containing the position, or undefined.
+     */
     export function getAreaOfPosition(position: Vector3, placeableAreas: Area[]) {
         for (const area of placeableAreas) {
             if (area.buildBounds?.isInside(position))
@@ -35,6 +49,12 @@ namespace ItemPlacement {
         return undefined;
     }
 
+    /**
+     * Gets the Area that completely contains the item's primary part, if any.
+     * @param itemModel The item model.
+     * @param placeableAreas The list of placeable areas.
+     * @returns The Area containing the item, or undefined.
+     */
     export function getArea(itemModel: Model, placeableAreas: Area[]) {
         const hitbox = itemModel.PrimaryPart;
         if (hitbox !== undefined) {
@@ -46,6 +66,12 @@ namespace ItemPlacement {
         return undefined;
     }
 
+    /**
+     * Determines if the item model is in a valid placeable area for the given item.
+     * @param itemModel The item model.
+     * @param item The item definition.
+     * @returns True if the item is in a placeable area, false otherwise.
+     */
     export function isInPlaceableArea(itemModel: Model, item: Item) {
         if (item.bounds === undefined) {
             return ItemPlacement.getArea(itemModel, item.placeableAreas) !== undefined;
