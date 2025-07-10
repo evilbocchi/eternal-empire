@@ -1,3 +1,16 @@
+/**
+ * @fileoverview BombsController - Client controller for managing bomb-related UI and gameplay interactions.
+ *
+ * Handles:
+ * - Setting up bomb board GUIs for purchasing and using bombs
+ * - Integrating with UIController for sound feedback
+ * - Observing and updating bomb balances
+ * - Displaying active bomb timers in the details window
+ *
+ * The controller manages bomb board GUIs, listens for relevant events, and coordinates with other systems for bomb usage and purchases.
+ *
+ * @since 1.0.0
+ */
 import { OnoeNum } from "@antivivi/serikanum";
 import { convertToHHMMSS } from "@antivivi/vrldk";
 import { Controller, OnStart } from "@flamework/core";
@@ -16,15 +29,27 @@ declare global {
     };
 }
 
+/**
+ * Controller responsible for managing bomb board GUIs, bomb purchases, usage, and bomb-related UI updates.
+ *
+ * Integrates with UIController for sound, observes bomb balances, and updates the details window with bomb timers.
+ */
 @Controller()
 export default class BombsController implements OnStart {
 
+    /** Map of bomb board GUIs to their associated currency. */
     guis = new Map<BombsBoardGui, Currency>();
 
     constructor(private uiController: UIController) {
 
     }
 
+    /**
+     * Sets up the bomb board GUI with purchase and use actions, and manages its lifecycle.
+     * @param bombsCurrency The currency type for bombs.
+     * @param boosting The currency type for boosting.
+     * @param gui The bomb board GUI instance.
+     */
     loadGui(bombsCurrency: Currency, boosting: Currency, gui: BombsBoardGui) {
         gui.BuyButton.Activated.Connect(() => {
             this.uiController.playSound("MenuClick.mp3");
@@ -42,6 +67,9 @@ export default class BombsController implements OnStart {
         this.guis.set(gui, bombsCurrency);
     }
 
+    /**
+     * Initializes the BombsController, sets up listeners for bomb boards, balance updates, and bomb timers.
+     */
     onStart() {
         CollectionService.GetInstanceAddedSignal("Bombs Board").Connect((board) => {
             const bombsCurrency = (board.WaitForChild("BombsCurrency") as StringValue).Value as Currency;
