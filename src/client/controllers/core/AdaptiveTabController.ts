@@ -16,8 +16,8 @@ import Signal from "@antivivi/lemon-signal";
 import { Controller, OnInit } from "@flamework/core";
 import { Lighting, TweenService, Workspace } from "@rbxts/services";
 import { LOCAL_PLAYER } from "client/constants";
-import HotkeysController from "client/controllers/HotkeysController";
-import UIController, { INTERFACE } from "client/controllers/UIController";
+import HotkeysController from "client/controllers/core/HotkeysController";
+import UIController, { INTERFACE } from "client/controllers/core/UIController";
 
 declare global {
     type SidebarOption = Frame & {

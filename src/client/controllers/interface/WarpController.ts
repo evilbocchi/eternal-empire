@@ -1,7 +1,7 @@
 import { Controller, OnInit } from "@flamework/core";
-import HotkeysController from "client/controllers/HotkeysController";
-import AdaptiveTabController, { ADAPTIVE_TAB_MAIN_WINDOW } from "client/controllers/interface/AdaptiveTabController";
-import UIController from "client/controllers/UIController";
+import HotkeysController from "client/controllers/core/HotkeysController";
+import AdaptiveTabController, { ADAPTIVE_TAB_MAIN_WINDOW } from "client/controllers/core/AdaptiveTabController";
+import UIController from "client/controllers/core/UIController";
 import { AREAS } from "shared/Area";
 import Packets from "shared/Packets";
 

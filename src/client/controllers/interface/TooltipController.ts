@@ -14,7 +14,7 @@ import { Controller, OnInit, OnPhysics } from "@flamework/core";
 import { TweenService, Workspace } from "@rbxts/services";
 import ItemSlot from "client/ItemSlot";
 import { MOUSE } from "client/constants";
-import { INTERFACE } from "client/controllers/UIController";
+import { INTERFACE } from "client/controllers/core/UIController";
 import Packets from "shared/Packets";
 import { CURRENCY_DETAILS } from "shared/currency/CurrencyDetails";
 import Item from "shared/item/Item";

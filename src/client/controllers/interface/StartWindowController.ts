@@ -3,14 +3,14 @@ import { combineHumanReadable, convertToHHMMSS, getHumanoid, paintObjects } from
 import { Controller, OnInit } from "@flamework/core";
 import { Players, ReplicatedFirst, RunService, TweenService, Workspace } from "@rbxts/services";
 import { LOCAL_PLAYER, PLAYER_GUI } from "client/constants";
-import HotkeysController from "client/controllers/HotkeysController";
-import AdaptiveTabController from "client/controllers/interface/AdaptiveTabController";
+import HotkeysController from "client/controllers/core/HotkeysController";
+import AdaptiveTabController from "client/controllers/core/AdaptiveTabController";
 import BalanceWindowController from "client/controllers/interface/BalanceWindowController";
 import IntroController from "client/controllers/interface/IntroController";
 import LoadingWindowController from "client/controllers/interface/LoadingWindowController";
 import { SETTINGS_WINDOW } from "client/controllers/interface/SettingsController";
 import SoundController from "client/controllers/interface/SoundController";
-import UIController from "client/controllers/UIController";
+import UIController from "client/controllers/core/UIController";
 import { getNameFromUserId, getStartCamera, isStartScreenEnabled } from "shared/constants";
 import { ASSETS } from "shared/asset/GameAssets";
 import Items from "shared/items/Items";

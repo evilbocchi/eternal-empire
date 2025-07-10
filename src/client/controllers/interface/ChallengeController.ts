@@ -15,7 +15,7 @@
 import { Controller, OnInit, OnPhysics } from "@flamework/core";
 import { RunService } from "@rbxts/services";
 import QuestsController from "client/controllers/interface/QuestsController";
-import UIController from "client/controllers/UIController";
+import UIController from "client/controllers/core/UIController";
 import { ASSETS } from "shared/asset/GameAssets";
 import { getChallengeGui } from "shared/constants";
 import Packets from "shared/Packets";
@@ -56,7 +56,7 @@ export default class ChallengeController implements OnPhysics, OnInit {
     challengeGui?: ChallengeGui;
     /** Debounce timer for leave action. */
     debounce = 0;
-    
+
     constructor(private uiController: UIController, private questsController: QuestsController) {
     }
 

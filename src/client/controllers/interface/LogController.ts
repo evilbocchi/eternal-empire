@@ -1,6 +1,6 @@
 import { OnoeNum } from "@antivivi/serikanum";
 import { Controller, OnInit, OnStart } from "@flamework/core";
-import { ADAPTIVE_TAB_MAIN_WINDOW } from "client/controllers/interface/AdaptiveTabController";
+import { ADAPTIVE_TAB_MAIN_WINDOW } from "client/controllers/core/AdaptiveTabController";
 import BalanceWindowController from "client/controllers/interface/BalanceWindowController";
 import { getNameFromUserId } from "shared/constants";
 import { ASSETS } from "shared/asset/GameAssets";

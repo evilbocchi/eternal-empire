@@ -1,7 +1,7 @@
 import { OnoeNum } from "@antivivi/serikanum";
 import { Controller, OnInit } from "@flamework/core";
-import { ADAPTIVE_TAB_MAIN_WINDOW } from "client/controllers/interface/AdaptiveTabController";
-import UIController from "client/controllers/UIController";
+import { ADAPTIVE_TAB_MAIN_WINDOW } from "client/controllers/core/AdaptiveTabController";
+import UIController from "client/controllers/core/UIController";
 import Packets from "shared/Packets";
 
 export const RENAME_WINDOW = ADAPTIVE_TAB_MAIN_WINDOW.WaitForChild("Rename") as Frame & {

@@ -4,7 +4,7 @@ import { Controller, OnStart } from "@flamework/core";
 import { CollectionService, MarketplaceService, Workspace } from "@rbxts/services";
 import { LOCAL_PLAYER } from "client/constants";
 import { DETAILS_WINDOW } from "client/controllers/interface/DetailsController";
-import UIController from "client/controllers/UIController";
+import UIController from "client/controllers/core/UIController";
 import { BOMBS_PRODUCTS } from "shared/devproducts/BombsProducts";
 import Packets from "shared/Packets";
 

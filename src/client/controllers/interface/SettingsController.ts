@@ -1,9 +1,9 @@
 import SerikaNum from "@antivivi/serikanum";
 import { Controller, OnStart } from "@flamework/core";
 import { UserInputService } from "@rbxts/services";
-import HotkeysController from "client/controllers/HotkeysController";
-import { ADAPTIVE_TAB_MAIN_WINDOW } from "client/controllers/interface/AdaptiveTabController";
-import UIController from "client/controllers/UIController";
+import HotkeysController from "client/controllers/core/HotkeysController";
+import { ADAPTIVE_TAB_MAIN_WINDOW } from "client/controllers/core/AdaptiveTabController";
+import UIController from "client/controllers/core/UIController";
 import { ASSETS } from "shared/asset/GameAssets";
 import Packets from "shared/Packets";
 import { paintObjects } from "@antivivi/vrldk";

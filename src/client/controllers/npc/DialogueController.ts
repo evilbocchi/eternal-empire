@@ -1,8 +1,8 @@
 import ComputeNameColor from "@antivivi/rbxnamecolor";
 import { Controller, OnInit, OnStart } from "@flamework/core";
 import { Debris, ReplicatedStorage, RunService, TextChatService, TweenService, Workspace } from "@rbxts/services";
-import HotkeysController from "client/controllers/HotkeysController";
-import UIController, { INTERFACE } from "client/controllers/UIController";
+import HotkeysController from "client/controllers/core/HotkeysController";
+import UIController, { INTERFACE } from "client/controllers/core/UIController";
 import { ASSETS, getSound } from "shared/asset/GameAssets";
 import { getDisplayName, getTextChannels } from "shared/constants";
 import Packets from "shared/Packets";

@@ -22,9 +22,9 @@ import { CollectionService, Debris, RunService, TweenService } from "@rbxts/serv
 import ItemFilter from "client/ItemFilter";
 import ItemSlot from "client/ItemSlot";
 import { LOCAL_PLAYER, PLAYER_GUI } from "client/constants";
-import HotkeysController from "client/controllers/HotkeysController";
-import UIController from "client/controllers/UIController";
-import AdaptiveTabController, { ADAPTIVE_TAB, ADAPTIVE_TAB_MAIN_WINDOW } from "client/controllers/interface/AdaptiveTabController";
+import HotkeysController from "client/controllers/core/HotkeysController";
+import UIController from "client/controllers/core/UIController";
+import AdaptiveTabController, { ADAPTIVE_TAB, ADAPTIVE_TAB_MAIN_WINDOW } from "client/controllers/core/AdaptiveTabController";
 import TooltipController from "client/controllers/interface/TooltipController";
 import Packets from "shared/Packets";
 import { ASSETS, getSound } from "shared/asset/GameAssets";

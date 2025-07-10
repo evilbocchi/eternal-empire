@@ -1,5 +1,5 @@
 import { Controller } from "@flamework/core";
-import { OnCharacterAdded } from "client/controllers/ModdingController";
+import { OnCharacterAdded } from "client/controllers/core/ModdingController";
 import ChatHookController from "client/controllers/permissions/ChatHookController";
 
 @Controller()

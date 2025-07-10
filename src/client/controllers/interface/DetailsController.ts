@@ -1,7 +1,7 @@
 import { Controller, OnInit } from "@flamework/core";
 import { RunService } from "@rbxts/services";
-import { OnCharacterAdded } from "client/controllers/ModdingController";
-import { INTERFACE } from "client/controllers/UIController";
+import { OnCharacterAdded } from "client/controllers/core/ModdingController";
+import { INTERFACE } from "client/controllers/core/UIController";
 import TooltipController from "client/controllers/interface/TooltipController";
 
 export const DETAILS_WINDOW = INTERFACE.WaitForChild("DetailsWindow") as Frame & {

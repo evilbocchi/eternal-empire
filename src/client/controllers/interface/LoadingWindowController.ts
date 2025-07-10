@@ -1,7 +1,7 @@
 import { Controller, OnInit } from "@flamework/core";
 import { TweenService } from "@rbxts/services";
 import { PLAYER_GUI } from "client/constants";
-import UIController from "client/controllers/UIController";
+import UIController from "client/controllers/core/UIController";
 
 export const LOADING_SCREEN = PLAYER_GUI.WaitForChild("LoadingScreen") as ScreenGui;
 export const LOADING_WINDOW = LOADING_SCREEN.WaitForChild("LoadingWindow") as Frame & {
