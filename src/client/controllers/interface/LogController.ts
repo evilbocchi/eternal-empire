@@ -1,3 +1,16 @@
+/**
+ * @fileoverview LogController - Client controller for managing the logs window and displaying player and game logs.
+ *
+ * Handles:
+ * - Creating and displaying log entries for various game events
+ * - Paginating logs and updating the logs window
+ * - Integrating with BalanceWindowController for navigation
+ * - Listening for new log events and updating the UI
+ *
+ * The controller manages log data, UI creation, and navigation for the logs window, providing a history of important player and game actions.
+ *
+ * @since 1.0.0
+ */
 import { OnoeNum } from "@antivivi/serikanum";
 import { Controller, OnInit, OnStart } from "@flamework/core";
 import { ADAPTIVE_TAB_MAIN_WINDOW } from "client/controllers/core/AdaptiveTabController";
@@ -29,6 +42,11 @@ export const LOGS_WINDOW = ADAPTIVE_TAB_MAIN_WINDOW.WaitForChild("Logs") as Fram
     };
 };
 
+/**
+ * Controller responsible for managing the logs window, log entry creation, and log pagination.
+ *
+ * Handles log UI creation, navigation, and updates in response to new log events.
+ */
 @Controller()
 export default class LogController implements OnInit, OnStart {
 
@@ -41,6 +59,11 @@ export default class LogController implements OnInit, OnStart {
 
     }
 
+    /**
+     * Creates a log option UI element for a given log entry.
+     * @param log The log entry to display.
+     * @returns The created log option UI element.
+     */
     createLogOption(log: Log) {
         const logOption = ASSETS.LogOption.Clone();
         logOption.TimestampLabel.Text = os.date("%c", log.time);
@@ -86,6 +109,9 @@ export default class LogController implements OnInit, OnStart {
         return logOption;
     }
 
+    /**
+     * Refreshes the logs window, updating visible log entries and pagination.
+     */
     refreshLogsWindow() {
         LOGS_WINDOW.NavigationOptions.PageLabel.Text = `Page ${this.page}`;
         const start = this.logsLength - (this.page * 20);
@@ -111,6 +137,9 @@ export default class LogController implements OnInit, OnStart {
         }
     }
 
+    /**
+     * Initializes the LogController, sets up navigation options for log pagination.
+     */
     onInit() {
         this.balanceWindowController.loadNavigationOption(LOGS_WINDOW.NavigationOptions.Left, Enum.KeyCode.Z, "Previous Page", () => {
             if (LOGS_WINDOW.Visible === false)
@@ -131,6 +160,9 @@ export default class LogController implements OnInit, OnStart {
         }, 5);
     }
 
+    /**
+     * Starts the LogController, loads logs and listens for new log events.
+     */
     onStart() {
         this.logs = Packets.getLogs.invoke();
         this.logsLength = this.logs.size();
