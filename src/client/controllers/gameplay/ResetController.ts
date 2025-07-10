@@ -9,7 +9,7 @@ import { ASSETS } from "shared/asset/GameAssets";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Packets from "shared/Packets";
 import { RESET_LAYERS } from "shared/ResetLayer";
-import { TRACKED_QUEST_WINDOW } from "./interface/QuestsController";
+import { TRACKED_QUEST_WINDOW } from "../interface/QuestsController";
 
 declare global {
     interface Assets {

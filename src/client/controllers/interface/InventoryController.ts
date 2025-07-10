@@ -16,7 +16,7 @@
  */
 
 import { Controller, OnInit, OnStart } from "@flamework/core";
-import BuildController from "client/controllers/BuildController";
+import BuildController from "client/controllers/gameplay/BuildController";
 import AdaptiveTabController, { ADAPTIVE_TAB_MAIN_WINDOW } from "client/controllers/core/AdaptiveTabController";
 import TooltipController, { Tooltip } from "client/controllers/interface/TooltipController";
 import UIController, { INTERFACE } from "client/controllers/core/UIController";

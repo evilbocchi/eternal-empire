@@ -4,7 +4,7 @@ import { Controller, OnInit, OnStart } from "@flamework/core";
 import { Debris, RunService, StarterGui, TweenService, UserInputService, Workspace } from "@rbxts/services";
 import { LOCAL_PLAYER } from "client/constants";
 import { ADAPTIVE_TAB } from "client/controllers/core/AdaptiveTabController";
-import BuildController from "client/controllers/BuildController";
+import BuildController from "client/controllers/gameplay/BuildController";
 import TooltipController, { Tooltip } from "client/controllers/interface/TooltipController";
 import { OnCharacterAdded } from "client/controllers/core/ModdingController";
 import UIController, { INTERFACE } from "client/controllers/core/UIController";
