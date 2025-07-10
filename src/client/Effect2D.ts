@@ -1,5 +1,7 @@
 /**
- * @file Handles all complex 2D effects on the client.
+ * @fileoverview Handles all complex 2D effects on the client.
+ * 
+ * @since 1.0.0
  */
 
 import ParticleEmitter from "@rbxts/rparticle";

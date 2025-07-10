@@ -1,9 +1,21 @@
+/**
+ * @fileoverview
+ * Provides UI logic for filtering items in the item slot container.
+ * Handles trait-based filtering, search input, and related UI feedback (animations, sounds).
+ * Exports the ItemFilter namespace with a single function to initialize and manage filter options.
+ */
+
 import { TweenService } from "@rbxts/services";
 import { FILTERABLE_TRAITS } from "client/ItemSlot";
 import { getAsset } from "shared/asset/AssetMap";
 import { getSound } from "shared/asset/GameAssets";
 
 declare global {
+
+    /**
+     * Component for filtering items in the item slot container.
+     * Contains trait options and a search box for filtering items based on traits and names.
+     */
     type FilterOptions = Frame & {
         TraitOptions: Frame & {
             [traitName in keyof ItemTraits]: ImageButton;
@@ -16,6 +28,9 @@ declare global {
     };
 }
 
+/**
+ * Namespace for item filtering logic.
+ */
 namespace ItemFilter {
 
     /**
