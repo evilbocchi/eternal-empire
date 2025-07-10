@@ -1,3 +1,17 @@
+/**
+ * @fileoverview ToolController - Client controller for managing tool usage, harvesting, and backpack UI.
+ *
+ * Handles:
+ * - Tool equipping, unequipping, and hotkey selection
+ * - Harvestable detection, health updates, and effects
+ * - Tool animations and sound feedback
+ * - Backpack window management and tool option UI
+ * - Integration with BuildController, AreaController, and TooltipController
+ *
+ * The controller manages tool state, UI, and interactions, providing a responsive experience for harvesting and tool switching.
+ *
+ * @since 1.0.0
+ */
 import { OnoeNum } from "@antivivi/serikanum";
 import { loadAnimation } from "@antivivi/vrldk";
 import { Controller, OnInit, OnStart } from "@flamework/core";
@@ -35,6 +49,11 @@ export const BACKPACK_WINDOW = INTERFACE.WaitForChild("BackpackWindow") as Frame
     UIListLayout: UIListLayout;
 };
 
+/**
+ * Controller responsible for managing tool usage, harvesting, and backpack UI.
+ *
+ * Handles tool equipping, harvesting logic, tool animations, and UI updates for the player's tools.
+ */
 @Controller()
 export default class ToolController implements OnInit, OnStart, OnCharacterAdded {
 
@@ -65,6 +84,11 @@ export default class ToolController implements OnInit, OnStart, OnCharacterAdded
 
     }
 
+    /**
+     * Checks for a harvestable object in range of the tool.
+     * @param tool The tool model to check from.
+     * @returns The harvestable model or part, if found.
+     */
     checkHarvestable(tool: Model) {
         const blade = ((tool.FindFirstChild("Blade") as BasePart | undefined) ?? tool.PrimaryPart);
         const inside = Workspace.GetPartBoundsInBox(blade!.CFrame, blade!.Size.add(new Vector3(1, 5, 1)), this.OVERLAP_PARAMS);
@@ -81,6 +105,10 @@ export default class ToolController implements OnInit, OnStart, OnCharacterAdded
         }
     }
 
+    /**
+     * Loads and sets up a harvestable's GUI and health tracking.
+     * @param model The harvestable model instance.
+     */
     loadHarvestable(model: Instance) {
         if (!model.IsA("PVInstance"))
             return;
@@ -151,6 +179,9 @@ export default class ToolController implements OnInit, OnStart, OnCharacterAdded
         model.Destroying.Connect(() => connection.Disconnect());
     }
 
+    /**
+     * Initializes the ToolController, sets up input listeners, harvestable loading, and disables default backpack UI.
+     */
     onInit() {
         StarterGui.SetCoreGuiEnabled("Backpack", false);
         UserInputService.InputBegan.Connect((input, gameProcessed) => {
@@ -228,6 +259,10 @@ export default class ToolController implements OnInit, OnStart, OnCharacterAdded
         }
     }
 
+    /**
+     * Recalculates tool option indices and updates their labels.
+     * @returns The sorted array of ToolOption instances.
+     */
     recalculateIndex() {
         const sorted = BACKPACK_WINDOW.GetChildren().sort((a, b) => {
             if (a.IsA("TextButton") && b.IsA("TextButton"))
@@ -246,6 +281,10 @@ export default class ToolController implements OnInit, OnStart, OnCharacterAdded
         return sorted;
     }
 
+    /**
+     * Handles character addition, sets up tool animations and backpack listeners.
+     * @param character The player's character model.
+     */
     onCharacterAdded(character: Model): void {
         {
             const humanoid = character.WaitForChild("Humanoid") as Humanoid;
@@ -282,6 +321,10 @@ export default class ToolController implements OnInit, OnStart, OnCharacterAdded
         }
     }
 
+    /**
+     * Loads and sets up a tool option UI for a given tool.
+     * @param tool The tool instance to add.
+     */
     onToolAdded(tool: Instance) {
         if (!tool.IsA("Tool") || this.tools.has(tool) === true)
             return;
@@ -347,6 +390,9 @@ export default class ToolController implements OnInit, OnStart, OnCharacterAdded
         this.recalculateIndex();
     }
 
+    /**
+     * Starts the ToolController, manages backpack window visibility based on UI state.
+     */
     onStart() {
         const refreshVisibility = () => BACKPACK_WINDOW.Visible = !ADAPTIVE_TAB.Visible && this.buildController.selected.isEmpty();
         RunService.BindToRenderStep("Tool Backpack", 0, () => refreshVisibility());
