@@ -1,3 +1,16 @@
+/**
+ * @fileoverview AreaController - Client controller for managing area UI, area unlocks, and area-specific stat bars.
+ *
+ * Handles:
+ * - Displaying and updating area stat bars (droplet limit, grid size, item count)
+ * - Animating area unlock effects and portal visuals
+ * - Integrating with UIController for sound feedback
+ * - Observing area unlock and stat changes for live updates
+ *
+ * The controller manages area UI updates, unlock animations, and stat bar refreshes for each area.
+ *
+ * @since 1.0.0
+ */
 import { OnoeNum } from "@antivivi/serikanum";
 import { Controller, OnInit, OnStart } from "@flamework/core";
 import CameraShaker from "@rbxts/camera-shaker";
@@ -6,6 +19,11 @@ import UIController from "client/controllers/core/UIController";
 import Area, { AREAS } from "shared/Area";
 import Packets from "shared/Packets";
 
+/**
+ * Controller responsible for managing area UI, unlock effects, and stat bar updates.
+ *
+ * Handles area stat display, unlock animations, and integration with UI and data packets.
+ */
 @Controller()
 export default class AreaController implements OnInit, OnStart {
 
@@ -24,6 +42,13 @@ export default class AreaController implements OnInit, OnStart {
 
     }
 
+    /**
+     * Refreshes a stat bar UI element for a given value and max.
+     * @param bar The bar UI element.
+     * @param current The current value.
+     * @param max The maximum value.
+     * @param invertColors Whether to invert the bar color logic.
+     */
     refreshBar(bar: Bar, current: number | OnoeNum, max: number | OnoeNum, invertColors?: boolean) {
         const isOnoe = type(current) === "number";
         const perc = isOnoe ? (current as number) / (max as number) : (current as OnoeNum).div(max).revert();
@@ -47,6 +72,11 @@ export default class AreaController implements OnInit, OnStart {
         bar.BarLabel.Text = tostring(current) + "/" + tostring(max);
     }
 
+    /**
+     * Loads and sets up area-specific UI and stat bar updates.
+     * @param id The area ID.
+     * @param area The Area instance.
+     */
     loadArea(id: AreaId, area: Area) {
         const boardGui = area.boardGui;
         const updateBar = (n: number) => {
@@ -78,6 +108,10 @@ export default class AreaController implements OnInit, OnStart {
         }
     }
 
+    /**
+     * Handles area unlock events, animating portal visuals and playing effects.
+     * @param area The area ID that was unlocked.
+     */
     onAreaUnlocked(area: AreaId) {
         for (const [_id, otherArea] of pairs(AREAS)) {
             const children = otherArea.areaFolder.GetChildren();
@@ -93,6 +127,9 @@ export default class AreaController implements OnInit, OnStart {
         this.uiController.playSound("Thunder.mp3");
     }
 
+    /**
+     * Initializes the AreaController, sets up area UI, stat bars, and unlock listeners.
+     */
     onInit() {
         this.AREA_UNLOCK_SHAKE.Start();
 
@@ -104,6 +141,9 @@ export default class AreaController implements OnInit, OnStart {
         Packets.dropletCountChanged.connect((area, current) => this.UPDATE_PER_AREA.get(area)!(current));
     }
 
+    /**
+     * Starts the AreaController, manages special area connections and unlock state.
+     */
     onStart() {
         const slamoVillageConnection = AREAS.IntermittentIsles.areaFolder.WaitForChild("SlamoVillageConnection", 10);
         if (slamoVillageConnection === undefined) {
