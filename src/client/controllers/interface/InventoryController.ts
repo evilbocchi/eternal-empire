@@ -59,14 +59,7 @@ export default class InventoryController implements OnInit, OnStart {
     readonly filterItems = ItemFilter.loadFilterOptions(INVENTORY_WINDOW.Page.FilterOptions, (query, whitelistedTraits) => {
         ItemSlot.filterItems(this.itemSlotsPerItem, this.items, query, whitelistedTraits);
     });
-
-    /**
-     * Constructs the InventoryController.
-     * @param uiController Controller for general UI actions.
-     * @param adaptiveTabController Controller for adaptive tab UI.
-     * @param buildController Controller for build/placement actions.
-     * @param tooltipController Controller for tooltips.
-     */
+    
     constructor(private uiController: UIController, private adaptiveTabController: AdaptiveTabController, private buildController: BuildController, private tooltipController: TooltipController) {
     }
 
