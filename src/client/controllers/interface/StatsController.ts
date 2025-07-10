@@ -1,3 +1,15 @@
+/**
+ * @fileoverview StatsController - Client controller for managing the stats window and displaying player statistics.
+ *
+ * Handles:
+ * - Displaying playtime, session time, and other tracked stats
+ * - Showing most balance stats for each currency
+ * - Integrating with UI and observing stat changes for live updates
+ *
+ * The controller manages stat UI updates, listens for relevant events, and updates the stats window with current values.
+ *
+ * @since 1.0.0
+ */
 import { OnoeNum } from "@antivivi/serikanum";
 import { convertToHHMMSS } from "@antivivi/vrldk";
 import { Controller, OnInit } from "@flamework/core";
@@ -32,13 +44,24 @@ export const STATS_WINDOW = ADAPTIVE_TAB_MAIN_WINDOW.WaitForChild("Stats") as Fr
     };
 };
 
+/**
+ * Controller responsible for managing the stats window UI and updating player statistics.
+ *
+ * Handles stat display, updates, and integration with UI and data packets.
+ */
 @Controller()
 export default class StatsController implements OnInit {
 
+    /**
+     * Refreshes the raw purifier clicks stat label.
+     */
     refreshRawPurifierClicks() {
         STATS_WINDOW.StatList.RawPurifierClicks.AmountLabel.Text = tostring(LOCAL_PLAYER.GetAttribute("RawPurifierClicks") as number ?? 0);
     }
 
+    /**
+     * Initializes the StatsController, sets up stat observers and populates the stats window.
+     */
     onInit() {
         Packets.empirePlaytime.observe((value) => STATS_WINDOW.StatList.Playtime.AmountLabel.Text = convertToHHMMSS(value));
         Packets.sessionTime.observe((value) => STATS_WINDOW.StatList.SessionTime.AmountLabel.Text = convertToHHMMSS(value));
