@@ -6,11 +6,11 @@ type Operation = {
     type: string,
     amount?: OnoeNum,
     base?: number,
-}
+};
 
 const def = new OnoeNum(0);
-const HALF = new OnoeNum(1/2);
-const ONETHIRD = new OnoeNum(1/3);
+const HALF = new OnoeNum(1 / 2);
+const ONETHIRD = new OnoeNum(1 / 3);
 const E = math.exp(1);
 
 /**
@@ -22,7 +22,7 @@ class Formula {
     operations = new Array<Operation>();
 
     constructor() {
-        
+
     }
 
     /**
@@ -95,7 +95,7 @@ class Formula {
      * @returns This Formula instance.
      */
     sqrt() {
-        this.operations.push({type: "sqrt"});
+        this.operations.push({ type: "sqrt" });
         return this;
     }
 
