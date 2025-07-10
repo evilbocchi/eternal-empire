@@ -1,3 +1,16 @@
+/**
+ * @fileoverview IntroController - Client controller for managing the intro sequence and related UI/camera effects.
+ *
+ * Handles:
+ * - Playing the intro cutscene sequence for new players
+ * - Managing camera transitions, animations, and sound effects during the intro
+ * - Hiding/showing UI elements and updating quest state
+ * - Integrating with UIController, AdaptiveTabController, and QuestsController
+ *
+ * The controller coordinates the intro experience, ensuring a smooth transition for new players and restoring UI state after the sequence.
+ *
+ * @since 1.0.0
+ */
 import { loadAnimation } from "@antivivi/vrldk";
 import { Controller, OnInit } from "@flamework/core";
 import { ReplicatedStorage, TweenService, Workspace } from "@rbxts/services";
@@ -11,16 +24,29 @@ import { getWaypoint } from "shared/constants";
 
 export const INTRO_WINDOW = INTERFACE.WaitForChild("IntroWindow") as Frame;
 
+/**
+ * Controller responsible for managing the intro sequence, camera transitions, and UI state for new players.
+ *
+ * Plays the intro cutscene, manages UI visibility, and updates quest state after the sequence.
+ */
 @Controller()
 export default class IntroController implements OnInit {
 
     isIntroSequenceDone = false;
     isCurrentlyInIntroSequence = false;
 
-    constructor(private uiController: UIController, private questsController: QuestsController, private adaptiveTabController: AdaptiveTabController,
-        private soundController: SoundController, private balanceWindowController: BalanceWindowController) {
+    constructor(
+        private uiController: UIController,
+        private questsController: QuestsController,
+        private adaptiveTabController: AdaptiveTabController,
+        private soundController: SoundController,
+        private balanceWindowController: BalanceWindowController
+    ) {
     }
 
+    /**
+     * Plays the intro cutscene sequence, including camera, animation, and UI transitions.
+     */
     doIntroSequence() {
         print("performing intro sequence");
         const humanoid = LOCAL_PLAYER.Character?.FindFirstChildOfClass("Humanoid");
@@ -82,6 +108,9 @@ export default class IntroController implements OnInit {
         });
     }
 
+    /**
+     * Handles changes to the intro marker, starting or ending the intro sequence as needed.
+     */
     onIntroMarkerChanged() {
         const shouldIntro = ReplicatedStorage.GetAttribute("Intro");
         if (shouldIntro === true)
@@ -93,6 +122,9 @@ export default class IntroController implements OnInit {
         }
     }
 
+    /**
+     * Initializes the IntroController, sets up listeners for intro state changes.
+     */
     onInit() {
         ReplicatedStorage.GetAttributeChangedSignal("Intro").Connect(() => this.onIntroMarkerChanged());
         if (Workspace.GetAttribute("IsPublicServer") !== true)
