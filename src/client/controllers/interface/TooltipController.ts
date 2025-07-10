@@ -120,7 +120,7 @@ export class Tooltip {
 }
 
 /**
- * TooltipController manages the display and animation of tooltips for GUI objects in the client interface.
+ * Manages the display and animation of tooltips for GUI objects in the client interface.
  * It handles mouse events to show/hide tooltips, formats item descriptions, and updates tooltip positions.
  */
 @Controller()
