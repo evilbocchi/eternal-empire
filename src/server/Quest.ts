@@ -1,8 +1,19 @@
+/**
+ * @fileoverview Implements the Quest and Stage classes for managing multi-stage quests and quest progression on the server.
+ * Handles quest initialization, stage management, NPC/dialogue integration, and quest rewards for the Roblox game.
+ * 
+ * @since 1.0.0
+ */
+
 import Signal from "@antivivi/lemon-signal";
 import { getNPCModel } from "shared/constants";
 import { Dialogue } from "shared/NPC";
 import { Server } from "shared/item/ItemUtils";
 
+/**
+ * Represents a single stage within a quest, including its description, position, focus, dialogue, and NPCs.
+ * Provides methods for configuring stage properties and handling stage events.
+ */
 export class Stage {
     description: string | undefined;
     position: Vector3 | undefined;
@@ -15,11 +26,21 @@ export class Stage {
     load?: ((stage: this) => (() => void));
     positionChanged = new Signal<(position?: Vector3) => void>();
 
+    /**
+     * Sets the description for this stage.
+     * @param description The stage description.
+     * @returns This stage instance.
+     */
     setDescription(description: string) {
         this.description = description;
         return this;
     }
 
+    /**
+     * Sets the focus instance for this stage, optionally tracking its position.
+     * @param instance The instance to focus on.
+     * @returns This stage instance.
+     */
     setFocus(instance?: Instance) {
         if (instance !== undefined && instance.IsA("BasePart")) {
             this.focus = instance;
@@ -29,6 +50,12 @@ export class Stage {
         return this;
     }
 
+    /**
+     * Sets the NPC for this stage by name, optionally setting it as the focus.
+     * @param npcName The name of the NPC.
+     * @param setAsFocus Whether to set the NPC as the focus.
+     * @returns This stage instance.
+     */
     setNPC(npcName: string, setAsFocus?: boolean) {
         this.npcModel = getNPCModel(npcName);
         this.npcHumanoid = this.npcModel.WaitForChild("Humanoid") as Humanoid;
@@ -37,6 +64,11 @@ export class Stage {
         return this;
     }
 
+    /**
+     * Sets the position for this stage and fires the positionChanged signal if changed.
+     * @param position The new position.
+     * @returns This stage instance.
+     */
     setPosition(position?: Vector3) {
         if (this.position !== position) {
             this.position = position;
@@ -45,11 +77,21 @@ export class Stage {
         return this;
     }
 
+    /**
+     * Sets the dialogue for this stage.
+     * @param dialogue The dialogue object.
+     * @returns This stage instance.
+     */
     setDialogue(dialogue: Dialogue) {
         this.dialogue = dialogue;
         return this;
     }
 
+    /**
+     * Registers a callback to run when the stage is loaded.
+     * @param load The load callback, returning an optional cleanup function.
+     * @returns This stage instance.
+     */
     onLoad(load: (stage: this) => (() => void)) {
         this.load = (stage) => {
             const callback = load(stage);
@@ -66,7 +108,12 @@ export class Stage {
         return this;
     }
 
-    /** Waits for the stage to start instead of as soon as the quest is available. */
+    /**
+     * Registers a callback to run when the stage starts, optionally with a load callback.
+     * @param start The start callback, returning an optional cleanup function.
+     * @param load Optional load callback.
+     * @returns This stage instance.
+     */
     onStart(start: (stage: this) => (() => void), load?: (stage: this) => (() => void)) {
         return this.onLoad((stage) => {
             const mainCallback = load === undefined ? undefined : load(stage);
@@ -84,6 +131,10 @@ export class Stage {
     }
 }
 
+/**
+ * Represents a multi-stage quest, including its metadata, stages, rewards, and completion dialogue.
+ * Provides methods for configuring quest properties, managing stages, and handling quest initialization.
+ */
 export default class Quest {
 
     static questsPerId: Map<string, Quest>;
@@ -113,11 +164,19 @@ export default class Quest {
     readonly initialized = new Signal<() => void>();
     completionDialogue: Dialogue | undefined;
 
+    /**
+     * Constructs a new Quest instance.
+     * @param id The unique quest identifier.
+     */
     constructor(id: string) {
         this.id = id;
         this.color = Quest.colors[string.byte(id)[0] % Quest.colors.size()];
     }
 
+    /**
+     * Initializes all quests from the quests folder, caching them by ID.
+     * @returns The map of quest IDs to Quest instances.
+     */
     static init() {
         if (this.questsPerId === undefined) {
             const questsFolder = script.Parent?.FindFirstChild("quests");
@@ -139,50 +198,101 @@ export default class Quest {
         return this.questsPerId;
     }
 
+    /**
+     * Retrieves a quest by its ID.
+     * @param questId The quest ID.
+     * @returns The Quest instance, or undefined if not found.
+     */
     static getQuest(questId: string) {
         return Quest.questsPerId?.get(questId);
     }
 
+    /**
+     * Sets the name of the quest.
+     * @param name The quest name.
+     * @returns This quest instance.
+     */
     setName(name: string) {
         this.name = name;
         return this;
     }
 
+    /**
+     * Sets the length (number of stages) of the quest.
+     * @param length The quest length.
+     * @returns This quest instance.
+     */
     setLength(length: number) {
         this.length = length;
         return this;
     }
 
+    /**
+     * Sets the level requirement for the quest.
+     * @param level The required level.
+     * @returns This quest instance.
+     */
     setLevel(level: number) {
         this.level = level;
         return this;
     }
 
+    /**
+     * Sets the order of the quest (for sorting).
+     * @param order The quest order.
+     * @returns This quest instance.
+     */
     setOrder(order: number) {
         this.order = order;
         return this;
     }
 
+    /**
+     * Sets the reward for completing the quest.
+     * @param reward The reward object.
+     * @returns This quest instance.
+     */
     setReward(reward: Reward) {
         this.reward = reward;
         return this;
     }
 
+    /**
+     * Sets a stage at the specified position in the quest.
+     * @param number The stage number (1-based).
+     * @param stage The Stage instance.
+     * @returns This quest instance.
+     */
     setStage(number: number, stage: Stage) {
         this.stages.insert(number - 1, stage);
         return this;
     }
 
+    /**
+     * Adds a stage to the end of the quest.
+     * @param stage The Stage instance.
+     * @returns This quest instance.
+     */
     addStage(stage: Stage) {
         this.stages.push(stage);
         return this;
     }
 
+    /**
+     * Sets the dialogue to be shown upon quest completion.
+     * @param dialogue The completion Dialogue.
+     * @returns This quest instance.
+     */
     setCompletionDialogue(dialogue: Dialogue) {
         this.completionDialogue = dialogue;
         return this;
     }
 
+    /**
+     * Registers a callback to run when the quest is initialized.
+     * @param callback The callback function.
+     * @returns This quest instance.
+     */
     onInit(callback: (quest: this) => void) {
         this.initialized.connect(() => callback(this));
         return this;
