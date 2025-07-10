@@ -75,11 +75,6 @@ export default class AdaptiveTabController implements OnInit {
         return blur;
     })();
 
-    /**
-     * Constructs the AdaptiveTabController.
-     * @param hotkeysController Controller for hotkey management.
-     * @param uiController Controller for general UI actions.
-     */
     constructor(private hotkeysController: HotkeysController, private uiController: UIController) {
     }
 

@@ -1,9 +1,23 @@
+/**
+ * @fileoverview ChallengeController - Client controller responsible for managing the challenge UI and challenge-related actions.
+ *
+ * Handles:
+ * - Displaying and updating the current challenge window
+ * - Managing challenge start/confirmation and leave actions
+ * - Integrating with UI and quests controllers
+ * - Observing challenge state and completion for live updates
+ *
+ * The controller manages challenge option buttons, confirmation logic, and reward display, coordinating with other controllers for UI and quest completion.
+ *
+ * @since 1.0.0
+ */
+
 import { Controller, OnInit, OnPhysics } from "@flamework/core";
 import { RunService } from "@rbxts/services";
 import QuestsController from "client/controllers/interface/QuestsController";
 import UIController from "client/controllers/UIController";
-import { getChallengeGui } from "shared/constants";
 import { ASSETS } from "shared/asset/GameAssets";
+import { getChallengeGui } from "shared/constants";
 import Packets from "shared/Packets";
 import { TRACKED_QUEST_WINDOW } from "./QuestsController";
 
@@ -27,18 +41,29 @@ export const CHALLENGE_TASK_WINDOW = TRACKED_QUEST_WINDOW.WaitForChild("Challeng
     RequirementLabel: TextLabel;
 };
 
+/**
+ * Controller responsible for managing the challenge UI, challenge start/leave actions, and integration with UI and quests controllers.
+ *
+ * Handles challenge option setup, confirmation, and reward display.
+ */
 @Controller()
 export default class ChallengeController implements OnPhysics, OnInit {
-
+    /** Confirmation label text for challenge start. */
     confirmationLabel = "Are you sure?";
+    /** Connection for the leave button. */
     leaveConnection?: RBXScriptConnection;
+    /** The current challenge GUI instance. */
     challengeGui?: ChallengeGui;
+    /** Debounce timer for leave action. */
     debounce = 0;
-
+    
     constructor(private uiController: UIController, private questsController: QuestsController) {
-
     }
 
+    /**
+     * Reloads and sets up challenge option buttons and leave button in the challenge GUI.
+     * @param challengeGui The challenge GUI to reload.
+     */
     reload(challengeGui: ChallengeGui) {
         challengeGui.ChallengeOptions.GetChildren().forEach((challengeOption) => {
             if (challengeOption.GetAttribute("loaded") === true || challengeOption.IsA("UIListLayout"))
@@ -89,6 +114,9 @@ export default class ChallengeController implements OnPhysics, OnInit {
         }
     }
 
+    /**
+     * Called every physics frame; ensures the challenge GUI is loaded and reloaded as needed.
+     */
     onPhysics() {
         const gui = this.challengeGui;
         if (gui !== undefined) {
@@ -99,6 +127,9 @@ export default class ChallengeController implements OnPhysics, OnInit {
         }
     }
 
+    /**
+     * Initializes the ChallengeController, sets up observers for challenge state and completion.
+     */
     onInit() {
         Packets.currentChallenge.observe((challengeInfo) => {
             if (challengeInfo.name === "") {

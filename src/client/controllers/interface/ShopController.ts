@@ -135,13 +135,6 @@ export default class ShopController implements OnInit, OnStart {
     /** Debounce for switching items. */
     switchDebounce = 0;
 
-    /**
-     * Constructs the ShopController.
-     * @param hotkeysController Controller for hotkey management.
-     * @param uiController Controller for general UI actions.
-     * @param adaptiveTabController Controller for adaptive tab UI.
-     * @param tooltipController Controller for tooltips.
-     */
     constructor(private hotkeysController: HotkeysController, private uiController: UIController,
         private adaptiveTabController: AdaptiveTabController, private tooltipController: TooltipController) {
     }

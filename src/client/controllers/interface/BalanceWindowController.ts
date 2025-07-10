@@ -89,12 +89,6 @@ export default class BalanceWindowController implements OnInit {
     /** Whether to format currencies with symbols and separators. */
     isFormatCurrencies = true;
 
-    /**
-     * Constructs the BalanceWindowController.
-     * @param uiController Controller for general UI actions.
-     * @param hotkeysController Controller for hotkey management.
-     * @param tooltipController Controller for tooltips.
-     */
     constructor(private uiController: UIController, private hotkeysController: HotkeysController, private tooltipController: TooltipController) {
     }
 
