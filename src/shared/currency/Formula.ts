@@ -13,6 +13,10 @@ const HALF = new OnoeNum(1/2);
 const ONETHIRD = new OnoeNum(1/3);
 const E = math.exp(1);
 
+/**
+ * Represents a chainable mathematical formula composed of operations.
+ * Supports addition, subtraction, multiplication, division, powers, roots, and logarithms.
+ */
 class Formula {
 
     operations = new Array<Operation>();
@@ -21,6 +25,11 @@ class Formula {
         
     }
 
+    /**
+     * Adds a value to the formula.
+     * @param number The value to add.
+     * @returns This Formula instance.
+     */
     add(number: Number) {
         this.operations.push({
             type: "add",
@@ -29,6 +38,11 @@ class Formula {
         return this;
     }
 
+    /**
+     * Subtracts a value from the formula.
+     * @param number The value to subtract.
+     * @returns This Formula instance.
+     */
     sub(number: Number) {
         this.operations.push({
             type: "sub",
@@ -37,6 +51,11 @@ class Formula {
         return this;
     }
 
+    /**
+     * Multiplies the formula by a value.
+     * @param number The value to multiply by.
+     * @returns This Formula instance.
+     */
     mul(number: Number) {
         this.operations.push({
             type: "mul",
@@ -45,6 +64,11 @@ class Formula {
         return this;
     }
 
+    /**
+     * Divides the formula by a value.
+     * @param number The value to divide by.
+     * @returns This Formula instance.
+     */
     div(number: Number) {
         this.operations.push({
             type: "div",
@@ -53,6 +77,11 @@ class Formula {
         return this;
     }
 
+    /**
+     * Raises the formula to the power of a value.
+     * @param number The exponent.
+     * @returns This Formula instance.
+     */
     pow(number: Number) {
         this.operations.push({
             type: "pow",
@@ -61,11 +90,20 @@ class Formula {
         return this;
     }
 
+    /**
+     * Applies a square root to the formula.
+     * @returns This Formula instance.
+     */
     sqrt() {
         this.operations.push({type: "sqrt"});
         return this;
     }
 
+    /**
+     * Applies a logarithm with the specified base to the formula.
+     * @param number The base of the logarithm.
+     * @returns This Formula instance.
+     */
     log(number: number) {
         this.operations.push({
             type: "log",
@@ -74,6 +112,10 @@ class Formula {
         return this;
     }
 
+    /**
+     * Applies a natural logarithm (ln) to the formula.
+     * @returns This Formula instance.
+     */
     ln() {
         this.operations.push({
             type: "ln"
@@ -81,6 +123,11 @@ class Formula {
         return this;
     }
 
+    /**
+     * Applies the formula's operations to a given OnoeNum value.
+     * @param number The input value.
+     * @returns The result after applying all operations.
+     */
     apply(number: OnoeNum) {
         for (const operation of this.operations) {
             switch (operation.type) {
@@ -116,6 +163,11 @@ class Formula {
         return number;
     }
 
+    /**
+     * Returns a string representation of the formula, using the provided variable name.
+     * @param nameOfX The variable name to use (e.g., "x").
+     * @returns The formula as a string.
+     */
     tostring(nameOfX: string) {
         let lastOperator: string | undefined;
         for (const operation of this.operations) {
