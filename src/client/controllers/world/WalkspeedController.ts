@@ -1,13 +1,34 @@
+/**
+ * @fileoverview WalkspeedController - Client controller for managing player walkspeed changes in special zones.
+ *
+ * Handles:
+ * - Adjusting player walkspeed when entering or leaving Obby zones
+ * - Sending personal chat messages on walkspeed changes
+ * - Integrating with ChatHookController for feedback
+ *
+ * The controller manages walkspeed transitions and feedback when the player interacts with Obby zones.
+ *
+ * @since 1.0.0
+ */
 import { Controller } from "@flamework/core";
 import { OnCharacterAdded } from "client/controllers/core/ModdingController";
 import ChatHookController from "client/controllers/permissions/ChatHookController";
 
+/**
+ * Controller responsible for managing player walkspeed changes in Obby zones and sending feedback messages.
+ *
+ * Handles walkspeed transitions and chat notifications on zone entry/exit.
+ */
 @Controller()
 export default class WalkspeedController implements OnCharacterAdded {
 
     lastCustomWalkspeed = 16;
     private debounce = false;
 
+    /**
+     * Handles character addition, sets up walkspeed logic for Obby zones.
+     * @param character The player's character model.
+     */
     onCharacterAdded(character: Model) {
         const humanoid = character.WaitForChild("Humanoid") as Humanoid;
         const rootPart = character.WaitForChild("HumanoidRootPart") as BasePart;
