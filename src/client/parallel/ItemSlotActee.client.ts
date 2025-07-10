@@ -1,21 +1,43 @@
 //!native
 //!optimize 2
 
+/**
+ * @fileoverview ItemSlotActee - Client-side script for rendering item viewports in UI slots.
+ * 
+ * Handles:
+ * - Loading and displaying 3D item models in ViewportFrames for inventory/shop UI.
+ * - Dynamic camera positioning and zoom effects on hover.
+ * - Coloring item descriptions based on currency.
+ * - Efficiently manages per-item viewport state and animation.
+ * 
+ * @since 1.0.0
+ */
+
 import { RunService } from "@rbxts/services";
 import { CURRENCY_DETAILS } from "shared/currency/CurrencyDetails";
 import Items from "shared/items/Items";
 
+/**
+ * Represents a running viewport instance for an item slot.
+ */
 type RunningViewport = {
     viewportFrame: ViewportFrame,
     delta: number,
     isTweening: boolean,
     zoom: number,
+    /**
+     * Rotates the camera around the item model.
+     * @param dt Delta time since last frame.
+     * @param care Whether to update regardless of hover/tween state.
+     * @param offset Optional CFrame offset.
+     */
     rotateCamera(dt: number, care: boolean, offset?: CFrame): void,
 };
 
 const runningViewports = new Array<RunningViewport>();
 const relsPerItem = new Map<string, [Vector3, number]>();
 
+// Precompute description coloring and model bounding info for each item
 for (const [id, item] of Items.itemsPerId) {
     let description = item.description;
     if (description !== undefined) {
@@ -42,7 +64,7 @@ for (const [id, item] of Items.itemsPerId) {
     relsPerItem.set(id, [cframe.Position.sub(model.GetPivot().Position), (math.max(size.X, size.Y, size.Z) * 0.8) + 1]);
 }
 
-
+// Animate all running item slot viewports each frame
 RunService.BindToRenderStep("ItemSlot Creation", 0, (dt) => {
     let i = 0;
     for (const rv of runningViewports) {
@@ -64,6 +86,10 @@ RunService.BindToRenderStep("ItemSlot Creation", 0, (dt) => {
     }
 });
 
+/**
+ * Handles loading and displaying an item model in a ViewportFrame.
+ * Sets up camera, model, and hover/tween logic.
+ */
 script.GetActor()!.BindToMessage("LoadViewportFrame", (viewportFrame: ViewportFrame, itemId: string) => {
     const camera = new Instance("Camera");
     camera.CameraType = Enum.CameraType.Scriptable;
