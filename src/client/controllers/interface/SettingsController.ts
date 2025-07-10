@@ -1,3 +1,16 @@
+/**
+ * @fileoverview SettingsController - Client controller for managing the settings window UI and hotkey/settings interactions.
+ *
+ * Handles:
+ * - Displaying and updating hotkey bindings
+ * - Managing toggleable settings and their UI state
+ * - Integrating with HotkeysController and UIController for feedback
+ * - Observing and updating settings state from the server
+ *
+ * The controller manages the settings window, hotkey rebinding, and toggleable options, providing a responsive settings interface.
+ *
+ * @since 1.0.0
+ */
 import SerikaNum from "@antivivi/serikanum";
 import { Controller, OnStart } from "@flamework/core";
 import { UserInputService } from "@rbxts/services";
@@ -29,6 +42,11 @@ export const SETTINGS_WINDOW = ADAPTIVE_TAB_MAIN_WINDOW.WaitForChild("Settings")
     };
 };
 
+/**
+ * Controller responsible for managing the settings window UI, hotkey rebinding, and toggleable settings.
+ *
+ * Handles hotkey UI, toggle state, and updates in response to server settings changes.
+ */
 @Controller()
 export default class SettingsController implements OnStart {
 
@@ -38,6 +56,10 @@ export default class SettingsController implements OnStart {
 
     }
 
+    /**
+     * Selects a hotkey option for rebinding and updates its UI.
+     * @param option The hotkey option to select.
+     */
     selectOption(option: HotkeyOption) {
         paintObjects(option.Bind, Color3.fromRGB(255, 138, 138));
         option.Bind.KeybindLabel.Text = "..";
@@ -45,6 +67,9 @@ export default class SettingsController implements OnStart {
         this.hotkeysController.bindsDisabled = true;
     }
 
+    /**
+     * Deselects the currently selected hotkey option and restores its UI.
+     */
     deselectOption() {
         const option = this.selectedOption;
         if (option === undefined) {
@@ -56,6 +81,11 @@ export default class SettingsController implements OnStart {
         task.delay(0.5, () => this.hotkeysController.bindsDisabled = false);
     }
 
+    /**
+     * Finds the Enum.KeyCode matching a given value.
+     * @param value The numeric value of the key code.
+     * @returns The matching Enum.KeyCode, or undefined.
+     */
     getMatchingKeyCodeFromValue(value: number) {
         const items = Enum.KeyCode.GetEnumItems();
         for (const keycode of items) {
@@ -65,6 +95,12 @@ export default class SettingsController implements OnStart {
         }
     }
 
+    /**
+     * Updates the toggle UI for a given setting.
+     * @param setting The setting name.
+     * @param enabled Whether the setting is enabled.
+     * @returns The toggle button instance, if found.
+     */
     refreshToggle(setting: string, enabled: boolean) {
         const toggle = SETTINGS_WINDOW.InteractionOptions.FindFirstChild(setting)?.FindFirstChild("Toggle");
         if (toggle === undefined) {
@@ -74,6 +110,9 @@ export default class SettingsController implements OnStart {
         return toggle;
     }
 
+    /**
+     * Starts the SettingsController, sets up hotkey and toggle UI, and observes settings changes.
+     */
     onStart() {
         this.hotkeysController.bindedKeys.forEach((value) => {
             const name = value.name;
