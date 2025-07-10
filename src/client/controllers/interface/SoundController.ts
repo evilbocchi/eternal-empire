@@ -1,3 +1,16 @@
+/**
+ * @fileoverview SoundController - Client controller for managing music and sound effects in the game.
+ *
+ * Handles:
+ * - Playing, fading in/out, and switching background music
+ * - Managing sound effect and music group volumes based on settings
+ * - Selecting music based on area, time of day, and challenge state
+ * - Integrating with UI and settings controllers for feedback
+ *
+ * The controller manages music playback, transitions, and sound effect volumes, providing a dynamic audio experience for the player.
+ *
+ * @since 1.0.0
+ */
 import { Controller, OnStart } from "@flamework/core";
 import { Lighting, ReplicatedStorage, SoundService, TweenService, Workspace } from "@rbxts/services";
 import { LOCAL_PLAYER, PLAYER_GUI } from "client/constants";
@@ -7,19 +20,37 @@ import { ASSETS, getSound, SOUND_EFFECTS_GROUP } from "shared/asset/GameAssets";
 import { MUSIC_GROUP } from "shared/constants";
 import Packets from "shared/Packets";
 
+/**
+ * Controller responsible for managing music and sound effects, including playback, transitions, and volume control.
+ *
+ * Handles music selection based on area, challenge state, and time of day, and integrates with settings for volume control.
+ */
 @Controller()
 export default class SoundController implements OnStart {
 
+    /** The default start music sound instance. */
     startMusic = ASSETS.WaitForChild("JJT Money Empire!") as Sound;
+    /** Label displaying the currently playing music. */
     currentlyPlayingLabel = SETTINGS_WINDOW.InteractionOptions.WaitForChild("CurrentlyPlaying").WaitForChild("Title") as TextLabel;
+    /** Whether music is enabled. */
     musicEnabled = true;
+    /** The music sound group. */
     musicGroup = SoundService.WaitForChild("Music") as SoundGroup;
+    /** The currently playing music sound. */
     playing = undefined as Sound | undefined;
+    /** Connection for music end event. */
     connection: RBXScriptConnection | undefined = undefined;
+    /** TweenInfo for sound transitions. */
     tweenInfo = new TweenInfo(0.2);
+    /** Folder containing challenge music. */
     challengePlaylist = ASSETS.WaitForChild("ChallengeMusic");
+    /** Whether the player is in a challenge. */
     inChallenge = false;
 
+    /**
+     * Fades out a sound by tweening its volume to 0, then stops it.
+     * @param sound The sound to fade out.
+     */
     fadeOut(sound: Sound) {
         const tween = TweenService.Create(sound, new TweenInfo(1), { Volume: 0 });
         tween.Completed.Once(() => {
@@ -28,6 +59,11 @@ export default class SoundController implements OnStart {
         tween.Play();
     }
 
+    /**
+     * Fades in a sound by tweening its volume up and playing it.
+     * @param sound The sound to fade in.
+     * @returns The sound instance.
+     */
     fadeIn(sound: Sound) {
         if (sound.SoundGroup === undefined)
             sound.SoundGroup = this.musicGroup;
@@ -44,6 +80,10 @@ export default class SoundController implements OnStart {
         return sound;
     }
 
+    /**
+     * Refreshes the background music based on area, challenge, and settings.
+     * @param force If true, forces a music refresh even if already playing.
+     */
     refreshMusic(force?: boolean) {
         let retrieved: Sound | undefined;
         let area: AreaId | undefined;
@@ -89,6 +129,11 @@ export default class SoundController implements OnStart {
         });
     }
 
+    /**
+     * Selects a random music track for a given area, considering challenge and time of day.
+     * @param id The AreaId to select music for.
+     * @returns The selected Sound instance, or undefined.
+     */
     getRandomMusic(id: AreaId): Sound | undefined {
         const areaMusicFolder = MUSIC_GROUP.FindFirstChild(id);
         if (areaMusicFolder === undefined)
@@ -107,10 +152,17 @@ export default class SoundController implements OnStart {
         return sounds[newCurrent] as Sound;
     }
 
+    /**
+     * Determines if it is currently night in the game.
+     * @returns True if night, false otherwise.
+     */
     isNight() {
         return math.abs(Lighting.ClockTime - 12) / 12 > 0.5;
     }
 
+    /**
+     * Initializes the SoundController, sets up settings observers and music refresh logic.
+     */
     onStart() {
         let ready = false;
         Packets.settings.observe((value) => {
