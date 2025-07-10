@@ -1,3 +1,17 @@
+/**
+ * @fileoverview BuildController - Client controller for managing item placement, selection, and build mode UI.
+ *
+ * Handles:
+ * - Selecting, placing, rotating, and deleting buildable items
+ * - Managing build mode UI and hotkeys
+ * - Animating placement and selection transitions
+ * - Integrating with UIController and AdaptiveTabController
+ * - Enforcing build restrictions and area bounds
+ *
+ * The controller maintains the state of selected items, manages build-related hotkeys, and coordinates with other systems for placement and UI feedback.
+ *
+ * @since 1.0.0
+ */
 import { weldModel } from "@antivivi/vrldk";
 import { Controller, OnInit, OnStart } from "@flamework/core";
 import { Debris, HttpService, ReplicatedStorage, TweenService, UserInputService, Workspace } from "@rbxts/services";
@@ -31,6 +45,11 @@ export const BUILD_WINDOW = INTERFACE.WaitForChild("BuildWindow") as Frame & {
     };
 };
 
+/**
+ * Controller responsible for managing build mode, item placement, selection, and related UI and hotkeys.
+ *
+ * Handles selection, placement, rotation, and deletion of items, and coordinates build mode UI and restrictions.
+ */
 @Controller()
 export default class BuildController implements OnInit, OnStart {
 
@@ -76,12 +95,16 @@ export default class BuildController implements OnInit, OnStart {
 
     /**
      * Whether the player is restricted from building.
+     * @returns True if restricted, false otherwise.
      */
     getRestricted() {
         const buildLevel = LOCAL_PLAYER.GetAttribute("PermissionLevel") as number | undefined ?? 0;
         return (Packets.permLevels.get().build ?? 0) > buildLevel || SHOP_GUI.Enabled;
     }
 
+    /**
+     * Refreshes the build UI and button visibility based on selection and restrictions.
+     */
     refresh() {
         let refreshButton: (button: BuildOption) => void;
 
@@ -126,7 +149,6 @@ export default class BuildController implements OnInit, OnStart {
 
     /**
      * Updates hovering states of models.
-     * 
      * @param model The model to set as hovering.
      */
     hover(model: Model | undefined) {
@@ -143,6 +165,10 @@ export default class BuildController implements OnInit, OnStart {
         this.hovering = model;
     }
 
+    /**
+     * Selects the main model for placement.
+     * @param model The model to select.
+     */
     mainSelect(model: Model) {
         this.selected.set(model, new CFrame());
         this.preselectCFrame = model.PrimaryPart!.CFrame;
@@ -155,12 +181,20 @@ export default class BuildController implements OnInit, OnStart {
         this.onMouseMove(true, false);
     }
 
+    /**
+     * Deselects a model and removes it from selection.
+     * @param model The model to deselect.
+     */
     deselect(model: Model) {
         model.Destroy();
         this.selected.delete(model);
         this.refresh();
     }
 
+    /**
+     * Deselects all models.
+     * @param noRefresh If true, skips UI refresh.
+     */
     deselectAll(noRefresh?: boolean) {
         for (const [model] of this.selected)
             model.Destroy();
@@ -169,6 +203,10 @@ export default class BuildController implements OnInit, OnStart {
             this.refresh();
     }
 
+    /**
+     * Sets the transparency of build area grids.
+     * @param transparency The transparency value to set.
+     */
     setGridTransparency(transparency: number) {
         for (const [_id, area] of pairs(AREAS)) {
             const grid = area.getGrid();
@@ -181,6 +219,9 @@ export default class BuildController implements OnInit, OnStart {
         }
     }
 
+    /**
+     * Reverts selected items to their initial positions and rotations.
+     */
     revertSelected() {
         const data = new Array<PlacingInfo>();
         for (const [selected] of this.selected) {
@@ -196,6 +237,14 @@ export default class BuildController implements OnInit, OnStart {
         Packets.placeItems.invoke(data);
     }
 
+    /**
+     * Adds a model for placement, setting up attributes and selection visuals.
+     * @param item The item to place.
+     * @param uuid The unique identifier for the item (optional).
+     * @param initialPosition The initial position for placement (optional).
+     * @param initialRotation The initial rotation for placement (optional).
+     * @returns The created item model.
+     */
     addPlacingModel(item: Item, uuid?: string, initialPosition?: Vector3, initialRotation?: number) {
         this.debounce = tick();
         const itemModel = item.MODEL?.Clone();
@@ -237,6 +286,10 @@ export default class BuildController implements OnInit, OnStart {
         return itemModel;
     }
 
+    /**
+     * Attempts to place all selected items in the world.
+     * @returns True if placement succeeded, false otherwise.
+     */
     placeSelected() {
         const mainSelected = this.mainSelected;
         if (mainSelected === undefined)
@@ -302,6 +355,11 @@ export default class BuildController implements OnInit, OnStart {
         return true;
     }
 
+    /**
+     * Handles mouse movement for selection and placement logic.
+     * @param changePos Whether to update position.
+     * @param animationsEnabled Whether to animate movement.
+     */
     onMouseMove(changePos = true, animationsEnabled = this.animationsEnabled) {
         const size = this.selected.size();
         if (size === 0) { // nothing selected, perform hovering logic
@@ -381,6 +439,9 @@ export default class BuildController implements OnInit, OnStart {
         this.lastMovedToCFrame = cframe;
     }
 
+    /**
+     * Handles mouse down events for selection and dragging.
+     */
     onMouseDown() {
         if (this.getRestricted() === true)
             return;
@@ -394,6 +455,10 @@ export default class BuildController implements OnInit, OnStart {
         this.lastCameraCFrame = cameraCFrame;
     }
 
+    /**
+     * Handles mouse up events for placement and dragging.
+     * @param useCurrentPos If true, uses the current position for placement.
+     */
     onMouseUp(useCurrentPos?: boolean) {
         if (this.getRestricted() === true)
             return;
@@ -455,6 +520,9 @@ export default class BuildController implements OnInit, OnStart {
         this.lastSelectingCFrame = selectingCFrame;
     }
 
+    /**
+     * Initializes the BuildController, sets up hotkeys, listeners, and build mode UI.
+     */
     onInit() {
         Packets.settings.observe((value) => this.animationsEnabled = value.BuildAnimation);
 
@@ -561,6 +629,9 @@ export default class BuildController implements OnInit, OnStart {
         });
     }
 
+    /**
+     * Starts the BuildController, sets up sandbox baseplate bounds if enabled.
+     */
     onStart() {
         if (Sandbox.getEnabled()) {
             this.baseplateBounds = Sandbox.createBaseplateBounds();
