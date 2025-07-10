@@ -1,7 +1,16 @@
 import { getAsset } from "shared/asset/AssetMap";
 
 declare global {
+
+    /**
+     * Represents a currency in the game.
+     * Each currency has specific details such as layout order that can be obtained from {@link CURRENCY_DETAILS}.
+     */
     type Currency = keyof (typeof details);
+
+    /**
+     * Represents the details of a currency, including its layout order, format, color, image, and page.
+     */
     type CurrencyDetails = Combine<typeof details[Currency]>;
 }
 

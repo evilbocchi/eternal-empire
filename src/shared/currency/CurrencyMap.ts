@@ -5,7 +5,15 @@ import { BaseOnoeNum, OnoeNum } from "@antivivi/serikanum";
 import { CURRENCIES } from "shared/currency/CurrencyDetails";
 
 declare global {
+    /**
+     * A map of currencies and their amounts.
+     */
     type CurrencyMap = Map<Currency, OnoeNum>;
+
+    /**
+     * A base currency map that uses BaseOnoeNum for amounts.
+     * This is used for operations that do not require the full functionality of OnoeNum.
+     */
     type BaseCurrencyMap = Map<Currency, BaseOnoeNum>;
 }
 
