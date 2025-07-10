@@ -1,14 +1,36 @@
+/**
+ * @fileoverview ChatHookController - Client controller for customizing chat appearance and handling system messages.
+ *
+ * Handles:
+ * - Customizing chat message colors and tags based on metadata
+ * - Displaying system and personal messages in chat channels
+ * - Integrating with text channels and listening for new messages
+ *
+ * The controller manages chat message formatting, color overrides, and system message display for enhanced chat experience.
+ *
+ * @since 1.0.0
+ */
 import ComputeNameColor from "@antivivi/rbxnamecolor";
 import { Controller, OnInit, OnStart } from "@flamework/core";
 import { LOCAL_PLAYER } from "client/constants";
 import { getTextChannels } from "shared/constants";
 import Packets from "shared/Packets";
 
+/**
+ * Controller responsible for customizing chat appearance and handling system messages.
+ *
+ * Handles chat message formatting, color overrides, and system/personal message display.
+ */
 @Controller()
 export default class ChatHookController implements OnInit, OnStart {
 
+    /** Hex color string for system messages. */
     systemColor = new Color3(0.05, 0.75, 0.05).ToHex();
 
+    /**
+     * Sets up a chat channel for custom message formatting and color overrides.
+     * @param channel The chat channel instance to set up.
+     */
     onChannelAdded(channel: Instance) {
         if (!channel.IsA("TextChannel")) {
             return;
@@ -57,18 +79,35 @@ export default class ChatHookController implements OnInit, OnStart {
         });
     }
 
+    /**
+     * Displays a personal system message in the player's chat channel.
+     * @param message The message to display.
+     * @param metadata Optional metadata for formatting.
+     */
     showPersonalMessage(message: string, metadata = "") {
         this.display(LOCAL_PLAYER.Name, message, metadata);
     }
 
+    /**
+     * Displays a system message in the specified chat channel.
+     * @param channel The channel name.
+     * @param message The message to display.
+     * @param metadata Optional metadata for formatting.
+     */
     private display(channel: string, message: string, metadata: string) {
         (getTextChannels().WaitForChild(channel) as TextChannel).DisplaySystemMessage(message, metadata);
     }
 
+    /**
+     * Initializes the ChatHookController, sets up system message listener.
+     */
     onInit() {
         Packets.systemMessageSent.connect((channel, message, metadata) => this.display(channel, message, metadata));
     }
 
+    /**
+     * Starts the ChatHookController, sets up chat channel listeners for formatting.
+     */
     onStart() {
         const TEXT_CHANNELS = getTextChannels();
         TEXT_CHANNELS.ChildAdded.Connect((child) => this.onChannelAdded(child));
