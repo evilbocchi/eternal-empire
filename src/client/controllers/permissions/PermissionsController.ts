@@ -1,3 +1,16 @@
+/**
+ * @fileoverview PermissionsController - Client controller for managing permissions, commands, and donation/game modification events.
+ *
+ * Handles:
+ * - Displaying and updating command list UI based on permission level
+ * - Handling donation and code sharing events
+ * - Integrating with UIController, EffectController, and AdaptiveTabController
+ * - Responding to game modification packets for developer/admin actions
+ *
+ * The controller manages command UI, permission-based filtering, and feedback for donation and game modification events.
+ *
+ * @since 1.0.0
+ */
 import { Controller, OnInit } from "@flamework/core";
 import CameraShaker from "@rbxts/camera-shaker";
 import { TextChatService } from "@rbxts/services";
@@ -33,6 +46,11 @@ export const COMMANDS_WINDOW = ADAPTIVE_TAB_MAIN_WINDOW.WaitForChild("Commands")
     };
 };
 
+/**
+ * Controller responsible for managing permissions, command UI, and donation/game modification events.
+ *
+ * Handles command list display, permission filtering, and feedback for donation and code sharing.
+ */
 @Controller()
 export default class PermissionsController implements OnInit {
 
@@ -40,6 +58,9 @@ export default class PermissionsController implements OnInit {
 
     }
 
+    /**
+     * Initializes the PermissionsController, sets up listeners for donations, tab openings, and game modifications.
+     */
     onInit() {
         Packets.donationGiven.connect(() => {
             this.uiController.playSound("PowerUp.mp3");
