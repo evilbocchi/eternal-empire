@@ -2,7 +2,7 @@
 //!optimize 2
 
 /**
- * @fileoverview UnlockedAreasService - Manages unlocking and locking of game areas for the current empire.
+ * @fileoverview Manages unlocking and locking of game areas for the current empire.
  *
  * This service provides:
  * - Checking if an area is unlocked

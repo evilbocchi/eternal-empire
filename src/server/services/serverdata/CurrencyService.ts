@@ -2,7 +2,7 @@
 //!optimize 2
 
 /**
- * @fileoverview CurrencyService - Core currency management system for the game.
+ * @fileoverview Core currency management system for the game.
  * 
  * This service handles:
  * - Currency balance tracking and manipulation

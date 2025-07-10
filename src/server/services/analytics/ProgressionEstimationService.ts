@@ -2,7 +2,7 @@
 //!optimize 2
 
 /**
- * @fileoverview ProgressionEstimationService - Estimates game progression and item acquisition times.
+ * @fileoverview Estimates game progression and item acquisition times.
  *
  * This service provides:
  * - Calculating time to obtain items based on revenue and requirements

@@ -1,5 +1,5 @@
 /**
- * @fileoverview DetailsController - Client controller for managing the details and position windows in the UI.
+ * @fileoverview Client controller for managing the details and position windows in the UI.
  *
  * Handles:
  * - Displaying character position in the UI

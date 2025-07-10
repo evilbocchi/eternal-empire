@@ -2,7 +2,7 @@
 //!optimize 2
 
 /**
- * @fileoverview ChallengeService - Manages challenge gameplay, UI, and progression.
+ * @fileoverview Manages challenge gameplay, UI, and progression.
  *
  * This service handles:
  * - Starting and ending challenges

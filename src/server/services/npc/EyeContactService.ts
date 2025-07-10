@@ -1,5 +1,5 @@
 /**
- * @fileoverview EyeContactService - Handles NPC eye contact and gaze tracking for immersion.
+ * @fileoverview Handles NPC eye contact and gaze tracking for immersion.
  *
  * This service provides:
  * - NPC eye contact logic

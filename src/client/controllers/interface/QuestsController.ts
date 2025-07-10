@@ -1,5 +1,5 @@
 /**
- * @fileoverview QuestsController - Client controller for managing quest UI, tracking, and notifications.
+ * @fileoverview Client controller for managing quest UI, tracking, and notifications.
  *
  * Handles:
  * - Displaying and updating quest progress and tracked quest information

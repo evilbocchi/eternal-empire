@@ -1,5 +1,5 @@
 /**
- * @fileoverview AtmosphereController - Client controller for managing area lighting and atmosphere effects.
+ * @fileoverview Client controller for managing area lighting and atmosphere effects.
  *
  * Handles:
  * - Tracking and updating light sources in each area

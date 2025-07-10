@@ -1,5 +1,5 @@
 /**
- * @fileoverview AdaptiveTabController - Client controller responsible for managing the adaptive tab UI and sidebar navigation.
+ * @fileoverview Client controller responsible for managing the adaptive tab UI and sidebar navigation.
  *
  * Handles:
  * - Showing and hiding the adaptive tab and its windows

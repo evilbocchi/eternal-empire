@@ -1,5 +1,5 @@
 /**
- * @fileoverview SoundController - Client controller for managing music and sound effects in the game.
+ * @fileoverview Client controller for managing music and sound effects in the game.
  *
  * Handles:
  * - Playing, fading in/out, and switching background music

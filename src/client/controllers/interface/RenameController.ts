@@ -1,5 +1,5 @@
 /**
- * @fileoverview RenameController - Client controller for managing the rename window UI and rename actions.
+ * @fileoverview Client controller for managing the rename window UI and rename actions.
  *
  * Handles:
  * - Submitting rename requests using Funds or Robux

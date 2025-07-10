@@ -1,5 +1,5 @@
 /**
- * @fileoverview SanityService - Validates game content for logical consistency.
+ * @fileoverview Validates game content for logical consistency.
  *
  * This service provides:
  * - Checks for item and harvestable configuration issues

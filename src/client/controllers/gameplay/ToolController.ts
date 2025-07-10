@@ -1,5 +1,5 @@
 /**
- * @fileoverview ToolController - Client controller for managing tool usage, harvesting, and backpack UI.
+ * @fileoverview Client controller for managing tool usage, harvesting, and backpack UI.
  *
  * Handles:
  * - Tool equipping, unequipping, and hotkey selection

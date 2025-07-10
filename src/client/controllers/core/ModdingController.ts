@@ -1,5 +1,5 @@
 /**
- * @fileoverview ModdingController - Client controller for managing modding listeners and character events.
+ * @fileoverview Client controller for managing modding listeners and character events.
  *
  * Handles:
  * - Registering and deregistering listeners for character addition

@@ -2,7 +2,7 @@
 //!optimize 2
 
 /**
- * @fileoverview NamedUpgradeService - Manages upgrades, their purchase, and synchronization.
+ * @fileoverview Manages upgrades, their purchase, and synchronization.
  *
  * This service provides:
  * - Tracking and updating upgrade amounts

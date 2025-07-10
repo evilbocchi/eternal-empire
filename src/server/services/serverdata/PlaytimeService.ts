@@ -2,7 +2,7 @@
 //!optimize 2
 
 /**
- * @fileoverview PlaytimeService - Player session and total playtime tracking system.
+ * @fileoverview Player session and total playtime tracking system.
  * 
  * This service handles:
  * - Total playtime accumulation across all sessions

@@ -1,5 +1,5 @@
 /**
- * @fileoverview IntroController - Client controller for managing the intro sequence and related UI/camera effects.
+ * @fileoverview Client controller for managing the intro sequence and related UI/camera effects.
  *
  * Handles:
  * - Playing the intro cutscene sequence for new players

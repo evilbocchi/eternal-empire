@@ -1,5 +1,5 @@
 /**
- * @fileoverview SettingsService - Handles player settings and hotkey management.
+ * @fileoverview Handles player settings and hotkey management.
  *
  * This service is responsible for:
  * - Loading and syncing player settings on join

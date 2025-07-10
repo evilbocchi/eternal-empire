@@ -2,7 +2,7 @@
 //!optimize 2
 
 /**
- * @fileoverview ToolService - Manages player tools, harvesting logic, and harvestable objects.
+ * @fileoverview Manages player tools, harvesting logic, and harvestable objects.
  *
  * This service provides:
  * - Assigning best tools to players and removing worse tools

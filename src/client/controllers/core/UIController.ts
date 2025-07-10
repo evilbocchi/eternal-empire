@@ -1,5 +1,5 @@
 /**
- * @fileoverview UIController - Client controller for managing the main player interface and asset preloading.
+ * @fileoverview Client controller for managing the main player interface and asset preloading.
  *
  * Handles:
  * - Playing UI sounds

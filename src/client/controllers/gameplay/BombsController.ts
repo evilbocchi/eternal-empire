@@ -1,5 +1,5 @@
 /**
- * @fileoverview BombsController - Client controller for managing bomb-related UI and gameplay interactions.
+ * @fileoverview Client controller for managing bomb-related UI and gameplay interactions.
  *
  * Handles:
  * - Setting up bomb board GUIs for purchasing and using bombs

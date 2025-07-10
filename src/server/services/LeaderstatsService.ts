@@ -1,5 +1,5 @@
 /**
- * @fileoverview LeaderstatsService - Handles creation and management of player leaderstats.
+ * @fileoverview Handles creation and management of player leaderstats.
  *
  * This service provides:
  * - Creating and retrieving leaderstats folders for players

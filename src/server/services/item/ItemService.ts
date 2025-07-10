@@ -2,7 +2,7 @@
 //!optimize 2
 
 /**
- * @fileoverview ItemService - Core item management system for the game.
+ * @fileoverview Core item management system for the game.
  * 
  * This service handles:
  * - Item inventory management (buying, placing, unplacing)

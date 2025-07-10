@@ -1,5 +1,5 @@
 /**
- * @fileoverview SettingsController - Client controller for managing the settings window UI and hotkey/settings interactions.
+ * @fileoverview Client controller for managing the settings window UI and hotkey/settings interactions.
  *
  * Handles:
  * - Displaying and updating hotkey bindings

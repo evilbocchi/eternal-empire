@@ -1,5 +1,5 @@
 /**
- * @fileoverview DialogueController - Client controller for managing NPC dialogue windows and chat integration.
+ * @fileoverview Client controller for managing NPC dialogue windows and chat integration.
  *
  * Handles:
  * - Displaying NPC dialogue windows and headshots

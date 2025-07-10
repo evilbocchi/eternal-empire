@@ -2,7 +2,7 @@
 //!optimize 2
 
 /**
- * @fileoverview DataService - Core data management service for empires and players.
+ * @fileoverview Core data management service for empires and players.
  * 
  * This service handles:
  * - Empire and player data loading/saving via ProfileService

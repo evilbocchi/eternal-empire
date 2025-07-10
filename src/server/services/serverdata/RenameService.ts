@@ -2,7 +2,7 @@
 //!optimize 2
 
 /**
- * @fileoverview RenameService - Empire name change management system.
+ * @fileoverview Empire name change management system.
  * 
  * This service handles:
  * - Empire name validation and filtering

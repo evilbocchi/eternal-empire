@@ -1,5 +1,5 @@
 /**
- * @fileoverview LoadingWindowController - Client controller for managing the loading window UI and transitions.
+ * @fileoverview Client controller for managing the loading window UI and transitions.
  *
  * Handles:
  * - Showing and hiding the loading window with animations

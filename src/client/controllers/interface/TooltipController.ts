@@ -1,6 +1,6 @@
 
 /**
- * @fileoverview TooltipController - Client controller responsible for managing and displaying tooltips in the user interface.
+ * @fileoverview Client controller responsible for managing and displaying tooltips in the user interface.
  * 
  * It provides logic for showing item or message tooltips, animating their appearance/disappearance, and formatting item descriptions with metadata and currency highlighting.
  * The Tooltip class encapsulates tooltip data and rendering logic, supporting both generic messages and item-specific tooltips with rich formatting.

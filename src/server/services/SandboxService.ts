@@ -1,5 +1,5 @@
 /**
- * @fileoverview SandboxService - Handles special logic for sandbox mode.
+ * @fileoverview Handles special logic for sandbox mode.
  *
  * This service is responsible for modifying the game world when sandbox mode is enabled.
  * Specifically, it removes chests from all areas to prevent progression or rewards

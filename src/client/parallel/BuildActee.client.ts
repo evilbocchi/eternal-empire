@@ -2,7 +2,7 @@
 //!native
 
 /**
- * @fileoverview BuildActee - Client-side script for managing item placement in build mode.
+ * @fileoverviewside script for managing item placement in build mode.
  * 
  * Handles:
  * - Loading and managing item models for placement.

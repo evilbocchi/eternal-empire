@@ -1,5 +1,5 @@
 /**
- * @fileoverview LeaderboardService - Manages all leaderboard logic and display in the game.
+ * @fileoverview Manages all leaderboard logic and display in the game.
  *
  * This service handles:
  * - Updating and displaying leaderboards for time played, donations, and all currencies

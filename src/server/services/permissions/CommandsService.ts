@@ -1,5 +1,5 @@
 /**
- * @fileoverview CommandsService - Comprehensive chat command system with permission-based access control.
+ * @fileoverviewol.
  * 
  * This service handles:
  * - Registration and management of all chat commands in the game

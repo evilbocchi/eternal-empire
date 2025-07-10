@@ -2,7 +2,7 @@
 //!optimize 2
 
 /**
- * @fileoverview LevelService - Player level and experience management system.
+ * @fileoverview Player level and experience management system.
  * 
  * This service handles:
  * - Player level progression and XP tracking

@@ -1,5 +1,5 @@
 /**
- * @fileoverview PermissionsController - Client controller for managing permissions, commands, and donation/game modification events.
+ * @fileoverview Client controller for managing permissions, commands, and donation/game modification events.
  *
  * Handles:
  * - Displaying and updating command list UI based on permission level

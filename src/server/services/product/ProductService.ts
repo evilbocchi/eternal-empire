@@ -1,5 +1,5 @@
 /**
- * @fileoverview ProductService - Handles Roblox developer product purchases and processing.
+ * @fileoverview Handles Roblox developer product purchases and processing.
  *
  * This service:
  * - Registers product purchase handlers for specific product IDs

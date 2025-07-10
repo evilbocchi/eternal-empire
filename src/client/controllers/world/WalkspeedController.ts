@@ -1,5 +1,5 @@
 /**
- * @fileoverview WalkspeedController - Client controller for managing player walkspeed changes in special zones.
+ * @fileoverview Client controller for managing player walkspeed changes in special zones.
  *
  * Handles:
  * - Adjusting player walkspeed when entering or leaving Obby zones

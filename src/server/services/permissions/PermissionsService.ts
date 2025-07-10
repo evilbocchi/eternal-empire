@@ -1,5 +1,5 @@
 /**
- * @fileoverview PermissionsService - Manages player permissions, moderation, and command handling.
+ * @fileoverview Manages player permissions, moderation, and command handling.
  * 
  * This service is responsible for:
  * - Managing permission levels (banned, trusted, managers, owner, etc.)

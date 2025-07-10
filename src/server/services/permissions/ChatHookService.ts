@@ -1,5 +1,5 @@
 /**
- * @fileoverview ChatHookService - Manages system and private chat messaging for players.
+ * @fileoverview Manages system and private chat messaging for players.
  *
  * This service:
  * - Sends private and server system messages

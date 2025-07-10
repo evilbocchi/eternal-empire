@@ -1,5 +1,5 @@
 /**
- * @fileoverview LogController - Client controller for managing the logs window and displaying player and game logs.
+ * @fileoverview Client controller for managing the logs window and displaying player and game logs.
  *
  * Handles:
  * - Creating and displaying log entries for various game events

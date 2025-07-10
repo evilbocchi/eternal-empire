@@ -1,5 +1,5 @@
 /**
- * @fileoverview CollisionGroupService - Configures and manages Roblox physics collision groups.
+ * @fileoverview Configures and manages Roblox physics collision groups.
  *
  * This service:
  * - Registers all required collision groups for the game world

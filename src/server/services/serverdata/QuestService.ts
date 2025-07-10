@@ -2,7 +2,7 @@
 //!optimize 2
 
 /**
- * @fileoverview QuestService - Quest progression and stage management system.
+ * @fileoverview Quest progression and stage management system.
  * 
  * This service handles:
  * - Quest stage progression tracking

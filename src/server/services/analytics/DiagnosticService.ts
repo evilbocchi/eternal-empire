@@ -1,5 +1,5 @@
 /**
- * @fileoverview DiagnosticService - Monitors game performance and system health.
+ * @fileoverview Monitors game performance and system health.
  * 
  * This service provides:
  * - Physics throttling detection and warnings

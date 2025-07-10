@@ -1,5 +1,5 @@
 /**
- * @fileoverview StartWindowController - Client controller for managing the start screen, empire selection, and title UI.
+ * @fileoverview Client controller for managing the start screen, empire selection, and title UI.
  *
  * Handles:
  * - Showing and hiding the start/title screen and its transitions

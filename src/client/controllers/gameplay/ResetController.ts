@@ -1,5 +1,5 @@
 /**
- * @fileoverview ResetController - Client controller for handling reset events, animations, and camera effects.
+ * @fileoverview Client controller for handling reset events, animations, and camera effects.
  *
  * Handles:
  * - Listening for reset events and updating UI

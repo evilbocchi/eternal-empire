@@ -2,7 +2,7 @@
 //!optimize 2
 
 /**
- * @fileoverview EffectController - Client controller for managing world effects, item visuals, and area lighting.
+ * @fileoverview Client controller for managing world effects, item visuals, and area lighting.
  *
  * Handles:
  * - Loading and applying item and droplet effects

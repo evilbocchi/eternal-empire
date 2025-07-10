@@ -1,5 +1,5 @@
 /**
- * @fileoverview DarkMatterService - Handles Dark Matter boosts and GUI updates.
+ * @fileoverview Handles Dark Matter boosts and GUI updates.
  *
  * This service provides:
  * - Calculating currency boosts based on Dark Matter amount

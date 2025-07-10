@@ -1,5 +1,5 @@
 /**
- * @fileoverview DialogueService - Handles NPC dialogue, interaction, and animation logic.
+ * @fileoverview Handles NPC dialogue, interaction, and animation logic.
  *
  * This service manages:
  * - Dialogue state and progression for NPCs

@@ -1,5 +1,5 @@
 /**
- * @fileoverview ModdingService - Provides a listener system for player join events.
+ * @fileoverview Provides a listener system for player join events.
  *
  * This service allows other services to register for OnPlayerJoined events,
  * ensuring modular and extensible player join logic.

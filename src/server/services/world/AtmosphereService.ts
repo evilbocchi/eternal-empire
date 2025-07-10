@@ -2,7 +2,7 @@
 //!optimize 2
 
 /**
- * @fileoverview AtmosphereService - Handles environmental effects such as lighting.
+ * @fileoverview Handles environmental effects such as lighting.
  *
  * This service is responsible for:
  * - Progressing the in-game time by updating Lighting.ClockTime

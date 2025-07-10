@@ -1,5 +1,5 @@
 /**
- * @fileoverview AreaController - Client controller for managing area UI, area unlocks, and area-specific stat bars.
+ * @fileoverviewspecific stat bars.
  *
  * Handles:
  * - Displaying and updating area stat bars (droplet limit, grid size, item count)

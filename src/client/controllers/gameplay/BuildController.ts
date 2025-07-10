@@ -1,5 +1,5 @@
 /**
- * @fileoverview BuildController - Client controller for managing item placement, selection, and build mode UI.
+ * @fileoverview Client controller for managing item placement, selection, and build mode UI.
  *
  * Handles:
  * - Selecting, placing, rotating, and deleting buildable items

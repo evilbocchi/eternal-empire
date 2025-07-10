@@ -2,7 +2,7 @@
 //!optimize 2
 
 /**
- * @fileoverview ItemSlotActee - Client-side script for rendering item viewports in UI slots.
+ * @fileoverviewside script for rendering item viewports in UI slots.
  * 
  * Handles:
  * - Loading and displaying 3D item models in ViewportFrames for inventory/shop UI.

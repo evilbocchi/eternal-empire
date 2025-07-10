@@ -1,5 +1,5 @@
 /**
- * @fileoverview BalanceWindowController - Client controller responsible for managing the balance window UI and currency display.
+ * @fileoverview Client controller responsible for managing the balance window UI and currency display.
  *
  * Handles:
  * - Displaying player currency balances and income

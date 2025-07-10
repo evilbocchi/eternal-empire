@@ -1,5 +1,5 @@
 /**
- * @fileoverview ChallengeController - Client controller responsible for managing the challenge UI and challenge-related actions.
+ * @fileoverviewrelated actions.
  *
  * Handles:
  * - Displaying and updating the current challenge window

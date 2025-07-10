@@ -1,6 +1,6 @@
 //!native
 /**
- * @fileoverview ShopController - Client controller responsible for managing the in-game shop interface and item purchasing logic.
+ * @fileoverviewgame shop interface and item purchasing logic.
  *
  * Handles:
  * - Displaying and filtering shop items

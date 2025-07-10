@@ -2,7 +2,7 @@
 //!native
 
 /**
- * @fileoverview NPCNavigationService - Handles NPC pathfinding, navigation, and game speed effects.
+ * @fileoverviewg, navigation, and game speed effects.
  *
  * This service manages:
  * - NPC pathfinding and movement using Roblox's PathfindingService

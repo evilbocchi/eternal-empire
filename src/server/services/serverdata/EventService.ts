@@ -2,7 +2,7 @@
 //!optimize 2
 
 /**
- * @fileoverview EventService - Event completion tracking system.
+ * @fileoverview Event completion tracking system.
  * 
  * This service handles:
  * - Tracking completion status of game events

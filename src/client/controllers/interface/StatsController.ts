@@ -1,5 +1,5 @@
 /**
- * @fileoverview StatsController - Client controller for managing the stats window and displaying player statistics.
+ * @fileoverview Client controller for managing the stats window and displaying player statistics.
  *
  * Handles:
  * - Displaying playtime, session time, and other tracked stats

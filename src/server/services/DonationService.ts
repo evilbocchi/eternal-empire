@@ -1,5 +1,5 @@
 /**
- * @fileoverview DonationService - Tracks and updates player donation stats.
+ * @fileoverview Tracks and updates player donation stats.
  *
  * This service provides:
  * - Getting and setting the amount a player has donated

@@ -1,5 +1,5 @@
 /**
- * @fileoverview ChestService - Manages chest spawning, loot pools, and chest interactions.
+ * @fileoverview Manages chest spawning, loot pools, and chest interactions.
  *
  * This service provides:
  * - Chest model spawning and initialization in all areas

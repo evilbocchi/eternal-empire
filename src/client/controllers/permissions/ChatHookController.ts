@@ -1,5 +1,5 @@
 /**
- * @fileoverview ChatHookController - Client controller for customizing chat appearance and handling system messages.
+ * @fileoverview Client controller for customizing chat appearance and handling system messages.
  *
  * Handles:
  * - Customizing chat message colors and tags based on metadata

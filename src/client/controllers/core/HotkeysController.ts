@@ -1,5 +1,5 @@
 /**
- * @fileoverview HotkeysController - Client controller for managing hotkey bindings and UI button actions.
+ * @fileoverview Client controller for managing hotkey bindings and UI button actions.
  *
  * Handles:
  * - Binding hotkeys to actions with optional priorities and labels

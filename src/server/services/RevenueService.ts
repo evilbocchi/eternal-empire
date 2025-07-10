@@ -2,7 +2,7 @@
 //!optimize 2
 
 /**
- * @fileoverview RevenueService - Handles all revenue, value, and boost calculations for items and droplets.
+ * @fileoverview Handles all revenue, value, and boost calculations for items and droplets.
  *
  * This service manages:
  * - Global and upgrade-based revenue multipliers (e.g., Dark Matter, Funds Bombs, named upgrades)

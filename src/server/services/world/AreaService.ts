@@ -2,7 +2,7 @@
 //!optimize 2
 
 /**
- * @fileoverview AreaService - Manages game areas, player movement, teleportation, and area-specific functionality.
+ * @fileoverviewspecific functionality.
  * 
  * This service handles all aspects of the game's area system including:
  * - Area loading and initialization (grids, bounds, music, portals)

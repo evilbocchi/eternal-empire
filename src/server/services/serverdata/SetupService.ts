@@ -2,7 +2,7 @@
 //!optimize 2
 
 /**
- * @fileoverview SetupService - Handles saving, loading, and managing item setups for areas.
+ * @fileoverview Handles saving, loading, and managing item setups for areas.
  *
  * This service provides:
  * - Saving the current placed items as a named setup

@@ -2,7 +2,7 @@
 //!optimize 2
 
 /**
- * @fileoverview BombsService - Manages bomb-related game events and boosts.
+ * @fileoverviewrelated game events and boosts.
  *
  * This service handles:
  * - Bomb activation and timing

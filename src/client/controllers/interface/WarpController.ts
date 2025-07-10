@@ -1,5 +1,5 @@
 /**
- * @fileoverview WarpController - Client controller for managing the warp window and area teleportation UI.
+ * @fileoverview Client controller for managing the warp window and area teleportation UI.
  *
  * Handles:
  * - Setting up hotkeys for area teleportation

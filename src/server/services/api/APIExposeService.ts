@@ -1,5 +1,5 @@
 /**
- * @fileoverview APIExposeService - Exposes a unified Server for use by items, challenges, quests, and related content.
+ * @fileoverview Exposes a unified Server for use by items, challenges, quests, and related content.
  *
  * This service:
  * - Aggregates and exposes core game services and utility functions

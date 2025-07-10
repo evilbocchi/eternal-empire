@@ -1,5 +1,5 @@
 /**
- * @fileoverview ResetService - Handles all logic related to game resets and prestige layers.
+ * @fileoverview Handles all logic related to game resets and prestige layers.
  *
  * This service manages:
  * - Determining which items, currencies, and upgrades are reset or kept per layer

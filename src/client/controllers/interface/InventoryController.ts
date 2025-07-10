@@ -2,7 +2,7 @@
 //!optimize 2
 
 /**
- * @fileoverview InventoryController - Client controller responsible for managing the player inventory interface.
+ * @fileoverview Client controller responsible for managing the player inventory interface.
  *
  * Handles:
  * - Displaying and filtering inventory items
@@ -59,7 +59,7 @@ export default class InventoryController implements OnInit, OnStart {
     readonly filterItems = ItemFilter.loadFilterOptions(INVENTORY_WINDOW.Page.FilterOptions, (query, whitelistedTraits) => {
         ItemSlot.filterItems(this.itemSlotsPerItem, this.items, query, whitelistedTraits);
     });
-    
+
     constructor(private uiController: UIController, private adaptiveTabController: AdaptiveTabController, private buildController: BuildController, private tooltipController: TooltipController) {
     }
 
