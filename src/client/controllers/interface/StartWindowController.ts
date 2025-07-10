@@ -1,3 +1,16 @@
+/**
+ * @fileoverview StartWindowController - Client controller for managing the start screen, empire selection, and title UI.
+ *
+ * Handles:
+ * - Showing and hiding the start/title screen and its transitions
+ * - Managing empire selection, creation, and teleportation
+ * - Integrating with UI, loading, intro, and sound controllers
+ * - Animating UI elements and handling hotkeys for start screen actions
+ *
+ * The controller coordinates the start experience, empire management, and transitions to gameplay, ensuring a smooth onboarding flow for players.
+ *
+ * @since 1.0.0
+ */
 import ComputeNameColor from "@antivivi/rbxnamecolor";
 import { combineHumanReadable, convertToHHMMSS, getHumanoid, paintObjects } from "@antivivi/vrldk";
 import { Controller, OnInit } from "@flamework/core";
@@ -80,13 +93,27 @@ export const START_WINDOW = ReplicatedFirst.WaitForChild("StartScreen") as Scree
     Logo: ImageLabel;
 };
 
-
+/**
+ * Controller responsible for managing the start screen, empire selection, and title UI.
+ *
+ * Handles start screen transitions, empire management, and integration with other controllers for onboarding and UI feedback.
+ */
 @Controller()
 export default class StartWindowController implements OnInit {
-    constructor(private uiController: UIController, private adaptiveTabController: AdaptiveTabController, private balanceWindowController: BalanceWindowController,
-        private loadingWindowController: LoadingWindowController, private introController: IntroController, private soundController: SoundController, private hotkeysController: HotkeysController) {
+    constructor(
+        private uiController: UIController,
+        private adaptiveTabController: AdaptiveTabController,
+        private balanceWindowController: BalanceWindowController,
+        private loadingWindowController: LoadingWindowController,
+        private introController: IntroController,
+        private soundController: SoundController,
+        private hotkeysController: HotkeysController
+    ) {
     }
 
+    /**
+     * Hides the start window and transitions to gameplay, restoring UI and camera state.
+     */
     hideStartWindow() {
         this.loadingWindowController.showLoadingWindow("Loading stuff");
         task.delay(1, () => {
@@ -103,6 +130,10 @@ export default class StartWindowController implements OnInit {
         });
     }
 
+    /**
+     * Animates and shows the title screen UI elements.
+     * @param fast If true, speeds up the animation.
+     */
     showTitleScreen(fast?: boolean) {
         START_WINDOW.Logo.Position = new UDim2(-0.15, 0, 0, 0);
         START_WINDOW.Logo.Rotation = -80;
@@ -134,6 +165,9 @@ export default class StartWindowController implements OnInit {
         START_WINDOW.DisplayOrder = 4;
     }
 
+    /**
+     * Animates and hides the title screen UI elements.
+     */
     hideTitleScreen() {
         const tweenInfo = new TweenInfo(1, Enum.EasingStyle.Circular, Enum.EasingDirection.Out);
         TweenService.Create(START_WINDOW.LeftBackground, tweenInfo, { Position: new UDim2(-0.5, 0, 0.5, 0) }).Play();
@@ -152,6 +186,9 @@ export default class StartWindowController implements OnInit {
         START_WINDOW.DisplayOrder = -1;
     }
 
+    /**
+     * Shows the start window and prepares the UI for empire selection or onboarding.
+     */
     showStartWindow() {
         if (Workspace.GetAttribute("IsPublicServer") !== true || Workspace.GetAttribute("IsSingleServer") === true) {
             return;
@@ -194,6 +231,10 @@ export default class StartWindowController implements OnInit {
         this.soundController.refreshMusic();
     }
 
+    /**
+     * Refreshes the empires window with available empires for selection.
+     * @param availableEmpires Map of available empire IDs to their info.
+     */
     refreshEmpiresWindow(availableEmpires: Map<string, EmpireInfo>) {
         for (const [availableEmpire, empireInfo] of availableEmpires) {
             if (START_WINDOW.EmpiresWindow.EmpireOptions.FindFirstChild(availableEmpire) !== undefined) {
@@ -234,6 +275,9 @@ export default class StartWindowController implements OnInit {
         }
     }
 
+    /**
+     * Initializes the StartWindowController, sets up UI, hotkeys, and event listeners for the start screen.
+     */
     onInit() {
         const newEmpireOption = ASSETS.EmpiresWindow.NewEmpireOption.Clone();
         const ogText = newEmpireOption.MessageLabel.Text;
