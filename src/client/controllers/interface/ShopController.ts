@@ -1,10 +1,10 @@
 import { Controller, OnInit } from "@flamework/core";
 import { ProximityPromptService, TweenService } from "@rbxts/services";
-import { ADAPTIVE_TAB, LOCAL_PLAYER, PURCHASE_WINDOW, SHOP_WINDOW } from "client/constants";
+import { ADAPTIVE_TAB, LOCAL_PLAYER, SHOP_WINDOW } from "client/constants";
 import Price from "shared/Price";
 import Difficulty from "shared/difficulty/Difficulty";
 import Item from "shared/item/Item";
-import Items from "shared/item/Items";
+import Items from "shared/items/Items";
 import ItemCounter from "shared/utils/ItemCounter";
 import { Fletchette } from "shared/utils/fletchette";
 import { HotkeysController } from "../HotkeysController";
@@ -61,6 +61,7 @@ export class ShopController implements OnInit {
             const difficultyOption = this.itemSlotController.getDifficultyOption(difficulty);
             for (const difficultyItem of difficultyItems) {
                 const [itemSlot, _v] = this.itemSlotController.getItemSlot(difficultyItem);
+                itemSlot.Parent = difficultyOption.Items;
                 task.spawn(() => {
                     const price = difficultyItem.getPrice((ItemsCanister.items.get().bought.get(difficultyItem.id) ?? 0) + 1);
                     if (price === undefined) {
@@ -68,11 +69,11 @@ export class ShopController implements OnInit {
                         itemSlot.AmountLabel.TextColor3 = Color3.fromRGB(255, 156, 5);
                         return;
                     }
-                    while (task.wait()) {
+                    while (itemSlot !== undefined && itemSlot.Parent !== undefined) {
                         for (const [currency, cost] of price.costPerCurrency) {
                             if (itemSlot !== undefined && itemSlot.FindFirstChild("AmountLabel") !== undefined) {
                                 itemSlot.AmountLabel.Text = price.tostring(currency, cost);
-                                TweenService.Create(itemSlot.AmountLabel, new TweenInfo(0.5), { TextColor3: Price.COLORS[currency] }).Play();
+                                TweenService.Create(itemSlot.AmountLabel, new TweenInfo(0.5), { TextColor3: Price.DETAILS_PER_CURRENCY[currency].color }).Play();
                             }
                             task.wait(2);
                         }
@@ -82,7 +83,6 @@ export class ShopController implements OnInit {
                     this.uiController.playSound("Click");
                     this.showPurchaseWindow(difficultyItem);
                 });
-                itemSlot.Parent = difficultyOption.Items;
             }
             difficultyOption.Parent = SHOP_WINDOW.ItemList;
         }
@@ -94,22 +94,53 @@ export class ShopController implements OnInit {
             return;
         }
         this.selected = item;
-        PURCHASE_WINDOW.Header.DifficultyLabel.Image = "rbxassetid://" + item.difficulty?.getImage();
-        PURCHASE_WINDOW.Header.ItemNameLabel.Text = (item.getName() ?? "error") + " (Owned: " + ItemCounter.getTotalAmount(items, item.id) + ")";
-        PURCHASE_WINDOW.Body.ViewportFrame.ClearAllChildren();
-        this.itemSlotController.loadViewportFrame(PURCHASE_WINDOW.Body.ViewportFrame, item);
-        PURCHASE_WINDOW.Body.ItemInfo.DescriptionLabel.Text = item.getDescription() ?? "<no description available>";
+        SHOP_WINDOW.PurchaseWindow.Title.DifficultyLabel.Image = "rbxassetid://" + item.difficulty?.getImage();
+        SHOP_WINDOW.PurchaseWindow.Title.ItemNameLabel.Text = (item.getName() ?? "error") + " (Owned: " + ItemCounter.getTotalAmount(items, item.id) + ")";
+        SHOP_WINDOW.PurchaseWindow.ViewportFrame.ClearAllChildren();
+        this.itemSlotController.loadViewportFrame(SHOP_WINDOW.PurchaseWindow.ViewportFrame, item);
+        SHOP_WINDOW.PurchaseWindow.ItemInfo.DescriptionFrame.DescriptionLabel.Text = item.getDescription() ?? "<no description available>";
         const price = item.getPrice((items.bought.get(item.id) ?? 0) + 1);
-        PURCHASE_WINDOW.Body.ItemInfo.Options.Purchase.PriceLabel.Text = "Price: " + (price === undefined ? "Unavailable" : price.tostring());
-        this.adaptiveTabController.showAdaptiveTab("Purchase");
+        let label = price?.tostring();
+        const requiredItems = item.getRequiredItems();
+        if (requiredItems !== undefined && label !== undefined) {
+            let i = 1;
+            const size = requiredItems.size();
+            for (const [required, amount] of requiredItems) {
+                if (i === 1) {
+                    label += ", ";
+                }
+                label += (amount + " " + required.getName());
+                if (i < size) {
+                    label += ", ";
+                }
+                i++
+            }
+        }
+        SHOP_WINDOW.PurchaseWindow.ItemInfo.Purchase.PriceLabel.Text = "Price: " + (price === undefined ? "Unavailable" : label);
+        let color = item.getDifficulty()?.getColor() ?? new Color3();
+        color = new Color3(color.R + 0.2, color.G + 0.2, color.B + 0.2);
+        SHOP_WINDOW.PurchaseWindow.ItemInfo.DescriptionFrame.Size = new UDim2(1, 0, 0.8, -SHOP_WINDOW.PurchaseWindow.ItemInfo.Purchase.AbsoluteSize.Y);
+        SHOP_WINDOW.PurchaseWindow.Visible = true;
+        SHOP_WINDOW.ItemList.Visible = false;
     }
 
     onInit() {
+        SHOP_WINDOW.PurchaseWindow.Visible = false;
+        const exitPurchase = () => {
+            if (SHOP_WINDOW.Visible && SHOP_WINDOW.PurchaseWindow.Visible) {
+                this.uiController.playSound("Click");
+                SHOP_WINDOW.PurchaseWindow.Visible = false;
+                SHOP_WINDOW.ItemList.Visible = true;
+                return true;
+            }
+            return false;
+        }
         ProximityPromptService.PromptTriggered.Connect((prompt, player) => {
             const s = prompt.GetAttribute("Shop") as string | undefined;
             if (player === LOCAL_PLAYER && !this.buildController.buildModeEnabled && s !== undefined) {
                 this.uiController.playSound("Flip");
                 this.showShopWindow(prompt.Name, s);
+                exitPurchase();
             }
         });
         this.buildController.placedItemsFolder.ChildRemoved.Connect((child) => {
@@ -121,29 +152,20 @@ export class ShopController implements OnInit {
             if (ADAPTIVE_TAB.Visible !== true) {
                 return;
             }
-            if (this.selected !== undefined && PURCHASE_WINDOW.Visible === true) {
-                this.showPurchaseWindow(this.selected);
-            }
             else if (SHOP_WINDOW.Visible === true && this.lastShop !== undefined) {
                 this.refreshShopWindow(this.lastShop);
+                if (SHOP_WINDOW.PurchaseWindow.Visible && this.selected !== undefined) {
+                    this.showPurchaseWindow(this.selected);
+                }
             }
         });
-        PURCHASE_WINDOW.Body.ItemInfo.Options.Purchase.Activated.Connect(() => {
+        SHOP_WINDOW.PurchaseWindow.ItemInfo.Purchase.Activated.Connect(() => {
             if (this.selected !== undefined && ItemsCanister.buyItem.invoke(this.selected.id)) {
                 this.uiController.playSound("Coins");
                 return;
             }
             this.uiController.playSound("Error");
         });
-        const exitPurchase = () => {
-            if (PURCHASE_WINDOW.Visible) {
-                this.uiController.playSound("Click");
-                this.showShopWindow(this.lastShop);
-                return true;
-            }
-            return false;
-        }
-        PURCHASE_WINDOW.Body.ItemInfo.Options.Back.Activated.Connect(() => exitPurchase());
-        this.hotkeysController.setHotkey(PURCHASE_WINDOW.Body.ItemInfo.Options.Back, Enum.KeyCode.X, () => exitPurchase(), "Back", 2);
+        this.hotkeysController.setHotkey(ADAPTIVE_TAB.CloseButton, Enum.KeyCode.X, () => exitPurchase(), "Back", 2);
     }
 }

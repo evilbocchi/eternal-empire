@@ -30,28 +30,28 @@ declare interface Number {
 	mod<T extends Number>(this: T, val: Value): T;
 
 	/** macro for Number == Number */
-	equals<T extends Number>(this: T, Number: Number): T;
+	equals<T extends Number>(this: T, Number: Number): boolean;
 	/** macro for Number == Value */
-	equals<T extends Number>(this: T, val: Value): T;
+	equals<T extends Number>(this: T, val: Value): boolean;
 	/** macro for Number == Number */
-	eq<T extends Number>(this: T, Number: Number): T;
+	eq<T extends Number>(this: T, Number: Number): boolean;
 	/** macro for Number == Value */
-	eq<T extends Number>(this: T, val: Value): T;
+	eq<T extends Number>(this: T, val: Value): boolean;
 
 	/** macro for Number < Number */
-	lt<T extends Number>(this: T, Number: Number): T;
+	lt<T extends Number>(this: T, Number: Number): boolean;
 	/** macro for Number < Value */
-	lt<T extends Number>(this: T, val: Value): Number;
+	lt<T extends Number>(this: T, val: Value): boolean;
 
 	/** macro for Number <= Number */
-	le<T extends Number>(this: T, Number: Number): T;
+	le<T extends Number>(this: T, Number: Number): boolean;
 	/** macro for Number <= Value */
-	le<T extends Number>(this: T, val: Value): Number;
+	le<T extends Number>(this: T, val: Value): boolean;
 
 	/** macro for Number <= Number */
-	le<T extends Number>(this: T, Number: Number): T;
+	le<T extends Number>(this: T, Number: Number): boolean;
 	/** macro for Number <= Value */
-	le<T extends Number>(this: T, val: Value): Number;
+	le<T extends Number>(this: T, val: Value): boolean;
 
 	/** macro for the unary -Number operator */
 	unm<T extends Number>(this: T): T;
@@ -69,7 +69,7 @@ declare interface Number {
 	 * @method Reverse
 	 * @return number
 	 */
-	Reverse<T extends Number>(this: T): T;
+	Reverse<T extends Number>(this: T): number;
 
 	/**
 	 * Returns a string with the number and a suffix at the end, these suffixes will go up to 1e+12000. After, it will default to returning scientific notation.

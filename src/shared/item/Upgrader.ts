@@ -4,8 +4,8 @@ import { findBaseParts } from "shared/utils/vrldk/BasePartUtils";
 
 class Upgrader extends Conveyor {
 
-    add: Price | undefined;
-    mul: Price | undefined;
+    add: Price | undefined = undefined;
+    mul: Price | undefined = undefined;
 
     constructor(id: string) {
         super(id);
@@ -34,14 +34,6 @@ class Upgrader extends Conveyor {
             }
             this.maintain(model, utils);
         });
-    }
-
-    getResult(value: Price) {
-        if (this.add !== undefined)
-            value = value.add(this.add);
-        if (this.mul !== undefined)
-            value = value.mul(this.mul);
-        return value;
     }
 
     getAdd() {

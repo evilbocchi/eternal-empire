@@ -1,6 +1,7 @@
 import { RunService } from "@rbxts/services";
 import Price from "shared/Price";
 import Item from "shared/item/Item";
+import NamedUpgrade from "./NamedUpgrade";
 
 class Generator extends Item {
     
@@ -10,9 +11,11 @@ class Generator extends Item {
         super(id);
         this.types.push("Generator");
         this.onLoad((model, utils) => {
+            const remoteEvent = new Instance("UnreliableRemoteEvent", model);
             const boostsFolder = new Instance("Folder");
             boostsFolder.Name = "Boosts";
             boostsFolder.Parent = model;
+
             task.spawn(() => {
                 let t = 0;
                 const c = RunService.Heartbeat.Connect((dt) => {
@@ -20,7 +23,33 @@ class Generator extends Item {
                     if (t > 0.5) {
                         const passiveGain = this.getPassiveGain();
                         if (passiveGain !== undefined) {
-                            utils.setBalance(utils.getBalance().add(passiveGain.mul(t)));
+                            let delta = passiveGain.mul(t);
+                            for (const boolValue of boostsFolder.GetChildren()) {
+                                const placedItem = utils.getPlacedItem(boolValue.Name);
+                                if (placedItem !== undefined) {
+                                    const item = utils.getItem(placedItem.item);
+                                    if (item !== undefined && item.isA("Charger")) {
+                                        const formula = item.getFormula();
+                                        if (formula !== undefined)
+                                            delta = formula(delta);
+                                    }
+                                }
+                            }
+                            for (const [upgradeId, amount] of pairs(utils.getAmountPerUpgrade())) {
+                                const upgrade = NamedUpgrade.getUpgrade(upgradeId as string);
+                                if (upgrade === undefined)
+                                    continue;
+                                const formula = upgrade.getGeneratorFormula();
+                                if (formula !== undefined) {
+                                    delta = formula(delta, amount, upgrade.getStep());
+                                }
+                            }
+                            const boost = model.GetAttribute("GeneratorBoost") as number | undefined;
+                            if (boost !== undefined) {
+                                delta = delta.mul(boost);
+                            }
+                            remoteEvent.FireAllClients(delta.costPerCurrency);
+                            utils.setBalance(utils.getBalance().add(delta));
                         }
                         t = 0;
                     }

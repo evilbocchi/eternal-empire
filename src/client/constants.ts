@@ -26,31 +26,39 @@ type ItemListContainer = Frame & {
 	ItemList: ScrollingFrame;
 }
 
-export const INVENTORY_WINDOW = ADAPTIVE_TAB_MAIN_WINDOW.WaitForChild("Inventory") as ItemListContainer;
-export const SHOP_WINDOW = ADAPTIVE_TAB_MAIN_WINDOW.WaitForChild("Shop") as ItemListContainer;
-
-export const PURCHASE_WINDOW = ADAPTIVE_TAB_MAIN_WINDOW.WaitForChild("Purchase") as Frame & {
-	Header: Frame & {
-		DifficultyLabel: ImageLabel,
-		ItemNameLabel: TextLabel
-	},
-	Body: Frame & {
+export const INVENTORY_WINDOW = ADAPTIVE_TAB_MAIN_WINDOW.WaitForChild("Inventory") as ItemListContainer & {
+	Empty: Frame
+};
+export const SHOP_WINDOW = ADAPTIVE_TAB_MAIN_WINDOW.WaitForChild("Shop") as ItemListContainer & {
+	PurchaseWindow: Frame & {
 		ViewportFrame: ViewportFrame,
+		Title: Frame & {
+			DifficultyLabel: ImageLabel,
+			ItemNameLabel: TextLabel
+		},
 		ItemInfo: Frame & {
-			DescriptionLabel: TextLabel,
-			Options: Frame & {
-				Purchase: TextButton & {
-					PriceLabel: TextLabel
-				},
-				Back: TextButton
+			DescriptionFrame: ScrollingFrame & {
+				DescriptionLabel: TextLabel,
+			}
+			Purchase: TextButton & {
+				PriceLabel: TextLabel
 			}
 		}
 	}
 };
 
+export type NavigationOption = Frame & {
+	ImageButton: ImageButton
+}
 
 export const BALANCE_WINDOW = INTERFACE.WaitForChild("BalanceWindow") as Frame & {
 	Balances: ScrollingFrame;
+	TitleLabel: TextLabel;
+	NavigationOptions: Frame & {
+		Left: NavigationOption,
+		Right: NavigationOption,
+		PageLabel: TextLabel
+	}
 };
 
 export const LOADING_WINDOW = INTERFACE.WaitForChild("LoadingWindow") as Frame & {
@@ -93,7 +101,10 @@ export const TOOLTIP_WINDOW = INTERFACE.WaitForChild("TooltipWindow") as CanvasG
 
 export const MUTE_BUTTON_WINDOW = INTERFACE.WaitForChild("MuteButtonWindow") as Frame & {
 	Button: TextButton,
-	SongTitle: TextLabel
+	Frame: Frame & {
+		UIPadding: UIPadding,
+		SongTitle: TextLabel
+	}
 }
 
 export type StatContainer = {
@@ -114,5 +125,11 @@ export const LOADED_ITEM_MODELS = ReplicatedStorage.WaitForChild("LoadedItemMode
 export const COMMANDS_WINDOW = ADAPTIVE_TAB_MAIN_WINDOW.WaitForChild("Commands") as Frame & {
 	CommandsList: ScrollingFrame & {
 		
+	}
+};
+
+export const SHARE_WINDOW = ADAPTIVE_TAB_MAIN_WINDOW.WaitForChild("Share") as Frame & {
+	JoinLink: Frame & {
+		Input: TextBox
 	}
 };

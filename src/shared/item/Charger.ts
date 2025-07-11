@@ -5,7 +5,7 @@ import Item from "shared/item/Item";
 class Charger extends Item {
     
     radius: number | undefined;
-    generatorBoost: Price | undefined;
+    formula: ((val: Price) => Price) | undefined;
 
     constructor(id: string) {
         super(id);
@@ -16,26 +16,59 @@ class Charger extends Item {
                 return;
             }
             const connection = model.FindFirstChild("ConnectionVFX");
+            if (connection !== undefined) {
+                connection.Parent = script;
+            }
+            let isMaintained = false;
+            this.maintain(model, utils, (i) => isMaintained = i);
             this.repeat(model, () => {
+                if (!isMaintained) {
+                    return;
+                }
+                const radius = this.getRadius();
                 for (const m of utils.getPlacedItems().GetChildren()) {
                     if (!m.IsA("Model")) {
                         continue;
                     }
                     const h = m.PrimaryPart;
-                    if (h !== undefined && h.Name === "Hitbox" && h.Position.sub(hitbox.Position).Magnitude <= 5) {
+                    const boostsFolder = m.FindFirstChild("Boosts");
+                    
+                    if (boostsFolder !== undefined && h !== undefined && h.Name === "Hitbox" && radius !== undefined) {
+                        const hPos = h.Position;
+                        const hitboxPos = hitbox.Position;
+                        const xDiff = hPos.X - hitboxPos.X;
+                        const zDiff = hPos.Z - hitboxPos.Z;
+                        if ((xDiff * xDiff) + (zDiff * zDiff) > (radius * radius)) {
+                            continue;
+                        }
+
                         const indicator = new Instance("BoolValue");
                         indicator.Name = model.Name;
-                        indicator.Parent = m.WaitForChild("Boosts");
+                        indicator.Parent = boostsFolder;
                         if (connection !== undefined) {
-                            const c = connection.Clone();
-                            const start = c.WaitForChild("Start") as Attachment;
-                            const end = c.WaitForChild("Start") as Attachment;
-                            start.Position = new Vector3();
-                            end.Position = new Vector3();
-                            start.Parent = hitbox;
-                            end.Parent = h;
-                            c.Parent = h;
-                            
+                            if (m.FindFirstChild("ConnectionVFX" + model.Name) === undefined) {
+                                const c = connection.Clone();
+                                const start = c.WaitForChild("Start") as Attachment;
+                                const e = c.WaitForChild("End") as Attachment;
+                                start.Parent = hitbox;
+                                e.Parent = h;
+                                c.Name = "ConnectionVFX" + model.Name;
+                                c.Parent = m;
+                                start.Position = new Vector3();
+                                e.Position = new Vector3();
+                                c.Destroying.Once(() => {
+                                    start.Destroy();
+                                    e.Destroy();
+                                });
+                            }
+                            task.delay(3, () => {
+                                if (boostsFolder.FindFirstChild(model.Name) === undefined) {
+                                    const f = h.FindFirstChild("ConnectionVFX");
+                                    if (f !== undefined) {
+                                        f.Destroy();
+                                    }
+                                }
+                            });
                         }
                         Debris.AddItem(indicator, 2);
                     }
@@ -56,12 +89,12 @@ class Charger extends Item {
         return this;
     }
     
-    getGeneratorBoost() {
-        return this.generatorBoost;
+    getFormula() {
+        return this.formula;
     }
 
-    setGeneratorBoost(generatorBoost: Price) {
-        this.generatorBoost = generatorBoost;
+    setFormula(formula: (val: Price) => Price) {
+        this.formula = formula;
         return this;
     }
 }

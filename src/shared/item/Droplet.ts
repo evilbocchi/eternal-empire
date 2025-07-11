@@ -18,7 +18,7 @@ class Droplet {
             droplet.Material = Enum.Material.Slate;
             return droplet;
         })
-        .setValue(new Price().setCost("Funds", new InfiniteMath(1)))
+        .setValue(new Price().setCost("Funds", 1))
     );
 
     static FatDroplet = Droplet.registerDroplet(
@@ -30,7 +30,7 @@ class Droplet {
             droplet.Material = Enum.Material.Slate;
             return droplet;
         })
-        .setValue(new Price().setCost("Funds", new InfiniteMath(4)))
+        .setValue(new Price().setCost("Funds", 4))
     );
 
     static ManualDroplet = Droplet.registerDroplet(
@@ -42,7 +42,7 @@ class Droplet {
             droplet.Material = Enum.Material.Slate;
             return droplet;
         })
-        .setValue(new Price().setCost("Funds", new InfiniteMath(15)))
+        .setValue(new Price().setCost("Funds", 15))
     );
 
     static HeavyweightDroplet = Droplet.registerDroplet(
@@ -54,7 +54,7 @@ class Droplet {
             droplet.Material = Enum.Material.Basalt;
             return droplet;
         })
-        .setValue(new Price().setCost("Funds", new InfiniteMath(110)))
+        .setValue(new Price().setCost("Funds", 110))
     );
 
     static GrassDroplet = Droplet.registerDroplet(
@@ -66,7 +66,7 @@ class Droplet {
             droplet.Material = Enum.Material.Grass;
             return droplet;
         })
-        .setValue(new Price().setCost("Funds", new InfiniteMath(120)))
+        .setValue(new Price().setCost("Funds", 120))
     );
 
     static NativeGrassDroplet = Droplet.registerDroplet(
@@ -78,7 +78,7 @@ class Droplet {
             droplet.Material = Enum.Material.Grass;
             return droplet;
         })
-        .setValue(new Price().setCost("Funds", new InfiniteMath(120)))
+        .setValue(new Price().setCost("Funds", 120))
     );
 
     static MassiveGrassDroplet = Droplet.registerDroplet(
@@ -90,7 +90,128 @@ class Droplet {
             droplet.Material = Enum.Material.Grass;
             return droplet;
         })
-        .setValue(new Price().setCost("Funds", new InfiniteMath(550)))
+        .setValue(new Price().setCost("Funds", 550))
+    );
+
+    static VibrantDroplet = Droplet.registerDroplet(
+        new Droplet("VibrantDroplet")
+        .setModel(() => {
+            const droplet = new Instance("Part");
+            droplet.Size = new Vector3(2, 2, 2);
+            droplet.Color = Difficulties.TrueEase.getColor() ?? new Color3();
+            droplet.Material = Enum.Material.Neon;
+            droplet.SetAttribute("Rainbow", 2);
+            return droplet;
+        })
+        .setValue(new Price().setCost("Funds", 20000))
+    );
+
+    static CommunismFundsDroplet = Droplet.registerDroplet(
+        new Droplet("CommunismFundsDroplet")
+        .setModel(() => {
+            const droplet = new Instance("Part");
+            droplet.Size = new Vector3(1, 1, 1);
+            droplet.Color = new Color3(1, 0, 0);
+            droplet.Material = Enum.Material.Slate;
+            return droplet;
+        })
+        .setValue(new Price().setCost("Funds", 3600))
+    );
+
+    static CommunismPowerDroplet = Droplet.registerDroplet(
+        new Droplet("CommunismPowerDroplet")
+        .setModel(() => {
+            const droplet = new Instance("Part");
+            droplet.Size = new Vector3(1, 1, 1);
+            droplet.Color = new Color3(1, 1, 0);
+            droplet.Material = Enum.Material.Slate;
+            return droplet;
+        })
+        .setValue(new Price().setCost("Power", 4))
+    );
+
+    static CommunismDroplet = Droplet.registerDroplet(
+        new Droplet("CommunismDroplet")
+        .setModel(() => {
+            const droplet = new Instance("Part");
+            droplet.Size = new Vector3(1, 1, 1);
+            droplet.Color = Color3.fromRGB(255, 89, 89);
+            droplet.Material = Enum.Material.Slate;
+            return droplet;
+        })
+        .setValue(new Price().setCost("Funds", 4000).setCost("Power", 3))
+    );
+
+    static LiquidFundsDroplet = Droplet.registerDroplet(
+        new Droplet("LiquidFundsDroplet")
+        .setModel(() => {
+            const droplet = new Instance("Part");
+            droplet.Size = new Vector3(1.25, 1.25, 1.25);
+            droplet.Color = Difficulties.FelixTheA.getColor() ?? new Color3();
+            droplet.Material = Enum.Material.Basalt;
+            return droplet;
+        })
+        .setValue(new Price().setCost("Funds", 100000))
+    );
+
+    static LiquidPowerDroplet = Droplet.registerDroplet(
+        new Droplet("LiquidPowerDroplet")
+        .setModel(() => {
+            const droplet = new Instance("Part");
+            droplet.Size = new Vector3(1.25, 1.25, 1.25);
+            droplet.Color = Color3.fromRGB(255, 163, 89);
+            droplet.Material = Enum.Material.Basalt;
+            return droplet;
+        })
+        .setValue(new Price().setCost("Power", 100))
+    );
+
+    static RapidDroplet = Droplet.registerDroplet(
+        new Droplet("RapidDroplet")
+        .setModel(() => {
+            const droplet = new Instance("Part");
+            droplet.Size = new Vector3(0.9, 0.9, 0.9);
+            droplet.Color = Difficulties.Exist.getColor() ?? new Color3();
+            droplet.Material = Enum.Material.Slate;
+            return droplet;
+        })
+        .setValue(new Price().setCost("Funds", 8000).setCost("Power", 8))
+    );
+
+    static RustyAmethystDroplet = Droplet.registerDroplet(
+        new Droplet("RustyAmethystDroplet")
+        .setModel(() => {
+            const droplet = new Instance("Part");
+            droplet.Size = new Vector3(1, 1, 1);
+            droplet.Color = Difficulties.ReversedPeripherality.getColor() ?? new Color3();
+            droplet.Material = Enum.Material.Slate;
+            return droplet;
+        })
+        .setValue(new Price().setCost("Funds", 34000))
+    );
+
+    static AmethystDroplet = Droplet.registerDroplet(
+        new Droplet("AmethystDroplet")
+        .setModel(() => {
+            const droplet = new Instance("Part");
+            droplet.Size = new Vector3(1, 1, 1);
+            droplet.Color = Difficulties.ReversedPeripherality.getColor() ?? new Color3();
+            droplet.Material = Enum.Material.Metal;
+            return droplet;
+        })
+        .setValue(new Price().setCost("Funds", 78000))
+    );
+
+    static Char = Droplet.registerDroplet(
+        new Droplet("Char")
+        .setModel(() => {
+            const droplet = new Instance("Part");
+            droplet.Size = new Vector3(1, 1, 1);
+            droplet.Color = new Color3();
+            droplet.Material = Enum.Material.Slate;
+            return droplet;
+        })
+        .setValue(new Price().setCost("Funds", 1))
     );
 
     static registerDroplet(droplet: Droplet) {

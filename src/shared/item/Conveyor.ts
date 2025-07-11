@@ -28,8 +28,9 @@ class Conveyor extends Item {
             const conveyors = findBaseParts(model, "Conveyor");
             for (const d of conveyors) {
                 const overwrite = d.FindFirstChild("Speed") as IntValue | undefined;
+                const inverted = (d.FindFirstChild("Inverted") as BoolValue | undefined)?.Value ?? false;
                 const s = overwrite === undefined ? speed : overwrite.Value;
-                d.Velocity = d.CFrame.LookVector.mul(s);
+                d.Velocity = d.CFrame.LookVector.mul((inverted ? -1 : 1) * s);
                 const beam = d.FindFirstChildOfClass("Beam");
                 if (beam !== undefined) {
                     beam.TextureSpeed = s / beam.TextureLength;

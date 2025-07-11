@@ -1,14 +1,18 @@
 import { OnStart, Service } from "@flamework/core";
-import { ContentProvider, MessagingService, Players, TextChatService } from "@rbxts/services";
+import { ContentProvider, MarketplaceService, MessagingService, Players, ReplicatedStorage, RunService, TeleportService, TextChatService } from "@rbxts/services";
 import { Currency, DONATION_PRODUCTS } from "shared/constants";
 import { Fletchette, RemoteSignal } from "shared/utils/fletchette";
+import InfiniteMath from "shared/utils/infinitemath/InfiniteMath";
 import { playSoundAtPart } from "shared/utils/vrldk/BasePartUtils";
 import { DonationService } from "./DonationService";
 import { GameAssetService } from "./GameAssetService";
-import { CurrencyService } from "./serverdata/CurrencyService";
-import { DataService } from "./serverdata/DataService";
 import { LeaderboardService } from "./LeaderboardService";
-import InfiniteMath from "shared/utils/infinitemath/InfiniteMath";
+import { CurrencyService } from "./serverdata/CurrencyService";
+import { DataService, EmpireProfileTemplate } from "./serverdata/DataService";
+import { UpgradeBoardService } from "./serverdata/UpgradeBoardService";
+import { ItemsService } from "./serverdata/ItemsService";
+import Price from "shared/Price";
+import { PlaytimeService } from "./serverdata/PlaytimeService";
 
 declare global {
     interface FletchetteCanisters {
@@ -18,8 +22,10 @@ declare global {
 
 const PermissionsCanister = Fletchette.createCanister("PermissionsCanister", {
     systemMessageSent: new RemoteSignal<(channel: TextChannel, message: string, metadata?: string) => void>(),
-    commandsGiven: new RemoteSignal<(commands: TextChatCommand[]) => void>(),
+    joinLinkReceived: new RemoteSignal<(joinLink: string) => void>(),
+    commandsGiven: new RemoteSignal<(commands: TextChatCommand[], permLevel: number) => void>(),
     donationGiven: new RemoteSignal<() => void>(),
+    promptDonation: new RemoteSignal<(donationId: number) => void>(),
 });
 
 type PermissionList = "banned" | "trusted" | "managers";
@@ -33,7 +39,8 @@ export class PermissionsService implements OnStart {
     commands = TextChatService.WaitForChild("TextChatCommands");
 
     constructor(private dataService: DataService, private gameAssetService: GameAssetService, private donationService: DonationService, 
-        private currencyService: CurrencyService, private leaderboardService: LeaderboardService) {
+        private currencyService: CurrencyService, private leaderboardService: LeaderboardService, private upgradeBoardService: UpgradeBoardService,
+        private itemsService: ItemsService, private playtimeService: PlaytimeService) {
 
     }
 
@@ -75,6 +82,9 @@ export class PermissionsService implements OnStart {
 
     getPermissionLevel(userId: number) {
         const data = this.dataService.empireProfile?.Data;
+        if (game.PlaceId === 16438564807) {
+            return 4;
+        }
         if (data === undefined) {
             return -2;
         }
@@ -165,6 +175,10 @@ export class PermissionsService implements OnStart {
 
     onStart() {
         const onPlayerAdded = (player: Player) => {
+            const joinData = player.GetJoinData();
+            if (joinData.LaunchData !== undefined) {
+                TeleportService.TeleportToPrivateServer(game.PlaceId, joinData.LaunchData, [player]);
+            }
             if (this.dataService.empireProfile?.Data.banned.includes(player.UserId)) {
                 player.Kick("You are banned from this empire.");
             }
@@ -338,10 +352,12 @@ export class PermissionsService implements OnStart {
             }
         }, 2);
         this.createCommand("help", "?", 
-        ": Displays all available commands.",
+        "Displays all available commands.",
         (o) => {
-            this.sendPrivateMessage(o, "Your permission level is " + this.getPermissionLevel(o.UserId), "color:138,255,138");
-            PermissionsCanister.commandsGiven.fire(o, this.commands.GetChildren().filter((command => command.IsA("TextChatCommand") && command.AutocompleteVisible)) as TextChatCommand[]);
+            const permLevel = this.getPermissionLevel(o.UserId);
+            this.sendPrivateMessage(o, "Your permission level is " + permLevel, "color:138,255,138");
+            PermissionsCanister.commandsGiven.fire(o, 
+                this.commands.GetChildren().filter((command => command.IsA("TextChatCommand") && command.AutocompleteVisible)) as TextChatCommand[], permLevel);
         }, 0);
 
         this.createCommand("invite", "inv", 
@@ -390,6 +406,38 @@ export class PermissionsService implements OnStart {
             }
         }, 1);
 
+        this.createCommand("accesscode", "ac", 
+        "View the access code for this empire. Anyone with the access code is able to join this empire. Only available for private empires.",
+        (o) => {
+            if (RunService.IsStudio() || (game.PrivateServerOwnerId === 0 && game.PrivateServerId !== "")) {
+                this.sendPrivateMessage(o, "The server access code is: " + this.dataService.empireProfile?.Data.accessCode);
+            }
+            else {
+                this.sendPrivateMessage(o, "You cannot use this command on this server", "color:255,43,43");
+            }
+        }, 1);
+
+        this.createCommand("join", "j", 
+        "<accesscode> : Joins an empire given an access code.",
+        (o, accessCode) => {
+            TeleportService.TeleportToPrivateServer(game.PlaceId, accessCode, [o]);
+        }, 0);
+
+        this.createCommand("joinlink", "jl", 
+        "Gets a URL in which players can use to join this empire. Utilises the empire's access code. Only available for private empires.",
+        (o) => {
+            if (RunService.IsStudio() || (game.PrivateServerOwnerId === 0 && game.PrivateServerId !== "")) {
+                const joinLink = "https://www.roblox.com/games/start?placeId=" + game.PlaceId + "&launchData=" + this.dataService.empireProfile?.Data.accessCode;
+                this.sendPrivateMessage(o, "Join link: " + joinLink);
+                PermissionsCanister.joinLinkReceived.fire(o, joinLink);
+            }
+            else {
+                this.sendPrivateMessage(o, "You cannot use this command on this server", "color:255,43,43");
+            }
+            
+        }, 1);
+
+
         this.createCommand("setdonation", "setdonate", 
         "<amount> : Set donation amount.",
         (o, a) => {
@@ -398,21 +446,68 @@ export class PermissionsService implements OnStart {
 
         this.createCommand("updateleaderboards", "updatelbs", 
         "Refreshes leaderboard stats.",
-        (o, a) => {
+        () => {
             this.leaderboardService.updateLeaderboards();
         }, 4);
     
         this.createCommand("economyset", "ecoset", 
-        "<currency> <first> <second> : Set balance for a currency.",
+        "<currency> <first> <second> : Set balance for a currency. You can type _ as a replacement for spaces.",
         (_o, currency, first, second) => {
-            this.currencyService.setCost(currency as Currency, new InfiniteMath([tonumber(first) ?? 0, tonumber(second) ?? 0]));
+            this.currencyService.setCost((currency.gsub("_", " ")[0]) as Currency, 
+                second === undefined ? new InfiniteMath(tonumber(first) ?? 0) : new InfiniteMath([tonumber(first) ?? 0, tonumber(second) ?? 0]));
+        }, 4);
+
+        this.createCommand("upgradeset", "upgset", 
+        "<upgrade> <amount> : Set the quantity for an upgrade.",
+        (_o, upgrade, amount) => {
+            this.upgradeBoardService.setUpgradeAmount(upgrade, tonumber(amount) ?? 0);
+        }, 4);
+
+        this.createCommand("itemset", "iset", 
+        "<item> <amount> : Set the quantity for an item.",
+        (_o, item, amount) => {
+            const a = tonumber(amount) ?? 0;
+            this.itemsService.setItemAmount(item, a);
+            this.itemsService.setBoughtAmount(item, a);
+        }, 4);
+
+        this.createCommand("colorstrictset", "csset", 
+        "<id> : Set the color for color strict items.",
+        (_o, item) => ReplicatedStorage.SetAttribute("ColorStrictColor", tonumber(item) ?? 0), 4);
+
+        
+
+        this.createCommand("trueresetdata", "truewipedata", 
+        "Reset all data like no progress was ever made.",
+        (_o) => {
+            this.itemsService.setPlacedItems([]);
+            this.itemsService.setBought(new Map());
+            this.itemsService.setInventory(new Map([["ClassLowerNegativeShop", 1]]));
+            this.gameAssetService.fullUpdatePlacedItemsModels();
+            this.sendServerMessage("Removal of items complete");
+            task.wait(0.5);
+
+            this.currencyService.setBalance(new Price().setCost("Funds", 0).setCost("Power", 0).setCost("Purifier Clicks", 0));
+            this.sendServerMessage("Removal of balance complete");
+            task.wait(0.5);
+
+            this.upgradeBoardService.setAmountPerUpgrade({});
+            this.sendServerMessage("Removal of named upgrades complete");
+            task.wait(0.5);
+
+            this.playtimeService.setPlaytime(0);
+            this.sendServerMessage("Removal of playtime complete");
+            task.wait(0.5);
+
+            this.sendServerMessage("True reset complete. The shop is in your inventory.");
         }, 4);
 
         MessagingService.SubscribeAsync("Donation", (message) => {
             PermissionsCanister.donationGiven.fireAll();
             this.sendServerMessage("[GLOBAL]: " + message.Data, "tag:hidden;color:3,207,252");
         });
-        
+
+        PermissionsCanister.promptDonation.connect((p, dp) => MarketplaceService.PromptProductPurchase(p, dp));
         for (const donationProduct of DONATION_PRODUCTS) {
             this.gameAssetService.setProductFunction(donationProduct.id, (_receipt, player) => {
                 this.donationService.setDonated(player, this.donationService.getDonated(player) + donationProduct.amount);

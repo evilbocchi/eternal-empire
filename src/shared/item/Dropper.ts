@@ -3,45 +3,75 @@ import { AREAS } from "shared/constants";
 import Droplet from "shared/item/Droplet";
 import Item from "shared/item/Item";
 import { findBaseParts } from "shared/utils/vrldk/BasePartUtils";
+import ItemUtils from "./ItemUtils";
 
 class Dropper extends Item {
+
+    static load(model: Model, utils: ItemUtils, item: Dropper) {
+        const drops = findBaseParts(model, "Drop");
+        for (const [drop, _droplet] of item.dropletPerDrop) {
+            const part = model.FindFirstChild(drop);
+            if (part !== undefined && part.IsA("Part")) {
+                drops.push(part);
+            }
+        }
+        for (const d of drops) {
+            const instantiator = item.getDroplet(d.Name)?.getInstantiator(model, d.CFrame, utils);
+            const areaId = utils.getPlacedItem(model.Name)?.area;
+            if (instantiator !== undefined && areaId !== undefined) {
+                const area = AREAS[areaId as keyof (typeof AREAS)];
+                const dropletLimit = area.dropletLimit;
+                const dropletCount = area.areaFolder.WaitForChild("DropletCount") as IntValue;
+                let t = 0;
+                item.instantiatorPerDrop.set(d, instantiator);
+                const connection = RunService.Heartbeat.Connect((deltaTime) => {
+                    const dropRate = d.GetAttribute("DropRate") as number | undefined ?? item.getDropRate();
+                    if (dropRate === undefined) {
+                        return;
+                    }
+                    t += deltaTime;
+                    if (t > 1 / dropRate) {
+                        if (dropletCount.Value > dropletLimit.Value) {
+                            return;
+                        }
+                        t = 0;
+                        instantiator();
+                    }
+                });
+                model.Destroying.Once(() => {
+                    connection.Disconnect();
+                    item.instantiatorPerDrop.delete(d);
+                });
+            }
+        }
+    }
     
     droplet: Droplet | undefined;
+    dropletPerDrop = new Map<string, Droplet>();
+    instantiatorPerDrop = new Map<BasePart, () => void>();
     dropRate: number | undefined;
 
     constructor(id: string) {
         super(id);
         this.types.push("Dropper");
-        this.onLoad((model, utils) => {
-            for (const d of findBaseParts(model, "Drop")) {
-                const instantiator = this.getDroplet()?.getInstantiator(model, d.CFrame, utils);
-                const areaId = utils.getPlacedItem(model.Name)?.area;
-                if (instantiator !== undefined && areaId !== undefined) {
-                    const area = AREAS[areaId as keyof (typeof AREAS)];
-                    const dropletLimit = area.dropletLimit;
-                    const dropletCount = area.areaFolder.WaitForChild("DropletCount") as IntValue;
-                    let t = 0;
-                    const connection = RunService.Heartbeat.Connect((deltaTime) => {
-                        t += deltaTime;
-                        if (t > 1 / (d.GetAttribute("DropRate") as number | undefined ?? (this.getDropRate() ?? 1))) {
-                            if (dropletCount.Value > dropletLimit.Value) {
-                                return;
-                            }
-                            t = 0;
-                            instantiator();
-                        }
-                    });
-                    model.Destroying.Once(() => connection.Disconnect());
-                }
-            }
-        })
+        this.onLoad((model, utils) => Dropper.load(model, utils, this));
     }
 
-    getDroplet() {
+    getDroplet(dropPart?: string) {
+        if (dropPart !== undefined) {
+            const cached = this.dropletPerDrop.get(dropPart);
+            if (cached !== undefined) {
+                return cached;
+            }
+        }
         return this.droplet;
     }
 
-    setDroplet(droplet: Droplet) {
+    setDroplet(droplet: Droplet, dropPart?: string) {
+        if (dropPart !== undefined) {
+            this.dropletPerDrop.set(dropPart, droplet);
+            return this;
+        }
         this.droplet = droplet;
         return this;
     }

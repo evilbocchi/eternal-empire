@@ -33,6 +33,7 @@ class Transformer extends Conveyor {
                     d.Color = model.Color;
                     d.Material = model.Material;
                     d.Size = model.Size;
+                    d.SetAttribute("Rainbow", model.GetAttribute("Rainbow"));
                     d.SetAttribute("DropletId", res.id);
                 });
             }

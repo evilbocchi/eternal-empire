@@ -37,7 +37,8 @@ class ItemPlacement {
         if (ItemPlacement.isTouchingPlacedItem(itemModel)) {
             return [false, undefined]
         }
-        return [true, ItemPlacement.getArea(itemModel, placeableAreas)];
+        const area = ItemPlacement.getArea(itemModel, placeableAreas);
+        return area !== undefined ? [true, area] : [false, undefined];
     }
 }
 

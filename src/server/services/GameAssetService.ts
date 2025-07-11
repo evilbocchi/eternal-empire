@@ -5,11 +5,16 @@ import { DataService } from "server/services/serverdata/DataService";
 import { ItemsCanister, ItemsService } from "server/services/serverdata/ItemsService";
 import { AREAS, PlacedItem } from "shared/constants";
 import Conveyor from "shared/item/Conveyor";
+import Droplet from "shared/item/Droplet";
+import Furnace from "shared/item/Furnace";
 import Item from "shared/item/Item";
 import ItemUtils from "shared/item/ItemUtils";
-import Items from "shared/item/Items";
+import Items from "shared/items/Items";
+import Upgrader from "shared/item/Upgrader";
 import ItemPlacement from "shared/utils/ItemPlacement";
-import ValueCalculator from "shared/utils/ValueCalculator";
+import { UpgradeBoardService } from "./serverdata/UpgradeBoardService";
+import NamedUpgrade from "shared/item/NamedUpgrade";
+import Price from "shared/Price";
 
 type ProductFunction = (receiptInfo: ReceiptInfo, player: Player) => Enum.ProductPurchaseDecision;
 
@@ -20,8 +25,58 @@ export class GameAssetService implements OnStart {
     itemModels = new Map<string, Model>();
     productFunctions = new Map<number, ProductFunction>();
 
-    constructor(private dataService: DataService, private itemsService: ItemsService, private currencyService: CurrencyService) {
+    constructor(private dataService: DataService, private itemsService: ItemsService, private currencyService: CurrencyService, private upgradeBoardService: UpgradeBoardService) {
 
+    }
+    
+    calculateRawDropletValue(dropletModel: BasePart) {
+        const droplet = Droplet.getDroplet(dropletModel.GetAttribute("DropletId") as string) as Droplet;
+        let worth = droplet.getValue();
+        if (worth === undefined) {
+            return;
+        }
+        let totalAdd = new Price();
+        let totalMul: Price | undefined = undefined;
+        for (const upgrade of dropletModel.GetChildren()) {
+            if (!upgrade.IsA("ObjectValue") || upgrade.Value === undefined || upgrade.Value.Parent === undefined) {
+                continue;
+            }
+            const item = Items.getItem(upgrade.GetAttribute("ItemId") as string) as Upgrader | undefined;
+            if (item === undefined) {
+                continue;
+            }
+            const add = item.getAdd();
+            if (add !== undefined) {
+                totalAdd = totalAdd.add(add);
+            }
+            const mul = item.getMul();
+            if (mul !== undefined) {
+                totalMul = totalMul === undefined ? mul : totalMul.mul(mul);
+            }
+        }
+        worth = worth.add(totalAdd);
+        if (totalMul !== undefined) {
+            worth = worth.mul(totalMul);
+        }
+        return worth;
+    }
+
+    calculateDropletValue(dropletModel: BasePart): [Price | undefined, Price | undefined] {
+        const rawWorth = this.calculateRawDropletValue(dropletModel);
+        if (rawWorth === undefined) {
+            return [undefined, undefined];
+        }
+        let worth = new Price(rawWorth.costPerCurrency);
+        for (const [upgradeId, amount] of pairs(this.upgradeBoardService.getAmountPerUpgrade())) {
+            const upgrade = NamedUpgrade.getUpgrade(upgradeId as string);
+            if (upgrade === undefined)
+                continue;
+            const formula = upgrade.getDropletFormula();
+            if (formula !== undefined) {
+                worth = formula(worth, amount, upgrade.getStep());
+            }
+        }
+        return [worth, rawWorth];
     }
 
     getItemUtils(item: Item): ItemUtils {
@@ -29,7 +84,8 @@ export class GameAssetService implements OnStart {
             getPlacedItems: () => this.placedItemsFolder,
             getBalance: () => this.currencyService.getBalance(),
             setBalance: (balance) => this.currencyService.setBalance(balance),
-            calculateGain: (droplet, furnace, model) => ValueCalculator.calculateGain(droplet, furnace, model),
+            calculateRawDropletValue: (droplet) => this.calculateRawDropletValue(droplet),
+            calculateDropletValue: (droplet) => this.calculateDropletValue(droplet),
             applyFormula: (callback, x, formula) => item.repeat(undefined, () => callback(formula(x())), 1),
             getPlacedItem: (placementId) => {
                 for (const placedItem of this.itemsService.getPlacedItems()) {
@@ -37,7 +93,10 @@ export class GameAssetService implements OnStart {
                         return placedItem;
                 }
                 return undefined;
-            }
+            },
+            getItem: (itemId) => Items.getItem(itemId),
+            getAmountPerUpgrade: () => this.upgradeBoardService.getAmountPerUpgrade(),
+            setUpgradeAmount: (upgradeId, amount) => this.upgradeBoardService.setUpgradeAmount(upgradeId, amount),
         }
     }
 
@@ -194,8 +253,18 @@ export class GameAssetService implements OnStart {
                 for (const c of model.GetChildren()) {
                     if (c.Name === "Conveyor" && c.IsA("BasePart")) {
                         const beam = Conveyor.getBeam(1, c.Size.X);
-                        beam.Attachment0 = c.WaitForChild("Attachment0") as Attachment;
-                        beam.Attachment1 = c.WaitForChild("Attachment1") as Attachment;
+                        const inverted = (c.FindFirstChild("Inverted") as BoolValue | undefined)?.Value ?? false;
+                        const attachment0 = c.WaitForChild("Attachment0") as Attachment;
+                        const attachment1 = c.WaitForChild("Attachment1") as Attachment;
+                        if (inverted) {
+                            beam.Attachment0 = attachment1;
+                            beam.Attachment1 = attachment0;
+                        }
+                        else {
+                            beam.Attachment0 = attachment0;
+                            beam.Attachment1 = attachment1;
+                        }
+                        
                         beam.Parent = c;
                         c.FrontSurface = Enum.SurfaceType.Studs;
                     }
@@ -230,12 +299,13 @@ export class GameAssetService implements OnStart {
                 this.addItemModel(placedItem);
             }
         });
-        Items.ITEMS.forEach((value) => value.initialised.Fire(this.getItemUtils(value), value));
+        Items.init().forEach((value) => value.initialised.Fire(this.getItemUtils(value), value));
 
         MarketplaceService.ProcessReceipt = (receiptInfo: ReceiptInfo) => {
             const productFunction = this.productFunctions.get(receiptInfo.ProductId);
             const player = Players.GetPlayerByUserId(receiptInfo.PlayerId);
             if (productFunction === undefined || player === undefined) {
+                print(receiptInfo);
                 return Enum.ProductPurchaseDecision.NotProcessedYet;
             }
             return productFunction(receiptInfo, player);

@@ -4,7 +4,7 @@ import { Fletchette } from "shared/utils/fletchette";
 import { UIController } from "./UIController";
 import { EffectController } from "./EffectController";
 import CameraShaker from "@rbxts/camera-shaker";
-import { COMMANDS_WINDOW } from "client/constants";
+import { COMMANDS_WINDOW, SHARE_WINDOW } from "client/constants";
 import { UI_ASSETS } from "shared/constants";
 import { AdaptiveTabController } from "./interface/AdaptiveTabController";
 
@@ -23,15 +23,15 @@ export class PermissionsController implements OnInit {
             this.uiController.playSound("PowerUp");
             this.effectController.camShake.Shake(CameraShaker.Presets.Bump);
         });
-        PermissionsCanister.commandsGiven.connect((commands) => {
+        PermissionsCanister.commandsGiven.connect((commands, permLevel) => {
             for (const c of COMMANDS_WINDOW.CommandsList.GetChildren()) {
-                if (c.IsA("Frame")) {
+                if (c.IsA("CanvasGroup")) {
                     c.Destroy();
                 }
             }
             for (const command of commands) {
                 const option = UI_ASSETS.CommandOption.Clone();
-                const permLevel = command.GetAttribute("PermissionLevel") as number ?? 0;
+                const pl = command.GetAttribute("PermissionLevel") as number ?? 0;
                 const description = command.GetAttribute("Description") as string;
                 if (description === undefined) {
                     continue;
@@ -39,11 +39,16 @@ export class PermissionsController implements OnInit {
                 option.Name = command.PrimaryAlias;
                 option.AliasLabel.Text = command.PrimaryAlias;
                 option.DescriptionLabel.Text = description;
-                option.PermLevelLabel.Text = "Permission Level " + permLevel;
-                option.LayoutOrder = permLevel;
+                option.PermLevelLabel.Text = "Permission Level " + pl;
+                option.BackgroundTransparency = pl > permLevel ? 0.5 : 0.8;
+                option.LayoutOrder = pl;
                 option.Parent = COMMANDS_WINDOW.CommandsList;
             }
             this.adaptiveTabController.showAdaptiveTab("Commands");
+        });
+        PermissionsCanister.joinLinkReceived.connect((joinLink) => {
+            SHARE_WINDOW.JoinLink.Input.Text = joinLink;
+            this.adaptiveTabController.showAdaptiveTab("Share");
         });
 
         const onChannelAdded = (channel: Instance) => {

@@ -1,9 +1,9 @@
 import { OnInit, Service } from "@flamework/core";
 import ProfileService from "@rbxts/profileservice";
 import { Profile } from "@rbxts/profileservice/globals";
-import { HttpService, Players, RunService, TeleportService, Workspace } from "@rbxts/services";
+import { DataStoreService, HttpService, Players, RunService, TeleportService, Workspace } from "@rbxts/services";
 import Signal from "@rbxutil/signal";
-import { EmpireInfo, ItemsData, START_SCREEN_ENABLED } from "shared/constants";
+import { Currency, EmpireInfo, ItemsData, START_CAMERA, START_SCREEN_ENABLED } from "shared/constants";
 import { Fletchette, RemoteFunc, RemoteProperty, RemoteSignal } from "shared/utils/fletchette";
 import InfiniteMath from "shared/utils/infinitemath/InfiniteMath";
 import ProfileManager from "shared/utils/vrldk/ProfileManager";
@@ -14,7 +14,7 @@ declare global {
     }
 }
 
-const empireProfileTemplate = {
+export const EmpireProfileTemplate = {
     name: "no name",
     owner: 0,
     created: 0,
@@ -25,11 +25,10 @@ const empireProfileTemplate = {
     managers: new Array<number>(),
     trusted: new Array<number>(),
 
-    currencies: {
-        Funds: new InfiniteMath(0),
-        Power: new InfiniteMath(0),
-        Bitcoin: new InfiniteMath(0),
+    upgrades: {
+        
     },
+    currencies: new Map<Currency, InfiniteMath>(),
     items: {
         inventory: new Map<string, number>(),
         bought: new Map<string, number>(),
@@ -47,7 +46,7 @@ const empireProfileTemplate = {
     } as ItemsData
 };
 
-const playerProfileTemplate = {
+const PlayerProfileTemplate = {
     availableEmpires: new Array<string>(),
     donated: 0,
 };
@@ -60,12 +59,14 @@ const EmpireCanister = Fletchette.createCanister("EmpireCanister", {
 
 @Service()
 export class DataService implements OnInit {
-    empireProfileManager = new ProfileManager(ProfileService.GetProfileStore("EmpireData", empireProfileTemplate));
-    playerProfileManager = new ProfileManager(ProfileService.GetProfileStore("PlayerData", playerProfileTemplate));
+    empireProfileManager = new ProfileManager(ProfileService.GetProfileStore("EmpireData", EmpireProfileTemplate));
+    playerProfileManager = new ProfileManager(ProfileService.GetProfileStore("PlayerData", PlayerProfileTemplate));
 
-    empireProfile = undefined as Profile<typeof empireProfileTemplate> | undefined;
-    cachedEmpireProfiles = new Map<string, Profile<typeof empireProfileTemplate>>();
-    empireProfileLoaded = new Signal<Profile<typeof empireProfileTemplate>>();
+    availableEmpiresStore = DataStoreService.GetDataStore("AvailableEmpires");
+    availableEmpiresPerPlayer = new Map<number, string[]>();
+    empireProfile = undefined as Profile<typeof EmpireProfileTemplate> | undefined;
+    cachedEmpireProfiles = new Map<string, Profile<typeof EmpireProfileTemplate>>();
+    empireProfileLoaded = new Signal<Profile<typeof EmpireProfileTemplate>>();
 
     loadEmpireProfile(empireId: string, view?: boolean) {
         const key = "Empire_" + empireId;
@@ -101,10 +102,6 @@ export class DataService implements OnInit {
     }
 
     teleportToEmpire(player: Player, empireId: string) {
-        const playerProfile = this.loadPlayerProfile(player.UserId);
-        if (playerProfile === undefined || !playerProfile.Data.availableEmpires.includes(empireId)) {
-            return;
-        }
         const profile = this.loadEmpireProfile(empireId, true);
         if (profile && profile.Data.accessCode) {
             TeleportService.TeleportToPrivateServer(game.PlaceId, profile.Data.accessCode, [player], undefined, empireId);
@@ -112,23 +109,28 @@ export class DataService implements OnInit {
     }
 
     getAvailableEmpires(userId: number) {
-        return this.loadPlayerProfile(userId)?.Data.availableEmpires ?? [];
+        const cached = this.availableEmpiresPerPlayer.get(userId);
+        if (cached !== undefined) {
+            return cached;
+        }
+        const [data] = this.availableEmpiresStore.GetAsync("Player_" + userId);
+        this.availableEmpiresPerPlayer.set(userId, data as string[]);
+        return (data ?? []) as string[];
     }
 
     setAvailableEmpires(userId: number, availableEmpires: string[]) {
-        const playerProfile = this.loadPlayerProfile(userId);
-        if (playerProfile) {
-            playerProfile.Data.availableEmpires = availableEmpires;
-            const plr = Players.GetPlayerByUserId(userId);
-            if (plr !== undefined)
-                EmpireCanister.availableEmpires.setFor(plr, this.mapInfo(availableEmpires));
+        this.availableEmpiresStore.SetAsync("Player_" + userId, availableEmpires);
+        this.availableEmpiresPerPlayer.set(userId, availableEmpires);
+        const plr = Players.GetPlayerByUserId(userId);
+        if (plr !== undefined) {
+            EmpireCanister.availableEmpires.setFor(plr, this.mapInfo(availableEmpires));
         }
     }
 
     mapInfo(availableEmpires: string[]) {
         const infos = new Map<string, EmpireInfo>();
         for (const empireId of availableEmpires) {
-            const empire = this.loadEmpireProfile(empireId, true);
+            const empire =  this.loadEmpireProfile(empireId, true);
             if (empire === undefined)
                 error("No empire");
             infos.set(empireId, {
@@ -180,7 +182,7 @@ export class DataService implements OnInit {
             }
         }
         else {
-            Workspace.SetAttribute("EmpireID", "TESTENVIRONMENT");
+            Workspace.SetAttribute("EmpireID", (START_CAMERA.WaitForChild("Id") as StringValue).Value);
         }
 
         const empireId = Workspace.GetAttribute("EmpireID");
@@ -190,6 +192,12 @@ export class DataService implements OnInit {
         }
         this.empireProfile = this.loadEmpireProfile(empireId as string);
         if (this.empireProfile !== undefined) {
+            if (game.PrivateServerOwnerId !== 0) {
+                this.empireProfile.Data.owner = game.PrivateServerOwnerId;
+                if (this.empireProfile.Data.name === "no name") {
+                    this.empireProfile.Data.name = Players.GetNameFromUserIdAsync(game.PrivateServerOwnerId) + "'s Private Server";
+                }
+            }
             this.empireProfileLoaded.Fire(this.empireProfile);
         }
         Workspace.SetAttribute("EmpireProfileLoaded", true);
@@ -205,7 +213,15 @@ export class DataService implements OnInit {
                 this.unloadEmpireProfile(empireId);
             }
         });
-        const onPlayerAdded = (player: Player) => EmpireCanister.availableEmpires.setFor(player, this.mapInfo(this.getAvailableEmpires(player.UserId)));
+        const onPlayerAdded = (player: Player) => {
+            let availableEmpires = this.getAvailableEmpires(player.UserId);
+            const playerProfile = this.loadPlayerProfile(player.UserId);
+            if (playerProfile?.Data.availableEmpires !== undefined) {
+                availableEmpires = [...availableEmpires, ...playerProfile.Data.availableEmpires];
+                this.setAvailableEmpires(player.UserId, availableEmpires);
+            }
+            EmpireCanister.availableEmpires.setFor(player, this.mapInfo(availableEmpires));
+        };
         Players.PlayerAdded.Connect((player) => onPlayerAdded(player));
         for (const player of Players.GetPlayers()) {
             onPlayerAdded(player);

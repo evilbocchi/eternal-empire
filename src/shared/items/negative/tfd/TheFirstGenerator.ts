@@ -1,0 +1,17 @@
+import Price from "shared/Price";
+import { AREAS } from "shared/constants";
+import Difficulties from "shared/difficulty/Difficulties";
+import Generator from "shared/item/Generator";
+
+export = new Generator("TheFirstGenerator")
+.setName("The First Generator")
+.setDescription("Start producing Power at +1 W/s.")
+.setDifficulty(Difficulties.TheFirstDifficulty)
+.setPrice(new Price().setCost("Funds", 1000000000), 1)
+.setPrice(new Price().setCost("Funds", 1450000000).setCost("Power", 50), 2)
+.setPrice(new Price().setCost("Funds", 3000000000).setCost("Power", 250), 3)
+.setPrice(new Price().setCost("Funds", 42200000000).setCost("Power", 1200), 4)        
+.addPlaceableArea(AREAS.BarrenIslands)
+
+.setPassiveGain(new Price().setCost("Power", 1))
+.ambienceSound((model) => (model.WaitForChild("Hitbox").WaitForChild("Sound") as Sound));

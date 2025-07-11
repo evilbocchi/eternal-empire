@@ -4,7 +4,7 @@ interface ClientRemoteProperty<T> {
 	get(): T;
 	isReady(): boolean;
 	destroy(): void;
-	observe(observer: (value: T) => void): void; 
+	observe(observer: (value: T) => void): Signal.Connection; 
 	readonly changed: Signal<(value: T) => void>;
 }
 

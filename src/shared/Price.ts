@@ -3,18 +3,48 @@ import InfiniteMath from "./utils/infinitemath/InfiniteMath";
 
 class Price {
 
-    static FORMAT: {[currency in Currency]?: string} = {
-        Funds: "$%s",
-        Power: "%s W",
+    static CATEGORIES = {
+        Main: 1,
+        Misc: 2
     }
 
-    static COLORS: {[currency in Currency]?: Color3} = {
-        Funds: Color3.fromRGB(0, 170, 0),
-        Power: Color3.fromRGB(255, 102, 0)
+    static DETAILS_PER_CURRENCY: {[currency in Currency]: {layoutOrder: number, format?: string, color: Color3, page?: number}} = {
+        Funds: {
+            layoutOrder: 1,
+            format: "$%s",
+            color: Color3.fromRGB(0, 170, 0),
+            page: Price.CATEGORIES.Main
+        },
+        Power: {
+            layoutOrder: 2,
+            format: "%s W",
+            color: Color3.fromRGB(255, 102, 0),
+            page: Price.CATEGORIES.Main
+        },
+        Bitcoin: {
+            layoutOrder: 3,
+            format: "%s BTC",
+            color: Color3.fromRGB(10, 207, 255),
+            page: Price.CATEGORIES.Main
+        },
+        "Purifier Clicks": {
+            layoutOrder: 99,
+            color: Color3.fromRGB(156, 217, 255),
+            page: Price.CATEGORIES.Misc
+        }
+    }
+
+    static getCategory(page: number) {
+        for (const [c, p] of pairs(Price.CATEGORIES)) {
+            if (page === p) {
+                return c;
+            }
+        }
+        return undefined;
     }
 
     static getFormatted(currency: Currency, cost?: InfiniteMath, excludeName?: boolean) {
-        const format = Price.FORMAT[currency];
+        const format = Price.DETAILS_PER_CURRENCY[currency].format;
         let c = tostring(cost);
         if (cost?.lt(1)) {
             c = c.sub(1, 4);
@@ -26,16 +56,22 @@ class Price {
 
     costPerCurrency = new Map<Currency, InfiniteMath>();
 
-    constructor() {
-
+    constructor(costPerCurrency?: Map<Currency, InfiniteMath>) {
+        if (costPerCurrency !== undefined) {
+            const fixed = new Map<Currency, InfiniteMath>();
+            for (const [currency, cost] of costPerCurrency) {
+                fixed.set(currency, new InfiniteMath(cost));
+            }
+            this.costPerCurrency = fixed;
+        }
     }
 
     getCost(currency: Currency) {
         return this.costPerCurrency.get(currency);
     }
 
-    setCost(currency: Currency, cost: InfiniteMath) {
-        this.costPerCurrency.set(currency, cost);
+    setCost(currency: Currency, cost: InfiniteMath | number) {
+        this.costPerCurrency.set(currency, typeOf(cost) === "number" ? new InfiniteMath(cost) : (cost as InfiniteMath));
         return this;
     }
 
@@ -46,21 +82,33 @@ class Price {
         let priceLabel = "";
         let i = 1;
         const size = this.costPerCurrency.size();
-        for (const [currency, cost] of this.costPerCurrency) {
-            priceLabel += this.tostring(currency, cost);
-            if (i < size) {
-                priceLabel += ", ";
+        for (const [c] of pairs(Price.DETAILS_PER_CURRENCY)) {
+            const cc = this.getCost(c);
+            if (cc !== undefined) {
+                priceLabel += this.tostring(c, cc);
+                if (i < size) {
+                    priceLabel += ", ";
+                }
+                i++;
             }
-            i += 1;
         }
         return priceLabel;
     }
 
     add(value: Price) {
         const newPrice = new Price();
-        const def = new InfiniteMath(0);
-        for (const [currency, cost] of pairs(this.costPerCurrency)) {
-            newPrice.setCost(currency as Currency, cost.add(value.getCost(currency) ?? def));
+        for (const [currency] of pairs(Price.DETAILS_PER_CURRENCY)) {
+            const a = this.getCost(currency);
+            const b = value.getCost(currency);
+            if (a !== undefined && b !== undefined) {
+                newPrice.setCost(currency, a.add(b));
+            }
+            else if (a !== undefined) {
+                newPrice.setCost(currency, a);
+            }
+            else if (b !== undefined) {
+                newPrice.setCost(currency, b);
+            }
         }
         return newPrice;
     }
@@ -68,8 +116,18 @@ class Price {
     sub(value: Price) {
         const newPrice = new Price();
         const def = new InfiniteMath(0);
-        for (const [currency, cost] of pairs(this.costPerCurrency)) {
-            newPrice.setCost(currency as Currency, cost.sub(value.getCost(currency) ?? def));
+        for (const [currency] of pairs(Price.DETAILS_PER_CURRENCY)) {
+            const a = this.getCost(currency);
+            const b = value.getCost(currency);
+            if (a !== undefined && b !== undefined) {
+                newPrice.setCost(currency, a.sub(b));
+            }
+            else if (a !== undefined) {
+                newPrice.setCost(currency, a);
+            }
+            else if (b !== undefined) {
+                newPrice.setCost(currency, def.sub(b));
+            }
         }
         return newPrice;
     }
@@ -79,7 +137,7 @@ class Price {
         const newPrice = new Price();
         const def = new InfiniteMath(1);
         for (const [currency, cost] of pairs(this.costPerCurrency)) {
-            newPrice.setCost(currency as Currency, cost.mul((isNum ? new InfiniteMath(value as number) : (value as Price).getCost(currency)) ?? def));
+            newPrice.setCost(currency as Currency, cost.mul((isNum ? new InfiniteMath(value as number) : ((value as Price).getCost(currency)) ?? def)));
         }
         return newPrice;
     }

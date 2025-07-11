@@ -82,8 +82,14 @@ export class LeaderboardService implements OnStart {
         }
         const name = profile.name;
         this.updateLeaderboard(LEADERBOARDS.TimePlayed, this.updateLeaderboardStore("TotalTime", name, new InfiniteMath(profile.playtime).ConvertForLeaderboards()));
-        this.updateLeaderboard(LEADERBOARDS.Funds, this.updateLeaderboardStore("Funds", name, new InfiniteMath(profile.currencies.Funds).ConvertForLeaderboards()));
-        this.updateLeaderboard(LEADERBOARDS.Power, this.updateLeaderboardStore("Power", name, new InfiniteMath(profile.currencies.Power).ConvertForLeaderboards()));
+        const funds = profile.currencies.get("Funds");
+        if (funds !== undefined) {
+            this.updateLeaderboard(LEADERBOARDS.Funds, this.updateLeaderboardStore("Funds", name, new InfiniteMath(funds).ConvertForLeaderboards()));
+        }
+        const power = profile.currencies.get("Power");
+        if (power !== undefined) {
+            this.updateLeaderboard(LEADERBOARDS.Power, this.updateLeaderboardStore("Power", name, new InfiniteMath(power).ConvertForLeaderboards()));
+        }
         for (const player of Players.GetPlayers()) {
             this.donatedStore.SetAsync(tostring(player.UserId), 
                 new InfiniteMath(this.leaderstatsService.getLeaderstat(player, "Donated") as number | undefined ?? 0).ConvertForLeaderboards());

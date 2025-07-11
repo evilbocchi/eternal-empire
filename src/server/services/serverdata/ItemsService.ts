@@ -3,7 +3,7 @@ import Signal from "@rbxutil/signal";
 import { CurrencyService } from "server/services/serverdata/CurrencyService";
 import { DataService } from "server/services/serverdata/DataService";
 import { Inventory, ItemsData, PlacedItem } from "shared/constants";
-import Items from "shared/item/Items";
+import Items from "shared/items/Items";
 import { Fletchette, RemoteFunc, RemoteProperty } from "shared/utils/fletchette";
 
 declare global {
@@ -107,9 +107,18 @@ export class ItemsService implements OnStart {
         const item = Items.getItem(itemId);
         if (item === undefined)
             return false;
-        const price = item.getPrice(this.getBoughtAmount(itemId) + 1);
+
+        for (const [required, amount] of item.getRequiredItems()) {
+            if (this.getItemAmount(required.id) < amount) {
+                return false;
+            }
+        }    
+        const price = item.getPrice(this.getBoughtAmount(itemId) + 1);    
         const success = price ? this.currencyService.purchase(price) : price;
         if (success === true) {
+            for (const [required, amount] of item.getRequiredItems()) {
+                this.setItemAmount(required.id, this.getItemAmount(required.id) - amount);
+            }
             this.setBoughtAmount(itemId, this.getBoughtAmount(itemId) + 1);
             this.setItemAmount(itemId, this.getItemAmount(itemId) + 1);
         }

@@ -20,6 +20,7 @@ class InstantiationDelimiter extends Item {
                 if (n !== a.Value && n !== undefined)
                     a.Value = n;
             });
+            model.Destroying.Once(() => a.Destroy());
             this.maintain(model, utils);
         });
     }

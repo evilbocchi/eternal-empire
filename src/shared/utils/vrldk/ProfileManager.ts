@@ -4,6 +4,7 @@ class ProfileManager<T extends object, MetaData> {
 
     profileStore: ProfileStore<T, MetaData>;
     loadedProfiles = new Map<string, Profile<T>>();
+    viewedProfiles = new Map<string, Profile<T>>();
 
     constructor(profileStore: ProfileStore<T, MetaData>) {
         this.profileStore = profileStore;
@@ -15,7 +16,7 @@ class ProfileManager<T extends object, MetaData> {
         if (cached !== undefined) {
             return cached;
         }
-        const profile = this.profileStore.LoadProfileAsync(profileKey);
+        const profile = this.profileStore.LoadProfileAsync(profileKey, "Steal");
         if (profile === undefined) {
             if (retryTime === undefined) {
                 retryTime = 0.1;
@@ -45,11 +46,28 @@ class ProfileManager<T extends object, MetaData> {
     }
 
     view(profileKey: string) {
+        const t = tick();
         const cached = this.loadedProfiles.get(profileKey);
         if (cached !== undefined) {
             return cached;
         }
-        return this.profileStore.ViewProfileAsync(profileKey);
+        const viewCached = this.viewedProfiles.get(profileKey);
+        if (viewCached !== undefined) {
+            return viewCached;
+        }
+        const profile = this.profileStore.ViewProfileAsync(profileKey);
+        if (profile !== undefined) {
+            this.viewedProfiles.set(profileKey, profile);
+        }
+        const delta = tick() - t;
+        const message = "Loaded profile " + profileKey + " in " + math.floor(delta * 100) / 100 + "s";
+        if (delta > 5) {
+            warn(message);
+        }
+        else {
+            print(message);
+        }
+        return profile;
     }
 
     unload(profileKey: string) {

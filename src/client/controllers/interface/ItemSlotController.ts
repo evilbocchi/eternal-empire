@@ -47,7 +47,7 @@ export class ItemSlotController {
             }
         });
         difficultyOption.Name = difficulty.id;
-        difficultyOption.LayoutOrder = difficulty.getRating() ?? 0;
+        difficultyOption.LayoutOrder = (difficulty.getRating() ?? 0) * 100;
         return difficultyOption;
     }
 

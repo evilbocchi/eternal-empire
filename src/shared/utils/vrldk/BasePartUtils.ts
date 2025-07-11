@@ -46,14 +46,16 @@ export function rainbowEffect(basePart: BasePart, dur: number) {
 	const c5 = t5.Completed.Connect(() => t6.Play());
 	const c6 = t6.Completed.Connect(() => t1.Play());
 	t1.Play();
-	basePart.Destroying.Once(() => {
+	const endRainbow = () => {
 		c1.Disconnect();
 		c2.Disconnect();
 		c3.Disconnect();
 		c4.Disconnect();
 		c5.Disconnect();
 		c6.Disconnect();
-	});
+	}
+	basePart.Destroying.Once(() => endRainbow());
+	return endRainbow;
 }
 
 export function revertSurfaces(part: Part) {

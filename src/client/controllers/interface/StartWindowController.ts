@@ -107,7 +107,7 @@ export class StartWindowController implements OnInit {
             empireOption.Stats.ItemsLabel.Text = "Items: " + empireInfo.items;
             empireOption.Stats.DateCreatedLabel.Text = "Created: " + os.date("%x", empireInfo.created);
             empireOption.Stats.PlaytimeLabel.Text = "Playtime: " + convertToHHMMSS(empireInfo.playtime ?? 0);
-            const color = empireInfo.name ? computeNameColor(empireInfo.name) : Color3.fromRGB(0, 170, 0);
+            const color = (empireInfo.name ? computeNameColor(empireInfo.name) : Color3.fromRGB(0, 170, 0)) ?? Color3.fromRGB(0, 170, 0);
             empireOption.BackgroundColor3 = color;
             empireOption.UIStroke.Color = color;
             paintObjects(empireOption, color);

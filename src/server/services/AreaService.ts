@@ -1,15 +1,17 @@
-import { OnInit, Service } from "@flamework/core";
+import { OnInit, OnStart, Service } from "@flamework/core";
 import { Players, SoundService } from "@rbxts/services";
 import { GameAssetService } from "server/services/GameAssetService";
 import { LeaderstatsService } from "server/services/LeaderstatsService";
 import Area from "shared/Area";
 import { AREAS } from "shared/constants";
+import { UpgradeBoardService } from "./serverdata/UpgradeBoardService";
+import NamedUpgrade from "shared/item/NamedUpgrade";
 
 @Service()
 export class AreaService implements OnInit {
     musicGroup = new Instance("SoundGroup");
 
-    constructor(private leaderstatsService: LeaderstatsService, private gameAssetService: GameAssetService) {
+    constructor(private leaderstatsService: LeaderstatsService, private gameAssetService: GameAssetService, private upgradeBoardService: UpgradeBoardService) {
 
     }
 
@@ -25,6 +27,22 @@ export class AreaService implements OnInit {
     loadArea(id: keyof (typeof AREAS), area: Area) {
         this.loadAreaGroup(id, area);
         this.loadBoardGui(id, area);
+        this.upgradeBoardService.upgradesChanged.Connect((data) => {
+            let size = area.originalGridSize;
+            for (const [upgradeId, amount] of pairs(data)) {
+                const upgrade = NamedUpgrade.getUpgrade(upgradeId as string);
+                if (upgrade === undefined)
+                    continue;
+                const sizeFormula = upgrade.getGridSizeFormula(id);
+                if (sizeFormula !== undefined) {
+                    size = sizeFormula(size, amount, upgrade.getStep());
+                }
+            }
+            if (area.grid.Size !== size) {
+                area.grid.Size = size;
+            }
+        });
+        this.upgradeBoardService.upgradesChanged.Fire(this.upgradeBoardService.getAmountPerUpgrade()); // yes this is hacky and no i dont give a shit
     }
 
     loadAreaGroup(id: keyof (typeof AREAS), area: Area) {
@@ -36,6 +54,7 @@ export class AreaService implements OnInit {
             if (!sound.IsA("Sound"))
                 return;
             sound.SoundGroup = areaSoundGroup;
+            sound.SetAttribute("OriginalVolume", sound.Volume);
             sound.Parent = areaSoundGroup;
         }
 
@@ -85,7 +104,7 @@ export class AreaService implements OnInit {
 
     onInit() {
         this.musicGroup.Name = "Music";
-        this.musicGroup.Volume = 1;
+        this.musicGroup.Volume = 0.5;
         this.musicGroup.Parent = SoundService;
         for (const [id, area] of pairs(AREAS)) {
             this.loadArea(id, area);

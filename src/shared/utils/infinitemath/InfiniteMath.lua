@@ -451,18 +451,31 @@ function Number:GetSuffix(abbreviation)
 
 	if second < 3 then 
 		local result = tostring(self:Reverse())
+		local Length = 2
+		if math.sign(first) == -1 then Length = 3 end
 
-		if first >= 1 then
+		if math.abs(first) >= 1 then
 			if InfiniteMath.DECIMALPOINTS > 0 then
-				result = result:sub(1, second + 2 + InfiniteMath.DECIMALPOINTS)
-				if tonumber(result:split(".")[2]) == 0 then
+				result = result:sub(1, second + Length + InfiniteMath.DECIMALPOINTS)
+				local decimal = result:split(".")[2]
+				if decimal == nil then return result end
+				
+				if tonumber(decimal) == 0 then
 					result = result:split(".")[1]
+				elseif decimal == string.rep(9, InfiniteMath.DECIMALPOINTS) then
+					result = tonumber(result:split(".")[1]) + 1
 				end
 			else
 				result = result:split(".")[1]
 			end
 		else
-			result = first
+			if math.abs(first) <= .01 then return "0" end
+			result = result:sub(1, second + Length + InfiniteMath.DECIMALPOINTS)
+			local decimal = result:split(".")[2]
+			
+			if decimal == string.rep(9, InfiniteMath.DECIMALPOINTS) then
+				result = tonumber(result:split(".")[1]) + 1
+			end
 		end
 
 		return result
@@ -486,6 +499,7 @@ function Number:GetSuffix(abbreviation)
 
 	return str
 end
+
 
 --[=[
 	@within Number
@@ -661,6 +675,10 @@ function InfiniteMath:ConvertFromLeaderboards(GivenNumber)
 	first = firstFirst.."."..firstSecond
 
 	return InfiniteMath.new({tonumber(first) or 0, tonumber(second) or 0})
+end
+
+function InfiniteMath:ConvertToNumber()
+	return math.pow(10, self.second) * self.first
 end
 
 --[[ Math methods ]]--

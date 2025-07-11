@@ -7,7 +7,7 @@ import { ItemModelController } from "client/controllers/ItemModelController";
 import { UIController } from "client/controllers/UIController";
 import { AREAS } from "shared/constants";
 import Item from "shared/item/Item";
-import Items from "shared/item/Items";
+import Items from "shared/items/Items";
 import ItemPlacement from "shared/utils/ItemPlacement";
 import { Fletchette } from "shared/utils/fletchette";
 import { weldModel } from "shared/utils/vrldk/BasePartUtils";
@@ -171,6 +171,7 @@ export class BuildController implements OnInit {
 
     onInit() {
         let elapsed = 0;
+        const moveTweenInfo = new TweenInfo(0.15, Enum.EasingStyle.Quint);
         RunService.Heartbeat.Connect((dt) => {
             if (this.debounce === true) {
                 elapsed += dt;
@@ -185,7 +186,7 @@ export class BuildController implements OnInit {
                 const pp = this.selected.PrimaryPart;
                 const area = LOCAL_PLAYER.GetAttribute("Area") as keyof (typeof AREAS) | undefined;
                 if (pp !== undefined && area !== undefined) {
-                    TweenService.Create(pp, this.modeOptionsTween2, {CFrame: AREAS[area].getBuildBounds()
+                    TweenService.Create(pp, moveTweenInfo, {CFrame: AREAS[area].getBuildBounds()
                         .calcPlacementCFrame(this.selected, pos.Position, math.rad(this.rotation.Value), this.rotation.Value % 90 !== 0)}).Play();
                 }
             }
@@ -194,7 +195,7 @@ export class BuildController implements OnInit {
         UserInputService.InputBegan.Connect((input, gameProcessed) => {
             if (gameProcessed)
                 return;
-            if (input.UserInputType === Enum.UserInputType.MouseButton1 || input.KeyCode === Enum.KeyCode.ButtonL1) {
+            if (input.UserInputType === Enum.UserInputType.MouseButton1 || input.UserInputType === Enum.UserInputType.Touch || input.KeyCode === Enum.KeyCode.ButtonL1) {
                 this.placeSelected();
             }
         })
@@ -224,6 +225,10 @@ export class BuildController implements OnInit {
                     else
                         proximityPrompts.push(c);
                 }
+                else if (c.IsA("BillboardGui") || c.IsA("Beam")) {
+                    if (isPlacing)
+                        c.Destroy();
+                }
                 else if (c.IsA("BasePart")) {
                     const clickDetector = new Instance("ClickDetector");
                     clickDetector.CursorIcon = "rbxassetid://16375707867";
@@ -236,7 +241,6 @@ export class BuildController implements OnInit {
                             this.placeNewItem(item, hitbox.Position, (model.GetAttribute("Rotation") as number | undefined) ?? 0);
                         }
                     });
-                    const buildModeToggleConnection = this.buildModeToggled.Connect((enabled) => clickDetector.MaxActivationDistance = enabled ? 32 : 0);
                     model.Destroying.Once(() => {
                         buildModeToggleConnection.Disconnect();
                         clickConnection.Disconnect();
@@ -245,11 +249,19 @@ export class BuildController implements OnInit {
                     cPart.Size = cPart.Size.add(new Vector3(0.1, 0.1, 0.1));
                     cPart.Transparency = 1;
                     cPart.Name = "cpart";
+                    cPart.CanCollide = false;
+                    cPart.CanTouch = false;
                     cPart.Parent = c.Parent;
                     for (const a of cPart.GetDescendants()) {
                         if (!a.IsA("BasePart"))
                             a.Destroy();
                     }
+                    const onBuildModeChanged = (enabled: boolean) => {
+                        clickDetector.MaxActivationDistance = enabled ? 32 : 0;
+                        cPart.CanQuery = enabled;
+                    }
+                    const buildModeToggleConnection = this.buildModeToggled.Connect((enabled) => onBuildModeChanged(enabled));
+                    onBuildModeChanged(this.buildModeEnabled);
                     clickDetector.Parent = cPart;
                 }
             }
@@ -284,6 +296,7 @@ export class BuildController implements OnInit {
                 if (this.selected === model) {
                     transparency *= 0.3;
                 }
+                hitbox.CanQuery = this.buildModeEnabled;
                 updateSelectionBox();
                 TweenService.Create(selectionBox, new TweenInfo(0.2), {Transparency: transparency, SurfaceTransparency: transparency * 1.3 + 0.3}).Play();
             }

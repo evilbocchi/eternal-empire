@@ -8,7 +8,7 @@ import { ItemSlotController } from "client/controllers/interface/ItemSlotControl
 import { DifficultyOption, ItemSlot, ItemsData } from "shared/constants";
 import Difficulties from "shared/difficulty/Difficulties";
 import Difficulty from "shared/difficulty/Difficulty";
-import Items from "shared/item/Items";
+import Items from "shared/items/Items";
 import { Fletchette } from "shared/utils/fletchette";
 
 const ItemsCanister = Fletchette.getCanister("ItemsCanister");
@@ -22,7 +22,7 @@ export class InventoryController implements OnInit {
     }
 
     getDifficultyOption(difficulty?: Difficulty) {
-        return INVENTORY_WINDOW.ItemList.WaitForChild(difficulty?.id ?? "error") as DifficultyOption;
+        return difficulty !== undefined ? INVENTORY_WINDOW.ItemList.WaitForChild(difficulty?.id) as DifficultyOption : undefined;
     }
 
     refreshInventoryWindow(items: ItemsData) {
@@ -30,18 +30,26 @@ export class InventoryController implements OnInit {
             if (difficultyOption.IsA("Frame"))
                 difficultyOption.Visible = false;
         }
+        let total = 0;
         for (const [itemId, amount] of items.inventory) {
+            total += amount;
             task.spawn(() => {
                 const difficultyOption = this.getDifficultyOption(Items.getItem(itemId)?.getDifficulty());
+                if (difficultyOption === undefined) {
+                    return;
+                }
                 const hasItem = amount > 0;
-                const itemSlot = (difficultyOption.Items.WaitForChild(itemId) as ItemSlot);
-                itemSlot.AmountLabel.Text = tostring(amount);
-                TweenService.Create(itemSlot.AmountLabel, new TweenInfo(0.5), { TextColor3: hasItem ? Color3.fromRGB(255, 255, 255) : Color3.fromRGB(150, 150, 150) }).Play();
-                itemSlot.Visible = hasItem ? true : false;
-                if (hasItem)
-                    difficultyOption.Visible = true;
+                const itemSlot = (difficultyOption.Items.FindFirstChild(itemId) as ItemSlot);
+                if (itemSlot !== undefined) {
+                    itemSlot.AmountLabel.Text = tostring(amount);
+                    TweenService.Create(itemSlot.AmountLabel, new TweenInfo(0.5), { TextColor3: hasItem ? Color3.fromRGB(255, 255, 255) : Color3.fromRGB(150, 150, 150) }).Play();
+                    itemSlot.Visible = hasItem ? true : false;
+                    if (hasItem)
+                        difficultyOption.Visible = true;
+                }
             });
         }
+        INVENTORY_WINDOW.Empty.Visible = total === 0;
     }
 
     onInit() {
@@ -51,7 +59,7 @@ export class InventoryController implements OnInit {
             difficultyOption.Visible = false;
             difficultyOption.Parent = INVENTORY_WINDOW.ItemList;
         }
-        for (const item of Items.ITEMS) {
+        for (const [_id, item] of Items.init()) {
             const [itemSlot, _v] = this.itemSlotController.getItemSlot(item);
             itemSlot.Activated.Connect(() => {
                 this.uiController.playSound("Click");
@@ -59,7 +67,7 @@ export class InventoryController implements OnInit {
                 this.buildController.placeNewItem(item);
             });
             itemSlot.Visible = false;
-            itemSlot.Parent = this.getDifficultyOption(item.getDifficulty()).WaitForChild("Items");
+            itemSlot.Parent = this.getDifficultyOption(item.getDifficulty())?.WaitForChild("Items");
         }
         ItemsCanister.items.observe((items) => this.refreshInventoryWindow(items));
     }

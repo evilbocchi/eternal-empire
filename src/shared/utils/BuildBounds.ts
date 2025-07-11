@@ -9,13 +9,18 @@ class BuildBounds {
 
     constructor(grid: BasePart) {
         this.grid = grid;
-        const region = grid.Clone();
-        region.Size = grid.Size.add(new Vector3(0.1, 50, 0.1));
-        region.CanCollide = false;
-        region.Transparency = 1;
-        region.Name = "BuildRegion";
-        this.region = region;
-        [this.canvasCFrame, this.canvasSize] = this.calcCanvas();
+        const onSizeChanged = (): [BasePart, CFrame, Vector2] => {
+            const region = grid.Clone();
+            region.Size = grid.Size.add(new Vector3(0.1, 50, 0.1));
+            region.CanCollide = false;
+            region.Transparency = 1;
+            region.Name = "BuildRegion";
+            this.region = region;
+            [this.canvasCFrame, this.canvasSize] = this.calcCanvas();
+            return [this.region, this.canvasCFrame, this.canvasSize];
+        }
+        grid.GetPropertyChangedSignal("Size").Connect(() => onSizeChanged());
+        [this.region, this.canvasCFrame, this.canvasSize] = onSizeChanged();
     }
 
     calcCanvas(): [CFrame, Vector2] {

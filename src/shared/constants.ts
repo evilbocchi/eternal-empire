@@ -38,7 +38,7 @@ export const AREAS = {
     //SlamoVillage: new Area(Workspace.WaitForChild("SlamoVillage")),
 }
 
-export type Currency = "Funds" | "Power" | "Bitcoin";
+export type Currency = "Funds" | "Power" | "Bitcoin" | "Purifier Clicks";
 
 export type Balance = {[currency in Currency]: number};
 
@@ -48,6 +48,26 @@ export type BalanceOption = Frame & {
 	IncomeLabel: TextLabel,
 	UIStroke: UIStroke,
 };
+
+export type UpgradeActionsGui = SurfaceGui & {
+	PurchaseOptions: Frame,
+	ImageLabel: ImageLabel,
+	DescriptionLabel: TextLabel,
+	TitleLabel: TextLabel,
+	AmountLabel: TextLabel
+}
+
+export type UpgradeBoardUpgradeOption = Frame & {
+	AmountLabel: TextLabel,
+	ImageButton: ImageButton
+}
+
+export type UpgradeBoardPurchaseOption = Frame & {
+	Button: TextButton & {
+		AmountLabel: TextLabel
+	},
+	CostLabel: TextLabel
+}
 
 export const UI_ASSETS = StarterGui.WaitForChild("Assets") as Folder & {
 	BalanceWindow: Folder & {
@@ -79,7 +99,7 @@ export const UI_ASSETS = StarterGui.WaitForChild("Assets") as Folder & {
 	},
 	Droplet: Folder & {
 		DropletGui: BillboardGui & {
-			Main: CanvasGroup
+			Main: Frame
 		},
 		CurrencyLabel: TextLabel
 	}
@@ -95,6 +115,12 @@ export const UI_ASSETS = StarterGui.WaitForChild("Assets") as Folder & {
 		AliasLabel: TextLabel,
 		DescriptionLabel: TextLabel,
 		PermLevelLabel: TextLabel
+	},
+	UpgradeBoard: Folder & {
+		UpgradeActionsGui: UpgradeActionsGui,
+		UpgradeOptionsGui: SurfaceGui,
+		PurchaseOption: UpgradeBoardPurchaseOption,
+		UpgradeOption: UpgradeBoardUpgradeOption
 	}
 }
 
@@ -144,34 +170,34 @@ export const LEADERBOARDS = Workspace.WaitForChild("Leaderboards") as Folder & {
 export const DONATION_PRODUCTS = [
 	{
 		amount: 5,
-		id: 1774168434
+		id: 1779030516
 	},
 	{
 		amount: 10,
-		id: 1774168551
+		id: 1779030651
 	},
 	{
 		amount: 25,
-		id: 1774168648
+		id: 1779030829
 	},
 	{
 		amount: 100,
-		id: 1774168786
+		id: 1779031038
 	},
 	{
 		amount: 250,
-		id: 1774168874
+		id: 1779031277
 	},
 	{
 		amount: 1000,
-		id: 1774169531
+		id: 1779031582
 	},
 	{
 		amount: 2500,
-		id: 1774170067
+		id: 1779031773
 	},
 	{
 		amount: 10000,
-		id: 1774170563
+		id: 1779031920
 	},
-]
+];

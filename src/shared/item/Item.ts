@@ -18,6 +18,7 @@ class Item {
     maintenance: Price | undefined = undefined;
     placeableAreas: Area[] = [];
     pricePerIteration = new Map<number, Price>();
+    requiredItems = new Map<Item, number>();
 
     constructor(id: string) {
         this.id = id;
@@ -68,6 +69,20 @@ class Item {
         return this;
     }
 
+    getRequiredItems() {
+        return this.requiredItems;
+    }
+
+    setRequiredItems(required: Map<Item, number>) {
+        this.requiredItems = required;
+        return this;
+    }
+
+    setRequiredItemAmount(item: Item, amount: number) {
+        this.requiredItems.set(item, amount);
+        return this;
+    }
+
     getPlaceableAreas() {
         return this.placeableAreas;
     }
@@ -100,14 +115,14 @@ class Item {
         return this;
     }
 
-    repeat(model: Model | undefined, callback: () => unknown, delta?: number) {
+    repeat(model: Model | undefined, callback: (dt: number) => unknown, delta?: number) {
         const d = delta ?? 0;
         let t = 0;
         const connection = RunService.Heartbeat.Connect((dt) => {
             t += dt;
             if (t > d) {
+                callback(t);
                 t = 0;
-                callback();
             }
         });
         if (model !== undefined)

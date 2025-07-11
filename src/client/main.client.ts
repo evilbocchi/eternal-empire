@@ -3,6 +3,7 @@ import { MarketplaceService, StarterGui, Workspace } from "@rbxts/services";
 import { LOCAL_PLAYER, SERVER_INFO_LABEL } from "client/constants";
 import { UIController } from "client/controllers/UIController";
 import { DONATION_PRODUCTS, LEADERBOARDS } from "shared/constants";
+import { Fletchette } from "shared/utils/fletchette";
 import { playSoundAtPart } from "shared/utils/vrldk/BasePartUtils";
 
 Flamework.addPaths("src/client/controllers");
@@ -43,7 +44,7 @@ for (const donationOption of LEADERBOARDS.Donated.DonationPart.SurfaceGui.Displa
         }
         donationOption.MouseButton1Click.Connect(() => {
             playSoundAtPart(LEADERBOARDS.Donated.DonationPart, uiController.getSound("Click"));
-            MarketplaceService.PromptProductPurchase(LOCAL_PLAYER, donationProduct);
+            Fletchette.getCanister("PermissionsCanister").promptDonation.fire(donationProduct);
         });
     }
 }

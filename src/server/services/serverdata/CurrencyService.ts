@@ -12,7 +12,7 @@ declare global {
 }
 
 const CurrencyCanister = Fletchette.createCanister("CurrencyCanister", {
-    balance: new RemoteProperty<{[currency in Currency]?: InfiniteMath}>({}, false),
+    balance: new RemoteProperty<Map<Currency, InfiniteMath>>(new Map(), false),
 });
 
 @Service()
@@ -23,14 +23,19 @@ export class CurrencyService implements OnStart {
     }
 
     getCost(currency: Currency) {
-        return new InfiniteMath(this.dataService.empireProfile?.Data.currencies[currency] ?? 0);
+        return new InfiniteMath(this.dataService.empireProfile?.Data.currencies.get(currency) ?? 0);
     }
 
-    setCost(currency: Currency, cost: InfiniteMath, f?: boolean) {
+    setCost(currency: Currency, cost: InfiniteMath | undefined, dontPropagateToClient?: boolean) {
         const profile = this.dataService.empireProfile;
         if (profile !== undefined) {
-            profile.Data.currencies[currency] = cost;
-            if (f !== true) {
+            if (cost === undefined) {
+                profile.Data.currencies.delete(currency);
+            }
+            else {
+                profile.Data.currencies.set(currency, cost);
+            }
+            if (dontPropagateToClient !== true) {
                 CurrencyCanister.balance.set(profile.Data.currencies);
             }
         }
@@ -60,7 +65,12 @@ export class CurrencyService implements OnStart {
         let sufficient = true;
         for (const [currency, cost] of price.costPerCurrency) {
             const balCost = balance.getCost(currency);
-            if (balCost !== undefined) {
+            if (balCost === undefined) {
+                if (!cost.le(0)) {
+                    sufficient = false;
+                }
+            }
+            else {
                 if (balCost.lt(cost)) {
                     sufficient = false;
                 }

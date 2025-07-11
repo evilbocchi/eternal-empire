@@ -21,6 +21,7 @@ class Area {
     name: string;
     dropletLimit: IntValue;
     grid: BasePart;
+    originalGridSize: Vector3;
     catchArea: BasePart;
     buildBounds: BuildBounds;
     areaBounds: BasePart;
@@ -39,6 +40,7 @@ class Area {
         this.dropletLimit = areaFolder.WaitForChild("DropletLimit") as IntValue;
         this.dropletLimit.SetAttribute("Default", this.dropletLimit.Value);
         this.grid = areaFolder.WaitForChild("Grid") as BasePart;
+        this.originalGridSize = this.grid.Size;
         this.catchArea = areaFolder.WaitForChild("CatchArea") as BasePart;
         this.buildBounds = new BuildBounds(this.grid);
         this.areaBounds = areaFolder.WaitForChild("AreaBounds") as BasePart;
