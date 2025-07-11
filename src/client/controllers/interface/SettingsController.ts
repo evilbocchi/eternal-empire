@@ -1,10 +1,11 @@
+import { SerikaNum } from "@antivivi/serikanum";
 import { Controller, OnStart } from "@flamework/core";
 import { UserInputService } from "@rbxts/services";
 import { SETTINGS_WINDOW } from "client/constants";
 import { HotkeysController } from "client/controllers/HotkeysController";
-import { HotkeyOption, UI_ASSETS } from "shared/constants";
-import { Fletchette } from "shared/utils/fletchette";
-import InfiniteMath from "shared/utils/infinitemath/InfiniteMath";
+import { UIController } from "client/controllers/UIController";
+import { ASSETS, HotkeyOption } from "shared/constants";
+import { Fletchette } from "@antivivi/fletchette";
 import { paintObjects } from "shared/utils/vrldk/UIUtils";
 
 const SettingsCanister = Fletchette.getCanister("SettingsCanister");
@@ -14,7 +15,7 @@ export class SettingsController implements OnStart {
 
     selectedOption: HotkeyOption | undefined = undefined;
 
-    constructor(private hotkeysController: HotkeysController) {
+    constructor(private hotkeysController: HotkeysController, private uiController: UIController) {
         
     }
 
@@ -64,7 +65,7 @@ export class SettingsController implements OnStart {
             if (cached !== undefined) {
                 return;
             }
-            const option = UI_ASSETS.SettingsWindow.HotkeyOption.Clone();
+            const option = ASSETS.SettingsWindow.HotkeyOption.Clone();
             option.Name = name;
             const key = value.hotkey.Name;
             option.Bind.SetAttribute("Original", key);
@@ -82,7 +83,7 @@ export class SettingsController implements OnStart {
             if (input.UserInputType === Enum.UserInputType.MouseButton1) {
                 this.deselectOption();
             }
-            if (input.KeyCode !== undefined && this.selectedOption !== undefined) {
+            if (input.KeyCode !== Enum.KeyCode.Unknown && input.KeyCode !== undefined && this.selectedOption !== undefined) {
                 const name = this.selectedOption.Name;
                 this.deselectOption();
                 SettingsCanister.setHotkey.fire(name, input.KeyCode.Value);
@@ -93,6 +94,7 @@ export class SettingsController implements OnStart {
             const toggle = settingOption.FindFirstChild("Toggle") as TextButton;
             if (toggle !== undefined) {
                 toggle.Activated.Connect(() => {
+                    this.uiController.playSound("Click");
                     const setting = settingOption.Name as keyof Settings;
                     SettingsCanister.setSetting.fire(setting, !SettingsCanister.settings.get()[setting]);
                 });
@@ -103,7 +105,7 @@ export class SettingsController implements OnStart {
             for (const [setting, v] of pairs(value)) {
                 this.refreshToggle(setting, v === true);
             }
-            InfiniteMath.useScientific(value.ScientificNotation === true);            
+            SerikaNum.changeDefaultAbbreviation(value.ScientificNotation === true ? "scientific" : "suffix");            
         
             for (const [name, code] of value.hotkeys) {
                 const keyCode = this.getMatchingKeyCodeFromValue(code);
@@ -119,7 +121,6 @@ export class SettingsController implements OnStart {
                 this.hotkeysController.bindedKeys = bindedKeys;
                 const option = SETTINGS_WINDOW.InteractionOptions.FindFirstChild(name) as HotkeyOption;
                 if (option === undefined) {
-                    warn(`No such hotkey ${name} exists`);
                     continue;
                 }
                 option.Bind.KeybindLabel.Text = keyCode?.Name ?? "None";

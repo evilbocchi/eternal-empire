@@ -1,3 +1,5 @@
+//!native
+
 class Difficulty {
 
     static DIFFICULTIES = new Map<string, Difficulty>();
@@ -8,6 +10,24 @@ class Difficulty {
         .setImage(0)
         .setColor(Color3.fromRGB(255, 252, 89))
         .setRating(-1000000011)
+        .setClass(-3)
+    );
+
+    static Excavation = Difficulty.registerDifficulty(
+        new Difficulty("Excavation")
+        .setName("Materials")
+        .setImage(0)
+        .setColor(Color3.fromRGB(110, 166, 255))
+        .setRating(-1000000012)
+        .setClass(-3)
+    );
+    
+    static Miscellaneous = Difficulty.registerDifficulty(
+        new Difficulty("Miscellaneous")
+        .setName("Miscellaneous")
+        .setImage(17790114135)
+        .setColor(Color3.fromRGB(255, 110, 110))
+        .setRating(-1000000013)
         .setClass(-3)
     );
 
@@ -159,14 +179,14 @@ class Difficulty {
     static Win = Difficulty.registerDifficulty(new Difficulty("Win")
         .setName("Win")
         .setImage(6382362791)
-        .setColor(Color3.fromRGB(52, 10, 255))
+        .setColor(Color3.fromRGB(39, 119, 232))
         .setRating(-29)
         .setClass(0)
     );
 
     static Winsome = Difficulty.registerDifficulty(new Difficulty("Winsome")
         .setName("Winsome")
-        .setImage(14081288003)
+        .setImage(14081287986)
         .setColor(Color3.fromRGB(106, 205, 255))
         .setRating(-28)
         .setClass(0)
@@ -174,12 +194,28 @@ class Difficulty {
 
     static DoNothing = Difficulty.registerDifficulty(new Difficulty("DoNothing")
         .setName("Do Nothing")
-        .setImage(7662806869)
+        .setImage(7662806862)
         .setColor(Color3.fromRGB(153, 209, 229))
         .setRating(-27)
         .setClass(0)
     );
     
+    static Sleepful = Difficulty.registerDifficulty(new Difficulty("Sleepful")
+        .setName("Sleepful")
+        .setImage(17705157889)
+        .setColor(Color3.fromRGB(52, 155, 255))
+        .setRating(-26.5)
+        .setClass(0)
+    );
+
+    static Blessing = Difficulty.registerDifficulty(new Difficulty("Blessing")
+        .setName("Blessing")
+        .setImage(17705253718)
+        .setColor(Color3.fromRGB(114, 224, 178))
+        .setRating(-26)
+        .setClass(0)
+    );
+
     static registerDifficulty<T extends Difficulty>(difficulty: T) {
         Difficulty.DIFFICULTIES.set(difficulty.id, difficulty);
         return difficulty;

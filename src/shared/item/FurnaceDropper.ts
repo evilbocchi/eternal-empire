@@ -1,12 +1,15 @@
+//!native
+
 import Price from "../Price";
 import Dropper from "./Dropper";
 import Furnace from "./Furnace";
-import { Signal } from "shared/utils/fletchette";
+import { Signal } from "@antivivi/fletchette";
 
 class FurnaceDropper extends Dropper implements Furnace {
 
-    formula: ((value: Price) => Price) | undefined;
-    processed = new Signal<(model: Model, utils: ItemUtils, item: this, worth?: Price, raw?: Price, droplet?: Instance) => void>();
+    add: Price | undefined;
+    mul: Price | undefined;
+    processed = new Signal<(model: Model, utils: GameUtils, item: this, worth?: Price, raw?: Price, droplet?: Instance) => void>();
     variance: number | undefined;
     isAcceptsUpgrades: boolean | undefined;
 
@@ -16,8 +19,13 @@ class FurnaceDropper extends Dropper implements Furnace {
         this.onLoad((model, utils) => Furnace.load(model, utils, this));
     }
 
-    setFormula(formula: (value: Price) => Price) {
-        this.formula = formula;
+    setAdd(add: Price | undefined) {
+        this.add = add;
+        return this;
+    }
+
+    setMul(mul: Price | undefined) {
+        this.mul = mul;
         return this;
     }
 
@@ -31,7 +39,7 @@ class FurnaceDropper extends Dropper implements Furnace {
         return this;
     }
 
-    onProcessed(callback: (model: Model, utils: ItemUtils, item: this, worth?: Price, raw?: Price, droplet?: Instance) => void) {
+    onProcessed(callback: (model: Model, utils: GameUtils, item: this, worth?: Price, raw?: Price, droplet?: Instance) => void) {
         this.processed.connect((model, utils, item, worth, raw, droplet) => callback(model, utils, item, worth, raw, droplet));
         return this;
     }

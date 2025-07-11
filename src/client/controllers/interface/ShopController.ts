@@ -1,3 +1,6 @@
+import { Fletchette } from "@antivivi/fletchette";
+import { Connection } from "@antivivi/fletchette/out/Signal";
+import { OnoeNum } from "@antivivi/serikanum";
 import { Controller, OnInit } from "@flamework/core";
 import { ProximityPromptService, RunService, TweenService } from "@rbxts/services";
 import { LOCAL_PLAYER, SHOP_WINDOW } from "client/constants";
@@ -6,31 +9,37 @@ import { UIController } from "client/controllers/UIController";
 import { AdaptiveTabController } from "client/controllers/interface/AdaptiveTabController";
 import { BuildController } from "client/controllers/interface/BuildController";
 import { ItemSlotController } from "client/controllers/interface/ItemSlotController";
+import { TooltipController } from "client/controllers/interface/TooltipController";
 import Difficulty from "shared/Difficulty";
 import Price from "shared/Price";
-import { DifficultyOption, ItemSlot, PLACED_ITEMS_FOLDER } from "shared/constants";
+import { AREAS, ASSETS, DifficultyOption, ItemSlot, PLACED_ITEMS_FOLDER } from "shared/constants";
 import Item from "shared/item/Item";
 import Shop from "shared/item/Shop";
 import Items from "shared/items/Items";
 import ItemCounter from "shared/utils/ItemCounter";
-import { Fletchette } from "shared/utils/fletchette";
-import InfiniteMath from "shared/utils/infinitemath/InfiniteMath";
-import { combineHumanReadable } from "shared/utils/vrldk/StringUtils";
 
 const ItemsCanister = Fletchette.getCanister("ItemsCanister");
+const CurrencyCanister = Fletchette.getCanister("CurrencyCanister");
 
 @Controller()
 export class ShopController implements OnInit {
     tween = new TweenInfo(0.3, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out);
 
+    descColorHex = SHOP_WINDOW.PurchaseWindow.DescriptionFrame.DescriptionLabel.TextColor3.ToHex();
+    defaultTooltips = new Map<ItemSlot, string>();
     difficultyOptions = new Array<DifficultyOption>();
     placementId = undefined as string | undefined;
     selected = undefined as Item | undefined;
     lastShop = undefined as string | undefined;
+    currentContainerId = 0;
+    currentContainerSpace = 0;
+    sufficientColor = Color3.fromRGB(255, 255, 255);
+    insufficientColor = Color3.fromRGB(255, 80, 80);
+
 
     constructor(private hotkeysController: HotkeysController, private uiController: UIController, 
         private adaptiveTabController: AdaptiveTabController, private buildController: BuildController, 
-        private itemSlotController: ItemSlotController) {
+        private itemSlotController: ItemSlotController, private tooltipController: TooltipController) {
         
     }
 
@@ -42,10 +51,10 @@ export class ShopController implements OnInit {
         this.lastShop = item?.id;
         SHOP_WINDOW.Active = true;
         if (!SHOP_WINDOW.Visible)
-            SHOP_WINDOW.Position = new UDim2(0.06, 52, 1.5, -15);
+            SHOP_WINDOW.Position = new UDim2(0.5, 0, 2.5, 0);
 
         SHOP_WINDOW.Visible = true;
-        TweenService.Create(SHOP_WINDOW, this.tween, {Position: new UDim2(0.06, 52, 0.5, -15)}).Play();
+        TweenService.Create(SHOP_WINDOW, this.tween, {Position: new UDim2(0.5, 0, 1, 5)}).Play();
     }
 
     hideShopWindow() {
@@ -54,7 +63,7 @@ export class ShopController implements OnInit {
         }
         this.buildController.showBuildWindow();
         SHOP_WINDOW.Active = false;
-        const tween = TweenService.Create(SHOP_WINDOW, this.tween, {Position: new UDim2(0.06, 52, 1.5, -15)});
+        const tween = TweenService.Create(SHOP_WINDOW, this.tween, {Position: new UDim2(0.5, 0, 2.5, 0)});
         tween.Play();
         tween.Completed.Once((playbackState) => {
             if (playbackState === Enum.PlaybackState.Completed)
@@ -64,6 +73,10 @@ export class ShopController implements OnInit {
     }
 
     refreshShopWindow(item: Shop, placementId?: string) {
+        const color = item.difficulty?.color;
+        if (color) {
+            SHOP_WINDOW.UIStroke.Color = color;
+        }
         if (placementId !== undefined) {
             this.placementId = placementId;
         }
@@ -100,6 +113,58 @@ export class ShopController implements OnInit {
             difficultyOption.Visible = true;
         }
     }
+    
+    createPriceOption(amount: OnoeNum | number, currency: Currency | undefined, item: Item | undefined) {
+        const option = ASSETS.ShopWindow.PriceOption.Clone();
+        let connection: Connection;
+        if (currency !== undefined) {
+            const details = Price.DETAILS_PER_CURRENCY[currency];
+            option.ImageLabel.Image = "rbxassetid://" + details.image;
+            option.LayoutOrder = details.layoutOrder;
+            option.ImageLabel.Visible = true;
+            option.ViewportFrame.Visible = false;
+            option.AmountLabel.Text = Price.getFormatted(currency, amount as OnoeNum, true);
+            connection = CurrencyCanister.balance.observe((balance) => {
+                if (option === undefined || option.Parent === undefined) {
+                    connection.disconnect();
+                    return;
+                }
+                const inBalance = balance.get(currency);
+                option.AmountLabel.TextColor3 = inBalance !== undefined && (amount as OnoeNum).lessEquals(inBalance) ? this.sufficientColor : this.insufficientColor;
+            });
+        }
+        else if (item !== undefined) {
+            this.itemSlotController.loadViewportFrame(option.ViewportFrame, item);
+            option.LayoutOrder = 1000 + (item.difficulty?.rating ?? 0);
+            option.ImageLabel.Visible = false;
+            option.ViewportFrame.Visible = true;
+            option.AmountLabel.Text = amount + " " + item.name;
+            connection = ItemsCanister.items.observe((items) => {
+                if (option === undefined || option.Parent === undefined) {
+                    connection.disconnect();
+                    return;
+                }
+                const inInventory = items.inventory.get(item.id);
+                option.AmountLabel.TextColor3 = inInventory === undefined || inInventory < (amount as number) ? this.insufficientColor : this.sufficientColor;
+            });
+        }
+        option.Destroying.Once(() => connection.disconnect());
+        this.assignContainer(option);
+    }
+
+    assignContainer(priceOption: typeof ASSETS.ShopWindow.PriceOption) {
+        priceOption.Parent = SHOP_WINDOW.PurchaseWindow.Purchase.Price;
+        const size = priceOption.AbsoluteSize.X + 5;
+        let currentContainer = SHOP_WINDOW.PurchaseWindow.Purchase.Price.FindFirstChild(this.currentContainerId) as typeof ASSETS.ShopWindow.PriceOptionsContainer | undefined;
+        if (currentContainer === undefined || this.currentContainerSpace < size) {
+            currentContainer = ASSETS.ShopWindow.PriceOptionsContainer.Clone();
+            currentContainer.Name = tostring(++this.currentContainerId);
+            currentContainer.Parent = SHOP_WINDOW.PurchaseWindow.Purchase.Price;
+            this.currentContainerSpace = currentContainer.AbsoluteSize.X + 5;
+        }
+        this.currentContainerSpace -= size;
+        priceOption.Parent = currentContainer;
+    }
 
     showPurchaseWindow(item: Item) {
         const items = ItemsCanister.items.get();
@@ -111,28 +176,40 @@ export class ShopController implements OnInit {
         SHOP_WINDOW.PurchaseWindow.Title.ItemNameLabel.Text = (item.name ?? "error") + " (Owned: " + ItemCounter.getTotalAmount(items, item.id) + ")";
         SHOP_WINDOW.PurchaseWindow.ViewportFrame.ClearAllChildren();
         this.itemSlotController.loadViewportFrame(SHOP_WINDOW.PurchaseWindow.ViewportFrame, item);
-        SHOP_WINDOW.PurchaseWindow.DescriptionFrame.DescriptionLabel.Text = item.description ?? "<no description available>";
-        const price = item.getPrice((items.bought.get(item.id) ?? 0) + 1);
-        let riLabel = price?.tostring();
-        const requiredItems = item.requiredItems;
-        if (requiredItems !== undefined && riLabel !== undefined) {
-            const vals = new Array<string>();
-            requiredItems.forEach((amount, key) => vals.push(`${amount} ${key.name}`));
-            riLabel = combineHumanReadable(riLabel, ...vals);
+        let description = this.itemSlotController.formatDescription(item, 21, "Medium");
+        for (const option of SHOP_WINDOW.PurchaseWindow.Purchase.Price.GetChildren()) {
+            if (option.IsA("Frame"))
+                option.Destroy();
         }
-        let paLabel = "";
-        const placeableAreas = item.placeableAreas;
-        if (placeableAreas !== undefined) {
-            const vals = new Array<string>();
-            placeableAreas.forEach((area) => vals.push(area.name));
-            paLabel = combineHumanReadable(paLabel, ...vals);
+        const price = item.getPrice((items.bought.get(item.id) ?? 0) + 1);
+        if (price === undefined) {
+            SHOP_WINDOW.PurchaseWindow.Purchase.HeadingLabel.Text = "Unavailable";
+        }
+        else {
+            SHOP_WINDOW.PurchaseWindow.Purchase.HeadingLabel.Text = "Cost:";
+            for (const [currency, cost] of price.costPerCurrency)
+                this.createPriceOption(cost, currency, undefined);
+            for (const [requiredItem, amount] of item.requiredItems)
+                this.createPriceOption(amount, undefined, requiredItem);
         }
         SHOP_WINDOW.PurchaseWindow.DescriptionFrame.CreatorLabel.Text = `Creator: ${item.creator}`;
-        SHOP_WINDOW.PurchaseWindow.Purchase.PriceLabel.Text = `Cost: ${price === undefined ? "Unavailable" : riLabel}`;
-        SHOP_WINDOW.PurchaseWindow.DescriptionFrame.PlaceableAreasLabel.Text = `Placeable in: ${paLabel}`;
+        
+        const hasFormula = item.formula !== undefined;
+        const hasSlamoVillage = AREAS.SlamoVillage.unlocked.Value === true;
+        if (hasFormula || hasSlamoVillage) {
+            description += `\n<font size="7"> </font>`;
+        }
+        if (hasFormula)
+            description += `\n${this.itemSlotController.formatFormula(item, ItemsCanister.multiplierPerItem.get()?.get(item.id), 18, "Medium")}`;
+        if (item.placeableAreas.isEmpty() || hasSlamoVillage)
+            description += `\n${this.itemSlotController.formatPlaceableAreas(item, 18, "Medium")}`;
+        if (hasSlamoVillage)
+            description += `\n${this.itemSlotController.formatResettingAreas(item, 18, "Medium")}`;
+
+        SHOP_WINDOW.PurchaseWindow.DescriptionFrame.DescriptionLabel.Text = description;
         let color = item.difficulty?.color ?? new Color3();
         color = new Color3(color.R + 0.2, color.G + 0.2, color.B + 0.2);
-        SHOP_WINDOW.PurchaseWindow.DescriptionFrame.Size = new UDim2(1, 0, 0.8, -SHOP_WINDOW.PurchaseWindow.Purchase.AbsoluteSize.Y);
+        SHOP_WINDOW.PurchaseWindow.DescriptionFrame.Size = new UDim2(1, 0, 0.8, -SHOP_WINDOW.PurchaseWindow.Purchase.AbsoluteSize.Y - 40);
         SHOP_WINDOW.PurchaseWindow.Purchase.Visible = price !== undefined;
     
         SHOP_WINDOW.PurchaseWindow.DescriptionFrame.CreatorLabel.Visible = item.creator !== undefined;
@@ -146,7 +223,7 @@ export class ShopController implements OnInit {
         }
         for (const [_id, item] of Items.init()) {
             const [itemSlot, _v] = this.itemSlotController.getItemSlot(item);
-            SHOP_WINDOW.GetPropertyChangedSignal("Visible").Connect(() => itemSlot.ViewportFrame.SetAttribute("Delta", SHOP_WINDOW.Visible ? 0.4 : 0));
+            this.defaultTooltips.set(itemSlot, this.tooltipController.tooltipsPerObject.get(itemSlot)!);
             const diff = item.difficulty;
             if (diff === undefined) {
                 error("No difficulty found");
@@ -168,7 +245,14 @@ export class ShopController implements OnInit {
                     }
                     t = 0;
                     ++checks;
-                    const price = item.getPrice((ItemsCanister.items.get().bought.get(item.id) ?? 0) + 1);
+                    const owned = ItemsCanister.items.get().bought.get(item.id) ?? 0;
+                    const price = item.getPrice(owned + 1);
+                    let info = `\n<font size="4"> </font>`;
+                    if (price !== undefined) {
+                        info += `\n<font color="#ffff00" size="16">Cost: ${price.tostring()}</font>`;
+                    }
+                    info += `\n<font color="#9de5ff" size="16">Owned: ${owned}</font>`;
+                    this.tooltipController.setTooltip(itemSlot, this.defaultTooltips.get(itemSlot) + info);
                     if (price === undefined) {
                         itemSlot.AmountLabel.Text = "MAXED";
                         itemSlot.AmountLabel.TextColor3 = Color3.fromRGB(255, 156, 5);
@@ -182,7 +266,7 @@ export class ShopController implements OnInit {
                         }
                         checks = 0;
                         let currency: Currency | undefined = undefined;
-                        let cost: InfiniteMath | undefined = undefined;
+                        let cost: OnoeNum | undefined = undefined;
                         const loop = () => {
                             let i = 0;
                             for (const [iCurrency, iCost] of price.costPerCurrency) {
@@ -220,7 +304,7 @@ export class ShopController implements OnInit {
         });
         ProximityPromptService.PromptTriggered.Connect((prompt, player) => {
             const s = prompt.GetAttribute("Shop") as string | undefined;
-            if (player === LOCAL_PLAYER && !this.buildController.buildModeEnabled && s !== undefined) {
+            if (player === LOCAL_PLAYER && s !== undefined) {
                 this.uiController.playSound("Flip");
                 const item = Items.getItem(prompt.Name);
                 if (item !== undefined && item.isA("Shop"))

@@ -1,10 +1,12 @@
 import { OnStart, Service } from "@flamework/core";
+import { HttpService } from "@rbxts/services";
 import { CurrencyService } from "server/services/serverdata/CurrencyService";
 import { DataService, EmpireProfileTemplate } from "server/services/serverdata/DataService";
 import { Inventory, ItemsData, PlacedItem } from "shared/constants";
 import Item from "shared/item/Item";
 import Items from "shared/items/Items";
-import { Fletchette, RemoteFunc, RemoteProperty, RemoteSignal, Signal } from "shared/utils/fletchette";
+import { Fletchette, RemoteFunc, RemoteProperty, RemoteSignal, Signal } from "@antivivi/fletchette";
+import { OnoeNum } from "@antivivi/serikanum";
 
 declare global {
     interface FletchetteCanisters {
@@ -20,6 +22,7 @@ export const ItemsCanister = Fletchette.createCanister("ItemsCanister", {
     placeItem: new RemoteFunc<(itemId: string, position: Vector3, rotation: number) => [boolean, number?]>(),
     moveItem: new RemoteFunc<(placementId: string, position: Vector3, rotation: number) => [boolean, number?]>(),
     unplaceItems: new RemoteSignal<(placementIds: string[]) => void>(),
+    multiplierPerItem: new RemoteProperty<Map<string, OnoeNum>>(new Map(), false),
 });
 
 @Service()
@@ -146,6 +149,14 @@ export class ItemsService implements OnStart {
         }
         this.itemsBought.fire(player, bought);
         return oneSucceeded;
+    }
+
+    nextId() {
+        const profile = this.dataService.empireProfile;
+        if (profile === undefined)
+            return HttpService.GenerateGUID(false);
+        else
+            return tostring(++profile.Data.items.nextId);
     }
 
     onStart() {

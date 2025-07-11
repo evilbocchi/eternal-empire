@@ -1,4 +1,6 @@
-import { Debris, Players, TweenService } from "@rbxts/services";
+//!native
+
+import { Debris, TweenService } from "@rbxts/services";
 import Difficulty from "shared/Difficulty";
 import Price from "shared/Price";
 import { DROPLETS_FOLDER } from "shared/constants";
@@ -77,6 +79,18 @@ class Droplet {
             return droplet;
         })
         .setValue(new Price().setCost("Funds", 120))
+    );
+
+    static RustyDroplet = Droplet.registerDroplet(
+        new Droplet("RustyDroplet")
+        .setModel(() => {
+            const droplet = new Instance("Part");
+            droplet.Size = new Vector3(0.9, 0.9, 0.9);
+            droplet.Color = Color3.fromRGB(160, 95, 53);
+            droplet.Material = Enum.Material.Slate;
+            return droplet;
+        })
+        .setValue(new Price().setCost("Funds", 180))
     );
 
     static MassiveGrassDroplet = Droplet.registerDroplet(
@@ -246,7 +260,7 @@ class Droplet {
             return droplet;
         })
         .setValue(new Price().setCost("Funds", 40000).setCost("Power", 2000))
-        .setHealth(160)
+        .setHealth(140)
     );
 
     static DepressingDroplet = Droplet.registerDroplet(
@@ -306,7 +320,7 @@ class Droplet {
             droplet.Material = Enum.Material.Slate;
             return droplet;
         })
-        .setValue(new Price().setCost("Funds", 60000))
+        .setValue(new Price().setCost("Funds", 100000))
     );
 
     static LiquidestFundsDroplet = Droplet.registerDroplet(
@@ -345,13 +359,50 @@ class Droplet {
         .setValue(new Price().setCost("Funds", 1000))
     );
 
+    static HydratingDroplet = Droplet.registerDroplet(
+        new Droplet("HydratingDroplet")
+        .setModel(() => {
+            const droplet = new Instance("Part");
+            droplet.Size = new Vector3(1.25, 1.25, 1.25);
+            droplet.Color = Difficulty.Win.color ?? new Color3();
+            droplet.Material = Enum.Material.Basalt;
+            return droplet;
+        })
+        .setHealth(130)
+        .setValue(new Price().setCost("Power", 8000))
+    );
+
+    static BasicCoin = Droplet.registerDroplet(
+        new Droplet("BasicCoin")
+        .setModel(() => {
+            const droplet = new Instance("Part");
+            droplet.Size = new Vector3(1, 1, 1);
+            droplet.Color = Difficulty.Winsome.color ?? new Color3();
+            droplet.Material = Enum.Material.Ice;
+            return droplet;
+        })
+        .setValue(new Price().setCost("Bitcoin", 1))
+    );
+
+    static SkillDroplet = Droplet.registerDroplet(
+        new Droplet("SkillDroplet")
+        .setModel(() => {
+            const droplet = new Instance("Part");
+            droplet.Size = new Vector3(0.9, 0.9, 0.9);
+            droplet.Color = Difficulty.Blessing.color ?? new Color3();
+            droplet.Material = Enum.Material.Slate;
+            return droplet;
+        })
+        .setValue(new Price().setCost("Skill", 0.01))
+    );
+
     static registerDroplet(droplet: Droplet) {
         Droplet.DROPLETS.push(droplet);
         return droplet;
     }
 
     id: string;
-    model: Instance | undefined = undefined;
+    model: BasePart | undefined = undefined;
     value: Price | undefined = undefined;
     health = 100;
 
@@ -359,16 +410,13 @@ class Droplet {
         this.id = id;
     }
 
-    getInstantiator(dropperModel: Model, cframe: CFrame, utils: ItemUtils) {
+    getInstantiator(dropperModel: Model, cframe: CFrame, utils: GameUtils) {
         const model = this.model?.Clone();
         if (model === undefined)
             error("No model found for droplet " + this.id);
-        const isBasePart = model.IsA("BasePart");
-        if (isBasePart) {
-            model.CanQuery = false;
-            model.CFrame = cframe;
-            model.CastShadow = false;
-        }
+        model.CanQuery = false;
+        model.CFrame = cframe;
+        model.CastShadow = false;
         model.SetAttribute("Health", this.health);
         model.SetAttribute("ItemId", dropperModel.GetAttribute("ItemId"));
         model.SetAttribute("Area", utils.getPlacedItem(dropperModel.Name)?.area);
@@ -396,36 +444,25 @@ class Droplet {
             task.spawn(() => {
                 let prev = new Vector3(0, 10000, 0); // random value
                 while (clone.Parent !== undefined) {
-                    if (isBasePart) {
-                        if ((clone as BasePart).Position.sub(prev).Magnitude < 1) {
-                            Debris.AddItem(clone, 1);
-                            TweenService.Create(clone as BasePart, new TweenInfo(0.5), {Transparency: 1}).Play();
-                            break;
-                        }
-                        prev = (clone as BasePart).Position;
+                    if ((clone as BasePart).Position.sub(prev).Magnitude < 1) {
+                        Debris.AddItem(clone, 1);
+                        TweenService.Create(clone as BasePart, new TweenInfo(0.5), {Transparency: 1}).Play();
+                        break;
                     }
+                    prev = (clone as BasePart).Position;
                     task.wait(5);
                 }
-            });            
-            const players = Players.GetPlayers();
-            if (isBasePart && players.size() === 1) {
-                (clone as BasePart).SetNetworkOwner(players[0]);
-            }
+            });
+            clone.SetNetworkOwner(undefined);
+            return clone;
         };
     }
 
-    setModel(modelFunc: () => Instance) {
+    setModel(modelFunc: () => BasePart) {
         this.model = modelFunc();
         this.model.Name = "Droplet";
         this.model.SetAttribute("DropletId", this.id);
-        if (this.model.IsA("BasePart")) {
-            this.model.CollisionGroup = "Droplets";
-        }
-        for (const p of this.model.GetDescendants()) {
-            if (p.IsA("BasePart")) {
-                p.CollisionGroup = "Droplets";
-            }
-        }
+        this.model.CollisionGroup = "Droplet";
         const re = new Instance("UnreliableRemoteEvent");
         re.Parent = this.model;
         return this;

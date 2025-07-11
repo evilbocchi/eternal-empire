@@ -1,3 +1,5 @@
+//!native
+
 import { AREAS } from "shared/constants";
 import Item from "shared/item/Item";
 

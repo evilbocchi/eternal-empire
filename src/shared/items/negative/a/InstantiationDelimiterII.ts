@@ -10,7 +10,7 @@ export = new InstantiationDelimiter("InstantiationDelimiterII")
 .setDifficulty(Difficulty.A)
 .setPrice(new Price().setCost("Power", 30000), 1)
 .setRequiredItemAmount(InstantiationDelimiterI, 1)
-.addPlaceableArea(AREAS.BarrenIslands)
+.addPlaceableArea("BarrenIslands")
 
 .setDropletIncrease(50)
-.setMaintenance(new Price().setCost("Power", 15));
+.setDrain(new Price().setCost("Power", 15));

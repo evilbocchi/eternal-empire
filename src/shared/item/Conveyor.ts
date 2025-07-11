@@ -1,3 +1,5 @@
+//!native
+
 import Item from "shared/item/Item";
 import { findBaseParts } from "shared/utils/vrldk/BasePartUtils";
 

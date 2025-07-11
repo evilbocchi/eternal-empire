@@ -1,10 +1,10 @@
 import { Controller, OnStart } from "@flamework/core";
 import { PLAYER_GUI } from "client/constants";
 import { UIController } from "client/controllers/UIController";
-import { PLACED_ITEMS_FOLDER, UI_ASSETS, UpgradeBoardUpgradeOption } from "shared/constants";
+import { PLACED_ITEMS_FOLDER, ASSETS, UpgradeBoardUpgradeOption } from "shared/constants";
 import NamedUpgrade from "shared/item/NamedUpgrade";
 import Items from "shared/items/Items";
-import { Fletchette } from "shared/utils/fletchette";
+import { Fletchette } from "@antivivi/fletchette";
 
 
 const UpgradeBoardCanister = Fletchette.getCanister("UpgradeBoardCanister");
@@ -38,13 +38,13 @@ export class UpgradeBoardController implements OnStart {
         }
         const upgradeOptionsPart = model.WaitForChild("UpgradeOptionsPart") as BasePart;
         const upgradeActionsPart = model.WaitForChild("UpgradeActionsPart") as BasePart;
-        const upgradeOptionsGui = UI_ASSETS.UpgradeBoard.UpgradeOptionsGui.Clone();
-        const upgradeActionsGui = UI_ASSETS.UpgradeBoard.UpgradeActionsGui.Clone();
+        const upgradeOptionsGui = ASSETS.UpgradeBoard.UpgradeOptionsGui.Clone();
+        const upgradeActionsGui = ASSETS.UpgradeBoard.UpgradeActionsGui.Clone();
         upgradeOptionsGui.ResetOnSpawn = false;
         upgradeActionsGui.ResetOnSpawn = false;
 
         const newPurchaseOption = (name: string) => {
-            const purchaseOption = UI_ASSETS.UpgradeBoard.PurchaseOption.Clone();
+            const purchaseOption = ASSETS.UpgradeBoard.PurchaseOption.Clone();
             purchaseOption.Button.AmountLabel.Text = "Buy " + name;
             purchaseOption.Name = name;
             purchaseOption.CostLabel.Text = "Select an upgrade!";
@@ -93,7 +93,7 @@ export class UpgradeBoardController implements OnStart {
             buyMax.CostLabel.Text = "Cost: " + (isMaxed ? "MAXED" : upgrade.getPrice(amount + 1, cap)?.tostring());
         }
         for (const upgrade of item.upgrades) {
-            const upgradeOption = UI_ASSETS.UpgradeBoard.UpgradeOption.Clone();
+            const upgradeOption = ASSETS.UpgradeBoard.UpgradeOption.Clone();
             upgradeOption.ImageButton.Image = "rbxassetid://" + upgrade.image;
             upgradeOption.Name = upgrade.id;
             upgradeOption.ImageButton.Activated.Connect(() => selectUpgrade(upgrade));

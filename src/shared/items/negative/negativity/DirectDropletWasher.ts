@@ -5,7 +5,7 @@ import Upgrader from "shared/item/Upgrader";
 
 export = new Upgrader("DirectDropletWasher")
 .setName("Direct Droplet Washer")
-.setDescription("Upgrades droplets dropped directly above it for a $55 gain.")
+.setDescription("Upgrades droplets dropped directly above it for a %add% gain.")
 .setDifficulty(Difficulty.Negativity)
 .setPrice(new Price().setCost("Funds", 25000), 1)
 .setPrice(new Price().setCost("Funds", 30000), 2)
@@ -13,6 +13,7 @@ export = new Upgrader("DirectDropletWasher")
 .setPrice(new Price().setCost("Funds", 60000), 4)
 .setPrice(new Price().setCost("Funds", 100000), 5, 9)
 .setPrice(new Price().setCost("Funds", 200000), 10, 20)
-.addPlaceableArea(AREAS.BarrenIslands)
+.addPlaceableArea("BarrenIslands")
 
+.setSpeed(3)
 .setAdd(new Price().setCost("Funds", 55));

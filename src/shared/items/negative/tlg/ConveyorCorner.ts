@@ -8,6 +8,6 @@ export = new Conveyor("ConveyorCorner")
 .setDescription("A conveyor invented by Move-Your-Droplets™. Advertised to 'rotate any droplet, anytime.' Only goes clockwise unfortunately.")
 .setDifficulty(Difficulty.TheLowerGap)
 .setPrice(new Price().setCost("Funds", 90), 1, 5)
-.addPlaceableArea(AREAS.BarrenIslands)
+.addPlaceableArea("BarrenIslands")
 
 .setSpeed(5);

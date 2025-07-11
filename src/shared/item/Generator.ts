@@ -1,3 +1,5 @@
+//!native
+
 import { RunService } from "@rbxts/services";
 import Price from "shared/Price";
 import Item from "shared/item/Item";
@@ -24,15 +26,23 @@ class Generator extends Item {
                         const passiveGain = this.passiveGain;
                         if (passiveGain !== undefined) {
                             let delta = passiveGain.mul(t);
+                            const boosted = new Set<string>();
                             for (const boolValue of boostsFolder.GetChildren()) {
                                 const placedItem = utils.getPlacedItem(boolValue.Name);
                                 if (placedItem !== undefined) {
+                                    const check = placedItem.placementId ?? "no name";
+                                    if (boosted.has(check))
+                                        continue;
+                                    boosted.add(check);
                                     const item = utils.getItem(placedItem.item);
                                     if (item !== undefined && item.isA("Charger")) {
                                         const mul = item.mul;
                                         if (mul !== undefined)
                                             delta = delta.mul(mul);
                                     }
+                                }
+                                else {
+                                    boolValue.Destroy();
                                 }
                             }
                             for (const [upgradeId, amount] of pairs(utils.getAmountPerUpgrade())) {

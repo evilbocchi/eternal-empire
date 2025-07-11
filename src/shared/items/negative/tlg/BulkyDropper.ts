@@ -6,12 +6,12 @@ import Dropper from "shared/item/Dropper";
 
 export = new Dropper("BulkyDropper")
 .setName("Bulky Dropper")
-.setDescription("Takes a lot of space, but generates $4/droplet/s.")
+.setDescription("Takes a lot of space, but generates %val% droplets per second.")
 .setDifficulty(Difficulty.TheLowerGap)
 .setPrice(new Price().setCost("Funds", 100), 1)
 .setPrice(new Price().setCost("Funds", 545), 2)
 .setPrice(new Price().setCost("Funds", 1450), 3)
-.addPlaceableArea(AREAS.BarrenIslands)
+.addPlaceableArea("BarrenIslands")
 
 .setDroplet(Droplet.FatDroplet)
 .setDropRate(1);

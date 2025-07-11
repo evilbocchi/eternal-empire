@@ -1,11 +1,24 @@
+import { Signal } from "@antivivi/fletchette";
+import { Connection } from "@antivivi/fletchette/out/Signal";
+import { OnoeNum } from "@antivivi/serikanum";
 import { OnInit, OnStart, Service } from "@flamework/core";
-import { Debris, HttpService, MarketplaceService, PhysicsService, Players, ReplicatedStorage } from "@rbxts/services";
+import { Debris, MarketplaceService, PathfindingService, PhysicsService, Players, ProximityPromptService, ReplicatedStorage, RunService, TweenService } from "@rbxts/services";
+import { BombsService } from "server/services/BombsService";
+import { DarkMatterService } from "server/services/DarkMatterService";
+import { NPCService } from "server/services/NPCService";
 import { CurrencyService } from "server/services/serverdata/CurrencyService";
 import { DataService, EmpireProfileTemplate } from "server/services/serverdata/DataService";
+import { EventService } from "server/services/serverdata/EventService";
 import { ItemsCanister, ItemsService } from "server/services/serverdata/ItemsService";
+import { LevelService } from "server/services/serverdata/LevelService";
+import { QuestCanister, QuestsService } from "server/services/serverdata/QuestsService";
+import { UnlockedAreasService } from "server/services/serverdata/UnlockedAreasService";
+import { UpgradeBoardService } from "server/services/serverdata/UpgradeBoardService";
+import InteractableObject from "shared/InteractableObject";
+import NPC, { Dialogue, NPCAnimationType } from "shared/NPC";
 import Price from "shared/Price";
 import Quest, { Stage } from "shared/Quest";
-import { AREAS, PLACED_ITEMS_FOLDER, PlacedItem } from "shared/constants";
+import { AREAS, PLACED_ITEMS_FOLDER, PlacedItem, SOUND_EFFECTS_GROUP, getNPCPosition, getWaypoint } from "shared/constants";
 import Conveyor from "shared/item/Conveyor";
 import Droplet from "shared/item/Droplet";
 import Item from "shared/item/Item";
@@ -14,25 +27,20 @@ import Upgrader from "shared/item/Upgrader";
 import Items from "shared/items/Items";
 import ItemPlacement from "shared/utils/ItemPlacement";
 import ReserveModels from "shared/utils/ReserveModels";
-import { Signal } from "shared/utils/fletchette";
-import InfiniteMath from "shared/utils/infinitemath/InfiniteMath";
-import { BombsService } from "./BombsService";
-import { DarkMatterService } from "./DarkMatterService";
-import { LevelService } from "./serverdata/LevelService";
-import { QuestCanister, QuestsService } from "./serverdata/QuestsService";
-import { UnlockedAreasService } from "./serverdata/UnlockedAreasService";
-import { UpgradeBoardService } from "./serverdata/UpgradeBoardService";
+import { getRootPart } from "shared/utils/vrldk/PlayerUtils";
+import { pathfind } from "shared/utils/vrldk/RigUtils";
+
 
 declare global {
-    interface ItemUtils {
-        balanceChanged: Signal<(balance: Map<Currency, InfiniteMath>) => void>;
+    interface GameUtils {
+        balanceChanged: Signal<(balance: Map<Currency, OnoeNum>) => void>;
         itemsBought: Signal<(player: Player, items: Item[]) => void>;
         itemPlaced: Signal<(player: Player, placedItem: PlacedItem) => void>;
         unlockArea: (area: keyof (typeof AREAS)) => boolean;
         getBalance: () => Price;
         setBalance: (bal: Price) => void;
-        calculateRawDropletValue: (droplet: BasePart) => Price | undefined;
-        calculateDropletValue: (droplet: BasePart) => [Price | undefined, Price | undefined];
+        calculateRawDropletValue: (droplet: BasePart, isAcceptsUpgrades?: boolean) => Price | undefined;
+        calculateDropletValue: (droplet: BasePart, isAcceptsUpgrades?: boolean) => [Price | undefined, Price | undefined];
         
         /**
          * Gets the PlacedItem object directly linked to the empire's Profile.
@@ -55,6 +63,23 @@ declare global {
         getSavedSetup: (area: keyof (typeof AREAS)) => PlacedItem[] | undefined;
         saveSetup: (player: Player, area: keyof (typeof AREAS)) => boolean;
         loadSetup: (player: Player, area: keyof (typeof AREAS)) => boolean;
+
+        dialogueFinished: Signal<(dialogue: Dialogue) => void>;
+        playNPCAnimation: (npc: NPC, animType: NPCAnimationType) => void;
+        stopNPCAnimation: (npc: NPC, animType: NPCAnimationType) => boolean;
+        onStageReached: (stage: Stage, callback: () => unknown) => Connection;
+        addDialogue: (npc: NPC, dialogue: Dialogue) => void;
+        removeDialogue: (npc: NPC, dialogue: Dialogue) => void;
+        talk: (dialogue: Dialogue) => void;
+        onEventCompleted: (event: string, callback: (isCompleted: boolean) => unknown) => Connection;
+        isEventCompleted: (event: string) => boolean;
+        setEventCompleted: (event: string, isCompleted: boolean) => void;
+        leadToPoint: (npcHumanoid: Humanoid, point: CFrame, callback: () => unknown) => RBXScriptConnection;
+
+        giveQuestItem: (itemId: string, amount: number) => void;
+        takeQuestItem: (itemId: string, amount: number) => boolean;
+
+        getBoughtAmount: (itemId: string) => number;
     }
 }
 
@@ -70,25 +95,31 @@ export class GameAssetService implements OnInit, OnStart {
     itemsUnplaced = new Signal<(player: Player, placedItems: PlacedItem[]) => void>();
     setupSaved = new Signal<(player: Player, area: keyof (typeof AREAS)) => void>();
     setupLoaded = new Signal<(player: Player, area: keyof (typeof AREAS)) => void>();
-    itemUtils: ItemUtils;
+    drainsPerId = new Map<string, number>();
+    gameUtils: GameUtils;
     productFunctions = new Map<number, ProductFunction>();
+    stageReached = new Signal<(stage: Stage) => void>();
+    questItemGiven = new Signal<(itemId: string, amount: number) => void>();
+    questItemTaken = new Signal<(itemId: string, amount: number) => void>();
+    isRendering = false;
 
     constructor(private dataService: DataService, private itemsService: ItemsService, private currencyService: CurrencyService, 
         private upgradeBoardService: UpgradeBoardService, private questsService: QuestsService, private levelService: LevelService,
-        private unlockedAreasService: UnlockedAreasService, private darkMatterService: DarkMatterService, private bombsService: BombsService) {
+        private unlockedAreasService: UnlockedAreasService, private darkMatterService: DarkMatterService, private bombsService: BombsService,
+        private npcService: NPCService, private eventService: EventService) {
         defMul = new Price();
         for (const [currency] of pairs(Price.DETAILS_PER_CURRENCY)) {
             defMul.setCost(currency, 1);
         }
-        this.itemUtils = {
+        this.gameUtils = {
             balanceChanged: this.currencyService.balanceChanged,
             itemsBought: this.itemsService.itemsBought,
             itemPlaced: this.itemPlaced,
             unlockArea: (area) => this.unlockedAreasService.unlockArea(area),
             getBalance: () => this.currencyService.getBalance(),
             setBalance: (balance) => this.currencyService.setBalance(balance),
-            calculateRawDropletValue: (droplet) => this.calculateRawDropletValue(droplet),
-            calculateDropletValue: (droplet) => this.calculateDropletValue(droplet),
+            calculateRawDropletValue: (droplet, isAcceptsUpgrades) => this.calculateRawDropletValue(droplet, isAcceptsUpgrades),
+            calculateDropletValue: (droplet, isAcceptsUpgrades) => this.calculateDropletValue(droplet, isAcceptsUpgrades),
             getPlacedItem: (placementId) => {
                 for (const placedItem of this.itemsService.getPlacedItems()) {
                     if (placedItem.placementId === placementId)
@@ -128,6 +159,62 @@ export class GameAssetService implements OnInit, OnStart {
                 this.setupLoaded.fire(player, area);
                 return true;
             },
+            dialogueFinished: this.npcService.dialogueFinished,
+            playNPCAnimation: (npc: NPC, animType: NPCAnimationType) => this.npcService.playAnimation(npc, animType),
+            stopNPCAnimation: (npc: NPC, animType: NPCAnimationType) => this.npcService.stopAnimation(npc, animType),
+            onStageReached: (stage, callback) => {
+                return this.stageReached.connect((s) => {
+                    if (stage === s) {
+                        callback();
+                    }
+                });
+            },
+            addDialogue: (npc: NPC, dialogue: Dialogue) => this.npcService.addDialogue(npc, dialogue),
+            removeDialogue: (npc: NPC, dialogue: Dialogue) => this.npcService.removeDialogue(npc, dialogue),
+            talk: (dialogue: Dialogue) => this.npcService.talk(dialogue),
+            onEventCompleted: (event, callback) => {
+                if (this.gameUtils.isEventCompleted(event))
+                    callback(true);
+                return this.eventService.eventCompleted.connect((e, isCompleted) => {
+                    if (event === e)
+                        callback(isCompleted);
+                });
+            },
+            isEventCompleted: (event) => this.eventService.isEventCompleted(event),
+            setEventCompleted: (event, isCompleted) => this.eventService.setEventCompleted(event, isCompleted),
+            leadToPoint: (npcHumanoid: Humanoid, point: CFrame, callback: () => unknown) => {
+                npcHumanoid.RootPart!.Anchored = false;
+                const tween = TweenService.Create(npcHumanoid.RootPart!, new TweenInfo(1), { CFrame: point });
+                pathfind(npcHumanoid, point.Position, () => tween.Play());
+                const connection = RunService.Heartbeat.Connect(() => {
+                    const players = Players.GetPlayers();
+                    for (const player of players) {
+                        const playerRootPart = getRootPart(player);
+                        if (playerRootPart === undefined)
+                            continue;
+                        if (point.Position.sub(playerRootPart.Position).Magnitude < 10) {
+                            tween.Play();
+                            callback();
+                            connection.Disconnect();
+                        }
+                    }
+                });
+                return connection;
+            },
+
+            giveQuestItem: (itemId, amount) => {
+                this.itemsService.setItemAmount(itemId, this.itemsService.getItemAmount(itemId) + amount);
+                this.questItemGiven.fire(itemId, amount);
+            },
+            takeQuestItem: (itemId, amount) => {
+                const currentAmount = this.itemsService.getItemAmount(itemId);
+                if (currentAmount < amount)
+                    return false;
+                this.itemsService.setItemAmount(itemId, currentAmount - amount);
+                this.questItemTaken.fire(itemId, amount);
+                return true;
+            },
+            getBoughtAmount: (itemId: string) => this.itemsService.getBoughtAmount(itemId),
         }
     }
     
@@ -138,7 +225,7 @@ export class GameAssetService implements OnInit, OnStart {
      * @param dropletModel Droplet model to valuate
      * @returns Price of droplet
      */
-    calculateRawDropletValue(dropletModel: BasePart) {
+    calculateRawDropletValue(dropletModel: BasePart, isAcceptsUpgrades?: boolean) {
         const droplet = Droplet.getDroplet(dropletModel.GetAttribute("DropletId") as string) as Droplet;
         let worth = droplet.value;
         if (worth === undefined) {
@@ -147,13 +234,14 @@ export class GameAssetService implements OnInit, OnStart {
         let totalAdd = new Price();
         let totalMul: Price | undefined = defMul;
         for (const upgrade of dropletModel.GetChildren()) {
-            if (!upgrade.IsA("ObjectValue") || upgrade.Value === undefined || upgrade.Value.Parent === undefined) {
+            if (!upgrade.IsA("ObjectValue") || upgrade.Value === undefined || upgrade.Value.Parent === undefined || upgrade.GetAttribute("EmptyUpgrade") === true) {
                 continue;
             }
+            if (isAcceptsUpgrades === false)
+                continue;
             const item = Items.getItem(upgrade.GetAttribute("ItemId") as string) as Upgrader | undefined;
-            if (item === undefined) {
+            if (item === undefined)
                 continue;
-            }
             const add = item.add;
             if (add !== undefined) {
                 totalAdd = totalAdd.add(add);
@@ -171,8 +259,8 @@ export class GameAssetService implements OnInit, OnStart {
         return worth;
     }
 
-    calculateDropletValue(dropletModel: BasePart): [Price | undefined, Price | undefined] {
-        const rawWorth = this.calculateRawDropletValue(dropletModel);
+    calculateDropletValue(dropletModel: BasePart, isAcceptsUpgrades?: boolean): [Price | undefined, Price | undefined] {
+        const rawWorth = this.calculateRawDropletValue(dropletModel, isAcceptsUpgrades);
         if (rawWorth === undefined) {
             return [undefined, undefined];
         }
@@ -186,6 +274,9 @@ export class GameAssetService implements OnInit, OnStart {
                 worth = formula(worth, amount, upgrade.step);
             }
         }
+        for (const [_id, drain] of this.drainsPerId) {
+            worth = worth.mul(1 - drain);
+        }
         worth = worth.mul(this.darkMatterService.boost);
         if (this.bombsService.fundsBombEnabled) {
             worth = worth.mul(this.bombsService.fundsBombBoost);
@@ -194,7 +285,7 @@ export class GameAssetService implements OnInit, OnStart {
     }
 
     loadItemModel(model: Model, item: Item) {
-        item.loaded.fire(model, this.itemUtils, item);
+        item.loaded.fire(model, this.gameUtils, item);
     }
 
     unplaceItems(player: Player, placementIds: string[]): PlacedItem[] | undefined {
@@ -267,7 +358,7 @@ export class GameAssetService implements OnInit, OnStart {
         }
         const [rotX, rotY, rotZ] = cframe.ToOrientation();
         const placedItem = {
-            placementId: HttpService.GenerateGUID(false),
+            placementId: this.itemsService.nextId(),
             item: itemId,
             posX: cframe.X,
             posY: cframe.Y,
@@ -296,7 +387,7 @@ export class GameAssetService implements OnInit, OnStart {
     }
 
     addItemModel(placedItem: PlacedItem) {
-        if (PLACED_ITEMS_FOLDER.FindFirstChild(placedItem.placementId ?? "default") !== undefined) {
+        if (PLACED_ITEMS_FOLDER.FindFirstChild(placedItem.placementId ?? "default") !== undefined || this.isRendering === true) {
             return false;
         }
         const model = ReserveModels.fetchReserve(placedItem.item);
@@ -359,12 +450,17 @@ export class GameAssetService implements OnInit, OnStart {
             }
         }
 
+        const handleSound = (sound?: Sound) => {
+            if (sound !== undefined)
+                sound.SoundGroup = SOUND_EFFECTS_GROUP;
+        }
         const found = findModels(models);
         for (const model of found) {
             ungroup(model, model);
             for (const c of model.GetChildren()) {
                 if (c.IsA("BasePart")) {
                     if (c.Name === "Part") {
+                        c.CollisionGroup = "Item";
                         c.CanTouch = false;
                     }
                     else if (c.Name === "Conveyor") {
@@ -384,7 +480,10 @@ export class GameAssetService implements OnInit, OnStart {
                         beam.Parent = c;
                         c.FrontSurface = Enum.SurfaceType.Studs;
                     }
+                    handleSound(c.FindFirstChildOfClass("Sound"));
                 }
+                else if (c.IsA("Sound"))
+                    handleSound(c);
             }
             ReserveModels.reserveModels(model.Name, model);
             const objectValue = new Instance("ObjectValue");
@@ -411,6 +510,12 @@ export class GameAssetService implements OnInit, OnStart {
         this.addItemModels(placedItems);
     }
 
+    onQuestComplete(quest: Quest) {
+        const completionDialogue = quest.completionDialogue;
+        if (completionDialogue !== undefined && completionDialogue.npc !== undefined)
+            this.npcService.addDialogue(completionDialogue.npc, completionDialogue);
+    }
+
     loadAvailableQuests(level?: number) {
         if (level === undefined) {
             level = this.levelService.getLevel();
@@ -423,42 +528,48 @@ export class GameAssetService implements OnInit, OnStart {
         if (stagePerQuest === undefined) {
             return;
         }
-        const itemUtils = this.itemUtils;
+        const gameUtils = this.gameUtils;
         const quests = Quest.init();
         for (const [id, quest] of quests) {
-            if (quest.level > level || quest.loaded) {
+            if (quest.level > level) {
                 continue;
             }
-            const current = stagePerQuest.get(id);
-            if (current !== undefined && current < 0) {
-                continue;
-            }
+            const current = stagePerQuest.get(id) ?? 0;
             quest.loaded = true;
             quest.stages.forEach((stage, index) => {
-                if (this.loadedStages.has(stage)) {
-                    return;
-                }
-                const load = stage.load;
-                if (load === undefined) {
-                    warn("No load found");
-                    return;
-                }
-                this.loadedStages.add(stage);
-                const rem = load(itemUtils, stage);
-                const connection = stage.completed.connect(() => {
-                    const newStage = this.questsService.completeStage(quest, index);
-                    if (newStage === undefined) {
-                        return;
+                task.spawn(() => {
+                    // loading
+                    if (!this.loadedStages.has(stage)) {
+                        const load = stage.load;
+                        if (load !== undefined) {
+                            this.loadedStages.add(stage);
+                            const rem = load(gameUtils, stage);
+                            const connection = stage.completed.connect(() => {
+                                const newStage = this.questsService.completeStage(quest, index);
+                                if (newStage === undefined) {
+                                    return;
+                                }
+                                rem();
+                                print(`Completed stage ${index} in ${quest.id}, now in stage ${newStage}`);
+                                if (newStage === -1) {
+                                    this.completeQuest(quest);
+                                }
+                                else {
+                                    this.stageReached.fire(quest.stages[newStage]);
+                                }
+                                this.loadedStages.delete(stage);
+                                connection.disconnect();
+                            });
+                        }
                     }
-                    rem();
-                    print(`Completed stage ${index} in ${quest.id}, now in stage ${newStage}`);
-                    if (newStage === -1) {
-                        this.completeQuest(quest);
+                    if (current === index) {
+                        this.stageReached.fire(stage);
                     }
-                    this.loadedStages.delete(stage);
-                    connection.disconnect();
                 });
             });
+            if (current === -1) {
+                this.onQuestComplete(quest);
+            }
         }
     }
 
@@ -479,6 +590,7 @@ export class GameAssetService implements OnInit, OnStart {
                 this.itemsService.setItemAmount(item.id, this.itemsService.getItemAmount(item.id) + amount);
             }
         }
+        this.onQuestComplete(quest);
     }
 
     setProductFunction(productID: number, productFunction: ProductFunction) {
@@ -486,14 +598,38 @@ export class GameAssetService implements OnInit, OnStart {
     }
 
     onInit() {
+        const path = PathfindingService.CreatePath();
+        path.ComputeAsync(getNPCPosition("Freddy")!, getWaypoint("AHelpingHand2").Position) // load it
+        if (path.GetWaypoints().isEmpty()) {
+            warn("Pathfinding is not working.");
+        }
         this.preloadItemModels();
+
+        ProximityPromptService.PromptTriggered.Connect((prompt, player) => {
+            if (this.npcService.isInteractionEnabled === false || prompt.Parent === undefined)
+                return;
+            const interactableObject = InteractableObject.getInteractableObject(prompt.Parent.Name);
+            if (interactableObject === undefined)
+                return;
+            this.npcService.proximityPrompts.add(prompt);
+            interactableObject.interacted.fire(this.gameUtils, player);
+        });
+        
+        PhysicsService.RegisterCollisionGroup("Item");
+        PhysicsService.RegisterCollisionGroup("Droplet");
+        PhysicsService.RegisterCollisionGroup("Player");
+        PhysicsService.RegisterCollisionGroup("NPC");
+        PhysicsService.RegisterCollisionGroup("NPCHitbox");
+        PhysicsService.CollisionGroupSetCollidable("Droplet", "Droplet", false);
+        PhysicsService.CollisionGroupSetCollidable("NPC", "Item", false);
+        PhysicsService.CollisionGroupSetCollidable("NPC", "Player", false);
+        PhysicsService.CollisionGroupSetCollidable("NPCHitbox", "NPC", false);
     }
 
     onStart() {
-        PhysicsService.RegisterCollisionGroup("Droplets");
-        PhysicsService.CollisionGroupSetCollidable("Droplets", "Droplets", false);
-        PhysicsService.RegisterCollisionGroup("Players");
-        PhysicsService.CollisionGroupSetCollidable("Players", "Droplets", false);
+        this.isRendering = this.dataService.getEmpireId() === "RENDER";
+        if (this.isRendering === true)
+            print("Rendering set to true. Will not spawn item models.");
         this.dataService.empireProfileLoaded.connect(() => this.fullUpdatePlacedItemsModels());
         this.fullUpdatePlacedItemsModels();
         this.itemsService.placedItemsUpdated.connect((...placedItems) => {
@@ -501,12 +637,22 @@ export class GameAssetService implements OnInit, OnStart {
                 this.addItemModel(placedItem);
             }
         });
-        Items.init().forEach((value) => value.initialised.fire(this.itemUtils, value));
-        Quest.init().forEach((quest, questId) => quest.stages.forEach((stage, index) => {
-            const onPositionChanged = (position?: Vector3) => ReplicatedStorage.SetAttribute(`${questId}${index}`, position);
-            onPositionChanged(stage.position);
-            stage.positionChanged.connect((position) => onPositionChanged(position));
-        }));
+        Items.init().forEach((item) => {
+            item.initialized.fire(this.gameUtils, item);
+            item.formulaResultChanged.connect((multiplier) => {
+                const map = ItemsCanister.multiplierPerItem.get();
+                map.set(item.id, multiplier);
+                ItemsCanister.multiplierPerItem.set(map);
+            });
+        });
+        Quest.init().forEach((quest, questId) => {
+            quest.initialized.fire(this.gameUtils);
+            quest.stages.forEach((stage, index) => {
+                const onPositionChanged = (position?: Vector3) => ReplicatedStorage.SetAttribute(`${questId}${index}`, position);
+                onPositionChanged(stage.position);
+                stage.positionChanged.connect((position) => onPositionChanged(position));
+            });
+        });
         this.loadAvailableQuests();
         this.levelService.levelChanged.connect(() => this.loadAvailableQuests());
 

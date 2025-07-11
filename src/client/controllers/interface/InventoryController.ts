@@ -4,10 +4,13 @@ import { UIController } from "client/controllers/UIController";
 import { AdaptiveTabController } from "client/controllers/interface/AdaptiveTabController";
 import { BuildController } from "client/controllers/interface/BuildController";
 import { ItemSlotController } from "client/controllers/interface/ItemSlotController";
+import { TooltipController } from "client/controllers/interface/TooltipController";
 import Difficulty from "shared/Difficulty";
-import { DifficultyOption, ItemSlot, ItemsData } from "shared/constants";
+import { AREAS, DifficultyOption, ItemSlot, ItemsData } from "shared/constants";
+import Item from "shared/item/Item";
 import Items from "shared/items/Items";
-import { Fletchette } from "shared/utils/fletchette";
+import { Fletchette } from "@antivivi/fletchette";
+import { OnoeNum } from "@antivivi/serikanum";
 
 const ItemsCanister = Fletchette.getCanister("ItemsCanister");
 
@@ -15,8 +18,10 @@ const ItemsCanister = Fletchette.getCanister("ItemsCanister");
 export class InventoryController implements OnInit {
 
     difficultyOptions = new Array<DifficultyOption>();
+    tooltipsPerItem = new Map<string, string>();
+    itemSlotsPerItem = new Map<string, ItemSlot>();
     constructor(private uiController: UIController, private adaptiveTabController: AdaptiveTabController, private buildController: BuildController, 
-        private itemSlotController: ItemSlotController) {
+        private itemSlotController: ItemSlotController, private tooltipController: TooltipController) {
         
     }
 
@@ -26,8 +31,10 @@ export class InventoryController implements OnInit {
 
     refreshInventoryWindow(items: ItemsData) {
         for (const difficultyOption of this.difficultyOptions) {
-            if (difficultyOption.IsA("Frame"))
-                difficultyOption.Visible = false;
+            difficultyOption.Visible = false;
+        }
+        for (const [_, itemSlot] of this.itemSlotsPerItem) {
+            itemSlot.Visible = false;
         }
         let total = 0;
         for (const [itemId, amount] of items.inventory) {
@@ -57,10 +64,27 @@ export class InventoryController implements OnInit {
             difficultyOption.LayoutOrder = -difficultyOption.LayoutOrder;
             difficultyOption.Visible = false;
             difficultyOption.Parent = INVENTORY_WINDOW.ItemList;
+            this.difficultyOptions.push(difficultyOption);
         }
-        for (const [_id, item] of Items.init()) {
+
+        const updateTooltip = (item: Item, itemSlot: ItemSlot, multiplier: OnoeNum | undefined) => {
+            let tooltip = this.tooltipsPerItem.get(item.id)!;
+            const hasFormula = item.formula !== undefined;
+            const hasSlamoVillage = AREAS.SlamoVillage.unlocked.Value === true;
+            if (hasFormula || hasSlamoVillage) {
+                tooltip += `\n<font size="7"> </font>`;
+            }
+            if (hasFormula)
+                tooltip += `\n${this.itemSlotController.formatFormula(item, ItemsCanister.multiplierPerItem.get()?.get(item.id), 16, "Bold")}`;
+            if (item.placeableAreas.isEmpty() || hasSlamoVillage)
+                tooltip += `\n${this.itemSlotController.formatPlaceableAreas(item, 16, "Bold")}`;
+            if (hasSlamoVillage)
+                tooltip += `\n${this.itemSlotController.formatResettingAreas(item, 16, "Bold")}`;
+            this.tooltipController.setTooltip(itemSlot, tooltip);
+        }
+
+        for (const [id, item] of Items.init()) {
             const [itemSlot, _v] = this.itemSlotController.getItemSlot(item);
-            INVENTORY_WINDOW.GetPropertyChangedSignal("Visible").Connect(() => itemSlot.ViewportFrame.SetAttribute("Delta", INVENTORY_WINDOW.Visible ? 0.4 : 0));
             itemSlot.Activated.Connect(() => {
                 if (this.buildController.restricted === true) {
                     return;
@@ -70,9 +94,21 @@ export class InventoryController implements OnInit {
                 this.buildController.placeNewItem(item);
             });
             itemSlot.Visible = false;
+            this.tooltipsPerItem.set(id, this.tooltipController.tooltipsPerObject.get(itemSlot)!);
+            updateTooltip(item, itemSlot, undefined);
             itemSlot.Parent = this.getDifficultyOption(item.difficulty)?.WaitForChild("Items");
+            this.itemSlotsPerItem.set(id, itemSlot);
         }
-        this.difficultyOptions = INVENTORY_WINDOW.ItemList.GetChildren() as DifficultyOption[];
         ItemsCanister.items.observe((items) => this.refreshInventoryWindow(items));
+        ItemsCanister.multiplierPerItem.observe((value) => {
+            for (const [itemId, amount] of value) {
+                updateTooltip(Items.getItem(itemId)!, this.itemSlotsPerItem.get(itemId)!, amount);
+            }
+        });
+        AREAS.SlamoVillage.unlocked.Changed.Connect(() => {
+            for (const [id, item] of Items.init()) {
+                updateTooltip(item, this.itemSlotsPerItem.get(id)!, undefined);
+            }
+        })
     }
 }

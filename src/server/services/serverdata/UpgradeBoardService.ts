@@ -3,7 +3,7 @@ import { Players, StarterPlayer } from "@rbxts/services";
 import { CurrencyService } from "server/services/serverdata/CurrencyService";
 import { DataService } from "server/services/serverdata/DataService";
 import NamedUpgrade from "shared/item/NamedUpgrade";
-import { Fletchette, RemoteFunc, RemoteProperty, Signal } from "shared/utils/fletchette";
+import { Fletchette, RemoteFunc, RemoteProperty, Signal } from "@antivivi/fletchette";
 
 declare global {
     interface FletchetteCanisters {

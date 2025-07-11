@@ -1,21 +1,20 @@
-import PartCacheModule from "@rbxts/partcache";
 import { TweenService, Workspace } from "@rbxts/services";
 import Difficulty from "shared/Difficulty";
 import Price from "shared/Price";
 import { AREAS } from "shared/constants";
 import { Manumatic } from "shared/item/Special";
-import InfiniteMath from "shared/utils/infinitemath/InfiniteMath";
-import { playSoundAtPart } from "shared/utils/vrldk/BasePartUtils";
+import { OnoeNum } from "@antivivi/serikanum";
+import PartCacheModule from "shared/utils/partcache";
 
 export = new Manumatic.ManumaticUpgrader("AwesomeManumaticPurifier")
 .setName("Awesome Manumatic Purifier")
 .setDescription("A majestic tower standing through the innumerable trials. Click the structure to increase its Funds boost!")
 .setDifficulty(Difficulty.FelixTheA)
-.setPrice(new Price().setCost("Funds", new InfiniteMath([158, 12])), 1)
-.addPlaceableArea(AREAS.BarrenIslands)
+.setPrice(new Price().setCost("Funds", OnoeNum.fromSerika(158, 12)), 1)
+.addPlaceableArea("BarrenIslands")
 
 .onLoad((model, utils, item) => {
-    const sound = model.FindFirstChildOfClass("Sound");
+    const sound = model.PrimaryPart?.FindFirstChildOfClass("Sound");
     if (sound === undefined) {
         return;
     }
@@ -25,19 +24,19 @@ export = new Manumatic.ManumaticUpgrader("AwesomeManumaticPurifier")
     const amountLabel = billboardGui.WaitForChild("AmountLabel") as TextLabel;
     const fundsLabel = billboardGui.WaitForChild("FundsLabel") as TextLabel;
     const cpcLabel = billboardGui.WaitForChild("CPCLabel") as TextLabel;
-    let cpc = new InfiniteMath(1);
+    let cpc = new OnoeNum(1);
     const update = () => {
-        const amount = utils.getBalance().getCost("Purifier Clicks") ?? new InfiniteMath(0);
-        amountLabel.Text = "Clicked: " + tostring(new InfiniteMath(amount));
-        const fundsBoost = InfiniteMath.log(amount.div(50).add(1), 8).pow(1.1).add(1);
+        const amount = utils.getBalance().getCost("Purifier Clicks") ?? new OnoeNum(0);
+        amountLabel.Text = "Clicked: " + tostring(new OnoeNum(amount));
+        const fundsBoost = OnoeNum.log(amount.div(50).add(1), 8)?.pow(1.1).add(1);
         fundsLabel.Text = tostring(fundsBoost) + "x Funds";
         item.setMul(new Price().setCost("Funds", fundsBoost));
-        if (amount.lt(100)) {
-            cpc = new InfiniteMath(1);
-            cpcLabel.Text = "(Click " + (new InfiniteMath(100).sub(amount)) + " more times to unlock this boost!)";
+        if (amount.lessThan(100)) {
+            cpc = new OnoeNum(1);
+            cpcLabel.Text = "(Click " + (new OnoeNum(100).sub(amount)) + " more times to unlock this boost!)";
         }
         else {
-            cpc = InfiniteMath.log10(amount.sub(90).div(10)).pow(1.1).div(3.5).add(1);
+            cpc = OnoeNum.log10(amount.sub(90).div(10))?.pow(1.1).div(3.5).add(1) ?? new OnoeNum(1);
             cpcLabel.Text = tostring(cpc) + "x Purifier Clicks/click";
         }
     }
@@ -48,8 +47,8 @@ export = new Manumatic.ManumaticUpgrader("AwesomeManumaticPurifier")
     const shadowSize = shadow.Size;
     const newSize = shadowSize.add(new Vector3(1, 1, 1));
     // Fortunately this is a singleton
-    item.setOnClick((model, utils, _item, player, value) => {
-        playSoundAtPart(model.PrimaryPart, sound);
+    item.setOnClick((_model, utils, _item, player, value) => {
+        sound.Play();
         task.spawn(() => {
             const clone = partCache.GetPart();
             clone.Position = shadow.Position;

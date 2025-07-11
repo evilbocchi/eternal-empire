@@ -1,17 +1,16 @@
 import { TweenService } from "@rbxts/services";
-import Price from "shared/Price";
-import { AREAS } from "shared/constants";
 import Difficulty from "shared/Difficulty";
 import Upgrader from "shared/item/Upgrader";
+import Price from "shared/Price";
 import { weldModel } from "shared/utils/vrldk/BasePartUtils";
 
 export = new Upgrader("LaserFan")
 .setName("Laser Fan")
-.setDescription("If you've played tower defense games, you know exactly how to utilise this. Increases droplet value by $1.3x compounding per blade.")
+.setDescription("Increases droplet value by %mul%x compounding per blade.")
 .setDifficulty(Difficulty.Unimpossible)
 .setPrice(new Price().setCost("Funds", 150000), 1)
 .setPrice(new Price().setCost("Funds", 350000), 2)
-.addPlaceableArea(AREAS.BarrenIslands)
+.addPlaceableArea("BarrenIslands")
 
 .setMul(new Price().setCost("Funds", 1.3))
 .onLoad((model, utils, item) => {

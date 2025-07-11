@@ -1,10 +1,11 @@
-import InfiniteMath from "./utils/infinitemath/InfiniteMath";
+//!native
+import { OnoeNum } from "@antivivi/serikanum";
 
 declare global {
     type Currency = "Funds" | "Power" | "Bitcoin" | "Purifier Clicks" | "Skill" | "Dark Matter" | "Funds Bombs";
 }
 
-const def = new InfiniteMath(1);
+const def = new OnoeNum(1);
 
 /**
  * Utility class for combining multiple currencies into a single instance.
@@ -26,44 +27,51 @@ class Price {
         Misc: 2
     }
 
-    static DETAILS_PER_CURRENCY: {[currency in Currency]: {layoutOrder: number, format?: string, color: Color3, page?: number}} = {
+    static DETAILS_PER_CURRENCY: {[currency in Currency]: {layoutOrder: number, format?: string, color: Color3, image: number, page?: number}} = {
         Funds: {
             layoutOrder: 1,
             format: "$%s",
-            color: Color3.fromRGB(0, 170, 0),
+            color: Color3.fromRGB(0, 200, 0),
+            image: 17574921441,
             page: Price.CATEGORIES.Main
         },
         Power: {
             layoutOrder: 2,
             format: "%s W",
             color: Color3.fromRGB(255, 102, 0),
+            image: 17574930060,
             page: Price.CATEGORIES.Main
         },
         Bitcoin: {
             layoutOrder: 3,
             format: "%s BTC",
             color: Color3.fromRGB(10, 207, 255),
+            image: 17574930341,
             page: Price.CATEGORIES.Main
         },
 
         Skill: {
             layoutOrder: 100,
             color: Color3.fromRGB(138, 255, 128),
+            image: 17574929706,
             page: Price.CATEGORIES.Main
         },
         "Purifier Clicks": {
             layoutOrder: 1000,
             color: Color3.fromRGB(156, 217, 255),
+            image: 17574929896,
             page: Price.CATEGORIES.Misc
         },
         "Dark Matter": {
             layoutOrder: 1001,
             color: Color3.fromRGB(125, 0, 130),
+            image: 17574930185,
             page: Price.CATEGORIES.Misc
         },
         "Funds Bombs": {
             layoutOrder: 1002,
             color: Color3.fromRGB(0, 140, 97),
+            image: 13623679087,
             page: Price.CATEGORIES.Misc
         },
     }
@@ -87,7 +95,7 @@ class Price {
      * Formats the specified cost using the specified currency's format string.
      * If no format is available for the currency, it will instead default to the format ```"<value> <currency>"```.
      * ```
-     * print(Price.getFormatted("Funds", new InfiniteMath(5120))) // Output: $5.12K
+     * print(Price.getFormatted("Funds", new OnoeNum(5120))) // Output: $5.12K
      * ```
      * 
      * @param currency Currency to use to format
@@ -95,7 +103,7 @@ class Price {
      * @param excludeName Whether to exclude ```<currency>``` in the default format. If left blank, does not exclude
      * @returns Formatted string version of the cost
      */
-    static getFormatted(currency: Currency, cost?: InfiniteMath, excludeName?: boolean) {
+    static getFormatted(currency: Currency, cost?: OnoeNum, excludeName?: boolean) {
         const format = Price.DETAILS_PER_CURRENCY[currency].format;
         const c = tostring(cost);
         if (format !== undefined)
@@ -103,13 +111,13 @@ class Price {
         return excludeName === true ? c : `${c} ${currency}`;
     }
 
-    costPerCurrency = new Map<Currency, InfiniteMath>();
+    costPerCurrency = new Map<Currency, OnoeNum>();
 
-    constructor(costPerCurrency?: Map<Currency, InfiniteMath>) {
+    constructor(costPerCurrency?: Map<Currency, OnoeNum>) {
         if (costPerCurrency !== undefined) {
-            const fixed = new Map<Currency, InfiniteMath>();
+            const fixed = new Map<Currency, OnoeNum>();
             for (const [currency, cost] of costPerCurrency) {
-                fixed.set(currency, new InfiniteMath(cost));
+                fixed.set(currency, new OnoeNum(cost));
             }
             this.costPerCurrency = fixed;
         }
@@ -119,8 +127,12 @@ class Price {
         return this.costPerCurrency.get(currency);
     }
 
-    setCost(currency: Currency, cost: InfiniteMath | number) {
-        this.costPerCurrency.set(currency, typeOf(cost) === "number" ? new InfiniteMath(cost) : (cost as InfiniteMath));
+    setCost(currency: Currency, cost?: OnoeNum | number) {
+        if (cost === undefined) {
+            this.costPerCurrency.delete(currency);
+            return this;
+        }
+        this.costPerCurrency.set(currency, typeOf(cost) === "number" ? new OnoeNum(cost) : (cost as OnoeNum));
         return this;
     }
 
@@ -136,7 +148,7 @@ class Price {
      * @param cost The cost of the specified currency. Omit this to use the cost in the instance instead.
      * @returns A formatted huamn-readable string of the Price instance
      */
-    tostring(currency?: Currency, cost?: InfiniteMath) {
+    tostring(currency?: Currency, cost?: OnoeNum) {
         if (currency !== undefined) {
             return Price.getFormatted(currency, cost ? cost : this.getCost(currency));
         }
@@ -161,14 +173,17 @@ class Price {
         for (const [currency] of pairs(Price.DETAILS_PER_CURRENCY)) {
             const a = this.getCost(currency);
             const b = value.getCost(currency);
-            if (a !== undefined && b !== undefined) {
-                newPrice.setCost(currency, a.add(b));
+            if (a === undefined) {
+                if (b === undefined)
+                    continue;
+                else
+                    newPrice.setCost(currency, b);
             }
-            else if (a !== undefined) {
-                newPrice.setCost(currency, a);
-            }
-            else if (b !== undefined) {
-                newPrice.setCost(currency, b);
+            else {
+                if (b === undefined)
+                    newPrice.setCost(currency, a);
+                else
+                    newPrice.setCost(currency, a.add(b));
             }
         }
         return newPrice;
@@ -176,7 +191,7 @@ class Price {
 
     sub(value: Price) {
         const newPrice = new Price();
-        const def = new InfiniteMath(0);
+        const def = new OnoeNum(0);
         for (const [currency] of pairs(Price.DETAILS_PER_CURRENCY)) {
             const a = this.getCost(currency);
             const b = value.getCost(currency);
@@ -197,7 +212,7 @@ class Price {
         const isNum = typeOf(value) === "number";
         const newPrice = new Price();
         for (const [currency, cost] of pairs(this.costPerCurrency)) {
-            newPrice.setCost(currency as Currency, cost.mul((isNum ? new InfiniteMath(value as number) : ((value as Price).getCost(currency)) ?? def)));
+            newPrice.setCost(currency as Currency, cost.mul((isNum ? new OnoeNum(value as number) : ((value as Price).getCost(currency)) ?? def)));
         }
         return newPrice;
     }

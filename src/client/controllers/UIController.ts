@@ -1,24 +1,20 @@
-import { Controller } from "@flamework/core";
+import { Controller, OnInit, OnStart } from "@flamework/core";
 import { ContentProvider } from "@rbxts/services";
 import { INTERFACE } from "client/constants";
-import { UI_ASSETS } from "shared/constants";
-import { Signal } from "shared/utils/fletchette";
+import { ASSETS, getSound } from "shared/constants";
+import { Signal } from "@antivivi/fletchette";
 
 @Controller()
-export class UIController {
+export class UIController implements OnInit, OnStart {
     preloadedAsset = new Signal<(asset: string) => void>();
 
-    getSound(soundName: string) {
-        return UI_ASSETS.Sounds.WaitForChild(soundName + "Sound") as Sound;
-    }
-
     playSound(soundName: string) {
-        this.getSound(soundName).Play();
+        getSound(soundName).Play();
     }
 
     preloadAssets() {
         const assets = [] as string[];
-        for (const object of UI_ASSETS.GetDescendants()) {
+        for (const object of ASSETS.GetDescendants()) {
             if (object.IsA("Sound"))
                 assets.push(object.SoundId);
             else if (object.IsA("MeshPart"))
@@ -36,5 +32,13 @@ export class UIController {
                 this.preloadedAsset.fire(contentId);
             }
         });
+    }
+
+    onInit() {
+        task.spawn(() => this.preloadAssets());
+    }
+
+    onStart() {
+        INTERFACE.Enabled = true;
     }
 }

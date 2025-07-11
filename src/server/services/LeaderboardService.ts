@@ -1,7 +1,7 @@
 import { OnStart, Service } from "@flamework/core";
-import { DataStoreService, Players } from "@rbxts/services";
-import { LEADERBOARDS, Leaderboard, UI_ASSETS, getNameFromUserId } from "shared/constants";
-import InfiniteMath from "shared/utils/infinitemath/InfiniteMath";
+import { DataStoreService, Players, RunService } from "@rbxts/services";
+import { LEADERBOARDS, Leaderboard, ASSETS, getNameFromUserId } from "shared/constants";
+import { OnoeNum } from "@antivivi/serikanum";
 import { LeaderstatsService } from "./LeaderstatsService";
 import { DataService } from "./serverdata/DataService";
 
@@ -13,15 +13,16 @@ export class LeaderboardService implements OnStart {
     skillStore = DataStoreService.GetOrderedDataStore("Skill");
     totalTimeStore = DataStoreService.GetOrderedDataStore("TotalTime1");
     donatedStore = DataStoreService.GetOrderedDataStore("Donated");
+    banned = [1900444407];
 
     constructor(private dataService: DataService, private leaderstatsService: LeaderstatsService) {
 
     }
 
     getLeaderboardSlot(place: number, name: string, amount: number) {
-        const lbSlot = UI_ASSETS.LeaderboardSlot.Clone();
+        const lbSlot = ASSETS.LeaderboardSlot.Clone();
         lbSlot.ServerLabel.Text = name;
-        lbSlot.AmountLabel.Text = tostring(InfiniteMath.ConvertFromLeaderboards(amount as number));
+        lbSlot.AmountLabel.Text = tostring(OnoeNum.fromSingle(amount as number));
         lbSlot.PlaceLabel.Text = tostring(place);
         lbSlot.LayoutOrder = place;
         return lbSlot;
@@ -36,7 +37,7 @@ export class LeaderboardService implements OnStart {
     }
 
     updateLeaderboardStore(store: OrderedDataStore, name: string, amount: number) {
-        if (name !== "no name" && name !== undefined) {
+        if (name !== "no name" && name !== undefined && !RunService.IsStudio()) {
             store.SetAsync(name, amount);
         }
         const data = store.GetSortedAsync(false, 100);
@@ -60,27 +61,30 @@ export class LeaderboardService implements OnStart {
         if (profile === undefined) {
             return;
         }
+        if (this.banned.includes(profile.owner)) {
+            return;
+        }
         const name = profile.name;
         this.updateLeaderboard(LEADERBOARDS.TimePlayed, 
-            this.updateLeaderboardStore(this.totalTimeStore, name, new InfiniteMath(profile.playtime).ConvertForLeaderboards()));
+            this.updateLeaderboardStore(this.totalTimeStore, name, new OnoeNum(profile.playtime).toSingle()));
         const funds = profile.mostCurrencies.get("Funds");
         if (funds !== undefined) {
             this.updateLeaderboard(LEADERBOARDS.Funds, 
-                this.updateLeaderboardStore(this.fundsStore, name, new InfiniteMath(funds).ConvertForLeaderboards()));
+                this.updateLeaderboardStore(this.fundsStore, name, new OnoeNum(funds).toSingle()));
         }
         const power = profile.mostCurrencies.get("Power");
         if (power !== undefined) {
             this.updateLeaderboard(LEADERBOARDS.Power, 
-                this.updateLeaderboardStore(this.powerStore, name, new InfiniteMath(power).ConvertForLeaderboards()));
+                this.updateLeaderboardStore(this.powerStore, name, new OnoeNum(power).toSingle()));
         }
         const skill = profile.mostCurrencies.get("Skill");
         if (skill !== undefined) {
             this.updateLeaderboard(LEADERBOARDS.Skill, 
-                this.updateLeaderboardStore(this.skillStore, name, new InfiniteMath(skill).ConvertForLeaderboards()));
+                this.updateLeaderboardStore(this.skillStore, name, new OnoeNum(skill).toSingle()));
         }
         for (const player of Players.GetPlayers()) {
             this.donatedStore.SetAsync(tostring(player.UserId), 
-                new InfiniteMath(this.leaderstatsService.getLeaderstat(player, "Donated") as number | undefined ?? 0).ConvertForLeaderboards());
+                new OnoeNum(this.leaderstatsService.getLeaderstat(player, "Donated") as number | undefined ?? 0).toSingle());
         }
         this.updateLeaderboard(LEADERBOARDS.Donated, this.donatedStore.GetSortedAsync(false, 100).GetCurrentPage()
             .map((value) => {

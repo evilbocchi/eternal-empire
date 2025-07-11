@@ -1,8 +1,6 @@
-import Price from "shared/Price";
-import { AREAS } from "shared/constants";
 import Difficulty from "shared/Difficulty";
 import { Manumatic } from "shared/item/Special";
-import InfiniteMath from "shared/utils/infinitemath/InfiniteMath";
+import Price from "shared/Price";
 import { loadAnimation } from "shared/utils/vrldk/RigUtils";
 
 const animTrackPerModel = new Map<Model, AnimationTrack>();
@@ -11,9 +9,9 @@ export = new Manumatic.Clicker("NoobClicker")
 .setName("Noob Clicker")
 .setDescription("Noobs clicking your awesome tower for you.")
 .setDifficulty(Difficulty.Skip)
-.setPrice(new Price().setCost("Funds", new InfiniteMath([30, 18])).setCost("Purifier Clicks", 100), 1)
-.setPrice(new Price().setCost("Funds", new InfiniteMath([90, 18])).setCost("Purifier Clicks", 300), 2)
-.addPlaceableArea(AREAS.BarrenIslands)
+.setPrice(new Price().setCost("Funds", 30e18).setCost("Purifier Clicks", 100), 1)
+.setPrice(new Price().setCost("Funds", 90e18).setCost("Purifier Clicks", 300), 2)
+.addPlaceableArea("BarrenIslands")
 
 .setCPS(3)
 .onLoad((model) => {

@@ -1,18 +1,10 @@
-import { OnInit, Service } from "@flamework/core";
-import { BadgeService, Players } from "@rbxts/services";
+import { Service } from "@flamework/core";
+import { BadgeService } from "@rbxts/services";
+import { OnPlayerJoined } from "server/services/PlayerJoinService";
 
 @Service()
-export class BadgesService implements OnInit {
-
-
-    onPlayerAdded(player: Player) {
+export class BadgesService implements OnPlayerJoined {
+    onPlayerJoined(player: Player) {
         BadgeService.AwardBadge(player.UserId, 3498765777753358);
-    }
-
-    onInit() {
-        Players.PlayerAdded.Connect((player) => this.onPlayerAdded(player));
-        for (const player of Players.GetPlayers()) {
-            this.onPlayerAdded(player);
-        } 
     }
 }

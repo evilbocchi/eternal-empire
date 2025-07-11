@@ -1,13 +1,15 @@
+//!native
+
 import { Debris } from "@rbxts/services";
 import Price from "shared/Price";
 import Item from "shared/item/Item";
-import { Signal } from "shared/utils/fletchette";
+import Operative from "shared/item/Operative";
+import { Signal } from "@antivivi/fletchette";
 import { findBaseParts } from "shared/utils/vrldk/BasePartUtils";
 
-class Furnace extends Item {
+class Furnace extends Item implements Operative {
 
-    static load(model: Model, utils: ItemUtils, item: Furnace) {
-        const isAcceptsUpgrades = item.isAcceptsUpgrades;
+    static load(model: Model, utils: GameUtils, item: Furnace) {
         for (const d of findBaseParts(model, "Lava")) {
             d.SetAttribute("ItemId", item.id);
             d.Touched.Connect((droplet) => {
@@ -18,22 +20,25 @@ class Furnace extends Item {
                             droplet.Anchored = true;
                     });
                     Debris.AddItem(droplet, 4);
-                    if (droplet.FindFirstChildOfClass("ObjectValue") !== undefined && isAcceptsUpgrades === false) {
-                        droplet.Destroy();
-                        return;
-                    }
-                    const [worth, raw] = model.GetAttribute("Maintained") === true ? utils.calculateDropletValue(droplet) : [new Price()];
-                    let res = undefined;
-                    const formula = item.formula;
-                    if (worth !== undefined && formula !== undefined) {
-                        res = formula(worth);
-                        const variance = model.GetAttribute("V") as number;
-                        if (variance !== undefined) {
-                            res = res.mul(variance);
-                        }
-                        utils.setBalance(utils.getBalance().add(res));
+                    const [worth, raw] = model.GetAttribute("Maintained") === true ? utils.calculateDropletValue(droplet, item.isAcceptsUpgrades) : [new Price()];
+                    let res = worth;
+                    if (res !== undefined) {                        
+                        if (item.add !== undefined)
+                            res = res.add(item.add);
+                        if (item.mul !== undefined)
+                            res = res.mul(item.mul);
+                        
+                        if (res === worth)
+                            res = undefined;
+                        else {
+                            const variance = model.GetAttribute("V") as number;
+                            if (variance !== undefined) {
+                                res = res.mul(variance);
+                            }
+                            utils.setBalance(utils.getBalance().add(res));
+                        }                        
                     }                    
-                    droplet.FindFirstChildOfClass("UnreliableRemoteEvent")?.FireAllClients(res?.costPerCurrency);
+                    droplet.FindFirstChildOfClass("UnreliableRemoteEvent")?.FireAllClients(res?.costPerCurrency, d);
                     item.processed.fire(model, utils, item, worth, raw, droplet);
                 }
             });
@@ -45,8 +50,9 @@ class Furnace extends Item {
         item.maintain(model, utils);
     }
     
-    formula: ((value: Price) => Price) | undefined;
-    processed = new Signal<(model: Model, utils: ItemUtils, item: this, worth?: Price, raw?: Price, droplet?: Instance) => void>();
+    add: Price | undefined;
+    mul: Price | undefined;
+    processed = new Signal<(model: Model, utils: GameUtils, item: this, worth?: Price, raw?: Price, droplet?: Instance) => void>();
     variance: number | undefined;
     isAcceptsUpgrades: boolean | undefined;
 
@@ -56,8 +62,13 @@ class Furnace extends Item {
         this.onLoad((model, utils) => Furnace.load(model, utils, this));
     }
 
-    setFormula(formula: ((value: Price) => Price) | undefined) {
-        this.formula = formula;
+    setAdd(add: Price | undefined) {
+        this.add = add;
+        return this;
+    }
+
+    setMul(mul: Price | undefined) {
+        this.mul = mul;
         return this;
     }
 
@@ -71,7 +82,7 @@ class Furnace extends Item {
         return this;
     }
 
-    onProcessed(callback: (model: Model, utils: ItemUtils, item: this, worth?: Price, raw?: Price) => void) {
+    onProcessed(callback: (model: Model, utils: GameUtils, item: this, worth?: Price, raw?: Price) => void) {
         this.processed.connect((model, utils, item, worth, raw) => callback(model, utils, item, worth, raw));
         return this;
     }

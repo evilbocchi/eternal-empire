@@ -1,7 +1,7 @@
 import { OnStart, Service } from "@flamework/core";
+import { OnPlayerJoined } from "server/services/PlayerJoinService";
+import { Fletchette, RemoteProperty, RemoteSignal } from "@antivivi/fletchette";
 import { DataService, PlayerProfileTemplate } from "./serverdata/DataService";
-import { Players } from "@rbxts/services";
-import { Fletchette, RemoteProperty, RemoteSignal } from "shared/utils/fletchette";
 
 declare global {
     interface FletchetteCanisters {
@@ -17,23 +17,20 @@ const SettingsCanister = Fletchette.createCanister("SettingsCanister", {
 });
 
 @Service()
-export class SettingsService implements OnStart {
+export class SettingsService implements OnStart, OnPlayerJoined {
 
     constructor(private dataService: DataService) {
 
     }
 
-    onStart() {
-        const onPlayerAdded = (player: Player) => {
-            const playerProfile = this.dataService.loadPlayerProfile(player.UserId);
-            if (playerProfile !== undefined) {
-                SettingsCanister.settings.setFor(player, playerProfile.Data.settings);
-            }
-        };
-        Players.PlayerAdded.Connect((player) => onPlayerAdded(player));
-        for (const player of Players.GetPlayers()) {
-            onPlayerAdded(player);
+    onPlayerJoined(player: Player) {
+        const playerProfile = this.dataService.loadPlayerProfile(player.UserId);
+        if (playerProfile !== undefined) {
+            SettingsCanister.settings.setFor(player, playerProfile.Data.settings);
         }
+    }
+
+    onStart() {
         SettingsCanister.setHotkey.connect((player, name, key) => {
             const playerProfile = this.dataService.loadPlayerProfile(player.UserId);
             if (playerProfile === undefined) {

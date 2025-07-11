@@ -1,12 +1,13 @@
 import { Controller, OnInit } from "@flamework/core";
-import { TweenService } from "@rbxts/services";
+import { ReplicatedStorage, TweenService } from "@rbxts/services";
 import { ADAPTIVE_TAB, ADAPTIVE_TAB_MAIN_WINDOW, LOCAL_PLAYER, SIDEBAR_BUTTONS } from "client/constants";
 import { HotkeysController } from "client/controllers/HotkeysController";
 import { UIController } from "client/controllers/UIController";
-import { Fletchette } from "shared/utils/fletchette";
 
 @Controller()
 export class AdaptiveTabController implements OnInit {
+
+    originalSidebarPosition = SIDEBAR_BUTTONS.Position;
     tween = new TweenInfo(0.3, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out);
     colorsPerWindow = new Map<string, ImageLabel & {
         UIGradient: UIGradient
@@ -22,6 +23,7 @@ export class AdaptiveTabController implements OnInit {
         ADAPTIVE_TAB.Active = false;
         if (this.currentWindow !== undefined) {
             this.currentWindow.Visible = false;
+            this.currentWindow.Parent = ReplicatedStorage;
         }
         const tween = TweenService.Create(ADAPTIVE_TAB, this.tween, {Position: new UDim2(0.5, 0, 1.5, 104)})
         tween.Play();
@@ -34,6 +36,7 @@ export class AdaptiveTabController implements OnInit {
     showAdaptiveTab(windowName: string) {
         if (this.currentWindow !== undefined && this.currentWindow.Name !== windowName) {
             this.currentWindow.Visible = false;
+            this.currentWindow.Parent = ReplicatedStorage;
         }
         ADAPTIVE_TAB.Active = true;
         if (!ADAPTIVE_TAB.Visible)
@@ -45,11 +48,12 @@ export class AdaptiveTabController implements OnInit {
     }
 
     refreshAdaptiveTab(windowName: string) {
-        const window = (ADAPTIVE_TAB_MAIN_WINDOW.FindFirstChild(windowName) as Frame);
+        const window = (ReplicatedStorage.FindFirstChild(windowName) as Frame);
         if (window === undefined) {
             return;
         }
         window.Visible = true;
+        window.Parent = ADAPTIVE_TAB_MAIN_WINDOW;
         ADAPTIVE_TAB.TitleLabel.Text = windowName;
         ADAPTIVE_TAB.UIStroke.Color = this.colorsPerWindow.get(windowName)?.ImageColor3 ?? Color3.fromRGB();
         ADAPTIVE_TAB.UIStroke.UIGradient.Color = this.colorsPerWindow.get(windowName)?.UIGradient.Color ?? new ColorSequence(Color3.fromRGB());
@@ -66,11 +70,11 @@ export class AdaptiveTabController implements OnInit {
     }
 
     hideSidebarButtons() {
-        return SIDEBAR_BUTTONS.Visible = false;
+        TweenService.Create(SIDEBAR_BUTTONS, new TweenInfo(0.5), { Position: new UDim2(-0.015, -50, 0.5, 0) }).Play();
     }
-    
+
     showSidebarButtons() {
-        return SIDEBAR_BUTTONS.Visible = true;
+        TweenService.Create(SIDEBAR_BUTTONS, new TweenInfo(0.5), { Position: this.originalSidebarPosition }).Play();
     }
     
     refreshSidebarButtons() {
@@ -91,13 +95,19 @@ export class AdaptiveTabController implements OnInit {
         this.hotkeys.set("Settings", Enum.KeyCode.P);
         this.hotkeys.set("Quests", Enum.KeyCode.V);
         this.hotkeys.set("Warp", Enum.KeyCode.G);
+        const windows = ADAPTIVE_TAB_MAIN_WINDOW.GetChildren();
+        for (const window of windows) {
+            window.Parent = ReplicatedStorage; // bye
+        }
 
-        for (const sidebarButton of SIDEBAR_BUTTONS.GetChildren()) {
+        for (const sidebarButton of SIDEBAR_BUTTONS.GetDescendants()) {
             if (sidebarButton.IsA("TextButton")) {
                 const hotkey = this.hotkeys.get(sidebarButton.Name);
                 if (hotkey !== undefined) {
                     this.hotkeysController.setHotkey(sidebarButton, hotkey, () => {
                         this.uiController.playSound("Flip");
+                        sidebarButton.Size = new UDim2(1.1, 0, 1.1, 0);
+                        TweenService.Create(sidebarButton, new TweenInfo(0.2), {Size: new UDim2(1, 0, 1, 0)}).Play();
                         this.toggleAdaptiveTab(sidebarButton.Name);
                         return true;
                     }, sidebarButton.Name)

@@ -1,3 +1,5 @@
+//!native
+
 import Item from "shared/item/Item";
 
 class Shop extends Item {

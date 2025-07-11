@@ -1,8 +1,9 @@
-import { OnStart, Service } from "@flamework/core";
+import { OnInit, OnStart, Service } from "@flamework/core";
 import { Profile } from "@rbxts/profileservice/globals";
 import { DataService, EmpireProfileTemplate } from "server/services/serverdata/DataService";
 import Quest from "shared/Quest";
-import { Fletchette, RemoteProperty, RemoteSignal } from "shared/utils/fletchette";
+import { WAYPOINTS } from "shared/constants";
+import { Fletchette, RemoteProperty, RemoteSignal } from "@antivivi/fletchette";
 
 declare global {
     interface FletchetteCanisters {
@@ -16,7 +17,7 @@ export const QuestCanister = Fletchette.createCanister("QuestCanister", {
 });
 
 @Service()
-export class QuestsService implements OnStart {
+export class QuestsService implements OnInit, OnStart {
 
     constructor(private dataService: DataService) {
 
@@ -52,6 +53,12 @@ export class QuestsService implements OnStart {
         stagePerQuest.set(quest.id, n);
         this.setStagePerQuest(stagePerQuest);
         return n;
+    }
+
+    onInit() {
+        for (const waypoint of WAYPOINTS.GetChildren()) {
+            (waypoint as BasePart).Transparency = 1;
+        }
     }
 
     onStart() {

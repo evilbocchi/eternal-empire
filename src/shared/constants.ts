@@ -1,6 +1,7 @@
-import { Players, RunService, StarterGui, Workspace } from "@rbxts/services";
+import { Players, RunService, SoundService, StarterGui, Workspace } from "@rbxts/services";
 import Area from "shared/Area";
-import InfiniteMath from "./utils/infinitemath/InfiniteMath";
+import Formula from "shared/utils/Formula";
+import { OnoeNum } from "@antivivi/serikanum";
 
 export const IS_SINGLE_SERVER = game.PlaceId === 17479698702;
 
@@ -17,10 +18,13 @@ placedItems.Name = "PlacedItems";
 placedItems.Parent = Workspace;
 export const PLACED_ITEMS_FOLDER = placedItems;
 
-const reserveModels = new Instance("Folder");
+const reserveModels = RunService.IsServer() ? new Instance("Folder") : Workspace.WaitForChild("ReserveModels");
 reserveModels.Name = "ReserveModels";
 reserveModels.Parent = Workspace;
 export const RESERVE_MODELS_FOLDER = reserveModels;
+
+export const SOUND_EFFECTS_GROUP = SoundService.WaitForChild("SoundEffectsGroup") as SoundGroup;
+
 
 export const NAMES_PER_USER_ID = new Map<number, string>();
 export function getNameFromUserId(userId: number) {
@@ -85,9 +89,11 @@ export const AREAS = {
 export type Balance = {[currency in Currency]: number};
 
 export type BalanceOption = Frame & {
-	BalanceLabel: TextLabel,
-	CurrencyLabel: TextLabel,
-	IncomeLabel: TextLabel,
+	ImageLabel: ImageLabel,
+	Amount: Frame & {
+		BalanceLabel: TextLabel,
+		IncomeLabel: TextLabel,
+	}
 	UIStroke: UIStroke,
 };
 
@@ -123,14 +129,16 @@ export type QuestOption = Frame & {
 	},
 	Dropdown: TextButton & {
 		ImageLabel: ImageLabel,
-		LevelLabel: TextLabel,
+		LevelLabel: TextLabel & {
+			UIStroke: UIStroke
+		},
 		NameLabel: TextLabel & {
 			UIStroke: UIStroke
 		}
 	}
 }
 
-export const UI_ASSETS = StarterGui.WaitForChild("Assets") as Folder & {
+export const ASSETS = StarterGui.WaitForChild("Assets") as Folder & {
 	BalanceWindow: Folder & {
 		BalanceOption: BalanceOption
 	},
@@ -174,6 +182,7 @@ export const UI_ASSETS = StarterGui.WaitForChild("Assets") as Folder & {
 	Sounds: Folder & {
 		[key: string]: Sound
 	}
+	NPCTextSounds: Folder;
 	LeaderboardSlot: LeaderboardSlot;
 	CommandOption: Frame & {
 		AliasLabel: TextLabel,
@@ -193,6 +202,7 @@ export const UI_ASSETS = StarterGui.WaitForChild("Assets") as Folder & {
 		DetailsLabel: TextLabel,
 		TimestampLabel: TextLabel
 	},
+	ChargerRing: Beam,
 	ArrowBeam: Beam,
 	ClassicSword: Tool,
 	MostBalanceStat: Frame & {
@@ -203,6 +213,33 @@ export const UI_ASSETS = StarterGui.WaitForChild("Assets") as Folder & {
 		ImageLabel: ImageLabel
 	},
 	Resets: Folder,
+	Chest: Model & {
+		Lid: Model,
+		Base: Model,
+		Hitbox: BasePart & {
+			CooldownGui: BillboardGui & {
+				CooldownLabel: TextLabel
+			}
+		}
+	},
+	LootTableItemSlot: Frame & {
+		ViewportFrame: ViewportFrame,
+		TitleLabel: TextLabel,
+		Background: Folder & {
+			ImageLabel: ImageLabel
+		}
+	},
+	ShopWindow: Frame & {
+		PriceOptionsContainer: Frame,
+		PriceOption: Frame & {
+			ImageLabel: ImageLabel,
+			ViewportFrame: ViewportFrame,
+			AmountLabel: TextLabel,
+		}
+	}
+}
+export function getSound(soundName: string) {
+	return ASSETS.Sounds.WaitForChild(soundName + "Sound") as Sound;
 }
 
 export type HotkeyOption = Frame & {
@@ -214,6 +251,7 @@ export type HotkeyOption = Frame & {
 
 export type ItemSlot = TextButton & {
 	UIStroke: UIStroke,
+	Frame: Frame,
 	AmountLabel: TextLabel,
 	ViewportFrame: ViewportFrame & {
 		Camera: Camera
@@ -257,7 +295,7 @@ export type Log = {
 	layer?: string,
 	amount?: number,
 	currency?: Currency,
-	infAmount?: InfiniteMath
+	infAmount?: OnoeNum
 }
 
 export const LEADERBOARDS = Workspace.WaitForChild("Leaderboards") as Folder & {
@@ -274,7 +312,13 @@ export const LEADERBOARDS = Workspace.WaitForChild("Leaderboards") as Folder & {
 	};
 };
 
-export const NPCS = Workspace.WaitForChild("NPCs") as Folder;
+export const WAYPOINTS = Workspace.WaitForChild("Waypoints") as Folder;
+export const getWaypoint = (waypoint: string) => WAYPOINTS.WaitForChild(waypoint) as BasePart;
+export const NPCS = script.Parent?.WaitForChild("npcs") as Folder;
+export const NPC_MODELS = Workspace.WaitForChild("NPCs") as Folder;
+export const getNPCModel = (npc: string) => NPC_MODELS.WaitForChild(npc) as Model;
+export const getNPCPosition = (npc: string) => getNPCModel(npc).PrimaryPart?.Position;
+export const getDisplayName = (humanoid: Humanoid) => humanoid.DisplayName === "" ? (humanoid.Parent?.Name ?? "???") : humanoid.DisplayName;
 
 export const DONATION_PRODUCTS = [
 	{
@@ -320,3 +364,33 @@ export type BombsBoardGui = SurfaceGui & {
 export const BOMBS_PRODUCTS = {
 	Funds: 1826607791
 }
+
+export const XP_PACKS = {
+    T1_XP: 1,
+    T2_XP: 3,
+    T3_XP: 5,
+}
+
+export const RESET_LAYERS = [
+	{
+		name: "Skillification",
+		area: AREAS.BarrenIslands,
+		formula: new Formula().add(1).div(1e+12).log(16).pow(1.1).add(1),
+		minimum: OnoeNum.fromSerika(1, 12),
+		scalesWith: "Power" as Currency,
+		gives: "Skill" as Currency,
+		resettingCurrencies: ["Funds", "Power", "Purifier Clicks"] as Currency[],
+		resettingUpgrades: ["MoreFunds", "MorePower", "LandReclaimation"],
+		badgeId: 1485187140296844,
+
+		gainLabel: AREAS.SlamoVillage.areaFolder.WaitForChild("SkillifyBoard").WaitForChild("SurfaceGui")
+            .WaitForChild("DifficultyLabel").WaitForChild("Frame").WaitForChild("GainLabel") as TextLabel,
+		touchPart: AREAS.SlamoVillage.areaFolder.WaitForChild("Skillification") as BasePart & {
+			BillboardGui: BillboardGui & {
+				TextLabel: TextLabel
+			}
+		},
+		tpLocation: AREAS.SlamoVillage.spawnLocation!,
+		isResetting: false,
+	}
+];

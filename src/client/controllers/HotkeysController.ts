@@ -37,12 +37,13 @@ export class HotkeysController implements OnInit {
         this.bindKey(keyCode, action, priority, l, button);
         if (!this.connections.has(button)) {
             const connection = button.Activated.Connect(() => {
-                for (const binded of this.bindedKeys) {
-                    if (binded.button === button) {
-                        this.execute(binded.hotkey);
-                        return;
-                    }
-                }
+                // for (const binded of this.bindedKeys) {
+                //     if (binded.button === button) {
+                //         this.execute(binded.hotkey);
+                //         return;
+                //     }
+                // }
+                action();
             });
             this.connections.set(button, connection);
             button.Destroying.Once(() => {

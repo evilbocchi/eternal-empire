@@ -1,33 +1,31 @@
 import { RunService } from "@rbxts/services";
 import Difficulty from "shared/Difficulty";
 import Price from "shared/Price";
-import { AREAS } from "shared/constants";
 import { PowerHarvester } from "shared/item/Special";
 import Upgrader from "shared/item/Upgrader";
-import InfiniteMath from "shared/utils/infinitemath/InfiniteMath";
+import Formula from "shared/utils/Formula";
+import { OnoeNum } from "@antivivi/serikanum";
 import BasicBlankEssence from "./BasicBlankEssence";
 
-const div = new InfiniteMath([5, 12]);
-const limit = new InfiniteMath([1, 33]);
+const div = OnoeNum.fromSerika(5, 12);
+const limit = OnoeNum.fromSerika(1, 33);
+const mul = new Price().setCost("Funds", 0).setCost("Power", 0);
 
 export = new Upgrader("Admiration")
 .setName("Admiration")
-.setDescription("A gentle stream enchanting the air, taking the stage with a serene retreat... An upgrader boosting Funds and Power with Power, maxing out at 1De W. <log25(power / 5T + 1) + 1>")
+.setDescription("A gentle stream enchanting the air, taking the stage with a serene retreat... An upgrader boosting Funds and Power with Power, maxing out at 1De W.")
 .setDifficulty(Difficulty.InstantWin)
-.setPrice(new Price().setCost("Funds", new InfiniteMath([1, 21])), 1)
+.setPrice(new Price().setCost("Funds", 1e21), 1)
 .setRequiredItemAmount(BasicBlankEssence, 1)
-.addPlaceableArea(AREAS.BarrenIslands)
+.addPlaceableArea("BarrenIslands")
 
-.onInit((utils, item) => item.applyFormula((v) => item.setMul(v), () => {
-    const cost = new InfiniteMath(utils.getBalance().getCost("Power") ?? 0);
-    if (limit.lt(cost)) {
+.setFormula(new Formula().div(div).add(1).log(25).add(1))
+.onInit((utils, item) => item.applyFormula((v) => item.setMul(mul.setCost("Funds", v).setCost("Power", v)), () => {
+    const cost = new OnoeNum(utils.getBalance().getCost("Power") ?? 0);
+    if (limit.lessThan(cost)) {
         return limit;
     }
     return cost;
-}, 
-(x) => {
-    const y = InfiniteMath.log(x.div(div).add(1), 25).add(1);
-    return new Price().setCost("Funds", y).setCost("Power", y);
 }))
 .onLoad((model) => {
     PowerHarvester.spin(model);

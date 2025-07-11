@@ -2,24 +2,26 @@ import Price from "shared/Price";
 import { AREAS } from "shared/constants";
 import Difficulty from "shared/Difficulty";
 import Upgrader from "shared/item/Upgrader";
-import InfiniteMath from "shared/utils/infinitemath/InfiniteMath";
+import { OnoeNum } from "@antivivi/serikanum";
+import Formula from "shared/utils/Formula";
 
-const limit = new InfiniteMath(5000);
+const limit = new OnoeNum(5000);
+const mul = new Price().setCost("Funds", 0);
 
 export = new Upgrader("EnergisedRefiner")
 .setName("Energised Refiner")
-.setDescription("Funds boost increases with Power, maxing out at 5K W. Uses 0.4 W/s. <log13(power + 1) + 1>")
+.setDescription("Funds boost increases with Power, maxing out at 5K W. Uses 0.4 W/s.")
 .setDifficulty(Difficulty.Friendliness)
 .setPrice(new Price().setCost("Power", 20), 1)
 .setPrice(new Price().setCost("Power", 120), 2)
-.addPlaceableArea(AREAS.BarrenIslands)
+.addPlaceableArea("BarrenIslands")
 
-.onInit((utils, item) => item.applyFormula((v) => item.setMul(v), () => {
-    const cost = new InfiniteMath(utils.getBalance().getCost("Power") ?? 0);
-    if (limit.lt(cost)) {
+.setFormula(new Formula().add(1).log(13).add(1))
+.onInit((utils, item) => item.applyFormula((v) => item.setMul(mul.setCost("Funds", v)), () => {
+    const cost = new OnoeNum(utils.getBalance().getCost("Power") ?? 0);
+    if (limit.lessThan(cost)) {
         return limit;
     }
     return cost;
-}, 
-    (x) => (new Price().setCost("Funds", InfiniteMath.log(x.add(1), 13).add(1)))))
-.setMaintenance(new Price().setCost("Power", 0.4));
+}))
+.setDrain(new Price().setCost("Power", 0.4));

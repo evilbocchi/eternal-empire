@@ -18,16 +18,18 @@ type BoardGui = SurfaceGui & {
 class Area {
     areaFolder: Folder;
     name: string;
+    map: Folder;
     dropletLimit: IntValue;
     grid: BasePart | undefined;
     originalGridSize: Vector3 | undefined;
     catchArea: BasePart | undefined;
     buildBounds: BuildBounds | undefined;
-    areaBounds: BasePart;
+    areaBounds?: BasePart;
     spawnLocation: SpawnLocation | undefined;
     islandInfoBoard: Model | undefined;
     boardGui: BoardGui | undefined;
     unlocked: BoolValue;
+    hidden: boolean;
     lightingConfiguration: Lighting | undefined;
 
     constructor(areaFolder: Instance, buildable: boolean) {
@@ -36,6 +38,7 @@ class Area {
         }
         this.areaFolder = areaFolder;
         this.name = (areaFolder.WaitForChild("Name") as StringValue).Value;
+        this.map = areaFolder.WaitForChild("Map") as Folder;
         this.spawnLocation = (buildable ? areaFolder.WaitForChild("SpawnLocation") : areaFolder.FindFirstChild("SpawnLocation")) as SpawnLocation | undefined;
         this.dropletLimit = areaFolder.WaitForChild("DropletLimit") as IntValue;
         this.dropletLimit.SetAttribute("Default", this.dropletLimit.Value);
@@ -45,11 +48,14 @@ class Area {
         if (this.grid !== undefined) {
             this.buildBounds = new BuildBounds(this.grid);
         }
-        this.areaBounds = areaFolder.WaitForChild("AreaBounds") as BasePart;
-        this.areaBounds.Transparency = 1;
+        this.areaBounds = areaFolder.FindFirstChild("AreaBounds") as BasePart | undefined;
+        if (this.areaBounds !== undefined)
+            this.areaBounds.Transparency = 1;
+        
         this.islandInfoBoard = (buildable ? areaFolder.WaitForChild("IslandInfoBoard") : areaFolder.FindFirstChild("IslandInfoBoard")) as Model | undefined;
         this.boardGui = this.islandInfoBoard?.WaitForChild("GuiPart").FindFirstChildOfClass("SurfaceGui") as BoardGui | undefined;
         this.unlocked = areaFolder.WaitForChild("Unlocked") as BoolValue;
+        this.hidden = (areaFolder.FindFirstChild("Hidden") as BoolValue | undefined)?.Value === true;
         const lightingConfigModule = areaFolder.FindFirstChild("LightingConfiguration");
         if (lightingConfigModule !== undefined) {
             this.lightingConfiguration = require(lightingConfigModule as ModuleScript) as Lighting;

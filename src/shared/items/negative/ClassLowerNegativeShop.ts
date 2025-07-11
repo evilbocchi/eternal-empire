@@ -1,7 +1,5 @@
 import Difficulty from "shared/Difficulty";
-import { AREAS } from "shared/constants";
 import Shop from "shared/item/Shop";
-import Trophy from "shared/items/bonuses/100KVisitsTrophy";
 import AdvancedRefiner from "shared/items/negative/a/AdvancedRefiner";
 import DropDropper from "shared/items/negative/a/DropDropper";
 import DualDropper from "shared/items/negative/a/DualDropper";
@@ -27,6 +25,7 @@ import EnergisedRefiner from "shared/items/negative/friendliness/EnergisedRefine
 import GrassConveyor from "shared/items/negative/friendliness/GrassConveyor";
 import GrassDropper from "shared/items/negative/friendliness/GrassDropper";
 import IndustrialFurnace from "shared/items/negative/friendliness/IndustrialFurnace";
+import TheFirstGenerator from "shared/items/negative/friendliness/TheFirstGenerator";
 import DepressingDropper from "shared/items/negative/ifinity/DepressingDropper";
 import FundsCompactDropper from "shared/items/negative/ifinity/FundsCompactDropper";
 import PowerCompactDropper from "shared/items/negative/ifinity/PowerCompactDropper";
@@ -54,6 +53,7 @@ import SleepingConveyor from "shared/items/negative/restful/SleepingConveyor";
 import VitalizedDropper from "shared/items/negative/restful/VitalizedDropper";
 import CompactReactor from "shared/items/negative/reversedperipherality/CompactReactor";
 import ConversionConveyor from "shared/items/negative/reversedperipherality/ConversionConveyor";
+import ElevatedAnticlockwiseConveyorCorner from "shared/items/negative/reversedperipherality/ElevatedAnticlockwiseConveyorCorner";
 import MagmaticConveyor from "shared/items/negative/reversedperipherality/MagmaticConveyor";
 import OverusedAmethystDropper from "shared/items/negative/reversedperipherality/OverusedAmethystDropper";
 import PeripheralGenerator from "shared/items/negative/reversedperipherality/PeripheralGenerator";
@@ -65,7 +65,6 @@ import NoobClicker from "shared/items/negative/skip/NoobClicker";
 import TheFirstConveyor from "shared/items/negative/tfd/TheFirstConveyor";
 import TheFirstDropper from "shared/items/negative/tfd/TheFirstDropper";
 import TheFirstFurnace from "shared/items/negative/tfd/TheFirstFurnace";
-import TheFirstGenerator from "shared/items/negative/tfd/TheFirstGenerator";
 import TheFirstUpgrader from "shared/items/negative/tfd/TheFirstUpgrader";
 import BasicCauldron from "shared/items/negative/tlg/BasicCauldron";
 import BasicRefiner from "shared/items/negative/tlg/BasicRefiner";
@@ -89,10 +88,8 @@ export = new Shop("ClassLowerNegativeShop")
 .setName("Class Negative Shop")
 .setDescription("Purchase all of your items here! Well, at least all items below Instant Win difficulty.")
 .setDifficulty(Difficulty.TheFirstDifficulty)
-.addPlaceableArea(AREAS.BarrenIslands)
+.addPlaceableArea("BarrenIslands")
 .setItems([
-    Trophy,
-
     TheFirstDropper,
     TheFirstFurnace,
     TheFirstConveyor,
@@ -162,6 +159,7 @@ export = new Shop("ClassLowerNegativeShop")
     PeripheralGenerator,
     MagmaticConveyor,
     ReversedUpgrader,
+    ElevatedAnticlockwiseConveyorCorner,
 
     DropletAligner,
     AdvancedPowerHarvester,

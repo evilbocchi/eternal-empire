@@ -1,8 +1,6 @@
-import Price from "shared/Price";
-import { AREAS } from "shared/constants";
 import Difficulty from "shared/Difficulty";
 import { Manumatic } from "shared/item/Special";
-import InfiniteMath from "shared/utils/infinitemath/InfiniteMath";
+import Price from "shared/Price";
 import { loadAnimation } from "shared/utils/vrldk/RigUtils";
 
 const animTrackPerModel = new Map<Model, AnimationTrack>();
@@ -11,9 +9,9 @@ export = new Manumatic.Clicker("SlamoClicker")
 .setName("Slamo Clicker")
 .setDescription("Slamos click pretty well at 20 CPS.")
 .setDifficulty(Difficulty.Millisecondless)
-.setPrice(new Price().setCost("Funds", new InfiniteMath([1.4, 24])).setCost("Purifier Clicks", 10000), 1)
-.setPrice(new Price().setCost("Funds", new InfiniteMath([2.9, 18])).setCost("Purifier Clicks", 30000), 2)
-.addPlaceableArea(AREAS.BarrenIslands)
+.setPrice(new Price().setCost("Funds", 1.4e24).setCost("Purifier Clicks", 10000), 1)
+.setPrice(new Price().setCost("Funds", 2.9e24).setCost("Purifier Clicks", 30000), 2)
+.addPlaceableArea("BarrenIslands")
 
 .setCPS(4)
 .setClickValue(5)

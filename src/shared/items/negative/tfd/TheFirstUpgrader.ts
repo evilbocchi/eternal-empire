@@ -8,7 +8,7 @@ export = new Upgrader("TheFirstUpgrader")
 .setDescription("Increases the monetary value of droplets. Pass droplets through the laser to increase revenue.")
 .setDifficulty(Difficulty.TheFirstDifficulty)
 .setPrice(new Price().setCost("Funds", 30), 1)
-.addPlaceableArea(AREAS.BarrenIslands)
+.addPlaceableArea("BarrenIslands")
 
 .setSpeed(3)
 .setAdd(new Price().setCost("Funds", 4));

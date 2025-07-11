@@ -1,3 +1,5 @@
+//!native
+
 import { AREAS } from "shared/constants";
 import Item from "shared/item/Item";
 
@@ -18,6 +20,7 @@ class Printer extends Item {
                 error("No area");
             const updateFill = () => fill.Transparency = this.area !== undefined && utils.getSavedSetup(this.area) !== undefined ? 0.4 : 0.8;
             saveEvent.OnServerInvoke = (player) => {
+                print("Saved");
                 if (this.area === undefined)
                     error("No area");
                 const success = utils.saveSetup(player, this.area);
@@ -25,6 +28,7 @@ class Printer extends Item {
                 return success;
             };
             loadEvent.OnServerInvoke = (player) => {
+                print("Loaded");
                 if (this.area === undefined)
                     error("No area");
                 const success =  utils.loadSetup(player, this.area);

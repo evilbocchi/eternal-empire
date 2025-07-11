@@ -15,3 +15,7 @@ export const combineHumanReadable = (...strings: string[]) => {
     }
     return label;
 }
+
+export const formatRichText = (text: string, color: Color3, size: number, weight: string | number) => {
+    return `<font color="#${color.ToHex()}" size="${size}" weight="${weight}">${text}</font>`;
+}

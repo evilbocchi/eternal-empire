@@ -1,25 +1,33 @@
+//!native
+
 import { RunService } from "@rbxts/services";
 import Area from "shared/Area";
 import Difficulty from "shared/Difficulty";
 import Price from "shared/Price";
+import { AREAS, RESET_LAYERS } from "shared/constants";
 import ItemTypes from "shared/item/ItemTypes";
-import { Signal } from "shared/utils/fletchette";
-import InfiniteMath from "shared/utils/infinitemath/InfiniteMath";
+import { Signal } from "@antivivi/fletchette";
+import Formula from "shared/utils/Formula";
+import { OnoeNum } from "@antivivi/serikanum";
 
 class Item {
 
-    initialised = new Signal<(utils: ItemUtils, item: this) => void>();
-    loaded = new Signal<(model: Model, utils: ItemUtils, item: this) => void>();
+    initialized = new Signal<(utils: GameUtils, item: this) => void>();
+    loaded = new Signal<(model: Model, utils: GameUtils, item: this) => void>();
     types: (keyof ItemTypes)[] = [];
     id: string;
     name: string | undefined = undefined;
     description: string | undefined = undefined;
     difficulty: Difficulty | undefined = undefined;
-    maintenance: Price | undefined = undefined;
+    drain: Price | undefined = undefined;
     placeableAreas: Area[] = [];
+    defaultPrice: Price | undefined;
     pricePerIteration = new Map<number, Price>();
     creator: string | undefined = undefined;
     requiredItems = new Map<Item, number>();
+    formula: Formula | undefined;
+    formulaResult: OnoeNum | undefined;
+    formulaResultChanged = new Signal<(multiplier: OnoeNum) => void>();
 
     constructor(id: string) {
         this.id = id;
@@ -42,10 +50,14 @@ class Item {
     }
 
     getPrice(iteration: number) {
-        return this.pricePerIteration.get(iteration); 
+        return this.pricePerIteration.get(iteration) ?? this.defaultPrice; 
     }
 
-    setPrice(price: Price, iteration: number, endIteration?: number) {
+    setPrice(price: Price, iteration?: number, endIteration?: number) {
+        if (iteration === undefined) {
+            this.defaultPrice = price;
+            return this;
+        }
         this.pricePerIteration.set(iteration, price);
         if (endIteration !== undefined) {
             for (let i = iteration + 1; i <= endIteration; i++) {
@@ -65,13 +77,21 @@ class Item {
         return this;
     }
 
-    addPlaceableArea(area: Area) {
-        this.placeableAreas.push(area);
+    addPlaceableArea(...areas: (keyof (typeof AREAS))[]) {
+        for (const area of areas)
+            this.placeableAreas.push(AREAS[area]);
         return this;        
     }
 
-    setMaintenance(maintenance: Price) {
-        this.maintenance = maintenance;
+    markPlaceableEverywhere() {
+        for (const [_id, area] of pairs(AREAS)) {
+            this.placeableAreas.push(area);
+        }
+        return this;
+    }
+
+    setDrain(drain: Price) {
+        this.drain = drain;
         return this;
     }
 
@@ -84,12 +104,12 @@ class Item {
         return this.types.includes(itemType);
     }
 
-    onInit(initCallback: (utils: ItemUtils, item: this) => void) {
-        this.initialised.connect((utils, item) => initCallback(utils, item));
+    onInit(initCallback: (utils: GameUtils, item: this) => void) {
+        this.initialized.connect((utils, item) => initCallback(utils, item));
         return this;
     }
 
-    onLoad(loadCallback: (model: Model, utils: ItemUtils, item: this) => void) {
+    onLoad(loadCallback: (model: Model, utils: GameUtils, item: this) => void) {
         this.loaded.connect((model, utils, item) => loadCallback(model, utils, item));
         return this;
     }
@@ -113,49 +133,75 @@ class Item {
         return this;
     }
 
-    maintain(model: Model | undefined, utils: ItemUtils, callback?: (isMaintained: boolean, balance: Price) => void) {
+    maintain(model: Model | undefined, utils: GameUtils, callback?: (isMaintained: boolean, balance: Price) => void) {
         this.repeat(model, () => {
-            const maintenance = this.maintenance;
+            const drain = this.drain;
             let bal = utils.getBalance();
-            if (maintenance === undefined) {
-                if (callback !== undefined) {
-                    callback(true, bal);
-                }
-                model?.SetAttribute("Maintained", true);
-                return;
-            }
-            bal = bal.sub(maintenance);
             let affordable = true;
-            for (const [_currency, amount] of bal.costPerCurrency) {
-                if (amount.lt(0)) {
-                    affordable = false;
+            if (drain === undefined) {
+                if (callback !== undefined)
+                    callback(true, bal);
+            }
+            else {
+                bal = bal.sub(drain);
+                for (const [_currency, amount] of bal.costPerCurrency) {
+                    if (amount.lessThan(0)) {
+                        affordable = false;
+                    }
+                }
+                if (affordable === true) {
+                    utils.setBalance(bal);
+                }
+                if (callback !== undefined) {
+                    callback(affordable, bal);
                 }
             }
-            if (affordable === true) {
-                utils.setBalance(bal);
+            if (model !== undefined && model.GetAttribute("Maintained") !== affordable) {
+                model.SetAttribute("Maintained", affordable);
             }
-            if (callback !== undefined) {
-                callback(affordable, bal);
-            }
-            model?.SetAttribute("Maintained", affordable);
         }, 1);
     }
 
+    setFormula(formula: Formula) {
+        this.formula = formula;
+        return this;
+    }
 
     /**
      * Calls the callback function every second by passing the return of the x function in the formula function, and passing the return of that to the callback.
      * 
-     * @param callback Called every second with the return of the formula function as the value parameter.
+     * @param callback Called every second with the `value` parameter passed as the return of `this.formula`.
      * @param x The value to be used in the formula.
-     * @param formula The formula to be applied to x.
      */
-    applyFormula(callback: (value: Price) => unknown, x: () => InfiniteMath, formula: (x: InfiniteMath) => Price) {
+    applyFormula(callback: (value: OnoeNum) => unknown, x: () => OnoeNum) {
         this.repeat(undefined, () => {
             const v = x();
-            if (v !== undefined) {
-                callback(formula(v));
+            if (v !== undefined && this.formula !== undefined) {
+                const result = this.formula.apply(v);
+                callback(result);
+                if (this.formulaResult === undefined || !this.formulaResult.equals(result)) {
+                    this.formulaResultChanged.fire(result);
+                }
+                this.formulaResult = result;
             }
         }, 1);
+    }
+
+    isPersistent() {
+        const difficulty = this.difficulty;
+        return difficulty === Difficulty.Bonuses || difficulty === Difficulty.Excavation || difficulty === Difficulty.Miscellaneous || this.isA("Shop");
+    }
+
+    getResetLayer() {
+        if (this.isPersistent())
+            return -1;
+        const size = RESET_LAYERS.size();
+        for (let i = 0; i < size; i++) {
+            const resetLayer = RESET_LAYERS[i];
+            if (this.placeableAreas.includes(resetLayer.area))
+                return i;
+        }
+        return -1;
     }
 }
 

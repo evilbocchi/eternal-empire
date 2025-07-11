@@ -67,10 +67,13 @@ export function revertSurfaces(part: Part) {
 	part.BackSurface = Enum.SurfaceType.Studs;
 }
 
+export function isInside(position: Vector3, volumeCenter: CFrame, volumeSize: Vector3) {
+	const v3 = volumeCenter.PointToObjectSpace(position);
+	return (math.abs(v3.X) <= volumeSize.X / 2) && (math.abs(v3.Y) <= volumeSize.Y / 2) && (math.abs(v3.Z) <= volumeSize.Z / 2);
+}
+
 export function isInsidePart(position: Vector3, part: BasePart) {
-	const v3 = part.CFrame.PointToObjectSpace(position);
-	const size = part.Size;
-	return (math.abs(v3.X) <= size.X / 2) && (math.abs(v3.Y) <= size.Y / 2) && (math.abs(v3.Z) <= size.Z / 2);
+	return isInside(position, part.CFrame, part.Size);
 }
 
 export function isCompletelyInside(cframe: CFrame, size: Vector3, part: BasePart) {

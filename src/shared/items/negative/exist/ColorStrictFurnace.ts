@@ -1,16 +1,14 @@
 import { ReplicatedStorage } from "@rbxts/services";
-import Price from "shared/Price";
-import { AREAS } from "shared/constants";
 import Difficulty from "shared/Difficulty";
 import Furnace from "shared/item/Furnace";
-import InfiniteMath from "shared/utils/infinitemath/InfiniteMath";
+import Price from "shared/Price";
 
 export = new Furnace("ColorStrictFurnace")
 .setName("Color Strict Furnace")
 .setDescription("Only processes droplets if the color it's on matches with the enabled switch. Different colors apply different boosts.")
 .setDifficulty(Difficulty.Exist)
-.setPrice(new Price().setCost("Funds", new InfiniteMath([2.56, 15])), 1)
-.addPlaceableArea(AREAS.BarrenIslands)
+.setPrice(new Price().setCost("Funds", 2.56e15), 1)
+.addPlaceableArea("BarrenIslands")
 
 .onInit((_utils, item) => {
     const randomColor = () => {
@@ -78,18 +76,13 @@ export = new Furnace("ColorStrictFurnace")
         colorLabel.TextColor3 = strictColorColor;
         if (strictColor === color) {
             boostLabel.Text = info.boostLabel;
-            item.setFormula((v) => {
-                if (info.add !== undefined) {
-                    v = v.add(info.add);
-                }
-                return v.mul(info.mul);
-            });
+            item.setAdd(info.add).setMul(info.mul);
             alertSound.Stop();
         }
         else {
             boostLabel.Text = "WRONG COLOR";
             alertSound.Resume();
-            item.setFormula(undefined);
+            item.setAdd(undefined).setMul(undefined);
         }
         border.Color = color === 0 ? new Color3(1, 1, 1) : (model.WaitForChild(tostring(color)) as BasePart).Color;
     }

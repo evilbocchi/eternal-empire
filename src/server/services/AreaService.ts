@@ -1,12 +1,13 @@
 import { OnInit, Service } from "@flamework/core";
-import { Players, SoundService } from "@rbxts/services";
+import { Players, RunService, SoundService } from "@rbxts/services";
 import { LeaderstatsService } from "server/services/LeaderstatsService";
+import { OnPlayerJoined } from "server/services/PlayerJoinService";
 import { UpgradeBoardService } from "server/services/serverdata/UpgradeBoardService";
 import Area from "shared/Area";
-import { AREAS, DROPLETS_FOLDER, PLACED_ITEMS_FOLDER } from "shared/constants";
+import { AREAS, DROPLETS_FOLDER, PLACED_ITEMS_FOLDER, getSound } from "shared/constants";
 import NamedUpgrade from "shared/item/NamedUpgrade";
-import { Fletchette, RemoteFunc } from "shared/utils/fletchette";
-import { playSoundAtPart } from "shared/utils/vrldk/BasePartUtils";
+import { Fletchette, RemoteFunc } from "@antivivi/fletchette";
+import { isInside } from "shared/utils/vrldk/BasePartUtils";
 
 declare global {
     interface FletchetteCanisters {
@@ -19,9 +20,10 @@ const AreaCanister = Fletchette.createCanister("AreaCanister", {
 });
 
 @Service()
-export class AreaService implements OnInit {
-    musicGroup = new Instance("SoundGroup");
+export class AreaService implements OnInit, OnPlayerJoined {
 
+    boundingBoxPerArea = new Map<keyof (typeof AREAS), [CFrame, Vector3]>();
+    musicGroup = new Instance("SoundGroup");
     constructor(private leaderstatsService: LeaderstatsService, private upgradeBoardService: UpgradeBoardService) {
 
     }
@@ -63,7 +65,7 @@ export class AreaService implements OnInit {
                 const frame = instance.WaitForChild("Frame") as BasePart;
                 const originalPos = frame.Position;
                 let debounce = 0;
-                const updatePosition = (unlocked: boolean) => frame.Position = unlocked ? originalPos : new Vector3(0, -10000, 0);
+                const updatePosition = (unlocked: boolean) => frame.Position = unlocked ? originalPos : new Vector3(0, -1000, 0);
                 const unlocked = AREAS[(instance.WaitForChild("Destination") as ObjectValue).Value!.Name as keyof (typeof AREAS)].unlocked;
                 updatePosition(unlocked.Value);
                 unlocked.Changed.Connect((value) => updatePosition(value));
@@ -81,7 +83,7 @@ export class AreaService implements OnInit {
                     if (rootPart === undefined || tick() - debounce < 0.2) {
                         return;
                     }
-                    playSoundAtPart(rootPart, "rbxassetid://4562690876");
+                    (rootPart.FindFirstChild("TeleportSound") as Sound | undefined)?.Play();
                     character.PivotTo((instance.WaitForChild("TpPart") as BasePart).CFrame);
                     debounce = tick();
                     player.SetAttribute("UsedPortal", true);
@@ -95,27 +97,13 @@ export class AreaService implements OnInit {
         areaSoundGroup.Name = id;
         areaSoundGroup.Volume = 1;
         areaSoundGroup.Parent = this.musicGroup;
-        for (const sound of area.areaBounds.GetChildren()) {
+        for (const sound of area.areaBounds!.GetDescendants()) {
             if (!sound.IsA("Sound"))
-                return;
+                continue;
             sound.SoundGroup = areaSoundGroup;
             sound.SetAttribute("OriginalVolume", sound.Volume);
-            sound.Parent = areaSoundGroup;
         }
-
-        area.areaBounds.Touched.Connect((otherPart) => {
-            const character = otherPart.Parent;
-            if (character === undefined) {
-                return;
-            }
-            const player = Players.GetPlayerFromCharacter(character);
-            if (player !== undefined) {
-                const cached = this.getArea(player);
-                if (cached !== id) {
-                    this.setArea(player, id);
-                }
-            }
-        });
+        this.boundingBoxPerArea.set(id, [area.areaBounds!.CFrame, area.areaBounds!.Size]);
     }
 
     loadBoardGui(id: keyof (typeof AREAS), area: Area) {
@@ -181,6 +169,30 @@ export class AreaService implements OnInit {
             }
         });
 
+    }
+
+    onPlayerJoined(player: Player) {
+        const onCharacterAdded = (() => getSound("Teleport").Clone().Parent = player.Character?.FindFirstChild("HumanoidRootPart"));
+        player.CharacterAdded.Connect(() => onCharacterAdded());
+        onCharacterAdded();
+        RunService.Heartbeat.Connect(() => {
+            const character = player.Character;
+            if (character === undefined)
+                return;
+            const rootPart = character.FindFirstChild("HumanoidRootPart") as BasePart | undefined;
+            if (rootPart === undefined)
+                return;
+            const position = rootPart.Position;
+            for (const [id, [cframe, size]] of this.boundingBoxPerArea) {
+                if (isInside(position, cframe, size)) {
+                    const cached = this.getArea(player);
+                    if (cached !== id) {
+                        this.setArea(player, id);
+                    }
+                    break;
+                }
+            }
+        });
     }
 
     onInit() {

@@ -1,16 +1,14 @@
-import Price from "shared/Price";
-import { AREAS } from "shared/constants";
 import Difficulty from "shared/Difficulty";
 import NamedUpgrade from "shared/item/NamedUpgrade";
 import UpgradeBoard from "shared/item/UpgradeBoard";
-import InfiniteMath from "shared/utils/infinitemath/InfiniteMath";
+import Price from "shared/Price";
 
 export = new UpgradeBoard("UpgradeBoardI")
 .setName("Upgrade Board I")
 .setDescription("A board that contains various upgrades which may help you grow more money...")
 .setDifficulty(Difficulty.TrueEase)
-.setPrice(new Price().setCost("Funds", new InfiniteMath([15.5, 9])).setCost("Power", 150), 1)
-.addPlaceableArea(AREAS.BarrenIslands)
+.setPrice(new Price().setCost("Funds", 15.5e9).setCost("Power", 150), 1)
+.addPlaceableArea("BarrenIslands")
 
 .addUpgrade(NamedUpgrade.MoreFunds)
 .addUpgrade(NamedUpgrade.MorePower)

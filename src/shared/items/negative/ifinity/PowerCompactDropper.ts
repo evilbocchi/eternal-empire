@@ -7,11 +7,11 @@ import DepressingDropper from "./DepressingDropper";
 
 export = new Dropper("PowerCompactDropper")
 .setName("Power Compact Dropper")
-.setDescription("You may have already realized, but you can't sell items back. Do you want Funds, or a dropper producing 6K W/droplet/s?")
+.setDescription("You may have already realized, but you can't sell items back. Do you want Funds, or a dropper producing 6K W droplets per second?")
 .setDifficulty(Difficulty.Ifinity)
 .setPrice(new Price().setCost("Power", 1), 1)
 .setRequiredItemAmount(DepressingDropper, 1)
 
-.addPlaceableArea(AREAS.BarrenIslands)
+.addPlaceableArea("BarrenIslands")
 .setDroplet(Droplet.PowerCompactDroplet)
 .setDropRate(1)

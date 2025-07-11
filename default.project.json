@@ -20,6 +20,9 @@
           },
           "@flamework": {
             "$path": "node_modules/@flamework"
+          },
+          "@antivivi": {
+            "$path": "node_modules/@antivivi"
           }
         }
       },

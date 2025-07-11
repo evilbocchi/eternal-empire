@@ -8,6 +8,6 @@ export = new Conveyor("TheFirstConveyor")
 .setDescription("Moves stuff from one place to another. Use this to push droplets into furnaces.")
 .setDifficulty(Difficulty.TheFirstDifficulty)
 .setPrice(new Price().setCost("Funds", 5), 1, 5)
-.addPlaceableArea(AREAS.BarrenIslands)
+.addPlaceableArea("BarrenIslands")
 
 .setSpeed(6);

@@ -1,3 +1,5 @@
+//!native
+
 import { RunService, TweenService, Workspace } from "@rbxts/services";
 import { weldModel } from "shared/utils/vrldk/BasePartUtils";
 import { loadAnimation } from "shared/utils/vrldk/RigUtils";
@@ -71,18 +73,16 @@ namespace Special {
             slash.Transparency = 1;
             const sound = laser.WaitForChild("Sound") as Sound;
             const slashOriginalCFrame = slash.CFrame;
-            const oCFrame = laser.CFrame;
-            const bye = oCFrame.sub(new Vector3(0, 10000, 0));
-            laser.CFrame = bye;
+            laser.SetAttribute("Enabled", false);
             item.repeat(model, () => {
                 slash.Transparency = 0.011;
                 slash.CFrame = slashOriginalCFrame;
                 TweenService.Create(slash, new TweenInfo(0.3), {CFrame: slashOriginalCFrame.mul(CFrame.Angles(0, math.rad(180), 0)), Transparency: 1}).Play();
                 animation?.Play();
                 sound.Play();
-                laser.CFrame = oCFrame;
+                laser.SetAttribute("Enabled", true);
                 task.delay(0.5, () => {
-                    laser.CFrame = bye;
+                    laser.SetAttribute("Enabled", false);
                 });
             }, cd);
         }
@@ -118,12 +118,12 @@ namespace Special {
     export namespace Manumatic {
         export interface Clickable {
             setDebounce(debounce: number): ThisType<Clickable>;
-            setOnClick(onClick: (model: Model, utils: ItemUtils, item: Item) => void): ThisType<Clickable>;
+            setOnClick(onClick: (model: Model, utils: GameUtils, item: Item) => void): ThisType<Clickable>;
         }
         
         export class ManumaticUpgrader extends Upgrader implements Clickable {
             debounce = 0.1;
-            onClick: ((model: Model, utils: ItemUtils, item: Item, player: Player | undefined, value: number) => void) | undefined;
+            onClick: ((model: Model, utils: GameUtils, item: Item, player: Player | undefined, value: number) => void) | undefined;
 
             constructor(id: string) {
                 super(id);
@@ -158,7 +158,7 @@ namespace Special {
                 return this;
             }
 
-            setOnClick(onClick: (model: Model, utils: ItemUtils, item: Item, player: Player | undefined, value: number) => void) {
+            setOnClick(onClick: (model: Model, utils: GameUtils, item: Item, player: Player | undefined, value: number) => void) {
                 this.onClick = onClick;
                 return this;
             }
@@ -168,7 +168,7 @@ namespace Special {
 
             cps: number | undefined = undefined;
             clickValue = 1;
-            onClick: ((model: Model, utils: ItemUtils, item: Item) => void) | undefined = undefined;
+            onClick: ((model: Model, utils: GameUtils, item: Item) => void) | undefined = undefined;
 
             constructor(id: string) {
                 super(id);
@@ -210,7 +210,7 @@ namespace Special {
                         }
                         else if (t > 1 / (this.cps ?? 999) && this.onClick !== undefined) {
                             t = 0;
-                            if (event === undefined) {
+                            if (event === undefined || event.Parent === undefined) {
                                 event = target.WaitForChild("Click") as BindableEvent;
                             }
                             event.Fire(this.clickValue);
@@ -231,7 +231,7 @@ namespace Special {
                 return this;
             }
 
-            setOnClick(onClick: (model: Model, utils: ItemUtils, item: Item) => void) {
+            setOnClick(onClick: (model: Model, utils: GameUtils, item: Item) => void) {
                 this.onClick = onClick;
                 return this;
             }

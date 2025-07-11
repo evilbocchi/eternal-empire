@@ -1,9 +1,9 @@
-import { Controller, OnInit } from "@flamework/core";
-import { RunService, TweenService, Workspace } from "@rbxts/services";
+import { Controller, OnPhysics } from "@flamework/core";
+import { TweenService, Workspace } from "@rbxts/services";
 import { MOUSE, TOOLTIP_WINDOW } from "client/constants";
 
 @Controller()
-export class TooltipController implements OnInit {
+export class TooltipController implements OnPhysics {
 
     tooltipsPerObject = new Map<GuiObject, string>();
 
@@ -16,18 +16,24 @@ export class TooltipController implements OnInit {
     }
 
     hideTooltipWindow() {
-        const tween = TweenService.Create(TOOLTIP_WINDOW, new TweenInfo(0.2), { GroupTransparency: 1 })
+        const tweenInfo = new TweenInfo(0.2);
+        const tween = TweenService.Create(TOOLTIP_WINDOW, tweenInfo, { BackgroundTransparency: 1 });
+        TweenService.Create(TOOLTIP_WINDOW.MessageLabel, tweenInfo, { TextTransparency: 1, TextStrokeTransparency: 1 }).Play();
+        TweenService.Create(TOOLTIP_WINDOW.UIStroke, tweenInfo, { Transparency: 1 }).Play();
         tween.Play();
         tween.Completed.Connect(() => TOOLTIP_WINDOW.Visible = false);
     }
 
     showTooltipWindow() {
+        const tweenInfo = new TweenInfo(0.2);
         TOOLTIP_WINDOW.Visible = true;
-        TweenService.Create(TOOLTIP_WINDOW, new TweenInfo(0.2), { GroupTransparency: 0 }).Play();
+        TweenService.Create(TOOLTIP_WINDOW, tweenInfo, { BackgroundTransparency: 0.5 }).Play();
+        TweenService.Create(TOOLTIP_WINDOW.UIStroke, tweenInfo, { Transparency: 0.5 }).Play();
+        TweenService.Create(TOOLTIP_WINDOW.MessageLabel, tweenInfo, { TextTransparency: 0, TextStrokeTransparency: 0 }).Play();
     }
 
     setMessage(message: string) {
-        TOOLTIP_WINDOW.Main.MessageLabel.Text = message;
+        TOOLTIP_WINDOW.MessageLabel.Text = message;
     }
     
     setTooltip(guiObject: GuiObject, message: string) {
@@ -45,10 +51,8 @@ export class TooltipController implements OnInit {
         }
         this.tooltipsPerObject.set(guiObject, message);
     }
-    
-    onInit() {
-        RunService.Heartbeat.Connect(() => {
-            this.moveTooltipToMouse();
-        })
+
+    onPhysics() {
+        this.moveTooltipToMouse();
     }
 }

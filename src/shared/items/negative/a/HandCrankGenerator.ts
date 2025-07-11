@@ -1,9 +1,7 @@
-import Price from "shared/Price";
-import { AREAS } from "shared/constants";
 import Difficulty from "shared/Difficulty";
 import Generator from "shared/item/Generator";
 import Special from "shared/item/Special";
-import InfiniteMath from "shared/utils/infinitemath/InfiniteMath";
+import Price from "shared/Price";
 
 export = new Generator("HandCrankGenerator")
 .setName("Hand Crank Generator")
@@ -11,9 +9,9 @@ export = new Generator("HandCrankGenerator")
 .setDifficulty(Difficulty.A)
 .setPrice(new Price().setCost("Power", 104000), 1)
 .setPrice(new Price().setCost("Power", 648100), 2)
-.addPlaceableArea(AREAS.BarrenIslands)
+.addPlaceableArea("BarrenIslands")
 
-.setPassiveGain(new Price().setCost("Power", 26).setCost("Funds", new InfiniteMath([1, 9])))
+.setPassiveGain(new Price().setCost("Power", 26).setCost("Funds", 1e9))
 .ambienceSound((model) => (model.WaitForChild("Hitbox").WaitForChild("Sound") as Sound))
 .onLoad((model) => {
     Special.HandCrank.load(model, (t) => model.SetAttribute("GeneratorBoost", t < 10 ? 3 : 1));

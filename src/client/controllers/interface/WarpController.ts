@@ -4,7 +4,7 @@ import { HotkeysController } from "client/controllers/HotkeysController";
 import { UIController } from "client/controllers/UIController";
 import { AdaptiveTabController } from "client/controllers/interface/AdaptiveTabController";
 import { AREAS } from "shared/constants";
-import { Fletchette } from "shared/utils/fletchette";
+import { Fletchette } from "@antivivi/fletchette";
 
 @Controller()
 export class WarpController implements OnInit {

@@ -1,26 +1,24 @@
-import Price from "shared/Price";
-import { AREAS } from "shared/constants";
 import Difficulty from "shared/Difficulty";
 import Furnace from "shared/item/Furnace";
-import InfiniteMath from "shared/utils/infinitemath/InfiniteMath";
+import Price from "shared/Price";
+import Formula from "shared/utils/Formula";
+import { OnoeNum } from "@antivivi/serikanum";
 
-const limit = new InfiniteMath([100, 15]);
+const limit = OnoeNum.fromSerika(100, 15);
+const mul = new Price().setCost("Funds", 0).setCost("Power", 0);
 
 export = new Furnace("MoltenAltar")
 .setName("Molten Altar")
-.setDescription("Burn the sacrifice. Funds gain is 400x that of Power, maxing out at 100Qd W. <2 * log19(power + 1) + 1>")
+.setDescription("Burn the sacrifice. Funds gain is 400x that of Power, maxing out at 100Qd W.")
 .setDifficulty(Difficulty.InstantWin)
-.setPrice(new Price().setCost("Funds", new InfiniteMath([21.3, 21])).setCost("Power", new InfiniteMath([14.2, 12])), 1)
-.addPlaceableArea(AREAS.BarrenIslands)
+.setPrice(new Price().setCost("Funds", 21.3e21).setCost("Power", 14.2e12), 1)
+.addPlaceableArea("BarrenIslands")
 
-.onInit((utils, item) => item.applyFormula((v) => item.setFormula((val) => val.mul(v)), () => {
-    const cost = new InfiniteMath(utils.getBalance().getCost("Power") ?? 0);
-    if (limit.lt(cost)) {
+.setFormula(new Formula().add(1).log(19).mul(2).add(1))
+.onInit((utils, item) => item.applyFormula((v) => item.setMul(mul.setCost("Funds", v.mul(400)).setCost("Power", v)), () => {
+    const cost = new OnoeNum(utils.getBalance().getCost("Power") ?? 0);
+    if (limit.lessThan(cost)) {
         return limit;
     }
     return cost;
-}, 
-    (x) => {
-        const y = InfiniteMath.log(x.add(1), 19).mul(2).add(1);
-        return new Price().setCost("Funds", y.mul(400)).setCost("Power", y);
-    }));
+}));

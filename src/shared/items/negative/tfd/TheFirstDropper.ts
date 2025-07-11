@@ -11,7 +11,7 @@ export = new Dropper("TheFirstDropper")
 .setPrice(new Price().setCost("Funds", 0), 1)
 .setPrice(new Price().setCost("Funds", 10), 2)
 .setPrice(new Price().setCost("Funds", 55), 3)
-.addPlaceableArea(AREAS.BarrenIslands)
+.addPlaceableArea("BarrenIslands")
 
 .setDroplet(Droplet.TheFirstDroplet)
 .setDropRate(1);

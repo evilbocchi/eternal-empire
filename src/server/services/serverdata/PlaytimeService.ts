@@ -1,7 +1,7 @@
 import { OnStart, Service } from "@flamework/core";
 import { RunService } from "@rbxts/services";
 import { DataService } from "server/services/serverdata/DataService";
-import { Fletchette, RemoteProperty } from "shared/utils/fletchette";
+import { Fletchette, RemoteProperty } from "@antivivi/fletchette";
 
 declare global {
     interface FletchetteCanisters {

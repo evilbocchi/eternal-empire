@@ -1,8 +1,10 @@
+//!native
+
 import { OnStart, Service } from "@flamework/core";
 import { DataService } from "server/services/serverdata/DataService";
 import Price from "shared/Price";
-import { Fletchette, RemoteProperty, Signal } from "shared/utils/fletchette";
-import InfiniteMath from "shared/utils/infinitemath/InfiniteMath";
+import { Fletchette, RemoteProperty, Signal } from "@antivivi/fletchette";
+import { OnoeNum } from "@antivivi/serikanum";
 
 declare global {
     interface FletchetteCanisters {
@@ -11,30 +13,30 @@ declare global {
 }
 
 export const CurrencyCanister = Fletchette.createCanister("CurrencyCanister", {
-    balance: new RemoteProperty<Map<Currency, InfiniteMath>>(new Map(), false),
-    mostBalance: new RemoteProperty<Map<Currency, InfiniteMath>>(new Map(), false),
+    balance: new RemoteProperty<Map<Currency, OnoeNum>>(new Map(), false),
+    mostBalance: new RemoteProperty<Map<Currency, OnoeNum>>(new Map(), false),
 });
 
 @Service()
 export class CurrencyService implements OnStart {
-    balanceChanged = new Signal<(balance: Map<Currency, InfiniteMath>) => void>();
+    balanceChanged = new Signal<(balance: Map<Currency, OnoeNum>) => void>();
 
     constructor(private dataService: DataService) {
         
     }
 
     getCost(currency: Currency) {
-        return new InfiniteMath(this.dataService.empireProfile?.Data.currencies.get(currency) ?? 0);
+        return new OnoeNum(this.dataService.empireProfile?.Data.currencies.get(currency) ?? 0);
     }
 
-    setCost(currency: Currency, cost: InfiniteMath | undefined, dontPropagateToClient?: boolean) {
+    setCost(currency: Currency, cost: OnoeNum | undefined, dontPropagateToClient?: boolean) {
         const profile = this.dataService.empireProfile;
         if (profile !== undefined) {
             if (cost === undefined) {
                 profile.Data.currencies.delete(currency);
             }
             else {
-                profile.Data.currencies.set(currency, cost.lt(0) ? new InfiniteMath(0) : cost);
+                profile.Data.currencies.set(currency, cost.lessThan(0) ? new OnoeNum(0) : cost);
             }
             if (dontPropagateToClient !== true) {
                 const balance = profile.Data.currencies;
@@ -44,7 +46,7 @@ export class CurrencyService implements OnStart {
         }
     }
 
-    incrementCost(currency: Currency, cost: InfiniteMath) {
+    incrementCost(currency: Currency, cost: OnoeNum) {
         const c = this.getCost(currency);
         if (c !== undefined) {
             this.setCost(currency, c.add(cost));
@@ -58,7 +60,7 @@ export class CurrencyService implements OnStart {
             return price;
         }
         for (const [currency, amount] of pairs(currencies)) {
-            price.setCost(currency, new InfiniteMath(amount));
+            price.setCost(currency, new OnoeNum(amount));
         }
         return price;
     }
@@ -69,14 +71,12 @@ export class CurrencyService implements OnStart {
         for (const [currency, cost] of price.costPerCurrency) {
             const balCost = balance.getCost(currency);
             if (balCost === undefined) {
-                if (!cost.le(0)) {
+                if (cost.moreThan(0))
                     sufficient = false;
-                }
             }
             else {
-                if (balCost.lt(cost)) {
+                if (balCost.lessThan(cost))
                     sufficient = false;
-                }
                 balance.setCost(currency, balCost.sub(cost));
             }
         }
@@ -118,7 +118,7 @@ export class CurrencyService implements OnStart {
                 const mostCurrencies = profile.Data.mostCurrencies;
                 for (const [currency, amount] of currencies) {
                     const mostRecorded = mostCurrencies.get(currency);
-                    if (mostRecorded === undefined || new InfiniteMath(mostRecorded).lt(new InfiniteMath(amount))) {
+                    if (mostRecorded === undefined || new OnoeNum(mostRecorded).lessThan(new OnoeNum(amount))) {
                         mostCurrencies.set(currency, amount);
                     }
                 }

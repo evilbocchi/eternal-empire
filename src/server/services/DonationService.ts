@@ -2,7 +2,7 @@ import { OnStart, Service } from "@flamework/core";
 import { Players } from "@rbxts/services";
 import { LeaderstatsService } from "server/services/LeaderstatsService";
 import { DataService } from "server/services/serverdata/DataService";
-import { Signal } from "shared/utils/fletchette";
+import { Signal } from "@antivivi/fletchette";
 
 @Service()
 export class DonationService implements OnStart {

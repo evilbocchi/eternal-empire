@@ -1,28 +1,26 @@
-import Price from "shared/Price";
-import { AREAS } from "shared/constants";
 import Difficulty from "shared/Difficulty";
 import Upgrader from "shared/item/Upgrader";
-import InfiniteMath from "shared/utils/infinitemath/InfiniteMath";
+import Price from "shared/Price";
+import Formula from "shared/utils/Formula";
+import { OnoeNum } from "@antivivi/serikanum";
 import { rainbowEffect } from "shared/utils/vrldk/BasePartUtils";
 
-const limit = new InfiniteMath([10, 12]);
+const limit = OnoeNum.fromSerika(10, 12);
+const mul = new Price().setCost("Funds", 0).setCost("Power", 0);
 
 export = new Upgrader("EffervescentDropletSpray")
 .setName("Effervescent Droplet Spray")
-.setDescription("Rinses droplets to make them sparkling clean! Funds boost is 2/3 that of Power. Maxes out at 10T W. <0.3 * log20(power / 20 + 1) + 1>")
+.setDescription("Rinses droplets to make them sparkling clean! Funds boost is 2/3 that of Power. Maxes out at 10T W.")
 .setDifficulty(Difficulty.Exist)
-.setPrice(new Price().setCost("Funds", new InfiniteMath([504, 12])), 1)
-.addPlaceableArea(AREAS.BarrenIslands)
+.setPrice(new Price().setCost("Funds", 504e12), 1)
+.addPlaceableArea("BarrenIslands")
 
 .onLoad((model) => rainbowEffect(model.WaitForChild("Conveyor") as BasePart, 3))
-.onInit((utils, item) => item.applyFormula((v) => item.setMul(v), () => {
-    const cost = new InfiniteMath(utils.getBalance().getCost("Power") ?? 0);
-    if (limit.lt(cost)) {
+.setFormula(new Formula().div(20).add(1).log(20).mul(0.3).add(1))
+.onInit((utils, item) => item.applyFormula((v) => item.setMul(mul.setCost("Funds", v.mul(0.666)).setCost("Power", v)), () => {
+    const cost = new OnoeNum(utils.getBalance().getCost("Power") ?? 0);
+    if (limit.lessThan(cost)) {
         return limit;
     }
     return cost;
-}, 
-(x) => {
-    const y = InfiniteMath.log(x.div(20).add(1), 20).mul(0.3).add(1);
-    return new Price().setCost("Funds", y.mul(2/3)).setCost("Power", y);
 }));

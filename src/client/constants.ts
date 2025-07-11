@@ -7,7 +7,13 @@ export const PLAYER_GUI = LOCAL_PLAYER.WaitForChild("PlayerGui") as StarterGui;
 
 export const INTERFACE = PLAYER_GUI.WaitForChild("Interface") as ScreenGui;
 
-export const SIDEBAR_BUTTONS = INTERFACE.WaitForChild("SidebarButtons") as Frame;
+export const SIDEBAR_BUTTONS = INTERFACE.WaitForChild("SidebarButtons") as Frame & {
+	Quests: TextButton & {
+		NotificationWindow: Frame & {
+			AmountLabel: TextLabel
+		}
+	}
+};
 
 export const ADAPTIVE_TAB = INTERFACE.WaitForChild("AdaptiveTab") as Frame & {
     CloseButton: TextButton,
@@ -23,12 +29,7 @@ export const ADAPTIVE_TAB_MAIN_WINDOW = ADAPTIVE_TAB.WaitForChild("MainWindow") 
 
 export const TRACKED_QUEST_WINDOW = INTERFACE.WaitForChild("TrackedQuestWindow") as Frame & {
 	Background: Folder & {
-		Frame: Frame,
-		ProgressBar: CanvasGroup & {
-			UIStroke: UIStroke,
-			Fill: Frame,
-			BarLabel: TextLabel
-		}
+		Frame: Frame
 	},
 	Completion: Frame & {
 		ImageLabel: ImageLabel,
@@ -49,15 +50,21 @@ export const TRACKED_QUEST_WINDOW = INTERFACE.WaitForChild("TrackedQuestWindow")
 		}
 	},
 	DescriptionLabel: TextLabel,
-	TitleLabel: TextLabel
+	TitleLabel: TextLabel,
+	ProgressBar: CanvasGroup & {
+		Bar: Frame & {
+			UIStroke: UIStroke,
+			Fill: Frame,
+			BarLabel: TextLabel
+		}
+	}
 }
 
 export const DETAILS_WINDOW = INTERFACE.WaitForChild("DetailsWindow") as Frame & {
 	PositionLabel: TextLabel,
-	FundsBombLabel: TextLabel
+	FundsBombLabel: TextLabel,
+	SavingDataLabel: TextLabel
 }
-
-export const SAVING_DATA_LABEL = INTERFACE.WaitForChild("SavingDataLabel") as TextLabel;
 
 type ItemListContainer = Frame & {
 	ItemList: ScrollingFrame;
@@ -67,6 +74,7 @@ export const INVENTORY_WINDOW = ADAPTIVE_TAB_MAIN_WINDOW.WaitForChild("Inventory
 	Empty: Frame
 };
 export const SHOP_WINDOW = INTERFACE.WaitForChild("ShopWindow") as Frame & {
+	UIStroke: UIStroke,
 	PurchaseWindow: Frame & {
 		ViewportFrame: ViewportFrame,
 		Title: Frame & {
@@ -76,10 +84,10 @@ export const SHOP_WINDOW = INTERFACE.WaitForChild("ShopWindow") as Frame & {
 		DescriptionFrame: ScrollingFrame & {
 			DescriptionLabel: TextLabel,
 			CreatorLabel: TextLabel,
-			PlaceableAreasLabel: TextLabel,
 		},
 		Purchase: TextButton & {
-			PriceLabel: TextLabel
+			Price: Frame,
+			HeadingLabel: TextLabel
 		},
 		CloseButton: TextButton
 	},
@@ -95,13 +103,14 @@ export type NavigationOption = Frame & {
 }
 
 export const BALANCE_WINDOW = INTERFACE.WaitForChild("BalanceWindow") as Frame & {
-	Balances: ScrollingFrame;
+	Balances: ScrollingFrame & {
+		NavigationOptions: Frame & {
+			Left: NavigationOption,
+			Right: NavigationOption,
+			PageLabel: TextLabel
+		}
+	};
 	TitleLabel: TextLabel;
-	NavigationOptions: Frame & {
-		Left: NavigationOption,
-		Right: NavigationOption,
-		PageLabel: TextLabel
-	}
 };
 
 export const LOADING_WINDOW = INTERFACE.WaitForChild("LoadingWindow") as Frame & {
@@ -121,33 +130,21 @@ export const START_WINDOW = INTERFACE.WaitForChild("StartWindow") as Frame & {
 	Footer: CanvasGroup
 };
 
-export const BUILD_WINDOW = INTERFACE.WaitForChild("BuildWindow") as CanvasGroup & {
-	ModeOptions: Frame & {
-		UIListLayout: UIListLayout,
-		Dropdown: TextButton & {
-			ImageLabel: ImageLabel
-		},
-		Deselect: TextButton,
-		Place: TextButton,
-		Rotate: TextButton,
-		Delete: TextButton,
-	},
-	PlacementLabel: TextLabel,
-	ModeLabel: TextLabel
-};
+export const INTRO_WINDOW = INTERFACE.WaitForChild("IntroWindow") as Frame;
 
-export const TOOLTIP_WINDOW = INTERFACE.WaitForChild("TooltipWindow") as CanvasGroup & {
-	Main: Frame & {
-		MessageLabel: TextLabel
-	}
+export type BuildOption = TextButton & {
+	UIScale: UIScale
 }
 
-export const MUTE_BUTTON_WINDOW = INTERFACE.WaitForChild("MuteButtonWindow") as Frame & {
-	Button: TextButton,
-	Frame: Frame & {
-		UIPadding: UIPadding,
-		SongTitle: TextLabel
-	}
+export const BUILD_WINDOW = INTERFACE.WaitForChild("BuildWindow") as Frame & {
+	Deselect: BuildOption,
+	Rotate: BuildOption,
+	Delete: BuildOption,
+};
+
+export const TOOLTIP_WINDOW = INTERFACE.WaitForChild("TooltipWindow") as Frame & {
+	UIStroke: UIStroke,
+	MessageLabel: TextLabel
 }
 
 export type StatContainer = Frame & {
@@ -161,6 +158,7 @@ export const STATS_WINDOW = ADAPTIVE_TAB_MAIN_WINDOW.WaitForChild("Stats") as Fr
 		SessionTime: StatContainer;
 		LongestSessionTime: StatContainer;
 		RawPurifierClicks: StatContainer;
+		CurrentPing: StatContainer;
 	}
 };
 
@@ -192,8 +190,11 @@ export const SETTINGS_WINDOW = ADAPTIVE_TAB_MAIN_WINDOW.WaitForChild("Settings")
 };
 
 export const LOGS_WINDOW = ADAPTIVE_TAB_MAIN_WINDOW.WaitForChild("Logs") as Frame & {
-	LogList: Frame & {
-		
+	LogList: Frame,
+	NavigationOptions: Frame & {
+		Left: NavigationOption,
+		Right: NavigationOption,
+		PageLabel: TextLabel
 	}
 };
 
@@ -235,3 +236,9 @@ export const LEVELS_WINDOW = ADAPTIVE_TAB_MAIN_WINDOW.WaitForChild("Levels") as 
 export const WARP_WINDOW = ADAPTIVE_TAB_MAIN_WINDOW.WaitForChild("Warp") as Frame & {
 	[area in keyof (typeof AREAS)]: ImageButton
 };
+
+export const DIALOGUE_WINDOW = INTERFACE.WaitForChild("DialogueWindow") as TextButton & {
+	NameLabel: TextLabel,
+	TextLabel: TextLabel,
+	HintLabel: TextLabel,
+}

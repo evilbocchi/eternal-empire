@@ -5,9 +5,9 @@ import Furnace from "shared/item/Furnace";
 
 export = new Furnace("ButtonFurnace")
 .setName("Button Furnace")
-.setDescription("Doesn't actually press. Gives a sizeable $70x bonus though!")
+.setDescription("Doesn't actually press. Gives a sizeable %mul%x bonus though.")
 .setDifficulty(Difficulty.Unimpossible)
 .setPrice(new Price().setCost("Funds", 700000), 1)
-.addPlaceableArea(AREAS.BarrenIslands)
+.addPlaceableArea("BarrenIslands")
 
-.setFormula((price) => price.mul(new Price().setCost("Funds", 70)));
+.setMul(new Price().setCost("Funds", 70));

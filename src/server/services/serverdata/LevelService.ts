@@ -3,7 +3,7 @@ import { DataService } from "server/services/serverdata/DataService";
 import { UpgradeBoardService } from "server/services/serverdata/UpgradeBoardService";
 import { getMaxXp } from "shared/constants";
 import NamedUpgrade from "shared/item/NamedUpgrade";
-import { Fletchette, RemoteFunc, RemoteProperty, RemoteSignal, Signal } from "shared/utils/fletchette";
+import { Fletchette, RemoteFunc, RemoteProperty, Signal } from "@antivivi/fletchette";
 
 declare global {
     interface FletchetteCanisters {
@@ -16,7 +16,6 @@ export const LevelCanister = Fletchette.createCanister("LevelCanister", {
     level: new RemoteProperty<number>(-1),
     xp: new RemoteProperty<number>(-1),
     getUpgrade: new RemoteFunc<(upgradeId: string, amount: number) => boolean>(),
-    respec: new RemoteSignal<() => void>(),
 });
 
 @Service()
@@ -89,16 +88,16 @@ export class LevelService implements OnStart {
             LevelCanister.xp.set(profile.Data.xp);
             LevelCanister.remainingLevelPoints.set(this.getRemainingLevelPoints()!);
         });
-        LevelCanister.respec.connect((player) => {
-            if (!this.dataService.checkPermLevel(player, "purchase")) {
-                return false;
-            }
-            this.upgradeBoardService.setUpgradeAmount(NamedUpgrade.Stone.id, 0);
-            this.upgradeBoardService.setUpgradeAmount(NamedUpgrade.WhiteGem.id, 0);
-            this.upgradeBoardService.setUpgradeAmount(NamedUpgrade.Crystal.id, 0);
-            this.respected.fire(player);
-            LevelCanister.remainingLevelPoints.set(this.getRemainingLevelPoints()!);
-        });
+        // LevelCanister.respec.connect((player) => {
+        //     if (!this.dataService.checkPermLevel(player, "purchase")) {
+        //         return false;
+        //     }
+        //     this.upgradeBoardService.setUpgradeAmount(NamedUpgrade.Stone.id, 0);
+        //     this.upgradeBoardService.setUpgradeAmount(NamedUpgrade.WhiteGem.id, 0);
+        //     this.upgradeBoardService.setUpgradeAmount(NamedUpgrade.Crystal.id, 0);
+        //     this.respected.fire(player);
+        //     LevelCanister.remainingLevelPoints.set(this.getRemainingLevelPoints()!);
+        // });
         LevelCanister.getUpgrade.onInvoke((player, upgradeId, amount) => {
             if (!this.dataService.checkPermLevel(player, "purchase")) {
                 return false;

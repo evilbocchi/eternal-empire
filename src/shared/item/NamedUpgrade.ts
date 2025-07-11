@@ -1,35 +1,15 @@
-import Price from "shared/Price";
-import InfiniteMath from "shared/utils/infinitemath/InfiniteMath";
+//!native
 
-const fivePercent = new InfiniteMath(0.05);
-const one = new InfiniteMath(1);
+import Price from "shared/Price";
+import { AREAS } from "shared/constants";
+import { OnoeNum } from "@antivivi/serikanum";
+
+const fivePercent = new OnoeNum(0.05);
+const one = new OnoeNum(1);
 
 class NamedUpgrade {
 
     static UPGRADES: NamedUpgrade[] = [];
-
-    static moreFundsFormula(value: Price, amount: number, step: number | undefined) {
-        if (step !== undefined && amount >= step) {
-            value = value.mul(new Price().setCost("Funds", new InfiniteMath(1.2).pow(math.floor(amount / step))));
-        }
-        if (amount > 0) {
-            value = value.mul(new Price().setCost("Funds", new InfiniteMath(1.04).pow(amount)));
-        }
-        return value;
-    }
-
-    static morePowerFormula(value: Price, amount: number, step: number | undefined) {
-        if (value.getCost("Power")?.equals(0)) {
-            return value;
-        }
-        if (step !== undefined && amount >= step) {
-            value = value.mul(new Price().setCost("Power", new InfiniteMath(1.2).pow(math.floor(amount / step))));
-        }
-        if (amount > 0) {
-            value = value.mul(new Price().setCost("Power", new InfiniteMath(1.03).pow(amount)));
-        }
-        return value;
-    }
 
     static Stone = NamedUpgrade.registerUpgrade(
         new NamedUpgrade("Stone")
@@ -52,29 +32,37 @@ class NamedUpgrade {
     static MoreFunds = NamedUpgrade.registerUpgrade(
         new NamedUpgrade("MoreFunds")
         .setName("Improved Droplet Technology")
-        .setDescription("Increases droplet Funds processing value and generator gain by 4% per upgrade compounding. Every 10 upgrades multiplies the upgrade by 1.2x.")
+        .setDescription("Increases Funds gain by 4% per upgrade compounding. Every 10 upgrades multiplies the upgrade by 1.2x.")
         .setCap(100)
-        .setImage(4743601341)
+        .setImage(17567361523)
         .setStep(10)
-        .setPriceFormula((amount) => {
-            return new Price().setCost("Funds", new InfiniteMath([1, 9]).mul(new InfiniteMath(1.55).pow(amount)));
+        .setPriceFormula((amount) => new Price().setCost("Funds", OnoeNum.fromSerika(1, 9).mul(new OnoeNum(1.55).pow(amount))))
+        .setGain((value, amount, step) => {
+            if (step !== undefined && amount >= step)
+                value = value.mul(new Price().setCost("Funds", new OnoeNum(1.2).pow(math.floor(amount / step))));
+            if (amount > 0)
+                value = value.mul(new Price().setCost("Funds", new OnoeNum(1.04).pow(amount)));
+            return value;
         })
-        .setGeneratorFormula((value, amount, step) => NamedUpgrade.moreFundsFormula(value, amount, step))
-        .setDropletFormula((value, amount, step) => NamedUpgrade.moreFundsFormula(value, amount, step))
     );
 
     static MorePower = NamedUpgrade.registerUpgrade(
         new NamedUpgrade("MorePower")
         .setName("Better Networking")
-        .setDescription("Increases droplet Power processing value and generator gain by 3% per upgrade compounding. Every 10 upgrades multiplies the upgrade by 1.2x.")
+        .setDescription("Increases Power gain by 3% per upgrade compounding. Every 10 upgrades multiplies the upgrade by 1.2x.")
         .setCap(100)
-        .setImage(12600837039)
+        .setImage(17567361376)
         .setStep(10)
-        .setPriceFormula((amount) => {
-            return new Price().setCost("Power", new InfiniteMath([4, 1]).mul(new InfiniteMath(1.45).pow(amount)));
+        .setPriceFormula((amount) => new Price().setCost("Power", OnoeNum.fromSerika(4, 1).mul(new OnoeNum(1.45).pow(amount))))
+        .setGain((value, amount, step) => {
+            if (value.getCost("Power")?.equals(0))
+                return value;
+            if (step !== undefined && amount >= step)
+                value = value.mul(new Price().setCost("Power", new OnoeNum(1.2).pow(math.floor(amount / step))));
+            if (amount > 0)
+                value = value.mul(new Price().setCost("Power", new OnoeNum(1.03).pow(amount)));
+            return value;
         })
-        .setGeneratorFormula((value, amount, step) => NamedUpgrade.morePowerFormula(value, amount, step))
-        .setDropletFormula((value, amount, step) => NamedUpgrade.morePowerFormula(value, amount, step))
     );
 
     static FasterTreading = NamedUpgrade.registerUpgrade(
@@ -82,13 +70,9 @@ class NamedUpgrade {
         .setName("Fast Treads")
         .setDescription("In case you hate walking, this upgrade increases player walkspeed by 1.")
         .setCap(4)
-        .setImage(15657670979)
-        .setPriceFormula((amount) => {
-            return new Price().setCost("Power", new InfiniteMath([10, amount * 2]));
-        })
-        .setWalkSpeedFormula((value, amount) => {
-            return value + amount;
-        })
+        .setImage(17567361098)
+        .setPriceFormula((amount) => new Price().setCost("Power", OnoeNum.fromSerika(10, amount * 2)))
+        .setWalkSpeedFormula((value, amount) => value + amount)
     );
 
     static LandReclaimation = NamedUpgrade.registerUpgrade(
@@ -96,12 +80,80 @@ class NamedUpgrade {
         .setName("Land Reclaimation")
         .setDescription("Finally, some space. Increases the grid size of Barren Islands by 6 studs each side.")
         .setCap(5)
-        .setImage(16800883223)
-        .setPriceFormula((amount) => {
-            return new Price().setCost("Funds", new InfiniteMath([5, 3 + (amount * 6)]));
-        })
+        .setImage(17567364321)
+        .setPriceFormula((amount) => new Price().setCost("Funds", OnoeNum.fromSerika(5, 3 + (amount * 6))))
         .setGridSizeFormula("BarrenIslands", (value, amount) => {
             const delta = amount * 12;
+            return value.add(new Vector3(delta, 0, delta));
+        })
+    );
+
+    static CryptographicFunds = NamedUpgrade.registerUpgrade(
+        new NamedUpgrade("CryptographicFunds")
+        .setName("Cryptographic Funds")
+        .setDescription("Increases Funds gain by 5% per upgrade compounding. Every 10 upgrades multiplies the upgrade by 1.25x.")
+        .setCap(100)
+        .setImage(17567394388)
+        .setStep(10)
+        .setPriceFormula((amount) => new Price().setCost("Bitcoin", new OnoeNum(20).mul(new OnoeNum(1.75).pow(amount))))
+        .setGain((value, amount, step) =>  {
+            if (step !== undefined && amount >= step) {
+                value = value.mul(new Price().setCost("Funds", new OnoeNum(1.25).pow(math.floor(amount / step))));
+            }
+            if (amount > 0) {
+                value = value.mul(new Price().setCost("Funds", new OnoeNum(1.05).pow(amount)));
+            }
+            return value;
+        })
+    );
+
+    static CryptographicPower = NamedUpgrade.registerUpgrade(
+        new NamedUpgrade("CryptographicPower")
+        .setName("Cryptographic Power")
+        .setDescription("Increases Power gain by 4% per upgrade compounding. Every 10 upgrades multiplies the upgrade by 1.25x.")
+        .setCap(100)
+        .setImage(17567405360)
+        .setStep(10)
+        .setPriceFormula((amount) => new Price().setCost("Bitcoin", new OnoeNum(35).mul(new OnoeNum(1.75).pow(amount))))
+        .setGain((value, amount, step) =>  {
+            if (step !== undefined && amount >= step) {
+                value = value.mul(new Price().setCost("Funds", new OnoeNum(1.25).pow(math.floor(amount / step))));
+            }
+            if (amount > 0) {
+                value = value.mul(new Price().setCost("Funds", new OnoeNum(1.04).pow(amount)));
+            }
+            return value;
+        })
+    );
+
+    static SkilledMining = NamedUpgrade.registerUpgrade(
+        new NamedUpgrade("SkilledMining")
+        .setName("Skilled Mining")
+        .setDescription("Increases Bitcoin gain by 10% per upgrade compounding. Every 10 upgrades multiplies the upgrade by 1.2x.")
+        .setCap(100)
+        .setImage(17567487942)
+        .setStep(10)
+        .setPriceFormula((amount) => new Price().setCost("Skill", new OnoeNum(2).mul(new OnoeNum(1.55).pow(amount))))
+        .setGain((value, amount, step) =>  {
+            if (step !== undefined && amount >= step) {
+                value = value.mul(new Price().setCost("Bitcoin", new OnoeNum(1.2).pow(math.floor(amount / step))));
+            }
+            if (amount > 0) {
+                value = value.mul(new Price().setCost("Bitcoin", new OnoeNum(1.1).pow(amount)));
+            }
+            return value;
+        })
+    );
+
+    static LandReclaimationII = NamedUpgrade.registerUpgrade(
+        new NamedUpgrade("LandReclaimationII")
+        .setName("Land Reclaimation II")
+        .setDescription("Increases the grid size of Slamo Village by 3 studs each side.")
+        .setCap(5)
+        .setImage(17705772522)
+        .setPriceFormula((amount) => new Price().setCost("Skill", OnoeNum.fromSerika(5, (amount * 6) - 6)))
+        .setGridSizeFormula("SlamoVillage", (value, amount) => {
+            const delta = amount * 6;
             return value.add(new Vector3(delta, 0, delta));
         })
     );
@@ -172,13 +224,17 @@ class NamedUpgrade {
         return this;
     }
 
-    getGridSizeFormula(area: string) {
+    getGridSizeFormula(area: keyof (typeof AREAS)) {
         return this.gridSizeFormula.get(area); 
     }
 
-    setGridSizeFormula(area: string, gridSizeFormula: (gridSize: Vector3, amount: number, step?: number) => Vector3) {
+    setGridSizeFormula(area: keyof (typeof AREAS), gridSizeFormula: (gridSize: Vector3, amount: number, step?: number) => Vector3) {
         this.gridSizeFormula.set(area, gridSizeFormula);
         return this;
+    }
+
+    setGain(gain: (original: Price, amount: number, step?: number) => Price) {
+        return this.setDropletFormula(gain).setGeneratorFormula(gain);
     }
 
     setDropletFormula(dropletFormula: (dropletValue: Price, amount: number, step?: number) => Price) {

@@ -4,9 +4,11 @@ import { LOCAL_PLAYER, START_WINDOW } from "client/constants";
 import { UIController } from "client/controllers/UIController";
 import { AdaptiveTabController } from "client/controllers/interface/AdaptiveTabController";
 import { BalanceWindowController } from "client/controllers/interface/BalanceWindowController";
+import { IntroController } from "client/controllers/interface/IntroController";
 import { LoadingWindowController } from "client/controllers/interface/LoadingWindowController";
-import { EmpireInfo, START_CAMERA, START_SCREEN_ENABLED, UI_ASSETS, getNameFromUserId } from "shared/constants";
-import { Fletchette } from "shared/utils/fletchette";
+import { SoundController } from "client/controllers/interface/SoundController";
+import { ASSETS, EmpireInfo, START_CAMERA, START_SCREEN_ENABLED, getNameFromUserId, getSound } from "shared/constants";
+import { Fletchette } from "@antivivi/fletchette";
 import computeNameColor from "shared/utils/vrldk/ComputeNameColor";
 import { convertToHHMMSS } from "shared/utils/vrldk/NumberAbbreviations";
 import { getHumanoid } from "shared/utils/vrldk/PlayerUtils";
@@ -17,7 +19,7 @@ const EmpireCanister = Fletchette.getCanister("EmpireCanister");
 @Controller()
 export class StartWindowController implements OnInit {
     constructor(private uiController: UIController, private adaptiveTabController: AdaptiveTabController, private balanceWindowController: BalanceWindowController, 
-        private loadingWindowController: LoadingWindowController) {
+        private loadingWindowController: LoadingWindowController, private introController: IntroController, private soundController: SoundController) {
     }
 
     hideStartWindow() {
@@ -28,6 +30,7 @@ export class StartWindowController implements OnInit {
                 Workspace.CurrentCamera.CameraType = Enum.CameraType.Custom;
                 Workspace.CurrentCamera.CameraSubject = getHumanoid(LOCAL_PLAYER);
             }
+            this.soundController.refreshMusic();
             this.balanceWindowController.showBalanceWindow();
             this.adaptiveTabController.showSidebarButtons();
             this.loadingWindowController.refreshLoadingWindow("Done loading");
@@ -60,6 +63,9 @@ export class StartWindowController implements OnInit {
             TweenService.Create(START_WINDOW.EmpiresWindow, new TweenInfo(1), {Position: new UDim2(0.5, 0, 0.65, 0)}).Play();
         });
         START_WINDOW.Visible = true;
+        if (this.soundController.playing !== undefined)
+            this.soundController.fadeOut(this.soundController.playing);
+        this.soundController.fadeIn(getSound("Start"));
     }
 
     refreshEmpiresWindow(availableEmpires?: Map<string, EmpireInfo>) {
@@ -71,7 +77,7 @@ export class StartWindowController implements OnInit {
             if (START_WINDOW.EmpiresWindow.EmpireOptions.FindFirstChild(availableEmpire) !== undefined) {
                 continue;
             }
-            const empireOption = UI_ASSETS.EmpiresWindow.EmpireOption.Clone();
+            const empireOption = ASSETS.EmpiresWindow.EmpireOption.Clone();
             empireOption.Activated.Connect(() => {
                 this.uiController.playSound("Click");
                 this.loadingWindowController.showLoadingWindow("Loading server");
@@ -100,7 +106,7 @@ export class StartWindowController implements OnInit {
     }
 
     onInit() {
-        const newEmpireOption = UI_ASSETS.EmpiresWindow.NewEmpireOption.Clone();
+        const newEmpireOption = ASSETS.EmpiresWindow.NewEmpireOption.Clone();
         const ogText = newEmpireOption.MessageLabel.Text;
         newEmpireOption.Activated.Connect(() => {
             this.uiController.playSound("Click");
@@ -121,6 +127,7 @@ export class StartWindowController implements OnInit {
         START_WINDOW.EmpiresWindow.PublicEmpireWindow.JoinPublicEmpire.Activated.Connect(() => {
             this.uiController.playSound("Click");
             this.hideStartWindow();
+            task.delay(0.9, () => this.introController.onIntroMarkerChanged());
         });
 
         EmpireCanister.availableEmpires.observe((availableEmpires) => this.refreshEmpiresWindow(availableEmpires));

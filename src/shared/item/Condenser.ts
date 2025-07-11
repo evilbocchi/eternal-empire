@@ -1,5 +1,9 @@
+//!native
+
 import Price from "shared/Price";
 import { AREAS } from "shared/constants";
+import Dropper from "shared/item/Dropper";
+import { OnoeNum } from "@antivivi/serikanum";
 import Droplet from "./Droplet";
 import FurnaceDropper from "./FurnaceDropper";
 
@@ -16,12 +20,20 @@ class Condenser extends FurnaceDropper {
             const dropletLimit = area.dropletLimit;
             const dropletCount = area.areaFolder.WaitForChild("DropletCount") as IntValue;
 
-            const bannedDroplets = new Array<string>();
-            const instantiatorsPerDroplet = new Map<Droplet, () => void>();
-            const quotasPerDroplet = item.quotasPerDroplet;
-            for (const [droplet] of quotasPerDroplet) {
-                bannedDroplets.push(droplet.id);
-                instantiatorsPerDroplet.set(droplet, droplet.getInstantiator(model, (model.WaitForChild("Drop") as BasePart).CFrame, utils));
+            const instantiatorsPerDroplet = new Map<Droplet, () => BasePart>();
+            const pricePerDroplet = new Map<Droplet, Price>();
+            const maxCosts = new Map<Currency, OnoeNum>();
+            for (const [droplet, quota] of this.quotasPerDroplet) {
+                const value = droplet.value;
+                if (value === undefined)
+                    continue;
+                const price = value.mul(quota);
+                pricePerDroplet.set(droplet, price);
+                for (const [currency, cost] of price.costPerCurrency) {
+                    maxCosts.set(currency, cost.mul(10));
+                }
+                const drop = model.WaitForChild("Drop") as BasePart;
+                instantiatorsPerDroplet.set(droplet, Dropper.wrapInstantiator(drop, droplet.getInstantiator(model, drop.CFrame, utils)));
             }
             const event = new Instance("BindableEvent");
             event.Parent = model;
@@ -30,20 +42,16 @@ class Condenser extends FurnaceDropper {
                 return;
             }
             let current = new Price();
+            const upgrades = new Map<string, Model>();
             const check = () => {
-                quotasPerDroplet.forEach((quota, droplet) => {
+                pricePerDroplet.forEach((price, droplet) => {
                     if (dropletCount.Value > dropletLimit.Value) {
                         return;
                     }
-                    
                     let isInstantiate = true;
-                    const price = droplet.value?.mul(quota);
-                    if (price === undefined) {
-                        return;
-                    }
                     for (const [currency, cost] of pairs(price.costPerCurrency)) {
                         const currentCost = current.getCost(currency);
-                        if (currentCost === undefined || currentCost.lt(cost)) {
+                        if (currentCost === undefined || currentCost.lessThan(cost)) {
                             isInstantiate = false;
                             break;
                         }
@@ -52,23 +60,28 @@ class Condenser extends FurnaceDropper {
                         current = current.sub(price);
                         const instantiator = instantiatorsPerDroplet.get(droplet);
                         if (instantiator !== undefined) {
-                            instantiator();
+                            const droplet = instantiator();
+                            for (const [upgraderId, upgraderModel] of upgrades) {
+                                const pointer = new Instance("ObjectValue");
+                                pointer.Name = upgraderId;
+                                pointer.Value = upgraderModel;
+                                pointer.SetAttribute("ItemId", upgraderModel.GetAttribute("ItemId"));
+                                pointer.SetAttribute("EmptyUpgrade", true);
+                                pointer.Parent = droplet;
+                            }
+                            droplet.SetAttribute("Condensed", true);
                         }
                     }
                 });
+                update();
             }
             const update = () => {
-                quotasPerDroplet.forEach((quota, droplet) => {
-                    let price = droplet.value;
-                    if (price === undefined) {
-                        return;
-                    }
-                    price = price.mul(quota);
+                pricePerDroplet.forEach((price) => {
                     for (const [currency, cost] of pairs(price.costPerCurrency)) {
-                        const progress = math.min(current.getCost(currency)?.div(cost).Reverse() ?? 0, 10);
+                        const progress = current.getCost(currency)?.div(cost).revert() ?? 0;
                         const bar = surfaceGui.WaitForChild(currency + "Bar");
                         (bar.WaitForChild("Fill") as Frame).Size = new UDim2(math.min(progress, 1), 0, 1, 0);
-                        (bar.WaitForChild("PercentageLabel") as TextLabel).Text = (math.floor(progress * 10000) / 100) + "%";
+                        (bar.WaitForChild("PercentageLabel") as TextLabel).Text = math.floor(progress * 100) + "%";
                     }
                 });
             }
@@ -76,10 +89,22 @@ class Condenser extends FurnaceDropper {
             event.Event.Connect((raw?: Price, dropletModel?: BasePart) => {
                 if (raw !== undefined && dropletModel !== undefined) {
                     const id = dropletModel.GetAttribute("DropletId") as string;
-                    if (id === undefined || bannedDroplets.includes(id)) {
+                    if (id === undefined || dropletModel.GetAttribute("Condensed") === true) {
                         return;
                     }
-                    current = current.add(new Price(raw.costPerCurrency));
+                    const newCurrent = current.add(new Price(raw.costPerCurrency));
+                    for (const [currency, cost] of newCurrent.costPerCurrency) {
+                        const limit = maxCosts.get(currency);
+                        if (limit === undefined || cost.lessThan(limit))
+                            continue;
+                        newCurrent.setCost(currency, limit);
+                    }
+                    for (const upgrade of dropletModel.GetChildren()) {
+                        if (upgrade.IsA("ObjectValue")) {
+                            upgrades.set(upgrade.Name, upgrade.Value as Model);
+                        }
+                    }
+                    current = newCurrent;
                     check();
                     update();
                 }

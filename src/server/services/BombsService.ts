@@ -1,6 +1,6 @@
 import { OnStart, Service } from "@flamework/core";
 import { DataStoreService, MessagingService, Workspace } from "@rbxts/services";
-import { Fletchette, RemoteFunc, Signal } from "shared/utils/fletchette";
+import { Fletchette, RemoteFunc, Signal } from "@antivivi/fletchette";
 import { CurrencyService } from "./serverdata/CurrencyService";
 import { DataService } from "./serverdata/DataService";
 import Price from "shared/Price";
@@ -13,6 +13,7 @@ declare global {
 
 type BombMessage = {
     bombType: Currency,
+    player: number,
     endTime: number
 }
 
@@ -26,6 +27,7 @@ export class BombsService implements OnStart {
 
     globalDataStore = DataStoreService.GetGlobalDataStore();
     bombUsed = new Signal<(player: Player, bombType: Currency) => void>();
+    bombActive = new Signal<(endTime: number, bombType: Currency, player: number) => void>();
     fundsBombEnabled = false;
     fundsBombBoost = new Price().setCost("Funds", 1.2);
 
@@ -53,6 +55,7 @@ export class BombsService implements OnStart {
             const data = message.Data as BombMessage;
             if (data.bombType === "Funds Bombs") {
                 Workspace.SetAttribute("FundsBombTime", data.endTime);
+                this.bombActive.fire(data.endTime, data.bombType, data.player);
                 this.refreshBombsEnabled();
             }
         });
@@ -62,7 +65,7 @@ export class BombsService implements OnStart {
                 return false;
             }
             const amount = this.currencyService.getCost(bombType);
-            if (amount.le(0)) {
+            if (amount.lessEquals(0)) {
                 return false;
             }
             if (bombType === "Funds Bombs") {
@@ -79,6 +82,7 @@ export class BombsService implements OnStart {
                     task.spawn(() => {
                         MessagingService.PublishAsync("Bomb", {
                             bombType: bombType,
+                            player: player.UserId,
                             endTime: value
                         });
                     });

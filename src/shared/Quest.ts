@@ -1,6 +1,9 @@
-import { AREAS } from "./constants";
-import Item from "./item/Item";
-import { Signal } from "./utils/fletchette";
+//!native
+
+import { Signal } from "@antivivi/fletchette";
+import { AREAS, getNPCModel } from "shared/constants";
+import Item from "shared/item/Item";
+import { Dialogue } from "shared/NPC";
 
 export type Reward = {
     items?: Map<Item, number>,
@@ -9,18 +12,40 @@ export type Reward = {
 }
 
 export class Stage {
-    description: string | undefined = undefined;
-    position: Vector3 | undefined = undefined;
+    description: string | undefined;
+    position: Vector3 | undefined;
+    focus: BasePart | undefined;
+    dialogue: Dialogue | undefined;
+    npcModel: Model | undefined;
+    npcHumanoid: Humanoid | undefined;
+
     completed = new Signal<() => void>();
-    load: ((utils: ItemUtils, stage: this) => (() => void)) | undefined = undefined;
-    positionChanged = new Signal<(position: Vector3) => void>();
+    load?: ((utils: GameUtils, stage: this) => (() => void));
+    positionChanged = new Signal<(position?: Vector3) => void>();
 
     setDescription(description: string) {
         this.description = description;
         return this;
     }
 
-    setPosition(position: Vector3) {
+    setFocus(instance?: Instance) {
+        if (instance !== undefined && instance.IsA("BasePart")) {
+            this.focus = instance;
+            this.setPosition(instance.Position);
+            instance.GetPropertyChangedSignal("CFrame").Connect(() => this.setPosition(instance.Position));
+        }
+        return this;
+    }
+
+    setNPC(npcName: string, setAsFocus?: boolean) {
+        this.npcModel = getNPCModel(npcName);
+        this.npcHumanoid = this.npcModel.FindFirstChildOfClass("Humanoid");
+        if (setAsFocus === true)
+            return this.setFocus(this.npcHumanoid?.RootPart);
+        return this;
+    }
+
+    setPosition(position?: Vector3) {
         if (this.position !== position) {
             this.position = position;
             this.positionChanged.fire(position);
@@ -28,29 +53,77 @@ export class Stage {
         return this;
     }
 
-    onLoad(load: (utils: ItemUtils, stage: this) => (() => void)) {
-        this.load = load;
+    setDialogue(dialogue: Dialogue) {
+        this.dialogue = dialogue;
         return this;
+    }
+
+    onLoad(load: (utils: GameUtils, stage: this) => (() => void)) {
+        this.load = (utils, stage) => {
+            const callback = load(utils, stage);
+            const dialogue = this.dialogue;
+            if (dialogue !== undefined) {
+                utils.onStageReached(this, () => {
+                    utils.addDialogue(dialogue.npc, dialogue);
+                });
+                stage.completed.connect(() => utils.removeDialogue(dialogue.npc, dialogue));
+                return callback;
+            }
+            return callback;
+        };
+        return this;
+    }
+
+    /** Waits for the stage to start instead of as soon as the quest is available. */
+    onStart(start: (utils: GameUtils, stage: this) => (() => void), load?: (utils: GameUtils, stage: this) => (() => void)) {
+        return this.onLoad((utils, stage) => {
+            const mainCallback = load === undefined ? undefined : load(utils, stage);
+            let callback: () => void;
+            utils.onStageReached(this, () => {
+                callback = start(utils, stage);
+            });
+            return () => {
+                if (callback !== undefined)
+                    callback();
+                if (mainCallback !== undefined)
+                    mainCallback();
+            };
+        });
     }
 }
 
 export default class Quest {
 
     static questsPerId: Map<string, Quest> | undefined = undefined;
+    static colors = [
+		Color3.fromRGB(253, 41, 67),
+		Color3.fromRGB(1, 162, 255),
+		Color3.fromRGB(2, 184, 87),
+		Color3.fromRGB(255, 43, 245),
+		Color3.fromRGB(255, 125, 0),
+		Color3.fromRGB(240, 255, 26),
+		Color3.fromRGB(255, 74, 166),
+		Color3.fromRGB(255, 237, 61),
+        Color3.fromRGB(112, 255, 84),
+        Color3.fromRGB(36, 255, 209),
+    ];
     
     id: string;
     name: string | undefined = undefined;
     description: string | undefined = undefined;
     stages = new Array<Stage>();
-    color = Color3.fromRGB(0, 0, 0);
+    color: Color3;
     length = 0;
     level = 0;
     order = 0;
     loaded = false;
-    reward: Reward = {}
+    reward: Reward = {};
+    initialized = new Signal<(utils: GameUtils) => void>();
+    completionDialogue: Dialogue | undefined;
 
     constructor(id: string) {
         this.id = id;
+        this.color = Quest.colors[string.byte(id)[0] % Quest.colors.size()];
     }
 
     static init() {
@@ -82,11 +155,6 @@ export default class Quest {
         this.name = name;
         return this;
     }
-    
-    setColor(color: Color3) {
-        this.color = color;
-        return this;
-    }
 
     setLength(length: number) {
         this.length = length;
@@ -110,6 +178,21 @@ export default class Quest {
 
     setStage(number: number, stage: Stage) {
         this.stages.insert(number - 1, stage);
+        return this;
+    }
+
+    addStage(stage: Stage) {
+        this.stages.push(stage);
+        return this;
+    }
+
+    setCompletionDialogue(dialogue: Dialogue) {
+        this.completionDialogue = dialogue;
+        return this;
+    }
+
+    onInit(callback: (utils: GameUtils, quest: this) => void) {
+        this.initialized.connect((utils) => callback(utils, this));
         return this;
     }
 }

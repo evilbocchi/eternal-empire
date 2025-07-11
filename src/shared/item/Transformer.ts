@@ -1,3 +1,5 @@
+//!native
+
 import Conveyor from "shared/item/Conveyor";
 import Droplet from "shared/item/Droplet";
 import { findBaseParts } from "shared/utils/vrldk/BasePartUtils";

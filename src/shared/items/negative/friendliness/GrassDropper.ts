@@ -1,8 +1,7 @@
-import Price from "shared/Price";
-import { AREAS } from "shared/constants";
 import Difficulty from "shared/Difficulty";
 import Droplet from "shared/item/Droplet";
 import Dropper from "shared/item/Dropper";
+import Price from "shared/Price";
 
 export = new Dropper("GrassDropper")
 .setName("Grass Dropper")
@@ -11,6 +10,6 @@ export = new Dropper("GrassDropper")
 .setPrice(new Price().setCost("Funds", 34500000), 1)
 .setPrice(new Price().setCost("Funds", 80000000), 2)
 
-.addPlaceableArea(AREAS.BarrenIslands)
+.addPlaceableArea("BarrenIslands")
 .setDroplet(Droplet.NativeGrassDroplet)
 .setDropRate(1);

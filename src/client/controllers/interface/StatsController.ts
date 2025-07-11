@@ -1,9 +1,9 @@
 import { Controller, OnInit } from "@flamework/core";
 import { LOCAL_PLAYER, STATS_WINDOW, StatContainer } from "client/constants";
 import Price from "shared/Price";
-import { UI_ASSETS } from "shared/constants";
-import { Fletchette } from "shared/utils/fletchette";
-import InfiniteMath from "shared/utils/infinitemath/InfiniteMath";
+import { ASSETS } from "shared/constants";
+import { Fletchette } from "@antivivi/fletchette";
+import { OnoeNum } from "@antivivi/serikanum";
 import { convertToHHMMSS } from "shared/utils/vrldk/NumberAbbreviations";
 
 @Controller()
@@ -22,7 +22,7 @@ export class StatsController implements OnInit {
         LOCAL_PLAYER.GetAttributeChangedSignal("RawPurifierClicks").Connect(() => this.refreshRawPurifierClicks());
         this.refreshRawPurifierClicks();
         for (const [currency, details] of pairs(Price.DETAILS_PER_CURRENCY)) {
-            const mostBalanceStat = UI_ASSETS.MostBalanceStat.Clone();
+            const mostBalanceStat = ASSETS.MostBalanceStat.Clone();
             mostBalanceStat.StatLabel.Text = `Most ${currency}`;
             mostBalanceStat.Name = currency;
             mostBalanceStat.Visible = false;
@@ -31,10 +31,10 @@ export class StatsController implements OnInit {
         }
         CurrencyCanister.mostBalance.observe((value) => {
             for (const [currency, a] of value) {
-                const amount = new InfiniteMath(a);
+                const amount = new OnoeNum(a);
                 const option = STATS_WINDOW.StatList.FindFirstChild(currency) as StatContainer | undefined;
                 if (option !== undefined) {
-                    if (amount.le(0)) {
+                    if (amount.lessEquals(0)) {
                         option.Visible = false;
                         continue;
                     }

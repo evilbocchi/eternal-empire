@@ -1,15 +1,13 @@
-import Price from "shared/Price";
-import { AREAS } from "shared/constants";
 import Difficulty from "shared/Difficulty";
 import Upgrader from "shared/item/Upgrader";
-import InfiniteMath from "shared/utils/infinitemath/InfiniteMath";
+import Price from "shared/Price";
 
 export = new Upgrader("PrecisionRefiner")
 .setName("Precision Refiner")
 .setDescription("A thin laser requiring utmost precision to upgrade droplets for $2x value.")
 .setDifficulty(Difficulty.Relax)
-.setPrice(new Price().setCost("Funds", new InfiniteMath([5, 18])), 1)
-.setPrice(new Price().setCost("Funds", new InfiniteMath([11, 18])), 2)
-.addPlaceableArea(AREAS.BarrenIslands)
+.setPrice(new Price().setCost("Funds", 5e18), 1)
+.setPrice(new Price().setCost("Funds", 11e18), 2)
+.addPlaceableArea("BarrenIslands")
 
 .setMul(new Price().setCost("Funds", 2));

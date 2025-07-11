@@ -3,8 +3,8 @@ import { MarketplaceService, Workspace } from "@rbxts/services";
 import { DETAILS_WINDOW, LOCAL_PLAYER } from "client/constants";
 import { UIController } from "client/controllers/UIController";
 import { AREAS, BOMBS_PRODUCTS, BombsBoardGui } from "shared/constants";
-import { Fletchette } from "shared/utils/fletchette";
-import InfiniteMath from "shared/utils/infinitemath/InfiniteMath";
+import { Fletchette } from "@antivivi/fletchette";
+import { OnoeNum } from "@antivivi/serikanum";
 import { convertToHHMMSS } from "shared/utils/vrldk/NumberAbbreviations";
 
 @Controller()
@@ -35,7 +35,7 @@ export class BombsController implements OnStart {
         });
 
         CurrencyCanister.balance.observe((value) => {
-                fundsBombGui.AmountLabel.Text = tostring(new InfiniteMath(value.get("Funds Bombs") ?? 0));
+                fundsBombGui.AmountLabel.Text = tostring(new OnoeNum(value.get("Funds Bombs") ?? 0));
         });
 
         task.spawn(() => {

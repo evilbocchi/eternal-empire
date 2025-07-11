@@ -1,11 +1,12 @@
 import { Controller, OnStart } from "@flamework/core";
 import { LOGS_WINDOW } from "client/constants";
+import { BalanceWindowController } from "client/controllers/interface/BalanceWindowController";
 import Price from "shared/Price";
-import { AREAS, Log, UI_ASSETS, getNameFromUserId } from "shared/constants";
+import { AREAS, ASSETS, getNameFromUserId, Log } from "shared/constants";
 import NamedUpgrade from "shared/item/NamedUpgrade";
 import Items from "shared/items/Items";
-import { Fletchette } from "shared/utils/fletchette";
-import InfiniteMath from "shared/utils/infinitemath/InfiniteMath";
+import { OnoeNum } from "@antivivi/serikanum";
+import { Fletchette } from "@antivivi/fletchette";
 import { combineHumanReadable } from "shared/utils/vrldk/StringUtils";
 
 const PermissionsCanister = Fletchette.getCanister("PermissionsCanister");
@@ -13,10 +14,17 @@ const PermissionsCanister = Fletchette.getCanister("PermissionsCanister");
 @Controller()
 export class LogController implements OnStart {
 
-    i = 1000000;
+    logsLength = 0;
+    logs = new Array<Log>();
+    page = 1;
+    i = 0;
 
-    addLog(log: Log) {
-        const logOption = UI_ASSETS.LogOption.Clone();
+    constructor(private balanceWindowController: BalanceWindowController) {
+
+    }
+
+    createLogOption(log: Log) {
+        const logOption = ASSETS.LogOption.Clone();
         logOption.TimestampLabel.Text = os.date("%c", log.time);
         let details = "No details found.";
         const itemName = log.item === undefined ? undefined : Items.getItem(log.item)?.name;
@@ -42,7 +50,7 @@ export class LogController implements OnStart {
                 details = `${getNameFromUserId(log.player)} respecialized level points`;
                 break;
             case "Reset":
-                details = `${getNameFromUserId(log.player)} performed a ${log.layer} for ${log.currency === undefined || log.infAmount === undefined ? "nothing" : Price.getFormatted(log.currency, new InfiniteMath(log.infAmount))}`;
+                details = `${getNameFromUserId(log.player)} performed a ${log.layer} for ${log.currency === undefined || log.infAmount === undefined ? "nothing" : Price.getFormatted(log.currency, new OnoeNum(log.infAmount))}`;
                 break;
             case "Bomb":
                 details = `${getNameFromUserId(log.player)} used 1 ${log.currency}`;
@@ -56,15 +64,61 @@ export class LogController implements OnStart {
         }
         logOption.DetailsLabel.Text = details;
         logOption.LayoutOrder = this.i;
-        logOption.Parent = LOGS_WINDOW.LogList;
         --this.i;
+        return logOption;
+    }
+
+    refreshLogsWindow() {
+        LOGS_WINDOW.NavigationOptions.PageLabel.Text = `Page ${this.page}`;
+        const start = this.logsLength - (this.page * 20);
+        const logOptions = LOGS_WINDOW.LogList.GetChildren();
+        for (const logOption of logOptions) {
+            const index = tonumber(logOption.Name);
+            if (index === undefined)
+                continue;
+            if (index >= start && index < start + 20)
+                continue;
+            logOption.Destroy();
+        }
+        for (let i = start; i < start + 20; i++) {
+            const log = this.logs[i];
+            if (log === undefined)
+                continue;
+            const cachedLogOption = LOGS_WINDOW.LogList.FindFirstChild(i);
+            if (cachedLogOption !== undefined)
+                continue;
+            const logOption = this.createLogOption(log);
+            logOption.Name = tostring(i);
+            logOption.Parent = LOGS_WINDOW.LogList;
+        }
     }
 
     onStart() {
-        const logs = PermissionsCanister.getLogs.invoke();
-        for (const log of logs) {
-            this.addLog(log);
-        }
-        PermissionsCanister.logAdded.connect((log) => this.addLog(log));
+        this.balanceWindowController.loadNavigationOption(LOGS_WINDOW.NavigationOptions.Left, Enum.KeyCode.Z, "Previous Page", () => {
+            if (LOGS_WINDOW.Visible === false)
+                return false;
+            --this.page;
+            if (this.page < 1) {
+                this.page = 1;
+            }
+            this.refreshLogsWindow();
+            return true;
+        }, 5);
+        this.balanceWindowController.loadNavigationOption(LOGS_WINDOW.NavigationOptions.Right, Enum.KeyCode.C, "Next Page", () => {
+            if (LOGS_WINDOW.Visible === false)
+                return false;
+            ++this.page;
+            this.refreshLogsWindow();
+            return true;
+        }, 5);
+
+        this.logs = PermissionsCanister.getLogs.invoke();
+        this.logsLength = this.logs.size();
+        PermissionsCanister.logAdded.connect((log) => {
+            this.logs.push(log);
+            this.logsLength = this.logs.size();
+            this.refreshLogsWindow();
+        });
+        this.refreshLogsWindow();
     }
 }

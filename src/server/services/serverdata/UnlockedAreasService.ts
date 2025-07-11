@@ -2,7 +2,7 @@ import { OnStart, Service } from "@flamework/core";
 import { Profile } from "@rbxts/profileservice/globals";
 import { DataService, EmpireProfileTemplate } from "server/services/serverdata/DataService";
 import { AREAS } from "shared/constants";
-import { Fletchette, RemoteSignal } from "shared/utils/fletchette";
+import { Fletchette, RemoteSignal } from "@antivivi/fletchette";
 
 declare global {
     interface FletchetteCanisters {

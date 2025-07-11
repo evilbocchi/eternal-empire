@@ -5,14 +5,17 @@ import { COMMANDS_WINDOW, LOCAL_PLAYER, SHARE_WINDOW } from "client/constants";
 import { EffectController } from "client/controllers/EffectController";
 import { UIController } from "client/controllers/UIController";
 import { AdaptiveTabController } from "client/controllers/interface/AdaptiveTabController";
-import { UI_ASSETS } from "shared/constants";
-import { Fletchette } from "shared/utils/fletchette";
+import { ASSETS } from "shared/constants";
+import { Fletchette } from "@antivivi/fletchette";
+import ComputeNameColor from "shared/utils/vrldk/ComputeNameColor";
 
 const PermissionsCanister = Fletchette.getCanister("PermissionsCanister");
 
 @Controller()
 export class PermissionsController implements OnInit {
     
+    systemColor = new Color3(0.05, 0.75, 0.05).ToHex();
+
     constructor(private uiController: UIController, private effectController: EffectController, private adaptiveTabController: AdaptiveTabController) {
 
     }
@@ -23,7 +26,12 @@ export class PermissionsController implements OnInit {
             this.uiController.playSound("PowerUp");
             this.effectController.camShake.Shake(CameraShaker.Presets.Bump);
         });
-        PermissionsCanister.tabOpened.connect((tab) => this.adaptiveTabController.showAdaptiveTab(tab));
+        PermissionsCanister.tabOpened.connect((tab) => {
+            this.adaptiveTabController.showAdaptiveTab(tab);
+            if (tab === "Commands") {
+                permLevelUpdated(LOCAL_PLAYER.GetAttribute("PermissionLevel") as number ?? 0);
+            }
+        });
         const permLevelUpdated = (permLevel: number) => {
             for (const c of COMMANDS_WINDOW.CommandsList.GetChildren()) {
                 if (c.IsA("Frame")) {
@@ -43,7 +51,7 @@ export class PermissionsController implements OnInit {
                 if (pl > 3 && permLevel < 4) {
                     continue;
                 }
-                const option = UI_ASSETS.CommandOption.Clone();
+                const option = ASSETS.CommandOption.Clone();
                 option.Name = command.PrimaryAlias;
                 option.AliasLabel.Text = command.PrimaryAlias;
                 option.DescriptionLabel.Text = description;
@@ -53,11 +61,6 @@ export class PermissionsController implements OnInit {
                 option.Parent = COMMANDS_WINDOW.CommandsList;
             }
         }
-        permLevelUpdated(LOCAL_PLAYER.GetAttribute("PermissionLevel") as number ?? 0);
-        LOCAL_PLAYER.GetAttributeChangedSignal("PermissionLevel").Connect(() => {
-            permLevelUpdated(LOCAL_PLAYER.GetAttribute("PermissionLevel") as number ?? 0);
-        });
-        
         PermissionsCanister.codeReceived.connect((joinLink) => {
             SHARE_WINDOW.Code.Input.Text = joinLink;
             this.adaptiveTabController.showAdaptiveTab("Share");
@@ -72,6 +75,7 @@ export class PermissionsController implements OnInit {
                 const metadatas = message.Metadata.split(";");
                 let c = color;
                 let showTag = true;
+                
                 for (const data of metadatas) {
                     const [propName, prop] = data.split(":");
                     if (propName === "color") {
@@ -87,12 +91,16 @@ export class PermissionsController implements OnInit {
                         showTag = false;
                     }
                 }
-                let text = message.Text;
-                if (showTag) {
-                    text = "[SYSTEM]: " + text;
+                if (message.PrefixText === "") {
+                    if (showTag === true)
+                        message.PrefixText = `<font color="#${this.systemColor}">[SYSTEM]:</font>`;
                 }
+                else
+                    message.PrefixText = `<font color="#${ComputeNameColor(message.PrefixText.sub(1, message.PrefixText.size() - 1)).ToHex()}">${message.PrefixText}</font>`;
+
+                let text = message.Text;
                 if (c !== undefined) {
-                    text = string.format("<font color='#" + c.ToHex() + "'>%s</font>", text);
+                    text = `<font color="#${c.ToHex()}">${text}</font>`;
                 }
                 const overrideProperties = new Instance("TextChatMessageProperties");
                 if (c !== undefined)
