@@ -1,3 +1,5 @@
+--!native
+
 local Signal = require(script.Parent.Signal)
 local ClientRemoteSignal = require(script.Parent.ClientRemoteSignal)
 

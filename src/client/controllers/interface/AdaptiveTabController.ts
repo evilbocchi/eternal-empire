@@ -1,8 +1,9 @@
 import { Controller, OnInit } from "@flamework/core";
 import { TweenService } from "@rbxts/services";
-import { ADAPTIVE_TAB, ADAPTIVE_TAB_MAIN_WINDOW, SIDEBAR_BUTTONS } from "client/constants";
+import { ADAPTIVE_TAB, ADAPTIVE_TAB_MAIN_WINDOW, LOCAL_PLAYER, SIDEBAR_BUTTONS } from "client/constants";
 import { HotkeysController } from "client/controllers/HotkeysController";
 import { UIController } from "client/controllers/UIController";
+import { Fletchette } from "shared/utils/fletchette";
 
 @Controller()
 export class AdaptiveTabController implements OnInit {
@@ -19,6 +20,9 @@ export class AdaptiveTabController implements OnInit {
 
     hideAdaptiveTab() {
         ADAPTIVE_TAB.Active = false;
+        if (this.currentWindow !== undefined) {
+            this.currentWindow.Visible = false;
+        }
         const tween = TweenService.Create(ADAPTIVE_TAB, this.tween, {Position: new UDim2(0.5, 0, 1.5, 104)})
         tween.Play();
         tween.Completed.Once((playbackState) => {
@@ -70,7 +74,7 @@ export class AdaptiveTabController implements OnInit {
     }
     
     refreshSidebarButtons() {
-        (SIDEBAR_BUTTONS.WaitForChild("Warp") as TextButton).Visible = false;
+        (SIDEBAR_BUTTONS.WaitForChild("Warp") as TextButton).Visible = LOCAL_PLAYER.GetAttribute("UsedPortal") === true;
     }
 
     onInit() {
@@ -84,6 +88,9 @@ export class AdaptiveTabController implements OnInit {
         }, "Close");
         this.hotkeys.set("Inventory", Enum.KeyCode.F);
         this.hotkeys.set("Stats", Enum.KeyCode.M);
+        this.hotkeys.set("Settings", Enum.KeyCode.P);
+        this.hotkeys.set("Quests", Enum.KeyCode.V);
+        this.hotkeys.set("Warp", Enum.KeyCode.G);
 
         for (const sidebarButton of SIDEBAR_BUTTONS.GetChildren()) {
             if (sidebarButton.IsA("TextButton")) {
@@ -98,6 +105,7 @@ export class AdaptiveTabController implements OnInit {
                 this.colorsPerWindow.set(sidebarButton.Name, sidebarButton.WaitForChild("ImageLabel") as ImageLabel & { UIGradient: UIGradient });
             }
         }
+        LOCAL_PLAYER.GetAttributeChangedSignal("UsedPortal").Connect(() => this.refreshSidebarButtons());
         this.refreshSidebarButtons();
     }
 }

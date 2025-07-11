@@ -179,6 +179,8 @@ interface InfiniteMathConstructor {
 
 	ConvertFromLeaderboards(GivenNumber: number): InfiniteMath;
 		
+	useScientific: (useScientific: boolean) => void;
+
 	/**
 	 * @within InfiniteMath
 	 * 

@@ -25,8 +25,7 @@ class Items {
     }
 
     static getItem(itemId: string): Item | undefined {
-        this.init();
-        return this.itemsPerId?.get(itemId);
+        return this.init().get(itemId);
     }
 }
 

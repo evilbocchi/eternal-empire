@@ -1,19 +1,20 @@
 import Price from "shared/Price";
 import { AREAS } from "shared/constants";
-import Difficulties from "shared/difficulty/Difficulties";
+import Difficulty from "shared/Difficulty";
 import Furnace from "shared/item/Furnace";
 import InfiniteMath from "shared/utils/infinitemath/InfiniteMath";
+
+const limit = new InfiniteMath(25000);
 
 export = new Furnace("EnergisedFurnace")
 .setName("Energised Furnace")
 .setDescription("Same thing as Energised Refiner, with Funds boost increasing with Power at a slightly weaker scale, maxing out at 25K W. Uses 0.5 W/s. <100 * log15(power + 1) + 250>")
-.setDifficulty(Difficulties.Friendliness)
+.setDifficulty(Difficulty.Friendliness)
 .setPrice(new Price().setCost("Power", 75), 1)
 .addPlaceableArea(AREAS.BarrenIslands)
 
-.onInit((utils, item) => utils.applyFormula((v) => item.setFormula((val) => val.mul(v)), () => {
+.onInit((utils, item) => item.applyFormula((v) => item.setFormula((val) => val.mul(v)), () => {
     const cost = new InfiniteMath(utils.getBalance().getCost("Power") ?? 0);
-    const limit = new InfiniteMath(25000);
     if (limit.lt(cost)) {
         return limit;
     }

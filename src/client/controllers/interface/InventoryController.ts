@@ -1,13 +1,11 @@
 import { Controller, OnInit } from "@flamework/core";
-import { TweenService } from "@rbxts/services";
 import { INVENTORY_WINDOW } from "client/constants";
 import { UIController } from "client/controllers/UIController";
 import { AdaptiveTabController } from "client/controllers/interface/AdaptiveTabController";
 import { BuildController } from "client/controllers/interface/BuildController";
 import { ItemSlotController } from "client/controllers/interface/ItemSlotController";
+import Difficulty from "shared/Difficulty";
 import { DifficultyOption, ItemSlot, ItemsData } from "shared/constants";
-import Difficulties from "shared/difficulty/Difficulties";
-import Difficulty from "shared/difficulty/Difficulty";
 import Items from "shared/items/Items";
 import { Fletchette } from "shared/utils/fletchette";
 
@@ -16,6 +14,7 @@ const ItemsCanister = Fletchette.getCanister("ItemsCanister");
 @Controller()
 export class InventoryController implements OnInit {
 
+    difficultyOptions = new Array<DifficultyOption>();
     constructor(private uiController: UIController, private adaptiveTabController: AdaptiveTabController, private buildController: BuildController, 
         private itemSlotController: ItemSlotController) {
         
@@ -26,7 +25,7 @@ export class InventoryController implements OnInit {
     }
 
     refreshInventoryWindow(items: ItemsData) {
-        for (const difficultyOption of INVENTORY_WINDOW.ItemList.GetChildren()) {
+        for (const difficultyOption of this.difficultyOptions) {
             if (difficultyOption.IsA("Frame"))
                 difficultyOption.Visible = false;
         }
@@ -34,7 +33,7 @@ export class InventoryController implements OnInit {
         for (const [itemId, amount] of items.inventory) {
             total += amount;
             task.spawn(() => {
-                const difficultyOption = this.getDifficultyOption(Items.getItem(itemId)?.getDifficulty());
+                const difficultyOption = this.getDifficultyOption(Items.getItem(itemId)?.difficulty);
                 if (difficultyOption === undefined) {
                     return;
                 }
@@ -42,7 +41,7 @@ export class InventoryController implements OnInit {
                 const itemSlot = (difficultyOption.Items.FindFirstChild(itemId) as ItemSlot);
                 if (itemSlot !== undefined) {
                     itemSlot.AmountLabel.Text = tostring(amount);
-                    TweenService.Create(itemSlot.AmountLabel, new TweenInfo(0.5), { TextColor3: hasItem ? Color3.fromRGB(255, 255, 255) : Color3.fromRGB(150, 150, 150) }).Play();
+                    itemSlot.AmountLabel.TextColor3 = hasItem ? Color3.fromRGB(255, 255, 255) : Color3.fromRGB(150, 150, 150);
                     itemSlot.Visible = hasItem ? true : false;
                     if (hasItem)
                         difficultyOption.Visible = true;
@@ -53,7 +52,7 @@ export class InventoryController implements OnInit {
     }
 
     onInit() {
-        for (const difficulty of Difficulties.DIFFICULTIES) {
+        for (const [_id, difficulty] of pairs(Difficulty.DIFFICULTIES)) {
             const difficultyOption = this.itemSlotController.getDifficultyOption(difficulty);
             difficultyOption.LayoutOrder = -difficultyOption.LayoutOrder;
             difficultyOption.Visible = false;
@@ -61,14 +60,19 @@ export class InventoryController implements OnInit {
         }
         for (const [_id, item] of Items.init()) {
             const [itemSlot, _v] = this.itemSlotController.getItemSlot(item);
+            INVENTORY_WINDOW.GetPropertyChangedSignal("Visible").Connect(() => itemSlot.ViewportFrame.SetAttribute("Delta", INVENTORY_WINDOW.Visible ? 0.4 : 0));
             itemSlot.Activated.Connect(() => {
+                if (this.buildController.restricted === true) {
+                    return;
+                }
                 this.uiController.playSound("Click");
                 this.adaptiveTabController.hideAdaptiveTab();
                 this.buildController.placeNewItem(item);
             });
             itemSlot.Visible = false;
-            itemSlot.Parent = this.getDifficultyOption(item.getDifficulty())?.WaitForChild("Items");
+            itemSlot.Parent = this.getDifficultyOption(item.difficulty)?.WaitForChild("Items");
         }
+        this.difficultyOptions = INVENTORY_WINDOW.ItemList.GetChildren() as DifficultyOption[];
         ItemsCanister.items.observe((items) => this.refreshInventoryWindow(items));
     }
 }

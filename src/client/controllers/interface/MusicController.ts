@@ -3,14 +3,15 @@ import { SoundService, TweenService } from "@rbxts/services";
 import { LOCAL_PLAYER, MUTE_BUTTON_WINDOW } from "client/constants";
 import { UIController } from "client/controllers/UIController";
 import { AREAS } from "shared/constants";
-import Signal from "@rbxutil/signal";
+import { Signal } from "shared/utils/fletchette";
 
 @Controller()
 export class MusicController implements OnInit {
     musicEnabled = true;
     musicGroup = SoundService.WaitForChild("Music") as SoundGroup;
-    musicEnabledChanged = new Signal<boolean>();
+    musicEnabledChanged = new Signal<(enabled: boolean) => void>();
     playing = undefined as Sound | undefined;
+    connection: RBXScriptConnection | undefined = undefined;
     tweenInfo = new TweenInfo(0.2);
 
     constructor(private uiController: UIController) {
@@ -23,12 +24,16 @@ export class MusicController implements OnInit {
 
     setMusicEnabled(musicEnabled: boolean) {
         this.musicEnabled = musicEnabled;
-        this.musicEnabledChanged.Fire(musicEnabled);
+        this.musicEnabledChanged.fire(musicEnabled);
         this.refreshMuteButtonWindow();
     }
 
     fadeOut(sound: Sound) {
-        TweenService.Create(sound, new TweenInfo(1), {Volume: 0}).Play();
+        const tween = TweenService.Create(sound, new TweenInfo(1), {Volume: 0});
+        tween.Completed.Once(() => {
+            sound.Stop();
+        });
+        tween.Play();
     }
 
     fadeIn(sound: Sound) {
@@ -47,10 +52,7 @@ export class MusicController implements OnInit {
         if (area !== undefined) {
             const music = this.getRandomMusic(area);
             this.fadeIn(music);
-            const connection = music.Ended.Connect(() => {
-                this.refreshMusic(area);
-                connection.Disconnect();
-            });
+            music.Ended.Once(() => this.refreshMusic(LOCAL_PLAYER.GetAttribute("Area") as keyof (typeof AREAS)));
         }
         this.showSongTitle();
         const songTitle = (this.playing === undefined ? "<no song playing>" : this.playing.Name);
@@ -100,7 +102,7 @@ export class MusicController implements OnInit {
             this.uiController.playSound("Click");
             this.setMusicEnabled(!this.musicEnabled);
         });
-        this.musicEnabledChanged.Connect((musicEnabled) => {
+        this.musicEnabledChanged.connect((musicEnabled) => {
             this.musicGroup.Volume = musicEnabled ? 0.5 : 0;
         });
         const onAreaChanged = () => this.refreshMusic(LOCAL_PLAYER.GetAttribute("Area") as keyof (typeof AREAS));

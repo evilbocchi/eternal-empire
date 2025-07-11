@@ -1,13 +1,19 @@
+import ProfileService from "@rbxts/profileservice";
 import { Profile, ProfileStore } from "@rbxts/profileservice/globals";
+import { DataStoreService } from "@rbxts/services";
 
 class ProfileManager<T extends object, MetaData> {
 
     profileStore: ProfileStore<T, MetaData>;
+    name: string;
+    template: T;
     loadedProfiles = new Map<string, Profile<T>>();
     viewedProfiles = new Map<string, Profile<T>>();
 
-    constructor(profileStore: ProfileStore<T, MetaData>) {
-        this.profileStore = profileStore;
+    constructor(name: string, template: T) {
+        this.profileStore = ProfileService.GetProfileStore(name, template);
+        this.name = name;
+        this.template = template;
     }
 
     load(profileKey: string, retryTime?: number): Profile<T> {
@@ -16,7 +22,7 @@ class ProfileManager<T extends object, MetaData> {
         if (cached !== undefined) {
             return cached;
         }
-        const profile = this.profileStore.LoadProfileAsync(profileKey, "Steal");
+        const profile = this.profileStore.LoadProfileAsync(profileKey);
         if (profile === undefined) {
             if (retryTime === undefined) {
                 retryTime = 0.1;
@@ -83,6 +89,15 @@ class ProfileManager<T extends object, MetaData> {
             warn("Could not unload profile " + profileKey);
         }
         return success;
+    }
+
+    save(profileKey: string) {
+        const profile = this.loadedProfiles.get(profileKey);
+        if (profile !== undefined) {
+            profile.Save();
+            return true;
+        }
+        return false;
     }
 }
 

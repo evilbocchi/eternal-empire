@@ -5,7 +5,7 @@ import { UIController } from "client/controllers/UIController";
 import { AdaptiveTabController } from "client/controllers/interface/AdaptiveTabController";
 import { BalanceWindowController } from "client/controllers/interface/BalanceWindowController";
 import { LoadingWindowController } from "client/controllers/interface/LoadingWindowController";
-import { EmpireInfo, START_CAMERA, START_SCREEN_ENABLED, UI_ASSETS } from "shared/constants";
+import { EmpireInfo, START_CAMERA, START_SCREEN_ENABLED, UI_ASSETS, getNameFromUserId } from "shared/constants";
 import { Fletchette } from "shared/utils/fletchette";
 import computeNameColor from "shared/utils/vrldk/ComputeNameColor";
 import { convertToHHMMSS } from "shared/utils/vrldk/NumberAbbreviations";
@@ -36,7 +36,7 @@ export class StartWindowController implements OnInit {
     }
     
     showStartWindow() {
-        if (Workspace.GetAttribute("IsPublicServer") !== true) {
+        if (Workspace.GetAttribute("IsPublicServer") !== true || Workspace.GetAttribute("IsSingleServer") === true) {
             return;
         }
         if (RunService.IsStudio() && START_SCREEN_ENABLED === false) {
@@ -63,11 +63,43 @@ export class StartWindowController implements OnInit {
     }
 
     refreshEmpiresWindow(availableEmpires?: Map<string, EmpireInfo>) {
-        for (const empireOption of START_WINDOW.EmpiresWindow.EmpireOptions.GetChildren()) {
-            if (empireOption.IsA("TextButton")) {
-                empireOption.Destroy();
-            }
+        if (availableEmpires === undefined) {
+            this.refreshEmpiresWindow(EmpireCanister.availableEmpires.get() ?? new Map<string, EmpireInfo>());
+            return;
         }
+        for (const [availableEmpire, empireInfo] of availableEmpires) {
+            if (START_WINDOW.EmpiresWindow.EmpireOptions.FindFirstChild(availableEmpire) !== undefined) {
+                continue;
+            }
+            const empireOption = UI_ASSETS.EmpiresWindow.EmpireOption.Clone();
+            empireOption.Activated.Connect(() => {
+                this.uiController.playSound("Click");
+                this.loadingWindowController.showLoadingWindow("Loading server");
+                EmpireCanister.teleportToEmpire.fire(availableEmpire);
+            });
+            empireOption.Name = availableEmpire;
+            empireOption.EmpireIDLabel.Text = availableEmpire;
+            empireOption.EmpireInformation.Labels.TitleLabel.Text = empireInfo.name ?? "error";
+            empireOption.EmpireInformation.Labels.OwnerLabel.Text = empireInfo.owner ? "Owned by " + getNameFromUserId(empireInfo.owner) : "could not load info";
+            empireOption.Stats.ItemsLabel.Text = "Items: " + empireInfo.items;
+            empireOption.Stats.DateCreatedLabel.Text = "Created: " + os.date("%x", empireInfo.created);
+            empireOption.Stats.PlaytimeLabel.Text = "Playtime: " + convertToHHMMSS(empireInfo.playtime ?? 0);
+            const color = (empireInfo.name ? computeNameColor(empireInfo.name) : Color3.fromRGB(0, 170, 0)) ?? Color3.fromRGB(0, 170, 0);
+            empireOption.BackgroundColor3 = color;
+            empireOption.UIStroke.Color = color;
+            paintObjects(empireOption, color);
+            empireOption.Parent = START_WINDOW.EmpiresWindow.EmpireOptions;
+            task.spawn(() => {
+                if (empireOption === undefined || empireOption.FindFirstChild("EmpireInformation") === undefined) {
+                    return;
+                }
+                empireOption.EmpireInformation.OwnerAvatar.Image = empireInfo.owner ? 
+                    Players.GetUserThumbnailAsync(empireInfo.owner, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size150x150)[0] : "";
+            });
+        }
+    }
+
+    onInit() {
         const newEmpireOption = UI_ASSETS.EmpiresWindow.NewEmpireOption.Clone();
         const ogText = newEmpireOption.MessageLabel.Text;
         newEmpireOption.Activated.Connect(() => {
@@ -83,39 +115,7 @@ export class StartWindowController implements OnInit {
             }
         });
         newEmpireOption.Parent = START_WINDOW.EmpiresWindow.EmpireOptions;
-        if (availableEmpires === undefined) {
-            this.refreshEmpiresWindow(EmpireCanister.availableEmpires.get() ?? new Map<string, EmpireInfo>());
-            return;
-        }
-        for (const [availableEmpire, empireInfo] of availableEmpires) {
-            const empireOption = UI_ASSETS.EmpiresWindow.EmpireOption.Clone();
-            empireOption.Activated.Connect(() => {
-                this.uiController.playSound("Click");
-                this.loadingWindowController.showLoadingWindow("Loading server");
-                EmpireCanister.teleportToEmpire.fire(availableEmpire);
-            });
-            empireOption.Name = availableEmpire;
-            empireOption.EmpireIDLabel.Text = availableEmpire;
-            empireOption.Parent = START_WINDOW.EmpiresWindow.EmpireOptions;
-            if (empireOption === undefined || empireOption.FindFirstChild("EmpireInformation") === undefined) {
-                return;
-            }
-            empireOption.EmpireInformation.Labels.TitleLabel.Text = empireInfo.name ?? "error";
-            empireOption.EmpireInformation.Labels.OwnerLabel.Text = empireInfo.owner ? "Owned by " + Players.GetNameFromUserIdAsync(empireInfo.owner) : "could not load info";
-            task.spawn(() =>  empireOption.EmpireInformation.OwnerAvatar.Image = empireInfo.owner ? 
-            Players.GetUserThumbnailAsync(empireInfo.owner, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size150x150)[0] : "");
-            empireOption.Stats.ItemsLabel.Text = "Items: " + empireInfo.items;
-            empireOption.Stats.DateCreatedLabel.Text = "Created: " + os.date("%x", empireInfo.created);
-            empireOption.Stats.PlaytimeLabel.Text = "Playtime: " + convertToHHMMSS(empireInfo.playtime ?? 0);
-            const color = (empireInfo.name ? computeNameColor(empireInfo.name) : Color3.fromRGB(0, 170, 0)) ?? Color3.fromRGB(0, 170, 0);
-            empireOption.BackgroundColor3 = color;
-            empireOption.UIStroke.Color = color;
-            paintObjects(empireOption, color);
-            
-        }
-    }
 
-    onInit() {
         this.refreshEmpiresWindow();
 
         START_WINDOW.EmpiresWindow.PublicEmpireWindow.JoinPublicEmpire.Activated.Connect(() => {

@@ -1,3 +1,5 @@
+--!native
+
 -- -----------------------------------------------------------------------------
 --               Batched Yield-Safe Signal Implementation                     --
 -- This is a Signal class which has effectively identical behavior to a       --
@@ -250,13 +252,13 @@ function Signal:once(fn)
 	local connection
 	local done = false
 
-	connection = self:Connect(function(...)
+	connection = self:connect(function(...)
 		if done then
 			return
 		end
 
 		done = true
-		connection:Disconnect()
+		connection:disconnect()
 		fn(...)
 	end)
 

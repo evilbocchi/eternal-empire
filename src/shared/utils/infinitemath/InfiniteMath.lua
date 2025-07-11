@@ -337,8 +337,10 @@ function Number.__unm(a)
 end
 Number.unm = Number.__unm
 
+local useScientific = false
+
 function Number.__tostring(self)
-	return self:GetSuffix(true)
+	return useScientific and self:ScientificNotation(true) or self:GetSuffix(true)
 end
 Number.tostring = Number.__tostring
 
@@ -679,6 +681,10 @@ end
 
 function InfiniteMath:ConvertToNumber()
 	return math.pow(10, self.second) * self.first
+end
+
+function InfiniteMath.useScientific(us)
+	useScientific = us
 end
 
 --[[ Math methods ]]--

@@ -1,13 +1,13 @@
 import { Debris } from "@rbxts/services";
-import Signal from "@rbxutil/signal";
 import Price from "shared/Price";
 import Item from "shared/item/Item";
+import { Signal } from "shared/utils/fletchette";
 import { findBaseParts } from "shared/utils/vrldk/BasePartUtils";
-import ItemUtils from "./ItemUtils";
 
 class Furnace extends Item {
 
     static load(model: Model, utils: ItemUtils, item: Furnace) {
+        const isAcceptsUpgrades = item.isAcceptsUpgrades;
         for (const d of findBaseParts(model, "Lava")) {
             d.SetAttribute("ItemId", item.id);
             d.Touched.Connect((droplet) => {
@@ -18,15 +18,23 @@ class Furnace extends Item {
                             droplet.Anchored = true;
                     });
                     Debris.AddItem(droplet, 4);
+                    if (droplet.FindFirstChildOfClass("ObjectValue") !== undefined && isAcceptsUpgrades === false) {
+                        droplet.Destroy();
+                        return;
+                    }
                     const [worth, raw] = model.GetAttribute("Maintained") === true ? utils.calculateDropletValue(droplet) : [new Price()];
                     let res = undefined;
-                    const formula = item.getFormula();
+                    const formula = item.formula;
                     if (worth !== undefined && formula !== undefined) {
-                        res = formula(worth).mul((model.GetAttribute("V") as number) ?? 1);
+                        res = formula(worth);
+                        const variance = model.GetAttribute("V") as number;
+                        if (variance !== undefined) {
+                            res = res.mul(variance);
+                        }
                         utils.setBalance(utils.getBalance().add(res));
                     }                    
                     droplet.FindFirstChildOfClass("UnreliableRemoteEvent")?.FireAllClients(res?.costPerCurrency);
-                    item.processed.Fire(model, utils, item, worth, raw);
+                    item.processed.fire(model, utils, item, worth, raw, droplet);
                 }
             });
         }
@@ -38,8 +46,9 @@ class Furnace extends Item {
     }
     
     formula: ((value: Price) => Price) | undefined;
-    processed = new Signal<[Model, ItemUtils, this, Price?, Price?]>();
+    processed = new Signal<(model: Model, utils: ItemUtils, item: this, worth?: Price, raw?: Price, droplet?: Instance) => void>();
     variance: number | undefined;
+    isAcceptsUpgrades: boolean | undefined;
 
     constructor(id: string) {
         super(id);
@@ -47,17 +56,9 @@ class Furnace extends Item {
         this.onLoad((model, utils) => Furnace.load(model, utils, this));
     }
 
-    getFormula() {
-        return this.formula;
-    }
-
     setFormula(formula: ((value: Price) => Price) | undefined) {
         this.formula = formula;
         return this;
-    }
-
-    getVariance() {
-        return this.variance;
     }
 
     setVariance(variance: number) {
@@ -65,8 +66,13 @@ class Furnace extends Item {
         return this;
     }
 
+    acceptsUpgrades(isAcceptsUpgrades: boolean) {
+        this.isAcceptsUpgrades = isAcceptsUpgrades;
+        return this;
+    }
+
     onProcessed(callback: (model: Model, utils: ItemUtils, item: this, worth?: Price, raw?: Price) => void) {
-        this.processed.Connect((model, utils, item, worth, raw) => callback(model, utils, item, worth, raw));
+        this.processed.connect((model, utils, item, worth, raw) => callback(model, utils, item, worth, raw));
         return this;
     }
 }

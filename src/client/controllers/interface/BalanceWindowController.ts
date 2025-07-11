@@ -1,13 +1,14 @@
 import { Controller, OnInit } from "@flamework/core";
 import { TweenService } from "@rbxts/services";
 import { BALANCE_WINDOW, NavigationOption } from "client/constants";
+import { HotkeysController } from "client/controllers/HotkeysController";
+import { UIController } from "client/controllers/UIController";
 import Price from "shared/Price";
-import { BalanceOption, Currency, UI_ASSETS } from "shared/constants";
+import { BalanceOption, UI_ASSETS } from "shared/constants";
 import { Fletchette } from "shared/utils/fletchette";
-import InfiniteMath, { max } from "shared/utils/infinitemath/InfiniteMath";
+import InfiniteMath from "shared/utils/infinitemath/InfiniteMath";
+import Queue from "shared/utils/infinitemath/Queue";
 import { paintObjects } from "shared/utils/vrldk/UIUtils";
-import { HotkeysController } from "../HotkeysController";
-import { UIController } from "../UIController";
 
 const CurrencyCanister = Fletchette.getCanister("CurrencyCanister");
 
@@ -33,7 +34,7 @@ export class BalanceWindowController implements OnInit {
         let currencyOption = BALANCE_WINDOW.Balances.FindFirstChild(currency) as BalanceOption;
         if (currencyOption === undefined) {
             currencyOption = UI_ASSETS.BalanceWindow.BalanceOption.Clone();
-            const backgroundColor = Price.DETAILS_PER_CURRENCY[currency].color ?? new Color3(1, 1, 1);
+            const backgroundColor = Price.DETAILS_PER_CURRENCY[currency]?.color ?? new Color3(1, 1, 1);
             paintObjects(currencyOption, backgroundColor);
             currencyOption.Name = currency;
             currencyOption.CurrencyLabel.Text = currency;
@@ -118,25 +119,21 @@ export class BalanceWindowController implements OnInit {
         CurrencyCanister.balance.observe((value) => this.refreshBalanceWindow(value));
 
         task.spawn(() => {
-            const logsPerCurrency = new Map<Currency, {balance: InfiniteMath, t: number}[]>();
+            const queuePerCurrency = new Map<Currency, Queue>();
+            for (const [currency] of pairs(Price.DETAILS_PER_CURRENCY)) {
+                queuePerCurrency.set(currency, new Queue());
+            }
             while (task.wait(1)) {
-                const t = tick();
                 const balance = CurrencyCanister.balance.get();
-                for (const [currency, cost] of balance) {
-                    const logs = logsPerCurrency.get(currency) ?? [];
-                    const newLogs: typeof logs = [];
-                    let change = new InfiniteMath(0);
-                    for (const log of logs) {
-                        const dt = t - log.t;
-                        if (dt > 5)
-                            continue;
-                        change = change.add((new InfiniteMath(cost).sub(log.balance)).div(dt)).mul(0.5);
-                        newLogs.push(log);
+                for (const [currency, cost] of pairs(balance)) {
+                    const queue = queuePerCurrency.get(currency);
+                    if (queue === undefined) {
+                        continue;
                     }
-                    newLogs.push({balance: cost, t: t});
-                    logsPerCurrency.set(currency, newLogs);
-                    this.getCurrencyOption(currency).IncomeLabel.Text = Price.getFormatted(currency, change.lt(0) ? new InfiniteMath(0) : change, true) + "/s";
-                }
+                    queue.addToQueue(cost);
+                    const change = queue.getAverageGain();
+                    this.getCurrencyOption(currency).IncomeLabel.Text = Price.getFormatted(currency, InfiniteMath.max(change, 0), true) + "/s";
+                }            
             }
         });
     }

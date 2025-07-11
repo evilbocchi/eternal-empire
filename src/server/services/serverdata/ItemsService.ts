@@ -1,10 +1,10 @@
 import { OnStart, Service } from "@flamework/core";
-import Signal from "@rbxutil/signal";
 import { CurrencyService } from "server/services/serverdata/CurrencyService";
-import { DataService } from "server/services/serverdata/DataService";
+import { DataService, EmpireProfileTemplate } from "server/services/serverdata/DataService";
 import { Inventory, ItemsData, PlacedItem } from "shared/constants";
+import Item from "shared/item/Item";
 import Items from "shared/items/Items";
-import { Fletchette, RemoteFunc, RemoteProperty } from "shared/utils/fletchette";
+import { Fletchette, RemoteFunc, RemoteProperty, RemoteSignal, Signal } from "shared/utils/fletchette";
 
 declare global {
     interface FletchetteCanisters {
@@ -12,27 +12,21 @@ declare global {
     }
 }
 
-const defaultItems = {
-    inventory: new Map<string, number>(),
-    bought: new Map<string, number>(),
-    placed: [],
-};
-
 export const ItemsCanister = Fletchette.createCanister("ItemsCanister", {
-    items: new RemoteProperty<ItemsData>(defaultItems),
+    items: new RemoteProperty<ItemsData>(EmpireProfileTemplate.items),
     placedItems: new RemoteProperty<PlacedItem[]>([]),
     buyItem: new RemoteFunc<(itemId: string) => boolean>(),
+    buyAllItems: new RemoteFunc<(shopId: string) => boolean>(),
     placeItem: new RemoteFunc<(itemId: string, position: Vector3, rotation: number) => [boolean, number?]>(),
     moveItem: new RemoteFunc<(placementId: string, position: Vector3, rotation: number) => [boolean, number?]>(),
-    unplaceItem: new RemoteFunc<(placementId: string) => [boolean, string | undefined]>(),
+    unplaceItems: new RemoteSignal<(placementIds: string[]) => void>(),
 });
 
 @Service()
 export class ItemsService implements OnStart {
 
-    inventoryChanged = new Signal<Inventory>();
-    boughtUpdated = new Signal<Inventory>();
-    placedItemsUpdated = new Signal<PlacedItem[]>()
+    itemsBought = new Signal<(player: Player, items: Item[]) => void>();
+    placedItemsUpdated = new Signal<(...placedItems: PlacedItem[]) => void>();
     modelPerPlacedItem = new Map<PlacedItem, Model>();
 
     constructor(private dataService: DataService, private currencyService: CurrencyService) {
@@ -40,7 +34,7 @@ export class ItemsService implements OnStart {
     }
 
     getItems() {
-        return this.dataService.empireProfile?.Data.items ?? defaultItems;
+        return this.dataService.empireProfile?.Data.items ?? EmpireProfileTemplate.items;
     }
 
     setItems(itemsData: ItemsData) {
@@ -58,7 +52,6 @@ export class ItemsService implements OnStart {
         const items = this.getItems();
         items.inventory = inventory;
         this.setItems(items);
-        this.inventoryChanged.Fire(inventory);
     }
 
     getItemAmount(itemId: string) {
@@ -79,7 +72,6 @@ export class ItemsService implements OnStart {
         const items = this.getItems();
         items.bought = bought;
         this.setItems(items);
-        this.boughtUpdated.Fire(bought);
     }
 
     getBoughtAmount(itemId: string) {
@@ -100,23 +92,20 @@ export class ItemsService implements OnStart {
         const items = this.getItems();
         items.placed = placedItems;
         this.setItems(items);
-        this.placedItemsUpdated.Fire(...placedItems);
+        this.placedItemsUpdated.fire(...placedItems);
     }
 
-    buyItem(itemId: string) {
-        const item = Items.getItem(itemId);
-        if (item === undefined)
-            return false;
-
-        for (const [required, amount] of item.getRequiredItems()) {
+    serverBuy(item: Item) {
+        for (const [required, amount] of item.requiredItems) {
             if (this.getItemAmount(required.id) < amount) {
                 return false;
             }
-        }    
+        }
+        const itemId = item.id;
         const price = item.getPrice(this.getBoughtAmount(itemId) + 1);    
         const success = price ? this.currencyService.purchase(price) : price;
         if (success === true) {
-            for (const [required, amount] of item.getRequiredItems()) {
+            for (const [required, amount] of item.requiredItems) {
                 this.setItemAmount(required.id, this.getItemAmount(required.id) - amount);
             }
             this.setBoughtAmount(itemId, this.getBoughtAmount(itemId) + 1);
@@ -125,9 +114,44 @@ export class ItemsService implements OnStart {
         return success ? success : false;
     }
 
+    buyItem(player: Player, itemId: string) {
+        if (!this.dataService.checkPermLevel(player, "purchase")) {
+            return false;
+        }
+        const item = Items.getItem(itemId);
+        if (item === undefined)
+            return false;
+
+        const success = this.serverBuy(item);
+        if (success) {
+            this.itemsBought.fire(player, [item]);
+        }
+        return success;
+    }
+
+    buyAllItems(player: Player, shopId: string) {
+        if (!this.dataService.checkPermLevel(player, "purchase"))
+            return false;
+        const shop = Items.getItem(shopId);
+        if (shop === undefined || !shop.isA("Shop"))
+            return false;
+        const items = shop.items;
+        let oneSucceeded = false;
+        const bought = new Array<Item>();
+        for (const item of items) {
+            if (this.serverBuy(item) === true) {
+                oneSucceeded = true;
+                bought.push(item);
+            }
+        }
+        this.itemsBought.fire(player, bought);
+        return oneSucceeded;
+    }
+
     onStart() {
-        ItemsCanister.buyItem.onInvoke((_player, itemId) => this.buyItem(itemId));
-        this.dataService.empireProfileLoaded.Connect((profile) => ItemsCanister.items.set(profile.Data.items));
+        ItemsCanister.buyItem.onInvoke((player, itemId) => this.buyItem(player, itemId));
+        ItemsCanister.buyAllItems.onInvoke((player, shopId) => this.buyAllItems(player, shopId));
+        this.dataService.empireProfileLoaded.connect((profile) => ItemsCanister.items.set(profile.Data.items));
         ItemsCanister.items.set(this.getItems());
     }
 }

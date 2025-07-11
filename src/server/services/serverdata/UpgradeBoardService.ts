@@ -1,10 +1,9 @@
 import { OnStart, Service } from "@flamework/core";
-import NamedUpgrade from "shared/item/NamedUpgrade";
-import { Fletchette, RemoteFunc, RemoteProperty } from "shared/utils/fletchette";
-import { CurrencyService } from "./CurrencyService";
-import { DataService } from "./DataService";
 import { Players, StarterPlayer } from "@rbxts/services";
-import Signal from "@rbxutil/signal";
+import { CurrencyService } from "server/services/serverdata/CurrencyService";
+import { DataService } from "server/services/serverdata/DataService";
+import NamedUpgrade from "shared/item/NamedUpgrade";
+import { Fletchette, RemoteFunc, RemoteProperty, Signal } from "shared/utils/fletchette";
 
 declare global {
     interface FletchetteCanisters {
@@ -20,7 +19,8 @@ const UpgradeBoardCanister = Fletchette.createCanister("UpgradeBoardCanister", {
 @Service()
 export class UpgradeBoardService implements OnStart {
 
-    upgradesChanged = new Signal<[{[upgradeId: string]: number}]>();
+    upgradesChanged = new Signal<(upgrades: {[upgradeId: string]: number}) => void>();
+    upgradeBought = new Signal<(player: Player, upgradeId: string, to: number, from: number) => void>();
     
     constructor(private dataService: DataService, private currencyService: CurrencyService) {
 
@@ -33,7 +33,7 @@ export class UpgradeBoardService implements OnStart {
     setAmountPerUpgrade(data: {[upgradeId: string]: number}) {
         if (this.dataService.empireProfile !== undefined) {
             this.dataService.empireProfile.Data.upgrades = data;
-            this.upgradesChanged.Fire(data);
+            this.upgradesChanged.fire(data);
         }
     }
 
@@ -50,12 +50,15 @@ export class UpgradeBoardService implements OnStart {
 
     onStart() {
         UpgradeBoardCanister.upgrades.set(this.getAmountPerUpgrade());
-        UpgradeBoardCanister.buyUpgrade.onInvoke((_player, upgradeId, to) => {
+        UpgradeBoardCanister.buyUpgrade.onInvoke((player, upgradeId, to) => {
             const upgrade = NamedUpgrade.getUpgrade(upgradeId);
             if (upgrade === undefined || to === undefined) {
                 return false;
             }
-            const cap = upgrade.getCap();
+            if (!this.dataService.checkPermLevel(player, "purchase")) {
+                return false;
+            }
+            const cap = upgrade.cap;
             if (cap !== undefined && to > cap) {
                 return false;
             }
@@ -71,18 +74,19 @@ export class UpgradeBoardService implements OnStart {
             if (success) {
                 this.setUpgradeAmount(upgradeId, to);
                 this.currencyService.setBalance(remain);
+                this.upgradeBought.fire(player, upgradeId, to, current);
             }
             return success;
         });
-        this.upgradesChanged.Connect((data) => {
+        this.upgradesChanged.connect((data) => {
             StarterPlayer.CharacterWalkSpeed = 16;
             for (const [upgradeId, amount] of pairs(data)) {
                 const upgrade = NamedUpgrade.getUpgrade(upgradeId as string);
                 if (upgrade === undefined)
                     continue;
-                const wsFormula = upgrade.getWalkSpeedFormula();
+                const wsFormula = upgrade.walkSpeedFormula;
                 if (wsFormula !== undefined) {
-                    StarterPlayer.CharacterWalkSpeed = wsFormula(StarterPlayer.CharacterWalkSpeed, amount, upgrade.getStep());
+                    StarterPlayer.CharacterWalkSpeed = wsFormula(StarterPlayer.CharacterWalkSpeed, amount, upgrade.step);
                 }
             }
             for (const player of Players.GetPlayers()) {
@@ -93,6 +97,6 @@ export class UpgradeBoardService implements OnStart {
                 }
             }
         });
-        this.upgradesChanged.Fire(this.getAmountPerUpgrade());
+        this.upgradesChanged.fire(this.getAmountPerUpgrade());
     }
 }

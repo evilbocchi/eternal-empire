@@ -1,12 +1,12 @@
-import { Controller, OnInit, OnStart } from "@flamework/core";
-import { TextChatService } from "@rbxts/services";
-import { Fletchette } from "shared/utils/fletchette";
-import { UIController } from "./UIController";
-import { EffectController } from "./EffectController";
+import { Controller, OnInit } from "@flamework/core";
 import CameraShaker from "@rbxts/camera-shaker";
-import { COMMANDS_WINDOW, SHARE_WINDOW } from "client/constants";
+import { TextChatService } from "@rbxts/services";
+import { COMMANDS_WINDOW, LOCAL_PLAYER, SHARE_WINDOW } from "client/constants";
+import { EffectController } from "client/controllers/EffectController";
+import { UIController } from "client/controllers/UIController";
+import { AdaptiveTabController } from "client/controllers/interface/AdaptiveTabController";
 import { UI_ASSETS } from "shared/constants";
-import { AdaptiveTabController } from "./interface/AdaptiveTabController";
+import { Fletchette } from "shared/utils/fletchette";
 
 const PermissionsCanister = Fletchette.getCanister("PermissionsCanister");
 
@@ -23,19 +23,27 @@ export class PermissionsController implements OnInit {
             this.uiController.playSound("PowerUp");
             this.effectController.camShake.Shake(CameraShaker.Presets.Bump);
         });
-        PermissionsCanister.commandsGiven.connect((commands, permLevel) => {
+        PermissionsCanister.tabOpened.connect((tab) => this.adaptiveTabController.showAdaptiveTab(tab));
+        const permLevelUpdated = (permLevel: number) => {
             for (const c of COMMANDS_WINDOW.CommandsList.GetChildren()) {
-                if (c.IsA("CanvasGroup")) {
+                if (c.IsA("Frame")) {
                     c.Destroy();
                 }
             }
+            const commands = TextChatService.GetDescendants();
             for (const command of commands) {
-                const option = UI_ASSETS.CommandOption.Clone();
+                if (!command.IsA("TextChatCommand")) {
+                    continue;
+                }
                 const pl = command.GetAttribute("PermissionLevel") as number ?? 0;
                 const description = command.GetAttribute("Description") as string;
                 if (description === undefined) {
                     continue;
                 }
+                if (pl > 3 && permLevel < 4) {
+                    continue;
+                }
+                const option = UI_ASSETS.CommandOption.Clone();
                 option.Name = command.PrimaryAlias;
                 option.AliasLabel.Text = command.PrimaryAlias;
                 option.DescriptionLabel.Text = description;
@@ -44,10 +52,14 @@ export class PermissionsController implements OnInit {
                 option.LayoutOrder = pl;
                 option.Parent = COMMANDS_WINDOW.CommandsList;
             }
-            this.adaptiveTabController.showAdaptiveTab("Commands");
+        }
+        permLevelUpdated(LOCAL_PLAYER.GetAttribute("PermissionLevel") as number ?? 0);
+        LOCAL_PLAYER.GetAttributeChangedSignal("PermissionLevel").Connect(() => {
+            permLevelUpdated(LOCAL_PLAYER.GetAttribute("PermissionLevel") as number ?? 0);
         });
-        PermissionsCanister.joinLinkReceived.connect((joinLink) => {
-            SHARE_WINDOW.JoinLink.Input.Text = joinLink;
+        
+        PermissionsCanister.codeReceived.connect((joinLink) => {
+            SHARE_WINDOW.Code.Input.Text = joinLink;
             this.adaptiveTabController.showAdaptiveTab("Share");
         });
 

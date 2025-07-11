@@ -1,3 +1,5 @@
+--!native
+
 local Players = game:GetService("Players")
 
 local RemoteSignal = {}

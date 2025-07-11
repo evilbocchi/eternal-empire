@@ -1,6 +1,6 @@
 import Price from "shared/Price";
 import { AREAS } from "shared/constants";
-import Difficulties from "shared/difficulty/Difficulties";
+import Difficulty from "shared/Difficulty";
 import Condenser from "shared/item/Condenser";
 import Droplet from "shared/item/Droplet";
 import InfiniteMath from "shared/utils/infinitemath/InfiniteMath";
@@ -8,8 +8,8 @@ import InfiniteMath from "shared/utils/infinitemath/InfiniteMath";
 export = new Condenser("BasicCondenser")
 .setName("Basic Condenser")
 .setDescription("The successor to the Recycling Dropper. Produces $100K and 100 W droplets when 50% of those values are processed through the attached furnace.")
-.setDifficulty(Difficulties.FelixTheA)
-.setPrice(new Price().setCost("Funds", new InfiniteMath([306, 12])), 1)
+.setDifficulty(Difficulty.FelixTheA)
+.setPrice(new Price().setCost("Funds", new InfiniteMath([256, 12])), 1)
 
 .addPlaceableArea(AREAS.BarrenIslands)
 .setDropletQuota(Droplet.LiquidFundsDroplet, 0.5)

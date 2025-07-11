@@ -1,9 +1,7 @@
 import { Debris, Players, TweenService } from "@rbxts/services";
+import Difficulty from "shared/Difficulty";
 import Price from "shared/Price";
-import Difficulties from "shared/difficulty/Difficulties";
-import InfiniteMath from "shared/utils/infinitemath/InfiniteMath";
-import Dropper from "./Dropper";
-import ItemUtils from "./ItemUtils";
+import { DROPLETS_FOLDER } from "shared/constants";
 
 class Droplet {
 
@@ -14,7 +12,7 @@ class Droplet {
         .setModel(() => {
             const droplet = new Instance("Part");
             droplet.Size = new Vector3(1, 1, 1);
-            droplet.Color = Difficulties.TheFirstDifficulty.getColor() ?? new Color3();
+            droplet.Color = Difficulty.TheFirstDifficulty.color ?? new Color3();
             droplet.Material = Enum.Material.Slate;
             return droplet;
         })
@@ -26,7 +24,7 @@ class Droplet {
         .setModel(() => {
             const droplet = new Instance("Part");
             droplet.Size = new Vector3(1.5, 1.5, 1.5);
-            droplet.Color = Difficulties.TheLowerGap.getColor() ?? new Color3();
+            droplet.Color = Difficulty.TheLowerGap.color ?? new Color3();
             droplet.Material = Enum.Material.Slate;
             return droplet;
         })
@@ -38,7 +36,7 @@ class Droplet {
         .setModel(() => {
             const droplet = new Instance("Part");
             droplet.Size = new Vector3(1, 1, 1);
-            droplet.Color = Difficulties.Negativity.getColor() ?? new Color3();
+            droplet.Color = Difficulty.Negativity.color ?? new Color3();
             droplet.Material = Enum.Material.Slate;
             return droplet;
         })
@@ -50,7 +48,7 @@ class Droplet {
         .setModel(() => {
             const droplet = new Instance("Part");
             droplet.Size = new Vector3(1.75, 1.75, 1.75);
-            droplet.Color = Difficulties.Negativity.getColor() ?? new Color3();
+            droplet.Color = Difficulty.Negativity.color ?? new Color3();
             droplet.Material = Enum.Material.Basalt;
             return droplet;
         })
@@ -62,7 +60,7 @@ class Droplet {
         .setModel(() => {
             const droplet = new Instance("Part");
             droplet.Size = new Vector3(1, 1, 1);
-            droplet.Color = Difficulties.Friendliness.getColor() ?? new Color3();
+            droplet.Color = Difficulty.Friendliness.color ?? new Color3();
             droplet.Material = Enum.Material.Grass;
             return droplet;
         })
@@ -74,7 +72,7 @@ class Droplet {
         .setModel(() => {
             const droplet = new Instance("Part");
             droplet.Size = new Vector3(1, 1, 1);
-            droplet.Color = Difficulties.Friendliness.getColor() ?? new Color3();
+            droplet.Color = Difficulty.Friendliness.color ?? new Color3();
             droplet.Material = Enum.Material.Grass;
             return droplet;
         })
@@ -86,7 +84,7 @@ class Droplet {
         .setModel(() => {
             const droplet = new Instance("Part");
             droplet.Size = new Vector3(2, 2, 2);
-            droplet.Color = Difficulties.Friendliness.getColor() ?? new Color3();
+            droplet.Color = Difficulty.Friendliness.color ?? new Color3();
             droplet.Material = Enum.Material.Grass;
             return droplet;
         })
@@ -98,7 +96,7 @@ class Droplet {
         .setModel(() => {
             const droplet = new Instance("Part");
             droplet.Size = new Vector3(2, 2, 2);
-            droplet.Color = Difficulties.TrueEase.getColor() ?? new Color3();
+            droplet.Color = Difficulty.TrueEase.color ?? new Color3();
             droplet.Material = Enum.Material.Neon;
             droplet.SetAttribute("Rainbow", 2);
             return droplet;
@@ -147,7 +145,7 @@ class Droplet {
         .setModel(() => {
             const droplet = new Instance("Part");
             droplet.Size = new Vector3(1.25, 1.25, 1.25);
-            droplet.Color = Difficulties.FelixTheA.getColor() ?? new Color3();
+            droplet.Color = Difficulty.FelixTheA.color ?? new Color3();
             droplet.Material = Enum.Material.Basalt;
             return droplet;
         })
@@ -171,11 +169,11 @@ class Droplet {
         .setModel(() => {
             const droplet = new Instance("Part");
             droplet.Size = new Vector3(0.9, 0.9, 0.9);
-            droplet.Color = Difficulties.Exist.getColor() ?? new Color3();
+            droplet.Color = Difficulty.Exist.color ?? new Color3();
             droplet.Material = Enum.Material.Slate;
             return droplet;
         })
-        .setValue(new Price().setCost("Funds", 8000).setCost("Power", 8))
+        .setValue(new Price().setCost("Funds", 12000).setCost("Power", 12))
     );
 
     static RustyAmethystDroplet = Droplet.registerDroplet(
@@ -183,7 +181,7 @@ class Droplet {
         .setModel(() => {
             const droplet = new Instance("Part");
             droplet.Size = new Vector3(1, 1, 1);
-            droplet.Color = Difficulties.ReversedPeripherality.getColor() ?? new Color3();
+            droplet.Color = Difficulty.ReversedPeripherality.color ?? new Color3();
             droplet.Material = Enum.Material.Slate;
             return droplet;
         })
@@ -195,7 +193,7 @@ class Droplet {
         .setModel(() => {
             const droplet = new Instance("Part");
             droplet.Size = new Vector3(1, 1, 1);
-            droplet.Color = Difficulties.ReversedPeripherality.getColor() ?? new Color3();
+            droplet.Color = Difficulty.ReversedPeripherality.color ?? new Color3();
             droplet.Material = Enum.Material.Metal;
             return droplet;
         })
@@ -214,6 +212,139 @@ class Droplet {
         .setValue(new Price().setCost("Funds", 1))
     );
 
+    static LiquiderFundsDroplet = Droplet.registerDroplet(
+        new Droplet("LiquiderFundsDroplet")
+        .setModel(() => {
+            const droplet = new Instance("Part");
+            droplet.Size = new Vector3(1.25, 1.25, 1.25);
+            droplet.Color = Color3.fromRGB(255, 166, 0);
+            droplet.Material = Enum.Material.Basalt;
+            return droplet;
+        })
+        .setValue(new Price().setCost("Funds", 3000000))
+    );
+
+    static LiquiderPowerDroplet = Droplet.registerDroplet(
+        new Droplet("LiquiderPowerDroplet")
+        .setModel(() => {
+            const droplet = new Instance("Part");
+            droplet.Size = new Vector3(1.25, 1.25, 1.25);
+            droplet.Color = Color3.fromRGB(255, 130, 28);
+            droplet.Material = Enum.Material.Basalt;
+            return droplet;
+        })
+        .setValue(new Price().setCost("Power", 100000))
+    );
+
+    static VitalizedDroplet = Droplet.registerDroplet(
+        new Droplet("VitalizedDroplet")
+        .setModel(() => {
+            const droplet = new Instance("Part");
+            droplet.Size = new Vector3(1.2, 1.2, 1.2);
+            droplet.Color = Difficulty.Restful.color ?? new Color3();
+            droplet.Material = Enum.Material.Glass;
+            return droplet;
+        })
+        .setValue(new Price().setCost("Funds", 40000).setCost("Power", 2000))
+        .setHealth(160)
+    );
+
+    static DepressingDroplet = Droplet.registerDroplet(
+        new Droplet("DepressingDroplet")
+        .setModel(() => {
+            const droplet = new Instance("Part");
+            droplet.Size = new Vector3(1, 1, 1);
+            droplet.Color = Difficulty.Ifinity.color ?? new Color3();
+            droplet.Material = Enum.Material.Basalt;
+            return droplet;
+        })
+        .setValue(new Price().setCost("Funds", 0.01))
+    );
+
+    static FundsCompactDroplet = Droplet.registerDroplet(
+        new Droplet("FundsCompactDroplet")
+        .setModel(() => {
+            const droplet = new Instance("Part");
+            droplet.Size = new Vector3(1.25, 1.25, 1.25);
+            droplet.Color = Color3.fromRGB(0, 255, 0);
+            droplet.Material = Enum.Material.Glass;
+            return droplet;
+        })
+        .setValue(new Price().setCost("Funds", 100000))
+    );
+
+    static PowerCompactDroplet = Droplet.registerDroplet(
+        new Droplet("PowerCompactDroplet")
+        .setModel(() => {
+            const droplet = new Instance("Part");
+            droplet.Size = new Vector3(1.25, 1.25, 1.25);
+            droplet.Color = Color3.fromRGB(255, 163, 89);
+            droplet.Material = Enum.Material.Glass;
+            return droplet;
+        })
+        .setValue(new Price().setCost("Power", 6000))
+    );
+
+    static PurifiersDroplet = Droplet.registerDroplet(
+        new Droplet("PurifiersDroplet")
+        .setModel(() => {
+            const droplet = new Instance("Part");
+            droplet.Size = new Vector3(1.25, 1.25, 1.25);
+            droplet.Color = Color3.fromRGB(255, 138, 255);
+            droplet.Material = Enum.Material.Slate;
+            return droplet;
+        })
+        .setValue(new Price().setCost("Purifier Clicks", 200))
+    );
+
+    static ManualV2Droplet = Droplet.registerDroplet(
+        new Droplet("ManualV2Droplet")
+        .setModel(() => {
+            const droplet = new Instance("Part");
+            droplet.Size = new Vector3(1, 1, 1);
+            droplet.Color = Difficulty.Millisecondless.color ?? new Color3();
+            droplet.Material = Enum.Material.Slate;
+            return droplet;
+        })
+        .setValue(new Price().setCost("Funds", 60000))
+    );
+
+    static LiquidestFundsDroplet = Droplet.registerDroplet(
+        new Droplet("LiquidestFundsDroplet")
+        .setModel(() => {
+            const droplet = new Instance("Part");
+            droplet.Size = new Vector3(1.25, 1.25, 1.25);
+            droplet.Color = Color3.fromRGB(255, 135, 235);
+            droplet.Material = Enum.Material.Basalt;
+            return droplet;
+        })
+        .setValue(new Price().setCost("Funds", 30000000))
+    );
+
+    static LiquidestPowerDroplet = Droplet.registerDroplet(
+        new Droplet("LiquidestPowerDroplet")
+        .setModel(() => {
+            const droplet = new Instance("Part");
+            droplet.Size = new Vector3(1.25, 1.25, 1.25);
+            droplet.Color = Color3.fromRGB(255, 51, 222);
+            droplet.Material = Enum.Material.Basalt;
+            return droplet;
+        })
+        .setValue(new Price().setCost("Power", 5000000))
+    );
+
+    static SpatialDroplet = Droplet.registerDroplet(
+        new Droplet("SpatialDroplet")
+        .setModel(() => {
+            const droplet = new Instance("Part");
+            droplet.Size = new Vector3(1, 1, 1);
+            droplet.Color = Difficulty.Astronomical.color ?? new Color3();
+            droplet.Material = Enum.Material.Basalt;
+            return droplet;
+        })
+        .setValue(new Price().setCost("Funds", 1000))
+    );
+
     static registerDroplet(droplet: Droplet) {
         Droplet.DROPLETS.push(droplet);
         return droplet;
@@ -222,28 +353,46 @@ class Droplet {
     id: string;
     model: Instance | undefined = undefined;
     value: Price | undefined = undefined;
+    health = 100;
 
     constructor(id: string) {
         this.id = id;
     }
 
     getInstantiator(dropperModel: Model, cframe: CFrame, utils: ItemUtils) {
-        const model = this.getModel()?.Clone();
+        const model = this.model?.Clone();
         if (model === undefined)
             error("No model found for droplet " + this.id);
         const isBasePart = model.IsA("BasePart");
         if (isBasePart) {
+            model.CanQuery = false;
             model.CFrame = cframe;
+            model.CastShadow = false;
         }
+        model.SetAttribute("Health", this.health);
         model.SetAttribute("ItemId", dropperModel.GetAttribute("ItemId"));
         model.SetAttribute("Area", utils.getPlacedItem(dropperModel.Name)?.area);
         return () => {
             const clone = model.Clone();
-            const players = Players.GetPlayers();
-            clone.Parent = utils.getPlacedItems();
-            if (isBasePart && players.size() === 1) {
-                (clone as BasePart).SetNetworkOwner(players[0]);
-            }
+            clone.GetAttributeChangedSignal("Health").Connect(() => {
+                const health = clone.GetAttribute("Health") as number | undefined;
+                if (health === undefined) {
+                    return;
+                }
+                if (health <= 0) {
+                    (clone as BasePart).Anchored = true;
+                    (clone as BasePart).Transparency = 1;
+                    Debris.AddItem(clone, 2);
+                    const explosion = new Instance("Explosion");
+                    explosion.ExplosionType = Enum.ExplosionType.NoCraters;
+                    explosion.DestroyJointRadiusPercent = 0;
+                    explosion.BlastRadius = 0;
+                    explosion.Position = (clone as BasePart).Position;
+                    explosion.Parent = clone;
+                }
+            });
+            clone.Parent = DROPLETS_FOLDER;
+            
             task.spawn(() => {
                 let prev = new Vector3(0, 10000, 0); // random value
                 while (clone.Parent !== undefined) {
@@ -257,13 +406,12 @@ class Droplet {
                     }
                     task.wait(5);
                 }
-            });
-            return 
+            });            
+            const players = Players.GetPlayers();
+            if (isBasePart && players.size() === 1) {
+                (clone as BasePart).SetNetworkOwner(players[0]);
+            }
         };
-    }
-
-    getModel() {
-        return this.model;
     }
 
     setModel(modelFunc: () => Instance) {
@@ -283,12 +431,13 @@ class Droplet {
         return this;
     }
 
-    getValue() {
-        return this.value; 
-    }
-
     setValue(value: Price) {
         this.value = value;
+        return this;
+    }
+
+    setHealth(health: number) {
+        this.health = health;
         return this;
     }
 

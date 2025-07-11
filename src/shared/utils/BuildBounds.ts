@@ -11,7 +11,7 @@ class BuildBounds {
         this.grid = grid;
         const onSizeChanged = (): [BasePart, CFrame, Vector2] => {
             const region = grid.Clone();
-            region.Size = grid.Size.add(new Vector3(0.1, 50, 0.1));
+            region.Size = grid.Size.add(new Vector3(0.1, 150, 0.1));
             region.CanCollide = false;
             region.Transparency = 1;
             region.Name = "BuildRegion";

@@ -4,6 +4,9 @@ import { MOUSE, TOOLTIP_WINDOW } from "client/constants";
 
 @Controller()
 export class TooltipController implements OnInit {
+
+    tooltipsPerObject = new Map<GuiObject, string>();
+
     moveTooltipToMouse() {
         const canvasSize = Workspace.CurrentCamera?.ViewportSize;
         if (canvasSize) {
@@ -28,16 +31,19 @@ export class TooltipController implements OnInit {
     }
     
     setTooltip(guiObject: GuiObject, message: string) {
-        guiObject.MouseMoved.Connect(() => {
-            this.showTooltipWindow();
-            this.setMessage(message);
-        });
-        guiObject.MouseEnter.Connect(() => {
-            this.showTooltipWindow();
-        });
-        guiObject.MouseLeave.Connect(() => {
-            this.hideTooltipWindow();
-        });
+        if (!this.tooltipsPerObject.has(guiObject)) {
+            guiObject.MouseMoved.Connect(() => {
+                this.showTooltipWindow();
+                this.setMessage(this.tooltipsPerObject.get(guiObject) ?? "");
+            });
+            guiObject.MouseEnter.Connect(() => {
+                this.showTooltipWindow();
+            });
+            guiObject.MouseLeave.Connect(() => {
+                this.hideTooltipWindow();
+            });
+        }
+        this.tooltipsPerObject.set(guiObject, message);
     }
     
     onInit() {

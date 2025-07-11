@@ -16,17 +16,13 @@ class InstantiationDelimiter extends Item {
             a.Name = model.Name;
             a.Parent = AREAS[area].dropletLimit;
             item.repeat(model, () => {
-                const n = model.GetAttribute("Maintained") === true ? this.getDropletIncrease() : 0;
+                const n = model.GetAttribute("Maintained") === true ? this.dropletIncrease : 0;
                 if (n !== a.Value && n !== undefined)
                     a.Value = n;
             });
             model.Destroying.Once(() => a.Destroy());
             this.maintain(model, utils);
         });
-    }
-
-    getDropletIncrease() {
-        return this.dropletIncrease;
     }
 
     setDropletIncrease(dropletIncrease: number) {

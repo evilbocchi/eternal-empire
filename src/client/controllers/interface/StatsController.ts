@@ -1,27 +1,47 @@
 import { Controller, OnInit } from "@flamework/core";
-import { STATS_WINDOW } from "client/constants";
+import { LOCAL_PLAYER, STATS_WINDOW, StatContainer } from "client/constants";
+import Price from "shared/Price";
+import { UI_ASSETS } from "shared/constants";
 import { Fletchette } from "shared/utils/fletchette";
+import InfiniteMath from "shared/utils/infinitemath/InfiniteMath";
 import { convertToHHMMSS } from "shared/utils/vrldk/NumberAbbreviations";
 
 @Controller()
 export class StatsController implements OnInit {
 
-    refreshPlaytime(playtime: number) {
-        STATS_WINDOW.StatList.Playtime.AmountLabel.Text = convertToHHMMSS(playtime);
-    }
-
-    refreshSessionTime(sessionTime: number) {
-        STATS_WINDOW.StatList.SessionTime.AmountLabel.Text = convertToHHMMSS(sessionTime);
-    }
-
-    refreshLongestSessionTime(lst: number) {
-        STATS_WINDOW.StatList.LongestSessionTime.AmountLabel.Text = convertToHHMMSS(lst);
+    refreshRawPurifierClicks() {
+        STATS_WINDOW.StatList.RawPurifierClicks.AmountLabel.Text = tostring(LOCAL_PLAYER.GetAttribute("RawPurifierClicks") as number ?? 0);
     }
 
     onInit() {
+        const CurrencyCanister = Fletchette.getCanister("CurrencyCanister");
         const PlaytimeCanister = Fletchette.getCanister("PlaytimeCanister");
-        PlaytimeCanister.empirePlaytime.observe((value) => this.refreshPlaytime(value));
-        PlaytimeCanister.sessionTime.observe((value) => this.refreshSessionTime(value));
-        PlaytimeCanister.longestSessionTime.observe((value) => this.refreshLongestSessionTime(value));
+        PlaytimeCanister.empirePlaytime.observe((value) => STATS_WINDOW.StatList.Playtime.AmountLabel.Text = convertToHHMMSS(value));
+        PlaytimeCanister.sessionTime.observe((value) => STATS_WINDOW.StatList.SessionTime.AmountLabel.Text = convertToHHMMSS(value));
+        PlaytimeCanister.longestSessionTime.observe((value) => STATS_WINDOW.StatList.LongestSessionTime.AmountLabel.Text = convertToHHMMSS(value));
+        LOCAL_PLAYER.GetAttributeChangedSignal("RawPurifierClicks").Connect(() => this.refreshRawPurifierClicks());
+        this.refreshRawPurifierClicks();
+        for (const [currency, details] of pairs(Price.DETAILS_PER_CURRENCY)) {
+            const mostBalanceStat = UI_ASSETS.MostBalanceStat.Clone();
+            mostBalanceStat.StatLabel.Text = `Most ${currency}`;
+            mostBalanceStat.Name = currency;
+            mostBalanceStat.Visible = false;
+            mostBalanceStat.LayoutOrder = 50 + details.layoutOrder;
+            mostBalanceStat.Parent = STATS_WINDOW.StatList;
+        }
+        CurrencyCanister.mostBalance.observe((value) => {
+            for (const [currency, a] of value) {
+                const amount = new InfiniteMath(a);
+                const option = STATS_WINDOW.StatList.FindFirstChild(currency) as StatContainer | undefined;
+                if (option !== undefined) {
+                    if (amount.le(0)) {
+                        option.Visible = false;
+                        continue;
+                    }
+                    option.Visible = true;
+                    option.AmountLabel.Text = Price.getFormatted(currency, amount, true);
+                }
+            }
+        });
     }
 }

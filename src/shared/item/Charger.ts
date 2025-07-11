@@ -1,11 +1,11 @@
-import { Debris } from "@rbxts/services";
 import Price from "shared/Price";
+import { PLACED_ITEMS_FOLDER } from "shared/constants";
 import Item from "shared/item/Item";
 
 class Charger extends Item {
     
     radius: number | undefined;
-    formula: ((val: Price) => Price) | undefined;
+    mul: Price | undefined;
 
     constructor(id: string) {
         super(id);
@@ -19,82 +19,110 @@ class Charger extends Item {
             if (connection !== undefined) {
                 connection.Parent = script;
             }
-            let isMaintained = false;
-            this.maintain(model, utils, (i) => isMaintained = i);
-            this.repeat(model, () => {
-                if (!isMaintained) {
+            const charging = new Set<Instance>();
+            const radius = this.radius;
+            if (radius === undefined) {
+                warn("No radius for charger");
+                return;
+            }
+            const marker = model.FindFirstChild("Marker");
+            let maintained = false;
+            const area = model.GetAttribute("Area");
+            const checkAdd = (m: Instance) => {
+                if (maintained === false || !m.IsA("Model") || m.PrimaryPart === undefined || m.GetAttribute("Area") !== area) {
                     return;
                 }
-                const radius = this.getRadius();
-                for (const m of utils.getPlacedItems().GetChildren()) {
-                    if (!m.IsA("Model")) {
-                        continue;
-                    }
-                    const h = m.PrimaryPart;
-                    const boostsFolder = m.FindFirstChild("Boosts");
-                    
-                    if (boostsFolder !== undefined && h !== undefined && h.Name === "Hitbox" && radius !== undefined) {
-                        const hPos = h.Position;
-                        const hitboxPos = hitbox.Position;
-                        const xDiff = hPos.X - hitboxPos.X;
-                        const zDiff = hPos.Z - hitboxPos.Z;
-                        if ((xDiff * xDiff) + (zDiff * zDiff) > (radius * radius)) {
-                            continue;
-                        }
-
-                        const indicator = new Instance("BoolValue");
-                        indicator.Name = model.Name;
-                        indicator.Parent = boostsFolder;
-                        if (connection !== undefined) {
-                            if (m.FindFirstChild("ConnectionVFX" + model.Name) === undefined) {
-                                const c = connection.Clone();
-                                const start = c.WaitForChild("Start") as Attachment;
-                                const e = c.WaitForChild("End") as Attachment;
-                                start.Parent = hitbox;
-                                e.Parent = h;
-                                c.Name = "ConnectionVFX" + model.Name;
-                                c.Parent = m;
-                                start.Position = new Vector3();
-                                e.Position = new Vector3();
-                                c.Destroying.Once(() => {
-                                    start.Destroy();
-                                    e.Destroy();
-                                });
-                            }
-                            task.delay(3, () => {
-                                if (boostsFolder.FindFirstChild(model.Name) === undefined) {
-                                    const f = h.FindFirstChild("ConnectionVFX");
-                                    if (f !== undefined) {
-                                        f.Destroy();
-                                    }
-                                }
-                            });
-                        }
-                        Debris.AddItem(indicator, 2);
+                const h = m.PrimaryPart;
+                if (radius < 999) {
+                    const hPos = h.Position;
+                    const hitboxPos = hitbox.Position;
+                    const xDiff = hPos.X - hitboxPos.X;
+                    const zDiff = hPos.Z - hitboxPos.Z;
+                    if ((xDiff * xDiff) + (zDiff * zDiff) > (radius * radius)) {
+                        return;
                     }
                 }
-            }, 2);
-            task.spawn(() => {
-                
+                charging.add(m);
+                const boostsFolder = m.FindFirstChild("Boosts");
+                if (boostsFolder === undefined) {
+                    return;
+                }
+                const indicator = new Instance("BoolValue");
+                indicator.Name = model.Name;
+                indicator.Parent = boostsFolder;
+                if (connection !== undefined) {
+                    const name = "ConnectionVFX" + model.Name;
+                    if (m.FindFirstChild(name) === undefined) {
+                        const c = connection.Clone();
+                        const start = c.WaitForChild("Start") as Attachment;
+                        const e = c.WaitForChild("End") as Attachment;
+                        start.Parent = marker ?? hitbox;
+                        e.Parent = m.FindFirstChild("Marker") ?? h;
+                        c.Name = name;
+                        c.Parent = h;
+                        start.Position = new Vector3();
+                        e.Position = new Vector3();
+                        c.Destroying.Once(() => {
+                            start.Destroy();
+                            e.Destroy();
+                        });
+                    }
+                }
+            }
+            const checkRemove = (m: Instance) => {
+                if (!m.IsA("Model")) {
+                    return;
+                }
+                charging.delete(m);
+                const boostsFolder = model.FindFirstChild("Boosts");
+                if (boostsFolder === undefined) {
+                    return;
+                }
+                const indicator = boostsFolder.FindFirstChild(model.Name);
+                if (indicator === undefined) {
+                    warn("No indicator found");
+                    return;
+                }
+                indicator.Destroy();
+                m.FindFirstChild("ConnectionVFX" + model.Name)?.Destroy();
+            }
+
+            for (const m of PLACED_ITEMS_FOLDER.GetChildren()) {
+                checkAdd(m);
+            }
+            PLACED_ITEMS_FOLDER.ChildAdded.Connect((m) => checkAdd(m));
+            PLACED_ITEMS_FOLDER.ChildRemoved.Connect((m) => checkRemove(m));
+            model.Destroying.Connect(() => {
+                for (const m of charging) {
+                    checkRemove(m);
+                }
+            });
+
+            this.maintain(model, utils, (maintain) => {
+                if (maintain !== maintained) {
+                    maintained = maintain;
+                    if (maintain === true) {
+                        for (const m of PLACED_ITEMS_FOLDER.GetChildren()) {
+                            checkAdd(m);
+                        }
+                    }
+                    else {
+                        for (const m of PLACED_ITEMS_FOLDER.GetChildren()) {
+                            checkRemove(m);
+                        }
+                    }
+                }
             });
         });
-    }
-
-    getRadius() {
-        return this.radius;
     }
 
     setRadius(radius: number) {
         this.radius = radius;
         return this;
     }
-    
-    getFormula() {
-        return this.formula;
-    }
 
-    setFormula(formula: (val: Price) => Price) {
-        this.formula = formula;
+    setMul(mul: Price) {
+        this.mul = mul;
         return this;
     }
 }

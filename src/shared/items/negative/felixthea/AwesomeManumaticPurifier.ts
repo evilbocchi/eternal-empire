@@ -1,16 +1,17 @@
-import { TweenService, Debris, Workspace } from "@rbxts/services";
+import PartCacheModule from "@rbxts/partcache";
+import { TweenService, Workspace } from "@rbxts/services";
+import Difficulty from "shared/Difficulty";
 import Price from "shared/Price";
 import { AREAS } from "shared/constants";
-import Difficulties from "shared/difficulty/Difficulties";
-import Upgrader from "shared/item/Upgrader";
+import { Manumatic } from "shared/item/Special";
 import InfiniteMath from "shared/utils/infinitemath/InfiniteMath";
 import { playSoundAtPart } from "shared/utils/vrldk/BasePartUtils";
 
-export = new Upgrader("AwesomeManumaticPurifier")
+export = new Manumatic.ManumaticUpgrader("AwesomeManumaticPurifier")
 .setName("Awesome Manumatic Purifier")
 .setDescription("A majestic tower standing through the innumerable trials. Click the structure to increase its Funds boost!")
-.setDifficulty(Difficulties.FelixTheA)
-.setPrice(new Price().setCost("Funds", new InfiniteMath([208, 12])), 1)
+.setDifficulty(Difficulty.FelixTheA)
+.setPrice(new Price().setCost("Funds", new InfiniteMath([158, 12])), 1)
 .addPlaceableArea(AREAS.BarrenIslands)
 
 .onLoad((model, utils, item) => {
@@ -28,7 +29,7 @@ export = new Upgrader("AwesomeManumaticPurifier")
     const update = () => {
         const amount = utils.getBalance().getCost("Purifier Clicks") ?? new InfiniteMath(0);
         amountLabel.Text = "Clicked: " + tostring(new InfiniteMath(amount));
-        const fundsBoost = InfiniteMath.log10(amount.div(50).add(1)).pow(1.1).add(1);
+        const fundsBoost = InfiniteMath.log(amount.div(50).add(1), 8).pow(1.1).add(1);
         fundsLabel.Text = tostring(fundsBoost) + "x Funds";
         item.setMul(new Price().setCost("Funds", fundsBoost));
         if (amount.lt(100)) {
@@ -40,29 +41,31 @@ export = new Upgrader("AwesomeManumaticPurifier")
             cpcLabel.Text = tostring(cpc) + "x Purifier Clicks/click";
         }
     }
-    item.repeat(model, () => update(), 0.5);
-    const click = (delta: InfiniteMath) => {
+    const tweenInfo = new TweenInfo(0.2);
+
+    const partCache = new PartCacheModule(shadow, 25);
+
+    const shadowSize = shadow.Size;
+    const newSize = shadowSize.add(new Vector3(1, 1, 1));
+    // Fortunately this is a singleton
+    item.setOnClick((model, utils, _item, player, value) => {
         playSoundAtPart(model.PrimaryPart, sound);
         task.spawn(() => {
-            const clone = shadow.Clone();
+            const clone = partCache.GetPart();
+            clone.Position = shadow.Position;
+            clone.Size = shadowSize;
             clone.Transparency = 0.5;
-            TweenService.Create(clone, tweenInfo, { Transparency: 1, Size: clone.Size.add(new Vector3(1, 1, 1)) }).Play();
-            Debris.AddItem(clone, 1);
+            TweenService.Create(clone, tweenInfo, { Transparency: 1, Size: newSize }).Play();
             clone.Parent = Workspace;
+            task.wait(1);
+            partCache.ReturnPart(clone);
         });
-        utils.setBalance(utils.getBalance().add(new Price().setCost("Purifier Clicks", delta)));
-        update();
-        last = tick();
-    }
-    update();
-    const clickDetector = new Instance("ClickDetector");
-    let last = 0;
-    const tweenInfo = new TweenInfo(0.2);
-    clickDetector.MouseClick.Connect(() => {
-        if (tick() - last < 0.1) {
-            return;
+        if (player !== undefined) {
+            player.SetAttribute("RawPurifierClicks", (player.GetAttribute("RawPurifierClicks") as number ?? 0) + 1);
         }
-        click(cpc);
+        utils.setBalance(utils.getBalance().add(new Price().setCost("Purifier Clicks", cpc.mul(value))));
+        update();
     });
-    clickDetector.Parent = model.WaitForChild("ClickArea");
+    item.repeat(model, () => update(), 0.5);
+    update();
 });

@@ -1,13 +1,13 @@
 import { TweenService } from "@rbxts/services";
 import Price from "shared/Price";
 import { AREAS } from "shared/constants";
-import Difficulties from "shared/difficulty/Difficulties";
+import Difficulty from "shared/Difficulty";
 import Upgrader from "shared/item/Upgrader";
 
 export = new Upgrader("DropletSlayerMkI")
 .setName("Droplet Slayer Mk. I")
 .setDescription("What in the... Fires a short beam that multiplies a droplet's value by $3x every 4 seconds.")
-.setDifficulty(Difficulties.Negativity)
+.setDifficulty(Difficulty.Negativity)
 .setPrice(new Price().setCost("Funds", 6600), 1)
 .addPlaceableArea(AREAS.BarrenIslands)
 

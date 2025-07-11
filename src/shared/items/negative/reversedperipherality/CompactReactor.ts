@@ -1,7 +1,7 @@
 import { TweenService } from "@rbxts/services";
 import Price from "shared/Price";
 import { AREAS } from "shared/constants";
-import Difficulties from "shared/difficulty/Difficulties";
+import Difficulty from "shared/Difficulty";
 import Upgrader from "shared/item/Upgrader";
 import InfiniteMath from "shared/utils/infinitemath/InfiniteMath";
 import SmallReactor from "../unimpossible/SmallReactor";
@@ -9,7 +9,7 @@ import SmallReactor from "../unimpossible/SmallReactor";
 export = new Upgrader("CompactReactor")
 .setName("Compact Reactor")
 .setDescription("Okay, that is NOT compact. Seriously, who came up with these naming schemes? Well, it's your problem now. Have fun rearranging your setup for a 5.5x Funds boost.")
-.setDifficulty(Difficulties.ReversedPeripherality)
+.setDifficulty(Difficulty.ReversedPeripherality)
 .setPrice(new Price().setCost("Funds", new InfiniteMath([54, 15])), 1)
 .setRequiredItemAmount(SmallReactor, 1)
 .addPlaceableArea(AREAS.BarrenIslands)

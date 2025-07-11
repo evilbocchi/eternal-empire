@@ -1,10 +1,10 @@
-import Difficulties from "shared/difficulty/Difficulties";
+import Difficulty from "shared/Difficulty";
 import Shop from "shared/item/Shop";
-import Stud from "./Stud";
+import Stud from "shared/items/bonuses/Stud";
 
 export = new Shop("SuspiciousStud")
 .setName("Suspicious Stud")
-.setDifficulty(Difficulties.Bonuses)
+.setDifficulty(Difficulty.Bonuses)
 .setItems([
     Stud
 ]);

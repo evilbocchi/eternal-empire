@@ -27,7 +27,7 @@ class Transformer extends Conveyor {
                     const res = this.getResult(droplet);
                     if (res === undefined)
                         return;
-                    const model = res.getModel() as BasePart | undefined;
+                    const model = res.model as BasePart | undefined;
                     if (model === undefined)
                         return;
                     d.Color = model.Color;

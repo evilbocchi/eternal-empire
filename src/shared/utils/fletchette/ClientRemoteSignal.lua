@@ -1,3 +1,5 @@
+--!native
+
 -- ClientRemoteSignal
 -- Stephen Leitnick
 -- December 20, 2021

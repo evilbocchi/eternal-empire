@@ -1,7 +1,7 @@
 import { ReplicatedStorage } from "@rbxts/services";
 import Price from "shared/Price";
 import { AREAS } from "shared/constants";
-import Difficulties from "shared/difficulty/Difficulties";
+import Difficulty from "shared/Difficulty";
 import Upgrader from "shared/item/Upgrader";
 import InfiniteMath from "shared/utils/infinitemath/InfiniteMath";
 import AdvancedRefiner from "../a/AdvancedRefiner";
@@ -9,8 +9,8 @@ import AdvancedRefiner from "../a/AdvancedRefiner";
 export = new Upgrader("PurifiersRefiner")
 .setName("Purifier's Refiner")
 .setDescription("Exchange one of your Advanced Refiners for a better refiner that also adds +1 Purifier Clicks value to droplets.")
-.setDifficulty(Difficulties.Exist)
-.setPrice(new Price().setCost("Funds", new InfiniteMath([5.75, 15])), 1)
+.setDifficulty(Difficulty.Exist)
+.setPrice(new Price().setCost("Funds", new InfiniteMath([4, 15])), 1)
 .setRequiredItemAmount(AdvancedRefiner, 1)
 .addPlaceableArea(AREAS.BarrenIslands)
 

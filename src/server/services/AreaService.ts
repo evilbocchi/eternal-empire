@@ -1,17 +1,28 @@
-import { OnInit, OnStart, Service } from "@flamework/core";
+import { OnInit, Service } from "@flamework/core";
 import { Players, SoundService } from "@rbxts/services";
-import { GameAssetService } from "server/services/GameAssetService";
 import { LeaderstatsService } from "server/services/LeaderstatsService";
+import { UpgradeBoardService } from "server/services/serverdata/UpgradeBoardService";
 import Area from "shared/Area";
-import { AREAS } from "shared/constants";
-import { UpgradeBoardService } from "./serverdata/UpgradeBoardService";
+import { AREAS, DROPLETS_FOLDER, PLACED_ITEMS_FOLDER } from "shared/constants";
 import NamedUpgrade from "shared/item/NamedUpgrade";
+import { Fletchette, RemoteFunc } from "shared/utils/fletchette";
+import { playSoundAtPart } from "shared/utils/vrldk/BasePartUtils";
+
+declare global {
+    interface FletchetteCanisters {
+        AreaCanister: typeof AreaCanister;
+    }
+}
+
+const AreaCanister = Fletchette.createCanister("AreaCanister", {
+    tpToArea: new RemoteFunc<(area: keyof (typeof AREAS)) => boolean>(),
+});
 
 @Service()
 export class AreaService implements OnInit {
     musicGroup = new Instance("SoundGroup");
 
-    constructor(private leaderstatsService: LeaderstatsService, private gameAssetService: GameAssetService, private upgradeBoardService: UpgradeBoardService) {
+    constructor(private leaderstatsService: LeaderstatsService, private upgradeBoardService: UpgradeBoardService) {
 
     }
 
@@ -27,22 +38,56 @@ export class AreaService implements OnInit {
     loadArea(id: keyof (typeof AREAS), area: Area) {
         this.loadAreaGroup(id, area);
         this.loadBoardGui(id, area);
-        this.upgradeBoardService.upgradesChanged.Connect((data) => {
+        this.upgradeBoardService.upgradesChanged.connect((data) => {
             let size = area.originalGridSize;
+            if (size === undefined) {
+                return;
+            }
             for (const [upgradeId, amount] of pairs(data)) {
                 const upgrade = NamedUpgrade.getUpgrade(upgradeId as string);
                 if (upgrade === undefined)
                     continue;
                 const sizeFormula = upgrade.getGridSizeFormula(id);
                 if (sizeFormula !== undefined) {
-                    size = sizeFormula(size, amount, upgrade.getStep());
+                    size = sizeFormula(size, amount, upgrade.step);
                 }
             }
-            if (area.grid.Size !== size) {
+            if (area.grid !== undefined && area.grid.Size !== size) {
                 area.grid.Size = size;
             }
         });
-        this.upgradeBoardService.upgradesChanged.Fire(this.upgradeBoardService.getAmountPerUpgrade()); // yes this is hacky and no i dont give a shit
+        this.upgradeBoardService.upgradesChanged.fire(this.upgradeBoardService.getAmountPerUpgrade()); // yes this is hacky and no i dont give a shit
+        const instances = area.areaFolder.GetChildren();
+        for (const instance of instances) {
+            if (instance.Name === "Portal") {
+                const frame = instance.WaitForChild("Frame") as BasePart;
+                const originalPos = frame.Position;
+                let debounce = 0;
+                const updatePosition = (unlocked: boolean) => frame.Position = unlocked ? originalPos : new Vector3(0, -10000, 0);
+                const unlocked = AREAS[(instance.WaitForChild("Destination") as ObjectValue).Value!.Name as keyof (typeof AREAS)].unlocked;
+                updatePosition(unlocked.Value);
+                unlocked.Changed.Connect((value) => updatePosition(value));
+                frame.Touched.Connect((otherPart) => {
+                    const character = otherPart.Parent as Model;
+                    if (character === undefined)
+                        return;
+                    const player = Players.GetPlayerFromCharacter(character);
+                    if (player === undefined)
+                        return;
+                    const humanoid = character.FindFirstChildOfClass("Humanoid");
+                    if (humanoid === undefined)
+                        return;
+                    const rootPart = humanoid.RootPart;
+                    if (rootPart === undefined || tick() - debounce < 0.2) {
+                        return;
+                    }
+                    playSoundAtPart(rootPart, "rbxassetid://4562690876");
+                    character.PivotTo((instance.WaitForChild("TpPart") as BasePart).CFrame);
+                    debounce = tick();
+                    player.SetAttribute("UsedPortal", true);
+                });
+            }
+        }
     }
 
     loadAreaGroup(id: keyof (typeof AREAS), area: Area) {
@@ -74,9 +119,11 @@ export class AreaService implements OnInit {
     }
 
     loadBoardGui(id: keyof (typeof AREAS), area: Area) {
-        const boardGui = area.serverBoardGui;
+        const boardGui = area.boardGui;
         const nv = new Instance("IntValue");
         const updateBar = (n: number) => {
+            if (boardGui === undefined)
+                return;
             const max = area.dropletLimit.Value;
             const perc = n / max;
             boardGui.DropletLimit.Bar.Fill.Size = new UDim2(perc, 0, 1, 0);
@@ -85,11 +132,11 @@ export class AreaService implements OnInit {
         }
         area.dropletLimit.Changed.Connect(() => updateBar(nv.Value));
         nv.Changed.Connect((value) => updateBar(value));
-        for (const d of this.gameAssetService.placedItemsFolder.GetChildren()) {
+        for (const d of DROPLETS_FOLDER.GetChildren()) {
             if (d.Name === "Droplet" && d.GetAttribute("Area") === id)
                 nv.Value += 1;
         }
-        this.gameAssetService.placedItemsFolder.ChildAdded.Connect((d) => {
+        DROPLETS_FOLDER.ChildAdded.Connect((d) => {
             if (d.Name === "Droplet" && d.GetAttribute("Area") === id) {
                 nv.Value += 1;
                 d.Destroying.Once(() => {
@@ -100,6 +147,40 @@ export class AreaService implements OnInit {
         nv.Name = "DropletCount";
         nv.Parent = area.areaFolder;
         updateBar(nv.Value);
+
+        if (area.grid !== undefined && boardGui !== undefined) {
+            const onGridSizeChanged = () => {
+                const size = area.grid!.Size;
+                boardGui.GridSize.BarLabel.Text = `${size.X}x${size.Z}`;
+            }
+            onGridSizeChanged();
+            area.grid.GetPropertyChangedSignal("Size").Connect(() => onGridSizeChanged);
+        }
+        let itemCount = 0;
+        for (const placed of PLACED_ITEMS_FOLDER.GetChildren()) {
+            if (placed.IsA("Model") && placed.GetAttribute("Area") === id) {
+                ++itemCount;
+            }
+        }
+        const onItemsChanged = () => {
+            if (boardGui === undefined)
+                return;
+            boardGui.ItemCount.BarLabel.Text = tostring(itemCount);
+        }
+        onItemsChanged();
+        PLACED_ITEMS_FOLDER.ChildAdded.Connect((d) => {
+            if (d.IsA("Model") && d.GetAttribute("Area") === id) {
+                ++itemCount;
+                onItemsChanged();
+            }
+        });
+        PLACED_ITEMS_FOLDER.ChildRemoved.Connect((d) => {
+            if (d.IsA("Model") && d.GetAttribute("Area") === id) {
+                --itemCount;
+                onItemsChanged();
+            }
+        });
+
     }
 
     onInit() {
@@ -109,5 +190,14 @@ export class AreaService implements OnInit {
         for (const [id, area] of pairs(AREAS)) {
             this.loadArea(id, area);
         }
+        AreaCanister.tpToArea.onInvoke((player, areaId) => {
+            const character = player.Character;
+            const area = AREAS[areaId];
+            if (character === undefined || area.unlocked.Value === false || area.spawnLocation === undefined) {
+                return false;
+            }
+            character.PivotTo(area.spawnLocation.CFrame);
+            return true;
+        });
     }
 }

@@ -1,15 +1,15 @@
 import { RunService } from "@rbxts/services";
 import Area from "shared/Area";
+import Difficulty from "shared/Difficulty";
 import Price from "shared/Price";
-import Difficulty from "shared/difficulty/Difficulty";
 import ItemTypes from "shared/item/ItemTypes";
-import ItemUtils from "shared/item/ItemUtils";
-import Signal from "@rbxutil/signal";
+import { Signal } from "shared/utils/fletchette";
+import InfiniteMath from "shared/utils/infinitemath/InfiniteMath";
 
 class Item {
 
-    initialised = new Signal<[ItemUtils, this]>();
-    loaded = new Signal<[Model, ItemUtils, this]>();
+    initialised = new Signal<(utils: ItemUtils, item: this) => void>();
+    loaded = new Signal<(model: Model, utils: ItemUtils, item: this) => void>();
     types: (keyof ItemTypes)[] = [];
     id: string;
     name: string | undefined = undefined;
@@ -18,23 +18,17 @@ class Item {
     maintenance: Price | undefined = undefined;
     placeableAreas: Area[] = [];
     pricePerIteration = new Map<number, Price>();
+    creator: string | undefined = undefined;
     requiredItems = new Map<Item, number>();
 
     constructor(id: string) {
         this.id = id;
     }
 
-    getName() {
-        return this.name; 
-    }
 
     setName(name: string) {
         this.name = name;
         return this;
-    }
-
-    getDescription() {
-        return this.description; 
     }
 
     setDescription(description: string) {
@@ -42,19 +36,11 @@ class Item {
         return this;
     }
 
-    getDifficulty() {
-        return this.difficulty; 
-    }
-
     setDifficulty(difficulty: Difficulty) {
         this.difficulty = difficulty;
         return this;
     }
 
-    getTypes() {
-        return this.types;
-    }
-    
     getPrice(iteration: number) {
         return this.pricePerIteration.get(iteration); 
     }
@@ -69,10 +55,6 @@ class Item {
         return this;
     }
 
-    getRequiredItems() {
-        return this.requiredItems;
-    }
-
     setRequiredItems(required: Map<Item, number>) {
         this.requiredItems = required;
         return this;
@@ -83,21 +65,18 @@ class Item {
         return this;
     }
 
-    getPlaceableAreas() {
-        return this.placeableAreas;
-    }
-
     addPlaceableArea(area: Area) {
         this.placeableAreas.push(area);
         return this;        
     }
 
-    getMaintenance() {
-        return this.maintenance;
-    }
-
     setMaintenance(maintenance: Price) {
         this.maintenance = maintenance;
+        return this;
+    }
+
+    setCreator(creator: string) {
+        this.creator = creator;
         return this;
     }
 
@@ -106,12 +85,12 @@ class Item {
     }
 
     onInit(initCallback: (utils: ItemUtils, item: this) => void) {
-        this.initialised.Connect((utils, item) => initCallback(utils, item));
+        this.initialised.connect((utils, item) => initCallback(utils, item));
         return this;
     }
 
     onLoad(loadCallback: (model: Model, utils: ItemUtils, item: this) => void) {
-        this.loaded.Connect((model, utils, item) => loadCallback(model, utils, item));
+        this.loaded.connect((model, utils, item) => loadCallback(model, utils, item));
         return this;
     }
 
@@ -136,25 +115,46 @@ class Item {
 
     maintain(model: Model | undefined, utils: ItemUtils, callback?: (isMaintained: boolean, balance: Price) => void) {
         this.repeat(model, () => {
-            const maintenance = this.getMaintenance();
+            const maintenance = this.maintenance;
+            let bal = utils.getBalance();
             if (maintenance === undefined) {
+                if (callback !== undefined) {
+                    callback(true, bal);
+                }
                 model?.SetAttribute("Maintained", true);
                 return;
             }
-            const bal = utils.getBalance().sub(maintenance);
+            bal = bal.sub(maintenance);
             let affordable = true;
             for (const [_currency, amount] of bal.costPerCurrency) {
                 if (amount.lt(0)) {
                     affordable = false;
                 }
             }
-            if (affordable) {
+            if (affordable === true) {
                 utils.setBalance(bal);
             }
             if (callback !== undefined) {
                 callback(affordable, bal);
             }
             model?.SetAttribute("Maintained", affordable);
+        }, 1);
+    }
+
+
+    /**
+     * Calls the callback function every second by passing the return of the x function in the formula function, and passing the return of that to the callback.
+     * 
+     * @param callback Called every second with the return of the formula function as the value parameter.
+     * @param x The value to be used in the formula.
+     * @param formula The formula to be applied to x.
+     */
+    applyFormula(callback: (value: Price) => unknown, x: () => InfiniteMath, formula: (x: InfiniteMath) => Price) {
+        this.repeat(undefined, () => {
+            const v = x();
+            if (v !== undefined) {
+                callback(formula(v));
+            }
         }, 1);
     }
 }

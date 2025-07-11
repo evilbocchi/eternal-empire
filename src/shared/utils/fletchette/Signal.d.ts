@@ -8,6 +8,7 @@ declare namespace Signal {
 interface Signal<T extends Callback = Callback> {
 	fire(...args: Parameters<T>): void;
 	wait(): LuaTuple<Parameters<T>>;
+	once(handler: T): Signal.Connection;
 	connect(handler: T): Signal.Connection;
 	disconnectAll(): void;
 	destroy(): void;

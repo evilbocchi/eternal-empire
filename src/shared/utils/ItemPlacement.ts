@@ -1,41 +1,44 @@
 import { Workspace } from "@rbxts/services";
 import Area from "shared/Area";
 
-class ItemPlacement {
-    static isTouchingPlacedItem(itemModel: Model) {
-        const hitbox = itemModel.FindFirstChild("Hitbox") as BasePart;
-        if (hitbox === undefined)
-            return true;
-        for (const part of Workspace.GetPartBoundsInBox(hitbox.CFrame, hitbox.Size.sub(new Vector3(0.2, 0.2, 0.2)))) {
-            if (part.Name === "Hitbox" && part.Parent?.Name !== itemModel.Name) {
-                return true;
+namespace ItemPlacement {
+    export function isTouchingPlacedItem(itemModel: Model) {
+        const children = itemModel.GetChildren();
+        for (const hitbox of children) {
+            if (hitbox.Name !== "Hitbox" || !hitbox.IsA("BasePart")) {
+                continue;
+            }
+            for (const part of Workspace.GetPartBoundsInBox(hitbox.CFrame, hitbox.Size.sub(new Vector3(0.2, 0.2, 0.2)))) {
+                if (part.Name === "Hitbox" && part.Parent?.Name !== itemModel.Name) {
+                    return true;
+                }
             }
         }
         return false;
     }
 
-    static getAreaOfPosition(position: Vector3, placeableAreas: Area[]) {
+    export function getAreaOfPosition(position: Vector3, placeableAreas: Area[]) {
         for (const area of placeableAreas) {
-            if (area.getBuildBounds().isInside(position))
+            if (area.buildBounds?.isInside(position))
                 return area;
         }
         return undefined;
     }
 
-    static getArea(itemModel: Model, placeableAreas: Area[]) {
-        const hitbox = itemModel.FindFirstChild("Hitbox") as BasePart;
+    export function getArea(itemModel: Model, placeableAreas: Area[]) {
+        const hitbox = itemModel.PrimaryPart;
         if (hitbox !== undefined) {
             for (const area of placeableAreas) {
-                if (area.getBuildBounds().isCompletelyInside(hitbox))
+                if (area.buildBounds?.isCompletelyInside(hitbox))
                     return area;
             }
         }
         return undefined;
     }
 
-    static isItemModelAcceptable(itemModel: Model, placeableAreas: Area[]): [boolean, Area | undefined] {
+    export function isItemModelAcceptable(itemModel: Model, placeableAreas: Area[]): [boolean, Area | undefined] {
         if (ItemPlacement.isTouchingPlacedItem(itemModel)) {
-            return [false, undefined]
+            return [false, undefined];
         }
         const area = ItemPlacement.getArea(itemModel, placeableAreas);
         return area !== undefined ? [true, area] : [false, undefined];

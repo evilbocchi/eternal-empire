@@ -1,3 +1,5 @@
+--!native
+
 local exports = {}
 
 exports.Fletchette = require(script.Fletchette)

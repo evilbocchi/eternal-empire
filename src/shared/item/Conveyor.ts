@@ -24,7 +24,7 @@ class Conveyor extends Item {
         super(id);
         this.types.push("Conveyor");
         this.onLoad((model) => {
-            const speed = this.getSpeed() ?? 1;
+            const speed = this.speed ?? 1;
             const conveyors = findBaseParts(model, "Conveyor");
             for (const d of conveyors) {
                 const overwrite = d.FindFirstChild("Speed") as IntValue | undefined;
@@ -43,10 +43,6 @@ class Conveyor extends Item {
     enableBeam(enabled: boolean) {
         this.beamEnabled = enabled;
         return this;
-    }
-    
-    getSpeed() {
-        return this.speed;
     }
 
     setSpeed(speed: number) {

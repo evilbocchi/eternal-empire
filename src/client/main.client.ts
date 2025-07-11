@@ -1,6 +1,5 @@
 import { Dependency, Flamework } from "@flamework/core";
-import { MarketplaceService, StarterGui, Workspace } from "@rbxts/services";
-import { LOCAL_PLAYER, SERVER_INFO_LABEL } from "client/constants";
+import { LOCAL_PLAYER } from "client/constants";
 import { UIController } from "client/controllers/UIController";
 import { DONATION_PRODUCTS, LEADERBOARDS } from "shared/constants";
 import { Fletchette } from "shared/utils/fletchette";
@@ -11,16 +10,9 @@ Flamework.ignite();
 
 const uiController = Dependency<UIController>();
 
-StarterGui.SetCoreGuiEnabled(Enum.CoreGuiType.Backpack, false);
 task.spawn(() => {
     uiController.preloadAssets();
 });
-
-const refreshServerInfo = () => {
-    SERVER_INFO_LABEL.Text = "Empire ID: " + (Workspace.GetAttribute("EmpireID") ?? "loading");
-}
-Workspace.GetAttributeChangedSignal("EmpireID").Connect(() => refreshServerInfo());
-refreshServerInfo();
 
 const onCharacterAdded = (character: Model) => {
     const humanoid = character.WaitForChild("Humanoid") as Humanoid;

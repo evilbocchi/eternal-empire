@@ -1,20 +1,17 @@
 import { OnStart, Service } from "@flamework/core";
-import { DataStoreService, Players, Workspace } from "@rbxts/services";
-import { LEADERBOARDS, Leaderboard, UI_ASSETS } from "shared/constants";
-import { DataService } from "./serverdata/DataService";
+import { DataStoreService, Players } from "@rbxts/services";
+import { LEADERBOARDS, Leaderboard, UI_ASSETS, getNameFromUserId } from "shared/constants";
 import InfiniteMath from "shared/utils/infinitemath/InfiniteMath";
 import { LeaderstatsService } from "./LeaderstatsService";
-
-export type LbData = {
-    id: string;
-    name: string;
-    amount: number;
-}
+import { DataService } from "./serverdata/DataService";
 
 @Service()
 export class LeaderboardService implements OnStart {
 
-    leaderboardStore = DataStoreService.GetDataStore("Leaderboards");
+    fundsStore = DataStoreService.GetOrderedDataStore("Funds1");
+    powerStore = DataStoreService.GetOrderedDataStore("Power1");
+    skillStore = DataStoreService.GetOrderedDataStore("Skill");
+    totalTimeStore = DataStoreService.GetOrderedDataStore("TotalTime1");
     donatedStore = DataStoreService.GetOrderedDataStore("Donated");
 
     constructor(private dataService: DataService, private leaderstatsService: LeaderstatsService) {
@@ -38,39 +35,22 @@ export class LeaderboardService implements OnStart {
         }
     }
 
-    updateLeaderboardStore(metric: string, name: string, amount: number) {
-        const [d] = this.leaderboardStore.GetAsync(metric);
-        const key = this.dataService.getEmpireId();
-        let datas = (d as Array<LbData> ?? new Array<LbData>).filter((value) => value.id !== key && value.name !== "no name");
-        datas.push({
-            id: key,
-            name: name,
-            amount: amount
-        });
-        datas = datas.sort((a, b) => a.amount > b.amount);
-        const newArray = new Array<LbData>();
-        let i = 0;
-        for (const data of datas) {
-            if (i < 100) {
-                newArray.push(data);
-            }
-            else {
-                break;
-            }
-            ++i;
+    updateLeaderboardStore(store: OrderedDataStore, name: string, amount: number) {
+        if (name !== "no name" && name !== undefined) {
+            store.SetAsync(name, amount);
         }
-        this.leaderboardStore.SetAsync(metric, newArray);
-        return newArray;
+        const data = store.GetSortedAsync(false, 100);
+        return data.GetCurrentPage();
     }
 
-    updateLeaderboard(leaderboard: Leaderboard, lbDatas: Array<LbData | undefined>) {
+    updateLeaderboard(leaderboard: Leaderboard, lbDatas: { key: string, value: unknown }[]) {
         this.resetLeaderboard(leaderboard);
         let i = 1;
         for (const data of lbDatas) {
             if (data === undefined) {
                 continue;
             }
-            this.getLeaderboardSlot(i, data.name, data.amount).Parent = leaderboard.GuiPart.SurfaceGui.Display;
+            this.getLeaderboardSlot(i, data.key, data.value as number).Parent = leaderboard.GuiPart.SurfaceGui.Display;
             ++i;
         }
     }
@@ -81,30 +61,31 @@ export class LeaderboardService implements OnStart {
             return;
         }
         const name = profile.name;
-        this.updateLeaderboard(LEADERBOARDS.TimePlayed, this.updateLeaderboardStore("TotalTime", name, new InfiniteMath(profile.playtime).ConvertForLeaderboards()));
-        const funds = profile.currencies.get("Funds");
+        this.updateLeaderboard(LEADERBOARDS.TimePlayed, 
+            this.updateLeaderboardStore(this.totalTimeStore, name, new InfiniteMath(profile.playtime).ConvertForLeaderboards()));
+        const funds = profile.mostCurrencies.get("Funds");
         if (funds !== undefined) {
-            this.updateLeaderboard(LEADERBOARDS.Funds, this.updateLeaderboardStore("Funds", name, new InfiniteMath(funds).ConvertForLeaderboards()));
+            this.updateLeaderboard(LEADERBOARDS.Funds, 
+                this.updateLeaderboardStore(this.fundsStore, name, new InfiniteMath(funds).ConvertForLeaderboards()));
         }
-        const power = profile.currencies.get("Power");
+        const power = profile.mostCurrencies.get("Power");
         if (power !== undefined) {
-            this.updateLeaderboard(LEADERBOARDS.Power, this.updateLeaderboardStore("Power", name, new InfiniteMath(power).ConvertForLeaderboards()));
+            this.updateLeaderboard(LEADERBOARDS.Power, 
+                this.updateLeaderboardStore(this.powerStore, name, new InfiniteMath(power).ConvertForLeaderboards()));
+        }
+        const skill = profile.mostCurrencies.get("Skill");
+        if (skill !== undefined) {
+            this.updateLeaderboard(LEADERBOARDS.Skill, 
+                this.updateLeaderboardStore(this.skillStore, name, new InfiniteMath(skill).ConvertForLeaderboards()));
         }
         for (const player of Players.GetPlayers()) {
             this.donatedStore.SetAsync(tostring(player.UserId), 
                 new InfiniteMath(this.leaderstatsService.getLeaderstat(player, "Donated") as number | undefined ?? 0).ConvertForLeaderboards());
         }
-        this.updateLeaderboard(LEADERBOARDS.Donated, this.donatedStore.GetSortedAsync(false, 100).GetCurrentPage().map((v) => {
-            const [success, name] = pcall(() => Players.GetNameFromUserIdAsync(tonumber(v.key) as number));
-            if (success !== true) {
-                return undefined;
-            }
-            return { 
-                id: v.key, 
-                name: (name as string), 
-                amount: v.value as number 
-            };
-        }));
+        this.updateLeaderboard(LEADERBOARDS.Donated, this.donatedStore.GetSortedAsync(false, 100).GetCurrentPage()
+            .map((value) => {
+                return { key: getNameFromUserId(tonumber(value.key) ?? 0), value: value.value };
+            }));
     }
 
     onStart() {

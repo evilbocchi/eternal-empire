@@ -1,6 +1,9 @@
 import Price from "shared/Price";
 import InfiniteMath from "shared/utils/infinitemath/InfiniteMath";
 
+const fivePercent = new InfiniteMath(0.05);
+const one = new InfiniteMath(1);
+
 class NamedUpgrade {
 
     static UPGRADES: NamedUpgrade[] = [];
@@ -28,10 +31,28 @@ class NamedUpgrade {
         return value;
     }
 
+    static Stone = NamedUpgrade.registerUpgrade(
+        new NamedUpgrade("Stone")
+        .setDescription("Boosts Funds processing value in all furnaces by 5%.")
+        .setDropletFormula((value, amount) => value.mul(new Price().setCost("Funds", fivePercent.mul(amount).add(one))))
+    );
+
+    static WhiteGem = NamedUpgrade.registerUpgrade(
+        new NamedUpgrade("WhiteGem")
+        .setDescription("Boosts Power gain in all generators by 5%.")
+        .setGeneratorFormula((value, amount) => value.mul(new Price().setCost("Power", fivePercent.mul(amount).add(one))))
+    );
+
+    static Crystal = NamedUpgrade.registerUpgrade(
+        new NamedUpgrade("Crystal")
+        .setDescription("Boosts Skill gain by 5%.")
+        .setResetFormula((value, amount) => value.mul(new Price().setCost("Skill", fivePercent.mul(amount).add(one))))
+    );
+
     static MoreFunds = NamedUpgrade.registerUpgrade(
         new NamedUpgrade("MoreFunds")
         .setName("Improved Droplet Technology")
-        .setDescription("Increases droplet Funds value and generator gain by 4% per upgrade compounding. Every 10 upgrades multiplies the upgrade by 1.2x.")
+        .setDescription("Increases droplet Funds processing value and generator gain by 4% per upgrade compounding. Every 10 upgrades multiplies the upgrade by 1.2x.")
         .setCap(100)
         .setImage(4743601341)
         .setStep(10)
@@ -45,7 +66,7 @@ class NamedUpgrade {
     static MorePower = NamedUpgrade.registerUpgrade(
         new NamedUpgrade("MorePower")
         .setName("Better Networking")
-        .setDescription("Increases droplet Power value and generator gain by 3% per upgrade compounding. Every 10 upgrades multiplies the upgrade by 1.2x.")
+        .setDescription("Increases droplet Power processing value and generator gain by 3% per upgrade compounding. Every 10 upgrades multiplies the upgrade by 1.2x.")
         .setCap(100)
         .setImage(12600837039)
         .setStep(10)
@@ -74,7 +95,7 @@ class NamedUpgrade {
         new NamedUpgrade("LandReclaimation")
         .setName("Land Reclaimation")
         .setDescription("Finally, some space. Increases the grid size of Barren Islands by 6 studs each side.")
-        .setCap(3)
+        .setCap(5)
         .setImage(16800883223)
         .setPriceFormula((amount) => {
             return new Price().setCost("Funds", new InfiniteMath([5, 3 + (amount * 6)]));
@@ -101,13 +122,10 @@ class NamedUpgrade {
     gridSizeFormula: Map<string, ((val: Vector3, amount: number, step?: number) => Vector3)> = new Map();
     dropletFormula: ((val: Price, amount: number, step?: number) => Price) | undefined = undefined;
     generatorFormula: ((val: Price, amount: number, step?: number) => Price) | undefined = undefined;
+    resetFormula: ((val: Price, amount: number, step?: number) => Price) | undefined = undefined;
 
     constructor(id: string) {
         this.id = id;
-    }
-
-    getName() {
-        return this.name;
     }
 
     setName(name: string) {
@@ -115,35 +133,18 @@ class NamedUpgrade {
         return this;
     }
 
-    getDescription() {
-        return this.description;
-    }
-
     setDescription(description: string) {
         this.description = description;
         return this;
     }
-
-    getCap() {
-        return this.cap;
-    }
-
     setCap(cap: number) {
         this.cap = cap;
         return this;
     }
 
-    getStep() {
-        return this.step;
-    }
-
     setStep(step: number) {
         this.step = step;
         return this;
-    }
-    
-    getPriceFormula() {
-        return this.priceFormula; 
     }
 
     setPriceFormula(priceFormula: (amount: number) => Price) {
@@ -152,7 +153,7 @@ class NamedUpgrade {
     }
 
     getPrice(start: number, endAmount?: number) {
-        const formula = this.getPriceFormula();
+        const formula = this.priceFormula;
         if (formula === undefined) {
             return;
         }
@@ -164,10 +165,6 @@ class NamedUpgrade {
             price = price.add(formula(i));
         }
         return price;
-    }
-
-    getWalkSpeedFormula() {
-        return this.walkSpeedFormula; 
     }
 
     setWalkSpeedFormula(walkSpeedFormula: (walkSpeed: number, amount: number, step?: number) => number) {
@@ -184,17 +181,9 @@ class NamedUpgrade {
         return this;
     }
 
-    getDropletFormula() {
-        return this.dropletFormula; 
-    }
-
     setDropletFormula(dropletFormula: (dropletValue: Price, amount: number, step?: number) => Price) {
         this.dropletFormula = dropletFormula;
         return this;
-    }
-
-    getGeneratorFormula() {
-        return this.generatorFormula; 
     }
 
     setGeneratorFormula(generatorFormula: (generatorGain: Price, amount: number, step?: number) => Price) {
@@ -202,8 +191,9 @@ class NamedUpgrade {
         return this;
     }
 
-    getImage() {
-        return this.image;
+    setResetFormula(resetFormula: (gain: Price, amount: number, step?: number) => Price) {
+        this.resetFormula = resetFormula;
+        return this;
     }
 
     setImage(image: number) {

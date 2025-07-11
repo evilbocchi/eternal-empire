@@ -1,9 +1,8 @@
-import Difficulty from "shared/difficulty/Difficulty";
+class Difficulty {
 
-class Difficulties {
-    static DIFFICULTIES: Difficulty[] = [];
+    static DIFFICULTIES = new Map<string, Difficulty>();
 
-    static Bonuses = Difficulties.registerDifficulty(
+    static Bonuses = Difficulty.registerDifficulty(
         new Difficulty("Bonuses")
         .setName("Bonuses")
         .setImage(0)
@@ -12,7 +11,7 @@ class Difficulties {
         .setClass(-3)
     );
 
-    static TheFirstDifficulty = Difficulties.registerDifficulty(
+    static TheFirstDifficulty = Difficulty.registerDifficulty(
         new Difficulty("TheFirstDifficulty")
         .setName("The First Difficulty")
         .setImage(13521197654)
@@ -21,7 +20,7 @@ class Difficulties {
         .setClass(-2)
     );
 
-    static TheLowerGap = Difficulties.registerDifficulty(
+    static TheLowerGap = Difficulty.registerDifficulty(
         new Difficulty("TheLowerGap")
         .setName("The Lower Gap")
         .setImage(16500432025)
@@ -30,7 +29,7 @@ class Difficulties {
         .setClass(-2)
     );
 
-    static Negativity = Difficulties.registerDifficulty(
+    static Negativity = Difficulty.registerDifficulty(
         new Difficulty("Negativity")
         .setName("Negativity")
         .setImage(11996464962)
@@ -39,7 +38,7 @@ class Difficulties {
         .setClass(-2)
     );
 
-    static Unimpossible = Difficulties.registerDifficulty(
+    static Unimpossible = Difficulty.registerDifficulty(
         new Difficulty("Unimpossible")
         .setName("Unimpossible")
         .setImage(16623639157)
@@ -48,7 +47,7 @@ class Difficulties {
         .setClass(-2)
     );
 
-    static Friendliness = Difficulties.registerDifficulty(
+    static Friendliness = Difficulty.registerDifficulty(
         new Difficulty("Friendliness")
         .setName("Friendliness")
         .setImage(15380381686)
@@ -57,7 +56,7 @@ class Difficulties {
         .setClass(-2)
     );
         
-    static TrueEase = Difficulties.registerDifficulty(
+    static TrueEase = Difficulty.registerDifficulty(
         new Difficulty("TrueEase")
         .setName("True Ease")
         .setImage(7851469193)
@@ -66,7 +65,7 @@ class Difficulties {
         .setClass(-1)
     );
 
-    static A = Difficulties.registerDifficulty(
+    static A = Difficulty.registerDifficulty(
         new Difficulty("A")
         .setName("A")
         .setImage(7690507721)
@@ -75,7 +74,7 @@ class Difficulties {
         .setClass(-1)
     );
 
-    static FelixTheA = Difficulties.registerDifficulty(
+    static FelixTheA = Difficulty.registerDifficulty(
         new Difficulty("FelixTheA")
         .setName("Felix the ДА")
         .setImage(16420667835)
@@ -84,7 +83,7 @@ class Difficulties {
         .setClass(-1)
     );
 
-    static Exist = Difficulties.registerDifficulty(
+    static Exist = Difficulty.registerDifficulty(
         new Difficulty("Exist")
         .setName("Exist")
         .setImage(16420694167)
@@ -93,7 +92,7 @@ class Difficulties {
         .setClass(-1)
     );
 
-    static ReversedPeripherality = Difficulties.registerDifficulty(new Difficulty("ReversedPeripherality")
+    static ReversedPeripherality = Difficulty.registerDifficulty(new Difficulty("ReversedPeripherality")
         .setName("Reversed Peripherality")
         .setImage(16006133166)
         .setColor(Color3.fromRGB(127, 95, 140))
@@ -101,39 +100,39 @@ class Difficulties {
         .setClass(-1)
     );
     
-    static Relax = Difficulties.registerDifficulty(new Difficulty("Relax")
+    static Relax = Difficulty.registerDifficulty(new Difficulty("Relax")
         .setName("Relax")
-        .setImage(13054817960)
+        .setImage(13054817910)
         .setColor(Color3.fromRGB(255, 255, 255))
         .setRating(-1000000)
         .setClass(-1)
     );
 
-    static Skip = Difficulties.registerDifficulty(new Difficulty("Skip")
+    static Skip = Difficulty.registerDifficulty(new Difficulty("Skip")
         .setName("Skip")
-        .setImage(7662792908)
+        .setImage(7662792899)
         .setColor(Color3.fromRGB(255, 172, 101))
         .setRating(-1000)
         .setClass(-1)
     );
         
-    static Restful = Difficulties.registerDifficulty(new Difficulty("Restful")
+    static Restful = Difficulty.registerDifficulty(new Difficulty("Restful")
         .setName("Restful")
-        .setImage(15097557184)
+        .setImage(15097557171)
         .setColor(Color3.fromRGB(4, 61, 1))
         .setRating(-50)
         .setClass(-1)
     );
 
-    static Ifinity = Difficulties.registerDifficulty(new Difficulty("Ifinity")
+    static Ifinity = Difficulty.registerDifficulty(new Difficulty("Ifinity")
         .setName("Ifinity")
-        .setImage(11622168417)
+        .setImage(11622168387)
         .setColor(Color3.fromRGB(35, 7, 51))
         .setRating(-40)
         .setClass(-1)
     );
 
-    static InstantWin = Difficulties.registerDifficulty(new Difficulty("InstantWin")
+    static InstantWin = Difficulty.registerDifficulty(new Difficulty("InstantWin")
         .setName("Instant Win")
         .setImage(16421451231)
         .setColor(Color3.fromRGB(0, 46, 255))
@@ -141,7 +140,7 @@ class Difficulties {
         .setClass(-1)
     );
 
-    static Millisecondless = Difficulties.registerDifficulty(new Difficulty("Millisecondless")
+    static Millisecondless = Difficulty.registerDifficulty(new Difficulty("Millisecondless")
         .setName("Millisecondless")
         .setImage(16421468207)
         .setColor(Color3.fromRGB(244, 112, 254))
@@ -149,23 +148,23 @@ class Difficulties {
         .setClass(0)
     );
 
-    static Astronomical = Difficulties.registerDifficulty(new Difficulty("Astronomical")
+    static Astronomical = Difficulty.registerDifficulty(new Difficulty("Astronomical")
         .setName("Astronomical")
-        .setImage(14008721932)
+        .setImage(17441599695)
         .setColor(Color3.fromRGB(21, 0, 186))
         .setRating(-29.5)
         .setClass(0)
     );
 
-    static Win = Difficulties.registerDifficulty(new Difficulty("Win")
+    static Win = Difficulty.registerDifficulty(new Difficulty("Win")
         .setName("Win")
-        .setImage(6382362796)
+        .setImage(6382362791)
         .setColor(Color3.fromRGB(52, 10, 255))
         .setRating(-29)
         .setClass(0)
     );
 
-    static Winsome = Difficulties.registerDifficulty(new Difficulty("Winsome")
+    static Winsome = Difficulty.registerDifficulty(new Difficulty("Winsome")
         .setName("Winsome")
         .setImage(14081288003)
         .setColor(Color3.fromRGB(106, 205, 255))
@@ -173,7 +172,7 @@ class Difficulties {
         .setClass(0)
     );
 
-    static DoNothing = Difficulties.registerDifficulty(new Difficulty("DoNothing")
+    static DoNothing = Difficulty.registerDifficulty(new Difficulty("DoNothing")
         .setName("Do Nothing")
         .setImage(7662806869)
         .setColor(Color3.fromRGB(153, 209, 229))
@@ -182,17 +181,49 @@ class Difficulties {
     );
     
     static registerDifficulty<T extends Difficulty>(difficulty: T) {
-        Difficulties.DIFFICULTIES.push(difficulty);
+        Difficulty.DIFFICULTIES.set(difficulty.id, difficulty);
         return difficulty;
     }
 
     static getDifficulty(difficultyId: string) {
-        for (const difficulty of Difficulties.DIFFICULTIES) {
-            if (difficulty.id === difficultyId)
-                return difficulty;
-        }
-        return undefined;
+        return Difficulty.DIFFICULTIES.get(difficultyId);
+    }
+
+    id: string;
+    name: string | undefined = undefined;
+    class: number | undefined = undefined;
+    rating: number | undefined = undefined;
+    color: Color3 | undefined = undefined;
+    image: number | undefined = undefined;
+
+    constructor(id: string) {
+        this.id = id;
+    }
+
+    setName(name: string) {
+        this.name = name;
+        return this;
+    }
+
+    setClass(difficultyClass: number) {
+        this.class = difficultyClass;
+        return this;
+    }
+
+    setRating(rating: number) {
+        this.rating = rating;
+        return this;
+    }
+
+    setColor(color: Color3) {
+        this.color = color;
+        return this;
+    }
+
+    setImage(image: number) {
+        this.image = image;
+        return this;
     }
 }
 
-export = Difficulties;
+export = Difficulty;

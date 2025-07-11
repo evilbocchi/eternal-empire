@@ -36,7 +36,7 @@ export class PlaytimeService implements OnStart {
 
     onStart() {
         task.spawn(() => {
-            this.dataService.empireProfileLoaded.Once((profile) => PlaytimeCanister.longestSessionTime.set(profile.Data.longestSession));
+            this.dataService.empireProfileLoaded.once((profile) => PlaytimeCanister.longestSessionTime.set(profile.Data.longestSession));
             if (this.dataService.empireProfile !== undefined) {
                 PlaytimeCanister.longestSessionTime.set(this.dataService.empireProfile.Data.longestSession);
             }

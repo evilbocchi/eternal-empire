@@ -1,5 +1,5 @@
 {
-  "name": "tower-jjt",
+  "name": "jjt-money-empire",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -9,18 +9,18 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/evilbocchi/tower-jjt.git"
+    "url": "git+https://github.com/evilbocchi/jjt-money-empire.git"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/evilbocchi/tower-jjt/issues"
+    "url": "https://github.com/evilbocchi/jjt-money-empire/issues"
   },
-  "homepage": "https://github.com/evilbocchi/tower-jjt#readme",
+  "homepage": "https://github.com/evilbocchi/jjt-money-empire#readme",
   "devDependencies": {
     "@rbxts/compiler-types": "^2.3.0-types.0",
-    "@rbxts/types": "^1.0.709",
+    "@rbxts/types": "^1.0.771",
     "@typescript-eslint/eslint-plugin": "^6.7.5",
     "@typescript-eslint/parser": "^6.7.5",
     "eslint": "^8.46.0",
@@ -37,9 +37,10 @@
     "@rbxts/camera-shaker": "^1.0.8",
     "@rbxts/chat-service": "^1.3.0",
     "@rbxts/datastore2": "^1.4.0-ts.0",
+    "@rbxts/firebase-rtdb": "^1.0.5",
+    "@rbxts/partcache": "^1.1.1",
     "@rbxts/profileservice": "^1.4.2",
     "@rbxts/services": "^1.5.1",
-    "@rbxts/topbar-plus": "^2.0.9",
-    "@rbxutil/signal": "^2.0.1"
+    "@rbxts/topbar-plus": "^2.0.9"
   }
 }

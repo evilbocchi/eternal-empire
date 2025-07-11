@@ -21,7 +21,7 @@ class Generator extends Item {
                 const c = RunService.Heartbeat.Connect((dt) => {
                     t += dt;
                     if (t > 0.5) {
-                        const passiveGain = this.getPassiveGain();
+                        const passiveGain = this.passiveGain;
                         if (passiveGain !== undefined) {
                             let delta = passiveGain.mul(t);
                             for (const boolValue of boostsFolder.GetChildren()) {
@@ -29,9 +29,9 @@ class Generator extends Item {
                                 if (placedItem !== undefined) {
                                     const item = utils.getItem(placedItem.item);
                                     if (item !== undefined && item.isA("Charger")) {
-                                        const formula = item.getFormula();
-                                        if (formula !== undefined)
-                                            delta = formula(delta);
+                                        const mul = item.mul;
+                                        if (mul !== undefined)
+                                            delta = delta.mul(mul);
                                     }
                                 }
                             }
@@ -39,9 +39,9 @@ class Generator extends Item {
                                 const upgrade = NamedUpgrade.getUpgrade(upgradeId as string);
                                 if (upgrade === undefined)
                                     continue;
-                                const formula = upgrade.getGeneratorFormula();
+                                const formula = upgrade.generatorFormula;
                                 if (formula !== undefined) {
-                                    delta = formula(delta, amount, upgrade.getStep());
+                                    delta = formula(delta, amount, upgrade.step);
                                 }
                             }
                             const boost = model.GetAttribute("GeneratorBoost") as number | undefined;
@@ -59,10 +59,6 @@ class Generator extends Item {
         });
     }
     
-    getPassiveGain() {
-        return this.passiveGain;
-    }
-
     setPassiveGain(passiveGain: Price) {
         this.passiveGain = passiveGain;
         return this;

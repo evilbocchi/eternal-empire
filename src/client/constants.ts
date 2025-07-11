@@ -1,12 +1,11 @@
 import { Players, ReplicatedStorage } from "@rbxts/services";
+import { AREAS } from "shared/constants";
 
 export const LOCAL_PLAYER = Players.LocalPlayer;
 export const MOUSE = LOCAL_PLAYER.GetMouse();
 export const PLAYER_GUI = LOCAL_PLAYER.WaitForChild("PlayerGui") as StarterGui;
 
 export const INTERFACE = PLAYER_GUI.WaitForChild("Interface") as ScreenGui;
-
-export const SERVER_INFO_LABEL = INTERFACE.WaitForChild("ServerInfoLabel") as TextLabel;
 
 export const SIDEBAR_BUTTONS = INTERFACE.WaitForChild("SidebarButtons") as Frame;
 
@@ -22,6 +21,44 @@ export const ADAPTIVE_TAB_MAIN_WINDOW = ADAPTIVE_TAB.WaitForChild("MainWindow") 
 	
 };
 
+export const TRACKED_QUEST_WINDOW = INTERFACE.WaitForChild("TrackedQuestWindow") as Frame & {
+	Background: Folder & {
+		Frame: Frame,
+		ProgressBar: CanvasGroup & {
+			UIStroke: UIStroke,
+			Fill: Frame,
+			BarLabel: TextLabel
+		}
+	},
+	Completion: Frame & {
+		ImageLabel: ImageLabel,
+		TextLabel: TextLabel & {
+			UIStroke: UIStroke
+		},
+		RewardLabel: TextLabel & {
+			UIStroke: UIStroke
+		}
+	},
+	Reset: Frame & {
+		ImageLabel: ImageLabel,
+		TextLabel: TextLabel & {
+			UIStroke: UIStroke
+		},
+		AmountLabel: TextLabel & {
+			UIStroke: UIStroke
+		}
+	},
+	DescriptionLabel: TextLabel,
+	TitleLabel: TextLabel
+}
+
+export const DETAILS_WINDOW = INTERFACE.WaitForChild("DetailsWindow") as Frame & {
+	PositionLabel: TextLabel,
+	FundsBombLabel: TextLabel
+}
+
+export const SAVING_DATA_LABEL = INTERFACE.WaitForChild("SavingDataLabel") as TextLabel;
+
 type ItemListContainer = Frame & {
 	ItemList: ScrollingFrame;
 }
@@ -29,20 +66,26 @@ type ItemListContainer = Frame & {
 export const INVENTORY_WINDOW = ADAPTIVE_TAB_MAIN_WINDOW.WaitForChild("Inventory") as ItemListContainer & {
 	Empty: Frame
 };
-export const SHOP_WINDOW = ADAPTIVE_TAB_MAIN_WINDOW.WaitForChild("Shop") as ItemListContainer & {
+export const SHOP_WINDOW = INTERFACE.WaitForChild("ShopWindow") as Frame & {
 	PurchaseWindow: Frame & {
 		ViewportFrame: ViewportFrame,
 		Title: Frame & {
 			DifficultyLabel: ImageLabel,
 			ItemNameLabel: TextLabel
 		},
-		ItemInfo: Frame & {
-			DescriptionFrame: ScrollingFrame & {
-				DescriptionLabel: TextLabel,
-			}
-			Purchase: TextButton & {
-				PriceLabel: TextLabel
-			}
+		DescriptionFrame: ScrollingFrame & {
+			DescriptionLabel: TextLabel,
+			CreatorLabel: TextLabel,
+			PlaceableAreasLabel: TextLabel,
+		},
+		Purchase: TextButton & {
+			PriceLabel: TextLabel
+		},
+		CloseButton: TextButton
+	},
+	ItemListWrapper: Frame & {
+		ItemList: ItemListContainer & {
+			BuyAll: TextButton,
 		}
 	}
 };
@@ -107,7 +150,7 @@ export const MUTE_BUTTON_WINDOW = INTERFACE.WaitForChild("MuteButtonWindow") as 
 	}
 }
 
-export type StatContainer = {
+export type StatContainer = Frame & {
 	StatLabel: TextLabel;
 	AmountLabel: TextLabel;
 }
@@ -117,10 +160,18 @@ export const STATS_WINDOW = ADAPTIVE_TAB_MAIN_WINDOW.WaitForChild("Stats") as Fr
 		Playtime: StatContainer;
 		SessionTime: StatContainer;
 		LongestSessionTime: StatContainer;
+		RawPurifierClicks: StatContainer;
 	}
 };
 
-export const LOADED_ITEM_MODELS = ReplicatedStorage.WaitForChild("LoadedItemModels") as Folder;
+const itemModels = new Map<string, Model>();
+const loaded = ReplicatedStorage.WaitForChild("LoadedItemModels").GetChildren();
+for (const value of loaded) {
+	if (value.IsA("ObjectValue")) {
+		itemModels.set(value.Name, value.Value as Model);
+	}
+}
+export const ITEM_MODELS = itemModels;
 
 export const COMMANDS_WINDOW = ADAPTIVE_TAB_MAIN_WINDOW.WaitForChild("Commands") as Frame & {
 	CommandsList: ScrollingFrame & {
@@ -129,7 +180,58 @@ export const COMMANDS_WINDOW = ADAPTIVE_TAB_MAIN_WINDOW.WaitForChild("Commands")
 };
 
 export const SHARE_WINDOW = ADAPTIVE_TAB_MAIN_WINDOW.WaitForChild("Share") as Frame & {
-	JoinLink: Frame & {
+	Code: Frame & {
 		Input: TextBox
 	}
+};
+
+export const SETTINGS_WINDOW = ADAPTIVE_TAB_MAIN_WINDOW.WaitForChild("Settings") as Frame & {
+	InteractionOptions: Frame & {
+		
+	}
+};
+
+export const LOGS_WINDOW = ADAPTIVE_TAB_MAIN_WINDOW.WaitForChild("Logs") as Frame & {
+	LogList: Frame & {
+		
+	}
+};
+
+export const QUESTS_WINDOW = ADAPTIVE_TAB_MAIN_WINDOW.WaitForChild("Quests") as Frame & {
+	Level: Frame & {
+		Current: TextButton & {
+			NotificationLabel: ImageLabel,
+			LevelLabel: TextLabel
+		},
+		ProgressBar: Frame & {
+			Fill: Frame,
+			BarLabel: TextLabel
+		}
+	},
+	QuestList: Frame & {
+		
+	}
+};
+
+export type LPUpgradeOption = Frame & {
+	Button: ImageButton & {
+		ValueLabel: TextLabel
+	},
+	DescriptionLabel: TextLabel
+}
+
+export const LEVELS_WINDOW = ADAPTIVE_TAB_MAIN_WINDOW.WaitForChild("Levels") as Frame & {
+	LevelPointOptions: Frame & {
+		Respec: TextButton,
+		LevelPointsLabel: TextLabel
+	},
+	UpgradeOptions: Frame & {
+		Stone: LPUpgradeOption,
+		WhiteGem: LPUpgradeOption,
+		Crystal: LPUpgradeOption
+	}
+};
+
+export const WARP_WINDOW = ADAPTIVE_TAB_MAIN_WINDOW.WaitForChild("Warp") as Frame & {
+	[area in keyof (typeof AREAS)]: ImageButton
 };

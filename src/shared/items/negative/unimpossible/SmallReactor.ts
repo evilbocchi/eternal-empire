@@ -1,12 +1,12 @@
 import Price from "shared/Price";
 import { AREAS } from "shared/constants";
-import Difficulties from "shared/difficulty/Difficulties";
+import Difficulty from "shared/Difficulty";
 import Upgrader from "shared/item/Upgrader";
 
 export = new Upgrader("SmallReactor")
 .setName("Small Reactor")
 .setDescription("Small? THAT is small? Well, this 'small' reactor gives a $3.5x boost to any droplets passing through it.")
-.setDifficulty(Difficulties.Unimpossible)
+.setDifficulty(Difficulty.Unimpossible)
 .setPrice(new Price().setCost("Funds", 3500000), 1)
 .addPlaceableArea(AREAS.BarrenIslands)
 

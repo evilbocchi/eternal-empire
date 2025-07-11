@@ -11,6 +11,7 @@ class Upgrader extends Conveyor {
         super(id);
         this.types.push("Upgrader");
         this.onLoad((model, utils) => {
+            const upgradedEvent = new Instance("BindableEvent");
             const lasers = findBaseParts(model, "Laser");
             let i = 0;
             for (const d of lasers) {
@@ -26,6 +27,7 @@ class Upgrader extends Conveyor {
                         l.Value = model;
                         l.SetAttribute("ItemId", this.id);
                         l.Parent = droplet;
+                        upgradedEvent.Fire(droplet);
                     }
                 });
                 const o = d.Transparency;
@@ -33,20 +35,14 @@ class Upgrader extends Conveyor {
                 i++;
             }
             this.maintain(model, utils);
+            upgradedEvent.Name = "UpgradedEvent";
+            upgradedEvent.Parent = model;
         });
-    }
-
-    getAdd() {
-        return this.add;
     }
 
     setAdd(add: Price) {
         this.add = add;
         return this;
-    }
-
-    getMul() {
-        return this.mul;
     }
 
     setMul(mul: Price) {

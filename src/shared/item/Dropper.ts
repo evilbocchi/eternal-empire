@@ -1,9 +1,8 @@
-import { Debris, Players, RunService, TweenService } from "@rbxts/services";
+import { RunService } from "@rbxts/services";
 import { AREAS } from "shared/constants";
 import Droplet from "shared/item/Droplet";
 import Item from "shared/item/Item";
 import { findBaseParts } from "shared/utils/vrldk/BasePartUtils";
-import ItemUtils from "./ItemUtils";
 
 class Dropper extends Item {
 
@@ -25,7 +24,7 @@ class Dropper extends Item {
                 let t = 0;
                 item.instantiatorPerDrop.set(d, instantiator);
                 const connection = RunService.Heartbeat.Connect((deltaTime) => {
-                    const dropRate = d.GetAttribute("DropRate") as number | undefined ?? item.getDropRate();
+                    const dropRate = d.GetAttribute("DropRate") as number | undefined ?? item.dropRate;
                     if (dropRate === undefined) {
                         return;
                     }
@@ -74,10 +73,6 @@ class Dropper extends Item {
         }
         this.droplet = droplet;
         return this;
-    }
-
-    getDropRate() {
-        return this.dropRate;
     }
 
     setDropRate(dropRate: number) {

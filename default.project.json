@@ -1,5 +1,5 @@
 {
-  "name": "tower-jjt",
+  "name": "jjt-money-empire",
   "globIgnorePaths": ["**/package.json", "**/tsconfig.json"],
   "tree": {
     "$className": "DataModel",
@@ -20,9 +20,6 @@
           },
           "@flamework": {
             "$path": "node_modules/@flamework"
-          },
-          "@rbxutil": {
-            "$path": "node_modules/@rbxutil"
           }
         }
       },

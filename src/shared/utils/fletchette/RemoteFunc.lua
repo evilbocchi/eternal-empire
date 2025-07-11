@@ -1,3 +1,5 @@
+--!native
+
 local RemoteFunc = {}
 RemoteFunc.__index = RemoteFunc
 

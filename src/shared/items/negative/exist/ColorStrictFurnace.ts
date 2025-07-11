@@ -1,14 +1,14 @@
 import { ReplicatedStorage } from "@rbxts/services";
 import Price from "shared/Price";
 import { AREAS } from "shared/constants";
-import Difficulties from "shared/difficulty/Difficulties";
+import Difficulty from "shared/Difficulty";
 import Furnace from "shared/item/Furnace";
 import InfiniteMath from "shared/utils/infinitemath/InfiniteMath";
 
 export = new Furnace("ColorStrictFurnace")
 .setName("Color Strict Furnace")
 .setDescription("Only processes droplets if the color it's on matches with the enabled switch. Different colors apply different boosts.")
-.setDifficulty(Difficulties.Exist)
+.setDifficulty(Difficulty.Exist)
 .setPrice(new Price().setCost("Funds", new InfiniteMath([2.56, 15])), 1)
 .addPlaceableArea(AREAS.BarrenIslands)
 
@@ -59,7 +59,6 @@ export = new Furnace("ColorStrictFurnace")
     const fill = bar.WaitForChild("Fill") as Frame;
     const colorLabel = bar.WaitForChild("ColorLabel") as TextLabel;
     const boostLabel = model.WaitForChild("BoostGuiPart").WaitForChild("SurfaceGui").WaitForChild("BoostLabel") as TextLabel;
-    const switches = model.WaitForChild("Switches");
     const hitbox = model.WaitForChild("Hitbox");
     const alertSound = hitbox.WaitForChild("AlertSound") as Sound;
     const sound = hitbox.WaitForChild("Sound") as Sound;
@@ -73,7 +72,7 @@ export = new Furnace("ColorStrictFurnace")
         }
         const info = infoPerId[strictColor];
         colorLabel.Text = info.name + "!";
-        const strictColorSwitch = switches.FindFirstChild(tostring(strictColor)) as BasePart;
+        const strictColorSwitch = model.FindFirstChild(tostring(strictColor)) as BasePart;
         const strictColorColor = strictColorSwitch.Color;
         fill.BackgroundColor3 = strictColorColor;
         colorLabel.TextColor3 = strictColorColor;
@@ -92,16 +91,18 @@ export = new Furnace("ColorStrictFurnace")
             alertSound.Resume();
             item.setFormula(undefined);
         }
-        border.Color = color === 0 ? new Color3(1, 1, 1) : (switches.WaitForChild(tostring(color)) as BasePart).Color;
+        border.Color = color === 0 ? new Color3(1, 1, 1) : (model.WaitForChild(tostring(color)) as BasePart).Color;
     }
-    for (const colorSwitch of switches.GetChildren()) {
-        const clickDetector = new Instance("ClickDetector");
-        clickDetector.MouseClick.Connect(() => {
-            sound.Play();
-            color = tonumber(colorSwitch.Name) ?? 0;
-            updateColor();
-        });
-        clickDetector.Parent = colorSwitch;
+    for (const colorSwitch of model.GetChildren()) {
+        if (colorSwitch.IsA("Part") && colorSwitch.Material === Enum.Material.Neon) {
+            const clickDetector = new Instance("ClickDetector");
+            clickDetector.MouseClick.Connect(() => {
+                sound.Play();
+                color = tonumber(colorSwitch.Name) ?? 0;
+                updateColor();
+            });
+            clickDetector.Parent = colorSwitch;
+        }
     }
     updateColor();
     const connection = ReplicatedStorage.GetAttributeChangedSignal("ColorStrictColor").Connect(() => updateColor());
