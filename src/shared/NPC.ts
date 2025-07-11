@@ -1,10 +1,9 @@
-//!native
-
 export type NPCAnimationType = "Default" | "Walk" | "Run" | "Jump";
 
 export default class NPC {
     animationsPerType = new Map<NPCAnimationType, number>();
     defaultDialogue!: Dialogue;
+    interact: (() => void) | undefined;
 
     constructor() {
         this.animationsPerType.set("Walk", 180426354);
@@ -24,6 +23,10 @@ export default class NPC {
     createDefaultMonologue(text: string) {
         this.defaultDialogue = new Dialogue(this, text);
         return this.defaultDialogue;
+    }
+
+    onInteract(callback?: () => void) {
+        this.interact = callback;
     }
 }
 
@@ -55,12 +58,12 @@ export class Dialogue {
     
     /**
      * Add a Dialogue instance to be followed by the current Dialogue.
-     * Does not change the `root` parameter.
      * 
      * @param dialogue 
      * @returns The added Dialogue
      */
     next(dialogue: Dialogue) {
+        dialogue.root = this.root;
         this.nextDialogue = dialogue;
         return dialogue;
     }

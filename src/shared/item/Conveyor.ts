@@ -1,9 +1,14 @@
-//!native
-
-import Item from "shared/item/Item";
+import GameSpeed from "shared/GameSpeed";
+import Operative from "shared/item/Operative";
 import { findBaseParts } from "shared/utils/vrldk/BasePartUtils";
 
-class Conveyor extends Item {
+declare global {
+    interface ItemTypes {
+        Conveyor: Conveyor;
+    }
+}
+
+class Conveyor extends Operative {
 
     static getBeam(speed: number, width?: number) {
         const beam = new Instance("Beam");
@@ -18,28 +23,32 @@ class Conveyor extends Item {
         beam.TextureSpeed = (speed ?? 0) / beam.TextureLength;
         return beam;
     }
-    
+
+    static load(model: Model, item: Conveyor) {
+        const speed = (item.speed ?? 1) * GameSpeed.speed;
+        const conveyors = findBaseParts(model, "Conveyor");
+        for (const d of conveyors) {
+            const overwrite = d.FindFirstChild("Speed") as IntValue | undefined;
+            const inverted = (d.FindFirstChild("Inverted") as BoolValue | undefined)?.Value ?? false;
+            const s = overwrite === undefined ? speed : overwrite.Value;
+            d.AssemblyLinearVelocity = d.CFrame.LookVector.mul((inverted ? -1 : 1) * s);
+            d.CustomPhysicalProperties = Conveyor.PHYSICAL_PROPERTIES;
+            const beam = d.FindFirstChildOfClass("Beam");
+            if (beam !== undefined) {
+                beam.TextureSpeed = s / beam.TextureLength;
+                beam.Enabled = item.beamEnabled !== false;
+            }
+        }
+    }
+
+    static readonly PHYSICAL_PROPERTIES = new PhysicalProperties(0.7, 0.3, 0.5);
     speed: number | undefined;
-    beamEnabled = true;
+    beamEnabled: boolean | undefined;
 
     constructor(id: string) {
         super(id);
-        this.types.push("Conveyor");
-        this.onLoad((model) => {
-            const speed = this.speed ?? 1;
-            const conveyors = findBaseParts(model, "Conveyor");
-            for (const d of conveyors) {
-                const overwrite = d.FindFirstChild("Speed") as IntValue | undefined;
-                const inverted = (d.FindFirstChild("Inverted") as BoolValue | undefined)?.Value ?? false;
-                const s = overwrite === undefined ? speed : overwrite.Value;
-                d.Velocity = d.CFrame.LookVector.mul((inverted ? -1 : 1) * s);
-                const beam = d.FindFirstChildOfClass("Beam");
-                if (beam !== undefined) {
-                    beam.TextureSpeed = s / beam.TextureLength;
-                    beam.Enabled = this.beamEnabled;
-                }
-            }
-        });
+        this.types.add("Conveyor");
+        this.onLoad((model) => Conveyor.load(model, this));
     }
 
     enableBeam(enabled: boolean) {

@@ -1,11 +1,11 @@
-import Difficulty from "shared/Difficulty";
+import Difficulty from "@antivivi/jjt-difficulties";
 import Price from "shared/Price";
 import Condenser from "shared/item/Condenser";
 import Droplet from "shared/item/Droplet";
 
-export = new Condenser("AdvancedCondenser")
+export = new Condenser(script.Name)
 .setName("Advanced Condenser")
-.setDescription("Produces $3M and 100K W droplets when 45% of those values are processed through the attached furnace. Droplets can only be condensed once.")
+.setDescription("Produces %val% droplets when 45% of those values are processed through the attached furnace. Droplets can only be condensed once.")
 .setDifficulty(Difficulty.Skip)
 .setPrice(new Price().setCost("Funds", 19.9e18), 1)
 

@@ -1,14 +1,14 @@
-import Difficulty from "shared/Difficulty";
+import Difficulty from "@antivivi/jjt-difficulties";
 import Price from "shared/Price";
-import { AREAS } from "shared/constants";
 import Furnace from "shared/item/Furnace";
 
 
-export = new Furnace("PurifyingCauldron")
+export = new Furnace(script.Name)
 .setName("Purifying Cauldron")
-.setDescription("A massive %mul%x boost... and a massive price tag with it.")
+.setDescription("A massive %mul% boost. Though, this also costs a pretty massive price.")
 .setDifficulty(Difficulty.Winsome)
-.setPrice(new Price().setCost("Dark Matter", 3600), 1)
+.setPrice(new Price().setCost("Dark Matter", 36000), 1)
 .addPlaceableArea("BarrenIslands")
+.persists("Skillification")
 
-.setMul(new Price().setCost("Purifier Clicks", 5));
+.setMul(new Price().setCost("Purifier Clicks", 26));

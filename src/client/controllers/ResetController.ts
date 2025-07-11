@@ -1,4 +1,5 @@
-import { Controller, OnStart } from "@flamework/core";
+import { OnoeNum } from "@antivivi/serikanum";
+import { Controller, OnInit } from "@flamework/core";
 import CameraShaker from "@rbxts/camera-shaker";
 import { Debris, TweenService, Workspace } from "@rbxts/services";
 import { TRACKED_QUEST_WINDOW } from "client/constants";
@@ -6,15 +7,11 @@ import { EffectController } from "client/controllers/EffectController";
 import { UIController } from "client/controllers/UIController";
 import { SoundController } from "client/controllers/interface/SoundController";
 import Price from "shared/Price";
-import { AREAS, ASSETS, RESET_LAYERS } from "shared/constants";
-import { Fletchette } from "@antivivi/fletchette";
-import { OnoeNum } from "@antivivi/serikanum";
-
-const SettingsCanister = Fletchette.getCanister("SettingsCanister");
-const ResetCanister = Fletchette.getCanister("ResetCanister");
+import { ASSETS, RESET_LAYERS } from "shared/constants";
+import Packets from "shared/network/Packets";
 
 @Controller()
-export class ResetController implements OnStart {
+export class ResetController implements OnInit {
 
     constructor(private uiController: UIController, private effectController: EffectController, private SoundController: SoundController) {
         
@@ -56,9 +53,9 @@ export class ResetController implements OnStart {
         }
     }
 
-    onStart() {
-        ResetCanister.reset.connect((layer, amount) => {
-            if (SettingsCanister.settings.get().ResetAnimation === false)
+    onInit() {
+        Packets.reset.connect((layer, amount) => {
+            if (Packets.settings.get().ResetAnimation === false)
                 return;
             const resetLayer = RESET_LAYERS[layer];
             TRACKED_QUEST_WINDOW.Reset.AmountLabel.Text = Price.getFormatted(resetLayer.gives, new OnoeNum(amount)).upper();

@@ -1,11 +1,11 @@
-import Difficulty from "shared/Difficulty";
+import Difficulty from "@antivivi/jjt-difficulties";
 import Upgrader from "shared/item/Upgrader";
 import Price from "shared/Price";
 import LaserFan from "../unimpossible/LaserFan";
 
-export = new Upgrader("LaserTunnel")
+export = new Upgrader(script.Name)
 .setName("Laser Tunnel")
-.setDescription("No more convoluted structures to accomodate for the Laser Fans anymore. Boost droplet value by %mul%x.")
+.setDescription("No more convoluted structures to accomodate for the Laser Fans anymore. Boost droplet value by %mul%.")
 .setDifficulty(Difficulty.Skip)
 .setPrice(new Price().setCost("Power", 3.3e9), 1)
 .setRequiredItemAmount(LaserFan, 2)

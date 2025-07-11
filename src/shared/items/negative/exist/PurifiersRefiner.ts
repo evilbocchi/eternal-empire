@@ -1,11 +1,11 @@
-import Difficulty from "shared/Difficulty";
+import Difficulty from "@antivivi/jjt-difficulties";
 import Upgrader from "shared/item/Upgrader";
 import AdvancedRefiner from "shared/items/negative/a/AdvancedRefiner";
 import Price from "shared/Price";
 
-export = new Upgrader("PurifiersRefiner")
+export = new Upgrader(script.Name)
 .setName("Purifier's Refiner")
-.setDescription("Exchange one of your Advanced Refiners for a better refiner that also adds +1 Purifier Clicks value to droplets.")
+.setDescription("Upgrade one of your Advanced Refiners, keeping its original boosts while adding +1 Purifier Clicks value to droplets.")
 .setDifficulty(Difficulty.Exist)
 .setPrice(new Price().setCost("Funds", 4e15), 1)
 .setRequiredItemAmount(AdvancedRefiner, 1)

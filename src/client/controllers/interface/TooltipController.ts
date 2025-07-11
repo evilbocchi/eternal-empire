@@ -7,14 +7,6 @@ export class TooltipController implements OnPhysics {
 
     tooltipsPerObject = new Map<GuiObject, string>();
 
-    moveTooltipToMouse() {
-        const canvasSize = Workspace.CurrentCamera?.ViewportSize;
-        if (canvasSize) {
-            TOOLTIP_WINDOW.AnchorPoint = new Vector2(canvasSize.X - MOUSE.X < 200 ? 1 : 0, canvasSize.Y - MOUSE.Y < 200 ? 1 : 0);
-            TOOLTIP_WINDOW.Position = UDim2.fromOffset(MOUSE.X, MOUSE.Y + 36);
-        }
-    }
-
     hideTooltipWindow() {
         const tweenInfo = new TweenInfo(0.2);
         const tween = TweenService.Create(TOOLTIP_WINDOW, tweenInfo, { BackgroundTransparency: 1 });
@@ -53,6 +45,10 @@ export class TooltipController implements OnPhysics {
     }
 
     onPhysics() {
-        this.moveTooltipToMouse();
+        const canvasSize = Workspace.CurrentCamera?.ViewportSize;
+        if (canvasSize !== undefined) {
+            TOOLTIP_WINDOW.AnchorPoint = new Vector2(canvasSize.X - MOUSE.X < 200 ? 1 : 0, canvasSize.Y - MOUSE.Y < 200 ? 1 : 0);
+            TOOLTIP_WINDOW.Position = UDim2.fromOffset(MOUSE.X + 5, MOUSE.Y + 36);
+        }
     }
 }

@@ -1,23 +1,17 @@
+import Signal from "@antivivi/lemon-signal";
 import { Controller, OnInit, OnPhysics } from "@flamework/core";
 import { Debris, ReplicatedStorage, TweenService, Workspace } from "@rbxts/services";
-import { ADAPTIVE_TAB, LEVELS_WINDOW, LOCAL_PLAYER, LPUpgradeOption, QUESTS_WINDOW, SIDEBAR_BUTTONS, TRACKED_QUEST_WINDOW } from "client/constants";
+import { ADAPTIVE_TAB, CompletionFrame, LEVELS_WINDOW, LOCAL_PLAYER, LPUpgradeOption, QUESTS_WINDOW, SIDEBAR_BUTTONS, TRACKED_QUEST_WINDOW } from "client/constants";
 import { EffectController } from "client/controllers/EffectController";
 import { HotkeysController } from "client/controllers/HotkeysController";
 import { UIController } from "client/controllers/UIController";
 import { AdaptiveTabController } from "client/controllers/interface/AdaptiveTabController";
 import { ItemSlotController } from "client/controllers/interface/ItemSlotController";
-import Quest, { Reward } from "shared/Quest";
 import { ASSETS, getDisplayName, getMaxXp } from "shared/constants";
-import NamedUpgrade from "shared/item/NamedUpgrade";
 import Items from "shared/items/Items";
-import NewBeginnings from "shared/quests/NewBeginnings";
-import { Fletchette, Signal } from "@antivivi/fletchette";
+import NamedUpgrades from "shared/namedupgrade/NamedUpgrades";
+import Packets from "shared/network/Packets";
 import { combineHumanReadable } from "shared/utils/vrldk/StringUtils";
-
-const ChestCanister = Fletchette.getCanister("ChestCanister");
-const UpgradeBoardCanister = Fletchette.getCanister("UpgradeBoardCanister");
-const QuestCanister = Fletchette.getCanister("QuestCanister");
-const LevelCanister = Fletchette.getCanister("LevelCanister");
 
 @Controller()
 export class QuestsController implements OnInit, OnPhysics {
@@ -77,17 +71,16 @@ export class QuestsController implements OnInit, OnPhysics {
         TRACKED_QUEST_WINDOW.DescriptionLabel.Visible = true;
     }
 
-    getFormattedDescription(quest: Quest, stageNum: number) {
+    getFormattedDescription(id: string, quest: QuestInfo, stageNum: number) {
         if (stageNum < 0) {
             return "Quest complete.";
         }
         const stage = quest.stages[stageNum];
-        const noDesc = "<no description provided>";
         let desc = stage.description;
         if (desc === undefined) {
-            return noDesc;
+            return "<no description provided>";
         }
-        const position = ReplicatedStorage.GetAttribute(quest.id + stageNum) as Vector3 | undefined;
+        const position = ReplicatedStorage.GetAttribute(id + stageNum) as Vector3 | undefined;
         if (position !== undefined) {
             desc = desc.gsub("%%coords%%", `(${math.round(position.X)}, ${math.round(position.Y)}, ${math.round(position.Z)})`)[0];
         }
@@ -103,19 +96,20 @@ export class QuestsController implements OnInit, OnPhysics {
         if (!hasQuest) {
             return;
         }
-        const quest = Quest.getQuest(questId);
+        const quest = Packets.questInfo.get().get(questId);
         if (quest === undefined) {
             warn("wtf");
             return;
         }
         if (index === undefined) {
-            index = QuestCanister.quests.get().get(questId) ?? 0;
+            index = Packets.quests.get().get(questId) ?? 0;
         }
-        TRACKED_QUEST_WINDOW.Background.Frame.BackgroundColor3 = quest.color;
+        const color = new Color3(quest.colorR, quest.colorG, quest.colorB);
+        TRACKED_QUEST_WINDOW.Background.Frame.BackgroundColor3 = color;
         TRACKED_QUEST_WINDOW.TitleLabel.Text = quest.name ?? "no name";
-        TRACKED_QUEST_WINDOW.DescriptionLabel.Text = this.getFormattedDescription(quest, index) ?? "<no description provided>";
-        this.beam.Color = new ColorSequence(quest.color);
-        if (this.oldIndex !== index && (questId !== NewBeginnings.id || index !== 0)) {
+        TRACKED_QUEST_WINDOW.DescriptionLabel.Text = this.getFormattedDescription(questId, quest, index) ?? "<no description provided>";
+        this.beam.Color = new ColorSequence(color);
+        if (this.oldIndex !== index && (questId !== "NewBeginnings" || index !== 0)) {
             this.uiController.playSound("Notification");
         }
         this.oldIndex = index;
@@ -129,22 +123,16 @@ export class QuestsController implements OnInit, OnPhysics {
         }
         if (reward.items !== undefined) {
             for (const [item, amount] of reward.items) {
-                items.push(`${amount} ${item.name}`);
+                items.push(`${amount} ${Items.getItem(item)?.name}`);
             }
         }
         return combineHumanReadable(...items);
     }
 
-    showQuestCompletion(questId: string) {
-        const quest = Quest.getQuest(questId);
-        if (quest === undefined) {
-            warn("wtf bro");
-            return;
-        }
+    showCompletion(completionFrame: CompletionFrame, message: string) {
         this.uiController.playSound("Unlock");
-        const complFrame = TRACKED_QUEST_WINDOW.Completion;
-        complFrame.RewardLabel.Text = `${quest.name} rewards: ${this.getRewardLabel(quest.reward)}`;
-        this.effectController.showQuestMessage(complFrame);
+        completionFrame.RewardLabel.Text = message;
+        this.effectController.showQuestMessage(completionFrame);
     }
 
     refreshXp(xp: number) {
@@ -163,7 +151,7 @@ export class QuestsController implements OnInit, OnPhysics {
             TRACKED_QUEST_WINDOW.ProgressBar.GroupTransparency = 1;
             TRACKED_QUEST_WINDOW.ProgressBar.Bar.UIStroke.Transparency = 1;
             TRACKED_QUEST_WINDOW.ProgressBar.Visible = true;
-            TweenService.Create(TRACKED_QUEST_WINDOW.ProgressBar, new TweenInfo(0.2), { GroupTransparency: 0}).Play();
+            TweenService.Create(TRACKED_QUEST_WINDOW.ProgressBar, new TweenInfo(0.2), { GroupTransparency: 0 }).Play();
             TweenService.Create(TRACKED_QUEST_WINDOW.ProgressBar.Bar.UIStroke, new TweenInfo(0.2), { Transparency: 0 }).Play();
             TRACKED_QUEST_WINDOW.ProgressBar.Bar.BarLabel.Text = text;
             const tween = TweenService.Create(TRACKED_QUEST_WINDOW.ProgressBar.Bar.Fill, new TweenInfo(0.4), { Size: fillSize });
@@ -179,7 +167,7 @@ export class QuestsController implements OnInit, OnPhysics {
                 this.xpTweenConnection.Disconnect();
             }
             this.xpTweenConnection = tween.Completed.Once(() => task.delay(1.6, () => {
-                const t = TweenService.Create(TRACKED_QUEST_WINDOW.ProgressBar, new TweenInfo(0.2), { GroupTransparency: 1});
+                const t = TweenService.Create(TRACKED_QUEST_WINDOW.ProgressBar, new TweenInfo(0.2), { GroupTransparency: 1 });
                 TweenService.Create(TRACKED_QUEST_WINDOW.ProgressBar.Bar.UIStroke, new TweenInfo(0.2), { Transparency: 1 }).Play();
                 t.Completed.Once(() => TRACKED_QUEST_WINDOW.ProgressBar.Visible = false);
                 t.Play();
@@ -235,12 +223,12 @@ export class QuestsController implements OnInit, OnPhysics {
         });
         // LEVELS_WINDOW.LevelPointOptions.Respec.Activated.Connect(() => {
         //     this.uiController.playSound("Charge");
-        //     LevelCanister.respec.fire();
+        //     Packets.respec.fire();
         // });
         for (const uo of LEVELS_WINDOW.UpgradeOptions.GetChildren()) {
             if (uo.IsA("Frame")) {
                 const upgradeOption = uo as LPUpgradeOption;
-                const upgrade = NamedUpgrade.getUpgrade(upgradeOption.Name);
+                const upgrade = NamedUpgrades.ALL_UPGRADES.get(upgradeOption.Name);
                 if (upgrade === undefined) {
                     warn("What id win?");
                     continue;
@@ -248,23 +236,23 @@ export class QuestsController implements OnInit, OnPhysics {
                 upgradeOption.DescriptionLabel.Text = upgrade.description ?? "<no description provided>";
                 upgradeOption.Button.Transparency = 0.1;
                 upgradeOption.Button.Activated.Connect(() => {
-                    this.uiController.playSound(LevelCanister.getUpgrade.invoke(upgradeOption.Name, 1) ? "Charge" : "Error");
+                    this.uiController.playSound(Packets.getUpgrade.invoke(upgradeOption.Name, 1) ? "Charge" : "Error");
                 });
-                UpgradeBoardCanister.upgrades.observe((value) => upgradeOption.Button.ValueLabel.Text = tostring(value[upgradeOption.Name] ?? 0));
+                Packets.upgrades.observe((value) => upgradeOption.Button.ValueLabel.Text = tostring(value.get(upgradeOption.Name) ?? 0));
             }
         }
         let lastLevel = -1;
-        LevelCanister.level.observe((level) => {
+        Packets.level.observe((level) => {
             QUESTS_WINDOW.Level.Current.LevelLabel.Text = `Lv. ${level}`;
             QUESTS_WINDOW.Level.ProgressBar.SetAttribute("Level", level);
             if (lastLevel > -1) {
                 this.uiController.playSound("LevelUp");
             }
-            this.refreshXp(LevelCanister.xp.get());
+            this.refreshXp(Packets.xp.get());
             lastLevel = level;
         });
-        LevelCanister.xp.observe((xp) => this.refreshXp(xp));
-        LevelCanister.remainingLevelPoints.observe((val) => {
+        Packets.xp.observe((xp) => this.refreshXp(xp));
+        Packets.remainingLevelPoints.observe((val) => {
             QUESTS_WINDOW.Level.Current.NotificationLabel.Visible = val > 0;
             LEVELS_WINDOW.LevelPointOptions.LevelPointsLabel.Text = tostring(val);
         });
@@ -276,20 +264,26 @@ export class QuestsController implements OnInit, OnPhysics {
             }
             return false;
         }, "Close", 2);
-        Quest.init().forEach((quest) => {
+        const questInfoObservation = Packets.questInfo.observe((value) => {
+            for (const [id, questInfo] of value)
+                onQuestReceived(id, questInfo);
+            questInfoObservation.disconnect();
+        });
+        const onQuestReceived = (id: string, quest: QuestInfo) => {
             if (quest.level >= 999)
                 return;
-            this.availableQuests.add(quest.id);
+            this.availableQuests.add(id);
+            const color = new Color3(quest.colorR, quest.colorG, quest.colorB);
             const questOption = ASSETS.QuestsWindow.QuestOption.Clone();
             questOption.Dropdown.NameLabel.Text = quest.name ?? "no name";
-            questOption.Dropdown.NameLabel.TextColor3 = quest.color;
+            questOption.Dropdown.NameLabel.TextColor3 = color;
             questOption.Dropdown.LevelLabel.Text = `Lv. ${quest.level}`;
             questOption.Content.LengthLabel.Text = `Length: ${this.getLengthName(quest.length)}`;
             questOption.Content.LengthLabel.TextColor3 = this.getLengthColor(quest.length);
             questOption.Content.RewardLabel.Text = `Reward: ${this.getRewardLabel(quest.reward)}`;
-            questOption.BackgroundColor3 = quest.color;
-            questOption.UIStroke.Color = quest.color;
-            questOption.Name = quest.id;
+            questOption.BackgroundColor3 = color;
+            questOption.UIStroke.Color = color;
+            questOption.Name = id;
             let index = 0;
             let belowReq = false;
             const refreshDropdownLabel = () => TweenService.Create(questOption.Dropdown.ImageLabel, this.tween, { Rotation: questOption.Content.Visible ? 0 : 180 }).Play();
@@ -301,18 +295,18 @@ export class QuestsController implements OnInit, OnPhysics {
                 this.uiController.playSound("Flip");
             });
             const updateTrack = (q: string | undefined) => {
-                const color = quest.id === q ? Color3.fromRGB(85, 255, 127) : Color3.fromRGB(255, 52, 52);
+                const color = id === q ? Color3.fromRGB(85, 255, 127) : Color3.fromRGB(255, 52, 52);
                 questOption.Content.Track.BackgroundColor3 = color;
                 questOption.Content.Track.UIStroke.Color = color;
-            }
+            };
             this.trackedQuestChanged.connect((q) => updateTrack(q));
             updateTrack(this.trackedQuest);
             questOption.Content.Track.Activated.Connect(() => {
-                if (this.trackedQuest === quest.id) {
+                if (this.trackedQuest === id) {
                     this.trackedQuest = undefined;
                 }
                 else {
-                    this.trackedQuest = quest.id;
+                    this.trackedQuest = id;
                 }
                 this.trackedQuestChanged.fire(this.trackedQuest);
             });
@@ -321,7 +315,7 @@ export class QuestsController implements OnInit, OnPhysics {
             }
             const updateAvailability = () => {
                 if (index < 0) {
-                    this.availableQuests.delete(quest.id);
+                    this.availableQuests.delete(id);
                     if (moved === false)
                         questOption.Content.Visible = false;
                     questOption.Dropdown.NameLabel.TextTransparency = 0.5;
@@ -333,9 +327,9 @@ export class QuestsController implements OnInit, OnPhysics {
                 }
                 else {
                     if (belowReq === true)
-                        this.availableQuests.delete(quest.id);
+                        this.availableQuests.delete(id);
                     else
-                        this.availableQuests.add(quest.id);
+                        this.availableQuests.add(id);
                     questOption.Dropdown.NameLabel.TextTransparency = 0;
                     questOption.Dropdown.NameLabel.UIStroke.Transparency = 0;
                     questOption.Dropdown.LevelLabel.TextTransparency = 0;
@@ -343,32 +337,32 @@ export class QuestsController implements OnInit, OnPhysics {
                     questOption.LayoutOrder = belowReq ? getLayoutOrder() + 100000000 : getLayoutOrder();
                 }
                 questOption.Dropdown.LevelLabel.TextColor3 = belowReq ? Color3.fromRGB(255, 52, 52) : Color3.fromRGB(255, 255, 255);
-            }
-            LevelCanister.level.observe((level) => {
+            };
+            Packets.level.observe((level) => {
                 belowReq = level < quest.level;
                 updateAvailability();
                 this.refreshNotificationWindow();
-                
+
                 questOption.Content.Track.Visible = !belowReq;
             });
             let moved = false;
-            QuestCanister.quests.observe((quests) => {
-                index = quests.get(quest.id) ?? 0;
+            Packets.quests.observe((quests) => {
+                index = quests.get(id) ?? 0;
                 updateAvailability();
                 this.refreshNotificationWindow();
-                questOption.Content.CurrentStepLabel.Text = `- ${this.getFormattedDescription(quest, index)}`;
+                questOption.Content.CurrentStepLabel.Text = `- ${this.getFormattedDescription(id, quest, index)}`;
             });
             questOption.Parent = QUESTS_WINDOW.QuestList;
-        });
+        };
         this.trackedQuestChanged.connect((questId) => this.refreshTrackedQuestWindow(questId));
-        
-        QuestCanister.quests.observe((quests) => {
+
+        Packets.quests.observe((quests) => {
             const index = this.trackedQuest === undefined ? 0 : (quests.get(this.trackedQuest) ?? 0);
             this.indexer = this.trackedQuest === undefined ? undefined : this.trackedQuest + index;
             this.refreshTrackedQuestWindow(this.trackedQuest, index);
             this.refreshNotificationWindow();
         });
-        ChestCanister.xpReceived.connect((xp) => {
+        Packets.xpReceived.connect((xp) => {
             const lootItemSlot = ASSETS.LootTableItemSlot.Clone();
             this.uiController.playSound("ItemGet");
             lootItemSlot.Background.ImageLabel.ImageColor3 = TRACKED_QUEST_WINDOW.Background.Frame.BackgroundColor3;
@@ -377,19 +371,28 @@ export class QuestsController implements OnInit, OnPhysics {
             lootItemSlot.Parent = TRACKED_QUEST_WINDOW;
             task.delay(3, () => this.phaseOutLootTableItemSlot(lootItemSlot));
         });
-        ChestCanister.itemReceived.connect((itemId) => {
-            const item = Items.getItem(itemId);
-            if (item === undefined)
-                return;
-            const lootItemSlot = ASSETS.LootTableItemSlot.Clone();
+        Packets.itemsReceived.connect((items) => {
             this.uiController.playSound("ItemGet");
-            lootItemSlot.Background.ImageLabel.ImageColor3 = TRACKED_QUEST_WINDOW.Background.Frame.BackgroundColor3;
-            this.itemSlotController.loadViewportFrame(lootItemSlot.ViewportFrame, item);
-            lootItemSlot.TitleLabel.Text = item.name ?? item.id;
-            lootItemSlot.Parent = TRACKED_QUEST_WINDOW;
-            task.delay(3, () => this.phaseOutLootTableItemSlot(lootItemSlot));
+            for (const [itemId, amount] of items) {
+                const item = Items.getItem(itemId);
+                if (item === undefined)
+                    continue;
+                const lootItemSlot = ASSETS.LootTableItemSlot.Clone();
+                lootItemSlot.Background.ImageLabel.ImageColor3 = TRACKED_QUEST_WINDOW.Background.Frame.BackgroundColor3;
+                this.itemSlotController.loadViewportFrame(lootItemSlot.ViewportFrame, item);
+                lootItemSlot.TitleLabel.Text = `x${amount} ${item.name ?? item.id}`;
+                lootItemSlot.Parent = TRACKED_QUEST_WINDOW;
+                task.delay(3, () => this.phaseOutLootTableItemSlot(lootItemSlot));
+            }
         });
 
-        QuestCanister.questCompleted.connect((questId) => this.showQuestCompletion(questId));
+        Packets.questCompleted.connect((questId) => {
+            const quest = Packets.questInfo.get().get(questId);
+            if (quest === undefined) {
+                warn("wtf bro");
+                return;
+            }
+            this.showCompletion(TRACKED_QUEST_WINDOW.Completion, `${quest.name} rewards: ${this.getRewardLabel(quest.reward)}`);
+        });
     }
 }

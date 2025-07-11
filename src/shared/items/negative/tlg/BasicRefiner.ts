@@ -1,9 +1,9 @@
 import Price from "shared/Price";
 import { AREAS } from "shared/constants";
-import Difficulty from "shared/Difficulty";
+import Difficulty from "@antivivi/jjt-difficulties";
 import Upgrader from "shared/item/Upgrader";
 
-export = new Upgrader("BasicRefiner")
+export = new Upgrader(script.Name)
 .setName("Basic Refiner")
 .setDescription("A flag-like device used to refine droplets, increasing their value by %add%.")
 .setDifficulty(Difficulty.TheLowerGap)

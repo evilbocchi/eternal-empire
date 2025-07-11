@@ -1,10 +1,10 @@
-import Difficulty from "shared/Difficulty";
+import Difficulty from "@antivivi/jjt-difficulties";
 import Furnace from "shared/item/Furnace";
 import Price from "shared/Price";
 
-export = new Furnace("BasicCauldron")
+export = new Furnace(script.Name)
 .setName("Basic Cauldron")
-.setDescription("Able to process droplets for %mul%x more Funds, but must be directly dropped into.")
+.setDescription("Able to process droplets for %mul% more Funds, but must be directly dropped into.")
 .setDifficulty(Difficulty.TheLowerGap)
 .setPrice(new Price().setCost("Funds", 5000), 1)
 .addPlaceableArea("BarrenIslands")

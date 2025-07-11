@@ -1,8 +1,8 @@
-import Difficulty from "shared/Difficulty";
+import Difficulty from "@antivivi/jjt-difficulties";
 import Furnace from "shared/item/Furnace";
 import Price from "shared/Price";
 
-export = new Furnace("TheFirstFurnace")
+export = new Furnace(script.Name)
 .setName("The First Furnace")
 .setDescription("Processes droplets, turning them into liquid currency.")
 .setDifficulty(Difficulty.TheFirstDifficulty)

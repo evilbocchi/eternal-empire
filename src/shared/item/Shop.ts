@@ -1,6 +1,10 @@
-//!native
-
 import Item from "shared/item/Item";
+
+declare global {
+    interface ItemTypes {
+        Shop: Shop;
+    }
+}
 
 class Shop extends Item {
     
@@ -8,7 +12,7 @@ class Shop extends Item {
 
     constructor(id: string) {
         super(id);
-        this.types.push("Shop");
+        this.types.add("Shop");
         this.onLoad((model) => {
             const prompt = new Instance("ProximityPrompt");
             prompt.RequiresLineOfSight = false;
@@ -19,6 +23,7 @@ class Shop extends Item {
             prompt.SetAttribute("Shop", model.Name);
             prompt.Parent = model.WaitForChild("NPC");
         })
+        this.persists();
     }
 
     setItems(items: Item[]) {

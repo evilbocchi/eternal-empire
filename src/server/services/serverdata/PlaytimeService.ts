@@ -1,56 +1,40 @@
-import { OnStart, Service } from "@flamework/core";
+import { OnInit, Service } from "@flamework/core";
 import { RunService } from "@rbxts/services";
 import { DataService } from "server/services/serverdata/DataService";
-import { Fletchette, RemoteProperty } from "@antivivi/fletchette";
-
-declare global {
-    interface FletchetteCanisters {
-        PlaytimeCanister: typeof PlaytimeCanister
-    }
-}
-
-const PlaytimeCanister = Fletchette.createCanister("PlaytimeCanister", {
-    longestSessionTime: new RemoteProperty<number>(0, false),
-    sessionTime: new RemoteProperty<number>(0, false),
-    empirePlaytime: new RemoteProperty<number>(0, false),
-    playerPlaytime: new RemoteProperty<number>(0, false),
-});
+import Packets from "shared/network/Packets";
+import ItemUtils from "shared/utils/ItemUtils";
 
 @Service()
-export class PlaytimeService implements OnStart {
+export class PlaytimeService implements OnInit {
 
     constructor(private dataService: DataService) {
 
     }
 
     getPlaytime() {
-        return this.dataService.empireProfile?.Data.playtime ?? 0;
+        return this.dataService.empireData.playtime;
     }
 
     setPlaytime(value: number) {
-        if (this.dataService.empireProfile !== undefined) {
-            this.dataService.empireProfile.Data.playtime = value;
-            PlaytimeCanister.empirePlaytime.set(value);
-        }
+        this.dataService.empireData.playtime = value;
+        Packets.empirePlaytime.set(value);
     }
 
-    onStart() {
+    onInit() {
+        Packets.longestSessionTime.set(this.dataService.empireData.longestSession);
         task.spawn(() => {
-            this.dataService.empireProfileLoaded.once((profile) => PlaytimeCanister.longestSessionTime.set(profile.Data.longestSession));
-            if (this.dataService.empireProfile !== undefined) {
-                PlaytimeCanister.longestSessionTime.set(this.dataService.empireProfile.Data.longestSession);
-            }
-    
             let t = 0;
             RunService.Heartbeat.Connect((dt) => {
                 t += dt;
                 if (t > 1) {
-                    this.setPlaytime(this.getPlaytime() + t);
-                    const st = PlaytimeCanister.sessionTime.get() + t;
-                    PlaytimeCanister.sessionTime.set(st);
-                    if (this.dataService.empireProfile !== undefined &&  this.dataService.empireProfile.Data.longestSession < st) {
-                        this.dataService.empireProfile.Data.longestSession = st;
-                        PlaytimeCanister.longestSessionTime.set(st);
+                    const playtime = this.getPlaytime() + t;
+                    this.setPlaytime(playtime);
+                    ItemUtils.clientDroplets = playtime > 100000;
+                    const st = Packets.sessionTime.get() + t;
+                    Packets.sessionTime.set(st);
+                    if (this.dataService.empireData.longestSession < st) {
+                        this.dataService.empireData.longestSession = st;
+                        Packets.longestSessionTime.set(st);
                     }
                     t = 0;
                 }

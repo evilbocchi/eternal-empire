@@ -1,8 +1,8 @@
-import Difficulty from "shared/Difficulty";
+import Difficulty from "@antivivi/jjt-difficulties";
 import Conveyor from "shared/item/Conveyor";
 import Price from "shared/Price";
 
-export = new Conveyor("DropletAligner")
+export = new Conveyor(script.Name)
 .setName("Droplet Aligner")
 .setDescription("Moves droplets to the direct center of the conveyor and pushes them forward. Useful for a few things.")
 .setDifficulty(Difficulty.Relax)

@@ -1,14 +1,12 @@
-import { SerikaNum } from "@antivivi/serikanum";
-import { Controller, OnStart } from "@flamework/core";
+import SerikaNum from "@antivivi/serikanum";
+import { Controller, OnInit, OnStart } from "@flamework/core";
 import { UserInputService } from "@rbxts/services";
 import { SETTINGS_WINDOW } from "client/constants";
 import { HotkeysController } from "client/controllers/HotkeysController";
 import { UIController } from "client/controllers/UIController";
 import { ASSETS, HotkeyOption } from "shared/constants";
-import { Fletchette } from "@antivivi/fletchette";
+import Packets from "shared/network/Packets";
 import { paintObjects } from "shared/utils/vrldk/UIUtils";
-
-const SettingsCanister = Fletchette.getCanister("SettingsCanister");
 
 @Controller()
 export class SettingsController implements OnStart {
@@ -46,7 +44,7 @@ export class SettingsController implements OnStart {
         }
     }
 
-    refreshToggle(setting: keyof Settings, enabled: boolean) {
+    refreshToggle(setting: string, enabled: boolean) {
         const toggle = SETTINGS_WINDOW.InteractionOptions.FindFirstChild(setting)?.FindFirstChild("Toggle");
         if (toggle === undefined) {
             return;
@@ -86,7 +84,7 @@ export class SettingsController implements OnStart {
             if (input.KeyCode !== Enum.KeyCode.Unknown && input.KeyCode !== undefined && this.selectedOption !== undefined) {
                 const name = this.selectedOption.Name;
                 this.deselectOption();
-                SettingsCanister.setHotkey.fire(name, input.KeyCode.Value);
+                Packets.setHotkey.inform(name, input.KeyCode.Value);
             }
         });
 
@@ -96,20 +94,20 @@ export class SettingsController implements OnStart {
                 toggle.Activated.Connect(() => {
                     this.uiController.playSound("Click");
                     const setting = settingOption.Name as keyof Settings;
-                    SettingsCanister.setSetting.fire(setting, !SettingsCanister.settings.get()[setting]);
+                    Packets.setSetting.inform(setting, !Packets.settings.get()[setting]);
                 });
             }
         }
 
-        SettingsCanister.settings.observe((value) => {
+        Packets.settings.observe((value) => {
             for (const [setting, v] of pairs(value)) {
                 this.refreshToggle(setting, v === true);
             }
             SerikaNum.changeDefaultAbbreviation(value.ScientificNotation === true ? "scientific" : "suffix");            
         
-            for (const [name, code] of value.hotkeys) {
+            const bindedKeys = this.hotkeysController.bindedKeys;
+            for (const [name, code] of pairs(value.hotkeys)) {
                 const keyCode = this.getMatchingKeyCodeFromValue(code);
-                const bindedKeys = this.hotkeysController.bindedKeys;
                 for (const bindedKey of bindedKeys) {
                     if (bindedKey.name === name && keyCode !== undefined) {
                         bindedKey.hotkey = keyCode;

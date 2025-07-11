@@ -1,8 +1,8 @@
-import Difficulty from "shared/Difficulty";
+import Difficulty from "@antivivi/jjt-difficulties";
 import Charger from "shared/item/Charger";
 import Price from "shared/Price";
 
-export = new Charger("IndustrialCharger")
+export = new Charger(script.Name)
 .setName("Industrial Charger")
 .setDescription("Invented yet again by Speed Bobs, this charger doesn't count towards any charge limits, but only boosts Power by 1.25x in a 8 stud radius.")
 .setDifficulty(Difficulty.Relax)

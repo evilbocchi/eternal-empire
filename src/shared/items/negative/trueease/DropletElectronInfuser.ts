@@ -1,9 +1,9 @@
-import Difficulty from "shared/Difficulty";
+import Difficulty from "@antivivi/jjt-difficulties";
 import Upgrader from "shared/item/Upgrader";
 import Price from "shared/Price";
 import { rainbowEffect } from "shared/utils/vrldk/BasePartUtils";
 
-export = new Upgrader("DropletElectronInfuser")
+export = new Upgrader(script.Name)
 .setName("Droplet Electron Infuser")
 .setDescription("Now we're talking. Droplets passing through this upgrader gain %add% in value.")
 .setDifficulty(Difficulty.TrueEase)

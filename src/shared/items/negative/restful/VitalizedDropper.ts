@@ -1,9 +1,9 @@
-import Difficulty from "shared/Difficulty";
+import Difficulty from "@antivivi/jjt-difficulties";
 import Droplet from "shared/item/Droplet";
 import Dropper from "shared/item/Dropper";
 import Price from "shared/Price";
 
-export = new Dropper("VitalizedDropper")
+export = new Dropper(script.Name)
 .setName("Vitalized Dropper")
 .setDescription("Produces $40K, 2K W droplets per second with droplets having an extra 40 health.")
 .setDifficulty(Difficulty.Restful)

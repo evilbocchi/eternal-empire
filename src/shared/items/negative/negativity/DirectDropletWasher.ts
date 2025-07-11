@@ -1,9 +1,9 @@
 import Price from "shared/Price";
 import { AREAS } from "shared/constants";
-import Difficulty from "shared/Difficulty";
+import Difficulty from "@antivivi/jjt-difficulties";
 import Upgrader from "shared/item/Upgrader";
 
-export = new Upgrader("DirectDropletWasher")
+export = new Upgrader(script.Name)
 .setName("Direct Droplet Washer")
 .setDescription("Upgrades droplets dropped directly above it for a %add% gain.")
 .setDifficulty(Difficulty.Negativity)

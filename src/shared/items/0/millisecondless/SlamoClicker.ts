@@ -1,21 +1,21 @@
-import Difficulty from "shared/Difficulty";
+import Difficulty from "@antivivi/jjt-difficulties";
 import { Manumatic } from "shared/item/Special";
 import Price from "shared/Price";
 import { loadAnimation } from "shared/utils/vrldk/RigUtils";
 
-const animTrackPerModel = new Map<Model, AnimationTrack>();
 
-export = new Manumatic.Clicker("SlamoClicker")
+export = new Manumatic.Clicker(script.Name)
 .setName("Slamo Clicker")
-.setDescription("Slamos click pretty well at 20 CPS.")
+.setDescription("Slamos click pretty well at 80 CPS.")
 .setDifficulty(Difficulty.Millisecondless)
 .setPrice(new Price().setCost("Funds", 1.4e24).setCost("Purifier Clicks", 10000), 1)
 .setPrice(new Price().setCost("Funds", 2.9e24).setCost("Purifier Clicks", 30000), 2)
 .addPlaceableArea("BarrenIslands")
 
-.setCPS(4)
-.setClickValue(5)
-.onLoad((model) => {
+.setCPS(5)
+.setClickValue(16)
+.onLoad((model) => Manumatic.Clicker.createClickRemote(model))
+.onClientLoad((model) => {
     const slamo = model.WaitForChild("Slamo") as Model;
     const humanoid = slamo.FindFirstChildOfClass("Humanoid");
     if (humanoid === undefined) {
@@ -27,13 +27,12 @@ export = new Manumatic.Clicker("SlamoClicker")
     }
     const animTrack = loadAnimation(humanoid, 17441475234);
     if (animTrack !== undefined) {
-        animTrackPerModel.set(model, animTrack);
-        model.Destroying.Once(() => animTrackPerModel.delete(model));
+        (model.WaitForChild("ClickEvent") as UnreliableRemoteEvent).OnClientEvent.Connect(() => animTrack.Play());
     }
 })
 .setOnClick((model: Model) => {
-    const animTrack = animTrackPerModel.get(model);
-    if (animTrack !== undefined) {
-        animTrack.Play();
+    const clickEvent = model.FindFirstChild("ClickEvent");
+    if (clickEvent !== undefined) {
+        (clickEvent as UnreliableRemoteEvent).FireAllClients();
     }
 });

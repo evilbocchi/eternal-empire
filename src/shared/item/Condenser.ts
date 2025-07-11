@@ -1,25 +1,36 @@
-//!native
-
+import { OnoeNum } from "@antivivi/serikanum";
 import Price from "shared/Price";
 import { AREAS } from "shared/constants";
 import Dropper from "shared/item/Dropper";
-import { OnoeNum } from "@antivivi/serikanum";
+import Packets from "shared/network/Packets";
+import ItemUtils, { GameUtils } from "shared/utils/ItemUtils";
 import Droplet from "./Droplet";
-import FurnaceDropper from "./FurnaceDropper";
 
-class Condenser extends FurnaceDropper {
+declare global {
+    interface ItemTypes {
+        Condenser: Condenser;
+    }
+
+    interface InstanceInfo {
+        Condensed?: boolean;
+    }
+}
+
+class Condenser extends Dropper {
 
     quotasPerDroplet = new Map<Droplet, number>();
 
     constructor(id: string) {
         super(id);
-        this.types.push("Condenser");
-        this.onLoad((model, utils, item) => {
-            const areaId = utils.getPlacedItem(model.Name)?.area;
-            const area = AREAS[areaId as keyof (typeof AREAS)];
+        this.types.add("Condenser");
+        this.acceptsGlobalBoosts(false);
+        this.onLoad((model, item) => {
+            const areaId = GameUtils.itemsService.getPlacedItem(model.Name)?.area;
+            if (areaId === undefined)
+                return;
+            const area = AREAS[areaId as AreaId];
             const dropletLimit = area.dropletLimit;
-            const dropletCount = area.areaFolder.WaitForChild("DropletCount") as IntValue;
-
+            const dropletCountPerArea = GameUtils.dropletCountPerArea;
             const instantiatorsPerDroplet = new Map<Droplet, () => BasePart>();
             const pricePerDroplet = new Map<Droplet, Price>();
             const maxCosts = new Map<Currency, OnoeNum>();
@@ -33,19 +44,22 @@ class Condenser extends FurnaceDropper {
                     maxCosts.set(currency, cost.mul(10));
                 }
                 const drop = model.WaitForChild("Drop") as BasePart;
-                instantiatorsPerDroplet.set(droplet, Dropper.wrapInstantiator(drop, droplet.getInstantiator(model, drop.CFrame, utils)));
+                instantiatorsPerDroplet.set(droplet, Dropper.wrapInstantiator(drop, droplet.getInstantiator(model, drop.CFrame), item as Dropper));
             }
             const event = new Instance("BindableEvent");
             event.Parent = model;
             const surfaceGui = model.WaitForChild("GuiPart").FindFirstChildOfClass("SurfaceGui");
+            const lava = model.WaitForChild("Lava");
             if (surfaceGui === undefined) {
                 return;
             }
             let current = new Price();
-            const upgrades = new Map<string, Model>();
+            const upgrades = new Map<string, UpgradeInfo>();
+
             const check = () => {
                 pricePerDroplet.forEach((price, droplet) => {
-                    if (dropletCount.Value > dropletLimit.Value) {
+                    const dropletCount = dropletCountPerArea.get(areaId as AreaId);
+                    if (dropletCount === undefined || dropletCount > dropletLimit.Value) {
                         return;
                     }
                     let isInstantiate = true;
@@ -56,25 +70,25 @@ class Condenser extends FurnaceDropper {
                             break;
                         }
                     }
-                    if (isInstantiate) {
+                    if (isInstantiate === true) {
                         current = current.sub(price);
                         const instantiator = instantiatorsPerDroplet.get(droplet);
                         if (instantiator !== undefined) {
                             const droplet = instantiator();
-                            for (const [upgraderId, upgraderModel] of upgrades) {
-                                const pointer = new Instance("ObjectValue");
-                                pointer.Name = upgraderId;
-                                pointer.Value = upgraderModel;
-                                pointer.SetAttribute("ItemId", upgraderModel.GetAttribute("ItemId"));
-                                pointer.SetAttribute("EmptyUpgrade", true);
-                                pointer.Parent = droplet;
+                            const instanceInfo = GameUtils.getAllInstanceInfo(droplet);
+                            for (const [id, upgradeInfo] of upgrades) {
+                                let upgrades = instanceInfo.Upgrades ?? new Map();
+                                const pointer = table.clone(upgradeInfo);
+                                pointer.EmptyUpgrade = true;
+                                upgrades.set(id, pointer);
+                                instanceInfo.Upgrades = upgrades;
                             }
-                            droplet.SetAttribute("Condensed", true);
+                            instanceInfo.Condensed = true;
                         }
                     }
                 });
                 update();
-            }
+            };
             const update = () => {
                 pricePerDroplet.forEach((price) => {
                     for (const [currency, cost] of pairs(price.costPerCurrency)) {
@@ -84,37 +98,53 @@ class Condenser extends FurnaceDropper {
                         (bar.WaitForChild("PercentageLabel") as TextLabel).Text = math.floor(progress * 100) + "%";
                     }
                 });
-            }
+            };
             update();
+            const ZERO = new OnoeNum(0);
+            const CurrencyService = GameUtils.currencyService;
+            const RevenueService = GameUtils.revenueService;
             event.Event.Connect((raw?: Price, dropletModel?: BasePart) => {
                 if (raw !== undefined && dropletModel !== undefined) {
-                    const id = dropletModel.GetAttribute("DropletId") as string;
-                    if (id === undefined || dropletModel.GetAttribute("Condensed") === true) {
+                    const instanceInfo = GameUtils.getAllInstanceInfo(dropletModel);
+                    if (instanceInfo.DropletId === undefined || instanceInfo.Condensed === true) {
                         return;
                     }
-                    const newCurrent = current.add(new Price(raw.costPerCurrency));
-                    for (const [currency, cost] of newCurrent.costPerCurrency) {
+                    const currentMap = current.costPerCurrency;
+                    const lostCurrencies = new Map<Currency, OnoeNum>();
+                    for (const [currency, cost] of raw.costPerCurrency) {
+                        const prev = currentMap.get(currency);
+                        let newCost = prev === undefined ? cost : prev.add(cost);
                         const limit = maxCosts.get(currency);
-                        if (limit === undefined || cost.lessThan(limit))
-                            continue;
-                        newCurrent.setCost(currency, limit);
-                    }
-                    for (const upgrade of dropletModel.GetChildren()) {
-                        if (upgrade.IsA("ObjectValue")) {
-                            upgrades.set(upgrade.Name, upgrade.Value as Model);
+                        if (limit === undefined) {
+                            if (ZERO.lessThan(cost)) {
+                                lostCurrencies.set(currency, new OnoeNum(cost));
+                            }
+                        }
+                        else {
+                            currentMap.set(currency, OnoeNum.min(newCost, limit));
                         }
                     }
-                    current = newCurrent;
+
+                    if (!lostCurrencies.isEmpty()) {
+                        CurrencyService.incrementCurrencies(RevenueService.applySoftcaps(lostCurrencies));
+                        Packets.dropletBurnt.fireAll(dropletModel.Name, lostCurrencies, model.Name, lava.Name, ItemUtils.clientDroplets);
+                    }
+                    const upgrades = instanceInfo.Upgrades;
+                    if (upgrades !== undefined) {
+                        for (const [id, upgrade] of upgrades) {
+                            upgrades.set(id, upgrade);
+                        }
+                    }
                     check();
                     update();
                 }
             });
             item.repeat(model, () => check(), 0.4);
         });
-        this.onProcessed((model, _utils, _item, _worth, raw, droplet) => {
+        this.onProcessed((model, _item, worth, droplet) => {
             const event = model.FindFirstChildOfClass("BindableEvent");
             if (event !== undefined) {
-                event.Fire(raw, droplet);
+                event.Fire(worth, droplet);
             }
         });
     }

@@ -1,78 +1,80 @@
 //!native
 
-import { OnStart, Service } from "@flamework/core";
-import { DataService } from "server/services/serverdata/DataService";
-import Price from "shared/Price";
-import { Fletchette, RemoteProperty, Signal } from "@antivivi/fletchette";
+import Signal from "@antivivi/lemon-signal";
 import { OnoeNum } from "@antivivi/serikanum";
+import { OnInit, Service } from "@flamework/core";
+import { DataService } from "server/services/serverdata/DataService";
+import Packets from "shared/network/Packets";
+import Price from "shared/Price";
+import Softcaps from "shared/Softcaps";
+import Queue from "shared/utils/Queue";
 
-declare global {
-    interface FletchetteCanisters {
-        CurrencyCanister: typeof CurrencyCanister;
-    }
-}
+const ZERO = new OnoeNum(0);
 
-export const CurrencyCanister = Fletchette.createCanister("CurrencyCanister", {
-    balance: new RemoteProperty<Map<Currency, OnoeNum>>(new Map(), false),
-    mostBalance: new RemoteProperty<Map<Currency, OnoeNum>>(new Map(), false),
-});
 
 @Service()
-export class CurrencyService implements OnStart {
+export class CurrencyService implements OnInit {
     balanceChanged = new Signal<(balance: Map<Currency, OnoeNum>) => void>();
 
     constructor(private dataService: DataService) {
-        
+
     }
 
-    getCost(currency: Currency) {
-        return new OnoeNum(this.dataService.empireProfile?.Data.currencies.get(currency) ?? 0);
+    getCost(currency: Currency, currencies = this.dataService.empireData.currencies) {
+        return new OnoeNum(currencies.get(currency) ?? 0);
     }
 
-    setCost(currency: Currency, cost: OnoeNum | undefined, dontPropagateToClient?: boolean) {
-        const profile = this.dataService.empireProfile;
-        if (profile !== undefined) {
-            if (cost === undefined) {
-                profile.Data.currencies.delete(currency);
-            }
-            else {
-                profile.Data.currencies.set(currency, cost.lessThan(0) ? new OnoeNum(0) : cost);
-            }
-            if (dontPropagateToClient !== true) {
-                const balance = profile.Data.currencies;
-                CurrencyCanister.balance.set(balance);
-                this.balanceChanged.fire(balance);
-            }
+    setCost(currency: Currency, cost: OnoeNum | undefined, dontPropagateToClient?: boolean, currencies = this.dataService.empireData.currencies) {
+        if (cost === undefined) {
+            currencies.delete(currency);
+        }
+        else {
+            currencies.set(currency, ZERO.moreThan(cost) ? ZERO : cost);
+        }
+        if (dontPropagateToClient !== true) {
+            this.propagate(currencies);
         }
     }
 
-    incrementCost(currency: Currency, cost: OnoeNum) {
-        const c = this.getCost(currency);
-        if (c !== undefined) {
-            this.setCost(currency, c.add(cost));
-        }
+    incrementCost(currency: Currency, delta: OnoeNum, dontPropagateToClient?: boolean, currencies = this.dataService.empireData.currencies) {
+        return this.setCost(currency, this.getCost(currency, currencies).add(delta), dontPropagateToClient, currencies);
     }
 
+    /**
+     * Gets the amount of each currency in the server.
+     * This is a slow function since it creates a new Price instance and
+     * effectively clones the currencies object stored in data.
+     * 
+     * @returns Price instance containing amounts of each currency
+     */
     getBalance() {
         const price = new Price();
-        const currencies = this.dataService.empireProfile?.Data.currencies;
-        if (currencies === undefined) {
-            return price;
-        }
+        const currencies = this.dataService.empireData.currencies;
         for (const [currency, amount] of pairs(currencies)) {
             price.setCost(currency, new OnoeNum(amount));
         }
         return price;
     }
 
-    isSufficientBalance(price: Price): [boolean, Price] {
+    setBalance(balance: Price) {
+        this.setCurrencies(balance.costPerCurrency);
+    }
+
+    /**
+     * Checks whether the amount of each currency in the server satisfies the required currency amounts.
+     * 
+     * @param required The currency amounts needed
+     * @returns A tuple that contains if there is sufficient currencies and the remaining currency amounts after subtraction.
+     */
+    isSufficientBalance(required: Price): LuaTuple<[boolean, Price]> {
         const balance = this.getBalance();
         let sufficient = true;
-        for (const [currency, cost] of price.costPerCurrency) {
+        for (const [currency, cost] of required.costPerCurrency) {
             const balCost = balance.getCost(currency);
             if (balCost === undefined) {
                 if (cost.moreThan(0))
                     sufficient = false;
+                balance.setCost(currency, cost.unary());
             }
             else {
                 if (balCost.lessThan(cost))
@@ -80,49 +82,70 @@ export class CurrencyService implements OnStart {
                 balance.setCost(currency, balCost.sub(cost));
             }
         }
-        return [sufficient, balance];
+        return $tuple(sufficient, balance);
     }
 
-    setBalance(balance: Price) {
-        for (const [currency, cost] of balance.costPerCurrency) {
-            this.setCost(currency, cost, true);
+    setCurrencies(to: Map<Currency, OnoeNum>, currencies = this.dataService.empireData.currencies) {
+        for (const [currency, cost] of to) {
+            this.setCost(currency, cost, true, currencies);
         }
-        if (this.dataService.empireProfile !== undefined) {
-            const balance = this.dataService.empireProfile.Data.currencies;
-            CurrencyCanister.balance.set(balance);
-            this.balanceChanged.fire(balance);
+        this.propagate(currencies);
+    }
+
+    incrementCurrencies(delta: Map<Currency, OnoeNum>, currencies = this.dataService.empireData.currencies) {
+        for (const [currency, cost] of delta) {
+            this.incrementCost(currency, cost, true, currencies);
         }
+        this.propagate(currencies);
+    }
+
+    propagate(currencies: Map<Currency, OnoeNum>) {
+        Packets.balance.set(currencies);
+        this.balanceChanged.fire(currencies);
     }
 
     purchase(price: Price) {
         const [isSufficient, bal] = this.isSufficientBalance(price);
         if (isSufficient === true) {
-            this.setBalance(bal);
+            this.setCurrencies(bal.costPerCurrency);
             return true;
         }
         return false;
     }
 
-    onStart() {
-        this.dataService.empireProfileLoaded.once((profile) => CurrencyCanister.balance.set(profile.Data.currencies));
-        if (this.dataService.empireProfile !== undefined) {
-            CurrencyCanister.balance.set(this.dataService.empireProfile.Data.currencies);
+    onInit() {
+        Packets.balance.set(this.dataService.empireData.currencies);
+
+        const queuePerCurrency = new Map<Currency, Queue>();
+        for (const [currency] of pairs(Price.DETAILS_PER_CURRENCY)) {
+            queuePerCurrency.set(currency, new Queue());
         }
+        const income = new Map<Currency, OnoeNum>();
+
         task.spawn(() => {
             while (task.wait(1)) {
-                const profile = this.dataService.empireProfile;
-                if (profile === undefined) {
-                    continue;
-                }
-                const currencies = profile.Data.currencies;
-                const mostCurrencies = profile.Data.mostCurrencies;
+                const data = this.dataService.empireData;
+                const currencies = data.currencies;
+                const mostCurrencies = data.mostCurrencies;
                 for (const [currency, amount] of currencies) {
+                    if (Price.DETAILS_PER_CURRENCY[currency] === undefined) {
+                        currencies.delete(currency);
+                        continue;
+                    }
                     const mostRecorded = mostCurrencies.get(currency);
-                    if (mostRecorded === undefined || new OnoeNum(mostRecorded).lessThan(new OnoeNum(amount))) {
+                    if (mostRecorded === undefined || new OnoeNum(amount).moreThan(mostRecorded)) {
                         mostCurrencies.set(currency, amount);
                     }
+
+                    const queue = queuePerCurrency.get(currency);
+                    if (queue === undefined) {
+                        continue;
+                    }
+                    queue.addToQueue(amount);
+                    income.set(currency, queue.getAverageGain());
                 }
-                CurrencyCanister.mostBalance.set(mostCurrencies);
+                Packets.mostBalance.set(mostCurrencies);
+                Packets.income.set(income);
             }
         });
     }

@@ -1,9 +1,9 @@
-import Difficulty from "shared/Difficulty";
+import Difficulty from "@antivivi/jjt-difficulties";
 import Conveyor from "shared/item/Conveyor";
 import Price from "shared/Price";
 import { rainbowEffect } from "shared/utils/vrldk/BasePartUtils";
 
-export = new Conveyor("QuickConveyor")
+export = new Conveyor(script.Name)
 .setName("Quick Conveyor")
 .setDescription("Less droplets in a single moment means less worry about droplet limits. Transports droplets at a quicker rate than all previous conveyors!")
 .setDifficulty(Difficulty.TrueEase)

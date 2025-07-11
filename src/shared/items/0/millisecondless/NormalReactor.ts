@@ -1,10 +1,10 @@
-import Difficulty from "shared/Difficulty";
+import Difficulty from "@antivivi/jjt-difficulties";
 import Price from "shared/Price";
 import { PowerHarvester } from "shared/item/Special";
 import Upgrader from "shared/item/Upgrader";
 import CompactReactor from "shared/items/negative/reversedperipherality/CompactReactor";
 
-export = new Upgrader("NormalReactor")
+export = new Upgrader(script.Name)
 .setName("Normal Reactor")
 .setDescription("Surprisingly reasonable sizing this time! Uh, wait. Each entrance gives a 3.5x Funds boost, but... oh. I wish you the best of luck in configuring this.")
 .setDifficulty(Difficulty.Millisecondless)
@@ -16,6 +16,6 @@ export = new Upgrader("NormalReactor")
 .setSpeed(5)
 .setMul(new Price().setCost("Funds", 3.5))
 .ambienceSound((model) => (model.WaitForChild("Hitbox").WaitForChild("Sound") as Sound))
-.onLoad((model) => {
+.onClientLoad((model) => {
     PowerHarvester.spin(model);
 })

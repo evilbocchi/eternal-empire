@@ -1,9 +1,9 @@
-import Difficulty from "shared/Difficulty";
+import Difficulty from "@antivivi/jjt-difficulties";
 import Price from "shared/Price";
 import Furnace from "shared/item/Furnace";
 import { OnoeNum } from "@antivivi/serikanum";
 
-export = new Furnace("SpatialFurnace")
+export = new Furnace(script.Name)
 .setName("Spatial Furnace")
 .setDescription("A basic furnace placeable in Slamo Village.")
 .setDifficulty(Difficulty.Astronomical)

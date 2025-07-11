@@ -1,9 +1,9 @@
 import Price from "shared/Price";
 import { AREAS } from "shared/constants";
-import Difficulty from "shared/Difficulty";
+import Difficulty from "@antivivi/jjt-difficulties";
 import Conveyor from "shared/item/Conveyor";
 
-export = new Conveyor("AnticlockwiseConveyorCorner")
+export = new Conveyor(script.Name)
 .setName("Anti-clockwise Conveyor Corner")
 .setDescription("Originally developed by the legend himself, Speed Bobs, his legacy lives on in the name of transporting droplets anti-clockwise.")
 .setDifficulty(Difficulty.Friendliness)

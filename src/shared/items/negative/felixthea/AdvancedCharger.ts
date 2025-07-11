@@ -1,8 +1,8 @@
-import Difficulty from "shared/Difficulty";
+import Difficulty from "@antivivi/jjt-difficulties";
 import Price from "shared/Price";
 import Charger from "shared/item/Charger";
 
-export = new Charger("AdvancedCharger")
+export = new Charger(script.Name)
 .setName("Advanced Charger")
 .setDescription("Boosts Power gain of generators within 11 studs radius of this charger by 4x.")
 .setDifficulty(Difficulty.FelixTheA)

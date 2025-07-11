@@ -1,8 +1,8 @@
-import Difficulty from "shared/Difficulty";
+import Difficulty from "@antivivi/jjt-difficulties";
 import Price from "shared/Price";
 import Item from "shared/item/Item";
 
-export = new Item("Glass")
+export = new Item(script.Name)
 .setName("Glass")
 .setDescription("It didn't lie. This really is glass, costing quite the fortune.")
 .setDifficulty(Difficulty.Millisecondless)

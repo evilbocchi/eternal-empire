@@ -1,32 +1,42 @@
-//!native
-
-import { RunService, TweenService } from "@rbxts/services";
-import { AREAS, getSound } from "shared/constants";
+import { RunService } from "@rbxts/services";
+import { AREAS } from "shared/constants";
+import GameSpeed from "shared/GameSpeed";
 import Droplet from "shared/item/Droplet";
-import Item from "shared/item/Item";
+import Furnace from "shared/item/Furnace";
+import Packets from "shared/network/Packets";
+import { GameUtils } from "shared/utils/ItemUtils";
 import { findBaseParts } from "shared/utils/vrldk/BasePartUtils";
 
-class Dropper extends Item {
-
-    static wrapInstantiator(drop: BasePart, instantiator: () => BasePart) {
-        const sound = getSound("Drop").Clone();
-        sound.Parent = drop;
-        const originalSize = drop.Size;
-        const bigSize = originalSize.add(new Vector3(0.25, 0.25, 0.25));
-        const tweenInfo = new TweenInfo(0.2);
-        return () => {
-            drop.Size = bigSize;
-            TweenService.Create(drop, tweenInfo, { Size: originalSize }).Play();
-            sound.Play();
-            const droplet = instantiator();
-            const originalDropletSize = droplet.Size;
-            droplet.Size = new Vector3(0.01, 0.01, 0.01);
-            TweenService.Create(droplet, tweenInfo, { Size: originalDropletSize }).Play();
-            return droplet;
-        }
+declare global {
+    interface ItemTypes {
+        Dropper: Dropper;
     }
 
-    static load(model: Model, utils: GameUtils, item: Dropper) {
+    interface InstanceInfo {
+        DropRate?: number;
+        DropRateModifiers?: Set<{multi: number}>;
+        LastDrop?: number;
+        DropletLimitValue?: IntValue;
+        Instantiator?: () => void;
+    }
+}
+
+class Dropper extends Furnace {
+
+    static wrapInstantiator(drop: BasePart, instantiator: () => BasePart, item: Dropper) {
+        const placedItemId = drop.Parent!.Name;
+        const dropId = drop.Name;
+        const callback = item.dropletProduced;
+        return () => {
+            const droplet = instantiator();
+            Packets.dropletAdded.fireAll(placedItemId, dropId, droplet.Name);
+            if (callback !== undefined)
+                callback(droplet, item);
+            return droplet;
+        };
+    }
+
+    static load(model: Model, item: Dropper) {
         const drops = findBaseParts(model, "Drop");
         for (const [drop, _droplet] of item.dropletPerDrop) {
             const part = model.FindFirstChild(drop);
@@ -35,46 +45,32 @@ class Dropper extends Item {
             }
         }
         for (const d of drops) {
-            let instantiator = item.getDroplet(d.Name)?.getInstantiator(model, d.CFrame, utils);
-            const areaId = utils.getPlacedItem(model.Name)?.area;
+            let instantiator = item.getDroplet(d.Name)?.getInstantiator(model, d.CFrame);
+            const areaId = GameUtils.itemsService.getPlacedItem(model.Name)?.area;
+            const info = GameUtils.getAllInstanceInfo(d);
+            info.Area = areaId as AreaId;
             if (instantiator !== undefined && areaId !== undefined) {
-                const area = AREAS[areaId as keyof (typeof AREAS)];
-                const dropletLimit = area.dropletLimit;
-                const dropletCount = area.areaFolder.WaitForChild("DropletCount") as IntValue;
-                let t = 0;
-                instantiator = Dropper.wrapInstantiator(d, instantiator);
-                item.instantiatorPerDrop.set(d, instantiator);
-                const connection = RunService.Heartbeat.Connect((deltaTime) => {
-                    const dropRate = d.GetAttribute("DropRate") as number | undefined ?? item.dropRate;
-                    if (dropRate === undefined) {
-                        return;
-                    }
-                    t += deltaTime;
-                    if (t > 1 / dropRate && instantiator !== undefined) {
-                        if (dropletCount.Value > dropletLimit.Value) {
-                            return;
-                        }
-                        t = 0;
-                        instantiator();
-                    }
-                });
-                model.Destroying.Once(() => {
-                    connection.Disconnect();
-                    item.instantiatorPerDrop.delete(d);
-                });
+                const area = AREAS[areaId as AreaId];
+                info.DropletLimitValue = area.dropletLimit;
+                info.DropRateModifiers = new Set();
+                info.DropRate = item.dropRate;
+                info.Instantiator = Dropper.wrapInstantiator(d, instantiator, item);
+                Dropper.SPAWNED_DROPS.set(d, info);
+                model.Destroying.Once(() => Dropper.SPAWNED_DROPS.delete(d));
             }
         }
     }
-    
+
+    static readonly SPAWNED_DROPS = new Map<BasePart, InstanceInfo>();
+    dropletProduced: ((droplet: BasePart, item: this) => void) | undefined;
     droplet: Droplet | undefined;
     dropletPerDrop = new Map<string, Droplet>();
-    instantiatorPerDrop = new Map<BasePart, () => void>();
     dropRate: number | undefined;
 
     constructor(id: string) {
         super(id);
-        this.types.push("Dropper");
-        this.onLoad((model, utils) => Dropper.load(model, utils, this));
+        this.types.add("Dropper");
+        this.onLoad((model) => Dropper.load(model, this));
     }
 
     getDroplet(dropPart?: string) {
@@ -99,6 +95,40 @@ class Dropper extends Item {
     setDropRate(dropRate: number) {
         this.dropRate = dropRate;
         return this;
+    }
+
+    onDropletProduced(callback: (droplet: BasePart, item: this) => void) {
+        this.dropletProduced = callback;
+        return this;
+    }
+
+    static {
+        RunService.Heartbeat.Connect(() => {
+            const speed = GameSpeed.speed;
+            const t = tick();
+            for (const [_d, info] of this.SPAWNED_DROPS) {
+                const modifiers = info.DropRateModifiers;
+                if (modifiers === undefined)
+                    continue;
+                if (info.LastDrop === undefined) {
+                    info.LastDrop = t;
+                    continue;
+                }
+                let dropRate = info.DropRate;
+                if (dropRate === undefined)
+                    continue;
+                for (const modifier of modifiers)
+                    dropRate *= modifier.multi;
+                if (dropRate === 0)
+                    continue;
+                if (t > info.LastDrop + 1 / dropRate / speed) {
+                    if (GameUtils.dropletCountPerArea.get(info.Area!)! > info.DropletLimitValue!.Value)
+                        continue;
+                    info.LastDrop = t;
+                    info.Instantiator!();
+                }
+            }
+        });
     }
 }
 

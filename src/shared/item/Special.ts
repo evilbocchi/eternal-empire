@@ -1,13 +1,49 @@
-//!native
-
-import { RunService, TweenService, Workspace } from "@rbxts/services";
+import { RunService, TweenService } from "@rbxts/services";
+import Item from "shared/item/Item";
+import Upgrader from "shared/item/Upgrader";
+import Price from "shared/Price";
+import { GameUtils, getPlacedItemsInArea } from "shared/utils/ItemUtils";
 import { weldModel } from "shared/utils/vrldk/BasePartUtils";
 import { loadAnimation } from "shared/utils/vrldk/RigUtils";
-import Item from "./Item";
-import Upgrader from "./Upgrader";
-import Items from "shared/items/Items";
+
+
+declare global {
+    interface ItemTypes {
+        Clickable: Special.Manumatic.Clickable;
+        Clicker: Special.Manumatic.Clicker;
+        Damager: Special.Killbrick.Damager;
+        OmniUpgrader: Special.OmniUpgrader;
+    }
+    interface UpgradeInfo {
+        Omni?: string;
+    }
+}
 
 namespace Special {
+    export namespace LaserFan {
+        export function load(model: Model, item: Item, speed?: number) {
+            const motor = model.WaitForChild("Motor") as Model;
+            const bp = weldModel(motor);
+            const o = bp.CFrame;
+            let v = 0;
+            const ItemsService = GameUtils.itemsService;
+            let d = ItemsService.getPlacedItem(model.Name)?.direction === true;
+            const tweenInfo = new TweenInfo(0.1, Enum.EasingStyle.Linear);
+            item.repeat(model, () => {
+                v += (d ? 1 : -1) * (speed ?? 3);
+                TweenService.Create(bp, tweenInfo, { CFrame: o.mul(CFrame.Angles(math.rad(v), 0, 0)) }).Play();
+            }, 0.1);
+            (bp.FindFirstChild("ProximityPrompt") as ProximityPrompt | undefined)?.Triggered.Connect(() => {
+                d = !d;
+                const pi = ItemsService.getPlacedItem(model.Name);
+                if (pi === undefined) {
+                    return;
+                }
+                pi.direction = d;
+            });
+        }
+    }
+
     export namespace HandCrank {
         export function load(model: Model, callback: (timeSinceCrank: number) => void) {
             let t = 0;
@@ -32,7 +68,7 @@ namespace Special {
                     sound.Play();
                     if (tween === undefined || tween.PlaybackState === Enum.PlaybackState.Completed) {
                         v.Value = 0;
-                        tween = TweenService.Create(v, new TweenInfo(1), {Value: 360});
+                        tween = TweenService.Create(v, new TweenInfo(1), { Value: 360 });
                         tween.Play();
                     }
                 }
@@ -58,33 +94,35 @@ namespace Special {
 
     export namespace DropletSlayer {
         export function noob(model: Model, item: Item, cd: number) {
+            const laser = model.WaitForChild("Laser") as BasePart;
+            const laserInfo = GameUtils.getAllInstanceInfo(laser);
+            laserInfo.Enabled = false;
+            const activeEvent = new Instance("UnreliableRemoteEvent");
+            activeEvent.Name = "ActiveEvent";
+            activeEvent.Parent = model;
+            item.repeat(model, () => {
+                activeEvent.FireAllClients();
+                laserInfo.Enabled = true;
+                task.delay(0.5, () => laserInfo.Enabled = false);
+            }, cd);
+        }
+        export function noobClient(model: Model) {
             const noob = model.WaitForChild("Noob") as Model;
-            const humanoid = noob.FindFirstChildOfClass("Humanoid");
-            if (humanoid === undefined) {
-                return;
-            }
-            const animator = humanoid.FindFirstChildOfClass("Animator");
-            if (animator === undefined) {
-                return;
-            }
+            const humanoid = noob.WaitForChild("Humanoid") as Humanoid;
             const animation = loadAnimation(humanoid, 16920778613);
             const laser = model.WaitForChild("Laser") as BasePart;
             const slash = model.WaitForChild("Slash") as BasePart;
             slash.Transparency = 1;
             const sound = laser.WaitForChild("Sound") as Sound;
             const slashOriginalCFrame = slash.CFrame;
-            laser.SetAttribute("Enabled", false);
-            item.repeat(model, () => {
+            const activeEvent = model.WaitForChild("ActiveEvent") as UnreliableRemoteEvent;
+            activeEvent.OnClientEvent.Connect(() => {
                 slash.Transparency = 0.011;
                 slash.CFrame = slashOriginalCFrame;
-                TweenService.Create(slash, new TweenInfo(0.3), {CFrame: slashOriginalCFrame.mul(CFrame.Angles(0, math.rad(180), 0)), Transparency: 1}).Play();
+                TweenService.Create(slash, new TweenInfo(0.3), { CFrame: slashOriginalCFrame.mul(CFrame.Angles(0, math.rad(180), 0)), Transparency: 1 }).Play();
                 animation?.Play();
                 sound.Play();
-                laser.SetAttribute("Enabled", true);
-                task.delay(0.5, () => {
-                    laser.SetAttribute("Enabled", false);
-                });
-            }, cd);
+            });
         }
     }
 
@@ -98,13 +136,13 @@ namespace Special {
 
             constructor(id: string) {
                 super(id);
-                this.types.push("Damager");
+                this.types.add("Damager");
                 this.onLoad((model) => (model.WaitForChild("UpgradedEvent") as BindableEvent).Event.Connect((droplet: Instance) => {
-                    const health = droplet.GetAttribute("Health") as number | undefined;
+                    const health = GameUtils.getInstanceInfo(droplet, "Health") as number | undefined;
                     if (health === undefined) {
                         return;
                     }
-                    droplet.SetAttribute("Health", health - this.damage);
+                    GameUtils.setInstanceInfo(droplet, "Health", health - this.damage);
                 }));
             }
 
@@ -118,25 +156,25 @@ namespace Special {
     export namespace Manumatic {
         export interface Clickable {
             setDebounce(debounce: number): ThisType<Clickable>;
-            setOnClick(onClick: (model: Model, utils: GameUtils, item: Item) => void): ThisType<Clickable>;
+            setOnClick(onClick: (model: Model, item: Item) => void): ThisType<Clickable>;
         }
-        
+
         export class ManumaticUpgrader extends Upgrader implements Clickable {
             debounce = 0.1;
-            onClick: ((model: Model, utils: GameUtils, item: Item, player: Player | undefined, value: number) => void) | undefined;
+            onClick: ((model: Model, item: Item, player: Player | undefined, value: number) => void) | undefined;
 
             constructor(id: string) {
                 super(id);
-                this.types.push("Clickable");
-                this.onLoad((model, utils, item) => {
+                this.types.add("Clickable");
+                this.onLoad((model, item) => {
                     const clickDetector = new Instance("ClickDetector");
                     let last = 0;
                     const click = (player: Player | undefined, value: number) => {
                         const onClick = this.onClick;
                         if (onClick !== undefined) {
-                            onClick(model, utils, item, player, value);
+                            onClick(model, item, player, value);
                         }
-                    }
+                    };
                     clickDetector.MouseClick.Connect((player) => {
                         const now = tick();
                         if (now - last < this.debounce) {
@@ -150,7 +188,7 @@ namespace Special {
                     event.Name = "Click";
                     event.Event.Connect((clickValue: number) => click(undefined, clickValue));
                     event.Parent = model;
-                })
+                });
             }
 
             setDebounce(debounce: number) {
@@ -158,7 +196,7 @@ namespace Special {
                 return this;
             }
 
-            setOnClick(onClick: (model: Model, utils: GameUtils, item: Item, player: Player | undefined, value: number) => void) {
+            setOnClick(onClick: (model: Model, item: Item, player: Player | undefined, value: number) => void) {
                 this.onClick = onClick;
                 return this;
             }
@@ -168,53 +206,48 @@ namespace Special {
 
             cps: number | undefined = undefined;
             clickValue = 1;
-            onClick: ((model: Model, utils: GameUtils, item: Item) => void) | undefined = undefined;
+            onClick: ((model: Model, item: Item) => void) | undefined = undefined;
+
+            static createClickRemote(model: Model) {
+                const clickEvent = new Instance("UnreliableRemoteEvent");
+                clickEvent.Name = "ClickEvent";
+                clickEvent.Parent = model;
+                return clickEvent;
+            }
 
             constructor(id: string) {
                 super(id);
-                this.types.push("Clicker");
+                this.types.add("Clicker");
 
-                this.onLoad((model, utils) => {
+                this.onLoad((model) => {
                     const clickArea = model.WaitForChild("ClickArea") as BasePart;
-                    clickArea.Touched.Connect(() => {});
-                    const find = () => {
-                        const array = clickArea.GetTouchingParts();
-                        for (const touching of array) {
-                            const target = touching.FindFirstAncestorOfClass("Model");
-                            if (target === undefined) {
-                                continue;
-                            }
-                            const itemId = target.GetAttribute("ItemId") as string;
-                            if (itemId === undefined) {
-                                continue;
-                            }
-                            const item = Items.getItem(itemId);
-                            if (item === undefined) {
-                                error();
-                            }
-                            if (item.isA("Clickable")) {
-                                return target;
-                            }
-                        }
-                    }
-                    let target = find();
+                    clickArea.Touched.Connect(() => { });
+                    const Items = GameUtils.items;
+
+                    let target: Model | undefined;
                     let event: BindableEvent | undefined;
                     let t = 0;
                     const connection = RunService.Heartbeat.Connect((dt) => {
                         t += dt;
                         if (target === undefined || target.Parent === undefined) {
-                            if (t > 1) {
+                            if (t > 0.05) {
                                 t = 0;
-                                target = find();
+                                const found = getPlacedItemsInArea(clickArea, Items);
+                                for (const [model, item] of found)
+                                    if (item.isA("Clickable")) {
+                                        target = model;
+                                        return;
+                                    }
                             }
                         }
-                        else if (t > 1 / (this.cps ?? 999) && this.onClick !== undefined) {
+                        else if (t > 1 / (this.cps ?? 999)) {
                             t = 0;
                             if (event === undefined || event.Parent === undefined) {
                                 event = target.WaitForChild("Click") as BindableEvent;
                             }
                             event.Fire(this.clickValue);
-                            this.onClick(model, utils, this);
+                            if (this.onClick !== undefined)
+                                this.onClick(model, this);
                         }
                     });
                     model.Destroying.Once(() => connection.Disconnect());
@@ -231,10 +264,44 @@ namespace Special {
                 return this;
             }
 
-            setOnClick(onClick: (model: Model, utils: GameUtils, item: Item) => void) {
+            setOnClick(onClick: (model: Model, item: Item) => void) {
                 this.onClick = onClick;
                 return this;
             }
+        }
+    }
+
+    export class OmniUpgrader extends Upgrader {
+        addsPerLaser = new Map<string, Price>();
+        mulsPerLaser = new Map<string, Price>();
+
+        constructor(id: string) {
+            super(id);
+            this.types.add("OmniUpgrader");
+            this.onLoad((model) => {
+                const lasers = new Set<string>();
+                for (const [laser, _] of this.addsPerLaser)
+                    lasers.add(laser);
+                for (const [laser, _] of this.mulsPerLaser)
+                    lasers.add(laser);
+
+                const upgradedEvent = model.WaitForChild("UpgradedEvent") as BindableEvent;
+                for (const laser of lasers) {
+                    const part = model.WaitForChild(laser) as BasePart;
+                    GameUtils.setInstanceInfo(part, "LaserId", part.Name);
+                    Upgrader.hookLaser(model, this, part, upgradedEvent, (indicator) => indicator.Omni = laser);
+                }
+            });
+        }
+
+        setAdds(addsPerLaser: Map<string, Price>) {
+            this.addsPerLaser = addsPerLaser;
+            return this;
+        }
+
+        setMuls(mulsPerLaser: Map<string, Price>) {
+            this.mulsPerLaser = mulsPerLaser;
+            return this;
         }
     }
 }

@@ -1,23 +1,11 @@
-import { OnStart, Service } from "@flamework/core";
-import { OnPlayerJoined } from "server/services/PlayerJoinService";
-import { Fletchette, RemoteProperty, RemoteSignal } from "@antivivi/fletchette";
-import { DataService, PlayerProfileTemplate } from "./serverdata/DataService";
+import { OnInit, Service } from "@flamework/core";
+import { OnPlayerJoined } from "server/services/ModdingService";
+import Packets from "shared/network/Packets";
+import { DataService } from "./serverdata/DataService";
 
-declare global {
-    interface FletchetteCanisters {
-        SettingsCanister: typeof SettingsCanister
-    }
-    type Settings = typeof PlayerProfileTemplate.settings
-}
-
-const SettingsCanister = Fletchette.createCanister("SettingsCanister", {
-    settings: new RemoteProperty<typeof PlayerProfileTemplate.settings>(PlayerProfileTemplate.settings),
-    setSetting: new RemoteSignal<<T extends keyof (typeof PlayerProfileTemplate.settings)>(setting: T, value: typeof PlayerProfileTemplate.settings[T]) => void>(),
-    setHotkey: new RemoteSignal<(name: string, key: number) => void>()
-});
 
 @Service()
-export class SettingsService implements OnStart, OnPlayerJoined {
+export class SettingsService implements OnInit, OnPlayerJoined {
 
     constructor(private dataService: DataService) {
 
@@ -26,26 +14,26 @@ export class SettingsService implements OnStart, OnPlayerJoined {
     onPlayerJoined(player: Player) {
         const playerProfile = this.dataService.loadPlayerProfile(player.UserId);
         if (playerProfile !== undefined) {
-            SettingsCanister.settings.setFor(player, playerProfile.Data.settings);
+            Packets.settings.setFor(player, playerProfile.Data.settings);
         }
     }
 
-    onStart() {
-        SettingsCanister.setHotkey.connect((player, name, key) => {
+    onInit() {
+        Packets.setHotkey.listen((player, name, key) => {
             const playerProfile = this.dataService.loadPlayerProfile(player.UserId);
             if (playerProfile === undefined) {
                 error("Player profile not loaded");
             }
-            playerProfile.Data.settings.hotkeys.set(name, key);
-            SettingsCanister.settings.setFor(player, playerProfile.Data.settings);
+            playerProfile.Data.settings.hotkeys[name] = key;
+            Packets.settings.setFor(player, playerProfile.Data.settings);
         });
-        SettingsCanister.setSetting.connect((player, setting, value) => {
+        Packets.setSetting.listen((player, setting, value) => {
             const playerProfile = this.dataService.loadPlayerProfile(player.UserId);
             if (playerProfile === undefined) {
                 error("Player profile not loaded");
             }
             (playerProfile.Data.settings as {[key: string]: unknown})[setting] = value;
-            SettingsCanister.settings.setFor(player, playerProfile.Data.settings);
+            Packets.settings.setFor(player, playerProfile.Data.settings);
         });
     }
 }

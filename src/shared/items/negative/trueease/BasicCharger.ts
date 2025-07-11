@@ -1,12 +1,11 @@
+import Difficulty from "@antivivi/jjt-difficulties";
 import Price from "shared/Price";
-import { AREAS } from "shared/constants";
-import Difficulty from "shared/Difficulty";
 import Charger from "shared/item/Charger";
 import { rainbowEffect } from "shared/utils/vrldk/BasePartUtils";
 
-export = new Charger("BasicCharger")
+export = new Charger(script.Name)
 .setName("Basic Charger")
-.setDescription("Boosts gain of generators within %radius% studs radius of this charger by %mul%x. Generators can only be charged two times.")
+.setDescription("Boosts gain of generators within %radius% studs radius of this charger by %mul%. Generators can only be charged two times.")
 .setDifficulty(Difficulty.TrueEase)
 .setPrice(new Price().setCost("Funds", 3500000000).setCost("Power", 100), 1)
 .setPrice(new Price().setCost("Funds", 5000000000).setCost("Power", 160), 2)

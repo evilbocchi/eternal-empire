@@ -1,5 +1,9 @@
 import { Workspace } from "@rbxts/services";
 import Area from "shared/Area";
+import Item from "shared/item/Item";
+
+const overlapParams = new OverlapParams();
+overlapParams.CollisionGroup = "ItemHitbox";
 
 namespace ItemPlacement {
     export function isTouchingPlacedItem(itemModel: Model) {
@@ -8,7 +12,8 @@ namespace ItemPlacement {
             if (hitbox.Name !== "Hitbox" || !hitbox.IsA("BasePart")) {
                 continue;
             }
-            for (const part of Workspace.GetPartBoundsInBox(hitbox.CFrame, hitbox.Size.sub(new Vector3(0.2, 0.2, 0.2)))) {
+            const parts = Workspace.GetPartBoundsInBox(hitbox.CFrame, hitbox.Size.sub(new Vector3(0.01, 0, 0.01)), overlapParams);
+            for (const part of parts) {
                 if (part.Name === "Hitbox" && part.Parent?.Name !== itemModel.Name) {
                     return true;
                 }
@@ -36,12 +41,23 @@ namespace ItemPlacement {
         return undefined;
     }
 
-    export function isItemModelAcceptable(itemModel: Model, placeableAreas: Area[]): [boolean, Area | undefined] {
+    export function isItemModelAcceptable(itemModel: Model, item: Item) {
         if (ItemPlacement.isTouchingPlacedItem(itemModel)) {
-            return [false, undefined];
+            return false;
         }
-        const area = ItemPlacement.getArea(itemModel, placeableAreas);
-        return area !== undefined ? [true, area] : [false, undefined];
+
+        if (item.bounds === undefined) {
+            return ItemPlacement.getArea(itemModel, item.placeableAreas) !== undefined;
+        }
+        else {
+            const primaryPart = itemModel.PrimaryPart!;
+            for (const touching of Workspace.GetPartBoundsInBox(primaryPart.CFrame, primaryPart.Size.add(new Vector3(1, 10, 1)))) {
+                if (touching.Name === item.bounds) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 }
 

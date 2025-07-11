@@ -4,7 +4,7 @@ import { HotkeysController } from "client/controllers/HotkeysController";
 import { UIController } from "client/controllers/UIController";
 import { AdaptiveTabController } from "client/controllers/interface/AdaptiveTabController";
 import { AREAS } from "shared/constants";
-import { Fletchette } from "@antivivi/fletchette";
+import Packets from "shared/network/Packets";
 
 @Controller()
 export class WarpController implements OnInit {
@@ -14,8 +14,7 @@ export class WarpController implements OnInit {
     }
 
     onInit() {
-        const AreaCanister = Fletchette.getCanister("AreaCanister");
-        const keys = new Map<keyof (typeof AREAS), Enum.KeyCode>();
+        const keys = new Map<AreaId, Enum.KeyCode>();
         keys.set("BarrenIslands", Enum.KeyCode.One);
         keys.set("SlamoVillage", Enum.KeyCode.Two);
 
@@ -23,10 +22,10 @@ export class WarpController implements OnInit {
         for (const button of buttons) {
             if (!button.IsA("ImageButton"))
                 continue;
-            const areaId = button.Name as keyof (typeof AREAS);
+            const areaId = button.Name as AreaId;
             this.hotkeysController.setHotkey(button, keys.get(areaId)!, () => {
                 if (WARP_WINDOW.Visible) {
-                    const success = AreaCanister.tpToArea.invoke(areaId);
+                    const success = Packets.tpToArea.invoke(areaId);
                     if (success) {
                         this.uiController.playSound("Teleport");
                         this.adaptiveTabController.hideAdaptiveTab();

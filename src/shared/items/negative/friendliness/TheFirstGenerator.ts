@@ -1,11 +1,10 @@
-import Difficulty from "shared/Difficulty";
+import Difficulty from "@antivivi/jjt-difficulties";
 import Price from "shared/Price";
-import { AREAS } from "shared/constants";
 import Generator from "shared/item/Generator";
 
-export = new Generator("TheFirstGenerator")
+export = new Generator(script.Name)
 .setName("Basic Generator")
-.setDescription("Start producing Power at +1 W/s.")
+.setDescription("Start producing Power at %gain%.")
 .setDifficulty(Difficulty.Friendliness)
 .setPrice(new Price().setCost("Funds", 1000000000), 1)
 .setPrice(new Price().setCost("Funds", 1450000000).setCost("Power", 50), 2)

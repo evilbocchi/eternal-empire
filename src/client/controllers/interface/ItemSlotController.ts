@@ -1,42 +1,53 @@
-import { Controller } from "@flamework/core";
-import { RunService, TweenService } from "@rbxts/services";
-import { ITEM_MODELS, SHOP_WINDOW } from "client/constants";
+import Difficulty from "@antivivi/jjt-difficulties";
+import { BaseOnoeNum, OnoeNum } from "@antivivi/serikanum";
+import { Controller, OnInit } from "@flamework/core";
+import { TweenService } from "@rbxts/services";
+import { PARALLEL, SHOP_WINDOW } from "client/constants";
 import { UIController } from "client/controllers/UIController";
 import { TooltipController } from "client/controllers/interface/TooltipController";
-import Difficulty from "shared/Difficulty";
 import Price from "shared/Price";
-import { ASSETS, ItemSlot, RESET_LAYERS } from "shared/constants";
+import { AREAS, ASSETS, DifficultyOption, ItemSlot, RESET_LAYERS } from "shared/constants";
+import Condenser from "shared/item/Condenser";
+import HarvestingTool from "shared/item/HarvestingTool";
 import Item from "shared/item/Item";
-import { OnoeNum } from "@antivivi/serikanum";
+import Items from "shared/items/Items";
+import Packets from "shared/network/Packets";
+import StringBuilder from "shared/utils/StringBuilder";
 import { combineHumanReadable, formatRichText } from "shared/utils/vrldk/StringUtils";
 import { paintObjects } from "shared/utils/vrldk/UIUtils";
 
 @Controller()
-export class ItemSlotController {
-    
+export class ItemSlotController implements OnInit {
+
     descColor = SHOP_WINDOW.PurchaseWindow.DescriptionFrame.DescriptionLabel.TextColor3;
     tween = new TweenInfo(0.3, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out);
+    boostPerItem = new Map<string, BaseOnoeNum>();
     inventory = new Map<string, number>();
+    valsPerCondenser = new Map<Condenser, string>();
 
     constructor(private uiController: UIController, private tooltipController: TooltipController) {
 
     }
 
-    getItemSlot(item: Item): [ItemSlot, RBXScriptConnection?] {
+    getItemSlot(item: Item, isTool?: boolean): ItemSlot {
         const itemSlot = ASSETS.ItemListContainer.ItemSlot.Clone();
-        const c = item.difficulty?.color ?? new Color3();
+        const difficulty = item.difficulty;
+        const c = difficulty?.color ?? new Color3();
         const color = new Color3(math.max(math.min(0.9, c.R), 0.1), math.max(math.min(0.9, c.G), 0.1), math.max(math.min(0.9, c.B), 0.1));
         itemSlot.UIStroke.Color = color;
         itemSlot.BackgroundColor3 = color;
         itemSlot.Frame.BackgroundColor3 = color;
-        const v = this.loadViewportFrame(itemSlot.ViewportFrame, item);
+        itemSlot.LayoutOrder = difficulty?.rating ?? 0;
+        if (isTool === true)
+            itemSlot.ImageLabel.Image = "rbxassetid://" + ((item as HarvestingTool).image);
+        else
+            this.loadViewportFrame(itemSlot.ViewportFrame, item);
         itemSlot.Name = item.id;
-        const tooltip = `${item.name ?? item.id}\n${this.formatDescription(item, 15, "Medium")}`
-        this.tooltipController.setTooltip(itemSlot, tooltip);
-        return [itemSlot, v];
+        this.tooltipController.setTooltip(itemSlot, tostring(new StringBuilder(item.name ?? item.id).append("\n").append(this.formatDescription(item, 15, "Medium"))));
+        return itemSlot;
     }
 
-    getDifficultyOption(difficulty: Difficulty) {
+    getDifficultyOption(difficulty: Difficulty): DifficultyOption {
         const difficultyOption = ASSETS.ItemListContainer.DifficultyOption.Clone();
         difficultyOption.Dropdown.DifficultyLabel.Text = difficulty.name ?? "error";
         paintObjects(difficultyOption.Dropdown, difficulty.color ?? Color3.fromRGB());
@@ -56,69 +67,12 @@ export class ItemSlotController {
         return difficultyOption;
     }
 
+    calculateOptimalCellCount(containerX: number): number {
+        return math.max(math.round((containerX - 50) / 65), 3);
+    }
+
     loadViewportFrame(viewportFrame: ViewportFrame, item: Item) {
-        const camera = new Instance("Camera");
-        camera.CameraType = Enum.CameraType.Scriptable;
-        viewportFrame.CurrentCamera = camera;
-        camera.Parent = viewportFrame;
-        const blurEffect = new Instance("BlurEffect");
-        blurEffect.Parent = camera;
-        const m = ITEM_MODELS.get(item.id);
-        if (m === undefined)
-            return;
-        const model = m.Clone();
-        model.PivotTo(new CFrame(0, 0, 0));
-        const hitbox = model.WaitForChild("Hitbox") as BasePart;
-        const rel = (math.max(hitbox.Size.X, hitbox.Size.Y, hitbox.Size.Z) * 1.25) - 1.5 + (item.isA("Dropper") ? 1 : 0);
-        const centerCFrame = new CFrame(0, 0, 0);
-        const offsetCFrameValue = new Instance("CFrameValue");
-        const unfocused = new CFrame(0, 4, rel + 1);
-        const focused = new CFrame(0, 4, rel);
-        offsetCFrameValue.Value = unfocused;
-        offsetCFrameValue.Parent = camera;
-        let currentAngle = 220;
-        let delta = 0;
-        function rotateCamera(dt: number, care: boolean) {
-            if (care === true && runningTween === undefined && (delta === 0 || viewportFrame.Visible === false || ((viewportFrame.Parent as GuiObject).Visible === false))) {
-                return;
-            }
-            const newCframe = CFrame.lookAt(centerCFrame.mul(CFrame.Angles(0, math.rad(currentAngle), 0).mul(offsetCFrameValue.Value)).Position, centerCFrame.Position);
-            if (camera.CFrame !== newCframe) {
-                camera.CFrame = newCframe;
-                currentAngle = currentAngle + (delta * 60 * dt);
-            }
-        }
-        let runningTween: Tween | undefined = undefined;
-        viewportFrame.MouseEnter.Connect(() => {
-            delta = 0.5;
-            const tween = TweenService.Create(offsetCFrameValue, this.tween, {Value: focused});
-            runningTween = tween;
-            tween.Completed.Connect(() => {
-                if (tween === runningTween)
-                    runningTween = undefined;
-            });
-            tween.Play();
-        });
-        viewportFrame.MouseLeave.Connect(() => {
-            delta = 0;
-            const tween = TweenService.Create(offsetCFrameValue, this.tween, {Value: unfocused});
-            runningTween = tween;
-            tween.Completed.Connect(() => {
-                if (tween === runningTween)
-                    runningTween = undefined;
-            });
-            tween.Play();
-        });
-        const connection = RunService.Heartbeat.Connect((dt) => {
-            if (viewportFrame === undefined || viewportFrame.Parent === undefined) {
-                connection.Disconnect();
-                return;
-            }
-            rotateCamera(dt, true);
-        });
-        rotateCamera(0, false);
-        model.Parent = viewportFrame;
-        return connection;
+        PARALLEL.SendMessage("LoadViewportFrame", viewportFrame, item.id);
     }
 
     formatPlaceableAreas(item: Item, size: number, weight: string | number) {
@@ -132,61 +86,130 @@ export class ItemSlotController {
             });
             paLabel = combineHumanReadable(paLabel, ...vals);
         }
-        return formatRichText(paLabel === "" ? "This item is unplaceable." : "Placeable in " + paLabel, Color3.fromRGB(248, 255, 221), size, weight); 
+        return formatRichText(paLabel === "" ? "This item is unplaceable." : "Placeable in " + paLabel, Color3.fromRGB(248, 255, 221), size, weight);
     }
 
-    formatFormula(item: Item, multiplier: OnoeNum | undefined, size: number, weight: string | number) {
-        let text = `Formula: &lt;${item.formula?.tostring("x")}&gt;`;
+    formatFormula(item: Item, multiplier: BaseOnoeNum | undefined, size: number, weight: string | number) {
+        let text = `Formula: &lt;${item.formula?.tostring(item.formulaX ?? "x")}&gt;`;
         if (multiplier !== undefined)
-            text += ` (Currently ${new OnoeNum(multiplier)}x)`;
+            text += ` (Currently x${OnoeNum.toString(multiplier)})`;
         return formatRichText(text, Color3.fromRGB(126, 255, 167), size, weight);
     }
 
     formatResettingAreas(item: Item, size: number, weight: string | number) {
         let text: string;
-        const index = item.getResetLayer();
-        if (index === -1)
+        const order = item.getResetLayer();
+        if (order > 900)
             text = "[Persistent]";
-        else 
-            text = `[Resets on ${RESET_LAYERS[index].name}]`;
+        else {
+            let layer: ResetLayerId | undefined;
+            for (const [id, l] of pairs(RESET_LAYERS))
+                if (l.order === order) {
+                    layer = id;
+                    break;
+                }
+            text = layer === undefined ? "[Persistent]" : `[Resets on ${layer}]`;
+        }
         return formatRichText(text, Color3.fromRGB(255, 99, 99), size, weight);
     }
-    
-    formatPrice(price: Price) {
+
+    formatTool(tool: HarvestingTool, size: number, weight: string | number) {
+        if (tool.toolType === "None")
+            return "";
+        return formatRichText("Speed: " + tool.speed, Color3.fromRGB(112, 176, 255), size, weight) + " | " + formatRichText("Damage: " + tool.damage, Color3.fromRGB(255, 71, 0), size, weight);
+    }
+
+    formatPrice(price: Price, prefix?: string, suffix?: string) {
         let text = "";
         let i = 0;
-        let isInitial = true;
         for (const [currency, amount] of price.costPerCurrency) {
-            if (isInitial === true)
-                isInitial = false;
-            else
-                text += ", ";
-            text += `<font color="#${Price.DETAILS_PER_CURRENCY[currency].color.ToHex()}" weight="Bold">${Price.getFormatted(currency, amount)}</font>`;
+            if (i === 1)
+                text = " and " + text;
+            else if (i > 1)
+                text = ", " + text;
+            let label = Price.getFormatted(currency, amount);
+            if (prefix !== undefined)
+                label = prefix + label;
+            if (suffix !== undefined)
+                label = label + suffix;
+            text = `<font color="#${Price.DETAILS_PER_CURRENCY[currency].color.ToHex()}" weight="Bold">${label}</font>` + text;
             ++i;
         }
-        return i > 1 ? "(" + text + ")" : text;
+        return text;
     }
 
     formatDescription(item: Item, size: number, weight: string | number) {
         let description = item.description ?? item.id;
-        if (item.isA("Upgrader") || item.isA("Charger") || item.isA("Furnace")) {
-            if (item.add !== undefined) 
-                description = description.gsub("%%add%%", this.formatPrice(item.add))[0];
-            if (item.mul !== undefined) 
-                description = description.gsub("%%mul%%", this.formatPrice(item.mul))[0];
+        if (item.isA("Operative")) {
+            if (item.add !== undefined)
+                description = description.gsub("%%add%%", this.formatPrice(item.add, "+"))[0];
+            if (item.mul !== undefined)
+                description = description.gsub("%%mul%%", this.formatPrice(item.mul, "x"))[0];
+            if (item.pow !== undefined)
+                description = description.gsub("%%pow%%", this.formatPrice(item.pow, "^"))[0];
             if (item.isA("Charger") && item.radius !== undefined)
                 description = description.gsub("%%radius%%", item.radius)[0];
         }
+        if (item.isA("Condenser")) {
+            description = description.gsub("%%val%%", this.valsPerCondenser.get(item)!)[0];
+        }
         else if (item.isA("Dropper")) {
-            if (item.droplet !== undefined && item.droplet.value !== undefined)
+            if (item.droplet !== undefined && item.droplet.value !== undefined) {
                 description = description.gsub("%%val%%", this.formatPrice(item.droplet.value))[0];
+            }
         }
         else if (item.isA("Generator")) {
-            if (item.passiveGain !== undefined) 
-                description = description.gsub("%%gain%%", this.formatPrice(item.passiveGain))[0];
+            if (item.passiveGain !== undefined)
+                description = description.gsub("%%gain%%", this.formatPrice(item.passiveGain, undefined, "/s"))[0];
         }
         if (item.drain !== undefined)
-            description = description.gsub("%%drain%%", this.formatPrice(item.drain))[0];
+            description = description.gsub("%%drain%%", this.formatPrice(item.drain, undefined, "/s"))[0];
+        if (item.formulaXCap !== undefined)
+            description = description.gsub("%%cap%%", this.formatPrice(item.formulaXCap))[0];
         return formatRichText(description, this.descColor, size, weight);
+    }
+
+    formatMetadata(item: Item, description: string, size: number, weight: string | number, multiplier?: OnoeNum) {
+        let builder = new StringBuilder(description);
+        if (item.isA("HarvestingTool")) {
+            builder = builder.append("\n").append(this.formatTool(item, size, weight));
+        }
+        else {
+            const hasFormula = item.formula !== undefined;
+            const hasSlamoVillage = AREAS.SlamoVillage.unlocked.Value === true;
+            if (hasFormula || hasSlamoVillage) {
+                builder = builder.append(`\n<font size="7"> </font>`);
+            }
+            if (hasFormula)
+                builder = builder.append(`\n${this.formatFormula(item, multiplier ?? this.boostPerItem.get(item.id), size, weight)}`);
+            if ((item.placeableAreas.isEmpty() || hasSlamoVillage) && item.bounds === undefined)
+                builder = builder.append(`\n${this.formatPlaceableAreas(item, size, weight)}`);
+            if (hasSlamoVillage)
+                builder = builder.append(`\n${this.formatResettingAreas(item, size, weight)}`);
+        }
+        if (item.levelReq !== undefined)
+            builder = builder.append(`\n${formatRichText("Lv. Min: " + item.levelReq,
+                item.levelReq > Packets.level.get() ? Color3.fromRGB(255, 105, 105) : Color3.fromRGB(125, 255, 125), size, weight)}`);
+        return builder.toString();
+    }
+
+    onInit() {
+        Packets.boostChanged.connect((value) => this.boostPerItem = value);
+        for (const [_id, item] of Items.itemsPerId) {
+            let description = item.description;
+            if (description !== undefined) {
+                for (const [currency, details] of pairs(Price.DETAILS_PER_CURRENCY)) {
+                    [description] = description!.gsub(currency, `<font color="#${details.color.ToHex()}">${currency}</font>`);
+                }
+                item.description = description;
+            }
+            if (item.isA("Condenser")) {
+                let val = new Price();
+                for (const [droplet] of item.quotasPerDroplet) {
+                    val = val.add(droplet.value);
+                }
+                this.valsPerCondenser.set(item, this.formatPrice(val));
+            }
+        }
     }
 }

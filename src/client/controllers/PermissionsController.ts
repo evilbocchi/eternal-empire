@@ -5,11 +5,10 @@ import { COMMANDS_WINDOW, LOCAL_PLAYER, SHARE_WINDOW } from "client/constants";
 import { EffectController } from "client/controllers/EffectController";
 import { UIController } from "client/controllers/UIController";
 import { AdaptiveTabController } from "client/controllers/interface/AdaptiveTabController";
-import { ASSETS } from "shared/constants";
-import { Fletchette } from "@antivivi/fletchette";
+import { ASSETS, TEXT_CHANNELS } from "shared/constants";
+import Items from "shared/items/Items";
+import Packets from "shared/network/Packets";
 import ComputeNameColor from "shared/utils/vrldk/ComputeNameColor";
-
-const PermissionsCanister = Fletchette.getCanister("PermissionsCanister");
 
 @Controller()
 export class PermissionsController implements OnInit {
@@ -21,12 +20,12 @@ export class PermissionsController implements OnInit {
     }
 
     onInit() {
-        PermissionsCanister.systemMessageSent.connect((channel, message, metadata) => channel.DisplaySystemMessage(message, metadata));
-        PermissionsCanister.donationGiven.connect(() => {
+        Packets.systemMessageSent.connect((channel, message, metadata) => (TEXT_CHANNELS.WaitForChild(channel) as TextChannel).DisplaySystemMessage(message, metadata));
+        Packets.donationGiven.connect(() => {
             this.uiController.playSound("PowerUp");
             this.effectController.camShake.Shake(CameraShaker.Presets.Bump);
         });
-        PermissionsCanister.tabOpened.connect((tab) => {
+        Packets.tabOpened.connect((tab) => {
             this.adaptiveTabController.showAdaptiveTab(tab);
             if (tab === "Commands") {
                 permLevelUpdated(LOCAL_PLAYER.GetAttribute("PermissionLevel") as number ?? 0);
@@ -61,9 +60,15 @@ export class PermissionsController implements OnInit {
                 option.Parent = COMMANDS_WINDOW.CommandsList;
             }
         }
-        PermissionsCanister.codeReceived.connect((joinLink) => {
+        Packets.codeReceived.connect((joinLink) => {
             SHARE_WINDOW.Code.Input.Text = joinLink;
             this.adaptiveTabController.showAdaptiveTab("Share");
+        });
+        
+        Packets.modifyGame.connect((param) => {
+            if (param === "markplaceableeverywhere") {
+                Items.itemsPerId.forEach((item) => item.markPlaceableEverywhere());
+            }
         });
 
         const onChannelAdded = (channel: Instance) => {

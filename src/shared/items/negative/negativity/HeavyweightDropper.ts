@@ -1,10 +1,10 @@
 import Price from "shared/Price";
 import { AREAS } from "shared/constants";
-import Difficulty from "shared/Difficulty";
+import Difficulty from "@antivivi/jjt-difficulties";
 import Droplet from "shared/item/Droplet";
 import Dropper from "shared/item/Dropper";
 
-export = new Dropper("HeavyweightDropper")
+export = new Dropper(script.Name)
 .setName("Heavy-weight Dropper")
 .setDescription("Despite the name, its build is actually quite modest. Produces %val% droplets every 2 seconds.")
 .setDifficulty(Difficulty.Negativity)

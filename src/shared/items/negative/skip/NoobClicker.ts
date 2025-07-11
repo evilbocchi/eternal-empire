@@ -1,9 +1,7 @@
-import Difficulty from "shared/Difficulty";
+import Difficulty from "@antivivi/jjt-difficulties";
 import { Manumatic } from "shared/item/Special";
 import Price from "shared/Price";
 import { loadAnimation } from "shared/utils/vrldk/RigUtils";
-
-const animTrackPerModel = new Map<Model, AnimationTrack>();
 
 export = new Manumatic.Clicker("NoobClicker")
 .setName("Noob Clicker")
@@ -14,7 +12,8 @@ export = new Manumatic.Clicker("NoobClicker")
 .addPlaceableArea("BarrenIslands")
 
 .setCPS(3)
-.onLoad((model) => {
+.onLoad((model) => Manumatic.Clicker.createClickRemote(model))
+.onClientLoad((model) => {
     const noob = model.WaitForChild("Noob") as Model;
     const humanoid = noob.FindFirstChildOfClass("Humanoid");
     if (humanoid === undefined) {
@@ -26,13 +25,12 @@ export = new Manumatic.Clicker("NoobClicker")
     }
     const animTrack = loadAnimation(humanoid, 16920778613);
     if (animTrack !== undefined) {
-        animTrackPerModel.set(model, animTrack);
-        model.Destroying.Once(() => animTrackPerModel.delete(model));
+        (model.WaitForChild("ClickEvent") as UnreliableRemoteEvent).OnClientEvent.Connect(() => animTrack.Play());
     }
 })
 .setOnClick((model: Model) => {
-    const animTrack = animTrackPerModel.get(model);
-    if (animTrack !== undefined) {
-        animTrack.Play();
+    const clickEvent = model.FindFirstChild("ClickEvent");
+    if (clickEvent !== undefined) {
+        (clickEvent as UnreliableRemoteEvent).FireAllClients();
     }
 });

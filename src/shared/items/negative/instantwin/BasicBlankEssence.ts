@@ -1,8 +1,8 @@
-import Difficulty from "shared/Difficulty";
+import Difficulty from "@antivivi/jjt-difficulties";
 import Price from "shared/Price";
 import Item from "shared/item/Item";
 
-export = new Item("BasicBlankEssence")
+export = new Item(script.Name)
 .setName("Basic Blank Essence")
 .setDescription("A small piece of the Void, ready to manifest into whatever you choose.")
 .setDifficulty(Difficulty.InstantWin)

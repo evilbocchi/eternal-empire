@@ -1,8 +1,8 @@
-import Difficulty from "shared/Difficulty";
+import Difficulty from "@antivivi/jjt-difficulties";
 import Price from "shared/Price";
 import Upgrader from "shared/item/Upgrader";
 
-export = new Upgrader("FreddysUpgrader")
+export = new Upgrader(script.Name)
 .setName("Freddy's Upgrader")
 .setDescription("A well-built upgrader that adds $250 to droplet value.")
 .setDifficulty(Difficulty.Miscellaneous)

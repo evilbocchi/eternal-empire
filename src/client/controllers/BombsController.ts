@@ -1,10 +1,10 @@
+import { OnoeNum } from "@antivivi/serikanum";
 import { Controller, OnStart } from "@flamework/core";
 import { MarketplaceService, Workspace } from "@rbxts/services";
 import { DETAILS_WINDOW, LOCAL_PLAYER } from "client/constants";
 import { UIController } from "client/controllers/UIController";
 import { AREAS, BOMBS_PRODUCTS, BombsBoardGui } from "shared/constants";
-import { Fletchette } from "@antivivi/fletchette";
-import { OnoeNum } from "@antivivi/serikanum";
+import Packets from "shared/network/Packets";
 import { convertToHHMMSS } from "shared/utils/vrldk/NumberAbbreviations";
 
 @Controller()
@@ -15,18 +15,16 @@ export class BombsController implements OnStart {
     }
 
     onStart() {
-        const BombsCanister = Fletchette.getCanister("BombsCanister");
-        const CurrencyCanister = Fletchette.getCanister("CurrencyCanister");
         const fundsBombGui = AREAS.SlamoVillage.areaFolder.WaitForChild("BombsBoard").WaitForChild("SurfaceGui") as BombsBoardGui;
         if (fundsBombGui === undefined)
-            error("Whattt");
+            throw "Whattt";
         
         fundsBombGui.BuyButton.Activated.Connect(() => {
             this.uiController.playSound("Click");
             MarketplaceService.PromptProductPurchase(LOCAL_PLAYER, BOMBS_PRODUCTS.Funds);
         });
         fundsBombGui.UseButton.Activated.Connect(() => {
-            if (BombsCanister.useBomb.invoke("Funds Bombs")) {
+            if (Packets.useBomb.invoke("Funds Bombs") === true) {
                 this.uiController.playSound("Coins");
             }
             else {
@@ -34,8 +32,8 @@ export class BombsController implements OnStart {
             }
         });
 
-        CurrencyCanister.balance.observe((value) => {
-                fundsBombGui.AmountLabel.Text = tostring(new OnoeNum(value.get("Funds Bombs") ?? 0));
+        Packets.balance.observe((value) => {
+            fundsBombGui.AmountLabel.Text = tostring(new OnoeNum(value.get("Funds Bombs") ?? 0));
         });
 
         task.spawn(() => {
@@ -46,7 +44,7 @@ export class BombsController implements OnStart {
                     DETAILS_WINDOW.FundsBombLabel.Visible = false;
                 }
                 else {
-                    DETAILS_WINDOW.FundsBombLabel.Text = `Funds Bomb Active (1.2x): ${convertToHHMMSS(fundsBombTime - currentTime)}`;
+                    DETAILS_WINDOW.FundsBombLabel.Text = `Funds Bomb Active (x2): ${convertToHHMMSS(fundsBombTime - currentTime)}`;
                     DETAILS_WINDOW.FundsBombLabel.Visible = true;
                 }
             }

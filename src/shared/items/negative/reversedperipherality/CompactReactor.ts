@@ -1,14 +1,14 @@
 import { TweenService } from "@rbxts/services";
-import Difficulty from "shared/Difficulty";
+import Difficulty from "@antivivi/jjt-difficulties";
 import Upgrader from "shared/item/Upgrader";
 import SmallReactor from "shared/items/negative/unimpossible/SmallReactor";
 import Price from "shared/Price";
 
-export = new Upgrader("CompactReactor")
+export = new Upgrader(script.Name)
 .setName("Compact Reactor")
 .setDescription("Okay, that is NOT compact. Seriously, who came up with these naming schemes? Well, it's your problem now. Have fun rearranging your setup for a %mul% boost.")
 .setDifficulty(Difficulty.ReversedPeripherality)
-.setPrice(new Price().setCost("Funds", 54e15), 1)
+.setPrice(new Price().setCost("Funds", 40e15), 1)
 .setRequiredItemAmount(SmallReactor, 1)
 .addPlaceableArea("BarrenIslands")
 

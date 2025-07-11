@@ -1,35 +1,41 @@
+import { RunService } from "@rbxts/services";
 import BuildBounds from "shared/utils/BuildBounds";
 
-type BoardGui = SurfaceGui & {
-    DropletLimit: Frame & {
-        Bar: Frame & {
-            Fill: Frame;
-            BarLabel: TextLabel
+declare global {
+    type Bar = Frame & {
+        UIStroke: UIStroke;
+        Fill: Frame;
+        BarLabel: TextLabel;
+    }
+    type BoardGui = SurfaceGui & {
+        DropletLimit: Frame & {
+            Bar: Bar
+        },
+        GridSize: Frame & {
+            BarLabel: TextLabel;
+        },
+        ItemCount: Frame & {
+            BarLabel: TextLabel;
         }
-    },
-    GridSize: Frame & {
-        BarLabel: TextLabel;
-    },
-    ItemCount: Frame & {
-        BarLabel: TextLabel;
     }
 }
 
 class Area {
-    areaFolder: Folder;
-    name: string;
-    map: Folder;
-    dropletLimit: IntValue;
-    grid: BasePart | undefined;
-    originalGridSize: Vector3 | undefined;
-    catchArea: BasePart | undefined;
-    buildBounds: BuildBounds | undefined;
+    readonly areaFolder: Folder;
+    readonly id: AreaId;
+    readonly name: string;
+    readonly map: Folder;
+    readonly dropletLimit: IntValue;
+    readonly grid: BasePart | undefined;
+    readonly originalGridSize: Vector3 | undefined;
+    readonly catchArea: BasePart | undefined;
+    readonly buildBounds: BuildBounds | undefined;
+    readonly unlocked: BoolValue;
+    readonly hidden: boolean;
     areaBounds?: BasePart;
     spawnLocation: SpawnLocation | undefined;
     islandInfoBoard: Model | undefined;
     boardGui: BoardGui | undefined;
-    unlocked: BoolValue;
-    hidden: boolean;
     lightingConfiguration: Lighting | undefined;
 
     constructor(areaFolder: Instance, buildable: boolean) {
@@ -37,6 +43,7 @@ class Area {
             error(areaFolder.Name + " is not a folder");
         }
         this.areaFolder = areaFolder;
+        this.id = areaFolder.Name as AreaId;
         this.name = (areaFolder.WaitForChild("Name") as StringValue).Value;
         this.map = areaFolder.WaitForChild("Map") as Folder;
         this.spawnLocation = (buildable ? areaFolder.WaitForChild("SpawnLocation") : areaFolder.FindFirstChild("SpawnLocation")) as SpawnLocation | undefined;
@@ -60,17 +67,19 @@ class Area {
         if (lightingConfigModule !== undefined) {
             this.lightingConfiguration = require(lightingConfigModule as ModuleScript) as Lighting;
         }
-        task.spawn(() => {
-            while (task.wait()) {
-                let limit = this.dropletLimit.GetAttribute("Default") as number;
-                for (const a of this.dropletLimit.GetChildren()) {
-                    if (a.IsA("IntValue")) {
-                        limit += a.Value;
+        if (RunService.IsServer()) {
+            task.spawn(() => {
+                while (task.wait(1)) {
+                    let limit = this.dropletLimit.GetAttribute("Default") as number;
+                    for (const a of this.dropletLimit.GetChildren()) {
+                        if (a.IsA("IntValue")) {
+                            limit += a.Value;
+                        }
                     }
+                    this.dropletLimit.Value = limit;
                 }
-                this.dropletLimit.Value = limit;
-            }
-        });
+            });
+        }
     }
 }
 

@@ -1,9 +1,9 @@
-import { OnStart, Service } from "@flamework/core";
+import Signal from "@antivivi/lemon-signal";
+import { Service } from "@flamework/core";
 import { DataService } from "server/services/serverdata/DataService";
-import { Signal } from "@antivivi/fletchette";
 
 @Service()
-export class EventService implements OnStart {
+export class EventService {
 
     eventCompleted = new Signal<(event: string, isCompleted: boolean) => void>();
 
@@ -12,9 +12,7 @@ export class EventService implements OnStart {
     }
 
     setEventCompleted(event: string, isCompleted: boolean) {
-        const completedEvents = this.dataService.empireProfile?.Data.completedEvents;
-        if (completedEvents === undefined)
-            return false;
+        const completedEvents = this.dataService.empireData.completedEvents;
         let success = true;
         if (isCompleted === true)
             completedEvents.add(event);
@@ -26,10 +24,6 @@ export class EventService implements OnStart {
     }
 
     isEventCompleted(event: string) {
-        return this.dataService.empireProfile?.Data.completedEvents.has(event) === true;
-    }
-
-    onStart() {
-        
+        return this.dataService.empireData.completedEvents.has(event) === true;
     }
 }

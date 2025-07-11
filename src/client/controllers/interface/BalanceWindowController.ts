@@ -1,3 +1,4 @@
+import { OnoeNum } from "@antivivi/serikanum";
 import { Controller, OnInit } from "@flamework/core";
 import { TweenService } from "@rbxts/services";
 import { BALANCE_WINDOW, INTERFACE, NavigationOption } from "client/constants";
@@ -5,13 +6,27 @@ import { HotkeysController } from "client/controllers/HotkeysController";
 import { UIController } from "client/controllers/UIController";
 import { TooltipController } from "client/controllers/interface/TooltipController";
 import Price from "shared/Price";
-import { BalanceOption, ASSETS } from "shared/constants";
-import { OnoeNum } from "@antivivi/serikanum";
+import Softcaps, { performSoftcap } from "shared/Softcaps";
+import { ASSETS } from "shared/constants";
+import Packets from "shared/network/Packets";
+import StringBuilder from "shared/utils/StringBuilder";
 import { paintObjects } from "shared/utils/vrldk/UIUtils";
-import Queue from "shared/utils/Queue";
-import { Fletchette } from "@antivivi/fletchette";
 
-const CurrencyCanister = Fletchette.getCanister("CurrencyCanister");
+declare global {
+    type BalanceOption = Frame & {
+        ImageLabel: ImageLabel,
+        Amount: Frame & {
+            BalanceLabel: TextLabel,
+            Income: Frame & {
+                IncomeLabel: TextLabel,
+                SoftcapLabel: TextLabel & {
+                    UIStroke: UIStroke
+                },
+            }
+        }
+        UIStroke: UIStroke,
+    }
+}
 
 @Controller()
 export class BalanceWindowController implements OnInit {
@@ -40,37 +55,69 @@ export class BalanceWindowController implements OnInit {
             const details = Price.DETAILS_PER_CURRENCY[currency];
             const backgroundColor = details?.color ?? new Color3(1, 1, 1);
             paintObjects(currencyOption, backgroundColor);
+            currencyOption.Amount.Income.SoftcapLabel.UIStroke.Color = new Color3(0.4, 0, 0);
             currencyOption.Name = currency;
             currencyOption.ImageLabel.Image = "rbxassetid://" + details?.image;
-            this.tooltipController.setTooltip(currencyOption.ImageLabel, currency);
             currencyOption.Amount.BalanceLabel.Text = this.format(currency, new OnoeNum(0));
-            currencyOption.Amount.IncomeLabel.Visible = false;
+            currencyOption.Amount.Income.Visible = false;
             currencyOption.Parent = BALANCE_WINDOW.Balances;
         }
         return currencyOption;
     }
 
-    refreshBalanceWindow(balance?: Map<Currency, OnoeNum>) {
+    refreshBalanceWindow(balance = Packets.balance.get()) {
         let size = 100;
-        if (balance !== undefined) {
-            let maxPage = 1;
-            for (const [currency, details] of pairs(Price.DETAILS_PER_CURRENCY)) {
-                let cost = balance.get(currency);
-                cost = new OnoeNum(cost === undefined ? 0 : cost); 
-                const exists = !cost.lessEquals(0);
-                const currencyOption = this.getCurrencyOption(currency);
-                currencyOption.Visible = (exists || currency === "Funds") && this.page === details.page;
-                if (currencyOption.Visible === true) {
-                    size += currencyOption.AbsoluteSize.X;
+        let maxPage = 1;
+        for (const [currency, details] of pairs(Price.DETAILS_PER_CURRENCY)) {
+            const c = balance.get(currency);
+            const cost = new OnoeNum(c === undefined ? 0 : c); 
+            const exists = !cost.lessEquals(0);
+            const currencyOption = this.getCurrencyOption(currency);
+
+            currencyOption.Visible = (exists || currency === "Funds") && this.page === details.page;
+            if (currencyOption.Visible === true) {
+                size += currencyOption.AbsoluteSize.X;
+            }
+            const amountLabel = this.format(currency, cost);
+            const labels = currencyOption.Amount;
+            labels.BalanceLabel.Text = amountLabel;
+            const softcap = Softcaps[currency];
+            let capped = false;
+
+            const tooltipBuilder = new StringBuilder().append("You have ").append(cost.toString()).append(" ").append(currency);
+
+            if (softcap !== undefined) {
+                const builder = new StringBuilder();
+                const [recippow, recippowStarts] = performSoftcap(cost, softcap.recippow);
+                let lowestStart: OnoeNum | undefined;
+                if (recippow !== undefined) {
+                    capped = true;
+                    builder.append("^(1/").append(recippow.toString()).append(")");
+                    lowestStart = recippowStarts;
                 }
-                currencyOption.Amount.BalanceLabel.Text = this.format(currency, cost);
-                currencyOption.LayoutOrder = details.layoutOrder;
-                if (exists && details.page !== undefined && details.page > maxPage) {
-                    maxPage = details.page;
+                const [div, divStarts] = performSoftcap(cost, softcap.div);
+                if (div !== undefined) {
+                    capped = true;
+                    builder.append("/").append(div.toString());
+                    if (lowestStart === undefined || divStarts.lessThan(lowestStart))
+                        lowestStart = divStarts;
+                }
+                const softcapLabel = builder.toString();
+                labels.Income.SoftcapLabel.Text = softcapLabel;
+                if (capped === true) {
+                    tooltipBuilder.append(`\n<font color="rgb(255, 0, 0)" size="16">After ${Price.getFormatted(currency, lowestStart)}, a softcap of ${softcapLabel} is applied to ${currency} gain!</font>`);
                 }
             }
-            this.maxPage = maxPage;
+            labels.Income.SoftcapLabel.Visible = capped;
+
+            this.tooltipController.setTooltip(currencyOption, tooltipBuilder.toString());
+
+            currencyOption.LayoutOrder = details.layoutOrder;
+            if (exists && details.page !== undefined && details.page > maxPage) {
+                maxPage = details.page;
+            }
         }
+        this.maxPage = maxPage;
         if (this.maxPage === 1 && this.page > 1) {
             this.page = 1;
             this.refreshBalanceWindow(balance);
@@ -137,29 +184,17 @@ export class BalanceWindowController implements OnInit {
             return true;
         });
 
-        CurrencyCanister.balance.observe((value) => this.refreshBalanceWindow(value));
+        Packets.balance.observe((value) => this.refreshBalanceWindow(value));
 
-        task.spawn(() => {
-            const queuePerCurrency = new Map<Currency, Queue>();
-            for (const [currency] of pairs(Price.DETAILS_PER_CURRENCY)) {
-                queuePerCurrency.set(currency, new Queue());
-            }
-            while (task.wait(1)) {
-                const balance = CurrencyCanister.balance.get();
-                for (const [currency, cost] of pairs(balance)) {
-                    const queue = queuePerCurrency.get(currency);
-                    if (queue === undefined) {
-                        continue;
-                    }
-                    queue.addToQueue(cost);
-                    const change = queue.getAverageGain();
-                    const currencyOptionLabels = this.getCurrencyOption(currency).Amount;
-                    currencyOptionLabels.IncomeLabel.Visible = !change.lessEquals(0);
-                    currencyOptionLabels.IncomeLabel.Text = this.format(currency, change) + "/s";
-                }            
+        Packets.income.observe((income) => {
+            for (const [currency, cost] of income) {
+                const change = new OnoeNum(cost);
+                const currencyOptionLabels = this.getCurrencyOption(currency).Amount;
+                currencyOptionLabels.Income.Visible = !change.lessEquals(0);
+                currencyOptionLabels.Income.IncomeLabel.Text = this.format(currency, change) + "/s";
             }
         });
 
-        Fletchette.getCanister("SettingsCanister").settings.observe((value) => this.isFormatCurrencies = INTERFACE.AbsoluteSize.X < 1000 ? false : value.FormatCurrencies);
+        Packets.settings.observe((value) => this.isFormatCurrencies = INTERFACE.AbsoluteSize.X < 1000 ? false : value.FormatCurrencies);
     }
 }

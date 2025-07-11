@@ -1,6 +1,6 @@
 import { Service } from "@flamework/core";
 import { BadgeService } from "@rbxts/services";
-import { OnPlayerJoined } from "server/services/PlayerJoinService";
+import { OnPlayerJoined } from "server/services/ModdingService";
 
 @Service()
 export class BadgesService implements OnPlayerJoined {

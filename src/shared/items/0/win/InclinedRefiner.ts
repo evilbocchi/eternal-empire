@@ -1,10 +1,10 @@
-import Difficulty from "shared/Difficulty";
+import Difficulty from "@antivivi/jjt-difficulties";
 import Price from "shared/Price";
 import Upgrader from "shared/item/Upgrader";
 
-export = new Upgrader("InclinedRefiner")
+export = new Upgrader(script.Name)
 .setName("Inclined Refiner")
-.setDescription("Inclines up then down... Adds %add% to droplets in Slamo Village.")
+.setDescription("Inclines up then down... %add% to droplets in Slamo Village.")
 .setDifficulty(Difficulty.Win)
 .setPrice(new Price().setCost("Funds", 4.1e24).setCost("Skill", 1), 1)
 .setCreator("MHPlayer12")

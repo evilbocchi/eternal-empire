@@ -1,4 +1,4 @@
-import Difficulty from "shared/Difficulty";
+import Difficulty from "@antivivi/jjt-difficulties";
 import Shop from "shared/item/Shop";
 import AdvancedRefiner from "shared/items/negative/a/AdvancedRefiner";
 import DropDropper from "shared/items/negative/a/DropDropper";
@@ -84,109 +84,110 @@ import LaserFan from "shared/items/negative/unimpossible/LaserFan";
 import SmallReactor from "shared/items/negative/unimpossible/SmallReactor";
 import VolatileCauldron from "shared/items/negative/unimpossible/VolatileCauldron";
 
-export = new Shop("ClassLowerNegativeShop")
-.setName("Class Negative Shop")
-.setDescription("Purchase all of your items here! Well, at least all items below Instant Win difficulty.")
-.setDifficulty(Difficulty.TheFirstDifficulty)
-.addPlaceableArea("BarrenIslands")
-.setItems([
-    TheFirstDropper,
-    TheFirstFurnace,
-    TheFirstConveyor,
-    TheFirstUpgrader,
+export = new Shop(script.Name)
+    .setName("Class Negative Shop")
+    .setDescription("Purchase all of your items here! Well, at least all items below Instant Win difficulty.")
+    .setDifficulty(Difficulty.TheFirstDifficulty)
+    .addPlaceableArea("BarrenIslands")
+    .persists()
+    .setItems([
+        TheFirstDropper,
+        TheFirstFurnace,
+        TheFirstConveyor,
+        TheFirstUpgrader,
 
-    BulkyDropper,
-    ImprovedFurnace,
-    ExtendedConveyor,
-    BasicRefiner,
-    BasicCauldron,
-    ConveyorCorner,
+        BulkyDropper,
+        ImprovedFurnace,
+        ExtendedConveyor,
+        BasicRefiner,
+        BasicCauldron,
+        ConveyorCorner,
 
-    HandCrankDropper,
-    DropletSlayerMkI,
-    HeavyweightDropper,
-    DirectDropletWasher,
-    InstantiationDelimiterI,
+        HandCrankDropper,
+        DropletSlayerMkI,
+        HeavyweightDropper,
+        DirectDropletWasher,
+        InstantiationDelimiterI,
 
-    LaserFan,
-    VolatileCauldron,
-    ButtonFurnace,
-    SmallReactor,
+        LaserFan,
+        VolatileCauldron,
+        ButtonFurnace,
+        SmallReactor,
 
-    GrassConveyor,
-    AnticlockwiseConveyorCorner,
-    GrassDropper,
-    IndustrialFurnace,
+        GrassConveyor,
+        AnticlockwiseConveyorCorner,
+        GrassDropper,
+        IndustrialFurnace,
 
-    TheFirstGenerator,
+        TheFirstGenerator,
 
-    EnergisedRefiner,
-    EnergisedFurnace,
+        EnergisedRefiner,
+        EnergisedFurnace,
 
-    BasicCharger,
-    UpgradeBoardI,
-    VibrantDropper,
-    DropletElectronInfuser,
-    UpgradedGenerator,
-    QuickConveyor,
-    BasicPowerHarvester,
-    
-    DualDropper,
-    InstantiationDelimiterII,
-    DropDropper,
-    AdvancedRefiner,
-    HandCrankGenerator,
-    
-    ShockingCauldron,
-    ElevatedUpgrader,
-    ElevatingConveyor,
-    AdvancedCharger,
-    AwesomeManumaticPurifier,
-    BasicCondenser,
-    ElevatedConveyor,
-    ElevatedConveyorCorner,
-    
-    EffervescentDropletSpray,
-    RapidDropper,
-    ColorStrictFurnace,
-    PurifiersRefiner,
-    DropletSlayerMkII,
-    ShockingRefiner,
+        BasicCharger,
+        UpgradeBoardI,
+        VibrantDropper,
+        DropletElectronInfuser,
+        UpgradedGenerator,
+        QuickConveyor,
+        BasicPowerHarvester,
 
-    CompactReactor,
-    ConversionConveyor,
-    OverusedAmethystDropper,
-    PeripheralGenerator,
-    MagmaticConveyor,
-    ReversedUpgrader,
-    ElevatedAnticlockwiseConveyorCorner,
+        DualDropper,
+        InstantiationDelimiterII,
+        DropDropper,
+        AdvancedRefiner,
+        HandCrankGenerator,
 
-    DropletAligner,
-    AdvancedPowerHarvester,
-    IndustrialCharger,
-    PrecisionRefiner,
-    MiniDropletSlayer,
+        ShockingCauldron,
+        ElevatedUpgrader,
+        ElevatingConveyor,
+        AdvancedCharger,
+        AwesomeManumaticPurifier,
+        BasicCondenser,
+        ElevatedConveyor,
+        ElevatedConveyorCorner,
 
-    NoobClicker,
-    LaserTunnel,
-    InstantiationDelimiterIII,
-    AdvancedCondenser,
+        EffervescentDropletSpray,
+        RapidDropper,
+        ColorStrictFurnace,
+        PurifiersRefiner,
+        DropletSlayerMkII,
+        ShockingRefiner,
 
-    SleepingConveyor,
-    KillbrickUpgrader,
-    BasicHealthPack,
-    VitalizedDropper,
-    HalfSleepingConveyor,
+        CompactReactor,
+        ConversionConveyor,
+        OverusedAmethystDropper,
+        PeripheralGenerator,
+        MagmaticConveyor,
+        ReversedUpgrader,
+        ElevatedAnticlockwiseConveyorCorner,
 
-    DepressingDropper,
-    FundsCompactDropper,
-    PowerCompactDropper,
+        DropletAligner,
+        AdvancedPowerHarvester,
+        IndustrialCharger,
+        PrecisionRefiner,
+        MiniDropletSlayer,
 
-    FrozenGate,
-    PassiveBonanza,
-    PurifiersDream,
-    MoltenAltar,
-    BasicBlankEssence,
-    Admiration,
-    Codependence
-]);
+        NoobClicker,
+        LaserTunnel,
+        InstantiationDelimiterIII,
+        AdvancedCondenser,
+
+        SleepingConveyor,
+        KillbrickUpgrader,
+        BasicHealthPack,
+        VitalizedDropper,
+        HalfSleepingConveyor,
+
+        DepressingDropper,
+        FundsCompactDropper,
+        PowerCompactDropper,
+
+        FrozenGate,
+        PassiveBonanza,
+        PurifiersDream,
+        MoltenAltar,
+        BasicBlankEssence,
+        Admiration,
+        Codependence
+    ]);

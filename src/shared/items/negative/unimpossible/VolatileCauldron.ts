@@ -1,8 +1,8 @@
-import Difficulty from "shared/Difficulty";
+import Difficulty from "@antivivi/jjt-difficulties";
 import Furnace from "shared/item/Furnace";
 import Price from "shared/Price";
 
-export = new Furnace("VolatileCauldron")
+export = new Furnace(script.Name)
 .setName("Volatile Cauldron")
 .setDescription("A cauldron giving... some multiplier of Funds? I don't know.")
 .setDifficulty(Difficulty.Unimpossible)

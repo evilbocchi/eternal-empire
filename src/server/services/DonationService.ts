@@ -1,8 +1,8 @@
+import Signal from "@antivivi/lemon-signal";
 import { OnStart, Service } from "@flamework/core";
 import { Players } from "@rbxts/services";
 import { LeaderstatsService } from "server/services/LeaderstatsService";
 import { DataService } from "server/services/serverdata/DataService";
-import { Signal } from "@antivivi/fletchette";
 
 @Service()
 export class DonationService implements OnStart {
@@ -26,7 +26,7 @@ export class DonationService implements OnStart {
     onStart() {
         const update = (player: Player, donated: number) => {
             this.leaderstatsService.setLeaderstat(player, "Donated", donated);
-        }
+        };
         this.donatedChanged.connect((player, donated) => update(player, donated));
         Players.PlayerAdded.Connect((player) => update(player, this.getDonated(player)));
         for (const player of Players.GetPlayers()) {

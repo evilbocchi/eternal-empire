@@ -1,19 +1,20 @@
-import Difficulty from "shared/Difficulty";
+import Difficulty from "@antivivi/jjt-difficulties";
 import Droplet from "shared/item/Droplet";
-import FurnaceDropper from "shared/item/FurnaceDropper";
+import Dropper from "shared/item/Dropper";
 import Price from "shared/Price";
+import { GameUtils } from "shared/utils/ItemUtils";
 
-export = new FurnaceDropper("DropDropper")
-.setName("Recycling Dropper")
-.setDescription("Produces a $4K, 3 W droplet every time a droplet is processed through the attached furnace. No need for conjoined droppers anymore.")
-.setDifficulty(Difficulty.A)
-.setPrice(new Price().setCost("Funds", 6.5e12), 1)
+export = new Dropper(script.Name)
+    .setName("Recycling Dropper")
+    .setDescription("Produces a %val% droplet every time a droplet is processed through the attached furnace. No need for conjoined droppers anymore.")
+    .setDifficulty(Difficulty.A)
+    .setPrice(new Price().setCost("Funds", 6.5e12), 1)
 
-.addPlaceableArea("BarrenIslands")
-.setDroplet(Droplet.CommunismDroplet)
-.onProcessed((model, _utils, item) => {
-    const instantiator = item?.instantiatorPerDrop.get(model.WaitForChild("Drop") as BasePart);
-    if (instantiator !== undefined) {
-        instantiator();
-    }
-});
+    .addPlaceableArea("BarrenIslands")
+    .setDroplet(Droplet.CommunismDroplet)
+    .onProcessed((model) => {
+        const instantiator = GameUtils.getInstanceInfo(model.WaitForChild("Drop") as BasePart, "Instantiator");
+        if (instantiator !== undefined) {
+            instantiator();
+        }
+    });

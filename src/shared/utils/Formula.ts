@@ -1,3 +1,4 @@
+//!native
 import { OnoeNum } from "@antivivi/serikanum";
 
 type Number = number | OnoeNum;
@@ -8,6 +9,9 @@ type Operation = {
 }
 
 const def = new OnoeNum(0);
+const HALF = new OnoeNum(1/2);
+const ONETHIRD = new OnoeNum(1/3);
+const E = math.exp(1);
 
 class Formula {
 
@@ -57,10 +61,22 @@ class Formula {
         return this;
     }
 
+    sqrt() {
+        this.operations.push({type: "sqrt"});
+        return this;
+    }
+
     log(number: number) {
         this.operations.push({
             type: "log",
             base: number
+        });
+        return this;
+    }
+
+    ln() {
+        this.operations.push({
+            type: "ln"
         });
         return this;
     }
@@ -83,8 +99,17 @@ class Formula {
                 case "pow":
                     number = number.pow(operation.amount!);
                     break;
+                case "sqrt":
+                    number = number.pow(HALF);
+                    break;
+                case "cbrt":
+                    number = number.pow(ONETHIRD);
+                    break;
                 case "log":
                     number = OnoeNum.log(number, operation.base!) ?? def;
+                    break;
+                case "ln":
+                    number = OnoeNum.log(number, E) ?? def;
                     break;
             }
         }
@@ -92,6 +117,7 @@ class Formula {
     }
 
     tostring(nameOfX: string) {
+        let lastOperator: string | undefined;
         for (const operation of this.operations) {
             switch (operation.type) {
                 case "add":
@@ -107,12 +133,24 @@ class Formula {
                     nameOfX += " / " + operation.amount;
                     break;
                 case "pow":
-                    nameOfX += " ^ " + operation.amount;
+                    if (lastOperator === "add" || lastOperator === "sub" || lastOperator === "mul" || lastOperator === "div") {
+                        nameOfX = "(" + nameOfX + ") ^ " + operation.amount;
+                    }
+                    else {
+                        nameOfX += " ^ " + operation.amount;
+                    }
+                    break;
+                case "sqrt":
+                    nameOfX = "√(" + nameOfX + ")";
                     break;
                 case "log":
-                    nameOfX = "log" + operation.base + "(" + nameOfX + ")";
+                    nameOfX = "log<font size='16'>" + operation.base + "</font>(" + nameOfX + ")";
+                    break;
+                case "ln":
+                    nameOfX = "ln(" + nameOfX + ")";
                     break;
             }
+            lastOperator = operation.type;
         }
         return nameOfX;
     }

@@ -1,4 +1,4 @@
-import { TweenService } from "@rbxts/services";
+import { Debris, TweenService, Workspace } from "@rbxts/services";
 
 export function weld(part0: BasePart, part1: BasePart) {
 	const w = new Instance("ManualWeld", part0);
@@ -99,37 +99,22 @@ export function findBaseParts(instance: Instance, name: string): BasePart[] {
 	return instance.GetDescendants().filter((v) => v.Name === name && v.IsA("BasePart")) as BasePart[];
 }
 
-export function playSoundAtPart(basePart: BasePart | undefined, sound: Sound | string | number, volume?: number) {
-	if (basePart) {
-		if (typeOf(sound) === "Instance") {
-			const soundInstance = (sound as Sound).Clone();
-			soundInstance.Parent = basePart;
-			soundInstance.Name = "sound" + (sound as Sound).SoundId;
-			if (volume) {
-				soundInstance.Volume = volume;
-			}
-			soundInstance.Play();
-			return;
-		}
-
-		const id = typeOf(sound) === "string" ? sound as string : "rbxassetid://" + tostring(sound);
-		const cacheSoundInstance = basePart.FindFirstChild("sound" + id);
-		if (cacheSoundInstance && cacheSoundInstance.IsA("Sound")) {
-			if (volume) {
-				cacheSoundInstance.Volume = volume;
-			}
-			cacheSoundInstance.Play();
-			return;
-		}
-		const soundInstance = new Instance("Sound");
-		soundInstance.Name = "sound" + id;
-		soundInstance.SoundId = id;
-		soundInstance.Parent = basePart;
-		if (volume) {
-			soundInstance.Volume = volume;
-		}
-		soundInstance.Play();
-	}
+export function playSoundAtPart(basePart: Instance | undefined, sound: Sound | string | number, volume?: number) {
+    let soundInstance: Sound;
+    if (typeOf(sound) === "Instance") {
+        soundInstance = (sound as Sound).Clone();
+    }
+    else {
+        soundInstance = new Instance("Sound");
+        soundInstance.SoundId = typeOf(sound) === "string" ? sound as string : "rbxassetid://" + tostring(sound);
+    }
+    if (volume !== undefined) {
+        soundInstance.Volume = volume;
+    }
+    soundInstance.Parent = basePart;
+    soundInstance.Ended.Once(() => Debris.AddItem(soundInstance, 0.05));
+    soundInstance.Stopped.Once(() => Debris.AddItem(soundInstance, 0.05));
+    soundInstance.Play();
 }
 
 export function addTouchInterest(basePart: BasePart): TouchTransmitter | undefined {
@@ -154,4 +139,22 @@ export function getHumanoidsInArea(humanoids: Humanoid[], area: BasePart) {
 export function getWorldSize(part: BasePart) {
 	const c = part.CFrame.VectorToWorldSpace(part.Size);
 	return new Vector3(math.abs(c.X), math.abs(c.Y), math.abs(c.Z));
+}
+
+export function spawnExplosion(position: Vector3, part?: BasePart) {
+    if (part === undefined) {
+        part = new Instance("Part");
+        part.Transparency = 1;
+        part.Anchored = true;
+        part.CanCollide = false;
+        part.Position = position;
+        part.Parent = Workspace;
+    }
+    const explosion = new Instance("Explosion");
+    explosion.DestroyJointRadiusPercent = 0;
+    explosion.ExplosionType = Enum.ExplosionType.NoCraters;
+    explosion.Position = position;
+    explosion.BlastRadius = 0;
+    explosion.Parent = part;
+    Debris.AddItem(part, 4);
 }

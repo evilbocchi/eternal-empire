@@ -1,10 +1,10 @@
-import Difficulty from "shared/Difficulty";
+import Difficulty from "@antivivi/jjt-difficulties";
 import Droplet from "shared/item/Droplet";
 import Dropper from "shared/item/Dropper";
 import Price from "shared/Price";
 import { rainbowEffect } from "shared/utils/vrldk/BasePartUtils";
 
-export = new Dropper("VibrantDropper")
+export = new Dropper(script.Name)
 .setName("Vibrant Dropper")
 .setDescription("Might want to get rid of that Grass Conveyor now, this dropper produces %val% droplets every 8 seconds.")
 .setDifficulty(Difficulty.TrueEase)

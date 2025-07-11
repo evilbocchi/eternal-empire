@@ -1,60 +1,76 @@
-import { OnInit, OnStart, Service } from "@flamework/core";
-import { RunService, TweenService } from "@rbxts/services";
+import Signal from "@antivivi/lemon-signal";
+import { OnInit, Service } from "@flamework/core";
+import { Players, RunService, TweenService, Workspace } from "@rbxts/services";
+import { DataService } from "server/services/serverdata/DataService";
 import NPC, { Dialogue, NPCAnimationType } from "shared/NPC";
 import { ASSETS, NPCS, NPC_MODELS, getDisplayName, getSound } from "shared/constants";
-import { Fletchette, RemoteFunc, RemoteSignal, Signal } from "@antivivi/fletchette";
+import Packets from "shared/network/Packets";
 import { loadAnimation } from "shared/utils/vrldk/RigUtils";
 
-declare global {
-    interface FletchetteCanisters {
-        NPCCanister: typeof NPCCanister;
-    }
-}
-
-const NPCCanister = Fletchette.createCanister("NPCCanister", {
-    npcMessage: new RemoteSignal<(npc: Model | undefined, message: string, pos: number, end: number) => void>(),
-    nextDialogue: new RemoteFunc<() => boolean>(),
-});
-
 @Service()
-export class NPCService implements OnInit, OnStart {
+export class NPCService implements OnInit {
 
     dialogueFinished = new Signal<(dialogue: Dialogue) => void>();
     npcPerName = new Map<string, NPC>();
     modelPerNPC = new Map<NPC, Model>();
     runningAnimationsPerNPC = new Map<NPC, Map<string, AnimationTrack>>();
-    dialoguePerNPC = new Map<NPC, Set<Dialogue>>();
+    dialoguePerNPC = new Map<NPC, Map<Dialogue, number>>();
     animationsPerNPC = new Map<NPC, Map<NPCAnimationType, AnimationTrack>>();
+    defaultLocationsPerNPC = new Map<NPC, CFrame>();
     proximityPrompts = new Set<ProximityPrompt>();
+    currentDialogue: Dialogue | undefined;
     isInteractionEnabled = true;
 
-    addDialogue(npc: NPC, dialogue: Dialogue) {
-        this.dialoguePerNPC.get(npc)!.add(dialogue);
+    constructor(private dataService: DataService) {
+
+    }
+
+    addDialogue(npc: NPC, dialogue: Dialogue, priority?: number) {
+        this.dialoguePerNPC.get(npc)!.set(dialogue, priority ?? 1);
     }
 
     removeDialogue(npc: NPC, dialogue: Dialogue) {
         this.dialoguePerNPC.get(npc)!.delete(dialogue);
     }
 
-    talk(dialogue: Dialogue) {
+    talk(dialogue: Dialogue, requireInteraction?: boolean) {
         const dialogues = this.extractDialogue(dialogue);
         const size = dialogues.size();
         let i = 0;
         const nextDialogue = () => {
             const current = dialogues[i];
-            const currentIndex = i + 1;
+            const currentIndex = ++i;
             if (currentIndex > size) {
                 this.dialogueFinished.fire(dialogue);
                 this.enableInteraction();
                 return true;
             }
-            ++i;
             const talkingModel = current.npc === undefined ? undefined : this.modelPerNPC.get(current.npc);
             this.disableInteraction();
-            NPCCanister.npcMessage.fireAll(talkingModel, current.text, currentIndex, size);
+            if (talkingModel === undefined) {
+                Packets.npcMessage.fireAll(talkingModel ?? Workspace, current.text, currentIndex, size, true);
+            }
+            else {
+                let playersPrompted = 0;
+                const players = Players.GetPlayers();
+                const talkingPart = talkingModel.FindFirstChildOfClass("Humanoid")?.RootPart;
+                for (const player of players) {
+                    const rootPart = player.Character?.FindFirstChildOfClass("Humanoid")?.RootPart;
+                    const isPrompt = talkingPart !== undefined &&
+                        (requireInteraction !== false && rootPart !== undefined && rootPart.Position.sub(talkingPart.Position).Magnitude < 60);
+                    if (isPrompt === true) {
+                        ++playersPrompted;
+                    }
+                    Packets.npcMessage.fire(player, talkingModel ?? Workspace, current.text, currentIndex, size, isPrompt);
+                }
+                task.delay(current.text.size() / 11 + 1, () => {
+                    if (i === currentIndex)
+                        nextDialogue();
+                });
+            }
             return false;
-        }
-        NPCCanister.nextDialogue.onInvoke(() => nextDialogue());
+        };
+        Packets.nextDialogue.onInvoke(() => nextDialogue());
         nextDialogue();
     }
 
@@ -116,20 +132,11 @@ export class NPCService implements OnInit, OnStart {
     }
 
     onInit() {
-        const npcScripts = NPCS.GetDescendants();
-        if (npcScripts === undefined)
-            error("wtf");
-        for (const npcScript of npcScripts) {
-            if (npcScript.IsA("ModuleScript")) {
-                const npc = require(npcScript) as NPC;
-                this.npcPerName.set(npcScript.Name, npc);
-                this.animationsPerNPC.set(npc, new Map());
-            }
-        }
-    }
+        if (this.dataService.isPublicServer)
+            NPC_MODELS.WaitForChild("Name Changer").Destroy();
 
-    onStart() {
         const npcModels = NPC_MODELS.GetChildren();
+
         for (const npcModel of npcModels) {
             if (npcModel.IsA("Model")) {
                 const humanoid = npcModel.FindFirstChildOfClass("Humanoid");
@@ -157,27 +164,39 @@ export class NPCService implements OnInit, OnStart {
                 prompt.RequiresLineOfSight = false;
                 prompt.Parent = npcModel;
                 getSound("Ding").Clone().Parent = npcModel.PrimaryPart;
-                const npc = this.npcPerName.get(npcModel.Name);
+
+                const npcScript = NPCS.FindFirstChild(npcModel.Name);
+                if (npcScript === undefined) {
+                    warn(npcModel.Name + " does not have a script");
+                    continue;
+                }
+                const npc = require(npcScript as ModuleScript) as NPC;
+                this.npcPerName.set(npcScript.Name, npc);
+                this.animationsPerNPC.set(npc, new Map());
+
                 if (npc === undefined) {
                     warn("Cannot find NPC for " + npcModel.Name);
                     continue;
                 }
                 this.modelPerNPC.set(npc, npcModel);
                 this.runningAnimationsPerNPC.set(npc, new Map());
-                this.dialoguePerNPC.set(npc, new Set());
+                this.dialoguePerNPC.set(npc, new Map());
 
                 prompt.Triggered.Connect((player) => {
                     print(`${player.Name} interacted`);
-                    let isOveridden = false;
+                    if (npc.interact !== undefined) {
+                        npc.interact();
+                        return;
+                    }
                     const availableDialogues = this.dialoguePerNPC.get(npc)!;
-                    for (const dialogue of availableDialogues) {
-                        isOveridden = true;
-                        this.talk(dialogue);
-                        break;
+                    let highestPriority: number | undefined, highestDialogue: Dialogue | undefined;
+                    for (const [dialogue, priority] of availableDialogues) {
+                        if (highestPriority === undefined || priority > highestPriority) {
+                            highestDialogue = dialogue;
+                            highestPriority = priority;
+                        }
                     }
-                    if (isOveridden === false) {
-                        this.talk(npc.defaultDialogue);
-                    }
+                    this.talk(highestDialogue ?? npc.defaultDialogue);
                 });
                 this.proximityPrompts.add(prompt);
 
@@ -188,7 +207,7 @@ export class NPCService implements OnInit, OnStart {
                     }
                 }
                 humanoid.RootPart!.CustomPhysicalProperties = new PhysicalProperties(100, 0.3, 0.5);
-
+                this.defaultLocationsPerNPC.set(npc, humanoid.RootPart!.CFrame);
                 this.playAnimation(npc, "Default");
                 humanoid.Running.Connect((speed) => {
                     if (speed > 0)
@@ -197,13 +216,10 @@ export class NPCService implements OnInit, OnStart {
                         this.stopAnimation(npc, "Walk");
                 });
                 let last = humanoid.RootPart!.Position;
-                let t = 0;
-                RunService.Heartbeat.Connect((dt) => {
-                    t += dt;
-                    if (t > 0.5) {
-                        t = 0;
+                task.spawn(() => {
+                    while (task.wait(1)) {
                         const newPosition = humanoid.RootPart!.Position;
-                        if (this.runningAnimationsPerNPC.get(npc)?.has("Walk") && newPosition.sub(last).Magnitude < 1) {
+                        if (newPosition.sub(last).Magnitude < 1) {
                             last = newPosition;
                             this.stopAnimation(npc, "Walk");
                         }

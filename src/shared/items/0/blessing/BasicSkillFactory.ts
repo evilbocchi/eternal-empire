@@ -1,11 +1,11 @@
-import Difficulty from "shared/Difficulty";
+import Difficulty from "@antivivi/jjt-difficulties";
 import Price from "shared/Price";
 import Droplet from "shared/item/Droplet";
-import Factory from "shared/item/Factory";
+import Dropper from "shared/item/Dropper";
 
-export = new Factory("BasicSkillFactory")
+export = new Dropper(script.Name)
 .setName("Basic Skill Factory")
-.setDescription("Start producing Skill passively, with a Factory producing 0.01 Skill droplets every 2 seconds.")
+.setDescription("Start producing Skill passively, with a Factory producing %val% droplets every 2 seconds.")
 .setDifficulty(Difficulty.Blessing)
 .setPrice(new Price().setCost("Power", 1e15).setCost("Skill", 8), 1)
 .setPrice(new Price().setCost("Power", 2e15).setCost("Skill", 10), 2)

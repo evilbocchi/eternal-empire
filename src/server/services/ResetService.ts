@@ -1,89 +1,90 @@
-import { OnStart, Service } from "@flamework/core";
+import Signal from "@antivivi/lemon-signal";
+import { OnoeNum } from "@antivivi/serikanum";
+import { OnInit, Service } from "@flamework/core";
 import { BadgeService, Players, RunService } from "@rbxts/services";
 import { UpgradeBoardService } from "server/services/serverdata/UpgradeBoardService";
-import Area from "shared/Area";
 import Price from "shared/Price";
-import { AREAS, Inventory, PlacedItem, RESET_LAYERS } from "shared/constants";
-import NamedUpgrade from "shared/item/NamedUpgrade";
+import { RESET_LAYERS } from "shared/constants";
 import Items from "shared/items/Items";
-import { Fletchette, RemoteSignal, Signal } from "@antivivi/fletchette";
-import { OnoeNum } from "@antivivi/serikanum";
-import { GameAssetService } from "./GameAssetService";
+import NamedUpgrades from "shared/namedupgrade/NamedUpgrades";
+import Packets from "shared/network/Packets";
 import { CurrencyService } from "./serverdata/CurrencyService";
 import { DataService } from "./serverdata/DataService";
 import { ItemsService } from "./serverdata/ItemsService";
+import { RevenueService } from "server/services/RevenueService";
 
 declare global {
-    interface FletchetteCanisters {
-        ResetCanister: typeof ResetCanister;
-    }
+    type ResetLayerId = keyof (typeof RESET_LAYERS);
+    type ResetLayer = (typeof RESET_LAYERS)[ResetLayerId];
 }
 
 const trillion = OnoeNum.fromSerika(1, 12);
-const ResetCanister = Fletchette.createCanister("ResetCanister", {
-    reset: new RemoteSignal<(layer: number, amount: OnoeNum) => void>(),
-});
+const RESET_UPGRADES = NamedUpgrades.getUpgrades("Reset");
 
 @Service()
-export class ResetService implements OnStart {
+export class ResetService implements OnInit {
 
-    reset = new Signal<(player: Player, layer: number, amount: OnoeNum) => void>();
+    reset = new Signal<(player: Player, layer: ResetLayerId, amount: OnoeNum) => void>();
+    resettingPerLayer = new Map<ResetLayerId, boolean>();
 
-    constructor(private dataService: DataService, private itemsService: ItemsService, private currencyService: CurrencyService, 
-        private gameAssetService: GameAssetService, private upgradeBoardService: UpgradeBoardService) {
+    constructor(private dataService: DataService, private itemsService: ItemsService,
+        private currencyService: CurrencyService, private upgradeBoardService: UpgradeBoardService,
+        private revenueService: RevenueService) {
 
     }
 
-    shouldRemove(itemId: string, resetLayerIndex: number) {
+    /**
+     * Whether the specified item should be kept, unplaced or reset from the server.
+     * 
+     * @param itemId Item id to check
+     * @param resetLayer Reset layer to reset on
+     * @param placedIn Where the item is placed
+     * @returns 0 if the item should be kept, 1 if the item should be unplaced and 2 if the item should be reset
+     */
+    shouldRemove(itemId: string, resetLayer: ResetLayer, placedIn?: AreaId) {
         const item = Items.getItem(itemId);
         if (item === undefined)
-            return false;
-        const index = item.getResetLayer();
-        if (index === -1)
-            return false;
+            return 0;
+        const shouldReset = item.getResetLayer() <= resetLayer.order;
+        if (shouldReset === true)
+            return 2;
         else
-            return index <= resetLayerIndex;
+            return placedIn === resetLayer.area.id ? 1 : 0;
     }
 
-    filterExcludeInventory(inventory: Inventory, resetLayerIndex: number) {
+    filterExcludeInventory(inventory: Inventory, resetLayer: ResetLayer) {
         for (const [itemId] of inventory) {
-            if (this.shouldRemove(itemId, resetLayerIndex)) {
+            if (this.shouldRemove(itemId, resetLayer) === 2) {
                 inventory.delete(itemId);
             }
         }
         return inventory;
     }
 
-    removeItems(resetLayerIndex: number) {
-        // Remove placed items
-        const placedItems = this.itemsService.getPlacedItems();
+    unplaceItems(resetLayer: ResetLayer, items: ItemsData) {
         const newPlacedItems = new Array<PlacedItem>();
-        for (const placedItem of placedItems) {
-            if (!this.shouldRemove(placedItem.item, resetLayerIndex)) {
+        const inventory = items.inventory;
+        items.placed.forEach((placedItem) => {
+            const status = this.shouldRemove(placedItem.item, resetLayer, placedItem.area as AreaId | undefined);
+            if (status === 1) {
+                inventory.set(placedItem.item, (inventory.get(placedItem.item) ?? 0) + 1);
+            }
+            else if (status === 0) {
                 newPlacedItems.push(placedItem);
             }
-        }
-        this.itemsService.setPlacedItems(newPlacedItems);
-
-        // Remove bought history
-        this.itemsService.setBought(this.filterExcludeInventory(this.itemsService.getBought(), resetLayerIndex));
-
-        // Remove items from inventory
-        this.itemsService.setInventory(this.filterExcludeInventory(this.itemsService.getInventory(), resetLayerIndex));
+        });
+        items.placed = newPlacedItems;
+        return inventory;
     }
 
-    getUpgraded(value: Price) {
-        const upgrades = this.upgradeBoardService.getAmountPerUpgrade();
-        for (const [upgradeId, amount] of pairs(upgrades)) {
-            const upgrade = NamedUpgrade.getUpgrade(upgradeId as string);
-            if (upgrade === undefined)
-                continue;
-            const formula = upgrade.resetFormula;
-            if (formula !== undefined) {
-                value = formula(value, amount, upgrade.step);
-            }
-        }
-        return value;
+    removeItems(resetLayer: ResetLayer) {
+        const items = this.dataService.empireData.items;
+        // Remove placed items
+        const inventory = this.unplaceItems(resetLayer, items);
+        items.bought = this.filterExcludeInventory(items.bought, resetLayer);
+        items.inventory = this.filterExcludeInventory(inventory, resetLayer);
+
+        this.itemsService.setItems(items);
     }
 
     getPlayer(otherPart: BasePart) {
@@ -108,7 +109,7 @@ export class ResetService implements OnStart {
                 t = tick();
             }
             countdownStarted = !players.isEmpty();
-        }
+        };
         touchPart.Touched.Connect((otherPart) => {
             const player = this.getPlayer(otherPart);
             if (player === undefined)
@@ -141,15 +142,39 @@ export class ResetService implements OnStart {
         });
     }
 
-    onStart() {
+    performReset(resetLayer: ResetLayer) {
+        this.removeItems(resetLayer);
+        this.itemsService.fullUpdatePlacedItemsModels();
+        for (const resettingCurrency of resetLayer.resettingCurrencies)
+            this.currencyService.setCost(resettingCurrency, new OnoeNum(0));
+        for (const resettingUpgrade of resetLayer.resettingUpgrades)
+            this.upgradeBoardService.setUpgradeAmount(resettingUpgrade, 0);
+    }
+
+    getResetReward(resetLayer: ResetLayer) {
+        const amount = this.currencyService.getCost(resetLayer.scalesWith);
+        let value = new Price();
+        let totalAdd = Price.EMPTY_PRICE;
+        let totalMul = Price.ONES;
+        let totalPow = Price.ONES;
+        if (resetLayer.minimum.moreThan(amount))
+            return value;
+        value = value.setCost(resetLayer.gives, resetLayer.formula.apply(amount));
+        [totalAdd, totalMul, totalPow] = this.revenueService.applyGlobal(totalAdd, totalMul, totalPow, RESET_UPGRADES);
+        const worth = this.revenueService.coalesce(value, totalAdd, totalMul, totalPow);
+        this.revenueService.applySoftcaps(worth.costPerCurrency);
+        return worth;
+    }
+
+    onInit() {
         this.currencyService.balanceChanged.connect((balance) => {
-            for (const resetLayer of RESET_LAYERS) {
+            for (const [name, resetLayer] of pairs(RESET_LAYERS)) {
                 const baseAmount = balance.get(resetLayer.scalesWith);
                 const isNoBaseAmount = baseAmount === undefined || baseAmount.lessThan(trillion);
-                resetLayer.isResetting = !isNoBaseAmount;
+                this.resettingPerLayer.set(name, !isNoBaseAmount);
                 resetLayer.gainLabel.Text = `${isNoBaseAmount ? 0 : resetLayer.formula.apply(baseAmount)} Skill`;
                 const msgLabel = resetLayer.touchPart.BillboardGui.TextLabel;
-                if (isNoBaseAmount) {
+                if (isNoBaseAmount === true) {
                     msgLabel.Text = `You need ${Price.getFormatted(resetLayer.scalesWith, resetLayer.minimum)} to reset`;
                     msgLabel.LayoutOrder = 2;
                 }
@@ -160,14 +185,19 @@ export class ResetService implements OnStart {
             }
         });
 
-        for (let i = 0; i < RESET_LAYERS.size(); i++) {
-            const resetLayer = RESET_LAYERS[i];
+
+        for (const [name, resetLayer] of pairs(RESET_LAYERS)) {
+            resetLayer.touchPart.BillboardGui.TextLabel.LayoutOrder = 2;
             this.hookTouch(resetLayer.touchPart, new Price().setCost(resetLayer.scalesWith, resetLayer.minimum), (players, countdown) => {
                 resetLayer.touchPart.BillboardGui.TextLabel.Text = `Stand on the altar for ${math.floor(countdown * 100) / 100} seconds to reset`;
                 if (countdown <= 0) {
-                    const currency = resetLayer.gives;
-                    const amount = resetLayer.formula.apply(this.currencyService.getCost(resetLayer.scalesWith));
-                    ResetCanister.reset.fireAll(i, amount);
+                    const price = this.getResetReward(resetLayer);
+                    if (price === undefined)
+                        return;
+                    const [currency, amount] = price.getFirst();
+                    if (amount === undefined)
+                        return;
+                    Packets.reset.fireAll(name, amount);
                     let p: Player | undefined;
                     for (const player of players) {
                         p = player;
@@ -178,18 +208,13 @@ export class ResetService implements OnStart {
                     if (p === undefined) {
                         return;
                     }
-                    resetLayer.isResetting = false;
-                    this.reset.fire(p, i, amount);
+                    this.resettingPerLayer.set(name, false);
+                    this.reset.fire(p, name, amount);
                     task.delay(2, () => {
                         if (p === undefined)
                             return;
-                        this.removeItems(i);
-                        this.gameAssetService.fullUpdatePlacedItemsModels();
-                        for (const resettingCurrency of resetLayer.resettingCurrencies)
-                            this.currencyService.setCost(resettingCurrency, new OnoeNum(0));
-                        for (const resettingUpgrade of resetLayer.resettingUpgrades)
-                            this.upgradeBoardService.setUpgradeAmount(resettingUpgrade, 0);
-                        this.currencyService.incrementCost(currency, amount);
+                        this.performReset(resetLayer);
+                        this.currencyService.incrementCost(currency!, amount);
                         for (const player of Players.GetPlayers()) {
                             pcall(() => BadgeService.AwardBadge(player.UserId, resetLayer.badgeId));
                         }
@@ -197,6 +222,6 @@ export class ResetService implements OnStart {
                 }
             });
         }
-        
+
     }
 }

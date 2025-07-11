@@ -1,18 +1,16 @@
-import { Controller, OnStart } from "@flamework/core";
+import { OnoeNum } from "@antivivi/serikanum";
+import { Controller, OnInit, OnStart } from "@flamework/core";
 import { LOGS_WINDOW } from "client/constants";
 import { BalanceWindowController } from "client/controllers/interface/BalanceWindowController";
 import Price from "shared/Price";
-import { AREAS, ASSETS, getNameFromUserId, Log } from "shared/constants";
-import NamedUpgrade from "shared/item/NamedUpgrade";
+import { AREAS, ASSETS, getNameFromUserId } from "shared/constants";
 import Items from "shared/items/Items";
-import { OnoeNum } from "@antivivi/serikanum";
-import { Fletchette } from "@antivivi/fletchette";
+import NamedUpgrades from "shared/namedupgrade/NamedUpgrades";
+import Packets from "shared/network/Packets";
 import { combineHumanReadable } from "shared/utils/vrldk/StringUtils";
 
-const PermissionsCanister = Fletchette.getCanister("PermissionsCanister");
-
 @Controller()
-export class LogController implements OnStart {
+export class LogController implements OnInit, OnStart {
 
     logsLength = 0;
     logs = new Array<Log>();
@@ -44,7 +42,7 @@ export class LogController implements OnStart {
                 details = `${getNameFromUserId(log.player)} unplaced ${itemName} at (${log.x}, ${log.y}, ${log.z})`;
                 break;
             case "Upgrade":
-                details = `${getNameFromUserId(log.player)} bought ${NamedUpgrade.getUpgrade(log.upgrade!)?.name} until ${log.amount}`;
+                details = `${getNameFromUserId(log.player)} bought ${NamedUpgrades.ALL_UPGRADES.get(log.upgrade!)?.name} until ${log.amount}`;
                 break;
             case "Respec":
                 details = `${getNameFromUserId(log.player)} respecialized level points`;
@@ -56,10 +54,10 @@ export class LogController implements OnStart {
                 details = `${getNameFromUserId(log.player)} used 1 ${log.currency}`;
                 break;
             case "SetupSave":
-                details = `${getNameFromUserId(log.player)} saved the setup in ${AREAS[log.area as keyof (typeof AREAS)].name}`;
+                details = `${getNameFromUserId(log.player)} saved the setup in ${AREAS[log.area as AreaId].name}`;
                 break;
             case "SetupLoad":
-                details = `${getNameFromUserId(log.player)} loaded the setup in ${AREAS[log.area as keyof (typeof AREAS)].name}`;
+                details = `${getNameFromUserId(log.player)} loaded the setup in ${AREAS[log.area as AreaId].name}`;
                 break;
         }
         logOption.DetailsLabel.Text = details;
@@ -93,7 +91,7 @@ export class LogController implements OnStart {
         }
     }
 
-    onStart() {
+    onInit() {
         this.balanceWindowController.loadNavigationOption(LOGS_WINDOW.NavigationOptions.Left, Enum.KeyCode.Z, "Previous Page", () => {
             if (LOGS_WINDOW.Visible === false)
                 return false;
@@ -111,10 +109,12 @@ export class LogController implements OnStart {
             this.refreshLogsWindow();
             return true;
         }, 5);
+    }
 
-        this.logs = PermissionsCanister.getLogs.invoke();
+    onStart() {
+        this.logs = Packets.getLogs.invoke();
         this.logsLength = this.logs.size();
-        PermissionsCanister.logAdded.connect((log) => {
+        Packets.logAdded.connect((log) => {
             this.logs.push(log);
             this.logsLength = this.logs.size();
             this.refreshLogsWindow();

@@ -1,10 +1,10 @@
-import Difficulty from "shared/Difficulty";
+import Difficulty from "@antivivi/jjt-difficulties";
 import Price from "shared/Price";
 import Generator from "shared/item/Generator";
 
-export = new Generator("BasicTesseract")
+export = new Generator(script.Name)
 .setName("Basic Tesseract")
-.setDescription("A generator that produces +1 Dark Matter/s. You'll need to Skillify for this!")
+.setDescription("A generator that produces %gain%. You'll need to skillify for this!")
 .setDifficulty(Difficulty.Millisecondless)
 .setPrice(new Price().setCost("Skill", 1), 1)
 .setPrice(new Price().setCost("Skill", 2), 2)

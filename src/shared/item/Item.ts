@@ -1,33 +1,51 @@
-//!native
-
+import Difficulty from "@antivivi/jjt-difficulties";
+import { OnoeNum } from "@antivivi/serikanum";
 import { RunService } from "@rbxts/services";
 import Area from "shared/Area";
-import Difficulty from "shared/Difficulty";
+import GameSpeed from "shared/GameSpeed";
 import Price from "shared/Price";
 import { AREAS, RESET_LAYERS } from "shared/constants";
-import ItemTypes from "shared/item/ItemTypes";
-import { Signal } from "@antivivi/fletchette";
 import Formula from "shared/utils/Formula";
-import { OnoeNum } from "@antivivi/serikanum";
+import ItemUtils, { GameUtils } from "shared/utils/ItemUtils";
+
+declare global {
+    interface InstanceInfo {
+        Maintained?: boolean;
+    }
+
+    type ClientGameUtils = Partial<GameUtils>;
+}
 
 class Item {
 
-    initialized = new Signal<(utils: GameUtils, item: this) => void>();
-    loaded = new Signal<(model: Model, utils: GameUtils, item: this) => void>();
-    types: (keyof ItemTypes)[] = [];
-    id: string;
-    name: string | undefined = undefined;
-    description: string | undefined = undefined;
-    difficulty: Difficulty | undefined = undefined;
-    drain: Price | undefined = undefined;
-    placeableAreas: Area[] = [];
-    defaultPrice: Price | undefined;
-    pricePerIteration = new Map<number, Price>();
-    creator: string | undefined = undefined;
+    readonly INITALIZES = new Array<<T extends this>(item: T) => void>();
+    readonly LOADS = new Array<<T extends this>(model: Model, item: T) => void>();
+    readonly CLIENT_LOADS = new Array<<T extends this>(model: Model, item: T, player: Player) => void>();
+    readonly types = new Set<keyof ItemTypes>();
+    readonly id: string;
+    readonly placeableAreas = new Array<Area>();
+    readonly pricePerIteration = new Map<number, Price>();
+    name?: string;
+    description?: string;
+    difficulty?: Difficulty;
+    drain?: Price;
+    defaultPrice?: Price;
+    creator?: string;
     requiredItems = new Map<Item, number>();
-    formula: Formula | undefined;
-    formulaResult: OnoeNum | undefined;
-    formulaResultChanged = new Signal<(multiplier: OnoeNum) => void>();
+    formula?: Formula;
+    formulaX?: string;
+    formulaXGet?: (utils: GameUtils) => OnoeNum;
+    formulaXCap?: Price;
+    formulaCallback?: <T extends this>(value: OnoeNum, item: T, utils: GameUtils) => unknown;
+    formulaResult?: OnoeNum;
+    /** Order in which the item will appear in the inventory */
+    layoutOrder?: number;
+    /** The reset layer's order in which this item will reset at */
+    defaultResetLayer?: number;
+    /** The reset layer's order in which this item will persist. Takes precedence over {@link Item.resetLayer} */
+    persistingLayer?: number;
+    levelReq?: number;
+    bounds?: string;
 
     constructor(id: string) {
         this.id = id;
@@ -46,6 +64,8 @@ class Item {
 
     setDifficulty(difficulty: Difficulty) {
         this.difficulty = difficulty;
+        if (difficulty === Difficulty.Miscellaneous || difficulty === Difficulty.Excavation || difficulty === Difficulty.Bonuses)
+            this.persists();
         return this;
     }
 
@@ -77,9 +97,56 @@ class Item {
         return this;
     }
 
-    addPlaceableArea(...areas: (keyof (typeof AREAS))[]) {
+    setRequiredHarvestableAmount(harvestable: HarvestableId, amount: number) {
+        if (ItemUtils.itemsPerId === undefined) {
+            task.spawn(() => {
+                while (ItemUtils.itemsPerId === undefined)
+                    task.wait();
+                this.requiredItems.set(ItemUtils.itemsPerId.get(harvestable)!, amount);
+            });
+        }
+        else {
+            this.requiredItems.set(ItemUtils.itemsPerId.get(harvestable)!, amount);
+        }
+        return this;
+    }
+
+    updateResetLayer() {
+        let resetLayer = this.defaultResetLayer;
+        for (const area of this.placeableAreas) {
+            let layer: ResetLayer | undefined;
+            for (const [_name, l] of pairs(RESET_LAYERS))
+                if (l.area === area) {
+                    layer = l;
+                    break;
+                }
+            if (layer === undefined) {
+                resetLayer = 999;
+                break;
+            }
+
+            if (resetLayer === undefined || layer.order > resetLayer)
+                resetLayer = layer.order;
+        }
+        this.defaultResetLayer = resetLayer;
+    }
+
+    getResetLayer() {
+        if (this.defaultResetLayer !== undefined) {
+            if (this.persistingLayer !== undefined) {
+                return math.max(this.persistingLayer + 1, this.defaultResetLayer);
+            }
+            else {
+                return this.defaultResetLayer;
+            }
+        }
+        return 999;
+    }
+
+    addPlaceableArea(...areas: (AreaId)[]) {
         for (const area of areas)
             this.placeableAreas.push(AREAS[area]);
+        this.updateResetLayer();
         return this;        
     }
 
@@ -87,6 +154,7 @@ class Item {
         for (const [_id, area] of pairs(AREAS)) {
             this.placeableAreas.push(area);
         }
+        this.updateResetLayer();
         return this;
     }
 
@@ -101,69 +169,62 @@ class Item {
     }
 
     isA<T extends keyof ItemTypes>(itemType: T): this is ItemTypes[T] {
-        return this.types.includes(itemType);
+        return this.types.has(itemType);
     }
 
-    onInit(initCallback: (utils: GameUtils, item: this) => void) {
-        this.initialized.connect((utils, item) => initCallback(utils, item));
+    onInit(initCallback: (item: this) => void) {
+        this.INITALIZES.push(initCallback);
         return this;
     }
 
-    onLoad(loadCallback: (model: Model, utils: GameUtils, item: this) => void) {
-        this.loaded.connect((model, utils, item) => loadCallback(model, utils, item));
+    onLoad(loadCallback: (model: Model, item: this) => void) {
+        this.LOADS.push(loadCallback);
+        return this;
+    }
+
+    onClientLoad(loadCallback: (model: Model, item: this, player: Player) => void) {
+        this.CLIENT_LOADS.push(loadCallback);
         return this;
     }
 
     repeat(model: Model | undefined, callback: (dt: number) => unknown, delta?: number) {
-        const d = delta ?? 0;
-        let t = 0;
-        const connection = RunService.Heartbeat.Connect((dt) => {
-            t += dt;
-            if (t > d) {
-                callback(t);
-                t = 0;
-            }
-        });
+        ItemUtils.REPEATS.set(callback, {delta: delta});
         if (model !== undefined)
-            model.Destroying.Once(() => connection.Disconnect());
+            model.Destroying.Once(() => ItemUtils.REPEATS.delete(callback));
     }
 
     ambienceSound(func: (model: Model) => Sound) {
-        this.onLoad((model) => func(model).Play());
+        this.onClientLoad((model) => func(model).Play());
         return this;
     }
 
-    maintain(model: Model | undefined, utils: GameUtils, callback?: (isMaintained: boolean, balance: Price) => void) {
+    maintain(model: Model | undefined) {
         this.repeat(model, () => {
             const drain = this.drain;
-            let bal = utils.getBalance();
             let affordable = true;
-            if (drain === undefined) {
-                if (callback !== undefined)
-                    callback(true, bal);
-            }
-            else {
-                bal = bal.sub(drain);
-                for (const [_currency, amount] of bal.costPerCurrency) {
-                    if (amount.lessThan(0)) {
-                        affordable = false;
-                    }
-                }
-                if (affordable === true) {
-                    utils.setBalance(bal);
-                }
-                if (callback !== undefined) {
-                    callback(affordable, bal);
-                }
-            }
-            if (model !== undefined && model.GetAttribute("Maintained") !== affordable) {
-                model.SetAttribute("Maintained", affordable);
-            }
+
+            if (drain !== undefined)
+                affordable = GameUtils.currencyService.purchase(drain);
+
+            if (model === undefined)
+                return;
+            const instanceInfo = GameUtils.getAllInstanceInfo(model);
+            instanceInfo.Maintained = affordable;
         }, 1);
     }
 
     setFormula(formula: Formula) {
         this.formula = formula;
+        return this;
+    }
+
+    setFormulaX(x: string) {
+        this.formulaX = x;
+        return this;
+    }
+
+    setFormulaXCap(cap: Price) {
+        this.formulaXCap = cap;
         return this;
     }
 
@@ -173,35 +234,78 @@ class Item {
      * @param callback Called every second with the `value` parameter passed as the return of `this.formula`.
      * @param x The value to be used in the formula.
      */
-    applyFormula(callback: (value: OnoeNum) => unknown, x: () => OnoeNum) {
-        this.repeat(undefined, () => {
-            const v = x();
-            if (v !== undefined && this.formula !== undefined) {
-                const result = this.formula.apply(v);
-                callback(result);
-                if (this.formulaResult === undefined || !this.formulaResult.equals(result)) {
-                    this.formulaResultChanged.fire(result);
+    applyFormula(callback: (value: OnoeNum, item: this) => unknown, x: () => OnoeNum) {
+        this.formulaCallback = callback;
+        this.formulaXGet = x;
+        return this;
+    }
+
+    persists(layerName?: ResetLayerId) {
+        this.persistingLayer = layerName === undefined ? 999 : RESET_LAYERS[layerName].order;
+        this.updateResetLayer();
+        return this;
+    }
+
+    setLevelReq(level: number) {
+        this.levelReq = level;
+        return this;
+    }
+
+    /**
+     * Set a custom area where this item can be placed.
+     * 
+     * @param boundId Name of BasePart which is the custom area
+     */
+    setBounds(boundId: string) {
+        this.bounds = boundId;
+        return this;
+    }
+
+    static {
+        ItemUtils.REPEATS.set(() => {
+            const formulaResults = new Map<string, OnoeNum>();
+
+            for (const [_id, item] of ItemUtils.itemsPerId) {
+                if (item.formula === undefined || item.formulaXGet === undefined ||  item.formulaCallback === undefined)
+                    continue;
+
+                let v = item.formulaXGet(GameUtils);
+                if (v === undefined)
+                    continue;
+
+                if (item.formulaXCap !== undefined) {
+                    const [_c, val] = item.formulaXCap.getFirst();
+                    if (val !== undefined && v.moreThan(val) === true)
+                        v = val;
                 }
-                this.formulaResult = result;
+                const result = item.formula.apply(v);
+                item.formulaResult = result;
+                item.formulaCallback(result, item, GameUtils);
+                formulaResults.set(item.id, result);
             }
-        }, 1);
-    }
+            ItemUtils.formulaResultsChanged.fire(formulaResults);
+        }, {
+            delta: 1,
+            lastCall: 0
+        });
+        const connection = RunService.Heartbeat.Connect((dt) => {
+            if (GameUtils.ready === false)
+                return;
 
-    isPersistent() {
-        const difficulty = this.difficulty;
-        return difficulty === Difficulty.Bonuses || difficulty === Difficulty.Excavation || difficulty === Difficulty.Miscellaneous || this.isA("Shop");
-    }
-
-    getResetLayer() {
-        if (this.isPersistent())
-            return -1;
-        const size = RESET_LAYERS.size();
-        for (let i = 0; i < size; i++) {
-            const resetLayer = RESET_LAYERS[i];
-            if (this.placeableAreas.includes(resetLayer.area))
-                return i;
-        }
-        return -1;
+            const t = tick();
+            const gameSpeed = GameSpeed.speed;
+            dt *= gameSpeed;
+            for (const [callback, rep] of ItemUtils.REPEATS) {
+                if (rep.lastCall === undefined) {
+                    rep.lastCall = t;
+                    continue;
+                }
+                if (rep.delta === undefined || t > rep.lastCall + (rep.delta / gameSpeed)) {
+                    callback(dt);
+                    rep.lastCall = t;
+                }
+            }
+        });
     }
 }
 

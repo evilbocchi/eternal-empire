@@ -1,9 +1,9 @@
-import { Controller, OnStart } from "@flamework/core";
+import { Controller, OnInit } from "@flamework/core";
 import { RunService } from "@rbxts/services";
 import { DETAILS_WINDOW, LOCAL_PLAYER } from "client/constants";
 
 @Controller()
-export class DetailsController implements OnStart {
+export class DetailsController implements OnInit {
 
     onCharacterAdded(character: Model) {
         const humanoid = character.WaitForChild("Humanoid") as Humanoid;
@@ -19,11 +19,10 @@ export class DetailsController implements OnStart {
         humanoid.Died.Once(() => connection.Disconnect());
     }
 
-    onStart() {
+    onInit() {
         if (LOCAL_PLAYER.Character !== undefined) {
             this.onCharacterAdded(LOCAL_PLAYER.Character);
         }
         LOCAL_PLAYER.CharacterAdded.Connect((model) => this.onCharacterAdded(model));
-
     }
 }

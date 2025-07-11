@@ -1,8 +1,8 @@
-import Difficulty from "shared/Difficulty";
+import Difficulty from "@antivivi/jjt-difficulties";
 import Price from "shared/Price";
 import Conveyor from "shared/item/Conveyor";
 
-export = new Conveyor("HalfSleepingConveyor")
+export = new Conveyor(script.Name)
 .setName("Half Sleeping Conveyor")
 .setDescription("Didn't this item already exist?")
 .setDifficulty(Difficulty.Restful)

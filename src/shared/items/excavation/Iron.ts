@@ -1,7 +1,7 @@
-import Difficulty from "shared/Difficulty";
+import Difficulty from "@antivivi/jjt-difficulties";
 import Item from "shared/item/Item";
 
-export = new Item("Iron")
+export = new Item(script.Name)
 .setName("Iron")
 .setDescription("Commonly found in abandoned caves, but nowadays harvested using advanced mining technology to prevent chance of falls.")
 .setDifficulty(Difficulty.Excavation);

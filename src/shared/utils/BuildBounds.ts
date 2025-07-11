@@ -2,14 +2,15 @@ import { isCompletelyInside, isInsidePart } from "shared/utils/vrldk/BasePartUti
 
 class BuildBounds {
     grid: BasePart;
-    region: BasePart;
+    region!: BasePart;
 
-    canvasCFrame: CFrame;
-    canvasSize: Vector2;
+    canvasCFrame!: CFrame;
+    canvasAltitude!: number;
+    canvasSize!: Vector2;
 
     constructor(grid: BasePart) {
         this.grid = grid;
-        const onSizeChanged = (): [BasePart, CFrame, Vector2] => {
+        const onSizeChanged = () => {
             const region = grid.Clone();
             region.Size = grid.Size.add(new Vector3(0.1, 150, 0.1));
             region.CanCollide = false;
@@ -17,10 +18,10 @@ class BuildBounds {
             region.Name = "BuildRegion";
             this.region = region;
             [this.canvasCFrame, this.canvasSize] = this.calcCanvas();
-            return [this.region, this.canvasCFrame, this.canvasSize];
+            this.canvasAltitude = this.canvasCFrame.Y;
         }
         grid.GetPropertyChangedSignal("Size").Connect(() => onSizeChanged());
-        [this.region, this.canvasCFrame, this.canvasSize] = onSizeChanged();
+        onSizeChanged();
     }
 
     calcCanvas(): [CFrame, Vector2] {
@@ -33,18 +34,33 @@ class BuildBounds {
         return [cf, size];
     }
 
-    calcPlacementCFrame(model: Model, position: Vector3, rotation: number, noSnap?: boolean) {
-        let modelSize = CFrame.fromEulerAnglesYXZ(0, rotation, 0).mul(model.PrimaryPart?.Size ?? new Vector3());
-        modelSize = new Vector3(math.abs(modelSize.X), math.abs(modelSize.Y), math.abs(modelSize.Z));
+    calcPlacementCFrame(size: Vector3, position: Vector3, rotation: number, noSnap?: boolean) {
+        const modelSize = CFrame.fromEulerAnglesYXZ(0, rotation, 0).mul(size);
+        const modelSizeX = math.abs(modelSize.X);
+        const modelSizeY = math.abs(modelSize.Y);
+        const modelSizeZ = math.abs(modelSize.Z);
         const lpos = this.canvasCFrame.PointToObjectSpace(position);
-        const size2 = this.canvasSize.sub(new Vector2(modelSize.X, modelSize.Z)).div(2);
-        let x = math.clamp(lpos.X, -size2.X, size2.X);
-        let y = math.clamp(lpos.Y, -size2.Y, size2.Y);
+        const size2 = this.canvasSize.sub(new Vector2(modelSizeX, modelSizeZ)).div(2);
+        let x: number;
+        let y: number;
+        let altOffset = -modelSizeY / 2;
+        const isUnbounded = math.abs(lpos.X) > size2.X + 10 || math.abs(lpos.Y) > size2.Y + 10;
+        if (isUnbounded) {
+            x = lpos.X;
+            y = lpos.Y;
+            altOffset += this.canvasAltitude - position.Y;
+        }
+        else {
+            x = math.clamp(lpos.X, -size2.X, size2.X);
+            y = math.clamp(lpos.Y, -size2.Y, size2.Y);
+        }
+
         if (noSnap !== true) {
             x = math.sign(x) * ((math.abs(x) - math.abs(x) % 3) + (size2.X % 3));
             y = math.sign(y) * ((math.abs(y) - math.abs(y) % 3) + (size2.Y % 3));
         }
-        return this.canvasCFrame.mul(new CFrame(x, y, -modelSize.Y/2).mul(CFrame.Angles(-math.pi/2, rotation, 0)));
+
+        return this.canvasCFrame.mul(new CFrame(x, y, altOffset).mul(CFrame.Angles(-math.pi/2, rotation, 0)));
     }
 
     isInside(position: Vector3) {

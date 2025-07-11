@@ -7,7 +7,6 @@ import { BalanceWindowController } from "client/controllers/interface/BalanceWin
 import { QuestsController } from "client/controllers/interface/QuestsController";
 import { SoundController } from "client/controllers/interface/SoundController";
 import { getWaypoint } from "shared/constants";
-import NewBeginnings from "shared/quests/NewBeginnings";
 import { loadAnimation } from "shared/utils/vrldk/RigUtils";
 
 @Controller()
@@ -76,8 +75,8 @@ export class IntroController implements OnInit {
         });
         task.delay(7.5, () => {
             this.uiController.playSound("Ding");
-            this.questsController.trackedQuest = NewBeginnings.id;
-            this.questsController.trackedQuestChanged.fire(NewBeginnings.id);
+            this.questsController.trackedQuest = "NewBeginnings";
+            this.questsController.trackedQuestChanged.fire("NewBeginnings");
             this.isCurrentlyInIntroSequence = false;
         });
     }

@@ -1,16 +1,24 @@
-import { Controller, OnStart } from "@flamework/core";
+import { Controller, OnInit } from "@flamework/core";
 import { PLAYER_GUI } from "client/constants";
 import { UIController } from "client/controllers/UIController";
-import { PLACED_ITEMS_FOLDER, ASSETS, UpgradeBoardUpgradeOption } from "shared/constants";
-import NamedUpgrade from "shared/item/NamedUpgrade";
+import { ASSETS, PLACED_ITEMS_FOLDER, UpgradeBoardUpgradeOption } from "shared/constants";
+import NamedUpgrade from "shared/namedupgrade/NamedUpgrade";
 import Items from "shared/items/Items";
-import { Fletchette } from "@antivivi/fletchette";
+import Packets from "shared/network/Packets";
+import NamedUpgrades from "shared/namedupgrade/NamedUpgrades";
 
-
-const UpgradeBoardCanister = Fletchette.getCanister("UpgradeBoardCanister");
+declare global {
+    type UpgradeActionsGui = SurfaceGui & {
+        PurchaseOptions: Frame,
+        ImageLabel: ImageLabel,
+        DescriptionLabel: TextLabel,
+        TitleLabel: TextLabel,
+        AmountLabel: TextLabel;
+    };
+}
 
 @Controller()
-export class UpgradeBoardController implements OnStart {
+export class UpgradeBoardController implements OnInit {
 
     constructor(private uiController: UIController) {
 
@@ -21,7 +29,7 @@ export class UpgradeBoardController implements OnStart {
     }
 
     getUpgradeAmount(upgrade: NamedUpgrade) {
-        return ((UpgradeBoardCanister.upgrades.get() ?? {})[upgrade.id]) ?? 0;
+        return Packets.upgrades.get().get(upgrade.id) ?? 0;
     }
 
     loadUpgradeBoard(model: Instance) {
@@ -50,23 +58,23 @@ export class UpgradeBoardController implements OnStart {
             purchaseOption.CostLabel.Text = "Select an upgrade!";
             purchaseOption.Parent = upgradeActionsGui.PurchaseOptions;
             return purchaseOption;
-        }
+        };
         const buy1 = newPurchaseOption("x1");
         const buyNext = newPurchaseOption("NEXT");
         const buyMax = newPurchaseOption("MAX");
         let selected: NamedUpgrade | undefined = undefined;
         buy1.Button.Activated.Connect(() => {
             if (selected !== undefined)
-                this.sound(UpgradeBoardCanister.buyUpgrade.invoke(selected.id, this.getUpgradeAmount(selected) + 1));
+                this.sound(Packets.buyUpgrade.invoke(selected.id, this.getUpgradeAmount(selected) + 1));
         });
-        const getNext = (amount: number, step?: number) => step === undefined ? undefined : amount + step - (amount % step);
+        const getNext = (amount: number, step?: number) => step === undefined ? amount + 1 : amount + step - (amount % step);
         buyNext.Button.Activated.Connect(() => {
             if (selected !== undefined)
-                this.sound(UpgradeBoardCanister.buyUpgrade.invoke(selected.id, getNext(this.getUpgradeAmount(selected), selected.step)));
+                this.sound(Packets.buyUpgrade.invoke(selected.id, getNext(this.getUpgradeAmount(selected), selected.step)));
         });
         buyMax.Button.Activated.Connect(() => {
             if (selected !== undefined)
-                this.sound(UpgradeBoardCanister.buyUpgrade.invoke(selected.id, selected.cap));
+                this.sound(Packets.buyUpgrade.invoke(selected.id, selected.cap));
         });
         const selectUpgrade = (upgrade?: NamedUpgrade) => {
             upgradeActionsGui.TitleLabel.Text = upgrade?.name ?? "<no upgrade selected>";
@@ -75,7 +83,7 @@ export class UpgradeBoardController implements OnStart {
             upgradeActionsGui.ImageLabel.Image = image === undefined ? "" : "rbxassetid://" + image;
             updateCosts(upgrade);
             selected = upgrade;
-        }
+        };
         const updateCosts = (upgrade?: NamedUpgrade) => {
             if (upgrade === undefined) {
                 upgradeActionsGui.AmountLabel.Text = "";
@@ -86,12 +94,12 @@ export class UpgradeBoardController implements OnStart {
             const isMaxed = amount === cap;
             upgradeActionsGui.AmountLabel.Text = cap === undefined ? tostring(amount) : amount + "/" + cap;
             upgradeActionsGui.AmountLabel.TextColor3 = amount === cap ? new Color3(1, 0.83, 0.06) : new Color3(1, 1, 1);
-            buy1.CostLabel.Text = "Cost: " + (isMaxed ? "MAXED" : upgrade.getPrice(amount + 1)?.tostring());
+            buy1.CostLabel.Text = "Cost: " + (isMaxed ? "MAXED" : upgrade.getPrice(amount + 1)?.toString());
             const step = upgrade.step;
             const to = getNext(amount, step) ?? (amount + 1);
-            buyNext.CostLabel.Text = "Cost: " + (isMaxed ? "MAXED" : upgrade.getPrice(amount + 1, to)?.tostring() + " (to " + to + ")");
-            buyMax.CostLabel.Text = "Cost: " + (isMaxed ? "MAXED" : upgrade.getPrice(amount + 1, cap)?.tostring());
-        }
+            buyNext.CostLabel.Text = "Cost: " + (isMaxed ? "MAXED" : upgrade.getPrice(amount + 1, to)?.toString() + " (to " + to + ")");
+            buyMax.CostLabel.Text = "Cost: " + (isMaxed ? "MAXED" : upgrade.getPrice(amount + 1, cap)?.toString());
+        };
         for (const upgrade of item.upgrades) {
             const upgradeOption = ASSETS.UpgradeBoard.UpgradeOption.Clone();
             upgradeOption.ImageButton.Image = "rbxassetid://" + upgrade.image;
@@ -99,12 +107,12 @@ export class UpgradeBoardController implements OnStart {
             upgradeOption.ImageButton.Activated.Connect(() => selectUpgrade(upgrade));
             upgradeOption.Parent = upgradeOptionsGui;
         }
-        const updateAmounts = (value: {[upgradeId: string]: number}) => {
+        const updateAmounts = (value: Map<string, number>) => {
             for (const uo of upgradeOptionsGui.GetChildren()) {
                 if (uo?.IsA("Frame")) {
                     const upgradeOption = (uo as UpgradeBoardUpgradeOption);
-                    const upgrade = NamedUpgrade.getUpgrade(upgradeOption.Name);
-                    const amount = value[upgradeOption.Name];
+                    const upgrade = NamedUpgrades.ALL_UPGRADES.get(upgradeOption.Name);
+                    const amount = value.get(upgradeOption.Name);
                     upgradeOption.AmountLabel.Text = tostring(amount ?? 0);
                     upgradeOption.AmountLabel.TextColor3 = amount === upgrade?.cap ? new Color3(1, 0.83, 0.06) : new Color3(1, 1, 1);
                 }
@@ -112,8 +120,8 @@ export class UpgradeBoardController implements OnStart {
             if (selected !== undefined) {
                 updateCosts(selected);
             }
-        }
-        const connection = UpgradeBoardCanister.upgrades.observe((value) => updateAmounts(value));
+        };
+        const connection = Packets.upgrades.observe((value) => updateAmounts(value));
         selectUpgrade(undefined);
         upgradeOptionsGui.Adornee = upgradeOptionsPart;
         upgradeOptionsGui.Parent = PLAYER_GUI;
@@ -126,7 +134,7 @@ export class UpgradeBoardController implements OnStart {
         });
     }
 
-    onStart() {
+    onInit() {
         for (const model of PLACED_ITEMS_FOLDER.GetChildren()) {
             this.loadUpgradeBoard(model);
         }

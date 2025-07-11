@@ -1,9 +1,8 @@
+import Difficulty from "@antivivi/jjt-difficulties";
 import Price from "shared/Price";
-import { AREAS } from "shared/constants";
-import Difficulty from "shared/Difficulty";
 import Conveyor from "shared/item/Conveyor";
 
-export = new Conveyor("ConveyorCorner")
+export = new Conveyor(script.Name)
 .setName("Conveyor Corner")
 .setDescription("A conveyor invented by Move-Your-Droplets™. Advertised to 'rotate any droplet, anytime.' Only goes clockwise unfortunately.")
 .setDifficulty(Difficulty.TheLowerGap)

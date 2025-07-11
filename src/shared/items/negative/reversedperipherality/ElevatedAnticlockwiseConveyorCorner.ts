@@ -1,8 +1,8 @@
-import Difficulty from "shared/Difficulty";
+import Difficulty from "@antivivi/jjt-difficulties";
 import Conveyor from "shared/item/Conveyor";
 import Price from "shared/Price";
 
-export = new Conveyor("ElevatedAnticlockwiseConveyorCorner")
+export = new Conveyor(script.Name)
 .setName("Elevated Anti-clockwise Conveyor Corner")
 .setDescription("What a mouthful...")
 .setDifficulty(Difficulty.ReversedPeripherality)

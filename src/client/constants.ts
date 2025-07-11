@@ -1,12 +1,10 @@
-import { Players, ReplicatedStorage } from "@rbxts/services";
-import { AREAS } from "shared/constants";
+import { Players, ReplicatedFirst, ReplicatedStorage } from "@rbxts/services";
+import { findModels } from "shared/utils/vrldk/InstanceUtils";
 
 export const LOCAL_PLAYER = Players.LocalPlayer;
 export const MOUSE = LOCAL_PLAYER.GetMouse();
 export const PLAYER_GUI = LOCAL_PLAYER.WaitForChild("PlayerGui") as StarterGui;
-
 export const INTERFACE = PLAYER_GUI.WaitForChild("Interface") as ScreenGui;
-
 export const SIDEBAR_BUTTONS = INTERFACE.WaitForChild("SidebarButtons") as Frame & {
 	Quests: TextButton & {
 		NotificationWindow: Frame & {
@@ -27,19 +25,22 @@ export const ADAPTIVE_TAB_MAIN_WINDOW = ADAPTIVE_TAB.WaitForChild("MainWindow") 
 	
 };
 
+export type CompletionFrame = Frame & {
+    ImageLabel: ImageLabel,
+    TextLabel: TextLabel & {
+        UIStroke: UIStroke
+    },
+    RewardLabel: TextLabel & {
+        UIStroke: UIStroke
+    }
+}
+
 export const TRACKED_QUEST_WINDOW = INTERFACE.WaitForChild("TrackedQuestWindow") as Frame & {
 	Background: Folder & {
 		Frame: Frame
 	},
-	Completion: Frame & {
-		ImageLabel: ImageLabel,
-		TextLabel: TextLabel & {
-			UIStroke: UIStroke
-		},
-		RewardLabel: TextLabel & {
-			UIStroke: UIStroke
-		}
-	},
+	Completion: CompletionFrame,
+    ChallengeCompletion: CompletionFrame,
 	Reset: Frame & {
 		ImageLabel: ImageLabel,
 		TextLabel: TextLabel & {
@@ -52,11 +53,7 @@ export const TRACKED_QUEST_WINDOW = INTERFACE.WaitForChild("TrackedQuestWindow")
 	DescriptionLabel: TextLabel,
 	TitleLabel: TextLabel,
 	ProgressBar: CanvasGroup & {
-		Bar: Frame & {
-			UIStroke: UIStroke,
-			Fill: Frame,
-			BarLabel: TextLabel
-		}
+		Bar: Bar
 	}
 }
 
@@ -113,39 +110,70 @@ export const BALANCE_WINDOW = INTERFACE.WaitForChild("BalanceWindow") as Frame &
 	TitleLabel: TextLabel;
 };
 
-export const LOADING_WINDOW = INTERFACE.WaitForChild("LoadingWindow") as Frame & {
-	MessageLabel: TextLabel;
+export const LOADING_SCREEN = PLAYER_GUI.WaitForChild("LoadingScreen") as ScreenGui & {
+    LoadingWindow: Frame & {
+        Background: ImageLabel;
+        Thumbnail: ImageLabel;
+        MessageLabel: TextLabel;
+    }
 };
 
-export const START_WINDOW = INTERFACE.WaitForChild("StartWindow") as Frame & {
+type StartOption = Frame & {
+    Button: ImageButton,
+    ImageLabel: ImageLabel,
+    Label: TextLabel & {
+        UIStroke: UIStroke
+    }
+}
+
+export const START_WINDOW = ReplicatedFirst.WaitForChild("StartScreen") as ScreenGui & {
+    AboutWindow: ScrollingFrame & {
+        Contributors: Frame & {
+            RecipientLabel: TextLabel
+        },
+        CloseButton: ImageButton
+    },
+    MainOptions: Frame & {
+        Play: StartOption,
+        Settings: StartOption,
+        About: StartOption,
+    },
 	EmpiresWindow: Frame & {
+        CloseButton: TextButton,
 		EmpireOptions: ScrollingFrame,
 		PublicEmpireWindow: Frame & {
 			JoinPublicEmpire: TextButton
 		}
 	},
-	Header: Frame & {
-		Logo: ImageLabel
-	},
-	Footer: CanvasGroup
+    LeftBackground: ImageLabel,
+	Logo: ImageLabel
 };
 
 export const INTRO_WINDOW = INTERFACE.WaitForChild("IntroWindow") as Frame;
 
 export type BuildOption = TextButton & {
-	UIScale: UIScale
+	UIScale: UIScale,
+    TextLabel: TextLabel,
+    ImageLabel: ImageLabel
 }
 
 export const BUILD_WINDOW = INTERFACE.WaitForChild("BuildWindow") as Frame & {
 	Deselect: BuildOption,
-	Rotate: BuildOption,
-	Delete: BuildOption,
+	Options: Frame & {
+        Rotate: BuildOption,
+	    Delete: BuildOption,
+        Place: BuildOption
+    }
 };
 
 export const TOOLTIP_WINDOW = INTERFACE.WaitForChild("TooltipWindow") as Frame & {
 	UIStroke: UIStroke,
 	MessageLabel: TextLabel
 }
+
+export const BACKPACK_WINDOW = INTERFACE.WaitForChild("BackpackWindow") as Frame & {
+
+};
 
 export type StatContainer = Frame & {
 	StatLabel: TextLabel;
@@ -162,14 +190,13 @@ export const STATS_WINDOW = ADAPTIVE_TAB_MAIN_WINDOW.WaitForChild("Stats") as Fr
 	}
 };
 
-const itemModels = new Map<string, Model>();
-const loaded = ReplicatedStorage.WaitForChild("LoadedItemModels").GetChildren();
-for (const value of loaded) {
-	if (value.IsA("ObjectValue")) {
-		itemModels.set(value.Name, value.Value as Model);
-	}
-}
-export const ITEM_MODELS = itemModels;
+export const ITEM_MODELS = (function() {
+    const itemModels = new Map<string, Model>();
+    const served = findModels(ReplicatedStorage.WaitForChild("ItemModels"));
+    for (const value of served)
+        itemModels.set(value.Name, value);
+    return itemModels;
+})();
 
 export const COMMANDS_WINDOW = ADAPTIVE_TAB_MAIN_WINDOW.WaitForChild("Commands") as Frame & {
 	CommandsList: ScrollingFrame & {
@@ -204,10 +231,7 @@ export const QUESTS_WINDOW = ADAPTIVE_TAB_MAIN_WINDOW.WaitForChild("Quests") as 
 			NotificationLabel: ImageLabel,
 			LevelLabel: TextLabel
 		},
-		ProgressBar: Frame & {
-			Fill: Frame,
-			BarLabel: TextLabel
-		}
+		ProgressBar: Bar
 	},
 	QuestList: Frame & {
 		
@@ -234,7 +258,7 @@ export const LEVELS_WINDOW = ADAPTIVE_TAB_MAIN_WINDOW.WaitForChild("Levels") as 
 };
 
 export const WARP_WINDOW = ADAPTIVE_TAB_MAIN_WINDOW.WaitForChild("Warp") as Frame & {
-	[area in keyof (typeof AREAS)]: ImageButton
+	[area in AreaId]: ImageButton
 };
 
 export const DIALOGUE_WINDOW = INTERFACE.WaitForChild("DialogueWindow") as TextButton & {
@@ -242,3 +266,27 @@ export const DIALOGUE_WINDOW = INTERFACE.WaitForChild("DialogueWindow") as TextB
 	TextLabel: TextLabel,
 	HintLabel: TextLabel,
 }
+
+export const RENAME_WINDOW = ADAPTIVE_TAB_MAIN_WINDOW.WaitForChild("Rename") as Frame & {
+    PurchaseOptions: Frame & {
+        Funds: TextButton & {
+            AmountLabel: TextLabel,
+        },
+        Robux: TextButton,
+    },
+    Input: Frame & {
+        InputBox: TextBox,
+        PrefixLabel: TextLabel
+    },
+    FundsLabel: TextLabel
+}
+
+export const CHALLENGE_TASK_WINDOW = TRACKED_QUEST_WINDOW.WaitForChild("ChallengeTaskWindow") as Frame & {
+    TitleLabel: TextLabel & {
+        UIGradient: UIGradient
+    },
+    RequirementLabel: TextLabel
+}
+
+
+export const PARALLEL = script.Parent!.FindFirstChildOfClass("Actor")!;

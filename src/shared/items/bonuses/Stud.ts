@@ -1,8 +1,8 @@
 import Price from "shared/Price";
-import Difficulty from "shared/Difficulty";
+import Difficulty from "@antivivi/jjt-difficulties";
 import Item from "shared/item/Item";
 
-export = new Item("Stud")
+export = new Item(script.Name)
 .setName("Stud")
 .setDescription("Stud")
 .setDifficulty(Difficulty.Bonuses)

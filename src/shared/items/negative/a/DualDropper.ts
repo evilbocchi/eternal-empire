@@ -1,9 +1,9 @@
-import Difficulty from "shared/Difficulty";
+import Difficulty from "@antivivi/jjt-difficulties";
 import Droplet from "shared/item/Droplet";
 import Dropper from "shared/item/Dropper";
 import Price from "shared/Price";
 
-export = new Dropper("DualDropper")
+export = new Dropper(script.Name)
 .setName("Dual Dropper")
 .setDescription("One day, a scientist realised that using the power of A, they could communize anything - and that included droppers. Thus, this amalgamation was born: one side producing $3.6K droplets, the other producing 4 W droplets, both per second.")
 .setDifficulty(Difficulty.A)

@@ -1,33 +1,32 @@
-import { Fletchette } from "@antivivi/fletchette";
-import { Connection } from "@antivivi/fletchette/out/Signal";
+import Difficulty from "@antivivi/jjt-difficulties";
+import { Connection } from "@antivivi/lemon-signal";
 import { OnoeNum } from "@antivivi/serikanum";
-import { Controller, OnInit } from "@flamework/core";
+import { Controller, OnStart } from "@flamework/core";
 import { ProximityPromptService, RunService, TweenService } from "@rbxts/services";
-import { LOCAL_PLAYER, SHOP_WINDOW } from "client/constants";
+import { INTERFACE, LOCAL_PLAYER, SHOP_WINDOW } from "client/constants";
 import { HotkeysController } from "client/controllers/HotkeysController";
 import { UIController } from "client/controllers/UIController";
 import { AdaptiveTabController } from "client/controllers/interface/AdaptiveTabController";
 import { BuildController } from "client/controllers/interface/BuildController";
 import { ItemSlotController } from "client/controllers/interface/ItemSlotController";
 import { TooltipController } from "client/controllers/interface/TooltipController";
-import Difficulty from "shared/Difficulty";
 import Price from "shared/Price";
-import { AREAS, ASSETS, DifficultyOption, ItemSlot, PLACED_ITEMS_FOLDER } from "shared/constants";
+import { ASSETS, DifficultyOption, ItemSlot, PLACED_ITEMS_FOLDER } from "shared/constants";
 import Item from "shared/item/Item";
 import Shop from "shared/item/Shop";
 import Items from "shared/items/Items";
+import Packets from "shared/network/Packets";
 import ItemCounter from "shared/utils/ItemCounter";
-
-const ItemsCanister = Fletchette.getCanister("ItemsCanister");
-const CurrencyCanister = Fletchette.getCanister("CurrencyCanister");
+import StringBuilder from "shared/utils/StringBuilder";
 
 @Controller()
-export class ShopController implements OnInit {
+export class ShopController implements OnStart {
     tween = new TweenInfo(0.3, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out);
 
     descColorHex = SHOP_WINDOW.PurchaseWindow.DescriptionFrame.DescriptionLabel.TextColor3.ToHex();
     defaultTooltips = new Map<ItemSlot, string>();
-    difficultyOptions = new Array<DifficultyOption>();
+    difficultyOptionsPerItem = new Map<Item, DifficultyOption>();
+    itemSlotsPerItem = new Map<Item, ItemSlot>();
     placementId = undefined as string | undefined;
     selected = undefined as Item | undefined;
     lastShop = undefined as string | undefined;
@@ -35,6 +34,7 @@ export class ShopController implements OnInit {
     currentContainerSpace = 0;
     sufficientColor = Color3.fromRGB(255, 255, 255);
     insufficientColor = Color3.fromRGB(255, 80, 80);
+    calibrated: UDim2 | undefined;
 
 
     constructor(private hotkeysController: HotkeysController, private uiController: UIController, 
@@ -80,38 +80,30 @@ export class ShopController implements OnInit {
         if (placementId !== undefined) {
             this.placementId = placementId;
         }
-        if (this.selected === undefined || !item.items.includes(this.selected)) {
-            this.showPurchaseWindow(item.items[0]);
+        const shopItems = item.items;
+        if (this.selected === undefined || !shopItems.includes(this.selected)) {
+            this.showPurchaseWindow(shopItems[0]);
         }
-        for (const difficultyOption of this.difficultyOptions) {
-            if (difficultyOption.IsA("Frame"))
-                difficultyOption.Visible = false;
-        }
-        const difficulties = new Map<Difficulty, Item[]>();
-        for (const i of item.items) {
-            const difficulty = i.difficulty;
-            if (difficulty === undefined)
-                continue;
-            const difficultyItems = difficulties.get(difficulty) ?? [];
-            difficultyItems.push(i);
-            difficulties.set(difficulty, difficultyItems);
-        }
-        for (const [difficulty, difficultyItems] of difficulties) {
-            const difficultyOption = SHOP_WINDOW.ItemListWrapper.ItemList.FindFirstChild(difficulty.id) as DifficultyOption;
-            if (difficultyOption === undefined) {
-                error("How did this happen?");
+        const visibilityPerDifficultyOption = new Map<DifficultyOption, boolean>();
+        for (const [item, difficultyOption] of this.difficultyOptionsPerItem) {
+            const index = shopItems.indexOf(item);
+            const hasItem = index > -1;
+            if (hasItem) {
+                visibilityPerDifficultyOption.set(difficultyOption, true);  
             }
-            for (const is of difficultyOption.Items.GetChildren()) {
-                if (is.Name === "UIGridLayout")
-                    continue;
-                const itemSlot = is as ItemSlot;
-                const item = Items.getItem(itemSlot.Name)!;
-                const index = difficultyItems.indexOf(item);
+            else if (visibilityPerDifficultyOption.has(difficultyOption) === false) {
+                visibilityPerDifficultyOption.set(difficultyOption, false);
+            }    
+            const itemSlot = this.itemSlotsPerItem.get(item);
+            if (itemSlot !== undefined) {
                 itemSlot.LayoutOrder = index;
-                itemSlot.Visible = index > -1;
+                itemSlot.Visible = hasItem;
             }
-            difficultyOption.Visible = true;
         }
+        task.spawn(() => {
+            for (const [difficultyOption, visibility] of visibilityPerDifficultyOption)
+                difficultyOption.Visible = visibility; 
+        });
     }
     
     createPriceOption(amount: OnoeNum | number, currency: Currency | undefined, item: Item | undefined) {
@@ -124,7 +116,7 @@ export class ShopController implements OnInit {
             option.ImageLabel.Visible = true;
             option.ViewportFrame.Visible = false;
             option.AmountLabel.Text = Price.getFormatted(currency, amount as OnoeNum, true);
-            connection = CurrencyCanister.balance.observe((balance) => {
+            connection = Packets.balance.observe((balance) => {
                 if (option === undefined || option.Parent === undefined) {
                     connection.disconnect();
                     return;
@@ -139,12 +131,12 @@ export class ShopController implements OnInit {
             option.ImageLabel.Visible = false;
             option.ViewportFrame.Visible = true;
             option.AmountLabel.Text = amount + " " + item.name;
-            connection = ItemsCanister.items.observe((items) => {
+            connection = Packets.inventory.observe((inventory) => {
                 if (option === undefined || option.Parent === undefined) {
                     connection.disconnect();
                     return;
                 }
-                const inInventory = items.inventory.get(item.id);
+                const inInventory = inventory.get(item.id);
                 option.AmountLabel.TextColor3 = inInventory === undefined || inInventory < (amount as number) ? this.insufficientColor : this.sufficientColor;
             });
         }
@@ -167,21 +159,25 @@ export class ShopController implements OnInit {
     }
 
     showPurchaseWindow(item: Item) {
-        const items = ItemsCanister.items.get();
-        if (items === undefined) {
+        const inventory = Packets.inventory.get();
+        const bought = Packets.bought.get();
+        const placed = Packets.placedItems.get();
+        if (inventory === undefined || bought === undefined || placed === undefined) {
             return;
         }
         this.selected = item;
         SHOP_WINDOW.PurchaseWindow.Title.DifficultyLabel.Image = "rbxassetid://" + item.difficulty?.image;
-        SHOP_WINDOW.PurchaseWindow.Title.ItemNameLabel.Text = (item.name ?? "error") + " (Owned: " + ItemCounter.getTotalAmount(items, item.id) + ")";
+        SHOP_WINDOW.PurchaseWindow.Title.ItemNameLabel.Text = (item.name ?? "error") + " (Owned: " + ItemCounter.getTotalAmount(inventory, placed, item.id) + ")";
         SHOP_WINDOW.PurchaseWindow.ViewportFrame.ClearAllChildren();
         this.itemSlotController.loadViewportFrame(SHOP_WINDOW.PurchaseWindow.ViewportFrame, item);
-        let description = this.itemSlotController.formatDescription(item, 21, "Medium");
         for (const option of SHOP_WINDOW.PurchaseWindow.Purchase.Price.GetChildren()) {
             if (option.IsA("Frame"))
                 option.Destroy();
         }
-        const price = item.getPrice((items.bought.get(item.id) ?? 0) + 1);
+        let price = item.getPrice((bought.get(item.id) ?? 0) + 1);
+        if (RunService.IsStudio() && price === undefined) {
+            price = item.getPrice(bought.get(item.id) ?? 0)
+        }
         if (price === undefined) {
             SHOP_WINDOW.PurchaseWindow.Purchase.HeadingLabel.Text = "Unavailable";
         }
@@ -193,20 +189,9 @@ export class ShopController implements OnInit {
                 this.createPriceOption(amount, undefined, requiredItem);
         }
         SHOP_WINDOW.PurchaseWindow.DescriptionFrame.CreatorLabel.Text = `Creator: ${item.creator}`;
-        
-        const hasFormula = item.formula !== undefined;
-        const hasSlamoVillage = AREAS.SlamoVillage.unlocked.Value === true;
-        if (hasFormula || hasSlamoVillage) {
-            description += `\n<font size="7"> </font>`;
-        }
-        if (hasFormula)
-            description += `\n${this.itemSlotController.formatFormula(item, ItemsCanister.multiplierPerItem.get()?.get(item.id), 18, "Medium")}`;
-        if (item.placeableAreas.isEmpty() || hasSlamoVillage)
-            description += `\n${this.itemSlotController.formatPlaceableAreas(item, 18, "Medium")}`;
-        if (hasSlamoVillage)
-            description += `\n${this.itemSlotController.formatResettingAreas(item, 18, "Medium")}`;
 
-        SHOP_WINDOW.PurchaseWindow.DescriptionFrame.DescriptionLabel.Text = description;
+        SHOP_WINDOW.PurchaseWindow.DescriptionFrame.DescriptionLabel.Text = 
+            this.itemSlotController.formatMetadata(item, this.itemSlotController.formatDescription(item, 21, "Medium"), 18, "Medium");
         let color = item.difficulty?.color ?? new Color3();
         color = new Color3(color.R + 0.2, color.G + 0.2, color.B + 0.2);
         SHOP_WINDOW.PurchaseWindow.DescriptionFrame.Size = new UDim2(1, 0, 0.8, -SHOP_WINDOW.PurchaseWindow.Purchase.AbsoluteSize.Y - 40);
@@ -215,14 +200,13 @@ export class ShopController implements OnInit {
         SHOP_WINDOW.PurchaseWindow.DescriptionFrame.CreatorLabel.Visible = item.creator !== undefined;
     }
 
-    onInit() {
-        for (const [_id, difficulty] of pairs(Difficulty.DIFFICULTIES)) {
-            const difficultyOption = this.itemSlotController.getDifficultyOption(difficulty);
-            difficultyOption.Visible = false;
-            difficultyOption.Parent = SHOP_WINDOW.ItemListWrapper.ItemList;
-        }
-        for (const [_id, item] of Items.init()) {
-            const [itemSlot, _v] = this.itemSlotController.getItemSlot(item);
+    recalibrate(difficultyOption: DifficultyOption) {
+        this.calibrated = new UDim2(1 / this.itemSlotController.calculateOptimalCellCount(difficultyOption.Items.AbsoluteSize.X), -12, 1, 0);
+    }
+
+    loadItemSlots(coalesce: boolean) {
+        for (const [_id, item] of Items.itemsPerId) {
+            const itemSlot = this.itemSlotController.getItemSlot(item, item.isA("HarvestingTool"));
             this.defaultTooltips.set(itemSlot, this.tooltipController.tooltipsPerObject.get(itemSlot)!);
             const diff = item.difficulty;
             if (diff === undefined) {
@@ -233,75 +217,51 @@ export class ShopController implements OnInit {
                 this.uiController.playSound("Click");
                 this.showPurchaseWindow(item);
             });
-            task.spawn(() => {
-                let t = 0;
-                let index = -1;
-                let checks = 0;
-                let lastPrice: Price | undefined = undefined;
-                RunService.BindToRenderStep("priceDisplay", 0, (dt) => {
-                    t += dt;
-                    if (!itemSlot.Visible || t < 0.5) {
-                        return;
-                    }
-                    t = 0;
-                    ++checks;
-                    const owned = ItemsCanister.items.get().bought.get(item.id) ?? 0;
-                    const price = item.getPrice(owned + 1);
-                    let info = `\n<font size="4"> </font>`;
-                    if (price !== undefined) {
-                        info += `\n<font color="#ffff00" size="16">Cost: ${price.tostring()}</font>`;
-                    }
-                    info += `\n<font color="#9de5ff" size="16">Owned: ${owned}</font>`;
-                    this.tooltipController.setTooltip(itemSlot, this.defaultTooltips.get(itemSlot) + info);
-                    if (price === undefined) {
-                        itemSlot.AmountLabel.Text = "MAXED";
-                        itemSlot.AmountLabel.TextColor3 = Color3.fromRGB(255, 156, 5);
-                    }
-                    else {
-                        if (lastPrice !== price) {
-                            index = -1;
-                        }
-                        else if (checks < 3) {
-                            return;
-                        }
-                        checks = 0;
-                        let currency: Currency | undefined = undefined;
-                        let cost: OnoeNum | undefined = undefined;
-                        const loop = () => {
-                            let i = 0;
-                            for (const [iCurrency, iCost] of price.costPerCurrency) {
-                                if (i === index + 1) {
-                                    currency = iCurrency;
-                                    cost = iCost;
-                                    index = i;
-                                    break;
-                                }
-                                ++i;
-                            }
-                            return currency;
-                        }
-                        if (loop() === undefined) {
-                            index = -1;
-                            currency = loop();
-                        }
-                        if (currency !== undefined) {
-                            itemSlot.AmountLabel.Text = price.tostring(currency, cost);
-                            TweenService.Create(itemSlot.AmountLabel, new TweenInfo(0.5), { TextColor3: Price.DETAILS_PER_CURRENCY[currency].color }).Play();
-                        }
-                        lastPrice = price;
-                    }
-                });
+            itemSlot.MouseEnter.Connect(() => {
+                const owned = Packets.bought.get()?.get(item.id) ?? 0;
+                const price = item.getPrice(owned + 1);
+                const builder = new StringBuilder('\n<font size="4"> </font>');
+                if (price !== undefined) {
+                    builder.append(`\n<font color="#ffff00" size="16">Cost: ${price.toString()}</font>`);
+                }
+                builder.append(`\n<font color="#9de5ff" size="16">Owned: ${owned}</font>`);
+                this.tooltipController.setTooltip(itemSlot, this.defaultTooltips.get(itemSlot) + builder.toString());
             });
-            itemSlot.Parent = SHOP_WINDOW.ItemListWrapper.ItemList.FindFirstChild(diff.id)?.WaitForChild("Items");
+            const category = coalesce === true ? Difficulty.Main : item.difficulty!;
+            let difficultyOption = SHOP_WINDOW.ItemListWrapper.ItemList.FindFirstChild(category.id) as DifficultyOption | undefined;
+            if (difficultyOption === undefined) {
+                difficultyOption = this.itemSlotController.getDifficultyOption(category);
+                if (item.difficulty === Difficulty.Excavation) {
+                    difficultyOption.LayoutOrder += 5000000;
+                }
+                //difficultyOption.LayoutOrder = -difficultyOption.LayoutOrder;
+                difficultyOption.Visible = false;
+                difficultyOption.Parent = SHOP_WINDOW.ItemListWrapper.ItemList;
+                if (this.calibrated === undefined)
+                    this.recalibrate(difficultyOption);
+                difficultyOption.Items.UIGridLayout.CellSize = this.calibrated!;
+            }
+            this.difficultyOptionsPerItem.set(item, difficultyOption);
+            this.itemSlotsPerItem.set(item, itemSlot);
+            itemSlot.Parent = difficultyOption.Items;
         }
+    }
 
-        this.difficultyOptions = SHOP_WINDOW.ItemListWrapper.ItemList.GetChildren() as DifficultyOption[];
+    onStart() {
+        Packets.settings.observe((settings) => {
+            const objs = SHOP_WINDOW.ItemListWrapper.ItemList.GetChildren();
+            for (const obj of objs)
+                if (obj.IsA("Frame"))
+                    obj.Destroy();
+            this.loadItemSlots(settings.CoalesceItemCategories);
+        });
 
-        ItemsCanister.items.observe(() => {
+        Packets.inventory.observe(() => {
             if (this.selected !== undefined) {
                 this.showPurchaseWindow(this.selected);
             }
         });
+        Packets.openShop.connect((itemId) => this.showShopWindow(Items.getItem(itemId) as Shop));
         ProximityPromptService.PromptTriggered.Connect((prompt, player) => {
             const s = prompt.GetAttribute("Shop") as string | undefined;
             if (player === LOCAL_PLAYER && s !== undefined) {
@@ -322,7 +282,7 @@ export class ShopController implements OnInit {
             if (!SHOP_WINDOW.Visible) {
                 return false;
             }
-            this.uiController.playSound(this.selected !== undefined && ItemsCanister.buyItem.invoke(this.selected.id) ? "Coins" : "Error");
+            this.uiController.playSound(this.selected !== undefined && Packets.buyItem.invoke(this.selected.id) ? "Coins" : "Error");
             return true;
         }, "Buy", 1);
         SHOP_WINDOW.PurchaseWindow.DescriptionFrame.CreatorLabel.MouseMoved.Connect(() => {
@@ -340,10 +300,77 @@ export class ShopController implements OnInit {
         }, "Close", 2);
         this.hotkeysController.setHotkey(SHOP_WINDOW.ItemListWrapper.ItemList.BuyAll, Enum.KeyCode.O, () => {
             if (SHOP_WINDOW.Visible && this.lastShop !== undefined) {
-                this.uiController.playSound(ItemsCanister.buyAllItems.invoke(this.lastShop) ? "Coins" : "Error");
+                this.uiController.playSound(Packets.buyAllItems.invoke(this.lastShop) ? "Coins" : "Error");
                 return true;
             }
             return false;
         }, "Buy All Items", 5);
+
+        INTERFACE.GetPropertyChangedSignal("AbsoluteSize").Connect(() => {
+            let recalibrated = false;
+            const difficultyOptions = SHOP_WINDOW.ItemListWrapper.ItemList.GetChildren();
+            for (const dO of difficultyOptions) {
+                if (!dO.IsA("Frame"))
+                    continue;
+                const difficultyOption = dO as DifficultyOption;
+                if (recalibrated === false) {
+                    recalibrated = true;
+                    this.recalibrate(difficultyOption);
+                }
+                difficultyOption.Items.UIGridLayout.CellSize = this.calibrated!;
+            }
+        });
+
+        let t = 0;
+        const indexPerItem = new Map<Item, number>();
+        RunService.BindToRenderStep("Shop Price Cycle", 1, (dt) => {
+            t += dt;
+            if (t < 2) {
+                return;
+            }
+            t = 0;
+            const bought = Packets.bought.get();
+            
+            for (const [item, itemSlot] of this.itemSlotsPerItem) {
+                if (itemSlot.Visible === false) {
+                    continue;
+                }
+                const price = item.getPrice((bought.get(item.id) ?? 0) + 1);
+                
+                if (price === undefined) {
+                    itemSlot.AmountLabel.Text = "MAXED";
+                    itemSlot.AmountLabel.TextColor3 = Color3.fromRGB(255, 156, 5);
+                    continue;
+                }
+
+                let cost: OnoeNum | undefined = undefined;
+                let firstCurrency: Currency | undefined;
+                let firstCost: OnoeNum | undefined;
+                const loop = () => {
+                    let i = 0;
+                    const index = indexPerItem.get(item);
+                    for (const [iCurrency, iCost] of price.costPerCurrency) {
+                        if (i === 0) {
+                            firstCurrency = iCurrency;
+                            firstCost = iCost;
+                        }
+                        if (index === undefined || i === index + 1) {
+                            indexPerItem.set(item, i);
+                            cost = iCost;
+                            return iCurrency;
+                        }
+                        ++i;
+                    }
+                    indexPerItem.set(item, 0);
+                    cost = firstCost;
+                    return firstCurrency;
+                }
+                const currency = loop();
+                if (currency !== undefined) {
+                    itemSlot.AmountLabel.Text = price.toString(currency, cost);
+                    TweenService.Create(itemSlot.AmountLabel, new TweenInfo(0.5), { TextColor3: Price.DETAILS_PER_CURRENCY[currency].color }).Play();
+                }
+            }
+        });
     }
 }

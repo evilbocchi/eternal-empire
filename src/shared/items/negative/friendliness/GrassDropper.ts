@@ -1,9 +1,9 @@
-import Difficulty from "shared/Difficulty";
+import Difficulty from "@antivivi/jjt-difficulties";
 import Droplet from "shared/item/Droplet";
 import Dropper from "shared/item/Dropper";
 import Price from "shared/Price";
 
-export = new Dropper("GrassDropper")
+export = new Dropper(script.Name)
 .setName("Grass Dropper")
 .setDescription("You need more grass. A Grass Droplet from this dropper touching a Grass Conveyor transforms it into a Massive Grass Droplet worth $550.")
 .setDifficulty(Difficulty.Friendliness)

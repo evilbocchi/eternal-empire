@@ -1,10 +1,10 @@
-import Difficulty from "shared/Difficulty";
+import Difficulty from "@antivivi/jjt-difficulties";
 import Upgrader from "shared/item/Upgrader";
 import Price from "shared/Price";
 
-export = new Upgrader("SmallReactor")
+export = new Upgrader(script.Name)
 .setName("Small Reactor")
-.setDescription("This 'small' reactor gives a %mul%x boost to any droplets passing through it.")
+.setDescription("This 'small' reactor gives a %mul% boost to any droplets passing through it.")
 .setDifficulty(Difficulty.Unimpossible)
 .setPrice(new Price().setCost("Funds", 3500000), 1)
 .addPlaceableArea("BarrenIslands")

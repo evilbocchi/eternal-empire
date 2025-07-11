@@ -1,12 +1,7 @@
-import Difficulty from "shared/Difficulty";
-import Price from "shared/Price";
-import Shop from "shared/item/Shop";
+import Difficulty from "@antivivi/jjt-difficulties";
+import Item from "shared/item/Item";
 
-const item = new Shop("LostPendant")
+export = new Item(script.Name)
 .setName("Lost Pendant")
 .setDescription("Located atop a peculiar hill. Seems to have no materialistic value.")
-.setDifficulty(Difficulty.Miscellaneous)
-.setPrice(new Price().setCost("Funds", 0), 1);
-item.setItems([item]);
-
-export = item;
+.setDifficulty(Difficulty.Miscellaneous);

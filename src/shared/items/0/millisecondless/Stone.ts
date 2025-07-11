@@ -1,8 +1,8 @@
-import Difficulty from "shared/Difficulty";
+import Difficulty from "@antivivi/jjt-difficulties";
 import Price from "shared/Price";
 import Item from "shared/item/Item";
 
-export = new Item("Stone")
+export = new Item(script.Name)
 .setName("Rock")
 .setDescription("What's better than wood? Rock.")
 .setDifficulty(Difficulty.Millisecondless)

@@ -1,12 +1,12 @@
-import Difficulty from "shared/Difficulty";
+import Difficulty from "@antivivi/jjt-difficulties";
 import Droplet from "shared/item/Droplet";
 import Dropper from "shared/item/Dropper";
 import Price from "shared/Price";
 import { rainbowEffect } from "shared/utils/vrldk/BasePartUtils";
 
-export = new Dropper("RapidDropper")
+export = new Dropper(script.Name)
 .setName("Rapid Dropper")
-.setDescription("Pew pew pew... or something. Produces $12K, 12 W droplets/0.5s.")
+.setDescription("Pew pew pew... or something. Produces %val% droplets every 0.5 seconds.")
 .setDifficulty(Difficulty.Exist)
 .setPrice(new Price().setCost("Funds", 920e12).setCost("Power", 740000), 1)
 .setPrice(new Price().setCost("Funds", 2.92e15).setCost("Power", 1520000), 2)

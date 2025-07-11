@@ -1,45 +1,23 @@
-import { OnInit, OnStart, Service } from "@flamework/core";
-import { Profile } from "@rbxts/profileservice/globals";
-import { DataService, EmpireProfileTemplate } from "server/services/serverdata/DataService";
-import Quest from "shared/Quest";
+import { OnInit, Service } from "@flamework/core";
+import { DataService } from "server/services/serverdata/DataService";
+import Quest from "server/Quest";
 import { WAYPOINTS } from "shared/constants";
-import { Fletchette, RemoteProperty, RemoteSignal } from "@antivivi/fletchette";
-
-declare global {
-    interface FletchetteCanisters {
-        QuestCanister: typeof QuestCanister;
-    }
-}
-
-export const QuestCanister = Fletchette.createCanister("QuestCanister", {
-    quests: new RemoteProperty<Map<string, number>>(new Map()),
-    questCompleted: new RemoteSignal<(questId: string) => void>(),
-});
+import Packets from "shared/network/Packets";
 
 @Service()
-export class QuestsService implements OnInit, OnStart {
+export class QuestsService implements OnInit {
 
     constructor(private dataService: DataService) {
 
     }
 
-    getStagePerQuest() {
-        return this.dataService.empireProfile?.Data.quests;
-    }
-
     setStagePerQuest(quests: Map<string, number>) {
-        if (this.dataService.empireProfile !== undefined) {
-            this.dataService.empireProfile.Data.quests = quests;
-            QuestCanister.quests.set(quests);
-        }
+        this.dataService.empireData.quests = quests;
+        Packets.quests.set(quests);
     }
 
     completeStage(quest: Quest, current: number) {
-        const stagePerQuest = this.getStagePerQuest();
-        if (stagePerQuest === undefined) {
-            warn("Profile not loaded");
-            return;
-        }
+        const stagePerQuest = this.dataService.empireData.quests;
         const currentStage = stagePerQuest.get(quest.id);
         if (currentStage === -1) {
             return;
@@ -59,15 +37,6 @@ export class QuestsService implements OnInit, OnStart {
         for (const waypoint of WAYPOINTS.GetChildren()) {
             (waypoint as BasePart).Transparency = 1;
         }
-    }
-
-    onStart() {
-        const onProfile = (profile: Profile<typeof EmpireProfileTemplate>) => {
-            QuestCanister.quests.set(profile.Data.quests);
-        }
-        if (this.dataService.empireProfile !== undefined) {
-            onProfile(this.dataService.empireProfile);
-        }
-        this.dataService.empireProfileLoaded.connect((profile) => onProfile(profile));
+        Packets.quests.set(this.dataService.empireData.quests);
     }
 }

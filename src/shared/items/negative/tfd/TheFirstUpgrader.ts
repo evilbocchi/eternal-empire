@@ -1,9 +1,9 @@
 import Price from "shared/Price";
 import { AREAS } from "shared/constants";
-import Difficulty from "shared/Difficulty";
+import Difficulty from "@antivivi/jjt-difficulties";
 import Upgrader from "shared/item/Upgrader";
 
-export = new Upgrader("TheFirstUpgrader")
+export = new Upgrader(script.Name)
 .setName("The First Upgrader")
 .setDescription("Increases the monetary value of droplets. Pass droplets through the laser to increase revenue.")
 .setDifficulty(Difficulty.TheFirstDifficulty)

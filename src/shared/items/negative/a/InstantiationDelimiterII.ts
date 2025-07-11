@@ -1,12 +1,11 @@
+import Difficulty from "@antivivi/jjt-difficulties";
 import Price from "shared/Price";
-import { AREAS } from "shared/constants";
-import Difficulty from "shared/Difficulty";
 import InstantiationDelimiter from "shared/item/InstantiationDelimiter";
 import InstantiationDelimiterI from "../negativity/InstantiationDelimiterI";
 
-export = new InstantiationDelimiter("InstantiationDelimiterII")
+export = new InstantiationDelimiter(script.Name)
 .setName("Instantiation Delimiter II")
-.setDescription("Increases droplet limit by 50, at the cost of 15 W/s.")
+.setDescription("Increases droplet limit by 50, at the cost of %drain%.")
 .setDifficulty(Difficulty.A)
 .setPrice(new Price().setCost("Power", 30000), 1)
 .setRequiredItemAmount(InstantiationDelimiterI, 1)

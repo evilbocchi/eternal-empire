@@ -1,4 +1,4 @@
-import Difficulty from "shared/Difficulty";
+import Difficulty from "@antivivi/jjt-difficulties";
 import Price from "shared/Price";
 import { Killbrick } from "shared/item/Special";
 

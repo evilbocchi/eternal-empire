@@ -1,16 +1,14 @@
-import { Controller, OnInit } from "@flamework/core";
+import { Controller, OnStart } from "@flamework/core";
 import { Debris, ReplicatedStorage, RunService, TextChatService, TweenService } from "@rbxts/services";
 import { DIALOGUE_WINDOW } from "client/constants";
 import { HotkeysController } from "client/controllers/HotkeysController";
 import { UIController } from "client/controllers/UIController";
 import { ASSETS, getDisplayName, getSound } from "shared/constants";
-import { Fletchette } from "@antivivi/fletchette";
+import Packets from "shared/network/Packets";
 import computeNameColor from "shared/utils/vrldk/ComputeNameColor";
 
-const NPCCanister = Fletchette.getCanister("NPCCanister");
-
 @Controller()
-export class NPCController implements OnInit {
+export class NPCController implements OnStart {
 
     npcTagColor = Color3.fromRGB(201, 255, 13).ToHex();
     emptyColor = Color3.fromRGB(0, 181, 28).ToHex();
@@ -46,13 +44,15 @@ export class NPCController implements OnInit {
         })
     }
 
-    onInit() {
+    onStart() {
         const channel = TextChatService.WaitForChild("TextChannels").WaitForChild("RBXGeneral") as TextChannel;
-        NPCCanister.npcMessage.connect((model, message, pos, endPos) => {
+        Packets.npcMessage.connect((model, message, pos, endPos, prompt) => {
             const humanoid = model?.FindFirstChildOfClass("Humanoid");
             let name = undefined as string | undefined;
+
             if (model !== undefined && humanoid !== undefined) {
-                (model.PrimaryPart?.FindFirstChild("DingSound") as Sound | undefined)?.Play();
+                if (Packets.settings.get().SoundEffects)
+                    (humanoid.RootPart?.FindFirstChild("DingSound") as Sound | undefined)?.Play();
                 name = getDisplayName(humanoid);
                 channel.DisplaySystemMessage(
                     `<font color="#${this.npcTagColor}">[${pos}/${endPos}]</font> <font color="#${computeNameColor(name).ToHex()}">${name}:</font> ${message}`
@@ -65,12 +65,13 @@ export class NPCController implements OnInit {
                     `<font color="#${this.emptyColor}">${message}</font>`, "tag:hidden");
             }
             this.textSound = model === undefined ? undefined : ASSETS.NPCTextSounds.FindFirstChild(model.Name) as Sound | undefined;
-            this.showDialogueWindow(name, message);
+            if (prompt === true)
+                this.showDialogueWindow(name, message);
         });
         const dialogueWindowClicked = () => {
             if (this.i < this.size)
                 this.i = this.size - 1;
-            else if (NPCCanister.nextDialogue.invoke() === true)
+            else if (Packets.nextDialogue.invoke() === true)
                 this.hideDialogueWindow();
         }
         this.hotkeysController.bindKey(Enum.KeyCode.Return, () => {
@@ -96,7 +97,8 @@ export class NPCController implements OnInit {
                 if (isSpace === false) {
                     const sound = (this.textSound ?? this.defaultTextSound).Clone();
                     sound.Parent = ReplicatedStorage;
-                    sound.Play();
+                    if (Packets.settings.get().SoundEffects)
+                        sound.Play();
                     Debris.AddItem(sound);
                 }
             }

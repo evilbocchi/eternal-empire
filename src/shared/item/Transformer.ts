@@ -1,8 +1,14 @@
-//!native
-
+import { DROPLETS_FOLDER } from "shared/constants";
 import Conveyor from "shared/item/Conveyor";
 import Droplet from "shared/item/Droplet";
+import { GameUtils } from "shared/utils/ItemUtils";
 import { findBaseParts } from "shared/utils/vrldk/BasePartUtils";
+
+declare global {
+    interface ItemTypes {
+        Transformer: Transformer;
+    }
+}
 
 class Transformer extends Conveyor {
 
@@ -13,17 +19,18 @@ class Transformer extends Conveyor {
 
     constructor(id: string) {
         super(id);
-        this.types.push("Transformer");
+        this.types.add("Transformer");
         this.onLoad((model) => {
             const transformers = findBaseParts(model, "Transformer");
             for (const t of transformers) {
                 t.Touched.Connect((d) => {
-                    if (d.Name !== "Droplet")
+                    const instanceInfo = GameUtils.getAllInstanceInfo(d);
+                    if (d.Parent !== DROPLETS_FOLDER || instanceInfo.Incinerated === true)
                         return;
-                    const dropletId = d.GetAttribute("DropletId") as string;
+                    const dropletId = instanceInfo.DropletId;
                     if (dropletId === this.id)
                         return;
-                    const droplet = Droplet.getDroplet(dropletId);
+                    const droplet = Droplet.getDroplet(dropletId!);
                     if (droplet === undefined)
                         return;
                     const res = this.getResult(droplet);
@@ -36,7 +43,7 @@ class Transformer extends Conveyor {
                     d.Material = model.Material;
                     d.Size = model.Size;
                     d.SetAttribute("Rainbow", model.GetAttribute("Rainbow"));
-                    d.SetAttribute("DropletId", res.id);
+                    instanceInfo.DropletId = res.id;
                 });
             }
         });

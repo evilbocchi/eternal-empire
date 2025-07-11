@@ -1,9 +1,9 @@
 import Price from "shared/Price";
 import { AREAS } from "shared/constants";
-import Difficulty from "shared/Difficulty";
+import Difficulty from "@antivivi/jjt-difficulties";
 import Conveyor from "shared/item/Conveyor";
 
-export = new Conveyor("ExtendedConveyor")
+export = new Conveyor(script.Name)
 .setName("Extended Conveyor")
 .setDescription("A slightly longer conveyor than usual. Has walls that make droplets unable to change directions.")
 .setDifficulty(Difficulty.TheLowerGap)

@@ -1,37 +1,79 @@
-import { OnInit, OnStart, Service } from "@flamework/core";
-import { Profile } from "@rbxts/profileservice/globals";
+import { OnInit, Service } from "@flamework/core";
 import { RunService, TweenService, Workspace } from "@rbxts/services";
-import { DataService, EmpireProfileTemplate } from "server/services/serverdata/DataService";
+import { DataService } from "server/services/serverdata/DataService";
 import { ItemsService } from "server/services/serverdata/ItemsService";
 import { LevelService } from "server/services/serverdata/LevelService";
 import { UnlockedAreasService } from "server/services/serverdata/UnlockedAreasService";
-import { AREAS, ASSETS, XP_PACKS, getSound } from "shared/constants";
+import { AREAS, ASSETS, getSound, SOUND_EFFECTS_GROUP } from "shared/constants";
 import Item from "shared/item/Item";
 import Crystal from "shared/items/excavation/Crystal";
 import ExcavationStone from "shared/items/excavation/ExcavationStone";
 import Gold from "shared/items/excavation/Gold";
+import EnchantedGrass from "shared/items/excavation/harvestable/EnchantedGrass";
 import Iron from "shared/items/excavation/Iron";
+import Quartz from "shared/items/excavation/Quartz";
 import WhiteGem from "shared/items/excavation/WhiteGem";
-import { Fletchette, RemoteSignal } from "@antivivi/fletchette";
+import Items from "shared/items/Items";
+import Packets from "shared/network/Packets";
 import { weldModel } from "shared/utils/vrldk/BasePartUtils";
 import { convertToMMSS } from "shared/utils/vrldk/NumberAbbreviations";
 
-declare global {
-    interface FletchetteCanisters {
-        ChestCanister: typeof ChestCanister;
+interface Loot {
+    item?: Item;
+    harvestable?: HarvestableId;
+    xp?: number;
+}
+class LootPool {
+    static readonly RANDOM = new Random(tick());
+    pool = new Map<Loot, number>();
+
+    addItem(item: Item, weight: number) {
+        this.pool.set({item: item}, weight);
+        return this;
+    }
+
+    addHarvestable(harvestable: HarvestableId, weight: number) {
+        this.pool.set({harvestable: harvestable}, weight);
+        return this;
+    }
+    
+    addXP(xp: number, weight: number) {
+        this.pool.set({xp: xp}, weight);
+        return this;
+    }
+
+    getTotalWeight() {
+        let totalWeight = 0;
+        for (const [_piece, weight] of this.pool) {
+            totalWeight += weight;
+        }
+        return totalWeight;
+    }
+
+    pull(amount = 5) {
+        const totalWeight = this.getTotalWeight();
+        const get = () => {
+            const chance = LootPool.RANDOM.NextInteger(1, totalWeight);
+            let counter = 0;
+            for (const [piece, weight] of this.pool) {
+                counter += weight;
+                if (chance < counter) {
+                    return piece;
+                }
+            }
+        }
+        const loot = new Array<Loot>();
+        for (let i = 0; i < amount; i++) {
+            const got = get();
+            if (got !== undefined)
+                loot.push(got);
+        }
+        return loot;
     }
 }
 
-type Loot = keyof (typeof XP_PACKS) | Item;
-type LootPool = Map<Loot, number>;
-
-export const ChestCanister = Fletchette.createCanister("ChestCanister", {
-    xpReceived: new RemoteSignal<(xp: number) => void>(),
-    itemReceived: new RemoteSignal<(itemId: string) => void>(),
-});
-
 @Service()
-export class ChestService implements OnInit, OnStart {
+export class ChestService implements OnInit {
 
     poolPerLevel = new Map<number, LootPool>();
     cooldown = 900;
@@ -57,64 +99,63 @@ export class ChestService implements OnInit, OnStart {
         return true;
     }
 
-    getTotalWeight(pool: LootPool) {
-        let totalWeight = 0;
-        for (const [_piece, weight] of pool) {
-            totalWeight += weight;
-        }
-        return totalWeight;
-    }
 
-    randomFromPool(pool: LootPool, totalWeight?: number) {
-        if (totalWeight === undefined) {
-            totalWeight = this.getTotalWeight(pool);
-        }
-        const chance = math.random(1, totalWeight);
-        let counter = 0;
-        for (const [piece, weight] of pool) {
-            counter += weight;
-            if (chance < counter)
-                return piece;
-        }
-        error("What the sigma");
-    }
-
-    pool(pool: LootPool, amount?: number) {
-        const totalWeight = this.getTotalWeight(pool);
-        const loot = new Array<Loot>();
-        for (let i = 0; i < (amount ?? 5); i++) {
-            loot.push(this.randomFromPool(pool, totalWeight));
-        }
-        return loot;
-    }
-
-    rewardLoot(loot: Loot) {
-        if (typeOf(loot) === "string") {
-            const xp = XP_PACKS[loot as keyof (typeof XP_PACKS)];
-            const current = this.levelService.getXp();
-            if (current === undefined)
-                error("WAT THE FAQ");
-            this.levelService.setXp(current + xp);
-            ChestCanister.xpReceived.fireAll(xp);
-        }
-        else {
-            const itemId = (loot as Item).id;
+    rewardLoot(...loots: Loot[]) {
+        let totalXp = 0;
+        const items = new Map<string, number>();
+        const addItem = (item: Item) => {
+            const itemId = item.id;
             this.itemsService.setItemAmount(itemId, this.itemsService.getItemAmount(itemId) + 1);
-            ChestCanister.itemReceived.fireAll(itemId);
+            items.set(itemId, (items.get(itemId) ?? 0) + 1);
         }
+        for (const loot of loots) {
+            if (loot.xp !== undefined)
+                totalXp += loot.xp;
+            if (loot.item !== undefined)
+                addItem(loot.item);
+            if (loot.harvestable !== undefined)
+                addItem(Items.getItem(loot.harvestable)!);
+        }
+        const current = this.levelService.getXp();
+        if (totalXp > 0) {
+            this.levelService.setXp(current + totalXp);
+            Packets.xpReceived.fireAll(totalXp);
+        }
+        
+        Packets.itemsReceived.fireAll(items);
     }
     
     onInit() {
-        const l1 = new Map() as LootPool;
-        l1.set("T1_XP", 2000);
-        l1.set("T2_XP", 1000);
-        l1.set("T3_XP", 500);
-        l1.set(ExcavationStone, 1000);
-        l1.set(WhiteGem, 200);
-        l1.set(Crystal, 50);
-        l1.set(Iron, 10);
-        l1.set(Gold, 1);
-        this.poolPerLevel.set(1, l1);
+        this.poolPerLevel.set(1, new LootPool()
+            .addXP(1, 2000)
+            .addXP(3, 1000)
+            .addXP(5, 500)
+            .addHarvestable("Grass", 1000)
+            .addHarvestable("StaleWood", 1000)
+            .addItem(ExcavationStone, 1000)
+            .addItem(WhiteGem, 200)
+            .addItem(EnchantedGrass, 100)
+            .addHarvestable("MagicalWood", 50)
+            .addItem(Crystal, 50)
+            .addItem(Iron, 10)
+            .addItem(Gold, 1)
+        );
+        this.poolPerLevel.set(2, new LootPool()
+            .addXP(1, 500)
+            .addXP(3, 1500)
+            .addXP(5, 1000)
+            .addXP(9, 500)
+            .addHarvestable("Grass", 600)
+            .addHarvestable("StaleWood", 600)
+            .addItem(ExcavationStone, 600)
+            .addItem(WhiteGem, 400)
+            .addItem(EnchantedGrass, 200)
+            .addHarvestable("MagicalWood", 150)
+            .addItem(Crystal, 150)
+            .addItem(Iron, 70)
+            .addItem(Gold, 30)
+            .addItem(Quartz, 1)
+        );
 
         for (const [_id, area] of pairs(AREAS)) {
             const chestsFolder = area.areaFolder.FindFirstChild("Chests");
@@ -129,6 +170,7 @@ export class ChestService implements OnInit, OnStart {
                 const chestModel = ASSETS.Chest.Clone();
                 chestModel.PivotTo(chestLocationMarker.CFrame);
                 const sound = getSound("ChestOpen").Clone();
+                sound.SoundGroup = SOUND_EFFECTS_GROUP;
                 sound.Parent = chestModel.PrimaryPart;
 
                 const prompt = new Instance("ProximityPrompt");
@@ -147,14 +189,16 @@ export class ChestService implements OnInit, OnStart {
                     prompt.Enabled = !isOpened;
                     chestModel.Hitbox.CooldownGui.Enabled = isOpened;
                 }
-                RunService.Heartbeat.Connect(() => {
-                    const elapsed = tick() - lastOpen;
-                    if (elapsed > this.cooldown && isOpened === true) {
-                        isOpened = false;
-                        markLastOpen(lastOpen);
-                    }
-                    if (isOpened) {
-                        chestModel.Hitbox.CooldownGui.CooldownLabel.Text = convertToMMSS(math.floor(this.cooldown - elapsed));
+                task.spawn(() => {
+                    while (task.wait(1)) {
+                        const elapsed = tick() - lastOpen;
+                        if (elapsed > this.cooldown && isOpened === true) {
+                            isOpened = false;
+                            markLastOpen(lastOpen);
+                        }
+                        if (isOpened) {
+                            chestModel.Hitbox.CooldownGui.CooldownLabel.Text = convertToMMSS(math.floor(this.cooldown - elapsed));
+                        }
                     }
                 });
                 const bindableEvent = new Instance("BindableEvent");
@@ -166,23 +210,16 @@ export class ChestService implements OnInit, OnStart {
                 prompt.Triggered.Connect(() => {
                     if (!prompt.Enabled)
                         return;
-                    if (this.unlockedAreasService.getUnlockedAreas()?.has(area.name as keyof (typeof AREAS)))
+                    if (this.dataService.empireData.unlockedAreas.has(area.name as AreaId))
                         return;
                     sound.Play();
                     const t = tick();
-                    const profile = this.dataService.empireProfile;
-                    if (profile === undefined)
-                        return;
-                    const amount = lastOpen === 0 ? math.random(4, 5) : math.random(2, 3);
-                    const pooled = this.pool(this.poolPerLevel.get(tonumber(chestLocationMarker.Name) ?? 1)!, amount);
-                    profile.Data.openedChests.set(`${chestLocation.X}_${chestLocation.Y}_${chestLocation.Z}`, t);
+                    const amount = lastOpen === 0 ? math.random(10, 14) : math.random(5, 8);
+                    this.dataService.empireData.openedChests.set(`${chestLocation.X}_${chestLocation.Y}_${chestLocation.Z}`, t);
                     markLastOpen(t);
                     task.spawn(() => {
                         task.wait(0.25);
-                        for (const loot of pooled) {
-                            task.wait(1.25 / amount);
-                            this.rewardLoot(loot);
-                        }
+                        this.rewardLoot(...this.poolPerLevel.get(tonumber(chestLocationMarker.Name) ?? 1)!.pull(amount));
                     });
                 });
                 
@@ -190,20 +227,13 @@ export class ChestService implements OnInit, OnStart {
                 chestModel.Parent = Workspace;
             }
         }
-    }
 
-    onStart() {
-        const onProfileLoaded = (profile: Profile<typeof EmpireProfileTemplate>) => {
-            const lastOpenPerLocation = profile.Data.openedChests;
-            for (const [location, lastOpen] of lastOpenPerLocation) {
-                const [xString, yString, zString] = location.split("_");
-                if (this.markLastOpen(new Vector3(tonumber(xString), tonumber(yString), tonumber(zString)), lastOpen) === false) {
-                    lastOpenPerLocation.delete(location);
-                }
+        const lastOpenPerLocation = this.dataService.empireData.openedChests;
+        for (const [location, lastOpen] of lastOpenPerLocation) {
+            const [xString, yString, zString] = location.split("_");
+            if (this.markLastOpen(new Vector3(tonumber(xString), tonumber(yString), tonumber(zString)), lastOpen) === false) {
+                lastOpenPerLocation.delete(location);
             }
         }
-        if (this.dataService.empireProfile !== undefined)
-            onProfileLoaded(this.dataService.empireProfile);
-        this.dataService.empireProfileLoaded.connect((profile) => onProfileLoaded(profile));
     }
 }

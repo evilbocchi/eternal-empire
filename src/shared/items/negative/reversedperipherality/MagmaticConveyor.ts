@@ -1,9 +1,9 @@
-import Difficulty from "shared/Difficulty";
+import Difficulty from "@antivivi/jjt-difficulties";
 import Droplet from "shared/item/Droplet";
 import Transformer from "shared/item/Transformer";
 import Price from "shared/Price";
 
-export = new Transformer("MagmaticConveyor")
+export = new Transformer(script.Name)
 .setName("Magmatic Conveyor")
 .setDescription("It's time to heat up. Cleans amethyst droplets for $78K value. Anything else will be burned to char. :(")
 .setDifficulty(Difficulty.ReversedPeripherality)

@@ -1,11 +1,8 @@
-import { RESERVE_MODELS_FOLDER } from "shared/constants";
-import Items from "shared/items/Items";
-
 type Toggleable = ParticleEmitter | Beam | Script;
 
 namespace ReserveModels {
     export const reserveModelsPerId = new Map<string, Model[]>();
-    export const particlesPerModel = new Map<Model, Map<Toggleable, boolean>>();
+    export const particles = new Map<Toggleable, boolean>();
     export const itemModels = new Map<string, Model>();
 
     export function reserveModels(itemId: string, model?: Model) {
@@ -13,6 +10,12 @@ namespace ReserveModels {
             model = ReserveModels.itemModels.get(itemId)!;
         }
         else {
+            const children = model.GetDescendants();
+            for (const child of children) {
+                if (child.IsA("ParticleEmitter") || child.IsA("Beam") || child.IsA("Script")) {
+                    ReserveModels.particles.set(child, child.Enabled);
+                }
+            }
             ReserveModels.itemModels.set(itemId, model);
         }
         // let reserveModelFolder = RESERVE_MODELS_FOLDER.FindFirstChild(itemId);

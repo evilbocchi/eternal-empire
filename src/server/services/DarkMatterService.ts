@@ -1,31 +1,29 @@
-import { OnStart, Service } from "@flamework/core";
+import { OnoeNum } from "@antivivi/serikanum";
+import { OnInit, Service } from "@flamework/core";
 import Price from "shared/Price";
 import { AREAS } from "shared/constants";
-import { OnoeNum } from "@antivivi/serikanum";
 import { CurrencyService } from "./serverdata/CurrencyService";
+import { DataService } from "server/services/serverdata/DataService";
 
 @Service()
-export class DarkMatterService implements OnStart {
+export class DarkMatterService implements OnInit {
 
     boost = new Price().setCost("Funds", new OnoeNum(1));
     gui = AREAS.SlamoVillage.areaFolder.WaitForChild("DarkMatter").WaitForChild("SurfaceGui");
 
-    constructor(private currencyService: CurrencyService) {
+    constructor(private dataService: DataService, private currencyService: CurrencyService) {
 
     }
 
-    onStart() {
+    onInit() {
         const darkMatterLabel = this.gui.WaitForChild("DarkMatterLabel") as TextLabel;
         const fundsLabel = this.gui.WaitForChild("FundsLabel") as TextLabel;
         const powerLabel = this.gui.WaitForChild("PowerLabel") as TextLabel;
         const balanceChanged = (balance: Map<Currency, OnoeNum>) => {
-            const darkMatter = balance.get("Dark Matter");
-            if (darkMatter === undefined) {
-                return;
-            }
+            const darkMatter = balance.get("Dark Matter") ?? new OnoeNum(0);
             darkMatterLabel.Text = tostring(darkMatter);
-            const fundsBoost = OnoeNum.log(darkMatter.add(1), 32)?.pow(1.1).add(1);
-            const powerBoost = darkMatter.lessThan(1000) ? 1 : OnoeNum.log(darkMatter.div(1000), 32)?.pow(1.1).div(2).add(1);
+            const fundsBoost = darkMatter.equals(0) ? 1 : OnoeNum.log(darkMatter.add(1), 11)?.pow(2).div(4.5).add(1.2);
+            const powerBoost = darkMatter.lessThan(1000) ? 1 : OnoeNum.log(darkMatter.div(1000), 11)?.pow(2).div(9).add(1.2);
             if (fundsBoost === undefined || powerBoost === undefined)
                 return;
             this.boost.setCost("Funds", fundsBoost);
@@ -36,6 +34,6 @@ export class DarkMatterService implements OnStart {
             powerLabel.TextSize = powerBoost === 1 ? 50 : 70;
         }
         this.currencyService.balanceChanged.connect((balance) => balanceChanged(balance));
-        balanceChanged(this.currencyService.getBalance().costPerCurrency);
+        balanceChanged(this.dataService.empireData.currencies);
     }
 }

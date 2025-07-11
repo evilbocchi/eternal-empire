@@ -1,9 +1,9 @@
-import Difficulty from "shared/Difficulty";
+import Difficulty from "@antivivi/jjt-difficulties";
 import Price from "shared/Price";
 import InstantiationDelimiter from "shared/item/InstantiationDelimiter";
 import ExcavationStone from "shared/items/excavation/ExcavationStone";
 
-export = new InstantiationDelimiter("LimitBreaker")
+export = new InstantiationDelimiter(script.Name)
 .setName("Limit Breaker")
 .setDescription("A massive structure made to delimit. Sustains itself, increasing droplet limit by 20 at no cost.")
 .setDifficulty(Difficulty.Miscellaneous)

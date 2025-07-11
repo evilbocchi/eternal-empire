@@ -1,9 +1,9 @@
-import Difficulty from "shared/Difficulty";
+import Difficulty from "@antivivi/jjt-difficulties";
 import Price from "shared/Price";
 import Droplet from "shared/item/Droplet";
 import Dropper from "shared/item/Dropper";
 
-export = new Dropper("SpatialDropper")
+export = new Dropper(script.Name)
 .setName("Spatial Dropper")
 .setDescription("A dropper placeable in Slamo Village producing %val% droplets per second, saving between skillifications!")
 .setDifficulty(Difficulty.Astronomical)

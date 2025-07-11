@@ -1,28 +1,33 @@
-import { Controller } from "@flamework/core";
+import { Controller, OnInit } from "@flamework/core";
 import { TweenService } from "@rbxts/services";
-import { LOADING_WINDOW } from "client/constants";
+import { LOADING_SCREEN } from "client/constants";
 import { UIController } from "client/controllers/UIController";
 
+const LOADING_WINDOW = LOADING_SCREEN.LoadingWindow;
+
 @Controller()
-export class LoadingWindowController {
+export class LoadingWindowController implements OnInit {
 
     constructor(private uiController: UIController) {
 
     }
 
     hideLoadingWindow() {
-        TweenService.Create(LOADING_WINDOW, new TweenInfo(0.25), {Position: new UDim2(0, 0, -2, 0)}).Play();
-        task.delay(0.25, () => {
+        const tween = TweenService.Create(LOADING_WINDOW, new TweenInfo(0.25), {Position: new UDim2(0, 0, -1.1, 0)});
+        tween.Play();
+        tween.Completed.Once(() => {
             LOADING_WINDOW.Visible = false;
         });
-        this.uiController.playSound("Woosh");
+
+        if (LOADING_WINDOW.Visible === true)
+            this.uiController.playSound("Woosh");
     }
     
     showLoadingWindow(message?: string) {
         if (message !== undefined) {
             this.refreshLoadingWindow(message);
         }
-        LOADING_WINDOW.Position = new UDim2(0, 0, -2, 0)
+        LOADING_WINDOW.Position = new UDim2(0, 0, -1.1, 0)
         TweenService.Create(LOADING_WINDOW, new TweenInfo(0.25), {Position: new UDim2(0, 0, 0, 0)}).Play();
         LOADING_WINDOW.Visible = true;
         this.uiController.playSound("Woosh");
@@ -30,5 +35,9 @@ export class LoadingWindowController {
 
     refreshLoadingWindow(message: string) {
         LOADING_WINDOW.MessageLabel.Text = message;
+    }
+
+    onInit() {
+        task.delay(0.5, () => this.hideLoadingWindow());
     }
 }

@@ -1,21 +1,22 @@
-//!native
-
 import { Debris } from "@rbxts/services";
 import Price from "shared/Price";
 import { PLACED_ITEMS_FOLDER } from "shared/constants";
-import Item from "shared/item/Item";
 import Operative from "shared/item/Operative";
 
-class Charger extends Item implements Operative {
+declare global {
+    interface ItemTypes {
+        Charger: Charger;
+    }
+}
+
+class Charger extends Operative {
     
     ignoreLimit: boolean | undefined;
     radius: number | undefined;
-    add: Price | undefined;
-    mul: Price | undefined;
 
     constructor(id: string) {
         super(id);
-        this.types.push("Charger");
+        this.types.add("Charger");
         this.onLoad((model) => {
             const hitbox = model.PrimaryPart;
             if (hitbox === undefined) {
@@ -25,13 +26,13 @@ class Charger extends Item implements Operative {
             if (connection !== undefined) {
                 connection.Parent = script;
             }
-            const charging = new Set<Instance>();
             let radius = this.radius;
             if (radius === undefined) {
                 warn("No radius for charger");
                 return;
             }
             radius += hitbox.Size.X / 2;
+            const charging = new Set<Instance>();
             const marker = model.FindFirstChild("Marker");
             const area = model.GetAttribute("Area");
             const watching = new Map<Model, RBXScriptConnection>();

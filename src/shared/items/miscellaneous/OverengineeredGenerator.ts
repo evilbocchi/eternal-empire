@@ -1,12 +1,12 @@
-import Difficulty from "shared/Difficulty";
+import Difficulty from "@antivivi/jjt-difficulties";
 import Price from "shared/Price";
 import Generator from "shared/item/Generator";
 import ExcavationStone from "shared/items/excavation/ExcavationStone";
 import WhiteGem from "shared/items/excavation/WhiteGem";
 
-export = new Generator("OverengineeredGenerator")
+export = new Generator(script.Name)
 .setName("Over-engineered Generator")
-.setDescription("Unnecessarily bulky, but produces a worth-while 15 W/s.")
+.setDescription("Unnecessarily bulky, but produces a worth-while %gain%.")
 .setDifficulty(Difficulty.Miscellaneous)
 .setPrice(new Price().setCost("Funds", 1e9))
 .setRequiredItemAmount(ExcavationStone, 40)

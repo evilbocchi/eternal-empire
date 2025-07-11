@@ -1,3 +1,4 @@
+import { BaseOnoeNum, OnoeNum } from "@antivivi/serikanum";
 import { Controller, OnInit } from "@flamework/core";
 import CameraShaker from "@rbxts/camera-shaker";
 import { Debris, Lighting, Players, RunService, TweenService, Workspace } from "@rbxts/services";
@@ -7,12 +8,9 @@ import Area from "shared/Area";
 import Price from "shared/Price";
 import { AREAS, ASSETS, DROPLETS_FOLDER, PLACED_ITEMS_FOLDER, getSound } from "shared/constants";
 import Items from "shared/items/Items";
-import { Fletchette } from "@antivivi/fletchette";
-import { OnoeNum } from "@antivivi/serikanum";
-import { rainbowEffect } from "shared/utils/vrldk/BasePartUtils";
-
-const EmpireCanister = Fletchette.getCanister("EmpireCanister");
-const UnlockedAreasCanister = Fletchette.getCanister("UnlockedAreasCanister");
+import Packets from "shared/network/Packets";
+import StringBuilder from "shared/utils/StringBuilder";
+import { playSoundAtPart, rainbowEffect } from "shared/utils/vrldk/BasePartUtils";
 
 @Controller()
 export class EffectController implements OnInit {
@@ -25,7 +23,10 @@ export class EffectController implements OnInit {
                 cam.CFrame = cam.CFrame.mul(shakeCFrame);
         }
     );
+    dropletAddedTween = new TweenInfo(0.2);
     dropletTween = new TweenInfo(1.4, Enum.EasingStyle.Quad, Enum.EasingDirection.Out);
+    sizePerDrop = new Map<BasePart, Vector3>();
+    updatePerArea = new Map<AreaId, (n: number) => void>();
     burnSound = getSound("Burn");
     delay = 0.2;
 
@@ -33,25 +34,41 @@ export class EffectController implements OnInit {
         
     }
 
-    loadDropletGui(costPerCurrency: Map<Currency, OnoeNum>, part: BasePart) {
-        const dropletGui = ASSETS.Droplet.DropletGui.Clone();
-        for (const [currency, cost] of costPerCurrency) {
-            const currencyLabel = ASSETS.Droplet.CurrencyLabel.Clone();
-            const details = Price.DETAILS_PER_CURRENCY[currency];
-            currencyLabel.TextColor3 = details.color ?? Color3.fromRGB(255, 255, 255);
-            currencyLabel.LayoutOrder = -(details.layoutOrder ?? 1);
-            currencyLabel.Text = Price.getFormatted(currency, new OnoeNum(cost));
-            task.delay(1, () => {
-                if (currencyLabel !== undefined && currencyLabel.Parent !== undefined) {
-                    TweenService.Create(currencyLabel, new TweenInfo(0.4), {TextTransparency: 1, TextStrokeTransparency: 1}).Play();
-                }
-            });
-            currencyLabel.Parent = dropletGui.Main;
+    loadDropletGui(position: Vector3, host?: PVInstance | Attachment, costPerCurrency?: Map<Currency, BaseOnoeNum>, overrideText?: string, sizeMulti?: number) {
+        const hrp = LOCAL_PLAYER.Character?.FindFirstChild("HumanoidRootPart") as BasePart | undefined;
+        if (hrp === undefined || hrp.Position.sub(position).Magnitude > 50) {
+            return;
         }
+        const dropletGui = ASSETS.Droplet.DropletGui.Clone();
+        if (overrideText !== undefined) {
+            if (sizeMulti !== undefined)
+                dropletGui.ValueLabel.Size = new UDim2(1, 0, 0.125 * sizeMulti, 0);
+            dropletGui.ValueLabel.Text = overrideText;
+        }
+        else if (costPerCurrency !== undefined) {
+            const builder = new StringBuilder();
+            let i = 0;
+            for (const [currency, details] of Price.SORTED_DETAILS) {
+                const cost = costPerCurrency.get(currency);
+                if (cost === undefined)
+                    continue;
+                if (i > 0) {
+                    builder.append("\n");
+                }
+                builder.append('<font color="#').append((details.color ?? Color3.fromRGB(255, 255, 255)).ToHex()).append('">')
+                .append(Price.getFormatted(currency, new OnoeNum(cost))).append("</font>");
+                ++i;
+            }
+            dropletGui.ValueLabel.Size = new UDim2(1, 0, 0.125 * i, 0);
+            dropletGui.ValueLabel.Text = builder.toString();
+        }
+        
         dropletGui.StudsOffset = (new Vector3(math.random(-25, 25), math.random(-25, 25), math.random(-25, 25))).mul(0.01);
+        task.delay(1, () => TweenService.Create(dropletGui.ValueLabel, new TweenInfo(0.4), {TextTransparency: 1, TextStrokeTransparency: 1}).Play());
         TweenService.Create(dropletGui, this.dropletTween, { StudsOffset: dropletGui.StudsOffset.add(new Vector3(0, 0.6, 0)) }).Play();
-        dropletGui.Adornee = part;
-        dropletGui.Parent = part;
+        dropletGui.Adornee = host;
+        dropletGui.Enabled = true;
+        dropletGui.Parent = host;
         Debris.AddItem(dropletGui, 3);
         
         return dropletGui;
@@ -75,77 +92,62 @@ export class EffectController implements OnInit {
             const part = model.FindFirstChild("Marker");
             remoteEvent.OnClientEvent.Connect((costPerCurrency?: Map<Currency, OnoeNum>) => {
                 if (costPerCurrency !== undefined) {
-                    this.loadDropletGui(costPerCurrency, part as BasePart ?? model.PrimaryPart);
+                    const host = part as BasePart ?? model.PrimaryPart;
+                    this.loadDropletGui(host.Position, host, costPerCurrency);
                 }
             });
         }
-        else if (item.isA("Printer")) {
-            const gui = model.WaitForChild("GuiPart").WaitForChild("SurfaceGui") as SurfaceGui;
-            if (gui === undefined) {
-                return;
-            }
-            const save = model.WaitForChild("Save") as RemoteFunction;
-            const load = model.WaitForChild("Load") as RemoteFunction;
-            const saveButton = gui.WaitForChild("SaveButton") as TextButton;
-            const loadButton = gui.WaitForChild("LoadButton") as TextButton;
-            saveButton.Activated.Connect(() => this.uiController.playSound((save.InvokeServer() as unknown) === true ? "MagicSprinkle" : "Error"));
-            loadButton.Activated.Connect(() => this.uiController.playSound((load.InvokeServer() as unknown) === true ? "MagicSprinkle" : "Error"));
-        }
+        item.CLIENT_LOADS.forEach((callback) => callback(model, item, LOCAL_PLAYER));
     }
-    
-    loadDroplet(droplet: BasePart) {
-        if (droplet.Name !== "Droplet")
-            return;
-        
-        const re = droplet.FindFirstChildOfClass("UnreliableRemoteEvent");
-        if (re === undefined)
-            return;
-        
-        re.OnClientEvent.Once((cpc?: Map<Currency, OnoeNum>, lava?: BasePart) => {
-            Debris.AddItem(droplet, 6);
-            const t = tick();
-            const burnt = () => {
-                if (droplet.Anchored === true)
-                    return;
-                droplet.Anchored = true;
-                const hs = this.burnSound.Clone();
-                hs.Parent = droplet;
-                hs.Play();
-                TweenService.Create(droplet, new TweenInfo(0.5), {Color: new Color3(), Transparency: 1}).Play();
-                Debris.AddItem(droplet, 2);
-                if (cpc !== undefined)
-                    this.loadDropletGui(cpc, droplet);
-                this.delay = (((tick() - t) / 4) + this.delay) * 0.8;
-                STATS_WINDOW.StatList.CurrentPing.AmountLabel.Text = math.floor(this.delay * 1000) + "ms";
-            }
-            if (lava === undefined)
-                burnt();
-            else {
-                const connection = RunService.Heartbeat.Connect(() => {
-                    if (lava.GetTouchingParts().includes(droplet)) {
-                        connection.Disconnect();
-                        burnt();
-                    }
-                });
-                task.delay(1, () => connection.Disconnect());
-            }
+
+    refreshBar(bar: Bar, current: number | OnoeNum, max: number | OnoeNum, invertColors?: boolean) {
+        const isOnoe = type(current) === "number";
+        const perc = isOnoe ? (current as number) / (max as number) : (current as OnoeNum).div(max).revert();
+        let color: Color3;
+        if (perc < 0.5) {
+            color = invertColors === true ? Color3.fromRGB(85, 255, 127) : Color3.fromRGB(255, 0, 0);
+        }
+        else if (perc < 0.75) {
+            color = Color3.fromRGB(255, 170, 0);
+        }
+        else {
+            color = invertColors === true ? Color3.fromRGB(255, 0, 0) : Color3.fromRGB(85, 255, 127); 
+        }
+        TweenService.Create(bar.Fill, this.dropletAddedTween, {
+            Size: new UDim2(perc, 0, 1, 0),
+            BackgroundColor3: color
+        }).Play();
+        bar.BarLabel.Text = tostring(current) + "/" + tostring(max);
+    }
+
+    loadArea(id: AreaId, area: Area) {
+        const boardGui = area.boardGui;
+        const updateBar = (n: number) => {
+            if (boardGui === undefined)
+                return;
+            const max = area.dropletLimit.Value;
+            this.refreshBar(boardGui.DropletLimit.Bar, n, max, true);
             
+        }
+        updateBar(0);
+        this.updatePerArea.set(id, updateBar);
+        
+        task.spawn(() => {
+            while (task.wait(1)) {
+                if (area.grid !== undefined && boardGui !== undefined) {
+                    const size = area.grid.Size;
+                    boardGui.GridSize.BarLabel.Text = `${size.X}x${size.Z}`;
+                    let itemCount = 0;
+                    for (const placed of PLACED_ITEMS_FOLDER.GetChildren()) {
+                        if (placed.IsA("Model") && placed.GetAttribute("Area") === id) {
+                            ++itemCount;
+                        }
+                    }
+                    boardGui.ItemCount.BarLabel.Text = tostring(itemCount);
+                }
+            }
         });
 
-        let rainbowDuration = droplet.GetAttribute("Rainbow") as number | undefined;
-        if (rainbowDuration !== undefined) {
-            const endRainbow = rainbowEffect(droplet, rainbowDuration);
-            droplet.GetAttributeChangedSignal("Rainbow").Connect(() => {
-                endRainbow();
-                rainbowDuration = droplet.GetAttribute("Rainbow") as number | undefined;
-                if (rainbowDuration !== undefined && rainbowDuration > 0) {
-                    rainbowEffect(droplet, rainbowDuration);
-                }
-            });
-        }
-    }
-
-    loadArea(area: Area) {
         area.catchArea?.Touched.Connect((o) => {
             const player = Players.GetPlayerFromCharacter(o.Parent);
             if (player !== LOCAL_PLAYER || player.Character === undefined)
@@ -198,8 +200,71 @@ export class EffectController implements OnInit {
         frame.Visible = true;
     }
 
+    onSavingDataStatusChanged(finishedSaving: number) {
+        if (finishedSaving === 200) {
+            this.hideSavingDataLabel("Game saved.");
+        }
+        else if (finishedSaving === 500) {
+            this.showSavingDataLabel("Game saving unsuccessful.");
+        }
+        else if (finishedSaving === 100) {
+            this.showSavingDataLabel("Saving data...");
+        }
+    }
+
+    onAreaUnlocked(area: AreaId) {
+        for (const [_id, otherArea] of pairs(AREAS)) {
+            const children = otherArea.areaFolder.GetChildren();
+            for (const child of children) {
+                if (child.Name === "Portal" && (child.WaitForChild("Destination") as ObjectValue).Value?.Name === area) {
+                    const pointLight = child.WaitForChild("Frame").WaitForChild("PointLight") as PointLight;
+                    pointLight.Brightness = 5;
+                    TweenService.Create(pointLight, new TweenInfo(2), { Brightness: 0.5 }).Play();
+                }
+            }
+        }
+        this.camShake.Shake(CameraShaker.Presets.Bump);
+        this.uiController.playSound("Thunder");
+    }
+
+    onDropletAdded(drop: BasePart, droplet: BasePart) {
+        let originalSize = this.sizePerDrop.get(drop);
+        if (originalSize === undefined) {
+            originalSize = drop.Size;
+            this.sizePerDrop.set(drop, drop.Size);
+        }
+        const bigSize = originalSize.add(new Vector3(0.25, 0.25, 0.25));
+        drop.Size = bigSize;
+        const originalDropletSize = droplet.Size;
+        droplet.Size = new Vector3(0.01, 0.01, 0.01);
+
+        TweenService.Create(drop, this.dropletAddedTween, { Size: originalSize }).Play();
+        TweenService.Create(droplet, this.dropletAddedTween, { Size: originalDropletSize }).Play();
+        playSoundAtPart(drop, getSound("Drop"));
+
+        let rainbowDuration = droplet.GetAttribute("Rainbow") as number | undefined;
+        if (rainbowDuration !== undefined) {
+            const endRainbow = rainbowEffect(droplet, rainbowDuration);
+            droplet.GetAttributeChangedSignal("Rainbow").Connect(() => {
+                endRainbow();
+                rainbowDuration = droplet.GetAttribute("Rainbow") as number | undefined;
+                if (rainbowDuration !== undefined && rainbowDuration > 0) {
+                    rainbowEffect(droplet, rainbowDuration);
+                }
+            });
+        }
+        // if (Players.GetPlayers().size() === 1) {
+        //     const connection = droplet.Touched.Connect((otherPart) => {
+        //         if (otherPart.Name === "Lava") {
+        //             connection.Disconnect();
+        //             droplet.Anchored = true;
+        //             TweenService.Create(droplet, new TweenInfo(0.5), {Color: new Color3()}).Play();
+        //         }
+        //     })
+        // }
+    }
+
     onInit() {
-        DROPLETS_FOLDER.ChildAdded.Connect((c) => this.loadDroplet(c as BasePart));
         task.spawn(() => {
             while (task.wait(2)) {
                 for (const child of PLACED_ITEMS_FOLDER.GetChildren()) {
@@ -212,36 +277,64 @@ export class EffectController implements OnInit {
         for (const item of PLACED_ITEMS_FOLDER.GetChildren()) {
             this.load(item);
         }
-        for (const [_id, area] of pairs(AREAS))
-            this.loadArea(area);
+        for (const [id, area] of pairs(AREAS))
+            this.loadArea(id, area);
 
         this.camShake.Start();
         this.hideSavingDataLabel("");
-        EmpireCanister.savingEmpire.connect((finishedSaving) => {
-            if (finishedSaving === 200) {
-                this.hideSavingDataLabel("Game saved.");
-            }
-            else if (finishedSaving === 500) {
-                this.showSavingDataLabel("Game saving unsuccessful.");
-            }
-            else if (finishedSaving === 100) {
-                this.showSavingDataLabel("Saving data...");
-            }
+        Packets.camShake.connect(() => this.camShake.Shake(CameraShaker.Presets.Bump));
+        Packets.savingEmpire.connect((status) => this.onSavingDataStatusChanged(status));
+        Packets.areaUnlocked.connect((area) => this.onAreaUnlocked(area));
+        Packets.dropletAdded.connect((placedItemId, dropId, dropletModelId) => {
+            const placedItemModel = PLACED_ITEMS_FOLDER.FindFirstChild(placedItemId);
+            if (placedItemModel === undefined)
+                return;
+            const drop = placedItemModel.FindFirstChild(dropId);
+            if (drop === undefined)
+                return;
+            const droplet = DROPLETS_FOLDER.FindFirstChild(dropletModelId);
+            if (droplet === undefined)
+                return;
+            this.onDropletAdded(drop as BasePart, droplet as BasePart);
         });
-        UnlockedAreasCanister.areaUnlocked.connect((area) => {
-            for (const [_id, otherArea] of pairs(AREAS)) {
-                const children = otherArea.areaFolder.GetChildren();
-                for (const child of children) {
-                    if (child.Name === "Portal" && (child.WaitForChild("Destination") as ObjectValue).Value?.Name === area) {
-                        const pointLight = child.WaitForChild("Frame").WaitForChild("PointLight") as PointLight;
-                        pointLight.Brightness = 5;
-                        TweenService.Create(pointLight, new TweenInfo(2), { Brightness: 0.5 }).Play();
+        Packets.dropletBurnt.connect((dropletModelId, cpc, furnaceId, lavaId, isClient) => {
+            const droplet = DROPLETS_FOLDER.FindFirstChild(dropletModelId) as BasePart | undefined;
+            if (droplet === undefined)
+                return;
+            Debris.AddItem(droplet, 6);
+            const t = tick();
+            const hs = this.burnSound.Clone();
+            hs.Parent = droplet;
+            let isBurnt = false;
+            const burnt = () => {
+                if (isBurnt === true)
+                    return;
+                isBurnt = true;
+                droplet.Anchored = true;
+                droplet.CanCollide = false;   
+                hs.Play();
+                TweenService.Create(droplet, new TweenInfo(0.5), {Color: new Color3(), Transparency: 1}).Play();
+                Debris.AddItem(droplet, 2);
+                this.loadDropletGui(droplet.Position, droplet, cpc);
+                this.delay = (((tick() - t) / 4) + this.delay) * 0.8;
+                STATS_WINDOW.StatList.CurrentPing.AmountLabel.Text = math.floor(this.delay * 1000) + "ms";
+            }
+            const lava = PLACED_ITEMS_FOLDER.FindFirstChild(furnaceId)?.FindFirstChild(lavaId) as BasePart | undefined;
+            if (lava === undefined || isClient === true) {
+                burnt();
+            }
+            else {
+                const connection = RunService.Heartbeat.Connect(() => {
+                    if (lava.GetTouchingParts().includes(droplet)) {
+                        connection.Disconnect();
+                        burnt();
                     }
-                }
+                });
+                task.delay(1, () => connection.Disconnect());
+                return;
             }
-            this.camShake.Shake(CameraShaker.Presets.Bump);
-            this.uiController.playSound("Thunder");
         });
+        Packets.dropletCountChanged.connect((area, current) => this.updatePerArea.get(area)!(current));
 
         const defaultLighting = {
             Ambient: Lighting.Ambient,
@@ -254,7 +347,7 @@ export class EffectController implements OnInit {
             Brightness: Lighting.Brightness
         }
         const onAreaChanged = () => {
-            const lightingConfig = AREAS[LOCAL_PLAYER.GetAttribute("Area") as keyof (typeof AREAS)]?.lightingConfiguration;
+            const lightingConfig = AREAS[LOCAL_PLAYER.GetAttribute("Area") as AreaId]?.lightingConfiguration;
             Lighting.Ambient = lightingConfig === undefined ? defaultLighting.Ambient : lightingConfig.Ambient;
             Lighting.OutdoorAmbient = lightingConfig === undefined ? defaultLighting.OutdoorAmbient : lightingConfig.OutdoorAmbient;
             Lighting.EnvironmentDiffuseScale = lightingConfig === undefined ? defaultLighting.EnvironmentDiffuseScale : lightingConfig.EnvironmentDiffuseScale;

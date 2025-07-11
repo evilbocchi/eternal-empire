@@ -1,12 +1,12 @@
+import Signal from "@antivivi/lemon-signal";
 import { Controller, OnInit, OnStart } from "@flamework/core";
 import { ContentProvider } from "@rbxts/services";
 import { INTERFACE } from "client/constants";
 import { ASSETS, getSound } from "shared/constants";
-import { Signal } from "@antivivi/fletchette";
 
 @Controller()
 export class UIController implements OnInit, OnStart {
-    preloadedAsset = new Signal<(asset: string) => void>();
+    preloadedAsset = new Signal<string>();
 
     playSound(soundName: string) {
         getSound(soundName).Play();

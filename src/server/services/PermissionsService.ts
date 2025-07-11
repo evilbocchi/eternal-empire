@@ -1,18 +1,23 @@
-import { Fletchette, RemoteFunc, RemoteProperty, RemoteSignal } from "@antivivi/fletchette";
-import { OnoeNum } from "@antivivi/serikanum";
-import { OnStart, Service } from "@flamework/core";
-import { Profile } from "@rbxts/profileservice/globals";
-import { ContentProvider, Debris, MarketplaceService, MessagingService, Players, ReplicatedStorage, RunService, TeleportService, TextChatService, TextService, Workspace } from "@rbxts/services";
-import { OnPlayerJoined } from "server/services/PlayerJoinService";
-import Price from "shared/Price";
-import Quest from "shared/Quest";
-import { AREAS, ASSETS, BOMBS_PRODUCTS, DONATION_PRODUCTS, IS_SINGLE_SERVER, Log, RESET_LAYERS, getNameFromUserId } from "shared/constants";
+import { BaseOnoeNum, OnoeNum } from "@antivivi/serikanum";
+import { OnInit, Service } from "@flamework/core";
+import { Debris, Lighting, MarketplaceService, MessagingService, Players, ReplicatedStorage, RunService, ServerStorage, TeleportService, TextChatService, TextService, Workspace } from "@rbxts/services";
+import Quest from "server/Quest";
+import { OnPlayerJoined } from "server/services/ModdingService";
+import { SetupService } from "server/services/serverdata/SetupService";
+import { AREAS, ASSETS, BOMBS_PRODUCTS, DONATION_PRODUCTS, DROPLETS_FOLDER, IS_SINGLE_SERVER, RESET_LAYERS, TEXT_CHANNELS, getNameFromUserId, getSound } from "shared/constants";
+import GameSpeed from "shared/GameSpeed";
 import Item from "shared/item/Item";
+import Class0Shop from "shared/items/0/Class0Shop";
 import Items from "shared/items/Items";
+import ClassLowerNegativeShop from "shared/items/negative/ClassLowerNegativeShop";
 import BasicCondenser from "shared/items/negative/felixthea/BasicCondenser";
 import AdvancedCondenser from "shared/items/negative/skip/AdvancedCondenser";
 import BasicCharger from "shared/items/negative/trueease/BasicCharger";
-import { playSoundAtPart } from "shared/utils/vrldk/BasePartUtils";
+import Packets from "shared/network/Packets";
+import Price from "shared/Price";
+import ItemCounter from "shared/utils/ItemCounter";
+import ReserveModels from "shared/utils/ReserveModels";
+import { playSoundAtPart, spawnExplosion } from "shared/utils/vrldk/BasePartUtils";
 import { convertToHHMMSS } from "shared/utils/vrldk/NumberAbbreviations";
 import { AreaService } from "./AreaService";
 import { BombsService } from "./BombsService";
@@ -21,7 +26,7 @@ import { GameAssetService } from "./GameAssetService";
 import { LeaderboardService } from "./LeaderboardService";
 import { ResetService } from "./ResetService";
 import { CurrencyService } from "./serverdata/CurrencyService";
-import { DataService, EmpireProfileTemplate } from "./serverdata/DataService";
+import { DataService } from "./serverdata/DataService";
 import { ItemsService } from "./serverdata/ItemsService";
 import { LevelService } from "./serverdata/LevelService";
 import { PlaytimeService } from "./serverdata/PlaytimeService";
@@ -30,48 +35,48 @@ import { UnlockedAreasService } from "./serverdata/UnlockedAreasService";
 import { UpgradeBoardService } from "./serverdata/UpgradeBoardService";
 
 declare global {
-    interface FletchetteCanisters {
-        PermissionsCanister: typeof PermissionsCanister;
-    }
+    type Log = {
+        time: number,
+        type: string,
+        player?: number,
+        recipient?: number,
+        x?: number,
+        y?: number,
+        z?: number,
+        area?: string,
+        upgrade?: string,
+        item?: string,
+        items?: string[],
+        layer?: string,
+        amount?: number,
+        currency?: Currency,
+        infAmount?: BaseOnoeNum;
+    };
 }
-
-const PermissionsCanister = Fletchette.createCanister("PermissionsCanister", {
-    permLevels: new RemoteProperty<{[key: string]: number}>({}),
-    getLogs: new RemoteFunc<() => Log[]>(),
-    logAdded: new RemoteSignal<(log: Log) => void>(),
-    systemMessageSent: new RemoteSignal<(channel: TextChannel, message: string, metadata?: string) => void>(),
-    codeReceived: new RemoteSignal<(code: string) => void>(),
-    tabOpened: new RemoteSignal<(tab: string) => void>(),
-    donationGiven: new RemoteSignal<() => void>(),
-    promptDonation: new RemoteSignal<(donationId: number) => void>(),
-});
 
 type PermissionList = "banned" | "trusted" | "managers";
 
 @Service()
-export class PermissionsService implements OnStart, OnPlayerJoined {
+export class PermissionsService implements OnInit, OnPlayerJoined {
 
     plrChannels = new Map<Player, TextChannel>();
-    textChannels = TextChatService.WaitForChild("TextChannels") as Folder;
-    rbxGeneral = this.textChannels.WaitForChild("RBXGeneral") as TextChannel;
+    rbxGeneral = TEXT_CHANNELS.WaitForChild("RBXGeneral") as TextChannel;
     commands = TextChatService.WaitForChild("TextChatCommands");
 
-    constructor(private dataService: DataService, private gameAssetService: GameAssetService, private donationService: DonationService, 
+    constructor(private dataService: DataService, private gameAssetService: GameAssetService, private donationService: DonationService,
         private currencyService: CurrencyService, private leaderboardService: LeaderboardService, private upgradeBoardService: UpgradeBoardService,
         private itemsService: ItemsService, private playtimeService: PlaytimeService, private areaService: AreaService, private levelService: LevelService,
-        private questsService: QuestsService, private unlockedAreasService: UnlockedAreasService, private resetService: ResetService, 
-        private bombsService: BombsService) {
+        private questsService: QuestsService, private unlockedAreasService: UnlockedAreasService, private resetService: ResetService,
+        private bombsService: BombsService, private setupService: SetupService) {
 
     }
 
     getList(list: PermissionList) {
-        return this.dataService.empireProfile?.Data[list] ?? [];
+        return this.dataService.empireData[list] ?? [];
     }
 
     setList(list: PermissionList, value: number[]) {
-        if (this.dataService.empireProfile !== undefined) {
-            this.dataService.empireProfile.Data[list] = value;
-        }
+        this.dataService.empireData[list] = value;
     }
 
     add(list: PermissionList, userId: number) {
@@ -101,10 +106,7 @@ export class PermissionsService implements OnStart, OnPlayerJoined {
     }
 
     getPermissionLevel(userId: number) {
-        const data = this.dataService.empireProfile?.Data;
-        if (data === undefined) {
-            return -4;
-        }
+        const data = this.dataService.empireData;
         if (game.PlaceId === 16438564807) {
             return 4;
         }
@@ -186,12 +188,12 @@ export class PermissionsService implements OnStart, OnPlayerJoined {
     sendPrivateMessage(player: Player, message: string, metadata?: string) {
         const plrChannel = this.plrChannels.get(player);
         if (plrChannel !== undefined) {
-            PermissionsCanister.systemMessageSent.fire(player, plrChannel, message, metadata);
+            Packets.systemMessageSent.fire(player, plrChannel.Name, message, metadata ?? "");
         }
     }
 
     sendServerMessage(message: string, metadata?: string) {
-        PermissionsCanister.systemMessageSent.fireAll(this.rbxGeneral, message, metadata);
+        Packets.systemMessageSent.fireAll(this.rbxGeneral.Name, message, metadata ?? "");
     }
 
     fp(name: string, id: number) {
@@ -211,19 +213,16 @@ export class PermissionsService implements OnStart, OnPlayerJoined {
         }
         return permLevel;
     }
-    
+
     log(log: Log) {
-        const profile = this.dataService.empireProfile;
-        if (profile === undefined) {
-            return;
-        }
-        profile.Data.logs = profile.Data.logs.filter((value) => tick() - value.time < 604800);
-        profile.Data.logs.push(log);
-        PermissionsCanister.logAdded.fireAll(log);
+        const data = this.dataService.empireData;
+        data.logs = data.logs.filter((value) => tick() - value.time < 604800);
+        data.logs.push(log);
+        Packets.logAdded.fireAll(log);
     }
 
     getAccessCode() {
-        return this.dataService.empireProfile?.Data.accessCode + "|" + this.dataService.getEmpireId();
+        return this.dataService.empireData.accessCode + "|" + this.dataService.getEmpireId();
     }
 
     onPlayerJoined(player: Player) {
@@ -234,12 +233,12 @@ export class PermissionsService implements OnStart, OnPlayerJoined {
                 TeleportService.TeleportToPrivateServer(game.PlaceId, ac, [player], undefined, id);
             }
         }
-        if (this.dataService.empireProfile?.Data.banned.includes(player.UserId)) {
+        if (this.dataService.empireData.banned.includes(player.UserId)) {
             player.Kick("You are banned from this empire.");
         }
         const plrChannel = new Instance("TextChannel");
         plrChannel.Name = player.Name;
-        plrChannel.Parent = this.textChannels;
+        plrChannel.Parent = TEXT_CHANNELS;
         plrChannel.AddUserAsync(player.UserId);
         plrChannel.SetAttribute("Color", Color3.fromRGB(82, 255, 105));
         player.SetAttribute("Developer", player.GetRankInGroup(10940445) > 252);
@@ -248,32 +247,29 @@ export class PermissionsService implements OnStart, OnPlayerJoined {
         this.sendPrivateMessage(player, `Your permission level is ${permLevel}. Type /help for a list of available commands.`, "color:138,255,138");
         let counter = 0;
         player.Chatted.Connect((message) => {
-            if (this.dataService.empireProfile?.Data.globalChat === true && message.sub(1, 1) !== "/") {
+            if (this.dataService.empireData.globalChat === true && message.sub(1, 1) !== "/") {
                 ++counter;
                 task.delay(5, () => --counter);
                 if (counter > 5) {
                     return;
                 }
                 task.spawn(() => {
-                    MessagingService.PublishAsync("GlobalChat", {player: player.UserId, message: TextService.FilterStringAsync(message, player.UserId).GetNonChatStringForBroadcastAsync()});
+                    MessagingService.PublishAsync("GlobalChat", { player: player.UserId, message: TextService.FilterStringAsync(message, player.UserId).GetNonChatStringForBroadcastAsync() });
                 });
             }
         });
     }
 
-    onStart() {
-        const explosionSound = new Instance("Sound");
-        explosionSound.SoundId = "rbxassetid://5801257793";
-        const rocketSound = new Instance("Sound");
-        rocketSound.SoundId = "rbxassetid://5801273676";
-        task.spawn(() => ContentProvider.PreloadAsync([explosionSound, rocketSound]));
+    onInit() {
 
         MessagingService.SubscribeAsync("Donation", (message) => {
-            PermissionsCanister.donationGiven.fireAll();
+            Packets.donationGiven.fireAll();
             this.sendServerMessage(message.Data as string, "color:3,207,252");
         });
         MessagingService.SubscribeAsync("GlobalChat", (message) => {
-            const data = message.Data as {player: number, message: string};
+            if (this.dataService.empireData.globalChat !== true)
+                return;
+            const data = message.Data as { player: number, message: string; };
             for (const player of Players.GetPlayers()) {
                 if (player.UserId === data.player) {
                     return;
@@ -283,7 +279,7 @@ export class PermissionsService implements OnStart, OnPlayerJoined {
             this.sendServerMessage(`${name}:  ${data.message}`, "tag:hidden;color:180,180,180;");
         });
 
-        PermissionsCanister.promptDonation.connect((p, dp) => MarketplaceService.PromptProductPurchase(p, dp));
+        Packets.promptDonation.listen((player, dp) => MarketplaceService.PromptProductPurchase(player, dp));
         for (const donationProduct of DONATION_PRODUCTS) {
             this.gameAssetService.setProductFunction(donationProduct.id, (_receipt, player) => {
                 this.donationService.setDonated(player, this.donationService.getDonated(player) + donationProduct.amount);
@@ -303,33 +299,48 @@ export class PermissionsService implements OnStart, OnPlayerJoined {
         this.bombsService.bombActive.connect((endTime, bombType, player) => {
             this.sendServerMessage(getNameFromUserId(player) + " just activated a " + bombType + " for " + convertToHHMMSS(endTime - os.time()) + "!");
         });
-        const onEmpireLoaded = (empireProfile: Profile<typeof EmpireProfileTemplate>) => {
-            PermissionsCanister.permLevels.set(empireProfile.Data.permLevels);
-            const compensateItem = (item: Item) => {
-                const placedItems = this.itemsService.getPlacedItems();
-                let placed = 0;
-                for (const placedItem of placedItems) {
-                    if (placedItem.item === item.id)
-                        ++placed;
-                }
-                const inInv = this.itemsService.getItemAmount(item.id);
-                const bought = this.itemsService.getBoughtAmount(item.id);
-                if (bought > inInv + placed) {
-                    const given = bought - placed;
-                    this.itemsService.setItemAmount(item.id, inInv + given);
-                    this.sendServerMessage("You have been given " + given + " " + item.name + "(s) in return for item cost changes.");
-                    print("gave " + given + " " + item.id);
+
+        Packets.permLevels.set(this.dataService.empireData.permLevels);
+        const compensateItem = (item: Item) => {
+            const placedItems = this.dataService.empireData.items.placed;
+            let placed = 0;
+            for (const placedItem of placedItems) {
+                if (placedItem.item === item.id)
+                    ++placed;
+            }
+            const inInv = this.itemsService.getItemAmount(item.id);
+            const bought = this.itemsService.getBoughtAmount(item.id);
+            if (bought > inInv + placed) {
+                const given = bought - placed;
+                this.itemsService.setItemAmount(item.id, inInv + given);
+                this.sendServerMessage("You have been given " + given + " " + item.name + "(s) in return for item cost changes.");
+                print("gave " + given + " " + item.id);
+            }
+        };
+        compensateItem(BasicCharger);
+        compensateItem(AdvancedCondenser);
+        compensateItem(BasicCondenser);
+        const setups = this.dataService.empireData.printedSetups;
+        this.currencyService.balanceChanged.connect((balance) => {
+            for (const setup of setups) {
+                if (setup.alerted === false && setup.autoloads === true) {
+                    let isAffordable = true;
+                    for (const [currency, cost] of setup.calculatedPrice) {
+                        const inBal = balance.get(currency);
+                        if (inBal === undefined || inBal.lessThan(cost)) {
+                            isAffordable = false;
+                            break;
+                        }
+                    }
+                    if (isAffordable) {
+                        setup.alerted = true;
+                        this.sendServerMessage(setup.name + " can now be purchased!", "color:255,255,127");
+                    }
                 }
             }
-            compensateItem(BasicCharger);
-            compensateItem(AdvancedCondenser);
-            compensateItem(BasicCondenser);
-        }
-        if (this.dataService.empireProfile !== undefined) {
-            onEmpireLoaded(this.dataService.empireProfile);
-        }
-        this.dataService.empireProfileLoaded.connect((profile) => onEmpireLoaded(profile));
-        PermissionsCanister.getLogs.onInvoke(() => this.dataService.empireProfile?.Data.logs);
+        });
+
+        Packets.getLogs.onInvoke(() => this.dataService.empireData.logs);
         this.gameAssetService.questItemGiven.connect((itemId, amount) => this.sendServerMessage(`[+${amount} ${Items.getItem(itemId)?.name}]`, "tag:hidden;color:255,170,255"));
         this.gameAssetService.questItemTaken.connect((itemId, amount) => this.sendServerMessage(`[-${amount} ${Items.getItem(itemId)?.name}]`, "tag:hidden;color:255,170,255"));
 
@@ -349,7 +360,7 @@ export class PermissionsService implements OnStart, OnPlayerJoined {
             currency: bombType,
             amount: 1
         }));
-        this.gameAssetService.itemPlaced.connect((player, placedItem) => this.log({
+        this.itemsService.itemPlaced.connect((player, placedItem) => this.log({
             time: tick(),
             type: "Place",
             player: player.UserId,
@@ -358,7 +369,7 @@ export class PermissionsService implements OnStart, OnPlayerJoined {
             y: placedItem.posY,
             z: placedItem.posZ,
         }));
-        this.gameAssetService.itemsUnplaced.connect((player, placedItems) => {
+        this.itemsService.itemsUnplaced.connect((player, placedItems) => {
             const time = tick();
             let i = 0;
             for (const placedItem of placedItems) {
@@ -376,7 +387,7 @@ export class PermissionsService implements OnStart, OnPlayerJoined {
         this.upgradeBoardService.upgradeBought.connect((player, upgrade, to) => this.log({
             time: tick(),
             type: "Upgrade",
-            player: player.UserId,
+            player: player?.UserId,
             upgrade: upgrade,
             amount: to,
         }));
@@ -388,23 +399,23 @@ export class PermissionsService implements OnStart, OnPlayerJoined {
         this.resetService.reset.connect((player, layer, amount) => {
             const resetLayer = RESET_LAYERS[layer];
             const color = Price.DETAILS_PER_CURRENCY[resetLayer.gives].color;
-            this.sendServerMessage(`${player.Name} performed a ${resetLayer.name} for ${Price.getFormatted(resetLayer.gives, amount)}`, `color:${color.R*255},${color.G*255},${color.B*255}`);
+            this.sendServerMessage(`${player.Name} performed a ${layer} for ${Price.getFormatted(resetLayer.gives, amount)}`, `color:${color.R * 255},${color.G * 255},${color.B * 255}`);
             this.log({
                 time: tick(),
                 type: "Reset",
-                layer: resetLayer.name,
+                layer: layer,
                 player: player.UserId,
                 infAmount: amount,
                 currency: resetLayer.gives
             });
         });
-        this.gameAssetService.setupSaved.connect((player, area) => this.log({
+        this.setupService.setupSaved.connect((player, area) => this.log({
             time: tick(),
             type: "SetupSave",
             player: player.UserId,
-            area: area
+            area: area,
         }));
-        this.gameAssetService.setupLoaded.connect((player, area) => this.log({
+        this.setupService.setupLoaded.connect((player, area) => this.log({
             time: tick(),
             type: "SetupLoad",
             player: player.UserId,
@@ -417,597 +428,735 @@ export class PermissionsService implements OnStart, OnPlayerJoined {
 
         // PERM LEVEL 0
 
-        this.createCommand("help", "?", 
-        "Displays all available commands.",
-        (o) => {
-            this.sendPrivateMessage(o, `Your permission level is ${this.getPermissionLevel(o.UserId)}`, "color:138,255,138");
-            PermissionsCanister.tabOpened.fire(o, "Commands");
-        }, 0);
+        this.createCommand("help", "?",
+            "Displays all available commands.",
+            (o) => {
+                this.sendPrivateMessage(o, `Your permission level is ${this.getPermissionLevel(o.UserId)}`, "color:138,255,138");
+                Packets.tabOpened.fire(o, "Commands");
+            }, 0);
 
-        this.createCommand("join", "j", 
-        "<accesscode> : Joins an empire given an access code.",
-        (o, accessCode) => {
-            if (IS_SINGLE_SERVER) {
-                return;
-            }
-            const [ac, id] = accessCode.split("|");
-            TeleportService.TeleportToPrivateServer(game.PlaceId, ac, [o], undefined, id);
-        }, 0);
+        this.createCommand("join", "j",
+            "<accesscode> : Joins an empire given an access code.",
+            (o, accessCode) => {
+                if (IS_SINGLE_SERVER) {
+                    return;
+                }
+                const [ac, id] = accessCode.split("|");
+                TeleportService.TeleportToPrivateServer(game.PlaceId, ac, [o], undefined, id);
+            }, 0);
 
-        this.createCommand("logs", "log", 
-        "Open the log window, where activities from every player are recorded.",
-        (o) => {
-            PermissionsCanister.tabOpened.fire(o, "Logs");
-        }, 0);
+        this.createCommand("logs", "log",
+            "Open the log window, where activities from every player are recorded.",
+            (o) => {
+                Packets.tabOpened.fire(o, "Logs");
+            }, 0);
 
-        this.createCommand("voterestrict", "vr", 
-        "<player> : Vote to restrict a player.", 
-        (o, p) => {
-            const targets = this.findPlayers(o, p);
-            if (targets.size() < 1) {
-                this.sendPrivateMessage(o, `Could not find matching players ${p}`, "color:255,43,43");
-                return;
-            }
-            const profile = this.dataService.empireProfile;
-            if (profile === undefined) {
-                return;
-            }
-            const playerCount = Players.GetPlayers().filter((player) => (player.GetAttribute("PermissionLevel") as number ?? 0) > -1).size();
-            for (const target of targets) {
-                const userId = target.UserId;
-                if (this.getPermissionLevel(userId) >= 1) {
-                    this.sendPrivateMessage(o, "You can't vote to restrict a trusted player", "color:255,43,43");
-                    continue;
+        this.createCommand("voterestrict", "vr",
+            "<player> : Vote to restrict a player.",
+            (o, p) => {
+                const targets = this.findPlayers(o, p);
+                if (targets.size() < 1) {
+                    this.sendPrivateMessage(o, `Could not find matching players ${p}`, "color:255,43,43");
+                    return;
                 }
-                if (o.FindFirstChild(userId) !== undefined) {
-                    this.sendPrivateMessage(o, "You have already voted to restrict this player", "color:255,43,43");
-                    continue;
+                const data = this.dataService.empireData;
+                const playerCount = Players.GetPlayers().filter((player) => (player.GetAttribute("PermissionLevel") as number ?? 0) > -1).size();
+                for (const target of targets) {
+                    const userId = target.UserId;
+                    if (this.getPermissionLevel(userId) >= 1) {
+                        this.sendPrivateMessage(o, "You can't vote to restrict a trusted player", "color:255,43,43");
+                        continue;
+                    }
+                    if (o.FindFirstChild(userId) !== undefined) {
+                        this.sendPrivateMessage(o, "You have already voted to restrict this player", "color:255,43,43");
+                        continue;
+                    }
+                    const votes = (target.GetAttribute("Votes") as number ?? 0) + 1;
+                    target.SetAttribute("Votes", votes);
+                    if (votes === 0) {
+                        this.sendServerMessage(`A vote has started to restrict player ${target.Name}. Type /vr ${target.Name} to vote to restrict them too.`, "color:138,255,138");
+                    }
+                    const requirement = math.round(playerCount * 2 / 3);
+                    this.sendServerMessage(`${votes}/${requirement} votes needed.`, "color:138,255,138");
+                    const voteToken = new Instance("NumberValue");
+                    voteToken.Value = tick();
+                    voteToken.Name = tostring(userId);
+                    voteToken.Parent = o;
+                    Debris.AddItem(voteToken, 30);
+                    task.delay(30, () => {
+                        if (target === undefined) {
+                            return;
+                        }
+                        target.SetAttribute("Votes", target.GetAttribute("Votes") as number - 1);
+                        if (target.GetAttribute("RestrictionTime") as number ?? 0 < tick()) {
+                            this.sendPrivateMessage(o, `Your vote to restrict ${target.Name} has worn off.`, "color:138,255,138");
+                        }
+                    });
+                    this.sendPrivateMessage(o, `Voted to restrict ${target.Name}. Your vote will wear off after 30 seconds.`, "color:138,255,138");
+                    if (votes >= requirement) {
+                        this.sendServerMessage(`${target.Name} has been restricted for 5 minutes.`, "color:138,255,138");
+                        data.restricted.set(userId, tick() + 360);
+                        task.delay(360, () => {
+                            data.restricted.delete(userId);
+                            this.updatePermissionLevel(userId);
+                        });
+                        this.updatePermissionLevel(userId);
+                    }
                 }
-                const votes = (target.GetAttribute("Votes") as number ?? 0) + 1;
-                target.SetAttribute("Votes", votes);
-                if (votes === 0) {
-                    this.sendServerMessage(`A vote has started to restrict player ${target.Name}. Type /vr ${target.Name} to vote to restrict them too.`, "color:138,255,138");
-                }
-                const requirement = math.round(playerCount * 2 / 3);
-                this.sendServerMessage(`${votes}/${requirement} votes needed.`, "color:138,255,138");
-                const voteToken = new Instance("NumberValue");
-                voteToken.Value = tick();
-                voteToken.Name = tostring(userId);
-                voteToken.Parent = o;
-                Debris.AddItem(voteToken, 30);
-                task.delay(30, () => {
-                    if (target === undefined) {
+            }, 0);
+
+        this.createCommand("empireid", "ei",
+            "View the empire ID for this empire. Only useful for diagnostics.",
+            (o) => {
+                const id = this.dataService.getEmpireId();
+                this.sendPrivateMessage(o, "The empire ID is: " + id);
+                Packets.codeReceived.fire(o, id);
+            }, 1);
+
+        // PERM LEVEL 1
+
+        this.createCommand("invite", "inv",
+            "<player> : Allows the specified player to join this empire.",
+            (o, p, useId) => {
+                const userId = this.id(p, useId);
+                if (userId !== undefined && userId !== o.UserId) {
+                    if (game.PrivateServerOwnerId !== 0 || game.PrivateServerId === "") {
+                        this.sendPrivateMessage(o, "You cannot use /invite in this server.", "color:255,43,43");
                         return;
                     }
-                    target.SetAttribute("Votes", target.GetAttribute("Votes") as number - 1);
-                    if (target.GetAttribute("RestrictionTime") as number ?? 0 < tick()) {
-                        this.sendPrivateMessage(o, `Your vote to restrict ${target.Name} has worn off.`, "color:138,255,138");
+                    this.dataService.addAvailableEmpire(userId, this.dataService.getEmpireId());
+                    this.sendPrivateMessage(o, "Invited " + this.fp(p, userId), "color:138,255,138");
+                }
+            }, 1);
+
+        this.createCommand("revoke", "rv",
+            "<player> : Removes the player's access to join the empire.",
+            (o, p, useId) => {
+                const userId = this.id(p, useId);
+                if (userId !== undefined) {
+                    if (this.getPermissionLevel(userId) >= this.getPermissionLevel(o.UserId)) {
+                        this.sendPrivateMessage(o, "You can't revoke someone with an equal/higher permission level.", "color:255,43,43");
+                        return;
                     }
-                });
-                this.sendPrivateMessage(o, `Voted to restrict ${target.Name}. Your vote will wear off after 30 seconds.`, "color:138,255,138");
-                if (votes >= requirement) {
-                    this.sendServerMessage(`${target.Name} has been restricted for 5 minutes.`, "color:138,255,138");
-                    profile.Data.restricted.set(userId, tick() + 360);
-                    task.delay(360, () => {
-                        profile.Data.restricted.delete(userId);
+                    const empireId = this.dataService.getEmpireId();
+                    this.dataService.removeAvailableEmpire(userId, empireId);
+                    this.sendPrivateMessage(o, `Revoked ${this.fp(p, userId)}`, "color:138,255,138");
+                }
+            }, 1);
+
+        this.createCommand("accesscode", "ac",
+            "View the access code for this empire. Anyone with the access code is able to join this empire. Only available for private empires.",
+            (o) => {
+                if (RunService.IsStudio() || (game.PrivateServerOwnerId === 0 && game.PrivateServerId !== "")) {
+                    const code = this.getAccessCode();
+                    this.sendPrivateMessage(o, "The server access code is: " + code);
+                    Packets.codeReceived.fire(o, code);
+                }
+                else {
+                    this.sendPrivateMessage(o, "You cannot use this command on this server", "color:255,43,43");
+                }
+            }, 1);
+
+        this.createCommand("joinlink", "jl",
+            "Gets a URL in which players can use to join this empire. Utilises the empire's access code. Only available for private empires.",
+            (o) => {
+                if (RunService.IsStudio() || (game.PrivateServerOwnerId === 0 && game.PrivateServerId !== "")) {
+                    const joinLink = "https://www.roblox.com/games/start?placeId=" + game.PlaceId + "&launchData=" + this.getAccessCode();
+                    this.sendPrivateMessage(o, "Join link: " + joinLink);
+                    Packets.codeReceived.fire(o, joinLink);
+                }
+                else {
+                    this.sendPrivateMessage(o, "You cannot use this command on this server", "color:255,43,43");
+                }
+            }, 1);
+
+        this.createCommand("unplaceall", "ua",
+            "Unplace all items in the area you are currently in.",
+            (o) => {
+                const area = this.areaService.getArea(o);
+                this.itemsService.unplaceItems(o, this.dataService.empireData.items.placed.filter(value => value.area === area).map(value => value.placementId ?? "default"));
+                this.sendPrivateMessage(o, `Unplaced all items in ${AREAS[area].name}`, "color:138,255,138");
+            }, 1);
+
+        this.createCommand("kill", "unalive",
+            "<player> : Kills a player's character.",
+            (o, p) => {
+                const targets = this.findPlayers(o, p);
+                if (targets.size() < 1) {
+                    this.sendPrivateMessage(o, `Could not find matching players ${p}`, "color:255,43,43");
+                    return;
+                }
+                for (const target of targets) {
+                    const humanoid = target.Character?.FindFirstChildOfClass("Humanoid");
+                    if (humanoid !== undefined)
+                        humanoid.TakeDamage(humanoid.Health + 1);
+                }
+                this.sendPrivateMessage(o, `Killed players`, "color:138,255,138");
+            }, 1);
+
+
+
+        // PERM LEVEL 2
+
+        this.createCommand("restrict", "r",
+            "<player> <multiplier> : Restricts a player, removing their access to build and purchase permissions. Pass a multiplier to multiply the default 5 minute duration.",
+            (o, p, m) => {
+                const targets = this.findPlayers(o, p);
+                if (targets.size() < 1) {
+                    this.sendPrivateMessage(o, `Could not find matching players ${p}`, "color:255,43,43");
+                    return;
+                }
+                const data = this.dataService.empireData;
+                const duration = 5 * (m === undefined ? 1 : (tonumber(m) ?? 1));
+                for (const target of targets) {
+                    if (target === o) {
+                        this.sendPrivateMessage(o, "You can't restrict yourself.", "color:255,43,43");
+                        continue;
+                    }
+                    const userId = target.UserId;
+                    if (this.getPermissionLevel(userId) >= this.getPermissionLevel(o.UserId)) {
+                        this.sendPrivateMessage(o, "You can't restrict someone with an equal/higher permission level.", "color:255,43,43");
+                        continue;
+                    }
+                    this.sendPrivateMessage(o, `Restricted player ${target.Name}`, "color:138,255,138");
+                    const restrictionTime = tick() + (duration * 60);
+                    target.SetAttribute("RestrictionTime", restrictionTime);
+                    data.restricted.set(userId, restrictionTime);
+                    task.delay(duration * 60, () => {
+                        data.restricted.delete(userId);
                         this.updatePermissionLevel(userId);
                     });
                     this.updatePermissionLevel(userId);
                 }
-            }
-        }, 0);
+            }, 2);
 
-        this.createCommand("empireid", "ei", 
-        "View the empire ID for this empire. Only useful for diagnostics.",
-        (o) => {
-            if (this.dataService.empireProfile !== undefined) {
-                const id = this.dataService.getEmpireId();
-                this.sendPrivateMessage(o, "The empire ID is: " + id);
-                PermissionsCanister.codeReceived.fire(o, id);
-            }
-            else {
-                this.sendPrivateMessage(o, "You cannot use this command on this server", "color:255,43,43");
-            }
-        }, 1);
-
-        // PERM LEVEL 1
-
-        this.createCommand("invite", "inv", 
-        "<player> : Allows the specified player to join this empire.",
-        (o, p, useId) => {
-            const userId = this.id(p, useId);
-            if (userId !== undefined && userId !== o.UserId) {
-                if (game.PrivateServerOwnerId === 0 && game.PrivateServerId !== "") {
-                    this.sendPrivateMessage(o, "You cannot use /invite in this server", "color:255,43,43");
+        this.createCommand("unrestrict", "ur",
+            "<player> : Unrestricts a player.",
+            (o, p, m) => {
+                const targets = this.findPlayers(o, p);
+                if (targets.size() < 1) {
+                    this.sendPrivateMessage(o, `Could not find matching players ${p}`, "color:255,43,43");
                     return;
                 }
-                this.dataService.addAvailableEmpire(userId, this.dataService.getEmpireId());
-                this.sendPrivateMessage(o, "Invited " + this.fp(p, userId), "color:138,255,138");
-            }
-        }, 1);
-
-        this.createCommand("revoke", "rv", 
-        "<player> : Removes the player's access to join the empire.",
-        (o, p, useId) => {
-            const userId = this.id(p, useId);
-            if (userId !== undefined) {
-                if (this.getPermissionLevel(userId) >= this.getPermissionLevel(o.UserId)) {
-                    this.sendPrivateMessage(o, "You can't revoke someone with an equal/higher permission level.", "color:255,43,43");
-                    return;
-                }
-                const empireId = this.dataService.getEmpireId();
-                this.dataService.removeAvailableEmpire(userId, empireId);
-                this.sendPrivateMessage(o, `Revoked ${this.fp(p, userId)}`, "color:138,255,138");
-            }
-        }, 1);
-
-        this.createCommand("accesscode", "ac", 
-        "View the access code for this empire. Anyone with the access code is able to join this empire. Only available for private empires.",
-        (o) => {
-            if ((RunService.IsStudio() || (game.PrivateServerOwnerId === 0 && game.PrivateServerId !== "")) && this.dataService.empireProfile !== undefined) {
-                const code = this.getAccessCode();
-                this.sendPrivateMessage(o, "The server access code is: " + code);
-                PermissionsCanister.codeReceived.fire(o, code);
-            }
-            else {
-                this.sendPrivateMessage(o, "You cannot use this command on this server", "color:255,43,43");
-            }
-        }, 1);
-
-        this.createCommand("joinlink", "jl", 
-        "Gets a URL in which players can use to join this empire. Utilises the empire's access code. Only available for private empires.",
-        (o) => {
-            if (RunService.IsStudio() || (game.PrivateServerOwnerId === 0 && game.PrivateServerId !== "")) {
-                const joinLink = "https://www.roblox.com/games/start?placeId=" + game.PlaceId + "&launchData=" + this.getAccessCode();
-                this.sendPrivateMessage(o, "Join link: " + joinLink);
-                PermissionsCanister.codeReceived.fire(o, joinLink);
-            }
-            else {
-                this.sendPrivateMessage(o, "You cannot use this command on this server", "color:255,43,43");
-            }
-        }, 1);
-
-        this.createCommand("unplaceall", "ua", 
-        "Unplace all items in the area you are currently in.",
-        (o) => {
-            const area = this.areaService.getArea(o);
-            this.gameAssetService.unplaceItems(o, this.itemsService.getPlacedItems().filter(value => value.area === area).map(value => value.placementId ?? "default"));
-            this.sendPrivateMessage(o, `Unplaced all items in ${AREAS[area].name}`, "color:138,255,138");
-        }, 1);
-
-        // PERM LEVEL 2
-
-        this.createCommand("restrict", "r", 
-        "<player> <multiplier> : Restricts a player, removing their access to build and purchase permissions. Pass a multiplier to multiply the default 5 minute duration.", 
-        (o, p, m) => {
-            const targets = this.findPlayers(o, p);
-            if (targets.size() < 1) {
-                this.sendPrivateMessage(o, `Could not find matching players ${p}`, "color:255,43,43");
-                return;
-            }
-            const profile = this.dataService.empireProfile;
-            if (profile === undefined) {
-                return;
-            }
-            const duration = 5 * (m === undefined ? 1 : (tonumber(m) ?? 1));
-            for (const target of targets) {
-                if (target === o) {
-                    this.sendPrivateMessage(o, "You can't restrict yourself.", "color:255,43,43");
-                    continue;
-                }
-                const userId = target.UserId;
-                if (this.getPermissionLevel(userId) >= this.getPermissionLevel(o.UserId)) {
-                    this.sendPrivateMessage(o, "You can't restrict someone with an equal/higher permission level.", "color:255,43,43");
-                    continue;
-                }
-                this.sendPrivateMessage(o, `Restricted player ${target.Name}`, "color:138,255,138");
-                const restrictionTime = tick() + (duration * 60);
-                target.SetAttribute("RestrictionTime", restrictionTime);
-                profile.Data.restricted.set(userId, restrictionTime);
-                task.delay(duration * 60, () => {
-                    profile.Data.restricted.delete(userId);
-                    this.updatePermissionLevel(userId);
-                });
-                this.updatePermissionLevel(userId);
-            }
-        }, 2);
-
-        this.createCommand("unrestrict", "ur", 
-        "<player> : Unrestricts a player.", 
-        (o, p, m) => {
-            const targets = this.findPlayers(o, p);
-            if (targets.size() < 1) {
-                this.sendPrivateMessage(o, `Could not find matching players ${p}`, "color:255,43,43");
-                return;
-            }
-            const profile = this.dataService.empireProfile;
-            if (profile === undefined) {
-                return;
-            }
-            for (const target of targets) {
-                const userId = target.UserId;
-                if (profile.Data.restricted.delete(userId)) {
-                    this.sendPrivateMessage(o, `Unrestricted player ${target.Name}`, "color:138,255,138");
-                    this.updatePermissionLevel(userId);
-                }
-                else {
-                    this.sendPrivateMessage(o, `${target.Name} is not restricted`, "color:255,43,43");
-                }
-            }
-        }, 2);
-
-        this.createCommand("kick", "k", 
-        "<player> : Kicks a player from the server.", 
-        (o, p) => {
-            const targets = this.findPlayers(o, p);
-            if (targets.size() < 1) {
-                this.sendPrivateMessage(o, `Could not find matching players ${p}`, "color:255,43,43");
-                return;
-            }
-            for (const target of targets) {
-                if (target === o) {
-                    this.sendPrivateMessage(o, "You can't kick yourself.", "color:255,43,43");
-                    continue;
-                }
-                if (this.getPermissionLevel(target.UserId) >= this.getPermissionLevel(o.UserId)) {
-                    this.sendPrivateMessage(o, "You can't kick someone with an equal/higher permission level.", "color:255,43,43");
-                    continue;
-                }
-                this.sendPrivateMessage(o, `Kicked player ${target.Name}`, "color:138,255,138");
-                const explosion = new Instance("Explosion");
-                explosion.ExplosionType = Enum.ExplosionType.NoCraters;
-                explosion.DestroyJointRadiusPercent = 0;
-                explosion.BlastRadius = 0;
-                const h = target.Character?.FindFirstChildOfClass("Humanoid")
-                if (h !== undefined && h.RootPart !== undefined) {
-                    explosion.Position = h.RootPart.Position;
-                    explosion.Parent = h.RootPart;
-                    playSoundAtPart(h.RootPart, explosionSound);
-                    h.TakeDamage(99999999);
-                }
-                task.delay(1, () => {
-                    if (target !== undefined) {
-                        target.Kick("You were kicked by " + o.Name);
-                    }
-                });
-            }
-        }, 2);
-
-        this.createCommand("ban", "b", 
-        "<player> <useId: boolean> : Bans a player from the server.", 
-        (o, p, useId) => {
-            const targets = this.findPlayers(o, p);
-            if (targets.size() < 1) {
-                const userId = useId === "true" ? tonumber(p) : Players.GetUserIdFromNameAsync(p);
-                if (userId !== undefined) {
-                    if (this.getPermissionLevel(userId) >= this.getPermissionLevel(o.UserId)) {
-                        this.sendPrivateMessage(o, "You can't ban someone with an equal/higher permission level.", "color:255,43,43");
-                        return;
-                    }
-                    const success = this.add("banned", userId);
-                    if (success) {
-                        this.sendPrivateMessage(o, `Banned ${this.fp(p, userId)}`, "color:138,255,138");
+                const data = this.dataService.empireData;
+                for (const target of targets) {
+                    const userId = target.UserId;
+                    if (data.restricted.delete(userId)) {
+                        this.sendPrivateMessage(o, `Unrestricted player ${target.Name}`, "color:138,255,138");
+                        this.updatePermissionLevel(userId);
                     }
                     else {
-                        this.sendPrivateMessage(o, `${this.fp(p, userId)} is already banned`, "color:255,43,43");
+                        this.sendPrivateMessage(o, `${target.Name} is not restricted`, "color:255,43,43");
                     }
+                }
+            }, 2);
+
+        const kaboom = (player: Player) => {
+            const h = player.Character?.FindFirstChildOfClass("Humanoid");
+            if (h !== undefined && h.RootPart !== undefined) {
+                spawnExplosion(h.RootPart.Position);
+                playSoundAtPart(h.RootPart, getSound("Explosion"));
+                h.TakeDamage(99999999);
+            }
+        }
+
+        this.createCommand("kick", "k",
+            "<player> : Kicks a player from the server.",
+            (o, p) => {
+                const targets = this.findPlayers(o, p);
+                if (targets.size() < 1) {
+                    this.sendPrivateMessage(o, `Could not find matching players ${p}`, "color:255,43,43");
                     return;
                 }
-                this.sendPrivateMessage(o, `Could not find matching players ${p}`, "color:255,43,43");
-                return;
-            }
-            for (const target of targets) {
-                if (target === o) {
-                    this.sendPrivateMessage(o, "You can't ban yourself.", "color:255,43,43");
-                    continue;
-                }
-                if (this.getPermissionLevel(target.UserId) >= this.getPermissionLevel(o.UserId)) {
-                    this.sendPrivateMessage(o, "You can't ban someone with an equal/higher permission level.", "color:255,43,43");
-                    continue;
-                }
-                this.sendPrivateMessage(o, `Banned player ${target.Name}`, "color:138,255,138");
-                const h = target.Character?.FindFirstChildOfClass("Humanoid")
-                if (h !== undefined && h.RootPart !== undefined) {
-                    const smoke = new Instance("Smoke");
-                    smoke.Size = 5;
-                    smoke.TimeScale = 20;
-                    smoke.Parent = h.RootPart;
-                    const attachment = h.RootPart.FindFirstChild("LVAttachment") as Attachment ?? new Instance("Attachment", h.RootPart);
-                    attachment.Name = "LVAttachment";
-                    const vector = new Vector3(0, 300, 0);
-                    const linearVelocity = new Instance("LinearVelocity");
-                    linearVelocity.MaxForce = vector.Magnitude * 20000;
-                    linearVelocity.VectorVelocity = vector;
-                    linearVelocity.Attachment0 = attachment;
-                    linearVelocity.Parent = attachment;
-                    playSoundAtPart(h.RootPart, rocketSound);
-                }
-                this.add("banned", target.UserId);
-                task.delay(1, () => {
-                    if (target !== undefined) {
-                        target.Kick(`You were banned by ${o.Name}`);
+                for (const target of targets) {
+                    if (target === o) {
+                        this.sendPrivateMessage(o, "You can't kick yourself.", "color:255,43,43");
+                        continue;
                     }
-                });
-            }
-        }, 2);
+                    if (this.getPermissionLevel(target.UserId) >= this.getPermissionLevel(o.UserId)) {
+                        this.sendPrivateMessage(o, "You can't kick someone with an equal/higher permission level.", "color:255,43,43");
+                        continue;
+                    }
+                    this.sendPrivateMessage(o, `Kicked player ${target.Name}`, "color:138,255,138");
+                    kaboom(target);
+                    task.delay(1, () => {
+                        if (target !== undefined) {
+                            target.Kick("You were kicked by " + o.Name);
+                        }
+                    });
+                }
+            }, 2);
 
-        this.createCommand("unban", "ub", 
-        "<player> <useId: boolean> : Unbans a player from the server.", 
-        (o, p, useId) => {
-            const userId = this.id(p, useId);
-            if (userId !== undefined) {
-                const success = this.remove("banned", userId);
-                if (success) {
-                    this.sendPrivateMessage(o, `Unbanned ${this.fp(p, userId)}`, "color:138,255,138");
+        this.createCommand("ban", "b",
+            "<player> <useId: boolean> : Bans a player from the server.",
+            (o, p, useId) => {
+                const targets = this.findPlayers(o, p);
+                if (targets.size() < 1) {
+                    const userId = useId === "true" ? tonumber(p) : Players.GetUserIdFromNameAsync(p);
+                    if (userId !== undefined) {
+                        if (this.getPermissionLevel(userId) >= this.getPermissionLevel(o.UserId)) {
+                            this.sendPrivateMessage(o, "You can't ban someone with an equal/higher permission level.", "color:255,43,43");
+                            return;
+                        }
+                        const success = this.add("banned", userId);
+                        if (success) {
+                            this.sendPrivateMessage(o, `Banned ${this.fp(p, userId)}`, "color:138,255,138");
+                        }
+                        else {
+                            this.sendPrivateMessage(o, `${this.fp(p, userId)} is already banned`, "color:255,43,43");
+                        }
+                        return;
+                    }
+                    this.sendPrivateMessage(o, `Could not find matching players ${p}`, "color:255,43,43");
+                    return;
                 }
-                else {
-                    this.sendPrivateMessage(o, `${this.fp(p, userId)} is not banned`, "color:255,43,43");
+                for (const target of targets) {
+                    if (target === o) {
+                        this.sendPrivateMessage(o, "You can't ban yourself.", "color:255,43,43");
+                        continue;
+                    }
+                    if (this.getPermissionLevel(target.UserId) >= this.getPermissionLevel(o.UserId)) {
+                        this.sendPrivateMessage(o, "You can't ban someone with an equal/higher permission level.", "color:255,43,43");
+                        continue;
+                    }
+                    this.sendPrivateMessage(o, `Banned player ${target.Name}`, "color:138,255,138");
+                    const h = target.Character?.FindFirstChildOfClass("Humanoid");
+                    if (h !== undefined && h.RootPart !== undefined) {
+                        const smoke = new Instance("Smoke");
+                        smoke.Size = 5;
+                        smoke.TimeScale = 20;
+                        smoke.Parent = h.RootPart;
+                        const attachment = h.RootPart.FindFirstChild("LVAttachment") as Attachment ?? new Instance("Attachment", h.RootPart);
+                        attachment.Name = "LVAttachment";
+                        const vector = new Vector3(0, 300, 0);
+                        const linearVelocity = new Instance("LinearVelocity");
+                        linearVelocity.MaxForce = vector.Magnitude * 20000;
+                        linearVelocity.VectorVelocity = vector;
+                        linearVelocity.Attachment0 = attachment;
+                        linearVelocity.Parent = attachment;
+                        playSoundAtPart(h.RootPart, getSound("Rocket"));
+                    }
+                    this.add("banned", target.UserId);
+                    task.delay(1, () => {
+                        if (target !== undefined) {
+                            target.Kick(`You were banned by ${o.Name}`);
+                        }
+                    });
                 }
-            }
-        }, 2);
+            }, 2);
 
-        this.createCommand("trust", "t", 
-        "<player> <useId: boolean> : Trusts a player, giving them a permission level of 1.",
-        (o, p, useId) => {
-            const userId = this.id(p, useId);
-            if (userId !== undefined) {
-                const success = this.add("trusted", userId);
-                if (success) {
-                    this.sendPrivateMessage(o, `Trusted ${this.fp(p, userId)}`, "color:138,255,138");
+        this.createCommand("unban", "ub",
+            "<player> <useId: boolean> : Unbans a player from the server.",
+            (o, p, useId) => {
+                const userId = this.id(p, useId);
+                if (userId !== undefined) {
+                    const success = this.remove("banned", userId);
+                    if (success) {
+                        this.sendPrivateMessage(o, `Unbanned ${this.fp(p, userId)}`, "color:138,255,138");
+                    }
+                    else {
+                        this.sendPrivateMessage(o, `${this.fp(p, userId)} is not banned`, "color:255,43,43");
+                    }
                 }
-                else {
-                    this.sendPrivateMessage(o, `${this.fp(p, userId)} is already trusted`, "color:255,43,43");
-                }
-                this.updatePermissionLevel(userId);
-            }
-        }, 2);
+            }, 2);
 
-        this.createCommand("untrust", "ut", 
-        "<player> <useId: boolean> : Untrusts a player, revoking both their trust and manager status.",
-        (o, p, useId) => {
-            const userId = this.id(p, useId);
-            if (userId !== undefined) {
-                const success1 = this.remove("trusted", userId);
-                const success2 = this.remove("managers", userId);
-                if (success1 || success2) {
-                    this.sendPrivateMessage(o, `Untrusted ${this.fp(p, userId)}`, "color:138,255,138");
+        this.createCommand("trust", "t",
+            "<player> <useId: boolean> : Trusts a player, giving them a permission level of 1.",
+            (o, p, useId) => {
+                const userId = this.id(p, useId);
+                if (userId !== undefined) {
+                    const success = this.add("trusted", userId);
+                    if (success) {
+                        this.sendPrivateMessage(o, `Trusted ${this.fp(p, userId)}`, "color:138,255,138");
+                    }
+                    else {
+                        this.sendPrivateMessage(o, `${this.fp(p, userId)} is already trusted`, "color:255,43,43");
+                    }
+                    this.updatePermissionLevel(userId);
                 }
-                else {
-                    this.sendPrivateMessage(o, `${this.fp(p, userId)} is not trusted/a manager`, "color:255,43,43");
+            }, 2);
+
+        this.createCommand("untrust", "ut",
+            "<player> <useId: boolean> : Untrusts a player, revoking both their trust and manager status.",
+            (o, p, useId) => {
+                const userId = this.id(p, useId);
+                if (userId !== undefined) {
+                    const success1 = this.remove("trusted", userId);
+                    const success2 = this.remove("managers", userId);
+                    if (success1 || success2) {
+                        this.sendPrivateMessage(o, `Untrusted ${this.fp(p, userId)}`, "color:138,255,138");
+                    }
+                    else {
+                        this.sendPrivateMessage(o, `${this.fp(p, userId)} is not trusted/a manager`, "color:255,43,43");
+                    }
+                    this.updatePermissionLevel(userId);
                 }
-                this.updatePermissionLevel(userId);
-            }
-        }, 2);
+            }, 2);
 
         this.createCommand("globalchat", "g",
-        "Toggle global chat.",
-        () => {
-            const empireProfile = this.dataService.empireProfile;
-            if (empireProfile === undefined)
-                return;
-            const newSetting = !empireProfile.Data.globalChat;
-            empireProfile.Data.globalChat = newSetting;
-            this.sendServerMessage(`Global chat has been turned ${newSetting === true ? "on" : "off"}`);
-        }, 3);
+            "Toggle global chat.",
+            () => {
+                const empireData = this.dataService.empireData;
+                const newSetting = !empireData.globalChat;
+                empireData.globalChat = newSetting;
+                this.sendServerMessage(`Global chat has been turned ${newSetting === true ? "on" : "off"}`);
+            }, 2);
+
+        this.createCommand("toggleparticles", "tglp",
+            "Toggle particles emitted by newly placed items on or off.",
+            () => {
+                const empireData = this.dataService.empireData;
+                const newSetting = !empireData.particlesEnabled;
+                empireData.particlesEnabled = newSetting;
+                for (const [particle, toggled] of ReserveModels.particles) {
+                    particle.Enabled = toggled && newSetting;
+                }
+                this.sendServerMessage(`Particles for newly placed items have been ${newSetting === true ? "enabled" : "disabled"}`);
+            }, 2);
+
+        this.createCommand("teleport", "tp",
+            "<teleporter> <to> : Teleport players to a target player.",
+            (o, p, t) => {
+                const teleporters = this.findPlayers(o, p);
+                const targets = this.findPlayers(o, t);
+                const size = targets.size();
+                if (size === 0) {
+                    this.sendPrivateMessage(o, `No target called ${t} found`, "color:255,43,43");
+                    return;
+                }
+                else if (size > 1) {
+                    this.sendPrivateMessage(o, `Too many targets specified: ${t}`, "color:255,43,43");
+                    return;
+                }
+                const target = targets[0];
+                const destination = target.Character?.GetPivot();
+                if (destination === undefined)
+                    return;
+                for (const teleporter of teleporters) {
+                    if (this.getPermissionLevel(teleporter.UserId) > this.getPermissionLevel(o.UserId)) {
+                        this.sendPrivateMessage(o, `You cannot teleport a player with a permission level higher than your own`, "color:255,43,43");
+                        continue;
+                    }
+                    teleporter.Character?.PivotTo(destination);
+                }
+                this.sendPrivateMessage(o, `Teleported ${p} to ${t}`, "color:138,255,138");
+            }, 2);
+
+        this.createCommand("cleardroplets", "cd",
+            "Delete ALL droplets in ALL areas.",
+            (_o) => {
+                const droplets = DROPLETS_FOLDER.GetChildren();
+                for (const droplet of droplets)
+                    if (droplet.IsA("BasePart"))
+                        droplet.Destroy();
+                this.sendServerMessage("Deleted all droplets");
+            }, 2);
+
 
         // PERM LEVEL 3
 
         this.createCommand("manager", "man",
-        "<player> <useId: boolean> : Appoints a player as a manager, giving them a permission level of 2.",
-        (o, p, useId) => {
-            const userId = this.id(p, useId);
-            if (userId !== undefined) {
-                const success = this.add("managers", userId);
-                if (success) {
-                    this.sendPrivateMessage(o, `${this.fp(p, userId)} is now a manager`, "color:138,255,138");
+            "<player> <useId: boolean> : Appoints a player as a manager, giving them a permission level of 2.",
+            (o, p, useId) => {
+                const userId = this.id(p, useId);
+                if (userId !== undefined) {
+                    const success = this.add("managers", userId);
+                    if (success) {
+                        this.sendPrivateMessage(o, `${this.fp(p, userId)} is now a manager`, "color:138,255,138");
+                    }
+                    else {
+                        this.sendPrivateMessage(o, `${this.fp(p, userId)} is already a manager`, "color:255,43,43");
+                    }
+                    this.updatePermissionLevel(userId);
                 }
-                else {
-                    this.sendPrivateMessage(o, `${this.fp(p, userId)} is already a manager`, "color:255,43,43");
-                }
-                this.updatePermissionLevel(userId);
-            }
-        }, 3);
+            }, 3);
 
-        this.createCommand("setbuildlvl", "bl",
-        "<permlevel> : Sets the minimum permission level required to build.",
-        (o, level) => {
+        const setPermLevel = (o: Player, perm: keyof (typeof this.dataService.empireData.permLevels), level: string) => {
             const lvl = tonumber(level);
-            if (lvl === undefined || this.dataService.empireProfile === undefined) {
+            if (lvl === undefined) {
                 this.sendPrivateMessage(o, `${level} is not a valid permission level`, "color:255,43,43");
                 return;
             }
-            this.dataService.empireProfile.Data.permLevels.build = lvl;
-            PermissionsCanister.permLevels.set(this.dataService.empireProfile.Data.permLevels);
-            this.sendServerMessage(`Building now requires permission level ${lvl}`, "color:138,255,138");
-        }, 3);
+            else if (lvl > this.getPermissionLevel(o.UserId)) {
+                this.sendPrivateMessage(o, `You cannot set a permission level higher than your own`, "color:255,43,43");
+                return;
+            }
+            this.dataService.empireData.permLevels[perm] = math.min(3, lvl);
+            Packets.permLevels.set(this.dataService.empireData.permLevels);
+            this.sendServerMessage(`Permission level ${lvl} set for permission ${perm}`, "color:138,255,138");
+        };
+        this.createCommand("setbuildlvl", "bl",
+            "<permlevel> : Sets the minimum permission level required to build.",
+            (o, level) => setPermLevel(o, "build", level), 3);
 
         this.createCommand("setpurchaselevel", "pl",
-        "<permlevel> : Sets the minimum permission level required to purchase items.",
-        (o, level) => {
-            const lvl = tonumber(level);
-            if (lvl === undefined || this.dataService.empireProfile === undefined) {
-                this.sendPrivateMessage(o, `${level} is not a valid permission level`, "color:255,43,43");
-                return;
-            }
-            this.dataService.empireProfile.Data.permLevels.purchase = lvl;
-            PermissionsCanister.permLevels.set(this.dataService.empireProfile.Data.permLevels);
-            this.sendServerMessage(`Purchasing now requires permission level ${lvl}`, "color:138,255,138");
-        }, 3);
+            "<permlevel> : Sets the minimum permission level required to purchase items.",
+            (o, level) => setPermLevel(o, "purchase", level), 3);
 
         this.createCommand("setresetlevel", "rl",
-        "<permlevel> : Sets the minimum permission level required to reset.",
-        (o, level) => {
-            const lvl = tonumber(level);
-            if (lvl === undefined || this.dataService.empireProfile === undefined) {
-                this.sendPrivateMessage(o, `${level} is not a valid permission level`, "color:255,43,43");
-                return;
-            }
-            this.dataService.empireProfile.Data.permLevels.reset = lvl;
-            PermissionsCanister.permLevels.set(this.dataService.empireProfile.Data.permLevels);
-            this.sendServerMessage(`Resetting now requires permission level ${lvl}`, "color:138,255,138");
-        }, 3);
+            "<permlevel> : Sets the minimum permission level required to reset.",
+            (o, level) => setPermLevel(o, "reset", level), 3);
 
         // PERM LEVEL 4
 
-        this.createCommand("sword", "sw", 
-        "Shank",
-        (o) => {
-            ASSETS.ClassicSword.Clone().Parent = o.FindFirstChildOfClass("Backpack");
-        }, 4);
+        this.createCommand("sword", "sw",
+            "Shank",
+            (o) => {
+                ASSETS.ClassicSword.Clone().Parent = o.FindFirstChildOfClass("Backpack");
+            }, 4);
 
-        this.createCommand("walkspeed", "ws", 
-        "<player> <amount> : Speeed.",
-        (o, p, a) => {
-            const walkspeed = tonumber(a) ?? 0;
-            const players = this.findPlayers(o, p);
-            for (const player of players) {
-                const humanoid = player.Character?.FindFirstChildOfClass("Humanoid");
-                if (humanoid !== undefined) {
-                    humanoid.WalkSpeed = walkspeed;
+        this.createCommand("walkspeed", "ws",
+            "<player> <amount> : Speeed.",
+            (o, p, a) => {
+                const walkspeed = tonumber(a) ?? 0;
+                const players = this.findPlayers(o, p);
+                for (const player of players) {
+                    const humanoid = player.Character?.FindFirstChildOfClass("Humanoid");
+                    if (humanoid !== undefined) {
+                        humanoid.WalkSpeed = walkspeed;
+                    }
                 }
-            }
-        }, 4);
+            }, 4);
 
-        this.createCommand("setdonation", "setdonate", 
-        "<amount> : Set donation amount.",
-        (o, a) => {
-            this.donationService.setDonated(o, tonumber(a) ?? 0);
-        }, 4);
+        this.createCommand("setdonation", "setdonate",
+            "<amount> : Set donation amount.",
+            (o, a) => {
+                this.donationService.setDonated(o, tonumber(a) ?? 0);
+            }, 4);
 
-        this.createCommand("updateleaderboards", "updatelbs", 
-        "Refreshes leaderboard stats.",
-        () => {
-            this.leaderboardService.updateLeaderboards();
-        }, 4);
-    
-        this.createCommand("economyset", "ecoset", 
-        "<currency> <first> <second> : Set balance for a currency. You can type _ as a replacement for spaces.",
-        (_o, currency, first, second) => {
-            this.currencyService.setCost((currency.gsub("_", " ")[0]) as Currency, 
-                second === undefined ? new OnoeNum(tonumber(first) ?? 0) : OnoeNum.fromSerika(tonumber(first) ?? 0, tonumber(second) ?? 0));
-        }, 4);
+        this.createCommand("updateleaderboards", "updatelbs",
+            "Refreshes leaderboard stats.",
+            () => {
+                this.leaderboardService.debug = true;
+                this.leaderboardService.updateLeaderboards();
+                this.leaderboardService.debug = false;
+            }, 4);
 
-        this.createCommand("upgradeset", "upgset", 
-        "<upgrade> <amount> : Set the quantity for an upgrade.",
-        (_o, upgrade, amount) => {
-            this.upgradeBoardService.setUpgradeAmount(upgrade, tonumber(amount) ?? 0);
-        }, 4);
+        this.createCommand("economyset", "ecoset",
+            "<currency> <first> <second> : Set balance for a currency. You can type _ as a replacement for spaces.",
+            (_o, currency, first, second) => {
+                currency = currency.gsub("_", " ")[0];
+                if (Price.DETAILS_PER_CURRENCY[currency as Currency] === undefined)
+                    return;
+                this.currencyService.setCost(currency as Currency,
+                    second === undefined ? new OnoeNum(tonumber(first) ?? 0) : OnoeNum.fromSerika(tonumber(first) ?? 0, tonumber(second) ?? 0));
+            }, 4);
 
-        this.createCommand("itemset", "iset", 
-        "<item> <amount> : Set the quantity for an item.",
-        (_o, item, amount) => {
-            const a = tonumber(amount) ?? 0;
-            this.itemsService.setItemAmount(item, a);
-            this.itemsService.setBoughtAmount(item, a);
-        }, 4);
+        this.createCommand("upgradeset", "upgset",
+            "<upgrade> <amount> : Set the quantity for an upgrade.",
+            (_o, upgrade, amount) => {
+                this.upgradeBoardService.setUpgradeAmount(upgrade, tonumber(amount) ?? 0);
+            }, 4);
 
-        this.createCommand("levelset", "lset", 
-        "<level> : Set the empire's level.",
-        (_o, amount) => {
-            const a = tonumber(amount) ?? 0;
-            this.levelService.setLevel(a);
-        }, 4);
+        this.createCommand("itemset", "iset",
+            "<item> <amount> : Set the quantity for an item.",
+            (_o, item, amount) => {
+                const a = tonumber(amount) ?? 0;
+                this.itemsService.setItemAmount(item, a);
+                this.itemsService.setBoughtAmount(item, a);
+            }, 4);
 
-        this.createCommand("xpset", "xset", 
-        "<xp> : Set the empire's XP.",
-        (_o, amount) => {
-            const a = tonumber(amount) ?? 0;
-            this.levelService.setXp(a);
-        }, 4);
+        this.createCommand("levelset", "lset",
+            "<level> : Set the empire's level.",
+            (_o, amount) => {
+                const a = tonumber(amount) ?? 0;
+                this.levelService.setLevel(a);
+            }, 4);
 
-        this.createCommand("stageset", "sset", 
-        "<quest> <stage> : Set the stage number for the quest.",
-        (_o, questId, amount) => {
-            const stagePerQuest = this.questsService.getStagePerQuest();
-            if (stagePerQuest === undefined) {
-                return;
-            }
-            stagePerQuest.set(questId, tonumber(amount) ?? 0);
-            this.questsService.setStagePerQuest(stagePerQuest);
-            this.gameAssetService.loadAvailableQuests();
-        }, 4);
+        this.createCommand("xpset", "xset",
+            "<xp> : Set the empire's XP.",
+            (_o, amount) => {
+                const a = tonumber(amount) ?? 0;
+                this.levelService.setXp(a);
+            }, 4);
 
-        this.createCommand("completequest", "cq", 
-        "<quest> : Complete a quest.",
-        (_o, questId) => {
-            const quest = Quest.getQuest(questId);
-            if (quest === undefined) {
-                return;
-            }
-            this.gameAssetService.completeQuest(quest);
-        }, 4);
+        this.createCommand("stageset", "sset",
+            "<quest> <stage> : Set the stage number for the quest.",
+            (_o, questId, amount) => {
+                const stagePerQuest = this.dataService.empireData.quests;
+                if (stagePerQuest === undefined) {
+                    return;
+                }
+                stagePerQuest.set(questId, tonumber(amount) ?? 0);
+                this.questsService.setStagePerQuest(stagePerQuest);
+                this.gameAssetService.loadAvailableQuests();
+            }, 4);
 
-        this.createCommand("unlockarea", "ula", 
-        "<area> : Unlock an area.",
-        (_o, area) => {
-            this.unlockedAreasService.unlockArea(area as keyof (typeof AREAS));
-        }, 4);
+        this.createCommand("completequest", "cq",
+            "<quest> : Complete a quest.",
+            (_o, questId) => {
+                const quest = Quest.getQuest(questId);
+                if (quest === undefined) {
+                    return;
+                }
+                this.gameAssetService.completeQuest(quest);
+            }, 4);
 
-        this.createCommand("lockarea", "la", 
-        "<area> : Lock an area.",
-        (_o, area) => {
-            this.unlockedAreasService.lockArea(area as keyof (typeof AREAS));
-        }, 4);
+        this.createCommand("unlockarea", "ula",
+            "<area> : Unlock an area.",
+            (_o, area) => {
+                this.unlockedAreasService.unlockArea(area as AreaId);
+            }, 4);
 
-        this.createCommand("colorstrictset", "csset", 
-        "<id> : Set the color for color strict items.",
-        (_o, item) => ReplicatedStorage.SetAttribute("ColorStrictColor", tonumber(item) ?? 0), 4);
+        this.createCommand("lockarea", "la",
+            "<area> : Lock an area.",
+            (_o, area) => {
+                this.unlockedAreasService.lockArea(area as AreaId);
+            }, 4);
 
-        this.createCommand("printdata", "pd", 
-        "Print game data to console.",
-        (_o) => print(this.dataService.empireProfile?.Data), 4);
+        this.createCommand("colorstrictset", "csset",
+            "<id> : Set the color for color strict items.",
+            (_o, item) => ReplicatedStorage.SetAttribute("ColorStrictColor", tonumber(item) ?? 0), 4);
+
+        this.createCommand("printdata", "pd",
+            "Print game data to console.",
+            (_o) => print(this.dataService.empireData), 4);
 
         this.createCommand("resetdata", "wipedata",
-        "Reset all data like no progress was ever made.",
-        () => {
-            const attempts = (Workspace.GetAttribute("ResetAttempts") as number | undefined ?? 0) + 1;
-            Workspace.SetAttribute("ResetAttempts", attempts);
-            if (attempts === 1)
-                this.sendServerMessage("Are you sure you want to reset your data? Type /resetdata again to confirm.");
-            else if (attempts === 2)
-                this.sendServerMessage("Yeah, but are you REALLY sure? Like, REALLY REALLY sure? You can't recover this data once it's gone.");
-            else if (attempts === 3)
-                this.sendServerMessage("I'm saying that you gain nothing in return for doing this. Literally nothing.");
-            else if (attempts === 4)
-                this.sendServerMessage("...");
-            else if (attempts === 5)
-                this.sendServerMessage(".....");
-            else if (attempts === 6)
-                this.sendServerMessage("If you say so. Type /resetdata 3 more times to confirm.");
-            else if (attempts === 7)
-                this.sendServerMessage("Type /resetdata 2 more times to confirm.");
-            else if (attempts === 8)
-                this.sendServerMessage("Type /resetdata 1 more time to confirm.");
-            else if (attempts === 9) {
-                this.sendServerMessage("You have confirmed the data reset.");
-                task.delay(2, () => this.sendServerMessage("This world will cease to exist in 5 seconds."));
-                task.delay(4, () => this.sendServerMessage("Goodbye"));
-                task.delay(7, () => {
-                    const players = Players.GetPlayers();
-                    for (const player of players)
-                        player.Kick("This world has collapsed.");
-                });
-            }
-            
-        }, 4);
+            "Reset all data like no progress was ever made.",
+            () => {
+                const attempts = (Workspace.GetAttribute("ResetAttempts") as number | undefined ?? 0) + 1;
+                Workspace.SetAttribute("ResetAttempts", attempts);
+                if (attempts === 1)
+                    this.sendServerMessage("Are you sure you want to reset your data? Type /resetdata again to confirm.");
+                else if (attempts === 2)
+                    this.sendServerMessage("Yeah, but are you REALLY sure? Like, REALLY REALLY sure? You can't recover this data once it's gone.");
+                else if (attempts === 3)
+                    this.sendServerMessage("I'm saying that you gain nothing in return for doing this. Literally nothing.");
+                else if (attempts === 4)
+                    this.sendServerMessage("...");
+                else if (attempts === 5)
+                    this.sendServerMessage(".....");
+                else if (attempts === 6)
+                    this.sendServerMessage("If you say so. Type /resetdata 3 more times to confirm.");
+                else if (attempts === 7)
+                    this.sendServerMessage("Type /resetdata 2 more times to confirm.");
+                else if (attempts === 8)
+                    this.sendServerMessage("Type /resetdata 1 more time to confirm.");
+                else if (attempts === 9) {
+                    this.sendServerMessage("You have confirmed the data reset.");
+                    task.delay(2, () => this.sendServerMessage("This world will cease to exist in 5 seconds."));
+                    task.delay(4, () => this.sendServerMessage("Goodbye"));
+                    task.delay(7, () => {
+                        const players = Players.GetPlayers();
+                        for (const player of players)
+                            player.Kick("This world has collapsed.");
+                    });
+                }
 
-        this.createCommand("trueresetdata", "truewipedata", 
-        "Reset all data like no progress was ever made.",
-        (_o) => {
-            this.itemsService.setPlacedItems([]);
-            this.itemsService.setBought(new Map());
-            this.itemsService.setInventory(new Map([["ClassLowerNegativeShop", 1]]));
-            this.gameAssetService.fullUpdatePlacedItemsModels();
-            const balance = this.currencyService.getBalance();
-            for (const [currency, _amount] of balance.costPerCurrency)
-                balance.setCost(currency, 0);
-            this.currencyService.setBalance(balance);
-            this.upgradeBoardService.setAmountPerUpgrade({});
-            this.playtimeService.setPlaytime(0);
-            this.levelService.setLevel(1);
-            this.levelService.setXp(0);
-            this.questsService.setStagePerQuest(new Map());
-            this.sendServerMessage("True reset complete. The shop is in your inventory.");
-        }, 4);
+            }, 4);
+
+        this.createCommand("trueresetdata", "truewipedata",
+            "Reset all data like no progress was ever made.",
+            (_o) => {
+                this.itemsService.setPlacedItems([]);
+                this.itemsService.setBought(new Map());
+                this.itemsService.setInventory(new Map([["ClassLowerNegativeShop", 1]]));
+                this.itemsService.fullUpdatePlacedItemsModels();
+                const currencies = this.dataService.empireData.currencies;
+                for (const [currency, _amount] of currencies)
+                    currencies.set(currency, new OnoeNum(0));
+                this.currencyService.setCurrencies(currencies);
+                this.upgradeBoardService.setAmountPerUpgrade(new Map());
+                this.playtimeService.setPlaytime(0);
+                this.levelService.setLevel(1);
+                this.levelService.setXp(0);
+                this.questsService.setStagePerQuest(new Map());
+                this.sendServerMessage("True reset complete. The shop is in your inventory.");
+            }, 4);
+
+        this.createCommand("countparts", "getpartcount",
+            "Get the part count of the current world.",
+            () => {
+                let i = 0;
+                for (const part of Workspace.GetDescendants())
+                    if (part.IsA("BasePart"))
+                        i++;
+                this.sendServerMessage("Part count: " + i);
+            }, 4);
+
+        this.createCommand("gamespeed", "gs",
+            "Set how fast the game runs. Default is 1.",
+            (_player, newSpeed) => {
+                const speed = tonumber(newSpeed) ?? 1;
+                this.sendServerMessage(`Changed speed to ${speed}. Old speed: ${GameSpeed.speed}`);
+                GameSpeed.speed = speed;
+            }, 4);
+
+        this.createCommand("fix", "fix",
+            "debug command",
+            (_player) => {
+                const items = this.dataService.empireData.items;
+                const itemSearch = (item: Item) => {
+                    const count = ItemCounter.getTotalAmount(items.inventory, items.placed, item.id);
+                    const max = item.pricePerIteration.size();
+                    if (count > max) {
+                        warn(item.id, "has", count, "compared to", max);
+                        const inInv = items.inventory.get(item.id);
+                        const diff = count - max;
+                        if (inInv !== undefined && inInv >= diff) {
+                            items.inventory.set(item.id, inInv - diff);
+                        }
+                    }
+                }
+                ClassLowerNegativeShop.items.forEach(itemSearch);
+                Class0Shop.items.forEach(itemSearch);
+                this.itemsService.setInventory(items.inventory);
+            }, 4);
+
+        this.createCommand("timeofday", "time",
+            "<hours> : Set the hours after midnight",
+            (_o, hours) => {
+                Lighting.ClockTime = tonumber(hours) ?? 0;
+            }, 4);
+
+        this.createCommand("fling", "woosh",
+            "<player> : Weeeeee",
+            (o, p) => {
+                const targets = this.findPlayers(o, p);
+                if (targets.size() < 1) {
+                    this.sendPrivateMessage(o, `Could not find matching players ${p}`, "color:255,43,43");
+                    return;
+                }
+                const rng = new Random();
+                for (const target of targets) {
+                    const humanoid = target.Character?.FindFirstChildOfClass("Humanoid");
+                    if (humanoid === undefined)
+                        continue;
+                    const rootPart = humanoid.RootPart!;
+                    rootPart.PivotTo(rootPart.GetPivot().add(Vector3.yAxis));
+                    rootPart.AssemblyLinearVelocity = rng.NextUnitVector().mul(5000);
+                    rootPart.AssemblyAngularVelocity = rng.NextUnitVector().mul(5000);
+                }
+                this.sendPrivateMessage(o, `Flung players`, "color:138,255,138");
+            }, 4);
+
+
+        this.createCommand("zombies", "apocalypse",
+            "Brains",
+            (_o) => {
+                const asset = ServerStorage.WaitForChild("Fun").WaitForChild("Zombie") as Model;
+                for (let i = 0; i < 15; i++) {
+                    for (const [_, area] of pairs(AREAS)) {
+                        const spawnLocation = area.spawnLocation;
+                        if (spawnLocation === undefined)
+                            continue;
+                        const zombie = asset.Clone();
+                        const humanoid = zombie.FindFirstChildOfClass("Humanoid")
+                        if (humanoid !== undefined)
+                            humanoid.WalkSpeed = math.random(14, 26);
+                        zombie.PivotTo(spawnLocation.CFrame.add(new Vector3(math.random(-45, 45), 0, math.random(-45, 45))));
+                        zombie.Parent = Workspace;
+                    }
+                }
+            }, 4);
+
+        this.createCommand("markplaceableeverywhere", "mpe",
+            "Make the specified item placeable everywhere.",
+            (_player, itemId) => {
+                Packets.modifyGame.fireAll("markplaceableeverywhere");
+                Items.getItem(itemId)?.markPlaceableEverywhere();
+            }, 4);
+
     }
 }

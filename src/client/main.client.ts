@@ -1,7 +1,7 @@
 import { Flamework } from "@flamework/core";
 import { LOCAL_PLAYER } from "client/constants";
 import { DONATION_PRODUCTS, LEADERBOARDS, getSound } from "shared/constants";
-import { Fletchette } from "@antivivi/fletchette";
+import Packets from "shared/network/Packets";
 
 Flamework.addPaths("src/client/controllers");
 Flamework.ignite();
@@ -33,7 +33,7 @@ for (const donationOption of LEADERBOARDS.Donated.DonationPart.SurfaceGui.Displa
         }
         donationOption.MouseButton1Click.Connect(() => {
             clickSound.Play();
-            Fletchette.getCanister("PermissionsCanister").promptDonation.fire(donationProduct);
+            Packets.promptDonation.inform(donationProduct);
         });
     }
 }
