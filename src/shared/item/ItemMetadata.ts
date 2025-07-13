@@ -44,10 +44,10 @@ export default class ItemMetadata {
             return;
         }
 
-        const speed = formatRichText(`Speed: ${tool.speed}`, Color3.fromRGB(112, 176, 255), this.size, this.weight);
-        const damage = formatRichText("Damage: " + tool.damage, Color3.fromRGB(255, 71, 0), this.size, this.weight);
+        const speed = formatRichText(`\nSpeed: ${tool.speed}`, Color3.fromRGB(112, 176, 255), this.size, this.weight);
+        const damage = formatRichText(`\nDamage: ${tool.damage}`, Color3.fromRGB(255, 71, 0), this.size, this.weight);
 
-        this.builder[ItemMetadata.INDICES.TOOL] = speed + " // " + damage;
+        this.builder[ItemMetadata.INDICES.TOOL] = speed + damage;
     }
 
     spacing() {

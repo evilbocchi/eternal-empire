@@ -78,7 +78,12 @@ export default class DialogueService implements OnInit, OnStart, OnNPCLoad {
      */
     addDialogue(dialogue: Dialogue, priority?: number, npc?: NPC) {
         npc ??= dialogue.npc;
-        this.dialoguePerNPC.get(npc)!.set(dialogue, priority ?? 1);
+        let dialogues = this.dialoguePerNPC.get(npc);
+        if (dialogues === undefined) {
+            dialogues = new Map<Dialogue, number>();
+            this.dialoguePerNPC.set(npc, dialogues);
+        }
+        dialogues.set(dialogue, priority ?? 1);
     }
 
     /**
