@@ -39,7 +39,7 @@
         "rojo": "^1.0.2",
         "rokit-npm": "^1.0.1",
         "tsx": "^4.20.3",
-        "typedoc": "^0.27.9",
+        "typedoc": "^0.28.7",
         "typedoc-material-theme": "^1.4.0",
         "typedoc-plugin-extras": "^4.0.0",
         "typedoc-plugin-missing-exports": "^3.0.0",
