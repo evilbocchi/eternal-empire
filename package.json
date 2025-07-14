@@ -42,7 +42,7 @@
         "typedoc": "^0.27.9",
         "typedoc-material-theme": "^1.4.0",
         "typedoc-plugin-extras": "^4.0.0",
-        "typedoc-plugin-missing-exports": "^3.0.0",
+        "typedoc-plugin-missing-exports": "^4.0.0",
         "typedoc-plugin-rename-defaults": "^0.7.3",
         "typescript": "^5.5.3"
     },
