@@ -6,6 +6,7 @@ import DropletCoaster from "shared/items/1/coasterifying/DropletCoaster";
 import AquaticFurnace from "shared/items/1/dosomething/AquaticFurnace";
 import CompressedObbyUpgrader from "shared/items/1/dosomething/CompressedObbyUpgrader";
 import IndustrialDropletSpray from "shared/items/1/dosomething/IndustrialDropletSpray";
+import MovementDetectionDropper from "shared/items/1/dosomething/MovementDetectionDropper";
 import SilentMemory from "shared/items/1/dosomething/SilentMemory";
 import AbruptBridge from "shared/items/1/joyful/AbruptBridge";
 import AntiGravityConverter from "shared/items/1/joyful/AntiGravityConverter";
@@ -39,6 +40,7 @@ export = new Item(script.Name)
         AbruptBridge,
         TheAmplified,
 
+        MovementDetectionDropper,
         AquaticFurnace,
         SilentMemory,
         CompressedObbyUpgrader,

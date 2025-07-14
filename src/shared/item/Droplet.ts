@@ -4,9 +4,9 @@
 import Difficulty from "@antivivi/jjt-difficulties";
 import { getAllInstanceInfo, getInstanceInfo } from "@antivivi/vrldk";
 import { Debris, RunService, TweenService, Workspace } from "@rbxts/services";
+import { ASSETS } from "shared/asset/GameAssets";
 import { IS_SERVER } from "shared/constants";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
-import { ASSETS } from "shared/asset/GameAssets";
 import { Server } from "shared/item/ItemUtils";
 import Operative from "shared/item/traits/Operative";
 import Packets from "shared/Packets";
@@ -675,10 +675,22 @@ export default class Droplet {
                 light.Range = 10;
                 light.Brightness = 0.5;
                 light.Parent = droplet;
-                
+
                 return droplet;
             })
             .setValue(new CurrencyBundle().set("Diamonds", 1))
+    );
+
+    static MovementDroplet = Droplet.registerDroplet(
+        new Droplet("MovementDroplet")
+            .setModel(() => {
+                const droplet = new Instance("Part");
+                droplet.Size = new Vector3(1.4, 1.4, 1.4);
+                droplet.Color = Difficulty.DoSomething.color!;
+                droplet.Material = Enum.Material.Slate;
+                return droplet;
+            })
+            .setValue(new CurrencyBundle().set("Funds", 150000))
     );
 
     /**
