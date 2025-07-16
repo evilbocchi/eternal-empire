@@ -112,6 +112,7 @@ export const assets = {
   "assets/sounds/MagicCast.mp3": "rbxassetid://135911080785862",
   "assets/sounds/MagicPowerUp.mp3": "rbxassetid://87779885965647",
   "assets/sounds/MagicSprinkle.mp3": "rbxassetid://89467860255949",
+  "assets/sounds/MechanicalPress.mp3": "rbxassetid://98598677876073",
   "assets/sounds/MenuClick.mp3": "rbxassetid://89464798897151",
   "assets/sounds/MenuClose.mp3": "rbxassetid://112183974066757",
   "assets/sounds/MenuOpen.mp3": "rbxassetid://83777048073694",

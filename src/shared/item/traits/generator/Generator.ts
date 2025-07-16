@@ -1,10 +1,11 @@
-import { getAllInstanceInfo } from "@antivivi/vrldk";
+import { getAllInstanceInfo, playSoundAtPart } from "@antivivi/vrldk";
 import { Players, TweenService } from "@rbxts/services";
+import { getSound } from "shared/asset/GameAssets";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
 import ItemUtils, { Server } from "shared/item/ItemUtils";
 import Boostable from "shared/item/traits/boost/Boostable";
-import Operative, { IOperative } from "shared/item/traits/Operative";
+import Operative from "shared/item/traits/Operative";
 import NamedUpgrades from "shared/namedupgrade/NamedUpgrades";
 
 declare global {
@@ -31,12 +32,28 @@ export default class Generator extends Boostable {
         const instanceInfo = getAllInstanceInfo(model);
         const boosts = instanceInfo.Boosts!;
 
+        let lastClicked = 0;
+        const clickPart = model.FindFirstChild("ClickPart") as BasePart | undefined;
+        if (clickPart !== undefined) {
+            const clickDetector = new Instance("ClickDetector");
+            clickDetector.MouseClick.Connect((player) => {
+                lastClicked = tick();
+                remoteEvent.FireClient(player);
+            });
+            clickDetector.Parent = clickPart;
+        }
+
         item.repeat(model, (dt) => {
             const passiveGain = generator.passiveGain;
             if (passiveGain === undefined)
                 return;
 
             let value = passiveGain;
+
+            if (tick() - lastClicked < 1) {
+                value = value.mul(1.5);
+            }
+
             let [totalAdd, totalMul, totalPow] = Operative.template();
 
             for (const [id, boost] of boosts) {
@@ -98,12 +115,12 @@ export default class Generator extends Boostable {
             }
             const tween1 = new TweenInfo(0.1, Enum.EasingStyle.Quad, Enum.EasingDirection.In);
             const tween2 = new TweenInfo(0.4, Enum.EasingStyle.Quad, Enum.EasingDirection.Out);
+            const clickTween = new TweenInfo(1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out);
+
+            const clickPart = model.FindFirstChild("ClickPart") as BasePart | undefined;
+            const clickPartOriginalSize = clickPart?.Size;
 
             remoteEvent.OnClientEvent.Connect((amountPerCurrency?: CurrencyMap) => {
-                if (amountPerCurrency === undefined)
-                    return;
-                ItemUtils.showCurrencyGain?.(part.Position, amountPerCurrency);
-
                 if (ItemUtils.UserGameSettings!.SavedQualityLevel.Value > 5) {
                     for (const [part, position] of positions) {
                         TweenService.Create(part, tween1, {
@@ -115,6 +132,19 @@ export default class Generator extends Boostable {
                             }).Play();
                         });
                     }
+                }
+
+                if (amountPerCurrency === undefined) { // clickpart was pressed                    
+                    if (clickPart !== undefined) {
+                        playSoundAtPart(clickPart, getSound("MechanicalPress.mp3"));
+                        clickPart.Size = clickPartOriginalSize!.mul(1.2);
+                        TweenService.Create(clickPart, clickTween, {
+                            Size: clickPartOriginalSize!
+                        }).Play();
+                    }
+                }
+                else {
+                    ItemUtils.showCurrencyGain?.(part.Position, amountPerCurrency);
                 }
             });
         });
