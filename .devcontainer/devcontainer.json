@@ -1,0 +1,17 @@
+{
+    "name": "rojo-roblox-ts-devcontainer",
+    "image": "mcr.microsoft.com/devcontainers/node:18",
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "christian-kohler.npm-intellisense",
+                "evilbocchi.rbxtsasvs",
+                "github.vscode-github-actions",
+                "tacheometrist.testez-companion"
+            ]
+        }
+    },
+    "forwardPorts": [
+        34872
+    ]
+}
