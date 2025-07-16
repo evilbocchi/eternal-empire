@@ -19,6 +19,11 @@ However, note that we strive to maintain things in a stable state. As such, chan
 
 ## Setup
 
+### Prerequisities
+- [Node.js 19+](https://nodejs.org/en/download)
+
+### Build
+
 > If you are using VS Code, an [automatic task](.vscode/tasks.json) is run when opening the project folder that sets up the development environment for you.
 
 To set up the development environment for JME, follow these steps:
