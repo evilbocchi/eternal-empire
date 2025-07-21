@@ -26,6 +26,7 @@ import PlaytimeService from "server/services/serverdata/PlaytimeService";
 import QuestService from "server/services/serverdata/QuestService";
 import SetupService from "server/services/serverdata/SetupService";
 import AreaService from "server/services/world/AreaService";
+import AtmosphereService from "server/services/world/AtmosphereService";
 import UnlockedAreasService from "server/services/world/UnlockedAreasService";
 import ItemUtils from "shared/item/ItemUtils";
 import Items from "shared/items/Items";
@@ -46,6 +47,7 @@ export default class APIExposeService implements OnInit {
     constructor(
         private readonly chatHookService: ChatHookService,
         private readonly areaService: AreaService,
+        private readonly atmosphereService: AtmosphereService,
         private readonly dataService: DataService,
         private readonly itemService: ItemService,
         private readonly currencyService: CurrencyService,
@@ -90,6 +92,14 @@ export default class APIExposeService implements OnInit {
              * @see {@link AreaService} for more details.
              */
             Area: this.areaService,
+
+            /**
+             * Atmosphere and weather management service.
+             * 
+             * @borrows AtmosphereService as atmosphereService
+             * @see {@link AtmosphereService} for more details.
+             */
+            Atmosphere: this.atmosphereService,
 
             /**
              * Chat hook service for sending messages and managing channels.
