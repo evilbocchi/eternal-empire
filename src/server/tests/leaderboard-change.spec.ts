@@ -19,7 +19,7 @@ export = function () {
 
         it("empire data has leaderboard positions map", () => {
             expect(dataService.empireData.leaderboardPositions).to.be.ok();
-            expect(dataService.empireData.leaderboardPositions).to.be.a("Map");
+            expect(typeIs(dataService.empireData.leaderboardPositions, "Instance")).to.equal(false);
         });
     });
 };
