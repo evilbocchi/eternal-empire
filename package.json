@@ -47,7 +47,7 @@
         "typescript": "^5.5.3"
     },
     "dependencies": {
-        "@antivivi/fletchette": "^2.0.0",
+        "@antivivi/fletchette": "^2.0.2",
         "@antivivi/jjt-difficulties": "^1.3.0",
         "@antivivi/lemon-signal": "^1.2.4",
         "@antivivi/profileservice": "^1.4.4",
