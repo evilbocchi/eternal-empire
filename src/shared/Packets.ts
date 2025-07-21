@@ -174,6 +174,19 @@ namespace Packets {
 
     // admin
     export const modifyGame = signal<(param: string) => void>();
+
+    // marketplace
+    export const marketplaceListings = property<Map<string, DataType.Packed<MarketplaceListing>>>(new Map());
+    export const createListing = request<(uuid: string, price: CurrencyBundle, listingType: "buyout" | "auction", duration: DataType.i32) => boolean>();
+    export const cancelListing = request<(uuid: string) => boolean>();
+    export const buyItem = request<(uuid: string) => boolean>();
+    export const placeBid = request<(uuid: string, bidAmount: CurrencyBundle) => boolean>();
+    export const getMarketplaceListings = request<() => MarketplaceListing[]>();
+    export const marketplaceTransaction = signal<(transaction: MarketplaceTransaction) => void>();
+    export const listingUpdated = signal<(listing: MarketplaceListing) => void>();
+    export const listingRemoved = signal<(uuid: string) => void>();
+    export const myActiveListings = property<Map<string, DataType.Packed<MarketplaceListing>>>(new Map());
+    export const marketplaceEnabled = property<boolean>(true);
 }
 
 export = Packets;
