@@ -10,7 +10,6 @@
  * @since 1.0.0
  */
 
-import { OnoeNum } from "@antivivi/serikanum";
 import { OnStart, Service } from "@flamework/core";
 import { DataStoreService, HttpService, RunService } from "@rbxts/services";
 import { $env } from "rbxts-transform-env";
@@ -24,24 +23,24 @@ import { CURRENCIES } from "shared/currency/CurrencyDetails";
  */
 @Service()
 export default class LeaderboardChangeService implements OnStart {
-    
+
     /** OrderedDataStore for total time leaderboard. */
     private totalTimeStore = DataStoreService.GetOrderedDataStore("TotalTime");
-    
+
     /** OrderedDataStore for donations leaderboard. */
     private donatedStore = DataStoreService.GetOrderedDataStore("Donated");
-    
+
     /** Map of leaderboard names to their corresponding DataStores. */
     private leaderboardStores = new Map<string, OrderedDataStore>();
-    
+
     /** List of banned user IDs (excluded from leaderboards). */
     private banned = [1900444407];
-    
+
     constructor(private dataService: DataService) {
         // Initialize currency leaderboard stores
         this.leaderboardStores.set("TimePlayed", this.totalTimeStore);
         this.leaderboardStores.set("Donated", this.donatedStore);
-        
+
         for (const currency of CURRENCIES) {
             const lb = LEADERBOARDS.FindFirstChild(currency);
             if (lb !== undefined) {
@@ -49,7 +48,7 @@ export default class LeaderboardChangeService implements OnStart {
             }
         }
     }
-    
+
     /**
      * Gets the position of the current empire in a specific leaderboard.
      * 
@@ -59,11 +58,11 @@ export default class LeaderboardChangeService implements OnStart {
      */
     private getEmpirePosition(leaderboardName: string, store: OrderedDataStore): number {
         const empireName = this.dataService.empireData.name;
-        
+
         try {
             const data = store.GetSortedAsync(false, 100);
             const entries = data.GetCurrentPage();
-            
+
             for (let i = 0; i < entries.size(); i++) {
                 const entry = entries[i];
                 if (leaderboardName === "Donated") {
@@ -82,45 +81,45 @@ export default class LeaderboardChangeService implements OnStart {
         } catch (error) {
             warn(`Failed to get leaderboard position for ${leaderboardName}: ${error}`);
         }
-        
+
         return 0; // Not in top 100 or error occurred
     }
-    
+
     /**
      * Checks all leaderboard positions and updates stored positions.
      * Sends webhook notifications for any changes where empire is in top 100.
      */
     private checkLeaderboardPositions() {
         const empireData = this.dataService.empireData;
-        
+
         // Skip if empire owner is banned
         if (this.banned.includes(empireData.owner)) {
             return;
         }
-        
+
         const previousPositions = new Map<string, number>();
         for (const [key, value] of empireData.leaderboardPositions) {
             previousPositions.set(key, value);
         }
         const currentPositions = new Map<string, number>();
-        
+
         // Check all leaderboards
         for (const [leaderboardName, store] of this.leaderboardStores) {
             const currentPosition = this.getEmpirePosition(leaderboardName, store);
             const previousPosition = previousPositions.get(leaderboardName) ?? 0;
-            
+
             currentPositions.set(leaderboardName, currentPosition);
-            
+
             // Check if position changed and empire is in top 100
             if (currentPosition !== previousPosition && currentPosition > 0 && currentPosition <= 100) {
                 this.sendWebhookNotification(leaderboardName, previousPosition, currentPosition);
             }
         }
-        
+
         // Update stored positions
         empireData.leaderboardPositions = currentPositions;
     }
-    
+
     /**
      * Sends a Discord webhook notification about leaderboard position change.
      * 
@@ -134,16 +133,16 @@ export default class LeaderboardChangeService implements OnStart {
             warn("LEADERBOARD_WEBHOOK is not set, skipping Discord notification.");
             return;
         }
-        
+
         const empireData = this.dataService.empireData;
         const empireName = empireData.name;
         const ownerName = getNameFromUserId(empireData.owner);
-        
+
         // Determine position change direction and emoji
         let changeText: string;
         let changeEmoji: string;
         let embedColor: number;
-        
+
         if (previousPosition === 0) {
             changeText = `entered the leaderboard at position **#${currentPosition}**`;
             changeEmoji = "📈";
@@ -157,7 +156,7 @@ export default class LeaderboardChangeService implements OnStart {
             changeEmoji = "⬇️";
             embedColor = 0xFF6600; // Orange
         }
-        
+
         // Create the webhook message
         const embed = {
             title: `${changeEmoji} Leaderboard Position Change`,
@@ -192,18 +191,18 @@ export default class LeaderboardChangeService implements OnStart {
                 }
             ]
         };
-        
+
         try {
             HttpService.PostAsync(webhookUrl, HttpService.JSONEncode({
                 embeds: [embed]
             }), Enum.HttpContentType.ApplicationJson);
-            
+
             print(`Leaderboard change notification sent for ${empireName}: ${leaderboardName} ${previousPosition} -> ${currentPosition}`);
         } catch (error) {
             warn(`Failed to send webhook notification: ${error}`);
         }
     }
-    
+
     /**
      * Starts the leaderboard monitoring loop.
      */
@@ -211,24 +210,19 @@ export default class LeaderboardChangeService implements OnStart {
         if (Sandbox.getEnabled()) {
             return;
         }
-        
-        // Don't run in studio unless specifically enabled
-        if (RunService.IsStudio()) {
-            return;
-        }
-        
+
         // Start the monitoring loop with 60-second intervals
         task.spawn(() => {
             // Initial check after a short delay to let other services initialize
             task.wait(10);
             this.checkLeaderboardPositions();
-            
+
             // Regular checks every 60 seconds
             while (task.wait(60)) {
                 this.checkLeaderboardPositions();
             }
         });
-        
+
         print("LeaderboardChangeService started - monitoring leaderboard positions every 60 seconds");
     }
 }

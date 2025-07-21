@@ -64,11 +64,13 @@
         "@rbxts/fuzzy-search": "^1.0.4",
         "@rbxts/luau-thread": "^1.0.1",
         "@rbxts/partcache": "^1.1.1",
+        "@rbxts/roact": "^3.0.1",
         "@rbxts/roman-numerals": "^1.0.2",
         "@rbxts/rparticle": "^1.0.0",
         "@rbxts/services": "^1.5.1",
         "@rbxts/stringbuilder": "^1.1.0",
         "@rbxts/testez": "^0.4.2-ts.0",
+        "@rbxts/ui-labs": "^2.4.0",
         "rbxts-asset-sync": "^0.2.0"
     }
 }

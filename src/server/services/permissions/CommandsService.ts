@@ -30,7 +30,7 @@ import Quest from "server/Quest";
 import BombsService from "server/services/boosts/BombsService";
 import { DonationService } from "server/services/DonationService";
 import ItemService from "server/services/item/ItemService";
-import { LeaderboardService } from "server/services/LeaderboardService";
+import { LeaderboardService } from "server/services/leaderboard/LeaderboardService";
 import ChatHookService from "server/services/permissions/ChatHookService";
 import PermissionsService from "server/services/permissions/PermissionsService";
 import ResetService from "server/services/ResetService";

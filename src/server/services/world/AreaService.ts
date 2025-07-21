@@ -23,7 +23,7 @@
 import { getAllInstanceInfo, isInside, playSoundAtPart } from "@antivivi/vrldk";
 import { OnInit, Service } from "@flamework/core";
 import { Players } from "@rbxts/services";
-import LeaderstatsService from "server/services/LeaderstatsService";
+import LeaderstatsService from "server/services/leaderboard/LeaderstatsService";
 import { OnPlayerJoined } from "server/services/ModdingService";
 import NPCNavigationService from "server/services/npc/NPCNavigationService";
 import DataService from "server/services/serverdata/DataService";

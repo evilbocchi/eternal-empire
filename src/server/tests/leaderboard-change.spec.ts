@@ -1,7 +1,7 @@
 /// <reference types="@rbxts/testez/globals" />
 
 import DataService from "server/services/serverdata/DataService";
-import LeaderboardChangeService from "server/services/LeaderboardChangeService";
+import LeaderboardChangeService from "server/services/leaderboard/LeaderboardChangeService";
 
 export = function () {
     describe("LeaderboardChangeService", () => {

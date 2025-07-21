@@ -12,7 +12,7 @@
 import Signal from "@antivivi/lemon-signal";
 import { OnStart, Service } from "@flamework/core";
 import { Players } from "@rbxts/services";
-import LeaderstatsService from "server/services/LeaderstatsService";
+import LeaderstatsService from "server/services/leaderboard/LeaderstatsService";
 import DataService from "server/services/serverdata/DataService";
 
 /**
