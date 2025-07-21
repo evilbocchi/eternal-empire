@@ -102,6 +102,10 @@ namespace Packets {
     export const dropletBurnt = signal<(dropletModelId: string, amountPerCurrency: Map<Currency, BaseOnoeNum>) => void>(true);
     export const applyImpulse = signal<(dropletModelId: string, impulse: Vector3) => void>(true);
 
+    // weather
+    export const weatherChanged = signal<(weatherState: object) => void>();
+    export const getWeatherState = request<() => object>();
+
     // currencies
     export const balance = property<Map<Currency, BaseOnoeNum>>(new Map(), true);
     export const mostBalance = property<Map<Currency, BaseOnoeNum>>(new Map(), true);
