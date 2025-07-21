@@ -47,7 +47,7 @@ declare global {
 export class LeaderboardService implements OnStart {
 
     /** OrderedDataStore for total time leaderboard. */
-    totalTimeStore = DataStoreService.GetOrderedDataStore("TotalTime1");
+    totalTimeStore = DataStoreService.GetOrderedDataStore("TotalTime");
 
     /** OrderedDataStore for donations leaderboard. */
     donatedStore = DataStoreService.GetOrderedDataStore("Donated");
@@ -177,7 +177,7 @@ export class LeaderboardService implements OnStart {
 
             let mostCurrencies = profile.mostCurrencies.get(currency);
             let amt = mostCurrencies === undefined ? undefined : new OnoeNum(mostCurrencies).toSingle();
-            const store = DataStoreService.GetOrderedDataStore(lb.Name + "1");
+            const store = DataStoreService.GetOrderedDataStore(lb.Name);
 
             if (isDeleting)
                 this.deleteEntry(store, deleteEntries);
