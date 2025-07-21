@@ -23,7 +23,7 @@ import { OnInit, OnStart, Service } from "@flamework/core";
 import { DataStoreService, HttpService, Players, RunService } from "@rbxts/services";
 import CurrencyService from "server/services/serverdata/CurrencyService";
 import DataService from "server/services/serverdata/DataService";
-import { MARKETPLACE_CONFIG } from "shared/marketplace/MarketplaceListing";
+import MARKETPLACE_CONFIG = require("shared/marketplace/MarketplaceListing");
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Packets from "shared/Packets";
 
@@ -112,7 +112,7 @@ export default class MarketplaceService implements OnInit, OnStart {
 
         try {
             // Validate that player owns the unique item
-            const empireData = this.dataService.getEmpireData();
+            const empireData = this.dataService.empireData;
             const uniqueItem = empireData.items.uniqueInstances.get(uuid);
             
             if (!uniqueItem) {
@@ -174,7 +174,9 @@ export default class MarketplaceService implements OnInit, OnStart {
 
             if (success === undefined) {
                 // Refund listing fee
-                this.currencyService.add(listingFee);
+                for (const [currency, amount] of listingFee.amounts) {
+                    this.currencyService.increment(currency, amount);
+                }
                 return false;
             }
 
@@ -217,7 +219,7 @@ export default class MarketplaceService implements OnInit, OnStart {
             }
 
             // Return item to player's inventory
-            const empireData = this.dataService.getEmpireData();
+            const empireData = this.dataService.empireData;
             
             // For now, we'll create a simple unique item entry
             // In a real implementation, you'd fetch the stored unique item data
@@ -232,7 +234,9 @@ export default class MarketplaceService implements OnInit, OnStart {
             // Refund listing fee (50% penalty)
             if (listing.listingFee !== undefined) {
                 const refund = listing.listingFee.mul(0.5);
-                this.currencyService.add(refund);
+                for (const [currency, amount] of refund.amounts) {
+                    this.currencyService.increment(currency, amount);
+                }
             }
 
             // Fire events
@@ -316,7 +320,7 @@ export default class MarketplaceService implements OnInit, OnStart {
             const sellerProceeds = listing.price.sub(tax);
 
             // Add item to buyer's inventory
-            const empireData = this.dataService.getEmpireData();
+            const empireData = this.dataService.empireData;
             
             // For now, we'll create a simple unique item entry
             // In a real implementation, you'd fetch the full unique item data

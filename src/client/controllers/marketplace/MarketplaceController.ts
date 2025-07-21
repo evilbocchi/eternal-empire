@@ -16,7 +16,7 @@
 
 import { Controller, OnInit, OnStart } from "@flamework/core";
 import { Players, UserInputService } from "@rbxts/services";
-import { MARKETPLACE_CONFIG } from "shared/marketplace/MarketplaceListing";
+import MARKETPLACE_CONFIG = require("shared/marketplace/MarketplaceListing");
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Packets from "shared/Packets";
 
@@ -32,25 +32,13 @@ export default class MarketplaceController implements OnInit, OnStart {
     private currentFilters: MarketplaceFilters = {};
     
     onInit() {
-        // Set up packet listeners
-        Packets.marketplaceListings.connect((listings) => {
-            this.updateListings(listings);
-        });
-
+        // Set up signal listeners
         Packets.listingUpdated.connect((listing) => {
             this.updateListing(listing);
         });
 
         Packets.listingRemoved.connect((uuid) => {
             this.removeListing(uuid);
-        });
-
-        Packets.myActiveListings.connect((listings) => {
-            this.updateMyListings(listings);
-        });
-
-        Packets.marketplaceEnabled.connect((enabled) => {
-            this.setMarketplaceEnabled(enabled);
         });
 
         Packets.marketplaceTransaction.connect((transaction) => {
@@ -349,7 +337,17 @@ export default class MarketplaceController implements OnInit, OnStart {
 
         if (this.marketplaceGui.Enabled) {
             // Request fresh marketplace data
-            Packets.getMarketplaceListings.fire();
+            Packets.getMarketplaceListings.inform();
+            
+            // Get property data directly
+            const listings = Packets.marketplaceListings.get();
+            this.updateListings(listings);
+            
+            const myListings = Packets.myActiveListings.get();
+            this.updateMyListings(myListings);
+            
+            const enabled = Packets.marketplaceEnabled.get();
+            this.setMarketplaceEnabled(enabled);
         }
     }
 
@@ -409,7 +407,7 @@ export default class MarketplaceController implements OnInit, OnStart {
     private updateSearch(searchText: string): void {
         this.currentFilters.search = searchText === "Search items..." ? undefined : searchText;
         // Request updated listings (simplified for now)
-        Packets.getMarketplaceListings.fire();
+        Packets.getMarketplaceListings.inform();
     }
 
     /**
@@ -466,27 +464,27 @@ export default class MarketplaceController implements OnInit, OnStart {
      * Creates a new listing.
      */
     createListing(uuid: string, price: CurrencyBundle, listingType: "buyout" | "auction", duration: number): void {
-        Packets.createListing.fire(uuid, price, listingType, duration);
+        Packets.createListing.inform(uuid, price, listingType, duration);
     }
 
     /**
      * Cancels a listing.
      */
     cancelListing(uuid: string): void {
-        Packets.cancelListing.fire(uuid);
+        Packets.cancelListing.inform(uuid);
     }
 
     /**
      * Buys an item.
      */
     buyItem(uuid: string): void {
-        Packets.buyItem.fire(uuid);
+        Packets.buyItem.inform(uuid);
     }
 
     /**
      * Places a bid on an auction.
      */
     placeBid(uuid: string, bidAmount: CurrencyBundle): void {
-        Packets.placeBid.fire(uuid, bidAmount);
+        Packets.placeBid.inform(uuid, bidAmount);
     }
 }
