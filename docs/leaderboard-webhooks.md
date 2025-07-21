@@ -1,6 +1,10 @@
-# Leaderboard Change Webhooks
+---
+title: Leaderboard Webhooks
+---
 
-This feature automatically sends Discord webhook notifications when an empire's leaderboard position changes.
+# Leaderboard Webhooks
+
+The server sends Discord webhook notifications when its empire's leaderboard position changes.
 
 ## Setup
 
@@ -14,7 +18,7 @@ This feature automatically sends Discord webhook notifications when an empire's 
    - Set `LEADERBOARD_WEBHOOK` to your Discord webhook URL
    - This follows the same pattern as the existing `PROGRESSION_WEBHOOK`
 
-## How it works
+## How It Works
 
 - Checks leaderboard positions every 60 seconds
 - Monitors all leaderboards: TimePlayed, Funds, Power, Skill, Donated
