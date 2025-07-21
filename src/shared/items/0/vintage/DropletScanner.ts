@@ -57,6 +57,17 @@ export = new Item(script.Name)
 
             const [globAdd, globMul, globPow] = RevenueService.getGlobal(FURNACE_UPGRADES);
             const [total, nerf] = RevenueService.calculateDropletValue(dropletModel, true, true);
+            
+            // Get weather multipliers for display
+            const weatherMultipliers = Server.Atmosphere.getWeatherMultipliers();
+            let weatherMultiplier = weatherMultipliers.dropletValue;
+            
+            // Check for lightning surge effect
+            const isLightningSurged = dropletModel.GetAttribute("LightningSurged") as boolean;
+            const surgeMultiplier = dropletModel.GetAttribute("SurgeMultiplier") as number;
+            if (isLightningSurged && surgeMultiplier) {
+                weatherMultiplier *= surgeMultiplier;
+            }
 
             const builder = new StringBuilder();
             builder.append("RAW WORTH: ").append(rawValue.toString(true));
@@ -98,6 +109,22 @@ export = new Item(script.Name)
             const washedPow = removeOnes(globPow);
             if (washedPow.amountPerCurrency.size() > 0)
                 builder.append("^").append(washedPow.toString(true));
+
+            // Display weather effects
+            if (weatherMultiplier !== 1) {
+                builder.append("\nWEATHER: ");
+                if (isLightningSurged && surgeMultiplier && surgeMultiplier > 1) {
+                    // Show base weather + lightning surge
+                    const baseWeatherMultiplier = weatherMultipliers.dropletValue;
+                    if (baseWeatherMultiplier !== 1) {
+                        builder.append("x").append(formatRichText(OnoeNum.toString(baseWeatherMultiplier), new Color3(0.5, 0.8, 1)));
+                    }
+                    builder.append(" + ").append(formatRichText("LIGHTNING", new Color3(1, 1, 0.3)));
+                    builder.append(" x").append(formatRichText(OnoeNum.toString(surgeMultiplier), new Color3(1, 1, 0.3)));
+                } else {
+                    builder.append("x").append(formatRichText(OnoeNum.toString(weatherMultiplier), new Color3(0.5, 0.8, 1)));
+                }
+            }
 
             if (nerf !== 1)
                 builder.append("\nNERF: /").append(OnoeNum.toString(1 / nerf));
