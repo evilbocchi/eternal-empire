@@ -26,7 +26,7 @@ import { CURRENCIES } from "shared/currency/CurrencyDetails";
 export default class LeaderboardChangeService implements OnStart {
     
     /** OrderedDataStore for total time leaderboard. */
-    private totalTimeStore = DataStoreService.GetOrderedDataStore("TotalTime1");
+    private totalTimeStore = DataStoreService.GetOrderedDataStore("TotalTime");
     
     /** OrderedDataStore for donations leaderboard. */
     private donatedStore = DataStoreService.GetOrderedDataStore("Donated");
@@ -45,7 +45,7 @@ export default class LeaderboardChangeService implements OnStart {
         for (const currency of CURRENCIES) {
             const lb = LEADERBOARDS.FindFirstChild(currency);
             if (lb !== undefined) {
-                this.leaderboardStores.set(currency, DataStoreService.GetOrderedDataStore(lb.Name + "1"));
+                this.leaderboardStores.set(currency, DataStoreService.GetOrderedDataStore(lb.Name));
             }
         }
     }
