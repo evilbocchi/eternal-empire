@@ -44,6 +44,15 @@ export default class MarketplaceController implements OnInit, OnStart {
         Packets.marketplaceTransaction.connect((transaction) => {
             this.onTransactionCompleted(transaction);
         });
+
+        // Terminal-specific signals
+        Packets.openMarketplaceTerminal.connect(() => {
+            this.openMarketplaceFromTerminal();
+        });
+
+        Packets.closeMarketplaceTerminal.connect(() => {
+            this.closeMarketplaceFromTerminal();
+        });
     }
 
     onStart() {
@@ -486,5 +495,35 @@ export default class MarketplaceController implements OnInit, OnStart {
      */
     placeBid(uuid: string, bidAmount: CurrencyBundle): void {
         Packets.placeBid.inform(uuid, bidAmount);
+    }
+
+    /**
+     * Opens marketplace from terminal with movement restriction.
+     */
+    private openMarketplaceFromTerminal(): void {
+        this.toggleMarketplace(true);
+        
+        // Disable GUI close button when opened from terminal
+        if (this.marketplaceGui) {
+            const closeButton = this.marketplaceGui.FindFirstChild("MainFrame")?.FindFirstChild("TitleBar")?.FindFirstChild("CloseButton") as TextButton;
+            if (closeButton) {
+                closeButton.Visible = false;
+            }
+        }
+    }
+
+    /**
+     * Closes marketplace from terminal and restores movement.
+     */
+    private closeMarketplaceFromTerminal(): void {
+        this.toggleMarketplace(false);
+        
+        // Re-enable GUI close button
+        if (this.marketplaceGui) {
+            const closeButton = this.marketplaceGui.FindFirstChild("MainFrame")?.FindFirstChild("TitleBar")?.FindFirstChild("CloseButton") as TextButton;
+            if (closeButton) {
+                closeButton.Visible = true;
+            }
+        }
     }
 }

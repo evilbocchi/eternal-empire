@@ -187,6 +187,10 @@ namespace Packets {
     export const listingRemoved = signal<(uuid: string) => void>();
     export const myActiveListings = property<Map<string, DataType.Packed<MarketplaceListing>>>(new Map());
     export const marketplaceEnabled = property<boolean>(true);
+    
+    // marketplace terminal
+    export const openMarketplaceTerminal = signal<() => void>();
+    export const closeMarketplaceTerminal = signal<() => void>();
 }
 
 export = Packets;
