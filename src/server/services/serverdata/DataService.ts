@@ -312,7 +312,14 @@ export const EmpireProfileTemplate = {
     savedItems: new Map<AreaId, Array<PlacedItem>>(),
     printedSetups: new Array<Setup>(),
     nameChanges: 0,
-    previousNames: new Set<string>()
+    previousNames: new Set<string>(),
+    
+    /**
+     * The current leaderboard positions of this empire.
+     * Key is the leaderboard name, value is the position (1 = first place, 2 = second, etc.)
+     * Undefined or 0 means not in top 100.
+     */
+    leaderboardPositions: new Map<string, number>()
 };
 
 export const PlayerProfileTemplate = {
