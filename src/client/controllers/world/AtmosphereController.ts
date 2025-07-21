@@ -16,7 +16,7 @@ import { Lighting, Workspace } from "@rbxts/services";
 import { AREAS } from "shared/Area";
 import ItemUtils from "shared/item/ItemUtils";
 import Packets from "shared/Packets";
-import { WeatherType, WeatherState } from "shared/weather/WeatherTypes";
+import { WeatherState, WeatherType } from "shared/weather/WeatherTypes";
 
 /**
  * Controller responsible for managing area lighting and atmosphere effects.
@@ -30,11 +30,10 @@ export default class AtmosphereController implements OnInit, OnStart {
     /** Map of Light instances to their base brightness. */
     lights = new Map<Light, number>();
 
+    rainy = false;
+
     /** Current weather state. */
     private currentWeather: WeatherState = { type: WeatherType.Clear, intensity: 0, duration: 300, timeRemaining: 300 };
-
-    /** Rain effect particles. */
-    private rainEffect?: Attachment;
 
     /**
      * Finds a Light instance within a given container.
@@ -96,14 +95,14 @@ export default class AtmosphereController implements OnInit, OnStart {
                         light.Shadows = qualityLevel === 10;
                     }
                     let brightness = qualityLevel === 1 ? 0 : (math.abs(Lighting.ClockTime - 12) / 8 - 0.25) * base * 2;
-                    
+
                     // Apply weather dimming effects
                     if (this.currentWeather.type === WeatherType.Cloudy) {
                         brightness *= 0.8; // Slightly dimmer for cloudy weather
                     } else if (this.currentWeather.type === WeatherType.Rainy || this.currentWeather.type === WeatherType.Thunderstorm) {
                         brightness *= 0.6; // Much dimmer for rain/thunderstorm
                     }
-                    
+
                     light.Brightness = brightness;
                 }
                 oldQualityLevel = qualityLevel;
@@ -116,7 +115,7 @@ export default class AtmosphereController implements OnInit, OnStart {
      */
     private updateWeatherEffects() {
         this.clearWeatherEffects();
-        
+
         switch (this.currentWeather.type) {
             case WeatherType.Clear:
                 this.applyClearWeather();
@@ -137,15 +136,12 @@ export default class AtmosphereController implements OnInit, OnStart {
      * Clears all weather effects.
      */
     private clearWeatherEffects() {
-        if (this.rainEffect) {
-            this.rainEffect.Destroy();
-            this.rainEffect = undefined;
-        }
-        
         // Reset atmospheric properties
         Lighting.Brightness = 2;
         Lighting.OutdoorAmbient = Color3.fromRGB(128, 128, 128);
         Lighting.FogEnd = 100000;
+
+        this.rainy = false;
     }
 
     /**
@@ -155,6 +151,8 @@ export default class AtmosphereController implements OnInit, OnStart {
         Lighting.Brightness = 2;
         Lighting.OutdoorAmbient = Color3.fromRGB(128, 128, 128);
         Lighting.FogEnd = 100000;
+
+        this.rainy = false;
     }
 
     /**
@@ -164,6 +162,8 @@ export default class AtmosphereController implements OnInit, OnStart {
         Lighting.Brightness = 1.5;
         Lighting.OutdoorAmbient = Color3.fromRGB(100, 100, 120);
         Lighting.FogEnd = 50000;
+
+        this.rainy = false;
     }
 
     /**
@@ -173,8 +173,8 @@ export default class AtmosphereController implements OnInit, OnStart {
         Lighting.Brightness = 1;
         Lighting.OutdoorAmbient = Color3.fromRGB(80, 80, 100);
         Lighting.FogEnd = 20000;
-        
-        this.createRainEffect();
+
+        this.rainy = true;
     }
 
     /**
@@ -184,46 +184,11 @@ export default class AtmosphereController implements OnInit, OnStart {
         Lighting.Brightness = 0.8;
         Lighting.OutdoorAmbient = Color3.fromRGB(60, 60, 80);
         Lighting.FogEnd = 15000;
-        
-        this.createRainEffect();
+
+        this.rainy = true;
     }
 
-    /**
-     * Creates rain particle effects.
-     */
-    private createRainEffect() {
-        const camera = Workspace.CurrentCamera;
-        if (!camera) return;
-        
-        // Create rain effect attachment
-        this.rainEffect = new Instance("Attachment");
-        this.rainEffect.Name = "RainEffect";
-        this.rainEffect.Parent = camera;
-        
-        // Create rain particles
-        const rain = new Instance("ParticleEmitter");
-        rain.Name = "Rain";
-        rain.Parent = this.rainEffect;
-        
-        // Configure rain particles
-        rain.Enabled = true;
-        rain.Texture = "rbxasset://textures/particles/water_splash_02_dripcatch.png";
-        rain.Lifetime = new NumberRange(1, 2);
-        rain.Rate = 500;
-        rain.SpreadAngle = new Vector2(5, 5);
-        rain.Speed = new NumberRange(30, 50);
-        rain.VelocityInheritance = 0;
-        rain.Acceleration = new Vector3(0, -50, 0);
-        rain.Size = new NumberSequence([
-            new NumberSequenceKeypoint(0, 0.1),
-            new NumberSequenceKeypoint(1, 0.1)
-        ]);
-        rain.Transparency = new NumberSequence([
-            new NumberSequenceKeypoint(0, 0.3),
-            new NumberSequenceKeypoint(1, 1)
-        ]);
-        rain.Color = new ColorSequence(Color3.fromRGB(200, 200, 255));
-        
-        print("Rain effect created");
+    private rainDrop() {
+        // TODO
     }
 }
