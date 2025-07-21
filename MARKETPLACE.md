@@ -74,10 +74,20 @@ The marketplace system allows players to list, buy, and sell unique items with U
 
 ### Player Usage
 
+#### Regular Interface
 - Press 'M' to open the marketplace interface
 - Browse existing listings in the "Browse" tab
 - View your active listings in "My Listings" tab
 - Create new listings in "Create Listing" tab
+
+#### Marketplace Terminal (Intermittent Isles)
+- **Marketplace Terminal** - A placeable item that provides automatic marketplace access
+- Purchase and place the terminal in Intermittent Isles (costs 1,000 Funds)
+- **Automatic Detection** - Standing within 15 studs (7.5 stud radius) automatically opens the marketplace
+- **Movement Restriction** - Player movement is disabled while the marketplace UI is open from a terminal
+- **Auto-Close** - The marketplace automatically closes when the player moves outside the detection range
+- **Cooldown System** - After leaving the area, there's a 2-second cooldown before the UI can reopen
+- **Visual Effects** - The terminal has a blue glow and particle effects to indicate it's active
 
 ## Data Structures
 
@@ -180,5 +190,52 @@ Cancel listing: true
 - External webhook URL must be configured for full trade recovery functionality
 - The system is designed to fail safely - if in doubt, it will cancel transactions
 - All marketplace operations are logged for audit and debugging purposes
+
+## Marketplace Terminal Implementation
+
+### Technical Details
+
+The Marketplace Terminal (`src/shared/items/tools/MarketplaceTerminal.ts`) provides a region-based marketplace interface:
+
+#### Key Features
+- **Region Detection**: Uses a 15x15 stud invisible detection zone around the terminal
+- **Automatic UI Management**: Opens marketplace UI when players enter, closes when they leave
+- **Movement Control**: Disables player movement (`PlatformStand = true`, `Sit = true`) while UI is active
+- **State Tracking**: Manages multiple concurrent players with individual state tracking
+- **Cooldown System**: Prevents immediate UI reopening after leaving the area
+
+#### Implementation Pattern
+```typescript
+// Server-side detection and control
+detectionRegion.Touched.Connect((hit) => {
+    // Detect player entry and open UI
+    Packets.openMarketplaceTerminal.fire(player);
+    // Disable movement
+    humanoid.PlatformStand = true;
+    humanoid.Sit = true;
+});
+
+// Continuous monitoring for exit detection
+RunService.Heartbeat.Connect(() => {
+    // Check distance and handle exits
+    if (distance > DETECTION_RANGE) {
+        Packets.closeMarketplaceTerminal.fire(player);
+        // Restore movement
+        humanoid.PlatformStand = false;
+        humanoid.Sit = false;
+    }
+});
+```
+
+#### Client-side Integration
+- Integrates with existing `MarketplaceController`
+- Hides close button when opened from terminal
+- Restores normal functionality when opened via hotkey
+- Visual effects include glowing and particle systems
+
+#### Files Added
+- `src/shared/items/tools/MarketplaceTerminal.ts` - Terminal item implementation
+- `src/shared/Packets.ts` - Added `openMarketplaceTerminal` and `closeMarketplaceTerminal` signals
+- `src/client/controllers/marketplace/MarketplaceController.ts` - Added terminal-specific UI handling
 
 This implementation provides a solid foundation for a secure, reliable marketplace system that can be expanded with additional features as needed.
