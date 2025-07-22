@@ -1,3 +1,4 @@
+import { func } from "@rbxts/react/src/prop-types";
 import { Debris, ReplicatedStorage, SoundService, StarterGui } from "@rbxts/services";
 import { assets } from "shared/asset/AssetMap";
 
@@ -49,6 +50,23 @@ export function getSound(path: Filename<SoundAssetPath>) {
     sound.SoundGroup = SOUND_EFFECTS_GROUP;
     sound.Parent = ReplicatedStorage;
     return sound;
+}
+
+/**
+ * Plays a sound at a specific part's position.
+ * 
+ * @param path The path to the sound asset.
+ * @param part The part where the sound should be played. If not provided, it plays in ReplicatedStorage.
+ * @param modifier An optional function to modify the sound instance before playing it.
+ */
+export function playSound(path: Filename<SoundAssetPath>, part?: BasePart, modifier?: (sound: Sound) => void) {
+    const sound = getSound(path).Clone();
+    Debris.AddItem(sound, (sound.TimeLength - sound.TimePosition) / sound.PlaybackSpeed + 0.1);
+    sound.Parent = part ?? ReplicatedStorage;
+    if (modifier) {
+        modifier(sound);
+    }
+    sound.Play();
 }
 
 /**
