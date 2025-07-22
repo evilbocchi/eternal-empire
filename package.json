@@ -3,10 +3,14 @@
     "version": "1.0.0",
     "description": "",
     "main": "index.js",
+    "type": "module",
     "bin": {
         "rokit": ""
     },
     "scripts": {
+        "test:build": "npx rojo build --output testingPlace.rbxlx",
+        "test:roblox": "rir.exe --script out/server/tests/runTests.luau --place testingPlace.rbxlx",
+        "test": "npm run test:build && npm run test:roblox",
         "asset-sync": "npx rbxts-asset-sync --output=src/shared/asset/AssetMap.ts",
         "asset-watch": "npx rbxts-asset-sync --watch --output=src/shared/asset/AssetMap.ts",
         "build": "npm run asset-sync & rbxtsc",

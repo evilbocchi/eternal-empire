@@ -3,8 +3,6 @@ import { OnoeNum } from "@antivivi/serikanum";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 
 export = function () {
-
-
     describe("constructor", () => {
 
         it("creates a number", () => {

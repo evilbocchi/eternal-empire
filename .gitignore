@@ -6,3 +6,5 @@
 flamework.build
 *.build
 .env
+compiledItems.txt
+testingPlace.rbxlx
