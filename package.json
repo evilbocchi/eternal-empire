@@ -8,9 +8,7 @@
         "rokit": ""
     },
     "scripts": {
-        "test:build": "npx rojo build --output testingPlace.rbxlx",
-        "test:roblox": "rir.exe --script out/server/tests/runTests.luau --place testingPlace.rbxlx",
-        "test": "npm run test:build && npm run test:roblox",
+        "test": "node test/runTests.js",
         "asset-sync": "npx rbxts-asset-sync --output=src/shared/asset/AssetMap.ts",
         "asset-watch": "npx rbxts-asset-sync --watch --output=src/shared/asset/AssetMap.ts",
         "build": "npm run asset-sync & rbxtsc",
@@ -32,6 +30,7 @@
     "devDependencies": {
         "@rbxts/compiler-types": "^3.0.0-types.0",
         "@rbxts/types": "^1.0.864",
+        "axios": "^1.11.0",
         "concurrently": "^9.2.0",
         "eslint": "^9.31.0",
         "eslint-plugin-roblox-ts": "^0.0.36",
@@ -42,13 +41,15 @@
         "roblox-ts": "^3.0.0",
         "rojo": "^1.0.2",
         "rokit-npm": "^1.0.1",
+        "signale": "^1.4.0",
         "tsx": "^4.20.3",
         "typedoc": "^0.28.7",
         "typedoc-material-theme": "^1.4.0",
         "typedoc-plugin-extras": "^4.0.1",
         "typedoc-plugin-missing-exports": "^4.0.0",
         "typedoc-plugin-rename-defaults": "^0.7.3",
-        "typescript": "^5.5.3"
+        "typescript": "^5.5.3",
+        "typescript-eslint": "^8.38.0"
     },
     "dependencies": {
         "@antivivi/fletchette": "^2.0.2",

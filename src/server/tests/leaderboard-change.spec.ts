@@ -5,13 +5,8 @@ import LeaderboardChangeService from "server/services/leaderboard/LeaderboardCha
 
 export = function () {
     describe("LeaderboardChangeService", () => {
-        let dataService: DataService;
-        let leaderboardChangeService: LeaderboardChangeService;
-
-        beforeEach(() => {
-            dataService = new DataService();
-            leaderboardChangeService = new LeaderboardChangeService(dataService);
-        });
+        const dataService = new DataService();
+        const leaderboardChangeService = new LeaderboardChangeService(dataService);
 
         it("creates successfully", () => {
             expect(leaderboardChangeService).to.be.ok();

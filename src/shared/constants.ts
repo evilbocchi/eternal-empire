@@ -1,20 +1,44 @@
-import { Players, RunService, SoundService, TextChatService, Workspace } from "@rbxts/services";
+import { Debris, Players, RunService, SoundService, TextChatService, Workspace } from "@rbxts/services";
 import { AREAS } from "shared/Area";
 
 declare global {
     type AreaId = keyof (typeof AREAS);
 }
 
+/**
+ * Whether the current context is the server.
+ */
 export const IS_SERVER = RunService.IsServer();
+
+/**
+ * Whether the game is running in a Continuous Integration (CI) environment.
+ * 
+ * This is true when physics simulation is not running.
+ */
+export const IS_CI = !RunService.IsRunning();
+
+/**
+ * Whether the game is in Single Server mode.
+ */
 export const IS_SINGLE_SERVER = game.PlaceId === 17479698702;
 
+/**
+ * Creates a folder in the Workspace.
+ * 
+ * @param name The name of the folder to create.
+ * @returns The created folder instance.
+ */
 function createFolder(name: string) {
-    if (IS_SERVER) {
+    if (IS_SERVER || IS_CI) {
         const folder = new Instance("Folder");
         folder.Name = name;
         folder.Parent = Workspace;
+        if (IS_CI) {
+            Debris.AddItem(folder, 30); // Automatically clean up the folder after 30 seconds
+        }
         return folder;
     }
+
     return Workspace.FindFirstChild(name)!;
 }
 
