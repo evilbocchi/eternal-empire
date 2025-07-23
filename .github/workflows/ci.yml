@@ -79,7 +79,7 @@ jobs:
           LICENSE
 
     - name: Create GitHub Release
-      if: ${{ github.event_name == 'push' || inputs.create_release }}
+      if: ${{ inputs.create_release }}
       uses: softprops/action-gh-release@v1
       with:
         files: build-artifacts/jme-${{ steps.version.outputs.release_version }}.zip
