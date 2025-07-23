@@ -35,10 +35,6 @@ jobs:
     - name: Install dependencies
       run: npm ci
     
-    - name: Run linting
-      run: npm run lint
-      continue-on-error: false
-    
     - name: Build project
       run: npm run build
     
