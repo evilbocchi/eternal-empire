@@ -1,26 +1,10 @@
-import { Debris, Players, RunService, SoundService, TextChatService, Workspace } from "@rbxts/services";
+import { Debris, Players, SoundService, TextChatService, Workspace } from "@rbxts/services";
 import { AREAS } from "shared/Area";
+import { IS_CI, IS_SERVER } from "shared/Context";
 
 declare global {
     type AreaId = keyof (typeof AREAS);
 }
-
-/**
- * Whether the current context is the server.
- */
-export const IS_SERVER = RunService.IsServer();
-
-/**
- * Whether the game is running in a Continuous Integration (CI) environment.
- * 
- * This is true when physics simulation is not running.
- */
-export const IS_CI = !RunService.IsRunning();
-
-/**
- * Whether the game is in Single Server mode.
- */
-export const IS_SINGLE_SERVER = game.PlaceId === 17479698702;
 
 /**
  * Creates a folder in the Workspace.

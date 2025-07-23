@@ -20,13 +20,19 @@ function SetupOption({
 }: SetupOptionProps) {
 
     const onSave = () => {
-        playSound("MagicSprinkle.mp3");
-        print("Save clicked");
+        playSound("MagicSprinkle.mp3", undefined, (sound) => {
+            sound.PlaybackSpeed = 1.15;
+        });
+        
     };
 
     const onLoad = () => {
-        playSound("MagicSprinkle.mp3");
-        print("Load clicked");
+        playSound("MagicSprinkle.mp3", undefined, (sound) => {
+            sound.PlaybackSpeed = 0.95;
+            const reverb = new Instance("ReverbSoundEffect");
+            reverb.Parent = sound;
+        });
+        
     };
 
     return (

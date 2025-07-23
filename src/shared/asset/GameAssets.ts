@@ -1,6 +1,7 @@
-import { func } from "@rbxts/react/src/prop-types";
 import { Debris, ReplicatedStorage, SoundService, StarterGui } from "@rbxts/services";
+import { Environment } from "@rbxts/ui-labs";
 import { assets } from "shared/asset/AssetMap";
+import { IS_CI } from "shared/Context";
 
 declare global {
     /**
@@ -60,12 +61,24 @@ export function getSound(path: Filename<SoundAssetPath>) {
  * @param modifier An optional function to modify the sound instance before playing it.
  */
 export function playSound(path: Filename<SoundAssetPath>, part?: BasePart, modifier?: (sound: Sound) => void) {
-    const sound = getSound(path).Clone();
-    Debris.AddItem(sound, (sound.TimeLength - sound.TimePosition) / sound.PlaybackSpeed + 0.1);
-    sound.Parent = part ?? ReplicatedStorage;
+    let sound = getSound(path);
+    if (IS_CI) {
+        print(Environment.PluginWidget)
+        sound.Parent = Environment.PluginWidget;
+    }
+    else {
+        sound = sound.Clone();
+        sound.Parent = part ?? ReplicatedStorage;
+    }
+
+    task.delay(1, () => {
+        Debris.AddItem(sound, (sound.TimeLength - sound.TimePosition) / sound.PlaybackSpeed);
+    });
+
     if (modifier) {
         modifier(sound);
     }
+
     sound.Play();
 }
 

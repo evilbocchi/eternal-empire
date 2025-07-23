@@ -46,7 +46,7 @@ import ChestService from "server/services/world/ChestService";
 import UnlockedAreasService from "server/services/world/UnlockedAreasService";
 import { AREAS } from "shared/Area";
 import { ASSETS, getSound } from "shared/asset/GameAssets";
-import { IS_SINGLE_SERVER } from "shared/constants";
+import { IS_SINGLE_SERVER } from "shared/Context";
 import { CURRENCY_DETAILS } from "shared/currency/CurrencyDetails";
 import GameSpeed from "shared/GameSpeed";
 import { DROPLET_STORAGE } from "shared/item/Droplet";

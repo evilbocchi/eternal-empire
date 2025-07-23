@@ -1,13 +1,54 @@
 import React from "@rbxts/react";
 import { RobotoSlab } from "shared/ui/GameFonts";
+import { TweenService, RunService } from "@rbxts/services";
+import { playSound } from "shared/asset/GameAssets";
 
 interface ToggleSwitchProps {
     label: string;
-    isEnabled: boolean;
-    onToggle?: () => void;
+    initialEnabled?: boolean;
+    onToggle?: (newState: boolean) => void;
 }
 
-function ToggleSwitch({ label, isEnabled, onToggle }: ToggleSwitchProps) {
+function ToggleSwitch({ label, initialEnabled = false, onToggle }: ToggleSwitchProps) {
+    const [isEnabled, setIsEnabled] = React.useState(initialEnabled);
+    const toggleRef = React.useRef<Frame>();
+    const buttonRef = React.useRef<TextButton>();
+
+    const handleToggle = () => {
+        const newState = !isEnabled;
+        if (newState) {
+            playSound("CheckOn.mp3");
+        }
+        else {
+            playSound("CheckOff.mp3");
+        }
+        setIsEnabled(newState);
+
+        // Animate the toggle
+        if (toggleRef.current && buttonRef.current) {
+            const targetPosition = newState ? new UDim2(1, -4, 0.5, 0) : new UDim2(0, 4, 0.5, 0);
+            const targetAnchor = newState ? new Vector2(1, 0.5) : new Vector2(0, 0.5);
+            const targetColor = newState ? Color3.fromRGB(127, 255, 127) : Color3.fromRGB(255, 79, 79);
+
+            const tweenInfo = new TweenInfo(
+                0.4,
+                Enum.EasingStyle.Quart,
+                Enum.EasingDirection.Out
+            );
+
+            // Tween position and color
+            TweenService.Create(toggleRef.current, tweenInfo, {
+                Position: targetPosition,
+                AnchorPoint: targetAnchor,
+                BackgroundColor3: targetColor
+            }).Play();
+        }
+
+        if (onToggle) {
+            onToggle(newState);
+        }
+    };
+
     const toggleColor = isEnabled ? Color3.fromRGB(127, 255, 127) : Color3.fromRGB(255, 79, 79);
     const togglePosition = isEnabled ? new UDim2(1, -4, 0.5, 0) : new UDim2(0, 4, 0.5, 0);
     const toggleAnchor = isEnabled ? new Vector2(1, 0.5) : new Vector2(0, 0.5);
@@ -38,7 +79,8 @@ function ToggleSwitch({ label, isEnabled, onToggle }: ToggleSwitchProps) {
             />
             <textbutton
                 key="ToggleButton"
-                BackgroundColor3={Color3.fromRGB(50, 50, 50)}
+                ref={buttonRef}
+                BackgroundColor3={toggleColor.Lerp(Color3.fromRGB(0, 0, 0), 0.8)}
                 BorderSizePixel={0}
                 Font={Enum.Font.SourceSans}
                 LayoutOrder={5}
@@ -47,11 +89,12 @@ function ToggleSwitch({ label, isEnabled, onToggle }: ToggleSwitchProps) {
                 TextColor3={Color3.fromRGB(0, 0, 0)}
                 TextSize={14}
                 Event={{
-                    Activated: onToggle
+                    Activated: handleToggle
                 }}
             >
                 <uistroke ApplyStrokeMode={Enum.ApplyStrokeMode.Border} Thickness={2} />
                 <frame
+                    ref={toggleRef}
                     AnchorPoint={toggleAnchor}
                     BackgroundColor3={toggleColor}
                     BorderSizePixel={0}

@@ -9,7 +9,7 @@ interface SetupBodyProps {
     onToggleAutoload?: () => void;
 }
 
-function SetupBody({ isAutoloadEnabled, onSave, onLoad, onToggleAutoload }: SetupBodyProps) {
+function SetupBody({ onSave, onLoad, onToggleAutoload }: SetupBodyProps) {
     return (
         <frame key="Body" BackgroundTransparency={1} Size={new UDim2(1, 0, 0.66, 0)}>
             <ActionButton
@@ -32,7 +32,6 @@ function SetupBody({ isAutoloadEnabled, onSave, onLoad, onToggleAutoload }: Setu
             />
             <ToggleSwitch
                 label="Alert when affordable"
-                isEnabled={isAutoloadEnabled}
                 onToggle={onToggleAutoload}
             />
         </frame>

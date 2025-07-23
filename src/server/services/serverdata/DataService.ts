@@ -25,7 +25,8 @@ import { ProfileManager } from "@antivivi/vrldk";
 import { OnInit, Service } from "@flamework/core";
 import { BadgeService, DataStoreService, HttpService, MarketplaceService, Players, RunService, TeleportService, Workspace } from "@rbxts/services";
 import { OnPlayerJoined } from "server/services/ModdingService";
-import { IS_CI, IS_SERVER, IS_SINGLE_SERVER, getNameFromUserId, getStartCamera, isStartScreenEnabled } from "shared/constants";
+import { getNameFromUserId, getStartCamera, isStartScreenEnabled } from "shared/constants";
+import { IS_CI, IS_SERVER, IS_SINGLE_SERVER } from "shared/Context";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import { CURRENCY_DETAILS } from "shared/currency/CurrencyDetails";
 import Item from "shared/item/Item";
@@ -520,7 +521,7 @@ export default class DataService implements OnInit, OnPlayerJoined {
         }
 
         if (empireProfile === undefined)
-                throw "Could not load empire";
+            throw "Could not load empire";
 
         const empireData = empireProfile.Data;
 

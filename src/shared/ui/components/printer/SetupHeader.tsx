@@ -15,11 +15,39 @@ function SetupHeader({ setupName, cost, onEditClick }: SetupHeaderProps) {
                 key="EditButton"
                 BackgroundTransparency={1}
                 Image={getAsset("assets/PrinterNameEdit.png")}
-                ImageTransparency={0.2}
+                ImageTransparency={0.1}
                 LayoutOrder={2}
                 Size={new UDim2(0.6, 0, 0.6, 0)}
                 Event={{
-                    Activated: onEditClick
+                    Activated: onEditClick,
+                    MouseEnter: (rbx) => {
+                        const tween = game.GetService("TweenService").Create(rbx,
+                            new TweenInfo(0.2, Enum.EasingStyle.Bounce, Enum.EasingDirection.Out),
+                            { Size: new UDim2(0.65, 0, 0.65, 0) }
+                        );
+                        tween.Play();
+                    },
+                    MouseLeave: (rbx) => {
+                        const tween = game.GetService("TweenService").Create(rbx,
+                            new TweenInfo(0.15, Enum.EasingStyle.Back, Enum.EasingDirection.Out),
+                            { Size: new UDim2(0.6, 0, 0.6, 0) }
+                        );
+                        tween.Play();
+                    },
+                    MouseButton1Down: (rbx) => {
+                        const tween = game.GetService("TweenService").Create(rbx,
+                            new TweenInfo(0.1, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut),
+                            { Size: new UDim2(0.55, 0, 0.55, 0) }
+                        );
+                        tween.Play();
+                    },
+                    MouseButton1Up: (rbx) => {
+                        const tween = game.GetService("TweenService").Create(rbx,
+                            new TweenInfo(0.2, Enum.EasingStyle.Bounce, Enum.EasingDirection.Out),
+                            { Size: new UDim2(0.65, 0, 0.65, 0) }
+                        );
+                        tween.Play();
+                    }
                 }}
             >
                 <uiaspectratioconstraint />

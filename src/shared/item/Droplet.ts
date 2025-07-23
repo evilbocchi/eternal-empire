@@ -5,7 +5,7 @@ import Difficulty from "@antivivi/jjt-difficulties";
 import { getAllInstanceInfo, getInstanceInfo } from "@antivivi/vrldk";
 import { Debris, RunService, TweenService, Workspace } from "@rbxts/services";
 import { ASSETS } from "shared/asset/GameAssets";
-import { IS_CI, IS_SERVER } from "shared/constants";
+import { IS_CI, IS_SERVER } from "shared/Context";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import { Server } from "shared/item/ItemUtils";
 import Operative from "shared/item/traits/Operative";
