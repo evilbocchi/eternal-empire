@@ -32,7 +32,7 @@
         "@rbxts/types": "^1.0.864",
         "axios": "^1.11.0",
         "concurrently": "^9.2.0",
-        "eslint": "^9.31.0",
+        "eslint": "^9.32.0",
         "eslint-plugin-roblox-ts": "^0.0.36",
         "prettier": "^3.1.1",
         "rbxts-transform-env": "^3.0.0",
