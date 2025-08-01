@@ -28,7 +28,7 @@ export default class AtmosphereService implements OnInit, OnPhysics {
     /**
      * Current weather state.
      */
-    private currentWeather: WeatherState = {
+    currentWeather: WeatherState = {
         type: WeatherType.Clear,
         intensity: 0,
         duration: 300, // 5 minutes

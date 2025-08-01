@@ -321,7 +321,7 @@ export default class QuestService implements OnInit {
                 length: quest.length,
                 reward: quest.reward,
                 order: quest.order,
-                stages: new Array()
+                stages: [],
             };
 
             // Set up stage position tracking

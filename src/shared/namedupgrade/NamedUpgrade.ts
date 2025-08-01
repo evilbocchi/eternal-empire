@@ -7,6 +7,7 @@ import CurrencyBundle from "shared/currency/CurrencyBundle";
  * Provides method chaining for configuration and an `apply` method to apply upgrade effects.
  * @template T The value type this upgrade operates on.
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export default abstract class NamedUpgrade<T = any> {
 
     types = new Set<string>();

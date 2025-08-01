@@ -9,6 +9,7 @@
     },
     "scripts": {
         "test": "node test/runTests.js",
+        "lint": "npx eslint src --no-error-on-unmatched-pattern",
         "asset-sync": "npx rbxts-asset-sync --output=src/shared/asset/AssetMap.ts",
         "asset-watch": "npx rbxts-asset-sync --watch --output=src/shared/asset/AssetMap.ts",
         "build": "npm run asset-sync & rbxtsc",

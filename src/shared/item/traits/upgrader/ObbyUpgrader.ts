@@ -49,6 +49,7 @@ export default class ObbyUpgrader extends ItemTrait {
                 case "WinPart":
                     part.CanTouch = true;
                     part.CanCollide = false;
+                    break;
                 default:
                     break;
             }
