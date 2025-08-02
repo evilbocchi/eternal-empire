@@ -1,3 +1,7 @@
+---
+title: Continuous Integration Setup
+---
+
 # Continuous Integration Setup
 
 This project includes automated CI/CD pipelines for testing, linting, and building.
