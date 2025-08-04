@@ -30,7 +30,7 @@
     "private": true,
     "devDependencies": {
         "@rbxts/compiler-types": "^3.0.0-types.0",
-        "@rbxts/types": "^1.0.865",
+        "@rbxts/types": "^1.0.867",
         "axios": "^1.11.0",
         "concurrently": "^9.2.0",
         "eslint": "^9.32.0",
