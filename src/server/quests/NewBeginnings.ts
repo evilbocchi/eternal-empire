@@ -15,6 +15,17 @@ const triaHumanoid = triaModel.FindFirstChildOfClass("Humanoid")!;
 const triaRootPart = triaHumanoid.RootPart!;
 const characterTween = TweenService.Create(triaRootPart, new TweenInfo(1), { CFrame: waypoint1.CFrame });
 
+const triaToMine = Server.NPC.Navigation.createPathfindingOperation(
+    triaHumanoid,
+    getWaypoint("NewBeginningsEnd").CFrame,
+    getWaypoint("NewBeginnings1").CFrame
+);
+const triaToHome = Server.NPC.Navigation.createPathfindingOperation(
+    triaHumanoid,
+    getWaypoint("NewBeginnings1").CFrame,
+    getWaypoint("NewBeginningsEnd").CFrame
+);
+
 export = new Quest(script.Name)
     .setName("New Beginnings")
     .setLength(1)
@@ -54,8 +65,8 @@ export = new Quest(script.Name)
             ReplicatedStorage.SetAttribute("Intro", false);
             Server.NPC.State.stopAnimation(Tria, "Default");
             task.wait(2);
-            const connection = Server.NPC.Navigation.leadToPoint(triaHumanoid, stage.focus!.CFrame, () => stage.completed.fire());
-            return () => connection.Disconnect();
+            triaToMine().onComplete(() => stage.completed.fire());
+            return () => {};
         })
     )
     .addStage(new Stage()
@@ -113,7 +124,7 @@ export = new Quest(script.Name)
                     const c2 = Server.Dialogue.dialogueFinished.connect((dialogue) => {
                         if (dialogue === continuation) {
                             c2.disconnect();
-                            Server.NPC.Navigation.leadToPoint(triaHumanoid, getWaypoint("NewBeginningsEnd").CFrame, () => {
+                            triaToHome().onComplete(() => {
                                 Server.NPC.State.playAnimation(Tria, "Default");
                             });
                             stage.completed.fire();

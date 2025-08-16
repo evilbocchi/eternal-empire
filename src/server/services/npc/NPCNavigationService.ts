@@ -20,6 +20,7 @@ import { getNPCPosition, getWaypoint, PLACED_ITEMS_FOLDER } from "shared/constan
 import { getSound } from "shared/asset/GameAssets";
 import GameSpeed from "shared/GameSpeed";
 import Sandbox from "shared/Sandbox";
+import Signal from "@antivivi/lemon-signal";
 
 declare global {
     /** Function type for handling product purchases. */
@@ -62,6 +63,36 @@ export default class NPCNavigationService implements OnInit, OnStart, OnPhysics 
     }
 
     /**
+     * Calculate waypoints for NPC navigation.
+     *
+     * @param humanoid The NPC's humanoid.
+     * @param source The starting position.
+     * @param destination The target position.
+     * @param params Pathfinding parameters.
+     * @param retries Number of retry attempts.
+     * @returns An array of waypoints or undefined if no path is found.
+     */
+    getWaypoints(humanoid: Humanoid, source: Vector3, destination: Vector3, params: AgentParameters = this.PATHFINDING_PARAMS, retries = 0): PathWaypoint[] | undefined {
+        if (humanoid === undefined || humanoid.RootPart === undefined) {
+            warn("Humanoid or RootPart is undefined");
+            return;
+        }
+        params.Costs = this.PATHFINDING_COSTS;
+        const path = PathfindingService.CreatePath(params);
+        path.ComputeAsync(source, destination);
+        const waypoints = path.GetWaypoints();
+        if (waypoints.isEmpty()) {
+            warn("No path found");
+            if (retries < 3) {
+                return this.getWaypoints(humanoid, source.add(new Vector3(0, 1, 0)), destination, params, retries + 1);
+            }
+            return;
+        }
+        return waypoints;
+
+    }
+
+    /**
      * Makes an NPC navigate to a specific position using Roblox pathfinding.
      * Handles waypoint following, jump actions, and failure recovery.
      *
@@ -74,19 +105,12 @@ export default class NPCNavigationService implements OnInit, OnStart, OnPhysics 
      */
     pathfind(
         humanoid: Humanoid,
-        position: Vector3,
+        waypoints: PathWaypoint[],
         endCallback: () => unknown,
-        params: AgentParameters = this.PATHFINDING_PARAMS,
-        iterations?: number
     ) {
-        if (iterations !== undefined && iterations <= 0) {
+        const rootPart = humanoid.RootPart;
+        if (rootPart === undefined)
             return;
-        }
-        const rootPart = humanoid.RootPart!;
-        params.Costs = this.PATHFINDING_COSTS;
-        const path = PathfindingService.CreatePath(params);
-        path.ComputeAsync(rootPart.Position, position);
-        const waypoints = path.GetWaypoints();
         let i = 0;
         let newPos: Vector3 | undefined;
 
@@ -129,72 +153,98 @@ export default class NPCNavigationService implements OnInit, OnStart, OnPhysics 
             }
         });
 
-        // Retry with adjusted position if no path found
-        if (waypoints.isEmpty()) {
-            warn("No path found");
-            this.pathfind(humanoid, position.add(new Vector3(0, 1, 0)), endCallback, params, iterations === undefined ? 2 : iterations - 1);
-            return;
-        }
-
         doNextWaypoint();
         return connection;
     }
 
     /**
-     * Guides an NPC humanoid to a point, optionally requiring a player.
-     * 
+     * Calculates a function for guiding an NPC humanoid to a point.
+     *
+     * This should preferably be called a moderate time before the NPC has to move, as pathfinding can take time.
+     *
      * @param npcHumanoid The humanoid instance.
-     * @param point The target CFrame.
-     * @param callback Called when reached.
-     * @param requiresPlayer If true, waits for player proximity.
+     * @param source The starting position.
+     * @param destination The target position.
+     * @param requiresPlayer If true, waits for player proximity before firing the signal.
      * @param agentParams Optional pathfinding parameters.
+     *
+     * @returns A function that can be called to start traversing the path.
      */
-    leadToPoint(
+    createPathfindingOperation(
         npcHumanoid: Instance,
-        point: CFrame,
-        callback: () => unknown,
+        source: CFrame,
+        destination: CFrame,
         requiresPlayer?: boolean,
         agentParams?: AgentParameters
     ) {
+        // Validate parameters
         if (!npcHumanoid.IsA("Humanoid"))
             throw npcHumanoid.Name + " is not a Humanoid";
+        npcHumanoid.RootPart!.Anchored = false;
+
+        // Cancel any ongoing pathfinding
         const cached = this.runningPathfinds.get(npcHumanoid);
         if (cached !== undefined)
             cached.Disconnect();
-        npcHumanoid.RootPart!.Anchored = false;
-        const tween = TweenService.Create(npcHumanoid.RootPart!, new TweenInfo(1), { CFrame: point });
+
+        // Load waypoints and tweens
+        const waypoints = this.getWaypoints(npcHumanoid, source.Position, destination.Position, agentParams);
+        if (waypoints === undefined || waypoints.isEmpty()) {
+            throw `No valid waypoints found from ${source.Position} to ${destination.Position} for ${npcHumanoid.Name}`;
+        }
+
+        const tween = TweenService.Create(npcHumanoid.RootPart!, new TweenInfo(1), { CFrame: destination });
         let toCall = false;
-        this.pathfind(npcHumanoid, point.Position, () => {
-            tween.Play();
-            if (requiresPlayer === false) {
-                toCall = true;
-            }
-        }, agentParams);
-        const connection = RunService.Heartbeat.Connect(() => {
-            const players = Players.GetPlayers();
-            for (const player of players) {
-                const playerRootPart = getRootPart(player);
-                if (playerRootPart === undefined)
-                    continue;
-                if (point.Position.sub(playerRootPart.Position).Magnitude < 10) {
-                    tween.Play();
-                    toCall = true;
-                    connection.Disconnect();
-                    return;
+        
+        /**
+         * Starts the pathfinding operation.
+         *
+         * @returns The response object containing waypoints and the fitting tween.
+         */
+        const start = () => {
+            const callbacks = new WeakSet<() => unknown>();
+            const body = {
+                waypoints,
+                fittingTween: tween,
+                onComplete: (callback: () => unknown) => {
+                    callbacks.add(callback);
                 }
-            }
-        });
-        task.spawn(() => {
-            while (!toCall) {
-                RunService.Heartbeat.Wait();
-            }
-            print("Reached point", npcHumanoid.Name, point.Position);
-            if (callback !== undefined) {
-                callback();
-            }
-        });
-        this.runningPathfinds.set(npcHumanoid, connection);
-        return connection;
+            };
+
+            this.pathfind(npcHumanoid, waypoints, () => {
+                tween.Play();
+                if (requiresPlayer === false) {
+                    toCall = true;
+                }
+            });
+
+            const connection = RunService.Heartbeat.Connect(() => {
+                const players = Players.GetPlayers();
+                for (const player of players) {
+                    const playerRootPart = getRootPart(player);
+                    if (playerRootPart === undefined)
+                        continue;
+                    if (destination.Position.sub(playerRootPart.Position).Magnitude < 10) {
+                        tween.Play();
+                        toCall = true;
+                        connection.Disconnect();
+                        return;
+                    }
+                }
+            });
+            task.spawn(() => {
+                while (!toCall) {
+                    RunService.Heartbeat.Wait();
+                }
+                print("Reached point", npcHumanoid.Name, destination.Position);
+                callbacks.forEach(callback => callback());
+                connection.Disconnect();
+            });
+            this.runningPathfinds.set(npcHumanoid, connection);
+            return body;
+        };
+
+        return start;
     }
 
     // Lifecycle Methods

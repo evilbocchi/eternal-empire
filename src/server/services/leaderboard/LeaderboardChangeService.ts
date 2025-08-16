@@ -222,7 +222,5 @@ export default class LeaderboardChangeService implements OnStart {
                 this.checkLeaderboardPositions();
             }
         });
-
-        print("LeaderboardChangeService started - monitoring leaderboard positions every 60 seconds");
     }
 }
