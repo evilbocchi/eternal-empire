@@ -131,18 +131,18 @@ export class Stage {
     }
 
     /**
-     * Registers a callback to run when the stage starts, optionally with a load callback.
+     * Registers a callback to run when the stage is reached, optionally with a load callback.
      * 
-     * @param start The start callback, returning an optional cleanup function.
+     * @param reached The reached callback, returning an optional cleanup function.
      * @param load Optional load callback.
      * @returns This stage instance.
      */
-    onStart(start: (stage: this) => (() => void), load?: (stage: this) => (() => void)) {
+    onReached(reached: (stage: this) => (() => void), load?: (stage: this) => (() => void)) {
         return this.onLoad((stage) => {
             const mainCallback = load === undefined ? undefined : load(stage);
             let callback: () => void;
             Server.Quest.onStageReached(this, () => {
-                callback = start(stage);
+                callback = reached(stage);
             });
             return () => {
                 if (callback !== undefined)
@@ -326,7 +326,7 @@ export default class Quest {
         }
         const stage = new Stage()
             .setDescription(`Complete the quest "${depQuest.name}" before starting this.`)
-            .onStart(() => {
+            .onReached(() => {
                 while (Server.Quest.isQuestCompleted(questId) === false) {
                     task.wait(2);
                 }

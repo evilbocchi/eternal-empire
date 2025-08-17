@@ -43,7 +43,7 @@ export = new Quest(script.Name)
                 .monologue("...can you not disturb my sleep.")
                 .root
         )
-        .onStart((stage) => {
+        .onReached((stage) => {
             chuckRootPart.Position = stage.position!;
             const continuation = new Dialogue(Chuck, "So, you want to craft something?")
                 .monologue("That's surprising... Most people nowadays simply avoid what they call a 'primitive' method of creating items.")
@@ -74,7 +74,7 @@ export = new Quest(script.Name)
         .setDialogue(
             new Dialogue(Chuck, "You got the stuff?")
         )
-        .onStart((stage) => {
+        .onReached((stage) => {
             const ItemService = Server.Item;
             const ricargDialogue = new Dialogue(Ricarg, "Hahah... money... haah...")
                 .monologue("Wait, who are you again?")
@@ -121,7 +121,7 @@ export = new Quest(script.Name)
         .setDialogue(
             new Dialogue(Chuck, "Come with me.")
         )
-        .onStart((stage) => {
+        .onReached((stage) => {
             Server.NPC.State.stopAnimation(Chuck, "Default");
             chuckRootPart.Anchored = false;
             chuckToCraftingTable().onComplete(() => stage.complete());
@@ -138,7 +138,7 @@ export = new Quest(script.Name)
                 .monologue("I'll give you some resources. Go ahead and craft something. Let's see what you can do.")
                 .root
         )
-        .onStart((stage) => {
+        .onReached((stage) => {
             Server.NPC.State.stopAnimation(Chuck, "Default");
             chuckRootPart.CFrame = WAYPOINTS.CraftingManiaChuckCraftingAssistance.CFrame;
 
@@ -158,7 +158,7 @@ export = new Quest(script.Name)
         .setDialogue(
             new Dialogue(Chuck, "Let's see what you're capable of.")
         )
-        .onStart((stage) => {
+        .onReached((stage) => {
             Server.NPC.State.stopAnimation(Chuck, "Default");
             chuckRootPart.CFrame = WAYPOINTS.CraftingManiaChuckCraftingAssistance.CFrame;
 
@@ -181,7 +181,7 @@ export = new Quest(script.Name)
         .setDialogue(
             new Dialogue(Chuck, "Hmm... Let's see...")
         )
-        .onStart((stage) => {
+        .onReached((stage) => {
             const ItemService = Server.Item;
             Server.NPC.State.stopAnimation(Chuck, "Default");
             chuckRootPart.CFrame = WAYPOINTS.CraftingManiaChuckCraftingAssistance.CFrame;

@@ -22,7 +22,7 @@ export = new Quest(script.Name)
             .monologue(`Could you spare ${req.toString()} for me? Please?`)
             .root
         )
-        .onStart((stage) => {
+        .onReached((stage) => {
             const connection = Server.Dialogue.dialogueFinished.connect((dialogue) => {
                 if (dialogue === stage.dialogue)
                     stage.complete();
@@ -36,7 +36,7 @@ export = new Quest(script.Name)
     .addStage(new Stage()
         .setDescription(`Get ${req.toString()} and give it to Ricarg.`)
         .setNPC("Ricarg", true)
-        .onStart((stage) => {
+        .onReached((stage) => {
             const CurrencyService = Server.Currency;
             const unmetDialogue = new Dialogue(Ricarg, `Please... I need ${req.toString()}...`);
             const metDialogue = new Dialogue(Ricarg, "You actually have the money!?")

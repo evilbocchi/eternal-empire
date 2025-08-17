@@ -24,7 +24,7 @@ export = new Quest(script.Name)
             .monologue("Could you maybe... find a way to... make him change his prices? Uh... however you want... I trust you... I think.")
             .root
         )
-        .onStart((stage) => {
+        .onReached((stage) => {
             const replacement = new Dialogue(Prest, "Buy your crates and logs here! Wait, nevermind. We're out of stock.");
             Server.Dialogue.addDialogue(replacement);
             const connection = Server.Dialogue.dialogueFinished.connect((dialogue) => {
@@ -46,7 +46,7 @@ export = new Quest(script.Name)
             .monologue(`...Unless, you have a ${GrassConveyor.name}. Hah, I know you don't.`)
             .root
         )
-        .onStart((stage) => {
+        .onReached((stage) => {
             const replacement = new Dialogue(Tria, "O-oh! Uh... y-you're... you're not supposed to... um... be talking to me right now, I... I mean... sorry! I... I didn't mean to... ugh, never mind!");
             Server.Dialogue.addDialogue(replacement);
 
@@ -76,7 +76,7 @@ export = new Quest(script.Name)
             .monologue("You... you'll have to do this yourself... sorry. It costs a bit, but... I believe in you, maybe...")
             .root
         )
-        .onStart((stage) => {
+        .onReached((stage) => {
             Server.Dialogue.addDialogue(prestAnnoyance);
             let t = 0;
             const ItemService = Server.Item;
@@ -101,7 +101,7 @@ export = new Quest(script.Name)
             .root
         )
         .setNPC("Prest", true)
-        .onStart((stage) => {
+        .onReached((stage) => {
             const replacement = new Dialogue(Tria, "O-okay... uh... I... I hope this is... fine? I mean... I don't know if it's fine... ugh...")
                 .monologue("W-wait... did I... say the wrong thing? I... I just... uh... hope he doesn't get mad...")
                 .monologue("P-please... don't mess this up... I... I believe in you, maybe...")
@@ -136,7 +136,7 @@ export = new Quest(script.Name)
             .monologue("It's... a bit much, maybe, but... it should... probably work?")
             .root
         )
-        .onStart((stage) => {
+        .onReached((stage) => {
             Server.Dialogue.addDialogue(prestAnnoyance);
             const connection = Server.Dialogue.dialogueFinished.connect((dialogue) => {
                 if (dialogue === stage.dialogue) {
@@ -161,7 +161,7 @@ export = new Quest(script.Name)
             .monologue(`This ${SkillPod.name} is gonna change my life... Thank you, from the bottom of my heart!`)
             .root
         )
-        .onStart((stage) => {
+        .onReached((stage) => {
             const replacement = new Dialogue(Tria, `Uh... okay... use that ${SkillPod.name} to... help with your... negotiations... I guess.`)
                 .monologue("I... I hope it works... fingers crossed...")
                 .root;

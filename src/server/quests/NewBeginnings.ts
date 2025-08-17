@@ -40,7 +40,7 @@ export = new Quest(script.Name)
             .monologue("There's a lot to learn and... lots of challenges, I think. But... you'll figure it out, probably.")
             .root
         )
-        .onStart((stage) => {
+        .onReached((stage) => {
             ReplicatedStorage.SetAttribute("Intro", true);
             const continuation = new Dialogue(Tria, "Uh... I-I'm Tria... I guess. Um... if... if you want, I can... show you... how to, uh... maybe... make some money? Heh...");
             const connection = Server.Dialogue.dialogueFinished.connect((dialogue) => {
@@ -59,7 +59,7 @@ export = new Quest(script.Name)
         .setNPC("Tria")
         .setFocus(WAYPOINTS.NewBeginningsTriaMineGuiding)
         .setDialogue(new Dialogue(Tria, "Follow me..."))
-        .onStart((stage) => {
+        .onReached((stage) => {
             ReplicatedStorage.SetAttribute("Intro", false);
             Server.NPC.State.stopAnimation(Tria, "Default");
             task.wait(1);
@@ -79,7 +79,7 @@ export = new Quest(script.Name)
             .monologue("Let's... let's try to get this... thing going, okay?")
             .root
         )
-        .onStart((stage) => {
+        .onReached((stage) => {
             Server.NPC.State.stopAnimation(Tria, "Default");
             triaRootPart.CFrame = WAYPOINTS.NewBeginningsTriaMineGuiding.CFrame;
 
@@ -110,7 +110,7 @@ export = new Quest(script.Name)
         .setDialogue(
             new Dialogue(Tria, "Uh... see that backpack over there... left side of your screen... yeah, click it to open your Inventory... I think.")
         )
-        .onStart((stage) => {
+        .onReached((stage) => {
             Server.NPC.State.stopAnimation(Tria, "Default");
             triaRootPart.CFrame = WAYPOINTS.NewBeginningsTriaMineGuiding.CFrame;
 

@@ -91,7 +91,7 @@ export = new Quest(script.Name)
             .monologue("To start, can you give me an Empowered Brick? You can craft one at that weird blacksmith's place.")
             .root
         )
-        .onStart((stage) => {
+        .onReached((stage) => {
             const connection = Server.Dialogue.dialogueFinished.connect((dialogue) => {
                 if (dialogue === stage.dialogue) {
                     stage.complete();
@@ -104,7 +104,7 @@ export = new Quest(script.Name)
         .setDescription(`Craft an Empowered Brick and give it to the Slamo Refugee.`)
         .setFocus(WAYPOINTS.CraftingTable)
         .setDialogue(new Dialogue(SlamoRefugee, "Do you have that Empowered Brick?"))
-        .onStart((stage) => {
+        .onReached((stage) => {
             const continuation = new Dialogue(SlamoRefugee, "Wow... I feel the power of the brick already!")
                 .monologue("In order to fully manifest the power of the Empowered Brick, I need to infuse it with Instant Win energy.")
                 .monologue("To start, can you obtain 2 XL Wool? You can get it from that guy selling wool in the marketplace.")
@@ -123,7 +123,7 @@ export = new Quest(script.Name)
     .addStage(new Stage()
         .setDescription(`Obtain 2 XL Wool from the marketplace and give it to the Slamo Refugee.`)
         .setDialogue(new Dialogue(SlamoRefugee, "Do you have the 2 XL Wool?"))
-        .onStart((stage) => {
+        .onReached((stage) => {
             const continuation = new Dialogue(SlamoRefugee, "This is some high-quality wool. We can use this to absorb the Instant Win energy.")
                 .monologue("I know Freddy has a cauldron that has a bunch of Instant Win energy, but he won't let me use it. I hope you can convince him to let us borrow it.")
                 .root;
@@ -143,7 +143,7 @@ export = new Quest(script.Name)
         .setNPC("Freddy", true)
         .setDescription(`Talk to Freddy at %coords%.`)
         .setDialogue(new Dialogue(SlamoRefugee, "Please talk to Freddy. He has a cauldron that can dissolve the XL Wool in Instant Win energy."))
-        .onStart((stage) => {
+        .onReached((stage) => {
             freddyModel.PivotTo(WAYPOINTS.ToTheVillageFreddyWaiting.CFrame);
             const refugee = getNPCModel("Slamo Refugee");
             const continuation = new Dialogue(Freddy, "Oh, my friend! How can I help you?")
@@ -170,7 +170,7 @@ export = new Quest(script.Name)
         .setDescription(`Fill the cauldron with Instant Win energy.`)
         .setFocus(cauldron.PrimaryPart!)
         .setDialogue(new Dialogue(SlamoRefugee, "Go on, fill the cauldron!"))
-        .onStart((stage) => {
+        .onReached((stage) => {
             refugeeModel.FindFirstChild("FishingRod")?.Destroy();
             refugeeModel.PivotTo(WAYPOINTS.ToTheVillageRefugeeWaiting.CFrame);
             refugeeToBrewing();
@@ -196,7 +196,7 @@ export = new Quest(script.Name)
         .setDescription(`Let the Slamo Refugee use the cauldron to infuse the Empowered Brick with Instant Win energy.`)
         .setFocus(cauldron.PrimaryPart!)
         .setDialogue(new Dialogue(SlamoRefugee, "Let me handle this."))
-        .onStart((stage) => {
+        .onReached((stage) => {
             for (const effect of instantWinEffects) {
                 effect.Transparency = 0;
             }
@@ -291,7 +291,7 @@ export = new Quest(script.Name)
         .setDescription(`Go to the Slamo Village linkway with the Charged Empowered Brick at %coords%.`)
         .setFocus(WAYPOINTS.ToTheVillageRefugeeIntermittentIsles)
         .setDialogue(new Dialogue(SlamoRefugee, "All you need to do is place the Charged Empowered Brick down. Once you do that, the linkway will be repaired and we can finally go home."))
-        .onStart((stage) => {
+        .onReached((stage) => {
             refugeeModel.FindFirstChild("FishingRod")?.Destroy();
             refugeeModel.PivotTo(WAYPOINTS.ToTheVillageRefugeeBrewing.CFrame);
 
@@ -342,7 +342,7 @@ export = new Quest(script.Name)
         .setNPC("Slamo Refugee", true)
         .setDescription(`Follow the Slamo Refugee to the village.`)
         .setDialogue(new Dialogue(SlamoRefugee, "..."))
-        .onStart((stage) => {
+        .onReached((stage) => {
             refugeeModel.FindFirstChild("FishingRod")?.Destroy();
             refugeeModel.PivotTo(WAYPOINTS.ToTheVillageRefugeeIntermittentIsles.CFrame);
 
@@ -393,7 +393,7 @@ export = new Quest(script.Name)
             .monologue("I mean, he literally ran to the police station all by himself. What was he expecting? A warm welcome?")
             .root
         )
-        .onStart((stage) => {
+        .onReached((stage) => {
             Server.Event.setEventCompleted("ImprisonedSlamoRefugee", true);
 
             const connection = Server.Dialogue.dialogueFinished.connect((dialogue) => {
@@ -415,7 +415,7 @@ export = new Quest(script.Name)
             .monologue("But for now, I will wait here. I have nothing left to lose.")
             .root
         )
-        .onStart((stage) => {
+        .onReached((stage) => {
             const connection = Server.Dialogue.dialogueFinished.connect((dialogue) => {
                 if (dialogue === stage.dialogue) {
                     stage.complete();

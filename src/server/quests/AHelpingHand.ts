@@ -40,7 +40,7 @@ export = new Quest(script.Name)
                 .monologue("What do you say? Care to lend a hand to someone down on their luck?")
                 .root
         )
-        .onStart((stage) => {
+        .onReached((stage) => {
             const continuation = new Dialogue(Freddy, "My name's Freddy. Follow me, I have something to show you.");
             freddyRootPart.Position = stage.position!;
             const connection = Server.Dialogue.dialogueFinished.connect((dialogue) => {
@@ -61,7 +61,7 @@ export = new Quest(script.Name)
         .setDialogue(
             new Dialogue(Freddy, "Follow me, I have something to show you.")
         )
-        .onStart((stage) => {
+        .onReached((stage) => {
             Server.NPC.State.stopAnimation(Freddy, "Default");
             task.wait(2);
             freddyToRequest().onComplete(() => stage.complete());
@@ -81,7 +81,7 @@ export = new Quest(script.Name)
                 .monologue("Good luck, and remember, I'm counting on you!")
                 .root
         )
-        .onStart((stage) => {
+        .onReached((stage) => {
             Server.NPC.State.stopAnimation(Freddy, "Default");
             freddyRootPart.CFrame = WAYPOINTS.AHelpingHandFreddyRequest.CFrame;
 
@@ -98,7 +98,7 @@ export = new Quest(script.Name)
         .setDialogue(
             new Dialogue(Freddy, "What are you waiting for? Go get it!")
         )
-        .onStart((stage) => {
+        .onReached((stage) => {
             Server.NPC.State.stopAnimation(Freddy, "Default");
             freddyRootPart.CFrame = WAYPOINTS.AHelpingHandFreddyRequest.CFrame;
 
@@ -132,7 +132,7 @@ export = new Quest(script.Name)
                 .monologue("Enjoy, and may it bring you as much fortune as you've brought me today. Thanks again!")
                 .root
         )
-        .onStart((stage) => {
+        .onReached((stage) => {
             Server.NPC.State.stopAnimation(Freddy, "Default");
             freddyRootPart.CFrame = WAYPOINTS.AHelpingHandFreddyRequest.CFrame;
 

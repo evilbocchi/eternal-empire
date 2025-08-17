@@ -104,7 +104,7 @@ export = new Quest(script.Name)
             .monologue("I'll spare you the details for now, but if you're truly curious and want to delve deeper into the history, you should head to the library.")
             .root
         )
-        .onStart((stage) => {
+        .onReached((stage) => {
             const connection = Server.Dialogue.dialogueFinished.connect((dialogue) => {
                 if (dialogue === stage.dialogue) {
                     stage.complete();
@@ -116,7 +116,7 @@ export = new Quest(script.Name)
     .addStage(new Stage()
         .setDescription("Find details about the history of Barren Islands in the library at %coords%.")
         .setFocus(WAYPOINTS.LearningThePastLibraryEntrance)
-        .onStart((stage) => {
+        .onReached((stage) => {
             const connection = Server.Dialogue.dialogueFinished.connect((dialogue) => {
                 if (dialogue === InteractableObject.OldBooks1.dialogue) {
                     stage.complete();
@@ -127,7 +127,7 @@ export = new Quest(script.Name)
     )
     .addStage(new Stage()
         .setDescription("Ask around the library for clues about the 'strike'.")
-        .onStart((stage) => {
+        .onReached((stage) => {
             const pasalDialogue = new Dialogue(Pasal, "Yahallo! ...You want that shiny green orb behind me?")
                 .monologue("Sorry, I can't do that for you. It's not on sale.")
                 .monologue("Why would you want that anyways?")
@@ -208,7 +208,7 @@ export = new Quest(script.Name)
             .monologue(`Once you do, I'll tell you the inner workings of that key... heh heh.`)
             .root
         )
-        .onStart((stage) => {
+        .onReached((stage) => {
             const connection = Server.Dialogue.dialogueFinished.connect((dialogue) => {
                 if (dialogue === stage.dialogue) {
                     stage.complete();
@@ -220,7 +220,7 @@ export = new Quest(script.Name)
     .addStage(new Stage()
         .setDescription(`Collect 20 ${ExcavationStone.name}.`)
         .setDialogue(new Dialogue(OldNoob, `Report back to me once you're done. I just... need that stone...`))
-        .onStart((stage) => {
+        .onReached((stage) => {
             let t = 0;
             const connection = RunService.Heartbeat.Connect((dt) => {
                 t += dt;
@@ -240,7 +240,7 @@ export = new Quest(script.Name)
         .setDescription(`Give the ${ExcavationStone.name} back to the Old Noob.`)
         .setNPC("Old Noob", true)
         .setDialogue(new Dialogue(OldNoob, `Do you have 20 ${ExcavationStone.name}?`))
-        .onStart((stage) => {
+        .onReached((stage) => {
             const continuation = new Dialogue(OldNoob, "Yup, sure do. Alright, let's get going. I won't waste either of our time.");
             const connection = Server.Dialogue.dialogueFinished.connect((dialogue) => {
                 if (dialogue === stage.dialogue && Server.Quest.takeQuestItem(ExcavationStone.id, 20) === true) {
@@ -256,7 +256,7 @@ export = new Quest(script.Name)
         .setFocus(WAYPOINTS.LearningThePastOldNoobApproachingPasal)
         .setNPC("Old Noob")
         .setDialogue(new Dialogue(OldNoob, `I'll lead the way. My body can still move, after all.`))
-        .onStart((stage) => {
+        .onReached((stage) => {
             oldNoobModel.FindFirstChildOfClass("Tool")?.Destroy();
             const intro = new Dialogue(OldNoob, "You. I don't know how you got your hands on that orb, but you're coming with us.")
                 .next(new Dialogue(Pasal, "Uh... yeah, sure. Wait, why?"))
@@ -302,7 +302,7 @@ export = new Quest(script.Name)
     )
     .addStage(new Stage()
         .setDescription(`Discover the depths of the hidden cave.`)
-        .onStart((stage) => {
+        .onReached((stage) => {
             task.wait(0.5);
             if (Server.Event.isEventCompleted("SuspiciousWallOpened") === false) {
                 unlockWall();

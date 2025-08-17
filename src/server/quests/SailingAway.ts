@@ -21,7 +21,7 @@ export = new Quest(script.Name)
             .monologue("")
             .root
         )
-        .onStart((stage) => {
+        .onReached((stage) => {
             const connection = Server.Dialogue.dialogueFinished.connect((dialogue) => {
                 if (dialogue === stage.dialogue) {
                     stage.complete();
@@ -34,7 +34,7 @@ export = new Quest(script.Name)
         .setDescription(`Find Captain Bacon's map.`)
         .setNPC("Captain Bacon")
         .setDialogue(new Dialogue(CaptainBacon, "Have you found my map yet?"))
-        .onStart((stage) => {
+        .onReached((stage) => {
             const dialogues = [
                 new Dialogue(Tria, "Captain Bacon's been complaining about having lost his map lately.")
                     .monologue("I've also been trying to help him out, but it's nowhere near here.")

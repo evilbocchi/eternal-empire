@@ -89,7 +89,7 @@ export = new Quest(script.Name)
                 .monologue("Anyways, I'm counting on you. Set me free!")
                 .root
         )
-        .onStart((stage) => {
+        .onReached((stage) => {
             simpulRootPart.Position = stage.position!;
             const connection = Server.Dialogue.dialogueFinished.connect((dialogue) => {
                 if (dialogue === stage.dialogue) {
@@ -105,7 +105,7 @@ export = new Quest(script.Name)
         .setDialogue(
             new Dialogue(Simpul, "Set me free for the sake of world peace!")
         )
-        .onStart((stage) => {
+        .onReached((stage) => {
             const dialogues = [
                 new Dialogue(SlamoReceptionist, "Hey, I don't remember allowing you to talk to the prisoner we have on board.")
                     .monologue("Let me make this clear, he's not a safe individual to be around. He was arrested because of his connections with the underworld, you know?")
@@ -141,7 +141,7 @@ export = new Quest(script.Name)
                 .monologue("Nevermind this whole charade anymore.")
                 .root
         )
-        .onStart((stage) => {
+        .onReached((stage) => {
             const continuation = new Dialogue(Simpul, "You thought these puny bars could stop me? Yeah, right. See you never!");
 
             const connection = Server.Dialogue.dialogueFinished.connect((dialogue) => {
@@ -170,7 +170,7 @@ export = new Quest(script.Name)
                 .monologue("I would care more, but I don't care.")
                 .root
         )
-        .onStart((stage) => {
+        .onReached((stage) => {
             simpulRootPart.CFrame = WAYPOINTS.LudicrousEscapeSimpulOut.CFrame.add(new Vector3(0, 150, 0));
 
             const ItemService = Server.Item;
@@ -245,7 +245,7 @@ export = new Quest(script.Name)
             new Dialogue(SlamoReceptionist, "Follow my lead.")
                 .root
         )
-        .onStart((stage) => {
+        .onReached((stage) => {
             toggleRing(true);
             const hint = new Dialogue(SlamoReceptionist, "Come on, get in front of me and place the statue down where Simpul can easily spot it.");
             slamoReceptionistToHiding().onComplete(() => {
@@ -345,7 +345,7 @@ export = new Quest(script.Name)
     .addStage(new Stage()
         .setDescription(`Serve justice to Simpul.`)
         .setNPC("Simpul")
-        .onStart((stage) => {
+        .onReached((stage) => {
             Server.Dialogue.talk(finishing);
 
             const connection = Server.Dialogue.dialogueFinished.connect((dialogue) => {
