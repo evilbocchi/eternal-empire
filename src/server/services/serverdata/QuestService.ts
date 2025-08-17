@@ -80,7 +80,7 @@ export default class QuestService implements OnInit {
      */
     setStagePerQuest(quests: Map<string, number>) {
         this.dataService.empireData.quests = quests;
-        Packets.quests.set(quests);
+        Packets.stagePerQuest.set(quests);
     }
 
     /**
@@ -200,6 +200,7 @@ export default class QuestService implements OnInit {
 
                     // Fire signal for current stage
                     if (current === index && !reached.has(stage)) {
+                        print(`Reached stage ${index} in ${quest.id}`);
                         this.stageReached.fire(stage);
                     }
                 });
@@ -338,6 +339,6 @@ export default class QuestService implements OnInit {
         // Send quest info to clients
         Packets.questInfo.set(questInfos);
         // Send quest progress to clients
-        Packets.quests.set(this.dataService.empireData.quests);
+        Packets.stagePerQuest.set(this.dataService.empireData.quests);
     }
 }

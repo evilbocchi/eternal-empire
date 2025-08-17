@@ -62,8 +62,11 @@ export = new Quest(script.Name)
         .onStart((stage) => {
             ReplicatedStorage.SetAttribute("Intro", false);
             Server.NPC.State.stopAnimation(Tria, "Default");
-            task.wait(2);
-            triaToMineGuiding().onComplete(() => stage.completed.fire());
+            task.wait(1);
+            triaToMineGuiding().onComplete(() => {
+                print("Reached mine guiding point");
+                stage.completed.fire();
+            });
             return () => { };
         })
     )

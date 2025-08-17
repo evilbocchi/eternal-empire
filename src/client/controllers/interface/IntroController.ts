@@ -117,7 +117,9 @@ export default class IntroController implements OnInit {
         if (shouldIntro === true)
             this.doIntroSequence();
         else {
+            math.randomseed(42);
             this.soundController.refreshMusic(true);
+            math.randomseed(tick());
             this.adaptiveTabController.showSidebarButtons();
             this.balanceWindowController.showBalanceWindow();
         }

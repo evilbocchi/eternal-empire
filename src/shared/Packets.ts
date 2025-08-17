@@ -133,7 +133,7 @@ namespace Packets {
 
     // quests
     export const questInfo = property<Map<string, DataType.Packed<QuestInfo>>>();
-    export const quests = property<Map<string, DataType.i32>>(new Map());
+    export const stagePerQuest = property<Map<string, DataType.i32>>(new Map());
     export const questCompleted = signal<(questId: string) => void>();
     export const level = property<DataType.i32>(-1);
     export const xp = property<DataType.i32>(-1);

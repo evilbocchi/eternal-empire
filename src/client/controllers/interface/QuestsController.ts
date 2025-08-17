@@ -230,7 +230,7 @@ export default class QuestsController implements OnInit, OnPhysics, OnCharacterA
             return;
         }
         if (index === undefined) {
-            index = Packets.quests.get().get(questId) ?? 0;
+            index = Packets.stagePerQuest.get().get(questId) ?? 0;
         }
         const color = new Color3(quest.colorR, quest.colorG, quest.colorB);
         TRACKED_QUEST_WINDOW.Background.Frame.BackgroundColor3 = color;
@@ -361,7 +361,7 @@ export default class QuestsController implements OnInit, OnPhysics, OnCharacterA
             questInfoObservation.disconnect();
         });
         const onQuestReceived = (id: string, quest: QuestInfo) => {
-            if (quest.level >= 999)
+            if (quest.level >= 999 || this.availableQuests.has(id))
                 return;
             this.availableQuests.add(id);
             const color = new Color3(quest.colorR, quest.colorG, quest.colorB);
@@ -443,7 +443,7 @@ export default class QuestsController implements OnInit, OnPhysics, OnCharacterA
                 questOption.Content.Track.Visible = !belowReq;
             });
             let moved = false;
-            Packets.quests.observe((quests) => {
+            Packets.stagePerQuest.observe((quests) => {
                 index = quests.get(id) ?? 0;
                 updateAvailability();
                 this.refreshNotificationWindow();
@@ -453,7 +453,7 @@ export default class QuestsController implements OnInit, OnPhysics, OnCharacterA
         };
         this.trackedQuestChanged.connect((questId) => this.refreshTrackedQuestWindow(questId));
 
-        Packets.quests.observe((quests) => {
+        Packets.stagePerQuest.observe((quests) => {
             const index = this.trackedQuest === undefined ? 0 : (quests.get(this.trackedQuest) ?? 0);
             this.indexer = this.trackedQuest === undefined ? undefined : this.trackedQuest + index;
             this.refreshTrackedQuestWindow(this.trackedQuest, index);

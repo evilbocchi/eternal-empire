@@ -242,8 +242,10 @@ export default class NPCNavigationService implements OnInit, OnStart, OnPhysics 
                 while (!toCall) {
                     RunService.Heartbeat.Wait();
                 }
-                print("Reached point", npcHumanoid.Name, destination.Position);
-                callbacks.forEach(callback => callback());
+                print("Reached point", npcHumanoid.Parent?.Name, destination.Position);
+                for (const callback of callbacks) {
+                    callback();
+                }
                 connection.Disconnect();
             });
             this.runningPathfinds.set(npcHumanoid, connection);

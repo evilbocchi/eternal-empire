@@ -430,6 +430,13 @@ export default class ShopController implements OnInit, OnStart {
             this.refreshPurchaseWindow(this.selectedItem);
         });
 
+        // Refresh purchase window if the bought amount for the selected item changes
+        Packets.bought.observe(() => {
+            if (this.selectedItem === undefined)
+                return;
+            this.refreshPurchaseWindow(this.selectedItem);
+        });
+
         const purchaseButton = PURCHASE_WINDOW.DescriptionFrame.PurchaseContainer.Purchase;
         this.hotkeysController.setHotkey(purchaseButton, Enum.KeyCode.E, () => {
             if (!SHOP_GUI.Enabled) {
