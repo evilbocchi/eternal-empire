@@ -24,7 +24,7 @@ export = new Quest(script.Name)
         .onStart((stage) => {
             const connection = Server.Dialogue.dialogueFinished.connect((dialogue) => {
                 if (dialogue === stage.dialogue) {
-                    stage.completed.fire();
+                    stage.complete();
                 }
             });
             return () => connection.disconnect();
@@ -47,7 +47,7 @@ export = new Quest(script.Name)
             ];
             for (const dialogue of dialogues)
                 Server.Dialogue.addDialogue(dialogue);
-            stage.completed.once(() => {
+            stage.onComplete(() => {
                 for (const dialogue of dialogues)
                     Server.Dialogue.removeDialogue(dialogue);
             });

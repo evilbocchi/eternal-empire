@@ -94,7 +94,7 @@ export = new Quest(script.Name)
             const connection = Server.Dialogue.dialogueFinished.connect((dialogue) => {
                 if (dialogue === stage.dialogue) {
                     Server.Event.setEventCompleted("SimpulReveal", true);
-                    stage.completed.fire();
+                    stage.complete();
                 }
             });
             return () => connection.disconnect();
@@ -120,13 +120,13 @@ export = new Quest(script.Name)
             ];
             for (const dialogue of dialogues)
                 Server.Dialogue.addDialogue(dialogue);
-            stage.completed.once(() => {
+            stage.onComplete(() => {
                 for (const dialogue of dialogues)
                     Server.Dialogue.removeDialogue(dialogue);
             });
             const connection = Server.Dialogue.dialogueFinished.connect((dialogue) => {
                 if (dialogue === InteractableObject.SlamoBook.dialogue)
-                    stage.completed.fire();
+                    stage.complete();
             });
             return () => connection.disconnect();
         })
@@ -156,7 +156,7 @@ export = new Quest(script.Name)
                 else if (dialogue === continuation) {
                     simpulRootPart.Anchored = true;
                     TweenService.Create(simpulRootPart, new TweenInfo(0.5), { CFrame: WAYPOINTS.LudicrousEscapeSimpulOut.CFrame.add(new Vector3(0, 150, 0)) }).Play();
-                    task.delay(2, () => stage.completed.fire());
+                    task.delay(2, () => stage.complete());
                 }
             });
             return () => connection.disconnect();
@@ -231,7 +231,7 @@ export = new Quest(script.Name)
                     Server.Dialogue.talk(ending);
                 }
                 else if (dialogue === ending) {
-                    stage.completed.fire();
+                    stage.complete();
                 }
             });
             return () => connection.disconnect();
@@ -333,7 +333,7 @@ export = new Quest(script.Name)
                 if (!isCompleted)
                     return;
                 slamoReceptionistToReveal();
-                stage.completed.fire();
+                stage.complete();
             });
             return () => {
                 connection1.disconnect();
@@ -359,7 +359,7 @@ export = new Quest(script.Name)
                         defaultLocation,
                     )();
                     toggleRing(false);
-                    stage.completed.fire();
+                    stage.complete();
                 }
             });
             return () => connection.disconnect();

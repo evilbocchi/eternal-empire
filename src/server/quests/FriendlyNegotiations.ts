@@ -29,7 +29,7 @@ export = new Quest(script.Name)
             Server.Dialogue.addDialogue(replacement);
             const connection = Server.Dialogue.dialogueFinished.connect((dialogue) => {
                 if (dialogue === stage.dialogue)
-                    stage.completed.fire();
+                    stage.complete();
             });
             return () => {
                 connection.disconnect();
@@ -49,18 +49,18 @@ export = new Quest(script.Name)
         .onStart((stage) => {
             const replacement = new Dialogue(Tria, "O-oh! Uh... y-you're... you're not supposed to... um... be talking to me right now, I... I mean... sorry! I... I didn't mean to... ugh, never mind!");
             Server.Dialogue.addDialogue(replacement);
-            
+
             const replacement2 = new Dialogue(Tria, "I... I just... uh... wanted to say something, but... maybe I shouldn't...")
                 .monologue("P-please... just... come back later, okay? I... I'll explain then...")
                 .root;
-            
+
             const connection = Server.Dialogue.dialogueFinished.connect((dialogue) => {
                 if (dialogue === replacement) {
                     Server.Dialogue.removeDialogue(replacement);
                     Server.Dialogue.addDialogue(replacement2);
                 }
                 else if (dialogue === stage.dialogue)
-                    stage.completed.fire();
+                    stage.complete();
             });
             return () => {
                 connection.disconnect();
@@ -86,7 +86,7 @@ export = new Quest(script.Name)
                     return;
                 t = 0;
                 if (ItemService.getBoughtAmount(GrassConveyor.id) > 0) {
-                    stage.completed.fire();
+                    stage.complete();
                 }
             });
             return () => {
@@ -118,7 +118,7 @@ export = new Quest(script.Name)
             const connection = Server.Dialogue.dialogueFinished.connect((dialogue) => {
                 if (dialogue === stage.dialogue && Server.Quest.takeQuestItem(GrassConveyor.id, 1) === true) {
                     Server.Dialogue.talk(continuation);
-                    stage.completed.fire();
+                    stage.complete();
                 }
             });
             return () => {
@@ -141,7 +141,7 @@ export = new Quest(script.Name)
             const connection = Server.Dialogue.dialogueFinished.connect((dialogue) => {
                 if (dialogue === stage.dialogue) {
                     Server.Quest.giveQuestItem(SkillPod.id, 1);
-                    stage.completed.fire();
+                    stage.complete();
                 }
 
             });
@@ -169,7 +169,7 @@ export = new Quest(script.Name)
             const connection = Server.Dialogue.dialogueFinished.connect((dialogue) => {
                 if (dialogue === stage.dialogue) {
                     Server.Quest.takeQuestItem(SkillPod.id, 1);
-                    stage.completed.fire();
+                    stage.complete();
                 }
             });
             return () => {

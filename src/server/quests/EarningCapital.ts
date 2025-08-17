@@ -25,7 +25,7 @@ export = new Quest(script.Name)
         .onStart((stage) => {
             const connection = Server.Dialogue.dialogueFinished.connect((dialogue) => {
                 if (dialogue === stage.dialogue)
-                    stage.completed.fire();
+                    stage.complete();
             });
             return () => connection.disconnect();
         }, (stage) => {
@@ -64,7 +64,7 @@ export = new Quest(script.Name)
                 if (dialogue !== metDialogue)
                     return;
                 if (CurrencyService.purchase(req))
-                    stage.completed.fire();
+                    stage.complete();
             });
             return () => {
                 c1.Disconnect();

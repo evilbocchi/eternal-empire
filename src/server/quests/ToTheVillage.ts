@@ -94,7 +94,7 @@ export = new Quest(script.Name)
         .onStart((stage) => {
             const connection = Server.Dialogue.dialogueFinished.connect((dialogue) => {
                 if (dialogue === stage.dialogue) {
-                    stage.completed.fire();
+                    stage.complete();
                 }
             });
             return () => connection.disconnect();
@@ -114,7 +114,7 @@ export = new Quest(script.Name)
                     Server.Dialogue.talk(continuation);
                 }
                 if (dialogue === continuation && Server.Quest.takeQuestItem(EmpoweredBrick.id, 1)) {
-                    stage.completed.fire();
+                    stage.complete();
                 }
             });
             return () => connection.disconnect();
@@ -133,7 +133,7 @@ export = new Quest(script.Name)
                     Server.Dialogue.talk(continuation);
                 }
                 if (dialogue === continuation && Server.Quest.takeQuestItem("XLWool", 2)) {
-                    stage.completed.fire();
+                    stage.complete();
                 }
             });
             return () => connection.disconnect();
@@ -158,7 +158,7 @@ export = new Quest(script.Name)
 
             const connection = Server.Dialogue.dialogueFinished.connect((dialogue) => {
                 if (dialogue === continuation) {
-                    stage.completed.fire();
+                    stage.complete();
                 }
             });
             return () => {
@@ -184,7 +184,7 @@ export = new Quest(script.Name)
                 explosionEffect.Emit(2);
                 playSoundAtPart(cauldron.PrimaryPart, getSound("MagicSprinkle.mp3"));
                 proximityPrompt.Enabled = false;
-                stage.completed.fire();
+                stage.complete();
             });
 
             return () => {
@@ -277,7 +277,7 @@ export = new Quest(script.Name)
                     Server.Dialogue.talk(continuation2);
                 }
                 else if (dialogue === continuation2) {
-                    stage.completed.fire();
+                    stage.complete();
                     Server.Quest.giveQuestItem(ChargedEmpoweredBrick.id, 1);
                     empoweredBrick.Destroy();
                 }
@@ -330,7 +330,7 @@ export = new Quest(script.Name)
                 linkwayEffect.Emit(4);
                 playSoundAtPart(particlePart, getSound("LaserExplosion.mp3"), 2);
                 Server.UnlockedAreas.unlockArea("SlamoVillage");
-                stage.completed.fire();
+                stage.complete();
             });
 
             return () => {
@@ -375,7 +375,7 @@ export = new Quest(script.Name)
                 refugeeToEnteringPoliceStation(false).onComplete(() => {
                     refugeeModel.PivotTo(WAYPOINTS.ToTheVillageRefugeeImprisoned.CFrame);
                     refugeeRootPart.Anchored = true;
-                    stage.completed.fire();
+                    stage.complete();
                 });
             });
 
@@ -398,7 +398,7 @@ export = new Quest(script.Name)
 
             const connection = Server.Dialogue.dialogueFinished.connect((dialogue) => {
                 if (dialogue === stage.dialogue) {
-                    stage.completed.fire();
+                    stage.complete();
                 }
             });
             return () => connection.disconnect();
@@ -418,7 +418,7 @@ export = new Quest(script.Name)
         .onStart((stage) => {
             const connection = Server.Dialogue.dialogueFinished.connect((dialogue) => {
                 if (dialogue === stage.dialogue) {
-                    stage.completed.fire();
+                    stage.complete();
                 }
             });
             return () => connection.disconnect();

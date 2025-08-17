@@ -62,7 +62,7 @@ export = new Quest(script.Name)
                     Server.Dialogue.talk(continuation);
                 }
                 else if (dialogue === continuation) {
-                    stage.completed.fire();
+                    stage.complete();
                 }
             });
             return () => connection.disconnect();
@@ -107,7 +107,7 @@ export = new Quest(script.Name)
                     Server.Dialogue.talk(ItemService.getItemAmount(Wool.id) >= 1 && ItemService.getItemAmount(Grass.id) >= 3 ? itemed : noItemed);
                 }
                 else if (dialogue === itemed && Server.Quest.takeQuestItem(Wool.id, 1) && Server.Quest.takeQuestItem(Grass.id, 3)) {
-                    stage.completed.fire();
+                    stage.complete();
                 }
             });
             return () => connection.disconnect();
@@ -124,7 +124,7 @@ export = new Quest(script.Name)
         .onStart((stage) => {
             Server.NPC.State.stopAnimation(Chuck, "Default");
             chuckRootPart.Anchored = false;
-            chuckToCraftingTable().onComplete(() => stage.completed.fire());
+            chuckToCraftingTable().onComplete(() => stage.complete());
             return () => { };
         })
     )
@@ -146,7 +146,7 @@ export = new Quest(script.Name)
                 if (dialogue === stage.dialogue) {
                     Server.Quest.giveQuestItem(ExcavationStone.id, 50);
                     Server.Quest.giveQuestItem(WhiteGem.id, 15);
-                    stage.completed.fire();
+                    stage.complete();
                 }
             });
             return () => connection.disconnect();
@@ -167,7 +167,7 @@ export = new Quest(script.Name)
                     const craftingItems = CraftingTable.trait(Shop).items;
 
                     if (craftingItems.includes(item)) {
-                        stage.completed.fire();
+                        stage.complete();
                     }
                 }
             });
@@ -220,7 +220,7 @@ export = new Quest(script.Name)
                     Server.Dialogue.talk(continuation);
                 }
                 else if (dialogue === continuation) {
-                    stage.completed.fire();
+                    stage.complete();
                 }
             });
             return () => connection.disconnect();

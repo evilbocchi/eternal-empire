@@ -49,7 +49,7 @@ export = new Quest(script.Name)
                     Server.Dialogue.talk(continuation);
                 }
                 else if (dialogue === continuation)
-                    stage.completed.fire();
+                    stage.complete();
             });
             return () => connection.disconnect();
         })
@@ -64,7 +64,7 @@ export = new Quest(script.Name)
             Server.NPC.State.stopAnimation(Tria, "Default");
             task.wait(1);
             triaToMineGuiding().onComplete(() => {
-                stage.completed.fire();
+                stage.complete();
             });
             return () => { };
         })
@@ -91,7 +91,7 @@ export = new Quest(script.Name)
                     return;
                 t = 0;
                 if (ItemService.getBoughtAmount(TheFirstDropper.id) > 0 && ItemService.getBoughtAmount(TheFirstFurnace.id) > 0) {
-                    stage.completed.fire();
+                    stage.complete();
                     Server.Dialogue.talk(new Dialogue(Tria, "Oh! You did it... wow, nice job!")
                         .monologue("Now... um... place those items down carefully, okay?")
                         .monologue("Make sure... uh... the dropper head is... above the furnace... yes.")
@@ -129,7 +129,7 @@ export = new Quest(script.Name)
                             triaToStart().onComplete(() => {
                                 Server.NPC.State.playAnimation(Tria, "Default");
                             });
-                            stage.completed.fire();
+                            stage.complete();
                         }
                     });
                     Server.Dialogue.talk(continuation);

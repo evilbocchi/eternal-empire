@@ -166,7 +166,7 @@ export default class QuestService implements OnInit {
                         const cleanup = stage.load?.(stage);
 
                         // Set up stage completion handler
-                        const connection = stage.completed.connect(() => {
+                        stage.onComplete(() => {
                             const newStage = this.completeStage(quest, index);
                             if (newStage === undefined) {
                                 return;
@@ -188,10 +188,6 @@ export default class QuestService implements OnInit {
                                 this.stageReached.fire(nextStage);
                                 reached.add(nextStage);
                             }
-
-                            // Clean up
-                            this.loadedStages.delete(stage);
-                            connection.disconnect();
                         });
                     }
 

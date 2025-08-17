@@ -22,7 +22,7 @@ export class Stage {
     npcModel: Model | undefined;
     npcHumanoid: Humanoid | undefined;
 
-    readonly completed = new Signal<() => void>();
+    private readonly completed = new Signal<() => void>();
 
     /**
      * Called when the stage is loaded, returning an optional cleanup function.
@@ -33,14 +33,10 @@ export class Stage {
 
     loadedTimes = 0;
     completedTimes = 0;
+    safe = true;
 
     constructor() {
-        this.completed.connect(() => {
-            if (++this.completedTimes > 1) {
-                warn("Stage completed multiple times");
-                print(this);
-            }
-        });
+
     }
 
     /**
@@ -115,15 +111,18 @@ export class Stage {
             if (++this.loadedTimes > 1) {
                 warn("Stage loaded multiple times");
                 print(stage);
+                if (this.safe) { // Prevent further processing
+                    return () => {};
+                }
+                print("Unsafe mode enabled, allowing multiple loads");
             }
-
             const callback = load(stage);
             const dialogue = this.dialogue;
             if (dialogue !== undefined) {
                 Server.Quest.onStageReached(this, () => {
                     Server.Dialogue.addDialogue(dialogue);
                 });
-                stage.completed.connect(() => Server.Dialogue.removeDialogue(dialogue));
+                stage.onComplete(() => Server.Dialogue.removeDialogue(dialogue));
                 return callback;
             }
             return callback;
@@ -152,6 +151,34 @@ export class Stage {
                     mainCallback();
             };
         });
+    }
+
+    /**
+     * Registers a callback to run when the stage is completed.
+     * 
+     * @param complete The complete callback.
+     * @returns This stage instance.
+     */
+    onComplete(complete: (stage: this) => void) {
+        this.completed.connect(() => {
+            complete(this);
+        });
+        return this;
+    }
+
+    /**
+     * Completes the stage, firing the completed signal.
+     */
+    complete() {
+        if (++this.completedTimes > 1) {
+            warn("Stage completed multiple times");
+            print(this);
+            if (this.safe) { // Prevent further processing
+                return;
+            }
+            print("Unsafe mode enabled, allowing multiple completions");
+        }
+        this.completed.fire();
     }
 }
 
@@ -303,7 +330,7 @@ export default class Quest {
                 while (Server.Quest.isQuestCompleted(questId) === false) {
                     task.wait(2);
                 }
-                stage.completed.fire();
+                stage.complete();
                 return () => { };
             });
         return this.setStage(1, stage);

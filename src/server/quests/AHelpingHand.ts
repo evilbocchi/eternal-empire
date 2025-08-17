@@ -49,7 +49,7 @@ export = new Quest(script.Name)
                     Server.Dialogue.talk(continuation);
                 }
                 else if (dialogue === continuation)
-                    stage.completed.fire();
+                    stage.complete();
             });
             return () => connection.disconnect();
         })
@@ -64,7 +64,7 @@ export = new Quest(script.Name)
         .onStart((stage) => {
             Server.NPC.State.stopAnimation(Freddy, "Default");
             task.wait(2);
-            freddyToRequest().onComplete(() => stage.completed.fire());
+            freddyToRequest().onComplete(() => stage.complete());
             return () => { };
         })
     )
@@ -87,7 +87,7 @@ export = new Quest(script.Name)
 
             const connection = Server.Dialogue.dialogueFinished.connect((dialogue) => {
                 if (stage.dialogue === dialogue)
-                    stage.completed.fire();
+                    stage.complete();
             });
             return () => connection.disconnect();
         })
@@ -117,7 +117,7 @@ export = new Quest(script.Name)
 
             const connection = Server.Event.addCompletionListener("AHelpingHandPendant", (isCompleted) => {
                 if (isCompleted)
-                    stage.completed.fire();
+                    stage.complete();
             });
             return () => connection.disconnect();
         })
@@ -139,7 +139,7 @@ export = new Quest(script.Name)
             const connection = Server.Dialogue.dialogueFinished.connect((dialogue) => {
                 Server.Quest.takeQuestItem(LostPendant.id, 1);
                 if (dialogue === stage.dialogue)
-                    stage.completed.fire();
+                    stage.complete();
             });
             return () => connection.disconnect();
         })

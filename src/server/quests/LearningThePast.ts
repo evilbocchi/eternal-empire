@@ -107,7 +107,7 @@ export = new Quest(script.Name)
         .onStart((stage) => {
             const connection = Server.Dialogue.dialogueFinished.connect((dialogue) => {
                 if (dialogue === stage.dialogue) {
-                    stage.completed.fire();
+                    stage.complete();
                 }
             });
             return () => connection.disconnect();
@@ -119,7 +119,7 @@ export = new Quest(script.Name)
         .onStart((stage) => {
             const connection = Server.Dialogue.dialogueFinished.connect((dialogue) => {
                 if (dialogue === InteractableObject.OldBooks1.dialogue) {
-                    stage.completed.fire();
+                    stage.complete();
                 }
             });
             return () => connection.disconnect();
@@ -185,7 +185,7 @@ export = new Quest(script.Name)
                     Server.Dialogue.talk(continuation);
                 }
                 else if (dialogue === continuation) {
-                    stage.completed.fire();
+                    stage.complete();
                     Server.Event.setEventCompleted("PasalReveal", true);
                     Server.Quest.giveQuestItem(IrregularlyShapedKey.id, 1);
                 }
@@ -211,7 +211,7 @@ export = new Quest(script.Name)
         .onStart((stage) => {
             const connection = Server.Dialogue.dialogueFinished.connect((dialogue) => {
                 if (dialogue === stage.dialogue) {
-                    stage.completed.fire();
+                    stage.complete();
                 }
             });
             return () => connection.disconnect();
@@ -228,7 +228,7 @@ export = new Quest(script.Name)
                     return;
                 t = 0;
                 if (Server.Item.getItemAmount(ExcavationStone.id) >= 15) {
-                    stage.completed.fire();
+                    stage.complete();
                 }
             });
             return () => {
@@ -244,7 +244,7 @@ export = new Quest(script.Name)
             const continuation = new Dialogue(OldNoob, "Yup, sure do. Alright, let's get going. I won't waste either of our time.");
             const connection = Server.Dialogue.dialogueFinished.connect((dialogue) => {
                 if (dialogue === stage.dialogue && Server.Quest.takeQuestItem(ExcavationStone.id, 20) === true) {
-                    stage.completed.fire();
+                    stage.complete();
                     Server.Dialogue.talk(continuation);
                 }
             });
@@ -291,7 +291,7 @@ export = new Quest(script.Name)
             });
             const connection2 = Server.Event.addCompletionListener("SuspiciousWallOpened", (isCompleted) => {
                 if (isCompleted) {
-                    stage.completed.fire();
+                    stage.complete();
                 }
             });
             return () => {
@@ -364,7 +364,7 @@ export = new Quest(script.Name)
                     });
                     Server.Dialogue.addDialogue(new Dialogue(Pasal, "What am I witnessing..."), 69);
                     task.delay(1, () => Server.Dialogue.talk(new Dialogue(Pasal, "I'll stay back for a bit. I'm just... shocked...")));
-                    stage.completed.fire();
+                    stage.complete();
                 }
             });
             return () => connection.disconnect();
