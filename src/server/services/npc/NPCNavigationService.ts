@@ -200,9 +200,10 @@ export default class NPCNavigationService implements OnInit, OnStart, OnPhysics 
         /**
          * Starts the pathfinding operation.
          *
+         * @param playTween Whether to play the tween animation.
          * @returns The response object containing waypoints and the fitting tween.
          */
-        const start = () => {
+        const start = (playTween = true) => {
             // Wait until waypoints are available
             while (waypoints === undefined) {
                 task.wait();
@@ -218,7 +219,8 @@ export default class NPCNavigationService implements OnInit, OnStart, OnPhysics 
             };
 
             this.pathfind(npcHumanoid, waypoints, () => {
-                tween.Play();
+                if (playTween)
+                    tween.Play();
                 if (requiresPlayer === false) {
                     toCall = true;
                 }
@@ -231,7 +233,8 @@ export default class NPCNavigationService implements OnInit, OnStart, OnPhysics 
                     if (playerRootPart === undefined)
                         continue;
                     if (destination.Position.sub(playerRootPart.Position).Magnitude < 10) {
-                        tween.Play();
+                        if (playTween)
+                            tween.Play();
                         toCall = true;
                         connection.Disconnect();
                         return;

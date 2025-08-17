@@ -39,7 +39,7 @@ const oldNoobToApproachingWall = Server.NPC.Navigation.createPathfindingOperatio
 const pasalToApproachingWall = Server.NPC.Navigation.createPathfindingOperation(
     pasalHumanoid,
     pasalRootPart.CFrame,
-    WAYPOINTS.LearningThePastOldNoobApproachingWall.CFrame
+    WAYPOINTS.LearningThePastPasalApproachingWall.CFrame
 );
 
 const oldNoobToEnteredCave = Server.NPC.Navigation.createPathfindingOperation(
@@ -341,10 +341,12 @@ export = new Quest(script.Name)
                 if (dialogue === intro) {
                     pasalHumanoid.MoveToFinished.Once(() => {
                         pasalRootPart.CFrame = WAYPOINTS.LearningThePastEnterCave.CFrame;
+                        task.wait(0.5);
                         pasalHumanoid.MoveTo(WAYPOINTS.LearningThePastPasalEnteredCave.Position);
                     });
                     oldNoobHumanoid.MoveToFinished.Once(() => {
                         oldNoobRootPart.CFrame = WAYPOINTS.LearningThePastEnterCave.CFrame;
+                        task.wait(0.5);
                         oldNoobToEnteredCave().onComplete(() => {
                             Server.Dialogue.talk(continuation, false);
                             oldNoobToViewingLight().onComplete(() => {
@@ -357,7 +359,7 @@ export = new Quest(script.Name)
                     oldNoobHumanoid.MoveTo(suspiciousWall.Position);
                 }
                 else if (dialogue === ending) {
-                    oldNoobToEnterCave().onComplete(() => {
+                    oldNoobToEnterCave(false).onComplete(() => {
                         oldNoobRootPart.CFrame = Server.NPC.State.getInfo(OldNoob)!.defaultLocation;
                     });
                     Server.Dialogue.addDialogue(new Dialogue(Pasal, "What am I witnessing..."), 69);

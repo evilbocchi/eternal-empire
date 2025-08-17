@@ -169,6 +169,7 @@ export = new Quest(script.Name)
     .addStage(new Stage()
         .setDescription(`Fill the cauldron with Instant Win energy.`)
         .setFocus(cauldron.PrimaryPart!)
+        .setDialogue(new Dialogue(SlamoRefugee, "Go on, fill the cauldron!"))
         .onStart((stage) => {
             refugeeModel.FindFirstChild("FishingRod")?.Destroy();
             refugeeModel.PivotTo(WAYPOINTS.ToTheVillageRefugeeWaiting.CFrame);
@@ -194,6 +195,7 @@ export = new Quest(script.Name)
     .addStage(new Stage()
         .setDescription(`Let the Slamo Refugee use the cauldron to infuse the Empowered Brick with Instant Win energy.`)
         .setFocus(cauldron.PrimaryPart!)
+        .setDialogue(new Dialogue(SlamoRefugee, "Let me handle this."))
         .onStart((stage) => {
             for (const effect of instantWinEffects) {
                 effect.Transparency = 0;
@@ -288,6 +290,7 @@ export = new Quest(script.Name)
     .addStage(new Stage()
         .setDescription(`Go to the Slamo Village linkway with the Charged Empowered Brick at %coords%.`)
         .setFocus(WAYPOINTS.ToTheVillageRefugeeIntermittentIsles)
+        .setDialogue(new Dialogue(SlamoRefugee, "All you need to do is place the Charged Empowered Brick down. Once you do that, the linkway will be repaired and we can finally go home."))
         .onStart((stage) => {
             refugeeModel.FindFirstChild("FishingRod")?.Destroy();
             refugeeModel.PivotTo(WAYPOINTS.ToTheVillageRefugeeBrewing.CFrame);
@@ -338,6 +341,7 @@ export = new Quest(script.Name)
     .addStage(new Stage()
         .setNPC("Slamo Refugee", true)
         .setDescription(`Follow the Slamo Refugee to the village.`)
+        .setDialogue(new Dialogue(SlamoRefugee, "..."))
         .onStart((stage) => {
             refugeeModel.FindFirstChild("FishingRod")?.Destroy();
             refugeeModel.PivotTo(WAYPOINTS.ToTheVillageRefugeeIntermittentIsles.CFrame);
@@ -368,7 +372,7 @@ export = new Quest(script.Name)
                 }
 
                 refugeeHumanoid.WalkSpeed = 30;
-                refugeeToEnteringPoliceStation().onComplete(() => {
+                refugeeToEnteringPoliceStation(false).onComplete(() => {
                     refugeeModel.PivotTo(WAYPOINTS.ToTheVillageRefugeeImprisoned.CFrame);
                     refugeeRootPart.Anchored = true;
                     stage.completed.fire();
@@ -429,11 +433,9 @@ export = new Quest(script.Name)
         hideInstantWinBlock();
         instantWinBlock.CanCollide = false;
         Server.Event.addCompletionListener("ImprisonedSlamoRefugee", () => {
-            const refugee = getNPCModel("Slamo Refugee");
-            refugee.FindFirstChild("FishingRod")?.Destroy();
-            const humanoid = refugee.WaitForChild("Humanoid") as Humanoid;
-            humanoid.RootPart!.Anchored = true;
-            refugee.PivotTo(WAYPOINTS.ToTheVillageRefugeeImprisoned.CFrame);
+            refugeeModel.FindFirstChild("FishingRod")?.Destroy();
+            refugeeRootPart.Anchored = true;
+            refugeeRootPart.CFrame = WAYPOINTS.ToTheVillageRefugeeImprisoned.CFrame;
         });
     })
     .setReward({
