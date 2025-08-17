@@ -86,7 +86,8 @@ export = new Quest(script.Name)
                 .root;
             const helped = new Dialogue(Ricarg, `Oh, you're the guy who gave me money! Really, thank you so much. I could buy so much ${Grass.id} because of that!`)
                 .monologue(`You want to learn how to get ${Grass.id} yourself? Well, that's kind of difficult... the merchant left for Sky Pavilion quite a while ago.`)
-                .monologue("You'll need to harvest it yourself with a Scythe. Luckily, I actually have some with me! I'll even give them to you for cheap.");
+                .monologue("You'll need to harvest it yourself with a Scythe. Luckily, I actually have some with me! I'll even give them to you for cheap.")
+                .root;
 
             const noItemed = new Dialogue(Chuck, `I need a ${Wool.id} and 3 ${Grass.id}.`);
             const itemed = new Dialogue(Chuck, "Good job. You don't look like much, but clearly you tell me otherwise.")
@@ -135,6 +136,7 @@ export = new Quest(script.Name)
             new Dialogue(Chuck, "Here we are.")
                 .monologue("My Crafting Table isn't much, but it gets the job done.")
                 .monologue("I'll give you some resources. Go ahead and craft something. Let's see what you can do.")
+                .root
         )
         .onStart((stage) => {
             Server.NPC.State.stopAnimation(Chuck, "Default");
@@ -164,7 +166,7 @@ export = new Quest(script.Name)
                 for (const item of items) {
                     const craftingItems = CraftingTable.trait(Shop).items;
 
-                    if (item.difficulty === Difficulty.Miscellaneous && craftingItems.includes(item)) {
+                    if (craftingItems.includes(item)) {
                         stage.completed.fire();
                     }
                 }
