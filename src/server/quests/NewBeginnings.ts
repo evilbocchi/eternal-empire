@@ -64,7 +64,6 @@ export = new Quest(script.Name)
             Server.NPC.State.stopAnimation(Tria, "Default");
             task.wait(1);
             triaToMineGuiding().onComplete(() => {
-                print("Reached mine guiding point");
                 stage.completed.fire();
             });
             return () => { };

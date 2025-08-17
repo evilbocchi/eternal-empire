@@ -208,7 +208,7 @@ export default class NPCNavigationService implements OnInit, OnStart, OnPhysics 
                 task.wait();
             }
 
-            const callbacks = new WeakSet<() => unknown>();
+            const callbacks = new Set<() => unknown>();
             const body = {
                 waypoints,
                 fittingTween: tween,
