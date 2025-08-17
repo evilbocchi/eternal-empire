@@ -14,10 +14,11 @@
  */
 
 import { OnInit, OnPhysics, Service } from "@flamework/core";
-import { Lighting, SoundService, Workspace, RunService } from "@rbxts/services";
+import { Lighting, Workspace } from "@rbxts/services";
+import DataService from "server/services/serverdata/DataService";
 import { getSound } from "shared/asset/GameAssets";
 import Packets from "shared/Packets";
-import { WeatherType, WeatherState } from "shared/weather/WeatherTypes";
+import { WeatherState, WeatherType } from "shared/weather/WeatherTypes";
 
 /**
  * Service that manages atmospheric effects and weather.
@@ -57,7 +58,7 @@ export default class AtmosphereService implements OnInit, OnPhysics {
         [WeatherType.Thunderstorm]: 0.1
     };
 
-    constructor() {
+    constructor(private readonly dataService: DataService) {
         // Use current UTC time rounded to nearest hour for global sync
         const now = os.time();
         this.weatherSeed = math.floor(now / 3600) * 3600;
@@ -81,11 +82,11 @@ export default class AtmosphereService implements OnInit, OnPhysics {
      */
     private updateWeather(dt: number) {
         this.currentWeather.timeRemaining -= dt;
-        
+
         if (this.currentWeather.timeRemaining <= 0) {
             this.generateNextWeather();
         }
-        
+
         this.applyWeatherEffects();
     }
 
@@ -93,16 +94,22 @@ export default class AtmosphereService implements OnInit, OnPhysics {
      * Generates the next weather state using deterministic algorithm.
      */
     private generateNextWeather() {
+        // Don't generate weather changes during the first 20 minutes of playtime
+        if (this.dataService.empireData.playtime < 1200) {
+            this.setWeather(WeatherType.Clear);
+            return;
+        }
+
         const currentTime = os.time();
         const cyclePosition = (currentTime - this.weatherSeed) % this.WEATHER_CYCLE_DURATION;
-        
+
         // Use seeded random for deterministic weather
         const seed = this.weatherSeed + math.floor(cyclePosition / 300); // New weather every 5 minutes
-        math.randomseed(seed);
-        
-        const roll = math.random();
+        const random = new Random(seed);
+
+        const roll = random.NextNumber();
         let cumulativeProbability = 0;
-        
+
         for (const [weatherType, probability] of pairs(this.WEATHER_PROBABILITIES)) {
             cumulativeProbability += probability;
             if (roll <= cumulativeProbability) {
@@ -110,9 +117,6 @@ export default class AtmosphereService implements OnInit, OnPhysics {
                 break;
             }
         }
-        
-        // Reset random seed to current time to avoid affecting other systems
-        math.randomseed(os.time());
     }
 
     /**
@@ -123,7 +127,7 @@ export default class AtmosphereService implements OnInit, OnPhysics {
     private setWeather(weatherType: WeatherType) {
         let duration = 300; // 5 minutes default
         let intensity = 1;
-        
+
         // Adjust duration and intensity based on weather type
         switch (weatherType) {
             case WeatherType.Clear:
@@ -143,16 +147,16 @@ export default class AtmosphereService implements OnInit, OnPhysics {
                 intensity = 1;
                 break;
         }
-        
+
         this.currentWeather = {
             type: weatherType,
             intensity,
             duration,
             timeRemaining: duration
         };
-        
+
         print(`Weather changed to: ${weatherType} for ${duration} seconds`);
-        
+
         // Notify clients of weather change
         Packets.weatherChanged.fireAll(this.currentWeather);
     }
@@ -232,19 +236,19 @@ export default class AtmosphereService implements OnInit, OnPhysics {
         // Find a random droplet to strike
         const droplets = Workspace.FindFirstChild("Droplets") as Model | undefined;
         if (!droplets) return;
-        
+
         const children = droplets.GetChildren();
         if (children.size() === 0) return;
-        
+
         const randomDroplet = children[math.random(0, children.size() - 1)] as BasePart;
         if (!randomDroplet || !randomDroplet.IsA("BasePart")) return;
-        
+
         // Apply lightning surge effect (10x value boost)
         this.surgeDroplet(randomDroplet);
-        
+
         // Visual and audio effects
         this.createLightningEffects(randomDroplet.Position);
-        
+
         print(`Lightning struck droplet at position: ${randomDroplet.Position}`);
     }
 
@@ -257,12 +261,12 @@ export default class AtmosphereService implements OnInit, OnPhysics {
         // Add a surge attribute that can be read by the value calculation system
         droplet.SetAttribute("LightningSurged", true);
         droplet.SetAttribute("SurgeMultiplier", 10);
-        
+
         // Visual effect for surged droplet
         droplet.Material = Enum.Material.Neon;
         const originalColor = droplet.Color;
         droplet.Color = Color3.fromRGB(255, 255, 255); // Bright white
-        
+
         // Fade back to original color over time
         task.spawn(() => {
             task.wait(2);
@@ -289,20 +293,20 @@ export default class AtmosphereService implements OnInit, OnPhysics {
         lightning.CanCollide = false;
         lightning.CFrame = new CFrame(position.add(new Vector3(0, 50, 0)));
         lightning.Parent = Workspace;
-        
+
         // Lightning flash effect
         const flash = new Instance("PointLight");
         flash.Color = Color3.fromRGB(200, 200, 255);
         flash.Brightness = 10;
         flash.Range = 100;
         flash.Parent = lightning;
-        
+
         // Remove effects after short duration
         task.spawn(() => {
             task.wait(0.2);
             lightning.Destroy();
         });
-        
+
         // Thunder sound effect
         try {
             const thunderSound = getSound("Thunder.mp3");
@@ -313,7 +317,7 @@ export default class AtmosphereService implements OnInit, OnPhysics {
         } catch (error) {
             print("Could not play thunder sound:", error);
         }
-        
+
         print("⚡ THUNDER! ⚡");
     }
 
@@ -349,7 +353,7 @@ export default class AtmosphereService implements OnInit, OnPhysics {
     onInit() {
         // Initialize weather system
         this.generateNextWeather();
-        
+
         // Set up packet handlers for weather state requests
         Packets.getWeatherState.onInvoke(() => this.getCurrentWeather());
     }

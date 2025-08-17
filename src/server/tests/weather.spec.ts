@@ -1,10 +1,12 @@
 /// <reference types="@rbxts/testez/globals" />
+import DataService from "server/services/serverdata/DataService";
 import AtmosphereService from "server/services/world/AtmosphereService";
 import { WeatherType } from "shared/weather/WeatherTypes";
 
 export = function () {
     describe("AtmosphereService", () => {
-        const atmosphereService = new AtmosphereService();
+        const dataService = new DataService();
+        const atmosphereService = new AtmosphereService(dataService);
 
         describe("getWeatherMultipliers", () => {
             it("returns correct multipliers for clear weather", () => {
