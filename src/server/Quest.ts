@@ -101,12 +101,12 @@ export class Stage {
     }
 
     /**
-     * Registers a callback to run when the stage is loaded.
+     * Set the callback to run when the stage is loaded.
      * 
      * @param load The load callback, returning an optional cleanup function.
      * @returns This stage instance.
      */
-    onLoad(load: (stage: this) => (() => void)) {
+    setLoadCallback(load: (stage: this) => (() => void)) {
         this.load = (stage) => {
             if (++this.loadedTimes > 1) {
                 warn("Stage loaded multiple times");
@@ -138,7 +138,7 @@ export class Stage {
      * @returns This stage instance.
      */
     onReached(reached: (stage: this) => (() => void), load?: (stage: this) => (() => void)) {
-        return this.onLoad((stage) => {
+        return this.setLoadCallback((stage) => {
             const mainCallback = load === undefined ? undefined : load(stage);
             let callback: () => void;
             Server.Quest.onStageReached(this, () => {
