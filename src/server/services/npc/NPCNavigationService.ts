@@ -16,11 +16,9 @@
 import { getInstanceInfo, getRootPart, playSoundAtPart } from "@antivivi/vrldk";
 import { OnInit, OnPhysics, OnStart, Service } from "@flamework/core";
 import { PathfindingService, Players, RunService, TweenService, Workspace } from "@rbxts/services";
-import { getNPCPosition, getWaypoint, PLACED_ITEMS_FOLDER } from "shared/constants";
 import { getSound } from "shared/asset/GameAssets";
+import { PLACED_ITEMS_FOLDER } from "shared/constants";
 import GameSpeed from "shared/GameSpeed";
-import Sandbox from "shared/Sandbox";
-import Signal from "@antivivi/lemon-signal";
 
 declare global {
     /** Function type for handling product purchases. */
@@ -165,7 +163,7 @@ export default class NPCNavigationService implements OnInit, OnStart, OnPhysics 
      * @param npcHumanoid The humanoid instance.
      * @param source The starting position.
      * @param destination The target position.
-     * @param requiresPlayer If true, waits for player proximity before firing the signal.
+     * @param requiresPlayer If false, the callbacks will be fired immediately without waiting for player proximity.
      * @param agentParams Optional pathfinding parameters.
      *
      * @returns A function that can be called to start traversing the path.
@@ -188,20 +186,28 @@ export default class NPCNavigationService implements OnInit, OnStart, OnPhysics 
             cached.Disconnect();
 
         // Load waypoints and tweens
-        const waypoints = this.getWaypoints(npcHumanoid, source.Position, destination.Position, agentParams);
-        if (waypoints === undefined || waypoints.isEmpty()) {
-            throw `No valid waypoints found from ${source.Position} to ${destination.Position} for ${npcHumanoid.Name}`;
-        }
+        let waypoints: PathWaypoint[] | undefined;
+        task.spawn(() => {
+            waypoints = this.getWaypoints(npcHumanoid, source.Position, destination.Position, agentParams);
+            if (waypoints === undefined || waypoints.isEmpty()) {
+                throw `No valid waypoints found from ${source.Position} to ${destination.Position} for ${npcHumanoid.Name}`;
+            }
+        });
 
         const tween = TweenService.Create(npcHumanoid.RootPart!, new TweenInfo(1), { CFrame: destination });
         let toCall = false;
-        
+
         /**
          * Starts the pathfinding operation.
          *
          * @returns The response object containing waypoints and the fitting tween.
          */
         const start = () => {
+            // Wait until waypoints are available
+            while (waypoints === undefined) {
+                task.wait();
+            }
+
             const callbacks = new WeakSet<() => unknown>();
             const body = {
                 waypoints,
@@ -277,15 +283,6 @@ export default class NPCNavigationService implements OnInit, OnStart, OnPhysics 
      * Performs initial pathfinding setup and validation.
      */
     onStart() {
-        // Skip pathfinding setup in sandbox mode
-        if (Sandbox.getEnabled())
-            return;
 
-        // Test pathfinding functionality
-        const path = PathfindingService.CreatePath();
-        path.ComputeAsync(getNPCPosition("Freddy")!, getWaypoint("AHelpingHand2").Position); // load it
-        if (path.GetWaypoints().isEmpty()) {
-            warn("Pathfinding is not working.");
-        }
     }
 }

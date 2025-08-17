@@ -95,7 +95,6 @@ export default class NPCStateService implements OnInit {
             return false;
 
         animTrack.Stop();
-        npcInfo.runningAnimations.delete(animType);
         return true;
     }
 

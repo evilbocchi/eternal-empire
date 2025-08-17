@@ -16,6 +16,7 @@
         "skipLibCheck": true,
         "target": "ESNext",
         "typeRoots": [
+            "node_modules/@types",
             "node_modules/@rbxts",
             "node_modules/@flamework",
             "node_modules/@antivivi"

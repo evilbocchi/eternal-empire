@@ -3,8 +3,8 @@ import { convertToMMSS, playSoundAtPart, spawnExplosion } from "@antivivi/vrldk"
 import { RunService, TweenService, Workspace } from "@rbxts/services";
 import Quest, { Stage } from "server/Quest";
 import { AREAS } from "shared/Area";
-import { getNPCModel, getWaypoint, PLACED_ITEMS_FOLDER } from "shared/constants";
 import { emitEffect, getSound } from "shared/asset/GameAssets";
+import { getNPCModel, PLACED_ITEMS_FOLDER, WAYPOINTS } from "shared/constants";
 import InteractableObject from "shared/InteractableObject";
 import { Server } from "shared/item/ItemUtils";
 import SkillPod from "shared/items/0/millisecondless/SkillPod";
@@ -28,13 +28,32 @@ import { RESET_LAYERS } from "shared/ResetLayer";
 const simpulModel = getNPCModel("Simpul");
 const simpulHumanoid = simpulModel.FindFirstChildOfClass("Humanoid")!;
 const simpulRootPart = simpulHumanoid.RootPart!;
-simpulRootPart.Anchored = true;
 
 const slamoReceptionistHumanoid = getNPCModel("Slamo Receptionist").FindFirstChildOfClass("Humanoid")!;
+const slamoReceptionistRootPart = slamoReceptionistHumanoid.RootPart!;
 
-const waypoint1 = getWaypoint("LudicrousEscape1").CFrame;
-const waypoint2 = getWaypoint("LudicrousEscape2");
-const ring = waypoint2.WaitForChild("LudicrousEscapeRing") as BasePart;
+simpulRootPart.Anchored = true;
+
+const simpulToOut = Server.NPC.Navigation.createPathfindingOperation(
+    simpulHumanoid,
+    simpulRootPart.CFrame,
+    WAYPOINTS.LudicrousEscapeSimpulOut.CFrame
+);
+
+const slamoReceptionistToHiding = Server.NPC.Navigation.createPathfindingOperation(
+    slamoReceptionistHumanoid,
+    slamoReceptionistRootPart.CFrame,
+    WAYPOINTS.LudicrousEscapeSlamoReceptionistHiding.CFrame,
+    false
+);
+
+const slamoReceptionistToReveal = Server.NPC.Navigation.createPathfindingOperation(
+    slamoReceptionistHumanoid,
+    WAYPOINTS.LudicrousEscapeSlamoReceptionistHiding.CFrame,
+    WAYPOINTS.LudicrousEscapeSlamoReceptionistReveal.CFrame
+);
+
+const ring = WAYPOINTS.LudicrousEscapeSlamoReceptionistHiding.LudicrousEscapeRing;
 const toggleRing = (enabled: boolean) => {
     for (const beam of ring.GetChildren())
         if (beam.IsA("Beam"))
@@ -129,12 +148,14 @@ export = new Quest(script.Name)
                 if (dialogue === stage.dialogue) {
                     Server.Event.setEventCompleted("FlimsyBarsDestroyed", true);
                     task.delay(1, () => {
-                        Server.NPC.Navigation.leadToPoint(simpulHumanoid, waypoint1, () => Server.Dialogue.talk(continuation));
+                        simpulToOut().onComplete(() => {
+                            Server.Dialogue.talk(continuation);
+                        });
                     });
                 }
                 else if (dialogue === continuation) {
                     simpulRootPart.Anchored = true;
-                    TweenService.Create(simpulRootPart, new TweenInfo(0.5), { CFrame: waypoint1.add(new Vector3(0, 150, 0)) }).Play();
+                    TweenService.Create(simpulRootPart, new TweenInfo(0.5), { CFrame: WAYPOINTS.LudicrousEscapeSimpulOut.CFrame.add(new Vector3(0, 150, 0)) }).Play();
                     task.delay(2, () => stage.completed.fire());
                 }
             });
@@ -150,7 +171,7 @@ export = new Quest(script.Name)
                 .root
         )
         .onStart((stage) => {
-            simpulRootPart.CFrame = waypoint1.add(new Vector3(0, 150, 0));
+            simpulRootPart.CFrame = WAYPOINTS.LudicrousEscapeSimpulOut.CFrame.add(new Vector3(0, 150, 0));
 
             const ItemService = Server.Item;
             const start = new Dialogue(SlamoReceptionist, "So, about that explosion above... Simpul escaped, didn't he.")
@@ -227,8 +248,11 @@ export = new Quest(script.Name)
         .onStart((stage) => {
             toggleRing(true);
             const hint = new Dialogue(SlamoReceptionist, "Come on, get in front of me and place the statue down where Simpul can easily spot it.");
-            Server.NPC.Navigation.leadToPoint(getNPCModel("Slamo Receptionist").WaitForChild("Humanoid"), waypoint2.CFrame, () => Server.Dialogue.talk(
-                new Dialogue(SlamoReceptionist, "Alright. I'll stay here and hide to make sure nothing happens. You go in front and place the statue down.")), false);
+            slamoReceptionistToHiding().onComplete(() => {
+                Server.Dialogue.talk(
+                    new Dialogue(SlamoReceptionist, "Alright. I'll stay here and hide to make sure nothing happens. You go in front and place the statue down.")
+                );
+            });
 
             let statue: Model | undefined;
 
@@ -308,7 +332,7 @@ export = new Quest(script.Name)
             const connection3 = Server.Event.addCompletionListener("SimpulGone", (isCompleted) => {
                 if (!isCompleted)
                     return;
-                Server.NPC.Navigation.leadToPoint(slamoReceptionistHumanoid, getWaypoint("LudicrousEscape3").CFrame, () => { });
+                slamoReceptionistToReveal();
                 stage.completed.fire();
             });
             return () => {
@@ -329,7 +353,11 @@ export = new Quest(script.Name)
                     const defaultLocation = Server.NPC.State.getInfo(SlamoReceptionist)?.defaultLocation;
                     if (defaultLocation === undefined)
                         throw "Slamo Receptionist default location not found!";
-                    Server.NPC.Navigation.leadToPoint(slamoReceptionistHumanoid, defaultLocation, () => { });
+                    Server.NPC.Navigation.createPathfindingOperation(
+                        slamoReceptionistHumanoid,
+                        slamoReceptionistRootPart.CFrame,
+                        defaultLocation,
+                    )();
                     toggleRing(false);
                     stage.completed.fire();
                 }

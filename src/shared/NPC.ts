@@ -8,15 +8,12 @@ export type NPCAnimationType = "Default" | "Walk" | "Run" | "Jump";
  */
 export default class NPC {
     animationsPerType = new Map<NPCAnimationType, number>();
-    hipHeightPerAnimationType = new Map<NPCAnimationType, number>();
     defaultDialogue!: Dialogue;
     interact: (() => void) | undefined;
 
     constructor() {
         this.animationsPerType.set("Walk", 180426354);
         this.animationsPerType.set("Jump", 125750702);
-        this.hipHeightPerAnimationType.set("Walk", 1);
-        this.hipHeightPerAnimationType.set("Jump", 1);
     }
 
     /**

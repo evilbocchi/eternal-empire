@@ -1,4 +1,5 @@
 import { Debris, Players, SoundService, TextChatService, Workspace } from "@rbxts/services";
+import { Workspace_Waypoints } from "services";
 import { AREAS } from "shared/Area";
 import { IS_CI, IS_SERVER } from "shared/Context";
 
@@ -59,7 +60,6 @@ export function getNameFromUserId(userId: number | undefined) {
 export const getNPCModel = (npc: string) => NPC_MODELS.WaitForChild(npc) as Model;
 export const getNPCPosition = (npc: string) => getNPCModel(npc).PrimaryPart?.Position;
 export const getStartCamera = () => Workspace.FindFirstChild("StartCamera") as Part;
-export const getWaypoint = (waypoint: string) => WAYPOINTS.WaitForChild(waypoint) as BasePart;
 
 export const LEADERBOARDS = Workspace.WaitForChild("Leaderboards") as Folder & {
     TimePlayed: Leaderboard;
@@ -90,6 +90,6 @@ export const PLACED_ITEMS_FOLDER = createFolder("PlacedItems");
  */
 export const getTextChannels = () => TextChatService.WaitForChild("TextChannels", 5) as Folder;
 
-export const WAYPOINTS = Workspace.WaitForChild("Waypoints") as Folder;
+export const WAYPOINTS = Workspace.WaitForChild("Waypoints") as Workspace_Waypoints;
 
 export const isStartScreenEnabled = () => (getStartCamera().WaitForChild("StartScreen") as BoolValue).Value;

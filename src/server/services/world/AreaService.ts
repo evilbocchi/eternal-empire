@@ -112,7 +112,7 @@ export default class AreaService implements OnInit, OnPlayerJoined {
         // and preserving original size for upgrade calculations
         const grid = area.getGrid();
         if (grid !== undefined) {
-            grid.CollisionGroup = "Item"; // Allow items to interact with the grid
+            grid.CollisionGroup = "Grid";
             grid.SetAttribute("OriginalSize", grid.Size); // Store for upgrade scaling
         }
 
