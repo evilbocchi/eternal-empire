@@ -76,12 +76,6 @@ const refugeeToEnteringPoliceStation = Server.NPC.Navigation.createPathfindingOp
     WAYPOINTS.ToTheVillageRefugeeEnteringPoliceStation.CFrame
 );
 
-const refugeeToImprisoned = Server.NPC.Navigation.createPathfindingOperation(
-    refugeeHumanoid,
-    WAYPOINTS.ToTheVillageRefugeeEnteringPoliceStation.CFrame,
-    WAYPOINTS.ToTheVillageRefugeeImprisoned.CFrame
-);
-
 export = new Quest(script.Name)
     .setName("To The Village")
     .setLength(3)

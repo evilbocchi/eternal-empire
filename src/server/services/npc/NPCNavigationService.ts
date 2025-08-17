@@ -190,7 +190,7 @@ export default class NPCNavigationService implements OnInit, OnStart, OnPhysics 
         task.spawn(() => {
             waypoints = this.getWaypoints(npcHumanoid, source.Position, destination.Position, agentParams);
             if (waypoints === undefined || waypoints.isEmpty()) {
-                throw `No valid waypoints found from ${source.Position} to ${destination.Position} for ${npcHumanoid.Name}`;
+                throw `No valid waypoints found from ${source.Position} to ${destination.Position} for ${npcHumanoid.Parent?.Name}`;
             }
         });
 

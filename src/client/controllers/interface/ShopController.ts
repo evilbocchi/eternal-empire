@@ -221,7 +221,7 @@ export default class ShopController implements OnInit, OnStart {
                     return;
                 }
                 const inBalance = balance.get(currency);
-                update(inBalance !== undefined && (amount as OnoeNum).lessEquals(inBalance));
+                update((amount as OnoeNum).lessEquals(0) || (inBalance !== undefined && (amount as OnoeNum).lessEquals(inBalance)));
             });
         }
         else if (item !== undefined) {
