@@ -7,8 +7,8 @@
 
 import Signal from "@antivivi/lemon-signal";
 import { getNPCModel } from "shared/constants";
-import { Dialogue } from "shared/NPC";
 import { Server } from "shared/item/ItemUtils";
+import { Dialogue } from "shared/NPC";
 
 /**
  * Represents a single stage within a quest, including its description, position, focus, dialogue, and NPCs.
@@ -22,9 +22,26 @@ export class Stage {
     npcModel: Model | undefined;
     npcHumanoid: Humanoid | undefined;
 
-    completed = new Signal<() => void>();
+    readonly completed = new Signal<() => void>();
+
+    /**
+     * Called when the stage is loaded, returning an optional cleanup function.
+     */
     load?: ((stage: this) => (() => void));
+
     positionChanged = new Signal<(position?: Vector3) => void>();
+
+    loadedTimes = 0;
+    completedTimes = 0;
+
+    constructor() {
+        this.completed.connect(() => {
+            if (++this.completedTimes > 1) {
+                warn("Stage completed multiple times");
+                print(this);
+            }
+        });
+    }
 
     /**
      * Sets the description for this stage.
@@ -89,11 +106,17 @@ export class Stage {
 
     /**
      * Registers a callback to run when the stage is loaded.
+     * 
      * @param load The load callback, returning an optional cleanup function.
      * @returns This stage instance.
      */
     onLoad(load: (stage: this) => (() => void)) {
         this.load = (stage) => {
+            if (++this.loadedTimes > 1) {
+                warn("Stage loaded multiple times");
+                print(stage);
+            }
+
             const callback = load(stage);
             const dialogue = this.dialogue;
             if (dialogue !== undefined) {
@@ -110,6 +133,7 @@ export class Stage {
 
     /**
      * Registers a callback to run when the stage starts, optionally with a load callback.
+     * 
      * @param start The start callback, returning an optional cleanup function.
      * @param load Optional load callback.
      * @returns This stage instance.
@@ -137,8 +161,8 @@ export class Stage {
  */
 export default class Quest {
 
-    static readonly QUEST_MODULES = function() {
-        const moduleScripts = new Map<string,ModuleScript>();
+    static readonly QUEST_MODULES = function () {
+        const moduleScripts = new Map<string, ModuleScript>();
         const folder = script.Parent!.WaitForChild("quests");
         for (const moduleScript of folder.GetDescendants()) {
             if (moduleScript.IsA("ModuleScript") && moduleScript !== script) {
@@ -280,7 +304,7 @@ export default class Quest {
                     task.wait(2);
                 }
                 stage.completed.fire();
-                return () => {};
+                return () => { };
             });
         return this.setStage(1, stage);
     }

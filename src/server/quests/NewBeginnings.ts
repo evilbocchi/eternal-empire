@@ -145,7 +145,7 @@ export = new Quest(script.Name)
         });
 
         Server.Dialogue.dialogueFinished.connect((dialogue) => {
-            if (dialogue === NameChanger.defaultDialogue) {
+            if (dialogue === NameChanger.defaultDialogues[0]) {
                 Packets.tabOpened.fireAll("Rename");
             }
         });

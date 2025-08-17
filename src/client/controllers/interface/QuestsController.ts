@@ -222,6 +222,7 @@ export default class QuestsController implements OnInit, OnPhysics, OnCharacterA
         TRACKED_QUEST_WINDOW.DescriptionLabel.Visible = hasQuest;
         TRACKED_QUEST_WINDOW.TitleLabel.Visible = hasQuest;
         if (!hasQuest) {
+            this.indexer = undefined;
             return;
         }
         const quest = Packets.questInfo.get().get(questId);
@@ -361,7 +362,7 @@ export default class QuestsController implements OnInit, OnPhysics, OnCharacterA
             questInfoObservation.disconnect();
         });
         const onQuestReceived = (id: string, quest: QuestInfo) => {
-            if (quest.level >= 999 || this.availableQuests.has(id))
+            if (quest.level >= 999 || QUESTS_WINDOW.QuestList.FindFirstChild(id))
                 return;
             this.availableQuests.add(id);
             const color = new Color3(quest.colorR, quest.colorG, quest.colorB);

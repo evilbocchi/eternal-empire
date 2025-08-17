@@ -395,7 +395,7 @@ export = new Quest(script.Name)
         const done = new Dialogue(Andy, "Wow! Those are some really cool looking apples. Don't mind if I do.");
 
         Server.Dialogue.dialogueFinished.connect((dialogue) => {
-            if (dialogue === Andy.defaultDialogue) {
+            if (dialogue === Andy.defaultDialogues[0]) {
                 const last = questMetadata.get("Andy") as number | undefined;
                 if (last === undefined || last + 3600 < tick()) {
                     if (Server.Quest.takeQuestItem("Apple", 40)) {
