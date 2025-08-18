@@ -439,7 +439,7 @@ export default class ShopController implements OnInit, OnStart {
 
         const purchaseButton = PURCHASE_WINDOW.DescriptionFrame.PurchaseContainer.Purchase;
         this.hotkeysController.setHotkey(purchaseButton, Enum.KeyCode.E, () => {
-            if (!SHOP_GUI.Enabled) {
+            if (!SHOP_GUI.Enabled || PURCHASE_WINDOW.Visible === false) {
                 return false;
             }
             if (this.selectedItem !== undefined && Packets.buyItem.invoke(this.selectedItem.id)) {

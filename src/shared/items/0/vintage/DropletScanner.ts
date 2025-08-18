@@ -9,6 +9,7 @@ import { CURRENCY_DETAILS } from "shared/currency/CurrencyDetails";
 import Droplet from "shared/item/Droplet";
 import Item from "shared/item/Item";
 import { Server } from "shared/item/ItemUtils";
+import WeatherBoost from "shared/item/traits/boost/WeatherBoost";
 import Upgrader from "shared/item/traits/upgrader/Upgrader";
 import NamedUpgrades from "shared/namedupgrade/NamedUpgrades";
 
@@ -57,17 +58,9 @@ export = new Item(script.Name)
 
             const [globAdd, globMul, globPow] = RevenueService.getGlobal(FURNACE_UPGRADES);
             const [total, nerf] = RevenueService.calculateDropletValue(dropletModel, true, true);
-            
+
             // Get weather multipliers for display
-            const weatherMultipliers = Server.Atmosphere.getWeatherMultipliers();
-            let weatherMultiplier = weatherMultipliers.dropletValue;
-            
-            // Check for lightning surge effect
-            const isLightningSurged = dropletModel.GetAttribute("LightningSurged") as boolean;
-            const surgeMultiplier = dropletModel.GetAttribute("SurgeMultiplier") as number;
-            if (isLightningSurged && surgeMultiplier) {
-                weatherMultiplier *= surgeMultiplier;
-            }
+            const weatherMultiplier = WeatherBoost.getDropletValueMultiplier(dropletModel);
 
             const builder = new StringBuilder();
             builder.append("RAW WORTH: ").append(rawValue.toString(true));
@@ -113,17 +106,7 @@ export = new Item(script.Name)
             // Display weather effects
             if (weatherMultiplier !== 1) {
                 builder.append("\nWEATHER: ");
-                if (isLightningSurged && surgeMultiplier && surgeMultiplier > 1) {
-                    // Show base weather + lightning surge
-                    const baseWeatherMultiplier = weatherMultipliers.dropletValue;
-                    if (baseWeatherMultiplier !== 1) {
-                        builder.append("x").append(formatRichText(OnoeNum.toString(baseWeatherMultiplier), new Color3(0.5, 0.8, 1)));
-                    }
-                    builder.append(" + ").append(formatRichText("LIGHTNING", new Color3(1, 1, 0.3)));
-                    builder.append(" x").append(formatRichText(OnoeNum.toString(surgeMultiplier), new Color3(1, 1, 0.3)));
-                } else {
-                    builder.append("x").append(formatRichText(OnoeNum.toString(weatherMultiplier), new Color3(0.5, 0.8, 1)));
-                }
+                builder.append("x").append(formatRichText(OnoeNum.toString(weatherMultiplier), new Color3(0.5, 0.8, 1)));
             }
 
             if (nerf !== 1)

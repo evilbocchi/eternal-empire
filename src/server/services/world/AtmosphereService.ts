@@ -13,12 +13,19 @@
  * @since 1.0.0
  */
 
+import { setInstanceInfo } from "@antivivi/vrldk";
 import { OnInit, OnPhysics, Service } from "@flamework/core";
-import { Lighting, Workspace } from "@rbxts/services";
+import { Lighting, TweenService, Workspace } from "@rbxts/services";
 import DataService from "server/services/serverdata/DataService";
 import { getSound } from "shared/asset/GameAssets";
 import Packets from "shared/Packets";
 import { WeatherState, WeatherType } from "shared/weather/WeatherTypes";
+
+declare global {
+    interface InstanceInfo {
+        LightningSurged?: boolean;
+    }
+}
 
 /**
  * Service that manages atmospheric effects and weather.
@@ -224,7 +231,7 @@ export default class AtmosphereService implements OnInit, OnPhysics {
      */
     private handleLightningStrikes() {
         // Random chance for lightning strike every few seconds
-        if (math.random() < 0.05) { // 5% chance per physics step during thunderstorm
+        if (math.random() < 0.0005) { // 0.05% chance per physics step during thunderstorm
             this.triggerLightningStrike();
         }
     }
@@ -259,21 +266,19 @@ export default class AtmosphereService implements OnInit, OnPhysics {
      */
     private surgeDroplet(droplet: BasePart) {
         // Add a surge attribute that can be read by the value calculation system
-        droplet.SetAttribute("LightningSurged", true);
-        droplet.SetAttribute("SurgeMultiplier", 10);
+        setInstanceInfo(droplet, "LightningSurged", true);
 
         // Visual effect for surged droplet
-        droplet.Material = Enum.Material.Neon;
-        const originalColor = droplet.Color;
-        droplet.Color = Color3.fromRGB(255, 255, 255); // Bright white
+        const light = new Instance("PointLight");
+        light.Color = Color3.fromRGB(255, 255, 255);
+        light.Brightness = 10;
+        light.Range = 3;
+        light.Parent = droplet;
 
         // Fade back to original color over time
-        task.spawn(() => {
-            task.wait(2);
-            droplet.Material = Enum.Material.Slate;
-            droplet.Color = originalColor;
-            droplet.SetAttribute("LightningSurged", false);
-            droplet.SetAttribute("SurgeMultiplier", 1);
+        TweenService.Create(light, new TweenInfo(2), { Brightness: 0 }).Play();
+        task.delay(2, () => {
+            setInstanceInfo(droplet, "LightningSurged", false);
         });
     }
 
@@ -303,7 +308,7 @@ export default class AtmosphereService implements OnInit, OnPhysics {
 
         // Remove effects after short duration
         task.spawn(() => {
-            task.wait(0.2);
+            task.wait(0.05);
             lightning.Destroy();
         });
 

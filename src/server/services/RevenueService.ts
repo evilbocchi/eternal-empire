@@ -31,6 +31,7 @@ import Upgrader from "shared/item/traits/upgrader/Upgrader";
 import { PriceUpgrade } from "shared/namedupgrade/NamedUpgrade";
 import NamedUpgrades from "shared/namedupgrade/NamedUpgrades";
 import { performSoftcaps } from "shared/Softcaps";
+import WeatherBoost from "shared/item/traits/boost/WeatherBoost";
 
 const FURNACE_UPGRADES = NamedUpgrades.getUpgrades("Furnace");
 
@@ -139,24 +140,14 @@ export default class RevenueService {
         }
 
         let worth = Droplet.getDroplet(instanceInfo.DropletId!)!.coalesce(totalAdd, totalMul, totalPow);
-        
-        // Apply weather value multipliers
-        const weatherMultipliers = this.atmosphereService.getWeatherMultipliers();
-        let weatherMultiplier = weatherMultipliers.dropletValue;
-        
-        // Check for lightning surge effect
-        const isLightningSurged = dropletModel.GetAttribute("LightningSurged") as boolean;
-        const surgeMultiplier = dropletModel.GetAttribute("SurgeMultiplier") as number;
-        if (isLightningSurged && surgeMultiplier) {
-            weatherMultiplier *= surgeMultiplier;
-        }
-        
-        // Apply weather multiplier to worth
-        if (weatherMultiplier !== 1) {
-            worth = worth.mul(weatherMultiplier);
-        }
-        
+
         if (includesGlobalBoosts === true) {
+            // Apply weather value multipliers
+            const weatherMultiplier = WeatherBoost.getDropletValueMultiplier(dropletModel);
+            if (weatherMultiplier !== 1) {
+                worth = worth.mul(weatherMultiplier);
+            }
+            
             this.performSoftcaps(worth.amountPerCurrency);
         }
 
