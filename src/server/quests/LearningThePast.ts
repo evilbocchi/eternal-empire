@@ -2,8 +2,8 @@ import { playSoundAtPart, spawnExplosion } from "@antivivi/vrldk";
 import { RunService, TweenService, Workspace } from "@rbxts/services";
 import Quest, { Stage } from "server/Quest";
 import { AREAS } from "shared/Area";
-import { getNPCModel, getWaypoint } from "shared/constants";
 import { emitEffect, getSound } from "shared/asset/GameAssets";
+import { getNPCModel, WAYPOINTS } from "shared/constants";
 import InteractableObject from "shared/InteractableObject";
 import { Server } from "shared/item/ItemUtils";
 import ExcavationStone from "shared/items/excavation/ExcavationStone";
@@ -17,9 +17,54 @@ import Pasal from "shared/npcs/Pasal";
 
 const pasalModel = getNPCModel("Pasal");
 const pasalHumanoid = pasalModel.FindFirstChildOfClass("Humanoid")!;
+const pasalRootPart = pasalHumanoid.RootPart!;
 const oldNoobModel = getNPCModel("Old Noob");
 const oldNoobHumanoid = oldNoobModel.FindFirstChildOfClass("Humanoid")!;
+const oldNoobRootPart = oldNoobHumanoid.RootPart!;
+
 const suspiciousWall = AREAS.BarrenIslands.map.WaitForChild("SuspiciousWall") as BasePart;
+
+const oldNoobToApproachingPasal = Server.NPC.Navigation.createPathfindingOperation(
+    oldNoobHumanoid,
+    oldNoobRootPart.CFrame,
+    WAYPOINTS.LearningThePastOldNoobApproachingPasal.CFrame
+);
+
+const oldNoobToApproachingWall = Server.NPC.Navigation.createPathfindingOperation(
+    oldNoobHumanoid,
+    WAYPOINTS.LearningThePastOldNoobApproachingPasal.CFrame,
+    WAYPOINTS.LearningThePastOldNoobApproachingWall.CFrame
+);
+
+const pasalToApproachingWall = Server.NPC.Navigation.createPathfindingOperation(
+    pasalHumanoid,
+    pasalRootPart.CFrame,
+    WAYPOINTS.LearningThePastPasalApproachingWall.CFrame
+);
+
+const oldNoobToEnteredCave = Server.NPC.Navigation.createPathfindingOperation(
+    oldNoobHumanoid,
+    WAYPOINTS.LearningThePastEnterCave.CFrame,
+    WAYPOINTS.LearningThePastOldNoobEnteredCave.CFrame
+);
+
+const oldNoobToViewingLight = Server.NPC.Navigation.createPathfindingOperation(
+    oldNoobHumanoid,
+    WAYPOINTS.LearningThePastOldNoobEnteredCave.CFrame,
+    WAYPOINTS.LearningThePastOldNoobViewingLight.CFrame
+);
+
+const pasalToViewingLight = Server.NPC.Navigation.createPathfindingOperation(
+    pasalHumanoid,
+    WAYPOINTS.LearningThePastPasalEnteredCave.CFrame,
+    WAYPOINTS.LearningThePastPasalViewingLight.CFrame
+);
+
+const oldNoobToEnterCave = Server.NPC.Navigation.createPathfindingOperation(
+    oldNoobHumanoid,
+    WAYPOINTS.LearningThePastOldNoobViewingLight.CFrame,
+    WAYPOINTS.LearningThePastEnterCave.CFrame
+);
 
 const unlockWall = () => {
     const keyhole = suspiciousWall.WaitForChild("Keyhole") as BasePart;
@@ -27,7 +72,7 @@ const unlockWall = () => {
     const keyModel = IrregularlyShapedKey.MODEL?.Clone();
     if (keyModel === undefined)
         return;
-    keyModel.PrimaryPart!.CFrame = getWaypoint("LearningThePastKey").CFrame;
+    keyModel.PrimaryPart!.CFrame = WAYPOINTS.LearningThePastKey.CFrame;
     keyModel.Parent = Workspace;
     const tweenInfo = new TweenInfo(0.5);
     TweenService.Create(keyModel.PrimaryPart!, tweenInfo, { Orientation: keyModel.PrimaryPart!.Orientation.add(inc) }).Play();
@@ -70,7 +115,7 @@ export = new Quest(script.Name)
     )
     .addStage(new Stage()
         .setDescription("Find details about the history of Barren Islands in the library at %coords%.")
-        .setFocus(getWaypoint("LearningThePast2"))
+        .setFocus(WAYPOINTS.LearningThePastLibraryEntrance)
         .onStart((stage) => {
             const connection = Server.Dialogue.dialogueFinished.connect((dialogue) => {
                 if (dialogue === InteractableObject.OldBooks1.dialogue) {
@@ -208,7 +253,7 @@ export = new Quest(script.Name)
     )
     .addStage(new Stage()
         .setDescription(`Follow the Old Noob to use the key.`)
-        .setFocus(getWaypoint("LearningThePastOldNoob1"))
+        .setFocus(WAYPOINTS.LearningThePastOldNoobApproachingPasal)
         .setNPC("Old Noob")
         .setDialogue(new Dialogue(OldNoob, `I'll lead the way. My body can still move, after all.`))
         .onStart((stage) => {
@@ -224,7 +269,7 @@ export = new Quest(script.Name)
 
             Server.NPC.State.stopAnimation(OldNoob, "Default");
             task.wait(1);
-            Server.NPC.Navigation.leadToPoint(oldNoobHumanoid, getWaypoint("LearningThePastOldNoob1").CFrame, () => {
+            oldNoobToApproachingPasal().onComplete(() => {
                 Server.Dialogue.talk(intro);
             });
 
@@ -235,8 +280,8 @@ export = new Quest(script.Name)
                 if (dialogue === intro) {
                     Server.NPC.State.stopAnimation(Pasal, "Default");
                     task.wait(0.5);
-                    Server.NPC.Navigation.leadToPoint(pasalHumanoid, getWaypoint("LearningThePastPasal1").CFrame, () => { });
-                    Server.NPC.Navigation.leadToPoint(oldNoobHumanoid, getWaypoint("LearningThePastOldNoob2").CFrame, () => {
+                    pasalToApproachingWall().onComplete(() => { });
+                    oldNoobToApproachingWall().onComplete(() => {
                         Server.Dialogue.talk(teaching);
                         Server.Event.setEventCompleted("IrregularlyShapedKeyUsable", true);
                         Server.Dialogue.addDialogue(oldNoobAwaiting);
@@ -265,10 +310,10 @@ export = new Quest(script.Name)
             Server.NPC.State.stopAnimation(OldNoob, "Default");
             Server.NPC.State.stopAnimation(Pasal, "Default");
             oldNoobModel.FindFirstChildOfClass("Tool")?.Destroy();
-            pasalHumanoid.RootPart!.Anchored = false;
-            oldNoobHumanoid.RootPart!.Anchored = false;
-            pasalHumanoid.RootPart!.CFrame = getWaypoint("LearningThePastPasal1").CFrame;
-            oldNoobHumanoid.RootPart!.CFrame = getWaypoint("LearningThePastOldNoob2").CFrame;
+            pasalRootPart.Anchored = false;
+            oldNoobRootPart.Anchored = false;
+            pasalRootPart.CFrame = WAYPOINTS.LearningThePastPasalApproachingWall.CFrame;
+            oldNoobRootPart.CFrame = WAYPOINTS.LearningThePastOldNoobApproachingWall.CFrame;
             const intro = new Dialogue(Pasal, "...what in the world?")
                 .next(new Dialogue(OldNoob, "This place has some pretty neat tricks, as you can see."))
                 .monologue("Let's get in before anyone else notices.")
@@ -295,25 +340,27 @@ export = new Quest(script.Name)
             const connection = Server.Dialogue.dialogueFinished.connect((dialogue) => {
                 if (dialogue === intro) {
                     pasalHumanoid.MoveToFinished.Once(() => {
-                        pasalHumanoid.RootPart!.CFrame = getWaypoint("LearningThePastEnterCave").CFrame;
-                        pasalHumanoid.MoveTo(getWaypoint("LearningThePastPasal2").Position);
+                        pasalRootPart.CFrame = WAYPOINTS.LearningThePastEnterCave.CFrame;
+                        task.wait(0.5);
+                        pasalHumanoid.MoveTo(WAYPOINTS.LearningThePastPasalEnteredCave.Position);
                     });
                     oldNoobHumanoid.MoveToFinished.Once(() => {
-                        oldNoobHumanoid.RootPart!.CFrame = getWaypoint("LearningThePastEnterCave").CFrame;
-                        Server.NPC.Navigation.leadToPoint(oldNoobHumanoid, getWaypoint("LearningThePastOldNoob3").CFrame, () => {
+                        oldNoobRootPart.CFrame = WAYPOINTS.LearningThePastEnterCave.CFrame;
+                        task.wait(0.5);
+                        oldNoobToEnteredCave().onComplete(() => {
                             Server.Dialogue.talk(continuation, false);
-                            Server.NPC.Navigation.leadToPoint(oldNoobHumanoid, getWaypoint("LearningThePastOldNoob4").CFrame, () => {
+                            oldNoobToViewingLight().onComplete(() => {
                                 Server.Dialogue.talk(ending);
                             });
+                            pasalToViewingLight();
                         });
-                        Server.NPC.Navigation.leadToPoint(pasalHumanoid, getWaypoint("LearningThePastPasal3").CFrame, () => { });
                     });
                     pasalHumanoid.MoveTo(suspiciousWall.Position);
                     oldNoobHumanoid.MoveTo(suspiciousWall.Position);
                 }
                 else if (dialogue === ending) {
-                    Server.NPC.Navigation.pathfind(oldNoobHumanoid, getWaypoint("LearningThePastEnterCave").Position, () => {
-                        oldNoobHumanoid.RootPart!.CFrame = Server.NPC.State.getInfo(OldNoob)!.defaultLocation;
+                    oldNoobToEnterCave(false).onComplete(() => {
+                        oldNoobRootPart.CFrame = Server.NPC.State.getInfo(OldNoob)!.defaultLocation;
                     });
                     Server.Dialogue.addDialogue(new Dialogue(Pasal, "What am I witnessing..."), 69);
                     task.delay(1, () => Server.Dialogue.talk(new Dialogue(Pasal, "I'll stay back for a bit. I'm just... shocked...")));

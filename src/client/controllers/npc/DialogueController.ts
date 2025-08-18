@@ -44,7 +44,11 @@ export default class DialogueController implements OnInit, OnStart {
 
     npcTagColor = Color3.fromRGB(201, 255, 13).ToHex();
     emptyColor = Color3.fromRGB(0, 181, 28).ToHex();
-    defaultTextSound = getSound("DefaultText.mp3");
+    defaultTextSound = function() {
+        const defaultText = getSound("DefaultText.mp3").Clone();
+        defaultText.Volume = 0.25;
+        return defaultText;
+    }();
     textSound = undefined as Sound | undefined;
     text = "";
     size = 0;

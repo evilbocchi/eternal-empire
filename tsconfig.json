@@ -4,8 +4,8 @@
         "allowSyntheticDefaultImports": true,
         "downlevelIteration": true,
         "jsx": "react",
-        "jsxFactory": "Roact.createElement",
-        "jsxFragmentFactory": "Roact.createFragment",
+        "jsxFactory": "React.createElement",
+        "jsxFragmentFactory": "React.createFragment",
         "module": "commonjs",
         "moduleResolution": "Node",
         "noLib": true,
@@ -16,6 +16,7 @@
         "skipLibCheck": true,
         "target": "ESNext",
         "typeRoots": [
+            "node_modules/@types",
             "node_modules/@rbxts",
             "node_modules/@flamework",
             "node_modules/@antivivi"

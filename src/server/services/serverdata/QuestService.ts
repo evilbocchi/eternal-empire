@@ -80,7 +80,7 @@ export default class QuestService implements OnInit {
      */
     setStagePerQuest(quests: Map<string, number>) {
         this.dataService.empireData.quests = quests;
-        Packets.quests.set(quests);
+        Packets.stagePerQuest.set(quests);
     }
 
     /**
@@ -162,44 +162,42 @@ export default class QuestService implements OnInit {
 
                     // Load stage if not already loaded
                     if (!this.loadedStages.has(stage)) {
-                        const load = stage.load;
-                        if (load !== undefined) {
-                            this.loadedStages.add(stage);
-                            const rem = load(stage);
+                        this.loadedStages.add(stage);
+                        const cleanup = stage.load?.(stage);
 
-                            // Set up stage completion handler
-                            const connection = stage.completed.connect(() => {
-                                const newStage = this.completeStage(quest, index);
-                                if (newStage === undefined) {
-                                    return;
-                                }
-                                rem();
-                                print(`Completed stage ${index} in ${quest.id}, now in stage ${newStage}`);
+                        // Set up stage completion handler
+                        const connection = stage.completed.connect(() => {
+                            const newStage = this.completeStage(quest, index);
+                            if (newStage === undefined) {
+                                return;
+                            }
+                            cleanup?.();
+                            print(`Completed stage ${index} in ${quest.id}, now in stage ${newStage}`);
 
-                                // Log analytics for quest progression
-                                const player = Players.GetPlayers()[0];
-                                if (player !== undefined)
-                                    AnalyticsService.LogOnboardingFunnelStepEvent(player, index + 1, "Quest " + quest.name);
+                            // Log analytics for quest progression
+                            const player = Players.GetPlayers()[0];
+                            if (player !== undefined)
+                                AnalyticsService.LogOnboardingFunnelStepEvent(player, index + 1, "Quest " + quest.name);
 
-                                // Handle quest completion or next stage
-                                if (newStage === -1) {
-                                    this.completeQuest(quest);
-                                }
-                                else {
-                                    const nextStage = quest.stages[newStage];
-                                    this.stageReached.fire(nextStage);
-                                    reached.add(nextStage);
-                                }
+                            // Handle quest completion or next stage
+                            if (newStage === -1) {
+                                this.completeQuest(quest);
+                            }
+                            else {
+                                const nextStage = quest.stages[newStage];
+                                this.stageReached.fire(nextStage);
+                                reached.add(nextStage);
+                            }
 
-                                // Clean up
-                                this.loadedStages.delete(stage);
-                                connection.disconnect();
-                            });
-                        }
+                            // Clean up
+                            this.loadedStages.delete(stage);
+                            connection.disconnect();
+                        });
                     }
 
                     // Fire signal for current stage
                     if (current === index && !reached.has(stage)) {
+                        print(`Reached stage ${index} in ${quest.id}`);
                         this.stageReached.fire(stage);
                     }
                 });
@@ -321,7 +319,7 @@ export default class QuestService implements OnInit {
                 length: quest.length,
                 reward: quest.reward,
                 order: quest.order,
-                stages: new Array()
+                stages: [],
             };
 
             // Set up stage position tracking
@@ -338,6 +336,6 @@ export default class QuestService implements OnInit {
         // Send quest info to clients
         Packets.questInfo.set(questInfos);
         // Send quest progress to clients
-        Packets.quests.set(this.dataService.empireData.quests);
+        Packets.stagePerQuest.set(this.dataService.empireData.quests);
     }
 }

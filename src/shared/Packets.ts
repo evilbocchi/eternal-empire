@@ -102,6 +102,10 @@ namespace Packets {
     export const dropletBurnt = signal<(dropletModelId: string, amountPerCurrency: Map<Currency, BaseOnoeNum>) => void>(true);
     export const applyImpulse = signal<(dropletModelId: string, impulse: Vector3) => void>(true);
 
+    // weather
+    export const weatherChanged = signal<(weatherState: object) => void>();
+    export const getWeatherState = request<() => object>();
+
     // currencies
     export const balance = property<Map<Currency, BaseOnoeNum>>(new Map(), true);
     export const mostBalance = property<Map<Currency, BaseOnoeNum>>(new Map(), true);
@@ -129,7 +133,7 @@ namespace Packets {
 
     // quests
     export const questInfo = property<Map<string, DataType.Packed<QuestInfo>>>();
-    export const quests = property<Map<string, DataType.i32>>(new Map());
+    export const stagePerQuest = property<Map<string, DataType.i32>>(new Map());
     export const questCompleted = signal<(questId: string) => void>();
     export const level = property<DataType.i32>(-1);
     export const xp = property<DataType.i32>(-1);

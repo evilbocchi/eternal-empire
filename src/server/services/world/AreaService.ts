@@ -23,7 +23,7 @@
 import { getAllInstanceInfo, isInside, playSoundAtPart } from "@antivivi/vrldk";
 import { OnInit, Service } from "@flamework/core";
 import { Players } from "@rbxts/services";
-import LeaderstatsService from "server/services/LeaderstatsService";
+import LeaderstatsService from "server/services/leaderboard/LeaderstatsService";
 import { OnPlayerJoined } from "server/services/ModdingService";
 import NPCNavigationService from "server/services/npc/NPCNavigationService";
 import DataService from "server/services/serverdata/DataService";
@@ -112,7 +112,7 @@ export default class AreaService implements OnInit, OnPlayerJoined {
         // and preserving original size for upgrade calculations
         const grid = area.getGrid();
         if (grid !== undefined) {
-            grid.CollisionGroup = "Item"; // Allow items to interact with the grid
+            grid.CollisionGroup = "Grid";
             grid.SetAttribute("OriginalSize", grid.Size); // Store for upgrade scaling
         }
 

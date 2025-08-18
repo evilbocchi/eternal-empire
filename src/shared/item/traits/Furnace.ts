@@ -40,12 +40,7 @@ export default class Furnace extends Operative {
                     return;
 
                 dropletInfo.Incinerated = true;
-                task.delay(0.5, () => {
-                    if (droplet !== undefined) {
-                        droplet.Transparency = 1;
-                    }
-                });
-                Debris.AddItem(droplet, 4);
+                Debris.AddItem(droplet, 6);
 
                 if (instanceInfo.Maintained === false)
                     return;

@@ -1,4 +1,4 @@
-/node_modules
+**/node_modules
 /out
 /include
 /docsout
@@ -6,3 +6,5 @@
 flamework.build
 *.build
 .env
+compiledItems.txt
+testingPlace.rbxlx

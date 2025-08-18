@@ -8,7 +8,7 @@ export type NPCAnimationType = "Default" | "Walk" | "Run" | "Jump";
  */
 export default class NPC {
     animationsPerType = new Map<NPCAnimationType, number>();
-    defaultDialogue!: Dialogue;
+    defaultDialogues = new Array<Dialogue>();
     interact: (() => void) | undefined;
 
     constructor() {
@@ -28,23 +28,27 @@ export default class NPC {
     }
 
     /**
-     * Sets the default dialogue for this NPC.
+     * Add dialogue that the NPC uses when no other dialogue is available.
+     * All default dialogues are sequentially exhausted, and only the last one will be repeated.
+     * 
      * @param defaultDialogue The default Dialogue instance.
      * @returns This NPC instance.
      */
-    setDefaultDialogue(defaultDialogue: Dialogue) {
-        this.defaultDialogue = defaultDialogue;
+    addDefaultDialogue(defaultDialogue: Dialogue) {
+        this.defaultDialogues.push(defaultDialogue);
         return this;
     }
 
     /**
      * Creates and sets a default monologue Dialogue for this NPC.
+     * 
      * @param text The monologue text.
      * @returns The created Dialogue instance.
      */
     createDefaultMonologue(text: string) {
-        this.defaultDialogue = new Dialogue(this, text);
-        return this.defaultDialogue;
+        const dialogue = new Dialogue(this, text);
+        this.addDefaultDialogue(dialogue);
+        return dialogue;
     }
 
     /**

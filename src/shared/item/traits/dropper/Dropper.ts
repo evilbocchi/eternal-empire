@@ -243,6 +243,12 @@ export default class Dropper extends ItemTrait {
                 if (dropRate === undefined)
                     continue;
 
+                // Apply weather multipliers
+                if (Server.Atmosphere) {
+                    const weatherMultipliers = Server.Atmosphere.getWeatherMultipliers();
+                    dropRate *= weatherMultipliers.dropRate;
+                }
+
                 for (const [_, boost] of boosts)
                     dropRate *= boost.dropRateMultiplier ?? 1;
 

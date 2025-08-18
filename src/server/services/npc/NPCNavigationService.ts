@@ -16,10 +16,9 @@
 import { getInstanceInfo, getRootPart, playSoundAtPart } from "@antivivi/vrldk";
 import { OnInit, OnPhysics, OnStart, Service } from "@flamework/core";
 import { PathfindingService, Players, RunService, TweenService, Workspace } from "@rbxts/services";
-import { getNPCPosition, getWaypoint, PLACED_ITEMS_FOLDER } from "shared/constants";
 import { getSound } from "shared/asset/GameAssets";
+import { PLACED_ITEMS_FOLDER } from "shared/constants";
 import GameSpeed from "shared/GameSpeed";
-import Sandbox from "shared/Sandbox";
 
 declare global {
     /** Function type for handling product purchases. */
@@ -62,6 +61,36 @@ export default class NPCNavigationService implements OnInit, OnStart, OnPhysics 
     }
 
     /**
+     * Calculate waypoints for NPC navigation.
+     *
+     * @param humanoid The NPC's humanoid.
+     * @param source The starting position.
+     * @param destination The target position.
+     * @param params Pathfinding parameters.
+     * @param retries Number of retry attempts.
+     * @returns An array of waypoints or undefined if no path is found.
+     */
+    getWaypoints(humanoid: Humanoid, source: Vector3, destination: Vector3, params: AgentParameters = this.PATHFINDING_PARAMS, retries = 0): PathWaypoint[] | undefined {
+        if (humanoid === undefined || humanoid.RootPart === undefined) {
+            warn("Humanoid or RootPart is undefined");
+            return;
+        }
+        params.Costs = this.PATHFINDING_COSTS;
+        const path = PathfindingService.CreatePath(params);
+        path.ComputeAsync(source, destination);
+        const waypoints = path.GetWaypoints();
+        if (waypoints.isEmpty()) {
+            warn("No path found");
+            if (retries < 3) {
+                return this.getWaypoints(humanoid, source.add(new Vector3(0, 1, 0)), destination, params, retries + 1);
+            }
+            return;
+        }
+        return waypoints;
+
+    }
+
+    /**
      * Makes an NPC navigate to a specific position using Roblox pathfinding.
      * Handles waypoint following, jump actions, and failure recovery.
      *
@@ -74,19 +103,12 @@ export default class NPCNavigationService implements OnInit, OnStart, OnPhysics 
      */
     pathfind(
         humanoid: Humanoid,
-        position: Vector3,
+        waypoints: PathWaypoint[],
         endCallback: () => unknown,
-        params: AgentParameters = this.PATHFINDING_PARAMS,
-        iterations?: number
     ) {
-        if (iterations !== undefined && iterations <= 0) {
+        const rootPart = humanoid.RootPart;
+        if (rootPart === undefined)
             return;
-        }
-        const rootPart = humanoid.RootPart!;
-        params.Costs = this.PATHFINDING_COSTS;
-        const path = PathfindingService.CreatePath(params);
-        path.ComputeAsync(rootPart.Position, position);
-        const waypoints = path.GetWaypoints();
         let i = 0;
         let newPos: Vector3 | undefined;
 
@@ -129,72 +151,111 @@ export default class NPCNavigationService implements OnInit, OnStart, OnPhysics 
             }
         });
 
-        // Retry with adjusted position if no path found
-        if (waypoints.isEmpty()) {
-            warn("No path found");
-            this.pathfind(humanoid, position.add(new Vector3(0, 1, 0)), endCallback, params, iterations === undefined ? 2 : iterations - 1);
-            return;
-        }
-
         doNextWaypoint();
         return connection;
     }
 
     /**
-     * Guides an NPC humanoid to a point, optionally requiring a player.
-     * 
+     * Calculates a function for guiding an NPC humanoid to a point.
+     *
+     * This should preferably be called a moderate time before the NPC has to move, as pathfinding can take time.
+     *
      * @param npcHumanoid The humanoid instance.
-     * @param point The target CFrame.
-     * @param callback Called when reached.
-     * @param requiresPlayer If true, waits for player proximity.
+     * @param source The starting position.
+     * @param destination The target position.
+     * @param requiresPlayer If false, the callbacks will be fired immediately without waiting for player proximity.
      * @param agentParams Optional pathfinding parameters.
+     *
+     * @returns A function that can be called to start traversing the path.
      */
-    leadToPoint(
+    createPathfindingOperation(
         npcHumanoid: Instance,
-        point: CFrame,
-        callback: () => unknown,
+        source: CFrame,
+        destination: CFrame,
         requiresPlayer?: boolean,
         agentParams?: AgentParameters
     ) {
+        // Validate parameters
         if (!npcHumanoid.IsA("Humanoid"))
             throw npcHumanoid.Name + " is not a Humanoid";
+        npcHumanoid.RootPart!.Anchored = false;
+
+        // Cancel any ongoing pathfinding
         const cached = this.runningPathfinds.get(npcHumanoid);
         if (cached !== undefined)
             cached.Disconnect();
-        npcHumanoid.RootPart!.Anchored = false;
-        const tween = TweenService.Create(npcHumanoid.RootPart!, new TweenInfo(1), { CFrame: point });
-        let toCall = false;
-        this.pathfind(npcHumanoid, point.Position, () => {
-            tween.Play();
-            if (requiresPlayer === false) {
-                toCall = true;
-            }
-        }, agentParams);
-        const connection = RunService.Heartbeat.Connect(() => {
-            const players = Players.GetPlayers();
-            for (const player of players) {
-                const playerRootPart = getRootPart(player);
-                if (playerRootPart === undefined)
-                    continue;
-                if (point.Position.sub(playerRootPart.Position).Magnitude < 10) {
-                    tween.Play();
-                    toCall = true;
-                    connection.Disconnect();
-                    return;
-                }
-            }
-        });
+
+        // Load waypoints and tweens
+        let waypoints: PathWaypoint[] | undefined;
         task.spawn(() => {
-            while (!toCall) {
-                RunService.Heartbeat.Wait();
-            }
-            print("Reached point", npcHumanoid.Name, point.Position);
-            if (callback !== undefined) {
-                callback();
+            waypoints = this.getWaypoints(npcHumanoid, source.Position, destination.Position, agentParams);
+            if (waypoints === undefined || waypoints.isEmpty()) {
+                throw `No valid waypoints found from ${source.Position} to ${destination.Position} for ${npcHumanoid.Parent?.Name}`;
             }
         });
-        this.runningPathfinds.set(npcHumanoid, connection);
-        return connection;
+
+        const tween = TweenService.Create(npcHumanoid.RootPart!, new TweenInfo(1), { CFrame: destination });
+        let toCall = false;
+
+        /**
+         * Starts the pathfinding operation.
+         *
+         * @param playTween Whether to play the tween animation.
+         * @returns The response object containing waypoints and the fitting tween.
+         */
+        const start = (playTween = true) => {
+            // Wait until waypoints are available
+            while (waypoints === undefined) {
+                task.wait();
+            }
+
+            const callbacks = new Set<() => unknown>();
+            const body = {
+                waypoints,
+                fittingTween: tween,
+                onComplete: (callback: () => unknown) => {
+                    callbacks.add(callback);
+                }
+            };
+
+            this.pathfind(npcHumanoid, waypoints, () => {
+                if (playTween)
+                    tween.Play();
+                if (requiresPlayer === false) {
+                    toCall = true;
+                }
+            });
+
+            const connection = RunService.Heartbeat.Connect(() => {
+                const players = Players.GetPlayers();
+                for (const player of players) {
+                    const playerRootPart = getRootPart(player);
+                    if (playerRootPart === undefined)
+                        continue;
+                    if (destination.Position.sub(playerRootPart.Position).Magnitude < 10) {
+                        if (playTween)
+                            tween.Play();
+                        toCall = true;
+                        connection.Disconnect();
+                        return;
+                    }
+                }
+            });
+            task.spawn(() => {
+                while (!toCall) {
+                    RunService.Heartbeat.Wait();
+                }
+                print("Reached point", npcHumanoid.Parent?.Name, destination.Position);
+                for (const callback of callbacks) {
+                    callback();
+                }
+                connection.Disconnect();
+            });
+            this.runningPathfinds.set(npcHumanoid, connection);
+            return body;
+        };
+
+        return start;
     }
 
     // Lifecycle Methods
@@ -227,15 +288,6 @@ export default class NPCNavigationService implements OnInit, OnStart, OnPhysics 
      * Performs initial pathfinding setup and validation.
      */
     onStart() {
-        // Skip pathfinding setup in sandbox mode
-        if (Sandbox.getEnabled())
-            return;
 
-        // Test pathfinding functionality
-        const path = PathfindingService.CreatePath();
-        path.ComputeAsync(getNPCPosition("Freddy")!, getWaypoint("AHelpingHand2").Position); // load it
-        if (path.GetWaypoints().isEmpty()) {
-            warn("Pathfinding is not working.");
-        }
     }
 }

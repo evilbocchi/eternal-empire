@@ -275,6 +275,10 @@ export default class CurrencyService implements OnInit, OnStart {
     onStart() {
         // High-frequency balance propagation loop - runs every 0.1 seconds
         task.spawn(() => {
+            // Ensure Funds currency exists
+            if (!this.currencies.has("Funds"))
+                this.currencies.set("Funds", new OnoeNum(0));
+
             while (task.wait(0.1)) {
                 this.propagate();
             }

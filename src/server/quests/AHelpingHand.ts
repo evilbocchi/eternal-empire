@@ -1,19 +1,22 @@
-import { TweenService } from "@rbxts/services";
 import Quest, { Stage } from "server/Quest";
 import { AREAS } from "shared/Area";
-import { getNPCModel, getWaypoint } from "shared/constants";
 import { emitEffect, getSound } from "shared/asset/GameAssets";
+import { getNPCModel, WAYPOINTS } from "shared/constants";
 import { Server } from "shared/item/ItemUtils";
-import FreddysUpgrader from "shared/items/negative/friendliness/FreddysUpgrader";
 import LostPendant from "shared/items/0/winsome/LostPendant";
+import FreddysUpgrader from "shared/items/negative/friendliness/FreddysUpgrader";
 import { Dialogue } from "shared/NPC";
 import Freddy from "shared/npcs/Freddy";
 
-const waypoint2 = getWaypoint("AHelpingHand2");
 const freddyModel = getNPCModel("Freddy");
 const freddyHumanoid = freddyModel.FindFirstChildOfClass("Humanoid")!;
 const freddyRootPart = freddyHumanoid.RootPart!;
-const characterTween = TweenService.Create(freddyRootPart, new TweenInfo(1), { CFrame: waypoint2.CFrame });
+
+const freddyToRequest = Server.NPC.Navigation.createPathfindingOperation(
+    freddyHumanoid,
+    freddyRootPart.CFrame,
+    WAYPOINTS.AHelpingHandFreddyRequest.CFrame
+);
 
 const obstacleCourse = AREAS.BarrenIslands.map.WaitForChild("ObstacleCourse");
 const ladder = obstacleCourse.WaitForChild("Ladder");
@@ -54,15 +57,15 @@ export = new Quest(script.Name)
     .addStage(new Stage()
         .setDescription(`Follow the Sad Noob to %coords%.`)
         .setNPC("Freddy")
-        .setFocus(waypoint2)
+        .setFocus(WAYPOINTS.AHelpingHandFreddyRequest)
         .setDialogue(
             new Dialogue(Freddy, "Follow me, I have something to show you.")
         )
         .onStart((stage) => {
             Server.NPC.State.stopAnimation(Freddy, "Default");
             task.wait(2);
-            const connection = Server.NPC.Navigation.leadToPoint(stage.npcHumanoid!, waypoint2.CFrame, () => stage.completed.fire());
-            return () => connection.Disconnect();
+            freddyToRequest().onComplete(() => stage.completed.fire());
+            return () => { };
         })
     )
     .addStage(new Stage()
@@ -80,7 +83,8 @@ export = new Quest(script.Name)
         )
         .onStart((stage) => {
             Server.NPC.State.stopAnimation(Freddy, "Default");
-            characterTween.Play();
+            freddyRootPart.CFrame = WAYPOINTS.AHelpingHandFreddyRequest.CFrame;
+
             const connection = Server.Dialogue.dialogueFinished.connect((dialogue) => {
                 if (stage.dialogue === dialogue)
                     stage.completed.fire();
@@ -96,7 +100,7 @@ export = new Quest(script.Name)
         )
         .onStart((stage) => {
             Server.NPC.State.stopAnimation(Freddy, "Default");
-            characterTween.Play();
+            freddyRootPart.CFrame = WAYPOINTS.AHelpingHandFreddyRequest.CFrame;
 
             const hitSound = getSound("QuestConstruct.mp3");
             for (const handle of ladderHandles) {
@@ -130,7 +134,8 @@ export = new Quest(script.Name)
         )
         .onStart((stage) => {
             Server.NPC.State.stopAnimation(Freddy, "Default");
-            characterTween.Play();
+            freddyRootPart.CFrame = WAYPOINTS.AHelpingHandFreddyRequest.CFrame;
+
             const connection = Server.Dialogue.dialogueFinished.connect((dialogue) => {
                 Server.Quest.takeQuestItem(LostPendant.id, 1);
                 if (dialogue === stage.dialogue)

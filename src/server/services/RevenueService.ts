@@ -21,6 +21,7 @@ import { getAllInstanceInfo } from "@antivivi/vrldk";
 import { Service } from "@flamework/core";
 import BombsService from "server/services/boosts/BombsService";
 import DarkMatterService from "server/services/boosts/DarkMatterService";
+import AtmosphereService from "server/services/world/AtmosphereService";
 import CurrencyService from "server/services/serverdata/CurrencyService";
 import DataService from "server/services/serverdata/DataService";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
@@ -44,7 +45,7 @@ export default class RevenueService {
      * Constructs the RevenueService with all required dependencies.
      */
     constructor(private dataService: DataService, private darkMatterService: DarkMatterService, private bombsService: BombsService,
-        private currencyService: CurrencyService) {
+        private currencyService: CurrencyService, private atmosphereService: AtmosphereService) {
 
     }
 
@@ -138,6 +139,23 @@ export default class RevenueService {
         }
 
         let worth = Droplet.getDroplet(instanceInfo.DropletId!)!.coalesce(totalAdd, totalMul, totalPow);
+        
+        // Apply weather value multipliers
+        const weatherMultipliers = this.atmosphereService.getWeatherMultipliers();
+        let weatherMultiplier = weatherMultipliers.dropletValue;
+        
+        // Check for lightning surge effect
+        const isLightningSurged = dropletModel.GetAttribute("LightningSurged") as boolean;
+        const surgeMultiplier = dropletModel.GetAttribute("SurgeMultiplier") as number;
+        if (isLightningSurged && surgeMultiplier) {
+            weatherMultiplier *= surgeMultiplier;
+        }
+        
+        // Apply weather multiplier to worth
+        if (weatherMultiplier !== 1) {
+            worth = worth.mul(weatherMultiplier);
+        }
+        
         if (includesGlobalBoosts === true) {
             this.performSoftcaps(worth.amountPerCurrency);
         }

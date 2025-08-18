@@ -13,14 +13,15 @@
  */
 import { loadAnimation } from "@antivivi/vrldk";
 import { Controller, OnInit } from "@flamework/core";
-import { ReplicatedStorage, TweenService, Workspace } from "@rbxts/services";
+import { ContentProvider, ReplicatedStorage, TweenService, Workspace } from "@rbxts/services";
 import { LOCAL_PLAYER } from "client/constants";
-import UIController, { INTERFACE } from "client/controllers/core/UIController";
 import AdaptiveTabController from "client/controllers/core/AdaptiveTabController";
+import UIController, { INTERFACE } from "client/controllers/core/UIController";
 import BalanceWindowController from "client/controllers/interface/BalanceWindowController";
 import QuestsController from "client/controllers/interface/QuestsController";
 import SoundController from "client/controllers/interface/SoundController";
-import { getWaypoint } from "shared/constants";
+import { assets, getAsset } from "shared/asset/AssetMap";
+import { WAYPOINTS } from "shared/constants";
 
 export const INTRO_WINDOW = INTERFACE.WaitForChild("IntroWindow") as Frame;
 
@@ -59,7 +60,7 @@ export default class IntroController implements OnInit {
             return;
         this.isIntroSequenceDone = true;
         this.isCurrentlyInIntroSequence = true;
-        humanoid.RootPart!.CFrame = getWaypoint("NewBeginningsPlayerPos").CFrame;
+        humanoid.RootPart!.CFrame = WAYPOINTS.NewBeginningsPlayerPos.CFrame;
         const head = humanoid.Parent?.WaitForChild("Head") as BasePart;
         const transparencyParts = [head];
         for (const transparencyPart of head.GetDescendants()) {
@@ -72,7 +73,7 @@ export default class IntroController implements OnInit {
         const sleepingAnimation = loadAnimation(humanoid, 17789845379);
         sleepingAnimation?.Play();
         camera.CameraType = Enum.CameraType.Scriptable;
-        camera.CFrame = getWaypoint("NewBeginningsCamera0").CFrame;
+        camera.CFrame = WAYPOINTS.NewBeginningsCamera0.CFrame;
         INTRO_WINDOW.BackgroundTransparency = 0;
         INTRO_WINDOW.Visible = true;
         this.balanceWindowController.hideBalanceWindow();
@@ -80,21 +81,21 @@ export default class IntroController implements OnInit {
         const fabricRustle = () => this.uiController.playSound("FabricRustle.mp3");
         task.delay(2, () => {
             fabricRustle();
-            TweenService.Create(camera, new TweenInfo(0.5), { CFrame: getWaypoint("NewBeginningsCamera1").CFrame }).Play();
+            TweenService.Create(camera, new TweenInfo(0.5), { CFrame: WAYPOINTS.NewBeginningsCamera1.CFrame }).Play();
             TweenService.Create(INTRO_WINDOW, new TweenInfo(2), { BackgroundTransparency: 1 }).Play();
         });
         task.delay(2.96, () => {
             fabricRustle();
-            TweenService.Create(camera, new TweenInfo(0.5), { CFrame: getWaypoint("NewBeginningsCamera2").CFrame }).Play();
+            TweenService.Create(camera, new TweenInfo(0.5), { CFrame: WAYPOINTS.NewBeginningsCamera2.CFrame }).Play();
         });
         task.delay(3.7, () => {
             fabricRustle();
-            TweenService.Create(camera, new TweenInfo(0.5), { CFrame: getWaypoint("NewBeginningsCamera3").CFrame }).Play();
+            TweenService.Create(camera, new TweenInfo(0.5), { CFrame: WAYPOINTS.NewBeginningsCamera3.CFrame }).Play();
         });
         task.delay(5, () => {
             this.uiController.playSound("JumpSwish.mp3");
             sleepingAnimation?.Stop();
-            camera.CFrame = getWaypoint("NewBeginningsCamera4").CFrame;
+            camera.CFrame = WAYPOINTS.NewBeginningsCamera4.CFrame;
             camera.CameraType = Enum.CameraType.Custom;
             humanoid.SetStateEnabled(Enum.HumanoidStateType.Jumping, true);
             for (const transparencyPart of transparencyParts) {
@@ -116,7 +117,9 @@ export default class IntroController implements OnInit {
         if (shouldIntro === true)
             this.doIntroSequence();
         else {
+            math.randomseed(42);
             this.soundController.refreshMusic(true);
+            math.randomseed(tick());
             this.adaptiveTabController.showSidebarButtons();
             this.balanceWindowController.showBalanceWindow();
         }
@@ -129,5 +132,21 @@ export default class IntroController implements OnInit {
         ReplicatedStorage.GetAttributeChangedSignal("Intro").Connect(() => this.onIntroMarkerChanged());
         if (Workspace.GetAttribute("IsPublicServer") !== true)
             this.onIntroMarkerChanged();
+
+        task.spawn(() => {
+            const priority = [
+                getAsset("assets/sounds/FabricRustle.mp3"),
+                getAsset("assets/sounds/JumpSwish.mp3"),
+                getAsset("assets/sounds/DefaultText.mp3"),
+                getAsset("assets/sounds/QuestComplete.mp3"),
+                getAsset("assets/sounds/QuestNextStage.mp3"),
+            ];
+            for (const [_, id] of pairs(assets)) {
+                if (!priority.includes(id))
+                    priority.push(id);
+            }
+
+            ContentProvider.PreloadAsync(priority);
+        });
     }
 }

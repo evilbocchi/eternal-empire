@@ -178,7 +178,9 @@ export default class ProgressionEstimationService implements OnGameAPILoaded, On
     maxUpgradeBoard(upgrades: string[]) {
         for (const id of upgrades) {
             const purchase = () => this.namedUpgradeService.buyUpgrade(id, undefined, undefined, true);
-            while (purchase()) { }
+            while (purchase()) {
+                task.wait();
+            }
         }
     }
 

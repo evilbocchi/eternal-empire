@@ -7,7 +7,7 @@
         "typedoc-plugin-rename-defaults"
     ],
     "projectDocuments": [
-        "documents/*.md"
+        "docs/*.md"
     ],
     "placeInternalsInOwningModule": true,
     "highlightLanguages": [

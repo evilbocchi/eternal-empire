@@ -2,7 +2,7 @@ import Difficulty from "@antivivi/jjt-difficulties";
 import Quest, { Stage } from "server/Quest";
 import EarningCapital from "server/quests/EarningCapital";
 import { Dialogue } from "shared/NPC";
-import { getNPCModel, getWaypoint, WAYPOINTS } from "shared/constants";
+import { getNPCModel, WAYPOINTS } from "shared/constants";
 import { Server } from "shared/item/ItemUtils";
 import Shop from "shared/item/traits/Shop";
 import ExcavationStone from "shared/items/excavation/ExcavationStone";
@@ -18,11 +18,17 @@ import OverengineeredGenerator from "shared/items/negative/trueease/Overengineer
 import Chuck from "shared/npcs/Chuck";
 import Ricarg from "shared/npcs/Ricarg";
 
-const waypoint2 = getWaypoint("CraftingMania2");
-const craftingTableModel = WAYPOINTS.WaitForChild("CraftingTable")!;
+const craftingTableModel = WAYPOINTS.CraftingTable;
+
 const chuckModel = getNPCModel("Chuck");
 const chuckHumanoid = chuckModel.FindFirstChildOfClass("Humanoid")!;
 const chuckRootPart = chuckHumanoid.RootPart!;
+
+const chuckToCraftingTable = Server.NPC.Navigation.createPathfindingOperation(
+    chuckHumanoid,
+    chuckRootPart.CFrame,
+    WAYPOINTS.CraftingManiaChuckCraftingAssistance.CFrame
+);
 
 export = new Quest(script.Name)
     .setName("Crafting Introductions")
@@ -80,7 +86,8 @@ export = new Quest(script.Name)
                 .root;
             const helped = new Dialogue(Ricarg, `Oh, you're the guy who gave me money! Really, thank you so much. I could buy so much ${Grass.id} because of that!`)
                 .monologue(`You want to learn how to get ${Grass.id} yourself? Well, that's kind of difficult... the merchant left for Sky Pavilion quite a while ago.`)
-                .monologue("You'll need to harvest it yourself with a Scythe. Luckily, I actually have some with me! I'll even give them to you for cheap.");
+                .monologue("You'll need to harvest it yourself with a Scythe. Luckily, I actually have some with me! I'll even give them to you for cheap.")
+                .root;
 
             const noItemed = new Dialogue(Chuck, `I need a ${Wool.id} and 3 ${Grass.id}.`);
             const itemed = new Dialogue(Chuck, "Good job. You don't look like much, but clearly you tell me otherwise.")
@@ -117,8 +124,8 @@ export = new Quest(script.Name)
         .onStart((stage) => {
             Server.NPC.State.stopAnimation(Chuck, "Default");
             chuckRootPart.Anchored = false;
-            const connection = Server.NPC.Navigation.leadToPoint(chuckHumanoid, waypoint2.CFrame, () => stage.completed.fire());
-            return () => connection.Disconnect();
+            chuckToCraftingTable().onComplete(() => stage.completed.fire());
+            return () => { };
         })
     )
     .addStage(new Stage()
@@ -129,10 +136,12 @@ export = new Quest(script.Name)
             new Dialogue(Chuck, "Here we are.")
                 .monologue("My Crafting Table isn't much, but it gets the job done.")
                 .monologue("I'll give you some resources. Go ahead and craft something. Let's see what you can do.")
+                .root
         )
         .onStart((stage) => {
             Server.NPC.State.stopAnimation(Chuck, "Default");
-            chuckRootPart.CFrame = waypoint2.CFrame;
+            chuckRootPart.CFrame = WAYPOINTS.CraftingManiaChuckCraftingAssistance.CFrame;
+
             const connection = Server.Dialogue.dialogueFinished.connect((dialogue) => {
                 if (dialogue === stage.dialogue) {
                     Server.Quest.giveQuestItem(ExcavationStone.id, 50);
@@ -151,12 +160,13 @@ export = new Quest(script.Name)
         )
         .onStart((stage) => {
             Server.NPC.State.stopAnimation(Chuck, "Default");
-            chuckRootPart.CFrame = waypoint2.CFrame;
+            chuckRootPart.CFrame = WAYPOINTS.CraftingManiaChuckCraftingAssistance.CFrame;
+
             const connection = Server.Item.itemsBought.connect((_player, items) => {
                 for (const item of items) {
                     const craftingItems = CraftingTable.trait(Shop).items;
 
-                    if (item.difficulty === Difficulty.Miscellaneous && craftingItems.includes(item)) {
+                    if (craftingItems.includes(item)) {
                         stage.completed.fire();
                     }
                 }
@@ -167,14 +177,14 @@ export = new Quest(script.Name)
     .addStage(new Stage()
         .setDescription(`Show the blacksmith what you crafted.`)
         .setNPC("Chuck")
-        .setFocus(waypoint2)
+        .setFocus(WAYPOINTS.CraftingManiaChuckCraftingAssistance)
         .setDialogue(
             new Dialogue(Chuck, "Hmm... Let's see...")
         )
         .onStart((stage) => {
             const ItemService = Server.Item;
             Server.NPC.State.stopAnimation(Chuck, "Default");
-            chuckRootPart.CFrame = waypoint2.CFrame;
+            chuckRootPart.CFrame = WAYPOINTS.CraftingManiaChuckCraftingAssistance.CFrame;
 
             let continuation: Dialogue;
             if (ItemService.getBoughtAmount(Lamp.id) > 0)

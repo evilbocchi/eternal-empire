@@ -16,8 +16,8 @@ import { OnInit, OnStart, Service } from "@flamework/core";
 import { Players, ProximityPromptService, TweenService, Workspace } from "@rbxts/services";
 import NPCStateService, { OnNPCLoad } from "server/services/npc/NPCStateService";
 import DataService from "server/services/serverdata/DataService";
+import { ASSETS } from "shared/asset/GameAssets";
 import { NPC_MODELS, getDisplayName } from "shared/constants";
-import { ASSETS, getSound } from "shared/asset/GameAssets";
 import InteractableObject from "shared/InteractableObject";
 import { Server } from "shared/item/ItemUtils";
 import NPC, { Dialogue } from "shared/NPC";
@@ -214,13 +214,17 @@ export default class DialogueService implements OnInit, OnStart, OnNPCLoad {
         prompt.MaxActivationDistance = 6.5;
         prompt.RequiresLineOfSight = false;
 
+        const defaultDialogues = npc.defaultDialogues;
+        let defaultDialogueIndex = 0;
+        const defaultDialoguesCount = defaultDialogues.size();
+
         prompt.Triggered.Connect((player) => {
             print(`${player.Name} interacted`);
             if (npc.interact !== undefined) {
                 npc.interact();
                 return;
             }
-            const availableDialogues = this.dialoguePerNPC.get(npc)!;
+            const availableDialogues = this.dialoguePerNPC.get(npc) ?? new Map();
             let highestPriority: number | undefined, highestDialogue: Dialogue | undefined;
             for (const [dialogue, priority] of availableDialogues) {
                 if (highestPriority === undefined || priority > highestPriority) {
@@ -228,7 +232,15 @@ export default class DialogueService implements OnInit, OnStart, OnNPCLoad {
                     highestPriority = priority;
                 }
             }
-            this.talk(highestDialogue ?? npc.defaultDialogue);
+            if (highestDialogue !== undefined) {
+                this.talk(highestDialogue);
+            }
+            else {
+                if (defaultDialogueIndex >= defaultDialoguesCount)
+                    defaultDialogueIndex = defaultDialogueIndex - 1;
+                this.talk(defaultDialogues[defaultDialogueIndex]);
+                defaultDialogueIndex++;
+            }
         });
         this.proximityPrompts.add(prompt);
 

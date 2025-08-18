@@ -5,7 +5,7 @@ import Difficulty from "@antivivi/jjt-difficulties";
 import { getAllInstanceInfo, getInstanceInfo } from "@antivivi/vrldk";
 import { Debris, RunService, TweenService, Workspace } from "@rbxts/services";
 import { ASSETS } from "shared/asset/GameAssets";
-import { IS_SERVER } from "shared/constants";
+import { IS_CI, IS_SERVER } from "shared/Context";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import { Server } from "shared/item/ItemUtils";
 import Operative from "shared/item/traits/Operative";
@@ -33,11 +33,14 @@ declare global {
 export default class Droplet {
 
     static readonly STORAGE = (function () {
-        if (IS_SERVER) {
+        if (IS_SERVER || IS_CI) {
             const storage = new Instance("Model");
             storage.ModelStreamingMode = Enum.ModelStreamingMode.Persistent;
             storage.Name = "Droplets";
             storage.Parent = Workspace;
+            if (IS_CI) {
+                Debris.AddItem(storage, 30); // Automatically clean up the storage after 30 seconds
+            }
             return storage;
         }
         return Workspace.WaitForChild("Droplets") as Model;

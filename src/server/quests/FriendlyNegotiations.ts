@@ -17,11 +17,11 @@ export = new Quest(script.Name)
     .addStage(new Stage()
         .setDescription(`Talk to Tria again at %coords%.`)
         .setNPC("Tria", true)
-        .setDialogue(new Dialogue(Tria, `Hey! I see that you've made quite the name for yourself around here. Your reputation precedes you, and that's exactly why I need your help with something.`)
-            .monologue("I have something to ask of you... You know that guy selling crates and logs outside of my house?")
-            .monologue("Normally, I wouldn't mind someone doing business on my turf, but the problem is he's selling them at ridiculous prices!")
-            .monologue("It would be fine if it didn't paint me as one of his associates too. Though, honestly, I'd rather he just stop trying.")
-            .monologue("Can you find a way to make him change his prices for good? Whether you negotiate with him, convince him of a fair deal, or find some other creative solution, I trust you can handle it.")
+        .setDialogue(new Dialogue(Tria, `O-Oh! Hi again... Uh, I... I see you've been... doing well around here? I guess... people know your name now.`)
+            .monologue("Um... so... I have a... something to ask you... You know that guy... selling crates and logs outside my place?")
+            .monologue("Normally, I wouldn't mind... I mean, it's not like it's huge deal... but... he's charging... um... kinda ridiculous prices!")
+            .monologue("It... it kinda makes me look like I'm one of his... associates too... which is... ugh... not great.")
+            .monologue("Could you maybe... find a way to... make him change his prices? Uh... however you want... I trust you... I think.")
             .root
         )
         .onStart((stage) => {
@@ -47,23 +47,33 @@ export = new Quest(script.Name)
             .root
         )
         .onStart((stage) => {
-            const replacement = new Dialogue(Tria, "Find a way to make him change his prices for good!");
+            const replacement = new Dialogue(Tria, "O-oh! Uh... y-you're... you're not supposed to... um... be talking to me right now, I... I mean... sorry! I... I didn't mean to... ugh, never mind!");
             Server.Dialogue.addDialogue(replacement);
+            
+            const replacement2 = new Dialogue(Tria, "I... I just... uh... wanted to say something, but... maybe I shouldn't...")
+                .monologue("P-please... just... come back later, okay? I... I'll explain then...")
+                .root;
+            
             const connection = Server.Dialogue.dialogueFinished.connect((dialogue) => {
-                if (dialogue === stage.dialogue)
+                if (dialogue === replacement) {
+                    Server.Dialogue.removeDialogue(replacement);
+                    Server.Dialogue.addDialogue(replacement2);
+                }
+                else if (dialogue === stage.dialogue)
                     stage.completed.fire();
             });
             return () => {
                 connection.disconnect();
                 Server.Dialogue.removeDialogue(replacement);
+                Server.Dialogue.removeDialogue(replacement2);
             };
         })
     )
     .addStage(new Stage()
         .setDescription(`Get a ${GrassConveyor.name}.`)
-        .setDialogue(new Dialogue(Tria, `He says he wants a ${GrassConveyor.name}?`)
-            .monologue("What a jerk... Unfortunately, I don't think he'll bend any other way.")
-            .monologue("You'll have to do this yourself, sorry. It costs quite a bit, but I'm sure you can make it.")
+        .setDialogue(new Dialogue(Tria, `H-He said he wants a ${GrassConveyor.name}? Uh... wow.`)
+            .monologue("What a... um... jerk, right? Unfortunately... I don't think he'll... bend any other way.")
+            .monologue("You... you'll have to do this yourself... sorry. It costs a bit, but... I believe in you, maybe...")
             .root
         )
         .onStart((stage) => {
@@ -92,8 +102,12 @@ export = new Quest(script.Name)
         )
         .setNPC("Prest", true)
         .onStart((stage) => {
-            const replacement = new Dialogue(Tria, "Find a way to make him change his prices for good!");
+            const replacement = new Dialogue(Tria, "O-okay... uh... I... I hope this is... fine? I mean... I don't know if it's fine... ugh...")
+                .monologue("W-wait... did I... say the wrong thing? I... I just... uh... hope he doesn't get mad...")
+                .monologue("P-please... don't mess this up... I... I believe in you, maybe...")
+                .root;
             Server.Dialogue.addDialogue(replacement);
+
             const continuation = new Dialogue(Prest, "Wait... Is that actually it?")
                 .monologue("...")
                 .monologue("......")
@@ -116,9 +130,10 @@ export = new Quest(script.Name)
     .addStage(new Stage()
         .setDescription("Negotiating with him any further would be futile. Get assistance from Tria.")
         .setNPC("Tria", true)
-        .setDialogue(new Dialogue(Tria, "That guy... Ugh. To be fair, you can't blame him. He just wants to get out of here, like the rest of us.")
-            .monologue(`But the way he's doing it is wrong. Here, a ${SkillPod.name}.`)
-            .monologue("Use this to convince him. This may be overkill, but it will definitely work.")
+        .setDialogue(new Dialogue(Tria, "That guy... ugh... I can't really blame him. He just... wants to get out of here, I guess... like the rest of us.")
+            .monologue("But... the way he's doing it... it's kinda wrong, haha... I think.")
+            .monologue(`Here... uh... take this ${SkillPod.name}.`)
+            .monologue("It's... a bit much, maybe, but... it should... probably work?")
             .root
         )
         .onStart((stage) => {
@@ -147,7 +162,9 @@ export = new Quest(script.Name)
             .root
         )
         .onStart((stage) => {
-            const replacement = new Dialogue(Tria, `Use that ${SkillPod.name} to help with your negotiations!`);
+            const replacement = new Dialogue(Tria, `Uh... okay... use that ${SkillPod.name} to... help with your... negotiations... I guess.`)
+                .monologue("I... I hope it works... fingers crossed...")
+                .root;
             Server.Dialogue.addDialogue(replacement);
             const connection = Server.Dialogue.dialogueFinished.connect((dialogue) => {
                 if (dialogue === stage.dialogue) {

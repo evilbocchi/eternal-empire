@@ -3,15 +3,19 @@
     "version": "1.0.0",
     "description": "",
     "main": "index.js",
+    "type": "module",
     "bin": {
         "rokit": ""
     },
     "scripts": {
+        "test": "node test/runTests.js",
+        "lint": "npx eslint src --no-error-on-unmatched-pattern",
         "asset-sync": "npx rbxts-asset-sync --output=src/shared/asset/AssetMap.ts",
         "asset-watch": "npx rbxts-asset-sync --watch --output=src/shared/asset/AssetMap.ts",
         "build": "npm run asset-sync & rbxtsc",
+        "plugin": "cd ./plugin && npx rojo build --plugin jme-tooling.rbxmx && cd .. && node plugin/index.js",
         "docs": "npx typedoc",
-        "dev": "concurrently \"rbxtsc -w --writeTransformedFiles --optimizedLoops\" \"npx rojo serve\""
+        "dev": "concurrently \"rbxtsc -w --writeTransformedFiles --optimizedLoops\" \"npx rojo serve\" \"npm run plugin\""
     },
     "repository": {
         "type": "git",
@@ -27,27 +31,33 @@
     "private": true,
     "devDependencies": {
         "@rbxts/compiler-types": "^3.0.0-types.0",
-        "@rbxts/types": "^1.0.862",
+        "@rbxts/types": "^1.0.867",
+        "@types/node": "^24.3.0",
+        "axios": "^1.11.0",
         "concurrently": "^9.2.0",
-        "eslint": "^9.31.0",
-        "eslint-plugin-roblox-ts": "^0.0.36",
+        "eslint": "^9.33.0",
+        "eslint-plugin-roblox-ts": "^1.1.0",
+        "express": "^5.1.0",
         "prettier": "^3.1.1",
         "rbxts-transform-env": "^3.0.0",
         "rbxts-transformer-flamework": "^1.3.1",
         "rbxts-transformer-services": "^1.1.1",
         "roblox-ts": "^3.0.0",
+        "robloxstudio-mcp": "^1.5.1",
         "rojo": "^1.0.2",
         "rokit-npm": "^1.0.1",
+        "signale": "^1.4.0",
         "tsx": "^4.20.3",
-        "typedoc": "^0.28.7",
+        "typedoc": "^0.28.10",
         "typedoc-material-theme": "^1.4.0",
         "typedoc-plugin-extras": "^4.0.1",
         "typedoc-plugin-missing-exports": "^4.0.0",
         "typedoc-plugin-rename-defaults": "^0.7.3",
-        "typescript": "^5.5.3"
+        "typescript": "^5.5.3",
+        "typescript-eslint": "^8.39.1"
     },
     "dependencies": {
-        "@antivivi/fletchette": "^2.0.0",
+        "@antivivi/fletchette": "^2.0.2",
         "@antivivi/jjt-difficulties": "^1.3.0",
         "@antivivi/lemon-signal": "^1.2.4",
         "@antivivi/profileservice": "^1.4.4",
@@ -55,7 +65,7 @@
         "@antivivi/serikanum": "^1.4.6",
         "@antivivi/unnamespaced-keyed": "^1.0.5",
         "@antivivi/vrldk": "^1.0.2",
-        "@flamework/components": "^1.2.3",
+        "@flamework/components": "^1.3.1",
         "@flamework/core": "^1.3.1",
         "@rbxts/camera-shaker": "^1.0.8",
         "@rbxts/chat-service": "^1.3.0",
@@ -64,11 +74,14 @@
         "@rbxts/fuzzy-search": "^1.0.4",
         "@rbxts/luau-thread": "^1.0.1",
         "@rbxts/partcache": "^1.1.1",
+        "@rbxts/react": "^17.2.3",
+        "@rbxts/react-roblox": "^17.2.3",
         "@rbxts/roman-numerals": "^1.0.2",
         "@rbxts/rparticle": "^1.0.0",
         "@rbxts/services": "^1.5.1",
         "@rbxts/stringbuilder": "^1.1.0",
         "@rbxts/testez": "^0.4.2-ts.0",
-        "rbxts-asset-sync": "^0.1.1"
+        "@rbxts/ui-labs": "^2.4.0",
+        "rbxts-asset-sync": "^0.2.0"
     }
 }

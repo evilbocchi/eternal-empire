@@ -26,7 +26,7 @@ import { OnoeNum } from "@antivivi/serikanum";
 import { playSoundAtPart } from "@antivivi/vrldk";
 import { OnInit, Service } from "@flamework/core";
 import { MarketplaceService, TextService, Workspace } from "@rbxts/services";
-import { LeaderboardService } from "server/services/LeaderboardService";
+import { LeaderboardService } from "server/services/leaderboard/LeaderboardService";
 import ChatHookService from "server/services/permissions/ChatHookService";
 import ProductService from "server/services/product/ProductService";
 import CurrencyService from "server/services/serverdata/CurrencyService";

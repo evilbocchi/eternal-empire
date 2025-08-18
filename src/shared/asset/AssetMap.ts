@@ -54,6 +54,7 @@ export const assets = {
   "assets/Plus.png": "rbxassetid://72350165627616",
   "assets/Power.png": "rbxassetid://115804207553521",
   "assets/PowerOfTheObbyI.png": "rbxassetid://110850919543477",
+  "assets/PrinterNameEdit.png": "rbxassetid://115839926922231",
   "assets/Purifier.png": "rbxassetid://79394095641057",
   "assets/PurifierClicks.png": "rbxassetid://128311184719893",
   "assets/QuartzAxe.png": "rbxassetid://108226625771564",

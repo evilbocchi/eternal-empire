@@ -1,5 +1,7 @@
 import { Debris, ReplicatedStorage, SoundService, StarterGui } from "@rbxts/services";
+import { Environment } from "@rbxts/ui-labs";
 import { assets } from "shared/asset/AssetMap";
+import { IS_CI } from "shared/Context";
 
 declare global {
     /**
@@ -49,6 +51,35 @@ export function getSound(path: Filename<SoundAssetPath>) {
     sound.SoundGroup = SOUND_EFFECTS_GROUP;
     sound.Parent = ReplicatedStorage;
     return sound;
+}
+
+/**
+ * Plays a sound at a specific part's position.
+ * 
+ * @param path The path to the sound asset.
+ * @param part The part where the sound should be played. If not provided, it plays in ReplicatedStorage.
+ * @param modifier An optional function to modify the sound instance before playing it.
+ */
+export function playSound(path: Filename<SoundAssetPath>, part?: BasePart, modifier?: (sound: Sound) => void) {
+    let sound = getSound(path);
+    if (IS_CI) {
+        print(Environment.PluginWidget)
+        sound.Parent = Environment.PluginWidget;
+    }
+    else {
+        sound = sound.Clone();
+        sound.Parent = part ?? ReplicatedStorage;
+    }
+
+    task.delay(1, () => {
+        Debris.AddItem(sound, (sound.TimeLength - sound.TimePosition) / sound.PlaybackSpeed);
+    });
+
+    if (modifier) {
+        modifier(sound);
+    }
+
+    sound.Play();
 }
 
 /**

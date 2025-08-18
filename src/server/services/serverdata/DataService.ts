@@ -25,7 +25,8 @@ import { ProfileManager } from "@antivivi/vrldk";
 import { OnInit, Service } from "@flamework/core";
 import { BadgeService, DataStoreService, HttpService, MarketplaceService, Players, RunService, TeleportService, Workspace } from "@rbxts/services";
 import { OnPlayerJoined } from "server/services/ModdingService";
-import { IS_SERVER, IS_SINGLE_SERVER, getNameFromUserId, getStartCamera, isStartScreenEnabled } from "shared/constants";
+import { getNameFromUserId, getStartCamera, isStartScreenEnabled } from "shared/constants";
+import { IS_CI, IS_SERVER, IS_SINGLE_SERVER } from "shared/Context";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import { CURRENCY_DETAILS } from "shared/currency/CurrencyDetails";
 import Item from "shared/item/Item";
@@ -312,7 +313,14 @@ export const EmpireProfileTemplate = {
     savedItems: new Map<AreaId, Array<PlacedItem>>(),
     printedSetups: new Array<Setup>(),
     nameChanges: 0,
-    previousNames: new Set<string>()
+    previousNames: new Set<string>(),
+
+    /**
+     * The current leaderboard positions of this empire.
+     * Key is the leaderboard name, value is the position (1 = first place, 2 = second, etc.)
+     * Undefined or 0 means not in top 100.
+     */
+    leaderboardPositions: new Map<string, number>()
 };
 
 export const PlayerProfileTemplate = {
@@ -476,7 +484,10 @@ export default class DataService implements OnInit, OnPlayerJoined {
         let empireId: string;
 
         // Determine empire ID based on server type and environment
-        if (!RunService.IsStudio() || START_SCREEN_ENABLED === true) { // production protocol
+        if (IS_CI) {
+            empireId = HttpService.GenerateGUID(false); // Clean empire for CI testing
+        }
+        else if (!RunService.IsStudio() || START_SCREEN_ENABLED === true) { // production protocol
             if (IS_SINGLE_SERVER) {
                 empireId = "SingleServer";
             }
@@ -501,7 +512,14 @@ export default class DataService implements OnInit, OnPlayerJoined {
         if (empireId === undefined)
             throw "Could not load empire ID";
 
-        const empireProfile = this.loadEmpireProfile(empireId, !IS_SERVER); // view the profile if not on server. absence of server means testing environment
+        let empireProfile: Profile<EmpireData> | undefined;
+        if (IS_CI) {
+            empireProfile = this.empireProfileManager.profileStore.Mock.LoadProfileAsync(empireId, "ForceLoad"); // Mock profile for CI testing
+        }
+        else {
+            empireProfile = this.loadEmpireProfile(empireId);
+        }
+
         if (empireProfile === undefined)
             throw "Could not load empire";
 
