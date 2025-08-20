@@ -22,6 +22,7 @@ import RevenueService from "server/services/RevenueService";
 import CurrencyService from "server/services/serverdata/CurrencyService";
 import DataService from "server/services/serverdata/DataService";
 import EventService from "server/services/serverdata/EventService";
+import LevelService from "server/services/serverdata/LevelService";
 import NamedUpgradeService from "server/services/serverdata/NamedUpgradeService";
 import PlaytimeService from "server/services/serverdata/PlaytimeService";
 import QuestService from "server/services/serverdata/QuestService";
@@ -54,6 +55,7 @@ export default class APIExposeService implements OnInit {
         private readonly dialogueService: DialogueService,
         private readonly eventService: EventService,
         private readonly itemService: ItemService,
+        private readonly levelService: LevelService,
         private readonly moddingService: ModdingService,
         private readonly namedUpgradeService: NamedUpgradeService,
         private readonly npcNavigationService: NPCNavigationService,
@@ -86,6 +88,14 @@ export default class APIExposeService implements OnInit {
              * @see {@link DataService.loadedInformation} for information on how this is loaded.
              */
             empireData: this.dataService.empireData,
+
+            /**
+             * Empire and player data management service.
+             * 
+             * @borrows DataService as dataService
+             * @see {@link DataService} for more details.
+             */
+            Data: this.dataService,
 
             /**
              * Area management service.
@@ -171,6 +181,14 @@ export default class APIExposeService implements OnInit {
              * @see {@link PlaytimeService} for more details.
              */
             Playtime: this.playtimeService,
+
+            /**
+             * Level and XP management service.
+             * 
+             * @borrows LevelService as levelService
+             * @see {@link LevelService} for more details.
+             */
+            Level: this.levelService,
 
             /**
              * Quest management service.
