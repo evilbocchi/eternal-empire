@@ -16,6 +16,7 @@ import DialogueService from "server/services/npc/DialogueService";
 import NPCNavigationService from "server/services/npc/NPCNavigationService";
 import NPCStateService from "server/services/npc/NPCStateService";
 import ChatHookService from "server/services/permissions/ChatHookService";
+import PermissionsService from "server/services/permissions/PermissionsService";
 import ResetService from "server/services/ResetService";
 import RevenueService from "server/services/RevenueService";
 import CurrencyService from "server/services/serverdata/CurrencyService";
@@ -45,24 +46,25 @@ declare global {
 export default class APIExposeService implements OnInit {
 
     constructor(
-        private readonly chatHookService: ChatHookService,
         private readonly areaService: AreaService,
         private readonly atmosphereService: AtmosphereService,
-        private readonly dataService: DataService,
-        private readonly itemService: ItemService,
+        private readonly chatHookService: ChatHookService,
         private readonly currencyService: CurrencyService,
-        private readonly unlockedAreasService: UnlockedAreasService,
-        private readonly playtimeService: PlaytimeService,
-        private readonly resetService: ResetService,
-        private readonly revenueService: RevenueService,
-        private readonly setupService: SetupService,
-        private readonly eventService: EventService,
+        private readonly dataService: DataService,
         private readonly dialogueService: DialogueService,
+        private readonly eventService: EventService,
+        private readonly itemService: ItemService,
+        private readonly moddingService: ModdingService,
         private readonly namedUpgradeService: NamedUpgradeService,
         private readonly npcNavigationService: NPCNavigationService,
         private readonly npcStateService: NPCStateService,
+        private readonly permissionsService: PermissionsService,
+        private readonly playtimeService: PlaytimeService,
         private readonly questService: QuestService,
-        private readonly moddingService: ModdingService
+        private readonly resetService: ResetService,
+        private readonly revenueService: RevenueService,
+        private readonly setupService: SetupService,
+        private readonly unlockedAreasService: UnlockedAreasService
     ) {
 
     }
@@ -201,6 +203,14 @@ export default class APIExposeService implements OnInit {
              * @see {@link SetupService} for more details.
              */
             Setup: this.setupService,
+
+            /**
+             * Permissions management service.
+             * 
+             * @borrows PermissionsService as permissionsService
+             * @see {@link PermissionsService} for more details.
+             */
+            Permissions: this.permissionsService,
 
             /**
              * Service for unlocking and tracking areas.

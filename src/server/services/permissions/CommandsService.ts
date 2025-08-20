@@ -1,5 +1,5 @@
 /**
- * @fileoverviewol.
+ * @fileoverview Handles chat commands and permissions.
  * 
  * This service handles:
  * - Registration and management of all chat commands in the game
@@ -27,11 +27,13 @@ import { playSoundAtPart, spawnExplosion } from "@antivivi/vrldk";
 import { OnInit, Service } from "@flamework/core";
 import { Debris, Lighting, Players, ReplicatedStorage, RunService, ServerStorage, TeleportService, TextChatService, Workspace } from "@rbxts/services";
 import Quest from "server/Quest";
+import APIExposeService from "server/services/api/APIExposeService";
 import BombsService from "server/services/boosts/BombsService";
 import { DonationService } from "server/services/DonationService";
 import ItemService from "server/services/item/ItemService";
 import { LeaderboardService } from "server/services/leaderboard/LeaderboardService";
 import ChatHookService from "server/services/permissions/ChatHookService";
+import Command, { CommandAPI } from "server/services/permissions/commands/Command";
 import PermissionsService from "server/services/permissions/PermissionsService";
 import ResetService from "server/services/ResetService";
 import CurrencyService from "server/services/serverdata/CurrencyService";
@@ -42,6 +44,7 @@ import PlaytimeService from "server/services/serverdata/PlaytimeService";
 import QuestService from "server/services/serverdata/QuestService";
 import SetupService from "server/services/serverdata/SetupService";
 import AreaService from "server/services/world/AreaService";
+import AtmosphereService from "server/services/world/AtmosphereService";
 import ChestService from "server/services/world/ChestService";
 import UnlockedAreasService from "server/services/world/UnlockedAreasService";
 import { AREAS } from "shared/Area";
@@ -55,6 +58,12 @@ import Items from "shared/items/Items";
 import Packets from "shared/Packets";
 import Sandbox from "shared/Sandbox";
 
+declare global {
+    type CommandAPI = APIExposeService['Server'] & {
+        Command: CommandsService
+    }
+}
+
 /**
  * Service that provides comprehensive chat command functionality with permission-based access control.
  * 
@@ -67,82 +76,34 @@ export default class CommandsService implements OnInit {
     /** Reference to the TextChatCommands container for command registration. */
     commands = TextChatService.WaitForChild("TextChatCommands");
 
-    /**
-     * Initializes the CommandsService with all required game service dependencies.
-     * 
-     * @param dataService Empire and player data management
-     * @param gameAssetService Game utilities and asset management
-     * @param donationService Player donation tracking
-     * @param currencyService Currency management and transactions
-     * @param leaderboardService Leaderboard management and updates
-     * @param namedUpgradeService Upgrade purchase and management
-     * @param itemService Item inventory and placement management
-     * @param playtimeService Playtime tracking and statistics
-     * @param areaService Area management and teleportation
-     * @param levelService Level and experience management
-     * @param questService Quest progression tracking
-     * @param unlockedAreasService Area unlock management
-     * @param resetService Game reset and prestige functionality
-     * @param bombsService Bomb effects and management
-     * @param setupService Item setup saving and loading
-     * @param chestService Chest management and loot
-     * @param permissionService Permission checking and messaging
-     */
     constructor(
-        private dataService: DataService,
-        private chatHookService: ChatHookService,
-        private donationService: DonationService,
-        private currencyService: CurrencyService,
-        private leaderboardService: LeaderboardService,
-        private namedUpgradeService: NamedUpgradeService,
-        private itemService: ItemService,
-        private playtimeService: PlaytimeService,
-        private areaService: AreaService,
-        private levelService: LevelService,
-        private questService: QuestService,
-        private unlockedAreasService: UnlockedAreasService,
-        private resetService: ResetService,
-        private bombsService: BombsService,
-        private setupService: SetupService,
-        private chestService: ChestService,
-        private permissionService: PermissionsService,
-    ) { }
-
-    /**
-     * Gets the permission level for a user.
-     * @param userId The user ID to check.
-     * @returns The permission level (0-4).
-     */
-    private getPermissionLevel(userId: number) {
-        return this.permissionService.getPermissionLevel(userId);
+        private readonly apiExposeService: APIExposeService,
+        private readonly areaService: AreaService,
+        private readonly atmosphereService: AtmosphereService,
+        private readonly bombsService: BombsService,
+        private readonly chatHookService: ChatHookService,
+        private readonly chestService: ChestService,
+        private readonly currencyService: CurrencyService,
+        private readonly dataService: DataService,
+        private readonly donationService: DonationService,
+        private readonly itemService: ItemService,
+        private readonly leaderboardService: LeaderboardService,
+        private readonly levelService: LevelService,
+        private readonly namedUpgradeService: NamedUpgradeService,
+        private readonly permissionService: PermissionsService,
+        private readonly playtimeService: PlaytimeService,
+        private readonly questService: QuestService,
+        private readonly resetService: ResetService,
+        private readonly setupService: SetupService,
+        private readonly unlockedAreasService: UnlockedAreasService
+    ) {
+        const server = this.apiExposeService.Server as CommandAPI;
+        server.Command = this;
+        for (const [key, value] of pairs(server)) {
+            (CommandAPI as { [key: string]: unknown })[key] = value;
+        }
     }
 
-    /**
-     * Sends a private message to a specific player.
-     * @param player The player to send the message to.
-     * @param message The message content.
-     * @param color Optional color formatting for the message.
-     */
-    private sendPrivateMessage(player: Player, message: string, color?: string) {
-        return this.chatHookService.sendPrivateMessage(player, message, color);
-    }
-
-    /**
-     * Sends a server-wide message to all players.
-     * @param message The message content.
-     * @param color Optional color formatting for the message.
-     */
-    private sendServerMessage(message: string, color?: string) {
-        return this.chatHookService.sendServerMessage(message, color);
-    }
-
-    /**
-     * Updates the permission level for a user.
-     * @param userId The user ID to update.
-     */
-    private updatePermissionLevel(userId: number) {
-        return this.permissionService.updatePermissionLevel(userId);
-    }
 
     /**
      * Finds players matching a string (e.g. "me", "all", or by name).
@@ -192,6 +153,9 @@ export default class CommandsService implements OnInit {
 
     /**
      * Registers a new chat command with permission checks.
+     * 
+     * @deprecated Use {@link Command} and {@link registerCommand} instead
+     * 
      * @param primary Primary command alias
      * @param secondary Secondary command alias
      * @param description Command description
@@ -208,9 +172,9 @@ export default class CommandsService implements OnInit {
             const params = u.split(" ");
             params.remove(0);
             const p = Players.WaitForChild(o.Name) as Player;
-            const pLevel = this.getPermissionLevel(p.UserId);
+            const pLevel = CommandAPI.Permissions.getPermissionLevel(p.UserId);
             if (pLevel < permLevel) {
-                this.sendPrivateMessage(p, "You do not have access to this command.", "color:255,43,43");
+                CommandAPI.ChatHook.sendPrivateMessage(p, "You do not have access to this command.", "color:255,43,43");
                 return;
             }
             callback(p, ...params);
@@ -220,6 +184,32 @@ export default class CommandsService implements OnInit {
         }
         command.SetAttribute("PermissionLevel", permLevel);
         command.Parent = this.commands;
+    }
+
+    /**
+     * Registers a new chat command.
+     * 
+     * @param command The command to register
+     */
+    registerCommand(command: Command) {
+        const textChatCommand = new Instance("TextChatCommand");
+        textChatCommand.PrimaryAlias = command.id;
+        textChatCommand.SecondaryAlias = command.aliases[0] || "";
+        textChatCommand.Name = command.id + "Command";
+        textChatCommand.SetAttribute("Description", command.description);
+        textChatCommand.Triggered.Connect((o, u) => {
+            const params = u.split(" ");
+            params.remove(0);
+            const p = Players.WaitForChild(o.Name) as Player;
+            const pLevel = CommandAPI.Permissions.getPermissionLevel(p.UserId);
+            if (pLevel < command.permissionLevel) {
+                CommandAPI.ChatHook.sendPrivateMessage(p, "You do not have access to this command.", "color:255,43,43");
+                return;
+            }
+            command.execute(p, ...params);
+        });
+        textChatCommand.SetAttribute("PermissionLevel", command.permissionLevel);
+        textChatCommand.Parent = this.commands;
     }
 
     /**
@@ -236,12 +226,22 @@ export default class CommandsService implements OnInit {
      * error messages for unauthorized access attempts.
      */
     onInit() {
+        for (const commandModule of Command.commandsFolder.GetDescendants()) {
+            if (commandModule.Name === "Command" || !commandModule.IsA("ModuleScript"))
+                continue;
+
+            const command = require(commandModule) as Command;
+            this.registerCommand(command);
+        }
+
+        
+
         // PERM LEVEL 0
 
         this.createCommand("help", "?",
             "Displays all available commands.",
             (o) => {
-                this.sendPrivateMessage(o, `Your permission level is ${this.getPermissionLevel(o.UserId)}`, "color:138,255,138");
+                CommandAPI.ChatHook.sendPrivateMessage(o, `Your permission level is ${CommandAPI.Permissions.getPermissionLevel(o.UserId)}`, "color:138,255,138");
                 Packets.tabOpened.fire(o, "Commands");
             }, 0);
 
@@ -266,28 +266,28 @@ export default class CommandsService implements OnInit {
             (o, p) => {
                 const targets = this.findPlayers(o, p);
                 if (targets.size() < 1) {
-                    this.sendPrivateMessage(o, `Could not find matching players ${p}`, "color:255,43,43");
+                    CommandAPI.ChatHook.sendPrivateMessage(o, `Could not find matching players ${p}`, "color:255,43,43");
                     return;
                 }
                 const data = this.dataService.empireData;
                 const playerCount = Players.GetPlayers().filter((player) => (player.GetAttribute("PermissionLevel") as number ?? 0) > -1).size();
                 for (const target of targets) {
                     const userId = target.UserId;
-                    if (this.getPermissionLevel(userId) >= 1) {
-                        this.sendPrivateMessage(o, "You can't vote to restrict a trusted player", "color:255,43,43");
+                    if (CommandAPI.Permissions.getPermissionLevel(userId) >= 1) {
+                        CommandAPI.ChatHook.sendPrivateMessage(o, "You can't vote to restrict a trusted player", "color:255,43,43");
                         continue;
                     }
                     if (o.FindFirstChild(userId) !== undefined) {
-                        this.sendPrivateMessage(o, "You have already voted to restrict this player", "color:255,43,43");
+                        CommandAPI.ChatHook.sendPrivateMessage(o, "You have already voted to restrict this player", "color:255,43,43");
                         continue;
                     }
                     const votes = (target.GetAttribute("Votes") as number ?? 0) + 1;
                     target.SetAttribute("Votes", votes);
                     if (votes === 0) {
-                        this.sendServerMessage(`A vote has started to restrict player ${target.Name}. Type /vr ${target.Name} to vote to restrict them too.`, "color:138,255,138");
+                        CommandAPI.ChatHook.sendServerMessage(`A vote has started to restrict player ${target.Name}. Type /vr ${target.Name} to vote to restrict them too.`, "color:138,255,138");
                     }
                     const requirement = math.round(playerCount * 2 / 3);
-                    this.sendServerMessage(`${votes}/${requirement} votes needed.`, "color:138,255,138");
+                    CommandAPI.ChatHook.sendServerMessage(`${votes}/${requirement} votes needed.`, "color:138,255,138");
                     const voteToken = new Instance("NumberValue");
                     voteToken.Value = tick();
                     voteToken.Name = tostring(userId);
@@ -299,21 +299,21 @@ export default class CommandsService implements OnInit {
                         }
                         target.SetAttribute("Votes", target.GetAttribute("Votes") as number - 1);
                         if (target.GetAttribute("RestrictionTime") as number ?? 0 < tick()) {
-                            this.sendPrivateMessage(o, `Your vote to restrict ${target.Name} has worn off.`, "color:138,255,138");
+                            CommandAPI.ChatHook.sendPrivateMessage(o, `Your vote to restrict ${target.Name} has worn off.`, "color:138,255,138");
                         }
                     });
-                    this.sendPrivateMessage(o, `Voted to restrict ${target.Name}. Your vote will wear off after 60 seconds.`, "color:138,255,138");
+                    CommandAPI.ChatHook.sendPrivateMessage(o, `Voted to restrict ${target.Name}. Your vote will wear off after 60 seconds.`, "color:138,255,138");
                     if (votes >= requirement) {
-                        this.sendServerMessage(`${target.Name} has been restricted for 20 minutes.`, "color:138,255,138");
+                        CommandAPI.ChatHook.sendServerMessage(`${target.Name} has been restricted for 20 minutes.`, "color:138,255,138");
                         data.restricted.set(userId, tick() + 1200);
                         task.delay(1201, () => {
                             const t = data.restricted.get(userId);
                             if (t === undefined || tick() - t > 0) {
                                 data.restricted.delete(userId);
-                                this.updatePermissionLevel(userId);
+                                CommandAPI.Permissions.updatePermissionLevel(userId);
                             }
                         });
-                        this.updatePermissionLevel(userId);
+                        CommandAPI.Permissions.updatePermissionLevel(userId);
                     }
                 }
             }, 0);
@@ -323,12 +323,12 @@ export default class CommandsService implements OnInit {
             (o, amount) => {
                 let walkspeed = tonumber(amount) ?? 0;
                 if (walkspeed < 0) {
-                    this.sendPrivateMessage(o, "Walk speed cannot be negative.", "color:255,43,43");
+                    CommandAPI.ChatHook.sendPrivateMessage(o, "Walk speed cannot be negative.", "color:255,43,43");
                     return;
                 }
                 const maxWalkSpeed = Workspace.GetAttribute("WalkSpeed") as number ?? 16;
                 if (walkspeed > maxWalkSpeed) {
-                    this.sendPrivateMessage(o, `Walk speed capped at ${maxWalkSpeed}.`, "color:255,43,43");
+                    CommandAPI.ChatHook.sendPrivateMessage(o, `Walk speed capped at ${maxWalkSpeed}.`, "color:255,43,43");
                 }
                 walkspeed = math.min(walkspeed, maxWalkSpeed);
                 const humanoid = o.Character?.FindFirstChildOfClass("Humanoid");
@@ -336,7 +336,7 @@ export default class CommandsService implements OnInit {
                     return;
                 }
                 humanoid.WalkSpeed = walkspeed;
-                this.sendPrivateMessage(o, `Walk speed set to ${walkspeed}.`, "color:138,255,138");
+                CommandAPI.ChatHook.sendPrivateMessage(o, `Walk speed set to ${walkspeed}.`, "color:138,255,138");
             }, 0);
 
 
@@ -348,7 +348,7 @@ export default class CommandsService implements OnInit {
                 const userId = this.id(p, useId);
                 if (userId !== undefined) {
                     this.dataService.empireData.blocking.add(userId);
-                    this.sendServerMessage("Ignoring " + this.fp(p, userId), "color:138,255,138");
+                    CommandAPI.ChatHook.sendServerMessage("Ignoring " + this.fp(p, userId), "color:138,255,138");
                 }
             }, 1);
 
@@ -356,7 +356,7 @@ export default class CommandsService implements OnInit {
             "View the empire ID for this empire. Only useful for diagnostics.",
             (o) => {
                 const id = this.dataService.empireId;
-                this.sendPrivateMessage(o, "The empire ID is: " + id);
+                CommandAPI.ChatHook.sendPrivateMessage(o, "The empire ID is: " + id);
                 Packets.codeReceived.fire(o, id);
             }, 1);
 
@@ -367,11 +367,11 @@ export default class CommandsService implements OnInit {
                 const isStudio = RunService.IsStudio();
                 if (userId !== undefined && (userId !== o.UserId || isStudio)) {
                     if (!isStudio && (game.PrivateServerOwnerId !== 0 || game.PrivateServerId === "")) {
-                        this.sendPrivateMessage(o, "You cannot use /invite in this server.", "color:255,43,43");
+                        CommandAPI.ChatHook.sendPrivateMessage(o, "You cannot use /invite in this server.", "color:255,43,43");
                         return;
                     }
                     this.dataService.addAvailableEmpire(userId, this.dataService.empireId);
-                    this.sendPrivateMessage(o, "Invited " + this.fp(p, userId), "color:138,255,138");
+                    CommandAPI.ChatHook.sendPrivateMessage(o, "Invited " + this.fp(p, userId), "color:138,255,138");
                 }
             }, 1);
 
@@ -380,13 +380,13 @@ export default class CommandsService implements OnInit {
             (o, p, useId) => {
                 const userId = this.id(p, useId);
                 if (userId !== undefined) {
-                    if (this.getPermissionLevel(userId) >= this.getPermissionLevel(o.UserId)) {
-                        this.sendPrivateMessage(o, "You can't revoke someone with an equal/higher permission level.", "color:255,43,43");
+                    if (CommandAPI.Permissions.getPermissionLevel(userId) >= CommandAPI.Permissions.getPermissionLevel(o.UserId)) {
+                        CommandAPI.ChatHook.sendPrivateMessage(o, "You can't revoke someone with an equal/higher permission level.", "color:255,43,43");
                         return;
                     }
                     const empireId = this.dataService.empireId;
                     this.dataService.removeAvailableEmpire(userId, empireId);
-                    this.sendPrivateMessage(o, `Revoked ${this.fp(p, userId)}`, "color:138,255,138");
+                    CommandAPI.ChatHook.sendPrivateMessage(o, `Revoked ${this.fp(p, userId)}`, "color:138,255,138");
                 }
             }, 1);
 
@@ -395,11 +395,11 @@ export default class CommandsService implements OnInit {
             (o) => {
                 if (RunService.IsStudio() || (game.PrivateServerOwnerId === 0 && game.PrivateServerId !== "")) {
                     const code = this.permissionService.getAccessCode();
-                    this.sendPrivateMessage(o, "The server access code is: " + code);
+                    CommandAPI.ChatHook.sendPrivateMessage(o, "The server access code is: " + code);
                     Packets.codeReceived.fire(o, code);
                 }
                 else {
-                    this.sendPrivateMessage(o, "You cannot use this command on this server", "color:255,43,43");
+                    CommandAPI.ChatHook.sendPrivateMessage(o, "You cannot use this command on this server", "color:255,43,43");
                 }
             }, 1);
 
@@ -408,11 +408,11 @@ export default class CommandsService implements OnInit {
             (o) => {
                 if (RunService.IsStudio() || (game.PrivateServerOwnerId === 0 && game.PrivateServerId !== "")) {
                     const joinLink = "https://www.roblox.com/games/start?placeId=" + game.PlaceId + "&launchData=" + this.permissionService.getAccessCode();
-                    this.sendPrivateMessage(o, "Join link: " + joinLink);
+                    CommandAPI.ChatHook.sendPrivateMessage(o, "Join link: " + joinLink);
                     Packets.codeReceived.fire(o, joinLink);
                 }
                 else {
-                    this.sendPrivateMessage(o, "You cannot use this command on this server", "color:255,43,43");
+                    CommandAPI.ChatHook.sendPrivateMessage(o, "You cannot use this command on this server", "color:255,43,43");
                 }
             }, 1);
 
@@ -427,7 +427,7 @@ export default class CommandsService implements OnInit {
                         toRemove.push(id);
 
                 this.itemService.unplaceItems(o, toRemove);
-                this.sendPrivateMessage(o, `Unplaced all items in ${area === undefined ? "all" : AREAS[area].name}`, "color:138,255,138");
+                CommandAPI.ChatHook.sendPrivateMessage(o, `Unplaced all items in ${area === undefined ? "all" : AREAS[area].name}`, "color:138,255,138");
             }, 1);
 
         this.createCommand("kill", "unalive",
@@ -435,7 +435,7 @@ export default class CommandsService implements OnInit {
             (o, p) => {
                 const targets = this.findPlayers(o, p);
                 if (targets.size() < 1) {
-                    this.sendPrivateMessage(o, `Could not find matching players ${p}`, "color:255,43,43");
+                    CommandAPI.ChatHook.sendPrivateMessage(o, `Could not find matching players ${p}`, "color:255,43,43");
                     return;
                 }
                 for (const target of targets) {
@@ -443,7 +443,7 @@ export default class CommandsService implements OnInit {
                     if (humanoid !== undefined)
                         humanoid.TakeDamage(humanoid.Health + 1);
                 }
-                this.sendPrivateMessage(o, `Killed players`, "color:138,255,138");
+                CommandAPI.ChatHook.sendPrivateMessage(o, `Killed players`, "color:138,255,138");
             }, 1);
 
 
@@ -455,30 +455,30 @@ export default class CommandsService implements OnInit {
             (o, p, m) => {
                 const targets = this.findPlayers(o, p);
                 if (targets.size() < 1) {
-                    this.sendPrivateMessage(o, `Could not find matching players ${p}`, "color:255,43,43");
+                    CommandAPI.ChatHook.sendPrivateMessage(o, `Could not find matching players ${p}`, "color:255,43,43");
                     return;
                 }
                 const data = this.dataService.empireData;
                 const duration = 5 * (m === undefined ? 1 : (tonumber(m) ?? 1));
                 for (const target of targets) {
                     if (target === o) {
-                        this.sendPrivateMessage(o, "You can't restrict yourself.", "color:255,43,43");
+                        CommandAPI.ChatHook.sendPrivateMessage(o, "You can't restrict yourself.", "color:255,43,43");
                         continue;
                     }
                     const userId = target.UserId;
-                    if (this.getPermissionLevel(userId) >= this.getPermissionLevel(o.UserId)) {
-                        this.sendPrivateMessage(o, "You can't restrict someone with an equal/higher permission level.", "color:255,43,43");
+                    if (CommandAPI.Permissions.getPermissionLevel(userId) >= CommandAPI.Permissions.getPermissionLevel(o.UserId)) {
+                        CommandAPI.ChatHook.sendPrivateMessage(o, "You can't restrict someone with an equal/higher permission level.", "color:255,43,43");
                         continue;
                     }
-                    this.sendPrivateMessage(o, `Restricted player ${target.Name}`, "color:138,255,138");
+                    CommandAPI.ChatHook.sendPrivateMessage(o, `Restricted player ${target.Name}`, "color:138,255,138");
                     const restrictionTime = tick() + (duration * 60);
                     target.SetAttribute("RestrictionTime", restrictionTime);
                     data.restricted.set(userId, restrictionTime);
                     task.delay(duration * 60, () => {
                         data.restricted.delete(userId);
-                        this.updatePermissionLevel(userId);
+                        CommandAPI.Permissions.updatePermissionLevel(userId);
                     });
-                    this.updatePermissionLevel(userId);
+                    CommandAPI.Permissions.updatePermissionLevel(userId);
                 }
             }, 2);
 
@@ -487,18 +487,18 @@ export default class CommandsService implements OnInit {
             (o, p, m) => {
                 const targets = this.findPlayers(o, p);
                 if (targets.size() < 1) {
-                    this.sendPrivateMessage(o, `Could not find matching players ${p}`, "color:255,43,43");
+                    CommandAPI.ChatHook.sendPrivateMessage(o, `Could not find matching players ${p}`, "color:255,43,43");
                     return;
                 }
                 const data = this.dataService.empireData;
                 for (const target of targets) {
                     const userId = target.UserId;
                     if (data.restricted.delete(userId)) {
-                        this.sendPrivateMessage(o, `Unrestricted player ${target.Name}`, "color:138,255,138");
-                        this.updatePermissionLevel(userId);
+                        CommandAPI.ChatHook.sendPrivateMessage(o, `Unrestricted player ${target.Name}`, "color:138,255,138");
+                        CommandAPI.Permissions.updatePermissionLevel(userId);
                     }
                     else {
-                        this.sendPrivateMessage(o, `${target.Name} is not restricted`, "color:255,43,43");
+                        CommandAPI.ChatHook.sendPrivateMessage(o, `${target.Name} is not restricted`, "color:255,43,43");
                     }
                 }
             }, 2);
@@ -517,19 +517,19 @@ export default class CommandsService implements OnInit {
             (o, p) => {
                 const targets = this.findPlayers(o, p);
                 if (targets.size() < 1) {
-                    this.sendPrivateMessage(o, `Could not find matching players ${p}`, "color:255,43,43");
+                    CommandAPI.ChatHook.sendPrivateMessage(o, `Could not find matching players ${p}`, "color:255,43,43");
                     return;
                 }
                 for (const target of targets) {
                     if (target === o) {
-                        this.sendPrivateMessage(o, "You can't kick yourself.", "color:255,43,43");
+                        CommandAPI.ChatHook.sendPrivateMessage(o, "You can't kick yourself.", "color:255,43,43");
                         continue;
                     }
-                    if (this.getPermissionLevel(target.UserId) >= this.getPermissionLevel(o.UserId)) {
-                        this.sendPrivateMessage(o, "You can't kick someone with an equal/higher permission level.", "color:255,43,43");
+                    if (CommandAPI.Permissions.getPermissionLevel(target.UserId) >= CommandAPI.Permissions.getPermissionLevel(o.UserId)) {
+                        CommandAPI.ChatHook.sendPrivateMessage(o, "You can't kick someone with an equal/higher permission level.", "color:255,43,43");
                         continue;
                     }
-                    this.sendPrivateMessage(o, `Kicked player ${target.Name}`, "color:138,255,138");
+                    CommandAPI.ChatHook.sendPrivateMessage(o, `Kicked player ${target.Name}`, "color:138,255,138");
                     kaboom(target);
                     task.delay(1, () => {
                         if (target !== undefined) {
@@ -546,32 +546,32 @@ export default class CommandsService implements OnInit {
                 if (targets.size() < 1) {
                     const userId = useId === "true" ? tonumber(p) : Players.GetUserIdFromNameAsync(p);
                     if (userId !== undefined) {
-                        if (this.getPermissionLevel(userId) >= this.getPermissionLevel(o.UserId)) {
-                            this.sendPrivateMessage(o, "You can't ban someone with an equal/higher permission level.", "color:255,43,43");
+                        if (CommandAPI.Permissions.getPermissionLevel(userId) >= CommandAPI.Permissions.getPermissionLevel(o.UserId)) {
+                            CommandAPI.ChatHook.sendPrivateMessage(o, "You can't ban someone with an equal/higher permission level.", "color:255,43,43");
                             return;
                         }
                         const success = this.permissionService.add("banned", userId);
                         if (success) {
-                            this.sendPrivateMessage(o, `Banned ${this.fp(p, userId)}`, "color:138,255,138");
+                            CommandAPI.ChatHook.sendPrivateMessage(o, `Banned ${this.fp(p, userId)}`, "color:138,255,138");
                         }
                         else {
-                            this.sendPrivateMessage(o, `${this.fp(p, userId)} is already banned`, "color:255,43,43");
+                            CommandAPI.ChatHook.sendPrivateMessage(o, `${this.fp(p, userId)} is already banned`, "color:255,43,43");
                         }
                         return;
                     }
-                    this.sendPrivateMessage(o, `Could not find matching players ${p}`, "color:255,43,43");
+                    CommandAPI.ChatHook.sendPrivateMessage(o, `Could not find matching players ${p}`, "color:255,43,43");
                     return;
                 }
                 for (const target of targets) {
                     if (target === o) {
-                        this.sendPrivateMessage(o, "You can't ban yourself.", "color:255,43,43");
+                        CommandAPI.ChatHook.sendPrivateMessage(o, "You can't ban yourself.", "color:255,43,43");
                         continue;
                     }
-                    if (this.getPermissionLevel(target.UserId) >= this.getPermissionLevel(o.UserId)) {
-                        this.sendPrivateMessage(o, "You can't ban someone with an equal/higher permission level.", "color:255,43,43");
+                    if (CommandAPI.Permissions.getPermissionLevel(target.UserId) >= CommandAPI.Permissions.getPermissionLevel(o.UserId)) {
+                        CommandAPI.ChatHook.sendPrivateMessage(o, "You can't ban someone with an equal/higher permission level.", "color:255,43,43");
                         continue;
                     }
-                    this.sendPrivateMessage(o, `Banned player ${target.Name}`, "color:138,255,138");
+                    CommandAPI.ChatHook.sendPrivateMessage(o, `Banned player ${target.Name}`, "color:138,255,138");
                     const h = target.Character?.FindFirstChildOfClass("Humanoid");
                     if (h !== undefined && h.RootPart !== undefined) {
                         const smoke = new Instance("Smoke");
@@ -604,10 +604,10 @@ export default class CommandsService implements OnInit {
                 if (userId !== undefined) {
                     const success = this.permissionService.remove("banned", userId);
                     if (success) {
-                        this.sendPrivateMessage(o, `Unbanned ${this.fp(p, userId)}`, "color:138,255,138");
+                        CommandAPI.ChatHook.sendPrivateMessage(o, `Unbanned ${this.fp(p, userId)}`, "color:138,255,138");
                     }
                     else {
-                        this.sendPrivateMessage(o, `${this.fp(p, userId)} is not banned`, "color:255,43,43");
+                        CommandAPI.ChatHook.sendPrivateMessage(o, `${this.fp(p, userId)} is not banned`, "color:255,43,43");
                     }
                 }
             }, 2);
@@ -619,12 +619,12 @@ export default class CommandsService implements OnInit {
                 if (userId !== undefined) {
                     const success = this.permissionService.add("trusted", userId);
                     if (success) {
-                        this.sendPrivateMessage(o, `Trusted ${this.fp(p, userId)}`, "color:138,255,138");
+                        CommandAPI.ChatHook.sendPrivateMessage(o, `Trusted ${this.fp(p, userId)}`, "color:138,255,138");
                     }
                     else {
-                        this.sendPrivateMessage(o, `${this.fp(p, userId)} is already trusted`, "color:255,43,43");
+                        CommandAPI.ChatHook.sendPrivateMessage(o, `${this.fp(p, userId)} is already trusted`, "color:255,43,43");
                     }
-                    this.updatePermissionLevel(userId);
+                    CommandAPI.Permissions.updatePermissionLevel(userId);
                 }
             }, 2);
 
@@ -636,12 +636,12 @@ export default class CommandsService implements OnInit {
                     const success1 = this.permissionService.remove("trusted", userId);
                     const success2 = this.permissionService.remove("managers", userId);
                     if (success1 || success2) {
-                        this.sendPrivateMessage(o, `Untrusted ${this.fp(p, userId)}`, "color:138,255,138");
+                        CommandAPI.ChatHook.sendPrivateMessage(o, `Untrusted ${this.fp(p, userId)}`, "color:138,255,138");
                     }
                     else {
-                        this.sendPrivateMessage(o, `${this.fp(p, userId)} is not trusted/a manager`, "color:255,43,43");
+                        CommandAPI.ChatHook.sendPrivateMessage(o, `${this.fp(p, userId)} is not trusted/a manager`, "color:255,43,43");
                     }
-                    this.updatePermissionLevel(userId);
+                    CommandAPI.Permissions.updatePermissionLevel(userId);
                 }
             }, 2);
 
@@ -651,7 +651,7 @@ export default class CommandsService implements OnInit {
                 const empireData = this.dataService.empireData;
                 const newSetting = !empireData.globalChat;
                 empireData.globalChat = newSetting;
-                this.sendServerMessage(`Global chat has been turned ${newSetting === true ? "on" : "off"}`);
+                CommandAPI.ChatHook.sendServerMessage(`Global chat has been turned ${newSetting === true ? "on" : "off"}`);
             }, 2);
 
         this.createCommand("toggleparticles", "tglp",
@@ -661,7 +661,7 @@ export default class CommandsService implements OnInit {
                 const newSetting = !empireData.particlesEnabled;
                 empireData.particlesEnabled = newSetting;
                 this.itemService.refreshEffects();
-                this.sendServerMessage(`Particles for newly placed items have been ${newSetting === true ? "enabled" : "disabled"}`);
+                CommandAPI.ChatHook.sendServerMessage(`Particles for newly placed items have been ${newSetting === true ? "enabled" : "disabled"}`);
             }, 2);
 
         this.createCommand("teleport", "tp",
@@ -671,11 +671,11 @@ export default class CommandsService implements OnInit {
                 const targets = this.findPlayers(o, t);
                 const size = targets.size();
                 if (size === 0) {
-                    this.sendPrivateMessage(o, `No target called ${t} found`, "color:255,43,43");
+                    CommandAPI.ChatHook.sendPrivateMessage(o, `No target called ${t} found`, "color:255,43,43");
                     return;
                 }
                 else if (size > 1) {
-                    this.sendPrivateMessage(o, `Too many targets specified: ${t}`, "color:255,43,43");
+                    CommandAPI.ChatHook.sendPrivateMessage(o, `Too many targets specified: ${t}`, "color:255,43,43");
                     return;
                 }
                 const target = targets[0];
@@ -683,13 +683,13 @@ export default class CommandsService implements OnInit {
                 if (destination === undefined)
                     return;
                 for (const teleporter of teleporters) {
-                    if (this.getPermissionLevel(teleporter.UserId) > this.getPermissionLevel(o.UserId)) {
-                        this.sendPrivateMessage(o, `You cannot teleport a player with a permission level higher than your own`, "color:255,43,43");
+                    if (CommandAPI.Permissions.getPermissionLevel(teleporter.UserId) > CommandAPI.Permissions.getPermissionLevel(o.UserId)) {
+                        CommandAPI.ChatHook.sendPrivateMessage(o, `You cannot teleport a player with a permission level higher than your own`, "color:255,43,43");
                         continue;
                     }
                     teleporter.Character?.PivotTo(destination);
                 }
-                this.sendPrivateMessage(o, `Teleported ${p} to ${t}`, "color:138,255,138");
+                CommandAPI.ChatHook.sendPrivateMessage(o, `Teleported ${p} to ${t}`, "color:138,255,138");
             }, 2);
 
         this.createCommand("cleardroplets", "cd",
@@ -698,7 +698,7 @@ export default class CommandsService implements OnInit {
                 for (const droplet of DROPLET_STORAGE.GetChildren())
                     if (droplet.IsA("BasePart"))
                         droplet.Destroy();
-                this.sendServerMessage("Deleted all droplets");
+                CommandAPI.ChatHook.sendServerMessage("Deleted all droplets");
             }, 2);
 
 
@@ -711,28 +711,28 @@ export default class CommandsService implements OnInit {
                 if (userId !== undefined) {
                     const success = this.permissionService.add("managers", userId);
                     if (success) {
-                        this.sendPrivateMessage(o, `${this.fp(p, userId)} is now a manager`, "color:138,255,138");
+                        CommandAPI.ChatHook.sendPrivateMessage(o, `${this.fp(p, userId)} is now a manager`, "color:138,255,138");
                     }
                     else {
-                        this.sendPrivateMessage(o, `${this.fp(p, userId)} is already a manager`, "color:255,43,43");
+                        CommandAPI.ChatHook.sendPrivateMessage(o, `${this.fp(p, userId)} is already a manager`, "color:255,43,43");
                     }
-                    this.updatePermissionLevel(userId);
+                    CommandAPI.Permissions.updatePermissionLevel(userId);
                 }
             }, 3);
 
         const setPermLevel = (o: Player, perm: keyof (typeof this.dataService.empireData.permLevels), level: string) => {
             const lvl = tonumber(level);
             if (lvl === undefined) {
-                this.sendPrivateMessage(o, `${level} is not a valid permission level`, "color:255,43,43");
+                CommandAPI.ChatHook.sendPrivateMessage(o, `${level} is not a valid permission level`, "color:255,43,43");
                 return;
             }
-            else if (lvl > this.getPermissionLevel(o.UserId)) {
-                this.sendPrivateMessage(o, `You cannot set a permission level higher than your own`, "color:255,43,43");
+            else if (lvl > CommandAPI.Permissions.getPermissionLevel(o.UserId)) {
+                CommandAPI.ChatHook.sendPrivateMessage(o, `You cannot set a permission level higher than your own`, "color:255,43,43");
                 return;
             }
             this.dataService.empireData.permLevels[perm] = math.min(3, lvl);
             Packets.permLevels.set(this.dataService.empireData.permLevels);
-            this.sendServerMessage(`Permission level ${lvl} set for permission ${perm}`, "color:138,255,138");
+            CommandAPI.ChatHook.sendServerMessage(`Permission level ${lvl} set for permission ${perm}`, "color:138,255,138");
         };
         this.createCommand("setbuildlvl", "bl",
             "<permlevel> : Sets the minimum permission level required to build.",
@@ -921,25 +921,25 @@ export default class CommandsService implements OnInit {
                 const attempts = (Workspace.GetAttribute("ResetAttempts") as number | undefined ?? 0) + 1;
                 Workspace.SetAttribute("ResetAttempts", attempts);
                 if (attempts === 1)
-                    this.sendServerMessage("Are you sure you want to reset your data? Type /resetdata again to confirm.");
+                    CommandAPI.ChatHook.sendServerMessage("Are you sure you want to reset your data? Type /resetdata again to confirm.");
                 else if (attempts === 2)
-                    this.sendServerMessage("Yeah, but are you REALLY sure? Like, REALLY REALLY sure? You can't recover this data once it's gone.");
+                    CommandAPI.ChatHook.sendServerMessage("Yeah, but are you REALLY sure? Like, REALLY REALLY sure? You can't recover this data once it's gone.");
                 else if (attempts === 3)
-                    this.sendServerMessage("I'm saying that you gain nothing in return for doing this. Literally nothing.");
+                    CommandAPI.ChatHook.sendServerMessage("I'm saying that you gain nothing in return for doing this. Literally nothing.");
                 else if (attempts === 4)
-                    this.sendServerMessage("...");
+                    CommandAPI.ChatHook.sendServerMessage("...");
                 else if (attempts === 5)
-                    this.sendServerMessage(".....");
+                    CommandAPI.ChatHook.sendServerMessage(".....");
                 else if (attempts === 6)
-                    this.sendServerMessage("If you say so. Type /resetdata 3 more times to confirm.");
+                    CommandAPI.ChatHook.sendServerMessage("If you say so. Type /resetdata 3 more times to confirm.");
                 else if (attempts === 7)
-                    this.sendServerMessage("Type /resetdata 2 more times to confirm.");
+                    CommandAPI.ChatHook.sendServerMessage("Type /resetdata 2 more times to confirm.");
                 else if (attempts === 8)
-                    this.sendServerMessage("Type /resetdata 1 more time to confirm.");
+                    CommandAPI.ChatHook.sendServerMessage("Type /resetdata 1 more time to confirm.");
                 else if (attempts === 9) {
-                    this.sendServerMessage("You have confirmed the data reset.");
-                    task.delay(2, () => this.sendServerMessage("This world will cease to exist in 5 seconds."));
-                    task.delay(4, () => this.sendServerMessage("Goodbye"));
+                    CommandAPI.ChatHook.sendServerMessage("You have confirmed the data reset.");
+                    task.delay(2, () => CommandAPI.ChatHook.sendServerMessage("This world will cease to exist in 5 seconds."));
+                    task.delay(4, () => CommandAPI.ChatHook.sendServerMessage("Goodbye"));
                     task.delay(7, () => {
                         const players = Players.GetPlayers();
                         for (const player of players)
@@ -963,7 +963,7 @@ export default class CommandsService implements OnInit {
                 this.levelService.setLevel(1);
                 this.levelService.setXp(0);
                 this.questService.setStagePerQuest(new Map());
-                this.sendServerMessage("True reset complete. The shop is in your inventory.");
+                CommandAPI.ChatHook.sendServerMessage("True reset complete. The shop is in your inventory.");
             }, 4);
 
         this.createCommand("countparts", "getpartcount",
@@ -973,14 +973,14 @@ export default class CommandsService implements OnInit {
                 for (const part of Workspace.GetDescendants())
                     if (part.IsA("BasePart"))
                         i++;
-                this.sendServerMessage("Part count: " + i);
+                CommandAPI.ChatHook.sendServerMessage("Part count: " + i);
             }, 4);
 
         this.createCommand("gamespeed", "gs",
             "Set how fast the game runs. Default is 1.",
             (_player, newSpeed) => {
                 const speed = tonumber(newSpeed) ?? 1;
-                this.sendServerMessage(`Changed speed to ${speed}. Old speed: ${GameSpeed.speed}`);
+                CommandAPI.ChatHook.sendServerMessage(`Changed speed to ${speed}. Old speed: ${GameSpeed.speed}`);
                 GameSpeed.speed = speed;
             }, 4);
 
@@ -989,10 +989,10 @@ export default class CommandsService implements OnInit {
             (_player, newChance) => {
                 const chance = tonumber(newChance) ?? 1000;
                 if (chance < 0) {
-                    this.sendServerMessage("Lucky droplet chance cannot be negative. Use 0 to disable.");
+                    CommandAPI.ChatHook.sendServerMessage("Lucky droplet chance cannot be negative. Use 0 to disable.");
                     return;
                 }
-                this.sendServerMessage(`Changed lucky droplet chance to 1/${chance === 0 ? "disabled" : chance}. Old chance: 1/${Dropper.luckyChance === 0 ? "disabled" : Dropper.luckyChance}`);
+                CommandAPI.ChatHook.sendServerMessage(`Changed lucky droplet chance to 1/${chance === 0 ? "disabled" : chance}. Old chance: 1/${Dropper.luckyChance === 0 ? "disabled" : Dropper.luckyChance}`);
                 Dropper.luckyChance = chance;
             }, 4);
 
@@ -1014,7 +1014,7 @@ export default class CommandsService implements OnInit {
             (o, p) => {
                 const targets = this.findPlayers(o, p);
                 if (targets.size() < 1) {
-                    this.sendPrivateMessage(o, `Could not find matching players ${p}`, "color:255,43,43");
+                    CommandAPI.ChatHook.sendPrivateMessage(o, `Could not find matching players ${p}`, "color:255,43,43");
                     return;
                 }
                 const rng = new Random();
@@ -1027,7 +1027,7 @@ export default class CommandsService implements OnInit {
                     rootPart.AssemblyLinearVelocity = rng.NextUnitVector().mul(5000);
                     rootPart.AssemblyAngularVelocity = rng.NextUnitVector().mul(5000);
                 }
-                this.sendPrivateMessage(o, `Flung players`, "color:138,255,138");
+                CommandAPI.ChatHook.sendPrivateMessage(o, `Flung players`, "color:138,255,138");
             }, 4);
 
 
@@ -1055,7 +1055,7 @@ export default class CommandsService implements OnInit {
             () => {
                 const newSetting = !this.dataService.testing;
                 this.dataService.testing = newSetting;
-                this.sendServerMessage(`Testing mode has been turned ${newSetting === true ? "on" : "off"}`);
+                CommandAPI.ChatHook.sendServerMessage(`Testing mode has been turned ${newSetting === true ? "on" : "off"}`);
             }, 4);
 
         this.createCommand("markplaceableeverywhere", "mpe",
