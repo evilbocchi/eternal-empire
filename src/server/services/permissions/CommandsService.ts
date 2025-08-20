@@ -238,8 +238,32 @@ export default class CommandsService implements OnInit {
 
         // PERM LEVEL 0
 
-        // Commands below are being migrated to separate files
-        // help, join, logs have been moved to individual files
+        //
+        // ALL COMMANDS BELOW SHOULD BE MOVED TO SEPARATE FILES IN THE COMMANDS FOLDER
+        // Following the pattern established in help.ts and other command files
+        //
+        // Each command should be created as:
+        // export = new Command("commandname")
+        //     .addAlias("alias")
+        //     .setDescription("description")
+        //     .setExecute((sender, ...args) => { /* implementation */ })
+        //     .setPermissionLevel(level);
+        //
+        // The auto-loading mechanism in onInit() will automatically pick up all command files
+        // and register them without needing to modify this file.
+        //
+        // Remaining commands to migrate:
+        // Level 0: voterestrict
+        // Level 1: unplaceall, kill  
+        // Level 2: restrict, unrestrict, teleport, cleardroplets, toggleparticles
+        // Level 3: manager, setbuildlvl, setpurchaselevel, setresetlevel
+        // Level 4: devwalkspeed, setdonation, updateleaderboards, clearmostcurrencies, 
+        //          itemall, uniqueitem, chestopen, levelset, xpset, stageset, completequest,
+        //          unlockarea, lockarea, colorstrictset, resetdata, trueresetdata, countparts,
+        //          gamespeed, luckychance, unduplicate, timeofday, fling, zombies, testing,
+        //          markplaceableeverywhere
+
+        // TODO: Remove these createCommand calls and create separate files for each command
 
         this.createCommand("voterestrict", "vr",
             "<player> : Vote to restrict a player.",
