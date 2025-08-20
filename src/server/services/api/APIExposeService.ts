@@ -88,6 +88,14 @@ export default class APIExposeService implements OnInit {
             empireData: this.dataService.empireData,
 
             /**
+             * Empire and player data management service.
+             * 
+             * @borrows DataService as dataService
+             * @see {@link DataService} for more details.
+             */
+            Data: this.dataService,
+
+            /**
              * Area management service.
              * 
              * @borrows AreaService as areaService
