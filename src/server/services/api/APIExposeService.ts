@@ -31,6 +31,7 @@ import QuestService from "server/services/serverdata/QuestService";
 import SetupService from "server/services/serverdata/SetupService";
 import AreaService from "server/services/world/AreaService";
 import AtmosphereService from "server/services/world/AtmosphereService";
+import ChestService from "server/services/world/ChestService";
 import UnlockedAreasService from "server/services/world/UnlockedAreasService";
 import ItemUtils from "shared/item/ItemUtils";
 import Items from "shared/items/Items";
@@ -52,6 +53,7 @@ export default class APIExposeService implements OnInit {
         private readonly areaService: AreaService,
         private readonly atmosphereService: AtmosphereService,
         private readonly chatHookService: ChatHookService,
+        private readonly chestService: ChestService,
         private readonly currencyService: CurrencyService,
         private readonly dataService: DataService,
         private readonly dialogueService: DialogueService,
@@ -132,6 +134,14 @@ export default class APIExposeService implements OnInit {
              * @see {@link ChatHookService} for more details.
              */
             ChatHook: this.chatHookService,
+
+            /**
+             * Chest management service.
+             * 
+             * @borrows ChestService as chestService
+             * @see {@link ChestService} for more details.
+             */
+            Chest: this.chestService,
 
             /**
              * Currency and balance management service.
