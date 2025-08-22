@@ -29,8 +29,8 @@ import Command, { CommandAPI } from "server/services/permissions/commands/Comman
 
 declare global {
     type CommandAPI = APIExposeService['Server'] & {
-        Command: CommandsService
-    }
+        Command: CommandsService;
+    };
 }
 
 /**
@@ -51,7 +51,7 @@ export default class CommandsService implements OnInit {
         const server = this.apiExposeService.Server as CommandAPI;
         server.Command = this;
         for (const [key, value] of pairs(server)) {
-            (CommandAPI as { [key: string]: unknown })[key] = value;
+            (CommandAPI as { [key: string]: unknown; })[key] = value;
         }
     }
 
@@ -83,6 +83,57 @@ export default class CommandsService implements OnInit {
     }
 
     /**
+     * Finds players based on the given string.
+     *
+     * @param sender The player who initiated the command
+     * @param str The string to search for
+     * @returns An array of matching players
+     */
+    findPlayers(sender: Player, str: string) {
+        switch (str) {
+            case "me":
+                return [sender];
+            case "others":
+                return Players.GetPlayers().filter((value) => value !== sender);
+            case "all":
+                return Players.GetPlayers();
+            case undefined:
+                return [];
+            default:
+                for (const player of Players.GetPlayers()) {
+                    if (str.lower() === player.Name.lower().sub(1, str.size())) {
+                        return [player];
+                    }
+                }
+                break;
+        }
+        return [];
+    }
+
+    /**
+     * Formats a player's name and ID for display.
+     *
+     * @param name The name of the player
+     * @param id The ID of the player
+     * @returns A formatted string containing the player's name and ID
+     */
+    fp(name: string, id: number) {
+        return name + " (ID: " + id + ")";
+    }
+
+    /**
+     * Obtain a player's user ID from their name or mention.
+     *
+     * @param p The player name or mention
+     * @param useId Whether to use the ID directly
+     * @returns The user ID of the player
+     */
+    id(p: string, useId: string) {
+        p = p.gsub("@", "")[0];
+        return useId === "true" ? tonumber(p) : Players.GetUserIdFromNameAsync(p);
+    }
+
+    /**
      * Initializes the CommandsService and registers all chat commands.
      * 
      * Creates and registers commands organized by permission levels:
@@ -103,10 +154,5 @@ export default class CommandsService implements OnInit {
             const command = require(commandModule) as Command;
             this.registerCommand(command);
         }
-
-        
-        // All commands have been successfully migrated to separate files in the commands folder.
-        // The auto-loading mechanism above automatically discovers and registers all command files.
-        // No createCommand calls should remain in this file.
     }
 }

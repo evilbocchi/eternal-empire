@@ -5,29 +5,8 @@ export = new Command("teleport")
     .addAlias("tp")
     .setDescription("<teleporter> <to> : Teleport players to a target player.")
     .setExecute((o, p, t) => {
-        const findPlayers = (sender: Player, str: string) => {
-            switch (str) {
-                case "me":
-                    return [sender];
-                case "others":
-                    return Players.GetPlayers().filter((value) => value !== sender);
-                case "all":
-                    return Players.GetPlayers();
-                case undefined:
-                    return [];
-                default:
-                    for (const player of Players.GetPlayers()) {
-                        if (str.lower() === player.Name.lower().sub(1, str.size())) {
-                            return [player];
-                        }
-                    }
-                    break;
-            }
-            return [];
-        };
-
-        const teleporters = findPlayers(o, p);
-        const targets = findPlayers(o, t);
+        const teleporters = CommandAPI.Command.findPlayers(o, p);
+        const targets = CommandAPI.Command.findPlayers(o, t);
         const size = targets.size();
         if (size === 0) {
             CommandAPI.ChatHook.sendPrivateMessage(o, `No target called ${t} found`, "color:255,43,43");
