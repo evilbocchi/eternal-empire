@@ -2,32 +2,62 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "npm: install, build, and dev",
+            "label": "npm: install",
             "type": "shell",
-            "command": "if not exist node_modules (npm install && npm run build) && npm run dev",
-            "windows": {
-                "command": "if (-not (Test-Path \"node_modules\")) { npm install; npm run build }; npm run dev"
-            },
-            "linux": {
-                "command": "if [ ! -d node_modules ]; then npm install && npm run build; fi && npm run dev"
-            },
-            "osx": {
-                "command": "if [ ! -d node_modules ]; then npm install && npm run build; fi && npm run dev"
-            },
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            },
+            "command": "npm install",
             "problemMatcher": [],
-            "runOptions": {
-                "runOn": "folderOpen"
-            },
+            "presentation": {
+                "reveal": "never"
+            }
+        },
+        {
+            "label": "npm: build",
+            "type": "shell",
+            "command": "npm run build",
+            "problemMatcher": "$tsc",
+            "presentation": {
+                "reveal": "never"
+            }
+        },
+        {
+            "label": "npm: dev",
+            "type": "shell",
+            "command": "npm run dev",
             "isBackground": true,
+            "problemMatcher": [
+                "$tsc-watch",
+                {
+                    "owner": "typescript",
+                    "fileLocation": ["relative", "${workspaceFolder}"],
+                    "pattern": {
+                        "regexp": "^(.+\\.ts):(\\d+):(\\d+) - error TS roblox-ts: (.*)$",
+                        "file": 1,
+                        "line": 2,
+                        "column": 3,
+                        "message": 4
+                    }
+                }
+            ],
             "presentation": {
                 "reveal": "never",
                 "group": "watchers",
                 "panel": "dedicated"
+            }
+        },
+        {
+            "label": "npm: install and dev",
+            "dependsOn": [
+                "npm: install",
+                "npm: dev"
+            ],
+            "dependsOrder": "sequence",
+            "group": {
+                "kind": "build",
+                "isDefault": true
             },
+            "runOptions": {
+                "runOn": "folderOpen"
+            }
         }
     ]
 }
