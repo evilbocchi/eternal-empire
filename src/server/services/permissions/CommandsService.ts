@@ -42,9 +42,6 @@ declare global {
 @Service()
 export default class CommandsService implements OnInit {
 
-    /** Reference to the TextChatCommands container for command registration. */
-    commands = TextChatService.WaitForChild("TextChatCommands");
-
     constructor(
         private readonly apiExposeService: APIExposeService,
     ) {
@@ -63,8 +60,8 @@ export default class CommandsService implements OnInit {
      */
     registerCommand(command: Command) {
         const textChatCommand = new Instance("TextChatCommand");
-        textChatCommand.PrimaryAlias = command.id;
-        textChatCommand.SecondaryAlias = command.aliases[0] || "";
+        textChatCommand.PrimaryAlias = "/" + command.id;
+        textChatCommand.SecondaryAlias = "/" + command.aliases[0] || "";
         textChatCommand.Name = command.id + "Command";
         textChatCommand.SetAttribute("Description", command.description);
         textChatCommand.Triggered.Connect((o, u) => {
@@ -79,7 +76,7 @@ export default class CommandsService implements OnInit {
             command.execute(p, ...params);
         });
         textChatCommand.SetAttribute("PermissionLevel", command.permissionLevel);
-        textChatCommand.Parent = this.commands;
+        textChatCommand.Parent = TextChatService.WaitForChild("TextChatCommands");
     }
 
     /**

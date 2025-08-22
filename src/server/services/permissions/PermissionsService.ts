@@ -423,9 +423,5 @@ export default class PermissionsService implements OnInit, OnPlayerJoined {
             player: player.UserId,
             area: area
         }));
-
-        //
-        // Commands
-        //
     }
 }

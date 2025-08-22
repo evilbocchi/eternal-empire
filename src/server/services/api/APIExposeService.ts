@@ -10,6 +10,7 @@
  */
 
 import { OnInit, Service } from "@flamework/core";
+import { DonationService } from "server/services/DonationService";
 import ItemService from "server/services/item/ItemService";
 import ModdingService from "server/services/ModdingService";
 import DialogueService from "server/services/npc/DialogueService";
@@ -53,6 +54,7 @@ export default class APIExposeService implements OnInit {
         private readonly currencyService: CurrencyService,
         private readonly dataService: DataService,
         private readonly dialogueService: DialogueService,
+        private readonly donationService: DonationService,
         private readonly eventService: EventService,
         private readonly itemService: ItemService,
         private readonly levelService: LevelService,
@@ -112,6 +114,14 @@ export default class APIExposeService implements OnInit {
              * @see {@link AtmosphereService} for more details.
              */
             Atmosphere: this.atmosphereService,
+
+            /**
+             * Donation management service.
+             * 
+             * @borrows DonationService as donationService
+             * @see {@link DonationService} for more details.
+             */
+            Donation: this.donationService,
 
             /**
              * Chat hook service for sending messages and managing channels.
