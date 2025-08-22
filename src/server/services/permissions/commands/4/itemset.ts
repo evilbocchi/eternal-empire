@@ -1,7 +1,7 @@
 import Command, { CommandAPI } from "server/services/permissions/commands/Command";
 import Items from "shared/items/Items";
 
-export = new Command("itemset")
+export = new Command(script.Name)
     .addAlias("iset")
     .setDescription("<item> <amount> : Set the quantity for an item.")
     .setExecute((_o, item, amount) => {

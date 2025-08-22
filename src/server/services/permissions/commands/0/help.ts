@@ -1,7 +1,7 @@
 import Command, { CommandAPI } from "server/services/permissions/commands/Command";
 import Packets from "shared/Packets";
 
-export = new Command("help")
+export = new Command(script.Name)
     .addAlias("?")
     .setDescription("Displays all available commands.")
     .setExecute((o) => {

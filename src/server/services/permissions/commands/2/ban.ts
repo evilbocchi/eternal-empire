@@ -3,7 +3,7 @@ import { Players } from "@rbxts/services";
 import Command, { CommandAPI } from "server/services/permissions/commands/Command";
 import { getSound } from "shared/asset/GameAssets";
 
-export = new Command("ban")
+export = new Command(script.Name)
     .addAlias("b")
     .setDescription("<player> <useId: boolean> : Bans a player from the server.")
     .setExecute((o, p, useId) => {

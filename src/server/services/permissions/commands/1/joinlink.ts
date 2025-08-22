@@ -2,7 +2,7 @@ import { RunService } from "@rbxts/services";
 import Command, { CommandAPI } from "server/services/permissions/commands/Command";
 import Packets from "shared/Packets";
 
-export = new Command("joinlink")
+export = new Command(script.Name)
     .addAlias("jl")
     .setDescription("Gets a URL in which players can use to join this empire. Utilises the empire's access code. Only available for private empires.")
     .setExecute((o) => {

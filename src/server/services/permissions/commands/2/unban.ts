@@ -1,6 +1,6 @@
 import Command, { CommandAPI } from "server/services/permissions/commands/Command";
 
-export = new Command("unban")
+export = new Command(script.Name)
     .addAlias("ub")
     .setDescription("<player> <useId: boolean> : Unbans a player from the server.")
     .setExecute((o, p, useId) => {

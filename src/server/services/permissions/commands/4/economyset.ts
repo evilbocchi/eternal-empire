@@ -2,7 +2,7 @@ import { OnoeNum } from "@antivivi/serikanum";
 import Command, { CommandAPI } from "server/services/permissions/commands/Command";
 import { CURRENCY_DETAILS } from "shared/currency/CurrencyDetails";
 
-export = new Command("economyset")
+export = new Command(script.Name)
     .addAlias("ecoset")
     .setDescription("<currency> <first> <second> : Set balance for a currency. You can type _ as a replacement for spaces.")
     .setExecute((_o, currency, first, second) => {

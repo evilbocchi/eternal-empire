@@ -1,7 +1,7 @@
 import { Workspace } from "@rbxts/services";
 import Command, { CommandAPI } from "server/services/permissions/commands/Command";
 
-export = new Command("walkspeed")
+export = new Command(script.Name)
     .addAlias("ws")
     .setDescription("<amount> : Sets your walk speed to the specified amount. If higher than the limit, it will be capped to the maximum allowed speed.")
     .setExecute((o, amount) => {

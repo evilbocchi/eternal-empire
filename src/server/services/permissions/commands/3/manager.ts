@@ -1,6 +1,6 @@
 import Command, { CommandAPI } from "server/services/permissions/commands/Command";
 
-export = new Command("manager")
+export = new Command(script.Name)
     .addAlias("man")
     .setDescription("<player> <useId: boolean> : Appoints a player as a manager, giving them a permission level of 2.")
     .setExecute((o, p, useId) => {

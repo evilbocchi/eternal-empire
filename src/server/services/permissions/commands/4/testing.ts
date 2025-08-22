@@ -1,6 +1,6 @@
 import Command, { CommandAPI } from "server/services/permissions/commands/Command";
 
-export = new Command("testing")
+export = new Command(script.Name)
     .addAlias("test")
     .setDescription("Enable/disable testing mode.")
     .setExecute(() => {

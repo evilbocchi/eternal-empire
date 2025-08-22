@@ -1,7 +1,7 @@
 import Command, { CommandAPI } from "server/services/permissions/commands/Command";
 import Packets from "shared/Packets";
 
-export = new Command("empireid")
+export = new Command(script.Name)
     .addAlias("ei")
     .setDescription("View the empire ID for this empire. Only useful for diagnostics.")
     .setExecute((o) => {

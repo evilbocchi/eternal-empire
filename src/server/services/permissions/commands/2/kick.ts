@@ -2,7 +2,7 @@ import { playSoundAtPart, spawnExplosion } from "@antivivi/vrldk";
 import Command, { CommandAPI } from "server/services/permissions/commands/Command";
 import { getSound } from "shared/asset/GameAssets";
 
-export = new Command("kick")
+export = new Command(script.Name)
     .addAlias("k")
     .setDescription("<player> : Kicks a player from the server.")
     .setExecute((o, p) => {

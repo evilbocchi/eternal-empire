@@ -1,6 +1,6 @@
 import Command, { CommandAPI } from "server/services/permissions/commands/Command";
 
-export = new Command("block")
+export = new Command(script.Name)
     .addAlias("ignore")
     .setDescription("<player> <useid: boolean> : Stop listening to the specified player's global chats. This affects the entire server.")
     .setExecute((_o, p, useId) => {

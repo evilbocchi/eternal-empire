@@ -1,6 +1,6 @@
 import Command, { CommandAPI } from "server/services/permissions/commands/Command";
 
-export = new Command("unduplicate")
+export = new Command(script.Name)
     .addAlias("undupe")
     .setDescription("Unduplicate all items in the world.")
     .setExecute((_player) => {

@@ -1,7 +1,7 @@
 import { Players } from "@rbxts/services";
 import Command, { CommandAPI } from "server/services/permissions/commands/Command";
 
-export = new Command("teleport")
+export = new Command(script.Name)
     .addAlias("tp")
     .setDescription("<teleporter> <to> : Teleport players to a target player.")
     .setExecute((o, p, t) => {

@@ -23,7 +23,6 @@ import BombsService from "server/services/boosts/BombsService";
 import { DonationService } from "server/services/DonationService";
 import ItemService from "server/services/item/ItemService";
 import { OnPlayerJoined } from "server/services/ModdingService";
-import NPCNavigationService from "server/services/npc/NPCNavigationService";
 import ChatHookService from "server/services/permissions/ChatHookService";
 import ProductService from "server/services/product/ProductService";
 import ResetService from "server/services/ResetService";
@@ -47,21 +46,89 @@ import { RESET_LAYERS } from "shared/ResetLayer";
 
 declare global {
     interface Log {
+        /**
+         * Timestamp of the log entry.
+         */
         time: number;
+
+        /**
+         * Type of the log entry.
+         */
         type: string;
+
+        /**
+         * ID of the player associated with the log entry.
+         */
         player?: number;
+
+        /**
+         * ID of the player who performed the action.
+         */
+        actor?: number;
+
+        /**
+         * ID of the player who received the action.
+         */
         recipient?: number;
+
+        /**
+         * X coordinates of the action.
+         */
         x?: number;
+
+        /**
+         * Y coordinates of the action.
+         */
         y?: number;
+
+        /**
+         * Z coordinates of the action.
+         */
         z?: number;
+
+        /**
+         * Area of the action.
+         */
         area?: string;
+
+        /**
+         * Upgrade related to the action.
+         */
         upgrade?: string;
+
+        /**
+         * Item related to the action.
+         */
         item?: string;
+
+        /**
+         * List of items related to the action.
+         */
         items?: string[];
+
+        /**
+         * Layer related to the action.
+         */
         layer?: string;
+
+        /**
+         * Amount related to the action.
+         * 
+         * @see {@link infAmount} for bigger numbers.
+         */
         amount?: number;
-        currency?: Currency;
+
+        /**
+         * Amount related to the action.
+         * 
+         * @see {@link amount} for smaller numbers.
+         */
         infAmount?: BaseOnoeNum;
+
+        /**
+         * Currency related to the action.
+         */
+        currency?: Currency;
     }
 
     interface Assets {
@@ -85,7 +152,6 @@ export default class PermissionsService implements OnInit, OnPlayerJoined {
      * Constructs the PermissionsService with all required dependencies.
      */
     constructor(private dataService: DataService,
-        private npcNavigationService: NPCNavigationService,
         private donationService: DonationService,
         private currencyService: CurrencyService,
         private namedUpgradeService: NamedUpgradeService,

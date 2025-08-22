@@ -1,7 +1,7 @@
 import Command, { CommandAPI } from "server/services/permissions/commands/Command";
 import Dropper from "shared/item/traits/dropper/Dropper";
 
-export = new Command("luckychance")
+export = new Command(script.Name)
     .addAlias("lc")
     .setDescription("<chance> : Set the lucky droplet chance. 1000 = 1/1000 chance, 1 = every droplet is lucky, 0 = disabled.")
     .setExecute((_player, newChance) => {

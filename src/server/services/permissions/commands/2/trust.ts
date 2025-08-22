@@ -1,6 +1,6 @@
 import Command, { CommandAPI } from "server/services/permissions/commands/Command";
 
-export = new Command("trust")
+export = new Command(script.Name)
     .addAlias("t")
     .setDescription("<player> <useId: boolean> : Trusts a player, giving them a permission level of 1.")
     .setExecute((o, p, useId) => {

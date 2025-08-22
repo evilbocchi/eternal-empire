@@ -2,7 +2,7 @@ import { ServerStorage, Workspace } from "@rbxts/services";
 import Command, { CommandAPI } from "server/services/permissions/commands/Command";
 import { AREAS } from "shared/Area";
 
-export = new Command("zombies")
+export = new Command(script.Name)
     .addAlias("apocalypse")
     .setDescription("Brains")
     .setExecute((_o) => {

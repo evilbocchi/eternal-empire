@@ -1,6 +1,6 @@
 import Command, { CommandAPI } from "server/services/permissions/commands/Command";
 
-export = new Command("revoke")
+export = new Command(script.Name)
     .addAlias("rv")
     .setDescription("<player> : Removes the player's access to join the empire.")
     .setExecute((o, p, useId) => {

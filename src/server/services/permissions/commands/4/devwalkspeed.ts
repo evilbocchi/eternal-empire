@@ -1,6 +1,6 @@
 import Command, { CommandAPI } from "server/services/permissions/commands/Command";
 
-export = new Command("walkspeed")
+export = new Command(script.Name)
     .addAlias("dws")
     .setDescription("<player> <amount> : Speeeeed.")
     .setExecute((o, p, a) => {

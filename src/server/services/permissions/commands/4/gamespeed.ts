@@ -1,7 +1,7 @@
 import Command, { CommandAPI } from "server/services/permissions/commands/Command";
 import GameSpeed from "shared/GameSpeed";
 
-export = new Command("gamespeed")
+export = new Command(script.Name)
     .addAlias("gs")
     .setDescription("Set how fast the game runs. Default is 1.")
     .setExecute((_player, newSpeed) => {

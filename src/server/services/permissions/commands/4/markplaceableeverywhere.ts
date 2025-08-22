@@ -2,7 +2,7 @@ import Command, { CommandAPI } from "server/services/permissions/commands/Comman
 import Items from "shared/items/Items";
 import Packets from "shared/Packets";
 
-export = new Command("markplaceableeverywhere")
+export = new Command(script.Name)
     .addAlias("mpe")
     .setDescription("Make the specified item placeable everywhere.")
     .setExecute((_player, itemId) => {

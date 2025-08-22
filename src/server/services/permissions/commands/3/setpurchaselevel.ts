@@ -1,7 +1,7 @@
 import Command, { CommandAPI } from "server/services/permissions/commands/Command";
 import Packets from "shared/Packets";
 
-export = new Command("setpurchaselevel")
+export = new Command(script.Name)
     .addAlias("pl")
     .setDescription("<permlevel> : Sets the minimum permission level required to purchase items.")
     .setExecute((o, level) => {
@@ -19,7 +19,7 @@ export = new Command("setpurchaselevel")
             Packets.permLevels.set(CommandAPI.Data.empireData.permLevels);
             CommandAPI.ChatHook.sendServerMessage(`Permission level ${lvl} set for permission ${perm}`, "color:138,255,138");
         };
-        
+
         setPermLevel(o, "purchase", level);
     })
     .setPermissionLevel(3);

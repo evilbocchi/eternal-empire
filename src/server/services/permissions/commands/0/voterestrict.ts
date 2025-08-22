@@ -1,7 +1,7 @@
 import { Debris, Players, Workspace } from "@rbxts/services";
 import Command, { CommandAPI } from "server/services/permissions/commands/Command";
 
-export = new Command("voterestrict")
+export = new Command(script.Name)
     .addAlias("vr")
     .setDescription("<player> : Vote to restrict a player.")
     .setExecute((o, p) => {

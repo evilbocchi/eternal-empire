@@ -1,7 +1,7 @@
 import { Workspace } from "@rbxts/services";
 import Command, { CommandAPI } from "server/services/permissions/commands/Command";
 
-export = new Command("countparts")
+export = new Command(script.Name)
     .addAlias("getpartcount")
     .setDescription("Get the part count of the current world.")
     .setExecute(() => {

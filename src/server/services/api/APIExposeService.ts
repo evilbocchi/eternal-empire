@@ -12,6 +12,7 @@
 import { OnInit, Service } from "@flamework/core";
 import { DonationService } from "server/services/DonationService";
 import ItemService from "server/services/item/ItemService";
+import { LeaderboardService } from "server/services/leaderboard/LeaderboardService";
 import ModdingService from "server/services/ModdingService";
 import DialogueService from "server/services/npc/DialogueService";
 import NPCNavigationService from "server/services/npc/NPCNavigationService";
@@ -58,6 +59,7 @@ export default class APIExposeService implements OnInit {
         private readonly eventService: EventService,
         private readonly itemService: ItemService,
         private readonly levelService: LevelService,
+        private readonly leaderboardService: LeaderboardService,
         private readonly moddingService: ModdingService,
         private readonly namedUpgradeService: NamedUpgradeService,
         private readonly npcNavigationService: NPCNavigationService,
@@ -199,6 +201,14 @@ export default class APIExposeService implements OnInit {
              * @see {@link LevelService} for more details.
              */
             Level: this.levelService,
+
+            /**
+             * Leaderboard management service.
+             * 
+             * @borrows LeaderboardService as leaderboardService
+             * @see {@link LeaderboardService} for more details.
+             */
+            Leaderboard: this.leaderboardService,
 
             /**
              * Quest management service.

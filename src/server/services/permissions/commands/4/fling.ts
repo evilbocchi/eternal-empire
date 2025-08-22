@@ -1,7 +1,7 @@
 import { Players } from "@rbxts/services";
 import Command, { CommandAPI } from "server/services/permissions/commands/Command";
 
-export = new Command("fling")
+export = new Command(script.Name)
     .addAlias("woosh")
     .setDescription("<player> : Weeeeee")
     .setExecute((o, p) => {

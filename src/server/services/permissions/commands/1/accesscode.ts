@@ -2,7 +2,7 @@ import { RunService } from "@rbxts/services";
 import Command, { CommandAPI } from "server/services/permissions/commands/Command";
 import Packets from "shared/Packets";
 
-export = new Command("accesscode")
+export = new Command(script.Name)
     .addAlias("ac")
     .setDescription("View the access code for this empire. Anyone with the access code is able to join this empire. Only available for private empires.")
     .setExecute((o) => {

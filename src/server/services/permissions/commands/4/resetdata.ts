@@ -1,7 +1,7 @@
 import { Workspace } from "@rbxts/services";
 import Command, { CommandAPI } from "server/services/permissions/commands/Command";
 
-export = new Command("resetdata")
+export = new Command(script.Name)
     .addAlias("wipedata")
     .setDescription("Reset all data like no progress was ever made.")
     .setExecute(() => {

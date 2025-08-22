@@ -1,6 +1,6 @@
 import Command, { CommandAPI } from "server/services/permissions/commands/Command";
 
-export = new Command("untrust")
+export = new Command(script.Name)
     .addAlias("ut")
     .setDescription("<player> <useId: boolean> : Untrusts a player, revoking both their trust and manager status.")
     .setExecute((o, p, useId) => {

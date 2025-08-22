@@ -2,7 +2,7 @@ import { TeleportService } from "@rbxts/services";
 import Command from "server/services/permissions/commands/Command";
 import { IS_SINGLE_SERVER } from "shared/Context";
 
-export = new Command("join")
+export = new Command(script.Name)
     .addAlias("j")
     .setDescription("<accesscode> : Joins an empire given an access code.")
     .setExecute((o, accessCode) => {

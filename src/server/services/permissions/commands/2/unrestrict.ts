@@ -1,6 +1,6 @@
 import Command, { CommandAPI } from "server/services/permissions/commands/Command";
 
-export = new Command("unrestrict")
+export = new Command(script.Name)
     .addAlias("ur")
     .setDescription("<player> : Unrestricts a player.")
     .setExecute((o, p, m) => {

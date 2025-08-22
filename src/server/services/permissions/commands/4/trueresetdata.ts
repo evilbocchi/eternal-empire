@@ -1,6 +1,6 @@
 import Command, { CommandAPI } from "server/services/permissions/commands/Command";
 
-export = new Command("trueresetdata")
+export = new Command(script.Name)
     .addAlias("truewipedata")
     .setDescription("Reset all data like no progress was ever made.")
     .setExecute((_o) => {

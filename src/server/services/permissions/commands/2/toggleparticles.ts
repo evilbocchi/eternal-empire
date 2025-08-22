@@ -1,6 +1,6 @@
 import Command, { CommandAPI } from "server/services/permissions/commands/Command";
 
-export = new Command("toggleparticles")
+export = new Command(script.Name)
     .addAlias("tglp")
     .setDescription("Toggle particles emitted by newly placed items on or off.")
     .setExecute(() => {

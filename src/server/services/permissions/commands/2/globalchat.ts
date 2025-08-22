@@ -1,6 +1,6 @@
 import Command, { CommandAPI } from "server/services/permissions/commands/Command";
 
-export = new Command("globalchat")
+export = new Command(script.Name)
     .addAlias("g")
     .setDescription("Toggle on/off global chat.")
     .setExecute(() => {

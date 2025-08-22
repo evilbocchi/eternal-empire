@@ -1,6 +1,6 @@
 import Command, { CommandAPI } from "server/services/permissions/commands/Command";
 
-export = new Command("upgradeset")
+export = new Command(script.Name)
     .addAlias("upgset")
     .setDescription("<upgrade> <amount> : Set the quantity for an upgrade.")
     .setExecute((_o, upgrade, amount) => {

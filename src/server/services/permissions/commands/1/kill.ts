@@ -1,6 +1,6 @@
 import Command, { CommandAPI } from "server/services/permissions/commands/Command";
 
-export = new Command("kill")
+export = new Command(script.Name)
     .addAlias("unalive")
     .setDescription("<player> : Kills a player's character.")
     .setExecute((o, p) => {

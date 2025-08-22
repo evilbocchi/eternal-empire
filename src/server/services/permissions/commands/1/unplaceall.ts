@@ -2,7 +2,7 @@ import Command, { CommandAPI } from "server/services/permissions/commands/Comman
 import { AREAS } from "shared/Area";
 import Sandbox from "shared/Sandbox";
 
-export = new Command("unplaceall")
+export = new Command(script.Name)
     .addAlias("ua")
     .setDescription("Unplace all items in the area you are currently in.")
     .setExecute((o) => {

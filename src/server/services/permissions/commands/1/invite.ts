@@ -1,7 +1,7 @@
 import { RunService } from "@rbxts/services";
 import Command, { CommandAPI } from "server/services/permissions/commands/Command";
 
-export = new Command("invite")
+export = new Command(script.Name)
     .addAlias("inv")
     .setDescription("<player> : Allows the specified player to join this empire.")
     .setExecute((o, p, useId) => {

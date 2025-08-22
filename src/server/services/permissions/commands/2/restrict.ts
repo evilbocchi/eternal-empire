@@ -1,6 +1,6 @@
 import Command, { CommandAPI } from "server/services/permissions/commands/Command";
 
-export = new Command("restrict")
+export = new Command(script.Name)
     .addAlias("r")
     .setDescription("<player> <multiplier> : Restricts a player, removing their access to build and purchase permissions. Pass a multiplier to multiply the default 5 minute duration.")
     .setExecute((o, p, m) => {

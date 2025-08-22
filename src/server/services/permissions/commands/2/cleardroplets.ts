@@ -1,7 +1,7 @@
 import { DROPLET_STORAGE } from "shared/item/Droplet";
 import Command, { CommandAPI } from "server/services/permissions/commands/Command";
 
-export = new Command("cleardroplets")
+export = new Command(script.Name)
     .addAlias("cd")
     .setDescription("Delete ALL droplets in ALL areas.")
     .setExecute((_o) => {
