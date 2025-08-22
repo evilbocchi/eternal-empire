@@ -295,6 +295,8 @@ export = new Quest(script.Name)
                 }
             });
             return () => {
+                Server.Dialogue.removeDialogue(oldNoobAwaiting);
+                Server.Dialogue.removeDialogue(pasalAwaiting);
                 connection1.disconnect();
                 connection2.disconnect();
             };

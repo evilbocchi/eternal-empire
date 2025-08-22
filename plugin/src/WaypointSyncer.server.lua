@@ -47,7 +47,7 @@ local function sendInstanceTree()
     end)
 end
 
-local lastSend = 0
+local lastSend = tick() + 5 -- small delay after connecting to dev server
 task.spawn(function()
 	connection = RunService.Heartbeat:Connect(function(dt)
 		if  tick() - lastSend >= INTERVAL then
