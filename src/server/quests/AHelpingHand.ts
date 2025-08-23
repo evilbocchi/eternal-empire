@@ -8,9 +8,7 @@ import FreddysUpgrader from "shared/items/negative/friendliness/FreddysUpgrader"
 import { Dialogue } from "shared/NPC";
 import Freddy from "shared/npcs/Freddy";
 
-const freddyModel = getNPCModel("Freddy");
-const freddyHumanoid = freddyModel.FindFirstChildOfClass("Humanoid")!;
-const freddyRootPart = freddyHumanoid.RootPart!;
+const [_freddyModel, freddyHumanoid, freddyRootPart] = getNPCModel("Freddy");
 
 const freddyToRequest = Server.NPC.Navigation.createPathfindingOperation(
     freddyHumanoid,

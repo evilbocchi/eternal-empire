@@ -15,13 +15,8 @@ import LibraryNoob2 from "shared/npcs/Library Noob 2";
 import OldNoob from "shared/npcs/Old Noob";
 import Pasal from "shared/npcs/Pasal";
 
-const pasalModel = getNPCModel("Pasal");
-const pasalHumanoid = pasalModel.FindFirstChildOfClass("Humanoid")!;
-const pasalRootPart = pasalHumanoid.RootPart!;
-const oldNoobModel = getNPCModel("Old Noob");
-const oldNoobHumanoid = oldNoobModel.FindFirstChildOfClass("Humanoid")!;
-const oldNoobRootPart = oldNoobHumanoid.RootPart!;
-
+const [_pasalModel, pasalHumanoid, pasalRootPart] = getNPCModel("Pasal");
+const [oldNoobModel, oldNoobHumanoid, oldNoobRootPart] = getNPCModel("Old Noob");
 const suspiciousWall = AREAS.BarrenIslands.map.WaitForChild("SuspiciousWall") as BasePart;
 
 const oldNoobToApproachingPasal = Server.NPC.Navigation.createPathfindingOperation(

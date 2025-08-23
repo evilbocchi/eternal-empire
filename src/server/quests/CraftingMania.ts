@@ -1,4 +1,3 @@
-import Difficulty from "@antivivi/jjt-difficulties";
 import Quest, { Stage } from "server/Quest";
 import EarningCapital from "server/quests/EarningCapital";
 import { Dialogue } from "shared/NPC";
@@ -20,9 +19,7 @@ import Ricarg from "shared/npcs/Ricarg";
 
 const craftingTableModel = WAYPOINTS.CraftingTable;
 
-const chuckModel = getNPCModel("Chuck");
-const chuckHumanoid = chuckModel.FindFirstChildOfClass("Humanoid")!;
-const chuckRootPart = chuckHumanoid.RootPart!;
+const [_chuckModel, chuckHumanoid, chuckRootPart] = getNPCModel("Chuck");
 
 const chuckToCraftingTable = Server.NPC.Navigation.createPathfindingOperation(
     chuckHumanoid,

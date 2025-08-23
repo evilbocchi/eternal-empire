@@ -69,9 +69,8 @@ export class Stage {
      * @param setAsFocus Whether to set the NPC as the focus.
      * @returns This stage instance.
      */
-    setNPC(npcName: string, setAsFocus?: boolean) {
-        this.npcModel = getNPCModel(npcName);
-        this.npcHumanoid = this.npcModel.WaitForChild("Humanoid") as Humanoid;
+    setNPC(npcName: NPCName, setAsFocus?: boolean) {
+        [this.npcModel, this.npcHumanoid] = getNPCModel(npcName);
         if (setAsFocus === true)
             return this.setFocus(this.npcHumanoid?.RootPart);
         return this;

@@ -13,10 +13,8 @@ import Freddy from "shared/npcs/Freddy";
 import SlamoReceptionist from "shared/npcs/Slamo Receptionist";
 import SlamoRefugee from "shared/npcs/Slamo Refugee";
 
-const freddyModel = getNPCModel("Freddy");
-const refugeeModel = getNPCModel("Slamo Refugee");
-const refugeeHumanoid = refugeeModel.FindFirstChildOfClass("Humanoid")!;
-const refugeeRootPart = refugeeHumanoid.RootPart!;
+const [freddyModel, _freddyHumanoid, _freddyRootPart] = getNPCModel("Freddy");
+const [refugeeModel, refugeeHumanoid, refugeeRootPart] = getNPCModel("Slamo Refugee");
 
 const cauldron = AREAS.BarrenIslands.map.WaitForChild("Cauldron") as Model;
 const linkway = AREAS.IntermittentIsles.areaFolder.WaitForChild("SlamoVillageConnection");
@@ -144,15 +142,15 @@ export = new Quest(script.Name)
         .setDescription(`Talk to Freddy at %coords%.`)
         .setDialogue(new Dialogue(SlamoRefugee, "Please talk to Freddy. He has a cauldron that can dissolve the XL Wool in Instant Win energy."))
         .onReached((stage) => {
+            refugeeModel.FindFirstChild("FishingRod")?.Destroy();
             freddyModel.PivotTo(WAYPOINTS.ToTheVillageFreddyWaiting.CFrame);
-            const refugee = getNPCModel("Slamo Refugee");
+
             const continuation = new Dialogue(Freddy, "Oh, my friend! How can I help you?")
                 .monologue("You need to borrow my cauldron? Of course, you can use it!")
                 .next(new Dialogue(SlamoRefugee, "What the... how did you get him to agree so easily?"))
                 .monologue("I guess he just really likes you. Anyways, let's get in his house. We can get started right away.")
                 .root;
 
-            refugee.FindFirstChild("FishingRod")?.Destroy();
             refugeeToWaiting();
             Server.Dialogue.addDialogue(continuation, 4);
 

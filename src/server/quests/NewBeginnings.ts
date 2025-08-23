@@ -9,9 +9,7 @@ import NameChanger from "shared/npcs/Name Changer";
 import Tria from "shared/npcs/Tria";
 import Packets from "shared/Packets";
 
-const triaModel = getNPCModel("Tria");
-const triaHumanoid = triaModel.FindFirstChildOfClass("Humanoid")!;
-const triaRootPart = triaHumanoid.RootPart!;
+const [_triaModel, triaHumanoid, triaRootPart] = getNPCModel("Tria");
 
 const triaToMineGuiding = Server.NPC.Navigation.createPathfindingOperation(
     triaHumanoid,

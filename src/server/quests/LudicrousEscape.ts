@@ -25,12 +25,8 @@ import Simpul from "shared/npcs/Simpul";
 import SlamoReceptionist from "shared/npcs/Slamo Receptionist";
 import { RESET_LAYERS } from "shared/ResetLayer";
 
-const simpulModel = getNPCModel("Simpul");
-const simpulHumanoid = simpulModel.FindFirstChildOfClass("Humanoid")!;
-const simpulRootPart = simpulHumanoid.RootPart!;
-
-const slamoReceptionistHumanoid = getNPCModel("Slamo Receptionist").FindFirstChildOfClass("Humanoid")!;
-const slamoReceptionistRootPart = slamoReceptionistHumanoid.RootPart!;
+const [simpulModel, simpulHumanoid, simpulRootPart] = getNPCModel("Simpul");
+const [_slamoReceptionistModel, slamoReceptionistHumanoid, slamoReceptionistRootPart] = getNPCModel("Slamo Receptionist");
 
 simpulRootPart.Anchored = true;
 
