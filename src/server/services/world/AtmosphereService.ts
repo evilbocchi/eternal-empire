@@ -16,7 +16,7 @@
 import { setInstanceInfo } from "@antivivi/vrldk";
 import { OnInit, OnPhysics, Service } from "@flamework/core";
 import { Lighting, TweenService, Workspace } from "@rbxts/services";
-import DataService from "server/services/serverdata/DataService";
+import DataService from "server/services/data/DataService";
 import { getSound } from "shared/asset/GameAssets";
 import Packets from "shared/Packets";
 import { WeatherState, WeatherType } from "shared/weather/WeatherTypes";

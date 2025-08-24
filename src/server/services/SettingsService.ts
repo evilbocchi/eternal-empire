@@ -14,7 +14,7 @@
 import { OnInit, Service } from "@flamework/core";
 import { OnPlayerJoined } from "server/services/ModdingService";
 import Packets from "shared/Packets";
-import DataService from "server/services/serverdata/DataService";
+import DataService from "server/services/data/DataService";
 
 /**
  * Service for managing player settings and hotkeys.

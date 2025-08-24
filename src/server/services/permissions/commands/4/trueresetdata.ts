@@ -8,13 +8,13 @@ export = new Command(script.Name)
         CommandAPI.Data.empireData.items.bought.clear();
         CommandAPI.Data.empireData.items.inventory.clear();
         CommandAPI.Data.empireData.items.inventory.set("ClassLowerNegativeShop", 1);
+        CommandAPI.Data.empireData.quests.clear();
         CommandAPI.Item.fullUpdatePlacedItemsModels();
         CommandAPI.Currency.setAll(new Map());
         CommandAPI.NamedUpgrade.setAmountPerUpgrade(new Map());
         CommandAPI.Playtime.setPlaytime(0);
         CommandAPI.Level.setLevel(1);
         CommandAPI.Level.setXp(0);
-        CommandAPI.Quest.setStagePerQuest(new Map());
         CommandAPI.ChatHook.sendServerMessage("True reset complete. The shop is in your inventory.");
     })
     .setPermissionLevel(4);

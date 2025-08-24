@@ -7,7 +7,7 @@
 
 import Signal from "@antivivi/lemon-signal";
 import { ReplicatedStorage } from "@rbxts/services";
-import type QuestService from "server/services/serverdata/QuestService";
+import type QuestService from "server/services/data/QuestService";
 import { getNPCModel } from "shared/constants";
 import { Server } from "shared/item/ItemUtils";
 import { Dialogue } from "shared/NPC";

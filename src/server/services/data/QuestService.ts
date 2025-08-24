@@ -26,8 +26,8 @@ import Quest, { Stage } from "server/Quest";
 import ItemService from "server/services/item/ItemService";
 import DialogueService from "server/services/npc/DialogueService";
 import ChatHookService from "server/services/permissions/ChatHookService";
-import DataService from "server/services/serverdata/DataService";
-import LevelService from "server/services/serverdata/LevelService";
+import DataService from "server/services/data/DataService";
+import LevelService from "server/services/data/LevelService";
 import { WAYPOINTS } from "shared/constants";
 import Items from "shared/items/Items";
 import Packets from "shared/Packets";
@@ -51,7 +51,7 @@ export default class QuestService implements OnInit {
         private readonly dialogueService: DialogueService) {
 
     }
-    
+
     /**
      * Advances a quest to the next stage with validation.
      * Ensures stages are completed in order and handles quest completion.

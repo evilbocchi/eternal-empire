@@ -1,6 +1,6 @@
 /// <reference types="@rbxts/testez/globals" />
 
-import DataService from "server/services/serverdata/DataService";
+import DataService from "server/services/data/DataService";
 import LeaderboardChangeService from "server/services/leaderboard/LeaderboardChangeService";
 
 export = function () {

@@ -13,7 +13,7 @@
 import { OnStart, Service } from "@flamework/core";
 import { DataStoreService, HttpService, RunService } from "@rbxts/services";
 import { $env } from "rbxts-transform-env";
-import DataService from "server/services/serverdata/DataService";
+import DataService from "server/services/data/DataService";
 import Sandbox from "shared/Sandbox";
 import { LEADERBOARDS, getNameFromUserId } from "shared/constants";
 import { CURRENCIES } from "shared/currency/CurrencyDetails";

@@ -2,8 +2,8 @@
 
 import { OnoeNum } from "@antivivi/serikanum";
 import ItemService from "server/services/item/ItemService";
-import CurrencyService from "server/services/serverdata/CurrencyService";
-import DataService from "server/services/serverdata/DataService";
+import CurrencyService from "server/services/data/CurrencyService";
+import DataService from "server/services/data/DataService";
 
 export = function () {
     const dataService = new DataService();

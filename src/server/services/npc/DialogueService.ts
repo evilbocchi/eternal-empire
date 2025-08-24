@@ -15,7 +15,7 @@ import Signal from "@antivivi/lemon-signal";
 import { OnInit, OnStart, Service } from "@flamework/core";
 import { Players, ProximityPromptService, TweenService, Workspace } from "@rbxts/services";
 import NPCStateService, { OnNPCLoad } from "server/services/npc/NPCStateService";
-import DataService from "server/services/serverdata/DataService";
+import DataService from "server/services/data/DataService";
 import { ASSETS } from "shared/asset/GameAssets";
 import { NPC_MODELS, getDisplayName } from "shared/constants";
 import InteractableObject from "shared/InteractableObject";

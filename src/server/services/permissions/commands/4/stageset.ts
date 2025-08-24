@@ -12,7 +12,6 @@ export = new Command(script.Name)
         if (stage) {
             stagePerQuest.set(questId, tonumber(stage) ?? 0);
         }
-        CommandAPI.Quest.setStagePerQuest(stagePerQuest);
         CommandAPI.Quest.loadQuests(); // Hot reload
     })
     .setPermissionLevel(4);

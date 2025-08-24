@@ -17,7 +17,7 @@ import { OnInit, Service } from "@flamework/core";
 import { Players, Workspace } from "@rbxts/services";
 import ItemService from "server/services/item/ItemService";
 import { OnPlayerJoined } from "server/services/ModdingService";
-import DataService from "server/services/serverdata/DataService";
+import DataService from "server/services/data/DataService";
 import { AREAS } from "shared/Area";
 import Harvestable from "shared/Harvestable";
 import HarvestingTool from "shared/item/traits/HarvestingTool";

@@ -16,8 +16,8 @@
 import Signal from "@antivivi/lemon-signal";
 import { OnInit, OnStart, Service } from "@flamework/core";
 import { DataStoreService, MessagingService, Workspace } from "@rbxts/services";
-import CurrencyService from "server/services/serverdata/CurrencyService";
-import DataService from "server/services/serverdata/DataService";
+import CurrencyService from "server/services/data/CurrencyService";
+import DataService from "server/services/data/DataService";
 import Packets from "shared/Packets";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 

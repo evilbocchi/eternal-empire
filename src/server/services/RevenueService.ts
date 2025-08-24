@@ -22,8 +22,8 @@ import { Service } from "@flamework/core";
 import BombsService from "server/services/boosts/BombsService";
 import DarkMatterService from "server/services/boosts/DarkMatterService";
 import AtmosphereService from "server/services/world/AtmosphereService";
-import CurrencyService from "server/services/serverdata/CurrencyService";
-import DataService from "server/services/serverdata/DataService";
+import CurrencyService from "server/services/data/CurrencyService";
+import DataService from "server/services/data/DataService";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Droplet from "shared/item/Droplet";
 import Operative from "shared/item/traits/Operative";
@@ -147,7 +147,7 @@ export default class RevenueService {
             if (weatherMultiplier !== 1) {
                 worth = worth.mul(weatherMultiplier);
             }
-            
+
             this.performSoftcaps(worth.amountPerCurrency);
         }
 

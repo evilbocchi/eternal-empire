@@ -11,7 +11,7 @@
 
 import { OnoeNum } from "@antivivi/serikanum";
 import { OnInit, Service } from "@flamework/core";
-import CurrencyService from "server/services/serverdata/CurrencyService";
+import CurrencyService from "server/services/data/CurrencyService";
 import { AREAS } from "shared/Area";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 

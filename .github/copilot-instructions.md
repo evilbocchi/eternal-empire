@@ -11,7 +11,7 @@
 - Use `.setName`, `.setDescription`, `.setDifficulty`, and similar methods for configuration.
 - For NPCs, use `.createDefaultMonologue` and `.monologue` for dialogue.
 - For items, use `.setPrice`, `.placeableEverywhere`, `.persists`, and other relevant methods as needed.
-- For *important* files, include a file overview summarizing its purpose. If there are attributes e.g. `//!native` at the top of the file, place the overview below it and above imports. View existing files (e.g. `server/services/serverdata/DataService.ts`) for reference.
+- For *important* files, include a file overview summarizing its purpose. If there are attributes e.g. `//!native` at the top of the file, place the overview below it and above imports. View existing files (e.g. `server/services/data/DataService.ts`) for reference.
 
 ## File Organization
 - Place new items in the appropriate subfolder under shared/items based on their type and category.

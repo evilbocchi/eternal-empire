@@ -1,5 +1,5 @@
 /// <reference types="@rbxts/testez/globals" />
-import DataService from "server/services/serverdata/DataService";
+import DataService from "server/services/data/DataService";
 import AtmosphereService from "server/services/world/AtmosphereService";
 import { WeatherType } from "shared/weather/WeatherTypes";
 
