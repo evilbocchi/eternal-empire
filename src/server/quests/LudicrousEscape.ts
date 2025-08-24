@@ -116,15 +116,15 @@ export = new Quest(script.Name)
             ];
             for (const dialogue of dialogues)
                 Server.Dialogue.addDialogue(dialogue);
-            stage.onComplete(() => {
-                for (const dialogue of dialogues)
-                    Server.Dialogue.removeDialogue(dialogue);
-            });
             const connection = Server.Dialogue.dialogueFinished.connect((dialogue) => {
                 if (dialogue === InteractableObject.SlamoBook.dialogue)
                     stage.complete();
             });
-            return () => connection.disconnect();
+            return () => {
+                for (const dialogue of dialogues)
+                    Server.Dialogue.removeDialogue(dialogue);
+                connection.disconnect();
+            };
         })
     )
     .addStage(new Stage()

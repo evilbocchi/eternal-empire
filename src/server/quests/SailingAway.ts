@@ -1,3 +1,5 @@
+import { getNearestPlayerHumanoid } from "@antivivi/vrldk";
+import { RunService } from "@rbxts/services";
 import Quest, { Stage } from "server/Quest";
 import { getNPCModel } from "shared/constants";
 import { Server } from "shared/item/ItemUtils";
@@ -7,7 +9,8 @@ import OldNoob from "shared/npcs/Old Noob";
 import Prest from "shared/npcs/Prest";
 import Tria from "shared/npcs/Tria";
 
-const triaModel = getNPCModel("Tria");
+const [triaModel, triaHumanoid, triaRootPart] = getNPCModel("Tria");
+const [captainBaconModel, captainBaconHumanoid, captainBaconRootPart] = getNPCModel("Captain Bacon");
 
 export = new Quest(script.Name)
     .setName("Sailing Away")
@@ -73,15 +76,11 @@ export = new Quest(script.Name)
         .setDescription(`Find Captain Bacon's map with Tria.`)
         .setDialogue(
             new Dialogue(CaptainBacon, "My map is at... uh... uhhh...")
-            .next(new Dialogue(Tria, "I... I'm really sorry... I just wanted to help... I think..."))
-            .root
+                .next(new Dialogue(Tria, "I... I'm really sorry... I just wanted to help... I think..."))
+                .root
         )
         .onReached((stage) => {
-            
-            
-            return () => {
-
-            };
+            return () => {};
         })
     )
     .setReward({

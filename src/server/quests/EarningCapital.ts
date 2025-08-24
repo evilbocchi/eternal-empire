@@ -1,11 +1,14 @@
 import { RunService } from "@rbxts/services";
 import Quest, { Stage } from "server/Quest";
+import { getNPCModel } from "shared/constants";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import ItemCounter from "shared/item/ItemCounter";
 import { Server } from "shared/item/ItemUtils";
 import RustyFactory from "shared/items/negative/negativity/RustyFactory";
 import { Dialogue } from "shared/NPC";
 import Ricarg from "shared/npcs/Ricarg";
+
+const [ricargModel, ricargHumanoid, ricargRootPart] = getNPCModel("Ricarg");
 
 const minFundsAmount = 10000;
 const req = new CurrencyBundle().set("Funds", minFundsAmount);
@@ -23,14 +26,12 @@ export = new Quest(script.Name)
             .root
         )
         .onReached((stage) => {
+            ricargRootPart.Anchored = true;
             const connection = Server.Dialogue.dialogueFinished.connect((dialogue) => {
                 if (dialogue === stage.dialogue)
                     stage.complete();
             });
             return () => connection.disconnect();
-        }, (stage) => {
-            stage.npcHumanoid!.RootPart!.Anchored = true;
-            return () => { };
         })
     )
     .addStage(new Stage()

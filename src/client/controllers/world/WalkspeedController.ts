@@ -11,6 +11,7 @@
  * @since 1.0.0
  */
 import { Controller } from "@flamework/core";
+import { Swimming } from "@rbxts/swimming";
 import { OnCharacterAdded } from "client/controllers/core/ModdingController";
 import ChatHookController from "client/controllers/permissions/ChatHookController";
 
@@ -23,6 +24,9 @@ import ChatHookController from "client/controllers/permissions/ChatHookControlle
 export default class WalkspeedController implements OnCharacterAdded {
 
     lastCustomWalkspeed = 16;
+    idleSwimAnimation: Animation;
+    actionSwimAnimation: Animation;
+    swimHandler: Swimming;
     private debounce = false;
 
     /**
@@ -60,6 +64,10 @@ export default class WalkspeedController implements OnCharacterAdded {
     }
 
     constructor(private chatHookController: ChatHookController) {
-
+        this.idleSwimAnimation = new Instance("Animation");
+        this.actionSwimAnimation = new Instance("Animation");
+        this.idleSwimAnimation.AnimationId = "rbxassetid://9261404265";
+        this.actionSwimAnimation.AnimationId = "rbxassetid://9261406753";
+        this.swimHandler = new Swimming(7, "Water", this.idleSwimAnimation, this.actionSwimAnimation, 30);
     }
 }

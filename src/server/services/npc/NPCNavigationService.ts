@@ -147,7 +147,7 @@ export default class NPCNavigationService implements OnInit, OnStart, OnPhysics 
             // Teleport if stuck for too long
             else if (t > 0.35 * dist) {
                 t = 0;
-                rootPart.CFrame = new CFrame(newPos);
+                rootPart.CFrame = new CFrame(newPos).add(new Vector3(0, humanoid.HipHeight, 0));
             }
         });
 

@@ -6,6 +6,8 @@
  */
 
 import Signal from "@antivivi/lemon-signal";
+import { ReplicatedStorage } from "@rbxts/services";
+import type QuestService from "server/services/serverdata/QuestService";
 import { getNPCModel } from "shared/constants";
 import { Server } from "shared/item/ItemUtils";
 import { Dialogue } from "shared/NPC";
@@ -15,24 +17,30 @@ import { Dialogue } from "shared/NPC";
  * Provides methods for configuring stage properties and handling stage events.
  */
 export class Stage {
+    /** The description of the stage. */
     description: string | undefined;
+
+    /** The position players are guided to when focusing on this stage. */
     position: Vector3 | undefined;
+
+    /** The part players are guided to when focusing on this stage. */
     focus: BasePart | undefined;
+
+    /** The dialogue added when this stage is reached. This is handled by {@link QuestService}. */
     dialogue: Dialogue | undefined;
+
+    /** The NPC model associated with this stage. */
     npcModel: Model | undefined;
+
+    /** The humanoid associated with the NPC model. */
     npcHumanoid: Humanoid | undefined;
 
-    private readonly completed = new Signal<() => void>();
+    private positionChangedCallback?: (position: Vector3 | undefined) => void;
+    private reachedCallback?: ((stage: this) => (() => void));
+    private completedCallback?: ((stage: this) => void);
 
-    /**
-     * Called when the stage is loaded, returning an optional cleanup function.
-     */
-    load?: ((stage: this) => (() => void));
-
-    positionChanged = new Signal<(position?: Vector3) => void>();
-
-    loadedTimes = 0;
-    completedTimes = 0;
+    private reachedTimes = 0;
+    private completedTimes = 0;
     safe = true;
 
     constructor() {
@@ -84,7 +92,7 @@ export class Stage {
     setPosition(position?: Vector3) {
         if (this.position !== position) {
             this.position = position;
-            this.positionChanged.fire(position);
+            this.positionChangedCallback?.(position);
         }
         return this;
     }
@@ -100,56 +108,14 @@ export class Stage {
     }
 
     /**
-     * Set the callback to run when the stage is loaded.
-     * 
-     * @param load The load callback, returning an optional cleanup function.
-     * @returns This stage instance.
-     */
-    setLoadCallback(load: (stage: this) => (() => void)) {
-        this.load = (stage) => {
-            if (++this.loadedTimes > 1) {
-                warn("Stage loaded multiple times");
-                print(stage);
-                if (this.safe) { // Prevent further processing
-                    return () => {};
-                }
-                print("Unsafe mode enabled, allowing multiple loads");
-            }
-            const callback = load(stage);
-            const dialogue = this.dialogue;
-            if (dialogue !== undefined) {
-                Server.Quest.onStageReached(this, () => {
-                    Server.Dialogue.addDialogue(dialogue);
-                });
-                stage.onComplete(() => Server.Dialogue.removeDialogue(dialogue));
-                return callback;
-            }
-            return callback;
-        };
-        return this;
-    }
-
-    /**
-     * Registers a callback to run when the stage is reached, optionally with a load callback.
+     * Registers a callback to run when the stage is reached.
      * 
      * @param reached The reached callback, returning an optional cleanup function.
-     * @param load Optional load callback.
      * @returns This stage instance.
      */
-    onReached(reached: (stage: this) => (() => void), load?: (stage: this) => (() => void)) {
-        return this.setLoadCallback((stage) => {
-            const mainCallback = load === undefined ? undefined : load(stage);
-            let callback: () => void;
-            Server.Quest.onStageReached(this, () => {
-                callback = reached(stage);
-            });
-            return () => {
-                if (callback !== undefined)
-                    callback();
-                if (mainCallback !== undefined)
-                    mainCallback();
-            };
-        });
+    onReached(reached: (stage: this) => (() => void)) {
+        this.reachedCallback = reached;
+        return this;
     }
 
     /**
@@ -159,10 +125,34 @@ export class Stage {
      * @returns This stage instance.
      */
     onComplete(complete: (stage: this) => void) {
-        this.completed.connect(() => {
-            complete(this);
-        });
+        this.completedCallback = complete;
         return this;
+    }
+
+    /**
+     * Registers a callback to run when the stage position changes.
+     * 
+     * @param callback The position changed callback.
+     * @returns This stage instance.
+     */
+    onPositionChanged(callback: (position: Vector3 | undefined) => void) {
+        this.positionChangedCallback = callback;
+        return this;
+    }
+
+    /**
+     * Triggers the stage reached event.
+     */
+    reach() {
+        if (++this.reachedTimes > 1) {
+            warn("Stage reached multiple times");
+            print(this);
+            if (this.safe) { // Prevent further processing
+                return;
+            }
+            print("Unsafe mode enabled, allowing multiple reaches");
+        }
+        return this.reachedCallback?.(this);
     }
 
     /**
@@ -177,7 +167,17 @@ export class Stage {
             }
             print("Unsafe mode enabled, allowing multiple completions");
         }
-        this.completed.fire();
+        this.completedCallback?.(this);
+    }
+
+    /**
+     * Unloads the stage and its resources.
+     */
+    unload() {
+        this.completedCallback = undefined;
+        this.reachedCallback = undefined;
+        this.positionChangedCallback = undefined;
+        table.clear(this);
     }
 }
 
@@ -187,17 +187,10 @@ export class Stage {
  */
 export default class Quest {
 
-    static readonly QUEST_MODULES = function () {
-        const moduleScripts = new Map<string, ModuleScript>();
-        const folder = script.Parent!.WaitForChild("quests");
-        for (const moduleScript of folder.GetDescendants()) {
-            if (moduleScript.IsA("ModuleScript") && moduleScript !== script) {
-                moduleScripts.set(moduleScript.Name, moduleScript);
-            }
-        }
-        return moduleScripts;
-    }();
-    static questsPerId: Map<string, Quest>;
+    static readonly QUEST_MODULES = new Map<string, ModuleScript>();
+    static readonly QUEST_PER_ID = new Map<string, Quest>();
+    private static readonly toClean = new Set<RBXScriptConnection>();
+
     static colors = [
         Color3.fromRGB(253, 41, 67),
         Color3.fromRGB(1, 162, 255),
@@ -219,7 +212,6 @@ export default class Quest {
     length = 0;
     level = 0;
     order = 0;
-    loaded = false;
     reward: Reward = {};
     readonly initialized = new Signal<() => void>();
     completionDialogue: Dialogue | undefined;
@@ -234,29 +226,72 @@ export default class Quest {
     }
 
     /**
-     * Initializes all quests from the quests folder, caching them by ID.
-     * @returns The map of quest IDs to Quest instances.
+     * Reloads the quest modules from the quests folder.
+     * 
+     * This clones the module scripts into the QUEST_MODULES map,
+     * allowing for hot reloading of quest modules.
      */
-    static init() {
-        const questsPerId = new Map<string, Quest>();
+    private static reloadQuestModules() {
+        this.QUEST_MODULES.clear();
+        const folder = script.Parent!.WaitForChild("quests");
+        for (const moduleScript of folder.GetDescendants()) {
+            if (moduleScript.IsA("ModuleScript") && moduleScript !== script) {
+                this.QUEST_MODULES.set(moduleScript.Name, moduleScript.Clone());
+            }
+        }
+    }
+
+    /**
+     * Loads all quest modules and initializes quest data.
+     * 
+     * @returns A map of quest IDs to their quest info.
+     */
+    static load() {
+        this.reloadQuestModules();
+        this.QUEST_PER_ID.clear();
+        for (const cleanup of this.toClean) {
+            cleanup.Disconnect();
+        }
         for (const [_, moduleScript] of this.QUEST_MODULES) {
             const i = require(moduleScript);
             if (i !== undefined) {
                 const quest = i as Quest;
-                questsPerId.set(quest.id, quest);
+                this.QUEST_PER_ID.set(quest.id, quest);
             }
         }
-        this.questsPerId = questsPerId;
-        return this.questsPerId;
-    }
 
-    /**
-     * Retrieves a quest by its ID.
-     * @param questId The quest ID.
-     * @returns The Quest instance, or undefined if not found.
-     */
-    static getQuest(questId: string) {
-        return Quest.questsPerId?.get(questId);
+        const questInfos = new Map<string, QuestInfo>();
+
+        // Process all quests and create client info
+        this.QUEST_PER_ID.forEach((quest, questId) => {
+            quest.initialized.fire();
+
+            const questInfo: QuestInfo = {
+                name: quest.name ?? questId,
+                colorR: quest.color.R,
+                colorG: quest.color.G,
+                colorB: quest.color.B,
+                level: quest.level,
+                length: quest.length,
+                reward: quest.reward,
+                order: quest.order,
+                stages: [],
+            };
+
+            // Set up stage position tracking
+            quest.stages.forEach((stage, index) => {
+                function onPositionChanged(position?: Vector3) {
+                    return ReplicatedStorage.SetAttribute(`${questId}${index}`, position);
+                }
+                onPositionChanged(stage.position);
+                stage.onPositionChanged(onPositionChanged);
+                questInfo.stages.push({ description: stage.description! });
+            });
+
+            questInfos.set(questId, questInfo);
+        });
+
+        return questInfos;
     }
 
     /**
@@ -374,5 +409,15 @@ export default class Quest {
     onInit(callback: (quest: this) => void) {
         this.initialized.connect(() => callback(this));
         return this;
+    }
+
+    /**
+     * Unloads the quest and its stages.
+     */
+    unload() {
+        this.stages.forEach((stage) => {
+            stage.unload();
+        });
+        table.clear(this);
     }
 }

@@ -20,14 +20,13 @@
  * @since 1.0.0
  */
 
-import Signal from "@antivivi/lemon-signal";
 import { OnInit, Service } from "@flamework/core";
-import { AnalyticsService, Players, ReplicatedStorage } from "@rbxts/services";
+import { AnalyticsService, Players } from "@rbxts/services";
 import Quest, { Stage } from "server/Quest";
+import ItemService from "server/services/item/ItemService";
 import DialogueService from "server/services/npc/DialogueService";
 import ChatHookService from "server/services/permissions/ChatHookService";
 import DataService from "server/services/serverdata/DataService";
-import ItemService from "server/services/item/ItemService";
 import LevelService from "server/services/serverdata/LevelService";
 import { WAYPOINTS } from "shared/constants";
 import Items from "shared/items/Items";
@@ -43,16 +42,7 @@ import Sandbox from "shared/Sandbox";
 @Service()
 export default class QuestService implements OnInit {
 
-    /**
-     * Signal fired when a quest stage is reached.
-     * @param stage The quest stage that was reached.
-     */
-    readonly stageReached = new Signal<(stage: Stage) => void>();
-
-    /**
-     * Set of quest stages that have been loaded and initialized.
-     */
-    readonly loadedStages = new Set<Stage>();
+    readonly CLEANUP_PER_STAGE = new Map<Stage, () => void>();
 
     constructor(private readonly chatHookService: ChatHookService,
         private readonly dataService: DataService,
@@ -81,20 +71,6 @@ export default class QuestService implements OnInit {
     setStagePerQuest(quests: Map<string, number>) {
         this.dataService.empireData.quests = quests;
         Packets.stagePerQuest.set(quests);
-    }
-
-    /**
-     * Registers a callback for when a quest stage is reached.
-     * 
-     * @param stage The quest stage.
-     * @param callback The function to call.
-     */
-    onStageReached(stage: Stage, callback: () => void) {
-        return this.stageReached.connect((s) => {
-            if (stage === s) {
-                callback();
-            }
-        });
     }
 
     /**
@@ -131,12 +107,11 @@ export default class QuestService implements OnInit {
     }
 
     /**
-     * Loads and initializes all available quests based on player level.
-     * Sets up quest stages and handles progression tracking.
+     * Checks and triggers the reachability of quest stages based on player level.
      * 
-     * @param level The player level to check quest availability (defaults to current level).
+     * @param level The player level to check quest reachability (defaults to current level).
      */
-    loadAvailableQuests(level?: number) {
+    reachStages(level?: number) {
         if (level === undefined) {
             level = this.dataService.empireData.level;
         }
@@ -144,64 +119,39 @@ export default class QuestService implements OnInit {
         if (stagePerQuest === undefined) {
             return;
         }
+        for (const [_, cleanup] of this.CLEANUP_PER_STAGE) {
+            cleanup();
+        }
 
-        // Process all available quests
-        for (const [id, quest] of Quest.init()) {
+        for (const [id, quest] of Quest.QUEST_PER_ID) {
             // Skip quests above player level
             if (quest.level > level) {
                 continue;
             }
 
             const current = stagePerQuest.get(id) ?? 0;
-            quest.loaded = true;
-
-            // Initialize all quest stages
-            quest.stages.forEach((stage, index) => {
-                task.spawn(() => {
-                    const reached = new Set<Stage>();
-
-                    // Load stage if not already loaded
-                    if (!this.loadedStages.has(stage)) {
-                        this.loadedStages.add(stage);
-                        const cleanup = stage.load?.(stage);
-
-                        // Set up stage completion handler
-                        stage.onComplete(() => {
-                            const newStage = this.completeStage(quest, index);
-                            if (newStage === undefined) {
-                                return;
-                            }
-                            cleanup?.();
-                            print(`Completed stage ${index} in ${quest.id}, now in stage ${newStage}`);
-
-                            // Log analytics for quest progression
-                            const player = Players.GetPlayers()[0];
-                            if (player !== undefined)
-                                AnalyticsService.LogOnboardingFunnelStepEvent(player, index + 1, "Quest " + quest.name);
-
-                            // Handle quest completion or next stage
-                            if (newStage === -1) {
-                                this.completeQuest(quest);
-                            }
-                            else {
-                                const nextStage = quest.stages[newStage];
-                                this.stageReached.fire(nextStage);
-                                reached.add(nextStage);
-                            }
-                        });
-                    }
-
-                    // Fire signal for current stage
-                    if (current === index && !reached.has(stage)) {
-                        print(`Reached stage ${index} in ${quest.id}`);
-                        this.stageReached.fire(stage);
-                    }
-                });
-            });
 
             // Handle already completed quests
             if (current === -1) {
-                this.onQuestComplete(quest);
+                const completionDialogue = quest.completionDialogue;
+                if (completionDialogue) {
+                    this.dialogueService.addDialogue(completionDialogue);
+                }
+            }
+
+            const stage = quest.stages[current];
+            if (stage !== undefined) {
+                const cleanup = stage.reach?.();
+                if (stage.dialogue)
+                    this.dialogueService.addDialogue(stage.dialogue);
+                this.CLEANUP_PER_STAGE.set(stage, () => {
+                    cleanup?.();
+                    if (stage.dialogue)
+                        this.dialogueService.removeDialogue(stage.dialogue);
+                    this.CLEANUP_PER_STAGE.delete(stage);
+                });
+
+                print(`Reached stage ${current} in ${quest.id}`);
             }
         }
     }
@@ -233,19 +183,7 @@ export default class QuestService implements OnInit {
             }
         }
 
-        this.onQuestComplete(quest);
-    }
-
-    /**
-     * Handles quest completion logic and rewards.
-     * 
-     * @param quest The quest that was completed.
-     */
-    onQuestComplete(quest: Quest) {
-        const completionDialogue = quest.completionDialogue;
-        if (completionDialogue !== undefined && completionDialogue.npc !== undefined) {
-            this.dialogueService.addDialogue(completionDialogue);
-        }
+        this.reachStages();
     }
 
     /**
@@ -274,6 +212,38 @@ export default class QuestService implements OnInit {
         return true;
     }
 
+    loadQuests() {
+        const questInfos = Quest.load();
+        for (const [_, quest] of Quest.QUEST_PER_ID) {
+            quest.stages.forEach((stage, index) => {
+                stage.onComplete((stage) => {
+                    const newStage = this.completeStage(quest, index);
+                    if (newStage === undefined) {
+                        return;
+                    }
+                    this.CLEANUP_PER_STAGE.get(stage)?.();
+                    print(`Completed stage ${index} in ${quest.id}, now in stage ${newStage}`);
+
+                    // Log analytics for quest progression
+                    const player = Players.GetPlayers()[0];
+                    if (player !== undefined)
+                        AnalyticsService.LogOnboardingFunnelStepEvent(player, index + 1, "Quest " + quest.name);
+
+                    // Handle quest completion or next stage
+                    if (newStage === -1) {
+                        this.completeQuest(quest);
+                    }
+                    else {
+                        const nextStage = quest.stages[newStage];
+                        nextStage.reach();
+                    }
+                });
+            });
+        }
+        // Send quest info to clients
+        Packets.questInfo.set(questInfos);
+        this.reachStages();
+    }
 
     /**
      * Initializes the QuestService.
@@ -296,42 +266,7 @@ export default class QuestService implements OnInit {
             waypoint.CanQuery = false;
         }
 
-        // Load available quests and set up level change handler
-        this.loadAvailableQuests();
-        this.levelService.levelChanged.connect(() => this.loadAvailableQuests());
-
-        const questInfos = new Map<string, QuestInfo>();
-
-        // Process all quests and create client info
-        Quest.init().forEach((quest, questId) => {
-            quest.initialized.fire();
-
-            const questInfo: QuestInfo = {
-                name: quest.name ?? questId,
-                colorR: quest.color.R,
-                colorG: quest.color.G,
-                colorB: quest.color.B,
-                level: quest.level,
-                length: quest.length,
-                reward: quest.reward,
-                order: quest.order,
-                stages: [],
-            };
-
-            // Set up stage position tracking
-            quest.stages.forEach((stage, index) => {
-                const onPositionChanged = (position?: Vector3) => ReplicatedStorage.SetAttribute(`${questId}${index}`, position);
-                onPositionChanged(stage.position);
-                stage.positionChanged.connect((position) => onPositionChanged(position));
-                questInfo.stages.push({ description: stage.description! });
-            });
-
-            questInfos.set(questId, questInfo);
-        });
-
-        // Send quest info to clients
-        Packets.questInfo.set(questInfos);
-        // Send quest progress to clients
-        Packets.stagePerQuest.set(this.dataService.empireData.quests);
+        this.loadQuests();
+        this.levelService.levelChanged.connect(() => this.reachStages());
     }
 }
