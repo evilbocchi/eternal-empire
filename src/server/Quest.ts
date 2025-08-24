@@ -11,6 +11,7 @@ import type QuestService from "server/services/serverdata/QuestService";
 import { getNPCModel } from "shared/constants";
 import { Server } from "shared/item/ItemUtils";
 import { Dialogue } from "shared/NPC";
+import Packets from "shared/Packets";
 
 /**
  * Represents a single stage within a quest, including its description, position, focus, dialogue, and NPCs.
@@ -39,9 +40,8 @@ export class Stage {
     private reachedCallback?: ((stage: this) => (() => void));
     private completedCallback?: ((stage: this) => void);
 
-    private reachedTimes = 0;
-    private completedTimes = 0;
-    safe = true;
+    private reached = false;
+    private completed = false;
 
     constructor() {
 
@@ -142,31 +142,34 @@ export class Stage {
 
     /**
      * Triggers the stage reached event.
+     * 
+     * @returns A cleanup function to call when the stage is no longer needed.
      */
     reach() {
-        if (++this.reachedTimes > 1) {
-            warn("Stage reached multiple times");
-            print(this);
-            if (this.safe) { // Prevent further processing
-                return;
-            }
-            print("Unsafe mode enabled, allowing multiple reaches");
+        if (this.reached) { // Prevent multiple reaches
+            return () => { };
         }
-        return this.reachedCallback?.(this);
+
+        this.reached = true;
+        const cleanup = this.reachedCallback?.(this);
+        if (this.dialogue)
+            Server.Dialogue.addDialogue(this.dialogue);
+
+        return () => {
+            if (this.dialogue)
+                Server.Dialogue.removeDialogue(this.dialogue);
+            cleanup?.();
+        };
     }
 
     /**
      * Completes the stage, firing the completed signal.
      */
     complete() {
-        if (++this.completedTimes > 1) {
-            warn("Stage completed multiple times");
-            print(this);
-            if (this.safe) { // Prevent further processing
-                return;
-            }
-            print("Unsafe mode enabled, allowing multiple completions");
+        if (this.completed) {
+            return;
         }
+        this.completed = true;
         this.completedCallback?.(this);
     }
 
@@ -207,7 +210,7 @@ export default class Quest {
     id: string;
     name: string | undefined = undefined;
     description: string | undefined = undefined;
-    stages = new Array<Stage>();
+    readonly stages = new Array<Stage>();
     color: Color3;
     length = 0;
     level = 0;
@@ -215,6 +218,9 @@ export default class Quest {
     reward: Reward = {};
     readonly initialized = new Signal<() => void>();
     completionDialogue: Dialogue | undefined;
+
+    /** Whether the quest is completed. */
+    completed = false;
 
     /**
      * Constructs a new Quest instance.
@@ -247,8 +253,12 @@ export default class Quest {
      * @returns A map of quest IDs to their quest info.
      */
     static load() {
+        for (const [_, quest] of this.QUEST_PER_ID) {
+            quest.unload();
+        }
         this.reloadQuestModules();
         this.QUEST_PER_ID.clear();
+
         for (const cleanup of this.toClean) {
             cleanup.Disconnect();
         }
@@ -361,7 +371,7 @@ export default class Quest {
         const stage = new Stage()
             .setDescription(`Complete the quest "${depQuest.name}" before starting this.`)
             .onReached(() => {
-                while (Server.Quest.isQuestCompleted(questId) === false) {
+                while (!Quest.QUEST_PER_ID.get(questId)?.completed) {
                     task.wait(2);
                 }
                 stage.complete();
@@ -409,6 +419,36 @@ export default class Quest {
     onInit(callback: (quest: this) => void) {
         this.initialized.connect(() => callback(this));
         return this;
+    }
+
+    /**
+     * Completes the quest, triggering rewards and cleanup.
+     */
+    complete() {
+        if (this.completed)
+            return warn(`Quest ${this.id} is already completed`);
+        this.completed = true;
+
+        Packets.questCompleted.fireAll(this.id);
+        const reward = this.reward;
+
+        // Award experience points
+        if (reward.xp !== undefined) {
+            const originalXp = Server.Level.getXp();
+            if (originalXp === undefined) {
+                warn("No original xp, not rewarding");
+            }
+            else {
+                Server.Level.setXp(originalXp + reward.xp);
+            }
+        }
+
+        // Award items
+        if (reward.items !== undefined) {
+            for (const [item, amount] of reward.items) {
+                Server.Item.setItemAmount(item, Server.Item.getItemAmount(item) + amount);
+            }
+        }
     }
 
     /**

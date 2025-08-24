@@ -51,28 +51,7 @@ export default class QuestService implements OnInit {
         private readonly dialogueService: DialogueService) {
 
     }
-
-    /**
-     * Checks if a quest is completed.
-     * 
-     * @param questId The quest ID.
-     * @return True if the quest is completed, false otherwise.
-     */
-    isQuestCompleted(questId: string) {
-        return this.dataService.empireData.quests.get(questId) === -1;
-    }
-
-
-    /**
-     * Updates the quest stage data and synchronizes with clients.
-     * 
-     * @param quests Map of quest IDs to their current stage numbers.
-     */
-    setStagePerQuest(quests: Map<string, number>) {
-        this.dataService.empireData.quests = quests;
-        Packets.stagePerQuest.set(quests);
-    }
-
+    
     /**
      * Advances a quest to the next stage with validation.
      * Ensures stages are completed in order and handles quest completion.
@@ -102,7 +81,7 @@ export default class QuestService implements OnInit {
         // Determine next stage or completion
         const n = newStage > stageSize - 1 ? -1 : newStage;
         stagePerQuest.set(quest.id, n);
-        this.setStagePerQuest(stagePerQuest);
+        Packets.stagePerQuest.set(stagePerQuest);
         return n;
     }
 
@@ -119,9 +98,6 @@ export default class QuestService implements OnInit {
         if (stagePerQuest === undefined) {
             return;
         }
-        for (const [_, cleanup] of this.CLEANUP_PER_STAGE) {
-            cleanup();
-        }
 
         for (const [id, quest] of Quest.QUEST_PER_ID) {
             // Skip quests above player level
@@ -133,57 +109,28 @@ export default class QuestService implements OnInit {
 
             // Handle already completed quests
             if (current === -1) {
+                quest.completed = true;
                 const completionDialogue = quest.completionDialogue;
                 if (completionDialogue) {
                     this.dialogueService.addDialogue(completionDialogue);
                 }
             }
 
+            // Handle previous stages
+            for (let i = 0; i < current; i++) {
+                const stage = quest.stages[i];
+                this.CLEANUP_PER_STAGE.get(stage)?.();
+            }
+
             const stage = quest.stages[current];
             if (stage !== undefined) {
-                const cleanup = stage.reach?.();
-                if (stage.dialogue)
-                    this.dialogueService.addDialogue(stage.dialogue);
+                const cleanup = stage.reach();
                 this.CLEANUP_PER_STAGE.set(stage, () => {
-                    cleanup?.();
-                    if (stage.dialogue)
-                        this.dialogueService.removeDialogue(stage.dialogue);
+                    cleanup();
                     this.CLEANUP_PER_STAGE.delete(stage);
                 });
-
-                print(`Reached stage ${current} in ${quest.id}`);
             }
         }
-    }
-
-    /**
-     * Completes a quest and distributes rewards.
-     * 
-     * @param quest The quest to complete.
-     */
-    completeQuest(quest: Quest) {
-        Packets.questCompleted.fireAll(quest.id);
-        const reward = quest.reward;
-
-        // Award experience points
-        if (reward.xp !== undefined) {
-            const originalXp = this.levelService.getXp();
-            if (originalXp === undefined) {
-                warn("No original xp, not rewarding");
-            }
-            else {
-                this.levelService.setXp(originalXp + reward.xp);
-            }
-        }
-
-        // Award items
-        if (reward.items !== undefined) {
-            for (const [item, amount] of reward.items) {
-                this.itemService.setItemAmount(item, this.itemService.getItemAmount(item) + amount);
-            }
-        }
-
-        this.reachStages();
     }
 
     /**
@@ -231,12 +178,9 @@ export default class QuestService implements OnInit {
 
                     // Handle quest completion or next stage
                     if (newStage === -1) {
-                        this.completeQuest(quest);
+                        quest.complete();
                     }
-                    else {
-                        const nextStage = quest.stages[newStage];
-                        nextStage.reach();
-                    }
+                    this.reachStages();
                 });
             });
         }

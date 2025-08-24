@@ -94,7 +94,7 @@ export = new Quest(script.Name)
             const connection = Server.Dialogue.dialogueFinished.connect((dialogue) => {
                 if (dialogue === ricargDialogue) {
                     Server.Dialogue.removeDialogue(ricargDialogue);
-                    Server.Dialogue.talk(Server.Quest.isQuestCompleted(EarningCapital.id) === true ? helped : noHelped);
+                    Server.Dialogue.talk(EarningCapital.completed ? helped : noHelped);
                 }
                 else if (dialogue === noHelped || dialogue === helped) {
                     Server.Dialogue.addDialogue(shopOpen);

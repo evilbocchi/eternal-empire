@@ -10,6 +10,9 @@ export = new Command(script.Name)
             CommandAPI.ChatHook.sendPrivateMessage(_o, `Quest with ID '${questId}' not found.`);
             return;
         }
-        CommandAPI.Quest.completeQuest(quest);
+        quest.completed = false; // Reset quest completion status
+        quest.complete();
+        CommandAPI.Quest.reachStages();
+        CommandAPI.ChatHook.sendPrivateMessage(_o, `Quest '${questId}' marked as complete.`);
     })
     .setPermissionLevel(4);

@@ -2,14 +2,17 @@ import Command, { CommandAPI } from "server/services/permissions/commands/Comman
 
 export = new Command(script.Name)
     .addAlias("sset")
-    .setDescription("<questId> <stage> : Set the stage number for the quest.")
+    .setDescription("<questId> <stage> : Set the stage number for the quest. Do not specify any parameters for a simple hot reload.")
     .setExecute((_o, questId, stage) => {
         const stagePerQuest = CommandAPI.empireData.quests;
         if (stagePerQuest === undefined) {
             return;
         }
-        stagePerQuest.set(questId, tonumber(stage) ?? 0);
+
+        if (stage) {
+            stagePerQuest.set(questId, tonumber(stage) ?? 0);
+        }
         CommandAPI.Quest.setStagePerQuest(stagePerQuest);
-        CommandAPI.Quest.loadAvailableQuests();
+        CommandAPI.Quest.loadQuests(); // Hot reload
     })
     .setPermissionLevel(4);
