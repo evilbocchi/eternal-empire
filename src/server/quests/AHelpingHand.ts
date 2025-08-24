@@ -147,16 +147,19 @@ export = new Quest(script.Name)
             handle.Transparency = 1;
             handle.CanCollide = false;
         }
-        const lostPendantModel = obstacleCourse.WaitForChild("LostPendant");
-        lostPendantModel.FindFirstChildOfClass("ProximityPrompt")!.Triggered.Connect(() => {
-            Server.Quest.giveQuestItem(LostPendant.id, 1);
-            Server.Event.setEventCompleted("AHelpingHandPendant", true);
+        const lostPendantModel = obstacleCourse.FindFirstChild("LostPendant");
+        if (lostPendantModel) {
+            lostPendantModel.FindFirstChildOfClass("ProximityPrompt")!.Triggered.Connect(() => {
+                Server.Quest.giveQuestItem(LostPendant.id, 1);
+                Server.Event.setEventCompleted("AHelpingHandPendant", true);
 
-        });
-        Server.Event.addCompletionListener("AHelpingHandPendant", (isCompleted) => {
-            if (isCompleted)
-                lostPendantModel.Destroy();
-        });
+            });
+            Server.Event.addCompletionListener("AHelpingHandPendant", (isCompleted) => {
+                if (isCompleted)
+                    lostPendantModel.Destroy();
+            });
+        }
+
         Server.Event.addCompletionListener("FreddyReveal", (isCompleted) => {
             if (isCompleted)
                 freddyHumanoid.DisplayName = "";

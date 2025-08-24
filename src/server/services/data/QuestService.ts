@@ -20,7 +20,7 @@
  * @since 1.0.0
  */
 
-import { OnInit, Service } from "@flamework/core";
+import { OnInit, OnStart, Service } from "@flamework/core";
 import { AnalyticsService, Players } from "@rbxts/services";
 import Quest, { Stage } from "server/Quest";
 import ItemService from "server/services/item/ItemService";
@@ -30,7 +30,7 @@ import DataService from "server/services/data/DataService";
 import LevelService from "server/services/data/LevelService";
 import { WAYPOINTS } from "shared/constants";
 import Items from "shared/items/Items";
-import Packets from "shared/Packets";
+import Packets, { stagePerQuest } from "shared/Packets";
 import Sandbox from "shared/Sandbox";
 
 /**
@@ -40,7 +40,7 @@ import Sandbox from "shared/Sandbox";
  * completion validation, and waypoint management for navigation.
  */
 @Service()
-export default class QuestService implements OnInit {
+export default class QuestService implements OnInit, OnStart {
 
     readonly CLEANUP_PER_STAGE = new Map<Stage, () => void>();
 
@@ -81,7 +81,6 @@ export default class QuestService implements OnInit {
         // Determine next stage or completion
         const n = newStage > stageSize - 1 ? -1 : newStage;
         stagePerQuest.set(quest.id, n);
-        Packets.stagePerQuest.set(stagePerQuest);
         return n;
     }
 
@@ -100,12 +99,18 @@ export default class QuestService implements OnInit {
         }
 
         for (const [id, quest] of Quest.QUEST_PER_ID) {
+            const current = stagePerQuest.get(id) ?? 0;
+
+            // Clean up all other stages
+            for (let i = 0; i < quest.stages.size(); i++) {
+                if (i !== current)
+                    this.CLEANUP_PER_STAGE.get(quest.stages[i])?.();
+            }
+
             // Skip quests above player level
             if (quest.level > level) {
                 continue;
             }
-
-            const current = stagePerQuest.get(id) ?? 0;
 
             // Handle already completed quests
             if (current === -1) {
@@ -116,13 +121,9 @@ export default class QuestService implements OnInit {
                 }
             }
 
-            // Handle previous stages
-            for (let i = 0; i < current; i++) {
-                const stage = quest.stages[i];
-                this.CLEANUP_PER_STAGE.get(stage)?.();
-            }
-
             const stage = quest.stages[current];
+
+            // Reach the current stage, set up cleanup
             if (stage !== undefined) {
                 const cleanup = stage.reach();
                 this.CLEANUP_PER_STAGE.set(stage, () => {
@@ -212,5 +213,26 @@ export default class QuestService implements OnInit {
 
         this.loadQuests();
         this.levelService.levelChanged.connect(() => this.reachStages());
+    }
+
+    onStart() {
+        // Monitor quest stage changes
+        let lastStagesPerQuest = new Map<string, number>();
+        while (task.wait(0.1)) {
+            const stagesPerQuest = this.dataService.empireData.quests;
+            let changed = false;
+            for (const [questId, stage] of stagesPerQuest) {
+                const last = lastStagesPerQuest.get(questId);
+                if (last !== stage) {
+                    changed = true;
+                    break;
+                }
+            }
+            if (!changed) {
+                continue;
+            }
+            lastStagesPerQuest = table.clone(stagesPerQuest);
+            Packets.stagePerQuest.set(stagesPerQuest);
+        }
     }
 }

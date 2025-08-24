@@ -116,8 +116,10 @@ export = new Quest(script.Name)
                 .monologue("See you again never!")
                 .root;
             const connection = Server.Dialogue.dialogueFinished.connect((dialogue) => {
-                if (dialogue === stage.dialogue && Server.Quest.takeQuestItem(GrassConveyor.id, 1) === true) {
+                if (dialogue === stage.dialogue) {
                     Server.Dialogue.talk(continuation);
+                }
+                else if (dialogue === continuation && Server.Quest.takeQuestItem(GrassConveyor.id, 1) === true) {
                     stage.complete();
                 }
             });

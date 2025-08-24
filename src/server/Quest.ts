@@ -151,13 +151,15 @@ export class Stage {
         }
 
         this.reached = true;
+        const dialogue = this.dialogue;
+        if (dialogue)
+            Server.Dialogue.addDialogue(dialogue);
+
         const cleanup = this.reachedCallback?.(this);
-        if (this.dialogue)
-            Server.Dialogue.addDialogue(this.dialogue);
 
         return () => {
-            if (this.dialogue)
-                Server.Dialogue.removeDialogue(this.dialogue);
+            if (dialogue)
+                Server.Dialogue.removeDialogue(dialogue);
             cleanup?.();
         };
     }
@@ -177,6 +179,8 @@ export class Stage {
      * Unloads the stage and its resources.
      */
     unload() {
+        if (this.dialogue)
+            Server.Dialogue.removeDialogue(this.dialogue);
         this.completedCallback = undefined;
         this.reachedCallback = undefined;
         this.positionChangedCallback = undefined;
@@ -192,7 +196,6 @@ export default class Quest {
 
     static readonly QUEST_MODULES = new Map<string, ModuleScript>();
     static readonly QUEST_PER_ID = new Map<string, Quest>();
-    private static readonly toClean = new Set<RBXScriptConnection>();
 
     static colors = [
         Color3.fromRGB(253, 41, 67),
@@ -257,11 +260,7 @@ export default class Quest {
             quest.unload();
         }
         this.reloadQuestModules();
-        this.QUEST_PER_ID.clear();
 
-        for (const cleanup of this.toClean) {
-            cleanup.Disconnect();
-        }
         for (const [_, moduleScript] of this.QUEST_MODULES) {
             const i = require(moduleScript);
             if (i !== undefined) {
@@ -459,5 +458,6 @@ export default class Quest {
             stage.unload();
         });
         table.clear(this);
+        Quest.QUEST_PER_ID.delete(this.id);
     }
 }

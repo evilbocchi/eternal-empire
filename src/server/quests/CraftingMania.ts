@@ -41,7 +41,9 @@ export = new Quest(script.Name)
                 .root
         )
         .onReached((stage) => {
-            chuckRootPart.Position = stage.position!;
+            Server.NPC.State.playAnimation(Chuck, "Default");
+            chuckRootPart.CFrame = Server.NPC.State.getInfo(Chuck)!.defaultLocation;
+
             const continuation = new Dialogue(Chuck, "So, you want to craft something?")
                 .monologue("That's surprising... Most people nowadays simply avoid what they call a 'primitive' method of creating items.")
                 .monologue("They get on my nerves, those stinking scientists. Thinking they're better than us.")
@@ -72,6 +74,9 @@ export = new Quest(script.Name)
             new Dialogue(Chuck, "You got the stuff?")
         )
         .onReached((stage) => {
+            Server.NPC.State.stopAnimation(Chuck, "Default");
+            chuckRootPart.CFrame = Server.NPC.State.getInfo(Chuck)!.defaultLocation;
+
             const ItemService = Server.Item;
             const ricargDialogue = new Dialogue(Ricarg, "Hahah... money... haah...")
                 .monologue("Wait, who are you again?")
@@ -121,6 +126,7 @@ export = new Quest(script.Name)
         .onReached((stage) => {
             Server.NPC.State.stopAnimation(Chuck, "Default");
             chuckRootPart.Anchored = false;
+
             chuckToCraftingTable().onComplete(() => stage.complete());
             return () => { };
         })
