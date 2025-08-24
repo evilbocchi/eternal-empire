@@ -94,7 +94,7 @@ export default class DialogueService implements OnInit, OnStart, OnNPCLoad {
      */
     removeDialogue(dialogue: Dialogue, npc?: NPC) {
         npc ??= dialogue.npc;
-        this.dialoguePerNPC.get(npc)!.delete(dialogue);
+        this.dialoguePerNPC.get(npc)?.delete(dialogue);
     }
 
     /**

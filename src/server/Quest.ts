@@ -457,7 +457,7 @@ export default class Quest {
         this.stages.forEach((stage) => {
             stage.unload();
         });
-        table.clear(this);
         Quest.QUEST_PER_ID.delete(this.id);
+        table.clear(this);
     }
 }
