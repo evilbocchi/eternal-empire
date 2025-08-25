@@ -29,4 +29,5 @@ export default class Command {
     }
 }
 
+
 export const CommandAPI = ({} as unknown) as CommandAPI;
