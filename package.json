@@ -54,7 +54,7 @@
         "typedoc-plugin-missing-exports": "^4.0.0",
         "typedoc-plugin-rename-defaults": "^0.7.3",
         "typescript": "^5.5.3",
-        "typescript-eslint": "^8.39.1"
+        "typescript-eslint": "^8.40.0"
     },
     "dependencies": {
         "@antivivi/fletchette": "^2.0.2",
