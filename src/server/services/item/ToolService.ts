@@ -217,7 +217,7 @@ export class ToolService implements OnInit, OnPlayerJoined, OnPlayerJoined {
                 for (const [id, amount] of receiving) {
                     this.itemService.giveItem(id, amount);
                 }
-                Packets.itemsReceived.fireAll(receiving);
+                Packets.showItemReward.fireAll(receiving);
 
                 this.moveHarvestable(harvestable, this.originalPosPerHarvestable.get(harvestable)!.sub(new Vector3(0, -500, 0)));
                 harvestable.SetAttribute("Health", harvestableData.health);

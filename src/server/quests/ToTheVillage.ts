@@ -13,8 +13,9 @@ import Freddy from "shared/npcs/Freddy";
 import SlamoReceptionist from "shared/npcs/Slamo Receptionist";
 import SlamoRefugee from "shared/npcs/Slamo Refugee";
 
-const [freddyModel, _freddyHumanoid, _freddyRootPart] = getNPCModel("Freddy");
+const [freddyModel, _freddyHumanoid, freddyRootPart] = getNPCModel("Freddy");
 const [refugeeModel, refugeeHumanoid, refugeeRootPart] = getNPCModel("Slamo Refugee");
+const refugeeDefaultLocation = Server.NPC.State.getInfo(SlamoRefugee)!.defaultLocation;
 
 const cauldron = AREAS.BarrenIslands.map.WaitForChild("Cauldron") as Model;
 const linkway = AREAS.IntermittentIsles.areaFolder.WaitForChild("SlamoVillageConnection");
@@ -71,7 +72,8 @@ const refugeeToEnteringSlamoVillage = Server.NPC.Navigation.createPathfindingOpe
 const refugeeToEnteringPoliceStation = Server.NPC.Navigation.createPathfindingOperation(
     refugeeHumanoid,
     WAYPOINTS.ToTheVillageRefugeeEnteringSlamoVillage.CFrame,
-    WAYPOINTS.ToTheVillageRefugeeEnteringPoliceStation.CFrame
+    WAYPOINTS.ToTheVillageRefugeeEnteringPoliceStation.CFrame,
+    false
 );
 
 export = new Quest(script.Name)
@@ -90,6 +92,8 @@ export = new Quest(script.Name)
             .root
         )
         .onReached((stage) => {
+            refugeeRootPart.CFrame = refugeeDefaultLocation;
+
             const connection = Server.Dialogue.dialogueFinished.connect((dialogue) => {
                 if (dialogue === stage.dialogue) {
                     stage.complete();
@@ -103,6 +107,8 @@ export = new Quest(script.Name)
         .setFocus(WAYPOINTS.CraftingTable)
         .setDialogue(new Dialogue(SlamoRefugee, "Do you have that Empowered Brick?"))
         .onReached((stage) => {
+            refugeeRootPart.CFrame = refugeeDefaultLocation;
+
             const continuation = new Dialogue(SlamoRefugee, "Wow... I feel the power of the brick already!")
                 .monologue("In order to fully manifest the power of the Empowered Brick, I need to infuse it with Instant Win energy.")
                 .monologue("To start, can you obtain 2 XL Wool? You can get it from that guy selling wool in the marketplace.")
@@ -122,6 +128,8 @@ export = new Quest(script.Name)
         .setDescription(`Obtain 2 XL Wool from the marketplace and give it to the Slamo Refugee.`)
         .setDialogue(new Dialogue(SlamoRefugee, "Do you have the 2 XL Wool?"))
         .onReached((stage) => {
+            refugeeRootPart.CFrame = refugeeDefaultLocation;
+
             const continuation = new Dialogue(SlamoRefugee, "This is some high-quality wool. We can use this to absorb the Instant Win energy.")
                 .monologue("I know Freddy has a cauldron that has a bunch of Instant Win energy, but he won't let me use it. I hope you can convince him to let us borrow it.")
                 .root;
@@ -142,8 +150,9 @@ export = new Quest(script.Name)
         .setDescription(`Talk to Freddy at %coords%.`)
         .setDialogue(new Dialogue(SlamoRefugee, "Please talk to Freddy. He has a cauldron that can dissolve the XL Wool in Instant Win energy."))
         .onReached((stage) => {
+            refugeeRootPart.CFrame = refugeeDefaultLocation;
+            freddyRootPart.CFrame = WAYPOINTS.ToTheVillageFreddyWaiting.CFrame;
             refugeeModel.FindFirstChild("FishingRod")?.Destroy();
-            freddyModel.PivotTo(WAYPOINTS.ToTheVillageFreddyWaiting.CFrame);
 
             const continuation = new Dialogue(Freddy, "Oh, my friend! How can I help you?")
                 .monologue("You need to borrow my cauldron? Of course, you can use it!")
@@ -169,8 +178,10 @@ export = new Quest(script.Name)
         .setFocus(cauldron.PrimaryPart!)
         .setDialogue(new Dialogue(SlamoRefugee, "Go on, fill the cauldron!"))
         .onReached((stage) => {
+            refugeeRootPart.CFrame = WAYPOINTS.ToTheVillageRefugeeWaiting.CFrame;
+            freddyRootPart.CFrame = WAYPOINTS.ToTheVillageFreddyWaiting.CFrame;
             refugeeModel.FindFirstChild("FishingRod")?.Destroy();
-            refugeeModel.PivotTo(WAYPOINTS.ToTheVillageRefugeeWaiting.CFrame);
+
             refugeeToBrewing();
 
             const proximityPrompt = cauldron.WaitForChild("ProximityPrompt") as ProximityPrompt;
@@ -198,8 +209,9 @@ export = new Quest(script.Name)
             for (const effect of instantWinEffects) {
                 effect.Transparency = 0;
             }
+            refugeeRootPart.CFrame = WAYPOINTS.ToTheVillageRefugeeBrewing.CFrame;
+            freddyRootPart.CFrame = WAYPOINTS.ToTheVillageFreddyWaiting.CFrame;
             refugeeModel.FindFirstChild("FishingRod")?.Destroy();
-            refugeeModel.PivotTo(WAYPOINTS.ToTheVillageRefugeeBrewing.CFrame);
 
             Server.Dialogue.talk(new Dialogue(SlamoRefugee, "Let me handle this."));
             const continuation = new Dialogue(SlamoRefugee, "Wow... it's raw Instant Win energy. It's so potent!")
@@ -290,8 +302,9 @@ export = new Quest(script.Name)
         .setFocus(WAYPOINTS.ToTheVillageRefugeeIntermittentIsles)
         .setDialogue(new Dialogue(SlamoRefugee, "All you need to do is place the Charged Empowered Brick down. Once you do that, the linkway will be repaired and we can finally go home."))
         .onReached((stage) => {
+            refugeeRootPart.CFrame = WAYPOINTS.ToTheVillageRefugeeBrewing.CFrame;
+            freddyRootPart.CFrame = WAYPOINTS.ToTheVillageFreddyWaiting.CFrame;
             refugeeModel.FindFirstChild("FishingRod")?.Destroy();
-            refugeeModel.PivotTo(WAYPOINTS.ToTheVillageRefugeeBrewing.CFrame);
 
             const particlePart = linkway.WaitForChild("Particle");
             const linkwayEffect = getEffect("MassiveMagicExplosion").Clone();
@@ -341,8 +354,9 @@ export = new Quest(script.Name)
         .setDescription(`Follow the Slamo Refugee to the village.`)
         .setDialogue(new Dialogue(SlamoRefugee, "..."))
         .onReached((stage) => {
+            refugeeRootPart.CFrame = WAYPOINTS.ToTheVillageRefugeeIntermittentIsles.CFrame;
+            freddyRootPart.CFrame = WAYPOINTS.ToTheVillageFreddyWaiting.CFrame;
             refugeeModel.FindFirstChild("FishingRod")?.Destroy();
-            refugeeModel.PivotTo(WAYPOINTS.ToTheVillageRefugeeIntermittentIsles.CFrame);
 
             const continuation = new Dialogue(SlamoRefugee, "Hey.")
                 .monologue("I bet you're wondering why I was in the Barren Islands in the first place.")
@@ -353,9 +367,9 @@ export = new Quest(script.Name)
             refugeeToEnteringSlamoVillage().onComplete(() => {
                 Server.Dialogue.talk(continuation);
             });
-            task.wait(2);
+            task.wait(1);
             Server.Dialogue.talk(new Dialogue(SlamoRefugee, "Finally! The linkway is repaired!"), false);
-            task.wait(6);
+            task.wait(7);
             Server.Dialogue.talk(new Dialogue(SlamoRefugee, "After all these years, I can finally see home again."), false);
             task.wait(6);
             Server.Dialogue.talk(new Dialogue(SlamoRefugee, "The village is right up ahead!"), false);
@@ -371,7 +385,7 @@ export = new Quest(script.Name)
 
                 refugeeHumanoid.WalkSpeed = 30;
                 refugeeToEnteringPoliceStation(false).onComplete(() => {
-                    refugeeModel.PivotTo(WAYPOINTS.ToTheVillageRefugeeImprisoned.CFrame);
+                    refugeeRootPart.CFrame = WAYPOINTS.ToTheVillageRefugeeImprisoned.CFrame;
                     refugeeRootPart.Anchored = true;
                     stage.complete();
                 });

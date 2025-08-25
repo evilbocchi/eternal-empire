@@ -883,7 +883,7 @@ export default class DataService implements OnInit, OnPlayerJoined {
             nestCheck(addedAmounts, item, baseAmounts.get(itemId));
         }
         for (const [itemId, item] of Items.itemsPerId) {
-            if (item.isA("HarvestingTool") || item.pricePerIteration.size() === 0 || item.difficulty === Difficulty.Excavation)
+            if (item.isA("HarvestingTool") || item.pricePerIteration.size() === 0 || item.difficulty === Difficulty.Excavation || item.isA("Unique"))
                 continue;
 
             const amount = (addedAmounts.get(itemId) ?? 0) + (baseAmounts.get(itemId) ?? 0);

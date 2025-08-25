@@ -98,8 +98,6 @@ export default class NPCNavigationService implements OnInit, OnStart, OnPhysics 
      * @param humanoid The NPC's humanoid to move.
      * @param position The target position to navigate to.
      * @param endCallback Function called when navigation completes.
-     * @param params Pathfinding parameters (defaults to PATHFINDING_PARAMS).
-     * @param iterations Number of retry attempts remaining.
      * @returns Connection object for the pathfinding operation.
      */
     pathfind(
@@ -110,14 +108,11 @@ export default class NPCNavigationService implements OnInit, OnStart, OnPhysics 
         const rootPart = humanoid.RootPart;
         if (rootPart === undefined)
             return;
-        let i = 0; // Waypoint index
-        let t = 0; // Time spent moving to current waypoint
+        let i = 0;
         let newPos: Vector3 | undefined;
-        let movingConnection: RBXScriptConnection | undefined;
 
         const doNextWaypoint = () => {
             ++i;
-            t = 0;
             const nextWaypoint = waypoints[i];
             if (nextWaypoint !== undefined) {
                 // Handle jump waypoints
@@ -126,33 +121,32 @@ export default class NPCNavigationService implements OnInit, OnStart, OnPhysics 
                     playSoundAtPart(rootPart, getSound("Jump.mp3"));
                 }
                 newPos = nextWaypoint.Position;
-                movingConnection?.Disconnect();
-                movingConnection = humanoid.MoveToFinished.Once((reached) => {
-                    if (reached) {
-                        doNextWaypoint();
-                    }
-                    else {
-                        t = math.huge; // Mark as stuck
-                    }
-                });
+
+
                 humanoid.MoveTo(newPos);
             }
             else {
                 // Navigation complete
-                movingConnection?.Disconnect();
                 connection.Disconnect();
                 endCallback();
             }
         };
 
+        let t = 0;
         const connection = RunService.Heartbeat.Connect((dt) => {
             if (newPos === undefined)
                 return;
             t += dt;
             const dist = rootPart.Position.sub(newPos).mul(new Vector3(1, 0, 1)).Magnitude;
 
+            // Check if close enough to waypoint
+            if (dist < math.max(humanoid.WalkSpeed * 0.1875, 0.5)) { // allow more leeway for higher speeds
+                t = 0;
+                newPos = undefined;
+                doNextWaypoint();
+            }
             // Teleport if stuck for too long
-            if (t > math.max(5.6 * dist / humanoid.WalkSpeed, 2)) {
+            else if (t > math.max(5.6 * dist / humanoid.WalkSpeed, 2)) {
                 t = 0;
                 rootPart.CFrame = new CFrame(newPos).add(new Vector3(0, humanoid.HipHeight, 0));
             }
@@ -264,6 +258,7 @@ export default class NPCNavigationService implements OnInit, OnStart, OnPhysics 
 
         return start;
     }
+
 
     // Lifecycle Methods
 

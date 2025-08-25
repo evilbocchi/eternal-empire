@@ -137,6 +137,11 @@ export = new Quest(script.Name)
     .addStage(new Stage()
         .setDescription("Ask around the library for clues about the 'strike'.")
         .onReached((stage) => {
+            oldNoobRootPart.CFrame = oldNoobDefaultLocation;
+            pasalRootPart.CFrame = pasalDefaultLocation;
+            Server.NPC.State.playAnimation(OldNoob, "Default");
+            Server.NPC.State.playAnimation(Pasal, "Default");
+
             const pasalDialogue = new Dialogue(Pasal, "Yahallo! ...You want that shiny green orb behind me?")
                 .monologue("Sorry, I can't do that for you. It's not on sale.")
                 .monologue("Why would you want that anyways?")
@@ -218,6 +223,11 @@ export = new Quest(script.Name)
             .root
         )
         .onReached((stage) => {
+            oldNoobRootPart.CFrame = oldNoobDefaultLocation;
+            pasalRootPart.CFrame = pasalDefaultLocation;
+            Server.NPC.State.playAnimation(OldNoob, "Default");
+            Server.NPC.State.playAnimation(Pasal, "Default");
+
             const connection = Server.Dialogue.dialogueFinished.connect((dialogue) => {
                 if (dialogue === stage.dialogue) {
                     stage.complete();
@@ -230,6 +240,11 @@ export = new Quest(script.Name)
         .setDescription(`Collect 20 ${ExcavationStone.name}.`)
         .setDialogue(new Dialogue(OldNoob, `Report back to me once you're done. I just... need that stone...`))
         .onReached((stage) => {
+            oldNoobRootPart.CFrame = oldNoobDefaultLocation;
+            pasalRootPart.CFrame = pasalDefaultLocation;
+            Server.NPC.State.playAnimation(OldNoob, "Default");
+            Server.NPC.State.playAnimation(Pasal, "Default");
+
             let t = 0;
             const connection = RunService.Heartbeat.Connect((dt) => {
                 t += dt;
@@ -250,6 +265,11 @@ export = new Quest(script.Name)
         .setNPC("Old Noob", true)
         .setDialogue(new Dialogue(OldNoob, `Do you have 20 ${ExcavationStone.name}?`))
         .onReached((stage) => {
+            oldNoobRootPart.CFrame = oldNoobDefaultLocation;
+            pasalRootPart.CFrame = pasalDefaultLocation;
+            Server.NPC.State.playAnimation(OldNoob, "Default");
+            Server.NPC.State.playAnimation(Pasal, "Default");
+
             const continuation = new Dialogue(OldNoob, "Yup, sure do. Alright, let's get going. I won't waste either of our time.");
             const connection = Server.Dialogue.dialogueFinished.connect((dialogue) => {
                 if (dialogue === stage.dialogue && Server.Quest.takeQuestItem(ExcavationStone.id, 20) === true) {
@@ -267,6 +287,11 @@ export = new Quest(script.Name)
         .setDialogue(new Dialogue(OldNoob, `I'll lead the way. My body can still move, after all.`))
         .onReached((stage) => {
             oldNoobModel.FindFirstChildOfClass("Tool")?.Destroy();
+            oldNoobRootPart.CFrame = oldNoobDefaultLocation;
+            pasalRootPart.CFrame = pasalDefaultLocation;
+            Server.NPC.State.playAnimation(Pasal, "Default");
+            Server.NPC.State.stopAnimation(OldNoob, "Default");
+
             const intro = new Dialogue(OldNoob, "You. I don't know how you got your hands on that orb, but you're coming with us.")
                 .next(new Dialogue(Pasal, "Uh... yeah, sure. Wait, why?"))
                 .next(new Dialogue(OldNoob, "Just stay quiet and come."))
@@ -276,7 +301,6 @@ export = new Quest(script.Name)
                 .next(new Dialogue(Pasal, "The fact that you have to say that it's safe kinda concerns me... Whatever. Come on, let's see something happen!"))
                 .root;
 
-            Server.NPC.State.stopAnimation(OldNoob, "Default");
             task.wait(1);
             oldNoobToApproachingPasal().onComplete(() => {
                 Server.Dialogue.talk(intro);

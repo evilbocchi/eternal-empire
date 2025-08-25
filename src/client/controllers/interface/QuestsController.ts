@@ -395,7 +395,7 @@ export default class QuestsController implements OnInit, OnPhysics, OnCharacterA
             const refreshDropdownLabel = () => TweenService.Create(questOption.Dropdown.ImageLabel, this.tween, { Rotation: questOption.Content.Visible ? 0 : 180 }).Play();
             questOption.Content.GetPropertyChangedSignal("Visible").Connect(() => refreshDropdownLabel());
             refreshDropdownLabel();
-            
+
 
             const trackConnection = this.trackedQuestChanged.connect((q) => updateTrack(q));
             const updateTrack = (q: string | undefined) => {
@@ -475,7 +475,7 @@ export default class QuestsController implements OnInit, OnPhysics, OnCharacterA
             this.refreshTrackedQuestWindow(this.trackedQuest, index);
             this.refreshNotificationWindow();
         });
-        Packets.xpReceived.connect((xp) => {
+        Packets.showXpReward.connect((xp) => {
             const lootItemSlot = ASSETS.LootTableItemSlot.Clone();
             this.uiController.playSound("UnlockItem.mp3");
             lootItemSlot.Background.ImageLabel.ImageColor3 = TRACKED_QUEST_WINDOW.Background.Frame.BackgroundColor3;
@@ -484,7 +484,7 @@ export default class QuestsController implements OnInit, OnPhysics, OnCharacterA
             lootItemSlot.Parent = TRACKED_QUEST_WINDOW;
             task.delay(3, () => this.phaseOutLootTableItemSlot(lootItemSlot));
         });
-        Packets.itemsReceived.connect((items) => {
+        Packets.showItemReward.connect((items) => {
             this.uiController.playSound("UnlockItem.mp3");
             for (const [itemId, amount] of items) {
                 const item = Items.getItem(itemId);

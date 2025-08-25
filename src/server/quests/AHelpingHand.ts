@@ -9,6 +9,7 @@ import { Dialogue } from "shared/NPC";
 import Freddy from "shared/npcs/Freddy";
 
 const [_freddyModel, freddyHumanoid, freddyRootPart] = getNPCModel("Freddy");
+const freddyDefaultLocation = Server.NPC.State.getInfo(Freddy)!.defaultLocation;
 
 const freddyToRequest = Server.NPC.Navigation.createPathfindingOperation(
     freddyHumanoid,
@@ -39,8 +40,11 @@ export = new Quest(script.Name)
                 .root
         )
         .onReached((stage) => {
+            freddyRootPart.CFrame = freddyDefaultLocation;
+            Server.NPC.State.playAnimation(Freddy, "Default");
+
             const continuation = new Dialogue(Freddy, "My name's Freddy. Follow me, I have something to show you.");
-            freddyRootPart.Position = stage.position!;
+
             const connection = Server.Dialogue.dialogueFinished.connect((dialogue) => {
                 if (dialogue === stage.dialogue) {
                     Server.Event.setEventCompleted("FreddyReveal", true);
@@ -60,9 +64,10 @@ export = new Quest(script.Name)
             new Dialogue(Freddy, "Follow me, I have something to show you.")
         )
         .onReached((stage) => {
+            freddyRootPart.CFrame = freddyDefaultLocation;
             Server.NPC.State.stopAnimation(Freddy, "Default");
-            task.wait(2);
-            freddyToRequest().onComplete(() => stage.complete());
+
+            task.delay(2, () => freddyToRequest().onComplete(() => stage.complete()));
             return () => { };
         })
     )
@@ -80,8 +85,8 @@ export = new Quest(script.Name)
                 .root
         )
         .onReached((stage) => {
-            Server.NPC.State.stopAnimation(Freddy, "Default");
             freddyRootPart.CFrame = WAYPOINTS.AHelpingHandFreddyRequest.CFrame;
+            Server.NPC.State.stopAnimation(Freddy, "Default");
 
             const connection = Server.Dialogue.dialogueFinished.connect((dialogue) => {
                 if (stage.dialogue === dialogue)
@@ -97,8 +102,8 @@ export = new Quest(script.Name)
             new Dialogue(Freddy, "What are you waiting for? Go get it!")
         )
         .onReached((stage) => {
-            Server.NPC.State.stopAnimation(Freddy, "Default");
             freddyRootPart.CFrame = WAYPOINTS.AHelpingHandFreddyRequest.CFrame;
+            Server.NPC.State.stopAnimation(Freddy, "Default");
 
             const hitSound = getSound("QuestConstruct.mp3");
             for (const handle of ladderHandles) {
@@ -131,8 +136,8 @@ export = new Quest(script.Name)
                 .root
         )
         .onReached((stage) => {
-            Server.NPC.State.stopAnimation(Freddy, "Default");
             freddyRootPart.CFrame = WAYPOINTS.AHelpingHandFreddyRequest.CFrame;
+            Server.NPC.State.stopAnimation(Freddy, "Default");
 
             const connection = Server.Dialogue.dialogueFinished.connect((dialogue) => {
                 Server.Quest.takeQuestItem(LostPendant.id, 1);
@@ -146,18 +151,6 @@ export = new Quest(script.Name)
         for (const handle of ladderHandles) {
             handle.Transparency = 1;
             handle.CanCollide = false;
-        }
-        const lostPendantModel = obstacleCourse.FindFirstChild("LostPendant");
-        if (lostPendantModel) {
-            lostPendantModel.FindFirstChildOfClass("ProximityPrompt")!.Triggered.Connect(() => {
-                Server.Quest.giveQuestItem(LostPendant.id, 1);
-                Server.Event.setEventCompleted("AHelpingHandPendant", true);
-
-            });
-            Server.Event.addCompletionListener("AHelpingHandPendant", (isCompleted) => {
-                if (isCompleted)
-                    lostPendantModel.Destroy();
-            });
         }
 
         Server.Event.addCompletionListener("FreddyReveal", (isCompleted) => {

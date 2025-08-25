@@ -232,10 +232,10 @@ export default class ChestService implements OnInit, OnStart {
         const current = this.levelService.getXp();
         if (totalXp > 0) {
             this.levelService.setXp(current + totalXp);
-            Packets.xpReceived.fireAll(totalXp);
+            Packets.showXpReward.fireAll(totalXp);
         }
 
-        Packets.itemsReceived.fireAll(items);
+        Packets.showItemReward.fireAll(items);
     }
 
     /**

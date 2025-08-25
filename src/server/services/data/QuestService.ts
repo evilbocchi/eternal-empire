@@ -89,7 +89,7 @@ export default class QuestService implements OnInit, OnStart {
      * 
      * @param level The player level to check quest reachability (defaults to current level).
      */
-    reachStages(level?: number) {
+    async reachStages(level?: number) {
         if (level === undefined) {
             level = this.dataService.empireData.level;
         }
@@ -213,6 +213,8 @@ export default class QuestService implements OnInit, OnStart {
 
         this.loadQuests();
         this.levelService.levelChanged.connect(() => this.reachStages());
+
+        print(`Loaded ${Quest.QUEST_PER_ID.size()} quests`);
     }
 
     onStart() {
