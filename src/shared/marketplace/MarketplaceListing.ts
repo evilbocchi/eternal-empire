@@ -1,6 +1,3 @@
-//!native
-//!optimize 2
-
 /**
  * @fileoverview Marketplace listing data structures and types.
  * 

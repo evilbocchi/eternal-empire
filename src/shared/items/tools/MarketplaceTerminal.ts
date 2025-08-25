@@ -9,7 +9,6 @@ export = new Item(script.Name)
     .setDescription("A high-tech terminal that provides access to the marketplace. Stand within 15 studs to automatically open the trading interface.")
     .setDifficulty(Difficulty.Easy)
     .setPrice(new CurrencyBundle().set("Funds", 1000), 1)
-    .setCreator("CoPKaDT")
     .addPlaceableArea("IntermittentIsles")
     .persists()
 
@@ -19,7 +18,7 @@ export = new Item(script.Name)
         const detectionRegion = new Instance("Part");
         detectionRegion.Name = "DetectionRegion";
         detectionRegion.Size = new Vector3(15, 15, 15);
-        detectionRegion.CFrame = model.GetPrimaryPartCFrame();
+        detectionRegion.CFrame = model.GetPivot();
         detectionRegion.Anchored = true;
         detectionRegion.CanCollide = false;
         detectionRegion.CanTouch = true;
@@ -77,15 +76,15 @@ export = new Item(script.Name)
                 const distance = rootPart.Position.sub(model.GetPrimaryPartCFrame().Position).Magnitude;
                 if (distance > DETECTION_RANGE) {
                     playersInRange.delete(player);
-                    
+
                     // If player had UI open, close it and restore movement
                     if (playersWithUIOpen.has(player)) {
                         playersWithUIOpen.delete(player);
                         playersBlockedFromReopening.add(player);
-                        
+
                         // Close marketplace UI
                         Packets.closeMarketplaceTerminal.fire(player);
-                        
+
                         // Re-enable player movement
                         if (humanoid) {
                             humanoid.PlatformStand = false;

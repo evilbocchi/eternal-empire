@@ -9,7 +9,7 @@ interface SetupBodyProps {
     onToggleAutoload?: () => void;
 }
 
-function SetupBody({ onSave, onLoad, onToggleAutoload }: SetupBodyProps) {
+export default function SetupBody({ onSave, onLoad, onToggleAutoload }: SetupBodyProps) {
     return (
         <frame key="Body" BackgroundTransparency={1} Size={new UDim2(1, 0, 0.66, 0)}>
             <ActionButton
@@ -37,5 +37,3 @@ function SetupBody({ onSave, onLoad, onToggleAutoload }: SetupBodyProps) {
         </frame>
     );
 }
-
-export default SetupBody;

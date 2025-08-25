@@ -1,7 +1,7 @@
 import React from "@rbxts/react";
-import { RobotoSlab } from "shared/ui/GameFonts";
-import { TweenService, RunService } from "@rbxts/services";
+import { TweenService } from "@rbxts/services";
 import { playSound } from "shared/asset/GameAssets";
+import { RobotoSlab } from "shared/ui/GameFonts";
 
 interface ToggleSwitchProps {
     label: string;
@@ -9,7 +9,7 @@ interface ToggleSwitchProps {
     onToggle?: (newState: boolean) => void;
 }
 
-function ToggleSwitch({ label, initialEnabled = false, onToggle }: ToggleSwitchProps) {
+export default function ToggleSwitch({ label, initialEnabled = false, onToggle }: ToggleSwitchProps) {
     const [isEnabled, setIsEnabled] = React.useState(initialEnabled);
     const toggleRef = React.useRef<Frame>();
     const buttonRef = React.useRef<TextButton>();
@@ -107,5 +107,3 @@ function ToggleSwitch({ label, initialEnabled = false, onToggle }: ToggleSwitchP
         </frame>
     );
 }
-
-export default ToggleSwitch;

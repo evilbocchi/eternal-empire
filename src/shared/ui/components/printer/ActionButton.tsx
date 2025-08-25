@@ -9,7 +9,7 @@ interface ActionButtonProps {
     onClick?: () => void;
 }
 
-function ActionButton({ text, backgroundColor, layoutOrder, onClick }: ActionButtonProps) {
+export default function ActionButton({ text, backgroundColor, layoutOrder, onClick }: ActionButtonProps) {
     const buttonRef = useRef<TextButton>();
     const [isAnimating, setIsAnimating] = useState(false);
     const [isHovered, setIsHovered] = useState(false);
@@ -119,5 +119,3 @@ function ActionButton({ text, backgroundColor, layoutOrder, onClick }: ActionBut
         </textbutton>
     );
 }
-
-export default ActionButton;

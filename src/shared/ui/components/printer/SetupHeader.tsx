@@ -8,7 +8,7 @@ interface SetupHeaderProps {
     onEditClick?: () => void;
 }
 
-function SetupHeader({ setupName, cost, onEditClick }: SetupHeaderProps) {
+export default function SetupHeader({ setupName, cost, onEditClick }: SetupHeaderProps) {
     return (
         <frame key="Heading" BackgroundTransparency={1} Size={new UDim2(1, -60, 0.33, 0)}>
             <imagebutton
@@ -105,5 +105,3 @@ function SetupHeader({ setupName, cost, onEditClick }: SetupHeaderProps) {
         </frame>
     );
 }
-
-export default SetupHeader;

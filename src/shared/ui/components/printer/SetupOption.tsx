@@ -11,7 +11,7 @@ interface SetupOptionProps {
     onToggleAutoload?: () => void;
 }
 
-function SetupOption({
+export default function SetupOption({
     setupName = "Setup 1",
     cost = "Cost: $1Qd, 100 W, 140 Purifier Clicks",
     isAutoloadEnabled = false,
@@ -62,5 +62,3 @@ function SetupOption({
         </frame>
     );
 }
-
-export default SetupOption;
