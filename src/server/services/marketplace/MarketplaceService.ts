@@ -19,6 +19,7 @@
  */
 
 import Signal from "@antivivi/lemon-signal";
+import { OnoeNum } from "@antivivi/serikanum";
 import { OnInit, OnStart, Service } from "@flamework/core";
 import { DataStoreService, HttpService, Players, RunService } from "@rbxts/services";
 import CurrencyService from "server/services/data/CurrencyService";
@@ -57,7 +58,7 @@ export default class MarketplaceService implements OnInit, OnStart {
     onInit() {
         // Set up packet handlers
         Packets.createListing.onInvoke((player, uuid, price, listingType, duration) => {
-            return this.createListing(player, uuid, new CurrencyBundle(price), listingType, duration);
+            return this.createListing(player, uuid, price, listingType, duration);
         });
 
         Packets.cancelListing.onInvoke((player, uuid) => {
@@ -69,7 +70,7 @@ export default class MarketplaceService implements OnInit, OnStart {
         });
 
         Packets.placeBid.onInvoke((player, uuid, bidAmount) => {
-            return this.placeBid(player, uuid, new CurrencyBundle(bidAmount));
+            return this.placeBid(player, uuid, bidAmount);
         });
 
         Packets.getMarketplaceListings.onInvoke((player) => {
@@ -102,7 +103,7 @@ export default class MarketplaceService implements OnInit, OnStart {
     createListing(
         player: Player,
         uuid: string,
-        price: CurrencyBundle,
+        price: number,
         listingType: "buyout" | "auction",
         duration: number
     ) {
@@ -125,10 +126,8 @@ export default class MarketplaceService implements OnInit, OnStart {
             }
 
             // Validate price
-            const priceValue = price.getFirst()[1];
-            if (priceValue === undefined ||
-                priceValue.lessThan(MARKETPLACE_CONFIG.MIN_LISTING_PRICE) ||
-                priceValue.moreThan(MARKETPLACE_CONFIG.MAX_LISTING_PRICE)) {
+            if (price < MARKETPLACE_CONFIG.MIN_LISTING_PRICE ||
+                price > MARKETPLACE_CONFIG.MAX_LISTING_PRICE) {
                 return false;
             }
 
@@ -139,17 +138,11 @@ export default class MarketplaceService implements OnInit, OnStart {
             }
 
             // Calculate listing fee
-            const listingFee = price.mul(MARKETPLACE_CONFIG.LISTING_FEE_PERCENTAGE);
-
-            // Check if player can afford listing fee
-            if (!this.currencyService.canAfford(listingFee)) {
-                return false;
-            }
+            const listingFee = math.ceil(price * MARKETPLACE_CONFIG.LISTING_FEE_PERCENTAGE * 100) / 100;
 
             // Charge listing fee
-            if (!this.currencyService.purchase(listingFee)) {
+            if (!this.currencyService.purchase(new CurrencyBundle().set("Diamonds", listingFee)))
                 return false;
-            }
 
             // Create the listing
             const expires = duration > 0 ? os.time() + duration : os.time() + MARKETPLACE_CONFIG.DEFAULT_LISTING_DURATION;
@@ -179,9 +172,7 @@ export default class MarketplaceService implements OnInit, OnStart {
 
             if (success === undefined) {
                 // Refund listing fee
-                for (const [currency, amount] of listingFee.amountPerCurrency) {
-                    this.currencyService.increment(currency, amount);
-                }
+                this.currencyService.increment("Diamonds", new OnoeNum(listingFee));
                 return false;
             }
 
@@ -238,10 +229,8 @@ export default class MarketplaceService implements OnInit, OnStart {
 
             // Refund listing fee (50% penalty)
             if (listing.listingFee !== undefined) {
-                const refund = listing.listingFee.mul(0.5);
-                for (const [currency, amount] of refund.amountPerCurrency) {
-                    this.currencyService.increment(currency, amount);
-                }
+                const refund = listing.listingFee * 0.5;
+                this.currencyService.increment("Diamonds", new OnoeNum(refund));
             }
 
             // Fire events
@@ -273,7 +262,7 @@ export default class MarketplaceService implements OnInit, OnStart {
             sellerEmpireId: "",
             sellerId: 0,
             uuid: uuid,
-            price: new CurrencyBundle(), // Will be filled from listing
+            price: 0, // Will be filled from listing
             timestamp: os.time(),
             status: "processing"
         };
@@ -306,23 +295,17 @@ export default class MarketplaceService implements OnInit, OnStart {
             // Upload processing token to external system
             this.uploadTradeToken(tokenId, token);
 
-            // Check if buyer can afford
-            if (!this.currencyService.canAfford(listing.price)) {
-                token.status = "failed";
-                this.uploadTradeToken(tokenId, token);
-                return false;
-            }
-
             // Process payment
-            if (!this.currencyService.purchase(listing.price)) {
+            const success = this.currencyService.purchase(new CurrencyBundle().set("Diamonds", listing.price));
+            if (!success) {
                 token.status = "failed";
                 this.uploadTradeToken(tokenId, token);
                 return false;
             }
 
             // Calculate taxes
-            const tax = listing.price.mul(MARKETPLACE_CONFIG.TRANSACTION_TAX_PERCENTAGE);
-            const sellerProceeds = listing.price.sub(tax);
+            const tax = listing.price * MARKETPLACE_CONFIG.TRANSACTION_TAX_PERCENTAGE;
+            const sellerProceeds = listing.price - tax;
 
             // Add item to buyer's inventory
             const empireData = this.dataService.empireData;
@@ -376,14 +359,14 @@ export default class MarketplaceService implements OnInit, OnStart {
     /**
      * Places a bid on an auction.
      */
-    placeBid(player: Player, uuid: string, bidAmount: CurrencyBundle): boolean {
+    placeBid(player: Player, uuid: string, bidAmount: number): boolean {
         if (!this.isMarketplaceEnabled) {
             return false;
         }
 
         try {
             // Check if player can afford bid
-            if (!this.currencyService.canAfford(bidAmount)) {
+            if (!this.currencyService.canAfford(new CurrencyBundle().set("Diamonds", bidAmount))) {
                 return false;
             }
 
@@ -393,10 +376,10 @@ export default class MarketplaceService implements OnInit, OnStart {
                 }
 
                 // Check if bid is higher than current bid
-                const currentBidValue = oldListing.currentBid?.getFirst()[1] ?? oldListing.price.getFirst()[1];
-                const newBidValue = bidAmount.getFirst()[1];
+                const currentBidValue = oldListing.currentBid ?? oldListing.price;
+                const newBidValue = bidAmount;
 
-                if (currentBidValue === undefined || newBidValue === undefined || newBidValue.lessEquals(currentBidValue)) {
+                if (currentBidValue === undefined || newBidValue === undefined || newBidValue <= currentBidValue) {
                     return $tuple(oldListing);
                 }
 
@@ -415,7 +398,7 @@ export default class MarketplaceService implements OnInit, OnStart {
             }
 
             // Process bid payment (held in escrow)
-            if (!this.currencyService.purchase(bidAmount)) {
+            if (!this.currencyService.purchase(new CurrencyBundle().set("Diamonds", bidAmount))) {
                 return false;
             }
 

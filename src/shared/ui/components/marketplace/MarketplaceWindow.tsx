@@ -1,3 +1,4 @@
+import { OnoeNum } from "@antivivi/serikanum";
 import React, { useEffect, useState } from "@rbxts/react";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import "shared/marketplace/MarketplaceListing";
@@ -16,13 +17,13 @@ type TabType = "Browse" | "MyListings" | "CreateListing";
 interface ListingCardProps {
     listing: MarketplaceListing;
     onBuy?: (uuid: string) => void;
-    onBid?: (uuid: string, amount: CurrencyBundle) => void;
+    onBid?: (uuid: string, amount: number) => void;
     onCancel?: (uuid: string) => void;
     isOwner?: boolean;
 }
 
 interface CreateListingFormProps {
-    onSubmit: (uuid: string, price: CurrencyBundle, listingType: "buyout" | "auction", duration: number) => void;
+    onSubmit: (uuid: string, price: number, listingType: "buyout" | "auction", duration: number) => void;
 }
 
 interface SearchFiltersProps {
@@ -41,11 +42,7 @@ export function ListingCard({ listing, onBuy, onBid, onCancel, isOwner = false }
 
     const handleBid = () => {
         if (onBid && bidAmount !== "") {
-            // Create currency bundle from bid amount - simplified for this example
-            const amount = tonumber(bidAmount) || 0;
-            const currencyBundle = new CurrencyBundle();
-            // You'd need to set the appropriate currency type here
-            onBid(listing.uuid, currencyBundle);
+            onBid(listing.uuid, tonumber(bidAmount) ?? 0);
             setBidAmount("");
             setShowBidInput(false);
         }
@@ -53,15 +50,6 @@ export function ListingCard({ listing, onBuy, onBid, onCancel, isOwner = false }
 
     const handleCancel = () => {
         if (onCancel) onCancel(listing.uuid);
-    };
-
-    const formatPrice = (price: CurrencyBundle): string => {
-        // Simplified price formatting - you'd implement proper currency display
-        const firstCurrency = price.getFirst();
-        if (firstCurrency && firstCurrency[1]) {
-            return tostring(firstCurrency[1]);
-        }
-        return "0";
     };
 
     const formatTimeRemaining = (expires?: number): string => {
@@ -131,7 +119,7 @@ export function ListingCard({ listing, onBuy, onBid, onCancel, isOwner = false }
                         Position={new UDim2(0, 50, 0, 0)}
                     >
                         <CurrencyDisplay
-                            currencyBundle={listing.price}
+                            currencyBundle={new CurrencyBundle().set("Diamonds", new OnoeNum(listing.price))}
                             size={new UDim2(1, 0, 1, 0)}
                         />
                     </frame>
@@ -161,7 +149,7 @@ export function ListingCard({ listing, onBuy, onBid, onCancel, isOwner = false }
                     <uistroke Thickness={1} />
                 </textlabel>
 
-                {listing.currentBid && (
+                {listing.currentBid !== undefined && (
                     <frame BackgroundTransparency={1} Size={new UDim2(1, 0, 0, 20)}>
                         <textlabel
                             BackgroundTransparency={1}
@@ -181,7 +169,7 @@ export function ListingCard({ listing, onBuy, onBid, onCancel, isOwner = false }
                             Position={new UDim2(0, 80, 0, 0)}
                         >
                             <CurrencyDisplay
-                                currencyBundle={listing.currentBid}
+                                currencyBundle={new CurrencyBundle().set("Diamonds", new OnoeNum(listing.currentBid))}
                                 size={new UDim2(1, 0, 1, 0)}
                                 textColor={Color3.fromRGB(255, 255, 150)}
                             />
@@ -485,11 +473,7 @@ export function CreateListingForm({ onSubmit }: CreateListingFormProps) {
         const durationNum = tonumber(duration);
         if (!durationNum || durationNum <= 0) return;
 
-        // Create currency bundle - simplified for this example
-        const currencyBundle = new CurrencyBundle();
-        // You'd need to set the appropriate currency type here
-
-        onSubmit(selectedUuid, currencyBundle, listingType, durationNum * 24 * 60 * 60);
+        onSubmit(selectedUuid, priceNum, listingType, durationNum * 24 * 60 * 60);
 
         // Reset form
         setSelectedUuid("");
@@ -804,16 +788,16 @@ export default function MarketplaceWindow({ visible, onClose }: MarketplaceWindo
         Packets.buyItem.invoke(uuid);
     };
 
-    const handlePlaceBid = (uuid: string, bidAmount: CurrencyBundle) => {
-        Packets.placeBid.invoke(uuid, bidAmount.amountPerCurrency);
+    const handlePlaceBid = (uuid: string, bidAmount: number) => {
+        Packets.placeBid.invoke(uuid, bidAmount);
     };
 
     const handleCancelListing = (uuid: string) => {
         Packets.cancelListing.invoke(uuid);
     };
 
-    const handleCreateListing = (uuid: string, price: CurrencyBundle, listingType: "buyout" | "auction", duration: number) => {
-        Packets.createListing.invoke(uuid, price.amountPerCurrency, listingType, duration);
+    const handleCreateListing = (uuid: string, price: number, listingType: "buyout" | "auction", duration: number) => {
+        Packets.createListing.invoke(uuid, price, listingType, duration);
     };
 
     const handleSearch = (query: string) => {

@@ -8,7 +8,6 @@
  */
 
 import { DataType } from "@rbxts/flamework-binary-serializer";
-import CurrencyBundle from "shared/currency/CurrencyBundle";
 
 declare global {
     /**
@@ -33,7 +32,7 @@ declare global {
         /**
          * The asking price for the item.
          */
-        price: CurrencyBundle;
+        price: number;
 
         /**
          * The type of listing.
@@ -53,7 +52,7 @@ declare global {
         /**
          * Current highest bid for auction listings.
          */
-        currentBid?: CurrencyBundle;
+        currentBid?: number;
 
         /**
          * User ID of the current highest bidder.
@@ -68,7 +67,7 @@ declare global {
         /**
          * Listing fee paid (for potential refunds).
          */
-        listingFee?: CurrencyBundle;
+        listingFee?: number;
 
         /**
          * Whether the listing is active.
@@ -113,7 +112,7 @@ declare global {
         /**
          * The agreed upon price.
          */
-        price: CurrencyBundle;
+        price: number;
 
         /**
          * Unix timestamp when the trade was initiated.
@@ -138,12 +137,12 @@ declare global {
         /**
          * Minimum price filter.
          */
-        minPrice?: CurrencyBundle;
+        minPrice?: number;
 
         /**
          * Maximum price filter.
          */
-        maxPrice?: CurrencyBundle;
+        maxPrice?: number;
 
         /**
          * Listing type filter.
@@ -193,7 +192,7 @@ declare global {
         /**
          * The final sale price.
          */
-        price: CurrencyBundle;
+        price: number;
 
         /**
          * Unix timestamp of the transaction.
@@ -213,31 +212,31 @@ declare global {
 const MARKETPLACE_CONFIG = {
     /** Maximum number of active listings per player */
     MAX_LISTINGS_PER_PLAYER: 10,
-    
+
     /** Default listing duration in seconds (7 days) */
     DEFAULT_LISTING_DURATION: 7 * 24 * 60 * 60,
-    
+
     /** Marketplace listing fee percentage (1%) */
     LISTING_FEE_PERCENTAGE: 0.01,
-    
+
     /** Transaction tax percentage (2%) */
     TRANSACTION_TAX_PERCENTAGE: 0.02,
-    
+
     /** Maximum price for any listing */
     MAX_LISTING_PRICE: 1e12,
-    
+
     /** Minimum price for any listing */
     MIN_LISTING_PRICE: 1,
-    
+
     /** Time before processing tokens expire (1 hour) */
     PROCESSING_TOKEN_TIMEOUT: 60 * 60,
-    
+
     /** Marketplace DataStore name */
     DATASTORE_NAME: "MarketplaceListings",
-    
+
     /** Trade tokens DataStore name */
     TOKENS_DATASTORE_NAME: "TradeTokens",
-    
+
     /** Transaction history DataStore name */
     HISTORY_DATASTORE_NAME: "MarketplaceHistory",
 } as const;

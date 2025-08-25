@@ -188,10 +188,10 @@ namespace Packets {
 
     // marketplace
     export const marketplaceListings = property<Map<string, DataType.Packed<MarketplaceListing>>>(new Map());
-    export const createListing = request<(uuid: string, price: CurrencyMap, listingType: "buyout" | "auction", duration: DataType.i32) => boolean>();
+    export const createListing = request<(uuid: string, price: number, listingType: "buyout" | "auction", duration: DataType.i32) => boolean>();
     export const cancelListing = request<(uuid: string) => boolean>();
     export const buyListing = request<(uuid: string) => boolean>();
-    export const placeBid = request<(uuid: string, bidAmount: CurrencyMap) => boolean>();
+    export const placeBid = request<(uuid: string, bidAmount: number) => boolean>();
     export const getMarketplaceListings = request<() => MarketplaceListing[]>();
     export const marketplaceTransaction = signal<(transaction: MarketplaceTransaction) => void>();
     export const listingUpdated = signal<(listing: MarketplaceListing) => void>();
