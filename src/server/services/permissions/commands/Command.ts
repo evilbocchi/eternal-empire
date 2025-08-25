@@ -29,38 +29,5 @@ export default class Command {
     }
 }
 
-interface CommandAPI {
-    ChatHook: {
-        sendPrivateMessage: (player: Player, message: string, color?: string) => void;
-    };
-    Command: {
-        findPlayers: (sender: Player, playerName: string) => Player[];
-        id: (playerName: string, useId?: string) => number | undefined;
-        fp: (playerName: string, userId: number) => string;
-    };
-    Data: {
-        empireId: string;
-        empireData: any;
-    };
-    Currency: {
-        set: (currency: Currency, amount: any) => void;
-    };
-    Item: {
-        setItemAmount: (itemId: string, amount: number) => void;
-        setBoughtAmount: (itemId: string, amount: number) => void;
-    };
-    Permissions: {
-        add: (group: string, userId: number) => boolean;
-        updatePermissionLevel: (userId: number) => void;
-    };
-    MarketplaceService: {
-        getMarketplaceStats: () => { enabled: boolean };
-        setMarketplaceEnabled: (enabled: boolean) => void;
-        setTradeTokenWebhook: (url: string) => void;
-    };
-    SimpleMarketplaceService: {
-        testMarketplace: () => void;
-    };
-}
 
 export const CommandAPI = ({} as unknown) as CommandAPI;

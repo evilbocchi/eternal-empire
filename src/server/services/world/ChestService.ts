@@ -14,8 +14,8 @@ import { convertToMMSS, weldModel } from "@antivivi/vrldk";
 import { OnInit, OnStart, Service } from "@flamework/core";
 import { TweenService, Workspace } from "@rbxts/services";
 import ItemService from "server/services/item/ItemService";
-import DataService from "server/services/serverdata/DataService";
-import LevelService from "server/services/serverdata/LevelService";
+import DataService from "server/services/data/DataService";
+import LevelService from "server/services/data/LevelService";
 import UnlockedAreasService from "server/services/world/UnlockedAreasService";
 import { AREAS } from "shared/Area";
 import { ASSETS, getSound, SOUND_EFFECTS_GROUP } from "shared/asset/GameAssets";
@@ -232,10 +232,10 @@ export default class ChestService implements OnInit, OnStart {
         const current = this.levelService.getXp();
         if (totalXp > 0) {
             this.levelService.setXp(current + totalXp);
-            Packets.xpReceived.fireAll(totalXp);
+            Packets.showXpReward.fireAll(totalXp);
         }
 
-        Packets.itemsReceived.fireAll(items);
+        Packets.showItemReward.fireAll(items);
     }
 
     /**

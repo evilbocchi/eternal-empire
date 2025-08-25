@@ -21,7 +21,7 @@
 import Signal from "@antivivi/lemon-signal";
 import { OnoeNum } from "@antivivi/serikanum";
 import { OnInit, OnStart, Service } from "@flamework/core";
-import DataService from "server/services/serverdata/DataService";
+import DataService from "server/services/data/DataService";
 import Packets from "shared/Packets";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import { CURRENCIES, CURRENCY_DETAILS } from "shared/currency/CurrencyDetails";

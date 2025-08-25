@@ -15,8 +15,8 @@ import Signal from "@antivivi/lemon-signal";
 import { combineHumanReadable } from "@antivivi/vrldk";
 import { Controller, OnInit, OnPhysics } from "@flamework/core";
 import { Debris, ReplicatedStorage, TweenService, Workspace } from "@rbxts/services";
-import HotkeysController from "client/controllers/core/HotkeysController";
 import AdaptiveTabController, { ADAPTIVE_TAB_MAIN_WINDOW, SIDEBAR_BUTTONS } from "client/controllers/core/AdaptiveTabController";
+import HotkeysController from "client/controllers/core/HotkeysController";
 import { OnCharacterAdded } from "client/controllers/core/ModdingController";
 import UIController, { INTERFACE } from "client/controllers/core/UIController";
 import EffectController from "client/controllers/world/EffectController";
@@ -356,14 +356,15 @@ export default class QuestsController implements OnInit, OnPhysics, OnCharacterA
             lastLevel = level;
         });
         Packets.xp.observe((xp) => this.refreshXp(xp));
-        const questInfoObservation = Packets.questInfo.observe((value) => {
+
+        Packets.questInfo.observe((value) => {
             for (const [id, questInfo] of value)
                 onQuestReceived(id, questInfo);
-            questInfoObservation.disconnect();
         });
         const onQuestReceived = (id: string, quest: QuestInfo) => {
-            if (quest.level >= 999 || QUESTS_WINDOW.QuestList.FindFirstChild(id))
+            if (quest.level >= 999)
                 return;
+            QUESTS_WINDOW.QuestList.FindFirstChild(id)?.Destroy();
             this.availableQuests.add(id);
             const color = new Color3(quest.colorR, quest.colorG, quest.colorB);
             const questOption = ASSETS.QuestsWindow.QuestOption.Clone();
@@ -376,11 +377,6 @@ export default class QuestsController implements OnInit, OnPhysics, OnCharacterA
             questOption.BackgroundColor3 = color;
             questOption.UIStroke.Color = color;
             questOption.Name = id;
-            let index = 0;
-            let belowReq = false;
-            const refreshDropdownLabel = () => TweenService.Create(questOption.Dropdown.ImageLabel, this.tween, { Rotation: questOption.Content.Visible ? 0 : 180 }).Play();
-            questOption.Content.GetPropertyChangedSignal("Visible").Connect(() => refreshDropdownLabel());
-            refreshDropdownLabel();
             questOption.Dropdown.Activated.Connect(() => {
                 const visible = !questOption.Content.Visible;
                 questOption.Content.Visible = visible;
@@ -392,13 +388,25 @@ export default class QuestsController implements OnInit, OnPhysics, OnCharacterA
                     this.uiController.playSound("CheckOff.mp3");
                 }
             });
+            questOption.Parent = QUESTS_WINDOW.QuestList;
+
+            let index = 0;
+            let belowReq = false;
+            const refreshDropdownLabel = () => TweenService.Create(questOption.Dropdown.ImageLabel, this.tween, { Rotation: questOption.Content.Visible ? 0 : 180 }).Play();
+            questOption.Content.GetPropertyChangedSignal("Visible").Connect(() => refreshDropdownLabel());
+            refreshDropdownLabel();
+
+
+            const trackConnection = this.trackedQuestChanged.connect((q) => updateTrack(q));
             const updateTrack = (q: string | undefined) => {
+                if (questOption.Parent === undefined)
+                    return trackConnection.disconnect();
                 const color = id === q ? Color3.fromRGB(85, 255, 127) : Color3.fromRGB(255, 52, 52);
                 questOption.Content.Track.BackgroundColor3 = color;
                 questOption.Content.Track.UIStroke.Color = color;
             };
-            this.trackedQuestChanged.connect((q) => updateTrack(q));
             updateTrack(this.trackedQuest);
+
             questOption.Content.Track.Activated.Connect(() => {
                 if (this.trackedQuest === id) {
                     this.trackedQuest = undefined;
@@ -436,22 +444,29 @@ export default class QuestsController implements OnInit, OnPhysics, OnCharacterA
                 }
                 questOption.Dropdown.LevelLabel.TextColor3 = belowReq ? Color3.fromRGB(255, 52, 52) : Color3.fromRGB(255, 255, 255);
             };
-            Packets.level.observe((level) => {
+            const levelConnection = Packets.level.observe((level) => {
+                if (questOption.Parent === undefined)
+                    return levelConnection.disconnect();
+
                 belowReq = level < quest.level;
                 updateAvailability();
                 this.refreshNotificationWindow();
 
                 questOption.Content.Track.Visible = !belowReq;
             });
+
             let moved = false;
-            Packets.stagePerQuest.observe((quests) => {
+            const stageConnection = Packets.stagePerQuest.observe((quests) => {
+                if (questOption.Parent === undefined)
+                    return stageConnection.disconnect();
+
                 index = quests.get(id) ?? 0;
                 updateAvailability();
                 this.refreshNotificationWindow();
                 questOption.Content.CurrentStepLabel.Text = `- ${this.getFormattedDescription(id, quest, index)}`;
             });
-            questOption.Parent = QUESTS_WINDOW.QuestList;
         };
+
         this.trackedQuestChanged.connect((questId) => this.refreshTrackedQuestWindow(questId));
 
         Packets.stagePerQuest.observe((quests) => {
@@ -460,7 +475,7 @@ export default class QuestsController implements OnInit, OnPhysics, OnCharacterA
             this.refreshTrackedQuestWindow(this.trackedQuest, index);
             this.refreshNotificationWindow();
         });
-        Packets.xpReceived.connect((xp) => {
+        Packets.showXpReward.connect((xp) => {
             const lootItemSlot = ASSETS.LootTableItemSlot.Clone();
             this.uiController.playSound("UnlockItem.mp3");
             lootItemSlot.Background.ImageLabel.ImageColor3 = TRACKED_QUEST_WINDOW.Background.Frame.BackgroundColor3;
@@ -469,7 +484,7 @@ export default class QuestsController implements OnInit, OnPhysics, OnCharacterA
             lootItemSlot.Parent = TRACKED_QUEST_WINDOW;
             task.delay(3, () => this.phaseOutLootTableItemSlot(lootItemSlot));
         });
-        Packets.itemsReceived.connect((items) => {
+        Packets.showItemReward.connect((items) => {
             this.uiController.playSound("UnlockItem.mp3");
             for (const [itemId, amount] of items) {
                 const item = Items.getItem(itemId);

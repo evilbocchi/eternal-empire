@@ -19,7 +19,7 @@
 
 import { OnInit, Service } from "@flamework/core";
 import { RunService } from "@rbxts/services";
-import DataService from "server/services/serverdata/DataService";
+import DataService from "server/services/data/DataService";
 import Packets from "shared/Packets";
 
 /**

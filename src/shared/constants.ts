@@ -57,12 +57,17 @@ export function getNameFromUserId(userId: number | undefined) {
     return value;
 }
 
-export const getNPCModel = (npc: string) => NPC_MODELS.WaitForChild(npc) as Model;
-export const getNPCPosition = (npc: string) => getNPCModel(npc).PrimaryPart?.Position;
+export const getNPCModel = (npc: NPCName): LuaTuple<[Model, Humanoid, BasePart]> => {
+    const model = NPC_MODELS.WaitForChild(npc) as Model;
+    const humanoid = model.WaitForChild("Humanoid") as Humanoid;
+    const rootPart = humanoid.RootPart!;
+    return $tuple(model, humanoid, rootPart);
+};
 export const getStartCamera = () => Workspace.FindFirstChild("StartCamera") as Part;
 
 export const LEADERBOARDS = Workspace.WaitForChild("Leaderboards") as Folder & {
     TimePlayed: Leaderboard;
+    Level: Leaderboard;
     Funds: Leaderboard;
     Power: Leaderboard;
     Skill: Leaderboard;

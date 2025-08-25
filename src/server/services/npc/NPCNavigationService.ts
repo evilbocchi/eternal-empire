@@ -45,13 +45,14 @@ export default class NPCNavigationService implements OnInit, OnStart, OnPhysics 
     /** Material costs for pathfinding calculations. Higher costs make NPCs avoid certain materials. */
     readonly PATHFINDING_COSTS = {
         Water: 20,
+        Limestone: 20, // Ground beneath water
         SmoothPlastic: 10,
         Wood: 10,
         Plastic: 2
     };
 
     /** Default parameters for NPC pathfinding operations. */
-    readonly PATHFINDING_PARAMS = {
+    readonly PATHFINDING_PARAMS: AgentParameters = {
         Costs: this.PATHFINDING_COSTS,
         WaypointSpacing: 6
     };
@@ -70,7 +71,7 @@ export default class NPCNavigationService implements OnInit, OnStart, OnPhysics 
      * @param retries Number of retry attempts.
      * @returns An array of waypoints or undefined if no path is found.
      */
-    getWaypoints(humanoid: Humanoid, source: Vector3, destination: Vector3, params: AgentParameters = this.PATHFINDING_PARAMS, retries = 0): PathWaypoint[] | undefined {
+    getWaypoints(humanoid: Humanoid, source: Vector3, destination: Vector3, params = this.PATHFINDING_PARAMS, retries = 0): PathWaypoint[] | undefined {
         if (humanoid === undefined || humanoid.RootPart === undefined) {
             warn("Humanoid or RootPart is undefined");
             return;
@@ -97,8 +98,6 @@ export default class NPCNavigationService implements OnInit, OnStart, OnPhysics 
      * @param humanoid The NPC's humanoid to move.
      * @param position The target position to navigate to.
      * @param endCallback Function called when navigation completes.
-     * @param params Pathfinding parameters (defaults to PATHFINDING_PARAMS).
-     * @param iterations Number of retry attempts remaining.
      * @returns Connection object for the pathfinding operation.
      */
     pathfind(
@@ -122,6 +121,8 @@ export default class NPCNavigationService implements OnInit, OnStart, OnPhysics 
                     playSoundAtPart(rootPart, getSound("Jump.mp3"));
                 }
                 newPos = nextWaypoint.Position;
+
+
                 humanoid.MoveTo(newPos);
             }
             else {
@@ -139,15 +140,15 @@ export default class NPCNavigationService implements OnInit, OnStart, OnPhysics 
             const dist = rootPart.Position.sub(newPos).mul(new Vector3(1, 0, 1)).Magnitude;
 
             // Check if close enough to waypoint
-            if (dist < humanoid.WalkSpeed * 0.1875) { // allow more leeway for higher speeds
+            if (dist < math.max(humanoid.WalkSpeed * 0.1875, 0.5)) { // allow more leeway for higher speeds
                 t = 0;
                 newPos = undefined;
                 doNextWaypoint();
             }
             // Teleport if stuck for too long
-            else if (t > 0.35 * dist) {
+            else if (t > math.max(5.6 * dist / humanoid.WalkSpeed, 2)) {
                 t = 0;
-                rootPart.CFrame = new CFrame(newPos);
+                rootPart.CFrame = new CFrame(newPos).add(new Vector3(0, humanoid.HipHeight, 0));
             }
         });
 
@@ -257,6 +258,7 @@ export default class NPCNavigationService implements OnInit, OnStart, OnPhysics 
 
         return start;
     }
+
 
     // Lifecycle Methods
 

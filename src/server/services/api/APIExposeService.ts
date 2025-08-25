@@ -10,23 +10,28 @@
  */
 
 import { OnInit, Service } from "@flamework/core";
+import { DonationService } from "server/services/DonationService";
 import ItemService from "server/services/item/ItemService";
+import { LeaderboardService } from "server/services/leaderboard/LeaderboardService";
 import ModdingService from "server/services/ModdingService";
 import DialogueService from "server/services/npc/DialogueService";
 import NPCNavigationService from "server/services/npc/NPCNavigationService";
 import NPCStateService from "server/services/npc/NPCStateService";
 import ChatHookService from "server/services/permissions/ChatHookService";
+import PermissionsService from "server/services/permissions/PermissionsService";
 import ResetService from "server/services/ResetService";
 import RevenueService from "server/services/RevenueService";
-import CurrencyService from "server/services/serverdata/CurrencyService";
-import DataService from "server/services/serverdata/DataService";
-import EventService from "server/services/serverdata/EventService";
-import NamedUpgradeService from "server/services/serverdata/NamedUpgradeService";
-import PlaytimeService from "server/services/serverdata/PlaytimeService";
-import QuestService from "server/services/serverdata/QuestService";
-import SetupService from "server/services/serverdata/SetupService";
+import CurrencyService from "server/services/data/CurrencyService";
+import DataService from "server/services/data/DataService";
+import EventService from "server/services/data/EventService";
+import LevelService from "server/services/data/LevelService";
+import NamedUpgradeService from "server/services/data/NamedUpgradeService";
+import PlaytimeService from "server/services/data/PlaytimeService";
+import QuestService from "server/services/data/QuestService";
+import SetupService from "server/services/data/SetupService";
 import AreaService from "server/services/world/AreaService";
 import AtmosphereService from "server/services/world/AtmosphereService";
+import ChestService from "server/services/world/ChestService";
 import UnlockedAreasService from "server/services/world/UnlockedAreasService";
 import ItemUtils from "shared/item/ItemUtils";
 import Items from "shared/items/Items";
@@ -45,24 +50,29 @@ declare global {
 export default class APIExposeService implements OnInit {
 
     constructor(
-        private readonly chatHookService: ChatHookService,
         private readonly areaService: AreaService,
         private readonly atmosphereService: AtmosphereService,
-        private readonly dataService: DataService,
-        private readonly itemService: ItemService,
+        private readonly chatHookService: ChatHookService,
+        private readonly chestService: ChestService,
         private readonly currencyService: CurrencyService,
-        private readonly unlockedAreasService: UnlockedAreasService,
-        private readonly playtimeService: PlaytimeService,
-        private readonly resetService: ResetService,
-        private readonly revenueService: RevenueService,
-        private readonly setupService: SetupService,
-        private readonly eventService: EventService,
+        private readonly dataService: DataService,
         private readonly dialogueService: DialogueService,
+        private readonly donationService: DonationService,
+        private readonly eventService: EventService,
+        private readonly itemService: ItemService,
+        private readonly levelService: LevelService,
+        private readonly leaderboardService: LeaderboardService,
+        private readonly moddingService: ModdingService,
         private readonly namedUpgradeService: NamedUpgradeService,
         private readonly npcNavigationService: NPCNavigationService,
         private readonly npcStateService: NPCStateService,
+        private readonly permissionsService: PermissionsService,
+        private readonly playtimeService: PlaytimeService,
         private readonly questService: QuestService,
-        private readonly moddingService: ModdingService
+        private readonly resetService: ResetService,
+        private readonly revenueService: RevenueService,
+        private readonly setupService: SetupService,
+        private readonly unlockedAreasService: UnlockedAreasService
     ) {
 
     }
@@ -86,6 +96,14 @@ export default class APIExposeService implements OnInit {
             empireData: this.dataService.empireData,
 
             /**
+             * Empire and player data management service.
+             * 
+             * @borrows DataService as dataService
+             * @see {@link DataService} for more details.
+             */
+            Data: this.dataService,
+
+            /**
              * Area management service.
              * 
              * @borrows AreaService as areaService
@@ -102,12 +120,28 @@ export default class APIExposeService implements OnInit {
             Atmosphere: this.atmosphereService,
 
             /**
+             * Donation management service.
+             * 
+             * @borrows DonationService as donationService
+             * @see {@link DonationService} for more details.
+             */
+            Donation: this.donationService,
+
+            /**
              * Chat hook service for sending messages and managing channels.
              * 
              * @borrows ChatHookService as chatHookService
              * @see {@link ChatHookService} for more details.
              */
             ChatHook: this.chatHookService,
+
+            /**
+             * Chest management service.
+             * 
+             * @borrows ChestService as chestService
+             * @see {@link ChestService} for more details.
+             */
+            Chest: this.chestService,
 
             /**
              * Currency and balance management service.
@@ -171,6 +205,22 @@ export default class APIExposeService implements OnInit {
             Playtime: this.playtimeService,
 
             /**
+             * Level and XP management service.
+             * 
+             * @borrows LevelService as levelService
+             * @see {@link LevelService} for more details.
+             */
+            Level: this.levelService,
+
+            /**
+             * Leaderboard management service.
+             * 
+             * @borrows LeaderboardService as leaderboardService
+             * @see {@link LeaderboardService} for more details.
+             */
+            Leaderboard: this.leaderboardService,
+
+            /**
              * Quest management service.
              * 
              * @borrows QuestService as questService
@@ -201,6 +251,14 @@ export default class APIExposeService implements OnInit {
              * @see {@link SetupService} for more details.
              */
             Setup: this.setupService,
+
+            /**
+             * Permissions management service.
+             * 
+             * @borrows PermissionsService as permissionsService
+             * @see {@link PermissionsService} for more details.
+             */
+            Permissions: this.permissionsService,
 
             /**
              * Service for unlocking and tracking areas.

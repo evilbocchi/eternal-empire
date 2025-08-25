@@ -22,8 +22,8 @@
 
 import Signal from "@antivivi/lemon-signal";
 import { OnInit, Service } from "@flamework/core";
-import DataService from "server/services/serverdata/DataService";
-import NamedUpgradeService from "server/services/serverdata/NamedUpgradeService";
+import DataService from "server/services/data/DataService";
+import NamedUpgradeService from "server/services/data/NamedUpgradeService";
 import { getMaxXp } from "shared/constants";
 import NamedUpgrades from "shared/namedupgrade/NamedUpgrades";
 import Packets from "shared/Packets";

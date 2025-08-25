@@ -21,11 +21,11 @@ import { CHALLENGE_UPGRADES, CHALLENGES, REWARD_UPGRADES } from "server/Challeng
 import ChatHookService from "server/services/permissions/ChatHookService";
 import PermissionsService from "server/services/permissions/PermissionsService";
 import ResetService from "server/services/ResetService";
-import CurrencyService from "server/services/serverdata/CurrencyService";
-import DataService from "server/services/serverdata/DataService";
+import CurrencyService from "server/services/data/CurrencyService";
+import DataService from "server/services/data/DataService";
 import ItemService from "server/services/item/ItemService";
-import SetupService from "server/services/serverdata/SetupService";
-import NamedUpgradeService from "server/services/serverdata/NamedUpgradeService";
+import SetupService from "server/services/data/SetupService";
+import NamedUpgradeService from "server/services/data/NamedUpgradeService";
 import { getChallengeGui } from "shared/constants";
 import { ASSETS } from "shared/asset/GameAssets";
 import Item from "shared/item/Item";

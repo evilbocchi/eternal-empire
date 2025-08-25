@@ -6,41 +6,45 @@
  */
 
 import Signal from "@antivivi/lemon-signal";
+import { ReplicatedStorage } from "@rbxts/services";
+import type QuestService from "server/services/data/QuestService";
 import { getNPCModel } from "shared/constants";
 import { Server } from "shared/item/ItemUtils";
 import { Dialogue } from "shared/NPC";
+import Packets from "shared/Packets";
 
 /**
  * Represents a single stage within a quest, including its description, position, focus, dialogue, and NPCs.
  * Provides methods for configuring stage properties and handling stage events.
  */
 export class Stage {
+    /** The description of the stage. */
     description: string | undefined;
+
+    /** The position players are guided to when focusing on this stage. */
     position: Vector3 | undefined;
+
+    /** The part players are guided to when focusing on this stage. */
     focus: BasePart | undefined;
+
+    /** The dialogue added when this stage is reached. This is handled by {@link QuestService}. */
     dialogue: Dialogue | undefined;
+
+    /** The NPC model associated with this stage. */
     npcModel: Model | undefined;
+
+    /** The humanoid associated with the NPC model. */
     npcHumanoid: Humanoid | undefined;
 
-    readonly completed = new Signal<() => void>();
+    private positionChangedCallback?: (position: Vector3 | undefined) => void;
+    private reachedCallback?: ((stage: this) => (() => void));
+    private completedCallback?: ((stage: this) => void);
 
-    /**
-     * Called when the stage is loaded, returning an optional cleanup function.
-     */
-    load?: ((stage: this) => (() => void));
-
-    positionChanged = new Signal<(position?: Vector3) => void>();
-
-    loadedTimes = 0;
-    completedTimes = 0;
+    private reached = false;
+    private completed = false;
 
     constructor() {
-        this.completed.connect(() => {
-            if (++this.completedTimes > 1) {
-                warn("Stage completed multiple times");
-                print(this);
-            }
-        });
+
     }
 
     /**
@@ -73,9 +77,8 @@ export class Stage {
      * @param setAsFocus Whether to set the NPC as the focus.
      * @returns This stage instance.
      */
-    setNPC(npcName: string, setAsFocus?: boolean) {
-        this.npcModel = getNPCModel(npcName);
-        this.npcHumanoid = this.npcModel.WaitForChild("Humanoid") as Humanoid;
+    setNPC(npcName: NPCName, setAsFocus?: boolean) {
+        [this.npcModel, this.npcHumanoid] = getNPCModel(npcName);
         if (setAsFocus === true)
             return this.setFocus(this.npcHumanoid?.RootPart);
         return this;
@@ -89,7 +92,7 @@ export class Stage {
     setPosition(position?: Vector3) {
         if (this.position !== position) {
             this.position = position;
-            this.positionChanged.fire(position);
+            this.positionChangedCallback?.(position);
         }
         return this;
     }
@@ -105,53 +108,83 @@ export class Stage {
     }
 
     /**
-     * Registers a callback to run when the stage is loaded.
+     * Registers a callback to run when the stage is reached.
      * 
-     * @param load The load callback, returning an optional cleanup function.
+     * @param reached The reached callback, returning an optional cleanup function.
      * @returns This stage instance.
      */
-    onLoad(load: (stage: this) => (() => void)) {
-        this.load = (stage) => {
-            if (++this.loadedTimes > 1) {
-                warn("Stage loaded multiple times");
-                print(stage);
-            }
-
-            const callback = load(stage);
-            const dialogue = this.dialogue;
-            if (dialogue !== undefined) {
-                Server.Quest.onStageReached(this, () => {
-                    Server.Dialogue.addDialogue(dialogue);
-                });
-                stage.completed.connect(() => Server.Dialogue.removeDialogue(dialogue));
-                return callback;
-            }
-            return callback;
-        };
+    onReached(reached: (stage: this) => (() => void)) {
+        this.reachedCallback = reached;
         return this;
     }
 
     /**
-     * Registers a callback to run when the stage starts, optionally with a load callback.
+     * Registers a callback to run when the stage is completed.
      * 
-     * @param start The start callback, returning an optional cleanup function.
-     * @param load Optional load callback.
+     * @param complete The complete callback.
      * @returns This stage instance.
      */
-    onStart(start: (stage: this) => (() => void), load?: (stage: this) => (() => void)) {
-        return this.onLoad((stage) => {
-            const mainCallback = load === undefined ? undefined : load(stage);
-            let callback: () => void;
-            Server.Quest.onStageReached(this, () => {
-                callback = start(stage);
-            });
-            return () => {
-                if (callback !== undefined)
-                    callback();
-                if (mainCallback !== undefined)
-                    mainCallback();
-            };
-        });
+    onComplete(complete: (stage: this) => void) {
+        this.completedCallback = complete;
+        return this;
+    }
+
+    /**
+     * Registers a callback to run when the stage position changes.
+     * 
+     * @param callback The position changed callback.
+     * @returns This stage instance.
+     */
+    onPositionChanged(callback: (position: Vector3 | undefined) => void) {
+        this.positionChangedCallback = callback;
+        return this;
+    }
+
+    /**
+     * Triggers the stage reached event.
+     * 
+     * @returns A cleanup function to call when the stage is no longer needed.
+     */
+    reach() {
+        if (this.reached) { // Prevent multiple reaches
+            return () => { };
+        }
+
+        this.reached = true;
+        const dialogue = this.dialogue;
+        if (dialogue)
+            Server.Dialogue.addDialogue(dialogue);
+
+        const cleanup = this.reachedCallback?.(this);
+
+        return () => {
+            if (dialogue)
+                Server.Dialogue.removeDialogue(dialogue);
+            cleanup?.();
+        };
+    }
+
+    /**
+     * Completes the stage, firing the completed signal.
+     */
+    complete() {
+        if (this.completed) {
+            return;
+        }
+        this.completed = true;
+        this.completedCallback?.(this);
+    }
+
+    /**
+     * Unloads the stage and its resources.
+     */
+    unload() {
+        if (this.dialogue)
+            Server.Dialogue.removeDialogue(this.dialogue);
+        this.completedCallback = undefined;
+        this.reachedCallback = undefined;
+        this.positionChangedCallback = undefined;
+        table.clear(this);
     }
 }
 
@@ -161,17 +194,9 @@ export class Stage {
  */
 export default class Quest {
 
-    static readonly QUEST_MODULES = function () {
-        const moduleScripts = new Map<string, ModuleScript>();
-        const folder = script.Parent!.WaitForChild("quests");
-        for (const moduleScript of folder.GetDescendants()) {
-            if (moduleScript.IsA("ModuleScript") && moduleScript !== script) {
-                moduleScripts.set(moduleScript.Name, moduleScript);
-            }
-        }
-        return moduleScripts;
-    }();
-    static questsPerId: Map<string, Quest>;
+    static readonly QUEST_MODULES = new Map<string, ModuleScript>();
+    static readonly QUEST_PER_ID = new Map<string, Quest>();
+
     static colors = [
         Color3.fromRGB(253, 41, 67),
         Color3.fromRGB(1, 162, 255),
@@ -188,15 +213,17 @@ export default class Quest {
     id: string;
     name: string | undefined = undefined;
     description: string | undefined = undefined;
-    stages = new Array<Stage>();
+    readonly stages = new Array<Stage>();
     color: Color3;
     length = 0;
     level = 0;
     order = 0;
-    loaded = false;
     reward: Reward = {};
     readonly initialized = new Signal<() => void>();
     completionDialogue: Dialogue | undefined;
+
+    /** Whether the quest is completed. */
+    completed = false;
 
     /**
      * Constructs a new Quest instance.
@@ -208,29 +235,72 @@ export default class Quest {
     }
 
     /**
-     * Initializes all quests from the quests folder, caching them by ID.
-     * @returns The map of quest IDs to Quest instances.
+     * Reloads the quest modules from the quests folder.
+     * 
+     * This clones the module scripts into the QUEST_MODULES map,
+     * allowing for hot reloading of quest modules.
      */
-    static init() {
-        const questsPerId = new Map<string, Quest>();
+    private static reloadQuestModules() {
+        this.QUEST_MODULES.clear();
+        const folder = script.Parent!.WaitForChild("quests");
+        for (const moduleScript of folder.GetDescendants()) {
+            if (moduleScript.IsA("ModuleScript") && moduleScript !== script) {
+                this.QUEST_MODULES.set(moduleScript.Name, moduleScript.Clone());
+            }
+        }
+    }
+
+    /**
+     * Loads all quest modules and initializes quest data.
+     * 
+     * @returns A map of quest IDs to their quest info.
+     */
+    static load() {
+        for (const [_, quest] of this.QUEST_PER_ID) {
+            quest.unload();
+        }
+        this.reloadQuestModules();
+
         for (const [_, moduleScript] of this.QUEST_MODULES) {
             const i = require(moduleScript);
             if (i !== undefined) {
                 const quest = i as Quest;
-                questsPerId.set(quest.id, quest);
+                this.QUEST_PER_ID.set(quest.id, quest);
             }
         }
-        this.questsPerId = questsPerId;
-        return this.questsPerId;
-    }
 
-    /**
-     * Retrieves a quest by its ID.
-     * @param questId The quest ID.
-     * @returns The Quest instance, or undefined if not found.
-     */
-    static getQuest(questId: string) {
-        return Quest.questsPerId?.get(questId);
+        const questInfos = new Map<string, QuestInfo>();
+
+        // Process all quests and create client info
+        this.QUEST_PER_ID.forEach((quest, questId) => {
+            quest.initialized.fire();
+
+            const questInfo: QuestInfo = {
+                name: quest.name ?? questId,
+                colorR: quest.color.R,
+                colorG: quest.color.G,
+                colorB: quest.color.B,
+                level: quest.level,
+                length: quest.length,
+                reward: quest.reward,
+                order: quest.order,
+                stages: [],
+            };
+
+            // Set up stage position tracking
+            quest.stages.forEach((stage, index) => {
+                function onPositionChanged(position?: Vector3) {
+                    return ReplicatedStorage.SetAttribute(`${questId}${index}`, position);
+                }
+                onPositionChanged(stage.position);
+                stage.onPositionChanged(onPositionChanged);
+                questInfo.stages.push({ description: stage.description! });
+            });
+
+            questInfos.set(questId, questInfo);
+        });
+
+        return questInfos;
     }
 
     /**
@@ -299,11 +369,11 @@ export default class Quest {
         }
         const stage = new Stage()
             .setDescription(`Complete the quest "${depQuest.name}" before starting this.`)
-            .onStart(() => {
-                while (Server.Quest.isQuestCompleted(questId) === false) {
+            .onReached(() => {
+                while (!Quest.QUEST_PER_ID.get(questId)?.completed) {
                     task.wait(2);
                 }
-                stage.completed.fire();
+                stage.complete();
                 return () => { };
             });
         return this.setStage(1, stage);
@@ -348,5 +418,46 @@ export default class Quest {
     onInit(callback: (quest: this) => void) {
         this.initialized.connect(() => callback(this));
         return this;
+    }
+
+    /**
+     * Completes the quest, triggering rewards and cleanup.
+     */
+    complete() {
+        if (this.completed)
+            return warn(`Quest ${this.id} is already completed`);
+        this.completed = true;
+
+        Packets.questCompleted.fireAll(this.id);
+        const reward = this.reward;
+
+        // Award experience points
+        if (reward.xp !== undefined) {
+            const originalXp = Server.Level.getXp();
+            if (originalXp === undefined) {
+                warn("No original xp, not rewarding");
+            }
+            else {
+                Server.Level.setXp(originalXp + reward.xp);
+            }
+        }
+
+        // Award items
+        if (reward.items !== undefined) {
+            for (const [item, amount] of reward.items) {
+                Server.Item.setItemAmount(item, Server.Item.getItemAmount(item) + amount);
+            }
+        }
+    }
+
+    /**
+     * Unloads the quest and its stages.
+     */
+    unload() {
+        this.stages.forEach((stage) => {
+            stage.unload();
+        });
+        Quest.QUEST_PER_ID.delete(this.id);
+        table.clear(this);
     }
 }

@@ -1,7 +1,7 @@
 import { property, request, signal } from "@antivivi/fletchette";
 import { BaseOnoeNum } from "@antivivi/serikanum";
 import { DataType } from "@rbxts/flamework-binary-serializer";
-import type { PlayerProfileTemplate } from "server/services/serverdata/DataService";
+import type { PlayerProfileTemplate } from "server/services/data/DataService";
 
 declare global {
     interface Reward {
@@ -43,9 +43,7 @@ namespace Packets {
      */
     export const savingEmpire = signal<(status: DataType.u16) => void>();
 
-    /**
-     * The empires that are available to the player.
-     */
+    /** The empires that are available to the player. */
     export const availableEmpires = property<Map<string, EmpireInfo>>(new Map<string, EmpireInfo>());
 
     /**
@@ -164,8 +162,17 @@ namespace Packets {
     export const npcMessage = signal<(message: string, pos: number, end: number, prompt: boolean, npc: Instance) => void>();
 
     // chests
-    export const itemsReceived = signal<(items: Map<string, number>) => void>();
-    export const xpReceived = signal<(xp: number) => void>();
+    /**
+     * Show the item reward UI.
+     * @param items The items to show in the reward UI.
+     */
+    export const showItemReward = signal<(items: Map<string, number>) => void>();
+
+    /**
+     * Show the XP reward UI.
+     * @param xp The amount of XP to show in the reward UI.
+     */
+    export const showXpReward = signal<(xp: number) => void>();
 
     // bombs
     export const useBomb = request<(bombType: Currency) => boolean>();

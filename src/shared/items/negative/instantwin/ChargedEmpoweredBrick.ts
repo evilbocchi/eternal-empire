@@ -5,12 +5,12 @@ import Upgrader from "shared/item/traits/upgrader/Upgrader";
 
 export = new Item(script.Name)
     .setName("Charged Empowered Brick")
-    .setDescription("A imbued power brick that has been charged with Instant Win energy. It's so powerful it actually applies %mul% to nearby droplets.")
+    .setDescription("A imbued power brick that has been charged with Instant Win energy. It's so powerful it actually applies %add% to nearby droplets.")
     .setDifficulty(Difficulty.InstantWin)
     .placeableEverywhere()
     .persists()
 
     .trait(Upgrader)
-    .setMul(new CurrencyBundle().set("Funds", 1.25))
+    .setAdd(new CurrencyBundle().set("Funds", 1000))
 
     .exit();

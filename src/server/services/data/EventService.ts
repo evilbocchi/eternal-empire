@@ -21,7 +21,7 @@
 
 import Signal from "@antivivi/lemon-signal";
 import { Service } from "@flamework/core";
-import DataService from "server/services/serverdata/DataService";
+import DataService from "server/services/data/DataService";
 
 /**
  * Service for tracking and managing completion status of game events.

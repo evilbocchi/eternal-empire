@@ -1,8 +1,5 @@
-import { getAllInstanceInfo } from "@antivivi/vrldk";
-import { RunService } from "@rbxts/services";
-import AtmosphereService from "server/services/world/AtmosphereService";
+import { getInstanceInfo } from "@antivivi/vrldk";
 import { Server } from "shared/item/ItemUtils";
-import Droplet from "shared/item/Droplet";
 import Dropper from "shared/item/traits/dropper/Dropper";
 
 declare global {
@@ -17,22 +14,22 @@ declare global {
  * This is a static class that automatically applies weather multipliers to all droppers.
  */
 export default class WeatherBoost {
-    
+
     /**
      * The current weather multipliers.
      */
     private static currentMultipliers = { dropRate: 1, dropletValue: 1 };
-    
+
     /**
      * Updates weather multipliers and applies them to all active droppers.
      * 
      * @param multipliers The new weather multipliers to apply.
      */
-    static updateWeatherMultipliers(multipliers: { dropRate: number, dropletValue: number }) {
+    static updateWeatherMultipliers(multipliers: { dropRate: number, dropletValue: number; }) {
         this.currentMultipliers = multipliers;
         this.applyMultipliersToDroppers();
     }
-    
+
     /**
      * Applies current weather multipliers to all active droppers.
      */
@@ -44,7 +41,7 @@ export default class WeatherBoost {
             weatherDropRateMultiplier: this.currentMultipliers.dropRate,
             weatherValueMultiplier: this.currentMultipliers.dropletValue
         };
-        
+
         // Apply to all spawned drops
         for (const [drop, info] of Dropper.SPAWNED_DROPS) {
             if (info.Boosts) {
@@ -52,7 +49,7 @@ export default class WeatherBoost {
             }
         }
     }
-    
+
     /**
      * Gets the weather value multiplier for a droplet, including lightning surge effects.
      * 
@@ -61,18 +58,14 @@ export default class WeatherBoost {
      */
     static getDropletValueMultiplier(droplet: BasePart): number {
         let multiplier = this.currentMultipliers.dropletValue;
-        
-        // Check for lightning surge effect
-        const isLightningSurged = droplet.GetAttribute("LightningSurged") as boolean;
-        const surgeMultiplier = droplet.GetAttribute("SurgeMultiplier") as number;
-        
-        if (isLightningSurged && surgeMultiplier) {
-            multiplier *= surgeMultiplier;
+
+        if (getInstanceInfo(droplet, "LightningSurged")) {
+            multiplier *= 10;
         }
-        
+
         return multiplier;
     }
-    
+
     /**
      * Initializes the weather boost system.
      */
@@ -86,7 +79,7 @@ export default class WeatherBoost {
                 }
             }
         });
-        
+
         print("Weather boost system initialized");
     }
 }

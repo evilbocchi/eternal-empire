@@ -13,7 +13,7 @@
  */
 
 import { OnInit, Service } from "@flamework/core";
-import DataService from "server/services/serverdata/DataService";
+import DataService from "server/services/data/DataService";
 import { AREAS } from "shared/Area";
 import Packets from "shared/Packets";
 

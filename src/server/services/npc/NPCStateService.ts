@@ -149,11 +149,16 @@ export default class NPCStateService implements OnInit {
             else
                 this.stopAnimation(npc, "Walk");
         });
-        let last = humanoid.RootPart!.Position;
+        let last = humanoid.RootPart?.Position;
         task.spawn(() => {
             while (task.wait(1)) {
-                const newPosition = humanoid.RootPart!.Position;
-                if (newPosition.sub(last).Magnitude < 1) {
+                const rootPart = humanoid.RootPart;
+                if (rootPart === undefined) {
+                    continue;
+                }
+
+                const newPosition = rootPart.Position;
+                if (last === undefined || newPosition.sub(last).Magnitude < 1) {
                     last = newPosition;
                     this.stopAnimation(npc, "Walk");
                 }

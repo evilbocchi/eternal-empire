@@ -1,4 +1,3 @@
-import Difficulty from "@antivivi/jjt-difficulties";
 import Quest, { Stage } from "server/Quest";
 import EarningCapital from "server/quests/EarningCapital";
 import { Dialogue } from "shared/NPC";
@@ -20,9 +19,7 @@ import Ricarg from "shared/npcs/Ricarg";
 
 const craftingTableModel = WAYPOINTS.CraftingTable;
 
-const chuckModel = getNPCModel("Chuck");
-const chuckHumanoid = chuckModel.FindFirstChildOfClass("Humanoid")!;
-const chuckRootPart = chuckHumanoid.RootPart!;
+const [_chuckModel, chuckHumanoid, chuckRootPart] = getNPCModel("Chuck");
 
 const chuckToCraftingTable = Server.NPC.Navigation.createPathfindingOperation(
     chuckHumanoid,
@@ -43,8 +40,10 @@ export = new Quest(script.Name)
                 .monologue("...can you not disturb my sleep.")
                 .root
         )
-        .onStart((stage) => {
-            chuckRootPart.Position = stage.position!;
+        .onReached((stage) => {
+            Server.NPC.State.playAnimation(Chuck, "Default");
+            chuckRootPart.CFrame = Server.NPC.State.getInfo(Chuck)!.defaultLocation;
+
             const continuation = new Dialogue(Chuck, "So, you want to craft something?")
                 .monologue("That's surprising... Most people nowadays simply avoid what they call a 'primitive' method of creating items.")
                 .monologue("They get on my nerves, those stinking scientists. Thinking they're better than us.")
@@ -62,7 +61,7 @@ export = new Quest(script.Name)
                     Server.Dialogue.talk(continuation);
                 }
                 else if (dialogue === continuation) {
-                    stage.completed.fire();
+                    stage.complete();
                 }
             });
             return () => connection.disconnect();
@@ -74,7 +73,10 @@ export = new Quest(script.Name)
         .setDialogue(
             new Dialogue(Chuck, "You got the stuff?")
         )
-        .onStart((stage) => {
+        .onReached((stage) => {
+            Server.NPC.State.stopAnimation(Chuck, "Default");
+            chuckRootPart.CFrame = Server.NPC.State.getInfo(Chuck)!.defaultLocation;
+
             const ItemService = Server.Item;
             const ricargDialogue = new Dialogue(Ricarg, "Hahah... money... haah...")
                 .monologue("Wait, who are you again?")
@@ -97,7 +99,7 @@ export = new Quest(script.Name)
             const connection = Server.Dialogue.dialogueFinished.connect((dialogue) => {
                 if (dialogue === ricargDialogue) {
                     Server.Dialogue.removeDialogue(ricargDialogue);
-                    Server.Dialogue.talk(Server.Quest.isQuestCompleted(EarningCapital.id) === true ? helped : noHelped);
+                    Server.Dialogue.talk(EarningCapital.completed ? helped : noHelped);
                 }
                 else if (dialogue === noHelped || dialogue === helped) {
                     Server.Dialogue.addDialogue(shopOpen);
@@ -107,7 +109,7 @@ export = new Quest(script.Name)
                     Server.Dialogue.talk(ItemService.getItemAmount(Wool.id) >= 1 && ItemService.getItemAmount(Grass.id) >= 3 ? itemed : noItemed);
                 }
                 else if (dialogue === itemed && Server.Quest.takeQuestItem(Wool.id, 1) && Server.Quest.takeQuestItem(Grass.id, 3)) {
-                    stage.completed.fire();
+                    stage.complete();
                 }
             });
             return () => connection.disconnect();
@@ -121,10 +123,11 @@ export = new Quest(script.Name)
         .setDialogue(
             new Dialogue(Chuck, "Come with me.")
         )
-        .onStart((stage) => {
+        .onReached((stage) => {
             Server.NPC.State.stopAnimation(Chuck, "Default");
             chuckRootPart.Anchored = false;
-            chuckToCraftingTable().onComplete(() => stage.completed.fire());
+
+            chuckToCraftingTable().onComplete(() => stage.complete());
             return () => { };
         })
     )
@@ -138,7 +141,7 @@ export = new Quest(script.Name)
                 .monologue("I'll give you some resources. Go ahead and craft something. Let's see what you can do.")
                 .root
         )
-        .onStart((stage) => {
+        .onReached((stage) => {
             Server.NPC.State.stopAnimation(Chuck, "Default");
             chuckRootPart.CFrame = WAYPOINTS.CraftingManiaChuckCraftingAssistance.CFrame;
 
@@ -146,7 +149,7 @@ export = new Quest(script.Name)
                 if (dialogue === stage.dialogue) {
                     Server.Quest.giveQuestItem(ExcavationStone.id, 50);
                     Server.Quest.giveQuestItem(WhiteGem.id, 15);
-                    stage.completed.fire();
+                    stage.complete();
                 }
             });
             return () => connection.disconnect();
@@ -158,7 +161,7 @@ export = new Quest(script.Name)
         .setDialogue(
             new Dialogue(Chuck, "Let's see what you're capable of.")
         )
-        .onStart((stage) => {
+        .onReached((stage) => {
             Server.NPC.State.stopAnimation(Chuck, "Default");
             chuckRootPart.CFrame = WAYPOINTS.CraftingManiaChuckCraftingAssistance.CFrame;
 
@@ -167,7 +170,7 @@ export = new Quest(script.Name)
                     const craftingItems = CraftingTable.trait(Shop).items;
 
                     if (craftingItems.includes(item)) {
-                        stage.completed.fire();
+                        stage.complete();
                     }
                 }
             });
@@ -181,7 +184,7 @@ export = new Quest(script.Name)
         .setDialogue(
             new Dialogue(Chuck, "Hmm... Let's see...")
         )
-        .onStart((stage) => {
+        .onReached((stage) => {
             const ItemService = Server.Item;
             Server.NPC.State.stopAnimation(Chuck, "Default");
             chuckRootPart.CFrame = WAYPOINTS.CraftingManiaChuckCraftingAssistance.CFrame;
@@ -220,7 +223,7 @@ export = new Quest(script.Name)
                     Server.Dialogue.talk(continuation);
                 }
                 else if (dialogue === continuation) {
-                    stage.completed.fire();
+                    stage.complete();
                 }
             });
             return () => connection.disconnect();

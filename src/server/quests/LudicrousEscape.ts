@@ -25,12 +25,8 @@ import Simpul from "shared/npcs/Simpul";
 import SlamoReceptionist from "shared/npcs/Slamo Receptionist";
 import { RESET_LAYERS } from "shared/ResetLayer";
 
-const simpulModel = getNPCModel("Simpul");
-const simpulHumanoid = simpulModel.FindFirstChildOfClass("Humanoid")!;
-const simpulRootPart = simpulHumanoid.RootPart!;
-
-const slamoReceptionistHumanoid = getNPCModel("Slamo Receptionist").FindFirstChildOfClass("Humanoid")!;
-const slamoReceptionistRootPart = slamoReceptionistHumanoid.RootPart!;
+const [simpulModel, simpulHumanoid, simpulRootPart] = getNPCModel("Simpul");
+const [_slamoReceptionistModel, slamoReceptionistHumanoid, slamoReceptionistRootPart] = getNPCModel("Slamo Receptionist");
 
 simpulRootPart.Anchored = true;
 
@@ -89,12 +85,12 @@ export = new Quest(script.Name)
                 .monologue("Anyways, I'm counting on you. Set me free!")
                 .root
         )
-        .onStart((stage) => {
+        .onReached((stage) => {
             simpulRootPart.Position = stage.position!;
             const connection = Server.Dialogue.dialogueFinished.connect((dialogue) => {
                 if (dialogue === stage.dialogue) {
                     Server.Event.setEventCompleted("SimpulReveal", true);
-                    stage.completed.fire();
+                    stage.complete();
                 }
             });
             return () => connection.disconnect();
@@ -105,7 +101,7 @@ export = new Quest(script.Name)
         .setDialogue(
             new Dialogue(Simpul, "Set me free for the sake of world peace!")
         )
-        .onStart((stage) => {
+        .onReached((stage) => {
             const dialogues = [
                 new Dialogue(SlamoReceptionist, "Hey, I don't remember allowing you to talk to the prisoner we have on board.")
                     .monologue("Let me make this clear, he's not a safe individual to be around. He was arrested because of his connections with the underworld, you know?")
@@ -120,15 +116,15 @@ export = new Quest(script.Name)
             ];
             for (const dialogue of dialogues)
                 Server.Dialogue.addDialogue(dialogue);
-            stage.completed.once(() => {
-                for (const dialogue of dialogues)
-                    Server.Dialogue.removeDialogue(dialogue);
-            });
             const connection = Server.Dialogue.dialogueFinished.connect((dialogue) => {
                 if (dialogue === InteractableObject.SlamoBook.dialogue)
-                    stage.completed.fire();
+                    stage.complete();
             });
-            return () => connection.disconnect();
+            return () => {
+                for (const dialogue of dialogues)
+                    Server.Dialogue.removeDialogue(dialogue);
+                connection.disconnect();
+            };
         })
     )
     .addStage(new Stage()
@@ -141,7 +137,7 @@ export = new Quest(script.Name)
                 .monologue("Nevermind this whole charade anymore.")
                 .root
         )
-        .onStart((stage) => {
+        .onReached((stage) => {
             const continuation = new Dialogue(Simpul, "You thought these puny bars could stop me? Yeah, right. See you never!");
 
             const connection = Server.Dialogue.dialogueFinished.connect((dialogue) => {
@@ -156,7 +152,7 @@ export = new Quest(script.Name)
                 else if (dialogue === continuation) {
                     simpulRootPart.Anchored = true;
                     TweenService.Create(simpulRootPart, new TweenInfo(0.5), { CFrame: WAYPOINTS.LudicrousEscapeSimpulOut.CFrame.add(new Vector3(0, 150, 0)) }).Play();
-                    task.delay(2, () => stage.completed.fire());
+                    task.delay(2, () => stage.complete());
                 }
             });
             return () => connection.disconnect();
@@ -170,7 +166,7 @@ export = new Quest(script.Name)
                 .monologue("I would care more, but I don't care.")
                 .root
         )
-        .onStart((stage) => {
+        .onReached((stage) => {
             simpulRootPart.CFrame = WAYPOINTS.LudicrousEscapeSimpulOut.CFrame.add(new Vector3(0, 150, 0));
 
             const ItemService = Server.Item;
@@ -231,7 +227,7 @@ export = new Quest(script.Name)
                     Server.Dialogue.talk(ending);
                 }
                 else if (dialogue === ending) {
-                    stage.completed.fire();
+                    stage.complete();
                 }
             });
             return () => connection.disconnect();
@@ -245,7 +241,7 @@ export = new Quest(script.Name)
             new Dialogue(SlamoReceptionist, "Follow my lead.")
                 .root
         )
-        .onStart((stage) => {
+        .onReached((stage) => {
             toggleRing(true);
             const hint = new Dialogue(SlamoReceptionist, "Come on, get in front of me and place the statue down where Simpul can easily spot it.");
             slamoReceptionistToHiding().onComplete(() => {
@@ -333,7 +329,7 @@ export = new Quest(script.Name)
                 if (!isCompleted)
                     return;
                 slamoReceptionistToReveal();
-                stage.completed.fire();
+                stage.complete();
             });
             return () => {
                 connection1.disconnect();
@@ -345,7 +341,7 @@ export = new Quest(script.Name)
     .addStage(new Stage()
         .setDescription(`Serve justice to Simpul.`)
         .setNPC("Simpul")
-        .onStart((stage) => {
+        .onReached((stage) => {
             Server.Dialogue.talk(finishing);
 
             const connection = Server.Dialogue.dialogueFinished.connect((dialogue) => {
@@ -359,7 +355,7 @@ export = new Quest(script.Name)
                         defaultLocation,
                     )();
                     toggleRing(false);
-                    stage.completed.fire();
+                    stage.complete();
                 }
             });
             return () => connection.disconnect();
