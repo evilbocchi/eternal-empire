@@ -21,10 +21,10 @@
 import Signal from "@antivivi/lemon-signal";
 import { OnInit, OnStart, Service } from "@flamework/core";
 import { DataStoreService, HttpService, Players, RunService } from "@rbxts/services";
-import CurrencyService from "server/services/serverdata/CurrencyService";
-import DataService from "server/services/serverdata/DataService";
-import MARKETPLACE_CONFIG = require("shared/marketplace/MarketplaceListing");
+import CurrencyService from "server/services/data/CurrencyService";
+import DataService from "server/services/data/DataService";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
+import MARKETPLACE_CONFIG from "shared/marketplace/MarketplaceListing";
 import Packets from "shared/Packets";
 
 /**
@@ -36,10 +36,10 @@ export default class MarketplaceService implements OnInit, OnStart {
     private marketplaceDataStore = DataStoreService.GetDataStore(MARKETPLACE_CONFIG.DATASTORE_NAME);
     private tokensDataStore = DataStoreService.GetDataStore(MARKETPLACE_CONFIG.TOKENS_DATASTORE_NAME);
     private historyDataStore = DataStoreService.GetDataStore(MARKETPLACE_CONFIG.HISTORY_DATASTORE_NAME);
-    
+
     private isMarketplaceEnabled = true;
     private cleanupConnection?: RBXScriptConnection;
-    
+
     // External webhook URL for trade tokens (set via admin commands)
     private tradeTokenWebhook?: string;
 
@@ -52,27 +52,27 @@ export default class MarketplaceService implements OnInit, OnStart {
     constructor(
         private currencyService: CurrencyService,
         private dataService: DataService
-    ) {}
+    ) { }
 
     onInit() {
         // Set up packet handlers
-        Packets.createListing.connect((player, uuid, price, listingType, duration) => {
-            return this.createListing(player, uuid, price, listingType, duration);
+        Packets.createListing.onInvoke((player, uuid, price, listingType, duration) => {
+            return this.createListing(player, uuid, new CurrencyBundle(price), listingType, duration);
         });
 
-        Packets.cancelListing.connect((player, uuid) => {
+        Packets.cancelListing.onInvoke((player, uuid) => {
             return this.cancelListing(player, uuid);
         });
 
-        Packets.buyItem.connect((player, uuid) => {
+        Packets.buyItem.onInvoke((player, uuid) => {
             return this.buyItem(player, uuid);
         });
 
-        Packets.placeBid.connect((player, uuid, bidAmount) => {
-            return this.placeBid(player, uuid, bidAmount);
+        Packets.placeBid.onInvoke((player, uuid, bidAmount) => {
+            return this.placeBid(player, uuid, new CurrencyBundle(bidAmount));
         });
 
-        Packets.getMarketplaceListings.connect((player) => {
+        Packets.getMarketplaceListings.onInvoke((player) => {
             return this.getMarketplaceListings();
         });
 
@@ -99,13 +99,13 @@ export default class MarketplaceService implements OnInit, OnStart {
     /**
      * Creates a new marketplace listing.
      */
-    async createListing(
-        player: Player, 
-        uuid: string, 
-        price: CurrencyBundle, 
+    createListing(
+        player: Player,
+        uuid: string,
+        price: CurrencyBundle,
         listingType: "buyout" | "auction",
         duration: number
-    ): Promise<boolean> {
+    ) {
         if (!this.isMarketplaceEnabled) {
             return false;
         }
@@ -114,7 +114,7 @@ export default class MarketplaceService implements OnInit, OnStart {
             // Validate that player owns the unique item
             const empireData = this.dataService.empireData;
             const uniqueItem = empireData.items.uniqueInstances.get(uuid);
-            
+
             if (!uniqueItem) {
                 return false; // Player doesn't own this item
             }
@@ -126,20 +126,21 @@ export default class MarketplaceService implements OnInit, OnStart {
 
             // Validate price
             const priceValue = price.getFirst()[1];
-            if (priceValue.lessThan(MARKETPLACE_CONFIG.MIN_LISTING_PRICE) || 
+            if (priceValue === undefined ||
+                priceValue.lessThan(MARKETPLACE_CONFIG.MIN_LISTING_PRICE) ||
                 priceValue.moreThan(MARKETPLACE_CONFIG.MAX_LISTING_PRICE)) {
                 return false;
             }
 
             // Check player's active listings count
-            const playerListings = await this.getPlayerActiveListings(player.UserId);
+            const playerListings = this.getPlayerActiveListings(player.UserId);
             if (playerListings.size() >= MARKETPLACE_CONFIG.MAX_LISTINGS_PER_PLAYER) {
                 return false;
             }
 
             // Calculate listing fee
             const listingFee = price.mul(MARKETPLACE_CONFIG.LISTING_FEE_PERCENTAGE);
-            
+
             // Check if player can afford listing fee
             if (!this.currencyService.canAfford(listingFee)) {
                 return false;
@@ -165,16 +166,20 @@ export default class MarketplaceService implements OnInit, OnStart {
             };
 
             // Store in DataStore using UpdateAsync for atomicity
-            const [success] = await this.marketplaceDataStore.UpdateAsync(uuid, (oldListing: MarketplaceListing | undefined) => {
-                if (oldListing !== undefined && oldListing.active) {
-                    return undefined; // Listing already exists for this UUID
+            const [success] = this.marketplaceDataStore.UpdateAsync(
+                uuid,
+                (oldListing: MarketplaceListing | undefined, keyInfo: DataStoreKeyInfo | undefined) => {
+                    if (oldListing !== undefined && oldListing.active) {
+                        // Listing already exists for this UUID, do not overwrite
+                        return $tuple(oldListing);
+                    }
+                    return $tuple(listing);
                 }
-                return $tuple(listing);
-            });
+            );
 
             if (success === undefined) {
                 // Refund listing fee
-                for (const [currency, amount] of listingFee.amounts) {
+                for (const [currency, amount] of listingFee.amountPerCurrency) {
                     this.currencyService.increment(currency, amount);
                 }
                 return false;
@@ -198,13 +203,13 @@ export default class MarketplaceService implements OnInit, OnStart {
     /**
      * Cancels an existing listing.
      */
-    async cancelListing(player: Player, uuid: string): Promise<boolean> {
+    cancelListing(player: Player, uuid: string): boolean {
         if (!this.isMarketplaceEnabled) {
             return false;
         }
 
         try {
-            const [listing] = await this.marketplaceDataStore.UpdateAsync(uuid, (oldListing: MarketplaceListing | undefined) => {
+            const [listing] = this.marketplaceDataStore.UpdateAsync(uuid, (oldListing: MarketplaceListing | undefined) => {
                 if (oldListing === undefined || !oldListing.active || oldListing.sellerId !== player.UserId) {
                     return $tuple(oldListing);
                 }
@@ -220,7 +225,7 @@ export default class MarketplaceService implements OnInit, OnStart {
 
             // Return item to player's inventory
             const empireData = this.dataService.empireData;
-            
+
             // For now, we'll create a simple unique item entry
             // In a real implementation, you'd fetch the stored unique item data
             const uniqueItem: UniqueItemInstance = {
@@ -228,13 +233,13 @@ export default class MarketplaceService implements OnInit, OnStart {
                 pots: new Map(),
                 created: os.time()
             };
-            
+
             empireData.items.uniqueInstances.set(uuid, uniqueItem);
 
             // Refund listing fee (50% penalty)
             if (listing.listingFee !== undefined) {
                 const refund = listing.listingFee.mul(0.5);
-                for (const [currency, amount] of refund.amounts) {
+                for (const [currency, amount] of refund.amountPerCurrency) {
                     this.currencyService.increment(currency, amount);
                 }
             }
@@ -254,7 +259,7 @@ export default class MarketplaceService implements OnInit, OnStart {
     /**
      * Processes a buyout purchase.
      */
-    async buyItem(player: Player, uuid: string): Promise<boolean> {
+    buyItem(player: Player, uuid: string): boolean {
         if (!this.isMarketplaceEnabled) {
             return false;
         }
@@ -262,12 +267,12 @@ export default class MarketplaceService implements OnInit, OnStart {
         // Create processing token before starting transaction
         const tokenId = HttpService.GenerateGUID(false);
         const token: TradeToken = {
-            uuid: uuid,
             empireKey: this.dataService.empireId,
-            buyerId: player.UserId,
             buyerEmpireId: this.dataService.empireId,
-            sellerId: 0, // Will be filled from listing
+            buyerId: player.UserId,
             sellerEmpireId: "",
+            sellerId: 0,
+            uuid: uuid,
             price: new CurrencyBundle(), // Will be filled from listing
             timestamp: os.time(),
             status: "processing"
@@ -275,11 +280,11 @@ export default class MarketplaceService implements OnInit, OnStart {
 
         try {
             // First, get the listing and validate
-            const [listing] = await this.marketplaceDataStore.UpdateAsync(uuid, (oldListing: MarketplaceListing | undefined) => {
+            const [listing] = this.marketplaceDataStore.UpdateAsync(uuid, (oldListing: MarketplaceListing | undefined) => {
                 if (oldListing === undefined || !oldListing.active || oldListing.sellerId === player.UserId) {
                     return $tuple(oldListing);
                 }
-                
+
                 if (oldListing.listingType !== "buyout") {
                     return $tuple(oldListing);
                 }
@@ -299,19 +304,19 @@ export default class MarketplaceService implements OnInit, OnStart {
             token.price = listing.price;
 
             // Upload processing token to external system
-            await this.uploadTradeToken(tokenId, token);
+            this.uploadTradeToken(tokenId, token);
 
             // Check if buyer can afford
             if (!this.currencyService.canAfford(listing.price)) {
                 token.status = "failed";
-                await this.uploadTradeToken(tokenId, token);
+                this.uploadTradeToken(tokenId, token);
                 return false;
             }
 
             // Process payment
             if (!this.currencyService.purchase(listing.price)) {
                 token.status = "failed";
-                await this.uploadTradeToken(tokenId, token);
+                this.uploadTradeToken(tokenId, token);
                 return false;
             }
 
@@ -321,7 +326,7 @@ export default class MarketplaceService implements OnInit, OnStart {
 
             // Add item to buyer's inventory
             const empireData = this.dataService.empireData;
-            
+
             // For now, we'll create a simple unique item entry
             // In a real implementation, you'd fetch the full unique item data
             const uniqueItem: UniqueItemInstance = {
@@ -329,7 +334,7 @@ export default class MarketplaceService implements OnInit, OnStart {
                 pots: new Map(),
                 created: os.time()
             };
-            
+
             empireData.items.uniqueInstances.set(uuid, uniqueItem);
 
             // Record transaction
@@ -344,11 +349,11 @@ export default class MarketplaceService implements OnInit, OnStart {
                 type: "buyout"
             };
 
-            await this.historyDataStore.SetAsync(tokenId, transaction);
+            this.historyDataStore.SetAsync(tokenId, transaction);
 
             // Complete token
             token.status = "completed";
-            await this.uploadTradeToken(tokenId, token);
+            this.uploadTradeToken(tokenId, token);
 
             // Fire events
             this.itemSold.fire(transaction);
@@ -359,10 +364,11 @@ export default class MarketplaceService implements OnInit, OnStart {
 
             return true;
 
-        } catch (error) {
+        }
+        catch (error) {
             warn("Error processing buyout:", error);
             token.status = "failed";
-            await this.uploadTradeToken(tokenId, token);
+            this.uploadTradeToken(tokenId, token);
             return false;
         }
     }
@@ -370,7 +376,7 @@ export default class MarketplaceService implements OnInit, OnStart {
     /**
      * Places a bid on an auction.
      */
-    async placeBid(player: Player, uuid: string, bidAmount: CurrencyBundle): Promise<boolean> {
+    placeBid(player: Player, uuid: string, bidAmount: CurrencyBundle): boolean {
         if (!this.isMarketplaceEnabled) {
             return false;
         }
@@ -381,7 +387,7 @@ export default class MarketplaceService implements OnInit, OnStart {
                 return false;
             }
 
-            const [listing] = await this.marketplaceDataStore.UpdateAsync(uuid, (oldListing: MarketplaceListing | undefined) => {
+            const [listing] = this.marketplaceDataStore.UpdateAsync(uuid, (oldListing: MarketplaceListing | undefined) => {
                 if (oldListing === undefined || !oldListing.active || oldListing.listingType !== "auction") {
                     return $tuple(oldListing);
                 }
@@ -389,15 +395,15 @@ export default class MarketplaceService implements OnInit, OnStart {
                 // Check if bid is higher than current bid
                 const currentBidValue = oldListing.currentBid?.getFirst()[1] ?? oldListing.price.getFirst()[1];
                 const newBidValue = bidAmount.getFirst()[1];
-                
+
                 if (currentBidValue === undefined || newBidValue === undefined || newBidValue.lessEquals(currentBidValue)) {
                     return $tuple(oldListing);
                 }
 
                 // Update with new bid
-                const updatedListing = { 
-                    ...oldListing, 
-                    currentBid: bidAmount, 
+                const updatedListing = {
+                    ...oldListing,
+                    currentBid: bidAmount,
                     currentBidderId: player.UserId,
                     currentBidderEmpireId: this.dataService.empireId
                 };
@@ -427,15 +433,15 @@ export default class MarketplaceService implements OnInit, OnStart {
     /**
      * Gets marketplace listings.
      */
-    async getMarketplaceListings(): Promise<MarketplaceListing[]> {
+    getMarketplaceListings(): MarketplaceListing[] {
         try {
             // This would typically implement pagination and filtering
             // For now, return a simplified version
             const listings: MarketplaceListing[] = [];
-            
+
             // In a real implementation, you'd use DataStore:ListKeysAsync 
             // and filter/sort the results based on the filters parameter
-            
+
             return listings;
         } catch (error) {
             warn("Error getting marketplace listings:", error);
@@ -446,7 +452,7 @@ export default class MarketplaceService implements OnInit, OnStart {
     /**
      * Gets active listings for a specific player.
      */
-    private async getPlayerActiveListings(userId: number): Promise<MarketplaceListing[]> {
+    private getPlayerActiveListings(userId: number): MarketplaceListing[] {
         // Implementation would query DataStore for player's active listings
         return [];
     }
@@ -454,7 +460,7 @@ export default class MarketplaceService implements OnInit, OnStart {
     /**
      * Uploads a trade token to external system for recovery.
      */
-    private async uploadTradeToken(tokenId: string, token: TradeToken): Promise<void> {
+    private uploadTradeToken(tokenId: string, token: TradeToken) {
         if (this.tradeTokenWebhook === undefined) {
             return;
         }
@@ -466,7 +472,7 @@ export default class MarketplaceService implements OnInit, OnStart {
                 timestamp: os.time()
             };
 
-            await HttpService.PostAsync(this.tradeTokenWebhook, HttpService.JSONEncode(payload), Enum.HttpContentType.ApplicationJson);
+            HttpService.PostAsync(this.tradeTokenWebhook, HttpService.JSONEncode(payload), Enum.HttpContentType.ApplicationJson);
         } catch (error) {
             warn("Failed to upload trade token:", error);
         }
@@ -475,11 +481,11 @@ export default class MarketplaceService implements OnInit, OnStart {
     /**
      * Recovers interrupted trades on startup.
      */
-    private async recoverInterruptedTrades(): Promise<void> {
+    private recoverInterruptedTrades() {
         try {
             // Check for any processing tokens that need to be completed or rolled back
             // This would query the external webhook system for any unresolved tokens
-            
+
             warn("Trade recovery system initialized");
         } catch (error) {
             warn("Error during trade recovery:", error);
@@ -539,15 +545,5 @@ export default class MarketplaceService implements OnInit, OnStart {
     setMarketplaceEnabled(enabled: boolean): void {
         this.isMarketplaceEnabled = enabled;
         Packets.marketplaceEnabled.set(enabled);
-    }
-
-    /**
-     * Gets marketplace statistics (admin only).
-     */
-    getMarketplaceStats(): Record<string, unknown> {
-        return {
-            enabled: this.isMarketplaceEnabled,
-            // Add more stats as needed
-        };
     }
 }

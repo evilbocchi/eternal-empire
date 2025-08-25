@@ -16,7 +16,6 @@
 
 import { Controller, OnInit, OnStart } from "@flamework/core";
 import { Players, UserInputService } from "@rbxts/services";
-import MARKETPLACE_CONFIG = require("shared/marketplace/MarketplaceListing");
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Packets from "shared/Packets";
 
@@ -25,12 +24,12 @@ import Packets from "shared/Packets";
  */
 @Controller()
 export default class MarketplaceController implements OnInit, OnStart {
-    
+
     private marketplaceGui?: ScreenGui;
     private currentListings = new Map<string, MarketplaceListing>();
     private myListings = new Map<string, MarketplaceListing>();
     private currentFilters: MarketplaceFilters = {};
-    
+
     onInit() {
         // Set up signal listeners
         Packets.listingUpdated.connect((listing) => {
@@ -66,7 +65,7 @@ export default class MarketplaceController implements OnInit, OnStart {
     private createMarketplaceUI(): void {
         const player = Players.LocalPlayer;
         const playerGui = player.WaitForChild("PlayerGui") as PlayerGui;
-        
+
         // Create main marketplace GUI
         this.marketplaceGui = new Instance("ScreenGui");
         this.marketplaceGui.Name = "MarketplaceGui";
@@ -346,15 +345,15 @@ export default class MarketplaceController implements OnInit, OnStart {
 
         if (this.marketplaceGui.Enabled) {
             // Request fresh marketplace data
-            Packets.getMarketplaceListings.inform();
-            
+            Packets.getMarketplaceListings.invoke();
+
             // Get property data directly
             const listings = Packets.marketplaceListings.get();
             this.updateListings(listings);
-            
+
             const myListings = Packets.myActiveListings.get();
             this.updateMyListings(myListings);
-            
+
             const enabled = Packets.marketplaceEnabled.get();
             this.setMarketplaceEnabled(enabled);
         }
@@ -416,7 +415,7 @@ export default class MarketplaceController implements OnInit, OnStart {
     private updateSearch(searchText: string): void {
         this.currentFilters.search = searchText === "Search items..." ? undefined : searchText;
         // Request updated listings (simplified for now)
-        Packets.getMarketplaceListings.inform();
+        Packets.getMarketplaceListings.invoke();
     }
 
     /**
@@ -473,28 +472,28 @@ export default class MarketplaceController implements OnInit, OnStart {
      * Creates a new listing.
      */
     createListing(uuid: string, price: CurrencyBundle, listingType: "buyout" | "auction", duration: number): void {
-        Packets.createListing.inform(uuid, price, listingType, duration);
+        Packets.createListing.invoke(uuid, price.amountPerCurrency, listingType, duration);
     }
 
     /**
      * Cancels a listing.
      */
     cancelListing(uuid: string): void {
-        Packets.cancelListing.inform(uuid);
+        Packets.cancelListing.invoke(uuid);
     }
 
     /**
      * Buys an item.
      */
     buyItem(uuid: string): void {
-        Packets.buyItem.inform(uuid);
+        Packets.buyItem.invoke(uuid);
     }
 
     /**
      * Places a bid on an auction.
      */
     placeBid(uuid: string, bidAmount: CurrencyBundle): void {
-        Packets.placeBid.inform(uuid, bidAmount);
+        Packets.placeBid.invoke(uuid, bidAmount.amountPerCurrency);
     }
 
     /**
@@ -502,7 +501,7 @@ export default class MarketplaceController implements OnInit, OnStart {
      */
     private openMarketplaceFromTerminal(): void {
         this.toggleMarketplace(true);
-        
+
         // Disable GUI close button when opened from terminal
         if (this.marketplaceGui) {
             const closeButton = this.marketplaceGui.FindFirstChild("MainFrame")?.FindFirstChild("TitleBar")?.FindFirstChild("CloseButton") as TextButton;
@@ -517,7 +516,7 @@ export default class MarketplaceController implements OnInit, OnStart {
      */
     private closeMarketplaceFromTerminal(): void {
         this.toggleMarketplace(false);
-        
+
         // Re-enable GUI close button
         if (this.marketplaceGui) {
             const closeButton = this.marketplaceGui.FindFirstChild("MainFrame")?.FindFirstChild("TitleBar")?.FindFirstChild("CloseButton") as TextButton;

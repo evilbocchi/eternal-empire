@@ -10,17 +10,6 @@
  */
 
 import { OnInit, Service } from "@flamework/core";
-import { DonationService } from "server/services/DonationService";
-import ItemService from "server/services/item/ItemService";
-import { LeaderboardService } from "server/services/leaderboard/LeaderboardService";
-import ModdingService from "server/services/ModdingService";
-import DialogueService from "server/services/npc/DialogueService";
-import NPCNavigationService from "server/services/npc/NPCNavigationService";
-import NPCStateService from "server/services/npc/NPCStateService";
-import ChatHookService from "server/services/permissions/ChatHookService";
-import PermissionsService from "server/services/permissions/PermissionsService";
-import ResetService from "server/services/ResetService";
-import RevenueService from "server/services/RevenueService";
 import CurrencyService from "server/services/data/CurrencyService";
 import DataService from "server/services/data/DataService";
 import EventService from "server/services/data/EventService";
@@ -29,6 +18,18 @@ import NamedUpgradeService from "server/services/data/NamedUpgradeService";
 import PlaytimeService from "server/services/data/PlaytimeService";
 import QuestService from "server/services/data/QuestService";
 import SetupService from "server/services/data/SetupService";
+import { DonationService } from "server/services/DonationService";
+import ItemService from "server/services/item/ItemService";
+import { LeaderboardService } from "server/services/leaderboard/LeaderboardService";
+import MarketplaceService from "server/services/marketplace/MarketplaceService";
+import ModdingService from "server/services/ModdingService";
+import DialogueService from "server/services/npc/DialogueService";
+import NPCNavigationService from "server/services/npc/NPCNavigationService";
+import NPCStateService from "server/services/npc/NPCStateService";
+import ChatHookService from "server/services/permissions/ChatHookService";
+import PermissionsService from "server/services/permissions/PermissionsService";
+import ResetService from "server/services/ResetService";
+import RevenueService from "server/services/RevenueService";
 import AreaService from "server/services/world/AreaService";
 import AtmosphereService from "server/services/world/AtmosphereService";
 import ChestService from "server/services/world/ChestService";
@@ -63,6 +64,7 @@ export default class APIExposeService implements OnInit {
         private readonly levelService: LevelService,
         private readonly leaderboardService: LeaderboardService,
         private readonly moddingService: ModdingService,
+        private readonly marketplaceService: MarketplaceService,
         private readonly namedUpgradeService: NamedUpgradeService,
         private readonly npcNavigationService: NPCNavigationService,
         private readonly npcStateService: NPCStateService,
@@ -275,6 +277,14 @@ export default class APIExposeService implements OnInit {
              * @see {@link NamedUpgradeService} for more details.
              */
             NamedUpgrade: this.namedUpgradeService,
+
+            /**
+             * Marketplace management service.
+             * 
+             * @borrows MarketplaceService as marketplaceService
+             * @see {@link MarketplaceService} for more details.
+             */
+            Marketplace: this.marketplaceService,
 
             /**
              * Reference to all registered items.
