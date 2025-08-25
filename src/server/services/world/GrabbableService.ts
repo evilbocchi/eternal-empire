@@ -37,12 +37,13 @@ export default class GrabbableService implements OnInit {
                     model.PivotTo(parent.CFrame);
                     model.Parent = parent;
                 }
+                parent.Transparency = 1;
             }
 
             const eventId = itemId + "_grabbed";
             if (this.eventService.isEventCompleted(eventId)) {
                 proximityPrompt.Parent?.Destroy();
-                return;
+                continue;
             }
 
             proximityPrompt.Triggered.Connect((player) => {
