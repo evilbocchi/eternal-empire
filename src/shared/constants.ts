@@ -67,6 +67,7 @@ export const getStartCamera = () => Workspace.FindFirstChild("StartCamera") as P
 
 export const LEADERBOARDS = Workspace.WaitForChild("Leaderboards") as Folder & {
     TimePlayed: Leaderboard;
+    Level: Leaderboard;
     Funds: Leaderboard;
     Power: Leaderboard;
     Skill: Leaderboard;

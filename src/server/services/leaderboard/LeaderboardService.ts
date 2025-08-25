@@ -52,6 +52,9 @@ export class LeaderboardService implements OnStart {
     /** OrderedDataStore for donations leaderboard. */
     donatedStore = DataStoreService.GetOrderedDataStore("Donated");
 
+    /** OrderedDataStore for level leaderboard. */
+    levelStore = DataStoreService.GetOrderedDataStore("Level");
+
     /** List of banned user IDs (excluded from leaderboards). */
     banned = [1900444407];
 
@@ -165,9 +168,13 @@ export class LeaderboardService implements OnStart {
 
         if (isDeleting) {
             this.deleteEntry(this.totalTimeStore, deleteEntries);
+            this.deleteEntry(this.levelStore, deleteEntries);
         }
         this.updateLeaderboard(LEADERBOARDS.TimePlayed,
             this.updateLeaderboardStore(this.totalTimeStore, name, new OnoeNum(profile.playtime).toSingle()));
+
+        this.updateLeaderboard(LEADERBOARDS.Level,
+            this.updateLeaderboardStore(this.levelStore, name, profile.level));
 
 
         for (const currency of CURRENCIES) {
