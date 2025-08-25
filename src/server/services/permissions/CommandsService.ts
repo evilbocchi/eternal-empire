@@ -44,8 +44,6 @@ import SetupService from "server/services/serverdata/SetupService";
 import AreaService from "server/services/world/AreaService";
 import ChestService from "server/services/world/ChestService";
 import UnlockedAreasService from "server/services/world/UnlockedAreasService";
-import MarketplaceService from "server/services/marketplace/MarketplaceService";
-import SimpleMarketplaceService from "server/services/marketplace/SimpleMarketplaceService";
 import { AREAS } from "shared/Area";
 import { ASSETS, getSound } from "shared/asset/GameAssets";
 import { IS_SINGLE_SERVER } from "shared/Context";
@@ -89,8 +87,6 @@ export default class CommandsService implements OnInit {
      * @param setupService Item setup saving and loading
      * @param chestService Chest management and loot
      * @param permissionService Permission checking and messaging
-     * @param marketplaceService Marketplace and auction management
-     * @param simpleMarketplaceService Simplified marketplace for testing
      */
     constructor(
         private dataService: DataService,
@@ -110,8 +106,6 @@ export default class CommandsService implements OnInit {
         private setupService: SetupService,
         private chestService: ChestService,
         private permissionService: PermissionsService,
-        private marketplaceService: MarketplaceService,
-        private simpleMarketplaceService: SimpleMarketplaceService,
     ) { }
 
     /**
@@ -1070,50 +1064,5 @@ export default class CommandsService implements OnInit {
                 Packets.modifyGame.fireAll("markplaceableeverywhere");
                 Items.getItem(itemId)?.placeableEverywhere();
             }, 4);
-
-        // MARKETPLACE COMMANDS
-
-        this.createCommand("marketplacetoggle", "mptoggle",
-            "Enable/disable the marketplace.",
-            (o) => {
-                const stats = this.marketplaceService.getMarketplaceStats();
-                const newEnabled = !stats.enabled;
-                this.marketplaceService.setMarketplaceEnabled(newEnabled);
-                this.sendPrivateMessage(o, `Marketplace has been ${newEnabled ? "enabled" : "disabled"}`, 
-                    newEnabled ? "color:138,255,138" : "color:255,43,43");
-            }, 3);
-
-        this.createCommand("marketplacestats", "mpstats",
-            "Display marketplace statistics.",
-            (o) => {
-                const stats = this.marketplaceService.getMarketplaceStats();
-                this.sendPrivateMessage(o, `Marketplace Status: ${stats.enabled ? "Enabled" : "Disabled"}`, "color:138,255,138");
-                // Add more stats as needed
-            }, 2);
-
-        this.createCommand("settradewebhook", "stwh",
-            "<webhook_url> : Set the trade recovery webhook URL.",
-            (o, webhookUrl) => {
-                this.marketplaceService.setTradeTokenWebhook(webhookUrl);
-                this.sendPrivateMessage(o, "Trade webhook URL has been set", "color:138,255,138");
-            }, 4);
-
-        this.createCommand("marketplacehelp", "mphelp",
-            "Display marketplace help information.",
-            (o) => {
-                this.sendPrivateMessage(o, "=== MARKETPLACE COMMANDS ===", "color:255,255,255");
-                this.sendPrivateMessage(o, "/marketplacetoggle - Enable/disable marketplace", "color:200,200,200");
-                this.sendPrivateMessage(o, "/marketplacestats - View marketplace statistics", "color:200,200,200");
-                this.sendPrivateMessage(o, "/settradewebhook <url> - Set trade recovery webhook", "color:200,200,200");
-                this.sendPrivateMessage(o, "/testmarketplace - Test marketplace functionality", "color:200,200,200");
-                this.sendPrivateMessage(o, "Players can press 'M' to open the marketplace UI", "color:200,200,200");
-            }, 1);
-
-        this.createCommand("testmarketplace", "tmptest",
-            "Test the marketplace functionality.",
-            (o) => {
-                this.simpleMarketplaceService.testMarketplace();
-                this.sendPrivateMessage(o, "Marketplace test completed - check console output", "color:138,255,138");
-            }, 3);
     }
 }
