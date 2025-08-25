@@ -11,15 +11,18 @@ import Packets from "shared/Packets";
 
 const [_triaModel, triaHumanoid, triaRootPart] = getNPCModel("Tria");
 
+const triaStart = Server.NPC.State.getInfo(Tria)!.defaultLocation;
+
 const triaToMineGuiding = Server.NPC.Navigation.createPathfindingOperation(
     triaHumanoid,
-    WAYPOINTS.NewBeginningsTriaStart.CFrame,
+    triaStart,
     WAYPOINTS.NewBeginningsTriaMineGuiding.CFrame
 );
 const triaToStart = Server.NPC.Navigation.createPathfindingOperation(
     triaHumanoid,
     WAYPOINTS.NewBeginningsTriaMineGuiding.CFrame,
-    WAYPOINTS.NewBeginningsTriaStart.CFrame
+    triaStart,
+    false
 );
 
 export = new Quest(script.Name)
@@ -39,7 +42,11 @@ export = new Quest(script.Name)
             .root
         )
         .onReached((stage) => {
+            triaRootPart.CFrame = triaStart;
+            Server.NPC.State.playAnimation(Tria, "Default");
             ReplicatedStorage.SetAttribute("Intro", true);
+
+
             const continuation = new Dialogue(Tria, "Uh... I-I'm Tria... I guess. Um... if... if you want, I can... show you... how to, uh... maybe... make some money? Heh...");
             const connection = Server.Dialogue.dialogueFinished.connect((dialogue) => {
                 if (dialogue === stage.dialogue) {
@@ -58,9 +65,12 @@ export = new Quest(script.Name)
         .setFocus(WAYPOINTS.NewBeginningsTriaMineGuiding)
         .setDialogue(new Dialogue(Tria, "Follow me..."))
         .onReached((stage) => {
-            ReplicatedStorage.SetAttribute("Intro", false);
+            triaRootPart.CFrame = triaStart;
             Server.NPC.State.stopAnimation(Tria, "Default");
+            ReplicatedStorage.SetAttribute("Intro", false);
+
             task.wait(1);
+
             triaToMineGuiding().onComplete(() => {
                 stage.complete();
             });
@@ -78,8 +88,8 @@ export = new Quest(script.Name)
             .root
         )
         .onReached((stage) => {
-            Server.NPC.State.stopAnimation(Tria, "Default");
             triaRootPart.CFrame = WAYPOINTS.NewBeginningsTriaMineGuiding.CFrame;
+            Server.NPC.State.stopAnimation(Tria, "Default");
 
             let t = 0;
             const ItemService = Server.Item;
@@ -109,8 +119,8 @@ export = new Quest(script.Name)
             new Dialogue(Tria, "Uh... see that backpack over there... left side of your screen... yeah, click it to open your Inventory... I think.")
         )
         .onReached((stage) => {
-            Server.NPC.State.stopAnimation(Tria, "Default");
             triaRootPart.CFrame = WAYPOINTS.NewBeginningsTriaMineGuiding.CFrame;
+            Server.NPC.State.stopAnimation(Tria, "Default");
 
             const continuation = new Dialogue(Tria, "N-nice job, uh... I guess!")
                 .monologue("I... I'd like to teach you more... but... I should probably... go home now... sorry.")

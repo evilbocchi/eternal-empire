@@ -45,13 +45,14 @@ export default class NPCNavigationService implements OnInit, OnStart, OnPhysics 
     /** Material costs for pathfinding calculations. Higher costs make NPCs avoid certain materials. */
     readonly PATHFINDING_COSTS = {
         Water: 20,
+        Limestone: 20, // Ground beneath water
         SmoothPlastic: 10,
         Wood: 10,
         Plastic: 2
     };
 
     /** Default parameters for NPC pathfinding operations. */
-    readonly PATHFINDING_PARAMS = {
+    readonly PATHFINDING_PARAMS: AgentParameters = {
         Costs: this.PATHFINDING_COSTS,
         WaypointSpacing: 6
     };
@@ -70,7 +71,7 @@ export default class NPCNavigationService implements OnInit, OnStart, OnPhysics 
      * @param retries Number of retry attempts.
      * @returns An array of waypoints or undefined if no path is found.
      */
-    getWaypoints(humanoid: Humanoid, source: Vector3, destination: Vector3, params: AgentParameters = this.PATHFINDING_PARAMS, retries = 0): PathWaypoint[] | undefined {
+    getWaypoints(humanoid: Humanoid, source: Vector3, destination: Vector3, params = this.PATHFINDING_PARAMS, retries = 0): PathWaypoint[] | undefined {
         if (humanoid === undefined || humanoid.RootPart === undefined) {
             warn("Humanoid or RootPart is undefined");
             return;
@@ -109,11 +110,14 @@ export default class NPCNavigationService implements OnInit, OnStart, OnPhysics 
         const rootPart = humanoid.RootPart;
         if (rootPart === undefined)
             return;
-        let i = 0;
+        let i = 0; // Waypoint index
+        let t = 0; // Time spent moving to current waypoint
         let newPos: Vector3 | undefined;
+        let movingConnection: RBXScriptConnection | undefined;
 
         const doNextWaypoint = () => {
             ++i;
+            t = 0;
             const nextWaypoint = waypoints[i];
             if (nextWaypoint !== undefined) {
                 // Handle jump waypoints
@@ -122,30 +126,33 @@ export default class NPCNavigationService implements OnInit, OnStart, OnPhysics 
                     playSoundAtPart(rootPart, getSound("Jump.mp3"));
                 }
                 newPos = nextWaypoint.Position;
+                movingConnection?.Disconnect();
+                movingConnection = humanoid.MoveToFinished.Once((reached) => {
+                    if (reached) {
+                        doNextWaypoint();
+                    }
+                    else {
+                        t = math.huge; // Mark as stuck
+                    }
+                });
                 humanoid.MoveTo(newPos);
             }
             else {
                 // Navigation complete
+                movingConnection?.Disconnect();
                 connection.Disconnect();
                 endCallback();
             }
         };
 
-        let t = 0;
         const connection = RunService.Heartbeat.Connect((dt) => {
             if (newPos === undefined)
                 return;
             t += dt;
             const dist = rootPart.Position.sub(newPos).mul(new Vector3(1, 0, 1)).Magnitude;
 
-            // Check if close enough to waypoint
-            if (dist < humanoid.WalkSpeed * 0.1875) { // allow more leeway for higher speeds
-                t = 0;
-                newPos = undefined;
-                doNextWaypoint();
-            }
             // Teleport if stuck for too long
-            else if (t > 0.35 * dist) {
+            if (t > math.max(5.6 * dist / humanoid.WalkSpeed, 2)) {
                 t = 0;
                 rootPart.CFrame = new CFrame(newPos).add(new Vector3(0, humanoid.HipHeight, 0));
             }

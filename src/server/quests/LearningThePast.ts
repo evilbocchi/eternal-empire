@@ -17,6 +17,9 @@ import Pasal from "shared/npcs/Pasal";
 
 const [_pasalModel, pasalHumanoid, pasalRootPart] = getNPCModel("Pasal");
 const [oldNoobModel, oldNoobHumanoid, oldNoobRootPart] = getNPCModel("Old Noob");
+const pasalDefaultLocation = Server.NPC.State.getInfo(Pasal)!.defaultLocation;
+const oldNoobDefaultLocation = Server.NPC.State.getInfo(OldNoob)!.defaultLocation;
+
 const suspiciousWall = AREAS.BarrenIslands.map.WaitForChild("SuspiciousWall") as BasePart;
 
 const oldNoobToApproachingPasal = Server.NPC.Navigation.createPathfindingOperation(
@@ -58,7 +61,8 @@ const pasalToViewingLight = Server.NPC.Navigation.createPathfindingOperation(
 const oldNoobToEnterCave = Server.NPC.Navigation.createPathfindingOperation(
     oldNoobHumanoid,
     WAYPOINTS.LearningThePastOldNoobViewingLight.CFrame,
-    WAYPOINTS.LearningThePastEnterCave.CFrame
+    WAYPOINTS.LearningThePastEnterCave.CFrame,
+    false
 );
 
 const unlockWall = () => {
@@ -100,6 +104,11 @@ export = new Quest(script.Name)
             .root
         )
         .onReached((stage) => {
+            oldNoobRootPart.CFrame = oldNoobDefaultLocation;
+            pasalRootPart.CFrame = pasalDefaultLocation;
+            Server.NPC.State.playAnimation(OldNoob, "Default");
+            Server.NPC.State.playAnimation(Pasal, "Default");
+
             const connection = Server.Dialogue.dialogueFinished.connect((dialogue) => {
                 if (dialogue === stage.dialogue) {
                     stage.complete();
@@ -112,6 +121,11 @@ export = new Quest(script.Name)
         .setDescription("Find details about the history of Barren Islands in the library at %coords%.")
         .setFocus(WAYPOINTS.LearningThePastLibraryEntrance)
         .onReached((stage) => {
+            oldNoobRootPart.CFrame = oldNoobDefaultLocation;
+            pasalRootPart.CFrame = pasalDefaultLocation;
+            Server.NPC.State.playAnimation(OldNoob, "Default");
+            Server.NPC.State.playAnimation(Pasal, "Default");
+
             const connection = Server.Dialogue.dialogueFinished.connect((dialogue) => {
                 if (dialogue === InteractableObject.OldBooks1.dialogue) {
                     stage.complete();
@@ -356,8 +370,8 @@ export = new Quest(script.Name)
                     oldNoobHumanoid.MoveTo(suspiciousWall.Position);
                 }
                 else if (dialogue === ending) {
-                    oldNoobToEnterCave(false).onComplete(() => {
-                        oldNoobRootPart.CFrame = Server.NPC.State.getInfo(OldNoob)!.defaultLocation;
+                    oldNoobToEnterCave().onComplete(() => {
+                        oldNoobRootPart.CFrame = oldNoobDefaultLocation;
                     });
                     Server.Dialogue.addDialogue(new Dialogue(Pasal, "What am I witnessing..."), 69);
                     task.delay(1, () => Server.Dialogue.talk(new Dialogue(Pasal, "I'll stay back for a bit. I'm just... shocked...")));

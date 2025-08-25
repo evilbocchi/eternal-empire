@@ -140,14 +140,14 @@ export default class QuestService implements OnInit, OnStart {
      * @param amount The amount to give.
      */
     giveQuestItem(itemId: string, amount: number) {
-        this.itemService.setItemAmount(itemId, this.itemService.getItemAmount(itemId) + amount);
+        this.itemService.giveItem(itemId, amount);
         this.chatHookService.sendServerMessage(`[+${amount} ${Items.getItem(itemId)?.name}]`, "tag:hidden;color:255,170,255");
     }
 
     /**
      * Takes a quest item if available and notifies the player.
      * 
-     * @param itemId The item ID.
+     * @param itemId The item ID. Unique items are not accepted.
      * @param amount The amount to take.
      * @returns True if successful, false otherwise.
      */

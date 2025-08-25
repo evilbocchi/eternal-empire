@@ -28,7 +28,7 @@ interface Workspace_Waypoints extends Folder {
     "NewBeginningsCamera2": Part;
     "NewBeginningsCamera3": Part;
     "NewBeginningsPlayerPos": Part;
-    "NewBeginningsTriaStart": Part;
+    "ToTheVillageRefugeeEnteringSlamoVillage": Part;
     "LearningThePastLibraryEntrance": Part;
     "LearningThePastOldNoobApproachingWall": Part;
     "LearningThePastKey": Part;
@@ -56,7 +56,6 @@ interface Workspace_Waypoints extends Folder {
     "ToTheVillageRefugeeIntermittentIsles": Part;
     "LudicrousEscapeSimpulOut": Part;
     "ToTheVillageRefugeeEnteringPoliceStation": Part;
-    "ToTheVillageRefugeeEnteringSlamoVillage": Part;
 }
 
 export type InstanceTreeType = {
