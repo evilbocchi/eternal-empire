@@ -82,6 +82,6 @@
         "@rbxts/stringbuilder": "^1.1.0",
         "@rbxts/testez": "^0.4.2-ts.0",
         "@rbxts/ui-labs": "^2.4.0",
-        "rbxts-asset-sync": "^0.2.0"
+        "rbxts-asset-sync": "^0.2.1"
     }
 }
