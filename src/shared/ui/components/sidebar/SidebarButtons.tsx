@@ -16,6 +16,7 @@
 import React, { useCallback, useEffect, useRef, useState } from "@rbxts/react";
 import { TweenService, UserInputService } from "@rbxts/services";
 import { getAsset } from "shared/asset/AssetMap";
+import { playSound } from "shared/asset/GameAssets";
 import { RobotoSlabBold } from "shared/ui/GameFonts";
 
 interface SidebarButtonProps {
@@ -36,8 +37,8 @@ interface SidebarButtonsProps {
     visible?: boolean;
     /** Callback fired when a button is clicked */
     onButtonClick?: (buttonName: string) => void;
-    /** Callback fired when adaptive tab should be toggled */
-    onToggleAdaptiveTab?: (windowName: string) => boolean;
+    /** Callback fired when window should be toggled */
+    onToggleWindow?: (windowName: string) => boolean;
     /** Current active window name */
     activeWindow?: string;
     /** Position of the sidebar */
@@ -80,26 +81,6 @@ export function SidebarButton({
 
         setIsAnimating(true);
 
-        // Create TweenInfo for press down animation
-        const pressDownInfo = new TweenInfo(
-            0.1, // Duration: 100ms
-            Enum.EasingStyle.Cubic,
-            Enum.EasingDirection.Out,
-            0, // Repeat count
-            false, // Reverses
-            0 // Delay
-        );
-
-        // Create TweenInfo for release animation with overshoot
-        const releaseInfo = new TweenInfo(
-            0.15, // Duration: 150ms
-            Enum.EasingStyle.Back,
-            Enum.EasingDirection.Out,
-            0, // Repeat count
-            false, // Reverses
-            0.05 // Delay after press down
-        );
-
         // Find the button element to animate
         let buttonElement: GuiObject | undefined;
 
@@ -114,23 +95,11 @@ export function SidebarButton({
             return;
         }
 
-        // Press down tween (shrink to 0.85)
-        const pressDownTween = TweenService.Create(buttonElement, pressDownInfo, {
-            Size: new UDim2(0.85, 0, 0.85, 0)
-        });
-
-        // Release tween (grow back to 1 with overshoot)
-        const releaseTween = TweenService.Create(buttonElement, releaseInfo, {
+        buttonElement.Size = new UDim2(0.85, 0, 0.85, 0);
+        const releaseTween = TweenService.Create(buttonElement, new TweenInfo(0.2), {
             Size: new UDim2(1, 0, 1, 0)
         });
-
-        // Play press down animation
-        pressDownTween.Play();
-
-        // When press down completes, play release animation
-        pressDownTween.Completed.Connect(() => {
-            releaseTween.Play();
-        });
+        releaseTween.Play();
 
         // When release completes, reset animation state
         releaseTween.Completed.Connect(() => {
@@ -326,7 +295,7 @@ export function SidebarButton({
     return (
         <textbutton
             key={data.name}
-            ref={buttonRef}
+            ref={textButtonRef}
             AnchorPoint={new Vector2(0.5, 0.5)}
             BackgroundColor3={data.color}
             BorderColor3={Color3.fromRGB(27, 42, 53)}
@@ -374,7 +343,7 @@ export function SidebarButton({
 export default function SidebarButtons({
     visible = true,
     onButtonClick,
-    onToggleAdaptiveTab,
+    onToggleWindow,
     activeWindow,
     position = new UDim2(0, 0, 0.5, 0),
     animationsEnabled = true,
@@ -383,6 +352,7 @@ export default function SidebarButtons({
     // Sidebar state
     const [isVisible, setIsVisible] = useState(visible);
     const [currentPosition, setCurrentPosition] = useState(position);
+    const sidebarRef = useRef<Frame>();
 
     // Button configurations - use provided buttons or defaults
     const [buttons, setButtons] = useState<SidebarButtonData[]>(providedButtons || [
@@ -407,13 +377,6 @@ export default function SidebarButtons({
             name: "Stats",
             image: "rbxassetid://8587689304",
             hotkey: Enum.KeyCode.M,
-            color: Color3.fromRGB(102, 102, 102),
-            visible: false
-        },
-        {
-            name: "Settings",
-            image: "rbxassetid://7059346373",
-            hotkey: Enum.KeyCode.P,
             color: Color3.fromRGB(102, 102, 102),
             visible: false
         },
@@ -448,9 +411,33 @@ export default function SidebarButtons({
     // Handle visibility changes
     useEffect(() => {
         setIsVisible(visible);
-        if (animationsEnabled) {
+        if (animationsEnabled && sidebarRef.current) {
             const targetPosition = visible ? position : new UDim2(-0.015, -50, 0.5, 0);
-            // Animation would be handled by the parent component or through TweenService
+
+            // Create TweenInfo for sidebar slide animation
+            const slideInfo = new TweenInfo(
+                0.3, // Duration: 300ms
+                Enum.EasingStyle.Quart,
+                Enum.EasingDirection.Out,
+                0, // Repeat count
+                false, // Reverses
+                0 // Delay
+            );
+
+            // Create and play the tween
+            const slideTween = TweenService.Create(sidebarRef.current, slideInfo, {
+                Position: targetPosition
+            });
+
+            slideTween.Play();
+
+            // Update current position when tween completes
+            slideTween.Completed.Connect(() => {
+                setCurrentPosition(targetPosition);
+            });
+        } else {
+            // If animations are disabled, set position immediately
+            const targetPosition = visible ? position : new UDim2(-0.015, -50, 0.5, 0);
             setCurrentPosition(targetPosition);
         }
     }, [visible, position, animationsEnabled]);
@@ -461,11 +448,14 @@ export default function SidebarButtons({
             onButtonClick(buttonName);
         }
 
-        if (onToggleAdaptiveTab) {
-            const result = onToggleAdaptiveTab(buttonName);
-            // Could play sound effects here based on result
+        if (onToggleWindow) {
+            const result = onToggleWindow(buttonName);
+            if (result)
+                playSound("MenuOpen.mp3");
+            else
+                playSound("MenuClose.mp3");
         }
-    }, [onButtonClick, onToggleAdaptiveTab]);
+    }, [onButtonClick, onToggleWindow]);
 
     // Update button visibility based on game state
     const updateButtonVisibility = useCallback((buttonName: string, visible: boolean) => {
@@ -496,6 +486,7 @@ export default function SidebarButtons({
     return (
         <frame
             key="SidebarButtons"
+            ref={sidebarRef}
             AnchorPoint={new Vector2(0, 0.5)}
             BackgroundTransparency={1}
             Position={currentPosition}

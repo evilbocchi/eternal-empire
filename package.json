@@ -15,7 +15,7 @@
         "build": "npm run asset-sync & rbxtsc",
         "plugin": "cd ./plugin && npx rojo build --plugin jme-tooling.rbxmx && cd .. && node plugin/index.js",
         "docs": "npx typedoc",
-        "dev": "concurrently --prefix none \"rbxtsc -w --writeTransformedFiles --optimizedLoops\" \"npx rojo serve\" \"npm run plugin\""
+        "dev": "concurrently --prefix none \"rbxtsc -w --writeTransformedFiles --optimizedLoops\" \"npx rojo serve\""
     },
     "repository": {
         "type": "git",
@@ -83,6 +83,7 @@
         "@rbxts/stringbuilder": "^1.1.0",
         "@rbxts/swimming": "^0.0.0",
         "@rbxts/testez": "^0.4.2-ts.0",
+        "@rbxts/topbar-plus": "^3.2.5",
         "@rbxts/ui-labs": "^2.4.0"
     }
 }

@@ -174,13 +174,6 @@ export default class AdaptiveTabController implements OnInit {
     }
 
     /**
-     * Refreshes the sidebar buttons based on player state.
-     */
-    refreshSidebarButtons() {
-        //(SIDEBAR_BUTTONS.WaitForChild("Warp") as GuiObject).Visible = LOCAL_PLAYER.GetAttribute("UsedPortal") === true;
-    }
-
-    /**
      * Loads a sidebar button, sets up hotkey and color/image mapping.
      * @param sidebarButton The sidebar button GUI element.
      */
@@ -233,7 +226,5 @@ export default class AdaptiveTabController implements OnInit {
             if (sidebarButton.IsA("GuiButton"))
                 this.loadSidebarButton(sidebarButton);
         }
-        LOCAL_PLAYER.GetAttributeChangedSignal("UsedPortal").Connect(() => this.refreshSidebarButtons());
-        this.refreshSidebarButtons();
     }
 }

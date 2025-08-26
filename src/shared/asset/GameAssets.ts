@@ -63,8 +63,7 @@ export function getSound(path: Filename<SoundAssetPath>) {
 export function playSound(path: Filename<SoundAssetPath>, part?: BasePart, modifier?: (sound: Sound) => void) {
     let sound = getSound(path);
     if (IS_CI) {
-        print(Environment.PluginWidget)
-        sound.Parent = Environment.PluginWidget;
+        sound.Parent = Environment.PluginWidget; // Sounds can only play in PluginWidget when not in-game
     }
     else {
         sound = sound.Clone();

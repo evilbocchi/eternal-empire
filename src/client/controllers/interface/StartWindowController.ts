@@ -320,11 +320,11 @@ export default class StartWindowController implements OnInit {
             return true;
         }, "Close");
         const registerOption = (option: typeof START_WINDOW.MainOptions.Play, callback: () => void) => {
-            option.Button.MouseEnter.Connect(() => this.uiController.playSound("ButtonHover.mp3"));
+            option.Button.MouseEnter.Connect(() => this.uiController.playSound("EmphasisButtonHover.mp3"));
             option.Button.MouseMoved.Connect(() => option.Button.ImageColor3 = new Color3(0.75, 0.75, 0.75));
             option.Button.MouseLeave.Connect(() => option.Button.ImageColor3 = new Color3(1, 1, 1));
             option.Button.Activated.Connect(() => {
-                this.uiController.playSound("MenuSelect.mp3");
+                this.uiController.playSound("EmphasisMenuSelect.mp3");
                 callback();
             });
         };

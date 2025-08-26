@@ -1,5 +1,6 @@
 export const ID_PER_FONT = {
-    RobotoSlab: "rbxassetid://12187368625"
+    RobotoSlab: "rbxassetid://12187368625",
+    RobotoMono: "rbxasset://fonts/families/RobotoMono.json"
 };
 
 export const RobotoSlab = new Font(ID_PER_FONT.RobotoSlab, Enum.FontWeight.Regular, Enum.FontStyle.Normal);
@@ -20,3 +21,6 @@ export const RobotoSlabExtraBold = new Font(ID_PER_FONT.RobotoSlab, Enum.FontWei
 export const RobotoSlabExtraBoldItalic = new Font(ID_PER_FONT.RobotoSlab, Enum.FontWeight.ExtraBold, Enum.FontStyle.Italic);
 export const RobotoSlabHeavy = new Font(ID_PER_FONT.RobotoSlab, Enum.FontWeight.Heavy, Enum.FontStyle.Normal);
 export const RobotoSlabHeavyItalic = new Font(ID_PER_FONT.RobotoSlab, Enum.FontWeight.Heavy, Enum.FontStyle.Italic);
+
+export const RobotoMono = new Font(ID_PER_FONT.RobotoMono, Enum.FontWeight.Regular, Enum.FontStyle.Normal);
+export const RobotoMonoBold = new Font(ID_PER_FONT.RobotoMono, Enum.FontWeight.Bold, Enum.FontStyle.Normal);
