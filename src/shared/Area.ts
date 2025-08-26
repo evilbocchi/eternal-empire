@@ -1,4 +1,5 @@
 import { RunService, Workspace } from "@rbxts/services";
+import { IS_CI } from "shared/Context";
 import Sandbox from "shared/Sandbox";
 import BuildBounds from "shared/placement/BuildBounds";
 
@@ -178,9 +179,9 @@ export default class Area {
         this.id = id;
 
         // Skip further initialization in sandbox mode
-        if (Sandbox.getEnabled()) {
+        if (Sandbox.getEnabled() || IS_CI) {
             this.name = id;
-            return;
+            return this;
         }
 
         // Initialize area properties from children in the area folder
@@ -229,11 +230,14 @@ export default class Area {
  * @returns A new Area instance
  */
 function createArea(name: string, buildable: boolean) {
-    if (Sandbox.getEnabled() && IS_SERVER) {
+    if ((Sandbox.getEnabled() && IS_SERVER) || IS_CI) {
         // In sandbox mode on the server, create a new folder
-        const folder = new Instance("Folder");
-        folder.Name = name;
-        folder.Parent = Workspace;
+        let folder = Workspace.FindFirstChild(name);
+        if (!folder) {
+            folder = new Instance("Folder");
+            folder.Name = name;
+            folder.Parent = Workspace;
+        }
         return new Area(folder, buildable);
     }
     // Otherwise use existing folder from Workspace
