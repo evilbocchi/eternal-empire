@@ -23,17 +23,16 @@
  */
 
 import { OnoeNum } from "@antivivi/serikanum";
-import { playSoundAtPart } from "@antivivi/vrldk";
 import { OnInit, Service } from "@flamework/core";
 import { MarketplaceService, TextService, Workspace } from "@rbxts/services";
+import CurrencyService from "server/services/data/CurrencyService";
+import DataService from "server/services/data/DataService";
 import { LeaderboardService } from "server/services/leaderboard/LeaderboardService";
 import ChatHookService from "server/services/permissions/ChatHookService";
 import ProductService from "server/services/product/ProductService";
-import CurrencyService from "server/services/data/CurrencyService";
-import DataService from "server/services/data/DataService";
+import { playSound } from "shared/asset/GameAssets";
 import { getNameFromUserId } from "shared/constants";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
-import { getSound } from "shared/asset/GameAssets";
 import Packets from "shared/Packets";
 
 /**
@@ -123,7 +122,7 @@ export class RenameService implements OnInit {
         name = getNameFromUserId(this.dataService.empireData.owner) + "'s " + name;
 
         // Play rename effects
-        playSoundAtPart(Workspace, getSound("MagicPowerUp.mp3"));
+        playSound("MagicPowerUp.mp3", Workspace);
         Packets.camShake.fireAll();
         this.chatHookService.sendServerMessage("The empire has been renamed to: " + name);
 

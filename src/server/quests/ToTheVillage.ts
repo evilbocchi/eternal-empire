@@ -2,7 +2,7 @@ import { playSoundAtPart } from "@antivivi/vrldk";
 import { TweenService, Workspace } from "@rbxts/services";
 import Quest, { Stage } from "server/Quest";
 import { AREAS } from "shared/Area";
-import { getEffect, getSound } from "shared/asset/GameAssets";
+import { getEffect, getSound, playSound } from "shared/asset/GameAssets";
 import { getNPCModel, WAYPOINTS } from "shared/constants";
 import { Server } from "shared/item/ItemUtils";
 import ChargedEmpoweredBrick from "shared/items/negative/instantwin/ChargedEmpoweredBrick";
@@ -191,7 +191,7 @@ export = new Quest(script.Name)
                     effect.Transparency = 0;
                 }
                 explosionEffect.Emit(2);
-                playSoundAtPart(cauldron.PrimaryPart, getSound("MagicSprinkle.mp3"));
+                playSound("MagicSprinkle.mp3", cauldron.PrimaryPart);
                 proximityPrompt.Enabled = false;
                 stage.complete();
             });
@@ -240,7 +240,7 @@ export = new Quest(script.Name)
                 }).Play();
             }
             task.wait(1);
-            playSoundAtPart(cauldron.PrimaryPart, getSound("MagicPowerUp.mp3"));
+            playSound("MagicPowerUp.mp3", cauldron.PrimaryPart);
             wool.Destroy();
             const effect = explosionEffect.Clone();
             effect.Parent = instantWinBlock;
@@ -271,7 +271,7 @@ export = new Quest(script.Name)
                         }
                     }
                     task.wait(2);
-                    playSoundAtPart(instantWinBlock, getSound("MagicSprinkle.mp3"));
+                    playSound("MagicSprinkle.mp3", instantWinBlock);
                     const effect = explosionEffect.Clone();
                     effect.Parent = instantWinBlock;
                     effect.Emit(2);

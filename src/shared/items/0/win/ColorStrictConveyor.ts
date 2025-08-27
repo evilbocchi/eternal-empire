@@ -1,9 +1,9 @@
 import Difficulty from "@antivivi/jjt-difficulties";
 import { OnoeNum } from "@antivivi/serikanum";
-import { getAllInstanceInfo, playSoundAtPart } from "@antivivi/vrldk";
+import { getAllInstanceInfo } from "@antivivi/vrldk";
+import { playSound } from "shared/asset/GameAssets";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import { CURRENCY_DETAILS } from "shared/currency/CurrencyDetails";
-import { getSound } from "shared/asset/GameAssets";
 import Droplet from "shared/item/Droplet";
 import Item from "shared/item/Item";
 import ItemUtils, { Server } from "shared/item/ItemUtils";
@@ -49,7 +49,7 @@ export = new Item(script.Name)
             const nextIndex = (currentIndex + 1) % modes.size();
             placedItem.currency = modes[nextIndex];
             updateMode();
-            playSoundAtPart(modeButton, getSound("SwitchFlick.mp3"));
+            playSound("SwitchFlick.mp3", modeButton);
         });
 
         const touched = new Set<BasePart>();

@@ -1,6 +1,6 @@
-import { playSoundAtPart, spawnExplosion } from "@antivivi/vrldk";
+import { spawnExplosion } from "@antivivi/vrldk";
 import Command, { CommandAPI } from "server/services/permissions/commands/Command";
-import { getSound } from "shared/asset/GameAssets";
+import { playSound } from "shared/asset/GameAssets";
 
 export = new Command(script.Name)
     .addAlias("k")
@@ -15,7 +15,7 @@ export = new Command(script.Name)
             const h = player.Character?.FindFirstChildOfClass("Humanoid");
             if (h !== undefined && h.RootPart !== undefined) {
                 spawnExplosion(h.RootPart.Position);
-                playSoundAtPart(h.RootPart, getSound("Explosion.mp3"));
+                playSound("Explosion.mp3", h.RootPart);
                 h.TakeDamage(99999999);
             }
         };

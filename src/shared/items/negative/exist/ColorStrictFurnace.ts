@@ -1,8 +1,8 @@
 import Difficulty from "@antivivi/jjt-difficulties";
-import { getAllInstanceInfo, getInstanceInfo, playSoundAtPart, setInstanceInfo } from "@antivivi/vrldk";
+import { getAllInstanceInfo, getInstanceInfo, setInstanceInfo } from "@antivivi/vrldk";
 import { ReplicatedStorage, RunService } from "@rbxts/services";
+import { playSound } from "shared/asset/GameAssets";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
-import { getSound } from "shared/asset/GameAssets";
 import Item from "shared/item/Item";
 import Furnace from "shared/item/traits/Furnace";
 
@@ -103,7 +103,7 @@ export = new Item(script.Name)
             if (colorSwitch.IsA("Part") && colorSwitch.Material === Enum.Material.Neon) {
                 const clickDetector = new Instance("ClickDetector");
                 clickDetector.MouseClick.Connect(() => {
-                    playSoundAtPart(colorSwitch, getSound("SwitchFlick.mp3"));
+                    playSound("SwitchFlick.mp3", colorSwitch);
                     color = tonumber(colorSwitch.Name) ?? 0;
                     updateColor();
                 });

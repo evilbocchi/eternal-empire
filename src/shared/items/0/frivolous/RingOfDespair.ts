@@ -1,10 +1,9 @@
 import Difficulty from "@antivivi/jjt-difficulties";
-import { getSound } from "shared/asset/GameAssets";
+import { findBaseParts, getAllInstanceInfo, getInstanceInfo } from "@antivivi/vrldk";
+import { playSound } from "shared/asset/GameAssets";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
 import Upgrader from "shared/item/traits/upgrader/Upgrader";
-import { getAllInstanceInfo, getInstanceInfo } from "@antivivi/vrldk";
-import { findBaseParts, playSoundAtPart } from "@antivivi/vrldk";
 
 export = new Item(script.Name)
     .setName("Ring Of Despair")
@@ -34,7 +33,7 @@ export = new Item(script.Name)
                     explosion.BlastPressure = 2500000;
                     explosion.DestroyJointRadiusPercent = 0;
                     explosion.Position = part.Position;
-                    playSoundAtPart(part, getSound("Explosion.mp3"));
+                    playSound("Explosion.mp3", part);
                     explosion.Parent = part;
                 }
             };

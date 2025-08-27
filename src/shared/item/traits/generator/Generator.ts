@@ -1,6 +1,6 @@
-import { getAllInstanceInfo, playSoundAtPart } from "@antivivi/vrldk";
+import { getAllInstanceInfo } from "@antivivi/vrldk";
 import { Players, TweenService } from "@rbxts/services";
-import { getSound } from "shared/asset/GameAssets";
+import { playSound } from "shared/asset/GameAssets";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
 import ItemUtils, { Server } from "shared/item/ItemUtils";
@@ -136,7 +136,7 @@ export default class Generator extends Boostable {
 
                 if (amountPerCurrency === undefined) { // clickpart was pressed                    
                     if (clickPart !== undefined) {
-                        playSoundAtPart(clickPart, getSound("MechanicalPress.mp3"));
+                        playSound("MechanicalPress.mp3", clickPart);
                         clickPart.Size = clickPartOriginalSize!.mul(1.2);
                         TweenService.Create(clickPart, clickTween, {
                             Size: clickPartOriginalSize!

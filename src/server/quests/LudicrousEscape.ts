@@ -1,9 +1,9 @@
 import { OnoeNum } from "@antivivi/serikanum";
-import { convertToMMSS, playSoundAtPart, spawnExplosion } from "@antivivi/vrldk";
+import { convertToMMSS, spawnExplosion } from "@antivivi/vrldk";
 import { RunService, TweenService, Workspace } from "@rbxts/services";
 import Quest, { Stage } from "server/Quest";
 import { AREAS } from "shared/Area";
-import { emitEffect, getSound } from "shared/asset/GameAssets";
+import { emitEffect, playSound } from "shared/asset/GameAssets";
 import { getNPCModel, PLACED_ITEMS_FOLDER, WAYPOINTS } from "shared/constants";
 import InteractableObject from "shared/InteractableObject";
 import { Server } from "shared/item/ItemUtils";
@@ -304,7 +304,7 @@ export = new Quest(script.Name)
                     task.delay(1, () => {
                         emitEffect("ExpandingWhirls", simpulRootPart, 4);
                         model.Destroy();
-                        playSoundAtPart(simpulRootPart, getSound("Splash.mp3"));
+                        playSound("Splash.mp3", simpulRootPart);
                         const trap = simpulModel.WaitForChild("Part") as BasePart;
                         trap.Transparency = 0;
                         trap.FindFirstChildOfClass("Decal")!.Transparency = 0;
@@ -321,7 +321,7 @@ export = new Quest(script.Name)
                     part.Position = simpulRootPart.Position;
                     part.Parent = Workspace;
                     spawnExplosion(part.Position, part);
-                    playSoundAtPart(part, getSound("Explosion.mp3"));
+                    playSound("Explosion.mp3", part);
                     Server.Event.setEventCompleted("SimpulGone", true);
                 }
             });

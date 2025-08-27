@@ -20,17 +20,17 @@
  * @since 1.0.0
  */
 
-import { getAllInstanceInfo, isInside, playSoundAtPart } from "@antivivi/vrldk";
+import { getAllInstanceInfo, isInside } from "@antivivi/vrldk";
 import { OnInit, Service } from "@flamework/core";
 import { Players } from "@rbxts/services";
+import DataService from "server/services/data/DataService";
+import NamedUpgradeService from "server/services/data/NamedUpgradeService";
 import LeaderstatsService from "server/services/leaderboard/LeaderstatsService";
 import { OnPlayerJoined } from "server/services/ModdingService";
 import NPCNavigationService from "server/services/npc/NPCNavigationService";
-import DataService from "server/services/data/DataService";
-import NamedUpgradeService from "server/services/data/NamedUpgradeService";
 import Area, { AREAS } from "shared/Area";
+import { getSound, playSound } from "shared/asset/GameAssets";
 import { MUSIC_GROUP } from "shared/constants";
-import { getSound } from "shared/asset/GameAssets";
 import { DROPLET_STORAGE } from "shared/item/Droplet";
 import NamedUpgrades from "shared/namedupgrade/NamedUpgrades";
 import Packets from "shared/Packets";
@@ -255,7 +255,7 @@ export default class AreaService implements OnInit, OnPlayerJoined {
                 // Teleport player back to safety with effects
                 rootPart.CFrame = spawnLocation.CFrame;
                 Packets.camShake.fire(player); // Visual feedback
-                playSoundAtPart(rootPart, getSound("Splash.mp3")); // Audio feedback
+                playSound("Splash.mp3", rootPart); // Audio feedback
             });
         }
     }

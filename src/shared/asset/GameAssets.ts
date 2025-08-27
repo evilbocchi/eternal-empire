@@ -60,7 +60,7 @@ export function getSound(path: Filename<SoundAssetPath>) {
  * @param part The part where the sound should be played. If not provided, it plays in ReplicatedStorage.
  * @param modifier An optional function to modify the sound instance before playing it.
  */
-export function playSound(path: Filename<SoundAssetPath>, part?: BasePart, modifier?: (sound: Sound) => void) {
+export function playSound(path: Filename<SoundAssetPath>, part?: Instance, modifier?: (sound: Sound) => void) {
     let sound = getSound(path);
     if (IS_CI) {
         sound.Parent = Environment.PluginWidget; // Sounds can only play in PluginWidget when not in-game

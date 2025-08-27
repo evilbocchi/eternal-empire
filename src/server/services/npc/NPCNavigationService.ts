@@ -13,10 +13,10 @@
  * @since 1.0.0
  */
 
-import { getInstanceInfo, getRootPart, playSoundAtPart } from "@antivivi/vrldk";
+import { getInstanceInfo, getRootPart } from "@antivivi/vrldk";
 import { OnInit, OnPhysics, OnStart, Service } from "@flamework/core";
 import { PathfindingService, Players, RunService, TweenService, Workspace } from "@rbxts/services";
-import { getSound } from "shared/asset/GameAssets";
+import { playSound } from "shared/asset/GameAssets";
 import { PLACED_ITEMS_FOLDER } from "shared/constants";
 import GameSpeed from "shared/GameSpeed";
 
@@ -118,7 +118,7 @@ export default class NPCNavigationService implements OnInit, OnStart, OnPhysics 
                 // Handle jump waypoints
                 if (nextWaypoint.Action === Enum.PathWaypointAction.Jump) {
                     humanoid.Jump = true;
-                    playSoundAtPart(rootPart, getSound("Jump.mp3"));
+                    playSound("Jump.mp3", rootPart);
                 }
                 newPos = nextWaypoint.Position;
 

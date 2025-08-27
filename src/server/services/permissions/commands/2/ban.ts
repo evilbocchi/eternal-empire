@@ -1,7 +1,6 @@
-import { playSoundAtPart } from "@antivivi/vrldk";
 import { Players } from "@rbxts/services";
 import Command, { CommandAPI } from "server/services/permissions/commands/Command";
-import { getSound } from "shared/asset/GameAssets";
+import { playSound } from "shared/asset/GameAssets";
 
 export = new Command(script.Name)
     .addAlias("b")
@@ -51,7 +50,7 @@ export = new Command(script.Name)
                 linearVelocity.VectorVelocity = vector;
                 linearVelocity.Attachment0 = attachment;
                 linearVelocity.Parent = attachment;
-                playSoundAtPart(h.RootPart, getSound("Rocket.mp3"));
+                playSound("Rocket.mp3", h.RootPart);
             }
             CommandAPI.Permissions.add("banned", target.UserId);
             task.delay(1, () => {

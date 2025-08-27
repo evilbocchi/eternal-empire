@@ -1,13 +1,11 @@
 import { BaseOnoeNum, OnoeNum } from "@antivivi/serikanum";
 import { TweenService } from "@rbxts/services";
-import { getSound } from "shared/asset/GameAssets";
-import { ASSETS } from "shared/asset/GameAssets";
+import { ASSETS, playSound } from "shared/asset/GameAssets";
+import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
+import { Server } from "shared/item/ItemUtils";
 import ItemTrait from "shared/item/traits/ItemTrait";
 import Packets from "shared/Packets";
-import CurrencyBundle from "shared/currency/CurrencyBundle";
-import { Server } from "shared/item/ItemUtils";
-import { playSoundAtPart } from "@antivivi/vrldk";
 
 declare global {
     interface ItemTraits {
@@ -103,7 +101,7 @@ export default class Printer extends ItemTrait {
         templateSetupOption.Heading.NameLabel.Text = "Setup " + (printedSetups === undefined ? "1" : (printedSetups.size() + 1));
         templateSetupOption.Body.SaveButton.Activated.Connect(() => {
             if (saveEvent.InvokeServer(templateSetupOption.Heading.NameLabel.Text) as unknown === true)
-                playSoundAtPart(model.PrimaryPart, getSound("MagicSprinkle.mp3"));
+                playSound("MagicSprinkle.mp3", model.PrimaryPart);
         });
         templateSetupOption.Parent = setupOptions;
 
@@ -126,11 +124,11 @@ export default class Printer extends ItemTrait {
                     setupOption.LayoutOrder = i;
                     setupOption.Body.SaveButton.Activated.Connect(() => {
                         if (saveEvent.InvokeServer(name) as unknown === true)
-                            playSoundAtPart(model.PrimaryPart, getSound("MagicSprinkle.mp3"));
+                            playSound("MagicSprinkle.mp3", model.PrimaryPart);
                     });
                     setupOption.Body.LoadButton.Activated.Connect(() => {
                         if (loadEvent.InvokeServer(name) as unknown === true)
-                            playSoundAtPart(model.PrimaryPart, getSound("MagicSprinkle.mp3"));
+                            playSound("MagicSprinkle.mp3", model.PrimaryPart);
                     });
                     const toggleEditable = (isEditable = !setupOption.Heading.NameLabel.TextEditable) => {
                         setupOption.Heading.NameLabel.TextEditable = isEditable;

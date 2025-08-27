@@ -1,8 +1,8 @@
-import { playSoundAtPart, spawnExplosion } from "@antivivi/vrldk";
+import { spawnExplosion } from "@antivivi/vrldk";
 import { RunService, TweenService, Workspace } from "@rbxts/services";
 import Quest, { Stage } from "server/Quest";
 import { AREAS } from "shared/Area";
-import { emitEffect, getSound } from "shared/asset/GameAssets";
+import { emitEffect, playSound } from "shared/asset/GameAssets";
 import { getNPCModel, WAYPOINTS } from "shared/constants";
 import InteractableObject from "shared/InteractableObject";
 import { Server } from "shared/item/ItemUtils";
@@ -84,7 +84,7 @@ const unlockWall = () => {
         suspiciousWall.CanCollide = false;
         spawnExplosion(suspiciousWall.Position);
         emitEffect("Sparks", suspiciousWall, 2);
-        playSoundAtPart(suspiciousWall, getSound("ExplosiveUnlock.mp3"));
+        playSound("ExplosiveUnlock.mp3", suspiciousWall);
         Server.Event.setEventCompleted("SuspiciousWallOpened", true);
     });
 };

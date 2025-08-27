@@ -1,9 +1,9 @@
+import { weldModel } from "@antivivi/vrldk";
 import { TweenService } from "@rbxts/services";
-import { getSound } from "shared/asset/GameAssets";
+import { playSound } from "shared/asset/GameAssets";
 import Item from "shared/item/Item";
-import Operative from "shared/item/traits/Operative";
 import { Server } from "shared/item/ItemUtils";
-import { playSoundAtPart, weldModel } from "@antivivi/vrldk";
+import Operative from "shared/item/traits/Operative";
 import Packets from "shared/Packets";
 
 declare global {
@@ -66,7 +66,7 @@ export default class Bin extends Operative {
             print(`Collected ${revenue} from ${item.name}`);
             CurrencyService.incrementAll(revenue.amountPerCurrency);
             Packets.showDifference.fireAll(revenue.amountPerCurrency);
-            playSoundAtPart(clickPart, getSound("GiantPress.mp3"));
+            playSound("GiantPress.mp3", clickPart);
             TweenService.Create(clickPart, new TweenInfo(0.2), { CFrame: unclickedCFrame.mul(new CFrame(0, 0, 0.5)) }).Play();
             task.wait(0.2);
             TweenService.Create(clickPart, new TweenInfo(0.6), { CFrame: unclickedCFrame }).Play();

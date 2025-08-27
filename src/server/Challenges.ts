@@ -1,18 +1,16 @@
 import { OnoeNum } from "@antivivi/serikanum";
-import { TweenService, Workspace, Debris } from "@rbxts/services";
-import { getSound } from "shared/asset/GameAssets";
-import { ASSETS } from "shared/asset/GameAssets";
+import { Debris, TweenService, Workspace } from "@rbxts/services";
 import { AREAS } from "shared/Area";
+import { ASSETS, playSound } from "shared/asset/GameAssets";
+import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
+import { Server } from "shared/item/ItemUtils";
 import Upgrader from "shared/item/traits/upgrader/Upgrader";
 import Admiration from "shared/items/negative/instantwin/Admiration";
 import Codependence from "shared/items/negative/instantwin/Codependence";
 import { GainUpgrade } from "shared/namedupgrade/NamedUpgrade";
 import NamedUpgrades from "shared/namedupgrade/NamedUpgrades";
 import Packets from "shared/Packets";
-import CurrencyBundle from "shared/currency/CurrencyBundle";
-import { Server } from "shared/item/ItemUtils";
-import { playSoundAtPart } from "@antivivi/vrldk";
 
 declare global {
     type ChallengeId = keyof (typeof CHALLENGES);
@@ -57,7 +55,7 @@ namespace Challenges {
         task.delay(0.5, () => {
             meteor.Transparency = 1;
             meteor.ClearAllChildren();
-            playSoundAtPart(meteor, getSound("Explosion.mp3"));
+            playSound("Explosion.mp3", meteor);
             meteor.CanCollide = false;
             meteor.CanTouch = false;
             meteor.CanQuery = false;
