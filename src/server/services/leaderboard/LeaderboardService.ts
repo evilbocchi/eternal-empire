@@ -13,39 +13,18 @@
 import { OnoeNum } from "@antivivi/serikanum";
 import { OnStart, Service } from "@flamework/core";
 import { DataStoreService, Players, RunService } from "@rbxts/services";
-import LeaderstatsService from "server/services/leaderboard/LeaderstatsService";
 import DataService from "server/services/data/DataService";
-import { ASSETS } from "shared/asset/GameAssets";
-import Sandbox from "shared/Sandbox";
+import LeaderstatsService from "server/services/leaderboard/LeaderstatsService";
 import { LEADERBOARDS, getNameFromUserId } from "shared/constants";
 import { CURRENCIES } from "shared/currency/CurrencyDetails";
-import { LeaderboardDataManager } from "shared/ui/components/leaderboard/LeaderboardDataManager";
-
-declare global {
-    type LeaderboardSlot = Frame & {
-        AmountLabel: TextLabel;
-        PlaceLabel: TextLabel;
-        ServerLabel: TextLabel;
-    };
-
-    type Leaderboard = Model & {
-        GuiPart: Part & {
-            SurfaceGui: SurfaceGui & {
-                Display: ScrollingFrame;
-            };
-        };
-    };
-
-    interface Assets {
-        LeaderboardSlot: LeaderboardSlot;
-    }
-}
+import Packets from "shared/Packets";
+import Sandbox from "shared/Sandbox";
 
 /**
  * Service that manages all leaderboard logic, including updating DataStores and UI.
  */
 @Service()
-export class LeaderboardService implements OnStart, LeaderboardDataManager {
+export class LeaderboardService implements OnStart {
 
     /** OrderedDataStore for total time leaderboard. */
     totalTimeStore = DataStoreService.GetOrderedDataStore("TotalTime");
@@ -66,38 +45,15 @@ export class LeaderboardService implements OnStart, LeaderboardDataManager {
     flushed = new Set<OrderedDataStore>();
 
     /** Cached leaderboard data for React components */
-    private leaderboardData = new Map<LeaderboardType, LeaderboardEntry[]>();
+    private readonly leaderboardData = new Map<LeaderboardType, LeaderboardEntry[]>();
 
     /** Update callbacks for React components */
     private updateCallbacks = new Map<LeaderboardType, ((entries: LeaderboardEntry[]) => void)[]>();
 
-    constructor(private dataService: DataService,
-        private leaderstatsService: LeaderstatsService) {
-    }
-
-    // LeaderboardDataManager interface methods
-
-    /**
-     * Get entries for a specific leaderboard type.
-     * @param leaderboardType The leaderboard type
-     * @returns Array of leaderboard entries
-     */
-    getLeaderboardEntries(leaderboardType: LeaderboardType): LeaderboardEntry[] {
-        return this.leaderboardData.get(leaderboardType) || [];
-    }
-
-    /**
-     * Update leaderboard data and notify React components.
-     * @param leaderboardType The leaderboard type
-     * @param entries The new entries
-     */
-    updateLeaderboardData(leaderboardType: LeaderboardType, entries: LeaderboardEntry[]): void {
-        this.leaderboardData.set(leaderboardType, entries);
-        const callbacks = this.updateCallbacks.get(leaderboardType) || [];
-        for (const callback of callbacks) {
-            callback(entries);
-        }
-    }
+    constructor(
+        private readonly dataService: DataService,
+        private readonly leaderstatsService: LeaderstatsService
+    ) { }
 
     /**
      * Subscribe to leaderboard updates.
@@ -123,16 +79,6 @@ export class LeaderboardService implements OnStart, LeaderboardDataManager {
     }
 
     /**
-     * Get all available leaderboard types.
-     * @returns Array of leaderboard types
-     */
-    getAvailableTypes(): LeaderboardType[] {
-        return ["TimePlayed", "Level", "Funds", "Power", "Skill", "Donated", ...CURRENCIES];
-    }
-
-    // Original methods (legacy support)
-
-    /**
      * Converts DataStore entries to LeaderboardEntry format.
      * @param lbDatas Raw leaderboard data from DataStore
      * @returns Formatted leaderboard entries
@@ -150,34 +96,6 @@ export class LeaderboardService implements OnStart, LeaderboardDataManager {
             }
         }
         return entries;
-    }
-
-    /**
-     * Creates a leaderboard slot UI element for a given place, name, and amount.
-     * @param place The leaderboard position
-     * @param name The player's name
-     * @param amount The leaderboard value
-     * @returns The leaderboard slot UI element
-     */
-    getLeaderboardSlot(place: number, name: string, amount: number) {
-        const lbSlot = ASSETS.LeaderboardSlot.Clone();
-        lbSlot.ServerLabel.Text = name;
-        lbSlot.AmountLabel.Text = tostring(OnoeNum.fromSingle(amount as number));
-        lbSlot.PlaceLabel.Text = tostring(place);
-        lbSlot.LayoutOrder = place;
-        return lbSlot;
-    }
-
-    /**
-     * Removes all leaderboard slot UI elements from a leaderboard.
-     * @param leaderboard The leaderboard model
-     */
-    resetLeaderboard(leaderboard: Leaderboard) {
-        for (const l of leaderboard.GuiPart.SurfaceGui.Display.GetChildren()) {
-            if (l.Name === "LeaderboardSlot") {
-                l.Destroy();
-            }
-        }
     }
 
     /**
@@ -207,7 +125,7 @@ export class LeaderboardService implements OnStart, LeaderboardDataManager {
      * @param amount The value to set (optional)
      * @returns The current page of sorted leaderboard data
      */
-    updateLeaderboardStore(store: OrderedDataStore, name?: string, amount?: number) {
+    private updateLeaderboardStore(store: OrderedDataStore, name?: string, amount?: number) {
         if (name !== undefined && (!RunService.IsStudio() || this.debug === true)) {
             if (amount === undefined)
                 store.RemoveAsync(name);
@@ -216,34 +134,6 @@ export class LeaderboardService implements OnStart, LeaderboardDataManager {
         }
         const data = store.GetSortedAsync(false, 100);
         return data.GetCurrentPage();
-    }
-
-    /**
-     * Updates the leaderboard UI with new data.
-     * @param leaderboard The leaderboard model (legacy)
-     * @param lbDatas The leaderboard data array
-     * @param leaderboardType The leaderboard type for React updates (optional)
-     */
-    updateLeaderboard(leaderboard: Leaderboard, lbDatas: { key: string, value: unknown; }[], leaderboardType?: LeaderboardType) {
-        // Legacy UI update
-        this.resetLeaderboard(leaderboard);
-        let i = 1;
-        for (const data of lbDatas) {
-            if (data === undefined) {
-                continue;
-            }
-            this.getLeaderboardSlot(i, data.key, data.value as number).Parent = leaderboard.GuiPart.SurfaceGui.Display;
-            ++i;
-            if (this.debug === true) {
-                print(leaderboard.Name, data.key, data.value);
-            }
-        }
-
-        // Update React components if leaderboardType is provided
-        if (leaderboardType !== undefined) {
-            const entries = this.convertToLeaderboardEntries(lbDatas);
-            this.updateLeaderboardData(leaderboardType, entries);
-        }
     }
 
     /**
@@ -256,43 +146,47 @@ export class LeaderboardService implements OnStart, LeaderboardDataManager {
             return;
         }
         const name = profile.name;
-        const isDeleting = deleteEntries !== undefined;
 
-        if (isDeleting) {
+        if (deleteEntries) {
             this.deleteEntry(this.totalTimeStore, deleteEntries);
             this.deleteEntry(this.levelStore, deleteEntries);
         }
-        this.updateLeaderboard(LEADERBOARDS.TimePlayed,
-            this.updateLeaderboardStore(this.totalTimeStore, name, new OnoeNum(profile.playtime).toSingle()),
-            "TimePlayed");
-
-        this.updateLeaderboard(LEADERBOARDS.Level,
-            this.updateLeaderboardStore(this.levelStore, name, profile.level),
-            "Level");
-
+        this.leaderboardData.set("TimePlayed", this.convertToLeaderboardEntries(
+            this.updateLeaderboardStore(this.totalTimeStore, name, new OnoeNum(profile.playtime).toSingle())
+        ));
+        this.leaderboardData.set("Level", this.convertToLeaderboardEntries(
+            this.updateLeaderboardStore(this.levelStore, name, new OnoeNum(profile.level).toSingle())
+        ));
 
         for (const currency of CURRENCIES) {
-            const lb = LEADERBOARDS.FindFirstChild(currency) as Leaderboard | undefined;
+            const lb = LEADERBOARDS.FindFirstChild(currency);
             if (lb === undefined)
                 continue;
 
             let mostCurrencies = profile.mostCurrencies.get(currency);
             let amt = mostCurrencies === undefined ? undefined : new OnoeNum(mostCurrencies).toSingle();
-            const store = DataStoreService.GetOrderedDataStore(lb.Name);
+            const store = DataStoreService.GetOrderedDataStore(currency);
 
-            if (isDeleting)
+            if (deleteEntries)
                 this.deleteEntry(store, deleteEntries);
-            this.updateLeaderboard(lb, this.updateLeaderboardStore(store, name, amt), currency as LeaderboardType);
+            this.leaderboardData.set(currency, this.convertToLeaderboardEntries(
+                this.updateLeaderboardStore(store, name, amt))
+            );
         }
 
         for (const player of Players.GetPlayers()) {
             this.donatedStore.SetAsync(tostring(player.UserId),
                 new OnoeNum(this.leaderstatsService.getLeaderstat(player, "Donated") as number | undefined ?? 0).toSingle());
         }
-        this.updateLeaderboard(LEADERBOARDS.Donated, this.donatedStore.GetSortedAsync(false, 100).GetCurrentPage()
-            .map((value) => {
-                return { key: getNameFromUserId(tonumber(value.key) ?? 0), value: value.value };
-            }), "Donated");
+        this.leaderboardData.set("Donated",
+            this.convertToLeaderboardEntries(
+                this.donatedStore.GetSortedAsync(false, 100).GetCurrentPage()
+                    .map((value) => {
+                        return { key: getNameFromUserId(tonumber(value.key) ?? 0), value: value.value };
+                    })
+            )
+        );
+        Packets.leaderboardData.set(this.leaderboardData);
     }
 
     /**

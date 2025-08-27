@@ -384,13 +384,13 @@ export default class BalanceWindowController implements OnInit {
         });
 
         Packets.balance.observe((value) => this.refreshBalanceWindow(value));
-        Packets.showDifference.connect((differencePerCurrency) => {
+        Packets.showDifference.fromServer((differencePerCurrency) => {
             for (const [currency, diff] of differencePerCurrency) {
                 this.showDifference(currency, diff);
             }
         });
 
-        Packets.dropletBurnt.connect((dropletModelId, amountPerCurrency) => {
+        Packets.dropletBurnt.fromServer((dropletModelId, amountPerCurrency) => {
             const dropletModel = DROPLET_STORAGE.FindFirstChild(dropletModelId) as BasePart | undefined;
             if (dropletModel === undefined) {
                 return;

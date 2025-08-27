@@ -29,12 +29,3 @@ export function useLeaderboardData(dataManager: LeaderboardDataManager, leaderbo
 
     return entries;
 }
-
-/**
- * Hook to get all available leaderboard types.
- * @param dataManager The leaderboard data manager instance
- * @returns Array of available leaderboard types
- */
-export function useAvailableLeaderboardTypes(dataManager: LeaderboardDataManager): LeaderboardType[] {
-    return React.useMemo(() => dataManager.getAvailableTypes(), [dataManager]);
-}

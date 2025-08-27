@@ -7,16 +7,10 @@
  */
 export interface LeaderboardDataManager {
     /** Get entries for a specific leaderboard type */
-    getLeaderboardEntries(type: LeaderboardType): LeaderboardEntry[];
-
-    /** Update a leaderboard with new data */
-    updateLeaderboardData(type: LeaderboardType, entries: LeaderboardEntry[]): void;
+    getLeaderboardEntries(leaderboardType: LeaderboardType): LeaderboardEntry[];
 
     /** Subscribe to leaderboard updates */
-    onLeaderboardUpdate(type: LeaderboardType, callback: (entries: LeaderboardEntry[]) => void): () => void;
-
-    /** Get all available leaderboard types */
-    getAvailableTypes(): LeaderboardType[];
+    onLeaderboardUpdate(leaderboardType: LeaderboardType, callback: (entries: LeaderboardEntry[]) => void): () => void;
 }
 
 /**
