@@ -3,7 +3,6 @@
  */
 
 import React from "@rbxts/react";
-import { LeaderboardDataManager } from "./LeaderboardDataManager";
 
 /**
  * React hook to subscribe to leaderboard data updates.

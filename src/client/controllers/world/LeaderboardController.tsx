@@ -1,7 +1,10 @@
 import Signal from "@antivivi/lemon-signal";
 import { Controller, OnStart } from "@flamework/core";
+import React from "@rbxts/react";
+import ReactRoblox from "@rbxts/react-roblox";
+import { LEADERBOARDS } from "shared/constants";
 import Packets from "shared/Packets";
-import { LeaderboardDataManager } from "shared/ui/components/leaderboard/LeaderboardDataManager";
+import LiveLeaderboard from "shared/ui/components/leaderboard/LiveLeaderboard";
 
 @Controller()
 export class LeaderboardController implements OnStart, LeaderboardDataManager {
@@ -10,7 +13,7 @@ export class LeaderboardController implements OnStart, LeaderboardDataManager {
     private leaderboardDataChanged = new Signal<(type: LeaderboardType, entries: LeaderboardEntry[]) => void>();
 
     getLeaderboardEntries(leaderboardType: LeaderboardType): LeaderboardEntry[] {
-        return Packets.leaderboardData.get()?.get(leaderboardType) || [];
+        return Packets.leaderboardData.get()?.get(leaderboardType) ?? [];
     }
 
     onLeaderboardUpdate(leaderboardType: LeaderboardType, callback: (entries: LeaderboardEntry[]) => void): () => void {
@@ -25,6 +28,20 @@ export class LeaderboardController implements OnStart, LeaderboardDataManager {
     }
 
     onStart() {
+        for (const leaderboard of LEADERBOARDS.GetChildren()) {
+            const guiPart = leaderboard.WaitForChild("GuiPart");
+            const surfaceGui = new Instance("SurfaceGui");
+            surfaceGui.Parent = guiPart;
+            task.spawn(() => {
+                const root = ReactRoblox.createRoot(surfaceGui);
+                root.render(<LiveLeaderboard
+                    dataManager={this}
+                    leaderboardType={leaderboard.Name as LeaderboardType}
+                />);
+            });
+
+        }
+
         Packets.leaderboardData.observe((leaderboardData) => {
             for (const [type, entries] of leaderboardData) {
                 if (entries !== this.leaderboardData.get(type)) {

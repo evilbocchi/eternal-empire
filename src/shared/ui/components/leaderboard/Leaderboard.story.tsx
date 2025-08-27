@@ -86,9 +86,13 @@ const mockEntries: { [key: string]: LeaderboardEntry[]; } = {
         { place: 10, name: "ThoughtfulUser", amount: 3210000 }
     ]
 };
-for (const [_, entries] of pairs(mockEntries))
-    for (const entry of entries)
+
+// Convert amounts to OnoeNum
+for (const [_, entries] of pairs(mockEntries)) {
+    for (const entry of entries) {
         entry.amount = new OnoeNum(entry.amount).toSingle();
+    }
+}
 
 export = {
     react: React,

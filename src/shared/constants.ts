@@ -1,7 +1,7 @@
 import { Debris, Players, SoundService, TextChatService, Workspace } from "@rbxts/services";
 import { Workspace_Waypoints } from "services";
 import { AREAS } from "shared/Area";
-import { IS_CI, IS_SERVER } from "shared/Context";
+import { IS_CI } from "shared/Context";
 
 declare global {
     type AreaId = keyof (typeof AREAS);
@@ -68,12 +68,12 @@ export const getNPCModel = (npc: NPCName): LuaTuple<[Model, Humanoid, BasePart]>
 export const getStartCamera = () => Workspace.FindFirstChild("StartCamera") as Part;
 
 export const LEADERBOARDS = Workspace.WaitForChild("Leaderboards") as Folder & {
-    TimePlayed: Leaderboard;
-    Level: Leaderboard;
-    Funds: Leaderboard;
-    Power: Leaderboard;
-    Skill: Leaderboard;
-    Donated: Leaderboard & {
+    TimePlayed: Model;
+    Level: Model;
+    Funds: Model;
+    Power: Model;
+    Skill: Model;
+    Donated: Model & {
         DonationPart: Part & {
             SurfaceGui: SurfaceGui & {
                 Display: ScrollingFrame;

@@ -47,36 +47,10 @@ export class LeaderboardService implements OnStart {
     /** Cached leaderboard data for React components */
     private readonly leaderboardData = new Map<LeaderboardType, LeaderboardEntry[]>();
 
-    /** Update callbacks for React components */
-    private updateCallbacks = new Map<LeaderboardType, ((entries: LeaderboardEntry[]) => void)[]>();
-
     constructor(
         private readonly dataService: DataService,
         private readonly leaderstatsService: LeaderstatsService
     ) { }
-
-    /**
-     * Subscribe to leaderboard updates.
-     * @param leaderboardType The leaderboard type
-     * @param callback The callback function
-     * @returns Unsubscribe function
-     */
-    onLeaderboardUpdate(leaderboardType: LeaderboardType, callback: (entries: LeaderboardEntry[]) => void): () => void {
-        const callbacks = this.updateCallbacks.get(leaderboardType) || [];
-        callbacks.push(callback);
-        this.updateCallbacks.set(leaderboardType, callbacks);
-
-        // Return unsubscribe function
-        return () => {
-            const currentCallbacks = this.updateCallbacks.get(leaderboardType) || [];
-            const index = currentCallbacks.indexOf(callback);
-            if (index > -1) {
-                const newCallbacks = [...currentCallbacks];
-                newCallbacks.remove(index);
-                this.updateCallbacks.set(leaderboardType, newCallbacks);
-            }
-        };
-    }
 
     /**
      * Converts DataStore entries to LeaderboardEntry format.

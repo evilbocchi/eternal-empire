@@ -4,8 +4,17 @@
 
 import React from "@rbxts/react";
 import Leaderboard from "shared/ui/components/leaderboard/Leaderboard";
-import { LeaderboardDataManager } from "shared/ui/components/leaderboard/LeaderboardDataManager";
 import { useLeaderboardData } from "shared/ui/components/leaderboard/useLeaderboardData";
+
+declare global {
+    export interface LeaderboardDataManager {
+        /** Get entries for a specific leaderboard type */
+        getLeaderboardEntries(leaderboardType: LeaderboardType): LeaderboardEntry[];
+
+        /** Subscribe to leaderboard updates */
+        onLeaderboardUpdate(leaderboardType: LeaderboardType, callback: (entries: LeaderboardEntry[]) => void): () => void;
+    }
+}
 
 interface LiveLeaderboardProps {
     /** The leaderboard data manager instance */
