@@ -18,13 +18,13 @@ import { Controller, OnInit, OnStart } from "@flamework/core";
 import { Debris, RunService, StarterGui, TweenService, UserInputService, Workspace } from "@rbxts/services";
 import { LOCAL_PLAYER } from "client/constants";
 import { ADAPTIVE_TAB } from "client/controllers/core/AdaptiveTabController";
+import { OnCharacterAdded } from "client/controllers/core/ModdingController";
+import { INTERFACE } from "client/controllers/core/UIController";
 import BuildController from "client/controllers/gameplay/BuildController";
 import TooltipController, { Tooltip } from "client/controllers/interface/TooltipController";
-import { OnCharacterAdded } from "client/controllers/core/ModdingController";
-import UIController, { INTERFACE } from "client/controllers/core/UIController";
 import AreaController from "client/controllers/world/AreaController";
 import { AREAS } from "shared/Area";
-import { ASSETS, emitEffect } from "shared/asset/GameAssets";
+import { ASSETS, emitEffect, playSound } from "shared/asset/GameAssets";
 import Harvestable from "shared/Harvestable";
 import ItemUtils from "shared/item/ItemUtils";
 import Items from "shared/items/Items";
@@ -80,7 +80,7 @@ export default class ToolController implements OnInit, OnStart, OnCharacterAdded
         return params;
     })();
 
-    constructor(private tooltipController: TooltipController, private uiController: UIController, private areaController: AreaController, private buildController: BuildController) {
+    constructor(private tooltipController: TooltipController, private areaController: AreaController, private buildController: BuildController) {
 
     }
 
@@ -163,11 +163,11 @@ export default class ToolController implements OnInit, OnStart, OnCharacterAdded
                 gui.Adornee = model;
                 gui.Parent = model;
                 if (multi > 1.5) {
-                    this.uiController.playSound("Critical.mp3");
+                    playSound("Critical.mp3");
                 }
             }
 
-            this.uiController.playSound("Harvest.mp3");
+            playSound("Harvest.mp3");
 
             highlight.Parent = model;
             Debris.AddItem(highlight, 2);
@@ -209,7 +209,7 @@ export default class ToolController implements OnInit, OnStart, OnCharacterAdded
                     return;
                 anim.Stopped.Once(() => Packets.useTool.inform(this.checkHarvestable(currentTool) ?? Workspace));
                 anim.Play();
-                this.uiController.playSound("ToolSwing.mp3");
+                playSound("ToolSwing.mp3");
             }
             else if (ADAPTIVE_TAB.Visible === false) {
                 for (const [i, v] of this.KEY_CODES) {
@@ -230,7 +230,7 @@ export default class ToolController implements OnInit, OnStart, OnCharacterAdded
                         return;
 
                     const backpack = LOCAL_PLAYER.FindFirstChildOfClass("Backpack");
-                    this.uiController.playSound("Equip.mp3");
+                    playSound("Equip.mp3");
                     if (tool.Parent === backpack) {
                         const currentTool = LOCAL_PLAYER.Character?.FindFirstChildOfClass("Tool");
                         if (currentTool !== undefined)
@@ -375,7 +375,7 @@ export default class ToolController implements OnInit, OnStart, OnCharacterAdded
         }
         toolOption.Activated.Connect(() => {
             const backpack = LOCAL_PLAYER.FindFirstChildOfClass("Backpack");
-            this.uiController.playSound("Equip.mp3");
+            playSound("Equip.mp3");
             if (tool.Parent === backpack) {
                 const currentTool = LOCAL_PLAYER.Character?.FindFirstChildOfClass("Tool");
                 if (currentTool !== undefined)

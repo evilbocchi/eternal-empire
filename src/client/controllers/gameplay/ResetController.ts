@@ -15,10 +15,10 @@ import { OnoeNum } from "@antivivi/serikanum";
 import { Controller, OnInit } from "@flamework/core";
 import CameraShaker from "@rbxts/camera-shaker";
 import { Debris, TweenService, Workspace } from "@rbxts/services";
-import EffectController from "client/controllers/world/EffectController";
-import SoundController from "client/controllers/interface/SoundController";
 import UIController from "client/controllers/core/UIController";
-import { ASSETS } from "shared/asset/GameAssets";
+import SoundController from "client/controllers/interface/SoundController";
+import EffectController from "client/controllers/world/EffectController";
+import { ASSETS, playSound } from "shared/asset/GameAssets";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Packets from "shared/Packets";
 import { RESET_LAYERS } from "shared/ResetLayer";
@@ -63,7 +63,7 @@ export default class ResetController implements OnInit {
             const toCframe = (instance as BasePart).CFrame;
             TweenService.Create(currentCamera, new TweenInfo(1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), { CFrame: toCframe }).Play();
             task.delay(1, () => {
-                this.uiController.playSound("Thunder.mp3");
+                playSound("Thunder.mp3");
                 const lightning = ASSETS.Resets.WaitForChild("SkillificationLightning").Clone() as BasePart;
                 lightning.Parent = Workspace;
                 TweenService.Create(lightning, new TweenInfo(1), { Transparency: 1 }).Play();
@@ -92,7 +92,7 @@ export default class ResetController implements OnInit {
             const resetLayer = RESET_LAYERS[layer];
             TRACKED_QUEST_WINDOW.Reset.AmountLabel.Text = CurrencyBundle.getFormatted(resetLayer.gives, new OnoeNum(amount)).upper();
             this.moveCamera(resetLayer.area.areaFolder.WaitForChild("ResetCamera"));
-            this.uiController.playSound("MagicCast.mp3");
+            playSound("MagicCast.mp3");
         });
     }
 }

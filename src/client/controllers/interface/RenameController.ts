@@ -14,7 +14,7 @@
 import { OnoeNum } from "@antivivi/serikanum";
 import { Controller, OnInit } from "@flamework/core";
 import { ADAPTIVE_TAB_MAIN_WINDOW } from "client/controllers/core/AdaptiveTabController";
-import UIController from "client/controllers/core/UIController";
+import { playSound } from "shared/asset/GameAssets";
 import Packets from "shared/Packets";
 
 export const RENAME_WINDOW = ADAPTIVE_TAB_MAIN_WINDOW.WaitForChild("Rename") as Frame & {
@@ -39,10 +39,6 @@ export const RENAME_WINDOW = ADAPTIVE_TAB_MAIN_WINDOW.WaitForChild("Rename") as 
 @Controller()
 export default class RenameController implements OnInit {
 
-    constructor(private uiController: UIController) {
-
-    }
-
     /**
      * Initializes the RenameController, sets up rename actions, input validation, and UI updates.
      */
@@ -50,10 +46,10 @@ export default class RenameController implements OnInit {
         RENAME_WINDOW.PurchaseOptions.Robux.Activated.Connect(() => Packets.promptRename.invoke(RENAME_WINDOW.Input.InputBox.Text, "robux"));
         RENAME_WINDOW.PurchaseOptions.Funds.Activated.Connect(() => {
             if (Packets.promptRename.invoke(RENAME_WINDOW.Input.InputBox.Text, "funds") === true) {
-                this.uiController.playSound("ItemPurchase.mp3");
+                playSound("ItemPurchase.mp3");
             }
             else {
-                this.uiController.playSound("Error.mp3");
+                playSound("Error.mp3");
             }
         });
         RENAME_WINDOW.Input.InputBox.FocusLost.Connect(() => {

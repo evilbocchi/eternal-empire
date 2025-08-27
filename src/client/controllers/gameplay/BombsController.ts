@@ -17,7 +17,7 @@ import { Controller, OnStart } from "@flamework/core";
 import { CollectionService, MarketplaceService, Workspace } from "@rbxts/services";
 import { LOCAL_PLAYER } from "client/constants";
 import { DETAILS_WINDOW } from "client/controllers/interface/DetailsController";
-import UIController from "client/controllers/core/UIController";
+import { playSound } from "shared/asset/GameAssets";
 import { BOMBS_PRODUCTS } from "shared/devproducts/BombsProducts";
 import Packets from "shared/Packets";
 
@@ -40,10 +40,6 @@ export default class BombsController implements OnStart {
     /** Map of bomb board GUIs to their associated currency. */
     guis = new Map<BombsBoardGui, Currency>();
 
-    constructor(private uiController: UIController) {
-
-    }
-
     /**
      * Sets up the bomb board GUI with purchase and use actions, and manages its lifecycle.
      * @param bombsCurrency The currency type for bombs.
@@ -52,15 +48,15 @@ export default class BombsController implements OnStart {
      */
     loadGui(bombsCurrency: Currency, boosting: Currency, gui: BombsBoardGui) {
         gui.BuyButton.Activated.Connect(() => {
-            this.uiController.playSound("MenuClick.mp3");
+            playSound("MenuClick.mp3");
             MarketplaceService.PromptProductPurchase(LOCAL_PLAYER, BOMBS_PRODUCTS[boosting as keyof (typeof BOMBS_PRODUCTS)]);
         });
         gui.UseButton.Activated.Connect(() => {
             if (Packets.useBomb.invoke(bombsCurrency) === true) {
-                this.uiController.playSound("ItemPurchase.mp3");
+                playSound("ItemPurchase.mp3");
             }
             else {
-                this.uiController.playSound("Error.mp3");
+                playSound("Error.mp3");
             }
         });
         gui.Destroying.Once(() => this.guis.delete(gui));

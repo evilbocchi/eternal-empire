@@ -16,16 +16,16 @@ import { combineHumanReadable, convertToHHMMSS, getHumanoid, paintObjects } from
 import { Controller, OnInit } from "@flamework/core";
 import { Players, ReplicatedFirst, RunService, TweenService, Workspace } from "@rbxts/services";
 import { LOCAL_PLAYER, PLAYER_GUI } from "client/constants";
-import HotkeysController from "client/controllers/core/HotkeysController";
 import AdaptiveTabController from "client/controllers/core/AdaptiveTabController";
+import HotkeysController from "client/controllers/core/HotkeysController";
+import UIController from "client/controllers/core/UIController";
 import BalanceWindowController from "client/controllers/interface/BalanceWindowController";
 import IntroController from "client/controllers/interface/IntroController";
 import LoadingWindowController from "client/controllers/interface/LoadingWindowController";
 import { SETTINGS_WINDOW } from "client/controllers/interface/SettingsController";
 import SoundController from "client/controllers/interface/SoundController";
-import UIController from "client/controllers/core/UIController";
+import { ASSETS, playSound } from "shared/asset/GameAssets";
 import { getNameFromUserId, getStartCamera, isStartScreenEnabled } from "shared/constants";
-import { ASSETS } from "shared/asset/GameAssets";
 import Items from "shared/items/Items";
 import Packets from "shared/Packets";
 
@@ -101,7 +101,6 @@ export const START_WINDOW = ReplicatedFirst.WaitForChild("StartScreen") as Scree
 @Controller()
 export default class StartWindowController implements OnInit {
     constructor(
-        private uiController: UIController,
         private adaptiveTabController: AdaptiveTabController,
         private balanceWindowController: BalanceWindowController,
         private loadingWindowController: LoadingWindowController,
@@ -242,13 +241,13 @@ export default class StartWindowController implements OnInit {
             }
             const empireOption = ASSETS.EmpiresWindow.EmpireOption.Clone();
             empireOption.Activated.Connect(() => {
-                this.uiController.playSound("MenuClick.mp3");
+                playSound("MenuClick.mp3");
                 const success = Packets.teleportToEmpire.invoke(availableEmpire);
                 if (success) {
                     this.loadingWindowController.showLoadingWindow("Loading server");
                 }
                 else {
-                    this.uiController.playSound("Error.mp3");
+                    playSound("Error.mp3");
                     warn(`Failed to teleport to empire ${availableEmpire}. It may not exist or is not available.`);
                     print("Player ID: " + LOCAL_PLAYER.UserId);
                 }
@@ -282,7 +281,7 @@ export default class StartWindowController implements OnInit {
         const newEmpireOption = ASSETS.EmpiresWindow.NewEmpireOption.Clone();
         const ogText = newEmpireOption.MessageLabel.Text;
         newEmpireOption.Activated.Connect(() => {
-            this.uiController.playSound("MenuClick.mp3");
+            playSound("MenuClick.mp3");
             newEmpireOption.MessageLabel.Text = "Creating empire...";
             const success = Packets.createNewEmpire.invoke();
             if (!success) {
@@ -300,7 +299,7 @@ export default class StartWindowController implements OnInit {
                 return false;
             }
 
-            this.uiController.playSound("MenuClick.mp3");
+            playSound("MenuClick.mp3");
             const tween = TweenService.Create(START_WINDOW.EmpiresWindow, new TweenInfo(1), { Position: new UDim2(0.5, 0, 1.4, 0) });
             tween.Play();
             tween.Completed.Once(() => START_WINDOW.EmpiresWindow.Visible = false);
@@ -312,7 +311,7 @@ export default class StartWindowController implements OnInit {
                 return false;
             }
 
-            this.uiController.playSound("MenuClose.mp3");
+            playSound("MenuClose.mp3");
             const tween = TweenService.Create(START_WINDOW.AboutWindow, new TweenInfo(0.25), { Position: new UDim2(0, 0, -0.5, 0) });
             tween.Play();
             tween.Completed.Once(() => START_WINDOW.AboutWindow.Visible = false);
@@ -320,11 +319,11 @@ export default class StartWindowController implements OnInit {
             return true;
         }, "Close");
         const registerOption = (option: typeof START_WINDOW.MainOptions.Play, callback: () => void) => {
-            option.Button.MouseEnter.Connect(() => this.uiController.playSound("EmphasisButtonHover.mp3"));
+            option.Button.MouseEnter.Connect(() => playSound("EmphasisButtonHover.mp3"));
             option.Button.MouseMoved.Connect(() => option.Button.ImageColor3 = new Color3(0.75, 0.75, 0.75));
             option.Button.MouseLeave.Connect(() => option.Button.ImageColor3 = new Color3(1, 1, 1));
             option.Button.Activated.Connect(() => {
-                this.uiController.playSound("EmphasisMenuSelect.mp3");
+                playSound("EmphasisMenuSelect.mp3");
                 callback();
             });
         };
@@ -350,7 +349,7 @@ export default class StartWindowController implements OnInit {
         });
 
         START_WINDOW.EmpiresWindow.PublicEmpireWindow.JoinPublicEmpire.Activated.Connect(() => {
-            this.uiController.playSound("MenuClick.mp3");
+            playSound("MenuClick.mp3");
             this.hideStartWindow();
             task.delay(0.9, () => this.introController.onIntroMarkerChanged());
         });

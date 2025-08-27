@@ -15,8 +15,7 @@
 import { Controller, OnInit, OnPhysics } from "@flamework/core";
 import { RunService } from "@rbxts/services";
 import QuestsController from "client/controllers/interface/QuestsController";
-import UIController from "client/controllers/core/UIController";
-import { ASSETS } from "shared/asset/GameAssets";
+import { ASSETS, playSound } from "shared/asset/GameAssets";
 import { getChallengeGui } from "shared/constants";
 import Packets from "shared/Packets";
 import { TRACKED_QUEST_WINDOW } from "./QuestsController";
@@ -57,7 +56,7 @@ export default class ChallengeController implements OnPhysics, OnInit {
     /** Debounce timer for leave action. */
     debounce = 0;
 
-    constructor(private uiController: UIController, private questsController: QuestsController) {
+    constructor(private questsController: QuestsController) {
     }
 
     /**
@@ -71,10 +70,10 @@ export default class ChallengeController implements OnPhysics, OnInit {
 
             const startButton = (challengeOption as typeof ASSETS.ChallengeOption).StartButton;
             startButton.Activated.Connect(() => {
-                this.uiController.playSound("MenuClick.mp3");
+                playSound("MenuClick.mp3");
                 const t = tick();
                 if (t - (startButton.GetAttribute("LastClick") as number ?? 0) < 3) {
-                    this.uiController.playSound("MagicCast.mp3");
+                    playSound("MagicCast.mp3");
                     Packets.startChallenge.inform(challengeOption.Name);
                 }
                 else {
@@ -108,7 +107,7 @@ export default class ChallengeController implements OnPhysics, OnInit {
                     return;
                 this.debounce = t;
 
-                this.uiController.playSound("MagicCast.mp3");
+                playSound("MagicCast.mp3");
                 Packets.quitChallenge.inform();
             });
         }

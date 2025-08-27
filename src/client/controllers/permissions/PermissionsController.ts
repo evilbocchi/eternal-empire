@@ -16,9 +16,8 @@ import CameraShaker from "@rbxts/camera-shaker";
 import { TextChatService } from "@rbxts/services";
 import { LOCAL_PLAYER } from "client/constants";
 import AdaptiveTabController, { ADAPTIVE_TAB_MAIN_WINDOW } from "client/controllers/core/AdaptiveTabController";
-import UIController from "client/controllers/core/UIController";
 import EffectController from "client/controllers/world/EffectController";
-import { ASSETS } from "shared/asset/GameAssets";
+import { ASSETS, playSound } from "shared/asset/GameAssets";
 import Items from "shared/items/Items";
 import Packets from "shared/Packets";
 
@@ -54,7 +53,7 @@ export const COMMANDS_WINDOW = ADAPTIVE_TAB_MAIN_WINDOW.WaitForChild("Commands")
 @Controller()
 export default class PermissionsController implements OnInit {
 
-    constructor(private uiController: UIController, private effectController: EffectController, private adaptiveTabController: AdaptiveTabController) {
+    constructor(private effectController: EffectController, private adaptiveTabController: AdaptiveTabController) {
 
     }
 
@@ -63,7 +62,7 @@ export default class PermissionsController implements OnInit {
      */
     onInit() {
         Packets.donationGiven.connect(() => {
-            this.uiController.playSound("PowerUp.mp3");
+            playSound("PowerUp.mp3");
             this.effectController.camShake.Shake(CameraShaker.Presets.Bump);
         });
         Packets.tabOpened.connect((tab) => {

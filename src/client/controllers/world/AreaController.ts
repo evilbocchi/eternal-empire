@@ -15,8 +15,8 @@ import { OnoeNum } from "@antivivi/serikanum";
 import { Controller, OnInit, OnStart } from "@flamework/core";
 import CameraShaker from "@rbxts/camera-shaker";
 import { ReplicatedStorage, TweenService, Workspace } from "@rbxts/services";
-import UIController from "client/controllers/core/UIController";
 import Area, { AREAS } from "shared/Area";
+import { playSound } from "shared/asset/GameAssets";
 import Packets from "shared/Packets";
 
 /**
@@ -37,10 +37,6 @@ export default class AreaController implements OnInit, OnStart {
     );
     readonly BAR_UPDATE_TWEENINFO = new TweenInfo(0.2);
     readonly UPDATE_PER_AREA = new Map<AreaId, (n: number) => void>();
-
-    constructor(private uiController: UIController) {
-
-    }
 
     /**
      * Refreshes a stat bar UI element for a given value and max.
@@ -98,6 +94,8 @@ export default class AreaController implements OnInit, OnStart {
                     const size = grid.Size;
                     boardGui.GridSize.BarLabel.Text = `${size.X}x${size.Z}`;
                     const placedItems = Packets.placedItems.get();
+                    if (placedItems === undefined)
+                        continue;
                     let i = 0;
                     for (const [_, placedItem] of placedItems)
                         if (placedItem.area === id)
@@ -124,7 +122,7 @@ export default class AreaController implements OnInit, OnStart {
             }
         }
         this.AREA_UNLOCK_SHAKE.Shake(CameraShaker.Presets.Bump);
-        this.uiController.playSound("Thunder.mp3");
+        playSound("Thunder.mp3");
     }
 
     /**

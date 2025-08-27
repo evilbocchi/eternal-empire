@@ -22,12 +22,10 @@ import { CollectionService, Debris, RunService, TweenService } from "@rbxts/serv
 import ItemFilter from "client/ItemFilter";
 import ItemSlot from "client/ItemSlot";
 import { LOCAL_PLAYER, PLAYER_GUI } from "client/constants";
-import HotkeysController from "client/controllers/core/HotkeysController";
-import UIController from "client/controllers/core/UIController";
 import AdaptiveTabController, { ADAPTIVE_TAB, ADAPTIVE_TAB_MAIN_WINDOW } from "client/controllers/core/AdaptiveTabController";
-import TooltipController from "client/controllers/interface/TooltipController";
+import HotkeysController from "client/controllers/core/HotkeysController";
 import Packets from "shared/Packets";
-import { ASSETS, getSound } from "shared/asset/GameAssets";
+import { ASSETS, getSound, playSound } from "shared/asset/GameAssets";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import { CURRENCY_DETAILS } from "shared/currency/CurrencyDetails";
 import Item from "shared/item/Item";
@@ -135,8 +133,7 @@ export default class ShopController implements OnInit, OnStart {
     /** Debounce for switching items. */
     switchDebounce = 0;
 
-    constructor(private hotkeysController: HotkeysController, private uiController: UIController,
-        private adaptiveTabController: AdaptiveTabController, private tooltipController: TooltipController) {
+    constructor(private hotkeysController: HotkeysController, private adaptiveTabController: AdaptiveTabController) {
     }
 
     /**
@@ -350,7 +347,7 @@ export default class ShopController implements OnInit, OnStart {
             }
             itemSlot.Visible = false;
             itemSlot.Activated.Connect(() => {
-                this.uiController.playSound("MenuClick.mp3");
+                playSound("MenuClick.mp3");
                 this.refreshPurchaseWindow(item);
                 this.adaptiveTabController.showAdaptiveTab("Purchase");
                 ADAPTIVE_TAB.UIStroke.Color = diff.color ?? Color3.fromRGB(255, 255, 255);
@@ -366,6 +363,8 @@ export default class ShopController implements OnInit, OnStart {
     priceCycle() {
         const hideMaxedItems = this.hideMaxedItems;
         const bought = Packets.bought.get();
+        if (bought === undefined)
+            return;
         for (const [item, itemSlot] of this.itemSlotsPerItem) {
             if (itemSlot.Visible === false) {
                 continue;
@@ -443,10 +442,10 @@ export default class ShopController implements OnInit, OnStart {
                 return false;
             }
             if (this.selectedItem !== undefined && Packets.buyItem.invoke(this.selectedItem.id)) {
-                this.uiController.playSound("ItemPurchase.mp3");
+                playSound("ItemPurchase.mp3");
             }
             else {
-                this.uiController.playSound("Error.mp3");
+                playSound("Error.mp3");
             }
             return true;
         }, "Buy", 1);
@@ -460,10 +459,10 @@ export default class ShopController implements OnInit, OnStart {
                     items.push(item.id);
                 }
                 if (Packets.buyAllItems.invoke(items)) {
-                    this.uiController.playSound("ItemPurchase.mp3");
+                    playSound("ItemPurchase.mp3");
                 }
                 else {
-                    this.uiController.playSound("Error.mp3");
+                    playSound("Error.mp3");
                 }
                 return true;
             }

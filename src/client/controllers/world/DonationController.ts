@@ -9,6 +9,7 @@
 
 import { Controller, OnStart } from "@flamework/core";
 import UIController from "client/controllers/core/UIController";
+import { playSound } from "shared/asset/GameAssets";
 import { LEADERBOARDS } from "shared/constants";
 import { DONATION_PRODUCTS } from "shared/devproducts/DonationProducts";
 import Packets from "shared/Packets";
@@ -41,7 +42,7 @@ export default class DonationController implements OnStart {
             }
         }
         donationOption.MouseButton1Click.Connect(() => {
-            this.uiController.playSound("MenuClick.mp3");
+            playSound("MenuClick.mp3");
             Packets.promptDonation.inform(donationProduct);
         });
     }

@@ -16,11 +16,12 @@ import { Controller, OnInit } from "@flamework/core";
 import { ContentProvider, ReplicatedStorage, TweenService, Workspace } from "@rbxts/services";
 import { LOCAL_PLAYER } from "client/constants";
 import AdaptiveTabController from "client/controllers/core/AdaptiveTabController";
-import UIController, { INTERFACE } from "client/controllers/core/UIController";
+import { INTERFACE } from "client/controllers/core/UIController";
 import BalanceWindowController from "client/controllers/interface/BalanceWindowController";
 import QuestsController from "client/controllers/interface/QuestsController";
 import SoundController from "client/controllers/interface/SoundController";
 import { assets, getAsset } from "shared/asset/AssetMap";
+import { playSound } from "shared/asset/GameAssets";
 import { WAYPOINTS } from "shared/constants";
 
 export const INTRO_WINDOW = INTERFACE.WaitForChild("IntroWindow") as Frame;
@@ -37,7 +38,6 @@ export default class IntroController implements OnInit {
     isCurrentlyInIntroSequence = false;
 
     constructor(
-        private uiController: UIController,
         private questsController: QuestsController,
         private adaptiveTabController: AdaptiveTabController,
         private soundController: SoundController,
@@ -78,7 +78,7 @@ export default class IntroController implements OnInit {
         INTRO_WINDOW.Visible = true;
         this.balanceWindowController.hideBalanceWindow();
         this.adaptiveTabController.hideSidebarButtons();
-        const fabricRustle = () => this.uiController.playSound("FabricRustle.mp3");
+        const fabricRustle = () => playSound("FabricRustle.mp3");
         task.delay(2, () => {
             fabricRustle();
             TweenService.Create(camera, new TweenInfo(0.5), { CFrame: WAYPOINTS.NewBeginningsCamera1.CFrame }).Play();
@@ -93,7 +93,7 @@ export default class IntroController implements OnInit {
             TweenService.Create(camera, new TweenInfo(0.5), { CFrame: WAYPOINTS.NewBeginningsCamera3.CFrame }).Play();
         });
         task.delay(5, () => {
-            this.uiController.playSound("JumpSwish.mp3");
+            playSound("JumpSwish.mp3");
             sleepingAnimation?.Stop();
             camera.CFrame = WAYPOINTS.NewBeginningsCamera4.CFrame;
             camera.CameraType = Enum.CameraType.Custom;

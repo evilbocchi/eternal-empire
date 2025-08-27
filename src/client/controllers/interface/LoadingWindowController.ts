@@ -14,6 +14,7 @@ import { Controller, OnInit } from "@flamework/core";
 import { TweenService } from "@rbxts/services";
 import { PLAYER_GUI } from "client/constants";
 import UIController from "client/controllers/core/UIController";
+import { playSound } from "shared/asset/GameAssets";
 
 export const LOADING_SCREEN = PLAYER_GUI.WaitForChild("LoadingScreen") as ScreenGui;
 export const LOADING_WINDOW = LOADING_SCREEN.WaitForChild("LoadingWindow") as Frame & {
@@ -45,7 +46,7 @@ export default class LoadingWindowController implements OnInit {
         });
 
         if (LOADING_WINDOW.Visible === true)
-            this.uiController.playSound("IntermissionEnd.mp3");
+            playSound("IntermissionEnd.mp3");
     }
 
     /**
@@ -59,7 +60,7 @@ export default class LoadingWindowController implements OnInit {
         LOADING_WINDOW.Position = new UDim2(0, 0, -1.1, 0);
         TweenService.Create(LOADING_WINDOW, new TweenInfo(0.25), { Position: new UDim2(0, 0, 0, 0) }).Play();
         LOADING_WINDOW.Visible = true;
-        this.uiController.playSound("IntermissionEnter.mp3");
+        playSound("IntermissionEnter.mp3");
     }
 
     /**

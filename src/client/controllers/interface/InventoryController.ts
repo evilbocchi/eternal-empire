@@ -22,7 +22,7 @@ import BuildController from "client/controllers/gameplay/BuildController";
 import TooltipController, { Tooltip } from "client/controllers/interface/TooltipController";
 import ItemFilter from "client/ItemFilter";
 import ItemSlot from "client/ItemSlot";
-import { ASSETS } from "shared/asset/GameAssets";
+import { ASSETS, playSound } from "shared/asset/GameAssets";
 import Item from "shared/item/Item";
 import Items from "shared/items/Items";
 import Packets from "shared/Packets";
@@ -178,11 +178,11 @@ export default class InventoryController implements OnInit, OnStart {
                 const isPlaceable = item.placeableAreas.size() > 0 || item.bounds !== undefined;
                 const level = Packets.level.get() ?? 0;
                 if (this.buildController.getRestricted() === true || isPlaceable === false || (item.levelReq !== undefined && item.levelReq > level)) {
-                    this.uiController.playSound("Error.mp3");
+                    playSound("Error.mp3");
                     return;
                 }
                 this.adaptiveTabController.hideAdaptiveTab();
-                this.uiController.playSound("MenuClick.mp3");
+                playSound("MenuClick.mp3");
                 let bestUuid: string | undefined;
                 if (Items.uniqueItems.has(item)) {
                     bestUuid = this.getBest(item.id);

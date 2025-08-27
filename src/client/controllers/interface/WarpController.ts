@@ -11,11 +11,11 @@
  * @since 1.0.0
  */
 import { Controller, OnInit } from "@flamework/core";
-import HotkeysController from "client/controllers/core/HotkeysController";
 import AdaptiveTabController, { ADAPTIVE_TAB_MAIN_WINDOW } from "client/controllers/core/AdaptiveTabController";
-import UIController from "client/controllers/core/UIController";
+import HotkeysController from "client/controllers/core/HotkeysController";
 import { AREAS } from "shared/Area";
 import Packets from "shared/Packets";
+import { playSound } from "shared/asset/GameAssets";
 
 export const WARP_WINDOW = ADAPTIVE_TAB_MAIN_WINDOW.WaitForChild("Warp") as Frame & {
     [area in AreaId]: ImageButton
@@ -29,7 +29,7 @@ export const WARP_WINDOW = ADAPTIVE_TAB_MAIN_WINDOW.WaitForChild("Warp") as Fram
 @Controller()
 export default class WarpController implements OnInit {
 
-    constructor(private uiController: UIController, private adaptiveTabController: AdaptiveTabController, private hotkeysController: HotkeysController) {
+    constructor(private adaptiveTabController: AdaptiveTabController, private hotkeysController: HotkeysController) {
 
     }
 
@@ -50,11 +50,11 @@ export default class WarpController implements OnInit {
                 if (WARP_WINDOW.Visible) {
                     const success = Packets.tpToArea.invoke(areaId);
                     if (success) {
-                        this.uiController.playSound("Teleport.mp3");
+                        playSound("Teleport.mp3");
                         this.adaptiveTabController.hideAdaptiveTab();
                     }
                     else {
-                        this.uiController.playSound("Error.mp3");
+                        playSound("Error.mp3");
                     }
                     return true;
                 }

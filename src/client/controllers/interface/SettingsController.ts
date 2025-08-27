@@ -157,7 +157,7 @@ export default class SettingsController implements OnStart {
                     if (!settings)
                         return playSound("Error.mp3");
                     const enabled = !settings[setting];
-                    this.uiController.playSound(enabled === true ? "CheckOn.mp3" : "CheckOff.mp3");
+                    playSound(enabled === true ? "CheckOn.mp3" : "CheckOff.mp3");
 
                     Packets.setSetting.inform(setting, enabled);
                 });

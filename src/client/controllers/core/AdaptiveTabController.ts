@@ -15,9 +15,9 @@
 import Signal from "@antivivi/lemon-signal";
 import { Controller, OnInit } from "@flamework/core";
 import { Lighting, TweenService, Workspace } from "@rbxts/services";
-import { LOCAL_PLAYER } from "client/constants";
 import HotkeysController from "client/controllers/core/HotkeysController";
-import UIController, { INTERFACE } from "client/controllers/core/UIController";
+import { INTERFACE } from "client/controllers/core/UIController";
+import { playSound } from "shared/asset/GameAssets";
 
 declare global {
     type SidebarOption = Frame & {
@@ -75,7 +75,7 @@ export default class AdaptiveTabController implements OnInit {
         return blur;
     })();
 
-    constructor(private hotkeysController: HotkeysController, private uiController: UIController) {
+    constructor(private hotkeysController: HotkeysController) {
     }
 
     /**
@@ -191,9 +191,9 @@ export default class AdaptiveTabController implements OnInit {
                 TweenService.Create(sidebarButton, tweenInfo, { Size: new UDim2(1, 0, 1, 0) }).Play();
                 const result = this.toggleAdaptiveTab(optionName);
                 if (result === true)
-                    this.uiController.playSound("MenuOpen.mp3");
+                    playSound("MenuOpen.mp3");
                 else
-                    this.uiController.playSound("MenuClose.mp3");
+                    playSound("MenuClose.mp3");
 
                 return true;
             }, optionName);
@@ -211,7 +211,7 @@ export default class AdaptiveTabController implements OnInit {
     onInit() {
         this.hotkeysController.setHotkey(ADAPTIVE_TAB.CloseButton, Enum.KeyCode.X, () => {
             if (ADAPTIVE_TAB.Visible === true) {
-                this.uiController.playSound("MenuClose.mp3");
+                playSound("MenuClose.mp3");
                 this.hideAdaptiveTab();
                 return true;
             }

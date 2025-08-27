@@ -453,7 +453,7 @@ export function CreateListingForm({ onSubmit }: CreateListingFormProps) {
 
     // Load player's available unique items
     useEffect(() => {
-        const uniqueInstances = Packets.uniqueInstances.get();
+        const uniqueInstances = Packets.uniqueInstances.get() ?? new Map();
         const items: string[] = [];
         for (const [uuid, item] of uniqueInstances) {
             // Only include items that aren't placed
@@ -751,9 +751,12 @@ export default function MarketplaceWindow({ visible, onClose }: MarketplaceWindo
             const currentMyListings = Packets.myActiveListings.get();
             const marketplaceEnabled = Packets.marketplaceEnabled.get();
 
-            setListings(currentListings);
-            setMyListings(currentMyListings);
-            setIsEnabled(marketplaceEnabled);
+            if (currentListings)
+                setListings(currentListings);
+            if (currentMyListings)
+                setMyListings(currentMyListings);
+            if (marketplaceEnabled)
+                setIsEnabled(marketplaceEnabled);
         }
     }, [visible]);
 

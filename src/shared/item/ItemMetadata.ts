@@ -155,7 +155,7 @@ export default class ItemMetadata {
 
     levelReq(level = Packets.level.get()) {
         const levelReq = this.item.levelReq;
-        if (levelReq === undefined) {
+        if (levelReq === undefined || level === undefined) {
             this.builder[ItemMetadata.INDICES.LEVEL_REQ] = "";
             return;
         }

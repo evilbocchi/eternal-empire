@@ -20,13 +20,13 @@ import StringBuilder from "@rbxts/stringbuilder";
 import HotkeysController from "client/controllers/core/HotkeysController";
 import UIController, { INTERFACE } from "client/controllers/core/UIController";
 import TooltipController from "client/controllers/interface/TooltipController";
-import { ASSETS } from "shared/asset/GameAssets";
-import Packets from "shared/Packets";
-import Softcaps, { performSoftcap } from "shared/Softcaps";
+import { ASSETS, playSound } from "shared/asset/GameAssets";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import { CURRENCY_DETAILS } from "shared/currency/CurrencyDetails";
 import { DROPLET_STORAGE } from "shared/item/Droplet";
 import ItemUtils from "shared/item/ItemUtils";
+import Packets from "shared/Packets";
+import Softcaps, { performSoftcap } from "shared/Softcaps";
 
 declare global {
     type BalanceOption = Frame & {
@@ -268,7 +268,7 @@ export default class BalanceWindowController implements OnInit {
             const success = action();
             navOption.ImageButton.Size = new UDim2(1.15, 0, 1.15, 0);
             TweenService.Create(navOption.ImageButton, new TweenInfo(0.3), { Size: new UDim2(1, 0, 1, 0) }).Play();
-            this.uiController.playSound("MenuClick.mp3");
+            playSound("MenuClick.mp3");
             return success;
         }, label, priority);
     }

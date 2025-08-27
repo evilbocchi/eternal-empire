@@ -1,10 +1,9 @@
-import { getSound } from "shared/asset/GameAssets";
-import { ASSETS } from "shared/asset/GameAssets";
+import { playSoundAtPart } from "@antivivi/vrldk";
+import { ASSETS, getSound } from "shared/asset/GameAssets";
 import Item from "shared/item/Item";
 import ItemTrait from "shared/item/traits/ItemTrait";
 import NamedUpgrades from "shared/namedupgrade/NamedUpgrades";
 import Packets from "shared/Packets";
-import { playSoundAtPart } from "@antivivi/vrldk";
 import NamedUpgrade from "../../namedupgrade/NamedUpgrade";
 
 declare global {
@@ -43,7 +42,7 @@ declare global {
 }
 
 const getUpgradeAmount = (upgrade: NamedUpgrade) => {
-    return Packets.upgrades.get().get(upgrade.id) ?? 0;
+    return Packets.upgrades.get()?.get(upgrade.id) ?? 0;
 };
 
 export default class UpgradeBoard extends ItemTrait {

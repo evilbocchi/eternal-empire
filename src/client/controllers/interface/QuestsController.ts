@@ -21,7 +21,7 @@ import { OnCharacterAdded } from "client/controllers/core/ModdingController";
 import UIController, { INTERFACE } from "client/controllers/core/UIController";
 import EffectController from "client/controllers/world/EffectController";
 import ItemSlot from "client/ItemSlot";
-import { ASSETS } from "shared/asset/GameAssets";
+import { ASSETS, playSound } from "shared/asset/GameAssets";
 import { getMaxXp } from "shared/constants";
 import Items from "shared/items/Items";
 import Packets from "shared/Packets";
@@ -239,7 +239,7 @@ export default class QuestsController implements OnInit, OnPhysics, OnCharacterA
         TRACKED_QUEST_WINDOW.DescriptionLabel.Text = this.getFormattedDescription(questId, quest, index) ?? "<no description provided>";
         this.beam.Color = new ColorSequence(color);
         if (this.oldIndex !== index && (questId !== "NewBeginnings" || index !== 0)) {
-            this.uiController.playSound("QuestNextStage.mp3");
+            playSound("QuestNextStage.mp3");
         }
         this.oldIndex = index;
         this.indexer = questId + index;
@@ -259,7 +259,7 @@ export default class QuestsController implements OnInit, OnPhysics, OnCharacterA
     }
 
     showCompletion(completionFrame: CompletionFrame, message: string) {
-        this.uiController.playSound("QuestComplete.mp3");
+        playSound("QuestComplete.mp3");
         completionFrame.RewardLabel.Text = message;
         this.effectController.showQuestMessage(completionFrame);
     }
@@ -350,7 +350,7 @@ export default class QuestsController implements OnInit, OnPhysics, OnCharacterA
             QUESTS_WINDOW.Level.Current.LevelLabel.Text = `Lv. ${level}`;
             QUESTS_WINDOW.Level.ProgressBar.SetAttribute("Level", level);
             if (lastLevel > -1) {
-                this.uiController.playSound("LevelUp.mp3");
+                playSound("LevelUp.mp3");
             }
             this.refreshXp(Packets.xp.get() ?? 0);
             lastLevel = level;
@@ -382,10 +382,10 @@ export default class QuestsController implements OnInit, OnPhysics, OnCharacterA
                 questOption.Content.Visible = visible;
                 moved = true;
                 if (visible) {
-                    this.uiController.playSound("CheckOn.mp3");
+                    playSound("CheckOn.mp3");
                 }
                 else {
-                    this.uiController.playSound("CheckOff.mp3");
+                    playSound("CheckOff.mp3");
                 }
             });
             questOption.Parent = QUESTS_WINDOW.QuestList;
@@ -477,7 +477,7 @@ export default class QuestsController implements OnInit, OnPhysics, OnCharacterA
         });
         Packets.showXpReward.connect((xp) => {
             const lootItemSlot = ASSETS.LootTableItemSlot.Clone();
-            this.uiController.playSound("UnlockItem.mp3");
+            playSound("UnlockItem.mp3");
             lootItemSlot.Background.ImageLabel.ImageColor3 = TRACKED_QUEST_WINDOW.Background.Frame.BackgroundColor3;
             lootItemSlot.ViewportFrame.Visible = false;
             lootItemSlot.TitleLabel.Text = `+${xp} XP`;
@@ -485,7 +485,7 @@ export default class QuestsController implements OnInit, OnPhysics, OnCharacterA
             task.delay(3, () => this.phaseOutLootTableItemSlot(lootItemSlot));
         });
         Packets.showItemReward.connect((items) => {
-            this.uiController.playSound("UnlockItem.mp3");
+            playSound("UnlockItem.mp3");
             for (const [itemId, amount] of items) {
                 const item = Items.getItem(itemId);
                 if (item === undefined)

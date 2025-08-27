@@ -44,7 +44,7 @@ export default class DialogueController implements OnInit, OnStart {
 
     npcTagColor = Color3.fromRGB(201, 255, 13).ToHex();
     emptyColor = Color3.fromRGB(0, 181, 28).ToHex();
-    defaultTextSound = function() {
+    defaultTextSound = function () {
         const defaultText = getSound("DefaultText.mp3").Clone();
         defaultText.Volume = 0.25;
         return defaultText;
@@ -193,7 +193,7 @@ export default class DialogueController implements OnInit, OnStart {
                 if (isSpace === false) {
                     const sound = (this.textSound ?? this.defaultTextSound).Clone();
                     sound.Parent = ReplicatedStorage;
-                    if (Packets.settings.get().SoundEffects)
+                    if (Packets.settings.get()?.SoundEffects)
                         sound.Play();
                     Debris.AddItem(sound);
                 }
