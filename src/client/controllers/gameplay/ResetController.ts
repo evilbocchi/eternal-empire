@@ -87,7 +87,7 @@ export default class ResetController implements OnInit {
      */
     onInit() {
         Packets.reset.connect((layer, amount) => {
-            if (Packets.settings.get().ResetAnimation === false)
+            if (Packets.settings.get()?.ResetAnimation === false)
                 return;
             const resetLayer = RESET_LAYERS[layer];
             TRACKED_QUEST_WINDOW.Reset.AmountLabel.Text = CurrencyBundle.getFormatted(resetLayer.gives, new OnoeNum(amount)).upper();

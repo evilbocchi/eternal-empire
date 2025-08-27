@@ -225,13 +225,13 @@ export default class QuestsController implements OnInit, OnPhysics, OnCharacterA
             this.indexer = undefined;
             return;
         }
-        const quest = Packets.questInfo.get().get(questId);
+        const quest = Packets.questInfo.get()?.get(questId);
         if (quest === undefined) {
-            warn("wtf");
+            warn("Quest not found");
             return;
         }
         if (index === undefined) {
-            index = Packets.stagePerQuest.get().get(questId) ?? 0;
+            index = Packets.stagePerQuest.get()?.get(questId) ?? 0;
         }
         const color = new Color3(quest.colorR, quest.colorG, quest.colorB);
         TRACKED_QUEST_WINDOW.Background.Frame.BackgroundColor3 = color;
@@ -352,7 +352,7 @@ export default class QuestsController implements OnInit, OnPhysics, OnCharacterA
             if (lastLevel > -1) {
                 this.uiController.playSound("LevelUp.mp3");
             }
-            this.refreshXp(Packets.xp.get());
+            this.refreshXp(Packets.xp.get() ?? 0);
             lastLevel = level;
         });
         Packets.xp.observe((xp) => this.refreshXp(xp));
@@ -500,7 +500,7 @@ export default class QuestsController implements OnInit, OnPhysics, OnCharacterA
         });
 
         Packets.questCompleted.connect((questId) => {
-            const quest = Packets.questInfo.get().get(questId);
+            const quest = Packets.questInfo.get()?.get(questId);
             if (quest === undefined) {
                 warn("wtf bro");
                 return;

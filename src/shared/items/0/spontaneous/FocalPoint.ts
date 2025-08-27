@@ -26,8 +26,6 @@ export = new Item(script.Name)
     .setDescription(`The harnessed, harmonized energy of... a point. What point is it?
 Scientists don't know. In fact, they don't even know how this item came to be.
 The structure of the Focal Point is said to be the exoskeleton of what was once a powerful entity, now reduced to a mere point of energy.
-...
-Scientists also don't know what is going on in Spontaneous.
 
 Produces a %val% droplet every 4 seconds.`
     )

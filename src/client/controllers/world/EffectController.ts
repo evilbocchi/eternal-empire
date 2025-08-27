@@ -141,7 +141,10 @@ export default class EffectController implements OnInit {
         }, true);
 
 
-        Packets.dropletAdded.connect((drop: BasePart) => {
+        Packets.dropletAdded.connect((drop?: BasePart) => {
+            if (!drop)
+                return;
+
             const originalSize = drop.GetAttribute("OriginalSize") as Vector3 | undefined;
             if (originalSize === undefined)
                 return;

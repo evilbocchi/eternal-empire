@@ -174,7 +174,7 @@ export default class BalanceWindowController implements OnInit {
         let size = 100;
         let maxPage = 1;
         for (const [currency, details] of pairs(CURRENCY_DETAILS)) {
-            const c = balance.get(currency);
+            const c = balance?.get(currency);
             const amount = new OnoeNum(c === undefined ? 0 : c);
 
             const exists = !amount.lessEquals(0);

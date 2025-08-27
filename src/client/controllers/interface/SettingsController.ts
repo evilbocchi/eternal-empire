@@ -17,7 +17,7 @@ import { UserInputService } from "@rbxts/services";
 import HotkeysController from "client/controllers/core/HotkeysController";
 import { ADAPTIVE_TAB_MAIN_WINDOW } from "client/controllers/core/AdaptiveTabController";
 import UIController from "client/controllers/core/UIController";
-import { ASSETS } from "shared/asset/GameAssets";
+import { ASSETS, playSound } from "shared/asset/GameAssets";
 import Packets from "shared/Packets";
 import { paintObjects } from "@antivivi/vrldk";
 
@@ -153,7 +153,10 @@ export default class SettingsController implements OnStart {
             if (toggle !== undefined) {
                 toggle.Activated.Connect(() => {
                     const setting = settingOption.Name as keyof Settings;
-                    const enabled = !Packets.settings.get()[setting];
+                    const settings = Packets.settings.get();
+                    if (!settings)
+                        return playSound("Error.mp3");
+                    const enabled = !settings[setting];
                     this.uiController.playSound(enabled === true ? "CheckOn.mp3" : "CheckOff.mp3");
 
                     Packets.setSetting.inform(setting, enabled);

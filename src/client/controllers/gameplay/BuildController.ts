@@ -17,11 +17,9 @@ import { Controller, OnInit, OnStart } from "@flamework/core";
 import { Debris, HttpService, ReplicatedStorage, TweenService, UserInputService, Workspace } from "@rbxts/services";
 import { LOCAL_PLAYER, MOUSE, NONCOLLISION_COLOR } from "client/constants";
 import HotkeysController from "client/controllers/core/HotkeysController";
-import AdaptiveTabController from "client/controllers/core/AdaptiveTabController";
 import { SHOP_GUI } from "client/controllers/interface/ShopController";
-import UIController, { INTERFACE } from "client/controllers/core/UIController";
 import { AREAS } from "shared/Area";
-import { getSound } from "shared/asset/GameAssets";
+import { getSound, playSound } from "shared/asset/GameAssets";
 import { PLACED_ITEMS_FOLDER } from "shared/constants";
 import Item from "shared/item/Item";
 import Items from "shared/items/Items";
@@ -29,20 +27,12 @@ import Packets from "shared/Packets";
 import BuildBounds from "shared/placement/BuildBounds";
 import ItemPlacement from "shared/placement/ItemPlacement";
 import Sandbox from "shared/Sandbox";
+import { BuildControllerInterface } from "shared/ui/components/build/BuildManager";
 
 export type BuildOption = TextButton & {
     UIScale: UIScale,
     TextLabel: TextLabel,
     ImageLabel: ImageLabel;
-};
-
-export const BUILD_WINDOW = INTERFACE.WaitForChild("BuildWindow") as Frame & {
-    Deselect: BuildOption,
-    Options: Frame & {
-        Rotate: BuildOption,
-        Delete: BuildOption,
-        Place: BuildOption;
-    };
 };
 
 /**
@@ -51,7 +41,7 @@ export const BUILD_WINDOW = INTERFACE.WaitForChild("BuildWindow") as Frame & {
  * Handles selection, placement, rotation, and deletion of items, and coordinates build mode UI and restrictions.
  */
 @Controller()
-export default class BuildController implements OnInit, OnStart {
+export default class BuildController implements OnInit, OnStart, BuildControllerInterface {
 
     /**
      * Offset of the selected models from the mouse.
@@ -89,8 +79,58 @@ export default class BuildController implements OnInit, OnStart {
     private lastSelectingCFrame = new CFrame();
     private lastCameraCFrame = new CFrame();
 
-    constructor(private uiController: UIController, private hotkeysController: HotkeysController, private adaptiveTabController: AdaptiveTabController) {
+    // State change listeners for React integration
+    private stateChangeCallbacks = new Set<() => void>();
 
+    constructor(private hotkeysController: HotkeysController) {
+
+    }
+
+    // BuildControllerInterface implementation
+    hasSelection(): boolean {
+        return !this.selected.isEmpty();
+    }
+
+    revertAndDeselectAll(): void {
+        this.revertSelected();
+        this.deselectAll();
+    }
+
+    rotateSelection(): void {
+        const rotateSound = getSound("ItemRotate.mp3").Clone();
+        const pitchDecrement = math.min(tick() - this.lastRotate, 0.5) * 0.25;
+        rotateSound.PlaybackSpeed = 1 + 0.25 - pitchDecrement;
+        rotateSound.Parent = ReplicatedStorage;
+        rotateSound.Play();
+        Debris.AddItem(rotateSound, 1.5);
+        this.lastRotate = tick();
+
+        if (this.rotationValue.Value >= 270) {
+            this.rotationValue.Value = 0;
+        } else {
+            this.rotationValue.Value += 90;
+        }
+        this.onMouseMove(!UserInputService.TouchEnabled);
+    }
+
+    deleteSelection(): void {
+        playSound("Unplace.mp3");
+        this.deselectAll();
+    }
+
+    placeSelection(): void {
+        this.onMouseUp(true);
+    }
+
+    onStateChange(callback: () => void): () => void {
+        this.stateChangeCallbacks.add(callback);
+        return () => this.stateChangeCallbacks.delete(callback);
+    }
+
+    private notifyStateChange(): void {
+        for (const callback of this.stateChangeCallbacks) {
+            callback();
+        }
     }
 
     /**
@@ -99,15 +139,13 @@ export default class BuildController implements OnInit, OnStart {
      */
     getRestricted() {
         const buildLevel = LOCAL_PLAYER.GetAttribute("PermissionLevel") as number | undefined ?? 0;
-        return (Packets.permLevels.get().build ?? 0) > buildLevel || SHOP_GUI.Enabled;
+        return (Packets.permLevels.get()?.build ?? 0) > buildLevel || SHOP_GUI.Enabled;
     }
 
     /**
-     * Refreshes the build UI and button visibility based on selection and restrictions.
+     * Refreshes the build UI state and notifies React components of changes.
      */
     refresh() {
-        let refreshButton: (button: BuildOption) => void;
-
         const isEmpty = this.selected.isEmpty();
         if (isEmpty || this.getRestricted() === true) {
             if (!isEmpty) {
@@ -117,34 +155,15 @@ export default class BuildController implements OnInit, OnStart {
             this.preselectCFrame = undefined;
             this.mainSelected = undefined;
             this.setGridTransparency(1);
-
-            refreshButton = (button: BuildOption) => {
-                const tween = TweenService.Create(button.UIScale, this.OPTIONSTWEENINFO, { Scale: 0 });
-                tween.Play();
-                task.delay(this.OPTIONSTWEENINFO.Time, () => {
-                    if (button.UIScale.Scale === 0) {
-                        button.Visible = false;
-                        BUILD_WINDOW.Visible = false;
-                    }
-                });
-            };
             Workspace.SetAttribute("BuildMode", false);
         }
         else {
             this.setGridTransparency(0.8);
-            BUILD_WINDOW.Visible = true;
-            refreshButton = (button: BuildOption) => {
-                button.Visible = true;
-                TweenService.Create(button.UIScale, this.OPTIONSTWEENINFO, { Scale: 1 }).Play();
-            };
             Workspace.SetAttribute("BuildMode", true);
         }
 
-        refreshButton(BUILD_WINDOW.Deselect);
-        refreshButton(BUILD_WINDOW.Options.Rotate);
-        refreshButton(BUILD_WINDOW.Options.Delete);
-        BUILD_WINDOW.Options.Place.Visible = UserInputService.TouchEnabled;
-        refreshButton(BUILD_WINDOW.Options.Place);
+        // Notify React components of state change
+        this.notifyStateChange();
     }
 
     /**
@@ -249,9 +268,10 @@ export default class BuildController implements OnInit, OnStart {
         this.debounce = tick();
         const itemModel = item.MODEL?.Clone();
         if (itemModel === undefined)
-            throw "how";
+            throw `Item ${item.name} has no model!`;
 
-        itemModel.Name = "placing_" + HttpService.GenerateGUID(false);
+        itemModel.Name = HttpService.GenerateGUID(false);
+        itemModel.AddTag("Placing");
         itemModel.SetAttribute("Selected", true);
         itemModel.SetAttribute("ItemName", item.name);
         itemModel.SetAttribute("ItemId", item.id);
@@ -470,7 +490,7 @@ export default class BuildController implements OnInit, OnStart {
             const hovering = this.hovering;
             const dragging = this.dragging;
             if (hovering !== undefined) {
-                this.uiController.playSound("Pickup.mp3");
+                playSound("Pickup.mp3");
                 const names = new Array<string>();
                 for (const model of dragging) {
                     names.push(model.Name);
@@ -509,10 +529,13 @@ export default class BuildController implements OnInit, OnStart {
                 primaryPart.CFrame = indicator.CFrame; // snap to indicator
             }
             if (this.placeSelected() === true) {
-                this.uiController.playSound("Place.mp3", 0.7);
+                playSound("Place.mp3", undefined, (sound) => {
+                    sound.PlaybackSpeed = (1 / (size + 5)) + 0.84;
+                    sound.Volume = 0.7;
+                });
             }
             else {
-                this.uiController.playSound("Error.mp3");
+                playSound("Error.mp3");
             }
             this.lastSelectingCFrame = selectingCFrame;
             return;
@@ -566,49 +589,27 @@ export default class BuildController implements OnInit, OnStart {
             this.onMouseUp();
         });
 
-        this.hotkeysController.setHotkey(BUILD_WINDOW.Deselect, Enum.KeyCode.Q, () => {
+        this.hotkeysController.bindKey(Enum.KeyCode.Q, () => {
             if (this.selected.isEmpty() || this.getRestricted() === true)
                 return false;
             this.revertSelected();
             this.deselectAll();
             return true;
-        }, "Deselect");
-        this.hotkeysController.setHotkey(BUILD_WINDOW.Options.Rotate, Enum.KeyCode.R, () => {
-            if (!this.selected.isEmpty() || this.getRestricted() === true) {
-                const rotateSound = getSound("ItemRotate.mp3").Clone();
-                const pitchDecrement = math.min(tick() - this.lastRotate, 0.5) * 0.25;
-                rotateSound.PlaybackSpeed = 1 + 0.25 - pitchDecrement;
-                rotateSound.Parent = ReplicatedStorage;
-                rotateSound.Play();
-                Debris.AddItem(rotateSound, 1.5);
-                this.lastRotate = tick();
+        }, 1, "Deselect");
 
-                if (this.rotationValue.Value >= 270) {
-                    this.rotationValue.Value = 0;
-                }
-                else {
-                    this.rotationValue.Value += 90;
-                }
-                this.onMouseMove(!UserInputService.TouchEnabled);
-                return true;
-            }
-            return false;
-        }, "Rotate");
-        this.hotkeysController.setHotkey(BUILD_WINDOW.Options.Delete, Enum.KeyCode.Delete, () => {
+        this.hotkeysController.bindKey(Enum.KeyCode.R, () => {
             if (this.selected.isEmpty() || this.getRestricted() === true)
                 return false;
-            this.uiController.playSound("Unplace.mp3");
-            this.deselectAll();
+            this.rotateSelection();
             return true;
-        }, "Unplace");
-        this.hotkeysController.setHotkey(BUILD_WINDOW.Options.Place, undefined, () => {
+        }, 1, "Rotate");
+
+        this.hotkeysController.bindKey(Enum.KeyCode.Delete, () => {
             if (this.selected.isEmpty() || this.getRestricted() === true)
                 return false;
-
-            this.onMouseUp(true);
+            this.deleteSelection();
             return true;
-        }, "Place");
-
+        }, 1, "Unplace");
 
         this.hotkeysController.bindKey(Enum.KeyCode.LeftShift, () => {
             this.multiselecting = true;

@@ -16,10 +16,10 @@
  */
 
 import { Controller, OnInit, OnStart } from "@flamework/core";
-import BuildController from "client/controllers/gameplay/BuildController";
 import AdaptiveTabController, { ADAPTIVE_TAB_MAIN_WINDOW } from "client/controllers/core/AdaptiveTabController";
-import TooltipController, { Tooltip } from "client/controllers/interface/TooltipController";
 import UIController, { INTERFACE } from "client/controllers/core/UIController";
+import BuildController from "client/controllers/gameplay/BuildController";
+import TooltipController, { Tooltip } from "client/controllers/interface/TooltipController";
 import ItemFilter from "client/ItemFilter";
 import ItemSlot from "client/ItemSlot";
 import { ASSETS } from "shared/asset/GameAssets";
@@ -130,7 +130,7 @@ export default class InventoryController implements OnInit, OnStart {
                 continue;
 
             const itemId = item.id;
-            let amount = inventory.get(itemId) ?? 0;
+            let amount = inventory?.get(itemId) ?? 0;
             const uniques = amounts.get(itemId);
             if (uniques !== undefined) {
                 amount += uniques;
@@ -176,7 +176,8 @@ export default class InventoryController implements OnInit, OnStart {
 
             itemSlot.Activated.Connect(() => {
                 const isPlaceable = item.placeableAreas.size() > 0 || item.bounds !== undefined;
-                if (this.buildController.getRestricted() === true || isPlaceable === false || (item.levelReq !== undefined && item.levelReq > Packets.level.get())) {
+                const level = Packets.level.get() ?? 0;
+                if (this.buildController.getRestricted() === true || isPlaceable === false || (item.levelReq !== undefined && item.levelReq > level)) {
                     this.uiController.playSound("Error.mp3");
                     return;
                 }

@@ -22,9 +22,9 @@ import Signal from "@antivivi/lemon-signal";
 import { OnInit, OnStart, Service } from "@flamework/core";
 import { CollectionService, HttpService, Workspace } from "@rbxts/services";
 import { CHALLENGES } from "server/Challenges";
-import { OnGameAPILoaded } from "server/services/ModdingService";
 import CurrencyService from "server/services/data/CurrencyService";
 import DataService from "server/services/data/DataService";
+import { OnGameAPILoaded } from "server/services/ModdingService";
 import { AREAS } from "shared/Area";
 import { PLACED_ITEMS_FOLDER } from "shared/constants";
 import Item from "shared/item/Item";
@@ -302,23 +302,11 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
             return;
         }
 
-        const model = item.MODEL?.Clone();
+        const model = item.createModel(placedItem);
         if (model === undefined) {
-            warn("Cannot find model for item " + placedItem.item);
             return;
         }
-
-        // Position and rotate the model based on placed item data
-        model.PivotTo(new CFrame(placedItem.posX, placedItem.posY, placedItem.posZ)
-            .mul(CFrame.Angles(math.rad(placedItem.rotX), math.rad(placedItem.rotY), math.rad(placedItem.rotZ))));
         model.Name = placementId;
-
-        // Set model attributes for identification and functionality
-        model.SetAttribute("Area", placedItem.area);
-        model.SetAttribute("ItemId", item.id);
-        model.SetAttribute("ItemName", item.name);
-        model.SetAttribute("Rotation", placedItem.rawRotation);
-        model.SetAttribute("UUID", placedItem.uniqueItemId);
         model.Parent = PLACED_ITEMS_FOLDER;
 
         // Execute item-specific load callbacks

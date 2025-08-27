@@ -220,6 +220,32 @@ export default class Item {
     }
 
     /**
+     * Create a model for the placed item.
+     * 
+     * @param placedItem The placed item data.
+     * @returns The created model or undefined if creation failed.
+     */
+    createModel(placedItem: PlacedItem) {
+        const model = this.MODEL?.Clone();
+        if (model === undefined) {
+            warn("Cannot find model for item " + placedItem.item);
+            return;
+        }
+
+        // Position and rotate the model based on placed item data
+        model.PivotTo(new CFrame(placedItem.posX, placedItem.posY, placedItem.posZ)
+            .mul(CFrame.Angles(math.rad(placedItem.rotX), math.rad(placedItem.rotY), math.rad(placedItem.rotZ))));
+
+        // Set model attributes for identification and functionality
+        model.SetAttribute("Area", placedItem.area);
+        model.SetAttribute("ItemId", this.id);
+        model.SetAttribute("ItemName", this.name);
+        model.SetAttribute("UUID", placedItem.uniqueItemId);
+
+        return model;
+    }
+
+    /**
      * Set the name of the item.
      * 
      * @param name The name of the item.

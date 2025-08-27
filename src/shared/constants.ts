@@ -7,24 +7,26 @@ declare global {
     type AreaId = keyof (typeof AREAS);
 }
 
+const CAMERA = Workspace.WaitForChild("Camera") as Camera;
 /**
  * Creates a folder in the Workspace.
  * 
  * @param name The name of the folder to create.
  * @returns The created folder instance.
  */
-function createFolder(name: string) {
-    if (IS_SERVER || IS_CI) {
-        const folder = new Instance("Folder");
-        folder.Name = name;
-        folder.Parent = Workspace;
-        if (IS_CI) {
-            Debris.AddItem(folder, 30); // Automatically clean up the folder after 30 seconds
-        }
-        return folder;
+function createFolder(name: string, parent: Instance = Workspace) {
+    const cached = parent.FindFirstChild(name)!;
+    if (cached !== undefined) {
+        return cached;
     }
 
-    return Workspace.FindFirstChild(name)!;
+    const folder = new Instance("Folder");
+    folder.Name = name;
+    folder.Parent = parent;
+    if (IS_CI) {
+        Debris.AddItem(folder, 30); // Automatically clean up the folder after 30 seconds
+    }
+    return folder;
 }
 
 export function getChallengeGui() {
@@ -87,7 +89,7 @@ export const NAMES_PER_USER_ID = new Map<number, string>();
 export const NPC_MODELS = Workspace.WaitForChild("NPCs") as Folder;
 export const NPCS = script.Parent?.WaitForChild("npcs") as Folder;
 
-export const PLACED_ITEMS_FOLDER = createFolder("PlacedItems");
+export const PLACED_ITEMS_FOLDER = createFolder("PlacedItems", CAMERA); // Placing instances in the server camera does not replicate to the client
 
 /**
  * Returns the folder automatically created containing all the text channels.

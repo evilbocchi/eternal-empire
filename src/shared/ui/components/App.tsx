@@ -1,10 +1,16 @@
 import React, { StrictMode } from "@rbxts/react";
+import BuildManager, { BuildControllerInterface } from "shared/ui/components/build/BuildManager";
 import { HotkeyProvider } from "shared/ui/components/hotkeys/HotkeyProvider";
 import SettingsManager from "shared/ui/components/settings/SettingsManager";
 import SidebarButtons from "shared/ui/components/sidebar/SidebarButtons";
 import { TooltipProvider } from "shared/ui/components/tooltip/TooltipProvider";
 
-export default function App() {
+interface AppProps {
+    /** Build controller interface for React integration */
+    buildController?: BuildControllerInterface;
+}
+
+export default function App({ buildController }: AppProps = {}) {
     const [settings, setSettings] = React.useState({
         ScientificNotation: true,
         FormatCurrencies: false,
@@ -62,6 +68,10 @@ export default function App() {
                         onHotkeyDeselect={handleHotkeyDeselect}
                     />
                     <SidebarButtons />
+                    <BuildManager
+                        buildController={buildController}
+                        animationsEnabled={settings.BuildAnimation}
+                    />
                 </TooltipProvider>
             </HotkeyProvider>
         </StrictMode>
