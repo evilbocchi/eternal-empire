@@ -65,7 +65,7 @@ export default class Bin extends Operative {
             updateHeight();
             print(`Collected ${revenue} from ${item.name}`);
             CurrencyService.incrementAll(revenue.amountPerCurrency);
-            Packets.showDifference.fireAll(revenue.amountPerCurrency);
+            Packets.showDifference.toAllClients(revenue.amountPerCurrency);
             playSound("GiantPress.mp3", clickPart);
             TweenService.Create(clickPart, new TweenInfo(0.2), { CFrame: unclickedCFrame.mul(new CFrame(0, 0, 0.5)) }).Play();
             task.wait(0.2);

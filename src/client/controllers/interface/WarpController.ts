@@ -48,7 +48,7 @@ export default class WarpController implements OnInit {
             const areaId = button.Name as AreaId;
             this.hotkeysController.setHotkey(button, keys.get(areaId)!, () => {
                 if (WARP_WINDOW.Visible) {
-                    const success = Packets.tpToArea.invoke(areaId);
+                    const success = Packets.tpToArea.toServer(areaId);
                     if (success) {
                         playSound("Teleport.mp3");
                         this.adaptiveTabController.hideAdaptiveTab();

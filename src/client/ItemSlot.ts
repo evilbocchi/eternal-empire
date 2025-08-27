@@ -215,7 +215,7 @@ namespace ItemSlot {
     }
 
     export function hookMetadata(metadataPerItem: Map<Item, ItemMetadata>) {
-        Packets.boostChanged.connect((value) => {
+        Packets.boostChanged.fromServer((value) => {
             for (const [itemId, boost] of value) {
                 const item = Items.getItem(itemId);
                 if (item === undefined)

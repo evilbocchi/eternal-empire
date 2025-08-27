@@ -86,7 +86,7 @@ export default class ResetController implements OnInit {
      * Initializes the ResetController, sets up reset event listeners and UI updates.
      */
     onInit() {
-        Packets.reset.connect((layer, amount) => {
+        Packets.reset.fromServer((layer, amount) => {
             if (Packets.settings.get()?.ResetAnimation === false)
                 return;
             const resetLayer = RESET_LAYERS[layer];

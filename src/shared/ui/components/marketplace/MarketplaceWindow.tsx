@@ -744,7 +744,7 @@ export default function MarketplaceWindow({ visible, onClose }: MarketplaceWindo
     useEffect(() => {
         if (visible) {
             // Request fresh data
-            Packets.getMarketplaceListings.invoke();
+            Packets.getMarketplaceListings.toServer();
 
             // Get current state
             const currentListings = Packets.marketplaceListings.get();
@@ -788,19 +788,19 @@ export default function MarketplaceWindow({ visible, onClose }: MarketplaceWindo
     }, []);
 
     const handleBuyItem = (uuid: string) => {
-        Packets.buyItem.invoke(uuid);
+        Packets.buyItem.toServer(uuid);
     };
 
     const handlePlaceBid = (uuid: string, bidAmount: number) => {
-        Packets.placeBid.invoke(uuid, bidAmount);
+        Packets.placeBid.toServer(uuid, bidAmount);
     };
 
     const handleCancelListing = (uuid: string) => {
-        Packets.cancelListing.invoke(uuid);
+        Packets.cancelListing.toServer(uuid);
     };
 
     const handleCreateListing = (uuid: string, price: number, listingType: "buyout" | "auction", duration: number) => {
-        Packets.createListing.invoke(uuid, price, listingType, duration);
+        Packets.createListing.toServer(uuid, price, listingType, duration);
     };
 
     const handleSearch = (query: string) => {

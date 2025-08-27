@@ -61,11 +61,11 @@ export default class PermissionsController implements OnInit {
      * Initializes the PermissionsController, sets up listeners for donations, tab openings, and game modifications.
      */
     onInit() {
-        Packets.donationGiven.connect(() => {
+        Packets.donationGiven.fromServer(() => {
             playSound("PowerUp.mp3");
             this.effectController.camShake.Shake(CameraShaker.Presets.Bump);
         });
-        Packets.tabOpened.connect((tab) => {
+        Packets.tabOpened.fromServer((tab) => {
             this.adaptiveTabController.showAdaptiveTab(tab);
             if (tab === "Commands") {
                 permLevelUpdated(LOCAL_PLAYER.GetAttribute("PermissionLevel") as number ?? 0);
@@ -100,12 +100,12 @@ export default class PermissionsController implements OnInit {
                 option.Parent = COMMANDS_WINDOW.CommandsList;
             }
         };
-        Packets.codeReceived.connect((joinLink) => {
+        Packets.codeReceived.fromServer((joinLink) => {
             SHARE_WINDOW.Code.Input.Text = joinLink;
             this.adaptiveTabController.showAdaptiveTab("Share");
         });
 
-        Packets.modifyGame.connect((param) => {
+        Packets.modifyGame.fromServer((param) => {
             if (param === "markplaceableeverywhere") {
                 Items.itemsPerId.forEach((item) => item.placeableEverywhere());
             }

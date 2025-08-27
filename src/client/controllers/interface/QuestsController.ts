@@ -475,7 +475,7 @@ export default class QuestsController implements OnInit, OnPhysics, OnCharacterA
             this.refreshTrackedQuestWindow(this.trackedQuest, index);
             this.refreshNotificationWindow();
         });
-        Packets.showXpReward.connect((xp) => {
+        Packets.showXpReward.fromServer((xp) => {
             const lootItemSlot = ASSETS.LootTableItemSlot.Clone();
             playSound("UnlockItem.mp3");
             lootItemSlot.Background.ImageLabel.ImageColor3 = TRACKED_QUEST_WINDOW.Background.Frame.BackgroundColor3;
@@ -484,7 +484,7 @@ export default class QuestsController implements OnInit, OnPhysics, OnCharacterA
             lootItemSlot.Parent = TRACKED_QUEST_WINDOW;
             task.delay(3, () => this.phaseOutLootTableItemSlot(lootItemSlot));
         });
-        Packets.showItemReward.connect((items) => {
+        Packets.showItemReward.fromServer((items) => {
             playSound("UnlockItem.mp3");
             for (const [itemId, amount] of items) {
                 const item = Items.getItem(itemId);
@@ -499,7 +499,7 @@ export default class QuestsController implements OnInit, OnPhysics, OnCharacterA
             }
         });
 
-        Packets.questCompleted.connect((questId) => {
+        Packets.questCompleted.fromServer((questId) => {
             const quest = Packets.questInfo.get()?.get(questId);
             if (quest === undefined) {
                 warn("wtf bro");

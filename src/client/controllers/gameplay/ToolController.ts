@@ -207,7 +207,7 @@ export default class ToolController implements OnInit, OnStart, OnCharacterAdded
                 const anim = this.swingAnimation;
                 if (anim === undefined)
                     return;
-                anim.Stopped.Once(() => Packets.useTool.inform(this.checkHarvestable(currentTool) ?? Workspace));
+                anim.Stopped.Once(() => Packets.useTool.toServer(this.checkHarvestable(currentTool) ?? Workspace));
                 anim.Play();
                 playSound("ToolSwing.mp3");
             }

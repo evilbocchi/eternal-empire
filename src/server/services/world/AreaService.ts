@@ -254,7 +254,7 @@ export default class AreaService implements OnInit, OnPlayerJoined {
 
                 // Teleport player back to safety with effects
                 rootPart.CFrame = spawnLocation.CFrame;
-                Packets.camShake.fire(player); // Visual feedback
+                Packets.camShake.toClient(player); // Visual feedback
                 playSound("Splash.mp3", rootPart); // Audio feedback
             });
         }
@@ -279,7 +279,7 @@ export default class AreaService implements OnInit, OnPlayerJoined {
         }
 
         // Broadcast the change to all connected clients
-        Packets.dropletCountChanged.fireAll(id, newCount);
+        Packets.dropletCountChanged.toAllClients(id, newCount);
     }
 
     /**
@@ -423,7 +423,7 @@ export default class AreaService implements OnInit, OnPlayerJoined {
         }
 
         // Handle client requests for area teleportation
-        Packets.tpToArea.onInvoke((player, areaId) => {
+        Packets.tpToArea.fromClient((player, areaId) => {
             const character = player.Character;
             const area = AREAS[areaId];
             const spawnLocation = area.getSpawnLocation();

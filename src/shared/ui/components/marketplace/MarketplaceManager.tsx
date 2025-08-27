@@ -44,13 +44,13 @@ export default function MarketplaceManager(props: MarketplaceManagerProps) {
 
     // Listen for terminal signals
     React.useEffect(() => {
-        const openConnection = Packets.openMarketplaceTerminal.connect(() => {
+        const openConnection = Packets.openMarketplaceTerminal.fromServer(() => {
             if (isMarketplaceEnabled) {
                 setIsVisible(true);
             }
         });
 
-        const closeConnection = Packets.closeMarketplaceTerminal.connect(() => {
+        const closeConnection = Packets.closeMarketplaceTerminal.fromServer(() => {
             setIsVisible(false);
         });
 

@@ -43,7 +43,7 @@ export default class DonationController implements OnStart {
         }
         donationOption.MouseButton1Click.Connect(() => {
             playSound("MenuClick.mp3");
-            Packets.promptDonation.inform(donationProduct);
+            Packets.promptDonation.toServer(donationProduct);
         });
     }
 

@@ -77,16 +77,16 @@ export default class UpgradeBoard extends ItemTrait {
         };
         buy1.Button.Activated.Connect(() => {
             if (selected !== undefined)
-                sound(Packets.buyUpgrade.invoke(selected.id, getUpgradeAmount(selected) + 1));
+                sound(Packets.buyUpgrade.toServer(selected.id, getUpgradeAmount(selected) + 1));
         });
         const getNext = (amount: number, step?: number) => step === undefined ? amount + 1 : amount + step - (amount % step);
         buyNext.Button.Activated.Connect(() => {
             if (selected !== undefined)
-                sound(Packets.buyUpgrade.invoke(selected.id, getNext(getUpgradeAmount(selected), selected.step)));
+                sound(Packets.buyUpgrade.toServer(selected.id, getNext(getUpgradeAmount(selected), selected.step)));
         });
         buyMax.Button.Activated.Connect(() => {
             if (selected !== undefined)
-                sound(Packets.buyUpgrade.invoke(selected.id, selected.cap));
+                sound(Packets.buyUpgrade.toServer(selected.id, selected.cap));
         });
         const selectUpgrade = (upgrade?: NamedUpgrade) => {
             upgradeActionsGui.TitleLabel.Text = upgrade?.name ?? "<no upgrade selected>";

@@ -61,7 +61,7 @@ export default class Furnace extends Operative {
                     if (amount.equals(ZERO))
                         result.amountPerCurrency.delete(currency);
                 }
-                Packets.dropletBurnt.fireAll(droplet.Name, result.amountPerCurrency);
+                Packets.dropletBurnt.toAllClients(droplet.Name, result.amountPerCurrency);
                 instanceInfo.OnProcessed?.(result, worth, droplet);
             };
         }

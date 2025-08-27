@@ -9,7 +9,7 @@ export = new Command(script.Name)
         if (RunService.IsStudio() || (game.PrivateServerOwnerId === 0 && game.PrivateServerId !== "")) {
             const code = CommandAPI.Permissions.getAccessCode();
             CommandAPI.ChatHook.sendPrivateMessage(o, "The server access code is: " + code);
-            Packets.codeReceived.fire(o, code);
+            Packets.codeReceived.toClient(o, code);
         }
         else {
             CommandAPI.ChatHook.sendPrivateMessage(o, "You cannot use this command on this server", "color:255,43,43");

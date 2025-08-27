@@ -423,7 +423,7 @@ export const EmpireProfileTemplate = {
      * @deprecated Use {@link printedSetups} instead.
      */
     savedItems: new Map<AreaId, Array<PlacedItem>>(),
-    
+
     /**
      * A list of setups (arrangement of placed items) that the empire has saved.
      */
@@ -773,7 +773,7 @@ export default class DataService implements OnInit, OnPlayerJoined {
             }
             if (removed === true) {
                 items.inventory.set("SadnessInMyHeart", 1);
-                Packets.systemMessageSent.fireAll("RBXGeneral", "An extreme apology to you. A hotfix was applied to challenges to fix a major bug, and your challenge stats have been affected. An item has been placed in your inventory.", "");
+                Packets.systemMessageSent.toAllClients("RBXGeneral", "An extreme apology to you. A hotfix was applied to challenges to fix a major bug, and your challenge stats have been affected. An item has been placed in your inventory.", "");
             }
             empireData.completedEvents.add("RemoveIllegalChallenges");
         }
@@ -785,7 +785,7 @@ export default class DataService implements OnInit, OnPlayerJoined {
                 newPrintedSetups.push(empireData.printedSetups[i]);
             }
             empireData.printedSetups = newPrintedSetups;
-            Packets.systemMessageSent.fireAll("RBXGeneral", "We noticed that you have more than 50 printed setups in your save. Please refrain from adding too many, as you could exceed the 4MB data limit and corrupt your save. Your printed setups have been trimmed.", "");
+            Packets.systemMessageSent.toAllClients("RBXGeneral", "We noticed that you have more than 50 printed setups in your save. Please refrain from adding too many, as you could exceed the 4MB data limit and corrupt your save. Your printed setups have been trimmed.", "");
         }
 
         if (empireData.logs.size() > 2000) {
@@ -1230,9 +1230,9 @@ export default class DataService implements OnInit, OnPlayerJoined {
         task.spawn(() => {
             if (IS_SINGLE_SERVER || !this.isPublicServer) {
                 while (task.wait(60)) {
-                    Packets.savingEmpire.fireAll(100);
+                    Packets.savingEmpire.toAllClients(100);
                     const success = this.saveEmpireProfile(this.empireId);
-                    Packets.savingEmpire.fireAll(success ? 200 : 500);
+                    Packets.savingEmpire.toAllClients(success ? 200 : 500);
                 }
             }
         });
@@ -1241,7 +1241,7 @@ export default class DataService implements OnInit, OnPlayerJoined {
             game.BindToClose(() => this.unloadEmpireProfile(this.empireId));
         }
 
-        Packets.createNewEmpire.onInvoke((player: Player) => this.createNewEmpire(player));
-        Packets.teleportToEmpire.onInvoke((player, empireId) => this.teleportToEmpire(player, empireId));
+        Packets.createNewEmpire.fromClient((player: Player) => this.createNewEmpire(player));
+        Packets.teleportToEmpire.fromClient((player, empireId) => this.teleportToEmpire(player, empireId));
     }
 }

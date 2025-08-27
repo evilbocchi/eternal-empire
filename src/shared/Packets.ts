@@ -174,6 +174,9 @@ namespace Packets {
      */
     export const showXpReward = signal<(xp: number) => void>();
 
+    // leaderboard
+    export const leaderboardData = property<Map<LeaderboardType, LeaderboardEntry[]>>(new Map());
+
     // bombs
     export const useBomb = request<(bombType: Currency) => boolean>();
 

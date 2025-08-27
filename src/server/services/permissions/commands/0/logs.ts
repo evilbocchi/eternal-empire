@@ -5,6 +5,6 @@ export = new Command(script.Name)
     .addAlias("log")
     .setDescription("Open the log window, where activities from every player are recorded.")
     .setExecute((o) => {
-        Packets.tabOpened.fire(o, "Logs");
+        Packets.tabOpened.toClient(o, "Logs");
     })
     .setPermissionLevel(0);

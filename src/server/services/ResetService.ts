@@ -261,7 +261,7 @@ export default class ResetService implements OnInit {
                     const [currency, amount] = reward.getFirst();
                     if (amount === undefined)
                         return;
-                    Packets.reset.fireAll(name, amount);
+                    Packets.reset.toAllClients(name, amount);
                     let p: Player | undefined;
                     const spawnCframe = resetLayer.tpLocation?.CFrame;
                     for (const player of players) {

@@ -82,7 +82,7 @@ export default class BombsService implements OnInit, OnStart {
      * Handles bomb activation, debouncing, and currency deduction.
      */
     onInit() {
-        Packets.useBomb.onInvoke((player, bombType) => {
+        Packets.useBomb.fromClient((player, bombType) => {
             if (!this.dataService.checkPermLevel(player, "purchase")) {
                 return false;
             }

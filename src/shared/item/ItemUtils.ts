@@ -102,7 +102,7 @@ namespace ItemUtils {
     export const applyImpulse = (part: BasePart, impulse: Vector3) => {
         const networkOwner = part.GetNetworkOwner();
         if (networkOwner !== undefined)
-            Packets.applyImpulse.fire(networkOwner, part.Name, impulse);
+            Packets.applyImpulse.toClient(networkOwner, part.Name, impulse);
         else
             part.ApplyImpulse(impulse);
     };

@@ -164,9 +164,9 @@ export default class LogController implements OnInit, OnStart {
      * Starts the LogController, loads logs and listens for new log events.
      */
     onStart() {
-        this.logs = Packets.getLogs.invoke();
+        this.logs = Packets.getLogs.toServer();
         this.logsLength = this.logs.size();
-        Packets.logAdded.connect((log) => {
+        Packets.logAdded.fromServer((log) => {
             this.logs.push(log);
             this.logsLength = this.logs.size();
             this.refreshLogsWindow();

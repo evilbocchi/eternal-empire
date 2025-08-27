@@ -242,7 +242,7 @@ export default class StartWindowController implements OnInit {
             const empireOption = ASSETS.EmpiresWindow.EmpireOption.Clone();
             empireOption.Activated.Connect(() => {
                 playSound("MenuClick.mp3");
-                const success = Packets.teleportToEmpire.invoke(availableEmpire);
+                const success = Packets.teleportToEmpire.toServer(availableEmpire);
                 if (success) {
                     this.loadingWindowController.showLoadingWindow("Loading server");
                 }
@@ -283,7 +283,7 @@ export default class StartWindowController implements OnInit {
         newEmpireOption.Activated.Connect(() => {
             playSound("MenuClick.mp3");
             newEmpireOption.MessageLabel.Text = "Creating empire...";
-            const success = Packets.createNewEmpire.invoke();
+            const success = Packets.createNewEmpire.toServer();
             if (!success) {
                 newEmpireOption.MessageLabel.Text = "You have reached the empire count limit.";
                 task.delay(2, () => newEmpireOption.MessageLabel.Text = ogText);

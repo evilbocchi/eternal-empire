@@ -57,23 +57,23 @@ export default class MarketplaceService implements OnInit, OnStart {
 
     onInit() {
         // Set up packet handlers
-        Packets.createListing.onInvoke((player, uuid, price, listingType, duration) => {
+        Packets.createListing.fromClient((player, uuid, price, listingType, duration) => {
             return this.createListing(player, uuid, price, listingType, duration);
         });
 
-        Packets.cancelListing.onInvoke((player, uuid) => {
+        Packets.cancelListing.fromClient((player, uuid) => {
             return this.cancelListing(player, uuid);
         });
 
-        Packets.buyItem.onInvoke((player, uuid) => {
+        Packets.buyItem.fromClient((player, uuid) => {
             return this.buyItem(player, uuid);
         });
 
-        Packets.placeBid.onInvoke((player, uuid, bidAmount) => {
+        Packets.placeBid.fromClient((player, uuid, bidAmount) => {
             return this.placeBid(player, uuid, bidAmount);
         });
 
-        Packets.getMarketplaceListings.onInvoke((player) => {
+        Packets.getMarketplaceListings.fromClient((player) => {
             return this.getMarketplaceListings();
         });
 

@@ -283,7 +283,7 @@ export default class PermissionsService implements OnInit, OnPlayerJoined {
         const data = this.dataService.empireData;
         data.logs = data.logs.filter((value) => tick() - value.time < 604800);
         data.logs.push(log);
-        Packets.logAdded.fireAll(log);
+        Packets.logAdded.toAllClients(log);
     }
 
     /**
@@ -332,7 +332,7 @@ export default class PermissionsService implements OnInit, OnPlayerJoined {
      */
     onInit() {
         MessagingService.SubscribeAsync("Donation", (message) => {
-            Packets.donationGiven.fireAll();
+            Packets.donationGiven.toAllClients();
             this.chatHookService.sendServerMessage(message.Data as string, "color:3,207,252");
         });
         MessagingService.SubscribeAsync("GlobalChat", (message) => {
@@ -350,7 +350,7 @@ export default class PermissionsService implements OnInit, OnPlayerJoined {
             this.chatHookService.sendServerMessage(`${name}:  ${data.message}`, "tag:hidden;color:180,180,180;");
         });
 
-        Packets.promptDonation.listen((player, dp) => MarketplaceService.PromptProductPurchase(player, dp));
+        Packets.promptDonation.fromClient((player, dp) => MarketplaceService.PromptProductPurchase(player, dp));
         for (const donationProduct of DONATION_PRODUCTS) {
             this.productService.setProductFunction(donationProduct.id, (_receipt, player) => {
                 this.donationService.setDonated(player, this.donationService.getDonated(player) + donationProduct.amount);
@@ -404,7 +404,7 @@ export default class PermissionsService implements OnInit, OnPlayerJoined {
             }
         });
 
-        Packets.getLogs.onInvoke(() => this.dataService.empireData.logs);
+        Packets.getLogs.fromClient(() => this.dataService.empireData.logs);
 
         //
         // Logs

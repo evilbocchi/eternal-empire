@@ -794,7 +794,7 @@ export default class Droplet {
 
             clone.Name = tostring(++Droplet.instatiationCount);
             if (cframe !== undefined) {
-                Packets.dropletAdded.fireInRadius(cframe.Position, 128, drop!);
+                Packets.dropletAdded.toClientsInRadius(cframe.Position, 128, drop!);
             }
 
             Droplet.SPAWNED_DROPLETS.set(clone, instanceInfo);

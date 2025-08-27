@@ -45,7 +45,7 @@ export default class SettingsService implements OnInit, OnPlayerJoined {
      * Initializes the SettingsService, setting up listeners for setting and hotkey changes.
      */
     onInit() {
-        Packets.setHotkey.listen((player, name, key) => {
+        Packets.setHotkey.fromClient((player, name, key) => {
             const playerProfile = this.dataService.loadPlayerProfile(player.UserId);
             if (playerProfile === undefined) {
                 error("Player profile not loaded");
@@ -53,7 +53,7 @@ export default class SettingsService implements OnInit, OnPlayerJoined {
             playerProfile.Data.settings.hotkeys[name] = key;
             Packets.settings.setFor(player, playerProfile.Data.settings);
         });
-        Packets.setSetting.listen((player, setting, value) => {
+        Packets.setSetting.fromClient((player, setting, value) => {
             const playerProfile = this.dataService.loadPlayerProfile(player.UserId);
             if (playerProfile === undefined) {
                 error("Player profile not loaded");

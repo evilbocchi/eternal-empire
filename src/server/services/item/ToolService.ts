@@ -173,7 +173,7 @@ export class ToolService implements OnInit, OnPlayerJoined, OnPlayerJoined {
             }
         });
 
-        Packets.useTool.listen((player, harvestable) => {
+        Packets.useTool.fromClient((player, harvestable) => {
             if (harvestable === undefined || harvestable === Workspace)
                 return;
             const character = player.Character;
@@ -217,7 +217,7 @@ export class ToolService implements OnInit, OnPlayerJoined, OnPlayerJoined {
                 for (const [id, amount] of receiving) {
                     this.itemService.giveItem(id, amount);
                 }
-                Packets.showItemReward.fireAll(receiving);
+                Packets.showItemReward.toAllClients(receiving);
 
                 this.moveHarvestable(harvestable, this.originalPosPerHarvestable.get(harvestable)!.sub(new Vector3(0, -500, 0)));
                 harvestable.SetAttribute("Health", harvestableData.health);

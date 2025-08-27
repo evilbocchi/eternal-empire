@@ -139,7 +139,7 @@ export default class DialogueController implements OnInit, OnStart {
      */
     onInit() {
         const channel = getTextChannels().WaitForChild("RBXGeneral") as TextChannel;
-        Packets.npcMessage.connect((message, pos, endPos, prompt, model) => {
+        Packets.npcMessage.fromServer((message, pos, endPos, prompt, model) => {
             const humanoid = model?.FindFirstChildOfClass("Humanoid");
             let name = undefined as string | undefined;
 
@@ -167,7 +167,7 @@ export default class DialogueController implements OnInit, OnStart {
         const dialogueWindowClicked = () => {
             if (this.i < this.size)
                 this.i = this.size - 1;
-            else if (Packets.nextDialogue.invoke() === true)
+            else if (Packets.nextDialogue.toServer() === true)
                 this.hideDialogueWindow();
         };
         this.hotkeysController.bindKey(Enum.KeyCode.Return, () => {

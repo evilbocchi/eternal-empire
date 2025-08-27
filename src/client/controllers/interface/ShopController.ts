@@ -441,7 +441,7 @@ export default class ShopController implements OnInit, OnStart {
             if (PURCHASE_WINDOW.Visible === false) {
                 return false;
             }
-            if (this.selectedItem !== undefined && Packets.buyItem.invoke(this.selectedItem.id)) {
+            if (this.selectedItem !== undefined && Packets.buyItem.toServer(this.selectedItem.id)) {
                 playSound("ItemPurchase.mp3");
             }
             else {
@@ -458,7 +458,7 @@ export default class ShopController implements OnInit, OnStart {
                         continue;
                     items.push(item.id);
                 }
-                if (Packets.buyAllItems.invoke(items)) {
+                if (Packets.buyAllItems.toServer(items)) {
                     playSound("ItemPurchase.mp3");
                 }
                 else {

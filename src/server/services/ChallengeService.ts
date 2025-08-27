@@ -348,7 +348,7 @@ export class ChallengeService implements OnStart {
             const title = this.getTitleLabel(challenge, challengeId);
             this.chatHookService.sendServerMessage(`Challenge ${title} has been cleared!`);
             const [_challenge, _id, clears] = this.endChallenge(true);
-            Packets.challengeCompleted.fireAll(title, this.getRewardLabel(challenge, clears!));
+            Packets.challengeCompleted.toAllClients(title, this.getRewardLabel(challenge, clears!));
         }
         else if (challenge.challengeEffect !== undefined) {
             if (challenge.lastEffect === undefined) {
@@ -407,7 +407,7 @@ export class ChallengeService implements OnStart {
         if (Sandbox.getEnabled())
             return;
 
-        Packets.startChallenge.listen((player, challengeId) => {
+        Packets.startChallenge.fromClient((player, challengeId) => {
             if (!this.dataService.checkPermLevel(player, "reset"))
                 return;
             const challenge = this.startChallenge(player, challengeId as ChallengeId);
@@ -416,7 +416,7 @@ export class ChallengeService implements OnStart {
             this.chatHookService.sendServerMessage(`Challenge ${this.getTitleLabel(challenge, challengeId)} has been started by ${player.Name}. The original setup has been saved, called "Autosaved", in a printer.`);
 
         });
-        Packets.quitChallenge.listen((player) => {
+        Packets.quitChallenge.fromClient((player) => {
             if (!this.dataService.checkPermLevel(player, "reset"))
                 return;
             const [challenge, challengeId] = this.endChallenge(false);

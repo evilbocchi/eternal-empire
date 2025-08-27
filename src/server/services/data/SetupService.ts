@@ -153,7 +153,7 @@ export default class SetupService implements OnInit {
     onInit() {
         Packets.printedSetups.set(this.dataService.empireData.printedSetups);
 
-        Packets.renameSetup.listen((player, currentName, renameTo) => {
+        Packets.renameSetup.fromClient((player, currentName, renameTo) => {
             if (!this.dataService.checkPermLevel(player, "build"))
                 return;
             renameTo = TextService.FilterStringAsync(renameTo, player.UserId).GetNonChatStringForBroadcastAsync();
@@ -166,7 +166,7 @@ export default class SetupService implements OnInit {
             }
             Packets.printedSetups.set(setups);
         });
-        Packets.autoloadSetup.listen((player, name) => {
+        Packets.autoloadSetup.fromClient((player, name) => {
             if (!this.dataService.checkPermLevel(player, "build"))
                 return;
             const setups = this.dataService.empireData.printedSetups;

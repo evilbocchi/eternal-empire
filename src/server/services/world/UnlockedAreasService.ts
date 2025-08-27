@@ -43,7 +43,7 @@ export default class UnlockedAreasService implements OnInit {
         const areas = this.dataService.empireData.unlockedAreas;
         areas.add(area);
         AREAS[area].unlocked.Value = true;
-        Packets.areaUnlocked.fireAll(area);
+        Packets.areaUnlocked.toAllClients(area);
         return true;
     }
 

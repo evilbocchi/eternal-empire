@@ -74,7 +74,7 @@ export default class ChallengeController implements OnPhysics, OnInit {
                 const t = tick();
                 if (t - (startButton.GetAttribute("LastClick") as number ?? 0) < 3) {
                     playSound("MagicCast.mp3");
-                    Packets.startChallenge.inform(challengeOption.Name);
+                    Packets.startChallenge.toServer(challengeOption.Name);
                 }
                 else {
                     startButton.Label.Text = this.confirmationLabel;
@@ -108,7 +108,7 @@ export default class ChallengeController implements OnPhysics, OnInit {
                 this.debounce = t;
 
                 playSound("MagicCast.mp3");
-                Packets.quitChallenge.inform();
+                Packets.quitChallenge.toServer();
             });
         }
     }
@@ -142,7 +142,7 @@ export default class ChallengeController implements OnPhysics, OnInit {
             CHALLENGE_TASK_WINDOW.TitleLabel.UIGradient.Color = new ColorSequence(c1, c2);
             CHALLENGE_TASK_WINDOW.RequirementLabel.Text = challengeInfo.description;
         });
-        Packets.challengeCompleted.connect((challenge, rewardLabel) => {
+        Packets.challengeCompleted.fromServer((challenge, rewardLabel) => {
             this.questsController.showCompletion(TRACKED_QUEST_WINDOW.ChallengeCompletion, `${challenge} rewards:\n${rewardLabel}`);
         });
     }

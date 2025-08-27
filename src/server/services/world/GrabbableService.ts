@@ -59,17 +59,17 @@ export default class GrabbableService implements OnInit {
             // Validate that the tagged object is actually a ProximityPrompt
             if (!proximityPrompt.IsA("ProximityPrompt"))
                 continue;
-            
+
             const parent = proximityPrompt.Parent;
             if (parent === undefined)
                 continue;
-            
+
             // Ensure the prompt has a valid BasePart parent
             if (!parent.IsA("BasePart")) {
                 warn("ProximityPrompt parent is not a BasePart");
                 continue;
             }
-            
+
             // Get the item data using the parent's name as the item ID
             const itemId = parent.Name;
             const item = Items.getItem(itemId);
@@ -106,8 +106,8 @@ export default class GrabbableService implements OnInit {
                 // Mark the item as collected and give it to the player
                 this.eventService.setEventCompleted(eventId, true);
                 this.itemService.giveItem(itemId, 1);
-                Packets.showItemReward.fire(player, new Map([[itemId, 1]]));
-                
+                Packets.showItemReward.toClient(player, new Map([[itemId, 1]]));
+
                 // Remove the grabbable object from the world
                 proximityPrompt.Parent?.Destroy();
             });

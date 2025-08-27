@@ -66,14 +66,14 @@ export default class AtmosphereController implements OnInit, OnStart {
         }
 
         // Set up weather packet listeners
-        Packets.weatherChanged.connect((weatherState: object) => {
+        Packets.weatherChanged.fromServer((weatherState: object) => {
             this.currentWeather = weatherState as WeatherState;
             this.updateWeatherEffects();
         });
 
         // Request current weather state
         task.spawn(() => {
-            const weatherState = Packets.getWeatherState.invoke() as WeatherState;
+            const weatherState = Packets.getWeatherState.toServer() as WeatherState;
             this.currentWeather = weatherState;
             this.updateWeatherEffects();
         });

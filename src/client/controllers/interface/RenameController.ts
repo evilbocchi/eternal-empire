@@ -43,9 +43,9 @@ export default class RenameController implements OnInit {
      * Initializes the RenameController, sets up rename actions, input validation, and UI updates.
      */
     onInit() {
-        RENAME_WINDOW.PurchaseOptions.Robux.Activated.Connect(() => Packets.promptRename.invoke(RENAME_WINDOW.Input.InputBox.Text, "robux"));
+        RENAME_WINDOW.PurchaseOptions.Robux.Activated.Connect(() => Packets.promptRename.toServer(RENAME_WINDOW.Input.InputBox.Text, "robux"));
         RENAME_WINDOW.PurchaseOptions.Funds.Activated.Connect(() => {
-            if (Packets.promptRename.invoke(RENAME_WINDOW.Input.InputBox.Text, "funds") === true) {
+            if (Packets.promptRename.toServer(RENAME_WINDOW.Input.InputBox.Text, "funds") === true) {
                 playSound("ItemPurchase.mp3");
             }
             else {

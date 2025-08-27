@@ -165,7 +165,7 @@ export default class AtmosphereService implements OnInit, OnPhysics {
         print(`Weather changed to: ${weatherType} for ${duration} seconds`);
 
         // Notify clients of weather change
-        Packets.weatherChanged.fireAll(this.currentWeather);
+        Packets.weatherChanged.toAllClients(this.currentWeather);
     }
 
     /**
@@ -360,6 +360,6 @@ export default class AtmosphereService implements OnInit, OnPhysics {
         this.generateNextWeather();
 
         // Set up packet handlers for weather state requests
-        Packets.getWeatherState.onInvoke(() => this.getCurrentWeather());
+        Packets.getWeatherState.fromClient(() => this.getCurrentWeather());
     }
 }

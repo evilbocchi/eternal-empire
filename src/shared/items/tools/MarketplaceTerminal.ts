@@ -48,7 +48,7 @@ export = new Item(script.Name)
             playersWithUIOpen.add(player);
 
             // Open marketplace UI
-            Packets.openMarketplaceTerminal.fire(player);
+            Packets.openMarketplaceTerminal.toClient(player);
 
             // Disable player movement
             humanoid.PlatformStand = true;
@@ -83,7 +83,7 @@ export = new Item(script.Name)
                         playersBlockedFromReopening.add(player);
 
                         // Close marketplace UI
-                        Packets.closeMarketplaceTerminal.fire(player);
+                        Packets.closeMarketplaceTerminal.toClient(player);
 
                         // Re-enable player movement
                         if (humanoid) {

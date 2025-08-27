@@ -102,7 +102,7 @@ export default class ChatHookController implements OnInit, OnStart {
      * Initializes the ChatHookController, sets up system message listener.
      */
     onInit() {
-        Packets.systemMessageSent.connect((channel, message, metadata) => this.display(channel, message, metadata));
+        Packets.systemMessageSent.fromServer((channel, message, metadata) => this.display(channel, message, metadata));
     }
 
     /**

@@ -734,16 +734,16 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
         this.refreshEffects();
 
         // Set up packet handlers for item operations
-        Packets.buyItem.onInvoke((player, itemId) => this.buyItem(player, itemId));
-        Packets.buyAllItems.onInvoke((player, itemIds) => this.buyAllItems(player, itemIds));
+        Packets.buyItem.fromClient((player, itemId) => this.buyItem(player, itemId));
+        Packets.buyAllItems.fromClient((player, itemIds) => this.buyAllItems(player, itemIds));
 
         // Set up placement handlers with queue protection
-        Packets.placeItems.onInvoke((player, items) => {
+        Packets.placeItems.fromClient((player, items) => {
             return this.waitInQueue(() => {
                 return this.placeItems(player, items);
             });
         });
-        Packets.unplaceItems.listen((player, placementIds) => {
+        Packets.unplaceItems.fromClient((player, placementIds) => {
             return this.waitInQueue(() => {
                 this.unplaceItems(player, placementIds);
                 return 1;

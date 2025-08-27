@@ -428,7 +428,7 @@ export default class Quest {
             return warn(`Quest ${this.id} is already completed`);
         this.completed = true;
 
-        Packets.questCompleted.fireAll(this.id);
+        Packets.questCompleted.toAllClients(this.id);
         const reward = this.reward;
 
         // Award experience points

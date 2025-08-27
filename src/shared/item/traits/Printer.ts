@@ -140,13 +140,13 @@ export default class Printer extends ItemTrait {
                     });
                     setupOption.Heading.NameLabel.FocusLost.Connect((enterPressed) => {
                         if (enterPressed === true) {
-                            Packets.renameSetup.inform(name, setupOption.Heading.NameLabel.Text);
+                            Packets.renameSetup.toServer(name, setupOption.Heading.NameLabel.Text);
                             setupOption.Destroy();
                             return;
                         }
                         toggleEditable(false);
                     });
-                    setupOption.Body.Autoload.ToggleButton.Activated.Connect(() => Packets.autoloadSetup.inform(name));
+                    setupOption.Body.Autoload.ToggleButton.Activated.Connect(() => Packets.autoloadSetup.toServer(name));
                     setupOption.Parent = setupOptions;
                 }
 

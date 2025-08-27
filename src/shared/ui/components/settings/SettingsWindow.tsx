@@ -45,7 +45,7 @@ export default function SettingsWindow({
     // Handle hotkey change with proper integration
     const handleHotkeyChange = (hotkeyName: string, newKeyCode: Enum.KeyCode) => {
         // Inform the server about the hotkey change
-        Packets.setHotkey.inform(hotkeyName, newKeyCode.Value);
+        Packets.setHotkey.toServer(hotkeyName, newKeyCode.Value);
 
         // Call the provided callback if available
         onHotkeyChange?.(hotkeyName, newKeyCode);

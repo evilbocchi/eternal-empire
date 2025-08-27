@@ -123,6 +123,6 @@ app.post('/write', (req, res) => {
     });
 });
 
-app.listen(PORT, () => {
+app.fromClient(PORT, () => {
     signale.info(`Plugin server running at http://localhost:${PORT}`);
 });

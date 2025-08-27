@@ -6,6 +6,6 @@ export = new Command(script.Name)
     .setDescription("Displays all available commands.")
     .setExecute((o) => {
         CommandAPI.ChatHook.sendPrivateMessage(o, `Your permission level is ${CommandAPI.Permissions.getPermissionLevel(o.UserId)}`, "color:138,255,138");
-        Packets.tabOpened.fire(o, "Commands");
+        Packets.tabOpened.toClient(o, "Commands");
     })
     .setPermissionLevel(0);

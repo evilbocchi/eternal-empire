@@ -144,7 +144,7 @@ export default class SettingsController implements OnStart {
             if (input.KeyCode !== Enum.KeyCode.Unknown && input.KeyCode !== undefined && this.selectedOption !== undefined) {
                 const name = this.selectedOption.Name;
                 this.deselectOption();
-                Packets.setHotkey.inform(name, input.KeyCode.Value);
+                Packets.setHotkey.toServer(name, input.KeyCode.Value);
             }
         });
 
@@ -159,7 +159,7 @@ export default class SettingsController implements OnStart {
                     const enabled = !settings[setting];
                     playSound(enabled === true ? "CheckOn.mp3" : "CheckOff.mp3");
 
-                    Packets.setSetting.inform(setting, enabled);
+                    Packets.setSetting.toServer(setting, enabled);
                 });
             }
         }

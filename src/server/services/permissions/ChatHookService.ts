@@ -30,7 +30,7 @@ export default class ChatHookService {
      */
     sendPrivateMessage(player: Player, message: string, metadata?: string) {
         const plrChannel = this.plrChannels.get(player) ?? this.createChannel(player);
-        Packets.systemMessageSent.fire(player, plrChannel.Name, message, metadata ?? "");
+        Packets.systemMessageSent.toClient(player, plrChannel.Name, message, metadata ?? "");
 
     }
 
@@ -42,7 +42,7 @@ export default class ChatHookService {
      */
     sendServerMessage(message: string, metadata?: string) {
         const rbxGeneral = getTextChannels().WaitForChild("RBXGeneral") as TextChannel;
-        Packets.systemMessageSent.fireAll(rbxGeneral.Name, message, metadata ?? "");
+        Packets.systemMessageSent.toAllClients(rbxGeneral.Name, message, metadata ?? "");
     }
 
     /**

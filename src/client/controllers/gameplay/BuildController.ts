@@ -253,7 +253,7 @@ export default class BuildController implements OnInit, OnStart, BuildController
 
             data.push({ id: (selected.GetAttribute("UUID") ?? selected.GetAttribute("ItemId")) as string, position, rotation });
         }
-        Packets.placeItems.invoke(data);
+        Packets.placeItems.toServer(data);
     }
 
     /**
@@ -360,7 +360,7 @@ export default class BuildController implements OnInit, OnStart, BuildController
         }
         this.debounce = tick();
 
-        const status = Packets.placeItems.invoke(data);
+        const status = Packets.placeItems.toServer(data);
         if (status === 0)
             return false;
 
@@ -507,7 +507,7 @@ export default class BuildController implements OnInit, OnStart, BuildController
                         this.selected.set(placingModel, hovering.PrimaryPart!.CFrame.Inverse().mul(model.PrimaryPart!.CFrame));
                     }
                 }
-                Packets.unplaceItems.inform(names);
+                Packets.unplaceItems.toServer(names);
                 this.onMouseMove(true, false);
             }
 

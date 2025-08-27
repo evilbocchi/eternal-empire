@@ -52,7 +52,7 @@ export default class BombsController implements OnStart {
             MarketplaceService.PromptProductPurchase(LOCAL_PLAYER, BOMBS_PRODUCTS[boosting as keyof (typeof BOMBS_PRODUCTS)]);
         });
         gui.UseButton.Activated.Connect(() => {
-            if (Packets.useBomb.invoke(bombsCurrency) === true) {
+            if (Packets.useBomb.toServer(bombsCurrency) === true) {
                 playSound("ItemPurchase.mp3");
             }
             else {

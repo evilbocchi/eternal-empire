@@ -741,7 +741,7 @@ export default class Item {
                 formulaResults.set(item.id, item.performFormula()!);
             }
             if (tick() - start > 4) { // simple delay to ensure clients are ready
-                Packets.boostChanged.fireAll(formulaResults);
+                Packets.boostChanged.toAllClients(formulaResults);
             }
         }, {
             delta: 1,

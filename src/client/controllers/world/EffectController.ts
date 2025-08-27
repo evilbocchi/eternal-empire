@@ -141,7 +141,7 @@ export default class EffectController implements OnInit {
         }, true);
 
 
-        Packets.dropletAdded.connect((drop?: BasePart) => {
+        Packets.dropletAdded.fromServer((drop?: BasePart) => {
             if (!drop)
                 return;
 
@@ -176,15 +176,15 @@ export default class EffectController implements OnInit {
         }
 
         this.camShake.Start();
-        Packets.camShake.connect(() => this.camShake.Shake(CameraShaker.Presets.Bump));
-        Packets.savingEmpire.connect((status) => {
+        Packets.camShake.fromServer(() => this.camShake.Shake(CameraShaker.Presets.Bump));
+        Packets.savingEmpire.fromServer((status) => {
             if (status === 500) {
                 warn("Empire saving failed.");
             }
         });
 
         const userId = LOCAL_PLAYER.UserId;
-        Packets.dropletBurnt.connect((dropletModelId) => {
+        Packets.dropletBurnt.fromServer((dropletModelId) => {
             const droplet = DROPLET_STORAGE.FindFirstChild(dropletModelId) as BasePart | undefined;
             if (droplet === undefined) // streamed out
                 return;
@@ -223,7 +223,7 @@ export default class EffectController implements OnInit {
             this.delay = (((tick() - t) / 4) + this.delay) * 0.8;
             STATS_WINDOW.StatList.CurrentPing.AmountLabel.Text = math.floor(this.delay * 1000) + "ms";
         });
-        Packets.applyImpulse.connect((dropletModelId, impulse) => {
+        Packets.applyImpulse.fromServer((dropletModelId, impulse) => {
             const model = DROPLET_STORAGE.FindFirstChild(dropletModelId) as BasePart | undefined;
             if (model === undefined) // streamed out
                 return;

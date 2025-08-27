@@ -83,7 +83,7 @@ namespace Challenges {
             explosion.DestroyJointRadiusPercent = 0;
             explosion.Position = meteor.Position;
             explosion.Parent = meteor;
-            Packets.camShake.fireAll();
+            Packets.camShake.toAllClients();
         });
         Debris.AddItem(meteor, 5);
     };

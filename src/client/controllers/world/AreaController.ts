@@ -135,8 +135,8 @@ export default class AreaController implements OnInit, OnStart {
             this.loadArea(id, area);
         }
 
-        Packets.areaUnlocked.connect((area) => this.onAreaUnlocked(area));
-        Packets.dropletCountChanged.connect((area, current) => this.UPDATE_PER_AREA.get(area)!(current));
+        Packets.areaUnlocked.fromServer((area) => this.onAreaUnlocked(area));
+        Packets.dropletCountChanged.fromServer((area, current) => this.UPDATE_PER_AREA.get(area)!(current));
     }
 
     /**

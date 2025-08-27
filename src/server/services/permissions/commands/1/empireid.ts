@@ -7,6 +7,6 @@ export = new Command(script.Name)
     .setExecute((o) => {
         const id = CommandAPI.Data.empireId;
         CommandAPI.ChatHook.sendPrivateMessage(o, "The empire ID is: " + id);
-        Packets.codeReceived.fire(o, id);
+        Packets.codeReceived.toClient(o, id);
     })
     .setPermissionLevel(1);

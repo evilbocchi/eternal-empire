@@ -119,7 +119,7 @@ export default class NamedUpgradeService implements OnInit {
      */
     onInit() {
         Packets.upgrades.set(this.upgrades);
-        Packets.buyUpgrade.onInvoke((player, upgradeId, to) => {
+        Packets.buyUpgrade.fromClient((player, upgradeId, to) => {
             if (!this.dataService.checkPermLevel(player, "purchase") || to === undefined) {
                 return false;
             }

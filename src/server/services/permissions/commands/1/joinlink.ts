@@ -9,7 +9,7 @@ export = new Command(script.Name)
         if (RunService.IsStudio() || (game.PrivateServerOwnerId === 0 && game.PrivateServerId !== "")) {
             const joinLink = "https://www.roblox.com/games/start?placeId=" + game.PlaceId + "&launchData=" + CommandAPI.Permissions.getAccessCode();
             CommandAPI.ChatHook.sendPrivateMessage(o, "Join link: " + joinLink);
-            Packets.codeReceived.fire(o, joinLink);
+            Packets.codeReceived.toClient(o, joinLink);
         }
         else {
             CommandAPI.ChatHook.sendPrivateMessage(o, "You cannot use this command on this server", "color:255,43,43");
