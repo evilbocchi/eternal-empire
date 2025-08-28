@@ -5,46 +5,41 @@ import Packets from "shared/Packets";
 import WindowCloseButton from "shared/ui/components/window/WindowCloseButton";
 import WindowTitle from "shared/ui/components/window/WindowTitle";
 import { RobotoMonoBold } from "shared/ui/GameFonts";
+import useProperty from "shared/ui/hooks/useProperty";
 import HotkeyOption from "./HotkeyOption";
 import SettingSection from "./SettingSection";
 import SettingToggle from "./SettingToggle";
 
 export interface SettingsWindowProps {
     visible?: boolean;
-    settings?: Settings;
-    selectedHotkey?: string;
     onClose?: () => void;
-    onSettingToggle?: (setting: keyof Settings, value: boolean) => void;
-    onHotkeySelect?: (hotkeyName: string) => void;
-    onHotkeyChange?: (hotkeyName: string, newKeyCode: Enum.KeyCode) => void;
-    onHotkeyDeselect?: () => void;
 }
 
 export default function SettingsWindow({
     visible = false,
-    settings = Packets.settings.get()!,
-    selectedHotkey,
     onClose,
-    onSettingToggle,
-    onHotkeySelect,
-    onHotkeyChange,
-    onHotkeyDeselect
 }: SettingsWindowProps) {
     const frameContentRef = useRef<Frame>();
     const [previousVisible, setPreviousVisible] = useState(visible);
-
+    const [selectedHotkey, setSelectedHotkey] = useState<string | undefined>();
+    const settings = useProperty(Packets.settings)!;
     const hotkeys = settings.hotkeys;
+
     let sortedHotkeys = new Array<{ name: string, key: number; }>();
     for (const [name, key] of pairs(hotkeys)) // TODO: Implement sorting
         sortedHotkeys.push({ name: tostring(name), key });
 
-    // Handle hotkey change with proper integration
-    const handleHotkeyChange = (hotkeyName: string, newKeyCode: Enum.KeyCode) => {
-        // Inform the server about the hotkey change
-        Packets.setHotkey.toServer(hotkeyName, newKeyCode.Value);
+    const onHotkeySelect = (hotkeyName: string) => {
+        setSelectedHotkey(prev => prev === hotkeyName ? undefined : hotkeyName);
+    };
 
-        // Call the provided callback if available
-        onHotkeyChange?.(hotkeyName, newKeyCode);
+    const onHotkeyDeselect = () => {
+        setSelectedHotkey(undefined);
+    };
+
+    const handleHotkeyChange = (hotkeyName: string, newKeyCode: Enum.KeyCode) => {
+        Packets.setHotkey.toServer(hotkeyName, newKeyCode.Value);
+        setSelectedHotkey(undefined);
     };
 
     useEffect(() => {
@@ -84,6 +79,7 @@ export default function SettingsWindow({
             Selectable={true}
             Size={new UDim2(0.9, 0, 0.9, -50)}
             Position={new UDim2(0.5, 0, 0.5, 0)}
+            Visible={false}
         >
             <uisizeconstraint
                 MaxSize={new Vector2(800, 600)}
@@ -107,57 +103,46 @@ export default function SettingsWindow({
                 {/* General Section */}
                 <SettingSection title="General" />
 
-                <SettingToggle
-                    title="Music"
-                    enabled={settings.Music}
-                    onToggle={(enabled) => onSettingToggle?.("Music", enabled)}
-                />
+                <SettingToggle setting="Music" />
 
                 <SettingToggle
+                    setting="SoundEffects"
                     title="Sound Effects"
-                    enabled={settings.SoundEffects}
-                    onToggle={(enabled) => onSettingToggle?.("SoundEffects", enabled)}
                 />
 
                 <SettingToggle
+                    setting="ScientificNotation"
                     title="Scientific Notation"
-                    enabled={settings.ScientificNotation}
-                    onToggle={(enabled) => onSettingToggle?.("ScientificNotation", enabled)}
                 />
 
                 <SettingToggle
+                    setting="FormatCurrencies"
                     title="Format Currencies"
                     subtitle="This is forcefully disabled on smaller screens."
-                    enabled={settings.FormatCurrencies}
-                    onToggle={(enabled) => onSettingToggle?.("FormatCurrencies", enabled)}
                 />
 
                 {/* Performance Section */}
                 <SettingSection title="Performance" />
 
                 <SettingToggle
+                    setting="ResetAnimation"
                     title="Reset Layer Animations"
-                    enabled={settings.ResetAnimation}
-                    onToggle={(enabled) => onSettingToggle?.("ResetAnimation", enabled)}
                 />
 
                 <SettingToggle
+                    setting="BuildAnimation"
                     title="Build Animations"
-                    enabled={settings.BuildAnimation}
-                    onToggle={(enabled) => onSettingToggle?.("BuildAnimation", enabled)}
                 />
 
                 <SettingToggle
+                    setting="CurrencyGainAnimation"
                     title="Currency Gain Animations"
-                    enabled={settings.CurrencyGainAnimation}
-                    onToggle={(enabled) => onSettingToggle?.("CurrencyGainAnimation", enabled)}
                 />
 
                 <SettingToggle
                     title="Item Shadows"
                     subtitle="Items may need to be placed again to apply changes."
-                    enabled={settings.ItemShadows}
-                    onToggle={(enabled) => onSettingToggle?.("ItemShadows", enabled)}
+                    setting="ItemShadows"
                 />
 
                 {/* Layout Section */}
@@ -165,8 +150,7 @@ export default function SettingsWindow({
 
                 <SettingToggle
                     title="Hide Maxed Items"
-                    enabled={settings.HideMaxedItems}
-                    onToggle={(enabled) => onSettingToggle?.("HideMaxedItems", enabled)}
+                    setting="HideMaxedItems"
                 />
 
                 {/* Controls Section */}

@@ -13,15 +13,6 @@ export = {
     reactRoblox: ReactRoblox,
     controls: controls,
     story: () => {
-        const mockPlayerData = table.clone(PlayerProfileTemplate);
-
-
-
-        Packets.setSetting.fromClient((player, setting, value) => {
-            (mockPlayerData.settings as { [key: string]: unknown; })[setting] = value;
-            Packets.settings.setFor(player, mockPlayerData.settings);
-        });
-
         const component = <App />;
         return component;
     },

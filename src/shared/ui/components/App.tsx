@@ -1,4 +1,4 @@
-import React, { StrictMode, useEffect } from "@rbxts/react";
+import React, { StrictMode } from "@rbxts/react";
 import type BuildController from "client/controllers/gameplay/BuildController";
 import Packets from "shared/Packets";
 import BuildManager from "shared/ui/components/build/BuildManager";
@@ -15,45 +15,17 @@ interface AppProps {
 }
 
 export default function App({ buildController }: AppProps = {}) {
-    const [settings, setSettings] = React.useState(Packets.settings.get()!);
-    const [selectedHotkey, setSelectedHotkey] = React.useState<string | undefined>();
-
-    useEffect(() => {
-        const connection = Packets.settings.observe((newSettings) => setSettings(newSettings));
-        return () => connection.disconnect();
-    }, []);
-
-    const handleHotkeySelect = (hotkeyName: string) => {
-        setSelectedHotkey(prev => prev === hotkeyName ? undefined : hotkeyName);
-    };
-
-    const handleHotkeyDeselect = () => {
-        setSelectedHotkey(undefined);
-    };
-
-    const handleHotkeyChange = (hotkeyName: string, newKeyCode: Enum.KeyCode) => {
-        Packets.setHotkey.toServer(hotkeyName, newKeyCode.Value);
-        // Auto-deselect after changing hotkey
-        setSelectedHotkey(undefined);
-    };
 
     return (
         <StrictMode>
             <HotkeyProvider defaultEnabled={true}>
                 <TooltipProvider>
-                    <SettingsManager
-                        settings={settings}
-                        selectedHotkey={selectedHotkey}
-                        onHotkeySelect={handleHotkeySelect}
-                        onHotkeyChange={handleHotkeyChange}
-                        onHotkeyDeselect={handleHotkeyDeselect}
-                    />
+                    <SettingsManager />
                     <SidebarButtons />
                     <PositionDisplay />
                     <TrackedQuestWindow />
                     <BuildManager
                         buildController={buildController}
-                        animationsEnabled={settings.BuildAnimation}
                     />
                 </TooltipProvider>
             </HotkeyProvider>

@@ -1,24 +1,48 @@
-import React from "@rbxts/react";
+import React, { useEffect, useRef, useState } from "@rbxts/react";
 import { TweenService } from "@rbxts/services";
 import { playSound } from "shared/asset/GameAssets";
+import Packets from "shared/Packets";
 import { RobotoMonoBold } from "shared/ui/GameFonts";
+import useProperty from "shared/ui/hooks/useProperty";
 
 interface SettingToggleProps {
-    title: string;
+    setting: keyof Settings;
+    title?: string;
     subtitle?: string;
-    enabled: boolean;
     layoutOrder?: number;
-    onToggle?: (enabled: boolean) => void;
 }
 
-export default function SettingToggle({ title, subtitle, enabled, layoutOrder = 0, onToggle }: SettingToggleProps) {
-    const [hovering, setHovering] = React.useState(false);
+export default function SettingToggle({ setting, title, subtitle, layoutOrder = 0 }: SettingToggleProps) {
+    title ??= setting;
+
+    const [hovering, setHovering] = useState(false);
+    const [justClicked, setJustClicked] = useState(false);
+    const settings = useProperty(Packets.settings);
+    const enabled = settings?.[setting] === true;
+
     const color = enabled ? Color3.fromRGB(170, 255, 127) : Color3.fromRGB(255, 52, 52);
     const hoverColor = color.Lerp(Color3.fromRGB(255, 255, 255), 0.5);
-    const buttonRef = React.useRef<TextButton>();
+    const buttonRef = useRef<TextButton>();
+
+    useEffect(() => {
+        TweenService.Create(buttonRef.current!, new TweenInfo(0.2), {
+            BackgroundColor3: (hovering && !justClicked) ? hoverColor : color
+        }).Play();
+    }, [hovering, enabled, justClicked]);
+
+    // Reset justClicked state after a short delay
+    useEffect(() => {
+        if (justClicked) {
+            task.delay(0.3, () => {
+                setJustClicked(false);
+            });
+        }
+    }, [justClicked]);
 
     const handleToggle = () => {
         const newEnabled = !enabled;
+
+        setJustClicked(true);
 
         // Play appropriate sound based on the new state
         if (newEnabled) {
@@ -27,7 +51,7 @@ export default function SettingToggle({ title, subtitle, enabled, layoutOrder = 
             playSound("CheckOff.mp3");
         }
 
-        onToggle?.(newEnabled);
+        Packets.setSetting.toServer(setting, newEnabled);
     };
 
     return (
@@ -41,7 +65,6 @@ export default function SettingToggle({ title, subtitle, enabled, layoutOrder = 
                 ref={buttonRef}
                 AnchorPoint={new Vector2(1, 0.5)}
                 AutoButtonColor={false}
-                BackgroundColor3={hovering ? hoverColor : color}
                 BorderColor3={Color3.fromRGB(255, 255, 255)}
                 BorderSizePixel={3}
                 FontFace={RobotoMonoBold}
@@ -65,10 +88,7 @@ export default function SettingToggle({ title, subtitle, enabled, layoutOrder = 
                             sound.PlaybackSpeed = enabled ? 2 : 1.75;
                         });
                     },
-                    MouseLeave: () => {
-                        setHovering(false);
-                        TweenService.Create(buttonRef.current!, new TweenInfo(0.2), { BackgroundColor3: color }).Play();
-                    }
+                    MouseLeave: () => setHovering(false)
                 }}
             >
                 <uigradient

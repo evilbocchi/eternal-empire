@@ -6,15 +6,14 @@
  */
 
 import React, { useCallback, useEffect, useState } from "@rbxts/react";
-import { UserInputService } from "@rbxts/services";
 import type BuildController from "client/controllers/gameplay/BuildController";
-import BuildWindow, { BuildWindowState, BuildWindowCallbacks } from "shared/ui/components/build/BuildWindow";
+import Packets from "shared/Packets";
+import BuildWindow, { BuildWindowCallbacks, BuildWindowState } from "shared/ui/components/build/BuildWindow";
+import useProperty from "shared/ui/hooks/useProperty";
 
 interface BuildManagerProps {
     /** Interface to the build controller */
     buildController?: BuildController;
-    /** Whether animations are enabled globally */
-    animationsEnabled?: boolean;
 }
 
 /**
@@ -23,19 +22,19 @@ interface BuildManagerProps {
  */
 export default function BuildManager({
     buildController,
-    animationsEnabled = true
 }: BuildManagerProps) {
     const [buildState, setBuildState] = useState<BuildWindowState>({
         visible: false,
         hasSelection: false,
         isRestricted: false,
-        animationsEnabled
+        animationsEnabled: true
     });
+    const settings = useProperty(Packets.settings)!;
 
     // Update animations setting when prop changes
     useEffect(() => {
-        setBuildState(prev => ({ ...prev, animationsEnabled }));
-    }, [animationsEnabled]);
+        setBuildState(prev => ({ ...prev, animationsEnabled: settings.BuildAnimation }));
+    }, [settings.BuildAnimation]);
 
     // Sync with build controller state
     useEffect(() => {
