@@ -1,6 +1,9 @@
 import React from "@rbxts/react";
 import ReactRoblox from "@rbxts/react-roblox";
+import PlayerProfileTemplate from "shared/data/PlayerProfileTemplate";
+import HotkeyProvider from "shared/ui/components/hotkeys/HotkeyProvider";
 import SettingsManager from "shared/ui/components/settings/SettingsManager";
+import TooltipProvider from "shared/ui/components/tooltip/TooltipProvider";
 
 const controls = {
     visible: true
@@ -11,23 +14,15 @@ export = {
     reactRoblox: ReactRoblox,
     controls: controls,
     story: (props: typeof controls) => {
-        const [settings, setSettings] = React.useState({
-            ScientificNotation: true,
-            FormatCurrencies: false,
-            Music: true,
-            SoundEffects: true,
-            ResetAnimation: false,
-            BuildAnimation: true,
-            CurrencyGainAnimation: true,
-            HideMaxedItems: true,
-            ItemShadows: true,
-            hotkeys: {
-                "Toggle Settings": Enum.KeyCode.P.Value,
-                "Toggle Inventory": Enum.KeyCode.B.Value,
-                "Quick Build": Enum.KeyCode.Q.Value,
-                "Toggle Music": Enum.KeyCode.M.Value
-            }
-        });
+        const defaultSettings = table.clone(PlayerProfileTemplate.settings);
+        defaultSettings.hotkeys = {
+            "Toggle Settings": Enum.KeyCode.P.Value,
+            "Toggle Inventory": Enum.KeyCode.B.Value,
+            "Quick Build": Enum.KeyCode.Q.Value,
+            "Toggle Music": Enum.KeyCode.M.Value
+        };
+
+        const [settings, setSettings] = React.useState(defaultSettings);
 
         const [selectedHotkey, setSelectedHotkey] = React.useState<string | undefined>();
 
@@ -56,14 +51,18 @@ export = {
         };
 
         return (
-            <SettingsManager
-                settings={settings}
-                selectedHotkey={selectedHotkey}
-                onSettingToggle={handleSettingToggle}
-                onHotkeySelect={handleHotkeySelect}
-                onHotkeyChange={handleHotkeyChange}
-                onHotkeyDeselect={handleHotkeyDeselect}
-            />
+            <HotkeyProvider defaultEnabled={true}>
+                <TooltipProvider>
+                    <SettingsManager
+                        settings={settings}
+                        selectedHotkey={selectedHotkey}
+                        onSettingToggle={handleSettingToggle}
+                        onHotkeySelect={handleHotkeySelect}
+                        onHotkeyChange={handleHotkeyChange}
+                        onHotkeyDeselect={handleHotkeyDeselect}
+                    />
+                </TooltipProvider>
+            </HotkeyProvider>
         );
     }
 };

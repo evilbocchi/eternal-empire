@@ -48,7 +48,7 @@ interface TooltipProviderProps {
 /**
  * Tooltip provider component that manages tooltip state and positioning
  */
-export function TooltipProvider({ children }: TooltipProviderProps) {
+export default function TooltipProvider({ children }: TooltipProviderProps) {
     const [tooltipData, setTooltipData] = useState<TooltipData | undefined>(undefined);
     const [isVisible, setIsVisible] = useState(false);
     const [position, setPosition] = useState(new Vector2(0, 0));

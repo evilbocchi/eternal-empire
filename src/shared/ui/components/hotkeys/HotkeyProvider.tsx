@@ -46,7 +46,7 @@ interface HotkeyProviderProps {
 /**
  * Hotkey provider component that manages hotkey state and input handling
  */
-export function HotkeyProvider({ children, defaultEnabled = true }: HotkeyProviderProps) {
+export default function HotkeyProvider({ children, defaultEnabled = true }: HotkeyProviderProps) {
     const [hotkeysEnabled, setHotkeysEnabled] = React.useState(defaultEnabled);
     const bindingsRef = useRef<Map<string, HotkeyBinding>>(new Map());
     const indexRef = useRef(0);
