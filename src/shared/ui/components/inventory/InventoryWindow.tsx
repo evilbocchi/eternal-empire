@@ -7,6 +7,7 @@
 
 import React, { useCallback, useEffect, useMemo, useState } from "@rbxts/react";
 import type BuildController from "client/controllers/gameplay/BuildController";
+import type InventoryController from "client/controllers/interface/InventoryController";
 import type Item from "shared/item/Item";
 import Items from "shared/items/Items";
 import Packets from "shared/Packets";
@@ -21,6 +22,8 @@ interface InventoryWindowProps {
     onVisibilityChange?: (visible: boolean) => void;
     /** Build controller for item placement */
     buildController?: BuildController;
+    /** Inventory controller for item handling */
+    inventoryController?: InventoryController;
 }
 
 interface InventoryState {
@@ -43,7 +46,8 @@ type TraitFilterId = keyof typeof FILTERABLE_TRAITS;
 export default function InventoryWindow({ 
     visible, 
     onVisibilityChange,
-    buildController 
+    buildController,
+    inventoryController
 }: InventoryWindowProps): React.Element | undefined {
     const [inventoryState, setInventoryState] = useState<InventoryState>({
         inventory: Packets.inventory.get() ?? new Map(),
@@ -300,6 +304,7 @@ export default function InventoryWindow({
                                         amount={itemData.amount}
                                         layoutOrder={i}
                                         buildController={buildController}
+                                        inventoryController={inventoryController}
                                         inventoryState={inventoryState}
                                     />
                                 );
@@ -338,6 +343,7 @@ interface InventoryItemSlotProps {
     amount: number;
     layoutOrder: number;
     buildController?: BuildController;
+    inventoryController?: InventoryController;
     inventoryState: InventoryState;
 }
 
@@ -346,9 +352,16 @@ function InventoryItemSlot({
     amount, 
     layoutOrder, 
     buildController, 
+    inventoryController,
     inventoryState 
 }: InventoryItemSlotProps) {
     const getBestUniqueInstance = useCallback((baseItemId: string): string | undefined => {
+        // Use inventory controller's method if available
+        if (inventoryController) {
+            return inventoryController.getBest(baseItemId);
+        }
+        
+        // Fallback to inline implementation
         const { uniqueInstances } = inventoryState;
         let bestUuid: string | undefined;
         let bestInstance: UniqueItemInstance | undefined;
@@ -375,7 +388,7 @@ function InventoryItemSlot({
         }
         
         return bestUuid;
-    }, [inventoryState]);
+    }, [inventoryState, inventoryController]);
 
     const bestUuid = useMemo(() => {
         return Items.uniqueItems.has(item) ? getBestUniqueInstance(item.id) : undefined;
@@ -384,22 +397,25 @@ function InventoryItemSlot({
     const tooltipProps = useItemTooltip(item, bestUuid);
 
     const handleClick = useCallback(() => {
-        if (!buildController) return;
-        
-        const isPlaceable = item.placeableAreas.size() > 0 || item.bounds !== undefined;
-        const level = Packets.level.get() ?? 0;
-        
-        if (buildController.getRestricted() === true || 
-            !isPlaceable || 
-            (item.levelReq !== undefined && item.levelReq > level)) {
-            // Could play error sound here
-            return;
-        }
+        // Use inventory controller if available, otherwise fallback to direct build controller
+        if (inventoryController) {
+            inventoryController.handleItemClick(item);
+        } else if (buildController) {
+            const isPlaceable = item.placeableAreas.size() > 0 || item.bounds !== undefined;
+            const level = Packets.level.get() ?? 0;
+            
+            if (buildController.getRestricted() === true || 
+                !isPlaceable || 
+                (item.levelReq !== undefined && item.levelReq > level)) {
+                // Could play error sound here
+                return;
+            }
 
-        // Could hide adaptive tab here
-        const placingModel = buildController.addPlacingModel(item, bestUuid);
-        buildController.mainSelect(placingModel);
-    }, [item, buildController, bestUuid]);
+            // Could hide adaptive tab here
+            const placingModel = buildController.addPlacingModel(item, bestUuid);
+            buildController.mainSelect(placingModel);
+        }
+    }, [item, buildController, inventoryController, bestUuid]);
 
     return (
         <ItemSlot

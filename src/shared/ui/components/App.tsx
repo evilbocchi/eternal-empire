@@ -1,5 +1,6 @@
 import React, { StrictMode } from "@rbxts/react";
 import type BuildController from "client/controllers/gameplay/BuildController";
+import type InventoryController from "client/controllers/interface/InventoryController";
 import Packets from "shared/Packets";
 import BuildManager from "shared/ui/components/build/BuildManager";
 import HotkeyProvider from "shared/ui/components/hotkeys/HotkeyProvider";
@@ -12,9 +13,11 @@ import TooltipProvider from "shared/ui/components/tooltip/TooltipProvider";
 interface AppProps {
     /** Build controller interface for React integration */
     buildController?: BuildController;
+    /** Inventory controller interface for React integration */
+    inventoryController?: InventoryController;
 }
 
-export default function App({ buildController }: AppProps = {}) {
+export default function App({ buildController, inventoryController }: AppProps = {}) {
     const [settings, setSettings] = React.useState(Packets.settings.get()!);
     const [selectedHotkey, setSelectedHotkey] = React.useState<string | undefined>();
     const [inventoryVisible, setInventoryVisible] = React.useState(false);
@@ -67,6 +70,7 @@ export default function App({ buildController }: AppProps = {}) {
                         visible={inventoryVisible}
                         onVisibilityChange={setInventoryVisible}
                         buildController={buildController}
+                        inventoryController={inventoryController}
                     />
                 </TooltipProvider>
             </HotkeyProvider>
