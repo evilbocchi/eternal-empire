@@ -1,7 +1,7 @@
 import React from "@rbxts/react";
-import { RobotoSlabBold, RobotoSlabHeavy, RobotoSlabMedium } from "shared/ui/GameFonts";
 import { getMaxXp } from "shared/constants";
-import { useQuestData, useQuestHelpers } from "./useQuestData";
+import { RobotoSlabBold, RobotoSlabHeavy, RobotoSlabMedium } from "shared/ui/GameFonts";
+import { useQuestData } from "./useQuestData";
 
 export default function TrackedQuestWindow() {
     const {
@@ -11,8 +11,6 @@ export default function TrackedQuestWindow() {
         xp,
         trackedQuest
     } = useQuestData();
-
-    const { getRewardLabel } = useQuestHelpers();
 
     const [showProgressBar, setShowProgressBar] = React.useState(false);
     const [showCompletion, setShowCompletion] = React.useState(false);
@@ -26,14 +24,14 @@ export default function TrackedQuestWindow() {
     // Format description for current stage
     const getFormattedDescription = React.useCallback(() => {
         if (!currentQuest || !trackedQuest) return "";
-        
+
         if (currentStage < 0) {
             return "Quest complete.";
         }
-        
+
         const stage = currentQuest.stages[currentStage];
         let desc = stage?.description || "<no description provided>";
-        
+
         // Note: In original implementation, this would replace %%coords%% with actual coordinates
         // For now, we'll keep it simple
         return desc;
@@ -48,12 +46,12 @@ export default function TrackedQuestWindow() {
     const questColor = currentQuest ? new Color3(currentQuest.colorR, currentQuest.colorG, currentQuest.colorB) : Color3.fromRGB(255, 255, 255);
 
     if (!hasQuest) {
-        return null; // Don't render if no quest is tracked
+        return undefined; // Don't render if no quest is tracked
     }
 
     return (
         <frame
-            Key="TrackedQuestWindow"
+            key="TrackedQuestWindow"
             AnchorPoint={new Vector2(0.5, 0)}
             AutomaticSize={Enum.AutomaticSize.Y}
             BackgroundTransparency={1}
@@ -67,7 +65,7 @@ export default function TrackedQuestWindow() {
 
             {/* Quest Title */}
             <textlabel
-                Key="TitleLabel"
+                key="TitleLabel"
                 AutomaticSize={Enum.AutomaticSize.Y}
                 BackgroundTransparency={1}
                 FontFace={RobotoSlabBold}
@@ -82,7 +80,7 @@ export default function TrackedQuestWindow() {
 
             {/* Quest Description */}
             <textlabel
-                Key="DescriptionLabel"
+                key="DescriptionLabel"
                 AutomaticSize={Enum.AutomaticSize.Y}
                 BackgroundTransparency={1}
                 FontFace={RobotoSlabBold}
@@ -99,14 +97,14 @@ export default function TrackedQuestWindow() {
 
             {/* Background Color Indicator */}
             <frame
-                Key="Background"
+                key="Background"
                 BackgroundTransparency={1}
                 LayoutOrder={-1}
                 Size={new UDim2(0, 0, 0, 0)}
                 Visible={false}
             >
                 <frame
-                    Key="Frame"
+                    key="Frame"
                     BackgroundColor3={questColor}
                     Size={new UDim2(1, 0, 1, 0)}
                 />
@@ -115,7 +113,7 @@ export default function TrackedQuestWindow() {
             {/* Quest Completion Notification */}
             {showCompletion && (
                 <frame
-                    Key="Completion"
+                    key="Completion"
                     BackgroundTransparency={1}
                     LayoutOrder={-5}
                     Size={new UDim2(0.5, 0, 0, 85)}
@@ -154,7 +152,7 @@ export default function TrackedQuestWindow() {
                     />
 
                     <textlabel
-                        Key="RewardLabel"
+                        key="RewardLabel"
                         AnchorPoint={new Vector2(0.5, 0)}
                         BackgroundTransparency={1}
                         FontFace={RobotoSlabMedium}
@@ -176,7 +174,7 @@ export default function TrackedQuestWindow() {
             {/* XP Progress Bar */}
             {showProgressBar && (
                 <canvasgroup
-                    Key="ProgressBar"
+                    key="ProgressBar"
                     AnchorPoint={new Vector2(0.5, 0)}
                     BackgroundTransparency={1}
                     LayoutOrder={6}
@@ -185,7 +183,7 @@ export default function TrackedQuestWindow() {
                     ZIndex={5}
                 >
                     <frame
-                        Key="Bar"
+                        key="Bar"
                         AnchorPoint={new Vector2(0.5, 0.5)}
                         BackgroundColor3={Color3.fromRGB(39, 39, 39)}
                         BorderSizePixel={0}
@@ -193,7 +191,7 @@ export default function TrackedQuestWindow() {
                         Size={new UDim2(0.9, 0, 1, -15)}
                     >
                         <textlabel
-                            Key="BarLabel"
+                            key="BarLabel"
                             AnchorPoint={new Vector2(0.5, 0.5)}
                             BackgroundTransparency={1}
                             FontFace={RobotoSlabBold}
@@ -208,7 +206,7 @@ export default function TrackedQuestWindow() {
                         </textlabel>
 
                         <frame
-                            Key="Fill"
+                            key="Fill"
                             BackgroundColor3={Color3.fromRGB(255, 170, 255)}
                             BorderSizePixel={0}
                             Size={new UDim2(xpProgress, 0, 1, 0)}

@@ -1,6 +1,6 @@
 import React from "@rbxts/react";
 import ReactRoblox from "@rbxts/react-roblox";
-import QuestWindow from "./QuestWindow";
+import QuestWindow from "shared/ui/components/quest/QuestWindow";
 
 interface QuestManagerProps {
     /** The container frame where the quest window should be mounted */
@@ -13,7 +13,7 @@ interface QuestManagerProps {
  */
 export default class QuestManager {
     private root?: ReactRoblox.Root;
-    
+
     constructor(private container: Frame) {
         this.mount();
     }
@@ -22,14 +22,14 @@ export default class QuestManager {
         if (this.root) {
             this.unmount();
         }
-        
+
         // Clear existing content
         this.container.GetChildren().forEach(child => {
             if (child.IsA("GuiObject")) {
                 child.Destroy();
             }
         });
-        
+
         // Create React root and render quest window
         this.root = ReactRoblox.createRoot(this.container);
         this.root.render(<QuestWindow />);
@@ -41,7 +41,7 @@ export default class QuestManager {
             this.root = undefined;
         }
     }
-    
+
     destroy() {
         this.unmount();
     }

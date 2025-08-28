@@ -5,22 +5,18 @@ import Signal from "@antivivi/lemon-signal";
  * This maintains the single source of truth for quest tracking state.
  */
 class QuestStateManager {
-    private _trackedQuest: string | undefined = undefined;
+    private trackedQuest: string | undefined = undefined;
     public readonly trackedQuestChanged = new Signal<(quest: string | undefined) => void>();
 
-    get trackedQuest(): string | undefined {
-        return this._trackedQuest;
-    }
-
-    set trackedQuest(questId: string | undefined) {
-        if (this._trackedQuest !== questId) {
-            this._trackedQuest = questId;
-            this.trackedQuestChanged.fire(questId);
-        }
+    getTrackedQuest(): string | undefined {
+        return this.trackedQuest;
     }
 
     setTrackedQuest(questId: string | undefined) {
-        this.trackedQuest = questId;
+        if (this.trackedQuest !== questId) {
+            this.trackedQuest = questId;
+            this.trackedQuestChanged.fire(questId);
+        }
     }
 }
 

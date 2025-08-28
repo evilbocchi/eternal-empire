@@ -1,6 +1,6 @@
 import React from "@rbxts/react";
+import { getLengthColor, getLengthName, getRewardLabel } from "shared/ui/components/quest/useQuestData";
 import { RobotoSlabBold, RobotoSlabExtraBold, RobotoSlabHeavy, RobotoSlabMedium } from "shared/ui/GameFonts";
-import { useQuestHelpers } from "./useQuestData";
 
 interface QuestOptionProps {
     questId: string;
@@ -23,7 +23,6 @@ export default function QuestOption({
     onToggleExpanded,
     onTrack
 }: QuestOptionProps) {
-    const { getLengthName, getLengthColor, getRewardLabel } = useQuestHelpers();
 
     const color = new Color3(quest.colorR, quest.colorG, quest.colorB);
     const belowRequirement = level < quest.level;
@@ -52,7 +51,7 @@ export default function QuestOption({
 
     return (
         <frame
-            Key={questId}
+            key={questId}
             AutomaticSize={Enum.AutomaticSize.Y}
             BackgroundColor3={color}
             BorderSizePixel={0}
@@ -67,7 +66,7 @@ export default function QuestOption({
 
             {/* Quest Header (Dropdown Button) */}
             <textbutton
-                Key="Dropdown"
+                key="Dropdown"
                 BackgroundTransparency={1}
                 LayoutOrder={-1}
                 Size={new UDim2(1, 0, 0, 30)}
@@ -90,7 +89,7 @@ export default function QuestOption({
 
                 {/* Level Label */}
                 <textlabel
-                    Key="LevelLabel"
+                    key="LevelLabel"
                     AnchorPoint={new Vector2(0, 0.5)}
                     BackgroundTransparency={1}
                     FontFace={RobotoSlabExtraBold}
@@ -106,7 +105,7 @@ export default function QuestOption({
 
                 {/* Quest Name */}
                 <textlabel
-                    Key="NameLabel"
+                    key="NameLabel"
                     AnchorPoint={new Vector2(0.5, 0.5)}
                     BackgroundTransparency={1}
                     FontFace={RobotoSlabHeavy}
@@ -132,7 +131,7 @@ export default function QuestOption({
             {/* Quest Content (Expandable) */}
             {isExpanded && (
                 <frame
-                    Key="Content"
+                    key="Content"
                     AutomaticSize={Enum.AutomaticSize.Y}
                     BackgroundColor3={Color3.fromRGB(0, 0, 0)}
                     BackgroundTransparency={0.95}
@@ -147,7 +146,7 @@ export default function QuestOption({
 
                     {/* Current Stage Description */}
                     <textlabel
-                        Key="CurrentStepLabel"
+                        key="CurrentStepLabel"
                         AutomaticSize={Enum.AutomaticSize.Y}
                         BackgroundTransparency={1}
                         FontFace={RobotoSlabMedium}
@@ -164,7 +163,7 @@ export default function QuestOption({
 
                     {/* Length Label */}
                     <textlabel
-                        Key="LengthLabel"
+                        key="LengthLabel"
                         AutomaticSize={Enum.AutomaticSize.Y}
                         BackgroundTransparency={1}
                         FontFace={RobotoSlabExtraBold}
@@ -190,7 +189,7 @@ export default function QuestOption({
 
                     {/* Reward Label */}
                     <textlabel
-                        Key="RewardLabel"
+                        key="RewardLabel"
                         AutomaticSize={Enum.AutomaticSize.Y}
                         BackgroundTransparency={1}
                         FontFace={RobotoSlabExtraBold}
@@ -215,7 +214,7 @@ export default function QuestOption({
                     {/* Track Button */}
                     {isAvailable && (
                         <textbutton
-                            Key="Track"
+                            key="Track"
                             AutomaticSize={Enum.AutomaticSize.Y}
                             BackgroundColor3={trackButtonColor}
                             BorderSizePixel={0}
@@ -240,7 +239,7 @@ export default function QuestOption({
                             />
 
                             <textlabel
-                                Key="Label"
+                                key="Label"
                                 AutomaticSize={Enum.AutomaticSize.Y}
                                 BackgroundTransparency={1}
                                 FontFace={RobotoSlabBold}

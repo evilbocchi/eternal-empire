@@ -11,22 +11,18 @@
  *
  * @since 1.0.0
  */
-import Signal from "@antivivi/lemon-signal";
 import { combineHumanReadable } from "@antivivi/vrldk";
 import { Controller, OnInit, OnPhysics } from "@flamework/core";
 import { Debris, ReplicatedStorage, TweenService, Workspace } from "@rbxts/services";
-import AdaptiveTabController, { ADAPTIVE_TAB_MAIN_WINDOW, SIDEBAR_BUTTONS } from "client/controllers/core/AdaptiveTabController";
-import HotkeysController from "client/controllers/core/HotkeysController";
+import { ADAPTIVE_TAB_MAIN_WINDOW, SIDEBAR_BUTTONS } from "client/controllers/core/AdaptiveTabController";
 import { OnCharacterAdded } from "client/controllers/core/ModdingController";
-import UIController, { INTERFACE } from "client/controllers/core/UIController";
+import { INTERFACE } from "client/controllers/core/UIController";
 import EffectController from "client/controllers/world/EffectController";
-import ItemSlot from "client/ItemSlot";
 import { ASSETS, playSound } from "shared/asset/GameAssets";
-import { getMaxXp } from "shared/constants";
 import Items from "shared/items/Items";
 import Packets from "shared/Packets";
-import { questState } from "shared/quest/QuestState";
 import QuestManager from "shared/ui/components/quest/QuestManager";
+import { questState } from "shared/ui/components/quest/QuestState";
 
 declare global {
     type QuestOption = Frame & {
@@ -134,24 +130,10 @@ export default class QuestsController implements OnInit, OnPhysics, OnCharacterA
     beam = ASSETS.ArrowBeam.Clone();
     beamContainer = new Instance("Part");
     availableQuests = new Set<string>();
-    
+
     private questManager?: QuestManager;
 
-    // Expose shared quest state for backward compatibility
-    get trackedQuest(): string | undefined {
-        return questState.trackedQuest;
-    }
-
-    set trackedQuest(questId: string | undefined) {
-        questState.trackedQuest = questId;
-    }
-
-    get trackedQuestChanged() {
-        return questState.trackedQuestChanged;
-    }
-
-    constructor(private uiController: UIController, private adaptiveTabController: AdaptiveTabController, private hotkeysController: HotkeysController,
-        private effectController: EffectController) {
+    constructor(private effectController: EffectController) {
 
     }
 
@@ -239,11 +221,11 @@ export default class QuestsController implements OnInit, OnPhysics, OnCharacterA
         if (index === undefined) {
             index = Packets.stagePerQuest.get()?.get(questId) ?? 0;
         }
-        
+
         // Update beam color for quest tracking
         const color = new Color3(quest.colorR, quest.colorG, quest.colorB);
         this.beam.Color = new ColorSequence(color);
-        
+
         // Play sound for quest progression
         if (this.oldIndex !== index && (questId !== "NewBeginnings" || index !== 0)) {
             playSound("QuestNextStage.mp3");
@@ -312,7 +294,7 @@ export default class QuestsController implements OnInit, OnPhysics, OnCharacterA
     onInit() {
         // Initialize React Quest Manager for the main quest window
         this.questManager = new QuestManager(QUESTS_WINDOW);
-        
+
         this.beamContainer.CanCollide = false;
         this.beamContainer.Anchored = true;
         this.beamContainer.Transparency = 1;
@@ -346,12 +328,13 @@ export default class QuestsController implements OnInit, OnPhysics, OnCharacterA
             this.refreshNotificationWindow();
         });
 
-        this.trackedQuestChanged.connect((questId) => this.refreshTrackedQuestWindow(questId));
+        //this.trackedQuestChanged.connect((questId) => this.refreshTrackedQuestWindow(questId));
 
         Packets.stagePerQuest.observe((quests) => {
-            const index = this.trackedQuest === undefined ? 0 : (quests.get(this.trackedQuest) ?? 0);
-            this.indexer = this.trackedQuest === undefined ? undefined : this.trackedQuest + index;
-            this.refreshTrackedQuestWindow(this.trackedQuest, index);
+            const trackedQuest = questState.getTrackedQuest();
+            const index = trackedQuest === undefined ? 0 : (quests.get(trackedQuest) ?? 0);
+            this.indexer = trackedQuest === undefined ? undefined : trackedQuest + index;
+            this.refreshTrackedQuestWindow(trackedQuest, index);
             this.refreshNotificationWindow();
         });
         // TODO: Implement reward notifications in React components
@@ -359,7 +342,7 @@ export default class QuestsController implements OnInit, OnPhysics, OnCharacterA
             playSound("UnlockItem.mp3");
             // XP rewards now handled by React TrackedQuestWindow component
         });
-        
+
         Packets.showItemReward.fromServer((items) => {
             playSound("UnlockItem.mp3");
             // Item rewards now handled by React TrackedQuestWindow component

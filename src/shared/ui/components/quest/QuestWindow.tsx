@@ -1,8 +1,9 @@
 import React from "@rbxts/react";
-import { RobotoSlabBold } from "shared/ui/GameFonts";
 import { getMaxXp } from "shared/constants";
-import QuestOption from "./QuestOption";
-import { useQuestData } from "./useQuestData";
+import QuestOption from "shared/ui/components/quest/QuestOption";
+import { useQuestData } from "shared/ui/components/quest/useQuestData";
+import { RobotoSlabBold } from "shared/ui/GameFonts";
+
 
 export default function QuestWindow() {
     const {
@@ -19,7 +20,7 @@ export default function QuestWindow() {
 
     const handleToggleQuestContent = React.useCallback((questId: string) => {
         setExpandedQuests(prev => {
-            const newSet = new Set(prev);
+            const newSet = table.clone(prev);
             if (newSet.has(questId)) {
                 newSet.delete(questId);
             } else {
@@ -44,7 +45,13 @@ export default function QuestWindow() {
 
     // Sort quests by their natural order
     const sortedQuests = React.useMemo(() => {
-        const quests = Array.from(questInfo.entries());
+        const quests = new Array<[string, QuestInfo]>();
+        for (const questId of availableQuests) {
+            const quest = questInfo.get(questId);
+            if (quest) {
+                quests.push([questId, quest]);
+            }
+        }
         return quests
             .filter(([id]) => {
                 // Filter out very high level quests (likely admin/debug quests)
@@ -61,25 +68,26 @@ export default function QuestWindow() {
 
                 // Completed quests go to bottom
                 if (aCompleted !== bCompleted) {
-                    return aCompleted ? 1 : -1;
+                    return aCompleted;
                 }
 
                 // Below requirement quests go to middle
                 if (aBelowReq !== bBelowReq) {
-                    return aBelowReq ? 1 : -1;
+                    return aBelowReq;
                 }
 
                 // Otherwise sort by level then order
                 const levelDiff = aQuest.level - bQuest.level;
-                if (levelDiff !== 0) return levelDiff;
-                
-                return aQuest.order - bQuest.order;
+                if (levelDiff !== 0)
+                    return levelDiff < 0;
+
+                return aQuest.order < bQuest.order;
             });
     }, [questInfo, stagePerQuest, level]);
 
     return (
         <frame
-            Key="Quests"
+            key="Quests"
             BackgroundTransparency={1}
             Size={new UDim2(1, 0, 1, 0)}
         >
@@ -91,21 +99,21 @@ export default function QuestWindow() {
 
             {/* Level and XP Progress */}
             <frame
-                Key="Level"
+                key="Level"
                 BackgroundTransparency={1}
                 LayoutOrder={-1}
                 Size={new UDim2(1, 0, 0, 60)}
             >
                 {/* Current Level Display */}
                 <frame
-                    Key="Current"
+                    key="Current"
                     AnchorPoint={new Vector2(0, 0.5)}
                     BackgroundTransparency={1}
                     Position={new UDim2(0, 10, 0.5, 0)}
                     Size={new UDim2(0.3, 0, 0.8, 0)}
                 >
                     <textlabel
-                        Key="LevelLabel"
+                        key="LevelLabel"
                         AnchorPoint={new Vector2(0.5, 0.5)}
                         BackgroundTransparency={1}
                         FontFace={RobotoSlabBold}
@@ -121,7 +129,7 @@ export default function QuestWindow() {
 
                 {/* XP Progress Bar */}
                 <frame
-                    Key="ProgressBar"
+                    key="ProgressBar"
                     AnchorPoint={new Vector2(1, 0.5)}
                     BackgroundColor3={Color3.fromRGB(39, 39, 39)}
                     BorderSizePixel={0}
@@ -129,7 +137,7 @@ export default function QuestWindow() {
                     Size={new UDim2(0.65, 0, 0.6, 0)}
                 >
                     <textlabel
-                        Key="BarLabel"
+                        key="BarLabel"
                         AnchorPoint={new Vector2(0.5, 0.5)}
                         BackgroundTransparency={1}
                         FontFace={RobotoSlabBold}
@@ -144,7 +152,7 @@ export default function QuestWindow() {
                     </textlabel>
 
                     <frame
-                        Key="Fill"
+                        key="Fill"
                         BackgroundColor3={Color3.fromRGB(255, 170, 255)}
                         BorderSizePixel={0}
                         Size={new UDim2(xpProgress, 0, 1, 0)}
@@ -167,7 +175,7 @@ export default function QuestWindow() {
 
             {/* Quest List */}
             <scrollingframe
-                Key="QuestList"
+                key="QuestList"
                 AutomaticCanvasSize={Enum.AutomaticSize.Y}
                 BackgroundTransparency={1}
                 BorderSizePixel={0}
