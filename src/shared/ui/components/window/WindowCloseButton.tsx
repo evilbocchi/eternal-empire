@@ -1,12 +1,28 @@
-import React from "@rbxts/react";
+import React, { useRef } from "@rbxts/react";
+import { TweenService } from "@rbxts/services";
 import { getAsset } from "shared/asset/AssetMap";
 import { playSound } from "shared/asset/GameAssets";
+import { useHover } from "shared/ui/hooks/useHover";
 
 interface WindowCloseButtonProps {
     onClick: () => void;
 }
 
 export default function WindowCloseButton({ onClick }: WindowCloseButtonProps) {
+    const closeButtonRef = useRef<TextButton>();
+    const defaultColor = Color3.fromRGB(255, 76, 76);
+
+    const { hovering, hoverProps } = useHover(
+        () => TweenService.Create(closeButtonRef.current!, new TweenInfo(0.1), {
+            BackgroundColor3: defaultColor.Lerp(new Color3(1, 1, 1), 0.5),
+            Rotation: 5
+        }).Play(),
+        () => TweenService.Create(closeButtonRef.current!, new TweenInfo(0.1), {
+            BackgroundColor3: defaultColor,
+            Rotation: 0
+        }).Play()
+    );
+
     const handleClick = () => {
         playSound("MenuClose.mp3");
         onClick();
@@ -14,18 +30,15 @@ export default function WindowCloseButton({ onClick }: WindowCloseButtonProps) {
 
     return (<textbutton
         key="CloseButton"
+        ref={closeButtonRef}
         AnchorPoint={new Vector2(0.5, 0.5)}
-        BackgroundColor3={Color3.fromRGB(255, 76, 76)}
+        AutoButtonColor={false}
+        BackgroundColor3={defaultColor}
         BorderColor3={Color3.fromRGB(45, 45, 45)}
         BorderSizePixel={3}
         Event={{
             Activated: handleClick,
-            MouseEnter: () => {
-                
-            },
-            MouseLeave: () => {
-                
-            }
+            ...hoverProps
         }}
         Position={new UDim2(1, -10, 0, 10)}
         Size={new UDim2(0, 30, 0, 30)}

@@ -14,15 +14,17 @@
 import { combineHumanReadable } from "@antivivi/vrldk";
 import { Controller, OnInit, OnPhysics } from "@flamework/core";
 import { Debris, ReplicatedStorage, TweenService, Workspace } from "@rbxts/services";
-import { ADAPTIVE_TAB_MAIN_WINDOW, SIDEBAR_BUTTONS } from "client/controllers/core/AdaptiveTabController";
+import { SIDEBAR_BUTTONS } from "client/controllers/core/AdaptiveTabController";
 import { OnCharacterAdded } from "client/controllers/core/ModdingController";
 import { INTERFACE } from "client/controllers/core/UIController";
 import EffectController from "client/controllers/world/EffectController";
 import { ASSETS, playSound } from "shared/asset/GameAssets";
 import Items from "shared/items/Items";
 import Packets from "shared/Packets";
-import QuestManager from "shared/ui/components/quest/QuestManager";
 import { questState } from "shared/ui/components/quest/QuestState";
+import React from "@rbxts/react";
+import ReactRoblox from "@rbxts/react-roblox";
+import StandaloneQuestWindow from "shared/ui/components/quest/StandaloneQuestWindow";
 
 declare global {
     type QuestOption = Frame & {
@@ -102,22 +104,11 @@ export const TRACKED_QUEST_WINDOW = INTERFACE.WaitForChild("TrackedQuestWindow")
     };
 };
 
-export const QUESTS_WINDOW = ADAPTIVE_TAB_MAIN_WINDOW.WaitForChild("Quests") as Frame & {
-    Level: Frame & {
-        Current: Frame & {
-            LevelLabel: TextLabel;
-        },
-        ProgressBar: Bar;
-    },
-    QuestList: Frame & {
-
-    };
-};
-
 /**
- * Controller responsible for managing quest UI, tracking, notifications, and quest-related player feedback.
+ * Controller responsible for managing quest tracking, notifications, standalone quest window, and quest-related player feedback.
  *
  * Handles quest progress, completion, XP/item rewards, and integrates with other controllers for UI and effects.
+ * Now includes management of the standalone quest window that replaces the adaptive tab implementation.
  */
 @Controller()
 export default class QuestsController implements OnInit, OnPhysics, OnCharacterAdded {
@@ -131,10 +122,71 @@ export default class QuestsController implements OnInit, OnPhysics, OnCharacterA
     beamContainer = new Instance("Part");
     availableQuests = new Set<string>();
 
-    private questManager?: QuestManager;
+    // Standalone quest window management
+    private questWindowRoot?: ReactRoblox.Root;
+    private questWindowContainer: Frame;
+    private isQuestWindowVisible = false;
 
     constructor(private effectController: EffectController) {
+        // Create the container for the standalone quest window
+        this.questWindowContainer = new Instance("Frame");
+        this.questWindowContainer.Name = "StandaloneQuestWindowContainer";
+        this.questWindowContainer.BackgroundTransparency = 1;
+        this.questWindowContainer.Size = new UDim2(1, 0, 1, 0);
+        this.questWindowContainer.Position = new UDim2(0, 0, 0, 0);
+        this.questWindowContainer.Parent = INTERFACE;
+    }
 
+    /**
+     * Shows the standalone quest window.
+     */
+    showQuestWindow() {
+        if (this.isQuestWindowVisible) return;
+        
+        this.isQuestWindowVisible = true;
+        this.updateQuestWindow();
+        playSound("MenuOpen.mp3");
+    }
+
+    /**
+     * Hides the standalone quest window.
+     */
+    hideQuestWindow() {
+        if (!this.isQuestWindowVisible) return;
+        
+        this.isQuestWindowVisible = false;
+        this.updateQuestWindow();
+        playSound("MenuClose.mp3");
+    }
+
+    /**
+     * Toggles the standalone quest window visibility.
+     * @returns True if the window was shown, false if hidden.
+     */
+    toggleQuestWindow(): boolean {
+        if (this.isQuestWindowVisible) {
+            this.hideQuestWindow();
+            return false;
+        } else {
+            this.showQuestWindow();
+            return true;
+        }
+    }
+
+    /**
+     * Updates the standalone quest window React component.
+     */
+    private updateQuestWindow() {
+        if (!this.questWindowRoot) {
+            this.questWindowRoot = ReactRoblox.createRoot(this.questWindowContainer);
+        }
+
+        this.questWindowRoot.render(
+            React.createElement(StandaloneQuestWindow, {
+                visible: this.isQuestWindowVisible,
+                onClose: () => this.hideQuestWindow()
+            })
+        );
     }
 
     /**
@@ -292,8 +344,8 @@ export default class QuestsController implements OnInit, OnPhysics, OnCharacterA
     }
 
     onInit() {
-        // Initialize React Quest Manager for the main quest window
-        this.questManager = new QuestManager(QUESTS_WINDOW);
+        // Initialize the standalone quest window
+        this.updateQuestWindow();
 
         this.beamContainer.CanCollide = false;
         this.beamContainer.Anchored = true;

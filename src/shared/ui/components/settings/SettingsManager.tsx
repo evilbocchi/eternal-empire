@@ -12,6 +12,7 @@ interface SettingsManagerProps extends SettingsWindowProps {
 }
 
 export function SettingsButton({ tooltipProps }: { tooltipProps: ReturnType<typeof useHotkeyWithTooltip>; }) {
+
     return (
         <IconButton
             image={getAsset("assets/Settings.png")}

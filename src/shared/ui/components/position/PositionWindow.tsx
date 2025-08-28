@@ -36,10 +36,6 @@ export default function PositionWindow({
             key="PositionWindow"
             AnchorPoint={anchorPoint}
             BackgroundTransparency={1}
-            Event={{
-                MouseEnter: tooltipProps.onMouseEnter,
-                MouseLeave: tooltipProps.onMouseLeave,
-            }}
             Position={windowPosition}
             Size={size}
             Visible={visible}
@@ -69,6 +65,7 @@ export default function PositionWindow({
                 ScaleType={Enum.ScaleType.Tile}
                 Size={new UDim2(0, 0, 0, 16)}
                 TileSize={new UDim2(0, 32, 0, 32)}
+                Event={{ ...tooltipProps.hoverProps }}
             >
                 {/* Position Text Label */}
                 <textlabel

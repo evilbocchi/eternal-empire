@@ -1,6 +1,5 @@
 import React, { StrictMode } from "@rbxts/react";
 import type BuildController from "client/controllers/gameplay/BuildController";
-import Packets from "shared/Packets";
 import BuildManager from "shared/ui/components/build/BuildManager";
 import HotkeyProvider from "shared/ui/components/hotkeys/HotkeyProvider";
 import PositionDisplay from "shared/ui/components/position/PositionDisplay";
@@ -15,7 +14,6 @@ interface AppProps {
 }
 
 export default function App({ buildController }: AppProps = {}) {
-
     return (
         <StrictMode>
             <HotkeyProvider defaultEnabled={true}>

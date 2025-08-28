@@ -8,25 +8,24 @@
 
 import { buildRichText } from "@antivivi/vrldk";
 import React, { useEffect, useRef } from "@rbxts/react";
-import { TweenService } from "@rbxts/services";
+import { Players, RunService, TweenService, Workspace } from "@rbxts/services";
 import Packets from "shared/Packets";
 import Item from "shared/item/Item";
 import ItemMetadata from "shared/item/ItemMetadata";
 import Unique from "shared/item/traits/Unique";
+import { RobotoSlab } from "shared/ui/GameFonts";
 import { TooltipData } from "shared/ui/components/tooltip/TooltipProvider";
 
 interface TooltipWindowProps {
     data?: TooltipData;
     visible: boolean;
-    position: Vector2;
     metadata: Map<Item, ItemMetadata>;
 }
 
 /**
  * Tooltip window component that displays formatted tooltip content
- * Matches the exact structure from the exported TooltipWindow
  */
-export default function TooltipWindow({ data, visible, position, metadata }: TooltipWindowProps) {
+export default function TooltipWindow({ data, visible, metadata }: TooltipWindowProps) {
     const frameRef = useRef<Frame>();
     const messageRef = useRef<TextLabel>();
     const strokeRef = useRef<UIStroke>();
@@ -42,10 +41,16 @@ export default function TooltipWindow({ data, visible, position, metadata }: Too
             const tweenInfo = new TweenInfo(0.2);
             TweenService.Create(frameRef.current, tweenInfo, { BackgroundTransparency: 0.2 }).Play();
             TweenService.Create(strokeRef.current, tweenInfo, { Transparency: 0.2 }).Play();
-        } else {
-            const tweenInfo = new TweenInfo(0.1, Enum.EasingStyle.Linear, Enum.EasingDirection.In);
+            if (messageRef.current)
+                TweenService.Create(messageRef.current, tweenInfo, { TextTransparency: 0, TextStrokeTransparency: 0 }).Play();
+        }
+        else {
+            const tweenInfo = new TweenInfo(0.2, Enum.EasingStyle.Linear, Enum.EasingDirection.In);
+
             const tween = TweenService.Create(frameRef.current, tweenInfo, { BackgroundTransparency: 1 });
             TweenService.Create(strokeRef.current, tweenInfo, { Transparency: 1 }).Play();
+            if (messageRef.current)
+                TweenService.Create(messageRef.current, tweenInfo, { TextTransparency: 1, TextStrokeTransparency: 1 }).Play();
 
             tween.Play();
             tween.Completed.Connect(() => {
@@ -58,17 +63,28 @@ export default function TooltipWindow({ data, visible, position, metadata }: Too
 
     // Update position
     useEffect(() => {
-        if (!frameRef.current) return;
+        const connection = RunService.Heartbeat.Connect(() => {
+            if (!frameRef.current) return;
 
-        const canvasSize = game.Workspace.CurrentCamera?.ViewportSize;
-        if (canvasSize !== undefined) {
-            const anchorX = canvasSize.X - position.X < 200 ? 1 : 0;
-            const anchorY = canvasSize.Y - position.Y < 200 ? 1 : 0;
+            const canvasSize = Workspace.CurrentCamera?.ViewportSize;
+            const mouse = Players.LocalPlayer.GetMouse();
 
-            frameRef.current.AnchorPoint = new Vector2(anchorX, anchorY);
-            frameRef.current.Position = UDim2.fromOffset(position.X, position.Y);
-        }
-    }, [position]);
+            if (canvasSize !== undefined) {
+                const mouseX = mouse.X;
+                const mouseY = mouse.Y;
+                const anchorX = canvasSize.X - mouseX < 200 ? 1 : 0;
+                const anchorY = canvasSize.Y - mouseY < 200 ? 1 : 0;
+
+                // Smart positioning to avoid going off-screen
+                const x = canvasSize.X - mouseX < 200 ? mouseX - 5 : mouseX + 5;
+                const y = canvasSize.Y - mouseY < 200 ? mouseY - 10 : mouseY + 36;
+
+                frameRef.current.AnchorPoint = new Vector2(anchorX, anchorY);
+                frameRef.current.Position = UDim2.fromOffset(x, y);
+            }
+        });
+        return () => connection.Disconnect();
+    }, []);
 
     const renderItemSlot = () => {
         if (!data?.item) return undefined;
@@ -262,13 +278,13 @@ export default function TooltipWindow({ data, visible, position, metadata }: Too
                     ref={messageRef}
                     AutomaticSize={Enum.AutomaticSize.XY}
                     BackgroundTransparency={1}
-                    Font={Enum.Font.Unknown}
-                    FontFace={new Font("rbxassetid://12187368625", Enum.FontWeight.Bold, Enum.FontStyle.Normal)}
+                    FontFace={RobotoSlab}
                     RichText={true}
                     Text={data.message || ""}
                     TextColor3={Color3.fromRGB(255, 255, 255)}
                     TextSize={19}
-                    TextStrokeTransparency={0}
+                    TextStrokeTransparency={1}
+                    TextTransparency={1}
                     TextWrapped={true}
                     TextXAlignment={Enum.TextXAlignment.Left}
                 >

@@ -99,7 +99,7 @@ export function useToggleHotkey(
         label?: string;
     }
 ) {
-    const tooltipProps = useHotkeyWithTooltip(
+    return useHotkeyWithTooltip(
         keyCode,
         (usedHotkey) => {
             onToggle();
@@ -111,6 +111,4 @@ export function useToggleHotkey(
             label: options?.label,
         }
     );
-
-    return tooltipProps;
 }

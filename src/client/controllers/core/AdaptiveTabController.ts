@@ -17,6 +17,7 @@ import { Controller, OnInit } from "@flamework/core";
 import { Lighting, TweenService, Workspace } from "@rbxts/services";
 import HotkeysController from "client/controllers/core/HotkeysController";
 import { INTERFACE } from "client/controllers/core/UIController";
+import QuestsController from "client/controllers/interface/QuestsController";
 import { playSound } from "shared/asset/GameAssets";
 
 declare global {
@@ -75,7 +76,10 @@ export default class AdaptiveTabController implements OnInit {
         return blur;
     })();
 
-    constructor(private hotkeysController: HotkeysController) {
+    constructor(
+        private hotkeysController: HotkeysController,
+        private questsController: QuestsController
+    ) {
     }
 
     /**
@@ -106,9 +110,16 @@ export default class AdaptiveTabController implements OnInit {
 
     /**
      * Animates and shows the adaptive tab window for a given window name.
+     * Special handling for Quests to use the standalone window.
      * @param windowName The name of the window to show.
      */
     showAdaptiveTab(windowName: string) {
+        // Special case: Redirect quest window to standalone implementation
+        if (windowName === "Quests") {
+            this.questsController.showQuestWindow();
+            return;
+        }
+
         const tweenInfo = new TweenInfo(0.3, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out);
 
         if (this.currentWindow !== undefined && this.currentWindow.Name !== windowName) {
@@ -145,10 +156,16 @@ export default class AdaptiveTabController implements OnInit {
 
     /**
      * Toggles the adaptive tab window for a given window name.
+     * Special handling for Quests to use the standalone window.
      * @param windowName The name of the window to toggle (optional).
      * @returns True if the tab was shown, false if hidden or unchanged.
      */
     toggleAdaptiveTab(windowName?: string) {
+        // Special case: Redirect quest window to standalone implementation
+        if (windowName === "Quests") {
+            return this.questsController.toggleQuestWindow();
+        }
+
         if (ADAPTIVE_TAB.Active && windowName === this.currentWindow?.Name) {
             this.hideAdaptiveTab();
             return false;
