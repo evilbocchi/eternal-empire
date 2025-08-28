@@ -1,7 +1,7 @@
 import { property, request, signal } from "@antivivi/fletchette";
 import { BaseOnoeNum } from "@antivivi/serikanum";
 import { DataType } from "@rbxts/flamework-binary-serializer";
-import type { PlayerProfileTemplate } from "server/services/data/DataService";
+import PlayerProfileTemplate from "shared/data/PlayerProfileTemplate";
 
 declare global {
     interface Reward {
