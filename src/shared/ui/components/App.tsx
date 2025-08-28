@@ -1,6 +1,6 @@
 import React, { StrictMode } from "@rbxts/react";
 import type BuildController from "client/controllers/gameplay/BuildController";
-import PlayerProfileTemplate from "shared/data/PlayerProfileTemplate";
+import Packets from "shared/Packets";
 import BuildManager from "shared/ui/components/build/BuildManager";
 import HotkeyProvider from "shared/ui/components/hotkeys/HotkeyProvider";
 import SettingsManager from "shared/ui/components/settings/SettingsManager";
@@ -13,15 +13,7 @@ interface AppProps {
 }
 
 export default function App({ buildController }: AppProps = {}) {
-    const defaultSettings = table.clone(PlayerProfileTemplate.settings);
-    defaultSettings.hotkeys = {
-        "Toggle Settings": Enum.KeyCode.P.Value,
-        "Toggle Inventory": Enum.KeyCode.B.Value,
-        "Quick Build": Enum.KeyCode.Q.Value,
-        "Toggle Music": Enum.KeyCode.M.Value
-    };
-
-    const [settings, setSettings] = React.useState(defaultSettings);
+    const [settings, setSettings] = React.useState(Packets.settings.get()!);
 
     const [selectedHotkey, setSelectedHotkey] = React.useState<string | undefined>();
 

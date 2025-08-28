@@ -1,6 +1,7 @@
 import { property, request, signal } from "@antivivi/fletchette";
 import { BaseOnoeNum } from "@antivivi/serikanum";
 import { DataType } from "@rbxts/flamework-binary-serializer";
+import EmpireProfileTemplate from "shared/data/EmpireProfileTemplate";
 import PlayerProfileTemplate from "shared/data/PlayerProfileTemplate";
 
 declare global {
@@ -84,13 +85,13 @@ namespace Packets {
      * The inventory of the empire, containing owned items and their quantities.
      * Some items may not be present in the inventory if they are not owned.
      */
-    export const inventory = property<DataType.Packed<Inventory>>();
-    export const bought = property<DataType.Packed<Inventory>>();
-    export const placedItems = property<Map<string, DataType.Packed<PlacedItem>>>();
+    export const inventory = property<DataType.Packed<Inventory>>(EmpireProfileTemplate.items.inventory);
+    export const bought = property<DataType.Packed<Inventory>>(EmpireProfileTemplate.items.bought);
+    export const placedItems = property<Map<string, DataType.Packed<PlacedItem>>>(EmpireProfileTemplate.items.worldPlaced);
     export const buyItem = request<(itemId: string) => boolean>();
     export const buyAllItems = request<(itemIds: string[]) => boolean>();
     export const placeItems = request<(items: PlacingInfo[]) => number>();
-    export const uniqueInstances = property<Map<string, DataType.Packed<UniqueItemInstance>>>();
+    export const uniqueInstances = property<Map<string, DataType.Packed<UniqueItemInstance>>>(EmpireProfileTemplate.items.uniqueInstances);
     
     export const unplaceItems = signal<(placementIds: string[]) => void>();
     export const boostChanged = signal<(boostPerItem: Map<string, BaseOnoeNum>) => void>(true);
@@ -105,18 +106,18 @@ namespace Packets {
     export const getWeatherState = request<() => object>();
 
     // currencies
-    export const balance = property<Map<Currency, BaseOnoeNum>>(new Map(), true);
-    export const mostBalance = property<Map<Currency, BaseOnoeNum>>(new Map(), true);
+    export const balance = property<Map<Currency, BaseOnoeNum>>(EmpireProfileTemplate.currencies, true);
+    export const mostBalance = property<Map<Currency, BaseOnoeNum>>(EmpireProfileTemplate.mostCurrencies, true);
     export const revenue = property<Map<Currency, BaseOnoeNum>>(new Map(), true);
     export const showDifference = signal<(differencePerCurrency: Map<Currency, BaseOnoeNum>) => void>();
 
     // upgrade board
-    export const upgrades = property<Map<string, DataType.i32>>(new Map());
+    export const upgrades = property<Map<string, DataType.i32>>(EmpireProfileTemplate.upgrades);
     export const buyUpgrade = request<(upgradeId: string, to: DataType.i32 | undefined) => boolean>();
 
     // resets
     export const reset = signal<(layer: ResetLayerId, amount: BaseOnoeNum) => void>();
-    export const printedSetups = property<Array<Setup>>();
+    export const printedSetups = property<Array<Setup>>(EmpireProfileTemplate.printedSetups);
     export const renameSetup = signal<(currentName: string, renameTo: string) => void>();
     export const autoloadSetup = signal<(name: string) => void>();
     export const startChallenge = signal<(challenge: string) => void>();
@@ -137,13 +138,13 @@ namespace Packets {
     export const xp = property<DataType.i32>(-1);
 
     // playtime
-    export const longestSessionTime = property<DataType.i32>(0, true);
+    export const longestSessionTime = property<DataType.i32>(EmpireProfileTemplate.longestSession, true);
     export const sessionTime = property<DataType.i32>(0, true);
-    export const empirePlaytime = property<DataType.i32>(0, true);
+    export const empirePlaytime = property<DataType.i32>(EmpireProfileTemplate.playtime, true);
     export const playerPlaytime = property<DataType.i32>(0, true);
 
     // permissions
-    export const permLevels = property<{[key in PermissionKey]?: number}>({});
+    export const permLevels = property<{[key in PermissionKey]?: number}>(EmpireProfileTemplate.permLevels);
     export const getLogs = request<() => Log[]>();
     export const systemMessageSent = signal<(channel: string, message: string, metadata: string) => void>();
     export const codeReceived = signal<(code: string) => void>();
@@ -153,7 +154,7 @@ namespace Packets {
     export const logAdded = signal<(log: Log) => void>();
 
     // settings
-    export const settings = property<DataType.Packed<typeof PlayerProfileTemplate.settings>>();
+    export const settings = property<DataType.Packed<typeof PlayerProfileTemplate.settings>>(PlayerProfileTemplate.settings);
     export const setSetting = signal<<T extends keyof Settings>(setting: T, value: Settings[T]) => void>();
     export const setHotkey = signal<(name: string, key: DataType.i32) => void>();
 
