@@ -1,23 +1,18 @@
 import React from "@rbxts/react";
 import { getAsset } from "shared/asset/AssetMap";
 import { playSound } from "shared/asset/GameAssets";
-import { useToggleHotkey } from "shared/ui/components/hotkeys/useHotkeyWithTooltip";
+import { useHotkeyWithTooltip, useToggleHotkey } from "shared/ui/components/hotkeys/useHotkeyWithTooltip";
 import IconButton from "shared/ui/components/IconButton";
 import SettingsWindow, { SettingsWindowProps } from "shared/ui/components/settings/SettingsWindow";
-import { useTooltipProps } from "shared/ui/components/tooltip/useTooltipProps";
 
 interface SettingsManagerProps extends SettingsWindowProps {
 
 }
 
-export function SettingsButton({ onClick }: { onClick: () => void; }) {
-    // Add tooltip with hotkey information
-    const tooltipProps = useTooltipProps({ message: "Settings (P)" });
-
+export function SettingsButton({ tooltipProps }: { tooltipProps: ReturnType<typeof useHotkeyWithTooltip>; }) {
     return (
         <IconButton
             image={getAsset("assets/Settings.png")}
-            onClick={onClick}
             buttonProps={{
                 AnchorPoint: new Vector2(0, 1),
                 Size: new UDim2(0, 35, 0.5, 0),
@@ -49,7 +44,7 @@ export default function SettingsManager(props: SettingsManagerProps) {
     };
 
     // Bind the P key to toggle settings
-    useToggleHotkey(
+    const tooltipProps = useToggleHotkey(
         Enum.KeyCode.P,
         isOpen,
         handleToggle,
@@ -71,6 +66,6 @@ export default function SettingsManager(props: SettingsManagerProps) {
             shouldClose={shouldClose}
             {...props}
         />
-        <SettingsButton onClick={handleToggle} />
+        <SettingsButton tooltipProps={tooltipProps} />
     </frame>);
 }

@@ -6,7 +6,7 @@
  */
 
 import { useCallback } from "@rbxts/react";
-import { useHotkey, useHotkeys } from "shared/ui/components/hotkeys/HotkeyProvider";
+import { useHotkey } from "shared/ui/components/hotkeys/HotkeyProvider";
 import { useTooltipProps } from "shared/ui/components/tooltip/useTooltipProps";
 
 /**
@@ -82,7 +82,12 @@ export function useSimpleHotkey(
 }
 
 /**
- * Hook for toggle hotkeys (like settings windows)
+ * Binds a hotkey that toggles a boolean state and provides tooltip info.
+ *
+ * @param keyCode The key code to bind the hotkey to.
+ * @param isOpen The current state of the toggle.
+ * @param onToggle The function to call when the hotkey is toggled.
+ * 
  */
 export function useToggleHotkey(
     keyCode: Enum.KeyCode,
@@ -94,21 +99,18 @@ export function useToggleHotkey(
         label?: string;
     }
 ) {
-    const { bindHotkey } = useHotkeys();
-
-    useHotkey({
+    const tooltipProps = useHotkeyWithTooltip(
         keyCode,
-        action: (usedHotkey) => {
+        (usedHotkey) => {
             onToggle();
             return true; // Always consume the hotkey
         },
-        priority: options?.priority,
-        enabled: options?.enabled,
-        label: options?.label,
-    });
+        {
+            priority: options?.priority,
+            enabled: options?.enabled,
+            label: options?.label,
+        }
+    );
 
-    return {
-        hotkeyLabel: keyCode.Name,
-        fullLabel: options?.label ? `${options.label} (${keyCode.Name})` : keyCode.Name,
-    };
+    return tooltipProps;
 }

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "@rbxts/react";
+import React, { useEffect, useRef, useState } from "@rbxts/react";
 import { TweenService } from "@rbxts/services";
 import { getAsset } from "shared/asset/AssetMap";
 import Packets from "shared/Packets";
@@ -34,7 +34,8 @@ export default function SettingsWindow({
 }: SettingsWindowProps) {
     const [isFading, setIsFading] = useState(false);
     const [isAnimating, setIsAnimating] = useState(false);
-    const [canvasGroupRef, setCanvasGroupRef] = useState<CanvasGroup | undefined>();
+    const frameContentRef = useRef<Frame>();
+    const canvasGroupRef = useRef<CanvasGroup>();
     const [previousVisible, setPreviousVisible] = useState(visible);
 
     const hotkeys = settings.hotkeys;
@@ -53,7 +54,8 @@ export default function SettingsWindow({
 
     // Handle close with fade animation
     const handleClose = () => {
-        if (!canvasGroupRef) {
+        const canvasGroup = canvasGroupRef.current;
+        if (!canvasGroup) {
             // No canvas group available, close immediately
             onClose?.();
             return;
@@ -67,7 +69,7 @@ export default function SettingsWindow({
             Enum.EasingDirection.Out
         );
 
-        const fadeTween = TweenService.Create(canvasGroupRef, fadeInfo, {
+        const fadeTween = TweenService.Create(canvasGroup, fadeInfo, {
             GroupTransparency: 1,
             Position: new UDim2(0.5, 0, 0.5, 30) // Move down by 30 pixels
         });
@@ -81,22 +83,12 @@ export default function SettingsWindow({
 
     // Reset canvas group transparency when visible changes
     useEffect(() => {
-        if (!canvasGroupRef) return;
-
         // Handle opening animation
         if (visible && !previousVisible) {
-            setIsAnimating(true);
-            canvasGroupRef.GroupTransparency = 1;
-            canvasGroupRef.Position = new UDim2(0.5, 0, 0.5, 30); // Start below
+            const frameContent = frameContentRef.current!;
+            frameContent.Position = new UDim2(0.5, 0, 0.5, 30); // Start below
 
-            const fadeInInfo = new TweenInfo(
-                0.3,
-                Enum.EasingStyle.Quad,
-                Enum.EasingDirection.Out
-            );
-
-            const fadeInTween = TweenService.Create(canvasGroupRef, fadeInInfo, {
-                GroupTransparency: 0,
+            const fadeInTween = TweenService.Create(frameContent, new TweenInfo(0.2), {
                 Position: new UDim2(0.5, 0, 0.5, 0) // Move to center
             });
 
@@ -107,8 +99,11 @@ export default function SettingsWindow({
         }
         // Handle immediate reset when becoming visible without animation state
         else if (visible && previousVisible && !isAnimating && !isFading) {
-            canvasGroupRef.GroupTransparency = 0;
-            canvasGroupRef.Position = new UDim2(0.5, 0, 0.5, 0);
+            const canvasGroup = canvasGroupRef.current;
+            if (canvasGroup) {
+                canvasGroup.GroupTransparency = 0;
+                canvasGroup.Position = new UDim2(0.5, 0, 0.5, 0);
+            }
         }
 
         setPreviousVisible(visible);
@@ -124,6 +119,7 @@ export default function SettingsWindow({
     const frameContent = (
         <frame
             key="Settings"
+            ref={frameContentRef}
             AnchorPoint={new Vector2(0.5, 0.5)}
             BackgroundColor3={Color3.fromRGB(13, 13, 13)}
             BorderColor3={Color3.fromRGB(0, 0, 0)}
@@ -257,7 +253,7 @@ export default function SettingsWindow({
                 GroupTransparency={0}
                 AnchorPoint={new Vector2(0.5, 0.5)}
                 Position={new UDim2(0.5, 0, 0.5, 0)}
-                ref={setCanvasGroupRef}
+                ref={canvasGroupRef}
             >
                 {frameContent}
             </canvasgroup>

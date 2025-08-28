@@ -219,7 +219,6 @@ export default class AdaptiveTabController implements OnInit {
         }, "Close");
         this.hotkeys.set("Inventory", Enum.KeyCode.F);
         this.hotkeys.set("Stats", Enum.KeyCode.M);
-        this.hotkeys.set("Settings", Enum.KeyCode.P);
         this.hotkeys.set("Quests", Enum.KeyCode.V);
         this.hotkeys.set("Warp", Enum.KeyCode.G);
         for (const sidebarButton of SIDEBAR_BUTTONS.GetDescendants()) {
