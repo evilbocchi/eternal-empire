@@ -133,24 +133,3 @@ export function useTooltip() {
     }
     return context;
 }
-
-/**
- * Hook for easily adding tooltip functionality to components
- */
-export function useTooltipHandlers(data: TooltipData | (() => TooltipData)) {
-    const { showTooltip, hideTooltip } = useTooltip();
-
-    const handleMouseEnter = useCallback(() => {
-        const tooltipData = typeIs(data, "function") ? data() : data;
-        showTooltip(tooltipData);
-    }, [data, showTooltip]);
-
-    const handleMouseLeave = useCallback(() => {
-        hideTooltip();
-    }, [hideTooltip]);
-
-    return {
-        onMouseEnter: handleMouseEnter,
-        onMouseLeave: handleMouseLeave,
-    };
-}

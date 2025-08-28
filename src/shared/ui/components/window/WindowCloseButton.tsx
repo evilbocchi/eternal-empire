@@ -1,12 +1,15 @@
 import React from "@rbxts/react";
 import { getAsset } from "shared/asset/AssetMap";
 import { playSound } from "shared/asset/GameAssets";
+import { useHover } from "shared/ui/hooks/useHover";
 
 interface WindowCloseButtonProps {
     onClick: () => void;
 }
 
 export default function WindowCloseButton({ onClick }: WindowCloseButtonProps) {
+    const { hovering, hoverProps } = useHover();
+
     const handleClick = () => {
         playSound("MenuClose.mp3");
         onClick();
@@ -15,17 +18,13 @@ export default function WindowCloseButton({ onClick }: WindowCloseButtonProps) {
     return (<textbutton
         key="CloseButton"
         AnchorPoint={new Vector2(0.5, 0.5)}
+        AutoButtonColor={false}
         BackgroundColor3={Color3.fromRGB(255, 76, 76)}
         BorderColor3={Color3.fromRGB(45, 45, 45)}
         BorderSizePixel={3}
         Event={{
             Activated: handleClick,
-            MouseEnter: () => {
-                
-            },
-            MouseLeave: () => {
-                
-            }
+            ...hoverProps
         }}
         Position={new UDim2(1, -10, 0, 10)}
         Size={new UDim2(0, 30, 0, 30)}

@@ -8,57 +8,29 @@
 import { useCallback } from "@rbxts/react";
 import Item from "shared/item/Item";
 import { TooltipData, useTooltip } from "shared/ui/components/tooltip/TooltipProvider";
+import { useHover } from "shared/ui/hooks/useHover";
 
 /**
  * Hook that provides tooltip event handlers for components
  * 
  * @param tooltipData Static tooltip data or function that returns tooltip data
- * @returns Object with onMouseEnter and onMouseLeave handlers
- * 
- * @example
- * ```tsx
- * function MyButton() {
- *   const tooltipProps = useTooltipProps({ message: "Click me!" });
- *   
- *   return (
- *     <textbutton
- *       Text="Button"
- *       {...tooltipProps}
- *     />
- *   );
- * }
- * ```
- * 
- * @example
- * ```tsx
- * function ItemButton({ item }: { item: Item }) {
- *   const tooltipProps = useTooltipProps(() => ({ item }));
- *   
- *   return (
- *     <textbutton
- *       Text={item.name}
- *       {...tooltipProps}
- *     />
- *   );
- * }
- * ```
+ * @returns Hover data object
  */
-export function useTooltipProps(data: TooltipData | (() => TooltipData)) {
+export function useTooltipProps(data: TooltipData | (() => TooltipData), onEnter?: (() => void), onLeave?: (() => void)) {
     const { showTooltip, hideTooltip } = useTooltip();
 
     const handleMouseEnter = useCallback(() => {
+        onEnter?.();
         const tooltipData = typeIs(data, "function") ? data() : data;
         showTooltip(tooltipData);
-    }, [data, showTooltip]);
+    }, [data, showTooltip, onEnter]);
 
     const handleMouseLeave = useCallback(() => {
+        onLeave?.();
         hideTooltip();
-    }, [hideTooltip]);
+    }, [hideTooltip, onLeave]);
 
-    return {
-        onMouseEnter: handleMouseEnter,
-        onMouseLeave: handleMouseLeave,
-    };
+    return useHover(handleMouseEnter, handleMouseLeave);
 }
 
 /**
