@@ -4,6 +4,7 @@ import Packets from "shared/Packets";
 import BuildManager from "shared/ui/components/build/BuildManager";
 import HotkeyProvider from "shared/ui/components/hotkeys/HotkeyProvider";
 import PositionDisplay from "shared/ui/components/position/PositionDisplay";
+import TrackedQuestWindow from "shared/ui/components/quest/TrackedQuestWindow";
 import SettingsManager from "shared/ui/components/settings/SettingsManager";
 import SidebarButtons from "shared/ui/components/sidebar/SidebarButtons";
 import TooltipProvider from "shared/ui/components/tooltip/TooltipProvider";
@@ -56,6 +57,7 @@ export default function App({ buildController }: AppProps = {}) {
                     />
                     <SidebarButtons />
                     <PositionDisplay />
+                    <TrackedQuestWindow />
                     <BuildManager
                         buildController={buildController}
                         animationsEnabled={settings.BuildAnimation}
