@@ -1,4 +1,4 @@
-import React from "@rbxts/react";
+import React, { useState, useCallback, useMemo } from "@rbxts/react";
 import { getMaxXp } from "shared/constants";
 import QuestOption from "shared/ui/components/quest/QuestOption";
 import { useQuestData } from "shared/ui/components/quest/useQuestData";
@@ -16,9 +16,9 @@ export default function QuestWindow() {
         onTrackQuest
     } = useQuestData();
 
-    const [expandedQuests, setExpandedQuests] = React.useState(new Set<string>());
+    const [expandedQuests, setExpandedQuests] = useState(new Set<string>());
 
-    const handleToggleQuestContent = React.useCallback((questId: string) => {
+    const handleToggleQuestContent = useCallback((questId: string) => {
         setExpandedQuests(prev => {
             const newSet = table.clone(prev);
             if (newSet.has(questId)) {
@@ -30,7 +30,7 @@ export default function QuestWindow() {
         });
     }, []);
 
-    const handleTrackQuest = React.useCallback((questId: string) => {
+    const handleTrackQuest = useCallback((questId: string) => {
         if (trackedQuest === questId) {
             onTrackQuest(undefined); // Untrack
         } else {
@@ -44,7 +44,7 @@ export default function QuestWindow() {
     const xpText = `${xp}/${maxXp} XP to Lv. ${level + 1}`;
 
     // Sort quests by their natural order
-    const sortedQuests = React.useMemo(() => {
+    const sortedQuests = useMemo(() => {
         const quests = new Array<[string, QuestInfo]>();
         for (const questId of availableQuests) {
             const quest = questInfo.get(questId);

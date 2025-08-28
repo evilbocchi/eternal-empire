@@ -6,7 +6,7 @@
  * binding, priority management, and integration with UI components.
  */
 
-import React, { createContext, useCallback, useContext, useEffect, useRef } from "@rbxts/react";
+import React, { createContext, useCallback, useContext, useEffect, useRef, ReactNode, DependencyList, useState } from "@rbxts/react";
 import { UserInputService } from "@rbxts/services";
 
 export interface HotkeyBinding {
@@ -38,7 +38,7 @@ interface HotkeyContextValue {
 const HotkeyContext = createContext<HotkeyContextValue | undefined>(undefined);
 
 interface HotkeyProviderProps {
-    children: React.ReactNode;
+    children: ReactNode;
     /** Whether hotkeys should be enabled by default */
     defaultEnabled?: boolean;
 }
@@ -47,7 +47,7 @@ interface HotkeyProviderProps {
  * Hotkey provider component that manages hotkey state and input handling
  */
 export default function HotkeyProvider({ children, defaultEnabled = true }: HotkeyProviderProps) {
-    const [hotkeysEnabled, setHotkeysEnabled] = React.useState(defaultEnabled);
+    const [hotkeysEnabled, setHotkeysEnabled] = useState(defaultEnabled);
     const bindingsRef = useRef<Map<string, HotkeyBinding>>(new Map());
     const indexRef = useRef(0);
 
@@ -145,7 +145,7 @@ export function useHotkeys() {
 /**
  * Hook to bind a hotkey with automatic cleanup
  */
-export function useHotkey(binding: HotkeyBinding | undefined, deps?: React.DependencyList) {
+export function useHotkey(binding: HotkeyBinding | undefined, deps?: DependencyList) {
     const { bindHotkey } = useHotkeys();
 
     useEffect(() => {

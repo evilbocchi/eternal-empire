@@ -1,4 +1,4 @@
-import React from "@rbxts/react";
+import React, { useState, useCallback } from "@rbxts/react";
 import { getMaxXp } from "shared/constants";
 import { RobotoSlabBold, RobotoSlabHeavy, RobotoSlabMedium } from "shared/ui/GameFonts";
 import { useQuestData } from "./useQuestData";
@@ -12,9 +12,9 @@ export default function TrackedQuestWindow() {
         trackedQuest
     } = useQuestData();
 
-    const [showProgressBar, setShowProgressBar] = React.useState(false);
-    const [showCompletion, setShowCompletion] = React.useState(false);
-    const [completionMessage, setCompletionMessage] = React.useState("");
+    const [showProgressBar, setShowProgressBar] = useState(false);
+    const [showCompletion, setShowCompletion] = useState(false);
+    const [completionMessage, setCompletionMessage] = useState("");
 
     // Get current quest data
     const currentQuest = trackedQuest ? questInfo.get(trackedQuest) : undefined;
@@ -22,7 +22,7 @@ export default function TrackedQuestWindow() {
     const hasQuest = currentQuest !== undefined && currentStage >= 0;
 
     // Format description for current stage
-    const getFormattedDescription = React.useCallback(() => {
+    const getFormattedDescription = useCallback(() => {
         if (!currentQuest || !trackedQuest) return "";
 
         if (currentStage < 0) {

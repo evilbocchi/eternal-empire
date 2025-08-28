@@ -1,5 +1,5 @@
 import { OnoeNum } from "@antivivi/serikanum";
-import React, { useEffect, useState } from "@rbxts/react";
+import React, { useEffect, useState, useMemo } from "@rbxts/react";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import "shared/marketplace/MarketplaceListing";
 import Packets from "shared/Packets";
@@ -813,7 +813,7 @@ export default function MarketplaceWindow({ visible, onClose }: MarketplaceWindo
         // Trigger filter logic here
     };
 
-    const filteredListings = React.useMemo(() => {
+    const filteredListings = useMemo(() => {
         let result = new Map<string, MarketplaceListing>();
 
         // Copy all listings first
