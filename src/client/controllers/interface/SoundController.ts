@@ -14,7 +14,6 @@
 import { Controller, OnStart } from "@flamework/core";
 import { Lighting, ReplicatedStorage, SoundService, TweenService, Workspace } from "@rbxts/services";
 import { LOCAL_PLAYER, PLAYER_GUI } from "client/constants";
-import { SETTINGS_WINDOW } from "client/controllers/interface/SettingsController";
 import { START_WINDOW } from "client/controllers/interface/StartWindowController";
 import { ASSETS, getSound, SOUND_EFFECTS_GROUP } from "shared/asset/GameAssets";
 import { MUSIC_GROUP } from "shared/constants";
@@ -30,8 +29,6 @@ export default class SoundController implements OnStart {
 
     /** The default start music sound instance. */
     startMusic = ASSETS.WaitForChild("JJT Money Empire!") as Sound;
-    /** Label displaying the currently playing music. */
-    currentlyPlayingLabel = SETTINGS_WINDOW.InteractionOptions.WaitForChild("CurrentlyPlaying").WaitForChild("Title") as TextLabel;
     /** Whether music is enabled. */
     musicEnabled = true;
     /** The music sound group. */

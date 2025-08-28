@@ -1,6 +1,7 @@
 import React from "@rbxts/react";
 import { getAsset } from "shared/asset/AssetMap";
 import { playSound } from "shared/asset/GameAssets";
+import Packets from "shared/Packets";
 import { useHotkeyWithTooltip, useToggleHotkey } from "shared/ui/components/hotkeys/useHotkeyWithTooltip";
 import IconButton from "shared/ui/components/IconButton";
 import SettingsWindow, { SettingsWindowProps } from "shared/ui/components/settings/SettingsWindow";
@@ -26,6 +27,23 @@ export function SettingsButton({ tooltipProps }: { tooltipProps: ReturnType<type
 export default function SettingsManager(props: SettingsManagerProps) {
     const [isOpen, setIsOpen] = React.useState(false);
     const [shouldClose, setShouldClose] = React.useState(false);
+    const [selectedHotkey, setSelectedHotkey] = React.useState<string | undefined>();
+
+    props.settings = Packets.settings.get()!;
+    props.onSettingToggle ??= (setting, value) => Packets.setSetting.toServer(setting, value);
+
+    props.onHotkeySelect ??= (hotkeyName: string) => {
+        setSelectedHotkey(prev => prev === hotkeyName ? undefined : hotkeyName);
+    };
+
+    props.onHotkeyDeselect ??= () => {
+        setSelectedHotkey(undefined);
+    };
+
+    props.onHotkeyChange ??= (hotkeyName: string, newKeyCode: Enum.KeyCode) => {
+        Packets.setHotkey.toServer(hotkeyName, newKeyCode.Value);
+        setSelectedHotkey(undefined);
+    };
 
     const handleToggle = () => {
         if (isOpen) {

@@ -18,11 +18,9 @@ import { Players, ReplicatedFirst, RunService, TweenService, Workspace } from "@
 import { LOCAL_PLAYER, PLAYER_GUI } from "client/constants";
 import AdaptiveTabController from "client/controllers/core/AdaptiveTabController";
 import HotkeysController from "client/controllers/core/HotkeysController";
-import UIController from "client/controllers/core/UIController";
 import BalanceWindowController from "client/controllers/interface/BalanceWindowController";
 import IntroController from "client/controllers/interface/IntroController";
 import LoadingWindowController from "client/controllers/interface/LoadingWindowController";
-import { SETTINGS_WINDOW } from "client/controllers/interface/SettingsController";
 import SoundController from "client/controllers/interface/SoundController";
 import { ASSETS, playSound } from "shared/asset/GameAssets";
 import { getNameFromUserId, getStartCamera, isStartScreenEnabled } from "shared/constants";
@@ -344,7 +342,7 @@ export default class StartWindowController implements OnInit {
             this.hideTitleScreen();
         });
         this.adaptiveTabController.tabHidden.connect((tab) => {
-            if (tab === SETTINGS_WINDOW.Name && START_WINDOW.Parent === PLAYER_GUI)
+            if (START_WINDOW.Parent === PLAYER_GUI)
                 this.showTitleScreen(true);
         });
 
