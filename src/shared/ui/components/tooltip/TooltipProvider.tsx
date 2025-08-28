@@ -6,8 +6,8 @@
  * and simple message tooltips with smooth animations and positioning.
  */
 
-import React, { createContext, useCallback, useContext, useEffect, useRef, useState, ReactNode } from "@rbxts/react";
-import { RunService, UserInputService, Workspace } from "@rbxts/services";
+import React, { createContext, ReactNode, useCallback, useContext, useEffect, useRef, useState } from "@rbxts/react";
+import { Players, RunService, Workspace } from "@rbxts/services";
 import Item from "shared/item/Item";
 import ItemMetadata from "shared/item/ItemMetadata";
 import Items from "shared/items/Items";
@@ -51,7 +51,6 @@ interface TooltipProviderProps {
 export default function TooltipProvider({ children }: TooltipProviderProps) {
     const [tooltipData, setTooltipData] = useState<TooltipData | undefined>(undefined);
     const [isVisible, setIsVisible] = useState(false);
-    const [position, setPosition] = useState(new Vector2(0, 0));
     const hideTimeoutRef = useRef<RBXScriptConnection | undefined>(undefined);
 
     const showTooltip = useCallback((data: TooltipData) => {
@@ -67,35 +66,9 @@ export default function TooltipProvider({ children }: TooltipProviderProps) {
 
     const hideTooltip = useCallback(() => {
         // Add small delay to prevent flicker when moving between elements quickly
-        task.spawn(() => {
-            task.wait(0.1);
-            setIsVisible(false);
-            setTooltipData(undefined);
-        });
+        setIsVisible(false);
     }, []);
 
-    // Update tooltip position based on mouse position
-    useEffect(() => {
-        if (!isVisible) return;
-
-        const connection = RunService.Heartbeat.Connect(() => {
-            const canvasSize = Workspace.CurrentCamera?.ViewportSize;
-            const mouse = UserInputService.GetMouseLocation();
-
-            if (canvasSize !== undefined) {
-                const mouseX = mouse.X;
-                const mouseY = mouse.Y;
-
-                // Smart positioning to avoid going off-screen
-                const x = canvasSize.X - mouseX < 200 ? mouseX - 5 : mouseX + 5;
-                const y = canvasSize.Y - mouseY < 200 ? mouseY - 10 : mouseY + 36;
-
-                setPosition(new Vector2(x, y));
-            }
-        });
-
-        return () => connection.Disconnect();
-    }, [isVisible]);    // Cleanup timeout on unmount
     useEffect(() => {
         return () => {
             if (hideTimeoutRef.current) {
@@ -116,7 +89,6 @@ export default function TooltipProvider({ children }: TooltipProviderProps) {
             <TooltipWindow
                 data={tooltipData}
                 visible={isVisible}
-                position={position}
                 metadata={METADATA_PER_ITEM}
             />
         </TooltipContext.Provider>
