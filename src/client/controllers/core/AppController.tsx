@@ -8,6 +8,7 @@ import App from "shared/ui/components/App";
 const APP_GUI = new Instance("ScreenGui");
 APP_GUI.IgnoreGuiInset = true;
 APP_GUI.ResetOnSpawn = false;
+APP_GUI.ZIndexBehavior = Enum.ZIndexBehavior.Sibling;
 APP_GUI.Name = "App";
 APP_GUI.Parent = PLAYER_GUI;
 
