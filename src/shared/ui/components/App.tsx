@@ -3,6 +3,7 @@ import type BuildController from "client/controllers/gameplay/BuildController";
 import Packets from "shared/Packets";
 import BuildManager from "shared/ui/components/build/BuildManager";
 import HotkeyProvider from "shared/ui/components/hotkeys/HotkeyProvider";
+import InventoryWindow from "shared/ui/components/inventory/InventoryWindow";
 import PositionDisplay from "shared/ui/components/position/PositionDisplay";
 import SettingsManager from "shared/ui/components/settings/SettingsManager";
 import SidebarButtons from "shared/ui/components/sidebar/SidebarButtons";
@@ -15,8 +16,8 @@ interface AppProps {
 
 export default function App({ buildController }: AppProps = {}) {
     const [settings, setSettings] = React.useState(Packets.settings.get()!);
-
     const [selectedHotkey, setSelectedHotkey] = React.useState<string | undefined>();
+    const [inventoryVisible, setInventoryVisible] = React.useState(false);
 
     const handleSettingToggle = (setting: keyof typeof settings, value: boolean) => {
         setSettings(prev => ({ ...prev, [setting]: value }));
@@ -54,11 +55,18 @@ export default function App({ buildController }: AppProps = {}) {
                         onHotkeyChange={handleHotkeyChange}
                         onHotkeyDeselect={handleHotkeyDeselect}
                     />
-                    <SidebarButtons />
+                    <SidebarButtons 
+                        onInventoryOpen={() => setInventoryVisible(true)}
+                    />
                     <PositionDisplay />
                     <BuildManager
                         buildController={buildController}
                         animationsEnabled={settings.BuildAnimation}
+                    />
+                    <InventoryWindow
+                        visible={inventoryVisible}
+                        onVisibilityChange={setInventoryVisible}
+                        buildController={buildController}
                     />
                 </TooltipProvider>
             </HotkeyProvider>

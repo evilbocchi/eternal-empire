@@ -39,6 +39,8 @@ interface SidebarButtonsProps {
     onButtonClick?: (buttonName: string) => void;
     /** Callback fired when window should be toggled */
     onToggleWindow?: (windowName: string) => boolean;
+    /** Callback fired when inventory should be opened */
+    onInventoryOpen?: () => void;
     /** Current active window name */
     activeWindow?: string;
     /** Position of the sidebar */
@@ -344,6 +346,7 @@ export default function SidebarButtons({
     visible = true,
     onButtonClick,
     onToggleWindow,
+    onInventoryOpen,
     activeWindow,
     position = new UDim2(0, 0, 0.5, 0),
     animationsEnabled = true,
@@ -448,6 +451,13 @@ export default function SidebarButtons({
             onButtonClick(buttonName);
         }
 
+        // Special handling for inventory button
+        if (buttonName === "Inventory" && onInventoryOpen) {
+            onInventoryOpen();
+            playSound("MenuOpen.mp3");
+            return;
+        }
+
         if (onToggleWindow) {
             const result = onToggleWindow(buttonName);
             if (result)
@@ -455,7 +465,7 @@ export default function SidebarButtons({
             else
                 playSound("MenuClose.mp3");
         }
-    }, [onButtonClick, onToggleWindow]);
+    }, [onButtonClick, onToggleWindow, onInventoryOpen]);
 
     // Update button visibility based on game state
     const updateButtonVisibility = useCallback((buttonName: string, visible: boolean) => {
