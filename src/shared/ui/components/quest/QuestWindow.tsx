@@ -12,8 +12,7 @@ export default function QuestWindow() {
         xp,
         availableQuests,
         trackedQuest,
-        onTrackQuest,
-        onToggleQuestContent
+        onTrackQuest
     } = useQuestData();
 
     const [expandedQuests, setExpandedQuests] = React.useState(new Set<string>());

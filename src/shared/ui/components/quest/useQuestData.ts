@@ -2,6 +2,7 @@ import React from "@rbxts/react";
 import { combineHumanReadable } from "@antivivi/vrldk";
 import Packets from "shared/Packets";
 import Items from "shared/items/Items";
+import { questState } from "shared/quest/QuestState";
 
 export interface QuestHookData {
     questInfo: Map<string, QuestInfo>;
@@ -13,7 +14,6 @@ export interface QuestHookData {
 
 export interface QuestActions {
     onTrackQuest: (questId: string | undefined) => void;
-    onToggleQuestContent: (questId: string) => void;
 }
 
 /**
@@ -24,8 +24,7 @@ export function useQuestData(): QuestHookData & QuestActions & { trackedQuest: s
     const [stagePerQuest, setStagePerQuest] = React.useState(Packets.stagePerQuest.get() || new Map<string, number>());
     const [level, setLevel] = React.useState(Packets.level.get() || 0);
     const [xp, setXp] = React.useState(Packets.xp.get() || 0);
-    const [trackedQuest, setTrackedQuest] = React.useState<string | undefined>();
-    const [expandedQuests, setExpandedQuests] = React.useState(new Set<string>());
+    const [trackedQuest, setTrackedQuest] = React.useState<string | undefined>(questState.trackedQuest);
     
     // Calculate available quests based on level requirements
     const availableQuests = React.useMemo(() => {
@@ -50,7 +49,9 @@ export function useQuestData(): QuestHookData & QuestActions & { trackedQuest: s
             Packets.questInfo.observe((value) => setQuestInfo(value)),
             Packets.stagePerQuest.observe((value) => setStagePerQuest(value)),
             Packets.level.observe((value) => setLevel(value)),
-            Packets.xp.observe((value) => setXp(value))
+            Packets.xp.observe((value) => setXp(value)),
+            // Listen to shared quest state changes
+            questState.trackedQuestChanged.connect((questId) => setTrackedQuest(questId))
         ];
 
         return () => {
@@ -59,24 +60,8 @@ export function useQuestData(): QuestHookData & QuestActions & { trackedQuest: s
     }, []);
 
     const onTrackQuest = React.useCallback((questId: string | undefined) => {
-        setTrackedQuest(prevTracked => {
-            if (prevTracked === questId) {
-                return undefined; // Untrack if already tracked
-            }
-            return questId;
-        });
-    }, []);
-
-    const onToggleQuestContent = React.useCallback((questId: string) => {
-        setExpandedQuests(prev => {
-            const newSet = new Set(prev);
-            if (newSet.has(questId)) {
-                newSet.delete(questId);
-            } else {
-                newSet.add(questId);
-            }
-            return newSet;
-        });
+        // Update shared quest state
+        questState.trackedQuest = questId;
     }, []);
 
     return {
@@ -86,8 +71,7 @@ export function useQuestData(): QuestHookData & QuestActions & { trackedQuest: s
         xp,
         availableQuests,
         trackedQuest,
-        onTrackQuest,
-        onToggleQuestContent
+        onTrackQuest
     };
 }
 
