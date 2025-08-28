@@ -14,14 +14,12 @@
 import { combineHumanReadable } from "@antivivi/vrldk";
 import { Controller, OnInit, OnPhysics } from "@flamework/core";
 import { Debris, ReplicatedStorage, TweenService, Workspace } from "@rbxts/services";
-import { ADAPTIVE_TAB_MAIN_WINDOW, SIDEBAR_BUTTONS } from "client/controllers/core/AdaptiveTabController";
 import { OnCharacterAdded } from "client/controllers/core/ModdingController";
 import { INTERFACE } from "client/controllers/core/UIController";
 import EffectController from "client/controllers/world/EffectController";
 import { ASSETS, playSound } from "shared/asset/GameAssets";
 import Items from "shared/items/Items";
 import Packets from "shared/Packets";
-import QuestManager from "shared/ui/components/quest/QuestManager";
 import { questState } from "shared/ui/components/quest/QuestState";
 
 declare global {
@@ -102,22 +100,11 @@ export const TRACKED_QUEST_WINDOW = INTERFACE.WaitForChild("TrackedQuestWindow")
     };
 };
 
-export const QUESTS_WINDOW = ADAPTIVE_TAB_MAIN_WINDOW.WaitForChild("Quests") as Frame & {
-    Level: Frame & {
-        Current: Frame & {
-            LevelLabel: TextLabel;
-        },
-        ProgressBar: Bar;
-    },
-    QuestList: Frame & {
-
-    };
-};
-
 /**
- * Controller responsible for managing quest UI, tracking, notifications, and quest-related player feedback.
+ * Controller responsible for managing quest tracking, notifications, and quest-related player feedback.
  *
  * Handles quest progress, completion, XP/item rewards, and integrates with other controllers for UI and effects.
+ * Note: Quest window management is now handled by StandaloneQuestWindowController.
  */
 @Controller()
 export default class QuestsController implements OnInit, OnPhysics, OnCharacterAdded {
@@ -130,8 +117,6 @@ export default class QuestsController implements OnInit, OnPhysics, OnCharacterA
     beam = ASSETS.ArrowBeam.Clone();
     beamContainer = new Instance("Part");
     availableQuests = new Set<string>();
-
-    private questManager?: QuestManager;
 
     constructor(private effectController: EffectController) {
 
@@ -270,11 +255,11 @@ export default class QuestsController implements OnInit, OnPhysics, OnCharacterA
     }
 
     refreshNotificationWindow() {
+        // NOTE: Notification handling is now managed by ReactSidebarController
+        // This method is kept for compatibility but functionality is moved
         const amount = this.availableQuests.size();
-        SIDEBAR_BUTTONS.Quests.NotificationWindow.Visible = amount > 0;
-        if (amount > 0) {
-            SIDEBAR_BUTTONS.Quests.NotificationWindow.AmountLabel.Text = tostring(amount);
-        }
+        // TODO: Update notification count via ReactSidebarController when implemented
+        print(`Quest notifications: ${amount} available quests`);
     }
 
     onPhysics() {
@@ -292,8 +277,7 @@ export default class QuestsController implements OnInit, OnPhysics, OnCharacterA
     }
 
     onInit() {
-        // Initialize React Quest Manager for the main quest window
-        this.questManager = new QuestManager(QUESTS_WINDOW);
+        // Remove React Quest Manager initialization - now handled by StandaloneQuestWindowController
 
         this.beamContainer.CanCollide = false;
         this.beamContainer.Anchored = true;
