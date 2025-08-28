@@ -66,8 +66,8 @@ export default class WalkspeedController implements OnCharacterAdded {
     constructor(private chatHookController: ChatHookController) {
         this.idleSwimAnimation = new Instance("Animation");
         this.actionSwimAnimation = new Instance("Animation");
-        this.idleSwimAnimation.AnimationId = "rbxassetid://9261404265";
-        this.actionSwimAnimation.AnimationId = "rbxassetid://9261406753";
+        this.idleSwimAnimation.AnimationId = "http://www.roblox.com/asset/?id=125750702";
+        this.actionSwimAnimation.AnimationId = "http://www.roblox.com/asset/?id=180426354";
         this.swimHandler = new Swimming(7, "Water", this.idleSwimAnimation, this.actionSwimAnimation, 30);
     }
 }
