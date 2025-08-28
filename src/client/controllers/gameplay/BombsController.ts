@@ -15,7 +15,7 @@ import { convertToHHMMSS } from "@antivivi/vrldk";
 import { Controller, OnStart } from "@flamework/core";
 import { CollectionService, MarketplaceService, Workspace } from "@rbxts/services";
 import { LOCAL_PLAYER } from "client/constants";
-import { DETAILS_WINDOW } from "client/controllers/interface/DetailsController";
+import { INTERFACE } from "client/controllers/core/UIController";
 import { playSound } from "shared/asset/GameAssets";
 import { BOMBS_PRODUCTS } from "shared/devproducts/BombsProducts";
 import Packets from "shared/Packets";
@@ -27,6 +27,10 @@ declare global {
         AmountLabel: TextLabel,
     };
 }
+
+export const DETAILS_WINDOW = INTERFACE.WaitForChild("DetailsWindow") as Frame & {
+    FundsBombLabel: TextLabel;
+};
 
 /**
  * Controller responsible for managing bomb board GUIs, bomb purchases, usage, and bomb-related UI updates.
