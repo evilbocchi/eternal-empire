@@ -1,5 +1,6 @@
 import React, { StrictMode } from "@rbxts/react";
-import BuildManager, { BuildControllerInterface } from "shared/ui/components/build/BuildManager";
+import type BuildController from "client/controllers/gameplay/BuildController";
+import BuildManager from "shared/ui/components/build/BuildManager";
 import { HotkeyProvider } from "shared/ui/components/hotkeys/HotkeyProvider";
 import SettingsManager from "shared/ui/components/settings/SettingsManager";
 import SidebarButtons from "shared/ui/components/sidebar/SidebarButtons";
@@ -7,7 +8,7 @@ import { TooltipProvider } from "shared/ui/components/tooltip/TooltipProvider";
 
 interface AppProps {
     /** Build controller interface for React integration */
-    buildController?: BuildControllerInterface;
+    buildController?: BuildController;
 }
 
 export default function App({ buildController }: AppProps = {}) {

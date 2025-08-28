@@ -15,7 +15,6 @@ import { OnoeNum } from "@antivivi/serikanum";
 import { Controller, OnInit } from "@flamework/core";
 import CameraShaker from "@rbxts/camera-shaker";
 import { Debris, TweenService, Workspace } from "@rbxts/services";
-import UIController from "client/controllers/core/UIController";
 import SoundController from "client/controllers/interface/SoundController";
 import EffectController from "client/controllers/world/EffectController";
 import { ASSETS, playSound } from "shared/asset/GameAssets";
@@ -32,13 +31,11 @@ declare global {
 
 /**
  * Controller responsible for handling reset events, animations, and camera effects.
- *
- * Integrates with EffectController, SoundController, and UIController to provide feedback and UI updates during resets.
  */
 @Controller()
 export default class ResetController implements OnInit {
 
-    constructor(private uiController: UIController, private effectController: EffectController, private SoundController: SoundController) {
+    constructor(private effectController: EffectController, private soundController: SoundController) {
 
     }
 
@@ -52,11 +49,11 @@ export default class ResetController implements OnInit {
             return;
         }
         if (currentCamera.CameraType !== Enum.CameraType.Scriptable) {
-            if (this.SoundController.playing !== undefined) {
-                this.SoundController.fadeOut(this.SoundController.playing);
+            if (this.soundController.playing !== undefined) {
+                this.soundController.fadeOut(this.soundController.playing);
                 task.delay(1.35, () => {
-                    if (this.SoundController.playing !== undefined)
-                        this.SoundController.fadeIn(this.SoundController.playing);
+                    if (this.soundController.playing !== undefined)
+                        this.soundController.fadeIn(this.soundController.playing);
                 });
             }
             currentCamera.CameraType = Enum.CameraType.Scriptable;

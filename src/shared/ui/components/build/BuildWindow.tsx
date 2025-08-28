@@ -59,9 +59,9 @@ export default function BuildWindow({ state, callbacks }: BuildWindowProps) {
         >
             {/* Deselect button */}
             <BuildButton
+                anchorPoint={new Vector2(0.5, 0)}
                 text="Deselect"
-
-                layoutOrder={2}
+                position={new UDim2(0.5, 0, 0.05, 0)}
                 size={new UDim2(0.7, 0, 0.4, -2)}
                 animationsEnabled={animationsEnabled}
                 onClick={onDeselect}
@@ -113,14 +113,6 @@ export default function BuildWindow({ state, callbacks }: BuildWindowProps) {
                     VerticalAlignment={Enum.VerticalAlignment.Center}
                 />
             </frame>
-
-            <uilistlayout
-                FillDirection={Enum.FillDirection.Vertical}
-                HorizontalAlignment={Enum.HorizontalAlignment.Center}
-                Padding={new UDim(0, 5)}
-                SortOrder={Enum.SortOrder.LayoutOrder}
-                VerticalAlignment={Enum.VerticalAlignment.Center}
-            />
         </frame>
     );
 }

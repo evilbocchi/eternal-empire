@@ -10,6 +10,8 @@ import { TweenService } from "@rbxts/services";
 import { RobotoSlabMedium } from "shared/ui/GameFonts";
 
 interface BuildButtonProps {
+    /** Button anchor point */
+    anchorPoint?: Vector2;
     /** Button text label */
     text: string;
     /** Optional icon asset ID */
@@ -24,6 +26,8 @@ interface BuildButtonProps {
     onClick?: () => void;
     /** Whether to enable hover and click animations */
     animationsEnabled?: boolean;
+    /** Button position */
+    position?: UDim2;
     /** Button size (defaults to standard build button size) */
     size?: UDim2;
     /** Custom background color */
@@ -34,13 +38,13 @@ interface BuildButtonProps {
 
 const DEFAULT_BACKGROUND_COLOR = Color3.fromRGB(102, 102, 102);
 const HOVER_COLOR_LERP = 0.1;
-const ANIMATION_TWEEN_INFO = new TweenInfo(0.15, Enum.EasingStyle.Quad, Enum.EasingDirection.Out);
 const SCALE_TWEEN_INFO = new TweenInfo(0.3, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out);
 
 /**
  * Styled button component for the build system with animations and hover effects
  */
 export default function BuildButton({
+    anchorPoint,
     text,
     icon,
     iconColor = Color3.fromRGB(255, 255, 255),
@@ -48,10 +52,13 @@ export default function BuildButton({
     visible = true,
     onClick,
     animationsEnabled = true,
+    position,
     size = new UDim2(0.5, 0, 1, 0),
     backgroundColor = DEFAULT_BACKGROUND_COLOR,
     disabled = false
 }: BuildButtonProps) {
+    anchorPoint ??= icon ? new Vector2(0, 1) : new Vector2(1, 1);
+    position ??= icon ? new UDim2(0, 0, 1, 0) : new UDim2(1, 0, 1, 0);
     const buttonRef = useRef<TextButton>();
     const scaleRef = useRef<UIScale>();
     const [isHovered, setIsHovered] = useState(false);
@@ -64,11 +71,8 @@ export default function BuildButton({
             const scale = scaleRef.current;
             if (scale) {
                 // Quick press animation
-                const pressDown = TweenService.Create(scale, ANIMATION_TWEEN_INFO, { Scale: 0.9 });
-                const pressUp = TweenService.Create(scale, ANIMATION_TWEEN_INFO, { Scale: 1 });
-
-                pressDown.Play();
-                pressDown.Completed.Connect(() => pressUp.Play());
+                scale.Scale = 0.9;
+                TweenService.Create(scale, SCALE_TWEEN_INFO, { Scale: 1 }).Play();
             }
         }
 
@@ -106,12 +110,12 @@ export default function BuildButton({
     return (
         <textbutton
             ref={buttonRef}
-            AnchorPoint={icon ? new Vector2(0, 1) : new Vector2(1, 1)}
+            AnchorPoint={anchorPoint}
             BackgroundColor3={currentBackgroundColor}
             BorderColor3={Color3.fromRGB(27, 42, 53)}
             ClipsDescendants={true}
             LayoutOrder={layoutOrder}
-            Position={icon ? new UDim2(0, 0, 1, 0) : new UDim2(1, 0, 1, 0)}
+            Position={position}
             Selectable={false}
             Size={size}
             Text=""
@@ -183,12 +187,12 @@ export default function BuildButton({
             />
 
             {/* Padding */}
-            <uipadding
+            {icon ? undefined : <uipadding
                 PaddingBottom={new UDim(0, 5)}
                 PaddingLeft={new UDim(0, 5)}
                 PaddingRight={new UDim(0, 5)}
                 PaddingTop={new UDim(0, 5)}
-            />
+            />}
 
             {/* Scale for animations */}
             <uiscale ref={scaleRef} Scale={1} />

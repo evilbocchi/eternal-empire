@@ -7,28 +7,12 @@
 
 import React, { useCallback, useEffect, useState } from "@rbxts/react";
 import { UserInputService } from "@rbxts/services";
+import type BuildController from "client/controllers/gameplay/BuildController";
 import BuildWindow, { BuildWindowState, BuildWindowCallbacks } from "shared/ui/components/build/BuildWindow";
-
-export interface BuildControllerInterface {
-    /** Check if building is currently restricted */
-    getRestricted(): boolean;
-    /** Check if there are items selected */
-    hasSelection(): boolean;
-    /** Deselect all items and revert to original positions */
-    revertAndDeselectAll(): void;
-    /** Rotate selected items by 90 degrees */
-    rotateSelection(): void;
-    /** Delete/unplace selected items */
-    deleteSelection(): void;
-    /** Place selected items at current position */
-    placeSelection(): void;
-    /** Add a listener for state changes */
-    onStateChange(callback: () => void): () => void;
-}
 
 interface BuildManagerProps {
     /** Interface to the build controller */
-    buildController?: BuildControllerInterface;
+    buildController?: BuildController;
     /** Whether animations are enabled globally */
     animationsEnabled?: boolean;
 }

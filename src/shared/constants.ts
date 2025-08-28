@@ -89,7 +89,7 @@ export const NAMES_PER_USER_ID = new Map<number, string>();
 export const NPC_MODELS = Workspace.WaitForChild("NPCs") as Folder;
 export const NPCS = script.Parent?.WaitForChild("npcs") as Folder;
 
-export const PLACED_ITEMS_FOLDER = createFolder("PlacedItems", CAMERA); // Placing instances in the server camera does not replicate to the client
+export const PLACED_ITEMS_FOLDER = createFolder("PlacedItems");
 
 /**
  * Returns the folder automatically created containing all the text channels.

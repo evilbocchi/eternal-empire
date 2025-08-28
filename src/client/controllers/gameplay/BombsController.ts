@@ -3,7 +3,6 @@
  *
  * Handles:
  * - Setting up bomb board GUIs for purchasing and using bombs
- * - Integrating with UIController for sound feedback
  * - Observing and updating bomb balances
  * - Displaying active bomb timers in the details window
  *
@@ -31,8 +30,6 @@ declare global {
 
 /**
  * Controller responsible for managing bomb board GUIs, bomb purchases, usage, and bomb-related UI updates.
- *
- * Integrates with UIController for sound, observes bomb balances, and updates the details window with bomb timers.
  */
 @Controller()
 export default class BombsController implements OnStart {

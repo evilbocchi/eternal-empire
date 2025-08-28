@@ -5,7 +5,6 @@
  * - Selecting, placing, rotating, and deleting buildable items
  * - Managing build mode UI and hotkeys
  * - Animating placement and selection transitions
- * - Integrating with UIController and AdaptiveTabController
  * - Enforcing build restrictions and area bounds
  *
  * The controller maintains the state of selected items, manages build-related hotkeys, and coordinates with other systems for placement and UI feedback.
@@ -27,13 +26,6 @@ import Packets from "shared/Packets";
 import BuildBounds from "shared/placement/BuildBounds";
 import ItemPlacement from "shared/placement/ItemPlacement";
 import Sandbox from "shared/Sandbox";
-import { BuildControllerInterface } from "shared/ui/components/build/BuildManager";
-
-export type BuildOption = TextButton & {
-    UIScale: UIScale,
-    TextLabel: TextLabel,
-    ImageLabel: ImageLabel;
-};
 
 /**
  * Controller responsible for managing build mode, item placement, selection, and related UI and hotkeys.
@@ -41,7 +33,7 @@ export type BuildOption = TextButton & {
  * Handles selection, placement, rotation, and deletion of items, and coordinates build mode UI and restrictions.
  */
 @Controller()
-export default class BuildController implements OnInit, OnStart, BuildControllerInterface {
+export default class BuildController implements OnInit, OnStart {
 
     /**
      * Offset of the selected models from the mouse.
@@ -86,7 +78,6 @@ export default class BuildController implements OnInit, OnStart, BuildController
 
     }
 
-    // BuildControllerInterface implementation
     hasSelection(): boolean {
         return !this.selected.isEmpty();
     }

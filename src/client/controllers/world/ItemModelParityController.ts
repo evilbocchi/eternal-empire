@@ -1,5 +1,5 @@
 import { Controller, OnInit } from "@flamework/core";
-import { TweenService } from "@rbxts/services";
+import { Workspace } from "@rbxts/services";
 import { PLACED_ITEMS_FOLDER } from "shared/constants";
 import Items from "shared/items/Items";
 import Packets from "shared/Packets";
@@ -8,6 +8,9 @@ import Packets from "shared/Packets";
 export default class ItemModelParityController implements OnInit {
 
     onInit() {
+        if (PLACED_ITEMS_FOLDER.Parent === Workspace)
+            return;
+
         Packets.placedItems.observe((placedItems) => {
             for (const child of PLACED_ITEMS_FOLDER.GetChildren()) {
                 if (!placedItems.has(child.Name) && !child.HasTag("Placing")) {

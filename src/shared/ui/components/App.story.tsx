@@ -11,7 +11,7 @@ export = {
     react: React,
     reactRoblox: ReactRoblox,
     controls: controls,
-    story: (props: InferProps<typeof controls>) => {
+    story: () => {
         const component = <App />;
         return component;
     },

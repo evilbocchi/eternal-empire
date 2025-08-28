@@ -18,7 +18,7 @@ import { Controller, OnInit } from "@flamework/core";
 import { Debris, TweenService, Workspace } from "@rbxts/services";
 import StringBuilder from "@rbxts/stringbuilder";
 import HotkeysController from "client/controllers/core/HotkeysController";
-import UIController, { INTERFACE } from "client/controllers/core/UIController";
+import { INTERFACE } from "client/controllers/core/UIController";
 import TooltipController from "client/controllers/interface/TooltipController";
 import { ASSETS, playSound } from "shared/asset/GameAssets";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
@@ -89,7 +89,7 @@ export default class BalanceWindowController implements OnInit {
     /** Whether to format currencies with symbols and separators. */
     isFormatCurrencies = true;
 
-    constructor(private uiController: UIController, private hotkeysController: HotkeysController, private tooltipController: TooltipController) {
+    constructor(private hotkeysController: HotkeysController, private tooltipController: TooltipController) {
     }
 
     /**
