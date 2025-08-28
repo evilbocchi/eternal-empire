@@ -1,4 +1,5 @@
 import React from "@rbxts/react";
+import { getAsset } from "shared/asset/AssetMap";
 import { useTooltipProps } from "shared/ui/components/tooltip/useTooltipProps";
 
 interface PositionWindowProps {
@@ -47,7 +48,7 @@ export default function PositionWindow({
             <imagelabel
                 AnchorPoint={new Vector2(0.5, 0.5)}
                 BackgroundTransparency={1}
-                Image="rbxassetid://132386902355520"
+                Image={getAsset("assets/Compass.png")}
                 Position={new UDim2(1, 0, 0.5, 0)}
                 Size={new UDim2(1.75, 0, 1.75, 0)}
                 SizeConstraint={Enum.SizeConstraint.RelativeYY}

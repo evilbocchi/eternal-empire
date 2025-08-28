@@ -7,6 +7,7 @@
 
 import React from "@rbxts/react";
 import { UserInputService } from "@rbxts/services";
+import { getAsset } from "shared/asset/AssetMap";
 import BuildButton from "shared/ui/components/build/BuildButton";
 
 export interface BuildWindowState {
@@ -77,7 +78,7 @@ export default function BuildWindow({ state, callbacks }: BuildWindowProps) {
                 {/* Rotate button */}
                 <BuildButton
                     text="Rotate"
-                    icon="rbxassetid://6710235432"
+                    icon={getAsset("assets/Build/Rotate.png")}
                     layoutOrder={4}
                     animationsEnabled={animationsEnabled}
                     onClick={onRotate}
@@ -86,7 +87,7 @@ export default function BuildWindow({ state, callbacks }: BuildWindowProps) {
                 {/* Delete button */}
                 <BuildButton
                     text="Delete"
-                    icon="rbxassetid://16353080084"
+                    icon={getAsset("assets/Build/Delete.png")}
                     iconColor={Color3.fromRGB(255, 70, 70)}
                     layoutOrder={6}
                     animationsEnabled={animationsEnabled}
@@ -96,7 +97,7 @@ export default function BuildWindow({ state, callbacks }: BuildWindowProps) {
                 {/* Place button (only visible on touch devices) */}
                 <BuildButton
                     text="Place"
-                    icon="rbxassetid://5715427603"
+                    icon={getAsset("assets/Build/Place.png")}
                     iconColor={Color3.fromRGB(170, 255, 127)}
                     layoutOrder={5}
                     visible={UserInputService.TouchEnabled}
