@@ -35,10 +35,13 @@ export default function PositionWindow({
             key="PositionWindow"
             AnchorPoint={anchorPoint}
             BackgroundTransparency={1}
+            Event={{
+                MouseEnter: tooltipProps.onMouseEnter,
+                MouseLeave: tooltipProps.onMouseLeave,
+            }}
             Position={windowPosition}
             Size={size}
             Visible={visible}
-            {...tooltipProps}
         >
             {/* Compass Icon */}
             <imagelabel
