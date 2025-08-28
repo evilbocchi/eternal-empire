@@ -19,8 +19,12 @@ export default function App({ buildController }: AppProps = {}) {
 
     const [selectedHotkey, setSelectedHotkey] = React.useState<string | undefined>();
 
-    const handleSettingToggle = (setting: keyof typeof settings, value: boolean) => {
-        setSettings(prev => ({ ...prev, [setting]: value }));
+    const handleSettingToggle = (setting: keyof Settings, value: boolean) => {
+        setSettings(prev => {
+            const newSettings = { ...prev, [setting]: value };
+            Packets.setSetting.toServer(setting, value);
+            return newSettings;
+        });
     };
 
     const handleHotkeySelect = (hotkeyName: string) => {
