@@ -16,16 +16,12 @@ interface AppProps {
 
 export default function App({ buildController }: AppProps = {}) {
     const [settings, setSettings] = React.useState(Packets.settings.get()!);
-
     const [selectedHotkey, setSelectedHotkey] = React.useState<string | undefined>();
 
-    const handleSettingToggle = (setting: keyof Settings, value: boolean) => {
-        setSettings(prev => {
-            const newSettings = { ...prev, [setting]: value };
-            Packets.setSetting.toServer(setting, value);
-            return newSettings;
-        });
-    };
+    React.useEffect(() => {
+        const connection = Packets.settings.observe((newSettings) => setSettings(newSettings));
+        return () => connection.disconnect();
+    }, []);
 
     const handleHotkeySelect = (hotkeyName: string) => {
         setSelectedHotkey(prev => prev === hotkeyName ? undefined : hotkeyName);
@@ -36,13 +32,7 @@ export default function App({ buildController }: AppProps = {}) {
     };
 
     const handleHotkeyChange = (hotkeyName: string, newKeyCode: Enum.KeyCode) => {
-        setSettings(prev => ({
-            ...prev,
-            hotkeys: {
-                ...prev.hotkeys,
-                [hotkeyName]: newKeyCode.Value
-            }
-        }));
+        Packets.setHotkey.toServer(hotkeyName, newKeyCode.Value);
         // Auto-deselect after changing hotkey
         setSelectedHotkey(undefined);
     };
@@ -54,7 +44,6 @@ export default function App({ buildController }: AppProps = {}) {
                     <SettingsManager
                         settings={settings}
                         selectedHotkey={selectedHotkey}
-                        onSettingToggle={handleSettingToggle}
                         onHotkeySelect={handleHotkeySelect}
                         onHotkeyChange={handleHotkeyChange}
                         onHotkeyDeselect={handleHotkeyDeselect}
