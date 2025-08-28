@@ -21,6 +21,7 @@ However, note that we strive to maintain things in a stable state. As such, chan
 
 ### Prerequisities
 - [Node.js 19+](https://nodejs.org/en/download)
+- [UI Labs (optional)](https://ui-labs.luau.page/docs/installation)
 
 ### Build
 
