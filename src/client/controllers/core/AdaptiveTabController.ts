@@ -17,6 +17,7 @@ import { Controller, OnInit } from "@flamework/core";
 import { Lighting, TweenService, Workspace } from "@rbxts/services";
 import HotkeysController from "client/controllers/core/HotkeysController";
 import { INTERFACE } from "client/controllers/core/UIController";
+import QuestsController from "client/controllers/interface/QuestsController";
 import { playSound } from "shared/asset/GameAssets";
 
 declare global {
@@ -39,6 +40,14 @@ export const ADAPTIVE_TAB = INTERFACE.WaitForChild("AdaptiveTab") as Frame & {
 
 export const ADAPTIVE_TAB_MAIN_WINDOW = ADAPTIVE_TAB.WaitForChild("MainWindow") as Frame;
 
+export const SIDEBAR_BUTTONS = INTERFACE.WaitForChild("SidebarButtons") as Frame & {
+    Quests: Frame & {
+        NotificationWindow: Frame & {
+            AmountLabel: TextLabel;
+        };
+    };
+};
+
 /**
  * Controller responsible for managing the adaptive tab UI, sidebar navigation, and related animations.
  *
@@ -49,7 +58,7 @@ export default class AdaptiveTabController implements OnInit {
     /** Signal fired when a tab is hidden. */
     tabHidden = new Signal<string>();
     /** The original position of the sidebar buttons. */
-    originalSidebarPosition = new UDim2(0, 0, 0.5, 0); // Default position since SIDEBAR_BUTTONS is replaced
+    originalSidebarPosition = SIDEBAR_BUTTONS.Position;
     /** Mapping of window names to their color. */
     colorsPerWindow = new Map<string, Color3>();
     /** Mapping of window names to their image. */
@@ -67,7 +76,10 @@ export default class AdaptiveTabController implements OnInit {
         return blur;
     })();
 
-    constructor(private hotkeysController: HotkeysController) {
+    constructor(
+        private hotkeysController: HotkeysController,
+        private questsController: QuestsController
+    ) {
     }
 
     /**
@@ -98,9 +110,16 @@ export default class AdaptiveTabController implements OnInit {
 
     /**
      * Animates and shows the adaptive tab window for a given window name.
+     * Special handling for Quests to use the standalone window.
      * @param windowName The name of the window to show.
      */
     showAdaptiveTab(windowName: string) {
+        // Special case: Redirect quest window to standalone implementation
+        if (windowName === "Quests") {
+            this.questsController.showQuestWindow();
+            return;
+        }
+
         const tweenInfo = new TweenInfo(0.3, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out);
 
         if (this.currentWindow !== undefined && this.currentWindow.Name !== windowName) {
@@ -137,10 +156,16 @@ export default class AdaptiveTabController implements OnInit {
 
     /**
      * Toggles the adaptive tab window for a given window name.
+     * Special handling for Quests to use the standalone window.
      * @param windowName The name of the window to toggle (optional).
      * @returns True if the tab was shown, false if hidden or unchanged.
      */
     toggleAdaptiveTab(windowName?: string) {
+        // Special case: Redirect quest window to standalone implementation
+        if (windowName === "Quests") {
+            return this.questsController.toggleQuestWindow();
+        }
+
         if (ADAPTIVE_TAB.Active && windowName === this.currentWindow?.Name) {
             this.hideAdaptiveTab();
             return false;
@@ -153,20 +178,16 @@ export default class AdaptiveTabController implements OnInit {
 
     /**
      * Animates and hides the sidebar buttons.
-     * Note: This is kept for compatibility but sidebar management is now handled by ReactSidebarController.
      */
     hideSidebarButtons() {
-        // TODO: Integrate with ReactSidebarController.hideSidebarButtons()
-        print("hideSidebarButtons called - now handled by ReactSidebarController");
+        TweenService.Create(SIDEBAR_BUTTONS, new TweenInfo(0.5), { Position: new UDim2(-0.015, -50, 0.5, 0) }).Play();
     }
 
     /**
      * Animates and shows the sidebar buttons.
-     * Note: This is kept for compatibility but sidebar management is now handled by ReactSidebarController.
      */
     showSidebarButtons() {
-        // TODO: Integrate with ReactSidebarController.showSidebarButtons()
-        print("showSidebarButtons called - now handled by ReactSidebarController");
+        TweenService.Create(SIDEBAR_BUTTONS, new TweenInfo(0.5), { Position: this.originalSidebarPosition }).Play();
     }
 
     /**
@@ -215,11 +236,11 @@ export default class AdaptiveTabController implements OnInit {
         }, "Close");
         this.hotkeys.set("Inventory", Enum.KeyCode.F);
         this.hotkeys.set("Stats", Enum.KeyCode.M);
+        this.hotkeys.set("Quests", Enum.KeyCode.V);
         this.hotkeys.set("Warp", Enum.KeyCode.G);
-        // Note: Quests hotkey (V) is now handled by ReactSidebarController
-        for (const sidebarButton of []) {
-            // Sidebar button loading is now handled by ReactSidebarController
-            // This loop is kept empty for compatibility
+        for (const sidebarButton of SIDEBAR_BUTTONS.GetDescendants()) {
+            if (sidebarButton.IsA("GuiButton"))
+                this.loadSidebarButton(sidebarButton);
         }
     }
 }
