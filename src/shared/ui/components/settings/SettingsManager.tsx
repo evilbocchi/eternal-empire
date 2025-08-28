@@ -11,7 +11,7 @@ interface SettingsManagerProps extends SettingsWindowProps {
     defaultVisible?: boolean;
 }
 
-export function SettingsButton({ tooltipProps }: { tooltipProps: ReturnType<typeof useHotkeyWithTooltip>; }) {
+export function SettingsButton({ tooltipProps }: { tooltipProps: TooltipProps; }) {
 
     return (
         <IconButton

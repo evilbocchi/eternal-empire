@@ -9,6 +9,10 @@ import { useCallback } from "@rbxts/react";
 import { useHotkey } from "shared/ui/components/hotkeys/HotkeyProvider";
 import { useTooltipProps } from "shared/ui/components/tooltip/useTooltipProps";
 
+declare global {
+    type TooltipProps = ReturnType<typeof useHotkeyWithTooltip>;
+}
+
 /**
  * Hook that combines hotkey binding with tooltip integration
  * Similar to the original HotkeysController.setHotkey method
