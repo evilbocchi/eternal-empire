@@ -1,5 +1,5 @@
 import { combineHumanReadable } from "@antivivi/vrldk";
-import React from "@rbxts/react";
+import React, { useEffect } from "@rbxts/react";
 import Packets from "shared/Packets";
 import Items from "shared/items/Items";
 import { questState } from "shared/ui/components/quest/QuestState";
@@ -44,7 +44,7 @@ export function useQuestData(): QuestHookData & QuestActions & { trackedQuest: s
     }, [questInfo, stagePerQuest, level]);
 
     // Set up packet observers
-    React.useEffect(() => {
+    useEffect(() => {
         const connections = [
             Packets.questInfo.observe((value) => setQuestInfo(value)),
             Packets.stagePerQuest.observe((value) => setStagePerQuest(value)),

@@ -1,4 +1,4 @@
-import React from "@rbxts/react";
+import React, { useEffect } from "@rbxts/react";
 import { UserInputService } from "@rbxts/services";
 import { playSound } from "shared/asset/GameAssets";
 import { RobotoMonoBold } from "shared/ui/GameFonts";
@@ -28,7 +28,7 @@ export default function HotkeyOption({ title, keyText, layoutOrder = 0, isSelect
     };
 
     // Listen for key presses when this hotkey option is selected
-    React.useEffect(() => {
+    useEffect(() => {
         if (!isSelected || !onHotkeyChange) return;
 
         const connection = UserInputService.InputBegan.Connect((input, gameProcessed) => {
@@ -47,7 +47,7 @@ export default function HotkeyOption({ title, keyText, layoutOrder = 0, isSelect
     }, [isSelected, onHotkeyChange, onDeselect]);
 
     // Handle deselection when clicking outside (mouse clicks)
-    React.useEffect(() => {
+    useEffect(() => {
         if (!isSelected) return;
 
         const connection = UserInputService.InputBegan.Connect((input, gameProcessed) => {

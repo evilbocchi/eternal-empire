@@ -2,7 +2,7 @@
  * @fileoverview React hook for consuming leaderboard data.
  */
 
-import React from "@rbxts/react";
+import React, { useEffect } from "@rbxts/react";
 
 /**
  * React hook to subscribe to leaderboard data updates.
@@ -13,7 +13,7 @@ import React from "@rbxts/react";
 export function useLeaderboardData(dataManager: LeaderboardDataManager, leaderboardType: LeaderboardType): LeaderboardEntry[] {
     const [entries, setEntries] = React.useState<LeaderboardEntry[]>([]);
 
-    React.useEffect(() => {
+    useEffect(() => {
         // Get initial data
         setEntries(dataManager.getLeaderboardEntries(leaderboardType));
 

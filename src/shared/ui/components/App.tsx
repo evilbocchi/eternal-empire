@@ -1,4 +1,4 @@
-import React, { StrictMode } from "@rbxts/react";
+import React, { StrictMode, useEffect } from "@rbxts/react";
 import type BuildController from "client/controllers/gameplay/BuildController";
 import Packets from "shared/Packets";
 import BuildManager from "shared/ui/components/build/BuildManager";
@@ -18,7 +18,7 @@ export default function App({ buildController }: AppProps = {}) {
     const [settings, setSettings] = React.useState(Packets.settings.get()!);
     const [selectedHotkey, setSelectedHotkey] = React.useState<string | undefined>();
 
-    React.useEffect(() => {
+    useEffect(() => {
         const connection = Packets.settings.observe((newSettings) => setSettings(newSettings));
         return () => connection.disconnect();
     }, []);

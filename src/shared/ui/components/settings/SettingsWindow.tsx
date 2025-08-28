@@ -11,7 +11,6 @@ import SettingToggle from "./SettingToggle";
 
 export interface SettingsWindowProps {
     visible?: boolean;
-    shouldClose?: boolean;
     settings?: Settings;
     selectedHotkey?: string;
     onClose?: () => void;
@@ -23,7 +22,6 @@ export interface SettingsWindowProps {
 
 export default function SettingsWindow({
     visible = false,
-    shouldClose = false,
     settings = Packets.settings.get()!,
     selectedHotkey,
     onClose,
@@ -32,10 +30,7 @@ export default function SettingsWindow({
     onHotkeyChange,
     onHotkeyDeselect
 }: SettingsWindowProps) {
-    const [isFading, setIsFading] = useState(false);
-    const [isAnimating, setIsAnimating] = useState(false);
     const frameContentRef = useRef<Frame>();
-    const canvasGroupRef = useRef<CanvasGroup>();
     const [previousVisible, setPreviousVisible] = useState(visible);
 
     const hotkeys = settings.hotkeys;
@@ -52,71 +47,33 @@ export default function SettingsWindow({
         onHotkeyChange?.(hotkeyName, newKeyCode);
     };
 
-    // Handle close with fade animation
-    const handleClose = () => {
-        const canvasGroup = canvasGroupRef.current;
-        if (!canvasGroup) {
-            // No canvas group available, close immediately
-            onClose?.();
-            return;
-        }
-
-        setIsFading(true);
-
-        const fadeInfo = new TweenInfo(
-            0.3, // Duration
-            Enum.EasingStyle.Quad,
-            Enum.EasingDirection.Out
-        );
-
-        const fadeTween = TweenService.Create(canvasGroup, fadeInfo, {
-            GroupTransparency: 1,
-            Position: new UDim2(0.5, 0, 0.5, 30) // Move down by 30 pixels
-        });
-
-        fadeTween.Play();
-        fadeTween.Completed.Connect(() => {
-            setIsFading(false);
-            onClose?.();
-        });
-    };
-
-    // Reset canvas group transparency when visible changes
     useEffect(() => {
-        // Handle opening animation
-        if (visible && !previousVisible) {
-            const frameContent = frameContentRef.current!;
-            frameContent.Position = new UDim2(0.5, 0, 0.5, 30); // Start below
+        const action = (visible && !previousVisible) ? "open" : (!visible && previousVisible) ? "close" : undefined;
 
-            const fadeInTween = TweenService.Create(frameContent, new TweenInfo(0.2), {
-                Position: new UDim2(0.5, 0, 0.5, 0) // Move to center
+        const frameContent = frameContentRef.current!;
+        const below = new UDim2(0.5, 0, 0.5, 30);
+        const middle = new UDim2(0.5, 0, 0.5, 0);
+        if (action === "open")
+            frameContent.Visible = true;
+
+        // Handle animation
+        if (action) {
+            frameContent.Position = action === "open" ? below : middle;
+
+            const tweenInfo = action === "open" ? new TweenInfo(0.2) : new TweenInfo(0.1, Enum.EasingStyle.Linear);
+            const tween = TweenService.Create(frameContent, tweenInfo, {
+                Position: action === "open" ? middle : below
             });
 
-            fadeInTween.Play();
-            fadeInTween.Completed.Connect(() => {
-                setIsAnimating(false);
+            tween.Play();
+            tween.Completed.Connect(() => {
+                frameContent.Visible = visible;
             });
         }
-        // Handle immediate reset when becoming visible without animation state
-        else if (visible && previousVisible && !isAnimating && !isFading) {
-            const canvasGroup = canvasGroupRef.current;
-            if (canvasGroup) {
-                canvasGroup.GroupTransparency = 0;
-                canvasGroup.Position = new UDim2(0.5, 0, 0.5, 0);
-            }
-        }
-
         setPreviousVisible(visible);
-    }, [visible, canvasGroupRef, previousVisible, isAnimating, isFading]);
+    }, [visible, previousVisible]);
 
-    // Handle external close trigger
-    useEffect(() => {
-        if (shouldClose && visible && !isFading) {
-            handleClose();
-        }
-    }, [shouldClose, visible, isFading]);
-
-    const frameContent = (
+    return (
         <frame
             key="Settings"
             ref={frameContentRef}
@@ -127,13 +84,12 @@ export default function SettingsWindow({
             Selectable={true}
             Size={new UDim2(0.9, 0, 0.9, -50)}
             Position={new UDim2(0.5, 0, 0.5, 0)}
-            Visible={visible}
         >
             <uisizeconstraint
                 MaxSize={new Vector2(800, 600)}
             />
             <WindowTitle icon={getAsset("assets/Settings.png")} title="Settings" font={RobotoMonoBold} />
-            <WindowCloseButton onClick={handleClose} />
+            <WindowCloseButton onClick={() => onClose?.()} />
             <scrollingframe
                 key="InteractionOptions"
                 AnchorPoint={new Vector2(0.5, 0.5)}
@@ -233,23 +189,4 @@ export default function SettingsWindow({
             <uistroke ApplyStrokeMode={Enum.ApplyStrokeMode.Border} Color={Color3.fromRGB(255, 255, 255)} />
         </frame>
     );
-
-    // Conditionally wrap in CanvasGroup for fade animation
-    if (isFading || isAnimating || visible) {
-        return (
-            <canvasgroup
-                key="SettingsCanvasGroup"
-                Size={new UDim2(1, 0, 1, 0)}
-                BackgroundTransparency={1}
-                GroupTransparency={0}
-                AnchorPoint={new Vector2(0.5, 0.5)}
-                Position={new UDim2(0.5, 0, 0.5, 0)}
-                ref={canvasGroupRef}
-            >
-                {frameContent}
-            </canvasgroup>
-        );
-    }
-
-    return frameContent;
 }

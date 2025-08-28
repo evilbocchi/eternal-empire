@@ -1,4 +1,4 @@
-import React from "@rbxts/react";
+import React, { useEffect } from "@rbxts/react";
 import { RunService, Workspace } from "@rbxts/services";
 
 /**
@@ -10,7 +10,7 @@ import { RunService, Workspace } from "@rbxts/services";
 export function usePlayerPosition(character?: Model): Vector3 | undefined {
     const [position, setPosition] = React.useState<Vector3 | undefined>(undefined);
 
-    React.useEffect(() => {
+    useEffect(() => {
         const rootPart = (character?.FindFirstChild("Humanoid") as Humanoid | undefined)?.RootPart;
 
         // Set up real-time position updates
@@ -47,7 +47,7 @@ export function useCharacterPosition(player?: Player): { character?: Model, posi
     // Get position using the character
     const position = usePlayerPosition(character);
 
-    React.useEffect(() => {
+    useEffect(() => {
         if (!player) {
             setCharacter(undefined);
             return;

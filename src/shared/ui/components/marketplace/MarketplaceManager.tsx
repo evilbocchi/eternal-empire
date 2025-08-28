@@ -1,4 +1,4 @@
-import React, { useState } from "@rbxts/react";
+import React, { useEffect, useState } from "@rbxts/react";
 import { UserInputService } from "@rbxts/services";
 import Packets from "shared/Packets";
 import MarketplaceWindow from "shared/ui/components/marketplace/MarketplaceWindow";
@@ -16,7 +16,7 @@ export default function MarketplaceManager(props: MarketplaceManagerProps) {
     const [isMarketplaceEnabled, setIsMarketplaceEnabled] = useState(true);
 
     // Set up keyboard hotkey (M key to toggle marketplace)
-    React.useEffect(() => {
+    useEffect(() => {
         const connection = UserInputService.InputBegan.Connect((input, gameProcessed) => {
             if (gameProcessed) return;
 
@@ -31,7 +31,7 @@ export default function MarketplaceManager(props: MarketplaceManagerProps) {
     }, [isVisible, isMarketplaceEnabled]);
 
     // Listen for marketplace enabled state changes
-    React.useEffect(() => {
+    useEffect(() => {
         const connection = Packets.marketplaceEnabled.observe((enabled) => {
             setIsMarketplaceEnabled(enabled);
             if (!enabled) {
@@ -43,7 +43,7 @@ export default function MarketplaceManager(props: MarketplaceManagerProps) {
     }, []);
 
     // Listen for terminal signals
-    React.useEffect(() => {
+    useEffect(() => {
         const openConnection = Packets.openMarketplaceTerminal.fromServer(() => {
             if (isMarketplaceEnabled) {
                 setIsVisible(true);

@@ -26,7 +26,6 @@ export function SettingsButton({ tooltipProps }: { tooltipProps: ReturnType<type
 
 export default function SettingsManager(props: SettingsManagerProps) {
     const [isOpen, setIsOpen] = React.useState(false);
-    const [shouldClose, setShouldClose] = React.useState(false);
     const [selectedHotkey, setSelectedHotkey] = React.useState<string | undefined>();
 
     props.settings = Packets.settings.get()!;
@@ -48,17 +47,11 @@ export default function SettingsManager(props: SettingsManagerProps) {
     const handleToggle = () => {
         if (isOpen) {
             playSound("MenuClose.mp3");
-            setShouldClose(true);
+            setIsOpen(false);
         } else {
             playSound("MenuOpen.mp3");
             setIsOpen(true);
-            setShouldClose(false);
         }
-    };
-
-    const handleClose = () => {
-        setIsOpen(false);
-        setShouldClose(false);
     };
 
     // Bind the P key to toggle settings
@@ -79,9 +72,8 @@ export default function SettingsManager(props: SettingsManagerProps) {
         Size={new UDim2(1, 0, 1, 0)}
     >
         <SettingsWindow
-            onClose={handleClose}
             visible={isOpen}
-            shouldClose={shouldClose}
+            onClose={() => setIsOpen(false)}
             {...props}
         />
         <SettingsButton tooltipProps={tooltipProps} />
