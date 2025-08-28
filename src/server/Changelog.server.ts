@@ -57,8 +57,7 @@ const CHANGELOGS = [
         "Revamped UI massively",
         "Reworked quests, adding 4 new ones",
         "Expanded Barren Islands",
-        "dded crafting and materials system",
-        "More coming soon in v0.6...",
+        "Added crafting and materials system",
     ]),
     new Changelog("0.6 - Wall of Text", [
         "Added difficulties and items Blessing to Frivolous",
@@ -72,7 +71,7 @@ const CHANGELOGS = [
         "Softcaps are now introduced at high amounts of each currency"
     ]),
     new Changelog("1.0 - Full Release", [
-        "Added difficulties and items Automatic to x",
+        "Added difficulties and items Automatic to Easy",
 
     ]),
 ];

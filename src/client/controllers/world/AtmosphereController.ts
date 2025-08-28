@@ -188,7 +188,4 @@ export default class AtmosphereController implements OnInit, OnStart {
         this.rainy = true;
     }
 
-    private rainDrop() {
-        // TODO
-    }
 }
