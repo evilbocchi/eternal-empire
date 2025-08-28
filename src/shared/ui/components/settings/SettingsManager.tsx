@@ -1,4 +1,4 @@
-import React, { useEffect } from "@rbxts/react";
+import React, { useEffect, useState } from "@rbxts/react";
 import { getAsset } from "shared/asset/AssetMap";
 import { playSound } from "shared/asset/GameAssets";
 import Packets from "shared/Packets";
@@ -26,7 +26,7 @@ export function SettingsButton({ tooltipProps }: { tooltipProps: ReturnType<type
 }
 
 export default function SettingsManager(props: SettingsManagerProps) {
-    const [isOpen, setIsOpen] = React.useState(false);
+    const [isOpen, setIsOpen] = useState(false);
 
     const handleToggle = () => {
         if (isOpen) {

@@ -1,5 +1,5 @@
 import { combineHumanReadable } from "@antivivi/vrldk";
-import React, { useEffect } from "@rbxts/react";
+import React, { useEffect, useState, useMemo, useCallback } from "@rbxts/react";
 import Packets from "shared/Packets";
 import Items from "shared/items/Items";
 import { questState } from "shared/ui/components/quest/QuestState";
@@ -20,14 +20,14 @@ export interface QuestActions {
  * Hook to manage quest data and interactions
  */
 export function useQuestData(): QuestHookData & QuestActions & { trackedQuest: string | undefined; } {
-    const [questInfo, setQuestInfo] = React.useState(Packets.questInfo.get() || new Map<string, QuestInfo>());
-    const [stagePerQuest, setStagePerQuest] = React.useState(Packets.stagePerQuest.get() || new Map<string, number>());
-    const [level, setLevel] = React.useState(Packets.level.get() || 0);
-    const [xp, setXp] = React.useState(Packets.xp.get() || 0);
-    const [trackedQuest, setTrackedQuest] = React.useState<string | undefined>(questState.getTrackedQuest());
+    const [questInfo, setQuestInfo] = useState(Packets.questInfo.get() || new Map<string, QuestInfo>());
+    const [stagePerQuest, setStagePerQuest] = useState(Packets.stagePerQuest.get() || new Map<string, number>());
+    const [level, setLevel] = useState(Packets.level.get() || 0);
+    const [xp, setXp] = useState(Packets.xp.get() || 0);
+    const [trackedQuest, setTrackedQuest] = useState<string | undefined>(questState.getTrackedQuest());
 
     // Calculate available quests based on level requirements
-    const availableQuests = React.useMemo(() => {
+    const availableQuests = useMemo(() => {
         const available = new Set<string>();
 
         questInfo.forEach((quest, questId) => {
@@ -59,7 +59,7 @@ export function useQuestData(): QuestHookData & QuestActions & { trackedQuest: s
         };
     }, []);
 
-    const onTrackQuest = React.useCallback((questId: string | undefined) => {
+    const onTrackQuest = useCallback((questId: string | undefined) => {
         // Update shared quest state
         questState.setTrackedQuest(questId);
     }, []);

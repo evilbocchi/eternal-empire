@@ -3,7 +3,7 @@
  */
 
 import { OnoeNum } from "@antivivi/serikanum";
-import React from "@rbxts/react";
+import React, { useState } from "@rbxts/react";
 import ReactRoblox from "@rbxts/react-roblox";
 import Leaderboard from "shared/ui/components/leaderboard/Leaderboard";
 
@@ -99,7 +99,7 @@ export = {
     reactRoblox: ReactRoblox,
     controls: controls,
     story: () => {
-        const [selectedType, setSelectedType] = React.useState<LeaderboardType>("Funds");
+        const [selectedType, setSelectedType] = useState<LeaderboardType>("Funds");
         const entries = mockEntries[selectedType] || mockEntries.Funds;
 
         return (

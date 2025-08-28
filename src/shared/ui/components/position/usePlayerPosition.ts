@@ -1,4 +1,4 @@
-import React, { useEffect } from "@rbxts/react";
+import React, { useEffect, useState } from "@rbxts/react";
 import { RunService, Workspace } from "@rbxts/services";
 
 /**
@@ -8,7 +8,7 @@ import { RunService, Workspace } from "@rbxts/services";
  * @returns The current position as Vector3, or undefined if no character/position available
  */
 export function usePlayerPosition(character?: Model): Vector3 | undefined {
-    const [position, setPosition] = React.useState<Vector3 | undefined>(undefined);
+    const [position, setPosition] = useState<Vector3 | undefined>(undefined);
 
     useEffect(() => {
         const rootPart = (character?.FindFirstChild("Humanoid") as Humanoid | undefined)?.RootPart;
@@ -42,7 +42,7 @@ export function usePlayerPosition(character?: Model): Vector3 | undefined {
  * @returns Object containing character and current position
  */
 export function useCharacterPosition(player?: Player): { character?: Model, position?: Vector3; } {
-    const [character, setCharacter] = React.useState<Model | undefined>();
+    const [character, setCharacter] = useState<Model | undefined>();
 
     // Get position using the character
     const position = usePlayerPosition(character);

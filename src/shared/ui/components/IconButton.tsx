@@ -1,4 +1,4 @@
-import React from "@rbxts/react";
+import React, { useRef, InstanceProps } from "@rbxts/react";
 import { TweenService } from "@rbxts/services";
 
 interface IconButtonProps {
@@ -6,11 +6,11 @@ interface IconButtonProps {
     onClick?: () => void;
     onMouseEnter?: () => void;
     onMouseLeave?: () => void;
-    buttonProps?: React.InstanceProps<ImageButton>;
+    buttonProps?: InstanceProps<ImageButton>;
 }
 
 export default function IconButton(props: IconButtonProps) {
-    const buttonRef = React.useRef<ImageButton>();
+    const buttonRef = useRef<ImageButton>();
 
     const handleClick = () => {
         

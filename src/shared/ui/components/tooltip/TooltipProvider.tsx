@@ -6,7 +6,7 @@
  * and simple message tooltips with smooth animations and positioning.
  */
 
-import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from "@rbxts/react";
+import React, { createContext, useCallback, useContext, useEffect, useRef, useState, ReactNode } from "@rbxts/react";
 import { RunService, UserInputService, Workspace } from "@rbxts/services";
 import Item from "shared/item/Item";
 import ItemMetadata from "shared/item/ItemMetadata";
@@ -42,7 +42,7 @@ for (const item of Items.sortedItems) {
 }
 
 interface TooltipProviderProps {
-    children: React.ReactNode;
+    children: ReactNode;
 }
 
 /**

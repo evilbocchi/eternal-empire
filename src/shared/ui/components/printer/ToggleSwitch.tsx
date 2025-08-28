@@ -1,4 +1,4 @@
-import React from "@rbxts/react";
+import React, { useState, useRef } from "@rbxts/react";
 import { TweenService } from "@rbxts/services";
 import { playSound } from "shared/asset/GameAssets";
 import { RobotoSlab } from "shared/ui/GameFonts";
@@ -10,9 +10,9 @@ interface ToggleSwitchProps {
 }
 
 export default function ToggleSwitch({ label, initialEnabled = false, onToggle }: ToggleSwitchProps) {
-    const [isEnabled, setIsEnabled] = React.useState(initialEnabled);
-    const toggleRef = React.useRef<Frame>();
-    const buttonRef = React.useRef<TextButton>();
+    const [isEnabled, setIsEnabled] = useState(initialEnabled);
+    const toggleRef = useRef<Frame>();
+    const buttonRef = useRef<TextButton>();
 
     const handleToggle = () => {
         const newState = !isEnabled;
