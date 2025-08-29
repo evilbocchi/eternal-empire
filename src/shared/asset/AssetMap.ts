@@ -77,6 +77,7 @@ export const assets = {
   "assets/Skill.png": "rbxassetid://125836127334422",
   "assets/SkilledMining.png": "rbxassetid://73378700676446",
   "assets/Skillification.png": "rbxassetid://112143941242972",
+  "assets/Spark.png": "rbxassetid://107747327911072",
   "assets/Speed.png": "rbxassetid://130847918296215",
   "assets/Stamina.png": "rbxassetid://134628132514261",
   "assets/SubsonicTreads.png": "rbxassetid://78622569008481",

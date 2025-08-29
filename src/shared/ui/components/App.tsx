@@ -1,6 +1,7 @@
 import React, { StrictMode } from "@rbxts/react";
 import type BuildController from "client/controllers/gameplay/BuildController";
 import BuildManager from "shared/ui/components/build/BuildManager";
+import { ClickSparkManager } from "shared/ui/components/effect/ClickSpark";
 import HotkeyProvider from "shared/ui/components/hotkeys/HotkeyProvider";
 import PositionDisplay from "shared/ui/components/position/PositionDisplay";
 import TrackedQuestWindow from "shared/ui/components/quest/TrackedQuestWindow";
@@ -18,6 +19,7 @@ export default function App({ buildController }: AppProps = {}) {
         <StrictMode>
             <HotkeyProvider defaultEnabled={true}>
                 <TooltipProvider>
+                    <ClickSparkManager />
                     <SettingsManager />
                     <SidebarButtons />
                     <PositionDisplay />

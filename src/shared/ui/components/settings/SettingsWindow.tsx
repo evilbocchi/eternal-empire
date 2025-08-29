@@ -5,6 +5,7 @@ import Packets from "shared/Packets";
 import WindowCloseButton from "shared/ui/components/window/WindowCloseButton";
 import WindowTitle from "shared/ui/components/window/WindowTitle";
 import { RobotoMonoBold } from "shared/ui/GameFonts";
+import useDraggable from "shared/ui/hooks/useDraggable";
 import useProperty from "shared/ui/hooks/useProperty";
 import HotkeyOption from "./HotkeyOption";
 import SettingSection from "./SettingSection";
@@ -24,6 +25,9 @@ export default function SettingsWindow({
     const [selectedHotkey, setSelectedHotkey] = useState<string | undefined>();
     const settings = useProperty(Packets.settings)!;
     const hotkeys = settings.hotkeys;
+
+    const initialPosition = new UDim2(0.5, 0, 0.5, 0);
+    const { position, dragProps } = useDraggable({ initialPosition });
 
     let sortedHotkeys = new Array<{ name: string, key: number; }>();
     for (const [name, key] of pairs(hotkeys)) // TODO: Implement sorting
@@ -46,8 +50,8 @@ export default function SettingsWindow({
         const action = (visible && !previousVisible) ? "open" : (!visible && previousVisible) ? "close" : undefined;
 
         const frameContent = frameContentRef.current!;
-        const below = new UDim2(0.5, 0, 0.5, 30);
-        const middle = new UDim2(0.5, 0, 0.5, 0);
+        const middle = position; // Use the draggable position as the stable reference
+        const below = middle.sub(new UDim2(0, 0, 0, 30));
         if (action === "open")
             frameContent.Visible = true;
 
@@ -66,7 +70,7 @@ export default function SettingsWindow({
             });
         }
         setPreviousVisible(visible);
-    }, [visible, previousVisible]);
+    }, [visible, previousVisible, position]);
 
     return (
         <frame
@@ -78,8 +82,9 @@ export default function SettingsWindow({
             BorderSizePixel={4}
             Selectable={true}
             Size={new UDim2(0.9, 0, 0.9, -50)}
-            Position={new UDim2(0.5, 0, 0.5, 0)}
+            Position={position}
             Visible={false}
+            Event={dragProps}
         >
             <uisizeconstraint
                 MaxSize={new Vector2(800, 600)}
