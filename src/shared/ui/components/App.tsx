@@ -17,7 +17,7 @@ interface AppProps {
 export default function App({ buildController }: AppProps = {}) {
     return (
         <StrictMode>
-            <HotkeyProvider defaultEnabled={true}>
+            <HotkeyProvider>
                 <TooltipProvider>
                     <ClickSparkManager />
                     <SettingsManager />

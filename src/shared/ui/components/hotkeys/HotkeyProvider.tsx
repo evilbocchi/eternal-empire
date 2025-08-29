@@ -1,12 +1,11 @@
 /**
  * @fileoverview React hotkey provider and hooks for managing keyboard shortcuts.
  * 
- * Provides a centralized hotkey system using React Context and hooks, replacing the
- * Flamework HotkeysController pattern with modern React patterns. Supports hotkey
- * binding, priority management, and integration with UI components.
+ * Provides a centralized hotkey system using React Context and hooks.
+ * Supports hotkey binding, priority management, and integration with UI components.
  */
 
-import React, { createContext, useCallback, useContext, useEffect, useRef, ReactNode, DependencyList, useState } from "@rbxts/react";
+import React, { createContext, DependencyList, ReactNode, useContext, useEffect, useRef } from "@rbxts/react";
 import { UserInputService } from "@rbxts/services";
 
 export interface HotkeyBinding {
@@ -29,31 +28,21 @@ interface HotkeyContextValue {
     bindHotkey: (binding: HotkeyBinding) => () => void;
     /** Execute a specific hotkey */
     executeHotkey: (keyCode: Enum.KeyCode) => boolean;
-    /** Enable/disable all hotkey bindings */
-    setHotkeysEnabled: (enabled: boolean) => void;
-    /** Check if hotkeys are enabled */
-    hotkeysEnabled: boolean;
 }
 
 const HotkeyContext = createContext<HotkeyContextValue | undefined>(undefined);
 
 interface HotkeyProviderProps {
     children: ReactNode;
-    /** Whether hotkeys should be enabled by default */
-    defaultEnabled?: boolean;
 }
 
 /**
  * Hotkey provider component that manages hotkey state and input handling
  */
-export default function HotkeyProvider({ children, defaultEnabled = true }: HotkeyProviderProps) {
-    const [hotkeysEnabled, setHotkeysEnabled] = useState(defaultEnabled);
+export default function HotkeyProvider({ children }: HotkeyProviderProps) {
     const bindingsRef = useRef<Map<string, HotkeyBinding>>(new Map());
-    const indexRef = useRef(0);
 
-    const executeHotkey = useCallback((keyCode: Enum.KeyCode): boolean => {
-        if (!hotkeysEnabled) return false;
-
+    const executeHotkey = (keyCode: Enum.KeyCode): boolean => {
         // Get all bindings for this key and sort by priority
         const allBindings: HotkeyBinding[] = [];
         for (const [_, binding] of pairs(bindingsRef.current)) {
@@ -71,27 +60,27 @@ export default function HotkeyProvider({ children, defaultEnabled = true }: Hotk
             }
         }
         return false;
-    }, [hotkeysEnabled]);
+    };
 
-    const bindHotkey = useCallback((binding: HotkeyBinding) => {
-        const id = `hotkey_${++indexRef.current}`;
+    const bindHotkey = (binding: HotkeyBinding) => {
+        const id = `hotkey_${binding.label}`;
         bindingsRef.current.set(id, binding);
 
         // Return cleanup function
         return () => {
             bindingsRef.current.delete(id);
         };
-    }, []);
+    };
 
     // Set up input listeners
     useEffect(() => {
         const inputBeganConnection = UserInputService.InputBegan.Connect((input, gameProcessed) => {
-            if (gameProcessed || !hotkeysEnabled) return;
+            if (gameProcessed) return;
             executeHotkey(input.KeyCode);
         });
 
         const inputEndedConnection = UserInputService.InputEnded.Connect((input, gameProcessed) => {
-            if (gameProcessed || !hotkeysEnabled) return;
+            if (gameProcessed) return;
 
             // Execute end actions for this key
             const endBindings: HotkeyBinding[] = [];
@@ -115,13 +104,11 @@ export default function HotkeyProvider({ children, defaultEnabled = true }: Hotk
             inputBeganConnection.Disconnect();
             inputEndedConnection.Disconnect();
         };
-    }, [hotkeysEnabled, executeHotkey]);
+    }, [executeHotkey]);
 
     const contextValue: HotkeyContextValue = {
         bindHotkey,
         executeHotkey,
-        setHotkeysEnabled,
-        hotkeysEnabled,
     };
 
     return (
@@ -154,41 +141,4 @@ export function useHotkey(binding: HotkeyBinding | undefined, deps?: DependencyL
         const cleanup = bindHotkey(binding);
         return cleanup;
     }, deps ? [bindHotkey, binding, ...deps] : [bindHotkey, binding]);
-}
-
-/**
- * Hook to bind a hotkey to a button with tooltip integration
- */
-export function useButtonHotkey(
-    keyCode: Enum.KeyCode | undefined,
-    action: (usedHotkey: boolean) => boolean,
-    options?: {
-        priority?: number;
-        label?: string;
-        endAction?: () => boolean;
-        enabled?: boolean;
-    }
-) {
-    const { bindHotkey } = useHotkeys();
-
-    useEffect(() => {
-        if (!keyCode) return;
-
-        const cleanup = bindHotkey({
-            keyCode,
-            action,
-            priority: options?.priority,
-            label: options?.label,
-            endAction: options?.endAction,
-            enabled: options?.enabled,
-        });
-
-        return cleanup;
-    }, [bindHotkey, keyCode, action, options?.priority, options?.label, options?.endAction, options?.enabled]);
-
-    // Return tooltip props that include hotkey information
-    return {
-        hotkeyLabel: keyCode ? `(${keyCode.Name})` : undefined,
-        fullLabel: options?.label && keyCode ? `${options.label} (${keyCode.Name})` : options?.label,
-    };
 }
