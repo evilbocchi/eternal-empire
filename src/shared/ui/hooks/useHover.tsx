@@ -18,7 +18,7 @@ import { useCallback, useState } from "@rbxts/react";
  * @example
  * ```tsx
  * function MyButton() {
- *   const { hovering, hoverProps } = useHoverWithCallbacks(
+ *   const { hovering, events } = useHoverWithCallbacks(
  *     () => playSound("hover.mp3"),
  *     () => playSound("unhover.mp3")
  *   );
@@ -26,7 +26,7 @@ import { useCallback, useState } from "@rbxts/react";
  *   return (
  *     <textbutton
  *       Text="Button"
- *       Event={{ ...hoverProps }}
+ *       Event={{ ...events }}
  *     />
  *   );
  * }
@@ -53,7 +53,7 @@ export function useHover(
         hovering,
         onMouseEnter,
         onMouseLeave,
-        hoverProps: {
+        events: {
             MouseEnter: onMouseEnter,
             MouseLeave: onMouseLeave,
         }

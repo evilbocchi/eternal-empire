@@ -70,17 +70,8 @@ export default function TooltipWindow({ data, visible, metadata }: TooltipWindow
             const mouse = Players.LocalPlayer.GetMouse();
 
             if (canvasSize !== undefined) {
-                const mouseX = mouse.X;
-                const mouseY = mouse.Y;
-                const anchorX = canvasSize.X - mouseX < 200 ? 1 : 0;
-                const anchorY = canvasSize.Y - mouseY < 200 ? 1 : 0;
-
-                // Smart positioning to avoid going off-screen
-                const x = canvasSize.X - mouseX < 200 ? mouseX - 5 : mouseX + 5;
-                const y = canvasSize.Y - mouseY < 200 ? mouseY - 10 : mouseY + 36;
-
-                frameRef.current.AnchorPoint = new Vector2(anchorX, anchorY);
-                frameRef.current.Position = UDim2.fromOffset(x, y);
+                frameRef.current.AnchorPoint = new Vector2(canvasSize.X - mouse.X < 200 ? 1 : 0, canvasSize.Y - mouse.Y < 200 ? 1 : 0);
+                frameRef.current.Position = UDim2.fromOffset(mouse.X, mouse.Y);
             }
         });
         return () => connection.Disconnect();

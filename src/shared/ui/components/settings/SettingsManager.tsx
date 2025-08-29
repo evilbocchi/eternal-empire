@@ -1,11 +1,9 @@
 import React, { useEffect, useState } from "@rbxts/react";
 import { getAsset } from "shared/asset/AssetMap";
 import { playSound } from "shared/asset/GameAssets";
-import Packets from "shared/Packets";
-import { useHotkeyWithTooltip, useToggleHotkey } from "shared/ui/components/hotkeys/useHotkeyWithTooltip";
+import useHotkeyWithTooltip from "shared/ui/components/hotkeys/useHotkeyWithTooltip";
 import IconButton from "shared/ui/components/IconButton";
 import SettingsWindow, { SettingsWindowProps } from "shared/ui/components/settings/SettingsWindow";
-import useProperty from "shared/ui/hooks/useProperty";
 
 interface SettingsManagerProps extends SettingsWindowProps {
     defaultVisible?: boolean;
@@ -40,16 +38,17 @@ export default function SettingsManager(props: SettingsManagerProps) {
     };
 
     // Bind the P key to toggle settings
-    const tooltipProps = useToggleHotkey(
-        Enum.KeyCode.P,
-        isOpen,
-        handleToggle,
-        {
-            priority: 10, // High priority for settings
-            enabled: true,
-            label: "Settings"
-        }
-    );
+    const tooltipProps = useHotkeyWithTooltip({
+        keyCode: Enum.KeyCode.P,
+        action: () => {
+            if (!isOpen)
+                return false;
+
+            handleToggle();
+            return true;
+        },
+        label: "Settings"
+    });
 
     useEffect(() => {
         if (props.defaultVisible) {

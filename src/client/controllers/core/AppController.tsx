@@ -1,4 +1,4 @@
-import { Controller, OnInit } from "@flamework/core";
+import { Controller, OnStart } from "@flamework/core";
 import React from "@rbxts/react";
 import ReactRoblox from "@rbxts/react-roblox";
 import { PLAYER_GUI } from "client/constants";
@@ -13,13 +13,13 @@ APP_GUI.Name = "App";
 APP_GUI.Parent = PLAYER_GUI;
 
 @Controller()
-export default class AppController implements OnInit {
+export default class AppController implements OnStart {
 
     constructor(
         private readonly buildController: BuildController
     ) { }
 
-    onInit() {
+    onStart() {
         const root = ReactRoblox.createRoot(APP_GUI);
         root.render(<App buildController={this.buildController} />);
     }

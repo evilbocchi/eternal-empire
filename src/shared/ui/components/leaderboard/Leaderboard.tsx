@@ -2,8 +2,7 @@
  * @fileoverview Main leaderboard component that displays rankings.
  */
 
-import React, { useEffect, useState } from "@rbxts/react";
-import { Workspace } from "@rbxts/services";
+import React, { useState } from "@rbxts/react";
 import LeaderboardHeader, { ColumnHeader } from "shared/ui/components/leaderboard/LeaderboardHeader";
 import LeaderboardSlot from "shared/ui/components/leaderboard/LeaderboardSlot";
 
@@ -23,8 +22,6 @@ declare global {
 
 /** Props for the main Leaderboard component */
 export interface LeaderboardProps {
-    /** The part where the leaderboard is displayed */
-    part?: BasePart;
     /** The type/title of the leaderboard */
     leaderboardType: LeaderboardType;
     /** Array of leaderboard entries to display */
@@ -63,14 +60,11 @@ const DEFAULT_VALUE_LABELS: Record<string, string> = {
  */
 export default function Leaderboard({
     leaderboardType,
-    part,
     entries,
     title,
     valueLabel,
     maxEntries = 100
 }: LeaderboardProps) {
-    const [playAnimation, setPlayAnimation] = useState(true);
-
     const displayTitle = title || DEFAULT_TITLES[leaderboardType] || `${leaderboardType} Leaderboard`;
     const displayValueLabel = valueLabel || DEFAULT_VALUE_LABELS[leaderboardType] || leaderboardType;
 
@@ -79,21 +73,6 @@ export default function Leaderboard({
     for (let i = 0; i < entries.size() && i < maxEntries; i++) {
         displayEntries.push(entries[i]);
     }
-
-    useEffect(() => {
-        let breaking = false;
-        while (task.wait(1)) {
-            if (breaking || !part || !Workspace.CurrentCamera) break;
-            const distance = Workspace.CurrentCamera.CFrame.Position.sub(part.Position).Magnitude;
-            const shouldAnimate = distance < 30;
-            if (shouldAnimate !== playAnimation) {
-                setPlayAnimation(shouldAnimate);
-            }
-        }
-        return () => {
-            breaking = true;
-        };
-    }, [part]);
 
     let gradient: ColorSequence;
     switch (leaderboardType) {
@@ -172,7 +151,6 @@ export default function Leaderboard({
                     <LeaderboardSlot
                         key={`entry-${entry.place}-${entry.name}`}
                         entry={entry}
-                        playAnimation={playAnimation}
                     />
                 ))}
             </scrollingframe>

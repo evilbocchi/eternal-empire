@@ -37,7 +37,6 @@ export class LeaderboardController implements OnStart, LeaderboardDataManager {
                 root.render(<LiveLeaderboard
                     dataManager={this}
                     leaderboardType={leaderboard.Name as LeaderboardType}
-                    part={guiPart}
                 />);
             });
 

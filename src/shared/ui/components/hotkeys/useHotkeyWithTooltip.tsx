@@ -11,26 +11,25 @@ import { useTooltipProps } from "shared/ui/components/tooltip/useTooltipProps";
 
 declare global {
     type TooltipProps = ReturnType<typeof useHotkeyWithTooltip>;
+
+    type HotkeyWithTooltipOptions = {
+        keyCode: Enum.KeyCode | undefined,
+        action: (usedHotkey: boolean) => boolean,
+        priority?: number;
+        label?: string;
+        endAction?: () => boolean;
+        enabled?: boolean;
+        hideHotkey?: boolean;
+        onEnter?: () => void;
+        onLeave?: () => void;
+    };
 }
 
 /**
  * Hook that combines hotkey binding with tooltip integration
  * Similar to the original HotkeysController.setHotkey method
  */
-export function useHotkeyWithTooltip(
-    keyCode: Enum.KeyCode | undefined,
-    action: (usedHotkey: boolean) => boolean,
-    options?: {
-        priority?: number;
-        label?: string;
-        endAction?: () => boolean;
-        enabled?: boolean;
-        hideHotkey?: boolean;
-    }
-) {
-    const label = options?.label;
-    const hideHotkey = options?.hideHotkey;
-
+export default function useHotkeyWithTooltip({ keyCode, action, priority, label, endAction, enabled, hideHotkey, onEnter, onLeave }: HotkeyWithTooltipOptions) {
     // Create tooltip message that includes hotkey if not hidden
     const tooltipMessage = (() => {
         if (!label) return undefined;
@@ -42,14 +41,14 @@ export function useHotkeyWithTooltip(
     useHotkey(keyCode ? {
         keyCode,
         action,
-        priority: options?.priority,
-        label: options?.label,
-        endAction: options?.endAction,
-        enabled: options?.enabled,
+        priority: priority,
+        label: label,
+        endAction: endAction,
+        enabled: enabled,
     } : undefined);
 
     // Get tooltip props
-    const tooltipProps = useTooltipProps(tooltipMessage ? { message: tooltipMessage } : {});
+    const tooltipProps = useTooltipProps(tooltipMessage ? { message: tooltipMessage } : {}, onEnter, onLeave);
 
     // Return both the action handler and tooltip props
     const handleClick = useCallback(() => {
@@ -61,58 +60,4 @@ export function useHotkeyWithTooltip(
         onClick: handleClick,
         hotkeyLabel: keyCode ? keyCode.Name : undefined,
     };
-}
-
-/**
- * Hook for simple hotkey binding without UI integration
- */
-export function useSimpleHotkey(
-    keyCode: Enum.KeyCode,
-    action: () => void | boolean,
-    options?: {
-        priority?: number;
-        enabled?: boolean;
-    }
-) {
-    useHotkey({
-        keyCode,
-        action: (usedHotkey) => {
-            const result = action();
-            return result === true;
-        },
-        priority: options?.priority,
-        enabled: options?.enabled,
-    });
-}
-
-/**
- * Binds a hotkey that toggles a boolean state and provides tooltip info.
- *
- * @param keyCode The key code to bind the hotkey to.
- * @param isOpen The current state of the toggle.
- * @param onToggle The function to call when the hotkey is toggled.
- * 
- */
-export function useToggleHotkey(
-    keyCode: Enum.KeyCode,
-    isOpen: boolean,
-    onToggle: () => void,
-    options?: {
-        priority?: number;
-        enabled?: boolean;
-        label?: string;
-    }
-) {
-    return useHotkeyWithTooltip(
-        keyCode,
-        (usedHotkey) => {
-            onToggle();
-            return true; // Always consume the hotkey
-        },
-        {
-            priority: options?.priority,
-            enabled: options?.enabled,
-            label: options?.label,
-        }
-    );
 }

@@ -2,7 +2,7 @@ import React, { useRef } from "@rbxts/react";
 import { TweenService } from "@rbxts/services";
 import { getAsset } from "shared/asset/AssetMap";
 import { playSound } from "shared/asset/GameAssets";
-import { useHover } from "shared/ui/hooks/useHover";
+import useHotkeyWithTooltip from "shared/ui/components/hotkeys/useHotkeyWithTooltip";
 
 interface WindowCloseButtonProps {
     onClick: () => void;
@@ -11,22 +11,26 @@ interface WindowCloseButtonProps {
 export default function WindowCloseButton({ onClick }: WindowCloseButtonProps) {
     const closeButtonRef = useRef<TextButton>();
     const defaultColor = Color3.fromRGB(255, 76, 76);
+    const { events } = useHotkeyWithTooltip({
+        keyCode: Enum.KeyCode.X,
+        action: () => {
+            const parent = closeButtonRef.current?.Parent;
+            if (!parent || !parent.IsA("GuiObject") || !parent.Visible)
+                return false;
 
-    const { hovering, hoverProps } = useHover(
-        () => TweenService.Create(closeButtonRef.current!, new TweenInfo(0.1), {
+            playSound("MenuClose.mp3");
+            onClick();
+            return true;
+        },
+        onEnter: () => TweenService.Create(closeButtonRef.current!, new TweenInfo(0.1), {
             BackgroundColor3: defaultColor.Lerp(new Color3(1, 1, 1), 0.5),
             Rotation: 5
         }).Play(),
-        () => TweenService.Create(closeButtonRef.current!, new TweenInfo(0.1), {
+        onLeave: () => TweenService.Create(closeButtonRef.current!, new TweenInfo(0.1), {
             BackgroundColor3: defaultColor,
             Rotation: 0
         }).Play()
-    );
-
-    const handleClick = () => {
-        playSound("MenuClose.mp3");
-        onClick();
-    };
+    });
 
     return (<textbutton
         key="CloseButton"
@@ -36,10 +40,7 @@ export default function WindowCloseButton({ onClick }: WindowCloseButtonProps) {
         BackgroundColor3={defaultColor}
         BorderColor3={Color3.fromRGB(45, 45, 45)}
         BorderSizePixel={3}
-        Event={{
-            Activated: handleClick,
-            ...hoverProps
-        }}
+        Event={{ ...events }}
         Position={new UDim2(1, -10, 0, 10)}
         Size={new UDim2(0, 30, 0, 30)}
         Text={""}

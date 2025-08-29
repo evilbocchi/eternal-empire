@@ -27,7 +27,7 @@ export default function PositionWindow({
     size = new UDim2(0, 0, 0, 16)
 }: PositionWindowProps) {
     const positionText = `${math.round(position.X)}, ${math.round(position.Y)}, ${math.round(position.Z)}`;
-    const tooltipProps = useTooltipProps({
+    const { events } = useTooltipProps({
         message: `Position of your character.\n<font color="rgb(200, 200, 200)" size="16">Use these coordinates to search your way through the world.</font>`
     });
 
@@ -65,7 +65,7 @@ export default function PositionWindow({
                 ScaleType={Enum.ScaleType.Tile}
                 Size={new UDim2(0, 0, 0, 16)}
                 TileSize={new UDim2(0, 32, 0, 32)}
-                Event={{ ...tooltipProps.hoverProps }}
+                Event={{ ...events }}
             >
                 {/* Position Text Label */}
                 <textlabel

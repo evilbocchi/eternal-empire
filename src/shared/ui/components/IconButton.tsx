@@ -14,7 +14,7 @@ export default function IconButton(props: IconButtonProps) {
     const buttonRef = useRef<ImageButton>();
     const scaleRef = useRef<UIScale>();
 
-    const { hovering, hoverProps } = useHover(props.onMouseEnter, props.onMouseLeave);
+    const { hovering, events } = useHover(props.onMouseEnter, props.onMouseLeave);
     const color = hovering ? new Color3(0.8, 0.8, 0.8) : new Color3(1, 1, 1);
     const scale = hovering ? 1.05 : 1;
     useEffect(() => {
@@ -36,7 +36,7 @@ export default function IconButton(props: IconButtonProps) {
             Image={props.image}
             Event={{
                 Activated: handleClick,
-                ...hoverProps
+                ...events
             }}
             {...props.buttonProps}
         >
