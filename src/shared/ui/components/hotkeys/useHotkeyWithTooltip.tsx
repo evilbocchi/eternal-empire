@@ -7,6 +7,7 @@
 
 import { useCallback } from "@rbxts/react";
 import { useHotkey } from "shared/ui/components/hotkeys/HotkeyProvider";
+import { TooltipData } from "shared/ui/components/tooltip/TooltipProvider";
 import { useTooltipProps } from "shared/ui/components/tooltip/useTooltipProps";
 
 declare global {
@@ -16,7 +17,7 @@ declare global {
         keyCode: Enum.KeyCode | undefined,
         action: (usedHotkey: boolean) => boolean,
         priority?: number;
-        label?: string;
+        label: string;
         endAction?: () => boolean;
         enabled?: boolean;
         hideHotkey?: boolean;
@@ -31,11 +32,11 @@ declare global {
  */
 export default function useHotkeyWithTooltip({ keyCode, action, priority, label, endAction, enabled, hideHotkey, onEnter, onLeave }: HotkeyWithTooltipOptions) {
     // Create tooltip message that includes hotkey if not hidden
-    const tooltipMessage = (() => {
-        if (!label) return undefined;
-        if (!keyCode || hideHotkey) return label;
-        return `${label} (${keyCode.Name})`;
-    })();
+    const generateTooltipData = (): TooltipData => {
+        if (!label) return {};
+        if (!keyCode || hideHotkey) return { message: label };
+        return { message: `${label} (${keyCode.Name})` };
+    };
 
     // Bind the hotkey
     useHotkey(keyCode ? {
@@ -48,7 +49,7 @@ export default function useHotkeyWithTooltip({ keyCode, action, priority, label,
     } : undefined);
 
     // Get tooltip props
-    const tooltipProps = useTooltipProps(tooltipMessage ? { message: tooltipMessage } : {}, onEnter, onLeave);
+    const tooltipProps = useTooltipProps(generateTooltipData, onEnter, onLeave);
 
     // Return both the action handler and tooltip props
     const handleClick = useCallback(() => {

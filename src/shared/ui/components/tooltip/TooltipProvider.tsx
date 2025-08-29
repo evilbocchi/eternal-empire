@@ -7,7 +7,6 @@
  */
 
 import React, { createContext, ReactNode, useCallback, useContext, useEffect, useRef, useState } from "@rbxts/react";
-import { Players, RunService, Workspace } from "@rbxts/services";
 import Item from "shared/item/Item";
 import ItemMetadata from "shared/item/ItemMetadata";
 import Items from "shared/items/Items";
@@ -77,14 +76,12 @@ export default function TooltipProvider({ children }: TooltipProviderProps) {
         };
     }, []);
 
-    const contextValue: TooltipContextValue = {
-        showTooltip,
-        hideTooltip,
-        isVisible,
-    };
-
     return (
-        <TooltipContext.Provider value={contextValue}>
+        <TooltipContext.Provider value={{
+            showTooltip,
+            hideTooltip,
+            isVisible,
+        }}>
             {children}
             <TooltipWindow
                 data={tooltipData}
@@ -101,7 +98,7 @@ export default function TooltipProvider({ children }: TooltipProviderProps) {
 export function useTooltip() {
     const context = useContext(TooltipContext);
     if (context === undefined) {
-        error("useTooltip must be used within a TooltipProvider");
+        throw "useTooltip must be used within a TooltipProvider";
     }
     return context;
 }

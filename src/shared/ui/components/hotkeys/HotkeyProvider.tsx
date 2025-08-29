@@ -5,8 +5,10 @@
  * Supports hotkey binding, priority management, and integration with UI components.
  */
 
-import React, { createContext, DependencyList, ReactNode, useContext, useEffect, useRef } from "@rbxts/react";
+import React, { createContext, DependencyList, ReactNode, useCallback, useContext, useEffect, useRef } from "@rbxts/react";
 import { UserInputService } from "@rbxts/services";
+import Packets from "shared/Packets";
+import useProperty from "shared/ui/hooks/useProperty";
 
 export interface HotkeyBinding {
     /** The key code to bind */
@@ -16,7 +18,7 @@ export interface HotkeyBinding {
     /** Priority for execution order (higher = executes first) */
     priority?: number;
     /** Label for the hotkey */
-    label?: string;
+    label: string;
     /** Action to execute on key release */
     endAction?: () => boolean;
     /** Whether this binding is currently enabled */
@@ -24,6 +26,8 @@ export interface HotkeyBinding {
 }
 
 interface HotkeyContextValue {
+
+    bindingsRef: React.MutableRefObject<Map<string, HotkeyBinding>>;
     /** Bind a hotkey */
     bindHotkey: (binding: HotkeyBinding) => () => void;
     /** Execute a specific hotkey */
@@ -41,8 +45,19 @@ interface HotkeyProviderProps {
  */
 export default function HotkeyProvider({ children }: HotkeyProviderProps) {
     const bindingsRef = useRef<Map<string, HotkeyBinding>>(new Map());
+    const hotkeys = useProperty(Packets.settings)?.hotkeys;
 
-    const executeHotkey = (keyCode: Enum.KeyCode): boolean => {
+    useEffect(() => {
+        if (!hotkeys) return;
+
+        for (const [label, value] of pairs(hotkeys)) {
+            const hotkeyBinding = bindingsRef.current.get(tostring(label));
+            if (hotkeyBinding)
+                hotkeyBinding.keyCode = Enum.KeyCode.FromValue(value) ?? Enum.KeyCode.Unknown;
+        }
+    }, [hotkeys]);
+
+    const executeHotkey = useCallback((keyCode: Enum.KeyCode): boolean => {
         // Get all bindings for this key and sort by priority
         const allBindings: HotkeyBinding[] = [];
         for (const [_, binding] of pairs(bindingsRef.current)) {
@@ -60,17 +75,17 @@ export default function HotkeyProvider({ children }: HotkeyProviderProps) {
             }
         }
         return false;
-    };
+    }, []);
 
-    const bindHotkey = (binding: HotkeyBinding) => {
-        const id = `hotkey_${binding.label}`;
+    const bindHotkey = useCallback((binding: HotkeyBinding) => {
+        const id = binding.label ?? "Unknown";
         bindingsRef.current.set(id, binding);
 
         // Return cleanup function
         return () => {
             bindingsRef.current.delete(id);
         };
-    };
+    }, []);
 
     // Set up input listeners
     useEffect(() => {
@@ -104,15 +119,14 @@ export default function HotkeyProvider({ children }: HotkeyProviderProps) {
             inputBeganConnection.Disconnect();
             inputEndedConnection.Disconnect();
         };
-    }, [executeHotkey]);
-
-    const contextValue: HotkeyContextValue = {
-        bindHotkey,
-        executeHotkey,
-    };
+    }, []);
 
     return (
-        <HotkeyContext.Provider value={contextValue}>
+        <HotkeyContext.Provider value={{
+            bindingsRef,
+            bindHotkey,
+            executeHotkey,
+        }}>
             {children}
         </HotkeyContext.Provider>
     );

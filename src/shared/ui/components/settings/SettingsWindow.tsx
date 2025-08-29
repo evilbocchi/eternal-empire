@@ -2,11 +2,11 @@ import React, { useEffect, useRef, useState } from "@rbxts/react";
 import { TweenService } from "@rbxts/services";
 import { getAsset } from "shared/asset/AssetMap";
 import Packets from "shared/Packets";
+import { useHotkeys } from "shared/ui/components/hotkeys/HotkeyProvider";
 import WindowCloseButton from "shared/ui/components/window/WindowCloseButton";
 import WindowTitle from "shared/ui/components/window/WindowTitle";
 import { RobotoMonoBold } from "shared/ui/GameFonts";
 import useDraggable from "shared/ui/hooks/useDraggable";
-import useProperty from "shared/ui/hooks/useProperty";
 import HotkeyOption from "./HotkeyOption";
 import SettingSection from "./SettingSection";
 import SettingToggle from "./SettingToggle";
@@ -23,15 +23,10 @@ export default function SettingsWindow({
     const frameContentRef = useRef<Frame>();
     const [previousVisible, setPreviousVisible] = useState(visible);
     const [selectedHotkey, setSelectedHotkey] = useState<string | undefined>();
-    const settings = useProperty(Packets.settings)!;
-    const hotkeys = settings.hotkeys;
+    const bindings = useHotkeys().bindingsRef.current;
 
     const initialPosition = new UDim2(0.5, 0, 0.5, 0);
     const { position, dragProps } = useDraggable({ initialPosition });
-
-    let sortedHotkeys = new Array<{ name: string, key: number; }>();
-    for (const [name, key] of pairs(hotkeys)) // TODO: Implement sorting
-        sortedHotkeys.push({ name: tostring(name), key });
 
     const onHotkeySelect = (hotkeyName: string) => {
         setSelectedHotkey(prev => prev === hotkeyName ? undefined : hotkeyName);
@@ -71,6 +66,20 @@ export default function SettingsWindow({
         }
         setPreviousVisible(visible);
     }, [visible, previousVisible, position]);
+
+    const hotkeyOptions = new Array<JSX.Element>();
+    for (const [label, binding] of bindings) {
+        hotkeyOptions.push(<HotkeyOption
+            key={label}
+            title={label}
+            keyText={binding.keyCode.Name ?? "?"}
+            layoutOrder={binding.priority ?? 0 + 100}
+            isSelected={selectedHotkey === label}
+            onSelect={() => onHotkeySelect?.(label)}
+            onHotkeyChange={(newKeyCode) => handleHotkeyChange(label, newKeyCode)}
+            onDeselect={() => onHotkeyDeselect?.()}
+        />);
+    }
 
     return (
         <frame
@@ -162,18 +171,7 @@ export default function SettingsWindow({
                 <SettingSection title="Controls" />
 
                 {/* Hotkeys */}
-                {sortedHotkeys.map((hotkey, index) => (
-                    <HotkeyOption
-                        key={hotkey.name}
-                        title={hotkey.name}
-                        keyText={Enum.KeyCode.FromValue(hotkey.key)?.Name ?? "?"}
-                        layoutOrder={index + 100}
-                        isSelected={selectedHotkey === hotkey.name}
-                        onSelect={() => onHotkeySelect?.(hotkey.name)}
-                        onHotkeyChange={(newKeyCode) => handleHotkeyChange(hotkey.name, newKeyCode)}
-                        onDeselect={() => onHotkeyDeselect?.()}
-                    />
-                ))}
+                {hotkeyOptions}
             </scrollingframe>
             <uistroke ApplyStrokeMode={Enum.ApplyStrokeMode.Border} Color={Color3.fromRGB(255, 255, 255)} />
         </frame>

@@ -18,7 +18,7 @@ export = {
         mockData();
 
         return (
-            <HotkeyProvider defaultEnabled={true}>
+            <HotkeyProvider>
                 <TooltipProvider>
                     <SettingsManager defaultVisible={true} />
                 </TooltipProvider>

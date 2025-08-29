@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "@rbxts/react";
+import React, { useCallback, useEffect, useState } from "@rbxts/react";
 import { getAsset } from "shared/asset/AssetMap";
 import { playSound } from "shared/asset/GameAssets";
 import useHotkeyWithTooltip from "shared/ui/components/hotkeys/useHotkeyWithTooltip";
@@ -27,7 +27,7 @@ export function SettingsButton({ tooltipProps }: { tooltipProps: TooltipProps; }
 export default function SettingsManager(props: SettingsManagerProps) {
     const [isOpen, setIsOpen] = useState(false);
 
-    const handleToggle = () => {
+    const handleToggle = useCallback(() => {
         if (isOpen) {
             playSound("MenuClose.mp3");
             setIsOpen(false);
@@ -35,15 +35,12 @@ export default function SettingsManager(props: SettingsManagerProps) {
             playSound("MenuOpen.mp3");
             setIsOpen(true);
         }
-    };
+    }, []);
 
     // Bind the P key to toggle settings
     const tooltipProps = useHotkeyWithTooltip({
         keyCode: Enum.KeyCode.P,
         action: () => {
-            if (!isOpen)
-                return false;
-
             handleToggle();
             return true;
         },

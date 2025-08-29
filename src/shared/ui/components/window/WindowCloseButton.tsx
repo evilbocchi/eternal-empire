@@ -12,6 +12,7 @@ export default function WindowCloseButton({ onClick }: WindowCloseButtonProps) {
     const closeButtonRef = useRef<TextButton>();
     const defaultColor = Color3.fromRGB(255, 76, 76);
     const { events } = useHotkeyWithTooltip({
+        label: "Close Window",
         keyCode: Enum.KeyCode.X,
         action: () => {
             const parent = closeButtonRef.current?.Parent;
