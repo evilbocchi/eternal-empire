@@ -18,7 +18,7 @@ export default function SettingToggle({ setting, title, subtitle, layoutOrder = 
     const [hovering, setHovering] = useState(false);
     const [justClicked, setJustClicked] = useState(false);
     const settings = useProperty(Packets.settings);
-    const enabled = settings?.[setting] === true;
+    const enabled = settings[setting] === true;
 
     const color = enabled ? Color3.fromRGB(170, 255, 127) : Color3.fromRGB(255, 52, 52);
     const hoverColor = color.Lerp(Color3.fromRGB(255, 255, 255), 0.5);

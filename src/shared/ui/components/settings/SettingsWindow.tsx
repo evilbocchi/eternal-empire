@@ -36,8 +36,8 @@ export default function SettingsWindow({
         setSelectedHotkey(undefined);
     };
 
-    const handleHotkeyChange = (hotkeyName: string, newKeyCode: Enum.KeyCode) => {
-        Packets.setHotkey.toServer(hotkeyName, newKeyCode.Value);
+    const handleHotkeyChange = (label: string, keyCode: Enum.KeyCode) => {
+        Packets.setHotkey.toServer(label, keyCode.Value);
         setSelectedHotkey(undefined);
     };
 

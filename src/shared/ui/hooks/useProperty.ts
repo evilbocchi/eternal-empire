@@ -19,7 +19,7 @@ function useProperty<T>(propertyPacket: PropertyPacket<T>) {
         return () => connection.disconnect();
     }, [propertyPacket]);
 
-    return property;
+    return property!;
 }
 
 export = useProperty;

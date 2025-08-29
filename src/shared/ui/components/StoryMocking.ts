@@ -8,4 +8,9 @@ export function mockData() {
         (mockPlayerData.settings as { [key: string]: unknown; })[setting] = value;
         Packets.settings.setFor(player, mockPlayerData.settings);
     });
+
+    Packets.setHotkey.fromClient((player, key, action) => {
+        mockPlayerData.settings.hotkeys[key] = action;
+        Packets.settings.setFor(player, mockPlayerData.settings);
+    });
 }

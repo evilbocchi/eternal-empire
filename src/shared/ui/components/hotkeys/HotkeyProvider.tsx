@@ -45,7 +45,8 @@ interface HotkeyProviderProps {
  */
 export default function HotkeyProvider({ children }: HotkeyProviderProps) {
     const bindingsRef = useRef<Map<string, HotkeyBinding>>(new Map());
-    const hotkeys = useProperty(Packets.settings)?.hotkeys;
+    const settings = useProperty(Packets.settings);
+    const hotkeys = settings.hotkeys;
 
     useEffect(() => {
         if (!hotkeys) return;

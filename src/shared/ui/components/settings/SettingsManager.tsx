@@ -35,7 +35,7 @@ export default function SettingsManager(props: SettingsManagerProps) {
             playSound("MenuOpen.mp3");
             setIsOpen(true);
         }
-    }, []);
+    }, [isOpen]);
 
     // Bind the P key to toggle settings
     const tooltipProps = useHotkeyWithTooltip({

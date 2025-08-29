@@ -57,8 +57,14 @@ export default function useHotkeyWithTooltip({ keyCode, action, priority, label,
     }, [action]);
 
     return {
-        ...tooltipProps,
+        hovering: tooltipProps.hovering,
+        onMouseEnter: tooltipProps.onMouseEnter,
+        onMouseLeave: tooltipProps.onMouseLeave,
         onClick: handleClick,
+        events: {
+            ...tooltipProps.events,
+            Activated: handleClick,
+        },
         hotkeyLabel: keyCode ? keyCode.Name : undefined,
     };
 }

@@ -29,7 +29,7 @@ export default function BuildManager({
         isRestricted: false,
         animationsEnabled: true
     });
-    const settings = useProperty(Packets.settings)!;
+    const settings = useProperty(Packets.settings);
 
     // Update animations setting when prop changes
     useEffect(() => {
