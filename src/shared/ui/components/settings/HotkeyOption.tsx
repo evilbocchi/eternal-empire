@@ -1,21 +1,20 @@
 import React, { useEffect } from "@rbxts/react";
 import { UserInputService } from "@rbxts/services";
 import { playSound } from "shared/asset/GameAssets";
+import { HotkeyBinding } from "shared/ui/components/hotkeys/HotkeyProvider";
 import { RobotoMonoBold } from "shared/ui/GameFonts";
 
 interface HotkeyOptionProps {
-    title: string;
-    keyText: string;
-    layoutOrder?: number;
+    hotkeyBinding: HotkeyBinding;
     isSelected?: boolean;
     onSelect?: () => void;
     onHotkeyChange?: (newKeyCode: Enum.KeyCode) => void;
     onDeselect?: () => void;
 }
 
-export default function HotkeyOption({ title, keyText, layoutOrder = 0, isSelected = false, onSelect, onHotkeyChange, onDeselect }: HotkeyOptionProps) {
+export default function HotkeyOption({ hotkeyBinding, isSelected = false, onSelect, onHotkeyChange, onDeselect }: HotkeyOptionProps) {
     const toggleColor = isSelected ? Color3.fromRGB(255, 138, 138) : Color3.fromRGB(85, 255, 127);
-    const displayText = isSelected ? ".." : keyText;
+    const displayText = isSelected ? ".." : hotkeyBinding.keyCode.Name ?? "?";
 
     const handleSelect = () => {
         if (!isSelected) {
@@ -63,7 +62,7 @@ export default function HotkeyOption({ title, keyText, layoutOrder = 0, isSelect
     }, [isSelected, onDeselect]); return (
         <frame
             BackgroundTransparency={1}
-            LayoutOrder={layoutOrder}
+            LayoutOrder={hotkeyBinding.priority ?? 0 + 100}
             Size={new UDim2(1, 0, 0, 40)}
         >
             <textbutton
@@ -145,7 +144,7 @@ export default function HotkeyOption({ title, keyText, layoutOrder = 0, isSelect
                 FontFace={RobotoMonoBold}
                 LayoutOrder={-1}
                 Position={new UDim2(0.025, 0, 0.5, 0)}
-                Text={title}
+                Text={hotkeyBinding.label}
                 TextColor3={Color3.fromRGB(255, 255, 255)}
                 TextSize={30}
                 TextStrokeTransparency={0}

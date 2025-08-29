@@ -8,7 +8,6 @@
 import React, { createContext, DependencyList, ReactNode, useCallback, useContext, useEffect, useRef } from "@rbxts/react";
 import { UserInputService } from "@rbxts/services";
 import Packets from "shared/Packets";
-import useProperty from "shared/ui/hooks/useProperty";
 
 export interface HotkeyBinding {
     /** The key code to bind */
@@ -45,18 +44,18 @@ interface HotkeyProviderProps {
  */
 export default function HotkeyProvider({ children }: HotkeyProviderProps) {
     const bindingsRef = useRef<Map<string, HotkeyBinding>>(new Map());
-    const settings = useProperty(Packets.settings);
-    const hotkeys = settings.hotkeys;
 
     useEffect(() => {
-        if (!hotkeys) return;
+        const connection = Packets.settings.observe((settings) => {
+            for (const [label, value] of pairs(settings.hotkeys)) {
+                const hotkeyBinding = bindingsRef.current.get(tostring(label));
+                if (hotkeyBinding)
+                    hotkeyBinding.keyCode = Enum.KeyCode.FromValue(value) ?? Enum.KeyCode.Unknown;
+            }
+        });
 
-        for (const [label, value] of pairs(hotkeys)) {
-            const hotkeyBinding = bindingsRef.current.get(tostring(label));
-            if (hotkeyBinding)
-                hotkeyBinding.keyCode = Enum.KeyCode.FromValue(value) ?? Enum.KeyCode.Unknown;
-        }
-    }, [hotkeys]);
+        return () => connection.Disconnect();
+    }, []);
 
     const executeHotkey = useCallback((keyCode: Enum.KeyCode): boolean => {
         // Get all bindings for this key and sort by priority

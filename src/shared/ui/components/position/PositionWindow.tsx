@@ -1,6 +1,6 @@
 import React from "@rbxts/react";
 import { getAsset } from "shared/asset/AssetMap";
-import { useTooltipProps } from "shared/ui/components/tooltip/useTooltipProps";
+import { useMessageTooltip } from "shared/ui/components/tooltip/useTooltipProps";
 
 interface PositionWindowProps {
     /** The position coordinates to display */
@@ -27,9 +27,9 @@ export default function PositionWindow({
     size = new UDim2(0, 0, 0, 16)
 }: PositionWindowProps) {
     const positionText = `${math.round(position.X)}, ${math.round(position.Y)}, ${math.round(position.Z)}`;
-    const { events } = useTooltipProps({
-        message: `Position of your character.\n<font color="rgb(200, 200, 200)" size="16">Use these coordinates to search your way through the world.</font>`
-    });
+    const { events } = useMessageTooltip(
+        `Position of your character.\n<font color="rgb(200, 200, 200)" size="16">Use these coordinates to search your way through the world.</font>`
+    );
 
     return (
         <frame

@@ -49,7 +49,7 @@ export default function useHotkeyWithTooltip({ keyCode, action, priority, label,
     } : undefined);
 
     // Get tooltip props
-    const tooltipProps = useTooltipProps(generateTooltipData, onEnter, onLeave);
+    const tooltipProps = useTooltipProps({ data: generateTooltipData, onEnter, onLeave });
 
     // Return both the action handler and tooltip props
     const handleClick = useCallback(() => {
@@ -58,8 +58,8 @@ export default function useHotkeyWithTooltip({ keyCode, action, priority, label,
 
     return {
         hovering: tooltipProps.hovering,
-        onMouseEnter: tooltipProps.onMouseEnter,
-        onMouseLeave: tooltipProps.onMouseLeave,
+        onEnter: tooltipProps.onEnter,
+        onLeave: tooltipProps.onLeave,
         onClick: handleClick,
         events: {
             ...tooltipProps.events,

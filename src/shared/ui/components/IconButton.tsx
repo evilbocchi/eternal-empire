@@ -1,12 +1,12 @@
 import React, { InstanceProps, useEffect, useRef } from "@rbxts/react";
 import { TweenService } from "@rbxts/services";
-import { useHover } from "shared/ui/hooks/useHover";
+import useHover from "shared/ui/hooks/useHover";
 
 interface IconButtonProps {
     image: string;
     onClick?: () => void;
-    onMouseEnter?: () => void;
-    onMouseLeave?: () => void;
+    onEnter?: () => void;
+    onLeave?: () => void;
     buttonProps?: InstanceProps<ImageButton>;
 }
 
@@ -14,7 +14,7 @@ export default function IconButton(props: IconButtonProps) {
     const buttonRef = useRef<ImageButton>();
     const scaleRef = useRef<UIScale>();
 
-    const { hovering, events } = useHover(props.onMouseEnter, props.onMouseLeave);
+    const { hovering, events } = useHover(props);
     const color = hovering ? new Color3(0.8, 0.8, 0.8) : new Color3(1, 1, 1);
     const scale = hovering ? 1.05 : 1;
     useEffect(() => {

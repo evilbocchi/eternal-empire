@@ -7,9 +7,17 @@
 
 import { useCallback, useState } from "@rbxts/react";
 
+interface UseHoverProps {
+    onMoved?: () => void;
+    onEnter?: () => void;
+    onLeave?: () => void;
+    initialState?: boolean;
+}
+
 /**
  * Hook that provides hover state with custom callbacks
  * 
+ * @param onMove Callback when mouse moves
  * @param onEnter Callback when mouse enters
  * @param onLeave Callback when mouse leaves
  * @param initialState Initial hover state (defaults to false)
@@ -32,30 +40,32 @@ import { useCallback, useState } from "@rbxts/react";
  * }
  * ```
  */
-export function useHover(
-    onEnter?: () => void,
-    onLeave?: () => void,
-    initialState = false
-) {
-    const [hovering, setHovering] = useState(initialState);
+export default function useHover(props: UseHoverProps) {
+    const [hovering, setHovering] = useState(props.initialState);
 
-    const onMouseEnter = useCallback(() => {
+    const onMoved = useCallback(() => {
         setHovering(true);
-        onEnter?.();
-    }, [onEnter]);
+        props.onMoved?.();
+    }, [props.onMoved]);
 
-    const onMouseLeave = useCallback(() => {
+    const onEnter = useCallback(() => {
+        setHovering(true);
+        props.onEnter?.();
+    }, [props.onEnter]);
+
+    const onLeave = useCallback(() => {
         setHovering(false);
-        onLeave?.();
-    }, [onLeave]);
+        props.onLeave?.();
+    }, [props.onLeave]);
 
     return {
         hovering,
-        onMouseEnter,
-        onMouseLeave,
+        onEnter,
+        onLeave,
         events: {
-            MouseEnter: onMouseEnter,
-            MouseLeave: onMouseLeave,
+            MouseMoved: onMoved,
+            MouseEnter: onEnter,
+            MouseLeave: onLeave,
         }
     };
 }

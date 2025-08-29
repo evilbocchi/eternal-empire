@@ -70,10 +70,7 @@ export default function SettingsWindow({
     const hotkeyOptions = new Array<JSX.Element>();
     for (const [label, binding] of bindings) {
         hotkeyOptions.push(<HotkeyOption
-            key={label}
-            title={label}
-            keyText={binding.keyCode.Name ?? "?"}
-            layoutOrder={binding.priority ?? 0 + 100}
+            hotkeyBinding={binding}
             isSelected={selectedHotkey === label}
             onSelect={() => onHotkeySelect?.(label)}
             onHotkeyChange={(newKeyCode) => handleHotkeyChange(label, newKeyCode)}
