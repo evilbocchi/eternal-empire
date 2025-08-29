@@ -17,6 +17,8 @@ declare global {
 }
 
 interface LiveLeaderboardProps {
+    /** The part where the leaderboard is displayed */
+    part: BasePart;
     /** The leaderboard data manager instance */
     dataManager: LeaderboardDataManager;
     /** The type of leaderboard to display */
@@ -33,6 +35,7 @@ interface LiveLeaderboardProps {
  * Live leaderboard component that automatically updates with server data.
  */
 export default function LiveLeaderboard({
+    part,
     dataManager,
     leaderboardType,
     title,
@@ -45,6 +48,7 @@ export default function LiveLeaderboard({
     return (
         <Leaderboard
             leaderboardType={leaderboardType}
+            part={part}
             entries={entries}
             title={title}
             valueLabel={valueLabel}

@@ -5,8 +5,8 @@
  * Works with any GuiObject that supports InputBegan, InputChanged, and InputEnded events.
  */
 
-import { useCallback, useRef, useState } from "@rbxts/react";
-import { UserInputService } from "@rbxts/services";
+import { useCallback, useRef, useState, useEffect } from "@rbxts/react";
+import { UserInputService, Workspace } from "@rbxts/services";
 
 export interface DragConstraints {
     /** Minimum X position (in offset pixels) */
@@ -26,6 +26,10 @@ export interface UseDraggableOptions {
     constraints?: DragConstraints;
     /** Whether dragging is disabled */
     disabled?: boolean;
+    /** Whether to automatically constrain to screen bounds (default: true) */
+    constrainToScreen?: boolean;
+    /** Size of the draggable element (required for screen constraints) */
+    elementSize?: UDim2;
     /** Callback when drag starts */
     onDragStart?: (position: UDim2) => void;
     /** Callback during drag (called frequently) */
@@ -50,15 +54,18 @@ export interface DragState {
  * @example
  * ```tsx
  * function DraggableWindow() {
+ *   const windowSize = new UDim2(0, 300, 0, 200);
  *   const { isDragging, position, dragProps } = useDraggable({
- *     initialPosition: new UDim2(0.5, 0, 0.5, 0),
- *     constraints: { minX: 0, maxX: 800, minY: 0, maxY: 600 },
+ *     initialPosition: new UDim2(0.5, -150, 0.5, -100),
+ *     elementSize: windowSize,
+ *     constrainToScreen: true, // Window won't go outside screen bounds
  *     onDragStart: () => print("Started dragging"),
  *     onDragEnd: (pos) => print("Ended at", pos)
  *   });
  *   
  *   return (
  *     <frame
+ *       Size={windowSize}
  *       Position={position}
  *       Event={{ ...dragProps }}
  *     />
@@ -71,6 +78,8 @@ export default function useDraggable(options: UseDraggableOptions = {}) {
         initialPosition = new UDim2(0.5, 0, 0.5, 0),
         constraints,
         disabled = false,
+        constrainToScreen = true,
+        elementSize,
         onDragStart,
         onDrag,
         onDragEnd
@@ -78,13 +87,50 @@ export default function useDraggable(options: UseDraggableOptions = {}) {
 
     const [isDragging, setIsDragging] = useState(false);
     const [position, setPosition] = useState(initialPosition);
+    const [screenConstraints, setScreenConstraints] = useState<DragConstraints | undefined>();
 
     const dragStartRef = useRef<Vector2>();
     const initialPositionRef = useRef<Vector2>();
     const connectionRef = useRef<RBXScriptConnection>();
 
+    // Calculate screen constraints
+    useEffect(() => {
+        if (!constrainToScreen || !elementSize) {
+            setScreenConstraints(undefined);
+            return;
+        }
+
+        const camera = Workspace.CurrentCamera;
+        if (!camera) return;
+
+        const viewportSize = camera.ViewportSize;
+
+        // Calculate element size in pixels
+        const elementWidth = elementSize.X.Scale * viewportSize.X + elementSize.X.Offset;
+        const elementHeight = elementSize.Y.Scale * viewportSize.Y + elementSize.Y.Offset;
+
+        setScreenConstraints({
+            minX: 0,
+            maxX: viewportSize.X - elementWidth,
+            minY: 0,
+            maxY: viewportSize.Y - elementHeight
+        });
+    }, [constrainToScreen, elementSize]);
+
     const applyConstraints = useCallback((newPosition: UDim2): UDim2 => {
-        if (!constraints) return newPosition;
+        // Combine manual constraints with screen constraints
+        const combinedConstraints: DragConstraints = {
+            ...screenConstraints,
+            ...constraints // Manual constraints override screen constraints
+        };
+
+        // Check if we have any constraints to apply
+        const hasConstraints = combinedConstraints.minX !== undefined ||
+            combinedConstraints.maxX !== undefined ||
+            combinedConstraints.minY !== undefined ||
+            combinedConstraints.maxY !== undefined;
+
+        if (!hasConstraints) return newPosition;
 
         const offsetX = newPosition.X.Offset;
         const offsetY = newPosition.Y.Offset;
@@ -92,10 +138,10 @@ export default function useDraggable(options: UseDraggableOptions = {}) {
         let constrainedX = offsetX;
         let constrainedY = offsetY;
 
-        if (constraints.minX !== undefined) constrainedX = math.max(constrainedX, constraints.minX);
-        if (constraints.maxX !== undefined) constrainedX = math.min(constrainedX, constraints.maxX);
-        if (constraints.minY !== undefined) constrainedY = math.max(constrainedY, constraints.minY);
-        if (constraints.maxY !== undefined) constrainedY = math.min(constrainedY, constraints.maxY);
+        if (combinedConstraints.minX !== undefined) constrainedX = math.max(constrainedX, combinedConstraints.minX);
+        if (combinedConstraints.maxX !== undefined) constrainedX = math.min(constrainedX, combinedConstraints.maxX);
+        if (combinedConstraints.minY !== undefined) constrainedY = math.max(constrainedY, combinedConstraints.minY);
+        if (combinedConstraints.maxY !== undefined) constrainedY = math.min(constrainedY, combinedConstraints.maxY);
 
         return new UDim2(
             newPosition.X.Scale,
@@ -103,7 +149,7 @@ export default function useDraggable(options: UseDraggableOptions = {}) {
             newPosition.Y.Scale,
             constrainedY
         );
-    }, [constraints]);
+    }, [constraints, screenConstraints]);
 
     const onInputBegan = useCallback((rbx: GuiObject, input: InputObject) => {
         if (disabled) return;

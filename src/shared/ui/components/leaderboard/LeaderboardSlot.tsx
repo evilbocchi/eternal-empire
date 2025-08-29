@@ -13,12 +13,14 @@ export interface LeaderboardSlotProps {
     entry: LeaderboardEntry;
     /** Whether this slot is highlighted */
     isHighlighted?: boolean;
+    /** Whether to play the scrolling gradient animation */
+    playAnimation?: boolean;
 }
 
 /**
  * A single leaderboard entry displaying place, name, and amount.
  */
-export default function LeaderboardSlot({ entry, isHighlighted = false }: LeaderboardSlotProps) {
+export default function LeaderboardSlot({ entry, isHighlighted = false, playAnimation = true }: LeaderboardSlotProps) {
     // Animation state for top 3 places gradients
     const [gradientOffset, setGradientOffset] = useState(0);
 
@@ -45,7 +47,7 @@ export default function LeaderboardSlot({ entry, isHighlighted = false }: Leader
         });
 
         return () => connection.Disconnect();
-    }, [entry.place]);
+    }, [entry.place, playAnimation]);
 
     // Special styling for top 3 places
     let backgroundColor: Color3;

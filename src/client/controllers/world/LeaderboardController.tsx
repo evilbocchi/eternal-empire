@@ -29,7 +29,7 @@ export class LeaderboardController implements OnStart, LeaderboardDataManager {
 
     onStart() {
         for (const leaderboard of LEADERBOARDS.GetChildren()) {
-            const guiPart = leaderboard.WaitForChild("GuiPart");
+            const guiPart = leaderboard.WaitForChild("GuiPart") as BasePart;
             const surfaceGui = new Instance("SurfaceGui");
             surfaceGui.Parent = guiPart;
             task.spawn(() => {
@@ -37,6 +37,7 @@ export class LeaderboardController implements OnStart, LeaderboardDataManager {
                 root.render(<LiveLeaderboard
                     dataManager={this}
                     leaderboardType={leaderboard.Name as LeaderboardType}
+                    part={guiPart}
                 />);
             });
 
