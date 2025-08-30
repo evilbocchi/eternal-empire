@@ -695,6 +695,18 @@ export default class Droplet {
             })
             .setValue(new CurrencyBundle().set("Funds", 150000))
     );
+    
+    static SlopeDroplet = Droplet.registerDroplet(
+        new Droplet("SlopeDroplet")
+            .setModel(() => {
+                const droplet = new Instance("Part");
+                droplet.Size = new Vector3(1.25, 1.25, 1.25);
+                droplet.Color = Difficulty.WalkASlope.color!;
+                droplet.Material = Enum.Material.Slate;
+                return droplet;
+            })
+            .setValue(new CurrencyBundle().set("Funds", 650000).set("Power", 150000).set("Bitcoin"),48)
+    );
 
     /**
      * Registers a droplet to the droplet list.
