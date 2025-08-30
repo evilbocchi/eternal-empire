@@ -24,7 +24,6 @@ import Packets from "shared/Packets";
 import { questState } from "shared/ui/components/quest/QuestState";
 import React from "@rbxts/react";
 import ReactRoblox from "@rbxts/react-roblox";
-import StandaloneQuestWindow from "shared/ui/components/quest/StandaloneQuestWindow";
 
 declare global {
     type QuestOption = Frame & {
@@ -144,7 +143,6 @@ export default class QuestsController implements OnInit, OnPhysics, OnCharacterA
         if (this.isQuestWindowVisible) return;
         
         this.isQuestWindowVisible = true;
-        this.updateQuestWindow();
         playSound("MenuOpen.mp3");
     }
 
@@ -155,7 +153,6 @@ export default class QuestsController implements OnInit, OnPhysics, OnCharacterA
         if (!this.isQuestWindowVisible) return;
         
         this.isQuestWindowVisible = false;
-        this.updateQuestWindow();
         playSound("MenuClose.mp3");
     }
 
@@ -171,22 +168,6 @@ export default class QuestsController implements OnInit, OnPhysics, OnCharacterA
             this.showQuestWindow();
             return true;
         }
-    }
-
-    /**
-     * Updates the standalone quest window React component.
-     */
-    private updateQuestWindow() {
-        if (!this.questWindowRoot) {
-            this.questWindowRoot = ReactRoblox.createRoot(this.questWindowContainer);
-        }
-
-        this.questWindowRoot.render(
-            React.createElement(StandaloneQuestWindow, {
-                visible: this.isQuestWindowVisible,
-                onClose: () => this.hideQuestWindow()
-            })
-        );
     }
 
     /**
@@ -344,9 +325,6 @@ export default class QuestsController implements OnInit, OnPhysics, OnCharacterA
     }
 
     onInit() {
-        // Initialize the standalone quest window
-        this.updateQuestWindow();
-
         this.beamContainer.CanCollide = false;
         this.beamContainer.Anchored = true;
         this.beamContainer.Transparency = 1;

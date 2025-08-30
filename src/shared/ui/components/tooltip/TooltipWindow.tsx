@@ -71,7 +71,7 @@ export default function TooltipWindow({ data, visible, metadata }: TooltipWindow
 
             if (canvasSize !== undefined) {
                 frameRef.current.AnchorPoint = new Vector2(canvasSize.X - mouse.X < 200 ? 1 : 0, canvasSize.Y - mouse.Y < 200 ? 1 : 0);
-                frameRef.current.Position = UDim2.fromOffset(mouse.X, mouse.Y);
+                frameRef.current.Position = UDim2.fromOffset(mouse.X, mouse.Y + 36);
             }
         });
         return () => connection.Disconnect();

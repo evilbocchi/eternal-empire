@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from "@rbxts/react";
 import { Players, TweenService, UserInputService } from "@rbxts/services";
 import { getAsset } from "shared/asset/AssetMap";
+import { IS_CI } from "shared/Context";
 
 interface SparkData {
     id: string;
@@ -88,6 +89,11 @@ export function ClickSparkManager() {
     const intervalRef = useRef<RBXScriptConnection | undefined>();
     const lastMousePosition = useRef<Vector2 | undefined>();
 
+    const getMousePosition = useCallback(() => {
+        const mouse = Players.LocalPlayer.GetMouse();
+        return new Vector2(mouse.X, IS_CI ? mouse.Y : mouse.Y + 36);
+    }, []);
+
     const handleSparkComplete = useCallback((sparkId: string) => {
         setSparks(prev => prev.filter(spark => spark.id !== sparkId));
     }, []);
@@ -125,8 +131,7 @@ export function ClickSparkManager() {
             if (input.UserInputType === Enum.UserInputType.MouseButton1 || input.UserInputType === Enum.UserInputType.Touch) {
                 setIsMouseHeld(true);
 
-                const mouse = Players.LocalPlayer.GetMouse();
-                const mousePosition = new Vector2(mouse.X, mouse.Y);
+                const mousePosition = getMousePosition();
                 lastMousePosition.current = mousePosition;
 
                 // Create initial sparks
@@ -152,8 +157,7 @@ export function ClickSparkManager() {
         if (isMouseHeld) {
             // Generate sparks every 0.1 seconds while mouse is held
             intervalRef.current = game.GetService("RunService").Heartbeat.Connect(() => {
-                const mouse = Players.LocalPlayer.GetMouse();
-                const mousePosition = new Vector2(mouse.X, mouse.Y);
+                const mousePosition = getMousePosition();
 
                 // Only generate sparks if mouse has moved and every few frames to avoid overwhelming
                 if (lastMousePosition.current && tick() % 0.1 < 0.017) { // Approximately every 0.1 seconds

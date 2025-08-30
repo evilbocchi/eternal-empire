@@ -6,7 +6,6 @@ import { useHotkeys } from "shared/ui/components/hotkeys/HotkeyProvider";
 import WindowCloseButton from "shared/ui/components/window/WindowCloseButton";
 import WindowTitle from "shared/ui/components/window/WindowTitle";
 import { RobotoMonoBold } from "shared/ui/GameFonts";
-import useDraggable from "shared/ui/hooks/useDraggable";
 import useProperty from "shared/ui/hooks/useProperty";
 import HotkeyOption from "./HotkeyOption";
 import SettingSection from "./SettingSection";
