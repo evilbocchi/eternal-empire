@@ -13,7 +13,7 @@ export = new Item(script.Name)
     .addPlaceableArea("BarrenIslands","SkyPavilion")
 
     .trait(Dropper)
-    .setDroplet(Droplet.TheFirstDroplet)
+    .setDroplet(Droplet.SlopeDroplet)
     .setDropRate(0.75)
 
     .exit();
