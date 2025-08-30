@@ -8,7 +8,7 @@
 
 import { buildRichText } from "@antivivi/vrldk";
 import React, { useEffect, useRef } from "@rbxts/react";
-import { Players, RunService, TweenService, Workspace } from "@rbxts/services";
+import { GuiService, Players, RunService, TweenService, Workspace } from "@rbxts/services";
 import Packets from "shared/Packets";
 import Item from "shared/item/Item";
 import ItemMetadata from "shared/item/ItemMetadata";
@@ -71,7 +71,8 @@ export default function TooltipWindow({ data, visible, metadata }: TooltipWindow
 
             if (canvasSize !== undefined) {
                 frameRef.current.AnchorPoint = new Vector2(canvasSize.X - mouse.X < 200 ? 1 : 0, canvasSize.Y - mouse.Y < 200 ? 1 : 0);
-                frameRef.current.Position = UDim2.fromOffset(mouse.X, mouse.Y + 36);
+                const [topLeftCorner] = GuiService.GetGuiInset();
+                frameRef.current.Position = UDim2.fromOffset(mouse.X + topLeftCorner.X, mouse.Y + topLeftCorner.Y);
             }
         });
         return () => connection.Disconnect();
