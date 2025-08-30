@@ -72,6 +72,9 @@ const CHANGELOGS = [
     ]),
     new Changelog("1.0 - Full Release", [
         "Added difficulties and items Automatic to Easy",
+        "Added new areas",
+        "Added many more crafting items",
+        "Added level leaderboard",
 
     ]),
 ];
