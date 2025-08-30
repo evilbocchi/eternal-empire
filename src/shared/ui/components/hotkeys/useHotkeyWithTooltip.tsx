@@ -42,7 +42,7 @@ export default function useHotkeyWithTooltip({ keyCode, action, priority, label,
     useHotkey(keyCode ? {
         keyCode,
         action,
-        priority: priority,
+        priority: priority ?? 0,
         label: label,
         endAction: endAction,
         enabled: enabled,

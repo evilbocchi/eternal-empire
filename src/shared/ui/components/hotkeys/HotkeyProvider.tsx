@@ -5,7 +5,7 @@
  * Supports hotkey binding, priority management, and integration with UI components.
  */
 
-import React, { createContext, DependencyList, ReactNode, useCallback, useContext, useEffect, useRef } from "@rbxts/react";
+import React, { createContext, DependencyList, ReactNode, useCallback, useContext, useEffect, useRef, useState } from "@rbxts/react";
 import { UserInputService } from "@rbxts/services";
 import Packets from "shared/Packets";
 
@@ -15,7 +15,7 @@ export interface HotkeyBinding {
     /** The action to execute */
     action: (usedHotkey: boolean) => boolean;
     /** Priority for execution order (higher = executes first) */
-    priority?: number;
+    priority: number;
     /** Label for the hotkey */
     label: string;
     /** Action to execute on key release */
@@ -31,6 +31,10 @@ interface HotkeyContextValue {
     bindHotkey: (binding: HotkeyBinding) => () => void;
     /** Execute a specific hotkey */
     executeHotkey: (keyCode: Enum.KeyCode) => boolean;
+    /** Whether hotkey setting mode is active (prevents hotkey execution) */
+    isSettingHotkey: boolean;
+    /** Set whether hotkey setting mode is active */
+    setIsSettingHotkey: (setting: boolean) => void;
 }
 
 const HotkeyContext = createContext<HotkeyContextValue | undefined>(undefined);
@@ -44,24 +48,18 @@ interface HotkeyProviderProps {
  */
 export default function HotkeyProvider({ children }: HotkeyProviderProps) {
     const bindingsRef = useRef<Map<string, HotkeyBinding>>(new Map());
+    const [isSettingHotkey, setIsSettingHotkey] = useState(false);
 
-    useEffect(() => {
-        const connection = Packets.settings.observe((settings) => {
-            for (const [label, value] of pairs(settings.hotkeys)) {
-                const hotkeyBinding = bindingsRef.current.get(tostring(label));
-                if (hotkeyBinding)
-                    hotkeyBinding.keyCode = Enum.KeyCode.FromValue(value) ?? Enum.KeyCode.Unknown;
-            }
-        });
+    const executeHotkey = useCallback((keyCode: Enum.KeyCode, endAction?: boolean): boolean => {
+        // Don't execute hotkeys when setting hotkeys
+        if (isSettingHotkey) return false;
 
-        return () => connection.Disconnect();
-    }, []);
-
-    const executeHotkey = useCallback((keyCode: Enum.KeyCode): boolean => {
         // Get all bindings for this key and sort by priority
         const allBindings: HotkeyBinding[] = [];
-        for (const [_, binding] of pairs(bindingsRef.current)) {
-            if (binding.enabled !== false && binding.keyCode === keyCode) {
+        for (const [id, binding] of bindingsRef.current) {
+            const customValue = Packets.settings.get()!.hotkeys[id];
+            const binded = customValue !== undefined ? Enum.KeyCode.FromValue(customValue) : binding.keyCode;
+            if (binding.enabled !== false && binded === keyCode) {
                 allBindings.push(binding);
             }
         }
@@ -70,12 +68,17 @@ export default function HotkeyProvider({ children }: HotkeyProviderProps) {
         table.sort(allBindings, (a, b) => (b.priority || 0) > (a.priority || 0));
 
         for (const binding of allBindings) {
-            if (binding.action(true)) {
+            if (endAction === true) {
+                if (binding.endAction?.()) {
+                    return true;
+                }
+            }
+            else if (binding.action(true)) {
                 return true;
             }
         }
         return false;
-    }, []);
+    }, [isSettingHotkey]);
 
     const bindHotkey = useCallback((binding: HotkeyBinding) => {
         const id = binding.label ?? "Unknown";
@@ -96,36 +99,22 @@ export default function HotkeyProvider({ children }: HotkeyProviderProps) {
 
         const inputEndedConnection = UserInputService.InputEnded.Connect((input, gameProcessed) => {
             if (gameProcessed) return;
-
-            // Execute end actions for this key
-            const endBindings: HotkeyBinding[] = [];
-            for (const [_, binding] of pairs(bindingsRef.current)) {
-                if (binding.enabled !== false && binding.keyCode === input.KeyCode && binding.endAction) {
-                    endBindings.push(binding);
-                }
-            }
-
-            // Sort by priority (higher priority first)
-            table.sort(endBindings, (a, b) => (b.priority || 0) > (a.priority || 0));
-
-            for (const binding of endBindings) {
-                if (binding.endAction && binding.endAction()) {
-                    break;
-                }
-            }
+            executeHotkey(input.KeyCode, true);
         });
 
         return () => {
             inputBeganConnection.Disconnect();
             inputEndedConnection.Disconnect();
         };
-    }, []);
+    }, [executeHotkey]);
 
     return (
         <HotkeyContext.Provider value={{
             bindingsRef,
             bindHotkey,
             executeHotkey,
+            isSettingHotkey,
+            setIsSettingHotkey,
         }}>
             {children}
         </HotkeyContext.Provider>

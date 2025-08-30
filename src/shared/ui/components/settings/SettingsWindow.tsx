@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "@rbxts/react";
+import React, { useCallback, useEffect, useRef, useState } from "@rbxts/react";
 import { TweenService } from "@rbxts/services";
 import { getAsset } from "shared/asset/AssetMap";
 import Packets from "shared/Packets";
@@ -7,6 +7,7 @@ import WindowCloseButton from "shared/ui/components/window/WindowCloseButton";
 import WindowTitle from "shared/ui/components/window/WindowTitle";
 import { RobotoMonoBold } from "shared/ui/GameFonts";
 import useDraggable from "shared/ui/hooks/useDraggable";
+import useProperty from "shared/ui/hooks/useProperty";
 import HotkeyOption from "./HotkeyOption";
 import SettingSection from "./SettingSection";
 import SettingToggle from "./SettingToggle";
@@ -23,35 +24,55 @@ export default function SettingsWindow({
     const frameContentRef = useRef<Frame>();
     const [previousVisible, setPreviousVisible] = useState(visible);
     const [selectedHotkey, setSelectedHotkey] = useState<string | undefined>();
-    const bindings = useHotkeys().bindingsRef.current;
+    const settings = useProperty(Packets.settings);
+    const { bindingsRef, setIsSettingHotkey } = useHotkeys();
 
     const initialPosition = new UDim2(0.5, 0, 0.5, 0);
-    const { position, dragProps } = useDraggable({ initialPosition });
 
-    const onHotkeySelect = (hotkeyName: string) => {
-        setSelectedHotkey(prev => prev === hotkeyName ? undefined : hotkeyName);
-    };
+    // Cleanup hotkey setting state when component unmounts or window closes
+    useEffect(() => {
+        if (!visible && selectedHotkey !== undefined) {
+            setSelectedHotkey(undefined);
+            setIsSettingHotkey(false);
+        }
+    }, [visible]);
 
-    const onHotkeyDeselect = () => {
+    const handleClose = useCallback(() => {
+        if (selectedHotkey !== undefined) {
+            setSelectedHotkey(undefined);
+            setIsSettingHotkey(false);
+        }
+        onClose?.();
+    }, [selectedHotkey, setIsSettingHotkey, onClose]);
+
+    const onHotkeySelect = useCallback((hotkeyName: string) => {
+        const newSelected = selectedHotkey === hotkeyName ? undefined : hotkeyName;
+        setSelectedHotkey(newSelected);
+        setIsSettingHotkey(newSelected !== undefined);
+    }, [selectedHotkey, setIsSettingHotkey]);
+
+    const onHotkeyDeselect = useCallback(() => {
         setSelectedHotkey(undefined);
-    };
+        setIsSettingHotkey(false);
+    }, [setIsSettingHotkey]);
 
-    const handleHotkeyChange = (label: string, keyCode: Enum.KeyCode) => {
+    const handleHotkeyChange = useCallback((label: string, keyCode: Enum.KeyCode) => {
         Packets.setHotkey.toServer(label, keyCode.Value);
         setSelectedHotkey(undefined);
-    };
+        setIsSettingHotkey(false);
+    }, [setSelectedHotkey, setIsSettingHotkey]);
 
     useEffect(() => {
         const action = (visible && !previousVisible) ? "open" : (!visible && previousVisible) ? "close" : undefined;
-
-        const frameContent = frameContentRef.current!;
-        const middle = position; // Use the draggable position as the stable reference
-        const below = middle.sub(new UDim2(0, 0, 0, 30));
-        if (action === "open")
-            frameContent.Visible = true;
-
         // Handle animation
         if (action) {
+            const frameContent = frameContentRef.current!;
+
+            if (action === "open")
+                frameContent.Visible = true;
+
+            const middle = initialPosition;
+            const below = middle.sub(new UDim2(0, 0, 0, 30));
             frameContent.Position = action === "open" ? below : middle;
 
             const tweenInfo = action === "open" ? new TweenInfo(0.2) : new TweenInfo(0.1, Enum.EasingStyle.Linear);
@@ -65,12 +86,17 @@ export default function SettingsWindow({
             });
         }
         setPreviousVisible(visible);
-    }, [visible, previousVisible, position]);
+    }, [visible]);
 
     const hotkeyOptions = new Array<JSX.Element>();
-    for (const [label, binding] of bindings) {
+    for (const [index, binding] of bindingsRef.current) {
+        const label = tostring(index);
+        const value = settings.hotkeys[label];
+        const keyText = value !== undefined ? Enum.KeyCode.FromValue(value)?.Name : binding.keyCode.Name;
         hotkeyOptions.push(<HotkeyOption
-            hotkeyBinding={binding}
+            key={label}
+            title={label}
+            keyText={keyText ?? "?"}
             isSelected={selectedHotkey === label}
             onSelect={() => onHotkeySelect?.(label)}
             onHotkeyChange={(newKeyCode) => handleHotkeyChange(label, newKeyCode)}
@@ -88,15 +114,14 @@ export default function SettingsWindow({
             BorderSizePixel={4}
             Selectable={true}
             Size={new UDim2(0.9, 0, 0.9, -50)}
-            Position={position}
+            Position={initialPosition}
             Visible={false}
-            Event={dragProps}
         >
             <uisizeconstraint
                 MaxSize={new Vector2(800, 600)}
             />
             <WindowTitle icon={getAsset("assets/Settings.png")} title="Settings" font={RobotoMonoBold} />
-            <WindowCloseButton onClick={() => onClose?.()} />
+            <WindowCloseButton onClick={handleClose} />
             <scrollingframe
                 key="InteractionOptions"
                 AnchorPoint={new Vector2(0.5, 0.5)}
