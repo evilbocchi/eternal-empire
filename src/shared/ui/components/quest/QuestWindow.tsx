@@ -1,8 +1,9 @@
-import React, { useState, useCallback, useMemo } from "@rbxts/react";
+import React, { useCallback, useMemo, useState } from "@rbxts/react";
 import { getMaxXp } from "shared/constants";
 import QuestOption from "shared/ui/components/quest/QuestOption";
 import { useQuestData } from "shared/ui/components/quest/useQuestData";
-import { RobotoSlabBold } from "shared/ui/GameFonts";
+import ProgressBar from "shared/ui/components/window/ProgressBar";
+import { RobotoSlabHeavy } from "shared/ui/GameFonts";
 
 
 export default function QuestWindow() {
@@ -88,8 +89,14 @@ export default function QuestWindow() {
     return (
         <frame
             key="Quests"
-            BackgroundTransparency={1}
-            Size={new UDim2(1, 0, 1, 0)}
+            AnchorPoint={new Vector2(0.5, 0.5)}
+            BackgroundColor3={Color3.fromRGB(13, 13, 13)}
+            BorderColor3={Color3.fromRGB(0, 0, 0)}
+            BorderSizePixel={4}
+            Selectable={true}
+            Size={new UDim2(0.9, 0, 0.9, -50)}
+            Position={new UDim2(0.5, 0, 0.5, 0)}
+            Visible={true}
         >
             <uilistlayout
                 HorizontalAlignment={Enum.HorizontalAlignment.Center}
@@ -102,75 +109,68 @@ export default function QuestWindow() {
                 key="Level"
                 BackgroundTransparency={1}
                 LayoutOrder={-1}
-                Size={new UDim2(1, 0, 0, 60)}
+                Size={new UDim2(1, 0, 0, 32)}
             >
                 {/* Current Level Display */}
                 <frame
                     key="Current"
-                    AnchorPoint={new Vector2(0, 0.5)}
-                    BackgroundTransparency={1}
-                    Position={new UDim2(0, 10, 0.5, 0)}
-                    Size={new UDim2(0.3, 0, 0.8, 0)}
+                    Active={true}
+                    BackgroundColor3={Color3.fromRGB(255, 223, 62)}
+                    BorderColor3={Color3.fromRGB(0, 0, 0)}
+                    BorderSizePixel={5}
+                    Selectable={true}
+                    Size={new UDim2(0.3, 0, 1, 0)}
                 >
+                    <uistroke
+                        ApplyStrokeMode={Enum.ApplyStrokeMode.Border}
+                        Color={Color3.fromRGB(255, 255, 255)}
+                        Thickness={3}
+                    >
+                        <uigradient
+                            Color={new ColorSequence([new ColorSequenceKeypoint(0, Color3.fromRGB(255, 223, 62)), new ColorSequenceKeypoint(1, Color3.fromRGB(255, 137, 3))])}
+                            Rotation={90}
+                        />
+                    </uistroke>
                     <textlabel
                         key="LevelLabel"
                         AnchorPoint={new Vector2(0.5, 0.5)}
                         BackgroundTransparency={1}
-                        FontFace={RobotoSlabBold}
+                        FontFace={RobotoSlabHeavy}
                         Position={new UDim2(0.5, 0, 0.5, 0)}
-                        Size={new UDim2(1, 0, 1, 0)}
+                        Size={new UDim2(0.8, 0, 0.8250000000000001, 0)}
                         Text={`Lv. ${level}`}
                         TextColor3={Color3.fromRGB(255, 255, 255)}
                         TextScaled={true}
+                        TextSize={14}
+                        TextWrapped={true}
                     >
                         <uistroke Thickness={2} />
                     </textlabel>
+                    <uigradient
+                        Color={new ColorSequence([new ColorSequenceKeypoint(0, Color3.fromRGB(255, 223, 41)), new ColorSequenceKeypoint(1, Color3.fromRGB(255, 131, 7))])}
+                        Rotation={90}
+                    />
                 </frame>
 
                 {/* XP Progress Bar */}
-                <frame
-                    key="ProgressBar"
-                    AnchorPoint={new Vector2(1, 0.5)}
-                    BackgroundColor3={Color3.fromRGB(39, 39, 39)}
-                    BorderSizePixel={0}
-                    Position={new UDim2(1, -10, 0.5, 0)}
-                    Size={new UDim2(0.65, 0, 0.6, 0)}
-                >
-                    <textlabel
-                        key="BarLabel"
-                        AnchorPoint={new Vector2(0.5, 0.5)}
-                        BackgroundTransparency={1}
-                        FontFace={RobotoSlabBold}
-                        Position={new UDim2(0.5, 0, 0.5, 0)}
-                        Size={new UDim2(0.8, 0, 0.8, 0)}
-                        Text={xpText}
-                        TextColor3={Color3.fromRGB(255, 255, 255)}
-                        TextScaled={true}
-                        ZIndex={2}
-                    >
-                        <uistroke Thickness={2} />
-                    </textlabel>
+                <ProgressBar
+                    current={xp}
+                    max={maxXp}
+                    text={`${xp}/${maxXp} XP to Lv. ${level + 1}`}
+                    colorSequence={new ColorSequence([
+                        new ColorSequenceKeypoint(0, Color3.fromRGB(255, 170, 255)),
+                        new ColorSequenceKeypoint(1, Color3.fromRGB(189, 58, 255))
+                    ])}
+                    frameProps={{ Size: new UDim2(0.5, 0, 1, 0) }}
+                />
 
-                    <frame
-                        key="Fill"
-                        BackgroundColor3={Color3.fromRGB(255, 170, 255)}
-                        BorderSizePixel={0}
-                        Size={new UDim2(xpProgress, 0, 1, 0)}
-                        Visible={xp > 0}
-                    >
-                        <uigradient
-                            Color={new ColorSequence([
-                                new ColorSequenceKeypoint(0, Color3.fromRGB(255, 255, 255)),
-                                new ColorSequenceKeypoint(1, Color3.fromRGB(189, 58, 255))
-                            ])}
-                            Rotation={90}
-                        />
-                        <uicorner CornerRadius={new UDim(0, 10)} />
-                    </frame>
-
-                    <uistroke ApplyStrokeMode={Enum.ApplyStrokeMode.Border} Thickness={2} />
-                    <uicorner CornerRadius={new UDim(0, 10)} />
-                </frame>
+                <uilistlayout
+                    HorizontalAlignment={Enum.HorizontalAlignment.Center}
+                    VerticalAlignment={Enum.VerticalAlignment.Center}
+                    FillDirection={Enum.FillDirection.Horizontal}
+                    Padding={new UDim(0, 15)}
+                    SortOrder={Enum.SortOrder.LayoutOrder}
+                />
             </frame>
 
             {/* Quest List */}
@@ -219,6 +219,6 @@ export default function QuestWindow() {
                     );
                 })}
             </scrollingframe>
-        </frame>
+        </frame >
     );
 }

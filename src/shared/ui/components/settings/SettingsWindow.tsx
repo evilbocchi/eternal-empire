@@ -116,6 +116,7 @@ export default function SettingsWindow({
             Position={initialPosition}
             Visible={false}
         >
+            <uistroke ApplyStrokeMode={Enum.ApplyStrokeMode.Border} Color={Color3.fromRGB(255, 255, 255)} />
             <uisizeconstraint
                 MaxSize={new Vector2(800, 600)}
             />
@@ -194,7 +195,6 @@ export default function SettingsWindow({
                 {/* Hotkeys */}
                 {hotkeyOptions}
             </scrollingframe>
-            <uistroke ApplyStrokeMode={Enum.ApplyStrokeMode.Border} Color={Color3.fromRGB(255, 255, 255)} />
         </frame>
     );
 }
