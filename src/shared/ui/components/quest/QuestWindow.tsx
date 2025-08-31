@@ -187,8 +187,8 @@ export default function QuestWindow({ visible, onClose }: { visible: boolean; on
 
                 <uipadding
                     PaddingBottom={new UDim(0, 5)}
-                    PaddingLeft={new UDim(0, 10)}
-                    PaddingRight={new UDim(0, 10)}
+                    PaddingLeft={new UDim(0, 15)}
+                    PaddingRight={new UDim(0, 15)}
                     PaddingTop={new UDim(0, 8)}
                 />
 
