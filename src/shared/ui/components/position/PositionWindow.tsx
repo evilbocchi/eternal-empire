@@ -1,6 +1,7 @@
 import React from "@rbxts/react";
 import { getAsset } from "shared/asset/AssetMap";
 import { useMessageTooltip } from "shared/ui/components/tooltip/useTooltipProps";
+import { RobotoSlabHeavy } from "shared/ui/GameFonts";
 
 interface PositionWindowProps {
     /** The position coordinates to display */
@@ -51,7 +52,7 @@ export default function PositionWindow({
                 ZIndex={2}
             />
 
-            {/* Main Frame with Background */}
+            {/* Overlay */}
             <imagelabel
                 key="Frame"
                 AnchorPoint={new Vector2(1, 0.5)}
@@ -59,7 +60,7 @@ export default function PositionWindow({
                 BackgroundColor3={Color3.fromRGB(255, 255, 255)}
                 BorderColor3={Color3.fromRGB(0, 0, 0)}
                 BorderSizePixel={2}
-                Image="rbxassetid://9734894135"
+                Image={getAsset("assets/Grid.png")}
                 ImageTransparency={0.6}
                 Position={new UDim2(0, 0, 0.5, 0)}
                 ScaleType={Enum.ScaleType.Tile}
@@ -73,8 +74,7 @@ export default function PositionWindow({
                     AnchorPoint={new Vector2(1, 0.5)}
                     AutomaticSize={Enum.AutomaticSize.X}
                     BackgroundTransparency={1}
-                    Font={Enum.Font.Unknown}
-                    FontFace={new Font("rbxassetid://12187368625", Enum.FontWeight.Heavy, Enum.FontStyle.Normal)}
+                    FontFace={RobotoSlabHeavy}
                     Size={new UDim2(0, 0, 1, 0)}
                     Text={positionText}
                     TextColor3={Color3.fromRGB(255, 255, 255)}
