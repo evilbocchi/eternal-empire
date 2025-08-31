@@ -1,12 +1,8 @@
 {
     "name": "jme",
     "version": "1.0.0",
-    "description": "",
-    "main": "index.js",
+    "private": true,
     "type": "module",
-    "bin": {
-        "rokit": ""
-    },
     "scripts": {
         "test": "node test/runTests.js",
         "lint": "npx eslint src --no-error-on-unmatched-pattern",
@@ -21,14 +17,10 @@
         "type": "git",
         "url": "git+https://github.com/evilbocchi/jme.git"
     },
-    "keywords": [],
-    "author": "",
-    "license": "Apache-2.0",
     "bugs": {
         "url": "https://github.com/evilbocchi/jme/issues"
     },
     "homepage": "https://github.com/evilbocchi/jme#readme",
-    "private": true,
     "devDependencies": {
         "@eslint/js": "^9.34.0",
         "@rbxts/compiler-types": "^3.0.0-types.0",
