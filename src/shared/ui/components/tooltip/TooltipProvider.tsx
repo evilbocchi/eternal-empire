@@ -6,7 +6,7 @@
  * and simple message tooltips with smooth animations and positioning.
  */
 
-import React, { createContext, ReactNode, useCallback, useContext, useEffect, useRef, useState } from "@rbxts/react";
+import React, { createContext, ReactNode, useCallback, useContext, useState } from "@rbxts/react";
 import Item from "shared/item/Item";
 import ItemMetadata from "shared/item/ItemMetadata";
 import Items from "shared/items/Items";
@@ -50,30 +50,14 @@ interface TooltipProviderProps {
 export default function TooltipProvider({ children }: TooltipProviderProps) {
     const [tooltipData, setTooltipData] = useState<TooltipData | undefined>(undefined);
     const [isVisible, setIsVisible] = useState(false);
-    const hideTimeoutRef = useRef<RBXScriptConnection | undefined>(undefined);
 
     const showTooltip = useCallback((data: TooltipData) => {
-        // Clear any pending hide timeout
-        if (hideTimeoutRef.current) {
-            hideTimeoutRef.current.Disconnect();
-            hideTimeoutRef.current = undefined;
-        }
-
         setTooltipData(data);
         setIsVisible(true);
     }, []);
 
     const hideTooltip = useCallback(() => {
-        // Add small delay to prevent flicker when moving between elements quickly
         setIsVisible(false);
-    }, []);
-
-    useEffect(() => {
-        return () => {
-            if (hideTimeoutRef.current) {
-                hideTimeoutRef.current.Disconnect();
-            }
-        };
     }, []);
 
     return (

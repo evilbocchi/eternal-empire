@@ -52,12 +52,13 @@ export default function TooltipWindow({ data, visible, metadata }: TooltipWindow
             if (messageRef.current)
                 TweenService.Create(messageRef.current, tweenInfo, { TextTransparency: 1, TextStrokeTransparency: 1 }).Play();
 
-            tween.Play();
-            tween.Completed.Connect(() => {
+            const connection = tween.Completed.Once(() => {
                 if (frameRef.current) {
                     frameRef.current.Visible = false;
                 }
             });
+            tween.Play();
+            return () => connection.Disconnect();
         }
     }, [visible]);
 
