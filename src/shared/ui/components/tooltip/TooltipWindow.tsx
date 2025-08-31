@@ -71,7 +71,7 @@ export default function TooltipWindow({ data, visible, metadata }: TooltipWindow
             const mouse = Players.LocalPlayer.GetMouse();
 
             if (canvasSize !== undefined) {
-                frameRef.current.AnchorPoint = new Vector2(canvasSize.X - mouse.X < 200 ? 1 : 0, canvasSize.Y - mouse.Y < 200 ? 1 : 0);
+                frameRef.current.AnchorPoint = new Vector2(canvasSize.X - mouse.X < 200 ? 1 : 0, mouse.Y < 200 ? 0 : 1);
                 const [topLeftCorner] = GuiService.GetGuiInset();
                 frameRef.current.Position = UDim2.fromOffset(mouse.X + topLeftCorner.X, mouse.Y + topLeftCorner.Y);
             }

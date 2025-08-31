@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "@rbxts/react";
+import React, { useCallback, useEffect, useMemo, useState } from "@rbxts/react";
 import { getAsset } from "shared/asset/AssetMap";
 import { playSound } from "shared/asset/GameAssets";
 import useHotkeyWithTooltip from "shared/ui/components/hotkeys/useHotkeyWithTooltip";
@@ -10,7 +10,6 @@ interface SettingsManagerProps extends SettingsWindowProps {
 }
 
 export function SettingsButton({ tooltipProps }: { tooltipProps: TooltipProps; }) {
-
     return (
         <IconButton
             image={getAsset("assets/Settings.png")}
@@ -37,7 +36,12 @@ export default function SettingsManager(props: SettingsManagerProps) {
         }
     }, [isOpen]);
 
-    // Bind the P key to toggle settings
+    useEffect(() => {
+        if (props.defaultVisible) {
+            setIsOpen(props.defaultVisible);
+        }
+    }, [props.defaultVisible]);
+
     const tooltipProps = useHotkeyWithTooltip({
         keyCode: Enum.KeyCode.P,
         action: () => {
@@ -47,22 +51,18 @@ export default function SettingsManager(props: SettingsManagerProps) {
         label: "Settings"
     });
 
-    useEffect(() => {
-        if (props.defaultVisible) {
-            setIsOpen(props.defaultVisible);
-        }
-    }, [props.defaultVisible]);
-
-    return (<frame
-        key='SettingsManager'
-        BackgroundTransparency={1}
-        Size={new UDim2(1, 0, 1, 0)}
-    >
-        <SettingsWindow
-            visible={isOpen}
-            onClose={() => setIsOpen(false)}
-            {...props}
-        />
-        <SettingsButton tooltipProps={tooltipProps} />
-    </frame>);
+    return (
+        <frame
+            key='SettingsManager'
+            BackgroundTransparency={1}
+            Size={new UDim2(1, 0, 1, 0)}
+        >
+            <SettingsWindow
+                visible={isOpen}
+                onClose={() => setIsOpen(false)}
+                {...props}
+            />
+            <SettingsButton tooltipProps={tooltipProps} />
+        </frame>
+    );
 }

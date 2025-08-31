@@ -6,11 +6,11 @@ import useHotkeyWithTooltip from "shared/ui/components/hotkeys/useHotkeyWithTool
 
 interface WindowCloseButtonProps {
     onClick: () => void;
+    color?: Color3;
 }
 
-export default function WindowCloseButton({ onClick }: WindowCloseButtonProps) {
+export default function WindowCloseButton({ onClick, color = Color3.fromRGB(255, 76, 76) }: WindowCloseButtonProps) {
     const closeButtonRef = useRef<TextButton>();
-    const defaultColor = Color3.fromRGB(255, 76, 76);
     const { events } = useHotkeyWithTooltip({
         label: "Close Window",
         keyCode: Enum.KeyCode.X,
@@ -24,11 +24,11 @@ export default function WindowCloseButton({ onClick }: WindowCloseButtonProps) {
             return true;
         },
         onEnter: () => TweenService.Create(closeButtonRef.current!, new TweenInfo(0.1), {
-            BackgroundColor3: defaultColor.Lerp(new Color3(1, 1, 1), 0.5),
+            BackgroundColor3: color.Lerp(new Color3(1, 1, 1), 0.5),
             Rotation: 5
         }).Play(),
         onLeave: () => TweenService.Create(closeButtonRef.current!, new TweenInfo(0.1), {
-            BackgroundColor3: defaultColor,
+            BackgroundColor3: color,
             Rotation: 0
         }).Play()
     });
@@ -38,7 +38,7 @@ export default function WindowCloseButton({ onClick }: WindowCloseButtonProps) {
         ref={closeButtonRef}
         AnchorPoint={new Vector2(0.5, 0.5)}
         AutoButtonColor={false}
-        BackgroundColor3={defaultColor}
+        BackgroundColor3={color}
         BorderColor3={Color3.fromRGB(45, 45, 45)}
         BorderSizePixel={3}
         Event={{ ...events }}

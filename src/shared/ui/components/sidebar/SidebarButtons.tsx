@@ -17,6 +17,7 @@ import React, { useCallback, useEffect, useRef, useState } from "@rbxts/react";
 import { TweenService } from "@rbxts/services";
 import { getAsset } from "shared/asset/AssetMap";
 import { playSound } from "shared/asset/GameAssets";
+import useHotkeyWithTooltip from "shared/ui/components/hotkeys/useHotkeyWithTooltip";
 import { RobotoSlabBold } from "shared/ui/GameFonts";
 
 interface SidebarButtonProps {
@@ -76,20 +77,6 @@ export const SidebarButtonConfiguration = [
         visible: true,
         glowColor: Color3.fromRGB(255, 186, 125)
     },
-    {
-        name: "Stats",
-        image: "rbxassetid://8587689304",
-        hotkey: Enum.KeyCode.M,
-        color: Color3.fromRGB(102, 102, 102),
-        visible: false
-    },
-    {
-        name: "Warp",
-        image: "rbxassetid://116744052956443",
-        hotkey: Enum.KeyCode.G,
-        color: Color3.fromRGB(255, 170, 255),
-        visible: false
-    }
 ] as SidebarButtonData[];
 
 
@@ -136,12 +123,24 @@ export function SidebarButton({
             setIsAnimating(false);
         });
 
-    }, [animationsEnabled, isAnimating]); const handleClick = useCallback(() => {
+    }, [animationsEnabled, isAnimating]);
+
+    const handleClick = useCallback(() => {
         if (animationsEnabled) {
             animatePress();
         }
         onClick();
     }, [onClick, animationsEnabled, animatePress]);
+
+    const { events } = useHotkeyWithTooltip({
+        keyCode: data.hotkey,
+        action: () => {
+            if (!data.visible) return false;
+            handleClick();
+            return true;
+        },
+        label: data.name
+    });
 
     // Calculate animated size
     const animatedSize = new UDim2(1, 0, 1, 0);    // Special handling for different button types
@@ -164,7 +163,7 @@ export function SidebarButton({
                 Position={new UDim2(0.5, 0, 0.5, 0)}
                 Selectable={false}
                 Size={animatedSize}
-                Event={{ Activated: handleClick }}
+                Event={events}
             >
                 <uiaspectratioconstraint
                     AspectType={Enum.AspectType.ScaleWithParentSize}

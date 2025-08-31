@@ -18,17 +18,17 @@ export = {
     story: (props: InferProps<typeof controls>) => {
         StoryMocking.mockData();
 
-        const [visible, setVisible] = useState(true);
+        const [activeWindow, setActiveWindow] = useState<string | undefined>(undefined);
 
         return (
             <HotkeyProvider>
                 <TooltipProvider>
-                    <SidebarButtons onButtonClick={(buttonName) => {
-                        if (buttonName === "Quests") {
-                            setVisible(!visible);
-                        }
+                    <SidebarButtons onToggleWindow={(windowName) => {
+                        const newActive = activeWindow === windowName ? undefined : windowName;
+                        setActiveWindow(newActive);
+                        return newActive === windowName;
                     }} />
-                    <QuestWindow visible={visible} onClose={() => setVisible(false)} />
+                    <QuestWindow visible={activeWindow === "Quests"} onClose={() => setActiveWindow(undefined)} />
                 </TooltipProvider>
             </HotkeyProvider>
         );
