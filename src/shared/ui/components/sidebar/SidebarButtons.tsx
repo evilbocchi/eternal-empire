@@ -24,8 +24,6 @@ interface SidebarButtonProps {
     data: SidebarButtonData;
     /** Layout order for positioning */
     layoutOrder: number;
-    /** Whether this button is currently active */
-    isActive?: boolean;
     /** Click handler */
     onClick: () => void;
     /** Whether animations are enabled */
@@ -39,13 +37,11 @@ interface SidebarButtonsProps {
     onButtonClick?: (buttonName: string) => void;
     /** Callback fired when window should be toggled */
     onToggleWindow?: (windowName: string) => boolean;
-    /** Current active window name */
-    activeWindow?: string;
     /** Position of the sidebar */
     position?: UDim2;
     /** Whether animations are enabled */
     animationsEnabled?: boolean;
-    /** Button configurations (optional, will use defaults if not provided) */
+    /** Array of button configurations  */
     buttons?: SidebarButtonData[];
 }
 
@@ -62,13 +58,47 @@ interface SidebarButtonData {
     glowColor?: Color3;
 }
 
+export const SidebarButtonConfiguration = [
+    {
+        name: "Quests",
+        image: getAsset("assets/Quests.png"),
+        hotkey: Enum.KeyCode.V,
+        color: Color3.fromRGB(255, 94, 94),
+        visible: true,
+        notification: { count: 0, color: Color3.fromRGB(255, 52, 52) },
+        glowColor: Color3.fromRGB(255, 94, 94)
+    },
+    {
+        name: "Inventory",
+        image: getAsset("assets/Inventory.png"),
+        hotkey: Enum.KeyCode.F,
+        color: Color3.fromRGB(255, 186, 125),
+        visible: true,
+        glowColor: Color3.fromRGB(255, 186, 125)
+    },
+    {
+        name: "Stats",
+        image: "rbxassetid://8587689304",
+        hotkey: Enum.KeyCode.M,
+        color: Color3.fromRGB(102, 102, 102),
+        visible: false
+    },
+    {
+        name: "Warp",
+        image: "rbxassetid://116744052956443",
+        hotkey: Enum.KeyCode.G,
+        color: Color3.fromRGB(255, 170, 255),
+        visible: false
+    }
+] as SidebarButtonData[];
+
+
 /**
  * Individual sidebar button component
  */
 export function SidebarButton({
     data,
     layoutOrder,
-    isActive = false,
     onClick,
     animationsEnabled = true
 }: SidebarButtonProps) {
@@ -159,7 +189,7 @@ export function SidebarButton({
             )}
 
             {/* Notification badge for Quests */}
-            {data.name === "Quests" && data.notification && (
+            {data.notification && data.notification.count > 0 && (
                 <frame
                     AnchorPoint={new Vector2(1, 0.5)}
                     AutomaticSize={Enum.AutomaticSize.XY}
@@ -202,50 +232,14 @@ export default function SidebarButtons({
     visible = true,
     onButtonClick,
     onToggleWindow,
-    activeWindow,
     position = new UDim2(0, 0, 0.5, 0),
     animationsEnabled = true,
-    buttons: providedButtons
+    buttons = SidebarButtonConfiguration
 }: SidebarButtonsProps) {
     // Sidebar state
     const [isVisible, setIsVisible] = useState(visible);
     const [currentPosition, setCurrentPosition] = useState(position);
     const sidebarRef = useRef<Frame>();
-
-    // Button configurations - use provided buttons or defaults
-    const [buttons, setButtons] = useState<SidebarButtonData[]>(providedButtons || [
-        {
-            name: "Quests",
-            image: getAsset("assets/Quests.png"),
-            hotkey: Enum.KeyCode.V,
-            color: Color3.fromRGB(255, 94, 94),
-            visible: true,
-            notification: { count: 0, color: Color3.fromRGB(255, 52, 52) },
-            glowColor: Color3.fromRGB(255, 94, 94)
-        },
-        {
-            name: "Inventory",
-            image: getAsset("assets/Inventory.png"),
-            hotkey: Enum.KeyCode.F,
-            color: Color3.fromRGB(255, 186, 125),
-            visible: true,
-            glowColor: Color3.fromRGB(255, 186, 125)
-        },
-        {
-            name: "Stats",
-            image: "rbxassetid://8587689304",
-            hotkey: Enum.KeyCode.M,
-            color: Color3.fromRGB(102, 102, 102),
-            visible: false
-        },
-        {
-            name: "Warp",
-            image: "rbxassetid://116744052956443",
-            hotkey: Enum.KeyCode.G,
-            color: Color3.fromRGB(255, 170, 255),
-            visible: false
-        }
-    ]);
 
     // Handle visibility changes
     useEffect(() => {
@@ -296,28 +290,6 @@ export default function SidebarButtons({
         }
     }, [onButtonClick, onToggleWindow]);
 
-    // Update button visibility based on game state
-    const updateButtonVisibility = useCallback((buttonName: string, visible: boolean) => {
-        setButtons(prev => prev.map(button =>
-            button.name === buttonName ? { ...button, visible } : button
-        ));
-    }, []);
-
-    // Update notification count
-    const updateNotification = useCallback((buttonName: string, count: number, color?: Color3) => {
-        setButtons(prev => prev.map(button =>
-            button.name === buttonName
-                ? {
-                    ...button,
-                    notification: count > 0 ? {
-                        count,
-                        color: color || button.notification?.color || Color3.fromRGB(255, 52, 52)
-                    } : undefined
-                }
-                : button
-        ));
-    }, []);
-
     return (
         <frame
             key="SidebarButtons"
@@ -340,7 +312,6 @@ export default function SidebarButtons({
                     key={button.name}
                     data={button}
                     layoutOrder={index + 1}
-                    isActive={activeWindow === button.name}
                     onClick={() => handleButtonClick(button.name)}
                     animationsEnabled={animationsEnabled}
                 />
