@@ -32,6 +32,7 @@ export const assets = {
   "assets/GoldScythe.png": "rbxassetid://109490904009329",
   "assets/GreedOfTheObbyI.png": "rbxassetid://74681940836826",
   "assets/Grid.png": "rbxassetid://86590348393566",
+  "assets/GridHighContrast.png": "rbxassetid://103616196092052",
   "assets/Health.png": "rbxassetid://106004359076657",
   "assets/Icon.png": "rbxassetid://111108485097243",
   "assets/IndustrialDroplets.png": "rbxassetid://84046995969757",

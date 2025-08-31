@@ -9,7 +9,6 @@ export interface QuestHookData {
     stagePerQuest: Map<string, number>;
     level: number;
     xp: number;
-    availableQuests: Set<string>;
 }
 
 export interface QuestActions {
@@ -25,23 +24,6 @@ export function useQuestData(): QuestHookData & QuestActions & { trackedQuest: s
     const [level, setLevel] = useState(Packets.level.get() || 0);
     const [xp, setXp] = useState(Packets.xp.get() || 0);
     const [trackedQuest, setTrackedQuest] = useState<string | undefined>(questState.getTrackedQuest());
-
-    // Calculate available quests based on level requirements
-    const availableQuests = useMemo(() => {
-        const available = new Set<string>();
-
-        questInfo.forEach((quest, questId) => {
-            const currentStage = stagePerQuest.get(questId) ?? 0;
-            const belowLevelRequirement = level < quest.level;
-
-            // Quest is available if it's not completed and meets level requirement
-            if (currentStage >= 0 && !belowLevelRequirement) {
-                available.add(questId);
-            }
-        });
-
-        return available;
-    }, [questInfo, stagePerQuest, level]);
 
     // Set up packet observers
     useEffect(() => {
@@ -69,7 +51,6 @@ export function useQuestData(): QuestHookData & QuestActions & { trackedQuest: s
         stagePerQuest,
         level,
         xp,
-        availableQuests,
         trackedQuest,
         onTrackQuest
     };

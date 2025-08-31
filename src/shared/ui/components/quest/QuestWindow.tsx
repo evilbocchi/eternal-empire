@@ -1,21 +1,25 @@
 import React, { useCallback, useMemo, useState } from "@rbxts/react";
+import { getAsset } from "shared/asset/AssetMap";
+import { playSound } from "shared/asset/GameAssets";
 import { getMaxXp } from "shared/constants";
 import QuestOption from "shared/ui/components/quest/QuestOption";
 import { useQuestData } from "shared/ui/components/quest/useQuestData";
+import BasicWindow from "shared/ui/components/window/BasicWindow";
 import ProgressBar from "shared/ui/components/window/ProgressBar";
 import { RobotoSlabHeavy } from "shared/ui/GameFonts";
 
 
-export default function QuestWindow() {
+export default function QuestWindow({ visible, onClose }: { visible: boolean; onClose: () => void; }) {
+
     const {
         questInfo,
         stagePerQuest,
         level,
         xp,
-        availableQuests,
         trackedQuest,
         onTrackQuest
     } = useQuestData();
+    const maxXp = getMaxXp(level);
 
     const [expandedQuests, setExpandedQuests] = useState(new Set<string>());
 
@@ -23,8 +27,10 @@ export default function QuestWindow() {
         setExpandedQuests(prev => {
             const newSet = table.clone(prev);
             if (newSet.has(questId)) {
+                playSound("CheckOff.mp3");
                 newSet.delete(questId);
             } else {
+                playSound("CheckOn.mp3");
                 newSet.add(questId);
             }
             return newSet;
@@ -39,19 +45,10 @@ export default function QuestWindow() {
         }
     }, [trackedQuest, onTrackQuest]);
 
-    // Calculate XP progress
-    const maxXp = getMaxXp(level);
-    const xpProgress = maxXp > 0 ? xp / maxXp : 0;
-    const xpText = `${xp}/${maxXp} XP to Lv. ${level + 1}`;
-
-    // Sort quests by their natural order
     const sortedQuests = useMemo(() => {
         const quests = new Array<[string, QuestInfo]>();
-        for (const questId of availableQuests) {
-            const quest = questInfo.get(questId);
-            if (quest) {
-                quests.push([questId, quest]);
-            }
+        for (const [questId, quest] of questInfo) {
+            quests.push([questId, quest]);
         }
         return quests
             .filter(([id]) => {
@@ -87,16 +84,15 @@ export default function QuestWindow() {
     }, [questInfo, stagePerQuest, level]);
 
     return (
-        <frame
-            key="Quests"
-            AnchorPoint={new Vector2(0.5, 0.5)}
-            BackgroundColor3={Color3.fromRGB(13, 13, 13)}
-            BorderColor3={Color3.fromRGB(0, 0, 0)}
-            BorderSizePixel={4}
-            Selectable={true}
-            Size={new UDim2(0.9, 0, 0.9, -50)}
-            Position={new UDim2(0.5, 0, 0.5, 0)}
-            Visible={true}
+        <BasicWindow
+            colorSequence={new ColorSequence([
+                new ColorSequenceKeypoint(0, Color3.fromRGB(255, 94, 94)),
+                new ColorSequenceKeypoint(1, Color3.fromRGB(255, 18, 18)),
+            ])}
+            title="Quests"
+            icon={getAsset("assets/Quests.png")}
+            visible={visible}
+            onClose={onClose}
         >
             <uilistlayout
                 HorizontalAlignment={Enum.HorizontalAlignment.Center}
@@ -181,21 +177,19 @@ export default function QuestWindow() {
                 BorderSizePixel={0}
                 CanvasSize={new UDim2(0, 0, 0, 0)}
                 ScrollBarThickness={8}
-                Size={new UDim2(1, 0, 1, -70)}
-                TopImage="rbxasset://textures/ui/Scroll/scroll-middle.png"
-                BottomImage="rbxasset://textures/ui/Scroll/scroll-middle.png"
+                Size={new UDim2(1, 0, 1, -50)}
             >
                 <uilistlayout
                     HorizontalAlignment={Enum.HorizontalAlignment.Center}
-                    Padding={new UDim(0, 5)}
+                    Padding={new UDim(0, 15)}
                     SortOrder={Enum.SortOrder.LayoutOrder}
                 />
 
                 <uipadding
-                    PaddingBottom={new UDim(0, 10)}
+                    PaddingBottom={new UDim(0, 5)}
                     PaddingLeft={new UDim(0, 10)}
                     PaddingRight={new UDim(0, 10)}
-                    PaddingTop={new UDim(0, 10)}
+                    PaddingTop={new UDim(0, 8)}
                 />
 
                 {/* Render Quest Options */}
@@ -219,6 +213,6 @@ export default function QuestWindow() {
                     );
                 })}
             </scrollingframe>
-        </frame >
+        </BasicWindow>
     );
 }

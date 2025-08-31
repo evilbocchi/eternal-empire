@@ -14,7 +14,7 @@
  */
 
 import React, { useCallback, useEffect, useRef, useState } from "@rbxts/react";
-import { TweenService, UserInputService } from "@rbxts/services";
+import { TweenService } from "@rbxts/services";
 import { getAsset } from "shared/asset/AssetMap";
 import { playSound } from "shared/asset/GameAssets";
 import { RobotoSlabBold } from "shared/ui/GameFonts";
@@ -115,225 +115,83 @@ export function SidebarButton({
 
     // Calculate animated size
     const animatedSize = new UDim2(1, 0, 1, 0);    // Special handling for different button types
-    if (data.name === "Inventory" || data.name === "Quests") {
-        return (
-            <frame
-                key={data.name}
-                ref={frameRef}
+    return (
+        <frame
+            key={data.name}
+            ref={frameRef}
+            BackgroundTransparency={1}
+            LayoutOrder={layoutOrder}
+            Size={new UDim2(1, 0, 1, -20)}
+            SizeConstraint={Enum.SizeConstraint.RelativeXX}
+        >
+            <imagebutton
+                key="Button"
+                AnchorPoint={new Vector2(0.5, 0.5)}
+                AutoButtonColor={false}
                 BackgroundTransparency={1}
-                LayoutOrder={layoutOrder}
-                Size={new UDim2(1, 0, 1, -20)}
-                SizeConstraint={Enum.SizeConstraint.RelativeXX}
+                Image={data.image}
+                LayoutOrder={1}
+                Position={new UDim2(0.5, 0, 0.5, 0)}
+                Selectable={false}
+                Size={animatedSize}
+                Event={{ Activated: handleClick }}
             >
-                <imagebutton
-                    key="Button"
+                <uiaspectratioconstraint
+                    AspectType={Enum.AspectType.ScaleWithParentSize}
+                    DominantAxis={Enum.DominantAxis.Height}
+                />
+            </imagebutton>
+
+            {/* Glow effect */}
+            {data.glowColor && (
+                <frame
                     AnchorPoint={new Vector2(0.5, 0.5)}
-                    AutoButtonColor={false}
-                    BackgroundTransparency={1}
-                    Image={data.image}
-                    LayoutOrder={1}
-                    Position={new UDim2(0.5, 0, 0.5, 0)}
-                    Selectable={false}
-                    Size={animatedSize}
-                    Event={{ Activated: handleClick }}
+                    BackgroundColor3={data.glowColor}
+                    BorderSizePixel={0}
+                    Position={new UDim2(0, 0, 0.5, 0)}
+                    Size={new UDim2(0.25, 0, 0.25, 0)}
+                    SizeConstraint={Enum.SizeConstraint.RelativeYY}
+                    ZIndex={0}
                 >
-                    <uiaspectratioconstraint
-                        AspectType={Enum.AspectType.ScaleWithParentSize}
-                        DominantAxis={Enum.DominantAxis.Height}
-                    />
-                </imagebutton>
+                    <uistroke ApplyStrokeMode={Enum.ApplyStrokeMode.Border} Thickness={2} />
+                    <uicorner CornerRadius={new UDim(0.5, 0)} />
+                </frame>
+            )}
 
-                {/* Glow effect */}
-                {data.glowColor && (
-                    <frame
-                        AnchorPoint={new Vector2(0.5, 0.5)}
-                        BackgroundColor3={data.glowColor}
-                        BorderSizePixel={0}
-                        Position={new UDim2(0, 0, 0.5, 0)}
-                        Size={new UDim2(0.25, 0, 0.25, 0)}
-                        SizeConstraint={Enum.SizeConstraint.RelativeYY}
-                        ZIndex={0}
-                    >
-                        <uistroke ApplyStrokeMode={Enum.ApplyStrokeMode.Border} Thickness={2} />
-                        <uicorner CornerRadius={new UDim(0.5, 0)} />
-                    </frame>
-                )}
-
-                {/* Notification badge for Quests */}
-                {data.name === "Quests" && data.notification && (
-                    <frame
-                        AnchorPoint={new Vector2(1, 0.5)}
-                        AutomaticSize={Enum.AutomaticSize.XY}
-                        BackgroundColor3={Color3.fromRGB(255, 255, 255)}
-                        BorderColor3={Color3.fromRGB(0, 0, 0)}
-                        BorderSizePixel={2}
-                        LayoutOrder={2}
-                        Position={new UDim2(1, -3, 0, 3)}
-                    >
-                        <uigradient
-                            Color={new ColorSequence([
-                                new ColorSequenceKeypoint(0, data.notification.color),
-                                new ColorSequenceKeypoint(1, data.notification.color.Lerp(Color3.fromRGB(255, 11, 105), 0.5))
-                            ])}
-                            Rotation={90}
-                        />
-                        <textlabel
-                            AutomaticSize={Enum.AutomaticSize.X}
-                            BackgroundTransparency={1}
-                            FontFace={RobotoSlabBold}
-                            Size={new UDim2(0, 0, 0, 16)}
-                            Text={tostring(data.notification.count)}
-                            TextColor3={Color3.fromRGB(255, 255, 255)}
-                            TextSize={16}
-                            TextWrapped={true}
-                        />
-                        <uipadding PaddingLeft={new UDim(0, 6)} PaddingRight={new UDim(0, 6)} />
-                        <uistroke Thickness={2} />
-                        <uicorner CornerRadius={new UDim(0.5, 0)} />
-                    </frame>
-                )}
-            </frame>
-        );
-    }
-
-    // Special handling for Warp button
-    if (data.name === "Warp") {
-        return (
-            <frame
-                key={data.name}
-                ref={frameRef}
-                BackgroundTransparency={1}
-                LayoutOrder={layoutOrder}
-                Size={new UDim2(1, 0, 1, 0)}
-                Visible={data.visible}
-            >
-                <uiaspectratioconstraint />
-
-                <textlabel
-                    AnchorPoint={new Vector2(0.5, 0.5)}
-                    BackgroundTransparency={1}
-                    FontFace={RobotoSlabBold}
-                    Position={new UDim2(0.5, 0, 1, 0)}
-                    Size={new UDim2(2, 0, 0.4, 0)}
-                    Text="Warp"
-                    TextColor3={Color3.fromRGB(255, 255, 255)}
-                    TextScaled={true}
-                    TextSize={14}
-                    TextWrapped={true}
-                    ZIndex={2}
-                >
-                    <uistroke Thickness={2} />
-                </textlabel>
-
-                <imagebutton
-                    key="Button"
-                    AnchorPoint={new Vector2(0.5, 0.5)}
-                    AutoButtonColor={false}
-                    BackgroundColor3={data.color}
-                    BorderColor3={Color3.fromRGB(27, 42, 53)}
-                    BorderSizePixel={3}
-                    ClipsDescendants={true}
-                    Image={data.image}
-                    LayoutOrder={4}
-                    Position={new UDim2(0.5, 0, 0.5, 0)}
-                    Selectable={false}
-                    Size={animatedSize}
-                    Event={{ Activated: handleClick }}
+            {/* Notification badge for Quests */}
+            {data.name === "Quests" && data.notification && (
+                <frame
+                    AnchorPoint={new Vector2(1, 0.5)}
+                    AutomaticSize={Enum.AutomaticSize.XY}
+                    BackgroundColor3={Color3.fromRGB(255, 255, 255)}
+                    BorderColor3={Color3.fromRGB(0, 0, 0)}
+                    BorderSizePixel={2}
+                    LayoutOrder={2}
+                    Position={new UDim2(1, -3, 0, 3)}
                 >
                     <uigradient
                         Color={new ColorSequence([
-                            new ColorSequenceKeypoint(0, Color3.fromRGB(255, 255, 255)),
-                            new ColorSequenceKeypoint(1, Color3.fromRGB(175, 199, 255))
+                            new ColorSequenceKeypoint(0, data.notification.color),
+                            new ColorSequenceKeypoint(1, data.notification.color.Lerp(Color3.fromRGB(255, 11, 105), 0.5))
                         ])}
                         Rotation={90}
                     />
-
-                    {/* Shadow effects */}
-                    {[
-                        { pos: new UDim2(0.5, 2, 0.5, -2) },
-                        { pos: new UDim2(0.5, -2, 0.5, -2) },
-                        { pos: new UDim2(0.5, 2, 0.5, 2) },
-                        { pos: new UDim2(0.5, -2, 0.5, 2) }
-                    ].map((shadow, index) => (
-                        <imagelabel
-                            key={`shadow-${index}`}
-                            AnchorPoint={new Vector2(0.5, 0.5)}
-                            BackgroundTransparency={1}
-                            Image="rbxassetid://8674050345"
-                            ImageColor3={Color3.fromRGB(0, 0, 0)}
-                            Position={shadow.pos}
-                            ScaleType={Enum.ScaleType.Fit}
-                            Size={new UDim2(0.7, 0, 0.7, 0)}
-                        />
-                    ))}
-
-                    {/* Main icon */}
-                    <imagelabel
-                        AnchorPoint={new Vector2(0.5, 0.5)}
+                    <textlabel
+                        AutomaticSize={Enum.AutomaticSize.X}
                         BackgroundTransparency={1}
-                        Image="rbxassetid://8674050345"
-                        ImageColor3={data.color}
-                        Position={new UDim2(0.5, 0, 0.5, 0)}
-                        ScaleType={Enum.ScaleType.Fit}
-                        Size={new UDim2(0.7, 0, 0.7, 0)}
-                        ZIndex={2}
-                    >
-                        <uigradient
-                            Color={new ColorSequence([
-                                new ColorSequenceKeypoint(0, Color3.fromRGB(255, 255, 255)),
-                                new ColorSequenceKeypoint(1, Color3.fromRGB(175, 199, 255))
-                            ])}
-                            Rotation={90}
-                        />
-                    </imagelabel>
-                </imagebutton>
-            </frame>
-        );
-    }
-
-    // Standard button (Settings, Stats, etc.)
-    return (
-        <textbutton
-            key={data.name}
-            ref={textButtonRef}
-            AnchorPoint={new Vector2(0.5, 0.5)}
-            BackgroundColor3={data.color}
-            BorderColor3={Color3.fromRGB(27, 42, 53)}
-            LayoutOrder={layoutOrder}
-            Position={new UDim2(0.5, 0, 0.5, 0)}
-            Selectable={false}
-            Size={animatedSize}
-            Text={""}
-            Visible={data.visible}
-            Event={{ Activated: handleClick }}
-        >
-            <uiaspectratioconstraint />
-            <uistroke ApplyStrokeMode={Enum.ApplyStrokeMode.Border} Color={Color3.fromRGB(77, 77, 77)} />
-            <uigradient
-                Color={new ColorSequence([
-                    new ColorSequenceKeypoint(0, Color3.fromRGB(35, 35, 35)),
-                    new ColorSequenceKeypoint(1, Color3.fromRGB(89, 89, 89))
-                ])}
-                Rotation={270}
-            />
-
-            <imagelabel
-                AnchorPoint={new Vector2(0.5, 0.5)}
-                BackgroundTransparency={1}
-                Image={data.image}
-                Position={new UDim2(0.5, 0, 0.5, 0)}
-                ScaleType={Enum.ScaleType.Fit}
-                Size={new UDim2(0.8, 0, 0.8, 0)}
-            >
-                <uigradient
-                    Color={new ColorSequence([
-                        new ColorSequenceKeypoint(0, Color3.fromRGB(255, 255, 255)),
-                        new ColorSequenceKeypoint(1, Color3.fromRGB(163, 173, 186))
-                    ])}
-                    Rotation={90}
-                />
-            </imagelabel>
-        </textbutton>
+                        FontFace={RobotoSlabBold}
+                        Size={new UDim2(0, 0, 0, 16)}
+                        Text={tostring(data.notification.count)}
+                        TextColor3={Color3.fromRGB(255, 255, 255)}
+                        TextSize={16}
+                        TextWrapped={true}
+                    />
+                    <uipadding PaddingLeft={new UDim(0, 6)} PaddingRight={new UDim(0, 6)} />
+                    <uistroke Thickness={2} />
+                    <uicorner CornerRadius={new UDim(0.5, 0)} />
+                </frame>
+            )}
+        </frame>
     );
 }
 
@@ -362,7 +220,7 @@ export default function SidebarButtons({
             hotkey: Enum.KeyCode.V,
             color: Color3.fromRGB(255, 94, 94),
             visible: true,
-            notification: { count: 2, color: Color3.fromRGB(255, 52, 52) },
+            notification: { count: 0, color: Color3.fromRGB(255, 52, 52) },
             glowColor: Color3.fromRGB(255, 94, 94)
         },
         {
@@ -388,25 +246,6 @@ export default function SidebarButtons({
             visible: false
         }
     ]);
-
-    // Update buttons when providedButtons changes
-    useEffect(() => {
-        if (providedButtons) {
-            setButtons(providedButtons);
-        }
-    }, [providedButtons]);    // Handle hotkey presses
-    useEffect(() => {
-        const connection = UserInputService.InputBegan.Connect((input, gameProcessed) => {
-            if (gameProcessed || !isVisible) return;
-
-            const button = buttons.find(b => b.hotkey === input.KeyCode && b.visible);
-            if (button) {
-                handleButtonClick(button.name);
-            }
-        });
-
-        return () => connection.Disconnect();
-    }, [buttons, isVisible]);
 
     // Handle visibility changes
     useEffect(() => {
@@ -479,10 +318,6 @@ export default function SidebarButtons({
         ));
     }, []);
 
-    if (!isVisible) {
-        return <></>;
-    }
-
     return (
         <frame
             key="SidebarButtons"
@@ -491,6 +326,7 @@ export default function SidebarButtons({
             BackgroundTransparency={1}
             Position={currentPosition}
             Size={new UDim2(0.025, 40, 0.5, 0)}
+            Visible={isVisible}
         >
             <uilistlayout
                 HorizontalAlignment={Enum.HorizontalAlignment.Center}
