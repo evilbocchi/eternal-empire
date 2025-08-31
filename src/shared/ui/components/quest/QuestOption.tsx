@@ -1,4 +1,5 @@
 import React from "@rbxts/react";
+import { getAsset } from "shared/asset/AssetMap";
 import { getLengthColor, getLengthName, getRewardLabel } from "shared/ui/components/quest/useQuestData";
 import { RobotoSlabBold, RobotoSlabExtraBold, RobotoSlabHeavy, RobotoSlabMedium } from "shared/ui/GameFonts";
 
@@ -79,7 +80,7 @@ export default function QuestOption({
                 <imagelabel
                     AnchorPoint={new Vector2(1, 0.5)}
                     BackgroundTransparency={1}
-                    Image="rbxassetid://5279719038"
+                    Image={getAsset("assets/Dropdown.png")}
                     Position={new UDim2(0.95, 0, 0.5, 0)}
                     Rotation={isExpanded ? 0 : 180}
                     ScaleType={Enum.ScaleType.Fit}

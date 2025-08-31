@@ -22,6 +22,7 @@ export const assets = {
   "assets/DarkerMatter.png": "rbxassetid://139388512819905",
   "assets/DecentralityOfTheObbyI.png": "rbxassetid://104023168579570",
   "assets/Diamond.png": "rbxassetid://111671825140475",
+  "assets/Dropdown.png": "rbxassetid://104302683273952",
   "assets/EJT.png": "rbxassetid://79789204218475",
   "assets/EfficientLearning.png": "rbxassetid://71571225449227",
   "assets/Flashlight.png": "rbxassetid://115424568408137",
