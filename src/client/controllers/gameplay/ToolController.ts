@@ -45,14 +45,15 @@ declare global {
     }
 }
 
+// Legacy BACKPACK_WINDOW export - UI is now handled by React
 export const BACKPACK_WINDOW = INTERFACE.WaitForChild("BackpackWindow") as Frame & {
     UIListLayout: UIListLayout;
 };
 
 /**
- * Controller responsible for managing tool usage, harvesting, and backpack UI.
+ * Controller responsible for managing tool usage, harvesting, and backpack data.
  *
- * Handles tool equipping, harvesting logic, tool animations, and UI updates for the player's tools.
+ * Handles tool equipping, harvesting logic, tool animations, and tool data tracking for React UI.
  */
 @Controller()
 export default class ToolController implements OnInit, OnStart, OnCharacterAdded {
@@ -61,6 +62,7 @@ export default class ToolController implements OnInit, OnStart, OnCharacterAdded
     harvestables = new Map<Instance, typeof ASSETS.HarvestableGui>();
     lastUse = 0;
     readonly tweenInfo = new TweenInfo(0.5);
+    /** Map of tools to their UI option data - used by React components */
     readonly tools = new Map<Tool, ToolOption>();
     readonly KEY_CODES = new Map<number, Enum.KeyCode>([
         [1, Enum.KeyCode.One],
@@ -216,18 +218,17 @@ export default class ToolController implements OnInit, OnStart, OnCharacterAdded
                     if (input.KeyCode !== v)
                         continue;
 
-                    const toolOption = this.recalculateIndex()[i];
-                    if (toolOption === undefined)
+                    // Get tools sorted by layout order for hotkey mapping
+                    const sortedTools = [...this.tools.entries()]
+                        .sort(([_a, optionA], [_b, optionB]) => {
+                            return optionA.LayoutOrder < optionB.LayoutOrder;
+                        });
+                    
+                    const toolEntry = sortedTools[i - 1]; // i is 1-based
+                    if (toolEntry === undefined)
                         return;
-                    let tool: Tool | undefined;
-                    for (const [t, option] of this.tools) {
-                        if (option === toolOption) {
-                            tool = t;
-                            break;
-                        }
-                    }
-                    if (tool === undefined)
-                        return;
+                    
+                    const [tool, _option] = toolEntry;
 
                     const backpack = LOCAL_PLAYER.FindFirstChildOfClass("Backpack");
                     playSound("Equip.mp3");
@@ -262,23 +263,11 @@ export default class ToolController implements OnInit, OnStart, OnCharacterAdded
     /**
      * Recalculates tool option indices and updates their labels.
      * @returns The sorted array of ToolOption instances.
+     * @deprecated UI is now handled by React components
      */
     recalculateIndex() {
-        const sorted = BACKPACK_WINDOW.GetChildren().sort((a, b) => {
-            if (a.IsA("TextButton") && b.IsA("TextButton"))
-                return a.LayoutOrder < b.LayoutOrder;
-            return false;
-        }) as ToolOption[];
-
-        let i = 0;
-        for (const toolOption of sorted) {
-            if (!toolOption.IsA("TextButton"))
-                continue;
-
-            i++;
-            toolOption.AmountLabel.Text = `${i}`;
-        }
-        return sorted;
+        // Legacy method - UI is now handled by React
+        return [];
     }
 
     /**
@@ -297,11 +286,7 @@ export default class ToolController implements OnInit, OnStart, OnCharacterAdded
             });
 
             humanoid.Died.Once(() => {
-                for (const toolOption of BACKPACK_WINDOW.GetChildren()) {
-                    if (toolOption.IsA("TextButton")) {
-                        toolOption.Destroy();
-                    }
-                }
+                // Clear tools data - UI cleanup handled by React
                 this.tools.clear();
             });
 
@@ -322,7 +307,7 @@ export default class ToolController implements OnInit, OnStart, OnCharacterAdded
     }
 
     /**
-     * Loads and sets up a tool option UI for a given tool.
+     * Loads and tracks a tool for React UI rendering.
      * @param tool The tool instance to add.
      */
     onToolAdded(tool: Instance) {
@@ -335,9 +320,11 @@ export default class ToolController implements OnInit, OnStart, OnCharacterAdded
         if (harvestingTool === undefined)
             return;
 
+        // Create a minimal tool option for data tracking
         const toolOption = ASSETS.ToolOption.Clone();
         toolOption.ImageLabel.Image = tool.TextureId;
         this.tools.set(tool, toolOption);
+        
         let layoutOrder: number;
         switch (harvestingTool.toolType) {
             case "Pickaxe":
@@ -360,41 +347,30 @@ export default class ToolController implements OnInit, OnStart, OnCharacterAdded
         toolOption.LayoutOrder = layoutOrder;
         toolOption.Name = tool.Name;
 
+        // Clean up when tool is removed
         const connection = tool.AncestryChanged.Connect(() => {
-            if (tool.Parent === undefined || toolOption.Parent === undefined) {
+            if (tool.Parent === undefined) {
+                this.tools.delete(tool);
                 pcall(() => toolOption.Destroy());
                 connection.Disconnect();
-                return;
             }
-            const color = tool.Parent === LOCAL_PLAYER.FindFirstChildOfClass("Backpack") ? Color3.fromRGB(255, 255, 255) : Color3.fromRGB(0, 184, 255);
-            toolOption.BackgroundColor3 = color;
-            toolOption.UIStroke.Color = color;
         });
+        
+        // Set tooltip for potential legacy usage
         if (item !== undefined) {
             this.tooltipController.setTooltip(toolOption, Tooltip.fromItem(item));
         }
-        toolOption.Activated.Connect(() => {
-            const backpack = LOCAL_PLAYER.FindFirstChildOfClass("Backpack");
-            playSound("Equip.mp3");
-            if (tool.Parent === backpack) {
-                const currentTool = LOCAL_PLAYER.Character?.FindFirstChildOfClass("Tool");
-                if (currentTool !== undefined)
-                    currentTool.Parent = backpack;
-                tool.Parent = LOCAL_PLAYER.Character;
-            }
-            else {
-                tool.Parent = backpack;
-            }
-        });
-        toolOption.Parent = BACKPACK_WINDOW;
-        this.recalculateIndex();
+        
+        // Don't parent to UI - React handles rendering
+        // toolOption.Parent = BACKPACK_WINDOW; // Removed - React handles this
     }
 
     /**
-     * Starts the ToolController, manages backpack window visibility based on UI state.
+     * Starts the ToolController.
+     * Hides legacy BACKPACK_WINDOW since React handles the UI now.
      */
     onStart() {
-        const refreshVisibility = () => BACKPACK_WINDOW.Visible = !ADAPTIVE_TAB.Visible && this.buildController.selected.isEmpty();
-        RunService.BindToRenderStep("Tool Backpack", 0, () => refreshVisibility());
+        // Hide the legacy BACKPACK_WINDOW since React components handle the UI
+        BACKPACK_WINDOW.Visible = false;
     }
 }
