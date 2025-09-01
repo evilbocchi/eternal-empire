@@ -37,6 +37,13 @@ export default function TooltipWindow({ data, visible, metadata }: TooltipWindow
     useEffect(() => {
         if (!frameRef.current || !strokeRef.current) return;
 
+        if (itemSlotRef.current) { // No animation for item slots
+            frameRef.current.Visible = visible;
+            frameRef.current.Transparency = 0;
+            strokeRef.current.Transparency = 1;
+            return;
+        }
+
         if (visible) {
             frameRef.current.Visible = true;
 
