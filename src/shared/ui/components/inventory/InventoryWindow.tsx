@@ -160,7 +160,9 @@ export default function InventoryWindow({ visible, onClose, inventoryController 
         }));
     }, [inventoryItems, searchQuery, traitFilters]);
 
-    const isEmpty = filteredItems.size() === 0;
+    // Check if user has any items at all (for empty state)
+    const hasAnyItems = inventoryItems.some(itemData => itemData.hasItem);
+    const isEmpty = !hasAnyItems; // Only show empty state if user has no items at all
 
     // Build trait filter options
     const traitOptions: TraitFilterOption[] = [
@@ -228,7 +230,7 @@ export default function InventoryWindow({ visible, onClose, inventoryController 
             <frame
                 BackgroundTransparency={1}
                 Size={new UDim2(1, 0, 1, 0)}
-                Visible={!isEmpty}
+                Visible={hasAnyItems}
             >
                 {/* Filter options */}
                 <InventoryFilter
@@ -251,6 +253,7 @@ export default function InventoryWindow({ visible, onClose, inventoryController 
                     ScrollBarThickness={6}
                     Selectable={false}
                     Size={new UDim2(1, 0, 0.975, -20)}
+                    Visible={filteredItems.size() > 0}
                 >
                     <uipadding
                         PaddingBottom={new UDim(0, 5)}

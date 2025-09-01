@@ -10,11 +10,13 @@ import Item from "shared/item/Item";
 import { TooltipData, useTooltip } from "shared/ui/components/tooltip/TooltipProvider";
 import useHover from "shared/ui/hooks/useHover";
 
-interface UseTooltipProps {
-    data: TooltipData | (() => TooltipData);
-    onMoved?: () => void;
-    onEnter?: () => void;
-    onLeave?: () => void;
+declare global {
+    interface UseTooltipProps {
+        data: TooltipData | (() => TooltipData);
+        onMoved?: () => void;
+        onEnter?: () => void;
+        onLeave?: () => void;
+    }
 }
 
 /**
@@ -23,7 +25,7 @@ interface UseTooltipProps {
  * @param tooltipData Static tooltip data or function that returns tooltip data
  * @returns Hover data object
  */
-export function useTooltipProps({ data, onMoved, onEnter, onLeave }: UseTooltipProps) {
+export function useTooltipProps({ data, onMoved, onEnter, onLeave }: UseTooltipProps): UseHoverReturn {
     const { showTooltip, hideTooltip } = useTooltip();
 
     const handleMouseMoved = useCallback(() => {
@@ -53,7 +55,7 @@ export function useTooltipProps({ data, onMoved, onEnter, onLeave }: UseTooltipP
  * @param uuid Unique item identifier
  * @returns Hover data object
  */
-export function useItemTooltip(item: Item, uuid?: string) {
+export function useItemTooltip(item: Item, uuid?: string): UseHoverReturn {
     return useTooltipProps({ data: { item, uuid } });
 }
 
@@ -63,6 +65,6 @@ export function useItemTooltip(item: Item, uuid?: string) {
  * @param message The message to display in the tooltip
  * @returns Hover data object
  */
-export function useMessageTooltip(message: string) {
+export function useMessageTooltip(message: string): UseHoverReturn {
     return useTooltipProps({ data: { message } });
 }

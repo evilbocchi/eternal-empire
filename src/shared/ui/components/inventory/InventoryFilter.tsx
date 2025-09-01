@@ -5,8 +5,8 @@
  * Replaces the traditional FilterOptions with React implementation.
  */
 
-import React, { useCallback } from "@rbxts/react";
-import { getAsset } from "shared/asset/AssetMap";
+import React, { useCallback, useMemo } from "@rbxts/react";
+import { useMessageTooltip } from "shared/ui/components/tooltip/useTooltipProps";
 
 interface TraitOption {
     id: string;
@@ -31,16 +31,30 @@ interface InventoryFilterProps {
 /**
  * Inventory filter component with search and trait filtering
  */
-export default function InventoryFilter({ 
-    searchQuery, 
-    traitOptions, 
-    onSearchChange, 
-    onTraitToggle, 
-    onClear 
+export default function InventoryFilter({
+    searchQuery,
+    traitOptions,
+    onSearchChange,
+    onTraitToggle,
+    onClear
 }: InventoryFilterProps) {
     const handleSearchChange = useCallback((rbx: TextBox) => {
         onSearchChange(rbx.Text);
     }, [onSearchChange]);
+
+    // Generate tooltip props for each trait at the top level
+    const tooltipPropsArray = traitOptions.map(trait => ({
+        id: trait.id,
+        props: useMessageTooltip(trait.id)
+    }));
+
+    const tooltipPropsPerTrait = useMemo(() => {
+        const tooltipProps = new Map<string, UseHoverReturn>();
+        for (const { id, props } of tooltipPropsArray) {
+            tooltipProps.set(id, props);
+        }
+        return tooltipProps;
+    }, [tooltipPropsArray]);
 
     return (
         <frame
@@ -77,7 +91,7 @@ export default function InventoryFilter({
                     PaddingRight={new UDim(0, 5)}
                     PaddingTop={new UDim(0, 5)}
                 />
-                
+
                 {/* Search icon */}
                 <imagebutton
                     AnchorPoint={new Vector2(1, 0.5)}
@@ -91,7 +105,7 @@ export default function InventoryFilter({
                     Size={new UDim2(1, 0, 0.7, 0)}
                     SizeConstraint={Enum.SizeConstraint.RelativeYY}
                 />
-                
+
                 {/* Search box border */}
                 <uistroke
                     ApplyStrokeMode={Enum.ApplyStrokeMode.Border}
@@ -135,7 +149,8 @@ export default function InventoryFilter({
                         ScaleType={Enum.ScaleType.Fit}
                         Size={new UDim2(1, 0, 1, 0)}
                         Event={{
-                            Activated: () => onTraitToggle(trait.id)
+                            Activated: () => onTraitToggle(trait.id),
+                            ...tooltipPropsPerTrait.get(trait.id)!.events
                         }}
                     >
                         <uipadding

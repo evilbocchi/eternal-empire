@@ -1,4 +1,5 @@
 import PlayerProfileTemplate from "shared/data/PlayerProfileTemplate";
+import Items from "shared/items/Items";
 import Packets from "shared/Packets";
 
 class StoryMocking {
@@ -85,6 +86,13 @@ class StoryMocking {
 
         Packets.level.set(2);
         Packets.xp.set(50);
+
+        const random = new Random(42);
+        const quantityPerItem = new Map<string, number>();
+        for (const [id, _] of Items.itemsPerId) {
+            quantityPerItem.set(id, random.NextInteger(1, 100));
+        }
+        Packets.inventory.set(quantityPerItem);
     }
 }
 

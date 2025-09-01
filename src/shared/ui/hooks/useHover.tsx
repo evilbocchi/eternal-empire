@@ -7,11 +7,15 @@
 
 import { useCallback, useState } from "@rbxts/react";
 
-interface UseHoverProps {
-    onMoved?: () => void;
-    onEnter?: () => void;
-    onLeave?: () => void;
-    initialState?: boolean;
+declare global {
+    interface UseHoverProps {
+        onMoved?: () => void;
+        onEnter?: () => void;
+        onLeave?: () => void;
+        initialState?: boolean;
+    }
+
+    type UseHoverReturn = ReturnType<typeof useHover>;
 }
 
 /**
