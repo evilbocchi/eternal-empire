@@ -77,8 +77,8 @@ class StoryMocking {
         Packets.questInfo.set(questInfos);
 
         const stagePerQuest = new Map<string, number>();
-        stagePerQuest.set("Quest1", -1);
-        stagePerQuest.set("Quest3", 2);
+        stagePerQuest.set("Quest1", 1);
+        stagePerQuest.set("Quest3", -1);
         stagePerQuest.set("Quest4", 2);
         Packets.stagePerQuest.set(stagePerQuest);
 
