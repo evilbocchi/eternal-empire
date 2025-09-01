@@ -7,7 +7,7 @@
  */
 
 import { buildRichText } from "@antivivi/vrldk";
-import React, { useEffect, useRef } from "@rbxts/react";
+import React, { useEffect, useMemo, useRef } from "@rbxts/react";
 import { GuiService, RunService, TweenService, Workspace } from "@rbxts/services";
 import Packets from "shared/Packets";
 import { getAsset } from "shared/asset/AssetMap";
@@ -68,7 +68,12 @@ export default function TooltipWindow({ data, visible, metadata }: TooltipWindow
     useEffect(() => {
         if (!visible) return;
 
+        let frameId = 0;
         const connection = RunService.Heartbeat.Connect(() => {
+            frameId++;
+            // Throttle position updates to every 3rd frame for better performance
+            if (frameId % 3 !== 0) return;
+
             if (!frameRef.current) return;
 
             const canvasSize = Workspace.CurrentCamera?.ViewportSize;
@@ -83,7 +88,8 @@ export default function TooltipWindow({ data, visible, metadata }: TooltipWindow
         return () => connection.Disconnect();
     }, [visible]);
 
-    const renderItemSlot = () => {
+    // Memoize expensive tooltip content computation
+    const tooltipContent = useMemo(() => {
         if (!data?.item) return undefined;
 
         const item = data.item;
@@ -113,15 +119,31 @@ export default function TooltipWindow({ data, visible, metadata }: TooltipWindow
             builder.appendAll(itemMetadata.builder);
         }
 
+        // Pre-calculate colors
         let color = difficulty.color ?? new Color3();
         color = color ? new Color3(math.clamp(color.R, 0.1, 0.9), math.clamp(color.G, 0.1, 0.9), math.clamp(color.B, 0.1, 0.9)) : new Color3();
+        const textColor = difficulty.color?.Lerp(new Color3(1, 1, 1), 0.5) ?? Color3.fromRGB(255, 255, 255);
+
+        return {
+            item,
+            difficulty,
+            richText: builder.toString(),
+            backgroundColor: color,
+            textColor,
+        };
+    }, [data?.item, data?.uuid, metadata]);
+
+    const renderItemSlot = () => {
+        if (!tooltipContent) return undefined;
+
+        const { item, difficulty, richText, backgroundColor, textColor } = tooltipContent;
 
         return (
             <imagelabel
                 key="ItemSlot"
                 ref={itemSlotRef}
                 AutomaticSize={Enum.AutomaticSize.XY}
-                BackgroundColor3={color}
+                BackgroundColor3={backgroundColor}
                 BackgroundTransparency={0.2}
                 BorderColor3={Color3.fromRGB(0, 0, 0)}
                 BorderSizePixel={3}
@@ -134,7 +156,7 @@ export default function TooltipWindow({ data, visible, metadata }: TooltipWindow
             >
                 <uistroke
                     ApplyStrokeMode={Enum.ApplyStrokeMode.Border}
-                    Color={color}
+                    Color={backgroundColor}
                     Thickness={2}
                     Transparency={0.2}
                 >
@@ -194,7 +216,7 @@ export default function TooltipWindow({ data, visible, metadata }: TooltipWindow
                         Position={new UDim2(0, 110, 0, 40)}
                         Size={new UDim2(0, 0, 1, 0)}
                         Text={tostring(difficulty.name)}
-                        TextColor3={difficulty.color?.Lerp(new Color3(1, 1, 1), 0.5) ?? Color3.fromRGB(255, 255, 255)}
+                        TextColor3={textColor}
                         TextSize={20}
                     >
                         <uistroke Thickness={2} />
@@ -235,7 +257,7 @@ export default function TooltipWindow({ data, visible, metadata }: TooltipWindow
                     FontFace={RobotoSlabBold}
                     LayoutOrder={5}
                     RichText={true}
-                    Text={builder.toString()}
+                    Text={richText}
                     TextColor3={Color3.fromRGB(255, 255, 255)}
                     TextSize={19}
                     TextStrokeTransparency={0}
