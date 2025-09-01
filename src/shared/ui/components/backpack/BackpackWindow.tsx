@@ -42,7 +42,7 @@ export default function BackpackWindow({
 
     return (
         <frame
-            Key="BackpackWindow"
+            key="BackpackWindow"
             AnchorPoint={new Vector2(0.5, 1)}
             BackgroundTransparency={1}
             Position={new UDim2(0.5, 0, 0.985, -5)}
@@ -53,7 +53,7 @@ export default function BackpackWindow({
             {/* Tool options */}
             {tools.map((toolData) => (
                 <ToolOption
-                    key={toolData.tool.GetDebugId()}
+                    key={`tool-${toolData.name}`}
                     data={toolData}
                     onClick={onToolClick}
                     animationsEnabled={animationsEnabled}

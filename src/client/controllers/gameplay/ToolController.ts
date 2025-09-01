@@ -367,10 +367,10 @@ export default class ToolController implements OnInit, OnStart, OnCharacterAdded
 
     /**
      * Starts the ToolController.
-     * @deprecated UI visibility is now handled by React components
+     * Hides legacy BACKPACK_WINDOW since React handles the UI now.
      */
     onStart() {
-        // UI management moved to React components
-        // React BackpackManager handles visibility logic
+        // Hide the legacy BACKPACK_WINDOW since React components handle the UI
+        BACKPACK_WINDOW.Visible = false;
     }
 }

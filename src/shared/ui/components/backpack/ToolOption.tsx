@@ -101,7 +101,7 @@ export default function ToolOption({
 
             {/* Hotkey number label */}
             <textlabel
-                Key="AmountLabel"
+                key="AmountLabel"
                 Active={true}
                 AutomaticSize={Enum.AutomaticSize.X}
                 BackgroundTransparency={1}
@@ -120,7 +120,7 @@ export default function ToolOption({
 
             {/* Tool icon */}
             <imagelabel
-                Key="ImageLabel"
+                key="ImageLabel"
                 AnchorPoint={new Vector2(0.5, 0.5)}
                 BackgroundTransparency={1}
                 Image={textureId}
@@ -131,7 +131,7 @@ export default function ToolOption({
 
             {/* Background pattern */}
             <imagelabel
-                Key="Pattern"
+                key="Pattern"
                 AnchorPoint={new Vector2(0.5, 0)}
                 BackgroundTransparency={1}
                 Image="rbxassetid://15562720000"
