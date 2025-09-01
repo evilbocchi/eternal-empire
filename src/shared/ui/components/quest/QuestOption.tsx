@@ -1,4 +1,5 @@
-import React from "@rbxts/react";
+import React, { useEffect, useRef } from "@rbxts/react";
+import { TweenService } from "@rbxts/services";
 import { getAsset } from "shared/asset/AssetMap";
 import { getLengthColor, getLengthName, getRewardLabel } from "shared/ui/components/quest/useQuestData";
 import { RobotoSlabBold, RobotoSlabExtraBold, RobotoSlabHeavy, RobotoSlabMedium } from "shared/ui/GameFonts";
@@ -30,7 +31,41 @@ export default function QuestOption({
     const isCompleted = currentStage < 0;
     const isAvailable = !isCompleted && !belowRequirement;
 
-    // Calculate layout order for quest sorting
+    // Create ref for the arrow image
+    const arrowRef = useRef<ImageLabel>();
+
+    // Set initial rotation without animation
+    useEffect(() => {
+        const arrow = arrowRef.current;
+        if (!arrow) return;
+
+        // Set initial rotation based on expanded state
+        arrow.Rotation = isExpanded ? 0 : 180;
+    }, []);
+
+    // Animate arrow rotation when expanded state changes
+    useEffect(() => {
+        const arrow = arrowRef.current;
+        if (!arrow) return;
+
+        const targetRotation = isExpanded ? 0 : 180;
+
+        const tweenInfo = new TweenInfo(
+            0.3, // Duration in seconds
+            Enum.EasingStyle.Quart,
+            Enum.EasingDirection.Out
+        );
+
+        const tween = TweenService.Create(arrow, tweenInfo, {
+            Rotation: targetRotation
+        });
+
+        tween.Play();
+
+        return () => {
+            tween.Cancel();
+        };
+    }, [isExpanded]);    // Calculate layout order for quest sorting
     const getLayoutOrder = () => {
         const baseOrder = (quest.level * 10) + (quest.order + 1);
         if (isCompleted) return baseOrder + 1000000000;
@@ -78,11 +113,11 @@ export default function QuestOption({
             >
                 {/* Dropdown Arrow */}
                 <imagelabel
+                    ref={arrowRef}
                     AnchorPoint={new Vector2(1, 0.5)}
                     BackgroundTransparency={1}
                     Image={getAsset("assets/Dropdown.png")}
                     Position={new UDim2(0.95, 0, 0.5, 0)}
-                    Rotation={isExpanded ? 0 : 180}
                     ScaleType={Enum.ScaleType.Fit}
                     Size={new UDim2(0.8, 0, 0.8, 0)}
                     SizeConstraint={Enum.SizeConstraint.RelativeYY}

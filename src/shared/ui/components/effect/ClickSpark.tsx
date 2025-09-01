@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from "@rbxts/react";
-import { GuiService, Players, TweenService, UserInputService } from "@rbxts/services";
+import { GuiService, Players, RunService, TweenService, UserInputService } from "@rbxts/services";
 import { getAsset } from "shared/asset/AssetMap";
 
 interface SparkData {
@@ -156,7 +156,7 @@ export function ClickSparkManager() {
     useEffect(() => {
         if (isMouseHeld) {
             // Generate sparks every 0.1 seconds while mouse is held
-            intervalRef.current = game.GetService("RunService").Heartbeat.Connect(() => {
+            intervalRef.current = RunService.Heartbeat.Connect(() => {
                 const mousePosition = getMousePosition();
 
                 // Only generate sparks if mouse has moved and every few frames to avoid overwhelming

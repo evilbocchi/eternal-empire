@@ -1,4 +1,5 @@
 import React from "@rbxts/react";
+import { TweenService } from "@rbxts/services";
 import { getAsset } from "shared/asset/AssetMap";
 import { RobotoSlabBold } from "shared/ui/GameFonts";
 
@@ -21,28 +22,28 @@ export default function SetupHeader({ setupName, cost, onEditClick }: SetupHeade
                 Event={{
                     Activated: onEditClick,
                     MouseEnter: (rbx) => {
-                        const tween = game.GetService("TweenService").Create(rbx,
+                        const tween = TweenService.Create(rbx,
                             new TweenInfo(0.2, Enum.EasingStyle.Bounce, Enum.EasingDirection.Out),
                             { Size: new UDim2(0.65, 0, 0.65, 0) }
                         );
                         tween.Play();
                     },
                     MouseLeave: (rbx) => {
-                        const tween = game.GetService("TweenService").Create(rbx,
+                        const tween = TweenService.Create(rbx,
                             new TweenInfo(0.15, Enum.EasingStyle.Back, Enum.EasingDirection.Out),
                             { Size: new UDim2(0.6, 0, 0.6, 0) }
                         );
                         tween.Play();
                     },
                     MouseButton1Down: (rbx) => {
-                        const tween = game.GetService("TweenService").Create(rbx,
+                        const tween = TweenService.Create(rbx,
                             new TweenInfo(0.1, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut),
                             { Size: new UDim2(0.55, 0, 0.55, 0) }
                         );
                         tween.Play();
                     },
                     MouseButton1Up: (rbx) => {
-                        const tween = game.GetService("TweenService").Create(rbx,
+                        const tween = TweenService.Create(rbx,
                             new TweenInfo(0.2, Enum.EasingStyle.Bounce, Enum.EasingDirection.Out),
                             { Size: new UDim2(0.65, 0, 0.65, 0) }
                         );
