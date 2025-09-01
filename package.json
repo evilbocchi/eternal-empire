@@ -24,7 +24,7 @@
     "devDependencies": {
         "@eslint/js": "^9.34.0",
         "@rbxts/compiler-types": "^3.0.0-types.0",
-        "@rbxts/types": "^1.0.877",
+        "@rbxts/types": "^1.0.879",
         "@types/node": "^24.3.0",
         "axios": "^1.11.0",
         "concurrently": "^9.2.0",
