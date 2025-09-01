@@ -5,7 +5,7 @@
  * This solves the issue of multiple close buttons competing for the same hotkey.
  */
 
-import React, { createContext, ReactNode, useCallback, useContext, useRef, useState } from "@rbxts/react";
+import React, { createContext, ReactNode, useCallback, useContext, useEffect, useRef } from "@rbxts/react";
 import { playSound } from "shared/asset/GameAssets";
 import { useHotkey } from "shared/ui/components/hotkeys/HotkeyProvider";
 
@@ -87,9 +87,7 @@ export default function WindowManager({ children }: WindowManagerProps) {
         },
         priority: 0,
         label: "Close Window",
-    });
-
-    return (
+    }); return (
         <WindowManagerContext.Provider value={{
             registerWindow,
             unregisterWindow,
@@ -117,15 +115,21 @@ export function useWindowManager() {
  */
 export function useWindow(id: string, visible: boolean, onClose: () => void, priority = 0) {
     const { registerWindow, unregisterWindow, setWindowVisible } = useWindowManager();
+    const onCloseRef = useRef(onClose);
 
-    // Register/unregister the window
-    React.useEffect(() => {
-        registerWindow(id, onClose, priority);
+    // Update the onClose ref when it changes
+    useEffect(() => {
+        onCloseRef.current = onClose;
+    }, [onClose]);
+
+    // Register/unregister the window (only when id or priority changes)
+    useEffect(() => {
+        registerWindow(id, () => onCloseRef.current(), priority);
         return () => unregisterWindow(id);
-    }, [id, onClose, priority, registerWindow, unregisterWindow]);
+    }, [id, priority, registerWindow, unregisterWindow]);
 
     // Update visibility when it changes
-    React.useEffect(() => {
+    useEffect(() => {
         setWindowVisible(id, visible);
     }, [id, visible, setWindowVisible]);
 }

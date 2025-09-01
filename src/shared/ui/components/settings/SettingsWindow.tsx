@@ -27,8 +27,13 @@ export default function SettingsWindow({
     const settings = useProperty(Packets.settings);
     const { bindingsRef, setIsSettingHotkey } = useHotkeys();
 
+    // Stable onClose callback to prevent re-registration
+    const stableOnClose = useCallback(() => {
+        onClose?.();
+    }, [onClose]);
+
     // Register with window manager with higher priority than normal windows
-    useWindow("settings", visible, onClose || (() => { }), 10);
+    useWindow("settings", visible, stableOnClose, 10);
 
     const initialPosition = new UDim2(0.5, 0, 0.5, 0);
 

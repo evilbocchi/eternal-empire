@@ -5,6 +5,7 @@ import HotkeyProvider from "shared/ui/components/hotkeys/HotkeyProvider";
 import SettingsManager from "shared/ui/components/settings/SettingsManager";
 import StoryMocking from "shared/ui/components/StoryMocking";
 import TooltipProvider from "shared/ui/components/tooltip/TooltipProvider";
+import WindowManager from "shared/ui/components/window/WindowManager";
 
 const controls = {
     visible: true
@@ -20,7 +21,9 @@ export = {
         return (
             <HotkeyProvider>
                 <TooltipProvider>
-                    <SettingsManager defaultVisible={true} />
+                    <WindowManager>
+                        <SettingsManager defaultVisible={true} />
+                    </WindowManager>
                 </TooltipProvider>
             </HotkeyProvider>
         );
