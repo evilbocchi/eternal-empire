@@ -2,38 +2,26 @@
 //!optimize 2
 
 /**
- * @fileoverview Client controller responsible for managing the player inventory interface.
+ * @fileoverview Client controller responsible for managing player inventory data.
  *
  * Handles:
- * - Displaying and filtering inventory items
- * - Managing item slot activation and placement
- * - Integrating with build, tooltip, and adaptive tab controllers
- * - Observing inventory and unique item state for live updates
+ * - Tracking inventory items and unique instances  
+ * - Finding best unique item instances for items
+ * - Coordinating with build controller for item placement
+ * - Observing inventory state changes
  *
- * The controller maintains mappings between items and their GUI slots, manages filtering, and coordinates with other controllers for UI and build actions.
+ * This controller focuses purely on data management and business logic.
+ * UI rendering is handled by React components.
  *
  * @since 1.0.0
  */
 
-import { Controller, OnInit, OnStart } from "@flamework/core";
-import AdaptiveTabController, { ADAPTIVE_TAB_MAIN_WINDOW } from "client/controllers/core/AdaptiveTabController";
-import UIController, { INTERFACE } from "client/controllers/core/UIController";
+import { Controller, OnStart } from "@flamework/core";
 import BuildController from "client/controllers/gameplay/BuildController";
-import TooltipController, { Tooltip } from "client/controllers/interface/TooltipController";
-import ItemFilter from "client/ItemFilter";
-import ItemSlot from "client/ItemSlot";
-import { ASSETS, playSound } from "shared/asset/GameAssets";
+import { playSound } from "shared/asset/GameAssets";
 import Item from "shared/item/Item";
 import Items from "shared/items/Items";
 import Packets from "shared/Packets";
-
-
-export const INVENTORY_WINDOW = ADAPTIVE_TAB_MAIN_WINDOW.WaitForChild("Inventory") as Frame & {
-    Empty: Frame;
-    Page: ItemListContainer & {
-        FilterOptions: FilterOptions;
-    };
-};
 
 const sortedItemsSize = Items.sortedItems.size();
 const reverseSortedItems = new Array<Item>(sortedItemsSize);
@@ -42,46 +30,16 @@ for (let i = 0; i < sortedItemsSize; i++) {
 }
 
 /**
- * Controller responsible for managing the player inventory interface, item slot activation, and integration with build and tooltip systems.
- *
- * Handles inventory display, filtering, and updates in response to game state changes.
+ * Controller responsible for managing player inventory data and business logic.
+ * 
+ * Provides data access methods for React components and handles item placement logic.
  */
 @Controller()
-export default class InventoryController implements OnInit, OnStart {
-    /** Mapping of items to their GUI slots. */
-    readonly itemSlotsPerItem = new Map<Item, ItemSlot>();
+export default class InventoryController implements OnStart {
     /** List of items currently in the inventory. */
     readonly items = new Array<Item>();
-    /** Whether React mode is enabled (disables traditional GUI) */
-    private reactMode = false;
 
-    /**
-     * Item filter logic for the inventory GUI.
-     * In React mode, this will be managed by React components.
-     */
-    readonly filterItems = ItemFilter.loadFilterOptions(INVENTORY_WINDOW.Page.FilterOptions, (query, whitelistedTraits) => {
-        if (!this.reactMode) {
-            ItemSlot.filterItems(this.itemSlotsPerItem, this.items, query, whitelistedTraits);
-        }
-    });
-
-    constructor(private uiController: UIController, private adaptiveTabController: AdaptiveTabController, private buildController: BuildController, private tooltipController: TooltipController) {
-    }
-
-    /**
-     * Enable React mode, which disables traditional GUI management.
-     */
-    enableReactMode() {
-        this.reactMode = true;
-        // Hide the traditional inventory window
-        INVENTORY_WINDOW.Visible = false;
-    }
-
-    /**
-     * Check if React mode is enabled.
-     */
-    isReactMode() {
-        return this.reactMode;
+    constructor(private buildController: BuildController) {
     }
 
     /**
@@ -124,16 +82,52 @@ export default class InventoryController implements OnInit, OnStart {
     }
 
     /**
-     * Refreshes the inventory window, updating item slots and amounts.
-     * In React mode, this only updates the data without modifying GUI.
+     * Handle item activation for placement in the game world.
+     * This method encapsulates the business logic for item placement.
+     * 
+     * @param item The item to activate/place
+     * @returns True if the item was successfully activated, false otherwise
+     */
+    activateItem(item: Item): boolean {
+        const isPlaceable = item.placeableAreas.size() > 0 || item.bounds !== undefined;
+        const level = Packets.level.get() ?? 0;
+        
+        // Check restrictions
+        if (this.buildController.getRestricted() === true || 
+            isPlaceable === false || 
+            (item.levelReq !== undefined && item.levelReq > level)) {
+            playSound("Error.mp3");
+            return false;
+        }
+        
+        playSound("MenuClick.mp3");
+        
+        // Find best unique instance if applicable
+        let bestUuid: string | undefined;
+        if (Items.uniqueItems.has(item)) {
+            bestUuid = this.getBest(item.id);
+        }
+        
+        // Add placing model and select it
+        this.buildController.mainSelect(
+            this.buildController.addPlacingModel(item, bestUuid)
+        );
+        
+        return true;
+    }
+
+    /**
+     * Refreshes the inventory items list based on current inventory state.
+     * Updates the items array with current inventory data.
      * @param inventory The current inventory map (optional).
      * @param uniqueInstances The current unique item instances map (optional).
      */
-    refreshInventoryWindow(inventory = Packets.inventory.get(), uniqueInstances = Packets.uniqueInstances.get()) {
-        let isEmpty = true;
+    refreshInventoryItems(inventory = Packets.inventory.get(), uniqueInstances = Packets.uniqueInstances.get()) {
         const items = this.items;
         items.clear();
         const amounts = new Map<string, number>();
+        
+        // Count unique instances
         if (uniqueInstances !== undefined) {
             for (const [_, uniqueInstance] of uniqueInstances) {
                 const itemId = uniqueInstance.baseItemId;
@@ -145,11 +139,10 @@ export default class InventoryController implements OnInit, OnStart {
             }
         }
 
+        // Build items list based on what's in inventory
         for (const item of reverseSortedItems) {
-            const itemSlot = this.itemSlotsPerItem.get(item);
-            if (itemSlot === undefined)
-                continue;
-
+            if (item.isA("HarvestingTool")) continue;
+            
             const itemId = item.id;
             let amount = inventory?.get(itemId) ?? 0;
             const uniques = amounts.get(itemId);
@@ -159,132 +152,20 @@ export default class InventoryController implements OnInit, OnStart {
 
             const hasItem = amount > 0;
             if (hasItem) {
-                isEmpty = false;
                 items.push(item);
             }
-            
-            // Only update GUI elements in non-React mode
-            if (!this.reactMode) {
-                if (Items.uniqueItems.has(item)) {
-                    const bestUuid = this.getBest(itemId);
-                    this.tooltipController.getTooltip(itemSlot).uuid = bestUuid;
-                }
-
-                itemSlot.AmountLabel.Text = tostring(amount);
-                itemSlot.AmountLabel.TextColor3 = hasItem ? Color3.fromRGB(255, 255, 255) : Color3.fromRGB(150, 150, 150);
-            }
-        }
-
-        // Only update GUI visibility in non-React mode
-        if (!this.reactMode) {
-            INVENTORY_WINDOW.Empty.Visible = isEmpty;
-            this.filterItems();
         }
     }
 
     /**
-     * Recalibrates the item grid layout based on window size.
-     */
-    recalibrate() {
-        const itemList = INVENTORY_WINDOW.Page.ItemList;
-        itemList.UIGridLayout.CellSize = new UDim2(1 / ItemSlot.calculateOptimalCellCount(itemList.AbsoluteSize.X), -12, 1, 0);
-    }
-
-    /**
-     * Loads item slots for all items in the inventory, sets up activation and tooltips.
-     * In React mode, this only creates the data mapping without GUI elements.
-     */
-    loadItemSlots() {
-        for (const [_id, item] of Items.itemsPerId) {
-            if (item.isA("HarvestingTool"))
-                continue;
-
-            if (!this.reactMode) {
-                // Traditional GUI mode: create actual item slots
-                const itemSlot = ItemSlot.loadItemSlot(ASSETS.ItemListContainer.ItemSlot.Clone(), item);
-                itemSlot.LayoutOrder = -item.layoutOrder;
-                itemSlot.Visible = false;
-
-                itemSlot.Activated.Connect(() => {
-                    const isPlaceable = item.placeableAreas.size() > 0 || item.bounds !== undefined;
-                    const level = Packets.level.get() ?? 0;
-                    if (this.buildController.getRestricted() === true || isPlaceable === false || (item.levelReq !== undefined && item.levelReq > level)) {
-                        playSound("Error.mp3");
-                        return;
-                    }
-                    this.adaptiveTabController.hideAdaptiveTab();
-                    playSound("MenuClick.mp3");
-                    let bestUuid: string | undefined;
-                    if (Items.uniqueItems.has(item)) {
-                        bestUuid = this.getBest(item.id);
-                    }
-
-                    this.buildController.mainSelect(this.buildController.addPlacingModel(item, bestUuid));
-                });
-
-                this.tooltipController.setTooltip(itemSlot, Tooltip.fromItem(item));
-
-                itemSlot.Parent = INVENTORY_WINDOW.Page.ItemList;
-                this.itemSlotsPerItem.set(item, itemSlot);
-            } else {
-                // React mode: create a dummy slot object that React can reference
-                // This maintains compatibility with the existing data structures
-                const dummySlot = {
-                    LayoutOrder: -item.layoutOrder,
-                    Visible: false,
-                    ReactVisible: false,
-                    AmountLabel: {
-                        Text: "0",
-                        TextColor3: Color3.fromRGB(150, 150, 150)
-                    }
-                } as ItemSlot & { ReactVisible: boolean };
-                
-                this.itemSlotsPerItem.set(item, dummySlot);
-            }
-        }
-    }
-
-
-    /**
-     * Initializes the InventoryController, loads item slots, and sets up event listeners.
-     */
-    onInit() {
-        this.loadItemSlots();
-
-        if (!this.reactMode) {
-            INTERFACE.GetPropertyChangedSignal("AbsoluteSize").Connect(() => this.recalibrate());
-
-            for (const traitOption of INVENTORY_WINDOW.Page.FilterOptions.TraitOptions.GetChildren()) {
-                if (traitOption.IsA("GuiButton")) {
-                    this.tooltipController.setTooltip(traitOption, Tooltip.fromMessage(traitOption.Name));
-                }
-            }
-        }
-    }
-
-    /**
-     * Starts the InventoryController, observes inventory and unique item changes, and recalibrates layout on first open.
+     * Starts the InventoryController and observes inventory and unique item changes.
      */
     onStart() {
         Packets.inventory.observe((inventory) => {
-            this.refreshInventoryWindow(inventory);
+            this.refreshInventoryItems(inventory);
         });
         Packets.uniqueInstances.observe((uniqueInstances) => {
-            this.refreshInventoryWindow(undefined, uniqueInstances);
+            this.refreshInventoryItems(undefined, uniqueInstances);
         });
-
-        if (!this.reactMode) {
-            let firstLoad = true;
-            const connection = INVENTORY_WINDOW.GetPropertyChangedSignal("Visible").Connect(() => {
-                if (!firstLoad) {
-                    connection.Disconnect();
-                    return;
-                }
-
-                firstLoad = false;
-                this.recalibrate();
-                connection.Disconnect();
-            });
-        }
     }
 }

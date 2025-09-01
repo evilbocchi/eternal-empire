@@ -1,11 +1,10 @@
 import React, { StrictMode, useState } from "@rbxts/react";
 import type BuildController from "client/controllers/gameplay/BuildController";
 import type InventoryController from "client/controllers/interface/InventoryController";
-import type AdaptiveTabController from "client/controllers/core/AdaptiveTabController";
 import BuildManager from "shared/ui/components/build/BuildManager";
 import { ClickSparkManager } from "shared/ui/components/effect/ClickSpark";
 import HotkeyProvider from "shared/ui/components/hotkeys/HotkeyProvider";
-import InventoryManager from "shared/ui/components/inventory/InventoryManager";
+import InventoryWindow from "shared/ui/components/inventory/InventoryWindow";
 import PositionDisplay from "shared/ui/components/position/PositionDisplay";
 import QuestWindow from "shared/ui/components/quest/QuestWindow";
 import TrackedQuestWindow from "shared/ui/components/quest/TrackedQuestWindow";
@@ -18,11 +17,9 @@ interface AppProps {
     buildController?: BuildController;
     /** Inventory controller interface for React integration */
     inventoryController?: InventoryController;
-    /** Adaptive tab controller interface for React integration */
-    adaptiveTabController?: AdaptiveTabController;
 }
 
-export default function App({ buildController, inventoryController, adaptiveTabController }: AppProps = {}) {
+export default function App({ buildController, inventoryController }: AppProps = {}) {
     const [activeWindow, setActiveWindow] = useState<string | undefined>(undefined);
 
     return (
@@ -45,12 +42,10 @@ export default function App({ buildController, inventoryController, adaptiveTabC
                     
                     <QuestWindow visible={activeWindow === "Quests"} onClose={() => setActiveWindow(undefined)} />
                     
-                    <InventoryManager 
-                        inventoryController={inventoryController}
-                        buildController={buildController}
-                        adaptiveTabController={adaptiveTabController}
+                    <InventoryWindow 
                         visible={activeWindow === "Inventory"} 
-                        onClose={() => setActiveWindow(undefined)} 
+                        onClose={() => setActiveWindow(undefined)}
+                        inventoryController={inventoryController}
                     />
                 </TooltipProvider>
             </HotkeyProvider>
