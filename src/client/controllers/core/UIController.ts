@@ -4,7 +4,8 @@
  * @since 1.0.0
  */
 import { Controller, OnStart } from "@flamework/core";
-import { LOCAL_PLAYER, PLAYER_GUI } from "client/constants";
+import { PLAYER_GUI } from "client/constants";
+import { LOCAL_PLAYER } from "shared/constants";
 
 /**
  * The {@link ScreenGui} that contains the main interface for the {@link LOCAL_PLAYER}.

@@ -6,7 +6,8 @@
 
 import ParticleEmitter from "@rbxts/rparticle";
 import { Debris, TweenService } from "@rbxts/services";
-import { LOCAL_PLAYER, PLAYER_GUI } from "client/constants";
+import { PLAYER_GUI } from "client/constants";
+import { LOCAL_PLAYER } from "shared/constants";
 
 namespace Effect2D {
 

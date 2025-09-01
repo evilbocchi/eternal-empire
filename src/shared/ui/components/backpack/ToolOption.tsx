@@ -59,26 +59,26 @@ export default function ToolOption({
     const { hovering, events } = useHover({});
 
     // Color based on equipped state
-    const backgroundColor = isEquipped 
-        ? Color3.fromRGB(0, 184, 255) 
+    const backgroundColor = isEquipped
+        ? Color3.fromRGB(0, 184, 255)
         : Color3.fromRGB(255, 255, 255);
-    
-    const strokeColor = isEquipped 
-        ? Color3.fromRGB(0, 184, 255) 
+
+    const strokeColor = isEquipped
+        ? Color3.fromRGB(0, 184, 255)
         : Color3.fromRGB(255, 255, 255);
 
     // Apply press effect
-    const currentBackgroundColor = isPressed 
+    const currentBackgroundColor = isPressed
         ? backgroundColor.Lerp(Color3.fromRGB(0, 0, 0), 0.2)
         : backgroundColor;
 
     return (
         <textbutton
+            key={name}
             BackgroundColor3={currentBackgroundColor}
             BorderColor3={Color3.fromRGB(0, 0, 0)}
             BorderSizePixel={4}
             LayoutOrder={layoutOrder}
-            Name={name}
             Size={new UDim2(1, 0, 1, 0)}
             SizeConstraint={Enum.SizeConstraint.RelativeYY}
             Text=""
@@ -93,7 +93,7 @@ export default function ToolOption({
             {/* Background gradient */}
             <uigradient
                 Color={new ColorSequence([
-                    new ColorSequenceKeypoint(0, Color3.fromRGB(143, 143, 143)), 
+                    new ColorSequenceKeypoint(0, Color3.fromRGB(143, 143, 143)),
                     new ColorSequenceKeypoint(1, Color3.fromRGB(198, 198, 198))
                 ])}
                 Rotation={272}
@@ -145,15 +145,15 @@ export default function ToolOption({
             />
 
             {/* Border stroke */}
-            <uistroke 
-                ApplyStrokeMode={Enum.ApplyStrokeMode.Border} 
-                Color={strokeColor} 
+            <uistroke
+                ApplyStrokeMode={Enum.ApplyStrokeMode.Border}
+                Color={strokeColor}
                 Thickness={2}
             >
                 <uigradient
                     Color={new ColorSequence([
-                        new ColorSequenceKeypoint(0, Color3.fromRGB(255, 255, 255)), 
-                        new ColorSequenceKeypoint(0.587, Color3.fromRGB(173, 173, 173)), 
+                        new ColorSequenceKeypoint(0, Color3.fromRGB(255, 255, 255)),
+                        new ColorSequenceKeypoint(0.587, Color3.fromRGB(173, 173, 173)),
                         new ColorSequenceKeypoint(1, Color3.fromRGB(255, 255, 255))
                     ])}
                     Rotation={75}

@@ -7,11 +7,10 @@
 
 import React, { useCallback, useEffect, useState } from "@rbxts/react";
 import { RunService } from "@rbxts/services";
-import { LOCAL_PLAYER } from "client/constants";
-import { ADAPTIVE_TAB } from "client/controllers/core/AdaptiveTabController";
 import type ToolController from "client/controllers/gameplay/ToolController";
-import Items from "shared/items/Items";
 import { playSound } from "shared/asset/GameAssets";
+import { LOCAL_PLAYER } from "shared/constants";
+import Items from "shared/items/Items";
 import BackpackWindow, { BackpackWindowCallbacks, BackpackWindowState } from "shared/ui/components/backpack/BackpackWindow";
 import { ToolOptionData } from "shared/ui/components/backpack/ToolOption";
 
@@ -45,7 +44,7 @@ export default function BackpackManager({
         const tools: ToolOptionData[] = [];
         const character = LOCAL_PLAYER.Character;
         const backpack = LOCAL_PLAYER.FindFirstChildOfClass("Backpack");
-        
+
         if (!character || !backpack) {
             setBackpackState({ visible: false, tools: [] });
             return;
@@ -58,13 +57,15 @@ export default function BackpackManager({
         const toolsMap = toolController.tools;
         let hotkeyIndex = 1;
 
-        // Sort tools by layout order for hotkey assignment
-        const sortedToolOptions = [...toolsMap.entries()]
-            .sort(([_a, optionA], [_b, optionB]) => {
-                const layoutA = optionA.LayoutOrder;
-                const layoutB = optionB.LayoutOrder;
-                return layoutA < layoutB;
-            });
+        const toolOptions = new Array<[Tool, ToolOption]>();
+        for (const [tool, option] of toolsMap) {
+            toolOptions.push([tool, option]);
+        }
+        const sortedToolOptions = toolOptions.sort(([_a, optionA], [_b, optionB]) => {
+            const layoutA = optionA.LayoutOrder;
+            const layoutB = optionB.LayoutOrder;
+            return layoutA < layoutB;
+        });
 
         for (const [tool, _option] of sortedToolOptions) {
             const item = Items.getItem(tool.Name);
@@ -110,9 +111,7 @@ export default function BackpackManager({
             if (hotkeyIndex > 10) break;
         }
 
-        // Calculate visibility (same logic as original ToolController)
-        const isVisible = !ADAPTIVE_TAB.Visible && toolController.buildController.selected.isEmpty() && tools.size() > 0;
-
+        const isVisible = tools.size() > 0;
         setBackpackState({
             visible: isVisible,
             tools

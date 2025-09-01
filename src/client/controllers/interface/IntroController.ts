@@ -14,7 +14,7 @@
 import { loadAnimation } from "@antivivi/vrldk";
 import { Controller, OnInit } from "@flamework/core";
 import { ContentProvider, ReplicatedStorage, TweenService, Workspace } from "@rbxts/services";
-import { LOCAL_PLAYER } from "client/constants";
+import { LOCAL_PLAYER } from "shared/constants";
 import AdaptiveTabController from "client/controllers/core/AdaptiveTabController";
 import { INTERFACE } from "client/controllers/core/UIController";
 import BalanceWindowController from "client/controllers/interface/BalanceWindowController";

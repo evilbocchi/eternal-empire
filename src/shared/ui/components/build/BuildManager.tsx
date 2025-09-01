@@ -20,9 +20,7 @@ interface BuildManagerProps {
  * High-level build manager component that handles UI state and coordinates with build logic.
  * This component should be integrated into your main UI controller.
  */
-export default function BuildManager({
-    buildController,
-}: BuildManagerProps) {
+export default function BuildManager({ buildController }: BuildManagerProps) {
     const [buildState, setBuildState] = useState<BuildWindowState>({
         visible: false,
         hasSelection: false,

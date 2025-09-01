@@ -14,7 +14,7 @@ import { OnoeNum } from "@antivivi/serikanum";
 import { convertToHHMMSS } from "@antivivi/vrldk";
 import { Controller, OnStart } from "@flamework/core";
 import { CollectionService, MarketplaceService, Workspace } from "@rbxts/services";
-import { LOCAL_PLAYER } from "client/constants";
+import { LOCAL_PLAYER } from "shared/constants";
 import { INTERFACE } from "client/controllers/core/UIController";
 import { playSound } from "shared/asset/GameAssets";
 import { BOMBS_PRODUCTS } from "shared/devproducts/BombsProducts";

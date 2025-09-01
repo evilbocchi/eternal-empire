@@ -8,8 +8,9 @@
 
 import { buildRichText } from "@antivivi/vrldk";
 import React, { useEffect, useRef } from "@rbxts/react";
-import { GuiService, Players, RunService, TweenService, Workspace } from "@rbxts/services";
+import { GuiService, RunService, TweenService, Workspace } from "@rbxts/services";
 import Packets from "shared/Packets";
+import { LOCAL_PLAYER } from "shared/constants";
 import Item from "shared/item/Item";
 import ItemMetadata from "shared/item/ItemMetadata";
 import Unique from "shared/item/traits/Unique";
@@ -68,7 +69,7 @@ export default function TooltipWindow({ data, visible, metadata }: TooltipWindow
             if (!frameRef.current) return;
 
             const canvasSize = Workspace.CurrentCamera?.ViewportSize;
-            const mouse = Players.LocalPlayer.GetMouse();
+            const mouse = LOCAL_PLAYER.GetMouse();
 
             if (canvasSize !== undefined) {
                 frameRef.current.AnchorPoint = new Vector2(canvasSize.X - mouse.X < 200 ? 1 : 0, mouse.Y < 200 ? 0 : 1);

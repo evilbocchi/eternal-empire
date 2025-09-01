@@ -11,7 +11,7 @@
  * @since 1.0.0
  */
 import { Controller, Modding, OnInit } from "@flamework/core";
-import { LOCAL_PLAYER } from "client/constants";
+import { LOCAL_PLAYER } from "shared/constants";
 
 /**
  * Interface for objects that listen for character addition events.

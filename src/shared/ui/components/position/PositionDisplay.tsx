@@ -1,5 +1,5 @@
 import React from "@rbxts/react";
-import { Players, Workspace } from "@rbxts/services";
+import { LOCAL_PLAYER } from "shared/constants";
 import { useCharacterPosition } from "shared/ui/components/position/usePlayerPosition";
 import PositionWindow from "./PositionWindow";
 
@@ -22,7 +22,7 @@ interface PositionDisplayProps {
  * providing a complete solution for displaying player coordinates.
  */
 export default function PositionDisplay({
-    player = Players.LocalPlayer,
+    player = LOCAL_PLAYER,
     visible = true,
     anchorPoint,
     windowPosition,

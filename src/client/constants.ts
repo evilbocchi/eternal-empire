@@ -5,12 +5,7 @@
  * @since 1.0.0
  */
 
-import { Players } from "@rbxts/services";
-
-/**
- * Reference to the local player.
- */
-export const LOCAL_PLAYER = Players.LocalPlayer;
+import { LOCAL_PLAYER } from "shared/constants";
 
 /**
  * Reference to the local player's mouse.

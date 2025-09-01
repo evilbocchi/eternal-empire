@@ -14,7 +14,7 @@
 import { Controller, OnInit } from "@flamework/core";
 import CameraShaker from "@rbxts/camera-shaker";
 import { TextChatService } from "@rbxts/services";
-import { LOCAL_PLAYER } from "client/constants";
+import { LOCAL_PLAYER } from "shared/constants";
 import AdaptiveTabController, { ADAPTIVE_TAB_MAIN_WINDOW } from "client/controllers/core/AdaptiveTabController";
 import EffectController from "client/controllers/world/EffectController";
 import { ASSETS, playSound } from "shared/asset/GameAssets";

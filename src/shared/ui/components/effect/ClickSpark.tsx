@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from "@rbxts/react";
-import { GuiService, Players, RunService, TweenService, UserInputService } from "@rbxts/services";
+import { GuiService, RunService, TweenService, UserInputService } from "@rbxts/services";
 import { getAsset } from "shared/asset/AssetMap";
+import { LOCAL_PLAYER } from "shared/constants";
 
 interface SparkData {
     id: string;
@@ -89,7 +90,7 @@ export function ClickSparkManager() {
     const lastMousePosition = useRef<Vector2 | undefined>();
 
     const getMousePosition = useCallback(() => {
-        const mouse = Players.LocalPlayer.GetMouse();
+        const mouse = LOCAL_PLAYER.GetMouse();
         const [topLeftCorner] = GuiService.GetGuiInset();
         return new Vector2(mouse.X, mouse.Y).add(topLeftCorner);
     }, []);

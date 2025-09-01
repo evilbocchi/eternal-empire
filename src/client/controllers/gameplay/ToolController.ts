@@ -15,9 +15,8 @@
 import { OnoeNum } from "@antivivi/serikanum";
 import { loadAnimation } from "@antivivi/vrldk";
 import { Controller, OnInit, OnStart } from "@flamework/core";
-import { Debris, RunService, StarterGui, TweenService, UserInputService, Workspace } from "@rbxts/services";
-import { LOCAL_PLAYER } from "client/constants";
-import { ADAPTIVE_TAB } from "client/controllers/core/AdaptiveTabController";
+import { Debris, StarterGui, TweenService, UserInputService, Workspace } from "@rbxts/services";
+import { LOCAL_PLAYER } from "shared/constants";
 import { OnCharacterAdded } from "client/controllers/core/ModdingController";
 import { INTERFACE } from "client/controllers/core/UIController";
 import BuildController from "client/controllers/gameplay/BuildController";
@@ -213,35 +212,39 @@ export default class ToolController implements OnInit, OnStart, OnCharacterAdded
                 anim.Play();
                 playSound("ToolSwing.mp3");
             }
-            else if (ADAPTIVE_TAB.Visible === false) {
+            else {
+                let index = -1;
                 for (const [i, v] of this.KEY_CODES) {
-                    if (input.KeyCode !== v)
-                        continue;
-
-                    // Get tools sorted by layout order for hotkey mapping
-                    const sortedTools = [...this.tools.entries()]
-                        .sort(([_a, optionA], [_b, optionB]) => {
-                            return optionA.LayoutOrder < optionB.LayoutOrder;
-                        });
-                    
-                    const toolEntry = sortedTools[i - 1]; // i is 1-based
-                    if (toolEntry === undefined)
-                        return;
-                    
-                    const [tool, _option] = toolEntry;
-
-                    const backpack = LOCAL_PLAYER.FindFirstChildOfClass("Backpack");
-                    playSound("Equip.mp3");
-                    if (tool.Parent === backpack) {
-                        const currentTool = LOCAL_PLAYER.Character?.FindFirstChildOfClass("Tool");
-                        if (currentTool !== undefined)
-                            currentTool.Parent = backpack;
-                        tool.Parent = LOCAL_PLAYER.Character;
+                    if (input.KeyCode === v) {
+                        index = i;
+                        break;
                     }
-                    else {
-                        tool.Parent = backpack;
-                    }
-                    break;
+                }
+
+                let sortedTools = new Array<[Tool, ToolOption]>();
+                for (const [tool, option] of this.tools) {
+                    sortedTools.push([tool, option]);
+                }
+                sortedTools = sortedTools.sort(([_a, optionA], [_b, optionB]) => {
+                    return optionA.LayoutOrder < optionB.LayoutOrder;
+                });
+
+                const toolEntry = sortedTools[index - 1]; // index is 1-based
+                if (toolEntry === undefined)
+                    return;
+
+                const [tool, _option] = toolEntry;
+
+                const backpack = LOCAL_PLAYER.FindFirstChildOfClass("Backpack");
+                playSound("Equip.mp3");
+                if (tool.Parent === backpack) {
+                    const currentTool = LOCAL_PLAYER.Character?.FindFirstChildOfClass("Tool");
+                    if (currentTool !== undefined)
+                        currentTool.Parent = backpack;
+                    tool.Parent = LOCAL_PLAYER.Character;
+                }
+                else {
+                    tool.Parent = backpack;
                 }
             }
 
@@ -324,7 +327,7 @@ export default class ToolController implements OnInit, OnStart, OnCharacterAdded
         const toolOption = ASSETS.ToolOption.Clone();
         toolOption.ImageLabel.Image = tool.TextureId;
         this.tools.set(tool, toolOption);
-        
+
         let layoutOrder: number;
         switch (harvestingTool.toolType) {
             case "Pickaxe":
@@ -355,12 +358,12 @@ export default class ToolController implements OnInit, OnStart, OnCharacterAdded
                 connection.Disconnect();
             }
         });
-        
+
         // Set tooltip for potential legacy usage
         if (item !== undefined) {
             this.tooltipController.setTooltip(toolOption, Tooltip.fromItem(item));
         }
-        
+
         // Don't parent to UI - React handles rendering
         // toolOption.Parent = BACKPACK_WINDOW; // Removed - React handles this
     }
