@@ -5,6 +5,7 @@
  */
 
 import React from "@rbxts/react";
+import { RobotoSlab, RobotoSlabHeavy } from "shared/ui/GameFonts";
 
 interface InventoryEmptyStateProps {
     /** Whether the empty state should be visible */
@@ -16,9 +17,9 @@ interface InventoryEmptyStateProps {
  */
 export default function InventoryEmptyState({ visible }: InventoryEmptyStateProps) {
     return (
-        <frame 
-            BackgroundTransparency={1} 
-            Size={new UDim2(1, 0, 1, 0)} 
+        <frame
+            BackgroundTransparency={1}
+            Size={new UDim2(1, 0, 1, 0)}
             Visible={visible}
         >
             <textlabel
@@ -26,7 +27,7 @@ export default function InventoryEmptyState({ visible }: InventoryEmptyStateProp
                 AnchorPoint={new Vector2(0.5, 0.5)}
                 AutomaticSize={Enum.AutomaticSize.XY}
                 BackgroundTransparency={1}
-                Font={Enum.Font.SourceSansBold}
+                FontFace={RobotoSlabHeavy}
                 Position={new UDim2(0.5, 0, 0.3, 0)}
                 Text="You don't have any items!"
                 TextColor3={Color3.fromRGB(206, 206, 206)}
@@ -35,13 +36,13 @@ export default function InventoryEmptyState({ visible }: InventoryEmptyStateProp
             >
                 <uistroke Thickness={2} />
             </textlabel>
-            
+
             <textlabel
                 Active={true}
                 AnchorPoint={new Vector2(0.5, 0.5)}
                 AutomaticSize={Enum.AutomaticSize.XY}
                 BackgroundTransparency={1}
-                Font={Enum.Font.SourceSans}
+                FontFace={RobotoSlab}
                 LayoutOrder={1}
                 Position={new UDim2(0.5, 0, 0.34, 20)}
                 Text="Buy some stuff in the shop to get started."
@@ -51,7 +52,7 @@ export default function InventoryEmptyState({ visible }: InventoryEmptyStateProp
             >
                 <uistroke Thickness={2} />
             </textlabel>
-            
+
             <uilistlayout
                 HorizontalAlignment={Enum.HorizontalAlignment.Center}
                 SortOrder={Enum.SortOrder.LayoutOrder}

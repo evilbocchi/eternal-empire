@@ -54,12 +54,12 @@ export default function InventoryWindow({ visible, onClose, inventoryController 
     const [searchQuery, setSearchQuery] = useState("");
     const [traitFilters, setTraitFilters] = useState<Record<string, boolean>>({});
     const [cellSize, setCellSize] = useState(new UDim2(0, 65, 0, 65));
-    
+
     // Observe inventory data from packets
     const inventory = useProperty(Packets.inventory);
     const uniqueInstances = useProperty(Packets.uniqueInstances);
     const level = useProperty(Packets.level) ?? 0;
-    
+
     const scrollingFrameRef = useRef<ScrollingFrame>();
 
     // Calculate cell size based on container width
@@ -90,7 +90,7 @@ export default function InventoryWindow({ visible, onClose, inventoryController 
     const inventoryItems = useMemo((): InventoryItemData[] => {
         const items: InventoryItemData[] = [];
         const amounts = new Map<string, number>();
-        
+
         // Count unique instances
         if (uniqueInstances) {
             for (const [_, uniqueInstance] of uniqueInstances) {
@@ -101,20 +101,20 @@ export default function InventoryWindow({ visible, onClose, inventoryController 
                 }
             }
         }
-        
+
         // Build item data
         for (const [_id, item] of Items.itemsPerId) {
             if (item.isA("HarvestingTool")) continue;
-            
+
             const itemId = item.id;
             let amount = inventory?.get(itemId) ?? 0;
             const uniques = amounts.get(itemId);
             if (uniques) {
                 amount += uniques;
             }
-            
+
             const hasItem = amount > 0;
-            
+
             items.push({
                 item,
                 amount,
@@ -122,14 +122,14 @@ export default function InventoryWindow({ visible, onClose, inventoryController 
                 visible: hasItem // Initial visibility based on having the item
             });
         }
-        
+
         return items;
     }, [inventory, uniqueInstances]);
 
     // Apply filtering
     const filteredItems = useMemo(() => {
         let filtered = inventoryItems.filter(itemData => itemData.hasItem);
-        
+
         // Filter by search query
         if (searchQuery && searchQuery !== "") {
             const lowerQuery = string.lower(searchQuery);
@@ -139,7 +139,7 @@ export default function InventoryWindow({ visible, onClose, inventoryController 
                 return nameMatch !== undefined || idMatch !== undefined;
             });
         }
-        
+
         // Filter by traits
         const activeTraits: string[] = [];
         for (const [trait, enabled] of pairs(traitFilters)) {
@@ -147,13 +147,13 @@ export default function InventoryWindow({ visible, onClose, inventoryController 
                 activeTraits.push(trait);
             }
         }
-        
+
         if (activeTraits.size() > 0) {
             filtered = filtered.filter(itemData => {
                 return activeTraits.some(trait => itemData.item.isA(trait as keyof ItemTraits));
             });
         }
-        
+
         return filtered.map(itemData => ({
             ...itemData,
             visible: true
@@ -195,10 +195,10 @@ export default function InventoryWindow({ visible, onClose, inventoryController 
     // Handle item activation
     const handleItemActivated = useCallback((item: Item) => {
         if (!inventoryController) return;
-        
+
         // Use the controller's activation logic
         const success = inventoryController.activateItem(item);
-        
+
         // Close the inventory window if activation was successful
         if (success) {
             onClose();
@@ -218,13 +218,15 @@ export default function InventoryWindow({ visible, onClose, inventoryController 
             title="Inventory"
             colorSequence={colorSequence}
             onClose={onClose}
+            windowId="inventory"
+            priority={1}
         >
             {/* Empty state */}
             <InventoryEmptyState visible={isEmpty} />
 
             {/* Main inventory content */}
-            <frame 
-                BackgroundTransparency={1} 
+            <frame
+                BackgroundTransparency={1}
                 Size={new UDim2(1, 0, 1, 0)}
                 Visible={!isEmpty}
             >
@@ -256,7 +258,7 @@ export default function InventoryWindow({ visible, onClose, inventoryController 
                         PaddingRight={new UDim(0, 10)}
                         PaddingTop={new UDim(0, 5)}
                     />
-                    
+
                     <uigridlayout
                         CellPadding={new UDim2(0, 12, 0, 12)}
                         CellSize={cellSize}

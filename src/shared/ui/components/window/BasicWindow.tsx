@@ -1,9 +1,9 @@
 import React, { useCallback, useEffect, useRef, useState } from "@rbxts/react";
 import { TweenService } from "@rbxts/services";
 import { getAsset } from "shared/asset/AssetMap";
-import { playSound } from "shared/asset/GameAssets";
 import WindowCloseButton from "shared/ui/components/window/WindowCloseButton";
 import WindowTitle from "shared/ui/components/window/WindowTitle";
+import { useWindow } from "shared/ui/components/window/WindowManager";
 
 interface BasicWindowProps {
     visible: boolean;
@@ -12,15 +12,21 @@ interface BasicWindowProps {
     colorSequence: ColorSequence;
     onClose: () => void;
     children: React.ReactNode;
+    windowId?: string; // Optional ID for window manager
+    priority?: number; // Optional priority for close order
 }
 
-export default function BasicWindow({ visible, icon, title, children, onClose, colorSequence }: BasicWindowProps) {
+export default function BasicWindow({ visible, icon, title, children, onClose, colorSequence, windowId, priority = 0 }: BasicWindowProps) {
     const frameRef = useRef<Frame>();
     const [previousVisible, setPreviousVisible] = useState(visible);
     const initialPosition = new UDim2(0.5, 0, 1, -40);
 
+    // Register with window manager if windowId is provided
+    if (windowId) {
+        useWindow(windowId, visible, onClose, priority);
+    }
+
     const handleClose = useCallback(() => {
-        playSound("MenuClose.mp3");
         onClose();
     }, [onClose]);
 

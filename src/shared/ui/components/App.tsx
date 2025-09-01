@@ -13,6 +13,7 @@ import TrackedQuestWindow from "shared/ui/components/quest/TrackedQuestWindow";
 import SettingsManager from "shared/ui/components/settings/SettingsManager";
 import SidebarButtons from "shared/ui/components/sidebar/SidebarButtons";
 import TooltipProvider from "shared/ui/components/tooltip/TooltipProvider";
+import WindowManager from "shared/ui/components/window/WindowManager";
 
 interface AppProps {
     /** Build controller interface for React integration */
@@ -29,32 +30,37 @@ export default function App({ buildController, inventoryController, toolControll
     return (
         <StrictMode>
             <HotkeyProvider>
-                <TooltipProvider>
-                    <ClickSparkManager />
-                    <SettingsManager />
-                    <PositionDisplay />
-                    <TrackedQuestWindow />
-                    <BuildManager
-                        buildController={buildController}
-                    />
-                    <BackpackManager
-                        toolController={toolController}
-                    />
+                <WindowManager>
+                    <TooltipProvider>
+                        <ClickSparkManager />
+                        <SettingsManager />
+                        <PositionDisplay />
+                        <TrackedQuestWindow />
+                        <BuildManager
+                            buildController={buildController}
+                        />
+                        <BackpackManager
+                            toolController={toolController}
+                        />
 
-                    <SidebarButtons onToggleWindow={(windowName) => {
-                        const newActive = activeWindow === windowName ? undefined : windowName;
-                        setActiveWindow(newActive);
-                        return newActive === windowName;
-                    }} />
-                    
-                    <QuestWindow visible={activeWindow === "Quests"} onClose={() => setActiveWindow(undefined)} />
-                    
-                    <InventoryWindow 
-                        visible={activeWindow === "Inventory"} 
-                        onClose={() => setActiveWindow(undefined)}
-                        inventoryController={inventoryController}
-                    />
-                </TooltipProvider>
+                        <SidebarButtons onToggleWindow={(windowName) => {
+                            const newActive = activeWindow === windowName ? undefined : windowName;
+                            setActiveWindow(newActive);
+                            return newActive === windowName;
+                        }} />
+
+                        <QuestWindow
+                            visible={activeWindow === "Quests"}
+                            onClose={() => setActiveWindow(undefined)}
+                        />
+
+                        <InventoryWindow
+                            visible={activeWindow === "Inventory"}
+                            onClose={() => setActiveWindow(undefined)}
+                            inventoryController={inventoryController}
+                        />
+                    </TooltipProvider>
+                </WindowManager>
             </HotkeyProvider>
         </StrictMode>
     );

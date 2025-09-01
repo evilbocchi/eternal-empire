@@ -5,6 +5,7 @@ import Packets from "shared/Packets";
 import { useHotkeys } from "shared/ui/components/hotkeys/HotkeyProvider";
 import WindowCloseButton from "shared/ui/components/window/WindowCloseButton";
 import WindowTitle from "shared/ui/components/window/WindowTitle";
+import { useWindow } from "shared/ui/components/window/WindowManager";
 import { RobotoMonoBold } from "shared/ui/GameFonts";
 import useProperty from "shared/ui/hooks/useProperty";
 import HotkeyOption from "./HotkeyOption";
@@ -25,6 +26,9 @@ export default function SettingsWindow({
     const [selectedHotkey, setSelectedHotkey] = useState<string | undefined>();
     const settings = useProperty(Packets.settings);
     const { bindingsRef, setIsSettingHotkey } = useHotkeys();
+
+    // Register with window manager with higher priority than normal windows
+    useWindow("settings", visible, onClose || (() => { }), 10);
 
     const initialPosition = new UDim2(0.5, 0, 0.5, 0);
 

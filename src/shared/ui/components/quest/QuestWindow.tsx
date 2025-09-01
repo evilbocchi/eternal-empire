@@ -93,6 +93,8 @@ export default function QuestWindow({ visible, onClose }: { visible: boolean; on
             icon={getAsset("assets/Quests.png")}
             visible={visible}
             onClose={onClose}
+            windowId="quests"
+            priority={1}
         >
             <uilistlayout
                 HorizontalAlignment={Enum.HorizontalAlignment.Center}

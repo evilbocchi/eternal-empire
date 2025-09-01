@@ -4,6 +4,7 @@ import CurrencyBundle from "shared/currency/CurrencyBundle";
 import "shared/marketplace/MarketplaceListing";
 import Packets from "shared/Packets";
 import { RobotoSlab, RobotoSlabBold } from "shared/ui/GameFonts";
+import { useWindow } from "shared/ui/components/window/WindowManager";
 import ActionButton from "../printer/ActionButton";
 import CurrencyDisplay from "./CurrencyDisplay";
 
@@ -739,6 +740,9 @@ export default function MarketplaceWindow({ visible, onClose }: MarketplaceWindo
     const [isEnabled, setIsEnabled] = useState(true);
     const [searchQuery, setSearchQuery] = useState("");
     const [filters, setFilters] = useState<MarketplaceFilters>({});
+
+    // Register with window manager
+    useWindow("marketplace", visible, onClose, 1);
 
     // Load data when window becomes visible
     useEffect(() => {

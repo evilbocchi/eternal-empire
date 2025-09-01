@@ -2,7 +2,7 @@ import React, { useRef } from "@rbxts/react";
 import { TweenService } from "@rbxts/services";
 import { getAsset } from "shared/asset/AssetMap";
 import { playSound } from "shared/asset/GameAssets";
-import useHotkeyWithTooltip from "shared/ui/components/hotkeys/useHotkeyWithTooltip";
+import { useTooltipProps } from "shared/ui/components/tooltip/useTooltipProps";
 
 interface WindowCloseButtonProps {
     onClick: () => void;
@@ -11,26 +11,26 @@ interface WindowCloseButtonProps {
 
 export default function WindowCloseButton({ onClick, color = Color3.fromRGB(255, 76, 76) }: WindowCloseButtonProps) {
     const closeButtonRef = useRef<TextButton>();
-    const { events } = useHotkeyWithTooltip({
-        label: "Close Window",
-        keyCode: Enum.KeyCode.X,
-        action: () => {
-            const parent = closeButtonRef.current?.Parent;
-            if (!parent || !parent.IsA("GuiObject") || !parent.Visible)
-                return false;
 
-            playSound("MenuClose.mp3");
-            onClick();
-            return true;
-        },
-        onEnter: () => TweenService.Create(closeButtonRef.current!, new TweenInfo(0.1), {
-            BackgroundColor3: color.Lerp(new Color3(1, 1, 1), 0.5),
-            Rotation: 5
-        }).Play(),
-        onLeave: () => TweenService.Create(closeButtonRef.current!, new TweenInfo(0.1), {
-            BackgroundColor3: color,
-            Rotation: 0
-        }).Play()
+    const handleClick = () => {
+        playSound("MenuClose.mp3");
+        onClick();
+    };
+
+    const handleEnter = () => TweenService.Create(closeButtonRef.current!, new TweenInfo(0.1), {
+        BackgroundColor3: color.Lerp(new Color3(1, 1, 1), 0.5),
+        Rotation: 5
+    }).Play();
+
+    const handleLeave = () => TweenService.Create(closeButtonRef.current!, new TweenInfo(0.1), {
+        BackgroundColor3: color,
+        Rotation: 0
+    }).Play();
+
+    const tooltipProps = useTooltipProps({
+        data: { message: "Close Window (X)" },
+        onEnter: handleEnter,
+        onLeave: handleLeave
     });
 
     return (<textbutton
@@ -41,7 +41,10 @@ export default function WindowCloseButton({ onClick, color = Color3.fromRGB(255,
         BackgroundColor3={color}
         BorderColor3={Color3.fromRGB(45, 45, 45)}
         BorderSizePixel={3}
-        Event={{ ...events }}
+        Event={{
+            ...tooltipProps.events,
+            Activated: handleClick
+        }}
         Position={new UDim2(1, -10, 0, 10)}
         Size={new UDim2(0, 30, 0, 30)}
         Text={""}
