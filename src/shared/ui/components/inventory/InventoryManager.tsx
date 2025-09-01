@@ -94,7 +94,15 @@ export default function InventoryManager({
             }
 
             const hasItem = amount > 0;
-            const visible = itemSlot.Visible;
+            // In React mode, use our own visibility logic
+            let visible: boolean;
+            if (inventoryController.isReactMode()) {
+                // In React mode, check if the slot has our custom visibility property
+                const extendedSlot = itemSlot as ItemSlot & { ReactVisible?: boolean };
+                visible = extendedSlot.ReactVisible ?? hasItem;
+            } else {
+                visible = itemSlot.Visible;
+            }
 
             itemData.push({
                 item,
@@ -128,8 +136,47 @@ export default function InventoryManager({
     // Sync with inventory controller when search or filters change
     useEffect(() => {
         if (inventoryController) {
-            // Apply filtering through the controller's filter system
-            inventoryController.filterItems();
+            // Apply filtering through a custom React-compatible filter function
+            const visibleItems = new Set<Item>();
+            
+            // Filter by search query
+            let filteredItems = inventoryController.items;
+            if (searchQuery !== "" && searchQuery !== undefined) {
+                const lowerQuery = string.lower(searchQuery);
+                filteredItems = filteredItems.filter(item => {
+                    const nameMatch = string.find(string.lower(item.name), lowerQuery, 1, true);
+                    const idMatch = string.find(string.lower(item.id), lowerQuery, 1, true);
+                    return nameMatch !== undefined || idMatch !== undefined;
+                });
+            }
+            
+            // Filter by traits
+            const activeTraits: string[] = [];
+            for (const [trait, enabled] of pairs(traitFilters)) {
+                if (enabled) {
+                    activeTraits.push(trait);
+                }
+            }
+            
+            if (activeTraits.size() > 0) {
+                filteredItems = filteredItems.filter(item => {
+                    return activeTraits.some(trait => item.isA(trait as keyof ItemTraits));
+                });
+            }
+            
+            // Update visibility of items
+            for (const item of filteredItems) {
+                visibleItems.add(item);
+            }
+            
+            // Update the itemSlots visibility for compatibility
+            for (const [item, itemSlot] of inventoryController.itemSlotsPerItem) {
+                if (!inventoryController.isReactMode()) continue;
+                
+                const shouldBeVisible = visibleItems.has(item);
+                const extendedSlot = itemSlot as ItemSlot & { ReactVisible?: boolean };
+                extendedSlot.ReactVisible = shouldBeVisible;
+            }
         }
     }, [inventoryController, searchQuery, traitFilters]);
 

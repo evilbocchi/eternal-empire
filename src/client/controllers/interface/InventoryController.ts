@@ -52,15 +52,36 @@ export default class InventoryController implements OnInit, OnStart {
     readonly itemSlotsPerItem = new Map<Item, ItemSlot>();
     /** List of items currently in the inventory. */
     readonly items = new Array<Item>();
+    /** Whether React mode is enabled (disables traditional GUI) */
+    private reactMode = false;
 
     /**
      * Item filter logic for the inventory GUI.
+     * In React mode, this will be managed by React components.
      */
     readonly filterItems = ItemFilter.loadFilterOptions(INVENTORY_WINDOW.Page.FilterOptions, (query, whitelistedTraits) => {
-        ItemSlot.filterItems(this.itemSlotsPerItem, this.items, query, whitelistedTraits);
+        if (!this.reactMode) {
+            ItemSlot.filterItems(this.itemSlotsPerItem, this.items, query, whitelistedTraits);
+        }
     });
 
     constructor(private uiController: UIController, private adaptiveTabController: AdaptiveTabController, private buildController: BuildController, private tooltipController: TooltipController) {
+    }
+
+    /**
+     * Enable React mode, which disables traditional GUI management.
+     */
+    enableReactMode() {
+        this.reactMode = true;
+        // Hide the traditional inventory window
+        INVENTORY_WINDOW.Visible = false;
+    }
+
+    /**
+     * Check if React mode is enabled.
+     */
+    isReactMode() {
+        return this.reactMode;
     }
 
     /**
@@ -104,6 +125,7 @@ export default class InventoryController implements OnInit, OnStart {
 
     /**
      * Refreshes the inventory window, updating item slots and amounts.
+     * In React mode, this only updates the data without modifying GUI.
      * @param inventory The current inventory map (optional).
      * @param uniqueInstances The current unique item instances map (optional).
      */
@@ -123,7 +145,6 @@ export default class InventoryController implements OnInit, OnStart {
             }
         }
 
-
         for (const item of reverseSortedItems) {
             const itemSlot = this.itemSlotsPerItem.get(item);
             if (itemSlot === undefined)
@@ -141,17 +162,24 @@ export default class InventoryController implements OnInit, OnStart {
                 isEmpty = false;
                 items.push(item);
             }
-            if (Items.uniqueItems.has(item)) {
-                const bestUuid = this.getBest(itemId);
-                this.tooltipController.getTooltip(itemSlot).uuid = bestUuid;
-            }
+            
+            // Only update GUI elements in non-React mode
+            if (!this.reactMode) {
+                if (Items.uniqueItems.has(item)) {
+                    const bestUuid = this.getBest(itemId);
+                    this.tooltipController.getTooltip(itemSlot).uuid = bestUuid;
+                }
 
-            itemSlot.AmountLabel.Text = tostring(amount);
-            itemSlot.AmountLabel.TextColor3 = hasItem ? Color3.fromRGB(255, 255, 255) : Color3.fromRGB(150, 150, 150);
+                itemSlot.AmountLabel.Text = tostring(amount);
+                itemSlot.AmountLabel.TextColor3 = hasItem ? Color3.fromRGB(255, 255, 255) : Color3.fromRGB(150, 150, 150);
+            }
         }
 
-        INVENTORY_WINDOW.Empty.Visible = isEmpty;
-        this.filterItems();
+        // Only update GUI visibility in non-React mode
+        if (!this.reactMode) {
+            INVENTORY_WINDOW.Empty.Visible = isEmpty;
+            this.filterItems();
+        }
     }
 
     /**
@@ -164,39 +192,56 @@ export default class InventoryController implements OnInit, OnStart {
 
     /**
      * Loads item slots for all items in the inventory, sets up activation and tooltips.
+     * In React mode, this only creates the data mapping without GUI elements.
      */
     loadItemSlots() {
         for (const [_id, item] of Items.itemsPerId) {
             if (item.isA("HarvestingTool"))
                 continue;
 
-            const itemSlot = ItemSlot.loadItemSlot(ASSETS.ItemListContainer.ItemSlot.Clone(), item);
-            itemSlot.LayoutOrder = -item.layoutOrder;
-            itemSlot.Visible = false;
+            if (!this.reactMode) {
+                // Traditional GUI mode: create actual item slots
+                const itemSlot = ItemSlot.loadItemSlot(ASSETS.ItemListContainer.ItemSlot.Clone(), item);
+                itemSlot.LayoutOrder = -item.layoutOrder;
+                itemSlot.Visible = false;
 
-            itemSlot.Activated.Connect(() => {
-                const isPlaceable = item.placeableAreas.size() > 0 || item.bounds !== undefined;
-                const level = Packets.level.get() ?? 0;
-                if (this.buildController.getRestricted() === true || isPlaceable === false || (item.levelReq !== undefined && item.levelReq > level)) {
-                    playSound("Error.mp3");
-                    return;
-                }
-                this.adaptiveTabController.hideAdaptiveTab();
-                playSound("MenuClick.mp3");
-                let bestUuid: string | undefined;
-                if (Items.uniqueItems.has(item)) {
-                    bestUuid = this.getBest(item.id);
-                }
+                itemSlot.Activated.Connect(() => {
+                    const isPlaceable = item.placeableAreas.size() > 0 || item.bounds !== undefined;
+                    const level = Packets.level.get() ?? 0;
+                    if (this.buildController.getRestricted() === true || isPlaceable === false || (item.levelReq !== undefined && item.levelReq > level)) {
+                        playSound("Error.mp3");
+                        return;
+                    }
+                    this.adaptiveTabController.hideAdaptiveTab();
+                    playSound("MenuClick.mp3");
+                    let bestUuid: string | undefined;
+                    if (Items.uniqueItems.has(item)) {
+                        bestUuid = this.getBest(item.id);
+                    }
 
-                this.buildController.mainSelect(this.buildController.addPlacingModel(item, bestUuid));
-            });
+                    this.buildController.mainSelect(this.buildController.addPlacingModel(item, bestUuid));
+                });
 
-            this.tooltipController.setTooltip(itemSlot, Tooltip.fromItem(item));
+                this.tooltipController.setTooltip(itemSlot, Tooltip.fromItem(item));
 
-            itemSlot.Parent = INVENTORY_WINDOW.Page.ItemList;
-            this.itemSlotsPerItem.set(item, itemSlot);
+                itemSlot.Parent = INVENTORY_WINDOW.Page.ItemList;
+                this.itemSlotsPerItem.set(item, itemSlot);
+            } else {
+                // React mode: create a dummy slot object that React can reference
+                // This maintains compatibility with the existing data structures
+                const dummySlot = {
+                    LayoutOrder: -item.layoutOrder,
+                    Visible: false,
+                    ReactVisible: false,
+                    AmountLabel: {
+                        Text: "0",
+                        TextColor3: Color3.fromRGB(150, 150, 150)
+                    }
+                } as ItemSlot & { ReactVisible: boolean };
+                
+                this.itemSlotsPerItem.set(item, dummySlot);
+            }
         }
-
     }
 
 
@@ -206,11 +251,13 @@ export default class InventoryController implements OnInit, OnStart {
     onInit() {
         this.loadItemSlots();
 
-        INTERFACE.GetPropertyChangedSignal("AbsoluteSize").Connect(() => this.recalibrate());
+        if (!this.reactMode) {
+            INTERFACE.GetPropertyChangedSignal("AbsoluteSize").Connect(() => this.recalibrate());
 
-        for (const traitOption of INVENTORY_WINDOW.Page.FilterOptions.TraitOptions.GetChildren()) {
-            if (traitOption.IsA("GuiButton")) {
-                this.tooltipController.setTooltip(traitOption, Tooltip.fromMessage(traitOption.Name));
+            for (const traitOption of INVENTORY_WINDOW.Page.FilterOptions.TraitOptions.GetChildren()) {
+                if (traitOption.IsA("GuiButton")) {
+                    this.tooltipController.setTooltip(traitOption, Tooltip.fromMessage(traitOption.Name));
+                }
             }
         }
     }
@@ -226,16 +273,18 @@ export default class InventoryController implements OnInit, OnStart {
             this.refreshInventoryWindow(undefined, uniqueInstances);
         });
 
-        let firstLoad = true;
-        const connection = INVENTORY_WINDOW.GetPropertyChangedSignal("Visible").Connect(() => {
-            if (!firstLoad) {
-                connection.Disconnect();
-                return;
-            }
+        if (!this.reactMode) {
+            let firstLoad = true;
+            const connection = INVENTORY_WINDOW.GetPropertyChangedSignal("Visible").Connect(() => {
+                if (!firstLoad) {
+                    connection.Disconnect();
+                    return;
+                }
 
-            firstLoad = false;
-            this.recalibrate();
-            connection.Disconnect();
-        });
+                firstLoad = false;
+                this.recalibrate();
+                connection.Disconnect();
+            });
+        }
     }
 }
