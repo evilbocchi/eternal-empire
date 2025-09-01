@@ -1,6 +1,8 @@
 import React, { StrictMode, useState } from "@rbxts/react";
 import type BuildController from "client/controllers/gameplay/BuildController";
 import type InventoryController from "client/controllers/interface/InventoryController";
+import type ToolController from "client/controllers/gameplay/ToolController";
+import BackpackManager from "shared/ui/components/backpack/BackpackManager";
 import BuildManager from "shared/ui/components/build/BuildManager";
 import { ClickSparkManager } from "shared/ui/components/effect/ClickSpark";
 import HotkeyProvider from "shared/ui/components/hotkeys/HotkeyProvider";
@@ -17,9 +19,11 @@ interface AppProps {
     buildController?: BuildController;
     /** Inventory controller interface for React integration */
     inventoryController?: InventoryController;
+    /** Tool controller interface for React integration */
+    toolController?: ToolController;
 }
 
-export default function App({ buildController, inventoryController }: AppProps = {}) {
+export default function App({ buildController, inventoryController, toolController }: AppProps = {}) {
     const [activeWindow, setActiveWindow] = useState<string | undefined>(undefined);
 
     return (
@@ -32,6 +36,9 @@ export default function App({ buildController, inventoryController }: AppProps =
                     <TrackedQuestWindow />
                     <BuildManager
                         buildController={buildController}
+                    />
+                    <BackpackManager
+                        toolController={toolController}
                     />
 
                     <SidebarButtons onToggleWindow={(windowName) => {
