@@ -7,6 +7,7 @@
  */
 
 import React from "@rbxts/react";
+import { RobotoSlabMedium } from "shared/ui/GameFonts";
 
 interface ItemSlotProps {
     /** The item to display (optional for empty slots) */
@@ -80,8 +81,7 @@ export default function ItemSlot({
                     AnchorPoint={new Vector2(0.5, 0.5)}
                     AutomaticSize={Enum.AutomaticSize.X}
                     BackgroundTransparency={1}
-                    Font={Enum.Font.Unknown}
-                    FontFace={new Font("rbxassetid://12187368625", Enum.FontWeight.Medium, Enum.FontStyle.Normal)}
+                    FontFace={RobotoSlabMedium}
                     Position={new UDim2(0.5, 0, 0.9, 0)}
                     Size={new UDim2(0.5, 0, 0.4, 0)}
                     Text={tostring(amount)}

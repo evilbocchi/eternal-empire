@@ -10,11 +10,12 @@ import { buildRichText } from "@antivivi/vrldk";
 import React, { useEffect, useRef } from "@rbxts/react";
 import { GuiService, RunService, TweenService, Workspace } from "@rbxts/services";
 import Packets from "shared/Packets";
+import { getAsset } from "shared/asset/AssetMap";
 import { LOCAL_PLAYER } from "shared/constants";
 import Item from "shared/item/Item";
 import ItemMetadata from "shared/item/ItemMetadata";
 import Unique from "shared/item/traits/Unique";
-import { RobotoSlab } from "shared/ui/GameFonts";
+import { RobotoSlab, RobotoSlabBold, RobotoSlabExtraBold, RobotoSlabMedium } from "shared/ui/GameFonts";
 import { TooltipData } from "shared/ui/components/tooltip/TooltipProvider";
 
 interface TooltipWindowProps {
@@ -63,8 +64,10 @@ export default function TooltipWindow({ data, visible, metadata }: TooltipWindow
         }
     }, [visible]);
 
-    // Update position
+    // Update position - only when tooltip is visible
     useEffect(() => {
+        if (!visible) return;
+
         const connection = RunService.Heartbeat.Connect(() => {
             if (!frameRef.current) return;
 
@@ -78,7 +81,7 @@ export default function TooltipWindow({ data, visible, metadata }: TooltipWindow
             }
         });
         return () => connection.Disconnect();
-    }, []);
+    }, [visible]);
 
     const renderItemSlot = () => {
         if (!data?.item) return undefined;
@@ -110,16 +113,19 @@ export default function TooltipWindow({ data, visible, metadata }: TooltipWindow
             builder.appendAll(itemMetadata.builder);
         }
 
+        let color = difficulty.color ?? new Color3();
+        color = color ? new Color3(math.clamp(color.R, 0.1, 0.9), math.clamp(color.G, 0.1, 0.9), math.clamp(color.B, 0.1, 0.9)) : new Color3();
+
         return (
             <imagelabel
                 key="ItemSlot"
                 ref={itemSlotRef}
                 AutomaticSize={Enum.AutomaticSize.XY}
-                BackgroundColor3={Color3.fromRGB(81, 81, 81)}
+                BackgroundColor3={color}
                 BackgroundTransparency={0.2}
                 BorderColor3={Color3.fromRGB(0, 0, 0)}
                 BorderSizePixel={3}
-                Image="rbxassetid://9734894135"
+                Image={getAsset("assets/Grid.png")}
                 ImageColor3={Color3.fromRGB(126, 126, 126)}
                 ImageTransparency={0.6}
                 LayoutOrder={-2}
@@ -128,7 +134,7 @@ export default function TooltipWindow({ data, visible, metadata }: TooltipWindow
             >
                 <uistroke
                     ApplyStrokeMode={Enum.ApplyStrokeMode.Border}
-                    Color={Color3.fromRGB(255, 255, 255)}
+                    Color={color}
                     Thickness={2}
                     Transparency={0.2}
                 >
@@ -173,8 +179,8 @@ export default function TooltipWindow({ data, visible, metadata }: TooltipWindow
                     />
                     <imagelabel
                         AnchorPoint={new Vector2(1, 0.5)}
-                        BackgroundTransparency={1}
-                        Image="rbxassetid://14197014108"
+                        BackgroundColor3={difficulty.color ?? Color3.fromRGB(255, 255, 255)}
+                        Image={`rbxassetid://${difficulty.image}`}
                         LayoutOrder={-1}
                         Position={new UDim2(1, -4, 0.5, 0)}
                         Size={new UDim2(0, 20, 0, 20)}
@@ -184,12 +190,11 @@ export default function TooltipWindow({ data, visible, metadata }: TooltipWindow
                     <textlabel
                         AutomaticSize={Enum.AutomaticSize.X}
                         BackgroundTransparency={1}
-                        Font={Enum.Font.Unknown}
-                        FontFace={new Font("rbxassetid://12187368625", Enum.FontWeight.Medium, Enum.FontStyle.Normal)}
+                        FontFace={RobotoSlabMedium}
                         Position={new UDim2(0, 110, 0, 40)}
                         Size={new UDim2(0, 0, 1, 0)}
-                        Text={tostring(difficulty)}
-                        TextColor3={Color3.fromRGB(255, 255, 255)}
+                        Text={tostring(difficulty.name)}
+                        TextColor3={difficulty.color?.Lerp(new Color3(1, 1, 1), 0.5) ?? Color3.fromRGB(255, 255, 255)}
                         TextSize={20}
                     >
                         <uistroke Thickness={2} />
@@ -209,8 +214,7 @@ export default function TooltipWindow({ data, visible, metadata }: TooltipWindow
                     key="TitleLabel"
                     AutomaticSize={Enum.AutomaticSize.XY}
                     BackgroundTransparency={1}
-                    Font={Enum.Font.Unknown}
-                    FontFace={new Font("rbxassetid://12187368625", Enum.FontWeight.ExtraBold, Enum.FontStyle.Normal)}
+                    FontFace={RobotoSlabExtraBold}
                     Position={new UDim2(0, 110, 0, 15)}
                     Text={item.name}
                     TextColor3={Color3.fromRGB(255, 255, 255)}
@@ -228,8 +232,7 @@ export default function TooltipWindow({ data, visible, metadata }: TooltipWindow
                     Active={true}
                     AutomaticSize={Enum.AutomaticSize.XY}
                     BackgroundTransparency={1}
-                    Font={Enum.Font.Unknown}
-                    FontFace={new Font("rbxassetid://12187368625", Enum.FontWeight.Bold, Enum.FontStyle.Normal)}
+                    FontFace={RobotoSlabBold}
                     LayoutOrder={5}
                     RichText={true}
                     Text={builder.toString()}

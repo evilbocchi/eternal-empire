@@ -28,12 +28,6 @@ declare global {
 export function useTooltipProps({ data, onMoved, onEnter, onLeave }: UseTooltipProps): UseHoverReturn {
     const { showTooltip, hideTooltip } = useTooltip();
 
-    const handleMouseMoved = useCallback(() => {
-        onMoved?.();
-        const tooltipData = typeIs(data, "function") ? data() : data;
-        showTooltip(tooltipData);
-    }, [data, showTooltip, onMoved]);
-
     const handleMouseEnter = useCallback(() => {
         onEnter?.();
         const tooltipData = typeIs(data, "function") ? data() : data;
@@ -45,7 +39,7 @@ export function useTooltipProps({ data, onMoved, onEnter, onLeave }: UseTooltipP
         hideTooltip();
     }, [hideTooltip, onLeave]);
 
-    return useHover({ onMoved: handleMouseMoved, onEnter: handleMouseEnter, onLeave: handleMouseLeave });
+    return useHover({ onEnter: handleMouseEnter, onLeave: handleMouseLeave });
 }
 
 /**

@@ -8,6 +8,7 @@
 import React from "@rbxts/react";
 import { getAsset } from "shared/asset/AssetMap";
 import type Item from "shared/item/Item";
+import { useItemTooltip } from "shared/ui/components/tooltip/useTooltipProps";
 import { RobotoSlab } from "shared/ui/GameFonts";
 
 interface InventoryItemSlotProps {
@@ -41,6 +42,7 @@ export default function InventoryItemSlot({
 }: InventoryItemSlotProps) {
     const textColor = hasItem ? Color3.fromRGB(255, 255, 255) : Color3.fromRGB(150, 150, 150);
     const backgroundColor = item.difficulty.color ?? Color3.fromRGB(52, 155, 255);
+    const hoverProps = useItemTooltip(item);
 
     return (
         <textbutton
@@ -55,7 +57,8 @@ export default function InventoryItemSlot({
             Text=""
             Visible={visible}
             Event={{
-                Activated: onActivated
+                Activated: onActivated,
+                ...hoverProps.events
             }}
         >
             {/* Background gradient */}
@@ -136,7 +139,7 @@ export default function InventoryItemSlot({
             {/* Background overlay image */}
             <imagelabel
                 BackgroundTransparency={1}
-                Image="rbxassetid://4576475446"
+                Image={getAsset("assets/Vignette.png")}
                 ImageTransparency={0.2}
                 Size={new UDim2(1, 0, 1, 0)}
                 ZIndex={-4}

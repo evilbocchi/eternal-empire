@@ -5,7 +5,7 @@ import Shop from "shared/item/traits/Shop";
 
 const ToolShop = new Item(script.Name)
     .setName("Tool Shop")
-    .setDifficulty(Difficulty.Miscellaneous);
+    .setDifficulty(Difficulty.Bonuses);
 
 let tools = new Array<HarvestingTool>();
 for (const module of script.Parent!.GetChildren()) {
