@@ -5,7 +5,7 @@
  * Uses BasicWindow for consistent styling with other windows.
  */
 
-import React from "@rbxts/react";
+import React, { useEffect, useRef } from "@rbxts/react";
 import type Item from "shared/item/Item";
 import { getAsset } from "shared/asset/AssetMap";
 import BasicWindow from "shared/ui/components/window/BasicWindow";
@@ -55,6 +55,8 @@ export interface InventoryWindowCallbacks {
     onItemActivated: (item: Item) => void;
     /** Called to get tooltip ref for an item */
     getItemTooltipRef: (item: Item) => React.Ref<TextButton>;
+    /** Called when container size changes */
+    onContainerSizeChange?: (size: Vector2) => void;
 }
 
 interface InventoryWindowProps {
@@ -83,8 +85,28 @@ export default function InventoryWindow({ state, callbacks }: InventoryWindowPro
         onTraitToggle, 
         onFilterClear, 
         onItemActivated,
-        getItemTooltipRef
+        getItemTooltipRef,
+        onContainerSizeChange
     } = callbacks;
+
+    const scrollingFrameRef = useRef<ScrollingFrame>();
+
+    // Monitor size changes
+    useEffect(() => {
+        const frame = scrollingFrameRef.current;
+        if (frame && onContainerSizeChange) {
+            const updateSize = () => {
+                onContainerSizeChange(frame.AbsoluteSize);
+            };
+
+            // Initial size update
+            updateSize();
+
+            // Listen for size changes
+            const connection = frame.GetPropertyChangedSignal("AbsoluteSize").Connect(updateSize);
+            return () => connection.Disconnect();
+        }
+    }, [onContainerSizeChange]);
 
     // Color sequence for inventory window border
     const colorSequence = new ColorSequence([
@@ -120,6 +142,7 @@ export default function InventoryWindow({ state, callbacks }: InventoryWindowPro
 
                 {/* Item list container */}
                 <scrollingframe
+                    ref={scrollingFrameRef}
                     AnchorPoint={new Vector2(0.5, 0)}
                     AutomaticCanvasSize={Enum.AutomaticSize.Y}
                     BackgroundTransparency={1}

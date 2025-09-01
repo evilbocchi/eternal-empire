@@ -21,6 +21,14 @@ import InventoryWindow, {
 } from "shared/ui/components/inventory/InventoryWindow";
 import useProperty from "shared/ui/hooks/useProperty";
 
+/**
+ * Calculate optimal cell count for the inventory grid.
+ * This replicates the logic from ItemSlot.calculateOptimalCellCount
+ */
+function calculateOptimalCellCount(containerX: number): number {
+    return math.max(math.round((containerX - 50) / 65), 3);
+}
+
 interface InventoryManagerProps {
     /** Inventory controller instance */
     inventoryController?: InventoryController;
@@ -48,6 +56,7 @@ export default function InventoryManager({
     const [searchQuery, setSearchQuery] = useState("");
     const [traitFilters, setTraitFilters] = useState<Record<string, boolean>>({});
     const [cellSize, setCellSize] = useState(new UDim2(0, 65, 0, 65));
+    const [containerWidth, setContainerWidth] = useState(400); // Default width
     
     // Observe inventory data from packets
     const inventory = useProperty(Packets.inventory);
@@ -55,6 +64,19 @@ export default function InventoryManager({
     
     // Refs for tooltip integration
     const itemTooltipRefs = useRef(new Map<string, React.Ref<TextButton>>());
+
+    // Calculate cell size based on container width
+    const updateCellSize = useCallback((width: number) => {
+        setContainerWidth(width);
+        const optimalCellCount = calculateOptimalCellCount(width);
+        const newCellSize = new UDim2(1 / optimalCellCount, -12, 1, 0);
+        setCellSize(newCellSize);
+    }, []);
+
+    // Update cell size when container width changes
+    useEffect(() => {
+        updateCellSize(containerWidth);
+    }, [containerWidth, updateCellSize]);
 
     // Calculate inventory state
     const inventoryState = useMemo((): InventoryWindowState => {
@@ -239,6 +261,11 @@ export default function InventoryManager({
         return itemTooltipRefs.current.get(itemId)!;
     }, []);
 
+    // Handle container size changes
+    const handleContainerSizeChange = useCallback((size: Vector2) => {
+        updateCellSize(size.X);
+    }, [updateCellSize]);
+
     // Callback handlers for inventory window
     const callbacks: InventoryWindowCallbacks = {
         onClose,
@@ -246,7 +273,8 @@ export default function InventoryManager({
         onTraitToggle: handleTraitToggle,
         onFilterClear: handleFilterClear,
         onItemActivated: handleItemActivated,
-        getItemTooltipRef
+        getItemTooltipRef,
+        onContainerSizeChange: handleContainerSizeChange
     };
 
     return (
