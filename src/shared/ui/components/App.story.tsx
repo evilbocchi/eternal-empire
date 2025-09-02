@@ -1,4 +1,4 @@
-import React from "@rbxts/react";
+import React, { StrictMode } from "@rbxts/react";
 import ReactRoblox from "@rbxts/react-roblox";
 import { InferProps } from "@rbxts/ui-labs";
 import Packets from "shared/Packets";
@@ -23,7 +23,8 @@ export = {
             Packets.inventory.set(new Map());
         }
 
-        const component = <App />;
-        return component;
+        return <StrictMode>
+            <App />
+        </StrictMode>;
     },
 };

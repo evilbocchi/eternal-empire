@@ -86,46 +86,44 @@ export default function App({ buildController, inventoryController, toolControll
             unmountTasksRef.current.clear();
         };
     }, []); return (
-        <StrictMode>
-            <HotkeyProvider>
-                <WindowManager>
-                    <TooltipProvider>
-                        <ClickSparkManager />
-                        <PositionDisplay />
-                        <TrackedQuestWindow />
-                        <BuildManager
-                            buildController={buildController}
+        <HotkeyProvider>
+            <WindowManager>
+                <TooltipProvider>
+                    <ClickSparkManager />
+                    <PositionDisplay />
+                    <TrackedQuestWindow />
+                    <BuildManager
+                        buildController={buildController}
+                    />
+                    <BackpackManager
+                        toolController={toolController}
+                    />
+
+                    <SidebarButtons onToggleWindow={handleWindowToggle} />
+
+                    {mountedWindows.includes("Settings") && (
+                        <SettingsWindow
+                            visible={activeWindow === "Settings"}
+                            onClose={() => setActiveWindow(undefined)}
                         />
-                        <BackpackManager
-                            toolController={toolController}
+                    )}
+
+                    {mountedWindows.includes("Quests") && (
+                        <QuestWindow
+                            visible={activeWindow === "Quests"}
+                            onClose={() => setActiveWindow(undefined)}
                         />
+                    )}
 
-                        <SidebarButtons onToggleWindow={handleWindowToggle} />
-
-                        {mountedWindows.includes("Settings") && (
-                            <SettingsWindow
-                                visible={activeWindow === "Settings"}
-                                onClose={() => setActiveWindow(undefined)}
-                            />
-                        )}
-
-                        {mountedWindows.includes("Quests") && (
-                            <QuestWindow
-                                visible={activeWindow === "Quests"}
-                                onClose={() => setActiveWindow(undefined)}
-                            />
-                        )}
-
-                        {mountedWindows.includes("Inventory") && (
-                            <InventoryWindow
-                                visible={activeWindow === "Inventory"}
-                                onClose={() => setActiveWindow(undefined)}
-                                inventoryController={inventoryController}
-                            />
-                        )}
-                    </TooltipProvider>
-                </WindowManager>
-            </HotkeyProvider>
-        </StrictMode>
+                    {mountedWindows.includes("Inventory") && (
+                        <InventoryWindow
+                            visible={activeWindow === "Inventory"}
+                            onClose={() => setActiveWindow(undefined)}
+                            inventoryController={inventoryController}
+                        />
+                    )}
+                </TooltipProvider>
+            </WindowManager>
+        </HotkeyProvider>
     );
 }

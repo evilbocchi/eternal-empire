@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "@rbxts/react";
+import React, { StrictMode, useEffect, useState } from "@rbxts/react";
 import ReactRoblox from "@rbxts/react-roblox";
 import { InferProps } from "@rbxts/ui-labs";
 import HotkeyProvider from "shared/ui/components/hotkeys/HotkeyProvider";
@@ -24,13 +24,15 @@ export = {
         }, [props.controls.visible]);
 
         return (
-            <HotkeyProvider>
-                <TooltipProvider>
-                    <WindowManager>
-                        <SettingsWindow visible={visible} />
-                    </WindowManager>
-                </TooltipProvider>
-            </HotkeyProvider>
+            <StrictMode>
+                <HotkeyProvider>
+                    <TooltipProvider>
+                        <WindowManager>
+                            <SettingsWindow visible={visible} />
+                        </WindowManager>
+                    </TooltipProvider>
+                </HotkeyProvider>
+            </StrictMode>
         );
     }
 };
