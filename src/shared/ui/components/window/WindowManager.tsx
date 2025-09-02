@@ -67,7 +67,7 @@ export default function WindowManager({ children }: WindowManagerProps) {
             }
         }
         // Sort by priority (higher priority first)
-        table.sort(visibleWindows, (a, b) => (b.priority || 0) > (a.priority || 0));
+        table.sort(visibleWindows, (a, b) => (b.priority || 0) < (a.priority || 0));
         return visibleWindows;
     }, []);
 

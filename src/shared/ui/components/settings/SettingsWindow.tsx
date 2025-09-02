@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useState } from "@rbxts/react";
 import { getAsset } from "shared/asset/AssetMap";
 import Packets from "shared/Packets";
 import { useHotkeys } from "shared/ui/components/hotkeys/HotkeyProvider";
+import IconButton from "shared/ui/components/IconButton";
 import TechWindow from "shared/ui/components/window/TechWindow";
 import useProperty from "shared/ui/hooks/useProperty";
 import HotkeyOption from "./HotkeyOption";
@@ -13,6 +14,21 @@ export interface SettingsWindowProps {
     onClose?: () => void;
 }
 
+export function SettingsButton({ tooltipProps }: { tooltipProps: TooltipProps; }) {
+    return (
+        <IconButton
+            image={getAsset("assets/Settings.png")}
+            buttonProps={{
+                AnchorPoint: new Vector2(0, 1),
+                Size: new UDim2(0, 35, 0.5, 0),
+                Position: new UDim2(0, 4, 1, -4)
+            }}
+            {...tooltipProps}
+        />
+    );
+}
+
+
 export default function SettingsWindow({
     visible = false,
     onClose,
@@ -20,11 +36,6 @@ export default function SettingsWindow({
     const [selectedHotkey, setSelectedHotkey] = useState<string | undefined>();
     const settings = useProperty(Packets.settings);
     const { bindingsRef, setIsSettingHotkey } = useHotkeys();
-
-    // Stable onClose callback to prevent re-registration
-    const stableOnClose = useCallback(() => {
-        onClose?.();
-    }, [onClose]);
 
     // Cleanup hotkey setting state when component unmounts or window closes
     useEffect(() => {
