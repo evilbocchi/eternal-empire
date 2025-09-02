@@ -1,27 +1,13 @@
-import React, { Fragment, useCallback, useEffect, useRef, useState } from "@rbxts/react";
+import React, { useCallback, useEffect, useRef, useState } from "@rbxts/react";
 import { TweenService } from "@rbxts/services";
-import { getAsset } from "shared/asset/AssetMap";
 import WindowCloseButton from "shared/ui/components/window/WindowCloseButton";
 import { useWindow } from "shared/ui/components/window/WindowManager";
 import WindowTitle from "shared/ui/components/window/WindowTitle";
 
-declare global {
-    interface WindowProps {
-        visible: boolean;
-        icon: string;
-        title: string;
-        colorSequence?: ColorSequence;
-        onClose: () => void;
-        children: React.ReactNode;
-        windowId?: string; // Optional ID for window manager
-        priority?: number; // Optional priority for close order
-    }
-}
-
-export default function BasicWindow({ visible, icon, title, children, onClose, colorSequence, windowId, priority = 0 }: WindowProps) {
+export default function TechWindow({ visible, icon, title, children, onClose, windowId, priority = 0 }: WindowProps) {
     const frameRef = useRef<Frame>();
     const [previousVisible, setPreviousVisible] = useState(visible);
-    const initialPosition = new UDim2(0.5, 0, 1, -40);
+    const initialPosition = new UDim2(0.5, 0, 0.5, 0);
 
     // Register with window manager if windowId is provided
     if (windowId) {
@@ -61,16 +47,20 @@ export default function BasicWindow({ visible, icon, title, children, onClose, c
     return (
         <frame
             ref={frameRef}
-            AnchorPoint={new Vector2(0.5, 1)}
-            BackgroundColor3={Color3.fromRGB(255, 255, 255)}
-            BackgroundTransparency={0.6}
+            AnchorPoint={new Vector2(0.5, 0.5)}
+            BackgroundColor3={Color3.fromRGB(13, 13, 13)}
             BorderColor3={Color3.fromRGB(0, 0, 0)}
             BorderSizePixel={4}
+            Selectable={true}
+            Size={new UDim2(0.9, 0, 0.9, -50)}
             Position={initialPosition}
-            Size={new UDim2(0.45, 200, 0.4, 100)}
             ZIndex={0}
             Visible={false}
         >
+            <uistroke ApplyStrokeMode={Enum.ApplyStrokeMode.Border} Color={Color3.fromRGB(255, 255, 255)} />
+            <uisizeconstraint
+                MaxSize={new Vector2(800, 600)}
+            />
             <WindowTitle icon={icon} title={title} />
             <WindowCloseButton onClick={handleClose} />
             <frame
@@ -82,30 +72,7 @@ export default function BasicWindow({ visible, icon, title, children, onClose, c
             >
                 {children}
             </frame>
-            <uistroke ApplyStrokeMode={Enum.ApplyStrokeMode.Border} Color={Color3.fromRGB(255, 255, 255)} Thickness={2}>
-                <uigradient
-                    Color={colorSequence}
-                    Rotation={80}
-                />
-            </uistroke>
-            <uigradient
-                Color={new ColorSequence([new ColorSequenceKeypoint(0, Color3.fromRGB(35, 35, 35)), new ColorSequenceKeypoint(1, Color3.fromRGB(89, 89, 89))])}
-                Rotation={270}
-            />
-            <canvasgroup BackgroundTransparency={1} Size={new UDim2(1, 0, 1, 0)} ZIndex={-5}>
-                <imagelabel
-                    AnchorPoint={new Vector2(0.5, 0.5)}
-                    BackgroundTransparency={1}
-                    Image={getAsset("assets/GridHighContrast.png")}
-                    ImageColor3={Color3.fromRGB(0, 0, 0)}
-                    ImageTransparency={0.95}
-                    Position={new UDim2(0.5, 0, 0.5, 0)}
-                    Rotation={5}
-                    ScaleType={Enum.ScaleType.Tile}
-                    Size={new UDim2(1.1, 0, 1.5, 0)}
-                    TileSize={new UDim2(0, 100, 0, 100)}
-                />
-            </canvasgroup>
+
         </frame>
     );
 }

@@ -17,6 +17,7 @@ import { Controller, OnInit } from "@flamework/core";
 import { Lighting, TweenService, Workspace } from "@rbxts/services";
 import HotkeysController from "client/controllers/core/HotkeysController";
 import { INTERFACE } from "client/controllers/core/UIController";
+import CommandsController from "client/controllers/interface/CommandsController";
 import QuestsController from "client/controllers/interface/QuestsController";
 import { playSound } from "shared/asset/GameAssets";
 
@@ -78,7 +79,8 @@ export default class AdaptiveTabController implements OnInit {
 
     constructor(
         private hotkeysController: HotkeysController,
-        private questsController: QuestsController
+        private questsController: QuestsController,
+        private commandsController?: CommandsController
     ) {
     }
 
@@ -110,13 +112,19 @@ export default class AdaptiveTabController implements OnInit {
 
     /**
      * Animates and shows the adaptive tab window for a given window name.
-     * Special handling for Quests to use the standalone window.
+     * Special handling for Quests and Commands to use standalone windows.
      * @param windowName The name of the window to show.
      */
     showAdaptiveTab(windowName: string) {
         // Special case: Redirect quest window to standalone implementation
         if (windowName === "Quests") {
             this.questsController.showQuestWindow();
+            return;
+        }
+
+        // Special case: Redirect commands window to standalone implementation
+        if (windowName === "Commands" && this.commandsController) {
+            this.commandsController.showCommandsWindow();
             return;
         }
 
@@ -156,7 +164,7 @@ export default class AdaptiveTabController implements OnInit {
 
     /**
      * Toggles the adaptive tab window for a given window name.
-     * Special handling for Quests to use the standalone window.
+     * Special handling for Quests and Commands to use standalone windows.
      * @param windowName The name of the window to toggle (optional).
      * @returns True if the tab was shown, false if hidden or unchanged.
      */
@@ -164,6 +172,11 @@ export default class AdaptiveTabController implements OnInit {
         // Special case: Redirect quest window to standalone implementation
         if (windowName === "Quests") {
             return this.questsController.toggleQuestWindow();
+        }
+
+        // Special case: Redirect commands window to standalone implementation  
+        if (windowName === "Commands" && this.commandsController) {
+            return this.commandsController.toggleCommandsWindow();
         }
 
         if (ADAPTIVE_TAB.Active && windowName === this.currentWindow?.Name) {
@@ -238,6 +251,8 @@ export default class AdaptiveTabController implements OnInit {
         this.hotkeys.set("Stats", Enum.KeyCode.M);
         this.hotkeys.set("Quests", Enum.KeyCode.V);
         this.hotkeys.set("Warp", Enum.KeyCode.G);
+        // Commands hotkey can be added here if needed in the future
+        // this.hotkeys.set("Commands", Enum.KeyCode.C);
         for (const sidebarButton of SIDEBAR_BUTTONS.GetDescendants()) {
             if (sidebarButton.IsA("GuiButton"))
                 this.loadSidebarButton(sidebarButton);

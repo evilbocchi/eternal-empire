@@ -1,37 +1,24 @@
 /**
- * @fileoverview Client controller for managing permissions, commands, and donation/game modification events.
+ * @fileoverview Client controller for managing permissions, donations, and game modification events.
  *
  * Handles:
- * - Displaying and updating command list UI based on permission level
  * - Handling donation and code sharing events
  * - Integrating with UIController, EffectController, and AdaptiveTabController
  * - Responding to game modification packets for developer/admin actions
  *
- * The controller manages command UI, permission-based filtering, and feedback for donation and game modification events.
+ * The controller manages permission-based feedback for donation and game modification events.
+ * Commands UI is now handled by the dedicated CommandsController with React components.
  *
  * @since 1.0.0
  */
 import { Controller, OnInit } from "@flamework/core";
 import CameraShaker from "@rbxts/camera-shaker";
-import { TextChatService } from "@rbxts/services";
-import { LOCAL_PLAYER } from "shared/constants";
 import AdaptiveTabController, { ADAPTIVE_TAB_MAIN_WINDOW } from "client/controllers/core/AdaptiveTabController";
+import CommandsController from "client/controllers/interface/CommandsController";
 import EffectController from "client/controllers/world/EffectController";
-import { ASSETS, playSound } from "shared/asset/GameAssets";
+import { playSound } from "shared/asset/GameAssets";
 import Items from "shared/items/Items";
 import Packets from "shared/Packets";
-
-declare global {
-    type CommandOption = Frame & {
-        AliasLabel: TextLabel,
-        DescriptionLabel: TextLabel,
-        PermLevelLabel: TextLabel;
-    };
-
-    interface Assets {
-        CommandOption: CommandOption;
-    }
-}
 
 export const SHARE_WINDOW = ADAPTIVE_TAB_MAIN_WINDOW.WaitForChild("Share") as Frame & {
     Code: Frame & {
@@ -39,67 +26,41 @@ export const SHARE_WINDOW = ADAPTIVE_TAB_MAIN_WINDOW.WaitForChild("Share") as Fr
     };
 };
 
-export const COMMANDS_WINDOW = ADAPTIVE_TAB_MAIN_WINDOW.WaitForChild("Commands") as Frame & {
-    CommandsList: ScrollingFrame & {
-
-    };
-};
-
 /**
- * Controller responsible for managing permissions, command UI, and donation/game modification events.
+ * Controller responsible for managing permissions, donation/game modification events, and code sharing.
  *
- * Handles command list display, permission filtering, and feedback for donation and code sharing.
+ * Handles donation feedback, code sharing UI, and game modification events.
+ * Commands UI is now handled by the dedicated CommandsController.
  */
 @Controller()
 export default class PermissionsController implements OnInit {
 
-    constructor(private effectController: EffectController, private adaptiveTabController: AdaptiveTabController) {
+    constructor(
+        private effectController: EffectController,
+        private adaptiveTabController: AdaptiveTabController,
+        private commandsController: CommandsController
+    ) {
 
     }
 
     /**
-     * Initializes the PermissionsController, sets up listeners for donations, tab openings, and game modifications.
+     * Initializes the PermissionsController, sets up listeners for donations and game modifications.
      */
     onInit() {
         Packets.donationGiven.fromServer(() => {
             playSound("PowerUp.mp3");
             this.effectController.camShake.Shake(CameraShaker.Presets.Bump);
         });
+
+        // Redirect Commands tab to the new React-based window
         Packets.tabOpened.fromServer((tab) => {
-            this.adaptiveTabController.showAdaptiveTab(tab);
             if (tab === "Commands") {
-                permLevelUpdated(LOCAL_PLAYER.GetAttribute("PermissionLevel") as number ?? 0);
+                // CommandsController handles this now
+                return;
             }
+            this.adaptiveTabController.showAdaptiveTab(tab);
         });
-        const permLevelUpdated = (permLevel: number) => {
-            for (const c of COMMANDS_WINDOW.CommandsList.GetChildren()) {
-                if (c.IsA("Frame")) {
-                    c.Destroy();
-                }
-            }
-            const commands = TextChatService.GetDescendants();
-            for (const command of commands) {
-                if (!command.IsA("TextChatCommand")) {
-                    continue;
-                }
-                const pl = command.GetAttribute("PermissionLevel") as number ?? 0;
-                const description = command.GetAttribute("Description") as string;
-                if (description === undefined) {
-                    continue;
-                }
-                if (pl > 3 && permLevel < 4) {
-                    continue;
-                }
-                const option = ASSETS.CommandOption.Clone();
-                option.Name = command.PrimaryAlias;
-                option.AliasLabel.Text = command.PrimaryAlias;
-                option.DescriptionLabel.Text = description;
-                option.PermLevelLabel.Text = "Permission Level " + pl;
-                option.BackgroundTransparency = pl > permLevel ? 0.5 : 0.8;
-                option.LayoutOrder = pl;
-                option.Parent = COMMANDS_WINDOW.CommandsList;
-            }
-        };
+
         Packets.codeReceived.fromServer((joinLink) => {
             SHARE_WINDOW.Code.Input.Text = joinLink;
             this.adaptiveTabController.showAdaptiveTab("Share");
