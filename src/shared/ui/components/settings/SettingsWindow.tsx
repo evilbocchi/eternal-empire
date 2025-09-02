@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from "@rbxts/react";
 import { getAsset } from "shared/asset/AssetMap";
 import Packets from "shared/Packets";
-import { useHotkeys } from "shared/ui/components/hotkeys/HotkeyProvider";
+import { HOTKEY_BINDINGS, useHotkeys } from "shared/ui/components/hotkeys/HotkeyProvider";
 import IconButton from "shared/ui/components/IconButton";
 import TechWindow from "shared/ui/components/window/TechWindow";
 import useProperty from "shared/ui/hooks/useProperty";
@@ -35,7 +35,7 @@ export default function SettingsWindow({
 }: SettingsWindowProps) {
     const [selectedHotkey, setSelectedHotkey] = useState<string | undefined>();
     const settings = useProperty(Packets.settings);
-    const { bindingsRef, setIsSettingHotkey } = useHotkeys();
+    const { setIsSettingHotkey } = useHotkeys();
 
     // Cleanup hotkey setting state when component unmounts or window closes
     useEffect(() => {
@@ -71,8 +71,8 @@ export default function SettingsWindow({
     }, [setSelectedHotkey, setIsSettingHotkey]);
 
     const hotkeyOptions = new Array<JSX.Element>();
-    for (const [index, binding] of bindingsRef.current) {
-        const label = tostring(index);
+    for (const binding of HOTKEY_BINDINGS) {
+        const label = binding.label;
         const value = settings.hotkeys[label];
         const keyText = value !== undefined ? Enum.KeyCode.FromValue(value)?.Name : binding.keyCode.Name;
         hotkeyOptions.push(<HotkeyOption

@@ -9,26 +9,29 @@ import React, { createContext, DependencyList, ReactNode, useCallback, useContex
 import { UserInputService } from "@rbxts/services";
 import Packets from "shared/Packets";
 
-export interface HotkeyBinding {
-    /** The key code to bind */
-    keyCode: Enum.KeyCode;
+declare global {
+    type HotkeyLabel = typeof HOTKEY_BINDINGS[number]["label"];
+    interface HotkeyBinding {
+        keyCode: Enum.KeyCode;
+        label: HotkeyLabel;
+        priority: number;
+    }
+}
+
+export interface HotkeyOptions {
+    /** The hotkey label */
+    label: HotkeyLabel;
     /** The action to execute */
     action: (usedHotkey: boolean) => boolean;
     /** Priority for execution order (higher = executes first) */
     priority: number;
-    /** Label for the hotkey */
-    label: string;
     /** Action to execute on key release */
     endAction?: () => boolean;
-    /** Whether this binding is currently enabled */
-    enabled?: boolean;
 }
 
 interface HotkeyContextValue {
-
-    bindingsRef: React.MutableRefObject<Map<string, HotkeyBinding>>;
     /** Bind a hotkey */
-    bindHotkey: (binding: HotkeyBinding) => () => void;
+    bindHotkey: (options: HotkeyOptions) => () => void;
     /** Execute a specific hotkey */
     executeHotkey: (keyCode: Enum.KeyCode) => boolean;
     /** Whether hotkey setting mode is active (prevents hotkey execution) */
@@ -43,11 +46,29 @@ interface HotkeyProviderProps {
     children: ReactNode;
 }
 
+export const HOTKEY_BINDINGS = [
+    {
+        keyCode: Enum.KeyCode.F,
+        label: "Inventory",
+        priority: 0
+    },
+    {
+        keyCode: Enum.KeyCode.V,
+        label: "Quests",
+        priority: 0
+    },
+    {
+        keyCode: Enum.KeyCode.X,
+        label: "Close Window",
+        priority: 0
+    },
+] as const;
+
 /**
  * Hotkey provider component that manages hotkey state and input handling
  */
 export default function HotkeyProvider({ children }: HotkeyProviderProps) {
-    const bindingsRef = useRef<Map<string, HotkeyBinding>>(new Map());
+    const optionsPerLabelRef = useRef<Map<string, HotkeyOptions>>(new Map());
     const [isSettingHotkey, setIsSettingHotkey] = useState(false);
 
     const executeHotkey = useCallback((keyCode: Enum.KeyCode, endAction?: boolean): boolean => {
@@ -56,10 +77,10 @@ export default function HotkeyProvider({ children }: HotkeyProviderProps) {
 
         // Get all bindings for this key and sort by priority
         const allBindings: HotkeyBinding[] = [];
-        for (const [id, binding] of bindingsRef.current) {
-            const customValue = Packets.settings.get()!.hotkeys[id];
+        for (const binding of HOTKEY_BINDINGS) {
+            const customValue = Packets.settings.get()!.hotkeys[binding.label];
             const binded = customValue !== undefined ? Enum.KeyCode.FromValue(customValue) : binding.keyCode;
-            if (binding.enabled !== false && binded === keyCode) {
+            if (binded === keyCode) {
                 allBindings.push(binding);
             }
         }
@@ -68,25 +89,25 @@ export default function HotkeyProvider({ children }: HotkeyProviderProps) {
         table.sort(allBindings, (a, b) => (b.priority || 0) > (a.priority || 0));
 
         for (const binding of allBindings) {
+            const options = optionsPerLabelRef.current.get(binding.label);
+            if (!options) continue;
+
             if (endAction === true) {
-                if (binding.endAction?.()) {
+                if (options.endAction?.()) {
                     return true;
                 }
             }
-            else if (binding.action(true)) {
+            else if (options.action(true)) {
                 return true;
             }
         }
         return false;
     }, [isSettingHotkey]);
 
-    const bindHotkey = useCallback((binding: HotkeyBinding) => {
-        const id = binding.label ?? "Unknown";
-        bindingsRef.current.set(id, binding);
-
-        // Return cleanup function
+    const bindHotkey = useCallback((options: HotkeyOptions) => {
+        optionsPerLabelRef.current.set(options.label, options);
         return () => {
-            bindingsRef.current.delete(id);
+            optionsPerLabelRef.current.delete(options.label);
         };
     }, []);
 
@@ -110,7 +131,6 @@ export default function HotkeyProvider({ children }: HotkeyProviderProps) {
 
     return (
         <HotkeyContext.Provider value={{
-            bindingsRef,
             bindHotkey,
             executeHotkey,
             isSettingHotkey,
@@ -135,13 +155,13 @@ export function useHotkeys() {
 /**
  * Hook to bind a hotkey with automatic cleanup
  */
-export function useHotkey(binding: HotkeyBinding | undefined, deps?: DependencyList) {
+export function useHotkey(options?: HotkeyOptions, deps?: DependencyList) {
     const { bindHotkey } = useHotkeys();
 
     useEffect(() => {
-        if (!binding) return;
+        if (!options) return;
 
-        const cleanup = bindHotkey(binding);
+        const cleanup = bindHotkey(options);
         return cleanup;
-    }, deps ? [bindHotkey, binding, ...deps] : [bindHotkey, binding]);
+    }, deps ? [bindHotkey, options, ...deps] : [bindHotkey, options]);
 }

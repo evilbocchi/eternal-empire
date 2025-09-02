@@ -73,7 +73,6 @@ export default function WindowManager({ children }: WindowManagerProps) {
 
     // Global hotkey for closing windows
     useHotkey({
-        keyCode: Enum.KeyCode.X,
         action: () => {
             const visibleWindows = getVisibleWindows();
             if (visibleWindows.size() > 0) {
@@ -87,7 +86,10 @@ export default function WindowManager({ children }: WindowManagerProps) {
         },
         priority: 0,
         label: "Close Window",
-    }); return (
+    });
+
+
+    return (
         <WindowManagerContext.Provider value={{
             registerWindow,
             unregisterWindow,

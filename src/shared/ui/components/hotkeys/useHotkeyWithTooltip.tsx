@@ -7,20 +7,16 @@
 
 import { useCallback } from "@rbxts/react";
 import { useHotkey } from "shared/ui/components/hotkeys/HotkeyProvider";
-import { TooltipData } from "shared/ui/components/tooltip/TooltipProvider";
 import { useTooltipProps } from "shared/ui/components/tooltip/useTooltipProps";
 
 declare global {
     type TooltipProps = ReturnType<typeof useHotkeyWithTooltip>;
 
     type HotkeyWithTooltipOptions = {
-        keyCode: Enum.KeyCode | undefined,
         action: (usedHotkey: boolean) => boolean,
         priority?: number;
-        label: string;
+        label: HotkeyLabel;
         endAction?: () => boolean;
-        enabled?: boolean;
-        hideHotkey?: boolean;
         onEnter?: () => void;
         onLeave?: () => void;
     };
@@ -30,26 +26,17 @@ declare global {
  * Hook that combines hotkey binding with tooltip integration
  * Similar to the original HotkeysController.setHotkey method
  */
-export default function useHotkeyWithTooltip({ keyCode, action, priority, label, endAction, enabled, hideHotkey, onEnter, onLeave }: HotkeyWithTooltipOptions) {
-    // Create tooltip message that includes hotkey if not hidden
-    const generateTooltipData = (): TooltipData => {
-        if (!label) return {};
-        if (!keyCode || hideHotkey) return { message: label };
-        return { message: `${label} (${keyCode.Name})` };
-    };
-
+export default function useHotkeyWithTooltip({ action, priority, label, endAction, onEnter, onLeave }: HotkeyWithTooltipOptions) {
     // Bind the hotkey
-    useHotkey(keyCode ? {
-        keyCode,
+    useHotkey({
         action,
         priority: priority ?? 0,
         label: label,
         endAction: endAction,
-        enabled: enabled,
-    } : undefined);
+    });
 
     // Get tooltip props
-    const tooltipProps = useTooltipProps({ data: generateTooltipData, onEnter, onLeave });
+    const tooltipProps = useTooltipProps({ data: { message: label }, onEnter, onLeave });
 
     // Return both the action handler and tooltip props
     const handleClick = useCallback(() => {
@@ -64,7 +51,6 @@ export default function useHotkeyWithTooltip({ keyCode, action, priority, label,
         events: {
             ...tooltipProps.events,
             Activated: handleClick,
-        },
-        hotkeyLabel: keyCode ? keyCode.Name : undefined,
+        }
     };
 }

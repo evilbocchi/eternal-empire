@@ -133,13 +133,12 @@ export function SidebarButton({
     }, [onClick, animationsEnabled, animatePress]);
 
     const { events } = useHotkeyWithTooltip({
-        keyCode: data.hotkey,
         action: () => {
             if (!data.visible) return false;
             handleClick();
             return true;
         },
-        label: data.name
+        label: data.name as HotkeyLabel
     });
 
     // Calculate animated size
