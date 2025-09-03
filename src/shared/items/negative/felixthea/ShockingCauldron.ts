@@ -21,6 +21,9 @@ export = new Item(script.Name)
 
     .trait(Furnace)
     .acceptsUpgrades(false)
-    .applyFormula((v, item) => item.setMul(mul.set("Funds", v)), () => Server.Currency.get("Power"))
+    .applyFormula(
+        (v, item) => item.setMul(mul.set("Funds", v)),
+        () => Server.Currency.get("Power"),
+    )
 
     .exit();

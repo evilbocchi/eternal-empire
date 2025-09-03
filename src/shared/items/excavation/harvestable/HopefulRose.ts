@@ -6,7 +6,9 @@ import Grass from "shared/items/excavation/harvestable/Grass";
 
 export = new Item(script.Name)
     .setName("Hopeful Rose")
-    .setDescription("You waste your whole life, and for what purpose? This is your purpose. %mul%. Unstackable. But %mul%. Hope is here.")
+    .setDescription(
+        "You waste your whole life, and for what purpose? This is your purpose. %mul%. Unstackable. But %mul%. Hope is here.",
+    )
     .setDifficulty(Difficulty.Excavation)
     .setPrice(new CurrencyBundle().set("Funds", 99))
     .setRequiredItemAmount(Grass, 100000)

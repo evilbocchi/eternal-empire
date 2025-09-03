@@ -3,9 +3,7 @@ import Item from "shared/item/Item";
 import HarvestingTool from "shared/item/traits/HarvestingTool";
 import Shop from "shared/item/traits/Shop";
 
-const ToolShop = new Item(script.Name)
-    .setName("Tool Shop")
-    .setDifficulty(Difficulty.Bonuses);
+const ToolShop = new Item(script.Name).setName("Tool Shop").setDifficulty(Difficulty.Bonuses);
 
 let tools = new Array<HarvestingTool>();
 for (const module of script.Parent!.GetChildren()) {

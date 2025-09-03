@@ -6,7 +6,9 @@ import CurrencyBundle from "shared/currency/CurrencyBundle";
 
 export = new Item(script.Name)
     .setName("Hand Crank Generator")
-    .setDescription("Did you enjoy the Hand Crank Dropper? If so, you'll love the all-new Hand Crank Generator! Produces %gain%, tripling its stats when cranked.")
+    .setDescription(
+        "Did you enjoy the Hand Crank Dropper? If so, you'll love the all-new Hand Crank Generator! Produces %gain%, tripling its stats when cranked.",
+    )
     .setDifficulty(Difficulty.A)
     .setPrice(new CurrencyBundle().set("Power", 104000), 1)
     .setPrice(new CurrencyBundle().set("Power", 648100), 2)

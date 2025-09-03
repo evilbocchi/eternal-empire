@@ -12,7 +12,9 @@ import CurrencyBundle from "shared/currency/CurrencyBundle";
 
 export = new Item(script.Name)
     .setName("Coalescent Refiner")
-    .setDescription("Raw stats. Combine your refiners into an extremely powerful refiner that boosts droplet value by %mul%.")
+    .setDescription(
+        "Raw stats. Combine your refiners into an extremely powerful refiner that boosts droplet value by %mul%.",
+    )
     .setDifficulty(Difficulty.Ifinitude)
     .setPrice(new CurrencyBundle().set("Funds", 2e30), 1)
     .setRequiredItemAmount(AdvancedBlankEssence, 1)

@@ -11,34 +11,41 @@ import Upgrader from "shared/item/traits/upgrader/Upgrader";
 import NamedUpgrade from "shared/namedupgrade/NamedUpgrade";
 
 export default class ObbyUpgrader extends ItemTrait {
-
     static init(obbyUpgrader: ObbyUpgrader) {
         const item = obbyUpgrader.item;
         const upgrader = item.trait(Upgrader);
 
-        item.repeat(undefined, () => {
-            const mul = new CurrencyBundle();
-            for (const [upgrade, { currency, formula }] of obbyUpgrader.boosts) {
-                const amount = Server.NamedUpgrade.getUpgradeAmount(upgrade.id);
-                mul.set(currency, formula.apply(new OnoeNum(amount)));
-            }
-            upgrader.setMul(mul);
-        }, 1);
+        item.repeat(
+            undefined,
+            () => {
+                const mul = new CurrencyBundle();
+                for (const [upgrade, { currency, formula }] of obbyUpgrader.boosts) {
+                    const amount = Server.NamedUpgrade.getUpgradeAmount(upgrade.id);
+                    mul.set(currency, formula.apply(new OnoeNum(amount)));
+                }
+                upgrader.setMul(mul);
+            },
+            1,
+        );
     }
 
     static load(model: Model, obbyUpgrader: ObbyUpgrader) {
         const item = obbyUpgrader.item;
         const obbyPointsGuiPart = model.WaitForChild("ObbyPointsGuiPart") as BasePart;
-        const label = obbyPointsGuiPart.FindFirstChildOfClass("SurfaceGui")?.FindFirstChild("TextLabel") as TextLabel | undefined;
-        if (label === undefined)
-            throw "ObbyPointsGuiPart does not have a TextLabel in its SurfaceGui";
-        item.repeat(model, () => {
-            label.Text = `OBBY POINTS: ${Server.Currency.get("Obby Points").toString()}`;
-        }, 1);
+        const label = obbyPointsGuiPart.FindFirstChildOfClass("SurfaceGui")?.FindFirstChild("TextLabel") as
+            | TextLabel
+            | undefined;
+        if (label === undefined) throw "ObbyPointsGuiPart does not have a TextLabel in its SurfaceGui";
+        item.repeat(
+            model,
+            () => {
+                label.Text = `OBBY POINTS: ${Server.Currency.get("Obby Points").toString()}`;
+            },
+            1,
+        );
 
         for (const part of model.GetChildren()) {
-            if (!part.IsA("BasePart"))
-                continue;
+            if (!part.IsA("BasePart")) continue;
             switch (part.Name) {
                 case "ObbyZone":
                 case "ReturnPart":
@@ -58,11 +65,9 @@ export default class ObbyUpgrader extends ItemTrait {
         const returnPart = model.WaitForChild("ReturnPart") as BasePart;
         let debounce = false;
         winPart.Touched.Connect((hit) => {
-            if (debounce)
-                return;
+            if (debounce) return;
             const parent = hit.Parent;
-            if (parent === undefined || !parent.IsA("Model"))
-                return;
+            if (parent === undefined || !parent.IsA("Model")) return;
             parent.PivotTo(returnPart.CFrame);
             const reward = obbyUpgrader.reward;
             Server.Currency.increment("Obby Points", reward);
@@ -72,7 +77,7 @@ export default class ObbyUpgrader extends ItemTrait {
             const b = color.B * 255;
             Server.ChatHook.sendServerMessage(
                 `${parent.Name} has completed the ${item.name} and earned ${reward.toString()} Obby Points!`,
-                `tag:hidden;color:${r},${g},${b}`
+                `tag:hidden;color:${r},${g},${b}`,
             );
             const sound = getSound("ObbyPointGet.mp3");
             sound.Play();
@@ -87,10 +92,13 @@ export default class ObbyUpgrader extends ItemTrait {
         });
     }
 
-    readonly boosts = new Map<NamedUpgrade, {
-        currency: Currency;
-        formula: Formula;
-    }>();
+    readonly boosts = new Map<
+        NamedUpgrade,
+        {
+            currency: Currency;
+            formula: Formula;
+        }
+    >();
 
     reward = new OnoeNum(0);
 

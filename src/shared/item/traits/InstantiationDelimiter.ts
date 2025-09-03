@@ -14,22 +14,21 @@ declare global {
 }
 
 export default class InstantiationDelimiter extends ItemTrait {
-
     static load(model: Model, delimiter: InstantiationDelimiter) {
         const item = delimiter.item;
 
         const area = model.GetAttribute("Area") as AreaId | undefined;
-        if (area === undefined)
-            throw `InstantiationDelimiter: ${model.Name} is not in an area`;
+        if (area === undefined) throw `InstantiationDelimiter: ${model.Name} is not in an area`;
 
         const indicator = new Instance("IntValue");
         indicator.Name = model.Name;
         indicator.Parent = AREAS[area].dropletLimit;
         item.repeat(model, () => {
-            const actual = getInstanceInfo(model, "Maintained") === true ?
-                (getInstanceInfo(model, "DropletIncrease") ?? delimiter.dropletIncrease) : 0;
-            if (actual !== indicator.Value && actual !== undefined)
-                indicator.Value = actual;
+            const actual =
+                getInstanceInfo(model, "Maintained") === true
+                    ? (getInstanceInfo(model, "DropletIncrease") ?? delimiter.dropletIncrease)
+                    : 0;
+            if (actual !== indicator.Value && actual !== undefined) indicator.Value = actual;
         });
         model.Destroying.Once(() => indicator.Destroy());
         item.maintain(model);

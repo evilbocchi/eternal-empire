@@ -29,7 +29,11 @@ export = new Item(script.Name)
             dropRateMultiplier: 1, // Default multiplier
         };
         instanceInfo.Boosts!.set("Solar", modifier);
-        item.repeat(model, () => {
-            modifier.dropRateMultiplier = (12 - math.abs(Lighting.ClockTime - 12)) / 6 + 1;
-        }, 1);
+        item.repeat(
+            model,
+            () => {
+                modifier.dropRateMultiplier = (12 - math.abs(Lighting.ClockTime - 12)) / 6 + 1;
+            },
+            1,
+        );
     });

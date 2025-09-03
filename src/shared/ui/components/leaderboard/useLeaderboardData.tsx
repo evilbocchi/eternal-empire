@@ -10,7 +10,10 @@ import React, { useEffect, useState } from "@rbxts/react";
  * @param leaderboardType The leaderboard type to subscribe to
  * @returns Current leaderboard entries
  */
-export function useLeaderboardData(dataManager: LeaderboardDataManager, leaderboardType: LeaderboardType): LeaderboardEntry[] {
+export function useLeaderboardData(
+    dataManager: LeaderboardDataManager,
+    leaderboardType: LeaderboardType,
+): LeaderboardEntry[] {
     const [entries, setEntries] = useState<LeaderboardEntry[]>([]);
 
     useEffect(() => {

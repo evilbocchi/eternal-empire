@@ -33,7 +33,6 @@ let oldSpeed = 1;
  */
 @Service()
 export default class NPCNavigationService implements OnInit, OnStart, OnPhysics {
-
     /** Map of active pathfinding operations for NPCs. */
     runningPathfinds = new Map<Humanoid, RBXScriptConnection>();
 
@@ -48,18 +47,16 @@ export default class NPCNavigationService implements OnInit, OnStart, OnPhysics 
         Limestone: 20, // Ground beneath water
         SmoothPlastic: 10,
         Wood: 10,
-        Plastic: 2
+        Plastic: 2,
     };
 
     /** Default parameters for NPC pathfinding operations. */
     readonly PATHFINDING_PARAMS: AgentParameters = {
         Costs: this.PATHFINDING_COSTS,
-        WaypointSpacing: 6
+        WaypointSpacing: 6,
     };
 
-    constructor() {
-
-    }
+    constructor() {}
 
     /**
      * Calculate waypoints for NPC navigation.
@@ -71,7 +68,13 @@ export default class NPCNavigationService implements OnInit, OnStart, OnPhysics 
      * @param retries Number of retry attempts.
      * @returns An array of waypoints or undefined if no path is found.
      */
-    getWaypoints(humanoid: Humanoid, source: Vector3, destination: Vector3, params = this.PATHFINDING_PARAMS, retries = 0): PathWaypoint[] | undefined {
+    getWaypoints(
+        humanoid: Humanoid,
+        source: Vector3,
+        destination: Vector3,
+        params = this.PATHFINDING_PARAMS,
+        retries = 0,
+    ): PathWaypoint[] | undefined {
         if (humanoid === undefined || humanoid.RootPart === undefined) {
             warn("Humanoid or RootPart is undefined");
             return;
@@ -88,7 +91,6 @@ export default class NPCNavigationService implements OnInit, OnStart, OnPhysics 
             return;
         }
         return waypoints;
-
     }
 
     /**
@@ -100,14 +102,9 @@ export default class NPCNavigationService implements OnInit, OnStart, OnPhysics 
      * @param endCallback Function called when navigation completes.
      * @returns Connection object for the pathfinding operation.
      */
-    pathfind(
-        humanoid: Humanoid,
-        waypoints: PathWaypoint[],
-        endCallback: () => unknown,
-    ) {
+    pathfind(humanoid: Humanoid, waypoints: PathWaypoint[], endCallback: () => unknown) {
         const rootPart = humanoid.RootPart;
-        if (rootPart === undefined)
-            return;
+        if (rootPart === undefined) return;
         let i = 0;
         let newPos: Vector3 | undefined;
 
@@ -122,10 +119,8 @@ export default class NPCNavigationService implements OnInit, OnStart, OnPhysics 
                 }
                 newPos = nextWaypoint.Position;
 
-
                 humanoid.MoveTo(newPos);
-            }
-            else {
+            } else {
                 // Navigation complete
                 connection.Disconnect();
                 endCallback();
@@ -134,19 +129,19 @@ export default class NPCNavigationService implements OnInit, OnStart, OnPhysics 
 
         let t = 0;
         const connection = RunService.Heartbeat.Connect((dt) => {
-            if (newPos === undefined)
-                return;
+            if (newPos === undefined) return;
             t += dt;
             const dist = rootPart.Position.sub(newPos).mul(new Vector3(1, 0, 1)).Magnitude;
 
             // Check if close enough to waypoint
-            if (dist < math.max(humanoid.WalkSpeed * 0.1875, 0.5)) { // allow more leeway for higher speeds
+            if (dist < math.max(humanoid.WalkSpeed * 0.1875, 0.5)) {
+                // allow more leeway for higher speeds
                 t = 0;
                 newPos = undefined;
                 doNextWaypoint();
             }
             // Teleport if stuck for too long
-            else if (t > math.max(5.6 * dist / humanoid.WalkSpeed, 2)) {
+            else if (t > math.max((5.6 * dist) / humanoid.WalkSpeed, 2)) {
                 t = 0;
                 rootPart.CFrame = new CFrame(newPos).add(new Vector3(0, humanoid.HipHeight, 0));
             }
@@ -174,17 +169,15 @@ export default class NPCNavigationService implements OnInit, OnStart, OnPhysics 
         source: CFrame,
         destination: CFrame,
         requiresPlayer?: boolean,
-        agentParams?: AgentParameters
+        agentParams?: AgentParameters,
     ) {
         // Validate parameters
-        if (!npcHumanoid.IsA("Humanoid"))
-            throw npcHumanoid.Name + " is not a Humanoid";
+        if (!npcHumanoid.IsA("Humanoid")) throw npcHumanoid.Name + " is not a Humanoid";
         npcHumanoid.RootPart!.Anchored = false;
 
         // Cancel any ongoing pathfinding
         const cached = this.runningPathfinds.get(npcHumanoid);
-        if (cached !== undefined)
-            cached.Disconnect();
+        if (cached !== undefined) cached.Disconnect();
 
         // Load waypoints and tweens
         let waypoints: PathWaypoint[] | undefined;
@@ -216,12 +209,11 @@ export default class NPCNavigationService implements OnInit, OnStart, OnPhysics 
                 fittingTween: tween,
                 onComplete: (callback: () => unknown) => {
                     callbacks.add(callback);
-                }
+                },
             };
 
             this.pathfind(npcHumanoid, waypoints, () => {
-                if (playTween)
-                    tween.Play();
+                if (playTween) tween.Play();
                 if (requiresPlayer === false) {
                     toCall = true;
                 }
@@ -231,11 +223,9 @@ export default class NPCNavigationService implements OnInit, OnStart, OnPhysics 
                 const players = Players.GetPlayers();
                 for (const player of players) {
                     const playerRootPart = getRootPart(player);
-                    if (playerRootPart === undefined)
-                        continue;
+                    if (playerRootPart === undefined) continue;
                     if (destination.Position.sub(playerRootPart.Position).Magnitude < 10) {
-                        if (playTween)
-                            tween.Play();
+                        if (playTween) tween.Play();
                         toCall = true;
                         connection.Disconnect();
                         return;
@@ -259,7 +249,6 @@ export default class NPCNavigationService implements OnInit, OnStart, OnPhysics 
         return start;
     }
 
-
     // Lifecycle Methods
 
     /**
@@ -282,14 +271,11 @@ export default class NPCNavigationService implements OnInit, OnStart, OnPhysics 
     /**
      * Initializes the NPCNavigationService.
      */
-    onInit() {
-    }
+    onInit() {}
 
     /**
      * Starts the NPCNavigationService.
      * Performs initial pathfinding setup and validation.
      */
-    onStart() {
-
-    }
+    onStart() {}
 }

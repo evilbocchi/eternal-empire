@@ -5,8 +5,9 @@ import Upgrader from "shared/item/traits/upgrader/Upgrader";
 
 export = new Item(script.Name)
     .setName("Basic Refiner")
-    .setDescription(`A flag-like device used to refine droplets.
-Increases the value of droplets passing through its laser by %add%.`
+    .setDescription(
+        `A flag-like device used to refine droplets.
+Increases the value of droplets passing through its laser by %add%.`,
     )
     .setDifficulty(Difficulty.TheLowerGap)
     .setPrice(new CurrencyBundle().set("Funds", 1000), 1)

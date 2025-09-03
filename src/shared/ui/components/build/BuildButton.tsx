@@ -1,6 +1,6 @@
 /**
  * @fileoverview Reusable build button component for the build system
- * 
+ *
  * A styled button component that matches the build window design with smooth animations,
  * hover effects, and scaling transitions.
  */
@@ -55,7 +55,7 @@ export default function BuildButton({
     position,
     size = new UDim2(0.5, 0, 1, 0),
     backgroundColor = DEFAULT_BACKGROUND_COLOR,
-    disabled = false
+    disabled = false,
 }: BuildButtonProps) {
     anchorPoint ??= icon ? new Vector2(0, 1) : new Vector2(1, 1);
     position ??= icon ? new UDim2(0, 0, 1, 0) : new UDim2(1, 0, 1, 0);
@@ -102,10 +102,10 @@ export default function BuildButton({
     const currentBackgroundColor = disabled
         ? backgroundColor.Lerp(Color3.fromRGB(0, 0, 0), 0.5)
         : isPressed
-            ? backgroundColor.Lerp(Color3.fromRGB(0, 0, 0), 0.2)
-            : isHovered
-                ? backgroundColor.Lerp(Color3.fromRGB(255, 255, 255), HOVER_COLOR_LERP)
-                : backgroundColor;
+          ? backgroundColor.Lerp(Color3.fromRGB(0, 0, 0), 0.2)
+          : isHovered
+            ? backgroundColor.Lerp(Color3.fromRGB(255, 255, 255), HOVER_COLOR_LERP)
+            : backgroundColor;
 
     return (
         <textbutton
@@ -126,7 +126,7 @@ export default function BuildButton({
                 MouseEnter: handleMouseEnter,
                 MouseLeave: handleMouseLeave,
                 MouseButton1Down: handleMouseDown,
-                MouseButton1Up: handleMouseUp
+                MouseButton1Up: handleMouseUp,
             }}
         >
             <uicorner CornerRadius={new UDim(0, 4)} />
@@ -135,10 +135,12 @@ export default function BuildButton({
                 Color={disabled ? Color3.fromRGB(40, 40, 40) : Color3.fromRGB(77, 77, 77)}
             />
             <uigradient
-                Color={new ColorSequence([
-                    new ColorSequenceKeypoint(0, Color3.fromRGB(35, 35, 35)),
-                    new ColorSequenceKeypoint(1, Color3.fromRGB(89, 89, 89))
-                ])}
+                Color={
+                    new ColorSequence([
+                        new ColorSequenceKeypoint(0, Color3.fromRGB(35, 35, 35)),
+                        new ColorSequenceKeypoint(1, Color3.fromRGB(89, 89, 89)),
+                    ])
+                }
                 Rotation={270}
             />
 
@@ -154,10 +156,12 @@ export default function BuildButton({
                     SizeConstraint={Enum.SizeConstraint.RelativeYY}
                 >
                     <uigradient
-                        Color={new ColorSequence([
-                            new ColorSequenceKeypoint(0, Color3.fromRGB(255, 255, 255)),
-                            new ColorSequenceKeypoint(1, Color3.fromRGB(175, 199, 255))
-                        ])}
+                        Color={
+                            new ColorSequence([
+                                new ColorSequenceKeypoint(0, Color3.fromRGB(255, 255, 255)),
+                                new ColorSequenceKeypoint(1, Color3.fromRGB(175, 199, 255)),
+                            ])
+                        }
                         Rotation={90}
                     />
                 </imagelabel>
@@ -187,12 +191,14 @@ export default function BuildButton({
             />
 
             {/* Padding */}
-            {icon ? undefined : <uipadding
-                PaddingBottom={new UDim(0, 5)}
-                PaddingLeft={new UDim(0, 5)}
-                PaddingRight={new UDim(0, 5)}
-                PaddingTop={new UDim(0, 5)}
-            />}
+            {icon ? undefined : (
+                <uipadding
+                    PaddingBottom={new UDim(0, 5)}
+                    PaddingLeft={new UDim(0, 5)}
+                    PaddingRight={new UDim(0, 5)}
+                    PaddingTop={new UDim(0, 5)}
+                />
+            )}
 
             {/* Scale for animations */}
             <uiscale ref={scaleRef} Scale={1} />

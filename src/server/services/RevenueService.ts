@@ -41,14 +41,16 @@ const FURNACE_UPGRADES = NamedUpgrades.getUpgrades("Furnace");
  */
 @Service()
 export default class RevenueService {
-
     /**
      * Constructs the RevenueService with all required dependencies.
      */
-    constructor(private dataService: DataService, private darkMatterService: DarkMatterService, private bombsService: BombsService,
-        private currencyService: CurrencyService, private atmosphereService: AtmosphereService) {
-
-    }
+    constructor(
+        private dataService: DataService,
+        private darkMatterService: DarkMatterService,
+        private bombsService: BombsService,
+        private currencyService: CurrencyService,
+        private atmosphereService: AtmosphereService,
+    ) {}
 
     /**
      * Gets the global additive, multiplicative, and exponential boosts applied to all revenue sources.
@@ -64,15 +66,13 @@ export default class RevenueService {
         mul = mul.mul(darkMatterBoost);
 
         // bombs
-        if (this.bombsService.fundsBombEnabled === true)
-            mul = mul.mul(this.bombsService.fundsBombBoost);
+        if (this.bombsService.fundsBombEnabled === true) mul = mul.mul(this.bombsService.fundsBombBoost);
 
         // named upgrades from upgrade boards and other stuff
         if (upgrades !== undefined) {
             for (const [id, upgrade] of upgrades) {
                 const amount = this.dataService.empireData.upgrades.get(id);
-                if (amount === undefined)
-                    continue;
+                if (amount === undefined) continue;
                 switch (upgrade.operative) {
                     case "mul":
                         mul = upgrade.apply(mul, amount);
@@ -122,7 +122,12 @@ export default class RevenueService {
      * @param enforce Whether to enforce the includesUpgrades parameter (for special cases)
      * @returns Tuple of (droplet value, nerf applied)
      */
-    calculateDropletValue(dropletModel: BasePart, includesGlobalBoosts: boolean, includesUpgrades: boolean, enforce?: boolean) {
+    calculateDropletValue(
+        dropletModel: BasePart,
+        includesGlobalBoosts: boolean,
+        includesUpgrades: boolean,
+        enforce?: boolean,
+    ) {
         const instanceInfo = getAllInstanceInfo(dropletModel);
 
         let [totalAdd, totalMul, totalPow] = Operative.template();

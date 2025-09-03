@@ -28,15 +28,16 @@ import Packets from "shared/Packets";
  */
 @Service()
 export default class SetupService implements OnInit {
-
     /** Signal fired when a setup is saved. */
     setupSaved = new Signal<(player: Player, area: AreaId) => void>();
 
     /** Signal fired when a setup is loaded. */
     setupLoaded = new Signal<(player: Player, area: AreaId) => void>();
 
-    constructor(private dataService: DataService, private itemService: ItemService) {
-    }
+    constructor(
+        private dataService: DataService,
+        private itemService: ItemService,
+    ) {}
 
     /**
      * Saves the current placed items in an area as a setup with the given name.
@@ -53,16 +54,13 @@ export default class SetupService implements OnInit {
         }
         const data = this.dataService.empireData;
         const items = new Array<PlacedItem>();
-        for (const [_, placedItem] of data.items.worldPlaced)
-            if (placedItem.area === area)
-                items.push(placedItem);
+        for (const [_, placedItem] of data.items.worldPlaced) if (placedItem.area === area) items.push(placedItem);
         let totalPrice = new CurrencyBundle();
-        let itemCount = new Map<Item, number>();
+        const itemCount = new Map<Item, number>();
         for (const placedItem of items) {
             const item = Items.getItem(placedItem.item);
-            if (item === undefined)
-                continue;
-            let currentItemCount = (itemCount.get(item) ?? 0) + 1;
+            if (item === undefined) continue;
+            const currentItemCount = (itemCount.get(item) ?? 0) + 1;
             const price = item.pricePerIteration.get(currentItemCount);
             if (price !== undefined && item.getResetLayer() < 100) {
                 totalPrice = totalPrice.add(price);
@@ -78,8 +76,7 @@ export default class SetupService implements OnInit {
         if (existingSetup !== undefined) {
             existingSetup.items = items;
             existingSetup.calculatedPrice = totalPrice.amountPerCurrency;
-        }
-        else {
+        } else {
             // truncate name to 32 characters
             if (name.size() > 32) {
                 name = name.sub(1, 32);
@@ -91,7 +88,7 @@ export default class SetupService implements OnInit {
                 items: items,
                 autoloads: false,
                 alerted: false,
-                calculatedPrice: totalPrice.amountPerCurrency
+                calculatedPrice: totalPrice.amountPerCurrency,
             });
         }
 
@@ -131,14 +128,17 @@ export default class SetupService implements OnInit {
         const items = new Array<PlacingInfo>();
         for (const savedItem of savedItems) {
             const itemId = savedItem.item;
-            if (this.itemService.getItemAmount(itemId) === 0 && this.itemService.serverBuy(Items.getItem(itemId)!) === false) {
+            if (
+                this.itemService.getItemAmount(itemId) === 0 &&
+                this.itemService.serverBuy(Items.getItem(itemId)!) === false
+            ) {
                 continue;
             }
             const id = savedItem.uniqueItemId ?? itemId;
             items.push({
                 id,
                 position: new Vector3(savedItem.posX, savedItem.posY, savedItem.posZ),
-                rotation: savedItem.rawRotation ?? 0
+                rotation: savedItem.rawRotation ?? 0,
             });
         }
         this.setupLoaded.fire(player, setup.area);
@@ -154,8 +154,7 @@ export default class SetupService implements OnInit {
         Packets.printedSetups.set(this.dataService.empireData.printedSetups);
 
         Packets.renameSetup.fromClient((player, currentName, renameTo) => {
-            if (!this.dataService.checkPermLevel(player, "build"))
-                return;
+            if (!this.dataService.checkPermLevel(player, "build")) return;
             renameTo = TextService.FilterStringAsync(renameTo, player.UserId).GetNonChatStringForBroadcastAsync();
             const setups = this.dataService.empireData.printedSetups;
             for (const setup of setups) {
@@ -167,8 +166,7 @@ export default class SetupService implements OnInit {
             Packets.printedSetups.set(setups);
         });
         Packets.autoloadSetup.fromClient((player, name) => {
-            if (!this.dataService.checkPermLevel(player, "build"))
-                return;
+            if (!this.dataService.checkPermLevel(player, "build")) return;
             const setups = this.dataService.empireData.printedSetups;
             for (const setup of setups) {
                 if (setup.name === name) {

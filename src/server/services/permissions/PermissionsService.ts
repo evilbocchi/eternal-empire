@@ -1,6 +1,6 @@
 /**
  * @fileoverview Manages player permissions, moderation, and command handling.
- * 
+ *
  * This service is responsible for:
  * - Managing permission levels (banned, trusted, managers, owner, etc.)
  * - Handling player moderation (ban, kick, restrict, trust, etc.)
@@ -9,9 +9,9 @@
  * - Integrating with other services for data, items, upgrades, and more
  * - Broadcasting server and private messages
  * - Handling global chat and related features
- * 
+ *
  * Acts as the central authority for all permission and moderation logic in the game.
- * 
+ *
  * @since 1.0.0
  */
 
@@ -113,14 +113,14 @@ declare global {
 
         /**
          * Amount related to the action.
-         * 
+         *
          * @see {@link infAmount} for bigger numbers.
          */
         amount?: number;
 
         /**
          * Amount related to the action.
-         * 
+         *
          * @see {@link amount} for smaller numbers.
          */
         infAmount?: BaseOnoeNum;
@@ -140,18 +140,17 @@ type PermissionList = "banned" | "trusted" | "managers";
 
 /**
  * Service for managing player permissions, moderation, and command registration.
- * 
+ *
  * Handles permission lists, player moderation actions, command creation, and logging.
  * Integrates with other services for data, items, upgrades, and messaging.
  */
 @Service()
 export default class PermissionsService implements OnInit, OnPlayerJoined {
-
-
     /**
      * Constructs the PermissionsService with all required dependencies.
      */
-    constructor(private dataService: DataService,
+    constructor(
+        private dataService: DataService,
         private donationService: DonationService,
         private currencyService: CurrencyService,
         private namedUpgradeService: NamedUpgradeService,
@@ -161,10 +160,8 @@ export default class PermissionsService implements OnInit, OnPlayerJoined {
         private bombsService: BombsService,
         private setupService: SetupService,
         private productService: ProductService,
-        private chatHookService: ChatHookService
-    ) {
-
-    }
+        private chatHookService: ChatHookService,
+    ) {}
 
     /**
      * Gets the list of user IDs for a given permission type.
@@ -212,8 +209,7 @@ export default class PermissionsService implements OnInit, OnPlayerJoined {
         for (const b of l) {
             if (b !== userId) {
                 n.push(b);
-            }
-            else {
+            } else {
                 removed = true;
             }
         }
@@ -230,8 +226,7 @@ export default class PermissionsService implements OnInit, OnPlayerJoined {
         const data = this.dataService.empireData;
         if (this.dataService.testing) {
             return 4;
-        }
-        else {
+        } else {
             const p = Players.GetPlayerByUserId(userId);
             if (p !== undefined && p.GetAttribute("Developer") === true) {
                 return 4;
@@ -241,21 +236,17 @@ export default class PermissionsService implements OnInit, OnPlayerJoined {
         if (restrictedTime !== undefined) {
             if (restrictedTime > tick()) {
                 return -1;
-            }
-            else {
+            } else {
                 data.restricted.delete(userId);
             }
         }
         if (data.owner === userId) {
             return 3;
-        }
-        else if (data.managers.includes(userId)) {
+        } else if (data.managers.includes(userId)) {
             return 2;
-        }
-        else if (data.trusted.includes(userId)) {
+        } else if (data.trusted.includes(userId)) {
             return 1;
-        }
-        else if (data.banned.includes(userId)) {
+        } else if (data.banned.includes(userId)) {
             return -2;
         }
         return 0;
@@ -311,7 +302,11 @@ export default class PermissionsService implements OnInit, OnPlayerJoined {
         }
         player.SetAttribute("Developer", player.GetRankInGroup(10940445) > 252);
         const permLevel = this.updatePermissionLevel(player.UserId);
-        this.chatHookService.sendPrivateMessage(player, `Your permission level is ${permLevel}. Type /help for a list of available commands.`, "color:138,255,138");
+        this.chatHookService.sendPrivateMessage(
+            player,
+            `Your permission level is ${permLevel}. Type /help for a list of available commands.`,
+            "color:138,255,138",
+        );
         let counter = 0;
         player.Chatted.Connect((message) => {
             if (this.dataService.empireData.globalChat === true && message.sub(1, 1) !== "/") {
@@ -321,7 +316,13 @@ export default class PermissionsService implements OnInit, OnPlayerJoined {
                     return;
                 }
                 task.spawn(() => {
-                    MessagingService.PublishAsync("GlobalChat", { player: player.UserId, message: TextService.FilterStringAsync(message, player.UserId).GetNonChatStringForBroadcastAsync() });
+                    MessagingService.PublishAsync("GlobalChat", {
+                        player: player.UserId,
+                        message: TextService.FilterStringAsync(
+                            message,
+                            player.UserId,
+                        ).GetNonChatStringForBroadcastAsync(),
+                    });
                 });
             }
         });
@@ -336,11 +337,9 @@ export default class PermissionsService implements OnInit, OnPlayerJoined {
             this.chatHookService.sendServerMessage(message.Data as string, "color:3,207,252");
         });
         MessagingService.SubscribeAsync("GlobalChat", (message) => {
-            if (this.dataService.empireData.globalChat !== true)
-                return;
-            const data = message.Data as { player: number, message: string; };
-            if (this.dataService.empireData.blocking.has(data.player))
-                return;
+            if (this.dataService.empireData.globalChat !== true) return;
+            const data = message.Data as { player: number; message: string };
+            if (this.dataService.empireData.blocking.has(data.player)) return;
             for (const player of Players.GetPlayers()) {
                 if (player.UserId === data.player) {
                     return;
@@ -353,22 +352,37 @@ export default class PermissionsService implements OnInit, OnPlayerJoined {
         Packets.promptDonation.fromClient((player, dp) => MarketplaceService.PromptProductPurchase(player, dp));
         for (const donationProduct of DONATION_PRODUCTS) {
             this.productService.setProductFunction(donationProduct.id, (_receipt, player) => {
-                this.donationService.setDonated(player, this.donationService.getDonated(player) + donationProduct.amount);
-                this.chatHookService.sendServerMessage(player.Name + " JUST DONATED " + donationProduct.amount + " ROBUX!");
+                this.donationService.setDonated(
+                    player,
+                    this.donationService.getDonated(player) + donationProduct.amount,
+                );
+                this.chatHookService.sendServerMessage(
+                    player.Name + " JUST DONATED " + donationProduct.amount + " ROBUX!",
+                );
                 if (donationProduct.amount >= 100) {
-                    MessagingService.PublishAsync("Donation", player.Name + " JUST DONATED " + donationProduct.amount + " ROBUX!!!");
+                    MessagingService.PublishAsync(
+                        "Donation",
+                        player.Name + " JUST DONATED " + donationProduct.amount + " ROBUX!!!",
+                    );
                 }
                 return Enum.ProductPurchaseDecision.PurchaseGranted;
             });
         }
         for (const [currency, bombProduct] of pairs(BOMBS_PRODUCTS)) {
             this.productService.setProductFunction(bombProduct, () => {
-                this.currencyService.increment(currency + " Bombs" as Currency, new OnoeNum(4));
+                this.currencyService.increment((currency + " Bombs") as Currency, new OnoeNum(4));
                 return Enum.ProductPurchaseDecision.PurchaseGranted;
             });
         }
         this.bombsService.bombActive.connect((endTime, bombType, player) => {
-            this.chatHookService.sendServerMessage(getNameFromUserId(player) + " just activated a " + bombType + " for " + convertToHHMMSS(endTime - os.time()) + "!");
+            this.chatHookService.sendServerMessage(
+                getNameFromUserId(player) +
+                    " just activated a " +
+                    bombType +
+                    " for " +
+                    convertToHHMMSS(endTime - os.time()) +
+                    "!",
+            );
         });
 
         Packets.permLevels.set(this.dataService.empireData.permLevels);
@@ -376,15 +390,16 @@ export default class PermissionsService implements OnInit, OnPlayerJoined {
             const placedItems = this.dataService.empireData.items.worldPlaced;
             let placed = 0;
             for (const [_, placedItem] of placedItems) {
-                if (placedItem.item === item.id)
-                    ++placed;
+                if (placedItem.item === item.id) ++placed;
             }
             const inInv = this.itemService.getItemAmount(item.id);
             const bought = this.itemService.getBoughtAmount(item.id);
             if (bought > inInv + placed) {
                 const given = bought - placed;
                 this.itemService.setItemAmount(item.id, inInv + given);
-                this.chatHookService.sendServerMessage("You have been given " + given + " " + item.name + "(s) in return for item cost changes.");
+                this.chatHookService.sendServerMessage(
+                    "You have been given " + given + " " + item.name + "(s) in return for item cost changes.",
+                );
                 print("gave " + given + " " + item.id);
             }
         };
@@ -396,9 +411,16 @@ export default class PermissionsService implements OnInit, OnPlayerJoined {
             while (task.wait(1)) {
                 const balance = this.currencyService.balance;
                 for (const setup of setups) {
-                    if (setup.alerted === false && setup.autoloads === true && balance.canAfford(setup.calculatedPrice)) {
+                    if (
+                        setup.alerted === false &&
+                        setup.autoloads === true &&
+                        balance.canAfford(setup.calculatedPrice)
+                    ) {
                         setup.alerted = true;
-                        this.chatHookService.sendServerMessage(`${setup.name} can now be purchased!`, "color:255,255,127");
+                        this.chatHookService.sendServerMessage(
+                            `${setup.name} can now be purchased!`,
+                            "color:255,255,127",
+                        );
                     }
                 }
             }
@@ -409,25 +431,29 @@ export default class PermissionsService implements OnInit, OnPlayerJoined {
         //
         // Logs
         //
-        this.itemService.itemsBought.connect((player, items) => this.log({
-            time: tick(),
-            type: "Purchase",
-            player: player?.UserId,
-            items: items.map((item) => item.id),
-        }));
-        this.bombsService.bombUsed.connect((player, bombType) => this.log({
-            time: tick(),
-            type: "Bomb",
-            player: player.UserId,
-            currency: bombType,
-            amount: 1
-        }));
+        this.itemService.itemsBought.connect((player, items) =>
+            this.log({
+                time: tick(),
+                type: "Purchase",
+                player: player?.UserId,
+                items: items.map((item) => item.id),
+            }),
+        );
+        this.bombsService.bombUsed.connect((player, bombType) =>
+            this.log({
+                time: tick(),
+                type: "Bomb",
+                player: player.UserId,
+                currency: bombType,
+                amount: 1,
+            }),
+        );
         this.itemService.itemsPlaced.connect((player, placedItems) => {
             const time = tick();
             let i = 0;
             for (const placedItem of placedItems) {
                 this.log({
-                    time: time + (++i / 1000), // not a hack i swear
+                    time: time + ++i / 1000, // not a hack i swear
                     type: "Place",
                     player: player.UserId,
                     item: placedItem.item,
@@ -442,7 +468,7 @@ export default class PermissionsService implements OnInit, OnPlayerJoined {
             let i = 0;
             for (const placedItem of placedItems) {
                 this.log({
-                    time: time + (++i / 1000),
+                    time: time + ++i / 1000,
                     type: "Unplace",
                     player: player.UserId,
                     item: placedItem.item,
@@ -452,42 +478,53 @@ export default class PermissionsService implements OnInit, OnPlayerJoined {
                 });
             }
         });
-        this.namedUpgradeService.upgradeBought.connect((player, upgrade, to) => this.log({
-            time: tick(),
-            type: "Upgrade",
-            player: player.UserId,
-            upgrade: upgrade,
-            amount: to,
-        }));
-        this.levelService.respected.connect((player) => this.log({
-            time: tick(),
-            type: "Respec",
-            player: player.UserId
-        }));
+        this.namedUpgradeService.upgradeBought.connect((player, upgrade, to) =>
+            this.log({
+                time: tick(),
+                type: "Upgrade",
+                player: player.UserId,
+                upgrade: upgrade,
+                amount: to,
+            }),
+        );
+        this.levelService.respected.connect((player) =>
+            this.log({
+                time: tick(),
+                type: "Respec",
+                player: player.UserId,
+            }),
+        );
         this.resetService.reset.connect((player, layer, amount) => {
             const resetLayer = RESET_LAYERS[layer];
             const color = CURRENCY_DETAILS[resetLayer.gives].color;
-            this.chatHookService.sendServerMessage(`${player.Name} performed a ${layer} for ${CurrencyBundle.getFormatted(resetLayer.gives, amount)}`, `color:${color.R * 255},${color.G * 255},${color.B * 255}`);
+            this.chatHookService.sendServerMessage(
+                `${player.Name} performed a ${layer} for ${CurrencyBundle.getFormatted(resetLayer.gives, amount)}`,
+                `color:${color.R * 255},${color.G * 255},${color.B * 255}`,
+            );
             this.log({
                 time: tick(),
                 type: "Reset",
                 layer: layer,
                 player: player.UserId,
                 infAmount: amount,
-                currency: resetLayer.gives
+                currency: resetLayer.gives,
             });
         });
-        this.setupService.setupSaved.connect((player, area) => this.log({
-            time: tick(),
-            type: "SetupSave",
-            player: player.UserId,
-            area: area,
-        }));
-        this.setupService.setupLoaded.connect((player, area) => this.log({
-            time: tick(),
-            type: "SetupLoad",
-            player: player.UserId,
-            area: area
-        }));
+        this.setupService.setupSaved.connect((player, area) =>
+            this.log({
+                time: tick(),
+                type: "SetupSave",
+                player: player.UserId,
+                area: area,
+            }),
+        );
+        this.setupService.setupLoaded.connect((player, area) =>
+            this.log({
+                time: tick(),
+                type: "SetupLoad",
+                player: player.UserId,
+                area: area,
+            }),
+        );
     }
 }

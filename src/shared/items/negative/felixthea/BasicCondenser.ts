@@ -6,7 +6,9 @@ import CurrencyBundle from "shared/currency/CurrencyBundle";
 
 export = new Item(script.Name)
     .setName("Basic Condenser")
-    .setDescription("The successor to the Recycling Dropper. Produces %val% droplets when %quota% of those values are processed through the attached furnace.")
+    .setDescription(
+        "The successor to the Recycling Dropper. Produces %val% droplets when %quota% of those values are processed through the attached furnace.",
+    )
     .setDifficulty(Difficulty.FelixTheA)
     .setPrice(new CurrencyBundle().set("Funds", 256e12), 1)
     .addPlaceableArea("BarrenIslands")

@@ -7,7 +7,9 @@ import CompactReactor from "shared/items/negative/reversedperipherality/CompactR
 
 export = new Item(script.Name)
     .setName("Normal Reactor")
-    .setDescription("This reactor has two entrances, each giving a %mul% boost. I wish you the best of luck in configuring this.")
+    .setDescription(
+        "This reactor has two entrances, each giving a %mul% boost. I wish you the best of luck in configuring this.",
+    )
     .setDifficulty(Difficulty.Millisecondless)
     .setPrice(new CurrencyBundle().set("Funds", 454e21), 1)
     .setRequiredItemAmount(CompactReactor, 1)

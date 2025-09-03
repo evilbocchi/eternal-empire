@@ -5,7 +5,7 @@ declare global {
     interface ItemTraits {
         HarvestingTool: HarvestingTool;
     }
-    type ToolType = typeof TOOL_TYPES[number];
+    type ToolType = (typeof TOOL_TYPES)[number];
 }
 
 const TOOL_TYPES = ["Sword", "Pickaxe", "Axe", "Scythe", "Rod", "None"] as const;

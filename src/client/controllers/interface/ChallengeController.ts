@@ -22,10 +22,10 @@ import { TRACKED_QUEST_WINDOW } from "./QuestsController";
 
 declare global {
     type ChallengeGui = SurfaceGui & {
-        ChallengeOptions: Frame,
+        ChallengeOptions: Frame;
         CurrentChallenge: Frame & {
-            LeaveButton: TextButton,
-            RequirementLabel: TextLabel,
+            LeaveButton: TextButton;
+            RequirementLabel: TextLabel;
             TitleLabel: TextLabel & {
                 UIGradient: UIGradient;
             };
@@ -36,7 +36,7 @@ declare global {
 export const CHALLENGE_TASK_WINDOW = TRACKED_QUEST_WINDOW.WaitForChild("ChallengeTaskWindow") as Frame & {
     TitleLabel: TextLabel & {
         UIGradient: UIGradient;
-    },
+    };
     RequirementLabel: TextLabel;
 };
 
@@ -56,8 +56,7 @@ export default class ChallengeController implements OnPhysics, OnInit {
     /** Debounce timer for leave action. */
     debounce = 0;
 
-    constructor(private questsController: QuestsController) {
-    }
+    constructor(private questsController: QuestsController) {}
 
     /**
      * Reloads and sets up challenge option buttons and leave button in the challenge GUI.
@@ -65,22 +64,19 @@ export default class ChallengeController implements OnPhysics, OnInit {
      */
     reload(challengeGui: ChallengeGui) {
         challengeGui.ChallengeOptions.GetChildren().forEach((challengeOption) => {
-            if (challengeOption.GetAttribute("loaded") === true || challengeOption.IsA("UIListLayout"))
-                return;
+            if (challengeOption.GetAttribute("loaded") === true || challengeOption.IsA("UIListLayout")) return;
 
             const startButton = (challengeOption as typeof ASSETS.ChallengeOption).StartButton;
             startButton.Activated.Connect(() => {
                 playSound("MenuClick.mp3");
                 const t = tick();
-                if (t - (startButton.GetAttribute("LastClick") as number ?? 0) < 3) {
+                if (t - ((startButton.GetAttribute("LastClick") as number) ?? 0) < 3) {
                     playSound("MagicCast.mp3");
                     Packets.startChallenge.toServer(challengeOption.Name);
-                }
-                else {
+                } else {
                     startButton.Label.Text = this.confirmationLabel;
                 }
                 startButton.SetAttribute("LastClick", t);
-
             });
 
             const connection = RunService.Heartbeat.Connect(() => {
@@ -89,9 +85,11 @@ export default class ChallengeController implements OnPhysics, OnInit {
                     return;
                 }
                 const label = startButton.FindFirstChild("Label") as typeof startButton.Label;
-                if (label === undefined)
-                    return;
-                if (label.Text === this.confirmationLabel && tick() - (startButton.GetAttribute("LastClick") as number ?? 0) > 3) {
+                if (label === undefined) return;
+                if (
+                    label.Text === this.confirmationLabel &&
+                    tick() - ((startButton.GetAttribute("LastClick") as number) ?? 0) > 3
+                ) {
                     label.Text = "Start";
                 }
             });
@@ -103,8 +101,7 @@ export default class ChallengeController implements OnPhysics, OnInit {
             leaveButton.SetAttribute("Connected", true);
             leaveButton.Activated.Connect(() => {
                 const t = tick();
-                if (t - this.debounce < 1)
-                    return;
+                if (t - this.debounce < 1) return;
                 this.debounce = t;
 
                 playSound("MagicCast.mp3");
@@ -120,8 +117,7 @@ export default class ChallengeController implements OnPhysics, OnInit {
         const gui = this.challengeGui;
         if (gui !== undefined) {
             this.reload(gui);
-        }
-        else {
+        } else {
             this.challengeGui = getChallengeGui();
         }
     }
@@ -143,7 +139,10 @@ export default class ChallengeController implements OnPhysics, OnInit {
             CHALLENGE_TASK_WINDOW.RequirementLabel.Text = challengeInfo.description;
         });
         Packets.challengeCompleted.fromServer((challenge, rewardLabel) => {
-            this.questsController.showCompletion(TRACKED_QUEST_WINDOW.ChallengeCompletion, `${challenge} rewards:\n${rewardLabel}`);
+            this.questsController.showCompletion(
+                TRACKED_QUEST_WINDOW.ChallengeCompletion,
+                `${challenge} rewards:\n${rewardLabel}`,
+            );
         });
     }
 }

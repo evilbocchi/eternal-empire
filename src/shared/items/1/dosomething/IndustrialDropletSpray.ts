@@ -8,7 +8,9 @@ import EffervescentDropletSpray from "shared/items/negative/exist/EffervescentDr
 
 export = new Item(script.Name)
     .setName("Industrial Droplet Spray")
-    .setDescription("The sequel to the Effervescent Droplet Spray, this spray provides the same boost but has a much higher cap.")
+    .setDescription(
+        "The sequel to the Effervescent Droplet Spray, this spray provides the same boost but has a much higher cap.",
+    )
     .setDifficulty(Difficulty.DoSomething)
     .setPrice(new CurrencyBundle().set("Purifier Clicks", 2500), 1)
     .addPlaceableArea("BarrenIslands", "SlamoVillage", "SkyPavilion")

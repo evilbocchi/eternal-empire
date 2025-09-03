@@ -30,7 +30,9 @@ import GoldDiggersHaven from "shared/items/negative/skip/GoldDiggersHaven";
 export = new Item(script.Name)
     .setName("Magical Crafting Table")
     .setDifficulty(Difficulty.Millisecondless)
-    .setDescription("A variant of the Crafting Table with more latent power, allowing you to craft more powerful items.")
+    .setDescription(
+        "A variant of the Crafting Table with more latent power, allowing you to craft more powerful items.",
+    )
     .setPrice(new CurrencyBundle().set("Funds", 1e60), 1)
     .placeableEverywhere()
     .persists()

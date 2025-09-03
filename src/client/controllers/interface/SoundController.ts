@@ -27,7 +27,6 @@ import Packets from "shared/Packets";
  */
 @Controller()
 export default class SoundController implements OnStart {
-
     /** The default start music sound instance. */
     startMusic = ASSETS.WaitForChild("JJT Money Empire!") as Sound;
     /** Whether music is enabled. */
@@ -63,8 +62,7 @@ export default class SoundController implements OnStart {
      * @returns The sound instance.
      */
     fadeIn(sound: Sound) {
-        if (sound.SoundGroup === undefined)
-            sound.SoundGroup = this.musicGroup;
+        if (sound.SoundGroup === undefined) sound.SoundGroup = this.musicGroup;
         sound.Volume = 0;
         sound.RollOffMinDistance = math.huge;
         sound.RollOffMaxDistance = math.huge;
@@ -72,7 +70,9 @@ export default class SoundController implements OnStart {
         if (!sound.IsPlaying) {
             sound.Play();
         }
-        TweenService.Create(sound, new TweenInfo(1), { Volume: sound.GetAttribute("OriginalVolume") as number ?? 0.5 }).Play();
+        TweenService.Create(sound, new TweenInfo(1), {
+            Volume: (sound.GetAttribute("OriginalVolume") as number) ?? 0.5,
+        }).Play();
         this.playing = sound;
         //this.currentlyPlayingLabel.Text = "Now playing: " + sound.Name;
         return sound;
@@ -87,25 +87,21 @@ export default class SoundController implements OnStart {
         let area: AreaId | undefined;
         if (START_WINDOW.Parent === PLAYER_GUI) {
             retrieved = this.startMusic;
-        }
-        else {
+        } else {
             area = LOCAL_PLAYER.GetAttribute("Area") as AreaId;
         }
 
-        if (retrieved === this.playing && retrieved !== undefined)
-            return;
+        if (retrieved === this.playing && retrieved !== undefined) return;
 
         if (this.playing !== undefined) {
-            if (force !== true && (this.inChallenge || this.playing.GetAttribute("Area") === area))
-                return;
+            if (force !== true && (this.inChallenge || this.playing.GetAttribute("Area") === area)) return;
 
             this.fadeOut(this.playing);
             this.playing = undefined;
         }
 
         if (retrieved === undefined) {
-            if (area === undefined || ReplicatedStorage.GetAttribute("Intro") === true)
-                return;
+            if (area === undefined || ReplicatedStorage.GetAttribute("Intro") === true) return;
             retrieved = this.getRandomMusic(area);
         }
 
@@ -116,8 +112,7 @@ export default class SoundController implements OnStart {
 
         const music = this.fadeIn(retrieved);
         music.SetAttribute("Area", area);
-        if (this.connection !== undefined)
-            this.connection.Disconnect();
+        if (this.connection !== undefined) this.connection.Disconnect();
         this.connection = music.Ended.Once((soundId) => {
             if (this.playing?.SoundId === soundId) {
                 this.playing = undefined;
@@ -134,11 +129,11 @@ export default class SoundController implements OnStart {
      */
     getRandomMusic(id: AreaId): Sound | undefined {
         const areaMusicFolder = MUSIC_GROUP.FindFirstChild(id);
-        if (areaMusicFolder === undefined)
-            return undefined;
-        let folder = this.inChallenge ? this.challengePlaylist : areaMusicFolder.FindFirstChild(this.isNight() ? "Night" : "Day");
-        if (folder === undefined)
-            folder = areaMusicFolder;
+        if (areaMusicFolder === undefined) return undefined;
+        let folder = this.inChallenge
+            ? this.challengePlaylist
+            : areaMusicFolder.FindFirstChild(this.isNight() ? "Night" : "Day");
+        if (folder === undefined) folder = areaMusicFolder;
         const current = folder.GetAttribute("Current");
         const sounds = folder.GetChildren();
         const s = sounds.size() - 1;
@@ -174,8 +169,7 @@ export default class SoundController implements OnStart {
         LOCAL_PLAYER.GetAttributeChangedSignal("Area").Connect(() => this.refreshMusic());
         Packets.currentChallenge.observe((challenge) => {
             this.inChallenge = challenge.name !== "";
-            if (ready === true)
-                this.refreshMusic(true);
+            if (ready === true) this.refreshMusic(true);
         });
 
         const oceanWaves = getSound("OceanWaves.mp3");
@@ -183,7 +177,7 @@ export default class SoundController implements OnStart {
         oceanWaves.Play();
         Workspace.CurrentCamera!.GetPropertyChangedSignal("CFrame").Connect(() => {
             const y = Workspace.CurrentCamera!.CFrame.Y;
-            oceanWaves.Volume = (1 - (math.abs(y) / 100)) / 14;
+            oceanWaves.Volume = (1 - math.abs(y) / 100) / 14;
         });
 
         // debug

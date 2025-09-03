@@ -9,10 +9,17 @@ export = new Command(script.Name)
             const success1 = CommandAPI.Permissions.remove("trusted", userId);
             const success2 = CommandAPI.Permissions.remove("managers", userId);
             if (success1 || success2) {
-                CommandAPI.ChatHook.sendPrivateMessage(o, `Untrusted ${CommandAPI.Command.fp(p, userId)}`, "color:138,255,138");
-            }
-            else {
-                CommandAPI.ChatHook.sendPrivateMessage(o, `${CommandAPI.Command.fp(p, userId)} is not trusted/a manager`, "color:255,43,43");
+                CommandAPI.ChatHook.sendPrivateMessage(
+                    o,
+                    `Untrusted ${CommandAPI.Command.fp(p, userId)}`,
+                    "color:138,255,138",
+                );
+            } else {
+                CommandAPI.ChatHook.sendPrivateMessage(
+                    o,
+                    `${CommandAPI.Command.fp(p, userId)} is not trusted/a manager`,
+                    "color:255,43,43",
+                );
             }
             CommandAPI.Permissions.updatePermissionLevel(userId);
         }

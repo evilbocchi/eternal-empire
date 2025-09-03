@@ -7,7 +7,9 @@ import Damager from "shared/item/traits/upgrader/Damager";
 
 export = new Item(script.Name)
     .setName("Injuring Upgrader")
-    .setDescription("I'm telling you, that smile is deceiving. It is out to kill you. Does %hp_add% to droplets, but gives a %mul% boost.")
+    .setDescription(
+        "I'm telling you, that smile is deceiving. It is out to kill you. Does %hp_add% to droplets, but gives a %mul% boost.",
+    )
     .setDifficulty(Difficulty.Happylike)
     .setPrice(new CurrencyBundle().set("Funds", 2e33), 1)
     .setPrice(new CurrencyBundle().set("Funds", 5e33), 2)

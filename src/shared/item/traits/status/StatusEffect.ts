@@ -3,17 +3,13 @@ import Item from "shared/item/Item";
 import ItemTrait from "shared/item/traits/ItemTrait";
 
 declare global {
-    interface StatusEffectAssets {
-
-    }
+    interface StatusEffectAssets {}
 
     interface Assets {
         StatusEffect: StatusEffectAssets;
     }
 
-    interface StatusEffectInfo {
-
-    }
+    interface StatusEffectInfo {}
 
     interface InstanceInfo {
         StatusEffects?: Map<StatusEffect, StatusEffectInfo>;
@@ -24,7 +20,6 @@ declare global {
  * A status effect applies a special effect to a droplet.
  */
 export default abstract class StatusEffect extends ItemTrait {
-
     active = true;
 
     static load(model: Model, statusEffect: StatusEffect) {

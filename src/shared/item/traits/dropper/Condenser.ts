@@ -30,7 +30,6 @@ declare global {
  * A condenser is an item that 'condenses' multiple droplets into a single droplet, usually of higher value.
  */
 export default class Condenser extends ItemTrait {
-
     droplets = new Array<Droplet>();
     totalValue = new CurrencyBundle();
 
@@ -40,8 +39,7 @@ export default class Condenser extends ItemTrait {
         const item = condenser.item;
         const dropper = item.trait(Dropper);
         const areaId = Server.Item.getPlacedItem(model.Name)?.area;
-        if (areaId === undefined)
-            return;
+        if (areaId === undefined) return;
         const area = AREAS[areaId as AreaId];
         const dropletLimit = area.dropletLimit;
         const dropletCountPerArea = Server.Area.dropletCountPerArea;
@@ -50,15 +48,17 @@ export default class Condenser extends ItemTrait {
         const maxCosts = new Map<Currency, OnoeNum>();
         for (const droplet of condenser.droplets) {
             const value = droplet.value;
-            if (value === undefined)
-                continue;
+            if (value === undefined) continue;
             const price = value.mul(condenser.quota);
             pricePerDroplet.set(droplet, price);
             for (const [currency, amount] of price.amountPerCurrency) {
                 maxCosts.set(currency, amount.mul(10));
             }
             const drop = model.WaitForChild("Drop") as BasePart;
-            instantiatorsPerDroplet.set(droplet, Dropper.wrapInstantiator(droplet.getInstantiator(model, drop), dropper, model, drop));
+            instantiatorsPerDroplet.set(
+                droplet,
+                Dropper.wrapInstantiator(droplet.getInstantiator(model, drop), dropper, model, drop),
+            );
         }
         const surfaceGui = model.WaitForChild("GuiPart").FindFirstChildOfClass("SurfaceGui");
         const lava = model.WaitForChild("Lava");
@@ -77,15 +77,13 @@ export default class Condenser extends ItemTrait {
                 let dontResetUpgrades = false;
                 for (const [currency, amount] of pairs(price.amountPerCurrency)) {
                     const currentCost = current.get(currency);
-                    if (currentCost === undefined)
-                        return;
+                    if (currentCost === undefined) return;
 
                     const percentage = currentCost.div(amount);
                     if (percentage.lessThan(1)) {
                         return;
                     }
-                    if (percentage.moreThan(1.15))
-                        dontResetUpgrades = true;
+                    if (percentage.moreThan(1.15)) dontResetUpgrades = true;
                 }
 
                 current = current.sub(price);
@@ -99,8 +97,7 @@ export default class Condenser extends ItemTrait {
                         pointer.EmptyUpgrade = true;
                         replacingUpgrades.set(id, pointer);
                     }
-                    if (!dontResetUpgrades)
-                        upgrades.clear();
+                    if (!dontResetUpgrades) upgrades.clear();
                     instanceInfo.Upgrades = replacingUpgrades;
                     instanceInfo.Condensed = true;
                 }
@@ -134,14 +131,13 @@ export default class Condenser extends ItemTrait {
             const lostValue = new Map<Currency, OnoeNum>();
             for (const [currency, amount] of raw.amountPerCurrency) {
                 const prev = currentMap.get(currency);
-                let newCost = prev === undefined ? amount : prev.add(amount);
+                const newCost = prev === undefined ? amount : prev.add(amount);
                 const limit = maxCosts.get(currency);
                 if (limit === undefined) {
                     if (ZERO.lessThan(amount)) {
                         lostValue.set(currency, amount);
                     }
-                }
-                else {
+                } else {
                     currentMap.set(currency, OnoeNum.min(newCost, limit));
                 }
             }
@@ -160,7 +156,6 @@ export default class Condenser extends ItemTrait {
 
             check();
             update();
-
         });
 
         item.repeat(model, () => check(), 0.4);
@@ -168,7 +163,7 @@ export default class Condenser extends ItemTrait {
 
     /**
      * Creates a new condenser.
-     * 
+     *
      * @param item The item to create the condenser from.
      */
     constructor(item: Item) {
@@ -183,7 +178,7 @@ export default class Condenser extends ItemTrait {
 
     /**
      * Sets the percentage of the original value required to produce one of the droplet.
-     * 
+     *
      * @param percentage The percentage of the original value required to produce one of the droplet.
      * @returns This condenser.
      */

@@ -31,12 +31,12 @@ import Packets from "shared/Packets";
 
 declare global {
     type ToolOption = ItemSlot & {
-        UIStroke: UIStroke,
+        UIStroke: UIStroke;
     };
 
     interface Assets {
         HarvestableGui: BillboardGui & {
-            HealthBar: Bar,
+            HealthBar: Bar;
             NameLabel: TextLabel;
         };
 
@@ -56,7 +56,6 @@ export const BACKPACK_WINDOW = INTERFACE.WaitForChild("BackpackWindow") as Frame
  */
 @Controller()
 export default class ToolController implements OnInit, OnStart, OnCharacterAdded {
-
     swingAnimation?: AnimationTrack;
     harvestables = new Map<Instance, typeof ASSETS.HarvestableGui>();
     lastUse = 0;
@@ -81,9 +80,11 @@ export default class ToolController implements OnInit, OnStart, OnCharacterAdded
         return params;
     })();
 
-    constructor(private tooltipController: TooltipController, private areaController: AreaController, private buildController: BuildController) {
-
-    }
+    constructor(
+        private tooltipController: TooltipController,
+        private areaController: AreaController,
+        private buildController: BuildController,
+    ) {}
 
     /**
      * Checks for a harvestable object in range of the tool.
@@ -91,18 +92,18 @@ export default class ToolController implements OnInit, OnStart, OnCharacterAdded
      * @returns The harvestable model or part, if found.
      */
     checkHarvestable(tool: Model) {
-        const blade = ((tool.FindFirstChild("Blade") as BasePart | undefined) ?? tool.PrimaryPart);
-        const inside = Workspace.GetPartBoundsInBox(blade!.CFrame, blade!.Size.add(new Vector3(1, 5, 1)), this.OVERLAP_PARAMS);
+        const blade = (tool.FindFirstChild("Blade") as BasePart | undefined) ?? tool.PrimaryPart;
+        const inside = Workspace.GetPartBoundsInBox(
+            blade!.CFrame,
+            blade!.Size.add(new Vector3(1, 5, 1)),
+            this.OVERLAP_PARAMS,
+        );
         for (const touching of inside) {
             const tParent = touching.Parent;
-            if (tParent === undefined)
-                continue;
+            if (tParent === undefined) continue;
             if (tParent.IsA("Model")) {
-                if (tParent.Parent?.Name === "Harvestable")
-                    return tParent;
-            }
-            else if (tParent.Name === "Harvestable")
-                return touching;
+                if (tParent.Parent?.Name === "Harvestable") return tParent;
+            } else if (tParent.Name === "Harvestable") return touching;
         }
     }
 
@@ -111,19 +112,22 @@ export default class ToolController implements OnInit, OnStart, OnCharacterAdded
      * @param model The harvestable model instance.
      */
     loadHarvestable(model: Instance) {
-        if (!model.IsA("PVInstance"))
-            return;
+        if (!model.IsA("PVInstance")) return;
         const gui = ASSETS.HarvestableGui.Clone();
         const harvestable = Harvestable[model.Name as HarvestableId];
-        if (harvestable === undefined)
-            return;
+        if (harvestable === undefined) return;
         const item = Items.getItem(model.Name);
         gui.NameLabel.Text = item?.name ?? harvestable.name ?? model.Name;
         let isNew = true;
         let prevHealth = 0;
         const updateHealth = () => {
             const currentHealth = model.GetAttribute("Health") as number;
-            this.areaController.refreshBar(gui.HealthBar, new OnoeNum(model.GetAttribute("Health") as number), new OnoeNum(harvestable.health), false);
+            this.areaController.refreshBar(
+                gui.HealthBar,
+                new OnoeNum(model.GetAttribute("Health") as number),
+                new OnoeNum(harvestable.health),
+                false,
+            );
             const drop = currentHealth - prevHealth;
             prevHealth = currentHealth;
 
@@ -133,8 +137,7 @@ export default class ToolController implements OnInit, OnStart, OnCharacterAdded
             }
 
             const currentTool = LOCAL_PLAYER.Character?.FindFirstChildOfClass("Tool");
-            if (currentTool === undefined)
-                return;
+            if (currentTool === undefined) return;
 
             const highlight = new Instance("Highlight");
             TweenService.Create(highlight, this.tweenInfo, { FillTransparency: 1, OutlineTransparency: 1 }).Play();
@@ -146,12 +149,10 @@ export default class ToolController implements OnInit, OnStart, OnCharacterAdded
 
             if (drop < 0) {
                 const item = Items.getItem(currentTool.Name);
-                if (item === undefined)
-                    return;
+                if (item === undefined) return;
 
                 const harvestingTool = item.findTrait("HarvestingTool");
-                if (harvestingTool === undefined)
-                    return;
+                if (harvestingTool === undefined) return;
 
                 const multi = -drop / harvestingTool.damage!;
                 effect.Brightness = multi;
@@ -186,33 +187,30 @@ export default class ToolController implements OnInit, OnStart, OnCharacterAdded
     onInit() {
         StarterGui.SetCoreGuiEnabled("Backpack", false);
         UserInputService.InputBegan.Connect((input, gameProcessed) => {
-            if (gameProcessed === true)
-                return;
+            if (gameProcessed === true) return;
 
-            if (input.UserInputType === Enum.UserInputType.MouseButton1 || input.UserInputType === Enum.UserInputType.Touch || input.KeyCode === Enum.KeyCode.ButtonL1) {
+            if (
+                input.UserInputType === Enum.UserInputType.MouseButton1 ||
+                input.UserInputType === Enum.UserInputType.Touch ||
+                input.KeyCode === Enum.KeyCode.ButtonL1
+            ) {
                 const currentTool = LOCAL_PLAYER.Character?.FindFirstChildOfClass("Tool");
-                if (currentTool === undefined)
-                    return;
+                if (currentTool === undefined) return;
 
                 const item = Items.getItem(currentTool.Name);
-                if (item === undefined)
-                    return;
+                if (item === undefined) return;
                 const harvestingTool = item.findTrait("HarvestingTool");
-                if (harvestingTool === undefined || harvestingTool.toolType === "None")
-                    return;
+                if (harvestingTool === undefined || harvestingTool.toolType === "None") return;
 
                 const t = tick();
-                if (this.lastUse + 8 / (harvestingTool.speed ?? 1) > t)
-                    return;
+                if (this.lastUse + 8 / (harvestingTool.speed ?? 1) > t) return;
                 this.lastUse = t;
                 const anim = this.swingAnimation;
-                if (anim === undefined)
-                    return;
+                if (anim === undefined) return;
                 anim.Stopped.Once(() => Packets.useTool.toServer(this.checkHarvestable(currentTool) ?? Workspace));
                 anim.Play();
                 playSound("ToolSwing.mp3");
-            }
-            else {
+            } else {
                 let index = -1;
                 for (const [i, v] of this.KEY_CODES) {
                     if (input.KeyCode === v) {
@@ -230,8 +228,7 @@ export default class ToolController implements OnInit, OnStart, OnCharacterAdded
                 });
 
                 const toolEntry = sortedTools[index - 1]; // index is 1-based
-                if (toolEntry === undefined)
-                    return;
+                if (toolEntry === undefined) return;
 
                 const [tool, _option] = toolEntry;
 
@@ -239,22 +236,17 @@ export default class ToolController implements OnInit, OnStart, OnCharacterAdded
                 playSound("Equip.mp3");
                 if (tool.Parent === backpack) {
                     const currentTool = LOCAL_PLAYER.Character?.FindFirstChildOfClass("Tool");
-                    if (currentTool !== undefined)
-                        currentTool.Parent = backpack;
+                    if (currentTool !== undefined) currentTool.Parent = backpack;
                     tool.Parent = LOCAL_PLAYER.Character;
-                }
-                else {
+                } else {
                     tool.Parent = backpack;
                 }
             }
-
-
         });
 
         for (const [_id, area] of pairs(AREAS)) {
             const folder = area.areaFolder.FindFirstChild("Harvestable");
-            if (folder === undefined)
-                continue;
+            if (folder === undefined) continue;
             const harvestables = folder.GetChildren();
             folder.ChildAdded.Connect((model) => this.loadHarvestable(model));
             for (const model of harvestables) {
@@ -282,8 +274,7 @@ export default class ToolController implements OnInit, OnStart, OnCharacterAdded
             const humanoid = character.WaitForChild("Humanoid") as Humanoid;
             this.swingAnimation = loadAnimation(humanoid, 16920778613);
             const backpack = LOCAL_PLAYER.WaitForChild("Backpack");
-            for (const tool of backpack.GetChildren())
-                this.onToolAdded(tool);
+            for (const tool of backpack.GetChildren()) this.onToolAdded(tool);
             backpack.ChildAdded.Connect((tool) => {
                 this.onToolAdded(tool);
             });
@@ -295,15 +286,13 @@ export default class ToolController implements OnInit, OnStart, OnCharacterAdded
 
             character.ChildAdded.Connect((child) => {
                 if (child.IsA("Tool")) {
-                    for (const [_, gui] of this.harvestables)
-                        gui.Enabled = true;
+                    for (const [_, gui] of this.harvestables) gui.Enabled = true;
                 }
             });
 
             character.ChildRemoved.Connect((child) => {
                 if (child.IsA("Tool")) {
-                    for (const [_, gui] of this.harvestables)
-                        gui.Enabled = false;
+                    for (const [_, gui] of this.harvestables) gui.Enabled = false;
                 }
             });
         }
@@ -314,14 +303,11 @@ export default class ToolController implements OnInit, OnStart, OnCharacterAdded
      * @param tool The tool instance to add.
      */
     onToolAdded(tool: Instance) {
-        if (!tool.IsA("Tool") || this.tools.has(tool) === true)
-            return;
+        if (!tool.IsA("Tool") || this.tools.has(tool) === true) return;
         const item = Items.getItem(tool.Name);
-        if (item === undefined)
-            return;
+        if (item === undefined) return;
         const harvestingTool = item.findTrait("HarvestingTool");
-        if (harvestingTool === undefined)
-            return;
+        if (harvestingTool === undefined) return;
 
         // Create a minimal tool option for data tracking
         const toolOption = ASSETS.ToolOption.Clone();

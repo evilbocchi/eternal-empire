@@ -10,7 +10,6 @@ declare global {
 }
 
 export default class UnleashedConveyor extends ItemTrait {
-
     static load(model: Model, _conveyor: UnleashedConveyor) {
         const instanceInfo = getAllInstanceInfo(model);
         instanceInfo.BoostAdded?.add(() => instanceInfo.UpdateSpeed?.());

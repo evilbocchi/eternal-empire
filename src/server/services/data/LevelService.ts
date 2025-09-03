@@ -3,20 +3,20 @@
 
 /**
  * @fileoverview Player level and experience management system.
- * 
+ *
  * This service handles:
  * - Player level progression and XP tracking
  * - Level point allocation and management
  * - Upgrade purchases using level points
  * - Level-based unlocks and progression
  * - Experience overflow handling for level-ups
- * 
+ *
  * The leveling system works as follows:
  * - Players gain XP from various activities
  * - When XP reaches the threshold, players level up
  * - Every 4 levels, players gain 1 level point
  * - Level points can be spent on permanent upgrades
- * 
+ *
  * @since 1.0.0
  */
 
@@ -30,13 +30,12 @@ import Packets from "shared/Packets";
 
 /**
  * Service for managing player levels, experience points, and level point allocation.
- * 
+ *
  * Handles the complete leveling progression system including XP gain, level-ups,
  * level point earning, and spending those points on permanent upgrades.
  */
 @Service()
 export default class LevelService implements OnInit {
-
     /**
      * Signal fired when the player's level changes.
      * @param level The new level that was reached.
@@ -51,20 +50,21 @@ export default class LevelService implements OnInit {
 
     /**
      * Initializes the LevelService with required dependencies.
-     * 
+     *
      * @param dataService Service providing persistent empire data.
      * @param namedUpgradeService Service for managing upgrade purchases and amounts.
      */
-    constructor(private dataService: DataService, private namedUpgradeService: NamedUpgradeService) {
-
-    }
+    constructor(
+        private dataService: DataService,
+        private namedUpgradeService: NamedUpgradeService,
+    ) {}
 
     // Level Management Methods
 
     /**
      * Sets the player's level and updates clients.
      * Also recalculates and updates remaining level points.
-     * 
+     *
      * @param level The new level to set.
      */
     setLevel(level: number) {
@@ -77,7 +77,7 @@ export default class LevelService implements OnInit {
 
     /**
      * Gets the current experience points.
-     * 
+     *
      * @returns The current XP amount.
      */
     getXp() {
@@ -87,7 +87,7 @@ export default class LevelService implements OnInit {
     /**
      * Sets the player's experience points and handles level-ups.
      * If XP exceeds the level threshold, automatically levels up and carries over excess XP.
-     * 
+     *
      * @param xp The new XP amount to set.
      */
     setXp(xp: number) {
@@ -98,14 +98,12 @@ export default class LevelService implements OnInit {
         if (xp >= maxXp) {
             this.setLevel(level + 1);
             this.setXp(xp - maxXp); // Recursively handle overflow XP
-        }
-        else {
+        } else {
             // Set XP without leveling up
             this.dataService.empireData.xp = xp;
             Packets.xp.set(xp);
         }
     }
-
 
     // Service Lifecycle
 

@@ -8,6 +8,8 @@ export = new Command(script.Name)
         const newSetting = !empireData.particlesEnabled;
         empireData.particlesEnabled = newSetting;
         CommandAPI.Item.refreshEffects();
-        CommandAPI.ChatHook.sendServerMessage(`Particles for newly placed items have been ${newSetting === true ? "enabled" : "disabled"}`);
+        CommandAPI.ChatHook.sendServerMessage(
+            `Particles for newly placed items have been ${newSetting === true ? "enabled" : "disabled"}`,
+        );
     })
     .setPermissionLevel(2);

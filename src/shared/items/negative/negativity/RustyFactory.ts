@@ -6,8 +6,9 @@ import Dropper from "shared/item/traits/dropper/Dropper";
 
 export = new Item(script.Name)
     .setName("Rusty Factory")
-    .setDescription(`A Factory that has gone through the various stages of wear and tear.
-Produces %val% droplets per second.`
+    .setDescription(
+        `A Factory that has gone through the various stages of wear and tear.
+Produces %val% droplets per second.`,
     )
     .setDifficulty(Difficulty.Negativity)
     .setCreator("CoPKaDT")

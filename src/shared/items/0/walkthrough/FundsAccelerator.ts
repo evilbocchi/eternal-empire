@@ -20,7 +20,10 @@ export = new Item(script.Name)
     .setFormulaX("funds")
 
     .trait(Upgrader)
-    .applyFormula((v, item) => item.setMul(mul.set("Funds", v)), () => Server.Currency.get("Funds"))
+    .applyFormula(
+        (v, item) => item.setMul(mul.set("Funds", v)),
+        () => Server.Currency.get("Funds"),
+    )
 
     .trait(Conveyor)
     .setSpeed(4)

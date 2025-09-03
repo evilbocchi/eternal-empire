@@ -3,7 +3,7 @@
 
 /**
  * @fileoverview Core item management system for the game.
- * 
+ *
  * This service handles:
  * - Item inventory management (buying, placing, unplacing)
  * - Item model creation and positioning in the world
@@ -11,10 +11,10 @@
  * - Purchase transactions with currency integration
  * - Item permissions and restrictions
  * - World synchronization between server and clients
- * 
+ *
  * The service manages both the logical item data (inventory, placed items) and
  * the physical 3D models that represent items in the game world.
- * 
+ *
  * @since 1.0.0
  */
 
@@ -50,13 +50,12 @@ const queue = new Array<() => void>();
 
 /**
  * Core service for managing items, inventory, and item placement in the game world.
- * 
+ *
  * Handles the complete item lifecycle from purchase to placement to removal,
  * including 3D model management and world synchronization.
  */
 @Service()
 export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
-
     private hasInventoryChanged = false;
     private hasUniqueChanged = false;
     private hasBoughtChanged = false;
@@ -105,29 +104,26 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
      */
     isRendering = (() => {
         const isRendering = this.dataService.empireId === "RENDER";
-        if (isRendering === true)
-            print("Rendering set to true. Will not spawn item models.");
+        if (isRendering === true) print("Rendering set to true. Will not spawn item models.");
         return isRendering;
     })();
 
     /**
      * Initializes the ItemService with required dependencies.
-     * 
+     *
      * @param dataService Service providing persistent empire and player data.
      * @param currencyService Service handling currency transactions for purchases.
      */
     constructor(
         private dataService: DataService,
-        private currencyService: CurrencyService
-    ) {
-
-    }
+        private currencyService: CurrencyService,
+    ) {}
 
     // Data Management Methods
 
     /**
      * Gets the current amount of an item in inventory.
-     * 
+     *
      * @param itemId The ID of the item to check.
      * @returns The amount of the item in inventory, or 0 if not found.
      */
@@ -137,7 +133,7 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
 
     /**
      * Sets the amount of a specific item in inventory.
-     * 
+     *
      * @param itemId The ID of the item to set.
      * @param amount The new amount to set.
      */
@@ -146,10 +142,9 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
         this.hasInventoryChanged = true;
     }
 
-
     /**
      * Gets the number of times an item has been bought.
-     * 
+     *
      * @param itemId The ID of the item to check.
      * @returns The number of times the item has been bought, or 0 if never bought.
      */
@@ -159,7 +154,7 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
 
     /**
      * Sets the number of times an item has been bought.
-     * 
+     *
      * @param itemId The ID of the item to set.
      * @param amount The new bought amount.
      */
@@ -170,7 +165,7 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
 
     /**
      * Updates the placed items collection and syncs to clients.
-     * 
+     *
      * @param placedItems The new placed items map to set.
      */
     setPlacedItems(placedItems: Map<string, PlacedItem>) {
@@ -180,7 +175,7 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
 
     /**
      * Creates a new unique item instance from the given base item.
-     * 
+     *
      * @param baseItemId The ID of the base item to create a unique instance from.
      * @param allPots Optional parameter to specify a fixed value for all pots (0-100).
      * @returns The UUID of the created unique item instance, or undefined if the item doesn't support unique instances.
@@ -208,7 +203,7 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
 
     /**
      * Gives an item to the empire, either as a unique instance or as a normal item.
-     * 
+     *
      * @param itemId The ID of the item to give.
      * @param amount The amount of the item to give (default is 1).
      */
@@ -223,8 +218,7 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
             for (let i = 0; i < amount; i++) {
                 this.createUniqueInstance(itemId);
             }
-        }
-        else {
+        } else {
             const currentAmount = this.getItemAmount(itemId);
             this.setItemAmount(itemId, currentAmount + amount);
         }
@@ -235,14 +229,13 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
     /**
      * Removes the specified placement ids from the setup and increments the inventory's item
      * amount accordingly.
-     * 
+     *
      * @param player Player that performed the unplacing
      * @param placementIds List of placement ids
      * @returns List of unplaced items. If nothing happened, this will be undefined.
      */
     unplaceItems(player: Player, placementIds: string[]): PlacedItem[] | undefined {
-        if (!this.dataService.checkPermLevel(player, "build"))
-            return undefined;
+        if (!this.dataService.checkPermLevel(player, "build")) return undefined;
         const unplacing = new Array<PlacedItem>();
         const itemsData = this.dataService.empireData.items;
         const placedItems = itemsData.worldPlaced;
@@ -269,16 +262,13 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
             const uuid = placedItem.uniqueItemId;
             if (uuid === undefined) {
                 this.setItemAmount(item, this.getItemAmount(item) + 1);
-            }
-            else {
+            } else {
                 const uniqueInstances = itemsData.uniqueInstances;
                 const uniqueItem = uniqueInstances.get(uuid);
-                if (uniqueItem === undefined)
-                    throw `Unique item ${uuid} not found.`;
+                if (uniqueItem === undefined) throw `Unique item ${uuid} not found.`;
                 uniqueItem.placed = undefined; // Clear the placement ID
                 this.hasUniqueChanged = true;
             }
-
         }
         this.itemsUnplaced.fire(player, unplacing);
         return unplacing;
@@ -287,14 +277,13 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
     /**
      * Clones an item model for the specified placed item into the setup.
      * If an existing item model for that placed item already exists, returns false.
-     * 
+     *
      * @param placementId The unique ID for this placement.
      * @param placedItem Placed item to add an item model for
      * @returns The model that was added, or undefined if it already exists.
      */
     addItemModel(placementId: string, placedItem: PlacedItem) {
-        if (PLACED_ITEMS_FOLDER.FindFirstChild(placementId) !== undefined || this.isRendering === true)
-            return;
+        if (PLACED_ITEMS_FOLDER.FindFirstChild(placementId) !== undefined || this.isRendering === true) return;
 
         const item = Items.getItem(placedItem.item);
         if (item === undefined) {
@@ -318,7 +307,7 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
      * Places items into the setup.
      * This is a wrapper for {@link serverPlace}, additionally handling replication and firing the {@link itemsPlaced} signal.
      * Checks for permissions and area validity.
-     * 
+     *
      * @param player Player that performed the placing
      * @param items List of items to place
      * @returns 0 if no items were placed, 1 if items were placed, 2 if items were placed and is allowed to place the same item again
@@ -329,10 +318,10 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
         }
 
         let area: AreaId | undefined;
-        if (baseplateBounds === undefined) { // normal placement
+        if (baseplateBounds === undefined) {
+            // normal placement
             area = player.GetAttribute("Area") as AreaId | undefined;
-            if (area === undefined)
-                return 0;
+            if (area === undefined) return 0;
         }
 
         let overallSuccess = true;
@@ -340,31 +329,28 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
         let totalAmount = 0;
         const placedItems = new Array<IdPlacedItem>();
         for (const item of items) {
-            let [placedItem, amount] = this.serverPlace(item.id, item.position, item.rotation, area);
+            const [placedItem, amount] = this.serverPlace(item.id, item.position, item.rotation, area);
             if (placedItem !== undefined) {
-                if (amount !== undefined) { // if this is a normal item
+                if (amount !== undefined) {
+                    // if this is a normal item
                     totalAmount += amount;
                 }
                 placedItems.push(placedItem);
-            }
-            else
-                overallSuccess = false;
+            } else overallSuccess = false;
             i++;
         }
         this.itemsPlaced.fire(player, placedItems);
-        if (i === 0 || overallSuccess === false)
-            return 0;
-        if (i === 1)
-            return totalAmount === 0 ? 1 : 2;
+        if (i === 0 || overallSuccess === false) return 0;
+        if (i === 1) return totalAmount === 0 ? 1 : 2;
         return 1;
     }
 
     /**
      * Places an item into the setup. At least 1 of this item needs to exist in the inventory.
      * This also automatically adds the item model into the setup.
-     * 
+     *
      * This does *not* replicate the changes to the client, nor fires the {@link itemsPlaced} signal.
-     * 
+     *
      * @param id Item id to place.
      * @param position Position of the PrimaryPart of the item model to place in.
      * @param rotation Rotation, in degrees, to rotate the item.
@@ -390,24 +376,20 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
                     return $tuple(undefined);
                 }
             }
-
-        }
-        else if (itemAmount < 1 || rotation % 90 !== 0) { // Validate item requirements
+        } else if (itemAmount < 1 || rotation % 90 !== 0) {
+            // Validate item requirements
             return $tuple(undefined);
         }
 
         rotation %= 360;
 
-
         const placedItems = itemsData.worldPlaced;
         const itemId = uniqueInstance?.baseItemId ?? id;
         const item = Items.getItem(itemId);
-        if (item === undefined)
-            throw "How did this happen?";
+        if (item === undefined) throw "How did this happen?";
 
         // Check level requirements
-        if (item.levelReq !== undefined && item.levelReq > empireData.level)
-            return $tuple(undefined);
+        if (item.levelReq !== undefined && item.levelReq > empireData.level) return $tuple(undefined);
 
         // Check challenge restrictions
         if (empireData.currentChallenge !== undefined) {
@@ -420,33 +402,32 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
         let buildBounds: BuildBounds | undefined;
 
         // Determine build bounds based on placement mode
-        if (baseplateBounds === undefined) { // normal placement
-            if (areaId === undefined)
-                return $tuple(undefined);
+        if (baseplateBounds === undefined) {
+            // normal placement
+            if (areaId === undefined) return $tuple(undefined);
 
-            const area = item.bounds === undefined ? ItemPlacement.getAreaOfPosition(position, item.placeableAreas) : AREAS[areaId];
-            if (area === undefined || area.buildBounds === undefined)
-                return $tuple(undefined);
+            const area =
+                item.bounds === undefined
+                    ? ItemPlacement.getAreaOfPosition(position, item.placeableAreas)
+                    : AREAS[areaId];
+            if (area === undefined || area.buildBounds === undefined) return $tuple(undefined);
 
             areaId = area.id;
             buildBounds = area.buildBounds;
-        }
-        else {
+        } else {
             // Sandbox mode
             buildBounds = baseplateBounds;
             areaId = AREAS.BarrenIslands.id;
         }
 
         const model = item.MODEL?.Clone();
-        if (model === undefined)
-            throw "No model found for " + id;
+        if (model === undefined) throw "No model found for " + id;
 
         const primaryPart = model.PrimaryPart!;
 
         // Calculate final position with snapping
         let cframe = buildBounds.snap(primaryPart.Size, position, math.rad(rotation));
-        if (cframe === undefined)
-            return $tuple(undefined);
+        if (cframe === undefined) return $tuple(undefined);
 
         // Adjust position if not inside build bounds
         if (!buildBounds.isInside(cframe.Position)) {
@@ -456,12 +437,10 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
         model.PivotTo(cframe);
 
         // Check for collisions with existing items
-        if (ItemPlacement.isTouchingPlacedItem(model))
-            return $tuple(undefined);
+        if (ItemPlacement.isTouchingPlacedItem(model)) return $tuple(undefined);
 
         // Check if placement is in valid area
-        if (baseplateBounds === undefined && !ItemPlacement.isInPlaceableArea(model, item))
-            return $tuple(undefined);
+        if (baseplateBounds === undefined && !ItemPlacement.isInPlaceableArea(model, item)) return $tuple(undefined);
 
         // Create placed item data
         const [rotX, rotY, rotZ] = cframe.ToOrientation();
@@ -491,8 +470,7 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
         this.setPlacedItems(placedItems);
         if (uniqueInstance !== undefined) {
             return $tuple(placedItem);
-        }
-        else {
+        } else {
             this.setItemAmount(itemId, itemAmount! - 1);
             return $tuple(placedItem, itemAmount! - 1);
         }
@@ -515,15 +493,14 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
         }
 
         // Add missing models
-        for (const [placementId, placedItem] of placedItems)
-            this.addItemModel(placementId, placedItem);
+        for (const [placementId, placedItem] of placedItems) this.addItemModel(placementId, placedItem);
     }
 
     // Purchase Methods
 
     /**
      * Purchases the item, spending currency.
-     * 
+     *
      * @param item Item to purchase.
      * @returns Whether the purchase was successful.
      */
@@ -536,14 +513,17 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
         }
 
         // Check level requirements for harvesting tools
-        if (item.isA("HarvestingTool") && item.levelReq !== undefined && item.levelReq > this.dataService.empireData.level)
+        if (
+            item.isA("HarvestingTool") &&
+            item.levelReq !== undefined &&
+            item.levelReq > this.dataService.empireData.level
+        )
             return false;
 
         const itemId = item.id;
         const nextBought = this.getBoughtAmount(itemId) + 1;
         const price = item.getPrice(nextBought);
-        if (price === undefined)
-            return false;
+        if (price === undefined) return false;
 
         // Attempt currency purchase
         const success = this.currencyService.purchase(price);
@@ -561,7 +541,7 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
 
     /**
      * Handles item purchase for a specific player.
-     * 
+     *
      * @param player The player making the purchase (undefined for system purchases).
      * @param itemId The ID of the item to buy.
      * @returns Whether the purchase was successful.
@@ -571,8 +551,7 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
             return false;
         }
         const item = Items.getItem(itemId);
-        if (item === undefined)
-            return false;
+        if (item === undefined) return false;
 
         const success = this.serverBuy(item);
         if (success) {
@@ -583,21 +562,19 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
 
     /**
      * Handles bulk item purchases for a player.
-     * 
+     *
      * @param player The player making the purchases.
      * @param itemIds Array of item IDs to attempt to buy.
      * @returns Whether at least one purchase was successful.
      */
     buyAllItems(player: Player, itemIds: string[]) {
-        if (!this.dataService.checkPermLevel(player, "purchase"))
-            return false;
+        if (!this.dataService.checkPermLevel(player, "purchase")) return false;
 
         let oneSucceeded = false;
         const bought = new Array<Item>();
         for (const itemId of itemIds) {
             const item = Items.getItem(itemId);
-            if (item === undefined)
-                continue;
+            if (item === undefined) continue;
             if (this.serverBuy(item) === true) {
                 oneSucceeded = true;
                 bought.push(item);
@@ -611,7 +588,7 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
 
     /**
      * Generates the next unique ID for placed items.
-     * 
+     *
      * @returns A unique string ID for the next placed item.
      */
     nextId() {
@@ -620,7 +597,7 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
 
     /**
      * Gets the PlacedItem object directly linked to the empire's Profile.
-     * 
+     *
      * @param placementId The placement UUID for the PlacedItem
      * @returns A mutable PlacedItem object that can be used to modify data
      */
@@ -649,11 +626,9 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
     addMapItems() {
         let i = 0;
         for (const waypoint of CollectionService.GetTagged("MapItem")) {
-            if (!waypoint.IsA("BasePart"))
-                continue;
+            if (!waypoint.IsA("BasePart")) continue;
             const item = Items.getItem(waypoint.Name);
-            if (item === undefined)
-                throw `Item ${waypoint.Name} not found`;
+            if (item === undefined) throw `Item ${waypoint.Name} not found`;
             const model = this.addItemModel(`wm${i}`, {
                 item: item.id,
                 posX: waypoint.Position.X,
@@ -663,10 +638,8 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
                 rotY: waypoint.Rotation.Y,
                 rotZ: waypoint.Rotation.Z,
             });
-            if (model !== undefined)
-                model.Parent = Workspace;
-            else
-                warn(`Model for ${item.id} not found`);
+            if (model !== undefined) model.Parent = Workspace;
+            else warn(`Model for ${item.id} not found`);
 
             i++;
         }
@@ -675,15 +648,14 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
     /**
      * Waits for the specified callback to finish before returning its value.
      * This is used to prevent race conditions when placing items.
-     * 
+     *
      * @param callback The callback to wait for
      * @returns The value returned by the callback
      */
     waitInQueue(callback: () => number) {
         queue.push(callback);
         while (task.wait()) {
-            if (queue.indexOf(callback) === 0)
-                break;
+            if (queue.indexOf(callback) === 0) break;
         }
         const value = callback();
         queue.remove(0);

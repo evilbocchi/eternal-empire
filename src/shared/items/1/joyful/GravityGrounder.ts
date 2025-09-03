@@ -5,7 +5,6 @@ import Conveyor from "shared/item/traits/conveyor/Conveyor";
 import { Grounder } from "shared/item/traits/status/Massless";
 import Upgrader from "shared/item/traits/upgrader/Upgrader";
 
-
 export = new Item(script.Name)
     .setName("Gravity Grounder")
     .setDescription("Brings anti-gravity droplets to the ground, removing the %massless% effect and its buffs.")

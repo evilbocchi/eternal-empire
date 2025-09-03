@@ -12,7 +12,9 @@ let firstBreaker: Model | undefined;
 
 export = new Item(script.Name)
     .setName("Limit Breaker")
-    .setDescription("A massive structure made to delimit. Sustains itself, increasing droplet limit by 25 at no cost. With multiple breakers, this effect greatly weakens.")
+    .setDescription(
+        "A massive structure made to delimit. Sustains itself, increasing droplet limit by 25 at no cost. With multiple breakers, this effect greatly weakens.",
+    )
     .setDifficulty(Difficulty.Friendliness)
     .setPrice(new CurrencyBundle().set("Funds", 10000000))
     .setRequiredItemAmount(ExcavationStone, 50)
@@ -29,7 +31,7 @@ export = new Item(script.Name)
                 firstBreaker = model;
             }
             if (firstBreaker === model) {
-                setInstanceInfo(model, "DropletIncrease", 10 + (15 * math.pow(breakerCount, 0.75)));
+                setInstanceInfo(model, "DropletIncrease", 10 + 15 * math.pow(breakerCount, 0.75));
             }
         });
         update.fire();

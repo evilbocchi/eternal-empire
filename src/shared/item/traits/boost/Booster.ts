@@ -4,12 +4,11 @@ import { Server, getPlacedItemsInArea } from "shared/item/ItemUtils";
 import Operative from "shared/item/traits/Operative";
 
 export default abstract class Booster extends Operative {
-
     observeTarget(model: Model, callback: (model: Model | undefined, item: Item | undefined) => boolean) {
         const clickArea = model.WaitForChild("ClickArea") as BasePart;
         clickArea.CanTouch = true;
         clickArea.CollisionGroup = "ItemHitbox";
-        clickArea.Touched.Connect(() => { });
+        clickArea.Touched.Connect(() => {});
         const Items = Server.items;
         const whitelist = this.whitelist;
 
@@ -36,12 +35,10 @@ export default abstract class Booster extends Operative {
                         break;
                     }
                 }
-            }
-            else if (target.Parent === undefined) {
+            } else if (target.Parent === undefined) {
                 target = undefined;
                 callback(undefined, undefined);
-            }
-            else {
+            } else {
                 callback(target, targetItem);
             }
         });

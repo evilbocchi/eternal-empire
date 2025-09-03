@@ -4,7 +4,6 @@ import ItemTrait from "shared/item/traits/ItemTrait";
 import Operative from "shared/item/traits/Operative";
 
 export default class Combiner extends ItemTrait {
-
     constructor(item: Item) {
         super(item);
     }
@@ -13,8 +12,7 @@ export default class Combiner extends ItemTrait {
         let [totalAdd, totalMul, totalPow] = Operative.template();
         let totalDamage = 0;
         for (const item of items) {
-            if (item.MODEL === undefined)
-                continue;
+            if (item.MODEL === undefined) continue;
             const laserCount = findBaseParts(item.MODEL, "Laser").size();
             const upgrader = item.findTrait("Upgrader");
             if (upgrader !== undefined) {
@@ -32,7 +30,5 @@ export default class Combiner extends ItemTrait {
                 totalMul.amountPerCurrency.delete(currency);
             }
         }
-
-
     }
 }

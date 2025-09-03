@@ -3,14 +3,16 @@ import Command, { CommandAPI } from "server/services/permissions/commands/Comman
 
 export = new Command(script.Name)
     .addAlias("ws")
-    .setDescription("<amount> : Sets your walk speed to the specified amount. If higher than the limit, it will be capped to the maximum allowed speed.")
+    .setDescription(
+        "<amount> : Sets your walk speed to the specified amount. If higher than the limit, it will be capped to the maximum allowed speed.",
+    )
     .setExecute((o, amount) => {
         let walkspeed = tonumber(amount);
         if (walkspeed !== undefined && walkspeed < 0) {
             CommandAPI.ChatHook.sendPrivateMessage(o, "Walk speed cannot be negative.", "color:255,43,43");
             return;
         }
-        const maxWalkSpeed = Workspace.GetAttribute("WalkSpeed") as number ?? 16;
+        const maxWalkSpeed = (Workspace.GetAttribute("WalkSpeed") as number) ?? 16;
         walkspeed ??= 16;
         if (walkspeed > maxWalkSpeed) {
             CommandAPI.ChatHook.sendPrivateMessage(o, `Walk speed capped at ${maxWalkSpeed}.`, "color:255,43,43");

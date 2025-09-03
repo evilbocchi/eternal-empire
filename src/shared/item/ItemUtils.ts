@@ -1,5 +1,5 @@
 import { BaseOnoeNum, OnoeNum } from "@antivivi/serikanum";
-import { Debris, RunService, TweenService, Workspace } from "@rbxts/services";
+import { Debris, RunService, TweenService } from "@rbxts/services";
 import StringBuilder from "@rbxts/stringbuilder";
 import { ASSETS } from "shared/asset/GameAssets";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
@@ -23,12 +23,12 @@ namespace ItemUtils {
     export let itemsPerId: Map<string, Item>;
     /** Shared access to game utilities. Initalized by server service */
     export const Server = {
-        ready: false
+        ready: false,
     } as Server;
 
     export const UserGameSettings = RunService.IsClient() ? UserSettings().GetService("UserGameSettings") : undefined;
 
-    export const REPEATS = new Map<(dt: number) => void, { delta?: number, lastCall?: number; }>();
+    export const REPEATS = new Map<(dt: number) => void, { delta?: number; lastCall?: number }>();
     export const dropletGuiTween = new TweenInfo(1.4, Enum.EasingStyle.Quad, Enum.EasingDirection.Out);
 
     const placedItemOverlapParams = new OverlapParams();
@@ -60,14 +60,12 @@ namespace ItemUtils {
             const label = dropletGui.Frame.ValueLabel;
             label.Text = overrideText;
             labels.push(label);
-        }
-        else if (amountPerCurrency !== undefined) {
+        } else if (amountPerCurrency !== undefined) {
             const builder = new StringBuilder();
             let i = 0;
             for (const [currency, details] of CurrencyBundle.SORTED_DETAILS) {
                 const amount = amountPerCurrency.get(currency);
-                if (amount === undefined || new OnoeNum(0).equals(amount))
-                    continue;
+                if (amount === undefined || new OnoeNum(0).equals(amount)) continue;
                 if (i > 0) {
                     builder.append("\n");
                 }
@@ -82,13 +80,15 @@ namespace ItemUtils {
             dropletGui.Frame.ValueLabel.Visible = false;
         }
 
-        dropletGui.StudsOffset = (new Vector3(math.random(-25, 25), math.random(-25, 25), math.random(-25, 25))).mul(0.01);
+        dropletGui.StudsOffset = new Vector3(math.random(-25, 25), math.random(-25, 25), math.random(-25, 25)).mul(
+            0.01,
+        );
 
         const tweenInfo = new TweenInfo(0.85, Enum.EasingStyle.Quart, Enum.EasingDirection.In);
         TweenService.Create(dropletGui.Frame, tweenInfo, {
             GroupTransparency: 1,
             Position: dropletGui.Frame.Position.add(new UDim2(0, 0, 0, 50)),
-            Rotation: dropletGui.Frame.Rotation + math.random(-45, 45)
+            Rotation: dropletGui.Frame.Rotation + math.random(-45, 45),
         }).Play();
 
         dropletGui.Enabled = true;
@@ -97,14 +97,13 @@ namespace ItemUtils {
         return dropletGui;
     };
 
-    export let showCurrencyGain: ((at: Vector3, amountPerCurrency: Map<Currency, BaseOnoeNum>) => void) | undefined = undefined;
+    export let showCurrencyGain: ((at: Vector3, amountPerCurrency: Map<Currency, BaseOnoeNum>) => void) | undefined =
+        undefined;
 
     export const applyImpulse = (part: BasePart, impulse: Vector3) => {
         const networkOwner = part.GetNetworkOwner();
-        if (networkOwner !== undefined)
-            Packets.applyImpulse.toClient(networkOwner, part.Name, impulse);
-        else
-            part.ApplyImpulse(impulse);
+        if (networkOwner !== undefined) Packets.applyImpulse.toClient(networkOwner, part.Name, impulse);
+        else part.ApplyImpulse(impulse);
     };
 }
 

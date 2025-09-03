@@ -245,7 +245,7 @@ export = new Item(script.Name)
         OctahedralTemple,
         CruelBlankEssence,
         Solitude,
-        Ame
+        Ame,
     ])
 
     .exit();

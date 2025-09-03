@@ -6,36 +6,35 @@ import PlayerProfileTemplate from "shared/data/PlayerProfileTemplate";
 
 declare global {
     interface Reward {
-        items?: Map<string, number>,
-        xp?: number,
-        area?: AreaId,
-    }
-    
-    type QuestInfo = {
-        name: string,
-        colorR: DataType.f32,
-        colorG: DataType.f32,
-        colorB: DataType.f32,
-        level: DataType.f64,
-        length: DataType.i8,
-        reward: Reward,
-        order: DataType.i32,
-        stages: Array<StageInfo>
-    }
-    
-    type StageInfo = {
-        description: string
+        items?: Map<string, number>;
+        xp?: number;
+        area?: AreaId;
     }
 
+    type QuestInfo = {
+        name: string;
+        colorR: DataType.f32;
+        colorG: DataType.f32;
+        colorB: DataType.f32;
+        level: DataType.f64;
+        length: DataType.i8;
+        reward: Reward;
+        order: DataType.i32;
+        stages: Array<StageInfo>;
+    };
+
+    type StageInfo = {
+        description: string;
+    };
+
     type PlacingInfo = {
-        id: string,
-        position: Vector3,
-        rotation: DataType.u16
-    }
+        id: string;
+        position: Vector3;
+        rotation: DataType.u16;
+    };
 }
 
 namespace Packets {
-
     // data management
 
     /**
@@ -63,7 +62,7 @@ namespace Packets {
     /**
      * Request the server to *prompt* a rename the current empire.
      * This does not immediately rename the empire if method is "robux".
-     * 
+     *
      * @param name The new name for the empire.
      * @param method The method of renaming, either "robux" or "funds".
      * @returns `true` if the request was successful, `false` otherwise.
@@ -87,18 +86,23 @@ namespace Packets {
      */
     export const inventory = property<DataType.Packed<Inventory>>(EmpireProfileTemplate.items.inventory);
     export const bought = property<DataType.Packed<Inventory>>(EmpireProfileTemplate.items.bought);
-    export const placedItems = property<Map<string, DataType.Packed<PlacedItem>>>(EmpireProfileTemplate.items.worldPlaced);
+    export const placedItems = property<Map<string, DataType.Packed<PlacedItem>>>(
+        EmpireProfileTemplate.items.worldPlaced,
+    );
     export const buyItem = request<(itemId: string) => boolean>();
     export const buyAllItems = request<(itemIds: string[]) => boolean>();
     export const placeItems = request<(items: PlacingInfo[]) => number>();
-    export const uniqueInstances = property<Map<string, DataType.Packed<UniqueItemInstance>>>(EmpireProfileTemplate.items.uniqueInstances);
-    
+    export const uniqueInstances = property<Map<string, DataType.Packed<UniqueItemInstance>>>(
+        EmpireProfileTemplate.items.uniqueInstances,
+    );
+
     export const unplaceItems = signal<(placementIds: string[]) => void>();
     export const boostChanged = signal<(boostPerItem: Map<string, BaseOnoeNum>) => void>(true);
 
     // droplets
     export const dropletAdded = signal<(drop: BasePart) => void>(true);
-    export const dropletBurnt = signal<(dropletModelId: string, amountPerCurrency: Map<Currency, BaseOnoeNum>) => void>(true);
+    export const dropletBurnt =
+        signal<(dropletModelId: string, amountPerCurrency: Map<Currency, BaseOnoeNum>) => void>(true);
     export const applyImpulse = signal<(dropletModelId: string, impulse: Vector3) => void>(true);
 
     // weather
@@ -122,7 +126,16 @@ namespace Packets {
     export const autoloadSetup = signal<(name: string) => void>();
     export const startChallenge = signal<(challenge: string) => void>();
     export const quitChallenge = signal<() => void>();
-    export const currentChallenge = property<{name: string, r1: DataType.f32, g1: DataType.f32, b1: DataType.f32, r2: DataType.f32, g2: DataType.f32, b2: DataType.f32, description: string}>();
+    export const currentChallenge = property<{
+        name: string;
+        r1: DataType.f32;
+        g1: DataType.f32;
+        b1: DataType.f32;
+        r2: DataType.f32;
+        g2: DataType.f32;
+        b2: DataType.f32;
+        description: string;
+    }>();
     export const challengeCompleted = signal<(challenge: string, rewardLabel: string) => void>();
 
     // areas
@@ -144,7 +157,7 @@ namespace Packets {
     export const playerPlaytime = property<DataType.i32>(0, true);
 
     // permissions
-    export const permLevels = property<{[key in PermissionKey]?: number}>(EmpireProfileTemplate.permLevels);
+    export const permLevels = property<{ [key in PermissionKey]?: number }>(EmpireProfileTemplate.permLevels);
     export const getLogs = request<() => Log[]>();
     export const systemMessageSent = signal<(channel: string, message: string, metadata: string) => void>();
     export const codeReceived = signal<(code: string) => void>();
@@ -154,13 +167,16 @@ namespace Packets {
     export const logAdded = signal<(log: Log) => void>();
 
     // settings
-    export const settings = property<DataType.Packed<typeof PlayerProfileTemplate.settings>>(PlayerProfileTemplate.settings);
+    export const settings = property<DataType.Packed<typeof PlayerProfileTemplate.settings>>(
+        PlayerProfileTemplate.settings,
+    );
     export const setSetting = signal<<T extends keyof Settings>(setting: T, value: Settings[T]) => void>();
     export const setHotkey = signal<(name: string, key: DataType.i32) => void>();
 
     // npcs
     export const nextDialogue = request<() => boolean>();
-    export const npcMessage = signal<(message: string, pos: number, end: number, prompt: boolean, npc: Instance) => void>();
+    export const npcMessage =
+        signal<(message: string, pos: number, end: number, prompt: boolean, npc: Instance) => void>();
 
     // chests
     /**
@@ -192,7 +208,8 @@ namespace Packets {
 
     // marketplace
     export const marketplaceListings = property<Map<string, DataType.Packed<MarketplaceListing>>>(new Map());
-    export const createListing = request<(uuid: string, price: number, listingType: "buyout" | "auction", duration: DataType.i32) => boolean>();
+    export const createListing =
+        request<(uuid: string, price: number, listingType: "buyout" | "auction", duration: DataType.i32) => boolean>();
     export const cancelListing = request<(uuid: string) => boolean>();
     export const buyListing = request<(uuid: string) => boolean>();
     export const placeBid = request<(uuid: string, bidAmount: number) => boolean>();
@@ -202,7 +219,7 @@ namespace Packets {
     export const listingRemoved = signal<(uuid: string) => void>();
     export const myActiveListings = property<Map<string, DataType.Packed<MarketplaceListing>>>(new Map());
     export const marketplaceEnabled = property<boolean>(true);
-    
+
     // marketplace terminal
     export const openMarketplaceTerminal = signal<() => void>();
     export const closeMarketplaceTerminal = signal<() => void>();

@@ -4,7 +4,6 @@ import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
 import Clicker from "shared/item/traits/action/Clicker";
 
-
 export = new Item(script.Name)
     .setName("Slamo Clicker")
     .setDescription("Slamos click pretty well at %cps%.")
@@ -22,8 +21,7 @@ export = new Item(script.Name)
     .onClientLoad((model) => {
         const slamo = model.WaitForChild("Slamo") as Model;
         const animationController = slamo.FindFirstChildOfClass("AnimationController");
-        if (animationController === undefined)
-            return;
+        if (animationController === undefined) return;
         const animTrack = loadAnimation(animationController, 17441475234);
         if (animTrack !== undefined) {
             Streaming.onStreamableRemote(model, () => animTrack.Play());

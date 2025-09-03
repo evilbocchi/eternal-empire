@@ -7,8 +7,9 @@ import TheAmplifier from "shared/items/0/blessing/TheAmplifier";
 
 export = new Item(script.Name)
     .setName("The Amplified")
-    .setDescription(`Recover all your progress back to The Amplifier, and now obtain a boost as if you had 4 of them.
-%mul% boost to droplets.`
+    .setDescription(
+        `Recover all your progress back to The Amplifier, and now obtain a boost as if you had 4 of them.
+%mul% boost to droplets.`,
     )
     .setDifficulty(Difficulty.Joyful)
     .setPrice(new CurrencyBundle().set("Skill", 30), 1)

@@ -5,7 +5,9 @@ import Item from "shared/item/Item";
 
 export = new Item(script.Name)
     .setName("Strong Charger")
-    .setDescription("Boosts Power gain of generators within %radius% studs radius of this charger by %mul%. We need to charge.")
+    .setDescription(
+        "Boosts Power gain of generators within %radius% studs radius of this charger by %mul%. We need to charge.",
+    )
     .setDifficulty(Difficulty.JustAir)
     .setPrice(new CurrencyBundle().set("Funds", 16e30).set("Power", 300e15), 1)
     .setPrice(new CurrencyBundle().set("Funds", 44e30).set("Power", 700e15), 2)

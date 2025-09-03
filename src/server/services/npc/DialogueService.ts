@@ -65,13 +65,14 @@ export default class DialogueService implements OnInit, OnStart, OnNPCLoad {
      */
     isInteractionEnabled = true;
 
-    constructor(private dataService: DataService, private npcStateService: NPCStateService) {
-
-    }
+    constructor(
+        private dataService: DataService,
+        private npcStateService: NPCStateService,
+    ) {}
 
     /**
      * Adds a dialogue to an NPC with an optional priority.
-     * 
+     *
      * @param dialogue The dialogue to add.
      * @param priority The priority of the dialogue (higher = more important).
      * @param npc The NPC to add the dialogue to. If not provided, uses the dialogue's NPC.
@@ -88,7 +89,7 @@ export default class DialogueService implements OnInit, OnStart, OnNPCLoad {
 
     /**
      * Removes a dialogue from an NPC.
-     * 
+     *
      * @param dialogue The dialogue to remove.
      * @param npc The NPC to remove the dialogue from. If not provided, uses the dialogue's NPC.
      */
@@ -99,7 +100,7 @@ export default class DialogueService implements OnInit, OnStart, OnNPCLoad {
 
     /**
      * Begins a dialogue sequence, handling progression and player prompts.
-     * 
+     *
      * @param dialogue The starting dialogue.
      * @param requireInteraction If true, requires proximity for prompt.
      */
@@ -115,27 +116,29 @@ export default class DialogueService implements OnInit, OnStart, OnNPCLoad {
                 this.enableInteraction();
                 return true;
             }
-            const talkingModel = current.npc === undefined ? undefined : this.npcStateService.getInfo(current.npc)?.model;
+            const talkingModel =
+                current.npc === undefined ? undefined : this.npcStateService.getInfo(current.npc)?.model;
             this.disableInteraction();
             if (talkingModel === undefined) {
                 Packets.npcMessage.toAllClients(current.text, currentIndex, size, true, Workspace);
-            }
-            else {
+            } else {
                 let playersPrompted = 0;
                 const players = Players.GetPlayers();
                 const talkingPart = talkingModel.FindFirstChildOfClass("Humanoid")?.RootPart;
                 for (const player of players) {
                     const rootPart = player.Character?.FindFirstChildOfClass("Humanoid")?.RootPart;
-                    const isPrompt = talkingPart !== undefined &&
-                        (requireInteraction !== false && rootPart !== undefined && rootPart.Position.sub(talkingPart.Position).Magnitude < 60);
+                    const isPrompt =
+                        talkingPart !== undefined &&
+                        requireInteraction !== false &&
+                        rootPart !== undefined &&
+                        rootPart.Position.sub(talkingPart.Position).Magnitude < 60;
                     if (isPrompt === true) {
                         ++playersPrompted;
                     }
                     Packets.npcMessage.toClient(player, current.text, currentIndex, size, isPrompt, talkingModel);
                 }
                 task.delay(current.text.size() / 11 + 1, () => {
-                    if (i === currentIndex)
-                        nextDialogue();
+                    if (i === currentIndex) nextDialogue();
                 });
             }
             return false;
@@ -166,7 +169,7 @@ export default class DialogueService implements OnInit, OnStart, OnNPCLoad {
 
     /**
      * Extracts a sequence of dialogues starting from the given dialogue.
-     * 
+     *
      * @param dialogue The starting dialogue.
      * @returns An array of dialogues in sequence.
      */
@@ -175,8 +178,7 @@ export default class DialogueService implements OnInit, OnStart, OnNPCLoad {
         const dialogues = [dialogue];
         while (current !== undefined) {
             const nextDialogue = current.nextDialogue;
-            if (nextDialogue === undefined)
-                break;
+            if (nextDialogue === undefined) break;
             dialogues.push(nextDialogue);
             current = nextDialogue;
         }
@@ -188,8 +190,7 @@ export default class DialogueService implements OnInit, OnStart, OnNPCLoad {
      * Destroys the name changer NPC in public servers.
      */
     onInit() {
-        if (this.dataService.isPublicServer)
-            NPC_MODELS.WaitForChild("Name Changer").Destroy();
+        if (this.dataService.isPublicServer) NPC_MODELS.WaitForChild("Name Changer").Destroy();
     }
 
     onNPCLoad({ npc, model, humanoid }: NPCInfo) {
@@ -199,14 +200,11 @@ export default class DialogueService implements OnInit, OnStart, OnNPCLoad {
         const showIndicator = TweenService.Create(indicator.ImageLabel, new TweenInfo(0.3), { ImageTransparency: 0 });
         const hideIndicator = TweenService.Create(indicator.ImageLabel, new TweenInfo(0.15), { ImageTransparency: 1 });
 
-
         // Set up proximity prompt for NPC interaction
         const prompt = new Instance("ProximityPrompt");
         prompt.GetPropertyChangedSignal("Enabled").Connect(() => {
-            if (prompt.Enabled)
-                showIndicator.Play();
-            else
-                hideIndicator.Play();
+            if (prompt.Enabled) showIndicator.Play();
+            else hideIndicator.Play();
         });
         prompt.ObjectText = getDisplayName(humanoid);
         prompt.ActionText = "Interact";
@@ -234,10 +232,8 @@ export default class DialogueService implements OnInit, OnStart, OnNPCLoad {
             }
             if (highestDialogue !== undefined) {
                 this.talk(highestDialogue);
-            }
-            else {
-                if (defaultDialogueIndex >= defaultDialoguesCount)
-                    defaultDialogueIndex = defaultDialogueIndex - 1;
+            } else {
+                if (defaultDialogueIndex >= defaultDialoguesCount) defaultDialogueIndex = defaultDialogueIndex - 1;
                 this.talk(defaultDialogues[defaultDialogueIndex]);
                 defaultDialogueIndex++;
             }
@@ -249,11 +245,9 @@ export default class DialogueService implements OnInit, OnStart, OnNPCLoad {
 
     onStart() {
         ProximityPromptService.PromptTriggered.Connect((prompt, player) => {
-            if (this.isInteractionEnabled === false || prompt.Parent === undefined)
-                return;
+            if (this.isInteractionEnabled === false || prompt.Parent === undefined) return;
             const interactableObject = InteractableObject.REGISTRY.get(prompt.Parent.Name);
-            if (interactableObject === undefined)
-                return;
+            if (interactableObject === undefined) return;
             this.proximityPrompts.add(prompt);
             interactableObject.interacted.fire(Server, player);
         });

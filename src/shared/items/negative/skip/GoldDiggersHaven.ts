@@ -8,7 +8,9 @@ import Gold from "shared/items/excavation/Gold";
 
 export = new Item(script.Name)
     .setName("Gold Digger's Haven")
-    .setDescription("Are you living in a dream? Everywhere around you is the beautiful color of gold... %add% droplet value.")
+    .setDescription(
+        "Are you living in a dream? Everywhere around you is the beautiful color of gold... %add% droplet value.",
+    )
     .setDifficulty(Difficulty.Skip)
     .setPrice(new CurrencyBundle().set("Skill", 7), 1)
     .setPrice(new CurrencyBundle().set("Skill", 20), 2)

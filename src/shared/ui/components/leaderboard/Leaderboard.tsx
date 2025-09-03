@@ -34,7 +34,6 @@ export interface LeaderboardProps {
     maxEntries?: number;
 }
 
-
 /** Default titles for different leaderboard types */
 const DEFAULT_TITLES: Record<string, string> = {
     TimePlayed: "Time Played Leaders",
@@ -42,7 +41,7 @@ const DEFAULT_TITLES: Record<string, string> = {
     Funds: "Richest Empires",
     Power: "Most Powerful",
     Skill: "Most Skilled",
-    Donated: "Top Donors"
+    Donated: "Top Donors",
 };
 
 /** Default value labels for different leaderboard types */
@@ -52,7 +51,7 @@ const DEFAULT_VALUE_LABELS: Record<string, string> = {
     Funds: "Funds",
     Power: "Power",
     Skill: "Skill",
-    Donated: "Donated"
+    Donated: "Donated",
 };
 
 /**
@@ -63,7 +62,7 @@ export default function Leaderboard({
     entries,
     title,
     valueLabel,
-    maxEntries = 100
+    maxEntries = 100,
 }: LeaderboardProps) {
     const displayTitle = title || DEFAULT_TITLES[leaderboardType] || `${leaderboardType} Leaderboard`;
     const displayValueLabel = valueLabel || DEFAULT_VALUE_LABELS[leaderboardType] || leaderboardType;
@@ -79,51 +78,48 @@ export default function Leaderboard({
         case "Funds":
             gradient = new ColorSequence([
                 new ColorSequenceKeypoint(0, Color3.fromRGB(170, 255, 144)),
-                new ColorSequenceKeypoint(1, Color3.fromRGB(0, 68, 34))
+                new ColorSequenceKeypoint(1, Color3.fromRGB(0, 68, 34)),
             ]);
             break;
         case "Power":
             gradient = new ColorSequence([
                 new ColorSequenceKeypoint(0, Color3.fromRGB(255, 155, 33)),
-                new ColorSequenceKeypoint(1, Color3.fromRGB(221, 74, 0))
+                new ColorSequenceKeypoint(1, Color3.fromRGB(221, 74, 0)),
             ]);
             break;
         case "Skill":
             gradient = new ColorSequence([
                 new ColorSequenceKeypoint(0, Color3.fromRGB(85, 170, 127)),
-                new ColorSequenceKeypoint(1, Color3.fromRGB(85, 255, 127))
+                new ColorSequenceKeypoint(1, Color3.fromRGB(85, 255, 127)),
             ]);
             break;
         case "TimePlayed":
             gradient = new ColorSequence([
                 new ColorSequenceKeypoint(0, Color3.fromRGB(152, 202, 255)),
-                new ColorSequenceKeypoint(1, Color3.fromRGB(0, 170, 255))
+                new ColorSequenceKeypoint(1, Color3.fromRGB(0, 170, 255)),
             ]);
             break;
         case "Level":
             gradient = new ColorSequence([
                 new ColorSequenceKeypoint(0, Color3.fromRGB(0, 170, 255)),
-                new ColorSequenceKeypoint(1, Color3.fromRGB(0, 170, 255))
+                new ColorSequenceKeypoint(1, Color3.fromRGB(0, 170, 255)),
             ]);
             break;
         case "Donated":
             gradient = new ColorSequence([
                 new ColorSequenceKeypoint(0, Color3.fromRGB(255, 123, 152)),
-                new ColorSequenceKeypoint(1, Color3.fromRGB(255, 85, 127))
+                new ColorSequenceKeypoint(1, Color3.fromRGB(255, 85, 127)),
             ]);
             break;
         default:
             gradient = new ColorSequence([
                 new ColorSequenceKeypoint(0, Color3.fromRGB(255, 0, 0)),
-                new ColorSequenceKeypoint(1, Color3.fromRGB(221, 74, 0))
+                new ColorSequenceKeypoint(1, Color3.fromRGB(221, 74, 0)),
             ]);
     }
 
     return (
-        <frame
-            BackgroundColor3={Color3.fromRGB(255, 255, 255)}
-            Size={new UDim2(1, 0, 1, 0)}
-        >
+        <frame BackgroundColor3={Color3.fromRGB(255, 255, 255)} Size={new UDim2(1, 0, 1, 0)}>
             <LeaderboardHeader title={displayTitle} gradient={gradient} />
             <scrollingframe
                 key="Display"
@@ -135,10 +131,7 @@ export default function Leaderboard({
                 Selectable={false}
                 Size={new UDim2(0.8, 0, 0.8, 0)}
             >
-                <uilistlayout
-                    Padding={new UDim(0, 5)}
-                    SortOrder={Enum.SortOrder.LayoutOrder}
-                />
+                <uilistlayout Padding={new UDim(0, 5)} SortOrder={Enum.SortOrder.LayoutOrder} />
                 <uipadding
                     PaddingBottom={new UDim(0, 15)}
                     PaddingLeft={new UDim(0, 15)}
@@ -148,10 +141,7 @@ export default function Leaderboard({
                 <ColumnHeader valueLabel={displayValueLabel} />
 
                 {displayEntries.map((entry: LeaderboardEntry) => (
-                    <LeaderboardSlot
-                        key={`entry-${entry.place}-${entry.name}`}
-                        entry={entry}
-                    />
+                    <LeaderboardSlot key={`entry-${entry.place}-${entry.name}`} entry={entry} />
                 ))}
             </scrollingframe>
         </frame>

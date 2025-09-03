@@ -1,12 +1,12 @@
 declare global {
-    type HarvestableId = keyof (typeof RawHarvestable);
+    type HarvestableId = keyof typeof RawHarvestable;
     type HarvestableData = {
-        health: number,
-        tool: ToolType,
-        name?: string,
-        description?: string,
-        gives?: Map<string, number[]>,
-    }
+        health: number;
+        tool: ToolType;
+        name?: string;
+        description?: string;
+        gives?: Map<string, number[]>;
+    };
 }
 
 const RawHarvestable = {
@@ -29,7 +29,10 @@ const RawHarvestable = {
         health: 40,
         tool: "Axe",
         name: "Apple Tree",
-        gives: new Map([["StaleWood", [3, 7]], ["Apple", [2, 6]]]),
+        gives: new Map([
+            ["StaleWood", [3, 7]],
+            ["Apple", [2, 6]],
+        ]),
     },
     MagicalTree: {
         health: 300,
@@ -67,12 +70,13 @@ const RawHarvestable = {
         health: 160,
         name: "Winsome Speck",
         tool: "Scythe",
-        description: "A common substance secreted by Slamos while they are asleep. While the Skill level of the average Slamo is generally slightly above Winsome, excess Skill released by this peculiar species usually breaks down into this exact form."
+        description:
+            "A common substance secreted by Slamos while they are asleep. While the Skill level of the average Slamo is generally slightly above Winsome, excess Skill released by this peculiar species usually breaks down into this exact form.",
     },
     Apple: {
         health: 10,
         tool: "Scythe",
-        description: "The Slamos' favorite past-time snack. Grows extraordinarily well in Slamo Village."
+        description: "The Slamos' favorite past-time snack. Grows extraordinarily well in Slamo Village.",
     },
     AppleBush: {
         health: 25,
@@ -133,9 +137,9 @@ const RawHarvestable = {
         tool: "Pickaxe",
         name: "Corrupted Stone",
         gives: new Map([["ExcavationStone", [2, 4]]]),
-    }
-}
+    },
+};
 
-const Harvestable = RawHarvestable as {[id: string]: HarvestableData};
+const Harvestable = RawHarvestable as { [id: string]: HarvestableData };
 
 export default Harvestable;

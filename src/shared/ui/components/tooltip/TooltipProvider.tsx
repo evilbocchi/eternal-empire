@@ -1,6 +1,6 @@
 /**
  * @fileoverview React tooltip provider and context for managing tooltips across the application.
- * 
+ *
  * Provides a centralized tooltip system using React Context and hooks, replacing the
  * Flamework controller pattern with modern React patterns. Supports both item tooltips
  * and simple message tooltips with smooth animations and positioning.
@@ -61,17 +61,15 @@ export default function TooltipProvider({ children }: TooltipProviderProps) {
     }, []);
 
     return (
-        <TooltipContext.Provider value={{
-            showTooltip,
-            hideTooltip,
-            isVisible,
-        }}>
+        <TooltipContext.Provider
+            value={{
+                showTooltip,
+                hideTooltip,
+                isVisible,
+            }}
+        >
             {children}
-            <TooltipWindow
-                data={tooltipData}
-                visible={isVisible}
-                metadata={METADATA_PER_ITEM}
-            />
+            <TooltipWindow data={tooltipData} visible={isVisible} metadata={METADATA_PER_ITEM} />
         </TooltipContext.Provider>
     );
 }

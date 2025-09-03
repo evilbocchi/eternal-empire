@@ -20,5 +20,4 @@ export = new Item(script.Name)
     .trait(Damager)
     .setDamage(-20)
 
-
     .exit();

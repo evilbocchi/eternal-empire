@@ -26,15 +26,10 @@ import Packets from "shared/Packets";
  */
 @Controller()
 export default class AreaController implements OnInit, OnStart {
-
-    readonly AREA_UNLOCK_SHAKE = new CameraShaker(
-        Enum.RenderPriority.Camera.Value,
-        shakeCFrame => {
-            const cam = Workspace.CurrentCamera;
-            if (cam !== undefined)
-                cam.CFrame = cam.CFrame.mul(shakeCFrame);
-        }
-    );
+    readonly AREA_UNLOCK_SHAKE = new CameraShaker(Enum.RenderPriority.Camera.Value, (shakeCFrame) => {
+        const cam = Workspace.CurrentCamera;
+        if (cam !== undefined) cam.CFrame = cam.CFrame.mul(shakeCFrame);
+    });
     readonly BAR_UPDATE_TWEENINFO = new TweenInfo(0.2);
     readonly UPDATE_PER_AREA = new Map<AreaId, (n: number) => void>();
 
@@ -51,19 +46,17 @@ export default class AreaController implements OnInit, OnStart {
         let color: Color3;
         if (perc < 0.5) {
             color = invertColors === true ? Color3.fromRGB(85, 255, 127) : Color3.fromRGB(255, 0, 0);
-        }
-        else if (perc < 0.75) {
+        } else if (perc < 0.75) {
             color = Color3.fromRGB(255, 170, 0);
-        }
-        else {
+        } else {
             color = invertColors === true ? Color3.fromRGB(255, 0, 0) : Color3.fromRGB(85, 255, 127);
         }
         TweenService.Create(bar.Fill, this.BAR_UPDATE_TWEENINFO, {
             Size: new UDim2(perc, 0, 1, 0),
-            BackgroundColor3: color
+            BackgroundColor3: color,
         }).Play();
         TweenService.Create(bar.Fill.UIStroke, this.BAR_UPDATE_TWEENINFO, {
-            Color: color
+            Color: color,
         }).Play();
         bar.BarLabel.Text = tostring(current) + "/" + tostring(max);
     }
@@ -76,11 +69,9 @@ export default class AreaController implements OnInit, OnStart {
     loadArea(id: AreaId, area: Area) {
         const boardGui = area.boardGui;
         const updateBar = (n: number) => {
-            if (boardGui === undefined)
-                return;
+            if (boardGui === undefined) return;
             const max = area.dropletLimit.Value;
             this.refreshBar(boardGui.DropletLimit.Bar, n, max, true);
-
         };
         updateBar(0);
         this.UPDATE_PER_AREA.set(id, updateBar);
@@ -89,17 +80,13 @@ export default class AreaController implements OnInit, OnStart {
             task.spawn(() => {
                 while (task.wait(1)) {
                     const grid = area.getGrid();
-                    if (grid === undefined)
-                        continue;
+                    if (grid === undefined) continue;
                     const size = grid.Size;
                     boardGui.GridSize.BarLabel.Text = `${size.X}x${size.Z}`;
                     const placedItems = Packets.placedItems.get();
-                    if (placedItems === undefined)
-                        continue;
+                    if (placedItems === undefined) continue;
                     let i = 0;
-                    for (const [_, placedItem] of placedItems)
-                        if (placedItem.area === id)
-                            ++i;
+                    for (const [_, placedItem] of placedItems) if (placedItem.area === id) ++i;
                     boardGui.ItemCount.BarLabel.Text = tostring(i);
                 }
             });
@@ -114,7 +101,10 @@ export default class AreaController implements OnInit, OnStart {
         for (const [_id, otherArea] of pairs(AREAS)) {
             const children = otherArea.areaFolder.GetChildren();
             for (const child of children) {
-                if (child.Name === "Portal" && (child.WaitForChild("Destination") as ObjectValue).Value?.Name === area) {
+                if (
+                    child.Name === "Portal" &&
+                    (child.WaitForChild("Destination") as ObjectValue).Value?.Name === area
+                ) {
                     const pointLight = child.WaitForChild("Frame").WaitForChild("PointLight") as PointLight;
                     pointLight.Brightness = 5;
                     TweenService.Create(pointLight, new TweenInfo(2), { Brightness: 0.5 }).Play();

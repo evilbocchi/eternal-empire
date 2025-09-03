@@ -18,8 +18,7 @@ export default function ToggleSwitch({ label, initialEnabled = false, onToggle }
         const newState = !isEnabled;
         if (newState) {
             playSound("CheckOn.mp3");
-        }
-        else {
+        } else {
             playSound("CheckOff.mp3");
         }
         setIsEnabled(newState);
@@ -30,17 +29,13 @@ export default function ToggleSwitch({ label, initialEnabled = false, onToggle }
             const targetAnchor = newState ? new Vector2(1, 0.5) : new Vector2(0, 0.5);
             const targetColor = newState ? Color3.fromRGB(127, 255, 127) : Color3.fromRGB(255, 79, 79);
 
-            const tweenInfo = new TweenInfo(
-                0.4,
-                Enum.EasingStyle.Quart,
-                Enum.EasingDirection.Out
-            );
+            const tweenInfo = new TweenInfo(0.4, Enum.EasingStyle.Quart, Enum.EasingDirection.Out);
 
             // Tween position and color
             TweenService.Create(toggleRef.current, tweenInfo, {
                 Position: targetPosition,
                 AnchorPoint: targetAnchor,
-                BackgroundColor3: targetColor
+                BackgroundColor3: targetColor,
             }).Play();
         }
 
@@ -54,12 +49,7 @@ export default function ToggleSwitch({ label, initialEnabled = false, onToggle }
     const toggleAnchor = isEnabled ? new Vector2(1, 0.5) : new Vector2(0, 0.5);
 
     return (
-        <frame
-            key="ToggleContainer"
-            BackgroundTransparency={1}
-            LayoutOrder={-5}
-            Size={new UDim2(0.4, 0, 1, 0)}
-        >
+        <frame key="ToggleContainer" BackgroundTransparency={1} LayoutOrder={-5} Size={new UDim2(0.4, 0, 1, 0)}>
             <textlabel
                 BackgroundTransparency={1}
                 FontFace={RobotoSlab}
@@ -89,7 +79,7 @@ export default function ToggleSwitch({ label, initialEnabled = false, onToggle }
                 TextColor3={Color3.fromRGB(0, 0, 0)}
                 TextSize={14}
                 Event={{
-                    Activated: handleToggle
+                    Activated: handleToggle,
                 }}
             >
                 <uistroke ApplyStrokeMode={Enum.ApplyStrokeMode.Border} Thickness={2} />

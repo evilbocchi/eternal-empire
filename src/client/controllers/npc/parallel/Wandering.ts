@@ -16,7 +16,7 @@ function unstuck(character: Model) {
 
 function getPathingFactory(character: Model) {
     const humanoid = character.WaitForChild("Humanoid") as Humanoid;
-    const rootPart = humanoid.RootPart ?? character.WaitForChild("HumanoidRootPart") as BasePart;
+    const rootPart = humanoid.RootPart ?? (character.WaitForChild("HumanoidRootPart") as BasePart);
 
     let pathCount = 0;
 
@@ -45,11 +45,9 @@ function getPathingFactory(character: Model) {
                     break;
                 }
             }
-        }
-        else if (path.Status === Enum.PathStatus.NoPath || path.Status === Enum.PathStatus.ClosestNoPath) {
+        } else if (path.Status === Enum.PathStatus.NoPath || path.Status === Enum.PathStatus.ClosestNoPath) {
             return;
-        }
-        else {
+        } else {
             unstuck(character);
         }
     };
@@ -66,7 +64,7 @@ function loadWanderer(character: Model) {
 
     const pathToLocation = getPathingFactory(character);
     const humanoid = character.WaitForChild("Humanoid") as Humanoid;
-    const rootPart = humanoid.RootPart ?? character.WaitForChild("HumanoidRootPart") as BasePart;
+    const rootPart = humanoid.RootPart ?? (character.WaitForChild("HumanoidRootPart") as BasePart);
 
     const wander = () => {
         let randX = math.random(-60, 60);
@@ -87,8 +85,7 @@ function loadWanderer(character: Model) {
 
 const enabled = false;
 for (const startPos of Workspace.WaitForChild("Wanderers").GetChildren()) {
-    if (!startPos.IsA("BasePart"))
-        continue;
+    if (!startPos.IsA("BasePart")) continue;
 
     startPos.Transparency = 1;
     if (!enabled) {

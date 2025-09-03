@@ -12,17 +12,8 @@ interface SetupBodyProps {
 export default function SetupBody({ onSave, onLoad, onToggleAutoload }: SetupBodyProps) {
     return (
         <frame key="Body" BackgroundTransparency={1} Size={new UDim2(1, 0, 0.66, 0)}>
-            <ActionButton
-                text="Save"
-                backgroundColor={Color3.fromRGB(170, 255, 127)}
-                onClick={onSave}
-            />
-            <ActionButton
-                text="Load"
-                backgroundColor={Color3.fromRGB(255, 170, 0)}
-                layoutOrder={1}
-                onClick={onLoad}
-            />
+            <ActionButton text="Save" backgroundColor={Color3.fromRGB(170, 255, 127)} onClick={onSave} />
+            <ActionButton text="Load" backgroundColor={Color3.fromRGB(255, 170, 0)} layoutOrder={1} onClick={onLoad} />
             <uilistlayout
                 FillDirection={Enum.FillDirection.Horizontal}
                 HorizontalAlignment={Enum.HorizontalAlignment.Center}
@@ -30,10 +21,7 @@ export default function SetupBody({ onSave, onLoad, onToggleAutoload }: SetupBod
                 SortOrder={Enum.SortOrder.LayoutOrder}
                 VerticalAlignment={Enum.VerticalAlignment.Center}
             />
-            <ToggleSwitch
-                label="Alert when affordable"
-                onToggle={onToggleAutoload}
-            />
+            <ToggleSwitch label="Alert when affordable" onToggle={onToggleAutoload} />
         </frame>
     );
 }

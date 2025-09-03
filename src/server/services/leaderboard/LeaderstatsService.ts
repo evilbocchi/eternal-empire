@@ -13,7 +13,6 @@ import { Service } from "@flamework/core";
 
 @Service()
 export default class LeaderstatsService {
-
     /**
      * Gets or creates the leaderstats folder for a player.
      * @param player The player to get leaderstats for
@@ -49,9 +48,15 @@ export default class LeaderstatsService {
      */
     setLeaderstat(player: Player, leaderstat: string, value: string | number) {
         const leaderstats = this.getLeaderstats(player);
-        let statValueObject = leaderstats.FindFirstChild(leaderstat) as IntValue | NumberValue | StringValue | undefined;
+        let statValueObject = leaderstats.FindFirstChild(leaderstat) as
+            | IntValue
+            | NumberValue
+            | StringValue
+            | undefined;
         if (statValueObject === undefined) {
-            statValueObject = new Instance(typeIs(value, "number") ? ((value as number) % 1 > 0 ? "NumberValue" : "IntValue") : "StringValue");
+            statValueObject = new Instance(
+                typeIs(value, "number") ? ((value as number) % 1 > 0 ? "NumberValue" : "IntValue") : "StringValue",
+            );
             statValueObject.Name = leaderstat;
             statValueObject.Parent = leaderstats;
         }

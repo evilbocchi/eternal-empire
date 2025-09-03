@@ -7,7 +7,9 @@ import TheFirstDropper from "shared/items/negative/tfd/TheFirstDropper";
 
 export = new Item(script.Name)
     .setName("The First Dropper Booster")
-    .setDescription("An enhancer that amplifies the performance of The First Dropper, multiplying drop rate by %dropRateMultiplier% times.")
+    .setDescription(
+        "An enhancer that amplifies the performance of The First Dropper, multiplying drop rate by %dropRateMultiplier% times.",
+    )
     .setDifficulty(Difficulty.TheFirstDifficulty)
     .setPrice(new CurrencyBundle().set("Funds", 500), 1)
     .addPlaceableArea("BarrenIslands")

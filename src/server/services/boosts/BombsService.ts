@@ -26,7 +26,7 @@ import CurrencyBundle from "shared/currency/CurrencyBundle";
  */
 interface BombMessage {
     /**
-     * Type of the bomb being used. 
+     * Type of the bomb being used.
      */
     bombType: Currency;
 
@@ -39,14 +39,13 @@ interface BombMessage {
      * End time for the bomb effect.
      */
     endTime: number;
-};
+}
 
 /**
  * Service that manages bomb boosts, usage, and global bomb state.
  */
 @Service()
 export default class BombsService implements OnInit, OnStart {
-
     /** Global DataStore for bomb timing. */
     globalDataStore = DataStoreService.GetGlobalDataStore();
 
@@ -64,9 +63,10 @@ export default class BombsService implements OnInit, OnStart {
     /** Currency boost applied when Funds Bomb is active. */
     fundsBombBoost = new CurrencyBundle().set("Funds", 2);
 
-    constructor(private dataService: DataService,
-        private currencyService: CurrencyService) {
-    }
+    constructor(
+        private dataService: DataService,
+        private currencyService: CurrencyService,
+    ) {}
 
     /**
      * Refreshes the enabled state of the Funds Bomb based on current time and stored end time.
@@ -101,16 +101,14 @@ export default class BombsService implements OnInit, OnStart {
                     const amount = this.currencyService.get(bombType);
                     if (amount.lessEquals(0)) {
                         value = base;
-                    }
-                    else {
-                        if (oldValue !== undefined && oldValue > base)
-                            base = oldValue;
+                    } else {
+                        if (oldValue !== undefined && oldValue > base) base = oldValue;
 
-                        value = base + (15 * 60);
+                        value = base + 15 * 60;
                         const msg = {
                             bombType: bombType,
                             player: player.UserId,
-                            endTime: value
+                            endTime: value,
                         };
                         this.updateBomb(msg);
                         task.spawn(() => {
@@ -118,7 +116,6 @@ export default class BombsService implements OnInit, OnStart {
                         });
                         this.currencyService.set(bombType, amount.sub(1));
                     }
-
 
                     return $tuple(value);
                 });

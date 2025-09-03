@@ -26,7 +26,7 @@ export default function SettingToggle({ setting, title, subtitle, layoutOrder = 
 
     useEffect(() => {
         TweenService.Create(buttonRef.current!, new TweenInfo(0.2), {
-            BackgroundColor3: (hovering && !justClicked) ? hoverColor : color
+            BackgroundColor3: hovering && !justClicked ? hoverColor : color,
         }).Play();
     }, [hovering, enabled, justClicked]);
 
@@ -55,11 +55,7 @@ export default function SettingToggle({ setting, title, subtitle, layoutOrder = 
     };
 
     return (
-        <frame
-            BackgroundTransparency={1}
-            LayoutOrder={layoutOrder}
-            Size={new UDim2(1, 0, 0, 40)}
-        >
+        <frame BackgroundTransparency={1} LayoutOrder={layoutOrder} Size={new UDim2(1, 0, 0, 40)}>
             <textbutton
                 key="Toggle"
                 ref={buttonRef}
@@ -88,35 +84,37 @@ export default function SettingToggle({ setting, title, subtitle, layoutOrder = 
                             sound.PlaybackSpeed = enabled ? 2 : 1.75;
                         });
                     },
-                    MouseLeave: () => setHovering(false)
+                    MouseLeave: () => setHovering(false),
                 }}
             >
                 <uigradient
-                    Color={new ColorSequence([
-                        new ColorSequenceKeypoint(0, Color3.fromRGB(255, 255, 255)),
-                        new ColorSequenceKeypoint(0.456, Color3.fromRGB(255, 255, 255)),
-                        new ColorSequenceKeypoint(1, Color3.fromRGB(131, 131, 131))
-                    ])}
+                    Color={
+                        new ColorSequence([
+                            new ColorSequenceKeypoint(0, Color3.fromRGB(255, 255, 255)),
+                            new ColorSequenceKeypoint(0.456, Color3.fromRGB(255, 255, 255)),
+                            new ColorSequenceKeypoint(1, Color3.fromRGB(131, 131, 131)),
+                        ])
+                    }
                     Rotation={90}
                 />
-                <uistroke
-                    ApplyStrokeMode={Enum.ApplyStrokeMode.Border}
-                    Color={color}
-                    Thickness={2}
-                >
+                <uistroke ApplyStrokeMode={Enum.ApplyStrokeMode.Border} Color={color} Thickness={2}>
                     <uigradient
-                        Color={new ColorSequence([
-                            new ColorSequenceKeypoint(0, Color3.fromRGB(109, 109, 109)),
-                            new ColorSequenceKeypoint(1, Color3.fromRGB(109, 109, 109))
-                        ])}
+                        Color={
+                            new ColorSequence([
+                                new ColorSequenceKeypoint(0, Color3.fromRGB(109, 109, 109)),
+                                new ColorSequenceKeypoint(1, Color3.fromRGB(109, 109, 109)),
+                            ])
+                        }
                     />
                 </uistroke>
                 <uistroke Color={color}>
                     <uigradient
-                        Color={new ColorSequence([
-                            new ColorSequenceKeypoint(0, Color3.fromRGB(109, 109, 109)),
-                            new ColorSequenceKeypoint(1, Color3.fromRGB(109, 109, 109))
-                        ])}
+                        Color={
+                            new ColorSequence([
+                                new ColorSequenceKeypoint(0, Color3.fromRGB(109, 109, 109)),
+                                new ColorSequenceKeypoint(1, Color3.fromRGB(109, 109, 109)),
+                            ])
+                        }
                     />
                 </uistroke>
             </textbutton>

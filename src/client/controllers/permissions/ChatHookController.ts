@@ -23,7 +23,6 @@ import Packets from "shared/Packets";
  */
 @Controller()
 export default class ChatHookController implements OnInit, OnStart {
-
     /** Hex color string for system messages. */
     systemColor = new Color3(0.05, 0.75, 0.05).ToHex();
 
@@ -47,20 +46,16 @@ export default class ChatHookController implements OnInit, OnStart {
                     const [r, g, b] = prop.split(",");
                     if (r === "255" && g === "255" && b === "255") {
                         c = undefined;
-                    }
-                    else {
+                    } else {
                         c = Color3.fromRGB(tonumber(r) ?? 0, tonumber(g) ?? 0, tonumber(b) ?? 0);
                     }
-                }
-                else if (propName === "tag" && prop === "hidden") {
+                } else if (propName === "tag" && prop === "hidden") {
                     showTag = false;
                 }
             }
             if (message.PrefixText === "") {
-                if (showTag === true)
-                    message.PrefixText = `<font color="#${this.systemColor}">[SYSTEM]:</font>`;
-            }
-            else
+                if (showTag === true) message.PrefixText = `<font color="#${this.systemColor}">[SYSTEM]:</font>`;
+            } else
                 message.PrefixText = `<font color="#${ComputeNameColor(message.PrefixText.sub(1, message.PrefixText.size() - 1)).ToHex()}">${message.PrefixText}</font>`;
 
             let text = message.Text;
@@ -68,11 +63,11 @@ export default class ChatHookController implements OnInit, OnStart {
                 text = `<font color="#${c.ToHex()}">${text}</font>`;
             }
             const overrideProperties = new Instance("TextChatMessageProperties");
-            if (c !== undefined)
-                overrideProperties.Text = text;
+            if (c !== undefined) overrideProperties.Text = text;
             return overrideProperties;
         };
-        task.spawn(() => { // annoyance workaround
+        task.spawn(() => {
+            // annoyance workaround
             while (task.wait(1)) {
                 channel.OnIncomingMessage = onMessageAdded;
             }

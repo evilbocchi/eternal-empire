@@ -23,8 +23,10 @@ export = {
             Packets.inventory.set(new Map());
         }
 
-        return <StrictMode>
-            <App />
-        </StrictMode>;
+        return (
+            <StrictMode>
+                <App />
+            </StrictMode>
+        );
     },
 };

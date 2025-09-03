@@ -1,18 +1,18 @@
 #!/usr/bin/env node
 
-import express from 'express';
-import fs from 'fs';
-import signale from 'signale';
+import express from "express";
+import fs from "fs";
+import signale from "signale";
 
 const app = express();
 app.use(express.json());
 
 // Use parsed options
 const PORT = 28354;
-const OUTPUT = 'src/services.d.ts';
+const OUTPUT = "src/services.d.ts";
 
-function generateInterfaceDefinition (serviceName, node, depth = 0) {
-    const indent = '    '.repeat(depth);
+function generateInterfaceDefinition(serviceName, node, depth = 0) {
+    const indent = "    ".repeat(depth);
     const childrenEntries = [];
 
     for (const child of node.children || []) {
@@ -21,7 +21,7 @@ function generateInterfaceDefinition (serviceName, node, depth = 0) {
 
         if (child.children && child.children.length > 0) {
             // Generate a nested interface for this child
-            const childInterfaceName = `${serviceName}_${child.name.replace(/[^a-zA-Z0-9]/g, '_')}`;
+            const childInterfaceName = `${serviceName}_${child.name.replace(/[^a-zA-Z0-9]/g, "_")}`;
             const childInterface = generateInterfaceDefinition(childInterfaceName, child, depth);
             childrenEntries.push(`${indent}    ${childName}: ${childInterfaceName};`);
             // Store child interface for later generation
@@ -31,21 +31,32 @@ function generateInterfaceDefinition (serviceName, node, depth = 0) {
             generateInterfaceDefinition.childInterfaces.push({
                 name: childInterfaceName,
                 content: childInterface,
-                baseType: robloxType
+                baseType: robloxType,
             });
         } else {
             childrenEntries.push(`${indent}    ${childName}: ${robloxType};`);
         }
     }
 
-    return childrenEntries.join('\n');
+    return childrenEntries.join("\n");
 }
 
-function generateTypeScriptContent (trees) {
+function generateTypeScriptContent(trees) {
     const serviceNames = [
-        'Workspace', 'Players', 'Lighting', 'MaterialService', 'ReplicatedFirst',
-        'ReplicatedStorage', 'ServerScriptService', 'ServerStorage', 'StarterGui',
-        'StarterPack', 'StarterPlayer', 'Teams', 'SoundService', 'TextChatService'
+        "Workspace",
+        "Players",
+        "Lighting",
+        "MaterialService",
+        "ReplicatedFirst",
+        "ReplicatedStorage",
+        "ServerScriptService",
+        "ServerStorage",
+        "StarterGui",
+        "StarterPack",
+        "StarterPlayer",
+        "Teams",
+        "SoundService",
+        "TextChatService",
     ];
 
     // Reset child interfaces for each generation
@@ -64,8 +75,7 @@ function generateTypeScriptContent (trees) {
                 interfaceDefinitions.push(`interface ${serviceName} extends Instance {
 ${childrenDef}
 }`);
-            }
-            else {
+            } else {
                 interfaceDefinitions.push(`interface ${serviceName} extends Instance {}`);
             }
         } else {
@@ -85,30 +95,30 @@ ${childInterface.content}
     }
 
     // Create a type that maps service names to their interfaces
-    const serviceTypeEntries = serviceNames.map(name => `    ${JSON.stringify(name)}: ${name};`);
+    const serviceTypeEntries = serviceNames.map((name) => `    ${JSON.stringify(name)}: ${name};`);
 
     return `// AUTO-GENERATED FILE
 // Do not edit manually.
 
 // Roblox types must be available in your environment.
 
-${interfaceDefinitions.join('\n\n')}
+${interfaceDefinitions.join("\n\n")}
 
 export type InstanceTreeType = {
-${serviceTypeEntries.join('\n')}
+${serviceTypeEntries.join("\n")}
 };
 `;
 }
 
-app.post('/write', (req, res) => {
+app.post("/write", (req, res) => {
     const body = req.body;
-    if (!body || typeof body !== 'object') {
-        return res.status(400).send('Missing or invalid JSON body.');
+    if (!body || typeof body !== "object") {
+        return res.status(400).send("Missing or invalid JSON body.");
     }
 
     const content = generateTypeScriptContent(body);
     // Read the current file contents first
-    fs.readFile(OUTPUT, 'utf8', (readErr, currentContent) => {
+    fs.readFile(OUTPUT, "utf8", (readErr, currentContent) => {
         if (!readErr && currentContent === content) {
             // No change, do not write
             return res.send(`No changes detected in ${OUTPUT}`);
@@ -116,7 +126,7 @@ app.post('/write', (req, res) => {
         // Write only if different or file does not exist
         fs.writeFile(OUTPUT, content, (writeErr) => {
             if (writeErr) {
-                return res.status(500).send('Failed to write to file.');
+                return res.status(500).send("Failed to write to file.");
             }
             res.send(`Written to ${OUTPUT}`);
         });

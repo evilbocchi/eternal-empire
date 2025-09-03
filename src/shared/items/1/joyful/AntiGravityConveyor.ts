@@ -3,7 +3,6 @@ import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
 import Conveyor from "shared/item/traits/conveyor/Conveyor";
 
-
 export = new Item(script.Name)
     .setName("Anti-Gravity Conveyor")
     .setDescription("A convenient conveyor suspended mid-air. This is Class 1.")

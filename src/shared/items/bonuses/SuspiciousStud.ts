@@ -8,8 +8,6 @@ export = new Item(script.Name)
     .setDifficulty(Difficulty.Bonuses)
 
     .trait(Shop)
-    .setItems([
-        Stud
-    ])
+    .setItems([Stud])
 
     .exit();

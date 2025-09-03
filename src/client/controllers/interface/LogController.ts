@@ -27,17 +27,17 @@ import { combineHumanReadable } from "@antivivi/vrldk";
 declare global {
     interface Assets {
         LogOption: Frame & {
-            DetailsLabel: TextLabel,
+            DetailsLabel: TextLabel;
             TimestampLabel: TextLabel;
         };
     }
 }
 
 export const LOGS_WINDOW = ADAPTIVE_TAB_MAIN_WINDOW.WaitForChild("Logs") as Frame & {
-    LogList: Frame,
+    LogList: Frame;
     NavigationOptions: Frame & {
-        Left: NavigationOption,
-        Right: NavigationOption,
+        Left: NavigationOption;
+        Right: NavigationOption;
         PageLabel: TextLabel;
     };
 };
@@ -49,15 +49,12 @@ export const LOGS_WINDOW = ADAPTIVE_TAB_MAIN_WINDOW.WaitForChild("Logs") as Fram
  */
 @Controller()
 export default class LogController implements OnInit, OnStart {
-
     logsLength = 0;
     logs = new Array<Log>();
     page = 1;
     i = 0;
 
-    constructor(private balanceWindowController: BalanceWindowController) {
-
-    }
+    constructor(private balanceWindowController: BalanceWindowController) {}
 
     /**
      * Creates a log option UI element for a given log entry.
@@ -114,23 +111,19 @@ export default class LogController implements OnInit, OnStart {
      */
     refreshLogsWindow() {
         LOGS_WINDOW.NavigationOptions.PageLabel.Text = `Page ${this.page}`;
-        const start = this.logsLength - (this.page * 20);
+        const start = this.logsLength - this.page * 20;
         const logOptions = LOGS_WINDOW.LogList.GetChildren();
         for (const logOption of logOptions) {
             const index = tonumber(logOption.Name);
-            if (index === undefined)
-                continue;
-            if (index >= start && index < start + 20)
-                continue;
+            if (index === undefined) continue;
+            if (index >= start && index < start + 20) continue;
             logOption.Destroy();
         }
         for (let i = start; i < start + 20; i++) {
             const log = this.logs[i];
-            if (log === undefined)
-                continue;
+            if (log === undefined) continue;
             const cachedLogOption = LOGS_WINDOW.LogList.FindFirstChild(i);
-            if (cachedLogOption !== undefined)
-                continue;
+            if (cachedLogOption !== undefined) continue;
             const logOption = this.createLogOption(log);
             logOption.Name = tostring(i);
             logOption.Parent = LOGS_WINDOW.LogList;
@@ -141,23 +134,33 @@ export default class LogController implements OnInit, OnStart {
      * Initializes the LogController, sets up navigation options for log pagination.
      */
     onInit() {
-        this.balanceWindowController.loadNavigationOption(LOGS_WINDOW.NavigationOptions.Left, Enum.KeyCode.Z, "Previous Page", () => {
-            if (LOGS_WINDOW.Visible === false)
-                return false;
-            --this.page;
-            if (this.page < 1) {
-                this.page = 1;
-            }
-            this.refreshLogsWindow();
-            return true;
-        }, 5);
-        this.balanceWindowController.loadNavigationOption(LOGS_WINDOW.NavigationOptions.Right, Enum.KeyCode.C, "Next Page", () => {
-            if (LOGS_WINDOW.Visible === false)
-                return false;
-            ++this.page;
-            this.refreshLogsWindow();
-            return true;
-        }, 5);
+        this.balanceWindowController.loadNavigationOption(
+            LOGS_WINDOW.NavigationOptions.Left,
+            Enum.KeyCode.Z,
+            "Previous Page",
+            () => {
+                if (LOGS_WINDOW.Visible === false) return false;
+                --this.page;
+                if (this.page < 1) {
+                    this.page = 1;
+                }
+                this.refreshLogsWindow();
+                return true;
+            },
+            5,
+        );
+        this.balanceWindowController.loadNavigationOption(
+            LOGS_WINDOW.NavigationOptions.Right,
+            Enum.KeyCode.C,
+            "Next Page",
+            () => {
+                if (LOGS_WINDOW.Visible === false) return false;
+                ++this.page;
+                this.refreshLogsWindow();
+                return true;
+            },
+            5,
+        );
     }
 
     /**

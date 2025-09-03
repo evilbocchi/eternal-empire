@@ -18,7 +18,7 @@ export interface QuestActions {
 /**
  * Hook to manage quest data and interactions
  */
-export function useQuestData(): QuestHookData & QuestActions & { trackedQuest: string | undefined; } {
+export function useQuestData(): QuestHookData & QuestActions & { trackedQuest: string | undefined } {
     const [questInfo, setQuestInfo] = useState(Packets.questInfo.get() || new Map<string, QuestInfo>());
     const [stagePerQuest, setStagePerQuest] = useState(Packets.stagePerQuest.get() || new Map<string, number>());
     const [level, setLevel] = useState(Packets.level.get() || 0);
@@ -33,11 +33,11 @@ export function useQuestData(): QuestHookData & QuestActions & { trackedQuest: s
             Packets.level.observe((value) => setLevel(value)),
             Packets.xp.observe((value) => setXp(value)),
             // Listen to shared quest state changes
-            questState.trackedQuestChanged.connect((questId) => setTrackedQuest(questId))
+            questState.trackedQuestChanged.connect((questId) => setTrackedQuest(questId)),
         ];
 
         return () => {
-            connections.forEach(conn => conn.disconnect());
+            connections.forEach((conn) => conn.disconnect());
         };
     }, []);
 
@@ -52,29 +52,41 @@ export function useQuestData(): QuestHookData & QuestActions & { trackedQuest: s
         level,
         xp,
         trackedQuest,
-        onTrackQuest
+        onTrackQuest,
     };
 }
 
 export function getLengthName(length: number) {
     switch (length) {
-        case 0: return "Tiny";
-        case 1: return "Short";
-        case 2: return "Medium";
-        case 3: return "Long";
-        case 4: return "Journey";
-        default: return "???";
+        case 0:
+            return "Tiny";
+        case 1:
+            return "Short";
+        case 2:
+            return "Medium";
+        case 3:
+            return "Long";
+        case 4:
+            return "Journey";
+        default:
+            return "???";
     }
 }
 
 export function getLengthColor(length: number) {
     switch (length) {
-        case 0: return Color3.fromRGB(143, 255, 115);
-        case 1: return Color3.fromRGB(0, 255, 56);
-        case 2: return Color3.fromRGB(255, 250, 0);
-        case 3: return Color3.fromRGB(255, 123, 28);
-        case 4: return Color3.fromRGB(255, 20, 20);
-        default: return Color3.fromRGB(255, 255, 255);
+        case 0:
+            return Color3.fromRGB(143, 255, 115);
+        case 1:
+            return Color3.fromRGB(0, 255, 56);
+        case 2:
+            return Color3.fromRGB(255, 250, 0);
+        case 3:
+            return Color3.fromRGB(255, 123, 28);
+        case 4:
+            return Color3.fromRGB(255, 20, 20);
+        default:
+            return Color3.fromRGB(255, 255, 255);
     }
 }
 

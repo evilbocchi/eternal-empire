@@ -16,14 +16,12 @@ export default function SetupOption({
     cost = "Cost: $1Qd, 100 W, 140 Purifier Clicks",
     isAutoloadEnabled = false,
     onEditName,
-    onToggleAutoload
+    onToggleAutoload,
 }: SetupOptionProps) {
-
     const onSave = () => {
         playSound("MagicSprinkle.mp3", undefined, (sound) => {
             sound.PlaybackSpeed = 1.15;
         });
-        
     };
 
     const onLoad = () => {
@@ -32,7 +30,6 @@ export default function SetupOption({
             const reverb = new Instance("ReverbSoundEffect");
             reverb.Parent = sound;
         });
-        
     };
 
     return (
@@ -48,11 +45,7 @@ export default function SetupOption({
                 SortOrder={Enum.SortOrder.LayoutOrder}
                 VerticalAlignment={Enum.VerticalAlignment.Center}
             />
-            <SetupHeader
-                setupName={setupName}
-                cost={cost}
-                onEditClick={onEditName}
-            />
+            <SetupHeader setupName={setupName} cost={cost} onEditClick={onEditName} />
             <SetupBody
                 isAutoloadEnabled={isAutoloadEnabled}
                 onSave={onSave}

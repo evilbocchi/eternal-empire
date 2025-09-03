@@ -22,10 +22,10 @@ declare global {
     type BoardGui = SurfaceGui & {
         DropletLimit: Frame & {
             Bar: Bar;
-        },
+        };
         GridSize: Frame & {
             BarLabel: TextLabel;
-        },
+        };
         ItemCount: Frame & {
             BarLabel: TextLabel;
         };
@@ -41,7 +41,6 @@ const IS_SERVER = RunService.IsServer();
  * have specific spawn locations, boundaries, and other properties.
  */
 export default class Area {
-
     /**
      * The global limit for droplets across all areas.
      * Created as an IntValue for game-wide tracking.
@@ -128,7 +127,7 @@ export default class Area {
     /**
      * Returns the spawn location for this area.
      * Players will teleport here when using teleporters to visit the area.
-     * 
+     *
      * @returns The SpawnLocation instance or undefined if none exists
      */
     getSpawnLocation() {
@@ -138,7 +137,7 @@ export default class Area {
     /**
      * Returns the grid part that defines where items can be placed.
      * The grid is a BasePart that marks the buildable region.
-     * 
+     *
      * @returns The Grid BasePart or undefined if none exists
      */
     getGrid() {
@@ -148,7 +147,7 @@ export default class Area {
     /**
      * Returns the part that defines where characters have fallen off the map.
      * When characters touch this part, they're considered to have fallen out of bounds.
-     * 
+     *
      * @returns The CatchArea BasePart or undefined if none exists
      */
     getCatchArea() {
@@ -158,7 +157,7 @@ export default class Area {
     /**
      * Returns the part that defines the region containing the area.
      * Used for determining when a player is within the area's boundaries.
-     * 
+     *
      * @returns The AreaBounds BasePart or undefined if none exists
      */
     getAreaBounds() {
@@ -167,11 +166,14 @@ export default class Area {
 
     /**
      * Creates a new Area instance.
-     * 
+     *
      * @param areaFolder The folder containing all area components and configuration
      * @param buildable Whether items can be placed/built in this area
      */
-    constructor(public readonly areaFolder: Instance, buildable: boolean) {
+    constructor(
+        public readonly areaFolder: Instance,
+        buildable: boolean,
+    ) {
         if (!areaFolder.IsA("Folder")) {
             error(areaFolder.Name + " is not a folder.");
         }
@@ -192,8 +194,12 @@ export default class Area {
         this.buildBounds = BuildBounds.fromArea(this);
 
         // Initialize UI components if they exist
-        this.islandInfoBoard = (buildable ? areaFolder.WaitForChild("IslandInfoBoard") : areaFolder.FindFirstChild("IslandInfoBoard")) as Model | undefined;
-        this.boardGui = this.islandInfoBoard?.WaitForChild("GuiPart").FindFirstChildOfClass("SurfaceGui") as BoardGui | undefined;
+        this.islandInfoBoard = (
+            buildable ? areaFolder.WaitForChild("IslandInfoBoard") : areaFolder.FindFirstChild("IslandInfoBoard")
+        ) as Model | undefined;
+        this.boardGui = this.islandInfoBoard?.WaitForChild("GuiPart").FindFirstChildOfClass("SurfaceGui") as
+            | BoardGui
+            | undefined;
         this.unlocked = areaFolder.WaitForChild("Unlocked") as BoolValue;
         this.hidden = (areaFolder.FindFirstChild("Hidden") as BoolValue | undefined)?.Value === true;
 
@@ -224,7 +230,7 @@ export default class Area {
 /**
  * Helper function to create an Area instance.
  * Uses different initialization strategies depending on whether sandbox mode is enabled.
- * 
+ *
  * @param name Name of the area folder in Workspace
  * @param buildable Whether items can be placed in this area
  * @returns A new Area instance

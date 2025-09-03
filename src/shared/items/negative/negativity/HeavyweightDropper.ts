@@ -6,8 +6,9 @@ import Dropper from "shared/item/traits/dropper/Dropper";
 
 export = new Item(script.Name)
     .setName("Heavy-weight Dropper")
-    .setDescription(`This dropper has a comparably large build compared to its peers.
-Produces %val% droplets every 2 seconds.`
+    .setDescription(
+        `This dropper has a comparably large build compared to its peers.
+Produces %val% droplets every 2 seconds.`,
     )
     .setDifficulty(Difficulty.Negativity)
     .setPrice(new CurrencyBundle().set("Funds", 9000), 1)

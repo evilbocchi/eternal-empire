@@ -4,7 +4,6 @@ import { NPC_MODELS, NPCS } from "shared/constants";
 import NPC, { NPCAnimationType } from "shared/NPC";
 
 declare global {
-
     /**
      * Interface representing the information associated with an NPC.
      */
@@ -21,11 +20,10 @@ declare global {
 }
 
 export interface OnNPCLoad {
-
     /**
      * Called when an NPC is loaded into the game.
      * This can be used to initialize NPC-specific logic or state.
-     * 
+     *
      * @param npcInfo The information about the loaded NPC.
      */
     onNPCLoad(npcInfo: NPCInfo): void;
@@ -33,7 +31,6 @@ export interface OnNPCLoad {
 
 @Service()
 export default class NPCStateService implements OnInit {
-
     /**
      * Map of NPC to their loaded information.
      */
@@ -41,7 +38,7 @@ export default class NPCStateService implements OnInit {
 
     /**
      * Gets the information associated with a given NPC.
-     * 
+     *
      * @param npc The NPC to get information for.
      * @returns The NPCInfo if available, undefined otherwise.
      */
@@ -51,48 +48,42 @@ export default class NPCStateService implements OnInit {
 
     /**
      * Plays an animation of a given type on an NPC.
-     * 
+     *
      * @param npc The NPC to animate.
      * @param animType The type of animation to play.
      * @returns True if the animation was played, false otherwise.
      */
     playAnimation(npc: NPC, animType: NPCAnimationType): boolean {
         const anim = npc.animationsPerType.get(animType);
-        if (anim === undefined)
-            return false;
+        if (anim === undefined) return false;
 
         const npcInfo = this.infoPerNPC.get(npc);
-        if (npcInfo === undefined)
-            return false;
+        if (npcInfo === undefined) return false;
 
         let animTrack = npcInfo.animations.get(animType);
         if (animTrack === undefined) {
             animTrack = loadAnimation(npcInfo.humanoid, anim);
-            if (animTrack === undefined)
-                return false;
+            if (animTrack === undefined) return false;
             npcInfo.animations.set(animType, animTrack);
         }
-        if (!animTrack.IsPlaying)
-            animTrack.Play();
+        if (!animTrack.IsPlaying) animTrack.Play();
         npcInfo.runningAnimations.set(animType, animTrack);
         return true;
     }
 
     /**
      * Stops a running animation of a given type on an NPC.
-     * 
+     *
      * @param npc The NPC to stop animating.
      * @param animType The type of animation to stop.
      * @returns True if the animation was stopped, false otherwise.
      */
     stopAnimation(npc: NPC, animType: NPCAnimationType): boolean {
         const npcInfo = this.infoPerNPC.get(npc);
-        if (npcInfo === undefined)
-            return false;
+        if (npcInfo === undefined) return false;
 
         const animTrack = npcInfo.runningAnimations.get(animType);
-        if (animTrack === undefined)
-            return false;
+        if (animTrack === undefined) return false;
 
         animTrack.Stop();
         return true;
@@ -100,7 +91,7 @@ export default class NPCStateService implements OnInit {
 
     /**
      * Loads an NPC model and initializes its state.
-     * 
+     *
      * @param npcModel The model of the NPC to load.
      */
     loadNPC(npcModel: Model): NPCInfo | undefined {
@@ -110,7 +101,6 @@ export default class NPCStateService implements OnInit {
             return;
         }
         humanoid.RootPart!.Anchored = true;
-
 
         const npcScript = NPCS.FindFirstChild(npcModel.Name);
         if (npcScript === undefined) {
@@ -131,7 +121,7 @@ export default class NPCStateService implements OnInit {
             rootPart: humanoid.RootPart!,
             animations: new Map<NPCAnimationType, AnimationTrack>(),
             runningAnimations: new Map<NPCAnimationType, AnimationTrack>(),
-            defaultLocation: humanoid.RootPart!.CFrame
+            defaultLocation: humanoid.RootPart!.CFrame,
         };
         this.infoPerNPC.set(npc, npcInfo);
 
@@ -144,10 +134,8 @@ export default class NPCStateService implements OnInit {
         humanoid.RootPart!.CustomPhysicalProperties = new PhysicalProperties(100, 0.3, 0.5);
         this.playAnimation(npc, "Default");
         humanoid.Running.Connect((speed) => {
-            if (speed > 0)
-                this.playAnimation(npc, "Walk");
-            else
-                this.stopAnimation(npc, "Walk");
+            if (speed > 0) this.playAnimation(npc, "Walk");
+            else this.stopAnimation(npc, "Walk");
         });
         let last = humanoid.RootPart?.Position;
         task.spawn(() => {
@@ -165,10 +153,8 @@ export default class NPCStateService implements OnInit {
             }
         });
         humanoid.Jumping.Connect((active) => {
-            if (active)
-                this.playAnimation(npc, "Jump");
-            else
-                this.stopAnimation(npc, "Jump");
+            if (active) this.playAnimation(npc, "Jump");
+            else this.stopAnimation(npc, "Jump");
         });
 
         return npcInfo;

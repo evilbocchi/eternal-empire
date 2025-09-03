@@ -6,7 +6,9 @@ import Upgrader from "shared/item/traits/upgrader/Upgrader";
 
 export = new Item(script.Name)
     .setName("Childhood Slide")
-    .setDescription("After all these years, you still remember the joy of sliding down a slide. This slide is no different, except it boosts your droplets by %mul%.")
+    .setDescription(
+        "After all these years, you still remember the joy of sliding down a slide. This slide is no different, except it boosts your droplets by %mul%.",
+    )
     .setDifficulty(Difficulty.Joyful)
     .setPrice(new CurrencyBundle().set("Skill", 20), 1)
     .setCreator("CoPKaDT")

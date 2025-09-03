@@ -13,7 +13,9 @@ const base = new CurrencyBundle().set("Power", amt);
 
 export = new Item(script.Name)
     .setName("Corrupted Bonanza")
-    .setDescription("Extracting a descending shadow, you find yourself trembling in quiet fear. Produces %gain%, this amount increasing with Skill. Caps at %cap%.")
+    .setDescription(
+        "Extracting a descending shadow, you find yourself trembling in quiet fear. Produces %gain%, this amount increasing with Skill. Caps at %cap%.",
+    )
     .setDifficulty(Difficulty.Ifinitude)
     .setRequiredItemAmount(AdvancedBlankEssence, 1)
     .setRequiredItemAmount(PassiveBonanza, 1)
@@ -26,6 +28,9 @@ export = new Item(script.Name)
 
     .trait(Generator)
     .setPassiveGain(base)
-    .applyFormula((v, item) => item.setPassiveGain(base.set("Power", amt.mul(v))), () => Server.Currency.get("Skill"))
+    .applyFormula(
+        (v, item) => item.setPassiveGain(base.set("Power", amt.mul(v))),
+        () => Server.Currency.get("Skill"),
+    )
 
     .exit();

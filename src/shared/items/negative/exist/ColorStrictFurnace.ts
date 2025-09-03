@@ -15,7 +15,9 @@ declare global {
 
 export = new Item(script.Name)
     .setName("Color Strict Furnace")
-    .setDescription("Only processes droplets if the color it's on matches with the enabled switch. Different colors apply different boosts.")
+    .setDescription(
+        "Only processes droplets if the color it's on matches with the enabled switch. Different colors apply different boosts.",
+    )
     .setDifficulty(Difficulty.Exist)
     .setPrice(new CurrencyBundle().set("Funds", 2.56e15), 1)
     .addPlaceableArea("BarrenIslands")
@@ -32,31 +34,33 @@ export = new Item(script.Name)
         const furnace = item.trait(Furnace);
 
         const cInfo = getAllInstanceInfo(ReplicatedStorage);
-        const infoPerId: { [id: number]: { name: string, boostLabel: string, add?: CurrencyBundle, mul: CurrencyBundle; }; } = {
+        const infoPerId: {
+            [id: number]: { name: string; boostLabel: string; add?: CurrencyBundle; mul: CurrencyBundle };
+        } = {
             0: {
                 name: "White",
                 boostLabel: "",
-                mul: new CurrencyBundle()
+                mul: new CurrencyBundle(),
             },
             1: {
                 name: "Green",
                 boostLabel: "x4500 Funds, x6 Power",
-                mul: new CurrencyBundle().set("Funds", 4500).set("Power", 6)
+                mul: new CurrencyBundle().set("Funds", 4500).set("Power", 6),
             },
             2: {
                 name: "Blue",
                 boostLabel: "x2500 Funds, x6 Power",
-                mul: new CurrencyBundle().set("Funds", 2500).set("Power", 6)
+                mul: new CurrencyBundle().set("Funds", 2500).set("Power", 6),
             },
             3: {
                 name: "Orange",
                 boostLabel: "x2500 Funds, x10 Power",
-                mul: new CurrencyBundle().set("Funds", 2500).set("Power", 10)
+                mul: new CurrencyBundle().set("Funds", 2500).set("Power", 10),
             },
             4: {
                 name: "Red",
                 boostLabel: "x4500 Funds, x10 Power",
-                mul: new CurrencyBundle().set("Funds", 4500).set("Power", 10)
+                mul: new CurrencyBundle().set("Funds", 4500).set("Power", 10),
             },
             5: {
                 name: "Violet",
@@ -69,12 +73,24 @@ export = new Item(script.Name)
         const bar = model.WaitForChild("GuiPart").WaitForChild("SurfaceGui").WaitForChild("Bar") as Frame;
         const fill = bar.WaitForChild("Fill") as Frame;
         const colorLabel = bar.WaitForChild("ColorLabel") as TextLabel;
-        const boostLabel = model.WaitForChild("BoostGuiPart").WaitForChild("SurfaceGui").WaitForChild("BoostLabel") as TextLabel;
+        const boostLabel = model
+            .WaitForChild("BoostGuiPart")
+            .WaitForChild("SurfaceGui")
+            .WaitForChild("BoostLabel") as TextLabel;
         const hitbox = model.WaitForChild("Hitbox");
         const alertSound = hitbox.WaitForChild("AlertSound") as Sound;
         const border = model.WaitForChild("Border") as UnionOperation;
         let color = 0;
-        item.repeat(model, () => fill.Size = new UDim2((tick() - (getInstanceInfo(ReplicatedStorage, "ColorStrictTime") ?? 0)) / 300, 0, 1, 0));
+        item.repeat(
+            model,
+            () =>
+                (fill.Size = new UDim2(
+                    (tick() - (getInstanceInfo(ReplicatedStorage, "ColorStrictTime") ?? 0)) / 300,
+                    0,
+                    1,
+                    0,
+                )),
+        );
         let currentlyWanting: number | undefined = 0;
         const updateColor = () => {
             const strictColor = cInfo.ColorStrictColor;
@@ -91,8 +107,7 @@ export = new Item(script.Name)
                 boostLabel.Text = info.boostLabel;
                 furnace.setAdd(info.add).setMul(info.mul);
                 alertSound.Stop();
-            }
-            else {
+            } else {
                 boostLabel.Text = "WRONG COLOR";
                 alertSound.Resume();
                 furnace.setAdd(undefined).setMul(undefined);

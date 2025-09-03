@@ -22,18 +22,22 @@ export = new Item(script.Name)
         const furnace = item.trait(Furnace);
 
         const CurrencyService = Server.Currency;
-        item.repeat(undefined, () => {
-            const skill = CurrencyService.get("Skill");
-            meetsRequirement = skill !== undefined && !skill.lessThan(requirement);
-            const mul = new OnoeNum(meetsRequirement ? 5 : 2);
-            furnace.setMul(new CurrencyBundle().set("Funds", mul));
-        }, 0.5);
+        item.repeat(
+            undefined,
+            () => {
+                const skill = CurrencyService.get("Skill");
+                meetsRequirement = skill !== undefined && !skill.lessThan(requirement);
+                const mul = new OnoeNum(meetsRequirement ? 5 : 2);
+                furnace.setMul(new CurrencyBundle().set("Funds", mul));
+            },
+            0.5,
+        );
     })
     .onLoad((model, item) => {
         const children = model.GetChildren();
         for (const glow of children) {
             if (glow.IsA("BasePart") && glow.Name === "Glow") {
-                item.repeat(model, () => glow.Transparency = meetsRequirement ? 0 : 0.5);
+                item.repeat(model, () => (glow.Transparency = meetsRequirement ? 0 : 0.5));
             }
         }
     });

@@ -6,7 +6,9 @@ import WhiteGem from "shared/items/excavation/WhiteGem";
 
 export = new Item(script.Name)
     .setName("Empowered Brick")
-    .setDescription("A brick that has been imbued with power, ready to be placed in the world. Does absolutely nothing.")
+    .setDescription(
+        "A brick that has been imbued with power, ready to be placed in the world. Does absolutely nothing.",
+    )
     .setDifficulty(Difficulty.InstantWin)
     .setPrice(new CurrencyBundle().set("Power", 5000000))
     .setRequiredItemAmount(WhiteGem, 6)

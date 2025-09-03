@@ -17,12 +17,11 @@ declare global {
 }
 
 export default class DropperBooster extends Booster {
-
     dropRateMultiplier = 1;
 
     /**
      * Creates a modifier token for the drop rate of droppers in the area of the model.
-     * 
+     *
      * @param model The model of the dropper booster.
      * @returns A modifier object that can be used to adjust the drop rate.
      */
@@ -31,7 +30,7 @@ export default class DropperBooster extends Booster {
         const modifier: ItemBoost = {
             placementId: model.Name,
             ignoresLimitations: false,
-            dropRateMultiplier: this.dropRateMultiplier
+            dropRateMultiplier: this.dropRateMultiplier,
         };
 
         let target: BasePart | undefined;
@@ -65,7 +64,7 @@ export default class DropperBooster extends Booster {
 
     /**
      * Loads the drop rate multiplier for the booster from the model.
-     * 
+     *
      * @param model The model to load the booster from.
      * @param booster The booster instance to apply the multiplier to.
      */

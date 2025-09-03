@@ -32,21 +32,19 @@ export interface IOperative {
      * Power (x^y) term.
      */
     pow?: CurrencyBundle;
-
 }
 
 /**
  * Provides mathematical operations to an item.
  */
 export default class Operative extends ItemTrait implements IOperative {
-
     add?: CurrencyBundle;
     mul?: CurrencyBundle;
     pow?: CurrencyBundle;
 
     /**
      * Constructs an Operative trait.
-     * 
+     *
      * @param item The item to which this trait belongs.
      */
     constructor(item: Item) {
@@ -55,7 +53,7 @@ export default class Operative extends ItemTrait implements IOperative {
 
     /**
      * Sets the addition term.
-     * 
+     *
      * @param add Addition term.
      * @returns This operative.
      */
@@ -66,7 +64,7 @@ export default class Operative extends ItemTrait implements IOperative {
 
     /**
      * Sets the multiplication term.
-     * 
+     *
      * @param mul Multiplication term.
      * @returns This operative.
      */
@@ -77,7 +75,7 @@ export default class Operative extends ItemTrait implements IOperative {
 
     /**
      * Sets the power term.
-     * 
+     *
      * @param pow Power term.
      * @returns This operative.
      */
@@ -87,19 +85,16 @@ export default class Operative extends ItemTrait implements IOperative {
     }
 
     format(str: string): string {
-        if (this.add !== undefined)
-            str = str.gsub("%%add%%", this.add.toString(true, "+"))[0];
-        if (this.mul !== undefined)
-            str = str.gsub("%%mul%%", this.mul.toString(true, "x"))[0];
-        if (this.pow !== undefined)
-            str = str.gsub("%%pow%%", this.pow.toString(true, "^"))[0];
+        if (this.add !== undefined) str = str.gsub("%%add%%", this.add.toString(true, "+"))[0];
+        if (this.mul !== undefined) str = str.gsub("%%mul%%", this.mul.toString(true, "x"))[0];
+        if (this.pow !== undefined) str = str.gsub("%%pow%%", this.pow.toString(true, "^"))[0];
         return str;
     }
 
     /**
      * Determines if this operative is less than another in one {@link Currency}.
      * Priority is given to the power term, then multiplication, then addition.
-     * 
+     *
      * @param other The other operative.
      * @param currency The currency to compare.
      * @returns True if this operative is less than the other in the specified currency.
@@ -116,23 +111,20 @@ export default class Operative extends ItemTrait implements IOperative {
 
     /**
      * Gets all currencies involved in the operations.
-     * 
+     *
      * @returns A set of currencies.
      */
     getCurrencies() {
         const currencies = new Set<Currency>();
-        if (this.add !== undefined)
-            this.add.amountPerCurrency.forEach((_, currency) => currencies.add(currency));
-        if (this.mul !== undefined)
-            this.mul.amountPerCurrency.forEach((_, currency) => currencies.add(currency));
-        if (this.pow !== undefined)
-            this.pow.amountPerCurrency.forEach((_, currency) => currencies.add(currency));
+        if (this.add !== undefined) this.add.amountPerCurrency.forEach((_, currency) => currencies.add(currency));
+        if (this.mul !== undefined) this.mul.amountPerCurrency.forEach((_, currency) => currencies.add(currency));
+        if (this.pow !== undefined) this.pow.amountPerCurrency.forEach((_, currency) => currencies.add(currency));
         return currencies;
     }
 
     /**
      * Apply operations to values.
-     * 
+     *
      * @param totalAdd Addition term to apply to.
      * @param totalMul Multiplication term to apply to.
      * @param totalPow Power term to apply to.
@@ -143,48 +135,50 @@ export default class Operative extends ItemTrait implements IOperative {
      * @param repeats Number of times to repeat the operations. Default is 1, which means no repetition.
      * @returns The resulting addition, multiplication, and power terms.
      */
-    static applyOperative(totalAdd?: CurrencyBundle, totalMul?: CurrencyBundle, totalPow?: CurrencyBundle,
-        add?: CurrencyBundle, mul?: CurrencyBundle, pow?: CurrencyBundle, inverse?: boolean, repeats?: number) {
+    static applyOperative(
+        totalAdd?: CurrencyBundle,
+        totalMul?: CurrencyBundle,
+        totalPow?: CurrencyBundle,
+        add?: CurrencyBundle,
+        mul?: CurrencyBundle,
+        pow?: CurrencyBundle,
+        inverse?: boolean,
+        repeats?: number,
+    ) {
         if (repeats !== undefined) {
-            if (add !== undefined)
-                add = add.mul(repeats);
-            if (mul !== undefined)
-                mul = mul.pow(repeats);
-            if (pow !== undefined)
-                pow = pow.pow(repeats);
+            if (add !== undefined) add = add.mul(repeats);
+            if (mul !== undefined) mul = mul.pow(repeats);
+            if (pow !== undefined) pow = pow.pow(repeats);
         }
 
         if (inverse === true) {
-            if (add !== undefined)
-                totalAdd = totalAdd?.sub(add);
-            if (mul !== undefined)
-                totalMul = totalMul?.div(mul);
-            if (pow !== undefined)
-                totalPow = totalPow?.mul(ONES.div(pow));
-        }
-        else {
-            if (add !== undefined)
-                totalAdd = totalAdd?.add(add);
-            if (mul !== undefined)
-                totalMul = totalMul?.mul(mul);
-            if (pow !== undefined)
-                totalPow = totalPow?.mul(pow);
+            if (add !== undefined) totalAdd = totalAdd?.sub(add);
+            if (mul !== undefined) totalMul = totalMul?.div(mul);
+            if (pow !== undefined) totalPow = totalPow?.mul(ONES.div(pow));
+        } else {
+            if (add !== undefined) totalAdd = totalAdd?.add(add);
+            if (mul !== undefined) totalMul = totalMul?.mul(mul);
+            if (pow !== undefined) totalPow = totalPow?.mul(pow);
         }
         return $tuple(totalAdd, totalMul, totalPow);
     }
 
     /**
      * Applies operations to values.
-     * 
+     *
      * @param add Addition term.
      * @param mul Multiplication term.
      * @param pow Power term.
      * @returns A tuple containing the addition, multiplication, and power terms after applying the operations.
      */
-    apply(add: CurrencyBundle, mul: CurrencyBundle, pow: CurrencyBundle): LuaTuple<[CurrencyBundle, CurrencyBundle, CurrencyBundle]>;
+    apply(
+        add: CurrencyBundle,
+        mul: CurrencyBundle,
+        pow: CurrencyBundle,
+    ): LuaTuple<[CurrencyBundle, CurrencyBundle, CurrencyBundle]>;
     /**
      * Applies all operations in the operative to a value.
-     * 
+     *
      * @param value The value to which to apply the operations.
      * @returns The value after all operations.
      */
@@ -198,12 +192,9 @@ export default class Operative extends ItemTrait implements IOperative {
         let totalMul = this.mul;
         let totalPow = this.pow;
         if (repeats !== undefined) {
-            if (totalAdd !== undefined)
-                totalAdd = totalAdd.mul(repeats);
-            if (totalMul !== undefined)
-                totalMul = totalMul.pow(repeats);
-            if (totalPow !== undefined)
-                totalPow = totalPow.pow(repeats);
+            if (totalAdd !== undefined) totalAdd = totalAdd.mul(repeats);
+            if (totalMul !== undefined) totalMul = totalMul.pow(repeats);
+            if (totalPow !== undefined) totalPow = totalPow.pow(repeats);
         }
         return Operative.coalesce(add, totalAdd, totalMul, totalPow);
     }
@@ -213,7 +204,7 @@ export default class Operative extends ItemTrait implements IOperative {
      * - `totalAdd` is a zeroed {@link CurrencyBundle}.
      * - `totalMul` is a `CurrencyBundle` with all currencies set to 1.
      * - `totalPow` is a `CurrencyBundle` with all currencies set to 1.
-     * 
+     *
      * @returns A tuple containing `totalAdd`, `totalMul`, and `totalPow`.
      */
     static template() {
@@ -222,14 +213,19 @@ export default class Operative extends ItemTrait implements IOperative {
 
     /**
      * Coalesce all values together with built-in validation.
-     * 
+     *
      * @param value The base value.
      * @param totalAdd Total addition term.
      * @param totalMul Total multiplication term.
      * @param totalPow Total power term.
      * @returns The value after all operations.
      */
-    static coalesce(value: CurrencyBundle, totalAdd?: CurrencyBundle, totalMul?: CurrencyBundle, totalPow?: CurrencyBundle) {
+    static coalesce(
+        value: CurrencyBundle,
+        totalAdd?: CurrencyBundle,
+        totalMul?: CurrencyBundle,
+        totalPow?: CurrencyBundle,
+    ) {
         const newCurrencies = new Map<Currency, OnoeNum>();
         const base = value.amountPerCurrency;
         const adds = totalAdd?.amountPerCurrency;
@@ -240,8 +236,7 @@ export default class Operative extends ItemTrait implements IOperative {
 
             if (adds !== undefined) {
                 const add = adds.get(currency);
-                if (add !== undefined)
-                    amount = amount === undefined ? add : amount.add(add);
+                if (add !== undefined) amount = amount === undefined ? add : amount.add(add);
             }
 
             if (amount === undefined) {
@@ -250,14 +245,12 @@ export default class Operative extends ItemTrait implements IOperative {
 
             if (muls !== undefined) {
                 const mul = muls.get(currency);
-                if (mul !== undefined)
-                    amount = amount.mul(mul);
+                if (mul !== undefined) amount = amount.mul(mul);
             }
 
             if (pows !== undefined) {
                 const pow = pows.get(currency);
-                if (pow !== undefined)
-                    amount = amount.pow(pow);
+                if (pow !== undefined) amount = amount.pow(pow);
             }
 
             if (amount.lessThan(ZERO)) {

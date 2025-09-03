@@ -6,7 +6,9 @@ import DropperBooster from "shared/item/traits/boost/DropperBooster";
 
 export = new Item(script.Name)
     .setName("Canistering Generator")
-    .setDescription("Boosts the drop rate of any dropper adjacent to the canister's vent by 2.5 times! Also produces %gain%.")
+    .setDescription(
+        "Boosts the drop rate of any dropper adjacent to the canister's vent by 2.5 times! Also produces %gain%.",
+    )
     .setDifficulty(Difficulty.Vintage)
     .setPrice(new CurrencyBundle().set("Power", 200e15).set("Bitcoin", 76000), 1)
     .addPlaceableArea("BarrenIslands")

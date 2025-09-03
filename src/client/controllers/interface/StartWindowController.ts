@@ -34,26 +34,26 @@ declare global {
     };
 
     interface EmpiresWindowAssets extends Folder {
-        PlayerSlot: PlayerSlot,
+        PlayerSlot: PlayerSlot;
         EmpireOption: TextButton & {
-            UIStroke: UIStroke,
-            EmpireIDLabel: TextLabel,
+            UIStroke: UIStroke;
+            EmpireIDLabel: TextLabel;
             EmpireInformation: Frame & {
-                OwnerAvatar: ImageLabel,
+                OwnerAvatar: ImageLabel;
                 Labels: Frame & {
-                    TitleLabel: TextLabel,
-                    OwnerLabel: TextLabel,
+                    TitleLabel: TextLabel;
+                    OwnerLabel: TextLabel;
                 };
-            },
+            };
             Stats: Frame & {
-                DateCreatedLabel: TextLabel,
-                ItemsLabel: TextLabel,
-                PlaytimeLabel: TextLabel,
-            },
-        },
+                DateCreatedLabel: TextLabel;
+                ItemsLabel: TextLabel;
+                PlaytimeLabel: TextLabel;
+            };
+        };
         NewEmpireOption: TextButton & {
             MessageLabel: TextLabel;
-        },
+        };
     }
 
     interface Assets {
@@ -62,8 +62,8 @@ declare global {
 }
 
 export type StartOption = Frame & {
-    Button: ImageButton,
-    ImageLabel: ImageLabel,
+    Button: ImageButton;
+    ImageLabel: ImageLabel;
     Label: TextLabel & {
         UIStroke: UIStroke;
     };
@@ -105,9 +105,8 @@ export default class StartWindowController implements OnInit {
         private loadingWindowController: LoadingWindowController,
         private introController: IntroController,
         private soundController: SoundController,
-        private hotkeysController: HotkeysController
-    ) {
-    }
+        private hotkeysController: HotkeysController,
+    ) {}
 
     /**
      * Hides the start window and transitions to gameplay, restoring UI and camera state.
@@ -156,7 +155,12 @@ export default class StartWindowController implements OnInit {
             });
         };
         TweenService.Create(START_WINDOW.LeftBackground, tweenInfo, { Position: new UDim2(0, 0, 0.5, 0) }).Play();
-        task.delay(fast ? 0.2 : 0.8, () => TweenService.Create(START_WINDOW.Logo, tweenInfo, { Position: new UDim2(0.15, 0, 0, 0), Rotation: 0 }).Play());
+        task.delay(fast ? 0.2 : 0.8, () =>
+            TweenService.Create(START_WINDOW.Logo, tweenInfo, {
+                Position: new UDim2(0.15, 0, 0, 0),
+                Rotation: 0,
+            }).Play(),
+        );
         transitionOption(START_WINDOW.MainOptions.Play);
         transitionOption(START_WINDOW.MainOptions.Settings, 0.2);
         transitionOption(START_WINDOW.MainOptions.About, 0.4);
@@ -192,8 +196,7 @@ export default class StartWindowController implements OnInit {
             return;
         }
         const START_SCREEN_ENABLED = isStartScreenEnabled();
-        if (START_SCREEN_ENABLED === undefined)
-            return;
+        if (START_SCREEN_ENABLED === undefined) return;
 
         if (RunService.IsStudio() && START_SCREEN_ENABLED === false) {
             return;
@@ -204,7 +207,7 @@ export default class StartWindowController implements OnInit {
             Workspace.CurrentCamera.CameraType = Enum.CameraType.Scriptable;
             Workspace.CurrentCamera.CFrame = getStartCamera().CFrame;
         }
-        // 
+        //
         // START_WINDOW.Header.Position = new UDim2(0, 0, -0.4, 0);
         // START_WINDOW.Footer.Position = new UDim2(0, 0, 1.4, 0);
         // START_WINDOW.Header.Logo.Position = new UDim2(0.5, 0, -1.1, 0);
@@ -221,7 +224,10 @@ export default class StartWindowController implements OnInit {
                 wave.AnchorPoint = new Vector2(0.5, 0.5);
                 wave.Size = new UDim2(1, 0, 1, 0);
                 wave.Parent = START_WINDOW.Logo;
-                TweenService.Create(wave, new TweenInfo(0.5), { Size: new UDim2(1.15, 5, 1.15, 5), ImageTransparency: 1 }).Play();
+                TweenService.Create(wave, new TweenInfo(0.5), {
+                    Size: new UDim2(1.15, 5, 1.15, 5),
+                    ImageTransparency: 1,
+                }).Play();
             };
             newWave();
         });
@@ -244,8 +250,7 @@ export default class StartWindowController implements OnInit {
                 const success = Packets.teleportToEmpire.toServer(availableEmpire);
                 if (success) {
                     this.loadingWindowController.showLoadingWindow("Loading server");
-                }
-                else {
+                } else {
                     playSound("Error.mp3");
                     warn(`Failed to teleport to empire ${availableEmpire}. It may not exist or is not available.`);
                     print("Player ID: " + LOCAL_PLAYER.UserId);
@@ -254,11 +259,15 @@ export default class StartWindowController implements OnInit {
             empireOption.Name = availableEmpire;
             empireOption.EmpireIDLabel.Text = availableEmpire;
             empireOption.EmpireInformation.Labels.TitleLabel.Text = empireInfo.name ?? "error";
-            empireOption.EmpireInformation.Labels.OwnerLabel.Text = empireInfo.owner ? "Owned by " + getNameFromUserId(empireInfo.owner) : "could not load info";
+            empireOption.EmpireInformation.Labels.OwnerLabel.Text = empireInfo.owner
+                ? "Owned by " + getNameFromUserId(empireInfo.owner)
+                : "could not load info";
             empireOption.Stats.ItemsLabel.Text = "Items: " + empireInfo.items;
             empireOption.Stats.DateCreatedLabel.Text = "Created: " + os.date("%x", empireInfo.created);
             empireOption.Stats.PlaytimeLabel.Text = "Playtime: " + convertToHHMMSS(empireInfo.playtime ?? 0);
-            const color = (empireInfo.name ? ComputeNameColor(empireInfo.name) : Color3.fromRGB(0, 170, 0)) ?? Color3.fromRGB(0, 170, 0);
+            const color =
+                (empireInfo.name ? ComputeNameColor(empireInfo.name) : Color3.fromRGB(0, 170, 0)) ??
+                Color3.fromRGB(0, 170, 0);
             empireOption.BackgroundColor3 = color;
             empireOption.UIStroke.Color = color;
             paintObjects(empireOption, color);
@@ -267,8 +276,13 @@ export default class StartWindowController implements OnInit {
                 if (empireOption === undefined || empireOption.FindFirstChild("EmpireInformation") === undefined) {
                     return;
                 }
-                empireOption.EmpireInformation.OwnerAvatar.Image = empireInfo.owner ?
-                    Players.GetUserThumbnailAsync(empireInfo.owner, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size150x150)[0] : "";
+                empireOption.EmpireInformation.OwnerAvatar.Image = empireInfo.owner
+                    ? Players.GetUserThumbnailAsync(
+                          empireInfo.owner,
+                          Enum.ThumbnailType.HeadShot,
+                          Enum.ThumbnailSize.Size150x150,
+                      )[0]
+                    : "";
             });
         }
     }
@@ -285,42 +299,55 @@ export default class StartWindowController implements OnInit {
             const success = Packets.createNewEmpire.toServer();
             if (!success) {
                 newEmpireOption.MessageLabel.Text = "You have reached the empire count limit.";
-                task.delay(2, () => newEmpireOption.MessageLabel.Text = ogText);
-            }
-            else {
+                task.delay(2, () => (newEmpireOption.MessageLabel.Text = ogText));
+            } else {
                 newEmpireOption.MessageLabel.Text = ogText;
             }
         });
         newEmpireOption.Parent = START_WINDOW.EmpiresWindow.EmpireOptions;
 
-        this.hotkeysController.setHotkey(START_WINDOW.EmpiresWindow.CloseButton, Enum.KeyCode.X, () => {
-            if (!START_WINDOW.EmpiresWindow.Visible) {
-                return false;
-            }
+        this.hotkeysController.setHotkey(
+            START_WINDOW.EmpiresWindow.CloseButton,
+            Enum.KeyCode.X,
+            () => {
+                if (!START_WINDOW.EmpiresWindow.Visible) {
+                    return false;
+                }
 
-            playSound("MenuClick.mp3");
-            const tween = TweenService.Create(START_WINDOW.EmpiresWindow, new TweenInfo(1), { Position: new UDim2(0.5, 0, 1.4, 0) });
-            tween.Play();
-            tween.Completed.Once(() => START_WINDOW.EmpiresWindow.Visible = false);
-            this.showTitleScreen(true);
-            return true;
-        }, "Close");
-        this.hotkeysController.setHotkey(START_WINDOW.AboutWindow.CloseButton, Enum.KeyCode.X, () => {
-            if (!START_WINDOW.AboutWindow.Visible) {
-                return false;
-            }
+                playSound("MenuClick.mp3");
+                const tween = TweenService.Create(START_WINDOW.EmpiresWindow, new TweenInfo(1), {
+                    Position: new UDim2(0.5, 0, 1.4, 0),
+                });
+                tween.Play();
+                tween.Completed.Once(() => (START_WINDOW.EmpiresWindow.Visible = false));
+                this.showTitleScreen(true);
+                return true;
+            },
+            "Close",
+        );
+        this.hotkeysController.setHotkey(
+            START_WINDOW.AboutWindow.CloseButton,
+            Enum.KeyCode.X,
+            () => {
+                if (!START_WINDOW.AboutWindow.Visible) {
+                    return false;
+                }
 
-            playSound("MenuClose.mp3");
-            const tween = TweenService.Create(START_WINDOW.AboutWindow, new TweenInfo(0.25), { Position: new UDim2(0, 0, -0.5, 0) });
-            tween.Play();
-            tween.Completed.Once(() => START_WINDOW.AboutWindow.Visible = false);
-            this.showTitleScreen(true);
-            return true;
-        }, "Close");
+                playSound("MenuClose.mp3");
+                const tween = TweenService.Create(START_WINDOW.AboutWindow, new TweenInfo(0.25), {
+                    Position: new UDim2(0, 0, -0.5, 0),
+                });
+                tween.Play();
+                tween.Completed.Once(() => (START_WINDOW.AboutWindow.Visible = false));
+                this.showTitleScreen(true);
+                return true;
+            },
+            "Close",
+        );
         const registerOption = (option: typeof START_WINDOW.MainOptions.Play, callback: () => void) => {
             option.Button.MouseEnter.Connect(() => playSound("EmphasisButtonHover.mp3"));
-            option.Button.MouseMoved.Connect(() => option.Button.ImageColor3 = new Color3(0.75, 0.75, 0.75));
-            option.Button.MouseLeave.Connect(() => option.Button.ImageColor3 = new Color3(1, 1, 1));
+            option.Button.MouseMoved.Connect(() => (option.Button.ImageColor3 = new Color3(0.75, 0.75, 0.75)));
+            option.Button.MouseLeave.Connect(() => (option.Button.ImageColor3 = new Color3(1, 1, 1)));
             option.Button.Activated.Connect(() => {
                 playSound("EmphasisMenuSelect.mp3");
                 callback();
@@ -329,7 +356,9 @@ export default class StartWindowController implements OnInit {
         registerOption(START_WINDOW.MainOptions.Play, () => {
             START_WINDOW.EmpiresWindow.Position = new UDim2(0.5, 0, 1.4, 0);
             START_WINDOW.EmpiresWindow.Visible = true;
-            TweenService.Create(START_WINDOW.EmpiresWindow, new TweenInfo(1), { Position: new UDim2(0.5, 0, 0.65, 0) }).Play();
+            TweenService.Create(START_WINDOW.EmpiresWindow, new TweenInfo(1), {
+                Position: new UDim2(0.5, 0, 0.65, 0),
+            }).Play();
             this.hideTitleScreen();
         });
         registerOption(START_WINDOW.MainOptions.Settings, () => {
@@ -339,12 +368,13 @@ export default class StartWindowController implements OnInit {
         registerOption(START_WINDOW.MainOptions.About, () => {
             START_WINDOW.AboutWindow.Position = new UDim2(0, 0, 1.5, 0);
             START_WINDOW.AboutWindow.Visible = true;
-            TweenService.Create(START_WINDOW.AboutWindow, new TweenInfo(0.25), { Position: new UDim2(0, 0, 0.5, 0) }).Play();
+            TweenService.Create(START_WINDOW.AboutWindow, new TweenInfo(0.25), {
+                Position: new UDim2(0, 0, 0.5, 0),
+            }).Play();
             this.hideTitleScreen();
         });
         this.adaptiveTabController.tabHidden.connect((tab) => {
-            if (START_WINDOW.Parent === PLAYER_GUI)
-                this.showTitleScreen(true);
+            if (START_WINDOW.Parent === PLAYER_GUI) this.showTitleScreen(true);
         });
 
         START_WINDOW.EmpiresWindow.PublicEmpireWindow.JoinPublicEmpire.Activated.Connect(() => {
@@ -355,8 +385,7 @@ export default class StartWindowController implements OnInit {
 
         const contributors = new Set<string>();
         for (const [_id, item] of Items.itemsPerId) {
-            if (item.creator !== undefined)
-                contributors.add(item.creator);
+            if (item.creator !== undefined) contributors.add(item.creator);
         }
         START_WINDOW.AboutWindow.Contributors.RecipientLabel.Text = combineHumanReadable(...contributors);
 

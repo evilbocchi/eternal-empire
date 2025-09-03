@@ -1,7 +1,6 @@
-
 /**
  * @fileoverview Client controller responsible for managing and displaying tooltips in the user interface.
- * 
+ *
  * It provides logic for showing item or message tooltips, animating their appearance/disappearance, and formatting item descriptions with metadata and currency highlighting.
  * The Tooltip class encapsulates tooltip data and rendering logic, supporting both generic messages and item-specific tooltips with rich formatting.
  *
@@ -60,7 +59,7 @@ export class Tooltip {
 
     /**
      * Create a Tooltip from a plain message string.
-     * 
+     *
      * @param message The message to display.
      * @returns Tooltip instance.
      */
@@ -72,7 +71,7 @@ export class Tooltip {
 
     /**
      * Create a Tooltip for a specific item, using precomputed metadata.
-     * 
+     *
      * @param item The item to display.
      * @returns Tooltip instance.
      */
@@ -106,7 +105,13 @@ export class Tooltip {
                 }
             }
 
-            const builder = buildRichText(undefined, item.format(description), Color3.fromRGB(195, 195, 195), 18, "Medium");
+            const builder = buildRichText(
+                undefined,
+                item.format(description),
+                Color3.fromRGB(195, 195, 195),
+                18,
+                "Medium",
+            );
             builder.appendAll(this.metadata!.builder);
             itemSlot.MessageLabel.Text = builder.toString();
 
@@ -134,14 +139,19 @@ export default class TooltipController implements OnInit, OnPhysics {
     hideTooltipWindow() {
         const tweenInfo = new TweenInfo(0.1, Enum.EasingStyle.Linear, Enum.EasingDirection.In);
         const tween = TweenService.Create(TOOLTIP_WINDOW, tweenInfo, { BackgroundTransparency: 1 });
-        TweenService.Create(TOOLTIP_WINDOW.MessageLabel, tweenInfo, { TextTransparency: 1, TextStrokeTransparency: 1 }).Play();
+        TweenService.Create(TOOLTIP_WINDOW.MessageLabel, tweenInfo, {
+            TextTransparency: 1,
+            TextStrokeTransparency: 1,
+        }).Play();
         TweenService.Create(TOOLTIP_WINDOW.UIStroke, tweenInfo, { Transparency: 1 }).Play();
 
-        TweenService.Create(TOOLTIP_WINDOW.ItemSlot.UIPadding, tweenInfo,
-            { PaddingTop: new UDim(0, 5), PaddingBottom: new UDim(0, 5) }).Play();
+        TweenService.Create(TOOLTIP_WINDOW.ItemSlot.UIPadding, tweenInfo, {
+            PaddingTop: new UDim(0, 5),
+            PaddingBottom: new UDim(0, 5),
+        }).Play();
 
         tween.Play();
-        tween.Completed.Connect(() => TOOLTIP_WINDOW.Visible = false);
+        tween.Completed.Connect(() => (TOOLTIP_WINDOW.Visible = false));
     }
 
     /**
@@ -152,16 +162,21 @@ export default class TooltipController implements OnInit, OnPhysics {
         TOOLTIP_WINDOW.Visible = true;
         TweenService.Create(TOOLTIP_WINDOW, tweenInfo, { BackgroundTransparency: 0.5 }).Play();
         TweenService.Create(TOOLTIP_WINDOW.UIStroke, tweenInfo, { Transparency: 0.5 }).Play();
-        TweenService.Create(TOOLTIP_WINDOW.MessageLabel, tweenInfo, { TextTransparency: 0, TextStrokeTransparency: 0 }).Play();
+        TweenService.Create(TOOLTIP_WINDOW.MessageLabel, tweenInfo, {
+            TextTransparency: 0,
+            TextStrokeTransparency: 0,
+        }).Play();
 
-        TweenService.Create(TOOLTIP_WINDOW.ItemSlot.UIPadding,
+        TweenService.Create(
+            TOOLTIP_WINDOW.ItemSlot.UIPadding,
             new TweenInfo(0.3, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out),
-            { PaddingTop: new UDim(0, 10), PaddingBottom: new UDim(0, 10) }).Play();
+            { PaddingTop: new UDim(0, 10), PaddingBottom: new UDim(0, 10) },
+        ).Play();
     }
 
     /**
      * Get or create a Tooltip instance for a given GUI object.
-     * 
+     *
      * @param guiObject The GUI object to get a tooltip for.
      * @returns Tooltip instance.
      */
@@ -177,7 +192,7 @@ export default class TooltipController implements OnInit, OnPhysics {
 
     /**
      * Associate a Tooltip with a GUI object and hook up mouse events for tooltip display.
-     * 
+     *
      * @param guiObject The GUI object to associate.
      * @param tooltip The Tooltip instance to associate.
      */
@@ -199,7 +214,7 @@ export default class TooltipController implements OnInit, OnPhysics {
 
     /**
      * Set a plain message as the tooltip for a GUI object.
-     * 
+     *
      * @param guiObject The GUI object to set a message for.
      * @param message The message to display.
      */
@@ -213,7 +228,10 @@ export default class TooltipController implements OnInit, OnPhysics {
     onPhysics() {
         const canvasSize = Workspace.CurrentCamera?.ViewportSize;
         if (canvasSize !== undefined) {
-            TOOLTIP_WINDOW.AnchorPoint = new Vector2(canvasSize.X - MOUSE.X < 200 ? 1 : 0, canvasSize.Y - MOUSE.Y < 200 ? 1 : 0);
+            TOOLTIP_WINDOW.AnchorPoint = new Vector2(
+                canvasSize.X - MOUSE.X < 200 ? 1 : 0,
+                canvasSize.Y - MOUSE.Y < 200 ? 1 : 0,
+            );
             TOOLTIP_WINDOW.Position = UDim2.fromOffset(MOUSE.X + 5, MOUSE.Y + 36);
         }
     }
@@ -228,7 +246,10 @@ export default class TooltipController implements OnInit, OnPhysics {
             let description = item.description;
             if (description !== undefined) {
                 for (const [currency, details] of pairs(CURRENCY_DETAILS)) {
-                    [description] = description!.gsub(currency, `<font color="#${details.color.ToHex()}">${currency}</font>`);
+                    [description] = description!.gsub(
+                        currency,
+                        `<font color="#${details.color.ToHex()}">${currency}</font>`,
+                    );
                 }
                 item.description = description;
             }

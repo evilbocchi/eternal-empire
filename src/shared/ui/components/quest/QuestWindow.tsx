@@ -8,23 +8,14 @@ import BasicWindow from "shared/ui/components/window/BasicWindow";
 import ProgressBar from "shared/ui/components/window/ProgressBar";
 import { RobotoSlabHeavy } from "shared/ui/GameFonts";
 
-
-export default function QuestWindow({ visible, onClose }: { visible: boolean; onClose: () => void; }) {
-
-    const {
-        questInfo,
-        stagePerQuest,
-        level,
-        xp,
-        trackedQuest,
-        onTrackQuest
-    } = useQuestData();
+export default function QuestWindow({ visible, onClose }: { visible: boolean; onClose: () => void }) {
+    const { questInfo, stagePerQuest, level, xp, trackedQuest, onTrackQuest } = useQuestData();
     const maxXp = getMaxXp(level);
 
     const [expandedQuests, setExpandedQuests] = useState(new Set<string>());
 
     const handleToggleQuestContent = useCallback((questId: string) => {
-        setExpandedQuests(prev => {
+        setExpandedQuests((prev) => {
             const newSet = table.clone(prev);
             if (newSet.has(questId)) {
                 playSound("CheckOff.mp3");
@@ -37,13 +28,16 @@ export default function QuestWindow({ visible, onClose }: { visible: boolean; on
         });
     }, []);
 
-    const handleTrackQuest = useCallback((questId: string) => {
-        if (trackedQuest === questId) {
-            onTrackQuest(undefined); // Untrack
-        } else {
-            onTrackQuest(questId); // Track
-        }
-    }, [trackedQuest, onTrackQuest]);
+    const handleTrackQuest = useCallback(
+        (questId: string) => {
+            if (trackedQuest === questId) {
+                onTrackQuest(undefined); // Untrack
+            } else {
+                onTrackQuest(questId); // Track
+            }
+        },
+        [trackedQuest, onTrackQuest],
+    );
 
     const sortedQuests = useMemo(() => {
         const quests = new Array<[string, QuestInfo]>();
@@ -76,8 +70,7 @@ export default function QuestWindow({ visible, onClose }: { visible: boolean; on
 
                 // Otherwise sort by level then order
                 const levelDiff = aQuest.level - bQuest.level;
-                if (levelDiff !== 0)
-                    return levelDiff < 0;
+                if (levelDiff !== 0) return levelDiff < 0;
 
                 return aQuest.order < bQuest.order;
             });
@@ -85,10 +78,12 @@ export default function QuestWindow({ visible, onClose }: { visible: boolean; on
 
     return (
         <BasicWindow
-            colorSequence={new ColorSequence([
-                new ColorSequenceKeypoint(0, Color3.fromRGB(255, 94, 94)),
-                new ColorSequenceKeypoint(1, Color3.fromRGB(255, 18, 18)),
-            ])}
+            colorSequence={
+                new ColorSequence([
+                    new ColorSequenceKeypoint(0, Color3.fromRGB(255, 94, 94)),
+                    new ColorSequenceKeypoint(1, Color3.fromRGB(255, 18, 18)),
+                ])
+            }
             title="Quests"
             icon={getAsset("assets/Quests.png")}
             visible={visible}
@@ -103,12 +98,7 @@ export default function QuestWindow({ visible, onClose }: { visible: boolean; on
             />
 
             {/* Level and XP Progress */}
-            <frame
-                key="Level"
-                BackgroundTransparency={1}
-                LayoutOrder={-1}
-                Size={new UDim2(1, 0, 0, 32)}
-            >
+            <frame key="Level" BackgroundTransparency={1} LayoutOrder={-1} Size={new UDim2(1, 0, 0, 32)}>
                 {/* Current Level Display */}
                 <frame
                     key="Current"
@@ -125,7 +115,12 @@ export default function QuestWindow({ visible, onClose }: { visible: boolean; on
                         Thickness={3}
                     >
                         <uigradient
-                            Color={new ColorSequence([new ColorSequenceKeypoint(0, Color3.fromRGB(255, 223, 62)), new ColorSequenceKeypoint(1, Color3.fromRGB(255, 137, 3))])}
+                            Color={
+                                new ColorSequence([
+                                    new ColorSequenceKeypoint(0, Color3.fromRGB(255, 223, 62)),
+                                    new ColorSequenceKeypoint(1, Color3.fromRGB(255, 137, 3)),
+                                ])
+                            }
                             Rotation={90}
                         />
                     </uistroke>
@@ -145,7 +140,12 @@ export default function QuestWindow({ visible, onClose }: { visible: boolean; on
                         <uistroke Thickness={2} />
                     </textlabel>
                     <uigradient
-                        Color={new ColorSequence([new ColorSequenceKeypoint(0, Color3.fromRGB(255, 223, 41)), new ColorSequenceKeypoint(1, Color3.fromRGB(255, 131, 7))])}
+                        Color={
+                            new ColorSequence([
+                                new ColorSequenceKeypoint(0, Color3.fromRGB(255, 223, 41)),
+                                new ColorSequenceKeypoint(1, Color3.fromRGB(255, 131, 7)),
+                            ])
+                        }
                         Rotation={90}
                     />
                 </frame>
@@ -155,10 +155,12 @@ export default function QuestWindow({ visible, onClose }: { visible: boolean; on
                     current={xp}
                     max={maxXp}
                     text={`${xp}/${maxXp} XP to Lv. ${level + 1}`}
-                    colorSequence={new ColorSequence([
-                        new ColorSequenceKeypoint(0, Color3.fromRGB(255, 170, 255)),
-                        new ColorSequenceKeypoint(1, Color3.fromRGB(189, 58, 255))
-                    ])}
+                    colorSequence={
+                        new ColorSequence([
+                            new ColorSequenceKeypoint(0, Color3.fromRGB(255, 170, 255)),
+                            new ColorSequenceKeypoint(1, Color3.fromRGB(189, 58, 255)),
+                        ])
+                    }
                     frameProps={{ Size: new UDim2(0.5, 0, 1, 0) }}
                 />
 

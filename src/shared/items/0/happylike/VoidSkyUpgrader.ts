@@ -6,7 +6,9 @@ import CurrencyBundle from "shared/currency/CurrencyBundle";
 
 export = new Item(script.Name)
     .setName("Void Sky Upgrader")
-    .setDescription("Reaching the skies? That was only a dream until now. %mul% droplet value for a cherry on top. You can drop upgraded droplets into cauldrons now, but at a reduced value (1/250).")
+    .setDescription(
+        "Reaching the skies? That was only a dream until now. %mul% droplet value for a cherry on top. You can drop upgraded droplets into cauldrons now, but at a reduced value (1/250).",
+    )
     .setDifficulty(Difficulty.Happylike)
     .setPrice(new CurrencyBundle().set("Funds", 35e30), 1)
     .addPlaceableArea("BarrenIslands")

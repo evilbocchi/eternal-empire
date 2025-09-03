@@ -7,7 +7,9 @@ import DepressingDropper from "./DepressingDropper";
 
 export = new Item(script.Name)
     .setName("Funds Compact Dropper")
-    .setDescription("Free! Just kidding. Go back and buy that Depressing Dropper for a dropper producing %val% droplets per second.")
+    .setDescription(
+        "Free! Just kidding. Go back and buy that Depressing Dropper for a dropper producing %val% droplets per second.",
+    )
     .setDifficulty(Difficulty.Ifinity)
     .setPrice(new CurrencyBundle().set("Funds", 1), 1)
     .setRequiredItemAmount(DepressingDropper, 1)

@@ -4,7 +4,8 @@ import Item from "shared/item/Item";
 
 export = new Item(script.Name)
     .setName("Cruel Blank Essence")
-    .setDescription(`In the beginning, there was only function. The green-lit marvels of order, built by a civilization obsessed with optimization and purity. They believed that progress was linear: input, process, output. Nothing more. Nothing less.
+    .setDescription(
+        `In the beginning, there was only function. The green-lit marvels of order, built by a civilization obsessed with optimization and purity. They believed that progress was linear: input, process, output. Nothing more. Nothing less.
 
 But entropy doesn't like being ignored.
 
@@ -31,9 +32,18 @@ People moved on. They destroyed the machines, the servers, the backups, rotting 
 But the Essence remained.
 Watching.
 Whispering,
-<font color="rgb(255,0,0)" weight="heavy">return null;</font>`
+<font color="rgb(255,0,0)" weight="heavy">return null;</font>`,
     )
     .setTooltipDescription("It remembers what you forgot.")
     .setDifficulty(Difficulty.Spontaneous)
-    .setPrice(new CurrencyBundle().set("Funds", 1e48).set("Power", 1e33).set("Bitcoin", 1e15).set("Skill", 1e9).set("Purifier Clicks", 1e33).set("Dark Matter", 1e33), 1)
+    .setPrice(
+        new CurrencyBundle()
+            .set("Funds", 1e48)
+            .set("Power", 1e33)
+            .set("Bitcoin", 1e15)
+            .set("Skill", 1e9)
+            .set("Purifier Clicks", 1e33)
+            .set("Dark Matter", 1e33),
+        1,
+    )
     .addPlaceableArea("BarrenIslands", "SlamoVillage");

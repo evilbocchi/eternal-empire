@@ -9,7 +9,6 @@ import { isCompletelyInside, isInsidePart } from "@antivivi/vrldk";
  * Represents the bounds of a build area.
  */
 class BuildBounds {
-
     /**
      * The grid of the build area. This is the part that the player can build on.
      * Objects that are placed on this part should be directly above it.
@@ -41,8 +40,7 @@ class BuildBounds {
         const buildBounds = new BuildBounds();
 
         const load = (grid?: Instance) => {
-            if (grid === undefined || grid.Parent !== areaFolder)
-                return;
+            if (grid === undefined || grid.Parent !== areaFolder) return;
             buildBounds.draw(grid as BasePart);
         };
         const areaFolder = area.areaFolder;
@@ -53,13 +51,12 @@ class BuildBounds {
     }
 
     constructor(part?: BasePart) {
-        if (part !== undefined)
-            this.draw(part);
+        if (part !== undefined) this.draw(part);
     }
 
     /**
      * Constructs properties for the build area.
-     * 
+     *
      * @param grid The grid of the build area.
      */
     draw(grid: BasePart) {
@@ -96,7 +93,7 @@ class BuildBounds {
     /**
      * Converts the position of a part to a position that is snapped to the grid.
      * The converted position is relative to the grid.
-     * 
+     *
      * @param size Size of the part.
      * @param position Position of the part.
      * @param rotation Rotation of the part. This is in radians.
@@ -105,8 +102,7 @@ class BuildBounds {
      */
     snap(size: Vector3, position: Vector3, rotation: number, noSnap?: boolean) {
         const canvasCFrame = this.canvasCFrame;
-        if (canvasCFrame === undefined)
-            return;
+        if (canvasCFrame === undefined) return;
 
         const modelSize = CFrame.fromEulerAnglesYXZ(0, rotation, 0).mul(size);
         const modelSizeX = math.abs(modelSize.X);
@@ -122,8 +118,7 @@ class BuildBounds {
             x = lpos.X;
             y = lpos.Y;
             altOffset += this.canvasAltitude! - position.Y;
-        }
-        else {
+        } else {
             x = math.clamp(lpos.X, -size2.X, size2.X);
             y = math.clamp(lpos.Y, -size2.Y, size2.Y);
 
@@ -145,7 +140,6 @@ class BuildBounds {
     isCompletelyInside(hitbox: BasePart) {
         return isCompletelyInside(hitbox.CFrame, hitbox.Size, this.region);
     }
-
 }
 
 export = BuildBounds;

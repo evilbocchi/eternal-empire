@@ -14,7 +14,9 @@ let mode = 0;
 
 export = new Item(script.Name)
     .setName("Electroshocked Coil")
-    .setDescription("Has increasing effects as Power milestones are reached: +3 W by default, +50 W at 1M W and +1000 W at 1T W.")
+    .setDescription(
+        "Has increasing effects as Power milestones are reached: +3 W by default, +50 W at 1M W and +1000 W at 1T W.",
+    )
     .setDifficulty(Difficulty.A)
     .setPrice(new CurrencyBundle().set("Funds", 1e12))
     .setRequiredItemAmount(WhiteGem, 35)
@@ -36,12 +38,10 @@ export = new Item(script.Name)
             if (power === undefined || power.lessThan(1000000)) {
                 upgrader.setAdd(first);
                 mode = 1;
-            }
-            else if (power.lessThan(1e+12)) {
+            } else if (power.lessThan(1e12)) {
                 upgrader.setAdd(second);
                 mode = 2;
-            }
-            else {
+            } else {
                 upgrader.setAdd(third);
                 mode = 3;
             }

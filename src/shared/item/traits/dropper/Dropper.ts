@@ -25,12 +25,11 @@ declare global {
 }
 
 export default class Dropper extends ItemTrait {
-
     /**
      * Wraps an instantiator function to create a droplet.
      * This function will set the parent of the droplet to the DROPLET_STORAGE,
      * set the network owner to the player, and handle lucky droplet spawning.
-     * 
+     *
      * @param instantiator The function that creates the droplet.
      * @param dropper The dropper item that produced the droplet.
      * @param model The model of the item.
@@ -62,8 +61,7 @@ export default class Dropper extends ItemTrait {
                 });
             }
 
-            if (callback !== undefined)
-                callback(droplet, dropper);
+            if (callback !== undefined) callback(droplet, dropper);
             return droplet;
         };
     }
@@ -72,7 +70,7 @@ export default class Dropper extends ItemTrait {
      * Loads the dropper item into the model.
      * This function finds all drop parts in the model, sets their attributes,
      * and initializes the instance info for each drop part.
-     * 
+     *
      * @param model The model to load the dropper into.
      * @param dropper The dropper item to load.
      */
@@ -87,7 +85,7 @@ export default class Dropper extends ItemTrait {
         for (const drop of drops) {
             drop.AddTag("Drop");
             drop.SetAttribute("OriginalSize", drop.Size);
-            let instantiator = dropper.getDroplet(drop.Name)?.getInstantiator(model, drop);
+            const instantiator = dropper.getDroplet(drop.Name)?.getInstantiator(model, drop);
             const areaId = Server.Item.getPlacedItem(model.Name)?.area as AreaId | undefined;
             const info = getAllInstanceInfo(drop);
             info.Area = areaId;
@@ -154,7 +152,7 @@ export default class Dropper extends ItemTrait {
     /**
      * Gets the droplet for a specific drop part.
      * If no droplet is set for the drop part, it returns the default droplet.
-     * 
+     *
      * @param dropPart The name of the drop part to get the droplet for.
      * @returns The droplet for the specified drop part, or the default droplet if not set.
      */
@@ -170,7 +168,7 @@ export default class Dropper extends ItemTrait {
 
     /**
      * Sets the droplet for a specific drop part or the default droplet.
-     * 
+     *
      * @param droplet The droplet to set.
      * @param dropPart The name of the drop part to set the droplet for. If undefined, sets the default droplet.
      * @returns The Dropper instance for chaining.
@@ -186,7 +184,7 @@ export default class Dropper extends ItemTrait {
 
     /**
      * Sets the drop rate of this dropper.
-     * 
+     *
      * @param dropRate The drop rate to set, in droplets per second.
      * @returns The Dropper instance for chaining.
      */
@@ -197,7 +195,7 @@ export default class Dropper extends ItemTrait {
 
     /**
      * Sets a callback that is called when a droplet is produced.
-     * 
+     *
      * @param callback The callback to set. It receives the droplet and the dropper item.
      * @returns The Dropper instance for chaining.
      */
@@ -208,11 +206,9 @@ export default class Dropper extends ItemTrait {
 
     format(str: string) {
         const droplet = this.droplet;
-        if (droplet === undefined)
-            return str;
+        if (droplet === undefined) return str;
         const value = droplet.value;
-        if (value === undefined)
-            return str;
+        if (value === undefined) return str;
 
         str = str.gsub("%%val%%", value.toString(true))[0];
         str = str.gsub("%%health%%", formatRichText(`${droplet.health} HP`, CURRENCY_DETAILS.Health.color))[0];
@@ -231,17 +227,15 @@ export default class Dropper extends ItemTrait {
             const t = tick();
             for (const [_d, info] of this.SPAWNED_DROPS) {
                 const boosts = info.Boosts;
-                if (boosts === undefined)
-                    continue;
-                
+                if (boosts === undefined) continue;
+
                 if (info.LastDrop === undefined) {
                     info.LastDrop = t;
                     continue;
                 }
 
                 let dropRate = info.DropRate;
-                if (dropRate === undefined)
-                    continue;
+                if (dropRate === undefined) continue;
 
                 // Apply weather multipliers
                 if (Server.Atmosphere) {
@@ -249,16 +243,13 @@ export default class Dropper extends ItemTrait {
                     dropRate *= weatherMultipliers.dropRate;
                 }
 
-                for (const [_, boost] of boosts)
-                    dropRate *= boost.dropRateMultiplier ?? 1;
+                for (const [_, boost] of boosts) dropRate *= boost.dropRateMultiplier ?? 1;
 
-                if (dropRate === 0)
-                    continue;
+                if (dropRate === 0) continue;
 
                 if (t > info.LastDrop + 1 / dropRate / speed) {
                     const dropletCount = Server.Area.dropletCountPerArea.get(info.Area!);
-                    if (dropletCount !== undefined && dropletCount > info.DropletLimitValue!.Value)
-                        continue;
+                    if (dropletCount !== undefined && dropletCount > info.DropletLimitValue!.Value) continue;
                     info.LastDrop = t;
                     info.Instantiator!();
                 }

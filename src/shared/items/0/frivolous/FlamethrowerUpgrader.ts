@@ -6,7 +6,9 @@ import Ablaze from "shared/item/traits/status/Ablaze";
 
 export = new Item(script.Name)
     .setName("Flamethrower Upgrader")
-    .setDescription("Applies %ablaze% to droplets hit by the flamethrower, providing a flat x2 boost to ALL currencies. Deals damage over time.")
+    .setDescription(
+        "Applies %ablaze% to droplets hit by the flamethrower, providing a flat x2 boost to ALL currencies. Deals damage over time.",
+    )
     .setDifficulty(Difficulty.Frivolous)
     .setPrice(new CurrencyBundle().set("Purifier Clicks", 1e24), 1)
     .setPrice(new CurrencyBundle().set("Purifier Clicks", 1e27), 2)

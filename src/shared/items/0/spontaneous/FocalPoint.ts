@@ -23,11 +23,12 @@ import VibrantDropper from "shared/items/negative/trueease/VibrantDropper";
 
 export = new Item(script.Name)
     .setName("Focal Point")
-    .setDescription(`The harnessed, harmonized energy of... a point. What point is it?
+    .setDescription(
+        `The harnessed, harmonized energy of... a point. What point is it?
 Scientists don't know. In fact, they don't even know how this item came to be.
 The structure of the Focal Point is said to be the exoskeleton of what was once a powerful entity, now reduced to a mere point of energy.
 
-Produces a %val% droplet every 4 seconds.`
+Produces a %val% droplet every 4 seconds.`,
     )
     .setDifficulty(Difficulty.Spontaneous)
     .setPrice(new CurrencyBundle().set("Funds", 600e42).set("Skill", 20000000).set("Dark Matter", 1e30), 1)

@@ -1,6 +1,6 @@
 /**
  * @fileoverview React hook for managing hover states.
- * 
+ *
  * Provides a simple `useHover` hook that returns hover state and event handlers,
  * eliminating the need to manually write MouseEnter/MouseLeave events every time.
  */
@@ -20,13 +20,13 @@ declare global {
 
 /**
  * Hook that provides hover state with custom callbacks
- * 
+ *
  * @param onMove Callback when mouse moves
  * @param onEnter Callback when mouse enters
  * @param onLeave Callback when mouse leaves
  * @param initialState Initial hover state (defaults to false)
  * @returns Object containing hover state and event handlers
- * 
+ *
  * @example
  * ```tsx
  * function MyButton() {
@@ -34,7 +34,7 @@ declare global {
  *     () => playSound("hover.mp3"),
  *     () => playSound("unhover.mp3")
  *   );
- *   
+ *
  *   return (
  *     <textbutton
  *       Text="Button"
@@ -70,6 +70,6 @@ export default function useHover(props: UseHoverProps) {
             MouseMoved: onMoved,
             MouseEnter: onEnter,
             MouseLeave: onLeave,
-        }
+        },
     };
 }

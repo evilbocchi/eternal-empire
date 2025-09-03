@@ -30,19 +30,19 @@ import Softcaps, { performSoftcap } from "shared/Softcaps";
 
 declare global {
     type BalanceOption = Frame & {
-        ImageLabel: ImageLabel,
+        ImageLabel: ImageLabel;
         Amount: Frame & {
-            BalanceLabel: TextLabel,
+            BalanceLabel: TextLabel;
             Income: Frame & {
                 IncomeLabel: TextLabel & {
                     UIStroke: UIStroke;
-                },
+                };
                 SoftcapLabel: TextLabel & {
                     UIStroke: UIStroke;
-                },
+                };
             };
         };
-        UIStroke: UIStroke,
+        UIStroke: UIStroke;
     };
 
     type NavigationOption = Frame & {
@@ -89,8 +89,10 @@ export default class BalanceWindowController implements OnInit {
     /** Whether to format currencies with symbols and separators. */
     isFormatCurrencies = true;
 
-    constructor(private hotkeysController: HotkeysController, private tooltipController: TooltipController) {
-    }
+    constructor(
+        private hotkeysController: HotkeysController,
+        private tooltipController: TooltipController,
+    ) {}
 
     /**
      * Animates and hides the balance window.
@@ -103,7 +105,9 @@ export default class BalanceWindowController implements OnInit {
      * Animates and shows the balance window.
      */
     showBalanceWindow() {
-        TweenService.Create(BALANCE_WINDOW, new TweenInfo(0.5), { Position: this.originalBalanceWindowPosition }).Play();
+        TweenService.Create(BALANCE_WINDOW, new TweenInfo(0.5), {
+            Position: this.originalBalanceWindowPosition,
+        }).Play();
     }
 
     /**
@@ -159,7 +163,7 @@ export default class BalanceWindowController implements OnInit {
         TweenService.Create(diffLabel, tweenInfo, {
             Position: transitioningPosition,
             TextTransparency: 1,
-            Rotation: diffLabel.Rotation + math.random(-45, 45)
+            Rotation: diffLabel.Rotation + math.random(-45, 45),
         }).Play();
         TweenService.Create(diffLabel.UIStroke, tweenInfo, { Transparency: 1 }).Play();
         diffLabel.Parent = INTERFACE;
@@ -192,7 +196,11 @@ export default class BalanceWindowController implements OnInit {
             const softcap = Softcaps[currency];
             let capped = false;
 
-            const tooltipBuilder = new StringBuilder().append("You have ").append(amount.toString()).append(" ").append(currency);
+            const tooltipBuilder = new StringBuilder()
+                .append("You have ")
+                .append(amount.toString())
+                .append(" ")
+                .append(currency);
 
             if (softcap !== undefined) {
                 const builder = new StringBuilder();
@@ -207,13 +215,14 @@ export default class BalanceWindowController implements OnInit {
                 if (div !== undefined) {
                     capped = true;
                     builder.append("/").append(div.toString());
-                    if (lowestStart === undefined || divStarts.lessThan(lowestStart))
-                        lowestStart = divStarts;
+                    if (lowestStart === undefined || divStarts.lessThan(lowestStart)) lowestStart = divStarts;
                 }
                 const softcapLabel = builder.toString();
                 labels.Income.SoftcapLabel.Text = softcapLabel;
                 if (capped === true) {
-                    tooltipBuilder.append(`\n<font color="rgb(255, 0, 0)" size="16">After ${CurrencyBundle.getFormatted(currency, lowestStart)}, a softcap of ${softcapLabel} is applied to ${currency} gain!</font>`);
+                    tooltipBuilder.append(
+                        `\n<font color="rgb(255, 0, 0)" size="16">After ${CurrencyBundle.getFormatted(currency, lowestStart)}, a softcap of ${softcapLabel} is applied to ${currency} gain!</font>`,
+                    );
                 }
             }
 
@@ -236,9 +245,7 @@ export default class BalanceWindowController implements OnInit {
         BALANCE_WINDOW.Balances.NavigationOptions.Visible = this.maxPage > 1;
         BALANCE_WINDOW.Balances.NavigationOptions.PageLabel.Text = CurrencyBundle.getCategory(this.page) ?? "Main";
         const newSize = new UDim2(0, size, 1, 0);
-        if (BALANCE_WINDOW.Balances.CanvasSize !== newSize)
-            BALANCE_WINDOW.Balances.CanvasSize = newSize;
-
+        if (BALANCE_WINDOW.Balances.CanvasSize !== newSize) BALANCE_WINDOW.Balances.CanvasSize = newSize;
     }
 
     /**
@@ -249,7 +256,13 @@ export default class BalanceWindowController implements OnInit {
      * @param action The action to perform on navigation.
      * @param priority Optional hotkey priority.
      */
-    loadNavigationOption(navOption: NavigationOption, hotkey: Enum.KeyCode, label: string, action: () => boolean, priority?: number) {
+    loadNavigationOption(
+        navOption: NavigationOption,
+        hotkey: Enum.KeyCode,
+        label: string,
+        action: () => boolean,
+        priority?: number,
+    ) {
         const highlight = () => {
             TweenService.Create(navOption.ImageButton, new TweenInfo(0.3), { ImageTransparency: 0 }).Play();
         };
@@ -261,16 +274,22 @@ export default class BalanceWindowController implements OnInit {
         navOption.MouseEnter.Connect(() => highlight());
         navOption.MouseMoved.Connect(() => highlight());
         navOption.MouseLeave.Connect(() => unhighlight());
-        this.hotkeysController.setHotkey(navOption.ImageButton, hotkey, () => {
-            if (!BALANCE_WINDOW.Balances.NavigationOptions.Visible) {
-                return false;
-            }
-            const success = action();
-            navOption.ImageButton.Size = new UDim2(1.15, 0, 1.15, 0);
-            TweenService.Create(navOption.ImageButton, new TweenInfo(0.3), { Size: new UDim2(1, 0, 1, 0) }).Play();
-            playSound("MenuClick.mp3");
-            return success;
-        }, label, priority);
+        this.hotkeysController.setHotkey(
+            navOption.ImageButton,
+            hotkey,
+            () => {
+                if (!BALANCE_WINDOW.Balances.NavigationOptions.Visible) {
+                    return false;
+                }
+                const success = action();
+                navOption.ImageButton.Size = new UDim2(1.15, 0, 1.15, 0);
+                TweenService.Create(navOption.ImageButton, new TweenInfo(0.3), { Size: new UDim2(1, 0, 1, 0) }).Play();
+                playSound("MenuClick.mp3");
+                return success;
+            },
+            label,
+            priority,
+        );
     }
 
     /**
@@ -293,14 +312,12 @@ export default class BalanceWindowController implements OnInit {
         }
 
         const camera = Workspace.CurrentCamera;
-        if (camera === undefined)
-            return;
+        if (camera === undefined) return;
         if (at.sub(camera.CFrame.Position).Magnitude > 50) {
             return;
         }
         const [location, withinBounds] = camera.WorldToScreenPoint(at);
-        if (!withinBounds)
-            return;
+        if (!withinBounds) return;
 
         const tweenInfo = new TweenInfo(1, Enum.EasingStyle.Quart, Enum.EasingDirection.In);
         const ySize = ASSETS.CurrencyGain.AbsoluteSize.Y;
@@ -308,18 +325,18 @@ export default class BalanceWindowController implements OnInit {
         const qualityLevel = ItemUtils.UserGameSettings!.SavedQualityLevel;
         for (const [currency, amount] of amountPerCurrency) {
             const details = CURRENCY_DETAILS[currency];
-            if (details === undefined)
-                continue;
+            if (details === undefined) continue;
             const currencyOption = this.getCurrencyOption(currency);
-            if (!currencyOption.Visible)
-                continue;
+            if (!currencyOption.Visible) continue;
 
             const gainWindow = ASSETS.CurrencyGain.Clone();
             gainWindow.ImageLabel.Image = details.image;
             gainWindow.TextLabel.Text = this.format(currency, new OnoeNum(amount));
             gainWindow.TextLabel.TextColor3 = details.color;
             const elementTo = currencyOption.ImageLabel;
-            const destination = elementTo.AbsolutePosition.sub(INTERFACE.AbsolutePosition).add(elementTo.AbsoluteSize.div(2));
+            const destination = elementTo.AbsolutePosition.sub(INTERFACE.AbsolutePosition).add(
+                elementTo.AbsoluteSize.div(2),
+            );
 
             TweenService.Create(gainWindow, tweenInfo, {
                 Position: UDim2.fromOffset(destination.X, destination.Y),
@@ -335,7 +352,7 @@ export default class BalanceWindowController implements OnInit {
             Debris.AddItem(gainWindow, 1);
             gainWindow.Parent = INTERFACE;
             const size = gainWindow.AbsoluteSize;
-            gainWindow.Position = UDim2.fromOffset(location.X - (size.X / 2), location.Y + (i * ySize) + (size.Y / 2));
+            gainWindow.Position = UDim2.fromOffset(location.X - size.X / 2, location.Y + i * ySize + size.Y / 2);
             i++;
         }
     }
@@ -347,10 +364,8 @@ export default class BalanceWindowController implements OnInit {
      * @returns The formatted string.
      */
     format(currency: Currency, amount: OnoeNum) {
-        if (this.isFormatCurrencies)
-            return CurrencyBundle.getFormatted(currency, amount, true);
-        else
-            return tostring(amount);
+        if (this.isFormatCurrencies) return CurrencyBundle.getFormatted(currency, amount, true);
+        else return tostring(amount);
     }
 
     /**
@@ -361,22 +376,25 @@ export default class BalanceWindowController implements OnInit {
             this.showCurrencyGain(at, amountPerCurrency);
         };
 
-        this.loadNavigationOption(BALANCE_WINDOW.Balances.NavigationOptions.Left, Enum.KeyCode.Z, "Previous Page", () => {
-            if (this.page === 1) {
-                this.page = this.maxPage;
-            }
-            else {
-                this.page -= 1;
-            }
-            this.refreshBalanceWindow();
-            return true;
-        });
+        this.loadNavigationOption(
+            BALANCE_WINDOW.Balances.NavigationOptions.Left,
+            Enum.KeyCode.Z,
+            "Previous Page",
+            () => {
+                if (this.page === 1) {
+                    this.page = this.maxPage;
+                } else {
+                    this.page -= 1;
+                }
+                this.refreshBalanceWindow();
+                return true;
+            },
+        );
 
         this.loadNavigationOption(BALANCE_WINDOW.Balances.NavigationOptions.Right, Enum.KeyCode.C, "Next Page", () => {
             if (this.page === this.maxPage) {
                 this.page = 1;
-            }
-            else {
+            } else {
                 this.page += 1;
             }
             this.refreshBalanceWindow();
@@ -407,6 +425,8 @@ export default class BalanceWindowController implements OnInit {
             }
         });
 
-        Packets.settings.observe((value) => this.isFormatCurrencies = INTERFACE.AbsoluteSize.X < 1000 ? false : value.FormatCurrencies);
+        Packets.settings.observe(
+            (value) => (this.isFormatCurrencies = INTERFACE.AbsoluteSize.X < 1000 ? false : value.FormatCurrencies),
+        );
     }
 }

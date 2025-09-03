@@ -16,7 +16,6 @@ declare global {
 }
 
 export default class Ablaze extends StatusEffect {
-
     static BOOST = CurrencyBundle.ones().mul(2);
 
     constructor(item: Item) {
@@ -26,16 +25,19 @@ export default class Ablaze extends StatusEffect {
 
     decorate(dropletModel: BasePart) {
         const dropletInfo = getAllInstanceInfo(dropletModel);
-        this.item.repeat(dropletModel, (dt) => {
-            if (dropletInfo.Incinerated === true)
-                return;
-            dropletInfo.Health! -= 10 * dt;
-        }, 0.5);
+        this.item.repeat(
+            dropletModel,
+            (dt) => {
+                if (dropletInfo.Incinerated === true) return;
+                dropletInfo.Health! -= 10 * dt;
+            },
+            0.5,
+        );
         dropletInfo.Upgrades!.set("Ablaze", {
             Upgrader: Workspace,
             Boost: {
                 mul: Ablaze.BOOST,
-            }
+            },
         });
         ASSETS.StatusEffect.Fire.Clone().Parent = dropletModel;
 

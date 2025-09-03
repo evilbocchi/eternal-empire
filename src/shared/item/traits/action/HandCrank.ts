@@ -16,8 +16,7 @@ export namespace HandCrank {
         });
         const sound = crank.FindFirstChildOfClass("Sound");
         const pp = bp.FindFirstChildOfClass("ProximityPrompt");
-        if (pp === undefined || sound === undefined)
-            return;
+        if (pp === undefined || sound === undefined) return;
         let tween: Tween | undefined = undefined;
         pp.Triggered.Connect(() => {
             if (tick() - t > 1) {

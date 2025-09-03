@@ -12,7 +12,9 @@ const mul = new CurrencyBundle().set("Funds", 0).set("Power", 0);
 
 export = new Item(script.Name)
     .setName("Codependence")
-    .setDescription("The solest form, bewitchering and blood-sucking. A charger that boosts Funds and Power with Power in its entire area, maxing out at %cap%. Ignores charge limits.")
+    .setDescription(
+        "The solest form, bewitchering and blood-sucking. A charger that boosts Funds and Power with Power in its entire area, maxing out at %cap%. Ignores charge limits.",
+    )
     .setDifficulty(Difficulty.InstantWin)
     .setPrice(new CurrencyBundle().set("Power", 1e12), 1)
     .setRequiredItemAmount(BasicBlankEssence, 1)
@@ -25,6 +27,9 @@ export = new Item(script.Name)
     .trait(Charger)
     .ignoresLimit(true)
     .setRadius(999)
-    .applyFormula((v, item) => item.setMul(mul.set("Funds", v).set("Power", v)), () => Server.Currency.get("Power"))
+    .applyFormula(
+        (v, item) => item.setMul(mul.set("Funds", v).set("Power", v)),
+        () => Server.Currency.get("Power"),
+    )
 
     .exit();

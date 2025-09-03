@@ -10,11 +10,9 @@ export = new Command(script.Name)
             CommandAPI.Item.setItemAmount(id, 99);
 
             const primaryPart = item.MODEL?.PrimaryPart;
-            if (primaryPart === undefined)
-                continue;
+            if (primaryPart === undefined) continue;
 
             CommandAPI.Item.serverPlace(id, primaryPart.Position, 0);
         }
-
     })
     .setPermissionLevel(4);

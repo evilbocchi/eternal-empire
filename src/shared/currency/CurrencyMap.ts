@@ -18,34 +18,32 @@ declare global {
 }
 
 namespace CurrencyMap {
-
     const ONE = new OnoeNum(1);
 
     /**
      * Wraps a base currency map into a currency map.
-     * 
+     *
      * @param baseCurrencyMap The base currency map to wrap.
      * @returns The wrapped currency map.
      */
     export function wrap(baseCurrencyMap: BaseCurrencyMap) {
-        for (const [currency, amount] of baseCurrencyMap)
-            baseCurrencyMap.set(currency, new OnoeNum(amount));
+        for (const [currency, amount] of baseCurrencyMap) baseCurrencyMap.set(currency, new OnoeNum(amount));
         return baseCurrencyMap as CurrencyMap;
     }
 
     /**
      * Checks if two currency maps are equal.
-     * 
+     *
      * @param map The first map.
      * @param other The second map.
      * @returns True if the maps are equal, false otherwise.
      */
     export function equals(map: CurrencyMap, other: CurrencyMap) {
-        if (map === other) // same reference
+        if (map === other)
+            // same reference
             return true;
 
-        if (map.size() !== other.size())
-            return false;
+        if (map.size() !== other.size()) return false;
 
         for (const [currency, amount] of map) {
             const otherAmount = other.get(currency);
@@ -74,8 +72,8 @@ namespace CurrencyMap {
      * //   ["Power", new OnoeNum(300)]
      * // ]);
      * ```
-     * 
-     * @param map The map to add to. 
+     *
+     * @param map The map to add to.
      * @param other The map to add from.
      * @param inplace If true, the result will be stored in this map. Otherwise, a new map will be created.
      * @returns The resulting map.
@@ -89,11 +87,9 @@ namespace CurrencyMap {
 
             if (a !== undefined && b !== undefined) {
                 result.set(currency, a.add(b));
-            }
-            else if (a !== undefined) {
+            } else if (a !== undefined) {
                 result.set(currency, a);
-            }
-            else if (b !== undefined) {
+            } else if (b !== undefined) {
                 result.set(currency, b);
             }
         }
@@ -102,7 +98,7 @@ namespace CurrencyMap {
 
     /**
      * Subtracts each currency's amount in the other map from this map.
-     * 
+     *
      * @example
      * ```ts
      * const a = new Map<Currency, OnoeNum>([
@@ -119,7 +115,7 @@ namespace CurrencyMap {
      * //   ["Power", new OnoeNum(100)]
      * // ]);
      * ```
-     * 
+     *
      * @param map The map to subtract from.
      * @param other The map to subtract.
      * @param inplace If true, the result will be stored in this map. Otherwise, a new map will be created.
@@ -134,11 +130,9 @@ namespace CurrencyMap {
 
             if (a !== undefined && b !== undefined) {
                 result.set(currency, a.sub(b));
-            }
-            else if (a !== undefined) {
+            } else if (a !== undefined) {
                 result.set(currency, a);
-            }
-            else if (b !== undefined) {
+            } else if (b !== undefined) {
                 result.set(currency, b.unary());
             }
         }
@@ -147,7 +141,7 @@ namespace CurrencyMap {
 
     /**
      * Multiplies each currency's amount in this map by the other map's amount.
-     * 
+     *
      * @example
      * ```ts
      * const a = new Map<Currency, OnoeNum>([
@@ -165,7 +159,7 @@ namespace CurrencyMap {
      * // ["Power", new OnoeNum(600)],
      * // ["Bitcoin", new OnoeNum(1)]
      * // ]);
-     * 
+     *
      * @param this The map to multiply.
      * @param other  The map to multiply by.
      * @param inplace If true, the result will be stored in this map. Otherwise, a new map will be created.
@@ -182,7 +176,7 @@ namespace CurrencyMap {
 
     /**
      * Multiplies each currency's amount in this map by a constant value.
-     * 
+     *
      * @param map The map to multiply.
      * @param value The value to multiply by.
      * @param inplace If true, the result will be stored in this map. Otherwise, a new map will be created.
@@ -199,7 +193,7 @@ namespace CurrencyMap {
 
     /**
      * Divides each currency's amount in this map by the other map's amount.
-     * 
+     *
      * @param map The map to divide.
      * @param other The map to divide by.
      * @param inplace If true, the result will be stored in this map. Otherwise, a new map will be created.
@@ -216,7 +210,7 @@ namespace CurrencyMap {
 
     /**
      * Divides each currency's amount in this map by a constant value.
-     * 
+     *
      * @param map The map to divide.
      * @param value The value to divide by.
      * @param inplace If true, the result will be stored in this map. Otherwise, a new map will be created.
@@ -233,7 +227,7 @@ namespace CurrencyMap {
 
     /**
      * Raises each currency's amount in this map to the power of the other map's amount.
-     * 
+     *
      * @param map The map to raise to the power.
      * @param other The map to raise by.
      * @param inplace If true, the result will be stored in this map. Otherwise, a new map will be created.
@@ -250,7 +244,7 @@ namespace CurrencyMap {
 
     /**
      * Raises each currency's amount in this map to the power of a constant value.
-     * 
+     *
      * @param map The map to raise to the power.
      * @param value The value to raise by.
      * @param inplace If true, the result will be stored in this map. Otherwise, a new map will be created.
@@ -267,7 +261,7 @@ namespace CurrencyMap {
 
     /**
      * Checks whether the amount of each currency in the balance satisfies the required currency amounts.
-     * 
+     *
      * @param balance The currency amounts to check against.
      * @param required The currency amounts needed.
      * @param result A map to store the resulting currency amounts after subtraction.
@@ -278,7 +272,8 @@ namespace CurrencyMap {
         for (const [currency, amount] of required) {
             const inBalance = balance.get(currency);
             const after = inBalance === undefined ? OnoeNum.unary(amount) : inBalance.sub(amount);
-            if (after.lessThan(0)) { // falls below 0, not enough in balance to cover amount
+            if (after.lessThan(0)) {
+                // falls below 0, not enough in balance to cover amount
                 sufficient = false;
             }
             result?.set(currency, after);

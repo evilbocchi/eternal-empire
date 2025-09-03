@@ -16,7 +16,7 @@ interface PositionWindowProps {
 
 /**
  * PositionWindow displays the player's current coordinates in a styled frame.
- * 
+ *
  * Features a compass icon and coordinates display with gradient styling.
  * The component is designed to be positioned in the top-right corner of the screen.
  */
@@ -25,11 +25,11 @@ export default function PositionWindow({
     visible = true,
     anchorPoint = new Vector2(1, 0),
     windowPosition = new UDim2(1, -20, 0, 10),
-    size = new UDim2(0, 0, 0, 16)
+    size = new UDim2(0, 0, 0, 16),
 }: PositionWindowProps) {
     const positionText = `${math.round(position.X)}, ${math.round(position.Y)}, ${math.round(position.Z)}`;
     const { events } = useMessageTooltip(
-        `Position of your character.\n<font color="rgb(200, 200, 200)" size="16">Use these coordinates to search your way through the world.</font>`
+        `Position of your character.\n<font color="rgb(200, 200, 200)" size="16">Use these coordinates to search your way through the world.</font>`,
     );
 
     return (
@@ -86,10 +86,12 @@ export default function PositionWindow({
 
                 {/* Background Gradient */}
                 <uigradient
-                    Color={new ColorSequence([
-                        new ColorSequenceKeypoint(0, Color3.fromRGB(85, 254, 171)),
-                        new ColorSequenceKeypoint(1, Color3.fromRGB(0, 164, 170))
-                    ])}
+                    Color={
+                        new ColorSequence([
+                            new ColorSequenceKeypoint(0, Color3.fromRGB(85, 254, 171)),
+                            new ColorSequenceKeypoint(1, Color3.fromRGB(0, 164, 170)),
+                        ])
+                    }
                     Rotation={90}
                 />
 
@@ -100,11 +102,13 @@ export default function PositionWindow({
                     Transparency={0.2}
                 >
                     <uigradient
-                        Color={new ColorSequence([
-                            new ColorSequenceKeypoint(0, Color3.fromRGB(255, 255, 255)),
-                            new ColorSequenceKeypoint(0.587, Color3.fromRGB(173, 173, 173)),
-                            new ColorSequenceKeypoint(1, Color3.fromRGB(255, 255, 255))
-                        ])}
+                        Color={
+                            new ColorSequence([
+                                new ColorSequenceKeypoint(0, Color3.fromRGB(255, 255, 255)),
+                                new ColorSequenceKeypoint(0.587, Color3.fromRGB(173, 173, 173)),
+                                new ColorSequenceKeypoint(1, Color3.fromRGB(255, 255, 255)),
+                            ])
+                        }
                         Rotation={80}
                     />
                 </uistroke>
@@ -115,10 +119,7 @@ export default function PositionWindow({
                     SortOrder={Enum.SortOrder.LayoutOrder}
                     VerticalAlignment={Enum.VerticalAlignment.Center}
                 />
-                <uipadding
-                    PaddingLeft={new UDim(0, 10)}
-                    PaddingRight={new UDim(0, 20)}
-                />
+                <uipadding PaddingLeft={new UDim(0, 10)} PaddingRight={new UDim(0, 20)} />
                 <uisizeconstraint MinSize={new Vector2(70, 0)} />
             </imagelabel>
         </frame>

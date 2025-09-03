@@ -23,7 +23,7 @@ import Packets from "shared/Packets";
 declare global {
     interface Assets {
         MostBalanceStat: Frame & {
-            AmountLabel: TextLabel,
+            AmountLabel: TextLabel;
             StatLabel: TextLabel;
         };
     }
@@ -51,21 +51,28 @@ export const STATS_WINDOW = ADAPTIVE_TAB_MAIN_WINDOW.WaitForChild("Stats") as Fr
  */
 @Controller()
 export default class StatsController implements OnInit {
-
     /**
      * Refreshes the raw purifier clicks stat label.
      */
     refreshRawPurifierClicks() {
-        STATS_WINDOW.StatList.RawPurifierClicks.AmountLabel.Text = tostring(LOCAL_PLAYER.GetAttribute("RawPurifierClicks") as number ?? 0);
+        STATS_WINDOW.StatList.RawPurifierClicks.AmountLabel.Text = tostring(
+            (LOCAL_PLAYER.GetAttribute("RawPurifierClicks") as number) ?? 0,
+        );
     }
 
     /**
      * Initializes the StatsController, sets up stat observers and populates the stats window.
      */
     onInit() {
-        Packets.empirePlaytime.observe((value) => STATS_WINDOW.StatList.Playtime.AmountLabel.Text = convertToHHMMSS(value));
-        Packets.sessionTime.observe((value) => STATS_WINDOW.StatList.SessionTime.AmountLabel.Text = convertToHHMMSS(value));
-        Packets.longestSessionTime.observe((value) => STATS_WINDOW.StatList.LongestSessionTime.AmountLabel.Text = convertToHHMMSS(value));
+        Packets.empirePlaytime.observe(
+            (value) => (STATS_WINDOW.StatList.Playtime.AmountLabel.Text = convertToHHMMSS(value)),
+        );
+        Packets.sessionTime.observe(
+            (value) => (STATS_WINDOW.StatList.SessionTime.AmountLabel.Text = convertToHHMMSS(value)),
+        );
+        Packets.longestSessionTime.observe(
+            (value) => (STATS_WINDOW.StatList.LongestSessionTime.AmountLabel.Text = convertToHHMMSS(value)),
+        );
         LOCAL_PLAYER.GetAttributeChangedSignal("RawPurifierClicks").Connect(() => this.refreshRawPurifierClicks());
         this.refreshRawPurifierClicks();
         for (const [currency, details] of pairs(CURRENCY_DETAILS)) {

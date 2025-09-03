@@ -28,10 +28,10 @@ import { paintObjects } from "@antivivi/vrldk";
  */
 @Controller()
 export default class SettingsController implements OnStart {
-
-    constructor(private hotkeysController: HotkeysController, private uiController: UIController) {
-
-    }
+    constructor(
+        private hotkeysController: HotkeysController,
+        private uiController: UIController,
+    ) {}
 
     /**
      * Finds the Enum.KeyCode matching a given value.

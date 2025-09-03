@@ -5,9 +5,7 @@ export = new Command(script.Name)
     .addAlias("cd")
     .setDescription("Delete ALL droplets in ALL areas.")
     .setExecute((_o) => {
-        for (const droplet of DROPLET_STORAGE.GetChildren())
-            if (droplet.IsA("BasePart"))
-                droplet.Destroy();
+        for (const droplet of DROPLET_STORAGE.GetChildren()) if (droplet.IsA("BasePart")) droplet.Destroy();
         CommandAPI.ChatHook.sendServerMessage("Deleted all droplets");
     })
     .setPermissionLevel(2);

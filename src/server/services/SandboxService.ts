@@ -18,13 +18,11 @@ import Sandbox from "shared/Sandbox";
  */
 @Service()
 export default class SandboxService implements OnInit {
-
     /**
      * Initializes the SandboxService. If sandbox mode is enabled, removes all chests from areas.
      */
     onInit() {
-        if (!Sandbox.getEnabled())
-            return;
+        if (!Sandbox.getEnabled()) return;
 
         for (const [_id, area] of pairs(AREAS)) {
             const chestsFolder = area.areaFolder.FindFirstChild("Chests");

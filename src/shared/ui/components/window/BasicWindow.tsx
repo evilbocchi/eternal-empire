@@ -18,7 +18,16 @@ declare global {
     }
 }
 
-export default function BasicWindow({ visible, icon, title, children, onClose, colorSequence, windowId, priority = 0 }: WindowProps) {
+export default function BasicWindow({
+    visible,
+    icon,
+    title,
+    children,
+    onClose,
+    colorSequence,
+    windowId,
+    priority = 0,
+}: WindowProps) {
     const frameRef = useRef<Frame>();
     const [previousVisible, setPreviousVisible] = useState(visible);
     const initialPosition = new UDim2(0.5, 0, 1, -40);
@@ -33,13 +42,12 @@ export default function BasicWindow({ visible, icon, title, children, onClose, c
     }, [onClose]);
 
     useEffect(() => {
-        const action = (visible && !previousVisible) ? "open" : (!visible && previousVisible) ? "close" : undefined;
+        const action = visible && !previousVisible ? "open" : !visible && previousVisible ? "close" : undefined;
         // Handle animation
         if (action) {
             const frame = frameRef.current!;
 
-            if (action === "open")
-                frame.Visible = true;
+            if (action === "open") frame.Visible = true;
 
             const middle = initialPosition;
             const below = middle.sub(new UDim2(0, 0, 0, 30));
@@ -47,7 +55,7 @@ export default function BasicWindow({ visible, icon, title, children, onClose, c
 
             const tweenInfo = action === "open" ? new TweenInfo(0.2) : new TweenInfo(0.1, Enum.EasingStyle.Linear);
             const tween = TweenService.Create(frame, tweenInfo, {
-                Position: action === "open" ? middle : below
+                Position: action === "open" ? middle : below,
             });
 
             tween.Play();
@@ -83,13 +91,15 @@ export default function BasicWindow({ visible, icon, title, children, onClose, c
                 {children}
             </frame>
             <uistroke ApplyStrokeMode={Enum.ApplyStrokeMode.Border} Color={Color3.fromRGB(255, 255, 255)} Thickness={2}>
-                <uigradient
-                    Color={colorSequence}
-                    Rotation={80}
-                />
+                <uigradient Color={colorSequence} Rotation={80} />
             </uistroke>
             <uigradient
-                Color={new ColorSequence([new ColorSequenceKeypoint(0, Color3.fromRGB(35, 35, 35)), new ColorSequenceKeypoint(1, Color3.fromRGB(89, 89, 89))])}
+                Color={
+                    new ColorSequence([
+                        new ColorSequenceKeypoint(0, Color3.fromRGB(35, 35, 35)),
+                        new ColorSequenceKeypoint(1, Color3.fromRGB(89, 89, 89)),
+                    ])
+                }
                 Rotation={270}
             />
             <canvasgroup BackgroundTransparency={1} Size={new UDim2(1, 0, 1, 0)} ZIndex={-5}>

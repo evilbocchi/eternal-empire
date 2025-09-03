@@ -24,5 +24,5 @@ export = new Item(script.Name)
         const instanceInfo = getAllInstanceInfo(drop);
         const modifier: ItemBoost = { placementId: model.Name, ignoresLimitations: false, dropRateMultiplier: 3 };
         instanceInfo.Boosts!.set("HandCrank", modifier);
-        HandCrank.load(model, (t) => modifier.dropRateMultiplier = t < 5 ? 3 : 1);
+        HandCrank.load(model, (t) => (modifier.dropRateMultiplier = t < 5 ? 3 : 1));
     });

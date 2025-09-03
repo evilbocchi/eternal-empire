@@ -34,7 +34,6 @@ export const INTRO_WINDOW = INTERFACE.WaitForChild("IntroWindow") as Frame;
  */
 @Controller()
 export default class IntroController implements OnInit {
-
     isIntroSequenceDone = false;
     isCurrentlyInIntroSequence = false;
 
@@ -42,9 +41,8 @@ export default class IntroController implements OnInit {
         private questsController: QuestsController,
         private adaptiveTabController: AdaptiveTabController,
         private soundController: SoundController,
-        private balanceWindowController: BalanceWindowController
-    ) {
-    }
+        private balanceWindowController: BalanceWindowController,
+    ) {}
 
     /**
      * Plays the intro cutscene sequence, including camera, animation, and UI transitions.
@@ -52,13 +50,10 @@ export default class IntroController implements OnInit {
     doIntroSequence() {
         print("performing intro sequence");
         const humanoid = LOCAL_PLAYER.Character?.FindFirstChildOfClass("Humanoid");
-        if (humanoid === undefined)
-            return;
+        if (humanoid === undefined) return;
         const camera = Workspace.CurrentCamera;
-        if (camera === undefined)
-            return;
-        if (this.isIntroSequenceDone === true)
-            return;
+        if (camera === undefined) return;
+        if (this.isIntroSequenceDone === true) return;
         this.isIntroSequenceDone = true;
         this.isCurrentlyInIntroSequence = true;
         humanoid.RootPart!.CFrame = WAYPOINTS.NewBeginningsPlayerPos.CFrame;
@@ -114,8 +109,7 @@ export default class IntroController implements OnInit {
      */
     onIntroMarkerChanged() {
         const shouldIntro = ReplicatedStorage.GetAttribute("Intro");
-        if (shouldIntro === true)
-            this.doIntroSequence();
+        if (shouldIntro === true) this.doIntroSequence();
         else {
             math.randomseed(42);
             this.soundController.refreshMusic(true);
@@ -130,8 +124,7 @@ export default class IntroController implements OnInit {
      */
     onInit() {
         ReplicatedStorage.GetAttributeChangedSignal("Intro").Connect(() => this.onIntroMarkerChanged());
-        if (Workspace.GetAttribute("IsPublicServer") !== true)
-            this.onIntroMarkerChanged();
+        if (Workspace.GetAttribute("IsPublicServer") !== true) this.onIntroMarkerChanged();
 
         task.spawn(() => {
             const priority = [
@@ -142,8 +135,7 @@ export default class IntroController implements OnInit {
                 getAsset("assets/sounds/QuestNextStage.mp3"),
             ];
             for (const [_, id] of pairs(assets)) {
-                if (!priority.includes(id))
-                    priority.push(id);
+                if (!priority.includes(id)) priority.push(id);
             }
 
             ContentProvider.PreloadAsync(priority);

@@ -17,4 +17,3 @@ export = new Item(script.Name)
     .exit()
 
     .onLoad((model, item) => LaserFan.load(model, item, 80));
-

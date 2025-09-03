@@ -20,12 +20,13 @@ import CurrencyBundle from "shared/currency/CurrencyBundle";
  */
 @Service()
 export default class DarkMatterService implements OnInit {
-
     /** CurrencyBundle storing calculated boosts. */
     boost = new CurrencyBundle();
 
     /** Reference to the SurfaceGui for Dark Matter display. */
-    gui = AREAS.SlamoVillage.areaFolder.FindFirstChild("DarkMatter")?.FindFirstChild("SurfaceGui") as SurfaceGui | undefined;
+    gui = AREAS.SlamoVillage.areaFolder.FindFirstChild("DarkMatter")?.FindFirstChild("SurfaceGui") as
+        | SurfaceGui
+        | undefined;
 
     /** Label displaying the current Dark Matter amount. */
     darkMatterLabel = this.gui?.WaitForChild("DarkMatterLabel") as TextLabel | undefined;
@@ -36,9 +37,7 @@ export default class DarkMatterService implements OnInit {
     /** Label displaying the current Power boost. */
     powerLabel = this.gui?.WaitForChild("PowerLabel") as TextLabel | undefined;
 
-    constructor(private currencyService: CurrencyService) {
-
-    }
+    constructor(private currencyService: CurrencyService) {}
 
     /**
      * Calculates the boost values for Funds and Power based on Dark Matter.
@@ -51,7 +50,10 @@ export default class DarkMatterService implements OnInit {
         const darkMatter = balance.get("Dark Matter") ?? new OnoeNum(0);
         const boost = this.boost;
         boost.set("Funds", darkMatter.equals(0) ? 1 : OnoeNum.log(darkMatter.add(1), 11)?.pow(2).div(4.5).add(1.2));
-        boost.set("Power", darkMatter.lessThan(1000) ? 1 : OnoeNum.log(darkMatter.div(1000), 11)?.pow(2).div(9).add(1.2));
+        boost.set(
+            "Power",
+            darkMatter.lessThan(1000) ? 1 : OnoeNum.log(darkMatter.div(1000), 11)?.pow(2).div(9).add(1.2),
+        );
         return $tuple(boost, darkMatter);
     }
 
@@ -69,7 +71,9 @@ export default class DarkMatterService implements OnInit {
         this.fundsLabel!.Text = `${fundsBoost}x Funds`;
 
         const powerUnlocked = powerBoost?.moreThan(1) === true;
-        this.powerLabel!.Text = powerUnlocked ? `${powerBoost}x Power` : `(${new OnoeNum(1000).sub(darkMatter)} more to unlock!)`;
+        this.powerLabel!.Text = powerUnlocked
+            ? `${powerBoost}x Power`
+            : `(${new OnoeNum(1000).sub(darkMatter)} more to unlock!)`;
         this.powerLabel!.TextSize = powerUnlocked ? 50 : 70;
     }
 
@@ -77,7 +81,8 @@ export default class DarkMatterService implements OnInit {
      * Initializes the service and starts periodic GUI refresh if the GUI exists.
      */
     onInit() {
-        if (this.gui === undefined) // if the GUI is not found, do not continue
+        if (this.gui === undefined)
+            // if the GUI is not found, do not continue
             return;
         task.spawn(() => {
             while (task.wait(1)) {

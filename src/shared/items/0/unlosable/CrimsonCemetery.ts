@@ -10,7 +10,9 @@ import WhiteGem from "shared/items/excavation/WhiteGem";
 
 export = new Item(script.Name)
     .setName("Crimson Cemetery")
-    .setDescription("A bloody moon dyes a forgotten cemetery in crimson red. Deals %hp_add% to droplets for a %mul% gain, though space constraints may pose a challenge...")
+    .setDescription(
+        "A bloody moon dyes a forgotten cemetery in crimson red. Deals %hp_add% to droplets for a %mul% gain, though space constraints may pose a challenge...",
+    )
     .setDifficulty(Difficulty.Unlosable)
     .setPrice(new CurrencyBundle().set("Power", 2e21), 2)
     .setRequiredItemAmount(ExcavationStone, 500)

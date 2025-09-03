@@ -35,7 +35,6 @@ import Sandbox from "shared/Sandbox";
  */
 @Controller()
 export default class BuildController implements OnInit, OnStart {
-
     /**
      * Offset of the selected models from the mouse.
      * The main selection has a blank identity CFrame.
@@ -75,9 +74,7 @@ export default class BuildController implements OnInit, OnStart {
     // State change listeners for React integration
     private stateChangeCallbacks = new Set<() => void>();
 
-    constructor(private hotkeysController: HotkeysController) {
-
-    }
+    constructor(private hotkeysController: HotkeysController) {}
 
     hasSelection(): boolean {
         return !this.selected.isEmpty();
@@ -130,7 +127,7 @@ export default class BuildController implements OnInit, OnStart {
      * @returns True if restricted, false otherwise.
      */
     getRestricted() {
-        const buildLevel = LOCAL_PLAYER.GetAttribute("PermissionLevel") as number | undefined ?? 0;
+        const buildLevel = (LOCAL_PLAYER.GetAttribute("PermissionLevel") as number | undefined) ?? 0;
         return (Packets.permLevels.get()?.build ?? 0) > buildLevel || SHOP_GUI.Enabled;
     }
 
@@ -148,8 +145,7 @@ export default class BuildController implements OnInit, OnStart {
             this.mainSelected = undefined;
             this.setGridTransparency(1);
             Workspace.SetAttribute("BuildMode", false);
-        }
-        else {
+        } else {
             this.setGridTransparency(0.8);
             Workspace.SetAttribute("BuildMode", true);
         }
@@ -168,7 +164,8 @@ export default class BuildController implements OnInit, OnStart {
             lastHovering.SetAttribute("Hovering", false);
         }
         if (model !== undefined) {
-            if (this.selected.has(model)) // don't hover over selected models
+            if (this.selected.has(model))
+                // don't hover over selected models
                 return;
 
             model.SetAttribute("Hovering", true);
@@ -184,7 +181,7 @@ export default class BuildController implements OnInit, OnStart {
         this.selected.set(model, new CFrame());
         this.preselectCFrame = model.PrimaryPart!.CFrame;
         this.mainSelected = model;
-        this.rotationValue.Value = model.GetAttribute("InitialRotation") as number ?? 0;
+        this.rotationValue.Value = (model.GetAttribute("InitialRotation") as number) ?? 0;
 
         this.hover(undefined);
         model.SetAttribute("Selected", true);
@@ -207,11 +204,9 @@ export default class BuildController implements OnInit, OnStart {
      * @param noRefresh If true, skips UI refresh.
      */
     deselectAll(noRefresh?: boolean) {
-        for (const [model] of this.selected)
-            model.Destroy();
+        for (const [model] of this.selected) model.Destroy();
         this.selected.clear();
-        if (noRefresh !== true)
-            this.refresh();
+        if (noRefresh !== true) this.refresh();
     }
 
     /**
@@ -221,11 +216,9 @@ export default class BuildController implements OnInit, OnStart {
     setGridTransparency(transparency: number) {
         for (const [_id, area] of pairs(AREAS)) {
             const grid = area.getGrid();
-            if (grid === undefined)
-                continue;
+            if (grid === undefined) continue;
             const texture = grid.FindFirstChildOfClass("Texture");
-            if (texture === undefined)
-                continue;
+            if (texture === undefined) continue;
             TweenService.Create(texture, this.OPTIONSTWEENINFO, { Transparency: transparency }).Play();
         }
     }
@@ -237,13 +230,15 @@ export default class BuildController implements OnInit, OnStart {
         const data = new Array<PlacingInfo>();
         for (const [selected] of this.selected) {
             const position = selected?.GetAttribute("InitialPosition") as Vector3 | undefined;
-            if (position === undefined)
-                continue;
+            if (position === undefined) continue;
             const rotation = selected?.GetAttribute("InitialRotation") as number | undefined;
-            if (rotation === undefined)
-                continue;
+            if (rotation === undefined) continue;
 
-            data.push({ id: (selected.GetAttribute("UUID") ?? selected.GetAttribute("ItemId")) as string, position, rotation });
+            data.push({
+                id: (selected.GetAttribute("UUID") ?? selected.GetAttribute("ItemId")) as string,
+                position,
+                rotation,
+            });
         }
         Packets.placeItems.toServer(data);
     }
@@ -259,8 +254,7 @@ export default class BuildController implements OnInit, OnStart {
     addPlacingModel(item: Item, uuid?: string, initialPosition?: Vector3, initialRotation?: number) {
         this.debounce = tick();
         const itemModel = item.MODEL?.Clone();
-        if (itemModel === undefined)
-            throw `Item ${item.name} has no model!`;
+        if (itemModel === undefined) throw `Item ${item.name} has no model!`;
 
         itemModel.Name = HttpService.GenerateGUID(false);
         itemModel.AddTag("Placing");
@@ -304,8 +298,7 @@ export default class BuildController implements OnInit, OnStart {
      */
     placeSelected() {
         const mainSelected = this.mainSelected;
-        if (mainSelected === undefined)
-            return false;
+        if (mainSelected === undefined) return false;
 
         const data = new Array<PlacingInfo>();
         let item: Item | undefined;
@@ -313,33 +306,26 @@ export default class BuildController implements OnInit, OnStart {
         const areaId = LOCAL_PLAYER.GetAttribute("Area") as AreaId | undefined;
         const baseplateBounds = this.baseplateBounds;
         const buildBounds = areaId === undefined ? baseplateBounds : AREAS[areaId].buildBounds;
-        if (buildBounds === undefined)
-            return;
+        if (buildBounds === undefined) return;
 
         const grid = buildBounds.grid;
-        if (grid === undefined)
-            return;
+        if (grid === undefined) return;
         const gridRotation = grid.Orientation.Y;
 
         for (const [selected] of this.selected) {
             const itemId = selected.GetAttribute("ItemId") as string | undefined;
-            if (itemId === undefined)
-                return false;
+            if (itemId === undefined) return false;
             item = Items.getItem(itemId);
-            if (item === undefined)
-                return false;
+            if (item === undefined) return false;
 
-            if (ItemPlacement.isTouchingPlacedItem(selected))
-                return false;
+            if (ItemPlacement.isTouchingPlacedItem(selected)) return false;
 
-            if (baseplateBounds === undefined && !ItemPlacement.isInPlaceableArea(selected, item))
-                return false;
+            if (baseplateBounds === undefined && !ItemPlacement.isInPlaceableArea(selected, item)) return false;
 
             const primaryPart = selected.PrimaryPart!;
             const indicator = primaryPart.FindFirstChild("Indicator") as BasePart;
-            if (indicator === undefined)
-                return false;
-            let position = indicator.Position;
+            if (indicator === undefined) return false;
+            const position = indicator.Position;
 
             // find the single number rotation from the CFrame
             const lookVector = primaryPart.CFrame.LookVector;
@@ -353,8 +339,7 @@ export default class BuildController implements OnInit, OnStart {
         this.debounce = tick();
 
         const status = Packets.placeItems.toServer(data);
-        if (status === 0)
-            return false;
+        if (status === 0) return false;
 
         if (status === 1) {
             this.deselectAll();
@@ -374,18 +359,20 @@ export default class BuildController implements OnInit, OnStart {
      */
     onMouseMove(changePos = true, animationsEnabled = this.animationsEnabled) {
         const size = this.selected.size();
-        if (size === 0) { // nothing selected, perform hovering logic
+        if (size === 0) {
+            // nothing selected, perform hovering logic
             MOUSE.TargetFilter = undefined;
             const target = MOUSE.Target;
-            if (target === undefined)
-                return;
+            if (target === undefined) return;
 
             let hovering = target.Parent;
-            if (hovering === undefined ||
+            if (
+                hovering === undefined ||
                 !hovering.IsA("Model") ||
                 hovering.Parent !== PLACED_ITEMS_FOLDER ||
                 target.HasTag("Unhoverable") === true ||
-                target.FindFirstChildOfClass("ClickDetector") !== undefined) {
+                target.FindFirstChildOfClass("ClickDetector") !== undefined
+            ) {
                 hovering = undefined;
             }
 
@@ -401,8 +388,7 @@ export default class BuildController implements OnInit, OnStart {
         // something is selected, perform moving logic
         const areaId = LOCAL_PLAYER.GetAttribute("Area") as AreaId | undefined;
         const buildBounds = areaId === undefined ? this.baseplateBounds : AREAS[areaId].buildBounds;
-        if (buildBounds === undefined)
-            return;
+        if (buildBounds === undefined) return;
 
         MOUSE.TargetFilter = PLACED_ITEMS_FOLDER;
 
@@ -411,31 +397,32 @@ export default class BuildController implements OnInit, OnStart {
         let cframe: CFrame | undefined;
         if (changePos === true) {
             cframe = MOUSE.Hit;
-        }
-        else {
+        } else {
             cframe = mainSelected.PrimaryPart!.CFrame;
         }
 
-        cframe = buildBounds.snap(mainSelected.PrimaryPart!.Size, cframe.Position, math.rad(rotation), rotation % 90 !== 0);
+        cframe = buildBounds.snap(
+            mainSelected.PrimaryPart!.Size,
+            cframe.Position,
+            math.rad(rotation),
+            rotation % 90 !== 0,
+        );
         if (cframe === undefined || cframe.FuzzyEq(this.lastMovedToCFrame)) {
             return;
         }
 
         for (const [selected, offset] of this.selected) {
             const primaryPart = selected.PrimaryPart;
-            if (primaryPart === undefined)
-                continue;
+            if (primaryPart === undefined) continue;
             const indicator = primaryPart.FindFirstChild("Indicator");
-            if (indicator === undefined)
-                continue;
+            if (indicator === undefined) continue;
 
             const relative = cframe.mul(offset);
             (indicator as BasePart).CFrame = relative;
 
             if (animationsEnabled === true)
                 TweenService.Create(primaryPart, this.MOVETWEENINFO, { CFrame: relative }).Play();
-            else
-                primaryPart.CFrame = relative;
+            else primaryPart.CFrame = relative;
         }
         const lastSound = tick() - this.lastMovedTo;
         if (lastSound > 0.05) {
@@ -455,8 +442,7 @@ export default class BuildController implements OnInit, OnStart {
      * Handles mouse down events for selection and dragging.
      */
     onMouseDown() {
-        if (this.getRestricted() === true)
-            return;
+        if (this.getRestricted() === true) return;
 
         this.clicking = true;
 
@@ -472,13 +458,13 @@ export default class BuildController implements OnInit, OnStart {
      * @param useCurrentPos If true, uses the current position for placement.
      */
     onMouseUp(useCurrentPos?: boolean) {
-        if (this.getRestricted() === true)
-            return;
+        if (this.getRestricted() === true) return;
 
         this.clicking = false;
 
         const size = this.selected.size();
-        if (size === 0) { // nothing selected, handle dragging
+        if (size === 0) {
+            // nothing selected, handle dragging
             const hovering = this.hovering;
             const dragging = this.dragging;
             if (hovering !== undefined) {
@@ -490,43 +476,45 @@ export default class BuildController implements OnInit, OnStart {
                         Items.getItem(model.GetAttribute("ItemId") as string)!,
                         model.GetAttribute("UUID") as string | undefined,
                         model.PrimaryPart?.Position,
-                        (model.GetAttribute("Rotation") as number | undefined) ?? 0
+                        (model.GetAttribute("Rotation") as number | undefined) ?? 0,
                     );
                     if (model === hovering) {
                         this.mainSelect(placingModel);
-                    }
-                    else {
-                        this.selected.set(placingModel, hovering.PrimaryPart!.CFrame.Inverse().mul(model.PrimaryPart!.CFrame));
+                    } else {
+                        this.selected.set(
+                            placingModel,
+                            hovering.PrimaryPart!.CFrame.Inverse().mul(model.PrimaryPart!.CFrame),
+                        );
                     }
                 }
                 Packets.unplaceItems.toServer(names);
                 this.onMouseMove(true, false);
             }
 
-            for (const model of dragging)
-                model.SetAttribute("Dragging", false);
+            for (const model of dragging) model.SetAttribute("Dragging", false);
             dragging.clear();
             return;
         }
 
         const selectingCFrame = (this.mainSelected!.PrimaryPart!.FindFirstChild("Indicator") as BasePart).CFrame;
-        if (UserInputService.TouchEnabled === false || useCurrentPos === true || this.lastSelectingCFrame === selectingCFrame) {
+        if (
+            UserInputService.TouchEnabled === false ||
+            useCurrentPos === true ||
+            this.lastSelectingCFrame === selectingCFrame
+        ) {
             for (const [selected] of this.selected) {
                 const primaryPart = selected.PrimaryPart;
-                if (primaryPart === undefined)
-                    continue;
+                if (primaryPart === undefined) continue;
                 const indicator = primaryPart.FindFirstChild("Indicator") as BasePart;
-                if (indicator === undefined)
-                    continue;
+                if (indicator === undefined) continue;
                 primaryPart.CFrame = indicator.CFrame; // snap to indicator
             }
             if (this.placeSelected() === true) {
                 playSound("Place.mp3", undefined, (sound) => {
-                    sound.PlaybackSpeed = (1 / (size + 5)) + 0.84;
+                    sound.PlaybackSpeed = 1 / (size + 5) + 0.84;
                     sound.Volume = 0.7;
                 });
-            }
-            else {
+            } else {
                 playSound("Error.mp3");
             }
             this.lastSelectingCFrame = selectingCFrame;
@@ -539,19 +527,21 @@ export default class BuildController implements OnInit, OnStart {
      * Initializes the BuildController, sets up hotkeys, listeners, and build mode UI.
      */
     onInit() {
-        Packets.settings.observe((value) => this.animationsEnabled = value.BuildAnimation);
+        Packets.settings.observe((value) => (this.animationsEnabled = value.BuildAnimation));
 
         Workspace.CurrentCamera?.GetPropertyChangedSignal("CFrame").Connect(() => {
-            if (UserInputService.TouchEnabled === true && !this.selected.isEmpty())
-                return;
+            if (UserInputService.TouchEnabled === true && !this.selected.isEmpty()) return;
             this.onMouseMove();
         });
 
         UserInputService.InputBegan.Connect((input, gameProcessed) => {
-            if (gameProcessed === true)
-                return;
+            if (gameProcessed === true) return;
 
-            if (input.UserInputType === Enum.UserInputType.Touch || input.UserInputType === Enum.UserInputType.MouseButton1 || input.KeyCode === Enum.KeyCode.ButtonL1) {
+            if (
+                input.UserInputType === Enum.UserInputType.Touch ||
+                input.UserInputType === Enum.UserInputType.MouseButton1 ||
+                input.KeyCode === Enum.KeyCode.ButtonL1
+            ) {
                 this.onMouseDown();
                 if (this.selected.isEmpty()) {
                     this.onMouseMove();
@@ -559,21 +549,18 @@ export default class BuildController implements OnInit, OnStart {
             }
         });
         UserInputService.TouchEnded.Connect((_touch, gameProcessed) => {
-            if (gameProcessed === true)
-                return;
+            if (gameProcessed === true) return;
             this.onMouseUp();
         });
 
         UserInputService.InputChanged.Connect((input, gameProcessed) => {
-            if (gameProcessed === true)
-                return;
+            if (gameProcessed === true) return;
             if (input.UserInputType === Enum.UserInputType.MouseMovement) {
                 this.onMouseMove();
             }
         });
         UserInputService.InputEnded.Connect((input, gameProcessed) => {
-            if (gameProcessed === true)
-                return;
+            if (gameProcessed === true) return;
 
             if (input.UserInputType !== Enum.UserInputType.MouseButton1 && input.KeyCode !== Enum.KeyCode.ButtonL1)
                 return;
@@ -581,35 +568,54 @@ export default class BuildController implements OnInit, OnStart {
             this.onMouseUp();
         });
 
-        this.hotkeysController.bindKey(Enum.KeyCode.Q, () => {
-            if (this.selected.isEmpty() || this.getRestricted() === true)
-                return false;
-            this.revertSelected();
-            this.deselectAll();
-            return true;
-        }, 1, "Deselect");
+        this.hotkeysController.bindKey(
+            Enum.KeyCode.Q,
+            () => {
+                if (this.selected.isEmpty() || this.getRestricted() === true) return false;
+                this.revertSelected();
+                this.deselectAll();
+                return true;
+            },
+            1,
+            "Deselect",
+        );
 
-        this.hotkeysController.bindKey(Enum.KeyCode.R, () => {
-            if (this.selected.isEmpty() || this.getRestricted() === true)
-                return false;
-            this.rotateSelection();
-            return true;
-        }, 1, "Rotate");
+        this.hotkeysController.bindKey(
+            Enum.KeyCode.R,
+            () => {
+                if (this.selected.isEmpty() || this.getRestricted() === true) return false;
+                this.rotateSelection();
+                return true;
+            },
+            1,
+            "Rotate",
+        );
 
-        this.hotkeysController.bindKey(Enum.KeyCode.Delete, () => {
-            if (this.selected.isEmpty() || this.getRestricted() === true)
-                return false;
-            this.deleteSelection();
-            return true;
-        }, 1, "Unplace");
+        this.hotkeysController.bindKey(
+            Enum.KeyCode.Delete,
+            () => {
+                if (this.selected.isEmpty() || this.getRestricted() === true) return false;
+                this.deleteSelection();
+                return true;
+            },
+            1,
+            "Unplace",
+        );
 
-        this.hotkeysController.bindKey(Enum.KeyCode.LeftShift, () => {
-            this.multiselecting = true;
-            return true;
-        }, 1, "Multiselect", undefined, () => {
-            this.multiselecting = false;
-            return true;
-        });
+        this.hotkeysController.bindKey(
+            Enum.KeyCode.LeftShift,
+            () => {
+                this.multiselecting = true;
+                return true;
+            },
+            1,
+            "Multiselect",
+            undefined,
+            () => {
+                this.multiselecting = false;
+                return true;
+            },
+        );
 
         Packets.permLevels.observe(() => this.refresh());
         LOCAL_PLAYER.GetAttributeChangedSignal("PermissionLevel").Connect(() => this.refresh());

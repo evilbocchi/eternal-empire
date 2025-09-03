@@ -1,10 +1,9 @@
-import React, { StrictMode, useEffect, useRef, useState } from "@rbxts/react";
+import React, { useEffect, useRef, useState } from "@rbxts/react";
 import type BuildController from "client/controllers/gameplay/BuildController";
 import type ToolController from "client/controllers/gameplay/ToolController";
 import type InventoryController from "client/controllers/interface/InventoryController";
 import BackpackManager from "shared/ui/components/backpack/BackpackManager";
 import BuildManager from "shared/ui/components/build/BuildManager";
-import { ClickSparkManager } from "shared/ui/components/effect/ClickSpark";
 import HotkeyProvider from "shared/ui/components/hotkeys/HotkeyProvider";
 import InventoryWindow from "shared/ui/components/inventory/InventoryWindow";
 import PositionDisplay from "shared/ui/components/position/PositionDisplay";
@@ -31,7 +30,7 @@ export default function App({ buildController, inventoryController, toolControll
 
     // Function to mount a window
     const mountWindow = (windowName: string) => {
-        setMountedWindows(prev => {
+        setMountedWindows((prev) => {
             if (!prev.includes(windowName)) {
                 return [...prev, windowName];
             }
@@ -55,7 +54,7 @@ export default function App({ buildController, inventoryController, toolControll
 
         // Spawn a new task to unmount after 1 second
         const unmountTask = task.delay(1, () => {
-            setMountedWindows(prev => prev.filter(name => name !== windowName));
+            setMountedWindows((prev) => prev.filter((name) => name !== windowName));
             unmountTasksRef.current.delete(windowName);
         });
 
@@ -85,43 +84,28 @@ export default function App({ buildController, inventoryController, toolControll
             }
             unmountTasksRef.current.clear();
         };
-    }, []); return (
+    }, []);
+
+    return (
         <HotkeyProvider>
             <WindowManager>
                 <TooltipProvider>
-                    <ClickSparkManager />
                     <PositionDisplay />
                     <TrackedQuestWindow />
-                    <BuildManager
-                        buildController={buildController}
-                    />
-                    <BackpackManager
-                        toolController={toolController}
-                    />
+                    <BuildManager buildController={buildController} />
+                    <BackpackManager toolController={toolController} />
 
                     <SidebarButtons onToggleWindow={handleWindowToggle} />
 
-                    {mountedWindows.includes("Settings") && (
-                        <SettingsWindow
-                            visible={activeWindow === "Settings"}
-                            onClose={() => setActiveWindow(undefined)}
-                        />
-                    )}
+                    <SettingsWindow visible={activeWindow === "Settings"} onClose={() => setActiveWindow(undefined)} />
 
-                    {mountedWindows.includes("Quests") && (
-                        <QuestWindow
-                            visible={activeWindow === "Quests"}
-                            onClose={() => setActiveWindow(undefined)}
-                        />
-                    )}
+                    <QuestWindow visible={activeWindow === "Quests"} onClose={() => setActiveWindow(undefined)} />
 
-                    {mountedWindows.includes("Inventory") && (
-                        <InventoryWindow
-                            visible={activeWindow === "Inventory"}
-                            onClose={() => setActiveWindow(undefined)}
-                            inventoryController={inventoryController}
-                        />
-                    )}
+                    <InventoryWindow
+                        visible={activeWindow === "Inventory"}
+                        onClose={() => setActiveWindow(undefined)}
+                        inventoryController={inventoryController}
+                    />
                 </TooltipProvider>
             </WindowManager>
         </HotkeyProvider>

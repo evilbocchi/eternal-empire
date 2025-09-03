@@ -3,7 +3,7 @@ import { RunService, Workspace } from "@rbxts/services";
 
 /**
  * Hook that tracks the player's character position in real-time.
- * 
+ *
  * @param character The player's character model to track
  * @returns The current position as Vector3, or undefined if no character/position available
  */
@@ -37,11 +37,11 @@ export function usePlayerPosition(character?: Model): Vector3 | undefined {
 
 /**
  * Hook that provides the current player's character and position.
- * 
+ *
  * @param player The player to track (defaults to LocalPlayer)
  * @returns Object containing character and current position
  */
-export function useCharacterPosition(player?: Player): { character?: Model, position?: Vector3; } {
+export function useCharacterPosition(player?: Player): { character?: Model; position?: Vector3 } {
     const [character, setCharacter] = useState<Model | undefined>();
 
     // Get position using the character

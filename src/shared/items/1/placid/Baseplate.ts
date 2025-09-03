@@ -6,7 +6,9 @@ import CurrencyBundle from "shared/currency/CurrencyBundle";
 
 export = new Item(script.Name)
     .setName("Baseplate")
-    .setDescription("Stop wasting time rebuilding everything from scratch. Provides a %mul% boost to droplets passing through.")
+    .setDescription(
+        "Stop wasting time rebuilding everything from scratch. Provides a %mul% boost to droplets passing through.",
+    )
     .setDifficulty(Difficulty.Placid)
     .setPrice(new CurrencyBundle().set("Wins", 1), 1, 3)
     .setCreator("CoPKaDT")

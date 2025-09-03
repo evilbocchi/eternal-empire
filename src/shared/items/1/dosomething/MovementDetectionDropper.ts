@@ -24,32 +24,36 @@ export = new Item(script.Name)
         const dropInfo = getAllInstanceInfo(model.WaitForChild("Drop"));
 
         const lastPositions = new WeakMap<Player, Vector3>();
-        item.repeat(model, () => {
-            const players = Players.GetPlayers();
-            let moving = false;
-            for (const player of players) {
-                const character = player.Character;
-                if (!character || !character.PrimaryPart) continue;
+        item.repeat(
+            model,
+            () => {
+                const players = Players.GetPlayers();
+                let moving = false;
+                for (const player of players) {
+                    const character = player.Character;
+                    if (!character || !character.PrimaryPart) continue;
 
-                const position = character.PrimaryPart.Position;
-                if (modelPosition.sub(position).Magnitude > 50) {
-                    // Player is too far away, skip movement detection
-                    lastPositions.delete(player);
-                    continue;
+                    const position = character.PrimaryPart.Position;
+                    if (modelPosition.sub(position).Magnitude > 50) {
+                        // Player is too far away, skip movement detection
+                        lastPositions.delete(player);
+                        continue;
+                    }
+
+                    const lastPosition = lastPositions.get(player);
+
+                    // Check if the player has moved significantly
+                    if (!lastPosition || position.sub(lastPosition).Magnitude > 2) {
+                        moving = true;
+                        lastPositions.set(player, position);
+                    }
                 }
 
-                const lastPosition = lastPositions.get(player);
-
-                // Check if the player has moved significantly
-                if (!lastPosition || position.sub(lastPosition).Magnitude > 2) {
-                    moving = true;
-                    lastPositions.set(player, position);
+                dropInfo.DropRate = moving ? 0.5 : 0; // Set drop rate based on movement
+                if (dropInfo.DropRate === 0) {
+                    dropInfo.LastDrop = tick(); // Make them wait the full 2 seconds
                 }
-            }
-
-            dropInfo.DropRate = moving ? 0.5 : 0; // Set drop rate based on movement
-            if (dropInfo.DropRate === 0) {
-                dropInfo.LastDrop = tick(); // Make them wait the full 2 seconds
-            }
-        }, 0.5);
+            },
+            0.5,
+        );
     });

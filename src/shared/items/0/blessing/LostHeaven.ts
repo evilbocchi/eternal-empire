@@ -6,7 +6,9 @@ import WhiteGem from "shared/items/excavation/WhiteGem";
 
 export = new Item(script.Name)
     .setName("Lost Heaven")
-    .setDescription("Everything around you unbelievably serene, an elysian realm the only thing you imagine in this world. Produces %gain%.")
+    .setDescription(
+        "Everything around you unbelievably serene, an elysian realm the only thing you imagine in this world. Produces %gain%.",
+    )
     .setDifficulty(Difficulty.Blessing)
     .setPrice(new CurrencyBundle().set("Skill", 40).set("Dark Matter", 200000))
     .setRequiredItemAmount(WhiteGem, 100)

@@ -41,7 +41,7 @@ declare global {
     /**
      * Global type alias for the game's API used by items, challenges, quests, and other related content.
      */
-    type Server = APIExposeService['Server'];
+    type Server = APIExposeService["Server"];
 }
 
 /**
@@ -49,7 +49,6 @@ declare global {
  */
 @Service()
 export default class APIExposeService implements OnInit {
-
     constructor(
         private readonly areaService: AreaService,
         private readonly atmosphereService: AtmosphereService,
@@ -74,32 +73,29 @@ export default class APIExposeService implements OnInit {
         private readonly resetService: ResetService,
         private readonly revenueService: RevenueService,
         private readonly setupService: SetupService,
-        private readonly unlockedAreasService: UnlockedAreasService
-    ) {
-
-    }
+        private readonly unlockedAreasService: UnlockedAreasService,
+    ) {}
 
     /**
      * Comprehensive game utilities API exposed to items, challenges, quests, and other related content.
-     * 
+     *
      * Provides access to all major game services and common operations.
      */
     readonly Server = (() => {
         const t = {
-
             /** Whether the Server object is ready for use */
             ready: true,
 
             /**
              * The mutable empire data table.
-             * 
+             *
              * @see {@link DataService.loadedInformation} for information on how this is loaded.
              */
             empireData: this.dataService.empireData,
 
             /**
              * Empire and player data management service.
-             * 
+             *
              * @borrows DataService as dataService
              * @see {@link DataService} for more details.
              */
@@ -107,7 +103,7 @@ export default class APIExposeService implements OnInit {
 
             /**
              * Area management service.
-             * 
+             *
              * @borrows AreaService as areaService
              * @see {@link AreaService} for more details.
              */
@@ -115,7 +111,7 @@ export default class APIExposeService implements OnInit {
 
             /**
              * Atmosphere and weather management service.
-             * 
+             *
              * @borrows AtmosphereService as atmosphereService
              * @see {@link AtmosphereService} for more details.
              */
@@ -123,7 +119,7 @@ export default class APIExposeService implements OnInit {
 
             /**
              * Donation management service.
-             * 
+             *
              * @borrows DonationService as donationService
              * @see {@link DonationService} for more details.
              */
@@ -131,7 +127,7 @@ export default class APIExposeService implements OnInit {
 
             /**
              * Chat hook service for sending messages and managing channels.
-             * 
+             *
              * @borrows ChatHookService as chatHookService
              * @see {@link ChatHookService} for more details.
              */
@@ -139,7 +135,7 @@ export default class APIExposeService implements OnInit {
 
             /**
              * Chest management service.
-             * 
+             *
              * @borrows ChestService as chestService
              * @see {@link ChestService} for more details.
              */
@@ -147,7 +143,7 @@ export default class APIExposeService implements OnInit {
 
             /**
              * Currency and balance management service.
-             * 
+             *
              * @borrows CurrencyService as currencyService
              * @see {@link CurrencyService} for more details.
              */
@@ -155,7 +151,7 @@ export default class APIExposeService implements OnInit {
 
             /**
              * Dialogue service for managing NPC dialogues and interactions.
-             * 
+             *
              * @borrows DialogueService as dialogueService
              * @see {@link DialogueService} for more details.
              */
@@ -163,7 +159,7 @@ export default class APIExposeService implements OnInit {
 
             /**
              * Event tracking and completion service.
-             * 
+             *
              * @borrows EventService as eventService
              * @see {@link EventService} for more details.
              */
@@ -171,7 +167,7 @@ export default class APIExposeService implements OnInit {
 
             /**
              * Item inventory and management service.
-             * 
+             *
              * @borrows ItemService as itemService
              * @see {@link ItemService} for more details.
              */
@@ -183,7 +179,7 @@ export default class APIExposeService implements OnInit {
             NPC: {
                 /**
                  * NPC navigation/pathfinding service.
-                 * 
+                 *
                  * @borrows NPCNavigationService as npcNavigationService
                  * @see {@link NPCNavigationService} for more details.
                  */
@@ -191,7 +187,7 @@ export default class APIExposeService implements OnInit {
 
                 /**
                  * NPC state management service.
-                 * 
+                 *
                  * @borrows NPCStateService as npcStateService
                  * @see {@link NPCStateService} for more details.
                  */
@@ -200,7 +196,7 @@ export default class APIExposeService implements OnInit {
 
             /**
              * Playtime tracking service.
-             * 
+             *
              * @borrows PlaytimeService as playtimeService
              * @see {@link PlaytimeService} for more details.
              */
@@ -208,7 +204,7 @@ export default class APIExposeService implements OnInit {
 
             /**
              * Level and XP management service.
-             * 
+             *
              * @borrows LevelService as levelService
              * @see {@link LevelService} for more details.
              */
@@ -216,7 +212,7 @@ export default class APIExposeService implements OnInit {
 
             /**
              * Leaderboard management service.
-             * 
+             *
              * @borrows LeaderboardService as leaderboardService
              * @see {@link LeaderboardService} for more details.
              */
@@ -224,7 +220,7 @@ export default class APIExposeService implements OnInit {
 
             /**
              * Quest management service.
-             * 
+             *
              * @borrows QuestService as questService
              * @see {@link QuestService} for more details.
              */
@@ -232,7 +228,7 @@ export default class APIExposeService implements OnInit {
 
             /**
              * Handles player resets and related logic.
-             * 
+             *
              * @borrows ResetService as resetService
              * @see {@link ResetService} for more details.
              */
@@ -240,7 +236,7 @@ export default class APIExposeService implements OnInit {
 
             /**
              * Revenue and purchase tracking service.
-             * 
+             *
              * @borrows RevenueService as revenueService
              * @see {@link RevenueService} for more details.
              */
@@ -248,7 +244,7 @@ export default class APIExposeService implements OnInit {
 
             /**
              * Setup and configuration management service.
-             * 
+             *
              * @borrows SetupService as setupService
              * @see {@link SetupService} for more details.
              */
@@ -256,7 +252,7 @@ export default class APIExposeService implements OnInit {
 
             /**
              * Permissions management service.
-             * 
+             *
              * @borrows PermissionsService as permissionsService
              * @see {@link PermissionsService} for more details.
              */
@@ -264,7 +260,7 @@ export default class APIExposeService implements OnInit {
 
             /**
              * Service for unlocking and tracking areas.
-             * 
+             *
              * @borrows UnlockedAreasService as unlockedAreasService
              * @see {@link UnlockedAreasService} for more details.
              */
@@ -272,7 +268,7 @@ export default class APIExposeService implements OnInit {
 
             /**
              * Named upgrade management service.
-             * 
+             *
              * @borrows NamedUpgradeService as namedUpgradeService
              * @see {@link NamedUpgradeService} for more details.
              */
@@ -280,7 +276,7 @@ export default class APIExposeService implements OnInit {
 
             /**
              * Marketplace management service.
-             * 
+             *
              * @borrows MarketplaceService as marketplaceService
              * @see {@link MarketplaceService} for more details.
              */
@@ -288,22 +284,19 @@ export default class APIExposeService implements OnInit {
 
             /**
              * Reference to all registered items.
-             * 
+             *
              * @see {@link Items} for more details.
              */
             items: Items,
         };
-        type noChecking = { [k: string]: unknown; };
+        type noChecking = { [k: string]: unknown };
 
-        for (const [k, v] of pairs(t))
-            (ItemUtils.Server as noChecking)[k] = v;
+        for (const [k, v] of pairs(t)) (ItemUtils.Server as noChecking)[k] = v;
 
         this.moddingService.gameAPILoaded.fire();
 
         return t;
     })();
 
-    onInit() {
-
-    }
+    onInit() {}
 }

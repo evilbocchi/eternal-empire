@@ -1,6 +1,6 @@
 import NPC from "shared/NPC";
 
 export = new NPC()
-.setAnimation("Default", 18130322046)
-.createDefaultMonologue("I hate school. I really, really hate school. Wait, I forgot I don't have school. My bad.")
-.npc;
+    .setAnimation("Default", 18130322046)
+    .createDefaultMonologue("I hate school. I really, really hate school. Wait, I forgot I don't have school. My bad.")
+    .npc;

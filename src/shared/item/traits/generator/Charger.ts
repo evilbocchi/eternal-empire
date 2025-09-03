@@ -22,19 +22,18 @@ declare global {
  * A charger is an item that 'charges' generators, giving them a boost in {@link Generator.passiveGain}.
  */
 export default class Charger extends Operative {
-
     static isInRange(charger: Charger, chargerHitbox: BasePart, generatorHitbox: BasePart) {
         const radius = charger.radius + chargerHitbox.Size.X / 2;
         const hPos = generatorHitbox.Position;
         const hitboxPos = chargerHitbox.Position;
         const xDiff = hPos.X - hitboxPos.X;
         const zDiff = hPos.Z - hitboxPos.Z;
-        return (xDiff * xDiff) + (zDiff * zDiff) <= (radius * radius);
+        return xDiff * xDiff + zDiff * zDiff <= radius * radius;
     }
 
     /**
      * Loads the charger onto the given model.
-     * 
+     *
      * @param model The model to load the charger onto.
      * @param charger The charger to load.
      */
@@ -43,8 +42,7 @@ export default class Charger extends Operative {
         const placementId = model.Name;
 
         const chargerHitbox = model.PrimaryPart;
-        if (chargerHitbox === undefined)
-            return;
+        if (chargerHitbox === undefined) return;
 
         const connection = model.FindFirstChild("ConnectionVFX");
         if (connection !== undefined) {
@@ -55,28 +53,27 @@ export default class Charger extends Operative {
         const chargerMarker = model.FindFirstChild("Marker");
         const area = model.GetAttribute("Area");
         const checkAdd = (generatorModel: Instance) => {
-            if (!generatorModel.IsA("Model"))
-                return;
+            if (!generatorModel.IsA("Model")) return;
 
             const generatorHitbox = generatorModel.PrimaryPart;
-            if (generatorHitbox === undefined || generatorModel.GetAttribute("Area") !== area || !this.isInRange(charger, chargerHitbox, generatorHitbox))
+            if (
+                generatorHitbox === undefined ||
+                generatorModel.GetAttribute("Area") !== area ||
+                !this.isInRange(charger, chargerHitbox, generatorHitbox)
+            )
                 return;
 
             const generatorInfo = getAllInstanceInfo(generatorModel);
             const boosts = generatorInfo.Boosts;
-            if (boosts === undefined || boosts.has(placementId))
-                return;
+            if (boosts === undefined || boosts.has(placementId)) return;
 
             const whitelist = generatorInfo.Boostable!.whitelist;
-            if (!whitelist.isEmpty() && !whitelist.has(chargerId))
-                return;
-
+            if (!whitelist.isEmpty() && !whitelist.has(chargerId)) return;
 
             if (charger.ignoreLimit !== true) {
                 let existing = 0;
                 for (const [_, boost] of boosts) {
-                    if (!boost.ignoresLimitations)
-                        ++existing;
+                    if (!boost.ignoresLimitations) ++existing;
                 }
 
                 if (existing > 1) {
@@ -112,8 +109,7 @@ export default class Charger extends Operative {
             }
         };
         const checkRemove = (generatorModel: Instance) => {
-            if (!generatorModel.IsA("Model"))
-                return;
+            if (!generatorModel.IsA("Model")) return;
             charging.delete(generatorModel);
             const instanceInfo = getAllInstanceInfo(generatorModel);
             Generator.removeBoost(instanceInfo, placementId);
@@ -151,7 +147,7 @@ export default class Charger extends Operative {
 
     /**
      * Constructs a new charger.
-     * 
+     *
      * @param item The item to which this charger belongs.
      */
     constructor(item: Item) {
@@ -161,7 +157,7 @@ export default class Charger extends Operative {
 
     /**
      * Sets whether the charger ignores the limit of two chargers per generator.
-     * 
+     *
      * @param ignoreLimit Whether the charger ignores the limit of two chargers per generator.
      * @returns This charger.
      */
@@ -172,7 +168,7 @@ export default class Charger extends Operative {
 
     /**
      * Sets the maximum distance from the generator that the charger can charge.
-     * 
+     *
      * @param radius The maximum distance from the generator that the charger can charge.
      * @returns This charger.
      */

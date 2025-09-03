@@ -8,7 +8,9 @@ import UpgradeBoardI from "shared/items/negative/trueease/UpgradeBoardI";
 
 export = new Item(script.Name)
     .setName("Slamo Board Automater")
-    .setDescription("Feel bad? Just remember the numerous war crimes this Slamo has committed in its life. It'll automate Upgrade Board I for you as part of its community service.")
+    .setDescription(
+        "Feel bad? Just remember the numerous war crimes this Slamo has committed in its life. It'll automate Upgrade Board I for you as part of its community service.",
+    )
     .setDifficulty(Difficulty.Winsome)
     .setPrice(new CurrencyBundle().set("Power", 400e12).set("Skill", 4), 1)
     .addPlaceableArea("BarrenIslands", "SlamoVillage")
@@ -21,9 +23,13 @@ export = new Item(script.Name)
     .onLoad((model, item) => {
         const upgrades = UpgradeBoardI.trait(UpgradeBoard).upgrades;
 
-        item.repeat(model, () => {
-            for (const upgrade of upgrades) {
-                Server.NamedUpgrade.buyUpgrade(upgrade.id, undefined, undefined, true);
-            }
-        }, 0.1);
+        item.repeat(
+            model,
+            () => {
+                for (const upgrade of upgrades) {
+                    Server.NamedUpgrade.buyUpgrade(upgrade.id, undefined, undefined, true);
+                }
+            },
+            0.1,
+        );
     });

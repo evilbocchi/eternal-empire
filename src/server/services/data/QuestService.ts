@@ -3,20 +3,20 @@
 
 /**
  * @fileoverview Quest progression and stage management system.
- * 
+ *
  * This service handles:
  * - Quest stage progression tracking
  * - Quest completion validation
  * - Quest data persistence and synchronization
  * - Waypoint management for quest navigation
  * - Integration with the sandbox mode
- * 
+ *
  * Quest stages are tracked as numbers:
  * - 0 to N-1: Active stages (where N is the total number of stages)
  * - -1: Quest completed
- * 
+ *
  * The service ensures proper stage progression order and prevents skipping.
- * 
+ *
  * @since 1.0.0
  */
 
@@ -35,27 +35,26 @@ import Sandbox from "shared/Sandbox";
 
 /**
  * Service for managing quest progression and stage tracking.
- * 
+ *
  * Handles the complete quest system including stage advancement,
  * completion validation, and waypoint management for navigation.
  */
 @Service()
 export default class QuestService implements OnInit, OnStart {
-
     readonly CLEANUP_PER_STAGE = new Map<Stage, () => void>();
 
-    constructor(private readonly chatHookService: ChatHookService,
+    constructor(
+        private readonly chatHookService: ChatHookService,
         private readonly dataService: DataService,
         private readonly levelService: LevelService,
         private readonly itemService: ItemService,
-        private readonly dialogueService: DialogueService) {
-
-    }
+        private readonly dialogueService: DialogueService,
+    ) {}
 
     /**
      * Advances a quest to the next stage with validation.
      * Ensures stages are completed in order and handles quest completion.
-     * 
+     *
      * @param quest The quest object to advance.
      * @param current The current stage number that should be completed.
      * @returns The new stage number, or undefined if advancement failed.
@@ -86,7 +85,7 @@ export default class QuestService implements OnInit, OnStart {
 
     /**
      * Checks and triggers the reachability of quest stages based on player level.
-     * 
+     *
      * @param level The player level to check quest reachability (defaults to current level).
      */
     async reachStages(level?: number) {
@@ -103,8 +102,7 @@ export default class QuestService implements OnInit, OnStart {
 
             // Clean up all other stages
             for (let i = 0; i < quest.stages.size(); i++) {
-                if (i !== current)
-                    this.CLEANUP_PER_STAGE.get(quest.stages[i])?.();
+                if (i !== current) this.CLEANUP_PER_STAGE.get(quest.stages[i])?.();
             }
 
             // Skip quests above player level
@@ -141,22 +139,27 @@ export default class QuestService implements OnInit, OnStart {
      */
     giveQuestItem(itemId: string, amount: number) {
         this.itemService.giveItem(itemId, amount);
-        this.chatHookService.sendServerMessage(`[+${amount} ${Items.getItem(itemId)?.name}]`, "tag:hidden;color:255,170,255");
+        this.chatHookService.sendServerMessage(
+            `[+${amount} ${Items.getItem(itemId)?.name}]`,
+            "tag:hidden;color:255,170,255",
+        );
     }
 
     /**
      * Takes a quest item if available and notifies the player.
-     * 
+     *
      * @param itemId The item ID. Unique items are not accepted.
      * @param amount The amount to take.
      * @returns True if successful, false otherwise.
      */
     takeQuestItem(itemId: string, amount: number) {
         const currentAmount = this.itemService.getItemAmount(itemId);
-        if (currentAmount < amount)
-            return false;
+        if (currentAmount < amount) return false;
         this.itemService.setItemAmount(itemId, currentAmount - amount);
-        this.chatHookService.sendServerMessage(`[-${amount} ${Items.getItem(itemId)?.name}]`, "tag:hidden;color:255,170,255");
+        this.chatHookService.sendServerMessage(
+            `[-${amount} ${Items.getItem(itemId)?.name}]`,
+            "tag:hidden;color:255,170,255",
+        );
         return true;
     }
 
@@ -196,13 +199,11 @@ export default class QuestService implements OnInit, OnStart {
      */
     onInit() {
         // Skip quest initialization in sandbox mode
-        if (Sandbox.getEnabled())
-            return;
+        if (Sandbox.getEnabled()) return;
 
         // Configure waypoint objects for quest navigation
         for (const waypoint of WAYPOINTS.GetChildren()) {
-            if (!waypoint.IsA("BasePart"))
-                continue;
+            if (!waypoint.IsA("BasePart")) continue;
 
             // Make waypoints invisible and non-interactive
             waypoint.Transparency = 1;

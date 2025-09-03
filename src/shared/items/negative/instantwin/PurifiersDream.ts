@@ -6,7 +6,9 @@ import CurrencyBundle from "shared/currency/CurrencyBundle";
 
 export = new Item(script.Name)
     .setName("Purifiers' Dream")
-    .setDescription("An unfounded treasure meant solely for the mastery of purification, producing %val% droplets every 2 seconds.")
+    .setDescription(
+        "An unfounded treasure meant solely for the mastery of purification, producing %val% droplets every 2 seconds.",
+    )
     .setDifficulty(Difficulty.InstantWin)
     .setPrice(new CurrencyBundle().set("Funds", 9.9e21).set("Purifier Clicks", 8000), 1)
     .addPlaceableArea("BarrenIslands")

@@ -45,7 +45,7 @@ const EmpireProfileTemplate = {
 
     /**
      * The code that can be used to access the reserved server of this empire.
-     * 
+     *
      * @see {@link TeleportService.TeleportToPrivateServer} for using the access code.
      */
     accessCode: "",
@@ -118,7 +118,7 @@ const EmpireProfileTemplate = {
 
     /**
      * The current quest stages for the player.
-     * 
+     *
      * Badly named, should be `currentQuestStages`.
      */
     quests: new Map<string, number>(),
@@ -230,7 +230,7 @@ const EmpireProfileTemplate = {
      * Key is the leaderboard name, value is the position (1 = first place, 2 = second, etc.)
      * Undefined or 0 means not in top 100.
      */
-    leaderboardPositions: new Map<string, number>()
+    leaderboardPositions: new Map<string, number>(),
 };
 
 export = EmpireProfileTemplate;

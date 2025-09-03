@@ -8,7 +8,9 @@ import { Server } from "shared/item/ItemUtils";
 
 export = new Item(script.Name)
     .setName("Slamo Upgrader")
-    .setDescription("This slamo wants to be a manumatic purifier, but unfortunately it couldn't. It settled to boost Funds and Bitcoin by... Purifier Clicks?")
+    .setDescription(
+        "This slamo wants to be a manumatic purifier, but unfortunately it couldn't. It settled to boost Funds and Bitcoin by... Purifier Clicks?",
+    )
     .setDifficulty(Difficulty.Happylike)
     .setPrice(new CurrencyBundle().set("Funds", 100e30), 1)
     .addPlaceableArea("BarrenIslands", "SlamoVillage")
@@ -19,7 +21,10 @@ export = new Item(script.Name)
     .setFormulaX("pclicks")
 
     .trait(Upgrader)
-    .applyFormula((v, item) => item.setMul(new CurrencyBundle().set("Funds", v).set("Bitcoin", v)), () => Server.Currency.get("Purifier Clicks"))
+    .applyFormula(
+        (v, item) => item.setMul(new CurrencyBundle().set("Funds", v).set("Bitcoin", v)),
+        () => Server.Currency.get("Purifier Clicks"),
+    )
 
     .trait(Conveyor)
     .setSpeed(8)

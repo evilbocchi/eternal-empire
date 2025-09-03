@@ -6,8 +6,6 @@ export = new Command(script.Name)
     .setDescription("<id> : Set the color for color strict items.")
     .setExecute((_o, colorId) => {
         ReplicatedStorage.SetAttribute("ColorStrictColor", tonumber(colorId) ?? 0);
-        CommandAPI.ChatHook.sendServerMessage(
-            `Color strict color set to ${tonumber(colorId) ?? 0}.`,
-        );
+        CommandAPI.ChatHook.sendServerMessage(`Color strict color set to ${tonumber(colorId) ?? 0}.`);
     })
     .setPermissionLevel(4);

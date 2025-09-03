@@ -10,7 +10,9 @@ const mul = new CurrencyBundle();
 
 export = new Item(script.Name)
     .setName("Chromatic Maze")
-    .setDescription("Boosts Funds and Power gain by Bitcoin! Pass droplets through each ring with an elevated conveyor to compound the boost. Though, this is easier said than done...")
+    .setDescription(
+        "Boosts Funds and Power gain by Bitcoin! Pass droplets through each ring with an elevated conveyor to compound the boost. Though, this is easier said than done...",
+    )
     .setDifficulty(Difficulty.Ifinitude)
     .setPrice(new CurrencyBundle().set("Bitcoin", 1e6).set("Skill", 15), 1)
     .setRequiredItemAmount(AdvancedBlankEssence, 1)
@@ -20,6 +22,9 @@ export = new Item(script.Name)
     .setFormulaX("bitcoin")
 
     .trait(Upgrader)
-    .applyFormula((v, item) => item.setMul(mul.set("Funds", v).set("Power", v)), () => Server.Currency.get("Bitcoin"))
+    .applyFormula(
+        (v, item) => item.setMul(mul.set("Funds", v).set("Power", v)),
+        () => Server.Currency.get("Bitcoin"),
+    )
 
     .exit();

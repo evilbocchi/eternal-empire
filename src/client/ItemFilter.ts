@@ -11,7 +11,6 @@ import { getAsset } from "shared/asset/AssetMap";
 import { getSound } from "shared/asset/GameAssets";
 
 declare global {
-
     /**
      * Component for filtering items in the item slot container.
      * Contains trait options and a search box for filtering items based on traits and names.
@@ -32,20 +31,21 @@ declare global {
  * Namespace for item filtering logic.
  */
 namespace ItemFilter {
-
     /**
      * Loads filter options for the item slot container.
-     * 
+     *
      * @param filterOptions Filter options frame.
      * @param callback Callback that is called when the filter options change.
      * @returns Function that fetches the current filter options, calling the callback.
      */
-    export function loadFilterOptions(filterOptions: FilterOptions, callback: (query: string, whitelistedTraits: { [trait in TraitFilterId]: boolean }) => void) {
+    export function loadFilterOptions(
+        filterOptions: FilterOptions,
+        callback: (query: string, whitelistedTraits: { [trait in TraitFilterId]: boolean }) => void,
+    ) {
         const filterItems = () => {
             for (const [trait, enabled] of pairs(whitelistedTraits)) {
                 const traitOption = filterOptions.TraitOptions.FindFirstChild(trait) as ImageButton | undefined;
-                if (traitOption === undefined)
-                    continue;
+                if (traitOption === undefined) continue;
                 traitOption.SetAttribute("Selected", enabled);
             }
             callback(search.Text, whitelistedTraits);
@@ -55,7 +55,7 @@ namespace ItemFilter {
         const search = filterOptions.Search;
         const searchAction = search.Action;
 
-        let previousText = search.Text;
+        const previousText = search.Text;
         search.GetPropertyChangedSignal("Text").Connect(() => {
             const text = search.Text;
             if (text.size() > previousText.size()) {
@@ -73,15 +73,13 @@ namespace ItemFilter {
                         getSound("KeyPress4.mp3").Play();
                         break;
                 }
-            }
-            else {
+            } else {
                 getSound("KeyDelete.mp3").Play();
             }
 
             if (text === "") {
                 searchAction.Image = getAsset("assets/indexing/Search.png");
-            }
-            else {
+            } else {
                 searchAction.Image = getAsset("assets/indexing/Clear.png");
             }
             filterItems();
@@ -100,15 +98,15 @@ namespace ItemFilter {
         });
 
         for (const traitOption of filterOptions.TraitOptions.GetChildren()) {
-            if (!traitOption.IsA("GuiButton"))
-                continue;
+            if (!traitOption.IsA("GuiButton")) continue;
 
             const key = traitOption.IsA("ImageButton") ? "ImageTransparency" : "TextTransparency";
 
             let hovering = false;
-            const update = () => TweenService.Create(traitOption, new TweenInfo(0.2), {
-                [key]: traitOption.GetAttribute("Selected") ? 0 : (hovering ? 0.25 : 0.5)
-            }).Play();
+            const update = () =>
+                TweenService.Create(traitOption, new TweenInfo(0.2), {
+                    [key]: traitOption.GetAttribute("Selected") ? 0 : hovering ? 0.25 : 0.5,
+                }).Play();
 
             traitOption.MouseEnter.Connect(() => {
                 hovering = true;
@@ -125,8 +123,7 @@ namespace ItemFilter {
                     for (const [trait, _enabled] of pairs(whitelistedTraits)) {
                         whitelistedTraits[trait] = false;
                     }
-                }
-                else {
+                } else {
                     whitelistedTraits[trait] = !whitelistedTraits[trait];
                 }
                 filterItems();

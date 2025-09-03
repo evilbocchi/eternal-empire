@@ -25,7 +25,6 @@ import Sandbox from "shared/Sandbox";
  */
 @Service()
 export class LeaderboardService implements OnStart {
-
     /** OrderedDataStore for total time leaderboard. */
     totalTimeStore = DataStoreService.GetOrderedDataStore("TotalTime");
 
@@ -49,15 +48,15 @@ export class LeaderboardService implements OnStart {
 
     constructor(
         private readonly dataService: DataService,
-        private readonly leaderstatsService: LeaderstatsService
-    ) { }
+        private readonly leaderstatsService: LeaderstatsService,
+    ) {}
 
     /**
      * Converts DataStore entries to LeaderboardEntry format.
      * @param lbDatas Raw leaderboard data from DataStore
      * @returns Formatted leaderboard entries
      */
-    private convertToLeaderboardEntries(lbDatas: { key: string, value: unknown; }[]): LeaderboardEntry[] {
+    private convertToLeaderboardEntries(lbDatas: { key: string; value: unknown }[]): LeaderboardEntry[] {
         const entries: LeaderboardEntry[] = [];
         for (let i = 0; i < lbDatas.size(); i++) {
             const data = lbDatas[i];
@@ -65,7 +64,7 @@ export class LeaderboardService implements OnStart {
                 entries.push({
                     place: i + 1,
                     name: data.key,
-                    amount: data.value as number
+                    amount: data.value as number,
                 });
             }
         }
@@ -88,8 +87,7 @@ export class LeaderboardService implements OnStart {
             return;
         }
 
-        if (name !== undefined)
-            store.RemoveAsync(name);
+        if (name !== undefined) store.RemoveAsync(name);
     }
 
     /**
@@ -101,10 +99,8 @@ export class LeaderboardService implements OnStart {
      */
     private updateLeaderboardStore(store: OrderedDataStore, name?: string, amount?: number) {
         if (name !== undefined && (!RunService.IsStudio() || this.debug === true)) {
-            if (amount === undefined)
-                store.RemoveAsync(name);
-            else
-                store.SetAsync(name, amount);
+            if (amount === undefined) store.RemoveAsync(name);
+            else store.SetAsync(name, amount);
         }
         const data = store.GetSortedAsync(false, 100);
         return data.GetCurrentPage();
@@ -125,40 +121,52 @@ export class LeaderboardService implements OnStart {
             this.deleteEntry(this.totalTimeStore, deleteEntries);
             this.deleteEntry(this.levelStore, deleteEntries);
         }
-        this.leaderboardData.set("TimePlayed", this.convertToLeaderboardEntries(
-            this.updateLeaderboardStore(this.totalTimeStore, name, new OnoeNum(profile.playtime).toSingle())
-        ));
-        this.leaderboardData.set("Level", this.convertToLeaderboardEntries(
-            this.updateLeaderboardStore(this.levelStore, name, new OnoeNum(profile.level).toSingle())
-        ));
+        this.leaderboardData.set(
+            "TimePlayed",
+            this.convertToLeaderboardEntries(
+                this.updateLeaderboardStore(this.totalTimeStore, name, new OnoeNum(profile.playtime).toSingle()),
+            ),
+        );
+        this.leaderboardData.set(
+            "Level",
+            this.convertToLeaderboardEntries(
+                this.updateLeaderboardStore(this.levelStore, name, new OnoeNum(profile.level).toSingle()),
+            ),
+        );
 
         for (const currency of CURRENCIES) {
             const lb = LEADERBOARDS.FindFirstChild(currency);
-            if (lb === undefined)
-                continue;
+            if (lb === undefined) continue;
 
-            let mostCurrencies = profile.mostCurrencies.get(currency);
-            let amt = mostCurrencies === undefined ? undefined : new OnoeNum(mostCurrencies).toSingle();
+            const mostCurrencies = profile.mostCurrencies.get(currency);
+            const amt = mostCurrencies === undefined ? undefined : new OnoeNum(mostCurrencies).toSingle();
             const store = DataStoreService.GetOrderedDataStore(currency);
 
-            if (deleteEntries)
-                this.deleteEntry(store, deleteEntries);
-            this.leaderboardData.set(currency, this.convertToLeaderboardEntries(
-                this.updateLeaderboardStore(store, name, amt))
+            if (deleteEntries) this.deleteEntry(store, deleteEntries);
+            this.leaderboardData.set(
+                currency,
+                this.convertToLeaderboardEntries(this.updateLeaderboardStore(store, name, amt)),
             );
         }
 
         for (const player of Players.GetPlayers()) {
-            this.donatedStore.SetAsync(tostring(player.UserId),
-                new OnoeNum(this.leaderstatsService.getLeaderstat(player, "Donated") as number | undefined ?? 0).toSingle());
+            this.donatedStore.SetAsync(
+                tostring(player.UserId),
+                new OnoeNum(
+                    (this.leaderstatsService.getLeaderstat(player, "Donated") as number | undefined) ?? 0,
+                ).toSingle(),
+            );
         }
-        this.leaderboardData.set("Donated",
+        this.leaderboardData.set(
+            "Donated",
             this.convertToLeaderboardEntries(
-                this.donatedStore.GetSortedAsync(false, 100).GetCurrentPage()
+                this.donatedStore
+                    .GetSortedAsync(false, 100)
+                    .GetCurrentPage()
                     .map((value) => {
                         return { key: getNameFromUserId(tonumber(value.key) ?? 0), value: value.value };
-                    })
-            )
+                    }),
+            ),
         );
         Packets.leaderboardData.set(this.leaderboardData);
     }
@@ -167,8 +175,7 @@ export class LeaderboardService implements OnStart {
      * Starts the leaderboard update loop and initializes leaderboards.
      */
     onStart() {
-        if (Sandbox.getEnabled())
-            return;
+        if (Sandbox.getEnabled()) return;
 
         task.spawn(() => {
             this.updateLeaderboards();

@@ -12,7 +12,10 @@ declare global {
         getLeaderboardEntries(leaderboardType: LeaderboardType): LeaderboardEntry[];
 
         /** Subscribe to leaderboard updates */
-        onLeaderboardUpdate(leaderboardType: LeaderboardType, callback: (entries: LeaderboardEntry[]) => void): () => void;
+        onLeaderboardUpdate(
+            leaderboardType: LeaderboardType,
+            callback: (entries: LeaderboardEntry[]) => void,
+        ): () => void;
     }
 }
 
@@ -37,7 +40,7 @@ export default function LiveLeaderboard({
     leaderboardType,
     title,
     valueLabel,
-    maxEntries = 100
+    maxEntries = 100,
 }: LiveLeaderboardProps) {
     // Use the hook to get live leaderboard data
     const entries = useLeaderboardData(dataManager, leaderboardType);

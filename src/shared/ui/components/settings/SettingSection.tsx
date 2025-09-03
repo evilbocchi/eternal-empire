@@ -27,10 +27,12 @@ export default function SettingSection({ title, layoutOrder = 0 }: SettingSectio
             >
                 <uistroke Thickness={2}>
                     <uigradient
-                        Color={new ColorSequence([
-                            new ColorSequenceKeypoint(0, Color3.fromRGB(30, 30, 30)),
-                            new ColorSequenceKeypoint(1, Color3.fromRGB(30, 30, 30))
-                        ])}
+                        Color={
+                            new ColorSequence([
+                                new ColorSequenceKeypoint(0, Color3.fromRGB(30, 30, 30)),
+                                new ColorSequenceKeypoint(1, Color3.fromRGB(30, 30, 30)),
+                            ])
+                        }
                         Rotation={90}
                     />
                 </uistroke>
@@ -44,15 +46,19 @@ export default function SettingSection({ title, layoutOrder = 0 }: SettingSectio
                 Size={new UDim2(1, 0, 0, 3)}
             >
                 <uigradient
-                    Color={new ColorSequence([
-                        new ColorSequenceKeypoint(0, Color3.fromRGB(208, 208, 208)),
-                        new ColorSequenceKeypoint(1, Color3.fromRGB(208, 208, 208))
-                    ])}
-                    Transparency={new NumberSequence([
-                        new NumberSequenceKeypoint(0, 0, 0),
-                        new NumberSequenceKeypoint(0.5, 0, 0),
-                        new NumberSequenceKeypoint(1, 1, 0)
-                    ])}
+                    Color={
+                        new ColorSequence([
+                            new ColorSequenceKeypoint(0, Color3.fromRGB(208, 208, 208)),
+                            new ColorSequenceKeypoint(1, Color3.fromRGB(208, 208, 208)),
+                        ])
+                    }
+                    Transparency={
+                        new NumberSequence([
+                            new NumberSequenceKeypoint(0, 0, 0),
+                            new NumberSequenceKeypoint(0.5, 0, 0),
+                            new NumberSequenceKeypoint(1, 1, 0),
+                        ])
+                    }
                 />
             </frame>
             <uilistlayout SortOrder={Enum.SortOrder.LayoutOrder} />

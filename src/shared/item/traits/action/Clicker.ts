@@ -20,9 +20,7 @@ declare global {
     }
 }
 
-
 export default class Clicker extends ItemTrait {
-
     static load(model: Model, clicker: Clicker) {
         const Items = Server.items;
 
@@ -35,7 +33,7 @@ export default class Clicker extends ItemTrait {
         const clickArea = model.WaitForChild("ClickArea") as BasePart;
         clickArea.CanTouch = true;
         clickArea.CollisionGroup = "ItemHitbox";
-        clickArea.Touched.Connect(() => { });
+        clickArea.Touched.Connect(() => {});
 
         let target: Model | undefined;
         let event: BindableEvent | undefined;
@@ -52,8 +50,7 @@ export default class Clicker extends ItemTrait {
                             return;
                         }
                 }
-            }
-            else if (t > 1 / (clicker.clickRate ?? 999)) {
+            } else if (t > 1 / (clicker.clickRate ?? 999)) {
                 t = 0;
                 if (event === undefined || event.Parent === undefined) {
                     event = target.WaitForChild("MenuClick.mp3") as BindableEvent;
@@ -65,10 +62,8 @@ export default class Clicker extends ItemTrait {
                 }
                 event.Fire(clicker.clickValue * rate);
 
-                if (clicker.onClick !== undefined)
-                    clicker.onClick(model, clicker);
-                if (clicker.replicatingClicks === true)
-                    fireClickRemote();
+                if (clicker.onClick !== undefined) clicker.onClick(model, clicker);
+                if (clicker.replicatingClicks === true) fireClickRemote();
             }
         });
         model.Destroying.Once(() => connection.Disconnect());
@@ -109,6 +104,9 @@ export default class Clicker extends ItemTrait {
     }
 
     format(str: string) {
-        return str.gsub("%%cps%%", formatRichText(`${OnoeNum.toString(this.getCPS())} CPS`, CURRENCY_DETAILS["Purifier Clicks"].color))[0];
+        return str.gsub(
+            "%%cps%%",
+            formatRichText(`${OnoeNum.toString(this.getCPS())} CPS`, CURRENCY_DETAILS["Purifier Clicks"].color),
+        )[0];
     }
 }

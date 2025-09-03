@@ -21,11 +21,15 @@ export = new Item(script.Name)
         const laserInfo = getAllInstanceInfo(laser);
         const sound = laser.WaitForChild("Sound") as Sound;
         laser.Transparency = 1;
-        item.repeat(model, () => {
-            sound.Play();
-            laserInfo.Enabled = true;
-            laser.Transparency = 0.3;
-            TweenService.Create(laser, new TweenInfo(0.5), { Transparency: 1 }).Play();
-            task.delay(0.5, () => laserInfo.Enabled = false);
-        }, 4);
+        item.repeat(
+            model,
+            () => {
+                sound.Play();
+                laserInfo.Enabled = true;
+                laser.Transparency = 0.3;
+                TweenService.Create(laser, new TweenInfo(0.5), { Transparency: 1 }).Play();
+                task.delay(0.5, () => (laserInfo.Enabled = false));
+            },
+            4,
+        );
     });

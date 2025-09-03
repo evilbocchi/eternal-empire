@@ -7,7 +7,9 @@ import Damager from "shared/item/traits/upgrader/Damager";
 
 export = new Item(script.Name)
     .setName("Diamond Intersection Upgrader")
-    .setDescription("I forged a diamond just for you. Let it intersect through your veins for a %mul% boost, dealing %hp_add% to droplets.")
+    .setDescription(
+        "I forged a diamond just for you. Let it intersect through your veins for a %mul% boost, dealing %hp_add% to droplets.",
+    )
     .setDifficulty(Difficulty.AutomaticJoyful)
     .setPrice(new CurrencyBundle().set("Funds", 1.8e36).set("Skill", 800), 1)
     .setPrice(new CurrencyBundle().set("Funds", 5e36).set("Skill", 2000), 2)

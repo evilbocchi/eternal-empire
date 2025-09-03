@@ -13,8 +13,8 @@ import NamedUpgrades from "shared/namedupgrade/NamedUpgrades";
 import Packets from "shared/Packets";
 
 declare global {
-    type ChallengeId = keyof (typeof CHALLENGES);
-    type ChallengeDetails = typeof CHALLENGES[ChallengeId];
+    type ChallengeId = keyof typeof CHALLENGES;
+    type ChallengeDetails = (typeof CHALLENGES)[ChallengeId];
 
     interface Assets {
         VFX: Folder;
@@ -25,9 +25,8 @@ namespace Challenges {
     const meltingEconomyNerf = (level: number) => {
         if (level > 9) {
             return 0.01;
-        }
-        else {
-            return 1 - (level * 0.1);
+        } else {
+            return 1 - level * 0.1;
         }
     };
     export const MeltingEconomy = {
@@ -35,20 +34,20 @@ namespace Challenges {
         description: (level: number) => `Funds gain is heavily nerfed by ^${meltingEconomyNerf(level)}.`,
         color: new ColorSequence(Color3.fromRGB(170, 255, 151), Color3.fromRGB(0, 170, 255)),
         cap: 5,
-        challengeUpgrade: new GainUpgrade().setPow(x => new CurrencyBundle().set("Funds", meltingEconomyNerf(x))),
-        rewardUpgrade: new GainUpgrade().setMul(x => new CurrencyBundle().set("Funds", new OnoeNum(1.75).pow(x))),
+        challengeUpgrade: new GainUpgrade().setPow((x) => new CurrencyBundle().set("Funds", meltingEconomyNerf(x))),
+        rewardUpgrade: new GainUpgrade().setMul((x) => new CurrencyBundle().set("Funds", new OnoeNum(1.75).pow(x))),
         resets: "Skillification",
         goal: [Admiration, Codependence],
         order: 1,
     };
 
     const cwMeteorTween = new TweenInfo(0.5, Enum.EasingStyle.Linear);
-    const cataclysicWorldCd = (level: number) => 22 - (level * 7);
+    const cataclysicWorldCd = (level: number) => 22 - level * 7;
     const spawnMeteor = () => {
         const meteor = ASSETS.VFX.WaitForChild("Meteor").Clone() as BasePart;
         const grid = AREAS.BarrenIslands.getGrid()!;
-        let rand = grid.Size.X * 0.25;
-        let target = grid.Position.add(new Vector3((math.random() - 0.5) * rand, 0, (math.random() - 0.5) * rand));
+        const rand = grid.Size.X * 0.25;
+        const target = grid.Position.add(new Vector3((math.random() - 0.5) * rand, 0, (math.random() - 0.5) * rand));
         meteor.CFrame = CFrame.lookAt(target.add(new Vector3(math.random(-50, 50), 300, math.random(-50, 50))), target);
         TweenService.Create(meteor, cwMeteorTween, { Position: target }).Play();
         meteor.Parent = Workspace;
@@ -70,7 +69,10 @@ namespace Challenges {
                 part.CanCollide = false;
                 part.CanTouch = false;
                 part.CanQuery = false;
-                TweenService.Create(part, new TweenInfo(0.2), { Size: new Vector3(100, 100, 100), Transparency: 1 }).Play();
+                TweenService.Create(part, new TweenInfo(0.2), {
+                    Size: new Vector3(100, 100, 100),
+                    Transparency: 1,
+                }).Play();
                 part.Parent = meteor;
             };
             reverb();
@@ -89,7 +91,8 @@ namespace Challenges {
     };
     export const CataclysmicWorld = {
         name: "Cataclysmic World",
-        description: (level: number) => `Meteors strike your setup every ${cataclysicWorldCd(level)} seconds. Every 4 minutes, the cooldown halves.`,
+        description: (level: number) =>
+            `Meteors strike your setup every ${cataclysicWorldCd(level)} seconds. Every 4 minutes, the cooldown halves.`,
         color: new ColorSequence(Color3.fromRGB(234, 7, 255), Color3.fromRGB(255, 85, 127)),
         cap: 3,
         challengeEffectInterval: 1,
@@ -102,30 +105,31 @@ namespace Challenges {
                 const elapsed = math.floor((empireData.playtime - challengeStart) / 240);
                 meteorCooldown = cataclysicWorldCd(level) / math.pow(2, elapsed);
                 if (meteorCooldown < 0.5) {
-                    forceEnd("Cataclysmic World was forcefully stopped because it was impossible to continue. You could not save the world.");
+                    forceEnd(
+                        "Cataclysmic World was forcefully stopped because it was impossible to continue. You could not save the world.",
+                    );
                     return;
                 }
                 spawnMeteor();
-            }
-            else {
+            } else {
                 meteorCooldown -= dt;
             }
             questMetadata.set("CataclysmicWorldCooldown", meteorCooldown);
-
         },
         resets: "Skillification",
-        rewardUpgrade: new GainUpgrade().setMul(x => new CurrencyBundle().set("Skill", new OnoeNum(1.5).pow(x))),
+        rewardUpgrade: new GainUpgrade().setMul((x) => new CurrencyBundle().set("Skill", new OnoeNum(1.5).pow(x))),
         goal: [Admiration, Codependence],
         order: 2,
     };
 
-    const pinnedProgressNerf = (level: number) => 1 - (level * 0.08);
+    const pinnedProgressNerf = (level: number) => 1 - level * 0.08;
     export const PinnedProgress = {
         name: "Pinned Progress",
-        description: (level: number) => `You cannot place Conveyors down, and an additional ^${pinnedProgressNerf(level)} Funds and Power nerf is applied.`,
+        description: (level: number) =>
+            `You cannot place Conveyors down, and an additional ^${pinnedProgressNerf(level)} Funds and Power nerf is applied.`,
         color: new ColorSequence(Color3.fromRGB(29, 67, 80), Color3.fromRGB(164, 57, 49)),
         cap: 3,
-        challengeUpgrade: new GainUpgrade().setPow(x => {
+        challengeUpgrade: new GainUpgrade().setPow((x) => {
             const res = pinnedProgressNerf(x);
             return new CurrencyBundle().set("Funds", res).set("Power", res);
         }),
@@ -135,19 +139,17 @@ namespace Challenges {
             for (const [name, builder] of types) {
                 if (name === "Conveyor" || name === "Operative") {
                     ++count;
-                }
-                else if (name === "Upgrader") {
+                } else if (name === "Upgrader") {
                     const upgrader = builder as Upgrader;
                     if (upgrader.add !== undefined || upgrader.mul !== undefined || upgrader.pow !== undefined)
                         return false;
-                }
-                else {
+                } else {
                     return false;
                 }
             }
             return count === 2;
         },
-        rewardUpgrade: new GainUpgrade().setMul(x => new CurrencyBundle().set("Power", new OnoeNum(2).pow(x))),
+        rewardUpgrade: new GainUpgrade().setMul((x) => new CurrencyBundle().set("Power", new OnoeNum(2).pow(x))),
         resets: "Skillification",
         goal: [Admiration, Codependence],
         order: 3,
@@ -155,8 +157,8 @@ namespace Challenges {
 }
 
 export const [CHALLENGES, CHALLENGE_UPGRADES, REWARD_UPGRADES] = (function () {
-    type ChallengeId = keyof (typeof Challenges);
-    type ChallengeDetails = Combine<typeof Challenges[ChallengeId]> & { lastEffect: number | undefined; };
+    type ChallengeId = keyof typeof Challenges;
+    type ChallengeDetails = Combine<(typeof Challenges)[ChallengeId]> & { lastEffect: number | undefined };
     const challenges = Challenges as Record<ChallengeId, ChallengeDetails>;
     const challengeUpgrades = new Map<string, string>();
     const rewardUpgrades = new Map<string, string>();

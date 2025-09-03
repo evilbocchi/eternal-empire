@@ -11,8 +11,7 @@ export = new Command(script.Name)
         }
         for (const target of targets) {
             const humanoid = target.Character?.FindFirstChildOfClass("Humanoid");
-            if (humanoid !== undefined)
-                humanoid.TakeDamage(humanoid.Health + 1);
+            if (humanoid !== undefined) humanoid.TakeDamage(humanoid.Health + 1);
         }
         CommandAPI.ChatHook.sendPrivateMessage(o, `Killed players`, "color:138,255,138");
     })

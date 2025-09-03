@@ -12,7 +12,7 @@ const controls = {
 };
 
 // Mock data for different leaderboard types
-const mockEntries: { [key: string]: LeaderboardEntry[]; } = {
+const mockEntries: { [key: string]: LeaderboardEntry[] } = {
     Funds: [
         { place: 1, name: "RichEmpire", amount: 1500000000 },
         { place: 2, name: "MoneyMakers Inc", amount: 987000000 },
@@ -23,7 +23,7 @@ const mockEntries: { [key: string]: LeaderboardEntry[]; } = {
         { place: 7, name: "WealthBuilders", amount: 123000000 },
         { place: 8, name: "FortuneHunters", amount: 89000000 },
         { place: 9, name: "SuccessLtd", amount: 67000000 },
-        { place: 10, name: "EconomyMasters", amount: 45000000 }
+        { place: 10, name: "EconomyMasters", amount: 45000000 },
     ],
     Power: [
         { place: 1, name: "PowerPlant Pro", amount: 850000000 },
@@ -35,7 +35,7 @@ const mockEntries: { [key: string]: LeaderboardEntry[]; } = {
         { place: 7, name: "WattageWorks", amount: 134000000 },
         { place: 8, name: "CircuitCity", amount: 98000000 },
         { place: 9, name: "BatteryBase", amount: 76000000 },
-        { place: 10, name: "ChargeChamps", amount: 54000000 }
+        { place: 10, name: "ChargeChamps", amount: 54000000 },
     ],
     Skill: [
         { place: 1, name: "SkillMaster9000", amount: 750 },
@@ -47,7 +47,7 @@ const mockEntries: { [key: string]: LeaderboardEntry[]; } = {
         { place: 7, name: "CompetentCorp", amount: 398 },
         { place: 8, name: "AbleCorp", amount: 334 },
         { place: 9, name: "CapableInc", amount: 287 },
-        { place: 10, name: "TalentTraders", amount: 234 }
+        { place: 10, name: "TalentTraders", amount: 234 },
     ],
     TimePlayed: [
         { place: 1, name: "AlwaysOnline", amount: 2847 },
@@ -59,7 +59,7 @@ const mockEntries: { [key: string]: LeaderboardEntry[]; } = {
         { place: 7, name: "PatientPlayer", amount: 1067 },
         { place: 8, name: "SteadyGamer", amount: 987 },
         { place: 9, name: "ConsistentUser", amount: 854 },
-        { place: 10, name: "RegularPlayer", amount: 743 }
+        { place: 10, name: "RegularPlayer", amount: 743 },
     ],
     Level: [
         { place: 1, name: "LevelMax", amount: 999 },
@@ -71,7 +71,7 @@ const mockEntries: { [key: string]: LeaderboardEntry[]; } = {
         { place: 7, name: "ExperiencedOne", amount: 523 },
         { place: 8, name: "LeveledUp", amount: 467 },
         { place: 9, name: "ProgressMaker", amount: 398 },
-        { place: 10, name: "RisingPlayer", amount: 334 }
+        { place: 10, name: "RisingPlayer", amount: 334 },
     ],
     Donated: [
         { place: 1, name: "GenerousGiver", amount: 50000000 },
@@ -83,8 +83,8 @@ const mockEntries: { [key: string]: LeaderboardEntry[]; } = {
         { place: 7, name: "HelpfulHero", amount: 9870000 },
         { place: 8, name: "SupportiveOne", amount: 7650000 },
         { place: 9, name: "CaringPlayer", amount: 5430000 },
-        { place: 10, name: "ThoughtfulUser", amount: 3210000 }
-    ]
+        { place: 10, name: "ThoughtfulUser", amount: 3210000 },
+    ],
 };
 
 // Convert amounts to OnoeNum
@@ -103,15 +103,9 @@ export = {
         const entries = mockEntries[selectedType] || mockEntries.Funds;
 
         return (
-            <frame
-                Size={new UDim2(1, 0, 1, 0)}
-            >
+            <frame Size={new UDim2(1, 0, 1, 0)}>
                 {/* Type selector buttons */}
-                <frame
-                    Size={new UDim2(1, 0, 0, 60)}
-                    BackgroundColor3={Color3.fromRGB(30, 30, 30)}
-                    BorderSizePixel={0}
-                >
+                <frame Size={new UDim2(1, 0, 0, 60)} BackgroundColor3={Color3.fromRGB(30, 30, 30)} BorderSizePixel={0}>
                     <uilistlayout
                         FillDirection={Enum.FillDirection.Horizontal}
                         Padding={new UDim(0, 10)}
@@ -122,93 +116,97 @@ export = {
                     <textbutton
                         key="button-Funds"
                         Size={new UDim2(0, 100, 0, 40)}
-                        BackgroundColor3={selectedType === "Funds" ? Color3.fromRGB(0, 170, 0) : Color3.fromRGB(70, 70, 70)}
+                        BackgroundColor3={
+                            selectedType === "Funds" ? Color3.fromRGB(0, 170, 0) : Color3.fromRGB(70, 70, 70)
+                        }
                         BorderSizePixel={0}
                         Text="Funds"
                         TextColor3={Color3.fromRGB(255, 255, 255)}
                         TextScaled={true}
                         Event={{
-                            MouseButton1Click: () => setSelectedType("Funds")
+                            MouseButton1Click: () => setSelectedType("Funds"),
                         }}
                     />
 
                     <textbutton
                         key="button-Power"
                         Size={new UDim2(0, 100, 0, 40)}
-                        BackgroundColor3={selectedType === "Power" ? Color3.fromRGB(0, 170, 0) : Color3.fromRGB(70, 70, 70)}
+                        BackgroundColor3={
+                            selectedType === "Power" ? Color3.fromRGB(0, 170, 0) : Color3.fromRGB(70, 70, 70)
+                        }
                         BorderSizePixel={0}
                         Text="Power"
                         TextColor3={Color3.fromRGB(255, 255, 255)}
                         TextScaled={true}
                         Event={{
-                            MouseButton1Click: () => setSelectedType("Power")
+                            MouseButton1Click: () => setSelectedType("Power"),
                         }}
                     />
 
                     <textbutton
                         key="button-Skill"
                         Size={new UDim2(0, 100, 0, 40)}
-                        BackgroundColor3={selectedType === "Skill" ? Color3.fromRGB(0, 170, 0) : Color3.fromRGB(70, 70, 70)}
+                        BackgroundColor3={
+                            selectedType === "Skill" ? Color3.fromRGB(0, 170, 0) : Color3.fromRGB(70, 70, 70)
+                        }
                         BorderSizePixel={0}
                         Text="Skill"
                         TextColor3={Color3.fromRGB(255, 255, 255)}
                         TextScaled={true}
                         Event={{
-                            MouseButton1Click: () => setSelectedType("Skill")
+                            MouseButton1Click: () => setSelectedType("Skill"),
                         }}
                     />
 
                     <textbutton
                         key="button-Level"
                         Size={new UDim2(0, 100, 0, 40)}
-                        BackgroundColor3={selectedType === "Level" ? Color3.fromRGB(0, 170, 0) : Color3.fromRGB(70, 70, 70)}
+                        BackgroundColor3={
+                            selectedType === "Level" ? Color3.fromRGB(0, 170, 0) : Color3.fromRGB(70, 70, 70)
+                        }
                         BorderSizePixel={0}
                         Text="Level"
                         TextColor3={Color3.fromRGB(255, 255, 255)}
                         TextScaled={true}
                         Event={{
-                            MouseButton1Click: () => setSelectedType("Level")
+                            MouseButton1Click: () => setSelectedType("Level"),
                         }}
                     />
 
                     <textbutton
                         key="button-Donated"
                         Size={new UDim2(0, 100, 0, 40)}
-                        BackgroundColor3={selectedType === "Donated" ? Color3.fromRGB(0, 170, 0) : Color3.fromRGB(70, 70, 70)}
+                        BackgroundColor3={
+                            selectedType === "Donated" ? Color3.fromRGB(0, 170, 0) : Color3.fromRGB(70, 70, 70)
+                        }
                         BorderSizePixel={0}
                         Text="Donated"
                         TextColor3={Color3.fromRGB(255, 255, 255)}
                         TextScaled={true}
                         Event={{
-                            MouseButton1Click: () => setSelectedType("Donated")
+                            MouseButton1Click: () => setSelectedType("Donated"),
                         }}
                     />
 
                     <textbutton
                         key="button-TimePlayed"
                         Size={new UDim2(0, 100, 0, 40)}
-                        BackgroundColor3={selectedType === "TimePlayed" ? Color3.fromRGB(0, 170, 0) : Color3.fromRGB(70, 70, 70)}
+                        BackgroundColor3={
+                            selectedType === "TimePlayed" ? Color3.fromRGB(0, 170, 0) : Color3.fromRGB(70, 70, 70)
+                        }
                         BorderSizePixel={0}
                         Text="Time Played"
                         TextColor3={Color3.fromRGB(255, 255, 255)}
                         TextScaled={true}
                         Event={{
-                            MouseButton1Click: () => setSelectedType("TimePlayed")
+                            MouseButton1Click: () => setSelectedType("TimePlayed"),
                         }}
                     />
                 </frame>
 
                 {/* Leaderboard display area */}
-                <frame
-                    Position={new UDim2(0, 0, 0, 60)}
-                    Size={new UDim2(1, 0, 1, -60)}
-                    BackgroundTransparency={1}
-                >
-                    <Leaderboard
-                        leaderboardType={selectedType}
-                        entries={entries}
-                        maxEntries={10}
-                    />
+                <frame Position={new UDim2(0, 0, 0, 60)} Size={new UDim2(1, 0, 1, -60)} BackgroundTransparency={1}>
+                    <Leaderboard leaderboardType={selectedType} entries={entries} maxEntries={10} />
                 </frame>
             </frame>
         );

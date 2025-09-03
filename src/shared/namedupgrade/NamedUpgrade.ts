@@ -9,7 +9,6 @@ import CurrencyBundle from "shared/currency/CurrencyBundle";
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export default abstract class NamedUpgrade<T = any> {
-
     types = new Set<string>();
     id!: string;
     name: string | undefined = undefined;
@@ -21,8 +20,7 @@ export default abstract class NamedUpgrade<T = any> {
     stepFormula?: (value: T, effectiveSteps: number) => T;
     mainFormula?: (value: T, amount: number) => T;
 
-    constructor() {
-    }
+    constructor() {}
 
     /**
      * Sets the display name of the upgrade.
@@ -124,15 +122,12 @@ export default abstract class NamedUpgrade<T = any> {
      * @returns The upgraded value.
      */
     apply(value: T, amount?: number) {
-        if (amount === 0 || amount === undefined)
-            return value;
+        if (amount === 0 || amount === undefined) return value;
         if (this.step !== undefined && this.stepFormula !== undefined)
             value = this.stepFormula(value, math.floor(amount / this.step));
-        if (this.mainFormula !== undefined)
-            value = this.mainFormula(value, amount);
+        if (this.mainFormula !== undefined) value = this.mainFormula(value, amount);
         return value;
     }
-
 }
 
 type PriceAmountFunction = (arg: number) => CurrencyBundle;
@@ -186,8 +181,7 @@ export class PriceUpgrade extends NamedUpgrade<CurrencyBundle> {
      * @returns The effect as a string.
      */
     toString(level: number) {
-        if (this.operationFormula === undefined)
-            return "";
+        if (this.operationFormula === undefined) return "";
         let prefix: string;
         switch (this.operative) {
             case "add":

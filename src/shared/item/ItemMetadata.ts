@@ -12,7 +12,6 @@ const RESET_LAYERS_UNLOCKED = AREAS.SlamoVillage.unlocked;
 const SANDBOX_ENABLED = Sandbox.getEnabled();
 
 export default class ItemMetadata {
-
     static readonly INDICES = {
         TOOL: 0,
         SPACING: 1,
@@ -25,7 +24,11 @@ export default class ItemMetadata {
     builder = new StringBuilder();
     formulaOperation = "x";
 
-    constructor(public item: Item, public size = 15, public weight = "Medium") {
+    constructor(
+        public item: Item,
+        public size = 15,
+        public weight = "Medium",
+    ) {
         for (const [_, value] of pairs(ItemMetadata.INDICES)) {
             this.builder[value] = "";
         }
@@ -53,8 +56,7 @@ export default class ItemMetadata {
     spacing() {
         if (this.item.formula !== undefined || RESET_LAYERS_UNLOCKED.Value) {
             this.builder[ItemMetadata.INDICES.SPACING] = `\n<font size="7"> </font>`;
-        }
-        else {
+        } else {
             this.builder[ItemMetadata.INDICES.SPACING] = "";
         }
     }
@@ -114,20 +116,21 @@ export default class ItemMetadata {
         }
 
         if (isEmpty) {
-            this.builder[ItemMetadata.INDICES.PLACEABLE_AREAS] = `\n${formatRichText("This item is not placeable.", color, this.size, this.weight)}`;
+            this.builder[ItemMetadata.INDICES.PLACEABLE_AREAS] =
+                `\n${formatRichText("This item is not placeable.", color, this.size, this.weight)}`;
             return;
         }
 
         const builder = new StringBuilder("Placeable in ");
         const vals = new Array<string>();
         for (const area of item.placeableAreas) {
-            if (area.hidden && !SANDBOX_ENABLED)
-                continue;
+            if (area.hidden && !SANDBOX_ENABLED) continue;
             vals.push(area.name);
         }
         builder.append(combineHumanReadable(...vals));
 
-        this.builder[ItemMetadata.INDICES.PLACEABLE_AREAS] = `\n${formatRichText(builder.toString(), color, this.size, this.weight)}`;
+        this.builder[ItemMetadata.INDICES.PLACEABLE_AREAS] =
+            `\n${formatRichText(builder.toString(), color, this.size, this.weight)}`;
     }
 
     resetLayer(color = Color3.fromRGB(255, 156, 99)) {
@@ -138,8 +141,7 @@ export default class ItemMetadata {
 
         let text: string;
         const order = this.item.getResetLayer();
-        if (order > 900)
-            text = "[Persistent]";
+        if (order > 900) text = "[Persistent]";
         else {
             let layer: ResetLayerId | undefined;
             for (const [id, l] of pairs(RESET_LAYERS))

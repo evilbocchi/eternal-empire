@@ -12,7 +12,9 @@ const mul = new CurrencyBundle().set("Funds", 0).set("Power", 0);
 
 export = new Item(script.Name)
     .setName("Admiration")
-    .setDescription("A gentle stream enchanting the air, taking the stage with a serene retreat... An upgrader boosting Funds and Power with Power, maxing out at %cap%.")
+    .setDescription(
+        "A gentle stream enchanting the air, taking the stage with a serene retreat... An upgrader boosting Funds and Power with Power, maxing out at %cap%.",
+    )
     .setDifficulty(Difficulty.InstantWin)
     .setPrice(new CurrencyBundle().set("Funds", 1e21), 1)
     .setRequiredItemAmount(BasicBlankEssence, 1)
@@ -23,6 +25,9 @@ export = new Item(script.Name)
     .setFormulaXCap(new CurrencyBundle().set("Power", 1e33))
 
     .trait(Upgrader)
-    .applyFormula((v, item) => item.setMul(mul.set("Funds", v).set("Power", v)), () => Server.Currency.get("Power"))
+    .applyFormula(
+        (v, item) => item.setMul(mul.set("Funds", v).set("Power", v)),
+        () => Server.Currency.get("Power"),
+    )
 
     .exit();

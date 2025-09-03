@@ -4,7 +4,6 @@ import Item from "shared/item/Item";
 import Conveyor from "shared/item/traits/conveyor/Conveyor";
 import Upgrader from "shared/item/traits/upgrader/Upgrader";
 
-
 export = new Item(script.Name)
     .setName("Automatic Railgun")
     .setDescription("Boom! Launches droplets to the skyline with a %mul% bang.")

@@ -18,7 +18,7 @@ import Packets from "shared/Packets";
 import { playSound } from "shared/asset/GameAssets";
 
 export const WARP_WINDOW = ADAPTIVE_TAB_MAIN_WINDOW.WaitForChild("Warp") as Frame & {
-    [area in AreaId]: ImageButton
+    [area in AreaId]: ImageButton;
 };
 
 /**
@@ -28,10 +28,10 @@ export const WARP_WINDOW = ADAPTIVE_TAB_MAIN_WINDOW.WaitForChild("Warp") as Fram
  */
 @Controller()
 export default class WarpController implements OnInit {
-
-    constructor(private adaptiveTabController: AdaptiveTabController, private hotkeysController: HotkeysController) {
-
-    }
+    constructor(
+        private adaptiveTabController: AdaptiveTabController,
+        private hotkeysController: HotkeysController,
+    ) {}
 
     /**
      * Initializes the WarpController, sets up hotkeys for area teleportation.
@@ -43,23 +43,27 @@ export default class WarpController implements OnInit {
 
         const buttons = WARP_WINDOW.GetChildren();
         for (const button of buttons) {
-            if (!button.IsA("ImageButton"))
-                continue;
+            if (!button.IsA("ImageButton")) continue;
             const areaId = button.Name as AreaId;
-            this.hotkeysController.setHotkey(button, keys.get(areaId)!, () => {
-                if (WARP_WINDOW.Visible) {
-                    const success = Packets.tpToArea.toServer(areaId);
-                    if (success) {
-                        playSound("Teleport.mp3");
-                        this.adaptiveTabController.hideAdaptiveTab();
+            this.hotkeysController.setHotkey(
+                button,
+                keys.get(areaId)!,
+                () => {
+                    if (WARP_WINDOW.Visible) {
+                        const success = Packets.tpToArea.toServer(areaId);
+                        if (success) {
+                            playSound("Teleport.mp3");
+                            this.adaptiveTabController.hideAdaptiveTab();
+                        } else {
+                            playSound("Error.mp3");
+                        }
+                        return true;
                     }
-                    else {
-                        playSound("Error.mp3");
-                    }
-                    return true;
-                }
-                return false;
-            }, `Teleport to ${AREAS[areaId].name}`, 3);
+                    return false;
+                },
+                `Teleport to ${AREAS[areaId].name}`,
+                3,
+            );
         }
     }
 }

@@ -16,7 +16,6 @@ declare global {
     }
 }
 
-
 export default class OmniUpgrader extends Upgrader {
     skysPerLaser = new Map<string, boolean>();
     addsPerLaser = new Map<string, CurrencyBundle>();
@@ -32,29 +31,26 @@ export default class OmniUpgrader extends Upgrader {
                 const laserInfo = getAllInstanceInfo(laser);
                 laserInfo.LaserId = laser.Name;
                 laserInfo.Sky = this.skysPerLaser.get(laser.Name) ?? this.sky;
-                Upgrader.hookLaser(model, this, laser, (indicator) => indicator.Omni = laserName);
+                Upgrader.hookLaser(model, this, laser, (indicator) => (indicator.Omni = laserName));
             }
         });
     }
 
     setSkys(skysPerLaser: Map<string, boolean>) {
         this.skysPerLaser = skysPerLaser;
-        for (const [laser] of skysPerLaser)
-            this.lasers.add(laser);
+        for (const [laser] of skysPerLaser) this.lasers.add(laser);
         return this;
     }
 
     setAdds(addsPerLaser: Map<string, CurrencyBundle>) {
         this.addsPerLaser = addsPerLaser;
-        for (const [laser] of addsPerLaser)
-            this.lasers.add(laser);
+        for (const [laser] of addsPerLaser) this.lasers.add(laser);
         return this;
     }
 
     setMuls(mulsPerLaser: Map<string, CurrencyBundle>) {
         this.mulsPerLaser = mulsPerLaser;
-        for (const [laser] of mulsPerLaser)
-            this.lasers.add(laser);
+        for (const [laser] of mulsPerLaser) this.lasers.add(laser);
         return this;
     }
 }

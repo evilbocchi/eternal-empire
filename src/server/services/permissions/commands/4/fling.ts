@@ -13,8 +13,7 @@ export = new Command(script.Name)
         const rng = new Random();
         for (const target of targets) {
             const humanoid = target.Character?.FindFirstChildOfClass("Humanoid");
-            if (humanoid === undefined)
-                continue;
+            if (humanoid === undefined) continue;
             const rootPart = humanoid.RootPart!;
             rootPart.PivotTo(rootPart.GetPivot().add(new Vector3(0, 1, 0)));
             rootPart.AssemblyLinearVelocity = rng.NextUnitVector().mul(5000);

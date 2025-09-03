@@ -17,12 +17,12 @@ import BasicPowerHarvester from "shared/items/negative/trueease/BasicPowerHarves
 import ButtonFurnace from "shared/items/negative/unimpossible/ButtonFurnace";
 import VolatileCauldron from "shared/items/negative/unimpossible/VolatileCauldron";
 
-
 export = new Item(script.Name)
     .setName("Light of Attrition")
-    .setDescription(`A self-sustaining light that only concerns itself with sucking the life out of anything it touches.
+    .setDescription(
+        `A self-sustaining light that only concerns itself with sucking the life out of anything it touches.
 
-Processes droplets at %mul% value.`
+Processes droplets at %mul% value.`,
     )
     .setDifficulty(Difficulty.Spontaneous)
     .setPrice(new CurrencyBundle().set("Funds", 100e42).set("Bitcoin", 1e12), 1)

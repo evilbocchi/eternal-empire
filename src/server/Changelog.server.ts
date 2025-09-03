@@ -21,16 +21,14 @@ class Changelog {
 }
 
 const CHANGELOGS = [
-    new Changelog("0.1 - Initial Release", [
-        "Released game :)))"
-    ]),
+    new Changelog("0.1 - Initial Release", ["Released game :)))"]),
     new Changelog("0.2 - Change of Scenery", [
         "Changed Place icon in Build Mode",
         "Implemented Basic Charger",
         "Stud",
         "Added some cool OSTs",
         "Added portal to next island",
-        "Did some lighting changes"
+        "Did some lighting changes",
     ]),
     new Changelog("0.3 - April Fools Update Without The Fools", [
         "Added difficulties True Ease to Reversed Peripherality",
@@ -41,7 +39,7 @@ const CHANGELOGS = [
         "Made upgraders more fair, with addition going first and multiplication second",
         "Fixed some weird rounding issue",
         "Fixed currency receive gui sometimes appearing as a white canvas",
-        "Added track Melodic Romance to Barren Islands"
+        "Added track Melodic Romance to Barren Islands",
     ]),
     new Changelog("0.4 - Reformation Update Pt. 1", [
         "Added difficulties Relax to Astronomical",
@@ -68,18 +66,21 @@ const CHANGELOGS = [
         "Rebalanced midgame",
         "Optimized game performance",
         "You can now change your empire name with in-game currency or Robux",
-        "Softcaps are now introduced at high amounts of each currency"
+        "Softcaps are now introduced at high amounts of each currency",
     ]),
     new Changelog("1.0 - Full Release", [
         "Added difficulties and items Automatic to Easy",
         "Added new areas",
         "Added many more crafting items",
         "Added level leaderboard",
-
     ]),
 ];
 
-const UPDATE_LIST = AREAS.BarrenIslands.areaFolder.FindFirstChild("UpdateBoard")?.FindFirstChild("GuiPart")?.FindFirstChild("SurfaceGui")?.FindFirstChild("ScrollingFrame");
+const UPDATE_LIST = AREAS.BarrenIslands.areaFolder
+    .FindFirstChild("UpdateBoard")
+    ?.FindFirstChild("GuiPart")
+    ?.FindFirstChild("SurfaceGui")
+    ?.FindFirstChild("ScrollingFrame");
 
 let i = 9999;
 for (const changelog of CHANGELOGS) {

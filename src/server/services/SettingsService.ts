@@ -22,13 +22,10 @@ import DataService from "server/services/data/DataService";
  */
 @Service()
 export default class SettingsService implements OnInit, OnPlayerJoined {
-
     /**
      * Constructs the SettingsService with required dependencies.
      */
-    constructor(private dataService: DataService) {
-
-    }
+    constructor(private dataService: DataService) {}
 
     /**
      * Loads and sends player settings to the client when they join.
@@ -58,7 +55,7 @@ export default class SettingsService implements OnInit, OnPlayerJoined {
             if (playerProfile === undefined) {
                 error("Player profile not loaded");
             }
-            (playerProfile.Data.settings as { [key: string]: unknown; })[setting] = value;
+            (playerProfile.Data.settings as { [key: string]: unknown })[setting] = value;
             Packets.settings.setFor(player, playerProfile.Data.settings);
         });
     }

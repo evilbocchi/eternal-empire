@@ -9,7 +9,9 @@ const mul = new CurrencyBundle().set("Funds", 0);
 
 export = new Item(script.Name)
     .setName("Energised Furnace")
-    .setDescription("Same thing as Energised Refiner, with Funds boost increasing with Power at a slightly weaker scale, maxing out at %cap%. Uses %drain%.")
+    .setDescription(
+        "Same thing as Energised Refiner, with Funds boost increasing with Power at a slightly weaker scale, maxing out at %cap%. Uses %drain%.",
+    )
     .setDifficulty(Difficulty.Friendliness)
     .setPrice(new CurrencyBundle().set("Power", 75), 1)
     .addPlaceableArea("BarrenIslands")
@@ -20,5 +22,8 @@ export = new Item(script.Name)
     .setDrain(new CurrencyBundle().set("Power", 0.5))
 
     .trait(Furnace)
-    .applyFormula((v, item) => item.setMul(mul.set("Funds", v)), () => Server.Currency.get("Power"))
+    .applyFormula(
+        (v, item) => item.setMul(mul.set("Funds", v)),
+        () => Server.Currency.get("Power"),
+    )
     .exit();

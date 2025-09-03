@@ -26,7 +26,6 @@ import Packets from "shared/Packets";
  */
 @Service()
 export default class NamedUpgradeService implements OnInit {
-
     /** Map of upgrade IDs to their current amounts. */
     readonly upgrades: Map<string, number>;
 
@@ -36,13 +35,16 @@ export default class NamedUpgradeService implements OnInit {
     /** Signal fired when an upgrade is bought. */
     upgradeBought = new Signal<(player: Player, upgradeId: string, to: number, from: number) => void>();
 
-    constructor(private dataService: DataService, private currencyService: CurrencyService) {
+    constructor(
+        private dataService: DataService,
+        private currencyService: CurrencyService,
+    ) {
         this.upgrades = this.dataService.empireData.upgrades;
     }
 
     /**
      * Sets the amount for each upgrade from a map and syncs with clients.
-     * 
+     *
      * @param data Map of upgrade IDs to amounts.
      */
     setAmountPerUpgrade(data: Map<string, number>) {
@@ -54,7 +56,7 @@ export default class NamedUpgradeService implements OnInit {
 
     /**
      * Gets the current amount for a specific upgrade.
-     * 
+     *
      * @param upgradeId The upgrade ID.
      */
     getUpgradeAmount(upgradeId: string) {
@@ -63,7 +65,7 @@ export default class NamedUpgradeService implements OnInit {
 
     /**
      * Sets the amount for a specific upgrade and syncs with clients.
-     * 
+     *
      * @param upgradeId The upgrade ID.
      * @param amount The new amount.
      */
@@ -77,7 +79,7 @@ export default class NamedUpgradeService implements OnInit {
     /**
      * Attempts to buy an upgrade, checking caps, price, and permissions.
      * Deducts currency and updates state if successful.
-     * 
+     *
      * @param upgradeId The upgrade ID.
      * @param to The target amount (optional).
      * @param player The player buying the upgrade (optional).
@@ -96,8 +98,7 @@ export default class NamedUpgradeService implements OnInit {
         const cap = upgrade.cap;
         if (cap !== undefined && to > cap) {
             return false;
-        }
-        else if (current >= to) {
+        } else if (current >= to) {
             return false;
         }
         const price = to === current + 1 ? upgrade.getPrice(to) : upgrade.getPrice(current + 1, to);
@@ -130,16 +131,14 @@ export default class NamedUpgradeService implements OnInit {
         this.upgradesChanged.connect((data) => {
             const oldWs = Workspace.GetAttribute("WalkSpeed") as number | undefined;
             let ws = 16;
-            wsUpgs.forEach((value, key) => ws = value.apply(ws, data.get(key)!));
+            wsUpgs.forEach((value, key) => (ws = value.apply(ws, data.get(key)!)));
             Workspace.SetAttribute("WalkSpeed", ws);
             StarterPlayer.CharacterWalkSpeed = ws;
             for (const player of Players.GetPlayers()) {
                 const character = player.Character;
-                if (character === undefined)
-                    continue;
+                if (character === undefined) continue;
                 const humanoid = character.FindFirstChildOfClass("Humanoid");
-                if (humanoid === undefined)
-                    continue;
+                if (humanoid === undefined) continue;
                 if (humanoid.WalkSpeed === oldWs) {
                     humanoid.WalkSpeed = ws;
                 }

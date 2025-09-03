@@ -19,6 +19,9 @@ export = new Item(script.Name)
     .setFormulaXCap(new CurrencyBundle().set("Power", 1e303))
 
     .trait(Upgrader)
-    .applyFormula((v, item) => item.setMul(mul.set("Funds", v)), () => Server.Currency.get("Power"))
+    .applyFormula(
+        (v, item) => item.setMul(mul.set("Funds", v)),
+        () => Server.Currency.get("Power"),
+    )
 
     .exit();

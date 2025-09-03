@@ -55,14 +55,11 @@ export default function LeaderboardSlot({ entry, isHighlighted = false }: Leader
 
     if (entry.place > 3) {
         // Default styling for other places
-        backgroundColor = isHighlighted
-            ? Color3.fromRGB(255, 255, 170)
-            : Color3.fromRGB(255, 255, 255);
+        backgroundColor = isHighlighted ? Color3.fromRGB(255, 255, 170) : Color3.fromRGB(255, 255, 255);
         textColor = Color3.fromRGB(0, 0, 0);
         strokeColor = Color3.fromRGB(255, 255, 255);
         strokeTransparency = 0.9;
-    }
-    else {
+    } else {
         switch (entry.place) {
             case 1:
                 backgroundColor = Color3.fromRGB(255, 215, 0);
@@ -81,7 +78,7 @@ export default function LeaderboardSlot({ entry, isHighlighted = false }: Leader
         strokeTransparency = 0.3;
     }
 
-    // Special height for 
+    // Special height for
     const slotHeight = entry.place === 1 ? 70 : 45;
 
     return (
@@ -95,9 +92,13 @@ export default function LeaderboardSlot({ entry, isHighlighted = false }: Leader
             {/* Add a subtle glow effect for top 3 places */}
             {entry.place <= 3 && (
                 <uistroke
-                    Color={entry.place === 1 ? Color3.fromRGB(255, 215, 0) :
-                        entry.place === 2 ? Color3.fromRGB(192, 192, 192) :
-                            Color3.fromRGB(205, 127, 50)}
+                    Color={
+                        entry.place === 1
+                            ? Color3.fromRGB(255, 215, 0)
+                            : entry.place === 2
+                              ? Color3.fromRGB(192, 192, 192)
+                              : Color3.fromRGB(205, 127, 50)
+                    }
                     Thickness={2}
                     Transparency={0.3}
                 />
@@ -106,12 +107,14 @@ export default function LeaderboardSlot({ entry, isHighlighted = false }: Leader
             {/* Animated gradient for 1st place */}
             {entry.place === 1 && (
                 <uigradient
-                    Color={new ColorSequence([
-                        new ColorSequenceKeypoint(0, Color3.fromRGB(255, 215, 0)),    // Gold
-                        new ColorSequenceKeypoint(0.3, Color3.fromRGB(255, 255, 0)),  // Bright Yellow
-                        new ColorSequenceKeypoint(0.6, Color3.fromRGB(255, 140, 0)),  // Orange
-                        new ColorSequenceKeypoint(1, Color3.fromRGB(255, 215, 0))     // Gold
-                    ])}
+                    Color={
+                        new ColorSequence([
+                            new ColorSequenceKeypoint(0, Color3.fromRGB(255, 215, 0)), // Gold
+                            new ColorSequenceKeypoint(0.3, Color3.fromRGB(255, 255, 0)), // Bright Yellow
+                            new ColorSequenceKeypoint(0.6, Color3.fromRGB(255, 140, 0)), // Orange
+                            new ColorSequenceKeypoint(1, Color3.fromRGB(255, 215, 0)), // Gold
+                        ])
+                    }
                     Offset={new Vector2(gradientOffset, 0)}
                 />
             )}
@@ -119,12 +122,14 @@ export default function LeaderboardSlot({ entry, isHighlighted = false }: Leader
             {/* Animated gradient for 2nd place */}
             {entry.place === 2 && (
                 <uigradient
-                    Color={new ColorSequence([
-                        new ColorSequenceKeypoint(0, Color3.fromRGB(192, 192, 192)),  // Silver
-                        new ColorSequenceKeypoint(0.3, Color3.fromRGB(220, 220, 220)), // Bright Silver
-                        new ColorSequenceKeypoint(0.6, Color3.fromRGB(169, 169, 169)), // Dark Silver
-                        new ColorSequenceKeypoint(1, Color3.fromRGB(192, 192, 192))   // Silver
-                    ])}
+                    Color={
+                        new ColorSequence([
+                            new ColorSequenceKeypoint(0, Color3.fromRGB(192, 192, 192)), // Silver
+                            new ColorSequenceKeypoint(0.3, Color3.fromRGB(220, 220, 220)), // Bright Silver
+                            new ColorSequenceKeypoint(0.6, Color3.fromRGB(169, 169, 169)), // Dark Silver
+                            new ColorSequenceKeypoint(1, Color3.fromRGB(192, 192, 192)), // Silver
+                        ])
+                    }
                     Offset={new Vector2(gradientOffset, 0)}
                 />
             )}
@@ -132,12 +137,14 @@ export default function LeaderboardSlot({ entry, isHighlighted = false }: Leader
             {/* Animated gradient for 3rd place */}
             {entry.place === 3 && (
                 <uigradient
-                    Color={new ColorSequence([
-                        new ColorSequenceKeypoint(0, Color3.fromRGB(205, 127, 50)),   // Bronze
-                        new ColorSequenceKeypoint(0.3, Color3.fromRGB(255, 165, 79)), // Bright Bronze
-                        new ColorSequenceKeypoint(0.6, Color3.fromRGB(184, 115, 51)), // Dark Bronze
-                        new ColorSequenceKeypoint(1, Color3.fromRGB(205, 127, 50))    // Bronze
-                    ])}
+                    Color={
+                        new ColorSequence([
+                            new ColorSequenceKeypoint(0, Color3.fromRGB(205, 127, 50)), // Bronze
+                            new ColorSequenceKeypoint(0.3, Color3.fromRGB(255, 165, 79)), // Bright Bronze
+                            new ColorSequenceKeypoint(0.6, Color3.fromRGB(184, 115, 51)), // Dark Bronze
+                            new ColorSequenceKeypoint(1, Color3.fromRGB(205, 127, 50)), // Bronze
+                        ])
+                    }
                     Offset={new Vector2(gradientOffset, 0)}
                 />
             )}
@@ -190,7 +197,12 @@ export default function LeaderboardSlot({ entry, isHighlighted = false }: Leader
                 SortOrder={Enum.SortOrder.LayoutOrder}
                 VerticalAlignment={Enum.VerticalAlignment.Center}
             />
-            <uipadding PaddingLeft={new UDim(0, 6)} PaddingRight={new UDim(0, 6)} PaddingTop={new UDim(0, 3)} PaddingBottom={new UDim(0, 3)} />
+            <uipadding
+                PaddingLeft={new UDim(0, 6)}
+                PaddingRight={new UDim(0, 6)}
+                PaddingTop={new UDim(0, 3)}
+                PaddingBottom={new UDim(0, 3)}
+            />
         </frame>
     );
 }

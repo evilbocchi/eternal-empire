@@ -23,7 +23,6 @@ import { CURRENCIES } from "shared/currency/CurrencyDetails";
  */
 @Service()
 export default class LeaderboardChangeService implements OnStart {
-
     /** OrderedDataStore for total time leaderboard. */
     private totalTimeStore = DataStoreService.GetOrderedDataStore("TotalTime");
 
@@ -51,7 +50,7 @@ export default class LeaderboardChangeService implements OnStart {
 
     /**
      * Gets the position of the current empire in a specific leaderboard.
-     * 
+     *
      * @param leaderboardName The name of the leaderboard to check.
      * @param store The OrderedDataStore for this leaderboard.
      * @returns The position (1-based) or 0 if not in top 100.
@@ -122,7 +121,7 @@ export default class LeaderboardChangeService implements OnStart {
 
     /**
      * Sends a Discord webhook notification about leaderboard position change.
-     * 
+     *
      * @param leaderboardName The name of the leaderboard.
      * @param previousPosition The previous position (0 if not in top 100).
      * @param currentPosition The current position.
@@ -146,15 +145,15 @@ export default class LeaderboardChangeService implements OnStart {
         if (previousPosition === 0) {
             changeText = `entered the leaderboard at position **#${currentPosition}**`;
             changeEmoji = "📈";
-            embedColor = 0x00FF00; // Green
+            embedColor = 0x00ff00; // Green
         } else if (currentPosition < previousPosition) {
             changeText = `moved up from **#${previousPosition}** to **#${currentPosition}**`;
             changeEmoji = "⬆️";
-            embedColor = 0x00FF00; // Green
+            embedColor = 0x00ff00; // Green
         } else {
             changeText = `moved down from **#${previousPosition}** to **#${currentPosition}**`;
             changeEmoji = "⬇️";
-            embedColor = 0xFF6600; // Orange
+            embedColor = 0xff6600; // Orange
         }
 
         // Create the webhook message
@@ -167,37 +166,43 @@ export default class LeaderboardChangeService implements OnStart {
                 {
                     name: "Empire",
                     value: empireName,
-                    inline: true
+                    inline: true,
                 },
                 {
                     name: "Owner",
                     value: ownerName,
-                    inline: true
+                    inline: true,
                 },
                 {
                     name: "Leaderboard",
                     value: leaderboardName,
-                    inline: true
+                    inline: true,
                 },
                 {
                     name: "Previous Position",
                     value: previousPosition === 0 ? "Not in top 100" : `#${previousPosition}`,
-                    inline: true
+                    inline: true,
                 },
                 {
                     name: "Current Position",
                     value: `#${currentPosition}`,
-                    inline: true
-                }
-            ]
+                    inline: true,
+                },
+            ],
         };
 
         try {
-            HttpService.PostAsync(webhookUrl, HttpService.JSONEncode({
-                embeds: [embed]
-            }), Enum.HttpContentType.ApplicationJson);
+            HttpService.PostAsync(
+                webhookUrl,
+                HttpService.JSONEncode({
+                    embeds: [embed],
+                }),
+                Enum.HttpContentType.ApplicationJson,
+            );
 
-            print(`Leaderboard change notification sent for ${empireName}: ${leaderboardName} ${previousPosition} -> ${currentPosition}`);
+            print(
+                `Leaderboard change notification sent for ${empireName}: ${leaderboardName} ${previousPosition} -> ${currentPosition}`,
+            );
         } catch (error) {
             warn(`Failed to send webhook notification: ${error}`);
         }

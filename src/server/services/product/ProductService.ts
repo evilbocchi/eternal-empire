@@ -24,7 +24,7 @@ export default class ProductService implements OnInit {
 
     /**
      * Registers a function to handle purchases for a specific product ID.
-     * 
+     *
      * @param productID The Roblox product ID to handle.
      * @param productFunction The function to call when this product is purchased.
      */

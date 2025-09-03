@@ -23,9 +23,8 @@ export default function QuestOption({
     isTracked,
     isExpanded,
     onToggleExpanded,
-    onTrack
+    onTrack,
 }: QuestOptionProps) {
-
     const color = new Color3(quest.colorR, quest.colorG, quest.colorB);
     const belowRequirement = level < quest.level;
     const isCompleted = currentStage < 0;
@@ -53,11 +52,11 @@ export default function QuestOption({
         const tweenInfo = new TweenInfo(
             0.3, // Duration in seconds
             Enum.EasingStyle.Quart,
-            Enum.EasingDirection.Out
+            Enum.EasingDirection.Out,
         );
 
         const tween = TweenService.Create(arrow, tweenInfo, {
-            Rotation: targetRotation
+            Rotation: targetRotation,
         });
 
         tween.Play();
@@ -65,9 +64,9 @@ export default function QuestOption({
         return () => {
             tween.Cancel();
         };
-    }, [isExpanded]);    // Calculate layout order for quest sorting
+    }, [isExpanded]); // Calculate layout order for quest sorting
     const getLayoutOrder = () => {
-        const baseOrder = (quest.level * 10) + (quest.order + 1);
+        const baseOrder = quest.level * 10 + (quest.order + 1);
         if (isCompleted) return baseOrder + 1000000000;
         if (belowRequirement) return baseOrder + 100000000;
         return baseOrder;
@@ -108,7 +107,7 @@ export default function QuestOption({
                 Size={new UDim2(1, 0, 0, 30)}
                 Text=""
                 Event={{
-                    Activated: onToggleExpanded
+                    Activated: onToggleExpanded,
                 }}
             >
                 {/* Dropdown Arrow */}
@@ -154,11 +153,13 @@ export default function QuestOption({
                 >
                     <uistroke Thickness={2} Transparency={transparency} />
                     <uigradient
-                        Color={new ColorSequence([
-                            new ColorSequenceKeypoint(0, Color3.fromRGB(255, 255, 255)),
-                            new ColorSequenceKeypoint(0.694, Color3.fromRGB(253, 253, 253)),
-                            new ColorSequenceKeypoint(1, Color3.fromRGB(176, 176, 176))
-                        ])}
+                        Color={
+                            new ColorSequence([
+                                new ColorSequenceKeypoint(0, Color3.fromRGB(255, 255, 255)),
+                                new ColorSequenceKeypoint(0.694, Color3.fromRGB(253, 253, 253)),
+                                new ColorSequenceKeypoint(1, Color3.fromRGB(176, 176, 176)),
+                            ])
+                        }
                         Rotation={90}
                     />
                 </textlabel>
@@ -213,11 +214,13 @@ export default function QuestOption({
                     >
                         <uistroke Thickness={2} />
                         <uigradient
-                            Color={new ColorSequence([
-                                new ColorSequenceKeypoint(0, Color3.fromRGB(255, 255, 255)),
-                                new ColorSequenceKeypoint(0.547, Color3.fromRGB(243, 243, 243)),
-                                new ColorSequenceKeypoint(1, Color3.fromRGB(206, 206, 206))
-                            ])}
+                            Color={
+                                new ColorSequence([
+                                    new ColorSequenceKeypoint(0, Color3.fromRGB(255, 255, 255)),
+                                    new ColorSequenceKeypoint(0.547, Color3.fromRGB(243, 243, 243)),
+                                    new ColorSequenceKeypoint(1, Color3.fromRGB(206, 206, 206)),
+                                ])
+                            }
                             Rotation={90}
                         />
                         <uipadding PaddingTop={new UDim(0, 10)} />
@@ -239,10 +242,12 @@ export default function QuestOption({
                     >
                         <uistroke Thickness={2} />
                         <uigradient
-                            Color={new ColorSequence([
-                                new ColorSequenceKeypoint(0, Color3.fromRGB(170, 255, 255)),
-                                new ColorSequenceKeypoint(1, Color3.fromRGB(0, 255, 255))
-                            ])}
+                            Color={
+                                new ColorSequence([
+                                    new ColorSequenceKeypoint(0, Color3.fromRGB(170, 255, 255)),
+                                    new ColorSequenceKeypoint(1, Color3.fromRGB(0, 255, 255)),
+                                ])
+                            }
                             Rotation={90}
                         />
                     </textlabel>
@@ -258,14 +263,16 @@ export default function QuestOption({
                             Size={new UDim2(0.4, 0, 0, 0)}
                             Text=""
                             Event={{
-                                Activated: onTrack
+                                Activated: onTrack,
                             }}
                         >
                             <uigradient
-                                Color={new ColorSequence([
-                                    new ColorSequenceKeypoint(0, Color3.fromRGB(255, 255, 255)),
-                                    new ColorSequenceKeypoint(1, Color3.fromRGB(156, 156, 156))
-                                ])}
+                                Color={
+                                    new ColorSequence([
+                                        new ColorSequenceKeypoint(0, Color3.fromRGB(255, 255, 255)),
+                                        new ColorSequenceKeypoint(1, Color3.fromRGB(156, 156, 156)),
+                                    ])
+                                }
                                 Rotation={90}
                             />
                             <uistroke
@@ -310,25 +317,25 @@ export default function QuestOption({
 
             {/* Quest Option Styling */}
             <uigradient
-                Color={new ColorSequence([
-                    new ColorSequenceKeypoint(0, Color3.fromRGB(150, 150, 150)),
-                    new ColorSequenceKeypoint(1, Color3.fromRGB(85, 85, 85))
-                ])}
+                Color={
+                    new ColorSequence([
+                        new ColorSequenceKeypoint(0, Color3.fromRGB(150, 150, 150)),
+                        new ColorSequenceKeypoint(1, Color3.fromRGB(85, 85, 85)),
+                    ])
+                }
                 Rotation={90}
             />
-            <uistroke
-                ApplyStrokeMode={Enum.ApplyStrokeMode.Border}
-                Color={color}
-                Thickness={4}
-            >
+            <uistroke ApplyStrokeMode={Enum.ApplyStrokeMode.Border} Color={color} Thickness={4}>
                 <uigradient
-                    Color={new ColorSequence([
-                        new ColorSequenceKeypoint(0, Color3.fromRGB(255, 255, 255)),
-                        new ColorSequenceKeypoint(0.375, Color3.fromRGB(255, 255, 255)),
-                        new ColorSequenceKeypoint(0.51, Color3.fromRGB(118, 118, 118)),
-                        new ColorSequenceKeypoint(0.583, Color3.fromRGB(255, 255, 255)),
-                        new ColorSequenceKeypoint(1, Color3.fromRGB(255, 255, 255))
-                    ])}
+                    Color={
+                        new ColorSequence([
+                            new ColorSequenceKeypoint(0, Color3.fromRGB(255, 255, 255)),
+                            new ColorSequenceKeypoint(0.375, Color3.fromRGB(255, 255, 255)),
+                            new ColorSequenceKeypoint(0.51, Color3.fromRGB(118, 118, 118)),
+                            new ColorSequenceKeypoint(0.583, Color3.fromRGB(255, 255, 255)),
+                            new ColorSequenceKeypoint(1, Color3.fromRGB(255, 255, 255)),
+                        ])
+                    }
                     Rotation={85}
                 />
             </uistroke>

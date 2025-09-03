@@ -8,7 +8,9 @@ import { getInstanceInfo, setInstanceInfo } from "@antivivi/vrldk";
 
 export = new Item(script.Name)
     .setName("Recycling Dropper")
-    .setDescription("Produces a %val% droplet every time a droplet is processed through the attached furnace. No need for conjoined droppers anymore.")
+    .setDescription(
+        "Produces a %val% droplet every time a droplet is processed through the attached furnace. No need for conjoined droppers anymore.",
+    )
     .setDifficulty(Difficulty.A)
     .setPrice(new CurrencyBundle().set("Funds", 6.5e12), 1)
     .addPlaceableArea("BarrenIslands")

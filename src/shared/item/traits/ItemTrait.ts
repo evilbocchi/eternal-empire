@@ -2,34 +2,28 @@ import { OnoeNum } from "@antivivi/serikanum";
 import Item from "shared/item/Item";
 
 declare global {
-
     /**
      * Contains all item traits.
-     * 
+     *
      * @see {@link ItemTrait} for the base class of all item traits.
      */
-    interface ItemTraits {
-        
-    }
+    interface ItemTraits {}
 }
 
 /**
  * Represents a trait for building a specific type of item.
  */
 export default abstract class ItemTrait {
-
     /**
      * Represents a trait for building a specific type of item.
-     * 
+     *
      * @param item The item instance to be built.
      */
-    constructor(public readonly item: Item) {
-
-    }
+    constructor(public readonly item: Item) {}
 
     /**
      * Returns the item instance of the trait.
-     * 
+     *
      * @returns The item instance.
      */
     exit() {
@@ -38,7 +32,7 @@ export default abstract class ItemTrait {
 
     /**
      * Redirects to another trait to build a specific type of item.
-     * 
+     *
      * @param Trait The constructor of the type of item.
      * @returns The redirected item trait.
      */
@@ -48,10 +42,10 @@ export default abstract class ItemTrait {
 
     /**
      * Calls the callback function every second by passing the return of the x function in the formula function, and passing the return of that to the callback.
-     * 
+     *
      * @param callback Called every second with the `value` parameter passed as the return of `this.formula`.
      * @param x The value to be used in the formula.
-     * 
+     *
      * @see {@link Item.applyFormula} for the unwrapped version of this function.
      */
     applyFormula(callback: (value: OnoeNum, upgrader: this) => unknown, x: () => OnoeNum) {
@@ -63,7 +57,7 @@ export default abstract class ItemTrait {
 
     /**
      * Formats a string with the item trait's properties.
-     * 
+     *
      * @param str The string to format.
      */
     format(str: string) {

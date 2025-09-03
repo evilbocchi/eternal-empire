@@ -11,11 +11,6 @@ export = new Item(script.Name)
     .setDifficulty(Difficulty.Millisecondless)
 
     .trait(Shop)
-    .setItems([
-        Class0Shop,
-        Wood,
-        Stone,
-        Glass
-    ])
+    .setItems([Class0Shop, Wood, Stone, Glass])
 
     .exit();

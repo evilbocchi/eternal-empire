@@ -1,33 +1,38 @@
 /**
  * @fileoverview Main inventory window React component
- * 
+ *
  * Modern React implementation of the inventory window using BasicWindow.
  * Follows the same pattern as QuestWindow for consistency.
  */
 
+import { FuzzySearch } from "@rbxts/fuzzy-search";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "@rbxts/react";
+import type InventoryController from "client/controllers/interface/InventoryController";
 import { getAsset } from "shared/asset/AssetMap";
 import type Item from "shared/item/Item";
-import type InventoryController from "client/controllers/interface/InventoryController";
 import Items from "shared/items/Items";
 import Packets from "shared/Packets";
-import BasicWindow from "shared/ui/components/window/BasicWindow";
 import InventoryEmptyState from "shared/ui/components/inventory/InventoryEmptyState";
-import InventoryFilter from "shared/ui/components/inventory/InventoryFilter";
+import InventoryFilter, { isWhitelisted, traitOptions } from "shared/ui/components/inventory/InventoryFilter";
 import InventoryItemSlot from "shared/ui/components/inventory/InventoryItemSlot";
+import BasicWindow from "shared/ui/components/window/BasicWindow";
+import { RobotoMono } from "shared/ui/GameFonts";
 import useProperty from "shared/ui/hooks/useProperty";
 
-interface TraitFilterOption {
-    id: string;
-    image: string;
-    color: Color3;
-    selected: boolean;
+declare global {
+    interface TraitFilterOption {
+        id: TraitFilterId;
+        image: string;
+        color: Color3;
+        selected?: boolean;
+    }
 }
 
 interface InventoryItemData {
     item: Item;
+    uuid?: string;
     amount: number;
-    hasItem: boolean;
+    layoutOrder: number;
     visible: boolean;
 }
 
@@ -47,18 +52,42 @@ function calculateOptimalCellCount(containerX: number): number {
     return math.max(math.round((containerX - 50) / 65), 3);
 }
 
+function getBestUniqueInstances(uniqueInstances: Map<string, UniqueItemInstance>) {
+    // Find the best unique item instance for the given base item ID
+    const bestUuidPerItem = new Map<string, string>();
+    const bestInstancePerItem = new Map<string, UniqueItemInstance>();
+    const lastBestPotsPerItem = new Map<string, number>();
+    for (const [uuid, instance] of uniqueInstances) {
+        if (instance.placed) continue; // Skip placed instances
+        let thisPots = 0;
+        for (const [_, potValue] of instance.pots) {
+            thisPots += potValue;
+        }
+
+        const lastBestPots = lastBestPotsPerItem.get(instance.baseItemId);
+        if (lastBestPots === undefined || thisPots > lastBestPots) {
+            lastBestPotsPerItem.set(instance.baseItemId, thisPots);
+            bestUuidPerItem.set(instance.baseItemId, uuid);
+            bestInstancePerItem.set(instance.baseItemId, instance);
+        }
+    }
+    return bestUuidPerItem;
+}
+
+const SEARCHABLE_ITEMS = Items.sortedItems.filter((item) => !item.isA("HarvestingTool"));
+
 /**
  * Main inventory window component following the QuestWindow pattern
  */
 export default function InventoryWindow({ visible, onClose, inventoryController }: InventoryWindowProps) {
     const [searchQuery, setSearchQuery] = useState("");
-    const [traitFilters, setTraitFilters] = useState<Record<string, boolean>>({});
+    const [queryTime, setQueryTime] = useState(0);
+    const [traitFilters, setTraitFilters] = useState<Set<TraitFilterId>>(new Set());
     const [cellSize, setCellSize] = useState(new UDim2(0, 65, 0, 65));
 
     // Observe inventory data from packets
     const inventory = useProperty(Packets.inventory);
     const uniqueInstances = useProperty(Packets.uniqueInstances);
-    const level = useProperty(Packets.level) ?? 0;
 
     const scrollingFrameRef = useRef<ScrollingFrame>();
 
@@ -86,94 +115,74 @@ export default function InventoryWindow({ visible, onClose, inventoryController 
         }
     }, [updateCellSize]);
 
-    // Calculate inventory items
-    const inventoryItems = useMemo((): InventoryItemData[] => {
-        const items: InventoryItemData[] = [];
-        const amounts = new Map<string, number>();
+    // Apply filtering TODO
+    const inventoryItemDatas = useMemo(() => {
+        const startTime = tick();
+        const inventoryItemDatas = new Array<InventoryItemData>();
 
-        // Count unique instances
-        if (uniqueInstances) {
-            for (const [_, uniqueInstance] of uniqueInstances) {
-                const itemId = uniqueInstance.baseItemId;
-                if (itemId && !uniqueInstance.placed) {
-                    const amount = amounts.get(itemId) ?? 0;
-                    amounts.set(itemId, amount + 1);
-                }
+        if (searchQuery !== "") {
+            const terms = new Array<string>();
+            for (const item of SEARCHABLE_ITEMS) {
+                if (!isWhitelisted(item, traitFilters)) continue;
+                terms.push(item.name);
+            }
+            const sorted = FuzzySearch.Sorting.FuzzyScore(terms, searchQuery);
+            for (const [index, name] of sorted) {
+                const item = Items.itemsPerName.get(name)!;
+                inventoryItemDatas.push({
+                    item,
+                    amount: 0,
+                    layoutOrder: index,
+                    visible: index >= 0,
+                });
+            }
+        } else {
+            for (const item of SEARCHABLE_ITEMS) {
+                if (!isWhitelisted(item, traitFilters)) continue;
+                inventoryItemDatas.push({
+                    item,
+                    amount: 0,
+                    layoutOrder: item.layoutOrder,
+                    visible: true,
+                });
             }
         }
 
-        // Build item data
-        for (const [_id, item] of Items.itemsPerId) {
-            if (item.isA("HarvestingTool")) continue;
-
-            const itemId = item.id;
-            let amount = inventory?.get(itemId) ?? 0;
-            const uniques = amounts.get(itemId);
-            if (uniques) {
-                amount += uniques;
+        const amountsPerItem = new Map<string, number>();
+        for (const [itemId, amount] of inventory) {
+            amountsPerItem.set(itemId, amount);
+        }
+        for (const [, uniqueInstance] of uniqueInstances) {
+            const itemId = uniqueInstance.baseItemId;
+            amountsPerItem.set(itemId, (amountsPerItem.get(itemId) ?? 0) + 1);
+        }
+        const bestInstancePerItem = getBestUniqueInstances(uniqueInstances);
+        for (const data of inventoryItemDatas) {
+            const amount = amountsPerItem.get(data.item.id) ?? 0;
+            data.amount = amount;
+            if (amount <= 0) {
+                data.visible = false;
             }
 
-            const hasItem = amount > 0;
-
-            items.push({
-                item,
-                amount,
-                hasItem,
-                visible: hasItem // Initial visibility based on having the item
-            });
-        }
-
-        return items;
-    }, [inventory, uniqueInstances]);
-
-    // Apply filtering
-    const filteredItems = useMemo(() => {
-        let filtered = inventoryItems.filter(itemData => itemData.hasItem);
-
-        // Filter by search query
-        if (searchQuery && searchQuery !== "") {
-            const lowerQuery = string.lower(searchQuery);
-            filtered = filtered.filter(itemData => {
-                const nameMatch = string.find(string.lower(itemData.item.name), lowerQuery, 1, true);
-                const idMatch = string.find(string.lower(itemData.item.id), lowerQuery, 1, true);
-                return nameMatch !== undefined || idMatch !== undefined;
-            });
-        }
-
-        // Filter by traits
-        const activeTraits: string[] = [];
-        for (const [trait, enabled] of pairs(traitFilters)) {
-            if (enabled) {
-                activeTraits.push(trait);
+            const bestInstance = bestInstancePerItem.get(data.item.id);
+            if (bestInstance !== undefined) {
+                data.uuid = bestInstance;
             }
         }
 
-        if (activeTraits.size() > 0) {
-            filtered = filtered.filter(itemData => {
-                return activeTraits.some(trait => itemData.item.isA(trait as keyof ItemTraits));
-            });
-        }
-
-        return filtered.map(itemData => ({
-            ...itemData,
-            visible: true
-        }));
-    }, [inventoryItems, searchQuery, traitFilters]);
+        setQueryTime(tick() - startTime);
+        return inventoryItemDatas;
+    }, [inventory, uniqueInstances, searchQuery, traitFilters]);
 
     // Check if user has any items at all (for empty state)
-    const hasAnyItems = inventoryItems.some(itemData => itemData.hasItem);
+    let hasAnyItems = false;
+    for (const [, amount] of inventory) {
+        if (amount > 0) {
+            hasAnyItems = true;
+            break;
+        }
+    }
     const isEmpty = !hasAnyItems; // Only show empty state if user has no items at all
-
-    // Build trait filter options
-    const traitOptions: TraitFilterOption[] = [
-        { id: "Dropper", image: "rbxassetid://83949759663146", color: Color3.fromRGB(255, 92, 92), selected: traitFilters.Dropper ?? false },
-        { id: "Furnace", image: "rbxassetid://71820860315442", color: Color3.fromRGB(255, 155, 74), selected: traitFilters.Furnace ?? false },
-        { id: "Upgrader", image: "rbxassetid://139557708725255", color: Color3.fromRGB(245, 255, 58), selected: traitFilters.Upgrader ?? false },
-        { id: "Conveyor", image: "rbxassetid://125924824081942", color: Color3.fromRGB(131, 255, 78), selected: traitFilters.Conveyor ?? false },
-        { id: "Generator", image: "rbxassetid://120594818359262", color: Color3.fromRGB(60, 171, 255), selected: traitFilters.Generator ?? false },
-        { id: "Charger", image: "rbxassetid://78469928600985", color: Color3.fromRGB(255, 170, 255), selected: traitFilters.Charger ?? false },
-        { id: "Miscellaneous", image: "rbxassetid://83704048628923", color: Color3.fromRGB(170, 85, 255), selected: traitFilters.Miscellaneous ?? false }
-    ];
 
     // Handle search change
     const handleSearchChange = useCallback((query: string) => {
@@ -181,44 +190,54 @@ export default function InventoryWindow({ visible, onClose, inventoryController 
     }, []);
 
     // Handle trait filter toggle
-    const handleTraitToggle = useCallback((traitId: string) => {
-        setTraitFilters(prev => ({
-            ...prev,
-            [traitId]: !prev[traitId]
-        }));
+    const handleTraitToggle = useCallback((traitId: TraitFilterId) => {
+        setTraitFilters((prev) => {
+            const newFilters = table.clone(prev);
+            if (newFilters.has(traitId)) {
+                newFilters.delete(traitId);
+            } else {
+                newFilters.add(traitId);
+            }
+            return newFilters;
+        });
     }, []);
 
     // Handle filter clear
     const handleFilterClear = useCallback(() => {
-        setSearchQuery("");
-        setTraitFilters({});
+        setTraitFilters(new Set());
     }, []);
 
     // Handle item activation
-    const handleItemActivated = useCallback((item: Item) => {
-        if (!inventoryController) return;
+    const handleItemActivated = useCallback(
+        (item: Item) => {
+            if (!inventoryController) return;
 
-        // Use the controller's activation logic
-        const success = inventoryController.activateItem(item);
+            // Use the controller's activation logic
+            const success = inventoryController.activateItem(item);
 
-        // Close the inventory window if activation was successful
-        if (success) {
-            onClose();
-        }
-    }, [inventoryController, onClose]);
+            // Close the inventory window if activation was successful
+            if (success) {
+                onClose();
+            }
+        },
+        [inventoryController, onClose],
+    );
 
-    // Color sequence for inventory window border
-    const colorSequence = new ColorSequence([
-        new ColorSequenceKeypoint(0, Color3.fromRGB(255, 186, 125)),
-        new ColorSequenceKeypoint(1, Color3.fromRGB(255, 123, 123))
-    ]);
+    for (const traitOption of traitOptions) {
+        traitOption.selected = traitFilters.has(traitOption.id);
+    }
 
     return (
         <BasicWindow
             visible={visible}
             icon={getAsset("assets/Inventory.png")}
             title="Inventory"
-            colorSequence={colorSequence}
+            colorSequence={
+                new ColorSequence([
+                    new ColorSequenceKeypoint(0, Color3.fromRGB(255, 186, 125)),
+                    new ColorSequenceKeypoint(1, Color3.fromRGB(255, 123, 123)),
+                ])
+            }
             onClose={onClose}
             windowId="inventory"
             priority={1}
@@ -227,14 +246,9 @@ export default function InventoryWindow({ visible, onClose, inventoryController 
             <InventoryEmptyState visible={isEmpty} />
 
             {/* Main inventory content */}
-            <frame
-                BackgroundTransparency={1}
-                Size={new UDim2(1, 0, 1, 0)}
-                Visible={hasAnyItems}
-            >
+            <frame BackgroundTransparency={1} Size={new UDim2(1, 0, 1, 0)} Visible={hasAnyItems}>
                 {/* Filter options */}
                 <InventoryFilter
-                    searchQuery={searchQuery}
                     traitOptions={traitOptions}
                     onSearchChange={handleSearchChange}
                     onTraitToggle={handleTraitToggle}
@@ -253,7 +267,7 @@ export default function InventoryWindow({ visible, onClose, inventoryController 
                     ScrollBarThickness={6}
                     Selectable={false}
                     Size={new UDim2(1, 0, 0.975, -20)}
-                    Visible={filteredItems.size() > 0}
+                    Visible={inventoryItemDatas.size() > 0}
                 >
                     <uipadding
                         PaddingBottom={new UDim(0, 5)}
@@ -271,13 +285,12 @@ export default function InventoryWindow({ visible, onClose, inventoryController 
                     </uigridlayout>
 
                     {/* Render inventory items */}
-                    {filteredItems.map((itemData) => (
+                    {inventoryItemDatas.map((itemData) => (
                         <InventoryItemSlot
                             key={itemData.item.id}
                             item={itemData.item}
                             amount={itemData.amount}
-                            hasItem={itemData.hasItem}
-                            layoutOrder={-itemData.item.layoutOrder}
+                            layoutOrder={-itemData.layoutOrder}
                             visible={itemData.visible}
                             onActivated={() => handleItemActivated(itemData.item)}
                         />
@@ -291,6 +304,14 @@ export default function InventoryWindow({ visible, onClose, inventoryController 
                     SortOrder={Enum.SortOrder.LayoutOrder}
                 />
             </frame>
+
+            <textlabel
+                AnchorPoint={new Vector2(0.5, 0)}
+                FontFace={RobotoMono}
+                Text={`Query Time: ${string.format("%.3f", queryTime * 1000)}ms`}
+                LayoutOrder={-2}
+                Position={new UDim2(0.5, 0, 0, -15)}
+            />
         </BasicWindow>
     );
 }

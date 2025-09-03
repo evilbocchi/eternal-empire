@@ -7,7 +7,9 @@ import InclinedRefiner from "shared/items/0/win/InclinedRefiner";
 
 export = new Item(script.Name)
     .setName("The Amplifier")
-    .setDescription("%mul% boost to droplets. This is technically a trade-off for the additive Funds boost the Inclined Refiner gives.")
+    .setDescription(
+        "%mul% boost to droplets. This is technically a trade-off for the additive Funds boost the Inclined Refiner gives.",
+    )
     .setDifficulty(Difficulty.Blessing)
     .setPrice(new CurrencyBundle().set("Skill", 30), 1)
     .setRequiredItemAmount(InclinedRefiner, 1)

@@ -9,9 +9,10 @@ import Upgrader from "shared/item/traits/upgrader/Upgrader";
 
 export = new Item(script.Name)
     .setName("Effervescent Droplet Spray")
-    .setDescription(`Rinses droplets to make them sparkling clean! Just put droplets above the mystical veil for an enchanting experience.
+    .setDescription(
+        `Rinses droplets to make them sparkling clean! Just put droplets above the mystical veil for an enchanting experience.
 
-The more Power you have, the better the boost this spray applies to Funds and Power.`
+The more Power you have, the better the boost this spray applies to Funds and Power.`,
     )
     .setDifficulty(Difficulty.Exist)
     .setPrice(new CurrencyBundle().set("Funds", 504e12), 1)

@@ -32,7 +32,6 @@ declare global {
  */
 @Service()
 export default class AtmosphereService implements OnInit, OnPhysics {
-
     /**
      * Current weather state.
      */
@@ -40,7 +39,7 @@ export default class AtmosphereService implements OnInit, OnPhysics {
         type: WeatherType.Clear,
         intensity: 0,
         duration: 300, // 5 minutes
-        timeRemaining: 300
+        timeRemaining: 300,
     };
 
     /**
@@ -62,7 +61,7 @@ export default class AtmosphereService implements OnInit, OnPhysics {
         [WeatherType.Clear]: 0.4,
         [WeatherType.Cloudy]: 0.3,
         [WeatherType.Rainy]: 0.2,
-        [WeatherType.Thunderstorm]: 0.1
+        [WeatherType.Thunderstorm]: 0.1,
     };
 
     constructor(private readonly dataService: DataService) {
@@ -84,7 +83,7 @@ export default class AtmosphereService implements OnInit, OnPhysics {
 
     /**
      * Updates the weather system.
-     * 
+     *
      * @param dt Delta time since last update.
      */
     private updateWeather(dt: number) {
@@ -128,7 +127,7 @@ export default class AtmosphereService implements OnInit, OnPhysics {
 
     /**
      * Sets the current weather state.
-     * 
+     *
      * @param weatherType The type of weather to set.
      */
     private setWeather(weatherType: WeatherType) {
@@ -159,7 +158,7 @@ export default class AtmosphereService implements OnInit, OnPhysics {
             type: weatherType,
             intensity,
             duration,
-            timeRemaining: duration
+            timeRemaining: duration,
         };
 
         print(`Weather changed to: ${weatherType} for ${duration} seconds`);
@@ -209,7 +208,7 @@ export default class AtmosphereService implements OnInit, OnPhysics {
      */
     private applyRainyWeather() {
         // Rainy weather:
-        // - Reduces drop rates to 0.5x 
+        // - Reduces drop rates to 0.5x
         // - Increases droplet values by 2.5x
         // - Shows rain visual effects
         // This will be handled by the weather boost system and visual effects
@@ -231,7 +230,8 @@ export default class AtmosphereService implements OnInit, OnPhysics {
      */
     private handleLightningStrikes() {
         // Random chance for lightning strike every few seconds
-        if (math.random() < 0.0005) { // 0.05% chance per physics step during thunderstorm
+        if (math.random() < 0.0005) {
+            // 0.05% chance per physics step during thunderstorm
             this.triggerLightningStrike();
         }
     }
@@ -261,7 +261,7 @@ export default class AtmosphereService implements OnInit, OnPhysics {
 
     /**
      * Applies a surge effect to a droplet, boosting its value by 10x.
-     * 
+     *
      * @param droplet The droplet to surge.
      */
     private surgeDroplet(droplet: BasePart) {
@@ -284,7 +284,7 @@ export default class AtmosphereService implements OnInit, OnPhysics {
 
     /**
      * Creates visual and audio effects for lightning strikes.
-     * 
+     *
      * @param position The position where lightning struck.
      */
     private createLightningEffects(position: Vector3) {
@@ -328,7 +328,7 @@ export default class AtmosphereService implements OnInit, OnPhysics {
 
     /**
      * Gets the current weather state.
-     * 
+     *
      * @returns The current weather state.
      */
     getCurrentWeather(): WeatherState {
@@ -337,7 +337,7 @@ export default class AtmosphereService implements OnInit, OnPhysics {
 
     /**
      * Gets the weather multipliers for drop rates and droplet values.
-     * 
+     *
      * @returns Object containing drop rate and value multipliers.
      */
     getWeatherMultipliers() {

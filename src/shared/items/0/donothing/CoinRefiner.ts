@@ -21,6 +21,9 @@ export = new Item(script.Name)
     .setFormulaX("bitcoin")
 
     .trait(Upgrader)
-    .applyFormula((v, upgrader) => upgrader.setMul(mul.set("Bitcoin", v)), () => Server.Currency.get("Bitcoin"))
+    .applyFormula(
+        (v, upgrader) => upgrader.setMul(mul.set("Bitcoin", v)),
+        () => Server.Currency.get("Bitcoin"),
+    )
 
     .exit();

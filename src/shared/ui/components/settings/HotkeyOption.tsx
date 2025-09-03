@@ -13,15 +13,22 @@ interface HotkeyOptionProps {
     onDeselect?: () => void;
 }
 
-export default function HotkeyOption({ title, keyText, layoutOrder = 0, isSelected = false, onSelect, onHotkeyChange, onDeselect }: HotkeyOptionProps) {
+export default function HotkeyOption({
+    title,
+    keyText,
+    layoutOrder = 0,
+    isSelected = false,
+    onSelect,
+    onHotkeyChange,
+    onDeselect,
+}: HotkeyOptionProps) {
     const toggleColor = isSelected ? Color3.fromRGB(255, 138, 138) : Color3.fromRGB(85, 255, 127);
     const displayText = isSelected ? ".." : keyText;
 
     const handleSelect = () => {
         if (!isSelected) {
             playSound("CheckOff.mp3");
-        }
-        else {
+        } else {
             playSound("CheckOn.mp3");
         }
         onSelect?.();
@@ -61,14 +68,9 @@ export default function HotkeyOption({ title, keyText, layoutOrder = 0, isSelect
 
         return () => connection.Disconnect();
     }, [isSelected, onDeselect]);
-    
-    
+
     return (
-        <frame
-            BackgroundTransparency={1}
-            LayoutOrder={layoutOrder}
-            Size={new UDim2(1, 0, 0, 40)}
-        >
+        <frame BackgroundTransparency={1} LayoutOrder={layoutOrder} Size={new UDim2(1, 0, 0, 40)}>
             <textbutton
                 key="Bind"
                 AnchorPoint={new Vector2(1, 0.5)}
@@ -94,35 +96,37 @@ export default function HotkeyOption({ title, keyText, layoutOrder = 0, isSelect
                             sound.Volume = 0.1;
                             sound.PlaybackSpeed = 2;
                         });
-                    }
+                    },
                 }}
             >
                 <uigradient
-                    Color={new ColorSequence([
-                        new ColorSequenceKeypoint(0, Color3.fromRGB(255, 255, 255)),
-                        new ColorSequenceKeypoint(0.456, Color3.fromRGB(255, 255, 255)),
-                        new ColorSequenceKeypoint(1, Color3.fromRGB(131, 131, 131))
-                    ])}
+                    Color={
+                        new ColorSequence([
+                            new ColorSequenceKeypoint(0, Color3.fromRGB(255, 255, 255)),
+                            new ColorSequenceKeypoint(0.456, Color3.fromRGB(255, 255, 255)),
+                            new ColorSequenceKeypoint(1, Color3.fromRGB(131, 131, 131)),
+                        ])
+                    }
                     Rotation={90}
                 />
-                <uistroke
-                    ApplyStrokeMode={Enum.ApplyStrokeMode.Border}
-                    Color={toggleColor}
-                    Thickness={2}
-                >
+                <uistroke ApplyStrokeMode={Enum.ApplyStrokeMode.Border} Color={toggleColor} Thickness={2}>
                     <uigradient
-                        Color={new ColorSequence([
-                            new ColorSequenceKeypoint(0, Color3.fromRGB(109, 109, 109)),
-                            new ColorSequenceKeypoint(1, Color3.fromRGB(109, 109, 109))
-                        ])}
+                        Color={
+                            new ColorSequence([
+                                new ColorSequenceKeypoint(0, Color3.fromRGB(109, 109, 109)),
+                                new ColorSequenceKeypoint(1, Color3.fromRGB(109, 109, 109)),
+                            ])
+                        }
                     />
                 </uistroke>
                 <uistroke Color={toggleColor}>
                     <uigradient
-                        Color={new ColorSequence([
-                            new ColorSequenceKeypoint(0, Color3.fromRGB(109, 109, 109)),
-                            new ColorSequenceKeypoint(1, Color3.fromRGB(109, 109, 109))
-                        ])}
+                        Color={
+                            new ColorSequence([
+                                new ColorSequenceKeypoint(0, Color3.fromRGB(109, 109, 109)),
+                                new ColorSequenceKeypoint(1, Color3.fromRGB(109, 109, 109)),
+                            ])
+                        }
                     />
                 </uistroke>
                 <textlabel

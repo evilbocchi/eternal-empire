@@ -6,7 +6,9 @@ import CurrencyBundle from "shared/currency/CurrencyBundle";
 
 export = new Item(script.Name)
     .setName("Purifier's Refiner")
-    .setDescription("Upgrade one of your Advanced Refiners, keeping its original boosts while adding %add% value to droplets.")
+    .setDescription(
+        "Upgrade one of your Advanced Refiners, keeping its original boosts while adding %add% value to droplets.",
+    )
     .setDifficulty(Difficulty.Exist)
     .setPrice(new CurrencyBundle().set("Funds", 4e15), 1)
     .setRequiredItemAmount(AdvancedRefiner, 1)

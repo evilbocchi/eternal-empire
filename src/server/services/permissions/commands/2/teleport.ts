@@ -11,18 +11,23 @@ export = new Command(script.Name)
         if (size === 0) {
             CommandAPI.ChatHook.sendPrivateMessage(o, `No target called ${t} found`, "color:255,43,43");
             return;
-        }
-        else if (size > 1) {
+        } else if (size > 1) {
             CommandAPI.ChatHook.sendPrivateMessage(o, `Too many targets specified: ${t}`, "color:255,43,43");
             return;
         }
         const target = targets[0];
         const destination = target.Character?.GetPivot();
-        if (destination === undefined)
-            return;
+        if (destination === undefined) return;
         for (const teleporter of teleporters) {
-            if (CommandAPI.Permissions.getPermissionLevel(teleporter.UserId) > CommandAPI.Permissions.getPermissionLevel(o.UserId)) {
-                CommandAPI.ChatHook.sendPrivateMessage(o, `You cannot teleport a player with a permission level higher than your own`, "color:255,43,43");
+            if (
+                CommandAPI.Permissions.getPermissionLevel(teleporter.UserId) >
+                CommandAPI.Permissions.getPermissionLevel(o.UserId)
+            ) {
+                CommandAPI.ChatHook.sendPrivateMessage(
+                    o,
+                    `You cannot teleport a player with a permission level higher than your own`,
+                    "color:255,43,43",
+                );
                 continue;
             }
             teleporter.Character?.PivotTo(destination);

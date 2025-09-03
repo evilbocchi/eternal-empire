@@ -6,7 +6,9 @@ import EnchantedGrass from "shared/items/excavation/harvestable/EnchantedGrass";
 
 export = new Item(script.Name)
     .setName("Winsome Charm")
-    .setDescription("If you're ever feeling down, just know that Winsome is here for you. +3% chance to inflict critical hits with tools.")
+    .setDescription(
+        "If you're ever feeling down, just know that Winsome is here for you. +3% chance to inflict critical hits with tools.",
+    )
     .setDifficulty(Difficulty.Winsome)
     .setPrice(new CurrencyBundle().set("Funds", 1), 1)
     .setRequiredHarvestableAmount("WinsomeSpeck", 25)

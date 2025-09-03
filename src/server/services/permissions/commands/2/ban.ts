@@ -10,16 +10,30 @@ export = new Command(script.Name)
         if (targets.size() < 1) {
             const userId = useId === "true" ? tonumber(p) : Players.GetUserIdFromNameAsync(p);
             if (userId !== undefined) {
-                if (CommandAPI.Permissions.getPermissionLevel(userId) >= CommandAPI.Permissions.getPermissionLevel(o.UserId)) {
-                    CommandAPI.ChatHook.sendPrivateMessage(o, "You can't ban someone with an equal/higher permission level.", "color:255,43,43");
+                if (
+                    CommandAPI.Permissions.getPermissionLevel(userId) >=
+                    CommandAPI.Permissions.getPermissionLevel(o.UserId)
+                ) {
+                    CommandAPI.ChatHook.sendPrivateMessage(
+                        o,
+                        "You can't ban someone with an equal/higher permission level.",
+                        "color:255,43,43",
+                    );
                     return;
                 }
                 const success = CommandAPI.Permissions.add("banned", userId);
                 if (success) {
-                    CommandAPI.ChatHook.sendPrivateMessage(o, `Banned ${CommandAPI.Command.fp(p, userId)}`, "color:138,255,138");
-                }
-                else {
-                    CommandAPI.ChatHook.sendPrivateMessage(o, `${CommandAPI.Command.fp(p, userId)} is already banned`, "color:255,43,43");
+                    CommandAPI.ChatHook.sendPrivateMessage(
+                        o,
+                        `Banned ${CommandAPI.Command.fp(p, userId)}`,
+                        "color:138,255,138",
+                    );
+                } else {
+                    CommandAPI.ChatHook.sendPrivateMessage(
+                        o,
+                        `${CommandAPI.Command.fp(p, userId)} is already banned`,
+                        "color:255,43,43",
+                    );
                 }
                 return;
             }
@@ -31,8 +45,15 @@ export = new Command(script.Name)
                 CommandAPI.ChatHook.sendPrivateMessage(o, "You can't ban yourself.", "color:255,43,43");
                 continue;
             }
-            if (CommandAPI.Permissions.getPermissionLevel(target.UserId) >= CommandAPI.Permissions.getPermissionLevel(o.UserId)) {
-                CommandAPI.ChatHook.sendPrivateMessage(o, "You can't ban someone with an equal/higher permission level.", "color:255,43,43");
+            if (
+                CommandAPI.Permissions.getPermissionLevel(target.UserId) >=
+                CommandAPI.Permissions.getPermissionLevel(o.UserId)
+            ) {
+                CommandAPI.ChatHook.sendPrivateMessage(
+                    o,
+                    "You can't ban someone with an equal/higher permission level.",
+                    "color:255,43,43",
+                );
                 continue;
             }
             CommandAPI.ChatHook.sendPrivateMessage(o, `Banned player ${target.Name}`, "color:138,255,138");
@@ -42,7 +63,8 @@ export = new Command(script.Name)
                 smoke.Size = 5;
                 smoke.TimeScale = 20;
                 smoke.Parent = h.RootPart;
-                const attachment = h.RootPart.FindFirstChild("LVAttachment") as Attachment ?? new Instance("Attachment", h.RootPart);
+                const attachment =
+                    (h.RootPart.FindFirstChild("LVAttachment") as Attachment) ?? new Instance("Attachment", h.RootPart);
                 attachment.Name = "LVAttachment";
                 const vector = new Vector3(0, 300, 0);
                 const linearVelocity = new Instance("LinearVelocity");

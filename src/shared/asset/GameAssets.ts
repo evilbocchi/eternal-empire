@@ -6,7 +6,7 @@ import { IS_CI } from "shared/Context";
 declare global {
     /**
      * The structure of the Assets folder in StarterGui.
-     * 
+     *
      * Modify this interface to match the actual structure of the Assets folder.
      */
     interface Assets extends Folder {
@@ -28,19 +28,19 @@ export const ASSETS = StarterGui.WaitForChild("Assets") as Assets;
 
 /**
  * The sound group for sound effects.
- * 
+ *
  * This group is used to categorize and manage sound effects in the game.
  */
 export const SOUND_EFFECTS_GROUP = SoundService.WaitForChild("SoundEffectsGroup") as SoundGroup;
 
 /**
  * Returns a sound from the Assets folder.
- * 
+ *
  * @param soundName The name of the sound to retrieve.
  * @returns The sound instance from the Assets folder.
  */
 export function getSound(path: Filename<SoundAssetPath>) {
-    const fullPath = "assets/sounds/" + path as AssetPath;
+    const fullPath = ("assets/sounds/" + path) as AssetPath;
     const cached = ReplicatedStorage.FindFirstChild(fullPath) as Sound | undefined;
     if (cached !== undefined) {
         return cached;
@@ -55,7 +55,7 @@ export function getSound(path: Filename<SoundAssetPath>) {
 
 /**
  * Plays a sound at a specific part's position.
- * 
+ *
  * @param path The path to the sound asset.
  * @param part The part where the sound should be played. If not provided, it plays in ReplicatedStorage.
  * @param modifier An optional function to modify the sound instance before playing it.
@@ -64,8 +64,7 @@ export function playSound(path: Filename<SoundAssetPath>, part?: Instance, modif
     let sound = getSound(path);
     if (IS_CI) {
         sound.Parent = Environment.PluginWidget; // Sounds can only play in PluginWidget when not in-game
-    }
-    else {
+    } else {
         sound = sound.Clone();
         sound.Parent = part ?? ReplicatedStorage;
     }
@@ -83,7 +82,7 @@ export function playSound(path: Filename<SoundAssetPath>, part?: Instance, modif
 
 /**
  * Returns a particle emitter from the Assets folder.
- * 
+ *
  * @param effectName The name of the effect to retrieve, without the "Effect" suffix.
  * @returns The particle emitter instance from the Assets folder.
  */
@@ -93,7 +92,7 @@ export function getEffect(effectName: string) {
 
 /**
  * Emits a particle effect from the Assets folder.
- * 
+ *
  * @param effectName The name of the effect to emit, without the "Effect" suffix.
  * @param parent The parent instance to attach the effect to.
  * @param amount The number of particles to emit (default is 1).

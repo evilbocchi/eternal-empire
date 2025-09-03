@@ -15,12 +15,11 @@ import { ITEM_MODELS } from "shared/item/ItemModels";
 import ItemUtils, { Server } from "shared/item/ItemUtils";
 
 declare global {
-
     /**
      * Metadata for instances. This is used to store additional information about instances.
      * This provides more flexibility than using attributes as it allows for storing any type of data.
      * Additionally, this data is not replicated to the client, improving performance.
-     * 
+     *
      * @see {@link getAllInstanceInfo} to retrieve the metadata for an instance.
      * @see {@link setInstanceInfo} to set the metadata for an instance.
      */
@@ -35,8 +34,8 @@ declare global {
     type Toggleable = ParticleEmitter | Beam | Script;
 
     type OmitConstructorSignature<T> = { [K in keyof T]: T[K] } & (T extends (...args: infer R) => infer S
-    ? (...args: R) => S
-    : unknown);
+        ? (...args: R) => S
+        : unknown);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     type Constructor<T> = new (...args: any[]) => T;
 }
@@ -46,7 +45,7 @@ const EMPTY_DIFFICULTY = new Difficulty();
 /**
  * Represents an item in the game.
  * The item may or may not be placed in the world and interacted with.
- * 
+ *
  * @example
  * ```ts
  * const item = new Item("example")
@@ -56,18 +55,17 @@ const EMPTY_DIFFICULTY = new Difficulty();
  * ```
  */
 export default class Item {
-
     /**
      * The {@link Model} of the item. This should be a descendant of the folder in {@link ReplicatedStorage} called `ItemModels`.
      * A hitbox should be present in the model to allow for placement in the world. The hitbox should be named `Hitbox`.
      * The {@link Model.PrimaryPart} is a required property for the model, which defines the primary hitbox.
-     * 
+     *
      * @see {@link ITEM_MODELS} for the models that are available.
      */
     readonly MODEL?: Model;
 
     /**
-     * Called when {@link NPCNavigationService} is initialized. 
+     * Called when {@link NPCNavigationService} is initialized.
      */
     readonly INITALIZES = new Array<<T extends this>(item: T) => void>();
 
@@ -84,7 +82,7 @@ export default class Item {
 
     /**
      * The types of the item.
-     * 
+     *
      * @see {@link isA} to check if the item is of a specific type.
      */
     readonly types = new Map<keyof ItemTraits, ItemTraits[keyof ItemTraits]>();
@@ -107,7 +105,7 @@ export default class Item {
 
     /**
      * The description of the item that will be shown in the tooltip when hovering over the item in the inventory.
-     * 
+     *
      * If not set, the {@link description} will be used as the tooltip description.
      */
     tooltipDescription?: string;
@@ -122,7 +120,7 @@ export default class Item {
      * If the price is not affordable, the item will be disabled.
      */
     drain?: CurrencyBundle;
-    
+
     /**
      * The price set as the default for this item. This price will be used if no other price is set for a specific iteration.
      */
@@ -157,7 +155,7 @@ export default class Item {
     /**
      * The maximum value that {@link formulaXGet} can return.
      * This {@link CurrencyBundle} should only have one amount.
-     * 
+     *
      * @see {@link formulaXCapValue} for the value of the amount.
      */
     formulaXCap?: CurrencyBundle;
@@ -186,7 +184,7 @@ export default class Item {
      * The order of the {@link ResetLayer} in which this item will reset at.
      */
     defaultResetLayer?: number;
-    
+
     /**
      * The order of the {@link ResetLayer} in which this item will persist. Takes precedence over {@link defaultResetLayer}.
      */
@@ -209,19 +207,22 @@ export default class Item {
 
     /**
      * Define a new item with the specified ID and name.
-     * 
+     *
      * @param id The ID of the item.
      * @param name The name of the item. Defaults to the ID if not provided.
      * @returns The item instance.
      */
-    constructor(public readonly id: string, public name = id) {
+    constructor(
+        public readonly id: string,
+        public name = id,
+    ) {
         this.MODEL = ITEM_MODELS.get(id);
         this.description = id;
     }
 
     /**
      * Create a model for the placed item.
-     * 
+     *
      * @param placedItem The placed item data.
      * @returns The created model or undefined if creation failed.
      */
@@ -233,8 +234,11 @@ export default class Item {
         }
 
         // Position and rotate the model based on placed item data
-        model.PivotTo(new CFrame(placedItem.posX, placedItem.posY, placedItem.posZ)
-            .mul(CFrame.Angles(math.rad(placedItem.rotX), math.rad(placedItem.rotY), math.rad(placedItem.rotZ))));
+        model.PivotTo(
+            new CFrame(placedItem.posX, placedItem.posY, placedItem.posZ).mul(
+                CFrame.Angles(math.rad(placedItem.rotX), math.rad(placedItem.rotY), math.rad(placedItem.rotZ)),
+            ),
+        );
 
         // Set model attributes for identification and functionality
         model.SetAttribute("Area", placedItem.area);
@@ -247,7 +251,7 @@ export default class Item {
 
     /**
      * Set the name of the item.
-     * 
+     *
      * @param name The name of the item.
      * @returns The item instance.
      */
@@ -258,7 +262,7 @@ export default class Item {
 
     /**
      * Set the description of the item.
-     * 
+     *
      * @param description The description of the item.
      * @returns The item instance.
      */
@@ -270,7 +274,7 @@ export default class Item {
     /**
      * Set the tooltip description of the item.
      * This description will be shown in the tooltip when hovering over the item in the inventory.
-     * 
+     *
      * @param description The tooltip description of the item.
      * @returns The item instance.
      */
@@ -281,13 +285,17 @@ export default class Item {
 
     /**
      * Set the difficulty of the item. i.e. level of progression that the item is recommended to be obtained and used at.
-     * 
+     *
      * @param difficulty The difficulty level of the item.
      * @returns The item instance.
      */
     setDifficulty(difficulty: Difficulty) {
         this.difficulty = difficulty;
-        if (difficulty === Difficulty.Miscellaneous || difficulty === Difficulty.Excavation || difficulty === Difficulty.Bonuses)
+        if (
+            difficulty === Difficulty.Miscellaneous ||
+            difficulty === Difficulty.Excavation ||
+            difficulty === Difficulty.Bonuses
+        )
             this.persists();
         if (this.layoutOrder === -100000) {
             this.layoutOrder = difficulty.rating ?? 0;
@@ -303,13 +311,13 @@ export default class Item {
      * @returns The price of the item for the specified iteration.
      */
     getPrice(iteration: number) {
-        return this.pricePerIteration.get(iteration) ?? this.defaultPrice; 
+        return this.pricePerIteration.get(iteration) ?? this.defaultPrice;
     }
 
     /**
      * Set the price of the item for the specified iteration.
      * If the end iteration is specified, the price will be set for all iterations between the start and end.
-     * 
+     *
      * @param price The price of the item.
      * @param iteration The iteration number to set the price for. The first purchase is iteration 1.
      * @param endIteration The end iteration number to set the price for. If not specified, the price will be set for the specified iteration only.
@@ -331,7 +339,7 @@ export default class Item {
 
     /**
      * Set the items required to purchase this item.
-     * 
+     *
      * @param required The items required to purchase this item.
      * @returns The item instance.
      */
@@ -342,7 +350,7 @@ export default class Item {
 
     /**
      * Set the amount of the item required to purchase this item.
-     * 
+     *
      * @param item The item required to purchase this item.
      * @param amount The amount of the item required.
      * @returns The item instance.
@@ -354,7 +362,7 @@ export default class Item {
 
     /**
      * Set the amount of the harvestable required to purchase this item.
-     * 
+     *
      * @param id The ID of the harvestable required to purchase this item.
      * @param amount The amount of the harvestable required.
      * @returns The item instance.
@@ -362,12 +370,10 @@ export default class Item {
     setRequiredHarvestableAmount(id: HarvestableId, amount: number) {
         if (ItemUtils.itemsPerId === undefined) {
             task.spawn(() => {
-                while (ItemUtils.itemsPerId === undefined)
-                    task.wait();
+                while (ItemUtils.itemsPerId === undefined) task.wait();
                 this.requiredItems.set(ItemUtils.itemsPerId.get(id)!, amount);
             });
-        }
-        else {
+        } else {
             this.requiredItems.set(ItemUtils.itemsPerId.get(id)!, amount);
         }
         return this;
@@ -390,23 +396,21 @@ export default class Item {
                 break;
             }
 
-            if (resetLayer === undefined || layer.order > resetLayer)
-                resetLayer = layer.order;
+            if (resetLayer === undefined || layer.order > resetLayer) resetLayer = layer.order;
         }
         this.defaultResetLayer = resetLayer;
     }
 
     /**
      * Get the reset layer for the item.
-     * 
+     *
      * @returns The current reset layer for the item.
      */
     getResetLayer() {
         if (this.defaultResetLayer !== undefined) {
             if (this.persistingLayer !== undefined) {
                 return math.max(this.persistingLayer + 1, this.defaultResetLayer);
-            }
-            else {
+            } else {
                 return this.defaultResetLayer;
             }
         }
@@ -415,20 +419,19 @@ export default class Item {
 
     /**
      * Add a placeable area for the item.
-     * 
+     *
      * @param areas The areas where the item can be placed.
      * @returns The item instance.
      */
-    addPlaceableArea(...areas: (AreaId)[]) {
-        for (const area of areas)
-            this.placeableAreas.push(AREAS[area]);
+    addPlaceableArea(...areas: AreaId[]) {
+        for (const area of areas) this.placeableAreas.push(AREAS[area]);
         this.updateResetLayer();
-        return this;        
+        return this;
     }
 
     /**
      * Adds all areas to the placeable areas for the item.
-     * 
+     *
      * @returns The item instance.
      */
     placeableEverywhere() {
@@ -442,7 +445,7 @@ export default class Item {
     /**
      * Set the price that will be drained from balance every second.
      * If the price is not affordable, the item will be disabled.
-     * 
+     *
      * @param drain The price that will be drained from balance every second.
      * @returns The item instance.
      */
@@ -453,7 +456,7 @@ export default class Item {
 
     /**
      * Set the contributor who originally created the item.
-     * 
+     *
      * @param creator The contributor who originally created the item.
      * @returns The item instance.
      */
@@ -464,7 +467,7 @@ export default class Item {
 
     /**
      * Calls the callback function when the item is initialized.
-     * 
+     *
      * @param initCallback Callback function that will be called when the item is initialized.
      * @returns The item instance.
      */
@@ -475,7 +478,7 @@ export default class Item {
 
     /**
      * Calls the callback function when the item is loaded.
-     * 
+     *
      * @param loadCallback Callback function that will be called when the item is loaded.
      * @returns The item instance.
      */
@@ -486,7 +489,7 @@ export default class Item {
 
     /**
      * Calls the callback function when the item is loaded on the client.
-     * 
+     *
      * @param loadCallback Callback function that will be called when the item is loaded on the client.
      * @returns The item instance.
      */
@@ -497,44 +500,45 @@ export default class Item {
 
     /**
      * Calls the callback function every specified delta time.
-     * 
+     *
      * @param instance Stops the repeat when the instance is destroyed. If undefined, the repeat will continue indefinitely.
      * @param callback The function to be called every delta time.
      * @param delta Delta time to specify the interval. If not specified, the function will be called every frame.
      * @returns An object that can be used to manage the repeat.
      */
     repeat(instance: Instance | undefined, callback: (dt: number) => unknown, delta?: number) {
-        const ref = {delta: delta};
+        const ref = { delta: delta };
         ItemUtils.REPEATS.set(callback, ref);
-        if (instance !== undefined)
-            instance.Destroying.Once(() => ItemUtils.REPEATS.delete(callback));
+        if (instance !== undefined) instance.Destroying.Once(() => ItemUtils.REPEATS.delete(callback));
         return ref;
     }
 
     /**
      * Drains the price set in {@link drain} every second.
      * If the price is not affordable, the item will be disabled.\
-     * 
+     *
      * @param model The model of the item to maintain.
      */
     maintain(model: Model | undefined) {
-        this.repeat(model, () => {
-            const drain = this.drain;
-            let affordable = true;
+        this.repeat(
+            model,
+            () => {
+                const drain = this.drain;
+                let affordable = true;
 
-            if (drain !== undefined)
-                affordable = Server.Currency.purchase(drain);
+                if (drain !== undefined) affordable = Server.Currency.purchase(drain);
 
-            if (model === undefined)
-                return;
-            const instanceInfo = getAllInstanceInfo(model);
-            instanceInfo.Maintained = affordable;
-        }, 1);
+                if (model === undefined) return;
+                const instanceInfo = getAllInstanceInfo(model);
+                instanceInfo.Maintained = affordable;
+            },
+            1,
+        );
     }
 
     /**
      * Set the formula for the item.
-     * 
+     *
      * @param formula The formula to be applied to the value of {@link formulaXGet} every second.
      * @returns The item instance.
      */
@@ -545,7 +549,7 @@ export default class Item {
 
     /**
      * Set the variable name that will be used in the formula.
-     * 
+     *
      * @param x The variable name that will be used in the formula.
      * @returns The item instance.
      */
@@ -556,7 +560,7 @@ export default class Item {
 
     /**
      * Set the maximum value that {@link formulaXGet} can return.
-     * 
+     *
      * @param cap The maximum value that {@link formulaXGet} can return.
      * @returns The item instance.
      */
@@ -568,7 +572,7 @@ export default class Item {
 
     /**
      * Calls the callback function every second by passing the return of the x function in the formula function, and passing the return of that to the callback.
-     * 
+     *
      * @param callback Called every second with the `value` parameter passed as the return of `this.formula`.
      * @param x The value to be used in the formula.
      */
@@ -581,12 +585,11 @@ export default class Item {
     /**
      * Applies the value fetched from {@link formulaXGet} to the formula and calls the callback function.
      * The value is capped by {@link formulaXCap}.
-     * 
+     *
      * @returns The result of the formula. Also stored in {@link formulaResult}.
      */
     performFormula() {
-        if (this.formula === undefined || this.formulaXGet === undefined || this.formulaCallback === undefined)
-            return;
+        if (this.formula === undefined || this.formulaXGet === undefined || this.formulaCallback === undefined) return;
 
         let value = this.formulaXGet(Server);
         const cap = this.formulaXCapValue;
@@ -603,7 +606,7 @@ export default class Item {
     /**
      * Marks the item to persist at the specified {@link ResetLayer}.
      * If the layer is not specified, the item will persist at the highest layer.
-     * 
+     *
      * The item will reset at the next layer after the persisting layer.
      *
      * @param layerName The name of the {@link ResetLayer} to persist at.
@@ -617,7 +620,7 @@ export default class Item {
 
     /**
      * Set the level required to purchase and use the item.
-     * 
+     *
      * @param level The level required to purchase and use the item.
      * @returns The item instance.
      */
@@ -625,10 +628,10 @@ export default class Item {
         this.levelReq = level;
         return this;
     }
-    
+
     /**
      * Set the order in which the item will appear in the inventory.
-     * 
+     *
      * @param layoutOrder The order in which the item will appear in the inventory.
      * @returns The item instance.
      */
@@ -639,7 +642,7 @@ export default class Item {
 
     /**
      * Set a custom area where this item can be placed.
-     * 
+     *
      * @param boundId Name of BasePart which is the custom area
      * @returns The item instance.
      */
@@ -650,7 +653,7 @@ export default class Item {
 
     /**
      * Set the image ID of the item.
-     * 
+     *
      * @param image The image ID of the item.
      * @returns The item instance.
      */
@@ -662,7 +665,7 @@ export default class Item {
     /**
      * Check if the item has a specific trait.
      * Equivalent to checking if a builder exists for the item trait.
-     * 
+     *
      * @param traitName The key name of the trait.
      * @returns Whether the item is of the specified trait.
      */
@@ -673,14 +676,14 @@ export default class Item {
     /**
      * Find a trait for the item.
      * If the trait does not exist, it will return undefined.
-     * 
+     *
      * @example
      * ```ts
      * const item = new Item("example");
      * const upgrader = item.findTrait("Upgrader");
-     * print(upgrader?.sky) // whether the item leads to skyline 
+     * print(upgrader?.sky) // whether the item leads to skyline
      * ```
-     * 
+     *
      * @param name The key name of the trait.
      * @returns The trait for the item.
      */
@@ -691,14 +694,14 @@ export default class Item {
     /**
      * Add a trait to the item.
      * If the trait already exists, it will return the existing trait.
-     * 
+     *
      * @example
      * ```ts
      * const item = new Item("example");
      * item.trait(Killbrick.Damager).setDamage(10).exit(); // Adds damage functionality to the item.
      * item.trait(Conveyor).setSpeed(5).exit(); // Adds conveyor functionality to the item.
      * ```
-     * 
+     *
      * @param Trait The constructor of the trait to add to the item.
      * @returns The trait for the item.
      */
@@ -714,7 +717,7 @@ export default class Item {
 
     /**
      * Format the string with the item's traits.
-     * 
+     *
      * @param str The string to format.
      * @returns The formatted string.
      */
@@ -723,11 +726,9 @@ export default class Item {
             str = trait.format(str);
         }
 
-        if (this.drain !== undefined)
-            str = str.gsub("%%drain%%", this.drain.toString(true, undefined, "/s"))[0];
+        if (this.drain !== undefined) str = str.gsub("%%drain%%", this.drain.toString(true, undefined, "/s"))[0];
 
-        if (this.formulaXCap !== undefined)
-            str = str.gsub("%%cap%%", this.formulaXCap.toString(true))[0];
+        if (this.formulaXCap !== undefined) str = str.gsub("%%cap%%", this.formulaXCap.toString(true))[0];
 
         return str;
     }
@@ -735,21 +736,24 @@ export default class Item {
     static init() {
         const start = tick();
 
-        ItemUtils.REPEATS.set(() => {
-            const formulaResults = new Map<string, OnoeNum>();
-            for (const [_id, item] of ItemUtils.itemsPerId) {                
-                formulaResults.set(item.id, item.performFormula()!);
-            }
-            if (tick() - start > 4) { // simple delay to ensure clients are ready
-                Packets.boostChanged.toAllClients(formulaResults);
-            }
-        }, {
-            delta: 1,
-            lastCall: 0
-        });
+        ItemUtils.REPEATS.set(
+            () => {
+                const formulaResults = new Map<string, OnoeNum>();
+                for (const [_id, item] of ItemUtils.itemsPerId) {
+                    formulaResults.set(item.id, item.performFormula()!);
+                }
+                if (tick() - start > 4) {
+                    // simple delay to ensure clients are ready
+                    Packets.boostChanged.toAllClients(formulaResults);
+                }
+            },
+            {
+                delta: 1,
+                lastCall: 0,
+            },
+        );
         RunService.Heartbeat.Connect((dt) => {
-            if (Server.ready === false)
-                return;
+            if (Server.ready === false) return;
 
             const t = tick();
             const gameSpeed = GameSpeed.speed;
@@ -760,7 +764,7 @@ export default class Item {
                     continue;
                 }
                 const diff = t - last;
-                if (rep.delta === undefined || diff > (rep.delta / gameSpeed)) {
+                if (rep.delta === undefined || diff > rep.delta / gameSpeed) {
                     callback(diff);
                     rep.lastCall = t;
                 }

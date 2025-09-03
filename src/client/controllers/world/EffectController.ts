@@ -36,16 +36,11 @@ import Packets from "shared/Packets";
  */
 @Controller()
 export default class EffectController implements OnInit {
-
     /** Camera shaker instance for world effects. */
-    camShake = new CameraShaker(
-        Enum.RenderPriority.Camera.Value,
-        shakeCFrame => {
-            const cam = Workspace.CurrentCamera;
-            if (cam !== undefined)
-                cam.CFrame = cam.CFrame.mul(shakeCFrame);
-        }
-    );
+    camShake = new CameraShaker(Enum.RenderPriority.Camera.Value, (shakeCFrame) => {
+        const cam = Workspace.CurrentCamera;
+        if (cam !== undefined) cam.CFrame = cam.CFrame.mul(shakeCFrame);
+    });
     /** Map of droplet parts to their original size. */
     sizePerDrop = new Map<BasePart, Vector3>();
     /** Delay value for ping calculation. */
@@ -77,8 +72,7 @@ export default class EffectController implements OnInit {
      */
     showQuestMessage(frame: Frame) {
         const imageLabel = frame.FindFirstChildOfClass("ImageLabel");
-        if (imageLabel === undefined)
-            return;
+        if (imageLabel === undefined) return;
         imageLabel.ImageTransparency = 1;
         const textLabels = frame.GetChildren().filter((value) => value.IsA("TextLabel")) as TextLabel[];
         textLabels.forEach((label) => {
@@ -103,58 +97,66 @@ export default class EffectController implements OnInit {
      */
     loadTags() {
         observeTagAdded("Rainbow", (instance) => rainbowEffect(instance as BasePart, 2), true);
-        observeTagAdded("Spinner", (instance) => {
-            if (!instance.IsA("BasePart"))
-                return;
+        observeTagAdded(
+            "Spinner",
+            (instance) => {
+                if (!instance.IsA("BasePart")) return;
 
-            const createRandomTween = () => {
-                if (instance === undefined || instance.Parent === undefined)
-                    return;
+                const createRandomTween = () => {
+                    if (instance === undefined || instance.Parent === undefined) return;
 
-                const tween = TweenService.Create(instance, new TweenInfo(2, Enum.EasingStyle.Linear), { Orientation: new Vector3(math.random(0, 360), math.random(0, 360), math.random(0, 360)) });
-                tween.Completed.Once(createRandomTween);
-                tween.Play();
-            };
-            createRandomTween();
-        }, true);
+                    const tween = TweenService.Create(instance, new TweenInfo(2, Enum.EasingStyle.Linear), {
+                        Orientation: new Vector3(math.random(0, 360), math.random(0, 360), math.random(0, 360)),
+                    });
+                    tween.Completed.Once(createRandomTween);
+                    tween.Play();
+                };
+                createRandomTween();
+            },
+            true,
+        );
 
         const tweenInfo = new TweenInfo(2, Enum.EasingStyle.Linear);
         function rotationLoop(instance: BasePart, delta: number) {
-            const tween = TweenService.Create(instance, tweenInfo, { CFrame: instance.CFrame.mul(CFrame.Angles(0, delta, 0)) });
+            const tween = TweenService.Create(instance, tweenInfo, {
+                CFrame: instance.CFrame.mul(CFrame.Angles(0, delta, 0)),
+            });
             tween.Completed.Once(() => rotationLoop(instance, delta));
             tween.Play();
             return tween;
         }
-        observeTagAdded("Clockwise", (instance) => {
-            if (!instance.IsA("BasePart"))
-                return;
+        observeTagAdded(
+            "Clockwise",
+            (instance) => {
+                if (!instance.IsA("BasePart")) return;
 
-            const tween = rotationLoop(instance, math.pi);
-            return () => tween.Destroy();
-        }, true);
-        observeTagAdded("Anticlockwise", (instance) => {
-            if (!instance.IsA("BasePart"))
-                return;
+                const tween = rotationLoop(instance, math.pi);
+                return () => tween.Destroy();
+            },
+            true,
+        );
+        observeTagAdded(
+            "Anticlockwise",
+            (instance) => {
+                if (!instance.IsA("BasePart")) return;
 
-            const tween = rotationLoop(instance, -math.pi);
-            return () => tween.Destroy();
-        }, true);
-
+                const tween = rotationLoop(instance, -math.pi);
+                return () => tween.Destroy();
+            },
+            true,
+        );
 
         Packets.dropletAdded.fromServer((drop?: BasePart) => {
-            if (!drop)
-                return;
+            if (!drop) return;
 
             const originalSize = drop.GetAttribute("OriginalSize") as Vector3 | undefined;
-            if (originalSize === undefined)
-                return;
+            if (originalSize === undefined) return;
 
             if (ItemUtils.UserGameSettings!.SavedQualityLevel.Value > 1) {
                 drop.Size = originalSize.add(new Vector3(0.15, 0.825, 0.15));
                 TweenService.Create(drop, new TweenInfo(0.3), { Size: originalSize }).Play();
             }
         });
-
     }
 
     /**
@@ -186,7 +188,8 @@ export default class EffectController implements OnInit {
         const userId = LOCAL_PLAYER.UserId;
         Packets.dropletBurnt.fromServer((dropletModelId) => {
             const droplet = DROPLET_STORAGE.FindFirstChild(dropletModelId) as BasePart | undefined;
-            if (droplet === undefined) // streamed out
+            if (droplet === undefined)
+                // streamed out
                 return;
 
             const t = tick();
@@ -199,8 +202,7 @@ export default class EffectController implements OnInit {
             if (light !== undefined) {
                 TweenService.Create(light, tweenInfo, { Range: 0 }).Play();
                 burnSound = getSound("LuckyDropletBurn.mp3");
-            }
-            else {
+            } else {
                 burnSound = getSound("DropletBurn.mp3");
             }
 
@@ -220,12 +222,13 @@ export default class EffectController implements OnInit {
             Debris.AddItem(droplet, 6);
             droplet.Anchored = true;
 
-            this.delay = (((tick() - t) / 4) + this.delay) * 0.8;
+            this.delay = ((tick() - t) / 4 + this.delay) * 0.8;
             STATS_WINDOW.StatList.CurrentPing.AmountLabel.Text = math.floor(this.delay * 1000) + "ms";
         });
         Packets.applyImpulse.fromServer((dropletModelId, impulse) => {
             const model = DROPLET_STORAGE.FindFirstChild(dropletModelId) as BasePart | undefined;
-            if (model === undefined) // streamed out
+            if (model === undefined)
+                // streamed out
                 return;
             model.ApplyImpulse(impulse);
         });
@@ -238,14 +241,21 @@ export default class EffectController implements OnInit {
             FogEnd: Lighting.FogEnd,
             FogStart: Lighting.FogStart,
             FogColor: Lighting.FogColor,
-            Brightness: Lighting.Brightness
+            Brightness: Lighting.Brightness,
         };
         const onAreaChanged = () => {
             const lightingConfig = AREAS[LOCAL_PLAYER.GetAttribute("Area") as AreaId]?.lightingConfiguration;
             Lighting.Ambient = lightingConfig === undefined ? defaultLighting.Ambient : lightingConfig.Ambient;
-            Lighting.OutdoorAmbient = lightingConfig === undefined ? defaultLighting.OutdoorAmbient : lightingConfig.OutdoorAmbient;
-            Lighting.EnvironmentDiffuseScale = lightingConfig === undefined ? defaultLighting.EnvironmentDiffuseScale : lightingConfig.EnvironmentDiffuseScale;
-            Lighting.EnvironmentSpecularScale = lightingConfig === undefined ? defaultLighting.EnvironmentSpecularScale : lightingConfig.EnvironmentSpecularScale;
+            Lighting.OutdoorAmbient =
+                lightingConfig === undefined ? defaultLighting.OutdoorAmbient : lightingConfig.OutdoorAmbient;
+            Lighting.EnvironmentDiffuseScale =
+                lightingConfig === undefined
+                    ? defaultLighting.EnvironmentDiffuseScale
+                    : lightingConfig.EnvironmentDiffuseScale;
+            Lighting.EnvironmentSpecularScale =
+                lightingConfig === undefined
+                    ? defaultLighting.EnvironmentSpecularScale
+                    : lightingConfig.EnvironmentSpecularScale;
             Lighting.FogEnd = lightingConfig === undefined ? defaultLighting.FogEnd : lightingConfig.FogEnd;
             Lighting.FogStart = lightingConfig === undefined ? defaultLighting.FogStart : lightingConfig.FogStart;
             Lighting.FogColor = lightingConfig === undefined ? defaultLighting.FogColor : lightingConfig.FogColor;

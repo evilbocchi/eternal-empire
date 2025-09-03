@@ -11,7 +11,9 @@ const mul = new CurrencyBundle().set("Bitcoin", 4);
 
 export = new Item(script.Name)
     .setName("Diversity Furnace")
-    .setDescription(`This amalgamation of an item is at least better than that ${DualDropper.name}... %mul% value to droplets for both the furnace and upgrader.`)
+    .setDescription(
+        `This amalgamation of an item is at least better than that ${DualDropper.name}... %mul% value to droplets for both the furnace and upgrader.`,
+    )
     .setDifficulty(Difficulty.Ifinitude)
     .setRequiredItemAmount(AdvancedBlankEssence, 1)
     .setPrice(new CurrencyBundle().set("Power", 500e15).set("Skill", 20), 1)

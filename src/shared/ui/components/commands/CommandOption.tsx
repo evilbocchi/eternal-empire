@@ -14,7 +14,7 @@ export default function CommandOption({
     description,
     permissionLevel,
     userPermissionLevel,
-    layoutOrder = 0
+    layoutOrder = 0,
 }: CommandOptionProps) {
     const isDisabled = permissionLevel > userPermissionLevel;
     const backgroundTransparency = isDisabled ? 0.5 : 0.8;

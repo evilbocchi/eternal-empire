@@ -7,7 +7,9 @@ import Damager from "shared/item/traits/upgrader/Damager";
 
 export = new Item(script.Name)
     .setName("Killbrick Upgrader")
-    .setDescription("Does %hp_add% to droplets, but boosts droplets by %mul%. Droplet value scales with its health by the following equation: &lt;health / 100&gt;, capping at 1x. Health defaults to 100.")
+    .setDescription(
+        "Does %hp_add% to droplets, but boosts droplets by %mul%. Droplet value scales with its health by the following equation: &lt;health / 100&gt;, capping at 1x. Health defaults to 100.",
+    )
     .setDifficulty(Difficulty.Restful)
     .setPrice(new CurrencyBundle().set("Funds", 38.5e18), 1)
     .setPrice(new CurrencyBundle().set("Funds", 58.1e18), 2)

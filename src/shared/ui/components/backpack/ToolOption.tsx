@@ -1,6 +1,6 @@
 /**
  * @fileoverview Tool option button component for the backpack system
- * 
+ *
  * A styled button component representing a tool in the player's backpack.
  * Displays tool icon, hotkey number, and handles selection state visualization.
  */
@@ -36,11 +36,7 @@ interface ToolOptionProps {
 /**
  * Individual tool option button component
  */
-export default function ToolOption({
-    data,
-    onClick,
-    animationsEnabled = true
-}: ToolOptionProps) {
+export default function ToolOption({ data, onClick, animationsEnabled = true }: ToolOptionProps) {
     const { tool, name, textureId, hotkeyNumber, isEquipped, layoutOrder } = data;
     const [isPressed, setIsPressed] = useState(false);
 
@@ -59,18 +55,12 @@ export default function ToolOption({
     const { hovering, events } = useHover({});
 
     // Color based on equipped state
-    const backgroundColor = isEquipped
-        ? Color3.fromRGB(0, 184, 255)
-        : Color3.fromRGB(255, 255, 255);
+    const backgroundColor = isEquipped ? Color3.fromRGB(0, 184, 255) : Color3.fromRGB(255, 255, 255);
 
-    const strokeColor = isEquipped
-        ? Color3.fromRGB(0, 184, 255)
-        : Color3.fromRGB(255, 255, 255);
+    const strokeColor = isEquipped ? Color3.fromRGB(0, 184, 255) : Color3.fromRGB(255, 255, 255);
 
     // Apply press effect
-    const currentBackgroundColor = isPressed
-        ? backgroundColor.Lerp(Color3.fromRGB(0, 0, 0), 0.2)
-        : backgroundColor;
+    const currentBackgroundColor = isPressed ? backgroundColor.Lerp(Color3.fromRGB(0, 0, 0), 0.2) : backgroundColor;
 
     return (
         <textbutton
@@ -87,15 +77,17 @@ export default function ToolOption({
                 Activated: handleClick,
                 MouseButton1Down: handleMouseDown,
                 MouseButton1Up: handleMouseUp,
-                ...events
+                ...events,
             }}
         >
             {/* Background gradient */}
             <uigradient
-                Color={new ColorSequence([
-                    new ColorSequenceKeypoint(0, Color3.fromRGB(143, 143, 143)),
-                    new ColorSequenceKeypoint(1, Color3.fromRGB(198, 198, 198))
-                ])}
+                Color={
+                    new ColorSequence([
+                        new ColorSequenceKeypoint(0, Color3.fromRGB(143, 143, 143)),
+                        new ColorSequenceKeypoint(1, Color3.fromRGB(198, 198, 198)),
+                    ])
+                }
                 Rotation={272}
             />
 
@@ -145,17 +137,15 @@ export default function ToolOption({
             />
 
             {/* Border stroke */}
-            <uistroke
-                ApplyStrokeMode={Enum.ApplyStrokeMode.Border}
-                Color={strokeColor}
-                Thickness={2}
-            >
+            <uistroke ApplyStrokeMode={Enum.ApplyStrokeMode.Border} Color={strokeColor} Thickness={2}>
                 <uigradient
-                    Color={new ColorSequence([
-                        new ColorSequenceKeypoint(0, Color3.fromRGB(255, 255, 255)),
-                        new ColorSequenceKeypoint(0.587, Color3.fromRGB(173, 173, 173)),
-                        new ColorSequenceKeypoint(1, Color3.fromRGB(255, 255, 255))
-                    ])}
+                    Color={
+                        new ColorSequence([
+                            new ColorSequenceKeypoint(0, Color3.fromRGB(255, 255, 255)),
+                            new ColorSequenceKeypoint(0.587, Color3.fromRGB(173, 173, 173)),
+                            new ColorSequenceKeypoint(1, Color3.fromRGB(255, 255, 255)),
+                        ])
+                    }
                     Rotation={75}
                 />
             </uistroke>

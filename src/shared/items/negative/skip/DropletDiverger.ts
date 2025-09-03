@@ -33,11 +33,9 @@ export = new Item(script.Name)
 
         getInstanceInfo(model, "OnUpgraded")?.connect((dropletModel) => {
             const dropletId = getInstanceInfo(dropletModel, "DropletId");
-            if (dropletId === undefined)
-                return;
+            if (dropletId === undefined) return;
             const droplet = Droplet.getDroplet(dropletId);
-            if (droplet === undefined)
-                throw "Droplet not found for id: " + dropletId;
+            if (droplet === undefined) throw "Droplet not found for id: " + dropletId;
 
             const value = droplet.value;
             let bestCurrency: Currency | undefined;
@@ -48,8 +46,7 @@ export = new Item(script.Name)
                     bestCurrency = currency;
                 }
             }
-            if (bestCurrency === undefined)
-                return;
+            if (bestCurrency === undefined) return;
 
             let side: number;
             switch (bestCurrency) {

@@ -8,10 +8,10 @@ import type Charm from "shared/item/traits/Charm";
  * Utility class to manage all items.
  */
 abstract class Items {
+    /** Map of item ID to Item object */
     static readonly itemsPerId = (function () {
         const folder = script.Parent;
-        if (folder === undefined)
-            throw "No folder specified";
+        if (folder === undefined) throw "No folder specified";
 
         const itemsPerId = new Map<string, Item>();
         for (const moduleScript of folder.GetDescendants()) {
@@ -24,16 +24,27 @@ abstract class Items {
             }
         }
         for (const [i, harvestable] of pairs(Harvestable)) {
-            if (harvestable.description === undefined)
-                continue;
+            if (harvestable.description === undefined) continue;
             const id = i as string;
-            const item = new Item(id).setName(harvestable.name ?? id).setDescription(harvestable.description).setDifficulty(Difficulty.Excavation);
+            const item = new Item(id)
+                .setName(harvestable.name ?? id)
+                .setDescription(harvestable.description)
+                .setDifficulty(Difficulty.Excavation);
             itemsPerId.set(id, item);
         }
         ItemUtils.itemsPerId = itemsPerId;
         return itemsPerId;
     })();
 
+    static readonly itemsPerName = (function () {
+        const itemsPerName = new Map<string, Item>();
+        for (const [_, item] of Items.itemsPerId) {
+            itemsPerName.set(item.name, item);
+        }
+        return itemsPerName;
+    })();
+
+    /** Set of all charm traits */
     static readonly charms = (function () {
         const charms = new Set<Charm>();
         for (const [_, item] of Items.itemsPerId) {
@@ -45,6 +56,7 @@ abstract class Items {
         return charms;
     })();
 
+    /** Set of all unique items */
     static readonly uniqueItems = (function () {
         const uniqueItems = new Set<Item>();
         for (const [_, item] of Items.itemsPerId) {
@@ -105,7 +117,7 @@ abstract class Items {
 
     /**
      * Retrieve the Item object at the specified ID.
-     * 
+     *
      * @param itemId The ID of the item.
      * @returns Item object or undefined if not found.
      */
@@ -115,7 +127,7 @@ abstract class Items {
 
     /**
      * Set the Item object at the specified ID.
-     * 
+     *
      * @param itemId The ID of the item.
      * @param item The Item object.
      */

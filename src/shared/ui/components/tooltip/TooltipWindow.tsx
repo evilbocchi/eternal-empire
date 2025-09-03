@@ -1,6 +1,6 @@
 /**
  * @fileoverview React tooltip window component for displaying formatted tooltips.
- * 
+ *
  * Renders tooltip content with smooth animations and supports both simple message
  * tooltips and rich item tooltips with metadata, difficulty indicators, and formatting.
  * Based on the actual TooltipWindow structure from Roblox Studio.
@@ -37,7 +37,8 @@ export default function TooltipWindow({ data, visible, metadata }: TooltipWindow
     useEffect(() => {
         if (!frameRef.current || !strokeRef.current) return;
 
-        if (itemSlotRef.current) { // No animation for item slots
+        if (itemSlotRef.current) {
+            // No animation for item slots
             frameRef.current.Visible = visible;
             frameRef.current.Transparency = 0;
             strokeRef.current.Transparency = 1;
@@ -51,15 +52,20 @@ export default function TooltipWindow({ data, visible, metadata }: TooltipWindow
             TweenService.Create(frameRef.current, tweenInfo, { BackgroundTransparency: 0.2 }).Play();
             TweenService.Create(strokeRef.current, tweenInfo, { Transparency: 0.2 }).Play();
             if (messageRef.current)
-                TweenService.Create(messageRef.current, tweenInfo, { TextTransparency: 0, TextStrokeTransparency: 0 }).Play();
-        }
-        else {
+                TweenService.Create(messageRef.current, tweenInfo, {
+                    TextTransparency: 0,
+                    TextStrokeTransparency: 0,
+                }).Play();
+        } else {
             const tweenInfo = new TweenInfo(0.2, Enum.EasingStyle.Linear, Enum.EasingDirection.In);
 
             const tween = TweenService.Create(frameRef.current, tweenInfo, { BackgroundTransparency: 1 });
             TweenService.Create(strokeRef.current, tweenInfo, { Transparency: 1 }).Play();
             if (messageRef.current)
-                TweenService.Create(messageRef.current, tweenInfo, { TextTransparency: 1, TextStrokeTransparency: 1 }).Play();
+                TweenService.Create(messageRef.current, tweenInfo, {
+                    TextTransparency: 1,
+                    TextStrokeTransparency: 1,
+                }).Play();
 
             const connection = tween.Completed.Once(() => {
                 if (frameRef.current) {
@@ -113,13 +119,7 @@ export default function TooltipWindow({ data, visible, metadata }: TooltipWindow
         }
 
         // Build rich text for item description
-        const builder = buildRichText(
-            undefined,
-            item.format(description),
-            Color3.fromRGB(195, 195, 195),
-            18,
-            "Medium"
-        );
+        const builder = buildRichText(undefined, item.format(description), Color3.fromRGB(195, 195, 195), 18, "Medium");
 
         const itemMetadata = metadata.get(item);
         if (itemMetadata) {
@@ -128,7 +128,9 @@ export default function TooltipWindow({ data, visible, metadata }: TooltipWindow
 
         // Pre-calculate colors
         let color = difficulty.color ?? new Color3();
-        color = color ? new Color3(math.clamp(color.R, 0.1, 0.9), math.clamp(color.G, 0.1, 0.9), math.clamp(color.B, 0.1, 0.9)) : new Color3();
+        color = color
+            ? new Color3(math.clamp(color.R, 0.1, 0.9), math.clamp(color.G, 0.1, 0.9), math.clamp(color.B, 0.1, 0.9))
+            : new Color3();
         const textColor = difficulty.color?.Lerp(new Color3(1, 1, 1), 0.5) ?? Color3.fromRGB(255, 255, 255);
 
         return {
@@ -168,21 +170,25 @@ export default function TooltipWindow({ data, visible, metadata }: TooltipWindow
                     Transparency={0.2}
                 >
                     <uigradient
-                        Color={new ColorSequence([
-                            new ColorSequenceKeypoint(0, Color3.fromRGB(236, 236, 236)),
-                            new ColorSequenceKeypoint(0.299, Color3.fromRGB(255, 255, 255)),
-                            new ColorSequenceKeypoint(0.51, Color3.fromRGB(118, 118, 118)),
-                            new ColorSequenceKeypoint(0.822, Color3.fromRGB(255, 255, 255)),
-                            new ColorSequenceKeypoint(1, Color3.fromRGB(220, 220, 220))
-                        ])}
+                        Color={
+                            new ColorSequence([
+                                new ColorSequenceKeypoint(0, Color3.fromRGB(236, 236, 236)),
+                                new ColorSequenceKeypoint(0.299, Color3.fromRGB(255, 255, 255)),
+                                new ColorSequenceKeypoint(0.51, Color3.fromRGB(118, 118, 118)),
+                                new ColorSequenceKeypoint(0.822, Color3.fromRGB(255, 255, 255)),
+                                new ColorSequenceKeypoint(1, Color3.fromRGB(220, 220, 220)),
+                            ])
+                        }
                         Rotation={35}
                     />
                 </uistroke>
                 <uigradient
-                    Color={new ColorSequence([
-                        new ColorSequenceKeypoint(0, Color3.fromRGB(39, 39, 39)),
-                        new ColorSequenceKeypoint(1, Color3.fromRGB(58, 58, 58))
-                    ])}
+                    Color={
+                        new ColorSequence([
+                            new ColorSequenceKeypoint(0, Color3.fromRGB(39, 39, 39)),
+                            new ColorSequenceKeypoint(1, Color3.fromRGB(58, 58, 58)),
+                        ])
+                    }
                     Rotation={270}
                 />
                 <uilistlayout
@@ -228,11 +234,13 @@ export default function TooltipWindow({ data, visible, metadata }: TooltipWindow
                     >
                         <uistroke Thickness={2} />
                         <uigradient
-                            Color={new ColorSequence([
-                                new ColorSequenceKeypoint(0, Color3.fromRGB(255, 255, 255)),
-                                new ColorSequenceKeypoint(0.478, Color3.fromRGB(225, 225, 225)),
-                                new ColorSequenceKeypoint(1, Color3.fromRGB(148, 148, 148))
-                            ])}
+                            Color={
+                                new ColorSequence([
+                                    new ColorSequenceKeypoint(0, Color3.fromRGB(255, 255, 255)),
+                                    new ColorSequenceKeypoint(0.478, Color3.fromRGB(225, 225, 225)),
+                                    new ColorSequenceKeypoint(1, Color3.fromRGB(148, 148, 148)),
+                                ])
+                            }
                             Rotation={90}
                         />
                     </textlabel>

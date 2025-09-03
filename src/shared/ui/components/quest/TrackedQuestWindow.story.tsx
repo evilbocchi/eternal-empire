@@ -8,7 +8,7 @@ import StoryMocking from "shared/ui/components/StoryMocking";
 import TooltipProvider from "shared/ui/components/tooltip/TooltipProvider";
 
 const controls = {
-    visible: true
+    visible: true,
 };
 
 export = {
@@ -26,5 +26,5 @@ export = {
                 </TooltipProvider>
             </HotkeyProvider>
         );
-    }
+    },
 };

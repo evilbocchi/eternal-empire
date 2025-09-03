@@ -1,4 +1,6 @@
+import { HttpService } from "@rbxts/services";
 import PlayerProfileTemplate from "shared/data/PlayerProfileTemplate";
+import Unique from "shared/item/traits/Unique";
 import Items from "shared/items/Items";
 import Packets from "shared/Packets";
 
@@ -7,7 +9,7 @@ class StoryMocking {
         const mockPlayerData = table.clone(PlayerProfileTemplate);
 
         Packets.setSetting.fromClient((player, setting, value) => {
-            (mockPlayerData.settings as { [key: string]: unknown; })[setting] = value;
+            (mockPlayerData.settings as { [key: string]: unknown })[setting] = value;
             Packets.settings.setFor(player, mockPlayerData.settings);
         });
 
@@ -26,10 +28,7 @@ class StoryMocking {
             length: 1,
             reward: { xp: 100 },
             order: 1,
-            stages: [
-                { description: "Complete the first task." },
-                { description: "Complete the second task." },
-            ],
+            stages: [{ description: "Complete the first task." }, { description: "Complete the second task." }],
         });
         questInfos.set("Quest2", {
             name: "Second Quest",
@@ -40,10 +39,7 @@ class StoryMocking {
             length: 3,
             reward: { xp: 500, items: new Map([["TheFirstDropper", 1]]) },
             order: 2,
-            stages: [
-                { description: "Complete the first task." },
-                { description: "Complete the second task." },
-            ],
+            stages: [{ description: "Complete the first task." }, { description: "Complete the second task." }],
         });
         questInfos.set("Quest3", {
             name: "Third Quest",
@@ -83,16 +79,30 @@ class StoryMocking {
         stagePerQuest.set("Quest4", 2);
         Packets.stagePerQuest.set(stagePerQuest);
 
-
         Packets.level.set(2);
         Packets.xp.set(50);
 
         const random = new Random(42);
         const quantityPerItem = new Map<string, number>();
-        for (const [id, _] of Items.itemsPerId) {
-            quantityPerItem.set(id, random.NextInteger(1, 100));
+        const uniqueInstances = new Map<string, UniqueItemInstance>();
+
+        for (const [id, item] of Items.itemsPerId) {
+            if (item.isA("Unique")) {
+                const pots = new Map<string, number>();
+                for (const [id, _] of item.trait(Unique).getPotConfigs()) {
+                    pots.set(id, random.NextNumber());
+                }
+                uniqueInstances.set(HttpService.GenerateGUID(false), {
+                    baseItemId: id,
+                    pots,
+                    created: 0,
+                });
+            } else {
+                quantityPerItem.set(id, random.NextInteger(1, 100));
+            }
         }
         Packets.inventory.set(quantityPerItem);
+        Packets.uniqueInstances.set(uniqueInstances);
     }
 }
 

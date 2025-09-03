@@ -36,7 +36,7 @@ export default function IconButton(props: IconButtonProps) {
             Image={props.image}
             Event={{
                 Activated: handleClick,
-                ...events
+                ...events,
             }}
             {...props.buttonProps}
         >

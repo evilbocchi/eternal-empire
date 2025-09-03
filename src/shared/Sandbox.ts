@@ -6,7 +6,6 @@ import BuildBounds from "shared/placement/BuildBounds";
  * including toggling sandbox mode, creating baseplate bounds, and synthesizing workspace objects.
  */
 export default class Sandbox {
-
     static readonly sandboxValue = Workspace.FindFirstChild("SANDBOX") as BoolValue | undefined;
 
     /**
@@ -14,15 +13,14 @@ export default class Sandbox {
      * @returns The BuildBounds instance or undefined if not available.
      */
     static createBaseplateBounds() {
-        if (!this.getEnabled())
-            return undefined;
+        if (!this.getEnabled()) return undefined;
 
         const baseplate = Workspace.FindFirstChild("Baseplate") as Part;
         if (baseplate === undefined) {
             return undefined;
         }
         return new BuildBounds(baseplate);
-    };
+    }
 
     /**
      * Checks if sandbox mode is enabled.
@@ -77,7 +75,7 @@ export default class Sandbox {
 
         const startId = new Instance("StringValue");
         startId.Name = "Id";
-        startId.Value = this.sandboxValue?.GetAttribute("Id") as string ?? "";
+        startId.Value = (this.sandboxValue?.GetAttribute("Id") as string) ?? "";
         startId.Parent = startCamera;
 
         Workspace.WaitForChild("ItemModels").Parent = ReplicatedStorage;

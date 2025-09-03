@@ -193,7 +193,7 @@ export = new Item(script.Name)
         MoltenAltar,
         BasicBlankEssence,
         Admiration,
-        Codependence
+        Codependence,
     ])
 
     .exit();

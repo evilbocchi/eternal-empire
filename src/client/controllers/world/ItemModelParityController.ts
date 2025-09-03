@@ -6,10 +6,8 @@ import Packets from "shared/Packets";
 
 @Controller()
 export default class ItemModelParityController implements OnInit {
-
     onInit() {
-        if (PLACED_ITEMS_FOLDER.Parent === Workspace)
-            return;
+        if (PLACED_ITEMS_FOLDER.Parent === Workspace) return;
 
         Packets.placedItems.observe((placedItems) => {
             for (const child of PLACED_ITEMS_FOLDER.GetChildren()) {
@@ -19,7 +17,7 @@ export default class ItemModelParityController implements OnInit {
             }
 
             for (const [placementId, placedItem] of placedItems) {
-                let itemModel = PLACED_ITEMS_FOLDER.FindFirstChild(placementId) as Model | undefined;
+                const itemModel = PLACED_ITEMS_FOLDER.FindFirstChild(placementId) as Model | undefined;
                 if (!itemModel) {
                     const item = Items.getItem(placedItem.item);
                     if (item === undefined) {
@@ -31,7 +29,6 @@ export default class ItemModelParityController implements OnInit {
                     }
                     itemModel.Name = placementId;
                     itemModel.Parent = PLACED_ITEMS_FOLDER;
-
                 }
             }
         });

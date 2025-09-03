@@ -22,7 +22,6 @@ import ChatHookController from "client/controllers/permissions/ChatHookControlle
  */
 @Controller()
 export default class WalkspeedController implements OnCharacterAdded {
-
     lastCustomWalkspeed = 16;
     idleSwimAnimation: Animation;
     actionSwimAnimation: Animation;
@@ -38,8 +37,7 @@ export default class WalkspeedController implements OnCharacterAdded {
         const rootPart = character.WaitForChild("HumanoidRootPart") as BasePart;
         this.lastCustomWalkspeed = humanoid.WalkSpeed;
         rootPart.Touched.Connect((part) => {
-            if (part.Name !== "ObbyZone" || this.debounce)
-                return;
+            if (part.Name !== "ObbyZone" || this.debounce) return;
             this.debounce = true;
             this.lastCustomWalkspeed = humanoid.WalkSpeed;
             const newWs = 16;
@@ -50,8 +48,7 @@ export default class WalkspeedController implements OnCharacterAdded {
             this.debounce = false;
         });
         rootPart.TouchEnded.Connect((part) => {
-            if (part.Name !== "ObbyZone" || this.debounce)
-                return;
+            if (part.Name !== "ObbyZone" || this.debounce) return;
             this.debounce = true;
             const newWs = this.lastCustomWalkspeed; // restore the last custom walkspeed
             humanoid.WalkSpeed = newWs;
@@ -59,7 +56,6 @@ export default class WalkspeedController implements OnCharacterAdded {
 
             task.wait(0.1); // short debounce delay
             this.debounce = false;
-
         });
     }
 

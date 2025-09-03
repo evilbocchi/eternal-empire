@@ -1,6 +1,5 @@
-namespace GameSpeed {
-    export let speed = 1;
+class GameSpeed {
+    static speed = 1;
 }
-
 
 export = GameSpeed;

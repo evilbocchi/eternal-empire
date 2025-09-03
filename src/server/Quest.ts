@@ -1,7 +1,7 @@
 /**
  * @fileoverview Implements the Quest and Stage classes for managing multi-stage quests and quest progression on the server.
  * Handles quest initialization, stage management, NPC/dialogue integration, and quest rewards for the Roblox game.
- * 
+ *
  * @since 1.0.0
  */
 
@@ -37,15 +37,13 @@ export class Stage {
     npcHumanoid: Humanoid | undefined;
 
     private positionChangedCallback?: (position: Vector3 | undefined) => void;
-    private reachedCallback?: ((stage: this) => (() => void));
-    private completedCallback?: ((stage: this) => void);
+    private reachedCallback?: (stage: this) => () => void;
+    private completedCallback?: (stage: this) => void;
 
     private reached = false;
     private completed = false;
 
-    constructor() {
-
-    }
+    constructor() {}
 
     /**
      * Sets the description for this stage.
@@ -79,8 +77,7 @@ export class Stage {
      */
     setNPC(npcName: NPCName, setAsFocus?: boolean) {
         [this.npcModel, this.npcHumanoid] = getNPCModel(npcName);
-        if (setAsFocus === true)
-            return this.setFocus(this.npcHumanoid?.RootPart);
+        if (setAsFocus === true) return this.setFocus(this.npcHumanoid?.RootPart);
         return this;
     }
 
@@ -109,18 +106,18 @@ export class Stage {
 
     /**
      * Registers a callback to run when the stage is reached.
-     * 
+     *
      * @param reached The reached callback, returning an optional cleanup function.
      * @returns This stage instance.
      */
-    onReached(reached: (stage: this) => (() => void)) {
+    onReached(reached: (stage: this) => () => void) {
         this.reachedCallback = reached;
         return this;
     }
 
     /**
      * Registers a callback to run when the stage is completed.
-     * 
+     *
      * @param complete The complete callback.
      * @returns This stage instance.
      */
@@ -131,7 +128,7 @@ export class Stage {
 
     /**
      * Registers a callback to run when the stage position changes.
-     * 
+     *
      * @param callback The position changed callback.
      * @returns This stage instance.
      */
@@ -142,24 +139,23 @@ export class Stage {
 
     /**
      * Triggers the stage reached event.
-     * 
+     *
      * @returns A cleanup function to call when the stage is no longer needed.
      */
     reach() {
-        if (this.reached) { // Prevent multiple reaches
-            return () => { };
+        if (this.reached) {
+            // Prevent multiple reaches
+            return () => {};
         }
 
         this.reached = true;
         const dialogue = this.dialogue;
-        if (dialogue)
-            Server.Dialogue.addDialogue(dialogue);
+        if (dialogue) Server.Dialogue.addDialogue(dialogue);
 
         const cleanup = this.reachedCallback?.(this);
 
         return () => {
-            if (dialogue)
-                Server.Dialogue.removeDialogue(dialogue);
+            if (dialogue) Server.Dialogue.removeDialogue(dialogue);
             cleanup?.();
         };
     }
@@ -179,8 +175,7 @@ export class Stage {
      * Unloads the stage and its resources.
      */
     unload() {
-        if (this.dialogue)
-            Server.Dialogue.removeDialogue(this.dialogue);
+        if (this.dialogue) Server.Dialogue.removeDialogue(this.dialogue);
         this.completedCallback = undefined;
         this.reachedCallback = undefined;
         this.positionChangedCallback = undefined;
@@ -193,7 +188,6 @@ export class Stage {
  * Provides methods for configuring quest properties, managing stages, and handling quest initialization.
  */
 export default class Quest {
-
     static readonly QUEST_MODULES = new Map<string, ModuleScript>();
     static readonly QUEST_PER_ID = new Map<string, Quest>();
 
@@ -236,7 +230,7 @@ export default class Quest {
 
     /**
      * Reloads the quest modules from the quests folder.
-     * 
+     *
      * This clones the module scripts into the QUEST_MODULES map,
      * allowing for hot reloading of quest modules.
      */
@@ -252,7 +246,7 @@ export default class Quest {
 
     /**
      * Loads all quest modules and initializes quest data.
-     * 
+     *
      * @returns A map of quest IDs to their quest info.
      */
     static load() {
@@ -374,7 +368,7 @@ export default class Quest {
                     task.wait(2);
                 }
                 stage.complete();
-                return () => { };
+                return () => {};
             });
         return this.setStage(1, stage);
     }
@@ -424,8 +418,7 @@ export default class Quest {
      * Completes the quest, triggering rewards and cleanup.
      */
     complete() {
-        if (this.completed)
-            return warn(`Quest ${this.id} is already completed`);
+        if (this.completed) return warn(`Quest ${this.id} is already completed`);
         this.completed = true;
 
         Packets.questCompleted.toAllClients(this.id);
@@ -436,8 +429,7 @@ export default class Quest {
             const originalXp = Server.Level.getXp();
             if (originalXp === undefined) {
                 warn("No original xp, not rewarding");
-            }
-            else {
+            } else {
                 Server.Level.setXp(originalXp + reward.xp);
             }
         }

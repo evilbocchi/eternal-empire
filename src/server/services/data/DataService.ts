@@ -3,7 +3,7 @@
 
 /**
  * @fileoverview Core data management service for empires and players.
- * 
+ *
  * This service handles:
  * - Empire and player data loading/saving via ProfileService
  * - Empire creation and management
@@ -11,10 +11,10 @@
  * - Data validation and corruption fixes
  * - Permission checking
  * - DataStore management for available empires
- * 
+ *
  * The service supports both public servers and private empire servers,
  * with different initialization logic for each type.
- * 
+ *
  * @since 1.0.0
  */
 
@@ -23,7 +23,16 @@ import { Profile } from "@antivivi/profileservice/globals";
 import { OnoeNum } from "@antivivi/serikanum";
 import { ProfileManager } from "@antivivi/vrldk";
 import { OnInit, Service } from "@flamework/core";
-import { BadgeService, DataStoreService, HttpService, MarketplaceService, Players, RunService, TeleportService, Workspace } from "@rbxts/services";
+import {
+    BadgeService,
+    DataStoreService,
+    HttpService,
+    MarketplaceService,
+    Players,
+    RunService,
+    TeleportService,
+    Workspace,
+} from "@rbxts/services";
 import { OnPlayerJoined } from "server/services/ModdingService";
 import { getNameFromUserId, getStartCamera, isStartScreenEnabled } from "shared/constants";
 import { IS_CI, IS_SERVER, IS_SINGLE_SERVER } from "shared/Context";
@@ -85,14 +94,14 @@ declare global {
 
         /**
          * The ID of the placement, used to identify the item in the world.
-         * 
+         *
          * This is automatically generated when the item is placed.
          */
         area?: string;
 
         /**
          * The ID of the placement, used to identify the item in the world.
-         * 
+         *
          * This is automatically generated when the item is placed.
          */
         meta?: PlacedItemMetadata;
@@ -132,12 +141,10 @@ declare global {
 
     /**
      * Metadata for a placed item.
-     * 
+     *
      * Use this to store additional information about the item, such as its state or configuration.
      */
-    interface PlacedItemMetadata {
-
-    }
+    interface PlacedItemMetadata {}
 
     type Inventory = Map<string, number>;
 
@@ -158,12 +165,12 @@ declare global {
         /**
          * The items that the empire has placed in the world.
          * @deprecated Use `worldPlaced` instead.
-        */
+         */
         placed: PlacedItem[];
 
         /**
          * The items that the empire has placed in the world, mapped by their placement ID.
-         * 
+         *
          * This is used to identify items in the world and allows for easy access to their properties.
          */
         worldPlaced: Map<string, PlacedItem>;
@@ -175,7 +182,7 @@ declare global {
 
         /**
          * The unique items that the empire owns, mapped by their UUID.
-         * 
+         *
          * Unique items that are placed will *not* be removed from this map.
          */
         uniqueInstances: Map<string, UniqueItemInstance>;
@@ -228,7 +235,6 @@ const START_SCREEN_ENABLED = isStartScreenEnabled();
  */
 @Service()
 export default class DataService implements OnInit, OnPlayerJoined {
-
     // Profile Managers
 
     /**
@@ -263,7 +269,8 @@ export default class DataService implements OnInit, OnPlayerJoined {
     /**
      * Whether this server is a public server (not private/reserved).
      */
-    isPublicServer = IS_SERVER && game.PrivateServerId === "" && (!RunService.IsStudio() || START_SCREEN_ENABLED === true);
+    isPublicServer =
+        IS_SERVER && game.PrivateServerId === "" && (!RunService.IsStudio() || START_SCREEN_ENABLED === true);
 
     /**
      * Debounce timer for empire creation to prevent spam.
@@ -293,15 +300,13 @@ export default class DataService implements OnInit, OnPlayerJoined {
         // Determine empire ID based on server type and environment
         if (IS_CI) {
             empireId = HttpService.GenerateGUID(false); // Clean empire for CI testing
-        }
-        else if (!RunService.IsStudio() || START_SCREEN_ENABLED === true) { // production protocol
+        } else if (!RunService.IsStudio() || START_SCREEN_ENABLED === true) {
+            // production protocol
             if (IS_SINGLE_SERVER) {
                 empireId = "SingleServer";
-            }
-            else if (this.isPublicServer) {
+            } else if (this.isPublicServer) {
                 empireId = game.JobId;
-            }
-            else {
+            } else {
                 // Wait for at least one player to join to get teleport data
                 while (Players.GetPlayers().size() < 1) {
                     task.wait();
@@ -310,38 +315,32 @@ export default class DataService implements OnInit, OnPlayerJoined {
                 const tpData = player.GetJoinData().TeleportData as string;
                 empireId ??= tpData === undefined ? game.PrivateServerId : tpData;
             }
-        }
-        else {
+        } else {
             // Studio environment - get ID from start camera
             empireId = (START_CAMERA.WaitForChild("Id") as StringValue).Value;
         }
 
-        if (empireId === undefined)
-            throw "Could not load empire ID";
+        if (empireId === undefined) throw "Could not load empire ID";
 
         let empireProfile: Profile<EmpireData> | undefined;
         if (IS_CI) {
             empireProfile = this.empireProfileManager.profileStore.Mock.LoadProfileAsync(empireId, "ForceLoad"); // Mock profile for CI testing
-        }
-        else {
+        } else {
             empireProfile = this.loadEmpireProfile(empireId);
         }
 
-        if (empireProfile === undefined)
-            throw "Could not load empire";
+        if (empireProfile === undefined) throw "Could not load empire";
 
         const empireData = empireProfile.Data;
 
         // Set default names for public servers
-        if (this.isPublicServer === true)
-            empireData.name = IS_SINGLE_SERVER ? "Single Server" : "Public Server";
+        if (this.isPublicServer === true) empireData.name = IS_SINGLE_SERVER ? "Single Server" : "Public Server";
 
         // Initialize empire name if not set
         if (empireData.previousNames.size() === 0 && IS_SERVER) {
             if (game.PrivateServerOwnerId === 0) {
                 empireData.name = getNameFromUserId(empireData.owner) + "'s Empire";
-            }
-            else {
+            } else {
                 empireData.owner = game.PrivateServerOwnerId;
                 empireData.name = getNameFromUserId(game.PrivateServerOwnerId) + "'s Private Server";
             }
@@ -355,12 +354,13 @@ export default class DataService implements OnInit, OnPlayerJoined {
                 empireData.mostCurrencies.delete(currency);
                 continue;
             }
-            const v = value as OnoeNum & { first?: number, second?: number; };
+            const v = value as OnoeNum & { first?: number; second?: number };
             if (v.first !== undefined && v.second !== undefined)
                 empireData.currencies.set(currency, OnoeNum.fromSerika(v.first, v.second));
             else {
                 const fixed = new OnoeNum(value);
-                if (fixed.mantissa !== fixed.mantissa) { // nan check
+                if (fixed.mantissa !== fixed.mantissa) {
+                    // nan check
                     fixed.mantissa = 0;
                     fixed.exponent = 0;
                 }
@@ -369,7 +369,7 @@ export default class DataService implements OnInit, OnPlayerJoined {
         }
         // Convert most currencies as well
         for (const [currency, value] of empireData.mostCurrencies) {
-            const v = value as OnoeNum & { first?: number, second?: number; };
+            const v = value as OnoeNum & { first?: number; second?: number };
             if (v.first !== undefined && v.second !== undefined)
                 empireData.mostCurrencies.set(currency, OnoeNum.fromSerika(v.first, v.second));
         }
@@ -378,13 +378,17 @@ export default class DataService implements OnInit, OnPlayerJoined {
         const items = empireData.items;
         if (items.placed !== undefined) {
             for (const placedItem of items.placed) {
-                items.worldPlaced.set(((placedItem as unknown) as { placementId: string; }).placementId ?? tostring(++items.nextId), placedItem);
+                items.worldPlaced.set(
+                    (placedItem as unknown as { placementId: string }).placementId ?? tostring(++items.nextId),
+                    placedItem,
+                );
             }
             items.placed = [];
         }
 
         // Perform dupe checking unless in sandbox mode
-        if (!Sandbox.getEnabled()) // ignore sandbox for dupes
+        if (!Sandbox.getEnabled())
+            // ignore sandbox for dupes
             this.dupeCheck(items);
 
         // Migration: Convert legacy printer setups to new system
@@ -392,15 +396,13 @@ export default class DataService implements OnInit, OnPlayerJoined {
         if (old !== undefined) {
             empireData.savedItems.delete("SlamoVillage");
             let totalPrice = new CurrencyBundle();
-            let itemCount = new Map<Item, number>();
+            const itemCount = new Map<Item, number>();
             for (const placedItem of old) {
                 const item = Items.getItem(placedItem.item);
-                if (item === undefined)
-                    continue;
-                let currentItemCount = (itemCount.get(item) ?? 0) + 1;
+                if (item === undefined) continue;
+                const currentItemCount = (itemCount.get(item) ?? 0) + 1;
                 const price = item.pricePerIteration.get(currentItemCount);
-                if (price !== undefined)
-                    totalPrice = totalPrice.add(price);
+                if (price !== undefined) totalPrice = totalPrice.add(price);
                 itemCount.set(item, currentItemCount);
             }
             empireData.printedSetups.push({
@@ -409,7 +411,7 @@ export default class DataService implements OnInit, OnPlayerJoined {
                 calculatedPrice: totalPrice.amountPerCurrency,
                 autoloads: false,
                 alerted: false,
-                items: old
+                items: old,
             });
         }
 
@@ -433,7 +435,7 @@ export default class DataService implements OnInit, OnPlayerJoined {
                     rotX: 0,
                     rotY: 0,
                     rotZ: 0,
-                    area: "BarrenIslands"
+                    area: "BarrenIslands",
                 });
                 warn("gave shop");
             }
@@ -456,7 +458,11 @@ export default class DataService implements OnInit, OnPlayerJoined {
             }
             if (removed === true) {
                 items.inventory.set("SadnessInMyHeart", 1);
-                Packets.systemMessageSent.toAllClients("RBXGeneral", "An extreme apology to you. A hotfix was applied to challenges to fix a major bug, and your challenge stats have been affected. An item has been placed in your inventory.", "");
+                Packets.systemMessageSent.toAllClients(
+                    "RBXGeneral",
+                    "An extreme apology to you. A hotfix was applied to challenges to fix a major bug, and your challenge stats have been affected. An item has been placed in your inventory.",
+                    "",
+                );
             }
             empireData.completedEvents.add("RemoveIllegalChallenges");
         }
@@ -468,7 +474,11 @@ export default class DataService implements OnInit, OnPlayerJoined {
                 newPrintedSetups.push(empireData.printedSetups[i]);
             }
             empireData.printedSetups = newPrintedSetups;
-            Packets.systemMessageSent.toAllClients("RBXGeneral", "We noticed that you have more than 50 printed setups in your save. Please refrain from adding too many, as you could exceed the 4MB data limit and corrupt your save. Your printed setups have been trimmed.", "");
+            Packets.systemMessageSent.toAllClients(
+                "RBXGeneral",
+                "We noticed that you have more than 50 printed setups in your save. Please refrain from adding too many, as you could exceed the 4MB data limit and corrupt your save. Your printed setups have been trimmed.",
+                "",
+            );
         }
 
         if (empireData.logs.size() > 2000) {
@@ -494,13 +504,14 @@ export default class DataService implements OnInit, OnPlayerJoined {
 
     /**
      * Fix duped items and bad bought amounts.
-     * 
+     *
      * @param items Data to fix.
      * @returns Fixed data.
      */
     dupeCheck(items: ItemsData) {
         Items.itemsPerId.forEach((item: Item) => {
-            if (item.defaultPrice !== undefined) // buy limit is uncapped, dont check
+            if (item.defaultPrice !== undefined)
+                // buy limit is uncapped, dont check
                 return;
 
             const itemId = item.id;
@@ -510,15 +521,12 @@ export default class DataService implements OnInit, OnPlayerJoined {
             let max = this.maxItemAmounts.get(itemId);
             if (max === undefined) {
                 max = -1;
-                for (const [amount, _] of item.pricePerIteration)
-                    if (amount > max)
-                        max = amount;
+                for (const [amount, _] of item.pricePerIteration) if (amount > max) max = amount;
 
                 this.maxItemAmounts.set(itemId, max);
             }
 
-            if (max === -1 || totalCount <= max)
-                return;
+            if (max === -1 || totalCount <= max) return;
 
             // this is the point where there are clearly more items than allowed. remove the excess
             const diff = totalCount - max;
@@ -527,7 +535,8 @@ export default class DataService implements OnInit, OnPlayerJoined {
             items.inventory.set(itemId, invCount - fromInvCount);
 
             const remaining = diff - fromInvCount;
-            if (remaining > 0) { // if there isnt enough in inventory to remove, remove from placed items
+            if (remaining > 0) {
+                // if there isnt enough in inventory to remove, remove from placed items
                 print("Removing", remaining, itemId, "from placed items");
                 let removed = 0;
                 for (const [placementId, placedItem] of items.worldPlaced) {
@@ -547,14 +556,11 @@ export default class DataService implements OnInit, OnPlayerJoined {
         };
 
         const baseAmounts = new Map<string, number>();
-        for (const [_, placedItem] of items.worldPlaced)
-            addAmount(baseAmounts, placedItem.item, 1);
-        for (const [itemId, amount] of items.inventory)
-            addAmount(baseAmounts, itemId, amount);
+        for (const [_, placedItem] of items.worldPlaced) addAmount(baseAmounts, placedItem.item, 1);
+        for (const [itemId, amount] of items.inventory) addAmount(baseAmounts, itemId, amount);
 
         const nestCheck = (base: Map<string, number>, item: Item, amount?: number) => {
-            if (amount === undefined)
-                return;
+            if (amount === undefined) return;
             for (const [subItem, requiredAmount] of item.requiredItems) {
                 const totalAmount = requiredAmount * amount;
                 addAmount(base, subItem.id, totalAmount);
@@ -566,12 +572,16 @@ export default class DataService implements OnInit, OnPlayerJoined {
             nestCheck(addedAmounts, item, baseAmounts.get(itemId));
         }
         for (const [itemId, item] of Items.itemsPerId) {
-            if (item.isA("HarvestingTool") || item.pricePerIteration.size() === 0 || item.difficulty === Difficulty.Excavation || item.isA("Unique"))
+            if (
+                item.isA("HarvestingTool") ||
+                item.pricePerIteration.size() === 0 ||
+                item.difficulty === Difficulty.Excavation ||
+                item.isA("Unique")
+            )
                 continue;
 
             const amount = (addedAmounts.get(itemId) ?? 0) + (baseAmounts.get(itemId) ?? 0);
-            if (amount < 0)
-                continue;
+            if (amount < 0) continue;
 
             const cached = items.bought.get(itemId) ?? 0;
             if (cached !== amount) {
@@ -583,7 +593,7 @@ export default class DataService implements OnInit, OnPlayerJoined {
 
     /**
      * Saves an empire profile to the DataStore.
-     * 
+     *
      * @param empireId The ID of the empire to save.
      * @returns Whether the save was successful.
      */
@@ -594,7 +604,7 @@ export default class DataService implements OnInit, OnPlayerJoined {
 
     /**
      * Loads an empire profile from the DataStore.
-     * 
+     *
      * @param empireId The ID of the empire to load.
      * @param view Whether to load in view-only mode (read-only).
      * @returns The loaded empire profile, or undefined if not found.
@@ -606,7 +616,7 @@ export default class DataService implements OnInit, OnPlayerJoined {
 
     /**
      * Unloads an empire profile from memory.
-     * 
+     *
      * @param empireId The ID of the empire to unload.
      * @returns Whether the unload was successful.
      */
@@ -617,7 +627,7 @@ export default class DataService implements OnInit, OnPlayerJoined {
     /**
      * Creates a new empire for a player.
      * Checks permissions, gamepass ownership, and generates a new empire with reserved server.
-     * 
+     *
      * @param player The player requesting to create an empire.
      * @returns Whether the empire was successfully created.
      */
@@ -627,11 +637,10 @@ export default class DataService implements OnInit, OnPlayerJoined {
         }
         this.debounce = tick();
         const playerProfile = this.loadPlayerProfile(player.UserId);
-        if (playerProfile === undefined)
-            throw "wtf";
+        if (playerProfile === undefined) throw "wtf";
         const playerData = playerProfile.Data;
 
-        let ownedEmpireCount = playerData.ownedEmpires.size();
+        const ownedEmpireCount = playerData.ownedEmpires.size();
         if (ownedEmpireCount > 3 && !MarketplaceService.UserOwnsGamePassAsync(player.UserId, 73544443675113)) {
             return false;
         }
@@ -641,8 +650,7 @@ export default class DataService implements OnInit, OnPlayerJoined {
         if (newProfile !== undefined) {
             newProfile.AddUserId(player.UserId);
             let name = player.DisplayName + "'s Empire";
-            if (ownedEmpireCount > 0)
-                name += " " + (ownedEmpireCount + 1);
+            if (ownedEmpireCount > 0) name += " " + (ownedEmpireCount + 1);
             newProfile.Data.name = name;
             newProfile.Data.owner = player.UserId;
             newProfile.Data.created = tick();
@@ -652,8 +660,7 @@ export default class DataService implements OnInit, OnPlayerJoined {
             });
             if (success === true) {
                 newProfile.Data.accessCode = result;
-            }
-            else if (!RunService.IsStudio()) {
+            } else if (!RunService.IsStudio()) {
                 return false;
             }
             playerData.ownedEmpires.push(empireId);
@@ -666,7 +673,7 @@ export default class DataService implements OnInit, OnPlayerJoined {
 
     /**
      * Teleports a player to their empire's private server.
-     * 
+     *
      * @param player The player to teleport.
      * @param empireId The ID of the empire to teleport to.
      * @returns Whether the teleport was successful.
@@ -674,7 +681,13 @@ export default class DataService implements OnInit, OnPlayerJoined {
     teleportToEmpire(player: Player, empireId: string) {
         const profile = this.loadEmpireProfile(empireId, true);
         if (profile && profile.Data.accessCode) {
-            TeleportService.TeleportToPrivateServer(game.PlaceId, profile.Data.accessCode, [player], undefined, empireId);
+            TeleportService.TeleportToPrivateServer(
+                game.PlaceId,
+                profile.Data.accessCode,
+                [player],
+                undefined,
+                empireId,
+            );
             return true;
         }
         return false;
@@ -683,7 +696,7 @@ export default class DataService implements OnInit, OnPlayerJoined {
     /**
      * Gets the list of empires a player has access to.
      * Uses caching to reduce DataStore calls.
-     * 
+     *
      * @param userId The user ID to get available empires for.
      * @returns Map of empire IDs to empire information.
      */
@@ -699,8 +712,7 @@ export default class DataService implements OnInit, OnPlayerJoined {
 
         if ((data as string[])[0] !== undefined) {
             const mapped = new Map<string, EmpireInfo>();
-            for (const empireId of (data as string[]))
-                mapped.set(empireId, this.getInfo(empireId));
+            for (const empireId of data as string[]) mapped.set(empireId, this.getInfo(empireId));
             task.spawn(() => this.availableEmpiresStore.SetAsync(key, mapped));
             this.availableEmpiresPerPlayer.set(userId, mapped);
             return mapped;
@@ -712,7 +724,7 @@ export default class DataService implements OnInit, OnPlayerJoined {
 
     /**
      * Updates the available empires for a player both in cache and client.
-     * 
+     *
      * @param userId The user ID to update.
      * @param availableEmpires The new available empires map.
      */
@@ -726,21 +738,24 @@ export default class DataService implements OnInit, OnPlayerJoined {
 
     /**
      * Adds an empire to a player's available empires list.
-     * 
+     *
      * @param userId The user ID to add the empire for.
      * @param empire The empire ID to add.
      */
     addAvailableEmpire(userId: number, empire: string) {
-        const [availableEmpires] = this.availableEmpiresStore.UpdateAsync("Player_" + userId, (oldValue: Map<string, EmpireInfo> | undefined) => {
-            if (oldValue === undefined) {
-                return $tuple(new Map([[empire, this.getInfo(empire)]]));
-            }
-            if (oldValue.has(empire)) {
+        const [availableEmpires] = this.availableEmpiresStore.UpdateAsync(
+            "Player_" + userId,
+            (oldValue: Map<string, EmpireInfo> | undefined) => {
+                if (oldValue === undefined) {
+                    return $tuple(new Map([[empire, this.getInfo(empire)]]));
+                }
+                if (oldValue.has(empire)) {
+                    return $tuple(oldValue);
+                }
+                oldValue.set(empire, this.getInfo(empire));
                 return $tuple(oldValue);
-            }
-            oldValue.set(empire, this.getInfo(empire));
-            return $tuple(oldValue);
-        });
+            },
+        );
         if (availableEmpires !== undefined) {
             this.updateAvailableEmpires(userId, availableEmpires);
         }
@@ -748,21 +763,22 @@ export default class DataService implements OnInit, OnPlayerJoined {
 
     /**
      * Removes an empire from a player's available empires list.
-     * 
+     *
      * @param userId The user ID to remove the empire for.
      * @param empire The empire ID to remove.
      */
     removeAvailableEmpire(userId: number, empire: string) {
-        const [availableEmpires] = this.availableEmpiresStore.UpdateAsync("Player_" + userId, (oldValue: Map<string, EmpireInfo> | undefined) => {
-            if (oldValue === undefined) {
-                return $tuple(new Map<string, EmpireInfo>());
-            }
-            const availableEmpires = new Map<string, EmpireInfo>();
-            for (const [k, v] of pairs(oldValue))
-                if (k !== empire)
-                    availableEmpires.set(k, v);
-            return $tuple(availableEmpires);
-        });
+        const [availableEmpires] = this.availableEmpiresStore.UpdateAsync(
+            "Player_" + userId,
+            (oldValue: Map<string, EmpireInfo> | undefined) => {
+                if (oldValue === undefined) {
+                    return $tuple(new Map<string, EmpireInfo>());
+                }
+                const availableEmpires = new Map<string, EmpireInfo>();
+                for (const [k, v] of pairs(oldValue)) if (k !== empire) availableEmpires.set(k, v);
+                return $tuple(availableEmpires);
+            },
+        );
         if (availableEmpires !== undefined) {
             this.updateAvailableEmpires(userId, availableEmpires);
         }
@@ -770,27 +786,26 @@ export default class DataService implements OnInit, OnPlayerJoined {
 
     /**
      * Gets basic information about an empire.
-     * 
+     *
      * @param empireId The ID of the empire to get info for.
      * @returns Empire information object.
      */
     getInfo(empireId: string) {
         const empire = this.loadEmpireProfile(empireId, true);
-        if (empire === undefined)
-            throw "No such empire " + empireId;
+        if (empire === undefined) throw "No such empire " + empireId;
         const items = empire.Data.items;
         return {
             name: empire.Data.name,
             owner: empire.Data.owner,
             items: (items.worldPlaced ?? items.placed).size(),
             created: empire.Data.created,
-            playtime: empire.Data.playtime
+            playtime: empire.Data.playtime,
         };
     }
 
     /**
      * Loads a player profile from the DataStore.
-     * 
+     *
      * @param userId The user ID to load the profile for.
      * @param view Whether to load in view-only mode (read-only).
      * @returns The loaded player profile, or undefined if not found.
@@ -802,7 +817,7 @@ export default class DataService implements OnInit, OnPlayerJoined {
 
     /**
      * Unloads a player profile from memory.
-     * 
+     *
      * @param userId The user ID to unload the profile for.
      * @returns Whether the unload was successful.
      */
@@ -812,7 +827,7 @@ export default class DataService implements OnInit, OnPlayerJoined {
 
     /**
      * Checks if a player has the required permission level for an action.
-     * 
+     *
      * @param player The player to check permissions for.
      * @param action The action requiring permission.
      * @returns Whether the player has sufficient permissions.
@@ -829,11 +844,11 @@ export default class DataService implements OnInit, OnPlayerJoined {
     /**
      * Handles player joining logic.
      * Sets up player data, available empires, and player attributes.
-     * 
+     *
      * @param player The player that joined.
      */
     onPlayerJoined(player: Player) {
-        let availableEmpires = this.getAvailableEmpires(player.UserId);
+        const availableEmpires = this.getAvailableEmpires(player.UserId);
         pcall(() => {
             for (const [id, empire] of availableEmpires) {
                 if (empire.owner === 0) {
@@ -850,8 +865,7 @@ export default class DataService implements OnInit, OnPlayerJoined {
         });
 
         const playerProfile = this.loadPlayerProfile(player.UserId);
-        if (playerProfile === undefined)
-            throw "No player profile for player " + player.Name;
+        if (playerProfile === undefined) throw "No player profile for player " + player.Name;
 
         let changed = false;
         if (playerProfile.Data.availableEmpires !== undefined) {
@@ -876,22 +890,36 @@ export default class DataService implements OnInit, OnPlayerJoined {
             warn("Player data was modified to fix lossy and old data");
         }
         player.SetAttribute("UsedPortal", playerProfile.Data.usedPortal);
-        player.GetAttributeChangedSignal("UsedPortal").Connect(() => playerProfile.Data.usedPortal = player.GetAttribute("UsedPortal") as boolean);
+        player
+            .GetAttributeChangedSignal("UsedPortal")
+            .Connect(() => (playerProfile.Data.usedPortal = player.GetAttribute("UsedPortal") as boolean));
         player.SetAttribute("RawPurifierClicks", math.floor(playerProfile.Data.rawPurifierClicks));
-        player.GetAttributeChangedSignal("RawPurifierClicks").Connect(() => playerProfile.Data.rawPurifierClicks = player.GetAttribute("RawPurifierClicks") as number);
-        if (playerProfile.Data.rawPurifierClicks === 0 && (this.empireData.owner === player.UserId || RunService.IsStudio())) {
+        player
+            .GetAttributeChangedSignal("RawPurifierClicks")
+            .Connect(() => (playerProfile.Data.rawPurifierClicks = player.GetAttribute("RawPurifierClicks") as number));
+        if (
+            playerProfile.Data.rawPurifierClicks === 0 &&
+            (this.empireData.owner === player.UserId || RunService.IsStudio())
+        ) {
             const c = this.empireData.currencies.get("Purifier Clicks");
             if (c !== undefined) {
                 const clicks = new OnoeNum(c);
                 if (clicks !== undefined) {
-                    player.SetAttribute("RawPurifierClicks", math.min(math.floor(clicks.div(3).add(1).revert()), 10000000));
+                    player.SetAttribute(
+                        "RawPurifierClicks",
+                        math.min(math.floor(clicks.div(3).add(1).revert()), 10000000),
+                    );
                     print("Awarded player with clicks as compensation");
                 }
             }
         }
 
         const ownedEmpires = playerProfile?.Data.ownedEmpires;
-        if (ownedEmpires !== undefined && !ownedEmpires.includes(this.empireId) && this.empireData.owner === player.UserId) {
+        if (
+            ownedEmpires !== undefined &&
+            !ownedEmpires.includes(this.empireId) &&
+            this.empireData.owner === player.UserId
+        ) {
             ownedEmpires.push(this.empireId);
         }
         if (this.isPublicServer) {
@@ -920,7 +948,8 @@ export default class DataService implements OnInit, OnPlayerJoined {
             }
         });
 
-        if (IS_SERVER) { // check for no testing environment
+        if (IS_SERVER) {
+            // check for no testing environment
             game.BindToClose(() => this.unloadEmpireProfile(this.empireId));
         }
 

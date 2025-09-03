@@ -37,8 +37,7 @@ import AwesomeManumaticPurifier from "shared/items/negative/felixthea/AwesomeMan
 import { RESET_LAYERS } from "shared/ResetLayer";
 
 declare global {
-    interface Assets {
-    }
+    interface Assets {}
 }
 
 type ItemProgressionStats = {
@@ -59,14 +58,18 @@ export default class ProgressionEstimationService implements OnGameAPILoaded, On
      */
     readonly MODEL_PER_DROPLET = new Map<Droplet, BasePart>();
 
-    constructor(private revenueService: RevenueService, private npcNavigationService: NPCNavigationService,
-        private currencyService: CurrencyService, private namedUpgradeService: NamedUpgradeService,
-        private dataService: DataService, private resetService: ResetService) {
-    }
+    constructor(
+        private revenueService: RevenueService,
+        private npcNavigationService: NPCNavigationService,
+        private currencyService: CurrencyService,
+        private namedUpgradeService: NamedUpgradeService,
+        private dataService: DataService,
+        private resetService: ResetService,
+    ) {}
 
     /**
      * Checks if a price is free (all currencies are zero).
-     * 
+     *
      * @param price The price bundle to check.
      */
     isPriceFree(price: CurrencyBundle) {
@@ -80,7 +83,7 @@ export default class ProgressionEstimationService implements OnGameAPILoaded, On
 
     /**
      * Gets the highest iteration of an item that is free.
-     * 
+     *
      * @param item The item to check.
      */
     getFreeIterations(item: Item) {
@@ -99,7 +102,7 @@ export default class ProgressionEstimationService implements OnGameAPILoaded, On
     /**
      * Calculates the minimum time to obtain a specified revenue with the specified price.
      * Returns a tuple of (max time, limiting currency) or undefined if not possible.
-     * 
+     *
      * @param revenue The revenue per second.
      * @param price The price to reach.
      */
@@ -108,8 +111,7 @@ export default class ProgressionEstimationService implements OnGameAPILoaded, On
         let limitingCurrency: Currency | undefined;
         for (const [currency, amount] of price.amountPerCurrency) {
             const revenueAmount = revenue.get(currency);
-            if (revenueAmount === undefined || revenueAmount.lessEquals(0))
-                return $tuple(undefined, undefined); // revenue cannot generate this currency, impossible to obtain
+            if (revenueAmount === undefined || revenueAmount.lessEquals(0)) return $tuple(undefined, undefined); // revenue cannot generate this currency, impossible to obtain
 
             const t = amount.div(revenueAmount);
             if (t.moreThan(maxTime)) {
@@ -122,12 +124,16 @@ export default class ProgressionEstimationService implements OnGameAPILoaded, On
 
     /**
      * Finds the next obtainable item and time to obtain it, given inventory and revenue.
-     * 
+     *
      * @param inventory Map of items and their amounts.
      * @param bought Map of items and their bought amounts.
      * @param revenue Current revenue bundle.
      */
-    getNextItem(inventory: Map<Item, number>, bought: Map<Item, number>, revenue: CurrencyBundle): ItemProgressionStats {
+    getNextItem(
+        inventory: Map<Item, number>,
+        bought: Map<Item, number>,
+        revenue: CurrencyBundle,
+    ): ItemProgressionStats {
         let nextItem: Item | undefined;
         let timeToObtain: OnoeNum | undefined;
         let limitingCurrency: Currency | undefined;
@@ -140,11 +146,11 @@ export default class ProgressionEstimationService implements OnGameAPILoaded, On
             const nextIteration = currentAmount === undefined ? 1 : currentAmount + 1;
             let nextPrice = item.pricePerIteration.get(nextIteration);
             if (nextPrice === undefined) {
-                if (nextIteration > 1 && item.defaultPrice !== undefined) // prevent infinite loop
+                if (nextIteration > 1 && item.defaultPrice !== undefined)
+                    // prevent infinite loop
                     continue;
                 nextPrice = item.defaultPrice;
-                if (nextPrice === undefined)
-                    continue;
+                if (nextPrice === undefined) continue;
             }
 
             // check if required items is in items
@@ -155,12 +161,10 @@ export default class ProgressionEstimationService implements OnGameAPILoaded, On
                     break;
                 }
             }
-            if (!canObtain)
-                continue;
+            if (!canObtain) continue;
 
             const [t, limiting] = this.getTimeToReachPrice(revenue, nextPrice);
-            if (t === undefined || t.moreThan(1e6))
-                continue;
+            if (t === undefined || t.moreThan(1e6)) continue;
             limitingCurrency = limiting;
             if (timeToObtain === undefined || t.lessThan(timeToObtain)) {
                 timeToObtain = t;
@@ -172,7 +176,7 @@ export default class ProgressionEstimationService implements OnGameAPILoaded, On
 
     /**
      * Buys all upgrades in the provided list, using free purchases.
-     * 
+     *
      * @param upgrades List of upgrade IDs.
      */
     maxUpgradeBoard(upgrades: string[]) {
@@ -186,7 +190,7 @@ export default class ProgressionEstimationService implements OnGameAPILoaded, On
 
     /**
      * Finds the progression path of the game, sorting by shortest to longest time to obtain the next item.
-     * 
+     *
      * @returns An array of item progression statistics.
      */
     getProgression() {
@@ -206,8 +210,7 @@ export default class ProgressionEstimationService implements OnGameAPILoaded, On
         const progress = () => {
             const stats = this.getNextItem(inventory, bought, lastRevenue);
             const item = stats.item;
-            if (item === undefined || stats.timeToObtain === undefined)
-                return allStats;
+            if (item === undefined || stats.timeToObtain === undefined) return allStats;
             allStats.push(stats);
             lastRevenue = stats.revenue;
 
@@ -226,7 +229,7 @@ export default class ProgressionEstimationService implements OnGameAPILoaded, On
     /**
      * Calculates the revenue generated by the specified items if optimally used.
      * Simulates droplet upgrades, generators, furnaces, and reset layers.
-     * 
+     *
      * @param items Items and their amounts.
      * @param balance The balance to emulate for calculations.
      */
@@ -267,8 +270,7 @@ export default class ProgressionEstimationService implements OnGameAPILoaded, On
                     let dropRate = droplets.get(droplet) ?? 0;
                     if (dropper.item.id === "DropDropper") {
                         dropRate = 10;
-                    }
-                    else {
+                    } else {
                         dropRate += dropper.dropRate * amount;
                     }
                     droplets.set(droplet, dropRate);
@@ -280,7 +282,7 @@ export default class ProgressionEstimationService implements OnGameAPILoaded, On
 
             if (damager !== undefined) {
                 const damage = damager.damage * amount;
-                for (const currency of (upgrader?.getCurrencies() ?? currencies)) {
+                for (const currency of upgrader?.getCurrencies() ?? currencies) {
                     damagePerCurrency.set(currency, damagePerCurrency.get(currency)! + damage);
                 }
             }
@@ -297,7 +299,8 @@ export default class ProgressionEstimationService implements OnGameAPILoaded, On
             const furnace = item.findTrait("Furnace");
             if (furnace !== undefined) {
                 for (const currency of furnace.getCurrencies()) {
-                    const toModify: Map<Currency, Furnace> = furnace.includesUpgrades === false ? cauldronPerCurrency : furnacePerCurrency;
+                    const toModify: Map<Currency, Furnace> =
+                        furnace.includesUpgrades === false ? cauldronPerCurrency : furnacePerCurrency;
                     const previous = toModify.get(currency);
                     if (previous === undefined || previous.lessThan(furnace, currency)) {
                         toModify.set(currency, furnace);
@@ -340,7 +343,9 @@ export default class ProgressionEstimationService implements OnGameAPILoaded, On
 
             const clicker = item.findTrait("Clicker");
             if (clicker !== undefined) {
-                generatorRevenue = generatorRevenue.add(new CurrencyBundle().set("Purifier Clicks", clicker.getCPS() * amount));
+                generatorRevenue = generatorRevenue.add(
+                    new CurrencyBundle().set("Purifier Clicks", clicker.getCPS() * amount),
+                );
             }
 
             const upgradeBoard = item.findTrait("UpgradeBoard");
@@ -368,8 +373,7 @@ export default class ProgressionEstimationService implements OnGameAPILoaded, On
             if (transformer !== undefined) {
                 for (const [droplet, dropRate] of droplets) {
                     const result = transformer.getResult(droplet);
-                    if (result === undefined)
-                        continue;
+                    if (result === undefined) continue;
                     if (result.value.canAfford(droplet.value.amountPerCurrency)) {
                         droplets.delete(droplet);
                         let resultDropRate = droplets.get(result) ?? 0;
@@ -396,23 +400,25 @@ export default class ProgressionEstimationService implements OnGameAPILoaded, On
             const baseHealth = droplet.health;
             instanceInfo.Health = 100; // override health check to make our own damage calculations
 
-            let [upgradedValue] = this.revenueService.calculateDropletValue(dropletModel, true, true);
+            const [upgradedValue] = this.revenueService.calculateDropletValue(dropletModel, true, true);
             // for (const [currency, amount] of upgradedValue.amountPerCurrency) {
             //     let damage = (baseHealth - (damagePerCurrency.get(currency) ?? 0)) / 100;
             //     damage = math.clamp(damage, 0.25, 1); // assume player wont degrade droplet more than 75%
             //     upgradedValue.set(currency, amount.mul(damage));
             // }
 
-
-            let [unupgradedValue] = this.revenueService.calculateDropletValue(dropletModel, true, false);
+            const [unupgradedValue] = this.revenueService.calculateDropletValue(dropletModel, true, false);
 
             const value = new CurrencyBundle();
             for (const [currency, upgradedAmount] of upgradedValue.amountPerCurrency) {
                 const furnace = furnacePerCurrency.get(currency);
                 const cauldron = cauldronPerCurrency.get(currency);
-                const furnaceValue = furnace?.apply(new CurrencyBundle().set(currency, upgradedAmount)).get(currency) ?? upgradedAmount;
+                const furnaceValue =
+                    furnace?.apply(new CurrencyBundle().set(currency, upgradedAmount)).get(currency) ?? upgradedAmount;
                 const unupgradedAmount = unupgradedValue.get(currency)!;
-                const cauldronValue = cauldron?.apply(new CurrencyBundle().set(currency, unupgradedAmount)).get(currency) ?? unupgradedAmount;
+                const cauldronValue =
+                    cauldron?.apply(new CurrencyBundle().set(currency, unupgradedAmount)).get(currency) ??
+                    unupgradedAmount;
 
                 value.set(currency, OnoeNum.max(furnaceValue, cauldronValue));
             }
@@ -452,8 +458,7 @@ export default class ProgressionEstimationService implements OnGameAPILoaded, On
      * Runs the progression estimation and posts the report if in the PROGRESSION empire.
      */
     onStart() {
-        if (this.dataService.empireId !== "PROGRESSION")
-            return;
+        if (this.dataService.empireId !== "PROGRESSION") return;
 
         const startingBalance = this.currencyService.balance.clone();
         this.currencyService.setAll(new Map());
@@ -467,8 +472,7 @@ export default class ProgressionEstimationService implements OnGameAPILoaded, On
             const revenue = stats.revenue;
             const item = stats.item;
             const timeToObtain = stats.timeToObtain;
-            if (item === undefined || timeToObtain === undefined)
-                continue;
+            if (item === undefined || timeToObtain === undefined) continue;
             builder.append(itemIteration);
             builder.append(". **");
             builder.append(item.name);
@@ -508,7 +512,7 @@ export default class ProgressionEstimationService implements OnGameAPILoaded, On
 
     /**
      * Encodes a record as a URL-encoded string for HTTP POST.
-     * 
+     *
      * @param data The data to encode.
      */
     private encode(data: Record<string, unknown>): string {
@@ -522,7 +526,7 @@ export default class ProgressionEstimationService implements OnGameAPILoaded, On
 
     /**
      * Posts a progression report to Workspace for offline usage.
-     * 
+     *
      * @param message The report message.
      */
     private postOffline(message: string) {
@@ -534,7 +538,7 @@ export default class ProgressionEstimationService implements OnGameAPILoaded, On
 
     /**
      * Posts a progression report to Discord and Workspace.
-     * 
+     *
      * @param message The report message.
      */
     post(message: string) {
@@ -552,7 +556,7 @@ export default class ProgressionEstimationService implements OnGameAPILoaded, On
             content: message,
             syntax: "md",
             title: `Progression Estimation Report ${timestamp}`,
-            expiry_days: 7
+            expiry_days: 7,
         };
 
         const response = HttpService.PostAsync(pasteUrl, this.encode(data), Enum.HttpContentType.ApplicationUrlEncoded);
@@ -568,17 +572,22 @@ export default class ProgressionEstimationService implements OnGameAPILoaded, On
             `isle of poxing`,
             `i shove docks in`,
             `i love socks in`,
-            `i love bach sing`
+            `i love bach sing`,
         ];
 
-        HttpService.PostAsync(webhookUrl, HttpService.JSONEncode({
-            content: `${quotes[math.random(0, quotes.size() - 1)]}\n${response.sub(1, -2)}-preview`,
-            embeds: [{
-                title: "Progression Estimation Report",
-                description: `Report dumped at ${response}`,
-                color: 0xFF0000,
-                timestamp: timestamp,
-            }],
-        }));
+        HttpService.PostAsync(
+            webhookUrl,
+            HttpService.JSONEncode({
+                content: `${quotes[math.random(0, quotes.size() - 1)]}\n${response.sub(1, -2)}-preview`,
+                embeds: [
+                    {
+                        title: "Progression Estimation Report",
+                        description: `Report dumped at ${response}`,
+                        color: 0xff0000,
+                        timestamp: timestamp,
+                    },
+                ],
+            }),
+        );
     }
 }

@@ -9,7 +9,9 @@ const mul = new CurrencyBundle().set("Funds", 0);
 
 export = new Item(script.Name)
     .setName("Energised Refiner")
-    .setDescription("Power your items up. This upgrader has a Funds boost that increases with the amount of Power you own, maxing out when you reach %cap%. Uses %drain%.")
+    .setDescription(
+        "Power your items up. This upgrader has a Funds boost that increases with the amount of Power you own, maxing out when you reach %cap%. Uses %drain%.",
+    )
     .setDifficulty(Difficulty.Friendliness)
     .setPrice(new CurrencyBundle().set("Power", 20), 1)
     .setPrice(new CurrencyBundle().set("Power", 120), 2)
@@ -22,5 +24,8 @@ export = new Item(script.Name)
     .setDrain(new CurrencyBundle().set("Power", 0.4))
 
     .trait(Upgrader)
-    .applyFormula((v, item) => item.setMul(mul.set("Funds", v)), () => Server.Currency.get("Power"))
+    .applyFormula(
+        (v, item) => item.setMul(mul.set("Funds", v)),
+        () => Server.Currency.get("Power"),
+    )
     .exit();

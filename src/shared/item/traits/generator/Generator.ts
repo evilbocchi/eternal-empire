@@ -17,7 +17,6 @@ declare global {
 const GENERATOR_UPGRADES = NamedUpgrades.getUpgrades("Generator");
 
 export default class Generator extends Boostable {
-
     passiveGain: CurrencyBundle | undefined;
 
     static load(model: Model, generator: Generator) {
@@ -43,62 +42,68 @@ export default class Generator extends Boostable {
             clickDetector.Parent = clickPart;
         }
 
-        item.repeat(model, (dt) => {
-            const passiveGain = generator.passiveGain;
-            if (passiveGain === undefined)
-                return;
+        item.repeat(
+            model,
+            (dt) => {
+                const passiveGain = generator.passiveGain;
+                if (passiveGain === undefined) return;
 
-            let value = passiveGain;
+                let value = passiveGain;
 
-            if (tick() - lastClicked < 1) {
-                value = value.mul(1.5);
-            }
-
-            let [totalAdd, totalMul, totalPow] = Operative.template();
-
-            for (const [id, boost] of boosts) {
-                // redundant check to prevent exploits with infinite charging
-                const placedItem = ItemService.getPlacedItem(id);
-                if (placedItem === undefined) {
-                    boosts.delete(id);
-                    continue;
+                if (tick() - lastClicked < 1) {
+                    value = value.mul(1.5);
                 }
 
-                const charger = boost.charger;
-                if (charger === undefined) {
-                    continue;
+                let [totalAdd, totalMul, totalPow] = Operative.template();
+
+                for (const [id, boost] of boosts) {
+                    // redundant check to prevent exploits with infinite charging
+                    const placedItem = ItemService.getPlacedItem(id);
+                    if (placedItem === undefined) {
+                        boosts.delete(id);
+                        continue;
+                    }
+
+                    const charger = boost.charger;
+                    if (charger === undefined) {
+                        continue;
+                    }
+
+                    let add = charger.add;
+                    let mul = charger.mul;
+                    let pow = charger.pow;
+                    [add, mul, pow] = Operative.applyOperative(totalAdd, totalMul, totalPow, add, mul, pow);
+                    totalAdd = add ?? totalAdd;
+                    totalMul = mul ?? totalMul;
+                    totalPow = pow ?? totalPow;
+                }
+                const boost = model.GetAttribute("GeneratorBoost") as number | undefined;
+                if (boost !== undefined) {
+                    totalMul = totalMul.mul(boost);
                 }
 
-                let add = charger.add;
-                let mul = charger.mul;
-                let pow = charger.pow;
-                [add, mul, pow] = Operative.applyOperative(totalAdd, totalMul, totalPow, add, mul, pow);
-                totalAdd = add ?? totalAdd;
-                totalMul = mul ?? totalMul;
-                totalPow = pow ?? totalPow;
-            }
-            const boost = model.GetAttribute("GeneratorBoost") as number | undefined;
-            if (boost !== undefined) {
-                totalMul = totalMul.mul(boost);
-            }
-
-            [totalAdd, totalMul, totalPow] = RevenueService.applyGlobal(totalAdd, totalMul, totalPow, GENERATOR_UPGRADES);
-            const worth = Operative.coalesce(value, totalAdd, totalMul, totalPow).mul(dt);
-            const amountPerCurrency = RevenueService.performSoftcaps(worth.amountPerCurrency);
-            const players = Players.GetPlayers();
-            for (const player of players) {
-                const character = player.Character;
-                if (character === undefined)
-                    continue;
-                const rootPart = character.FindFirstChild("HumanoidRootPart") as BasePart | undefined;
-                if (rootPart === undefined)
-                    continue;
-                if (rootPart.Position.sub(centre).Magnitude < 50) {
-                    remoteEvent.FireClient(player, amountPerCurrency);
+                [totalAdd, totalMul, totalPow] = RevenueService.applyGlobal(
+                    totalAdd,
+                    totalMul,
+                    totalPow,
+                    GENERATOR_UPGRADES,
+                );
+                const worth = Operative.coalesce(value, totalAdd, totalMul, totalPow).mul(dt);
+                const amountPerCurrency = RevenueService.performSoftcaps(worth.amountPerCurrency);
+                const players = Players.GetPlayers();
+                for (const player of players) {
+                    const character = player.Character;
+                    if (character === undefined) continue;
+                    const rootPart = character.FindFirstChild("HumanoidRootPart") as BasePart | undefined;
+                    if (rootPart === undefined) continue;
+                    if (rootPart.Position.sub(centre).Magnitude < 50) {
+                        remoteEvent.FireClient(player, amountPerCurrency);
+                    }
                 }
-            }
-            Server.Currency.incrementAll(amountPerCurrency);
-        }, 1);
+                Server.Currency.incrementAll(amountPerCurrency);
+            },
+            1,
+        );
     }
 
     constructor(item: Item) {
@@ -109,8 +114,7 @@ export default class Generator extends Boostable {
             const part = (model.FindFirstChild("Marker") ?? model.PrimaryPart) as BasePart;
             const positions = new Map<BasePart, Vector3>();
             for (const part of model.GetDescendants()) {
-                if (!part.IsA("BasePart") || part.Name === "Base" || part.Parent!.Name === "Base")
-                    continue;
+                if (!part.IsA("BasePart") || part.Name === "Base" || part.Parent!.Name === "Base") continue;
                 positions.set(part, part.Position);
             }
             const tween1 = new TweenInfo(0.1, Enum.EasingStyle.Quad, Enum.EasingDirection.In);
@@ -124,26 +128,26 @@ export default class Generator extends Boostable {
                 if (ItemUtils.UserGameSettings!.SavedQualityLevel.Value > 5) {
                     for (const [part, position] of positions) {
                         TweenService.Create(part, tween1, {
-                            Position: position.sub(new Vector3(0, 0.125, 0))
+                            Position: position.sub(new Vector3(0, 0.125, 0)),
                         }).Play();
                         task.delay(0.1, () => {
                             TweenService.Create(part, tween2, {
-                                Position: position
+                                Position: position,
                             }).Play();
                         });
                     }
                 }
 
-                if (amountPerCurrency === undefined) { // clickpart was pressed                    
+                if (amountPerCurrency === undefined) {
+                    // clickpart was pressed
                     if (clickPart !== undefined) {
                         playSound("MechanicalPress.mp3", clickPart);
                         clickPart.Size = clickPartOriginalSize!.mul(1.2);
                         TweenService.Create(clickPart, clickTween, {
-                            Size: clickPartOriginalSize!
+                            Size: clickPartOriginalSize!,
                         }).Play();
                     }
-                }
-                else {
+                } else {
                     ItemUtils.showCurrencyGain?.(part.Position, amountPerCurrency);
                 }
             });

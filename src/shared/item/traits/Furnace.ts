@@ -22,7 +22,6 @@ declare global {
 const ZERO = new OnoeNum(0);
 
 export default class Furnace extends Operative {
-
     static load(model: Model, furnace: Furnace) {
         const RevenueService = Server.Revenue;
         const CurrencyService = Server.Currency;
@@ -36,19 +35,22 @@ export default class Furnace extends Operative {
                 droplet.Anchored = true;
 
                 const dropletInfo = getAllInstanceInfo(droplet);
-                if (droplet.Parent !== DROPLET_STORAGE || dropletInfo.Incinerated === true)
-                    return;
+                if (droplet.Parent !== DROPLET_STORAGE || dropletInfo.Incinerated === true) return;
 
                 dropletInfo.Incinerated = true;
                 Debris.AddItem(droplet, 6);
 
-                if (instanceInfo.Maintained === false)
-                    return;
+                if (instanceInfo.Maintained === false) return;
 
-                let [worth] = RevenueService.calculateDropletValue(droplet, furnace.includesGlobalBoosts, furnace.includesUpgrades);
+                const [worth] = RevenueService.calculateDropletValue(
+                    droplet,
+                    furnace.includesGlobalBoosts,
+                    furnace.includesUpgrades,
+                );
                 let result = furnace.apply(worth);
 
-                if (result === worth) // furnace has no effect on droplet i.e. is a condenser
+                if (result === worth)
+                    // furnace has no effect on droplet i.e. is a condenser
                     result = new CurrencyBundle();
                 else {
                     const varianceResult = furnace.varianceResult;
@@ -58,8 +60,7 @@ export default class Furnace extends Operative {
                     CurrencyService.incrementAll(result.amountPerCurrency);
                 }
                 for (const [currency, amount] of result.amountPerCurrency) {
-                    if (amount.equals(ZERO))
-                        result.amountPerCurrency.delete(currency);
+                    if (amount.equals(ZERO)) result.amountPerCurrency.delete(currency);
                 }
                 Packets.dropletBurnt.toAllClients(droplet.Name, result.amountPerCurrency);
                 instanceInfo.OnProcessed?.(result, worth, droplet);
@@ -75,9 +76,9 @@ export default class Furnace extends Operative {
     /**
      * Whether the furnace will process upgrades in droplets.
      * This should be false for cauldrons, where droplets are expected to be directly dropped into.
-     * 
+     *
      * The only exception is when droplets are marked as sky droplets, in which case they will be processed.
-     * 
+     *
      * @see {@link InstanceInfo.Sky} for more information on sky droplets.
      */
     includesUpgrades = true;
@@ -85,15 +86,17 @@ export default class Furnace extends Operative {
     constructor(item: Item) {
         super(item);
         item.onInit(() => {
-            if (this.variance === undefined)
-                return;
+            if (this.variance === undefined) return;
 
-            item.repeat(undefined, () => {
-                const variance = this.variance;
-                if (variance === undefined)
-                    return;
-                this.varianceResult = (math.random() * variance) + 1 - (variance * 0.5);
-            }, 0.7);
+            item.repeat(
+                undefined,
+                () => {
+                    const variance = this.variance;
+                    if (variance === undefined) return;
+                    this.varianceResult = math.random() * variance + 1 - variance * 0.5;
+                },
+                0.7,
+            );
         });
         item.onLoad((model) => Furnace.load(model, this));
     }
@@ -113,7 +116,5 @@ export default class Furnace extends Operative {
         return this;
     }
 
-    process(dropletInfo: InstanceInfo, furnaceModel: Model) {
-
-    }
+    process(dropletInfo: InstanceInfo, furnaceModel: Model) {}
 }

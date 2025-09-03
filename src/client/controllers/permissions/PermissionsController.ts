@@ -34,14 +34,11 @@ export const SHARE_WINDOW = ADAPTIVE_TAB_MAIN_WINDOW.WaitForChild("Share") as Fr
  */
 @Controller()
 export default class PermissionsController implements OnInit {
-
     constructor(
         private effectController: EffectController,
         private adaptiveTabController: AdaptiveTabController,
-        private commandsController: CommandsController
-    ) {
-
-    }
+        private commandsController: CommandsController,
+    ) {}
 
     /**
      * Initializes the PermissionsController, sets up listeners for donations and game modifications.

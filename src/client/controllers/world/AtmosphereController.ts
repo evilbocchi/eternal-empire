@@ -26,7 +26,6 @@ import { WeatherState, WeatherType } from "shared/weather/WeatherTypes";
  */
 @Controller()
 export default class AtmosphereController implements OnInit, OnStart {
-
     /** Map of Light instances to their base brightness. */
     lights = new Map<Light, number>();
 
@@ -59,8 +58,7 @@ export default class AtmosphereController implements OnInit, OnStart {
                 const children = lights.GetChildren();
                 for (const child of children) {
                     const light = this.findLight(child);
-                    if (light !== undefined)
-                        this.lights.set(light, light.Brightness);
+                    if (light !== undefined) this.lights.set(light, light.Brightness);
                 }
             }
         }
@@ -99,7 +97,10 @@ export default class AtmosphereController implements OnInit, OnStart {
                     // Apply weather dimming effects
                     if (this.currentWeather.type === WeatherType.Cloudy) {
                         brightness *= 0.8; // Slightly dimmer for cloudy weather
-                    } else if (this.currentWeather.type === WeatherType.Rainy || this.currentWeather.type === WeatherType.Thunderstorm) {
+                    } else if (
+                        this.currentWeather.type === WeatherType.Rainy ||
+                        this.currentWeather.type === WeatherType.Thunderstorm
+                    ) {
                         brightness *= 0.6; // Much dimmer for rain/thunderstorm
                     }
 
@@ -187,5 +188,4 @@ export default class AtmosphereController implements OnInit, OnStart {
 
         this.rainy = true;
     }
-
 }

@@ -29,18 +29,18 @@ declare global {
     type QuestOption = Frame & {
         UIStroke: UIStroke;
         Content: Frame & {
-            CurrentStepLabel: TextLabel,
-            RewardLabel: TextLabel,
-            LengthLabel: TextLabel,
+            CurrentStepLabel: TextLabel;
+            RewardLabel: TextLabel;
+            LengthLabel: TextLabel;
             Track: TextButton & {
                 UIStroke: UIStroke;
             };
-        },
+        };
         Dropdown: TextButton & {
-            ImageLabel: ImageLabel,
+            ImageLabel: ImageLabel;
             LevelLabel: TextLabel & {
                 UIStroke: UIStroke;
-            },
+            };
             NameLabel: TextLabel & {
                 UIStroke: UIStroke;
             };
@@ -48,8 +48,8 @@ declare global {
     };
 
     type LootTableItemSlot = Frame & {
-        ViewportFrame: ViewportFrame,
-        TitleLabel: TextLabel,
+        ViewportFrame: ViewportFrame;
+        TitleLabel: TextLabel;
         Background: Folder & {
             ImageLabel: ImageLabel;
         };
@@ -65,10 +65,10 @@ declare global {
 }
 
 export type CompletionFrame = Frame & {
-    ImageLabel: ImageLabel,
+    ImageLabel: ImageLabel;
     TextLabel: TextLabel & {
         UIStroke: UIStroke;
-    },
+    };
     RewardLabel: TextLabel & {
         UIStroke: UIStroke;
     };
@@ -77,7 +77,7 @@ export type CompletionFrame = Frame & {
 export type LPUpgradeOption = Frame & {
     Button: ImageButton & {
         ValueLabel: TextLabel;
-    },
+    };
     DescriptionLabel: TextLabel;
 };
 
@@ -111,7 +111,6 @@ export const TRACKED_QUEST_WINDOW = INTERFACE.WaitForChild("TrackedQuestWindow")
  */
 @Controller()
 export default class QuestsController implements OnInit, OnPhysics, OnCharacterAdded {
-
     oldIndex = -2;
     indexer: string | undefined = undefined;
     tween = new TweenInfo(0.2, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out);
@@ -141,7 +140,7 @@ export default class QuestsController implements OnInit, OnPhysics, OnCharacterA
      */
     showQuestWindow() {
         if (this.isQuestWindowVisible) return;
-        
+
         this.isQuestWindowVisible = true;
         playSound("MenuOpen.mp3");
     }
@@ -151,7 +150,7 @@ export default class QuestsController implements OnInit, OnPhysics, OnCharacterA
      */
     hideQuestWindow() {
         if (!this.isQuestWindowVisible) return;
-        
+
         this.isQuestWindowVisible = false;
         playSound("MenuClose.mp3");
     }
@@ -229,7 +228,10 @@ export default class QuestsController implements OnInit, OnPhysics, OnCharacterA
         }
         const position = ReplicatedStorage.GetAttribute(id + stageNum) as Vector3 | undefined;
         if (position !== undefined) {
-            desc = desc.gsub("%%coords%%", `(${math.round(position.X)}, ${math.round(position.Y)}, ${math.round(position.Z)})`)[0];
+            desc = desc.gsub(
+                "%%coords%%",
+                `(${math.round(position.X)}, ${math.round(position.Y)}, ${math.round(position.Z)})`,
+            )[0];
         }
         return desc;
     }
@@ -311,7 +313,10 @@ export default class QuestsController implements OnInit, OnPhysics, OnCharacterA
     }
 
     onPhysics() {
-        const position = this.indexer === undefined ? undefined : ReplicatedStorage.GetAttribute(this.indexer) as Vector3 | undefined;
+        const position =
+            this.indexer === undefined
+                ? undefined
+                : (ReplicatedStorage.GetAttribute(this.indexer) as Vector3 | undefined);
         if (position !== undefined) {
             this.beamContainer.Position = position;
             this.beam.Enabled = true;
@@ -350,7 +355,8 @@ export default class QuestsController implements OnInit, OnPhysics, OnCharacterA
             for (const [id, quest] of value) {
                 if (quest.level < 999 && level >= quest.level) {
                     const currentStage = Packets.stagePerQuest.get()?.get(id) ?? 0;
-                    if (currentStage >= 0) { // Not completed
+                    if (currentStage >= 0) {
+                        // Not completed
                         this.availableQuests.add(id);
                     }
                 }

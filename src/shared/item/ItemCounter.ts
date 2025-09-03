@@ -3,8 +3,7 @@ class ItemCounter {
         const invCount = inventory.get(itemId) ?? 0;
         let placedCount = 0;
         for (const [_, placedItem] of placed) {
-            if (placedItem.item === itemId)
-                ++placedCount;
+            if (placedItem.item === itemId) ++placedCount;
         }
         return $tuple(invCount, placedCount);
     }

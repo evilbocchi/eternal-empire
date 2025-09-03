@@ -22,9 +22,9 @@ import Packets from "shared/Packets";
 
 declare global {
     type BombsBoardGui = SurfaceGui & {
-        BuyButton: TextButton,
-        UseButton: TextButton,
-        AmountLabel: TextLabel,
+        BuyButton: TextButton;
+        UseButton: TextButton;
+        AmountLabel: TextLabel;
     };
 }
 
@@ -37,7 +37,6 @@ export const DETAILS_WINDOW = INTERFACE.WaitForChild("DetailsWindow") as Frame &
  */
 @Controller()
 export default class BombsController implements OnStart {
-
     /** Map of bomb board GUIs to their associated currency. */
     guis = new Map<BombsBoardGui, Currency>();
 
@@ -50,13 +49,15 @@ export default class BombsController implements OnStart {
     loadGui(bombsCurrency: Currency, boosting: Currency, gui: BombsBoardGui) {
         gui.BuyButton.Activated.Connect(() => {
             playSound("MenuClick.mp3");
-            MarketplaceService.PromptProductPurchase(LOCAL_PLAYER, BOMBS_PRODUCTS[boosting as keyof (typeof BOMBS_PRODUCTS)]);
+            MarketplaceService.PromptProductPurchase(
+                LOCAL_PLAYER,
+                BOMBS_PRODUCTS[boosting as keyof typeof BOMBS_PRODUCTS],
+            );
         });
         gui.UseButton.Activated.Connect(() => {
             if (Packets.useBomb.toServer(bombsCurrency) === true) {
                 playSound("ItemPurchase.mp3");
-            }
-            else {
+            } else {
                 playSound("Error.mp3");
             }
         });
@@ -85,8 +86,7 @@ export default class BombsController implements OnStart {
                 const fundsBombTime = Workspace.GetAttribute("FundsBombTime") as number | undefined;
                 if (fundsBombTime === undefined || fundsBombTime < currentTime) {
                     DETAILS_WINDOW.FundsBombLabel.Visible = false;
-                }
-                else {
+                } else {
                     DETAILS_WINDOW.FundsBombLabel.Text = `Funds Bomb Active (x2): ${convertToHHMMSS(fundsBombTime - currentTime)}`;
                     DETAILS_WINDOW.FundsBombLabel.Visible = true;
                 }

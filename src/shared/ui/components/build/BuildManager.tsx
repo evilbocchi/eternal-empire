@@ -1,6 +1,6 @@
 /**
  * @fileoverview Build system manager component
- * 
+ *
  * High-level manager that bridges build controller logic with the new React UI.
  * Manages state synchronization and provides callbacks for build operations.
  */
@@ -25,13 +25,13 @@ export default function BuildManager({ buildController }: BuildManagerProps) {
         visible: false,
         hasSelection: false,
         isRestricted: false,
-        animationsEnabled: true
+        animationsEnabled: true,
     });
     const settings = useProperty(Packets.settings);
 
     // Update animations setting when prop changes
     useEffect(() => {
-        setBuildState(prev => ({ ...prev, animationsEnabled: settings.BuildAnimation }));
+        setBuildState((prev) => ({ ...prev, animationsEnabled: settings.BuildAnimation }));
     }, [settings.BuildAnimation]);
 
     // Sync with build controller state
@@ -42,11 +42,11 @@ export default function BuildManager({ buildController }: BuildManagerProps) {
             const hasSelection = buildController.hasSelection();
             const isRestricted = buildController.getRestricted();
 
-            setBuildState(prev => ({
+            setBuildState((prev) => ({
                 ...prev,
                 visible: hasSelection && !isRestricted,
                 hasSelection,
-                isRestricted
+                isRestricted,
             }));
         };
 
@@ -75,13 +75,8 @@ export default function BuildManager({ buildController }: BuildManagerProps) {
 
         onPlace: useCallback(() => {
             buildController?.placeSelection();
-        }, [buildController])
+        }, [buildController]),
     };
 
-    return (
-        <BuildWindow
-            state={buildState}
-            callbacks={callbacks}
-        />
-    );
+    return <BuildWindow state={buildState} callbacks={callbacks} />;
 }

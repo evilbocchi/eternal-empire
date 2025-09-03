@@ -16,9 +16,8 @@ export default function CurrencyDisplay({
     currencyBundle,
     size = new UDim2(1, 0, 1, 0),
     textColor = Color3.fromRGB(255, 255, 255),
-    showIcon = true
+    showIcon = true,
 }: CurrencyDisplayProps) {
-
     const formatCurrencyAmount = (amount: number): string => {
         if (amount >= 1e12) {
             return `${math.floor(amount / 1e11) / 10}T`;
@@ -35,21 +34,31 @@ export default function CurrencyDisplay({
     const getCurrencyIcon = (currencyType: string): string => {
         // Return appropriate currency icon based on type
         switch (currencyType) {
-            case "Funds": return "💰";
-            case "Power": return "⚡";
-            case "Skill": return "🎯";
-            case "Wins": return "🏆";
-            default: return "💎";
+            case "Funds":
+                return "💰";
+            case "Power":
+                return "⚡";
+            case "Skill":
+                return "🎯";
+            case "Wins":
+                return "🏆";
+            default:
+                return "💎";
         }
     };
 
     const getCurrencyColor = (currencyType: string): Color3 => {
         switch (currencyType) {
-            case "Funds": return Color3.fromRGB(255, 215, 0); // Gold
-            case "Power": return Color3.fromRGB(255, 100, 100); // Red
-            case "Skill": return Color3.fromRGB(100, 255, 100); // Green
-            case "Wins": return Color3.fromRGB(100, 100, 255); // Blue
-            default: return Color3.fromRGB(255, 255, 255); // White
+            case "Funds":
+                return Color3.fromRGB(255, 215, 0); // Gold
+            case "Power":
+                return Color3.fromRGB(255, 100, 100); // Red
+            case "Skill":
+                return Color3.fromRGB(100, 255, 100); // Green
+            case "Wins":
+                return Color3.fromRGB(100, 100, 255); // Blue
+            default:
+                return Color3.fromRGB(255, 255, 255); // White
         }
     };
 

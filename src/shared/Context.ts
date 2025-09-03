@@ -7,7 +7,7 @@ export const IS_SERVER = RunService.IsServer();
 
 /**
  * Whether the game is running in a Continuous Integration (CI) environment.
- * 
+ *
  * This is true when physics simulation is not running.
  */
 export const IS_CI = !RunService.IsRunning();

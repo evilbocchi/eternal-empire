@@ -7,9 +7,20 @@ import NormalReactor from "shared/items/0/millisecondless/NormalReactor";
 
 export = new Item(script.Name)
     .setName("Reinforced Reactor")
-    .setDescription("This reactor is extremely cheap, providing a %mul% boost to droplets in both of its entrances. However... be completely sure you really want to use this.")
+    .setDescription(
+        "This reactor is extremely cheap, providing a %mul% boost to droplets in both of its entrances. However... be completely sure you really want to use this.",
+    )
     .setDifficulty(Difficulty.Automatic)
-    .setPrice(new CurrencyBundle().set("Funds", 100e3).set("Power", 100e3).set("Bitcoin", 100e3).set("Skill", 100e3).set("Purifier Clicks", 10).set("Dark Matter", 10), 1)
+    .setPrice(
+        new CurrencyBundle()
+            .set("Funds", 100e3)
+            .set("Power", 100e3)
+            .set("Bitcoin", 100e3)
+            .set("Skill", 100e3)
+            .set("Purifier Clicks", 10)
+            .set("Dark Matter", 10),
+        1,
+    )
     .setRequiredItemAmount(NormalReactor, 1)
     .addPlaceableArea("BarrenIslands")
     .setCreator("sanjay2133")

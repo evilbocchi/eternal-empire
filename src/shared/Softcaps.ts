@@ -2,11 +2,11 @@ import { OnoeNum } from "@antivivi/serikanum";
 
 declare global {
     type CurrencySoftcaps = {
-        div: Softcap,
+        div: Softcap;
         recippow: Softcap;
     };
     type Softcap = {
-        starts: OnoeNum,
+        starts: OnoeNum;
         formula: (amount: OnoeNum) => OnoeNum;
     };
 }
@@ -37,33 +37,29 @@ const Softcaps = {
 /**
  * Returns a softcap coefficient from a specified total.
  * This can be used in reducing revenue.
- * 
+ *
  * @param amount Total to get softcap from
  * @param softcap The softcap to apply
  * @returns A tuple with the resulting coefficient and the softcap starting point. If the softcap is not applicable, this will be undefined.
  */
 export const performSoftcap = (amount?: OnoeNum, softcap?: Softcap) => {
-    if (softcap === undefined || amount === undefined)
-        return $tuple(undefined, undefined);
+    if (softcap === undefined || amount === undefined) return $tuple(undefined, undefined);
     const starts = softcap.starts;
-    if (starts.moreThan(amount))
-        return $tuple(undefined, starts);
-    else
-        return $tuple(softcap.formula(amount), starts);
+    if (starts.moreThan(amount)) return $tuple(undefined, starts);
+    else return $tuple(softcap.formula(amount), starts);
 };
 
 /**
  * Applies softcaps to a value based on the balance.
- * 
+ *
  * @param balance The balance the server currently has.
  * @param value The value to apply softcaps to.
  * @returns The value with softcaps applied.
  */
 export function performSoftcaps(balance: CurrencyMap, value: CurrencyMap) {
-    for (let [currency, amount] of value) {
+    for (const [currency, amount] of value) {
         const softcaps = Softcaps[currency];
-        if (softcaps === undefined)
-            continue;
+        if (softcaps === undefined) continue;
         const inBal = balance.get(currency);
         const highest = inBal === undefined || inBal.lessThan(amount) ? amount : inBal;
 
@@ -81,4 +77,3 @@ export function performSoftcaps(balance: CurrencyMap, value: CurrencyMap) {
 }
 
 export default Softcaps;
-

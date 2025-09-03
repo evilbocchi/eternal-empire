@@ -6,7 +6,9 @@ import Damager from "shared/item/traits/upgrader/Damager";
 
 export = new Item(script.Name)
     .setName("Arbiters' Killbricks")
-    .setDescription("The ultimate balance, with 4 killbrick upgraders boosting droplets by %mul% but dealing %hp_add% each.")
+    .setDescription(
+        "The ultimate balance, with 4 killbrick upgraders boosting droplets by %mul% but dealing %hp_add% each.",
+    )
     .setDifficulty(Difficulty.DoNothing)
     .setPrice(new CurrencyBundle().set("Funds", 24.5e24).set("Bitcoin", 90), 1)
     .setPrice(new CurrencyBundle().set("Funds", 42.5e24).set("Bitcoin", 180), 2)

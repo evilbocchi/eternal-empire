@@ -1,6 +1,5 @@
 export default class Command {
-
-    public static readonly commandsFolder = script.Parent!; 
+    public static readonly commandsFolder = script.Parent!;
     public readonly aliases = new Array<string>();
     public description = "<no description provided>";
     public execute: (sender: Player, ...args: string[]) => void = () => {};
@@ -29,5 +28,4 @@ export default class Command {
     }
 }
 
-
-export const CommandAPI = ({} as unknown) as CommandAPI;
+export const CommandAPI = {} as unknown as CommandAPI;

@@ -7,7 +7,9 @@ import LaserFan from "../unimpossible/LaserFan";
 
 export = new Item(script.Name)
     .setName("Laser Tunnel")
-    .setDescription("No more convoluted structures to accomodate for the Laser Fans anymore. Boost droplet value by %mul%.")
+    .setDescription(
+        "No more convoluted structures to accomodate for the Laser Fans anymore. Boost droplet value by %mul%.",
+    )
     .setDifficulty(Difficulty.Skip)
     .setPrice(new CurrencyBundle().set("Power", 3.3e9), 1)
     .setRequiredItemAmount(LaserFan, 2)

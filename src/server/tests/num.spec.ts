@@ -2,7 +2,6 @@
 import { OnoeNum } from "@antivivi/serikanum";
 
 export = function () {
-
     /**
      * Change this to test a different number library.
      */
@@ -10,14 +9,13 @@ export = function () {
 
     /**
      * Macro for creating a number from the number library being tested.
-     * 
+     *
      * @param n The number to create.
      * @param exponent Multiplies the number by `10^exponent`. Default is 0.
      * @returns The number object.
      */
     const num = (n: number, exponent?: number) => {
-        if (exponent === undefined)
-            return new Number(n);
+        if (exponent === undefined) return new Number(n);
 
         return new Number(n).mul(new Number(10).pow(exponent));
     };
@@ -25,7 +23,7 @@ export = function () {
 
     /**
      * Macro for equality check on the tested number library.
-     * 
+     *
      * @param a The number formatted by the library.
      * @param b The number to compare against.
      * @param result The expected result. Default is true.
@@ -44,7 +42,7 @@ export = function () {
         const testResult = subClose || divClose;
 
         if (testResult !== result) {
-            warn(`Expected ${a.revert()} to ${result ? '' : 'not '}equal ${actual.revert()}.`);
+            warn(`Expected ${a.revert()} to ${result ? "" : "not "}equal ${actual.revert()}.`);
         }
 
         expect(testResult).to.be.equal(result);
@@ -72,9 +70,9 @@ export = function () {
         });
 
         it("handles large numbers", () => {
-            check(2.62e+30);
+            check(2.62e30);
             check(1.16e-30);
-            check(3e+303);
+            check(3e303);
         });
     });
 
@@ -110,9 +108,9 @@ export = function () {
 
         it("handles large numbers", () => {
             check(1000000, 500000);
-            check(1e+30, 1e+30);
+            check(1e30, 1e30);
             check(1e-30, 1e-30);
-            check(3e+303, 2e+303);
+            check(3e303, 2e303);
             check(num(1, 500), num(2.6, 500), num(3.6, 500), num(-1.6, 500));
             check(num(6.9, 1e121), num(1, 1e121), num(7.9, 1e121), num(5.9, 1e121));
             check(num(5, 1000), num(6, 1001), num(6.5, 1001), num(-5.5, 1001));
@@ -161,7 +159,7 @@ export = function () {
 
         it("handles large numbers", () => {
             check(1000000, 500000);
-            check(1e+30, 1000, 1e+33, 1e+27);
+            check(1e30, 1000, 1e33, 1e27);
             check(num(1, 500), 200, num(200, 500), num(5, 497));
             check(num(3, 1e121), 3, num(9, 1e121), num(1, 1e121));
         });
@@ -193,7 +191,7 @@ export = function () {
 
         it("handles large numbers", () => {
             check(1000000, 2);
-            check(1e+30, 3);
+            check(1e30, 3);
             check(num(1, 500), 2, num(1, 1000));
             check(num(2, 1e20), 3, num(8, 3e20));
         });
@@ -215,7 +213,7 @@ export = function () {
             expect(num1.moreThan(num2)).to.equal(sign > 0);
             expect(num1.lessEquals(num2)).to.equal(sign <= 0);
             expect(num1.moreEquals(num2)).to.equal(sign >= 0);
-        }
+        };
 
         it("handles basic numbers", () => {
             check(5, 5);
@@ -224,9 +222,9 @@ export = function () {
         });
 
         it("handles large numbers", () => {
-            check(1e+30, 1e+30);
-            check(1e+30, 1e+31, -1);
-            check(1e+30, 1e+29, 1);
+            check(1e30, 1e30);
+            check(1e30, 1e31, -1);
+            check(1e30, 1e29, 1);
         });
 
         it("handles decimal numbers", () => {
@@ -247,7 +245,7 @@ export = function () {
             expectNumEquals(num.round(), roundActual);
             expectNumEquals(num.floor(), floorActual);
             expectNumEquals(num.ceil(), ceilActual);
-        }
+        };
 
         it("handles basic numbers", () => {
             check(5);
@@ -258,7 +256,7 @@ export = function () {
         });
 
         it("handles large numbers", () => {
-            check(1e+30);
+            check(1e30);
         });
     });
 
@@ -274,7 +272,7 @@ export = function () {
             expectNumEquals(new Number(1).log(base), ZERO); // identity property
             expectNumEquals(new Number(base).log(base), 1); // identity property
             expectNumEquals(new Number(base).pow(result), num); // inverse property
-        }
+        };
 
         it("handles basic numbers", () => {
             check(5, 10);
@@ -285,9 +283,9 @@ export = function () {
         });
 
         it("handles large numbers", () => {
-            check(1e+30, 10);
-            check(1e+30, 2);
-            check(1e+30, 150);
+            check(1e30, 10);
+            check(1e30, 2);
+            check(1e30, 150);
             check(num(1, 500), 10, 500);
         });
     });

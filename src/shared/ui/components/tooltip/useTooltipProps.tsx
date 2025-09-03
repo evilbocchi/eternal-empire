@@ -1,6 +1,6 @@
 /**
  * @fileoverview React hook for integrating tooltips with components.
- * 
+ *
  * Provides a simple `useTooltipProps` hook that returns props to spread
  * onto components for automatic tooltip functionality.
  */
@@ -21,7 +21,7 @@ declare global {
 
 /**
  * Hook that provides tooltip event handlers for components
- * 
+ *
  * @param tooltipData Static tooltip data or function that returns tooltip data
  * @returns Hover data object
  */
@@ -44,7 +44,7 @@ export function useTooltipProps({ data, onMoved, onEnter, onLeave }: UseTooltipP
 
 /**
  * Convenience hook for item tooltips
- * 
+ *
  * @param item The item to display in the tooltip
  * @param uuid Unique item identifier
  * @returns Hover data object
@@ -55,7 +55,7 @@ export function useItemTooltip(item: Item, uuid?: string): UseHoverReturn {
 
 /**
  * Convenience hook for message tooltips
- * 
+ *
  * @param message The message to display in the tooltip
  * @returns Hover data object
  */

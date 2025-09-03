@@ -7,7 +7,9 @@ import Upgrader from "shared/item/traits/upgrader/Upgrader";
 
 export = new Item(script.Name)
     .setName("Ring Of Despair")
-    .setDescription("Is it still fate? Pass droplets through the correct ring for... why even bother. You're not getting through THAT.")
+    .setDescription(
+        "Is it still fate? Pass droplets through the correct ring for... why even bother. You're not getting through THAT.",
+    )
     .setDifficulty(Difficulty.Frivolous)
     .setPrice(new CurrencyBundle().set("Funds", 4.44e39).set("Bitcoin", 2e9), 1)
     .addPlaceableArea("BarrenIslands")
@@ -22,11 +24,10 @@ export = new Item(script.Name)
             let debounce = false;
             const instanceInfo = getAllInstanceInfo(part);
             instanceInfo.DropletTouched = (otherPart: BasePart) => {
-                if (debounce === true)
-                    return;
+                if (debounce === true) return;
                 if (getInstanceInfo(otherPart, "DropletId") !== undefined) {
                     debounce = true;
-                    task.delay(1, () => debounce = false);
+                    task.delay(1, () => (debounce = false));
                     const explosion = new Instance("Explosion");
                     explosion.ExplosionType = Enum.ExplosionType.NoCraters;
                     explosion.BlastRadius = 50;

@@ -6,7 +6,9 @@ import Item from "shared/item/Item";
 
 export = new Item(script.Name)
     .setName("Lunary Dropper")
-    .setDescription("You need some Funds. Producing %val% droplets every 2 seconds, it's unclear how this ancient dropper is still in such good condition.")
+    .setDescription(
+        "You need some Funds. Producing %val% droplets every 2 seconds, it's unclear how this ancient dropper is still in such good condition.",
+    )
     .setDifficulty(Difficulty.Vintage)
     .setPrice(new CurrencyBundle().set("Funds", 44.4e27).set("Skill", 2), 1)
     .setPrice(new CurrencyBundle().set("Funds", 72.7e27).set("Skill", 4), 2)

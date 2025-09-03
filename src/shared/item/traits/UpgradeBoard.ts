@@ -14,25 +14,25 @@ declare global {
     type UpgradeBoardPurchaseOption = Frame & {
         Button: TextButton & {
             AmountLabel: TextLabel;
-        },
+        };
         CostLabel: TextLabel;
     };
 
     type UpgradeBoardUpgradeOption = Frame & {
-        AmountLabel: TextLabel,
+        AmountLabel: TextLabel;
         ImageButton: ImageButton;
     };
 
     interface UpgradeBoardAssets extends Folder {
         UpgradeActionsGui: SurfaceGui & {
-            PurchaseOptions: Frame,
-            ImageLabel: ImageLabel,
-            DescriptionLabel: TextLabel,
-            TitleLabel: TextLabel,
+            PurchaseOptions: Frame;
+            ImageLabel: ImageLabel;
+            DescriptionLabel: TextLabel;
+            TitleLabel: TextLabel;
             AmountLabel: TextLabel;
-        },
-        UpgradeOptionsGui: SurfaceGui,
-        PurchaseOption: UpgradeBoardPurchaseOption,
+        };
+        UpgradeOptionsGui: SurfaceGui;
+        PurchaseOption: UpgradeBoardPurchaseOption;
         UpgradeOption: UpgradeBoardUpgradeOption;
     }
 
@@ -46,7 +46,6 @@ const getUpgradeAmount = (upgrade: NamedUpgrade) => {
 };
 
 export default class UpgradeBoard extends ItemTrait {
-
     static clientLoad(model: Model, upgradeBoard: UpgradeBoard, player: Player) {
         const item = upgradeBoard.item;
 
@@ -76,17 +75,16 @@ export default class UpgradeBoard extends ItemTrait {
             playSoundAtPart(model.PrimaryPart, sound);
         };
         buy1.Button.Activated.Connect(() => {
-            if (selected !== undefined)
-                sound(Packets.buyUpgrade.toServer(selected.id, getUpgradeAmount(selected) + 1));
+            if (selected !== undefined) sound(Packets.buyUpgrade.toServer(selected.id, getUpgradeAmount(selected) + 1));
         });
-        const getNext = (amount: number, step?: number) => step === undefined ? amount + 1 : amount + step - (amount % step);
+        const getNext = (amount: number, step?: number) =>
+            step === undefined ? amount + 1 : amount + step - (amount % step);
         buyNext.Button.Activated.Connect(() => {
             if (selected !== undefined)
                 sound(Packets.buyUpgrade.toServer(selected.id, getNext(getUpgradeAmount(selected), selected.step)));
         });
         buyMax.Button.Activated.Connect(() => {
-            if (selected !== undefined)
-                sound(Packets.buyUpgrade.toServer(selected.id, selected.cap));
+            if (selected !== undefined) sound(Packets.buyUpgrade.toServer(selected.id, selected.cap));
         });
         const selectUpgrade = (upgrade?: NamedUpgrade) => {
             upgradeActionsGui.TitleLabel.Text = upgrade?.name ?? "<no upgrade selected>";
@@ -108,8 +106,9 @@ export default class UpgradeBoard extends ItemTrait {
             upgradeActionsGui.AmountLabel.TextColor3 = amount === cap ? new Color3(1, 0.83, 0.06) : new Color3(1, 1, 1);
             buy1.CostLabel.Text = "Cost: " + (isMaxed ? "MAXED" : upgrade.getPrice(amount + 1)?.toString());
             const step = upgrade.step;
-            const to = getNext(amount, step) ?? (amount + 1);
-            buyNext.CostLabel.Text = "Cost: " + (isMaxed ? "MAXED" : upgrade.getPrice(amount + 1, to)?.toString() + " (to " + to + ")");
+            const to = getNext(amount, step) ?? amount + 1;
+            buyNext.CostLabel.Text =
+                "Cost: " + (isMaxed ? "MAXED" : upgrade.getPrice(amount + 1, to)?.toString() + " (to " + to + ")");
             buyMax.CostLabel.Text = "Cost: " + (isMaxed ? "MAXED" : upgrade.getPrice(amount + 1, cap)?.toString());
         };
         for (const upgrade of upgradeBoard.upgrades) {
@@ -122,11 +121,12 @@ export default class UpgradeBoard extends ItemTrait {
         const updateAmounts = (value: Map<string, number>) => {
             for (const uo of upgradeOptionsGui.GetChildren()) {
                 if (uo?.IsA("Frame")) {
-                    const upgradeOption = (uo as UpgradeBoardUpgradeOption);
+                    const upgradeOption = uo as UpgradeBoardUpgradeOption;
                     const upgrade = NamedUpgrades.ALL_UPGRADES.get(upgradeOption.Name);
                     const amount = value.get(upgradeOption.Name);
                     upgradeOption.AmountLabel.Text = tostring(amount ?? 0);
-                    upgradeOption.AmountLabel.TextColor3 = amount === upgrade?.cap ? new Color3(1, 0.83, 0.06) : new Color3(1, 1, 1);
+                    upgradeOption.AmountLabel.TextColor3 =
+                        amount === upgrade?.cap ? new Color3(1, 0.83, 0.06) : new Color3(1, 1, 1);
                 }
             }
             if (selected !== undefined) {

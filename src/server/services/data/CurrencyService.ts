@@ -3,7 +3,7 @@
 
 /**
  * @fileoverview Core currency management system for the game.
- * 
+ *
  * This service handles:
  * - Currency balance tracking and manipulation
  * - Purchase transactions and affordability checks
@@ -11,10 +11,10 @@
  * - Currency propagation to clients
  * - Historical currency records (most ever, most since reset)
  * - Offline revenue estimation
- * 
+ *
  * The service uses OnoeNum for big number arithmetic to handle very large currency values
  * that exceed JavaScript's number precision limits.
- * 
+ *
  * @since 1.0.0
  */
 
@@ -33,13 +33,12 @@ const ZERO = new OnoeNum(0);
 
 /**
  * Core currency management service that handles all currency-related operations.
- * 
+ *
  * Manages multiple currency types with big number support, tracks historical maximums,
  * calculates revenue rates, and synchronizes currency data with clients.
  */
 @Service()
 export default class CurrencyService implements OnInit, OnStart {
-
     // Core Currency Data
 
     /**
@@ -83,7 +82,7 @@ export default class CurrencyService implements OnInit, OnStart {
     /**
      * Initializes the CurrencyService with data from DataService.
      * Sets up currency maps and creates the public balance interface.
-     * 
+     *
      * @param dataService Service providing persistent empire data.
      */
     constructor(private dataService: DataService) {
@@ -100,7 +99,7 @@ export default class CurrencyService implements OnInit, OnStart {
 
     /**
      * Gets the current amount of a specific currency.
-     * 
+     *
      * @param currency The currency type to retrieve.
      * @returns The current amount, or zero if not found.
      */
@@ -110,7 +109,7 @@ export default class CurrencyService implements OnInit, OnStart {
 
     /**
      * Sets the amount of a specific currency.
-     * 
+     *
      * @param currency The currency type to set.
      * @param amount The new amount (undefined to remove currency).
      */
@@ -120,7 +119,7 @@ export default class CurrencyService implements OnInit, OnStart {
 
     /**
      * Increases a currency by a specific amount.
-     * 
+     *
      * @param currency The currency type to increment.
      * @param delta The amount to add.
      */
@@ -131,7 +130,7 @@ export default class CurrencyService implements OnInit, OnStart {
     /**
      * Replaces all currencies with the provided currency map.
      * Clears existing currencies and sets new values.
-     * 
+     *
      * @param currencies The new currency amounts to set.
      */
     setAll(currencies: CurrencyMap) {
@@ -145,7 +144,7 @@ export default class CurrencyService implements OnInit, OnStart {
 
     /**
      * Checks whether the amount of each currency in the balance satisfies the required currency amounts.
-     * 
+     *
      * @param required The currency amounts needed.
      * @returns A tuple that contains if there is sufficient currencies and the remaining currency amounts after subtraction.
      */
@@ -157,7 +156,7 @@ export default class CurrencyService implements OnInit, OnStart {
 
     /**
      * Increments multiple currencies at once.
-     * 
+     *
      * @param delta Map of currencies and amounts to add.
      */
     incrementAll(delta: CurrencyMap) {
@@ -169,7 +168,7 @@ export default class CurrencyService implements OnInit, OnStart {
     /**
      * Attempts to purchase something with the given price.
      * Deducts currencies if affordable and not marked as free.
-     * 
+     *
      * @param price The cost of the purchase.
      * @param isFree Whether the purchase should be free (no currency deduction).
      * @returns Whether the purchase was successful.
@@ -206,8 +205,8 @@ export default class CurrencyService implements OnInit, OnStart {
 
     /**
      * Naive implementation of offline revenue calculation.
-     * Assumes revenue generation over the current reset period is linear. 
-     * 
+     * Assumes revenue generation over the current reset period is linear.
+     *
      * @param t Current time (defaults to current tick).
      * @returns Revenue generated per second.
      */
@@ -276,8 +275,7 @@ export default class CurrencyService implements OnInit, OnStart {
         // High-frequency balance propagation loop - runs every 0.1 seconds
         task.spawn(() => {
             // Ensure Funds currency exists
-            if (!this.currencies.has("Funds"))
-                this.currencies.set("Funds", new OnoeNum(0));
+            if (!this.currencies.has("Funds")) this.currencies.set("Funds", new OnoeNum(0));
 
             while (task.wait(0.1)) {
                 this.propagate();

@@ -4,13 +4,13 @@ import { AREAS } from "shared/Area";
 import { IS_CI } from "shared/Context";
 
 declare global {
-    type AreaId = keyof (typeof AREAS);
+    type AreaId = keyof typeof AREAS;
 }
 
 const CAMERA = Workspace.WaitForChild("Camera") as Camera;
 /**
  * Creates a folder in the Workspace.
- * 
+ *
  * @param name The name of the folder to create.
  * @returns The created folder instance.
  */
@@ -31,8 +31,7 @@ function createFolder(name: string, parent: Instance = Workspace) {
 
 export function getChallengeGui() {
     const board = AREAS.SlamoVillage.areaFolder.FindFirstChild("ChallengesBoard");
-    if (board === undefined)
-        return;
+    if (board === undefined) return;
     return board.WaitForChild("SurfaceGui") as ChallengeGui;
 }
 
@@ -45,8 +44,7 @@ export function getMaxXp(currentLevel: number) {
 }
 
 export function getNameFromUserId(userId: number | undefined) {
-    if (userId === undefined)
-        return "Server";
+    if (userId === undefined) return "Server";
     const name = NAMES_PER_USER_ID.get(userId);
     if (name !== undefined) {
         return name;

@@ -5,7 +5,7 @@ import PositionWindow from "shared/ui/components/position/PositionWindow";
 import TooltipProvider from "shared/ui/components/tooltip/TooltipProvider";
 
 const controls = {
-    visible: true
+    visible: true,
 };
 
 export = {
@@ -13,8 +13,10 @@ export = {
     reactRoblox: ReactRoblox,
     controls: controls,
     story: (props: InferProps<typeof controls>) => {
-        return <TooltipProvider>
-            <PositionWindow position={new Vector3(100, 50, 200)} {...props.controls} />
-        </TooltipProvider>;
-    }
+        return (
+            <TooltipProvider>
+                <PositionWindow position={new Vector3(100, 50, 200)} {...props.controls} />
+            </TooltipProvider>
+        );
+    },
 };

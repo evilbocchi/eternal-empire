@@ -77,11 +77,7 @@ export function ListingCard({ listing, onBuy, onBid, onCancel, isOwner = false }
             <uistroke Thickness={1} Color={Color3.fromRGB(80, 80, 80)} />
 
             {/* Item Info Section */}
-            <frame
-                BackgroundTransparency={1}
-                Size={new UDim2(0.6, 0, 1, 0)}
-                Position={new UDim2(0, 10, 0, 0)}
-            >
+            <frame BackgroundTransparency={1} Size={new UDim2(0.6, 0, 1, 0)} Position={new UDim2(0, 10, 0, 0)}>
                 <uilistlayout
                     FillDirection={Enum.FillDirection.Vertical}
                     HorizontalAlignment={Enum.HorizontalAlignment.Left}
@@ -114,11 +110,7 @@ export function ListingCard({ listing, onBuy, onBid, onCancel, isOwner = false }
                         <uistroke Thickness={1} />
                     </textlabel>
 
-                    <frame
-                        BackgroundTransparency={1}
-                        Size={new UDim2(1, -50, 1, 0)}
-                        Position={new UDim2(0, 50, 0, 0)}
-                    >
+                    <frame BackgroundTransparency={1} Size={new UDim2(1, -50, 1, 0)} Position={new UDim2(0, 50, 0, 0)}>
                         <CurrencyDisplay
                             currencyBundle={new CurrencyBundle().set("Diamonds", new OnoeNum(listing.price))}
                             size={new UDim2(1, 0, 1, 0)}
@@ -131,7 +123,9 @@ export function ListingCard({ listing, onBuy, onBid, onCancel, isOwner = false }
                     FontFace={RobotoSlab}
                     Size={new UDim2(1, 0, 0, 20)}
                     Text={`Type: ${listing.listingType === "buyout" ? "Buyout" : "Auction"}`}
-                    TextColor3={listing.listingType === "buyout" ? Color3.fromRGB(200, 200, 255) : Color3.fromRGB(255, 200, 200)}
+                    TextColor3={
+                        listing.listingType === "buyout" ? Color3.fromRGB(200, 200, 255) : Color3.fromRGB(255, 200, 200)
+                    }
                     TextScaled={true}
                     TextXAlignment={Enum.TextXAlignment.Left}
                 >
@@ -180,11 +174,7 @@ export function ListingCard({ listing, onBuy, onBid, onCancel, isOwner = false }
             </frame>
 
             {/* Action Buttons Section */}
-            <frame
-                BackgroundTransparency={1}
-                Size={new UDim2(0.35, 0, 1, 0)}
-                Position={new UDim2(0.65, 0, 0, 0)}
-            >
+            <frame BackgroundTransparency={1} Size={new UDim2(0.35, 0, 1, 0)} Position={new UDim2(0.65, 0, 0, 0)}>
                 <uilistlayout
                     FillDirection={Enum.FillDirection.Vertical}
                     HorizontalAlignment={Enum.HorizontalAlignment.Center}
@@ -193,11 +183,7 @@ export function ListingCard({ listing, onBuy, onBid, onCancel, isOwner = false }
                 />
 
                 {isOwner ? (
-                    <ActionButton
-                        text="Cancel"
-                        backgroundColor={Color3.fromRGB(200, 50, 50)}
-                        onClick={handleCancel}
-                    />
+                    <ActionButton text="Cancel" backgroundColor={Color3.fromRGB(200, 50, 50)} onClick={handleCancel} />
                 ) : (
                     <>
                         {listing.listingType === "buyout" && (
@@ -217,10 +203,7 @@ export function ListingCard({ listing, onBuy, onBid, onCancel, isOwner = false }
                                         onClick={() => setShowBidInput(true)}
                                     />
                                 ) : (
-                                    <frame
-                                        BackgroundTransparency={1}
-                                        Size={new UDim2(1, 0, 0, 60)}
-                                    >
+                                    <frame BackgroundTransparency={1} Size={new UDim2(1, 0, 0, 60)}>
                                         <textbox
                                             BackgroundColor3={Color3.fromRGB(60, 60, 60)}
                                             BorderSizePixel={0}
@@ -233,7 +216,7 @@ export function ListingCard({ listing, onBuy, onBid, onCancel, isOwner = false }
                                             FontFace={RobotoSlab}
                                             ClearTextOnFocus={false}
                                             Event={{
-                                                FocusLost: (textBox) => setBidAmount(textBox.Text)
+                                                FocusLost: (textBox) => setBidAmount(textBox.Text),
                                             }}
                                         >
                                             <uicorner CornerRadius={new UDim(0, 4)} />
@@ -311,11 +294,7 @@ export function SearchFilters({ onSearch, onFilter }: SearchFiltersProps) {
     }, [sortBy, listingTypeFilter]);
 
     return (
-        <frame
-            BackgroundColor3={Color3.fromRGB(45, 45, 45)}
-            BorderSizePixel={0}
-            Size={new UDim2(1, 0, 0, 80)}
-        >
+        <frame BackgroundColor3={Color3.fromRGB(45, 45, 45)} BorderSizePixel={0} Size={new UDim2(1, 0, 0, 80)}>
             <uilistlayout
                 FillDirection={Enum.FillDirection.Horizontal}
                 HorizontalAlignment={Enum.HorizontalAlignment.Left}
@@ -353,7 +332,7 @@ export function SearchFilters({ onSearch, onFilter }: SearchFiltersProps) {
                         FocusLost: (textBox, enterPressed) => {
                             setSearchQuery(textBox.Text);
                             if (enterPressed) handleSearch();
-                        }
+                        },
                     }}
                 >
                     <uicorner CornerRadius={new UDim(0, 4)} />
@@ -381,9 +360,15 @@ export function SearchFilters({ onSearch, onFilter }: SearchFiltersProps) {
                     BorderSizePixel={0}
                     Size={new UDim2(1, 0, 0, 35)}
                     Position={new UDim2(0, 0, 0, 25)}
-                    Text={sortBy === "created_desc" ? "Newest First" :
-                        sortBy === "created_asc" ? "Oldest First" :
-                            sortBy === "price_asc" ? "Price Low to High" : "Price High to Low"}
+                    Text={
+                        sortBy === "created_desc"
+                            ? "Newest First"
+                            : sortBy === "created_asc"
+                              ? "Oldest First"
+                              : sortBy === "price_asc"
+                                ? "Price Low to High"
+                                : "Price High to Low"
+                    }
                     TextColor3={Color3.fromRGB(255, 255, 255)}
                     TextScaled={true}
                     FontFace={RobotoSlab}
@@ -394,7 +379,7 @@ export function SearchFilters({ onSearch, onFilter }: SearchFiltersProps) {
                             const currentIndex = options.indexOf(sortBy);
                             const nextIndex = (currentIndex + 1) % options.size();
                             setSortBy(options[nextIndex]);
-                        }
+                        },
                     }}
                 >
                     <uicorner CornerRadius={new UDim(0, 4)} />
@@ -422,8 +407,13 @@ export function SearchFilters({ onSearch, onFilter }: SearchFiltersProps) {
                     BorderSizePixel={0}
                     Size={new UDim2(1, 0, 0, 35)}
                     Position={new UDim2(0, 0, 0, 25)}
-                    Text={listingTypeFilter === "all" ? "All Types" :
-                        listingTypeFilter === "buyout" ? "Buyout Only" : "Auction Only"}
+                    Text={
+                        listingTypeFilter === "all"
+                            ? "All Types"
+                            : listingTypeFilter === "buyout"
+                              ? "Buyout Only"
+                              : "Auction Only"
+                    }
                     TextColor3={Color3.fromRGB(255, 255, 255)}
                     TextScaled={true}
                     FontFace={RobotoSlab}
@@ -433,7 +423,7 @@ export function SearchFilters({ onSearch, onFilter }: SearchFiltersProps) {
                             const currentIndex = options.indexOf(listingTypeFilter);
                             const nextIndex = (currentIndex + 1) % options.size();
                             setListingTypeFilter(options[nextIndex]);
-                        }
+                        },
                     }}
                 >
                     <uicorner CornerRadius={new UDim(0, 4)} />
@@ -483,10 +473,7 @@ export function CreateListingForm({ onSubmit }: CreateListingFormProps) {
     };
 
     return (
-        <frame
-            BackgroundTransparency={1}
-            Size={new UDim2(1, 0, 1, 0)}
-        >
+        <frame BackgroundTransparency={1} Size={new UDim2(1, 0, 1, 0)}>
             <scrollingframe
                 BackgroundTransparency={1}
                 Size={new UDim2(1, 0, 1, 0)}
@@ -550,7 +537,9 @@ export function CreateListingForm({ onSubmit }: CreateListingFormProps) {
                         {availableItems.map((uuid, index) => (
                             <textbutton
                                 key={`item-${uuid}`}
-                                BackgroundColor3={selectedUuid === uuid ? Color3.fromRGB(100, 150, 100) : Color3.fromRGB(60, 60, 60)}
+                                BackgroundColor3={
+                                    selectedUuid === uuid ? Color3.fromRGB(100, 150, 100) : Color3.fromRGB(60, 60, 60)
+                                }
                                 BorderSizePixel={0}
                                 Size={new UDim2(0, 110, 1, 0)}
                                 Text={`${uuid.sub(1, 8)}...`}
@@ -558,11 +547,18 @@ export function CreateListingForm({ onSubmit }: CreateListingFormProps) {
                                 TextScaled={true}
                                 FontFace={RobotoSlab}
                                 Event={{
-                                    Activated: () => setSelectedUuid(uuid)
+                                    Activated: () => setSelectedUuid(uuid),
                                 }}
                             >
                                 <uicorner CornerRadius={new UDim(0, 4)} />
-                                <uistroke Thickness={1} Color={selectedUuid === uuid ? Color3.fromRGB(150, 200, 150) : Color3.fromRGB(100, 100, 100)} />
+                                <uistroke
+                                    Thickness={1}
+                                    Color={
+                                        selectedUuid === uuid
+                                            ? Color3.fromRGB(150, 200, 150)
+                                            : Color3.fromRGB(100, 100, 100)
+                                    }
+                                />
                             </textbutton>
                         ))}
                     </scrollingframe>
@@ -601,7 +597,7 @@ export function CreateListingForm({ onSubmit }: CreateListingFormProps) {
                         FontFace={RobotoSlab}
                         ClearTextOnFocus={false}
                         Event={{
-                            FocusLost: (textBox) => setPrice(textBox.Text)
+                            FocusLost: (textBox) => setPrice(textBox.Text),
                         }}
                     >
                         <uicorner CornerRadius={new UDim(0, 4)} />
@@ -642,7 +638,9 @@ export function CreateListingForm({ onSubmit }: CreateListingFormProps) {
                         />
 
                         <textbutton
-                            BackgroundColor3={listingType === "buyout" ? Color3.fromRGB(100, 150, 100) : Color3.fromRGB(60, 60, 60)}
+                            BackgroundColor3={
+                                listingType === "buyout" ? Color3.fromRGB(100, 150, 100) : Color3.fromRGB(60, 60, 60)
+                            }
                             BorderSizePixel={0}
                             Size={new UDim2(0, 120, 1, 0)}
                             Text="Buyout"
@@ -650,15 +648,24 @@ export function CreateListingForm({ onSubmit }: CreateListingFormProps) {
                             TextScaled={true}
                             FontFace={RobotoSlab}
                             Event={{
-                                Activated: () => setListingType("buyout")
+                                Activated: () => setListingType("buyout"),
                             }}
                         >
                             <uicorner CornerRadius={new UDim(0, 4)} />
-                            <uistroke Thickness={1} Color={listingType === "buyout" ? Color3.fromRGB(150, 200, 150) : Color3.fromRGB(100, 100, 100)} />
+                            <uistroke
+                                Thickness={1}
+                                Color={
+                                    listingType === "buyout"
+                                        ? Color3.fromRGB(150, 200, 150)
+                                        : Color3.fromRGB(100, 100, 100)
+                                }
+                            />
                         </textbutton>
 
                         <textbutton
-                            BackgroundColor3={listingType === "auction" ? Color3.fromRGB(150, 100, 100) : Color3.fromRGB(60, 60, 60)}
+                            BackgroundColor3={
+                                listingType === "auction" ? Color3.fromRGB(150, 100, 100) : Color3.fromRGB(60, 60, 60)
+                            }
                             BorderSizePixel={0}
                             Size={new UDim2(0, 120, 1, 0)}
                             Text="Auction"
@@ -666,11 +673,18 @@ export function CreateListingForm({ onSubmit }: CreateListingFormProps) {
                             TextScaled={true}
                             FontFace={RobotoSlab}
                             Event={{
-                                Activated: () => setListingType("auction")
+                                Activated: () => setListingType("auction"),
                             }}
                         >
                             <uicorner CornerRadius={new UDim(0, 4)} />
-                            <uistroke Thickness={1} Color={listingType === "auction" ? Color3.fromRGB(200, 150, 150) : Color3.fromRGB(100, 100, 100)} />
+                            <uistroke
+                                Thickness={1}
+                                Color={
+                                    listingType === "auction"
+                                        ? Color3.fromRGB(200, 150, 150)
+                                        : Color3.fromRGB(100, 100, 100)
+                                }
+                            />
                         </textbutton>
                     </frame>
                 </frame>
@@ -708,7 +722,7 @@ export function CreateListingForm({ onSubmit }: CreateListingFormProps) {
                         FontFace={RobotoSlab}
                         ClearTextOnFocus={false}
                         Event={{
-                            FocusLost: (textBox) => setDuration(textBox.Text)
+                            FocusLost: (textBox) => setDuration(textBox.Text),
                         }}
                     >
                         <uicorner CornerRadius={new UDim(0, 4)} />
@@ -717,10 +731,7 @@ export function CreateListingForm({ onSubmit }: CreateListingFormProps) {
                 </frame>
 
                 {/* Submit Button */}
-                <frame
-                    BackgroundTransparency={1}
-                    Size={new UDim2(0.8, 0, 0, 60)}
-                >
+                <frame BackgroundTransparency={1} Size={new UDim2(0.8, 0, 0, 60)}>
                     <ActionButton
                         text="Create Listing"
                         backgroundColor={Color3.fromRGB(50, 150, 50)}
@@ -755,12 +766,9 @@ export default function MarketplaceWindow({ visible, onClose }: MarketplaceWindo
             const currentMyListings = Packets.myActiveListings.get();
             const marketplaceEnabled = Packets.marketplaceEnabled.get();
 
-            if (currentListings)
-                setListings(currentListings);
-            if (currentMyListings)
-                setMyListings(currentMyListings);
-            if (marketplaceEnabled)
-                setIsEnabled(marketplaceEnabled);
+            if (currentListings) setListings(currentListings);
+            if (currentMyListings) setMyListings(currentMyListings);
+            if (marketplaceEnabled) setIsEnabled(marketplaceEnabled);
         }
     }, [visible]);
 
@@ -771,23 +779,23 @@ export default function MarketplaceWindow({ visible, onClose }: MarketplaceWindo
         connections.push(
             Packets.marketplaceListings.observe((newListings) => {
                 setListings(newListings);
-            })
+            }),
         );
 
         connections.push(
             Packets.myActiveListings.observe((newMyListings) => {
                 setMyListings(newMyListings);
-            })
+            }),
         );
 
         connections.push(
             Packets.marketplaceEnabled.observe((enabled) => {
                 setIsEnabled(enabled);
-            })
+            }),
         );
 
         return () => {
-            connections.forEach(conn => conn.Disconnect());
+            connections.forEach((conn) => conn.Disconnect());
         };
     }, []);
 
@@ -837,7 +845,8 @@ export default function MarketplaceWindow({ visible, onClose }: MarketplaceWindo
         }
 
         return result;
-    }, [listings, searchQuery, filters]); if (!visible) return <></>;
+    }, [listings, searchQuery, filters]);
+    if (!visible) return <></>;
 
     return (
         <screengui ResetOnSpawn={false}>
@@ -852,11 +861,7 @@ export default function MarketplaceWindow({ visible, onClose }: MarketplaceWindo
                 <uistroke Thickness={2} Color={Color3.fromRGB(80, 80, 80)} />
 
                 {/* Title Bar */}
-                <frame
-                    BackgroundColor3={Color3.fromRGB(30, 30, 30)}
-                    BorderSizePixel={0}
-                    Size={new UDim2(1, 0, 0, 50)}
-                >
+                <frame BackgroundColor3={Color3.fromRGB(30, 30, 30)} BorderSizePixel={0} Size={new UDim2(1, 0, 0, 50)}>
                     <uicorner CornerRadius={new UDim(0, 12)} />
 
                     <textlabel
@@ -918,27 +923,29 @@ export default function MarketplaceWindow({ visible, onClose }: MarketplaceWindo
                     {(["Browse", "MyListings", "CreateListing"] as TabType[]).map((tab, index) => (
                         <textbutton
                             key={`tab-${tab}`}
-                            BackgroundColor3={activeTab === tab ? Color3.fromRGB(80, 80, 80) : Color3.fromRGB(60, 60, 60)}
+                            BackgroundColor3={
+                                activeTab === tab ? Color3.fromRGB(80, 80, 80) : Color3.fromRGB(60, 60, 60)
+                            }
                             BorderSizePixel={0}
                             LayoutOrder={index}
                             Size={new UDim2(0.33, 0, 1, 0)}
-                            Text={tab === "MyListings" ? "My Listings" : tab === "CreateListing" ? "Create Listing" : tab}
-                            TextColor3={activeTab === tab ? Color3.fromRGB(255, 255, 255) : Color3.fromRGB(200, 200, 200)}
+                            Text={
+                                tab === "MyListings" ? "My Listings" : tab === "CreateListing" ? "Create Listing" : tab
+                            }
+                            TextColor3={
+                                activeTab === tab ? Color3.fromRGB(255, 255, 255) : Color3.fromRGB(200, 200, 200)
+                            }
                             TextScaled={true}
                             FontFace={RobotoSlab}
                             Event={{
-                                Activated: () => setActiveTab(tab)
+                                Activated: () => setActiveTab(tab),
                             }}
                         />
                     ))}
                 </frame>
 
                 {/* Content Area */}
-                <frame
-                    BackgroundTransparency={1}
-                    Position={new UDim2(0, 0, 0, 90)}
-                    Size={new UDim2(1, 0, 1, -90)}
-                >
+                <frame BackgroundTransparency={1} Position={new UDim2(0, 0, 0, 90)} Size={new UDim2(1, 0, 1, -90)}>
                     {/* Browse Tab */}
                     {activeTab === "Browse" && (
                         <frame BackgroundTransparency={1} Size={new UDim2(1, 0, 1, 0)}>
@@ -1042,9 +1049,7 @@ export default function MarketplaceWindow({ visible, onClose }: MarketplaceWindo
                     )}
 
                     {/* Create Listing Tab */}
-                    {activeTab === "CreateListing" && (
-                        <CreateListingForm onSubmit={handleCreateListing} />
-                    )}
+                    {activeTab === "CreateListing" && <CreateListingForm onSubmit={handleCreateListing} />}
                 </frame>
             </frame>
         </screengui>

@@ -20,14 +20,14 @@ import Packets from "shared/Packets";
 export const RENAME_WINDOW = ADAPTIVE_TAB_MAIN_WINDOW.WaitForChild("Rename") as Frame & {
     PurchaseOptions: Frame & {
         Funds: TextButton & {
-            AmountLabel: TextLabel,
-        },
-        Robux: TextButton,
-    },
+            AmountLabel: TextLabel;
+        };
+        Robux: TextButton;
+    };
     Input: Frame & {
-        InputBox: TextBox,
+        InputBox: TextBox;
         PrefixLabel: TextLabel;
-    },
+    };
     FundsLabel: TextLabel;
 };
 
@@ -38,24 +38,26 @@ export const RENAME_WINDOW = ADAPTIVE_TAB_MAIN_WINDOW.WaitForChild("Rename") as 
  */
 @Controller()
 export default class RenameController implements OnInit {
-
     /**
      * Initializes the RenameController, sets up rename actions, input validation, and UI updates.
      */
     onInit() {
-        RENAME_WINDOW.PurchaseOptions.Robux.Activated.Connect(() => Packets.promptRename.toServer(RENAME_WINDOW.Input.InputBox.Text, "robux"));
+        RENAME_WINDOW.PurchaseOptions.Robux.Activated.Connect(() =>
+            Packets.promptRename.toServer(RENAME_WINDOW.Input.InputBox.Text, "robux"),
+        );
         RENAME_WINDOW.PurchaseOptions.Funds.Activated.Connect(() => {
             if (Packets.promptRename.toServer(RENAME_WINDOW.Input.InputBox.Text, "funds") === true) {
                 playSound("ItemPurchase.mp3");
-            }
-            else {
+            } else {
                 playSound("Error.mp3");
             }
         });
         RENAME_WINDOW.Input.InputBox.FocusLost.Connect(() => {
-            [RENAME_WINDOW.Input.InputBox.Text] = RENAME_WINDOW.Input.InputBox.Text.gsub('[^%w_ ]', '');
+            [RENAME_WINDOW.Input.InputBox.Text] = RENAME_WINDOW.Input.InputBox.Text.gsub("[^%w_ ]", "");
         });
-        Packets.renameCost.observe((value) => RENAME_WINDOW.PurchaseOptions.Funds.AmountLabel.Text = "$" + OnoeNum.toString(value));
+        Packets.renameCost.observe(
+            (value) => (RENAME_WINDOW.PurchaseOptions.Funds.AmountLabel.Text = "$" + OnoeNum.toString(value)),
+        );
         Packets.empireName.observe((value) => {
             const [prefix, suffix] = value.split("'s ");
             RENAME_WINDOW.Input.PrefixLabel.Text = prefix + "'s ";

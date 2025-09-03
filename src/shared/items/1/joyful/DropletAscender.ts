@@ -8,7 +8,6 @@ import Upgrader from "shared/item/traits/upgrader/Upgrader";
 import MagicalWood from "shared/items/excavation/harvestable/MagicalWood";
 import Quartz from "shared/items/excavation/Quartz";
 
-
 export = new Item(script.Name)
     .setName("Droplet Ascender")
     .setDescription("Moves droplets directly to the sky level.")
@@ -34,6 +33,12 @@ export = new Item(script.Name)
     .onLoad((model) => {
         const forward = model.GetPivot().LookVector.Unit;
         getInstanceInfo(model, "OnUpgraded")!.connect((droplet) => {
-            ItemUtils.applyImpulse(droplet, forward.mul(4).add(new Vector3(0, 49, 0)).mul(droplet.Mass));
+            ItemUtils.applyImpulse(
+                droplet,
+                forward
+                    .mul(4)
+                    .add(new Vector3(0, 49, 0))
+                    .mul(droplet.Mass),
+            );
         });
     });

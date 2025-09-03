@@ -34,7 +34,7 @@ interface TrackingDetails {
      * The original C0 of the neck joint, used for resetting.
      */
     originalNeckC0: CFrame;
-};
+}
 
 /**
  * Service that manages NPC eye contact and gaze tracking for immersive interactions.
@@ -79,7 +79,7 @@ export default class EyeContactService implements OnInit, OnStart {
 
     /**
      * Finds the closest character model to the given NPC model within 20 studs.
-     * 
+     *
      * @param model The NPC model to check from.
      * @returns The closest character model, or undefined if none are close enough.
      */
@@ -94,8 +94,7 @@ export default class EyeContactService implements OnInit, OnStart {
                 continue; // Skip the model itself
             }
             const primaryPart = character.PrimaryPart;
-            if (primaryPart === undefined)
-                continue;
+            if (primaryPart === undefined) continue;
             const distance = model.PrimaryPart!.Position.sub(primaryPart.Position).Magnitude;
             if (distance < closestDistance) {
                 closestDistance = distance;
@@ -107,7 +106,7 @@ export default class EyeContactService implements OnInit, OnStart {
 
     /**
      * Rotates the NPC's neck to look at the given part, or resets if no part is provided.
-     * 
+     *
      * @param model The NPC model to rotate.
      * @param partToLookAt The part to look at (usually a player's head), or undefined to reset.
      */
@@ -132,7 +131,13 @@ export default class EyeContactService implements OnInit, OnStart {
         const yDiff = difference.Y;
 
         // Calculate new neck C0 to look at the target
-        const dest = details.originalNeckC0.mul(CFrame.Angles(math.atan(yDiff / dist) * 0.5, 0, (((headCFrame.Position.sub(lookAtPart.Position)).Unit).Cross(headCFrame.LookVector)).Y * 0.8));
+        const dest = details.originalNeckC0.mul(
+            CFrame.Angles(
+                math.atan(yDiff / dist) * 0.5,
+                0,
+                headCFrame.Position.sub(lookAtPart.Position).Unit.Cross(headCFrame.LookVector).Y * 0.8,
+            ),
+        );
         neck.C0 = neck.C0.Lerp(dest, 0.3);
     }
 
@@ -148,8 +153,7 @@ export default class EyeContactService implements OnInit, OnStart {
                     if (closest) {
                         const lookAtPart = closest.FindFirstChild("Head") as BasePart | undefined;
                         this.lookAt(model, lookAtPart);
-                    }
-                    else {
+                    } else {
                         this.lookAt(model, undefined); // Reset to original neck C0 if no player is found
                     }
                 }

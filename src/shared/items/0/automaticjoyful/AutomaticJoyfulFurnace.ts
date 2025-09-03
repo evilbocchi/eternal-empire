@@ -10,7 +10,9 @@ const mul = new CurrencyBundle().set("Power", 1);
 
 export = new Item(script.Name)
     .setName("Automatic Joyful Furnace")
-    .setDescription(`Processes Power at a higher value, boost increasing with Power. Could be better than the ${RoboticCauldron.name} depending on your use case.`)
+    .setDescription(
+        `Processes Power at a higher value, boost increasing with Power. Could be better than the ${RoboticCauldron.name} depending on your use case.`,
+    )
     .setDifficulty(Difficulty.AutomaticJoyful)
     .setPrice(new CurrencyBundle().set("Purifier Clicks", 1e21), 1)
     .addPlaceableArea("BarrenIslands")
@@ -20,6 +22,9 @@ export = new Item(script.Name)
     .setFormulaXCap(new CurrencyBundle().set("Power", 10e24))
 
     .trait(Furnace)
-    .applyFormula((v, item) => item.setMul(mul.set("Power", v)), () => Server.Currency.get("Power"))
+    .applyFormula(
+        (v, item) => item.setMul(mul.set("Power", v)),
+        () => Server.Currency.get("Power"),
+    )
 
     .exit();

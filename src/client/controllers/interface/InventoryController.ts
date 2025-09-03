@@ -5,7 +5,7 @@
  * @fileoverview Client controller responsible for managing player inventory data.
  *
  * Handles:
- * - Tracking inventory items and unique instances  
+ * - Tracking inventory items and unique instances
  * - Finding best unique item instances for items
  * - Coordinating with build controller for item placement
  * - Observing inventory state changes
@@ -31,7 +31,7 @@ for (let i = 0; i < sortedItemsSize; i++) {
 
 /**
  * Controller responsible for managing player inventory data and business logic.
- * 
+ *
  * Provides data access methods for React components and handles item placement logic.
  */
 @Controller()
@@ -39,8 +39,7 @@ export default class InventoryController implements OnStart {
     /** List of items currently in the inventory. */
     readonly items = new Array<Item>();
 
-    constructor(private buildController: BuildController) {
-    }
+    constructor(private buildController: BuildController) {}
 
     /**
      * Find the best unique item instance for a given base item ID based on its average pot.
@@ -57,8 +56,7 @@ export default class InventoryController implements OnStart {
             return undefined;
         }
         for (const [uuid, instance] of uniqueInstances) {
-            if (instance.placed)
-                continue; // Skip placed instances
+            if (instance.placed) continue; // Skip placed instances
             if (instance.baseItemId === baseItemId) {
                 let thisPots = 0;
                 for (const [_, potValue] of instance.pots) {
@@ -84,35 +82,35 @@ export default class InventoryController implements OnStart {
     /**
      * Handle item activation for placement in the game world.
      * This method encapsulates the business logic for item placement.
-     * 
+     *
      * @param item The item to activate/place
      * @returns True if the item was successfully activated, false otherwise
      */
     activateItem(item: Item): boolean {
         const isPlaceable = item.placeableAreas.size() > 0 || item.bounds !== undefined;
         const level = Packets.level.get() ?? 0;
-        
+
         // Check restrictions
-        if (this.buildController.getRestricted() === true || 
-            isPlaceable === false || 
-            (item.levelReq !== undefined && item.levelReq > level)) {
+        if (
+            this.buildController.getRestricted() === true ||
+            isPlaceable === false ||
+            (item.levelReq !== undefined && item.levelReq > level)
+        ) {
             playSound("Error.mp3");
             return false;
         }
-        
+
         playSound("MenuClick.mp3");
-        
+
         // Find best unique instance if applicable
         let bestUuid: string | undefined;
         if (Items.uniqueItems.has(item)) {
             bestUuid = this.getBest(item.id);
         }
-        
+
         // Add placing model and select it
-        this.buildController.mainSelect(
-            this.buildController.addPlacingModel(item, bestUuid)
-        );
-        
+        this.buildController.mainSelect(this.buildController.addPlacingModel(item, bestUuid));
+
         return true;
     }
 
@@ -126,13 +124,12 @@ export default class InventoryController implements OnStart {
         const items = this.items;
         items.clear();
         const amounts = new Map<string, number>();
-        
+
         // Count unique instances
         if (uniqueInstances !== undefined) {
             for (const [_, uniqueInstance] of uniqueInstances) {
                 const itemId = uniqueInstance.baseItemId;
-                if (itemId === undefined || uniqueInstance.placed)
-                    continue;
+                if (itemId === undefined || uniqueInstance.placed) continue;
 
                 const amount = amounts.get(itemId) ?? 0;
                 amounts.set(itemId, amount + 1);
@@ -142,7 +139,7 @@ export default class InventoryController implements OnStart {
         // Build items list based on what's in inventory
         for (const item of reverseSortedItems) {
             if (item.isA("HarvestingTool")) continue;
-            
+
             const itemId = item.id;
             let amount = inventory?.get(itemId) ?? 0;
             const uniques = amounts.get(itemId);

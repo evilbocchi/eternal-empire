@@ -16,14 +16,13 @@ declare global {
 }
 
 /**
- * An {@link Item} in which its model contains `Conveyor` {@link BasePart}s that move items along a path. 
+ * An {@link Item} in which its model contains `Conveyor` {@link BasePart}s that move items along a path.
  */
 export default class Conveyor extends ItemTrait {
-
     /**
      * Loads the conveyor arrow visual effect on the given conveyor part.
      * By default, the conveyor arrow is disabled.
-     * 
+     *
      * @param part The conveyor BasePart to which the arrow will be attached.
      * @param conveyor The conveyor instance to which the part belongs.
      * @returns The Beam instance representing the conveyor arrow.
@@ -50,8 +49,7 @@ export default class Conveyor extends ItemTrait {
         if (part.GetAttribute("Inverted")) {
             beam.Attachment0 = attachment1;
             beam.Attachment1 = attachment0;
-        }
-        else {
+        } else {
             beam.Attachment0 = attachment0;
             beam.Attachment1 = attachment1;
         }
@@ -76,7 +74,7 @@ export default class Conveyor extends ItemTrait {
 
     /**
      * Applies the conveyor properties to the given model.
-     * 
+     *
      * @param model The model to load.
      * @param conveyor The conveyor to load.
      */
@@ -96,7 +94,9 @@ export default class Conveyor extends ItemTrait {
                 speed += speedBoost;
                 part.SetAttribute("Speed", speed);
                 part.AddTag("Conveyor");
-                part.AssemblyLinearVelocity = part.CFrame.LookVector.mul((part.GetAttribute("Inverted") ? -1 : 1) * speed);
+                part.AssemblyLinearVelocity = part.CFrame.LookVector.mul(
+                    (part.GetAttribute("Inverted") ? -1 : 1) * speed,
+                );
             }
         };
         updateSpeed();
@@ -115,15 +115,14 @@ export default class Conveyor extends ItemTrait {
 
     /**
      * Constructs a new conveyor.
-     * 
+     *
      * @param item The item to which this conveyor belongs.
      */
     constructor(item: Item) {
         super(item);
         item.onInit((item) => {
             const model = item.MODEL;
-            if (model === undefined)
-                return;
+            if (model === undefined) return;
             for (const part of findBaseParts(model, "Conveyor")) {
                 part.FrontSurface = Enum.SurfaceType.Studs;
                 part.CustomPhysicalProperties = Conveyor.PHYSICAL_PROPERTIES;
@@ -133,7 +132,6 @@ export default class Conveyor extends ItemTrait {
                 if (invertedValue !== undefined) {
                     part.SetAttribute("Inverted", invertedValue.Value);
                     invertedValue.Destroy();
-
                 }
             }
         });
@@ -142,7 +140,7 @@ export default class Conveyor extends ItemTrait {
 
     /**
      * Sets the speed of the conveyor.
-     * 
+     *
      * @param speed The speed of the conveyor.
      * @returns This conveyor.
      */
@@ -153,7 +151,7 @@ export default class Conveyor extends ItemTrait {
 
     /**
      * Retrieves the current speed of the conveyor adjusted by the game speed.
-     * 
+     *
      * @returns The adjusted speed of the conveyor.
      */
     getSpeed() {

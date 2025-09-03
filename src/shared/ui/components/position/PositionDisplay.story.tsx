@@ -5,7 +5,7 @@ import PositionDisplay from "shared/ui/components/position/PositionDisplay";
 import TooltipProvider from "shared/ui/components/tooltip/TooltipProvider";
 
 const controls = {
-    visible: true
+    visible: true,
 };
 
 export = {
@@ -13,8 +13,10 @@ export = {
     reactRoblox: ReactRoblox,
     controls: controls,
     story: (props: InferProps<typeof controls>) => {
-        return <TooltipProvider>
-            <PositionDisplay {...props.controls} />
-        </TooltipProvider>;
-    }
+        return (
+            <TooltipProvider>
+                <PositionDisplay {...props.controls} />
+            </TooltipProvider>
+        );
+    },
 };

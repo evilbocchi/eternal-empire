@@ -5,7 +5,7 @@ import CommandsWindow from "shared/ui/components/commands/CommandsWindow";
 
 const controls = {
     visible: true,
-    userPermissionLevel: 4
+    userPermissionLevel: 4,
 };
 
 export = {

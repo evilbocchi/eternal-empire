@@ -7,7 +7,9 @@ import Upgrader from "shared/item/traits/upgrader/Upgrader";
 
 export = new Item(script.Name)
     .setName("Droplet Slayer Mk. II")
-    .setDescription("This is getting ridiculous. Literally hire a noob to slay droplets for you, multiplying their value by %mul% every 4 seconds.")
+    .setDescription(
+        "This is getting ridiculous. Literally hire a noob to slay droplets for you, multiplying their value by %mul% every 4 seconds.",
+    )
     .setDifficulty(Difficulty.Exist)
     .setPrice(new CurrencyBundle().set("Funds", 12.1e15), 1)
     .setRequiredItemAmount(DropletSlayerMkI, 1)

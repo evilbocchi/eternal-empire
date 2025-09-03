@@ -8,7 +8,6 @@ import LiveLeaderboard from "shared/ui/components/leaderboard/LiveLeaderboard";
 
 @Controller()
 export class LeaderboardController implements OnStart, LeaderboardDataManager {
-
     private leaderboardData = new Map<LeaderboardType, LeaderboardEntry[]>();
     private leaderboardDataChanged = new Signal<(type: LeaderboardType, entries: LeaderboardEntry[]) => void>();
 
@@ -34,12 +33,10 @@ export class LeaderboardController implements OnStart, LeaderboardDataManager {
             surfaceGui.Parent = guiPart;
             task.spawn(() => {
                 const root = ReactRoblox.createRoot(surfaceGui);
-                root.render(<LiveLeaderboard
-                    dataManager={this}
-                    leaderboardType={leaderboard.Name as LeaderboardType}
-                />);
+                root.render(
+                    <LiveLeaderboard dataManager={this} leaderboardType={leaderboard.Name as LeaderboardType} />,
+                );
             });
-
         }
 
         Packets.leaderboardData.observe((leaderboardData) => {

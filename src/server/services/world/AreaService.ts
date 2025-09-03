@@ -3,7 +3,7 @@
 
 /**
  * @fileoverviewspecific functionality.
- * 
+ *
  * This service handles all aspects of the game's area system including:
  * - Area loading and initialization (grids, bounds, music, portals)
  * - Player area tracking and movement detection
@@ -13,10 +13,10 @@
  * - Catch area mechanics for player safety/respawning
  * - Music system integration with area-specific sound groups
  * - Leaderstat updates for area display
- * 
- * The service integrates with multiple other systems including upgrades, music, 
+ *
+ * The service integrates with multiple other systems including upgrades, music,
  * droplet management, and player data to provide a seamless area experience.
- * 
+ *
  * @since 1.0.0
  */
 
@@ -49,13 +49,12 @@ AREA_CHECK_PARAMS.CollisionGroup = "PlayerHitbox";
  */
 @Service()
 export default class AreaService implements OnInit, OnPlayerJoined {
-
     /**
      * Maps area IDs to the number of droplets currently present in that area.
      */
     dropletCountPerArea = new Map<AreaId, number>();
 
-    /** 
+    /**
      * Stores bounding box information for each area to enable efficient player position checks.
      * Maps area ID to a tuple of [CFrame, Vector3] representing the area's bounds.
      * This is populated during area loading and used for real-time player tracking.
@@ -67,11 +66,11 @@ export default class AreaService implements OnInit, OnPlayerJoined {
         private leaderstatsService: LeaderstatsService,
         private namedUpgradeService: NamedUpgradeService,
         private npcNavigationService: NPCNavigationService,
-    ) { }
+    ) {}
 
     /**
      * Retrieves the current area ID for a player.
-     * 
+     *
      * @param player The player to get the area for
      * @returns The area ID where the player is currently located
      */
@@ -81,11 +80,11 @@ export default class AreaService implements OnInit, OnPlayerJoined {
 
     /**
      * Sets a player's current area and updates their leaderstat display.
-     * 
+     *
      * This method handles both the internal area tracking (via player attributes)
      * and the visual display (via leaderstats) to ensure consistency across
      * all area-related systems.
-     * 
+     *
      * @param player The player to set the area for
      * @param id The area ID to assign to the player
      */
@@ -98,12 +97,12 @@ export default class AreaService implements OnInit, OnPlayerJoined {
 
     /**
      * Loads and initializes a complete area with all its sub-systems.
-     * 
+     *
      * This is the core area initialization method that sets up all area-specific
      * functionality including grid systems, music integration, portal mechanics,
      * upgrade board connections, and safety systems. It's called during server
      * startup for each area in the game.
-     * 
+     *
      * @param id The unique identifier for the area being loaded
      * @param area The Area object containing all area configuration and components
      */
@@ -127,8 +126,7 @@ export default class AreaService implements OnInit, OnPlayerJoined {
 
             // Helper function to configure individual sound objects
             const loadSound = (sound: Instance) => {
-                if (!sound.IsA("Sound"))
-                    return;
+                if (!sound.IsA("Sound")) return;
                 sound.SoundGroup = areaSoundGroup; // Assign to area's sound group
                 sound.SetAttribute("OriginalVolume", sound.Volume); // Store original volume
             };
@@ -138,8 +136,7 @@ export default class AreaService implements OnInit, OnPlayerJoined {
                 group.Parent = areaSoundGroup;
                 loadSound(group);
                 // Process nested sound objects
-                for (const child of group.GetChildren())
-                    loadSound(child);
+                for (const child of group.GetChildren()) loadSound(child);
             });
 
             // Store bounding box for player tracking, then clean up the bounds object
@@ -152,8 +149,7 @@ export default class AreaService implements OnInit, OnPlayerJoined {
 
         // Connect to upgrade changes to dynamically resize the building grid
         this.namedUpgradeService.upgradesChanged.connect((data) => {
-            if (grid === undefined)
-                return;
+            if (grid === undefined) return;
 
             // Get the original grid size as baseline
             let size = grid.GetAttribute("OriginalSize") as Vector3 | undefined;
@@ -163,8 +159,7 @@ export default class AreaService implements OnInit, OnPlayerJoined {
 
             // Apply all relevant grid size upgrades for this area
             GRID_SIZE_UPGRADES.forEach((upgrade, upgradeId) => {
-                if (upgrade.area === id)
-                    size = upgrade.apply(size!, data.get(upgradeId));
+                if (upgrade.area === id) size = upgrade.apply(size!, data.get(upgradeId));
             });
 
             // Update the grid size if it has changed
@@ -186,10 +181,11 @@ export default class AreaService implements OnInit, OnPlayerJoined {
 
                 // Helper function to show/hide portal based on unlock status
                 const updatePosition = (unlocked: boolean) =>
-                    frame.Position = unlocked ? originalPos : new Vector3(0, -1000, 0);
+                    (frame.Position = unlocked ? originalPos : new Vector3(0, -1000, 0));
 
                 // Get unlock status and set initial position
-                const unlocked = AREAS[(instance.WaitForChild("Destination") as ObjectValue).Value!.Name as AreaId].unlocked;
+                const unlocked =
+                    AREAS[(instance.WaitForChild("Destination") as ObjectValue).Value!.Name as AreaId].unlocked;
                 updatePosition(unlocked.Value);
 
                 // React to unlock status changes
@@ -198,16 +194,13 @@ export default class AreaService implements OnInit, OnPlayerJoined {
                 // Handle portal teleportation when touched
                 frame.Touched.Connect((otherPart) => {
                     const character = otherPart.Parent as Model;
-                    if (character === undefined)
-                        return;
+                    if (character === undefined) return;
 
                     const player = Players.GetPlayerFromCharacter(character);
-                    if (player === undefined)
-                        return;
+                    if (player === undefined) return;
 
                     const humanoid = character.FindFirstChildOfClass("Humanoid");
-                    if (humanoid === undefined)
-                        return;
+                    if (humanoid === undefined) return;
 
                     const rootPart = humanoid.RootPart;
                     // Debounce check to prevent spam teleportation
@@ -234,16 +227,13 @@ export default class AreaService implements OnInit, OnPlayerJoined {
             catchArea.CanTouch = true;
             catchArea.Touched.Connect((o) => {
                 const player = Players.GetPlayerFromCharacter(o.Parent);
-                if (player === undefined || player.Character === undefined)
-                    return;
+                if (player === undefined || player.Character === undefined) return;
 
                 const humanoid = player.Character.FindFirstChildOfClass("Humanoid");
-                if (humanoid === undefined)
-                    return;
+                if (humanoid === undefined) return;
 
                 const rootPart = humanoid.RootPart;
-                if (rootPart === undefined)
-                    return;
+                if (rootPart === undefined) return;
 
                 const spawnLocation = area.getSpawnLocation();
                 if (spawnLocation === undefined) {
@@ -262,11 +252,11 @@ export default class AreaService implements OnInit, OnPlayerJoined {
 
     /**
      * Propagates droplet count changes to all clients and updates internal tracking.
-     * 
+     *
      * This method ensures that all players receive real-time updates about droplet
      * counts in each area, which is crucial for UI display and area limit enforcement.
      * It includes a safety check to prevent unnecessary network traffic during server startup.
-     * 
+     *
      * @param id The area ID where the droplet count changed
      * @param newCount The new droplet count for the area
      */
@@ -274,7 +264,8 @@ export default class AreaService implements OnInit, OnPlayerJoined {
         this.dropletCountPerArea.set(id, newCount);
 
         // Prevent network spam during server initialization
-        if (os.clock() < 6) { // don't propagate changes too early after server start
+        if (os.clock() < 6) {
+            // don't propagate changes too early after server start
             return;
         }
 
@@ -284,11 +275,11 @@ export default class AreaService implements OnInit, OnPlayerJoined {
 
     /**
      * Initializes droplet tracking and management systems for a specific area.
-     * 
+     *
      * This method sets up real-time droplet counting, automatic synchronization,
      * and periodic recalibration to prevent desynchronization issues. It handles
      * both droplet creation and destruction events while maintaining accurate counts.
-     * 
+     *
      * @param id The area ID to set up droplet tracking for
      * @param area The Area object containing droplet limit configuration
      */
@@ -299,9 +290,7 @@ export default class AreaService implements OnInit, OnPlayerJoined {
         dropletCountPerArea.set(id, 0);
 
         // React to droplet limit changes in the area configuration
-        area.dropletLimit.Changed.Connect(() =>
-            this.propagateDropletCountChange(id, dropletCountPerArea.get(id)!)
-        );
+        area.dropletLimit.Changed.Connect(() => this.propagateDropletCountChange(id, dropletCountPerArea.get(id)!));
 
         // Monitor droplet creation and track them by area
         DROPLET_STORAGE.ChildAdded.Connect((d) => {
@@ -324,7 +313,8 @@ export default class AreaService implements OnInit, OnPlayerJoined {
 
         // Prevent desynchronization by periodically recounting all droplets
         task.spawn(() => {
-            while (task.wait(5)) { // Check every 5 seconds
+            while (task.wait(5)) {
+                // Check every 5 seconds
                 let i = 0;
 
                 // Manual recount of all droplets in this area
@@ -343,23 +333,22 @@ export default class AreaService implements OnInit, OnPlayerJoined {
 
     /**
      * Handles player joining events and sets up area tracking systems.
-     * 
+     *
      * This method initializes all player-specific area functionality including
      * character collision group setup, teleportation sound preparation, and
      * real-time position tracking for area detection. It ensures that players
      * are properly integrated into the area system from the moment they join.
-     * 
+     *
      * @param player The player who just joined the game
      */
     onPlayerJoined(player: Player) {
         /**
          * Sets up character-specific area functionality when a player spawns.
-         * 
+         *
          * @param character - The player's character model (may be undefined)
          */
         const onCharacterAdded = (character: Model | undefined) => {
-            if (character === undefined)
-                return;
+            if (character === undefined) return;
 
             const rootPart = character.WaitForChild("HumanoidRootPart") as BasePart;
 
@@ -381,14 +370,13 @@ export default class AreaService implements OnInit, OnPlayerJoined {
 
         // Continuously monitor player position to detect area changes
         task.spawn(() => {
-            while (task.wait(0.1)) { // Check every 100ms for responsive area detection
+            while (task.wait(0.1)) {
+                // Check every 100ms for responsive area detection
                 const character = player.Character;
-                if (character === undefined)
-                    continue;
+                if (character === undefined) continue;
 
                 const rootPart = character.FindFirstChild("HumanoidRootPart") as BasePart | undefined;
-                if (rootPart === undefined)
-                    continue;
+                if (rootPart === undefined) continue;
 
                 const position = rootPart.Position;
 
@@ -410,7 +398,7 @@ export default class AreaService implements OnInit, OnPlayerJoined {
 
     /**
      * Initializes the AreaService and sets up all game areas and teleportation systems.
-     * 
+     *
      * This method is called during server startup and handles:
      * - Loading and initializing all areas in the game
      * - Setting up the area teleportation packet handler
@@ -429,9 +417,7 @@ export default class AreaService implements OnInit, OnPlayerJoined {
             const spawnLocation = area.getSpawnLocation();
 
             // Validate teleportation request with multiple safety checks
-            if (character === undefined ||
-                area.unlocked.Value === false ||
-                spawnLocation === undefined) {
+            if (character === undefined || area.unlocked.Value === false || spawnLocation === undefined) {
                 return false; // Teleportation denied
             }
 

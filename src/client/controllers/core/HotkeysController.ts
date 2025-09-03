@@ -15,7 +15,15 @@ import { Controller, OnInit } from "@flamework/core";
 import { UserInputService } from "@rbxts/services";
 import TooltipController from "client/controllers/interface/TooltipController";
 
-type BindedKey = { hotkey: Enum.KeyCode, action: (usedHotkey: boolean) => boolean, priority: number, name?: string, index: number, button?: GuiButton, endAction?: () => boolean; };
+type BindedKey = {
+    hotkey: Enum.KeyCode;
+    action: (usedHotkey: boolean) => boolean;
+    priority: number;
+    name?: string;
+    index: number;
+    button?: GuiButton;
+    endAction?: () => boolean;
+};
 
 /**
  * Controller responsible for managing hotkey bindings and their integration with UI buttons and tooltips.
@@ -33,9 +41,7 @@ export default class HotkeysController implements OnInit {
     /** Internal index for ordering binds. */
     index = 0;
 
-    constructor(private tooltipController: TooltipController) {
-
-    }
+    constructor(private tooltipController: TooltipController) {}
 
     /**
      * Executes the action associated with a given hotkey, if any.
@@ -43,8 +49,7 @@ export default class HotkeysController implements OnInit {
      */
     execute(hotkey: Enum.KeyCode) {
         for (const binded of this.bindedKeys) {
-            if (hotkey === binded.hotkey && binded.action(true) === true)
-                return;
+            if (hotkey === binded.hotkey && binded.action(true) === true) return;
         }
     }
 
@@ -59,10 +64,13 @@ export default class HotkeysController implements OnInit {
     tooltip(button: GuiButton, keyCode: Enum.KeyCode | undefined, label?: string, hideHotkey?: boolean) {
         let l = button.GetAttribute("Tooltip") as string;
         if (l === undefined) {
-            l = (label === undefined ? (button.IsA("TextButton") ? button.Text : button.Name) : label);
+            l = label === undefined ? (button.IsA("TextButton") ? button.Text : button.Name) : label;
             button.SetAttribute("Tooltip", l);
         }
-        this.tooltipController.setMessage(button, keyCode === undefined || hideHotkey === true ? l : `${l} (${keyCode.Name})`);
+        this.tooltipController.setMessage(
+            button,
+            keyCode === undefined || hideHotkey === true ? l : `${l} (${keyCode.Name})`,
+        );
         return l;
     }
 
@@ -76,10 +84,17 @@ export default class HotkeysController implements OnInit {
      * @param endAction The action to execute on key release (optional).
      * @param hideHotkey Whether to hide the hotkey in the tooltip (optional).
      */
-    setHotkey(button: GuiButton, keyCode: Enum.KeyCode | undefined, action: (usedHotkey: boolean) => boolean, label?: string, priority?: number, endAction?: () => boolean, hideHotkey?: boolean) {
+    setHotkey(
+        button: GuiButton,
+        keyCode: Enum.KeyCode | undefined,
+        action: (usedHotkey: boolean) => boolean,
+        label?: string,
+        priority?: number,
+        endAction?: () => boolean,
+        hideHotkey?: boolean,
+    ) {
         const l = this.tooltip(button, keyCode, label, hideHotkey);
-        if (keyCode !== undefined)
-            this.bindKey(keyCode, action, priority, l, button, endAction);
+        if (keyCode !== undefined) this.bindKey(keyCode, action, priority, l, button, endAction);
 
         if (this.connections.has(button) === false) {
             const connection = button.Activated.Connect(() => action(false));
@@ -100,8 +115,23 @@ export default class HotkeysController implements OnInit {
      * @param button The UI button associated with the hotkey (optional).
      * @param endAction The action to execute on key release (optional).
      */
-    bindKey(keyCode: Enum.KeyCode, action: (usedHotkey: boolean) => boolean, priority?: number, name?: string, button?: GuiButton, endAction?: () => boolean) {
-        this.bindedKeys.push({ hotkey: keyCode, action: action, priority: priority ?? 0, name: name, index: ++this.index, button: button, endAction: endAction });
+    bindKey(
+        keyCode: Enum.KeyCode,
+        action: (usedHotkey: boolean) => boolean,
+        priority?: number,
+        name?: string,
+        button?: GuiButton,
+        endAction?: () => boolean,
+    ) {
+        this.bindedKeys.push({
+            hotkey: keyCode,
+            action: action,
+            priority: priority ?? 0,
+            name: name,
+            index: ++this.index,
+            button: button,
+            endAction: endAction,
+        });
         this.bindedKeys = this.bindedKeys.sort((a, b) => a.priority > b.priority);
     }
 

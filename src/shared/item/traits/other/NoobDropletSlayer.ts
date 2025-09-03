@@ -8,7 +8,6 @@ import { Streaming } from "@antivivi/vrldk";
 import { loadAnimation } from "@antivivi/vrldk";
 
 export default class NoobDropletSlayer extends ItemTrait {
-
     static load(model: Model, slayer: NoobDropletSlayer) {
         const item = slayer.item;
         const upgrader = item.trait(Upgrader);
@@ -25,24 +24,27 @@ export default class NoobDropletSlayer extends ItemTrait {
             laser.Name = laserId;
             laserInfo.LaserId = laserId;
             laserInfo.Enabled = false;
-            laser.Touched.Connect(() => { });
+            laser.Touched.Connect(() => {});
             Upgrader.hookLaser(model, upgrader, laser);
             return laser;
         };
 
         const fireActiveRemote = Streaming.createStreamableRemote(model, true);
         let i = 0;
-        const ref = item.repeat(model, () => {
-            fireActiveRemote();
-            let cycled = lasers[++i];
-            if (cycled === undefined) {
-                i = 0;
-                cycled = lasers[i];
-            }
-            setInstanceInfo(cycled, "Enabled", true);
-            task.delay(0.5, () => setInstanceInfo(cycled, "Enabled", false));
-        }, slayer.cooldown);
-
+        const ref = item.repeat(
+            model,
+            () => {
+                fireActiveRemote();
+                let cycled = lasers[++i];
+                if (cycled === undefined) {
+                    i = 0;
+                    cycled = lasers[i];
+                }
+                setInstanceInfo(cycled, "Enabled", true);
+                task.delay(0.5, () => setInstanceInfo(cycled, "Enabled", false));
+            },
+            slayer.cooldown,
+        );
 
         const radioNoobLaser = createLaser();
 
@@ -60,8 +62,7 @@ export default class NoobDropletSlayer extends ItemTrait {
     static clientLoad(model: Model) {
         const noob = model.WaitForChild("Noob") as Model;
         const animationController = noob.FindFirstChildOfClass("AnimationController");
-        if (animationController === undefined)
-            return;
+        if (animationController === undefined) return;
         const animTrack = loadAnimation(animationController, 16920778613);
 
         let laser: BasePart;
@@ -78,11 +79,13 @@ export default class NoobDropletSlayer extends ItemTrait {
         });
 
         Streaming.onStreamableRemote(model, () => {
-            if (slash === undefined)
-                return;
+            if (slash === undefined) return;
             slash.Transparency = 0.011;
             slash.CFrame = slashOriginalCFrame;
-            TweenService.Create(slash, new TweenInfo(0.3), { CFrame: slashOriginalCFrame.mul(CFrame.Angles(0, math.rad(180), 0)), Transparency: 1 }).Play();
+            TweenService.Create(slash, new TweenInfo(0.3), {
+                CFrame: slashOriginalCFrame.mul(CFrame.Angles(0, math.rad(180), 0)),
+                Transparency: 1,
+            }).Play();
             animTrack?.Play();
             sound.Play();
         });

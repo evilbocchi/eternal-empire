@@ -68,10 +68,5 @@ export default function MarketplaceManager(props: MarketplaceManagerProps) {
         return <></>;
     }
 
-    return (
-        <MarketplaceWindow
-            visible={isVisible}
-            onClose={handleClose}
-        />
-    );
+    return <MarketplaceWindow visible={isVisible} onClose={handleClose} />;
 }

@@ -9,7 +9,9 @@ import WhiteGem from "shared/items/excavation/WhiteGem";
 
 export = new Item(script.Name)
     .setName("Fictional Upgrader")
-    .setDescription("The epitome of trying to exist. Seems to boost droplet values by %mul%, but its gap can only fit 1x1 droplets.")
+    .setDescription(
+        "The epitome of trying to exist. Seems to boost droplet values by %mul%, but its gap can only fit 1x1 droplets.",
+    )
     .setDifficulty(Difficulty.Exist)
     .setPrice(new CurrencyBundle().set("Funds", 1e15), 1)
     .setRequiredItemAmount(WhiteGem, 20)

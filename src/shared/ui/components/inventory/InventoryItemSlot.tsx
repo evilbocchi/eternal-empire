@@ -1,6 +1,6 @@
 /**
  * @fileoverview Individual inventory item slot React component
- * 
+ *
  * Displays an item with its icon, amount, and handles click interactions.
  * Replaces the traditional Roblox Studio ItemSlot with React implementation.
  */
@@ -16,12 +16,10 @@ interface InventoryItemSlotProps {
     item: Item;
     /** Number of items in inventory */
     amount: number;
-    /** Whether the item has any quantity */
-    hasItem: boolean;
     /** Layout order for sorting */
     layoutOrder: number;
     /** Whether the slot is visible */
-    visible: boolean;
+    visible?: boolean;
     /** Callback when the item is clicked */
     onActivated: () => void;
     /** Reference for tooltip attachment */
@@ -34,13 +32,12 @@ interface InventoryItemSlotProps {
 export default function InventoryItemSlot({
     item,
     amount,
-    hasItem,
     layoutOrder,
-    visible,
+    visible = true,
     onActivated,
-    ref
+    ref,
 }: InventoryItemSlotProps) {
-    const textColor = hasItem ? Color3.fromRGB(255, 255, 255) : Color3.fromRGB(150, 150, 150);
+    const textColor = amount > 0 ? Color3.fromRGB(255, 255, 255) : Color3.fromRGB(150, 150, 150);
     const backgroundColor = item.difficulty.color ?? Color3.fromRGB(52, 155, 255);
     const hoverProps = useItemTooltip(item);
 
@@ -58,32 +55,32 @@ export default function InventoryItemSlot({
             Visible={visible}
             Event={{
                 Activated: onActivated,
-                ...hoverProps.events
+                ...hoverProps.events,
             }}
         >
             {/* Background gradient */}
             <uigradient
-                Color={new ColorSequence([
-                    new ColorSequenceKeypoint(0, Color3.fromRGB(72, 72, 72)),
-                    new ColorSequenceKeypoint(1, Color3.fromRGB(76, 76, 76))
-                ])}
+                Color={
+                    new ColorSequence([
+                        new ColorSequenceKeypoint(0, Color3.fromRGB(72, 72, 72)),
+                        new ColorSequenceKeypoint(1, Color3.fromRGB(76, 76, 76)),
+                    ])
+                }
                 Rotation={90}
             />
 
             {/* Main stroke with gradient */}
-            <uistroke
-                ApplyStrokeMode={Enum.ApplyStrokeMode.Border}
-                Color={backgroundColor}
-                Thickness={2}
-            >
+            <uistroke ApplyStrokeMode={Enum.ApplyStrokeMode.Border} Color={backgroundColor} Thickness={2}>
                 <uigradient
-                    Color={new ColorSequence([
-                        new ColorSequenceKeypoint(0, Color3.fromRGB(255, 255, 255)),
-                        new ColorSequenceKeypoint(0.299, Color3.fromRGB(255, 255, 255)),
-                        new ColorSequenceKeypoint(0.51, Color3.fromRGB(118, 118, 118)),
-                        new ColorSequenceKeypoint(0.822, Color3.fromRGB(255, 255, 255)),
-                        new ColorSequenceKeypoint(1, Color3.fromRGB(255, 255, 255))
-                    ])}
+                    Color={
+                        new ColorSequence([
+                            new ColorSequenceKeypoint(0, Color3.fromRGB(255, 255, 255)),
+                            new ColorSequenceKeypoint(0.299, Color3.fromRGB(255, 255, 255)),
+                            new ColorSequenceKeypoint(0.51, Color3.fromRGB(118, 118, 118)),
+                            new ColorSequenceKeypoint(0.822, Color3.fromRGB(255, 255, 255)),
+                            new ColorSequenceKeypoint(1, Color3.fromRGB(255, 255, 255)),
+                        ])
+                    }
                     Rotation={35}
                 />
             </uistroke>

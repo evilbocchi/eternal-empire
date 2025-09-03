@@ -17,7 +17,9 @@ declare global {
 
 export = new Item(script.Name)
     .setName("Currency Strict Conveyor")
-    .setDescription("A conveyor that sorts droplets based on their currency. It has two outputs: one for the selected currency and another for all other currencies. Click the button to change the selected currency.")
+    .setDescription(
+        "A conveyor that sorts droplets based on their currency. It has two outputs: one for the selected currency and another for all other currencies. Click the button to change the selected currency.",
+    )
     .setDifficulty(Difficulty.Win)
     .setPrice(new CurrencyBundle().set("Power", 5e12), 1, 5)
     .addPlaceableArea("BarrenIslands", "SlamoVillage")
@@ -34,7 +36,7 @@ export = new Item(script.Name)
         const modeButton = model.WaitForChild("Mode") as BasePart;
         const placedItem = Server.Item.getPlacedItem(model.Name)!;
         placedItem.currency ??= "Funds";
-        const updateMode = () => modeButton.Color = CURRENCY_DETAILS[placedItem.currency!].color;
+        const updateMode = () => (modeButton.Color = CURRENCY_DETAILS[placedItem.currency!].color);
         updateMode();
         const modes = ["Funds", "Power", "Bitcoin", "Skill"] as Currency[];
 
@@ -55,11 +57,9 @@ export = new Item(script.Name)
         const touched = new Set<BasePart>();
         sortingPoint.Touched.Connect((part) => {
             const instanceInfo = getAllInstanceInfo(part);
-            if (instanceInfo.DropletId === undefined || touched.has(part))
-                return;
+            if (instanceInfo.DropletId === undefined || touched.has(part)) return;
             const droplet = Droplet.getDroplet(instanceInfo.DropletId);
-            if (droplet === undefined)
-                throw "Unknown droplet ID: " + instanceInfo.DropletId;
+            if (droplet === undefined) throw "Unknown droplet ID: " + instanceInfo.DropletId;
 
             touched.add(part);
             task.delay(0.5, () => touched.delete(part));
@@ -74,8 +74,7 @@ export = new Item(script.Name)
                 }
             }
 
-            if (bestCurrency !== placedItem.currency)
-                return;
+            if (bestCurrency !== placedItem.currency) return;
 
             ItemUtils.applyImpulse(part, forward.mul(part.Mass).mul(40));
         });

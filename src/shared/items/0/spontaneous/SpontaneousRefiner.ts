@@ -15,14 +15,24 @@ import TheFirstUpgrader from "shared/items/negative/tfd/TheFirstUpgrader";
 import BasicRefiner from "shared/items/negative/tlg/BasicRefiner";
 import DropletElectronInfuser from "shared/items/negative/trueease/DropletElectronInfuser";
 
-const combining = [TheFirstUpgrader, BasicRefiner, DirectDropletWasher, DropletElectronInfuser, ElevatedUpgrader, ReversedUpgrader, BasicHealthPack, FrozenGate, SmilingKiller, LaserTurbine];
+const combining = [
+    TheFirstUpgrader,
+    BasicRefiner,
+    DirectDropletWasher,
+    DropletElectronInfuser,
+    ElevatedUpgrader,
+    ReversedUpgrader,
+    BasicHealthPack,
+    FrozenGate,
+    SmilingKiller,
+    LaserTurbine,
+];
 
 let totalAdd = new CurrencyBundle();
 let totalMul = CurrencyBundle.ones();
 let totalDamage = 0;
 for (const item of combining) {
-    if (item.MODEL === undefined)
-        continue;
+    if (item.MODEL === undefined) continue;
     const laserCount = findBaseParts(item.MODEL, "Laser").size();
     const upgrader = item.findTrait("Upgrader");
     if (upgrader !== undefined) {
@@ -49,9 +59,10 @@ totalDamage -= 10;
 
 const SpontaneousRefiner = new Item(script.Name)
     .setName("Spontaneous Refiner")
-    .setDescription(`Suddenly, profit.
+    .setDescription(
+        `Suddenly, profit.
 
-%add%, %mul%, %hp_add%.`
+%add%, %mul%, %hp_add%.`,
     )
     .setDifficulty(Difficulty.Spontaneous)
     .setPrice(new CurrencyBundle().set("Funds", 45e42).set("Power", 10e27), 1)

@@ -34,10 +34,10 @@ declare global {
  */
 @Controller()
 export default class ResetController implements OnInit {
-
-    constructor(private effectController: EffectController, private soundController: SoundController) {
-
-    }
+    constructor(
+        private effectController: EffectController,
+        private soundController: SoundController,
+    ) {}
 
     /**
      * Moves the camera to a given instance and plays reset effects and sounds.
@@ -58,7 +58,9 @@ export default class ResetController implements OnInit {
             }
             currentCamera.CameraType = Enum.CameraType.Scriptable;
             const toCframe = (instance as BasePart).CFrame;
-            TweenService.Create(currentCamera, new TweenInfo(1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), { CFrame: toCframe }).Play();
+            TweenService.Create(currentCamera, new TweenInfo(1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+                CFrame: toCframe,
+            }).Play();
             task.delay(1, () => {
                 playSound("Thunder.mp3");
                 const lightning = ASSETS.Resets.WaitForChild("SkillificationLightning").Clone() as BasePart;
@@ -67,8 +69,7 @@ export default class ResetController implements OnInit {
                 task.delay(0.35, () => {
                     const effects = lightning.GetChildren();
                     for (const effect of effects) {
-                        if (effect.IsA("ParticleEmitter"))
-                            effect.Enabled = false;
+                        if (effect.IsA("ParticleEmitter")) effect.Enabled = false;
                     }
                     currentCamera.CameraType = Enum.CameraType.Custom;
                     this.effectController.camShake.Shake(CameraShaker.Presets.Bump);
@@ -84,10 +85,12 @@ export default class ResetController implements OnInit {
      */
     onInit() {
         Packets.reset.fromServer((layer, amount) => {
-            if (Packets.settings.get()?.ResetAnimation === false)
-                return;
+            if (Packets.settings.get()?.ResetAnimation === false) return;
             const resetLayer = RESET_LAYERS[layer];
-            TRACKED_QUEST_WINDOW.Reset.AmountLabel.Text = CurrencyBundle.getFormatted(resetLayer.gives, new OnoeNum(amount)).upper();
+            TRACKED_QUEST_WINDOW.Reset.AmountLabel.Text = CurrencyBundle.getFormatted(
+                resetLayer.gives,
+                new OnoeNum(amount),
+            ).upper();
             this.moveCamera(resetLayer.area.areaFolder.WaitForChild("ResetCamera"));
             playSound("MagicCast.mp3");
         });

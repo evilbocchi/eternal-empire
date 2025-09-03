@@ -35,8 +35,8 @@ import Packets from "shared/Packets";
 
 declare global {
     type ChestModel = Model & {
-        Lid: Model,
-        Base: Model,
+        Lid: Model;
+        Base: Model;
         Hitbox: BasePart & {
             CooldownGui: CooldownGui;
         };
@@ -77,7 +77,6 @@ interface Loot {
  * Supports adding items, harvestables, and XP with weights.
  */
 class LootPool {
-
     /** Static random instance for consistent pulls. */
     static readonly RANDOM = new Random(tick());
 
@@ -86,7 +85,7 @@ class LootPool {
 
     /**
      * Adds an item to the loot pool with a given weight.
-     * 
+     *
      * @param item The item to add.
      * @param weight The weight for random selection.
      */
@@ -97,7 +96,7 @@ class LootPool {
 
     /**
      * Adds a harvestable to the loot pool with a given weight.
-     * 
+     *
      * @param harvestable The harvestable ID.
      * @param weight The weight for random selection.
      */
@@ -108,7 +107,7 @@ class LootPool {
 
     /**
      * Adds XP to the loot pool with a given weight.
-     * 
+     *
      * @param xp The XP amount.
      * @param weight The weight for random selection.
      */
@@ -130,7 +129,7 @@ class LootPool {
 
     /**
      * Pulls a number of loot items from the pool using weighted random selection.
-     * 
+     *
      * @param amount The number of loot items to pull (default 5).
      * @returns An array of selected loot objects.
      */
@@ -153,8 +152,7 @@ class LootPool {
         const loot = new Array<Loot>();
         for (let i = 0; i < amount; i++) {
             const got = get();
-            if (got !== undefined)
-                loot.push(got);
+            if (got !== undefined) loot.push(got);
         }
         return loot;
     }
@@ -165,7 +163,6 @@ class LootPool {
  */
 @Service()
 export default class ChestService implements OnInit, OnStart {
-
     /** Loot pools per chest level. */
     poolPerLevel = new Map<string, LootPool>();
 
@@ -178,9 +175,12 @@ export default class ChestService implements OnInit, OnStart {
     /** Tween info for chest lid animation. */
     openTweenInfo = new TweenInfo(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out);
 
-    constructor(private dataService: DataService, private levelService: LevelService, private itemService: ItemService, private unlockedAreasService: UnlockedAreasService) {
-
-    }
+    constructor(
+        private dataService: DataService,
+        private levelService: LevelService,
+        private itemService: ItemService,
+        private unlockedAreasService: UnlockedAreasService,
+    ) {}
 
     /**
      * Rounds a Vector3 to integer values.
@@ -192,25 +192,22 @@ export default class ChestService implements OnInit, OnStart {
 
     /**
      * Marks the last open time for a chest and updates its state.
-     * 
+     *
      * @param chestLocation The chest's location.
      * @param lastOpen The last open timestamp.
      */
     markLastOpen(chestLocation: Vector3, lastOpen: number) {
         const chest = this.chestPerChestLocation.get(chestLocation);
-        if (chest === undefined)
-            return false;
+        if (chest === undefined) return false;
         const bindableEvent = chest.FindFirstChild("MarkLastOpen") as BindableEvent;
-        if (bindableEvent === undefined)
-            throw `Chest at ${chestLocation} does not have a MarkLastOpen BindableEvent`;
+        if (bindableEvent === undefined) throw `Chest at ${chestLocation} does not have a MarkLastOpen BindableEvent`;
         bindableEvent.Fire(lastOpen);
         return true;
     }
 
-
     /**
      * Rewards loot to the player, updating items and XP.
-     * 
+     *
      * @param loots The loot objects to reward.
      */
     rewardLoot(...loots: Loot[]) {
@@ -222,12 +219,9 @@ export default class ChestService implements OnInit, OnStart {
             items.set(itemId, (items.get(itemId) ?? 0) + 1);
         };
         for (const loot of loots) {
-            if (loot.xp !== undefined)
-                totalXp += loot.xp;
-            if (loot.item !== undefined)
-                addItem(loot.item);
-            if (loot.harvestable !== undefined)
-                addItem(Items.getItem(loot.harvestable)!);
+            if (loot.xp !== undefined) totalXp += loot.xp;
+            if (loot.item !== undefined) addItem(loot.item);
+            if (loot.harvestable !== undefined) addItem(Items.getItem(loot.harvestable)!);
         }
         const current = this.levelService.getXp();
         if (totalXp > 0) {
@@ -245,8 +239,7 @@ export default class ChestService implements OnInit, OnStart {
      */
     openChest(chestId: string, amount: number) {
         const pool = this.poolPerLevel.get(chestId);
-        if (pool === undefined)
-            throw `No loot pool found for chest ${chestId}`;
+        if (pool === undefined) throw `No loot pool found for chest ${chestId}`;
         this.rewardLoot(...pool.pull(amount));
     }
 
@@ -254,50 +247,55 @@ export default class ChestService implements OnInit, OnStart {
      * Initializes loot pools for each chest level.
      */
     onInit() {
-        this.poolPerLevel.set("1", new LootPool()
-            .addXP(1, 2000)
-            .addXP(3, 1000)
-            .addXP(5, 500)
-            .addItem(Grass, 1000)
-            .addItem(StaleWood, 1000)
-            .addItem(ExcavationStone, 1000)
-            .addItem(WhiteGem, 200)
-            .addItem(EnchantedGrass, 100)
-            .addHarvestable("MagicalWood", 50)
-            .addItem(Crystal, 50)
-            .addItem(Iron, 10)
-            .addItem(Gold, 1)
+        this.poolPerLevel.set(
+            "1",
+            new LootPool()
+                .addXP(1, 2000)
+                .addXP(3, 1000)
+                .addXP(5, 500)
+                .addItem(Grass, 1000)
+                .addItem(StaleWood, 1000)
+                .addItem(ExcavationStone, 1000)
+                .addItem(WhiteGem, 200)
+                .addItem(EnchantedGrass, 100)
+                .addHarvestable("MagicalWood", 50)
+                .addItem(Crystal, 50)
+                .addItem(Iron, 10)
+                .addItem(Gold, 1),
         );
-        this.poolPerLevel.set("2", new LootPool()
-            .addXP(1, 500)
-            .addXP(3, 1500)
-            .addXP(5, 1000)
-            .addXP(9, 500)
-            .addItem(Grass, 600)
-            .addItem(StaleWood, 600)
-            .addItem(ExcavationStone, 600)
-            .addItem(WhiteGem, 400)
-            .addItem(EnchantedGrass, 200)
-            .addHarvestable("MagicalWood", 150)
-            .addItem(Crystal, 150)
-            .addItem(Iron, 70)
-            .addItem(Gold, 30)
-            .addItem(Quartz, 1)
+        this.poolPerLevel.set(
+            "2",
+            new LootPool()
+                .addXP(1, 500)
+                .addXP(3, 1500)
+                .addXP(5, 1000)
+                .addXP(9, 500)
+                .addItem(Grass, 600)
+                .addItem(StaleWood, 600)
+                .addItem(ExcavationStone, 600)
+                .addItem(WhiteGem, 400)
+                .addItem(EnchantedGrass, 200)
+                .addHarvestable("MagicalWood", 150)
+                .addItem(Crystal, 150)
+                .addItem(Iron, 70)
+                .addItem(Gold, 30)
+                .addItem(Quartz, 1),
         );
-        this.poolPerLevel.set("3", new LootPool()
-            .addXP(4, 500)
-            .addXP(6, 1500)
-            .addXP(9, 1000)
-            .addXP(15, 500)
-            .addItem(WhiteGem, 400)
-            .addItem(EnchantedGrass, 200)
-            .addItem(CorruptedGrass, 2)
-            .addItem(Crystal, 200)
-            .addItem(Iron, 70)
-            .addItem(Gold, 30)
-            .addItem(Quartz, 2)
+        this.poolPerLevel.set(
+            "3",
+            new LootPool()
+                .addXP(4, 500)
+                .addXP(6, 1500)
+                .addXP(9, 1000)
+                .addXP(15, 500)
+                .addItem(WhiteGem, 400)
+                .addItem(EnchantedGrass, 200)
+                .addItem(CorruptedGrass, 2)
+                .addItem(Crystal, 200)
+                .addItem(Iron, 70)
+                .addItem(Gold, 30)
+                .addItem(Quartz, 2),
         );
-
     }
 
     /**
@@ -306,12 +304,10 @@ export default class ChestService implements OnInit, OnStart {
     onStart() {
         for (const [_id, area] of pairs(AREAS)) {
             const chestsFolder = area.areaFolder.FindFirstChild("Chests");
-            if (chestsFolder === undefined)
-                continue;
+            if (chestsFolder === undefined) continue;
             const chestLocations = chestsFolder.GetChildren();
             for (const chestLocationMarker of chestLocations) {
-                if (!chestLocationMarker.IsA("BasePart"))
-                    continue;
+                if (!chestLocationMarker.IsA("BasePart")) continue;
                 chestLocationMarker.FrontSurface = Enum.SurfaceType.Smooth;
                 chestLocationMarker.Transparency = 1;
                 const chestModel = ASSETS.Chest.Clone();
@@ -332,7 +328,9 @@ export default class ChestService implements OnInit, OnStart {
                 const markLastOpen = (lo: number) => {
                     lastOpen = lo;
                     isOpened = tick() - lastOpen < this.cooldown;
-                    TweenService.Create(bp, this.openTweenInfo, { CFrame: isOpened ? originalLidPivot.mul(CFrame.Angles(-1, 0, 0)) : originalLidPivot }).Play();
+                    TweenService.Create(bp, this.openTweenInfo, {
+                        CFrame: isOpened ? originalLidPivot.mul(CFrame.Angles(-1, 0, 0)) : originalLidPivot,
+                    }).Play();
                     prompt.Enabled = !isOpened;
                     chestModel.Hitbox.CooldownGui.Enabled = isOpened;
                 };
@@ -344,7 +342,9 @@ export default class ChestService implements OnInit, OnStart {
                             markLastOpen(lastOpen);
                         }
                         if (isOpened) {
-                            chestModel.Hitbox.CooldownGui.CooldownLabel.Text = convertToMMSS(math.floor(this.cooldown - elapsed));
+                            chestModel.Hitbox.CooldownGui.CooldownLabel.Text = convertToMMSS(
+                                math.floor(this.cooldown - elapsed),
+                            );
                         }
                     }
                 });
@@ -355,14 +355,15 @@ export default class ChestService implements OnInit, OnStart {
                 const chestLocation = this.round(chestLocationMarker.Position);
                 this.chestPerChestLocation.set(chestLocation, chestModel);
                 prompt.Triggered.Connect(() => {
-                    if (!prompt.Enabled)
-                        return;
-                    if (this.dataService.empireData.unlockedAreas.has(area.name as AreaId))
-                        return;
+                    if (!prompt.Enabled) return;
+                    if (this.dataService.empireData.unlockedAreas.has(area.name as AreaId)) return;
                     sound.Play();
                     const t = tick();
                     const amount = lastOpen === 0 ? math.random(10, 14) : math.random(3, 7);
-                    this.dataService.empireData.openedChests.set(`${chestLocation.X}_${chestLocation.Y}_${chestLocation.Z}`, t);
+                    this.dataService.empireData.openedChests.set(
+                        `${chestLocation.X}_${chestLocation.Y}_${chestLocation.Z}`,
+                        t,
+                    );
                     markLastOpen(t);
                     task.delay(0.25, () => {
                         this.openChest(chestLocationMarker.Name, amount);
@@ -377,7 +378,10 @@ export default class ChestService implements OnInit, OnStart {
         const lastOpenPerLocation = this.dataService.empireData.openedChests;
         for (const [location, lastOpen] of lastOpenPerLocation) {
             const [xString, yString, zString] = location.split("_");
-            if (this.markLastOpen(new Vector3(tonumber(xString), tonumber(yString), tonumber(zString)), lastOpen) === false) {
+            if (
+                this.markLastOpen(new Vector3(tonumber(xString), tonumber(yString), tonumber(zString)), lastOpen) ===
+                false
+            ) {
                 lastOpenPerLocation.delete(location);
             }
         }

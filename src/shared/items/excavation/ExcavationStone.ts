@@ -14,13 +14,6 @@ const ExcavationStone = new Item(script.Name)
     .placeableEverywhere()
     .persists();
 
-ExcavationStone.trait(Shop).setItems([
-    ExcavationStone,
-    WhiteGem,
-    Crystal,
-    Iron,
-    Gold,
-    Quartz
-]);
+ExcavationStone.trait(Shop).setItems([ExcavationStone, WhiteGem, Crystal, Iron, Gold, Quartz]);
 
 export = ExcavationStone;

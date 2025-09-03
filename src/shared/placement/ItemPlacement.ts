@@ -22,10 +22,13 @@ namespace ItemPlacement {
             }
 
             let indicator = hitbox.FindFirstChild("Indicator") as BasePart | undefined; // preferrably use hitbox indicator
-            if (indicator === undefined)
-                indicator = hitbox;
+            if (indicator === undefined) indicator = hitbox;
 
-            const parts = Workspace.GetPartBoundsInBox(indicator.CFrame, indicator.Size.sub(new Vector3(0.01, 0, 0.01)), overlapParams);
+            const parts = Workspace.GetPartBoundsInBox(
+                indicator.CFrame,
+                indicator.Size.sub(new Vector3(0.01, 0, 0.01)),
+                overlapParams,
+            );
             for (const part of parts) {
                 if (part.Name === "Hitbox" && part.Parent?.Name !== itemModel.Name) {
                     return true;
@@ -43,8 +46,7 @@ namespace ItemPlacement {
      */
     export function getAreaOfPosition(position: Vector3, placeableAreas: Area[]) {
         for (const area of placeableAreas) {
-            if (area.buildBounds?.isInside(position))
-                return area;
+            if (area.buildBounds?.isInside(position)) return area;
         }
         return undefined;
     }
@@ -59,8 +61,7 @@ namespace ItemPlacement {
         const hitbox = itemModel.PrimaryPart;
         if (hitbox !== undefined) {
             for (const area of placeableAreas) {
-                if (area.buildBounds?.isCompletelyInside(hitbox))
-                    return area;
+                if (area.buildBounds?.isCompletelyInside(hitbox)) return area;
             }
         }
         return undefined;
@@ -75,10 +76,12 @@ namespace ItemPlacement {
     export function isInPlaceableArea(itemModel: Model, item: Item) {
         if (item.bounds === undefined) {
             return ItemPlacement.getArea(itemModel, item.placeableAreas) !== undefined;
-        }
-        else {
+        } else {
             const primaryPart = itemModel.PrimaryPart!;
-            for (const touching of Workspace.GetPartBoundsInBox(primaryPart.CFrame, primaryPart.Size.add(new Vector3(1, 10, 1)))) {
+            for (const touching of Workspace.GetPartBoundsInBox(
+                primaryPart.CFrame,
+                primaryPart.Size.add(new Vector3(1, 10, 1)),
+            )) {
                 if (touching.Name === item.bounds) {
                     return true;
                 }

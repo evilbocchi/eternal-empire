@@ -23,7 +23,10 @@ import ItemFilter from "client/ItemFilter";
 import ItemSlot from "client/ItemSlot";
 import { PLAYER_GUI } from "client/constants";
 import { LOCAL_PLAYER } from "shared/constants";
-import AdaptiveTabController, { ADAPTIVE_TAB, ADAPTIVE_TAB_MAIN_WINDOW } from "client/controllers/core/AdaptiveTabController";
+import AdaptiveTabController, {
+    ADAPTIVE_TAB,
+    ADAPTIVE_TAB_MAIN_WINDOW,
+} from "client/controllers/core/AdaptiveTabController";
 import HotkeysController from "client/controllers/core/HotkeysController";
 import Packets from "shared/Packets";
 import { ASSETS, getSound, playSound } from "shared/asset/GameAssets";
@@ -80,7 +83,6 @@ export const PURCHASE_WINDOW = ADAPTIVE_TAB_MAIN_WINDOW.WaitForChild("Purchase")
             };
         };
     };
-
 };
 
 /**
@@ -109,8 +111,7 @@ export default class ShopController implements OnInit, OnStart {
     /** Item filter logic for the shop GUI. */
     readonly filterItems = ItemFilter.loadFilterOptions(SHOP_GUI.FilterOptions, (query, whitelistedTraits) => {
         const items = this.currentShop?.items;
-        if (items === undefined)
-            return;
+        if (items === undefined) return;
         ItemSlot.filterItems(this.itemSlotsPerItem, items, query, whitelistedTraits);
     });
 
@@ -134,8 +135,10 @@ export default class ShopController implements OnInit, OnStart {
     /** Debounce for switching items. */
     switchDebounce = 0;
 
-    constructor(private hotkeysController: HotkeysController, private adaptiveTabController: AdaptiveTabController) {
-    }
+    constructor(
+        private hotkeysController: HotkeysController,
+        private adaptiveTabController: AdaptiveTabController,
+    ) {}
 
     /**
      * Animates and hides the shop GUI part.
@@ -156,8 +159,7 @@ export default class ShopController implements OnInit, OnStart {
      * @param shop The shop data to display.
      */
     refreshShop(shopGuiPart?: Part, shop?: Shop) {
-        if (shopGuiPart !== undefined && this.shopGuiPart === shopGuiPart)
-            return;
+        if (shopGuiPart !== undefined && this.shopGuiPart === shopGuiPart) return;
 
         const previousShopGuiPart = this.shopGuiPart;
         if (previousShopGuiPart !== undefined && previousShopGuiPart !== shopGuiPart) {
@@ -219,10 +221,12 @@ export default class ShopController implements OnInit, OnStart {
                     return;
                 }
                 const inBalance = balance.get(currency);
-                update((amount as OnoeNum).lessEquals(0) || (inBalance !== undefined && (amount as OnoeNum).lessEquals(inBalance)));
+                update(
+                    (amount as OnoeNum).lessEquals(0) ||
+                        (inBalance !== undefined && (amount as OnoeNum).lessEquals(inBalance)),
+                );
             });
-        }
-        else if (item !== undefined) {
+        } else if (item !== undefined) {
             ItemSlot.loadViewportFrame(option.ViewportFrame, item);
             option.LayoutOrder = 1000 + (item.difficulty?.rating ?? 0);
             option.ImageLabel.Visible = false;
@@ -251,7 +255,9 @@ export default class ShopController implements OnInit, OnStart {
 
         priceOption.Parent = purchaseButton.Price;
         const size = priceOption.AbsoluteSize.X + 5;
-        let currentContainer = purchaseButton.Price.FindFirstChild(this.priceContainerCounter) as typeof ASSETS.ShopWindow.PriceOptionsContainer | undefined;
+        let currentContainer = purchaseButton.Price.FindFirstChild(this.priceContainerCounter) as
+            | typeof ASSETS.ShopWindow.PriceOptionsContainer
+            | undefined;
         if (currentContainer === undefined || this.availableContainerSpace < size) {
             currentContainer = ASSETS.ShopWindow.PriceOptionsContainer.Clone();
             currentContainer.Name = tostring(++this.priceContainerCounter);
@@ -275,8 +281,7 @@ export default class ShopController implements OnInit, OnStart {
         const inventory = Packets.inventory.get();
         const bought = Packets.bought.get();
         const placed = Packets.placedItems.get();
-        if (inventory === undefined || bought === undefined || placed === undefined)
-            return;
+        if (inventory === undefined || bought === undefined || placed === undefined) return;
 
         this.selectedItem = item;
 
@@ -291,8 +296,7 @@ export default class ShopController implements OnInit, OnStart {
         viewportFrame.ClearAllChildren();
         ItemSlot.loadViewportFrame(viewportFrame, item);
         for (const option of purchaseButton.Price.GetChildren()) {
-            if (option.IsA("Frame"))
-                option.Destroy();
+            if (option.IsA("Frame")) option.Destroy();
         }
         let price = item.getPrice((bought.get(item.id) ?? 0) + 1);
 
@@ -308,8 +312,7 @@ export default class ShopController implements OnInit, OnStart {
                 this.createPriceOption(amount, undefined, requiredItem);
 
             purchaseButton.Visible = true;
-        }
-        else {
+        } else {
             purchaseButton.Visible = false;
         }
 
@@ -328,8 +331,7 @@ export default class ShopController implements OnInit, OnStart {
      * @returns True if the window was hidden, false otherwise.
      */
     hidePurchaseWindow() {
-        if (PURCHASE_WINDOW.Visible === false)
-            return false;
+        if (PURCHASE_WINDOW.Visible === false) return false;
 
         this.adaptiveTabController.hideAdaptiveTab();
         this.selectedItem = undefined;
@@ -364,8 +366,7 @@ export default class ShopController implements OnInit, OnStart {
     priceCycle() {
         const hideMaxedItems = this.hideMaxedItems;
         const bought = Packets.bought.get();
-        if (bought === undefined)
-            return;
+        if (bought === undefined) return;
         for (const [item, itemSlot] of this.itemSlotsPerItem) {
             if (itemSlot.Visible === false) {
                 continue;
@@ -406,7 +407,9 @@ export default class ShopController implements OnInit, OnStart {
             const currency = getCurrencyAtIndex();
             if (currency !== undefined) {
                 itemSlot.AmountLabel.Text = CurrencyBundle.getFormatted(currency, amount);
-                TweenService.Create(itemSlot.AmountLabel, new TweenInfo(0.5), { TextColor3: CURRENCY_DETAILS[currency].color }).Play();
+                TweenService.Create(itemSlot.AmountLabel, new TweenInfo(0.5), {
+                    TextColor3: CURRENCY_DETAILS[currency].color,
+                }).Play();
             }
         }
     }
@@ -419,63 +422,75 @@ export default class ShopController implements OnInit, OnStart {
         this.hidePurchaseWindow();
 
         Packets.settings.observe((settings) => {
-            if (settings.HideMaxedItems === this.hideMaxedItems)
-                return;
+            if (settings.HideMaxedItems === this.hideMaxedItems) return;
             this.hideMaxedItems = settings.HideMaxedItems;
         });
 
         Packets.inventory.observe(() => {
-            if (this.selectedItem === undefined)
-                return;
+            if (this.selectedItem === undefined) return;
             this.refreshPurchaseWindow(this.selectedItem);
         });
 
         // Refresh purchase window if the bought amount for the selected item changes
         Packets.bought.observe(() => {
-            if (this.selectedItem === undefined)
-                return;
+            if (this.selectedItem === undefined) return;
             this.refreshPurchaseWindow(this.selectedItem);
         });
 
         const purchaseButton = PURCHASE_WINDOW.DescriptionFrame.PurchaseContainer.Purchase;
-        this.hotkeysController.setHotkey(purchaseButton, Enum.KeyCode.E, () => {
-            if (PURCHASE_WINDOW.Visible === false) {
-                return false;
-            }
-            if (this.selectedItem !== undefined && Packets.buyItem.toServer(this.selectedItem.id)) {
-                playSound("ItemPurchase.mp3");
-            }
-            else {
-                playSound("Error.mp3");
-            }
-            return true;
-        }, "Buy", 1);
-
-        this.hotkeysController.setHotkey(SHOP_GUI.ItemList.BuyAll.Button, Enum.KeyCode.O, () => {
-            if (SHOP_GUI.Enabled && this.currentShop !== undefined) {
-                const items = new Array<string>();
-                for (const [item, slot] of this.itemSlotsPerItem) {
-                    if (slot.Visible === false)
-                        continue;
-                    items.push(item.id);
+        this.hotkeysController.setHotkey(
+            purchaseButton,
+            Enum.KeyCode.E,
+            () => {
+                if (PURCHASE_WINDOW.Visible === false) {
+                    return false;
                 }
-                if (Packets.buyAllItems.toServer(items)) {
+                if (this.selectedItem !== undefined && Packets.buyItem.toServer(this.selectedItem.id)) {
                     playSound("ItemPurchase.mp3");
-                }
-                else {
+                } else {
                     playSound("Error.mp3");
                 }
                 return true;
-            }
-            return false;
-        }, "Buy All Items", 5);
+            },
+            "Buy",
+            1,
+        );
+
+        this.hotkeysController.setHotkey(
+            SHOP_GUI.ItemList.BuyAll.Button,
+            Enum.KeyCode.O,
+            () => {
+                if (SHOP_GUI.Enabled && this.currentShop !== undefined) {
+                    const items = new Array<string>();
+                    for (const [item, slot] of this.itemSlotsPerItem) {
+                        if (slot.Visible === false) continue;
+                        items.push(item.id);
+                    }
+                    if (Packets.buyAllItems.toServer(items)) {
+                        playSound("ItemPurchase.mp3");
+                    } else {
+                        playSound("Error.mp3");
+                    }
+                    return true;
+                }
+                return false;
+            },
+            "Buy All Items",
+            5,
+        );
 
         PURCHASE_WINDOW.DescriptionFrame.CreatorLabel.MouseMoved.Connect(() => {
-            TweenService.Create(PURCHASE_WINDOW.DescriptionFrame.CreatorLabel, new TweenInfo(0.2), { TextTransparency: 0, TextStrokeTransparency: 0 }).Play();
+            TweenService.Create(PURCHASE_WINDOW.DescriptionFrame.CreatorLabel, new TweenInfo(0.2), {
+                TextTransparency: 0,
+                TextStrokeTransparency: 0,
+            }).Play();
         });
 
         PURCHASE_WINDOW.DescriptionFrame.CreatorLabel.MouseLeave.Connect(() => {
-            TweenService.Create(PURCHASE_WINDOW.DescriptionFrame.CreatorLabel, new TweenInfo(0.2), { TextTransparency: 0.8, TextStrokeTransparency: 0.8 }).Play();
+            TweenService.Create(PURCHASE_WINDOW.DescriptionFrame.CreatorLabel, new TweenInfo(0.2), {
+                TextTransparency: 0.8,
+                TextStrokeTransparency: 0.8,
+            }).Play();
         });
 
         ItemSlot.hookMetadata(METADATA_PER_ITEM);
@@ -521,21 +536,17 @@ export default class ShopController implements OnInit, OnStart {
         task.spawn(() => {
             while (task.wait(0.1)) {
                 const primaryPart = LOCAL_PLAYER.Character?.PrimaryPart;
-                if (primaryPart === undefined)
-                    continue;
+                if (primaryPart === undefined) continue;
 
                 const shopHitboxes = CollectionService.GetTagged("Shop");
                 let shopFound = false;
                 for (const shopHitbox of shopHitboxes) {
-                    if (!shopHitbox.IsA("Part"))
-                        continue;
+                    if (!shopHitbox.IsA("Part")) continue;
                     const shopModel = shopHitbox.Parent;
-                    if (shopModel === undefined || shopModel.GetAttribute("Selected"))
-                        continue;
+                    if (shopModel === undefined || shopModel.GetAttribute("Selected")) continue;
 
                     const shopGuiPart = shopModel.FindFirstChild("ShopGuiPart") as Part | undefined;
-                    if (shopGuiPart === undefined)
-                        continue;
+                    if (shopGuiPart === undefined) continue;
 
                     if (shopGuiPart.GetAttribute("ClientLoaded") !== true) {
                         this.hideShopGuiPart(shopGuiPart);
@@ -543,16 +554,17 @@ export default class ShopController implements OnInit, OnStart {
                     }
 
                     const localPosition = shopHitbox.CFrame.PointToObjectSpace(primaryPart.Position);
-                    if (math.abs(localPosition.X) > shopHitbox.Size.X / 2 || math.abs(localPosition.Z) > shopHitbox.Size.Z / 2)
+                    if (
+                        math.abs(localPosition.X) > shopHitbox.Size.X / 2 ||
+                        math.abs(localPosition.Z) > shopHitbox.Size.Z / 2
+                    )
                         continue;
 
                     const itemId = shopModel.GetAttribute("ItemId") as string | undefined;
-                    if (itemId === undefined)
-                        continue;
+                    if (itemId === undefined) continue;
 
                     const item = Items.getItem(itemId);
-                    if (item === undefined)
-                        continue;
+                    if (item === undefined) continue;
 
                     this.refreshShop(shopGuiPart, item.trait(Shop));
                     shopFound = true;

@@ -19,10 +19,11 @@ const base = new CurrencyBundle().set("Power", amt);
 
 export = new Item(script.Name)
     .setName("Octahedral Temple")
-    .setDescription(`The shape for optimal power generation. It is said that this temple was built by worshippers of the octahedron as a symbol of balance and harmony.
+    .setDescription(
+        `The shape for optimal power generation. It is said that this temple was built by worshippers of the octahedron as a symbol of balance and harmony.
 Now, it has been reduced to a mere generator, corrupted by the greed of those who seek to harness its power.
 
-Produces %gain%, this amount increasing with Skill.`
+Produces %gain%, this amount increasing with Skill.`,
     )
     .setDifficulty(Difficulty.Spontaneous)
     .setPrice(new CurrencyBundle().set("Funds", 2e45).set("Power", 1e30).set("Purifier Clicks", 1e30), 1)
@@ -43,8 +44,11 @@ Produces %gain%, this amount increasing with Skill.`
 
     .trait(Generator)
     .setPassiveGain(base)
-    .applyFormula((v, item) => {
-        return item.setPassiveGain(base.set("Power", amt.mul(v)));
-    }, () => Server.Currency.get("Skill"))
+    .applyFormula(
+        (v, item) => {
+            return item.setPassiveGain(base.set("Power", amt.mul(v)));
+        },
+        () => Server.Currency.get("Skill"),
+    )
 
     .exit();

@@ -6,7 +6,9 @@ import CurrencyBundle from "shared/currency/CurrencyBundle";
 
 export = new Item(script.Name)
     .setName("Grass Dropper")
-    .setDescription("You need more grass. A Grass Droplet from this dropper touching a Grass Conveyor transforms it into a Massive Grass Droplet worth $550.")
+    .setDescription(
+        "You need more grass. A Grass Droplet from this dropper touching a Grass Conveyor transforms it into a Massive Grass Droplet worth $550.",
+    )
     .setDifficulty(Difficulty.Friendliness)
     .setPrice(new CurrencyBundle().set("Funds", 34500000), 1)
     .setPrice(new CurrencyBundle().set("Funds", 80000000), 2)

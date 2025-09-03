@@ -50,7 +50,7 @@ export = new Item(script.Name)
 
         FullConversionRamp,
 
-        DropletCoaster
+        DropletCoaster,
     ])
 
     .exit();

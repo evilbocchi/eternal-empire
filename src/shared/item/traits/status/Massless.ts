@@ -17,11 +17,13 @@ declare global {
 }
 
 const format = (str: string) => {
-    return str.gsub("%%massless%%", formatGradient("Massless", new Color3(0.16, 0.96, 0.69), new Color3(0, 1, 0.53)))[0];
-}
+    return str.gsub(
+        "%%massless%%",
+        formatGradient("Massless", new Color3(0.16, 0.96, 0.69), new Color3(0, 1, 0.53)),
+    )[0];
+};
 
 export default class Massless extends StatusEffect {
-
     static BOOST = CurrencyBundle.ones().mul(1.2);
 
     constructor(item: Item) {
@@ -36,7 +38,7 @@ export default class Massless extends StatusEffect {
             Upgrader: Workspace,
             Boost: {
                 mul: Massless.BOOST,
-            }
+            },
         });
 
         return {};
@@ -48,7 +50,6 @@ export default class Massless extends StatusEffect {
 }
 
 export class Grounder extends StatusEffect {
-
     constructor(item: Item) {
         super(item);
         item.onLoad((model) => Grounder.load(model, this));

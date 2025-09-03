@@ -10,7 +10,9 @@ const mul = new CurrencyBundle().set("Funds", 0);
 
 export = new Item(script.Name)
     .setName("Shocking Refiner")
-    .setDescription("Gives droplets a bigger shock than an Energised Refiner. Funds boost increases with Power, maxing out at %cap%. Uses %drain%.")
+    .setDescription(
+        "Gives droplets a bigger shock than an Energised Refiner. Funds boost increases with Power, maxing out at %cap%. Uses %drain%.",
+    )
     .setDifficulty(Difficulty.Exist)
     .setPrice(new CurrencyBundle().set("Funds", 16.25e15).set("Power", 1760000), 1)
     .setPrice(new CurrencyBundle().set("Funds", 24.6e15).set("Power", 3240000), 2)
@@ -24,6 +26,9 @@ export = new Item(script.Name)
     .setDrain(new CurrencyBundle().set("Power", 2000))
 
     .trait(Upgrader)
-    .applyFormula((v, item) => item.setMul(mul.set("Funds", v)), () => Server.Currency.get("Power"))
+    .applyFormula(
+        (v, item) => item.setMul(mul.set("Funds", v)),
+        () => Server.Currency.get("Power"),
+    )
 
     .exit();

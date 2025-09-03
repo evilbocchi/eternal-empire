@@ -1,6 +1,6 @@
 /**
  * @fileoverview Main backpack window React component
- * 
+ *
  * Displays the player's tool inventory with hotkey numbers and selection states.
  * Manages visibility based on adaptive tab and build mode states.
  */
@@ -32,11 +32,7 @@ interface BackpackWindowProps {
 /**
  * Main backpack window component that displays tool options
  */
-export default function BackpackWindow({ 
-    state, 
-    callbacks, 
-    animationsEnabled = true 
-}: BackpackWindowProps) {
+export default function BackpackWindow({ state, callbacks, animationsEnabled = true }: BackpackWindowProps) {
     const { visible, tools } = state;
     const { onToolClick } = callbacks;
 

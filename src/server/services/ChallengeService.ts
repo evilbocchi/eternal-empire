@@ -37,14 +37,14 @@ declare global {
     interface Assets {
         ChallengeOption: Frame & {
             Description: Frame & {
-                DescriptionLabel: TextLabel,
-                NoticeLabel: TextLabel,
+                DescriptionLabel: TextLabel;
+                NoticeLabel: TextLabel;
                 RequirementLabel: TextLabel;
-            },
+            };
             StartButton: TextButton & {
                 Label: TextLabel;
-            },
-            RewardLabel: TextLabel,
+            };
+            RewardLabel: TextLabel;
             TitleLabel: TextLabel & {
                 UIGradient: UIGradient;
             };
@@ -57,7 +57,6 @@ declare global {
  */
 @Service()
 export class ChallengeService implements OnStart {
-
     /** Debounce timer for challenge actions. */
     debounce = 0;
 
@@ -66,7 +65,7 @@ export class ChallengeService implements OnStart {
 
     /**
      * Forces the end of a challenge and sends a server message.
-     * 
+     *
      * @param message The message to send to the server.
      */
     forceEnd = (message: string) => {
@@ -74,20 +73,20 @@ export class ChallengeService implements OnStart {
         this.chatHookService.sendServerMessage(message);
     };
 
-    constructor(private dataService: DataService,
+    constructor(
+        private dataService: DataService,
         private resetService: ResetService,
         private itemService: ItemService,
         private currencyService: CurrencyService,
         private namedUpgradeService: NamedUpgradeService,
         private setupService: SetupService,
         private permissionsService: PermissionsService,
-        private chatHookService: ChatHookService) {
-
-    }
+        private chatHookService: ChatHookService,
+    ) {}
 
     /**
      * Starts a challenge for the player, performing resets and backups as needed.
-     * 
+     *
      * @param player The player starting the challenge.
      * @param challengeId The ID of the challenge to start.
      * @returns The challenge details if started, otherwise undefined.
@@ -101,13 +100,11 @@ export class ChallengeService implements OnStart {
 
         print("starting challenge", challengeId);
         const challengeDetails = CHALLENGES[challengeId];
-        if (challengeDetails === undefined)
-            return;
+        if (challengeDetails === undefined) return;
 
         const empireData = this.dataService.empireData;
         const currentLevel = this.getChallengeLevel(challengeId);
-        if (currentLevel > challengeDetails.cap)
-            return;
+        if (currentLevel > challengeDetails.cap) return;
 
         if (challengeDetails.resets !== undefined) {
             const resetLayer = RESET_LAYERS[challengeDetails.resets as ResetLayerId];
@@ -117,8 +114,7 @@ export class ChallengeService implements OnStart {
 
                 empireData.backup.upgrades = new Map();
                 for (const [upgrade, amount] of empireData.upgrades)
-                    if (resetLayer.resettingUpgrades.includes(upgrade))
-                        empireData.backup.upgrades.set(upgrade, amount);
+                    if (resetLayer.resettingUpgrades.includes(upgrade)) empireData.backup.upgrades.set(upgrade, amount);
 
                 empireData.backup.currencies = new Map();
                 for (const [currency, amount] of this.currencyService.balance.amountPerCurrency)
@@ -137,7 +133,7 @@ export class ChallengeService implements OnStart {
 
     /**
      * Returns a notice string for the given challenge.
-     * 
+     *
      * @param challenge The challenge details.
      */
     getNotice(challenge: ChallengeDetails) {
@@ -151,18 +147,17 @@ export class ChallengeService implements OnStart {
 
     /**
      * Returns the formatted title label for a challenge.
-     * 
+     *
      * @param challenge The challenge details.
      * @param id The challenge ID.
      * @param level The challenge level (optional).
      */
     getTitleLabel(challenge: ChallengeDetails, id?: string, level?: number) {
         if (level === undefined) {
-            if (id === undefined)
-                throw "Specify an id for non-provided levels";
+            if (id === undefined) throw "Specify an id for non-provided levels";
             level = this.getChallengeLevel(id);
         }
-        return `${challenge.name} ${(toNumeral(level))}`;
+        return `${challenge.name} ${toNumeral(level)}`;
     }
 
     /**
@@ -180,7 +175,7 @@ export class ChallengeService implements OnStart {
 
     /**
      * Returns the reward label for a challenge at the given level.
-     * 
+     *
      * @param challenge The challenge details.
      * @param currentLevel The current challenge level.
      */
@@ -214,12 +209,10 @@ export class ChallengeService implements OnStart {
                 r2: 0,
                 g2: 0,
                 b2: 0,
-                description: ""
+                description: "",
             });
-            for (const [_, id] of CHALLENGE_UPGRADES)
-                this.namedUpgradeService.setUpgradeAmount(id, 0);
-        }
-        else {
+            for (const [_, id] of CHALLENGE_UPGRADES) this.namedUpgradeService.setUpgradeAmount(id, 0);
+        } else {
             currentChallengeWindow.Visible = true;
             challengeOptions.Visible = false;
             const challenge = CHALLENGES[challengeId];
@@ -241,7 +234,7 @@ export class ChallengeService implements OnStart {
                 r2: c2.R,
                 g2: c2.G,
                 b2: c2.B,
-                description: challenge.description(currentLevel) + "\n" + requirement
+                description: challenge.description(currentLevel) + "\n" + requirement,
             });
             for (const [id, upgId] of CHALLENGE_UPGRADES)
                 this.namedUpgradeService.setUpgradeAmount(upgId, id === challengeId ? currentLevel : 0);
@@ -250,7 +243,7 @@ export class ChallengeService implements OnStart {
 
     /**
      * Ends the current challenge, restoring backups and updating stats.
-     * 
+     *
      * @param cleared Whether the challenge was cleared.
      * @returns Tuple of challenge, challengeId, and new clears count.
      */
@@ -267,8 +260,7 @@ export class ChallengeService implements OnStart {
             return $tuple(undefined, undefined);
         }
         const challenge = CHALLENGES[challengeId as ChallengeId];
-        if (challenge === undefined)
-            return $tuple(undefined, undefined);
+        if (challenge === undefined) return $tuple(undefined, undefined);
 
         const resetLayer = RESET_LAYERS[challenge.resets as ResetLayerId];
         const cachedCurrencies = table.clone(data.currencies);
@@ -324,33 +316,33 @@ export class ChallengeService implements OnStart {
     challengeEffect() {
         const data = this.dataService.empireData;
         const challengeId = data.currentChallenge;
-        if (challengeId === undefined)
-            return;
+        if (challengeId === undefined) return;
         const challenge = CHALLENGES[challengeId as ChallengeId];
-        if (challenge === undefined)
-            return;
+        if (challenge === undefined) return;
 
         let challengeCompleted = false;
         if (typeIs(challenge.goal, "table")) {
             const items = challenge.goal as Item[];
             for (const item of items) {
                 const amount = data.items.inventory.get(item.id);
-                if (amount === undefined || amount < 1)
-                    continue;
+                if (amount === undefined || amount < 1) continue;
                 challengeCompleted = true;
                 break;
             }
         }
 
         const t = tick();
-        if (challengeCompleted === true && t - this.lastCompletion > 2 && data.playtime - data.currentChallengeStartTime > 2) {
+        if (
+            challengeCompleted === true &&
+            t - this.lastCompletion > 2 &&
+            data.playtime - data.currentChallengeStartTime > 2
+        ) {
             this.lastCompletion = t;
             const title = this.getTitleLabel(challenge, challengeId);
             this.chatHookService.sendServerMessage(`Challenge ${title} has been cleared!`);
             const [_challenge, _id, clears] = this.endChallenge(true);
             Packets.challengeCompleted.toAllClients(title, this.getRewardLabel(challenge, clears!));
-        }
-        else if (challenge.challengeEffect !== undefined) {
+        } else if (challenge.challengeEffect !== undefined) {
             if (challenge.lastEffect === undefined) {
                 challenge.lastEffect = t;
             }
@@ -373,13 +365,11 @@ export class ChallengeService implements OnStart {
         }
         const challengeOptions = gui.ChallengeOptions;
         challengeOptions.GetChildren().forEach((instance) => {
-            if (instance.IsA("Frame"))
-                instance.Destroy();
+            if (instance.IsA("Frame")) instance.Destroy();
         });
         for (const [key, challenge] of pairs(CHALLENGES)) {
             const currentLevel = this.getChallengeLevel(key);
-            if (currentLevel > challenge.cap)
-                continue;
+            if (currentLevel > challenge.cap) continue;
             const challengeOption = ASSETS.ChallengeOption.Clone();
             challengeOption.TitleLabel.Text = this.getTitleLabel(challenge, key, currentLevel);
             challengeOption.TitleLabel.UIGradient.Color = challenge.color;
@@ -392,8 +382,7 @@ export class ChallengeService implements OnStart {
             challengeOption.Parent = challengeOptions;
             if (currentLevel > 1) {
                 const upgradeId = REWARD_UPGRADES.get(key);
-                if (upgradeId !== undefined)
-                    this.namedUpgradeService.setUpgradeAmount(upgradeId, currentLevel - 1);
+                if (upgradeId !== undefined) this.namedUpgradeService.setUpgradeAmount(upgradeId, currentLevel - 1);
             }
             ++i;
         }
@@ -404,25 +393,23 @@ export class ChallengeService implements OnStart {
      * Starts the challenge service, sets up listeners, and begins challenge effect loop.
      */
     onStart() {
-        if (Sandbox.getEnabled())
-            return;
+        if (Sandbox.getEnabled()) return;
 
         Packets.startChallenge.fromClient((player, challengeId) => {
-            if (!this.dataService.checkPermLevel(player, "reset"))
-                return;
+            if (!this.dataService.checkPermLevel(player, "reset")) return;
             const challenge = this.startChallenge(player, challengeId as ChallengeId);
-            if (challenge === undefined)
-                return;
-            this.chatHookService.sendServerMessage(`Challenge ${this.getTitleLabel(challenge, challengeId)} has been started by ${player.Name}. The original setup has been saved, called "Autosaved", in a printer.`);
-
+            if (challenge === undefined) return;
+            this.chatHookService.sendServerMessage(
+                `Challenge ${this.getTitleLabel(challenge, challengeId)} has been started by ${player.Name}. The original setup has been saved, called "Autosaved", in a printer.`,
+            );
         });
         Packets.quitChallenge.fromClient((player) => {
-            if (!this.dataService.checkPermLevel(player, "reset"))
-                return;
+            if (!this.dataService.checkPermLevel(player, "reset")) return;
             const [challenge, challengeId] = this.endChallenge(false);
-            if (challenge === undefined)
-                return;
-            this.chatHookService.sendServerMessage(`Challenge ${this.getTitleLabel(challenge, challengeId)} has been stopped by ${player.Name}.`);
+            if (challenge === undefined) return;
+            this.chatHookService.sendServerMessage(
+                `Challenge ${this.getTitleLabel(challenge, challengeId)} has been stopped by ${player.Name}.`,
+            );
         });
         this.refreshChallenges();
 

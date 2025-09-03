@@ -9,9 +9,7 @@ import Jade from "shared/items/excavation/Jade";
 
 export = new Item(script.Name)
     .setName("Moss Upgrader")
-    .setDescription(
-        `%add% but deals %hp_add% damage to droplets passing through this mossy mess.`
-    )
+    .setDescription(`%add% but deals %hp_add% damage to droplets passing through this mossy mess.`)
     .setDifficulty(Difficulty.Joyful)
     .setPrice(new CurrencyBundle().set("Skill", 1), 1)
     .setRequiredItemAmount(EnchantedGrass, 20)

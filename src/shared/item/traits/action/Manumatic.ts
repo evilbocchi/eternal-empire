@@ -3,7 +3,6 @@ import ItemTrait from "shared/item/traits/ItemTrait";
 import Clickable from "shared/item/traits/action/Clickable";
 
 export default class Manumatic extends ItemTrait {
-
     static load(model: Model, manumatic: Manumatic) {
         const clickable = manumatic.item.trait(Clickable);
 

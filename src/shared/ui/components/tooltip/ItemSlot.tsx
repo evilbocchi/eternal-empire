@@ -1,6 +1,6 @@
 /**
  * @fileoverview React ItemSlot component for displaying item slots in inventory/UI.
- * 
+ *
  * This component is based on the exported ItemSlot structure and can be used
  * for inventory slots, item displays, and other item-related UI elements.
  * Note: Tooltip functionality is now handled separately by TooltipWindow.
@@ -34,7 +34,7 @@ export default function ItemSlot({
     onClick,
     size = new UDim2(0, 100, 0, 100),
     position,
-    layoutOrder
+    layoutOrder,
 }: ItemSlotProps) {
     return (
         <textbutton
@@ -50,25 +50,25 @@ export default function ItemSlot({
             Event={onClick ? { Activated: onClick } : undefined}
         >
             <uigradient
-                Color={new ColorSequence([
-                    new ColorSequenceKeypoint(0, Color3.fromRGB(72, 72, 72)),
-                    new ColorSequenceKeypoint(1, Color3.fromRGB(76, 76, 76))
-                ])}
+                Color={
+                    new ColorSequence([
+                        new ColorSequenceKeypoint(0, Color3.fromRGB(72, 72, 72)),
+                        new ColorSequenceKeypoint(1, Color3.fromRGB(76, 76, 76)),
+                    ])
+                }
                 Rotation={90}
             />
-            <uistroke
-                ApplyStrokeMode={Enum.ApplyStrokeMode.Border}
-                Color={Color3.fromRGB(52, 155, 255)}
-                Thickness={2}
-            >
+            <uistroke ApplyStrokeMode={Enum.ApplyStrokeMode.Border} Color={Color3.fromRGB(52, 155, 255)} Thickness={2}>
                 <uigradient
-                    Color={new ColorSequence([
-                        new ColorSequenceKeypoint(0, Color3.fromRGB(255, 255, 255)),
-                        new ColorSequenceKeypoint(0.299, Color3.fromRGB(255, 255, 255)),
-                        new ColorSequenceKeypoint(0.51, Color3.fromRGB(118, 118, 118)),
-                        new ColorSequenceKeypoint(0.822, Color3.fromRGB(255, 255, 255)),
-                        new ColorSequenceKeypoint(1, Color3.fromRGB(255, 255, 255))
-                    ])}
+                    Color={
+                        new ColorSequence([
+                            new ColorSequenceKeypoint(0, Color3.fromRGB(255, 255, 255)),
+                            new ColorSequenceKeypoint(0.299, Color3.fromRGB(255, 255, 255)),
+                            new ColorSequenceKeypoint(0.51, Color3.fromRGB(118, 118, 118)),
+                            new ColorSequenceKeypoint(0.822, Color3.fromRGB(255, 255, 255)),
+                            new ColorSequenceKeypoint(1, Color3.fromRGB(255, 255, 255)),
+                        ])
+                    }
                     Rotation={35}
                 />
             </uistroke>

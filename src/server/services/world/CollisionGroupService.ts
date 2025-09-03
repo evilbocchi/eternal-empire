@@ -53,7 +53,11 @@ export default class CollisionGroupService implements OnInit {
         for (const group of PhysicsService.GetRegisteredCollisionGroups()) {
             PhysicsService.CollisionGroupSetCollidable("QueryableGhost", group.name, group.name === "QueryableGhost");
             PhysicsService.CollisionGroupSetCollidable("Antighost", group.name, group.name === "Droplet");
-            PhysicsService.CollisionGroupSetCollidable("NPC", group.name, group.name === "Default" || group.name === "Grid");
+            PhysicsService.CollisionGroupSetCollidable(
+                "NPC",
+                group.name,
+                group.name === "Default" || group.name === "Grid",
+            );
         }
     }
 }

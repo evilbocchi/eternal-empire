@@ -3,9 +3,9 @@ import { OnoeNum } from "@antivivi/serikanum";
 
 type Number = number | OnoeNum;
 type Operation = {
-    type: string,
-    amount?: OnoeNum,
-    base?: number,
+    type: string;
+    amount?: OnoeNum;
+    base?: number;
 };
 
 const def = new OnoeNum(0);
@@ -18,12 +18,9 @@ const E = math.exp(1);
  * Supports addition, subtraction, multiplication, division, powers, roots, and logarithms.
  */
 class Formula {
-
     operations = new Array<Operation>();
 
-    constructor() {
-
-    }
+    constructor() {}
 
     /**
      * Adds a value to the formula.
@@ -33,7 +30,7 @@ class Formula {
     add(number: Number) {
         this.operations.push({
             type: "add",
-            amount: new OnoeNum(number)
+            amount: new OnoeNum(number),
         });
         return this;
     }
@@ -46,7 +43,7 @@ class Formula {
     sub(number: Number) {
         this.operations.push({
             type: "sub",
-            amount: new OnoeNum(number)
+            amount: new OnoeNum(number),
         });
         return this;
     }
@@ -59,7 +56,7 @@ class Formula {
     mul(number: Number) {
         this.operations.push({
             type: "mul",
-            amount: new OnoeNum(number)
+            amount: new OnoeNum(number),
         });
         return this;
     }
@@ -72,7 +69,7 @@ class Formula {
     div(number: Number) {
         this.operations.push({
             type: "div",
-            amount: new OnoeNum(number)
+            amount: new OnoeNum(number),
         });
         return this;
     }
@@ -85,7 +82,7 @@ class Formula {
     pow(number: Number) {
         this.operations.push({
             type: "pow",
-            amount: new OnoeNum(number)
+            amount: new OnoeNum(number),
         });
         return this;
     }
@@ -107,7 +104,7 @@ class Formula {
     log(number: number) {
         this.operations.push({
             type: "log",
-            base: number
+            base: number,
         });
         return this;
     }
@@ -118,7 +115,7 @@ class Formula {
      */
     ln() {
         this.operations.push({
-            type: "ln"
+            type: "ln",
         });
         return this;
     }
@@ -185,10 +182,14 @@ class Formula {
                     nameOfX += " / " + operation.amount;
                     break;
                 case "pow":
-                    if (lastOperator === "add" || lastOperator === "sub" || lastOperator === "mul" || lastOperator === "div") {
+                    if (
+                        lastOperator === "add" ||
+                        lastOperator === "sub" ||
+                        lastOperator === "mul" ||
+                        lastOperator === "div"
+                    ) {
                         nameOfX = "(" + nameOfX + ") ^ " + operation.amount;
-                    }
-                    else {
+                    } else {
                         nameOfX += " ^ " + operation.amount;
                     }
                     break;

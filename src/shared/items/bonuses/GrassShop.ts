@@ -10,9 +10,6 @@ export = new Item(script.Name)
     .setDifficulty(Difficulty.Bonuses)
 
     .trait(Shop)
-    .setItems([
-        EnchantedGrass,
-        CorruptedGrass
-    ])
+    .setItems([EnchantedGrass, CorruptedGrass])
 
     .exit();

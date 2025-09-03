@@ -10,10 +10,13 @@ export = new Command(script.Name)
         const toRemove = new Array<string>();
         const area = Sandbox.getEnabled() ? undefined : CommandAPI.Area.getArea(o);
         for (const [id, placedItem] of placedItems)
-            if (area === undefined || placedItem.area === area)
-                toRemove.push(id);
+            if (area === undefined || placedItem.area === area) toRemove.push(id);
 
         CommandAPI.Item.unplaceItems(o, toRemove);
-        CommandAPI.ChatHook.sendPrivateMessage(o, `Unplaced all items in ${area === undefined ? "all" : AREAS[area].name}`, "color:138,255,138");
+        CommandAPI.ChatHook.sendPrivateMessage(
+            o,
+            `Unplaced all items in ${area === undefined ? "all" : AREAS[area].name}`,
+            "color:138,255,138",
+        );
     })
     .setPermissionLevel(1);

@@ -6,7 +6,9 @@ import UnleashedConveyor from "shared/item/traits/conveyor/UnleashedConveyor";
 
 export = new Item(script.Name)
     .setName("Unleashed Anti-clockwise Conveyor Corner")
-    .setDescription("The OSC went a little crazy this time with the naming scheme. Tinted orange just for your anti-clockwise needs.")
+    .setDescription(
+        "The OSC went a little crazy this time with the naming scheme. Tinted orange just for your anti-clockwise needs.",
+    )
     .setDifficulty(Difficulty.Locomotion)
     .setPrice(new CurrencyBundle().set("Power", 4e15), 1, 30)
     .addPlaceableArea("BarrenIslands", "SlamoVillage")

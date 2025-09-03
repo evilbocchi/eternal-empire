@@ -11,8 +11,7 @@ import CruelBlankEssence from "shared/items/0/spontaneous/CruelBlankEssence";
 
 export = new Item(script.Name)
     .setName("Solitude")
-    .setDescription(`<font color="rgb(255,0,0)" weight="heavy">An endless solo of nothingness.</font>\n`
-    )
+    .setDescription(`<font color="rgb(255,0,0)" weight="heavy">An endless solo of nothingness.</font>\n`)
     .setDifficulty(Difficulty.Spontaneous)
     .setPrice(new CurrencyBundle().set("Funds", 1e45), 1)
     .setRequiredItemAmount(CruelBlankEssence, 1)

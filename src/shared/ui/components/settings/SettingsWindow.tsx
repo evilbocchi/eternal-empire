@@ -14,25 +14,21 @@ export interface SettingsWindowProps {
     onClose?: () => void;
 }
 
-export function SettingsButton({ tooltipProps }: { tooltipProps: TooltipProps; }) {
+export function SettingsButton({ tooltipProps }: { tooltipProps: TooltipProps }) {
     return (
         <IconButton
             image={getAsset("assets/Settings.png")}
             buttonProps={{
                 AnchorPoint: new Vector2(0, 1),
                 Size: new UDim2(0, 35, 0.5, 0),
-                Position: new UDim2(0, 4, 1, -4)
+                Position: new UDim2(0, 4, 1, -4),
             }}
             {...tooltipProps}
         />
     );
 }
 
-
-export default function SettingsWindow({
-    visible = false,
-    onClose,
-}: SettingsWindowProps) {
+export default function SettingsWindow({ visible = false, onClose }: SettingsWindowProps) {
     const [selectedHotkey, setSelectedHotkey] = useState<string | undefined>();
     const settings = useProperty(Packets.settings);
     const { setIsSettingHotkey } = useHotkeys();
@@ -53,37 +49,45 @@ export default function SettingsWindow({
         onClose?.();
     }, [selectedHotkey, setIsSettingHotkey, onClose]);
 
-    const onHotkeySelect = useCallback((hotkeyName: string) => {
-        const newSelected = selectedHotkey === hotkeyName ? undefined : hotkeyName;
-        setSelectedHotkey(newSelected);
-        setIsSettingHotkey(newSelected !== undefined);
-    }, [selectedHotkey, setIsSettingHotkey]);
+    const onHotkeySelect = useCallback(
+        (hotkeyName: string) => {
+            const newSelected = selectedHotkey === hotkeyName ? undefined : hotkeyName;
+            setSelectedHotkey(newSelected);
+            setIsSettingHotkey(newSelected !== undefined);
+        },
+        [selectedHotkey, setIsSettingHotkey],
+    );
 
     const onHotkeyDeselect = useCallback(() => {
         setSelectedHotkey(undefined);
         setIsSettingHotkey(false);
     }, [setIsSettingHotkey]);
 
-    const handleHotkeyChange = useCallback((label: string, keyCode: Enum.KeyCode) => {
-        Packets.setHotkey.toServer(label, keyCode.Value);
-        setSelectedHotkey(undefined);
-        setIsSettingHotkey(false);
-    }, [setSelectedHotkey, setIsSettingHotkey]);
+    const handleHotkeyChange = useCallback(
+        (label: string, keyCode: Enum.KeyCode) => {
+            Packets.setHotkey.toServer(label, keyCode.Value);
+            setSelectedHotkey(undefined);
+            setIsSettingHotkey(false);
+        },
+        [setSelectedHotkey, setIsSettingHotkey],
+    );
 
     const hotkeyOptions = new Array<JSX.Element>();
     for (const binding of HOTKEY_BINDINGS) {
         const label = binding.label;
         const value = settings.hotkeys[label];
         const keyText = value !== undefined ? Enum.KeyCode.FromValue(value)?.Name : binding.keyCode.Name;
-        hotkeyOptions.push(<HotkeyOption
-            key={label}
-            title={label}
-            keyText={keyText ?? "?"}
-            isSelected={selectedHotkey === label}
-            onSelect={() => onHotkeySelect?.(label)}
-            onHotkeyChange={(newKeyCode) => handleHotkeyChange(label, newKeyCode)}
-            onDeselect={() => onHotkeyDeselect?.()}
-        />);
+        hotkeyOptions.push(
+            <HotkeyOption
+                key={label}
+                title={label}
+                keyText={keyText ?? "?"}
+                isSelected={selectedHotkey === label}
+                onSelect={() => onHotkeySelect?.(label)}
+                onHotkeyChange={(newKeyCode) => handleHotkeyChange(label, newKeyCode)}
+                onDeselect={() => onHotkeyDeselect?.()}
+            />,
+        );
     }
 
     return (
@@ -114,15 +118,9 @@ export default function SettingsWindow({
 
                 <SettingToggle setting="Music" />
 
-                <SettingToggle
-                    setting="SoundEffects"
-                    title="Sound Effects"
-                />
+                <SettingToggle setting="SoundEffects" title="Sound Effects" />
 
-                <SettingToggle
-                    setting="ScientificNotation"
-                    title="Scientific Notation"
-                />
+                <SettingToggle setting="ScientificNotation" title="Scientific Notation" />
 
                 <SettingToggle
                     setting="FormatCurrencies"
@@ -133,20 +131,11 @@ export default function SettingsWindow({
                 {/* Performance Section */}
                 <SettingSection title="Performance" />
 
-                <SettingToggle
-                    setting="ResetAnimation"
-                    title="Reset Layer Animations"
-                />
+                <SettingToggle setting="ResetAnimation" title="Reset Layer Animations" />
 
-                <SettingToggle
-                    setting="BuildAnimation"
-                    title="Build Animations"
-                />
+                <SettingToggle setting="BuildAnimation" title="Build Animations" />
 
-                <SettingToggle
-                    setting="CurrencyGainAnimation"
-                    title="Currency Gain Animations"
-                />
+                <SettingToggle setting="CurrencyGainAnimation" title="Currency Gain Animations" />
 
                 <SettingToggle
                     title="Item Shadows"
@@ -157,10 +146,7 @@ export default function SettingsWindow({
                 {/* Layout Section */}
                 <SettingSection title="Layout" />
 
-                <SettingToggle
-                    title="Hide Maxed Items"
-                    setting="HideMaxedItems"
-                />
+                <SettingToggle title="Hide Maxed Items" setting="HideMaxedItems" />
 
                 {/* Controls Section */}
                 <SettingSection title="Controls" />

@@ -16,13 +16,13 @@ const triaStart = Server.NPC.State.getInfo(Tria)!.defaultLocation;
 const triaToMineGuiding = Server.NPC.Navigation.createPathfindingOperation(
     triaHumanoid,
     triaStart,
-    WAYPOINTS.NewBeginningsTriaMineGuiding.CFrame
+    WAYPOINTS.NewBeginningsTriaMineGuiding.CFrame,
 );
 const triaToStart = Server.NPC.Navigation.createPathfindingOperation(
     triaHumanoid,
     WAYPOINTS.NewBeginningsTriaMineGuiding.CFrame,
     triaStart,
-    false
+    false,
 );
 
 export = new Quest(script.Name)
@@ -30,126 +30,152 @@ export = new Quest(script.Name)
     .setLength(1)
     .setLevel(1)
     .setOrder(1)
-    .addStage(new Stage()
-        .setDescription(`You seem to be lost. Talk to the Friendly Noob next to you.`)
-        .setNPC("Tria")
-        .setFocus(triaRootPart)
-        .setDialogue(new Dialogue(Tria, "Oh! Uh... you're awake! That... that was fast, I guess. You were, um... out cold for a bit. Yeah.")
-            .monologue("It... it happens a lot, people getting... washed up on shore. Not that it's... unusual or anything, haha.")
-            .monologue("I-I don't really understand how you... how you all stay alive after... the tossing in the sea.")
-            .monologue("So, uh... now that you're... here with us... I guess I should... show you, um... a few things?")
-            .monologue("There's a lot to learn and... lots of challenges, I think. But... you'll figure it out, probably.")
-            .root
-        )
-        .onReached((stage) => {
-            triaRootPart.CFrame = triaStart;
-            Server.NPC.State.playAnimation(Tria, "Default");
-            ReplicatedStorage.SetAttribute("Intro", true);
+    .addStage(
+        new Stage()
+            .setDescription(`You seem to be lost. Talk to the Friendly Noob next to you.`)
+            .setNPC("Tria")
+            .setFocus(triaRootPart)
+            .setDialogue(
+                new Dialogue(
+                    Tria,
+                    "Oh! Uh... you're awake! That... that was fast, I guess. You were, um... out cold for a bit. Yeah.",
+                )
+                    .monologue(
+                        "It... it happens a lot, people getting... washed up on shore. Not that it's... unusual or anything, haha.",
+                    )
+                    .monologue(
+                        "I-I don't really understand how you... how you all stay alive after... the tossing in the sea.",
+                    )
+                    .monologue(
+                        "So, uh... now that you're... here with us... I guess I should... show you, um... a few things?",
+                    )
+                    .monologue(
+                        "There's a lot to learn and... lots of challenges, I think. But... you'll figure it out, probably.",
+                    ).root,
+            )
+            .onReached((stage) => {
+                triaRootPart.CFrame = triaStart;
+                Server.NPC.State.playAnimation(Tria, "Default");
+                ReplicatedStorage.SetAttribute("Intro", true);
 
+                const continuation = new Dialogue(
+                    Tria,
+                    "Uh... I-I'm Tria... I guess. Um... if... if you want, I can... show you... how to, uh... maybe... make some money? Heh...",
+                );
+                const connection = Server.Dialogue.dialogueFinished.connect((dialogue) => {
+                    if (dialogue === stage.dialogue) {
+                        Server.Event.setEventCompleted("TriaReveal", true);
+                        Server.Dialogue.talk(continuation);
+                    } else if (dialogue === continuation) stage.complete();
+                });
+                return () => connection.disconnect();
+            }),
+    )
+    .addStage(
+        new Stage()
+            .setDescription(`Follow Tria...?`)
+            .setNPC("Tria")
+            .setFocus(WAYPOINTS.NewBeginningsTriaMineGuiding)
+            .setDialogue(new Dialogue(Tria, "Follow me..."))
+            .onReached((stage) => {
+                triaRootPart.CFrame = triaStart;
+                Server.NPC.State.stopAnimation(Tria, "Default");
+                ReplicatedStorage.SetAttribute("Intro", false);
 
-            const continuation = new Dialogue(Tria, "Uh... I-I'm Tria... I guess. Um... if... if you want, I can... show you... how to, uh... maybe... make some money? Heh...");
-            const connection = Server.Dialogue.dialogueFinished.connect((dialogue) => {
-                if (dialogue === stage.dialogue) {
-                    Server.Event.setEventCompleted("TriaReveal", true);
-                    Server.Dialogue.talk(continuation);
-                }
-                else if (dialogue === continuation)
+                task.wait(1);
+
+                triaToMineGuiding().onComplete(() => {
                     stage.complete();
-            });
-            return () => connection.disconnect();
-        })
+                });
+                return () => {};
+            }),
     )
-    .addStage(new Stage()
-        .setDescription(`Follow Tria...?`)
-        .setNPC("Tria")
-        .setFocus(WAYPOINTS.NewBeginningsTriaMineGuiding)
-        .setDialogue(new Dialogue(Tria, "Follow me..."))
-        .onReached((stage) => {
-            triaRootPart.CFrame = triaStart;
-            Server.NPC.State.stopAnimation(Tria, "Default");
-            ReplicatedStorage.SetAttribute("Intro", false);
+    .addStage(
+        new Stage()
+            .setDescription("Figure out how to purchase items with Tria.")
+            .setNPC("Tria")
+            .setDialogue(
+                new Dialogue(
+                    Tria,
+                    "O-okay, um... here we are, I guess. Your new... mine. It's... not much to look at, sorry.",
+                )
+                    .monologue("With some work though... it might... uh... become something nice, maybe?")
+                    .monologue(
+                        "Your first task... is to... get some basic equipment. Go to that shop over there and... um... get a Dropper and a Furnace.",
+                    )
+                    .monologue(
+                        "Don't worry about the cost... you don't have any money right now... but... uh... the essentials are free for newcomers, thankfully.",
+                    )
+                    .monologue("Let's... let's try to get this... thing going, okay?").root,
+            )
+            .onReached((stage) => {
+                triaRootPart.CFrame = WAYPOINTS.NewBeginningsTriaMineGuiding.CFrame;
+                Server.NPC.State.stopAnimation(Tria, "Default");
 
-            task.wait(1);
-
-            triaToMineGuiding().onComplete(() => {
-                stage.complete();
-            });
-            return () => { };
-        })
+                let t = 0;
+                const ItemService = Server.Item;
+                const connection = RunService.Heartbeat.Connect((dt) => {
+                    t += dt;
+                    if (t < 0.5) return;
+                    t = 0;
+                    if (
+                        ItemService.getBoughtAmount(TheFirstDropper.id) > 0 &&
+                        ItemService.getBoughtAmount(TheFirstFurnace.id) > 0
+                    ) {
+                        stage.complete();
+                        Server.Dialogue.talk(
+                            new Dialogue(Tria, "Oh! You did it... wow, nice job!")
+                                .monologue("Now... um... place those items down carefully, okay?")
+                                .monologue("Make sure... uh... the dropper head is... above the furnace... yes.")
+                                .monologue("Heh... let's see if this... can make some money... I hope.").root,
+                        );
+                    }
+                });
+                return () => connection.Disconnect();
+            }),
     )
-    .addStage(new Stage()
-        .setDescription("Figure out how to purchase items with Tria.")
-        .setNPC("Tria")
-        .setDialogue(new Dialogue(Tria, "O-okay, um... here we are, I guess. Your new... mine. It's... not much to look at, sorry.")
-            .monologue("With some work though... it might... uh... become something nice, maybe?")
-            .monologue("Your first task... is to... get some basic equipment. Go to that shop over there and... um... get a Dropper and a Furnace.")
-            .monologue("Don't worry about the cost... you don't have any money right now... but... uh... the essentials are free for newcomers, thankfully.")
-            .monologue("Let's... let's try to get this... thing going, okay?")
-            .root
-        )
-        .onReached((stage) => {
-            triaRootPart.CFrame = WAYPOINTS.NewBeginningsTriaMineGuiding.CFrame;
-            Server.NPC.State.stopAnimation(Tria, "Default");
+    .addStage(
+        new Stage()
+            .setDescription("Interact with Tria to learn how to start making money.")
+            .setNPC("Tria")
+            .setDialogue(
+                new Dialogue(
+                    Tria,
+                    "Uh... see that backpack over there... left side of your screen... yeah, click it to open your Inventory... I think.",
+                ),
+            )
+            .onReached((stage) => {
+                triaRootPart.CFrame = WAYPOINTS.NewBeginningsTriaMineGuiding.CFrame;
+                Server.NPC.State.stopAnimation(Tria, "Default");
 
-            let t = 0;
-            const ItemService = Server.Item;
-            const connection = RunService.Heartbeat.Connect((dt) => {
-                t += dt;
-                if (t < 0.5)
-                    return;
-                t = 0;
-                if (ItemService.getBoughtAmount(TheFirstDropper.id) > 0 && ItemService.getBoughtAmount(TheFirstFurnace.id) > 0) {
-                    stage.complete();
-                    Server.Dialogue.talk(new Dialogue(Tria, "Oh! You did it... wow, nice job!")
-                        .monologue("Now... um... place those items down carefully, okay?")
-                        .monologue("Make sure... uh... the dropper head is... above the furnace... yes.")
-                        .monologue("Heh... let's see if this... can make some money... I hope.")
-                        .root
-                    );
-                }
-
-            });
-            return () => connection.Disconnect();
-        })
-    )
-    .addStage(new Stage()
-        .setDescription("Interact with Tria to learn how to start making money.")
-        .setNPC("Tria")
-        .setDialogue(
-            new Dialogue(Tria, "Uh... see that backpack over there... left side of your screen... yeah, click it to open your Inventory... I think.")
-        )
-        .onReached((stage) => {
-            triaRootPart.CFrame = WAYPOINTS.NewBeginningsTriaMineGuiding.CFrame;
-            Server.NPC.State.stopAnimation(Tria, "Default");
-
-            const continuation = new Dialogue(Tria, "N-nice job, uh... I guess!")
-                .monologue("I... I'd like to teach you more... but... I should probably... go home now... sorry.")
-                .monologue("I'll... I'll see you again when... um... you've made a bit more money... maybe...")
-                .root;
-            let completed = false;
-            const connection = Server.Currency.balanceChanged.connect((balance) => {
-                const funds = balance.get("Funds");
-                if (completed === false && funds !== undefined && !funds.lessEquals(0)) {
-                    completed = true;
-                    const c2 = Server.Dialogue.dialogueFinished.connect((dialogue) => {
-                        if (dialogue === continuation) {
-                            c2.disconnect();
-                            triaToStart().onComplete(() => {
-                                Server.NPC.State.playAnimation(Tria, "Default");
-                            });
-                            stage.complete();
-                        }
-                    });
-                    Server.Dialogue.talk(continuation);
-                }
-            });
-            return () => connection.disconnect();
-        })
+                const continuation = new Dialogue(Tria, "N-nice job, uh... I guess!")
+                    .monologue("I... I'd like to teach you more... but... I should probably... go home now... sorry.")
+                    .monologue(
+                        "I'll... I'll see you again when... um... you've made a bit more money... maybe...",
+                    ).root;
+                let completed = false;
+                const connection = Server.Currency.balanceChanged.connect((balance) => {
+                    const funds = balance.get("Funds");
+                    if (completed === false && funds !== undefined && !funds.lessEquals(0)) {
+                        completed = true;
+                        const c2 = Server.Dialogue.dialogueFinished.connect((dialogue) => {
+                            if (dialogue === continuation) {
+                                c2.disconnect();
+                                triaToStart().onComplete(() => {
+                                    Server.NPC.State.playAnimation(Tria, "Default");
+                                });
+                                stage.complete();
+                            }
+                        });
+                        Server.Dialogue.talk(continuation);
+                    }
+                });
+                return () => connection.disconnect();
+            }),
     )
     .onInit(() => {
         Server.Event.addCompletionListener("TriaReveal", (isCompleted) => {
-            if (isCompleted)
-                triaHumanoid.DisplayName = "";
+            if (isCompleted) triaHumanoid.DisplayName = "";
         });
 
         Server.Dialogue.dialogueFinished.connect((dialogue) => {
@@ -159,5 +185,5 @@ export = new Quest(script.Name)
         });
     })
     .setReward({
-        xp: 60
+        xp: 60,
     });

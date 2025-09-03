@@ -23,12 +23,14 @@ export class DonationService implements OnStart {
     /** Signal fired when a player's donation amount changes. */
     donatedChanged = new Signal<(player: Player, amount: number) => void>();
 
-    constructor(private leaderstatsService: LeaderstatsService, private dataService: DataService) {
-    }
+    constructor(
+        private leaderstatsService: LeaderstatsService,
+        private dataService: DataService,
+    ) {}
 
     /**
      * Gets the amount a player has donated.
-     * 
+     *
      * @param player The player to check.
      */
     getDonated(player: Player) {
@@ -37,7 +39,7 @@ export class DonationService implements OnStart {
 
     /**
      * Sets the amount a player has donated and fires the change signal.
-     * 
+     *
      * @param player The player to update.
      * @param donated The new donation amount.
      */

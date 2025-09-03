@@ -7,7 +7,9 @@ import CurrencyBundle from "shared/currency/CurrencyBundle";
 
 export = new Item(script.Name)
     .setName("Mechnical Enhancer")
-    .setDescription("Built by a Chief Slamo with the assistance of a grey-and-yellow traveller; The result is a highly unstable machine of.. varying usefulness. %pow% gain to droplets, your very first exponential upgrader. When using this, you will need to sacrifice %drain%, however.")
+    .setDescription(
+        "Built by a Chief Slamo with the assistance of a grey-and-yellow traveller; The result is a highly unstable machine of.. varying usefulness. %pow% gain to droplets, your very first exponential upgrader. When using this, you will need to sacrifice %drain%, however.",
+    )
     .setDifficulty(Difficulty.Ifinitude)
     .setPrice(new CurrencyBundle().set("Funds", 4e33).set("Skill", 50), 1)
     .setRequiredItemAmount(AdvancedBlankEssence, 1)

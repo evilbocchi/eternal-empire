@@ -30,7 +30,7 @@ export default class NPC {
     /**
      * Add dialogue that the NPC uses when no other dialogue is available.
      * All default dialogues are sequentially exhausted, and only the last one will be repeated.
-     * 
+     *
      * @param defaultDialogue The default Dialogue instance.
      * @returns This NPC instance.
      */
@@ -41,7 +41,7 @@ export default class NPC {
 
     /**
      * Creates and sets a default monologue Dialogue for this NPC.
-     * 
+     *
      * @param text The monologue text.
      * @returns The created Dialogue instance.
      */
@@ -69,7 +69,6 @@ export const EMPTY_NPC = new NPC();
  * Represents a dialogue node for NPCs, supporting monologues, choices, and dialogue chaining.
  */
 export class Dialogue {
-
     npc: NPC;
     text: string;
     choices = new Map<string, Dialogue>();

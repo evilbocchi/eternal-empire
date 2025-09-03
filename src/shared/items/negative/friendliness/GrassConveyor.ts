@@ -6,7 +6,9 @@ import CurrencyBundle from "shared/currency/CurrencyBundle";
 
 export = new Item(script.Name)
     .setName("Grass Conveyor")
-    .setDescription("It's time to touch some grass. Converts all droplets passing through this conveyor into Grass Droplets worth $120.")
+    .setDescription(
+        "It's time to touch some grass. Converts all droplets passing through this conveyor into Grass Droplets worth $120.",
+    )
     .setDifficulty(Difficulty.Friendliness)
     .setPrice(new CurrencyBundle().set("Funds", 10000000), 1, 3)
     .addPlaceableArea("BarrenIslands")

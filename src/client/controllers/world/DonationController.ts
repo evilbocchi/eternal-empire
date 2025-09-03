@@ -1,9 +1,9 @@
 /**
  * @fileoverview Handles the donation UI and interactions in the game.
- * 
+ *
  * This controller initializes donation options, sets up click events for donation buttons,
  * and manages the donation process by prompting the user to donate specific amounts.
- * 
+ *
  * @since 1.0.0
  */
 
@@ -21,15 +21,12 @@ import Sandbox from "shared/Sandbox";
  */
 @Controller()
 export default class DonationController implements OnStart {
-
-    constructor(private uiController: UIController) {
-
-    }
+    constructor(private uiController: UIController) {}
 
     /**
      * Sets up the click event for each donation button.
      * When a button is clicked, it prompts the user to donate the corresponding amount.
-     * 
+     *
      * @param donationOption The TextButton representing the donation option.
      * @param productId The ID of the product to be purchased when the button is clicked.
      */
@@ -48,13 +45,14 @@ export default class DonationController implements OnStart {
     }
 
     onStart() {
-        if (Sandbox.getEnabled())
-            return;
+        if (Sandbox.getEnabled()) return;
 
         for (const donationOption of LEADERBOARDS.Donated.DonationPart.SurfaceGui.Display.GetChildren()) {
-            if (!donationOption.IsA("TextButton"))
-                continue;
-            this.setupDonationButton(donationOption as TextButton, DONATION_PRODUCTS[donationOption.LayoutOrder - 1]?.id || 0);
+            if (!donationOption.IsA("TextButton")) continue;
+            this.setupDonationButton(
+                donationOption as TextButton,
+                DONATION_PRODUCTS[donationOption.LayoutOrder - 1]?.id || 0,
+            );
         }
     }
 }

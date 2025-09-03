@@ -5,9 +5,11 @@ import Furnace from "shared/item/traits/Furnace";
 
 export = new Item(script.Name)
     .setName("Aquatic Furnace")
-    .setDescription(`A furnace that only works on low levels.
+    .setDescription(
+        `A furnace that only works on low levels.
 
-%mul% value.`)
+%mul% value.`,
+    )
     .setDifficulty(Difficulty.DoSomething)
     .setPrice(new CurrencyBundle().set("Skill", 400), 1)
     .addPlaceableArea("BarrenIslands", "SlamoVillage")

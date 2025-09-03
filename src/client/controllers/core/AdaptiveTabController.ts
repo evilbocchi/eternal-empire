@@ -29,14 +29,14 @@ declare global {
 }
 
 export const ADAPTIVE_TAB = INTERFACE.WaitForChild("AdaptiveTab") as Frame & {
-    CloseButton: TextButton,
+    CloseButton: TextButton;
     UIStroke: UIStroke & {
         UIGradient: UIGradient;
-    },
+    };
     Title: Frame & {
-        ImageLabel: ImageLabel,
+        ImageLabel: ImageLabel;
         TextLabel: TextLabel;
-    },
+    };
 };
 
 export const ADAPTIVE_TAB_MAIN_WINDOW = ADAPTIVE_TAB.WaitForChild("MainWindow") as Frame;
@@ -80,9 +80,8 @@ export default class AdaptiveTabController implements OnInit {
     constructor(
         private hotkeysController: HotkeysController,
         private questsController: QuestsController,
-        private commandsController?: CommandsController
-    ) {
-    }
+        private commandsController?: CommandsController,
+    ) {}
 
     /**
      * Animates and hides the adaptive tab window.
@@ -95,8 +94,7 @@ export default class AdaptiveTabController implements OnInit {
         const tween = TweenService.Create(ADAPTIVE_TAB, tweenInfo, { Position: new UDim2(0.5, 0, 1, -5) });
         tween.Play();
         tween.Completed.Once((playbackState) => {
-            if (playbackState !== Enum.PlaybackState.Completed)
-                return;
+            if (playbackState !== Enum.PlaybackState.Completed) return;
 
             ADAPTIVE_TAB.Visible = false;
             if (this.currentWindow !== undefined) {
@@ -133,8 +131,7 @@ export default class AdaptiveTabController implements OnInit {
         if (this.currentWindow !== undefined && this.currentWindow.Name !== windowName) {
             this.currentWindow.Visible = false;
         }
-        if (!ADAPTIVE_TAB.Visible)
-            ADAPTIVE_TAB.Position = new UDim2(0.5, 0, 1, -20);
+        if (!ADAPTIVE_TAB.Visible) ADAPTIVE_TAB.Position = new UDim2(0.5, 0, 1, -20);
 
         ADAPTIVE_TAB.Active = true;
         ADAPTIVE_TAB.Visible = true;
@@ -151,7 +148,7 @@ export default class AdaptiveTabController implements OnInit {
      * @param windowName The name of the window to refresh.
      */
     refreshAdaptiveTab(windowName: string) {
-        const window = (ADAPTIVE_TAB_MAIN_WINDOW.FindFirstChild(windowName) as Frame);
+        const window = ADAPTIVE_TAB_MAIN_WINDOW.FindFirstChild(windowName) as Frame;
         if (window === undefined) {
             return;
         }
@@ -174,7 +171,7 @@ export default class AdaptiveTabController implements OnInit {
             return this.questsController.toggleQuestWindow();
         }
 
-        // Special case: Redirect commands window to standalone implementation  
+        // Special case: Redirect commands window to standalone implementation
         if (windowName === "Commands" && this.commandsController) {
             return this.commandsController.toggleCommandsWindow();
         }
@@ -182,8 +179,7 @@ export default class AdaptiveTabController implements OnInit {
         if (ADAPTIVE_TAB.Active && windowName === this.currentWindow?.Name) {
             this.hideAdaptiveTab();
             return false;
-        }
-        else if (windowName !== undefined) {
+        } else if (windowName !== undefined) {
             this.showAdaptiveTab(windowName);
             return true;
         }
@@ -209,28 +205,29 @@ export default class AdaptiveTabController implements OnInit {
      */
     loadSidebarButton(sidebarButton: GuiButton) {
         const optionName = sidebarButton.Name === "Button" ? sidebarButton.Parent?.Name : sidebarButton.Name;
-        if (optionName === undefined)
-            throw `Sidebar button has no name`;
+        if (optionName === undefined) throw `Sidebar button has no name`;
 
         const hotkey = this.hotkeys.get(optionName);
         const tweenInfo = new TweenInfo(0.2);
 
         if (hotkey !== undefined) {
-            this.hotkeysController.setHotkey(sidebarButton, hotkey, () => {
-                sidebarButton.Size = new UDim2(0.9, 0, 0.9, 0);
-                TweenService.Create(sidebarButton, tweenInfo, { Size: new UDim2(1, 0, 1, 0) }).Play();
-                const result = this.toggleAdaptiveTab(optionName);
-                if (result === true)
-                    playSound("MenuOpen.mp3");
-                else
-                    playSound("MenuClose.mp3");
+            this.hotkeysController.setHotkey(
+                sidebarButton,
+                hotkey,
+                () => {
+                    sidebarButton.Size = new UDim2(0.9, 0, 0.9, 0);
+                    TweenService.Create(sidebarButton, tweenInfo, { Size: new UDim2(1, 0, 1, 0) }).Play();
+                    const result = this.toggleAdaptiveTab(optionName);
+                    if (result === true) playSound("MenuOpen.mp3");
+                    else playSound("MenuClose.mp3");
 
-                return true;
-            }, optionName);
+                    return true;
+                },
+                optionName,
+            );
         }
 
-        if (sidebarButton.IsA("ImageButton"))
-            this.imagePerWindow.set(optionName, sidebarButton.Image);
+        if (sidebarButton.IsA("ImageButton")) this.imagePerWindow.set(optionName, sidebarButton.Image);
 
         this.colorsPerWindow.set(optionName, sidebarButton.BackgroundColor3);
     }
@@ -239,14 +236,19 @@ export default class AdaptiveTabController implements OnInit {
      * Initializes the AdaptiveTabController, sets up hotkeys and loads sidebar buttons.
      */
     onInit() {
-        this.hotkeysController.setHotkey(ADAPTIVE_TAB.CloseButton, Enum.KeyCode.X, () => {
-            if (ADAPTIVE_TAB.Visible === true) {
-                playSound("MenuClose.mp3");
-                this.hideAdaptiveTab();
-                return true;
-            }
-            return false;
-        }, "Close");
+        this.hotkeysController.setHotkey(
+            ADAPTIVE_TAB.CloseButton,
+            Enum.KeyCode.X,
+            () => {
+                if (ADAPTIVE_TAB.Visible === true) {
+                    playSound("MenuClose.mp3");
+                    this.hideAdaptiveTab();
+                    return true;
+                }
+                return false;
+            },
+            "Close",
+        );
         this.hotkeys.set("Inventory", Enum.KeyCode.F);
         this.hotkeys.set("Stats", Enum.KeyCode.M);
         this.hotkeys.set("Quests", Enum.KeyCode.V);
@@ -254,8 +256,7 @@ export default class AdaptiveTabController implements OnInit {
         // Commands hotkey can be added here if needed in the future
         // this.hotkeys.set("Commands", Enum.KeyCode.C);
         for (const sidebarButton of SIDEBAR_BUTTONS.GetDescendants()) {
-            if (sidebarButton.IsA("GuiButton"))
-                this.loadSidebarButton(sidebarButton);
+            if (sidebarButton.IsA("GuiButton")) this.loadSidebarButton(sidebarButton);
         }
     }
 }

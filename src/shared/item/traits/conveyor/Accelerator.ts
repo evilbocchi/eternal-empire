@@ -8,7 +8,6 @@ declare global {
 }
 
 export default class Accelerator extends ItemTrait {
-
     boost = 1;
 
     constructor(item: Item) {

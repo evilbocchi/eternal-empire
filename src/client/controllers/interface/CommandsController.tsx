@@ -86,7 +86,7 @@ export default class CommandsController implements OnInit {
 
         const colorSequence = new ColorSequence([
             new ColorSequenceKeypoint(0, Color3.fromRGB(100, 150, 255)),
-            new ColorSequenceKeypoint(1, Color3.fromRGB(50, 100, 200))
+            new ColorSequenceKeypoint(1, Color3.fromRGB(50, 100, 200)),
         ]);
 
         this.commandsRoot.render(
@@ -99,11 +99,8 @@ export default class CommandsController implements OnInit {
                 windowId="commands"
                 priority={1}
             >
-                <CommandsWindow
-                    visible={this.isCommandsWindowVisible}
-                    userPermissionLevel={this.userPermissionLevel}
-                />
-            </BasicWindow>
+                <CommandsWindow visible={this.isCommandsWindowVisible} userPermissionLevel={this.userPermissionLevel} />
+            </BasicWindow>,
         );
     }
 

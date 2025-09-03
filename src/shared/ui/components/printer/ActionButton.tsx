@@ -20,9 +20,13 @@ export default function ActionButton({ text, backgroundColor, layoutOrder, onCli
         setIsHovered(true);
 
         // Smooth scale up and glow effect on hover
-        const hoverTween = TweenService.Create(buttonRef.current, new TweenInfo(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-            Size: new UDim2(0.22, 0, 0.85, 0)
-        });
+        const hoverTween = TweenService.Create(
+            buttonRef.current,
+            new TweenInfo(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+            {
+                Size: new UDim2(0.22, 0, 0.85, 0),
+            },
+        );
 
         hoverTween.Play();
     };
@@ -33,9 +37,13 @@ export default function ActionButton({ text, backgroundColor, layoutOrder, onCli
         setIsHovered(false);
 
         // Smooth scale back down
-        const unhoverTween = TweenService.Create(buttonRef.current, new TweenInfo(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-            Size: new UDim2(0.2, 0, 0.8, 0)
-        });
+        const unhoverTween = TweenService.Create(
+            buttonRef.current,
+            new TweenInfo(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+            {
+                Size: new UDim2(0.2, 0, 0.8, 0),
+            },
+        );
 
         unhoverTween.Play();
     };
@@ -45,23 +53,16 @@ export default function ActionButton({ text, backgroundColor, layoutOrder, onCli
 
         setIsAnimating(true);
 
-        const tweenInfo = new TweenInfo(
-            0.15,
-            Enum.EasingStyle.Back,
-            Enum.EasingDirection.Out,
-            0,
-            false,
-            0
-        );
+        const tweenInfo = new TweenInfo(0.15, Enum.EasingStyle.Back, Enum.EasingDirection.Out, 0, false, 0);
 
         // Scale down first
         const scaleDown = TweenService.Create(buttonRef.current, new TweenInfo(0.1), {
-            Size: isHovered ? new UDim2(0.2, 0, 0.77, 0) : new UDim2(0.18, 0, 0.72, 0)
+            Size: isHovered ? new UDim2(0.2, 0, 0.77, 0) : new UDim2(0.18, 0, 0.72, 0),
         });
 
         // Then scale back up with bounce
         const scaleUp = TweenService.Create(buttonRef.current, tweenInfo, {
-            Size: isHovered ? new UDim2(0.22, 0, 0.85, 0) : new UDim2(0.2, 0, 0.8, 0)
+            Size: isHovered ? new UDim2(0.22, 0, 0.85, 0) : new UDim2(0.2, 0, 0.8, 0),
         });
 
         scaleDown.Play();
@@ -92,7 +93,7 @@ export default function ActionButton({ text, backgroundColor, layoutOrder, onCli
             Event={{
                 Activated: handleClick,
                 MouseEnter: handleHoverEnter,
-                MouseLeave: handleHoverLeave
+                MouseLeave: handleHoverLeave,
             }}
         >
             <uistroke

@@ -13,7 +13,11 @@ export = new Command(script.Name)
                 return;
             }
             CommandAPI.Data.addAvailableEmpire(userId, CommandAPI.Data.empireId);
-            CommandAPI.ChatHook.sendPrivateMessage(o, "Invited " + CommandAPI.Command.fp(p, userId), "color:138,255,138");
+            CommandAPI.ChatHook.sendPrivateMessage(
+                o,
+                "Invited " + CommandAPI.Command.fp(p, userId),
+                "color:138,255,138",
+            );
         }
     })
     .setPermissionLevel(1);

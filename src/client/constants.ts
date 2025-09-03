@@ -1,7 +1,7 @@
 /**
  * @fileoverview Defines commonly used client-side constants for player, UI, and color configuration in the Roblox game.
  * These constants provide convenient references to the local player, mouse, GUI, and standard colors.
- * 
+ *
  * @since 1.0.0
  */
 

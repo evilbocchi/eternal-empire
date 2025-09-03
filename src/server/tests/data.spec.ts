@@ -11,7 +11,6 @@ export = function () {
     const itemService = new ItemService(dataService, currencyService);
 
     describe("loading", () => {
-
         it("loads data", () => {
             expect(dataService).to.be.ok();
             expect(dataService.empireData).to.be.ok();
@@ -35,16 +34,13 @@ export = function () {
     });
 
     describe("duplication", () => {
-
         it("removes excess in inventory", () => {
             const duped = {
                 inventory: new Map<string, number>([
                     ["ClassLowerNegativeShop", 1],
                     ["TheFirstDropper", 4],
                 ]),
-                bought: new Map<string, number>([
-                    ["TheFirstDropper", 3]
-                ]),
+                bought: new Map<string, number>([["TheFirstDropper", 3]]),
                 worldPlaced: new Map<string, PlacedItem>(),
                 nextId: 0,
                 uniqueInstances: new Map<string, UniqueItemInstance>(),
@@ -55,9 +51,7 @@ export = function () {
                     ["ClassLowerNegativeShop", 1],
                     ["TheFirstDropper", 2],
                 ]),
-                bought: new Map<string, number>([
-                    ["TheFirstDropper", 2]
-                ]),
+                bought: new Map<string, number>([["TheFirstDropper", 2]]),
                 worldPlaced: new Map<string, PlacedItem>(),
                 nextId: 0,
                 uniqueInstances: new Map<string, UniqueItemInstance>(),
@@ -78,9 +72,7 @@ export = function () {
                     ["ClassLowerNegativeShop", 1],
                     ["TheFirstDropper", 3],
                 ]),
-                bought: new Map<string, number>([
-                    ["TheFirstDropper", 1]
-                ]),
+                bought: new Map<string, number>([["TheFirstDropper", 1]]),
                 worldPlaced: new Map<string, PlacedItem>(),
                 nextId: 0,
                 uniqueInstances: new Map<string, UniqueItemInstance>(),
@@ -95,7 +87,6 @@ export = function () {
     });
 
     describe("items", () => {
-
         it("should buy a free item", () => {
             const itemId = "TheFirstDropper";
             itemService.setItemAmount(itemId, 0);

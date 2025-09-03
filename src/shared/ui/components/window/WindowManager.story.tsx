@@ -56,10 +56,12 @@ export = {
                             visible={window1Visible}
                             icon={getAsset("assets/Settings.png")}
                             title="Normal Priority Window"
-                            colorSequence={new ColorSequence([
-                                new ColorSequenceKeypoint(0, Color3.fromRGB(100, 150, 255)),
-                                new ColorSequenceKeypoint(1, Color3.fromRGB(50, 100, 200)),
-                            ])}
+                            colorSequence={
+                                new ColorSequence([
+                                    new ColorSequenceKeypoint(0, Color3.fromRGB(100, 150, 255)),
+                                    new ColorSequenceKeypoint(1, Color3.fromRGB(50, 100, 200)),
+                                ])
+                            }
                             onClose={() => setWindow1Visible(false)}
                             windowId="test-window-1"
                             priority={1}
@@ -78,10 +80,12 @@ export = {
                             visible={window2Visible}
                             icon={getAsset("assets/Quests.png")}
                             title="High Priority Window"
-                            colorSequence={new ColorSequence([
-                                new ColorSequenceKeypoint(0, Color3.fromRGB(255, 150, 100)),
-                                new ColorSequenceKeypoint(1, Color3.fromRGB(200, 100, 50)),
-                            ])}
+                            colorSequence={
+                                new ColorSequence([
+                                    new ColorSequenceKeypoint(0, Color3.fromRGB(255, 150, 100)),
+                                    new ColorSequenceKeypoint(1, Color3.fromRGB(200, 100, 50)),
+                                ])
+                            }
                             onClose={() => setWindow2Visible(false)}
                             windowId="test-window-2"
                             priority={5}
@@ -100,10 +104,12 @@ export = {
                             visible={window3Visible}
                             icon={getAsset("assets/Inventory.png")}
                             title="Low Priority Window"
-                            colorSequence={new ColorSequence([
-                                new ColorSequenceKeypoint(0, Color3.fromRGB(150, 255, 150)),
-                                new ColorSequenceKeypoint(1, Color3.fromRGB(100, 200, 100)),
-                            ])}
+                            colorSequence={
+                                new ColorSequence([
+                                    new ColorSequenceKeypoint(0, Color3.fromRGB(150, 255, 150)),
+                                    new ColorSequenceKeypoint(1, Color3.fromRGB(100, 200, 100)),
+                                ])
+                            }
                             onClose={() => setWindow3Visible(false)}
                             windowId="test-window-3"
                             priority={0}
@@ -121,5 +127,5 @@ export = {
                 </WindowManager>
             </HotkeyProvider>
         );
-    }
+    },
 };

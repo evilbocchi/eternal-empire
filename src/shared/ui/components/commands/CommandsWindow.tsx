@@ -42,7 +42,7 @@ export default function CommandsWindow({ visible, userPermissionLevel }: Command
             extractedCommands.push({
                 alias: command.PrimaryAlias,
                 description: description,
-                permissionLevel: permissionLevel
+                permissionLevel: permissionLevel,
             });
         }
 
@@ -59,12 +59,7 @@ export default function CommandsWindow({ visible, userPermissionLevel }: Command
     }
 
     return (
-        <frame
-            key="Commands"
-            BackgroundTransparency={1}
-            Size={new UDim2(1, 0, 1, 0)}
-            Visible={visible}
-        >
+        <frame key="Commands" BackgroundTransparency={1} Size={new UDim2(1, 0, 1, 0)} Visible={visible}>
             <scrollingframe
                 key="CommandsList"
                 AnchorPoint={new Vector2(0.5, 0)}

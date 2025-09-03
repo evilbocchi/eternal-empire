@@ -24,8 +24,15 @@ export = new Command(script.Name)
                 CommandAPI.ChatHook.sendPrivateMessage(o, "You can't kick yourself.", "color:255,43,43");
                 continue;
             }
-            if (CommandAPI.Permissions.getPermissionLevel(target.UserId) >= CommandAPI.Permissions.getPermissionLevel(o.UserId)) {
-                CommandAPI.ChatHook.sendPrivateMessage(o, "You can't kick someone with an equal/higher permission level.", "color:255,43,43");
+            if (
+                CommandAPI.Permissions.getPermissionLevel(target.UserId) >=
+                CommandAPI.Permissions.getPermissionLevel(o.UserId)
+            ) {
+                CommandAPI.ChatHook.sendPrivateMessage(
+                    o,
+                    "You can't kick someone with an equal/higher permission level.",
+                    "color:255,43,43",
+                );
                 continue;
             }
             CommandAPI.ChatHook.sendPrivateMessage(o, `Kicked player ${target.Name}`, "color:138,255,138");

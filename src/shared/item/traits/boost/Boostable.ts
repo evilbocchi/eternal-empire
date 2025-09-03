@@ -43,17 +43,16 @@ declare global {
 }
 
 export default class Boostable extends ItemTrait {
-
     static addBoost(instanceInfo: InstanceInfo, boost: ItemBoost) {
         const boosts = instanceInfo.Boosts ?? new Map<string, ItemBoost>();
         boosts.set(boost.placementId, boost);
-        instanceInfo.BoostAdded?.forEach(callback => callback());
+        instanceInfo.BoostAdded?.forEach((callback) => callback());
         instanceInfo.Boosts = boosts;
     }
 
     static removeBoost(instanceInfo: InstanceInfo, placementId: string) {
         instanceInfo.Boosts?.delete(placementId);
-        instanceInfo.BoostRemoved?.forEach(callback => callback());
+        instanceInfo.BoostRemoved?.forEach((callback) => callback());
     }
 
     static load(model: Model, boostable: Boostable) {

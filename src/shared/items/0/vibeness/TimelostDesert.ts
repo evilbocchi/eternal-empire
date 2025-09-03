@@ -11,7 +11,9 @@ const base = new CurrencyBundle().set("Power", amt);
 
 export = new Item(script.Name)
     .setName("Timelost Desert")
-    .setDescription("The hands of time are frozen for you, allowing you to produce unparalled amounts of Power. Produces %gain%, this amount increasing with Skill and Total Playtime.")
+    .setDescription(
+        "The hands of time are frozen for you, allowing you to produce unparalled amounts of Power. Produces %gain%, this amount increasing with Skill and Total Playtime.",
+    )
     .setDifficulty(Difficulty.Vibeness)
     .setPrice(new CurrencyBundle().set("Skill", 2000000), 1)
     .addPlaceableArea("BarrenIslands")
@@ -22,8 +24,11 @@ export = new Item(script.Name)
 
     .trait(Generator)
     .setPassiveGain(base)
-    .applyFormula((v, item) => {
-        return item.setPassiveGain(base.set("Power", amt.mul(v)));
-    }, () => Server.Currency.get("Skill").mul(Server.empireData.playtime))
+    .applyFormula(
+        (v, item) => {
+            return item.setPassiveGain(base.set("Power", amt.mul(v)));
+        },
+        () => Server.Currency.get("Skill").mul(Server.empireData.playtime),
+    )
 
     .exit();

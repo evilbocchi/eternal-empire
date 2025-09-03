@@ -8,7 +8,7 @@ const folder = Workspace.FindFirstChild("ItemModels") ?? ReplicatedStorage.WaitF
 
 /**
  * Can be used to make a part interactive with droplets.
- * 
+ *
  * @param basePart The part to make interactive.
  */
 function dropletInteractive(basePart: BasePart) {
@@ -19,13 +19,13 @@ function dropletInteractive(basePart: BasePart) {
 
 /**
  * Macro to validate if an instance is a BasePart.
- * 
+ *
  * @param instance The instance to validate.
  * @returns True if the instance is a BasePart, false otherwise.
  */
 function validateBasePart(instance: Instance): instance is BasePart {
     if (!instance.IsA("BasePart")) {
-        warn(`BasePart expected for`, instance, 'at', instance.GetFullName());
+        warn(`BasePart expected for`, instance, "at", instance.GetFullName());
         return false;
     }
     return true;
@@ -35,38 +35,34 @@ const served = findModels(folder);
 for (const model of served) {
     itemModels.set(model.Name, model);
 
-    if (!IS_SERVER || IS_CI)
-        continue;
+    if (!IS_SERVER || IS_CI) continue;
 
     for (const instance of model.GetDescendants()) {
         const name = instance.Name;
 
         if (name === "Hitbox") {
-            if (!validateBasePart(instance))
-                continue;
+            if (!validateBasePart(instance)) continue;
             instance.CollisionGroup = "ItemHitbox";
             continue;
         }
 
         if (name === "Laser" || name === "Transformer") {
-            if (!validateBasePart(instance))
-                continue;
+            if (!validateBasePart(instance)) continue;
             dropletInteractive(instance);
             CollectionService.AddTag(instance, "Laser");
             continue;
         }
 
         if (name === "Lava") {
-            if (!validateBasePart(instance))
-                continue;
+            if (!validateBasePart(instance)) continue;
             dropletInteractive(instance);
             CollectionService.AddTag(instance, "Lava");
             continue;
         }
 
-        if (name === "Decoration" || name === "Connector" || name === "Spinner") { // part that can only interact with players, not droplets
-            if (!validateBasePart(instance))
-                continue;
+        if (name === "Decoration" || name === "Connector" || name === "Spinner") {
+            // part that can only interact with players, not droplets
+            if (!validateBasePart(instance)) continue;
             instance.CollisionGroup = "Decoration";
             instance.CanCollide = true;
             instance.CanTouch = false;
@@ -74,9 +70,9 @@ for (const model of served) {
             continue;
         }
 
-        if (name === "Ghost") { // part that cannot interact with anything
-            if (!validateBasePart(instance))
-                continue;
+        if (name === "Ghost") {
+            // part that cannot interact with anything
+            if (!validateBasePart(instance)) continue;
             instance.CollisionGroup = "Decoration";
             instance.CanCollide = false;
             instance.CanTouch = false;
@@ -84,9 +80,9 @@ for (const model of served) {
             continue;
         }
 
-        if (name === "Antighost") { // part that can only interact with droplets, not players
-            if (!validateBasePart(instance))
-                continue;
+        if (name === "Antighost") {
+            // part that can only interact with droplets, not players
+            if (!validateBasePart(instance)) continue;
             instance.CollisionGroup = "Antighost";
             instance.CanCollide = true;
             instance.CanTouch = false;
@@ -96,8 +92,7 @@ for (const model of served) {
         }
 
         if (name === "ShopGuiPart") {
-            if (!validateBasePart(instance))
-                continue;
+            if (!validateBasePart(instance)) continue;
             instance.CollisionGroup = "Decoration";
             instance.CanQuery = true;
             instance.AddTag("Unhoverable");
@@ -134,8 +129,7 @@ for (const model of served) {
         const isScript = instance.IsA("Script");
         if ((instance.IsA("ParticleEmitter") || instance.IsA("Beam") || isScript) && instance.Enabled === true) {
             instance.AddTag("Effect");
-            if (isScript)
-                instance.Enabled = false;
+            if (isScript) instance.Enabled = false;
             continue;
         }
 
@@ -148,11 +142,14 @@ for (const model of served) {
         }
 
         // ungroup descendants to improve performance
-        if (instance.IsA("Folder") || (instance.IsA("Model") && instance.PrimaryPart?.Name !== "HumanoidRootPart" && (name === "Model" || instance.PrimaryPart === undefined))) {
-            if (instance.IsA("Tool"))
-                continue;
-            for (const unpacking of instance.GetChildren())
-                unpacking.Parent = model;
+        if (
+            instance.IsA("Folder") ||
+            (instance.IsA("Model") &&
+                instance.PrimaryPart?.Name !== "HumanoidRootPart" &&
+                (name === "Model" || instance.PrimaryPart === undefined))
+        ) {
+            if (instance.IsA("Tool")) continue;
+            for (const unpacking of instance.GetChildren()) unpacking.Parent = model;
             instance.Destroy();
             continue;
         }

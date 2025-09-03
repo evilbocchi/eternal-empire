@@ -9,7 +9,9 @@ import WhiteGem from "shared/items/excavation/WhiteGem";
 
 export = new Item(script.Name)
     .setName("Sideswiper")
-    .setDescription("A compact little gadget for some moderate gains! The blue laser gives a Bitcoin boost while the yellow laser gives a Power boost, adding up to %add%.")
+    .setDescription(
+        "A compact little gadget for some moderate gains! The blue laser gives a Bitcoin boost while the yellow laser gives a Power boost, adding up to %add%.",
+    )
     .setDifficulty(Difficulty.Winsome)
     .setPrice(new CurrencyBundle().set("Bitcoin", 200))
     .setRequiredItemAmount(ExcavationStone, 30)
@@ -22,10 +24,12 @@ export = new Item(script.Name)
     .persists()
 
     .trait(OmniUpgrader)
-    .setAdds(new Map([
-        ["BitcoinLaser", new CurrencyBundle().set("Bitcoin", 0.75)],
-        ["PowerLaser", new CurrencyBundle().set("Power", 4000)],
-    ]))
+    .setAdds(
+        new Map([
+            ["BitcoinLaser", new CurrencyBundle().set("Bitcoin", 0.75)],
+            ["PowerLaser", new CurrencyBundle().set("Power", 4000)],
+        ]),
+    )
     .setAdd(new CurrencyBundle().set("Power", 4000).set("Bitcoin", 0.75))
 
     .exit();

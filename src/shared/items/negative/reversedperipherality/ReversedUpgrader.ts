@@ -6,7 +6,9 @@ import CurrencyBundle from "shared/currency/CurrencyBundle";
 
 export = new Item(script.Name)
     .setName("Reversed Upgrader")
-    .setDescription("An elevated upgrader that does not appreciate Power, boosting Funds by x2 but nerfing Power by x0.5 in droplet value.")
+    .setDescription(
+        "An elevated upgrader that does not appreciate Power, boosting Funds by x2 but nerfing Power by x0.5 in droplet value.",
+    )
     .setDifficulty(Difficulty.ReversedPeripherality)
     .setPrice(new CurrencyBundle().set("Funds", 1.45e18), 1)
     .addPlaceableArea("BarrenIslands")

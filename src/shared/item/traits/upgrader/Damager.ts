@@ -11,7 +11,6 @@ declare global {
 }
 
 export default class Damager extends ItemTrait {
-
     damage = 0;
     variance = 0;
 
@@ -48,7 +47,7 @@ export default class Damager extends ItemTrait {
 
     format(str: string): string {
         const heal = -this.damage;
-        let label = heal > 0 ? `+${heal} HP` : `${heal} HP`;
+        const label = heal > 0 ? `+${heal} HP` : `${heal} HP`;
         return str.gsub("%%hp_add%%", formatRichText(label, CURRENCY_DETAILS.Health.color))[0];
     }
 }

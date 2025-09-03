@@ -30,10 +30,7 @@ export const LOADING_WINDOW = LOADING_SCREEN.WaitForChild("LoadingWindow") as Fr
  */
 @Controller()
 export default class LoadingWindowController implements OnInit {
-
-    constructor(private uiController: UIController) {
-
-    }
+    constructor(private uiController: UIController) {}
 
     /**
      * Hides the loading window with an animation and plays a sound.
@@ -45,8 +42,7 @@ export default class LoadingWindowController implements OnInit {
             LOADING_WINDOW.Visible = false;
         });
 
-        if (LOADING_WINDOW.Visible === true)
-            playSound("IntermissionEnd.mp3");
+        if (LOADING_WINDOW.Visible === true) playSound("IntermissionEnd.mp3");
     }
 
     /**

@@ -23,9 +23,8 @@ export default function CurrencyInput({
     currencyType = "Funds",
     minValue = 1,
     maxValue = 1e12,
-    size = new UDim2(1, 0, 0, 80)
+    size = new UDim2(1, 0, 0, 80),
 }: CurrencyInputProps) {
-
     const [inputText, setInputText] = useState("");
     const [isValid, setIsValid] = useState(true);
     const [errorMessage, setErrorMessage] = useState("");
@@ -87,16 +86,9 @@ export default function CurrencyInput({
     };
 
     return (
-        <frame
-            BackgroundColor3={Color3.fromRGB(50, 50, 50)}
-            BorderSizePixel={0}
-            Size={size}
-        >
+        <frame BackgroundColor3={Color3.fromRGB(50, 50, 50)} BorderSizePixel={0} Size={size}>
             <uicorner CornerRadius={new UDim(0, 8)} />
-            <uistroke
-                Thickness={1}
-                Color={isValid ? Color3.fromRGB(100, 100, 100) : Color3.fromRGB(200, 100, 100)}
-            />
+            <uistroke Thickness={1} Color={isValid ? Color3.fromRGB(100, 100, 100) : Color3.fromRGB(200, 100, 100)} />
 
             {/* Label */}
             <textlabel
@@ -129,7 +121,7 @@ export default function CurrencyInput({
                         const formatted = formatNumber(textBox.Text);
                         textBox.Text = formatted;
                         handleTextChange(formatted);
-                    }
+                    },
                 }}
             >
                 <uicorner CornerRadius={new UDim(0, 4)} />

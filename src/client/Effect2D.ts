@@ -1,6 +1,6 @@
 /**
  * @fileoverview Handles all complex 2D effects on the client.
- * 
+ *
  * @since 1.0.0
  */
 
@@ -10,7 +10,6 @@ import { PLAYER_GUI } from "client/constants";
 import { LOCAL_PLAYER } from "shared/constants";
 
 namespace Effect2D {
-
     /**
      * The masking GUI that will be used to mask elements.
      */
@@ -24,7 +23,7 @@ namespace Effect2D {
      * Create a {@link Frame} that has the same size and position as the given element.
      * Is transparent, parented to the {@link MASKING_GUI}.
      * The mask will be destroyed after the given lifetime.
-     * 
+     *
      * @param element The element to create a mask for.
      * @param lifetime The lifetime of the mask in seconds.
      * @returns The created mask.
@@ -48,15 +47,13 @@ namespace Effect2D {
             particles.rate = 0;
             task.delay(10, () => particles.Destroy());
         }
-        if (after === undefined)
-            fadeOut();
-        else
-            task.delay(after, fadeOut);
+        if (after === undefined) fadeOut();
+        else task.delay(after, fadeOut);
     }
 
     /**
      * Creates a radial grow effect on a GuiButton.
-     * 
+     *
      * @param element The GuiButton to apply the effect to.
      * @param useMousePosition Whether to use the mouse position as the center of the effect.
      * @returns The created circle.
@@ -78,8 +75,7 @@ namespace Effect2D {
             const x = mouse.X - mask.AbsolutePosition.X;
             const y = mouse.Y - mask.AbsolutePosition.Y;
             circle.Position = new UDim2(0, x, 0, y);
-        }
-        else {
+        } else {
             circle.Position = new UDim2(0.5, 0, 0.5, 0);
         }
         circle.Size = new UDim2(0, 0, 0, 0);

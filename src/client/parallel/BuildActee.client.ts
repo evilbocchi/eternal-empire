@@ -3,15 +3,15 @@
 
 /**
  * @fileoverviewside script for managing item placement in build mode.
- * 
+ *
  * Handles:
  * - Loading and managing item models for placement.
  * - Visual indicators for item placement (e.g., outlines, highlights).
  * - Collision detection and response for placed items.
  * - Special effects for items with specific traits (e.g., Conveyor, Charger).
- * 
+ *
  * Handles build mode visuals and logic for item placement in the workspace.
- * 
+ *
  * @since 1.0.0
  */
 
@@ -66,17 +66,14 @@ function retrieve<T extends ConstructorParameters<typeof Instance>[0]>(parent: I
  * @param model The model instance being added.
  */
 function onModelAdded(model: Instance) {
-    if (!model.IsA("Model") || loadedModels.has(model))
-        return;
+    if (!model.IsA("Model") || loadedModels.has(model)) return;
     const itemId = model.GetAttribute("ItemId") as string;
     const item = Items.getItem(itemId);
-    if (item === undefined)
-        throw "Model " + model.Name + " does not have item defined";
+    if (item === undefined) throw "Model " + model.Name + " does not have item defined";
 
     const isPlacing = model.GetAttribute("Selected") === true;
     const hitbox = model.PrimaryPart;
-    if (hitbox === undefined)
-        return;
+    if (hitbox === undefined) return;
     const conveyor = item.findTrait("Conveyor");
     const arrows = new Set<Beam>();
 
@@ -89,23 +86,24 @@ function onModelAdded(model: Instance) {
         if (instance.Name === "Conveyor" && conveyor !== undefined) {
             if (isPlacing) {
                 Conveyor.loadConveyorArrow(instance as BasePart, conveyor).Enabled = true;
-            }
-            else {
+            } else {
                 const arrow = instance.FindFirstChildOfClass("Beam");
-                if (arrow !== undefined)
-                    arrows.add(arrow);
+                if (arrow !== undefined) arrows.add(arrow);
             }
         }
 
         // Remove certain GUIs and beams during placement
-        if (instance.IsA("BillboardGui") || (instance.IsA("Beam") && conveyor === undefined) || instance.IsA("SurfaceGui")) {
-            if (isPlacing === true)
-                instance.Destroy();
+        if (
+            instance.IsA("BillboardGui") ||
+            (instance.IsA("Beam") && conveyor === undefined) ||
+            instance.IsA("SurfaceGui")
+        ) {
+            if (isPlacing === true) instance.Destroy();
         }
         // Make parts semi-transparent and non-collidable during placement
         else if (instance.IsA("BasePart") && isPlacing === true) {
             instance.CanCollide = false;
-            instance.Transparency = 1 - ((1 - instance.Transparency) / 2);
+            instance.Transparency = 1 - (1 - instance.Transparency) / 2;
             instance.CastShadow = false;
         }
         // For nested models, ensure all parts are non-collidable during placement
@@ -136,12 +134,14 @@ function onModelAdded(model: Instance) {
                 const connectionVFX = model.WaitForChild("ConnectionVFX", 1);
 
                 // Use item difficulty color or fallback
-                const color = (connectionVFX?.FindFirstChild("w") as Beam | undefined)?.Color ?? new ColorSequence(item.difficulty.color ?? new Color3());
+                const color =
+                    (connectionVFX?.FindFirstChild("w") as Beam | undefined)?.Color ??
+                    new ColorSequence(item.difficulty.color ?? new Color3());
                 const ring0 = ASSETS.ChargerRing.Clone();
                 const ring1 = ASSETS.ChargerRing.Clone();
                 const diameter = (charger.radius ?? 0) * 2 + hitbox.Size.X;
-                const l0 = 11 / 18 * diameter;
-                const l1 = -12 / 18 * diameter;
+                const l0 = (11 / 18) * diameter;
+                const l1 = (-12 / 18) * diameter;
                 const attachment0 = new Instance("Attachment");
                 const attachment1 = new Instance("Attachment");
                 const yOffset = -(hitbox.Size.Y / 2);
@@ -170,18 +170,15 @@ function onModelAdded(model: Instance) {
         // Update collision colors when the hitbox moves
         hitbox.GetPropertyChangedSignal("CFrame").Connect(() => {
             const selectionBox = indicator.FindFirstChildOfClass("SelectionBox");
-            if (selectionBox === undefined)
-                return;
+            if (selectionBox === undefined) return;
             let isAcceptable = !ItemPlacement.isTouchingPlacedItem(model);
-            if (!sandboxEnabled && !ItemPlacement.isInPlaceableArea(model, item))
-                isAcceptable = false;
+            if (!sandboxEnabled && !ItemPlacement.isInPlaceableArea(model, item)) isAcceptable = false;
 
             // Set indicator color based on placement validity
             if (isAcceptable) {
                 selectionBox.Color3 = NONCOLLISION_COLOR;
                 selectionBox.SurfaceColor3 = NONCOLLISION_COLOR;
-            }
-            else {
+            } else {
                 selectionBox.Color3 = COLLISION_COLOR;
                 selectionBox.SurfaceColor3 = COLLISION_COLOR;
             }
@@ -202,25 +199,20 @@ function onModelAdded(model: Instance) {
      */
     const update = () => {
         // Only allow hitbox queries if not placing and in build mode
-        hitbox.CanQuery = Workspace.GetAttribute("BuildMode") as boolean && !isPlacing;
+        hitbox.CanQuery = (Workspace.GetAttribute("BuildMode") as boolean) && !isPlacing;
 
         // Hide hitbox indicator if currently placing
-        if (isPlacing)
-            return;
+        if (isPlacing) return;
 
         // Calculate transparency based on dragging, hovering, and build mode
         let transparency = 1;
-        if (model.GetAttribute("Dragging") === true)
-            transparency *= 0.6;
+        if (model.GetAttribute("Dragging") === true) transparency *= 0.6;
 
-        if (model.GetAttribute("Hovering") === true)
-            transparency *= 0.5;
+        if (model.GetAttribute("Hovering") === true) transparency *= 0.5;
 
-        if (Workspace.GetAttribute("BuildMode") === true)
-            transparency *= 0.7;
+        if (Workspace.GetAttribute("BuildMode") === true) transparency *= 0.7;
 
-        if (transparency === previousTransparency)
-            return;
+        if (transparency === previousTransparency) return;
         previousTransparency = transparency;
 
         // Show or hide selection box based on transparency
@@ -231,8 +223,7 @@ function onModelAdded(model: Instance) {
             selectionBox.SurfaceTransparency = transparency * 1.3 + 0.25;
             selectionBox.Color3 = NONCOLLISION_COLOR;
             selectionBox.SurfaceColor3 = NONCOLLISION_COLOR;
-        }
-        else {
+        } else {
             hitbox.FindFirstChild("HitboxIndicator")?.Destroy();
         }
 
@@ -252,7 +243,7 @@ function onModelAdded(model: Instance) {
     update();
 }
 
-type Interactive = Instance & { Enabled: boolean; };
+type Interactive = Instance & { Enabled: boolean };
 
 // Disable interactives during build mode
 Workspace.GetAttributeChangedSignal("BuildMode").Connect(() => {

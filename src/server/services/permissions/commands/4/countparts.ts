@@ -6,9 +6,7 @@ export = new Command(script.Name)
     .setDescription("Get the part count of the current world.")
     .setExecute(() => {
         let i = 0;
-        for (const part of Workspace.GetDescendants())
-            if (part.IsA("BasePart"))
-                i++;
+        for (const part of Workspace.GetDescendants()) if (part.IsA("BasePart")) i++;
         CommandAPI.ChatHook.sendServerMessage("Part count: " + i);
     })
     .setPermissionLevel(4);

@@ -6,7 +6,9 @@ import Item from "shared/item/Item";
 
 export = new Item(script.Name)
     .setName("Advanced Condenser")
-    .setDescription("Produces %val% droplets when %quota% of those values are processed through the attached furnace. Droplets can only be condensed once.")
+    .setDescription(
+        "Produces %val% droplets when %quota% of those values are processed through the attached furnace. Droplets can only be condensed once.",
+    )
     .setDifficulty(Difficulty.Skip)
     .setPrice(new CurrencyBundle().set("Funds", 19.9e18), 1)
     .addPlaceableArea("BarrenIslands")

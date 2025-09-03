@@ -15,7 +15,9 @@ import NamedUpgrades from "shared/namedupgrade/NamedUpgrades";
 
 export = new Item(script.Name)
     .setName("Awesome Manumatic Purifier")
-    .setDescription("A majestic tower standing through the innumerable trials. Applies a Funds boost to raised droplets passing through it. Click the structure to increase the boost!")
+    .setDescription(
+        "A majestic tower standing through the innumerable trials. Applies a Funds boost to raised droplets passing through it. Click the structure to increase the boost!",
+    )
     .setDifficulty(Difficulty.FelixTheA)
     .setPrice(new CurrencyBundle().set("Funds", OnoeNum.fromSerika(158, 12)), 1)
     .addPlaceableArea("BarrenIslands")
@@ -48,9 +50,8 @@ export = new Item(script.Name)
             const purifierBoostReq = new OnoeNum(100);
             if (amount.lessThan(purifierBoostReq)) {
                 cpc = new OnoeNum(1);
-                cpcLabel.Text = "(Click " + (purifierBoostReq.sub(amount).round()) + " more times to unlock this boost!)";
-            }
-            else {
+                cpcLabel.Text = "(Click " + purifierBoostReq.sub(amount).round() + " more times to unlock this boost!)";
+            } else {
                 cpc = OnoeNum.log10(amount.sub(90).div(10))?.pow(2).div(6).add(1) ?? new OnoeNum(1);
                 cpcLabel.Text = tostring(cpc) + "x Purifier Clicks/click";
             }
@@ -60,10 +61,18 @@ export = new Item(script.Name)
         // Fortunately this is a singleton
         clickable.setOnClick((_model, _item, player, value) => {
             if (player !== undefined) {
-                player.SetAttribute("RawPurifierClicks", (player.GetAttribute("RawPurifierClicks") as number ?? 0) + 1);
+                player.SetAttribute(
+                    "RawPurifierClicks",
+                    ((player.GetAttribute("RawPurifierClicks") as number) ?? 0) + 1,
+                );
             }
             let [totalAdd, totalMul, totalPow] = Operative.template();
-            [totalAdd, totalMul, totalPow] = RevenueService.applyGlobal(totalAdd, totalMul, totalPow, PURIFIER_UPGRADES);
+            [totalAdd, totalMul, totalPow] = RevenueService.applyGlobal(
+                totalAdd,
+                totalMul,
+                totalPow,
+                PURIFIER_UPGRADES,
+            );
             const valuePrice = new CurrencyBundle().set("Purifier Clicks", cpc.mul(value));
             const worth = Operative.coalesce(valuePrice, totalAdd, totalMul, totalPow);
             const final = RevenueService.performSoftcaps(worth.amountPerCurrency);

@@ -22,9 +22,7 @@ import Packets from "shared/Packets";
  */
 @Service()
 export default class UnlockedAreasService implements OnInit {
-    constructor(private dataService: DataService) {
-
-    }
+    constructor(private dataService: DataService) {}
 
     /**
      * Checks if a given area is unlocked.

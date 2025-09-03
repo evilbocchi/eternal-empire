@@ -20,12 +20,11 @@ import Items from "shared/items/Items";
  */
 @Service()
 export default class SanityService implements OnStart {
-
     /**
      * Checks an item for common configuration mistakes.
      * Warns if the item is a crafting item with a low reset layer,
      * if required items have mismatched reset layers, or if the model is missing.
-     * 
+     *
      * @param item The item to check.
      */
     checkItem(item: Item) {
@@ -45,7 +44,9 @@ export default class SanityService implements OnStart {
                 for (const item of shop.items) {
                     const resetLayer = item.getResetLayer();
                     if (resetLayer < 100) {
-                        warn(`Item ${item.name} (${item.id}) has a reset layer of ${resetLayer}. This is likely a mistake as this is a crafting item and should persist.`);
+                        warn(
+                            `Item ${item.name} (${item.id}) has a reset layer of ${resetLayer}. This is likely a mistake as this is a crafting item and should persist.`,
+                        );
                     }
                 }
             }
@@ -56,7 +57,9 @@ export default class SanityService implements OnStart {
         for (const [requiredItem, _] of item.requiredItems) {
             const b = requiredItem.getResetLayer();
             if (a !== b && a < 100 && b < 100) {
-                warn(`Item ${item.name} (${item.id}) has a required item ${requiredItem.name} (${requiredItem.id}) with a different reset layer (${a} vs ${b}). This is likely a mistake.`);
+                warn(
+                    `Item ${item.name} (${item.id}) has a required item ${requiredItem.name} (${requiredItem.id}) with a different reset layer (${a} vs ${b}). This is likely a mistake.`,
+                );
             }
         }
 
@@ -75,7 +78,7 @@ export default class SanityService implements OnStart {
 
     /**
      * Checks a harvestable for craftable uses and warns if too few.
-     * 
+     *
      * @param harvestableId The harvestable's ID.
      */
     checkHarvestable(harvestableId: string) {
@@ -98,7 +101,9 @@ export default class SanityService implements OnStart {
             }
         }
         if (craftables < 5) {
-            warn(`Harvestable ${harvestable.name} (${harvestableId}) only has ${craftables} craftables (<5), consider adding more.`);
+            warn(
+                `Harvestable ${harvestable.name} (${harvestableId}) only has ${craftables} craftables (<5), consider adding more.`,
+            );
         }
     }
 

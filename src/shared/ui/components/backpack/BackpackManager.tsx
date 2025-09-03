@@ -1,6 +1,6 @@
 /**
  * @fileoverview Backpack system manager component
- * 
+ *
  * High-level manager that bridges tool controller logic with the new React UI.
  * Manages state synchronization and provides callbacks for tool operations.
  */
@@ -11,7 +11,10 @@ import type ToolController from "client/controllers/gameplay/ToolController";
 import { playSound } from "shared/asset/GameAssets";
 import { LOCAL_PLAYER } from "shared/constants";
 import Items from "shared/items/Items";
-import BackpackWindow, { BackpackWindowCallbacks, BackpackWindowState } from "shared/ui/components/backpack/BackpackWindow";
+import BackpackWindow, {
+    BackpackWindowCallbacks,
+    BackpackWindowState,
+} from "shared/ui/components/backpack/BackpackWindow";
 import { ToolOptionData } from "shared/ui/components/backpack/ToolOption";
 
 interface BackpackManagerProps {
@@ -25,13 +28,10 @@ interface BackpackManagerProps {
  * High-level backpack manager component that handles UI state and coordinates with tool logic.
  * This component should be integrated into your main UI controller.
  */
-export default function BackpackManager({
-    toolController,
-    animationsEnabled = true
-}: BackpackManagerProps) {
+export default function BackpackManager({ toolController, animationsEnabled = true }: BackpackManagerProps) {
     const [backpackState, setBackpackState] = useState<BackpackWindowState>({
         visible: false,
-        tools: []
+        tools: [],
     });
 
     // Update tool data from controller and visibility
@@ -101,7 +101,7 @@ export default function BackpackManager({
                 textureId: tool.TextureId,
                 hotkeyNumber: hotkeyIndex,
                 isEquipped: tool === equippedTool,
-                layoutOrder
+                layoutOrder,
             };
 
             tools.push(toolData);
@@ -114,7 +114,7 @@ export default function BackpackManager({
         const isVisible = tools.size() > 0;
         setBackpackState({
             visible: isVisible,
-            tools
+            tools,
         });
     }, [toolController]);
 
@@ -149,14 +149,8 @@ export default function BackpackManager({
                 // Unequip tool
                 tool.Parent = backpack;
             }
-        }, [])
+        }, []),
     };
 
-    return (
-        <BackpackWindow
-            state={backpackState}
-            callbacks={callbacks}
-            animationsEnabled={animationsEnabled}
-        />
-    );
+    return <BackpackWindow state={backpackState} callbacks={callbacks} animationsEnabled={animationsEnabled} />;
 }

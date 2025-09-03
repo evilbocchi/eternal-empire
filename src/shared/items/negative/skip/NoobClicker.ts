@@ -33,8 +33,7 @@ export = new Item(script.Name)
     .onClientLoad((model) => {
         const noob = model.WaitForChild("Noob") as Model;
         const animationController = noob.FindFirstChildOfClass("AnimationController");
-        if (animationController === undefined)
-            return;
+        if (animationController === undefined) return;
         const animTrack = loadAnimation(animationController, 16920778613);
         if (animTrack !== undefined) {
             Streaming.onStreamableRemote(model, () => animTrack.Play());

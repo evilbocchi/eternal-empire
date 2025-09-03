@@ -5,7 +5,9 @@ import CurrencyBundle from "shared/currency/CurrencyBundle";
 
 export = new Item(script.Name)
     .setName("Endless Void")
-    .setDescription("Looking into the depths of that seemingly eternal space brings you a massive headache, but who cares? %mul% droplet value makes it all worth it.")
+    .setDescription(
+        "Looking into the depths of that seemingly eternal space brings you a massive headache, but who cares? %mul% droplet value makes it all worth it.",
+    )
     .setDifficulty(Difficulty.Happylike)
     .setPrice(new CurrencyBundle().set("Funds", 400e30).set("Power", 400e15), 1)
     .addPlaceableArea("BarrenIslands", "SlamoVillage")

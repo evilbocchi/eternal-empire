@@ -15,8 +15,7 @@ export = new Command(script.Name)
             if (data.restricted.delete(userId)) {
                 CommandAPI.ChatHook.sendPrivateMessage(o, `Unrestricted player ${target.Name}`, "color:138,255,138");
                 CommandAPI.Permissions.updatePermissionLevel(userId);
-            }
-            else {
+            } else {
                 CommandAPI.ChatHook.sendPrivateMessage(o, `${target.Name} is not restricted`, "color:255,43,43");
             }
         }

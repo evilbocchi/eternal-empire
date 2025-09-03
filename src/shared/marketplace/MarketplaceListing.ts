@@ -1,9 +1,9 @@
 /**
  * @fileoverview Marketplace listing data structures and types.
- * 
+ *
  * This module defines the core data structures used in the marketplace system
  * for managing item listings, auctions, and trade information.
- * 
+ *
  * @since 1.0.0
  */
 

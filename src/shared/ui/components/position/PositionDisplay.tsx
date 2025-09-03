@@ -17,7 +17,7 @@ interface PositionDisplayProps {
 /**
  * PositionDisplay is a smart wrapper around PositionWindow that automatically
  * tracks player position and handles character spawning/despawning.
- * 
+ *
  * This component integrates the position tracking hook with the UI component,
  * providing a complete solution for displaying player coordinates.
  */
@@ -26,7 +26,7 @@ export default function PositionDisplay({
     visible = true,
     anchorPoint,
     windowPosition,
-    size
+    size,
 }: PositionDisplayProps) {
     const { position } = useCharacterPosition(player);
 

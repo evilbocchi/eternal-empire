@@ -19,7 +19,10 @@ function getFormattedDescription(id?: string, quest?: QuestInfo, stageNum = 0) {
     }
     const position = ReplicatedStorage.GetAttribute(id + stageNum) as Vector3 | undefined;
     if (position !== undefined) {
-        desc = desc.gsub("%%coords%%", `(${math.round(position.X)}, ${math.round(position.Y)}, ${math.round(position.Z)})`)[0];
+        desc = desc.gsub(
+            "%%coords%%",
+            `(${math.round(position.X)}, ${math.round(position.Y)}, ${math.round(position.Z)})`,
+        )[0];
     }
     return desc;
 }
@@ -30,7 +33,9 @@ export default function TrackedQuestWindow() {
     const currentStage = trackedQuest ? (stagePerQuest.get(trackedQuest) ?? 0) : 0;
     const hasQuest = currentQuest !== undefined && currentStage >= 0;
 
-    const questColor = currentQuest ? new Color3(currentQuest.colorR, currentQuest.colorG, currentQuest.colorB) : Color3.fromRGB(255, 255, 255);
+    const questColor = currentQuest
+        ? new Color3(currentQuest.colorR, currentQuest.colorG, currentQuest.colorB)
+        : Color3.fromRGB(255, 255, 255);
 
     if (!hasQuest) {
         return undefined;
@@ -65,10 +70,7 @@ export default function TrackedQuestWindow() {
                 TextXAlignment={Enum.TextXAlignment.Left}
             >
                 <uigradient
-                    Color={new ColorSequence(
-                        questColor.Lerp(new Color3(1, 1, 1), 0.5),
-                        questColor
-                    )}
+                    Color={new ColorSequence(questColor.Lerp(new Color3(1, 1, 1), 0.5), questColor)}
                     Rotation={50}
                 />
                 <uistroke Thickness={2} />

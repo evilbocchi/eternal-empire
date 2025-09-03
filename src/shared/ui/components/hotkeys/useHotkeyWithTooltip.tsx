@@ -1,6 +1,6 @@
 /**
  * @fileoverview Hooks for integrating hotkeys with tooltips and UI components.
- * 
+ *
  * Provides hooks that combine hotkey functionality with tooltip display,
  * matching the patterns from the original HotkeysController.
  */
@@ -13,7 +13,7 @@ declare global {
     type TooltipProps = ReturnType<typeof useHotkeyWithTooltip>;
 
     type HotkeyWithTooltipOptions = {
-        action: (usedHotkey: boolean) => boolean,
+        action: (usedHotkey: boolean) => boolean;
         priority?: number;
         label: HotkeyLabel;
         endAction?: () => boolean;
@@ -26,7 +26,14 @@ declare global {
  * Hook that combines hotkey binding with tooltip integration
  * Similar to the original HotkeysController.setHotkey method
  */
-export default function useHotkeyWithTooltip({ action, priority, label, endAction, onEnter, onLeave }: HotkeyWithTooltipOptions) {
+export default function useHotkeyWithTooltip({
+    action,
+    priority,
+    label,
+    endAction,
+    onEnter,
+    onLeave,
+}: HotkeyWithTooltipOptions) {
     // Bind the hotkey
     useHotkey({
         action,
@@ -51,6 +58,6 @@ export default function useHotkeyWithTooltip({ action, priority, label, endActio
         events: {
             ...tooltipProps.events,
             Activated: handleClick,
-        }
+        },
     };
 }

@@ -15,8 +15,10 @@ export default function ProgressBar(props: ProgressBarProps) {
         const size = props.colorSequence.Keypoints.size();
         for (let i = 0; i < size; i++) {
             const keypoint = props.colorSequence.Keypoints[i];
-            const alpha = 1 - ((i + 1) / size);
-            keypoints.push(new ColorSequenceKeypoint(keypoint.Time, keypoint.Value.Lerp(Color3.fromRGB(255, 255, 255), alpha)));
+            const alpha = 1 - (i + 1) / size;
+            keypoints.push(
+                new ColorSequenceKeypoint(keypoint.Time, keypoint.Value.Lerp(Color3.fromRGB(255, 255, 255), alpha)),
+            );
         }
         return new ColorSequence(keypoints);
     }, []);
@@ -51,26 +53,13 @@ export default function ProgressBar(props: ProgressBarProps) {
                 Size={new UDim2(math.clamp(props.current / props.max, 0, 1), 0, 1, 0)}
                 Visible={props.current > 0}
             >
-                <uigradient
-                    Color={props.colorSequence}
-                    Rotation={90}
-                />
-                <uistroke
-                    Color={Color3.fromRGB(255, 255, 255)}
-                    Thickness={3}
-                >
-                    <uigradient
-                        Color={tintedColorSequence}
-                        Rotation={90}
-                    />
+                <uigradient Color={props.colorSequence} Rotation={90} />
+                <uistroke Color={Color3.fromRGB(255, 255, 255)} Thickness={3}>
+                    <uigradient Color={tintedColorSequence} Rotation={90} />
                 </uistroke>
             </frame>
 
-            <uistroke
-                ApplyStrokeMode={Enum.ApplyStrokeMode.Border}
-                Color={Color3.fromRGB(48, 48, 48)}
-                Thickness={3}
-            />
+            <uistroke ApplyStrokeMode={Enum.ApplyStrokeMode.Border} Color={Color3.fromRGB(48, 48, 48)} Thickness={3} />
         </frame>
     );
 }

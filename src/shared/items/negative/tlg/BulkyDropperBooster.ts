@@ -7,7 +7,9 @@ import BulkyDropper from "shared/items/negative/tlg/BulkyDropper";
 
 export = new Item(script.Name)
     .setName("Bulky Dropper Booster")
-    .setDescription("An enhancer that amplifies the performance of Bulky Droppers, multiplying drop rate by %dropRateMultiplier% times.")
+    .setDescription(
+        "An enhancer that amplifies the performance of Bulky Droppers, multiplying drop rate by %dropRateMultiplier% times.",
+    )
     .setDifficulty(Difficulty.TheFirstDifficulty)
     .setPrice(new CurrencyBundle().set("Funds", 500), 1)
     .addPlaceableArea("BarrenIslands")

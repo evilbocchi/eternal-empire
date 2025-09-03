@@ -6,7 +6,9 @@ import Packets from "shared/Packets";
 
 export = new Item(script.Name)
     .setName("Marketplace Terminal")
-    .setDescription("A high-tech terminal that provides access to the marketplace. Stand within 15 studs to automatically open the trading interface.")
+    .setDescription(
+        "A high-tech terminal that provides access to the marketplace. Stand within 15 studs to automatically open the trading interface.",
+    )
     .setDifficulty(Difficulty.Easy)
     .setPrice(new CurrencyBundle().set("Funds", 1000), 1)
     .addPlaceableArea("IntermittentIsles")

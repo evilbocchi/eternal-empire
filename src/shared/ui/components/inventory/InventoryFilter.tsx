@@ -1,51 +1,122 @@
-/**
- * @fileoverview Inventory filter React component
- * 
- * Provides search and trait filtering functionality for the inventory.
- * Replaces the traditional FilterOptions with React implementation.
- */
-
-import React, { useCallback, useMemo } from "@rbxts/react";
+import React, { useCallback, useMemo, useRef, useState } from "@rbxts/react";
+import { getAsset } from "shared/asset/AssetMap";
+import { playSound } from "shared/asset/GameAssets";
+import Item from "shared/item/Item";
 import { useMessageTooltip } from "shared/ui/components/tooltip/useTooltipProps";
 
-interface TraitOption {
-    id: string;
-    image: string;
-    color: Color3;
-    selected: boolean;
-}
-
 interface InventoryFilterProps {
-    /** Current search query */
-    searchQuery: string;
     /** Available trait filter options */
-    traitOptions: TraitOption[];
+    traitOptions: TraitFilterOption[];
     /** Callback when search query changes */
     onSearchChange: (query: string) => void;
     /** Callback when trait filter is toggled */
-    onTraitToggle: (traitId: string) => void;
+    onTraitToggle: (traitId: TraitFilterId) => void;
     /** Callback when clear button is pressed */
     onClear: () => void;
+}
+
+export const traitOptions: TraitFilterOption[] = [
+    {
+        id: "Dropper",
+        image: getAsset("assets/indexing/Dropper.png"),
+        color: Color3.fromRGB(255, 92, 92),
+    },
+    {
+        id: "Furnace",
+        image: getAsset("assets/indexing/Furnace.png"),
+        color: Color3.fromRGB(255, 155, 74),
+    },
+    {
+        id: "Upgrader",
+        image: getAsset("assets/indexing/Upgrader.png"),
+        color: Color3.fromRGB(245, 255, 58),
+    },
+    {
+        id: "Conveyor",
+        image: getAsset("assets/indexing/Conveyor.png"),
+        color: Color3.fromRGB(131, 255, 78),
+    },
+    {
+        id: "Generator",
+        image: getAsset("assets/indexing/Generator.png"),
+        color: Color3.fromRGB(60, 171, 255),
+    },
+    {
+        id: "Charger",
+        image: getAsset("assets/indexing/Charger.png"),
+        color: Color3.fromRGB(255, 170, 255),
+    },
+    {
+        id: "Miscellaneous",
+        image: getAsset("assets/indexing/Miscellaneous.png"),
+        color: Color3.fromRGB(170, 85, 255),
+    },
+];
+
+/**
+ * Checks if the item has any of the whitelisted traits enabled.
+ * If the Miscellaneous trait is enabled, it will return true if no other traits are found.
+ *
+ * @param item The item to check.
+ * @param whitelistedTraits The traits to check for.
+ * @returns Whether the item is whitelisted.
+ */
+export function isWhitelisted(item: Item, whitelistedTraits: Set<TraitFilterId>) {
+    if (whitelistedTraits.isEmpty()) return true;
+    let isMisc = true;
+    for (const traitOption of traitOptions) {
+        const traitId = traitOption.id as TraitFilterId;
+        if (item.isA(traitId as keyof ItemTraits)) {
+            isMisc = false;
+            if (whitelistedTraits.has(traitId)) return true;
+        }
+    }
+    return isMisc && whitelistedTraits.has("Miscellaneous");
 }
 
 /**
  * Inventory filter component with search and trait filtering
  */
 export default function InventoryFilter({
-    searchQuery,
     traitOptions,
     onSearchChange,
     onTraitToggle,
-    onClear
+    onClear,
 }: InventoryFilterProps) {
-    const handleSearchChange = useCallback((rbx: TextBox) => {
-        onSearchChange(rbx.Text);
-    }, [onSearchChange]);
+    const textBoxRef = useRef<TextBox>();
+    const [previousText, setPreviousText] = useState("");
+
+    const handleSearchChange = useCallback(
+        (rbx: TextBox) => {
+            const text = rbx.Text;
+            onSearchChange(text);
+            if (text.size() > previousText.size()) {
+                switch (math.random(1, 4)) {
+                    case 1:
+                        playSound("KeyPress1.mp3");
+                        break;
+                    case 2:
+                        playSound("KeyPress2.mp3");
+                        break;
+                    case 3:
+                        playSound("KeyPress3.mp3");
+                        break;
+                    case 4:
+                        playSound("KeyPress4.mp3");
+                        break;
+                }
+            } else {
+                playSound("KeyDelete.mp3");
+            }
+            setPreviousText(text);
+        },
+        [onSearchChange],
+    );
 
     // Generate tooltip props for each trait at the top level
-    const tooltipPropsArray = traitOptions.map(trait => ({
+    const tooltipPropsArray = traitOptions.map((trait) => ({
         id: trait.id,
-        props: useMessageTooltip(trait.id)
+        props: useMessageTooltip(trait.id),
     }));
 
     const tooltipPropsPerTrait = useMemo(() => {
@@ -57,13 +128,10 @@ export default function InventoryFilter({
     }, [tooltipPropsArray]);
 
     return (
-        <frame
-            BackgroundTransparency={1}
-            LayoutOrder={-1}
-            Size={new UDim2(1, 0, 0.025, 20)}
-        >
+        <frame BackgroundTransparency={1} LayoutOrder={-1} Size={new UDim2(1, 0, 0.025, 20)}>
             {/* Search textbox */}
             <textbox
+                ref={textBoxRef}
                 AnchorPoint={new Vector2(1, 0.5)}
                 BackgroundColor3={Color3.fromRGB(255, 255, 255)}
                 BorderSizePixel={0}
@@ -73,7 +141,7 @@ export default function InventoryFilter({
                 PlaceholderText="Search..."
                 Position={new UDim2(0, 0, 0, 5)}
                 Size={new UDim2(0.4, 0, 1, 0)}
-                Text={searchQuery}
+                Text={""}
                 TextColor3={Color3.fromRGB(0, 0, 0)}
                 TextScaled={true}
                 TextSize={25}
@@ -81,7 +149,7 @@ export default function InventoryFilter({
                 TextXAlignment={Enum.TextXAlignment.Left}
                 ZIndex={100}
                 Change={{
-                    Text: handleSearchChange
+                    Text: handleSearchChange,
                 }}
             >
                 {/* Search box padding */}
@@ -94,9 +162,20 @@ export default function InventoryFilter({
 
                 {/* Search icon */}
                 <imagebutton
+                    Active={true}
                     AnchorPoint={new Vector2(1, 0.5)}
                     BackgroundTransparency={1}
-                    Image="rbxassetid://5492253050"
+                    Event={{
+                        Activated: () => {
+                            setPreviousText("");
+                            textBoxRef.current!.Text = "";
+                        },
+                    }}
+                    Image={
+                        previousText === ""
+                            ? getAsset("assets/indexing/Search.png")
+                            : getAsset("assets/indexing/Clear.png")
+                    }
                     ImageColor3={Color3.fromRGB(143, 143, 143)}
                     ImageTransparency={0.5}
                     Position={new UDim2(1, 0, 0.5, 0)}
@@ -150,7 +229,7 @@ export default function InventoryFilter({
                         Size={new UDim2(1, 0, 1, 0)}
                         Event={{
                             Activated: () => onTraitToggle(trait.id),
-                            ...tooltipPropsPerTrait.get(trait.id)!.events
+                            ...tooltipPropsPerTrait.get(trait.id)!.events,
                         }}
                     >
                         <uipadding
@@ -177,7 +256,7 @@ export default function InventoryFilter({
                     TextTransparency={0.5}
                     TextWrapped={true}
                     Event={{
-                        Activated: onClear
+                        Activated: onClear,
                     }}
                 />
             </frame>

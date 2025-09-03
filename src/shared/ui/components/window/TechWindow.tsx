@@ -19,13 +19,12 @@ export default function TechWindow({ visible, icon, title, children, onClose, wi
     }, [onClose]);
 
     useEffect(() => {
-        const action = (visible && !previousVisible) ? "open" : (!visible && previousVisible) ? "close" : undefined;
+        const action = visible && !previousVisible ? "open" : !visible && previousVisible ? "close" : undefined;
         // Handle animation
         if (action) {
             const frame = frameRef.current!;
 
-            if (action === "open")
-                frame.Visible = true;
+            if (action === "open") frame.Visible = true;
 
             const middle = initialPosition;
             const below = middle.sub(new UDim2(0, 0, 0, 30));
@@ -33,7 +32,7 @@ export default function TechWindow({ visible, icon, title, children, onClose, wi
 
             const tweenInfo = action === "open" ? new TweenInfo(0.2) : new TweenInfo(0.1, Enum.EasingStyle.Linear);
             const tween = TweenService.Create(frame, tweenInfo, {
-                Position: action === "open" ? middle : below
+                Position: action === "open" ? middle : below,
             });
 
             tween.Play();
@@ -58,9 +57,7 @@ export default function TechWindow({ visible, icon, title, children, onClose, wi
             Visible={false}
         >
             <uistroke ApplyStrokeMode={Enum.ApplyStrokeMode.Border} Color={Color3.fromRGB(255, 255, 255)} />
-            <uisizeconstraint
-                MaxSize={new Vector2(800, 600)}
-            />
+            <uisizeconstraint MaxSize={new Vector2(800, 600)} />
             <WindowTitle icon={icon} title={title} />
             <WindowCloseButton onClick={handleClose} />
             <frame
@@ -72,7 +69,6 @@ export default function TechWindow({ visible, icon, title, children, onClose, wi
             >
                 {children}
             </frame>
-
         </frame>
     );
 }

@@ -8,7 +8,9 @@ import StaleWood from "shared/items/excavation/harvestable/StaleWood";
 
 export = new Item(script.Name)
     .setName("Work-In-Progress Upgrader")
-    .setDescription("This upgrader's structure is still being built, but is still able to boost Funds by %add% on each upgrader. However, this drains %drain%.")
+    .setDescription(
+        "This upgrader's structure is still being built, but is still able to boost Funds by %add% on each upgrader. However, this drains %drain%.",
+    )
     .setDifficulty(Difficulty.FelixTheA)
     .setPrice(new CurrencyBundle().set("Funds", 20e12), 1)
     .setRequiredItemAmount(Grass, 50)

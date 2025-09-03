@@ -15,7 +15,7 @@ export = function () {
                     type: WeatherType.Clear,
                     intensity: 0,
                     duration: 300,
-                    timeRemaining: 300
+                    timeRemaining: 300,
                 };
 
                 const multipliers = atmosphereService.getWeatherMultipliers();
@@ -28,7 +28,7 @@ export = function () {
                     type: WeatherType.Cloudy,
                     intensity: 0.6,
                     duration: 300,
-                    timeRemaining: 300
+                    timeRemaining: 300,
                 };
 
                 const multipliers = atmosphereService.getWeatherMultipliers();
@@ -41,7 +41,7 @@ export = function () {
                     type: WeatherType.Rainy,
                     intensity: 0.8,
                     duration: 240,
-                    timeRemaining: 240
+                    timeRemaining: 240,
                 };
 
                 const multipliers = atmosphereService.getWeatherMultipliers();
@@ -54,7 +54,7 @@ export = function () {
                     type: WeatherType.Thunderstorm,
                     intensity: 1,
                     duration: 180,
-                    timeRemaining: 180
+                    timeRemaining: 180,
                 };
 
                 const multipliers = atmosphereService.getWeatherMultipliers();

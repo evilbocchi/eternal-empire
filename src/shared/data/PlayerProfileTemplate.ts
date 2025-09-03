@@ -32,7 +32,7 @@ const PlayerProfileTemplate = {
         /**
          * Hotkeys for various actions.
          */
-        hotkeys: {} as { [key: string]: number; },
+        hotkeys: {} as { [key: string]: number },
 
         /**
          * Whether the player wants to see the cutscene when a reset is performed.

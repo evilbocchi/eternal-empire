@@ -10,7 +10,9 @@ const mul = new CurrencyBundle().set("Funds", 0).set("Power", 0);
 
 export = new Item(script.Name)
     .setName("Basic Power Harvester")
-    .setDescription("Utilises the power of True Ease to somehow collect more Power from droplets. The boost increases when you have more Power, and maxes out at %cap%.")
+    .setDescription(
+        "Utilises the power of True Ease to somehow collect more Power from droplets. The boost increases when you have more Power, and maxes out at %cap%.",
+    )
     .setDifficulty(Difficulty.TrueEase)
     .setPrice(new CurrencyBundle().set("Funds", 1.56e12).set("Power", 18000), 1)
     .addPlaceableArea("BarrenIslands")

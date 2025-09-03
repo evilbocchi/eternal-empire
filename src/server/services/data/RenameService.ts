@@ -3,7 +3,7 @@
 
 /**
  * @fileoverview Empire name change management system.
- * 
+ *
  * This service handles:
  * - Empire name validation and filtering
  * - Cost calculation for name changes (exponential scaling)
@@ -11,13 +11,13 @@
  * - Name uniqueness checking via leaderboards
  * - Name change history tracking
  * - Integration with product purchase system
- * 
+ *
  * The service supports two payment methods:
  * - Robux purchases through MarketplaceService
  * - In-game "Funds" currency with escalating costs
- * 
+ *
  * Name changes include visual/audio effects and server notifications.
- * 
+ *
  * @author JME Development Team
  * @since 1.0.0
  */
@@ -37,14 +37,13 @@ import Packets from "shared/Packets";
 
 /**
  * Service for managing empire name changes with validation and payment processing.
- * 
+ *
  * Handles both Robux and in-game currency payments, validates names for
  * appropriateness and uniqueness, and manages the complete renaming process
  * including effects and notifications.
  */
 @Service()
 export class RenameService implements OnInit {
-
     /** Roblox product ID for Robux-based name changes. */
     readonly PRODUCT_ID = 1941029484;
 
@@ -54,20 +53,20 @@ export class RenameService implements OnInit {
     /** Temporary storage for player names during Robux purchase flow. */
     namesPerPlayer = new Map<Player, string>();
 
-    constructor(private dataService: DataService,
+    constructor(
+        private dataService: DataService,
         private productService: ProductService,
         private leaderboardService: LeaderboardService,
         private currencyService: CurrencyService,
-        private chatHookService: ChatHookService) {
-
-    }
+        private chatHookService: ChatHookService,
+    ) {}
 
     // Cost Management
 
     /**
      * Calculates and updates the current cost for name changes.
      * Cost increases exponentially with each name change: 1e24 * (1000 ^ nameChanges).
-     * 
+     *
      * @returns The updated cost as an OnoeNum.
      */
     refreshCost() {
@@ -81,7 +80,7 @@ export class RenameService implements OnInit {
 
     /**
      * Validates a proposed empire name for appropriateness and uniqueness.
-     * 
+     *
      * @param name The proposed name to validate.
      * @param player The player requesting the name change (for filtering context).
      * @returns True if the name is valid, false otherwise.
@@ -114,7 +113,7 @@ export class RenameService implements OnInit {
     /**
      * Performs the actual empire rename with effects and notifications.
      * Updates empire data, leaderboards, and notifies all players.
-     * 
+     *
      * @param name The new name for the empire (will be prefixed with owner's name).
      */
     rename(name: string) {
@@ -159,26 +158,22 @@ export class RenameService implements OnInit {
             }
 
             // Sanitize name (remove special characters)
-            [name] = name.gsub('[^%w_ ]', '');
+            [name] = name.gsub("[^%w_ ]", "");
             const size = name.size();
 
             // Validate name length
-            if (size > 16 || size < 5)
-                return false;
+            if (size > 16 || size < 5) return false;
 
             if (method === "robux") {
                 // Store name for Robux purchase flow
                 this.namesPerPlayer.set(player, name);
                 MarketplaceService.PromptProductPurchase(player, this.PRODUCT_ID);
-            }
-            else {
+            } else {
                 // Handle in-game currency purchase
-                if (!this.check(name, player))
-                    return false;
+                if (!this.check(name, player)) return false;
 
                 // Attempt purchase with Funds
-                if (!this.currencyService.purchase(new CurrencyBundle().set("Funds", this.cost)))
-                    return false;
+                if (!this.currencyService.purchase(new CurrencyBundle().set("Funds", this.cost))) return false;
 
                 // Perform rename and update cost
                 this.rename(name);
@@ -193,8 +188,7 @@ export class RenameService implements OnInit {
             const name = this.namesPerPlayer.get(player);
 
             // Validate stored name
-            if (name === undefined || !this.check(name, player))
-                return Enum.ProductPurchaseDecision.NotProcessedYet;
+            if (name === undefined || !this.check(name, player)) return Enum.ProductPurchaseDecision.NotProcessedYet;
 
             // Perform rename (no cost increment for Robux purchases)
             this.rename(name);

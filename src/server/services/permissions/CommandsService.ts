@@ -1,6 +1,6 @@
 /**
  * @fileoverview Handles chat commands and permissions.
- * 
+ *
  * This service handles:
  * - Registration and management of all chat commands in the game
  * - Permission-based command access control (levels 0-4)
@@ -8,17 +8,17 @@
  * - Moderation and administrative tools
  * - Game state manipulation and debugging utilities
  * - Server navigation and teleportation commands
- * 
+ *
  * Commands are organized by permission levels:
  * - Level 0: Basic player commands (help, join, logs, voting)
  * - Level 1: Trusted player commands (block, invite, empire tools)
  * - Level 2: Moderator commands (kick, restrict, teleport)
  * - Level 3: Manager commands (ban, currency/item management)
  * - Level 4: Owner commands (admin tools, server management)
- * 
+ *
  * The service integrates with multiple game systems including permissions,
  * currency, items, areas, quests, and player data management.
- * 
+ *
  * @since 1.0.0
  */
 
@@ -28,34 +28,30 @@ import APIExposeService from "server/services/api/APIExposeService";
 import Command, { CommandAPI } from "server/services/permissions/commands/Command";
 
 declare global {
-    type CommandAPI = APIExposeService['Server'] & {
+    type CommandAPI = APIExposeService["Server"] & {
         Command: CommandsService;
     };
 }
 
 /**
  * Service that provides comprehensive chat command functionality with permission-based access control.
- * 
+ *
  * Manages the complete command system including registration, permission checking,
  * and integration with all major game systems for moderation and administration.
  */
 @Service()
 export default class CommandsService implements OnInit {
-
-    constructor(
-        private readonly apiExposeService: APIExposeService,
-    ) {
+    constructor(private readonly apiExposeService: APIExposeService) {
         const server = this.apiExposeService.Server as CommandAPI;
         server.Command = this;
         for (const [key, value] of pairs(server)) {
-            (CommandAPI as { [key: string]: unknown; })[key] = value;
+            (CommandAPI as { [key: string]: unknown })[key] = value;
         }
     }
 
-
     /**
      * Registers a new chat command.
-     * 
+     *
      * @param command The command to register
      */
     registerCommand(command: Command) {
@@ -132,21 +128,20 @@ export default class CommandsService implements OnInit {
 
     /**
      * Initializes the CommandsService and registers all chat commands.
-     * 
+     *
      * Creates and registers commands organized by permission levels:
      * - Level 0: Basic player commands (help, join, logs, voting)
      * - Level 1: Trusted player commands (block, invite, empire management)
      * - Level 2: Moderator commands (kick, restrict, player management)
      * - Level 3: Manager commands (ban, currency/item management, admin tools)
      * - Level 4: Owner commands (server management, advanced debugging)
-     * 
+     *
      * Each command includes automatic permission checking and appropriate
      * error messages for unauthorized access attempts.
      */
     onInit() {
         for (const commandModule of Command.commandsFolder.GetDescendants()) {
-            if (commandModule.Name === "Command" || !commandModule.IsA("ModuleScript"))
-                continue;
+            if (commandModule.Name === "Command" || !commandModule.IsA("ModuleScript")) continue;
 
             const command = require(commandModule) as Command;
             this.registerCommand(command);

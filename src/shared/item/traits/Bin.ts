@@ -12,19 +12,16 @@ declare global {
     }
 }
 
-
 /**
  * A bin is an item that enables offline progress, generating revenue while the player is not actively playing the game.
  */
 export default class Bin extends Operative {
-
     static load(model: Model, bin: Bin) {
         const item = bin.item;
         const CurrencyService = Server.Currency;
         const ItemService = Server.Item;
         const placedItem = ItemService.getPlacedItem(model.Name);
-        if (placedItem === undefined)
-            return;
+        if (placedItem === undefined) return;
         placedItem.lastCollection ??= tick();
 
         const fill = model.WaitForChild("Fill") as Part;
@@ -55,25 +52,23 @@ export default class Bin extends Operative {
 
         clickDetector.MouseClick.Connect(() => {
             const lastCollection = placedItem.lastCollection;
-            if (lastCollection === undefined)
-                return;
+            if (lastCollection === undefined) return;
             const diff = math.min(tick() - lastCollection, limit);
             placedItem.lastCollection = tick();
             const revenue = bin.mul?.mul(CurrencyService.getOfflineRevenue()).mul(diff);
-            if (revenue === undefined)
-                return;
+            if (revenue === undefined) return;
             updateHeight();
             print(`Collected ${revenue} from ${item.name}`);
             CurrencyService.incrementAll(revenue.amountPerCurrency);
             Packets.showDifference.toAllClients(revenue.amountPerCurrency);
             playSound("GiantPress.mp3", clickPart);
-            TweenService.Create(clickPart, new TweenInfo(0.2), { CFrame: unclickedCFrame.mul(new CFrame(0, 0, 0.5)) }).Play();
+            TweenService.Create(clickPart, new TweenInfo(0.2), {
+                CFrame: unclickedCFrame.mul(new CFrame(0, 0, 0.5)),
+            }).Play();
             task.wait(0.2);
             TweenService.Create(clickPart, new TweenInfo(0.6), { CFrame: unclickedCFrame }).Play();
         });
     }
-
-
 
     constructor(item: Item) {
         super(item);

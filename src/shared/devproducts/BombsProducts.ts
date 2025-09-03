@@ -1,4 +1,3 @@
-
 export const BOMBS_PRODUCTS = {
-    Funds: 1826607791
+    Funds: 1826607791,
 };

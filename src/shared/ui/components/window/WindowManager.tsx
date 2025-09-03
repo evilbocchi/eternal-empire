@@ -1,6 +1,6 @@
 /**
  * @fileoverview Window management system for handling global window state and hotkeys.
- * 
+ *
  * Provides a centralized system for managing window visibility and the global close hotkey.
  * This solves the issue of multiple close buttons competing for the same hotkey.
  */
@@ -88,14 +88,15 @@ export default function WindowManager({ children }: WindowManagerProps) {
         label: "Close Window",
     });
 
-
     return (
-        <WindowManagerContext.Provider value={{
-            registerWindow,
-            unregisterWindow,
-            setWindowVisible,
-            getVisibleWindows,
-        }}>
+        <WindowManagerContext.Provider
+            value={{
+                registerWindow,
+                unregisterWindow,
+                setWindowVisible,
+                getVisibleWindows,
+            }}
+        >
             {children}
         </WindowManagerContext.Provider>
     );

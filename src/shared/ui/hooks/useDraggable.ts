@@ -1,6 +1,6 @@
 /**
  * @fileoverview React hook for making elements draggable.
- * 
+ *
  * Provides drag functionality with position tracking, constraints, and optional callbacks.
  * Works with any GuiObject that supports InputBegan, InputChanged, and InputEnded events.
  */
@@ -47,10 +47,10 @@ export interface DragState {
 
 /**
  * Hook that provides dragging functionality for GUI elements
- * 
+ *
  * @param options Configuration options for dragging behavior
  * @returns Object containing drag state, position, and event handlers
- * 
+ *
  * @example
  * ```tsx
  * function DraggableWindow() {
@@ -62,7 +62,7 @@ export interface DragState {
  *     onDragStart: () => print("Started dragging"),
  *     onDragEnd: (pos) => print("Ended at", pos)
  *   });
- *   
+ *
  *   return (
  *     <frame
  *       Size={windowSize}
@@ -82,7 +82,7 @@ export default function useDraggable(options: UseDraggableOptions = {}) {
         elementSize,
         onDragStart,
         onDrag,
-        onDragEnd
+        onDragEnd,
     } = options;
 
     const [isDragging, setIsDragging] = useState(false);
@@ -113,97 +113,103 @@ export default function useDraggable(options: UseDraggableOptions = {}) {
             minX: 0,
             maxX: viewportSize.X - elementWidth,
             minY: 0,
-            maxY: viewportSize.Y - elementHeight
+            maxY: viewportSize.Y - elementHeight,
         });
     }, [constrainToScreen, elementSize]);
 
-    const applyConstraints = useCallback((newPosition: UDim2): UDim2 => {
-        // Combine manual constraints with screen constraints
-        const combinedConstraints: DragConstraints = {
-            ...screenConstraints,
-            ...constraints // Manual constraints override screen constraints
-        };
+    const applyConstraints = useCallback(
+        (newPosition: UDim2): UDim2 => {
+            // Combine manual constraints with screen constraints
+            const combinedConstraints: DragConstraints = {
+                ...screenConstraints,
+                ...constraints, // Manual constraints override screen constraints
+            };
 
-        // Check if we have any constraints to apply
-        const hasConstraints = combinedConstraints.minX !== undefined ||
-            combinedConstraints.maxX !== undefined ||
-            combinedConstraints.minY !== undefined ||
-            combinedConstraints.maxY !== undefined;
+            // Check if we have any constraints to apply
+            const hasConstraints =
+                combinedConstraints.minX !== undefined ||
+                combinedConstraints.maxX !== undefined ||
+                combinedConstraints.minY !== undefined ||
+                combinedConstraints.maxY !== undefined;
 
-        if (!hasConstraints) return newPosition;
+            if (!hasConstraints) return newPosition;
 
-        const offsetX = newPosition.X.Offset;
-        const offsetY = newPosition.Y.Offset;
+            const offsetX = newPosition.X.Offset;
+            const offsetY = newPosition.Y.Offset;
 
-        let constrainedX = offsetX;
-        let constrainedY = offsetY;
+            let constrainedX = offsetX;
+            let constrainedY = offsetY;
 
-        if (combinedConstraints.minX !== undefined) constrainedX = math.max(constrainedX, combinedConstraints.minX);
-        if (combinedConstraints.maxX !== undefined) constrainedX = math.min(constrainedX, combinedConstraints.maxX);
-        if (combinedConstraints.minY !== undefined) constrainedY = math.max(constrainedY, combinedConstraints.minY);
-        if (combinedConstraints.maxY !== undefined) constrainedY = math.min(constrainedY, combinedConstraints.maxY);
+            if (combinedConstraints.minX !== undefined) constrainedX = math.max(constrainedX, combinedConstraints.minX);
+            if (combinedConstraints.maxX !== undefined) constrainedX = math.min(constrainedX, combinedConstraints.maxX);
+            if (combinedConstraints.minY !== undefined) constrainedY = math.max(constrainedY, combinedConstraints.minY);
+            if (combinedConstraints.maxY !== undefined) constrainedY = math.min(constrainedY, combinedConstraints.maxY);
 
-        return new UDim2(
-            newPosition.X.Scale,
-            constrainedX,
-            newPosition.Y.Scale,
-            constrainedY
-        );
-    }, [constraints, screenConstraints]);
+            return new UDim2(newPosition.X.Scale, constrainedX, newPosition.Y.Scale, constrainedY);
+        },
+        [constraints, screenConstraints],
+    );
 
-    const onInputBegan = useCallback((rbx: GuiObject, input: InputObject) => {
-        if (disabled) return;
+    const onInputBegan = useCallback(
+        (rbx: GuiObject, input: InputObject) => {
+            if (disabled) return;
 
-        if (input.UserInputType === Enum.UserInputType.MouseButton1 ||
-            input.UserInputType === Enum.UserInputType.Touch) {
-            setIsDragging(true);
-            dragStartRef.current = new Vector2(input.Position.X, input.Position.Y);
-            initialPositionRef.current = new Vector2(position.X.Offset, position.Y.Offset);
+            if (
+                input.UserInputType === Enum.UserInputType.MouseButton1 ||
+                input.UserInputType === Enum.UserInputType.Touch
+            ) {
+                setIsDragging(true);
+                dragStartRef.current = new Vector2(input.Position.X, input.Position.Y);
+                initialPositionRef.current = new Vector2(position.X.Offset, position.Y.Offset);
 
-            onDragStart?.(position);
+                onDragStart?.(position);
 
-            // Connect to user input service for global mouse/touch movement
-            connectionRef.current = UserInputService.InputChanged.Connect((changedInput) => {
-                if (changedInput.UserInputType === Enum.UserInputType.MouseMovement ||
-                    changedInput.UserInputType === Enum.UserInputType.Touch) {
+                // Connect to user input service for global mouse/touch movement
+                connectionRef.current = UserInputService.InputChanged.Connect((changedInput) => {
+                    if (
+                        changedInput.UserInputType === Enum.UserInputType.MouseMovement ||
+                        changedInput.UserInputType === Enum.UserInputType.Touch
+                    ) {
+                        if (dragStartRef.current && initialPositionRef.current) {
+                            const delta = new Vector2(
+                                changedInput.Position.X - dragStartRef.current.X,
+                                changedInput.Position.Y - dragStartRef.current.Y,
+                            );
 
-                    if (dragStartRef.current && initialPositionRef.current) {
-                        const delta = new Vector2(
-                            changedInput.Position.X - dragStartRef.current.X,
-                            changedInput.Position.Y - dragStartRef.current.Y
-                        );
+                            const newPosition = new UDim2(
+                                position.X.Scale,
+                                initialPositionRef.current.X + delta.X,
+                                position.Y.Scale,
+                                initialPositionRef.current.Y + delta.Y,
+                            );
 
-                        const newPosition = new UDim2(
-                            position.X.Scale,
-                            initialPositionRef.current.X + delta.X,
-                            position.Y.Scale,
-                            initialPositionRef.current.Y + delta.Y
-                        );
-
-                        const constrainedPosition = applyConstraints(newPosition);
-                        setPosition(constrainedPosition);
-                        onDrag?.(constrainedPosition);
+                            const constrainedPosition = applyConstraints(newPosition);
+                            setPosition(constrainedPosition);
+                            onDrag?.(constrainedPosition);
+                        }
                     }
-                }
-            });
+                });
 
-            // Connect to input ended to stop dragging
-            const endConnection = UserInputService.InputEnded.Connect((endedInput) => {
-                if (endedInput.UserInputType === Enum.UserInputType.MouseButton1 ||
-                    endedInput.UserInputType === Enum.UserInputType.Touch) {
+                // Connect to input ended to stop dragging
+                const endConnection = UserInputService.InputEnded.Connect((endedInput) => {
+                    if (
+                        endedInput.UserInputType === Enum.UserInputType.MouseButton1 ||
+                        endedInput.UserInputType === Enum.UserInputType.Touch
+                    ) {
+                        setIsDragging(false);
+                        dragStartRef.current = undefined;
+                        initialPositionRef.current = undefined;
 
-                    setIsDragging(false);
-                    dragStartRef.current = undefined;
-                    initialPositionRef.current = undefined;
+                        connectionRef.current?.Disconnect();
+                        endConnection.Disconnect();
 
-                    connectionRef.current?.Disconnect();
-                    endConnection.Disconnect();
-
-                    onDragEnd?.(position);
-                }
-            });
-        }
-    }, [disabled, position, applyConstraints, onDragStart, onDrag, onDragEnd]);
+                        onDragEnd?.(position);
+                    }
+                });
+            }
+        },
+        [disabled, position, applyConstraints, onDragStart, onDrag, onDragEnd],
+    );
 
     // Cleanup connection on unmount
     const cleanup = useCallback(() => {
@@ -217,6 +223,6 @@ export default function useDraggable(options: UseDraggableOptions = {}) {
             InputBegan: onInputBegan,
         },
         setPosition,
-        cleanup
+        cleanup,
     };
 }

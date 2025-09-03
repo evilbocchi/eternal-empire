@@ -24,7 +24,7 @@ export default class FormulaBundled extends ItemTrait {
 
     /**
      * Set the x function that returns the value to be used in the formula.
-     * 
+     *
      * @param x The function that returns the OnoeNum value for x.
      * @returns The FormulaBundled instance for chaining.
      */
@@ -35,7 +35,7 @@ export default class FormulaBundled extends ItemTrait {
 
     /**
      * Set the ratios for multiple currencies in the formula.
-     * 
+     *
      * @param ratios A map of Currency to ratio values.
      * @returns The FormulaBundled instance for chaining.
      */
@@ -46,7 +46,7 @@ export default class FormulaBundled extends ItemTrait {
 
     /**
      * Set how much the value of a profit will be multiplied by for a specific currency in the formula.
-     * 
+     *
      * @param currency The currency to set the ratio for.
      * @param ratio The ratio value to set.
      * @returns The FormulaBundled instance for chaining.
@@ -58,7 +58,7 @@ export default class FormulaBundled extends ItemTrait {
 
     /**
      * Set a flat value for a specific currency in the formula.
-     * 
+     *
      * @param currency The currency to set the flat value for.
      * @param flat The flat value to set, can be an OnoeNum or a number.
      * @returns The FormulaBundled instance for chaining.
@@ -70,7 +70,7 @@ export default class FormulaBundled extends ItemTrait {
 
     /**
      * Applies the bundled formula to the trait.
-     * 
+     *
      * @param Trait The trait constructor to apply the formula to.
      * @returns The trait instance with the formula applied.
      */
@@ -88,7 +88,6 @@ export default class FormulaBundled extends ItemTrait {
                 ratio.set(currency, flatValue);
             }
             trait.setMul(ratio);
-
         }, this.x);
         return trait;
     }

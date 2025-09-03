@@ -7,7 +7,7 @@ const controls = {
     visible: true,
     hasSelection: true,
     isRestricted: false,
-    animationsEnabled: true
+    animationsEnabled: true,
 };
 
 export = {
@@ -19,14 +19,14 @@ export = {
             visible: props.controls.visible,
             hasSelection: props.controls.hasSelection,
             isRestricted: props.controls.isRestricted,
-            animationsEnabled: props.controls.animationsEnabled
+            animationsEnabled: props.controls.animationsEnabled,
         };
 
         const callbacks = {
             onDeselect: () => print("Deselect clicked"),
             onRotate: () => print("Rotate clicked"),
             onDelete: () => print("Delete clicked"),
-            onPlace: () => print("Place clicked")
+            onPlace: () => print("Place clicked"),
         };
 
         return <BuildWindow state={state} callbacks={callbacks} />;

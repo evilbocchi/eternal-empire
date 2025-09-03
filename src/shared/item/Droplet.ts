@@ -31,7 +31,6 @@ declare global {
 }
 
 export default class Droplet {
-
     static readonly STORAGE = (function () {
         if (IS_SERVER || IS_CI) {
             const storage = new Instance("Model");
@@ -57,7 +56,7 @@ export default class Droplet {
                 droplet.Material = Enum.Material.Slate;
                 return droplet;
             })
-            .setValue(new CurrencyBundle().set("Funds", 1))
+            .setValue(new CurrencyBundle().set("Funds", 1)),
     );
 
     static FatDroplet = Droplet.registerDroplet(
@@ -69,7 +68,7 @@ export default class Droplet {
                 droplet.Material = Enum.Material.Slate;
                 return droplet;
             })
-            .setValue(new CurrencyBundle().set("Funds", 4))
+            .setValue(new CurrencyBundle().set("Funds", 4)),
     );
 
     static ManualDroplet = Droplet.registerDroplet(
@@ -81,7 +80,7 @@ export default class Droplet {
                 droplet.Material = Enum.Material.Slate;
                 return droplet;
             })
-            .setValue(new CurrencyBundle().set("Funds", 15))
+            .setValue(new CurrencyBundle().set("Funds", 15)),
     );
 
     static HeavyweightDroplet = Droplet.registerDroplet(
@@ -93,7 +92,7 @@ export default class Droplet {
                 droplet.Material = Enum.Material.Basalt;
                 return droplet;
             })
-            .setValue(new CurrencyBundle().set("Funds", 160))
+            .setValue(new CurrencyBundle().set("Funds", 160)),
     );
 
     static GrassDroplet = Droplet.registerDroplet(
@@ -105,7 +104,7 @@ export default class Droplet {
                 droplet.Material = Enum.Material.Grass;
                 return droplet;
             })
-            .setValue(new CurrencyBundle().set("Funds", 120))
+            .setValue(new CurrencyBundle().set("Funds", 120)),
     );
 
     static NativeGrassDroplet = Droplet.registerDroplet(
@@ -117,7 +116,7 @@ export default class Droplet {
                 droplet.Material = Enum.Material.Grass;
                 return droplet;
             })
-            .setValue(new CurrencyBundle().set("Funds", 120))
+            .setValue(new CurrencyBundle().set("Funds", 120)),
     );
 
     static RustyDroplet = Droplet.registerDroplet(
@@ -129,7 +128,7 @@ export default class Droplet {
                 droplet.Material = Enum.Material.Slate;
                 return droplet;
             })
-            .setValue(new CurrencyBundle().set("Funds", 180))
+            .setValue(new CurrencyBundle().set("Funds", 180)),
     );
 
     static MassiveGrassDroplet = Droplet.registerDroplet(
@@ -141,7 +140,7 @@ export default class Droplet {
                 droplet.Material = Enum.Material.Grass;
                 return droplet;
             })
-            .setValue(new CurrencyBundle().set("Funds", 650))
+            .setValue(new CurrencyBundle().set("Funds", 650)),
     );
 
     static VibrantDroplet = Droplet.registerDroplet(
@@ -154,7 +153,7 @@ export default class Droplet {
                 droplet.AddTag("Rainbow");
                 return droplet;
             })
-            .setValue(new CurrencyBundle().set("Funds", 24000))
+            .setValue(new CurrencyBundle().set("Funds", 24000)),
     );
 
     static CommunismFundsDroplet = Droplet.registerDroplet(
@@ -166,7 +165,7 @@ export default class Droplet {
                 droplet.Material = Enum.Material.Slate;
                 return droplet;
             })
-            .setValue(new CurrencyBundle().set("Funds", 3600))
+            .setValue(new CurrencyBundle().set("Funds", 3600)),
     );
 
     static CommunismPowerDroplet = Droplet.registerDroplet(
@@ -178,7 +177,7 @@ export default class Droplet {
                 droplet.Material = Enum.Material.Slate;
                 return droplet;
             })
-            .setValue(new CurrencyBundle().set("Power", 4))
+            .setValue(new CurrencyBundle().set("Power", 4)),
     );
 
     static CommunismDroplet = Droplet.registerDroplet(
@@ -190,7 +189,7 @@ export default class Droplet {
                 droplet.Material = Enum.Material.Slate;
                 return droplet;
             })
-            .setValue(new CurrencyBundle().set("Funds", 4000).set("Power", 3))
+            .setValue(new CurrencyBundle().set("Funds", 4000).set("Power", 3)),
     );
 
     static EnergyPoweredDroplet = Droplet.registerDroplet(
@@ -202,7 +201,7 @@ export default class Droplet {
                 droplet.Material = Enum.Material.Slate;
                 return droplet;
             })
-            .setValue(new CurrencyBundle().set("Funds", 12000))
+            .setValue(new CurrencyBundle().set("Funds", 12000)),
     );
 
     static LegDayDroplet = Droplet.registerDroplet(
@@ -214,7 +213,7 @@ export default class Droplet {
                 droplet.Material = Enum.Material.Slate;
                 return droplet;
             })
-            .setValue(new CurrencyBundle().set("Funds", 10000).set("Power", 15))
+            .setValue(new CurrencyBundle().set("Funds", 10000).set("Power", 15)),
     );
 
     static CrystalDroplet = Droplet.registerDroplet(
@@ -226,7 +225,7 @@ export default class Droplet {
                 droplet.Material = Enum.Material.Ice;
                 return droplet;
             })
-            .setValue(new CurrencyBundle().set("Power", 20000))
+            .setValue(new CurrencyBundle().set("Power", 20000)),
     );
 
     static LiquidFundsDroplet = Droplet.registerDroplet(
@@ -238,7 +237,7 @@ export default class Droplet {
                 droplet.Material = Enum.Material.Basalt;
                 return droplet;
             })
-            .setValue(new CurrencyBundle().set("Funds", 100000))
+            .setValue(new CurrencyBundle().set("Funds", 100000)),
     );
 
     static LiquidPowerDroplet = Droplet.registerDroplet(
@@ -250,7 +249,7 @@ export default class Droplet {
                 droplet.Material = Enum.Material.Basalt;
                 return droplet;
             })
-            .setValue(new CurrencyBundle().set("Power", 100))
+            .setValue(new CurrencyBundle().set("Power", 100)),
     );
 
     static RapidDroplet = Droplet.registerDroplet(
@@ -262,7 +261,7 @@ export default class Droplet {
                 droplet.Material = Enum.Material.Slate;
                 return droplet;
             })
-            .setValue(new CurrencyBundle().set("Funds", 16000).set("Power", 16))
+            .setValue(new CurrencyBundle().set("Funds", 16000).set("Power", 16)),
     );
 
     static RustyAmethystDroplet = Droplet.registerDroplet(
@@ -274,7 +273,7 @@ export default class Droplet {
                 droplet.Material = Enum.Material.Slate;
                 return droplet;
             })
-            .setValue(new CurrencyBundle().set("Funds", 34000))
+            .setValue(new CurrencyBundle().set("Funds", 34000)),
     );
 
     static AmethystDroplet = Droplet.registerDroplet(
@@ -286,7 +285,7 @@ export default class Droplet {
                 droplet.Material = Enum.Material.Metal;
                 return droplet;
             })
-            .setValue(new CurrencyBundle().set("Funds", 78000))
+            .setValue(new CurrencyBundle().set("Funds", 78000)),
     );
 
     static Char = Droplet.registerDroplet(
@@ -298,7 +297,7 @@ export default class Droplet {
                 droplet.Material = Enum.Material.Slate;
                 return droplet;
             })
-            .setValue(new CurrencyBundle().set("Funds", 1))
+            .setValue(new CurrencyBundle().set("Funds", 1)),
     );
 
     static LiquiderFundsDroplet = Droplet.registerDroplet(
@@ -310,7 +309,7 @@ export default class Droplet {
                 droplet.Material = Enum.Material.Basalt;
                 return droplet;
             })
-            .setValue(new CurrencyBundle().set("Funds", 3000000))
+            .setValue(new CurrencyBundle().set("Funds", 3000000)),
     );
 
     static LiquiderPowerDroplet = Droplet.registerDroplet(
@@ -322,7 +321,7 @@ export default class Droplet {
                 droplet.Material = Enum.Material.Basalt;
                 return droplet;
             })
-            .setValue(new CurrencyBundle().set("Power", 100000))
+            .setValue(new CurrencyBundle().set("Power", 100000)),
     );
 
     static VitalizedDroplet = Droplet.registerDroplet(
@@ -335,7 +334,7 @@ export default class Droplet {
                 return droplet;
             })
             .setValue(new CurrencyBundle().set("Funds", 40000).set("Power", 2000))
-            .setHealth(140)
+            .setHealth(140),
     );
 
     static DepressingDroplet = Droplet.registerDroplet(
@@ -347,7 +346,7 @@ export default class Droplet {
                 droplet.Material = Enum.Material.Basalt;
                 return droplet;
             })
-            .setValue(new CurrencyBundle().set("Funds", 0.01))
+            .setValue(new CurrencyBundle().set("Funds", 0.01)),
     );
 
     static FundsCompactDroplet = Droplet.registerDroplet(
@@ -359,7 +358,7 @@ export default class Droplet {
                 droplet.Material = Enum.Material.Glass;
                 return droplet;
             })
-            .setValue(new CurrencyBundle().set("Funds", 100000))
+            .setValue(new CurrencyBundle().set("Funds", 100000)),
     );
 
     static PowerCompactDroplet = Droplet.registerDroplet(
@@ -371,7 +370,7 @@ export default class Droplet {
                 droplet.Material = Enum.Material.Glass;
                 return droplet;
             })
-            .setValue(new CurrencyBundle().set("Power", 6000))
+            .setValue(new CurrencyBundle().set("Power", 6000)),
     );
 
     static PurifiersDroplet = Droplet.registerDroplet(
@@ -383,7 +382,7 @@ export default class Droplet {
                 droplet.Material = Enum.Material.Slate;
                 return droplet;
             })
-            .setValue(new CurrencyBundle().set("Purifier Clicks", 400))
+            .setValue(new CurrencyBundle().set("Purifier Clicks", 400)),
     );
 
     static ManualV2Droplet = Droplet.registerDroplet(
@@ -395,7 +394,7 @@ export default class Droplet {
                 droplet.Material = Enum.Material.Slate;
                 return droplet;
             })
-            .setValue(new CurrencyBundle().set("Funds", 100000))
+            .setValue(new CurrencyBundle().set("Funds", 100000)),
     );
 
     static LiquidestFundsDroplet = Droplet.registerDroplet(
@@ -407,7 +406,7 @@ export default class Droplet {
                 droplet.Material = Enum.Material.Basalt;
                 return droplet;
             })
-            .setValue(new CurrencyBundle().set("Funds", 30000000))
+            .setValue(new CurrencyBundle().set("Funds", 30000000)),
     );
 
     static LiquidestPowerDroplet = Droplet.registerDroplet(
@@ -419,7 +418,7 @@ export default class Droplet {
                 droplet.Material = Enum.Material.Basalt;
                 return droplet;
             })
-            .setValue(new CurrencyBundle().set("Power", 5000000))
+            .setValue(new CurrencyBundle().set("Power", 5000000)),
     );
 
     static SpatialDroplet = Droplet.registerDroplet(
@@ -431,7 +430,7 @@ export default class Droplet {
                 droplet.Material = Enum.Material.Basalt;
                 return droplet;
             })
-            .setValue(new CurrencyBundle().set("Funds", 2000))
+            .setValue(new CurrencyBundle().set("Funds", 2000)),
     );
 
     static HydratingDroplet = Droplet.registerDroplet(
@@ -444,7 +443,7 @@ export default class Droplet {
                 return droplet;
             })
             .setHealth(130)
-            .setValue(new CurrencyBundle().set("Power", 8000))
+            .setValue(new CurrencyBundle().set("Power", 8000)),
     );
 
     static BasicCoin = Droplet.registerDroplet(
@@ -456,7 +455,7 @@ export default class Droplet {
                 droplet.Material = Enum.Material.Ice;
                 return droplet;
             })
-            .setValue(new CurrencyBundle().set("Bitcoin", 1))
+            .setValue(new CurrencyBundle().set("Bitcoin", 1)),
     );
 
     static DoubleCoin = Droplet.registerDroplet(
@@ -468,7 +467,7 @@ export default class Droplet {
                 droplet.Material = Enum.Material.Ice;
                 return droplet;
             })
-            .setValue(new CurrencyBundle().set("Bitcoin", 2))
+            .setValue(new CurrencyBundle().set("Bitcoin", 2)),
     );
 
     static QuadrupleCoin = Droplet.registerDroplet(
@@ -480,7 +479,7 @@ export default class Droplet {
                 droplet.Material = Enum.Material.Ice;
                 return droplet;
             })
-            .setValue(new CurrencyBundle().set("Bitcoin", 4))
+            .setValue(new CurrencyBundle().set("Bitcoin", 4)),
     );
 
     static SkillDroplet = Droplet.registerDroplet(
@@ -492,7 +491,7 @@ export default class Droplet {
                 droplet.Material = Enum.Material.Slate;
                 return droplet;
             })
-            .setValue(new CurrencyBundle().set("Skill", 0.01))
+            .setValue(new CurrencyBundle().set("Skill", 0.01)),
     );
 
     static ClassicDroplet = Droplet.registerDroplet(
@@ -504,7 +503,7 @@ export default class Droplet {
                 droplet.Material = Enum.Material.Basalt;
                 return droplet;
             })
-            .setValue(new CurrencyBundle().set("Funds", 200000))
+            .setValue(new CurrencyBundle().set("Funds", 200000)),
     );
 
     static LunaryDroplet = Droplet.registerDroplet(
@@ -516,7 +515,7 @@ export default class Droplet {
                 droplet.Material = Enum.Material.Glass;
                 return droplet;
             })
-            .setValue(new CurrencyBundle().set("Funds", 480000).set("Power", 20000))
+            .setValue(new CurrencyBundle().set("Funds", 480000).set("Power", 20000)),
     );
 
     static SkillerDroplet = Droplet.registerDroplet(
@@ -528,7 +527,7 @@ export default class Droplet {
                 droplet.Material = Enum.Material.Slate;
                 return droplet;
             })
-            .setValue(new CurrencyBundle().set("Skill", 0.06))
+            .setValue(new CurrencyBundle().set("Skill", 0.06)),
     );
 
     static HappyDroplet = Droplet.registerDroplet(
@@ -540,7 +539,7 @@ export default class Droplet {
                 droplet.Material = Enum.Material.Glass;
                 return droplet;
             })
-            .setValue(new CurrencyBundle().set("Funds", 1600000).set("Power", 280000).set("Skill", 0.08))
+            .setValue(new CurrencyBundle().set("Funds", 1600000).set("Power", 280000).set("Skill", 0.08)),
     );
 
     static SolarDroplet = Droplet.registerDroplet(
@@ -552,7 +551,7 @@ export default class Droplet {
                 droplet.Material = Enum.Material.Glass;
                 return droplet;
             })
-            .setValue(new CurrencyBundle().set("Funds", 500000).set("Power", 70000).set("Skill", 0.02))
+            .setValue(new CurrencyBundle().set("Funds", 500000).set("Power", 70000).set("Skill", 0.02)),
     );
 
     static OctupleCoin = Droplet.registerDroplet(
@@ -564,7 +563,7 @@ export default class Droplet {
                 droplet.Material = Enum.Material.Ice;
                 return droplet;
             })
-            .setValue(new CurrencyBundle().set("Bitcoin", 8))
+            .setValue(new CurrencyBundle().set("Bitcoin", 8)),
     );
 
     static SkillestDroplet = Droplet.registerDroplet(
@@ -576,7 +575,7 @@ export default class Droplet {
                 droplet.Material = Enum.Material.Slate;
                 return droplet;
             })
-            .setValue(new CurrencyBundle().set("Skill", 0.12))
+            .setValue(new CurrencyBundle().set("Skill", 0.12)),
     );
 
     static LiquidesterFundsDroplet = Droplet.registerDroplet(
@@ -588,7 +587,7 @@ export default class Droplet {
                 droplet.Material = Enum.Material.Cardboard;
                 return droplet;
             })
-            .setValue(new CurrencyBundle().set("Funds", 700000000))
+            .setValue(new CurrencyBundle().set("Funds", 700000000)),
     );
 
     static LiquidesterPowerDroplet = Droplet.registerDroplet(
@@ -600,7 +599,7 @@ export default class Droplet {
                 droplet.Material = Enum.Material.Cardboard;
                 return droplet;
             })
-            .setValue(new CurrencyBundle().set("Power", 100000000))
+            .setValue(new CurrencyBundle().set("Power", 100000000)),
     );
 
     static LiquidesterBitcoinDroplet = Droplet.registerDroplet(
@@ -612,7 +611,7 @@ export default class Droplet {
                 droplet.Material = Enum.Material.Cardboard;
                 return droplet;
             })
-            .setValue(new CurrencyBundle().set("Bitcoin", 10000))
+            .setValue(new CurrencyBundle().set("Bitcoin", 10000)),
     );
 
     static SexdecupleCoin = Droplet.registerDroplet(
@@ -624,7 +623,7 @@ export default class Droplet {
                 droplet.Material = Enum.Material.Ice;
                 return droplet;
             })
-            .setValue(new CurrencyBundle().set("Bitcoin", 16).set("Skill", 0.15))
+            .setValue(new CurrencyBundle().set("Bitcoin", 16).set("Skill", 0.15)),
     );
 
     static SphericalDroplet = Droplet.registerDroplet(
@@ -637,7 +636,7 @@ export default class Droplet {
                 return droplet;
             })
             .setValue(new CurrencyBundle().set("Skill", 0.1))
-            .setHealth(10)
+            .setHealth(10),
     );
 
     static ShatteredDroplet = Droplet.registerDroplet(
@@ -649,7 +648,7 @@ export default class Droplet {
                 droplet.Material = Enum.Material.Slate;
                 return droplet;
             })
-            .setValue(new CurrencyBundle().set("Power", 200000))
+            .setValue(new CurrencyBundle().set("Power", 200000)),
     );
 
     static TotalityDroplet = Droplet.registerDroplet(
@@ -661,7 +660,7 @@ export default class Droplet {
                 droplet.Material = Enum.Material.Neon;
                 return droplet;
             })
-            .setValue(new CurrencyBundle().set("Funds", 10000000).set("Power", 10000000).set("Skill", 1))
+            .setValue(new CurrencyBundle().set("Funds", 10000000).set("Power", 10000000).set("Skill", 1)),
     );
 
     static LuckyDroplet = Droplet.registerDroplet(
@@ -681,7 +680,7 @@ export default class Droplet {
 
                 return droplet;
             })
-            .setValue(new CurrencyBundle().set("Diamonds", 1))
+            .setValue(new CurrencyBundle().set("Diamonds", 1)),
     );
 
     static MovementDroplet = Droplet.registerDroplet(
@@ -693,12 +692,12 @@ export default class Droplet {
                 droplet.Material = Enum.Material.Slate;
                 return droplet;
             })
-            .setValue(new CurrencyBundle().set("Funds", 150000))
+            .setValue(new CurrencyBundle().set("Funds", 150000)),
     );
 
     /**
      * Registers a droplet to the droplet list.
-     * 
+     *
      * @param droplet The droplet to register.
      * @returns The registered droplet.
      */
@@ -742,16 +741,14 @@ export default class Droplet {
 
     /**
      * Constructs a new droplet at the given ID.
-     * 
+     *
      * @param id The ID of the droplet.
      */
-    constructor(public readonly id: string) {
-
-    }
+    constructor(public readonly id: string) {}
 
     /**
      * Factory method to create a droplet from an item model and a CFrame.
-     * 
+     *
      * @param dropperModel The model of the dropper.
      * @param drop The drop part.
      * @returns The instantiator function for the droplet.
@@ -807,8 +804,7 @@ export default class Droplet {
             task.spawn(() => {
                 let prev: Vector3 | undefined;
                 while (task.wait(10)) {
-                    if (destroyed === true)
-                        break;
+                    if (destroyed === true) break;
                     if (prev !== undefined && (clone as BasePart).Position.sub(prev).Magnitude < 0.5) {
                         Debris.AddItem(clone, 1);
                         TweenService.Create(clone as BasePart, new TweenInfo(0.5), { Transparency: 1 }).Play();
@@ -823,7 +819,7 @@ export default class Droplet {
 
     /**
      * Sets the model of the droplet.
-     * 
+     *
      * @param modelFunc The function to create the model of the droplet.
      * @returns This droplet.
      */
@@ -837,7 +833,7 @@ export default class Droplet {
 
     /**
      * Sets the value of the droplet.
-     * 
+     *
      * @param value The value of the droplet.
      * @returns This droplet.
      */
@@ -848,7 +844,7 @@ export default class Droplet {
 
     /**
      * Sets the starting health of the droplet.
-     * 
+     *
      * @param health The starting health value to set for the droplet.
      * @returns This droplet.
      */
@@ -859,7 +855,7 @@ export default class Droplet {
 
     /**
      * Coalesce operative terms and the value of the droplet into a single currency bundle.
-     * 
+     *
      * @param totalAdd Total addition term.
      * @param totalMul Total multiplication term.
      * @param totalPow Total power term.
@@ -871,21 +867,20 @@ export default class Droplet {
 
     /**
      * Gets the droplet at the given ID.
-     * 
+     *
      * @param dropletId The ID of the droplet to get.
      * @returns The droplet at the given ID, or undefined if not found.
      */
     static getDroplet(dropletId: string) {
         for (const droplet of Droplet.DROPLETS) {
-            if (droplet.id === dropletId)
-                return droplet;
+            if (droplet.id === dropletId) return droplet;
         }
         return undefined;
     }
 
     /**
      * Calculates negative status effects applied to the droplet.
-     * 
+     *
      * @param instanceInfo The instance info of the droplet.
      * @returns A tuple containing the nerf value and a boolean indicating if the droplet had reached the skyline.
      */
@@ -901,13 +896,11 @@ export default class Droplet {
     }
 
     static {
-
         // let this run on both client and server; the instantiatior functions are on the same side
         const offset = new Vector3(0, 1.5, 0);
         RunService.Heartbeat.Connect(() => {
             for (const [dropletModel, instanceInfo] of this.SPAWNED_DROPLETS) {
-                if (instanceInfo.Health === undefined)
-                    continue;
+                if (instanceInfo.Health === undefined) continue;
 
                 if (instanceInfo.Health <= 0 || dropletModel.Position.Y > 1000) {
                     this.SPAWNED_DROPLETS.delete(dropletModel);

@@ -5,7 +5,9 @@ import CurrencyBundle from "shared/currency/CurrencyBundle";
 
 export = new Item(script.Name)
     .setName("Industrial Charger")
-    .setDescription("Invented yet again by Speed Bobs, this charger doesn't count towards any charge limits, but only boosts Power by 1.25x in a 8 stud radius.")
+    .setDescription(
+        "Invented yet again by Speed Bobs, this charger doesn't count towards any charge limits, but only boosts Power by 1.25x in a 8 stud radius.",
+    )
     .setDifficulty(Difficulty.Relax)
     .setPrice(new CurrencyBundle().set("Funds", 1.8e18).set("Power", 1e9), 1)
     .setPrice(new CurrencyBundle().set("Funds", 3.3e18).set("Power", 1.4e9), 2)

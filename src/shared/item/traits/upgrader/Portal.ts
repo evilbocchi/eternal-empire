@@ -12,7 +12,6 @@ declare global {
 }
 
 export default class Portal extends ItemTrait {
-
     portalOuts = new Set<BasePart>();
 
     static load(model: Model, portal: Portal) {

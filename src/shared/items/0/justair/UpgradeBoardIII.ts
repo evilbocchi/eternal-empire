@@ -6,7 +6,9 @@ import NamedUpgrades from "shared/namedupgrade/NamedUpgrades";
 
 export = new Item(script.Name)
     .setName("Upgrade Board III")
-    .setDescription("This upgrade board will last you an eternity. Use it to obtain small, but necessary boosts for exorbitant prices.")
+    .setDescription(
+        "This upgrade board will last you an eternity. Use it to obtain small, but necessary boosts for exorbitant prices.",
+    )
     .setDifficulty(Difficulty.JustAir)
     .setPrice(new CurrencyBundle().set("Funds", 2.1e30).set("Bitcoin", 100000).set("Skill", 10), 1)
     .addPlaceableArea("BarrenIslands", "SlamoVillage")

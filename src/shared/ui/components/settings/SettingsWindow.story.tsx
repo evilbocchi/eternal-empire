@@ -8,7 +8,7 @@ import TooltipProvider from "shared/ui/components/tooltip/TooltipProvider";
 import WindowManager from "shared/ui/components/window/WindowManager";
 
 const controls = {
-    visible: true
+    visible: true,
 };
 
 export = {
@@ -34,5 +34,5 @@ export = {
                 </HotkeyProvider>
             </StrictMode>
         );
-    }
+    },
 };

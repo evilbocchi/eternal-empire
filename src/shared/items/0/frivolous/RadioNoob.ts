@@ -6,7 +6,9 @@ import MiniDropletSlayer from "shared/items/negative/relax/MiniDropletSlayer";
 
 export = new Item(script.Name)
     .setName("Radio Noob")
-    .setDescription("This noob chose to take command over other noobs, expertly practicing the fine craft that is proper spelling and grammar. Buffs nearby Noob Clickers by x200K, Noob Droplet Slayers are x2 faster and can hit twice.")
+    .setDescription(
+        "This noob chose to take command over other noobs, expertly practicing the fine craft that is proper spelling and grammar. Buffs nearby Noob Clickers by x200K, Noob Droplet Slayers are x2 faster and can hit twice.",
+    )
     .setDifficulty(Difficulty.Frivolous)
     .setPrice(new CurrencyBundle().set("Funds", 5e39), 1)
     .setRequiredItemAmount(MiniDropletSlayer, 1)

@@ -3,9 +3,9 @@
  */
 export enum WeatherType {
     Clear = "Clear",
-    Cloudy = "Cloudy", 
+    Cloudy = "Cloudy",
     Rainy = "Rainy",
-    Thunderstorm = "Thunderstorm"
+    Thunderstorm = "Thunderstorm",
 }
 
 /**

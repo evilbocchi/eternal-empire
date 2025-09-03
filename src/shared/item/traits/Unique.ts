@@ -34,17 +34,16 @@ declare global {
 
 /**
  * Trait for items that can be generated as unique instances with randomized pots.
- * 
+ *
  * Unique items have randomly generated stats (called "pots") that vary between instances
  * of the same item type. Pot values are stored as raw percentages (0-100) and scaled
  * to the configured min-max ranges when accessed. This ensures that changing pot ranges
  * after publication won't cause inconsistency for existing items.
- * 
+ *
  * For example, an "Admirer" unique item might boost Admiration from 5% to 100% depending
  * on its pot value, but the raw percentage is always stored as 0-100.
  */
 export default class Unique extends ItemTrait {
-
     /**
      * Configuration for the pots that can be generated for this unique item.
      * Key is the pot name, value is the configuration for that pot.
@@ -106,13 +105,13 @@ export default class Unique extends ItemTrait {
 
     /**
      * Adds a pot configuration to this unique item.
-     * 
+     *
      * @param name The name of the pot (e.g., "admirationBoost", "dropRate").
      * @param min The minimum value for this pot.
      * @param max The maximum value for this pot.
      * @param integer Whether this value should be an integer (default: false).
      * @returns This trait for method chaining.
-     * 
+     *
      * @example
      * ```ts
      * item.trait(Unique)
@@ -124,14 +123,14 @@ export default class Unique extends ItemTrait {
         this.potConfigs.set(name, {
             min,
             max,
-            integer
+            integer,
         });
         return this;
     }
 
     /**
      * Gets the pot configurations for this unique item.
-     * 
+     *
      * @returns A read-only map of pot configurations.
      */
     getPotConfigs(): ReadonlyMap<string, PotConfig> {
@@ -141,7 +140,7 @@ export default class Unique extends ItemTrait {
     /**
      * Generates a new unique item instance with randomly generated pot values.
      * Pot values are generated as percentages (0-100) and scaled when accessed.
-     * 
+     *
      * @param allPots Optional parameter to specify a fixed value for all pots (0-100).
      * @returns A unique item instance with generated pots.
      */
@@ -157,13 +156,13 @@ export default class Unique extends ItemTrait {
         return {
             baseItemId: this.item.id,
             pots,
-            created: tick()
+            created: tick(),
         };
     }
 
     /**
      * Gets all scaled pot values for a unique item instance.
-     * 
+     *
      * @param instance The unique item instance.
      * @returns A map of pot names to their scaled values.
      */
@@ -190,7 +189,7 @@ export default class Unique extends ItemTrait {
     /**
      * Formats a string with pot values from a unique item instance.
      * Uses scaled pot values based on the current pot configurations.
-     * 
+     *
      * @param str The string to format with pot placeholders (e.g., "%admirationBoost%").
      * @param instance The unique item instance to get pot values from.
      * @returns The formatted string.
@@ -200,8 +199,7 @@ export default class Unique extends ItemTrait {
 
         for (const [potName, config] of this.potConfigs) {
             const value = scaledPots.get(potName);
-            if (value === undefined)
-                continue;
+            if (value === undefined) continue;
             const placeholder = `%%${potName}%%`;
             let formatted = new OnoeNum(value).toString();
             const alpha = (value - config.min) / (config.max - config.min);

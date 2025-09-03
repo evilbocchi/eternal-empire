@@ -1,6 +1,6 @@
 /**
  * @fileoverview Empty state component for the inventory
- * 
+ *
  * Displays a message when the player has no items in their inventory.
  */
 
@@ -17,11 +17,7 @@ interface InventoryEmptyStateProps {
  */
 export default function InventoryEmptyState({ visible }: InventoryEmptyStateProps) {
     return (
-        <frame
-            BackgroundTransparency={1}
-            Size={new UDim2(1, 0, 1, 0)}
-            Visible={visible}
-        >
+        <frame BackgroundTransparency={1} Size={new UDim2(1, 0, 1, 0)} Visible={visible}>
             <textlabel
                 Active={true}
                 AnchorPoint={new Vector2(0.5, 0.5)}

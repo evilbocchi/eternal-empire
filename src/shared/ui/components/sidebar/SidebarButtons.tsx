@@ -1,9 +1,9 @@
 /**
  * @fileoverview React component for sidebar navigation buttons
- * 
+ *
  * Modern React implementation of the sidebar buttons system, replacing the
  * monolithic Roblox Studio UI with maintainable React components.
- * 
+ *
  * Features:
  * - Individual button components for modularity
  * - State management for visibility and notifications
@@ -67,7 +67,7 @@ export const SidebarButtonConfiguration = [
         color: Color3.fromRGB(255, 94, 94),
         visible: true,
         notification: { count: 0, color: Color3.fromRGB(255, 52, 52) },
-        glowColor: Color3.fromRGB(255, 94, 94)
+        glowColor: Color3.fromRGB(255, 94, 94),
     },
     {
         name: "Inventory",
@@ -75,20 +75,14 @@ export const SidebarButtonConfiguration = [
         hotkey: Enum.KeyCode.F,
         color: Color3.fromRGB(255, 186, 125),
         visible: true,
-        glowColor: Color3.fromRGB(255, 186, 125)
+        glowColor: Color3.fromRGB(255, 186, 125),
     },
 ] as SidebarButtonData[];
-
 
 /**
  * Individual sidebar button component
  */
-export function SidebarButton({
-    data,
-    layoutOrder,
-    onClick,
-    animationsEnabled = true
-}: SidebarButtonProps) {
+export function SidebarButton({ data, layoutOrder, onClick, animationsEnabled = true }: SidebarButtonProps) {
     const [isAnimating, setIsAnimating] = useState(false);
     const frameRef = useRef<Frame>();
     const textButtonRef = useRef<TextButton>();
@@ -114,7 +108,7 @@ export function SidebarButton({
 
         buttonElement.Size = new UDim2(0.85, 0, 0.85, 0);
         const releaseTween = TweenService.Create(buttonElement, new TweenInfo(0.2), {
-            Size: new UDim2(1, 0, 1, 0)
+            Size: new UDim2(1, 0, 1, 0),
         });
         releaseTween.Play();
 
@@ -122,7 +116,6 @@ export function SidebarButton({
         releaseTween.Completed.Connect(() => {
             setIsAnimating(false);
         });
-
     }, [animationsEnabled, isAnimating]);
 
     const handleClick = useCallback(() => {
@@ -138,11 +131,11 @@ export function SidebarButton({
             handleClick();
             return true;
         },
-        label: data.name as HotkeyLabel
+        label: data.name as HotkeyLabel,
     });
 
     // Calculate animated size
-    const animatedSize = new UDim2(1, 0, 1, 0);    // Special handling for different button types
+    const animatedSize = new UDim2(1, 0, 1, 0); // Special handling for different button types
     return (
         <frame
             key={data.name}
@@ -198,10 +191,15 @@ export function SidebarButton({
                     Position={new UDim2(1, -3, 0, 3)}
                 >
                     <uigradient
-                        Color={new ColorSequence([
-                            new ColorSequenceKeypoint(0, data.notification.color),
-                            new ColorSequenceKeypoint(1, data.notification.color.Lerp(Color3.fromRGB(255, 11, 105), 0.5))
-                        ])}
+                        Color={
+                            new ColorSequence([
+                                new ColorSequenceKeypoint(0, data.notification.color),
+                                new ColorSequenceKeypoint(
+                                    1,
+                                    data.notification.color.Lerp(Color3.fromRGB(255, 11, 105), 0.5),
+                                ),
+                            ])
+                        }
                         Rotation={90}
                     />
                     <textlabel
@@ -232,7 +230,7 @@ export default function SidebarButtons({
     onToggleWindow,
     position = new UDim2(0, 0, 0.5, 0),
     animationsEnabled = true,
-    buttons = SidebarButtonConfiguration
+    buttons = SidebarButtonConfiguration,
 }: SidebarButtonsProps) {
     // Sidebar state
     const [isVisible, setIsVisible] = useState(visible);
@@ -252,12 +250,12 @@ export default function SidebarButtons({
                 Enum.EasingDirection.Out,
                 0, // Repeat count
                 false, // Reverses
-                0 // Delay
+                0, // Delay
             );
 
             // Create and play the tween
             const slideTween = TweenService.Create(sidebarRef.current, slideInfo, {
-                Position: targetPosition
+                Position: targetPosition,
             });
 
             slideTween.Play();
@@ -274,19 +272,20 @@ export default function SidebarButtons({
     }, [visible, position, animationsEnabled]);
 
     // Button click handler
-    const handleButtonClick = useCallback((buttonName: string) => {
-        if (onButtonClick) {
-            onButtonClick(buttonName);
-        }
+    const handleButtonClick = useCallback(
+        (buttonName: string) => {
+            if (onButtonClick) {
+                onButtonClick(buttonName);
+            }
 
-        if (onToggleWindow) {
-            const result = onToggleWindow(buttonName);
-            if (result)
-                playSound("MenuOpen.mp3");
-            else
-                playSound("MenuClose.mp3");
-        }
-    }, [onButtonClick, onToggleWindow]);
+            if (onToggleWindow) {
+                const result = onToggleWindow(buttonName);
+                if (result) playSound("MenuOpen.mp3");
+                else playSound("MenuClose.mp3");
+            }
+        },
+        [onButtonClick, onToggleWindow],
+    );
 
     return (
         <frame
@@ -305,15 +304,17 @@ export default function SidebarButtons({
                 VerticalAlignment={Enum.VerticalAlignment.Center}
             />
 
-            {buttons.filter(button => button.visible).map((button, index) => (
-                <SidebarButton
-                    key={button.name}
-                    data={button}
-                    layoutOrder={index + 1}
-                    onClick={() => handleButtonClick(button.name)}
-                    animationsEnabled={animationsEnabled}
-                />
-            ))}
+            {buttons
+                .filter((button) => button.visible)
+                .map((button, index) => (
+                    <SidebarButton
+                        key={button.name}
+                        data={button}
+                        layoutOrder={index + 1}
+                        onClick={() => handleButtonClick(button.name)}
+                        animationsEnabled={animationsEnabled}
+                    />
+                ))}
         </frame>
     );
 }

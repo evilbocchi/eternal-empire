@@ -6,7 +6,9 @@ import Grass from "shared/items/excavation/harvestable/Grass";
 
 export = new Item(script.Name)
     .setName("Enchanted Grass")
-    .setDescription("Grass but better. Boosts Funds by a whopping... %mul%. Doesn't stack with more of the same item. Don't expect much.")
+    .setDescription(
+        "Grass but better. Boosts Funds by a whopping... %mul%. Doesn't stack with more of the same item. Don't expect much.",
+    )
     .setDifficulty(Difficulty.Excavation)
     .setPrice(new CurrencyBundle().set("Funds", 100))
     .setRequiredItemAmount(Grass, 25)

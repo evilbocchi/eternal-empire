@@ -8,7 +8,9 @@ import CurrencyBundle from "shared/currency/CurrencyBundle";
 
 export = new Item(script.Name)
     .setName("Fool's Tribute")
-    .setDescription("Boosts Funds by %mul%. Doesn't stack with more of the same item. You're a fool for grinding the resources to create such a worthless item.")
+    .setDescription(
+        "Boosts Funds by %mul%. Doesn't stack with more of the same item. You're a fool for grinding the resources to create such a worthless item.",
+    )
     .setDifficulty(Difficulty.Excavation)
     .setPrice(new CurrencyBundle().set("Funds", 123))
     .setRequiredItemAmount(EnchantedGrass, 100)

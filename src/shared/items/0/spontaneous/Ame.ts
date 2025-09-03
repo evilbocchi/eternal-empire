@@ -11,8 +11,7 @@ import CruelBlankEssence from "shared/items/0/spontaneous/CruelBlankEssence";
 
 export = new Item(script.Name)
     .setName("Ame")
-    .setDescription(`<font color="rgb(255,0,0)" weight="heavy">The noise of rain.</font>\n`
-    )
+    .setDescription(`<font color="rgb(255,0,0)" weight="heavy">The noise of rain.</font>\n`)
     .setDifficulty(Difficulty.Spontaneous)
     .setPrice(new CurrencyBundle().set("Purifier Clicks", 1e36), 1)
     .setRequiredItemAmount(CruelBlankEssence, 1)

@@ -1,6 +1,6 @@
 /**
  * @fileoverview Main build window React component
- * 
+ *
  * Displays build mode controls including deselect, rotate, delete, and place buttons.
  * Manages visibility, animations, and user interactions for the build system.
  */
