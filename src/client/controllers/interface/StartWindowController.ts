@@ -16,7 +16,7 @@ import { combineHumanReadable, convertToHHMMSS, getHumanoid, paintObjects } from
 import { Controller, OnInit } from "@flamework/core";
 import { Players, ReplicatedFirst, RunService, TweenService, Workspace } from "@rbxts/services";
 import { PLAYER_GUI } from "client/constants";
-import { LOCAL_PLAYER } from "shared/constants";
+import { LOCAL_PLAYER } from "client/constants";
 import AdaptiveTabController from "client/controllers/core/AdaptiveTabController";
 import HotkeysController from "client/controllers/core/HotkeysController";
 import BalanceWindowController from "client/controllers/interface/BalanceWindowController";

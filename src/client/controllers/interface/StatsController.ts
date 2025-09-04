@@ -13,7 +13,7 @@
 import { OnoeNum } from "@antivivi/serikanum";
 import { convertToHHMMSS } from "@antivivi/vrldk";
 import { Controller, OnInit } from "@flamework/core";
-import { LOCAL_PLAYER } from "shared/constants";
+import { LOCAL_PLAYER } from "client/constants";
 import { ADAPTIVE_TAB_MAIN_WINDOW } from "client/controllers/core/AdaptiveTabController";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import { CURRENCY_DETAILS } from "shared/currency/CurrencyDetails";

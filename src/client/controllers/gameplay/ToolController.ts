@@ -16,7 +16,7 @@ import { OnoeNum } from "@antivivi/serikanum";
 import { loadAnimation } from "@antivivi/vrldk";
 import { Controller, OnInit, OnStart } from "@flamework/core";
 import { Debris, StarterGui, TweenService, UserInputService, Workspace } from "@rbxts/services";
-import { LOCAL_PLAYER } from "shared/constants";
+import { LOCAL_PLAYER } from "client/constants";
 import { OnCharacterAdded } from "client/controllers/core/ModdingController";
 import { INTERFACE } from "client/controllers/core/UIController";
 import BuildController from "client/controllers/gameplay/BuildController";

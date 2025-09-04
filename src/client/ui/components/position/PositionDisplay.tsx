@@ -1,5 +1,5 @@
 import React from "@rbxts/react";
-import { LOCAL_PLAYER } from "shared/constants";
+import { LOCAL_PLAYER } from "client/constants";
 import { useCharacterPosition } from "client/ui/components/position/usePlayerPosition";
 import PositionWindow from "./PositionWindow";
 

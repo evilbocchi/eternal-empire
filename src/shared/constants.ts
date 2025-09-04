@@ -98,8 +98,3 @@ export const getTextChannels = () => TextChatService.WaitForChild("TextChannels"
 export const WAYPOINTS = Workspace.WaitForChild("Waypoints") as Workspace_Waypoints;
 
 export const isStartScreenEnabled = () => (getStartCamera().WaitForChild("StartScreen") as BoolValue).Value;
-/**
- * Reference to the local player.
- */
-
-export const LOCAL_PLAYER = Players.LocalPlayer;

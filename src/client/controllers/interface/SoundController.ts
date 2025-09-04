@@ -14,7 +14,7 @@
 import { Controller, OnStart } from "@flamework/core";
 import { Lighting, ReplicatedStorage, SoundService, TweenService, Workspace } from "@rbxts/services";
 import { PLAYER_GUI } from "client/constants";
-import { LOCAL_PLAYER } from "shared/constants";
+import { LOCAL_PLAYER } from "client/constants";
 import { START_WINDOW } from "client/controllers/interface/StartWindowController";
 import { ASSETS, getSound, SOUND_EFFECTS_GROUP } from "shared/asset/GameAssets";
 import { MUSIC_GROUP } from "shared/constants";

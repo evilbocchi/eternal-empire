@@ -12,7 +12,7 @@
  */
 import ComputeNameColor from "@antivivi/rbxnamecolor";
 import { Controller, OnInit, OnStart } from "@flamework/core";
-import { LOCAL_PLAYER } from "shared/constants";
+import { LOCAL_PLAYER } from "client/constants";
 import { getTextChannels } from "shared/constants";
 import Packets from "shared/Packets";
 

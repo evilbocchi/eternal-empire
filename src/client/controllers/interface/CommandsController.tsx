@@ -16,7 +16,7 @@ import React from "@rbxts/react";
 import ReactRoblox from "@rbxts/react-roblox";
 import { PLAYER_GUI } from "client/constants";
 import { playSound } from "shared/asset/GameAssets";
-import { LOCAL_PLAYER } from "shared/constants";
+import { LOCAL_PLAYER } from "client/constants";
 import Packets from "shared/Packets";
 import BasicWindow from "client/ui/components/window/BasicWindow";
 import CommandsWindow from "client/ui/components/commands/CommandsWindow";

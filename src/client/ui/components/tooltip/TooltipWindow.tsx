@@ -3,7 +3,7 @@ import React, { useEffect, useMemo, useRef } from "@rbxts/react";
 import { GuiService, RunService, TweenService, Workspace } from "@rbxts/services";
 import Packets from "shared/Packets";
 import { getAsset } from "shared/asset/AssetMap";
-import { LOCAL_PLAYER } from "shared/constants";
+import { LOCAL_PLAYER } from "client/constants";
 import Item from "shared/item/Item";
 import ItemMetadata from "shared/item/ItemMetadata";
 import Unique from "shared/item/traits/Unique";

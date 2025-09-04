@@ -9,7 +9,7 @@ import React, { useCallback, useEffect, useState } from "@rbxts/react";
 import { RunService } from "@rbxts/services";
 import type ToolController from "client/controllers/gameplay/ToolController";
 import { playSound } from "shared/asset/GameAssets";
-import { LOCAL_PLAYER } from "shared/constants";
+import { LOCAL_PLAYER } from "client/constants";
 import Items from "shared/items/Items";
 import BackpackWindow, {
     BackpackWindowCallbacks,

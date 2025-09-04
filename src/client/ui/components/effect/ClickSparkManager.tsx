@@ -1,6 +1,6 @@
 import React, { useState, useRef, useCallback, useEffect } from "@rbxts/react";
 import { GuiService, UserInputService, RunService } from "@rbxts/services";
-import { LOCAL_PLAYER } from "shared/constants";
+import { LOCAL_PLAYER } from "client/constants";
 import ClickSpark, { SparkData } from "client/ui/components/effect/ClickSpark";
 
 export default function ClickSparkManager() {

@@ -19,7 +19,7 @@ import { observeTagAdded, rainbowEffect } from "@antivivi/vrldk";
 import { Controller, OnInit } from "@flamework/core";
 import CameraShaker from "@rbxts/camera-shaker";
 import { Debris, Lighting, TweenService, Workspace } from "@rbxts/services";
-import { LOCAL_PLAYER } from "shared/constants";
+import { LOCAL_PLAYER } from "client/constants";
 import { STATS_WINDOW } from "client/controllers/interface/StatsController";
 import { AREAS } from "shared/Area";
 import { getSound, SOUND_EFFECTS_GROUP } from "shared/asset/GameAssets";

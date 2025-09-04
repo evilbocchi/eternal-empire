@@ -22,7 +22,7 @@ import { CollectionService, Debris, RunService, TweenService } from "@rbxts/serv
 import ItemFilter from "client/ItemFilter";
 import ItemSlot from "client/ItemSlot";
 import { PLAYER_GUI } from "client/constants";
-import { LOCAL_PLAYER } from "shared/constants";
+import { LOCAL_PLAYER } from "client/constants";
 import AdaptiveTabController, {
     ADAPTIVE_TAB,
     ADAPTIVE_TAB_MAIN_WINDOW,

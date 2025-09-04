@@ -15,7 +15,7 @@ import { weldModel } from "@antivivi/vrldk";
 import { Controller, OnInit, OnStart } from "@flamework/core";
 import { Debris, HttpService, ReplicatedStorage, TweenService, UserInputService, Workspace } from "@rbxts/services";
 import { MOUSE, NONCOLLISION_COLOR } from "client/constants";
-import { LOCAL_PLAYER } from "shared/constants";
+import { LOCAL_PLAYER } from "client/constants";
 import HotkeysController from "client/controllers/core/HotkeysController";
 import { SHOP_GUI } from "client/controllers/interface/ShopController";
 import { AREAS } from "shared/Area";
