@@ -1,6 +1,6 @@
 import { buildRichText } from "@antivivi/vrldk";
 import React, { useEffect, useMemo, useRef } from "@rbxts/react";
-import { GuiService, RunService, TweenService, Workspace } from "@rbxts/services";
+import { RunService, TweenService, Workspace } from "@rbxts/services";
 import { Environment } from "@rbxts/ui-labs";
 import { RobotoSlab, RobotoSlabBold, RobotoSlabExtraBold, RobotoSlabMedium } from "client/ui/GameFonts";
 import Packets from "shared/Packets";
@@ -81,8 +81,7 @@ export default function TooltipWindow({ data, visible, metadata }: TooltipWindow
             if (canvasSize !== undefined) {
                 // Directly update DOM properties without triggering React reconciliation
                 frame.AnchorPoint = new Vector2(canvasSize.X - mouse.X < 200 ? 1 : 0, mouse.Y < 200 ? 0 : 1);
-                const [topLeftCorner] = GuiService.GetGuiInset();
-                frame.Position = UDim2.fromOffset(mouse.X + topLeftCorner.X, mouse.Y + topLeftCorner.Y);
+                frame.Position = UDim2.fromOffset(mouse.X, mouse.Y);
             }
         });
 

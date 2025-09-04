@@ -5,11 +5,8 @@
 import { OnoeNum } from "@antivivi/serikanum";
 import React, { useState } from "@rbxts/react";
 import ReactRoblox from "@rbxts/react-roblox";
+import { CreateReactStory } from "@rbxts/ui-labs";
 import Leaderboard from "client/ui/components/leaderboard/Leaderboard";
-
-const controls = {
-    Visible: true,
-};
 
 // Mock data for different leaderboard types
 const mockEntries: { [key: string]: LeaderboardEntry[] } = {
@@ -94,11 +91,15 @@ for (const [_, entries] of pairs(mockEntries)) {
     }
 }
 
-export = {
-    react: React,
-    reactRoblox: ReactRoblox,
-    controls: controls,
-    story: () => {
+export = CreateReactStory(
+    {
+        react: React,
+        reactRoblox: ReactRoblox,
+        controls: {
+            Visible: true,
+        },
+    },
+    () => {
         const [selectedType, setSelectedType] = useState<LeaderboardType>("Funds");
         const entries = mockEntries[selectedType] || mockEntries.Funds;
 
@@ -211,4 +212,4 @@ export = {
             </frame>
         );
     },
-};
+);

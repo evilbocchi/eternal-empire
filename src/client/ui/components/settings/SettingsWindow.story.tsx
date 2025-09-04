@@ -1,29 +1,29 @@
-import React, { StrictMode, useEffect, useState } from "@rbxts/react";
+import React, { StrictMode, useEffect } from "@rbxts/react";
 import ReactRoblox from "@rbxts/react-roblox";
-import { InferProps } from "@rbxts/ui-labs";
+import { CreateReactStory } from "@rbxts/ui-labs";
 import SettingsWindow from "client/ui/components/settings/SettingsWindow";
+import { SidebarManager } from "client/ui/components/sidebar/SidebarButtons";
 import StoryMocking from "client/ui/components/StoryMocking";
 
-const controls = {
-    visible: true,
-};
-
-export = {
-    react: React,
-    reactRoblox: ReactRoblox,
-    controls: controls,
-    story: (props: InferProps<typeof controls>) => {
+export = CreateReactStory(
+    {
+        react: React,
+        reactRoblox: ReactRoblox,
+        controls: {
+            visible: true,
+        },
+    },
+    (props) => {
         StoryMocking.mockData();
 
-        const [visible, setVisible] = useState(false);
         useEffect(() => {
-            setVisible(props.controls.visible);
+            if (props.controls.visible) {
+                SidebarManager.openWindow("Settings");
+            } else {
+                SidebarManager.closeWindow("Settings");
+            }
         }, [props.controls.visible]);
 
-        return (
-            <StrictMode>
-                <SettingsWindow visible={visible} />
-            </StrictMode>
-        );
+        return <SettingsWindow />;
     },
-};
+);

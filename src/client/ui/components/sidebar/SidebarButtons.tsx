@@ -232,6 +232,20 @@ export class SidebarManager {
         this.windowToggled.fire(windowName, this.activeWindow !== undefined);
         return this.activeWindow === windowName;
     }
+
+    static openWindow(windowName: string) {
+        if (this.activeWindow !== windowName) {
+            this.activeWindow = windowName;
+            this.windowToggled.fire(windowName, true);
+        }
+    }
+
+    static closeWindow(windowName: string) {
+        if (this.activeWindow === windowName) {
+            this.activeWindow = undefined;
+            this.windowToggled.fire(windowName, false);
+        }
+    }
 }
 
 /**

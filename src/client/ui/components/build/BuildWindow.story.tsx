@@ -1,20 +1,20 @@
 import React from "@rbxts/react";
 import ReactRoblox from "@rbxts/react-roblox";
-import { InferProps } from "@rbxts/ui-labs";
+import { CreateReactStory } from "@rbxts/ui-labs";
 import BuildWindow from "client/ui/components/build/BuildWindow";
 
-const controls = {
-    visible: true,
-    hasSelection: true,
-    isRestricted: false,
-    animationsEnabled: true,
-};
-
-export = {
-    react: React,
-    reactRoblox: ReactRoblox,
-    controls: controls,
-    story: (props: InferProps<typeof controls>) => {
+export = CreateReactStory(
+    {
+        react: React,
+        reactRoblox: ReactRoblox,
+        controls: {
+            visible: true,
+            hasSelection: true,
+            isRestricted: false,
+            animationsEnabled: true,
+        },
+    },
+    (props) => {
         const state = {
             visible: props.controls.visible,
             hasSelection: props.controls.hasSelection,
@@ -31,4 +31,4 @@ export = {
 
         return <BuildWindow state={state} callbacks={callbacks} />;
     },
-};
+);

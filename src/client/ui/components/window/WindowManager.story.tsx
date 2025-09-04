@@ -1,12 +1,15 @@
 import React, { StrictMode, useState } from "@rbxts/react";
 import ReactRoblox from "@rbxts/react-roblox";
+import { CreateReactStory } from "@rbxts/ui-labs";
 import { getAsset } from "shared/asset/AssetMap";
 import BasicWindow from "client/ui/components/window/BasicWindow";
 
-export = {
-    react: React,
-    reactRoblox: ReactRoblox,
-    story: () => {
+export = CreateReactStory(
+    {
+        react: React,
+        reactRoblox: ReactRoblox,
+    },
+    () => {
         const [window1Visible, setWindow1Visible] = useState(false);
         const [window2Visible, setWindow2Visible] = useState(false);
         const [window3Visible, setWindow3Visible] = useState(false);
@@ -121,4 +124,4 @@ export = {
             </StrictMode>
         );
     },
-};
+);

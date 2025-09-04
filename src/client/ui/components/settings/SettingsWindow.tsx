@@ -1,20 +1,32 @@
 import React, { useCallback, useEffect, useState } from "@rbxts/react";
-import { getAsset } from "shared/asset/AssetMap";
-import Packets from "shared/Packets";
 import HotkeyManager, { HOTKEY_BINDINGS } from "client/ui/components/hotkeys/HotkeyManager";
+import useHotkeyWithTooltip from "client/ui/components/hotkeys/useHotkeyWithTooltip";
 import IconButton from "client/ui/components/IconButton";
+import HotkeyOption from "client/ui/components/settings/HotkeyOption";
+import SettingSection from "client/ui/components/settings/SettingSection";
+import SettingToggle from "client/ui/components/settings/SettingToggle";
+import { SidebarManager } from "client/ui/components/sidebar/SidebarButtons";
+import useWindowVisibility from "client/ui/components/sidebar/useWindowVisibility";
 import TechWindow from "client/ui/components/window/TechWindow";
 import useProperty from "client/ui/hooks/useProperty";
-import HotkeyOption from "./HotkeyOption";
-import SettingSection from "./SettingSection";
-import SettingToggle from "./SettingToggle";
+import { getAsset } from "shared/asset/AssetMap";
+import { playSound } from "shared/asset/GameAssets";
+import Packets from "shared/Packets";
 
-export interface SettingsWindowProps {
-    visible?: boolean;
-    onClose?: () => void;
-}
+export function SettingsButton() {
+    const tooltipProps = useHotkeyWithTooltip({
+        action: () => {
+            const enabled = SidebarManager.toggleWindow("Settings");
+            if (enabled) {
+                playSound("MenuOpen.mp3");
+            } else {
+                playSound("MenuClose.mp3");
+            }
+            return true;
+        },
+        label: "Settings",
+    });
 
-export function SettingsButton({ tooltipProps }: { tooltipProps: TooltipProps }) {
     return (
         <IconButton
             image={getAsset("assets/Settings.png")}
@@ -28,7 +40,8 @@ export function SettingsButton({ tooltipProps }: { tooltipProps: TooltipProps })
     );
 }
 
-export default function SettingsWindow({ visible = false, onClose }: SettingsWindowProps) {
+export default function SettingsWindow() {
+    const { visible, closeWindow } = useWindowVisibility("Settings");
     const [selectedHotkey, setSelectedHotkey] = useState<string | undefined>();
     const settings = useProperty(Packets.settings);
 
@@ -45,8 +58,8 @@ export default function SettingsWindow({ visible = false, onClose }: SettingsWin
             setSelectedHotkey(undefined);
             HotkeyManager.setIsSettingHotkey(false);
         }
-        onClose?.();
-    }, [selectedHotkey, onClose]);
+        closeWindow();
+    }, [selectedHotkey]);
 
     const onHotkeySelect = useCallback(
         (hotkeyName: string) => {
@@ -66,7 +79,7 @@ export default function SettingsWindow({ visible = false, onClose }: SettingsWin
         (label: string, keyCode: Enum.KeyCode) => {
             Packets.setHotkey.toServer(label, keyCode.Value);
             setSelectedHotkey(undefined);
-            HotkeyManager.setIsSettingHotkey(false);
+            task.delay(0.5, () => HotkeyManager.setIsSettingHotkey(false)); // Slight delay to avoid immediate re-trigger
         },
         [setSelectedHotkey],
     );

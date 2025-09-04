@@ -1,14 +1,16 @@
 import React, { useCallback, useMemo, useState } from "@rbxts/react";
-import { getAsset } from "shared/asset/AssetMap";
-import { playSound } from "shared/asset/GameAssets";
-import { getMaxXp } from "shared/constants";
 import QuestOption from "client/ui/components/quest/QuestOption";
 import { useQuestData } from "client/ui/components/quest/useQuestData";
+import useWindowVisibility from "client/ui/components/sidebar/useWindowVisibility";
 import BasicWindow from "client/ui/components/window/BasicWindow";
 import ProgressBar from "client/ui/components/window/ProgressBar";
 import { RobotoSlabHeavy } from "client/ui/GameFonts";
+import { getAsset } from "shared/asset/AssetMap";
+import { playSound } from "shared/asset/GameAssets";
+import { getMaxXp } from "shared/constants";
 
-export default function QuestWindow({ visible, onClose }: { visible: boolean; onClose: () => void }) {
+export default function QuestWindow() {
+    const { visible, closeWindow } = useWindowVisibility("Quests");
     const { questInfo, stagePerQuest, level, xp, trackedQuest, onTrackQuest } = useQuestData();
     const maxXp = getMaxXp(level);
 
@@ -87,7 +89,7 @@ export default function QuestWindow({ visible, onClose }: { visible: boolean; on
             title="Quests"
             icon={getAsset("assets/Quests.png")}
             visible={visible}
-            onClose={onClose}
+            onClose={() => closeWindow()}
             windowId="quests"
             priority={1}
         >

@@ -1,31 +1,35 @@
-import React, { StrictMode, useEffect, useState } from "@rbxts/react";
+import React, { StrictMode, useEffect } from "@rbxts/react";
 import ReactRoblox from "@rbxts/react-roblox";
-import { InferProps } from "@rbxts/ui-labs";
+import { CreateReactStory } from "@rbxts/ui-labs";
 import InventoryWindow from "client/ui/components/inventory/InventoryWindow";
+import { SidebarManager } from "client/ui/components/sidebar/SidebarButtons";
 import StoryMocking from "client/ui/components/StoryMocking";
 import { TooltipDisplay } from "client/ui/components/tooltip/TooltipManager";
 
-const controls = {
-    visible: true,
-};
-
-export = {
-    react: React,
-    reactRoblox: ReactRoblox,
-    controls: controls,
-    story: (props: InferProps<typeof controls>) => {
+export = CreateReactStory(
+    {
+        react: React,
+        reactRoblox: ReactRoblox,
+        controls: {
+            visible: true,
+        },
+    },
+    (props) => {
         StoryMocking.mockData();
 
-        const [visible, setVisible] = useState(false);
         useEffect(() => {
-            setVisible(props.controls.visible);
+            if (props.controls.visible) {
+                SidebarManager.openWindow("Inventory");
+            } else {
+                SidebarManager.closeWindow("Inventory");
+            }
         }, [props.controls.visible]);
 
         return (
             <StrictMode>
-                <InventoryWindow visible={visible} onClose={() => setVisible(false)} />
+                <InventoryWindow />
                 <TooltipDisplay />
             </StrictMode>
         );
     },
-};
+);

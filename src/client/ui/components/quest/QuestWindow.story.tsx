@@ -1,31 +1,35 @@
-import React, { StrictMode, useEffect, useState } from "@rbxts/react";
+import React, { StrictMode, useEffect } from "@rbxts/react";
 import ReactRoblox from "@rbxts/react-roblox";
-import { InferProps } from "@rbxts/ui-labs";
+import { CreateReactStory } from "@rbxts/ui-labs";
 import QuestWindow from "client/ui/components/quest/QuestWindow";
+import { SidebarManager } from "client/ui/components/sidebar/SidebarButtons";
 import StoryMocking from "client/ui/components/StoryMocking";
 import { TooltipDisplay } from "client/ui/components/tooltip/TooltipManager";
 
-const controls = {
-    visible: true,
-};
-
-export = {
-    react: React,
-    reactRoblox: ReactRoblox,
-    controls: controls,
-    story: (props: InferProps<typeof controls>) => {
+export = CreateReactStory(
+    {
+        react: React,
+        reactRoblox: ReactRoblox,
+        controls: {
+            visible: true,
+        },
+    },
+    (props) => {
         StoryMocking.mockData();
 
-        const [visible, setVisible] = useState(false);
         useEffect(() => {
-            setVisible(props.controls.visible);
+            if (props.controls.visible) {
+                SidebarManager.openWindow("Quests");
+            } else {
+                SidebarManager.closeWindow("Quests");
+            }
         }, [props.controls.visible]);
 
         return (
             <StrictMode>
-                <QuestWindow visible={visible} onClose={() => setVisible(false)} />
+                <QuestWindow />
                 <TooltipDisplay />
             </StrictMode>
         );
     },
-};
+);

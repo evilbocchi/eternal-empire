@@ -1,7 +1,7 @@
 import React, { StrictMode } from "@rbxts/react";
 import ReactRoblox from "@rbxts/react-roblox";
 import { CreateReactStory } from "@rbxts/ui-labs";
-import PositionManager from "client/ui/components/position/PositionManager";
+import MainLayout from "client/ui/components/MainLayout";
 import { TooltipDisplay } from "client/ui/components/tooltip/TooltipManager";
 
 export = CreateReactStory(
@@ -10,12 +10,13 @@ export = CreateReactStory(
         reactRoblox: ReactRoblox,
         controls: {
             visible: true,
+            hasItems: true,
         },
     },
     (props) => {
         return (
             <StrictMode>
-                <PositionManager {...props.controls} />
+                <MainLayout />
                 <TooltipDisplay />
             </StrictMode>
         );

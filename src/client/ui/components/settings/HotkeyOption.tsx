@@ -1,7 +1,7 @@
 import React, { useEffect } from "@rbxts/react";
-import { UserInputService } from "@rbxts/services";
-import { playSound } from "shared/asset/GameAssets";
+import { Environment } from "@rbxts/ui-labs";
 import { RobotoMonoBold } from "client/ui/GameFonts";
+import { playSound } from "shared/asset/GameAssets";
 
 interface HotkeyOptionProps {
     title: string;
@@ -38,15 +38,13 @@ export default function HotkeyOption({
     useEffect(() => {
         if (!isSelected || !onHotkeyChange) return;
 
-        const connection = UserInputService.InputBegan.Connect((input, gameProcessed) => {
+        const connection = Environment.UserInput.InputBegan.Connect((input, gameProcessed) => {
             if (gameProcessed) return;
 
             // Only accept actual key presses, not mouse clicks or unknown keys
             if (input.KeyCode !== Enum.KeyCode.Unknown && input.UserInputType === Enum.UserInputType.Keyboard) {
                 onHotkeyChange(input.KeyCode);
                 playSound("CheckOn.mp3");
-                // Auto-deselect after setting the hotkey
-                onDeselect?.();
             }
         });
 
@@ -57,7 +55,7 @@ export default function HotkeyOption({
     useEffect(() => {
         if (!isSelected) return;
 
-        const connection = UserInputService.InputBegan.Connect((input, gameProcessed) => {
+        const connection = Environment.UserInput.InputBegan.Connect((input, gameProcessed) => {
             if (gameProcessed) return;
 
             // Deselect on Escape key press

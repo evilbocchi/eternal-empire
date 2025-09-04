@@ -1,6 +1,6 @@
 import React from "@rbxts/react";
 import ReactRoblox from "@rbxts/react-roblox";
-import { InferProps } from "@rbxts/ui-labs";
+import { CreateReactStory } from "@rbxts/ui-labs";
 import BackpackWindow from "client/ui/components/backpack/BackpackWindow";
 import { ToolOptionData } from "client/ui/components/backpack/ToolOption";
 
@@ -12,17 +12,17 @@ const createMockTool = (name: string, textureId: string): Tool =>
         Parent: undefined,
     }) as Tool;
 
-const controls = {
-    visible: true,
-    hasTools: true,
-    animationsEnabled: true,
-};
-
-export = {
-    react: React,
-    reactRoblox: ReactRoblox,
-    controls: controls,
-    story: (props: InferProps<typeof controls>) => {
+export = CreateReactStory(
+    {
+        react: React,
+        reactRoblox: ReactRoblox,
+        controls: {
+            visible: true,
+            hasTools: true,
+            animationsEnabled: true,
+        },
+    },
+    (props) => {
         const mockTools: ToolOptionData[] = props.controls.hasTools
             ? [
                   {
@@ -65,4 +65,4 @@ export = {
             <BackpackWindow state={state} callbacks={callbacks} animationsEnabled={props.controls.animationsEnabled} />
         );
     },
-};
+);

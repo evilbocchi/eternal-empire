@@ -8,16 +8,17 @@
 import { FuzzySearch } from "@rbxts/fuzzy-search";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "@rbxts/react";
 import type InventoryController from "client/controllers/interface/InventoryController";
+import InventoryEmptyState from "client/ui/components/inventory/InventoryEmptyState";
+import InventoryFilter, { isWhitelisted, traitOptions } from "client/ui/components/inventory/InventoryFilter";
+import InventoryItemSlot from "client/ui/components/inventory/InventoryItemSlot";
+import useWindowVisibility from "client/ui/components/sidebar/useWindowVisibility";
+import BasicWindow from "client/ui/components/window/BasicWindow";
+import { RobotoMono } from "client/ui/GameFonts";
+import useProperty from "client/ui/hooks/useProperty";
 import { getAsset } from "shared/asset/AssetMap";
 import type Item from "shared/item/Item";
 import Items from "shared/items/Items";
 import Packets from "shared/Packets";
-import InventoryEmptyState from "client/ui/components/inventory/InventoryEmptyState";
-import InventoryFilter, { isWhitelisted, traitOptions } from "client/ui/components/inventory/InventoryFilter";
-import InventoryItemSlot from "client/ui/components/inventory/InventoryItemSlot";
-import BasicWindow from "client/ui/components/window/BasicWindow";
-import { RobotoMono } from "client/ui/GameFonts";
-import useProperty from "client/ui/hooks/useProperty";
 
 declare global {
     interface TraitFilterOption {
@@ -37,11 +38,6 @@ interface InventoryItemData {
 }
 
 interface InventoryWindowProps {
-    /** Whether the inventory window is visible */
-    visible: boolean;
-    /** Called when window is closed */
-    onClose: () => void;
-    /** Inventory controller for business logic */
     inventoryController?: InventoryController;
 }
 
@@ -79,7 +75,8 @@ const SEARCHABLE_ITEMS = Items.sortedItems.filter((item) => !item.isA("Harvestin
 /**
  * Main inventory window component following the QuestWindow pattern
  */
-export default function InventoryWindow({ visible, onClose, inventoryController }: InventoryWindowProps) {
+export default function InventoryWindow({ inventoryController }: InventoryWindowProps) {
+    const { visible, closeWindow } = useWindowVisibility("Inventory");
     const [searchQuery, setSearchQuery] = useState("");
     const [queryTime, setQueryTime] = useState(0);
     const [traitFilters, setTraitFilters] = useState<Set<TraitFilterId>>(new Set());
@@ -220,10 +217,10 @@ export default function InventoryWindow({ visible, onClose, inventoryController 
 
             // Close the inventory window if activation was successful
             if (success) {
-                onClose();
+                closeWindow();
             }
         },
-        [inventoryController, onClose],
+        [inventoryController, closeWindow],
     );
 
     for (const traitOption of traitOptions) {
@@ -241,7 +238,7 @@ export default function InventoryWindow({ visible, onClose, inventoryController 
                     new ColorSequenceKeypoint(1, Color3.fromRGB(255, 123, 123)),
                 ])
             }
-            onClose={onClose}
+            onClose={closeWindow}
             windowId="inventory"
             priority={1}
         >
@@ -287,7 +284,7 @@ export default function InventoryWindow({ visible, onClose, inventoryController 
                         <uiaspectratioconstraint />
                     </uigridlayout>
 
-                    {/* Render inventory items */}
+                    {/* Render inventory items TODO OPTIMIZE THIS!!! */}
                     {inventoryItemDatas.map((itemData) => (
                         <InventoryItemSlot
                             key={itemData.item.id}

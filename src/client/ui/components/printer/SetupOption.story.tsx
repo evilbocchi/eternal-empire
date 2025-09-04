@@ -1,18 +1,18 @@
 import React from "@rbxts/react";
 import ReactRoblox from "@rbxts/react-roblox";
-import { InferProps } from "@rbxts/ui-labs";
+import { CreateReactStory } from "@rbxts/ui-labs";
 import SetupOption from "client/ui/components/printer/SetupOption";
 
-const controls = {
-    Visible: true,
-};
-
-export = {
-    react: React,
-    reactRoblox: ReactRoblox,
-    controls: controls,
-    story: (props: InferProps<typeof controls>) => {
+export = CreateReactStory(
+    {
+        react: React,
+        reactRoblox: ReactRoblox,
+        controls: {
+            Visible: true,
+        },
+    },
+    (props) => {
         const component = <SetupOption />;
         return component;
     },
-};
+);

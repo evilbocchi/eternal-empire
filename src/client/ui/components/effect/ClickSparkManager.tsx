@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from "@rbxts/react";
-import { GuiService, RunService } from "@rbxts/services";
+import { RunService } from "@rbxts/services";
 import { Environment } from "@rbxts/ui-labs";
 import ClickSpark, { SparkData } from "client/ui/components/effect/ClickSpark";
 
@@ -11,9 +11,7 @@ export default function ClickSparkManager() {
 
     const getMousePosition = useCallback(() => {
         const mouse = Environment.UserInput.GetMouseLocation();
-        const [topLeftCorner] = GuiService.GetGuiInset();
-        print(mouse, topLeftCorner);
-        return new Vector2(mouse.X, mouse.Y).add(topLeftCorner);
+        return new Vector2(mouse.X, mouse.Y);
     }, []);
 
     const handleSparkComplete = useCallback((sparkId: string) => {

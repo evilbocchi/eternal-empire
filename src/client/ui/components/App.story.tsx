@@ -1,22 +1,28 @@
 import React, { StrictMode } from "@rbxts/react";
 import ReactRoblox from "@rbxts/react-roblox";
-import { InferProps } from "@rbxts/ui-labs";
-import Packets from "shared/Packets";
-import App from "client/ui/components/App";
+import { CreateReactStory } from "@rbxts/ui-labs";
+import BackpackManager from "client/ui/components/backpack/BackpackManager";
+import BuildManager from "client/ui/components/build/BuildManager";
+import ClickSparkManager from "client/ui/components/effect/ClickSparkManager";
+import InventoryWindow from "client/ui/components/inventory/InventoryWindow";
+import MainLayout from "client/ui/components/MainLayout";
 import { questState } from "client/ui/components/quest/QuestState";
+import QuestWindow from "client/ui/components/quest/QuestWindow";
+import SettingsManager from "client/ui/components/settings/SettingsManager";
 import StoryMocking from "client/ui/components/StoryMocking";
 import { TooltipDisplay } from "client/ui/components/tooltip/TooltipManager";
+import Packets from "shared/Packets";
 
-const controls = {
-    visible: true,
-    hasItems: true,
-};
-
-export = {
-    react: React,
-    reactRoblox: ReactRoblox,
-    controls: controls,
-    story: (props: InferProps<typeof controls>) => {
+export = CreateReactStory(
+    {
+        react: React,
+        reactRoblox: ReactRoblox,
+        controls: {
+            visible: true,
+            hasItems: true,
+        },
+    },
+    (props) => {
         StoryMocking.mockData();
         questState.setTrackedQuest("Quest1");
 
@@ -26,10 +32,15 @@ export = {
 
         return (
             <StrictMode>
-                <App />
-                {/** Ensure tooltips work in stories **/}
+                <MainLayout />
+                <ClickSparkManager />
                 <TooltipDisplay />
+                <BuildManager />
+                <SettingsManager />
+                <InventoryWindow />
+                <QuestWindow />
+                <BackpackManager />
             </StrictMode>
         );
     },
-};
+);
