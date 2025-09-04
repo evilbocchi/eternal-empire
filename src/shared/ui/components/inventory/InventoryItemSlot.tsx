@@ -5,11 +5,12 @@
  * Replaces the traditional Roblox Studio ItemSlot with React implementation.
  */
 
-import React from "@rbxts/react";
+import React, { Ref, useEffect, useRef } from "@rbxts/react";
 import { getAsset } from "shared/asset/AssetMap";
+import { PARALLEL } from "shared/constants";
 import type Item from "shared/item/Item";
-import { useItemTooltip } from "shared/ui/components/tooltip/useTooltipProps";
 import { RobotoSlab } from "shared/ui/GameFonts";
+import { useItemTooltip } from "../tooltip/TooltipManager";
 
 interface InventoryItemSlotProps {
     /** The item to display */
@@ -23,7 +24,7 @@ interface InventoryItemSlotProps {
     /** Callback when the item is clicked */
     onActivated: () => void;
     /** Reference for tooltip attachment */
-    ref?: React.Ref<TextButton>;
+    ref?: Ref<TextButton>;
 }
 
 /**
@@ -37,9 +38,17 @@ export default function InventoryItemSlot({
     onActivated,
     ref,
 }: InventoryItemSlotProps) {
+    const viewportRef = useRef<ViewportFrame>();
     const textColor = amount > 0 ? Color3.fromRGB(255, 255, 255) : Color3.fromRGB(150, 150, 150);
     const backgroundColor = item.difficulty.color ?? Color3.fromRGB(52, 155, 255);
     const hoverProps = useItemTooltip(item);
+
+    useEffect(() => {
+        const viewport = viewportRef.current;
+        if (!viewport) return;
+
+        PARALLEL.SendMessage("LoadViewportFrame", viewport, item.id);
+    }, []);
 
     return (
         <textbutton
@@ -126,6 +135,7 @@ export default function InventoryItemSlot({
 
             {/* Viewport frame for 3D model */}
             <viewportframe
+                ref={viewportRef}
                 AnchorPoint={new Vector2(0.5, 0.5)}
                 BackgroundTransparency={1}
                 Position={new UDim2(0.5, 0, 0.5, 0)}

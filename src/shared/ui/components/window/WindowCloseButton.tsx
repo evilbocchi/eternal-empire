@@ -2,7 +2,7 @@ import React, { useRef } from "@rbxts/react";
 import { TweenService } from "@rbxts/services";
 import { getAsset } from "shared/asset/AssetMap";
 import { playSound } from "shared/asset/GameAssets";
-import { useTooltipProps } from "shared/ui/components/tooltip/useTooltipProps";
+import { useTooltipProps } from "../tooltip/TooltipManager";
 
 interface WindowCloseButtonProps {
     onClick: () => void;
@@ -30,7 +30,7 @@ export default function WindowCloseButton({ onClick, color = Color3.fromRGB(255,
         }).Play();
 
     const tooltipProps = useTooltipProps({
-        data: { message: "Close Window (X)" },
+        data: { message: "Close Window" },
         onEnter: handleEnter,
         onLeave: handleLeave,
     });

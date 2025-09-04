@@ -6,8 +6,8 @@
  */
 
 import { useCallback } from "@rbxts/react";
-import { useHotkey } from "shared/ui/components/hotkeys/HotkeyProvider";
-import { useTooltipProps } from "shared/ui/components/tooltip/useTooltipProps";
+import { useHotkey } from "shared/ui/components/hotkeys/HotkeyManager";
+import { useTooltipProps } from "shared/ui/components/tooltip/TooltipManager";
 
 declare global {
     type TooltipProps = ReturnType<typeof useHotkeyWithTooltip>;

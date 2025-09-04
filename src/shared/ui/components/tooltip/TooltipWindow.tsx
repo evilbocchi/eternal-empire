@@ -8,7 +8,6 @@ import Item from "shared/item/Item";
 import ItemMetadata from "shared/item/ItemMetadata";
 import Unique from "shared/item/traits/Unique";
 import { RobotoSlab, RobotoSlabBold, RobotoSlabExtraBold, RobotoSlabMedium } from "shared/ui/GameFonts";
-import { TooltipData } from "shared/ui/components/tooltip/TooltipManager";
 
 interface TooltipWindowProps {
     data?: TooltipData;

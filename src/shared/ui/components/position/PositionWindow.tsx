@@ -1,6 +1,6 @@
 import React from "@rbxts/react";
 import { getAsset } from "shared/asset/AssetMap";
-import { useMessageTooltip } from "shared/ui/components/tooltip/useTooltipProps";
+import { useMessageTooltip } from "../tooltip/TooltipManager";
 import { RobotoSlabHeavy } from "shared/ui/GameFonts";
 
 interface PositionWindowProps {

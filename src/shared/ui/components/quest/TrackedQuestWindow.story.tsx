@@ -1,7 +1,6 @@
 import React from "@rbxts/react";
 import ReactRoblox from "@rbxts/react-roblox";
 import { InferProps } from "@rbxts/ui-labs";
-import HotkeyProvider from "shared/ui/components/hotkeys/HotkeyProvider";
 import { questState } from "shared/ui/components/quest/QuestState";
 import TrackedQuestWindow from "shared/ui/components/quest/TrackedQuestWindow";
 import StoryMocking from "shared/ui/components/StoryMocking";
@@ -18,10 +17,6 @@ export = {
         StoryMocking.mockData();
         questState.setTrackedQuest("Quest1");
 
-        return (
-            <HotkeyProvider>
-                <TrackedQuestWindow />
-            </HotkeyProvider>
-        );
+        return <TrackedQuestWindow />;
     },
 };

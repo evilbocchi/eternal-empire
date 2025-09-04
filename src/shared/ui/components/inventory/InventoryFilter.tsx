@@ -2,7 +2,7 @@ import React, { useCallback, useMemo, useRef, useState } from "@rbxts/react";
 import { getAsset } from "shared/asset/AssetMap";
 import { playSound } from "shared/asset/GameAssets";
 import Item from "shared/item/Item";
-import { useMessageTooltip } from "shared/ui/components/tooltip/useTooltipProps";
+import { useMessageTooltip } from "../tooltip/TooltipManager";
 
 interface InventoryFilterProps {
     /** Available trait filter options */

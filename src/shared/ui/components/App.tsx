@@ -1,17 +1,15 @@
-import React, { useEffect, useRef, useState } from "@rbxts/react";
+import React, { Fragment, useEffect, useRef, useState } from "@rbxts/react";
 import type BuildController from "client/controllers/gameplay/BuildController";
 import type ToolController from "client/controllers/gameplay/ToolController";
 import type InventoryController from "client/controllers/interface/InventoryController";
 import BackpackManager from "shared/ui/components/backpack/BackpackManager";
 import BuildManager from "shared/ui/components/build/BuildManager";
-import HotkeyProvider from "shared/ui/components/hotkeys/HotkeyProvider";
 import InventoryWindow from "shared/ui/components/inventory/InventoryWindow";
 import PositionDisplay from "shared/ui/components/position/PositionDisplay";
 import QuestWindow from "shared/ui/components/quest/QuestWindow";
 import TrackedQuestWindow from "shared/ui/components/quest/TrackedQuestWindow";
 import SettingsWindow from "shared/ui/components/settings/SettingsWindow";
 import SidebarButtons from "shared/ui/components/sidebar/SidebarButtons";
-import WindowManager from "shared/ui/components/window/WindowManager";
 
 interface AppProps {
     /** Build controller interface for React integration */
@@ -86,25 +84,23 @@ export default function App({ buildController, inventoryController, toolControll
     }, []);
 
     return (
-        <HotkeyProvider>
-            <WindowManager>
-                <PositionDisplay />
-                <TrackedQuestWindow />
-                <BuildManager buildController={buildController} />
-                <BackpackManager toolController={toolController} />
+        <Fragment>
+            <PositionDisplay />
+            <TrackedQuestWindow />
+            <BuildManager buildController={buildController} />
+            <BackpackManager toolController={toolController} />
 
-                <SidebarButtons onToggleWindow={handleWindowToggle} />
+            <SidebarButtons onToggleWindow={handleWindowToggle} />
 
-                <SettingsWindow visible={activeWindow === "Settings"} onClose={() => setActiveWindow(undefined)} />
+            <SettingsWindow visible={activeWindow === "Settings"} onClose={() => setActiveWindow(undefined)} />
 
-                <QuestWindow visible={activeWindow === "Quests"} onClose={() => setActiveWindow(undefined)} />
+            <QuestWindow visible={activeWindow === "Quests"} onClose={() => setActiveWindow(undefined)} />
 
-                <InventoryWindow
-                    visible={activeWindow === "Inventory"}
-                    onClose={() => setActiveWindow(undefined)}
-                    inventoryController={inventoryController}
-                />
-            </WindowManager>
-        </HotkeyProvider>
+            <InventoryWindow
+                visible={activeWindow === "Inventory"}
+                onClose={() => setActiveWindow(undefined)}
+                inventoryController={inventoryController}
+            />
+        </Fragment>
     );
 }

@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from "@rbxts/react";
 import { getAsset } from "shared/asset/AssetMap";
 import Packets from "shared/Packets";
-import { HOTKEY_BINDINGS, useHotkeys } from "shared/ui/components/hotkeys/HotkeyProvider";
+import HotkeyManager, { HOTKEY_BINDINGS } from "shared/ui/components/hotkeys/HotkeyManager";
 import IconButton from "shared/ui/components/IconButton";
 import TechWindow from "shared/ui/components/window/TechWindow";
 import useProperty from "shared/ui/hooks/useProperty";
@@ -31,45 +31,44 @@ export function SettingsButton({ tooltipProps }: { tooltipProps: TooltipProps })
 export default function SettingsWindow({ visible = false, onClose }: SettingsWindowProps) {
     const [selectedHotkey, setSelectedHotkey] = useState<string | undefined>();
     const settings = useProperty(Packets.settings);
-    const { setIsSettingHotkey } = useHotkeys();
 
     // Cleanup hotkey setting state when component unmounts or window closes
     useEffect(() => {
         if (!visible && selectedHotkey !== undefined) {
             setSelectedHotkey(undefined);
-            setIsSettingHotkey(false);
+            HotkeyManager.setIsSettingHotkey(false);
         }
     }, [visible]);
 
     const handleClose = useCallback(() => {
         if (selectedHotkey !== undefined) {
             setSelectedHotkey(undefined);
-            setIsSettingHotkey(false);
+            HotkeyManager.setIsSettingHotkey(false);
         }
         onClose?.();
-    }, [selectedHotkey, setIsSettingHotkey, onClose]);
+    }, [selectedHotkey, onClose]);
 
     const onHotkeySelect = useCallback(
         (hotkeyName: string) => {
             const newSelected = selectedHotkey === hotkeyName ? undefined : hotkeyName;
             setSelectedHotkey(newSelected);
-            setIsSettingHotkey(newSelected !== undefined);
+            HotkeyManager.setIsSettingHotkey(newSelected !== undefined);
         },
-        [selectedHotkey, setIsSettingHotkey],
+        [selectedHotkey],
     );
 
     const onHotkeyDeselect = useCallback(() => {
         setSelectedHotkey(undefined);
-        setIsSettingHotkey(false);
-    }, [setIsSettingHotkey]);
+        HotkeyManager.setIsSettingHotkey(false);
+    }, []);
 
     const handleHotkeyChange = useCallback(
         (label: string, keyCode: Enum.KeyCode) => {
             Packets.setHotkey.toServer(label, keyCode.Value);
             setSelectedHotkey(undefined);
-            setIsSettingHotkey(false);
+            HotkeyManager.setIsSettingHotkey(false);
         },
-        [setSelectedHotkey, setIsSettingHotkey],
+        [setSelectedHotkey],
     );
 
     const hotkeyOptions = new Array<JSX.Element>();

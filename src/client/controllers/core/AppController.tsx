@@ -7,20 +7,21 @@ import ToolController from "client/controllers/gameplay/ToolController";
 import InventoryController from "client/controllers/interface/InventoryController";
 import App from "shared/ui/components/App";
 import ClickSparkManager from "shared/ui/components/effect/ClickSparkManager";
+import { TooltipDisplay } from "shared/ui/components/tooltip/TooltipManager";
 
-const APP_GUI = new Instance("ScreenGui");
-APP_GUI.IgnoreGuiInset = true;
-APP_GUI.ResetOnSpawn = false;
-APP_GUI.ZIndexBehavior = Enum.ZIndexBehavior.Sibling;
-APP_GUI.Name = "App";
-APP_GUI.Parent = PLAYER_GUI;
+const createScreenGui = (name: string): ScreenGui => {
+    const screenGui = new Instance("ScreenGui");
+    screenGui.IgnoreGuiInset = true;
+    screenGui.ResetOnSpawn = false;
+    screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling;
+    screenGui.Name = name;
+    screenGui.Parent = PLAYER_GUI;
+    return screenGui;
+};
 
-const CLICK_SPARKS = new Instance("ScreenGui");
-CLICK_SPARKS.IgnoreGuiInset = true;
-CLICK_SPARKS.ResetOnSpawn = false;
-CLICK_SPARKS.ZIndexBehavior = Enum.ZIndexBehavior.Sibling;
-CLICK_SPARKS.Name = "ClickSparks";
-CLICK_SPARKS.Parent = PLAYER_GUI;
+const APP_GUI = createScreenGui("App");
+const CLICK_SPARKS = createScreenGui("ClickSparks");
+const TOOLTIPS = createScreenGui("Tooltips");
 
 @Controller()
 export default class AppController implements OnStart {
@@ -31,6 +32,7 @@ export default class AppController implements OnStart {
     ) {}
 
     onStart() {
+        ReactRoblox.createRoot(TOOLTIPS).render(<TooltipDisplay />);
         ReactRoblox.createRoot(APP_GUI).render(
             <App
                 buildController={this.buildController}

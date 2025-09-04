@@ -5,6 +5,7 @@ import Packets from "shared/Packets";
 import App from "shared/ui/components/App";
 import { questState } from "shared/ui/components/quest/QuestState";
 import StoryMocking from "shared/ui/components/StoryMocking";
+import { TooltipDisplay } from "shared/ui/components/tooltip/TooltipManager";
 
 const controls = {
     visible: true,
@@ -26,6 +27,8 @@ export = {
         return (
             <StrictMode>
                 <App />
+                {/** Ensure tooltips work in stories **/}
+                <TooltipDisplay />
             </StrictMode>
         );
     },

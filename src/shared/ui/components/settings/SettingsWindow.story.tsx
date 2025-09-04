@@ -1,10 +1,8 @@
 import React, { StrictMode, useEffect, useState } from "@rbxts/react";
 import ReactRoblox from "@rbxts/react-roblox";
 import { InferProps } from "@rbxts/ui-labs";
-import HotkeyProvider from "shared/ui/components/hotkeys/HotkeyProvider";
 import SettingsWindow from "shared/ui/components/settings/SettingsWindow";
 import StoryMocking from "shared/ui/components/StoryMocking";
-import WindowManager from "shared/ui/components/window/WindowManager";
 
 const controls = {
     visible: true,
@@ -24,11 +22,7 @@ export = {
 
         return (
             <StrictMode>
-                <HotkeyProvider>
-                    <WindowManager>
-                        <SettingsWindow visible={visible} />
-                    </WindowManager>
-                </HotkeyProvider>
+                <SettingsWindow visible={visible} />
             </StrictMode>
         );
     },
