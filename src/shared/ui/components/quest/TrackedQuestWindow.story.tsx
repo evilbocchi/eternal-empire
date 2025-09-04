@@ -5,7 +5,6 @@ import HotkeyProvider from "shared/ui/components/hotkeys/HotkeyProvider";
 import { questState } from "shared/ui/components/quest/QuestState";
 import TrackedQuestWindow from "shared/ui/components/quest/TrackedQuestWindow";
 import StoryMocking from "shared/ui/components/StoryMocking";
-import TooltipProvider from "shared/ui/components/tooltip/TooltipProvider";
 
 const controls = {
     visible: true,
@@ -21,9 +20,7 @@ export = {
 
         return (
             <HotkeyProvider>
-                <TooltipProvider>
-                    <TrackedQuestWindow />
-                </TooltipProvider>
+                <TrackedQuestWindow />
             </HotkeyProvider>
         );
     },

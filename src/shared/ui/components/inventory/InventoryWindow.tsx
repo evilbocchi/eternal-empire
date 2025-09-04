@@ -52,7 +52,7 @@ function calculateOptimalCellCount(containerX: number): number {
     return math.max(math.round((containerX - 50) / 65), 3);
 }
 
-function getBestUniqueInstances(uniqueInstances: Map<string, UniqueItemInstance>) {
+export function getBestUniqueInstances(uniqueInstances: Map<string, UniqueItemInstance>) {
     // Find the best unique item instance for the given base item ID
     const bestUuidPerItem = new Map<string, string>();
     const bestInstancePerItem = new Map<string, UniqueItemInstance>();
@@ -118,6 +118,7 @@ export default function InventoryWindow({ visible, onClose, inventoryController 
     // Apply filtering TODO
     const inventoryItemDatas = useMemo(() => {
         const startTime = tick();
+        const processedItems = new Set<string>();
         const inventoryItemDatas = new Array<InventoryItemData>();
 
         if (searchQuery !== "") {
@@ -129,6 +130,8 @@ export default function InventoryWindow({ visible, onClose, inventoryController 
             const sorted = FuzzySearch.Sorting.FuzzyScore(terms, searchQuery);
             for (const [index, name] of sorted) {
                 const item = Items.itemsPerName.get(name)!;
+                if (processedItems.has(item.id)) continue; // Skip duplicates
+                processedItems.add(item.id);
                 inventoryItemDatas.push({
                     item,
                     amount: 0,

@@ -7,7 +7,7 @@
 
 import { useCallback } from "@rbxts/react";
 import Item from "shared/item/Item";
-import { TooltipData, useTooltip } from "shared/ui/components/tooltip/TooltipProvider";
+import TooltipManager, { TooltipData } from "shared/ui/components/tooltip/TooltipManager";
 import useHover from "shared/ui/hooks/useHover";
 
 declare global {
@@ -25,19 +25,17 @@ declare global {
  * @param tooltipData Static tooltip data or function that returns tooltip data
  * @returns Hover data object
  */
-export function useTooltipProps({ data, onMoved, onEnter, onLeave }: UseTooltipProps): UseHoverReturn {
-    const { showTooltip, hideTooltip } = useTooltip();
-
+export function useTooltipProps({ data, onEnter, onLeave }: UseTooltipProps): UseHoverReturn {
     const handleMouseEnter = useCallback(() => {
         onEnter?.();
         const tooltipData = typeIs(data, "function") ? data() : data;
-        showTooltip(tooltipData);
+        TooltipManager.showTooltip(tooltipData);
     }, [onEnter]);
 
     const handleMouseLeave = useCallback(() => {
         onLeave?.();
-        hideTooltip();
-    }, [hideTooltip, onLeave]);
+        TooltipManager.hideTooltip();
+    }, [onLeave]);
 
     return useHover({ onEnter: handleMouseEnter, onLeave: handleMouseLeave });
 }

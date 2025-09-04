@@ -73,7 +73,7 @@ export default class IntroController implements OnInit {
         INTRO_WINDOW.BackgroundTransparency = 0;
         INTRO_WINDOW.Visible = true;
         this.balanceWindowController.hideBalanceWindow();
-        this.adaptiveTabController.hideSidebarButtons();
+        //this.adaptiveTabController.hideSidebarButtons(); TODO
         const fabricRustle = () => playSound("FabricRustle.mp3");
         task.delay(2, () => {
             fabricRustle();
@@ -114,7 +114,7 @@ export default class IntroController implements OnInit {
             math.randomseed(42);
             this.soundController.refreshMusic(true);
             math.randomseed(tick());
-            this.adaptiveTabController.showSidebarButtons();
+            //this.adaptiveTabController.showSidebarButtons(); TODO
             this.balanceWindowController.showBalanceWindow();
         }
     }

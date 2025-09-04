@@ -11,7 +11,6 @@ import QuestWindow from "shared/ui/components/quest/QuestWindow";
 import TrackedQuestWindow from "shared/ui/components/quest/TrackedQuestWindow";
 import SettingsWindow from "shared/ui/components/settings/SettingsWindow";
 import SidebarButtons from "shared/ui/components/sidebar/SidebarButtons";
-import TooltipProvider from "shared/ui/components/tooltip/TooltipProvider";
 import WindowManager from "shared/ui/components/window/WindowManager";
 
 interface AppProps {
@@ -89,24 +88,22 @@ export default function App({ buildController, inventoryController, toolControll
     return (
         <HotkeyProvider>
             <WindowManager>
-                <TooltipProvider>
-                    <PositionDisplay />
-                    <TrackedQuestWindow />
-                    <BuildManager buildController={buildController} />
-                    <BackpackManager toolController={toolController} />
+                <PositionDisplay />
+                <TrackedQuestWindow />
+                <BuildManager buildController={buildController} />
+                <BackpackManager toolController={toolController} />
 
-                    <SidebarButtons onToggleWindow={handleWindowToggle} />
+                <SidebarButtons onToggleWindow={handleWindowToggle} />
 
-                    <SettingsWindow visible={activeWindow === "Settings"} onClose={() => setActiveWindow(undefined)} />
+                <SettingsWindow visible={activeWindow === "Settings"} onClose={() => setActiveWindow(undefined)} />
 
-                    <QuestWindow visible={activeWindow === "Quests"} onClose={() => setActiveWindow(undefined)} />
+                <QuestWindow visible={activeWindow === "Quests"} onClose={() => setActiveWindow(undefined)} />
 
-                    <InventoryWindow
-                        visible={activeWindow === "Inventory"}
-                        onClose={() => setActiveWindow(undefined)}
-                        inventoryController={inventoryController}
-                    />
-                </TooltipProvider>
+                <InventoryWindow
+                    visible={activeWindow === "Inventory"}
+                    onClose={() => setActiveWindow(undefined)}
+                    inventoryController={inventoryController}
+                />
             </WindowManager>
         </HotkeyProvider>
     );

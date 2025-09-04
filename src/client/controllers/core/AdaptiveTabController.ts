@@ -41,14 +41,6 @@ export const ADAPTIVE_TAB = INTERFACE.WaitForChild("AdaptiveTab") as Frame & {
 
 export const ADAPTIVE_TAB_MAIN_WINDOW = ADAPTIVE_TAB.WaitForChild("MainWindow") as Frame;
 
-export const SIDEBAR_BUTTONS = INTERFACE.WaitForChild("SidebarButtons") as Frame & {
-    Quests: Frame & {
-        NotificationWindow: Frame & {
-            AmountLabel: TextLabel;
-        };
-    };
-};
-
 /**
  * Controller responsible for managing the adaptive tab UI, sidebar navigation, and related animations.
  *
@@ -58,8 +50,6 @@ export const SIDEBAR_BUTTONS = INTERFACE.WaitForChild("SidebarButtons") as Frame
 export default class AdaptiveTabController implements OnInit {
     /** Signal fired when a tab is hidden. */
     tabHidden = new Signal<string>();
-    /** The original position of the sidebar buttons. */
-    originalSidebarPosition = SIDEBAR_BUTTONS.Position;
     /** Mapping of window names to their color. */
     colorsPerWindow = new Map<string, Color3>();
     /** Mapping of window names to their image. */
@@ -186,20 +176,6 @@ export default class AdaptiveTabController implements OnInit {
     }
 
     /**
-     * Animates and hides the sidebar buttons.
-     */
-    hideSidebarButtons() {
-        TweenService.Create(SIDEBAR_BUTTONS, new TweenInfo(0.5), { Position: new UDim2(-0.015, -50, 0.5, 0) }).Play();
-    }
-
-    /**
-     * Animates and shows the sidebar buttons.
-     */
-    showSidebarButtons() {
-        TweenService.Create(SIDEBAR_BUTTONS, new TweenInfo(0.5), { Position: this.originalSidebarPosition }).Play();
-    }
-
-    /**
      * Loads a sidebar button, sets up hotkey and color/image mapping.
      * @param sidebarButton The sidebar button GUI element.
      */
@@ -249,14 +225,5 @@ export default class AdaptiveTabController implements OnInit {
             },
             "Close",
         );
-        this.hotkeys.set("Inventory", Enum.KeyCode.F);
-        this.hotkeys.set("Stats", Enum.KeyCode.M);
-        this.hotkeys.set("Quests", Enum.KeyCode.V);
-        this.hotkeys.set("Warp", Enum.KeyCode.G);
-        // Commands hotkey can be added here if needed in the future
-        // this.hotkeys.set("Commands", Enum.KeyCode.C);
-        for (const sidebarButton of SIDEBAR_BUTTONS.GetDescendants()) {
-            if (sidebarButton.IsA("GuiButton")) this.loadSidebarButton(sidebarButton);
-        }
     }
 }

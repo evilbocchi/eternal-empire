@@ -121,7 +121,7 @@ export default class StartWindowController implements OnInit {
             }
             this.soundController.refreshMusic();
             this.balanceWindowController.showBalanceWindow();
-            this.adaptiveTabController.showSidebarButtons();
+            //this.adaptiveTabController.showSidebarButtons(); TODO
             this.loadingWindowController.refreshLoadingWindow("Done loading");
             this.loadingWindowController.hideLoadingWindow();
         });
@@ -202,7 +202,7 @@ export default class StartWindowController implements OnInit {
             return;
         }
         this.balanceWindowController.hideBalanceWindow();
-        this.adaptiveTabController.hideSidebarButtons();
+        //this.adaptiveTabController.hideSidebarButtons(); TODO
         if (Workspace.CurrentCamera !== undefined) {
             Workspace.CurrentCamera.CameraType = Enum.CameraType.Scriptable;
             Workspace.CurrentCamera.CFrame = getStartCamera().CFrame;

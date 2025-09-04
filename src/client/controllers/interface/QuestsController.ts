@@ -13,8 +13,8 @@
  */
 import { combineHumanReadable } from "@antivivi/vrldk";
 import { Controller, OnInit, OnPhysics } from "@flamework/core";
+import ReactRoblox from "@rbxts/react-roblox";
 import { Debris, ReplicatedStorage, TweenService, Workspace } from "@rbxts/services";
-import { SIDEBAR_BUTTONS } from "client/controllers/core/AdaptiveTabController";
 import { OnCharacterAdded } from "client/controllers/core/ModdingController";
 import { INTERFACE } from "client/controllers/core/UIController";
 import EffectController from "client/controllers/world/EffectController";
@@ -22,8 +22,6 @@ import { ASSETS, playSound } from "shared/asset/GameAssets";
 import Items from "shared/items/Items";
 import Packets from "shared/Packets";
 import { questState } from "shared/ui/components/quest/QuestState";
-import React from "@rbxts/react";
-import ReactRoblox from "@rbxts/react-roblox";
 
 declare global {
     type QuestOption = Frame & {
@@ -304,14 +302,6 @@ export default class QuestsController implements OnInit, OnPhysics, OnCharacterA
         Debris.AddItem(ltis, 1);
     }
 
-    refreshNotificationWindow() {
-        const amount = this.availableQuests.size();
-        SIDEBAR_BUTTONS.Quests.NotificationWindow.Visible = amount > 0;
-        if (amount > 0) {
-            SIDEBAR_BUTTONS.Quests.NotificationWindow.AmountLabel.Text = tostring(amount);
-        }
-    }
-
     onPhysics() {
         const position =
             this.indexer === undefined
@@ -361,7 +351,6 @@ export default class QuestsController implements OnInit, OnPhysics, OnCharacterA
                     }
                 }
             }
-            this.refreshNotificationWindow();
         });
 
         //this.trackedQuestChanged.connect((questId) => this.refreshTrackedQuestWindow(questId));
@@ -371,7 +360,6 @@ export default class QuestsController implements OnInit, OnPhysics, OnCharacterA
             const index = trackedQuest === undefined ? 0 : (quests.get(trackedQuest) ?? 0);
             this.indexer = trackedQuest === undefined ? undefined : trackedQuest + index;
             this.refreshTrackedQuestWindow(trackedQuest, index);
-            this.refreshNotificationWindow();
         });
         // TODO: Implement reward notifications in React components
         Packets.showXpReward.fromServer((xp) => {

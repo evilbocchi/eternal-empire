@@ -1,11 +1,3 @@
-/**
- * @fileoverview React tooltip window component for displaying formatted tooltips.
- *
- * Renders tooltip content with smooth animations and supports both simple message
- * tooltips and rich item tooltips with metadata, difficulty indicators, and formatting.
- * Based on the actual TooltipWindow structure from Roblox Studio.
- */
-
 import { buildRichText } from "@antivivi/vrldk";
 import React, { useEffect, useMemo, useRef } from "@rbxts/react";
 import { GuiService, RunService, TweenService, Workspace } from "@rbxts/services";
@@ -16,7 +8,7 @@ import Item from "shared/item/Item";
 import ItemMetadata from "shared/item/ItemMetadata";
 import Unique from "shared/item/traits/Unique";
 import { RobotoSlab, RobotoSlabBold, RobotoSlabExtraBold, RobotoSlabMedium } from "shared/ui/GameFonts";
-import { TooltipData } from "shared/ui/components/tooltip/TooltipProvider";
+import { TooltipData } from "shared/ui/components/tooltip/TooltipManager";
 
 interface TooltipWindowProps {
     data?: TooltipData;
@@ -77,27 +69,24 @@ export default function TooltipWindow({ data, visible, metadata }: TooltipWindow
         }
     }, [visible]);
 
-    // Update position - only when tooltip is visible
+    // Update position - decouple from React render cycle
     useEffect(() => {
-        if (!visible) return;
+        if (!visible || !frameRef.current) return;
 
-        let frameId = 0;
+        const frame = frameRef.current;
+
         const connection = RunService.Heartbeat.Connect(() => {
-            frameId++;
-            // Throttle position updates to every 3rd frame for better performance
-            if (frameId % 3 !== 0) return;
-
-            if (!frameRef.current) return;
-
             const canvasSize = Workspace.CurrentCamera?.ViewportSize;
             const mouse = LOCAL_PLAYER.GetMouse();
 
             if (canvasSize !== undefined) {
-                frameRef.current.AnchorPoint = new Vector2(canvasSize.X - mouse.X < 200 ? 1 : 0, mouse.Y < 200 ? 0 : 1);
+                // Directly update DOM properties without triggering React reconciliation
+                frame.AnchorPoint = new Vector2(canvasSize.X - mouse.X < 200 ? 1 : 0, mouse.Y < 200 ? 0 : 1);
                 const [topLeftCorner] = GuiService.GetGuiInset();
-                frameRef.current.Position = UDim2.fromOffset(mouse.X + topLeftCorner.X, mouse.Y + topLeftCorner.Y);
+                frame.Position = UDim2.fromOffset(mouse.X + topLeftCorner.X, mouse.Y + topLeftCorner.Y);
             }
         });
+
         return () => connection.Disconnect();
     }, [visible]);
 

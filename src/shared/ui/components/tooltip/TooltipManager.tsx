@@ -6,7 +6,7 @@
  * and simple message tooltips with smooth animations and positioning.
  */
 
-import React, { createContext, ReactNode, useCallback, useContext, useState } from "@rbxts/react";
+import React, { useCallback, useState } from "@rbxts/react";
 import Item from "shared/item/Item";
 import ItemMetadata from "shared/item/ItemMetadata";
 import Items from "shared/items/Items";
@@ -23,64 +23,37 @@ export interface TooltipData {
     position?: Vector2;
 }
 
-interface TooltipContextValue {
-    /** Show a tooltip with the given data */
-    showTooltip: (data: TooltipData) => void;
-    /** Hide the currently shown tooltip */
-    hideTooltip: () => void;
-    /** Check if a tooltip is currently visible */
-    isVisible: boolean;
-}
-
-const TooltipContext = createContext<TooltipContextValue | undefined>(undefined);
-
 // Precompute item metadata for efficient tooltip rendering
 const METADATA_PER_ITEM = new Map<Item, ItemMetadata>();
 for (const item of Items.sortedItems) {
     METADATA_PER_ITEM.set(item, new ItemMetadata(item, 16, "Bold"));
 }
 
-interface TooltipProviderProps {
-    children: ReactNode;
+/**
+ * Global tooltip manager with static methods for showing/hiding tooltips
+ */
+export default class TooltipManager {
+    static showTooltip: (data: TooltipData) => void = () => {};
+    static hideTooltip: () => void = () => {};
+    static isVisible: boolean = false;
 }
 
 /**
  * Tooltip provider component that manages tooltip state and positioning
  */
-export default function TooltipProvider({ children }: TooltipProviderProps) {
+export function TooltipDisplay() {
     const [tooltipData, setTooltipData] = useState<TooltipData | undefined>(undefined);
     const [isVisible, setIsVisible] = useState(false);
 
-    const showTooltip = useCallback((data: TooltipData) => {
+    TooltipManager.showTooltip = useCallback((data: TooltipData) => {
         setTooltipData(data);
         setIsVisible(true);
     }, []);
 
-    const hideTooltip = useCallback(() => {
+    TooltipManager.hideTooltip = useCallback(() => {
         setIsVisible(false);
     }, []);
+    TooltipManager.isVisible = isVisible;
 
-    return (
-        <TooltipContext.Provider
-            value={{
-                showTooltip,
-                hideTooltip,
-                isVisible,
-            }}
-        >
-            {children}
-            <TooltipWindow data={tooltipData} visible={isVisible} metadata={METADATA_PER_ITEM} />
-        </TooltipContext.Provider>
-    );
-}
-
-/**
- * Hook to access tooltip functionality
- */
-export function useTooltip() {
-    const context = useContext(TooltipContext);
-    if (context === undefined) {
-        throw "useTooltip must be used within a TooltipProvider";
-    }
-    return context;
+    return <TooltipWindow data={tooltipData} visible={isVisible} metadata={METADATA_PER_ITEM} />;
 }

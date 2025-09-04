@@ -4,7 +4,6 @@ import { InferProps } from "@rbxts/ui-labs";
 import HotkeyProvider from "shared/ui/components/hotkeys/HotkeyProvider";
 import SettingsWindow from "shared/ui/components/settings/SettingsWindow";
 import StoryMocking from "shared/ui/components/StoryMocking";
-import TooltipProvider from "shared/ui/components/tooltip/TooltipProvider";
 import WindowManager from "shared/ui/components/window/WindowManager";
 
 const controls = {
@@ -26,11 +25,9 @@ export = {
         return (
             <StrictMode>
                 <HotkeyProvider>
-                    <TooltipProvider>
-                        <WindowManager>
-                            <SettingsWindow visible={visible} />
-                        </WindowManager>
-                    </TooltipProvider>
+                    <WindowManager>
+                        <SettingsWindow visible={visible} />
+                    </WindowManager>
                 </HotkeyProvider>
             </StrictMode>
         );
