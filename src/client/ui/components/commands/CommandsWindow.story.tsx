@@ -1,4 +1,4 @@
-import React from "@rbxts/react";
+import React, { StrictMode } from "@rbxts/react";
 import ReactRoblox from "@rbxts/react-roblox";
 import { InferProps } from "@rbxts/ui-labs";
 import CommandsWindow from "client/ui/components/commands/CommandsWindow";
@@ -13,6 +13,10 @@ export = {
     reactRoblox: ReactRoblox,
     controls: controls,
     story: (props: InferProps<typeof controls>) => {
-        return <CommandsWindow {...props.controls} />;
+        return (
+            <StrictMode>
+                <CommandsWindow {...props.controls} />
+            </StrictMode>
+        );
     },
 };
