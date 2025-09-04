@@ -21,7 +21,7 @@ import EffectController from "client/controllers/world/EffectController";
 import { ASSETS, playSound } from "shared/asset/GameAssets";
 import Items from "shared/items/Items";
 import Packets from "shared/Packets";
-import { questState } from "shared/ui/components/quest/QuestState";
+import { questState } from "client/ui/components/quest/QuestState";
 
 declare global {
     type QuestOption = Frame & {

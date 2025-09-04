@@ -5,9 +5,9 @@ import { PLAYER_GUI } from "client/constants";
 import BuildController from "client/controllers/gameplay/BuildController";
 import ToolController from "client/controllers/gameplay/ToolController";
 import InventoryController from "client/controllers/interface/InventoryController";
-import App from "shared/ui/components/App";
-import ClickSparkManager from "shared/ui/components/effect/ClickSparkManager";
-import { TooltipDisplay } from "shared/ui/components/tooltip/TooltipManager";
+import App from "client/ui/components/App";
+import ClickSparkManager from "client/ui/components/effect/ClickSparkManager";
+import { TooltipDisplay } from "client/ui/components/tooltip/TooltipManager";
 
 const createScreenGui = (name: string): ScreenGui => {
     const screenGui = new Instance("ScreenGui");

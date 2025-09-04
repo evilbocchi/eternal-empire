@@ -18,8 +18,8 @@ import { PLAYER_GUI } from "client/constants";
 import { playSound } from "shared/asset/GameAssets";
 import { LOCAL_PLAYER } from "shared/constants";
 import Packets from "shared/Packets";
-import BasicWindow from "shared/ui/components/window/BasicWindow";
-import CommandsWindow from "shared/ui/components/commands/CommandsWindow";
+import BasicWindow from "client/ui/components/window/BasicWindow";
+import CommandsWindow from "client/ui/components/commands/CommandsWindow";
 import { getAsset } from "shared/asset/AssetMap";
 
 const COMMANDS_GUI = new Instance("ScreenGui");

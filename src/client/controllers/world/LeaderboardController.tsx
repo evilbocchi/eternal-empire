@@ -4,7 +4,7 @@ import React from "@rbxts/react";
 import ReactRoblox from "@rbxts/react-roblox";
 import { LEADERBOARDS } from "shared/constants";
 import Packets from "shared/Packets";
-import LiveLeaderboard from "shared/ui/components/leaderboard/LiveLeaderboard";
+import LiveLeaderboard from "client/ui/components/leaderboard/LiveLeaderboard";
 
 @Controller()
 export class LeaderboardController implements OnStart, LeaderboardDataManager {
