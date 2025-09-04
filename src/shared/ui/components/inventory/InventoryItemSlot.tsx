@@ -7,7 +7,6 @@
 
 import React, { Ref, useEffect, useRef } from "@rbxts/react";
 import { getAsset } from "shared/asset/AssetMap";
-import { PARALLEL } from "shared/constants";
 import type Item from "shared/item/Item";
 import { RobotoSlab } from "shared/ui/GameFonts";
 import { useItemTooltip } from "../tooltip/TooltipManager";

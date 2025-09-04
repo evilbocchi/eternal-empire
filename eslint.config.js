@@ -30,6 +30,7 @@ export default [
             "@typescript-eslint/no-unused-vars": "off",
             "roblox-ts/no-private-identifier": "off",
             "roblox-ts/lua-truthiness": "off",
+            "prettier/prettier": ["error", { endOfLine: "auto" }],
         },
     },
     {
