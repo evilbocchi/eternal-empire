@@ -1,7 +1,7 @@
 import React, { StrictMode } from "@rbxts/react";
 import ReactRoblox from "@rbxts/react-roblox";
 import { InferProps } from "@rbxts/ui-labs";
-import PositionDisplay from "client/ui/components/position/PositionDisplay";
+import PositionManager from "client/ui/components/position/PositionManager";
 import { TooltipDisplay } from "client/ui/components/tooltip/TooltipManager";
 
 const controls = {
@@ -15,7 +15,7 @@ export = {
     story: (props: InferProps<typeof controls>) => {
         return (
             <StrictMode>
-                <PositionDisplay {...props.controls} />
+                <PositionManager {...props.controls} />
                 <TooltipDisplay />
             </StrictMode>
         );

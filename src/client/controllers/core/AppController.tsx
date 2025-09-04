@@ -6,6 +6,7 @@ import BuildController from "client/controllers/gameplay/BuildController";
 import ToolController from "client/controllers/gameplay/ToolController";
 import InventoryController from "client/controllers/interface/InventoryController";
 import App from "client/ui/components/App";
+import BuildManager from "client/ui/components/build/BuildManager";
 import ClickSparkManager from "client/ui/components/effect/ClickSparkManager";
 import { TooltipDisplay } from "client/ui/components/tooltip/TooltipManager";
 
@@ -20,8 +21,9 @@ const createScreenGui = (name: string): ScreenGui => {
 };
 
 const APP_GUI = createScreenGui("App");
-const CLICK_SPARKS = createScreenGui("ClickSparks");
-const TOOLTIPS = createScreenGui("Tooltips");
+const CLICK_SPARKS_GUI = createScreenGui("ClickSparks");
+const TOOLTIPS_GUI = createScreenGui("Tooltips");
+const BUILD_MANAGER_GUI = createScreenGui("BuildManager");
 
 @Controller()
 export default class AppController implements OnStart {
@@ -32,14 +34,11 @@ export default class AppController implements OnStart {
     ) {}
 
     onStart() {
-        ReactRoblox.createRoot(TOOLTIPS).render(<TooltipDisplay />);
+        ReactRoblox.createRoot(TOOLTIPS_GUI).render(<TooltipDisplay />);
         ReactRoblox.createRoot(APP_GUI).render(
-            <App
-                buildController={this.buildController}
-                inventoryController={this.inventoryController}
-                toolController={this.toolController}
-            />,
+            <App inventoryController={this.inventoryController} toolController={this.toolController} />,
         );
-        ReactRoblox.createRoot(CLICK_SPARKS).render(<ClickSparkManager />);
+        ReactRoblox.createRoot(CLICK_SPARKS_GUI).render(<ClickSparkManager />);
+        ReactRoblox.createRoot(BUILD_MANAGER_GUI).render(<BuildManager buildController={this.buildController} />);
     }
 }

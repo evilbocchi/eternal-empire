@@ -1,13 +1,13 @@
 import { buildRichText } from "@antivivi/vrldk";
 import React, { useEffect, useMemo, useRef } from "@rbxts/react";
 import { GuiService, RunService, TweenService, Workspace } from "@rbxts/services";
+import { Environment } from "@rbxts/ui-labs";
+import { RobotoSlab, RobotoSlabBold, RobotoSlabExtraBold, RobotoSlabMedium } from "client/ui/GameFonts";
 import Packets from "shared/Packets";
 import { getAsset } from "shared/asset/AssetMap";
-import { LOCAL_PLAYER } from "client/constants";
 import Item from "shared/item/Item";
 import ItemMetadata from "shared/item/ItemMetadata";
 import Unique from "shared/item/traits/Unique";
-import { RobotoSlab, RobotoSlabBold, RobotoSlabExtraBold, RobotoSlabMedium } from "client/ui/GameFonts";
 
 interface TooltipWindowProps {
     data?: TooltipData;
@@ -76,7 +76,7 @@ export default function TooltipWindow({ data, visible, metadata }: TooltipWindow
 
         const connection = RunService.Heartbeat.Connect(() => {
             const canvasSize = Workspace.CurrentCamera?.ViewportSize;
-            const mouse = LOCAL_PLAYER.GetMouse();
+            const mouse = Environment.UserInput.GetMouseLocation();
 
             if (canvasSize !== undefined) {
                 // Directly update DOM properties without triggering React reconciliation

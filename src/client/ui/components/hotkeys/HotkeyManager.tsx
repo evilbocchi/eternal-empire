@@ -7,7 +7,7 @@
  */
 
 import { DependencyList, useEffect } from "@rbxts/react";
-import { UserInputService } from "@rbxts/services";
+import { Environment } from "@rbxts/ui-labs";
 import Packets from "shared/Packets";
 
 declare global {
@@ -109,12 +109,12 @@ export default class HotkeyManager {
         this.cleanup();
 
         // Set up input listeners
-        const inputBeganConnection = UserInputService.InputBegan.Connect((input, gameProcessed) => {
+        const inputBeganConnection = Environment.UserInput.InputBegan.Connect((input, gameProcessed) => {
             if (gameProcessed) return;
             this.executeHotkey(input.KeyCode);
         });
 
-        const inputEndedConnection = UserInputService.InputEnded.Connect((input, gameProcessed) => {
+        const inputEndedConnection = Environment.UserInput.InputEnded.Connect((input, gameProcessed) => {
             if (gameProcessed) return;
             this.executeHotkey(input.KeyCode, true);
         });

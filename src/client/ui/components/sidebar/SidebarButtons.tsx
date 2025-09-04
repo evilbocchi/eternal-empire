@@ -13,12 +13,13 @@
  * - Glow effects for active states
  */
 
+import Signal from "@antivivi/lemon-signal";
 import React, { useCallback, useEffect, useRef, useState } from "@rbxts/react";
 import { TweenService } from "@rbxts/services";
-import { getAsset } from "shared/asset/AssetMap";
-import { playSound } from "shared/asset/GameAssets";
 import useHotkeyWithTooltip from "client/ui/components/hotkeys/useHotkeyWithTooltip";
 import { RobotoSlabBold } from "client/ui/GameFonts";
+import { getAsset } from "shared/asset/AssetMap";
+import { playSound } from "shared/asset/GameAssets";
 
 interface SidebarButtonProps {
     /** Button configuration data */
@@ -34,10 +35,6 @@ interface SidebarButtonProps {
 interface SidebarButtonsProps {
     /** Whether the sidebar is visible */
     visible?: boolean;
-    /** Callback fired when a button is clicked */
-    onButtonClick?: (buttonName: string) => void;
-    /** Callback fired when window should be toggled */
-    onToggleWindow?: (windowName: string) => boolean;
     /** Position of the sidebar */
     position?: UDim2;
     /** Whether animations are enabled */
@@ -221,13 +218,27 @@ export function SidebarButton({ data, layoutOrder, onClick, animationsEnabled = 
     );
 }
 
+export class SidebarManager {
+    static buttonClicked = new Signal<string>();
+    static windowToggled = new Signal<[string, boolean]>();
+    static activeWindow?: string;
+
+    static toggleWindow(windowName: string) {
+        if (this.activeWindow === windowName) {
+            this.activeWindow = undefined;
+        } else {
+            this.activeWindow = windowName;
+        }
+        this.windowToggled.fire(windowName, this.activeWindow !== undefined);
+        return this.activeWindow === windowName;
+    }
+}
+
 /**
  * Main sidebar buttons container component
  */
 export default function SidebarButtons({
     visible = true,
-    onButtonClick,
-    onToggleWindow,
     position = new UDim2(0, 0, 0.5, 0),
     animationsEnabled = true,
     buttons = SidebarButtonConfiguration,
@@ -272,20 +283,13 @@ export default function SidebarButtons({
     }, [visible, position, animationsEnabled]);
 
     // Button click handler
-    const handleButtonClick = useCallback(
-        (buttonName: string) => {
-            if (onButtonClick) {
-                onButtonClick(buttonName);
-            }
+    const handleButtonClick = useCallback((buttonName: string) => {
+        SidebarManager.buttonClicked.fire(buttonName);
 
-            if (onToggleWindow) {
-                const result = onToggleWindow(buttonName);
-                if (result) playSound("MenuOpen.mp3");
-                else playSound("MenuClose.mp3");
-            }
-        },
-        [onButtonClick, onToggleWindow],
-    );
+        const result = SidebarManager.toggleWindow(buttonName);
+        if (result) playSound("MenuOpen.mp3");
+        else playSound("MenuClose.mp3");
+    }, []);
 
     return (
         <frame

@@ -1,6 +1,6 @@
-import React, { useState, useRef, useCallback, useEffect } from "@rbxts/react";
-import { GuiService, UserInputService, RunService } from "@rbxts/services";
-import { LOCAL_PLAYER } from "client/constants";
+import React, { useCallback, useEffect, useRef, useState } from "@rbxts/react";
+import { GuiService, RunService } from "@rbxts/services";
+import { Environment } from "@rbxts/ui-labs";
 import ClickSpark, { SparkData } from "client/ui/components/effect/ClickSpark";
 
 export default function ClickSparkManager() {
@@ -10,8 +10,9 @@ export default function ClickSparkManager() {
     const lastMousePosition = useRef<Vector2 | undefined>();
 
     const getMousePosition = useCallback(() => {
-        const mouse = LOCAL_PLAYER.GetMouse();
+        const mouse = Environment.UserInput.GetMouseLocation();
         const [topLeftCorner] = GuiService.GetGuiInset();
+        print(mouse, topLeftCorner);
         return new Vector2(mouse.X, mouse.Y).add(topLeftCorner);
     }, []);
 
@@ -48,7 +49,7 @@ export default function ClickSparkManager() {
     }, []);
 
     useEffect(() => {
-        const inputBeganConnection = UserInputService.InputBegan.Connect((input) => {
+        const inputBeganConnection = Environment.UserInput.InputBegan.Connect((input) => {
             if (
                 input.UserInputType === Enum.UserInputType.MouseButton1 ||
                 input.UserInputType === Enum.UserInputType.Touch
@@ -63,7 +64,7 @@ export default function ClickSparkManager() {
             }
         });
 
-        const inputEndedConnection = UserInputService.InputEnded.Connect((input) => {
+        const inputEndedConnection = Environment.UserInput.InputEnded.Connect((input) => {
             if (
                 input.UserInputType === Enum.UserInputType.MouseButton1 ||
                 input.UserInputType === Enum.UserInputType.Touch

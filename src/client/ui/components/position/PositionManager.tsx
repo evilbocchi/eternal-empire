@@ -3,7 +3,7 @@ import { LOCAL_PLAYER } from "client/constants";
 import { useCharacterPosition } from "client/ui/components/position/usePlayerPosition";
 import PositionWindow from "./PositionWindow";
 
-interface PositionDisplayProps {
+interface PositionManagerProps {
     /** The player to track position for (defaults to LocalPlayer) */
     player?: Player;
     /** Whether the component is visible */
@@ -15,19 +15,19 @@ interface PositionDisplayProps {
 }
 
 /**
- * PositionDisplay is a smart wrapper around PositionWindow that automatically
+ * PositionManager is a smart wrapper around PositionWindow that automatically
  * tracks player position and handles character spawning/despawning.
  *
  * This component integrates the position tracking hook with the UI component,
  * providing a complete solution for displaying player coordinates.
  */
-export default function PositionDisplay({
+export default function PositionManager({
     player = LOCAL_PLAYER,
     visible = true,
     anchorPoint,
     windowPosition,
     size,
-}: PositionDisplayProps) {
+}: PositionManagerProps) {
     const { position } = useCharacterPosition(player);
 
     return (

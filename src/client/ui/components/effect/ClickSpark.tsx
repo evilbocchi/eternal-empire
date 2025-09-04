@@ -21,7 +21,7 @@ export default function ClickSpark({ spark, onComplete }: { spark: SparkData; on
 
         // Set initial properties
         imageLabel.ImageTransparency = 0;
-        const width = math.random(6, 9);
+        const width = math.random(9, 15);
         imageLabel.Size = new UDim2(0, width, 0, width);
         imageLabel.Rotation = spark.rotation;
 
@@ -32,14 +32,7 @@ export default function ClickSpark({ spark, onComplete }: { spark: SparkData; on
         const endPosition = new UDim2(0, endX, 0, endY);
 
         // Create tween info
-        const tweenInfo = new TweenInfo(
-            1.2, // Longer duration for particle movement
-            Enum.EasingStyle.Quart,
-            Enum.EasingDirection.Out,
-            0, // Repeat count
-            false, // Reverses
-            0, // Delay
-        );
+        const tweenInfo = new TweenInfo(1.2, Enum.EasingStyle.Quart, Enum.EasingDirection.Out, 0, false, 0);
 
         // Create tweens for transparency, position, and rotation
         const transparencyTween = TweenService.Create(imageLabel, tweenInfo, {
@@ -52,6 +45,7 @@ export default function ClickSpark({ spark, onComplete }: { spark: SparkData; on
 
         const rotationTween = TweenService.Create(imageLabel, tweenInfo, {
             Rotation: spark.rotation + 360, // Full rotation
+            Size: new UDim2(0, width * 0.5, 0, width * 0.5),
         });
 
         // Start tweens

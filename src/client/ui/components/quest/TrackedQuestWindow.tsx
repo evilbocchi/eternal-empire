@@ -1,6 +1,7 @@
-import React from "@rbxts/react";
+import React, { useEffect, useState } from "@rbxts/react";
 import { ReplicatedStorage } from "@rbxts/services";
 import { RobotoSlabBold } from "client/ui/GameFonts";
+import { playSound } from "shared/asset/GameAssets";
 import { useQuestData } from "./useQuestData";
 
 /**
@@ -32,6 +33,15 @@ export default function TrackedQuestWindow() {
     const currentQuest = trackedQuest ? questInfo.get(trackedQuest) : undefined;
     const currentStage = trackedQuest ? (stagePerQuest.get(trackedQuest) ?? 0) : 0;
     const hasQuest = currentQuest !== undefined && currentStage >= 0;
+    const [lastKey, setLastKey] = useState<string | undefined>();
+
+    useEffect(() => {
+        if (!currentQuest || trackedQuest === undefined) return; // Don't play sound if no quest
+        const key = `${currentQuest}${currentStage}`;
+        if (key === lastKey) return;
+        playSound("QuestNextStage.mp3");
+        setLastKey(key);
+    }, [currentQuest, currentStage]);
 
     const questColor = currentQuest
         ? new Color3(currentQuest.colorR, currentQuest.colorG, currentQuest.colorB)
