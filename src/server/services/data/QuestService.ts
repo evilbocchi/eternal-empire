@@ -23,14 +23,14 @@
 import { OnInit, OnStart, Service } from "@flamework/core";
 import { AnalyticsService, Players } from "@rbxts/services";
 import Quest, { Stage } from "server/Quest";
+import DataService from "server/services/data/DataService";
+import LevelService from "server/services/data/LevelService";
 import ItemService from "server/services/item/ItemService";
 import DialogueService from "server/services/npc/DialogueService";
 import ChatHookService from "server/services/permissions/ChatHookService";
-import DataService from "server/services/data/DataService";
-import LevelService from "server/services/data/LevelService";
 import { WAYPOINTS } from "shared/constants";
 import Items from "shared/items/Items";
-import Packets, { stagePerQuest } from "shared/Packets";
+import Packets from "shared/Packets";
 import Sandbox from "shared/Sandbox";
 
 /**
@@ -42,6 +42,9 @@ import Sandbox from "shared/Sandbox";
 @Service()
 export default class QuestService implements OnInit, OnStart {
     readonly CLEANUP_PER_STAGE = new Map<Stage, () => void>();
+
+    /** Exposed Quest class for command access */
+    readonly Quest = Quest;
 
     constructor(
         private readonly chatHookService: ChatHookService,

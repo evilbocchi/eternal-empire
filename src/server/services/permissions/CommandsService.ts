@@ -25,7 +25,7 @@
 import { OnInit, Service } from "@flamework/core";
 import { Players, TextChatService } from "@rbxts/services";
 import APIExposeService from "server/services/api/APIExposeService";
-import Command, { CommandAPI } from "server/services/permissions/commands/Command";
+import Command, { CommandAPI } from "shared/commands/Command";
 
 declare global {
     type CommandAPI = APIExposeService["Server"] & {
