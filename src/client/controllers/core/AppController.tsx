@@ -19,7 +19,7 @@ export default class AppController implements OnStart {
 
     constructor(
         private readonly buildController: BuildController,
-        private readonly inventoryController: InventoryController
+        private readonly inventoryController: InventoryController,
         private readonly toolController: ToolController
     ) { }
 
