@@ -10,7 +10,7 @@ export = new Item(script.Name)
     .setDifficulty(Difficulty.TheFirstDifficulty)
     .setPrice(new CurrencyBundle().set("Funds", 640e44).set("Power", 145e27), 1)
     .setPrice(new CurrencyBundle().set("Funds", 175e45).set("Power", 250e28), 2)
-    .addPlaceableArea("BarrenIslands","SkyPavilion")
+    .addPlaceableArea("BarrenIslands","SkyPavillion")
 
     .trait(Dropper)
     .setDroplet(Droplet.SlopeDroplet)
