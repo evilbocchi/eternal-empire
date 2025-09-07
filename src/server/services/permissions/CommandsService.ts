@@ -59,7 +59,6 @@ export default class CommandsService implements OnInit {
         textChatCommand.PrimaryAlias = "/" + command.id;
         textChatCommand.SecondaryAlias = "/" + command.aliases[0] || "";
         textChatCommand.Name = command.id + "Command";
-        textChatCommand.SetAttribute("Description", command.description);
         textChatCommand.Triggered.Connect((o, u) => {
             const params = u.split(" ");
             params.remove(0);
@@ -71,7 +70,6 @@ export default class CommandsService implements OnInit {
             }
             command.execute(p, ...params);
         });
-        textChatCommand.SetAttribute("PermissionLevel", command.permissionLevel);
         textChatCommand.Parent = TextChatService.WaitForChild("TextChatCommands");
     }
 

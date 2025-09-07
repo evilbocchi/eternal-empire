@@ -33,12 +33,12 @@ export default class Command {
      * @returns An array of all registered commands
      */
     public static listAllCommands() {
-        const commands = new Array<Command>();
+        const commands = new Map<string, Command>();
         for (const commandModule of Command.commandsFolder.GetDescendants()) {
             if (commandModule.Name === "Command" || !commandModule.IsA("ModuleScript")) continue;
 
             const command = require(commandModule) as Command;
-            commands.push(command);
+            commands.set(command.id, command);
         }
         return commands;
     }

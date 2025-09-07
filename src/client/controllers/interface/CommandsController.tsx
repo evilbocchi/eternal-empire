@@ -99,7 +99,7 @@ export default class CommandsController implements OnInit {
                 windowId="commands"
                 priority={1}
             >
-                <CommandsWindow visible={this.isCommandsWindowVisible} userPermissionLevel={this.userPermissionLevel} />
+                <CommandsWindow userPermissionLevel={this.userPermissionLevel} />
             </BasicWindow>,
         );
     }
