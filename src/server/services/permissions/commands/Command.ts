@@ -26,6 +26,22 @@ export default class Command {
         this.permissionLevel = level;
         return this;
     }
+
+    /**
+     * Lists all registered commands by scanning the commands folder.
+     *
+     * @returns An array of all registered commands
+     */
+    public static listAllCommands() {
+        const commands = new Array<Command>();
+        for (const commandModule of Command.commandsFolder.GetDescendants()) {
+            if (commandModule.Name === "Command" || !commandModule.IsA("ModuleScript")) continue;
+
+            const command = require(commandModule) as Command;
+            commands.push(command);
+        }
+        return commands;
+    }
 }
 
 export const CommandAPI = {} as unknown as CommandAPI;

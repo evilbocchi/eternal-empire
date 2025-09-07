@@ -140,11 +140,8 @@ export default class CommandsService implements OnInit {
      * error messages for unauthorized access attempts.
      */
     onInit() {
-        for (const commandModule of Command.commandsFolder.GetDescendants()) {
-            if (commandModule.Name === "Command" || !commandModule.IsA("ModuleScript")) continue;
-
-            const command = require(commandModule) as Command;
+        Command.listAllCommands().forEach((command) => {
             this.registerCommand(command);
-        }
+        });
     }
 }
