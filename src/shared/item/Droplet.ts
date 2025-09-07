@@ -705,7 +705,7 @@ export default class Droplet {
                 droplet.Material = Enum.Material.Slate;
                 return droplet;
             })
-            .setValue(new CurrencyBundle().set("Funds", 650000).set("Power", 150000).set("Bitcoin"),48)
+            .setValue(new CurrencyBundle().set("Funds", 650000).set("Power", 150000).set("Bitcoin",48)
     );
 
     /**
