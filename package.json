@@ -79,6 +79,6 @@
         "@rbxts/swimming": "^0.0.0",
         "@rbxts/testez": "^0.4.2-ts.0",
         "@rbxts/topbar-plus": "^3.2.5",
-        "@rbxts/ui-labs": "^2.4.0"
+        "@rbxts/ui-labs": "^2.4.1"
     }
 }
