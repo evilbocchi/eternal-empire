@@ -705,7 +705,7 @@ export default class Droplet {
                 droplet.Material = Enum.Material.Slate;
                 return droplet;
             })
-            .setValue(new CurrencyBundle().set("Skill", 0.05).set("Purifier Clicks", 5000), "Power", 125000)
+            .setValue(new CurrencyBundle().set("Skill", 0.05).set("Purifier Clicks", 5000).set("Power", 125000)
             .setHealth(120)
     );
 
