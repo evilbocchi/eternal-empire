@@ -696,6 +696,19 @@ export default class Droplet {
             .setValue(new CurrencyBundle().set("Funds", 150000))
     );
 
+     static StuddedDroplet = Droplet.registerDroplet(
+        new Droplet("StuddedDroplet")
+            .setModel(() => {
+                const droplet = new Instance("Part");
+                droplet.Size = new Vector3(1.2, 1.2, 1.2);
+                droplet.Color = Difficulty.AutomaticJoyful.color!;
+                droplet.Material = Enum.Material.Slate;
+                return droplet;
+            })
+            .setValue(new CurrencyBundle().set("Skill", 0.05).set("Purifier Clicks", 5000), "Power", 125000)
+            .setHealth(120)
+    );
+
     /**
      * Registers a droplet to the droplet list.
      * 
