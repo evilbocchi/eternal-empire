@@ -7,7 +7,7 @@ import Upgrader from "shared/item/traits/upgrader/Upgrader";
 export = new Item(script.Name)
     .setName("EducationalUpgrader")
     .setDescription("Give your droplets an education that provides a MASSIVE boost by %val% to your droplets!  ")
-    .setDifficulty(Difficulty.Material)
+    .setDifficulty(Difficulty.Excavation)
     .setPrice(new CurrencyBundle().set("Funds", 15e52).set("Power", 1e33), 1)
     .addPlaceableArea("BarrenIslands", "SkyPavilion")
 
