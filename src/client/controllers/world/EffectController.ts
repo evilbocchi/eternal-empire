@@ -20,7 +20,7 @@ import { Controller, OnInit } from "@flamework/core";
 import CameraShaker from "@rbxts/camera-shaker";
 import { Debris, Lighting, TweenService, Workspace } from "@rbxts/services";
 import { LOCAL_PLAYER } from "client/constants";
-import { STATS_WINDOW } from "client/controllers/interface/StatsController";
+import { PingManager } from "client/ui/components/stats/StatsWindow";
 import { AREAS } from "shared/Area";
 import { getSound, SOUND_EFFECTS_GROUP } from "shared/asset/GameAssets";
 import { PLACED_ITEMS_FOLDER } from "shared/constants";
@@ -185,7 +185,6 @@ export default class EffectController implements OnInit {
             }
         });
 
-        const userId = LOCAL_PLAYER.UserId;
         Packets.dropletBurnt.fromServer((dropletModelId) => {
             const droplet = DROPLET_STORAGE.FindFirstChild(dropletModelId) as BasePart | undefined;
             if (droplet === undefined)
@@ -193,7 +192,6 @@ export default class EffectController implements OnInit {
                 return;
 
             const t = tick();
-            task.wait(droplet.GetAttribute("Owner") === userId ? 0.1 : 0.3);
             let burnSound: Sound;
             const sizeMagnitude = droplet.Size.Magnitude / 2;
             const tweenInfo = new TweenInfo(sizeMagnitude / 2);
@@ -222,8 +220,7 @@ export default class EffectController implements OnInit {
             Debris.AddItem(droplet, 6);
             droplet.Anchored = true;
 
-            this.delay = ((tick() - t) / 4 + this.delay) * 0.8;
-            STATS_WINDOW.StatList.CurrentPing.AmountLabel.Text = math.floor(this.delay * 1000) + "ms";
+            PingManager.logPing(tick() - t);
         });
         Packets.applyImpulse.fromServer((dropletModelId, impulse) => {
             const model = DROPLET_STORAGE.FindFirstChild(dropletModelId) as BasePart | undefined;

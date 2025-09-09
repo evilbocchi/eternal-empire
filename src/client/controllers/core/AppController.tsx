@@ -12,6 +12,7 @@ import ClickSparkManager from "client/ui/components/effect/ClickSparkManager";
 import InventoryWindow from "client/ui/components/inventory/InventoryWindow";
 import QuestWindow from "client/ui/components/quest/QuestWindow";
 import SettingsManager from "client/ui/components/settings/SettingsManager";
+import StatsWindow from "client/ui/components/stats/StatsWindow";
 import { TooltipDisplay } from "client/ui/components/tooltip/TooltipManager";
 
 const createScreenGui = (name: string, displayOrder = 0): ScreenGui => {
@@ -33,6 +34,7 @@ const SETTINGS_GUI = createScreenGui("Settings");
 const INVENTORY_GUI = createScreenGui("Inventory");
 const QUESTS_GUI = createScreenGui("Quests");
 const BACKPACK_GUI = createScreenGui("Backpack");
+const STATS_GUI = createScreenGui("Stats");
 
 @Controller()
 export default class AppController implements OnStart {
@@ -53,5 +55,6 @@ export default class AppController implements OnStart {
         );
         ReactRoblox.createRoot(QUESTS_GUI).render(<QuestWindow />);
         ReactRoblox.createRoot(BACKPACK_GUI).render(<BackpackManager toolController={this.toolController} />);
+        ReactRoblox.createRoot(STATS_GUI).render(<StatsWindow />);
     }
 }

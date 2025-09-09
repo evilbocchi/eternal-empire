@@ -133,7 +133,7 @@ export default function InventoryWindow({ inventoryController }: InventoryWindow
                     item,
                     amount: 0,
                     layoutOrder: index,
-                    visible: index >= 0,
+                    visible: index > 0,
                 });
             }
         } else {

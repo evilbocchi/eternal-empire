@@ -256,8 +256,8 @@ export default class CurrencyService implements OnInit, OnStart {
                     if (queue === undefined) {
                         continue;
                     }
-                    queue.addToQueue(amount);
-                    revenue.set(currency, queue.getAverageGain());
+                    queue.addDelta(amount);
+                    revenue.set(currency, queue.meanDelta());
                 }
 
                 // Propagate updates to clients
