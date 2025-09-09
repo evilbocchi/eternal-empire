@@ -10,7 +10,7 @@ export = new Item(script.Name)
      "at %val% every 3 seconds.")
     .setDifficulty(Difficulty.AutomaticJoyful)
     .setPrice(new CurrencyBundle().set("Funds", 7.5e35).set("Skill", 1200).set("Power", 6000000000000), 1)
-    .addPlaceableArea("BarrenIslands", "SlamoVillage")
+    .addPlaceableArea("BarrenIslands" , "SlamoVillage")
     .persists("Skillification")
 
     .trait(Dropper)
