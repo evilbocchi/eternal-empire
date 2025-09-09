@@ -717,7 +717,7 @@ export default class Droplet {
     static registerDroplet(droplet: Droplet) {
         Droplet.DROPLETS.push(droplet);
         return droplet;
-    }
+    })
 
     /**
      * The default physical properties of droplets.
