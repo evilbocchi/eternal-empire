@@ -84,7 +84,7 @@ export default function RenameWindow() {
     return (
         <TechWindow
             visible={visible}
-            icon={getAsset("assets/Rename.png")}
+            icon={getAsset("assets/Settings.png")}
             title="Rename Empire"
             onClose={closeWindow}
             windowId="rename"

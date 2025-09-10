@@ -14,7 +14,6 @@
 import { Controller, OnInit } from "@flamework/core";
 import CameraShaker from "@rbxts/camera-shaker";
 import AdaptiveTabController, { ADAPTIVE_TAB_MAIN_WINDOW } from "client/controllers/core/AdaptiveTabController";
-import CommandsController from "client/controllers/interface/CommandsController";
 import EffectController from "client/controllers/world/EffectController";
 import { playSound } from "shared/asset/GameAssets";
 import Items from "shared/items/Items";
@@ -37,7 +36,6 @@ export default class PermissionsController implements OnInit {
     constructor(
         private effectController: EffectController,
         private adaptiveTabController: AdaptiveTabController,
-        private commandsController: CommandsController,
     ) {}
 
     /**
@@ -47,15 +45,6 @@ export default class PermissionsController implements OnInit {
         Packets.donationGiven.fromServer(() => {
             playSound("PowerUp.mp3");
             this.effectController.camShake.Shake(CameraShaker.Presets.Bump);
-        });
-
-        // Redirect Commands tab to the new React-based window
-        Packets.tabOpened.fromServer((tab) => {
-            if (tab === "Commands") {
-                // CommandsController handles this now
-                return;
-            }
-            this.adaptiveTabController.showAdaptiveTab(tab);
         });
 
         Packets.codeReceived.fromServer((joinLink) => {

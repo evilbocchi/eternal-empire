@@ -1,5 +1,6 @@
 import { FuzzySearch } from "@rbxts/fuzzy-search";
 import React, { useEffect, useState } from "@rbxts/react";
+import { LOCAL_PLAYER } from "client/constants";
 import CommandOption from "client/ui/components/commands/CommandOption";
 import useWindowVisibility from "client/ui/components/sidebar/useWindowVisibility";
 import TechWindow from "client/ui/components/window/TechWindow";
@@ -8,7 +9,7 @@ import { getAsset } from "shared/asset/AssetMap";
 import Command from "shared/commands/Command";
 
 interface CommandsWindowProps {
-    userPermissionLevel: number;
+    defaultPermissionLevel?: number;
 }
 
 interface CommandInfo extends Command {
@@ -17,10 +18,18 @@ interface CommandInfo extends Command {
 
 const COMMAND_PER_ID = Command.listAllCommands();
 
-export default function CommandsWindow({ userPermissionLevel }: CommandsWindowProps) {
+export default function CommandsWindow({ defaultPermissionLevel }: CommandsWindowProps) {
+    const [userPermissionLevel, setUserPermissionLevel] = useState(defaultPermissionLevel ?? 0);
     const { visible, closeWindow } = useWindowVisibility("Commands");
     const [filteredCommands, setFilteredCommands] = useState<Set<CommandInfo>>(new Set());
     const [searchText, setSearchText] = useState("");
+
+    useEffect(() => {
+        LOCAL_PLAYER.GetAttributeChangedSignal("PermissionLevel").Connect(() => {
+            setUserPermissionLevel((LOCAL_PLAYER.GetAttribute("PermissionLevel") as number) ?? defaultPermissionLevel);
+        });
+        setUserPermissionLevel((LOCAL_PLAYER.GetAttribute("PermissionLevel") as number) ?? defaultPermissionLevel);
+    }, []);
 
     // Extract command information from TextChatService
     useEffect(() => {

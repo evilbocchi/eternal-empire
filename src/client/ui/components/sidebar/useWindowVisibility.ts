@@ -16,7 +16,7 @@ function useWindowVisibility(windowName: string) {
     const [visible, setVisible] = useState(SidebarManager.activeWindow === windowName);
 
     useEffect(() => {
-        const connection = SidebarManager.windowToggled.Connect((toggledWindowName, isOpen) => {
+        const connection = SidebarManager.windowToggled.connect((toggledWindowName, isOpen) => {
             if (toggledWindowName === windowName) {
                 setVisible(isOpen);
             } else if (isOpen && toggledWindowName !== windowName) {

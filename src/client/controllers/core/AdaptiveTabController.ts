@@ -17,7 +17,6 @@ import { Controller, OnInit } from "@flamework/core";
 import { Lighting, TweenService, Workspace } from "@rbxts/services";
 import HotkeysController from "client/controllers/core/HotkeysController";
 import { INTERFACE } from "client/controllers/core/UIController";
-import CommandsController from "client/controllers/interface/CommandsController";
 import QuestsController from "client/controllers/interface/QuestsController";
 import { playSound } from "shared/asset/GameAssets";
 
@@ -70,7 +69,6 @@ export default class AdaptiveTabController implements OnInit {
     constructor(
         private hotkeysController: HotkeysController,
         private questsController: QuestsController,
-        private commandsController?: CommandsController,
     ) {}
 
     /**
@@ -107,12 +105,6 @@ export default class AdaptiveTabController implements OnInit {
         // Special case: Redirect quest window to standalone implementation
         if (windowName === "Quests") {
             this.questsController.showQuestWindow();
-            return;
-        }
-
-        // Special case: Redirect commands window to standalone implementation
-        if (windowName === "Commands" && this.commandsController) {
-            this.commandsController.showCommandsWindow();
             return;
         }
 
@@ -159,11 +151,6 @@ export default class AdaptiveTabController implements OnInit {
         // Special case: Redirect quest window to standalone implementation
         if (windowName === "Quests") {
             return this.questsController.toggleQuestWindow();
-        }
-
-        // Special case: Redirect commands window to standalone implementation
-        if (windowName === "Commands" && this.commandsController) {
-            return this.commandsController.toggleCommandsWindow();
         }
 
         if (ADAPTIVE_TAB.Active && windowName === this.currentWindow?.Name) {

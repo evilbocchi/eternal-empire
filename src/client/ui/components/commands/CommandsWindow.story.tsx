@@ -22,6 +22,6 @@ export = CreateReactStory(
             }
         }, [props.controls.visible]);
 
-        return <CommandsWindow userPermissionLevel={props.controls.userPermissionLevel} />;
+        return <CommandsWindow defaultPermissionLevel={props.controls.userPermissionLevel} />;
     },
 );

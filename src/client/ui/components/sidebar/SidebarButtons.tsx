@@ -20,6 +20,7 @@ import useHotkeyWithTooltip from "client/ui/components/hotkeys/useHotkeyWithTool
 import { RobotoSlabBold } from "client/ui/GameFonts";
 import { getAsset } from "shared/asset/AssetMap";
 import { playSound } from "shared/asset/GameAssets";
+import Packets from "shared/Packets";
 
 interface SidebarButtonProps {
     /** Button configuration data */
@@ -245,6 +246,10 @@ export class SidebarManager {
             this.activeWindow = undefined;
             this.windowToggled.fire(windowName, false);
         }
+    }
+
+    static {
+        Packets.tabOpened.fromServer((tab) => this.openWindow(tab));
     }
 }
 

@@ -1,5 +1,5 @@
 import { Controller, OnStart } from "@flamework/core";
-import React from "@rbxts/react";
+import React, { Fragment } from "@rbxts/react";
 import ReactRoblox from "@rbxts/react-roblox";
 import { PLAYER_GUI } from "client/constants";
 import BuildController from "client/controllers/gameplay/BuildController";
@@ -8,9 +8,12 @@ import InventoryController from "client/controllers/interface/InventoryControlle
 import MainLayout from "client/ui/components/MainLayout";
 import BackpackManager from "client/ui/components/backpack/BackpackManager";
 import BuildManager from "client/ui/components/build/BuildManager";
+import CommandsWindow from "client/ui/components/commands/CommandsWindow";
 import ClickSparkManager from "client/ui/components/effect/ClickSparkManager";
 import InventoryWindow from "client/ui/components/inventory/InventoryWindow";
+import LogsWindow from "client/ui/components/logs/LogsWindow";
 import QuestWindow from "client/ui/components/quest/QuestWindow";
+import RenameWindow from "client/ui/components/rename/RenameWindow";
 import SettingsManager from "client/ui/components/settings/SettingsManager";
 import StatsWindow from "client/ui/components/stats/StatsWindow";
 import { TooltipDisplay } from "client/ui/components/tooltip/TooltipManager";
@@ -32,6 +35,7 @@ const TOOLTIPS_GUI = createScreenGui("Tooltips", 2);
 const BUILD_GUI = createScreenGui("BuildManager");
 const SETTINGS_GUI = createScreenGui("Settings");
 const INVENTORY_GUI = createScreenGui("Inventory");
+const LOGS_GUI = createScreenGui("Logs");
 const QUESTS_GUI = createScreenGui("Quests");
 const BACKPACK_GUI = createScreenGui("Backpack");
 const STATS_GUI = createScreenGui("Stats");
@@ -49,10 +53,17 @@ export default class AppController implements OnStart {
         ReactRoblox.createRoot(CLICK_SPARKS_GUI).render(<ClickSparkManager />);
         ReactRoblox.createRoot(TOOLTIPS_GUI).render(<TooltipDisplay />);
         ReactRoblox.createRoot(BUILD_GUI).render(<BuildManager buildController={this.buildController} />);
-        ReactRoblox.createRoot(SETTINGS_GUI).render(<SettingsManager />);
+        ReactRoblox.createRoot(SETTINGS_GUI).render(
+            <Fragment>
+                <SettingsManager />
+                <CommandsWindow />
+                <RenameWindow />
+            </Fragment>,
+        );
         ReactRoblox.createRoot(INVENTORY_GUI).render(
             <InventoryWindow inventoryController={this.inventoryController} />,
         );
+        ReactRoblox.createRoot(LOGS_GUI).render(<LogsWindow />);
         ReactRoblox.createRoot(QUESTS_GUI).render(<QuestWindow />);
         ReactRoblox.createRoot(BACKPACK_GUI).render(<BackpackManager toolController={this.toolController} />);
         ReactRoblox.createRoot(STATS_GUI).render(<StatsWindow />);
