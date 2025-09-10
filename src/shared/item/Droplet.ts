@@ -695,7 +695,7 @@ export default class Droplet {
             .setValue(new CurrencyBundle().set("Funds", 150000)),
     );
 
-     static StuddedDroplet = Droplet.registerDroplet(
+    static StuddedDroplet = Droplet.registerDroplet(
         new Droplet("StuddedDroplet")
             .setModel(() => {
                 const droplet = new Instance("Part");
@@ -705,7 +705,7 @@ export default class Droplet {
                 return droplet;
             })
             .setValue(new CurrencyBundle().set("Skill", 0.05).set("Purifier Clicks", 5000).set("Power", 125000))
-            .setHealth(120)
+            .setHealth(120),
     );
 
     /**
