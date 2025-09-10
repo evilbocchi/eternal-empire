@@ -14,9 +14,7 @@
 import { weldModel } from "@antivivi/vrldk";
 import { Controller, OnInit, OnStart } from "@flamework/core";
 import { Debris, HttpService, ReplicatedStorage, TweenService, UserInputService, Workspace } from "@rbxts/services";
-import { MOUSE, NONCOLLISION_COLOR } from "client/constants";
-import { LOCAL_PLAYER } from "client/constants";
-import HotkeysController from "client/controllers/core/HotkeysController";
+import { LOCAL_PLAYER, MOUSE, NONCOLLISION_COLOR } from "client/constants";
 import { SHOP_GUI } from "client/controllers/interface/ShopController";
 import { AREAS } from "shared/Area";
 import { getSound, playSound } from "shared/asset/GameAssets";
@@ -55,7 +53,6 @@ export default class BuildController implements OnInit, OnStart {
     hovering: Model | undefined;
 
     clicking = false;
-    multiselecting = false;
 
     baseplateBounds: BuildBounds | undefined;
 
@@ -74,15 +71,8 @@ export default class BuildController implements OnInit, OnStart {
     // State change listeners for React integration
     private stateChangeCallbacks = new Set<() => void>();
 
-    constructor(private hotkeysController: HotkeysController) {}
-
     hasSelection(): boolean {
         return !this.selected.isEmpty();
-    }
-
-    revertAndDeselectAll(): void {
-        this.revertSelected();
-        this.deselectAll();
     }
 
     rotateSelection(): void {
@@ -567,55 +557,6 @@ export default class BuildController implements OnInit, OnStart {
 
             this.onMouseUp();
         });
-
-        this.hotkeysController.bindKey(
-            Enum.KeyCode.Q,
-            () => {
-                if (this.selected.isEmpty() || this.getRestricted() === true) return false;
-                this.revertSelected();
-                this.deselectAll();
-                return true;
-            },
-            1,
-            "Deselect",
-        );
-
-        this.hotkeysController.bindKey(
-            Enum.KeyCode.R,
-            () => {
-                if (this.selected.isEmpty() || this.getRestricted() === true) return false;
-                this.rotateSelection();
-                return true;
-            },
-            1,
-            "Rotate",
-        );
-
-        this.hotkeysController.bindKey(
-            Enum.KeyCode.Delete,
-            () => {
-                if (this.selected.isEmpty() || this.getRestricted() === true) return false;
-                this.deleteSelection();
-                return true;
-            },
-            1,
-            "Unplace",
-        );
-
-        this.hotkeysController.bindKey(
-            Enum.KeyCode.LeftShift,
-            () => {
-                this.multiselecting = true;
-                return true;
-            },
-            1,
-            "Multiselect",
-            undefined,
-            () => {
-                this.multiselecting = false;
-                return true;
-            },
-        );
 
         Packets.permLevels.observe(() => this.refresh());
         LOCAL_PLAYER.GetAttributeChangedSignal("PermissionLevel").Connect(() => this.refresh());

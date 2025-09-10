@@ -1,4 +1,3 @@
-import { Flamework } from "@flamework/core";
+import { igniteFlameworkClient } from "shared/Context";
 
-Flamework.addPaths("src/client/controllers");
-Flamework.ignite();
+igniteFlameworkClient();

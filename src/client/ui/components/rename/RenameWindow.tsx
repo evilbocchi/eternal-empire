@@ -40,7 +40,7 @@ export default function RenameWindow() {
     const [isProcessing, setIsProcessing] = useState(false);
 
     // Parse empire name to get prefix and suffix
-    const [prefix, suffix] = empireName.split("'s ");
+    const [prefix, suffix] = empireName!.split("'s ");
     const fullPrefix = prefix + "'s ";
 
     const handleTextChanged = useCallback((text: string) => {
@@ -98,20 +98,13 @@ export default function RenameWindow() {
                     VerticalAlignment={Enum.VerticalAlignment.Center}
                 />
 
-                <uipadding
-                    PaddingBottom={new UDim(0, 30)}
-                    PaddingLeft={new UDim(0, 30)}
-                    PaddingRight={new UDim(0, 30)}
-                    PaddingTop={new UDim(0, 30)}
-                />
-
                 {/* Header Card */}
                 <frame
                     key="HeaderCard"
                     BackgroundColor3={Color3.fromRGB(25, 25, 30)}
                     BorderSizePixel={0}
                     LayoutOrder={1}
-                    Size={new UDim2(0.95, 0, 0, 80)}
+                    Size={new UDim2(0.95, 0, 0.2, 0)}
                 >
                     <uicorner CornerRadius={new UDim(0, 12)} />
                     <uistroke Color={Color3.fromRGB(70, 70, 80)} Thickness={1} />
@@ -131,18 +124,18 @@ export default function RenameWindow() {
                             VerticalAlignment={Enum.VerticalAlignment.Center}
                             SortOrder={Enum.SortOrder.LayoutOrder}
                         />
+                        <uipadding PaddingBottom={new UDim(0, 10)} PaddingTop={new UDim(0, 10)} />
 
                         {/* Main title */}
                         <textlabel
                             BackgroundTransparency={1}
                             FontFace={RobotoSlabBold}
                             LayoutOrder={1}
-                            Size={new UDim2(0.9, 0, 0, 35)}
+                            Size={new UDim2(1, 0, 0.6, 0)}
                             Text="Rename your empire!"
                             TextColor3={Color3.fromRGB(255, 255, 255)}
-                            TextSize={32}
+                            TextScaled={true}
                             TextWrapped={true}
-                            AutomaticSize={Enum.AutomaticSize.Y}
                         >
                             <uistroke Color={Color3.fromRGB(0, 0, 0)} Thickness={2} />
                         </textlabel>
@@ -152,12 +145,11 @@ export default function RenameWindow() {
                             BackgroundTransparency={1}
                             FontFace={RobotoSlab}
                             LayoutOrder={2}
-                            Size={new UDim2(0.8, 0, 0, 25)}
+                            Size={new UDim2(1, 0, 0.4, 0)}
                             Text="(5-16 characters)"
                             TextColor3={Color3.fromRGB(200, 200, 210)}
-                            TextSize={20}
+                            TextScaled={true}
                             TextWrapped={true}
-                            AutomaticSize={Enum.AutomaticSize.Y}
                         >
                             <uistroke Color={Color3.fromRGB(0, 0, 0)} Thickness={1.5} />
                         </textlabel>
@@ -170,7 +162,7 @@ export default function RenameWindow() {
                     BackgroundColor3={Color3.fromRGB(25, 25, 30)}
                     BorderSizePixel={0}
                     LayoutOrder={2}
-                    Size={new UDim2(0.95, 0, 0, 90)}
+                    Size={new UDim2(0.95, 0, 0.25, 0)}
                 >
                     <uicorner CornerRadius={new UDim(0, 12)} />
                     <uistroke Color={Color3.fromRGB(70, 70, 80)} Thickness={1} />
@@ -189,15 +181,8 @@ export default function RenameWindow() {
                             HorizontalAlignment={Enum.HorizontalAlignment.Center}
                             VerticalAlignment={Enum.VerticalAlignment.Center}
                             SortOrder={Enum.SortOrder.LayoutOrder}
-                            Padding={new UDim(0, 15)}
                         />
-
-                        <uipadding
-                            PaddingBottom={new UDim(0, 15)}
-                            PaddingLeft={new UDim(0, 15)}
-                            PaddingRight={new UDim(0, 15)}
-                            PaddingTop={new UDim(0, 15)}
-                        />
+                        <uipadding PaddingBottom={new UDim(0, 10)} PaddingTop={new UDim(0, 10)} />
 
                         {/* Empire name input */}
                         <EmpireNameInput
@@ -217,7 +202,7 @@ export default function RenameWindow() {
                     BackgroundColor3={Color3.fromRGB(25, 25, 30)}
                     BorderSizePixel={0}
                     LayoutOrder={3}
-                    Size={new UDim2(0.95, 0, 0, 120)}
+                    Size={new UDim2(0.95, 0, 0.25, 0)}
                 >
                     <uicorner CornerRadius={new UDim(0, 12)} />
                     <uistroke Color={Color3.fromRGB(70, 70, 80)} Thickness={1} />
@@ -251,7 +236,7 @@ export default function RenameWindow() {
                             BackgroundTransparency={1}
                             FontFace={RobotoSlabBold}
                             LayoutOrder={1}
-                            Size={new UDim2(0.8, 0, 0, 30)}
+                            Size={new UDim2(1, 0, 0, 30)}
                             Text="Purchase for:"
                             TextColor3={Color3.fromRGB(255, 255, 255)}
                             TextSize={24}
@@ -318,7 +303,7 @@ export default function RenameWindow() {
                     BackgroundColor3={Color3.fromRGB(40, 25, 25)}
                     BorderSizePixel={0}
                     LayoutOrder={4}
-                    Size={new UDim2(0.95, 0, 0, 60)}
+                    Size={new UDim2(0.95, 0, 0.15, 0)}
                 >
                     <uicorner CornerRadius={new UDim(0, 12)} />
                     <uistroke Color={Color3.fromRGB(100, 60, 60)} Thickness={1} />

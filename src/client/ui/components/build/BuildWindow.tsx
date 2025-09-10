@@ -7,8 +7,8 @@
 
 import React from "@rbxts/react";
 import { UserInputService } from "@rbxts/services";
-import { getAsset } from "shared/asset/AssetMap";
 import BuildButton from "client/ui/components/build/BuildButton";
+import { getAsset } from "shared/asset/AssetMap";
 
 export interface BuildWindowState {
     /** Whether the build window is visible */

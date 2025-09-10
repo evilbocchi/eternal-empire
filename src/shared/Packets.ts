@@ -77,7 +77,7 @@ namespace Packets {
     /**
      * The name of the current empire.
      */
-    export const empireName = property<string>();
+    export const empireName = property<string>(EmpireProfileTemplate.name);
 
     // items
     /**

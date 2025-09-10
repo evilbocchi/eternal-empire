@@ -44,11 +44,26 @@ export const HOTKEY_BINDINGS = [
     {
         keyCode: Enum.KeyCode.P,
         label: "Settings",
-        priority: 1,
+        priority: 2,
     },
     {
         keyCode: Enum.KeyCode.X,
         label: "Close Window",
+        priority: 1,
+    },
+    {
+        keyCode: Enum.KeyCode.Q,
+        label: "Deselect Build",
+        priority: 0,
+    },
+    {
+        keyCode: Enum.KeyCode.R,
+        label: "Rotate Build",
+        priority: 0,
+    },
+    {
+        keyCode: Enum.KeyCode.X,
+        label: "Delete Build",
         priority: 0,
     },
 ] as const;

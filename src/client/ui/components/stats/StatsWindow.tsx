@@ -12,7 +12,7 @@
 
 import { OnoeNum } from "@antivivi/serikanum";
 import { convertToHHMMSS } from "@antivivi/vrldk";
-import React, { useEffect, useState } from "@rbxts/react";
+import React, { Fragment, useEffect, useState } from "@rbxts/react";
 import { LOCAL_PLAYER } from "client/constants";
 import useWindowVisibility from "client/ui/components/sidebar/useWindowVisibility";
 import SectionHeader from "client/ui/components/stats/SectionHeader";
@@ -149,6 +149,7 @@ export default function StatsWindow() {
                     />
 
                     {/* Player Statistics Section */}
+                    <frame BackgroundTransparency={1} Size={new UDim2(1, 0, 0, 15)} />
                     <SectionHeader title="Player Statistics" icon={getAsset("assets/Empire.png")} />
 
                     <StatItem
@@ -162,7 +163,10 @@ export default function StatsWindow() {
 
                     {/* Currency Statistics Section */}
                     {currencyStats.size() > 0 ? (
-                        <SectionHeader title="Currency Records" icon={getAsset("assets/Currency.png")} />
+                        <Fragment>
+                            <frame BackgroundTransparency={1} Size={new UDim2(1, 0, 0, 25)} />
+                            <SectionHeader title="Currency Records" icon={getAsset("assets/Currency.png")} />
+                        </Fragment>
                     ) : undefined}
 
                     {currencyStats.map((stat) => (

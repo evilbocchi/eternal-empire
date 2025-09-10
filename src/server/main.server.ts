@@ -1,5 +1,5 @@
-import { Flamework } from "@flamework/core";
 import { Players, ReplicatedStorage, StarterGui, Workspace } from "@rbxts/services";
+import { igniteFlameworkServer } from "shared/Context";
 import Sandbox from "shared/Sandbox";
 
 if (!Sandbox.synthesise()) {
@@ -14,8 +14,7 @@ if (!Sandbox.synthesise()) {
     if (cso !== undefined) cso.Parent = ReplicatedStorage; // jtoh kit expects ClientSidedObjects to be in ReplicatedStorage
 }
 
-Flamework.addPaths("src/server/services");
-Flamework.ignite();
+igniteFlameworkServer();
 
 if (!Sandbox.getEnabled()) {
     Players.CharacterAutoLoads = true;

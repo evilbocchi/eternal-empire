@@ -88,7 +88,7 @@ export default function EmpireNameInput({
     const backgroundColor = isFocused ? Color3.fromRGB(35, 35, 45) : Color3.fromRGB(25, 25, 35);
 
     return (
-        <frame BackgroundTransparency={1} Size={new UDim2(0.9, 0, 0, 50)}>
+        <frame BackgroundTransparency={1} Size={new UDim2(1, 0, 1, 0)}>
             <uilistlayout
                 FillDirection={Enum.FillDirection.Horizontal}
                 HorizontalAlignment={Enum.HorizontalAlignment.Center}
@@ -99,9 +99,10 @@ export default function EmpireNameInput({
 
             {/* Prefix label */}
             <textlabel
+                AutomaticSize={Enum.AutomaticSize.X}
                 BackgroundTransparency={1}
                 FontFace={RobotoSlabBold}
-                Size={new UDim2(0, 200, 0.8, 0)}
+                Size={new UDim2(0, 0, 0.5, 0)}
                 Text={prefix}
                 TextColor3={Color3.fromRGB(220, 220, 230)}
                 TextScaled={true}
@@ -118,7 +119,7 @@ export default function EmpireNameInput({
                 BackgroundColor3={backgroundColor}
                 BackgroundTransparency={1}
                 BorderSizePixel={0}
-                Size={new UDim2(0, 250, 1, 0)}
+                Size={new UDim2(0.3, 0, 0.5, 0)}
                 LayoutOrder={2}
             >
                 <uicorner CornerRadius={new UDim(0, 10)} />
@@ -167,13 +168,19 @@ export default function EmpireNameInput({
                 BackgroundColor3={Color3.fromRGB(20, 20, 25)}
                 BackgroundTransparency={0.2}
                 BorderSizePixel={0}
-                Size={new UDim2(0, 60, 0.7, 0)}
+                Size={new UDim2(0.1, 0, 0.5, 0)}
                 LayoutOrder={3}
             >
                 <uicorner CornerRadius={new UDim(0, 8)} />
                 <uistroke
                     Color={isValid ? Color3.fromRGB(100, 180, 255) : Color3.fromRGB(255, 120, 120)}
                     Thickness={1}
+                />
+                <uipadding
+                    PaddingTop={new UDim(0, 4)}
+                    PaddingBottom={new UDim(0, 4)}
+                    PaddingLeft={new UDim(0, 6)}
+                    PaddingRight={new UDim(0, 6)}
                 />
 
                 <textlabel

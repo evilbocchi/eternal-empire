@@ -7,9 +7,10 @@
 
 import React, { useCallback, useEffect, useState } from "@rbxts/react";
 import type BuildController from "client/controllers/gameplay/BuildController";
-import Packets from "shared/Packets";
 import BuildWindow, { BuildWindowCallbacks, BuildWindowState } from "client/ui/components/build/BuildWindow";
+import useHotkeyWithTooltip from "client/ui/components/hotkeys/useHotkeyWithTooltip";
 import useProperty from "client/ui/hooks/useProperty";
+import Packets from "shared/Packets";
 
 interface BuildManagerProps {
     /** Interface to the build controller */
@@ -62,7 +63,8 @@ export default function BuildManager({ buildController }: BuildManagerProps) {
     // Callback handlers that delegate to build controller
     const callbacks: BuildWindowCallbacks = {
         onDeselect: useCallback(() => {
-            buildController?.revertAndDeselectAll();
+            buildController?.revertSelected();
+            buildController?.deselectAll();
         }, [buildController]),
 
         onRotate: useCallback(() => {
@@ -77,6 +79,33 @@ export default function BuildManager({ buildController }: BuildManagerProps) {
             buildController?.placeSelection();
         }, [buildController]),
     };
+
+    useHotkeyWithTooltip({
+        label: "Deselect Build",
+        action: () => {
+            if (!buildState.hasSelection || buildState.isRestricted) return false;
+            callbacks.onDeselect();
+            return true;
+        },
+    });
+
+    useHotkeyWithTooltip({
+        label: "Rotate Build",
+        action: () => {
+            if (!buildState.hasSelection || buildState.isRestricted) return false;
+            callbacks.onRotate();
+            return true;
+        },
+    });
+
+    useHotkeyWithTooltip({
+        label: "Delete Build",
+        action: () => {
+            if (!buildState.hasSelection || buildState.isRestricted) return false;
+            callbacks.onDelete();
+            return true;
+        },
+    });
 
     return <BuildWindow state={buildState} callbacks={callbacks} />;
 }

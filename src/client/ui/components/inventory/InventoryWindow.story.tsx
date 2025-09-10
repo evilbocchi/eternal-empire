@@ -25,8 +25,12 @@ export = CreateReactStory(
             }
         }, [props.controls.visible]);
 
+        // const buildController = new BuildController();
+        // const inventoryController = new InventoryController(buildController);
+
         return (
             <StrictMode>
+                {/* <InventoryWindow inventoryController={inventoryController} /> */}
                 <InventoryWindow />
                 <TooltipDisplay />
             </StrictMode>
