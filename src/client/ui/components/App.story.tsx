@@ -2,6 +2,7 @@ import React, { StrictMode } from "@rbxts/react";
 import ReactRoblox from "@rbxts/react-roblox";
 import { CreateReactStory } from "@rbxts/ui-labs";
 import BackpackManager from "client/ui/components/backpack/BackpackManager";
+import BalanceWindow from "client/ui/components/balance/BalanceWindow";
 import BuildManager from "client/ui/components/build/BuildManager";
 import ClickSparkManager from "client/ui/components/effect/ClickSparkManager";
 import InventoryWindow from "client/ui/components/inventory/InventoryWindow";
@@ -40,6 +41,7 @@ export = CreateReactStory(
                 <InventoryWindow />
                 <QuestWindow />
                 <BackpackManager />
+                <BalanceWindow />
             </StrictMode>
         );
     },

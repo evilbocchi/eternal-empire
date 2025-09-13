@@ -12,7 +12,7 @@ import { SidebarManager } from "client/ui/components/sidebar/SidebarButtons";
  * @param windowName The name of the window to manage visibility for
  * @returns An object containing the current visibility state and helper functions
  */
-function useWindowVisibility(windowName: string) {
+export default function useWindowVisibility(windowName: string) {
     const [visible, setVisible] = useState(SidebarManager.activeWindow === windowName);
 
     useEffect(() => {
@@ -37,5 +37,3 @@ function useWindowVisibility(windowName: string) {
         toggleWindow,
     };
 }
-
-export = useWindowVisibility;

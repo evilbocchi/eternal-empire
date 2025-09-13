@@ -101,7 +101,6 @@ export default function StatsWindow() {
             icon={getAsset("assets/Stats.png")}
             title="Statistics"
             onClose={closeWindow}
-            windowId="stats"
             priority={5}
         >
             <frame BackgroundTransparency={1} Size={new UDim2(1, 0, 1, 0)}>

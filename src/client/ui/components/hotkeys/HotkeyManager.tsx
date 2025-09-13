@@ -66,6 +66,16 @@ export const HOTKEY_BINDINGS = [
         label: "Delete Build",
         priority: 0,
     },
+    {
+        keyCode: Enum.KeyCode.Z,
+        label: "Previous Page",
+        priority: 0,
+    },
+    {
+        keyCode: Enum.KeyCode.C,
+        label: "Next Page",
+        priority: 0,
+    },
 ] as const;
 
 /**

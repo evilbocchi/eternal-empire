@@ -69,13 +69,7 @@ export default function LogsWindow() {
     }, [totalPages]);
 
     return (
-        <TechWindow
-            visible={visible}
-            icon={getAsset("assets/Settings.png")}
-            title="Logs"
-            onClose={closeWindow}
-            windowId="Logs"
-        >
+        <TechWindow visible={visible} icon={getAsset("assets/Settings.png")} title="Logs" onClose={closeWindow}>
             <frame BackgroundTransparency={1} Size={new UDim2(1, 0, 1, 0)}>
                 {/* Header with info text */}
                 <textlabel

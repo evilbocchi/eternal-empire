@@ -1,4 +1,7 @@
+import { OnoeNum } from "@antivivi/serikanum";
 import { HttpService } from "@rbxts/services";
+import CurrencyBundle from "shared/currency/CurrencyBundle";
+import { CURRENCY_DETAILS } from "shared/currency/CurrencyDetails";
 import PlayerProfileTemplate from "shared/data/PlayerProfileTemplate";
 import Unique from "shared/item/traits/Unique";
 import Items from "shared/items/Items";
@@ -103,6 +106,17 @@ class StoryMocking {
         }
         Packets.inventory.set(quantityPerItem);
         Packets.uniqueInstances.set(uniqueInstances);
+
+        Packets.balance.set(this.mockCurrencies().amountPerCurrency);
+        Packets.revenue.set(this.mockCurrencies().amountPerCurrency);
+    }
+
+    static mockCurrencies() {
+        const balance = new CurrencyBundle();
+        for (const [currency] of pairs(CURRENCY_DETAILS)) {
+            balance.set(currency, OnoeNum.fromSerika(math.random(1, 100), math.random(1, 500)));
+        }
+        return balance;
     }
 }
 

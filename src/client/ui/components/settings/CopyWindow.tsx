@@ -25,7 +25,6 @@ export default function CopyWindow() {
             icon={""}
             title=""
             onClose={closeWindow}
-            windowId="settings"
             priority={10}
             size={new UDim2(0.5, 0, 0.5, -50)}
         >

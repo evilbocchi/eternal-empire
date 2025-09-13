@@ -7,8 +7,8 @@
  */
 
 import { useEffect, useRef } from "@rbxts/react";
-import { playSound } from "shared/asset/GameAssets";
 import HotkeyManager from "client/ui/components/hotkeys/HotkeyManager";
+import { playSound } from "shared/asset/GameAssets";
 
 interface WindowInfo {
     id: string;
@@ -56,6 +56,11 @@ export default class WindowManager {
         return visibleWindows;
     }
 
+    static isWindowVisible(id: string): boolean {
+        const window = this.windows.get(id);
+        return window ? window.visible : false;
+    }
+
     static initialize(): void {
         if (this.initialized) return;
         this.initialized = true;
@@ -67,6 +72,7 @@ export default class WindowManager {
                 if (visibleWindows.size() > 0) {
                     // Close the highest priority visible window
                     const windowToClose = visibleWindows[0];
+                    if (windowToClose.priority !== undefined && windowToClose.priority < 0) return false; // Ignore windows with negative priority
                     playSound("MenuClose.mp3");
                     windowToClose.onClose();
                     return true;

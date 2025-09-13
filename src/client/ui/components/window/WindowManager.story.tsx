@@ -1,8 +1,8 @@
 import React, { StrictMode, useState } from "@rbxts/react";
 import ReactRoblox from "@rbxts/react-roblox";
 import { CreateReactStory } from "@rbxts/ui-labs";
-import { getAsset } from "shared/asset/AssetMap";
 import BasicWindow from "client/ui/components/window/BasicWindow";
+import { getAsset } from "shared/asset/AssetMap";
 
 export = CreateReactStory(
     {
@@ -61,7 +61,6 @@ export = CreateReactStory(
                         ])
                     }
                     onClose={() => setWindow1Visible(false)}
-                    windowId="test-window-1"
                     priority={1}
                 >
                     <textlabel
@@ -85,7 +84,6 @@ export = CreateReactStory(
                         ])
                     }
                     onClose={() => setWindow2Visible(false)}
-                    windowId="test-window-2"
                     priority={5}
                 >
                     <textlabel
@@ -109,7 +107,6 @@ export = CreateReactStory(
                         ])
                     }
                     onClose={() => setWindow3Visible(false)}
-                    windowId="test-window-3"
                     priority={0}
                 >
                     <textlabel

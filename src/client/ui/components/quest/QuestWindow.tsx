@@ -90,7 +90,6 @@ export default function QuestWindow() {
             icon={getAsset("assets/Quests.png")}
             visible={visible}
             onClose={() => closeWindow()}
-            windowId="quests"
             priority={1}
         >
             <uilistlayout

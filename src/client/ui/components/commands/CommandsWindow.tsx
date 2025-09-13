@@ -90,7 +90,6 @@ export default function CommandsWindow({ defaultPermissionLevel }: CommandsWindo
             icon={getAsset("assets/Settings.png")}
             title="Commands"
             onClose={closeWindow}
-            windowId="commands"
             priority={9}
         >
             <frame BackgroundTransparency={1} Size={new UDim2(1, 0, 1, 0)}>

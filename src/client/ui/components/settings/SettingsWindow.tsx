@@ -108,7 +108,6 @@ export default function SettingsWindow() {
             icon={getAsset("assets/Settings.png")}
             title="Settings"
             onClose={handleClose}
-            windowId="settings"
             priority={10}
         >
             <scrollingframe

@@ -87,7 +87,6 @@ export default function RenameWindow() {
             icon={getAsset("assets/Settings.png")}
             title="Rename Empire"
             onClose={closeWindow}
-            windowId="rename"
             priority={3}
         >
             <frame BackgroundTransparency={1} Size={new UDim2(1, 0, 1, 0)} Visible={!isProcessing}>

@@ -13,7 +13,6 @@ declare global {
         colorSequence?: ColorSequence;
         onClose: () => void;
         children: React.ReactNode;
-        windowId?: string; // Optional ID for window manager
         priority?: number; // Optional priority for close order
         size?: UDim2; // Optional size for the window
     }
@@ -26,17 +25,13 @@ export default function BasicWindow({
     children,
     onClose,
     colorSequence,
-    windowId,
     priority = 0,
 }: WindowProps) {
     const frameRef = useRef<Frame>();
     const [previousVisible, setPreviousVisible] = useState(visible);
     const initialPosition = new UDim2(0.5, 0, 1, -40);
 
-    // Register with window manager if windowId is provided
-    if (windowId) {
-        useWindow(windowId, visible, onClose, priority);
-    }
+    useWindow(title, visible, onClose, priority);
 
     const handleClose = useCallback(() => {
         onClose();

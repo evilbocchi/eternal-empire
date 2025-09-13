@@ -45,9 +45,8 @@ interface SidebarButtonsProps {
 }
 
 interface SidebarButtonData {
-    name: string;
+    label: HotkeyLabel;
     image: string;
-    hotkey?: Enum.KeyCode;
     color: Color3;
     visible: boolean;
     notification?: {
@@ -59,18 +58,16 @@ interface SidebarButtonData {
 
 export const SidebarButtonConfiguration = [
     {
-        name: "Quests",
+        label: "Quests",
         image: getAsset("assets/Quests.png"),
-        hotkey: Enum.KeyCode.V,
         color: Color3.fromRGB(255, 94, 94),
         visible: true,
         notification: { count: 0, color: Color3.fromRGB(255, 52, 52) },
         glowColor: Color3.fromRGB(255, 94, 94),
     },
     {
-        name: "Inventory",
+        label: "Inventory",
         image: getAsset("assets/Inventory.png"),
-        hotkey: Enum.KeyCode.F,
         color: Color3.fromRGB(255, 186, 125),
         visible: true,
         glowColor: Color3.fromRGB(255, 186, 125),
@@ -129,14 +126,14 @@ export function SidebarButton({ data, layoutOrder, onClick, animationsEnabled = 
             handleClick();
             return true;
         },
-        label: data.name as HotkeyLabel,
+        label: data.label,
     });
 
     // Calculate animated size
     const animatedSize = new UDim2(1, 0, 1, 0); // Special handling for different button types
     return (
         <frame
-            key={data.name}
+            key={data.label}
             ref={frameRef}
             BackgroundTransparency={1}
             LayoutOrder={layoutOrder}
@@ -331,10 +328,10 @@ export default function SidebarButtons({
                 .filter((button) => button.visible)
                 .map((button, index) => (
                     <SidebarButton
-                        key={button.name}
+                        key={button.label}
                         data={button}
                         layoutOrder={index + 1}
-                        onClick={() => handleButtonClick(button.name)}
+                        onClick={() => handleButtonClick(button.label)}
                         animationsEnabled={animationsEnabled}
                     />
                 ))}

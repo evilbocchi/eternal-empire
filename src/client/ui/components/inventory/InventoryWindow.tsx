@@ -239,7 +239,6 @@ export default function InventoryWindow({ inventoryController }: InventoryWindow
                 ])
             }
             onClose={closeWindow}
-            windowId="inventory"
             priority={1}
         >
             {/* Empty state */}

@@ -10,7 +10,6 @@ export default function TechWindow({
     title,
     children,
     onClose,
-    windowId,
     priority = 0,
     size = new UDim2(0.9, 0, 0.9, -50),
 }: WindowProps) {
@@ -18,10 +17,7 @@ export default function TechWindow({
     const [previousVisible, setPreviousVisible] = useState(visible);
     const initialPosition = new UDim2(0.5, 0, 0.5, 0);
 
-    // Register with window manager if windowId is provided
-    if (windowId) {
-        useWindow(windowId, visible, onClose, priority);
-    }
+    useWindow(title, visible, onClose, priority);
 
     const handleClose = useCallback(() => {
         onClose();
