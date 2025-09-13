@@ -62,7 +62,7 @@ export default function SettingSection({ title, layoutOrder = 0 }: SettingSectio
                 />
             </frame>
             <uilistlayout SortOrder={Enum.SortOrder.LayoutOrder} />
-            <uipadding PaddingBottom={new UDim(0, 10)} />
+            <uipadding PaddingBottom={new UDim(0, 10)} PaddingTop={new UDim(0, 10)} />
         </frame>
     );
 }

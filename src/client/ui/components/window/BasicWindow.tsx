@@ -1,9 +1,9 @@
-import React, { Fragment, useCallback, useEffect, useRef, useState } from "@rbxts/react";
+import React, { useCallback, useEffect, useRef, useState } from "@rbxts/react";
 import { TweenService } from "@rbxts/services";
-import { getAsset } from "shared/asset/AssetMap";
 import WindowCloseButton from "client/ui/components/window/WindowCloseButton";
 import { useWindow } from "client/ui/components/window/WindowManager";
 import WindowTitle from "client/ui/components/window/WindowTitle";
+import { getAsset } from "shared/asset/AssetMap";
 
 declare global {
     interface WindowProps {
@@ -15,6 +15,7 @@ declare global {
         children: React.ReactNode;
         windowId?: string; // Optional ID for window manager
         priority?: number; // Optional priority for close order
+        size?: UDim2; // Optional size for the window
     }
 }
 

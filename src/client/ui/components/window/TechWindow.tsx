@@ -4,7 +4,16 @@ import WindowCloseButton from "client/ui/components/window/WindowCloseButton";
 import { useWindow } from "client/ui/components/window/WindowManager";
 import WindowTitle from "client/ui/components/window/WindowTitle";
 
-export default function TechWindow({ visible, icon, title, children, onClose, windowId, priority = 0 }: WindowProps) {
+export default function TechWindow({
+    visible,
+    icon,
+    title,
+    children,
+    onClose,
+    windowId,
+    priority = 0,
+    size = new UDim2(0.9, 0, 0.9, -50),
+}: WindowProps) {
     const frameRef = useRef<Frame>();
     const [previousVisible, setPreviousVisible] = useState(visible);
     const initialPosition = new UDim2(0.5, 0, 0.5, 0);
@@ -51,7 +60,7 @@ export default function TechWindow({ visible, icon, title, children, onClose, wi
             BorderColor3={Color3.fromRGB(0, 0, 0)}
             BorderSizePixel={4}
             Selectable={true}
-            Size={new UDim2(0.9, 0, 0.9, -50)}
+            Size={size}
             Position={initialPosition}
             ZIndex={0}
             Visible={false}

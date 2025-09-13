@@ -9,11 +9,7 @@ export = new Command(script.Name)
     )
     .setExecute((o) => {
         if (RunService.IsStudio() || (game.PrivateServerOwnerId === 0 && game.PrivateServerId !== "")) {
-            const joinLink =
-                "https://www.roblox.com/games/start?placeId=" +
-                game.PlaceId +
-                "&launchData=" +
-                CommandAPI.Permissions.getAccessCode();
+            const joinLink = `https://www.roblox.com/games/start?placeId=${game.PlaceId}&launchData=${CommandAPI.Permissions.getAccessCode()}`;
             CommandAPI.ChatHook.sendPrivateMessage(o, "Join link: " + joinLink);
             Packets.codeReceived.toClient(o, joinLink);
         } else {

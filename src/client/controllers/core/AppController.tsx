@@ -14,6 +14,7 @@ import InventoryWindow from "client/ui/components/inventory/InventoryWindow";
 import LogsWindow from "client/ui/components/logs/LogsWindow";
 import QuestWindow from "client/ui/components/quest/QuestWindow";
 import RenameWindow from "client/ui/components/rename/RenameWindow";
+import CopyWindow from "client/ui/components/settings/CopyWindow";
 import SettingsManager from "client/ui/components/settings/SettingsManager";
 import StatsWindow from "client/ui/components/stats/StatsWindow";
 import { TooltipDisplay } from "client/ui/components/tooltip/TooltipManager";
@@ -55,6 +56,7 @@ export default class AppController implements OnStart {
         ReactRoblox.createRoot(BUILD_GUI).render(<BuildManager buildController={this.buildController} />);
         ReactRoblox.createRoot(SETTINGS_GUI).render(
             <Fragment>
+                <CopyWindow />
                 <SettingsManager />
                 <CommandsWindow />
                 <RenameWindow />

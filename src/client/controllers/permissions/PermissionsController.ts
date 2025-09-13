@@ -13,18 +13,10 @@
  */
 import { Controller, OnInit } from "@flamework/core";
 import CameraShaker from "@rbxts/camera-shaker";
-import AdaptiveTabController, { ADAPTIVE_TAB_MAIN_WINDOW } from "client/controllers/core/AdaptiveTabController";
 import EffectController from "client/controllers/world/EffectController";
 import { playSound } from "shared/asset/GameAssets";
 import Items from "shared/items/Items";
 import Packets from "shared/Packets";
-
-export const SHARE_WINDOW = ADAPTIVE_TAB_MAIN_WINDOW.WaitForChild("Share") as Frame & {
-    Code: Frame & {
-        Input: TextBox;
-    };
-};
-
 /**
  * Controller responsible for managing permissions, donation/game modification events, and code sharing.
  *
@@ -33,10 +25,7 @@ export const SHARE_WINDOW = ADAPTIVE_TAB_MAIN_WINDOW.WaitForChild("Share") as Fr
  */
 @Controller()
 export default class PermissionsController implements OnInit {
-    constructor(
-        private effectController: EffectController,
-        private adaptiveTabController: AdaptiveTabController,
-    ) {}
+    constructor(private effectController: EffectController) {}
 
     /**
      * Initializes the PermissionsController, sets up listeners for donations and game modifications.
@@ -45,11 +34,6 @@ export default class PermissionsController implements OnInit {
         Packets.donationGiven.fromServer(() => {
             playSound("PowerUp.mp3");
             this.effectController.camShake.Shake(CameraShaker.Presets.Bump);
-        });
-
-        Packets.codeReceived.fromServer((joinLink) => {
-            SHARE_WINDOW.Code.Input.Text = joinLink;
-            this.adaptiveTabController.showAdaptiveTab("Share");
         });
 
         Packets.modifyGame.fromServer((param) => {
