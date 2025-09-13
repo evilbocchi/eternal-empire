@@ -10,7 +10,7 @@ import { useQuestData } from "./useQuestData";
  * @param quest The quest info.
  * @param stageNum The stage number.
  */
-function getFormattedDescription(id?: string, quest?: QuestInfo, stageNum = 0) {
+export function getFormattedDescription(id?: string, quest?: QuestInfo, stageNum = 0) {
     if (stageNum < 0) {
         return "Quest complete.";
     }

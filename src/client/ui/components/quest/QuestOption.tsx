@@ -3,6 +3,7 @@ import { TweenService } from "@rbxts/services";
 import { getAsset } from "shared/asset/AssetMap";
 import { getLengthColor, getLengthName, getRewardLabel } from "client/ui/components/quest/useQuestData";
 import { RobotoSlabBold, RobotoSlabExtraBold, RobotoSlabHeavy, RobotoSlabMedium } from "client/ui/GameFonts";
+import { getFormattedDescription } from "client/ui/components/quest/TrackedQuestWindow";
 
 interface QuestOptionProps {
     questId: string;
@@ -70,15 +71,6 @@ export default function QuestOption({
         if (isCompleted) return baseOrder + 1000000000;
         if (belowRequirement) return baseOrder + 100000000;
         return baseOrder;
-    };
-
-    // Get formatted description for current stage
-    const getFormattedDescription = () => {
-        if (currentStage < 0) {
-            return "Quest complete.";
-        }
-        const stage = quest.stages[currentStage];
-        return stage?.description || "<no description provided>";
     };
 
     const transparency = isCompleted ? 0.5 : 0;
@@ -188,8 +180,8 @@ export default function QuestOption({
                         BackgroundTransparency={1}
                         FontFace={RobotoSlabMedium}
                         LayoutOrder={1}
-                        Size={new UDim2(0.856, 0, 0, 0)}
-                        Text={`- ${getFormattedDescription()}`}
+                        Size={new UDim2(0.9, 0, 0, 0)}
+                        Text={getFormattedDescription(questId, quest, currentStage)}
                         TextColor3={Color3.fromRGB(255, 255, 255)}
                         TextSize={20}
                         TextWrapped={true}
