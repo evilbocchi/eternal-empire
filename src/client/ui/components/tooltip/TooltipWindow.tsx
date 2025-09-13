@@ -1,3 +1,4 @@
+import Signal from "@antivivi/lemon-signal";
 import { buildRichText } from "@antivivi/vrldk";
 import React, { useEffect, useMemo, useRef } from "@rbxts/react";
 import { RunService, TweenService, Workspace } from "@rbxts/services";
@@ -8,21 +9,54 @@ import { getAsset } from "shared/asset/AssetMap";
 import Item from "shared/item/Item";
 import ItemMetadata from "shared/item/ItemMetadata";
 import Unique from "shared/item/traits/Unique";
+import Items from "shared/items/Items";
 
-interface TooltipWindowProps {
-    data?: TooltipData;
-    visible: boolean;
-    metadata: Map<Item, ItemMetadata>;
+// Precompute item metadata for efficient tooltip rendering
+const METADATA_PER_ITEM = new Map<Item, ItemMetadata>();
+for (const item of Items.sortedItems) {
+    METADATA_PER_ITEM.set(item, new ItemMetadata(item, 16, "Bold"));
+}
+
+/**
+ * Global tooltip manager with static methods for showing/hiding tooltips
+ */
+export class TooltipManager {
+    static tooltipData?: TooltipData;
+    static isVisible: boolean = false;
+    static tooltipUpdated = new Signal<(visible: boolean, data?: TooltipData) => void>();
+
+    static showTooltip(data: TooltipData) {
+        this.tooltipData = data;
+        this.isVisible = true;
+        this.tooltipUpdated.fire(this.isVisible, this.tooltipData);
+    }
+
+    static hideTooltip() {
+        this.isVisible = false;
+        this.tooltipUpdated.fire(this.isVisible, this.tooltipData);
+    }
 }
 
 /**
  * Tooltip window component that displays formatted tooltip content
  */
-export default function TooltipWindow({ data, visible, metadata }: TooltipWindowProps) {
+export default function TooltipWindow() {
     const frameRef = useRef<Frame>();
     const messageRef = useRef<TextLabel>();
     const strokeRef = useRef<UIStroke>();
     const itemSlotRef = useRef<ImageLabel>();
+    const [data, setData] = React.useState<TooltipData | undefined>(undefined);
+    const [visible, setVisible] = React.useState(false);
+
+    // Subscribe to tooltip manager updates
+    useEffect(() => {
+        const connection = TooltipManager.tooltipUpdated.connect((visible, data) => {
+            setVisible(visible);
+            setData(data);
+        });
+
+        return () => connection.disconnect();
+    }, []);
 
     // Animate show/hide
     useEffect(() => {
@@ -108,7 +142,7 @@ export default function TooltipWindow({ data, visible, metadata }: TooltipWindow
         // Build rich text for item description
         const builder = buildRichText(undefined, item.format(description), Color3.fromRGB(195, 195, 195), 18, "Medium");
 
-        const itemMetadata = metadata.get(item);
+        const itemMetadata = METADATA_PER_ITEM.get(item);
         if (itemMetadata) {
             builder.appendAll(itemMetadata.builder);
         }
@@ -127,7 +161,7 @@ export default function TooltipWindow({ data, visible, metadata }: TooltipWindow
             backgroundColor: color,
             textColor,
         };
-    }, [data?.item, data?.uuid, metadata]);
+    }, [data?.item, data?.uuid, METADATA_PER_ITEM]);
 
     const renderItemSlot = () => {
         if (!tooltipContent) return undefined;

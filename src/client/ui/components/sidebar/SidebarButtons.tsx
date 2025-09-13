@@ -316,6 +316,7 @@ export default function SidebarButtons({
             Position={currentPosition}
             Size={new UDim2(0.025, 40, 0.5, 0)}
             Visible={isVisible}
+            ZIndex={-1}
         >
             <uilistlayout
                 HorizontalAlignment={Enum.HorizontalAlignment.Center}

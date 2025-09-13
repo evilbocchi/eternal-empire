@@ -4,7 +4,7 @@ import { CreateReactStory } from "@rbxts/ui-labs";
 import InventoryWindow from "client/ui/components/inventory/InventoryWindow";
 import { SidebarManager } from "client/ui/components/sidebar/SidebarButtons";
 import StoryMocking from "client/ui/components/StoryMocking";
-import { TooltipDisplay } from "client/ui/components/tooltip/TooltipManager";
+import TooltipWindow from "client/ui/components/tooltip/TooltipWindow";
 
 export = CreateReactStory(
     {
@@ -32,7 +32,7 @@ export = CreateReactStory(
             <StrictMode>
                 {/* <InventoryWindow inventoryController={inventoryController} /> */}
                 <InventoryWindow />
-                <TooltipDisplay />
+                <TooltipWindow />
             </StrictMode>
         );
     },

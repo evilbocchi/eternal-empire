@@ -15,11 +15,9 @@ import ComputeNameColor from "@antivivi/rbxnamecolor";
 import { combineHumanReadable, convertToHHMMSS, getHumanoid, paintObjects } from "@antivivi/vrldk";
 import { Controller, OnInit } from "@flamework/core";
 import { Players, ReplicatedFirst, RunService, TweenService, Workspace } from "@rbxts/services";
-import { PLAYER_GUI } from "client/constants";
-import { LOCAL_PLAYER } from "client/constants";
+import { LOCAL_PLAYER, PLAYER_GUI } from "client/constants";
 import AdaptiveTabController from "client/controllers/core/AdaptiveTabController";
 import HotkeysController from "client/controllers/core/HotkeysController";
-import BalanceWindowController from "client/controllers/interface/BalanceWindowController";
 import IntroController from "client/controllers/interface/IntroController";
 import LoadingWindowController from "client/controllers/interface/LoadingWindowController";
 import SoundController from "client/controllers/interface/SoundController";
@@ -101,7 +99,6 @@ export const START_WINDOW = ReplicatedFirst.WaitForChild("StartScreen") as Scree
 export default class StartWindowController implements OnInit {
     constructor(
         private adaptiveTabController: AdaptiveTabController,
-        private balanceWindowController: BalanceWindowController,
         private loadingWindowController: LoadingWindowController,
         private introController: IntroController,
         private soundController: SoundController,
@@ -120,7 +117,7 @@ export default class StartWindowController implements OnInit {
                 Workspace.CurrentCamera.CameraSubject = getHumanoid(LOCAL_PLAYER);
             }
             this.soundController.refreshMusic();
-            this.balanceWindowController.showBalanceWindow();
+            //this.balanceWindowController.showBalanceWindow(); TODO
             //this.adaptiveTabController.showSidebarButtons(); TODO
             this.loadingWindowController.refreshLoadingWindow("Done loading");
             this.loadingWindowController.hideLoadingWindow();
@@ -201,7 +198,7 @@ export default class StartWindowController implements OnInit {
         if (RunService.IsStudio() && START_SCREEN_ENABLED === false) {
             return;
         }
-        this.balanceWindowController.hideBalanceWindow();
+        //this.balanceWindowController.hideBalanceWindow(); TODO
         //this.adaptiveTabController.hideSidebarButtons(); TODO
         if (Workspace.CurrentCamera !== undefined) {
             Workspace.CurrentCamera.CameraType = Enum.CameraType.Scriptable;

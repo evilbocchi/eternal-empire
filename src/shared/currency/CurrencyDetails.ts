@@ -16,6 +16,8 @@ declare global {
 export const CURRENCY_CATEGORIES = {
     Main: 1,
     Misc: 2,
+    Premium: 3,
+    Internal: 999,
 };
 
 /**
@@ -85,26 +87,26 @@ const details = {
         layoutOrder: 1003,
         color: Color3.fromRGB(255, 0, 0),
         image: getAsset("assets/Health.png"),
-        page: CURRENCY_CATEGORIES.Misc,
+        page: CURRENCY_CATEGORIES.Internal,
     },
     Stamina: {
         layoutOrder: 1004,
         color: Color3.fromRGB(255, 222, 74),
         image: getAsset("assets/Stamina.png"),
-        page: CURRENCY_CATEGORIES.Misc,
+        page: CURRENCY_CATEGORIES.Internal,
     },
 
     Diamonds: {
         layoutOrder: 1005,
         color: Color3.fromRGB(140, 255, 245),
         image: getAsset("assets/Diamond.png"),
-        page: CURRENCY_CATEGORIES.Misc,
+        page: CURRENCY_CATEGORIES.Premium,
     },
     "Funds Bombs": {
         layoutOrder: 10000,
         color: Color3.fromRGB(0, 140, 97),
         image: getAsset("assets/FundsBomb.png"),
-        page: CURRENCY_CATEGORIES.Misc,
+        page: CURRENCY_CATEGORIES.Premium,
     },
 };
 

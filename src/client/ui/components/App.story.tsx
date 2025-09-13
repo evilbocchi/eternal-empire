@@ -11,7 +11,7 @@ import { questState } from "client/ui/components/quest/QuestState";
 import QuestWindow from "client/ui/components/quest/QuestWindow";
 import SettingsManager from "client/ui/components/settings/SettingsManager";
 import StoryMocking from "client/ui/components/StoryMocking";
-import { TooltipDisplay } from "client/ui/components/tooltip/TooltipManager";
+import TooltipWindow from "client/ui/components/tooltip/TooltipWindow";
 import Packets from "shared/Packets";
 
 export = CreateReactStory(
@@ -35,7 +35,7 @@ export = CreateReactStory(
             <StrictMode>
                 <MainLayout />
                 <ClickSparkManager />
-                <TooltipDisplay />
+                <TooltipWindow />
                 <BuildManager />
                 <SettingsManager />
                 <InventoryWindow />

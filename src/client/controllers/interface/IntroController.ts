@@ -15,15 +15,12 @@ import { loadAnimation } from "@antivivi/vrldk";
 import { Controller, OnInit } from "@flamework/core";
 import { ContentProvider, ReplicatedStorage, TweenService, Workspace } from "@rbxts/services";
 import { LOCAL_PLAYER } from "client/constants";
-import AdaptiveTabController from "client/controllers/core/AdaptiveTabController";
 import { INTERFACE } from "client/controllers/core/UIController";
-import BalanceWindowController from "client/controllers/interface/BalanceWindowController";
-import QuestsController from "client/controllers/interface/QuestsController";
 import SoundController from "client/controllers/interface/SoundController";
+import { questState } from "client/ui/components/quest/QuestState";
 import { assets, getAsset } from "shared/asset/AssetMap";
 import { playSound } from "shared/asset/GameAssets";
 import { WAYPOINTS } from "shared/constants";
-import { questState } from "client/ui/components/quest/QuestState";
 
 export const INTRO_WINDOW = INTERFACE.WaitForChild("IntroWindow") as Frame;
 
@@ -37,12 +34,7 @@ export default class IntroController implements OnInit {
     isIntroSequenceDone = false;
     isCurrentlyInIntroSequence = false;
 
-    constructor(
-        private questsController: QuestsController,
-        private adaptiveTabController: AdaptiveTabController,
-        private soundController: SoundController,
-        private balanceWindowController: BalanceWindowController,
-    ) {}
+    constructor(private soundController: SoundController) {}
 
     /**
      * Plays the intro cutscene sequence, including camera, animation, and UI transitions.
@@ -72,7 +64,7 @@ export default class IntroController implements OnInit {
         camera.CFrame = WAYPOINTS.NewBeginningsCamera0.CFrame;
         INTRO_WINDOW.BackgroundTransparency = 0;
         INTRO_WINDOW.Visible = true;
-        this.balanceWindowController.hideBalanceWindow();
+        //this.balanceWindowController.hideBalanceWindow(); TODO
         //this.adaptiveTabController.hideSidebarButtons(); TODO
         const fabricRustle = () => playSound("FabricRustle.mp3");
         task.delay(2, () => {
@@ -115,7 +107,7 @@ export default class IntroController implements OnInit {
             this.soundController.refreshMusic(true);
             math.randomseed(tick());
             //this.adaptiveTabController.showSidebarButtons(); TODO
-            this.balanceWindowController.showBalanceWindow();
+            //this.balanceWindowController.showBalanceWindow(); TODO
         }
     }
 

@@ -2,7 +2,7 @@ import React, { StrictMode } from "@rbxts/react";
 import ReactRoblox from "@rbxts/react-roblox";
 import { CreateReactStory } from "@rbxts/ui-labs";
 import MainLayout from "client/ui/components/MainLayout";
-import { TooltipDisplay } from "client/ui/components/tooltip/TooltipManager";
+import TooltipWindow from "client/ui/components/tooltip/TooltipWindow";
 
 export = CreateReactStory(
     {
@@ -17,7 +17,7 @@ export = CreateReactStory(
         return (
             <StrictMode>
                 <MainLayout />
-                <TooltipDisplay />
+                <TooltipWindow />
             </StrictMode>
         );
     },

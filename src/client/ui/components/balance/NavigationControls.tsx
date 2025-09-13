@@ -3,6 +3,7 @@ import useHotkeyWithTooltip from "client/ui/components/hotkeys/useHotkeyWithTool
 import WindowManager from "client/ui/components/window/WindowManager";
 import { RobotoMonoBold } from "client/ui/GameFonts";
 import { getAsset } from "shared/asset/AssetMap";
+import { playSound } from "shared/asset/GameAssets";
 
 interface NavigationControlsProps {
     currentPage: number;
@@ -28,6 +29,7 @@ export default function NavigationControls({
             if (!WindowManager.isWindowVisible("Balance")) return false;
             if (currentPage > 1) {
                 onPageChange(currentPage - 1);
+                playSound("MenuClick.mp3");
                 return true;
             }
             return false;
@@ -45,6 +47,7 @@ export default function NavigationControls({
             if (!WindowManager.isWindowVisible("Balance")) return false;
             if (currentPage < maxPage) {
                 onPageChange(currentPage + 1);
+                playSound("MenuClick.mp3");
                 return true;
             }
             return false;

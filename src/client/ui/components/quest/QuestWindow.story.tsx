@@ -4,7 +4,7 @@ import { CreateReactStory } from "@rbxts/ui-labs";
 import QuestWindow from "client/ui/components/quest/QuestWindow";
 import { SidebarManager } from "client/ui/components/sidebar/SidebarButtons";
 import StoryMocking from "client/ui/components/StoryMocking";
-import { TooltipDisplay } from "client/ui/components/tooltip/TooltipManager";
+import TooltipWindow from "client/ui/components/tooltip/TooltipWindow";
 
 export = CreateReactStory(
     {
@@ -28,7 +28,7 @@ export = CreateReactStory(
         return (
             <StrictMode>
                 <QuestWindow />
-                <TooltipDisplay />
+                <TooltipWindow />
             </StrictMode>
         );
     },

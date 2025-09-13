@@ -6,12 +6,10 @@
  * and simple message tooltips with smooth animations and positioning.
  */
 
-import React, { useCallback, useState } from "@rbxts/react";
-import Item from "shared/item/Item";
-import ItemMetadata from "shared/item/ItemMetadata";
-import Items from "shared/items/Items";
-import TooltipWindow from "client/ui/components/tooltip/TooltipWindow";
+import { useCallback } from "@rbxts/react";
+import { TooltipManager } from "client/ui/components/tooltip/TooltipWindow";
 import useHover from "client/ui/hooks/useHover";
+import Item from "shared/item/Item";
 
 declare global {
     interface UseTooltipProps {
@@ -33,48 +31,12 @@ declare global {
     }
 }
 
-// Precompute item metadata for efficient tooltip rendering
-const METADATA_PER_ITEM = new Map<Item, ItemMetadata>();
-for (const item of Items.sortedItems) {
-    METADATA_PER_ITEM.set(item, new ItemMetadata(item, 16, "Bold"));
-}
-
 /**
- * Global tooltip manager with static methods for showing/hiding tooltips
- */
-export default class TooltipManager {
-    static showTooltip: (data: TooltipData) => void = () => {};
-    static hideTooltip: () => void = () => {};
-    static isVisible: boolean = false;
-}
-
-// NOTE: Don't use providers, we want this to work across multiple React roots
-
-/**
- * Tooltip provider component that manages tooltip state and positioning
- */
-export function TooltipDisplay() {
-    const [tooltipData, setTooltipData] = useState<TooltipData | undefined>(undefined);
-    const [isVisible, setIsVisible] = useState(false);
-
-    TooltipManager.showTooltip = useCallback((data: TooltipData) => {
-        setTooltipData(data);
-        setIsVisible(true);
-    }, []);
-
-    TooltipManager.hideTooltip = useCallback(() => {
-        setIsVisible(false);
-    }, []);
-    TooltipManager.isVisible = isVisible;
-
-    return <TooltipWindow data={tooltipData} visible={isVisible} metadata={METADATA_PER_ITEM} />;
-} /**
  * Hook that provides tooltip event handlers for components
  *
  * @param tooltipData Static tooltip data or function that returns tooltip data
  * @returns Hover data object
  */
-
 export function useTooltipProps({ data, onEnter, onLeave }: UseTooltipProps): UseHoverReturn {
     const handleMouseEnter = useCallback(() => {
         onEnter?.();
@@ -88,7 +50,9 @@ export function useTooltipProps({ data, onEnter, onLeave }: UseTooltipProps): Us
     }, [onLeave]);
 
     return useHover({ onEnter: handleMouseEnter, onLeave: handleMouseLeave });
-} /**
+}
+
+/**
  * Convenience hook for item tooltips
  *
  * @param item The item to display in the tooltip

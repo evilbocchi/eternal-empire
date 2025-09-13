@@ -1,12 +1,25 @@
 import { Controller, OnStart } from "@flamework/core";
 import React, { Fragment } from "@rbxts/react";
 import ReactRoblox from "@rbxts/react-roblox";
-import { PLAYER_GUI } from "client/constants";
+import {
+    BACKPACK_GUI,
+    BALANCE_GUI,
+    BUILD_GUI,
+    CLICK_SPARKS_GUI,
+    INVENTORY_GUI,
+    LOGS_GUI,
+    MAIN_LAYOUT_GUI,
+    QUESTS_GUI,
+    SETTINGS_GUI,
+    STATS_GUI,
+    TOOLTIPS_GUI,
+} from "client/controllers/core/ScreenGuis";
 import BuildController from "client/controllers/gameplay/BuildController";
 import ToolController from "client/controllers/gameplay/ToolController";
 import InventoryController from "client/controllers/interface/InventoryController";
 import MainLayout from "client/ui/components/MainLayout";
 import BackpackManager from "client/ui/components/backpack/BackpackManager";
+import BalanceWindow from "client/ui/components/balance/BalanceWindow";
 import BuildManager from "client/ui/components/build/BuildManager";
 import CommandsWindow from "client/ui/components/commands/CommandsWindow";
 import ClickSparkManager from "client/ui/components/effect/ClickSparkManager";
@@ -17,29 +30,7 @@ import RenameWindow from "client/ui/components/rename/RenameWindow";
 import CopyWindow from "client/ui/components/settings/CopyWindow";
 import SettingsManager from "client/ui/components/settings/SettingsManager";
 import StatsWindow from "client/ui/components/stats/StatsWindow";
-import { TooltipDisplay } from "client/ui/components/tooltip/TooltipManager";
-
-const createScreenGui = (name: string, displayOrder = 0): ScreenGui => {
-    const screenGui = new Instance("ScreenGui");
-    screenGui.IgnoreGuiInset = true;
-    screenGui.ResetOnSpawn = false;
-    screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling;
-    screenGui.Name = name;
-    screenGui.DisplayOrder = displayOrder;
-    screenGui.Parent = PLAYER_GUI;
-    return screenGui;
-};
-
-const MAIN_LAYOUT_GUI = createScreenGui("MainLayout");
-const CLICK_SPARKS_GUI = createScreenGui("ClickSparks", 1);
-const TOOLTIPS_GUI = createScreenGui("Tooltips", 2);
-const BUILD_GUI = createScreenGui("BuildManager");
-const SETTINGS_GUI = createScreenGui("Settings");
-const INVENTORY_GUI = createScreenGui("Inventory");
-const LOGS_GUI = createScreenGui("Logs");
-const QUESTS_GUI = createScreenGui("Quests");
-const BACKPACK_GUI = createScreenGui("Backpack");
-const STATS_GUI = createScreenGui("Stats");
+import TooltipWindow from "client/ui/components/tooltip/TooltipWindow";
 
 @Controller()
 export default class AppController implements OnStart {
@@ -52,7 +43,8 @@ export default class AppController implements OnStart {
     onStart() {
         ReactRoblox.createRoot(MAIN_LAYOUT_GUI).render(<MainLayout />);
         ReactRoblox.createRoot(CLICK_SPARKS_GUI).render(<ClickSparkManager />);
-        ReactRoblox.createRoot(TOOLTIPS_GUI).render(<TooltipDisplay />);
+        ReactRoblox.createRoot(TOOLTIPS_GUI).render(<TooltipWindow />);
+        ReactRoblox.createRoot(BALANCE_GUI).render(<BalanceWindow />);
         ReactRoblox.createRoot(BUILD_GUI).render(<BuildManager buildController={this.buildController} />);
         ReactRoblox.createRoot(SETTINGS_GUI).render(
             <Fragment>
