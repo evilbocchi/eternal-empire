@@ -1,10 +1,9 @@
 import { OnoeNum } from "@antivivi/serikanum";
 import React, { Fragment, useMemo, useRef } from "@rbxts/react";
 import StringBuilder from "@rbxts/stringbuilder";
-import { useTooltipProps } from "client/ui/components/tooltip/TooltipManager";
+import { TooltipManager } from "client/ui/components/tooltip/TooltipWindow";
 import { RobotoMono, RobotoSlab, RobotoSlabBold } from "client/ui/GameFonts";
 import { getAsset } from "shared/asset/AssetMap";
-import CurrencyBundle from "shared/currency/CurrencyBundle";
 import { CURRENCY_DETAILS } from "shared/currency/CurrencyDetails";
 import Softcaps, { performSoftcap } from "shared/Softcaps";
 
@@ -74,49 +73,46 @@ export function BalanceOptionStyling({ details }: { details: CurrencyDetails }) 
  * Individual currency balance display component.
  * Shows currency icon, amount, income rate, and softcap information.
  */
-export default function BalanceOption({ currency, amount, income, formatCurrency, layoutOrder }: BalanceOptionProps) {
+export default function BalanceOption({ currency, amount, income, formatCurrency }: BalanceOptionProps) {
     const wrapperRef = useRef<Frame>();
     const details = CURRENCY_DETAILS[currency];
+    const softcapColor = Color3.fromRGB(255, 77, 33);
+
+    const tooltipCurrencyColor = useMemo(() => {
+        return details.color.Lerp(Color3.fromRGB(255, 255, 255), 0.8).ToHex();
+    }, []);
 
     // Calculate softcap information
-    const softcapInfo = useMemo(() => {
+    const { capped, softcapText, softcapStart } = useMemo(() => {
         const softcap = Softcaps[currency];
-        if (!softcap) return { capped: false, softcapText: "" };
+        if (!softcap) return { capped: false };
 
         let capped = false;
         const builder = new StringBuilder();
+        const starts = new Array<OnoeNum>();
 
         const [recippow, recippowStarts] = performSoftcap(amount, softcap.recippow);
         if (recippow !== undefined) {
             capped = true;
-            builder.append("^(1/").append(recippowStarts.toString()).append(")");
+            builder.append("^(1/").append(recippow.toString()).append(")");
+            if (recippowStarts) {
+                starts.push(recippowStarts);
+            }
         }
 
         // Check division softcap
         const [div, divStarts] = performSoftcap(amount, softcap.div);
         if (div !== undefined) {
             capped = true;
-            builder.append("/").append(divStarts.toString());
+            builder.append("/").append(div.toString());
+            if (divStarts) {
+                starts.push(divStarts);
+            }
         }
         const softcapText = builder.toString();
 
-        const tooltipBuilder = new StringBuilder()
-            .append("You have ")
-            .append(amount.toString())
-            .append(" ")
-            .append(currency);
-
-        if (capped === true) {
-            const lowestStart = OnoeNum.min(recippowStarts ?? math.huge, divStarts ?? math.huge);
-            tooltipBuilder.append(
-                `\n<font color="rgb(255, 0, 0)" size="16">After ${CurrencyBundle.getFormatted(currency, lowestStart)}, a softcap of ${softcapText} is applied to ${currency} gain!</font>`,
-            );
-        }
-
-        return { capped, softcapText, tooltip: tooltipBuilder.toString() };
+        return { capped, softcapText, softcapStart: OnoeNum.min(...starts) };
     }, [currency, amount]);
-
-    const { events } = useTooltipProps({ data: () => ({ message: softcapInfo.tooltip }) });
 
     const showIncome = income && !income.lessEquals(0);
 
@@ -125,8 +121,39 @@ export default function BalanceOption({ currency, amount, income, formatCurrency
         <frame
             ref={wrapperRef}
             BackgroundTransparency={1}
-            Event={{ ...events }}
-            LayoutOrder={layoutOrder}
+            Event={{
+                MouseMoved: () => {
+                    const tooltipBuilder = new StringBuilder(details.description!)
+                        .append("\n<font size='16' color='#")
+                        .append(tooltipCurrencyColor)
+                        .append("'>You have ")
+                        .append(OnoeNum.toSuffix(amount))
+                        .append(" (")
+                        .append(OnoeNum.toScientific(amount))
+                        .append(") ")
+                        .append(currency)
+                        .append(".</font>");
+                    if (capped === true) {
+                        tooltipBuilder
+                            .append("\n<font color='#")
+                            .append(softcapColor.ToHex())
+                            .append("' size='16'>")
+                            .append(currency)
+                            .append(" gain is currently softcapped by ")
+                            .append(softcapText)
+                            .append(" as it exceeds ")
+                            .append(formatCurrency(currency, softcapStart!))
+                            .append(".</font>");
+                    }
+                    TooltipManager.showTooltip({
+                        message: tooltipBuilder.toString(),
+                    });
+                },
+                MouseLeave: () => {
+                    TooltipManager.hideTooltip();
+                },
+            }}
+            LayoutOrder={details.layoutOrder}
             Size={new UDim2(1, 0, 0.045, isFunds ? 30 : 21)}
         >
             <frame
@@ -218,7 +245,7 @@ export default function BalanceOption({ currency, amount, income, formatCurrency
                         </uistroke>
                     </textlabel>
                     {/* Softcap Label */}
-                    {softcapInfo.capped && (
+                    {capped && (
                         <textlabel
                             Active={true}
                             AutomaticSize={Enum.AutomaticSize.X}
@@ -227,8 +254,8 @@ export default function BalanceOption({ currency, amount, income, formatCurrency
                             LayoutOrder={2}
                             Position={new UDim2(0, 0, 1, 0)}
                             Size={new UDim2(0, 0, 0.9, 0)}
-                            Text={`${softcapInfo.softcapText}`}
-                            TextColor3={Color3.fromRGB(255, 77, 33)}
+                            Text={softcapText}
+                            TextColor3={softcapColor}
                             TextScaled={true}
                             TextWrapped={true}
                             TextXAlignment={Enum.TextXAlignment.Left}
