@@ -753,7 +753,7 @@ export default function MarketplaceWindow({ visible, onClose }: MarketplaceWindo
     const [filters, setFilters] = useState<MarketplaceFilters>({});
 
     // Register with window manager
-    useWindow("marketplace", visible, onClose, 1);
+    useWindow({ id: "marketplace", visible, onClose, priority: 1 });
 
     // Load data when window becomes visible
     useEffect(() => {

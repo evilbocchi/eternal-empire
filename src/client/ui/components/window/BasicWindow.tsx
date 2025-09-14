@@ -31,7 +31,7 @@ export default function BasicWindow({
     const [previousVisible, setPreviousVisible] = useState(visible);
     const initialPosition = new UDim2(0.5, 0, 1, -40);
 
-    useWindow(title, visible, onClose, priority);
+    useWindow({ id: title, visible, onClose, priority });
 
     const handleClose = useCallback(() => {
         onClose();

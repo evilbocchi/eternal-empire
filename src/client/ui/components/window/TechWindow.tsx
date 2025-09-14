@@ -17,7 +17,7 @@ export default function TechWindow({
     const [previousVisible, setPreviousVisible] = useState(visible);
     const initialPosition = new UDim2(0.5, 0, 0.5, 0);
 
-    useWindow(title, visible, onClose, priority);
+    useWindow({ id: title, visible, onClose, priority });
 
     const handleClose = useCallback(() => {
         onClose();

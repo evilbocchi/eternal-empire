@@ -30,7 +30,7 @@ export default function BalanceWindow() {
     const [currentPage, setCurrentPage] = useState(1);
     const [maxPage, setMaxPage] = useState(1);
 
-    useWindow("Balance", visible, () => setVisible(false), -1); // Negative priority to avoid closing
+    useWindow({ id: "Balance", visible, onClose: () => setVisible(false), priority: -1 }); // Negative priority to avoid closing
 
     // Subscribe to balance and revenue updates
     useEffect(() => {

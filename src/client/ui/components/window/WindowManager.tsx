@@ -24,7 +24,7 @@ export default class WindowManager {
     private static windows = new Map<string, WindowInfo>();
     private static initialized = false;
 
-    static registerWindow(id: string, onClose: () => void, priority = 0): void {
+    static registerWindow({ id, onClose, priority = 0 }: Omit<WindowInfo, "visible">): void {
         this.windows.set(id, {
             id,
             visible: false,
@@ -98,7 +98,7 @@ export default class WindowManager {
  * Hook for window components to register themselves with the window manager
  * Works across different React roots
  */
-export function useWindow(id: string, visible: boolean, onClose: () => void, priority = 0) {
+export function useWindow({ id, visible, onClose, priority = 0 }: WindowInfo) {
     const onCloseRef = useRef(onClose);
 
     // Update the onClose ref when it changes
@@ -108,7 +108,7 @@ export function useWindow(id: string, visible: boolean, onClose: () => void, pri
 
     // Register/unregister the window (only when id or priority changes)
     useEffect(() => {
-        WindowManager.registerWindow(id, () => onCloseRef.current(), priority);
+        WindowManager.registerWindow({ id, onClose: () => onCloseRef.current(), priority });
         return () => WindowManager.unregisterWindow(id);
     }, [id, priority]);
 
