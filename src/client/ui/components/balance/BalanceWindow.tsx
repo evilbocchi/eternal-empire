@@ -97,7 +97,11 @@ export default function BalanceWindow() {
     };
 
     const handlePageChange = (newPage: number) => {
-        if (newPage >= 1 && newPage <= maxPage) {
+        if (newPage < 1) {
+            setCurrentPage(maxPage);
+        } else if (newPage > maxPage) {
+            setCurrentPage(1);
+        } else {
             setCurrentPage(newPage);
         }
     };

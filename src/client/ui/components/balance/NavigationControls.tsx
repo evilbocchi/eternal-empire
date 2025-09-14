@@ -27,12 +27,9 @@ export default function NavigationControls({
         label: "Previous Page",
         action: () => {
             if (!WindowManager.isWindowVisible("Balance")) return false;
-            if (currentPage > 1) {
-                onPageChange(currentPage - 1);
-                playSound("MenuClick.mp3");
-                return true;
-            }
-            return false;
+            onPageChange(currentPage - 1);
+            playSound("MenuClick.mp3");
+            return true;
         },
         onEnter: () => {
             leftRef.current!.ImageTransparency = 0;
@@ -45,12 +42,9 @@ export default function NavigationControls({
         label: "Next Page",
         action: () => {
             if (!WindowManager.isWindowVisible("Balance")) return false;
-            if (currentPage < maxPage) {
-                onPageChange(currentPage + 1);
-                playSound("MenuClick.mp3");
-                return true;
-            }
-            return false;
+            onPageChange(currentPage + 1);
+            playSound("MenuClick.mp3");
+            return true;
         },
         onEnter: () => {
             rightRef.current!.ImageTransparency = 0;
