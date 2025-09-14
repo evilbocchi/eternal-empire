@@ -5,80 +5,65 @@
  * Displays tool icon, hotkey number, and handles selection state visualization.
  */
 
-import React, { useCallback, useState } from "@rbxts/react";
-import { RobotoSlabMedium } from "client/ui/GameFonts";
-import useHover from "client/ui/hooks/useHover";
+import React from "@rbxts/react";
+import { TooltipManager } from "client/ui/components/tooltip/TooltipWindow";
 import { getAsset } from "shared/asset/AssetMap";
-
-export interface ToolOptionData {
-    /** The tool instance this option represents */
-    tool: Tool;
-    /** Display name of the tool */
-    name: string;
-    /** Tool icon/texture ID */
-    textureId: string;
-    /** Hotkey number (1-10) */
-    hotkeyNumber: number;
-    /** Whether the tool is currently equipped */
-    isEquipped: boolean;
-    /** Layout order for sorting */
-    layoutOrder: number;
-}
+import HarvestingTool from "shared/item/traits/HarvestingTool";
 
 interface ToolOptionProps {
-    /** Tool data to display */
-    data: ToolOptionData;
+    harvestingTool: HarvestingTool;
+
+    isEquipped: boolean;
+
     /** Click event handler */
-    onClick?: (tool: Tool) => void;
-    /** Whether animations are enabled */
-    animationsEnabled?: boolean;
+    onClick: (harvestingTool: HarvestingTool) => void;
+}
+
+/** Determine layout order based on tool type */
+export function layoutOrderFromTool(harvestingTool: HarvestingTool): number {
+    switch (harvestingTool.toolType) {
+        case "Pickaxe":
+            return 1;
+        case "Axe":
+            return 2;
+        case "Scythe":
+            return 3;
+        case "Rod":
+            return 4;
+        case "None":
+        default:
+            return harvestingTool.item.layoutOrder;
+    }
 }
 
 /**
  * Individual tool option button component
  */
-export default function ToolOption({ data, onClick, animationsEnabled = true }: ToolOptionProps) {
-    const { tool, name, textureId, hotkeyNumber, isEquipped, layoutOrder } = data;
-    const [isPressed, setIsPressed] = useState(false);
-
-    const handleClick = useCallback(() => {
-        onClick?.(tool);
-    }, [onClick, tool]);
-
-    const handleMouseDown = useCallback(() => {
-        setIsPressed(true);
-    }, []);
-
-    const handleMouseUp = useCallback(() => {
-        setIsPressed(false);
-    }, []);
-
-    const { hovering, events } = useHover({});
-
+export default function ToolOption({ harvestingTool, isEquipped, onClick }: ToolOptionProps) {
     // Color based on equipped state
     const backgroundColor = isEquipped ? Color3.fromRGB(0, 184, 255) : Color3.fromRGB(31, 31, 31);
-
     const strokeColor = isEquipped ? Color3.fromRGB(0, 184, 255) : Color3.fromRGB(61, 61, 61);
-
-    // Apply press effect
-    const currentBackgroundColor = isPressed ? backgroundColor.Lerp(Color3.fromRGB(0, 0, 0), 0.2) : backgroundColor;
 
     return (
         <textbutton
-            key={name}
-            BackgroundColor3={currentBackgroundColor}
+            key={harvestingTool.item.id}
+            BackgroundColor3={backgroundColor}
             BorderColor3={Color3.fromRGB(0, 0, 0)}
             BorderSizePixel={4}
-            LayoutOrder={layoutOrder}
+            LayoutOrder={layoutOrderFromTool(harvestingTool)}
             Size={new UDim2(1, 0, 1, 0)}
             SizeConstraint={Enum.SizeConstraint.RelativeYY}
             Text=""
-            AutoButtonColor={false}
             Event={{
-                Activated: handleClick,
-                MouseButton1Down: handleMouseDown,
-                MouseButton1Up: handleMouseUp,
-                ...events,
+                Activated: () => {
+                    onClick(harvestingTool);
+                },
+                MouseMoved: () => {
+                    TooltipManager.showTooltip({ item: harvestingTool.item });
+                },
+                MouseLeave: () => {
+                    TooltipManager.hideTooltip();
+                },
             }}
         >
             {/* Background gradient */}
@@ -92,31 +77,12 @@ export default function ToolOption({ data, onClick, animationsEnabled = true }: 
                 Rotation={272}
             />
 
-            {/* Hotkey number label */}
-            <textlabel
-                key="AmountLabel"
-                Active={true}
-                AutomaticSize={Enum.AutomaticSize.X}
-                BackgroundTransparency={1}
-                FontFace={RobotoSlabMedium}
-                Position={new UDim2(0, 10, 0, 0)}
-                Size={new UDim2(1, 0, 0.4, 0)}
-                Text={tostring(hotkeyNumber)}
-                TextColor3={Color3.fromRGB(255, 255, 255)}
-                TextScaled={true}
-                TextSize={14}
-                TextWrapped={true}
-                TextXAlignment={Enum.TextXAlignment.Left}
-            >
-                <uistroke Thickness={2} />
-            </textlabel>
-
             {/* Tool icon */}
             <imagelabel
                 key="ImageLabel"
                 AnchorPoint={new Vector2(0.5, 0.5)}
                 BackgroundTransparency={1}
-                Image={textureId}
+                Image={harvestingTool.item.image}
                 Position={new UDim2(0.5, 0, 0.5, 0)}
                 Size={new UDim2(0.75, 0, 0.75, 0)}
                 ZIndex={0}
@@ -128,12 +94,12 @@ export default function ToolOption({ data, onClick, animationsEnabled = true }: 
                 AnchorPoint={new Vector2(0.5, 0)}
                 BackgroundTransparency={1}
                 Image={getAsset("assets/GridCheckers.png")}
-                ImageColor3={Color3.fromRGB(0, 0, 0)}
-                ImageTransparency={0.95}
+                ImageColor3={Color3.fromRGB(255, 255, 255)}
+                ImageTransparency={0.975}
                 Position={new UDim2(0.5, 0, 0, 0)}
                 ScaleType={Enum.ScaleType.Tile}
                 Size={new UDim2(1, 0, 1, 0)}
-                TileSize={new UDim2(0, 25, 0, 25)}
+                TileSize={new UDim2(0, 50, 0, 50)}
                 ZIndex={-4}
             />
 

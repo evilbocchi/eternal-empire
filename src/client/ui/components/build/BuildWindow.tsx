@@ -6,7 +6,8 @@
  */
 
 import React, { useRef, useState } from "@rbxts/react";
-import { TweenService, UserInputService } from "@rbxts/services";
+import { TweenService } from "@rbxts/services";
+import { Environment } from "@rbxts/ui-labs";
 import BuildButton from "client/ui/components/build/BuildButton";
 import { useWindow } from "client/ui/components/window/WindowManager";
 import { getAsset } from "shared/asset/AssetMap";
@@ -47,6 +48,7 @@ export default function BuildWindow({ state, callbacks }: BuildWindowProps) {
     const { hasSelection, isRestricted, animationsEnabled } = state;
     const { onDeselect, onRotate, onDelete, onPlace } = callbacks;
     const size = new UDim2(0.3, 0, 0, 75);
+    const closeSize = new UDim2(0, 0, 0, 0);
 
     useWindow({
         id: "Build",
@@ -60,7 +62,6 @@ export default function BuildWindow({ state, callbacks }: BuildWindowProps) {
         },
         onClose: () => {
             setVisible(false);
-            const closeSize = new UDim2(0, 0, 0, 0);
             const frame = ref.current;
             if (!frame) return;
             const tween = TweenService.Create(frame, new TweenInfo(0.2), { Size: closeSize });
@@ -82,7 +83,7 @@ export default function BuildWindow({ state, callbacks }: BuildWindowProps) {
             AnchorPoint={new Vector2(0.5, 1)}
             BackgroundTransparency={1}
             Position={new UDim2(0.5, 0, 0.95, -5)}
-            Size={size}
+            Size={closeSize}
         >
             {/* Deselect button */}
             <BuildButton
@@ -126,7 +127,7 @@ export default function BuildWindow({ state, callbacks }: BuildWindowProps) {
                     icon={getAsset("assets/Build/Place.png")}
                     iconColor={Color3.fromRGB(170, 255, 127)}
                     layoutOrder={5}
-                    visible={UserInputService.TouchEnabled}
+                    visible={Environment.UserInput.TouchEnabled}
                     animationsEnabled={animationsEnabled}
                     onClick={onPlace}
                 />

@@ -18,7 +18,7 @@ import BuildController from "client/controllers/gameplay/BuildController";
 import ToolController from "client/controllers/gameplay/ToolController";
 import InventoryController from "client/controllers/interface/InventoryController";
 import MainLayout from "client/ui/components/MainLayout";
-import BackpackManager from "client/ui/components/backpack/BackpackManager";
+import BackpackWindow from "client/ui/components/backpack/BackpackWindow";
 import BalanceWindow from "client/ui/components/balance/BalanceWindow";
 import BuildManager from "client/ui/components/build/BuildManager";
 import CommandsWindow from "client/ui/components/commands/CommandsWindow";
@@ -59,7 +59,7 @@ export default class AppController implements OnStart {
         );
         ReactRoblox.createRoot(LOGS_GUI).render(<LogsWindow />);
         ReactRoblox.createRoot(QUESTS_GUI).render(<QuestWindow />);
-        ReactRoblox.createRoot(BACKPACK_GUI).render(<BackpackManager toolController={this.toolController} />);
+        ReactRoblox.createRoot(BACKPACK_GUI).render(<BackpackWindow />);
         ReactRoblox.createRoot(STATS_GUI).render(<StatsWindow />);
     }
 }

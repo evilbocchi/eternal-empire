@@ -13,13 +13,9 @@
  */
 import SerikaNum from "@antivivi/serikanum";
 import { Controller, OnStart } from "@flamework/core";
-import { UserInputService } from "@rbxts/services";
 import HotkeysController from "client/controllers/core/HotkeysController";
-import { ADAPTIVE_TAB_MAIN_WINDOW } from "client/controllers/core/AdaptiveTabController";
 import UIController from "client/controllers/core/UIController";
-import { ASSETS, playSound } from "shared/asset/GameAssets";
 import Packets from "shared/Packets";
-import { paintObjects } from "@antivivi/vrldk";
 
 /**
  * Controller responsible for managing the settings window UI, hotkey rebinding, and toggleable settings.

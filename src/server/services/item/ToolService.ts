@@ -15,9 +15,9 @@
 
 import { OnInit, Service } from "@flamework/core";
 import { Players, Workspace } from "@rbxts/services";
+import DataService from "server/services/data/DataService";
 import ItemService from "server/services/item/ItemService";
 import { OnPlayerJoined } from "server/services/ModdingService";
-import DataService from "server/services/data/DataService";
 import { AREAS } from "shared/Area";
 import Harvestable from "shared/Harvestable";
 import HarvestingTool from "shared/item/traits/HarvestingTool";
@@ -38,9 +38,7 @@ export class ToolService implements OnInit, OnPlayerJoined, OnPlayerJoined {
     constructor(
         private itemService: ItemService,
         private dataService: DataService,
-    ) {
-        // ...existing code...
-    }
+    ) {}
 
     /**
      * Moves a harvestable instance to a new position.
@@ -53,36 +51,19 @@ export class ToolService implements OnInit, OnPlayerJoined, OnPlayerJoined {
     }
 
     /**
-     * Returns the best tools per tool type and a list of worse tools.
-     */
-    getBestTools() {
-        const items = this.dataService.empireData.items.inventory;
-        const tools = new Map<ToolType, HarvestingTool>();
-        const worse = new Array<HarvestingTool>();
-        for (const [id, amount] of items) {
-            const item = Items.getItem(id);
-            if (item === undefined || amount < 1) continue;
-            const harvestingTool = item.findTrait("HarvestingTool");
-            if (harvestingTool === undefined || harvestingTool.toolType === "None") continue;
-
-            const current = tools.get(harvestingTool.toolType);
-            if (current === undefined || current.item.difficulty.rating! < item.difficulty.rating!) {
-                tools.set(harvestingTool.toolType, harvestingTool);
-                if (current !== undefined) worse.push(current);
-            }
-        }
-        return $tuple(tools, worse);
-    }
-
-    /**
      * Refreshes the player's tools, giving best tools and removing worse ones.
      * @param player The player whose tools are refreshed.
      */
     refreshTools(player: Player) {
-        const [tools, worse] = this.getBestTools();
+        const [tools, worse] = HarvestingTool.getBestToolsFromInventory(
+            this.dataService.empireData.items.inventory,
+            Items.itemsPerId,
+        );
+        if (tools.size() === 0 && worse.size() === 0) return;
+        if (player.Character === undefined) return;
         const backpack = player.FindFirstChildOfClass("Backpack");
         if (backpack === undefined) return;
-        for (const [_, tool] of tools) {
+        for (const tool of tools) {
             const item = tool.item;
             const itemId = item.id;
             if (player.Character?.FindFirstChild(itemId) !== undefined || backpack.FindFirstChild(itemId) !== undefined)

@@ -1,16 +1,10 @@
-import React from "@rbxts/react";
+import React, { StrictMode } from "@rbxts/react";
 import ReactRoblox from "@rbxts/react-roblox";
 import { CreateReactStory } from "@rbxts/ui-labs";
 import BackpackWindow from "client/ui/components/backpack/BackpackWindow";
-import { ToolOptionData } from "client/ui/components/backpack/ToolOption";
-
-// Mock tool instances for testing
-const createMockTool = (name: string, textureId: string): Tool =>
-    ({
-        Name: name,
-        TextureId: textureId,
-        Parent: undefined,
-    }) as Tool;
+import StoryMocking from "client/ui/components/StoryMocking";
+import TooltipWindow from "client/ui/components/tooltip/TooltipWindow";
+import useVisibility from "client/ui/hooks/useVisibility";
 
 export = CreateReactStory(
     {
@@ -18,51 +12,17 @@ export = CreateReactStory(
         reactRoblox: ReactRoblox,
         controls: {
             visible: true,
-            hasTools: true,
-            animationsEnabled: true,
         },
     },
     (props) => {
-        const mockTools: ToolOptionData[] = props.controls.hasTools
-            ? [
-                  {
-                      tool: createMockTool("Wooden Pickaxe", "rbxassetid://123456789"),
-                      name: "Wooden Pickaxe",
-                      textureId: "rbxassetid://123456789",
-                      hotkeyNumber: 1,
-                      isEquipped: false,
-                      layoutOrder: 1,
-                  },
-                  {
-                      tool: createMockTool("Stone Axe", "rbxassetid://987654321"),
-                      name: "Stone Axe",
-                      textureId: "rbxassetid://987654321",
-                      hotkeyNumber: 2,
-                      isEquipped: true,
-                      layoutOrder: 2,
-                  },
-                  {
-                      tool: createMockTool("Iron Scythe", "rbxassetid://456789123"),
-                      name: "Iron Scythe",
-                      textureId: "rbxassetid://456789123",
-                      hotkeyNumber: 3,
-                      isEquipped: false,
-                      layoutOrder: 3,
-                  },
-              ]
-            : [];
-
-        const state = {
-            visible: props.controls.visible,
-            tools: mockTools,
-        };
-
-        const callbacks = {
-            onToolClick: (tool: Tool) => print(`Clicked tool: ${tool.Name}`),
-        };
+        StoryMocking.mockData();
+        useVisibility("Backpack", props.controls.visible);
 
         return (
-            <BackpackWindow state={state} callbacks={callbacks} animationsEnabled={props.controls.animationsEnabled} />
+            <StrictMode>
+                <BackpackWindow />
+                <TooltipWindow />
+            </StrictMode>
         );
     },
 );

@@ -44,18 +44,13 @@ declare global {
     }
 }
 
-// Legacy BACKPACK_WINDOW export - UI is now handled by React
-export const BACKPACK_WINDOW = INTERFACE.WaitForChild("BackpackWindow") as Frame & {
-    UIListLayout: UIListLayout;
-};
-
 /**
  * Controller responsible for managing tool usage, harvesting, and backpack data.
  *
  * Handles tool equipping, harvesting logic, tool animations, and tool data tracking for React UI.
  */
 @Controller()
-export default class ToolController implements OnInit, OnStart, OnCharacterAdded {
+export default class ToolController implements OnInit, OnCharacterAdded {
     swingAnimation?: AnimationTrack;
     harvestables = new Map<Instance, typeof ASSETS.HarvestableGui>();
     lastUse = 0;
@@ -351,14 +346,5 @@ export default class ToolController implements OnInit, OnStart, OnCharacterAdded
 
         // Don't parent to UI - React handles rendering
         // toolOption.Parent = BACKPACK_WINDOW; // Removed - React handles this
-    }
-
-    /**
-     * Starts the ToolController.
-     * Hides legacy BACKPACK_WINDOW since React handles the UI now.
-     */
-    onStart() {
-        // Hide the legacy BACKPACK_WINDOW since React components handle the UI
-        BACKPACK_WINDOW.Visible = false;
     }
 }
