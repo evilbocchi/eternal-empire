@@ -2,8 +2,8 @@ import React, { useEffect } from "@rbxts/react";
 import ReactRoblox from "@rbxts/react-roblox";
 import { CreateReactStory } from "@rbxts/ui-labs";
 import CopyWindow from "client/ui/components/settings/CopyWindow";
-import SingleDocumentManager from "../sidebar/SingleDocumentManager";
 import StoryMocking from "client/ui/components/StoryMocking";
+import { useSingleDocumentVisibility } from "client/ui/hooks/useVisibility";
 import Packets from "shared/Packets";
 
 export = CreateReactStory(
@@ -18,13 +18,7 @@ export = CreateReactStory(
     (props) => {
         StoryMocking.mockData();
 
-        useEffect(() => {
-            if (props.controls.visible) {
-                SingleDocumentManager.openWindow("Copy");
-            } else {
-                SingleDocumentManager.closeWindow("Copy");
-            }
-        }, [props.controls.visible]);
+        useSingleDocumentVisibility("Copy", props.controls.visible);
 
         useEffect(() => {
             Packets.codeReceived.toAllClients(props.controls.text);

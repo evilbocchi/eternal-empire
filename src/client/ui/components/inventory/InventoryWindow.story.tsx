@@ -1,10 +1,10 @@
-import React, { StrictMode, useEffect } from "@rbxts/react";
+import React, { StrictMode } from "@rbxts/react";
 import ReactRoblox from "@rbxts/react-roblox";
 import { CreateReactStory } from "@rbxts/ui-labs";
 import InventoryWindow from "client/ui/components/inventory/InventoryWindow";
-import SingleDocumentManager from "../sidebar/SingleDocumentManager";
 import StoryMocking from "client/ui/components/StoryMocking";
 import TooltipWindow from "client/ui/components/tooltip/TooltipWindow";
+import { useSingleDocumentVisibility } from "client/ui/hooks/useVisibility";
 
 export = CreateReactStory(
     {
@@ -17,13 +17,7 @@ export = CreateReactStory(
     (props) => {
         StoryMocking.mockData();
 
-        useEffect(() => {
-            if (props.controls.visible) {
-                SingleDocumentManager.openWindow("Inventory");
-            } else {
-                SingleDocumentManager.closeWindow("Inventory");
-            }
-        }, [props.controls.visible]);
+        useSingleDocumentVisibility("Inventory", props.controls.visible);
 
         // const buildController = new BuildController();
         // const inventoryController = new InventoryController(buildController);

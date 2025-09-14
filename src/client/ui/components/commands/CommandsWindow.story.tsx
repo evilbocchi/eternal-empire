@@ -1,8 +1,8 @@
-import React, { useEffect } from "@rbxts/react";
+import React from "@rbxts/react";
 import ReactRoblox from "@rbxts/react-roblox";
 import { CreateReactStory } from "@rbxts/ui-labs";
 import CommandsWindow from "client/ui/components/commands/CommandsWindow";
-import SingleDocumentManager from "../sidebar/SingleDocumentManager";
+import { useSingleDocumentVisibility } from "client/ui/hooks/useVisibility";
 
 export = CreateReactStory(
     {
@@ -14,14 +14,7 @@ export = CreateReactStory(
         },
     },
     (props) => {
-        useEffect(() => {
-            if (props.controls.visible) {
-                SingleDocumentManager.openWindow("Commands");
-            } else {
-                SingleDocumentManager.closeWindow("Commands");
-            }
-        }, [props.controls.visible]);
-
+        useSingleDocumentVisibility("Commands", props.controls.visible);
         return <CommandsWindow defaultPermissionLevel={props.controls.userPermissionLevel} />;
     },
 );

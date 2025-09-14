@@ -1,10 +1,10 @@
 import { OnoeNum } from "@antivivi/serikanum";
-import React, { useEffect } from "@rbxts/react";
+import React from "@rbxts/react";
 import ReactRoblox from "@rbxts/react-roblox";
 import { CreateReactStory } from "@rbxts/ui-labs";
-import SingleDocumentManager from "../sidebar/SingleDocumentManager";
 import StatsWindow, { PingManager } from "client/ui/components/stats/StatsWindow";
 import StoryMocking from "client/ui/components/StoryMocking";
+import { useSingleDocumentVisibility } from "client/ui/hooks/useVisibility";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import { CURRENCY_DETAILS } from "shared/currency/CurrencyDetails";
 import Packets from "shared/Packets";
@@ -20,13 +20,7 @@ export = CreateReactStory(
     (props) => {
         StoryMocking.mockData();
 
-        useEffect(() => {
-            if (props.controls.visible) {
-                SingleDocumentManager.openWindow("Stats");
-            } else {
-                SingleDocumentManager.closeWindow("Stats");
-            }
-        }, [props.controls.visible]);
+        useSingleDocumentVisibility("Stats", props.controls.visible);
 
         for (let i = 0; i < 10; i++) {
             PingManager.logPing(math.random(50, 300) / 1000); // Simulate random ping

@@ -23,7 +23,6 @@ interface BuildManagerProps {
  */
 export default function BuildManager({ buildController }: BuildManagerProps) {
     const [buildState, setBuildState] = useState<BuildWindowState>({
-        visible: false,
         hasSelection: false,
         isRestricted: false,
         animationsEnabled: true,

@@ -1,18 +1,8 @@
-import React from "@rbxts/react";
+import React, { useRef, useState } from "@rbxts/react";
+import { RobotoSlabHeavy } from "client/ui/GameFonts";
+import { useWindow } from "client/ui/components/window/WindowManager";
 import { getAsset } from "shared/asset/AssetMap";
 import { useMessageTooltip } from "../tooltip/TooltipManager";
-import { RobotoSlabHeavy } from "client/ui/GameFonts";
-
-interface PositionWindowProps {
-    /** The position coordinates to display */
-    position?: Vector3;
-    /** Whether the window is visible */
-    visible?: boolean;
-    /** Custom styling for the window */
-    anchorPoint?: Vector2;
-    windowPosition?: UDim2;
-    size?: UDim2;
-}
 
 /**
  * PositionWindow displays the player's current coordinates in a styled frame.
@@ -21,25 +11,51 @@ interface PositionWindowProps {
  * The component is designed to be positioned in the top-right corner of the screen.
  */
 export default function PositionWindow({
-    position = new Vector3(),
-    visible = true,
+    characterPosition = new Vector3(),
     anchorPoint = new Vector2(1, 0),
     windowPosition = new UDim2(1, -20, 0, 10),
     size = new UDim2(0, 0, 0, 16),
-}: PositionWindowProps) {
-    const positionText = `${math.round(position.X)}, ${math.round(position.Y)}, ${math.round(position.Z)}`;
+}: {
+    /** The position coordinates to display */
+    characterPosition?: Vector3;
+    /** Custom styling for the window */
+    anchorPoint?: Vector2;
+    /** Custom position for the window */
+    windowPosition?: UDim2;
+    /** Custom size for the window */
+    size?: UDim2;
+}) {
+    const ref = useRef<Frame>();
+    const [visible, setVisible] = useState(true);
+
+    useWindow({
+        id: "Position",
+        visible,
+        onOpen: () => {
+            setVisible(true);
+            ref.current?.TweenPosition(windowPosition, Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 1.5, true);
+        },
+        onClose: () => {
+            setVisible(false);
+            const closedPos = windowPosition.add(new UDim2(0, 0, 0, -50));
+            ref.current?.TweenPosition(closedPos, Enum.EasingDirection.In, Enum.EasingStyle.Quad, 1.5, true);
+        },
+        priority: 10, // High priority so it closes first
+    });
+
+    const positionText = `${math.round(characterPosition.X)}, ${math.round(characterPosition.Y)}, ${math.round(characterPosition.Z)}`;
     const { events } = useMessageTooltip(
         `Position of your character.\n<font color="rgb(200, 200, 200)" size="16">Use these coordinates to search your way through the world.</font>`,
     );
 
     return (
         <frame
+            ref={ref}
             key="PositionWindow"
             AnchorPoint={anchorPoint}
             BackgroundTransparency={1}
             Position={windowPosition}
             Size={size}
-            Visible={visible}
         >
             {/* Compass Icon */}
             <imagelabel

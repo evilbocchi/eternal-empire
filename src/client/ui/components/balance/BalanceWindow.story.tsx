@@ -1,9 +1,9 @@
-import React, { useEffect } from "@rbxts/react";
+import React from "@rbxts/react";
 import ReactRoblox from "@rbxts/react-roblox";
 import { CreateReactStory, Number } from "@rbxts/ui-labs";
 import BalanceWindow from "client/ui/components/balance/BalanceWindow";
 import StoryMocking from "client/ui/components/StoryMocking";
-import WindowManager from "client/ui/components/window/WindowManager";
+import useVisibility from "client/ui/hooks/useVisibility";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import { CURRENCIES } from "shared/currency/CurrencyDetails";
 import Packets from "shared/Packets";
@@ -37,10 +37,7 @@ export = CreateReactStory(
             Packets.balance.set(newBalance);
         }
 
-        useEffect(() => {
-            WindowManager.setWindowVisible("Balance", props.controls.visible);
-        }, [props.controls.visible]);
-
+        useVisibility("Balance", props.controls.visible);
         return <BalanceWindow />;
     },
 );

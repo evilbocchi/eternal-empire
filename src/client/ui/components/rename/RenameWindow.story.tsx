@@ -1,10 +1,10 @@
 import { OnoeNum } from "@antivivi/serikanum";
-import React, { useEffect } from "@rbxts/react";
+import React from "@rbxts/react";
 import ReactRoblox from "@rbxts/react-roblox";
 import { CreateReactStory } from "@rbxts/ui-labs";
 import RenameWindow from "client/ui/components/rename/RenameWindow";
-import SingleDocumentManager from "../sidebar/SingleDocumentManager";
 import StoryMocking from "client/ui/components/StoryMocking";
+import { useSingleDocumentVisibility } from "client/ui/hooks/useVisibility";
 import Packets from "shared/Packets";
 
 export = CreateReactStory(
@@ -20,13 +20,7 @@ export = CreateReactStory(
     (props) => {
         StoryMocking.mockData();
 
-        useEffect(() => {
-            if (props.controls.visible) {
-                SingleDocumentManager.openWindow("Rename");
-            } else {
-                SingleDocumentManager.closeWindow("Rename");
-            }
-        }, [props.controls.visible]);
+        useSingleDocumentVisibility("Rename", props.controls.visible);
 
         Packets.empireName.set(props.controls.name);
         Packets.renameCost.set(OnoeNum.fromSerika(1, props.controls.renameExponent));

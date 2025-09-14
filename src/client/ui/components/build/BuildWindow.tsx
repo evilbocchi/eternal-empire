@@ -5,14 +5,13 @@
  * Manages visibility, animations, and user interactions for the build system.
  */
 
-import React from "@rbxts/react";
-import { UserInputService } from "@rbxts/services";
+import React, { useRef, useState } from "@rbxts/react";
+import { TweenService, UserInputService } from "@rbxts/services";
 import BuildButton from "client/ui/components/build/BuildButton";
+import { useWindow } from "client/ui/components/window/WindowManager";
 import { getAsset } from "shared/asset/AssetMap";
 
 export interface BuildWindowState {
-    /** Whether the build window is visible */
-    visible: boolean;
     /** Whether there are items currently selected */
     hasSelection: boolean;
     /** Whether building is currently restricted */
@@ -43,20 +42,47 @@ interface BuildWindowProps {
  * Main build window component that displays build controls
  */
 export default function BuildWindow({ state, callbacks }: BuildWindowProps) {
-    const { visible, hasSelection, isRestricted, animationsEnabled } = state;
+    const ref = useRef<Frame>();
+    const [visible, setVisible] = useState<boolean>(false);
+    const { hasSelection, isRestricted, animationsEnabled } = state;
     const { onDeselect, onRotate, onDelete, onPlace } = callbacks;
+    const size = new UDim2(0.3, 0, 0, 75);
+
+    useWindow({
+        id: "Build",
+        visible,
+        onOpen: () => {
+            setVisible(true);
+            const frame = ref.current;
+            if (!frame) return;
+            frame.Visible = true;
+            TweenService.Create(frame, new TweenInfo(0.2), { Size: size }).Play();
+        },
+        onClose: () => {
+            setVisible(false);
+            const closeSize = new UDim2(0, 0, 0, 0);
+            const frame = ref.current;
+            if (!frame) return;
+            const tween = TweenService.Create(frame, new TweenInfo(0.2), { Size: closeSize });
+            tween.Completed.Once((playbackState) => {
+                if (playbackState !== Enum.PlaybackState.Completed) return;
+                frame.Visible = false;
+            });
+            tween.Play();
+        },
+    });
 
     // Don't render if there's no selection or building is restricted
     const shouldShow = visible && hasSelection && !isRestricted;
 
     return (
         <frame
+            ref={ref}
             Active={true}
             AnchorPoint={new Vector2(0.5, 1)}
             BackgroundTransparency={1}
             Position={new UDim2(0.5, 0, 0.95, -5)}
-            Size={new UDim2(0.3, 0, 0, 75)}
-            Visible={shouldShow}
+            Size={size}
         >
             {/* Deselect button */}
             <BuildButton

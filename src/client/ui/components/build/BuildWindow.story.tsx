@@ -2,6 +2,7 @@ import React from "@rbxts/react";
 import ReactRoblox from "@rbxts/react-roblox";
 import { CreateReactStory } from "@rbxts/ui-labs";
 import BuildWindow from "client/ui/components/build/BuildWindow";
+import useVisibility from "client/ui/hooks/useVisibility";
 
 export = CreateReactStory(
     {
@@ -16,7 +17,6 @@ export = CreateReactStory(
     },
     (props) => {
         const state = {
-            visible: props.controls.visible,
             hasSelection: props.controls.hasSelection,
             isRestricted: props.controls.isRestricted,
             animationsEnabled: props.controls.animationsEnabled,
@@ -28,6 +28,8 @@ export = CreateReactStory(
             onDelete: () => print("Delete clicked"),
             onPlace: () => print("Place clicked"),
         };
+
+        useVisibility("Build", props.controls.visible);
 
         return <BuildWindow state={state} callbacks={callbacks} />;
     },

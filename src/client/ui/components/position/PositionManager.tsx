@@ -23,7 +23,6 @@ interface PositionManagerProps {
  */
 export default function PositionManager({
     player = LOCAL_PLAYER,
-    visible = true,
     anchorPoint,
     windowPosition,
     size,
@@ -32,8 +31,7 @@ export default function PositionManager({
 
     return (
         <PositionWindow
-            position={position}
-            visible={visible}
+            characterPosition={position}
             anchorPoint={anchorPoint}
             windowPosition={windowPosition}
             size={size}

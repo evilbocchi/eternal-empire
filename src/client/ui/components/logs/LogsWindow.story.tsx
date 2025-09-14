@@ -3,8 +3,8 @@ import React, { useEffect } from "@rbxts/react";
 import ReactRoblox from "@rbxts/react-roblox";
 import { CreateReactStory } from "@rbxts/ui-labs";
 import LogsWindow from "client/ui/components/logs/LogsWindow";
-import SingleDocumentManager from "../sidebar/SingleDocumentManager";
 import StoryMocking from "client/ui/components/StoryMocking";
+import { useSingleDocumentVisibility } from "client/ui/hooks/useVisibility";
 import Packets from "shared/Packets";
 
 export = CreateReactStory(
@@ -20,13 +20,7 @@ export = CreateReactStory(
     (props) => {
         StoryMocking.mockData();
 
-        useEffect(() => {
-            if (props.controls.visible) {
-                SingleDocumentManager.openWindow("Logs");
-            } else {
-                SingleDocumentManager.closeWindow("Logs");
-            }
-        }, [props.controls.visible]);
+        useSingleDocumentVisibility("Logs", props.controls.visible);
 
         // Mock log data with various types
         const mockLogs: Log[] = [];
