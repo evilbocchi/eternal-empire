@@ -11,7 +11,7 @@ import type InventoryController from "client/controllers/interface/InventoryCont
 import InventoryEmptyState from "client/ui/components/inventory/InventoryEmptyState";
 import InventoryFilter, { isWhitelisted, traitOptions } from "client/ui/components/inventory/InventoryFilter";
 import InventoryItemSlot from "client/ui/components/inventory/InventoryItemSlot";
-import useWindowVisibility from "client/ui/components/sidebar/useWindowVisibility";
+import useSingleDocumentWindow from "client/ui/components/sidebar/useSingleDocumentWindow";
 import BasicWindow from "client/ui/components/window/BasicWindow";
 import { RobotoMono } from "client/ui/GameFonts";
 import useProperty from "client/ui/hooks/useProperty";
@@ -76,7 +76,7 @@ const SEARCHABLE_ITEMS = Items.sortedItems.filter((item) => !item.isA("Harvestin
  * Main inventory window component following the QuestWindow pattern
  */
 export default function InventoryWindow({ inventoryController }: InventoryWindowProps) {
-    const { visible, closeWindow } = useWindowVisibility("Inventory");
+    const { visible, closeWindow } = useSingleDocumentWindow("Inventory");
     const [searchQuery, setSearchQuery] = useState("");
     const [queryTime, setQueryTime] = useState(0);
     const [traitFilters, setTraitFilters] = useState<Set<TraitFilterId>>(new Set());

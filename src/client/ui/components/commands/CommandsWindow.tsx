@@ -2,7 +2,7 @@ import { FuzzySearch } from "@rbxts/fuzzy-search";
 import React, { useEffect, useState } from "@rbxts/react";
 import { LOCAL_PLAYER } from "client/constants";
 import CommandOption from "client/ui/components/commands/CommandOption";
-import useWindowVisibility from "client/ui/components/sidebar/useWindowVisibility";
+import useSingleDocumentWindow from "client/ui/components/sidebar/useSingleDocumentWindow";
 import TechWindow from "client/ui/components/window/TechWindow";
 import { RobotoSlab, RobotoSlabMedium } from "client/ui/GameFonts";
 import { getAsset } from "shared/asset/AssetMap";
@@ -20,7 +20,7 @@ const COMMAND_PER_ID = Command.listAllCommands();
 
 export default function CommandsWindow({ defaultPermissionLevel }: CommandsWindowProps) {
     const [userPermissionLevel, setUserPermissionLevel] = useState(defaultPermissionLevel ?? 0);
-    const { visible, closeWindow } = useWindowVisibility("Commands");
+    const { visible, closeWindow } = useSingleDocumentWindow("Commands");
     const [filteredCommands, setFilteredCommands] = useState<Set<CommandInfo>>(new Set());
     const [searchText, setSearchText] = useState("");
 

@@ -14,7 +14,7 @@ import { OnoeNum } from "@antivivi/serikanum";
 import { convertToHHMMSS } from "@antivivi/vrldk";
 import React, { Fragment, useEffect, useState } from "@rbxts/react";
 import { LOCAL_PLAYER } from "client/constants";
-import useWindowVisibility from "client/ui/components/sidebar/useWindowVisibility";
+import useSingleDocumentWindow from "client/ui/components/sidebar/useSingleDocumentWindow";
 import SectionHeader from "client/ui/components/stats/SectionHeader";
 import StatItem from "client/ui/components/stats/StatItem";
 import TechWindow from "client/ui/components/window/TechWindow";
@@ -42,7 +42,7 @@ export class PingManager {
  * Features enhanced visual design with modern styling and smooth interactions
  */
 export default function StatsWindow() {
-    const { visible, closeWindow } = useWindowVisibility("Stats");
+    const { visible, closeWindow } = useSingleDocumentWindow("Stats");
 
     // Observe data from packets
     const empirePlaytime = useProperty(Packets.empirePlaytime);

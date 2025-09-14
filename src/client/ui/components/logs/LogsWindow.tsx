@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from "@rbxts/react";
 import LogEntry from "client/ui/components/logs/LogEntry";
 import PaginationControls from "client/ui/components/logs/PaginationControls";
-import useWindowVisibility from "client/ui/components/sidebar/useWindowVisibility";
+import useSingleDocumentWindow from "client/ui/components/sidebar/useSingleDocumentWindow";
 import TechWindow from "client/ui/components/window/TechWindow";
 import { RobotoMonoBold } from "client/ui/GameFonts";
 import { getAsset } from "shared/asset/AssetMap";
@@ -14,7 +14,7 @@ const LOGS_PER_PAGE = 20;
  * Features enhanced visual design with modern styling and smooth interactions
  */
 export default function LogsWindow() {
-    const { visible, closeWindow } = useWindowVisibility("Logs");
+    const { visible, closeWindow } = useSingleDocumentWindow("Logs");
 
     // State for logs and pagination
     const [logs, setLogs] = useState<Log[]>([]);

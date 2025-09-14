@@ -12,11 +12,6 @@ interface WindowCloseButtonProps {
 export default function WindowCloseButton({ onClick, color = Color3.fromRGB(255, 76, 76) }: WindowCloseButtonProps) {
     const closeButtonRef = useRef<TextButton>();
 
-    const handleClick = () => {
-        playSound("MenuClose.mp3");
-        onClick();
-    };
-
     const handleEnter = () =>
         TweenService.Create(closeButtonRef.current!, new TweenInfo(0.1), {
             BackgroundColor3: color.Lerp(new Color3(1, 1, 1), 0.5),
@@ -46,7 +41,10 @@ export default function WindowCloseButton({ onClick, color = Color3.fromRGB(255,
             BorderSizePixel={3}
             Event={{
                 ...tooltipProps.events,
-                Activated: handleClick,
+                Activated: () => {
+                    playSound("MenuClose.mp3");
+                    onClick();
+                },
             }}
             Position={new UDim2(1, -10, 0, 10)}
             Size={new UDim2(0, 30, 0, 30)}

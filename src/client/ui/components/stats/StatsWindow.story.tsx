@@ -2,7 +2,7 @@ import { OnoeNum } from "@antivivi/serikanum";
 import React, { useEffect } from "@rbxts/react";
 import ReactRoblox from "@rbxts/react-roblox";
 import { CreateReactStory } from "@rbxts/ui-labs";
-import { SidebarManager } from "client/ui/components/sidebar/SidebarButtons";
+import { SingleDocumentManager } from "client/ui/components/sidebar/SidebarButtons";
 import StatsWindow, { PingManager } from "client/ui/components/stats/StatsWindow";
 import StoryMocking from "client/ui/components/StoryMocking";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
@@ -22,9 +22,9 @@ export = CreateReactStory(
 
         useEffect(() => {
             if (props.controls.visible) {
-                SidebarManager.openWindow("Stats");
+                SingleDocumentManager.openWindow("Stats");
             } else {
-                SidebarManager.closeWindow("Stats");
+                SingleDocumentManager.closeWindow("Stats");
             }
         }, [props.controls.visible]);
 

@@ -13,14 +13,13 @@
  * - Glow effects for active states
  */
 
-import Signal from "@antivivi/lemon-signal";
 import React, { useCallback, useEffect, useRef, useState } from "@rbxts/react";
 import { TweenService } from "@rbxts/services";
 import useHotkeyWithTooltip from "client/ui/components/hotkeys/useHotkeyWithTooltip";
+import WindowManager from "client/ui/components/window/WindowManager";
 import { RobotoSlabBold } from "client/ui/GameFonts";
 import { getAsset } from "shared/asset/AssetMap";
 import { playSound } from "shared/asset/GameAssets";
-import Packets from "shared/Packets";
 
 interface SidebarButtonProps {
     /** Button configuration data */
@@ -216,37 +215,63 @@ export function SidebarButton({ data, layoutOrder, onClick, animationsEnabled = 
     );
 }
 
-export class SidebarManager {
-    static buttonClicked = new Signal<string>();
-    static windowToggled = new Signal<[string, boolean]>();
+/**
+ * Manages single-document interface behavior for sidebar windows
+ */
+export class SingleDocumentManager {
     static activeWindow?: string;
 
+    /**
+     * Toggles the visibility of a window by its name, disabling the last opened window if necessary.
+     * @param windowName The unique name of the window to toggle.
+     * @returns True if the window was opened, false if it was closed.
+     */
     static toggleWindow(windowName: string) {
         if (this.activeWindow === windowName) {
             this.activeWindow = undefined;
-        } else {
-            this.activeWindow = windowName;
+            WindowManager.setWindowVisible(windowName, false);
+            return false;
         }
-        this.windowToggled.fire(windowName, this.activeWindow !== undefined);
-        return this.activeWindow === windowName;
+
+        if (this.activeWindow) {
+            WindowManager.setWindowVisible(this.activeWindow, false);
+        }
+
+        this.activeWindow = windowName;
+        WindowManager.setWindowVisible(windowName, true);
+        return true;
     }
 
+    /**
+     * Opens a window by its name, closing any previously opened window.
+     * @param windowName The unique name of the window to open.
+     * @returns True if the window was opened, false if it was already open.
+     */
     static openWindow(windowName: string) {
-        if (this.activeWindow !== windowName) {
-            this.activeWindow = windowName;
-            this.windowToggled.fire(windowName, true);
-        }
-    }
-
-    static closeWindow(windowName: string) {
         if (this.activeWindow === windowName) {
-            this.activeWindow = undefined;
-            this.windowToggled.fire(windowName, false);
+            return false;
         }
+
+        if (this.activeWindow) {
+            WindowManager.setWindowVisible(this.activeWindow, false);
+        }
+        this.activeWindow = windowName;
+        WindowManager.setWindowVisible(windowName, true);
     }
 
-    static {
-        Packets.tabOpened.fromServer((tab) => this.openWindow(tab));
+    /**
+     * Closes a window by its name if it is currently open.
+     * @param windowName The unique name of the window to close.
+     * @returns True if the window was closed, false if it was not open.
+     */
+    static closeWindow(windowName: string) {
+        if (this.activeWindow !== windowName) {
+            return false;
+        }
+
+        this.activeWindow = undefined;
+        WindowManager.setWindowVisible(windowName, false);
+        return true;
     }
 }
 
@@ -300,9 +325,7 @@ export default function SidebarButtons({
 
     // Button click handler
     const handleButtonClick = useCallback((buttonName: string) => {
-        SidebarManager.buttonClicked.fire(buttonName);
-
-        const result = SidebarManager.toggleWindow(buttonName);
+        const result = SingleDocumentManager.toggleWindow(buttonName);
         if (result) playSound("MenuOpen.mp3");
         else playSound("MenuClose.mp3");
     }, []);

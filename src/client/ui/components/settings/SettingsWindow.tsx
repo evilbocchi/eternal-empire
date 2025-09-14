@@ -5,8 +5,8 @@ import IconButton from "client/ui/components/IconButton";
 import HotkeyOption from "client/ui/components/settings/HotkeyOption";
 import SettingSection from "client/ui/components/settings/SettingSection";
 import SettingToggle from "client/ui/components/settings/SettingToggle";
-import { SidebarManager } from "client/ui/components/sidebar/SidebarButtons";
-import useWindowVisibility from "client/ui/components/sidebar/useWindowVisibility";
+import { SingleDocumentManager } from "client/ui/components/sidebar/SidebarButtons";
+import useSingleDocumentWindow from "client/ui/components/sidebar/useSingleDocumentWindow";
 import TechWindow from "client/ui/components/window/TechWindow";
 import useProperty from "client/ui/hooks/useProperty";
 import { getAsset } from "shared/asset/AssetMap";
@@ -16,7 +16,7 @@ import Packets from "shared/Packets";
 export function SettingsButton() {
     const tooltipProps = useHotkeyWithTooltip({
         action: () => {
-            const enabled = SidebarManager.toggleWindow("Settings");
+            const enabled = SingleDocumentManager.toggleWindow("Settings");
             if (enabled) {
                 playSound("MenuOpen.mp3");
             } else {
@@ -41,7 +41,7 @@ export function SettingsButton() {
 }
 
 export default function SettingsWindow() {
-    const { visible, closeWindow } = useWindowVisibility("Settings");
+    const { visible, closeWindow } = useSingleDocumentWindow("Settings");
     const [selectedHotkey, setSelectedHotkey] = useState<string | undefined>();
     const settings = useProperty(Packets.settings);
 

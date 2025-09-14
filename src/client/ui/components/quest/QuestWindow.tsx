@@ -1,7 +1,7 @@
 import React, { useCallback, useMemo, useState } from "@rbxts/react";
 import QuestOption from "client/ui/components/quest/QuestOption";
 import { useQuestData } from "client/ui/components/quest/useQuestData";
-import useWindowVisibility from "client/ui/components/sidebar/useWindowVisibility";
+import useSingleDocumentWindow from "client/ui/components/sidebar/useSingleDocumentWindow";
 import BasicWindow from "client/ui/components/window/BasicWindow";
 import ProgressBar from "client/ui/components/window/ProgressBar";
 import { RobotoSlabHeavy } from "client/ui/GameFonts";
@@ -10,7 +10,7 @@ import { playSound } from "shared/asset/GameAssets";
 import { getMaxXp } from "shared/constants";
 
 export default function QuestWindow() {
-    const { visible, closeWindow } = useWindowVisibility("Quests");
+    const { visible, closeWindow } = useSingleDocumentWindow("Quests");
     const { questInfo, stagePerQuest, level, xp, trackedQuest, onTrackQuest } = useQuestData();
     const maxXp = getMaxXp(level);
 

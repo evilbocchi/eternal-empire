@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from "@rbxts/react";
-import useWindowVisibility from "client/ui/components/sidebar/useWindowVisibility";
+import useSingleDocumentWindow from "client/ui/components/sidebar/useSingleDocumentWindow";
 import TechWindow from "client/ui/components/window/TechWindow";
 import { RobotoMono } from "client/ui/GameFonts";
 import Packets from "shared/Packets";
 
 export default function CopyWindow() {
-    const { visible, closeWindow, openWindow } = useWindowVisibility("Copy");
+    const { visible, closeWindow, openWindow } = useSingleDocumentWindow("Copy");
     const [text, setText] = useState("Copy this text");
 
     useEffect(() => {

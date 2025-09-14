@@ -2,7 +2,7 @@ import React, { useEffect } from "@rbxts/react";
 import ReactRoblox from "@rbxts/react-roblox";
 import { CreateReactStory } from "@rbxts/ui-labs";
 import CommandsWindow from "client/ui/components/commands/CommandsWindow";
-import { SidebarManager } from "client/ui/components/sidebar/SidebarButtons";
+import { SingleDocumentManager } from "client/ui/components/sidebar/SidebarButtons";
 
 export = CreateReactStory(
     {
@@ -16,9 +16,9 @@ export = CreateReactStory(
     (props) => {
         useEffect(() => {
             if (props.controls.visible) {
-                SidebarManager.openWindow("Commands");
+                SingleDocumentManager.openWindow("Commands");
             } else {
-                SidebarManager.closeWindow("Commands");
+                SingleDocumentManager.closeWindow("Commands");
             }
         }, [props.controls.visible]);
 

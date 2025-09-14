@@ -8,13 +8,26 @@
 
 import { useEffect, useRef } from "@rbxts/react";
 import HotkeyManager from "client/ui/components/hotkeys/HotkeyManager";
-import { playSound } from "shared/asset/GameAssets";
+import Packets from "shared/Packets";
 
-interface WindowInfo {
+/**
+ * Information about a registered window.
+ */
+export interface WindowInfo {
+    /** Unique identifier for the window */
     id: string;
+
+    /** Whether the window is currently visible */
     visible: boolean;
-    onClose: () => void;
-    priority?: number; // Higher priority windows get closed first
+
+    /** Callback function to be called when the window is opened */
+    onOpen?: () => void;
+
+    /** Callback function to be called when the window is closed */
+    onClose?: () => void;
+
+    /** Priority for closing windows (higher priority closes first) */
+    priority?: number;
 }
 
 /**
@@ -22,28 +35,55 @@ interface WindowInfo {
  */
 export default class WindowManager {
     private static windows = new Map<string, WindowInfo>();
+    private static tabOpenedConnection: RBXScriptConnection;
     private static initialized = false;
 
-    static registerWindow({ id, onClose, priority = 0 }: Omit<WindowInfo, "visible">): void {
+    /**
+     * Registers a new window with the window manager, allowing it to be tracked and managed
+     * with features like the global close hotkey.
+     *
+     * @param windowInfo Information about the window to register (id, onClose, priority).
+     */
+    static registerWindow(windowInfo: Omit<WindowInfo, "visible">): void {
+        const { id, onOpen, onClose, priority = 0 } = windowInfo;
         this.windows.set(id, {
             id,
             visible: false,
+            onOpen,
             onClose,
             priority,
         });
     }
 
+    /**
+     * Unregisters a window from the window manager, removing it from tracking.
+     *
+     * @param id The unique identifier of the window to unregister.
+     */
     static unregisterWindow(id: string): void {
         this.windows.delete(id);
     }
 
-    static setWindowVisible(id: string, visible: boolean): void {
+    /**
+     * Sets the visibility of a registered window.
+     * @param id The unique identifier of the window.
+     * @param visible Whether the window should be visible or not.
+     * @returns True if the window was found and updated, false otherwise.
+     */
+    static setWindowVisible(id: string, visible: boolean): boolean {
         const window = this.windows.get(id);
-        if (window) {
-            window.visible = visible;
-        }
+        if (!window) return false;
+        window.visible = visible;
+        if (visible) window.onOpen?.();
+        else window.onClose?.();
+        return true;
     }
 
+    /**
+     * Gets a list of all currently visible windows, sorted by priority (higher priority first).
+     *
+     * @returns Array of visible WindowInfo objects.
+     */
     static getVisibleWindows(): WindowInfo[] {
         const visibleWindows: WindowInfo[] = [];
         for (const [_, window] of this.windows) {
@@ -61,9 +101,10 @@ export default class WindowManager {
         return window ? window.visible : false;
     }
 
-    static initialize(): void {
-        if (this.initialized) return;
-        this.initialized = true;
+    private static initialize(): void {
+        if (this.initialized) {
+            this.cleanup();
+        }
 
         // Register global close hotkey
         HotkeyManager.bindHotkey({
@@ -73,19 +114,22 @@ export default class WindowManager {
                     // Close the highest priority visible window
                     const windowToClose = visibleWindows[0];
                     if (windowToClose.priority !== undefined && windowToClose.priority < 0) return false; // Ignore windows with negative priority
-                    playSound("MenuClose.mp3");
-                    windowToClose.onClose();
-                    return true;
+
+                    return this.setWindowVisible(windowToClose.id, false);
                 }
                 return false;
             },
             priority: 0,
             label: "Close Window",
         });
+
+        this.tabOpenedConnection = Packets.tabOpened.fromServer((tab) => this.setWindowVisible(tab, true));
+        this.initialized = true;
     }
 
-    static cleanup(): void {
+    private static cleanup(): void {
         this.windows.clear();
+        this.tabOpenedConnection?.Disconnect();
         this.initialized = false;
     }
 
@@ -98,17 +142,26 @@ export default class WindowManager {
  * Hook for window components to register themselves with the window manager
  * Works across different React roots
  */
-export function useWindow({ id, visible, onClose, priority = 0 }: WindowInfo) {
+export function useWindow({ id, visible, onOpen, onClose, priority = 0 }: WindowInfo) {
+    const onOpenRef = useRef(onOpen);
     const onCloseRef = useRef(onClose);
 
-    // Update the onClose ref when it changes
+    useEffect(() => {
+        onOpenRef.current = onOpen;
+    }, [onOpen]);
+
     useEffect(() => {
         onCloseRef.current = onClose;
     }, [onClose]);
 
     // Register/unregister the window (only when id or priority changes)
     useEffect(() => {
-        WindowManager.registerWindow({ id, onClose: () => onCloseRef.current(), priority });
+        WindowManager.registerWindow({
+            id,
+            onOpen: () => onOpenRef.current?.(),
+            onClose: () => onCloseRef.current?.(),
+            priority,
+        });
         return () => WindowManager.unregisterWindow(id);
     }, [id, priority]);
 

@@ -15,7 +15,7 @@ import { OnoeNum } from "@antivivi/serikanum";
 import React, { useCallback, useState } from "@rbxts/react";
 import EmpireNameInput from "client/ui/components/rename/EmpireNameInput";
 import PurchaseButton from "client/ui/components/rename/PurchaseButton";
-import useWindowVisibility from "client/ui/components/sidebar/useWindowVisibility";
+import useSingleDocumentWindow from "client/ui/components/sidebar/useSingleDocumentWindow";
 import TechWindow from "client/ui/components/window/TechWindow";
 import { RobotoSlab, RobotoSlabBold } from "client/ui/GameFonts";
 import useProperty from "client/ui/hooks/useProperty";
@@ -29,7 +29,7 @@ import Packets from "shared/Packets";
  * Features modern design with validation and smooth user interactions
  */
 export default function RenameWindow() {
-    const { visible, closeWindow } = useWindowVisibility("Rename");
+    const { visible, closeWindow } = useSingleDocumentWindow("Rename");
 
     // Observe data from packets
     const renameCost = useProperty(Packets.renameCost);

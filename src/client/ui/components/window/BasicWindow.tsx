@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from "@rbxts/react";
+import React, { useEffect, useRef, useState } from "@rbxts/react";
 import { TweenService } from "@rbxts/services";
 import WindowCloseButton from "client/ui/components/window/WindowCloseButton";
 import { useWindow } from "client/ui/components/window/WindowManager";
@@ -32,10 +32,6 @@ export default function BasicWindow({
     const initialPosition = new UDim2(0.5, 0, 1, -40);
 
     useWindow({ id: title, visible, onClose, priority });
-
-    const handleClose = useCallback(() => {
-        onClose();
-    }, [onClose]);
 
     useEffect(() => {
         const action = visible && !previousVisible ? "open" : !visible && previousVisible ? "close" : undefined;
@@ -76,7 +72,7 @@ export default function BasicWindow({
             Visible={false}
         >
             <WindowTitle icon={icon} title={title} />
-            <WindowCloseButton onClick={handleClose} />
+            <WindowCloseButton onClick={onClose} />
             <frame
                 key="MainWindow"
                 AnchorPoint={new Vector2(0.5, 0)}

@@ -3,7 +3,7 @@ import React, { useEffect } from "@rbxts/react";
 import ReactRoblox from "@rbxts/react-roblox";
 import { CreateReactStory } from "@rbxts/ui-labs";
 import RenameWindow from "client/ui/components/rename/RenameWindow";
-import { SidebarManager } from "client/ui/components/sidebar/SidebarButtons";
+import { SingleDocumentManager } from "client/ui/components/sidebar/SidebarButtons";
 import StoryMocking from "client/ui/components/StoryMocking";
 import Packets from "shared/Packets";
 
@@ -22,9 +22,9 @@ export = CreateReactStory(
 
         useEffect(() => {
             if (props.controls.visible) {
-                SidebarManager.openWindow("Rename");
+                SingleDocumentManager.openWindow("Rename");
             } else {
-                SidebarManager.closeWindow("Rename");
+                SingleDocumentManager.closeWindow("Rename");
             }
         }, [props.controls.visible]);
 

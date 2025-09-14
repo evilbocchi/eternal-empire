@@ -2,7 +2,7 @@ import React, { StrictMode, useEffect } from "@rbxts/react";
 import ReactRoblox from "@rbxts/react-roblox";
 import { CreateReactStory } from "@rbxts/ui-labs";
 import SettingsWindow from "client/ui/components/settings/SettingsWindow";
-import { SidebarManager } from "client/ui/components/sidebar/SidebarButtons";
+import { SingleDocumentManager } from "client/ui/components/sidebar/SidebarButtons";
 import StoryMocking from "client/ui/components/StoryMocking";
 
 export = CreateReactStory(
@@ -18,9 +18,9 @@ export = CreateReactStory(
 
         useEffect(() => {
             if (props.controls.visible) {
-                SidebarManager.openWindow("Settings");
+                SingleDocumentManager.openWindow("Settings");
             } else {
-                SidebarManager.closeWindow("Settings");
+                SingleDocumentManager.closeWindow("Settings");
             }
         }, [props.controls.visible]);
 
