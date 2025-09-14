@@ -122,11 +122,16 @@ export default function BackpackManager({ toolController, animationsEnabled = tr
     useEffect(() => {
         if (!toolController) return;
 
-        // Use RunService to continuously update state (matches original implementation)
-        const connection = RunService.BindToRenderStep("BackpackManager", Enum.RenderPriority.Last.Value, updateState);
+        let running = true;
+        task.spawn(() => {
+            while (running) {
+                task.wait(1);
+                updateState();
+            }
+        });
 
         return () => {
-            RunService.UnbindFromRenderStep("BackpackManager");
+            running = false;
         };
     }, [updateState]);
 

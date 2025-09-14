@@ -8,6 +8,7 @@
 import React, { useCallback, useState } from "@rbxts/react";
 import { RobotoSlabMedium } from "client/ui/GameFonts";
 import useHover from "client/ui/hooks/useHover";
+import { getAsset } from "shared/asset/AssetMap";
 
 export interface ToolOptionData {
     /** The tool instance this option represents */
@@ -55,9 +56,9 @@ export default function ToolOption({ data, onClick, animationsEnabled = true }: 
     const { hovering, events } = useHover({});
 
     // Color based on equipped state
-    const backgroundColor = isEquipped ? Color3.fromRGB(0, 184, 255) : Color3.fromRGB(255, 255, 255);
+    const backgroundColor = isEquipped ? Color3.fromRGB(0, 184, 255) : Color3.fromRGB(31, 31, 31);
 
-    const strokeColor = isEquipped ? Color3.fromRGB(0, 184, 255) : Color3.fromRGB(255, 255, 255);
+    const strokeColor = isEquipped ? Color3.fromRGB(0, 184, 255) : Color3.fromRGB(61, 61, 61);
 
     // Apply press effect
     const currentBackgroundColor = isPressed ? backgroundColor.Lerp(Color3.fromRGB(0, 0, 0), 0.2) : backgroundColor;
@@ -126,7 +127,7 @@ export default function ToolOption({ data, onClick, animationsEnabled = true }: 
                 key="Pattern"
                 AnchorPoint={new Vector2(0.5, 0)}
                 BackgroundTransparency={1}
-                Image="rbxassetid://15562720000"
+                Image={getAsset("assets/GridCheckers.png")}
                 ImageColor3={Color3.fromRGB(0, 0, 0)}
                 ImageTransparency={0.95}
                 Position={new UDim2(0.5, 0, 0, 0)}

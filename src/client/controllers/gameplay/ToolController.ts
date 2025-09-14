@@ -83,7 +83,6 @@ export default class ToolController implements OnInit, OnStart, OnCharacterAdded
     constructor(
         private tooltipController: TooltipController,
         private areaController: AreaController,
-        private buildController: BuildController,
     ) {}
 
     /**
