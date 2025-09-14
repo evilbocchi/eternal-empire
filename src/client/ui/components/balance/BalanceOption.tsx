@@ -183,7 +183,7 @@ export default function BalanceOption({ currency, amount, income, formatCurrency
                     BackgroundTransparency={1}
                     FontFace={RobotoSlabBold}
                     Position={new UDim2(0, 24, 0.5, 0)}
-                    Size={new UDim2(1, -30, isFunds ? 0.65 : 0.75, 0)}
+                    Size={new UDim2(1, -30, isFunds ? 0.7 : 0.75, 0)}
                     Text={formatCurrency(currency, amount)}
                     TextColor3={Color3.fromRGB(255, 255, 255)}
                     TextScaled={true}
@@ -215,8 +215,8 @@ export default function BalanceOption({ currency, amount, income, formatCurrency
                     AutomaticSize={Enum.AutomaticSize.X}
                     BackgroundTransparency={1}
                     LayoutOrder={2}
-                    Position={new UDim2(0, 0, 1, 0)}
-                    Size={new UDim2(1, 0, 0.325, 0)}
+                    Position={new UDim2(0, 24, 1, 0)}
+                    Size={new UDim2(1, -30, 0.35, 0)}
                 >
                     {/* Income Label */}
                     <textlabel
@@ -253,7 +253,7 @@ export default function BalanceOption({ currency, amount, income, formatCurrency
                             FontFace={RobotoMono}
                             LayoutOrder={2}
                             Position={new UDim2(0, 0, 1, 0)}
-                            Size={new UDim2(0, 0, 0.9, 0)}
+                            Size={new UDim2(0, 0, 0.6, 0)}
                             Text={softcapText}
                             TextColor3={softcapColor}
                             TextScaled={true}
@@ -267,7 +267,7 @@ export default function BalanceOption({ currency, amount, income, formatCurrency
                     <uilistlayout
                         FillDirection={Enum.FillDirection.Horizontal}
                         Padding={new UDim(0, 4)}
-                        HorizontalAlignment={Enum.HorizontalAlignment.Center}
+                        HorizontalAlignment={Enum.HorizontalAlignment.Left}
                         SortOrder={Enum.SortOrder.LayoutOrder}
                         VerticalAlignment={Enum.VerticalAlignment.Center}
                     />

@@ -1,5 +1,6 @@
 import { BaseOnoeNum, OnoeNum } from "@antivivi/serikanum";
-import React, { Fragment, useEffect, useState } from "@rbxts/react";
+import React, { Fragment, useEffect, useRef, useState } from "@rbxts/react";
+import { TweenService } from "@rbxts/services";
 import { MAIN_LAYOUT_GUI } from "client/controllers/core/ScreenGuis";
 import BalanceOption from "client/ui/components/balance/BalanceOption";
 import NavigationControls from "client/ui/components/balance/NavigationControls";
@@ -21,6 +22,7 @@ const ZERO = new OnoeNum(0);
  * - Configurable formatting options
  */
 export default function BalanceWindow() {
+    const wrapperRef = useRef<Frame>();
     const [visible, setVisible] = useState(true);
     const [balance, setBalance] = useState<Map<Currency, BaseOnoeNum>>(new Map());
     const [revenue, setRevenue] = useState<Map<Currency, BaseOnoeNum>>(new Map());
@@ -51,6 +53,16 @@ export default function BalanceWindow() {
             sizeConnection.Disconnect();
         };
     }, []);
+
+    const openPosition = new UDim2(1, 0, 1, -70);
+    const closedPosition = openPosition.add(new UDim2(0, 150, 0, 0));
+    useEffect(() => {
+        const wrapper = wrapperRef.current;
+        if (!wrapper) return;
+
+        if (visible) TweenService.Create(wrapper, new TweenInfo(0.5), { Position: openPosition }).Play();
+        else TweenService.Create(wrapper, new TweenInfo(0.5), { Position: closedPosition }).Play();
+    }, [visible]);
 
     // Calculate max pages and filter currencies
     useEffect(() => {
@@ -121,9 +133,10 @@ export default function BalanceWindow() {
 
     return (
         <frame
+            ref={wrapperRef}
             AnchorPoint={new Vector2(1, 1)}
             BackgroundTransparency={1}
-            Position={new UDim2(1, 0, 1, -70)}
+            Position={closedPosition}
             Size={new UDim2(0.025, 150, 0.5, -10)}
             ZIndex={-1}
         >
