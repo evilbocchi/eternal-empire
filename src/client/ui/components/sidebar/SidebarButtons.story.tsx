@@ -1,7 +1,8 @@
-import React from "@rbxts/react";
+import React, { useEffect } from "@rbxts/react";
 import ReactRoblox from "@rbxts/react-roblox";
 import { CreateReactStory } from "@rbxts/ui-labs";
 import SidebarButtons from "client/ui/components/sidebar/SidebarButtons";
+import WindowManager from "client/ui/components/window/WindowManager";
 
 export = CreateReactStory(
     {
@@ -12,6 +13,10 @@ export = CreateReactStory(
         },
     },
     (props) => {
-        return <SidebarButtons {...props.controls} />;
+        useEffect(() => {
+            WindowManager.setWindowVisible("Sidebar", props.controls.visible);
+        }, [props.controls.visible]);
+
+        return <SidebarButtons />;
     },
 );

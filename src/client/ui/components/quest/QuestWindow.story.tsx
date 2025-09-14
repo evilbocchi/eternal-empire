@@ -2,7 +2,7 @@ import React, { StrictMode, useEffect } from "@rbxts/react";
 import ReactRoblox from "@rbxts/react-roblox";
 import { CreateReactStory } from "@rbxts/ui-labs";
 import QuestWindow from "client/ui/components/quest/QuestWindow";
-import { SingleDocumentManager } from "client/ui/components/sidebar/SidebarButtons";
+import SingleDocumentManager from "../sidebar/SingleDocumentManager";
 import StoryMocking from "client/ui/components/StoryMocking";
 import TooltipWindow from "client/ui/components/tooltip/TooltipWindow";
 

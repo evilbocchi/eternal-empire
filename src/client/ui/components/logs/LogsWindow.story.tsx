@@ -3,7 +3,7 @@ import React, { useEffect } from "@rbxts/react";
 import ReactRoblox from "@rbxts/react-roblox";
 import { CreateReactStory } from "@rbxts/ui-labs";
 import LogsWindow from "client/ui/components/logs/LogsWindow";
-import { SingleDocumentManager } from "client/ui/components/sidebar/SidebarButtons";
+import SingleDocumentManager from "../sidebar/SingleDocumentManager";
 import StoryMocking from "client/ui/components/StoryMocking";
 import Packets from "shared/Packets";
 

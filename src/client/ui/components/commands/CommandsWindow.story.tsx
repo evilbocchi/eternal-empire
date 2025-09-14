@@ -2,7 +2,7 @@ import React, { useEffect } from "@rbxts/react";
 import ReactRoblox from "@rbxts/react-roblox";
 import { CreateReactStory } from "@rbxts/ui-labs";
 import CommandsWindow from "client/ui/components/commands/CommandsWindow";
-import { SingleDocumentManager } from "client/ui/components/sidebar/SidebarButtons";
+import SingleDocumentManager from "../sidebar/SingleDocumentManager";
 
 export = CreateReactStory(
     {

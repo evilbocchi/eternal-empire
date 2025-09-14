@@ -1,5 +1,5 @@
 import { useCallback, useState } from "@rbxts/react";
-import { SingleDocumentManager } from "client/ui/components/sidebar/SidebarButtons";
+import SingleDocumentManager from "./SingleDocumentManager";
 import { useWindow } from "client/ui/components/window/WindowManager";
 
 /**

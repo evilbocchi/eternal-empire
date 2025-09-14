@@ -5,7 +5,7 @@ import IconButton from "client/ui/components/IconButton";
 import HotkeyOption from "client/ui/components/settings/HotkeyOption";
 import SettingSection from "client/ui/components/settings/SettingSection";
 import SettingToggle from "client/ui/components/settings/SettingToggle";
-import { SingleDocumentManager } from "client/ui/components/sidebar/SidebarButtons";
+import SingleDocumentManager from "../sidebar/SingleDocumentManager";
 import useSingleDocumentWindow from "client/ui/components/sidebar/useSingleDocumentWindow";
 import TechWindow from "client/ui/components/window/TechWindow";
 import useProperty from "client/ui/hooks/useProperty";

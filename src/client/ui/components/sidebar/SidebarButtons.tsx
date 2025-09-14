@@ -13,10 +13,11 @@
  * - Glow effects for active states
  */
 
-import React, { useCallback, useEffect, useRef, useState } from "@rbxts/react";
+import React, { useCallback, useRef, useState } from "@rbxts/react";
 import { TweenService } from "@rbxts/services";
 import useHotkeyWithTooltip from "client/ui/components/hotkeys/useHotkeyWithTooltip";
-import WindowManager from "client/ui/components/window/WindowManager";
+import SingleDocumentManager from "client/ui/components/sidebar/SingleDocumentManager";
+import { useWindow } from "client/ui/components/window/WindowManager";
 import { RobotoSlabBold } from "client/ui/GameFonts";
 import { getAsset } from "shared/asset/AssetMap";
 import { playSound } from "shared/asset/GameAssets";
@@ -216,112 +217,32 @@ export function SidebarButton({ data, layoutOrder, onClick, animationsEnabled = 
 }
 
 /**
- * Manages single-document interface behavior for sidebar windows
- */
-export class SingleDocumentManager {
-    static activeWindow?: string;
-
-    /**
-     * Toggles the visibility of a window by its name, disabling the last opened window if necessary.
-     * @param windowName The unique name of the window to toggle.
-     * @returns True if the window was opened, false if it was closed.
-     */
-    static toggleWindow(windowName: string) {
-        if (this.activeWindow === windowName) {
-            this.activeWindow = undefined;
-            WindowManager.setWindowVisible(windowName, false);
-            return false;
-        }
-
-        if (this.activeWindow) {
-            WindowManager.setWindowVisible(this.activeWindow, false);
-        }
-
-        this.activeWindow = windowName;
-        WindowManager.setWindowVisible(windowName, true);
-        return true;
-    }
-
-    /**
-     * Opens a window by its name, closing any previously opened window.
-     * @param windowName The unique name of the window to open.
-     * @returns True if the window was opened, false if it was already open.
-     */
-    static openWindow(windowName: string) {
-        if (this.activeWindow === windowName) {
-            return false;
-        }
-
-        if (this.activeWindow) {
-            WindowManager.setWindowVisible(this.activeWindow, false);
-        }
-        this.activeWindow = windowName;
-        WindowManager.setWindowVisible(windowName, true);
-    }
-
-    /**
-     * Closes a window by its name if it is currently open.
-     * @param windowName The unique name of the window to close.
-     * @returns True if the window was closed, false if it was not open.
-     */
-    static closeWindow(windowName: string) {
-        if (this.activeWindow !== windowName) {
-            return false;
-        }
-
-        this.activeWindow = undefined;
-        WindowManager.setWindowVisible(windowName, false);
-        return true;
-    }
-}
-
-/**
  * Main sidebar buttons container component
  */
 export default function SidebarButtons({
-    visible = true,
     position = new UDim2(0, 0, 0.5, 0),
     animationsEnabled = true,
     buttons = SidebarButtonConfiguration,
 }: SidebarButtonsProps) {
-    // Sidebar state
-    const [isVisible, setIsVisible] = useState(visible);
-    const [currentPosition, setCurrentPosition] = useState(position);
+    const [visible, setVisible] = useState(true);
     const sidebarRef = useRef<Frame>();
+    const size = new UDim2(0.025, 40, 0.5, 0);
+    const sizeX = new UDim2(size.Width, new UDim(0, 0));
+    const closePos = position.sub(sizeX);
 
-    // Handle visibility changes
-    useEffect(() => {
-        setIsVisible(visible);
-        if (animationsEnabled && sidebarRef.current) {
-            const targetPosition = visible ? position : new UDim2(-0.015, -50, 0.5, 0);
-
-            // Create TweenInfo for sidebar slide animation
-            const slideInfo = new TweenInfo(
-                0.3, // Duration: 300ms
-                Enum.EasingStyle.Quart,
-                Enum.EasingDirection.Out,
-                0, // Repeat count
-                false, // Reverses
-                0, // Delay
-            );
-
-            // Create and play the tween
-            const slideTween = TweenService.Create(sidebarRef.current, slideInfo, {
-                Position: targetPosition,
-            });
-
-            slideTween.Play();
-
-            // Update current position when tween completes
-            slideTween.Completed.Connect(() => {
-                setCurrentPosition(targetPosition);
-            });
-        } else {
-            // If animations are disabled, set position immediately
-            const targetPosition = visible ? position : new UDim2(-0.015, -50, 0.5, 0);
-            setCurrentPosition(targetPosition);
-        }
-    }, [visible, position, animationsEnabled]);
+    useWindow({
+        id: "Sidebar",
+        visible,
+        onOpen: () => {
+            setVisible(true);
+            sidebarRef.current?.TweenPosition(position, Enum.EasingDirection.Out, Enum.EasingStyle.Quart, 1, true);
+        },
+        onClose: () => {
+            setVisible(false);
+            sidebarRef.current?.TweenPosition(closePos, Enum.EasingDirection.In, Enum.EasingStyle.Quart, 1, true);
+        },
+        priority: -1, // Negative priority so close hotkey does not work
+    });
 
     // Button click handler
     const handleButtonClick = useCallback((buttonName: string) => {
@@ -336,9 +257,8 @@ export default function SidebarButtons({
             ref={sidebarRef}
             AnchorPoint={new Vector2(0, 0.5)}
             BackgroundTransparency={1}
-            Position={currentPosition}
-            Size={new UDim2(0.025, 40, 0.5, 0)}
-            Visible={isVisible}
+            Position={closePos}
+            Size={size}
             ZIndex={-1}
         >
             <uilistlayout

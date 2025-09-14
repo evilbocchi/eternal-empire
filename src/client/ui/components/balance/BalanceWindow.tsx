@@ -1,6 +1,5 @@
 import { BaseOnoeNum, OnoeNum } from "@antivivi/serikanum";
 import React, { Fragment, useEffect, useRef, useState } from "@rbxts/react";
-import { TweenService } from "@rbxts/services";
 import { MAIN_LAYOUT_GUI } from "client/controllers/core/ScreenGuis";
 import BalanceOption from "client/ui/components/balance/BalanceOption";
 import NavigationControls from "client/ui/components/balance/NavigationControls";
@@ -30,7 +29,19 @@ export default function BalanceWindow() {
     const [currentPage, setCurrentPage] = useState(1);
     const [maxPage, setMaxPage] = useState(1);
 
-    useWindow({ id: "Balance", visible, onClose: () => setVisible(false), priority: -1 }); // Negative priority to avoid closing
+    const openPosition = new UDim2(1, 0, 1, -70);
+    const closePosition = openPosition.add(new UDim2(0, 250, 0, 0));
+    useWindow({
+        id: "Balance",
+        visible,
+        onOpen: () => {
+            wrapperRef.current?.TweenPosition(openPosition, Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 1, true);
+        },
+        onClose: () => {
+            wrapperRef.current?.TweenPosition(closePosition, Enum.EasingDirection.In, Enum.EasingStyle.Quad, 1, true);
+        },
+        priority: -1, // Negative priority so close hotkey does not work
+    });
 
     // Subscribe to balance and revenue updates
     useEffect(() => {
@@ -53,16 +64,6 @@ export default function BalanceWindow() {
             sizeConnection.Disconnect();
         };
     }, []);
-
-    const openPosition = new UDim2(1, 0, 1, -70);
-    const closedPosition = openPosition.add(new UDim2(0, 150, 0, 0));
-    useEffect(() => {
-        const wrapper = wrapperRef.current;
-        if (!wrapper) return;
-
-        if (visible) TweenService.Create(wrapper, new TweenInfo(0.5), { Position: openPosition }).Play();
-        else TweenService.Create(wrapper, new TweenInfo(0.5), { Position: closedPosition }).Play();
-    }, [visible]);
 
     // Calculate max pages and filter currencies
     useEffect(() => {
@@ -136,7 +137,7 @@ export default function BalanceWindow() {
             ref={wrapperRef}
             AnchorPoint={new Vector2(1, 1)}
             BackgroundTransparency={1}
-            Position={closedPosition}
+            Position={closePosition}
             Size={new UDim2(0.025, 150, 0.5, -10)}
             ZIndex={-1}
         >
