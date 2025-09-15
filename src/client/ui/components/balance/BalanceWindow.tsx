@@ -1,6 +1,5 @@
 import { BaseOnoeNum, OnoeNum } from "@antivivi/serikanum";
 import React, { Fragment, useEffect, useRef, useState } from "@rbxts/react";
-import { MAIN_LAYOUT_GUI } from "client/controllers/core/ScreenGuis";
 import BalanceOption from "client/ui/components/balance/BalanceOption";
 import NavigationControls from "client/ui/components/balance/NavigationControls";
 import { useWindow } from "client/ui/components/window/WindowManager";
@@ -27,7 +26,6 @@ export default function BalanceWindow() {
     const [balance, setBalance] = useState<Map<Currency, BaseOnoeNum>>(new Map());
     const [revenue, setRevenue] = useState<Map<Currency, BaseOnoeNum>>(new Map());
     const [difference, setDifference] = useState<Map<Currency, BaseOnoeNum>>(new Map());
-    const [isSmallScreen, setIsSmallScreen] = useState(true);
     const [currentPage, setCurrentPage] = useState(1);
     const [maxPage, setMaxPage] = useState(1);
     const [bombBoosts, setBombBoosts] = useState<CurrencyBundle | undefined>(new CurrencyBundle());
@@ -58,11 +56,6 @@ export default function BalanceWindow() {
             setRevenue(newRevenue);
         });
 
-        const sizeConnection = MAIN_LAYOUT_GUI.GetPropertyChangedSignal("AbsoluteSize").Connect(() => {
-            const size = MAIN_LAYOUT_GUI.AbsoluteSize;
-            setIsSmallScreen(size.X < 1000);
-        });
-
         const differenceConnection = Packets.showDifference.fromServer((diffPerCurrency) =>
             setDifference(diffPerCurrency),
         );
@@ -70,7 +63,6 @@ export default function BalanceWindow() {
         return () => {
             balanceConnection.Disconnect();
             revenueConnection.Disconnect();
-            sizeConnection.Disconnect();
             differenceConnection.Disconnect();
         };
     }, []);
@@ -144,13 +136,6 @@ export default function BalanceWindow() {
         }
     };
 
-    const formatCurrency = (currency: Currency, amount: OnoeNum): string => {
-        if (!isSmallScreen && Packets.settings.get()?.FormatCurrencies) {
-            return CurrencyBundle.getFormatted(currency, amount, true);
-        }
-        return tostring(amount);
-    };
-
     const getCurrentPageName = (): string => {
         return CurrencyBundle.getCategory(currentPage) ?? "Main";
     };
@@ -208,7 +193,6 @@ export default function BalanceWindow() {
                         income={incomeAmount ? new OnoeNum(incomeAmount) : undefined}
                         difference={differenceAmount ? new OnoeNum(differenceAmount) : undefined}
                         bombBoost={bombBoosts?.get(currency)}
-                        formatCurrency={formatCurrency}
                         layoutOrder={index}
                     />
                 );

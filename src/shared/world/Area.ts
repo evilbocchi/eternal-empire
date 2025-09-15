@@ -30,6 +30,9 @@ declare global {
             BarLabel: TextLabel;
         };
     };
+
+    /** Unique identifier for an area */
+    type AreaId = keyof typeof AREAS;
 }
 
 // Determine if the code is running on the server or client

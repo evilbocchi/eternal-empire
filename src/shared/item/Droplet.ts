@@ -33,6 +33,10 @@ declare global {
 export default class Droplet {
     static readonly STORAGE = (function () {
         if (IS_SERVER || IS_CI) {
+            if (IS_CI) {
+                const cached = Workspace.FindFirstChild("Droplets");
+                if (cached !== undefined) return cached as Model;
+            }
             const storage = new Instance("Model");
             storage.ModelStreamingMode = Enum.ModelStreamingMode.Persistent;
             storage.Name = "Droplets";

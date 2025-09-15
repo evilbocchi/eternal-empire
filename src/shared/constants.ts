@@ -1,32 +1,6 @@
-import { Debris, Players, SoundService, TextChatService, Workspace } from "@rbxts/services";
+import { Players, SoundService, TextChatService, Workspace } from "@rbxts/services";
 import { Workspace_Waypoints } from "services";
 import { AREAS } from "shared/world/Area";
-import { IS_CI } from "shared/Context";
-
-declare global {
-    type AreaId = keyof typeof AREAS;
-}
-
-/**
- * Creates a folder in the Workspace.
- *
- * @param name The name of the folder to create.
- * @returns The created folder instance.
- */
-function createFolder(name: string, parent: Instance = Workspace) {
-    const cached = parent.FindFirstChild(name)!;
-    if (cached !== undefined) {
-        return cached;
-    }
-
-    const folder = new Instance("Folder");
-    folder.Name = name;
-    folder.Parent = parent;
-    if (IS_CI) {
-        Debris.AddItem(folder, 30); // Automatically clean up the folder after 30 seconds
-    }
-    return folder;
-}
 
 export function getChallengeGui() {
     const board = AREAS.SlamoVillage.areaFolder.FindFirstChild("ChallengesBoard");
@@ -38,8 +12,14 @@ export function getDisplayName(humanoid: Humanoid) {
     return humanoid.DisplayName === "" ? (humanoid.Parent?.Name ?? "???") : humanoid.DisplayName;
 }
 
+/**
+ * Calculates the XP needed to reach the next level based on the current level.
+ * @see https://www.desmos.com/calculator/sqm2qsz4en for the formula graph
+ * @param currentLevel The player's current level.
+ * @returns The maximum XP required to reach the next level.
+ */
 export function getMaxXp(currentLevel: number) {
-    return math.floor((math.pow(1.1, currentLevel + 25) * 80 - 853) / 10 + 0.5) * 10; // <----- worst garbage ever written
+    return math.floor((math.pow(1.1, currentLevel + 25) * 80 - 853) / 10 + 0.5) * 10;
 }
 
 export function getNameFromUserId(userId: number | undefined) {
@@ -86,7 +66,7 @@ export const NAMES_PER_USER_ID = new Map<number, string>();
 export const NPC_MODELS = Workspace.WaitForChild("NPCs") as Folder;
 export const NPCS = script.Parent?.WaitForChild("npcs") as Folder;
 
-export const PLACED_ITEMS_FOLDER = createFolder("PlacedItems");
+export const PLACED_ITEMS_FOLDER = Workspace.WaitForChild("PlacedItems") as Folder;
 
 /**
  * Returns the folder automatically created containing all the text channels.

@@ -1,13 +1,16 @@
 import { OnoeNum } from "@antivivi/serikanum";
 import React, { StrictMode, useEffect } from "@rbxts/react";
 import ReactRoblox from "@rbxts/react-roblox";
+import { Debris } from "@rbxts/services";
 import { CreateReactStory, Number } from "@rbxts/ui-labs";
 import BalanceWindow from "client/ui/components/balance/BalanceWindow";
+import { CurrencyGainManager } from "client/ui/components/balance/CurrencyGain";
 import StoryMocking from "client/ui/components/StoryMocking";
 import TooltipWindow from "client/ui/components/tooltip/TooltipWindow";
 import useVisibility from "client/ui/hooks/useVisibility";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import { CURRENCIES } from "shared/currency/CurrencyDetails";
+import Droplet, { DROPLET_STORAGE } from "shared/item/Droplet";
 import Packets from "shared/Packets";
 
 export = CreateReactStory(
@@ -22,6 +25,7 @@ export = CreateReactStory(
         },
     },
     (props) => {
+        const [gainAmount, setGainAmount] = React.useState(new OnoeNum(1));
         StoryMocking.mockData();
 
         const removingCurrencies = CURRENCIES.size() - props.controls.visibleCurrencies;
@@ -57,11 +61,36 @@ export = CreateReactStory(
             Packets.showDifference.toAllClients(newDifference);
         }, [props.controls.difference]);
 
+        useEffect(() => {
+            const mockDroplet = Droplet.TheFirstDroplet.model.Clone();
+            mockDroplet.Parent = DROPLET_STORAGE;
+            mockDroplet.Position = new Vector3(0, 0, 0);
+            Debris.AddItem(mockDroplet, 5);
+
+            const amountPerCurrency = new Map<Currency, OnoeNum>();
+            for (const currency of CURRENCIES) {
+                amountPerCurrency.set(currency, new OnoeNum(gainAmount));
+            }
+            Packets.dropletBurnt.toAllClients(mockDroplet.Name, amountPerCurrency);
+        }, [gainAmount]);
+
         useVisibility("Balance", props.controls.visible);
         return (
             <StrictMode>
                 <BalanceWindow />
+                <CurrencyGainManager />
                 <TooltipWindow />
+                <textbutton
+                    AnchorPoint={new Vector2(0.5, 1)}
+                    Position={new UDim2(0.5, 0, 1, -50)}
+                    Size={new UDim2(0, 200, 0, 50)}
+                    Text="+1 Gain"
+                    Event={{
+                        MouseButton1Click: () => {
+                            setGainAmount(gainAmount.add(1));
+                        },
+                    }}
+                />
             </StrictMode>
         );
     },
