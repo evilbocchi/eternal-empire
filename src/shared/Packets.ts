@@ -195,6 +195,7 @@ namespace Packets {
     export const leaderboardData = property<Map<LeaderboardType, LeaderboardEntry[]>>(new Map());
 
     // bombs
+    export const bombEndTimes = property<Map<Currency, DataType.f64>>(new Map());
     export const useBomb = request<(bombType: Currency) => boolean>();
 
     // tools

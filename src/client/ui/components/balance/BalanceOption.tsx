@@ -1,5 +1,6 @@
 import { OnoeNum } from "@antivivi/serikanum";
-import React, { Fragment, useMemo, useRef } from "@rbxts/react";
+import React, { Fragment, useEffect, useMemo, useRef } from "@rbxts/react";
+import { Workspace } from "@rbxts/services";
 import StringBuilder from "@rbxts/stringbuilder";
 import { TooltipManager } from "client/ui/components/tooltip/TooltipWindow";
 import { RobotoMono, RobotoSlab, RobotoSlabBold } from "client/ui/GameFonts";
@@ -74,7 +75,7 @@ export function BalanceOptionStyling({ details }: { details: CurrencyDetails }) 
  * Shows currency icon, amount, income rate, and softcap information.
  */
 export default function BalanceOption({ currency, amount, income, formatCurrency }: BalanceOptionProps) {
-    const wrapperRef = useRef<Frame>();
+    const balanceGradientRef = useRef<UIGradient>();
     const details = CURRENCY_DETAILS[currency];
     const softcapColor = Color3.fromRGB(255, 77, 33);
 
@@ -114,12 +115,33 @@ export default function BalanceOption({ currency, amount, income, formatCurrency
         return { capped, softcapText, softcapStart: OnoeNum.min(...starts) };
     }, [currency, amount]);
 
+    useEffect(() => {
+        const key = `${currency}BombTime`;
+        const onBombUpdated = () => {
+            const fundsBombTime = Workspace.GetAttribute(key) as number | undefined;
+            if (fundsBombTime === undefined) return;
+            const currentTime = os.time();
+            const remainingTime = fundsBombTime - currentTime;
+            if (remainingTime > 0) {
+                balanceGradientRef.current!.Color = new ColorSequence(
+                    new Color3(1, 0.98, 0.87),
+                    new Color3(1, 0.84, 0),
+                );
+            } else {
+                balanceGradientRef.current!.Color = new ColorSequence(new Color3(1, 1, 1));
+            }
+        };
+
+        const connection = Workspace.GetAttributeChangedSignal(key).Connect(onBombUpdated);
+        onBombUpdated();
+        return () => connection.Disconnect();
+    }, []);
+
     const showIncome = income && !income.lessEquals(0);
 
     const isFunds = currency === "Funds";
     return (
         <frame
-            ref={wrapperRef}
             BackgroundTransparency={1}
             Event={{
                 MouseMoved: () => {
@@ -201,6 +223,7 @@ export default function BalanceOption({ currency, amount, income, formatCurrency
                             Rotation={90}
                         />
                     </uistroke>
+                    <uigradient ref={balanceGradientRef} Color={new ColorSequence(new Color3(1, 1, 1))} />
                 </textlabel>
 
                 {/* Styling */}

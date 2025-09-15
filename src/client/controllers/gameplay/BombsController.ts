@@ -11,11 +11,9 @@
  * @since 1.0.0
  */
 import { OnoeNum } from "@antivivi/serikanum";
-import { convertToHHMMSS } from "@antivivi/vrldk";
 import { Controller, OnStart } from "@flamework/core";
-import { CollectionService, MarketplaceService, Workspace } from "@rbxts/services";
+import { CollectionService, MarketplaceService } from "@rbxts/services";
 import { LOCAL_PLAYER } from "client/constants";
-import { INTERFACE } from "client/controllers/core/UIController";
 import { playSound } from "shared/asset/GameAssets";
 import { BOMBS_PRODUCTS } from "shared/devproducts/BombsProducts";
 import Packets from "shared/Packets";
@@ -27,10 +25,6 @@ declare global {
         AmountLabel: TextLabel;
     };
 }
-
-export const DETAILS_WINDOW = INTERFACE.WaitForChild("DetailsWindow") as Frame & {
-    FundsBombLabel: TextLabel;
-};
 
 /**
  * Controller responsible for managing bomb board GUIs, bomb purchases, usage, and bomb-related UI updates.
@@ -78,19 +72,6 @@ export default class BombsController implements OnStart {
         Packets.balance.observe((value) => {
             for (const [gui, currency] of this.guis)
                 gui.AmountLabel.Text = tostring(new OnoeNum(value.get(currency) ?? 0));
-        });
-
-        task.spawn(() => {
-            while (task.wait(1)) {
-                const currentTime = os.time();
-                const fundsBombTime = Workspace.GetAttribute("FundsBombTime") as number | undefined;
-                if (fundsBombTime === undefined || fundsBombTime < currentTime) {
-                    DETAILS_WINDOW.FundsBombLabel.Visible = false;
-                } else {
-                    DETAILS_WINDOW.FundsBombLabel.Text = `Funds Bomb Active (x2): ${convertToHHMMSS(fundsBombTime - currentTime)}`;
-                    DETAILS_WINDOW.FundsBombLabel.Visible = true;
-                }
-            }
         });
     }
 }

@@ -14,6 +14,7 @@ import { Server } from "shared/item/ItemUtils";
 export interface OnPlayerJoined {
     /**
      * Called when a player joins the game.
+     * Also called for players already in the game when the service starts.
      * @param player The player who joined.
      */
     onPlayerJoined(player: Player): void;

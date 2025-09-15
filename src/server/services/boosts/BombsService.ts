@@ -14,12 +14,18 @@
  */
 
 import Signal from "@antivivi/lemon-signal";
+import { OnoeNum } from "@antivivi/serikanum";
+import { convertToHHMMSS } from "@antivivi/vrldk";
 import { OnInit, OnStart, Service } from "@flamework/core";
 import { DataStoreService, MessagingService, Workspace } from "@rbxts/services";
 import CurrencyService from "server/services/data/CurrencyService";
 import DataService from "server/services/data/DataService";
+import ChatHookService from "server/services/permissions/ChatHookService";
+import ProductService from "server/services/product/ProductService";
 import Packets from "shared/Packets";
+import { getNameFromUserId } from "shared/constants";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
+import { BOMBS_PRODUCTS } from "shared/devproducts/BombsProducts";
 
 /**
  * Structure for bomb event messages sent via MessagingService.
@@ -52,9 +58,6 @@ export default class BombsService implements OnInit, OnStart {
     /** Signal fired when a bomb is used. */
     bombUsed = new Signal<(player: Player, bombType: Currency) => void>();
 
-    /** Signal fired when a bomb becomes active. */
-    bombActive = new Signal<(endTime: number, bombType: Currency, player: number) => void>();
-
     /** Debounce timer to prevent rapid bomb usage. */
     debounce = 0;
 
@@ -64,8 +67,10 @@ export default class BombsService implements OnInit, OnStart {
     fundsBombBoost = new CurrencyBundle().set("Funds", 2);
 
     constructor(
-        private dataService: DataService,
+        private chatHookService: ChatHookService,
         private currencyService: CurrencyService,
+        private dataService: DataService,
+        private productService: ProductService,
     ) {}
 
     /**
@@ -123,6 +128,13 @@ export default class BombsService implements OnInit, OnStart {
             }
             return false;
         });
+
+        for (const [currency, bombProduct] of pairs(BOMBS_PRODUCTS)) {
+            this.productService.setProductFunction(bombProduct, () => {
+                this.currencyService.increment((currency + " Bombs") as Currency, new OnoeNum(4));
+                return Enum.ProductPurchaseDecision.PurchaseGranted;
+            });
+        }
     }
 
     /**
@@ -133,7 +145,14 @@ export default class BombsService implements OnInit, OnStart {
     updateBomb(data: BombMessage) {
         if (data.bombType === "Funds Bombs") {
             Workspace.SetAttribute("FundsBombTime", data.endTime);
-            this.bombActive.fire(data.endTime, data.bombType, data.player);
+            this.chatHookService.sendServerMessage(
+                getNameFromUserId(data.player) +
+                    " just activated a " +
+                    data.bombType +
+                    " for " +
+                    convertToHHMMSS(data.endTime - os.time()) +
+                    "!",
+            );
             this.refreshBombsEnabled();
         }
     }

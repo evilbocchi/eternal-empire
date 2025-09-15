@@ -14,10 +14,12 @@
  */
 
 import Signal from "@antivivi/lemon-signal";
-import { OnInit, Service } from "@flamework/core";
+import { OnInit, OnStart, Service } from "@flamework/core";
 import { TextService } from "@rbxts/services";
-import ItemService from "server/services/item/ItemService";
+import CurrencyService from "server/services/data/CurrencyService";
 import DataService from "server/services/data/DataService";
+import ItemService from "server/services/item/ItemService";
+import ChatHookService from "server/services/permissions/ChatHookService";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
 import Items from "shared/items/Items";
@@ -27,7 +29,7 @@ import Packets from "shared/Packets";
  * Service that manages saving and loading of item setups for different areas.
  */
 @Service()
-export default class SetupService implements OnInit {
+export default class SetupService implements OnInit, OnStart {
     /** Signal fired when a setup is saved. */
     setupSaved = new Signal<(player: Player, area: AreaId) => void>();
 
@@ -36,6 +38,8 @@ export default class SetupService implements OnInit {
 
     constructor(
         private dataService: DataService,
+        private chatHookService: ChatHookService,
+        private currencyService: CurrencyService,
         private itemService: ItemService,
     ) {}
 
@@ -175,6 +179,28 @@ export default class SetupService implements OnInit {
                 }
             }
             Packets.printedSetups.set(setups);
+        });
+    }
+
+    onStart() {
+        const setups = this.dataService.empireData.printedSetups;
+        task.spawn(() => {
+            while (task.wait(1)) {
+                const balance = this.currencyService.balance;
+                for (const setup of setups) {
+                    if (
+                        setup.alerted === false &&
+                        setup.autoloads === true &&
+                        balance.canAfford(setup.calculatedPrice)
+                    ) {
+                        setup.alerted = true;
+                        this.chatHookService.sendServerMessage(
+                            `${setup.name} can now be purchased!`,
+                            "color:255,255,127",
+                        );
+                    }
+                }
+            }
         });
     }
 }

@@ -15,6 +15,7 @@ export = CreateReactStory(
         controls: {
             visible: true,
             visibleCurrencies: Number(CURRENCIES.size(), 0, CURRENCIES.size(), 1, true),
+            currencyBombTime: 0,
         },
     },
     (props) => {

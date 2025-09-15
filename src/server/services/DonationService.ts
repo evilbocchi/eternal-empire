@@ -3,29 +3,31 @@
  *
  * This service provides:
  * - Getting and setting the amount a player has donated
- * - Firing signals when donation amounts change
  * - Synchronizing donation stats with leaderboards
  *
  * @since 1.0.0
  */
 
-import Signal from "@antivivi/lemon-signal";
 import { OnStart, Service } from "@flamework/core";
-import { Players } from "@rbxts/services";
-import LeaderstatsService from "server/services/leaderboard/LeaderstatsService";
+import { MarketplaceService, MessagingService } from "@rbxts/services";
+import { OnPlayerJoined } from "server/services/ModdingService";
 import DataService from "server/services/data/DataService";
+import LeaderstatsService from "server/services/leaderboard/LeaderstatsService";
+import ChatHookService from "server/services/permissions/ChatHookService";
+import ProductService from "server/services/product/ProductService";
+import Packets from "shared/Packets";
+import { DONATION_PRODUCTS } from "shared/devproducts/DonationProducts";
 
 /**
  * Service that manages player donation stats and leaderboard updates.
  */
 @Service()
-export class DonationService implements OnStart {
-    /** Signal fired when a player's donation amount changes. */
-    donatedChanged = new Signal<(player: Player, amount: number) => void>();
-
+export class DonationService implements OnStart, OnPlayerJoined {
     constructor(
-        private leaderstatsService: LeaderstatsService,
+        private chatHookService: ChatHookService,
         private dataService: DataService,
+        private leaderstatsService: LeaderstatsService,
+        private productService: ProductService,
     ) {}
 
     /**
@@ -38,7 +40,7 @@ export class DonationService implements OnStart {
     }
 
     /**
-     * Sets the amount a player has donated and fires the change signal.
+     * Sets the amount a player has donated.
      *
      * @param player The player to update.
      * @param donated The new donation amount.
@@ -47,21 +49,39 @@ export class DonationService implements OnStart {
         const playerProfile = this.dataService.loadPlayerProfile(player.UserId);
         if (playerProfile !== undefined) {
             playerProfile.Data.donated = donated;
-            this.donatedChanged.fire(player, donated);
+            this.updateLeaderstats(player, donated);
         }
     }
 
-    /**
-     * Initializes the service, syncing donation stats with leaderboards and connecting signals.
-     */
+    updateLeaderstats(player: Player, donated = this.getDonated(player)) {
+        this.leaderstatsService.setLeaderstat(player, "Donated", donated);
+    }
+
+    onPlayerJoined(player: Player) {
+        this.updateLeaderstats(player);
+    }
+
     onStart() {
-        const update = (player: Player, donated: number) => {
-            this.leaderstatsService.setLeaderstat(player, "Donated", donated);
-        };
-        this.donatedChanged.connect((player, donated) => update(player, donated));
-        Players.PlayerAdded.Connect((player) => update(player, this.getDonated(player)));
-        for (const player of Players.GetPlayers()) {
-            update(player, this.getDonated(player));
+        MessagingService.SubscribeAsync("Donation", (message) => {
+            Packets.donationGiven.toAllClients();
+            this.chatHookService.sendServerMessage(message.Data as string, "color:3,207,252");
+        });
+
+        Packets.promptDonation.fromClient((player, dp) => MarketplaceService.PromptProductPurchase(player, dp));
+        for (const donationProduct of DONATION_PRODUCTS) {
+            this.productService.setProductFunction(donationProduct.id, (_receipt, player) => {
+                this.setDonated(player, this.getDonated(player) + donationProduct.amount);
+                this.chatHookService.sendServerMessage(
+                    player.Name + " JUST DONATED " + donationProduct.amount + " ROBUX!",
+                );
+                if (donationProduct.amount >= 100) {
+                    MessagingService.PublishAsync(
+                        "Donation",
+                        player.Name + " JUST DONATED " + donationProduct.amount + " ROBUX!!!",
+                    );
+                }
+                return Enum.ProductPurchaseDecision.PurchaseGranted;
+            });
         }
     }
 }

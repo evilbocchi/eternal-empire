@@ -955,5 +955,6 @@ export default class DataService implements OnInit, OnPlayerJoined {
 
         Packets.createNewEmpire.fromClient((player: Player) => this.createNewEmpire(player));
         Packets.teleportToEmpire.fromClient((player, empireId) => this.teleportToEmpire(player, empireId));
+        Packets.permLevels.set(this.empireData.permLevels);
     }
 }

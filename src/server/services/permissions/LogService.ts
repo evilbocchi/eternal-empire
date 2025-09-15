@@ -1,0 +1,229 @@
+import { BaseOnoeNum } from "@antivivi/serikanum";
+import { OnInit, OnStart, Service } from "@flamework/core";
+import BombsService from "server/services/boosts/BombsService";
+import DataService from "server/services/data/DataService";
+import LevelService from "server/services/data/LevelService";
+import NamedUpgradeService from "server/services/data/NamedUpgradeService";
+import SetupService from "server/services/data/SetupService";
+import ItemService from "server/services/item/ItemService";
+import ChatHookService from "server/services/permissions/ChatHookService";
+import ResetService from "server/services/ResetService";
+import CurrencyBundle from "shared/currency/CurrencyBundle";
+import { CURRENCY_DETAILS } from "shared/currency/CurrencyDetails";
+import Packets from "shared/Packets";
+import { RESET_LAYERS } from "shared/ResetLayer";
+
+declare global {
+    interface Log {
+        /**
+         * Timestamp of the log entry.
+         */
+        time: number;
+
+        /**
+         * Type of the log entry.
+         */
+        type: string;
+
+        /**
+         * ID of the player associated with the log entry.
+         */
+        player?: number;
+
+        /**
+         * ID of the player who performed the action.
+         */
+        actor?: number;
+
+        /**
+         * ID of the player who received the action.
+         */
+        recipient?: number;
+
+        /**
+         * X coordinates of the action.
+         */
+        x?: number;
+
+        /**
+         * Y coordinates of the action.
+         */
+        y?: number;
+
+        /**
+         * Z coordinates of the action.
+         */
+        z?: number;
+
+        /**
+         * Area of the action.
+         */
+        area?: string;
+
+        /**
+         * Upgrade related to the action.
+         */
+        upgrade?: string;
+
+        /**
+         * Item related to the action.
+         */
+        item?: string;
+
+        /**
+         * List of items related to the action.
+         */
+        items?: string[];
+
+        /**
+         * Layer related to the action.
+         */
+        layer?: string;
+
+        /**
+         * Amount related to the action.
+         *
+         * @see {@link infAmount} for bigger numbers.
+         */
+        amount?: number;
+
+        /**
+         * Amount related to the action.
+         *
+         * @see {@link amount} for smaller numbers.
+         */
+        infAmount?: BaseOnoeNum;
+
+        /**
+         * Currency related to the action.
+         */
+        currency?: Currency;
+    }
+}
+
+@Service()
+export default class LogService implements OnInit, OnStart {
+    constructor(
+        private dataService: DataService,
+        private namedUpgradeService: NamedUpgradeService,
+        private itemService: ItemService,
+        private levelService: LevelService,
+        private resetService: ResetService,
+        private bombsService: BombsService,
+        private setupService: SetupService,
+        private chatHookService: ChatHookService,
+    ) {}
+
+    /**
+     * Logs an action to the empire log and broadcasts to clients.
+     * @param log Log entry
+     */
+    log(log: Log) {
+        const data = this.dataService.empireData;
+        data.logs = data.logs.filter((value) => tick() - value.time < 604800);
+        data.logs.push(log);
+        Packets.logAdded.toAllClients(log);
+    }
+
+    onInit() {
+        Packets.getLogs.fromClient(() => this.dataService.empireData.logs);
+    }
+
+    onStart() {
+        this.itemService.itemsBought.connect((player, items) =>
+            this.log({
+                time: tick(),
+                type: "Purchase",
+                player: player?.UserId,
+                items: items.map((item) => item.id),
+            }),
+        );
+        this.bombsService.bombUsed.connect((player, bombType) =>
+            this.log({
+                time: tick(),
+                type: "Bomb",
+                player: player.UserId,
+                currency: bombType,
+                amount: 1,
+            }),
+        );
+        this.itemService.itemsPlaced.connect((player, placedItems) => {
+            const time = tick();
+            let i = 0;
+            for (const placedItem of placedItems) {
+                this.log({
+                    time: time + ++i / 1000, // not a hack i swear
+                    type: "Place",
+                    player: player.UserId,
+                    item: placedItem.item,
+                    x: placedItem.posX,
+                    y: placedItem.posY,
+                    z: placedItem.posZ,
+                });
+            }
+        });
+        this.itemService.itemsUnplaced.connect((player, placedItems) => {
+            const time = tick();
+            let i = 0;
+            for (const placedItem of placedItems) {
+                this.log({
+                    time: time + ++i / 1000,
+                    type: "Unplace",
+                    player: player.UserId,
+                    item: placedItem.item,
+                    x: placedItem.posX,
+                    y: placedItem.posY,
+                    z: placedItem.posZ,
+                });
+            }
+        });
+        this.namedUpgradeService.upgradeBought.connect((player, upgrade, to) =>
+            this.log({
+                time: tick(),
+                type: "Upgrade",
+                player: player.UserId,
+                upgrade: upgrade,
+                amount: to,
+            }),
+        );
+        this.levelService.respected.connect((player) =>
+            this.log({
+                time: tick(),
+                type: "Respec",
+                player: player.UserId,
+            }),
+        );
+        this.resetService.reset.connect((player, layer, amount) => {
+            const resetLayer = RESET_LAYERS[layer];
+            const color = CURRENCY_DETAILS[resetLayer.gives].color;
+            this.chatHookService.sendServerMessage(
+                `${player.Name} performed a ${layer} for ${CurrencyBundle.getFormatted(resetLayer.gives, amount)}`,
+                `color:${color.R * 255},${color.G * 255},${color.B * 255}`,
+            );
+            this.log({
+                time: tick(),
+                type: "Reset",
+                layer: layer,
+                player: player.UserId,
+                infAmount: amount,
+                currency: resetLayer.gives,
+            });
+        });
+        this.setupService.setupSaved.connect((player, area) =>
+            this.log({
+                time: tick(),
+                type: "SetupSave",
+                player: player.UserId,
+                area: area,
+            }),
+        );
+        this.setupService.setupLoaded.connect((player, area) =>
+            this.log({
+                time: tick(),
+                type: "SetupLoad",
+                player: player.UserId,
+                area: area,
+            }),
+        );
+    }
+}
