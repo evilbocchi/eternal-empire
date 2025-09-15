@@ -1,10 +1,10 @@
 import { BaseOnoeNum } from "@antivivi/serikanum";
 import { OnInit, OnStart, Service } from "@flamework/core";
+import { setInterval } from "@rbxts/jsnatives";
 import DataService from "server/services/data/DataService";
 import LevelService from "server/services/data/LevelService";
 import NamedUpgradeService from "server/services/data/NamedUpgradeService";
 import SetupService from "server/services/data/SetupService";
-import ItemService from "server/services/item/ItemService";
 import ChatHookService from "server/services/permissions/ChatHookService";
 import ResetService from "server/services/ResetService";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
@@ -113,10 +113,11 @@ export let log = (log: Log) => {
 
 @Service()
 export default class LogService implements OnInit, OnStart {
+    unpropagatedLogs = new Array<Log>();
+
     constructor(
         private dataService: DataService,
         private namedUpgradeService: NamedUpgradeService,
-        private itemService: ItemService,
         private levelService: LevelService,
         private resetService: ResetService,
         private setupService: SetupService,
@@ -130,7 +131,7 @@ export default class LogService implements OnInit, OnStart {
             const data = this.dataService.empireData;
             data.logs = data.logs.filter((value) => tick() - value.time < 604800);
             data.logs.push(log);
-            Packets.logAdded.toAllClients(log);
+            this.unpropagatedLogs.push(log);
         };
         for (const logEntry of PENDING) {
             log(logEntry);
@@ -138,44 +139,12 @@ export default class LogService implements OnInit, OnStart {
     }
 
     onStart() {
-        this.itemService.itemsBought.connect((player, items) =>
-            log({
-                time: tick(),
-                type: "Purchase",
-                player: player?.UserId,
-                items: items.map((item) => item.id),
-            }),
-        );
-        this.itemService.itemsPlaced.connect((player, placedItems) => {
-            const time = tick();
-            let i = 0;
-            for (const placedItem of placedItems) {
-                log({
-                    time: time + ++i / 1000, // not a hack i swear
-                    type: "Place",
-                    player: player.UserId,
-                    item: placedItem.item,
-                    x: placedItem.posX,
-                    y: placedItem.posY,
-                    z: placedItem.posZ,
-                });
-            }
-        });
-        this.itemService.itemsUnplaced.connect((player, placedItems) => {
-            const time = tick();
-            let i = 0;
-            for (const placedItem of placedItems) {
-                log({
-                    time: time + ++i / 1000,
-                    type: "Unplace",
-                    player: player.UserId,
-                    item: placedItem.item,
-                    x: placedItem.posX,
-                    y: placedItem.posY,
-                    z: placedItem.posZ,
-                });
-            }
-        });
+        setInterval(() => {
+            if (this.unpropagatedLogs.size() === 0) return;
+            Packets.logsAdded.toAllClients(this.unpropagatedLogs);
+            this.unpropagatedLogs.clear();
+        }, 1000);
+
         this.namedUpgradeService.upgradeBought.connect((player, upgrade, to) =>
             log({
                 time: tick(),

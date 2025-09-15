@@ -25,6 +25,7 @@ import { CHALLENGES } from "server/Challenges";
 import CurrencyService from "server/services/data/CurrencyService";
 import DataService from "server/services/data/DataService";
 import { OnGameAPILoaded } from "server/services/ModdingService";
+import { log } from "server/services/permissions/LogService";
 import { AREAS } from "shared/Area";
 import { PLACED_ITEMS_FOLDER } from "shared/constants";
 import Item from "shared/item/Item";
@@ -726,6 +727,48 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
         this.placedItemsUpdated.connect((placedItems) => {
             for (const [placementId, placedItem] of placedItems) {
                 this.addItemModel(placementId, placedItem);
+            }
+        });
+
+        // Set up logging for item actions
+        this.itemsBought.connect((player, items) =>
+            log({
+                time: tick(),
+                type: "Purchase",
+                player: player?.UserId,
+                items: items.map((item) => item.id),
+            }),
+        );
+
+        this.itemsPlaced.connect((player, placedItems) => {
+            const time = tick();
+            let i = 0;
+            for (const placedItem of placedItems) {
+                log({
+                    time: time + ++i / 1000, // not a hack i swear
+                    type: "Place",
+                    player: player.UserId,
+                    item: placedItem.item,
+                    x: placedItem.posX,
+                    y: placedItem.posY,
+                    z: placedItem.posZ,
+                });
+            }
+        });
+
+        this.itemsUnplaced.connect((player, placedItems) => {
+            const time = tick();
+            let i = 0;
+            for (const placedItem of placedItems) {
+                log({
+                    time: time + ++i / 1000,
+                    type: "Unplace",
+                    player: player.UserId,
+                    item: placedItem.item,
+                    x: placedItem.posX,
+                    y: placedItem.posY,
+                    z: placedItem.posZ,
+                });
             }
         });
     }

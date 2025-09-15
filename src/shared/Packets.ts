@@ -164,7 +164,7 @@ namespace Packets {
     export const tabOpened = signal<(tab: string) => void>();
     export const donationGiven = signal<() => void>();
     export const promptDonation = signal<(donationId: DataType.i32) => void>();
-    export const logAdded = signal<(log: Log) => void>();
+    export const logsAdded = signal<(logs: Log[]) => void>();
 
     // settings
     export const settings = property<DataType.Packed<typeof PlayerProfileTemplate.settings>>(

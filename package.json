@@ -68,6 +68,7 @@
         "@rbxts/datastore2": "^1.4.0-ts.0",
         "@rbxts/flamework-binary-serializer": "^0.6.0",
         "@rbxts/fuzzy-search": "^1.0.4",
+        "@rbxts/jsnatives": "^1.1.5",
         "@rbxts/luau-thread": "^1.0.1",
         "@rbxts/partcache": "^1.1.1",
         "@rbxts/react": "^17.2.3",
