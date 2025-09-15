@@ -5,12 +5,11 @@
  * Manages visibility based on adaptive tab and build mode states.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from "@rbxts/react";
+import React, { useCallback, useEffect, useState } from "@rbxts/react";
 import { Environment } from "@rbxts/ui-labs";
 import { LOCAL_PLAYER } from "client/constants";
 import ToolOption, { layoutOrderFromTool } from "client/ui/components/backpack/ToolOption";
 import { useWindow } from "client/ui/components/window/WindowManager";
-import useProperty from "client/ui/hooks/useProperty";
 import { playSound } from "shared/asset/GameAssets";
 import HarvestingTool from "shared/item/traits/HarvestingTool";
 import Items from "shared/items/Items";
@@ -34,8 +33,8 @@ const KEY_CODES = new Map<number, Enum.KeyCode>([
  */
 export default function BackpackWindow() {
     const [visible, setVisible] = useState(true);
+    const [harvestingTools, setHarvestingTools] = useState<Set<HarvestingTool>>(new Set());
     const [equippedTool, setEquippedTool] = useState<HarvestingTool | undefined>(undefined);
-    const inventory = useProperty(Packets.inventory);
 
     useWindow({
         id: "Backpack",
@@ -129,10 +128,13 @@ export default function BackpackWindow() {
         return () => connection.Disconnect();
     }, []);
 
-    const harvestingTools = useMemo(() => {
-        const [bestTools] = HarvestingTool.getBestToolsFromInventory(inventory, Items.itemsPerId);
-        return bestTools;
-    }, [inventory]);
+    useEffect(() => {
+        const connection = Packets.inventory.observe((inventory) => {
+            const [bestTools] = HarvestingTool.getBestToolsFromInventory(inventory, Items.itemsPerId);
+            setHarvestingTools(bestTools);
+        });
+        return () => connection.Disconnect();
+    }, []);
 
     const toolOptions = new Array<JSX.Element>();
     for (const harvestingTool of harvestingTools) {

@@ -10,15 +10,6 @@ import { TooltipManager } from "client/ui/components/tooltip/TooltipWindow";
 import { getAsset } from "shared/asset/AssetMap";
 import HarvestingTool from "shared/item/traits/HarvestingTool";
 
-interface ToolOptionProps {
-    harvestingTool: HarvestingTool;
-
-    isEquipped: boolean;
-
-    /** Click event handler */
-    onClick: (harvestingTool: HarvestingTool) => void;
-}
-
 /** Determine layout order based on tool type */
 export function layoutOrderFromTool(harvestingTool: HarvestingTool): number {
     switch (harvestingTool.toolType) {
@@ -39,7 +30,15 @@ export function layoutOrderFromTool(harvestingTool: HarvestingTool): number {
 /**
  * Individual tool option button component
  */
-export default function ToolOption({ harvestingTool, isEquipped, onClick }: ToolOptionProps) {
+export default function ToolOption({
+    harvestingTool,
+    isEquipped,
+    onClick,
+}: {
+    harvestingTool: HarvestingTool;
+    isEquipped: boolean;
+    onClick: () => void;
+}) {
     // Color based on equipped state
     const backgroundColor = isEquipped ? Color3.fromRGB(0, 184, 255) : Color3.fromRGB(31, 31, 31);
     const strokeColor = isEquipped ? Color3.fromRGB(0, 184, 255) : Color3.fromRGB(61, 61, 61);
@@ -55,9 +54,7 @@ export default function ToolOption({ harvestingTool, isEquipped, onClick }: Tool
             SizeConstraint={Enum.SizeConstraint.RelativeYY}
             Text=""
             Event={{
-                Activated: () => {
-                    onClick(harvestingTool);
-                },
+                Activated: onClick,
                 MouseMoved: () => {
                     TooltipManager.showTooltip({ item: harvestingTool.item });
                 },
