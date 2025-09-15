@@ -21,17 +21,17 @@ import { getAllInstanceInfo } from "@antivivi/vrldk";
 import { Service } from "@flamework/core";
 import BombsService from "server/services/boosts/BombsService";
 import DarkMatterService from "server/services/boosts/DarkMatterService";
-import AtmosphereService from "server/services/world/AtmosphereService";
 import CurrencyService from "server/services/data/CurrencyService";
 import DataService from "server/services/data/DataService";
+import AtmosphereService from "server/services/world/AtmosphereService";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Droplet from "shared/item/Droplet";
+import WeatherBoost from "shared/item/traits/boost/WeatherBoost";
 import Operative from "shared/item/traits/Operative";
 import Upgrader from "shared/item/traits/upgrader/Upgrader";
 import { PriceUpgrade } from "shared/namedupgrade/NamedUpgrade";
 import NamedUpgrades from "shared/namedupgrade/NamedUpgrades";
 import { performSoftcaps } from "shared/Softcaps";
-import WeatherBoost from "shared/item/traits/boost/WeatherBoost";
 
 const FURNACE_UPGRADES = NamedUpgrades.getUpgrades("Furnace");
 
@@ -61,12 +61,15 @@ export default class RevenueService {
      */
     getGlobal(upgrades?: Map<string, PriceUpgrade>) {
         let [add, mul, pow] = Operative.template();
+
         // dark matter
         const [darkMatterBoost] = this.darkMatterService.getBoost();
         mul = mul.mul(darkMatterBoost);
 
         // bombs
-        if (this.bombsService.fundsBombEnabled === true) mul = mul.mul(this.bombsService.fundsBombBoost);
+        if (this.bombsService.boost !== undefined) {
+            mul = mul.mul(this.bombsService.boost);
+        }
 
         // named upgrades from upgrade boards and other stuff
         if (upgrades !== undefined) {

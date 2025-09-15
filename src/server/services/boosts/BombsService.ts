@@ -17,10 +17,11 @@ import Signal from "@antivivi/lemon-signal";
 import { OnoeNum } from "@antivivi/serikanum";
 import { convertToHHMMSS } from "@antivivi/vrldk";
 import { OnInit, OnStart, Service } from "@flamework/core";
-import { DataStoreService, MessagingService, Workspace } from "@rbxts/services";
+import { DataStoreService, MessagingService } from "@rbxts/services";
 import CurrencyService from "server/services/data/CurrencyService";
 import DataService from "server/services/data/DataService";
 import ChatHookService from "server/services/permissions/ChatHookService";
+import { log } from "server/services/permissions/LogService";
 import ProductService from "server/services/product/ProductService";
 import Packets from "shared/Packets";
 import { getNameFromUserId } from "shared/constants";
@@ -61,10 +62,7 @@ export default class BombsService implements OnInit, OnStart {
     /** Debounce timer to prevent rapid bomb usage. */
     debounce = 0;
 
-    /** Whether the Funds Bomb is currently enabled. */
-    fundsBombEnabled = false;
-    /** Currency boost applied when Funds Bomb is active. */
-    fundsBombBoost = new CurrencyBundle().set("Funds", 2);
+    boost?: CurrencyBundle;
 
     constructor(
         private chatHookService: ChatHookService,
@@ -74,12 +72,38 @@ export default class BombsService implements OnInit, OnStart {
     ) {}
 
     /**
-     * Refreshes the enabled state of the Funds Bomb based on current time and stored end time.
+     * Activates a bomb based on the received message.
+     * Updates bomb end time and sends a server message.
+     * @param data The bomb message containing bomb type, player ID, and end time.
      */
-    refreshBombsEnabled() {
-        const currentTime = os.time();
-        const fundsBombTime = Workspace.GetAttribute("FundsBombTime") as number | undefined;
-        this.fundsBombEnabled = fundsBombTime !== undefined && fundsBombTime > currentTime;
+    activateBomb(data: BombMessage) {
+        this.setBombEndTime(data.bombType, data.endTime);
+        this.chatHookService.sendServerMessage(
+            `${getNameFromUserId(data.player)} just activated a ${data.bombType} for ${convertToHHMMSS(data.endTime - os.time())}!`,
+        );
+    }
+
+    /**
+     * Sets the end time for a specific bomb type and updates the corresponding packet.
+     * @param bombType The type of bomb (currency) to set the end time for.
+     * @param endTime The end time (as a Unix timestamp) when the bomb effect will expire.
+     */
+    setBombEndTime(bombType: Currency, endTime: number) {
+        const bombEndTimes = Packets.bombEndTimes.get();
+        bombEndTimes.set(bombType, endTime);
+        Packets.bombEndTimes.set(bombEndTimes);
+    }
+
+    /**
+     * Builds the initial bomb end times from the global DataStore.
+     */
+    buildInitialBombTimes() {
+        const bombEndTimes = new Map<Currency, number>();
+        const fundsEndTime = this.globalDataStore.GetAsync("Funds")[0] as number | undefined;
+        if (fundsEndTime !== undefined) {
+            bombEndTimes.set("Funds Bombs", fundsEndTime);
+        }
+        Packets.bombEndTimes.set(bombEndTimes);
     }
 
     /**
@@ -98,7 +122,13 @@ export default class BombsService implements OnInit, OnStart {
 
             this.debounce = tick();
             if (bombType === "Funds Bombs") {
-                this.bombUsed.fire(player, bombType);
+                log({
+                    time: tick(),
+                    type: "Bomb",
+                    player: player.UserId,
+                    currency: bombType,
+                    amount: 1,
+                });
                 this.globalDataStore.UpdateAsync("Funds", (oldValue: number | undefined) => {
                     let base = os.time();
                     let value: number;
@@ -115,7 +145,7 @@ export default class BombsService implements OnInit, OnStart {
                             player: player.UserId,
                             endTime: value,
                         };
-                        this.updateBomb(msg);
+                        this.activateBomb(msg);
                         task.spawn(() => {
                             MessagingService.PublishAsync("Bomb", msg);
                         });
@@ -135,42 +165,37 @@ export default class BombsService implements OnInit, OnStart {
                 return Enum.ProductPurchaseDecision.PurchaseGranted;
             });
         }
+
+        MessagingService.SubscribeAsync("Bomb", (message) => this.activateBomb(message.Data as BombMessage));
     }
 
-    /**
-     * Updates the global bomb state and notifies listeners.
-     *
-     * @param data Bomb message containing type, player, and end time.
-     */
-    updateBomb(data: BombMessage) {
-        if (data.bombType === "Funds Bombs") {
-            Workspace.SetAttribute("FundsBombTime", data.endTime);
-            this.chatHookService.sendServerMessage(
-                getNameFromUserId(data.player) +
-                    " just activated a " +
-                    data.bombType +
-                    " for " +
-                    convertToHHMMSS(data.endTime - os.time()) +
-                    "!",
-            );
-            this.refreshBombsEnabled();
-        }
-    }
-
-    /**
-     * Starts bomb state synchronization and periodic refresh.
-     * Subscribes to bomb events and updates bomb enabled state every second.
-     */
     onStart() {
-        Workspace.SetAttribute("FundsBombTime", this.globalDataStore.GetAsync("Funds")[0] as number | undefined);
         task.spawn(() => {
             while (task.wait(1)) {
-                this.refreshBombsEnabled();
+                const t = os.time();
+                const bombEndTimes = Packets.bombEndTimes.get();
+                const boost = new CurrencyBundle();
+                let changed = false;
+
+                for (const [currency, endTime] of bombEndTimes) {
+                    if (t > endTime) continue; // Skip expired bombs
+
+                    // TODO: Write a proper configuration for bomb boosts
+                    if (currency === "Funds Bombs") {
+                        boost.set("Funds", 2);
+                        changed = true;
+                    }
+                }
+
+                if (!changed) {
+                    this.boost = undefined;
+                    continue;
+                }
+
+                this.boost = boost;
             }
         });
 
-        this.refreshBombsEnabled();
-
-        MessagingService.SubscribeAsync("Bomb", (message) => this.updateBomb(message.Data as BombMessage));
+        this.buildInitialBombTimes();
     }
 }

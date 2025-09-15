@@ -1,6 +1,5 @@
 import { BaseOnoeNum } from "@antivivi/serikanum";
 import { OnInit, OnStart, Service } from "@flamework/core";
-import BombsService from "server/services/boosts/BombsService";
 import DataService from "server/services/data/DataService";
 import LevelService from "server/services/data/LevelService";
 import NamedUpgradeService from "server/services/data/NamedUpgradeService";
@@ -101,6 +100,17 @@ declare global {
     }
 }
 
+const PENDING = new Array<Log>();
+
+/**
+ * Function to log actions within the game.
+ * This function is assigned in the LogService constructor.
+ * @param log The log entry to be recorded.
+ */
+export let log = (log: Log) => {
+    PENDING.push(log);
+};
+
 @Service()
 export default class LogService implements OnInit, OnStart {
     constructor(
@@ -109,49 +119,38 @@ export default class LogService implements OnInit, OnStart {
         private itemService: ItemService,
         private levelService: LevelService,
         private resetService: ResetService,
-        private bombsService: BombsService,
         private setupService: SetupService,
         private chatHookService: ChatHookService,
     ) {}
 
-    /**
-     * Logs an action to the empire log and broadcasts to clients.
-     * @param log Log entry
-     */
-    log(log: Log) {
-        const data = this.dataService.empireData;
-        data.logs = data.logs.filter((value) => tick() - value.time < 604800);
-        data.logs.push(log);
-        Packets.logAdded.toAllClients(log);
-    }
-
     onInit() {
         Packets.getLogs.fromClient(() => this.dataService.empireData.logs);
+
+        log = (log: Log) => {
+            const data = this.dataService.empireData;
+            data.logs = data.logs.filter((value) => tick() - value.time < 604800);
+            data.logs.push(log);
+            Packets.logAdded.toAllClients(log);
+        };
+        for (const logEntry of PENDING) {
+            log(logEntry);
+        }
     }
 
     onStart() {
         this.itemService.itemsBought.connect((player, items) =>
-            this.log({
+            log({
                 time: tick(),
                 type: "Purchase",
                 player: player?.UserId,
                 items: items.map((item) => item.id),
             }),
         );
-        this.bombsService.bombUsed.connect((player, bombType) =>
-            this.log({
-                time: tick(),
-                type: "Bomb",
-                player: player.UserId,
-                currency: bombType,
-                amount: 1,
-            }),
-        );
         this.itemService.itemsPlaced.connect((player, placedItems) => {
             const time = tick();
             let i = 0;
             for (const placedItem of placedItems) {
-                this.log({
+                log({
                     time: time + ++i / 1000, // not a hack i swear
                     type: "Place",
                     player: player.UserId,
@@ -166,7 +165,7 @@ export default class LogService implements OnInit, OnStart {
             const time = tick();
             let i = 0;
             for (const placedItem of placedItems) {
-                this.log({
+                log({
                     time: time + ++i / 1000,
                     type: "Unplace",
                     player: player.UserId,
@@ -178,7 +177,7 @@ export default class LogService implements OnInit, OnStart {
             }
         });
         this.namedUpgradeService.upgradeBought.connect((player, upgrade, to) =>
-            this.log({
+            log({
                 time: tick(),
                 type: "Upgrade",
                 player: player.UserId,
@@ -187,7 +186,7 @@ export default class LogService implements OnInit, OnStart {
             }),
         );
         this.levelService.respected.connect((player) =>
-            this.log({
+            log({
                 time: tick(),
                 type: "Respec",
                 player: player.UserId,
@@ -200,7 +199,7 @@ export default class LogService implements OnInit, OnStart {
                 `${player.Name} performed a ${layer} for ${CurrencyBundle.getFormatted(resetLayer.gives, amount)}`,
                 `color:${color.R * 255},${color.G * 255},${color.B * 255}`,
             );
-            this.log({
+            log({
                 time: tick(),
                 type: "Reset",
                 layer: layer,
@@ -210,7 +209,7 @@ export default class LogService implements OnInit, OnStart {
             });
         });
         this.setupService.setupSaved.connect((player, area) =>
-            this.log({
+            log({
                 time: tick(),
                 type: "SetupSave",
                 player: player.UserId,
@@ -218,7 +217,7 @@ export default class LogService implements OnInit, OnStart {
             }),
         );
         this.setupService.setupLoaded.connect((player, area) =>
-            this.log({
+            log({
                 time: tick(),
                 type: "SetupLoad",
                 player: player.UserId,
