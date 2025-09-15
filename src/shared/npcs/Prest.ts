@@ -1,7 +1,7 @@
 import NPC from "shared/world/NPC";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 
-export = new NPC()
+export = new NPC(script.Name)
     .setAnimation("Default", 17708029763)
     .createDefaultMonologue(
         `Buy your crates and logs here! Come on, it's a limited stock! Only for ${new CurrencyBundle().set("Funds", 1e15).toString()}!`,

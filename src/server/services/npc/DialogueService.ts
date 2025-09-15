@@ -17,7 +17,8 @@ import { Players, ProximityPromptService, TweenService, Workspace } from "@rbxts
 import NPCStateService, { OnNPCLoad } from "server/services/npc/NPCStateService";
 import DataService from "server/services/data/DataService";
 import { ASSETS } from "shared/asset/GameAssets";
-import { NPC_MODELS, getDisplayName } from "shared/constants";
+import { getDisplayName } from "shared/constants";
+import { NPC_MODELS } from "shared/world/NPC";
 import InteractableObject from "shared/world/InteractableObject";
 import { Server } from "shared/item/ItemUtils";
 import NPC, { Dialogue } from "shared/world/NPC";

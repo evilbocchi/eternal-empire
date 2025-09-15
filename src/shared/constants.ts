@@ -1,6 +1,7 @@
 import { Players, SoundService, TextChatService, Workspace } from "@rbxts/services";
 import { Workspace_Waypoints } from "services";
 import { AREAS } from "shared/world/Area";
+import { NPC_MODELS } from "shared/world/NPC";
 
 export function getChallengeGui() {
     const board = AREAS.SlamoVillage.areaFolder.FindFirstChild("ChallengesBoard");
@@ -63,7 +64,6 @@ export const MUSIC_GROUP = SoundService.WaitForChild("Music") as SoundGroup;
 
 export const NAMES_PER_USER_ID = new Map<number, string>();
 
-export const NPC_MODELS = Workspace.WaitForChild("NPCs") as Folder;
 export const NPCS = script.Parent?.WaitForChild("npcs") as Folder;
 
 export const PLACED_ITEMS_FOLDER = Workspace.WaitForChild("PlacedItems") as Folder;

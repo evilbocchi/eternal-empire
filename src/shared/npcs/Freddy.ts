@@ -62,7 +62,7 @@ import NPC from "shared/world/NPC";
 // 	},
 // }
 
-export = new NPC()
+export = new NPC(script.Name)
     .setAnimation("Default", 17708029763)
     .createDefaultMonologue("New here? Well, welcome to the Barren Islands. Not much to do, I guess.")
     .monologue("Try making some Funds. It'll help you out.")

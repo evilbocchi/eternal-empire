@@ -1,7 +1,11 @@
+import { Workspace } from "@rbxts/services";
+
 /**
  * Represents the animation types available for NPCs.
  */
 export type NPCAnimationType = "Default" | "Walk" | "Run" | "Jump";
+
+export const NPC_MODELS = Workspace.WaitForChild("NPCs") as Folder;
 
 /**
  * Represents a non-player character (NPC) with animations, dialogue, and interaction logic.
@@ -9,21 +13,28 @@ export type NPCAnimationType = "Default" | "Walk" | "Run" | "Jump";
 export default class NPC {
     animationsPerType = new Map<NPCAnimationType, number>();
     defaultDialogues = new Array<Dialogue>();
+    defaultName: string;
     interact: (() => void) | undefined;
 
-    constructor() {
+    constructor(private readonly id: string) {
+        this.defaultName = id;
         this.animationsPerType.set("Walk", 180426354);
         this.animationsPerType.set("Jump", 125750702);
+    }
+
+    setDefaultName(name: string) {
+        this.defaultName = name;
+        return this;
     }
 
     /**
      * Sets the animation asset ID for a given animation type.
      * @param animType The animation type.
-     * @param id The asset ID for the animation.
+     * @param assetId The asset ID for the animation.
      * @returns This NPC instance.
      */
-    setAnimation(animType: NPCAnimationType, id: number) {
-        this.animationsPerType.set(animType, id);
+    setAnimation(animType: NPCAnimationType, assetId: number) {
+        this.animationsPerType.set(animType, assetId);
         return this;
     }
 
@@ -63,7 +74,7 @@ export default class NPC {
 /**
  * An empty NPC instance for default or placeholder use.
  */
-export const EMPTY_NPC = new NPC();
+export const EMPTY_NPC = new NPC("Empty");
 
 /**
  * Represents a dialogue node for NPCs, supporting monologues, choices, and dialogue chaining.

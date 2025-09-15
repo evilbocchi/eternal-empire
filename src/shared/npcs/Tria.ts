@@ -1,6 +1,7 @@
 import NPC from "shared/world/NPC";
 
-export = new NPC()
+export = new NPC(script.Name)
+    .setDefaultName("Friendly Noob")
     .setAnimation("Default", 17855439739)
     .createDefaultMonologue(
         "O-oh! Uh... y-you're... you're talking to me again? I... I didn't mean to... I mean... uh... hi!",

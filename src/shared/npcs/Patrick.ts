@@ -1,3 +1,4 @@
 import NPC from "shared/world/NPC";
 
-export = new NPC().createDefaultMonologue("I kinda need some items, but the store's a little expensive...").npc;
+export = new NPC(script.Name).createDefaultMonologue("I kinda need some items, but the store's a little expensive...")
+    .npc;
