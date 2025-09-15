@@ -14,13 +14,11 @@
  */
 import { OnoeNum } from "@antivivi/serikanum";
 import { loadAnimation } from "@antivivi/vrldk";
-import { Controller, OnInit, OnStart } from "@flamework/core";
+import { Controller, OnInit } from "@flamework/core";
 import { Debris, StarterGui, TweenService, UserInputService, Workspace } from "@rbxts/services";
 import { LOCAL_PLAYER } from "client/constants";
 import { OnCharacterAdded } from "client/controllers/core/ModdingController";
-import { INTERFACE } from "client/controllers/core/UIController";
-import BuildController from "client/controllers/gameplay/BuildController";
-import TooltipController, { Tooltip } from "client/controllers/interface/TooltipController";
+import TooltipController from "client/controllers/interface/TooltipController";
 import AreaController from "client/controllers/world/AreaController";
 import { AREAS } from "shared/Area";
 import { ASSETS, emitEffect, playSound } from "shared/asset/GameAssets";
@@ -55,20 +53,6 @@ export default class ToolController implements OnInit, OnCharacterAdded {
     harvestables = new Map<Instance, typeof ASSETS.HarvestableGui>();
     lastUse = 0;
     readonly tweenInfo = new TweenInfo(0.5);
-    /** Map of tools to their UI option data - used by React components */
-    readonly tools = new Map<Tool, ToolOption>();
-    readonly KEY_CODES = new Map<number, Enum.KeyCode>([
-        [1, Enum.KeyCode.One],
-        [2, Enum.KeyCode.Two],
-        [3, Enum.KeyCode.Three],
-        [4, Enum.KeyCode.Four],
-        [5, Enum.KeyCode.Five],
-        [6, Enum.KeyCode.Six],
-        [7, Enum.KeyCode.Seven],
-        [8, Enum.KeyCode.Eight],
-        [9, Enum.KeyCode.Nine],
-        [10, Enum.KeyCode.Zero],
-    ]);
     readonly OVERLAP_PARAMS = (function () {
         const params = new OverlapParams();
         params.CollisionGroup = "ItemHitbox";
@@ -204,37 +188,6 @@ export default class ToolController implements OnInit, OnCharacterAdded {
                 anim.Stopped.Once(() => Packets.useTool.toServer(this.checkHarvestable(currentTool) ?? Workspace));
                 anim.Play();
                 playSound("ToolSwing.mp3");
-            } else {
-                let index = -1;
-                for (const [i, v] of this.KEY_CODES) {
-                    if (input.KeyCode === v) {
-                        index = i;
-                        break;
-                    }
-                }
-
-                let sortedTools = new Array<[Tool, ToolOption]>();
-                for (const [tool, option] of this.tools) {
-                    sortedTools.push([tool, option]);
-                }
-                sortedTools = sortedTools.sort(([_a, optionA], [_b, optionB]) => {
-                    return optionA.LayoutOrder < optionB.LayoutOrder;
-                });
-
-                const toolEntry = sortedTools[index - 1]; // index is 1-based
-                if (toolEntry === undefined) return;
-
-                const [tool, _option] = toolEntry;
-
-                const backpack = LOCAL_PLAYER.FindFirstChildOfClass("Backpack");
-                playSound("Equip.mp3");
-                if (tool.Parent === backpack) {
-                    const currentTool = LOCAL_PLAYER.Character?.FindFirstChildOfClass("Tool");
-                    if (currentTool !== undefined) currentTool.Parent = backpack;
-                    tool.Parent = LOCAL_PLAYER.Character;
-                } else {
-                    tool.Parent = backpack;
-                }
             }
         });
 
@@ -264,87 +217,17 @@ export default class ToolController implements OnInit, OnCharacterAdded {
      * @param character The player's character model.
      */
     onCharacterAdded(character: Model): void {
-        {
-            const humanoid = character.WaitForChild("Humanoid") as Humanoid;
-            this.swingAnimation = loadAnimation(humanoid, 16920778613);
-            const backpack = LOCAL_PLAYER.WaitForChild("Backpack");
-            for (const tool of backpack.GetChildren()) this.onToolAdded(tool);
-            backpack.ChildAdded.Connect((tool) => {
-                this.onToolAdded(tool);
-            });
-
-            humanoid.Died.Once(() => {
-                // Clear tools data - UI cleanup handled by React
-                this.tools.clear();
-            });
-
-            character.ChildAdded.Connect((child) => {
-                if (child.IsA("Tool")) {
-                    for (const [_, gui] of this.harvestables) gui.Enabled = true;
-                }
-            });
-
-            character.ChildRemoved.Connect((child) => {
-                if (child.IsA("Tool")) {
-                    for (const [_, gui] of this.harvestables) gui.Enabled = false;
-                }
-            });
-        }
-    }
-
-    /**
-     * Loads and tracks a tool for React UI rendering.
-     * @param tool The tool instance to add.
-     */
-    onToolAdded(tool: Instance) {
-        if (!tool.IsA("Tool") || this.tools.has(tool) === true) return;
-        const item = Items.getItem(tool.Name);
-        if (item === undefined) return;
-        const harvestingTool = item.findTrait("HarvestingTool");
-        if (harvestingTool === undefined) return;
-
-        // Create a minimal tool option for data tracking
-        const toolOption = ASSETS.ToolOption.Clone();
-        toolOption.ImageLabel.Image = tool.TextureId;
-        this.tools.set(tool, toolOption);
-
-        let layoutOrder: number;
-        switch (harvestingTool.toolType) {
-            case "Pickaxe":
-                layoutOrder = 1;
-                break;
-            case "Axe":
-                layoutOrder = 2;
-                break;
-            case "Scythe":
-                layoutOrder = 3;
-                break;
-            case "Rod":
-                layoutOrder = 4;
-                break;
-            case "None":
-            default:
-                layoutOrder = item.layoutOrder;
-                break;
-        }
-        toolOption.LayoutOrder = layoutOrder;
-        toolOption.Name = tool.Name;
-
-        // Clean up when tool is removed
-        const connection = tool.AncestryChanged.Connect(() => {
-            if (tool.Parent === undefined) {
-                this.tools.delete(tool);
-                pcall(() => toolOption.Destroy());
-                connection.Disconnect();
+        const humanoid = character.WaitForChild("Humanoid") as Humanoid;
+        this.swingAnimation = loadAnimation(humanoid, 16920778613);
+        character.ChildAdded.Connect((child) => {
+            if (child.IsA("Tool")) {
+                for (const [_, gui] of this.harvestables) gui.Enabled = true;
             }
         });
-
-        // Set tooltip for potential legacy usage
-        if (item !== undefined) {
-            this.tooltipController.setTooltip(toolOption, Tooltip.fromItem(item));
-        }
-
-        // Don't parent to UI - React handles rendering
-        // toolOption.Parent = BACKPACK_WINDOW; // Removed - React handles this
+        character.ChildRemoved.Connect((child) => {
+            if (child.IsA("Tool")) {
+                for (const [_, gui] of this.harvestables) gui.Enabled = false;
+            }
+        });
     }
 }

@@ -5,7 +5,7 @@
  * Manages visibility based on adaptive tab and build mode states.
  */
 
-import React, { useCallback, useEffect, useState } from "@rbxts/react";
+import React, { useEffect, useState } from "@rbxts/react";
 import { Environment } from "@rbxts/ui-labs";
 import { LOCAL_PLAYER } from "client/constants";
 import ToolOption, { layoutOrderFromTool } from "client/ui/components/backpack/ToolOption";
@@ -27,6 +27,25 @@ const KEY_CODES = new Map<number, Enum.KeyCode>([
     [9, Enum.KeyCode.Nine],
     [10, Enum.KeyCode.Zero],
 ]);
+
+const equipHarvestableTool = (harvestingTool: HarvestingTool) => {
+    const backpack = LOCAL_PLAYER.FindFirstChildOfClass("Backpack");
+
+    const currentlyEquippedTool = LOCAL_PLAYER.Character?.FindFirstChildOfClass("Tool");
+    if (currentlyEquippedTool) {
+        currentlyEquippedTool.Parent = backpack;
+        if (currentlyEquippedTool.Name === harvestingTool.item.id) {
+            playSound("Unequip.mp3");
+            return;
+        }
+    }
+
+    const tool = backpack?.FindFirstChild(harvestingTool.item.id) as Tool | undefined;
+    if (tool === undefined) return;
+    tool.Parent = LOCAL_PLAYER.Character;
+    playSound("Equip.mp3");
+    return harvestingTool;
+};
 
 /**
  * Main backpack window component that displays tool options
@@ -82,26 +101,6 @@ export default function BackpackWindow() {
         };
     }, []);
 
-    const equipHarvestableTool = useCallback((harvestingTool: HarvestingTool) => {
-        const backpack = LOCAL_PLAYER.FindFirstChildOfClass("Backpack");
-
-        const currentlyEquippedTool = LOCAL_PLAYER.Character?.FindFirstChildOfClass("Tool");
-        if (currentlyEquippedTool) {
-            currentlyEquippedTool.Parent = backpack;
-            if (currentlyEquippedTool.Name === harvestingTool.item.id) {
-                setEquippedTool(undefined);
-                playSound("Unequip.mp3");
-                return;
-            }
-        }
-
-        const tool = backpack?.FindFirstChild(harvestingTool.item.id) as Tool | undefined;
-        if (tool === undefined) return;
-        tool.Parent = LOCAL_PLAYER.Character;
-        setEquippedTool(harvestingTool);
-        playSound("Equip.mp3");
-    }, []);
-
     useEffect(() => {
         const connection = Environment.UserInput.InputBegan.Connect((input, gameProcessed) => {
             if (gameProcessed === true) return;
@@ -122,7 +121,7 @@ export default function BackpackWindow() {
             const equipping = sortedTools[index - 1];
             if (equipping === undefined) return;
             print("Equipping tool via hotkey:", equipping.item.name);
-            equipHarvestableTool(equipping);
+            setEquippedTool(equipHarvestableTool(equipping));
         });
 
         return () => connection.Disconnect();
@@ -142,7 +141,7 @@ export default function BackpackWindow() {
             <ToolOption
                 harvestingTool={harvestingTool}
                 isEquipped={equippedTool === harvestingTool}
-                onClick={() => equipHarvestableTool(harvestingTool)}
+                onClick={() => setEquippedTool(equipHarvestableTool(harvestingTool))}
             />,
         );
     }
