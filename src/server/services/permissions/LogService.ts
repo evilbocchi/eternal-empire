@@ -1,6 +1,5 @@
 import { BaseOnoeNum } from "@antivivi/serikanum";
 import { OnInit, OnStart, Service } from "@flamework/core";
-import { setInterval } from "@rbxts/jsnatives";
 import DataService from "server/services/data/DataService";
 import Packets from "shared/Packets";
 
@@ -124,10 +123,12 @@ export default class LogService implements OnInit, OnStart {
     }
 
     onStart() {
-        setInterval(() => {
-            if (this.unpropagatedLogs.size() === 0) return;
-            Packets.logsAdded.toAllClients(this.unpropagatedLogs);
-            this.unpropagatedLogs.clear();
-        }, 1000);
+        task.spawn(() => {
+            while (task.wait(1)) {
+                if (this.unpropagatedLogs.size() === 0) return;
+                Packets.logsAdded.toAllClients(this.unpropagatedLogs);
+                this.unpropagatedLogs.clear();
+            }
+        });
     }
 }

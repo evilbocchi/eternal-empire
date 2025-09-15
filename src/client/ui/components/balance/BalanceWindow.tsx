@@ -28,6 +28,7 @@ export default function BalanceWindow() {
     const [isSmallScreen, setIsSmallScreen] = useState(true);
     const [currentPage, setCurrentPage] = useState(1);
     const [maxPage, setMaxPage] = useState(1);
+    const [enabledPerBomb, setEnabledPerBomb] = useState<Map<Currency, boolean>>(new Map());
 
     const openPosition = new UDim2(1, 0, 1, -70);
     const closePosition = openPosition.add(new UDim2(0, 250, 0, 0));
@@ -35,9 +36,11 @@ export default function BalanceWindow() {
         id: "Balance",
         visible,
         onOpen: () => {
+            setVisible(true);
             wrapperRef.current?.TweenPosition(openPosition, Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 1, true);
         },
         onClose: () => {
+            setVisible(false);
             wrapperRef.current?.TweenPosition(closePosition, Enum.EasingDirection.In, Enum.EasingStyle.Quad, 1, true);
         },
         priority: -1, // Negative priority so close hotkey does not work
@@ -62,6 +65,25 @@ export default function BalanceWindow() {
             balanceConnection.Disconnect();
             revenueConnection.Disconnect();
             sizeConnection.Disconnect();
+        };
+    }, []);
+
+    useEffect(() => {
+        let active = true;
+        const checkBomb = () => {
+            const newEnabledPerBomb = new Map<Currency, boolean>();
+            const currentTime = os.time();
+            for (const [currency, endTime] of Packets.bombEndTimes.get()) {
+                newEnabledPerBomb.set(currency, endTime > currentTime);
+            }
+            setEnabledPerBomb(newEnabledPerBomb);
+            if (active) {
+                task.delay(1, checkBomb);
+            }
+        };
+        checkBomb();
+        return () => {
+            active = false;
         };
     }, []);
 
@@ -182,6 +204,7 @@ export default function BalanceWindow() {
                         currency={currency}
                         amount={amount}
                         income={income}
+                        bombEnabled={enabledPerBomb.get(currency) ?? false}
                         formatCurrency={formatCurrency}
                         layoutOrder={index}
                     />

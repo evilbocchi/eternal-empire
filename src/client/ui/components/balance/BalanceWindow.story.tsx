@@ -1,8 +1,9 @@
-import React from "@rbxts/react";
+import React, { StrictMode, useEffect } from "@rbxts/react";
 import ReactRoblox from "@rbxts/react-roblox";
 import { CreateReactStory, Number } from "@rbxts/ui-labs";
 import BalanceWindow from "client/ui/components/balance/BalanceWindow";
 import StoryMocking from "client/ui/components/StoryMocking";
+import TooltipWindow from "client/ui/components/tooltip/TooltipWindow";
 import useVisibility from "client/ui/hooks/useVisibility";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import { CURRENCIES } from "shared/currency/CurrencyDetails";
@@ -38,7 +39,20 @@ export = CreateReactStory(
             Packets.balance.set(newBalance);
         }
 
+        useEffect(() => {
+            const bombEndTimes = Packets.bombEndTimes.get();
+            for (const currency of CURRENCIES) {
+                bombEndTimes.set(currency, os.time() + props.controls.currencyBombTime);
+            }
+            Packets.bombEndTimes.set(bombEndTimes);
+        }, [props.controls.currencyBombTime]);
+
         useVisibility("Balance", props.controls.visible);
-        return <BalanceWindow />;
+        return (
+            <StrictMode>
+                <BalanceWindow />
+                <TooltipWindow />
+            </StrictMode>
+        );
     },
 );
