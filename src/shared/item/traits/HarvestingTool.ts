@@ -78,7 +78,7 @@ export default class HarvestingTool extends ItemTrait {
             const item = itemsPerId.get(id);
             if (item === undefined || amount < 1) continue;
             const harvestingTool = item.findTrait("HarvestingTool");
-            if (harvestingTool === undefined || harvestingTool.toolType === "None") continue;
+            if (harvestingTool === undefined) continue;
             tools.push(harvestingTool);
         }
         return HarvestingTool.getBestTools(tools);
