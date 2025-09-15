@@ -65,10 +65,8 @@
         "@flamework/core": "^1.3.1",
         "@rbxts/camera-shaker": "^1.0.8",
         "@rbxts/chat-service": "^1.3.0",
-        "@rbxts/datastore2": "^1.4.0-ts.0",
         "@rbxts/flamework-binary-serializer": "^0.6.0",
         "@rbxts/fuzzy-search": "^1.0.4",
-        "@rbxts/jsnatives": "^1.1.5",
         "@rbxts/luau-thread": "^1.0.1",
         "@rbxts/partcache": "^1.1.1",
         "@rbxts/react": "^17.2.3",
@@ -77,9 +75,7 @@
         "@rbxts/rparticle": "^1.0.0",
         "@rbxts/services": "^1.5.1",
         "@rbxts/stringbuilder": "^1.1.0",
-        "@rbxts/swimming": "^0.0.0",
         "@rbxts/testez": "^0.4.2-ts.0",
-        "@rbxts/topbar-plus": "^3.2.5",
         "@rbxts/ui-labs": "^2.4.0"
     }
 }
