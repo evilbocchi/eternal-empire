@@ -215,7 +215,7 @@ export default class ResetService implements OnInit, OnStart {
         }
         if (resetLayer.minimum.moreThan(amount)) return value;
 
-        value = value.set(resetLayer.gives, resetLayer.formula.apply(amount));
+        value = value.set(resetLayer.gives, resetLayer.formula.evaluate(amount));
 
         let [totalAdd, totalMul, totalPow] = Operative.template();
         [totalAdd, totalMul, totalPow] = this.revenueService.applyGlobal(totalAdd, totalMul, totalPow, RESET_UPGRADES);

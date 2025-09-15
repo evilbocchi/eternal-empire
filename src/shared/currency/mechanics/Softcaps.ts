@@ -6,7 +6,7 @@ declare global {
         recippow: Softcap;
     };
     type Softcap = {
-        starts: OnoeNum;
+        requirement: OnoeNum;
         formula: (amount: OnoeNum) => OnoeNum;
     };
 }
@@ -14,21 +14,21 @@ declare global {
 const Softcaps = {
     Funds: {
         div: {
-            starts: new OnoeNum(1e33),
+            requirement: new OnoeNum(1e33),
             formula: (amount: OnoeNum) => amount.div(1e33).pow(0.15),
         },
         recippow: {
-            starts: new OnoeNum(1e306),
+            requirement: new OnoeNum(1e306),
             formula: (amount: OnoeNum) => amount.div(1e306).pow(0.15),
         },
     },
     Skill: {
         div: {
-            starts: new OnoeNum(100000),
+            requirement: new OnoeNum(100000),
             formula: (amount: OnoeNum) => amount.div(100000).pow(0.2),
         },
         recippow: {
-            starts: new OnoeNum(1e42),
+            requirement: new OnoeNum(1e42),
             formula: (amount: OnoeNum) => amount.div(1e42).pow(0.2),
         },
     },
@@ -44,7 +44,7 @@ const Softcaps = {
  */
 export const performSoftcap = (amount?: OnoeNum, softcap?: Softcap) => {
     if (softcap === undefined || amount === undefined) return $tuple(undefined, undefined);
-    const starts = softcap.starts;
+    const starts = softcap.requirement;
     if (starts.moreThan(amount)) return $tuple(undefined, starts);
     else return $tuple(softcap.formula(amount), starts);
 };

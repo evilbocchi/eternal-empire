@@ -597,7 +597,7 @@ export default class Item {
             value = cap;
         }
 
-        const result = this.formula.apply(value);
+        const result = this.formula.evaluate(value);
         this.formulaResult = result;
         this.formulaCallback(result, this, Server);
         return result;

@@ -21,7 +21,7 @@ export default class ObbyUpgrader extends ItemTrait {
                 const mul = new CurrencyBundle();
                 for (const [upgrade, { currency, formula }] of obbyUpgrader.boosts) {
                     const amount = Server.NamedUpgrade.getUpgradeAmount(upgrade.id);
-                    mul.set(currency, formula.apply(new OnoeNum(amount)));
+                    mul.set(currency, formula.evaluate(new OnoeNum(amount)));
                 }
                 upgrader.setMul(mul);
             },

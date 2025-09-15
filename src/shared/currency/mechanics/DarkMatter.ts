@@ -32,7 +32,7 @@ namespace DarkMatter {
         for (const [currency, boostingDetails] of pairs(BOOSTING_CURRENCIES)) {
             if (darkMatter.lessThan(boostingDetails.requirement)) continue;
 
-            boost = boost.set(currency, boostingDetails.formula.apply(darkMatter));
+            boost = boost.set(currency, boostingDetails.formula.evaluate(darkMatter));
         }
 
         return $tuple(boost, darkMatter);

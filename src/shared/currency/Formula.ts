@@ -3,7 +3,7 @@ import { OnoeNum } from "@antivivi/serikanum";
 
 type Number = number | OnoeNum;
 type Operation = {
-    type: string;
+    type: number;
     amount?: OnoeNum;
     base?: number;
 };
@@ -12,6 +12,17 @@ const def = new OnoeNum(0);
 const HALF = new OnoeNum(1 / 2);
 const ONETHIRD = new OnoeNum(1 / 3);
 const E = math.exp(1);
+
+// Operation types as bit flags
+const OPERATION_ADD = 0x0001;
+const OPERATION_SUB = 0x0002;
+const OPERATION_MUL = 0x0004;
+const OPERATION_DIV = 0x0008;
+const OPERATION_POW = 0x0010;
+const OPERATION_SQRT = 0x0020;
+const OPERATION_CBRT = 0x0040;
+const OPERATION_LOG = 0x0080;
+const OPERATION_LN = 0x0100;
 
 /**
  * Represents a chainable mathematical formula composed of operations.
@@ -29,7 +40,7 @@ class Formula {
      */
     add(number: Number) {
         this.operations.push({
-            type: "add",
+            type: OPERATION_ADD,
             amount: new OnoeNum(number),
         });
         return this;
@@ -42,7 +53,7 @@ class Formula {
      */
     sub(number: Number) {
         this.operations.push({
-            type: "sub",
+            type: OPERATION_SUB,
             amount: new OnoeNum(number),
         });
         return this;
@@ -55,7 +66,7 @@ class Formula {
      */
     mul(number: Number) {
         this.operations.push({
-            type: "mul",
+            type: OPERATION_MUL,
             amount: new OnoeNum(number),
         });
         return this;
@@ -68,7 +79,7 @@ class Formula {
      */
     div(number: Number) {
         this.operations.push({
-            type: "div",
+            type: OPERATION_DIV,
             amount: new OnoeNum(number),
         });
         return this;
@@ -81,7 +92,7 @@ class Formula {
      */
     pow(number: Number) {
         this.operations.push({
-            type: "pow",
+            type: OPERATION_POW,
             amount: new OnoeNum(number),
         });
         return this;
@@ -92,7 +103,7 @@ class Formula {
      * @returns This Formula instance.
      */
     sqrt() {
-        this.operations.push({ type: "sqrt" });
+        this.operations.push({ type: OPERATION_SQRT });
         return this;
     }
 
@@ -103,7 +114,7 @@ class Formula {
      */
     log(number: number) {
         this.operations.push({
-            type: "log",
+            type: OPERATION_LOG,
             base: number,
         });
         return this;
@@ -115,7 +126,7 @@ class Formula {
      */
     ln() {
         this.operations.push({
-            type: "ln",
+            type: OPERATION_LN,
         });
         return this;
     }
@@ -125,34 +136,34 @@ class Formula {
      * @param number The input value.
      * @returns The result after applying all operations.
      */
-    apply(number: OnoeNum) {
+    evaluate(number: OnoeNum) {
         for (const operation of this.operations) {
             switch (operation.type) {
-                case "add":
+                case OPERATION_ADD:
                     number = number.add(operation.amount!);
                     break;
-                case "sub":
+                case OPERATION_SUB:
                     number = number.sub(operation.amount!);
                     break;
-                case "mul":
+                case OPERATION_MUL:
                     number = number.mul(operation.amount!);
                     break;
-                case "div":
+                case OPERATION_DIV:
                     number = number.div(operation.amount!);
                     break;
-                case "pow":
+                case OPERATION_POW:
                     number = number.pow(operation.amount!);
                     break;
-                case "sqrt":
+                case OPERATION_SQRT:
                     number = number.pow(HALF);
                     break;
-                case "cbrt":
+                case OPERATION_CBRT:
                     number = number.pow(ONETHIRD);
                     break;
-                case "log":
+                case OPERATION_LOG:
                     number = OnoeNum.log(number, operation.base!) ?? def;
                     break;
-                case "ln":
+                case OPERATION_LN:
                     number = OnoeNum.log(number, E) ?? def;
                     break;
             }
@@ -166,40 +177,40 @@ class Formula {
      * @returns The formula as a string.
      */
     tostring(nameOfX: string) {
-        let lastOperator: string | undefined;
+        let lastOperator: number | undefined;
         for (const operation of this.operations) {
             switch (operation.type) {
-                case "add":
+                case OPERATION_ADD:
                     nameOfX += " + " + operation.amount;
                     break;
-                case "sub":
+                case OPERATION_SUB:
                     nameOfX += " - " + operation.amount;
                     break;
-                case "mul":
+                case OPERATION_MUL:
                     nameOfX += " * " + operation.amount;
                     break;
-                case "div":
+                case OPERATION_DIV:
                     nameOfX += " / " + operation.amount;
                     break;
-                case "pow":
+                case OPERATION_POW:
                     if (
-                        lastOperator === "add" ||
-                        lastOperator === "sub" ||
-                        lastOperator === "mul" ||
-                        lastOperator === "div"
+                        lastOperator === OPERATION_ADD ||
+                        lastOperator === OPERATION_SUB ||
+                        lastOperator === OPERATION_MUL ||
+                        lastOperator === OPERATION_DIV
                     ) {
                         nameOfX = "(" + nameOfX + ") ^ " + operation.amount;
                     } else {
                         nameOfX += " ^ " + operation.amount;
                     }
                     break;
-                case "sqrt":
+                case OPERATION_SQRT:
                     nameOfX = "√(" + nameOfX + ")";
                     break;
-                case "log":
+                case OPERATION_LOG:
                     nameOfX = "log<font size='16'>" + operation.base + "</font>(" + nameOfX + ")";
                     break;
-                case "ln":
+                case OPERATION_LN:
                     nameOfX = "ln(" + nameOfX + ")";
                     break;
             }
