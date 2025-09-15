@@ -23,7 +23,7 @@ import Andy from "shared/npcs/Andy";
 import PoliceOfficer from "shared/npcs/Police Officer";
 import Simpul from "shared/npcs/Simpul";
 import SlamoReceptionist from "shared/npcs/Slamo Receptionist";
-import { RESET_LAYERS } from "shared/ResetLayer";
+import { RESET_LAYERS } from "shared/currency/mechanics/ResetLayer";
 
 const [simpulModel, simpulHumanoid, simpulRootPart] = getNPCModel("Simpul");
 const [_slamoReceptionistModel, slamoReceptionistHumanoid, slamoReceptionistRootPart] =

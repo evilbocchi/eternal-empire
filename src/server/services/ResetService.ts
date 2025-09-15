@@ -32,7 +32,7 @@ import Operative from "shared/item/traits/Operative";
 import Items from "shared/items/Items";
 import NamedUpgrades from "shared/namedupgrade/NamedUpgrades";
 import Packets from "shared/Packets";
-import { RESET_LAYERS } from "shared/ResetLayer";
+import { RESET_LAYERS } from "shared/currency/mechanics/ResetLayer";
 import Sandbox from "shared/Sandbox";
 
 const RESET_UPGRADES = NamedUpgrades.getUpgrades("Reset");

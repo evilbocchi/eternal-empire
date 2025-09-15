@@ -26,7 +26,7 @@ import { CURRENCY_DETAILS } from "shared/currency/CurrencyDetails";
 import { DROPLET_STORAGE } from "shared/item/Droplet";
 import ItemUtils from "shared/item/ItemUtils";
 import Packets from "shared/Packets";
-import Softcaps, { performSoftcap } from "shared/Softcaps";
+import Softcaps, { performSoftcap } from "shared/currency/mechanics/Softcaps";
 
 declare global {
     type BalanceOption = Frame & {

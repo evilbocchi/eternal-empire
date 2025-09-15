@@ -3,7 +3,7 @@ import { buildRichText, combineHumanReadable, formatRichText } from "@antivivi/v
 import StringBuilder from "@rbxts/stringbuilder";
 import { AREAS } from "shared/world/Area";
 import Packets from "shared/Packets";
-import { RESET_LAYERS } from "shared/ResetLayer";
+import { RESET_LAYERS } from "shared/currency/mechanics/ResetLayer";
 import Sandbox from "shared/Sandbox";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";

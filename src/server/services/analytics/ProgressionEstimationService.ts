@@ -34,7 +34,7 @@ import Charger from "shared/item/traits/generator/Charger";
 import Furnace from "shared/item/traits/Furnace";
 import Items from "shared/items/Items";
 import AwesomeManumaticPurifier from "shared/items/negative/felixthea/AwesomeManumaticPurifier";
-import { RESET_LAYERS } from "shared/ResetLayer";
+import { RESET_LAYERS } from "shared/currency/mechanics/ResetLayer";
 
 declare global {
     interface Assets {}

@@ -1,6 +1,6 @@
 import Difficulty from "@antivivi/jjt-difficulties";
 import { OnoeNum } from "@antivivi/serikanum";
-import { RESET_LAYERS } from "shared/ResetLayer";
+import { RESET_LAYERS } from "shared/currency/mechanics/ResetLayer";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
 import Conveyor from "shared/item/traits/conveyor/Conveyor";

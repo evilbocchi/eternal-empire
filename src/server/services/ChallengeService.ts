@@ -30,7 +30,7 @@ import { getChallengeGui } from "shared/constants";
 import { ASSETS } from "shared/asset/GameAssets";
 import Item from "shared/item/Item";
 import Packets from "shared/Packets";
-import { RESET_LAYERS } from "shared/ResetLayer";
+import { RESET_LAYERS } from "shared/currency/mechanics/ResetLayer";
 import Sandbox from "shared/Sandbox";
 
 declare global {

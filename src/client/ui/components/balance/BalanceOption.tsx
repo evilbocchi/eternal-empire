@@ -5,7 +5,7 @@ import { TooltipManager } from "client/ui/components/tooltip/TooltipWindow";
 import { RobotoMono, RobotoSlab, RobotoSlabBold } from "client/ui/GameFonts";
 import { getAsset } from "shared/asset/AssetMap";
 import { CURRENCY_DETAILS } from "shared/currency/CurrencyDetails";
-import Softcaps, { performSoftcap } from "shared/Softcaps";
+import Softcaps, { performSoftcap } from "shared/currency/mechanics/Softcaps";
 
 interface BalanceOptionProps {
     currency: Currency;

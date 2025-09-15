@@ -25,13 +25,14 @@ import CurrencyService from "server/services/data/CurrencyService";
 import DataService from "server/services/data/DataService";
 import AtmosphereService from "server/services/world/AtmosphereService";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
+import DarkMatter from "shared/currency/mechanics/DarkMatter";
+import { performSoftcaps } from "shared/currency/mechanics/Softcaps";
 import Droplet from "shared/item/Droplet";
 import WeatherBoost from "shared/item/traits/boost/WeatherBoost";
 import Operative from "shared/item/traits/Operative";
 import Upgrader from "shared/item/traits/upgrader/Upgrader";
 import { PriceUpgrade } from "shared/namedupgrade/NamedUpgrade";
 import NamedUpgrades from "shared/namedupgrade/NamedUpgrades";
-import { performSoftcaps } from "shared/Softcaps";
 
 const FURNACE_UPGRADES = NamedUpgrades.getUpgrades("Furnace");
 
@@ -63,8 +64,10 @@ export default class RevenueService {
         let [add, mul, pow] = Operative.template();
 
         // dark matter
-        const [darkMatterBoost] = this.darkMatterService.getBoost();
-        mul = mul.mul(darkMatterBoost);
+        const [darkMatterBoost] = DarkMatter.getBoost(this.currencyService.balance);
+        if (darkMatterBoost !== undefined) {
+            mul = mul.mul(darkMatterBoost);
+        }
 
         // bombs
         if (this.bombsService.boost !== undefined) {

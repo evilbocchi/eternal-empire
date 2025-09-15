@@ -8,7 +8,7 @@ import { RunService } from "@rbxts/services";
 import Area, { AREAS } from "shared/world/Area";
 import GameSpeed from "shared/GameSpeed";
 import Packets from "shared/Packets";
-import { RESET_LAYERS } from "shared/ResetLayer";
+import { RESET_LAYERS } from "shared/currency/mechanics/ResetLayer";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Formula from "shared/currency/Formula";
 import { ITEM_MODELS } from "shared/item/ItemModels";

@@ -7,7 +7,6 @@ declare global {
     type AreaId = keyof typeof AREAS;
 }
 
-const CAMERA = Workspace.WaitForChild("Camera") as Camera;
 /**
  * Creates a folder in the Workspace.
  *
