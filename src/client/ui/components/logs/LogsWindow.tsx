@@ -28,11 +28,11 @@ export default function LogsWindow() {
         setLogs([...initialLogs]);
 
         // Listen for new logs
-        const connection = Packets.logAdded.fromServer((newLog) => {
+        const connection = Packets.logsAdded.fromServer((newLogs) => {
             if (visible) {
-                setLogs((prevLogs) => [...prevLogs, newLog]);
+                setLogs((prevLogs) => [...prevLogs, ...newLogs]);
             } else {
-                setPendingLogs((prevPending) => [...prevPending, newLog]);
+                setPendingLogs((prevPending) => [...prevPending, ...newLogs]);
             }
         });
 

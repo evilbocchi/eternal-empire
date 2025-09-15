@@ -18,6 +18,7 @@ import { OnInit, Service } from "@flamework/core";
 import { Players, StarterPlayer, Workspace } from "@rbxts/services";
 import CurrencyService from "server/services/data/CurrencyService";
 import DataService from "server/services/data/DataService";
+import { log } from "server/services/permissions/LogService";
 import NamedUpgrades from "shared/namedupgrade/NamedUpgrades";
 import Packets from "shared/Packets";
 
@@ -145,5 +146,15 @@ export default class NamedUpgradeService implements OnInit {
             }
         });
         this.upgradesChanged.fire(this.upgrades);
+
+        this.upgradeBought.connect((player, upgrade, to) =>
+            log({
+                time: tick(),
+                type: "Upgrade",
+                player: player.UserId,
+                upgrade: upgrade,
+                amount: to,
+            }),
+        );
     }
 }

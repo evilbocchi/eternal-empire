@@ -150,7 +150,7 @@ export = CreateReactStory(
                     ];
 
                     const randomLog = newLogTypes[math.random(0, newLogTypes.size() - 1)] as Log;
-                    Packets.logAdded.toAllClients(randomLog);
+                    Packets.logsAdded.toAllClients([randomLog]);
 
                     // Simulate adding a new log (in a real scenario, this would trigger via server)
                     print(`New log would be added: ${randomLog.type} by player ${randomLog.player}`);

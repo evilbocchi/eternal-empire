@@ -23,9 +23,7 @@
 import Signal from "@antivivi/lemon-signal";
 import { OnInit, Service } from "@flamework/core";
 import DataService from "server/services/data/DataService";
-import NamedUpgradeService from "server/services/data/NamedUpgradeService";
 import { getMaxXp } from "shared/constants";
-import NamedUpgrades from "shared/namedupgrade/NamedUpgrades";
 import Packets from "shared/Packets";
 
 /**
@@ -42,22 +40,7 @@ export default class LevelService implements OnInit {
      */
     levelChanged = new Signal<(level: number) => void>();
 
-    /**
-     * Signal fired when a player respecs their level points.
-     * @param player The player who performed the respec.
-     */
-    respected = new Signal<(player: Player) => void>();
-
-    /**
-     * Initializes the LevelService with required dependencies.
-     *
-     * @param dataService Service providing persistent empire data.
-     * @param namedUpgradeService Service for managing upgrade purchases and amounts.
-     */
-    constructor(
-        private dataService: DataService,
-        private namedUpgradeService: NamedUpgradeService,
-    ) {}
+    constructor(private dataService: DataService) {}
 
     // Level Management Methods
 

@@ -17,14 +17,17 @@
 import Signal from "@antivivi/lemon-signal";
 import { OnoeNum } from "@antivivi/serikanum";
 import { getPlayer } from "@antivivi/vrldk";
-import { OnInit, Service } from "@flamework/core";
+import { OnInit, OnStart, Service } from "@flamework/core";
 import { BadgeService, Players, RunService } from "@rbxts/services";
-import ItemService from "server/services/item/ItemService";
-import RevenueService from "server/services/RevenueService";
 import CurrencyService from "server/services/data/CurrencyService";
 import DataService from "server/services/data/DataService";
 import NamedUpgradeService from "server/services/data/NamedUpgradeService";
+import ItemService from "server/services/item/ItemService";
+import ChatHookService from "server/services/permissions/ChatHookService";
+import { log } from "server/services/permissions/LogService";
+import RevenueService from "server/services/RevenueService";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
+import { CURRENCY_DETAILS } from "shared/currency/CurrencyDetails";
 import Operative from "shared/item/traits/Operative";
 import Items from "shared/items/Items";
 import NamedUpgrades from "shared/namedupgrade/NamedUpgrades";
@@ -39,7 +42,7 @@ const RESET_UPGRADES = NamedUpgrades.getUpgrades("Reset");
  * Handles item, currency, and upgrade resets, reward calculation, and reset triggers.
  */
 @Service()
-export default class ResetService implements OnInit {
+export default class ResetService implements OnInit, OnStart {
     /**
      * Signal fired when a player completes a reset.
      * @param player The player who reset
@@ -56,6 +59,7 @@ export default class ResetService implements OnInit {
      * Constructs the ResetService with all required dependencies.
      */
     constructor(
+        private chatHookService: ChatHookService,
         private dataService: DataService,
         private itemService: ItemService,
         private currencyService: CurrencyService,
@@ -246,6 +250,25 @@ export default class ResetService implements OnInit {
         this.currencyService.balanceChanged.connect(balanceChanged);
         balanceChanged(this.currencyService.balance);
 
+        this.reset.connect((player, layer, amount) => {
+            const resetLayer = RESET_LAYERS[layer];
+            const color = CURRENCY_DETAILS[resetLayer.gives].color;
+            this.chatHookService.sendServerMessage(
+                `${player.Name} performed a ${layer} for ${CurrencyBundle.getFormatted(resetLayer.gives, amount)}`,
+                `color:${color.R * 255},${color.G * 255},${color.B * 255}`,
+            );
+            log({
+                time: tick(),
+                type: "Reset",
+                layer: layer,
+                player: player.UserId,
+                infAmount: amount,
+                currency: resetLayer.gives,
+            });
+        });
+    }
+
+    onStart() {
         for (const [name, resetLayer] of pairs(RESET_LAYERS)) {
             resetLayer.touchPart.BillboardGui.TextLabel.LayoutOrder = 2;
             this.hookTouch(

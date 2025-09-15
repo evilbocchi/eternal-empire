@@ -2,15 +2,7 @@ import { BaseOnoeNum } from "@antivivi/serikanum";
 import { OnInit, OnStart, Service } from "@flamework/core";
 import { setInterval } from "@rbxts/jsnatives";
 import DataService from "server/services/data/DataService";
-import LevelService from "server/services/data/LevelService";
-import NamedUpgradeService from "server/services/data/NamedUpgradeService";
-import SetupService from "server/services/data/SetupService";
-import ChatHookService from "server/services/permissions/ChatHookService";
-import ResetService from "server/services/ResetService";
-import CurrencyBundle from "shared/currency/CurrencyBundle";
-import { CURRENCY_DETAILS } from "shared/currency/CurrencyDetails";
 import Packets from "shared/Packets";
-import { RESET_LAYERS } from "shared/ResetLayer";
 
 declare global {
     interface Log {
@@ -113,16 +105,9 @@ export let log = (log: Log) => {
 
 @Service()
 export default class LogService implements OnInit, OnStart {
-    unpropagatedLogs = new Array<Log>();
+    readonly unpropagatedLogs = new Array<Log>();
 
-    constructor(
-        private dataService: DataService,
-        private namedUpgradeService: NamedUpgradeService,
-        private levelService: LevelService,
-        private resetService: ResetService,
-        private setupService: SetupService,
-        private chatHookService: ChatHookService,
-    ) {}
+    constructor(private dataService: DataService) {}
 
     onInit() {
         Packets.getLogs.fromClient(() => this.dataService.empireData.logs);
@@ -144,54 +129,5 @@ export default class LogService implements OnInit, OnStart {
             Packets.logsAdded.toAllClients(this.unpropagatedLogs);
             this.unpropagatedLogs.clear();
         }, 1000);
-
-        this.namedUpgradeService.upgradeBought.connect((player, upgrade, to) =>
-            log({
-                time: tick(),
-                type: "Upgrade",
-                player: player.UserId,
-                upgrade: upgrade,
-                amount: to,
-            }),
-        );
-        this.levelService.respected.connect((player) =>
-            log({
-                time: tick(),
-                type: "Respec",
-                player: player.UserId,
-            }),
-        );
-        this.resetService.reset.connect((player, layer, amount) => {
-            const resetLayer = RESET_LAYERS[layer];
-            const color = CURRENCY_DETAILS[resetLayer.gives].color;
-            this.chatHookService.sendServerMessage(
-                `${player.Name} performed a ${layer} for ${CurrencyBundle.getFormatted(resetLayer.gives, amount)}`,
-                `color:${color.R * 255},${color.G * 255},${color.B * 255}`,
-            );
-            log({
-                time: tick(),
-                type: "Reset",
-                layer: layer,
-                player: player.UserId,
-                infAmount: amount,
-                currency: resetLayer.gives,
-            });
-        });
-        this.setupService.setupSaved.connect((player, area) =>
-            log({
-                time: tick(),
-                type: "SetupSave",
-                player: player.UserId,
-                area: area,
-            }),
-        );
-        this.setupService.setupLoaded.connect((player, area) =>
-            log({
-                time: tick(),
-                type: "SetupLoad",
-                player: player.UserId,
-                area: area,
-            }),
-        );
     }
 }

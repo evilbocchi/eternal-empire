@@ -20,6 +20,7 @@ import CurrencyService from "server/services/data/CurrencyService";
 import DataService from "server/services/data/DataService";
 import ItemService from "server/services/item/ItemService";
 import ChatHookService from "server/services/permissions/ChatHookService";
+import { log } from "server/services/permissions/LogService";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
 import Items from "shared/items/Items";
@@ -180,6 +181,23 @@ export default class SetupService implements OnInit, OnStart {
             }
             Packets.printedSetups.set(setups);
         });
+
+        this.setupSaved.connect((player, area) =>
+            log({
+                time: tick(),
+                type: "SetupSave",
+                player: player.UserId,
+                area: area,
+            }),
+        );
+        this.setupLoaded.connect((player, area) =>
+            log({
+                time: tick(),
+                type: "SetupLoad",
+                player: player.UserId,
+                area: area,
+            }),
+        );
     }
 
     onStart() {
