@@ -1,4 +1,4 @@
-import NPC from "shared/NPC";
+import NPC from "shared/world/NPC";
 
 export = new NPC()
     .createDefaultMonologue("Want a bed? Just go upstairs and sleep in it! It's free, you know!")

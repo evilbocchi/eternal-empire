@@ -1,4 +1,4 @@
-import NPC from "shared/NPC";
+import NPC from "shared/world/NPC";
 
 export = new NPC()
     .setAnimation("Default", 17855439739)

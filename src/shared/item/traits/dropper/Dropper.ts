@@ -3,7 +3,7 @@
 
 import { findBaseParts, formatRichText, getAllInstanceInfo } from "@antivivi/vrldk";
 import { Players, RunService } from "@rbxts/services";
-import Area, { AREAS } from "shared/Area";
+import Area, { AREAS } from "shared/world/Area";
 import { CURRENCY_DETAILS } from "shared/currency/CurrencyDetails";
 import GameSpeed from "shared/GameSpeed";
 import Droplet, { DROPLET_STORAGE } from "shared/item/Droplet";

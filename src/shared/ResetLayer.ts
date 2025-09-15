@@ -1,5 +1,5 @@
 import { OnoeNum } from "@antivivi/serikanum";
-import { AREAS } from "shared/Area";
+import { AREAS } from "shared/world/Area";
 import Formula from "shared/currency/Formula";
 
 declare global {

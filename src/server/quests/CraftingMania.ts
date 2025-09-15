@@ -1,6 +1,6 @@
 import Quest, { Stage } from "server/Quest";
 import EarningCapital from "server/quests/EarningCapital";
-import { Dialogue } from "shared/NPC";
+import { Dialogue } from "shared/world/NPC";
 import { getNPCModel, WAYPOINTS } from "shared/constants";
 import { Server } from "shared/item/ItemUtils";
 import Shop from "shared/item/traits/Shop";

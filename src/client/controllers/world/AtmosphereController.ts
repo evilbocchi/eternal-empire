@@ -13,7 +13,7 @@
  */
 import { Controller, OnInit, OnStart } from "@flamework/core";
 import { Lighting, Workspace } from "@rbxts/services";
-import { AREAS } from "shared/Area";
+import { AREAS } from "shared/world/Area";
 import ItemUtils from "shared/item/ItemUtils";
 import Packets from "shared/Packets";
 import { WeatherState, WeatherType } from "shared/weather/WeatherTypes";

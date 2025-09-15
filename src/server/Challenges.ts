@@ -1,6 +1,6 @@
 import { OnoeNum } from "@antivivi/serikanum";
 import { Debris, TweenService, Workspace } from "@rbxts/services";
-import { AREAS } from "shared/Area";
+import { AREAS } from "shared/world/Area";
 import { ASSETS, playSound } from "shared/asset/GameAssets";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";

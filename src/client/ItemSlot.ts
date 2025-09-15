@@ -8,7 +8,7 @@
 import Difficulty from "@antivivi/jjt-difficulties";
 import { FuzzySearch } from "@rbxts/fuzzy-search";
 import { PARALLEL } from "client/constants";
-import { AREAS } from "shared/Area";
+import { AREAS } from "shared/world/Area";
 import Item from "shared/item/Item";
 import ItemMetadata from "shared/item/ItemMetadata";
 import Items from "shared/items/Items";

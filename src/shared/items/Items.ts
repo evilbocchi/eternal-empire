@@ -1,5 +1,5 @@
 import Difficulty from "@antivivi/jjt-difficulties";
-import Harvestable from "shared/Harvestable";
+import Harvestable from "shared/world/Harvestable";
 import Item from "shared/item/Item";
 import ItemUtils from "shared/item/ItemUtils";
 import type Charm from "shared/item/traits/Charm";

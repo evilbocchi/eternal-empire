@@ -1,4 +1,4 @@
-import NPC from "shared/NPC";
+import NPC from "shared/world/NPC";
 
 // local animNames = {
 // 	idle = 	{

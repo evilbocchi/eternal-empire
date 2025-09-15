@@ -1,7 +1,7 @@
 import { loadAnimation } from "@antivivi/vrldk";
 import { Modding, OnInit, Service } from "@flamework/core";
 import { NPC_MODELS, NPCS } from "shared/constants";
-import NPC, { NPCAnimationType } from "shared/NPC";
+import NPC, { NPCAnimationType } from "shared/world/NPC";
 
 declare global {
     /**

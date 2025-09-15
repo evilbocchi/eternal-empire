@@ -4,7 +4,7 @@ import { getNPCModel, WAYPOINTS } from "shared/constants";
 import { Server } from "shared/item/ItemUtils";
 import TheFirstDropper from "shared/items/negative/tfd/TheFirstDropper";
 import TheFirstFurnace from "shared/items/negative/tfd/TheFirstFurnace";
-import { Dialogue } from "shared/NPC";
+import { Dialogue } from "shared/world/NPC";
 import NameChanger from "shared/npcs/Name Changer";
 import Tria from "shared/npcs/Tria";
 import Packets from "shared/Packets";

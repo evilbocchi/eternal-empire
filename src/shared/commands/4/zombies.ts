@@ -1,6 +1,6 @@
 import { ServerStorage, Workspace } from "@rbxts/services";
 import Command, { CommandAPI } from "shared/commands/Command";
-import { AREAS } from "shared/Area";
+import { AREAS } from "shared/world/Area";
 
 export = new Command(script.Name)
     .addAlias("apocalypse")

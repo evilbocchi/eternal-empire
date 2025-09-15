@@ -2,7 +2,7 @@ import { RunService } from "@rbxts/services";
 import Quest, { Stage } from "server/Quest";
 import SkillPod from "shared/items/0/millisecondless/SkillPod";
 import GrassConveyor from "shared/items/negative/friendliness/GrassConveyor";
-import { Dialogue } from "shared/NPC";
+import { Dialogue } from "shared/world/NPC";
 import Prest from "shared/npcs/Prest";
 import Tria from "shared/npcs/Tria";
 import CurrencyBundle from "shared/currency/CurrencyBundle";

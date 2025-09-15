@@ -14,7 +14,7 @@
 
 import { OnInit, Service } from "@flamework/core";
 import DataService from "server/services/data/DataService";
-import { AREAS } from "shared/Area";
+import { AREAS } from "shared/world/Area";
 import Packets from "shared/Packets";
 
 /**

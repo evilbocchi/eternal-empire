@@ -1,11 +1,11 @@
 import Quest, { Stage } from "server/Quest";
-import { AREAS } from "shared/Area";
+import { AREAS } from "shared/world/Area";
 import { emitEffect, getSound } from "shared/asset/GameAssets";
 import { getNPCModel, WAYPOINTS } from "shared/constants";
 import { Server } from "shared/item/ItemUtils";
 import LostPendant from "shared/items/0/winsome/LostPendant";
 import FreddysUpgrader from "shared/items/negative/friendliness/FreddysUpgrader";
-import { Dialogue } from "shared/NPC";
+import { Dialogue } from "shared/world/NPC";
 import Freddy from "shared/npcs/Freddy";
 
 const [_freddyModel, freddyHumanoid, freddyRootPart] = getNPCModel("Freddy");

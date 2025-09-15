@@ -1,4 +1,4 @@
-import NPC from "shared/NPC";
+import NPC from "shared/world/NPC";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 
 export = new NPC()

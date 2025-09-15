@@ -13,7 +13,7 @@
 import { Controller, OnInit } from "@flamework/core";
 import AdaptiveTabController, { ADAPTIVE_TAB_MAIN_WINDOW } from "client/controllers/core/AdaptiveTabController";
 import HotkeysController from "client/controllers/core/HotkeysController";
-import { AREAS } from "shared/Area";
+import { AREAS } from "shared/world/Area";
 import Packets from "shared/Packets";
 import { playSound } from "shared/asset/GameAssets";
 

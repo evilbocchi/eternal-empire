@@ -1,5 +1,5 @@
 import { Workspace } from "@rbxts/services";
-import Area from "shared/Area";
+import Area from "shared/world/Area";
 import Item from "shared/item/Item";
 
 const overlapParams = new OverlapParams();

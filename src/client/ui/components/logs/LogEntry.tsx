@@ -2,7 +2,7 @@ import { OnoeNum } from "@antivivi/serikanum";
 import { combineHumanReadable } from "@antivivi/vrldk";
 import React from "@rbxts/react";
 import { RobotoMono } from "client/ui/GameFonts";
-import { AREAS } from "shared/Area";
+import { AREAS } from "shared/world/Area";
 import { getNameFromUserId } from "shared/constants";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Items from "shared/items/Items";

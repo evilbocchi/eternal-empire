@@ -21,7 +21,7 @@ import CameraShaker from "@rbxts/camera-shaker";
 import { Debris, Lighting, TweenService, Workspace } from "@rbxts/services";
 import { LOCAL_PLAYER } from "client/constants";
 import { PingManager } from "client/ui/components/stats/StatsWindow";
-import { AREAS } from "shared/Area";
+import { AREAS } from "shared/world/Area";
 import { getSound, SOUND_EFFECTS_GROUP } from "shared/asset/GameAssets";
 import { PLACED_ITEMS_FOLDER } from "shared/constants";
 import { DROPLET_STORAGE } from "shared/item/Droplet";

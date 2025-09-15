@@ -18,9 +18,9 @@ import NPCStateService, { OnNPCLoad } from "server/services/npc/NPCStateService"
 import DataService from "server/services/data/DataService";
 import { ASSETS } from "shared/asset/GameAssets";
 import { NPC_MODELS, getDisplayName } from "shared/constants";
-import InteractableObject from "shared/InteractableObject";
+import InteractableObject from "shared/world/InteractableObject";
 import { Server } from "shared/item/ItemUtils";
-import NPC, { Dialogue } from "shared/NPC";
+import NPC, { Dialogue } from "shared/world/NPC";
 import Packets from "shared/Packets";
 
 declare global {

@@ -1,14 +1,14 @@
 import { playSoundAtPart } from "@antivivi/vrldk";
 import { TweenService, Workspace } from "@rbxts/services";
 import Quest, { Stage } from "server/Quest";
-import { AREAS } from "shared/Area";
+import { AREAS } from "shared/world/Area";
 import { getEffect, getSound, playSound } from "shared/asset/GameAssets";
 import { getNPCModel, WAYPOINTS } from "shared/constants";
 import { Server } from "shared/item/ItemUtils";
 import ChargedEmpoweredBrick from "shared/items/negative/instantwin/ChargedEmpoweredBrick";
 import EmpoweredBrick from "shared/items/negative/instantwin/EmpoweredBrick";
 import XLWool from "shared/items/negative/relax/XLWool";
-import { Dialogue } from "shared/NPC";
+import { Dialogue } from "shared/world/NPC";
 import Freddy from "shared/npcs/Freddy";
 import SlamoReceptionist from "shared/npcs/Slamo Receptionist";
 import SlamoRefugee from "shared/npcs/Slamo Refugee";

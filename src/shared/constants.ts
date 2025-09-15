@@ -1,6 +1,6 @@
 import { Debris, Players, SoundService, TextChatService, Workspace } from "@rbxts/services";
 import { Workspace_Waypoints } from "services";
-import { AREAS } from "shared/Area";
+import { AREAS } from "shared/world/Area";
 import { IS_CI } from "shared/Context";
 
 declare global {

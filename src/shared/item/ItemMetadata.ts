@@ -1,7 +1,7 @@
 import { BaseOnoeNum, OnoeNum } from "@antivivi/serikanum";
 import { buildRichText, combineHumanReadable, formatRichText } from "@antivivi/vrldk";
 import StringBuilder from "@rbxts/stringbuilder";
-import { AREAS } from "shared/Area";
+import { AREAS } from "shared/world/Area";
 import Packets from "shared/Packets";
 import { RESET_LAYERS } from "shared/ResetLayer";
 import Sandbox from "shared/Sandbox";

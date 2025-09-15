@@ -5,7 +5,7 @@ import Difficulty from "@antivivi/jjt-difficulties";
 import { OnoeNum } from "@antivivi/serikanum";
 import { getAllInstanceInfo } from "@antivivi/vrldk";
 import { RunService } from "@rbxts/services";
-import Area, { AREAS } from "shared/Area";
+import Area, { AREAS } from "shared/world/Area";
 import GameSpeed from "shared/GameSpeed";
 import Packets from "shared/Packets";
 import { RESET_LAYERS } from "shared/ResetLayer";

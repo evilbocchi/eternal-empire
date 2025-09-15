@@ -1,5 +1,5 @@
 import Command, { CommandAPI } from "shared/commands/Command";
-import { AREAS } from "shared/Area";
+import { AREAS } from "shared/world/Area";
 import Sandbox from "shared/Sandbox";
 
 export = new Command(script.Name)

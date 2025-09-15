@@ -1,5 +1,5 @@
 import { ASSETS } from "shared/asset/GameAssets";
-import { AREAS } from "shared/Area";
+import { AREAS } from "shared/world/Area";
 
 declare global {
     interface Assets {

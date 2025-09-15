@@ -9,7 +9,7 @@
  */
 
 import { OnInit, Service } from "@flamework/core";
-import { AREAS } from "shared/Area";
+import { AREAS } from "shared/world/Area";
 import Sandbox from "shared/Sandbox";
 
 /**

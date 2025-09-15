@@ -1,14 +1,14 @@
 import { spawnExplosion } from "@antivivi/vrldk";
 import { RunService, TweenService, Workspace } from "@rbxts/services";
 import Quest, { Stage } from "server/Quest";
-import { AREAS } from "shared/Area";
+import { AREAS } from "shared/world/Area";
 import { emitEffect, playSound } from "shared/asset/GameAssets";
 import { getNPCModel, WAYPOINTS } from "shared/constants";
-import InteractableObject from "shared/InteractableObject";
+import InteractableObject from "shared/world/InteractableObject";
 import { Server } from "shared/item/ItemUtils";
 import ExcavationStone from "shared/items/excavation/ExcavationStone";
 import IrregularlyShapedKey from "shared/items/negative/skip/IrregularlyShapedKey";
-import { Dialogue, EMPTY_NPC } from "shared/NPC";
+import { Dialogue, EMPTY_NPC } from "shared/world/NPC";
 import Librarian from "shared/npcs/Librarian";
 import LibraryNoob1 from "shared/npcs/Library Noob 1";
 import LibraryNoob2 from "shared/npcs/Library Noob 2";

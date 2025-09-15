@@ -1,4 +1,4 @@
-import NPC from "shared/NPC";
+import NPC from "shared/world/NPC";
 
 export = new NPC()
     .createDefaultMonologue("Isn't today such a great day to set sail out to the great oceans?")

@@ -1,4 +1,4 @@
-import { AREAS } from "shared/Area";
+import { AREAS } from "shared/world/Area";
 import Item from "shared/item/Item";
 import ItemTrait from "shared/item/traits/ItemTrait";
 import { getInstanceInfo } from "@antivivi/vrldk";

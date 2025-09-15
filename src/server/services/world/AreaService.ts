@@ -28,7 +28,7 @@ import NamedUpgradeService from "server/services/data/NamedUpgradeService";
 import LeaderstatsService from "server/services/leaderboard/LeaderstatsService";
 import { OnPlayerJoined } from "server/services/ModdingService";
 import NPCNavigationService from "server/services/npc/NPCNavigationService";
-import Area, { AREAS } from "shared/Area";
+import Area, { AREAS } from "shared/world/Area";
 import { getSound, playSound } from "shared/asset/GameAssets";
 import { MUSIC_GROUP } from "shared/constants";
 import { DROPLET_STORAGE } from "shared/item/Droplet";

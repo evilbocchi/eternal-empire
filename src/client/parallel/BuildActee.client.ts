@@ -17,7 +17,7 @@
 
 import { CollectionService, RunService, Workspace } from "@rbxts/services";
 import { COLLISION_COLOR, MOUSE, NONCOLLISION_COLOR } from "client/constants";
-import Area from "shared/Area";
+import Area from "shared/world/Area";
 import { PLACED_ITEMS_FOLDER } from "shared/constants";
 import { ASSETS } from "shared/asset/GameAssets";
 import Conveyor from "shared/item/traits/conveyor/Conveyor";

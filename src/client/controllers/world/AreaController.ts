@@ -15,7 +15,7 @@ import { OnoeNum } from "@antivivi/serikanum";
 import { Controller, OnInit, OnStart } from "@flamework/core";
 import CameraShaker from "@rbxts/camera-shaker";
 import { ReplicatedStorage, TweenService, Workspace } from "@rbxts/services";
-import Area, { AREAS } from "shared/Area";
+import Area, { AREAS } from "shared/world/Area";
 import { playSound } from "shared/asset/GameAssets";
 import Packets from "shared/Packets";
 

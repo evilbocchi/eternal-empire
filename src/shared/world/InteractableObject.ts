@@ -1,6 +1,6 @@
 import Signal, { Connection } from "@antivivi/lemon-signal";
 import { Keyed, SimpleRegistry } from "@antivivi/unnamespaced-keyed";
-import { Dialogue, EMPTY_NPC } from "shared/NPC";
+import { Dialogue, EMPTY_NPC } from "shared/world/NPC";
 import { Server } from "shared/item/ItemUtils";
 
 class InteractableObject implements Keyed {

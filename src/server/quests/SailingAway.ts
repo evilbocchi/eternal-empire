@@ -3,7 +3,7 @@ import { RunService } from "@rbxts/services";
 import Quest, { Stage } from "server/Quest";
 import { getNPCModel } from "shared/constants";
 import { Server } from "shared/item/ItemUtils";
-import { Dialogue } from "shared/NPC";
+import { Dialogue } from "shared/world/NPC";
 import CaptainBacon from "shared/npcs/Captain Bacon";
 import OldNoob from "shared/npcs/Old Noob";
 import Prest from "shared/npcs/Prest";

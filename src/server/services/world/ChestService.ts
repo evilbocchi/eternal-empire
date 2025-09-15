@@ -17,7 +17,7 @@ import ItemService from "server/services/item/ItemService";
 import DataService from "server/services/data/DataService";
 import LevelService from "server/services/data/LevelService";
 import UnlockedAreasService from "server/services/world/UnlockedAreasService";
-import { AREAS } from "shared/Area";
+import { AREAS } from "shared/world/Area";
 import { ASSETS, getSound, SOUND_EFFECTS_GROUP } from "shared/asset/GameAssets";
 import Item from "shared/item/Item";
 import Crystal from "shared/items/excavation/Crystal";

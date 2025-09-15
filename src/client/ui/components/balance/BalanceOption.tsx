@@ -1,5 +1,5 @@
 import { OnoeNum } from "@antivivi/serikanum";
-import React, { Fragment, useMemo, useRef } from "@rbxts/react";
+import React, { Fragment, useMemo } from "@rbxts/react";
 import StringBuilder from "@rbxts/stringbuilder";
 import { TooltipManager } from "client/ui/components/tooltip/TooltipWindow";
 import { RobotoMono, RobotoSlab, RobotoSlabBold } from "client/ui/GameFonts";
@@ -38,7 +38,7 @@ export function BalanceOptionStyling({ details }: { details: CurrencyDetails }) 
                         new ColorSequenceKeypoint(1, Color3.fromRGB(217, 217, 217)),
                     ])
                 }
-                Rotation={272}
+                Rotation={270}
             />
             <folder>
                 <imagelabel
@@ -75,7 +75,6 @@ export function BalanceOptionStyling({ details }: { details: CurrencyDetails }) 
  * Shows currency icon, amount, income rate, and softcap information.
  */
 export default function BalanceOption({ currency, amount, income, bombEnabled, formatCurrency }: BalanceOptionProps) {
-    const balanceGradientRef = useRef<UIGradient>();
     const details = CURRENCY_DETAILS[currency];
     const softcapColor = Color3.fromRGB(255, 77, 33);
 
@@ -207,6 +206,7 @@ export default function BalanceOption({ currency, amount, income, bombEnabled, f
                                 ? new ColorSequence(new Color3(1, 0.98, 0.87), new Color3(1, 0.84, 0))
                                 : new ColorSequence(new Color3(1, 1, 1))
                         }
+                        Rotation={98}
                     />
                 </textlabel>
 

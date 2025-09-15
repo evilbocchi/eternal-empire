@@ -1,6 +1,6 @@
 import { OnoeNum } from "@antivivi/serikanum";
 import { getAllInstanceInfo, setInstanceInfo } from "@antivivi/vrldk";
-import { AREAS } from "shared/Area";
+import { AREAS } from "shared/world/Area";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
 import { Server } from "shared/item/ItemUtils";

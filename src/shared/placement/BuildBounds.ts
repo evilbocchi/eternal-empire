@@ -2,7 +2,7 @@
 //!optimize 2
 
 import { CollectionService } from "@rbxts/services";
-import Area from "shared/Area";
+import Area from "shared/world/Area";
 import { isCompletelyInside, isInsidePart } from "@antivivi/vrldk";
 
 /**

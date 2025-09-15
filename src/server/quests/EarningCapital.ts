@@ -6,7 +6,7 @@ import ItemCounter from "shared/item/ItemCounter";
 import { Server } from "shared/item/ItemUtils";
 import RustyFactory from "shared/items/negative/negativity/RustyFactory";
 import TheFirstUpgraderBooster from "shared/items/negative/tfd/TheFirstUpgraderBooster";
-import { Dialogue } from "shared/NPC";
+import { Dialogue } from "shared/world/NPC";
 import Ricarg from "shared/npcs/Ricarg";
 
 const [ricargModel, ricargHumanoid, ricargRootPart] = getNPCModel("Ricarg");

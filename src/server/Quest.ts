@@ -10,7 +10,7 @@ import { ReplicatedStorage } from "@rbxts/services";
 import type QuestService from "server/services/data/QuestService";
 import { getNPCModel } from "shared/constants";
 import { Server } from "shared/item/ItemUtils";
-import { Dialogue } from "shared/NPC";
+import { Dialogue } from "shared/world/NPC";
 import Packets from "shared/Packets";
 
 /**
