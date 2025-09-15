@@ -11,7 +11,7 @@ interface BalanceOptionProps {
     currency: Currency;
     amount: OnoeNum;
     income?: OnoeNum;
-    bombEnabled?: boolean;
+    bombBoost?: OnoeNum;
     formatCurrency: (currency: Currency, amount: OnoeNum) => string;
     layoutOrder: number;
 }
@@ -74,7 +74,7 @@ export function BalanceOptionStyling({ details }: { details: CurrencyDetails }) 
  * Individual currency balance display component.
  * Shows currency icon, amount, income rate, and softcap information.
  */
-export default function BalanceOption({ currency, amount, income, bombEnabled, formatCurrency }: BalanceOptionProps) {
+export default function BalanceOption({ currency, amount, income, bombBoost, formatCurrency }: BalanceOptionProps) {
     const details = CURRENCY_DETAILS[currency];
     const softcapColor = Color3.fromRGB(255, 77, 33);
 
@@ -144,6 +144,15 @@ export default function BalanceOption({ currency, amount, income, bombEnabled, f
                             .append(formatCurrency(currency, softcapStart!))
                             .append(".</font>");
                     }
+
+                    if (bombBoost) {
+                        tooltipBuilder
+                            .append("\n<font color='#FFD700' size='16'>A bomb is active, increasing ")
+                            .append(currency)
+                            .append(" income by x")
+                            .append(bombBoost)
+                            .append("!</font>");
+                    }
                     TooltipManager.showTooltip({
                         message: tooltipBuilder.toString(),
                     });
@@ -202,11 +211,11 @@ export default function BalanceOption({ currency, amount, income, bombEnabled, f
                     </uistroke>
                     <uigradient
                         Color={
-                            bombEnabled
+                            bombBoost
                                 ? new ColorSequence(new Color3(1, 0.98, 0.87), new Color3(1, 0.84, 0))
                                 : new ColorSequence(new Color3(1, 1, 1))
                         }
-                        Rotation={98}
+                        Rotation={12}
                     />
                 </textlabel>
 

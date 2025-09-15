@@ -26,6 +26,7 @@ import ProductService from "server/services/product/ProductService";
 import Packets from "shared/Packets";
 import { getNameFromUserId } from "shared/constants";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
+import CurrencyBomb from "shared/currency/mechanics/CurrencyBomb";
 import { BOMBS_PRODUCTS } from "shared/devproducts/BombsProducts";
 
 /**
@@ -62,6 +63,7 @@ export default class BombsService implements OnInit, OnStart {
     /** Debounce timer to prevent rapid bomb usage. */
     debounce = 0;
 
+    /** Current active bomb boosts per currency. */
     boost?: CurrencyBundle;
 
     constructor(
@@ -99,9 +101,13 @@ export default class BombsService implements OnInit, OnStart {
      */
     buildInitialBombTimes() {
         const bombEndTimes = new Map<Currency, number>();
-        const fundsEndTime = this.globalDataStore.GetAsync("Funds")[0] as number | undefined;
-        if (fundsEndTime !== undefined) {
-            bombEndTimes.set("Funds Bombs", fundsEndTime);
+        const bombs: Currency[] = ["Funds Bombs"];
+
+        for (const bomb of bombs) {
+            const endTime = this.globalDataStore.GetAsync(bomb)[0] as number | undefined;
+            if (endTime !== undefined) {
+                bombEndTimes.set(bomb, endTime);
+            }
         }
         Packets.bombEndTimes.set(bombEndTimes);
     }
@@ -129,7 +135,7 @@ export default class BombsService implements OnInit, OnStart {
                     currency: bombType,
                     amount: 1,
                 });
-                this.globalDataStore.UpdateAsync("Funds", (oldValue: number | undefined) => {
+                this.globalDataStore.UpdateAsync(bombType, (oldValue: number | undefined) => {
                     let base = os.time();
                     let value: number;
 
@@ -161,7 +167,7 @@ export default class BombsService implements OnInit, OnStart {
 
         for (const [currency, bombProduct] of pairs(BOMBS_PRODUCTS)) {
             this.productService.setProductFunction(bombProduct, () => {
-                this.currencyService.increment((currency + " Bombs") as Currency, new OnoeNum(4));
+                this.currencyService.increment(currency, new OnoeNum(4));
                 return Enum.ProductPurchaseDecision.PurchaseGranted;
             });
         }
@@ -172,27 +178,7 @@ export default class BombsService implements OnInit, OnStart {
     onStart() {
         task.spawn(() => {
             while (task.wait(1)) {
-                const t = os.time();
-                const bombEndTimes = Packets.bombEndTimes.get();
-                const boost = new CurrencyBundle();
-                let changed = false;
-
-                for (const [currency, endTime] of bombEndTimes) {
-                    if (t > endTime) continue; // Skip expired bombs
-
-                    // TODO: Write a proper configuration for bomb boosts
-                    if (currency === "Funds Bombs") {
-                        boost.set("Funds", 2);
-                        changed = true;
-                    }
-                }
-
-                if (!changed) {
-                    this.boost = undefined;
-                    continue;
-                }
-
-                this.boost = boost;
+                this.boost = CurrencyBomb.getBombBoosts(Packets.bombEndTimes.get(), os.time());
             }
         });
 

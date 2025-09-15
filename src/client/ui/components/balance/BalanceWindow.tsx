@@ -6,6 +6,7 @@ import NavigationControls from "client/ui/components/balance/NavigationControls"
 import { useWindow } from "client/ui/components/window/WindowManager";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import { CURRENCY_DETAILS } from "shared/currency/CurrencyDetails";
+import CurrencyBomb from "shared/currency/mechanics/CurrencyBomb";
 import Packets from "shared/Packets";
 
 const ZERO = new OnoeNum(0);
@@ -28,7 +29,7 @@ export default function BalanceWindow() {
     const [isSmallScreen, setIsSmallScreen] = useState(true);
     const [currentPage, setCurrentPage] = useState(1);
     const [maxPage, setMaxPage] = useState(1);
-    const [enabledPerBomb, setEnabledPerBomb] = useState<Map<Currency, boolean>>(new Map());
+    const [bombBoosts, setBombBoosts] = useState<CurrencyBundle | undefined>(new CurrencyBundle());
 
     const openPosition = new UDim2(1, 0, 1, -70);
     const closePosition = openPosition.add(new UDim2(0, 250, 0, 0));
@@ -71,12 +72,8 @@ export default function BalanceWindow() {
     useEffect(() => {
         let active = true;
         const checkBomb = () => {
-            const newEnabledPerBomb = new Map<Currency, boolean>();
-            const currentTime = os.time();
-            for (const [currency, endTime] of Packets.bombEndTimes.get()) {
-                newEnabledPerBomb.set(currency, endTime > currentTime);
-            }
-            setEnabledPerBomb(newEnabledPerBomb);
+            setBombBoosts(CurrencyBomb.getBombBoosts(Packets.bombEndTimes.get(), os.time()));
+
             if (active) {
                 task.delay(1, checkBomb);
             }
@@ -204,7 +201,7 @@ export default function BalanceWindow() {
                         currency={currency}
                         amount={amount}
                         income={income}
-                        bombEnabled={enabledPerBomb.get(currency) ?? false}
+                        bombBoost={bombBoosts?.get(currency)}
                         formatCurrency={formatCurrency}
                         layoutOrder={index}
                     />
