@@ -38,7 +38,7 @@ export = new Quest(script.Name)
                 new Dialogue(Chuck, "zzz... zzzzz.... zzzzzzz...").monologue("...can you not disturb my sleep.").root,
             )
             .onReached((stage) => {
-                Server.NPC.State.playAnimation(Chuck, "Default");
+                Chuck.playAnimation("Default");
                 Chuck.rootPart!.CFrame = Chuck.startingCFrame;
 
                 const continuation = new Dialogue(Chuck, "So, you want to craft something?")
@@ -62,7 +62,7 @@ export = new Quest(script.Name)
 
                 const connection = Server.Dialogue.dialogueFinished.connect((dialogue) => {
                     if (dialogue === stage.dialogue) {
-                        Server.NPC.State.stopAnimation(Chuck, "Default");
+                        Chuck.stopAnimation("Default");
                         task.wait(1);
                         Server.Dialogue.talk(continuation);
                     } else if (dialogue === continuation) {
@@ -80,7 +80,7 @@ export = new Quest(script.Name)
             .setNPC(Ricarg, true)
             .setDialogue(new Dialogue(Chuck, "You got the stuff?"))
             .onReached((stage) => {
-                Server.NPC.State.stopAnimation(Chuck, "Default");
+                Chuck.stopAnimation("Default");
                 Chuck.rootPart!.CFrame = Chuck.startingCFrame;
 
                 const ItemService = Server.Item;
@@ -151,7 +151,7 @@ export = new Quest(script.Name)
             .setFocus(craftingTableModel)
             .setDialogue(new Dialogue(Chuck, "Come with me."))
             .onReached((stage) => {
-                Server.NPC.State.stopAnimation(Chuck, "Default");
+                Chuck.stopAnimation("Default");
                 Chuck.rootPart!.Anchored = false;
 
                 chuckToCraftingTable().onComplete(() => stage.complete());
@@ -170,7 +170,7 @@ export = new Quest(script.Name)
                     .root,
             )
             .onReached((stage) => {
-                Server.NPC.State.stopAnimation(Chuck, "Default");
+                Chuck.stopAnimation("Default");
                 Chuck.rootPart!.CFrame = WAYPOINTS.CraftingManiaChuckCraftingAssistance.CFrame;
 
                 const connection = Server.Dialogue.dialogueFinished.connect((dialogue) => {
@@ -189,7 +189,7 @@ export = new Quest(script.Name)
             .setFocus(craftingTableModel)
             .setDialogue(new Dialogue(Chuck, "Let's see what you're capable of."))
             .onReached((stage) => {
-                Server.NPC.State.stopAnimation(Chuck, "Default");
+                Chuck.stopAnimation("Default");
                 Chuck.rootPart!.CFrame = WAYPOINTS.CraftingManiaChuckCraftingAssistance.CFrame;
 
                 const connection = Server.Item.itemsBought.connect((_player, items) => {
@@ -212,7 +212,7 @@ export = new Quest(script.Name)
             .setDialogue(new Dialogue(Chuck, "Hmm... Let's see..."))
             .onReached((stage) => {
                 const ItemService = Server.Item;
-                Server.NPC.State.stopAnimation(Chuck, "Default");
+                Chuck.stopAnimation("Default");
                 Chuck.rootPart!.CFrame = WAYPOINTS.CraftingManiaChuckCraftingAssistance.CFrame;
 
                 let continuation: Dialogue;

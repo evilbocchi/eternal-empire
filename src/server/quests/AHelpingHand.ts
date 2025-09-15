@@ -42,7 +42,7 @@ export = new Quest(script.Name)
             )
             .onReached((stage) => {
                 Freddy.rootPart!.CFrame = Freddy.startingCFrame;
-                Server.NPC.State.playAnimation(Freddy, "Default");
+                Freddy.playAnimation("Default");
 
                 const continuation = new Dialogue(Freddy, "My name's Freddy. Follow me, I have something to show you.");
 
@@ -63,7 +63,7 @@ export = new Quest(script.Name)
             .setDialogue(new Dialogue(Freddy, "Follow me, I have something to show you."))
             .onReached((stage) => {
                 Freddy.rootPart!.CFrame = Freddy.startingCFrame;
-                Server.NPC.State.stopAnimation(Freddy, "Default");
+                Freddy.stopAnimation("Default");
 
                 task.delay(2, () => freddyToRequest().onComplete(() => stage.complete()));
                 return () => {};
@@ -93,7 +93,7 @@ export = new Quest(script.Name)
             )
             .onReached((stage) => {
                 Freddy.rootPart!.CFrame = WAYPOINTS.AHelpingHandFreddyRequest.CFrame;
-                Server.NPC.State.stopAnimation(Freddy, "Default");
+                Freddy.stopAnimation("Default");
 
                 const connection = Server.Dialogue.dialogueFinished.connect((dialogue) => {
                     if (stage.dialogue === dialogue) stage.complete();
@@ -108,7 +108,7 @@ export = new Quest(script.Name)
             .setDialogue(new Dialogue(Freddy, "What are you waiting for? Go get it!"))
             .onReached((stage) => {
                 Freddy.rootPart!.CFrame = WAYPOINTS.AHelpingHandFreddyRequest.CFrame;
-                Server.NPC.State.stopAnimation(Freddy, "Default");
+                Freddy.stopAnimation("Default");
 
                 const hitSound = getSound("QuestConstruct.mp3");
                 for (const handle of ladderHandles) {
@@ -146,7 +146,7 @@ export = new Quest(script.Name)
             )
             .onReached((stage) => {
                 Freddy.rootPart!.CFrame = WAYPOINTS.AHelpingHandFreddyRequest.CFrame;
-                Server.NPC.State.stopAnimation(Freddy, "Default");
+                Freddy.stopAnimation("Default");
 
                 const connection = Server.Dialogue.dialogueFinished.connect((dialogue) => {
                     Server.Quest.takeQuestItem(LostPendant.id, 1);

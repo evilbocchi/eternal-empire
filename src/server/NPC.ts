@@ -1,4 +1,7 @@
+import { loadAnimation } from "@antivivi/vrldk";
 import { Workspace } from "@rbxts/services";
+import { IS_CI } from "shared/Context";
+import { HotReloader, Reloadable } from "shared/HotReload";
 
 /**
  * Represents the animation types available for NPCs.
@@ -10,39 +13,145 @@ export const NPC_MODELS = Workspace.WaitForChild("NPCs") as Folder;
 /**
  * Represents a non-player character (NPC) with animations, dialogue, and interaction logic.
  */
-export default class NPC {
-    animationsPerType = new Map<NPCAnimationType, number>();
-    defaultDialogues = new Array<Dialogue>();
+export default class NPC extends Reloadable {
+    static readonly HOT_RELOADER = new HotReloader<NPC>(script.Parent!.WaitForChild("npcs"));
+
+    readonly animAssetIdPerType = new Map<NPCAnimationType, number>();
+    readonly defaultDialogues = new Array<Dialogue>();
+    readonly animTrackPerType = new Map<NPCAnimationType, AnimationTrack>();
+    readonly runningAnimTrackPerType = new Map<NPCAnimationType, AnimationTrack>();
+
     defaultName: string;
     startingCFrame = new CFrame();
+
+    initialModelSnapshot?: Model;
     model?: Model;
     humanoid?: Humanoid;
     rootPart?: BasePart;
-    interact: (() => void) | undefined;
+    interact?: () => void;
+    cleanup?: () => void;
 
-    constructor(private readonly id: string) {
+    constructor(public readonly id: string) {
+        super();
         this.defaultName = id;
-        this.animationsPerType.set("Walk", 180426354);
-        this.animationsPerType.set("Jump", 125750702);
-        this.model = NPC_MODELS.FindFirstChild(id) as Model | undefined;
+        this.animAssetIdPerType.set("Walk", 180426354);
+        this.animAssetIdPerType.set("Jump", 125750702);
+        if (id === "Empty") return; // Early return for empty NPC
 
-        if (this.model === undefined) {
-            warn(`NPC model not found for ID: ${id}`);
+        this.cleanup = this.load();
+    }
+
+    /** Loads the NPC model and initializes its properties. */
+    private loadModel(model = NPC_MODELS.FindFirstChild(this.id) as Model | undefined) {
+        this.model = model;
+        if (model === undefined) {
+            warn(`NPC model not found for ID: ${this.id}`);
         } else {
-            this.startingCFrame = this.model.GetPivot();
+            this.initialModelSnapshot = model.Clone();
+            this.startingCFrame = model.GetPivot();
 
-            this.humanoid = this.model.FindFirstChildOfClass("Humanoid") as Humanoid | undefined;
+            this.humanoid = model.FindFirstChildOfClass("Humanoid") as Humanoid | undefined;
             if (this.humanoid === undefined) {
-                warn(`Humanoid not found for NPC ID: ${id}`);
+                warn(`Humanoid not found for NPC ID: ${this.id}`);
             } else {
                 this.humanoid.DisplayName = this.defaultName;
 
                 this.rootPart = this.humanoid.RootPart as BasePart | undefined;
                 if (this.rootPart === undefined) {
-                    warn(`RootPart not found for NPC ID: ${id}`);
+                    warn(`RootPart not found for NPC ID: ${this.id}`);
                 }
             }
         }
+    }
+
+    private load() {
+        if (IS_CI) return;
+        this.loadModel();
+        const model = this.model;
+        const humanoid = this.humanoid;
+        const rootPart = this.rootPart;
+        if (model === undefined || humanoid === undefined || rootPart === undefined) return;
+
+        const parts = model.GetDescendants();
+        for (const part of parts) {
+            if (part.IsA("BasePart")) {
+                part.CollisionGroup = "NPC";
+            }
+        }
+        rootPart.CustomPhysicalProperties = new PhysicalProperties(100, 0.3, 0.5);
+
+        // Always play the default animation when loaded
+        this.playAnimation("Default");
+
+        // Track the NPC's position and stop the walk animation if it hasn't moved
+        let active = true;
+        let last = humanoid.RootPart?.Position;
+        task.spawn(() => {
+            while (task.wait(1)) {
+                if (active === false) break;
+                const rootPart = humanoid.RootPart;
+                if (rootPart === undefined) {
+                    continue;
+                }
+
+                const newPosition = rootPart.Position;
+                if (last === undefined || newPosition.sub(last).Magnitude < 1) {
+                    last = newPosition;
+                    this.stopAnimation("Walk");
+                }
+            }
+        });
+
+        // Automatically play walk and jump animations based on humanoid events
+        const runningConnection = humanoid.Running.Connect((speed) => {
+            if (speed > 0) this.playAnimation("Walk");
+            else this.stopAnimation("Walk");
+        });
+        const jumpingConnection = humanoid.Jumping.Connect((active) => {
+            if (active) this.playAnimation("Jump");
+            else this.stopAnimation("Jump");
+        });
+
+        return () => {
+            active = false;
+            runningConnection.Disconnect();
+            jumpingConnection.Disconnect();
+        };
+    }
+
+    /**
+     * Plays the specified animation type on the NPC.
+     * @param animType The type of animation to play.
+     * @returns True if the animation was successfully played, false otherwise.
+     */
+    playAnimation(animType: NPCAnimationType): boolean {
+        const anim = this.animAssetIdPerType.get(animType);
+        if (anim === undefined) return false;
+        const humanoid = this.humanoid;
+        if (humanoid === undefined) return false;
+
+        let animTrack = this.animTrackPerType.get(animType);
+        if (animTrack === undefined) {
+            animTrack = loadAnimation(humanoid, anim);
+            if (animTrack === undefined) return false;
+            this.animTrackPerType.set(animType, animTrack);
+        }
+        if (!animTrack.IsPlaying) animTrack.Play();
+        this.runningAnimTrackPerType.set(animType, animTrack);
+        return true;
+    }
+
+    /**
+     * Stops the specified animation type on the NPC.
+     * @param animType The type of animation to stop.
+     * @returns True if the animation was successfully stopped, false otherwise.
+     */
+    stopAnimation(animType: NPCAnimationType): boolean {
+        const animTrack = this.runningAnimTrackPerType.get(animType);
+        if (animTrack === undefined) return false;
+
+        animTrack.Stop();
+        return true;
     }
 
     /** Reveals the actual name (ID) of the NPC. */
@@ -64,7 +173,7 @@ export default class NPC {
      * @returns This NPC instance.
      */
     setAnimation(animType: NPCAnimationType, assetId: number) {
-        this.animationsPerType.set(animType, assetId);
+        this.animAssetIdPerType.set(animType, assetId);
         return this;
     }
 
@@ -98,6 +207,19 @@ export default class NPC {
      */
     onInteract(callback?: () => void) {
         this.interact = callback;
+    }
+
+    unload(): void {
+        for (const [, animTrack] of this.animTrackPerType) {
+            animTrack.Stop();
+        }
+        if (this.model !== undefined && this.initialModelSnapshot !== undefined && !IS_CI) {
+            const recovered = this.initialModelSnapshot.Clone();
+            recovered.Parent = this.model.Parent;
+            this.model.Destroy();
+        }
+        this.cleanup?.();
+        table.clear(this);
     }
 }
 

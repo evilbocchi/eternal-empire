@@ -25,7 +25,6 @@ import MarketplaceService from "server/services/marketplace/MarketplaceService";
 import ModdingService from "server/services/ModdingService";
 import DialogueService from "server/services/npc/DialogueService";
 import NPCNavigationService from "server/services/npc/NPCNavigationService";
-import NPCStateService from "server/services/npc/NPCStateService";
 import ChatHookService from "server/services/permissions/ChatHookService";
 import PermissionsService from "server/services/permissions/PermissionsService";
 import ResetService from "server/services/ResetService";
@@ -66,7 +65,6 @@ export default class APIExposeService implements OnInit {
         private readonly marketplaceService: MarketplaceService,
         private readonly namedUpgradeService: NamedUpgradeService,
         private readonly npcNavigationService: NPCNavigationService,
-        private readonly npcStateService: NPCStateService,
         private readonly permissionsService: PermissionsService,
         private readonly playtimeService: PlaytimeService,
         private readonly questService: QuestService,
@@ -184,14 +182,6 @@ export default class APIExposeService implements OnInit {
                  * @see {@link NPCNavigationService} for more details.
                  */
                 Navigation: this.npcNavigationService,
-
-                /**
-                 * NPC state management service.
-                 *
-                 * @borrows NPCStateService as npcStateService
-                 * @see {@link NPCStateService} for more details.
-                 */
-                State: this.npcStateService,
             },
 
             /**

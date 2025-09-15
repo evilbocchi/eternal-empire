@@ -57,8 +57,6 @@ export const MUSIC_GROUP = SoundService.WaitForChild("Music") as SoundGroup;
 
 export const NAMES_PER_USER_ID = new Map<number, string>();
 
-export const NPCS = script.Parent?.WaitForChild("npcs") as Folder;
-
 export const PLACED_ITEMS_FOLDER = Workspace.WaitForChild("PlacedItems") as Folder;
 
 /**

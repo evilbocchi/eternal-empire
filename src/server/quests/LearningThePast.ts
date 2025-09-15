@@ -1,5 +1,6 @@
 import { spawnExplosion } from "@antivivi/vrldk";
 import { RunService, TweenService, Workspace } from "@rbxts/services";
+import InteractableObject from "server/InteractableObject";
 import { Dialogue, EMPTY_NPC } from "server/NPC";
 import Librarian from "server/npcs/Librarian";
 import LibraryNoob1 from "server/npcs/Library Noob 1";
@@ -13,7 +14,6 @@ import { Server } from "shared/item/ItemUtils";
 import ExcavationStone from "shared/items/excavation/ExcavationStone";
 import IrregularlyShapedKey from "shared/items/negative/skip/IrregularlyShapedKey";
 import { AREAS } from "shared/world/Area";
-import InteractableObject from "server/InteractableObject";
 
 const suspiciousWall = AREAS.BarrenIslands.map.WaitForChild("SuspiciousWall") as BasePart;
 
@@ -105,8 +105,8 @@ export = new Quest(script.Name)
             .onReached((stage) => {
                 OldNoob.rootPart!.CFrame = OldNoob.startingCFrame;
                 Pasal.rootPart!.CFrame = Pasal.startingCFrame;
-                Server.NPC.State.playAnimation(OldNoob, "Default");
-                Server.NPC.State.playAnimation(Pasal, "Default");
+                OldNoob.playAnimation("Default");
+                Pasal.playAnimation("Default");
 
                 const connection = Server.Dialogue.dialogueFinished.connect((dialogue) => {
                     if (dialogue === stage.dialogue) {
@@ -123,8 +123,8 @@ export = new Quest(script.Name)
             .onReached((stage) => {
                 OldNoob.rootPart!.CFrame = OldNoob.startingCFrame;
                 Pasal.rootPart!.CFrame = Pasal.startingCFrame;
-                Server.NPC.State.playAnimation(OldNoob, "Default");
-                Server.NPC.State.playAnimation(Pasal, "Default");
+                OldNoob.playAnimation("Default");
+                Pasal.playAnimation("Default");
 
                 const connection = Server.Dialogue.dialogueFinished.connect((dialogue) => {
                     if (dialogue === InteractableObject.OldBooks1.dialogue) {
@@ -138,8 +138,8 @@ export = new Quest(script.Name)
         new Stage().setDescription("Ask around the library for clues about the 'strike'.").onReached((stage) => {
             OldNoob.rootPart!.CFrame = OldNoob.startingCFrame;
             Pasal.rootPart!.CFrame = Pasal.startingCFrame;
-            Server.NPC.State.playAnimation(OldNoob, "Default");
-            Server.NPC.State.playAnimation(Pasal, "Default");
+            OldNoob.playAnimation("Default");
+            Pasal.playAnimation("Default");
 
             const pasalDialogue = new Dialogue(Pasal, "Yahallo! ...You want that shiny green orb behind me?")
                 .monologue("Sorry, I can't do that for you. It's not on sale.")
@@ -246,8 +246,8 @@ export = new Quest(script.Name)
             .onReached((stage) => {
                 OldNoob.rootPart!.CFrame = OldNoob.startingCFrame;
                 Pasal.rootPart!.CFrame = Pasal.startingCFrame;
-                Server.NPC.State.playAnimation(OldNoob, "Default");
-                Server.NPC.State.playAnimation(Pasal, "Default");
+                OldNoob.playAnimation("Default");
+                Pasal.playAnimation("Default");
 
                 const connection = Server.Dialogue.dialogueFinished.connect((dialogue) => {
                     if (dialogue === stage.dialogue) {
@@ -264,8 +264,8 @@ export = new Quest(script.Name)
             .onReached((stage) => {
                 OldNoob.rootPart!.CFrame = OldNoob.startingCFrame;
                 Pasal.rootPart!.CFrame = Pasal.startingCFrame;
-                Server.NPC.State.playAnimation(OldNoob, "Default");
-                Server.NPC.State.playAnimation(Pasal, "Default");
+                OldNoob.playAnimation("Default");
+                Pasal.playAnimation("Default");
 
                 let t = 0;
                 const connection = RunService.Heartbeat.Connect((dt) => {
@@ -289,8 +289,8 @@ export = new Quest(script.Name)
             .onReached((stage) => {
                 OldNoob.rootPart!.CFrame = OldNoob.startingCFrame;
                 Pasal.rootPart!.CFrame = Pasal.startingCFrame;
-                Server.NPC.State.playAnimation(OldNoob, "Default");
-                Server.NPC.State.playAnimation(Pasal, "Default");
+                OldNoob.playAnimation("Default");
+                Pasal.playAnimation("Default");
 
                 const continuation = new Dialogue(
                     OldNoob,
@@ -315,8 +315,8 @@ export = new Quest(script.Name)
                 OldNoob.model?.FindFirstChildOfClass("Tool")?.Destroy();
                 OldNoob.rootPart!.CFrame = OldNoob.startingCFrame;
                 Pasal.rootPart!.CFrame = Pasal.startingCFrame;
-                Server.NPC.State.playAnimation(Pasal, "Default");
-                Server.NPC.State.stopAnimation(OldNoob, "Default");
+                Pasal.playAnimation("Default");
+                OldNoob.stopAnimation("Default");
 
                 const intro = new Dialogue(
                     OldNoob,
@@ -346,7 +346,7 @@ export = new Quest(script.Name)
 
                 const connection1 = Server.Dialogue.dialogueFinished.connect((dialogue) => {
                     if (dialogue === intro) {
-                        Server.NPC.State.stopAnimation(Pasal, "Default");
+                        Pasal.stopAnimation("Default");
                         task.wait(0.5);
                         pasalToApproachingWall().onComplete(() => {});
                         oldNoobToApproachingWall().onComplete(() => {
@@ -376,8 +376,8 @@ export = new Quest(script.Name)
             if (Server.Event.isEventCompleted("SuspiciousWallOpened") === false) {
                 unlockWall();
             }
-            Server.NPC.State.stopAnimation(OldNoob, "Default");
-            Server.NPC.State.stopAnimation(Pasal, "Default");
+            OldNoob.playAnimation("Default");
+            Pasal.stopAnimation("Default");
             OldNoob.model?.FindFirstChildOfClass("Tool")?.Destroy();
             Pasal.rootPart!.Anchored = false;
             OldNoob.rootPart!.Anchored = false;

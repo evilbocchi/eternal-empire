@@ -14,6 +14,8 @@ export = new Command(script.Name)
         if (stage) {
             stagePerQuest.set(questId, tonumber(stage) ?? 0);
         }
-        CommandAPI.Quest.loadQuests(); // Hot reload
+
+        CommandAPI.Dialogue.loadNPCs();
+        CommandAPI.Quest.loadQuests();
     })
     .setPermissionLevel(4);

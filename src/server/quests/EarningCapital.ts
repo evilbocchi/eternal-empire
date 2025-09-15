@@ -31,7 +31,7 @@ export = new Quest(script.Name)
             )
             .onReached((stage) => {
                 Ricarg.rootPart!.CFrame = Ricarg.startingCFrame;
-                Server.NPC.State.playAnimation(Ricarg, "Default");
+                Ricarg.playAnimation("Default");
 
                 const connection = Server.Dialogue.dialogueFinished.connect((dialogue) => {
                     if (dialogue === stage.dialogue) {
@@ -49,7 +49,7 @@ export = new Quest(script.Name)
             .setDialogue(new Dialogue(Ricarg, `Please... I need ${req.toString()}...`))
             .onReached((stage) => {
                 Ricarg.rootPart!.CFrame = Ricarg.startingCFrame;
-                Server.NPC.State.playAnimation(Ricarg, "Default");
+                Ricarg.playAnimation("Default");
 
                 const continuation = new Dialogue(Ricarg, "Wait. You actually have the money!?")
                     .monologue("Thank you so much! You know what? I'll give you my most prized possession.")

@@ -50,7 +50,7 @@ export = new Quest(script.Name)
             )
             .onReached((stage) => {
                 Tria.rootPart!.CFrame = Tria.startingCFrame;
-                Server.NPC.State.playAnimation(Tria, "Default");
+                Tria.playAnimation("Default");
                 ReplicatedStorage.SetAttribute("Intro", true);
 
                 const continuation = new Dialogue(
@@ -74,7 +74,7 @@ export = new Quest(script.Name)
             .setDialogue(new Dialogue(Tria, "Follow me..."))
             .onReached((stage) => {
                 Tria.rootPart!.CFrame = Tria.startingCFrame;
-                Server.NPC.State.stopAnimation(Tria, "Default");
+                Tria.stopAnimation("Default");
                 ReplicatedStorage.SetAttribute("Intro", false);
 
                 task.wait(1);
@@ -105,7 +105,7 @@ export = new Quest(script.Name)
             )
             .onReached((stage) => {
                 Tria.rootPart!.CFrame = WAYPOINTS.NewBeginningsTriaMineGuiding.CFrame;
-                Server.NPC.State.stopAnimation(Tria, "Default");
+                Tria.stopAnimation("Default");
 
                 let t = 0;
                 const ItemService = Server.Item;
@@ -141,7 +141,7 @@ export = new Quest(script.Name)
             )
             .onReached((stage) => {
                 Tria.rootPart!.CFrame = WAYPOINTS.NewBeginningsTriaMineGuiding.CFrame;
-                Server.NPC.State.stopAnimation(Tria, "Default");
+                Tria.stopAnimation("Default");
 
                 const continuation = new Dialogue(Tria, "N-nice job, uh... I guess!")
                     .monologue("I... I'd like to teach you more... but... I should probably... go home now... sorry.")
@@ -157,7 +157,7 @@ export = new Quest(script.Name)
                             if (dialogue === continuation) {
                                 c2.disconnect();
                                 triaToStart().onComplete(() => {
-                                    Server.NPC.State.playAnimation(Tria, "Default");
+                                    Tria.playAnimation("Default");
                                 });
                                 stage.complete();
                             }

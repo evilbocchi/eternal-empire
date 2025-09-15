@@ -422,7 +422,6 @@ export default class Quest extends Reloadable {
         this.stages.forEach((stage) => {
             stage.unload();
         });
-        Quest.HOT_RELOADER.unload();
         table.clear(this);
     }
 }

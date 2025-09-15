@@ -6,7 +6,7 @@ export abstract class Reloadable {
     /** Unique identifier for this reloadable module. */
     abstract id: string;
 
-    /** Unique identifier for this reloadable module. */
+    /** Method to unload resources or perform cleanup. */
     abstract unload(): void;
 }
 

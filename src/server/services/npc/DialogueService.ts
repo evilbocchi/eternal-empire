@@ -14,14 +14,12 @@
 import Signal from "@antivivi/lemon-signal";
 import { OnInit, OnStart, Service } from "@flamework/core";
 import { Players, ProximityPromptService, TweenService, Workspace } from "@rbxts/services";
-import NPCStateService, { OnNPCLoad } from "server/services/npc/NPCStateService";
+import InteractableObject from "server/InteractableObject";
+import NPC, { Dialogue, NPC_MODELS } from "server/NPC";
+import NameChanger from "server/npcs/Name Changer";
 import DataService from "server/services/data/DataService";
 import { ASSETS } from "shared/asset/GameAssets";
 import { getDisplayName } from "shared/constants";
-import { NPC_MODELS } from "server/NPC";
-import InteractableObject from "server/InteractableObject";
-import { Server } from "shared/item/ItemUtils";
-import NPC, { Dialogue } from "server/NPC";
 import Packets from "shared/Packets";
 
 declare global {
@@ -39,7 +37,7 @@ declare global {
  * Service that manages all NPC dialogue, cutscenes, and related player interactions.
  */
 @Service()
-export default class DialogueService implements OnInit, OnStart, OnNPCLoad {
+export default class DialogueService implements OnInit, OnStart {
     /**
      * Signal fired when a dialogue sequence finishes.
      * @param dialogue The dialogue that finished.
@@ -66,10 +64,7 @@ export default class DialogueService implements OnInit, OnStart, OnNPCLoad {
      */
     isInteractionEnabled = true;
 
-    constructor(
-        private dataService: DataService,
-        private npcStateService: NPCStateService,
-    ) {}
+    constructor(private dataService: DataService) {}
 
     /**
      * Adds a dialogue to an NPC with an optional priority.
@@ -117,8 +112,7 @@ export default class DialogueService implements OnInit, OnStart, OnNPCLoad {
                 this.enableInteraction();
                 return true;
             }
-            const talkingModel =
-                current.npc === undefined ? undefined : this.npcStateService.getInfo(current.npc)?.model;
+            const talkingModel = current.npc.model;
             this.disableInteraction();
             if (talkingModel === undefined) {
                 Packets.npcMessage.toAllClients(current.text, currentIndex, size, true, Workspace);
@@ -191,13 +185,21 @@ export default class DialogueService implements OnInit, OnStart, OnNPCLoad {
      * Destroys the name changer NPC in public servers.
      */
     onInit() {
-        if (this.dataService.isPublicServer) NPC_MODELS.WaitForChild("Name Changer").Destroy();
+        if (this.dataService.isPublicServer) NameChanger.model?.Destroy();
+
+        ProximityPromptService.PromptTriggered.Connect((prompt, player) => {
+            if (this.isInteractionEnabled === false || prompt.Parent === undefined) return;
+            const interactableObject = InteractableObject.REGISTRY.get(prompt.Parent.Name);
+            if (interactableObject === undefined) return;
+            this.proximityPrompts.add(prompt);
+            interactableObject.interacted.fire(player);
+        });
     }
 
-    onNPCLoad({ npc, model, humanoid }: NPCInfo) {
+    onNPCLoad(npc: NPC) {
         const indicator = ASSETS.NPCNotification.Clone();
         indicator.Enabled = true;
-        indicator.Parent = model.WaitForChild("Head");
+        indicator.Parent = npc.model!.WaitForChild("Head");
         const showIndicator = TweenService.Create(indicator.ImageLabel, new TweenInfo(0.3), { ImageTransparency: 0 });
         const hideIndicator = TweenService.Create(indicator.ImageLabel, new TweenInfo(0.15), { ImageTransparency: 1 });
 
@@ -207,11 +209,15 @@ export default class DialogueService implements OnInit, OnStart, OnNPCLoad {
             if (prompt.Enabled) showIndicator.Play();
             else hideIndicator.Play();
         });
-        prompt.ObjectText = getDisplayName(humanoid);
+        prompt.ObjectText = getDisplayName(npc.humanoid!);
         prompt.ActionText = "Interact";
         prompt.Enabled = true;
         prompt.MaxActivationDistance = 6.5;
         prompt.RequiresLineOfSight = false;
+
+        npc.humanoid!.GetPropertyChangedSignal("DisplayName").Connect(() => {
+            prompt.ObjectText = getDisplayName(npc.humanoid!);
+        });
 
         const defaultDialogues = npc.defaultDialogues;
         let defaultDialogueIndex = 0;
@@ -241,16 +247,16 @@ export default class DialogueService implements OnInit, OnStart, OnNPCLoad {
         });
         this.proximityPrompts.add(prompt);
 
-        prompt.Parent = model;
+        prompt.Parent = npc.model!;
+    }
+
+    loadNPCs() {
+        for (const [, npc] of NPC.HOT_RELOADER.reload()) {
+            this.onNPCLoad(npc);
+        }
     }
 
     onStart() {
-        ProximityPromptService.PromptTriggered.Connect((prompt, player) => {
-            if (this.isInteractionEnabled === false || prompt.Parent === undefined) return;
-            const interactableObject = InteractableObject.REGISTRY.get(prompt.Parent.Name);
-            if (interactableObject === undefined) return;
-            this.proximityPrompts.add(prompt);
-            interactableObject.interacted.fire(player);
-        });
+        this.loadNPCs();
     }
 }
