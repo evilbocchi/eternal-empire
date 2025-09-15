@@ -26,6 +26,7 @@ export default function BalanceWindow() {
     const [visible, setVisible] = useState(true);
     const [balance, setBalance] = useState<Map<Currency, BaseOnoeNum>>(new Map());
     const [revenue, setRevenue] = useState<Map<Currency, BaseOnoeNum>>(new Map());
+    const [difference, setDifference] = useState<Map<Currency, BaseOnoeNum>>(new Map());
     const [isSmallScreen, setIsSmallScreen] = useState(true);
     const [currentPage, setCurrentPage] = useState(1);
     const [maxPage, setMaxPage] = useState(1);
@@ -62,10 +63,15 @@ export default function BalanceWindow() {
             setIsSmallScreen(size.X < 1000);
         });
 
+        const differenceConnection = Packets.showDifference.fromServer((diffPerCurrency) =>
+            setDifference(diffPerCurrency),
+        );
+
         return () => {
             balanceConnection.Disconnect();
             revenueConnection.Disconnect();
             sizeConnection.Disconnect();
+            differenceConnection.Disconnect();
         };
     }, []);
 
@@ -191,16 +197,16 @@ export default function BalanceWindow() {
             {/* Currency Options */}
             {currentCurrencies.map((currency, index) => {
                 const currencyBalance = balance.get(currency);
-                const amount = new OnoeNum(currencyBalance ?? 0);
                 const incomeAmount = revenue.get(currency);
-                const income = incomeAmount ? new OnoeNum(incomeAmount) : undefined;
+                const differenceAmount = difference.get(currency);
 
                 return (
                     <BalanceOption
                         key={currency}
                         currency={currency}
-                        amount={amount}
-                        income={income}
+                        amount={new OnoeNum(currencyBalance ?? 0)}
+                        income={incomeAmount ? new OnoeNum(incomeAmount) : undefined}
+                        difference={differenceAmount ? new OnoeNum(differenceAmount) : undefined}
                         bombBoost={bombBoosts?.get(currency)}
                         formatCurrency={formatCurrency}
                         layoutOrder={index}

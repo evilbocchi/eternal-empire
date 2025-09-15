@@ -1,20 +1,12 @@
 import { OnoeNum } from "@antivivi/serikanum";
-import React, { Fragment, useMemo } from "@rbxts/react";
+import React, { Fragment, useEffect, useMemo, useRef } from "@rbxts/react";
+import { Debris, TweenService } from "@rbxts/services";
 import StringBuilder from "@rbxts/stringbuilder";
 import { TooltipManager } from "client/ui/components/tooltip/TooltipWindow";
 import { RobotoMono, RobotoSlab, RobotoSlabBold } from "client/ui/GameFonts";
 import { getAsset } from "shared/asset/AssetMap";
 import { CURRENCY_DETAILS } from "shared/currency/CurrencyDetails";
 import Softcaps, { performSoftcap } from "shared/currency/mechanics/Softcaps";
-
-interface BalanceOptionProps {
-    currency: Currency;
-    amount: OnoeNum;
-    income?: OnoeNum;
-    bombBoost?: OnoeNum;
-    formatCurrency: (currency: Currency, amount: OnoeNum) => string;
-    layoutOrder: number;
-}
 
 export function BalanceOptionStyling({ details }: { details: CurrencyDetails }) {
     return (
@@ -74,7 +66,24 @@ export function BalanceOptionStyling({ details }: { details: CurrencyDetails }) 
  * Individual currency balance display component.
  * Shows currency icon, amount, income rate, and softcap information.
  */
-export default function BalanceOption({ currency, amount, income, bombBoost, formatCurrency }: BalanceOptionProps) {
+export default function BalanceOption({
+    currency,
+    amount,
+    income,
+    difference,
+    bombBoost,
+    formatCurrency,
+}: {
+    currency: Currency;
+    amount: OnoeNum;
+    income?: OnoeNum;
+    bombBoost?: OnoeNum;
+    difference?: OnoeNum;
+    formatCurrency: (currency: Currency, amount: OnoeNum) => string;
+    layoutOrder: number;
+}) {
+    const wrapperRef = useRef<Frame>(undefined);
+    const incomeRef = useRef<TextLabel>(undefined);
     const details = CURRENCY_DETAILS[currency];
     const softcapColor = Color3.fromRGB(255, 77, 33);
 
@@ -114,11 +123,46 @@ export default function BalanceOption({ currency, amount, income, bombBoost, for
         return { capped, softcapText, softcapStart: OnoeNum.min(...starts) };
     }, [currency, amount]);
 
+    useEffect(() => {
+        if (difference === undefined || difference.equals(0)) return;
+
+        const wrapper = wrapperRef.current;
+        if (wrapper === undefined) return;
+        const incomeLabel = incomeRef.current;
+        if (incomeLabel === undefined) return;
+
+        // Show floating difference text
+        const diffLabel = incomeLabel.Clone();
+        diffLabel.AnchorPoint = new Vector2(1, 0.5);
+        diffLabel.Position = new UDim2(0, -25, 0.5, 0);
+        diffLabel.Size = new UDim2(0, 0, 0, 0);
+        diffLabel.TextSize = 20;
+        diffLabel.TextScaled = false;
+        diffLabel.TextWrapped = false;
+        diffLabel.Text = `${difference.moreThan(0) ? "+" : "-"}${formatCurrency(currency, difference)}`;
+        diffLabel.TextXAlignment = Enum.TextXAlignment.Right;
+        diffLabel.Rotation = math.random(-10, 10);
+        diffLabel.ZIndex = 3;
+        const tweenInfo = new TweenInfo(1, Enum.EasingStyle.Quart, Enum.EasingDirection.In);
+        TweenService.Create(diffLabel, tweenInfo, {
+            Position: diffLabel.Position.add(new UDim2(0, 0, 0, 50)),
+            TextTransparency: 1,
+            Rotation: diffLabel.Rotation + math.random(-45, 45),
+        }).Play();
+        const stroke = diffLabel.FindFirstChildOfClass("UIStroke");
+        if (stroke) {
+            TweenService.Create(stroke, tweenInfo, { Transparency: 1 }).Play();
+        }
+        diffLabel.Parent = wrapper;
+        Debris.AddItem(diffLabel, 6);
+    }, [difference]);
+
     const showIncome = income && !income.lessEquals(0);
 
     const isFunds = currency === "Funds";
     return (
         <frame
+            ref={wrapperRef}
             BackgroundTransparency={1}
             Event={{
                 MouseMoved: () => {
@@ -224,71 +268,71 @@ export default function BalanceOption({ currency, amount, income, bombBoost, for
             </frame>
 
             {/* Income Container */}
-            {showIncome && (
-                <frame
+            <frame
+                Active={true}
+                AnchorPoint={new Vector2(0, 1)}
+                AutomaticSize={Enum.AutomaticSize.X}
+                BackgroundTransparency={1}
+                LayoutOrder={2}
+                Position={new UDim2(0, 24, 1, 0)}
+                Size={new UDim2(1, -30, 0.35, 0)}
+                Visible={showIncome || capped}
+            >
+                {/* Income Label */}
+                <textlabel
+                    ref={incomeRef}
                     Active={true}
-                    AnchorPoint={new Vector2(0, 1)}
                     AutomaticSize={Enum.AutomaticSize.X}
                     BackgroundTransparency={1}
-                    LayoutOrder={2}
-                    Position={new UDim2(0, 24, 1, 0)}
-                    Size={new UDim2(1, -30, 0.35, 0)}
+                    FontFace={RobotoSlab}
+                    LayoutOrder={1}
+                    Size={new UDim2(0, 0, 1, 0)}
+                    Text={`${formatCurrency(currency, income!)}/s`}
+                    TextColor3={Color3.fromRGB(255, 255, 255)}
+                    TextScaled={true}
+                    TextWrapped={true}
+                    TextXAlignment={Enum.TextXAlignment.Left}
                 >
-                    {/* Income Label */}
+                    <uistroke Color={details.color.Lerp(Color3.fromRGB(0, 0, 0), 0.3)} Thickness={2}>
+                        <uigradient
+                            Color={
+                                new ColorSequence([
+                                    new ColorSequenceKeypoint(0, Color3.fromRGB(97, 97, 97)),
+                                    new ColorSequenceKeypoint(1, Color3.fromRGB(63, 63, 63)),
+                                ])
+                            }
+                            Rotation={90}
+                        />
+                    </uistroke>
+                </textlabel>
+                {/* Softcap Label */}
+                {capped && (
                     <textlabel
                         Active={true}
                         AutomaticSize={Enum.AutomaticSize.X}
                         BackgroundTransparency={1}
-                        FontFace={RobotoSlab}
-                        LayoutOrder={1}
-                        Size={new UDim2(0, 0, 1, 0)}
-                        Text={`${formatCurrency(currency, income!)}/s`}
-                        TextColor3={Color3.fromRGB(255, 255, 255)}
+                        FontFace={RobotoMono}
+                        LayoutOrder={2}
+                        Position={new UDim2(0, 0, 1, 0)}
+                        Size={new UDim2(0, 0, 0.6, 0)}
+                        Text={softcapText}
+                        TextColor3={softcapColor}
                         TextScaled={true}
                         TextWrapped={true}
                         TextXAlignment={Enum.TextXAlignment.Left}
                     >
-                        <uistroke Color={details.color.Lerp(Color3.fromRGB(0, 0, 0), 0.3)} Thickness={2}>
-                            <uigradient
-                                Color={
-                                    new ColorSequence([
-                                        new ColorSequenceKeypoint(0, Color3.fromRGB(97, 97, 97)),
-                                        new ColorSequenceKeypoint(1, Color3.fromRGB(63, 63, 63)),
-                                    ])
-                                }
-                                Rotation={90}
-                            />
-                        </uistroke>
+                        <uistroke Color={details.color.Lerp(Color3.fromRGB(0, 0, 0), 0.9)} Thickness={2} />
                     </textlabel>
-                    {/* Softcap Label */}
-                    {capped && (
-                        <textlabel
-                            Active={true}
-                            AutomaticSize={Enum.AutomaticSize.X}
-                            BackgroundTransparency={1}
-                            FontFace={RobotoMono}
-                            LayoutOrder={2}
-                            Position={new UDim2(0, 0, 1, 0)}
-                            Size={new UDim2(0, 0, 0.6, 0)}
-                            Text={softcapText}
-                            TextColor3={softcapColor}
-                            TextScaled={true}
-                            TextWrapped={true}
-                            TextXAlignment={Enum.TextXAlignment.Left}
-                        >
-                            <uistroke Color={details.color.Lerp(Color3.fromRGB(0, 0, 0), 0.9)} Thickness={2} />
-                        </textlabel>
-                    )}
+                )}
 
-                    <uilistlayout
-                        FillDirection={Enum.FillDirection.Horizontal}
-                        Padding={new UDim(0, 4)}
-                        HorizontalAlignment={Enum.HorizontalAlignment.Left}
-                        SortOrder={Enum.SortOrder.LayoutOrder}
-                        VerticalAlignment={Enum.VerticalAlignment.Center}
-                    />
-                </frame>
-            )}
+                <uilistlayout
+                    FillDirection={Enum.FillDirection.Horizontal}
+                    Padding={new UDim(0, 4)}
+                    HorizontalAlignment={Enum.HorizontalAlignment.Left}
+                    SortOrder={Enum.SortOrder.LayoutOrder}
+                    VerticalAlignment={Enum.VerticalAlignment.Center}
+                />
+            </frame>
         </frame>
     );
 }

@@ -1,3 +1,4 @@
+import { OnoeNum } from "@antivivi/serikanum";
 import React, { StrictMode, useEffect } from "@rbxts/react";
 import ReactRoblox from "@rbxts/react-roblox";
 import { CreateReactStory, Number } from "@rbxts/ui-labs";
@@ -17,6 +18,7 @@ export = CreateReactStory(
             visible: true,
             visibleCurrencies: Number(CURRENCIES.size(), 0, CURRENCIES.size(), 1, true),
             currencyBombTime: 0,
+            difference: 0,
         },
     },
     (props) => {
@@ -46,6 +48,14 @@ export = CreateReactStory(
             }
             Packets.bombEndTimes.set(bombEndTimes);
         }, [props.controls.currencyBombTime]);
+
+        useEffect(() => {
+            const newDifference = new Map<Currency, OnoeNum>();
+            for (const currency of CURRENCIES) {
+                newDifference.set(currency, new OnoeNum(props.controls.difference));
+            }
+            Packets.showDifference.toAllClients(newDifference);
+        }, [props.controls.difference]);
 
         useVisibility("Balance", props.controls.visible);
         return (

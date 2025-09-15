@@ -74,6 +74,7 @@ export const assets = {
   "assets/QuartzPickaxe.png": "rbxassetid://98004116484467",
   "assets/QuartzScythe.png": "rbxassetid://130738141174754",
   "assets/Quests.png": "rbxassetid://138813978046157",
+  "assets/RadialBeams.png": "rbxassetid://75579087407522",
   "assets/ReinforcedAxe.png": "rbxassetid://90399917968984",
   "assets/ReinforcedPickaxe.png": "rbxassetid://137375042478505",
   "assets/ReinforcedScythe.png": "rbxassetid://115461260402437",
