@@ -1,27 +1,23 @@
 import { ReplicatedStorage, RunService } from "@rbxts/services";
+import { Dialogue } from "server/NPC";
+import NameChanger from "server/npcs/Name Changer";
+import Tria from "server/npcs/Tria";
 import Quest, { Stage } from "server/Quest";
-import { getNPCModel, WAYPOINTS } from "shared/constants";
+import { WAYPOINTS } from "shared/constants";
 import { Server } from "shared/item/ItemUtils";
 import TheFirstDropper from "shared/items/negative/tfd/TheFirstDropper";
 import TheFirstFurnace from "shared/items/negative/tfd/TheFirstFurnace";
-import { Dialogue } from "shared/world/NPC";
-import NameChanger from "shared/npcs/Name Changer";
-import Tria from "shared/npcs/Tria";
 import Packets from "shared/Packets";
 
-const [_triaModel, triaHumanoid, triaRootPart] = getNPCModel("Tria");
-
-const triaStart = Server.NPC.State.getInfo(Tria)!.defaultLocation;
-
 const triaToMineGuiding = Server.NPC.Navigation.createPathfindingOperation(
-    triaHumanoid,
-    triaStart,
+    Tria.humanoid,
+    Tria.startingCFrame,
     WAYPOINTS.NewBeginningsTriaMineGuiding.CFrame,
 );
 const triaToStart = Server.NPC.Navigation.createPathfindingOperation(
-    triaHumanoid,
+    Tria.humanoid,
     WAYPOINTS.NewBeginningsTriaMineGuiding.CFrame,
-    triaStart,
+    Tria.startingCFrame,
     false,
 );
 
@@ -33,8 +29,7 @@ export = new Quest(script.Name)
     .addStage(
         new Stage()
             .setDescription(`You seem to be lost. Talk to the Friendly Noob next to you.`)
-            .setNPC("Tria")
-            .setFocus(triaRootPart)
+            .setNPC(Tria, true)
             .setDialogue(
                 new Dialogue(
                     Tria,
@@ -54,7 +49,7 @@ export = new Quest(script.Name)
                     ).root,
             )
             .onReached((stage) => {
-                triaRootPart.CFrame = triaStart;
+                Tria.rootPart!.CFrame = Tria.startingCFrame;
                 Server.NPC.State.playAnimation(Tria, "Default");
                 ReplicatedStorage.SetAttribute("Intro", true);
 
@@ -74,11 +69,11 @@ export = new Quest(script.Name)
     .addStage(
         new Stage()
             .setDescription(`Follow Tria...?`)
-            .setNPC("Tria")
+            .setNPC(Tria)
             .setFocus(WAYPOINTS.NewBeginningsTriaMineGuiding)
             .setDialogue(new Dialogue(Tria, "Follow me..."))
             .onReached((stage) => {
-                triaRootPart.CFrame = triaStart;
+                Tria.rootPart!.CFrame = Tria.startingCFrame;
                 Server.NPC.State.stopAnimation(Tria, "Default");
                 ReplicatedStorage.SetAttribute("Intro", false);
 
@@ -93,7 +88,7 @@ export = new Quest(script.Name)
     .addStage(
         new Stage()
             .setDescription("Figure out how to purchase items with Tria.")
-            .setNPC("Tria")
+            .setNPC(Tria)
             .setDialogue(
                 new Dialogue(
                     Tria,
@@ -109,7 +104,7 @@ export = new Quest(script.Name)
                     .monologue("Let's... let's try to get this... thing going, okay?").root,
             )
             .onReached((stage) => {
-                triaRootPart.CFrame = WAYPOINTS.NewBeginningsTriaMineGuiding.CFrame;
+                Tria.rootPart!.CFrame = WAYPOINTS.NewBeginningsTriaMineGuiding.CFrame;
                 Server.NPC.State.stopAnimation(Tria, "Default");
 
                 let t = 0;
@@ -137,7 +132,7 @@ export = new Quest(script.Name)
     .addStage(
         new Stage()
             .setDescription("Interact with Tria to learn how to start making money.")
-            .setNPC("Tria")
+            .setNPC(Tria)
             .setDialogue(
                 new Dialogue(
                     Tria,
@@ -145,7 +140,7 @@ export = new Quest(script.Name)
                 ),
             )
             .onReached((stage) => {
-                triaRootPart.CFrame = WAYPOINTS.NewBeginningsTriaMineGuiding.CFrame;
+                Tria.rootPart!.CFrame = WAYPOINTS.NewBeginningsTriaMineGuiding.CFrame;
                 Server.NPC.State.stopAnimation(Tria, "Default");
 
                 const continuation = new Dialogue(Tria, "N-nice job, uh... I guess!")
@@ -175,7 +170,7 @@ export = new Quest(script.Name)
     )
     .onInit(() => {
         Server.Event.addCompletionListener("TriaReveal", (isCompleted) => {
-            if (isCompleted) triaHumanoid.DisplayName = "";
+            if (isCompleted) Tria.revealActualName();
         });
 
         Server.Dialogue.dialogueFinished.connect((dialogue) => {

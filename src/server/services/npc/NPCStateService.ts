@@ -1,8 +1,8 @@
 import { loadAnimation } from "@antivivi/vrldk";
 import { Modding, OnInit, Service } from "@flamework/core";
 import { NPCS } from "shared/constants";
-import { NPC_MODELS } from "shared/world/NPC";
-import NPC, { NPCAnimationType } from "shared/world/NPC";
+import { NPC_MODELS } from "server/NPC";
+import NPC, { NPCAnimationType } from "server/NPC";
 
 declare global {
     /**
@@ -16,7 +16,6 @@ declare global {
         rootPart: BasePart;
         animations: Map<NPCAnimationType, AnimationTrack>;
         runningAnimations: Map<NPCAnimationType, AnimationTrack>;
-        defaultLocation: CFrame;
     }
 }
 

@@ -100,7 +100,7 @@ export default class QuestService implements OnInit, OnStart {
             return;
         }
 
-        for (const [id, quest] of Quest.QUEST_PER_ID) {
+        for (const [id, quest] of Quest.HOT_RELOADER.RELOADABLE_PER_ID) {
             const current = stagePerQuest.get(id) ?? 0;
 
             // Clean up all other stages
@@ -168,7 +168,7 @@ export default class QuestService implements OnInit, OnStart {
 
     loadQuests() {
         const questInfos = Quest.load();
-        for (const [_, quest] of Quest.QUEST_PER_ID) {
+        for (const [_, quest] of Quest.HOT_RELOADER.RELOADABLE_PER_ID) {
             quest.stages.forEach((stage, index) => {
                 stage.onComplete((stage) => {
                     const newStage = this.completeStage(quest, index);
@@ -217,8 +217,6 @@ export default class QuestService implements OnInit, OnStart {
 
         this.loadQuests();
         this.levelService.levelChanged.connect(() => this.reachStages());
-
-        print(`Loaded ${Quest.QUEST_PER_ID.size()} quests`);
     }
 
     onStart() {

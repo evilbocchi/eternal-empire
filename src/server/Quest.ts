@@ -7,10 +7,10 @@
 
 import Signal from "@antivivi/lemon-signal";
 import { ReplicatedStorage } from "@rbxts/services";
+import NPC, { Dialogue } from "server/NPC";
 import type QuestService from "server/services/data/QuestService";
-import { getNPCModel } from "shared/constants";
+import { HotReloader, Reloadable } from "shared/HotReload";
 import { Server } from "shared/item/ItemUtils";
-import { Dialogue } from "shared/world/NPC";
 import Packets from "shared/Packets";
 
 /**
@@ -75,8 +75,9 @@ export class Stage {
      * @param setAsFocus Whether to set the NPC as the focus.
      * @returns This stage instance.
      */
-    setNPC(npcName: NPCName, setAsFocus?: boolean) {
-        [this.npcModel, this.npcHumanoid] = getNPCModel(npcName);
+    setNPC(npc: NPC, setAsFocus?: boolean) {
+        this.npcModel = npc.model;
+        this.npcHumanoid = npc.humanoid;
         if (setAsFocus === true) return this.setFocus(this.npcHumanoid?.RootPart);
         return this;
     }
@@ -187,9 +188,8 @@ export class Stage {
  * Represents a multi-stage quest, including its metadata, stages, rewards, and completion dialogue.
  * Provides methods for configuring quest properties, managing stages, and handling quest initialization.
  */
-export default class Quest {
-    static readonly QUEST_MODULES = new Map<string, ModuleScript>();
-    static readonly QUEST_PER_ID = new Map<string, Quest>();
+export default class Quest extends Reloadable {
+    static readonly HOT_RELOADER = new HotReloader<Quest>(script.Parent!.WaitForChild("quests") as Folder);
 
     static colors = [
         Color3.fromRGB(253, 41, 67),
@@ -204,7 +204,6 @@ export default class Quest {
         Color3.fromRGB(36, 255, 209),
     ];
 
-    id: string;
     name: string | undefined = undefined;
     description: string | undefined = undefined;
     readonly stages = new Array<Stage>();
@@ -223,25 +222,9 @@ export default class Quest {
      * Constructs a new Quest instance.
      * @param id The unique quest identifier.
      */
-    constructor(id: string) {
-        this.id = id;
+    constructor(public readonly id: string) {
+        super();
         this.color = Quest.colors[string.byte(id)[0] % Quest.colors.size()];
-    }
-
-    /**
-     * Reloads the quest modules from the quests folder.
-     *
-     * This clones the module scripts into the QUEST_MODULES map,
-     * allowing for hot reloading of quest modules.
-     */
-    private static reloadQuestModules() {
-        this.QUEST_MODULES.clear();
-        const folder = script.Parent!.WaitForChild("quests");
-        for (const moduleScript of folder.GetDescendants()) {
-            if (moduleScript.IsA("ModuleScript") && moduleScript !== script) {
-                this.QUEST_MODULES.set(moduleScript.Name, moduleScript.Clone());
-            }
-        }
     }
 
     /**
@@ -250,23 +233,13 @@ export default class Quest {
      * @returns A map of quest IDs to their quest info.
      */
     static load() {
-        for (const [_, quest] of this.QUEST_PER_ID) {
-            quest.unload();
-        }
-        this.reloadQuestModules();
-
-        for (const [_, moduleScript] of this.QUEST_MODULES) {
-            const i = require(moduleScript);
-            if (i !== undefined) {
-                const quest = i as Quest;
-                this.QUEST_PER_ID.set(quest.id, quest);
-            }
-        }
+        const questPerId = this.HOT_RELOADER.reload();
+        print(`Loaded ${questPerId.size()} quests`);
 
         const questInfos = new Map<string, QuestInfo>();
 
         // Process all quests and create client info
-        this.QUEST_PER_ID.forEach((quest, questId) => {
+        questPerId.forEach((quest, questId) => {
             quest.initialized.fire();
 
             const questInfo: QuestInfo = {
@@ -353,7 +326,7 @@ export default class Quest {
      * @returns This quest instance.
      */
     createQuestRequirement(questId: string) {
-        const depModule = Quest.QUEST_MODULES.get(questId);
+        const depModule = Quest.HOT_RELOADER.MODULES.get(questId);
         if (!depModule) {
             throw `Quest module not found for ID: ${questId}`;
         }
@@ -364,7 +337,7 @@ export default class Quest {
         const stage = new Stage()
             .setDescription(`Complete the quest "${depQuest.name}" before starting this.`)
             .onReached(() => {
-                while (!Quest.QUEST_PER_ID.get(questId)?.completed) {
+                while (!Quest.HOT_RELOADER.RELOADABLE_PER_ID.get(questId)?.completed) {
                     task.wait(2);
                 }
                 stage.complete();
@@ -449,7 +422,7 @@ export default class Quest {
         this.stages.forEach((stage) => {
             stage.unload();
         });
-        Quest.QUEST_PER_ID.delete(this.id);
+        Quest.HOT_RELOADER.unload();
         table.clear(this);
     }
 }

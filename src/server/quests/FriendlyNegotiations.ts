@@ -2,9 +2,9 @@ import { RunService } from "@rbxts/services";
 import Quest, { Stage } from "server/Quest";
 import SkillPod from "shared/items/0/millisecondless/SkillPod";
 import GrassConveyor from "shared/items/negative/friendliness/GrassConveyor";
-import { Dialogue } from "shared/world/NPC";
-import Prest from "shared/npcs/Prest";
-import Tria from "shared/npcs/Tria";
+import { Dialogue } from "server/NPC";
+import Prest from "server/npcs/Prest";
+import Tria from "server/npcs/Tria";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import { Server } from "shared/item/ItemUtils";
 
@@ -20,7 +20,7 @@ export = new Quest(script.Name)
     .addStage(
         new Stage()
             .setDescription(`Talk to Tria again at %coords%.`)
-            .setNPC("Tria", true)
+            .setNPC(Tria, true)
             .setDialogue(
                 new Dialogue(
                     Tria,
@@ -57,7 +57,7 @@ export = new Quest(script.Name)
     .addStage(
         new Stage()
             .setDescription(`Negotiate with Prest at %coords%.`)
-            .setNPC("Prest", true)
+            .setNPC(Prest, true)
             .setDialogue(
                 new Dialogue(
                     Prest,
@@ -130,7 +130,7 @@ export = new Quest(script.Name)
         new Stage()
             .setDescription(`Return to Prest with the ${GrassConveyor.name}.`)
             .setDialogue(new Dialogue(Prest, "Can you stop bothering me already?").root)
-            .setNPC("Prest", true)
+            .setNPC(Prest, true)
             .onReached((stage) => {
                 const replacement = new Dialogue(
                     Tria,
@@ -168,7 +168,7 @@ export = new Quest(script.Name)
     .addStage(
         new Stage()
             .setDescription("Negotiating with him any further would be futile. Get assistance from Tria.")
-            .setNPC("Tria", true)
+            .setNPC(Tria, true)
             .setDialogue(
                 new Dialogue(
                     Tria,
@@ -195,7 +195,7 @@ export = new Quest(script.Name)
     .addStage(
         new Stage()
             .setDescription(`Talk to Prest again.`)
-            .setNPC("Prest", true)
+            .setNPC(Prest, true)
             .setDialogue(
                 new Dialogue(Prest, "Buy your crates and logs here! ...No, really. Please just leave.")
                     .monologue(`Wait. Is that... A ${SkillPod.name?.upper()}!?!?`)

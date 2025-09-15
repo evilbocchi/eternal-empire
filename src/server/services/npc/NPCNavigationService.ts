@@ -165,14 +165,17 @@ export default class NPCNavigationService implements OnInit, OnStart, OnPhysics 
      * @returns A function that can be called to start traversing the path.
      */
     createPathfindingOperation(
-        npcHumanoid: Instance,
-        source: CFrame,
-        destination: CFrame,
+        npcHumanoid?: Instance,
+        source?: CFrame,
+        destination?: CFrame,
         requiresPlayer?: boolean,
-        agentParams?: AgentParameters,
+        agentParams = this.PATHFINDING_PARAMS,
     ) {
         // Validate parameters
-        if (!npcHumanoid.IsA("Humanoid")) throw npcHumanoid.Name + " is not a Humanoid";
+        if (npcHumanoid === undefined) throw "npcHumanoid is undefined";
+        if (source === undefined) throw "source is undefined";
+        if (destination === undefined) throw "destination is undefined";
+        if (!npcHumanoid.IsA("Humanoid")) throw `${npcHumanoid.Name} is not a Humanoid`;
         npcHumanoid.RootPart!.Anchored = false;
 
         // Cancel any ongoing pathfinding

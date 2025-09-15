@@ -9,7 +9,7 @@
  */
 import { OnInit, OnStart, Service } from "@flamework/core";
 import { Workspace } from "@rbxts/services";
-import { NPC_MODELS } from "shared/world/NPC";
+import { NPC_MODELS } from "server/NPC";
 
 /**
  * Details for tracking an NPC's head and neck for eye contact.

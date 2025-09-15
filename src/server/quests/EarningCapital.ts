@@ -1,16 +1,11 @@
-import { RunService } from "@rbxts/services";
+import { Dialogue } from "server/NPC";
+import Ricarg from "server/npcs/Ricarg";
 import Quest, { Stage } from "server/Quest";
-import { getNPCModel } from "shared/constants";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import ItemCounter from "shared/item/ItemCounter";
 import { Server } from "shared/item/ItemUtils";
 import RustyFactory from "shared/items/negative/negativity/RustyFactory";
 import TheFirstUpgraderBooster from "shared/items/negative/tfd/TheFirstUpgraderBooster";
-import { Dialogue } from "shared/world/NPC";
-import Ricarg from "shared/npcs/Ricarg";
-
-const [ricargModel, ricargHumanoid, ricargRootPart] = getNPCModel("Ricarg");
-const ricargDefaultLocation = Server.NPC.State.getInfo(Ricarg)!.defaultLocation;
 
 const minFundsAmount = 10000;
 const req = new CurrencyBundle().set("Funds", minFundsAmount);
@@ -23,7 +18,7 @@ export = new Quest(script.Name)
     .addStage(
         new Stage()
             .setDescription("Talk with Ricarg at %coords%.")
-            .setNPC("Ricarg", true)
+            .setNPC(Ricarg, true)
             .setDialogue(
                 new Dialogue(Ricarg, "I need money...")
                     .monologue(
@@ -35,7 +30,7 @@ export = new Quest(script.Name)
                     ).root,
             )
             .onReached((stage) => {
-                ricargRootPart.CFrame = ricargDefaultLocation;
+                Ricarg.rootPart!.CFrame = Ricarg.startingCFrame;
                 Server.NPC.State.playAnimation(Ricarg, "Default");
 
                 const connection = Server.Dialogue.dialogueFinished.connect((dialogue) => {
@@ -50,10 +45,10 @@ export = new Quest(script.Name)
     .addStage(
         new Stage()
             .setDescription(`Get ${req.toString()} and give it to Ricarg.`)
-            .setNPC("Ricarg", true)
+            .setNPC(Ricarg, true)
             .setDialogue(new Dialogue(Ricarg, `Please... I need ${req.toString()}...`))
             .onReached((stage) => {
-                ricargRootPart.CFrame = ricargDefaultLocation;
+                Ricarg.rootPart!.CFrame = Ricarg.startingCFrame;
                 Server.NPC.State.playAnimation(Ricarg, "Default");
 
                 const continuation = new Dialogue(Ricarg, "Wait. You actually have the money!?")

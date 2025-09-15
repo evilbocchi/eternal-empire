@@ -1,16 +1,10 @@
-import { getNearestPlayerHumanoid } from "@antivivi/vrldk";
-import { RunService } from "@rbxts/services";
+import { Dialogue } from "server/NPC";
+import CaptainBacon from "server/npcs/Captain Bacon";
+import OldNoob from "server/npcs/Old Noob";
+import Prest from "server/npcs/Prest";
+import Tria from "server/npcs/Tria";
 import Quest, { Stage } from "server/Quest";
-import { getNPCModel } from "shared/constants";
 import { Server } from "shared/item/ItemUtils";
-import { Dialogue } from "shared/world/NPC";
-import CaptainBacon from "shared/npcs/Captain Bacon";
-import OldNoob from "shared/npcs/Old Noob";
-import Prest from "shared/npcs/Prest";
-import Tria from "shared/npcs/Tria";
-
-const [triaModel, triaHumanoid, triaRootPart] = getNPCModel("Tria");
-const [captainBaconModel, captainBaconHumanoid, captainBaconRootPart] = getNPCModel("Captain Bacon");
 
 export = new Quest(script.Name)
     .setName("Sailing Away")
@@ -20,7 +14,7 @@ export = new Quest(script.Name)
     .addStage(
         new Stage()
             .setDescription(`Meet Captain Bacon at %coords%.`)
-            .setNPC("Captain Bacon", true)
+            .setNPC(CaptainBacon, true)
             .setDialogue(
                 new Dialogue(CaptainBacon, "Welcome aboard my glorious ship, stranger!")
                     .monologue(

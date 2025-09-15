@@ -1,11 +1,15 @@
 import { OnoeNum } from "@antivivi/serikanum";
 import { convertToMMSS, spawnExplosion } from "@antivivi/vrldk";
 import { RunService, TweenService, Workspace } from "@rbxts/services";
+import { Dialogue, EMPTY_NPC } from "server/NPC";
+import Andy from "server/npcs/Andy";
+import PoliceOfficer from "server/npcs/Police Officer";
+import Simpul from "server/npcs/Simpul";
+import SlamoReceptionist from "server/npcs/Slamo Receptionist";
 import Quest, { Stage } from "server/Quest";
-import { AREAS } from "shared/world/Area";
 import { emitEffect, playSound } from "shared/asset/GameAssets";
-import { getNPCModel, PLACED_ITEMS_FOLDER, WAYPOINTS } from "shared/constants";
-import InteractableObject from "shared/world/InteractableObject";
+import { PLACED_ITEMS_FOLDER, WAYPOINTS } from "shared/constants";
+import { RESET_LAYERS } from "shared/currency/mechanics/ResetLayer";
 import { Server } from "shared/item/ItemUtils";
 import SkillPod from "shared/items/0/millisecondless/SkillPod";
 import SlamoStatue from "shared/items/0/millisecondless/SlamoStatue";
@@ -18,34 +22,26 @@ import ExcavationStone from "shared/items/excavation/ExcavationStone";
 import Gold from "shared/items/excavation/Gold";
 import EnchantedGrass from "shared/items/excavation/harvestable/EnchantedGrass";
 import Iron from "shared/items/excavation/Iron";
-import { Dialogue, EMPTY_NPC } from "shared/world/NPC";
-import Andy from "shared/npcs/Andy";
-import PoliceOfficer from "shared/npcs/Police Officer";
-import Simpul from "shared/npcs/Simpul";
-import SlamoReceptionist from "shared/npcs/Slamo Receptionist";
-import { RESET_LAYERS } from "shared/currency/mechanics/ResetLayer";
+import { AREAS } from "shared/world/Area";
+import InteractableObject from "server/InteractableObject";
 
-const [simpulModel, simpulHumanoid, simpulRootPart] = getNPCModel("Simpul");
-const [_slamoReceptionistModel, slamoReceptionistHumanoid, slamoReceptionistRootPart] =
-    getNPCModel("Slamo Receptionist");
-
-simpulRootPart.Anchored = true;
+Simpul.rootPart!.Anchored = true;
 
 const simpulToOut = Server.NPC.Navigation.createPathfindingOperation(
-    simpulHumanoid,
-    simpulRootPart.CFrame,
+    Simpul.humanoid!,
+    Simpul.rootPart!.CFrame,
     WAYPOINTS.LudicrousEscapeSimpulOut.CFrame,
 );
 
 const slamoReceptionistToHiding = Server.NPC.Navigation.createPathfindingOperation(
-    slamoReceptionistHumanoid,
-    slamoReceptionistRootPart.CFrame,
+    SlamoReceptionist.humanoid!,
+    SlamoReceptionist.rootPart!.CFrame,
     WAYPOINTS.LudicrousEscapeSlamoReceptionistHiding.CFrame,
     false,
 );
 
 const slamoReceptionistToReveal = Server.NPC.Navigation.createPathfindingOperation(
-    slamoReceptionistHumanoid,
+    SlamoReceptionist.humanoid!,
     WAYPOINTS.LudicrousEscapeSlamoReceptionistHiding.CFrame,
     WAYPOINTS.LudicrousEscapeSlamoReceptionistReveal.CFrame,
 );
@@ -56,7 +52,7 @@ const toggleRing = (enabled: boolean) => {
 };
 toggleRing(false);
 
-const decal = simpulModel.WaitForChild("Head").FindFirstChildOfClass("Decal")!;
+const decal = Simpul.model!.WaitForChild("Head").FindFirstChildOfClass("Decal")!;
 const sadDecal = decal.Texture;
 const heheDecal = "http://www.roblox.com/asset/?id=6531524856";
 
@@ -80,7 +76,7 @@ export = new Quest(script.Name)
     .addStage(
         new Stage()
             .setDescription(`Head to the Slamo Police and talk to the prisoner held there at %coords%.`)
-            .setNPC("Simpul", true)
+            .setNPC(Simpul, true)
             .setDialogue(
                 new Dialogue(Simpul, "Sniff... sniff... Wait. You're a Player.")
                     .monologue(
@@ -96,7 +92,7 @@ export = new Quest(script.Name)
                     .monologue("Anyways, I'm counting on you. Set me free!").root,
             )
             .onReached((stage) => {
-                simpulRootPart.Position = stage.position!;
+                Simpul.rootPart!.Position = stage.position!;
                 const connection = Server.Dialogue.dialogueFinished.connect((dialogue) => {
                     if (dialogue === stage.dialogue) {
                         Server.Event.setEventCompleted("SimpulReveal", true);
@@ -149,7 +145,7 @@ export = new Quest(script.Name)
     .addStage(
         new Stage()
             .setDescription(`Confront Simpul about his past.`)
-            .setNPC("Simpul")
+            .setNPC(Simpul)
             .setDialogue(
                 new Dialogue(Simpul, "I see you do not have the keys. Haah, you're useless.")
                     .monologue("Um... considering you're here without any reason... why?")
@@ -171,8 +167,8 @@ export = new Quest(script.Name)
                             });
                         });
                     } else if (dialogue === continuation) {
-                        simpulRootPart.Anchored = true;
-                        TweenService.Create(simpulRootPart, new TweenInfo(0.5), {
+                        Simpul.rootPart!.Anchored = true;
+                        TweenService.Create(Simpul.rootPart!, new TweenInfo(0.5), {
                             CFrame: WAYPOINTS.LudicrousEscapeSimpulOut.CFrame.add(new Vector3(0, 150, 0)),
                         }).Play();
                         task.delay(2, () => stage.complete());
@@ -184,14 +180,14 @@ export = new Quest(script.Name)
     .addStage(
         new Stage()
             .setDescription(`Help the police find and re-capture Simpul.`)
-            .setNPC("Simpul")
+            .setNPC(Simpul)
             .setDialogue(
                 new Dialogue(PoliceOfficer, "Wow, Simpul really escaped just like that.").monologue(
                     "I would care more, but I don't care.",
                 ).root,
             )
             .onReached((stage) => {
-                simpulRootPart.CFrame = WAYPOINTS.LudicrousEscapeSimpulOut.CFrame.add(new Vector3(0, 150, 0));
+                Simpul.rootPart!.CFrame = WAYPOINTS.LudicrousEscapeSimpulOut.CFrame.add(new Vector3(0, 150, 0));
 
                 const ItemService = Server.Item;
                 const start = new Dialogue(
@@ -281,7 +277,7 @@ export = new Quest(script.Name)
         new Stage()
             .setDescription(`Lure Simpul and trap him.`)
             .setFocus(ring)
-            .setNPC("Simpul")
+            .setNPC(Simpul)
             .setDialogue(new Dialogue(SlamoReceptionist, "Follow my lead.").root)
             .onReached((stage) => {
                 toggleRing(true);
@@ -313,8 +309,8 @@ export = new Quest(script.Name)
                     initiated = true;
                     const statueCFrame = statue.GetPivot();
 
-                    simpulRootPart.CFrame = statueCFrame.add(new Vector3(0, 100, 0));
-                    TweenService.Create(simpulRootPart, new TweenInfo(4), {
+                    Simpul.rootPart!.CFrame = statueCFrame.add(new Vector3(0, 100, 0));
+                    TweenService.Create(Simpul.rootPart!, new TweenInfo(4), {
                         CFrame: statueCFrame.add(statueCFrame.LookVector.mul(12)).mul(CFrame.Angles(0, math.pi, 0)),
                     }).Play();
                     task.delay(1.5, () =>
@@ -348,7 +344,7 @@ export = new Quest(script.Name)
                     if (dialogue === poured) {
                         const model = WinsomeBucket.MODEL?.Clone();
                         if (model === undefined) return;
-                        const bucketCFrame = simpulRootPart.CFrame.add(new Vector3(0, 4, 0));
+                        const bucketCFrame = Simpul.rootPart!.CFrame.add(new Vector3(0, 4, 0));
                         Simpul.onInteract();
 
                         let t = 0;
@@ -360,10 +356,10 @@ export = new Quest(script.Name)
                             model.PivotTo(bucketCFrame.mul(CFrame.Angles(0, 0, t * 3 * math.pi)));
                         });
                         task.delay(1, () => {
-                            emitEffect("ExpandingWhirls", simpulRootPart, 4);
+                            emitEffect("ExpandingWhirls", Simpul.rootPart!, 4);
                             model.Destroy();
-                            playSound("Splash.mp3", simpulRootPart);
-                            const trap = simpulModel.WaitForChild("Part") as BasePart;
+                            playSound("Splash.mp3", Simpul.rootPart!);
+                            const trap = Simpul.model!.WaitForChild("Part") as BasePart;
                             trap.Transparency = 0;
                             trap.FindFirstChildOfClass("Decal")!.Transparency = 0;
                             decal.Texture = sadDecal;
@@ -375,7 +371,7 @@ export = new Quest(script.Name)
                         part.Transparency = 1;
                         part.Anchored = true;
                         part.CanCollide = false;
-                        part.Position = simpulRootPart.Position;
+                        part.Position = Simpul.rootPart!.Position;
                         part.Parent = Workspace;
                         spawnExplosion(part.Position, part);
                         playSound("Explosion.mp3", part);
@@ -397,18 +393,16 @@ export = new Quest(script.Name)
     .addStage(
         new Stage()
             .setDescription(`Serve justice to Simpul.`)
-            .setNPC("Simpul")
+            .setNPC(Simpul)
             .onReached((stage) => {
                 Server.Dialogue.talk(finishing);
 
                 const connection = Server.Dialogue.dialogueFinished.connect((dialogue) => {
                     if (dialogue === finishing) {
-                        const defaultLocation = Server.NPC.State.getInfo(SlamoReceptionist)?.defaultLocation;
-                        if (defaultLocation === undefined) throw "Slamo Receptionist default location not found!";
                         Server.NPC.Navigation.createPathfindingOperation(
-                            slamoReceptionistHumanoid,
-                            slamoReceptionistRootPart.CFrame,
-                            defaultLocation,
+                            SlamoReceptionist.humanoid!,
+                            SlamoReceptionist.rootPart!.CFrame,
+                            SlamoReceptionist.startingCFrame,
                         )();
                         toggleRing(false);
                         stage.complete();
@@ -420,7 +414,7 @@ export = new Quest(script.Name)
     .onInit(() => {
         const CurrencyService = Server.Currency;
         Server.Event.addCompletionListener("SimpulReveal", (isCompleted) => {
-            if (isCompleted) simpulHumanoid.DisplayName = "";
+            if (isCompleted) Simpul.revealActualName();
         });
         Server.Event.addCompletionListener("FlimsyBarsDestroyed", (isCompleted) => {
             if (!isCompleted) return;
@@ -435,7 +429,7 @@ export = new Quest(script.Name)
         });
         Server.Event.addCompletionListener("SimpulGone", (isCompleted) => {
             if (!isCompleted) return;
-            simpulRootPart.CFrame = new CFrame(0, -200, 0);
+            Simpul.rootPart!.CFrame = new CFrame(0, -200, 0);
         });
 
         const questMetadata = Server.empireData.questMetadata;

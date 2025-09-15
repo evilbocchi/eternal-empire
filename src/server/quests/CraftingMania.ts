@@ -1,7 +1,9 @@
+import { Dialogue } from "server/NPC";
 import Quest, { Stage } from "server/Quest";
+import Chuck from "server/npcs/Chuck";
+import Ricarg from "server/npcs/Ricarg";
 import EarningCapital from "server/quests/EarningCapital";
-import { Dialogue } from "shared/world/NPC";
-import { getNPCModel, WAYPOINTS } from "shared/constants";
+import { WAYPOINTS } from "shared/constants";
 import { Server } from "shared/item/ItemUtils";
 import Shop from "shared/item/traits/Shop";
 import ExcavationStone from "shared/items/excavation/ExcavationStone";
@@ -14,16 +16,12 @@ import LimitBreaker from "shared/items/negative/friendliness/LimitBreaker";
 import Lamp from "shared/items/negative/negativity/Lamp";
 import CraftingTable from "shared/items/negative/tfd/CraftingTable";
 import OverengineeredGenerator from "shared/items/negative/trueease/OverengineeredGenerator";
-import Chuck from "shared/npcs/Chuck";
-import Ricarg from "shared/npcs/Ricarg";
 
 const craftingTableModel = WAYPOINTS.CraftingTable;
 
-const [_chuckModel, chuckHumanoid, chuckRootPart] = getNPCModel("Chuck");
-
 const chuckToCraftingTable = Server.NPC.Navigation.createPathfindingOperation(
-    chuckHumanoid,
-    chuckRootPart.CFrame,
+    Chuck.humanoid,
+    Chuck.rootPart?.CFrame,
     WAYPOINTS.CraftingManiaChuckCraftingAssistance.CFrame,
 );
 
@@ -35,13 +33,13 @@ export = new Quest(script.Name)
     .addStage(
         new Stage()
             .setDescription(`Wake up the blacksmith at %coords%.`)
-            .setNPC("Chuck", true)
+            .setNPC(Chuck, true)
             .setDialogue(
                 new Dialogue(Chuck, "zzz... zzzzz.... zzzzzzz...").monologue("...can you not disturb my sleep.").root,
             )
             .onReached((stage) => {
                 Server.NPC.State.playAnimation(Chuck, "Default");
-                chuckRootPart.CFrame = Server.NPC.State.getInfo(Chuck)!.defaultLocation;
+                Chuck.rootPart!.CFrame = Chuck.startingCFrame;
 
                 const continuation = new Dialogue(Chuck, "So, you want to craft something?")
                     .monologue(
@@ -79,11 +77,11 @@ export = new Quest(script.Name)
             .setDescription(
                 `Collect 1 ${Wool.id} and 3 ${Grass.id}. Ask Ricarg how to collect the grass. Return to the blacksmith with the resources.`,
             )
-            .setNPC("Ricarg", true)
+            .setNPC(Ricarg, true)
             .setDialogue(new Dialogue(Chuck, "You got the stuff?"))
             .onReached((stage) => {
                 Server.NPC.State.stopAnimation(Chuck, "Default");
-                chuckRootPart.CFrame = Server.NPC.State.getInfo(Chuck)!.defaultLocation;
+                Chuck.rootPart!.CFrame = Chuck.startingCFrame;
 
                 const ItemService = Server.Item;
                 const ricargDialogue = new Dialogue(Ricarg, "Hahah... money... haah...").monologue(
@@ -149,12 +147,12 @@ export = new Quest(script.Name)
     .addStage(
         new Stage()
             .setDescription(`Head to the Crafting Table at %coords% with the blacksmith.`)
-            .setNPC("Chuck")
+            .setNPC(Chuck)
             .setFocus(craftingTableModel)
             .setDialogue(new Dialogue(Chuck, "Come with me."))
             .onReached((stage) => {
                 Server.NPC.State.stopAnimation(Chuck, "Default");
-                chuckRootPart.Anchored = false;
+                Chuck.rootPart!.Anchored = false;
 
                 chuckToCraftingTable().onComplete(() => stage.complete());
                 return () => {};
@@ -163,7 +161,7 @@ export = new Quest(script.Name)
     .addStage(
         new Stage()
             .setDescription(`Learn how to craft from the blacksmith.`)
-            .setNPC("Chuck")
+            .setNPC(Chuck)
             .setFocus(craftingTableModel)
             .setDialogue(
                 new Dialogue(Chuck, "Here we are.")
@@ -173,7 +171,7 @@ export = new Quest(script.Name)
             )
             .onReached((stage) => {
                 Server.NPC.State.stopAnimation(Chuck, "Default");
-                chuckRootPart.CFrame = WAYPOINTS.CraftingManiaChuckCraftingAssistance.CFrame;
+                Chuck.rootPart!.CFrame = WAYPOINTS.CraftingManiaChuckCraftingAssistance.CFrame;
 
                 const connection = Server.Dialogue.dialogueFinished.connect((dialogue) => {
                     if (dialogue === stage.dialogue) {
@@ -192,7 +190,7 @@ export = new Quest(script.Name)
             .setDialogue(new Dialogue(Chuck, "Let's see what you're capable of."))
             .onReached((stage) => {
                 Server.NPC.State.stopAnimation(Chuck, "Default");
-                chuckRootPart.CFrame = WAYPOINTS.CraftingManiaChuckCraftingAssistance.CFrame;
+                Chuck.rootPart!.CFrame = WAYPOINTS.CraftingManiaChuckCraftingAssistance.CFrame;
 
                 const connection = Server.Item.itemsBought.connect((_player, items) => {
                     for (const item of items) {
@@ -209,13 +207,13 @@ export = new Quest(script.Name)
     .addStage(
         new Stage()
             .setDescription(`Show the blacksmith what you crafted.`)
-            .setNPC("Chuck")
+            .setNPC(Chuck)
             .setFocus(WAYPOINTS.CraftingManiaChuckCraftingAssistance)
             .setDialogue(new Dialogue(Chuck, "Hmm... Let's see..."))
             .onReached((stage) => {
                 const ItemService = Server.Item;
                 Server.NPC.State.stopAnimation(Chuck, "Default");
-                chuckRootPart.CFrame = WAYPOINTS.CraftingManiaChuckCraftingAssistance.CFrame;
+                Chuck.rootPart!.CFrame = WAYPOINTS.CraftingManiaChuckCraftingAssistance.CFrame;
 
                 let continuation: Dialogue;
                 if (ItemService.getBoughtAmount(Lamp.id) > 0)

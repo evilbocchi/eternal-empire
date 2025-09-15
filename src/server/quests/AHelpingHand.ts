@@ -1,19 +1,16 @@
+import { Dialogue } from "server/NPC";
+import Freddy from "server/npcs/Freddy";
 import Quest, { Stage } from "server/Quest";
-import { AREAS } from "shared/world/Area";
 import { emitEffect, getSound } from "shared/asset/GameAssets";
-import { getNPCModel, WAYPOINTS } from "shared/constants";
+import { WAYPOINTS } from "shared/constants";
 import { Server } from "shared/item/ItemUtils";
 import LostPendant from "shared/items/0/winsome/LostPendant";
 import FreddysUpgrader from "shared/items/negative/friendliness/FreddysUpgrader";
-import { Dialogue } from "shared/world/NPC";
-import Freddy from "shared/npcs/Freddy";
-
-const [_freddyModel, freddyHumanoid, freddyRootPart] = getNPCModel("Freddy");
-const freddyDefaultLocation = Server.NPC.State.getInfo(Freddy)!.defaultLocation;
+import { AREAS } from "shared/world/Area";
 
 const freddyToRequest = Server.NPC.Navigation.createPathfindingOperation(
-    freddyHumanoid,
-    freddyRootPart.CFrame,
+    Freddy.humanoid,
+    Freddy.rootPart?.CFrame,
     WAYPOINTS.AHelpingHandFreddyRequest.CFrame,
 );
 
@@ -32,7 +29,7 @@ export = new Quest(script.Name)
     .addStage(
         new Stage()
             .setDescription(`Talk to the Sad Noob at %coords%.`)
-            .setNPC("Freddy", true)
+            .setNPC(Freddy, true)
             .setDialogue(
                 new Dialogue(Freddy, "I hate this place... It's dreary, and nothing ever goes my way. Oh, hey.")
                     .monologue(
@@ -44,7 +41,7 @@ export = new Quest(script.Name)
                     .monologue("What do you say? Care to lend a hand to someone down on their luck?").root,
             )
             .onReached((stage) => {
-                freddyRootPart.CFrame = freddyDefaultLocation;
+                Freddy.rootPart!.CFrame = Freddy.startingCFrame;
                 Server.NPC.State.playAnimation(Freddy, "Default");
 
                 const continuation = new Dialogue(Freddy, "My name's Freddy. Follow me, I have something to show you.");
@@ -61,11 +58,11 @@ export = new Quest(script.Name)
     .addStage(
         new Stage()
             .setDescription(`Follow the Sad Noob to %coords%.`)
-            .setNPC("Freddy")
+            .setNPC(Freddy)
             .setFocus(WAYPOINTS.AHelpingHandFreddyRequest)
             .setDialogue(new Dialogue(Freddy, "Follow me, I have something to show you."))
             .onReached((stage) => {
-                freddyRootPart.CFrame = freddyDefaultLocation;
+                Freddy.rootPart!.CFrame = Freddy.startingCFrame;
                 Server.NPC.State.stopAnimation(Freddy, "Default");
 
                 task.delay(2, () => freddyToRequest().onComplete(() => stage.complete()));
@@ -75,7 +72,7 @@ export = new Quest(script.Name)
     .addStage(
         new Stage()
             .setDescription(`Talk to the Sad Noob to help him out.`)
-            .setNPC("Freddy")
+            .setNPC(Freddy)
             .setDialogue(
                 new Dialogue(
                     Freddy,
@@ -95,7 +92,7 @@ export = new Quest(script.Name)
                     .monologue("Good luck, and remember, I'm counting on you!").root,
             )
             .onReached((stage) => {
-                freddyRootPart.CFrame = WAYPOINTS.AHelpingHandFreddyRequest.CFrame;
+                Freddy.rootPart!.CFrame = WAYPOINTS.AHelpingHandFreddyRequest.CFrame;
                 Server.NPC.State.stopAnimation(Freddy, "Default");
 
                 const connection = Server.Dialogue.dialogueFinished.connect((dialogue) => {
@@ -107,10 +104,10 @@ export = new Quest(script.Name)
     .addStage(
         new Stage()
             .setDescription(`Complete the obstacle course and retrieve the item.`)
-            .setNPC("Freddy")
+            .setNPC(Freddy)
             .setDialogue(new Dialogue(Freddy, "What are you waiting for? Go get it!"))
             .onReached((stage) => {
-                freddyRootPart.CFrame = WAYPOINTS.AHelpingHandFreddyRequest.CFrame;
+                Freddy.rootPart!.CFrame = WAYPOINTS.AHelpingHandFreddyRequest.CFrame;
                 Server.NPC.State.stopAnimation(Freddy, "Default");
 
                 const hitSound = getSound("QuestConstruct.mp3");
@@ -135,7 +132,7 @@ export = new Quest(script.Name)
     .addStage(
         new Stage()
             .setDescription(`Report back to the Sad Noob.`)
-            .setNPC("Freddy", true)
+            .setNPC(Freddy, true)
             .setDialogue(
                 new Dialogue(Freddy, "I see you have the item. Nice work! I knew you could do it.")
                     .monologue(
@@ -148,7 +145,7 @@ export = new Quest(script.Name)
                     .root,
             )
             .onReached((stage) => {
-                freddyRootPart.CFrame = WAYPOINTS.AHelpingHandFreddyRequest.CFrame;
+                Freddy.rootPart!.CFrame = WAYPOINTS.AHelpingHandFreddyRequest.CFrame;
                 Server.NPC.State.stopAnimation(Freddy, "Default");
 
                 const connection = Server.Dialogue.dialogueFinished.connect((dialogue) => {
@@ -165,7 +162,7 @@ export = new Quest(script.Name)
         }
 
         Server.Event.addCompletionListener("FreddyReveal", (isCompleted) => {
-            if (isCompleted) freddyHumanoid.DisplayName = "";
+            if (isCompleted) Freddy.revealActualName();
         });
     })
     .setCompletionDialogue(new Dialogue(Freddy, "Thanks a lot for your work! My name is Freddy, by the way."))

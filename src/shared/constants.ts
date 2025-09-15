@@ -1,7 +1,6 @@
 import { Players, SoundService, TextChatService, Workspace } from "@rbxts/services";
 import { Workspace_Waypoints } from "services";
 import { AREAS } from "shared/world/Area";
-import { NPC_MODELS } from "shared/world/NPC";
 
 export function getChallengeGui() {
     const board = AREAS.SlamoVillage.areaFolder.FindFirstChild("ChallengesBoard");
@@ -37,12 +36,6 @@ export function getNameFromUserId(userId: number | undefined) {
     return value;
 }
 
-export const getNPCModel = (npc: NPCName): LuaTuple<[Model, Humanoid, BasePart]> => {
-    const model = NPC_MODELS.WaitForChild(npc) as Model;
-    const humanoid = model.WaitForChild("Humanoid") as Humanoid;
-    const rootPart = humanoid.RootPart!;
-    return $tuple(model, humanoid, rootPart);
-};
 export const getStartCamera = () => Workspace.FindFirstChild("StartCamera") as Part;
 
 export const LEADERBOARDS = Workspace.WaitForChild("Leaderboards") as Folder & {

@@ -18,10 +18,10 @@ import NPCStateService, { OnNPCLoad } from "server/services/npc/NPCStateService"
 import DataService from "server/services/data/DataService";
 import { ASSETS } from "shared/asset/GameAssets";
 import { getDisplayName } from "shared/constants";
-import { NPC_MODELS } from "shared/world/NPC";
-import InteractableObject from "shared/world/InteractableObject";
+import { NPC_MODELS } from "server/NPC";
+import InteractableObject from "server/InteractableObject";
 import { Server } from "shared/item/ItemUtils";
-import NPC, { Dialogue } from "shared/world/NPC";
+import NPC, { Dialogue } from "server/NPC";
 import Packets from "shared/Packets";
 
 declare global {
@@ -250,7 +250,7 @@ export default class DialogueService implements OnInit, OnStart, OnNPCLoad {
             const interactableObject = InteractableObject.REGISTRY.get(prompt.Parent.Name);
             if (interactableObject === undefined) return;
             this.proximityPrompts.add(prompt);
-            interactableObject.interacted.fire(Server, player);
+            interactableObject.interacted.fire(player);
         });
     }
 }
