@@ -14,6 +14,11 @@ export const IS_SERVER = RunService.IsServer();
 export const IS_CI = !RunService.IsRunning();
 
 /**
+ * Whether the current context is Roblox Studio.
+ */
+export const IS_STUDIO = RunService.IsStudio();
+
+/**
  * Whether the game is in Single Server mode.
  */
 export const IS_SINGLE_SERVER = game.PlaceId === 17479698702;

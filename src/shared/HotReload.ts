@@ -56,8 +56,12 @@ export class HotReloader<T extends Reloadable> {
      * Loads all ModuleScripts in the MODULES map, requires them, and stores instances of Reloadable in the RELOADABLE_PER_ID map.
      * @return Map of reloadable instances by their IDs.
      */
-    private load() {
-        for (const [_, moduleScript] of this.MODULES) {
+    public load() {
+        for (const [id, moduleScript] of this.MODULES) {
+            if (this.RELOADABLE_PER_ID.has(id)) {
+                continue;
+            }
+
             const i = require(moduleScript);
             if (i !== undefined) {
                 const reloadable = i as T;

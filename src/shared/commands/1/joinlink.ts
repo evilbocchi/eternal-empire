@@ -1,5 +1,5 @@
-import { RunService } from "@rbxts/services";
 import Command, { CommandAPI } from "shared/commands/Command";
+import { IS_STUDIO } from "shared/Context";
 import Packets from "shared/Packets";
 
 export = new Command(script.Name)
@@ -8,7 +8,7 @@ export = new Command(script.Name)
         "Gets a URL in which players can use to join this empire. Utilises the empire's access code. Only available for private empires.",
     )
     .setExecute((o) => {
-        if (RunService.IsStudio() || (game.PrivateServerOwnerId === 0 && game.PrivateServerId !== "")) {
+        if (IS_STUDIO || (game.PrivateServerOwnerId === 0 && game.PrivateServerId !== "")) {
             const joinLink = `https://www.roblox.com/games/start?placeId=${game.PlaceId}&launchData=${CommandAPI.Permissions.getAccessCode()}`;
             CommandAPI.ChatHook.sendPrivateMessage(o, "Join link: " + joinLink);
             Packets.codeReceived.toClient(o, joinLink);

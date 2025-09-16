@@ -29,13 +29,12 @@ import {
     HttpService,
     MarketplaceService,
     Players,
-    RunService,
     TeleportService,
     Workspace,
 } from "@rbxts/services";
 import { OnPlayerJoined } from "server/services/ModdingService";
 import { getNameFromUserId, getStartCamera, isStartScreenEnabled } from "shared/constants";
-import { IS_CI, IS_SERVER, IS_SINGLE_SERVER } from "shared/Context";
+import { IS_CI, IS_SERVER, IS_SINGLE_SERVER, IS_STUDIO } from "shared/Context";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import { CURRENCY_DETAILS } from "shared/currency/CurrencyDetails";
 import EmpireProfileTemplate from "shared/data/EmpireProfileTemplate";
@@ -269,8 +268,7 @@ export default class DataService implements OnInit, OnPlayerJoined {
     /**
      * Whether this server is a public server (not private/reserved).
      */
-    isPublicServer =
-        IS_SERVER && game.PrivateServerId === "" && (!RunService.IsStudio() || START_SCREEN_ENABLED === true);
+    isPublicServer = IS_SERVER && game.PrivateServerId === "" && (!IS_STUDIO || START_SCREEN_ENABLED === true);
 
     /**
      * Debounce timer for empire creation to prevent spam.
@@ -300,7 +298,7 @@ export default class DataService implements OnInit, OnPlayerJoined {
         // Determine empire ID based on server type and environment
         if (IS_CI) {
             empireId = HttpService.GenerateGUID(false); // Clean empire for CI testing
-        } else if (!RunService.IsStudio() || START_SCREEN_ENABLED === true) {
+        } else if (!IS_STUDIO || START_SCREEN_ENABLED === true) {
             // production protocol
             if (IS_SINGLE_SERVER) {
                 empireId = "SingleServer";
@@ -660,7 +658,7 @@ export default class DataService implements OnInit, OnPlayerJoined {
             });
             if (success === true) {
                 newProfile.Data.accessCode = result;
-            } else if (!RunService.IsStudio()) {
+            } else if (!IS_STUDIO) {
                 return false;
             }
             playerData.ownedEmpires.push(empireId);
@@ -897,10 +895,7 @@ export default class DataService implements OnInit, OnPlayerJoined {
         player
             .GetAttributeChangedSignal("RawPurifierClicks")
             .Connect(() => (playerProfile.Data.rawPurifierClicks = player.GetAttribute("RawPurifierClicks") as number));
-        if (
-            playerProfile.Data.rawPurifierClicks === 0 &&
-            (this.empireData.owner === player.UserId || RunService.IsStudio())
-        ) {
+        if (playerProfile.Data.rawPurifierClicks === 0 && (this.empireData.owner === player.UserId || IS_STUDIO)) {
             const c = this.empireData.currencies.get("Purifier Clicks");
             if (c !== undefined) {
                 const clicks = new OnoeNum(c);

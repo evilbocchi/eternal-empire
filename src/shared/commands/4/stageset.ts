@@ -15,7 +15,6 @@ export = new Command(script.Name)
             stagePerQuest.set(questId, tonumber(stage) ?? 0);
         }
 
-        CommandAPI.Dialogue.loadInteractive();
-        CommandAPI.Quest.loadQuests();
+        CommandAPI.Hamster.sequentialReload();
     })
     .setPermissionLevel(4);

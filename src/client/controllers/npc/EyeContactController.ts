@@ -7,9 +7,9 @@
  *
  * @since 1.0.0
  */
-import { OnInit, OnStart, Service } from "@flamework/core";
+import { observeTag } from "@antivivi/vrldk";
+import { Controller, OnInit, OnStart } from "@flamework/core";
 import { Workspace } from "@rbxts/services";
-import { NPC_MODELS } from "server/interactive/npc/NPC";
 
 /**
  * Details for tracking an NPC's head and neck for eye contact.
@@ -36,12 +36,8 @@ interface TrackingDetails {
     originalNeckC0: CFrame;
 }
 
-/**
- * Service that manages NPC eye contact and gaze tracking for immersive interactions.
- * Updates neck orientation to look at the closest player/character within a specified distance.
- */
-@Service()
-export default class EyeContactService implements OnInit, OnStart {
+@Controller()
+export default class EyeContactController implements OnInit, OnStart {
     /**
      * Map of NPC models to their tracking details (head, neck, original C0).
      */
@@ -52,29 +48,36 @@ export default class EyeContactService implements OnInit, OnStart {
      * Stores original neck C0 for smooth resetting.
      */
     onInit() {
-        const npcModels = NPC_MODELS.GetChildren();
+        observeTag(
+            "NPC",
+            (npcModel) => {
+                if (!npcModel.IsA("Model")) {
+                    return;
+                }
+                const torso = npcModel.FindFirstChild("Torso") as BasePart | undefined;
+                if (torso === undefined) {
+                    return;
+                }
 
-        for (const npcModel of npcModels) {
-            if (!npcModel.IsA("Model")) {
-                continue;
-            }
-            const torso = npcModel.FindFirstChild("Torso") as BasePart | undefined;
-            if (torso === undefined) {
-                continue;
-            }
+                const neck = torso.FindFirstChild("Neck") as Motor6D | undefined;
+                if (neck === undefined) {
+                    return;
+                }
 
-            const neck = torso.FindFirstChild("Neck") as Motor6D | undefined;
-            if (neck === undefined) {
-                continue;
-            }
-
-            this.tracking.set(npcModel, {
-                model: npcModel,
-                head: npcModel.WaitForChild("Head") as BasePart,
-                neck: neck,
-                originalNeckC0: neck.C0,
-            });
-        }
+                this.tracking.set(npcModel, {
+                    model: npcModel,
+                    head: npcModel.WaitForChild("Head") as BasePart,
+                    neck: neck,
+                    originalNeckC0: neck.C0,
+                });
+            },
+            (npcModel) => {
+                if (!npcModel.IsA("Model")) {
+                    return;
+                }
+                this.tracking.delete(npcModel);
+            },
+        );
     }
 
     /**
@@ -86,6 +89,10 @@ export default class EyeContactService implements OnInit, OnStart {
     getClosestTarget(model: Model) {
         let closest: Model | undefined;
         let closestDistance = 20;
+        const modelPrimaryPart = model.PrimaryPart;
+        if (modelPrimaryPart === undefined) {
+            return undefined;
+        }
         for (const character of Workspace.GetChildren()) {
             if (!character.IsA("Model") || !character.FindFirstChild("Humanoid")) {
                 continue; // Skip non-character models
@@ -95,7 +102,7 @@ export default class EyeContactService implements OnInit, OnStart {
             }
             const primaryPart = character.PrimaryPart;
             if (primaryPart === undefined) continue;
-            const distance = model.PrimaryPart!.Position.sub(primaryPart.Position).Magnitude;
+            const distance = modelPrimaryPart.Position.sub(primaryPart.Position).Magnitude;
             if (distance < closestDistance) {
                 closestDistance = distance;
                 closest = character;

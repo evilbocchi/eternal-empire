@@ -24,9 +24,6 @@ import { RunService, Workspace } from "@rbxts/services";
  */
 @Service()
 export default class DiagnosticService implements OnStart {
-    /** Whether the service is running in Roblox Studio. */
-    isStudio = RunService.IsStudio();
-
     /**
      * Initializes the DiagnosticService.
      * Currently unused but required by the OnStart interface.

@@ -21,13 +21,13 @@ import { Controller, OnInit, OnStart } from "@flamework/core";
 import { CollectionService, Debris, RunService, TweenService } from "@rbxts/services";
 import ItemFilter from "client/ItemFilter";
 import ItemSlot from "client/ItemSlot";
-import { PLAYER_GUI } from "client/constants";
-import { LOCAL_PLAYER } from "client/constants";
+import { LOCAL_PLAYER, PLAYER_GUI } from "client/constants";
 import AdaptiveTabController, {
     ADAPTIVE_TAB,
     ADAPTIVE_TAB_MAIN_WINDOW,
 } from "client/controllers/core/AdaptiveTabController";
 import HotkeysController from "client/controllers/core/HotkeysController";
+import { IS_STUDIO } from "shared/Context";
 import Packets from "shared/Packets";
 import { ASSETS, getSound, playSound } from "shared/asset/GameAssets";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
@@ -300,7 +300,7 @@ export default class ShopController implements OnInit, OnStart {
         }
         let price = item.getPrice((bought.get(item.id) ?? 0) + 1);
 
-        if (RunService.IsStudio() && price === undefined) {
+        if (IS_STUDIO && price === undefined) {
             price = item.getPrice(bought.get(item.id) ?? 0);
         }
 

@@ -14,7 +14,7 @@
 import ComputeNameColor from "@antivivi/rbxnamecolor";
 import { combineHumanReadable, convertToHHMMSS, getHumanoid, paintObjects } from "@antivivi/vrldk";
 import { Controller, OnInit } from "@flamework/core";
-import { Players, ReplicatedFirst, RunService, TweenService, Workspace } from "@rbxts/services";
+import { Players, ReplicatedFirst, TweenService, Workspace } from "@rbxts/services";
 import { LOCAL_PLAYER, PLAYER_GUI } from "client/constants";
 import AdaptiveTabController from "client/controllers/core/AdaptiveTabController";
 import HotkeysController from "client/controllers/core/HotkeysController";
@@ -23,6 +23,7 @@ import LoadingWindowController from "client/controllers/interface/LoadingWindowC
 import SoundController from "client/controllers/interface/SoundController";
 import { ASSETS, playSound } from "shared/asset/GameAssets";
 import { getNameFromUserId, getStartCamera, isStartScreenEnabled } from "shared/constants";
+import { IS_STUDIO } from "shared/Context";
 import Items from "shared/items/Items";
 import Packets from "shared/Packets";
 
@@ -195,7 +196,7 @@ export default class StartWindowController implements OnInit {
         const START_SCREEN_ENABLED = isStartScreenEnabled();
         if (START_SCREEN_ENABLED === undefined) return;
 
-        if (RunService.IsStudio() && START_SCREEN_ENABLED === false) {
+        if (IS_STUDIO && START_SCREEN_ENABLED === false) {
             return;
         }
         //this.balanceWindowController.hideBalanceWindow(); TODO

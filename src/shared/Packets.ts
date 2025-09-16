@@ -207,6 +207,7 @@ namespace Packets {
 
     // admin
     export const modifyGame = signal<(param: string) => void>();
+    export const requestReload = signal<() => void>();
 
     // marketplace
     export const marketplaceListings = property<Map<string, DataType.Packed<MarketplaceListing>>>(new Map());

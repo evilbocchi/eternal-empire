@@ -6,9 +6,8 @@
  */
 
 import Signal from "@antivivi/lemon-signal";
-import { ReplicatedStorage } from "@rbxts/services";
+import { AnalyticsService, Players, ReplicatedStorage } from "@rbxts/services";
 import NPC, { Dialogue } from "server/interactive/npc/NPC";
-import type QuestService from "server/services/data/QuestService";
 import { HotReloader, Reloadable } from "shared/HotReload";
 import { Server } from "shared/item/ItemUtils";
 import Packets from "shared/Packets";
@@ -27,7 +26,7 @@ export class Stage {
     /** The part players are guided to when focusing on this stage. */
     focus: BasePart | undefined;
 
-    /** The dialogue added when this stage is reached. This is handled by {@link QuestService}. */
+    /** The dialogue added when this stage is reached. */
     dialogue: Dialogue | undefined;
 
     /** The NPC model associated with this stage. */
@@ -189,7 +188,8 @@ export class Stage {
  * Provides methods for configuring quest properties, managing stages, and handling quest initialization.
  */
 export default class Quest extends Reloadable {
-    static readonly HOT_RELOADER = new HotReloader<Quest>(script.Parent!, new Set([script]));
+    private static readonly HOT_RELOADER = new HotReloader<Quest>(script.Parent!, new Set([script]));
+    private static readonly CLEANUP_PER_STAGE = new Map<Stage, () => void>();
 
     static colors = [
         Color3.fromRGB(253, 41, 67),
@@ -232,16 +232,17 @@ export default class Quest extends Reloadable {
      *
      * @returns A map of quest IDs to their quest info.
      */
-    static load() {
+    static reload() {
         const questPerId = this.HOT_RELOADER.reload();
         print(`Loaded ${questPerId.size()} quests`);
 
         const questInfos = new Map<string, QuestInfo>();
 
-        // Process all quests and create client info
-        questPerId.forEach((quest, questId) => {
+        for (const [questId, quest] of questPerId) {
+            // Fire initialization event
             quest.initialized.fire();
 
+            // Prepare quest info for clients
             const questInfo: QuestInfo = {
                 name: quest.name ?? questId,
                 colorR: quest.color.R,
@@ -265,7 +266,29 @@ export default class Quest extends Reloadable {
             });
 
             questInfos.set(questId, questInfo);
-        });
+
+            // Set up stage completion handling
+            quest.stages.forEach((stage, index) => {
+                stage.onComplete((stage) => {
+                    const newStage = quest.advance(index);
+                    if (newStage === undefined) {
+                        return;
+                    }
+                    this.CLEANUP_PER_STAGE.get(stage)?.();
+                    print(`Completed stage ${index} in ${quest.id}, now in stage ${newStage}`);
+
+                    // Log analytics for quest progression
+                    const player = Players.GetPlayers()[0];
+                    if (player !== undefined)
+                        AnalyticsService.LogOnboardingFunnelStepEvent(player, index + 1, "Quest " + quest.name);
+                    this.reachStages();
+                });
+            });
+        }
+
+        // Send quest info to clients
+        Packets.questInfo.set(questInfos);
+        this.reachStages();
 
         return questInfos;
     }
@@ -388,6 +411,40 @@ export default class Quest extends Reloadable {
     }
 
     /**
+     * Advances a quest to the next stage with validation.
+     * Ensures stages are completed in order and handles quest completion.
+     * Fires {@link complete} if the quest is finished.
+     * @param current The current stage number that should be completed.
+     * @param stagePerQuest The map of quest IDs to their current stage numbers.
+     * @returns The new stage number, or undefined if advancement failed.
+     *          Returns -1 if the quest is now completed.
+     */
+    advance(current: number, stagePerQuest = Server.empireData.quests) {
+        const currentStage = stagePerQuest.get(this.id);
+
+        // Skip if quest is already completed
+        if (currentStage === -1) {
+            return;
+        }
+
+        const stageSize = this.stages.size();
+        const newStage = (currentStage ?? 0) + 1;
+
+        // Validate stage progression order
+        if (newStage !== current + 1) {
+            return;
+        }
+
+        // Determine next stage or completion
+        const n = newStage > stageSize - 1 ? -1 : newStage;
+        stagePerQuest.set(this.id, n);
+        if (n === -1) {
+            this.complete();
+        }
+        return n;
+    }
+
+    /**
      * Completes the quest, triggering rewards and cleanup.
      */
     complete() {
@@ -411,6 +468,55 @@ export default class Quest extends Reloadable {
         if (reward.items !== undefined) {
             for (const [item, amount] of reward.items) {
                 Server.Item.setItemAmount(item, Server.Item.getItemAmount(item) + amount);
+            }
+        }
+    }
+
+    /**
+     * Checks and triggers the reachability of quest stages based on player level.
+     *
+     * @param level The player level to check quest reachability (defaults to current level).
+     */
+    static async reachStages(level?: number) {
+        if (level === undefined) {
+            level = Server.empireData.level;
+        }
+        const stagePerQuest = Server.empireData.quests;
+        if (stagePerQuest === undefined) {
+            return;
+        }
+
+        for (const [id, quest] of Quest.HOT_RELOADER.RELOADABLE_PER_ID) {
+            const current = stagePerQuest.get(id) ?? 0;
+
+            // Clean up all other stages
+            for (let i = 0; i < quest.stages.size(); i++) {
+                if (i !== current) this.CLEANUP_PER_STAGE.get(quest.stages[i])?.();
+            }
+
+            // Skip quests above player level
+            if (quest.level > level) {
+                continue;
+            }
+
+            // Handle already completed quests
+            if (current === -1) {
+                quest.completed = true;
+                const completionDialogue = quest.completionDialogue;
+                if (completionDialogue) {
+                    completionDialogue.add();
+                }
+            }
+
+            const stage = quest.stages[current];
+
+            // Reach the current stage, set up cleanup
+            if (stage !== undefined) {
+                const cleanup = stage.reach();
+                this.CLEANUP_PER_STAGE.set(stage, () => {
+                    cleanup();
+                    this.CLEANUP_PER_STAGE.delete(stage);
+                });
             }
         }
     }

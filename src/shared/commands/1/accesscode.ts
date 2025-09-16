@@ -1,5 +1,5 @@
-import { RunService } from "@rbxts/services";
 import Command, { CommandAPI } from "shared/commands/Command";
+import { IS_STUDIO } from "shared/Context";
 import Packets from "shared/Packets";
 
 export = new Command(script.Name)
@@ -8,7 +8,7 @@ export = new Command(script.Name)
         "View the access code for this empire. Anyone with the access code is able to join this empire. Only available for private empires.",
     )
     .setExecute((o) => {
-        if (RunService.IsStudio() || (game.PrivateServerOwnerId === 0 && game.PrivateServerId !== "")) {
+        if (IS_STUDIO || (game.PrivateServerOwnerId === 0 && game.PrivateServerId !== "")) {
             const code = CommandAPI.Permissions.getAccessCode();
             CommandAPI.ChatHook.sendPrivateMessage(o, "The server access code is: " + code);
             Packets.codeReceived.toClient(o, code);

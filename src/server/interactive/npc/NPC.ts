@@ -1,7 +1,15 @@
 import Signal from "@antivivi/lemon-signal";
 import { getRootPart, loadAnimation } from "@antivivi/vrldk";
-import { PathfindingService, Players, RunService, TweenService, Workspace } from "@rbxts/services";
-import { ASSETS, playSound } from "shared/asset/GameAssets";
+import {
+    CollectionService,
+    PathfindingService,
+    Players,
+    RunService,
+    ServerStorage,
+    TweenService,
+    Workspace,
+} from "@rbxts/services";
+import { playSound } from "shared/asset/GameAssets";
 import { getDisplayName } from "shared/constants";
 import { IS_CI } from "shared/Context";
 import { HotReloader, Reloadable } from "shared/HotReload";
@@ -51,6 +59,7 @@ export default class NPC extends Reloadable {
     rootPart?: BasePart;
     interact?: () => void;
     cleanup?: () => void;
+    loaded = false;
 
     constructor(public readonly id: string) {
         super();
@@ -58,29 +67,44 @@ export default class NPC extends Reloadable {
         this.animAssetIdPerType.set("Walk", 180426354);
         this.animAssetIdPerType.set("Jump", 125750702);
         if (id === "Empty") return; // Early return for empty NPC
+
+        this.loadModel();
     }
 
-    /** Loads the NPC model and initializes its properties. */
-    private loadModel(model = NPC_MODELS.FindFirstChild(this.id) as Model | undefined) {
-        this.model = model;
+    /**
+     * Loads the NPC model and its humanoid, setting up necessary properties.
+     * @param model The model to load. If undefined, it will be looked up by ID.
+     * @returns A tuple containing the model, humanoid, and root part if successful; otherwise, undefined values.
+     */
+    private loadModel(
+        model = NPC_MODELS.FindFirstChild(this.id) as Model | undefined,
+    ): LuaTuple<[Model?, Humanoid?, BasePart?]> {
         if (model === undefined) {
             warn(`NPC model not found for ID: ${this.id}`);
-        } else {
-            this.initialModelSnapshot = model.Clone();
-            this.startingCFrame = model.GetPivot();
-
-            this.humanoid = model.FindFirstChildOfClass("Humanoid") as Humanoid | undefined;
-            if (this.humanoid === undefined) {
-                warn(`Humanoid not found for NPC ID: ${this.id}`);
-            } else {
-                this.humanoid.DisplayName = this.defaultName;
-
-                this.rootPart = this.humanoid.RootPart as BasePart | undefined;
-                if (this.rootPart === undefined) {
-                    warn(`RootPart not found for NPC ID: ${this.id}`);
-                }
-            }
+            return $tuple();
         }
+
+        const humanoid = model.FindFirstChildOfClass("Humanoid") as Humanoid | undefined;
+        if (humanoid === undefined) {
+            warn(`Humanoid not found for NPC ID: ${this.id}`);
+            return $tuple();
+        }
+
+        const rootPart = humanoid.RootPart as BasePart | undefined;
+        if (rootPart === undefined) {
+            warn(`RootPart not found for NPC ID: ${this.id}`);
+            return $tuple();
+        }
+
+        this.initialModelSnapshot = model.Clone();
+        this.initialModelSnapshot.Parent = ServerStorage;
+        humanoid.DisplayName = this.defaultName;
+        this.startingCFrame = rootPart.CFrame;
+        this.model = model;
+        this.humanoid = humanoid;
+        this.rootPart = rootPart;
+        CollectionService.AddTag(model, "NPC");
+        return $tuple(model, humanoid, rootPart);
     }
 
     /**
@@ -89,12 +113,13 @@ export default class NPC extends Reloadable {
      * @returns The NPC instance for chaining.
      */
     load(): this {
-        if (IS_CI) return this;
-        this.loadModel();
+        if (IS_CI || this.loaded) return this;
+
         const model = this.model;
         const humanoid = this.humanoid;
         const rootPart = this.rootPart;
         if (model === undefined || humanoid === undefined || rootPart === undefined) return this;
+
         const parts = model.GetDescendants();
         for (const part of parts) {
             if (part.IsA("BasePart")) {
@@ -182,7 +207,9 @@ export default class NPC extends Reloadable {
             jumpingConnection.Disconnect();
             displayNameConnection.Disconnect();
             promptConnection.Disconnect();
+            prompt.Destroy();
         };
+        this.loaded = true;
         return this;
     }
 
@@ -414,11 +441,14 @@ export default class NPC extends Reloadable {
         agentParams = NPC.PATHFINDING_PARAMS,
     ) {
         const humanoid = this.humanoid;
+        const rootPart = this.rootPart;
+
         // Validate parameters
         if (humanoid === undefined) throw "npcHumanoid is undefined";
+        if (rootPart === undefined) throw "rootPart is undefined";
         if (source === undefined) throw "source is undefined";
         if (destination === undefined) throw "destination is undefined";
-        humanoid.RootPart!.Anchored = false;
+        rootPart.Anchored = false;
 
         // Cancel any ongoing pathfinding
         for (const connection of this.runningPathfinds) {
@@ -435,7 +465,7 @@ export default class NPC extends Reloadable {
             }
         });
 
-        const tween = TweenService.Create(humanoid.RootPart!, new TweenInfo(1), { CFrame: destination });
+        const tween = TweenService.Create(rootPart, new TweenInfo(1), { CFrame: destination });
         let toCall = false;
 
         /**
@@ -483,7 +513,7 @@ export default class NPC extends Reloadable {
                 while (!toCall) {
                     RunService.Heartbeat.Wait();
                 }
-                print("Reached point", humanoid.Parent?.Name, destination.Position);
+                print("Reached point", this.model?.Name, destination.Position);
                 for (const callback of callbacks) {
                     callback();
                 }
@@ -519,16 +549,16 @@ export const EMPTY_NPC = new NPC("Empty");
 /**
  * Represents a dialogue node for NPCs, supporting monologues, choices, and dialogue chaining.
  */
-export class Dialogue {
+export class Dialogue<T extends NPC = NPC> {
     static readonly finished = new Signal<(dialogue: Dialogue) => void>();
     static readonly proximityPrompts = new Set<ProximityPrompt>();
     static isInteractionEnabled = true;
 
-    npc: NPC;
+    npc: T;
     text: string;
-    choices = new Map<string, Dialogue>();
-    nextDialogue: Dialogue | undefined = undefined;
-    root: Dialogue;
+    choices = new Map<string, Dialogue<T>>();
+    nextDialogue: Dialogue<T> | undefined = undefined;
+    root: Dialogue<T>;
 
     /**
      * Constructs a new Dialogue instance.
@@ -536,7 +566,7 @@ export class Dialogue {
      * @param text The dialogue text.
      * @param root The root dialogue node (optional).
      */
-    constructor(npc: NPC, text: string, root?: Dialogue) {
+    constructor(npc: T, text: string, root?: Dialogue<T>) {
         this.npc = npc;
         this.text = text;
         this.root = root ?? this;
@@ -556,7 +586,7 @@ export class Dialogue {
      * @param dialogue The Dialogue to add.
      * @returns The added Dialogue instance.
      */
-    next(dialogue: Dialogue) {
+    next(dialogue: Dialogue<T>) {
         dialogue.root = this.root;
         this.nextDialogue = dialogue;
         return dialogue;
@@ -585,8 +615,8 @@ export class Dialogue {
      * @returns An array of dialogues in sequence.
      */
     private extractDialogue() {
-        let current = this as Dialogue;
-        const dialogues = [this] as Dialogue[];
+        let current = this as Dialogue<T>;
+        const dialogues = [this] as Dialogue<T>[];
         while (current !== undefined) {
             const nextDialogue = current.nextDialogue;
             if (nextDialogue === undefined) break;

@@ -12,10 +12,11 @@
 
 import { OnoeNum } from "@antivivi/serikanum";
 import { OnStart, Service } from "@flamework/core";
-import { DataStoreService, Players, RunService } from "@rbxts/services";
+import { DataStoreService, Players } from "@rbxts/services";
 import DataService from "server/services/data/DataService";
 import LeaderstatsService from "server/services/leaderboard/LeaderstatsService";
 import { LEADERBOARDS, getNameFromUserId } from "shared/constants";
+import { IS_STUDIO } from "shared/Context";
 import { CURRENCIES } from "shared/currency/CurrencyDetails";
 import Packets from "shared/Packets";
 import Sandbox from "shared/Sandbox";
@@ -98,7 +99,7 @@ export class LeaderboardService implements OnStart {
      * @returns The current page of sorted leaderboard data
      */
     private updateLeaderboardStore(store: OrderedDataStore, name?: string, amount?: number) {
-        if (name !== undefined && (!RunService.IsStudio() || this.debug === true)) {
+        if (name !== undefined && (!IS_STUDIO || this.debug === true)) {
             if (amount === undefined) store.RemoveAsync(name);
             else store.SetAsync(name, amount);
         }
