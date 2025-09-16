@@ -1,8 +1,8 @@
 import { ReplicatedStorage, RunService } from "@rbxts/services";
-import { Dialogue } from "server/NPC";
-import NameChanger from "server/npcs/Name Changer";
-import Tria from "server/npcs/Tria";
-import Quest, { Stage } from "server/Quest";
+import { Dialogue } from "server/npc/NPC";
+import NameChanger from "server/npc/Name Changer";
+import Tria from "server/npc/Tria";
+import Quest, { Stage } from "server/quests/Quest";
 import { WAYPOINTS } from "shared/constants";
 import { Server } from "shared/item/ItemUtils";
 import TheFirstDropper from "shared/items/negative/tfd/TheFirstDropper";

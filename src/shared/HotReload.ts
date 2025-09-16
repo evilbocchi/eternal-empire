@@ -18,7 +18,17 @@ export class HotReloader<T extends Reloadable> {
     readonly MODULES = new Map<string, ModuleScript>();
     readonly RELOADABLE_PER_ID = new Map<string, T>();
 
-    constructor(private root: Instance) {}
+    /**
+     * Set of instances to exclude from reloading.
+     */
+    private exclude = new Set<Instance>();
+
+    constructor(
+        private root: Instance,
+        exclude?: Set<Instance>,
+    ) {
+        if (exclude) this.exclude = exclude;
+    }
 
     /**
      * Reloads all ModuleScripts under the root instance and updates the MODULES map.
@@ -26,7 +36,7 @@ export class HotReloader<T extends Reloadable> {
     private reloadModules() {
         this.MODULES.clear();
         for (const moduleScript of this.root.GetDescendants()) {
-            if (moduleScript.IsA("ModuleScript") && moduleScript !== script) {
+            if (moduleScript.IsA("ModuleScript") && !this.exclude.has(moduleScript)) {
                 this.MODULES.set(moduleScript.Name, moduleScript.Clone());
             }
         }

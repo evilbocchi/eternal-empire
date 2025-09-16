@@ -1,7 +1,7 @@
-import { Dialogue } from "server/NPC";
-import Quest, { Stage } from "server/Quest";
-import Chuck from "server/npcs/Chuck";
-import Ricarg from "server/npcs/Ricarg";
+import { Dialogue } from "server/npc/NPC";
+import Quest, { Stage } from "server/quests/Quest";
+import Chuck from "server/npc/Chuck";
+import Ricarg from "server/npc/Ricarg";
 import EarningCapital from "server/quests/EarningCapital";
 import { WAYPOINTS } from "shared/constants";
 import { Server } from "shared/item/ItemUtils";

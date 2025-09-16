@@ -1,6 +1,6 @@
-import { Dialogue } from "server/NPC";
-import Ricarg from "server/npcs/Ricarg";
-import Quest, { Stage } from "server/Quest";
+import { Dialogue } from "server/npc/NPC";
+import Ricarg from "server/npc/Ricarg";
+import Quest, { Stage } from "server/quests/Quest";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import ItemCounter from "shared/item/ItemCounter";
 import { Server } from "shared/item/ItemUtils";

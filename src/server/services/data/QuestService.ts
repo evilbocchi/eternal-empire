@@ -22,7 +22,7 @@
 
 import { OnInit, OnStart, Service } from "@flamework/core";
 import { AnalyticsService, Players } from "@rbxts/services";
-import Quest, { Stage } from "server/Quest";
+import Quest, { Stage } from "server/quests/Quest";
 import DataService from "server/services/data/DataService";
 import LevelService from "server/services/data/LevelService";
 import ItemService from "server/services/item/ItemService";

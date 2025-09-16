@@ -1,6 +1,6 @@
-import { Dialogue } from "server/NPC";
-import Freddy from "server/npcs/Freddy";
-import Quest, { Stage } from "server/Quest";
+import { Dialogue } from "server/npc/NPC";
+import Freddy from "server/npc/Freddy";
+import Quest, { Stage } from "server/quests/Quest";
 import { emitEffect, getSound } from "shared/asset/GameAssets";
 import { WAYPOINTS } from "shared/constants";
 import { Server } from "shared/item/ItemUtils";

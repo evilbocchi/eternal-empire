@@ -1,9 +1,9 @@
-import { Dialogue } from "server/NPC";
-import CaptainBacon from "server/npcs/Captain Bacon";
-import OldNoob from "server/npcs/Old Noob";
-import Prest from "server/npcs/Prest";
-import Tria from "server/npcs/Tria";
-import Quest, { Stage } from "server/Quest";
+import { Dialogue } from "server/npc/NPC";
+import CaptainBacon from "server/npc/Captain Bacon";
+import OldNoob from "server/npc/Old Noob";
+import Prest from "server/npc/Prest";
+import Tria from "server/npc/Tria";
+import Quest, { Stage } from "server/quests/Quest";
 import { Server } from "shared/item/ItemUtils";
 
 export = new Quest(script.Name)
