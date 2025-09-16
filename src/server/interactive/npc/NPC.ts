@@ -58,17 +58,10 @@ export default class NPC extends Reloadable {
     humanoid?: Humanoid;
     rootPart?: BasePart;
     interact?: () => void;
-    cleanup?: () => void;
-    loaded = false;
 
     constructor(public readonly id: string) {
-        super();
+        super(id, NPC.HOT_RELOADER);
         this.defaultName = id;
-        this.animAssetIdPerType.set("Walk", 180426354);
-        this.animAssetIdPerType.set("Jump", 125750702);
-        if (id === "Empty") return; // Early return for empty NPC
-
-        this.loadModel();
     }
 
     /**
@@ -112,13 +105,15 @@ export default class NPC extends Reloadable {
      * This method should be called after the NPC instance is created.
      * @returns The NPC instance for chaining.
      */
-    load(): this {
-        if (IS_CI || this.loaded) return this;
+    load() {
+        if (IS_CI || this.id === "Empty") return;
 
-        const model = this.model;
-        const humanoid = this.humanoid;
-        const rootPart = this.rootPart;
-        if (model === undefined || humanoid === undefined || rootPart === undefined) return this;
+        this.animAssetIdPerType.set("Walk", 180426354);
+        this.animAssetIdPerType.set("Jump", 125750702);
+
+        const [model, humanoid, rootPart] = this.loadModel();
+
+        if (model === undefined || humanoid === undefined || rootPart === undefined) return;
 
         const parts = model.GetDescendants();
         for (const part of parts) {
@@ -201,16 +196,26 @@ export default class NPC extends Reloadable {
         });
         Dialogue.proximityPrompts.add(prompt);
 
-        this.cleanup = () => {
+        return () => {
             active = false;
             runningConnection.Disconnect();
             jumpingConnection.Disconnect();
             displayNameConnection.Disconnect();
             promptConnection.Disconnect();
             prompt.Destroy();
+
+            for (const [, animTrack] of this.animTrackPerType) {
+                animTrack.Stop();
+            }
+
+            // Restore the initial model if it was replaced or removed
+            if (this.model !== undefined && this.initialModelSnapshot !== undefined && !IS_CI) {
+                const recovered = this.initialModelSnapshot.Clone();
+                recovered.Parent = this.model.Parent;
+                this.model.Destroy();
+            }
+            table.clear(this);
         };
-        this.loaded = true;
-        return this;
     }
 
     /**
@@ -523,21 +528,6 @@ export default class NPC extends Reloadable {
             return body;
         };
         return start;
-    }
-
-    // Hot reload cleanup
-
-    unload(): void {
-        for (const [, animTrack] of this.animTrackPerType) {
-            animTrack.Stop();
-        }
-        if (this.model !== undefined && this.initialModelSnapshot !== undefined && !IS_CI) {
-            const recovered = this.initialModelSnapshot.Clone();
-            recovered.Parent = this.model.Parent;
-            this.model.Destroy();
-        }
-        this.cleanup?.();
-        table.clear(this);
     }
 }
 

@@ -223,8 +223,43 @@ export default class Quest extends Reloadable {
      * @param id The unique quest identifier.
      */
     constructor(public readonly id: string) {
-        super();
+        super(id, Quest.HOT_RELOADER);
         this.color = Quest.colors[string.byte(id)[0] % Quest.colors.size()];
+    }
+
+    load() {
+        this.initialized.fire();
+
+        // Set up stage completion handling
+        this.stages.forEach((stage, index) => {
+            const onPositionChanged = (position?: Vector3) => {
+                return ReplicatedStorage.SetAttribute(`${this.id}${index}`, position);
+            };
+            onPositionChanged(stage.position);
+            stage.onPositionChanged(onPositionChanged);
+
+            stage.onComplete((stage) => {
+                const newStage = this.advance(index);
+                if (newStage === undefined) {
+                    return;
+                }
+                Quest.CLEANUP_PER_STAGE.get(stage)?.();
+                print(`Completed stage ${index} in ${this.id}, now in stage ${newStage}`);
+
+                // Log analytics for quest progression
+                const player = Players.GetPlayers()[0];
+                if (player !== undefined)
+                    AnalyticsService.LogOnboardingFunnelStepEvent(player, index + 1, `Quest ${this.name}`);
+                Quest.reachStages();
+            });
+        });
+
+        return () => {
+            this.stages.forEach((stage) => {
+                stage.unload();
+            });
+            table.clear(this);
+        };
     }
 
     /**
@@ -239,9 +274,6 @@ export default class Quest extends Reloadable {
         const questInfos = new Map<string, QuestInfo>();
 
         for (const [questId, quest] of questPerId) {
-            // Fire initialization event
-            quest.initialized.fire();
-
             // Prepare quest info for clients
             const questInfo: QuestInfo = {
                 name: quest.name ?? questId,
@@ -254,36 +286,11 @@ export default class Quest extends Reloadable {
                 order: quest.order,
                 stages: [],
             };
-
-            // Set up stage position tracking
-            quest.stages.forEach((stage, index) => {
-                function onPositionChanged(position?: Vector3) {
-                    return ReplicatedStorage.SetAttribute(`${questId}${index}`, position);
-                }
-                onPositionChanged(stage.position);
-                stage.onPositionChanged(onPositionChanged);
+            for (const stage of quest.stages) {
                 questInfo.stages.push({ description: stage.description! });
-            });
+            }
 
             questInfos.set(questId, questInfo);
-
-            // Set up stage completion handling
-            quest.stages.forEach((stage, index) => {
-                stage.onComplete((stage) => {
-                    const newStage = quest.advance(index);
-                    if (newStage === undefined) {
-                        return;
-                    }
-                    this.CLEANUP_PER_STAGE.get(stage)?.();
-                    print(`Completed stage ${index} in ${quest.id}, now in stage ${newStage}`);
-
-                    // Log analytics for quest progression
-                    const player = Players.GetPlayers()[0];
-                    if (player !== undefined)
-                        AnalyticsService.LogOnboardingFunnelStepEvent(player, index + 1, "Quest " + quest.name);
-                    this.reachStages();
-                });
-            });
         }
 
         // Send quest info to clients
@@ -519,15 +526,5 @@ export default class Quest extends Reloadable {
                 });
             }
         }
-    }
-
-    /**
-     * Unloads the quest and its stages.
-     */
-    unload() {
-        this.stages.forEach((stage) => {
-            stage.unload();
-        });
-        table.clear(this);
     }
 }

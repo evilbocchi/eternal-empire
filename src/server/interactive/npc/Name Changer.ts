@@ -13,6 +13,6 @@ class NameChanger extends NPC {
     }
 }
 
-export = new NameChanger(script.Name)
-    .createDefaultMonologue("Changing your name? Easy peasy! Just hand me your life savings.")
-    .npc.load();
+export = new NameChanger(script.Name).createDefaultMonologue(
+    "Changing your name? Easy peasy! Just hand me your life savings.",
+).npc;

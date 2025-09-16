@@ -12,7 +12,7 @@ class InteractableObject extends Reloadable {
     dialogueInteractConnection?: Connection;
 
     constructor(readonly id: string) {
-        super();
+        super(id, InteractableObject.HOT_RELOADER);
     }
 
     dialogueUponInteract(dialogue: Dialogue) {
@@ -29,10 +29,12 @@ class InteractableObject extends Reloadable {
         return this;
     }
 
-    unload() {
-        this.dialogueInteractConnection?.disconnect();
-        InteractableObject.promptTriggeredConnection?.Disconnect();
-        table.clear(this);
+    load() {
+        return () => {
+            this.dialogueInteractConnection?.disconnect();
+            InteractableObject.promptTriggeredConnection?.Disconnect();
+            table.clear(this);
+        };
     }
 
     static {

@@ -3,11 +3,19 @@
  * Modules extending this class must implement an id and an unload method.
  */
 export abstract class Reloadable {
-    /** Unique identifier for this reloadable module. */
-    abstract id: string;
+    abstract load(): (() => void) | undefined;
 
-    /** Method to unload resources or perform cleanup. */
-    abstract unload(): void;
+    constructor(
+        readonly id: string,
+        protected readonly hotReloader: HotReloader<Reloadable>,
+    ) {
+        const existing = hotReloader.RELOADABLE_PER_ID.get(id);
+        if (existing !== undefined) {
+            return existing;
+        }
+
+        hotReloader.RELOADABLE_PER_ID.set(id, this);
+    }
 }
 
 /**
@@ -17,6 +25,7 @@ export abstract class Reloadable {
 export class HotReloader<T extends Reloadable> {
     readonly MODULES = new Map<string, ModuleScript>();
     readonly RELOADABLE_PER_ID = new Map<string, T>();
+    readonly CLEANUP_PER_RELOADABLE = new Map<T, () => void>();
 
     /**
      * Set of instances to exclude from reloading.
@@ -66,15 +75,20 @@ export class HotReloader<T extends Reloadable> {
             if (i !== undefined) {
                 const reloadable = i as T;
                 this.RELOADABLE_PER_ID.set(reloadable.id, reloadable);
+                const cleanup = reloadable.load();
+                if (cleanup !== undefined) {
+                    this.CLEANUP_PER_RELOADABLE.set(reloadable, cleanup);
+                }
             }
         }
         return this.RELOADABLE_PER_ID;
     }
 
     public unload() {
-        for (const [, reloadable] of this.RELOADABLE_PER_ID) {
-            reloadable.unload();
+        for (const [, cleanup] of this.CLEANUP_PER_RELOADABLE) {
+            cleanup();
         }
         this.RELOADABLE_PER_ID.clear();
+        this.CLEANUP_PER_RELOADABLE.clear();
     }
 }

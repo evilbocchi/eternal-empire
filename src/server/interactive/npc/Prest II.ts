@@ -2,5 +2,4 @@ import NPC from "server/interactive/npc/NPC";
 
 export = new NPC(script.Name)
     .createDefaultMonologue("Want a bed? Just go upstairs and sleep in it! It's free, you know!")
-    .monologue("...? Prest? Who's that? I don't know anyone by that name.")
-    .npc.load();
+    .monologue("...? Prest? Who's that? I don't know anyone by that name.").npc;
