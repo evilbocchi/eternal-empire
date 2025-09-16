@@ -151,12 +151,12 @@ export class Stage {
 
         this.reached = true;
         const dialogue = this.dialogue;
-        if (dialogue) Server.Dialogue.addDialogue(dialogue);
+        if (dialogue) dialogue.add();
 
         const cleanup = this.reachedCallback?.(this);
 
         return () => {
-            if (dialogue) Server.Dialogue.removeDialogue(dialogue);
+            if (dialogue) dialogue.remove();
             cleanup?.();
         };
     }
@@ -176,7 +176,7 @@ export class Stage {
      * Unloads the stage and its resources.
      */
     unload() {
-        if (this.dialogue) Server.Dialogue.removeDialogue(this.dialogue);
+        if (this.dialogue) this.dialogue.remove();
         this.completedCallback = undefined;
         this.reachedCallback = undefined;
         this.positionChangedCallback = undefined;

@@ -90,7 +90,7 @@ export = new Quest(script.Name)
             .onReached((stage) => {
                 SlamoRefugee.rootPart!.CFrame = SlamoRefugee.startingCFrame!;
 
-                const connection = Server.Dialogue.dialogueFinished.connect((dialogue) => {
+                const connection = Dialogue.finished.connect((dialogue) => {
                     if (dialogue === stage.dialogue) {
                         stage.complete();
                     }
@@ -113,9 +113,9 @@ export = new Quest(script.Name)
                     .monologue(
                         "To start, can you obtain 2 XL Wool? You can get it from that guy selling wool in the marketplace.",
                     ).root;
-                const connection = Server.Dialogue.dialogueFinished.connect((dialogue) => {
+                const connection = Dialogue.finished.connect((dialogue) => {
                     if (dialogue === stage.dialogue && Server.Item.getItemAmount(EmpoweredBrick.id) >= 1) {
-                        Server.Dialogue.talk(continuation);
+                        continuation.talk();
                     }
                     if (dialogue === continuation && Server.Quest.takeQuestItem(EmpoweredBrick.id, 1)) {
                         stage.complete();
@@ -138,9 +138,9 @@ export = new Quest(script.Name)
                     "I know Freddy has a cauldron that has a bunch of Instant Win energy, but he won't let me use it. I hope you can convince him to let us borrow it.",
                 ).root;
 
-                const connection = Server.Dialogue.dialogueFinished.connect((dialogue) => {
+                const connection = Dialogue.finished.connect((dialogue) => {
                     if (dialogue === stage.dialogue && Server.Item.getItemAmount("XLWool") >= 2) {
-                        Server.Dialogue.talk(continuation);
+                        continuation.talk();
                     }
                     if (dialogue === continuation && Server.Quest.takeQuestItem("XLWool", 2)) {
                         stage.complete();
@@ -172,9 +172,9 @@ export = new Quest(script.Name)
                     ).root;
 
                 refugeeToWaiting();
-                Server.Dialogue.addDialogue(continuation, 4);
+                continuation.add(4);
 
-                const connection = Server.Dialogue.dialogueFinished.connect((dialogue) => {
+                const connection = Dialogue.finished.connect((dialogue) => {
                     if (dialogue === continuation) {
                         stage.complete();
                     }
@@ -228,7 +228,7 @@ export = new Quest(script.Name)
                 Freddy.rootPart!.CFrame = WAYPOINTS.ToTheVillageFreddyWaiting.CFrame;
                 SlamoRefugee.model!.FindFirstChild("FishingRod")?.Destroy();
 
-                Server.Dialogue.talk(new Dialogue(SlamoRefugee, "Let me handle this."));
+                new Dialogue(SlamoRefugee, "Let me handle this.").talk();
                 const continuation = new Dialogue(
                     SlamoRefugee,
                     "Wow... it's raw Instant Win energy. It's so potent!",
@@ -267,10 +267,10 @@ export = new Quest(script.Name)
                 }
                 showInstantWinBlock();
                 task.wait(1);
-                Server.Dialogue.talk(continuation);
+                continuation.talk();
 
                 const empoweredBrick = EmpoweredBrick.MODEL!.Clone();
-                const connection = Server.Dialogue.dialogueFinished.connect((dialogue) => {
+                const connection = Dialogue.finished.connect((dialogue) => {
                     if (dialogue === continuation) {
                         empoweredBrick.PivotTo(WAYPOINTS.ToTheVillageEmpoweredBrick.CFrame);
                         empoweredBrick.Parent = Workspace;
@@ -300,7 +300,7 @@ export = new Quest(script.Name)
                         light.Parent = empoweredBrick.PrimaryPart;
 
                         task.wait(1);
-                        Server.Dialogue.talk(continuation2);
+                        continuation2.talk();
                     } else if (dialogue === continuation2) {
                         stage.complete();
                         Server.Quest.giveQuestItem(ChargedEmpoweredBrick.id, 1);
@@ -337,7 +337,7 @@ export = new Quest(script.Name)
                     "We're here. All you need to do is place the Charged Empowered Brick down. Once you do that, the linkway will be repaired and we can finally go home.",
                 );
                 refugeeToIntermittent().onComplete(() => {
-                    Server.Dialogue.talk(dialogue);
+                    dialogue.talk();
                 });
 
                 const connection = Server.Item.itemsPlaced.connect((_, placedItems) => {
@@ -389,26 +389,23 @@ export = new Quest(script.Name)
                     .monologue("And now that I'm back... It's time to take my revenge.").root;
 
                 refugeeToEnteringSlamoVillage().onComplete(() => {
-                    Server.Dialogue.talk(continuation);
+                    continuation.talk();
                 });
                 task.wait(1);
-                Server.Dialogue.talk(new Dialogue(SlamoRefugee, "Finally! The linkway is repaired!"), false);
+                new Dialogue(SlamoRefugee, "Finally! The linkway is repaired!").talk(false);
                 task.wait(7);
-                Server.Dialogue.talk(
-                    new Dialogue(SlamoRefugee, "After all these years, I can finally see home again."),
+                new Dialogue(SlamoRefugee, "After all these years, I can finally see home again.").talk(false);
+                task.wait(6);
+                new Dialogue(SlamoRefugee, "The village is right up ahead!").talk(false);
+                task.wait(6);
+                new Dialogue(SlamoRefugee, "It's just as I remembered it... Small, cozy, and full of life.").talk(
                     false,
                 );
-                task.wait(6);
-                Server.Dialogue.talk(new Dialogue(SlamoRefugee, "The village is right up ahead!"), false);
-                task.wait(6);
-                Server.Dialogue.talk(
-                    new Dialogue(SlamoRefugee, "It's just as I remembered it... Small, cozy, and full of life."),
-                    false,
-                );
-                task.wait(10);
-                Server.Dialogue.talk(new Dialogue(SlamoRefugee, "..."), false);
 
-                const connection = Server.Dialogue.dialogueFinished.connect((dialogue) => {
+                task.wait(10);
+                new Dialogue(SlamoRefugee, "...").talk(false);
+
+                const connection = Dialogue.finished.connect((dialogue) => {
                     if (dialogue !== continuation) {
                         return;
                     }
@@ -441,7 +438,7 @@ export = new Quest(script.Name)
             .onReached((stage) => {
                 Server.Event.setEventCompleted("ImprisonedSlamoRefugee", true);
 
-                const connection = Server.Dialogue.dialogueFinished.connect((dialogue) => {
+                const connection = Dialogue.finished.connect((dialogue) => {
                     if (dialogue === stage.dialogue) {
                         stage.complete();
                     }
@@ -464,7 +461,7 @@ export = new Quest(script.Name)
                     .monologue("But for now, I will wait here. I have nothing left to lose.").root,
             )
             .onReached((stage) => {
-                const connection = Server.Dialogue.dialogueFinished.connect((dialogue) => {
+                const connection = Dialogue.finished.connect((dialogue) => {
                     if (dialogue === stage.dialogue) {
                         stage.complete();
                     }

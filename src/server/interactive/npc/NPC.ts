@@ -1,8 +1,11 @@
+import Signal from "@antivivi/lemon-signal";
 import { getRootPart, loadAnimation } from "@antivivi/vrldk";
 import { PathfindingService, Players, RunService, TweenService, Workspace } from "@rbxts/services";
-import { playSound } from "shared/asset/GameAssets";
+import { ASSETS, playSound } from "shared/asset/GameAssets";
+import { getDisplayName } from "shared/constants";
 import { IS_CI } from "shared/Context";
 import { HotReloader, Reloadable } from "shared/HotReload";
+import Packets from "shared/Packets";
 
 /**
  * Represents the animation types available for NPCs.
@@ -34,6 +37,7 @@ export default class NPC extends Reloadable {
 
     readonly animAssetIdPerType = new Map<NPCAnimationType, number>();
     readonly defaultDialogues = new Array<Dialogue>();
+    readonly priorityPerDialogue = new Map<Dialogue, number>();
     readonly animTrackPerType = new Map<NPCAnimationType, AnimationTrack>();
     readonly runningAnimTrackPerType = new Map<NPCAnimationType, AnimationTrack>();
     readonly runningPathfinds = new Set<RBXScriptConnection>();
@@ -54,8 +58,6 @@ export default class NPC extends Reloadable {
         this.animAssetIdPerType.set("Walk", 180426354);
         this.animAssetIdPerType.set("Jump", 125750702);
         if (id === "Empty") return; // Early return for empty NPC
-
-        this.cleanup = this.load();
     }
 
     /** Loads the NPC model and initializes its properties. */
@@ -81,14 +83,18 @@ export default class NPC extends Reloadable {
         }
     }
 
-    private load() {
-        if (IS_CI) return;
+    /**
+     * Loads the NPC model, sets up its properties, and initializes animations and event listeners.
+     * This method should be called after the NPC instance is created.
+     * @returns The NPC instance for chaining.
+     */
+    load(): this {
+        if (IS_CI) return this;
         this.loadModel();
         const model = this.model;
         const humanoid = this.humanoid;
         const rootPart = this.rootPart;
-        if (model === undefined || humanoid === undefined || rootPart === undefined) return;
-
+        if (model === undefined || humanoid === undefined || rootPart === undefined) return this;
         const parts = model.GetDescendants();
         for (const part of parts) {
             if (part.IsA("BasePart")) {
@@ -129,11 +135,65 @@ export default class NPC extends Reloadable {
             else this.stopAnimation("Jump");
         });
 
-        return () => {
+        // Set up NPC name indicator
+        const indicator = ASSETS.NPCNotification.Clone();
+        indicator.Enabled = true;
+        indicator.Parent = model.WaitForChild("Head");
+        const showIndicator = TweenService.Create(indicator.ImageLabel, new TweenInfo(0.3), { ImageTransparency: 0 });
+        const hideIndicator = TweenService.Create(indicator.ImageLabel, new TweenInfo(0.15), { ImageTransparency: 1 });
+
+        // Set up proximity prompt for NPC interaction
+        const prompt = new Instance("ProximityPrompt");
+        prompt.GetPropertyChangedSignal("Enabled").Connect(() => {
+            if (prompt.Enabled) showIndicator.Play();
+            else hideIndicator.Play();
+        });
+        prompt.ActionText = "Interact";
+        prompt.Enabled = true;
+        prompt.MaxActivationDistance = 6.5;
+        prompt.RequiresLineOfSight = false;
+
+        const updateDisplayName = () => {
+            prompt.ObjectText = getDisplayName(humanoid);
+        };
+        const displayNameConnection = humanoid.GetPropertyChangedSignal("DisplayName").Connect(updateDisplayName);
+        updateDisplayName();
+        const defaultDialogues = this.defaultDialogues;
+        let defaultDialogueIndex = 0;
+        const defaultDialoguesCount = defaultDialogues.size();
+
+        const promptConnection = prompt.Triggered.Connect((player) => {
+            print(`${player.Name} interacted`);
+            if (this.interact !== undefined) {
+                this.interact();
+                return;
+            }
+            let highestPriority: number | undefined, highestDialogue: Dialogue | undefined;
+            for (const [dialogue, priority] of this.priorityPerDialogue) {
+                if (highestPriority === undefined || priority > highestPriority) {
+                    highestDialogue = dialogue;
+                    highestPriority = priority;
+                }
+            }
+            if (highestDialogue !== undefined) {
+                highestDialogue.talk();
+            } else {
+                if (defaultDialogueIndex >= defaultDialoguesCount) defaultDialogueIndex = defaultDialogueIndex - 1;
+                defaultDialogues[defaultDialogueIndex].talk();
+                defaultDialogueIndex++;
+            }
+        });
+        Dialogue.proximityPrompts.add(prompt);
+        prompt.Parent = model;
+
+        this.cleanup = () => {
             active = false;
             runningConnection.Disconnect();
             jumpingConnection.Disconnect();
+            displayNameConnection.Disconnect();
+            promptConnection.Disconnect();
         };
+        return this;
     }
 
     /**
@@ -194,6 +254,29 @@ export default class NPC extends Reloadable {
         return this;
     }
 
+    // Dialogue methods
+
+    /**
+     * Adds a dialogue with a specified priority for the NPC.
+     * @param dialogue The Dialogue instance to add.
+     * @param priority The priority of the dialogue (higher = more important).
+     * @returns This NPC instance.
+     */
+    addDialogue(dialogue: Dialogue, priority = 1) {
+        this.priorityPerDialogue.set(dialogue, priority);
+        return this;
+    }
+
+    /**
+     * Removes a dialogue from the NPC.
+     * @param dialogue The Dialogue instance to remove.
+     * @returns This NPC instance.
+     */
+    removeDialogue(dialogue: Dialogue) {
+        this.priorityPerDialogue.delete(dialogue);
+        return this;
+    }
+
     /**
      * Add dialogue that the NPC uses when no other dialogue is available.
      * All default dialogues are sequentially exhausted, and only the last one will be repeated.
@@ -225,6 +308,8 @@ export default class NPC extends Reloadable {
     onInteract(callback?: () => void) {
         this.interact = callback;
     }
+
+    // Pathfinding methods
 
     /**
      * Calculate waypoints for NPC navigation.
@@ -420,6 +505,8 @@ export default class NPC extends Reloadable {
         return start;
     }
 
+    // Hot reload cleanup
+
     unload(): void {
         for (const [, animTrack] of this.animTrackPerType) {
             animTrack.Stop();
@@ -443,6 +530,10 @@ export const EMPTY_NPC = new NPC("Empty");
  * Represents a dialogue node for NPCs, supporting monologues, choices, and dialogue chaining.
  */
 export class Dialogue {
+    static readonly finished = new Signal<(dialogue: Dialogue) => void>();
+    static readonly proximityPrompts = new Set<ProximityPrompt>();
+    static isInteractionEnabled = true;
+
     npc: NPC;
     text: string;
     choices = new Map<string, Dialogue>();
@@ -479,6 +570,108 @@ export class Dialogue {
         dialogue.root = this.root;
         this.nextDialogue = dialogue;
         return dialogue;
+    }
+
+    /**
+     * Convenience method for adding a dialogue to its associated NPC with a specified priority.
+     * @param dialogue The Dialogue instance to add.
+     * @param priority The priority of the dialogue (higher = more important).
+     */
+    add(priority = 1) {
+        this.npc.addDialogue(this, priority);
+    }
+
+    /**
+     * Convenience method for removing a dialogue from its associated NPC.
+     * @param dialogue The Dialogue instance to remove.
+     */
+    remove() {
+        this.npc.removeDialogue(this);
+    }
+
+    /**
+     * Extracts a sequence of dialogues starting from the given dialogue.
+     * @param dialogue The starting dialogue.
+     * @returns An array of dialogues in sequence.
+     */
+    private extractDialogue() {
+        let current = this as Dialogue;
+        const dialogues = [this] as Dialogue[];
+        while (current !== undefined) {
+            const nextDialogue = current.nextDialogue;
+            if (nextDialogue === undefined) break;
+            dialogues.push(nextDialogue);
+            current = nextDialogue;
+        }
+        return dialogues;
+    }
+
+    /**
+     * Begins a dialogue sequence, handling progression and player prompts.
+     *
+     * @param dialogue The starting dialogue.
+     * @param requireInteraction If true, requires proximity for prompt.
+     */
+    talk(requireInteraction?: boolean) {
+        const dialogues = this.extractDialogue();
+        const size = dialogues.size();
+        let i = 0;
+        const nextDialogue = () => {
+            const current = dialogues[i];
+            const currentIndex = ++i;
+            if (currentIndex > size) {
+                Dialogue.finished.fire(this);
+                Dialogue.enableInteraction();
+                return true;
+            }
+            const talkingModel = current.npc.model;
+            Dialogue.disableInteraction();
+            if (talkingModel === undefined) {
+                Packets.npcMessage.toAllClients(current.text, currentIndex, size, true, Workspace);
+            } else {
+                let playersPrompted = 0;
+                const players = Players.GetPlayers();
+                const talkingPart = talkingModel.FindFirstChildOfClass("Humanoid")?.RootPart;
+                for (const player of players) {
+                    const rootPart = player.Character?.FindFirstChildOfClass("Humanoid")?.RootPart;
+                    const isPrompt =
+                        talkingPart !== undefined &&
+                        requireInteraction !== false &&
+                        rootPart !== undefined &&
+                        rootPart.Position.sub(talkingPart.Position).Magnitude < 60;
+                    if (isPrompt === true) {
+                        ++playersPrompted;
+                    }
+                    Packets.npcMessage.toClient(player, current.text, currentIndex, size, isPrompt, talkingModel);
+                }
+                task.delay(current.text.size() / 11 + 1, () => {
+                    if (i === currentIndex) nextDialogue();
+                });
+            }
+            return false;
+        };
+        Packets.nextDialogue.fromClient(() => nextDialogue());
+        nextDialogue();
+    }
+
+    /**
+     * Enables all proximity prompts and allows player interaction.
+     */
+    static enableInteraction() {
+        for (const proximityPrompt of this.proximityPrompts) {
+            proximityPrompt.Enabled = true;
+        }
+        this.isInteractionEnabled = true;
+    }
+
+    /**
+     * Disables all proximity prompts and blocks player interaction.
+     */
+    static disableInteraction() {
+        for (const proximityPrompt of this.proximityPrompts) {
+            proximityPrompt.Enabled = false;
+        }
+        this.isInteractionEnabled = false;
     }
 }
 

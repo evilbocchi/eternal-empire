@@ -1,5 +1,7 @@
 import NPC from "server/interactive/npc/NPC";
 
-export = new NPC(script.Name).createDefaultMonologue(
-    "My life is hard. I have no home, no food, and no friends. But I still try to stay positive.",
-).npc;
+export = new NPC(script.Name)
+    .createDefaultMonologue(
+        "My life is hard. I have no home, no food, and no friends. But I still try to stay positive.",
+    )
+    .npc.load();

@@ -22,6 +22,7 @@
 
 import { OnInit, OnStart, Service } from "@flamework/core";
 import { AnalyticsService, Players } from "@rbxts/services";
+import { Dialogue } from "server/interactive/npc/NPC";
 import Quest, { Stage } from "server/quests/Quest";
 import DataService from "server/services/data/DataService";
 import LevelService from "server/services/data/LevelService";
@@ -118,7 +119,7 @@ export default class QuestService implements OnInit, OnStart {
                 quest.completed = true;
                 const completionDialogue = quest.completionDialogue;
                 if (completionDialogue) {
-                    this.dialogueService.addDialogue(completionDialogue);
+                    completionDialogue.add();
                 }
             }
 

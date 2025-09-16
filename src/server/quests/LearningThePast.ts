@@ -102,7 +102,7 @@ export = new Quest(script.Name)
                 OldNoob.playAnimation("Default");
                 Pasal.playAnimation("Default");
 
-                const connection = Server.Dialogue.dialogueFinished.connect((dialogue) => {
+                const connection = Dialogue.finished.connect((dialogue) => {
                     if (dialogue === stage.dialogue) {
                         stage.complete();
                     }
@@ -120,7 +120,7 @@ export = new Quest(script.Name)
                 OldNoob.playAnimation("Default");
                 Pasal.playAnimation("Default");
 
-                const connection = Server.Dialogue.dialogueFinished.connect((dialogue) => {
+                const connection = Dialogue.finished.connect((dialogue) => {
                     if (dialogue === OldBooks1.dialogue) {
                         stage.complete();
                     }
@@ -194,20 +194,20 @@ export = new Quest(script.Name)
                 ).root;
 
             for (const dialogue of dialogues) {
-                Server.Dialogue.addDialogue(dialogue);
+                dialogue.add();
             }
-            Server.Dialogue.addDialogue(librarianDialogue);
-            Server.Dialogue.addDialogue(pasalDialogue);
-            const connection = Server.Dialogue.dialogueFinished.connect((dialogue) => {
+            librarianDialogue.add();
+            pasalDialogue.add();
+            const connection = Dialogue.finished.connect((dialogue) => {
                 if (dialogue === librarianDialogue) {
                     Server.Quest.takeQuestItem(IrregularlyShapedKey.id, 1);
                     Server.Quest.giveQuestItem(IrregularlyShapedKey.id, 1);
-                    Server.Dialogue.removeDialogue(librarianDialogue);
+                    librarianDialogue.remove();
                 } else if (
                     dialogue === pasalDialogue &&
                     Server.Quest.takeQuestItem(IrregularlyShapedKey.id, 1) === true
                 ) {
-                    Server.Dialogue.talk(continuation);
+                    continuation.talk();
                 } else if (dialogue === continuation) {
                     stage.complete();
                     Server.Event.setEventCompleted("PasalReveal", true);
@@ -217,7 +217,7 @@ export = new Quest(script.Name)
             return () => {
                 connection.disconnect();
                 for (const dialogue of dialogues) {
-                    Server.Dialogue.removeDialogue(dialogue);
+                    dialogue.remove();
                 }
             };
         }),
@@ -243,7 +243,7 @@ export = new Quest(script.Name)
                 OldNoob.playAnimation("Default");
                 Pasal.playAnimation("Default");
 
-                const connection = Server.Dialogue.dialogueFinished.connect((dialogue) => {
+                const connection = Dialogue.finished.connect((dialogue) => {
                     if (dialogue === stage.dialogue) {
                         stage.complete();
                     }
@@ -290,10 +290,10 @@ export = new Quest(script.Name)
                     OldNoob,
                     "Yup, sure do. Alright, let's get going. I won't waste either of our time.",
                 );
-                const connection = Server.Dialogue.dialogueFinished.connect((dialogue) => {
+                const connection = Dialogue.finished.connect((dialogue) => {
                     if (dialogue === stage.dialogue && Server.Quest.takeQuestItem(ExcavationStone.id, 20) === true) {
                         stage.complete();
-                        Server.Dialogue.talk(continuation);
+                        continuation.talk();
                     }
                 });
                 return () => connection.disconnect();
@@ -332,22 +332,22 @@ export = new Quest(script.Name)
 
                 task.wait(1);
                 oldNoobToApproachingPasal().onComplete(() => {
-                    Server.Dialogue.talk(intro);
+                    intro.talk();
                 });
 
                 const oldNoobAwaiting = new Dialogue(OldNoob, "Just stick that key in and see what happens.");
                 const pasalAwaiting = new Dialogue(Pasal, "Come on, let's see something happen!");
 
-                const connection1 = Server.Dialogue.dialogueFinished.connect((dialogue) => {
+                const connection1 = Dialogue.finished.connect((dialogue) => {
                     if (dialogue === intro) {
                         Pasal.stopAnimation("Default");
                         task.wait(0.5);
                         pasalToApproachingWall().onComplete(() => {});
                         oldNoobToApproachingWall().onComplete(() => {
-                            Server.Dialogue.talk(teaching);
+                            teaching.talk();
                             Server.Event.setEventCompleted("IrregularlyShapedKeyUsable", true);
-                            Server.Dialogue.addDialogue(oldNoobAwaiting);
-                            Server.Dialogue.addDialogue(pasalAwaiting);
+                            oldNoobAwaiting.add();
+                            pasalAwaiting.add();
                         });
                     }
                 });
@@ -357,8 +357,8 @@ export = new Quest(script.Name)
                     }
                 });
                 return () => {
-                    Server.Dialogue.removeDialogue(oldNoobAwaiting);
-                    Server.Dialogue.removeDialogue(pasalAwaiting);
+                    oldNoobAwaiting.remove();
+                    pasalAwaiting.remove();
                     connection1.disconnect();
                     connection2.disconnect();
                 };
@@ -381,7 +381,7 @@ export = new Quest(script.Name)
                 .next(new Dialogue(OldNoob, "This place has some pretty neat tricks, as you can see."))
                 .monologue("Let's get in before anyone else notices.")
                 .next(new Dialogue(Pasal, "I must be tripping... I don't know what I'm seeing...")).root;
-            Server.Dialogue.talk(intro);
+            intro.talk();
 
             const continuation = new Dialogue(OldNoob, "Well? Surprised?")
                 .next(new Dialogue(Pasal, "This was beneath us the whole time? How did no one find this?"))
@@ -430,7 +430,7 @@ export = new Quest(script.Name)
                     "There, you can hopefully get better items, which can help you progress faster than you ever would here.",
                 )
                 .monologue("I wish you the best of luck. See you again.").root;
-            const connection = Server.Dialogue.dialogueFinished.connect((dialogue) => {
+            const connection = Dialogue.finished.connect((dialogue) => {
                 if (dialogue === intro) {
                     Pasal.humanoid!.MoveToFinished.Once(() => {
                         Pasal.rootPart!.CFrame = WAYPOINTS.LearningThePastEnterCave.CFrame;
@@ -441,9 +441,9 @@ export = new Quest(script.Name)
                         OldNoob.rootPart!.CFrame = WAYPOINTS.LearningThePastEnterCave.CFrame;
                         task.wait(0.5);
                         oldNoobToEnteredCave().onComplete(() => {
-                            Server.Dialogue.talk(continuation, false);
+                            continuation.talk(false);
                             oldNoobToViewingLight().onComplete(() => {
-                                Server.Dialogue.talk(ending);
+                                ending.talk();
                             });
                             pasalToViewingLight();
                         });
@@ -454,10 +454,8 @@ export = new Quest(script.Name)
                     oldNoobToEnterCave().onComplete(() => {
                         OldNoob.rootPart!.CFrame = OldNoob.startingCFrame;
                     });
-                    Server.Dialogue.addDialogue(new Dialogue(Pasal, "What am I witnessing..."), 69);
-                    task.delay(1, () =>
-                        Server.Dialogue.talk(new Dialogue(Pasal, "I'll stay back for a bit. I'm just... shocked...")),
-                    );
+                    new Dialogue(Pasal, "What am I witnessing...").add(69);
+                    task.delay(1, () => new Dialogue(Pasal, "I'll stay back for a bit. I'm just... shocked...").talk());
                     stage.complete();
                 }
             });
@@ -480,7 +478,7 @@ export = new Quest(script.Name)
             SuspiciousWall.dialogueUponInteract(keyUsed);
         });
         Server.Event.setEventCompleted("SuspiciousWallOpened", false);
-        Server.Dialogue.dialogueFinished.connect((dialogue) => {
+        Dialogue.finished.connect((dialogue) => {
             if (dialogue === keyUsed) {
                 unlockWall();
             }

@@ -87,7 +87,7 @@ export = new Quest(script.Name)
             )
             .onReached((stage) => {
                 Simpul.rootPart!.Position = stage.position!;
-                const connection = Server.Dialogue.dialogueFinished.connect((dialogue) => {
+                const connection = Dialogue.finished.connect((dialogue) => {
                     if (dialogue === stage.dialogue) {
                         Server.Event.setEventCompleted("SimpulReveal", true);
                         stage.complete();
@@ -126,12 +126,12 @@ export = new Quest(script.Name)
                             "Anyways, just give it up. Our security is pretty high here, so we'll catch you if you do anything suspicious.",
                         ).root,
                 ];
-                for (const dialogue of dialogues) Server.Dialogue.addDialogue(dialogue);
-                const connection = Server.Dialogue.dialogueFinished.connect((dialogue) => {
+                for (const dialogue of dialogues) dialogue.add();
+                const connection = Dialogue.finished.connect((dialogue) => {
                     if (dialogue === SlamoBook.dialogue) stage.complete();
                 });
                 return () => {
-                    for (const dialogue of dialogues) Server.Dialogue.removeDialogue(dialogue);
+                    for (const dialogue of dialogues) dialogue.remove();
                     connection.disconnect();
                 };
             }),
@@ -152,12 +152,12 @@ export = new Quest(script.Name)
                     "You thought these puny bars could stop me? Yeah, right. See you never!",
                 );
 
-                const connection = Server.Dialogue.dialogueFinished.connect((dialogue) => {
+                const connection = Dialogue.finished.connect((dialogue) => {
                     if (dialogue === stage.dialogue) {
                         Server.Event.setEventCompleted("FlimsyBarsDestroyed", true);
                         task.delay(1, () => {
                             simpulToOut().onComplete(() => {
-                                Server.Dialogue.talk(continuation);
+                                continuation.talk();
                             });
                         });
                     } else if (dialogue === continuation) {
@@ -228,38 +228,38 @@ export = new Quest(script.Name)
                 );
                 if (ItemService.getItemAmount(SlamoStatue.id) > 0) {
                     if (ItemService.getItemAmount(WinsomeBucket.id) > 0) {
-                        Server.Dialogue.talk(ending);
+                        ending.talk();
                     } else {
-                        Server.Dialogue.addDialogue(checking2);
+                        checking2.add();
                     }
                 } else {
-                    Server.Dialogue.addDialogue(start);
+                    start.add();
                 }
-                const connection = Server.Dialogue.dialogueFinished.connect((dialogue) => {
+                const connection = Dialogue.finished.connect((dialogue) => {
                     if (dialogue === start) {
-                        Server.Dialogue.removeDialogue(start);
-                        Server.Dialogue.addDialogue(checking);
+                        start.remove();
+                        checking.add();
                     } else if (
                         dialogue === checking &&
                         ItemService.getItemAmount(Wood.id) >= 5 &&
                         ItemService.getItemAmount(Stone.id) >= 3
                     ) {
-                        Server.Dialogue.talk(getStatue);
+                        getStatue.talk();
                     } else if (dialogue === getStatue) {
                         Server.Quest.takeQuestItem(Wood.id, 5);
                         Server.Quest.takeQuestItem(Stone.id, 3);
                         Server.Quest.giveQuestItem(SlamoStatue.id, 1);
-                        Server.Dialogue.removeDialogue(checking);
-                        Server.Dialogue.addDialogue(checking2);
+                        checking.remove();
+                        checking2.add();
                     } else if (dialogue === checking2 && ItemService.getItemAmount("WinsomeSpeck") >= 10) {
-                        Server.Dialogue.talk(fetchBucket);
-                        Server.Dialogue.removeDialogue(checking2);
-                        Server.Dialogue.addDialogue(checking3);
+                        fetchBucket.talk();
+                        checking2.remove();
+                        checking3.add();
                     } else if (dialogue === fetchBucket) {
                         Server.Quest.giveQuestItem(SkillPod.id, 1);
                     } else if (dialogue === checking3 && ItemService.getItemAmount(WinsomeBucket.id) >= 1) {
-                        Server.Dialogue.removeDialogue(checking3);
-                        Server.Dialogue.talk(ending);
+                        checking3.remove();
+                        ending.talk();
                     } else if (dialogue === ending) {
                         stage.complete();
                     }
@@ -280,19 +280,17 @@ export = new Quest(script.Name)
                     "Come on, get in front of me and place the statue down where Simpul can easily spot it.",
                 );
                 slamoReceptionistToHiding().onComplete(() => {
-                    Server.Dialogue.talk(
-                        new Dialogue(
-                            SlamoReceptionist,
-                            "Alright. I'll stay here and hide to make sure nothing happens. You go in front and place the statue down.",
-                        ),
-                    );
+                    new Dialogue(
+                        SlamoReceptionist,
+                        "Alright. I'll stay here and hide to make sure nothing happens. You go in front and place the statue down.",
+                    ).talk(false);
                 });
 
                 let statue: Model | undefined;
 
-                Server.Dialogue.addDialogue(hint);
+                hint.add();
                 const poured = new Dialogue(EMPTY_NPC, "You pour the bucket on Simpul.");
-                Simpul.onInteract(() => Server.Dialogue.talk(poured));
+                Simpul.onInteract(() => poured.talk());
                 const simpulSad = new Dialogue(Simpul, "This can't be... No... NOO!!!");
                 let initiated = false;
                 const update = (placementId: string) => {
@@ -308,16 +306,12 @@ export = new Quest(script.Name)
                         CFrame: statueCFrame.add(statueCFrame.LookVector.mul(12)).mul(CFrame.Angles(0, math.pi, 0)),
                     }).Play();
                     task.delay(1.5, () =>
-                        Server.Dialogue.talk(
-                            new Dialogue(Simpul, "Oh my god... You're the perfect Slamo! Come with me, please."),
+                        new Dialogue(Simpul, "Oh my god... You're the perfect Slamo! Come with me, please.").talk(
                             false,
                         ),
                     );
                     task.delay(5, () =>
-                        Server.Dialogue.talk(
-                            new Dialogue(SlamoReceptionist, "Alright, pour the bucket on him!"),
-                            false,
-                        ),
+                        new Dialogue(SlamoReceptionist, "Alright, pour the bucket on him!").talk(false),
                     );
                 };
                 const placedItems = Server.empireData.items.worldPlaced;
@@ -334,7 +328,7 @@ export = new Quest(script.Name)
                             break;
                         }
                 });
-                const connection2 = Server.Dialogue.dialogueFinished.connect((dialogue) => {
+                const connection2 = Dialogue.finished.connect((dialogue) => {
                     if (dialogue === poured) {
                         const model = WinsomeBucket.MODEL?.Clone();
                         if (model === undefined) return;
@@ -358,7 +352,7 @@ export = new Quest(script.Name)
                             trap.FindFirstChildOfClass("Decal")!.Transparency = 0;
                             decal.Texture = sadDecal;
                         });
-                        task.delay(2.5, () => Server.Dialogue.talk(simpulSad));
+                        task.delay(2.5, () => simpulSad.talk());
                         model.Parent = Workspace;
                     } else if (dialogue === simpulSad) {
                         const part = new Instance("Part");
@@ -389,9 +383,9 @@ export = new Quest(script.Name)
             .setDescription(`Serve justice to Simpul.`)
             .setNPC(Simpul)
             .onReached((stage) => {
-                Server.Dialogue.talk(finishing);
+                finishing.talk();
 
-                const connection = Server.Dialogue.dialogueFinished.connect((dialogue) => {
+                const connection = Dialogue.finished.connect((dialogue) => {
                     if (dialogue === finishing) {
                         SlamoReceptionist.createPathfindingOperation(
                             SlamoReceptionist.rootPart!.CFrame,
@@ -433,59 +427,52 @@ export = new Quest(script.Name)
         );
         const done = new Dialogue(Andy, "Wow! Those are some really cool looking apples. Don't mind if I do.");
 
-        Server.Dialogue.dialogueFinished.connect((dialogue) => {
+        Dialogue.finished.connect((dialogue) => {
             if (dialogue === Andy.defaultDialogues[0]) {
                 const last = questMetadata.get("Andy") as number | undefined;
                 if (last === undefined || last + 3600 < tick()) {
                     if (Server.Quest.takeQuestItem("Apple", 40)) {
-                        Server.Dialogue.talk(done);
+                        done.talk();
                     } else {
-                        Server.Dialogue.talk(start);
+                        start.talk();
                     }
                 } else {
-                    Server.Dialogue.talk(
-                        new Dialogue(
-                            Andy,
-                            "You can talk with me again in " +
-                                convertToMMSS(
-                                    math.floor(((questMetadata.get("Andy") as number) ?? 0) - tick() + 3600),
-                                ) +
-                                " to help me out again!",
-                        ),
-                    );
+                    new Dialogue(
+                        Andy,
+                        "You can talk with me again in " +
+                            convertToMMSS(math.floor(((questMetadata.get("Andy") as number) ?? 0) - tick() + 3600)) +
+                            " to help me out again!",
+                    ).talk();
                 }
             } else if (dialogue === done) {
                 questMetadata.set("Andy", tick());
                 const rng = math.random(1, 3);
                 if (rng === 1) {
-                    Server.Dialogue.talk(new Dialogue(Andy, "As your reward, here's a Funds Bomb! Enjoy!"));
+                    new Dialogue(Andy, "As your reward, here's a Funds Bomb! Enjoy!").talk();
                     CurrencyService.increment("Funds Bombs", new OnoeNum(1));
                 } else if (rng === 2) {
                     const amount = Server.Reset.getResetReward(RESET_LAYERS.Skillification).div(5);
                     const skill = amount.get("Skill");
                     if (skill === undefined || skill.equals(0)) {
-                        Server.Dialogue.talk(
-                            new Dialogue(
-                                Andy,
-                                "As your reward, I wanted to give you some Skill... but I'm all out. Here's some resources instead!",
-                            ),
-                        );
+                        new Dialogue(
+                            Andy,
+                            "As your reward, I wanted to give you some Skill... but I'm all out. Here's some resources instead!",
+                        ).talk();
                         Server.Quest.giveQuestItem(EnchantedGrass.id, 3);
                         Server.Quest.giveQuestItem(ExcavationStone.id, 15);
                         return;
                     }
 
-                    Server.Dialogue.talk(
-                        new Dialogue(
-                            Andy,
-                            "As your reward, I gave you a bit of my Skill. Hopefully, it'll help you out!",
-                        ),
-                    );
+                    new Dialogue(
+                        Andy,
+                        "As your reward, I gave you a bit of my Skill. Hopefully, it'll help you out!",
+                    ).talk();
                     CurrencyService.incrementAll(amount.amountPerCurrency);
                 } else if (rng === 3) {
-                    Server.Dialogue.talk(
-                        new Dialogue(Andy, "As your reward, I gave you some pretty cool resources. Use them wisely!"),
-                    );
+                    new Dialogue(
+                        Andy,
+                        "As your reward, I gave you some pretty cool resources. Use them wisely!",
+                    ).talk();
                     Server.Quest.giveQuestItem(Gold.id, 1);
                     Server.Quest.giveQuestItem(Iron.id, 4);
                     Server.Quest.giveQuestItem(Crystal.id, 10);

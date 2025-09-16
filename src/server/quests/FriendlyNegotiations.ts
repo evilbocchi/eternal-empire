@@ -44,13 +44,13 @@ export = new Quest(script.Name)
                     Prest,
                     "Buy your crates and logs here! Wait, nevermind. We're out of stock.",
                 );
-                Server.Dialogue.addDialogue(replacement);
-                const connection = Server.Dialogue.dialogueFinished.connect((dialogue) => {
+                replacement.add();
+                const connection = Dialogue.finished.connect((dialogue) => {
                     if (dialogue === stage.dialogue) stage.complete();
                 });
                 return () => {
                     connection.disconnect();
-                    Server.Dialogue.removeDialogue(replacement);
+                    replacement.remove();
                 };
             }),
     )
@@ -76,23 +76,23 @@ export = new Quest(script.Name)
                     Tria,
                     "O-oh! Uh... y-you're... you're not supposed to... um... be talking to me right now, I... I mean... sorry! I... I didn't mean to... ugh, never mind!",
                 );
-                Server.Dialogue.addDialogue(replacement);
+                replacement.add();
 
                 const replacement2 = new Dialogue(
                     Tria,
                     "I... I just... uh... wanted to say something, but... maybe I shouldn't...",
                 ).monologue("P-please... just... come back later, okay? I... I'll explain then...").root;
 
-                const connection = Server.Dialogue.dialogueFinished.connect((dialogue) => {
+                const connection = Dialogue.finished.connect((dialogue) => {
                     if (dialogue === replacement) {
-                        Server.Dialogue.removeDialogue(replacement);
-                        Server.Dialogue.addDialogue(replacement2);
+                        replacement.remove();
+                        replacement2.add();
                     } else if (dialogue === stage.dialogue) stage.complete();
                 });
                 return () => {
                     connection.disconnect();
-                    Server.Dialogue.removeDialogue(replacement);
-                    Server.Dialogue.removeDialogue(replacement2);
+                    replacement.remove();
+                    replacement2.remove();
                 };
             }),
     )
@@ -109,7 +109,7 @@ export = new Quest(script.Name)
                     ).root,
             )
             .onReached((stage) => {
-                Server.Dialogue.addDialogue(prestAnnoyance);
+                prestAnnoyance.add();
                 let t = 0;
                 const ItemService = Server.Item;
                 const connection = RunService.Heartbeat.Connect((dt) => {
@@ -122,7 +122,7 @@ export = new Quest(script.Name)
                 });
                 return () => {
                     connection.Disconnect();
-                    Server.Dialogue.removeDialogue(prestAnnoyance);
+                    prestAnnoyance.remove();
                 };
             }),
     )
@@ -140,7 +140,7 @@ export = new Quest(script.Name)
                         "W-wait... did I... say the wrong thing? I... I just... uh... hope he doesn't get mad...",
                     )
                     .monologue("P-please... don't mess this up... I... I believe in you, maybe...").root;
-                Server.Dialogue.addDialogue(replacement);
+                replacement.add();
 
                 const continuation = new Dialogue(Prest, "Wait... Is that actually it?")
                     .monologue("...")
@@ -152,16 +152,16 @@ export = new Quest(script.Name)
                         `I know you don't have a ${SkillPod.name}, but I'm gonna be nice and hold onto your ${GrassConveyor.name} for you.`,
                     )
                     .monologue("See you again never!").root;
-                const connection = Server.Dialogue.dialogueFinished.connect((dialogue) => {
+                const connection = Dialogue.finished.connect((dialogue) => {
                     if (dialogue === stage.dialogue) {
-                        Server.Dialogue.talk(continuation);
+                        continuation.talk();
                     } else if (dialogue === continuation && Server.Quest.takeQuestItem(GrassConveyor.id, 1) === true) {
                         stage.complete();
                     }
                 });
                 return () => {
                     connection.disconnect();
-                    Server.Dialogue.removeDialogue(replacement);
+                    replacement.remove();
                 };
             }),
     )
@@ -179,8 +179,8 @@ export = new Quest(script.Name)
                     .monologue("It's... a bit much, maybe, but... it should... probably work?").root,
             )
             .onReached((stage) => {
-                Server.Dialogue.addDialogue(prestAnnoyance);
-                const connection = Server.Dialogue.dialogueFinished.connect((dialogue) => {
+                prestAnnoyance.add();
+                const connection = Dialogue.finished.connect((dialogue) => {
                     if (dialogue === stage.dialogue) {
                         Server.Quest.giveQuestItem(SkillPod.id, 1);
                         stage.complete();
@@ -188,7 +188,7 @@ export = new Quest(script.Name)
                 });
                 return () => {
                     connection.disconnect();
-                    Server.Dialogue.removeDialogue(prestAnnoyance);
+                    prestAnnoyance.remove();
                 };
             }),
     )
@@ -210,8 +210,8 @@ export = new Quest(script.Name)
                     Tria,
                     `Uh... okay... use that ${SkillPod.name} to... help with your... negotiations... I guess.`,
                 ).monologue("I... I hope it works... fingers crossed...").root;
-                Server.Dialogue.addDialogue(replacement);
-                const connection = Server.Dialogue.dialogueFinished.connect((dialogue) => {
+                replacement.add();
+                const connection = Dialogue.finished.connect((dialogue) => {
                     if (dialogue === stage.dialogue) {
                         Server.Quest.takeQuestItem(SkillPod.id, 1);
                         stage.complete();
@@ -219,7 +219,7 @@ export = new Quest(script.Name)
                 });
                 return () => {
                     connection.disconnect();
-                    Server.Dialogue.removeDialogue(replacement);
+                    replacement.remove();
                 };
             }),
     )

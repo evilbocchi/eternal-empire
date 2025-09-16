@@ -55,10 +55,10 @@ export = new Quest(script.Name)
                     Tria,
                     "Uh... I-I'm Tria... I guess. Um... if... if you want, I can... show you... how to, uh... maybe... make some money? Heh...",
                 );
-                const connection = Server.Dialogue.dialogueFinished.connect((dialogue) => {
+                const connection = Dialogue.finished.connect((dialogue) => {
                     if (dialogue === stage.dialogue) {
                         Server.Event.setEventCompleted("TriaReveal", true);
-                        Server.Dialogue.talk(continuation);
+                        continuation.talk();
                     } else if (dialogue === continuation) stage.complete();
                 });
                 return () => connection.disconnect();
@@ -116,12 +116,11 @@ export = new Quest(script.Name)
                         ItemService.getBoughtAmount(TheFirstFurnace.id) > 0
                     ) {
                         stage.complete();
-                        Server.Dialogue.talk(
-                            new Dialogue(Tria, "Oh! You did it... wow, nice job!")
-                                .monologue("Now... um... place those items down carefully, okay?")
-                                .monologue("Make sure... uh... the dropper head is... above the furnace... yes.")
-                                .monologue("Heh... let's see if this... can make some money... I hope.").root,
-                        );
+                        new Dialogue(Tria, "Oh! You did it... wow, nice job!")
+                            .monologue("Now... um... place those items down carefully, okay?")
+                            .monologue("Make sure... uh... the dropper head is... above the furnace... yes.")
+                            .monologue("Heh... let's see if this... can make some money... I hope.")
+                            .root.talk();
                     }
                 });
                 return () => connection.Disconnect();
@@ -151,7 +150,7 @@ export = new Quest(script.Name)
                     const funds = balance.get("Funds");
                     if (completed === false && funds !== undefined && !funds.lessEquals(0)) {
                         completed = true;
-                        const c2 = Server.Dialogue.dialogueFinished.connect((dialogue) => {
+                        const c2 = Dialogue.finished.connect((dialogue) => {
                             if (dialogue === continuation) {
                                 c2.disconnect();
                                 triaToStart().onComplete(() => {
@@ -160,7 +159,7 @@ export = new Quest(script.Name)
                                 stage.complete();
                             }
                         });
-                        Server.Dialogue.talk(continuation);
+                        continuation.talk();
                     }
                 });
                 return () => connection.disconnect();
@@ -171,7 +170,7 @@ export = new Quest(script.Name)
             if (isCompleted) Tria.revealActualName();
         });
 
-        Server.Dialogue.dialogueFinished.connect((dialogue) => {
+        Dialogue.finished.connect((dialogue) => {
             if (dialogue === NameChanger.defaultDialogues[0]) {
                 Packets.tabOpened.toAllClients("Rename");
             }

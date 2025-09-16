@@ -24,7 +24,7 @@ export = new Quest(script.Name)
                     .monologue("Why don't you get my map for me first? It's at... uh... where is it, again?").root,
             )
             .onReached((stage) => {
-                const connection = Server.Dialogue.dialogueFinished.connect((dialogue) => {
+                const connection = Dialogue.finished.connect((dialogue) => {
                     if (dialogue === stage.dialogue) {
                         stage.complete();
                     }
@@ -61,17 +61,17 @@ export = new Quest(script.Name)
                         .monologue("I've also been trying to help him out, but it's nowhere near here.")
                         .monologue("Maybe check other places? And try asking other people.").root,
                 ];
-                Server.Dialogue.addDialogue(triaActivation);
-                for (const dialogue of redHerrings) Server.Dialogue.addDialogue(dialogue);
+                triaActivation.add();
+                for (const dialogue of redHerrings) dialogue.add();
 
-                const connection = Server.Dialogue.dialogueFinished.connect((dialogue) => {
+                const connection = Dialogue.finished.connect((dialogue) => {
                     if (dialogue === triaActivation) {
                         stage.complete();
                     }
                 });
                 return () => {
-                    Server.Dialogue.removeDialogue(triaActivation);
-                    for (const dialogue of redHerrings) Server.Dialogue.removeDialogue(dialogue);
+                    triaActivation.remove();
+                    for (const dialogue of redHerrings) dialogue.remove();
                     connection.disconnect();
                 };
             }),

@@ -33,7 +33,7 @@ export = new Quest(script.Name)
                 Ricarg.rootPart!.CFrame = Ricarg.startingCFrame;
                 Ricarg.playAnimation("Default");
 
-                const connection = Server.Dialogue.dialogueFinished.connect((dialogue) => {
+                const connection = Dialogue.finished.connect((dialogue) => {
                     if (dialogue === stage.dialogue) {
                         Server.Quest.giveQuestItem(TheFirstUpgraderBooster.id, 1);
                         stage.complete();
@@ -58,9 +58,9 @@ export = new Quest(script.Name)
                     )
                     .monologue("What are you waiting for? Go wild with it!").root;
 
-                const connection = Server.Dialogue.dialogueFinished.connect((dialogue) => {
+                const connection = Dialogue.finished.connect((dialogue) => {
                     if (dialogue === stage.dialogue && Server.Currency.purchase(req)) {
-                        Server.Dialogue.talk(continuation);
+                        continuation.talk();
                     } else if (dialogue === continuation) {
                         stage.complete();
                     }
@@ -75,7 +75,7 @@ export = new Quest(script.Name)
         ),
     )
     .onInit((quest) => {
-        Server.Dialogue.dialogueFinished.connect((dialogue) => {
+        Dialogue.finished.connect((dialogue) => {
             if (dialogue === quest.completionDialogue) {
                 const items = Server.empireData.items;
                 const [invCount, placedCount] = ItemCounter.getAmounts(
