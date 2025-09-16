@@ -135,23 +135,14 @@ export default class NPC extends Reloadable {
             else this.stopAnimation("Jump");
         });
 
-        // Set up NPC name indicator
-        const indicator = ASSETS.NPCNotification.Clone();
-        indicator.Enabled = true;
-        indicator.Parent = model.WaitForChild("Head");
-        const showIndicator = TweenService.Create(indicator.ImageLabel, new TweenInfo(0.3), { ImageTransparency: 0 });
-        const hideIndicator = TweenService.Create(indicator.ImageLabel, new TweenInfo(0.15), { ImageTransparency: 1 });
-
         // Set up proximity prompt for NPC interaction
         const prompt = new Instance("ProximityPrompt");
-        prompt.GetPropertyChangedSignal("Enabled").Connect(() => {
-            if (prompt.Enabled) showIndicator.Play();
-            else hideIndicator.Play();
-        });
         prompt.ActionText = "Interact";
         prompt.Enabled = true;
         prompt.MaxActivationDistance = 6.5;
         prompt.RequiresLineOfSight = false;
+        prompt.AddTag("NPCPrompt");
+        prompt.Parent = model;
 
         const updateDisplayName = () => {
             prompt.ObjectText = getDisplayName(humanoid);
@@ -184,7 +175,6 @@ export default class NPC extends Reloadable {
             }
         });
         Dialogue.proximityPrompts.add(prompt);
-        prompt.Parent = model;
 
         this.cleanup = () => {
             active = false;
@@ -675,6 +665,9 @@ export class Dialogue {
     }
 }
 
+/**
+ * Convenience class for creating dialogues without an associated NPC.
+ */
 export class Soliloquy extends Dialogue {
     constructor(text: string, root?: Dialogue) {
         super(EMPTY_NPC, text, root);

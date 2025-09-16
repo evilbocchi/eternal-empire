@@ -59,6 +59,7 @@ export const assets = {
   "assets/MoreFunds.png": "rbxassetid://107339252280369",
   "assets/MorePower.png": "rbxassetid://139696893249443",
   "assets/Mul.png": "rbxassetid://93733101486583",
+  "assets/NPCNotification.png": "rbxassetid://140651633146948",
   "assets/ObbyPoint.png": "rbxassetid://100304339946501",
   "assets/Part.png": "rbxassetid://85141489706173",
   "assets/PickaxeHandle.png": "rbxassetid://93981281917616",

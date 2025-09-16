@@ -12,10 +12,14 @@
  * @since 1.0.0
  */
 import ComputeNameColor from "@antivivi/rbxnamecolor";
+import { observeTag } from "@antivivi/vrldk";
 import { Controller, OnInit, OnStart } from "@flamework/core";
+import React from "@rbxts/react";
+import { createRoot, Root } from "@rbxts/react-roblox";
 import { Debris, ReplicatedStorage, RunService, TextChatService, TweenService, Workspace } from "@rbxts/services";
 import HotkeysController from "client/controllers/core/HotkeysController";
-import UIController, { INTERFACE } from "client/controllers/core/UIController";
+import { INTERFACE } from "client/controllers/core/UIController";
+import NPCNotification from "client/ui/components/npc/NPCNotification";
 import { ASSETS, getSound } from "shared/asset/GameAssets";
 import { getDisplayName, getTextChannels } from "shared/constants";
 import Packets from "shared/Packets";
@@ -53,10 +57,7 @@ export default class DialogueController implements OnInit, OnStart {
     size = 0;
     i = 0;
 
-    constructor(
-        private uiController: UIController,
-        private hotkeysController: HotkeysController,
-    ) {}
+    constructor(private hotkeysController: HotkeysController) {}
 
     /**
      * Displays a headshot of the given model in the dialogue window's viewport.
@@ -161,6 +162,25 @@ export default class DialogueController implements OnInit, OnStart {
                     : (ASSETS.NPCTextSounds.FindFirstChild(model.Name) as Sound | undefined);
             if (prompt === true) this.showDialogueWindow(name, message, model as Model);
         });
+
+        const rootPerPrompt = new Map<ProximityPrompt, Root>();
+        observeTag(
+            "NPCPrompt",
+            (prompt) => {
+                if (!prompt.IsA("ProximityPrompt") || rootPerPrompt.has(prompt)) return;
+                const root = createRoot(prompt.Parent!);
+                rootPerPrompt.set(prompt, root);
+                root.render(<NPCNotification prompt={prompt} />);
+            },
+            (prompt) => {
+                if (!prompt.IsA("ProximityPrompt")) return;
+                const root = rootPerPrompt.get(prompt);
+                if (root !== undefined) {
+                    root.unmount();
+                    rootPerPrompt.delete(prompt);
+                }
+            },
+        );
     }
 
     /**

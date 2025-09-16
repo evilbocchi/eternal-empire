@@ -17,17 +17,6 @@ import NPC from "server/interactive/npc/NPC";
 import InteractableObject from "server/interactive/object/InteractableObject";
 import DataService from "server/services/data/DataService";
 
-declare global {
-    /**
-     * BillboardGui asset for NPC notifications.
-     */
-    interface Assets {
-        NPCNotification: BillboardGui & {
-            ImageLabel: ImageLabel;
-        };
-    }
-}
-
 /**
  * Service that manages all NPC dialogue, cutscenes, and related player interactions.
  */
