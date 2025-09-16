@@ -186,14 +186,14 @@ export default class HamsterService implements OnStart {
 
         NPC.HOT_RELOADER.reload();
         InteractableObject.HOT_RELOADER.reload();
-        Quest.reload();
+        Quest.HOT_RELOADER.reload();
         print("Hot reload complete. You're welcome. 🐹");
     }
 
     onStart() {
         NPC.HOT_RELOADER.load();
         InteractableObject.HOT_RELOADER.load();
-        Quest.reload();
+        Quest.HOT_RELOADER.load();
 
         Packets.requestReload.fromClient(() => this.reload());
     }

@@ -21,21 +21,11 @@ export default function NPCNotification({ prompt }: { prompt: ProximityPrompt })
     }, []);
 
     return (
-        <billboardgui
-            Active={true}
-            ClipsDescendants={true}
-            Enabled={false}
-            Size={new UDim2(2, 0, 2, 0)}
-            StudsOffset={new Vector3(0, 4, 0)}
-            ZIndexBehavior={Enum.ZIndexBehavior.Sibling}
-        >
-            <imagelabel
-                ref={imageRef}
-                BackgroundTransparency={1}
-                Image={getAsset("assets/NPCNotification.png")}
-                Rotation={90}
-                Size={new UDim2(1, 0, 1, 0)}
-            />
-        </billboardgui>
+        <imagelabel
+            ref={imageRef}
+            BackgroundTransparency={1}
+            Image={getAsset("assets/NPCNotification.png")}
+            Size={new UDim2(1, 0, 1, 0)}
+        />
     );
 }

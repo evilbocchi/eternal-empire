@@ -80,16 +80,17 @@ export class HotReloader<T extends Reloadable<T>> {
      * @return Map of reloadable instances by their IDs.
      */
     public reload() {
-        this.reloadModules();
         this.unload();
         return this.load();
     }
 
     /**
      * Loads all ModuleScripts in the MODULES map, requires them, and stores instances of Reloadable in the RELOADABLE_PER_ID map.
+     * This yields until all modules are loaded.
      * @return Map of reloadable instances by their IDs.
      */
     public load() {
+        this.reloadModules();
         for (const [id, moduleScript] of this.MODULES) {
             if (this.RELOADABLE_PER_ID.has(id)) {
                 continue;
@@ -109,6 +110,10 @@ export class HotReloader<T extends Reloadable<T>> {
         return this.RELOADABLE_PER_ID;
     }
 
+    /**
+     * Unloads all currently loaded reloadable instances by calling their cleanup functions, if any.
+     * Clears the {@link RELOADABLE_PER_ID} and {@link CLEANUP_PER_RELOADABLE} maps.
+     */
     public unload() {
         for (const [, cleanup] of this.CLEANUP_PER_RELOADABLE) {
             cleanup();

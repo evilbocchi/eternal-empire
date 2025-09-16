@@ -15,7 +15,7 @@ import ComputeNameColor from "@antivivi/rbxnamecolor";
 import { observeTag } from "@antivivi/vrldk";
 import { Controller, OnInit, OnStart } from "@flamework/core";
 import React from "@rbxts/react";
-import { createRoot, Root } from "@rbxts/react-roblox";
+import { createRoot } from "@rbxts/react-roblox";
 import { Debris, ReplicatedStorage, RunService, TextChatService, TweenService, Workspace } from "@rbxts/services";
 import HotkeysController from "client/controllers/core/HotkeysController";
 import { INTERFACE } from "client/controllers/core/UIController";
@@ -163,21 +163,33 @@ export default class DialogueController implements OnInit, OnStart {
             if (prompt === true) this.showDialogueWindow(name, message, model as Model);
         });
 
-        const rootPerPrompt = new Map<ProximityPrompt, Root>();
+        const cleanupPerPrompt = new Map<ProximityPrompt, () => void>();
         observeTag(
             "NPCPrompt",
             (prompt) => {
-                if (!prompt.IsA("ProximityPrompt") || rootPerPrompt.has(prompt)) return;
-                const root = createRoot(prompt.Parent!);
-                rootPerPrompt.set(prompt, root);
+                if (!prompt.IsA("ProximityPrompt") || cleanupPerPrompt.has(prompt)) return;
+                const gui = new Instance("BillboardGui");
+                gui.Active = true;
+                gui.ClipsDescendants = true;
+                gui.Size = new UDim2(2, 0, 2, 0);
+                gui.StudsOffset = new Vector3(0, 4, 0);
+                gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling;
+
+                const root = createRoot(gui);
+                cleanupPerPrompt.set(prompt, () => {
+                    root.unmount();
+                    gui.Destroy();
+                });
                 root.render(<NPCNotification prompt={prompt} />);
+
+                gui.Parent = prompt.Parent;
             },
             (prompt) => {
                 if (!prompt.IsA("ProximityPrompt")) return;
-                const root = rootPerPrompt.get(prompt);
-                if (root !== undefined) {
-                    root.unmount();
-                    rootPerPrompt.delete(prompt);
+                const cleanup = cleanupPerPrompt.get(prompt);
+                if (cleanup !== undefined) {
+                    cleanup();
+                    cleanupPerPrompt.delete(prompt);
                 }
             },
         );

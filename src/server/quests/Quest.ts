@@ -185,7 +185,37 @@ export class Stage {
  * Provides methods for configuring quest properties, managing stages, and handling quest initialization.
  */
 export default class Quest extends Reloadable<Quest> {
-    private static readonly HOT_RELOADER = new HotReloader<Quest>(script.Parent!, new Set([script]));
+    static readonly HOT_RELOADER = new HotReloader<Quest>(script.Parent!, new Set([script])).setLoadCallback(
+        (questPerId) => {
+            print(`Loaded ${questPerId.size()} quests`);
+
+            const questInfos = new Map<string, QuestInfo>();
+
+            for (const [questId, quest] of questPerId) {
+                // Prepare quest info for clients
+                const questInfo: QuestInfo = {
+                    name: quest.name ?? questId,
+                    colorR: quest.color.R,
+                    colorG: quest.color.G,
+                    colorB: quest.color.B,
+                    level: quest.level,
+                    length: quest.length,
+                    reward: quest.reward,
+                    order: quest.order,
+                    stages: [],
+                };
+                for (const stage of quest.stages) {
+                    questInfo.stages.push({ description: stage.description! });
+                }
+
+                questInfos.set(questId, questInfo);
+            }
+
+            // Send quest info to clients
+            Packets.questInfo.set(questInfos);
+            this.reachStages();
+        },
+    );
     private static readonly CLEANUP_PER_STAGE = new Map<Stage, () => void>();
 
     static colors = [
@@ -257,44 +287,6 @@ export default class Quest extends Reloadable<Quest> {
             });
             table.clear(this);
         };
-    }
-
-    /**
-     * Loads all quest modules and initializes quest data.
-     *
-     * @returns A map of quest IDs to their quest info.
-     */
-    static reload() {
-        const questPerId = this.HOT_RELOADER.reload();
-        print(`Loaded ${questPerId.size()} quests`);
-
-        const questInfos = new Map<string, QuestInfo>();
-
-        for (const [questId, quest] of questPerId) {
-            // Prepare quest info for clients
-            const questInfo: QuestInfo = {
-                name: quest.name ?? questId,
-                colorR: quest.color.R,
-                colorG: quest.color.G,
-                colorB: quest.color.B,
-                level: quest.level,
-                length: quest.length,
-                reward: quest.reward,
-                order: quest.order,
-                stages: [],
-            };
-            for (const stage of quest.stages) {
-                questInfo.stages.push({ description: stage.description! });
-            }
-
-            questInfos.set(questId, questInfo);
-        }
-
-        // Send quest info to clients
-        Packets.questInfo.set(questInfos);
-        this.reachStages();
-
-        return questInfos;
     }
 
     /**

@@ -11,7 +11,7 @@ import {
 } from "@rbxts/services";
 import { playSound } from "shared/asset/GameAssets";
 import { getDisplayName } from "shared/constants";
-import { IS_CI } from "shared/Context";
+import { IS_CI, IS_STUDIO } from "shared/Context";
 import { HotReloader, Reloadable } from "shared/HotReload";
 import Packets from "shared/Packets";
 
@@ -55,7 +55,6 @@ export default class NPC extends Reloadable<NPC> {
 
     defaultName: string;
     startingCFrame = new CFrame();
-
     initialModelSnapshot?: Model;
     model?: Model;
     humanoid?: Humanoid;
@@ -68,33 +67,6 @@ export default class NPC extends Reloadable<NPC> {
     }
 
     /**
-     * Loads the NPC model and its humanoid, setting up necessary properties.
-     * @param model The model to load. If undefined, it will be looked up by ID.
-     * @returns A tuple containing the model, humanoid, and root part if successful; otherwise, undefined values.
-     */
-    private loadModel(
-        model = NPC_MODELS?.FindFirstChild(this.id) as Model | undefined,
-    ): LuaTuple<[Model?, Humanoid?, BasePart?]> {
-        if (model === undefined) return $tuple();
-
-        const humanoid = model.FindFirstChildOfClass("Humanoid") as Humanoid | undefined;
-        if (humanoid === undefined) return $tuple();
-
-        const rootPart = humanoid.RootPart as BasePart | undefined;
-        if (rootPart === undefined) return $tuple();
-
-        this.initialModelSnapshot = model.Clone();
-        this.initialModelSnapshot.Parent = ServerStorage;
-        humanoid.DisplayName = this.defaultName;
-        this.startingCFrame = rootPart.CFrame;
-        this.model = model;
-        this.humanoid = humanoid;
-        this.rootPart = rootPart;
-        CollectionService.AddTag(model, "NPC");
-        return $tuple(model, humanoid, rootPart);
-    }
-
-    /**
      * Loads the NPC model, sets up its properties, and initializes animations and event listeners.
      * This method should be called after the NPC instance is created.
      * @returns The NPC instance for chaining.
@@ -102,9 +74,28 @@ export default class NPC extends Reloadable<NPC> {
     load() {
         if (IS_CI || this.id === "Empty") return;
 
-        const [model, humanoid, rootPart] = this.loadModel();
-        if (model === undefined || humanoid === undefined || rootPart === undefined) return;
+        const model = NPC_MODELS?.FindFirstChild(this.id) as Model | undefined;
+        if (model === undefined) return;
 
+        const humanoid = model.FindFirstChildOfClass("Humanoid") as Humanoid | undefined;
+        if (humanoid === undefined) return;
+
+        const rootPart = humanoid.RootPart as BasePart | undefined;
+        if (rootPart === undefined) return;
+
+        this.model = model;
+        this.humanoid = humanoid;
+        this.rootPart = rootPart;
+
+        // Store the starting CFrame and create an initial snapshot for recovery
+        if (IS_STUDIO) {
+            const initialModelSnapshot = model.Clone();
+            initialModelSnapshot.Parent = ServerStorage;
+            this.initialModelSnapshot = initialModelSnapshot;
+        }
+        this.startingCFrame = rootPart.CFrame;
+
+        CollectionService.AddTag(model, "NPC");
         const parts = model.GetDescendants();
         for (const part of parts) {
             if (part.IsA("BasePart")) {
@@ -187,7 +178,6 @@ export default class NPC extends Reloadable<NPC> {
             }
         });
         Dialogue.proximityPrompts.add(prompt);
-
         return () => {
             active = false;
             runningConnection.Disconnect();
