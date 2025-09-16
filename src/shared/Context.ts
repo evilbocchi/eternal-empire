@@ -1,5 +1,5 @@
 import { Flamework } from "@flamework/core";
-import { RunService } from "@rbxts/services";
+import { RunService, Workspace } from "@rbxts/services";
 
 /**
  * Whether the current context is the server.
@@ -22,6 +22,24 @@ export const IS_STUDIO = RunService.IsStudio();
  * Whether the game is in Single Server mode.
  */
 export const IS_SINGLE_SERVER = game.PlaceId === 17479698702;
+
+export const IS_PUBLIC_SERVER = (() => {
+    if (IS_CI) return false;
+    let key = "IsPublicServer";
+    if (!IS_SERVER) return Workspace.GetAttribute(key) === true;
+
+    let value = false;
+    if (IS_STUDIO) {
+        const boolValue = Workspace.FindFirstChild("StartCamera")?.FindFirstChild("StartScreen") as
+            | BoolValue
+            | undefined;
+        value = boolValue?.Value ?? false;
+    }
+
+    value = game.PrivateServerId === "";
+    Workspace.SetAttribute(key, value);
+    return value;
+})();
 
 export function preloadFlameworkClient() {
     Flamework.addPaths("src/client/controllers");

@@ -23,7 +23,7 @@ import LoadingWindowController from "client/controllers/interface/LoadingWindowC
 import SoundController from "client/controllers/interface/SoundController";
 import { ASSETS, playSound } from "shared/asset/GameAssets";
 import { getNameFromUserId, getStartCamera, isStartScreenEnabled } from "shared/constants";
-import { IS_STUDIO } from "shared/Context";
+import { IS_PUBLIC_SERVER, IS_SINGLE_SERVER, IS_STUDIO } from "shared/Context";
 import Items from "shared/items/Items";
 import Packets from "shared/Packets";
 
@@ -190,7 +190,7 @@ export default class StartWindowController implements OnInit {
      * Shows the start window and prepares the UI for empire selection or onboarding.
      */
     showStartWindow() {
-        if (Workspace.GetAttribute("IsPublicServer") !== true || Workspace.GetAttribute("IsSingleServer") === true) {
+        if (!IS_PUBLIC_SERVER || IS_SINGLE_SERVER) {
             return;
         }
         const START_SCREEN_ENABLED = isStartScreenEnabled();

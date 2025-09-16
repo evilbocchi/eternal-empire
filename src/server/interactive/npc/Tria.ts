@@ -17,4 +17,5 @@ export = new NPC(script.Name)
     .npc.createDefaultMonologue("P-please... uh... I... I don't want to be rude... but... maybe... come back later?")
     .npc.createDefaultMonologue(
         "Uh... I... I'm... really... I mean... okay... maybe... just... leave me alone for a bit...",
-    ).npc;
+    )
+    .npc.reconcile();

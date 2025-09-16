@@ -30,11 +30,10 @@ import {
     MarketplaceService,
     Players,
     TeleportService,
-    Workspace,
 } from "@rbxts/services";
 import { OnPlayerJoined } from "server/services/ModdingService";
 import { getNameFromUserId, getStartCamera, isStartScreenEnabled } from "shared/constants";
-import { IS_CI, IS_SERVER, IS_SINGLE_SERVER, IS_STUDIO } from "shared/Context";
+import { IS_CI, IS_PUBLIC_SERVER, IS_SERVER, IS_SINGLE_SERVER, IS_STUDIO } from "shared/Context";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import { CURRENCY_DETAILS } from "shared/currency/CurrencyDetails";
 import EmpireProfileTemplate from "shared/data/EmpireProfileTemplate";
@@ -266,11 +265,6 @@ export default class DataService implements OnInit, OnPlayerJoined {
     // Server State
 
     /**
-     * Whether this server is a public server (not private/reserved).
-     */
-    isPublicServer = IS_SERVER && game.PrivateServerId === "" && (!IS_STUDIO || START_SCREEN_ENABLED === true);
-
-    /**
      * Debounce timer for empire creation to prevent spam.
      */
     debounce = 0;
@@ -302,7 +296,7 @@ export default class DataService implements OnInit, OnPlayerJoined {
             // production protocol
             if (IS_SINGLE_SERVER) {
                 empireId = "SingleServer";
-            } else if (this.isPublicServer) {
+            } else if (IS_PUBLIC_SERVER) {
                 empireId = game.JobId;
             } else {
                 // Wait for at least one player to join to get teleport data
@@ -332,7 +326,7 @@ export default class DataService implements OnInit, OnPlayerJoined {
         const empireData = empireProfile.Data;
 
         // Set default names for public servers
-        if (this.isPublicServer === true) empireData.name = IS_SINGLE_SERVER ? "Single Server" : "Public Server";
+        if (IS_PUBLIC_SERVER) empireData.name = IS_SINGLE_SERVER ? "Single Server" : "Public Server";
 
         // Initialize empire name if not set
         if (empireData.previousNames.size() === 0 && IS_SERVER) {
@@ -854,7 +848,7 @@ export default class DataService implements OnInit, OnPlayerJoined {
                     warn("ridded public from available empires");
                 }
             }
-            if (!this.isPublicServer) {
+            if (!IS_PUBLIC_SERVER) {
                 availableEmpires.set(this.empireId, this.getInfo(this.empireId));
             }
         });
@@ -917,7 +911,7 @@ export default class DataService implements OnInit, OnPlayerJoined {
         ) {
             ownedEmpires.push(this.empireId);
         }
-        if (this.isPublicServer) {
+        if (IS_PUBLIC_SERVER) {
             Packets.availableEmpires.setFor(player, availableEmpires);
         }
     }
@@ -927,14 +921,12 @@ export default class DataService implements OnInit, OnPlayerJoined {
      * Sets up server attributes, event connections, and packet handlers.
      */
     onInit() {
-        Workspace.SetAttribute("IsSingleServer", IS_SINGLE_SERVER);
-        Workspace.SetAttribute("IsPublicServer", this.isPublicServer);
         Players.PlayerRemoving.Connect((player) => {
             this.unloadPlayerProfile(player.UserId);
             this.availableEmpiresPerPlayer.delete(player.UserId);
         });
         task.spawn(() => {
-            if (IS_SINGLE_SERVER || !this.isPublicServer) {
+            if (IS_SINGLE_SERVER || !IS_PUBLIC_SERVER) {
                 while (task.wait(60)) {
                     Packets.savingEmpire.toAllClients(100);
                     const success = this.saveEmpireProfile(this.empireId);

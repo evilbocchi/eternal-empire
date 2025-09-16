@@ -6,4 +6,5 @@ export = new NPC(script.Name)
     .createDefaultMonologue(
         `Buy your crates and logs here! Come on, it's a limited stock! Only for ${new CurrencyBundle().set("Funds", 1e15).toString()}!`,
     )
-    .monologue("Ah, sorry. You need to be Level 2 to purchase stuff from me.").npc;
+    .monologue("Ah, sorry. You need to be Level 2 to purchase stuff from me.")
+    .npc.reconcile();

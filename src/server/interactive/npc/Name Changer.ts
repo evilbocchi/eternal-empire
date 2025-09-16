@@ -3,8 +3,12 @@ import NPC from "server/interactive/npc/NPC";
 class NameChanger extends NPC {
     constructor(id: string) {
         super(id);
+    }
 
+    override load() {
+        super.load();
         this.rootPart!.Anchored = true;
+        return () => {};
     }
 
     toggleAvailability(available: boolean) {
@@ -13,6 +17,6 @@ class NameChanger extends NPC {
     }
 }
 
-export = new NameChanger(script.Name).createDefaultMonologue(
-    "Changing your name? Easy peasy! Just hand me your life savings.",
-).npc;
+export = new NameChanger(script.Name)
+    .createDefaultMonologue("Changing your name? Easy peasy! Just hand me your life savings.")
+    .npc.reconcile();

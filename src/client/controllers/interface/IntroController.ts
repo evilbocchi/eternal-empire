@@ -21,6 +21,7 @@ import { questState } from "client/ui/components/quest/QuestState";
 import { assets, getAsset } from "shared/asset/AssetMap";
 import { playSound } from "shared/asset/GameAssets";
 import { WAYPOINTS } from "shared/constants";
+import { IS_PUBLIC_SERVER } from "shared/Context";
 
 export const INTRO_WINDOW = INTERFACE.WaitForChild("IntroWindow") as Frame;
 
@@ -116,7 +117,7 @@ export default class IntroController implements OnInit {
      */
     onInit() {
         ReplicatedStorage.GetAttributeChangedSignal("Intro").Connect(() => this.onIntroMarkerChanged());
-        if (Workspace.GetAttribute("IsPublicServer") !== true) this.onIntroMarkerChanged();
+        if (!IS_PUBLIC_SERVER) this.onIntroMarkerChanged();
 
         task.spawn(() => {
             const priority = [
