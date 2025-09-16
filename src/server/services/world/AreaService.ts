@@ -27,13 +27,12 @@ import DataService from "server/services/data/DataService";
 import NamedUpgradeService from "server/services/data/NamedUpgradeService";
 import LeaderstatsService from "server/services/leaderboard/LeaderstatsService";
 import { OnPlayerJoined } from "server/services/ModdingService";
-import NPCNavigationService from "server/services/npc/NPCNavigationService";
-import Area, { AREAS } from "shared/world/Area";
 import { getSound, playSound } from "shared/asset/GameAssets";
 import { MUSIC_GROUP } from "shared/constants";
 import { DROPLET_STORAGE } from "shared/item/Droplet";
 import NamedUpgrades from "shared/namedupgrade/NamedUpgrades";
 import Packets from "shared/Packets";
+import Area, { AREAS } from "shared/world/Area";
 
 /** Grid size upgrades that affect area building grids */
 const GRID_SIZE_UPGRADES = NamedUpgrades.getUpgrades("GridSize");
@@ -65,7 +64,6 @@ export default class AreaService implements OnInit, OnPlayerJoined {
         private dataService: DataService,
         private leaderstatsService: LeaderstatsService,
         private namedUpgradeService: NamedUpgradeService,
-        private npcNavigationService: NPCNavigationService,
     ) {}
 
     /**

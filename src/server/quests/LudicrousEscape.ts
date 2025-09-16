@@ -1,6 +1,7 @@
 import { OnoeNum } from "@antivivi/serikanum";
 import { convertToMMSS, spawnExplosion } from "@antivivi/vrldk";
 import { RunService, TweenService, Workspace } from "@rbxts/services";
+import InteractableObject from "server/InteractableObject";
 import { Dialogue, EMPTY_NPC } from "server/NPC";
 import Andy from "server/npcs/Andy";
 import PoliceOfficer from "server/npcs/Police Officer";
@@ -23,25 +24,18 @@ import Gold from "shared/items/excavation/Gold";
 import EnchantedGrass from "shared/items/excavation/harvestable/EnchantedGrass";
 import Iron from "shared/items/excavation/Iron";
 import { AREAS } from "shared/world/Area";
-import InteractableObject from "server/InteractableObject";
 
 Simpul.rootPart!.Anchored = true;
 
-const simpulToOut = Server.NPC.Navigation.createPathfindingOperation(
-    Simpul.humanoid!,
-    Simpul.rootPart!.CFrame,
-    WAYPOINTS.LudicrousEscapeSimpulOut.CFrame,
-);
+const simpulToOut = Simpul.createPathfindingOperation(Simpul.startingCFrame, WAYPOINTS.LudicrousEscapeSimpulOut.CFrame);
 
-const slamoReceptionistToHiding = Server.NPC.Navigation.createPathfindingOperation(
-    SlamoReceptionist.humanoid!,
-    SlamoReceptionist.rootPart!.CFrame,
+const slamoReceptionistToHiding = SlamoReceptionist.createPathfindingOperation(
+    SlamoReceptionist.startingCFrame,
     WAYPOINTS.LudicrousEscapeSlamoReceptionistHiding.CFrame,
     false,
 );
 
-const slamoReceptionistToReveal = Server.NPC.Navigation.createPathfindingOperation(
-    SlamoReceptionist.humanoid!,
+const slamoReceptionistToReveal = SlamoReceptionist.createPathfindingOperation(
     WAYPOINTS.LudicrousEscapeSlamoReceptionistHiding.CFrame,
     WAYPOINTS.LudicrousEscapeSlamoReceptionistReveal.CFrame,
 );
@@ -399,8 +393,7 @@ export = new Quest(script.Name)
 
                 const connection = Server.Dialogue.dialogueFinished.connect((dialogue) => {
                     if (dialogue === finishing) {
-                        Server.NPC.Navigation.createPathfindingOperation(
-                            SlamoReceptionist.humanoid!,
+                        SlamoReceptionist.createPathfindingOperation(
                             SlamoReceptionist.rootPart!.CFrame,
                             SlamoReceptionist.startingCFrame,
                         )();

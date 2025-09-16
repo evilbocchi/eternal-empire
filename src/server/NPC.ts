@@ -1,5 +1,6 @@
-import { loadAnimation } from "@antivivi/vrldk";
-import { Workspace } from "@rbxts/services";
+import { getRootPart, loadAnimation } from "@antivivi/vrldk";
+import { PathfindingService, Players, RunService, TweenService, Workspace } from "@rbxts/services";
+import { playSound } from "shared/asset/GameAssets";
 import { IS_CI } from "shared/Context";
 import { HotReloader, Reloadable } from "shared/HotReload";
 
@@ -16,10 +17,26 @@ export const NPC_MODELS = Workspace.WaitForChild("NPCs") as Folder;
 export default class NPC extends Reloadable {
     static readonly HOT_RELOADER = new HotReloader<NPC>(script.Parent!.WaitForChild("npcs"));
 
+    /** Material costs for pathfinding calculations. Higher costs make NPCs avoid certain materials. */
+    static readonly PATHFINDING_COSTS = {
+        Water: 20,
+        Limestone: 20, // Ground beneath water
+        SmoothPlastic: 10,
+        Wood: 10,
+        Plastic: 2,
+    };
+
+    /** Default parameters for NPC pathfinding operations. */
+    static readonly PATHFINDING_PARAMS: AgentParameters = {
+        Costs: this.PATHFINDING_COSTS,
+        WaypointSpacing: 6,
+    };
+
     readonly animAssetIdPerType = new Map<NPCAnimationType, number>();
     readonly defaultDialogues = new Array<Dialogue>();
     readonly animTrackPerType = new Map<NPCAnimationType, AnimationTrack>();
     readonly runningAnimTrackPerType = new Map<NPCAnimationType, AnimationTrack>();
+    readonly runningPathfinds = new Set<RBXScriptConnection>();
 
     defaultName: string;
     startingCFrame = new CFrame();
@@ -207,6 +224,200 @@ export default class NPC extends Reloadable {
      */
     onInteract(callback?: () => void) {
         this.interact = callback;
+    }
+
+    /**
+     * Calculate waypoints for NPC navigation.
+     *
+     * @param source The starting position.
+     * @param destination The target position.
+     * @param params Pathfinding parameters.
+     * @param retries Number of retry attempts.
+     * @returns An array of waypoints or undefined if no path is found.
+     */
+    getWaypoints(
+        source: Vector3,
+        destination: Vector3,
+        params = NPC.PATHFINDING_PARAMS,
+        retries = 0,
+    ): PathWaypoint[] | undefined {
+        const humanoid = this.humanoid;
+        const rootPart = this.rootPart;
+        if (humanoid === undefined || rootPart === undefined) {
+            warn("Humanoid or RootPart is undefined");
+            return;
+        }
+        params.Costs = NPC.PATHFINDING_COSTS;
+        const path = PathfindingService.CreatePath(params);
+        path.ComputeAsync(source, destination);
+        const waypoints = path.GetWaypoints();
+        if (waypoints.isEmpty()) {
+            warn("No path found");
+            if (retries < 3) {
+                return this.getWaypoints(source.add(new Vector3(0, 1, 0)), destination, params, retries + 1);
+            }
+            return;
+        }
+        return waypoints;
+    }
+
+    /**
+     * Navigate the NPC through the given waypoints.
+     * @param waypoints The waypoints to follow.
+     * @param endCallback The callback to call when navigation ends.
+     * @returns The connection object for the pathfinding operation.
+     */
+    pathfind(waypoints: PathWaypoint[], endCallback: () => unknown) {
+        const humanoid = this.humanoid;
+        if (humanoid === undefined) {
+            warn("Humanoid is undefined");
+            return;
+        }
+        const rootPart = humanoid.RootPart;
+        if (rootPart === undefined) return;
+        let i = 0;
+        let newPos: Vector3 | undefined;
+
+        const doNextWaypoint = () => {
+            ++i;
+            const nextWaypoint = waypoints[i];
+            if (nextWaypoint !== undefined) {
+                // Handle jump waypoints
+                if (nextWaypoint.Action === Enum.PathWaypointAction.Jump) {
+                    humanoid.Jump = true;
+                    playSound("Jump.mp3", rootPart, (sound) => {
+                        sound.Volume = 0.25;
+                    });
+                }
+                newPos = nextWaypoint.Position;
+
+                humanoid.MoveTo(newPos);
+            } else {
+                // Navigation complete
+                connection.Disconnect();
+                endCallback();
+            }
+        };
+
+        let t = 0;
+        const connection = RunService.Heartbeat.Connect((dt) => {
+            if (newPos === undefined) return;
+            t += dt;
+            const dist = rootPart.Position.sub(newPos).mul(new Vector3(1, 0, 1)).Magnitude;
+
+            // Check if close enough to waypoint
+            if (dist < math.max(humanoid.WalkSpeed * 0.1875, 0.5)) {
+                // allow more leeway for higher speeds
+                t = 0;
+                newPos = undefined;
+                doNextWaypoint();
+            }
+            // Teleport if stuck for too long
+            else if (t > math.max((5.6 * dist) / humanoid.WalkSpeed, 2)) {
+                t = 0;
+                rootPart.CFrame = new CFrame(newPos).add(new Vector3(0, humanoid.HipHeight, 0));
+            }
+        });
+
+        doNextWaypoint();
+        return connection;
+    }
+
+    /**
+     * Calculates a function for guiding an NPC humanoid to a point.
+     * This should preferably be called a moderate time before the NPC has to move, as pathfinding can take time.
+     * @param source The starting position.
+     * @param destination The target position.
+     * @param requiresPlayer If false, the callbacks will be fired immediately without waiting for player proximity.
+     * @param agentParams Optional pathfinding parameters.
+     * @returns A function that can be called to start traversing the path.
+     */
+    createPathfindingOperation(
+        source?: CFrame,
+        destination?: CFrame,
+        requiresPlayer?: boolean,
+        agentParams = NPC.PATHFINDING_PARAMS,
+    ) {
+        const humanoid = this.humanoid;
+        // Validate parameters
+        if (humanoid === undefined) throw "npcHumanoid is undefined";
+        if (source === undefined) throw "source is undefined";
+        if (destination === undefined) throw "destination is undefined";
+        humanoid.RootPart!.Anchored = false;
+
+        // Cancel any ongoing pathfinding
+        for (const connection of this.runningPathfinds) {
+            connection.Disconnect();
+        }
+        this.runningPathfinds.clear();
+
+        // Load waypoints and tweens
+        let waypoints: PathWaypoint[] | undefined;
+        task.spawn(() => {
+            waypoints = this.getWaypoints(source.Position, destination.Position, agentParams);
+            if (waypoints === undefined || waypoints.isEmpty()) {
+                throw `No valid waypoints found from ${source.Position} to ${destination.Position} for ${humanoid.Parent?.Name}`;
+            }
+        });
+
+        const tween = TweenService.Create(humanoid.RootPart!, new TweenInfo(1), { CFrame: destination });
+        let toCall = false;
+
+        /**
+         * Starts the pathfinding operation.
+         *
+         * @param playTween Whether to play the tween animation.
+         * @returns The response object containing waypoints and the fitting tween.
+         */
+        const start = (playTween = true) => {
+            // Wait until waypoints are available
+            while (waypoints === undefined) {
+                task.wait();
+            }
+
+            const callbacks = new Set<() => unknown>();
+            const body = {
+                waypoints,
+                fittingTween: tween,
+                onComplete: (callback: () => unknown) => {
+                    callbacks.add(callback);
+                },
+            };
+
+            this.pathfind(waypoints, () => {
+                if (playTween) tween.Play();
+                if (requiresPlayer === false) {
+                    toCall = true;
+                }
+            });
+
+            const connection = RunService.Heartbeat.Connect(() => {
+                const players = Players.GetPlayers();
+                for (const player of players) {
+                    const playerRootPart = getRootPart(player);
+                    if (playerRootPart === undefined) continue;
+                    if (destination.Position.sub(playerRootPart.Position).Magnitude < 10) {
+                        if (playTween) tween.Play();
+                        toCall = true;
+                        connection.Disconnect();
+                        return;
+                    }
+                }
+            });
+            task.spawn(() => {
+                while (!toCall) {
+                    RunService.Heartbeat.Wait();
+                }
+                print("Reached point", humanoid.Parent?.Name, destination.Position);
+                for (const callback of callbacks) {
+                    callback();
+                }
+                connection.Disconnect();
+            });
+            this.runningPathfinds.add(connection);
+            return body;
+        };
+        return start;
     }
 
     unload(): void {

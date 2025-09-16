@@ -19,7 +19,6 @@ import { OnStart, Service } from "@flamework/core";
 import { HttpService, Workspace } from "@rbxts/services";
 import StringBuilder from "@rbxts/stringbuilder";
 import { $env } from "rbxts-transform-env";
-import NPCNavigationService from "server/services/npc/NPCNavigationService";
 import { OnGameAPILoaded } from "server/services/ModdingService";
 import ResetService from "server/services/ResetService";
 import RevenueService from "server/services/RevenueService";
@@ -28,13 +27,13 @@ import DataService from "server/services/data/DataService";
 import NamedUpgradeService from "server/services/data/NamedUpgradeService";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import { CURRENCIES } from "shared/currency/CurrencyDetails";
+import { RESET_LAYERS } from "shared/currency/mechanics/ResetLayer";
 import Droplet from "shared/item/Droplet";
 import Item from "shared/item/Item";
-import Charger from "shared/item/traits/generator/Charger";
 import Furnace from "shared/item/traits/Furnace";
+import Charger from "shared/item/traits/generator/Charger";
 import Items from "shared/items/Items";
 import AwesomeManumaticPurifier from "shared/items/negative/felixthea/AwesomeManumaticPurifier";
-import { RESET_LAYERS } from "shared/currency/mechanics/ResetLayer";
 
 declare global {
     interface Assets {}
@@ -60,7 +59,6 @@ export default class ProgressionEstimationService implements OnGameAPILoaded, On
 
     constructor(
         private revenueService: RevenueService,
-        private npcNavigationService: NPCNavigationService,
         private currencyService: CurrencyService,
         private namedUpgradeService: NamedUpgradeService,
         private dataService: DataService,

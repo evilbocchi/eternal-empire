@@ -41,32 +41,27 @@ const showInstantWinBlock = () => {
     }
 };
 
-const refugeeToWaiting = Server.NPC.Navigation.createPathfindingOperation(
-    SlamoRefugee.humanoid,
-    SlamoRefugee.rootPart?.CFrame,
+const refugeeToWaiting = SlamoRefugee.createPathfindingOperation(
+    SlamoRefugee.startingCFrame,
     WAYPOINTS.ToTheVillageRefugeeWaiting.CFrame,
 );
 
-const refugeeToBrewing = Server.NPC.Navigation.createPathfindingOperation(
-    SlamoRefugee.humanoid,
+const refugeeToBrewing = SlamoRefugee.createPathfindingOperation(
     WAYPOINTS.ToTheVillageRefugeeWaiting.CFrame,
     WAYPOINTS.ToTheVillageRefugeeBrewing.CFrame,
 );
 
-const refugeeToIntermittent = Server.NPC.Navigation.createPathfindingOperation(
-    SlamoRefugee.humanoid,
+const refugeeToIntermittent = SlamoRefugee.createPathfindingOperation(
     WAYPOINTS.ToTheVillageRefugeeBrewing.CFrame,
     WAYPOINTS.ToTheVillageRefugeeIntermittentIsles.CFrame,
 );
 
-const refugeeToEnteringSlamoVillage = Server.NPC.Navigation.createPathfindingOperation(
-    SlamoRefugee.humanoid,
+const refugeeToEnteringSlamoVillage = SlamoRefugee.createPathfindingOperation(
     WAYPOINTS.ToTheVillageRefugeeIntermittentIsles.CFrame,
     WAYPOINTS.ToTheVillageRefugeeEnteringSlamoVillage.CFrame,
 );
 
-const refugeeToEnteringPoliceStation = Server.NPC.Navigation.createPathfindingOperation(
-    SlamoRefugee.humanoid,
+const refugeeToEnteringPoliceStation = SlamoRefugee.createPathfindingOperation(
     WAYPOINTS.ToTheVillageRefugeeEnteringSlamoVillage.CFrame,
     WAYPOINTS.ToTheVillageRefugeeEnteringPoliceStation.CFrame,
     false,

@@ -24,7 +24,6 @@ import { LeaderboardService } from "server/services/leaderboard/LeaderboardServi
 import MarketplaceService from "server/services/marketplace/MarketplaceService";
 import ModdingService from "server/services/ModdingService";
 import DialogueService from "server/services/npc/DialogueService";
-import NPCNavigationService from "server/services/npc/NPCNavigationService";
 import ChatHookService from "server/services/permissions/ChatHookService";
 import PermissionsService from "server/services/permissions/PermissionsService";
 import ResetService from "server/services/ResetService";
@@ -64,7 +63,6 @@ export default class APIExposeService implements OnInit {
         private readonly moddingService: ModdingService,
         private readonly marketplaceService: MarketplaceService,
         private readonly namedUpgradeService: NamedUpgradeService,
-        private readonly npcNavigationService: NPCNavigationService,
         private readonly permissionsService: PermissionsService,
         private readonly playtimeService: PlaytimeService,
         private readonly questService: QuestService,
@@ -170,19 +168,6 @@ export default class APIExposeService implements OnInit {
              * @see {@link ItemService} for more details.
              */
             Item: this.itemService,
-
-            /**
-             * NPC-related services for managing NPCs in the game.
-             */
-            NPC: {
-                /**
-                 * NPC navigation/pathfinding service.
-                 *
-                 * @borrows NPCNavigationService as npcNavigationService
-                 * @see {@link NPCNavigationService} for more details.
-                 */
-                Navigation: this.npcNavigationService,
-            },
 
             /**
              * Playtime tracking service.

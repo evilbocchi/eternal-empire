@@ -12,6 +12,11 @@
 import { OnInit, Service } from "@flamework/core";
 import { MarketplaceService, Players } from "@rbxts/services";
 
+declare global {
+    /** Function type for handling product purchases. */
+    type ProductFunction = (receiptInfo: ReceiptInfo, player: Player) => Enum.ProductPurchaseDecision;
+}
+
 /**
  * Service that manages developer product purchase handling.
  */

@@ -9,13 +9,11 @@ import TheFirstDropper from "shared/items/negative/tfd/TheFirstDropper";
 import TheFirstFurnace from "shared/items/negative/tfd/TheFirstFurnace";
 import Packets from "shared/Packets";
 
-const triaToMineGuiding = Server.NPC.Navigation.createPathfindingOperation(
-    Tria.humanoid,
+const triaToMineGuiding = Tria.createPathfindingOperation(
     Tria.startingCFrame,
     WAYPOINTS.NewBeginningsTriaMineGuiding.CFrame,
 );
-const triaToStart = Server.NPC.Navigation.createPathfindingOperation(
-    Tria.humanoid,
+const triaToStart = Tria.createPathfindingOperation(
     WAYPOINTS.NewBeginningsTriaMineGuiding.CFrame,
     Tria.startingCFrame,
     false,

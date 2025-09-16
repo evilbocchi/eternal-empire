@@ -8,8 +8,7 @@ import LostPendant from "shared/items/0/winsome/LostPendant";
 import FreddysUpgrader from "shared/items/negative/friendliness/FreddysUpgrader";
 import { AREAS } from "shared/world/Area";
 
-const freddyToRequest = Server.NPC.Navigation.createPathfindingOperation(
-    Freddy.humanoid,
+const freddyToRequest = Freddy.createPathfindingOperation(
     Freddy.rootPart?.CFrame,
     WAYPOINTS.AHelpingHandFreddyRequest.CFrame,
 );

@@ -17,44 +17,37 @@ import { AREAS } from "shared/world/Area";
 
 const suspiciousWall = AREAS.BarrenIslands.map.WaitForChild("SuspiciousWall") as BasePart;
 
-const oldNoobToApproachingPasal = Server.NPC.Navigation.createPathfindingOperation(
-    OldNoob.humanoid,
-    OldNoob.rootPart?.CFrame,
+const oldNoobToApproachingPasal = OldNoob.createPathfindingOperation(
+    OldNoob.startingCFrame,
     WAYPOINTS.LearningThePastOldNoobApproachingPasal.CFrame,
 );
 
-const oldNoobToApproachingWall = Server.NPC.Navigation.createPathfindingOperation(
-    OldNoob.humanoid,
+const oldNoobToApproachingWall = OldNoob.createPathfindingOperation(
     WAYPOINTS.LearningThePastOldNoobApproachingPasal.CFrame,
     WAYPOINTS.LearningThePastOldNoobApproachingWall.CFrame,
 );
 
-const pasalToApproachingWall = Server.NPC.Navigation.createPathfindingOperation(
-    Pasal.humanoid,
-    Pasal.rootPart?.CFrame,
+const pasalToApproachingWall = Pasal.createPathfindingOperation(
+    Pasal.startingCFrame,
     WAYPOINTS.LearningThePastPasalApproachingWall.CFrame,
 );
 
-const oldNoobToEnteredCave = Server.NPC.Navigation.createPathfindingOperation(
-    OldNoob.humanoid,
+const oldNoobToEnteredCave = OldNoob.createPathfindingOperation(
     WAYPOINTS.LearningThePastEnterCave.CFrame,
     WAYPOINTS.LearningThePastOldNoobEnteredCave.CFrame,
 );
 
-const oldNoobToViewingLight = Server.NPC.Navigation.createPathfindingOperation(
-    OldNoob.humanoid,
+const oldNoobToViewingLight = OldNoob.createPathfindingOperation(
     WAYPOINTS.LearningThePastOldNoobEnteredCave.CFrame,
     WAYPOINTS.LearningThePastOldNoobViewingLight.CFrame,
 );
 
-const pasalToViewingLight = Server.NPC.Navigation.createPathfindingOperation(
-    Pasal.humanoid,
+const pasalToViewingLight = Pasal.createPathfindingOperation(
     WAYPOINTS.LearningThePastPasalEnteredCave.CFrame,
     WAYPOINTS.LearningThePastPasalViewingLight.CFrame,
 );
 
-const oldNoobToEnterCave = Server.NPC.Navigation.createPathfindingOperation(
-    OldNoob.humanoid,
+const oldNoobToEnterCave = OldNoob.createPathfindingOperation(
     WAYPOINTS.LearningThePastOldNoobViewingLight.CFrame,
     WAYPOINTS.LearningThePastEnterCave.CFrame,
     false,

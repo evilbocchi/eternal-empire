@@ -19,9 +19,8 @@ import OverengineeredGenerator from "shared/items/negative/trueease/Overengineer
 
 const craftingTableModel = WAYPOINTS.CraftingTable;
 
-const chuckToCraftingTable = Server.NPC.Navigation.createPathfindingOperation(
-    Chuck.humanoid,
-    Chuck.rootPart?.CFrame,
+const chuckToCraftingTable = Chuck.createPathfindingOperation(
+    Chuck.startingCFrame,
     WAYPOINTS.CraftingManiaChuckCraftingAssistance.CFrame,
 );
 
