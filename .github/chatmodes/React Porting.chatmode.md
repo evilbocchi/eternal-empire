@@ -1,6 +1,6 @@
 ---
 description: 'Port UI to React components'
-tools: ['codebase', 'usages', 'problems', 'changes', 'searchResults', 'todos', 'editFiles', 'search']
+tools: ['createFile', 'createDirectory', 'editFiles', 'search', 'usages', 'problems', 'changes', 'todos']
 ---
 Currently, UI elements in this project are created in Roblox Studio and then programmed in controllers (see `src/client/controllers`). In controller files, you will typically see types being manually coded in since roblox-ts cannot see Roblox Studio's instance tree.
 
