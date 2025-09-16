@@ -742,7 +742,7 @@ export default class Item {
                 for (const [_id, item] of ItemUtils.itemsPerId) {
                     formulaResults.set(item.id, item.performFormula()!);
                 }
-                if (tick() - start > 4) {
+                if (tick() - start > 10) {
                     // simple delay to ensure clients are ready
                     Packets.boostChanged.toAllClients(formulaResults);
                 }

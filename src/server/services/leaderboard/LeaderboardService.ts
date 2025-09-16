@@ -12,12 +12,12 @@
 
 import { OnoeNum } from "@antivivi/serikanum";
 import { OnStart, Service } from "@flamework/core";
-import { DataStoreService, Players } from "@rbxts/services";
+import { CollectionService, DataStoreService, Players } from "@rbxts/services";
 import DataService from "server/services/data/DataService";
 import LeaderstatsService from "server/services/leaderboard/LeaderstatsService";
-import { LEADERBOARDS, getNameFromUserId } from "shared/constants";
+import { getNameFromUserId } from "shared/constants";
 import { IS_STUDIO } from "shared/Context";
-import { CURRENCIES } from "shared/currency/CurrencyDetails";
+import { CURRENCIES, CURRENCY_DETAILS } from "shared/currency/CurrencyDetails";
 import Packets from "shared/Packets";
 import Sandbox from "shared/Sandbox";
 
@@ -135,9 +135,9 @@ export class LeaderboardService implements OnStart {
             ),
         );
 
-        for (const currency of CURRENCIES) {
-            const lb = LEADERBOARDS.FindFirstChild(currency);
-            if (lb === undefined) continue;
+        for (const lb of CollectionService.GetTagged("Leaderboard")) {
+            const currency = lb.Name as Currency;
+            if (CURRENCY_DETAILS[currency] === undefined) continue;
 
             const mostCurrencies = profile.mostCurrencies.get(currency);
             const amt = mostCurrencies === undefined ? undefined : new OnoeNum(mostCurrencies).toSingle();

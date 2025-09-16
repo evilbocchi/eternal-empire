@@ -1,10 +1,18 @@
 import Signal from "@antivivi/lemon-signal";
+import { observeTag } from "@antivivi/vrldk";
 import { Controller, OnStart } from "@flamework/core";
 import React from "@rbxts/react";
-import ReactRoblox from "@rbxts/react-roblox";
-import { LEADERBOARDS } from "shared/constants";
-import Packets from "shared/Packets";
+import { createRoot, Root } from "@rbxts/react-roblox";
 import LiveLeaderboard from "client/ui/components/leaderboard/LiveLeaderboard";
+import { playSound } from "shared/asset/GameAssets";
+import { DONATION_PRODUCTS } from "shared/devproducts/DonationProducts";
+import Packets from "shared/Packets";
+
+type DonationPart = Part & {
+    SurfaceGui: SurfaceGui & {
+        Display: ScrollingFrame;
+    };
+};
 
 @Controller()
 export class LeaderboardController implements OnStart, LeaderboardDataManager {
@@ -26,18 +34,61 @@ export class LeaderboardController implements OnStart, LeaderboardDataManager {
         };
     }
 
-    onStart() {
-        for (const leaderboard of LEADERBOARDS.GetChildren()) {
-            const guiPart = leaderboard.WaitForChild("GuiPart") as BasePart;
-            const surfaceGui = new Instance("SurfaceGui");
-            surfaceGui.Parent = guiPart;
-            task.spawn(() => {
-                const root = ReactRoblox.createRoot(surfaceGui);
-                root.render(
-                    <LiveLeaderboard dataManager={this} leaderboardType={leaderboard.Name as LeaderboardType} />,
-                );
-            });
+    /**
+     * Sets up the click event for each donation button.
+     * When a button is clicked, it prompts the user to donate the corresponding amount.
+     *
+     * @param donationOption The TextButton representing the donation option.
+     * @param productId The ID of the product to be purchased when the button is clicked.
+     */
+    setupDonationButton(donationOption: TextButton, productId: number) {
+        const amount = donationOption.LayoutOrder;
+        let donationProduct = 0;
+        for (const dp of DONATION_PRODUCTS) {
+            if (dp.amount === amount) {
+                donationProduct = dp.id;
+            }
         }
+        donationOption.MouseButton1Click.Connect(() => {
+            playSound("MenuClick.mp3");
+            Packets.promptDonation.toServer(donationProduct);
+        });
+    }
+
+    onStart() {
+        const ROOTS_PER_LEADERBOARD = new Map<Instance, Root>();
+        observeTag(
+            "Leaderboard",
+            (leaderboard) => {
+                const guiPart = leaderboard.WaitForChild("GuiPart") as BasePart;
+                const surfaceGui = new Instance("SurfaceGui");
+                surfaceGui.Parent = guiPart;
+                task.spawn(() => {
+                    const root = createRoot(surfaceGui);
+                    root.render(
+                        <LiveLeaderboard dataManager={this} leaderboardType={leaderboard.Name as LeaderboardType} />,
+                    );
+                    ROOTS_PER_LEADERBOARD.set(leaderboard, root);
+                });
+                if (leaderboard.Name === "Donated") {
+                    const donationPart = leaderboard.WaitForChild("DonationPart") as DonationPart;
+                    for (const donationOption of donationPart.SurfaceGui.Display.GetChildren()) {
+                        if (!donationOption.IsA("TextButton")) continue;
+                        this.setupDonationButton(
+                            donationOption as TextButton,
+                            DONATION_PRODUCTS[donationOption.LayoutOrder - 1]?.id || 0,
+                        );
+                    }
+                }
+            },
+            (leaderboard) => {
+                const root = ROOTS_PER_LEADERBOARD.get(leaderboard);
+                if (root) {
+                    root.unmount();
+                    ROOTS_PER_LEADERBOARD.delete(leaderboard);
+                }
+            },
+        );
 
         Packets.leaderboardData.observe((leaderboardData) => {
             for (const [type, entries] of leaderboardData) {

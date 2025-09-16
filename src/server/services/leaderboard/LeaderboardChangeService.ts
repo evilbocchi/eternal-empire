@@ -11,12 +11,12 @@
  */
 
 import { OnStart, Service } from "@flamework/core";
-import { DataStoreService, HttpService, RunService } from "@rbxts/services";
+import { CollectionService, DataStoreService, HttpService, RunService } from "@rbxts/services";
 import { $env } from "rbxts-transform-env";
 import DataService from "server/services/data/DataService";
 import Sandbox from "shared/Sandbox";
-import { LEADERBOARDS, getNameFromUserId } from "shared/constants";
-import { CURRENCIES } from "shared/currency/CurrencyDetails";
+import { getNameFromUserId } from "shared/constants";
+import { CURRENCIES, CURRENCY_DETAILS } from "shared/currency/CurrencyDetails";
 
 /**
  * Service that monitors leaderboard position changes and sends webhook notifications.
@@ -40,11 +40,10 @@ export default class LeaderboardChangeService implements OnStart {
         this.leaderboardStores.set("TimePlayed", this.totalTimeStore);
         this.leaderboardStores.set("Donated", this.donatedStore);
 
-        for (const currency of CURRENCIES) {
-            const lb = LEADERBOARDS.FindFirstChild(currency);
-            if (lb !== undefined) {
-                this.leaderboardStores.set(currency, DataStoreService.GetOrderedDataStore(lb.Name));
-            }
+        for (const lb of CollectionService.GetTagged("Leaderboard")) {
+            const currency = lb.Name as Currency;
+            if (CURRENCY_DETAILS[currency] === undefined) continue;
+            this.leaderboardStores.set(currency, DataStoreService.GetOrderedDataStore(lb.Name));
         }
     }
 

@@ -38,21 +38,6 @@ export function getNameFromUserId(userId: number | undefined) {
 
 export const getStartCamera = () => Workspace.FindFirstChild("StartCamera") as Part;
 
-export const LEADERBOARDS = Workspace.WaitForChild("Leaderboards") as Folder & {
-    TimePlayed: Model;
-    Level: Model;
-    Funds: Model;
-    Power: Model;
-    Skill: Model;
-    Donated: Model & {
-        DonationPart: Part & {
-            SurfaceGui: SurfaceGui & {
-                Display: ScrollingFrame;
-            };
-        };
-    };
-};
-
 export const MUSIC_GROUP = SoundService.WaitForChild("Music") as SoundGroup;
 
 export const NAMES_PER_USER_ID = new Map<number, string>();

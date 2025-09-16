@@ -47,14 +47,6 @@ export default class Sandbox {
             return false;
         }
 
-        const leaderboards = new Instance("Folder");
-        leaderboards.Name = "Leaderboards";
-        leaderboards.Parent = Workspace;
-
-        const npcModels = new Instance("Folder");
-        npcModels.Name = "NPCs";
-        npcModels.Parent = Workspace;
-
         const wanderers = new Instance("Folder");
         wanderers.Name = "Wanderers";
         wanderers.Parent = Workspace;

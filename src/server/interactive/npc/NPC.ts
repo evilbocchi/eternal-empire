@@ -20,7 +20,7 @@ import Packets from "shared/Packets";
  */
 export type NPCAnimationType = "Default" | "Walk" | "Run" | "Jump";
 
-export const NPC_MODELS = Workspace.WaitForChild("NPCs") as Folder;
+export const NPC_MODELS = Workspace.FindFirstChild("NPCs") as Folder | undefined;
 
 /**
  * Represents a non-player character (NPC) with animations, dialogue, and interaction logic.
@@ -43,7 +43,10 @@ export default class NPC extends Reloadable {
         WaypointSpacing: 6,
     };
 
-    readonly animAssetIdPerType = new Map<NPCAnimationType, number>();
+    readonly animAssetIdPerType = new Map<NPCAnimationType, number>([
+        ["Walk", 180426354],
+        ["Jump", 125750702],
+    ]);
     readonly defaultDialogues = new Array<Dialogue>();
     readonly priorityPerDialogue = new Map<Dialogue, number>();
     readonly animTrackPerType = new Map<NPCAnimationType, AnimationTrack>();
@@ -70,24 +73,15 @@ export default class NPC extends Reloadable {
      * @returns A tuple containing the model, humanoid, and root part if successful; otherwise, undefined values.
      */
     private loadModel(
-        model = NPC_MODELS.FindFirstChild(this.id) as Model | undefined,
+        model = NPC_MODELS?.FindFirstChild(this.id) as Model | undefined,
     ): LuaTuple<[Model?, Humanoid?, BasePart?]> {
-        if (model === undefined) {
-            warn(`NPC model not found for ID: ${this.id}`);
-            return $tuple();
-        }
+        if (model === undefined) return $tuple();
 
         const humanoid = model.FindFirstChildOfClass("Humanoid") as Humanoid | undefined;
-        if (humanoid === undefined) {
-            warn(`Humanoid not found for NPC ID: ${this.id}`);
-            return $tuple();
-        }
+        if (humanoid === undefined) return $tuple();
 
         const rootPart = humanoid.RootPart as BasePart | undefined;
-        if (rootPart === undefined) {
-            warn(`RootPart not found for NPC ID: ${this.id}`);
-            return $tuple();
-        }
+        if (rootPart === undefined) return $tuple();
 
         this.initialModelSnapshot = model.Clone();
         this.initialModelSnapshot.Parent = ServerStorage;
@@ -108,11 +102,7 @@ export default class NPC extends Reloadable {
     load() {
         if (IS_CI || this.id === "Empty") return;
 
-        this.animAssetIdPerType.set("Walk", 180426354);
-        this.animAssetIdPerType.set("Jump", 125750702);
-
         const [model, humanoid, rootPart] = this.loadModel();
-
         if (model === undefined || humanoid === undefined || rootPart === undefined) return;
 
         const parts = model.GetDescendants();
@@ -123,7 +113,7 @@ export default class NPC extends Reloadable {
         }
         rootPart.CustomPhysicalProperties = new PhysicalProperties(100, 0.3, 0.5);
 
-        // Always play the default animation when loaded
+        // Always play the default animation
         this.playAnimation("Default");
 
         // Track the NPC's position and stop the walk animation if it hasn't moved
@@ -169,6 +159,8 @@ export default class NPC extends Reloadable {
         };
         const displayNameConnection = humanoid.GetPropertyChangedSignal("DisplayName").Connect(updateDisplayName);
         updateDisplayName();
+
+        // Handle NPC interaction
         const defaultDialogues = this.defaultDialogues;
         let defaultDialogueIndex = 0;
         const defaultDialoguesCount = defaultDialogues.size();
@@ -202,6 +194,7 @@ export default class NPC extends Reloadable {
             jumpingConnection.Disconnect();
             displayNameConnection.Disconnect();
             promptConnection.Disconnect();
+            Dialogue.proximityPrompts.delete(prompt);
             prompt.Destroy();
 
             for (const [, animTrack] of this.animTrackPerType) {
