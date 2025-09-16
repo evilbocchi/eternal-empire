@@ -1,4 +1,5 @@
 import Command, { CommandAPI } from "shared/commands/Command";
+import { Server } from "shared/item/ItemUtils";
 
 export = new Command(script.Name)
     .addAlias("sset")
@@ -15,6 +16,6 @@ export = new Command(script.Name)
             stagePerQuest.set(questId, tonumber(stage) ?? 0);
         }
 
-        CommandAPI.Hamster.sequentialReload();
+        Server.Hamster.reload();
     })
     .setPermissionLevel(4);

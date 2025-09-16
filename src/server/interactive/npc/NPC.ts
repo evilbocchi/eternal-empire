@@ -25,7 +25,7 @@ export const NPC_MODELS = Workspace.FindFirstChild("NPCs") as Folder | undefined
 /**
  * Represents a non-player character (NPC) with animations, dialogue, and interaction logic.
  */
-export default class NPC extends Reloadable {
+export default class NPC extends Reloadable<NPC> {
     static readonly HOT_RELOADER = new HotReloader<NPC>(script.Parent!, new Set([script]));
 
     /** Material costs for pathfinding calculations. Higher costs make NPCs avoid certain materials. */
@@ -589,7 +589,7 @@ export class Dialogue<T extends NPC = NPC> {
      * @param dialogue The Dialogue instance to remove.
      */
     remove() {
-        this.npc.removeDialogue(this);
+        this.npc?.removeDialogue(this); // Optional check if NPCs are unloaded before dialogues
     }
 
     /**

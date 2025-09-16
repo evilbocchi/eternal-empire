@@ -3,7 +3,7 @@ import { ProximityPromptService } from "@rbxts/services";
 import { Dialogue } from "server/interactive/npc/NPC";
 import { HotReloader, Reloadable } from "shared/HotReload";
 
-class InteractableObject extends Reloadable {
+class InteractableObject extends Reloadable<InteractableObject> {
     static readonly HOT_RELOADER = new HotReloader<InteractableObject>(script.Parent!, new Set([script]));
     private static promptTriggeredConnection?: RBXScriptConnection;
 

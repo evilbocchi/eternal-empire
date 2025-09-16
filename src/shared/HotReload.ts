@@ -2,7 +2,7 @@
  * Abstract class representing a reloadable module.
  * Modules extending this class must implement an id and an unload method.
  */
-export abstract class Reloadable {
+export abstract class Reloadable<T extends Reloadable<T>> {
     /**
      * Abstract method to load the module, called after the class is instantiated.
      * Should return a cleanup function to be called on unload, or undefined if no cleanup is needed.
@@ -12,7 +12,7 @@ export abstract class Reloadable {
 
     constructor(
         readonly id: string,
-        protected readonly hotReloader: HotReloader<Reloadable>,
+        protected readonly hotReloader: HotReloader<T>,
     ) {}
 
     /**
@@ -23,9 +23,9 @@ export abstract class Reloadable {
     reconcile(): this {
         const existing = this.hotReloader.RELOADABLE_PER_ID.get(this.id);
         if (existing !== undefined) {
-            return existing as this;
+            return existing as unknown as this;
         }
-        this.hotReloader.RELOADABLE_PER_ID.set(this.id, this);
+        this.hotReloader.RELOADABLE_PER_ID.set(this.id, this as unknown as T);
         return this;
     }
 }
@@ -34,10 +34,12 @@ export abstract class Reloadable {
  * HotReloader class to manage hot-reloading of modules.
  * It tracks modules and their instances, allowing for unloading and reloading.
  */
-export class HotReloader<T extends Reloadable> {
+export class HotReloader<T extends Reloadable<T>> {
     readonly MODULES = new Map<string, ModuleScript>();
     readonly RELOADABLE_PER_ID = new Map<string, T>();
     readonly CLEANUP_PER_RELOADABLE = new Map<T, () => void>();
+
+    private loadCallback?: (reloadablePerId: Map<string, T>) => void;
 
     /**
      * Set of instances to exclude from reloading.
@@ -49,6 +51,16 @@ export class HotReloader<T extends Reloadable> {
         exclude?: Set<Instance>,
     ) {
         if (exclude) this.exclude = exclude;
+    }
+
+    /**
+     * Sets a callback to be invoked after loading modules.
+     * @param callback The callback function to set.
+     * @returns The HotReloader instance for chaining.
+     */
+    setLoadCallback(callback: (reloadablePerId: Map<string, T>) => void) {
+        this.loadCallback = callback;
+        return this;
     }
 
     /**
@@ -93,6 +105,7 @@ export class HotReloader<T extends Reloadable> {
                 }
             }
         }
+        this.loadCallback?.(this.RELOADABLE_PER_ID);
         return this.RELOADABLE_PER_ID;
     }
 

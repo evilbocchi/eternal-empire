@@ -176,26 +176,25 @@ export default class HamsterService implements OnStart {
         this.stuffAndRunMode(foodItem);
     }
 
-    /** Performs hot-reloading of key game components in sequence. */
-    sequentialReload() {
-        NPC.HOT_RELOADER.reload();
-        InteractableObject.HOT_RELOADER.reload();
-        Quest.reload();
-    }
-
     feedSunflowerSeeds() {
         const food = new Food(5);
         this.detectFood(food);
     }
 
+    reload() {
+        if (!IS_STUDIO) return;
+
+        NPC.HOT_RELOADER.reload();
+        InteractableObject.HOT_RELOADER.reload();
+        Quest.reload();
+        print("Hot reload complete. You're welcome. 🐹");
+    }
+
     onStart() {
-        this.sequentialReload();
+        NPC.HOT_RELOADER.load();
+        InteractableObject.HOT_RELOADER.load();
+        Quest.reload();
 
-        Packets.requestReload.fromClient(() => {
-            if (!IS_STUDIO) return;
-
-            this.sequentialReload();
-            print("Hot reload complete. You're welcome. 🐹");
-        });
+        Packets.requestReload.fromClient(() => this.reload());
     }
 }

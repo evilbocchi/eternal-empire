@@ -175,10 +175,7 @@ export class Stage {
      * Unloads the stage and its resources.
      */
     unload() {
-        if (this.dialogue) this.dialogue.remove();
-        this.completedCallback = undefined;
-        this.reachedCallback = undefined;
-        this.positionChangedCallback = undefined;
+        this.dialogue?.remove();
         table.clear(this);
     }
 }
@@ -187,7 +184,7 @@ export class Stage {
  * Represents a multi-stage quest, including its metadata, stages, rewards, and completion dialogue.
  * Provides methods for configuring quest properties, managing stages, and handling quest initialization.
  */
-export default class Quest extends Reloadable {
+export default class Quest extends Reloadable<Quest> {
     private static readonly HOT_RELOADER = new HotReloader<Quest>(script.Parent!, new Set([script]));
     private static readonly CLEANUP_PER_STAGE = new Map<Stage, () => void>();
 
