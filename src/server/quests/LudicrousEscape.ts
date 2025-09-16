@@ -1,12 +1,12 @@
 import { OnoeNum } from "@antivivi/serikanum";
 import { convertToMMSS, spawnExplosion } from "@antivivi/vrldk";
 import { RunService, TweenService, Workspace } from "@rbxts/services";
-import InteractableObject from "server/InteractableObject";
-import { Dialogue, EMPTY_NPC } from "server/npc/NPC";
-import Andy from "server/npc/Andy";
-import PoliceOfficer from "server/npc/Police Officer";
-import Simpul from "server/npc/Simpul";
-import SlamoReceptionist from "server/npc/Slamo Receptionist";
+import Andy from "server/interactive/npc/Andy";
+import { Dialogue, EMPTY_NPC } from "server/interactive/npc/NPC";
+import PoliceOfficer from "server/interactive/npc/Police Officer";
+import Simpul from "server/interactive/npc/Simpul";
+import SlamoReceptionist from "server/interactive/npc/Slamo Receptionist";
+import SlamoBook from "server/interactive/object/SlamoBook";
 import Quest, { Stage } from "server/quests/Quest";
 import { emitEffect, playSound } from "shared/asset/GameAssets";
 import { PLACED_ITEMS_FOLDER, WAYPOINTS } from "shared/constants";
@@ -128,7 +128,7 @@ export = new Quest(script.Name)
                 ];
                 for (const dialogue of dialogues) Server.Dialogue.addDialogue(dialogue);
                 const connection = Server.Dialogue.dialogueFinished.connect((dialogue) => {
-                    if (dialogue === InteractableObject.SlamoBook.dialogue) stage.complete();
+                    if (dialogue === SlamoBook.dialogue) stage.complete();
                 });
                 return () => {
                     for (const dialogue of dialogues) Server.Dialogue.removeDialogue(dialogue);

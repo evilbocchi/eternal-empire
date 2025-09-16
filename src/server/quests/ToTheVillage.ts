@@ -1,9 +1,9 @@
 import { playSoundAtPart } from "@antivivi/vrldk";
 import { TweenService, Workspace } from "@rbxts/services";
-import { Dialogue } from "server/npc/NPC";
-import Freddy from "server/npc/Freddy";
-import SlamoReceptionist from "server/npc/Slamo Receptionist";
-import SlamoRefugee from "server/npc/Slamo Refugee";
+import { Dialogue } from "server/interactive/npc/NPC";
+import Freddy from "server/interactive/npc/Freddy";
+import SlamoReceptionist from "server/interactive/npc/Slamo Receptionist";
+import SlamoRefugee from "server/interactive/npc/Slamo Refugee";
 import Quest, { Stage } from "server/quests/Quest";
 import { getEffect, getSound, playSound } from "shared/asset/GameAssets";
 import { WAYPOINTS } from "shared/constants";

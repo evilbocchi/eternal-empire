@@ -1,5 +1,5 @@
-import { Dialogue } from "server/npc/NPC";
-import Freddy from "server/npc/Freddy";
+import { Dialogue } from "server/interactive/npc/NPC";
+import Freddy from "server/interactive/npc/Freddy";
 import Quest, { Stage } from "server/quests/Quest";
 import { emitEffect, getSound } from "shared/asset/GameAssets";
 import { WAYPOINTS } from "shared/constants";

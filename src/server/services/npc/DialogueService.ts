@@ -14,9 +14,9 @@
 import Signal from "@antivivi/lemon-signal";
 import { OnInit, OnStart, Service } from "@flamework/core";
 import { Players, ProximityPromptService, TweenService, Workspace } from "@rbxts/services";
-import InteractableObject from "server/InteractableObject";
-import NPC, { Dialogue, NPC_MODELS } from "server/npc/NPC";
-import NameChanger from "server/npc/Name Changer";
+import NameChanger from "server/interactive/npc/Name Changer";
+import NPC, { Dialogue } from "server/interactive/npc/NPC";
+import InteractableObject from "server/interactive/object/InteractableObject";
 import DataService from "server/services/data/DataService";
 import { ASSETS } from "shared/asset/GameAssets";
 import { getDisplayName } from "shared/constants";
@@ -189,7 +189,7 @@ export default class DialogueService implements OnInit, OnStart {
 
         ProximityPromptService.PromptTriggered.Connect((prompt, player) => {
             if (this.isInteractionEnabled === false || prompt.Parent === undefined) return;
-            const interactableObject = InteractableObject.REGISTRY.get(prompt.Parent.Name);
+            const interactableObject = InteractableObject.HOT_RELOADER.RELOADABLE_PER_ID.get(prompt.Parent.Name);
             if (interactableObject === undefined) return;
             this.proximityPrompts.add(prompt);
             interactableObject.interacted.fire(player);
@@ -250,13 +250,14 @@ export default class DialogueService implements OnInit, OnStart {
         prompt.Parent = npc.model!;
     }
 
-    loadNPCs() {
+    loadInteractive() {
+        InteractableObject.HOT_RELOADER.reload();
         for (const [, npc] of NPC.HOT_RELOADER.reload()) {
             this.onNPCLoad(npc);
         }
     }
 
     onStart() {
-        this.loadNPCs();
+        this.loadInteractive();
     }
 }

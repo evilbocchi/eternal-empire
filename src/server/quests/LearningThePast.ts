@@ -1,12 +1,13 @@
 import { spawnExplosion } from "@antivivi/vrldk";
 import { RunService, TweenService, Workspace } from "@rbxts/services";
-import InteractableObject from "server/InteractableObject";
-import { Dialogue, EMPTY_NPC } from "server/npc/NPC";
-import Librarian from "server/npc/Librarian";
-import LibraryNoob1 from "server/npc/Library Noob 1";
-import LibraryNoob2 from "server/npc/Library Noob 2";
-import OldNoob from "server/npc/Old Noob";
-import Pasal from "server/npc/Pasal";
+import Librarian from "server/interactive/npc/Librarian";
+import LibraryNoob1 from "server/interactive/npc/Library Noob 1";
+import LibraryNoob2 from "server/interactive/npc/Library Noob 2";
+import { Dialogue, EMPTY_NPC } from "server/interactive/npc/NPC";
+import OldNoob from "server/interactive/npc/Old Noob";
+import Pasal from "server/interactive/npc/Pasal";
+import OldBooks1 from "server/interactive/object/OldBooks1";
+import SuspiciousWall from "server/interactive/object/SuspiciousWall";
 import Quest, { Stage } from "server/quests/Quest";
 import { emitEffect, playSound } from "shared/asset/GameAssets";
 import { WAYPOINTS } from "shared/constants";
@@ -120,7 +121,7 @@ export = new Quest(script.Name)
                 Pasal.playAnimation("Default");
 
                 const connection = Server.Dialogue.dialogueFinished.connect((dialogue) => {
-                    if (dialogue === InteractableObject.OldBooks1.dialogue) {
+                    if (dialogue === OldBooks1.dialogue) {
                         stage.complete();
                     }
                 });
@@ -476,7 +477,7 @@ export = new Quest(script.Name)
         });
         Server.Event.addCompletionListener("IrregularlyShapedKeyUsable", (isCompleted) => {
             if (!isCompleted) return;
-            InteractableObject.SuspiciousWall.dialogueUponInteract(keyUsed);
+            SuspiciousWall.dialogueUponInteract(keyUsed);
         });
         Server.Event.setEventCompleted("SuspiciousWallOpened", false);
         Server.Dialogue.dialogueFinished.connect((dialogue) => {

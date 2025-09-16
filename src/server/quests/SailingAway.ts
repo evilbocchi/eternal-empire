@@ -1,8 +1,8 @@
-import { Dialogue } from "server/npc/NPC";
-import CaptainBacon from "server/npc/Captain Bacon";
-import OldNoob from "server/npc/Old Noob";
-import Prest from "server/npc/Prest";
-import Tria from "server/npc/Tria";
+import { Dialogue } from "server/interactive/npc/NPC";
+import CaptainBacon from "server/interactive/npc/Captain Bacon";
+import OldNoob from "server/interactive/npc/Old Noob";
+import Prest from "server/interactive/npc/Prest";
+import Tria from "server/interactive/npc/Tria";
 import Quest, { Stage } from "server/quests/Quest";
 import { Server } from "shared/item/ItemUtils";
 
