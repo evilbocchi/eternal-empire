@@ -7,7 +7,6 @@ export = new Item(script.Name)
     .setName("Aquatic Furnace")
     .setDescription(
         `A furnace that only works on low levels.
-
 %mul% value.`,
     )
     .setDifficulty(Difficulty.DoSomething)

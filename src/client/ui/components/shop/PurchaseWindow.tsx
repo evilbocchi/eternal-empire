@@ -1,5 +1,6 @@
 import Difficulty from "@antivivi/jjt-difficulties";
 import React, { useMemo } from "@rbxts/react";
+import InventoryItemSlot from "client/ui/components/inventory/InventoryItemSlot";
 import ItemWindow from "client/ui/components/shop/ItemWindow";
 import useSingleDocumentWindow from "client/ui/components/sidebar/useSingleDocumentWindow";
 import getDifficultyDisplayColors from "client/ui/components/tooltip/getDifficultyDisplayColors";
@@ -118,7 +119,7 @@ export default function PurchaseWindow({
     description,
     creator,
     priceOptions,
-    ownedText,
+    owned,
     canPurchase,
     affordable,
     onPurchase,
@@ -137,8 +138,8 @@ export default function PurchaseWindow({
         amount: number | string;
         affordable: boolean;
     }>;
-    /** Current owned amount text */
-    ownedText: string;
+    /** Current owned amount */
+    owned: number;
     /** Whether the purchase button should be visible */
     canPurchase: boolean;
     /** Whether all price options are affordable */
@@ -181,7 +182,7 @@ export default function PurchaseWindow({
             />
 
             {/* Item slot display */}
-            <frame BackgroundTransparency={1} LayoutOrder={1} Size={new UDim2(1, 0, 0, 120)}>
+            <frame BackgroundTransparency={1} LayoutOrder={1} Size={new UDim2(1, 0, 0, 50)}>
                 <uilistlayout
                     FillDirection={Enum.FillDirection.Horizontal}
                     HorizontalAlignment={Enum.HorizontalAlignment.Center}
@@ -191,15 +192,14 @@ export default function PurchaseWindow({
                 />
 
                 {/* Item slot */}
-                <textbutton
-                    BackgroundColor3={Color3.fromRGB(52, 155, 255)}
-                    BorderColor3={Color3.fromRGB(0, 0, 0)}
-                    BorderSizePixel={5}
-                    LayoutOrder={1}
-                    Selectable={false}
-                    Size={new UDim2(0, 100, 0, 100)}
-                    Text=""
-                ></textbutton>
+                <InventoryItemSlot
+                    item={item}
+                    amount={owned}
+                    layoutOrder={-1}
+                    visible={true}
+                    onActivated={() => {}}
+                    size={new UDim2(0, 50, 0, 50)}
+                />
 
                 <frame AutomaticSize={Enum.AutomaticSize.X} BackgroundTransparency={1} Size={new UDim2(0, 0, 1, 0)}>
                     <textlabel
@@ -207,7 +207,7 @@ export default function PurchaseWindow({
                         BackgroundTransparency={1}
                         FontFace={RobotoSlabHeavy}
                         Position={new UDim2(0, 110, 0, 15)}
-                        Size={new UDim2(0, 0, 0.4, 0)}
+                        Size={new UDim2(0, 0, 0.57, 0)}
                         Text={item.name}
                         TextColor3={Color3.fromRGB(255, 255, 255)}
                         TextScaled={true}
@@ -222,7 +222,7 @@ export default function PurchaseWindow({
                         BackgroundTransparency={1}
                         LayoutOrder={1}
                         Position={new UDim2(0, 110, 1, -15)}
-                        Size={new UDim2(0, 0, 0.3, 0)}
+                        Size={new UDim2(0, 0, 0.43, 0)}
                     >
                         <uilistlayout
                             FillDirection={Enum.FillDirection.Horizontal}

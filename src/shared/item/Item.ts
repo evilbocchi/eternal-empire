@@ -5,14 +5,14 @@ import Difficulty from "@antivivi/jjt-difficulties";
 import { OnoeNum } from "@antivivi/serikanum";
 import { getAllInstanceInfo } from "@antivivi/vrldk";
 import { RunService } from "@rbxts/services";
-import Area, { AREAS } from "shared/world/Area";
 import GameSpeed from "shared/GameSpeed";
 import Packets from "shared/Packets";
-import { RESET_LAYERS } from "shared/currency/mechanics/ResetLayer";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Formula from "shared/currency/Formula";
+import { RESET_LAYERS } from "shared/currency/mechanics/ResetLayer";
 import { ITEM_MODELS } from "shared/item/ItemModels";
 import ItemUtils, { Server } from "shared/item/ItemUtils";
+import Area, { AREAS } from "shared/world/Area";
 
 declare global {
     /**
@@ -104,9 +104,9 @@ export default class Item {
     description: string;
 
     /**
-     * The description of the item that will be shown in the tooltip when hovering over the item in the inventory.
-     *
-     * If not set, the {@link description} will be used as the tooltip description.
+     * The description of the item that will be shown in the tooltip when hovering over the item in the inventory,
+     * and does **not** support currency coloring or trait formatting, unlike {@link description}.
+     * If not set, the description will be used as the tooltip description.
      */
     tooltipDescription?: string;
 
@@ -274,6 +274,7 @@ export default class Item {
     /**
      * Set the tooltip description of the item.
      * This description will be shown in the tooltip when hovering over the item in the inventory.
+     * It does **not** support currency coloring or trait formatting, unlike {@link description}.
      *
      * @param description The tooltip description of the item.
      * @returns The item instance.

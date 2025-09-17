@@ -1,17 +1,28 @@
 import { BaseOnoeNum, OnoeNum } from "@antivivi/serikanum";
 import { buildRichText, combineHumanReadable, formatRichText } from "@antivivi/vrldk";
 import StringBuilder from "@rbxts/stringbuilder";
-import { AREAS } from "shared/world/Area";
 import Packets from "shared/Packets";
-import { RESET_LAYERS } from "shared/currency/mechanics/ResetLayer";
 import Sandbox from "shared/Sandbox";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
+import { CURRENCY_DETAILS } from "shared/currency/CurrencyDetails";
+import { RESET_LAYERS } from "shared/currency/mechanics/ResetLayer";
 import Item from "shared/item/Item";
+import Unique from "shared/item/traits/Unique";
+import Items from "shared/items/Items";
+import { AREAS } from "shared/world/Area";
 
 const RESET_LAYERS_UNLOCKED = AREAS.SlamoVillage.unlocked;
 const SANDBOX_ENABLED = Sandbox.getEnabled();
 
 export default class ItemMetadata {
+    static readonly DESCRIPTION_PER_ITEM = (() => {
+        const map = new Map<Item, string>();
+        for (const [, item] of Items.itemsPerId) {
+            map.set(item, this.formatCurrencyColors(item.description));
+        }
+        return map;
+    })();
+
     static readonly INDICES = {
         TOOL: 0,
         SPACING: 1,
@@ -166,5 +177,83 @@ export default class ItemMetadata {
         const text = `Lv. Min: ${levelReq}`;
 
         this.builder[ItemMetadata.INDICES.LEVEL_REQ] = `\n${formatRichText(text, color, this.size, this.weight)}`;
+    }
+
+    /**
+     * Append this metadata to the description.
+     * @param description The existing description to append to.
+     * @param color Optional color for the appended text.
+     * @param size Optional font size.
+     * @param weight Optional font weight.
+     * @returns The combined rich text string.
+     */
+    private appendMetadata(
+        description: string,
+        color = Color3.fromRGB(195, 195, 195),
+        size = 18,
+        weight?: string | number,
+    ) {
+        const builder = buildRichText(undefined, description, color, size, weight);
+        return builder.appendAll(this.builder).toString();
+    }
+
+    /**
+     * Format an item's description with metadata appended.
+     * @param item The item whose description to format.
+     * @param uuid Optional UUID for unique item instances.
+     * @param useTooltipDescription Whether to use the tooltip description if available.
+     * @param color Optional color for the description text.
+     * @param size Optional font size.
+     * @param weight Optional font weight.
+     * @returns The combined rich text string.
+     */
+    formatItemDescription(
+        item: Item,
+        uuid?: string,
+        useTooltipDescription?: boolean,
+        color?: Color3,
+        size?: number,
+        weight?: string | number,
+    ) {
+        const description = ItemMetadata.formatDescription(item, uuid, useTooltipDescription);
+        return this.appendMetadata(description, color, size, weight);
+    }
+
+    /**
+     * Formats currency names in a string with their associated colors.
+     * @param text The input text containing currency names.
+     * @returns The text with currency names color-formatted.
+     */
+    static formatCurrencyColors(text: string) {
+        for (const [currency, details] of pairs(CURRENCY_DETAILS)) {
+            [text] = text!.gsub(currency, `<font color="#${details.color.ToHex()}">${currency}</font>`);
+        }
+        return text;
+    }
+
+    /**
+     * Formats an item's description, applying currency colors and unique instance traits if provided.
+     * @param item The item whose description is to be formatted.
+     * @param uuid Optional UUID for unique item instances.
+     * @returns The formatted description string.
+     */
+    static formatDescription(item: Item, uuid?: string, useTooltipDescription?: boolean) {
+        if (useTooltipDescription === true) {
+            const tooltipDescription = item.tooltipDescription;
+            if (tooltipDescription !== undefined) return tooltipDescription;
+        }
+
+        let description = ItemMetadata.DESCRIPTION_PER_ITEM.get(item);
+        if (description === undefined) {
+            description = this.formatCurrencyColors(item.description);
+            ItemMetadata.DESCRIPTION_PER_ITEM.set(item, description);
+        }
+        if (uuid !== undefined) {
+            const uniqueInstance = Packets.uniqueInstances.get()?.get(uuid);
+            if (uniqueInstance !== undefined) {
+                description = item.trait(Unique).formatWithPots(description, uniqueInstance);
+            }
+        }
+        return item.format(description);
     }
 }

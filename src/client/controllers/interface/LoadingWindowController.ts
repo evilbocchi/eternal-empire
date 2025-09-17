@@ -13,7 +13,6 @@
 import { Controller, OnInit } from "@flamework/core";
 import { TweenService } from "@rbxts/services";
 import { PLAYER_GUI } from "client/constants";
-import UIController from "client/controllers/core/UIController";
 import { playSound } from "shared/asset/GameAssets";
 
 export const LOADING_SCREEN = PLAYER_GUI.WaitForChild("LoadingScreen") as ScreenGui;
@@ -30,8 +29,6 @@ export const LOADING_WINDOW = LOADING_SCREEN.WaitForChild("LoadingWindow") as Fr
  */
 @Controller()
 export default class LoadingWindowController implements OnInit {
-    constructor(private uiController: UIController) {}
-
     /**
      * Hides the loading window with an animation and plays a sound.
      */

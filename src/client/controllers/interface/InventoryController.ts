@@ -17,11 +17,11 @@
 
 import { Controller } from "@flamework/core";
 import BuildController from "client/controllers/gameplay/BuildController";
+import { getBestUniqueInstances } from "client/ui/components/inventory/InventoryWindow";
 import { playSound } from "shared/asset/GameAssets";
 import Item from "shared/item/Item";
 import Items from "shared/items/Items";
 import Packets from "shared/Packets";
-import { getBestUniqueInstances } from "client/ui/components/inventory/InventoryWindow";
 
 /**
  * Controller responsible for managing player inventory data and business logic.

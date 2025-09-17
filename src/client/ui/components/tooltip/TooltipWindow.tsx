@@ -1,15 +1,12 @@
 import Signal from "@antivivi/lemon-signal";
-import { buildRichText } from "@antivivi/vrldk";
 import React, { useEffect, useMemo, useRef } from "@rbxts/react";
 import { RunService, TweenService, Workspace } from "@rbxts/services";
 import { Environment } from "@rbxts/ui-labs";
 import { RobotoSlab, RobotoSlabBold, RobotoSlabExtraBold, RobotoSlabMedium } from "client/ui/GameFonts";
 import getDifficultyDisplayColors from "client/ui/components/tooltip/getDifficultyDisplayColors";
-import Packets from "shared/Packets";
 import { getAsset } from "shared/asset/AssetMap";
 import Item from "shared/item/Item";
 import ItemMetadata from "shared/item/ItemMetadata";
-import Unique from "shared/item/traits/Unique";
 import Items from "shared/items/Items";
 
 // Precompute item metadata for efficient tooltip rendering
@@ -130,35 +127,28 @@ export default function TooltipWindow() {
         const item = data.item;
         const difficulty = item.difficulty;
 
-        let description = item.tooltipDescription ?? item.description;
-
-        // Use unique item description if this is a unique item
-        if (data.uuid !== undefined) {
-            const uniqueInstance = Packets.uniqueInstances.get()?.get(data.uuid);
-            if (uniqueInstance !== undefined) {
-                description = item.trait(Unique).formatWithPots(description, uniqueInstance);
-            }
-        }
-
-        // Build rich text for item description
-        const builder = buildRichText(undefined, item.format(description), Color3.fromRGB(195, 195, 195), 18, "Medium");
-
         const itemMetadata = METADATA_PER_ITEM.get(item);
-        if (itemMetadata) {
-            builder.appendAll(itemMetadata.builder);
-        }
-        const richText = builder.toString();
+        if (!itemMetadata) return undefined;
+
+        const description = itemMetadata.formatItemDescription(
+            item,
+            data.uuid,
+            true,
+            Color3.fromRGB(195, 195, 195),
+            18,
+            "Medium",
+        );
 
         // Pre-calculate colors
         const { background: backgroundColor, text: textColor } = getDifficultyDisplayColors(difficulty);
 
-        return { item, difficulty, richText, backgroundColor, textColor };
+        return { item, difficulty, description, backgroundColor, textColor };
     }, [data?.item, data?.uuid, METADATA_PER_ITEM]);
 
     const renderItemSlot = () => {
         if (!tooltipContent) return undefined;
 
-        const { item, difficulty, richText, backgroundColor, textColor } = tooltipContent;
+        const { item, difficulty, description, backgroundColor, textColor } = tooltipContent;
 
         return (
             <imagelabel
@@ -285,7 +275,7 @@ export default function TooltipWindow() {
                     FontFace={RobotoSlabBold}
                     LayoutOrder={5}
                     RichText={true}
-                    Text={richText}
+                    Text={description}
                     TextColor3={Color3.fromRGB(255, 255, 255)}
                     TextSize={19}
                     TextStrokeTransparency={0}

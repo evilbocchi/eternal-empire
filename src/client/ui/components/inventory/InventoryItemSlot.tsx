@@ -6,13 +6,26 @@
  */
 
 import React, { Ref, useEffect, useRef } from "@rbxts/react";
-import { getAsset } from "shared/asset/AssetMap";
-import type Item from "shared/item/Item";
-import { RobotoSlab } from "client/ui/GameFonts";
-import { useItemTooltip } from "../tooltip/TooltipManager";
 import { PARALLEL } from "client/constants";
+import { loadItemIntoViewport, loadItemViewportManagement } from "client/ui/components/inventory/ItemViewport";
+import { useItemTooltip } from "client/ui/components/tooltip/TooltipManager";
+import { RobotoSlab } from "client/ui/GameFonts";
+import { getAsset } from "shared/asset/AssetMap";
+import { IS_CI } from "shared/Context";
+import type Item from "shared/item/Item";
 
-interface InventoryItemSlotProps {
+/**
+ * Individual inventory item slot component
+ */
+export default function InventoryItemSlot({
+    item,
+    amount = 0,
+    layoutOrder,
+    visible,
+    onActivated,
+    ref,
+    size = new UDim2(0, 100, 0, 100),
+}: {
     /** The item to display */
     item: Item;
     /** Number of items in inventory */
@@ -25,19 +38,9 @@ interface InventoryItemSlotProps {
     onActivated: () => void;
     /** Reference for tooltip attachment */
     ref?: Ref<TextButton>;
-}
-
-/**
- * Individual inventory item slot component
- */
-export default function InventoryItemSlot({
-    item,
-    amount = 0,
-    layoutOrder,
-    visible,
-    onActivated,
-    ref,
-}: InventoryItemSlotProps) {
+    /** Size of the item slot */
+    size?: UDim2;
+}) {
     const viewportRef = useRef<ViewportFrame>();
     const textColor = amount > 0 ? Color3.fromRGB(255, 255, 255) : Color3.fromRGB(150, 150, 150);
     const backgroundColor = item.difficulty.color ?? Color3.fromRGB(52, 155, 255);
@@ -47,7 +50,7 @@ export default function InventoryItemSlot({
         const viewport = viewportRef.current;
         if (!viewport) return;
 
-        PARALLEL.SendMessage("LoadViewportFrame", viewport, item.id);
+        loadItemIntoViewport(PARALLEL, viewport, item.id);
     }, []);
 
     return (
@@ -59,7 +62,7 @@ export default function InventoryItemSlot({
             LayoutOrder={layoutOrder}
             Position={new UDim2(0.5, 0, 0.5, 0)}
             Selectable={false}
-            Size={new UDim2(0, 100, 0, 100)}
+            Size={size}
             Text=""
             Visible={visible}
             Event={{
