@@ -154,7 +154,7 @@ export default function BackpackWindow() {
             Position={new UDim2(0.5, 0, 0.985, -5)}
             Size={new UDim2(0.45, 200, 0.025, 30)}
             Visible={visible}
-            ZIndex={0}
+            ZIndex={-3}
         >
             {/* Tool options */}
             {toolOptions}

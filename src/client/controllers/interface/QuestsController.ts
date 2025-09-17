@@ -12,16 +12,15 @@
  * @since 1.0.0
  */
 import { combineHumanReadable } from "@antivivi/vrldk";
-import { Controller, OnInit, OnPhysics } from "@flamework/core";
+import { Controller, OnInit } from "@flamework/core";
 import ReactRoblox from "@rbxts/react-roblox";
-import { Debris, ReplicatedStorage, TweenService, Workspace } from "@rbxts/services";
-import { OnCharacterAdded } from "client/controllers/core/ModdingController";
+import { Debris, ReplicatedStorage, TweenService } from "@rbxts/services";
 import { INTERFACE } from "client/controllers/core/UIController";
 import EffectController from "client/controllers/world/EffectController";
+import { questState } from "client/ui/components/quest/QuestState";
 import { ASSETS, playSound } from "shared/asset/GameAssets";
 import Items from "shared/items/Items";
 import Packets from "shared/Packets";
-import { questState } from "client/ui/components/quest/QuestState";
 
 declare global {
     type QuestOption = Frame & {
@@ -54,7 +53,6 @@ declare global {
     };
 
     interface Assets {
-        ArrowBeam: Beam;
         LootTableItemSlot: LootTableItemSlot;
         QuestsWindow: Folder & {
             QuestOption: QuestOption;
@@ -108,13 +106,12 @@ export const TRACKED_QUEST_WINDOW = INTERFACE.WaitForChild("TrackedQuestWindow")
  * Now includes management of the standalone quest window that replaces the adaptive tab implementation.
  */
 @Controller()
-export default class QuestsController implements OnInit, OnPhysics, OnCharacterAdded {
+export default class QuestsController implements OnInit {
     oldIndex = -2;
     indexer: string | undefined = undefined;
     tween = new TweenInfo(0.2, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out);
     lastXp = -1;
     xpTweenConnection: RBXScriptConnection | undefined = undefined;
-    beam = ASSETS.ArrowBeam.Clone();
     beamContainer = new Instance("Part");
     availableQuests = new Set<string>();
 
@@ -255,10 +252,6 @@ export default class QuestsController implements OnInit, OnPhysics, OnCharacterA
             index = Packets.stagePerQuest.get()?.get(questId) ?? 0;
         }
 
-        // Update beam color for quest tracking
-        const color = new Color3(quest.colorR, quest.colorG, quest.colorB);
-        this.beam.Color = new ColorSequence(color);
-
         // Play sound for quest progression
         if (this.oldIndex !== index && (questId !== "NewBeginnings" || index !== 0)) {
             playSound("QuestNextStage.mp3");
@@ -302,32 +295,7 @@ export default class QuestsController implements OnInit, OnPhysics, OnCharacterA
         Debris.AddItem(ltis, 1);
     }
 
-    onPhysics() {
-        const position =
-            this.indexer === undefined
-                ? undefined
-                : (ReplicatedStorage.GetAttribute(this.indexer) as Vector3 | undefined);
-        if (position !== undefined) {
-            this.beamContainer.Position = position;
-            this.beam.Enabled = true;
-            return;
-        }
-        this.beam.Enabled = false;
-    }
-
-    onCharacterAdded(character: Model) {
-        this.beam.Attachment1 = new Instance("Attachment", character.WaitForChild("HumanoidRootPart"));
-    }
-
     onInit() {
-        this.beamContainer.CanCollide = false;
-        this.beamContainer.Anchored = true;
-        this.beamContainer.Transparency = 1;
-        this.beam.Enabled = false;
-        this.beam.Parent = this.beamContainer;
-        this.beamContainer.Parent = Workspace;
-        this.beam.Attachment0 = new Instance("Attachment", this.beamContainer);
-
         // Remove old UI management code - now handled by React components
         let lastLevel = -1;
         Packets.level.observe((level) => {

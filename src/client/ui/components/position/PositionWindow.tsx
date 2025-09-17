@@ -27,6 +27,7 @@ export default function PositionWindow({
 }) {
     const ref = useRef<Frame>();
     const [visible, setVisible] = useState(true);
+    const closedPosition = windowPosition.add(new UDim2(0, 0, 0, -50));
 
     useWindow({
         id: "Position",
@@ -37,8 +38,8 @@ export default function PositionWindow({
         },
         onClose: () => {
             setVisible(false);
-            const closedPos = windowPosition.add(new UDim2(0, 0, 0, -50));
-            ref.current?.TweenPosition(closedPos, Enum.EasingDirection.In, Enum.EasingStyle.Quad, 1.5, true);
+
+            ref.current?.TweenPosition(closedPosition, Enum.EasingDirection.In, Enum.EasingStyle.Quad, 1.5, true);
         },
         priority: 10, // High priority so it closes first
     });
@@ -54,7 +55,7 @@ export default function PositionWindow({
             key="PositionWindow"
             AnchorPoint={anchorPoint}
             BackgroundTransparency={1}
-            Position={windowPosition}
+            Position={closedPosition}
             Size={size}
         >
             {/* Compass Icon */}

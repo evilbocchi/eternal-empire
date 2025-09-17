@@ -117,7 +117,7 @@ const EmpireProfileTemplate = {
     xp: 0,
 
     /**
-     * The current quest stages for the player.
+     * The current quest stages for the player, where current stage is 0-indexed and -1 means completed.
      *
      * Badly named, should be `currentQuestStages`.
      */

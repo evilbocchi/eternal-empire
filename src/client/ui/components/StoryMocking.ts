@@ -1,5 +1,6 @@
 import { OnoeNum } from "@antivivi/serikanum";
-import { HttpService } from "@rbxts/services";
+import { useEffect } from "@rbxts/react";
+import { HttpService, ReplicatedStorage } from "@rbxts/services";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import { CURRENCY_DETAILS } from "shared/currency/CurrencyDetails";
 import PlayerProfileTemplate from "shared/data/PlayerProfileTemplate";
@@ -11,15 +12,22 @@ class StoryMocking {
     static mockData() {
         const mockPlayerData = table.clone(PlayerProfileTemplate);
 
-        Packets.setSetting.fromClient((player, setting, value) => {
-            (mockPlayerData.settings as { [key: string]: unknown })[setting] = value;
-            Packets.settings.setFor(player, mockPlayerData.settings);
-        });
+        useEffect(() => {
+            const setSetting = Packets.setSetting.fromClient((player, setting, value) => {
+                (mockPlayerData.settings as { [key: string]: unknown })[setting] = value;
+                Packets.settings.setFor(player, mockPlayerData.settings);
+            });
 
-        Packets.setHotkey.fromClient((player, key, action) => {
-            mockPlayerData.settings.hotkeys[key] = action;
-            Packets.settings.setFor(player, mockPlayerData.settings);
-        });
+            const setHotkey = Packets.setHotkey.fromClient((player, key, action) => {
+                mockPlayerData.settings.hotkeys[key] = action;
+                Packets.settings.setFor(player, mockPlayerData.settings);
+            });
+
+            return () => {
+                setSetting.Disconnect();
+                setHotkey.Disconnect();
+            };
+        }, []);
 
         const questInfos = new Map<string, QuestInfo>();
         questInfos.set("Quest1", {
@@ -82,6 +90,22 @@ class StoryMocking {
         stagePerQuest.set("Quest4", 2);
         Packets.stagePerQuest.set(stagePerQuest);
 
+        useEffect(() => {
+            const keys = new Array<string>();
+            for (const [id, questInfo] of questInfos) {
+                for (let stage = 0; stage < questInfo.stages.size(); stage++) {
+                    const key = id + stage;
+                    keys.push(key);
+                    ReplicatedStorage.SetAttribute(key, new Vector3(stage * 10, 0, stage * 10));
+                }
+            }
+            return () => {
+                for (const key of keys) {
+                    ReplicatedStorage.SetAttribute(key, undefined);
+                }
+            };
+        }, []);
+
         Packets.level.set(2);
         Packets.xp.set(50);
 
@@ -111,7 +135,7 @@ class StoryMocking {
         Packets.revenue.set(this.mockCurrencies().amountPerCurrency);
     }
 
-    static mockCurrencies() {
+    private static mockCurrencies() {
         const balance = new CurrencyBundle();
         for (const [currency] of pairs(CURRENCY_DETAILS)) {
             balance.set(currency, OnoeNum.fromSerika(math.random(1, 100), math.random(1, 500)));

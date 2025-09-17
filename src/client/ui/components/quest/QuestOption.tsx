@@ -1,9 +1,9 @@
 import React, { useEffect, useRef } from "@rbxts/react";
 import { TweenService } from "@rbxts/services";
-import { getAsset } from "shared/asset/AssetMap";
+import { getPositionDetails } from "client/ui/components/quest/TrackedQuestWindow";
 import { getLengthColor, getLengthName, getRewardLabel } from "client/ui/components/quest/useQuestData";
 import { RobotoSlabBold, RobotoSlabExtraBold, RobotoSlabHeavy, RobotoSlabMedium } from "client/ui/GameFonts";
-import { getFormattedDescription } from "client/ui/components/quest/TrackedQuestWindow";
+import { getAsset } from "shared/asset/AssetMap";
 
 interface QuestOptionProps {
     questId: string;
@@ -181,7 +181,7 @@ export default function QuestOption({
                         FontFace={RobotoSlabMedium}
                         LayoutOrder={1}
                         Size={new UDim2(0.9, 0, 0, 0)}
-                        Text={getFormattedDescription(questId, quest, currentStage)}
+                        Text={getPositionDetails(questId, quest, currentStage).description}
                         TextColor3={Color3.fromRGB(255, 255, 255)}
                         TextSize={20}
                         TextWrapped={true}
