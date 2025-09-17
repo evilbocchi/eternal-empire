@@ -30,7 +30,6 @@ declare global {
 }
 
 interface InventoryItemData {
-    item: Item;
     uuid?: string;
     amount: number;
     layoutOrder: number;
@@ -113,10 +112,10 @@ export default function InventoryWindow({ inventoryController }: InventoryWindow
     }, [updateCellSize]);
 
     // Apply filtering TODO
-    const inventoryItemDatas = useMemo(() => {
+    const inventoryDataPerItem = useMemo(() => {
         const startTime = tick();
         const processedItems = new Set<string>();
-        const inventoryItemDatas = new Array<InventoryItemData>();
+        const inventoryDataPerItem = new Map<string, InventoryItemData>();
 
         if (searchQuery !== "") {
             const terms = new Array<string>();
@@ -129,8 +128,7 @@ export default function InventoryWindow({ inventoryController }: InventoryWindow
                 const item = Items.itemsPerName.get(name)!;
                 if (processedItems.has(item.id)) continue; // Skip duplicates
                 processedItems.add(item.id);
-                inventoryItemDatas.push({
-                    item,
+                inventoryDataPerItem.set(item.id, {
                     amount: 0,
                     layoutOrder: index,
                     visible: index > 0,
@@ -139,8 +137,7 @@ export default function InventoryWindow({ inventoryController }: InventoryWindow
         } else {
             for (const item of SEARCHABLE_ITEMS) {
                 if (!isWhitelisted(item, traitFilters)) continue;
-                inventoryItemDatas.push({
-                    item,
+                inventoryDataPerItem.set(item.id, {
                     amount: 0,
                     layoutOrder: item.layoutOrder,
                     visible: true,
@@ -157,21 +154,21 @@ export default function InventoryWindow({ inventoryController }: InventoryWindow
             amountsPerItem.set(itemId, (amountsPerItem.get(itemId) ?? 0) + 1);
         }
         const bestInstancePerItem = getBestUniqueInstances(uniqueInstances);
-        for (const data of inventoryItemDatas) {
-            const amount = amountsPerItem.get(data.item.id) ?? 0;
+        for (const [id, data] of inventoryDataPerItem) {
+            const amount = amountsPerItem.get(id) ?? 0;
             data.amount = amount;
             if (amount <= 0) {
                 data.visible = false;
             }
 
-            const bestInstance = bestInstancePerItem.get(data.item.id);
+            const bestInstance = bestInstancePerItem.get(id);
             if (bestInstance !== undefined) {
                 data.uuid = bestInstance;
             }
         }
 
         setQueryTime(tick() - startTime);
-        return inventoryItemDatas;
+        return inventoryDataPerItem;
     }, [inventory, uniqueInstances, searchQuery, traitFilters]);
 
     // Check if user has any items at all (for empty state)
@@ -266,7 +263,7 @@ export default function InventoryWindow({ inventoryController }: InventoryWindow
                     ScrollBarThickness={6}
                     Selectable={false}
                     Size={new UDim2(1, 0, 0.975, -20)}
-                    Visible={inventoryItemDatas.size() > 0}
+                    Visible={inventoryDataPerItem.size() > 0}
                 >
                     <uipadding
                         PaddingBottom={new UDim(0, 5)}
@@ -283,17 +280,23 @@ export default function InventoryWindow({ inventoryController }: InventoryWindow
                         <uiaspectratioconstraint />
                     </uigridlayout>
 
-                    {/* Render inventory items TODO OPTIMIZE THIS!!! */}
-                    {inventoryItemDatas.map((itemData) => (
-                        <InventoryItemSlot
-                            key={itemData.item.id}
-                            item={itemData.item}
-                            amount={itemData.amount}
-                            layoutOrder={-itemData.layoutOrder}
-                            visible={itemData.visible}
-                            onActivated={() => handleItemActivated(itemData.item)}
-                        />
-                    ))}
+                    {/* Render inventory items TODO Decouple from React render loop for max performance */}
+                    {SEARCHABLE_ITEMS.map((item) => {
+                        const inventoryData = inventoryDataPerItem.get(item.id);
+
+                        return (
+                            <InventoryItemSlot
+                                key={item.id}
+                                item={item}
+                                amount={inventoryData?.amount}
+                                layoutOrder={
+                                    inventoryData === undefined ? item.layoutOrder : -inventoryData.layoutOrder
+                                }
+                                visible={inventoryData?.visible === true}
+                                onActivated={() => handleItemActivated(item)}
+                            />
+                        );
+                    })}
                 </scrollingframe>
 
                 {/* Layout for filter and item list */}

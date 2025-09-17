@@ -16,11 +16,11 @@ interface InventoryItemSlotProps {
     /** The item to display */
     item: Item;
     /** Number of items in inventory */
-    amount: number;
+    amount?: number;
     /** Layout order for sorting */
     layoutOrder: number;
     /** Whether the slot is visible */
-    visible?: boolean;
+    visible: boolean;
     /** Callback when the item is clicked */
     onActivated: () => void;
     /** Reference for tooltip attachment */
@@ -32,9 +32,9 @@ interface InventoryItemSlotProps {
  */
 export default function InventoryItemSlot({
     item,
-    amount,
+    amount = 0,
     layoutOrder,
-    visible = true,
+    visible,
     onActivated,
     ref,
 }: InventoryItemSlotProps) {
