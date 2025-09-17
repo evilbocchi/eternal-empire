@@ -52,8 +52,8 @@ export default class ItemMetadata {
     }
 
     tool() {
-        const tool = this.item.findTrait("HarvestingTool");
-        if (tool === undefined || tool.toolType === "None") {
+        const tool = this.item.findTrait("Gear");
+        if (tool === undefined || tool.type === "None") {
             this.builder[ItemMetadata.INDICES.TOOL] = "";
             return;
         }

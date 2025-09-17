@@ -2,7 +2,7 @@ import { getAsset } from "shared/asset/AssetMap";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
 import TierDifficulty from "shared/item/TierDifficulty";
-import HarvestingTool from "shared/item/traits/HarvestingTool";
+import Gear from "shared/item/traits/Gear";
 import MagicalWood from "shared/items/excavation/harvestable/MagicalWood";
 import Iron from "shared/items/excavation/Iron";
 import CrystalPickaxe from "shared/items/tools/CrystalPickaxe";
@@ -18,8 +18,8 @@ export = new Item(script.Name)
     .setLevelReq(12)
     .setImage(getAsset("assets/IronPickaxe.png"))
 
-    .trait(HarvestingTool)
-    .setToolType("Pickaxe")
+    .trait(Gear)
+    .setType("Pickaxe")
     .setSpeed(18)
     .setDamage(35)
 

@@ -69,7 +69,7 @@ export function getBestUniqueInstances(uniqueInstances: Map<string, UniqueItemIn
     return bestUuidPerItem;
 }
 
-const SEARCHABLE_ITEMS = Items.sortedItems.filter((item) => !item.isA("HarvestingTool"));
+const SEARCHABLE_ITEMS = Items.sortedItems.filter((item) => !item.isA("Gear"));
 
 /**
  * Main inventory window component following the QuestWindow pattern

@@ -565,7 +565,7 @@ export default class DataService implements OnInit, OnPlayerJoined {
         }
         for (const [itemId, item] of Items.itemsPerId) {
             if (
-                item.isA("HarvestingTool") ||
+                item.isA("Gear") ||
                 item.pricePerIteration.size() === 0 ||
                 item.difficulty === Difficulty.Excavation ||
                 item.isA("Unique")

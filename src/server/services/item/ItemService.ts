@@ -514,11 +514,7 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
         }
 
         // Check level requirements for harvesting tools
-        if (
-            item.isA("HarvestingTool") &&
-            item.levelReq !== undefined &&
-            item.levelReq > this.dataService.empireData.level
-        )
+        if (item.isA("Gear") && item.levelReq !== undefined && item.levelReq > this.dataService.empireData.level)
             return false;
 
         const itemId = item.id;

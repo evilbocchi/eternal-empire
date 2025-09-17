@@ -2,7 +2,7 @@ import { getAsset } from "shared/asset/AssetMap";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
 import TierDifficulty from "shared/item/TierDifficulty";
-import HarvestingTool from "shared/item/traits/HarvestingTool";
+import Gear from "shared/item/traits/Gear";
 import Crystal from "shared/items/excavation/Crystal";
 import EnchantedGrass from "shared/items/excavation/harvestable/EnchantedGrass";
 import MagicalWood from "shared/items/excavation/harvestable/MagicalWood";
@@ -19,5 +19,5 @@ export = new Item(script.Name)
     .setImage(getAsset("assets/Flashlight.png"))
     .setLayoutOrder(5)
 
-    .trait(HarvestingTool)
+    .trait(Gear)
     .exit();

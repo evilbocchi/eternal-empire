@@ -129,10 +129,10 @@ export default class ToolController implements OnInit, OnCharacterAdded {
                 const item = Items.getItem(currentTool.Name);
                 if (item === undefined) return;
 
-                const harvestingTool = item.findTrait("HarvestingTool");
-                if (harvestingTool === undefined) return;
+                const gear = item.findTrait("Gear");
+                if (gear === undefined) return;
 
-                const multi = -drop / harvestingTool.damage!;
+                const multi = -drop / gear.damage!;
                 effect.Brightness = multi;
                 const color = multi > 1 ? Color3.fromRGB(217, 0, (multi - 1) * 120) : Color3.fromRGB(217, 0, 0);
                 const gui = ItemUtils.loadDropletGui(undefined, OnoeNum.toString(drop));
@@ -177,11 +177,11 @@ export default class ToolController implements OnInit, OnCharacterAdded {
 
                 const item = Items.getItem(currentTool.Name);
                 if (item === undefined) return;
-                const harvestingTool = item.findTrait("HarvestingTool");
-                if (harvestingTool === undefined || harvestingTool.toolType === "None") return;
+                const gear = item.findTrait("Gear");
+                if (gear === undefined || gear.type === "None") return;
 
                 const t = tick();
-                if (this.lastUse + 8 / (harvestingTool.speed ?? 1) > t) return;
+                if (this.lastUse + 8 / (gear.speed ?? 1) > t) return;
                 this.lastUse = t;
                 const anim = this.swingAnimation;
                 if (anim === undefined) return;

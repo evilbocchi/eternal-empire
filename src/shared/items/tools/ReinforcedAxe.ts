@@ -2,7 +2,7 @@ import { getAsset } from "shared/asset/AssetMap";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
 import TierDifficulty from "shared/item/TierDifficulty";
-import HarvestingTool from "shared/item/traits/HarvestingTool";
+import Gear from "shared/item/traits/Gear";
 import ExcavationStone from "shared/items/excavation/ExcavationStone";
 import MagicalWood from "shared/items/excavation/harvestable/MagicalWood";
 import WhiteGem from "shared/items/excavation/WhiteGem";
@@ -20,8 +20,8 @@ export = new Item(script.Name)
     .setImage(getAsset("assets/ReinforcedAxe.png"))
     .setLevelReq(4)
 
-    .trait(HarvestingTool)
-    .setToolType("Axe")
+    .trait(Gear)
+    .setType("Axe")
     .setSpeed(18)
     .setDamage(2)
 

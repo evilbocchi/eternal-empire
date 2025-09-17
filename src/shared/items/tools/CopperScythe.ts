@@ -1,4 +1,4 @@
-import HarvestingTool from "shared/item/traits/HarvestingTool";
+import Gear from "shared/item/traits/Gear";
 import Item from "shared/item/Item";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import TierDifficulty from "shared/item/TierDifficulty";
@@ -12,8 +12,8 @@ export = new Item(script.Name)
     .setLevelReq(1)
     .setImage(getAsset("assets/CopperScythe.png"))
 
-    .trait(HarvestingTool)
-    .setToolType("Scythe")
+    .trait(Gear)
+    .setType("Scythe")
     .setSpeed(8)
     .setDamage(1)
 

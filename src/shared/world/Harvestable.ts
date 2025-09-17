@@ -2,7 +2,7 @@ declare global {
     type HarvestableId = keyof typeof RawHarvestable;
     type HarvestableData = {
         health: number;
-        tool: ToolType;
+        tool: GearType;
         name?: string;
         description?: string;
         gives?: Map<string, number[]>;

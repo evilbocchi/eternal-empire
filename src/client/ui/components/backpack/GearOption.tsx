@@ -8,11 +8,11 @@
 import React from "@rbxts/react";
 import { TooltipManager } from "client/ui/components/tooltip/TooltipWindow";
 import { getAsset } from "shared/asset/AssetMap";
-import HarvestingTool from "shared/item/traits/HarvestingTool";
+import Gear from "shared/item/traits/Gear";
 
 /** Determine layout order based on tool type */
-export function layoutOrderFromTool(harvestingTool: HarvestingTool): number {
-    switch (harvestingTool.toolType) {
+export function layoutOrderFromGear(gear: Gear): number {
+    switch (gear.type) {
         case "Pickaxe":
             return 1;
         case "Axe":
@@ -23,19 +23,19 @@ export function layoutOrderFromTool(harvestingTool: HarvestingTool): number {
             return 4;
         case "None":
         default:
-            return harvestingTool.item.layoutOrder;
+            return gear.item.layoutOrder;
     }
 }
 
 /**
  * Individual tool option button component
  */
-export default function ToolOption({
-    harvestingTool,
+export default function GearOption({
+    gear,
     isEquipped,
     onClick,
 }: {
-    harvestingTool: HarvestingTool;
+    gear: Gear;
     isEquipped: boolean;
     onClick: () => void;
 }) {
@@ -45,18 +45,18 @@ export default function ToolOption({
 
     return (
         <textbutton
-            key={harvestingTool.item.id}
+            key={gear.item.id}
             BackgroundColor3={backgroundColor}
             BorderColor3={Color3.fromRGB(0, 0, 0)}
             BorderSizePixel={4}
-            LayoutOrder={layoutOrderFromTool(harvestingTool)}
+            LayoutOrder={layoutOrderFromGear(gear)}
             Size={new UDim2(1, 0, 1, 0)}
             SizeConstraint={Enum.SizeConstraint.RelativeYY}
             Text=""
             Event={{
                 Activated: onClick,
                 MouseMoved: () => {
-                    TooltipManager.showTooltip({ item: harvestingTool.item });
+                    TooltipManager.showTooltip({ item: gear.item });
                 },
                 MouseLeave: () => {
                     TooltipManager.hideTooltip();
@@ -79,7 +79,7 @@ export default function ToolOption({
                 key="ImageLabel"
                 AnchorPoint={new Vector2(0.5, 0.5)}
                 BackgroundTransparency={1}
-                Image={harvestingTool.item.image}
+                Image={gear.item.image}
                 Position={new UDim2(0.5, 0, 0.5, 0)}
                 Size={new UDim2(0.75, 0, 0.75, 0)}
                 ZIndex={0}

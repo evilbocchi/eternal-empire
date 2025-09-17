@@ -20,7 +20,7 @@ export function getPositionDetails(id?: string, quest?: QuestInfo, stageNum = 0)
     }
     let description = quest?.stages[stageNum]?.description;
     if (description === undefined || id === undefined) {
-        return { description: "<no description provided>" };
+        return { description: "" };
     }
 
     const key = id + stageNum;
@@ -64,8 +64,9 @@ export default function TrackedQuestWindow() {
     });
 
     useEffect(() => {
-        if (currentQuest === undefined || trackedQuest === undefined) return; // Don't play sound if no quest
-        playSound("QuestNextStage.mp3");
+        if (currentQuest && trackedQuest) {
+            playSound("QuestNextStage.mp3");
+        }
 
         const onPositionUpdated = (newPosition: Vector3 | undefined) => {
             if (trackerPart === undefined || trackerBeam === undefined) return;
@@ -132,6 +133,8 @@ export default function TrackedQuestWindow() {
             dummyCharacter.CanCollide = false;
             dummyCharacter.CanTouch = false;
             dummyCharacter.CanQuery = false;
+            dummyCharacter.Locked = true;
+            dummyCharacter.Transparency = 1;
             beam.Attachment1 = new Instance("Attachment", dummyCharacter);
             dummyCharacter.Parent = beamContainer;
             connection = RunService.Heartbeat.Connect(() => {
@@ -170,10 +173,6 @@ export default function TrackedQuestWindow() {
         ? new Color3(currentQuest.colorR, currentQuest.colorG, currentQuest.colorB)
         : Color3.fromRGB(255, 255, 255);
 
-    if (!hasQuest) {
-        return undefined;
-    }
-
     return (
         <frame
             ref={ref}
@@ -183,6 +182,7 @@ export default function TrackedQuestWindow() {
             BackgroundTransparency={1}
             Position={closedPosition}
             Size={new UDim2(0.2, 200, 0, 0)}
+            Visible={visible}
             ZIndex={-1}
         >
             <uilistlayout
@@ -197,7 +197,7 @@ export default function TrackedQuestWindow() {
                 BackgroundTransparency={1}
                 FontFace={RobotoSlabBold}
                 Size={new UDim2(1, 0, 0, 0)}
-                Text={currentQuest.name || "no name"}
+                Text={currentQuest?.name ?? ""}
                 TextColor3={Color3.fromRGB(255, 255, 255)}
                 TextSize={30}
                 TextWrapped={true}

@@ -2,7 +2,7 @@ import { getAsset } from "shared/asset/AssetMap";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
 import TierDifficulty from "shared/item/TierDifficulty";
-import HarvestingTool from "shared/item/traits/HarvestingTool";
+import Gear from "shared/item/traits/Gear";
 
 export = new Item(script.Name)
     .setName("Copper Axe")
@@ -12,8 +12,8 @@ export = new Item(script.Name)
     .setLevelReq(1)
     .setImage(getAsset("assets/CopperAxe.png"))
 
-    .trait(HarvestingTool)
-    .setToolType("Axe")
+    .trait(Gear)
+    .setType("Axe")
     .setSpeed(8)
     .setDamage(1)
 

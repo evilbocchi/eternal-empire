@@ -8,10 +8,10 @@
 import React, { useEffect, useState } from "@rbxts/react";
 import { Environment } from "@rbxts/ui-labs";
 import { LOCAL_PLAYER } from "client/constants";
-import ToolOption, { layoutOrderFromTool } from "client/ui/components/backpack/ToolOption";
+import GearOption, { layoutOrderFromGear } from "client/ui/components/backpack/GearOption";
 import { useWindow } from "client/ui/components/window/WindowManager";
 import { playSound } from "shared/asset/GameAssets";
-import HarvestingTool from "shared/item/traits/HarvestingTool";
+import Gear from "shared/item/traits/Gear";
 import Items from "shared/items/Items";
 import Packets from "shared/Packets";
 
@@ -28,23 +28,23 @@ const KEY_CODES = new Map<number, Enum.KeyCode>([
     [10, Enum.KeyCode.Zero],
 ]);
 
-const equipHarvestableTool = (harvestingTool: HarvestingTool) => {
+const equipGear = (gear: Gear) => {
     const backpack = LOCAL_PLAYER.FindFirstChildOfClass("Backpack");
 
     const currentlyEquippedTool = LOCAL_PLAYER.Character?.FindFirstChildOfClass("Tool");
     if (currentlyEquippedTool) {
         currentlyEquippedTool.Parent = backpack;
-        if (currentlyEquippedTool.Name === harvestingTool.item.id) {
+        if (currentlyEquippedTool.Name === gear.item.id) {
             playSound("Unequip.mp3");
             return;
         }
     }
 
-    const tool = backpack?.FindFirstChild(harvestingTool.item.id) as Tool | undefined;
+    const tool = backpack?.FindFirstChild(gear.item.id) as Tool | undefined;
     if (tool === undefined) return;
     tool.Parent = LOCAL_PLAYER.Character;
     playSound("Equip.mp3");
-    return harvestingTool;
+    return gear;
 };
 
 /**
@@ -52,8 +52,8 @@ const equipHarvestableTool = (harvestingTool: HarvestingTool) => {
  */
 export default function BackpackWindow() {
     const [visible, setVisible] = useState(true);
-    const [harvestingTools, setHarvestingTools] = useState<Set<HarvestingTool>>(new Set());
-    const [equippedTool, setEquippedTool] = useState<HarvestingTool | undefined>(undefined);
+    const [gears, setGears] = useState<Set<Gear>>(new Set());
+    const [equippedGear, setEquippedGear] = useState<Gear | undefined>(undefined);
 
     useWindow({
         id: "Backpack",
@@ -72,15 +72,15 @@ export default function BackpackWindow() {
                 if (tool.IsA("Tool")) {
                     const item = Items.itemsPerId.get(tool.Name);
                     if (item) {
-                        const harvestingTool = item.findTrait("HarvestingTool");
-                        setEquippedTool(harvestingTool);
+                        const gear = item.findTrait("Gear");
+                        setEquippedGear(gear);
                     }
                 }
             };
 
             const onToolRemoved = (tool: Instance) => {
                 if (tool.IsA("Tool")) {
-                    setEquippedTool(undefined);
+                    setEquippedGear(undefined);
                 }
             };
             character.ChildAdded.Connect(onToolAdded);
@@ -113,15 +113,15 @@ export default function BackpackWindow() {
                 }
             }
 
-            let sortedTools = new Array<HarvestingTool>();
-            for (const tool of harvestingTools) {
-                sortedTools.push(tool);
+            let sortedGears = new Array<Gear>();
+            for (const tool of gears) {
+                sortedGears.push(tool);
             }
-            sortedTools = sortedTools.sort((a, b) => layoutOrderFromTool(a) < layoutOrderFromTool(b));
-            const equipping = sortedTools[index - 1];
+            sortedGears = sortedGears.sort((a, b) => layoutOrderFromGear(a) < layoutOrderFromGear(b));
+            const equipping = sortedGears[index - 1];
             if (equipping === undefined) return;
-            print("Equipping tool via hotkey:", equipping.item.name);
-            setEquippedTool(equipHarvestableTool(equipping));
+            print("Equipping gear via hotkey:", equipping.item.name);
+            setEquippedGear(equipGear(equipping));
         });
 
         return () => connection.Disconnect();
@@ -129,19 +129,19 @@ export default function BackpackWindow() {
 
     useEffect(() => {
         const connection = Packets.inventory.observe((inventory) => {
-            const [bestTools] = HarvestingTool.getBestToolsFromInventory(inventory, Items.itemsPerId);
-            setHarvestingTools(bestTools);
+            const [bestTools] = Gear.getBestGearsFromInventory(inventory, Items.itemsPerId);
+            setGears(bestTools);
         });
         return () => connection.Disconnect();
     }, []);
 
-    const toolOptions = new Array<JSX.Element>();
-    for (const harvestingTool of harvestingTools) {
-        toolOptions.push(
-            <ToolOption
-                harvestingTool={harvestingTool}
-                isEquipped={equippedTool === harvestingTool}
-                onClick={() => setEquippedTool(equipHarvestableTool(harvestingTool))}
+    const gearOptions = new Array<JSX.Element>();
+    for (const gear of gears) {
+        gearOptions.push(
+            <GearOption
+                gear={gear}
+                isEquipped={equippedGear === gear}
+                onClick={() => setEquippedGear(equipGear(gear))}
             />,
         );
     }
@@ -152,12 +152,12 @@ export default function BackpackWindow() {
             AnchorPoint={new Vector2(0.5, 1)}
             BackgroundTransparency={1}
             Position={new UDim2(0.5, 0, 0.985, -5)}
-            Size={new UDim2(0.45, 200, 0.025, 30)}
+            Size={new UDim2(0.45, 200, 0.03, 20)}
             Visible={visible}
             ZIndex={-3}
         >
-            {/* Tool options */}
-            {toolOptions}
+            {/* Gear options */}
+            {gearOptions}
 
             {/* Layout */}
             <uilistlayout

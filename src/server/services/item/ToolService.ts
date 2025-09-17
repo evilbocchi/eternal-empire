@@ -20,7 +20,7 @@ import ItemService from "server/services/item/ItemService";
 import { OnPlayerJoined } from "server/services/ModdingService";
 import { AREAS } from "shared/world/Area";
 import Harvestable from "shared/world/Harvestable";
-import HarvestingTool from "shared/item/traits/HarvestingTool";
+import Gear from "shared/item/traits/Gear";
 import Items from "shared/items/Items";
 import Packets from "shared/Packets";
 
@@ -55,7 +55,7 @@ export class ToolService implements OnInit, OnPlayerJoined, OnPlayerJoined {
      * @param player The player whose tools are refreshed.
      */
     refreshTools(player: Player) {
-        const [tools, worse] = HarvestingTool.getBestToolsFromInventory(
+        const [tools, worse] = Gear.getBestGearsFromInventory(
             this.dataService.empireData.items.inventory,
             Items.itemsPerId,
         );
@@ -105,7 +105,7 @@ export class ToolService implements OnInit, OnPlayerJoined, OnPlayerJoined {
      * Calculates the critical hit chance for a harvesting tool.
      * @param _item The harvesting tool.
      */
-    getCritChance(_item: HarvestingTool) {
+    getCritChance(_item: Gear) {
         let critChance = 5;
         const inventory = this.dataService.empireData.items.inventory;
         for (const charm of Items.charms) {
@@ -136,7 +136,7 @@ export class ToolService implements OnInit, OnPlayerJoined, OnPlayerJoined {
     onInit() {
         this.itemService.itemsBought.connect((_player, items) => {
             for (const item of items) {
-                if (item.isA("HarvestingTool")) {
+                if (item.isA("Gear")) {
                     for (const player of Players.GetPlayers()) this.refreshTools(player);
                     break;
                 }
@@ -153,19 +153,16 @@ export class ToolService implements OnInit, OnPlayerJoined, OnPlayerJoined {
             if (tool === undefined || this.isWithin(tool, harvestable) !== true) return;
             const item = Items.getItem(tool.Name);
             if (item === undefined) return;
-            const harvestingTool = item.findTrait("HarvestingTool");
-            if (harvestingTool === undefined) return;
+            const gear = item.findTrait("Gear");
+            if (gear === undefined) return;
 
             const lastUse = this.lastUsePerPlayer.get(player);
             const t = tick();
-            if (lastUse !== undefined && t + 0.5 + 8 / (harvestingTool.speed ?? 1) < lastUse) return;
+            if (lastUse !== undefined && t + 0.5 + 8 / (gear.speed ?? 1) < lastUse) return;
             this.lastUsePerPlayer.set(player, t);
             const harvestableData = Harvestable[harvestable.Name as HarvestableId];
-            let damage =
-                harvestingTool.toolType === harvestableData.tool
-                    ? harvestingTool.damage!
-                    : harvestingTool.damage! * 0.05;
-            if (math.random(1, 100) / 100 <= this.getCritChance(harvestingTool)) {
+            let damage = gear.type === harvestableData.tool ? gear.damage! : gear.damage! * 0.05;
+            if (math.random(1, 100) / 100 <= this.getCritChance(gear)) {
                 damage *= 2;
             }
             damage *= math.random(80, 120) * 0.01;
