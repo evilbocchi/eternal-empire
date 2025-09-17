@@ -23,7 +23,7 @@ import BalanceWindow from "client/ui/components/balance/BalanceWindow";
 import BuildManager from "client/ui/components/build/BuildManager";
 import CommandsWindow from "client/ui/components/commands/CommandsWindow";
 import ClickSparkManager from "client/ui/components/effect/ClickSparkManager";
-import InventoryWindow from "client/ui/components/inventory/InventoryWindow";
+import InventoryWindow from "client/ui/components/item/inventory/InventoryWindow";
 import LogsWindow from "client/ui/components/logs/LogsWindow";
 import QuestWindow from "client/ui/components/quest/QuestWindow";
 import RenameWindow from "client/ui/components/rename/RenameWindow";

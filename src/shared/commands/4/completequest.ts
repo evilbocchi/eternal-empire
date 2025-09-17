@@ -11,7 +11,7 @@ export = new Command(script.Name)
         }
         quest.completed = false; // Reset quest completion status
         quest.complete();
-        CommandAPI.Quest.reachStages();
+        CommandAPI.Quest.Quest.reachStages();
         CommandAPI.ChatHook.sendPrivateMessage(_o, `Quest '${questId}' marked as complete.`);
     })
     .setPermissionLevel(4);

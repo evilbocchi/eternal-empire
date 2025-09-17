@@ -8,9 +8,9 @@
 import { FuzzySearch } from "@rbxts/fuzzy-search";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "@rbxts/react";
 import type InventoryController from "client/controllers/interface/InventoryController";
-import InventoryEmptyState from "client/ui/components/inventory/InventoryEmptyState";
-import InventoryFilter, { isWhitelisted, traitOptions } from "client/ui/components/inventory/InventoryFilter";
-import InventoryItemSlot from "client/ui/components/inventory/InventoryItemSlot";
+import InventoryEmptyState from "client/ui/components/item/inventory/InventoryEmptyState";
+import InventoryFilter, { isWhitelisted, traitOptions } from "client/ui/components/item/inventory/InventoryFilter";
+import InventoryItemSlot from "client/ui/components/item/inventory/InventoryItemSlot";
 import useSingleDocumentWindow from "client/ui/components/sidebar/useSingleDocumentWindow";
 import BasicWindow from "client/ui/components/window/BasicWindow";
 import { RobotoMono } from "client/ui/GameFonts";

@@ -7,7 +7,7 @@
 
 import React, { Ref, useEffect, useRef } from "@rbxts/react";
 import { PARALLEL } from "client/constants";
-import { loadItemIntoViewport, loadItemViewportManagement } from "client/ui/components/inventory/ItemViewport";
+import { loadItemIntoViewport, loadItemViewportManagement } from "client/ui/components/item/ItemViewport";
 import { useItemTooltip } from "client/ui/components/tooltip/TooltipManager";
 import { RobotoSlab } from "client/ui/GameFonts";
 import { getAsset } from "shared/asset/AssetMap";

@@ -1,7 +1,7 @@
 import React, { StrictMode, useState } from "@rbxts/react";
 import ReactRoblox from "@rbxts/react-roblox";
 import { CreateReactStory } from "@rbxts/ui-labs";
-import ShopWindow from "client/ui/components/shop/ShopWindow";
+import ShopWindow from "client/ui/components/item/shop/ShopWindow";
 import Item from "shared/item/Item";
 import TheFirstConveyor from "shared/items/negative/tfd/TheFirstConveyor";
 import TheFirstDropper from "shared/items/negative/tfd/TheFirstDropper";

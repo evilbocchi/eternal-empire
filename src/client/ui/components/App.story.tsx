@@ -5,7 +5,7 @@ import BackpackWindow from "client/ui/components/backpack/BackpackWindow";
 import BalanceWindow from "client/ui/components/balance/BalanceWindow";
 import BuildManager from "client/ui/components/build/BuildManager";
 import ClickSparkManager from "client/ui/components/effect/ClickSparkManager";
-import InventoryWindow from "client/ui/components/inventory/InventoryWindow";
+import InventoryWindow from "client/ui/components/item/inventory/InventoryWindow";
 import MainLayout from "client/ui/components/MainLayout";
 import { questState } from "client/ui/components/quest/QuestState";
 import QuestWindow from "client/ui/components/quest/QuestWindow";

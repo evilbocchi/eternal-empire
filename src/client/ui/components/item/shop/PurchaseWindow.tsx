@@ -1,7 +1,7 @@
 import Difficulty from "@antivivi/jjt-difficulties";
 import React, { useMemo } from "@rbxts/react";
-import InventoryItemSlot from "client/ui/components/inventory/InventoryItemSlot";
-import ItemWindow from "client/ui/components/shop/ItemWindow";
+import InventoryItemSlot from "client/ui/components/item/inventory/InventoryItemSlot";
+import ItemWindow from "client/ui/components/item/shop/ItemWindow";
 import useSingleDocumentWindow from "client/ui/components/sidebar/useSingleDocumentWindow";
 import getDifficultyDisplayColors from "client/ui/components/tooltip/getDifficultyDisplayColors";
 import { RobotoSlabHeavy, RobotoSlabMedium } from "client/ui/GameFonts";

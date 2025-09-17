@@ -1,7 +1,7 @@
 import React, { StrictMode, useState } from "@rbxts/react";
 import ReactRoblox from "@rbxts/react-roblox";
 import { CreateReactStory } from "@rbxts/ui-labs";
-import PurchaseWindow from "client/ui/components/shop/PurchaseWindow";
+import PurchaseWindow from "client/ui/components/item/shop/PurchaseWindow";
 import { useSingleDocumentVisibility } from "client/ui/hooks/useVisibility";
 import CoalescentRefiner from "shared/items/0/ifinitude/CoalescentRefiner";
 
