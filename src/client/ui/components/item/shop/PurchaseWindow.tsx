@@ -1,5 +1,6 @@
 import { OnoeNum } from "@antivivi/serikanum";
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "@rbxts/react";
+import React, { forwardRef, useCallback, useEffect, useMemo, useRef, useState } from "@rbxts/react";
+import StringBuilder from "@rbxts/stringbuilder";
 import displayBalanceCurrency from "client/ui/components/balance/displayBalanceCurrency";
 import InventoryItemSlot from "client/ui/components/item/inventory/InventoryItemSlot";
 import { ItemViewportManagement } from "client/ui/components/item/ItemViewport";
@@ -7,38 +8,33 @@ import ItemWindow from "client/ui/components/item/shop/ItemWindow";
 import useCIViewportManagement from "client/ui/components/item/useCIViewportManagement";
 import useSingleDocumentWindow from "client/ui/components/sidebar/useSingleDocumentWindow";
 import getDifficultyDisplayColors from "client/ui/components/tooltip/getDifficultyDisplayColors";
-import { METADATA_PER_ITEM } from "client/ui/components/tooltip/TooltipWindow";
+import { METADATA_PER_ITEM, TooltipManager } from "client/ui/components/tooltip/TooltipWindow";
 import { RobotoMono, RobotoSlab, RobotoSlabHeavy, RobotoSlabMedium } from "client/ui/GameFonts";
 import { getAsset } from "shared/asset/AssetMap";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import { CURRENCY_DETAILS } from "shared/currency/CurrencyDetails";
 import Item from "shared/item/Item";
+import Items from "shared/items/Items";
 import Packets from "shared/Packets";
 
 /**
  * Individual price option component for purchase window
  */
-function PriceOption({
-    currency,
-    item,
-    amount,
-    affordable,
-    layoutOrder = 0,
-    viewportManagement,
-}: {
-    /** Currency amount and type */
-    currency?: Currency;
-    /** Item amount and type */
-    item?: Item;
-    /** Amount to display */
-    amount: OnoeNum | number;
-    /** Whether the price is affordable */
-    affordable: boolean;
-    /** Layout order for sorting */
-    layoutOrder?: number;
-    /** Shared viewport management instance */
-    viewportManagement?: ItemViewportManagement;
-}) {
+const PriceOption = forwardRef<
+    Frame,
+    {
+        /** Currency amount and type */
+        currency?: Currency;
+        /** Item amount and type */
+        item?: Item;
+        /** Amount to display */
+        amount: OnoeNum | number;
+        /** Whether the price is affordable */
+        affordable: boolean;
+        /** Shared viewport management instance */
+        viewportManagement?: ItemViewportManagement;
+    }
+>(({ currency, item, amount, affordable, viewportManagement }, ref) => {
     const viewportRef = useRef<ViewportFrame>();
     const textColor = affordable ? Color3.fromRGB(255, 255, 255) : Color3.fromRGB(255, 80, 80);
 
@@ -49,10 +45,10 @@ function PriceOption({
 
     return (
         <frame
+            ref={ref}
             AutomaticSize={Enum.AutomaticSize.X}
             BackgroundColor3={new Color3()}
             BackgroundTransparency={0.8}
-            LayoutOrder={layoutOrder}
             Size={new UDim2(0, 0, 0, 25)}
         >
             <uilistlayout
@@ -74,7 +70,6 @@ function PriceOption({
                 <imagelabel
                     BackgroundTransparency={1}
                     Image={CURRENCY_DETAILS[currency].image}
-                    LayoutOrder={1}
                     ScaleType={Enum.ScaleType.Fit}
                     Size={new UDim2(1, 0, 1, 0)}
                     SizeConstraint={Enum.SizeConstraint.RelativeYY}
@@ -85,7 +80,6 @@ function PriceOption({
                 <viewportframe
                     ref={viewportRef}
                     BackgroundTransparency={1}
-                    LayoutOrder={1}
                     Size={new UDim2(1, 0, 1, 0)}
                     SizeConstraint={Enum.SizeConstraint.RelativeYY}
                 />
@@ -95,30 +89,17 @@ function PriceOption({
                 AutomaticSize={Enum.AutomaticSize.X}
                 BackgroundTransparency={1}
                 FontFace={RobotoSlabHeavy}
-                LayoutOrder={2}
                 Size={new UDim2(0, 0, 1, 0)}
                 Text={currency ? displayBalanceCurrency(currency, amount as OnoeNum) : `${amount} ${item?.name}`}
                 TextColor3={textColor}
                 TextScaled={true}
-                TextSize={18}
                 TextXAlignment={Enum.TextXAlignment.Left}
-                TextWrapped={true}
             >
                 <uistroke Thickness={2} />
-                <uigradient
-                    Color={
-                        new ColorSequence([
-                            new ColorSequenceKeypoint(0, Color3.fromRGB(255, 255, 255)),
-                            new ColorSequenceKeypoint(0.7, Color3.fromRGB(225, 225, 225)),
-                            new ColorSequenceKeypoint(1, Color3.fromRGB(112, 112, 112)),
-                        ])
-                    }
-                    Rotation={90}
-                />
             </textlabel>
         </frame>
     );
-}
+});
 
 /**
  * Purchase window component for buying shop items
@@ -135,11 +116,25 @@ export default function PurchaseWindow({
     const purchaseButtonRef = useRef<TextButton>();
     const { visible, closeWindow } = useSingleDocumentWindow("Purchase");
     const [{ bought, price }, setBoughtData] = useState({ bought: 0, price: new CurrencyBundle() });
+    const [unaffordableLabel, setUnaffordableLabel] = useState("UNAFFORDABLE");
     const [affordablePerCurrency, setAffordablePerCurrency] = useState(new Map<Currency, boolean>());
     const [affordablePerItem, setAffordablePerItem] = useState(new Map<Item, boolean>());
     const viewportManagement = useCIViewportManagement({ enabled: viewportsEnabled });
     const metadata = METADATA_PER_ITEM.get(item);
-    const canPurchase = price !== undefined;
+
+    useEffect(() => {
+        let active = true;
+        const updateUnaffordableLabel = () => {
+            if (!active) return;
+            const options = ["UNAFFORDABLE", "YOU ARE BROKE", "GET MORE STUFF", "WORK HARDER", "NOPE", "YOU WISH"];
+            setUnaffordableLabel(options[math.floor(math.random(0, options.size() - 1))]);
+            task.delay(5, updateUnaffordableLabel);
+        };
+        updateUnaffordableLabel();
+        return () => {
+            active = false;
+        };
+    }, []);
 
     useEffect(() => {
         const boughtConnection = Packets.bought.observe((boughtPerItem) => {
@@ -148,7 +143,7 @@ export default function PurchaseWindow({
             setBoughtData({ bought, price });
         });
         return () => boughtConnection.disconnect();
-    }, []);
+    }, [item]);
 
     useEffect(() => {
         const balanceConnection = Packets.balance.observe((balance) => {
@@ -156,8 +151,8 @@ export default function PurchaseWindow({
 
             const affordablePerCurrency = new Map<Currency, boolean>();
             for (const [currency, amount] of price.amountPerCurrency) {
-                const inBalance = balance.get(currency);
-                affordablePerCurrency.set(currency, inBalance !== undefined && amount.lessEquals(inBalance));
+                const inBalance = balance.get(currency) ?? new OnoeNum(0);
+                affordablePerCurrency.set(currency, amount.lessEquals(inBalance));
             }
             setAffordablePerCurrency(affordablePerCurrency);
         });
@@ -167,8 +162,8 @@ export default function PurchaseWindow({
 
             const affordablePerItem = new Map<Item, boolean>();
             for (const [requiredItem, amount] of item.requiredItems) {
-                const inInventory = inventory.get(requiredItem.id);
-                affordablePerItem.set(requiredItem, inInventory !== undefined && inInventory >= amount);
+                const inInventory = inventory.get(requiredItem.id) ?? 0;
+                affordablePerItem.set(requiredItem, inInventory >= amount);
             }
             setAffordablePerItem(affordablePerItem);
         });
@@ -177,7 +172,7 @@ export default function PurchaseWindow({
             balanceConnection.disconnect();
             inventoryConnection.disconnect();
         };
-    }, [item, bought]);
+    }, [item, price]);
 
     const onPurchase = useCallback(() => {
         const success = Packets.buyItem.toServer(item.id);
@@ -189,28 +184,99 @@ export default function PurchaseWindow({
         return getDifficultyDisplayColors(item.difficulty);
     }, [item]);
 
+    const priceOptionRefs = useRef<Map<string, Frame>>(new Map());
     const priceOptions = new Array<JSX.Element>();
     for (const [currency, amount] of price.amountPerCurrency) {
         priceOptions.push(
             <PriceOption
+                ref={(instance) => {
+                    if (instance) {
+                        priceOptionRefs.current.set(currency, instance);
+                    }
+                }}
                 currency={currency}
                 amount={amount}
                 affordable={affordablePerCurrency.get(currency) ?? false}
-                layoutOrder={CURRENCY_DETAILS[currency].layoutOrder}
             />,
         );
     }
     for (const [requiredItem, amount] of item.requiredItems) {
         priceOptions.push(
             <PriceOption
+                ref={(instance) => {
+                    if (instance) {
+                        priceOptionRefs.current.set(requiredItem.id, instance);
+                    }
+                }}
                 item={requiredItem}
                 amount={amount}
                 affordable={affordablePerItem.get(requiredItem) ?? false}
-                layoutOrder={100 + requiredItem.layoutOrder}
                 viewportManagement={viewportManagement}
             />,
         );
     }
+
+    const containerPadding = 5;
+    useEffect(() => {
+        const button = purchaseButtonRef.current;
+        if (!button) return;
+
+        // Manually position price options to wrap within the purchase button
+        const wrapPriceOptions = () => {
+            const containerX = button.AbsoluteSize.X;
+            let currentX = 0;
+            let currentY = 0;
+            const priceOptionsPerKey = priceOptionRefs.current;
+            const priceOptions = new Array<Frame>();
+            for (const [currency] of CurrencyBundle.SORTED_DETAILS) {
+                const instance = priceOptionsPerKey.get(currency);
+                if (instance) {
+                    priceOptions.push(instance);
+                }
+            }
+            for (const item of Items.sortedItems) {
+                const instance = priceOptionsPerKey.get(item.id);
+                if (instance) {
+                    priceOptions.push(instance);
+                }
+            }
+
+            for (const instance of priceOptions) {
+                const size = instance.AbsoluteSize;
+                const sizeX = size.X;
+                const sizeY = size.Y;
+                if (currentX + sizeX + containerPadding > containerX) {
+                    currentX = 0;
+                    currentY += sizeY + containerPadding;
+                }
+                instance.Position = new UDim2(0, currentX, 0, currentY);
+                currentX += sizeX + containerPadding;
+            }
+        };
+        const connection = button.GetPropertyChangedSignal("AbsoluteSize").Connect(wrapPriceOptions);
+        wrapPriceOptions();
+
+        return () => {
+            connection.Disconnect();
+        };
+    }, [priceOptions]);
+
+    const totalAffordable = useMemo(() => {
+        let totalAffordable = true;
+        for (const [, affordable] of affordablePerCurrency) {
+            if (!affordable) {
+                totalAffordable = false;
+                break;
+            }
+        }
+        for (const [, affordable] of affordablePerItem) {
+            if (!affordable) {
+                totalAffordable = false;
+                break;
+            }
+        }
+        return totalAffordable;
+    }, [affordablePerCurrency, affordablePerItem]);
 
     return (
         <ItemWindow
@@ -236,7 +302,7 @@ export default function PurchaseWindow({
             />
 
             {/* Item slot display */}
-            <frame BackgroundTransparency={1} LayoutOrder={1} Size={new UDim2(1, 0, 0.075, 30)}>
+            <frame BackgroundTransparency={1} LayoutOrder={1} Size={new UDim2(0.9, 0, 0.075, 30)}>
                 <uilistlayout
                     FillDirection={Enum.FillDirection.Horizontal}
                     HorizontalAlignment={Enum.HorizontalAlignment.Left}
@@ -253,6 +319,7 @@ export default function PurchaseWindow({
                     visible={true}
                     onActivated={() => {}}
                     size={new UDim2(0, 0, 1, 0)}
+                    tooltipEnabled={false}
                     viewportManagement={viewportManagement}
                 />
 
@@ -393,8 +460,8 @@ export default function PurchaseWindow({
                 </frame>
 
                 {/* Purchase container */}
-                {canPurchase && (
-                    <frame BackgroundTransparency={1} Size={new UDim2(1, 0, 0, 50)}>
+                {!price.amountPerCurrency.isEmpty() && (
+                    <frame AutomaticSize={Enum.AutomaticSize.Y} BackgroundTransparency={1} Size={new UDim2(1, 0, 0, 0)}>
                         <uilistlayout
                             FillDirection={Enum.FillDirection.Vertical}
                             HorizontalAlignment={Enum.HorizontalAlignment.Center}
@@ -406,18 +473,71 @@ export default function PurchaseWindow({
                         {/* Purchase button */}
                         <textbutton
                             ref={purchaseButtonRef}
+                            AutomaticSize={Enum.AutomaticSize.Y}
                             BackgroundColor3={Color3.fromRGB(85, 255, 127)}
+                            BackgroundTransparency={totalAffordable ? 0 : 0.5}
                             BorderColor3={Color3.fromRGB(0, 28, 5)}
                             BorderSizePixel={3}
+                            FontFace={RobotoSlabHeavy}
                             Selectable={false}
-                            Text=""
-                            Size={new UDim2(0.8, 0, 0.8, 0)}
+                            Text={totalAffordable ? "PURCHASE" : unaffordableLabel}
+                            TextColor3={new Color3(0, 0, 0)}
+                            TextSize={24}
+                            TextTransparency={0.8}
+                            TextXAlignment={Enum.TextXAlignment.Right}
+                            TextYAlignment={Enum.TextYAlignment.Bottom}
+                            Size={new UDim2(0.8, 0, 0, 0)}
                             Event={{
+                                MouseMoved: () => {
+                                    if (totalAffordable) return;
+                                    const balance = Packets.balance.get();
+                                    const inventory = Packets.inventory.get();
+                                    const builder = new StringBuilder("Missing requirements:");
+                                    for (const [currency] of CurrencyBundle.SORTED_DETAILS) {
+                                        if (affordablePerCurrency.get(currency) ?? true) continue;
+                                        builder
+                                            .append("<font size='16' color='#")
+                                            .append(
+                                                CURRENCY_DETAILS[currency].color.Lerp(new Color3(1, 1, 1), 0.7).ToHex(),
+                                            )
+                                            .append("'>\n- ")
+                                            .append(new OnoeNum(balance.get(currency) ?? 0).toString())
+                                            .append("/")
+                                            .append(price.get(currency)!.toString())
+                                            .append(" ")
+                                            .append(currency)
+                                            .append("</font>");
+                                    }
+                                    for (const requiredItem of Items.sortedItems) {
+                                        if (affordablePerItem.get(requiredItem) ?? true) continue;
+                                        const color = requiredItem.difficulty.color ?? Color3.fromRGB(255, 255, 255);
+                                        builder
+                                            .append("<font size='16' color='#")
+                                            .append(color.Lerp(new Color3(1, 1, 1), 0.7).ToHex())
+                                            .append("'>\n- ")
+                                            .append(inventory.get(requiredItem.id) ?? 0)
+                                            .append("/")
+                                            .append(item.requiredItems.get(requiredItem))
+                                            .append(" ")
+                                            .append(requiredItem.name)
+                                            .append("</font>");
+                                    }
+                                    TooltipManager.showTooltip({ message: builder.toString() });
+                                },
+                                MouseLeave: () => {
+                                    TooltipManager.hideTooltip();
+                                },
                                 Activated: onPurchase,
                             }}
                         >
                             {priceOptions}
 
+                            <uipadding
+                                PaddingBottom={new UDim(0, containerPadding)}
+                                PaddingTop={new UDim(0, containerPadding)}
+                                PaddingLeft={new UDim(0, containerPadding)}
+                                PaddingRight={new UDim(0, containerPadding)}
+                            />
                             <uistroke
                                 ApplyStrokeMode={Enum.ApplyStrokeMode.Border}
                                 Color={Color3.fromRGB(156, 255, 156)}
@@ -432,13 +552,6 @@ export default function PurchaseWindow({
                                     ])
                                 }
                                 Rotation={270}
-                            />
-                            <uilistlayout
-                                FillDirection={Enum.FillDirection.Horizontal}
-                                HorizontalAlignment={Enum.HorizontalAlignment.Center}
-                                Padding={new UDim(0, 5)}
-                                SortOrder={Enum.SortOrder.LayoutOrder}
-                                VerticalAlignment={Enum.VerticalAlignment.Center}
                             />
                         </textbutton>
                     </frame>
