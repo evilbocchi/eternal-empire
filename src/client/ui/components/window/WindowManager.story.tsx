@@ -54,7 +54,7 @@ export = CreateReactStory(
                     visible={window1Visible}
                     icon={getAsset("assets/Settings.png")}
                     title="Normal Priority Window"
-                    colorSequence={
+                    strokeColor={
                         new ColorSequence([
                             new ColorSequenceKeypoint(0, Color3.fromRGB(100, 150, 255)),
                             new ColorSequenceKeypoint(1, Color3.fromRGB(50, 100, 200)),
@@ -77,7 +77,7 @@ export = CreateReactStory(
                     visible={window2Visible}
                     icon={getAsset("assets/Quests.png")}
                     title="High Priority Window"
-                    colorSequence={
+                    strokeColor={
                         new ColorSequence([
                             new ColorSequenceKeypoint(0, Color3.fromRGB(255, 150, 100)),
                             new ColorSequenceKeypoint(1, Color3.fromRGB(200, 100, 50)),
@@ -100,7 +100,7 @@ export = CreateReactStory(
                     visible={window3Visible}
                     icon={getAsset("assets/Inventory.png")}
                     title="Low Priority Window"
-                    colorSequence={
+                    strokeColor={
                         new ColorSequence([
                             new ColorSequenceKeypoint(0, Color3.fromRGB(150, 255, 150)),
                             new ColorSequenceKeypoint(1, Color3.fromRGB(100, 200, 100)),

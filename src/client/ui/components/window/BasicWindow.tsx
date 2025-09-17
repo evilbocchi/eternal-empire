@@ -10,7 +10,7 @@ declare global {
         visible: boolean;
         icon: string;
         title: string;
-        colorSequence?: ColorSequence;
+        strokeColor?: ColorSequence;
         onClose: () => void;
         children: React.ReactNode;
         priority?: number; // Optional priority for close order
@@ -24,7 +24,7 @@ export default function BasicWindow({
     title,
     children,
     onClose,
-    colorSequence,
+    strokeColor,
     priority = 0,
 }: WindowProps) {
     const frameRef = useRef<Frame>();
@@ -83,7 +83,7 @@ export default function BasicWindow({
                 {children}
             </frame>
             <uistroke ApplyStrokeMode={Enum.ApplyStrokeMode.Border} Color={Color3.fromRGB(255, 255, 255)} Thickness={2}>
-                <uigradient Color={colorSequence} Rotation={80} />
+                <uigradient Color={strokeColor} Rotation={80} />
             </uistroke>
             <uigradient
                 Color={

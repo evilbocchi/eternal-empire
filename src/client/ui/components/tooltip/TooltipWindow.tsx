@@ -4,6 +4,7 @@ import React, { useEffect, useMemo, useRef } from "@rbxts/react";
 import { RunService, TweenService, Workspace } from "@rbxts/services";
 import { Environment } from "@rbxts/ui-labs";
 import { RobotoSlab, RobotoSlabBold, RobotoSlabExtraBold, RobotoSlabMedium } from "client/ui/GameFonts";
+import getDifficultyDisplayColors from "client/ui/components/tooltip/getDifficultyDisplayColors";
 import Packets from "shared/Packets";
 import { getAsset } from "shared/asset/AssetMap";
 import Item from "shared/item/Item";
@@ -146,21 +147,12 @@ export default function TooltipWindow() {
         if (itemMetadata) {
             builder.appendAll(itemMetadata.builder);
         }
+        const richText = builder.toString();
 
         // Pre-calculate colors
-        let color = difficulty.color ?? new Color3();
-        color = color
-            ? new Color3(math.clamp(color.R, 0.1, 0.9), math.clamp(color.G, 0.1, 0.9), math.clamp(color.B, 0.1, 0.9))
-            : new Color3();
-        const textColor = difficulty.color?.Lerp(new Color3(1, 1, 1), 0.5) ?? Color3.fromRGB(255, 255, 255);
+        const { background: backgroundColor, text: textColor } = getDifficultyDisplayColors(difficulty);
 
-        return {
-            item,
-            difficulty,
-            richText: builder.toString(),
-            backgroundColor: color,
-            textColor,
-        };
+        return { item, difficulty, richText, backgroundColor, textColor };
     }, [data?.item, data?.uuid, METADATA_PER_ITEM]);
 
     const renderItemSlot = () => {

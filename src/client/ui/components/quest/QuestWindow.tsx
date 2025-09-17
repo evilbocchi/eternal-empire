@@ -80,7 +80,7 @@ export default function QuestWindow() {
 
     return (
         <BasicWindow
-            colorSequence={
+            strokeColor={
                 new ColorSequence([
                     new ColorSequenceKeypoint(0, Color3.fromRGB(255, 94, 94)),
                     new ColorSequenceKeypoint(1, Color3.fromRGB(255, 18, 18)),

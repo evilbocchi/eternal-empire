@@ -232,7 +232,7 @@ export default function InventoryWindow({ inventoryController }: InventoryWindow
             visible={visible}
             icon={getAsset("assets/Inventory.png")}
             title="Inventory"
-            colorSequence={
+            strokeColor={
                 new ColorSequence([
                     new ColorSequenceKeypoint(0, Color3.fromRGB(255, 186, 125)),
                     new ColorSequenceKeypoint(1, Color3.fromRGB(255, 123, 123)),
