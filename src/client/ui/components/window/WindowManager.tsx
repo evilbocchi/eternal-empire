@@ -119,7 +119,6 @@ export default class WindowManager {
                 }
                 return false;
             },
-            priority: 0,
             label: "Close Window",
         });
 

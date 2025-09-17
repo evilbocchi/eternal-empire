@@ -2,6 +2,8 @@ import { OnoeNum } from "@antivivi/serikanum";
 import React, { forwardRef, useCallback, useEffect, useMemo, useRef, useState } from "@rbxts/react";
 import StringBuilder from "@rbxts/stringbuilder";
 import displayBalanceCurrency from "client/ui/components/balance/displayBalanceCurrency";
+import { useHotkey } from "client/ui/components/hotkeys/HotkeyManager";
+import useHotkeyWithTooltip from "client/ui/components/hotkeys/useHotkeyWithTooltip";
 import InventoryItemSlot from "client/ui/components/item/inventory/InventoryItemSlot";
 import { ItemViewportManagement } from "client/ui/components/item/ItemViewport";
 import ItemWindow from "client/ui/components/item/shop/ItemWindow";
@@ -11,6 +13,7 @@ import getDifficultyDisplayColors from "client/ui/components/tooltip/getDifficul
 import { METADATA_PER_ITEM, TooltipManager } from "client/ui/components/tooltip/TooltipWindow";
 import { RobotoMono, RobotoSlab, RobotoSlabHeavy, RobotoSlabMedium } from "client/ui/GameFonts";
 import { getAsset } from "shared/asset/AssetMap";
+import { playSound } from "shared/asset/GameAssets";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import { CURRENCY_DETAILS } from "shared/currency/CurrencyDetails";
 import Item from "shared/item/Item";
@@ -174,9 +177,20 @@ export default function PurchaseWindow({
         };
     }, [item, price]);
 
-    const onPurchase = useCallback(() => {
-        const success = Packets.buyItem.toServer(item.id);
-    }, []);
+    const purchase = () => {
+        if (!visible) return false;
+
+        if (Packets.buyItem.toServer(item.id)) {
+            playSound("ItemPurchase.mp3");
+        } else {
+            playSound("Error.mp3");
+        }
+        return true;
+    };
+    useHotkey({
+        action: purchase,
+        label: "Purchase",
+    });
 
     const description = metadata?.formatItemDescription(undefined, false, Color3.fromRGB(255, 255, 255), 20);
 
@@ -185,6 +199,12 @@ export default function PurchaseWindow({
     }, [item]);
 
     const priceOptionRefs = useRef<Map<string, Frame>>(new Map());
+
+    // Clear refs when item changes to prevent stale references
+    useEffect(() => {
+        priceOptionRefs.current.clear();
+    }, [item.id]);
+
     const priceOptions = new Array<JSX.Element>();
     for (const [currency, amount] of price.amountPerCurrency) {
         priceOptions.push(
@@ -192,6 +212,8 @@ export default function PurchaseWindow({
                 ref={(instance) => {
                     if (instance) {
                         priceOptionRefs.current.set(currency, instance);
+                    } else {
+                        priceOptionRefs.current.delete(currency);
                     }
                 }}
                 currency={currency}
@@ -206,6 +228,8 @@ export default function PurchaseWindow({
                 ref={(instance) => {
                     if (instance) {
                         priceOptionRefs.current.set(requiredItem.id, instance);
+                    } else {
+                        priceOptionRefs.current.delete(requiredItem.id);
                     }
                 }}
                 item={requiredItem}
@@ -224,42 +248,96 @@ export default function PurchaseWindow({
         // Manually position price options to wrap within the purchase button
         const wrapPriceOptions = () => {
             const containerX = button.AbsoluteSize.X;
-            let currentX = 0;
-            let currentY = 0;
+            // Account for the button's left and right padding
+            const availableWidth = containerX - containerPadding * 2;
             const priceOptionsPerKey = priceOptionRefs.current;
             const priceOptions = new Array<Frame>();
-            for (const [currency] of CurrencyBundle.SORTED_DETAILS) {
+
+            // Only get instances that actually exist in the current refs
+            for (const [currency, amount] of price.amountPerCurrency) {
                 const instance = priceOptionsPerKey.get(currency);
                 if (instance) {
                     priceOptions.push(instance);
                 }
             }
-            for (const item of Items.sortedItems) {
-                const instance = priceOptionsPerKey.get(item.id);
+            for (const [requiredItem] of item.requiredItems) {
+                const instance = priceOptionsPerKey.get(requiredItem.id);
                 if (instance) {
                     priceOptions.push(instance);
                 }
             }
 
+            // Early return if no price options are available yet
+            if (priceOptions.size() === 0) return;
+
+            // First pass: organize options into rows
+            const rows: Array<Array<{ instance: Frame; originalWidth: number; height: number }>> = [];
+            let currentRow: Array<{ instance: Frame; originalWidth: number; height: number }> = [];
+            let currentRowWidth = 0;
+
             for (const instance of priceOptions) {
                 const size = instance.AbsoluteSize;
                 const sizeX = size.X;
                 const sizeY = size.Y;
-                if (currentX + sizeX + containerPadding > containerX) {
-                    currentX = 0;
-                    currentY += sizeY + containerPadding;
+
+                // Skip instances that haven't been sized yet
+                if (sizeX === 0 || sizeY === 0) continue;
+
+                // Check if this option fits in the current row
+                const neededWidth = currentRowWidth + sizeX + (currentRow.size() > 0 ? containerPadding : 0);
+                if (neededWidth > availableWidth && currentRow.size() > 0) {
+                    // Start a new row
+                    rows.push(currentRow);
+                    currentRow = [{ instance, originalWidth: sizeX, height: sizeY }];
+                    currentRowWidth = sizeX;
+                } else {
+                    // Add to current row
+                    currentRow.push({ instance, originalWidth: sizeX, height: sizeY });
+                    currentRowWidth = neededWidth;
                 }
-                instance.Position = new UDim2(0, currentX, 0, currentY);
-                currentX += sizeX + containerPadding;
+            }
+            if (currentRow.size() > 0) {
+                rows.push(currentRow);
+            }
+
+            // Second pass: position options with distributed widths
+            let currentY = 0;
+            for (const row of rows) {
+                if (row.size() === 0) continue;
+
+                // Calculate total original width used by this row
+                const totalOriginalWidth = row.reduce((sum, item) => sum + item.originalWidth, 0);
+                const totalPadding = (row.size() - 1) * containerPadding;
+                const usedWidth = totalOriginalWidth + totalPadding;
+                const excessWidth = availableWidth - usedWidth;
+                const widthPerOption = excessWidth / row.size();
+
+                // Position and resize options in this row
+                let currentX = 0;
+                for (const { instance, originalWidth, height } of row) {
+                    const newWidth = originalWidth + widthPerOption;
+                    instance.Position = new UDim2(0, currentX, 0, currentY);
+                    instance.Size = new UDim2(0, newWidth, 0, height);
+                    currentX += newWidth + containerPadding;
+                }
+
+                currentY += row[0].height + containerPadding;
             }
         };
+
         const connection = button.GetPropertyChangedSignal("AbsoluteSize").Connect(wrapPriceOptions);
-        wrapPriceOptions();
+
+        // Delay initial layout to ensure components are rendered
+        const delayedWrap = () => {
+            task.wait(); // Wait one frame
+            wrapPriceOptions();
+        };
+        delayedWrap();
 
         return () => {
             connection.Disconnect();
         };
-    }, [priceOptions]);
+    }, [item.id, price, affordablePerCurrency, affordablePerItem]); // Changed dependencies
 
     const totalAffordable = useMemo(() => {
         let totalAffordable = true;
@@ -527,7 +605,7 @@ export default function PurchaseWindow({
                                 MouseLeave: () => {
                                     TooltipManager.hideTooltip();
                                 },
-                                Activated: onPurchase,
+                                Activated: purchase,
                             }}
                         >
                             {priceOptions}

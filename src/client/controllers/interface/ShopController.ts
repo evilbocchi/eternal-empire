@@ -59,33 +59,6 @@ export const SHOP_GUI = (function () {
 })();
 
 /**
- * The main purchase window for the shop, which displays item details and allows purchasing.
- */
-export const PURCHASE_WINDOW = ADAPTIVE_TAB_MAIN_WINDOW.WaitForChild("Purchase") as Frame & {
-    ItemSlot: ItemSlot & {
-        Contents: Frame & {
-            ViewportFrame: ViewportFrame;
-            Identification: Frame & {
-                Difficulty: DifficultyLabel;
-                TitleLabel: TextLabel;
-            };
-        };
-        AmountLabel: TextLabel;
-    };
-    DescriptionFrame: ScrollingFrame & {
-        DescriptionLabel: TextLabel;
-        CreatorLabel: TextLabel;
-        PurchaseContainer: Frame & {
-            Purchase: TextButton & {
-                Price: Frame;
-                HeadingLabel: TextLabel;
-                UIStroke: UIStroke;
-            };
-        };
-    };
-};
-
-/**
  * The metadata for each item in the shop, used to display additional information.
  */
 const METADATA_PER_ITEM = new Map<Item, ItemMetadata>();
@@ -101,13 +74,6 @@ for (const item of Items.sortedItems) {
  */
 @Controller()
 export default class ShopController implements OnInit, OnStart {
-    /** Color for sufficient funds. */
-    readonly sufficientColor = Color3.fromRGB(255, 255, 255);
-    /** Color for insufficient funds. */
-    readonly insufficientColor = Color3.fromRGB(255, 80, 80);
-    /** Default description label color. */
-    readonly descriptionColor = PURCHASE_WINDOW.DescriptionFrame.DescriptionLabel.TextColor3;
-
     /** Item filter logic for the shop GUI. */
     readonly filterItems = ItemFilter.loadFilterOptions(SHOP_GUI.FilterOptions, (query, whitelistedTraits) => {
         const items = this.currentShop?.items;
@@ -194,151 +160,6 @@ export default class ShopController implements OnInit, OnStart {
     }
 
     /**
-     * Creates a price option UI element for a given currency or required item.
-     * @param amount The amount required.
-     * @param currency The currency type, if any.
-     * @param item The required item, if any.
-     * @returns The created price option UI element.
-     */
-    createPriceOption(amount: OnoeNum | number, currency: Currency | undefined, item: Item | undefined) {
-        const option = ASSETS.ShopWindow.PriceOption.Clone();
-        const update = (affordable: boolean) => {
-            option.AmountLabel.TextColor3 = affordable ? this.sufficientColor : this.insufficientColor;
-            option.SetAttribute("Affordable", affordable);
-        };
-
-        let connection: Connection;
-        if (currency !== undefined) {
-            const details = CURRENCY_DETAILS[currency];
-            option.ImageLabel.Image = details.image;
-            option.LayoutOrder = details.layoutOrder;
-            option.ImageLabel.Visible = true;
-            option.ViewportFrame.Visible = false;
-            option.AmountLabel.Text = CurrencyBundle.getFormatted(currency, amount as OnoeNum, true);
-            connection = Packets.balance.observe((balance) => {
-                if (option === undefined || option.Parent === undefined) {
-                    connection.disconnect();
-                    return;
-                }
-                const inBalance = balance.get(currency);
-                update(
-                    (amount as OnoeNum).lessEquals(0) ||
-                        (inBalance !== undefined && (amount as OnoeNum).lessEquals(inBalance)),
-                );
-            });
-        } else if (item !== undefined) {
-            ItemSlot.loadViewportFrame(option.ViewportFrame, item);
-            option.LayoutOrder = 1000 + (item.difficulty?.rating ?? 0);
-            option.ImageLabel.Visible = false;
-            option.ViewportFrame.Visible = true;
-            option.AmountLabel.Text = amount + " " + item.name;
-            connection = Packets.inventory.observe((inventory) => {
-                if (option === undefined || option.Parent === undefined) {
-                    connection.disconnect();
-                    return;
-                }
-                const inInventory = inventory.get(item.id);
-                update(inInventory !== undefined && inInventory >= (amount as number));
-            });
-        }
-        option.Destroying.Once(() => connection.disconnect());
-        this.assignContainer(option);
-        return option;
-    }
-
-    /**
-     * Assigns a price option to a container in the purchase window.
-     * @param priceOption The price option UI element to assign.
-     */
-    assignContainer(priceOption: typeof ASSETS.ShopWindow.PriceOption) {
-        const purchaseButton = PURCHASE_WINDOW.DescriptionFrame.PurchaseContainer.Purchase;
-
-        priceOption.Parent = purchaseButton.Price;
-        const size = priceOption.AbsoluteSize.X + 5;
-        let currentContainer = purchaseButton.Price.FindFirstChild(this.priceContainerCounter) as
-            | typeof ASSETS.ShopWindow.PriceOptionsContainer
-            | undefined;
-        if (currentContainer === undefined || this.availableContainerSpace < size) {
-            currentContainer = ASSETS.ShopWindow.PriceOptionsContainer.Clone();
-            currentContainer.Name = tostring(++this.priceContainerCounter);
-            currentContainer.Parent = purchaseButton.Price;
-            this.availableContainerSpace = currentContainer.AbsoluteSize.X + 5;
-        }
-        this.availableContainerSpace -= size;
-        priceOption.Parent = currentContainer;
-    }
-
-    /**
-     * Updates the purchase window with details for the selected item.
-     * @param item The item to display in the purchase window.
-     */
-    refreshPurchaseWindow(item: Item) {
-        const purchaseButton = PURCHASE_WINDOW.DescriptionFrame.PurchaseContainer.Purchase;
-        const itemSlot = PURCHASE_WINDOW.ItemSlot;
-        const identification = itemSlot.Contents.Identification;
-        const viewportFrame = itemSlot.Contents.ViewportFrame;
-
-        const inventory = Packets.inventory.get();
-        const bought = Packets.bought.get();
-        const placed = Packets.placedItems.get();
-        if (inventory === undefined || bought === undefined || placed === undefined) return;
-
-        this.selectedItem = item;
-
-        identification.TitleLabel.Text = item.name ?? "error";
-
-        ItemSlot.loadDifficultyLabel(identification.Difficulty, item.difficulty);
-        ItemSlot.colorItemSlot(itemSlot, item.difficulty);
-
-        const [invCount, placedCount] = ItemCounter.getAmounts(inventory, placed, item.id);
-        itemSlot.AmountLabel.Text = `Owned ${invCount + placedCount}`;
-
-        viewportFrame.ClearAllChildren();
-        ItemSlot.loadViewportFrame(viewportFrame, item);
-        for (const option of purchaseButton.Price.GetChildren()) {
-            if (option.IsA("Frame")) option.Destroy();
-        }
-        let price = item.getPrice((bought.get(item.id) ?? 0) + 1);
-
-        if (IS_STUDIO && price === undefined) {
-            price = item.getPrice(bought.get(item.id) ?? 0);
-        }
-
-        if (price !== undefined) {
-            for (const [currency, amount] of price.amountPerCurrency)
-                this.createPriceOption(amount, currency, undefined);
-
-            for (const [requiredItem, amount] of item.requiredItems)
-                this.createPriceOption(amount, undefined, requiredItem);
-
-            purchaseButton.Visible = true;
-        } else {
-            purchaseButton.Visible = false;
-        }
-
-        PURCHASE_WINDOW.DescriptionFrame.CreatorLabel.Text = `Creator: ${item.creator}`;
-
-        const builder = buildRichText(undefined, item.format(item.description), this.descriptionColor, 21, "Medium");
-        builder.appendAll(METADATA_PER_ITEM.get(item)!.builder);
-        PURCHASE_WINDOW.DescriptionFrame.DescriptionLabel.Text = builder.toString();
-        purchaseButton.Visible = price !== undefined;
-        PURCHASE_WINDOW.DescriptionFrame.CreatorLabel.Visible = item.creator !== undefined;
-        this.switchDebounce = tick();
-    }
-
-    /**
-     * Hides the purchase window if visible.
-     * @returns True if the window was hidden, false otherwise.
-     */
-    hidePurchaseWindow() {
-        if (PURCHASE_WINDOW.Visible === false) return false;
-
-        this.adaptiveTabController.hideAdaptiveTab();
-        this.selectedItem = undefined;
-        return true;
-    }
-
-    /**
      * Loads item slots for all items in the shop.
      */
     loadItemSlots() {
@@ -351,7 +172,7 @@ export default class ShopController implements OnInit, OnStart {
             itemSlot.Visible = false;
             itemSlot.Activated.Connect(() => {
                 playSound("MenuClick.mp3");
-                this.refreshPurchaseWindow(item);
+                //this.refreshPurchaseWindow(item);
                 this.adaptiveTabController.showAdaptiveTab("Purchase");
                 ADAPTIVE_TAB.UIStroke.Color = diff.color ?? Color3.fromRGB(255, 255, 255);
             });
@@ -419,42 +240,11 @@ export default class ShopController implements OnInit, OnStart {
      */
     onInit() {
         this.refreshShop();
-        this.hidePurchaseWindow();
 
         Packets.settings.observe((settings) => {
             if (settings.HideMaxedItems === this.hideMaxedItems) return;
             this.hideMaxedItems = settings.HideMaxedItems;
         });
-
-        Packets.inventory.observe(() => {
-            if (this.selectedItem === undefined) return;
-            this.refreshPurchaseWindow(this.selectedItem);
-        });
-
-        // Refresh purchase window if the bought amount for the selected item changes
-        Packets.bought.observe(() => {
-            if (this.selectedItem === undefined) return;
-            this.refreshPurchaseWindow(this.selectedItem);
-        });
-
-        const purchaseButton = PURCHASE_WINDOW.DescriptionFrame.PurchaseContainer.Purchase;
-        this.hotkeysController.setHotkey(
-            purchaseButton,
-            Enum.KeyCode.E,
-            () => {
-                if (PURCHASE_WINDOW.Visible === false) {
-                    return false;
-                }
-                if (this.selectedItem !== undefined && Packets.buyItem.toServer(this.selectedItem.id)) {
-                    playSound("ItemPurchase.mp3");
-                } else {
-                    playSound("Error.mp3");
-                }
-                return true;
-            },
-            "Buy",
-            1,
-        );
 
         this.hotkeysController.setHotkey(
             SHOP_GUI.ItemList.BuyAll.Button,
@@ -479,20 +269,6 @@ export default class ShopController implements OnInit, OnStart {
             5,
         );
 
-        PURCHASE_WINDOW.DescriptionFrame.CreatorLabel.MouseMoved.Connect(() => {
-            TweenService.Create(PURCHASE_WINDOW.DescriptionFrame.CreatorLabel, new TweenInfo(0.2), {
-                TextTransparency: 0,
-                TextStrokeTransparency: 0,
-            }).Play();
-        });
-
-        PURCHASE_WINDOW.DescriptionFrame.CreatorLabel.MouseLeave.Connect(() => {
-            TweenService.Create(PURCHASE_WINDOW.DescriptionFrame.CreatorLabel, new TweenInfo(0.2), {
-                TextTransparency: 0.8,
-                TextStrokeTransparency: 0.8,
-            }).Play();
-        });
-
         ItemSlot.hookMetadata(METADATA_PER_ITEM);
 
         this.loadItemSlots();
@@ -510,27 +286,6 @@ export default class ShopController implements OnInit, OnStart {
             }
             elapsedTime = 0;
             this.priceCycle();
-        });
-
-        task.spawn(() => {
-            const purchaseButton = PURCHASE_WINDOW.DescriptionFrame.PurchaseContainer.Purchase;
-            const headingLabel = purchaseButton.HeadingLabel;
-
-            while (task.wait(1 / 60)) {
-                let affordable = true;
-                for (const descendant of purchaseButton.Price.GetDescendants()) {
-                    if (descendant.Name === "PriceOption" && descendant.GetAttribute("Affordable") === false) {
-                        affordable = false;
-                        break;
-                    }
-                }
-
-                const color = affordable ? Color3.fromRGB(85, 255, 127) : Color3.fromRGB(56, 176, 84);
-                const tweenInfo = new TweenInfo(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out);
-                TweenService.Create(purchaseButton, tweenInfo, { BackgroundColor3: color }).Play();
-                TweenService.Create(purchaseButton.UIStroke, tweenInfo, { Color: color }).Play();
-                headingLabel.Text = affordable ? "PURCHASE" : "UNAFFORDABLE";
-            }
         });
 
         task.spawn(() => {

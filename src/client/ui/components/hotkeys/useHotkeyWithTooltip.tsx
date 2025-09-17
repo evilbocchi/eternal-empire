@@ -14,7 +14,6 @@ declare global {
 
     type HotkeyWithTooltipOptions = {
         action: (usedHotkey: boolean) => boolean;
-        priority?: number;
         label: HotkeyLabel;
         endAction?: () => boolean;
         onEnter?: () => void;
@@ -26,18 +25,10 @@ declare global {
  * Hook that combines hotkey binding with tooltip integration
  * Similar to the original HotkeysController.setHotkey method
  */
-export default function useHotkeyWithTooltip({
-    action,
-    priority,
-    label,
-    endAction,
-    onEnter,
-    onLeave,
-}: HotkeyWithTooltipOptions) {
+export default function useHotkeyWithTooltip({ action, label, endAction, onEnter, onLeave }: HotkeyWithTooltipOptions) {
     // Bind the hotkey
     useHotkey({
         action,
-        priority: priority ?? 0,
         label: label,
         endAction: endAction,
     });

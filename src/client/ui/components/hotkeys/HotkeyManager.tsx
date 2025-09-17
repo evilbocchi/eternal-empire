@@ -24,8 +24,6 @@ export interface HotkeyOptions {
     label: HotkeyLabel;
     /** The action to execute */
     action: (usedHotkey: boolean) => boolean;
-    /** Priority for execution order (higher = executes first) */
-    priority: number;
     /** Action to execute on key release */
     endAction?: () => boolean;
 }
@@ -45,6 +43,11 @@ export const HOTKEY_BINDINGS = [
         keyCode: Enum.KeyCode.P,
         label: "Settings",
         priority: 2,
+    },
+    {
+        keyCode: Enum.KeyCode.E,
+        label: "Purchase",
+        priority: 0,
     },
     {
         keyCode: Enum.KeyCode.X,
