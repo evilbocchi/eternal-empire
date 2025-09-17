@@ -10,7 +10,7 @@ export = new Item(script.Name)
     .setDescription(
         "An enhancer that amplifies the performance of Bulky Droppers, multiplying drop rate by %dropRateMultiplier% times.",
     )
-    .setDifficulty(Difficulty.TheFirstDifficulty)
+    .setDifficulty(Difficulty.TheLowerGap)
     .setPrice(new CurrencyBundle().set("Funds", 500), 1)
     .addPlaceableArea("BarrenIslands")
 

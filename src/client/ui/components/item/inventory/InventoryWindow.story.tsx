@@ -12,6 +12,7 @@ export = CreateReactStory(
         reactRoblox: ReactRoblox,
         controls: {
             visible: true,
+            viewportsEnabled: false,
         },
     },
     (props) => {
@@ -19,13 +20,9 @@ export = CreateReactStory(
 
         useSingleDocumentVisibility("Inventory", props.controls.visible);
 
-        // const buildController = new BuildController();
-        // const inventoryController = new InventoryController(buildController);
-
         return (
             <StrictMode>
-                {/* <InventoryWindow inventoryController={inventoryController} /> */}
-                <InventoryWindow />
+                <InventoryWindow viewportsEnabled={props.controls.viewportsEnabled} />
                 <TooltipWindow />
             </StrictMode>
         );

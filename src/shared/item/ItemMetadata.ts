@@ -208,14 +208,13 @@ export default class ItemMetadata {
      * @returns The combined rich text string.
      */
     formatItemDescription(
-        item: Item,
         uuid?: string,
         useTooltipDescription?: boolean,
         color?: Color3,
         size?: number,
         weight?: string | number,
     ) {
-        const description = ItemMetadata.formatDescription(item, uuid, useTooltipDescription);
+        const description = ItemMetadata.formatDescription(this.item, uuid, useTooltipDescription);
         return this.appendMetadata(description, color, size, weight);
     }
 

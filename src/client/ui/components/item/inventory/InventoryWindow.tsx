@@ -11,6 +11,7 @@ import type InventoryController from "client/controllers/interface/InventoryCont
 import InventoryEmptyState from "client/ui/components/item/inventory/InventoryEmptyState";
 import InventoryFilter, { isWhitelisted, traitOptions } from "client/ui/components/item/inventory/InventoryFilter";
 import InventoryItemSlot from "client/ui/components/item/inventory/InventoryItemSlot";
+import useCIViewportManagement from "client/ui/components/item/useCIViewportManagement";
 import useSingleDocumentWindow from "client/ui/components/sidebar/useSingleDocumentWindow";
 import BasicWindow from "client/ui/components/window/BasicWindow";
 import { RobotoMono } from "client/ui/GameFonts";
@@ -34,10 +35,6 @@ interface InventoryItemData {
     amount: number;
     layoutOrder: number;
     visible: boolean;
-}
-
-interface InventoryWindowProps {
-    inventoryController?: InventoryController;
 }
 
 /**
@@ -74,12 +71,19 @@ const SEARCHABLE_ITEMS = Items.sortedItems.filter((item) => !item.isA("Gear"));
 /**
  * Main inventory window component following the QuestWindow pattern
  */
-export default function InventoryWindow({ inventoryController }: InventoryWindowProps) {
+export default function InventoryWindow({
+    inventoryController,
+    viewportsEnabled,
+}: {
+    inventoryController?: InventoryController;
+    viewportsEnabled?: boolean;
+}) {
     const { visible, closeWindow } = useSingleDocumentWindow("Inventory");
     const [searchQuery, setSearchQuery] = useState("");
     const [queryTime, setQueryTime] = useState(0);
     const [traitFilters, setTraitFilters] = useState<Set<TraitFilterId>>(new Set());
     const [cellSize, setCellSize] = useState(new UDim2(0, 65, 0, 65));
+    const viewportManagement = useCIViewportManagement({ enabled: viewportsEnabled });
 
     // Observe inventory data from packets
     const inventory = useProperty(Packets.inventory);
@@ -294,6 +298,7 @@ export default function InventoryWindow({ inventoryController }: InventoryWindow
                                 }
                                 visible={inventoryData?.visible === true}
                                 onActivated={() => handleItemActivated(item)}
+                                viewportManagement={viewportManagement}
                             />
                         );
                     })}

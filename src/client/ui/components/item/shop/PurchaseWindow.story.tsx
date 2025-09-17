@@ -1,9 +1,15 @@
-import React, { StrictMode, useState } from "@rbxts/react";
+import React, { StrictMode } from "@rbxts/react";
 import ReactRoblox from "@rbxts/react-roblox";
-import { CreateReactStory } from "@rbxts/ui-labs";
+import { Choose, CreateReactStory } from "@rbxts/ui-labs";
 import PurchaseWindow from "client/ui/components/item/shop/PurchaseWindow";
+import StoryMocking from "client/ui/components/StoryMocking";
+import TooltipWindow from "client/ui/components/tooltip/TooltipWindow";
 import { useSingleDocumentVisibility } from "client/ui/hooks/useVisibility";
-import CoalescentRefiner from "shared/items/0/ifinitude/CoalescentRefiner";
+import Items from "shared/items/Items";
+import TheFirstDropper from "shared/items/negative/tfd/TheFirstDropper";
+
+const options = new Array<string>();
+for (const item of Items.sortedItems) options.push(item.id);
 
 export = CreateReactStory(
     {
@@ -11,46 +17,21 @@ export = CreateReactStory(
         reactRoblox: ReactRoblox,
         controls: {
             visible: true,
+            viewportsEnabled: false,
+            item: Choose(options),
         },
     },
     (props) => {
-        const [purchased, setPurchased] = useState(false);
+        StoryMocking.mockData();
 
         useSingleDocumentVisibility("Purchase", props.controls.visible);
 
-        const handlePurchase = () => {
-            print("Purchasing item!");
-            setPurchased(true);
-        };
-
-        const priceOptions = [
-            {
-                currency: "Funds" as Currency,
-                amount: "500",
-                affordable: true,
-            },
-            {
-                currency: "Power" as Currency,
-                amount: "100",
-                affordable: true,
-            },
-        ];
-
-        const mockItem = CoalescentRefiner;
+        const item = Items.getItem(props.controls.item) ?? TheFirstDropper;
 
         return (
             <StrictMode>
-                <PurchaseWindow
-                    item={mockItem}
-                    description={purchased ? "Already purchased!" : mockItem.description}
-                    creator={mockItem.creator}
-                    priceOptions={priceOptions}
-                    owned={purchased ? 1 : 0}
-                    canPurchase={true}
-                    affordable={true}
-                    onPurchase={handlePurchase}
-                    strokeColor={mockItem.difficulty?.color ?? Color3.fromRGB(255, 255, 255)}
-                />
+                <TooltipWindow />
+                <PurchaseWindow item={item} viewportsEnabled={props.controls.viewportsEnabled} />
             </StrictMode>
         );
     },

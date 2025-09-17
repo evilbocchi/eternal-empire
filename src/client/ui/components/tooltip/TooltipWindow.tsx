@@ -10,7 +10,7 @@ import ItemMetadata from "shared/item/ItemMetadata";
 import Items from "shared/items/Items";
 
 // Precompute item metadata for efficient tooltip rendering
-const METADATA_PER_ITEM = new Map<Item, ItemMetadata>();
+export const METADATA_PER_ITEM = new Map<Item, ItemMetadata>();
 for (const item of Items.sortedItems) {
     METADATA_PER_ITEM.set(item, new ItemMetadata(item, 16, "Bold"));
 }
@@ -131,7 +131,6 @@ export default function TooltipWindow() {
         if (!itemMetadata) return undefined;
 
         const description = itemMetadata.formatItemDescription(
-            item,
             data.uuid,
             true,
             Color3.fromRGB(195, 195, 195),

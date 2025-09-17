@@ -1,42 +1,74 @@
-import Difficulty from "@antivivi/jjt-difficulties";
-import React, { useMemo } from "@rbxts/react";
+import { OnoeNum } from "@antivivi/serikanum";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "@rbxts/react";
+import displayBalanceCurrency from "client/ui/components/balance/displayBalanceCurrency";
 import InventoryItemSlot from "client/ui/components/item/inventory/InventoryItemSlot";
+import { ItemViewportManagement } from "client/ui/components/item/ItemViewport";
 import ItemWindow from "client/ui/components/item/shop/ItemWindow";
+import useCIViewportManagement from "client/ui/components/item/useCIViewportManagement";
 import useSingleDocumentWindow from "client/ui/components/sidebar/useSingleDocumentWindow";
 import getDifficultyDisplayColors from "client/ui/components/tooltip/getDifficultyDisplayColors";
-import { RobotoSlabHeavy, RobotoSlabMedium } from "client/ui/GameFonts";
+import { METADATA_PER_ITEM } from "client/ui/components/tooltip/TooltipWindow";
+import { RobotoMono, RobotoSlab, RobotoSlabHeavy, RobotoSlabMedium } from "client/ui/GameFonts";
 import { getAsset } from "shared/asset/AssetMap";
+import CurrencyBundle from "shared/currency/CurrencyBundle";
 import { CURRENCY_DETAILS } from "shared/currency/CurrencyDetails";
 import Item from "shared/item/Item";
+import Packets from "shared/Packets";
 
-interface PriceOptionProps {
+/**
+ * Individual price option component for purchase window
+ */
+function PriceOption({
+    currency,
+    item,
+    amount,
+    affordable,
+    layoutOrder = 0,
+    viewportManagement,
+}: {
     /** Currency amount and type */
     currency?: Currency;
     /** Item amount and type */
     item?: Item;
     /** Amount to display */
-    amount: number | string;
+    amount: OnoeNum | number;
     /** Whether the price is affordable */
     affordable: boolean;
     /** Layout order for sorting */
     layoutOrder?: number;
-}
-
-/**
- * Individual price option component for purchase window
- */
-function PriceOption({ currency, item, amount, affordable, layoutOrder = 0 }: PriceOptionProps) {
+    /** Shared viewport management instance */
+    viewportManagement?: ItemViewportManagement;
+}) {
+    const viewportRef = useRef<ViewportFrame>();
     const textColor = affordable ? Color3.fromRGB(255, 255, 255) : Color3.fromRGB(255, 80, 80);
 
+    useEffect(() => {
+        if (!item || !viewportRef.current) return;
+        viewportManagement?.loadItemIntoViewport(viewportRef.current!, item.id);
+    }, [viewportManagement, item?.id]);
+
     return (
-        <frame LayoutOrder={layoutOrder} Size={new UDim2(1, 0, 0, 30)}>
+        <frame
+            AutomaticSize={Enum.AutomaticSize.X}
+            BackgroundColor3={new Color3()}
+            BackgroundTransparency={0.8}
+            LayoutOrder={layoutOrder}
+            Size={new UDim2(0, 0, 0, 25)}
+        >
             <uilistlayout
                 FillDirection={Enum.FillDirection.Horizontal}
                 HorizontalAlignment={Enum.HorizontalAlignment.Center}
-                Padding={new UDim(0, 5)}
+                Padding={new UDim(0, 4)}
                 SortOrder={Enum.SortOrder.LayoutOrder}
                 VerticalAlignment={Enum.VerticalAlignment.Center}
             />
+            <uipadding
+                PaddingBottom={new UDim(0, 1)}
+                PaddingTop={new UDim(0, 1)}
+                PaddingLeft={new UDim(0, 10)}
+                PaddingRight={new UDim(0, 10)}
+            />
+            <uicorner CornerRadius={new UDim(0, 5)} />
 
             {currency && (
                 <imagelabel
@@ -44,69 +76,46 @@ function PriceOption({ currency, item, amount, affordable, layoutOrder = 0 }: Pr
                     Image={CURRENCY_DETAILS[currency].image}
                     LayoutOrder={1}
                     ScaleType={Enum.ScaleType.Fit}
-                    Size={new UDim2(0, 25, 0, 25)}
+                    Size={new UDim2(1, 0, 1, 0)}
+                    SizeConstraint={Enum.SizeConstraint.RelativeYY}
                 />
             )}
 
-            {item && <viewportframe BackgroundTransparency={1} LayoutOrder={1} Size={new UDim2(0, 25, 0, 25)} />}
+            {item && (
+                <viewportframe
+                    ref={viewportRef}
+                    BackgroundTransparency={1}
+                    LayoutOrder={1}
+                    Size={new UDim2(1, 0, 1, 0)}
+                    SizeConstraint={Enum.SizeConstraint.RelativeYY}
+                />
+            )}
 
             <textlabel
                 AutomaticSize={Enum.AutomaticSize.X}
                 BackgroundTransparency={1}
-                Font={Enum.Font.RobotoMono}
+                FontFace={RobotoSlabHeavy}
                 LayoutOrder={2}
                 Size={new UDim2(0, 0, 1, 0)}
-                Text={tostring(amount)}
+                Text={currency ? displayBalanceCurrency(currency, amount as OnoeNum) : `${amount} ${item?.name}`}
                 TextColor3={textColor}
                 TextScaled={true}
                 TextSize={18}
+                TextXAlignment={Enum.TextXAlignment.Left}
                 TextWrapped={true}
-            />
-        </frame>
-    );
-}
-
-interface DifficultyLabelProps {
-    /** The item difficulty to display */
-    difficulty?: Difficulty;
-}
-
-/**
- * Difficulty label component showing item difficulty
- */
-function DifficultyLabel({ difficulty }: DifficultyLabelProps) {
-    if (!difficulty) return <></>;
-
-    return (
-        <frame BackgroundTransparency={1} Size={new UDim2(1, 0, 0, 30)}>
-            <uilistlayout
-                FillDirection={Enum.FillDirection.Horizontal}
-                HorizontalAlignment={Enum.HorizontalAlignment.Center}
-                Padding={new UDim(0, 5)}
-                SortOrder={Enum.SortOrder.LayoutOrder}
-                VerticalAlignment={Enum.VerticalAlignment.Center}
-            />
-
-            <imagelabel
-                BackgroundTransparency={1}
-                Image={difficulty.image ? `rbxassetid://${difficulty.image}` : ""}
-                LayoutOrder={1}
-                ScaleType={Enum.ScaleType.Fit}
-                Size={new UDim2(0, 25, 0, 25)}
-            />
-
-            <textlabel
-                AutomaticSize={Enum.AutomaticSize.X}
-                BackgroundTransparency={1}
-                Font={Enum.Font.SourceSansBold}
-                LayoutOrder={2}
-                Size={new UDim2(0, 0, 1, 0)}
-                Text={difficulty.name}
-                TextColor3={difficulty.color ?? Color3.fromRGB(255, 255, 255)}
-                TextScaled={true}
-                TextSize={16}
-                TextWrapped={true}
-            />
+            >
+                <uistroke Thickness={2} />
+                <uigradient
+                    Color={
+                        new ColorSequence([
+                            new ColorSequenceKeypoint(0, Color3.fromRGB(255, 255, 255)),
+                            new ColorSequenceKeypoint(0.7, Color3.fromRGB(225, 225, 225)),
+                            new ColorSequenceKeypoint(1, Color3.fromRGB(112, 112, 112)),
+                        ])
+                    }
+                    Rotation={90}
+                />
+            </textlabel>
         </frame>
     );
 }
@@ -116,47 +125,92 @@ function DifficultyLabel({ difficulty }: DifficultyLabelProps) {
  */
 export default function PurchaseWindow({
     item,
-    description,
-    creator,
-    priceOptions,
-    owned,
-    canPurchase,
-    affordable,
-    onPurchase,
-    strokeColor = Color3.fromRGB(255, 255, 255),
+    viewportsEnabled,
 }: {
     /** The item to display for purchase */
     item: Item;
-    /** The formatted description text */
-    description: string;
-    /** The creator text */
-    creator?: string;
-    /** Array of price options */
-    priceOptions: Array<{
-        currency?: Currency;
-        item?: Item;
-        amount: number | string;
-        affordable: boolean;
-    }>;
-    /** Current owned amount */
-    owned: number;
-    /** Whether the purchase button should be visible */
-    canPurchase: boolean;
-    /** Whether all price options are affordable */
-    affordable: boolean;
-    /** Callback when purchase button is clicked */
-    onPurchase: () => void;
-    /** Stroke color for styling */
-    strokeColor?: Color3;
+    /** Whether 3D model viewports are enabled */
+    viewportsEnabled?: boolean;
 }) {
+    const purchaseButtonRef = useRef<TextButton>();
     const { visible, closeWindow } = useSingleDocumentWindow("Purchase");
+    const [{ bought, price }, setBoughtData] = useState({ bought: 0, price: new CurrencyBundle() });
+    const [affordablePerCurrency, setAffordablePerCurrency] = useState(new Map<Currency, boolean>());
+    const [affordablePerItem, setAffordablePerItem] = useState(new Map<Item, boolean>());
+    const viewportManagement = useCIViewportManagement({ enabled: viewportsEnabled });
+    const metadata = METADATA_PER_ITEM.get(item);
+    const canPurchase = price !== undefined;
 
-    const purchaseButtonColor = affordable ? Color3.fromRGB(85, 255, 127) : Color3.fromRGB(56, 176, 84);
-    const purchaseButtonText = affordable ? "PURCHASE" : "UNAFFORDABLE";
+    useEffect(() => {
+        const boughtConnection = Packets.bought.observe((boughtPerItem) => {
+            const bought = boughtPerItem.get(item.id) ?? 0;
+            const price = item.getPrice(bought + 1) ?? new CurrencyBundle();
+            setBoughtData({ bought, price });
+        });
+        return () => boughtConnection.disconnect();
+    }, []);
+
+    useEffect(() => {
+        const balanceConnection = Packets.balance.observe((balance) => {
+            if (!price) return;
+
+            const affordablePerCurrency = new Map<Currency, boolean>();
+            for (const [currency, amount] of price.amountPerCurrency) {
+                const inBalance = balance.get(currency);
+                affordablePerCurrency.set(currency, inBalance !== undefined && amount.lessEquals(inBalance));
+            }
+            setAffordablePerCurrency(affordablePerCurrency);
+        });
+
+        const inventoryConnection = Packets.inventory.observe((inventory) => {
+            if (!price) return;
+
+            const affordablePerItem = new Map<Item, boolean>();
+            for (const [requiredItem, amount] of item.requiredItems) {
+                const inInventory = inventory.get(requiredItem.id);
+                affordablePerItem.set(requiredItem, inInventory !== undefined && inInventory >= amount);
+            }
+            setAffordablePerItem(affordablePerItem);
+        });
+
+        return () => {
+            balanceConnection.disconnect();
+            inventoryConnection.disconnect();
+        };
+    }, [item, bought]);
+
+    const onPurchase = useCallback(() => {
+        const success = Packets.buyItem.toServer(item.id);
+    }, []);
+
+    const description = metadata?.formatItemDescription(undefined, false, Color3.fromRGB(255, 255, 255), 20);
 
     const { background: backgroundColor, text: textColor } = useMemo(() => {
         return getDifficultyDisplayColors(item.difficulty);
     }, [item]);
+
+    const priceOptions = new Array<JSX.Element>();
+    for (const [currency, amount] of price.amountPerCurrency) {
+        priceOptions.push(
+            <PriceOption
+                currency={currency}
+                amount={amount}
+                affordable={affordablePerCurrency.get(currency) ?? false}
+                layoutOrder={CURRENCY_DETAILS[currency].layoutOrder}
+            />,
+        );
+    }
+    for (const [requiredItem, amount] of item.requiredItems) {
+        priceOptions.push(
+            <PriceOption
+                item={requiredItem}
+                amount={amount}
+                affordable={affordablePerItem.get(requiredItem) ?? false}
+                layoutOrder={100 + requiredItem.layoutOrder}
+                viewportManagement={viewportManagement}
+            />,
+        );
+    }
 
     return (
         <ItemWindow
@@ -182,10 +236,10 @@ export default function PurchaseWindow({
             />
 
             {/* Item slot display */}
-            <frame BackgroundTransparency={1} LayoutOrder={1} Size={new UDim2(1, 0, 0, 50)}>
+            <frame BackgroundTransparency={1} LayoutOrder={1} Size={new UDim2(1, 0, 0.075, 30)}>
                 <uilistlayout
                     FillDirection={Enum.FillDirection.Horizontal}
-                    HorizontalAlignment={Enum.HorizontalAlignment.Center}
+                    HorizontalAlignment={Enum.HorizontalAlignment.Left}
                     Padding={new UDim(0, 15)}
                     SortOrder={Enum.SortOrder.LayoutOrder}
                     VerticalAlignment={Enum.VerticalAlignment.Center}
@@ -194,11 +248,12 @@ export default function PurchaseWindow({
                 {/* Item slot */}
                 <InventoryItemSlot
                     item={item}
-                    amount={owned}
+                    amount={bought}
                     layoutOrder={-1}
                     visible={true}
                     onActivated={() => {}}
-                    size={new UDim2(0, 50, 0, 50)}
+                    size={new UDim2(0, 0, 1, 0)}
+                    viewportManagement={viewportManagement}
                 />
 
                 <frame AutomaticSize={Enum.AutomaticSize.X} BackgroundTransparency={1} Size={new UDim2(0, 0, 1, 0)}>
@@ -232,7 +287,7 @@ export default function PurchaseWindow({
                         />
                         <imagelabel
                             AnchorPoint={new Vector2(1, 0.5)}
-                            BackgroundTransparency={1}
+                            BackgroundColor3={item.difficulty.color ?? Color3.fromRGB(255, 255, 255)}
                             Image={item.difficulty?.image ? `rbxassetid://${item.difficulty?.image}` : ""}
                             LayoutOrder={-1}
                             Position={new UDim2(1, -4, 0.5, 0)}
@@ -285,8 +340,9 @@ export default function PurchaseWindow({
                 LayoutOrder={2}
                 ScrollBarThickness={6}
                 Selectable={false}
-                Size={new UDim2(1, 0, 0, 200)}
+                Size={new UDim2(1, 0, 0.925, -40)}
             >
+                <uipadding PaddingBottom={new UDim(0, 10)} />
                 <uilistlayout
                     FillDirection={Enum.FillDirection.Vertical}
                     HorizontalAlignment={Enum.HorizontalAlignment.Center}
@@ -298,28 +354,28 @@ export default function PurchaseWindow({
                 <textlabel
                     AutomaticSize={Enum.AutomaticSize.Y}
                     BackgroundTransparency={1}
-                    Font={Enum.Font.RobotoMono}
-                    LayoutOrder={1}
+                    FontFace={RobotoSlab}
                     RichText={true}
                     Size={new UDim2(1, 0, 0, 0)}
                     Text={description}
                     TextColor3={Color3.fromRGB(255, 255, 255)}
                     TextScaled={false}
-                    TextSize={16}
+                    TextSize={18}
+                    TextStrokeColor3={Color3.fromRGB(0, 0, 0)}
+                    TextStrokeTransparency={0}
                     TextWrapped={true}
                     TextXAlignment={Enum.TextXAlignment.Left}
                     TextYAlignment={Enum.TextYAlignment.Top}
                 />
 
                 {/* Creator label */}
-                {creator ? (
+                {item.creator ? (
                     <textlabel
                         AutomaticSize={Enum.AutomaticSize.Y}
                         BackgroundTransparency={1}
-                        Font={Enum.Font.SourceSans}
-                        LayoutOrder={2}
+                        FontFace={RobotoMono}
                         Size={new UDim2(1, 0, 0, 0)}
-                        Text={`Creator: ${creator}`}
+                        Text={`Creator: ${item.creator}`}
                         TextColor3={Color3.fromRGB(255, 255, 255)}
                         TextScaled={false}
                         TextSize={14}
@@ -331,53 +387,41 @@ export default function PurchaseWindow({
                     </textlabel>
                 ) : undefined}
 
+                {/* Spacer */}
+                <frame BackgroundTransparency={1} Size={new UDim2(1, 0, 0, 0)}>
+                    <uiflexitem FlexMode={Enum.UIFlexMode.Fill} />
+                </frame>
+
                 {/* Purchase container */}
                 {canPurchase && (
-                    <frame BackgroundTransparency={1} LayoutOrder={3} Size={new UDim2(1, 0, 0, 100)}>
+                    <frame BackgroundTransparency={1} Size={new UDim2(1, 0, 0, 50)}>
                         <uilistlayout
                             FillDirection={Enum.FillDirection.Vertical}
                             HorizontalAlignment={Enum.HorizontalAlignment.Center}
                             Padding={new UDim(0, 10)}
-                            SortOrder={Enum.SortOrder.LayoutOrder}
+                            VerticalAlignment={Enum.VerticalAlignment.Center}
                         />
-
-                        {/* Price options */}
-                        <frame BackgroundTransparency={1} LayoutOrder={1} Size={new UDim2(1, 0, 0, 40)}>
-                            <uilistlayout
-                                FillDirection={Enum.FillDirection.Vertical}
-                                HorizontalAlignment={Enum.HorizontalAlignment.Center}
-                                Padding={new UDim(0, 5)}
-                                SortOrder={Enum.SortOrder.LayoutOrder}
-                            />
-
-                            {priceOptions.map((option, index) => (
-                                <PriceOption
-                                    key={index}
-                                    currency={option.currency}
-                                    item={option.item}
-                                    amount={option.amount}
-                                    affordable={option.affordable}
-                                    layoutOrder={index}
-                                />
-                            ))}
-                        </frame>
+                        <uipadding PaddingBottom={new UDim(0, 5)} PaddingTop={new UDim(0, 5)} />
 
                         {/* Purchase button */}
                         <textbutton
-                            BackgroundColor3={purchaseButtonColor}
-                            BorderColor3={Color3.fromRGB(27, 42, 53)}
-                            LayoutOrder={2}
+                            ref={purchaseButtonRef}
+                            BackgroundColor3={Color3.fromRGB(85, 255, 127)}
+                            BorderColor3={Color3.fromRGB(0, 28, 5)}
+                            BorderSizePixel={3}
                             Selectable={false}
-                            Size={new UDim2(0.8, 0, 0, 50)}
                             Text=""
+                            Size={new UDim2(0.8, 0, 0.8, 0)}
                             Event={{
                                 Activated: onPurchase,
                             }}
                         >
+                            {priceOptions}
+
                             <uistroke
                                 ApplyStrokeMode={Enum.ApplyStrokeMode.Border}
-                                Color={purchaseButtonColor}
-                                Thickness={3}
+                                Color={Color3.fromRGB(156, 255, 156)}
+                                Thickness={1}
                             />
 
                             <uigradient
@@ -389,19 +433,13 @@ export default function PurchaseWindow({
                                 }
                                 Rotation={270}
                             />
-
-                            <textlabel
-                                BackgroundTransparency={1}
-                                Font={Enum.Font.SourceSansBold}
-                                Size={new UDim2(1, 0, 1, 0)}
-                                Text={purchaseButtonText}
-                                TextColor3={Color3.fromRGB(255, 255, 255)}
-                                TextScaled={true}
-                                TextSize={18}
-                                TextWrapped={true}
-                            >
-                                <uistroke Color={Color3.fromRGB(5, 16, 0)} Thickness={2} />
-                            </textlabel>
+                            <uilistlayout
+                                FillDirection={Enum.FillDirection.Horizontal}
+                                HorizontalAlignment={Enum.HorizontalAlignment.Center}
+                                Padding={new UDim(0, 5)}
+                                SortOrder={Enum.SortOrder.LayoutOrder}
+                                VerticalAlignment={Enum.VerticalAlignment.Center}
+                            />
                         </textbutton>
                     </frame>
                 )}

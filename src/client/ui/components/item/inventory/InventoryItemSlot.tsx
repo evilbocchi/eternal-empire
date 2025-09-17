@@ -7,11 +7,10 @@
 
 import React, { Ref, useEffect, useRef } from "@rbxts/react";
 import { PARALLEL } from "client/constants";
-import { loadItemIntoViewport, loadItemViewportManagement } from "client/ui/components/item/ItemViewport";
+import { ItemViewportManagement, loadItemIntoViewport } from "client/ui/components/item/ItemViewport";
 import { useItemTooltip } from "client/ui/components/tooltip/TooltipManager";
 import { RobotoSlab } from "client/ui/GameFonts";
 import { getAsset } from "shared/asset/AssetMap";
-import { IS_CI } from "shared/Context";
 import type Item from "shared/item/Item";
 
 /**
@@ -25,6 +24,8 @@ export default function InventoryItemSlot({
     onActivated,
     ref,
     size = new UDim2(0, 100, 0, 100),
+    tooltipEnabled = true,
+    viewportManagement,
 }: {
     /** The item to display */
     item: Item;
@@ -40,18 +41,22 @@ export default function InventoryItemSlot({
     ref?: Ref<TextButton>;
     /** Size of the item slot */
     size?: UDim2;
+    /** Whether tooltips are enabled */
+    tooltipEnabled?: boolean;
+    /** Shared viewport management instance */
+    viewportManagement?: ItemViewportManagement;
 }) {
     const viewportRef = useRef<ViewportFrame>();
     const textColor = amount > 0 ? Color3.fromRGB(255, 255, 255) : Color3.fromRGB(150, 150, 150);
     const backgroundColor = item.difficulty.color ?? Color3.fromRGB(52, 155, 255);
-    const hoverProps = useItemTooltip(item);
+    const hoverProps = tooltipEnabled ? useItemTooltip(item) : undefined;
 
     useEffect(() => {
         const viewport = viewportRef.current;
         if (!viewport) return;
 
-        loadItemIntoViewport(PARALLEL, viewport, item.id);
-    }, []);
+        loadItemIntoViewport(PARALLEL, viewport, item.id, viewportManagement);
+    }, [viewportManagement, item.id]);
 
     return (
         <textbutton
@@ -67,9 +72,14 @@ export default function InventoryItemSlot({
             Visible={visible}
             Event={{
                 Activated: onActivated,
-                ...hoverProps.events,
+                ...hoverProps?.events,
             }}
         >
+            <uiaspectratioconstraint
+                AspectRatio={1}
+                AspectType={Enum.AspectType.ScaleWithParentSize}
+                DominantAxis={Enum.DominantAxis.Height}
+            />
             {/* Background gradient */}
             <uigradient
                 Color={

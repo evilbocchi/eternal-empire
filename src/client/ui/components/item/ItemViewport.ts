@@ -35,6 +35,7 @@ type RunningViewport = {
 };
 
 const KEY = "ItemViewport";
+const VIEWPORT_WORLD_POSITION = new CFrame(0, -500, 0);
 
 export function loadItemViewportManagement() {
     const runningViewports = new Array<RunningViewport>();
@@ -84,6 +85,8 @@ export function loadItemViewportManagement() {
      * @param itemId The ID of the item to display.
      */
     function loadItemIntoViewport(viewportFrame: ViewportFrame, itemId: string) {
+        viewportFrame.ClearAllChildren();
+
         const camera = new Instance("Camera");
         camera.CameraType = Enum.CameraType.Scriptable;
         viewportFrame.CurrentCamera = camera;
@@ -91,7 +94,8 @@ export function loadItemViewportManagement() {
         const m = ITEM_MODELS.get(itemId);
         if (m === undefined) return;
         const model = m.Clone();
-
+        let cframe = VIEWPORT_WORLD_POSITION;
+        model.TranslateBy(cframe.Position.sub(model.GetPivot().Position));
         const [adjust, rel] = relsPerItem.get(itemId)!;
         let currentAngle = 220;
         const runningViewport: RunningViewport = {
@@ -109,7 +113,7 @@ export function loadItemViewportManagement() {
                 ) {
                     return;
                 }
-                const pos = model.GetPivot().add(adjust);
+                const pos = cframe.add(adjust);
                 camera.Focus = pos;
                 const newCframe = CFrame.lookAt(
                     pos.mul(CFrame.Angles(0, math.rad(currentAngle), 0).mul(new CFrame(0, 3, rel - this.zoom)))
@@ -139,6 +143,10 @@ export function loadItemViewportManagement() {
         loadItemIntoViewport,
         cleanup: () => {
             RunService.UnbindFromRenderStep(KEY);
+            for (const rv of runningViewports) {
+                rv.viewportFrame.ClearAllChildren();
+            }
+            runningViewports.clear();
         },
         bind: (actor: Actor) => {
             actor.BindToMessage(KEY, loadItemIntoViewport);

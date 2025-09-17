@@ -1,7 +1,6 @@
 import { BaseOnoeNum, OnoeNum } from "@antivivi/serikanum";
 import React, { Fragment, useEffect, useRef } from "@rbxts/react";
-import ReactRoblox from "@rbxts/react-roblox";
-import { Debris, Players, TweenService, Workspace } from "@rbxts/services";
+import { Debris, TweenService, Workspace } from "@rbxts/services";
 import { BalanceOptionManager } from "client/ui/components/balance/BalanceOption";
 import displayBalanceCurrency from "client/ui/components/balance/displayBalanceCurrency";
 import { RobotoSlabExtraBold } from "client/ui/GameFonts";
