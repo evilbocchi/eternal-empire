@@ -195,9 +195,9 @@ export default class Quest extends Reloadable<Quest> {
                 // Prepare quest info for clients
                 const questInfo: QuestInfo = {
                     name: quest.name ?? questId,
-                    colorR: quest.color.R,
-                    colorG: quest.color.G,
-                    colorB: quest.color.B,
+                    colorR: quest.color.R * 255,
+                    colorG: quest.color.G * 255,
+                    colorB: quest.color.B * 255,
                     level: quest.level,
                     length: quest.length,
                     reward: quest.reward,

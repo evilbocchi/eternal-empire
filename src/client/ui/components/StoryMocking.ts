@@ -40,9 +40,9 @@ class StoryMocking {
         const questInfos = new Map<string, QuestInfo>();
         questInfos.set("Quest1", {
             name: "First Quest",
-            colorR: 255 / 255,
-            colorG: 223 / 255,
-            colorB: 62 / 255,
+            colorR: 255,
+            colorG: 223,
+            colorB: 62,
             level: 1,
             length: 1,
             reward: { xp: 100 },
@@ -51,9 +51,9 @@ class StoryMocking {
         });
         questInfos.set("Quest2", {
             name: "Second Quest",
-            colorR: 25 / 255,
-            colorG: 66 / 255,
-            colorB: 200 / 255,
+            colorR: 25,
+            colorG: 66,
+            colorB: 200,
             level: 4,
             length: 3,
             reward: { xp: 500, items: new Map([["TheFirstDropper", 1]]) },
@@ -62,9 +62,9 @@ class StoryMocking {
         });
         questInfos.set("Quest3", {
             name: "Third Quest",
-            colorR: 250 / 255,
-            colorG: 20 / 255,
-            colorB: 100 / 255,
+            colorR: 250,
+            colorG: 20,
+            colorB: 100,
             level: 4,
             length: 2,
             reward: { xp: 6000, items: new Map([["TheFirstConveyor", 1]]) },
@@ -77,9 +77,9 @@ class StoryMocking {
         });
         questInfos.set("Quest4", {
             name: "Fourth Quest",
-            colorR: 6 / 255,
-            colorG: 6 / 255,
-            colorB: 200 / 255,
+            colorR: 6,
+            colorG: 6,
+            colorB: 200,
             level: 1,
             length: 4,
             reward: { xp: 6000 },

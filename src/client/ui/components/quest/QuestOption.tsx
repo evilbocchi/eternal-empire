@@ -26,7 +26,7 @@ export default function QuestOption({
     onToggleExpanded,
     onTrack,
 }: QuestOptionProps) {
-    const color = new Color3(quest.colorR, quest.colorG, quest.colorB);
+    const color = Color3.fromRGB(quest.colorR, quest.colorG, quest.colorB);
     const belowRequirement = level < quest.level;
     const isCompleted = currentStage < 0;
     const isAvailable = !isCompleted && !belowRequirement;

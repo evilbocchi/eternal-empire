@@ -91,7 +91,7 @@ export default function TrackedQuestWindow() {
 
     useEffect(() => {
         if (trackerBeam === undefined || currentQuest === undefined) return;
-        const color = new Color3(currentQuest.colorR, currentQuest.colorG, currentQuest.colorB);
+        const color = Color3.fromRGB(currentQuest.colorR, currentQuest.colorG, currentQuest.colorB);
         trackerBeam.Color = new ColorSequence(color);
     }, [currentQuest, trackerBeam]);
 
@@ -170,7 +170,7 @@ export default function TrackedQuestWindow() {
     }, []);
 
     const questColor = currentQuest
-        ? new Color3(currentQuest.colorR, currentQuest.colorG, currentQuest.colorB)
+        ? Color3.fromRGB(currentQuest.colorR, currentQuest.colorG, currentQuest.colorB)
         : Color3.fromRGB(255, 255, 255);
 
     return (

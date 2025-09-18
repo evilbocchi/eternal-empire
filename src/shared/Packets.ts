@@ -13,9 +13,9 @@ declare global {
 
     type QuestInfo = {
         name: string;
-        colorR: DataType.f32;
-        colorG: DataType.f32;
-        colorB: DataType.f32;
+        colorR: DataType.u8;
+        colorG: DataType.u8;
+        colorB: DataType.u8;
         level: DataType.f64;
         length: DataType.i8;
         reward: Reward;
