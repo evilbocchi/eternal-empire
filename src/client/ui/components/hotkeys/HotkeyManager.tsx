@@ -50,6 +50,11 @@ export const HOTKEY_BINDINGS = [
         priority: 0,
     },
     {
+        keyCode: Enum.KeyCode.O,
+        label: "Purchase All",
+        priority: 0,
+    },
+    {
         keyCode: Enum.KeyCode.X,
         label: "Close Window",
         priority: 1,

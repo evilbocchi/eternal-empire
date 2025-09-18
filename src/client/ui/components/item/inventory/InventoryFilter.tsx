@@ -8,6 +8,12 @@ import { useMessageTooltip } from "../../tooltip/TooltipManager";
 
 export const SEARCHABLE_ITEMS = Items.sortedItems.filter((item) => !item.isA("Gear"));
 
+interface TraitFilterOption {
+    id: TraitFilterId;
+    image: string;
+    color: Color3;
+}
+
 export const traitOptions: TraitFilterOption[] = [
     {
         id: "Dropper",
@@ -115,15 +121,15 @@ export function filterItems(searchQuery: string, traitFilters: Set<TraitFilterId
  */
 export default function InventoryFilter({
     color = Color3.fromRGB(255, 186, 125),
-    traitOptions,
+    traitFilters,
     onSearchChange,
     onTraitToggle,
     onClear,
 }: {
     /** Border color for the search box */
     color?: Color3;
-    /** Available trait filter options */
-    traitOptions: TraitFilterOption[];
+    /** Currently selected trait filters */
+    traitFilters: Set<TraitFilterId>;
     /** Callback when search query changes */
     onSearchChange: (query: string) => void;
     /** Callback when trait filter is toggled */
@@ -267,7 +273,7 @@ export default function InventoryFilter({
                         BackgroundTransparency={1}
                         Image={trait.image}
                         ImageColor3={trait.color}
-                        ImageTransparency={trait.selected ? 0 : 0.6}
+                        ImageTransparency={traitFilters.has(trait.id) ? 0 : 0.6}
                         LayoutOrder={index + 1}
                         ScaleType={Enum.ScaleType.Fit}
                         Size={new UDim2(1, 0, 1, 0)}
@@ -339,9 +345,8 @@ export function useBasicInventoryFilter() {
 
     return {
         searchQuery,
-        traitFilters,
         props: {
-            traitOptions,
+            traitFilters,
             onSearchChange,
             onTraitToggle,
             onClear,

@@ -18,6 +18,7 @@ export default function useCIViewportManagement({ enabled = IS_CI }): ItemViewpo
     useEffect(() => {
         let newViewportManagement: ItemViewportManagement | undefined;
         if (enabled) {
+            if (viewportManagement !== undefined) return;
             newViewportManagement = loadItemViewportManagement();
             setViewportManagement(newViewportManagement);
         } else {
@@ -47,7 +48,6 @@ export function useItemViewport(
     useEffect(() => {
         const viewport = viewportRef.current;
         if (!viewport) return;
-
         loadItemIntoViewport(PARALLEL, viewport, itemId, viewportManagement);
     }, [viewportManagement, itemId]);
 }

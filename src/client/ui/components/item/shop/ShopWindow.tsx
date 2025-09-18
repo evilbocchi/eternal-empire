@@ -1,44 +1,51 @@
-import React, { Fragment, useCallback, useMemo } from "@rbxts/react";
+import React, { Fragment, memo, useCallback, useMemo } from "@rbxts/react";
+import useHotkeyWithTooltip from "client/ui/components/hotkeys/useHotkeyWithTooltip";
 import InventoryFilter, {
     filterItems,
     useBasicInventoryFilter,
 } from "client/ui/components/item/inventory/InventoryFilter";
-import { loadItemViewportManagement } from "client/ui/components/item/ItemViewport";
 import { PurchaseManager } from "client/ui/components/item/shop/PurchaseWindow";
 import ShopItemSlot from "client/ui/components/item/shop/ShopItemSlot";
+import useCIViewportManagement from "client/ui/components/item/useCIViewportManagement";
 import { RobotoSlabHeavy } from "client/ui/GameFonts";
 import useProperty from "client/ui/hooks/useProperty";
 import { playSound } from "shared/asset/GameAssets";
 import Item from "shared/item/Item";
 import Shop from "shared/item/traits/Shop";
+import Items from "shared/items/Items";
 import Packets from "shared/Packets";
+
+const MemoizedShopItemSlot = memo(ShopItemSlot);
 
 /**
  * Main shop window component with integrated filtering
  */
 export default function ShopWindow({ shop }: { shop: Shop }) {
-    const { searchQuery, traitFilters, props: filterProps } = useBasicInventoryFilter();
-    const viewportManagement = loadItemViewportManagement();
+    const { searchQuery, props: filterProps } = useBasicInventoryFilter();
+    const viewportManagement = useCIViewportManagement({});
     const ownedPerItem = useProperty(Packets.bought);
     const shopItems = shop.items;
 
     const dataPerItem = useMemo(() => {
-        return filterItems(searchQuery, traitFilters);
-    }, [shopItems, searchQuery, traitFilters]);
+        return filterItems(searchQuery, filterProps.traitFilters);
+    }, [shopItems, searchQuery, filterProps.traitFilters]);
 
     const handleItemClick = useCallback((item: Item) => {
         playSound("MenuClick.mp3");
         PurchaseManager.select(item);
     }, []);
 
-    const handleBuyAllClick = useCallback(() => {
-        playSound("MenuClick.mp3");
-        if (Packets.buyAllItems.toServer(shop.items.map((item) => item.id))) {
-            playSound("ItemPurchase.mp3");
-        } else {
-            playSound("Error.mp3");
-        }
-    }, []);
+    const { events } = useHotkeyWithTooltip({
+        action: () => {
+            if (Packets.buyAllItems.toServer(shop.items.map((item) => item.id))) {
+                playSound("ItemPurchase.mp3");
+            } else {
+                playSound("Error.mp3");
+            }
+            return true;
+        },
+        label: "Purchase All",
+    });
 
     return (
         <Fragment>
@@ -92,11 +99,11 @@ export default function ShopWindow({ shop }: { shop: Shop }) {
                 {/* Border stroke */}
                 <uistroke Color={shop.item.difficulty.color} Thickness={3} />
 
-                {shopItems.map((item) => {
+                {Items.sortedItems.map((item) => {
                     const data = dataPerItem.get(item.id);
 
                     return (
-                        <ShopItemSlot
+                        <MemoizedShopItemSlot
                             key={item.id}
                             item={item}
                             ownedAmount={ownedPerItem.get(item.id) ?? 0}
@@ -120,7 +127,7 @@ export default function ShopWindow({ shop }: { shop: Shop }) {
                         Size={new UDim2(0.7, 0, 0.6, 0)}
                         Text=""
                         Event={{
-                            Activated: handleBuyAllClick,
+                            ...events,
                         }}
                     >
                         {/* Button stroke */}

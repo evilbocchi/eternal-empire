@@ -92,17 +92,19 @@ function ShopPriceOption({
                     SizeConstraint={Enum.SizeConstraint.RelativeYY}
                 />
             )}
-            <textlabel
-                ref={textLabelRef}
-                AutomaticSize={Enum.AutomaticSize.X}
-                BackgroundTransparency={1}
-                FontFace={RobotoSlabHeavy}
-                Size={new UDim2(0, 0, 1, 0)}
-                Text={currency !== undefined ? displayBalanceCurrency(currency, amount) : tostring(amount)}
-                TextScaled={true}
-            >
-                <uistroke Color={Color3.fromRGB(0, 0, 0)} Thickness={2} />
-            </textlabel>
+            {(currency !== undefined || item !== undefined) && (
+                <textlabel
+                    ref={textLabelRef}
+                    AutomaticSize={Enum.AutomaticSize.X}
+                    BackgroundTransparency={1}
+                    FontFace={RobotoSlabHeavy}
+                    Size={new UDim2(0, 0, 1, 0)}
+                    Text={currency !== undefined ? displayBalanceCurrency(currency, amount) : tostring(amount)}
+                    TextScaled={true}
+                >
+                    <uistroke Color={Color3.fromRGB(0, 0, 0)} Thickness={2} />
+                </textlabel>
+            )}
         </frame>
     );
 }
@@ -176,7 +178,7 @@ export default function ShopItemSlot({
 
     const [viewing, setViewing] = useState<Currency | Item>();
     useEffect(() => {
-        if (price === undefined) return;
+        if (price === undefined || !visible) return;
 
         const options = new Array<Currency | Item>();
         for (const [currency] of CurrencyBundle.SORTED_DETAILS) {
@@ -205,7 +207,7 @@ export default function ShopItemSlot({
         return () => {
             active = false;
         };
-    }, [price, requiredItems]);
+    }, [price, requiredItems, visible]);
 
     const isCurrency = typeIs(viewing, "string");
     const currency = isCurrency ? (viewing as Currency) : undefined;

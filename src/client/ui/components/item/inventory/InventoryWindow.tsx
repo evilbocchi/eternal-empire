@@ -5,7 +5,7 @@
  * Follows the same pattern as QuestWindow for consistency.
  */
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "@rbxts/react";
+import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from "@rbxts/react";
 import type InventoryController from "client/controllers/interface/InventoryController";
 import InventoryEmptyState from "client/ui/components/item/inventory/InventoryEmptyState";
 import InventoryFilter, {
@@ -25,14 +25,7 @@ import { getAsset } from "shared/asset/AssetMap";
 import type Item from "shared/item/Item";
 import Packets from "shared/Packets";
 
-declare global {
-    interface TraitFilterOption {
-        id: TraitFilterId;
-        image: string;
-        color: Color3;
-        selected?: boolean;
-    }
-}
+const MemoizedInventoryItemSlot = memo(InventoryItemSlot);
 
 /**
  * Calculate optimal cell count for the inventory grid.
@@ -74,7 +67,7 @@ export default function InventoryWindow({
     viewportsEnabled?: boolean;
 }) {
     const { visible, closeWindow } = useSingleDocumentWindow("Inventory");
-    const { searchQuery, traitFilters, props: filterProps } = useBasicInventoryFilter();
+    const { searchQuery, props: filterProps } = useBasicInventoryFilter();
     const [queryTime, setQueryTime] = useState(0);
     const [cellSize, setCellSize] = useState(new UDim2(0, 65, 0, 65));
     const viewportManagement = useCIViewportManagement({ enabled: viewportsEnabled });
@@ -117,7 +110,7 @@ export default function InventoryWindow({
                 amount?: number;
                 uuid?: string;
             }
-        > = filterItems(searchQuery, traitFilters);
+        > = filterItems(searchQuery, filterProps.traitFilters);
 
         const amountsPerItem = new Map<string, number>();
         for (const [itemId, amount] of inventory) {
@@ -143,7 +136,7 @@ export default function InventoryWindow({
 
         setQueryTime(tick() - startTime);
         return dataPerItem;
-    }, [inventory, uniqueInstances, searchQuery, traitFilters]);
+    }, [inventory, uniqueInstances, searchQuery, filterProps.traitFilters]);
 
     // Check if user has any items at all (for empty state)
     let hasAnyItems = false;
@@ -170,10 +163,6 @@ export default function InventoryWindow({
         },
         [inventoryController, closeWindow],
     );
-
-    for (const traitOption of traitOptions) {
-        traitOption.selected = traitFilters.has(traitOption.id);
-    }
 
     return (
         <BasicWindow
@@ -231,7 +220,7 @@ export default function InventoryWindow({
                         const data = dataPerItem.get(item.id);
 
                         return (
-                            <InventoryItemSlot
+                            <MemoizedInventoryItemSlot
                                 key={item.id}
                                 item={item}
                                 amount={data?.amount}
