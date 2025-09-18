@@ -5,11 +5,16 @@
  * Follows the same pattern as QuestWindow for consistency.
  */
 
-import { FuzzySearch } from "@rbxts/fuzzy-search";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "@rbxts/react";
 import type InventoryController from "client/controllers/interface/InventoryController";
 import InventoryEmptyState from "client/ui/components/item/inventory/InventoryEmptyState";
-import InventoryFilter, { isWhitelisted, traitOptions } from "client/ui/components/item/inventory/InventoryFilter";
+import InventoryFilter, {
+    filterItems,
+    ItemFilterData,
+    SEARCHABLE_ITEMS,
+    traitOptions,
+    useBasicInventoryFilter,
+} from "client/ui/components/item/inventory/InventoryFilter";
 import InventoryItemSlot from "client/ui/components/item/inventory/InventoryItemSlot";
 import useCIViewportManagement from "client/ui/components/item/useCIViewportManagement";
 import useSingleDocumentWindow from "client/ui/components/sidebar/useSingleDocumentWindow";
@@ -18,7 +23,6 @@ import { RobotoMono } from "client/ui/GameFonts";
 import useProperty from "client/ui/hooks/useProperty";
 import { getAsset } from "shared/asset/AssetMap";
 import type Item from "shared/item/Item";
-import Items from "shared/items/Items";
 import Packets from "shared/Packets";
 
 declare global {
@@ -28,13 +32,6 @@ declare global {
         color: Color3;
         selected?: boolean;
     }
-}
-
-interface InventoryItemData {
-    uuid?: string;
-    amount: number;
-    layoutOrder: number;
-    visible: boolean;
 }
 
 /**
@@ -66,8 +63,6 @@ export function getBestUniqueInstances(uniqueInstances: Map<string, UniqueItemIn
     return bestUuidPerItem;
 }
 
-const SEARCHABLE_ITEMS = Items.sortedItems.filter((item) => !item.isA("Gear"));
-
 /**
  * Main inventory window component following the QuestWindow pattern
  */
@@ -79,9 +74,8 @@ export default function InventoryWindow({
     viewportsEnabled?: boolean;
 }) {
     const { visible, closeWindow } = useSingleDocumentWindow("Inventory");
-    const [searchQuery, setSearchQuery] = useState("");
+    const { searchQuery, traitFilters, props: filterProps } = useBasicInventoryFilter();
     const [queryTime, setQueryTime] = useState(0);
-    const [traitFilters, setTraitFilters] = useState<Set<TraitFilterId>>(new Set());
     const [cellSize, setCellSize] = useState(new UDim2(0, 65, 0, 65));
     const viewportManagement = useCIViewportManagement({ enabled: viewportsEnabled });
 
@@ -115,39 +109,15 @@ export default function InventoryWindow({
         }
     }, [updateCellSize]);
 
-    // Apply filtering TODO
-    const inventoryDataPerItem = useMemo(() => {
+    const dataPerItem = useMemo(() => {
         const startTime = tick();
-        const processedItems = new Set<string>();
-        const inventoryDataPerItem = new Map<string, InventoryItemData>();
-
-        if (searchQuery !== "") {
-            const terms = new Array<string>();
-            for (const item of SEARCHABLE_ITEMS) {
-                if (!isWhitelisted(item, traitFilters)) continue;
-                terms.push(item.name);
+        const dataPerItem: Map<
+            string,
+            ItemFilterData & {
+                amount?: number;
+                uuid?: string;
             }
-            const sorted = FuzzySearch.Sorting.FuzzyScore(terms, searchQuery);
-            for (const [index, name] of sorted) {
-                const item = Items.itemsPerName.get(name)!;
-                if (processedItems.has(item.id)) continue; // Skip duplicates
-                processedItems.add(item.id);
-                inventoryDataPerItem.set(item.id, {
-                    amount: 0,
-                    layoutOrder: index,
-                    visible: index > 0,
-                });
-            }
-        } else {
-            for (const item of SEARCHABLE_ITEMS) {
-                if (!isWhitelisted(item, traitFilters)) continue;
-                inventoryDataPerItem.set(item.id, {
-                    amount: 0,
-                    layoutOrder: item.layoutOrder,
-                    visible: true,
-                });
-            }
-        }
+        > = filterItems(searchQuery, traitFilters);
 
         const amountsPerItem = new Map<string, number>();
         for (const [itemId, amount] of inventory) {
@@ -158,7 +128,7 @@ export default function InventoryWindow({
             amountsPerItem.set(itemId, (amountsPerItem.get(itemId) ?? 0) + 1);
         }
         const bestInstancePerItem = getBestUniqueInstances(uniqueInstances);
-        for (const [id, data] of inventoryDataPerItem) {
+        for (const [id, data] of dataPerItem) {
             const amount = amountsPerItem.get(id) ?? 0;
             data.amount = amount;
             if (amount <= 0) {
@@ -172,7 +142,7 @@ export default function InventoryWindow({
         }
 
         setQueryTime(tick() - startTime);
-        return inventoryDataPerItem;
+        return dataPerItem;
     }, [inventory, uniqueInstances, searchQuery, traitFilters]);
 
     // Check if user has any items at all (for empty state)
@@ -184,29 +154,6 @@ export default function InventoryWindow({
         }
     }
     const isEmpty = !hasAnyItems; // Only show empty state if user has no items at all
-
-    // Handle search change
-    const handleSearchChange = useCallback((query: string) => {
-        setSearchQuery(query);
-    }, []);
-
-    // Handle trait filter toggle
-    const handleTraitToggle = useCallback((traitId: TraitFilterId) => {
-        setTraitFilters((prev) => {
-            const newFilters = table.clone(prev);
-            if (newFilters.has(traitId)) {
-                newFilters.delete(traitId);
-            } else {
-                newFilters.add(traitId);
-            }
-            return newFilters;
-        });
-    }, []);
-
-    // Handle filter clear
-    const handleFilterClear = useCallback(() => {
-        setTraitFilters(new Set());
-    }, []);
 
     // Handle item activation
     const handleItemActivated = useCallback(
@@ -248,12 +195,7 @@ export default function InventoryWindow({
             {/* Main inventory content */}
             <frame BackgroundTransparency={1} Size={new UDim2(1, 0, 1, 0)} Visible={hasAnyItems}>
                 {/* Filter options */}
-                <InventoryFilter
-                    traitOptions={traitOptions}
-                    onSearchChange={handleSearchChange}
-                    onTraitToggle={handleTraitToggle}
-                    onClear={handleFilterClear}
-                />
+                <InventoryFilter {...filterProps} />
 
                 {/* Item list container */}
                 <scrollingframe
@@ -267,7 +209,7 @@ export default function InventoryWindow({
                     ScrollBarThickness={6}
                     Selectable={false}
                     Size={new UDim2(1, 0, 0.975, -20)}
-                    Visible={inventoryDataPerItem.size() > 0}
+                    Visible={dataPerItem.size() > 0}
                 >
                     <uipadding
                         PaddingBottom={new UDim(0, 5)}
@@ -286,7 +228,7 @@ export default function InventoryWindow({
 
                     {/* Render inventory items TODO Decouple from React render loop for max performance */}
                     {SEARCHABLE_ITEMS.map((item) => {
-                        const inventoryData = inventoryDataPerItem.get(item.id);
+                        const inventoryData = dataPerItem.get(item.id);
 
                         return (
                             <InventoryItemSlot

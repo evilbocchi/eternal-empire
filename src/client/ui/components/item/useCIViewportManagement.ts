@@ -1,5 +1,10 @@
-import { useEffect, useState } from "@rbxts/react";
-import { ItemViewportManagement, loadItemViewportManagement } from "client/ui/components/item/ItemViewport";
+import { RefObject, useEffect, useState } from "@rbxts/react";
+import { PARALLEL } from "client/constants";
+import {
+    ItemViewportManagement,
+    loadItemIntoViewport,
+    loadItemViewportManagement,
+} from "client/ui/components/item/ItemViewport";
 import { IS_CI } from "shared/Context";
 
 /**
@@ -26,4 +31,23 @@ export default function useCIViewportManagement({ enabled = IS_CI }): ItemViewpo
     }, [enabled]);
 
     return viewportManagement;
+}
+
+/**
+ * Hook to load an item into a viewport frame using shared viewport management.
+ * @param viewportRef The reference to the viewport frame.
+ * @param itemId The ID of the item to load.
+ * @param viewportManagement Optional shared viewport management instance.
+ */
+export function useItemViewport(
+    viewportRef: RefObject<ViewportFrame>,
+    itemId: string,
+    viewportManagement?: ItemViewportManagement,
+) {
+    useEffect(() => {
+        const viewport = viewportRef.current;
+        if (!viewport) return;
+
+        loadItemIntoViewport(PARALLEL, viewport, itemId, viewportManagement);
+    }, [viewportManagement, itemId]);
 }

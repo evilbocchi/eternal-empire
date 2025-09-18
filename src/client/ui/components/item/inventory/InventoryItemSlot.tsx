@@ -5,9 +5,9 @@
  * Replaces the traditional Roblox Studio ItemSlot with React implementation.
  */
 
-import React, { Ref, useEffect, useRef } from "@rbxts/react";
-import { PARALLEL } from "client/constants";
-import { ItemViewportManagement, loadItemIntoViewport } from "client/ui/components/item/ItemViewport";
+import React, { Ref, useRef } from "@rbxts/react";
+import { ItemViewportManagement } from "client/ui/components/item/ItemViewport";
+import { useItemViewport } from "client/ui/components/item/useCIViewportManagement";
 import { useItemTooltip } from "client/ui/components/tooltip/TooltipManager";
 import { RobotoSlab } from "client/ui/GameFonts";
 import { getAsset } from "shared/asset/AssetMap";
@@ -50,13 +50,7 @@ export default function InventoryItemSlot({
     const textColor = amount > 0 ? Color3.fromRGB(255, 255, 255) : Color3.fromRGB(150, 150, 150);
     const backgroundColor = item.difficulty.color ?? Color3.fromRGB(52, 155, 255);
     const hoverProps = tooltipEnabled ? useItemTooltip(item) : undefined;
-
-    useEffect(() => {
-        const viewport = viewportRef.current;
-        if (!viewport) return;
-
-        loadItemIntoViewport(PARALLEL, viewport, item.id, viewportManagement);
-    }, [viewportManagement, item.id]);
+    useItemViewport(viewportRef, item.id, viewportManagement);
 
     return (
         <textbutton

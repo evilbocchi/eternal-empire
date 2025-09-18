@@ -1,38 +1,37 @@
-import React from "@rbxts/react";
+import React, { useRef } from "@rbxts/react";
+import { ItemViewportManagement } from "client/ui/components/item/ItemViewport";
+import { useItemViewport } from "client/ui/components/item/useCIViewportManagement";
+import { RobotoSlabHeavy } from "client/ui/GameFonts";
 import { getAsset } from "shared/asset/AssetMap";
 import Item from "shared/item/Item";
-
-interface ShopItemSlotProps {
-    /** The item to display in the slot */
-    item: Item;
-    /** The current amount/price text to display */
-    amountText: string;
-    /** The amount text color */
-    amountColor: Color3;
-    /** Whether the slot is maxed */
-    isMaxed?: boolean;
-    /** Callback when the slot is clicked */
-    onClick: () => void;
-    /** Viewport frame content for the item */
-    viewportContent?: Instance;
-    /** Layout order for sorting */
-    layoutOrder?: number;
-}
 
 /**
  * Individual shop item slot component
  */
 export default function ShopItemSlot({
     item,
-    amountText,
-    amountColor,
-    isMaxed = false,
+    ownedAmount,
     onClick,
-    viewportContent,
     layoutOrder = 0,
-}: ShopItemSlotProps) {
+    viewportManagement,
+}: {
+    /** The item to display in the slot */
+    item: Item;
+    /** Amount of the item the player currently owns */
+    ownedAmount: number;
+    /** Callback when the slot is clicked */
+    onClick: () => void;
+    /** Layout order for sorting */
+    layoutOrder?: number;
+    /** Shared viewport management instance */
+    viewportManagement?: ItemViewportManagement;
+}) {
+    const viewportRef = useRef<ViewportFrame>();
     const difficulty = item.difficulty;
     const borderColor = difficulty?.color ?? Color3.fromRGB(52, 155, 255);
+    useItemViewport(viewportRef, item.id, viewportManagement);
+
+    const price = item.getPrice(ownedAmount + 1);
 
     return (
         <textbutton
@@ -80,12 +79,11 @@ export default function ShopItemSlot({
                 AnchorPoint={new Vector2(0.5, 0.5)}
                 AutomaticSize={Enum.AutomaticSize.X}
                 BackgroundTransparency={1}
-                Font={Enum.Font.Unknown}
-                FontFace={new Font("rbxassetid://12187368625", Enum.FontWeight.Medium, Enum.FontStyle.Normal)}
+                FontFace={RobotoSlabHeavy}
                 Position={new UDim2(0.5, 0, 0.9, 0)}
                 Size={new UDim2(1, 0, 0.4, 0)}
-                Text={isMaxed ? "MAXED" : amountText}
-                TextColor3={isMaxed ? Color3.fromRGB(255, 156, 5) : amountColor}
+                Text={price ? price.toString() : "MAXED"}
+                TextColor3={price ? Color3.fromRGB(255, 156, 5) : Color3.fromRGB(255, 156, 5)}
                 TextScaled={true}
                 TextSize={14}
                 TextWrapped={true}
@@ -111,6 +109,7 @@ export default function ShopItemSlot({
 
             {/* Viewport frame for 3D item display */}
             <viewportframe
+                ref={viewportRef}
                 AnchorPoint={new Vector2(0.5, 0.5)}
                 BackgroundTransparency={1}
                 Position={new UDim2(0.5, 0, 0.5, 0)}

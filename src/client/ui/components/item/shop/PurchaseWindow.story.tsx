@@ -1,7 +1,7 @@
-import React, { StrictMode } from "@rbxts/react";
+import React, { StrictMode, useEffect } from "@rbxts/react";
 import ReactRoblox from "@rbxts/react-roblox";
 import { Choose, CreateReactStory } from "@rbxts/ui-labs";
-import PurchaseWindow from "client/ui/components/item/shop/PurchaseWindow";
+import PurchaseWindow, { PurchaseManager } from "client/ui/components/item/shop/PurchaseWindow";
 import StoryMocking from "client/ui/components/StoryMocking";
 import TooltipWindow from "client/ui/components/tooltip/TooltipWindow";
 import { useSingleDocumentVisibility } from "client/ui/hooks/useVisibility";
@@ -34,11 +34,14 @@ export = CreateReactStory(
         useSingleDocumentVisibility("Purchase", props.controls.visible);
 
         const item = Items.getItem(props.controls.item) ?? TheFirstDropper;
+        useEffect(() => {
+            PurchaseManager.select(item);
+        }, [item]);
 
         return (
             <StrictMode>
                 <TooltipWindow />
-                <PurchaseWindow item={item} viewportsEnabled={props.controls.viewportsEnabled} />
+                <PurchaseWindow viewportsEnabled={props.controls.viewportsEnabled} />
             </StrictMode>
         );
     },

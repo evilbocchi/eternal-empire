@@ -1,19 +1,12 @@
+import { FuzzySearch } from "@rbxts/fuzzy-search";
 import React, { useCallback, useMemo, useRef, useState } from "@rbxts/react";
 import { getAsset } from "shared/asset/AssetMap";
 import { playSound } from "shared/asset/GameAssets";
 import Item from "shared/item/Item";
+import Items from "shared/items/Items";
 import { useMessageTooltip } from "../../tooltip/TooltipManager";
 
-interface InventoryFilterProps {
-    /** Available trait filter options */
-    traitOptions: TraitFilterOption[];
-    /** Callback when search query changes */
-    onSearchChange: (query: string) => void;
-    /** Callback when trait filter is toggled */
-    onTraitToggle: (traitId: TraitFilterId) => void;
-    /** Callback when clear button is pressed */
-    onClear: () => void;
-}
+export const SEARCHABLE_ITEMS = Items.sortedItems.filter((item) => !item.isA("Gear"));
 
 export const traitOptions: TraitFilterOption[] = [
     {
@@ -74,6 +67,49 @@ export function isWhitelisted(item: Item, whitelistedTraits: Set<TraitFilterId>)
     return isMisc && whitelistedTraits.has("Miscellaneous");
 }
 
+export type ItemFilterData = {
+    layoutOrder: number;
+    visible: boolean;
+};
+
+/**
+ * Filters items based on search query and trait filters.
+ * @param searchQuery The search query string.
+ * @param traitFilters The selected trait filters.
+ * @returns A map of item IDs to their layout order and visibility.
+ */
+export function filterItems(searchQuery: string, traitFilters: Set<TraitFilterId>) {
+    const processedItems = new Set<string>();
+    const dataPerItem = new Map<string, ItemFilterData>();
+
+    if (searchQuery !== "") {
+        const terms = new Array<string>();
+        for (const item of SEARCHABLE_ITEMS) {
+            if (!isWhitelisted(item, traitFilters)) continue;
+            terms.push(item.name);
+        }
+        const sorted = FuzzySearch.Sorting.FuzzyScore(terms, searchQuery);
+        for (const [index, name] of sorted) {
+            const item = Items.itemsPerName.get(name)!;
+            if (processedItems.has(item.id)) continue; // Skip duplicates
+            processedItems.add(item.id);
+            dataPerItem.set(item.id, {
+                layoutOrder: index,
+                visible: index > 0,
+            });
+        }
+    } else {
+        for (const item of SEARCHABLE_ITEMS) {
+            if (!isWhitelisted(item, traitFilters)) continue;
+            dataPerItem.set(item.id, {
+                layoutOrder: item.layoutOrder,
+                visible: true,
+            });
+        }
+    }
+    return dataPerItem;
+}
+
 /**
  * Inventory filter component with search and trait filtering
  */
@@ -82,7 +118,16 @@ export default function InventoryFilter({
     onSearchChange,
     onTraitToggle,
     onClear,
-}: InventoryFilterProps) {
+}: {
+    /** Available trait filter options */
+    traitOptions: TraitFilterOption[];
+    /** Callback when search query changes */
+    onSearchChange: (query: string) => void;
+    /** Callback when trait filter is toggled */
+    onTraitToggle: (traitId: TraitFilterId) => void;
+    /** Callback when clear button is pressed */
+    onClear: () => void;
+}) {
     const textBoxRef = useRef<TextBox>();
     const [previousText, setPreviousText] = useState("");
 
@@ -262,4 +307,43 @@ export default function InventoryFilter({
             </frame>
         </frame>
     );
+}
+
+export function useBasicInventoryFilter() {
+    const [searchQuery, setSearchQuery] = useState("");
+    const [traitFilters, setTraitFilters] = useState<Set<TraitFilterId>>(new Set());
+
+    // Handle search change
+    const onSearchChange = useCallback((query: string) => {
+        setSearchQuery(query);
+    }, []);
+
+    // Handle trait filter toggle
+    const onTraitToggle = useCallback((traitId: TraitFilterId) => {
+        setTraitFilters((prev) => {
+            const newFilters = table.clone(prev);
+            if (newFilters.has(traitId)) {
+                newFilters.delete(traitId);
+            } else {
+                newFilters.add(traitId);
+            }
+            return newFilters;
+        });
+    }, []);
+
+    // Handle filter clear
+    const onClear = useCallback(() => {
+        setTraitFilters(new Set());
+    }, []);
+
+    return {
+        searchQuery,
+        traitFilters,
+        props: {
+            traitOptions,
+            onSearchChange,
+            onTraitToggle,
+            onClear,
+        },
+    };
 }

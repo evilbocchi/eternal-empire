@@ -1,8 +1,16 @@
-import React, { Fragment, useCallback, useState } from "@rbxts/react";
+import React, { Fragment, useCallback, useMemo } from "@rbxts/react";
+import InventoryFilter, {
+    filterItems,
+    useBasicInventoryFilter,
+} from "client/ui/components/item/inventory/InventoryFilter";
+import { loadItemViewportManagement } from "client/ui/components/item/ItemViewport";
+import { PurchaseManager } from "client/ui/components/item/shop/PurchaseWindow";
+import ShopItemSlot from "client/ui/components/item/shop/ShopItemSlot";
+import useProperty from "client/ui/hooks/useProperty";
 import { playSound } from "shared/asset/GameAssets";
 import Item from "shared/item/Item";
-import InventoryFilter, { isWhitelisted, traitOptions } from "../inventory/InventoryFilter";
-import ShopItemSlot from "./ShopItemSlot";
+import Shop from "shared/item/traits/Shop";
+import Packets from "shared/Packets";
 
 interface ShopItem {
     item: Item;
@@ -13,93 +21,33 @@ interface ShopItem {
 }
 
 interface ShopWindowProps {
-    /** Array of shop items to display */
-    shopItems: ShopItem[];
-    /** Currently selected item for purchase */
-    selectedItem?: Item;
-    /** Whether the purchase window is visible */
-    isPurchaseWindowVisible: boolean;
-    /** Callback when an item is selected for purchase */
-    onItemSelect: (item: Item) => void;
+    shop: Shop;
     /** Callback when buy all button is pressed */
     onBuyAll: () => void;
-    /** Shop difficulty color for styling */
-    shopColor?: Color3;
 }
 
 /**
  * Main shop window component with integrated filtering
  */
-export default function ShopWindow({
-    shopItems,
-    selectedItem,
-    isPurchaseWindowVisible,
-    onItemSelect,
-    onBuyAll,
-    shopColor = Color3.fromRGB(255, 255, 255),
-}: ShopWindowProps) {
-    const [searchQuery, setSearchQuery] = useState("");
-    const [selectedTraits, setSelectedTraits] = useState<Set<TraitFilterId>>(new Set());
+export default function ShopWindow({ shop, onBuyAll }: ShopWindowProps) {
+    const { searchQuery, traitFilters, props: filterProps } = useBasicInventoryFilter();
+    const viewportManagement = loadItemViewportManagement();
+    const ownedPerItem = useProperty(Packets.bought);
+    const shopItems = shop.items;
 
-    // Prepare trait options with selection state
-    const traitOptionsWithSelection = traitOptions.map((option) => ({
-        ...option,
-        selected: selectedTraits.has(option.id),
-    }));
+    const dataPerItem = useMemo(() => {
+        return filterItems(searchQuery, traitFilters);
+    }, [shopItems, searchQuery, traitFilters]);
 
-    const handleSearchChange = useCallback((query: string) => {
-        setSearchQuery(query);
-    }, []);
-
-    const handleTraitToggle = useCallback((traitId: TraitFilterId) => {
+    const handleItemClick = useCallback((item: Item) => {
         playSound("MenuClick.mp3");
-        setSelectedTraits((prev) => {
-            const newSet = new Set<TraitFilterId>();
-            prev.forEach((trait) => newSet.add(trait));
-            if (newSet.has(traitId)) {
-                newSet.delete(traitId);
-            } else {
-                newSet.add(traitId);
-            }
-            return newSet;
-        });
+        PurchaseManager.select(item);
     }, []);
-
-    const handleClear = useCallback(() => {
-        playSound("MenuClick.mp3");
-        setSearchQuery("");
-        setSelectedTraits(new Set());
-    }, []);
-
-    const handleItemClick = useCallback(
-        (item: Item) => {
-            playSound("MenuClick.mp3");
-            onItemSelect(item);
-        },
-        [onItemSelect],
-    );
 
     const handleBuyAllClick = useCallback(() => {
         playSound("MenuClick.mp3");
         onBuyAll();
     }, [onBuyAll]);
-
-    // Filter shop items based on search and traits
-    const filteredItems = shopItems.filter((shopItem) => {
-        const { item } = shopItem;
-
-        // Search filter
-        if (searchQuery !== "" && !item.name.lower().find(searchQuery.lower())[0]) {
-            return false;
-        }
-
-        // Trait filter
-        if (!isWhitelisted(item, selectedTraits)) {
-            return false;
-        }
-
-        return true;
-    });
 
     return (
         <Fragment>
@@ -112,12 +60,7 @@ export default function ShopWindow({
             />
 
             {/* Filter options */}
-            <InventoryFilter
-                traitOptions={traitOptionsWithSelection}
-                onSearchChange={handleSearchChange}
-                onTraitToggle={handleTraitToggle}
-                onClear={handleClear}
-            />
+            <InventoryFilter {...filterProps} />
 
             {/* Item list scrolling frame */}
             <scrollingframe
@@ -150,20 +93,22 @@ export default function ShopWindow({
                 />
 
                 {/* Border stroke */}
-                <uistroke Color={shopColor} Thickness={3} />
+                <uistroke Color={shop.item.difficulty.color} Thickness={3} />
 
-                {/* Render filtered shop items */}
-                {filteredItems.map((shopItem, index) => (
-                    <ShopItemSlot
-                        key={shopItem.item.id}
-                        item={shopItem.item}
-                        amountText={shopItem.amountText}
-                        amountColor={shopItem.amountColor}
-                        isMaxed={shopItem.isMaxed}
-                        layoutOrder={index}
-                        onClick={() => handleItemClick(shopItem.item)}
-                    />
-                ))}
+                {shopItems.map((item) => {
+                    const data = dataPerItem.get(item.id);
+
+                    return (
+                        <ShopItemSlot
+                            key={item.id}
+                            item={item}
+                            ownedAmount={ownedPerItem.get(item.id) ?? 0}
+                            layoutOrder={data?.layoutOrder}
+                            onClick={() => handleItemClick(item)}
+                            viewportManagement={viewportManagement}
+                        />
+                    );
+                })}
 
                 {/* Buy All button */}
                 <frame BackgroundTransparency={1} LayoutOrder={99999} Size={new UDim2(0, 100, 0, 100)}>
