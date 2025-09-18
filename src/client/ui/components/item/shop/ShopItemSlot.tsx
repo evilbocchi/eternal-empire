@@ -10,6 +10,8 @@ import { CURRENCY_DETAILS } from "shared/currency/CurrencyDetails";
 import Item from "shared/item/Item";
 import Items from "shared/items/Items";
 
+const TweenService = game.GetService("TweenService");
+
 function ShopPriceOption({
     currency,
     item,
@@ -21,19 +23,51 @@ function ShopPriceOption({
     amount: OnoeNum | number;
     viewportManagement?: ItemViewportManagement;
 }) {
-    let viewportRef: React.RefObject<ViewportFrame> | undefined;
-    if (item !== undefined) {
-        viewportRef = useRef<ViewportFrame>();
-        useItemViewport(viewportRef, item.id, viewportManagement);
-    }
+    // Always call hooks unconditionally
+    const viewportRef = useRef<ViewportFrame>();
+    const textLabelRef = useRef<TextLabel>();
+    const currentTweenRef = useRef<Tween>();
+
+    // Only pass itemId if item is defined, otherwise pass empty string
+    useItemViewport(viewportRef, item?.id ?? "", viewportManagement);
+
     const image = currency !== undefined ? CURRENCY_DETAILS[currency].image : item?.image;
-    let color = Color3.fromRGB(255, 255, 255);
+    let targetColor = Color3.fromRGB(255, 255, 255);
     if (currency !== undefined) {
-        color = CURRENCY_DETAILS[currency].color;
+        targetColor = CURRENCY_DETAILS[currency].color;
     } else if (item !== undefined) {
-        color = item.difficulty?.color ?? Color3.fromRGB(255, 255, 255);
+        targetColor = item.difficulty?.color ?? Color3.fromRGB(255, 255, 255);
     }
-    color = new Color3(math.clamp(color.R, 0.1, 0.9), math.clamp(color.G, 0.1, 0.9), math.clamp(color.B, 0.1, 0.9));
+    targetColor = new Color3(
+        math.clamp(targetColor.R, 0.1, 0.9),
+        math.clamp(targetColor.G, 0.1, 0.9),
+        math.clamp(targetColor.B, 0.1, 0.9),
+    );
+
+    // Tween color when currency or item changes
+    useEffect(() => {
+        if (!textLabelRef.current) return;
+
+        // Cancel any existing tween
+        if (currentTweenRef.current) {
+            currentTweenRef.current.Cancel();
+        }
+
+        const tweenInfo = new TweenInfo(0.3, Enum.EasingStyle.Quart, Enum.EasingDirection.Out);
+        const tween = TweenService.Create(textLabelRef.current, tweenInfo, {
+            TextColor3: targetColor,
+        });
+
+        currentTweenRef.current = tween;
+        tween.Play();
+
+        return () => {
+            if (currentTweenRef.current) {
+                currentTweenRef.current.Cancel();
+                currentTweenRef.current = undefined;
+            }
+        };
+    }, [currency, item]);
 
     return (
         <frame AutomaticSize={Enum.AutomaticSize.X} BackgroundTransparency={1} Size={new UDim2(1, 0, 0, 28)}>
@@ -59,12 +93,12 @@ function ShopPriceOption({
                 />
             )}
             <textlabel
+                ref={textLabelRef}
                 AutomaticSize={Enum.AutomaticSize.X}
                 BackgroundTransparency={1}
                 FontFace={RobotoSlabHeavy}
                 Size={new UDim2(0, 0, 1, 0)}
                 Text={currency !== undefined ? displayBalanceCurrency(currency, amount) : tostring(amount)}
-                TextColor3={color}
                 TextScaled={true}
             >
                 <uistroke Color={Color3.fromRGB(0, 0, 0)} Thickness={2} />
