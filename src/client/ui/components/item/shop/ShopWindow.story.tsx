@@ -1,10 +1,14 @@
 import React, { StrictMode, useEffect } from "@rbxts/react";
 import ReactRoblox, { createRoot } from "@rbxts/react-roblox";
 import { StarterGui, Workspace } from "@rbxts/services";
-import { CreateReactStory } from "@rbxts/ui-labs";
+import { Choose, CreateReactStory } from "@rbxts/ui-labs";
 import PurchaseWindow from "client/ui/components/item/shop/PurchaseWindow";
 import ShopWindow from "client/ui/components/item/shop/ShopWindow";
+import TooltipWindow from "client/ui/components/tooltip/TooltipWindow";
+import Items from "shared/items/Items";
 import ClassLowerNegativeShop from "shared/items/negative/ClassLowerNegativeShop";
+
+const shops = Items.sortedItems.filter((item) => item.findTrait("Shop") !== undefined);
 
 export = CreateReactStory(
     {
@@ -12,6 +16,10 @@ export = CreateReactStory(
         reactRoblox: ReactRoblox,
         controls: {
             onSurface: false,
+            shop: Choose(
+                shops.map((item) => item.id),
+                shops.findIndex((item) => item.id === ClassLowerNegativeShop.id),
+            ),
         },
     },
     (props) => {
@@ -19,7 +27,8 @@ export = CreateReactStory(
             print("Buy all items!");
         };
 
-        const shopWindow = <ShopWindow shop={ClassLowerNegativeShop.findTrait("Shop")!} onBuyAll={handleBuyAll} />;
+        const item = Items.getItem(props.controls.shop) ?? ClassLowerNegativeShop;
+        const shopWindow = <ShopWindow shop={item.findTrait("Shop")!} onBuyAll={handleBuyAll} />;
 
         useEffect(() => {
             if (!props.controls.onSurface) return;
@@ -47,6 +56,7 @@ export = CreateReactStory(
 
         return (
             <StrictMode>
+                <TooltipWindow />
                 <frame Size={new UDim2(1, 0, 1, 0)} BackgroundTransparency={1} ZIndex={-10}>
                     {!props.controls.onSurface && shopWindow}
                 </frame>

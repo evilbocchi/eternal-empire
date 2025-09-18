@@ -6,6 +6,7 @@ import InventoryFilter, {
 import { loadItemViewportManagement } from "client/ui/components/item/ItemViewport";
 import { PurchaseManager } from "client/ui/components/item/shop/PurchaseWindow";
 import ShopItemSlot from "client/ui/components/item/shop/ShopItemSlot";
+import { RobotoSlabHeavy } from "client/ui/GameFonts";
 import useProperty from "client/ui/hooks/useProperty";
 import { playSound } from "shared/asset/GameAssets";
 import Item from "shared/item/Item";
@@ -58,9 +59,15 @@ export default function ShopWindow({ shop, onBuyAll }: ShopWindowProps) {
                 PaddingRight={new UDim(0, 5)}
                 PaddingTop={new UDim(0, 5)}
             />
+            <uilistlayout
+                HorizontalAlignment={Enum.HorizontalAlignment.Center}
+                Padding={new UDim(0, 10)}
+                SortOrder={Enum.SortOrder.LayoutOrder}
+                VerticalAlignment={Enum.VerticalAlignment.Center}
+            />
 
             {/* Filter options */}
-            <InventoryFilter {...filterProps} />
+            <InventoryFilter color={shop.item.difficulty.color} {...filterProps} />
 
             {/* Item list scrolling frame */}
             <scrollingframe
@@ -81,7 +88,7 @@ export default function ShopWindow({ shop, onBuyAll }: ShopWindowProps) {
                     CellSize={new UDim2(0.167, -12, 0, 0)}
                     SortOrder={Enum.SortOrder.LayoutOrder}
                 >
-                    <uiaspectratioconstraint AspectRatio={1.5} AspectType={Enum.AspectType.ScaleWithParentSize} />
+                    <uiaspectratioconstraint AspectRatio={0.8} AspectType={Enum.AspectType.ScaleWithParentSize} />
                 </uigridlayout>
 
                 {/* Padding */}
@@ -104,6 +111,7 @@ export default function ShopWindow({ shop, onBuyAll }: ShopWindowProps) {
                             item={item}
                             ownedAmount={ownedPerItem.get(item.id) ?? 0}
                             layoutOrder={data?.layoutOrder}
+                            visible={data?.visible === true}
                             onClick={() => handleItemClick(item)}
                             viewportManagement={viewportManagement}
                         />
@@ -173,8 +181,7 @@ export default function ShopWindow({ shop, onBuyAll }: ShopWindowProps) {
                         {/* Button text */}
                         <textlabel
                             BackgroundTransparency={1}
-                            Font={Enum.Font.Unknown}
-                            FontFace={new Font("rbxassetid://12187368625", Enum.FontWeight.Bold, Enum.FontStyle.Normal)}
+                            FontFace={RobotoSlabHeavy}
                             LayoutOrder={-5}
                             Size={new UDim2(1, 0, 1, 0)}
                             Text="Buy All Items"

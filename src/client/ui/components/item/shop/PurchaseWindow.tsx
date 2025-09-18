@@ -5,7 +5,7 @@ import StringBuilder from "@rbxts/stringbuilder";
 import { useHotkey } from "client/ui/components/hotkeys/HotkeyManager";
 import InventoryItemSlot from "client/ui/components/item/inventory/InventoryItemSlot";
 import ItemWindow from "client/ui/components/item/shop/ItemWindow";
-import { PriceOptions } from "client/ui/components/item/shop/PriceOption";
+import { WrappingPriceOptions } from "client/ui/components/item/shop/PriceOption";
 import useCIViewportManagement from "client/ui/components/item/useCIViewportManagement";
 import useSingleDocumentWindow from "client/ui/components/sidebar/useSingleDocumentWindow";
 import getDifficultyDisplayColors from "client/ui/components/tooltip/getDifficultyDisplayColors";
@@ -134,7 +134,6 @@ export default function PurchaseWindow({
         return getDifficultyDisplayColors(item.difficulty);
     }, [item]);
 
-    const containerSize = new UDim2(0.8, 0, 0, 0);
     const containerPadding = 5;
     const requiredItems = item.requiredItems;
 
@@ -286,7 +285,6 @@ export default function PurchaseWindow({
                 Selectable={false}
                 Size={new UDim2(1, 0, 0.925, -40)}
             >
-                <uipadding PaddingBottom={new UDim(0, 10)} />
                 <uilistlayout
                     FillDirection={Enum.FillDirection.Vertical}
                     VerticalFlex={Enum.UIFlexAlignment.Fill}
@@ -332,106 +330,105 @@ export default function PurchaseWindow({
                     </textlabel>
                 ) : undefined}
 
-                {/* Spacer */}
-                <frame BackgroundTransparency={1} Size={new UDim2(1, 0, 0, 5)}>
-                    <uiflexitem FlexMode={Enum.UIFlexMode.Fill} />
-                </frame>
-
                 {/* Purchase container */}
                 {!price.amountPerCurrency.isEmpty() ? (
-                    <textbutton
-                        AutomaticSize={Enum.AutomaticSize.Y}
-                        BackgroundColor3={Color3.fromRGB(85, 255, 127)}
-                        BackgroundTransparency={totalAffordable ? 0 : 0.5}
-                        BorderColor3={Color3.fromRGB(0, 28, 5)}
-                        BorderSizePixel={3}
-                        FontFace={RobotoSlabHeavy}
-                        Selectable={false}
-                        Text={totalAffordable ? "PURCHASE" : unaffordableLabel}
-                        TextColor3={new Color3(0, 0, 0)}
-                        TextSize={24}
-                        TextTransparency={0.9}
-                        TextXAlignment={Enum.TextXAlignment.Right}
-                        TextYAlignment={Enum.TextYAlignment.Bottom}
-                        Size={containerSize}
-                        Event={{
-                            MouseMoved: () => {
-                                if (totalAffordable) return;
-                                const balance = Packets.balance.get();
-                                const inventory = Packets.inventory.get();
-                                const builder = new StringBuilder("Missing:");
-                                for (const [currency] of CurrencyBundle.SORTED_DETAILS) {
-                                    if (affordablePerCurrency.get(currency) ?? true) continue;
-                                    builder
-                                        .append("<font size='16' color='#")
-                                        .append(CURRENCY_DETAILS[currency].color.Lerp(new Color3(1, 1, 1), 0.7).ToHex())
-                                        .append("'>\n- ")
-                                        .append(new OnoeNum(balance.get(currency) ?? 0).toString())
-                                        .append("/")
-                                        .append(price.get(currency)!.toString())
-                                        .append(" ")
-                                        .append(currency)
-                                        .append("</font>");
-                                }
-                                for (const requiredItem of Items.sortedItems) {
-                                    if (affordablePerItem.get(requiredItem) ?? true) continue;
-                                    const color = requiredItem.difficulty.color ?? Color3.fromRGB(255, 255, 255);
-                                    builder
-                                        .append("<font size='16' color='#")
-                                        .append(color.Lerp(new Color3(1, 1, 1), 0.7).ToHex())
-                                        .append("'>\n- ")
-                                        .append(inventory.get(requiredItem.id) ?? 0)
-                                        .append("/")
-                                        .append(requiredItems.get(requiredItem))
-                                        .append(" ")
-                                        .append(requiredItem.name)
-                                        .append("</font>");
-                                }
-                                TooltipManager.showTooltip({ message: builder.toString() });
-                            },
-                            MouseLeave: () => {
-                                TooltipManager.hideTooltip();
-                            },
-                            Activated: purchase,
-                        }}
-                    >
-                        {
-                            <PriceOptions
-                                containerX={containerSize.X}
-                                price={price}
-                                requiredItems={requiredItems}
-                                viewportManagement={viewportManagement}
-                                affordablePerCurrency={affordablePerCurrency}
-                                affordablePerItem={affordablePerItem}
+                    <frame AutomaticSize={Enum.AutomaticSize.Y} BackgroundTransparency={1} Size={new UDim2(1, 0, 0, 0)}>
+                        <textbutton
+                            AutomaticSize={Enum.AutomaticSize.Y}
+                            BackgroundColor3={Color3.fromRGB(85, 255, 127)}
+                            BackgroundTransparency={totalAffordable ? 0 : 0.5}
+                            BorderColor3={Color3.fromRGB(0, 28, 5)}
+                            BorderSizePixel={3}
+                            FontFace={RobotoSlabHeavy}
+                            Selectable={false}
+                            Text={totalAffordable ? "PURCHASE" : unaffordableLabel}
+                            TextColor3={new Color3(0, 0, 0)}
+                            TextSize={24}
+                            TextTransparency={0.9}
+                            TextXAlignment={Enum.TextXAlignment.Right}
+                            TextYAlignment={Enum.TextYAlignment.Bottom}
+                            Size={new UDim2(0.8, 0, 0, 0)}
+                            Event={{
+                                MouseMoved: () => {
+                                    if (totalAffordable) return;
+                                    const balance = Packets.balance.get();
+                                    const inventory = Packets.inventory.get();
+                                    const builder = new StringBuilder("Missing:");
+                                    for (const [currency] of CurrencyBundle.SORTED_DETAILS) {
+                                        if (affordablePerCurrency.get(currency) ?? true) continue;
+                                        builder
+                                            .append("<font size='16' color='#")
+                                            .append(
+                                                CURRENCY_DETAILS[currency].color.Lerp(new Color3(1, 1, 1), 0.7).ToHex(),
+                                            )
+                                            .append("'>\n- ")
+                                            .append(new OnoeNum(balance.get(currency) ?? 0).toString())
+                                            .append("/")
+                                            .append(price.get(currency)!.toString())
+                                            .append(" ")
+                                            .append(currency)
+                                            .append("</font>");
+                                    }
+                                    for (const requiredItem of Items.sortedItems) {
+                                        if (affordablePerItem.get(requiredItem) ?? true) continue;
+                                        const color = requiredItem.difficulty.color ?? Color3.fromRGB(255, 255, 255);
+                                        builder
+                                            .append("<font size='16' color='#")
+                                            .append(color.Lerp(new Color3(1, 1, 1), 0.7).ToHex())
+                                            .append("'>\n- ")
+                                            .append(inventory.get(requiredItem.id) ?? 0)
+                                            .append("/")
+                                            .append(requiredItems.get(requiredItem))
+                                            .append(" ")
+                                            .append(requiredItem.name)
+                                            .append("</font>");
+                                    }
+                                    TooltipManager.showTooltip({ message: builder.toString() });
+                                },
+                                MouseLeave: () => {
+                                    TooltipManager.hideTooltip();
+                                },
+                                Activated: purchase,
+                            }}
+                        >
+                            {
+                                <WrappingPriceOptions
+                                    price={price}
+                                    requiredItems={requiredItems}
+                                    viewportManagement={viewportManagement}
+                                    affordablePerCurrency={affordablePerCurrency}
+                                    affordablePerItem={affordablePerItem}
+                                />
+                            }
+                            <uipadding
+                                PaddingBottom={new UDim(0, containerPadding)}
+                                PaddingTop={new UDim(0, containerPadding)}
+                                PaddingLeft={new UDim(0, containerPadding)}
+                                PaddingRight={new UDim(0, containerPadding)}
                             />
-                        }
+                            <uistroke
+                                ApplyStrokeMode={Enum.ApplyStrokeMode.Border}
+                                Color={Color3.fromRGB(156, 255, 156)}
+                                Thickness={1}
+                            />
+
+                            <uigradient
+                                Color={
+                                    new ColorSequence([
+                                        new ColorSequenceKeypoint(0, Color3.fromRGB(170, 170, 255)),
+                                        new ColorSequenceKeypoint(1, Color3.fromRGB(255, 255, 255)),
+                                    ])
+                                }
+                                Rotation={270}
+                            />
+                        </textbutton>
                         <uilistlayout
                             HorizontalAlignment={Enum.HorizontalAlignment.Center}
-                            VerticalAlignment={Enum.VerticalAlignment.Center}
+                            VerticalAlignment={Enum.VerticalAlignment.Bottom}
                         />
+                        <uipadding PaddingBottom={new UDim(0, 2)} />
                         <uiflexitem FlexMode={Enum.UIFlexMode.None} />
-                        <uipadding
-                            PaddingBottom={new UDim(0, containerPadding)}
-                            PaddingTop={new UDim(0, containerPadding)}
-                            PaddingLeft={new UDim(0, containerPadding)}
-                            PaddingRight={new UDim(0, containerPadding)}
-                        />
-                        <uistroke
-                            ApplyStrokeMode={Enum.ApplyStrokeMode.Border}
-                            Color={Color3.fromRGB(156, 255, 156)}
-                            Thickness={1}
-                        />
-
-                        <uigradient
-                            Color={
-                                new ColorSequence([
-                                    new ColorSequenceKeypoint(0, Color3.fromRGB(170, 170, 255)),
-                                    new ColorSequenceKeypoint(1, Color3.fromRGB(255, 255, 255)),
-                                ])
-                            }
-                            Rotation={270}
-                        />
-                    </textbutton>
+                    </frame>
                 ) : (
                     <frame AutomaticSize={Enum.AutomaticSize.Y} BackgroundTransparency={1} Size={new UDim2(1, 0, 0, 0)}>
                         <uilistlayout

@@ -228,17 +228,15 @@ export default function InventoryWindow({
 
                     {/* Render inventory items TODO Decouple from React render loop for max performance */}
                     {SEARCHABLE_ITEMS.map((item) => {
-                        const inventoryData = dataPerItem.get(item.id);
+                        const data = dataPerItem.get(item.id);
 
                         return (
                             <InventoryItemSlot
                                 key={item.id}
                                 item={item}
-                                amount={inventoryData?.amount}
-                                layoutOrder={
-                                    inventoryData === undefined ? item.layoutOrder : -inventoryData.layoutOrder
-                                }
-                                visible={inventoryData?.visible === true}
+                                amount={data?.amount}
+                                layoutOrder={data === undefined ? item.layoutOrder : -data.layoutOrder}
+                                visible={data?.visible === true}
                                 onActivated={() => handleItemActivated(item)}
                                 viewportManagement={viewportManagement}
                             />

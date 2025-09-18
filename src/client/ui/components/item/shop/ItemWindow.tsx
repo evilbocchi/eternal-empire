@@ -53,6 +53,7 @@ export default function ItemWindow({
     return (
         <imagelabel
             ref={wrapperRef}
+            Active={true}
             AnchorPoint={new Vector2(0.5, 1)}
             BackgroundColor3={backgroundColor}
             BackgroundTransparency={0.2}

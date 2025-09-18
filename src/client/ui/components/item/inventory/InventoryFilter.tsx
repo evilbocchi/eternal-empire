@@ -114,11 +114,14 @@ export function filterItems(searchQuery: string, traitFilters: Set<TraitFilterId
  * Inventory filter component with search and trait filtering
  */
 export default function InventoryFilter({
+    color = Color3.fromRGB(255, 186, 125),
     traitOptions,
     onSearchChange,
     onTraitToggle,
     onClear,
 }: {
+    /** Border color for the search box */
+    color?: Color3;
     /** Available trait filter options */
     traitOptions: TraitFilterOption[];
     /** Callback when search query changes */
@@ -174,6 +177,15 @@ export default function InventoryFilter({
 
     return (
         <frame BackgroundTransparency={1} LayoutOrder={-1} Size={new UDim2(1, 0, 0.025, 20)}>
+            <uilistlayout
+                FillDirection={Enum.FillDirection.Horizontal}
+                HorizontalAlignment={Enum.HorizontalAlignment.Left}
+                Padding={new UDim(0, 15)}
+                SortOrder={Enum.SortOrder.LayoutOrder}
+                VerticalAlignment={Enum.VerticalAlignment.Center}
+            />
+            <uipadding PaddingLeft={new UDim(0, 10)} />
+
             {/* Search textbox */}
             <textbox
                 ref={textBoxRef}
@@ -231,21 +243,8 @@ export default function InventoryFilter({
                 />
 
                 {/* Search box border */}
-                <uistroke
-                    ApplyStrokeMode={Enum.ApplyStrokeMode.Border}
-                    Color={Color3.fromRGB(255, 186, 125)}
-                    Thickness={2}
-                />
+                <uistroke ApplyStrokeMode={Enum.ApplyStrokeMode.Border} Color={color} Thickness={2} />
             </textbox>
-
-            {/* Filter layout */}
-            <uilistlayout
-                FillDirection={Enum.FillDirection.Horizontal}
-                HorizontalAlignment={Enum.HorizontalAlignment.Center}
-                Padding={new UDim(0, 15)}
-                SortOrder={Enum.SortOrder.LayoutOrder}
-                VerticalAlignment={Enum.VerticalAlignment.Center}
-            />
 
             {/* Trait filter options */}
             <frame
@@ -323,8 +322,10 @@ export function useBasicInventoryFilter() {
         setTraitFilters((prev) => {
             const newFilters = table.clone(prev);
             if (newFilters.has(traitId)) {
+                playSound("CheckOff.mp3");
                 newFilters.delete(traitId);
             } else {
+                playSound("CheckOn.mp3");
                 newFilters.add(traitId);
             }
             return newFilters;

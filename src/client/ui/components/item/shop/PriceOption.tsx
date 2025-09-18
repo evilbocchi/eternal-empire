@@ -1,5 +1,5 @@
 import { OnoeNum } from "@antivivi/serikanum";
-import React, { useEffect, useRef } from "@rbxts/react";
+import React, { useEffect, useMemo, useRef } from "@rbxts/react";
 import { TextService } from "@rbxts/services";
 import displayBalanceCurrency from "client/ui/components/balance/displayBalanceCurrency";
 import { ItemViewportManagement } from "client/ui/components/item/ItemViewport";
@@ -111,8 +111,7 @@ function PriceOption({
     );
 }
 
-export function PriceOptions({
-    containerX,
+export function WrappingPriceOptions({
     priceOptionHeight = 25,
     padding = 5,
     price,
@@ -121,7 +120,6 @@ export function PriceOptions({
     affordablePerCurrency,
     affordablePerItem,
 }: {
-    containerX: UDim;
     priceOptionHeight?: number;
     padding?: number;
     price: CurrencyBundle;
@@ -133,8 +131,17 @@ export function PriceOptions({
     const ref = useRef<Frame>();
     const containerXPixels = ref.current?.AbsoluteSize.X;
 
+    // Create a unique key based on price and required items to force re-render when they change
+    const priceKey = useMemo(() => {
+        const currencyKey = price.amountPerCurrency.isEmpty()
+            ? ""
+            : [...price.amountPerCurrency].map(([c, a]) => `${c}:${a.toString()}`).join(",");
+        const itemKey = requiredItems.size() === 0 ? "" : [...requiredItems].map(([i, a]) => `${i.id}:${a}`).join(",");
+        return `${currencyKey}|${itemKey}`;
+    }, [price, requiredItems]);
+
     if (containerXPixels === undefined)
-        return <frame ref={ref} BackgroundTransparency={1} Size={new UDim2(1, 0, 0, 0)} />;
+        return <frame key={priceKey} ref={ref} BackgroundTransparency={1} Size={new UDim2(1, 0, 0, 0)} />;
 
     const getText = (currency: Currency | undefined, item: Item | undefined, amount: OnoeNum | number) => {
         return currency ? displayBalanceCurrency(currency, amount as OnoeNum) : `${amount} ${item?.name}`;
@@ -220,14 +227,18 @@ export function PriceOptions({
     const totalPriceOptions = infos.size();
 
     return (
-        <frame ref={ref} BackgroundTransparency={1} Size={new UDim2(1, 0, 0, rows.size() * priceOptionHeight)}>
+        <frame
+            key={priceKey}
+            ref={ref}
+            BackgroundTransparency={1}
+            Size={new UDim2(1, 0, 0, rows.size() * priceOptionHeight)}
+        >
             {infos.map((info) => {
                 const affordable = info.currency
                     ? (affordablePerCurrency.get(info.currency) ?? false)
                     : info.item
                       ? (affordablePerItem.get(info.item) ?? false)
                       : false;
-                print(info.currency, info.item?.id, affordable);
 
                 return (
                     <frame

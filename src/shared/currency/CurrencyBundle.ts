@@ -71,7 +71,7 @@ class CurrencyBundle {
      * @param excludeName Whether to exclude ```<currency>``` in the default format. If left blank, does not exclude
      * @returns Formatted string version of the amount
      */
-    static getFormatted(currency: Currency, amount?: BaseOnoeNum, excludeName?: boolean) {
+    static getFormatted(currency: Currency, amount?: BaseOnoeNum | number, excludeName?: boolean) {
         const format = CURRENCY_DETAILS[currency].format;
         const c = amount === undefined ? "" : OnoeNum.toString(amount);
         if (format !== undefined) return format.format(c);
