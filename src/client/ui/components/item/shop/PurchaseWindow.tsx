@@ -1,12 +1,11 @@
 import Signal from "@antivivi/lemon-signal";
 import { OnoeNum } from "@antivivi/serikanum";
-import React, { forwardRef, useEffect, useMemo, useRef, useState } from "@rbxts/react";
+import React, { useEffect, useMemo, useState } from "@rbxts/react";
 import StringBuilder from "@rbxts/stringbuilder";
-import displayBalanceCurrency from "client/ui/components/balance/displayBalanceCurrency";
 import { useHotkey } from "client/ui/components/hotkeys/HotkeyManager";
 import InventoryItemSlot from "client/ui/components/item/inventory/InventoryItemSlot";
-import { ItemViewportManagement } from "client/ui/components/item/ItemViewport";
 import ItemWindow from "client/ui/components/item/shop/ItemWindow";
+import { PriceOptions } from "client/ui/components/item/shop/PriceOption";
 import useCIViewportManagement from "client/ui/components/item/useCIViewportManagement";
 import useSingleDocumentWindow from "client/ui/components/sidebar/useSingleDocumentWindow";
 import getDifficultyDisplayColors from "client/ui/components/tooltip/getDifficultyDisplayColors";
@@ -20,83 +19,6 @@ import Item from "shared/item/Item";
 import Items from "shared/items/Items";
 import TheFirstDropper from "shared/items/negative/tfd/TheFirstDropper";
 import Packets from "shared/Packets";
-
-/**
- * Individual price option component for purchase window
- */
-const PriceOption = forwardRef<
-    Frame,
-    {
-        /** Currency amount and type */
-        currency?: Currency;
-        /** Item amount and type */
-        item?: Item;
-        /** Amount to display */
-        amount: OnoeNum | number;
-        /** Whether the price is affordable */
-        affordable: boolean;
-        /** Shared viewport management instance */
-        viewportManagement?: ItemViewportManagement;
-    }
->(({ currency, item, amount, affordable, viewportManagement }, ref) => {
-    const viewportRef = useRef<ViewportFrame>();
-    const textColor = affordable ? Color3.fromRGB(255, 255, 255) : Color3.fromRGB(255, 80, 80);
-
-    useEffect(() => {
-        if (!item || !viewportRef.current) return;
-        viewportManagement?.loadItemIntoViewport(viewportRef.current!, item.id);
-    }, [viewportManagement, item?.id]);
-
-    return (
-        <frame ref={ref} AutomaticSize={Enum.AutomaticSize.X} BackgroundTransparency={1} Size={new UDim2(0, 0, 1, 0)}>
-            <uilistlayout
-                FillDirection={Enum.FillDirection.Horizontal}
-                HorizontalAlignment={Enum.HorizontalAlignment.Center}
-                Padding={new UDim(0, 4)}
-                SortOrder={Enum.SortOrder.LayoutOrder}
-                VerticalAlignment={Enum.VerticalAlignment.Center}
-            />
-            <uipadding
-                PaddingBottom={new UDim(0, 1)}
-                PaddingTop={new UDim(0, 1)}
-                PaddingLeft={new UDim(0, 10)}
-                PaddingRight={new UDim(0, 10)}
-            />
-
-            {currency && (
-                <imagelabel
-                    BackgroundTransparency={1}
-                    Image={CURRENCY_DETAILS[currency].image}
-                    ScaleType={Enum.ScaleType.Fit}
-                    Size={new UDim2(1, 0, 1, 0)}
-                    SizeConstraint={Enum.SizeConstraint.RelativeYY}
-                />
-            )}
-
-            {item && (
-                <viewportframe
-                    ref={viewportRef}
-                    BackgroundTransparency={1}
-                    Size={new UDim2(1, 0, 1, 0)}
-                    SizeConstraint={Enum.SizeConstraint.RelativeYY}
-                />
-            )}
-
-            <textlabel
-                AutomaticSize={Enum.AutomaticSize.X}
-                BackgroundTransparency={1}
-                FontFace={RobotoSlabHeavy}
-                Size={new UDim2(0, 0, 1, 0)}
-                Text={currency ? displayBalanceCurrency(currency, amount as OnoeNum) : `${amount} ${item?.name}`}
-                TextColor3={textColor}
-                TextScaled={true}
-                TextXAlignment={Enum.TextXAlignment.Left}
-            >
-                <uistroke Thickness={2} />
-            </textlabel>
-        </frame>
-    );
-});
 
 export class PurchaseManager {
     static readonly itemSelected = new Signal<Item>();
@@ -115,7 +37,6 @@ export default function PurchaseWindow({
     /** Whether 3D model viewports are enabled */
     viewportsEnabled?: boolean;
 }) {
-    const purchaseButtonRef = useRef<TextButton>();
     const { visible, closeWindow, openWindow } = useSingleDocumentWindow("Purchase");
     const [{ bought, price }, setBoughtData] = useState({ bought: 0, price: new CurrencyBundle() });
     const [unaffordableLabel, setUnaffordableLabel] = useState("UNAFFORDABLE");
@@ -213,143 +134,9 @@ export default function PurchaseWindow({
         return getDifficultyDisplayColors(item.difficulty);
     }, [item]);
 
-    const priceOptionRefs = useRef<Map<string, Frame>>(new Map());
-
-    // Clear refs when item changes to prevent stale references
-    useEffect(() => {
-        priceOptionRefs.current.clear();
-    }, [item.id]);
-
-    const priceOptions = new Array<JSX.Element>();
-    const totalPriceOptions = price.amountPerCurrency.size() + item.requiredItems.size();
-
-    for (const [currency, amount] of price.amountPerCurrency) {
-        priceOptions.push(
-            <PriceOption
-                ref={(instance) => {
-                    if (instance) {
-                        priceOptionRefs.current.set(currency, instance);
-                    } else {
-                        priceOptionRefs.current.delete(currency);
-                    }
-                }}
-                currency={currency}
-                amount={amount}
-                affordable={affordablePerCurrency.get(currency) ?? false}
-            />,
-        );
-    }
-    for (const [requiredItem, amount] of item.requiredItems) {
-        priceOptions.push(
-            <PriceOption
-                ref={(instance) => {
-                    if (instance) {
-                        priceOptionRefs.current.set(requiredItem.id, instance);
-                    } else {
-                        priceOptionRefs.current.delete(requiredItem.id);
-                    }
-                }}
-                item={requiredItem}
-                amount={amount}
-                affordable={affordablePerItem.get(requiredItem) ?? false}
-                viewportManagement={viewportManagement}
-            />,
-        );
-    }
-
-    const [containerX, setContainerX] = useState(0);
-    useEffect(() => {
-        const button = purchaseButtonRef.current;
-        if (!button) return;
-        setContainerX(button.AbsoluteSize.X);
-        const connection = button.GetPropertyChangedSignal("AbsoluteSize").Connect(() => {
-            setContainerX(button.AbsoluteSize.X);
-        });
-        return () => connection.Disconnect();
-    }, [purchaseButtonRef.current]);
-
+    const containerSize = new UDim2(0.8, 0, 0, 0);
     const containerPadding = 5;
-    useEffect(() => {
-        const button = purchaseButtonRef.current;
-        if (!button) return;
-
-        // Account for the button's left and right padding
-        const availableWidth = containerX - containerPadding * 2;
-        const priceOptionsPerKey = priceOptionRefs.current;
-        const priceOptions = new Array<Frame>();
-
-        // Sort by currency first, then items
-        for (const [currency] of CurrencyBundle.SORTED_DETAILS) {
-            const instance = priceOptionsPerKey.get(currency);
-            if (instance) {
-                priceOptions.push(instance);
-            }
-        }
-        for (const requiredItem of Items.sortedItems) {
-            const instance = priceOptionsPerKey.get(requiredItem.id);
-            if (instance) {
-                priceOptions.push(instance);
-            }
-        }
-
-        // Early return if no price options are available yet
-        if (priceOptions.size() === 0) return;
-
-        // First pass: organize options into rows
-        const rows: Array<Array<{ wrapper: Frame; originalWidth: number; height: number }>> = [];
-        let currentRow: Array<{ wrapper: Frame; originalWidth: number; height: number }> = [];
-        let currentRowWidth = 0;
-
-        for (const instance of priceOptions) {
-            const size = instance.AbsoluteSize;
-            const sizeX = size.X;
-            const sizeY = size.Y;
-
-            // Skip instances that haven't been sized yet
-            if (sizeX === 0 || sizeY === 0) continue;
-
-            // Check if this option fits in the current row
-            const neededWidth = currentRowWidth + sizeX + (currentRow.size() > 0 ? containerPadding : 0);
-            const wrapper = instance.Parent as Frame;
-            if (neededWidth > availableWidth && currentRow.size()) {
-                // Start a new row
-                rows.push(currentRow);
-                currentRow = [{ wrapper, originalWidth: sizeX, height: sizeY }];
-                currentRowWidth = sizeX;
-            } else {
-                // Add to current row
-                currentRow.push({ wrapper, originalWidth: sizeX, height: sizeY });
-                currentRowWidth = neededWidth;
-            }
-        }
-        if (currentRow.size() > 0) {
-            rows.push(currentRow);
-        }
-
-        // Second pass: position options with distributed widths
-        let currentY = 0;
-        for (const row of rows) {
-            if (row.size() === 0) continue;
-
-            // Calculate total original width used by this row
-            const totalOriginalWidth = row.reduce((sum, item) => sum + item.originalWidth, 0);
-            const totalPadding = (row.size() - 1) * containerPadding;
-            const usedWidth = totalOriginalWidth + totalPadding;
-            const excessWidth = availableWidth - usedWidth;
-            const widthPerOption = excessWidth / row.size();
-
-            // Position and resize options in this row
-            let currentX = 0;
-            for (const { wrapper, originalWidth, height } of row) {
-                const newWidth = originalWidth + widthPerOption;
-                wrapper.Position = new UDim2(0, currentX, 0, currentY);
-                wrapper.Size = new UDim2(0, newWidth, 0, height);
-                currentX += newWidth + containerPadding;
-            }
-
-            currentY += row[0].height + containerPadding;
-        }
-    }, [item.requiredItems, price, containerX]);
+    const requiredItems = item.requiredItems;
 
     const totalAffordable = useMemo(() => {
         let totalAffordable = true;
@@ -553,7 +340,6 @@ export default function PurchaseWindow({
                 {/* Purchase container */}
                 {!price.amountPerCurrency.isEmpty() ? (
                     <textbutton
-                        ref={purchaseButtonRef}
                         AutomaticSize={Enum.AutomaticSize.Y}
                         BackgroundColor3={Color3.fromRGB(85, 255, 127)}
                         BackgroundTransparency={totalAffordable ? 0 : 0.5}
@@ -567,7 +353,7 @@ export default function PurchaseWindow({
                         TextTransparency={0.9}
                         TextXAlignment={Enum.TextXAlignment.Right}
                         TextYAlignment={Enum.TextYAlignment.Bottom}
-                        Size={new UDim2(0.8, 0, 0, 0)}
+                        Size={containerSize}
                         Event={{
                             MouseMoved: () => {
                                 if (totalAffordable) return;
@@ -596,7 +382,7 @@ export default function PurchaseWindow({
                                         .append("'>\n- ")
                                         .append(inventory.get(requiredItem.id) ?? 0)
                                         .append("/")
-                                        .append(item.requiredItems.get(requiredItem))
+                                        .append(requiredItems.get(requiredItem))
                                         .append(" ")
                                         .append(requiredItem.name)
                                         .append("</font>");
@@ -609,21 +395,20 @@ export default function PurchaseWindow({
                             Activated: purchase,
                         }}
                     >
-                        {priceOptions.map((option) => {
-                            return (
-                                <frame
-                                    AutomaticSize={Enum.AutomaticSize.X}
-                                    BackgroundColor3={new Color3()}
-                                    BackgroundTransparency={totalPriceOptions > 1 ? 0.8 : 1}
-                                    Size={new UDim2(0, 0, 0, 25)}
-                                >
-                                    <uicorner CornerRadius={new UDim(0, 5)} />
-                                    <uilistlayout HorizontalAlignment={Enum.HorizontalAlignment.Center} />
-                                    {option}
-                                </frame>
-                            );
-                        })}
-
+                        {
+                            <PriceOptions
+                                containerX={containerSize.X}
+                                price={price}
+                                requiredItems={requiredItems}
+                                viewportManagement={viewportManagement}
+                                affordablePerCurrency={affordablePerCurrency}
+                                affordablePerItem={affordablePerItem}
+                            />
+                        }
+                        <uilistlayout
+                            HorizontalAlignment={Enum.HorizontalAlignment.Center}
+                            VerticalAlignment={Enum.VerticalAlignment.Center}
+                        />
                         <uiflexitem FlexMode={Enum.UIFlexMode.None} />
                         <uipadding
                             PaddingBottom={new UDim(0, containerPadding)}
