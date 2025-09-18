@@ -5,7 +5,7 @@
  * Replaces the traditional Roblox Studio ItemSlot with React implementation.
  */
 
-import React, { Ref, useRef } from "@rbxts/react";
+import React, { forwardRef, Ref, useRef } from "@rbxts/react";
 import { ItemViewportManagement } from "client/ui/components/item/ItemViewport";
 import { useItemViewport } from "client/ui/components/item/useCIViewportManagement";
 import { useItemTooltip } from "client/ui/components/tooltip/TooltipManager";
@@ -16,36 +16,37 @@ import type Item from "shared/item/Item";
 /**
  * Individual inventory item slot component
  */
-export default function InventoryItemSlot({
-    item,
-    amount = 0,
-    layoutOrder,
-    visible,
-    onActivated,
-    ref,
-    size = new UDim2(0, 100, 0, 100),
-    tooltipEnabled = true,
-    viewportManagement,
-}: {
-    /** The item to display */
-    item: Item;
-    /** Number of items in inventory */
-    amount?: number;
-    /** Layout order for sorting */
-    layoutOrder: number;
-    /** Whether the slot is visible */
-    visible: boolean;
-    /** Callback when the item is clicked */
-    onActivated: () => void;
-    /** Reference for tooltip attachment */
-    ref?: Ref<TextButton>;
-    /** Size of the item slot */
-    size?: UDim2;
-    /** Whether tooltips are enabled */
-    tooltipEnabled?: boolean;
-    /** Shared viewport management instance */
-    viewportManagement?: ItemViewportManagement;
-}) {
+const InventoryItemSlot = forwardRef<
+    TextButton,
+    {
+        /** The item to display */
+        item: Item;
+        /** Number of items in inventory */
+        amount?: number;
+        /** Layout order for sorting */
+        layoutOrder: number;
+        /** Whether the slot is visible */
+        visible: boolean;
+        /** Callback when the item is clicked */
+        onActivated: () => void;
+        /** Size of the item slot */
+        size?: UDim2;
+        /** Whether tooltips are enabled */
+        tooltipEnabled?: boolean;
+        /** Shared viewport management instance */
+        viewportManagement?: ItemViewportManagement;
+    }
+>((props, ref) => {
+    const {
+        item,
+        amount = 0,
+        layoutOrder,
+        visible,
+        onActivated,
+        size = new UDim2(0, 100, 0, 100),
+        tooltipEnabled = true,
+        viewportManagement,
+    } = props;
     const viewportRef = useRef<ViewportFrame>();
     const textColor = amount > 0 ? Color3.fromRGB(255, 255, 255) : Color3.fromRGB(150, 150, 150);
     const backgroundColor = item.difficulty.color ?? Color3.fromRGB(52, 155, 255);
@@ -160,4 +161,6 @@ export default function InventoryItemSlot({
             />
         </textbutton>
     );
-}
+});
+
+export default InventoryItemSlot;

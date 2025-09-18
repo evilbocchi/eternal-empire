@@ -16,7 +16,10 @@ class StoryMocking {
             print(player.Name + " is buying item " + itemId);
             const inventory = Packets.inventory.get();
             inventory.set(itemId, (inventory.get(itemId) ?? 0) + 1);
+            const bought = Packets.bought.get();
+            bought.set(itemId, (bought.get(itemId) ?? 0) + 1);
             Packets.inventory.set(inventory);
+            Packets.bought.set(bought);
             return true;
         });
 

@@ -1,14 +1,21 @@
 import React, { StrictMode, useEffect } from "@rbxts/react";
 import ReactRoblox, { createRoot } from "@rbxts/react-roblox";
 import { StarterGui, Workspace } from "@rbxts/services";
-import { Choose, CreateReactStory } from "@rbxts/ui-labs";
+import { CreateReactStory, EnumList } from "@rbxts/ui-labs";
+import { ChooseOptionType } from "@rbxts/ui-labs/src/ControlTypings/Advanced";
 import PurchaseWindow from "client/ui/components/item/shop/PurchaseWindow";
 import ShopWindow from "client/ui/components/item/shop/ShopWindow";
+import StoryMocking from "client/ui/components/StoryMocking";
 import TooltipWindow from "client/ui/components/tooltip/TooltipWindow";
 import Items from "shared/items/Items";
 import ClassLowerNegativeShop from "shared/items/negative/ClassLowerNegativeShop";
 
-const shops = Items.sortedItems.filter((item) => item.findTrait("Shop") !== undefined);
+const shops: Record<string, ChooseOptionType> = {};
+for (const item of Items.sortedItems) {
+    if (item.findTrait("Shop") !== undefined) {
+        shops[item.name] = item.id;
+    }
+}
 
 export = CreateReactStory(
     {
@@ -16,19 +23,14 @@ export = CreateReactStory(
         reactRoblox: ReactRoblox,
         controls: {
             onSurface: false,
-            shop: Choose(
-                shops.map((item) => item.id),
-                shops.findIndex((item) => item.id === ClassLowerNegativeShop.id),
-            ),
+            shop: EnumList(shops, ClassLowerNegativeShop.name),
         },
     },
     (props) => {
-        const handleBuyAll = () => {
-            print("Buy all items!");
-        };
+        StoryMocking.mockData();
 
-        const item = Items.getItem(props.controls.shop) ?? ClassLowerNegativeShop;
-        const shopWindow = <ShopWindow shop={item.findTrait("Shop")!} onBuyAll={handleBuyAll} />;
+        const item = Items.getItem(props.controls.shop as string) ?? ClassLowerNegativeShop;
+        const shopWindow = <ShopWindow shop={item.findTrait("Shop")!} />;
 
         useEffect(() => {
             if (!props.controls.onSurface) return;

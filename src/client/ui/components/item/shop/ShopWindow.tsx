@@ -13,24 +13,10 @@ import Item from "shared/item/Item";
 import Shop from "shared/item/traits/Shop";
 import Packets from "shared/Packets";
 
-interface ShopItem {
-    item: Item;
-    amountText: string;
-    amountColor: Color3;
-    isMaxed: boolean;
-    layoutOrder: number;
-}
-
-interface ShopWindowProps {
-    shop: Shop;
-    /** Callback when buy all button is pressed */
-    onBuyAll: () => void;
-}
-
 /**
  * Main shop window component with integrated filtering
  */
-export default function ShopWindow({ shop, onBuyAll }: ShopWindowProps) {
+export default function ShopWindow({ shop }: { shop: Shop }) {
     const { searchQuery, traitFilters, props: filterProps } = useBasicInventoryFilter();
     const viewportManagement = loadItemViewportManagement();
     const ownedPerItem = useProperty(Packets.bought);
@@ -47,8 +33,12 @@ export default function ShopWindow({ shop, onBuyAll }: ShopWindowProps) {
 
     const handleBuyAllClick = useCallback(() => {
         playSound("MenuClick.mp3");
-        onBuyAll();
-    }, [onBuyAll]);
+        if (Packets.buyAllItems.toServer(shop.items.map((item) => item.id))) {
+            playSound("ItemPurchase.mp3");
+        } else {
+            playSound("Error.mp3");
+        }
+    }, []);
 
     return (
         <Fragment>
