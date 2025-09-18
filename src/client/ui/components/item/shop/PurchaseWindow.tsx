@@ -36,8 +36,10 @@ const PriceOption = forwardRef<
         affordable: boolean;
         /** Shared viewport management instance */
         viewportManagement?: ItemViewportManagement;
+        /** Total number of price options */
+        totalOptions: number;
     }
->(({ currency, item, amount, affordable, viewportManagement }, ref) => {
+>(({ currency, item, amount, affordable, viewportManagement, totalOptions }, ref) => {
     const viewportRef = useRef<ViewportFrame>();
     const textColor = affordable ? Color3.fromRGB(255, 255, 255) : Color3.fromRGB(255, 80, 80);
 
@@ -51,7 +53,7 @@ const PriceOption = forwardRef<
             ref={ref}
             AutomaticSize={Enum.AutomaticSize.X}
             BackgroundColor3={new Color3()}
-            BackgroundTransparency={0.8}
+            BackgroundTransparency={totalOptions > 1 ? 0.8 : 1}
             Size={new UDim2(0, 0, 0, 25)}
         >
             <uilistlayout
@@ -206,6 +208,8 @@ export default function PurchaseWindow({
     }, [item.id]);
 
     const priceOptions = new Array<JSX.Element>();
+    const totalPriceOptions = price.amountPerCurrency.size() + item.requiredItems.size();
+
     for (const [currency, amount] of price.amountPerCurrency) {
         priceOptions.push(
             <PriceOption
@@ -219,6 +223,7 @@ export default function PurchaseWindow({
                 currency={currency}
                 amount={amount}
                 affordable={affordablePerCurrency.get(currency) ?? false}
+                totalOptions={totalPriceOptions}
             />,
         );
     }
@@ -236,6 +241,7 @@ export default function PurchaseWindow({
                 amount={amount}
                 affordable={affordablePerItem.get(requiredItem) ?? false}
                 viewportManagement={viewportManagement}
+                totalOptions={totalPriceOptions}
             />,
         );
     }
@@ -538,7 +544,7 @@ export default function PurchaseWindow({
                 </frame>
 
                 {/* Purchase container */}
-                {!price.amountPerCurrency.isEmpty() && (
+                {!price.amountPerCurrency.isEmpty() ? (
                     <frame AutomaticSize={Enum.AutomaticSize.Y} BackgroundTransparency={1} Size={new UDim2(1, 0, 0, 0)}>
                         <uilistlayout
                             FillDirection={Enum.FillDirection.Vertical}
@@ -570,7 +576,7 @@ export default function PurchaseWindow({
                                     if (totalAffordable) return;
                                     const balance = Packets.balance.get();
                                     const inventory = Packets.inventory.get();
-                                    const builder = new StringBuilder("Missing requirements:");
+                                    const builder = new StringBuilder("Missing:");
                                     for (const [currency] of CurrencyBundle.SORTED_DETAILS) {
                                         if (affordablePerCurrency.get(currency) ?? true) continue;
                                         builder
@@ -632,6 +638,71 @@ export default function PurchaseWindow({
                                 Rotation={270}
                             />
                         </textbutton>
+                    </frame>
+                ) : (
+                    <frame AutomaticSize={Enum.AutomaticSize.Y} BackgroundTransparency={1} Size={new UDim2(1, 0, 0, 0)}>
+                        <uilistlayout
+                            FillDirection={Enum.FillDirection.Vertical}
+                            HorizontalAlignment={Enum.HorizontalAlignment.Center}
+                            Padding={new UDim(0, 10)}
+                            VerticalAlignment={Enum.VerticalAlignment.Center}
+                        />
+                        <uipadding PaddingBottom={new UDim(0, 5)} PaddingTop={new UDim(0, 5)} />
+
+                        {/* Not purchasable disclaimer */}
+                        <frame
+                            AutomaticSize={Enum.AutomaticSize.Y}
+                            BackgroundColor3={Color3.fromRGB(255, 80, 80)}
+                            BackgroundTransparency={0.2}
+                            BorderColor3={Color3.fromRGB(180, 0, 0)}
+                            BorderSizePixel={2}
+                            Size={new UDim2(0.8, 0, 0, 0)}
+                        >
+                            <uipadding
+                                PaddingBottom={new UDim(0, 10)}
+                                PaddingTop={new UDim(0, 10)}
+                                PaddingLeft={new UDim(0, 15)}
+                                PaddingRight={new UDim(0, 15)}
+                            />
+                            <uistroke
+                                ApplyStrokeMode={Enum.ApplyStrokeMode.Border}
+                                Color={Color3.fromRGB(255, 120, 120)}
+                                Thickness={1}
+                            />
+
+                            <textlabel
+                                AutomaticSize={Enum.AutomaticSize.Y}
+                                BackgroundTransparency={1}
+                                FontFace={RobotoSlabHeavy}
+                                Size={new UDim2(1, 0, 0, 0)}
+                                Text="NOT PURCHASABLE"
+                                TextColor3={Color3.fromRGB(255, 255, 255)}
+                                TextScaled={false}
+                                TextSize={20}
+                                TextWrapped={true}
+                                TextXAlignment={Enum.TextXAlignment.Center}
+                                TextYAlignment={Enum.TextYAlignment.Center}
+                            >
+                                <uistroke Color={Color3.fromRGB(150, 0, 0)} Thickness={2} />
+                            </textlabel>
+
+                            <textlabel
+                                AutomaticSize={Enum.AutomaticSize.Y}
+                                BackgroundTransparency={1}
+                                FontFace={RobotoSlab}
+                                Position={new UDim2(0, 0, 0, 20)}
+                                Size={new UDim2(1, 0, 0, 0)}
+                                Text="This item cannot be purchased anymore."
+                                TextColor3={Color3.fromRGB(255, 220, 220)}
+                                TextScaled={false}
+                                TextSize={16}
+                                TextWrapped={true}
+                                TextXAlignment={Enum.TextXAlignment.Center}
+                                TextYAlignment={Enum.TextYAlignment.Top}
+                            >
+                                <uistroke Color={Color3.fromRGB(100, 0, 0)} Thickness={1} />
+                            </textlabel>
+                        </frame>
                     </frame>
                 )}
             </scrollingframe>

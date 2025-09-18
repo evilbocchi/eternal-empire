@@ -12,6 +12,14 @@ class StoryMocking {
     static mockData() {
         const mockPlayerData = table.clone(PlayerProfileTemplate);
 
+        Packets.buyItem.fromClient((player, itemId) => {
+            print(player.Name + " is buying item " + itemId);
+            const inventory = Packets.inventory.get();
+            inventory.set(itemId, (inventory.get(itemId) ?? 0) + 1);
+            Packets.inventory.set(inventory);
+            return true;
+        });
+
         useEffect(() => {
             const setSetting = Packets.setSetting.fromClient((player, setting, value) => {
                 (mockPlayerData.settings as { [key: string]: unknown })[setting] = value;
