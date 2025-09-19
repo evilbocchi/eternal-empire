@@ -15,11 +15,13 @@ function ShopPriceOption({
     currency,
     item,
     amount,
+    active,
     viewportManagement,
 }: {
     currency?: Currency;
     item?: Item;
-    amount: OnoeNum | number;
+    amount?: OnoeNum | number;
+    active?: boolean;
     viewportManagement?: ItemViewportManagement;
 }) {
     // Always call hooks unconditionally
@@ -45,7 +47,7 @@ function ShopPriceOption({
 
     // Tween color when currency or item changes
     useEffect(() => {
-        if (!textLabelRef.current) return;
+        if (!textLabelRef.current || !active) return;
 
         // Cancel any existing tween
         if (currentTweenRef.current) {
@@ -66,7 +68,7 @@ function ShopPriceOption({
                 currentTweenRef.current = undefined;
             }
         };
-    }, [currency, item]);
+    }, [currency, item, active]);
 
     return (
         <frame AutomaticSize={Enum.AutomaticSize.X} BackgroundTransparency={1} Size={new UDim2(1, 0, 0, 28)}>
@@ -93,7 +95,7 @@ function ShopPriceOption({
                     />
                 )
             )}
-            {currency !== undefined || item !== undefined ? (
+            {(currency !== undefined || item !== undefined) && amount !== undefined ? (
                 <textlabel
                     ref={textLabelRef}
                     AutomaticSize={Enum.AutomaticSize.X}
@@ -244,13 +246,24 @@ export default function ShopItemSlot({
                 }}
             >
                 {/* Viewport frame for 3D item display */}
-                <viewportframe
-                    ref={viewportRef}
-                    AnchorPoint={new Vector2(0.5, 0.5)}
-                    BackgroundTransparency={1}
-                    Position={new UDim2(0.5, 0, 0.5, 0)}
-                    Size={new UDim2(1, 0, 1, 0)}
-                />
+                {item.image !== undefined ? (
+                    <imagelabel
+                        AnchorPoint={new Vector2(0.5, 0.5)}
+                        BackgroundTransparency={1}
+                        Image={item.image}
+                        Position={new UDim2(0.5, 0, 0.5, 0)}
+                        Size={new UDim2(0.7, 0, 0.7, 0)}
+                        SizeConstraint={Enum.SizeConstraint.RelativeYY}
+                    />
+                ) : (
+                    <viewportframe
+                        ref={viewportRef}
+                        AnchorPoint={new Vector2(0.5, 0.5)}
+                        BackgroundTransparency={1}
+                        Position={new UDim2(0.5, 0, 0.5, 0)}
+                        Size={new UDim2(1, 0, 1, 0)}
+                    />
+                )}
                 <uipadding
                     PaddingBottom={new UDim(0, 4)}
                     PaddingTop={new UDim(0, 4)}
@@ -282,14 +295,13 @@ export default function ShopItemSlot({
                 Position={new UDim2(0, 0, 1, 0)}
                 Size={new UDim2(1, 0, 0, 30)}
             >
-                {amount !== undefined && (
-                    <ShopPriceOption
-                        currency={currency}
-                        item={reqItem}
-                        amount={amount}
-                        viewportManagement={viewportManagement}
-                    />
-                )}
+                <ShopPriceOption
+                    active={visible}
+                    currency={currency}
+                    item={reqItem}
+                    amount={amount}
+                    viewportManagement={viewportManagement}
+                />
                 <ShopItemSlotStyling gridTransparency={0.9} />
             </frame>
         </frame>

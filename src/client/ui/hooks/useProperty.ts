@@ -1,4 +1,4 @@
-import { PropertyPacket } from "@antivivi/fletchette";
+import { PropertyPacket } from "@rbxts/fletchette";
 import { useEffect, useState } from "@rbxts/react";
 
 /**

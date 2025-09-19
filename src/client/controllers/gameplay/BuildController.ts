@@ -16,6 +16,7 @@ import { Controller, OnInit, OnStart } from "@flamework/core";
 import { Debris, HttpService, ReplicatedStorage, TweenService, UserInputService, Workspace } from "@rbxts/services";
 import { LOCAL_PLAYER, MOUSE, NONCOLLISION_COLOR } from "client/constants";
 import { SHOP_GUI } from "client/controllers/core/Guis";
+import DocumentManager from "client/ui/components/window/WindowManager";
 import { getSound, playSound } from "shared/asset/GameAssets";
 import { PLACED_ITEMS_FOLDER } from "shared/constants";
 import Item from "shared/item/Item";
@@ -135,9 +136,11 @@ export default class BuildController implements OnInit, OnStart {
             this.mainSelected = undefined;
             this.setGridTransparency(1);
             Workspace.SetAttribute("BuildMode", false);
+            DocumentManager.setVisible("Build", false);
         } else {
             this.setGridTransparency(0.8);
             Workspace.SetAttribute("BuildMode", true);
+            DocumentManager.setVisible("Build", true);
         }
 
         // Notify React components of state change

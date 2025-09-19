@@ -3,6 +3,7 @@ import ReactRoblox from "@rbxts/react-roblox";
 import { CreateReactStory } from "@rbxts/ui-labs";
 import PositionManager from "client/ui/components/position/PositionManager";
 import TooltipWindow from "client/ui/components/tooltip/TooltipWindow";
+import useVisibility from "client/ui/hooks/useVisibility";
 
 export = CreateReactStory(
     {
@@ -13,6 +14,8 @@ export = CreateReactStory(
         },
     },
     (props) => {
+        useVisibility("Position", props.controls.visible);
+
         return (
             <StrictMode>
                 <PositionManager {...props.controls} />

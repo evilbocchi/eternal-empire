@@ -11,7 +11,6 @@ import InventoryEmptyState from "client/ui/components/item/inventory/InventoryEm
 import InventoryFilter, {
     filterItems,
     ItemFilterData,
-    SEARCHABLE_ITEMS,
     useBasicInventoryFilter,
 } from "client/ui/components/item/inventory/InventoryFilter";
 import InventoryItemSlot from "client/ui/components/item/inventory/InventoryItemSlot";
@@ -21,6 +20,7 @@ import { RobotoMono } from "client/ui/GameFonts";
 import useProperty from "client/ui/hooks/useProperty";
 import { getAsset } from "shared/asset/AssetMap";
 import type Item from "shared/item/Item";
+import Items from "shared/items/Items";
 import Packets from "shared/Packets";
 
 const MemoizedInventoryItemSlot = memo(InventoryItemSlot);
@@ -53,6 +53,8 @@ export function getBestUniqueInstances(uniqueInstances: Map<string, UniqueItemIn
     }
     return bestUuidPerItem;
 }
+
+const NON_GEAR_ITEMS = Items.sortedItems.filter((item) => !item.findTrait("Gear"));
 
 /**
  * Main inventory window component following the QuestWindow pattern
@@ -101,13 +103,6 @@ export default function InventoryWindow({
 
     const dataPerItem = useMemo(() => {
         const startTime = tick();
-        const dataPerItem: Map<
-            string,
-            ItemFilterData & {
-                amount?: number;
-                uuid?: string;
-            }
-        > = filterItems(searchQuery, filterProps.traitFilters);
 
         const amountsPerItem = new Map<string, number>();
         for (const [itemId, amount] of inventory) {
@@ -117,6 +112,15 @@ export default function InventoryWindow({
             const itemId = uniqueInstance.baseItemId;
             amountsPerItem.set(itemId, (amountsPerItem.get(itemId) ?? 0) + 1);
         }
+
+        const dataPerItem: Map<
+            string,
+            ItemFilterData & {
+                amount?: number;
+                uuid?: string;
+            }
+        > = filterItems(NON_GEAR_ITEMS, searchQuery, filterProps.traitFilters);
+
         const bestInstancePerItem = getBestUniqueInstances(uniqueInstances);
         for (const [id, data] of dataPerItem) {
             const amount = amountsPerItem.get(id) ?? 0;
@@ -211,7 +215,7 @@ export default function InventoryWindow({
                     </uigridlayout>
 
                     {/* Render inventory items TODO Decouple from React render loop for max performance */}
-                    {SEARCHABLE_ITEMS.map((item) => {
+                    {NON_GEAR_ITEMS.map((item) => {
                         const data = dataPerItem.get(item.id);
 
                         return (

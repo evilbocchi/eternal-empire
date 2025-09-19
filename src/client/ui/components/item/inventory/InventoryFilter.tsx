@@ -6,8 +6,6 @@ import Item from "shared/item/Item";
 import Items from "shared/items/Items";
 import { useMessageTooltip } from "../../tooltip/TooltipManager";
 
-export const SEARCHABLE_ITEMS = Items.sortedItems.filter((item) => !item.isA("Gear"));
-
 interface TraitFilterOption {
     id: TraitFilterId;
     image: string;
@@ -84,13 +82,13 @@ export type ItemFilterData = {
  * @param traitFilters The selected trait filters.
  * @returns A map of item IDs to their layout order and visibility.
  */
-export function filterItems(searchQuery: string, traitFilters: Set<TraitFilterId>) {
+export function filterItems(items: Item[], searchQuery: string, traitFilters: Set<TraitFilterId>) {
     const processedItems = new Set<string>();
     const dataPerItem = new Map<string, ItemFilterData>();
 
     if (searchQuery !== "") {
         const terms = new Array<string>();
-        for (const item of SEARCHABLE_ITEMS) {
+        for (const item of items) {
             if (!isWhitelisted(item, traitFilters)) continue;
             terms.push(item.name);
         }
@@ -105,7 +103,7 @@ export function filterItems(searchQuery: string, traitFilters: Set<TraitFilterId
             });
         }
     } else {
-        for (const item of SEARCHABLE_ITEMS) {
+        for (const item of items) {
             if (!isWhitelisted(item, traitFilters)) continue;
             dataPerItem.set(item.id, {
                 layoutOrder: item.layoutOrder,

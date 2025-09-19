@@ -141,14 +141,25 @@ const InventoryItemSlot = forwardRef<
             </imagelabel>
 
             {/* Viewport frame for 3D model */}
-            <viewportframe
-                ref={viewportRef}
-                AnchorPoint={new Vector2(0.5, 0.5)}
-                BackgroundTransparency={1}
-                Position={new UDim2(0.5, 0, 0.5, 0)}
-                Size={new UDim2(0.8, 0, 0.8, 0)}
-                ZIndex={0}
-            />
+            {item.image !== undefined ? (
+                <imagelabel
+                    AnchorPoint={new Vector2(0.5, 0.5)}
+                    BackgroundTransparency={1}
+                    Image={item.image}
+                    Position={new UDim2(0.5, 0, 0.5, 0)}
+                    Size={new UDim2(0.8, 0, 0.8, 0)}
+                    ZIndex={0}
+                />
+            ) : (
+                <viewportframe
+                    ref={viewportRef}
+                    AnchorPoint={new Vector2(0.5, 0.5)}
+                    BackgroundTransparency={1}
+                    Position={new UDim2(0.5, 0, 0.5, 0)}
+                    Size={new UDim2(0.8, 0, 0.8, 0)}
+                    ZIndex={0}
+                />
+            )}
 
             {/* Background overlay image */}
             <imagelabel

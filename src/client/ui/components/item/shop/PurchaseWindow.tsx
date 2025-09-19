@@ -1,5 +1,4 @@
 import Signal from "@antivivi/lemon-signal";
-import * as fe from "@antivivi/fletchette/out/Environment";
 import { OnoeNum } from "@antivivi/serikanum";
 import React, { Fragment, useEffect, useMemo, useRef, useState } from "@rbxts/react";
 import { Debris, GuiService, TweenService } from "@rbxts/services";
@@ -126,21 +125,33 @@ export default function PurchaseWindow({ viewportManagement }: { viewportManagem
 
             // Item flying into item slot animation
             const mousePosition = Environment.UserInput.GetMouseLocation();
-            const viewportFrame = new Instance("ViewportFrame");
-            viewportFrame.AnchorPoint = new Vector2(0.5, 0.5);
-            viewportFrame.BackgroundTransparency = 1;
-            viewportFrame.Size = new UDim2(0, 60, 0, 60);
-            viewportFrame.Position = new UDim2(0, mousePosition.X, 0, mousePosition.Y);
-            loadItemIntoViewport(PARALLEL, viewportFrame, item.id, viewportManagement);
+            let frame: GuiObject;
+            if (item.image) {
+                const imageLabel = new Instance("ImageLabel");
+                imageLabel.AnchorPoint = new Vector2(0.5, 0.5);
+                imageLabel.BackgroundTransparency = 1;
+                imageLabel.Image = item.image;
+                imageLabel.Size = new UDim2(0, 60, 0, 60);
+                frame = imageLabel;
+            } else {
+                const viewportFrame = new Instance("ViewportFrame");
+                viewportFrame.AnchorPoint = new Vector2(0.5, 0.5);
+                viewportFrame.BackgroundTransparency = 1;
+                viewportFrame.Size = new UDim2(0, 60, 0, 60);
+                loadItemIntoViewport(PARALLEL, viewportFrame, item.id, viewportManagement);
+                frame = viewportFrame;
+            }
+            frame.Position = new UDim2(0, mousePosition.X, 0, mousePosition.Y);
+
             const destination = itemSlot.AbsolutePosition.add(itemSlot.AbsoluteSize.div(2)).add(
                 GuiService.GetGuiInset()[0],
             );
-            TweenService.Create(viewportFrame, new TweenInfo(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
+            TweenService.Create(frame, new TweenInfo(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
                 Position: new UDim2(0, destination.X, 0, destination.Y),
                 Size: new UDim2(0, 0, 0, 0),
             }).Play();
-            viewportFrame.Parent = windowWrapperRef.current;
-            Debris.AddItem(viewportFrame, 0.5);
+            frame.Parent = windowWrapperRef.current;
+            Debris.AddItem(frame, 0.5);
 
             // Padding animation
             const padding = paddingRef.current;

@@ -65,7 +65,7 @@ export default function ShopWindow({
     }, [shopOverride]);
 
     const dataPerItem = useMemo(() => {
-        return filterItems(searchQuery, filterProps.traitFilters);
+        return filterItems(shopItems, searchQuery, filterProps.traitFilters);
     }, [shopItems, searchQuery, filterProps.traitFilters]);
 
     const handleItemClick = useCallback((item: Item) => {
