@@ -1,11 +1,12 @@
 import { Controller, OnStart } from "@flamework/core";
 import React, { Fragment } from "@rbxts/react";
-import ReactRoblox, { createRoot } from "@rbxts/react-roblox";
+import { createRoot } from "@rbxts/react-roblox";
 import {
     BACKPACK_GUI,
     BALANCE_GUI,
     BUILD_GUI,
     CLICK_SPARKS_GUI,
+    HAMSTER_GUI,
     INVENTORY_GUI,
     LOGS_GUI,
     MAIN_LAYOUT_GUI,
@@ -17,7 +18,6 @@ import {
     TOOLTIPS_GUI,
 } from "client/controllers/core/Guis";
 import BuildController from "client/controllers/gameplay/BuildController";
-import ToolController from "client/controllers/gameplay/ToolController";
 import InventoryController from "client/controllers/interface/InventoryController";
 import MainLayout from "client/ui/components/MainLayout";
 import BackpackWindow from "client/ui/components/backpack/BackpackWindow";
@@ -30,11 +30,19 @@ import PurchaseWindow from "client/ui/components/item/shop/PurchaseWindow";
 import ShopWindow from "client/ui/components/item/shop/ShopWindow";
 import LogsWindow from "client/ui/components/logs/LogsWindow";
 import QuestWindow from "client/ui/components/quest/QuestWindow";
+import TrackedQuestWindow from "client/ui/components/quest/TrackedQuestWindow";
 import RenameWindow from "client/ui/components/rename/RenameWindow";
 import CopyWindow from "client/ui/components/settings/CopyWindow";
 import SettingsManager from "client/ui/components/settings/SettingsManager";
 import StatsWindow from "client/ui/components/stats/StatsWindow";
 import TooltipWindow from "client/ui/components/tooltip/TooltipWindow";
+import { useVisibilityMain } from "client/ui/hooks/useVisibility";
+
+export function Hamster() {
+    useVisibilityMain(true);
+
+    return <Fragment />;
+}
 
 @Controller()
 export default class AppController implements OnStart {
@@ -59,10 +67,18 @@ export default class AppController implements OnStart {
         );
         createRoot(INVENTORY_GUI).render(<InventoryWindow inventoryController={this.inventoryController} />);
         createRoot(LOGS_GUI).render(<LogsWindow />);
-        createRoot(QUESTS_GUI).render(<QuestWindow />);
+        createRoot(QUESTS_GUI).render(
+            <Fragment>
+                <QuestWindow />
+                <TrackedQuestWindow />
+            </Fragment>,
+        );
         createRoot(BACKPACK_GUI).render(<BackpackWindow />);
         createRoot(STATS_GUI).render(<StatsWindow />);
         createRoot(PURCHASE_GUI).render(<PurchaseWindow />);
         createRoot(SHOP_GUI).render(<ShopWindow />);
+
+        task.wait(1);
+        createRoot(HAMSTER_GUI).render(<Hamster />);
     }
 }

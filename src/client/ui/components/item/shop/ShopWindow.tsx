@@ -33,13 +33,13 @@ export class ShopManager {
  * Main shop window component with integrated filtering
  */
 export default function ShopWindow({
-    defaultShop,
+    shop: shopOverride,
     viewportManagement,
 }: {
-    defaultShop?: Shop;
+    shop?: Shop;
     viewportManagement?: ItemViewportManagement;
 }) {
-    const [shop, setShop] = useState<Shop | undefined>(defaultShop);
+    const [shop, setShop] = useState<Shop | undefined>(shopOverride);
     const { searchQuery, props: filterProps } = useBasicInventoryFilter();
     const [hideMaxedItems, setHideMaxedItems] = useState(Packets.settings.get().HideMaxedItems);
     const ownedPerItem = useProperty(Packets.bought);
@@ -58,6 +58,11 @@ export default function ShopWindow({
             openedConnection.disconnect();
         };
     }, []);
+
+    useEffect(() => {
+        if (!shopOverride) return;
+        setShop(shopOverride);
+    }, [shopOverride]);
 
     const dataPerItem = useMemo(() => {
         return filterItems(searchQuery, filterProps.traitFilters);

@@ -34,7 +34,7 @@ export = CreateReactStory(
 
         const item = Items.getItem(props.controls.shop as string) ?? ClassLowerNegativeShop;
         const viewportManagement = useCIViewportManagement({ enabled: true });
-        const shopWindow = <ShopWindow defaultShop={item.findTrait("Shop")!} viewportManagement={viewportManagement} />;
+        const shopWindow = <ShopWindow shop={item.findTrait("Shop")!} viewportManagement={viewportManagement} />;
 
         useEffect(() => {
             if (!props.controls.onSurface) {

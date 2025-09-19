@@ -1,7 +1,8 @@
 import Signal from "@antivivi/lemon-signal";
+import * as fe from "@antivivi/fletchette/out/Environment";
 import { OnoeNum } from "@antivivi/serikanum";
-import React, { Fragment, useCallback, useEffect, useMemo, useRef, useState } from "@rbxts/react";
-import { Debris, TweenService } from "@rbxts/services";
+import React, { Fragment, useEffect, useMemo, useRef, useState } from "@rbxts/react";
+import { Debris, GuiService, TweenService } from "@rbxts/services";
 import StringBuilder from "@rbxts/stringbuilder";
 import { Environment } from "@rbxts/ui-labs";
 import { PARALLEL } from "client/constants";
@@ -116,12 +117,10 @@ export default function PurchaseWindow({ viewportManagement }: { viewportManagem
     }, [item, price]);
 
     const itemSlot = itemSlotRef.current;
-    const purchase = useCallback(() => {
+    const purchase = () => {
         if (!visible) return false;
 
-        const success = Packets.buyItem.toServer(item.id);
-        print(success);
-        if (success) {
+        if (Packets.buyItem.toServer(item.id)) {
             playSound("ItemPurchase.mp3");
             if (!itemSlot) return true;
 
@@ -133,7 +132,9 @@ export default function PurchaseWindow({ viewportManagement }: { viewportManagem
             viewportFrame.Size = new UDim2(0, 60, 0, 60);
             viewportFrame.Position = new UDim2(0, mousePosition.X, 0, mousePosition.Y);
             loadItemIntoViewport(PARALLEL, viewportFrame, item.id, viewportManagement);
-            const destination = itemSlot.AbsolutePosition.add(itemSlot.AbsoluteSize.div(2));
+            const destination = itemSlot.AbsolutePosition.add(itemSlot.AbsoluteSize.div(2)).add(
+                GuiService.GetGuiInset()[0],
+            );
             TweenService.Create(viewportFrame, new TweenInfo(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
                 Position: new UDim2(0, destination.X, 0, destination.Y),
                 Size: new UDim2(0, 0, 0, 0),
@@ -158,7 +159,7 @@ export default function PurchaseWindow({ viewportManagement }: { viewportManagem
             playSound("Error.mp3");
         }
         return true;
-    }, [visible, item, itemSlot, viewportManagement]);
+    };
     useHotkey({
         action: purchase,
         label: "Purchase",

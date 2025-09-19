@@ -66,6 +66,7 @@ export const assets = {
   "assets/PickaxeHandle.png": "rbxassetid://93981281917616",
   "assets/PickaxeHead.png": "rbxassetid://125711239885483",
   "assets/Plus.png": "rbxassetid://72350165627616",
+  "assets/PortableBeacon.png": "rbxassetid://121884677112125",
   "assets/Power.png": "rbxassetid://115804207553521",
   "assets/PowerOfTheObbyI.png": "rbxassetid://110850919543477",
   "assets/PrinterNameEdit.png": "rbxassetid://115839926922231",

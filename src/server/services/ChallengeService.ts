@@ -363,29 +363,30 @@ export class ChallengeService implements OnStart {
         if (gui === undefined) {
             throw "No challenge gui found";
         }
-        const challengeOptions = gui.ChallengeOptions;
-        challengeOptions.GetChildren().forEach((instance) => {
-            if (instance.IsA("Frame")) instance.Destroy();
-        });
-        for (const [key, challenge] of pairs(CHALLENGES)) {
-            const currentLevel = this.getChallengeLevel(key);
-            if (currentLevel > challenge.cap) continue;
-            const challengeOption = ASSETS.ChallengeOption.Clone();
-            challengeOption.TitleLabel.Text = this.getTitleLabel(challenge, key, currentLevel);
-            challengeOption.TitleLabel.UIGradient.Color = challenge.color;
-            challengeOption.Description.DescriptionLabel.Text = challenge.description(currentLevel);
-            challengeOption.Description.NoticeLabel.Text = this.getNotice(challenge);
-            challengeOption.Description.RequirementLabel.Text = "Requirement: " + this.getRequirementLabel(challenge);
-            challengeOption.RewardLabel.Text = "Boost: " + this.getRewardLabel(challenge, currentLevel);
-            challengeOption.LayoutOrder = challenge.order ?? -i;
-            challengeOption.Name = key;
-            challengeOption.Parent = challengeOptions;
-            if (currentLevel > 1) {
-                const upgradeId = REWARD_UPGRADES.get(key);
-                if (upgradeId !== undefined) this.namedUpgradeService.setUpgradeAmount(upgradeId, currentLevel - 1);
-            }
-            ++i;
-        }
+        // TODO
+        // const challengeOptions = gui.ChallengeOptions;
+        // challengeOptions.GetChildren().forEach((instance) => {
+        //     if (instance.IsA("Frame")) instance.Destroy();
+        // });
+        // for (const [key, challenge] of pairs(CHALLENGES)) {
+        //     const currentLevel = this.getChallengeLevel(key);
+        //     if (currentLevel > challenge.cap) continue;
+        //     const challengeOption = ASSETS.ChallengeOption.Clone();
+        //     challengeOption.TitleLabel.Text = this.getTitleLabel(challenge, key, currentLevel);
+        //     challengeOption.TitleLabel.UIGradient.Color = challenge.color;
+        //     challengeOption.Description.DescriptionLabel.Text = challenge.description(currentLevel);
+        //     challengeOption.Description.NoticeLabel.Text = this.getNotice(challenge);
+        //     challengeOption.Description.RequirementLabel.Text = "Requirement: " + this.getRequirementLabel(challenge);
+        //     challengeOption.RewardLabel.Text = "Boost: " + this.getRewardLabel(challenge, currentLevel);
+        //     challengeOption.LayoutOrder = challenge.order ?? -i;
+        //     challengeOption.Name = key;
+        //     challengeOption.Parent = challengeOptions;
+        //     if (currentLevel > 1) {
+        //         const upgradeId = REWARD_UPGRADES.get(key);
+        //         if (upgradeId !== undefined) this.namedUpgradeService.setUpgradeAmount(upgradeId, currentLevel - 1);
+        //     }
+        //     ++i;
+        // }
         this.refreshCurrentChallenge();
     }
 

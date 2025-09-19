@@ -15,13 +15,11 @@ import InventoryFilter, {
     useBasicInventoryFilter,
 } from "client/ui/components/item/inventory/InventoryFilter";
 import InventoryItemSlot from "client/ui/components/item/inventory/InventoryItemSlot";
-import useCIViewportManagement from "client/ui/components/item/useCIViewportManagement";
 import useSingleDocument from "client/ui/components/sidebar/useSingleDocumentWindow";
 import BasicWindow from "client/ui/components/window/BasicWindow";
 import { RobotoMono } from "client/ui/GameFonts";
 import useProperty from "client/ui/hooks/useProperty";
 import { getAsset } from "shared/asset/AssetMap";
-import { playSound } from "shared/asset/GameAssets";
 import type Item from "shared/item/Item";
 import Packets from "shared/Packets";
 
@@ -61,16 +59,15 @@ export function getBestUniqueInstances(uniqueInstances: Map<string, UniqueItemIn
  */
 export default function InventoryWindow({
     inventoryController,
-    viewportsEnabled,
+    viewportManagement,
 }: {
     inventoryController?: InventoryController;
-    viewportsEnabled?: boolean;
+    viewportManagement?: ItemViewportManagement;
 }) {
     const { id, visible, closeDocument } = useSingleDocument({ id: "Inventory" });
     const { searchQuery, props: filterProps } = useBasicInventoryFilter();
     const [queryTime, setQueryTime] = useState(0);
     const [cellSize, setCellSize] = useState(new UDim2(0, 65, 0, 65));
-    const viewportManagement = useCIViewportManagement({ enabled: viewportsEnabled });
 
     // Observe inventory data from packets
     const inventory = useProperty(Packets.inventory);

@@ -64,8 +64,8 @@ export default class MarketplaceService implements OnInit, OnStart {
             return this.cancelListing(player, uuid);
         });
 
-        Packets.buyItem.fromClient((player, uuid) => {
-            return this.buyItem(player, uuid);
+        Packets.buyListing.fromClient((player, uuid) => {
+            return this.buyListing(player, uuid);
         });
 
         Packets.placeBid.fromClient((player, uuid, bidAmount) => {
@@ -241,7 +241,7 @@ export default class MarketplaceService implements OnInit, OnStart {
     /**
      * Processes a buyout purchase.
      */
-    buyItem(player: Player, uuid: string): boolean {
+    buyListing(player: Player, uuid: string): boolean {
         if (!this.isMarketplaceEnabled) {
             return false;
         }

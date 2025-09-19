@@ -1,7 +1,8 @@
 import { OnoeNum } from "@antivivi/serikanum";
-import React, { useEffect, useMemo, useRef } from "@rbxts/react";
+import React, { useMemo, useRef } from "@rbxts/react";
 import { TextService } from "@rbxts/services";
 import displayBalanceCurrency from "client/ui/components/balance/displayBalanceCurrency";
+import { useItemViewport } from "client/ui/components/item/useCIViewportManagement";
 import { RobotoSlabHeavy } from "client/ui/GameFonts";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import { CURRENCY_DETAILS } from "shared/currency/CurrencyDetails";
@@ -53,11 +54,9 @@ function PriceOption({
 }) {
     const viewportRef = useRef<ViewportFrame>();
     const textColor = affordable ? Color3.fromRGB(255, 255, 255) : Color3.fromRGB(255, 80, 80);
-
-    useEffect(() => {
-        if (!item || !viewportRef.current) return;
-        viewportManagement?.loadItemIntoViewport(viewportRef.current!, item.id);
-    }, [viewportManagement, item?.id]);
+    if (item) {
+        useItemViewport(viewportRef, item.id, viewportManagement);
+    }
 
     return (
         <frame BackgroundTransparency={1} Position={position} Size={new UDim2(0, width, 0, height)}>

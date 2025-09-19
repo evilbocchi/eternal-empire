@@ -35,3 +35,13 @@ export function useSingleDocumentVisibility(id: string, visible: boolean) {
         }
     }, [id, visible]);
 }
+
+export function useVisibilityMain(visible: boolean) {
+    useEffect(() => {
+        DocumentManager.setVisible("Backpack", visible);
+        DocumentManager.setVisible("Balance", visible);
+        DocumentManager.setVisible("Sidebar", visible);
+        DocumentManager.setVisible("Position", visible);
+        DocumentManager.setVisible("TrackedQuest", visible);
+    }, [visible]);
+}

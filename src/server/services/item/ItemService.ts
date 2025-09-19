@@ -703,7 +703,6 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
 
         // Set up packet handlers for item operations
         Packets.buyItem.fromClient((player, itemId) => {
-            print("Player " + player.Name + " is attempting to buy item " + itemId);
             return this.buyItem(player, itemId);
         });
         Packets.buyAllItems.fromClient((player, itemIds) => this.buyAllItems(player, itemIds));
