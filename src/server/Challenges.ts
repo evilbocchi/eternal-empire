@@ -36,7 +36,7 @@ namespace Challenges {
         cap: 5,
         challengeUpgrade: new GainUpgrade().setPow((x) => new CurrencyBundle().set("Funds", meltingEconomyNerf(x))),
         rewardUpgrade: new GainUpgrade().setMul((x) => new CurrencyBundle().set("Funds", new OnoeNum(1.75).pow(x))),
-        resets: "Skillification",
+        resets: "Skillification" as ResetLayerId,
         goal: [Admiration, Codependence],
         order: 1,
     };
@@ -85,7 +85,7 @@ namespace Challenges {
             explosion.DestroyJointRadiusPercent = 0;
             explosion.Position = meteor.Position;
             explosion.Parent = meteor;
-            Packets.camShake.toAllClients();
+            Packets.shakeCamera.toAllClients("Bump");
         });
         Debris.AddItem(meteor, 5);
     };
@@ -116,7 +116,7 @@ namespace Challenges {
             }
             questMetadata.set("CataclysmicWorldCooldown", meteorCooldown);
         },
-        resets: "Skillification",
+        resets: "Skillification" as ResetLayerId,
         rewardUpgrade: new GainUpgrade().setMul((x) => new CurrencyBundle().set("Skill", new OnoeNum(1.5).pow(x))),
         goal: [Admiration, Codependence],
         order: 2,
@@ -150,7 +150,7 @@ namespace Challenges {
             return count === 2;
         },
         rewardUpgrade: new GainUpgrade().setMul((x) => new CurrencyBundle().set("Power", new OnoeNum(2).pow(x))),
-        resets: "Skillification",
+        resets: "Skillification" as ResetLayerId,
         goal: [Admiration, Codependence],
         order: 3,
     };

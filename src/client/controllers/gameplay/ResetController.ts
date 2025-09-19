@@ -11,16 +11,13 @@
  *
  * @since 1.0.0
  */
-import { OnoeNum } from "@antivivi/serikanum";
 import { Controller, OnInit } from "@flamework/core";
-import CameraShaker from "@rbxts/camera-shaker";
 import { Debris, TweenService, Workspace } from "@rbxts/services";
 import SoundController from "client/controllers/interface/SoundController";
-import EffectController from "client/controllers/world/EffectController";
+import ShakeController from "client/controllers/world/ShakeController";
 import { ASSETS, playSound } from "shared/asset/GameAssets";
-import CurrencyBundle from "shared/currency/CurrencyBundle";
-import Packets from "shared/Packets";
 import { RESET_LAYERS } from "shared/currency/mechanics/ResetLayer";
+import Packets from "shared/Packets";
 
 declare global {
     interface Assets {
@@ -34,7 +31,7 @@ declare global {
 @Controller()
 export default class ResetController implements OnInit {
     constructor(
-        private effectController: EffectController,
+        private shakeController: ShakeController,
         private soundController: SoundController,
     ) {}
 
@@ -71,7 +68,7 @@ export default class ResetController implements OnInit {
                         if (effect.IsA("ParticleEmitter")) effect.Enabled = false;
                     }
                     currentCamera.CameraType = Enum.CameraType.Custom;
-                    this.effectController.camShake.Shake(CameraShaker.Presets.Bump);
+                    this.shakeController.shake();
                     // this.effectController.showQuestMessage(TRACKED_QUEST_WINDOW.Reset); TODO: Port to React
                 });
                 Debris.AddItem(lightning, 2);
@@ -90,7 +87,7 @@ export default class ResetController implements OnInit {
             //     resetLayer.gives,
             //     new OnoeNum(amount),
             // ).upper(); TODO: Port to React
-            this.moveCamera(resetLayer.area.areaFolder.WaitForChild("ResetCamera"));
+            // this.moveCamera(resetLayer.area.areaFolder.WaitForChild("ResetCamera"));
             playSound("MagicCast.mp3");
         });
     }

@@ -14,9 +14,8 @@ import { WAYPOINTS } from "shared/constants";
 import { Server } from "shared/item/ItemUtils";
 import ExcavationStone from "shared/items/excavation/ExcavationStone";
 import IrregularlyShapedKey from "shared/items/negative/skip/IrregularlyShapedKey";
-import { AREAS } from "shared/world/Area";
 
-const suspiciousWall = AREAS.BarrenIslands.map.WaitForChild("SuspiciousWall") as BasePart;
+const suspiciousWall = SuspiciousWall.getWorldNode().waitForInstance() as BasePart;
 
 const oldNoobToApproachingPasal = OldNoob.createPathfindingOperation(
     OldNoob.startingCFrame,

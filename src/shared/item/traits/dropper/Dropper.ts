@@ -3,13 +3,13 @@
 
 import { findBaseParts, formatRichText, getAllInstanceInfo } from "@antivivi/vrldk";
 import { Players, RunService } from "@rbxts/services";
-import Area, { AREAS } from "shared/world/Area";
 import { CURRENCY_DETAILS } from "shared/currency/CurrencyDetails";
 import GameSpeed from "shared/GameSpeed";
 import Droplet, { DROPLET_STORAGE } from "shared/item/Droplet";
 import Item from "shared/item/Item";
 import { Server } from "shared/item/ItemUtils";
 import ItemTrait from "shared/item/traits/ItemTrait";
+import { AREAS } from "shared/world/Area";
 
 declare global {
     interface ItemTraits {
@@ -19,7 +19,6 @@ declare global {
     interface InstanceInfo {
         DropRate?: number;
         LastDrop?: number;
-        DropletLimitValue?: IntValue;
         Instantiator?: () => void;
     }
 }
@@ -89,8 +88,6 @@ export default class Dropper extends ItemTrait {
             const areaId = Server.Item.getPlacedItem(model.Name)?.area as AreaId | undefined;
             const info = getAllInstanceInfo(drop);
             info.Area = areaId;
-
-            info.DropletLimitValue = areaId === undefined ? Area.globalDropletLimit : AREAS[areaId].dropletLimit;
             info.Boosts = new Map<string, ItemBoost>();
             info.DropRate = dropper.dropRate;
 
@@ -249,7 +246,7 @@ export default class Dropper extends ItemTrait {
 
                 if (t > info.LastDrop + 1 / dropRate / speed) {
                     const dropletCount = Server.Area.dropletCountPerArea.get(info.Area!);
-                    if (dropletCount !== undefined && dropletCount > info.DropletLimitValue!.Value) continue;
+                    if (dropletCount !== undefined && dropletCount > AREAS[info.Area!].getDropletLimit()) continue;
                     info.LastDrop = t;
                     info.Instantiator!();
                 }

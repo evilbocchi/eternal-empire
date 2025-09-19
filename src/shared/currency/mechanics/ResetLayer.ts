@@ -1,5 +1,4 @@
 import { OnoeNum } from "@antivivi/serikanum";
-import { AREAS } from "shared/world/Area";
 import Formula from "shared/currency/Formula";
 
 declare global {
@@ -10,31 +9,18 @@ declare global {
 export const RESET_LAYERS = {
     Skillification: {
         order: 1,
-        area: AREAS.BarrenIslands,
+        area: "BarrenIslands" as AreaId,
         formula: new Formula().add(1).div(1e12).log(16).pow(1.8).add(1),
         minimum: new OnoeNum(1e12),
         scalesWith: "Power" as Currency,
         gives: "Skill" as Currency,
         resettingCurrencies: ["Funds", "Power", "Purifier Clicks"] as Currency[],
         resettingUpgrades: ["MoreFunds", "MorePower"],
-        badgeId: 1485187140296844,
-
-        gainLabel: AREAS.SlamoVillage.areaFolder
-            .FindFirstChild("SkillifyBoard")
-            ?.FindFirstChild("SurfaceGui")
-            ?.FindFirstChild("DifficultyLabel")
-            ?.FindFirstChild("Frame")
-            ?.FindFirstChild("GainLabel") as TextLabel,
-        touchPart: AREAS.SlamoVillage.areaFolder.FindFirstChild("Skillification") as BasePart & {
-            BillboardGui: BillboardGui & {
-                TextLabel: TextLabel;
-            };
-        },
-        tpLocation: AREAS.BarrenIslands.getSpawnLocation(),
+        badgeId: 1485187140296844, // TODO: change badge
     },
     Winification: {
         order: 2,
-        area: AREAS.SlamoVillage,
+        area: "SlamoVillage" as AreaId,
         formula: new Formula().add(1).div(1e12).log(18).pow(1.7).add(1),
         minimum: new OnoeNum(1e12),
         scalesWith: "Skill" as Currency,
@@ -48,19 +34,6 @@ export const RESET_LAYERS = {
             "DarkerMatter",
             "EfficientLearning",
         ],
-        badgeId: 645025346348557,
-
-        gainLabel: AREAS.Eden.areaFolder
-            .FindFirstChild("WinifyBoard")
-            ?.FindFirstChild("SurfaceGui")
-            ?.FindFirstChild("DifficultyLabel")
-            ?.FindFirstChild("Frame")
-            ?.FindFirstChild("GainLabel") as TextLabel,
-        touchPart: AREAS.Eden.areaFolder.FindFirstChild("Winification") as BasePart & {
-            BillboardGui: BillboardGui & {
-                TextLabel: TextLabel;
-            };
-        },
-        tpLocation: AREAS.SkyPavilion.getSpawnLocation(),
+        badgeId: 645025346348557, // TODO: change badge
     },
 };

@@ -17,7 +17,6 @@ import { Controller, OnInit, OnStart } from "@flamework/core";
 import React from "@rbxts/react";
 import { createRoot } from "@rbxts/react-roblox";
 import { Debris, ReplicatedStorage, RunService, TextChatService, TweenService, Workspace } from "@rbxts/services";
-import HotkeysController from "client/controllers/core/HotkeysController";
 import { INTERFACE } from "client/controllers/core/UIController";
 import NPCNotification from "client/ui/components/npc/NPCNotification";
 import { ASSETS, getSound } from "shared/asset/GameAssets";
@@ -56,8 +55,6 @@ export default class DialogueController implements OnInit, OnStart {
     text = "";
     size = 0;
     i = 0;
-
-    constructor(private hotkeysController: HotkeysController) {}
 
     /**
      * Displays a headshot of the given model in the dialogue window's viewport.
@@ -203,18 +200,18 @@ export default class DialogueController implements OnInit, OnStart {
             if (this.i < this.size) this.i = this.size - 1;
             else if (Packets.nextDialogue.toServer() === true) this.hideDialogueWindow();
         };
-        this.hotkeysController.bindKey(
-            Enum.KeyCode.Return,
-            () => {
-                if (DIALOGUE_WINDOW.Visible === true) {
-                    dialogueWindowClicked();
-                    return true;
-                }
-                return false;
-            },
-            1,
-            "Next Dialogue",
-        );
+        // this.hotkeysController.bindKey(
+        //     Enum.KeyCode.Return,
+        //     () => {
+        //         if (DIALOGUE_WINDOW.Visible === true) {
+        //             dialogueWindowClicked();
+        //             return true;
+        //         }
+        //         return false;
+        //     },
+        //     1,
+        //     "Next Dialogue",
+        // );
         DIALOGUE_WINDOW.Activated.Connect(() => dialogueWindowClicked());
         let t = 0;
         let minDt = 0.03;

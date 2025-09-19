@@ -388,7 +388,7 @@ export default class Item {
         for (const area of this.placeableAreas) {
             let layer: ResetLayer | undefined;
             for (const [_name, l] of pairs(RESET_LAYERS))
-                if (l.area === area) {
+                if (l.area === area.id) {
                     layer = l;
                     break;
                 }
@@ -516,7 +516,7 @@ export default class Item {
 
     /**
      * Drains the price set in {@link drain} every second.
-     * If the price is not affordable, the item will be disabled.\
+     * If the price is not affordable, the item will be disabled.
      *
      * @param model The model of the item to maintain.
      */

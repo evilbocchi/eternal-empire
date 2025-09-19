@@ -8,7 +8,6 @@
 import Difficulty from "@antivivi/jjt-difficulties";
 import { FuzzySearch } from "@rbxts/fuzzy-search";
 import { PARALLEL } from "client/constants";
-import { AREAS } from "shared/world/Area";
 import Item from "shared/item/Item";
 import ItemMetadata from "shared/item/ItemMetadata";
 import Items from "shared/items/Items";
@@ -188,56 +187,6 @@ namespace ItemSlot {
             : new Color3();
         itemSlot.UIStroke.Color = color;
         itemSlot.BackgroundColor3 = color;
-    }
-
-    /**
-     * Colors the difficulty label based on the difficulty of the item.
-     *
-     * @param difficultyLabel A label to color.
-     * @param difficulty The difficulty to color the label with.
-     */
-    export function loadDifficultyLabel(difficultyLabel: DifficultyLabel, difficulty: Difficulty) {
-        const color = difficulty.color;
-
-        const imageLabel = difficultyLabel.ImageLabel;
-        imageLabel.Image = "rbxassetid://" + difficulty.image;
-        if (color !== undefined) {
-            imageLabel.BackgroundColor3 = color;
-            imageLabel.BackgroundTransparency = 0;
-        } else {
-            imageLabel.BackgroundTransparency = 1;
-        }
-
-        difficultyLabel.TextLabel.TextColor3 =
-            color === undefined ? new Color3() : color.Lerp(new Color3(1, 1, 1), 0.5);
-        difficultyLabel.TextLabel.Text = difficulty.name ?? "error";
-    }
-
-    export function hookMetadata(metadataPerItem: Map<Item, ItemMetadata>) {
-        Packets.boostChanged.fromServer((value) => {
-            for (const [itemId, boost] of value) {
-                const item = Items.getItem(itemId);
-                if (item === undefined) continue;
-                const metadata = metadataPerItem.get(item);
-                if (metadata === undefined) continue;
-                metadata.spacing();
-                metadata.formula(undefined, boost);
-            }
-        });
-
-        AREAS.SlamoVillage.unlocked.Changed.Connect(() => {
-            for (const [_, metadata] of metadataPerItem) {
-                metadata.spacing();
-                metadata.placeableAreas();
-                metadata.resetLayer();
-            }
-        });
-
-        Packets.level.observe((level) => {
-            for (const [_, metadata] of metadataPerItem) {
-                metadata.levelReq(level);
-            }
-        });
     }
 }
 

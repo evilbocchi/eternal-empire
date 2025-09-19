@@ -1,7 +1,7 @@
 import { playSoundAtPart } from "@antivivi/vrldk";
 import { TweenService, Workspace } from "@rbxts/services";
-import { Dialogue } from "server/interactive/npc/NPC";
 import Freddy from "server/interactive/npc/Freddy";
+import { Dialogue } from "server/interactive/npc/NPC";
 import SlamoReceptionist from "server/interactive/npc/Slamo Receptionist";
 import SlamoRefugee from "server/interactive/npc/Slamo Refugee";
 import Quest, { Stage } from "server/quests/Quest";
@@ -11,10 +11,11 @@ import { Server } from "shared/item/ItemUtils";
 import ChargedEmpoweredBrick from "shared/items/negative/instantwin/ChargedEmpoweredBrick";
 import EmpoweredBrick from "shared/items/negative/instantwin/EmpoweredBrick";
 import XLWool from "shared/items/negative/relax/XLWool";
-import { AREAS } from "shared/world/Area";
+import FreddysCauldron from "shared/world/nodes/FreddysCauldron";
+import SlamoVillageConnection from "shared/world/nodes/SlamoVillageConnection";
 
-const cauldron = AREAS.BarrenIslands.map.WaitForChild("Cauldron") as Model;
-const linkway = AREAS.IntermittentIsles.areaFolder.WaitForChild("SlamoVillageConnection");
+const cauldron = FreddysCauldron.waitForInstance();
+const linkway = SlamoVillageConnection.waitForInstance();
 
 const instantWinEffects = new Array<BasePart>();
 for (const child of cauldron.GetChildren()) {

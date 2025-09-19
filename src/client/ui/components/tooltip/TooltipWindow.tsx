@@ -4,6 +4,7 @@ import { RunService, TweenService, Workspace } from "@rbxts/services";
 import { Environment } from "@rbxts/ui-labs";
 import { RobotoSlab, RobotoSlabBold, RobotoSlabExtraBold, RobotoSlabMedium } from "client/ui/GameFonts";
 import getDifficultyDisplayColors from "client/ui/components/tooltip/getDifficultyDisplayColors";
+import Packets from "shared/Packets";
 import { getAsset } from "shared/asset/AssetMap";
 import Item from "shared/item/Item";
 import ItemMetadata from "shared/item/ItemMetadata";
@@ -48,12 +49,44 @@ export default function TooltipWindow() {
 
     // Subscribe to tooltip manager updates
     useEffect(() => {
-        const connection = TooltipManager.tooltipUpdated.connect((visible, data) => {
+        const tooltipUpdatedConnection = TooltipManager.tooltipUpdated.connect((visible, data) => {
             setVisible(visible);
             setData(data);
         });
 
-        return () => connection.disconnect();
+        const boostChangedConnection = Packets.boostChanged.fromServer((value) => {
+            for (const [itemId, boost] of value) {
+                const item = Items.getItem(itemId);
+                if (item === undefined) continue;
+                const metadata = METADATA_PER_ITEM.get(item);
+                if (metadata === undefined) continue;
+                metadata.spacing();
+                metadata.formula(undefined, boost);
+            }
+        });
+
+        const unlockedAreasConnection = Packets.unlockedAreas.observe((areas) => {
+            if (areas.has("SlamoVillage")) {
+                for (const [_, metadata] of METADATA_PER_ITEM) {
+                    metadata.spacing();
+                    metadata.placeableAreas();
+                    metadata.resetLayer();
+                }
+            }
+        });
+
+        const levelConnection = Packets.level.observe((level) => {
+            for (const [_, metadata] of METADATA_PER_ITEM) {
+                metadata.levelReq(level);
+            }
+        });
+
+        return () => {
+            tooltipUpdatedConnection.disconnect();
+            boostChangedConnection.Disconnect();
+            unlockedAreasConnection.disconnect();
+            levelConnection.disconnect();
+        };
     }, []);
 
     // Animate show/hide

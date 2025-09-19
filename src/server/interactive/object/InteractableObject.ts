@@ -2,11 +2,13 @@ import Signal, { Connection } from "@antivivi/lemon-signal";
 import { ProximityPromptService } from "@rbxts/services";
 import { Dialogue } from "server/interactive/npc/NPC";
 import { HotReloader, Reloadable } from "shared/HotReload";
+import { SingleWorldNode } from "shared/world/nodes/WorldNode";
 
 class InteractableObject extends Reloadable<InteractableObject> {
     static readonly HOT_RELOADER = new HotReloader<InteractableObject>(script.Parent!, new Set([script]));
     private static promptTriggeredConnection?: RBXScriptConnection;
 
+    worldNode?: SingleWorldNode;
     readonly interacted = new Signal<(player: Player) => void>();
     dialogue?: Dialogue;
     dialogueInteractConnection?: Connection;
@@ -27,6 +29,11 @@ class InteractableObject extends Reloadable<InteractableObject> {
     onInteract(callback: (player: Player, object: this) => void) {
         this.interacted.connect((player) => callback(player, this));
         return this;
+    }
+
+    getWorldNode() {
+        this.worldNode ??= new SingleWorldNode(this.id);
+        return this.worldNode;
     }
 
     load() {

@@ -28,7 +28,7 @@ export default class CollisionGroupService implements OnInit {
         PhysicsService.RegisterCollisionGroup("Decoration");
         PhysicsService.RegisterCollisionGroup("ItemHitbox");
         PhysicsService.RegisterCollisionGroup("Item");
-        PhysicsService.RegisterCollisionGroup("Grid");
+        PhysicsService.RegisterCollisionGroup("BuildGrid");
         PhysicsService.RegisterCollisionGroup("QueryableGhost");
         PhysicsService.RegisterCollisionGroup("Antighost");
         PhysicsService.RegisterCollisionGroup("Droplet");
@@ -42,12 +42,12 @@ export default class CollisionGroupService implements OnInit {
         PhysicsService.CollisionGroupSetCollidable("Droplet", "QueryableGhost", false);
         PhysicsService.CollisionGroupSetCollidable("Droplet", "Decoration", false);
         PhysicsService.CollisionGroupSetCollidable("Droplet", "Item", true);
-        PhysicsService.CollisionGroupSetCollidable("Droplet", "Grid", true);
+        PhysicsService.CollisionGroupSetCollidable("Droplet", "BuildGrid", true);
 
         // Configure item hitbox interactions
         PhysicsService.CollisionGroupSetCollidable("ItemHitbox", "Droplet", false);
         PhysicsService.CollisionGroupSetCollidable("ItemHitbox", "Item", false);
-        PhysicsService.CollisionGroupSetCollidable("ItemHitbox", "Grid", false);
+        PhysicsService.CollisionGroupSetCollidable("ItemHitbox", "BuildGrid", false);
 
         // Configure special ghost groups for selective collision
         for (const group of PhysicsService.GetRegisteredCollisionGroups()) {
@@ -56,7 +56,7 @@ export default class CollisionGroupService implements OnInit {
             PhysicsService.CollisionGroupSetCollidable(
                 "NPC",
                 group.name,
-                group.name === "Default" || group.name === "Grid",
+                group.name === "Default" || group.name === "BuildGrid",
             );
         }
     }

@@ -17,6 +17,7 @@ import { AREAS } from "shared/world/Area";
 import ItemUtils from "shared/item/ItemUtils";
 import Packets from "shared/Packets";
 import { WeatherState, WeatherType } from "shared/weather/WeatherTypes";
+import WorldNode from "shared/world/nodes/WorldNode";
 
 /**
  * Controller responsible for managing area lighting and atmosphere effects.
@@ -27,7 +28,7 @@ import { WeatherState, WeatherType } from "shared/weather/WeatherTypes";
 @Controller()
 export default class AtmosphereController implements OnInit, OnStart {
     /** Map of Light instances to their base brightness. */
-    lights = new Map<Light, number>();
+    cyclingLights = new Map<Light, number>();
 
     rainy = false;
 
@@ -52,17 +53,6 @@ export default class AtmosphereController implements OnInit, OnStart {
      * Initializes the AtmosphereController, collects lights from all areas.
      */
     onInit() {
-        for (const [_id, area] of pairs(AREAS)) {
-            const lights = area.map.FindFirstChild("Lights");
-            if (lights !== undefined) {
-                const children = lights.GetChildren();
-                for (const child of children) {
-                    const light = this.findLight(child);
-                    if (light !== undefined) this.lights.set(light, light.Brightness);
-                }
-            }
-        }
-
         // Set up weather packet listeners
         Packets.weatherChanged.fromServer((weatherState: object) => {
             this.currentWeather = weatherState as WeatherState;
@@ -81,6 +71,11 @@ export default class AtmosphereController implements OnInit, OnStart {
      * Starts the AtmosphereController, updates light brightness and shadows based on quality and time of day.
      */
     onStart() {
+        const cyclingLightWorldNode = new WorldNode("CyclingLight", (container) => {
+            const light = this.findLight(container);
+            if (light !== undefined) this.cyclingLights.set(light, light.Brightness);
+        });
+
         const UserGameSettings = ItemUtils.UserGameSettings!;
         let oldQualityLevel = UserGameSettings.SavedQualityLevel.Value;
         task.spawn(() => {
@@ -88,7 +83,7 @@ export default class AtmosphereController implements OnInit, OnStart {
                 const qualityLevel = UserGameSettings.SavedQualityLevel.Value;
                 task.wait(qualityLevel >= 5 ? 1 / 60 : 1);
 
-                for (const [light, base] of this.lights) {
+                for (const [light, base] of this.cyclingLights) {
                     if (oldQualityLevel !== qualityLevel) {
                         light.Shadows = qualityLevel === 10;
                     }

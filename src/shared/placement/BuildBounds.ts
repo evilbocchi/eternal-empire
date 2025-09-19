@@ -44,8 +44,8 @@ class BuildBounds {
             buildBounds.draw(grid as BasePart);
         };
         const areaFolder = area.areaFolder;
-        CollectionService.GetInstanceAddedSignal("Grid").Connect(load);
-        load(areaFolder.FindFirstChild("Grid"));
+        CollectionService.GetInstanceAddedSignal("BuildGrid").Connect(load);
+        load(areaFolder.FindFirstChild("BuildGrid"));
 
         return buildBounds;
     }

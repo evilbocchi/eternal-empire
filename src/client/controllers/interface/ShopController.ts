@@ -14,35 +14,14 @@
  * @since 1.0.0
  */
 
-import { Controller, OnInit, OnStart } from "@flamework/core";
+import { Controller, OnStart } from "@flamework/core";
 import { CollectionService, Debris, TweenService } from "@rbxts/services";
-import ItemSlot from "client/ItemSlot";
 import { LOCAL_PLAYER } from "client/constants";
 import { SHOP_GUI } from "client/controllers/core/Guis";
 import { ShopManager } from "client/ui/components/item/shop/ShopWindow";
 import { getSound } from "shared/asset/GameAssets";
-import Item from "shared/item/Item";
-import ItemMetadata from "shared/item/ItemMetadata";
 import Shop from "shared/item/traits/Shop";
 import Items from "shared/items/Items";
-
-declare global {
-    /**
-     * Represents the label for the difficulty of an item in the shop GUI.
-     */
-    type DifficultyLabel = Frame & {
-        ImageLabel: ImageLabel;
-        TextLabel: TextLabel;
-    };
-}
-
-/**
- * The metadata for each item in the shop, used to display additional information.
- */
-const METADATA_PER_ITEM = new Map<Item, ItemMetadata>();
-for (const item of Items.sortedItems) {
-    METADATA_PER_ITEM.set(item, new ItemMetadata(item, 21, "Medium"));
-}
 
 /**
  * Controller responsible for managing the in-game shop interface, item display, and purchase logic.
@@ -51,24 +30,11 @@ for (const item of Items.sortedItems) {
  * Observes inventory and settings for live updates, and coordinates with other controllers for UI and hotkey actions.
  */
 @Controller()
-export default class ShopController implements OnInit, OnStart {
-    /** Mapping of items to their GUI slots. */
-    itemSlotsPerItem = new Map<Item, ItemSlot>();
-    /** Currently selected item in the shop. */
-    selectedItem = undefined as Item | undefined;
-
+export default class ShopController implements OnStart {
     /** The current shop GUI part being displayed. */
     shopGuiPart: Part | undefined;
     /** The current shop data. */
     currentShop: Shop | undefined;
-    /** Tracks which currency index is shown for each item. */
-    currencyIndexPerItem = new Map<Item, number>();
-    /** Whether to hide maxed items. */
-    hideMaxedItems: boolean | undefined;
-    /** Debounce for switching items. */
-    switchDebounce = 0;
-
-    constructor() {}
 
     /**
      * Animates and hides the shop GUI part.
@@ -117,17 +83,11 @@ export default class ShopController implements OnInit, OnStart {
     }
 
     /**
-     * Initializes the ShopController, sets up observers, and loads item slots.
-     */
-    onInit() {
-        this.refreshShop();
-        ItemSlot.hookMetadata(METADATA_PER_ITEM);
-    }
-
-    /**
      * Starts the ShopController, binds render steps for price cycling and shop detection.
      */
     onStart() {
+        this.refreshShop();
+
         task.spawn(() => {
             while (task.wait(0.1)) {
                 const primaryPart = LOCAL_PLAYER.Character?.PrimaryPart;

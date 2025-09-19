@@ -100,12 +100,12 @@ export default class ToolController implements OnInit, OnCharacterAdded {
         let prevHealth = 0;
         const updateHealth = () => {
             const currentHealth = model.GetAttribute("Health") as number;
-            this.areaController.refreshBar(
-                gui.HealthBar,
-                new OnoeNum(model.GetAttribute("Health") as number),
-                new OnoeNum(harvestable.health),
-                false,
-            );
+            // this.areaController.refreshBar(
+            //     gui.HealthBar,
+            //     new OnoeNum(model.GetAttribute("Health") as number),
+            //     new OnoeNum(harvestable.health),
+            //     false,
+            // ); TODO: Port to React
             const drop = currentHealth - prevHealth;
             prevHealth = currentHealth;
 

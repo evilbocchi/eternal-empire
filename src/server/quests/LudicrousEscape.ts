@@ -23,7 +23,7 @@ import ExcavationStone from "shared/items/excavation/ExcavationStone";
 import Gold from "shared/items/excavation/Gold";
 import EnchantedGrass from "shared/items/excavation/harvestable/EnchantedGrass";
 import Iron from "shared/items/excavation/Iron";
-import { AREAS } from "shared/world/Area";
+import FlimsyBars from "shared/world/nodes/FlimsyBars";
 
 Simpul.rootPart!.Anchored = true;
 
@@ -407,7 +407,7 @@ export = new Quest(script.Name)
             if (!isCompleted) return;
 
             decal.Texture = heheDecal;
-            const bars = AREAS.SlamoVillage.map.WaitForChild("FlimsyBars") as Model;
+            const bars = FlimsyBars.waitForInstance();
             bars.PrimaryPart?.FindFirstChildOfClass("Sound")?.Play();
             spawnExplosion(bars.GetPivot().Position);
             for (const bar of bars.GetChildren()) {

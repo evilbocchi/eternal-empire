@@ -17,17 +17,16 @@
 
 import { observeTagAdded, rainbowEffect } from "@antivivi/vrldk";
 import { Controller, OnInit } from "@flamework/core";
-import CameraShaker from "@rbxts/camera-shaker";
-import { Debris, Lighting, TweenService, Workspace } from "@rbxts/services";
+import { Debris, Lighting, TweenService } from "@rbxts/services";
 import { LOCAL_PLAYER } from "client/constants";
 import { PingManager } from "client/ui/components/stats/StatsWindow";
-import { AREAS } from "shared/world/Area";
 import { getSound, SOUND_EFFECTS_GROUP } from "shared/asset/GameAssets";
 import { PLACED_ITEMS_FOLDER } from "shared/constants";
 import { DROPLET_STORAGE } from "shared/item/Droplet";
 import ItemUtils from "shared/item/ItemUtils";
 import Items from "shared/items/Items";
 import Packets from "shared/Packets";
+import { AREAS } from "shared/world/Area";
 
 /**
  * Controller responsible for managing world effects, item visuals, and area lighting.
@@ -36,35 +35,10 @@ import Packets from "shared/Packets";
  */
 @Controller()
 export default class EffectController implements OnInit {
-    /** Camera shaker instance for world effects. */
-    camShake = new CameraShaker(Enum.RenderPriority.Camera.Value, (shakeCFrame) => {
-        const cam = Workspace.CurrentCamera;
-        if (cam !== undefined) cam.CFrame = cam.CFrame.mul(shakeCFrame);
-    });
     /** Map of droplet parts to their original size. */
     sizePerDrop = new Map<BasePart, Vector3>();
     /** Delay value for ping calculation. */
     delay = 0.2;
-
-    /**
-     * Loads item effects for a given model instance.
-     * @param model The item model instance.
-     */
-    load(model: Instance) {
-        if (!model.IsA("Model") || model.GetAttribute("Selected") === true || model.GetAttribute("applied") === true) {
-            return;
-        }
-        const itemId = model.GetAttribute("ItemId") as string | undefined;
-        if (itemId === undefined) {
-            return;
-        }
-        const item = Items.getItem(itemId);
-        if (item === undefined) {
-            return;
-        }
-        model.SetAttribute("applied", true);
-        task.spawn(() => item.CLIENT_LOADS.forEach((callback) => callback(model, item, LOCAL_PLAYER)));
-    }
 
     /**
      * Animates and displays a quest message frame.
@@ -145,6 +119,13 @@ export default class EffectController implements OnInit {
             },
             true,
         );
+    }
+
+    /**
+     * Initializes the EffectController, sets up effect listeners and area lighting changes.
+     */
+    onInit() {
+        this.loadTags();
 
         Packets.dropletAdded.fromServer((drop?: BasePart) => {
             if (!drop) return;
@@ -155,33 +136,6 @@ export default class EffectController implements OnInit {
             if (ItemUtils.UserGameSettings!.SavedQualityLevel.Value > 1) {
                 drop.Size = originalSize.add(new Vector3(0.15, 0.825, 0.15));
                 TweenService.Create(drop, new TweenInfo(0.3), { Size: originalSize }).Play();
-            }
-        });
-    }
-
-    /**
-     * Initializes the EffectController, sets up effect listeners and area lighting changes.
-     */
-    onInit() {
-        task.spawn(() => {
-            while (task.wait(2)) {
-                for (const child of PLACED_ITEMS_FOLDER.GetChildren()) {
-                    this.load(child);
-                }
-            }
-        });
-        this.loadTags();
-        PLACED_ITEMS_FOLDER.ChildAdded.Connect((child) => this.load(child));
-
-        for (const item of PLACED_ITEMS_FOLDER.GetChildren()) {
-            this.load(item);
-        }
-
-        this.camShake.Start();
-        Packets.camShake.fromServer(() => this.camShake.Shake(CameraShaker.Presets.Bump));
-        Packets.savingEmpire.fromServer((status) => {
-            if (status === 500) {
-                warn("Empire saving failed.");
             }
         });
 
@@ -229,36 +183,5 @@ export default class EffectController implements OnInit {
                 return;
             model.ApplyImpulse(impulse);
         });
-
-        const defaultLighting = {
-            Ambient: Lighting.Ambient,
-            OutdoorAmbient: Lighting.OutdoorAmbient,
-            EnvironmentDiffuseScale: Lighting.EnvironmentDiffuseScale,
-            EnvironmentSpecularScale: Lighting.EnvironmentSpecularScale,
-            FogEnd: Lighting.FogEnd,
-            FogStart: Lighting.FogStart,
-            FogColor: Lighting.FogColor,
-            Brightness: Lighting.Brightness,
-        };
-        const onAreaChanged = () => {
-            const lightingConfig = AREAS[LOCAL_PLAYER.GetAttribute("Area") as AreaId]?.lightingConfiguration;
-            Lighting.Ambient = lightingConfig === undefined ? defaultLighting.Ambient : lightingConfig.Ambient;
-            Lighting.OutdoorAmbient =
-                lightingConfig === undefined ? defaultLighting.OutdoorAmbient : lightingConfig.OutdoorAmbient;
-            Lighting.EnvironmentDiffuseScale =
-                lightingConfig === undefined
-                    ? defaultLighting.EnvironmentDiffuseScale
-                    : lightingConfig.EnvironmentDiffuseScale;
-            Lighting.EnvironmentSpecularScale =
-                lightingConfig === undefined
-                    ? defaultLighting.EnvironmentSpecularScale
-                    : lightingConfig.EnvironmentSpecularScale;
-            Lighting.FogEnd = lightingConfig === undefined ? defaultLighting.FogEnd : lightingConfig.FogEnd;
-            Lighting.FogStart = lightingConfig === undefined ? defaultLighting.FogStart : lightingConfig.FogStart;
-            Lighting.FogColor = lightingConfig === undefined ? defaultLighting.FogColor : lightingConfig.FogColor;
-            Lighting.Brightness = lightingConfig === undefined ? defaultLighting.Brightness : lightingConfig.Brightness;
-        };
-        LOCAL_PLAYER.GetAttributeChangedSignal("Area").Connect(() => onAreaChanged());
-        onAreaChanged();
     }
 }

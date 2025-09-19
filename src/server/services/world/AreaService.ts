@@ -87,9 +87,7 @@ export default class AreaService implements OnInit, OnPlayerJoined {
      * @param id The area ID to assign to the player
      */
     setArea(player: Player, id: AreaId) {
-        // Update the visible leaderstat with the area's display name
         this.leaderstatsService.setLeaderstat(player, "Area", AREAS[id].name);
-        // Store the area ID as a player attribute for internal tracking
         player.SetAttribute("Area", id);
     }
 
@@ -109,7 +107,7 @@ export default class AreaService implements OnInit, OnPlayerJoined {
         // and preserving original size for upgrade calculations
         const grid = area.getGrid();
         if (grid !== undefined) {
-            grid.CollisionGroup = "Grid";
+            grid.CollisionGroup = "BuildGrid";
             grid.SetAttribute("OriginalSize", grid.Size); // Store for upgrade scaling
         }
 
@@ -142,8 +140,8 @@ export default class AreaService implements OnInit, OnPlayerJoined {
             areaBounds.Destroy();
         }
 
-        // Initialize the area's board GUI and droplet systems
-        this.loadBoardGui(id, area);
+        // Initialize droplet systems
+        this.loadDropletTracking(id);
 
         // Connect to upgrade changes to dynamically resize the building grid
         this.namedUpgradeService.upgradesChanged.connect((data) => {
@@ -169,56 +167,6 @@ export default class AreaService implements OnInit, OnPlayerJoined {
         // Trigger initial upgrade application (hacky but functional)
         this.namedUpgradeService.upgradesChanged.fire(this.dataService.empireData.upgrades);
 
-        // Configure all portals in this area for teleportation mechanics
-        const instances = area.areaFolder.GetChildren();
-        for (const instance of instances) {
-            if (instance.Name === "Portal") {
-                const frame = instance.WaitForChild("Frame") as BasePart;
-                const originalPos = frame.Position;
-                let debounce = 0; // Prevent rapid teleportation spam
-
-                // Helper function to show/hide portal based on unlock status
-                const updatePosition = (unlocked: boolean) =>
-                    (frame.Position = unlocked ? originalPos : new Vector3(0, -1000, 0));
-
-                // Get unlock status and set initial position
-                const unlocked =
-                    AREAS[(instance.WaitForChild("Destination") as ObjectValue).Value!.Name as AreaId].unlocked;
-                updatePosition(unlocked.Value);
-
-                // React to unlock status changes
-                unlocked.Changed.Connect((value) => updatePosition(value));
-
-                // Handle portal teleportation when touched
-                frame.Touched.Connect((otherPart) => {
-                    const character = otherPart.Parent as Model;
-                    if (character === undefined) return;
-
-                    const player = Players.GetPlayerFromCharacter(character);
-                    if (player === undefined) return;
-
-                    const humanoid = character.FindFirstChildOfClass("Humanoid");
-                    if (humanoid === undefined) return;
-
-                    const rootPart = humanoid.RootPart;
-                    // Debounce check to prevent spam teleportation
-                    if (rootPart === undefined || tick() - debounce < 0.2) {
-                        return;
-                    }
-
-                    // Play teleportation sound effect
-                    (rootPart.FindFirstChild("TeleportSound") as Sound | undefined)?.Play();
-
-                    // Execute the teleportation
-                    character.PivotTo((instance.WaitForChild("TpPart") as BasePart).CFrame);
-                    debounce = tick();
-
-                    // Mark player as having used a portal (for tracking/achievements)
-                    player.SetAttribute("UsedPortal", true);
-                });
-            }
-        }
-
         // Set up catch areas to prevent players from falling into the void
         const catchArea = area.getCatchArea();
         if (catchArea !== undefined) {
@@ -242,7 +190,7 @@ export default class AreaService implements OnInit, OnPlayerJoined {
 
                 // Teleport player back to safety with effects
                 rootPart.CFrame = spawnLocation.CFrame;
-                Packets.camShake.toClient(player); // Visual feedback
+                Packets.shakeCamera.toClient(player, "Bump"); // Visual feedback
                 playSound("Splash.mp3", rootPart); // Audio feedback
             });
         }
@@ -262,8 +210,7 @@ export default class AreaService implements OnInit, OnPlayerJoined {
         this.dropletCountPerArea.set(id, newCount);
 
         // Prevent network spam during server initialization
-        if (os.clock() < 6) {
-            // don't propagate changes too early after server start
+        if (os.clock() < 10) {
             return;
         }
 
@@ -281,14 +228,9 @@ export default class AreaService implements OnInit, OnPlayerJoined {
      * @param id The area ID to set up droplet tracking for
      * @param area The Area object containing droplet limit configuration
      */
-    loadBoardGui(id: AreaId, area: Area) {
+    loadDropletTracking(id: AreaId) {
         const dropletCountPerArea = this.dropletCountPerArea;
-
-        // Initialize droplet count for this area
         dropletCountPerArea.set(id, 0);
-
-        // React to droplet limit changes in the area configuration
-        area.dropletLimit.Changed.Connect(() => this.propagateDropletCountChange(id, dropletCountPerArea.get(id)!));
 
         // Monitor droplet creation and track them by area
         DROPLET_STORAGE.ChildAdded.Connect((d) => {
@@ -310,23 +252,22 @@ export default class AreaService implements OnInit, OnPlayerJoined {
         });
 
         // Prevent desynchronization by periodically recounting all droplets
-        task.spawn(() => {
-            while (task.wait(5)) {
-                // Check every 5 seconds
-                let i = 0;
+        const resynchronize = () => {
+            // Check every 5 seconds
+            let i = 0;
 
-                // Manual recount of all droplets in this area
-                for (const d of DROPLET_STORAGE.GetChildren()) {
-                    const info = getAllInstanceInfo(d);
-                    if (info.Incinerated !== true && info.Area === id) {
-                        ++i;
-                    }
+            // Manual recount of all droplets in this area
+            for (const d of DROPLET_STORAGE.GetChildren()) {
+                const info = getAllInstanceInfo(d);
+                if (info.Incinerated !== true && info.Area === id) {
+                    ++i;
                 }
-
-                // Update the count with the recalibrated value
-                this.propagateDropletCountChange(id, i);
             }
-        });
+
+            this.propagateDropletCountChange(id, i);
+            task.delay(5, resynchronize);
+        };
+        task.spawn(resynchronize);
     }
 
     /**
@@ -340,11 +281,6 @@ export default class AreaService implements OnInit, OnPlayerJoined {
      * @param player The player who just joined the game
      */
     onPlayerJoined(player: Player) {
-        /**
-         * Sets up character-specific area functionality when a player spawns.
-         *
-         * @param character - The player's character model (may be undefined)
-         */
         const onCharacterAdded = (character: Model | undefined) => {
             if (character === undefined) return;
 
@@ -361,37 +297,34 @@ export default class AreaService implements OnInit, OnPlayerJoined {
             // Clone teleportation sound to the character for portal usage
             getSound("Teleport.mp3").Clone().Parent = rootPart;
         };
-
-        // Set up character handling for current and future character spawns
         player.CharacterAdded.Connect((character) => onCharacterAdded(character));
         onCharacterAdded(player.Character);
 
         // Continuously monitor player position to detect area changes
-        task.spawn(() => {
-            while (task.wait(0.1)) {
-                // Check every 100ms for responsive area detection
-                const character = player.Character;
-                if (character === undefined) continue;
+        const checkAreaChange = () => {
+            const character = player.Character;
+            if (character === undefined) return;
 
-                const rootPart = character.FindFirstChild("HumanoidRootPart") as BasePart | undefined;
-                if (rootPart === undefined) continue;
+            const rootPart = character.FindFirstChild("HumanoidRootPart") as BasePart | undefined;
+            if (rootPart === undefined) return;
 
-                const position = rootPart.Position;
+            const position = rootPart.Position;
 
-                // Check against all area bounding boxes to find current area
-                for (const [id, [cframe, size]] of this.boundingBoxPerArea) {
-                    if (isInside(position, cframe, size)) {
-                        const cached = this.getArea(player);
+            // Check against all area bounding boxes to find current area
+            for (const [id, [cframe, size]] of this.boundingBoxPerArea) {
+                if (isInside(position, cframe, size)) {
+                    const cached = this.getArea(player);
 
-                        // Only update if the area has actually changed
-                        if (cached !== id) {
-                            this.setArea(player, id);
-                        }
-                        break; // Found the area, no need to check others
+                    // Only update if the area has actually changed
+                    if (cached !== id) {
+                        this.setArea(player, id);
                     }
+                    break; // Found the area, no need to check others
                 }
             }
-        });
+            task.delay(0.1, checkAreaChange);
+        };
+        task.spawn(checkAreaChange);
     }
 
     /**
@@ -414,14 +347,16 @@ export default class AreaService implements OnInit, OnPlayerJoined {
             const area = AREAS[areaId];
             const spawnLocation = area.getSpawnLocation();
 
-            // Validate teleportation request with multiple safety checks
-            if (character === undefined || area.unlocked.Value === false || spawnLocation === undefined) {
-                return false; // Teleportation denied
+            if (
+                character === undefined ||
+                !this.dataService.empireData.unlockedAreas.has(areaId) ||
+                spawnLocation === undefined
+            ) {
+                return false;
             }
 
-            // Execute the teleportation
             character.PivotTo(spawnLocation.CFrame);
-            return true; // Teleportation successful
+            return true;
         });
     }
 }

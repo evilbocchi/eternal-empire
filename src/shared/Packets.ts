@@ -1,4 +1,5 @@
 import { BaseOnoeNum } from "@antivivi/serikanum";
+import CameraShaker from "@rbxts/camera-shaker";
 import { DataType } from "@rbxts/flamework-binary-serializer";
 import { packet, property } from "@rbxts/fletchette";
 import EmpireProfileTemplate from "shared/data/EmpireProfileTemplate";
@@ -36,12 +37,6 @@ declare global {
 
 namespace Packets {
     // data management
-
-    /**
-     * Fired when the server completed saving empire data.
-     * @param status 100 for continue, 200 for success, 500 for failure.
-     */
-    export const savingEmpire = packet<(status: DataType.u16) => void>();
 
     /** The empires that are available to the player. */
     export const availableEmpires = property<Map<string, EmpireInfo>>(new Map<string, EmpireInfo>());
@@ -142,6 +137,7 @@ namespace Packets {
     // areas
     export const tpToArea = packet<(area: AreaId) => boolean>();
     export const areaUnlocked = packet<(area: AreaId) => void>();
+    export const unlockedAreas = property<Set<AreaId>>(new Set<AreaId>());
     export const dropletCountChanged = packet<(area: AreaId, current: number) => void>({ isUnreliable: true });
 
     // quests
@@ -204,7 +200,7 @@ namespace Packets {
     export const useTool = packet<(harvestable: Instance) => void>({ isUnreliable: true });
 
     // visual
-    export const camShake = packet<() => void>();
+    export const shakeCamera = packet<(presetName: keyof typeof CameraShaker.Presets) => void>();
 
     // admin
     export const modifyGame = packet<(param: string) => void>();

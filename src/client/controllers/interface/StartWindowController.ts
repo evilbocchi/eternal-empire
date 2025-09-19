@@ -16,8 +16,6 @@ import { combineHumanReadable, convertToHHMMSS, getHumanoid, paintObjects } from
 import { Controller, OnInit } from "@flamework/core";
 import { Players, ReplicatedFirst, TweenService, Workspace } from "@rbxts/services";
 import { LOCAL_PLAYER, PLAYER_GUI } from "client/constants";
-import AdaptiveTabController from "client/controllers/core/AdaptiveTabController";
-import HotkeysController from "client/controllers/core/HotkeysController";
 import IntroController from "client/controllers/interface/IntroController";
 import LoadingWindowController from "client/controllers/interface/LoadingWindowController";
 import SoundController from "client/controllers/interface/SoundController";
@@ -99,11 +97,9 @@ export const START_WINDOW = ReplicatedFirst.WaitForChild("StartScreen") as Scree
 @Controller()
 export default class StartWindowController implements OnInit {
     constructor(
-        private adaptiveTabController: AdaptiveTabController,
         private loadingWindowController: LoadingWindowController,
         private introController: IntroController,
         private soundController: SoundController,
-        private hotkeysController: HotkeysController,
     ) {}
 
     /**
@@ -304,44 +300,44 @@ export default class StartWindowController implements OnInit {
         });
         newEmpireOption.Parent = START_WINDOW.EmpiresWindow.EmpireOptions;
 
-        this.hotkeysController.setHotkey(
-            START_WINDOW.EmpiresWindow.CloseButton,
-            Enum.KeyCode.X,
-            () => {
-                if (!START_WINDOW.EmpiresWindow.Visible) {
-                    return false;
-                }
+        // this.hotkeysController.setHotkey(
+        //     START_WINDOW.EmpiresWindow.CloseButton,
+        //     Enum.KeyCode.X,
+        //     () => {
+        //         if (!START_WINDOW.EmpiresWindow.Visible) {
+        //             return false;
+        //         }
 
-                playSound("MenuClick.mp3");
-                const tween = TweenService.Create(START_WINDOW.EmpiresWindow, new TweenInfo(1), {
-                    Position: new UDim2(0.5, 0, 1.4, 0),
-                });
-                tween.Play();
-                tween.Completed.Once(() => (START_WINDOW.EmpiresWindow.Visible = false));
-                this.showTitleScreen(true);
-                return true;
-            },
-            "Close",
-        );
-        this.hotkeysController.setHotkey(
-            START_WINDOW.AboutWindow.CloseButton,
-            Enum.KeyCode.X,
-            () => {
-                if (!START_WINDOW.AboutWindow.Visible) {
-                    return false;
-                }
+        //         playSound("MenuClick.mp3");
+        //         const tween = TweenService.Create(START_WINDOW.EmpiresWindow, new TweenInfo(1), {
+        //             Position: new UDim2(0.5, 0, 1.4, 0),
+        //         });
+        //         tween.Play();
+        //         tween.Completed.Once(() => (START_WINDOW.EmpiresWindow.Visible = false));
+        //         this.showTitleScreen(true);
+        //         return true;
+        //     },
+        //     "Close",
+        // );
+        // this.hotkeysController.setHotkey(
+        //     START_WINDOW.AboutWindow.CloseButton,
+        //     Enum.KeyCode.X,
+        //     () => {
+        //         if (!START_WINDOW.AboutWindow.Visible) {
+        //             return false;
+        //         }
 
-                playSound("MenuClose.mp3");
-                const tween = TweenService.Create(START_WINDOW.AboutWindow, new TweenInfo(0.25), {
-                    Position: new UDim2(0, 0, -0.5, 0),
-                });
-                tween.Play();
-                tween.Completed.Once(() => (START_WINDOW.AboutWindow.Visible = false));
-                this.showTitleScreen(true);
-                return true;
-            },
-            "Close",
-        );
+        //         playSound("MenuClose.mp3");
+        //         const tween = TweenService.Create(START_WINDOW.AboutWindow, new TweenInfo(0.25), {
+        //             Position: new UDim2(0, 0, -0.5, 0),
+        //         });
+        //         tween.Play();
+        //         tween.Completed.Once(() => (START_WINDOW.AboutWindow.Visible = false));
+        //         this.showTitleScreen(true);
+        //         return true;
+        //     },
+        //     "Close",
+        // );
         const registerOption = (option: typeof START_WINDOW.MainOptions.Play, callback: () => void) => {
             option.Button.MouseEnter.Connect(() => playSound("EmphasisButtonHover.mp3"));
             option.Button.MouseMoved.Connect(() => (option.Button.ImageColor3 = new Color3(0.75, 0.75, 0.75)));
@@ -359,10 +355,6 @@ export default class StartWindowController implements OnInit {
             }).Play();
             this.hideTitleScreen();
         });
-        registerOption(START_WINDOW.MainOptions.Settings, () => {
-            this.adaptiveTabController.showAdaptiveTab("Settings");
-            this.hideTitleScreen();
-        });
         registerOption(START_WINDOW.MainOptions.About, () => {
             START_WINDOW.AboutWindow.Position = new UDim2(0, 0, 1.5, 0);
             START_WINDOW.AboutWindow.Visible = true;
@@ -370,9 +362,6 @@ export default class StartWindowController implements OnInit {
                 Position: new UDim2(0, 0, 0.5, 0),
             }).Play();
             this.hideTitleScreen();
-        });
-        this.adaptiveTabController.tabHidden.connect((tab) => {
-            if (START_WINDOW.Parent === PLAYER_GUI) this.showTitleScreen(true);
         });
 
         START_WINDOW.EmpiresWindow.PublicEmpireWindow.JoinPublicEmpire.Activated.Connect(() => {

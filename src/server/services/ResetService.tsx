@@ -79,7 +79,7 @@ export default class ResetService implements OnInit, OnStart {
         if (item === undefined) return 0;
         const shouldReset = item.getResetLayer() <= resetLayer.order;
         if (shouldReset === true) return 2;
-        else return placedIn === resetLayer.area.id ? 1 : 0;
+        else return placedIn === resetLayer.area ? 1 : 0;
     }
 
     /**
@@ -231,24 +231,24 @@ export default class ResetService implements OnInit, OnStart {
     onInit() {
         if (Sandbox.getEnabled()) return;
 
-        const balanceChanged = (balance: CurrencyBundle) => {
-            for (const [name, resetLayer] of pairs(RESET_LAYERS)) {
-                const reward = this.getResetReward(resetLayer, balance);
-                const isNoBaseAmount = reward.amountPerCurrency.isEmpty();
-                this.resettingPerLayer.set(name, !isNoBaseAmount);
-                resetLayer.gainLabel.Text = isNoBaseAmount ? `0 ${resetLayer.gives}` : reward.toString();
-                const msgLabel = resetLayer.touchPart.BillboardGui.TextLabel;
-                if (isNoBaseAmount === true) {
-                    msgLabel.Text = `You need ${CurrencyBundle.getFormatted(resetLayer.scalesWith, resetLayer.minimum)} to reset`;
-                    msgLabel.LayoutOrder = 2;
-                } else if (msgLabel.LayoutOrder === 2) {
-                    msgLabel.Text = "Stand on the altar for 3 seconds to reset";
-                    msgLabel.LayoutOrder = 1;
-                }
-            }
-        };
-        this.currencyService.balanceChanged.connect(balanceChanged);
-        balanceChanged(this.currencyService.balance);
+        // const balanceChanged = (balance: CurrencyBundle) => {
+        //     for (const [name, resetLayer] of pairs(RESET_LAYERS)) {
+        //         const reward = this.getResetReward(resetLayer, balance);
+        //         const isNoBaseAmount = reward.amountPerCurrency.isEmpty();
+        //         this.resettingPerLayer.set(name, !isNoBaseAmount);
+        //         resetLayer.gainLabel.Text = isNoBaseAmount ? `0 ${resetLayer.gives}` : reward.toString();
+        //         const msgLabel = resetLayer.touchPart.BillboardGui.TextLabel;
+        //         if (isNoBaseAmount === true) {
+        //             msgLabel.Text = `You need ${CurrencyBundle.getFormatted(resetLayer.scalesWith, resetLayer.minimum)} to reset`;
+        //             msgLabel.LayoutOrder = 2;
+        //         } else if (msgLabel.LayoutOrder === 2) {
+        //             msgLabel.Text = "Stand on the altar for 3 seconds to reset";
+        //             msgLabel.LayoutOrder = 1;
+        //         }
+        //     }
+        // };
+        // this.currencyService.balanceChanged.connect(balanceChanged);
+        // balanceChanged(this.currencyService.balance);
 
         this.reset.connect((player, layer, amount) => {
             const resetLayer = RESET_LAYERS[layer];
@@ -269,43 +269,43 @@ export default class ResetService implements OnInit, OnStart {
     }
 
     onStart() {
-        for (const [name, resetLayer] of pairs(RESET_LAYERS)) {
-            resetLayer.touchPart.BillboardGui.TextLabel.LayoutOrder = 2;
-            this.hookTouch(
-                resetLayer.touchPart,
-                new CurrencyBundle().set(resetLayer.scalesWith, resetLayer.minimum),
-                (players, countdown) => {
-                    resetLayer.touchPart.BillboardGui.TextLabel.Text = `Stand on the altar for ${math.floor(countdown * 100) / 100} seconds to reset`;
-                    if (countdown <= 0) {
-                        const reward = this.getResetReward(resetLayer);
-                        if (reward === undefined) return;
-                        const [currency, amount] = reward.getFirst();
-                        if (amount === undefined) return;
-                        Packets.reset.toAllClients(name, amount);
-                        let p: Player | undefined;
-                        const spawnCframe = resetLayer.tpLocation?.CFrame;
-                        for (const player of players) {
-                            p = player;
-                            if (player.Character !== undefined && spawnCframe !== undefined) {
-                                player.Character.PivotTo(spawnCframe);
-                            }
-                        }
-                        if (p === undefined) {
-                            return;
-                        }
-                        this.resettingPerLayer.set(name, false);
-                        this.reset.fire(p, name, amount);
-                        task.delay(2, () => {
-                            if (p === undefined) return;
-                            this.performReset(resetLayer);
-                            this.currencyService.increment(currency!, amount);
-                            for (const player of Players.GetPlayers()) {
-                                pcall(() => BadgeService.AwardBadge(player.UserId, resetLayer.badgeId));
-                            }
-                        });
-                    }
-                },
-            );
-        }
+        // for (const [name, resetLayer] of pairs(RESET_LAYERS)) {
+        //     resetLayer.touchPart.BillboardGui.TextLabel.LayoutOrder = 2;
+        //     this.hookTouch(
+        //         resetLayer.touchPart,
+        //         new CurrencyBundle().set(resetLayer.scalesWith, resetLayer.minimum),
+        //         (players, countdown) => {
+        //             resetLayer.touchPart.BillboardGui.TextLabel.Text = `Stand on the altar for ${math.floor(countdown * 100) / 100} seconds to reset`;
+        //             if (countdown <= 0) {
+        //                 const reward = this.getResetReward(resetLayer);
+        //                 if (reward === undefined) return;
+        //                 const [currency, amount] = reward.getFirst();
+        //                 if (amount === undefined) return;
+        //                 Packets.reset.toAllClients(name, amount);
+        //                 let p: Player | undefined;
+        //                 const spawnCframe = resetLayer.tpLocation?.CFrame;
+        //                 for (const player of players) {
+        //                     p = player;
+        //                     if (player.Character !== undefined && spawnCframe !== undefined) {
+        //                         player.Character.PivotTo(spawnCframe);
+        //                     }
+        //                 }
+        //                 if (p === undefined) {
+        //                     return;
+        //                 }
+        //                 this.resettingPerLayer.set(name, false);
+        //                 this.reset.fire(p, name, amount);
+        //                 task.delay(2, () => {
+        //                     if (p === undefined) return;
+        //                     this.performReset(resetLayer);
+        //                     this.currencyService.increment(currency!, amount);
+        //                     for (const player of Players.GetPlayers()) {
+        //                         pcall(() => BadgeService.AwardBadge(player.UserId, resetLayer.badgeId));
+        //                     }
+        //                 });
+        //             }
+        //         },
+        //     );
+        // }
     }
 }

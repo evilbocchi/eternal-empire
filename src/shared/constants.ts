@@ -1,12 +1,11 @@
 import { Players, SoundService, TextChatService, Workspace } from "@rbxts/services";
 import { Workspace_Waypoints } from "services";
-import { AREAS } from "shared/world/Area";
 
-export function getChallengeGui() {
-    const board = AREAS.SlamoVillage.areaFolder.FindFirstChild("ChallengesBoard");
-    if (board === undefined) return;
-    return board.WaitForChild("SurfaceGui") as ChallengeGui;
-}
+// export function getChallengeGui() {
+//     const board = AREAS.SlamoVillage.areaFolder.FindFirstChild("ChallengesBoard");
+//     if (board === undefined) return;
+//     return board.WaitForChild("SurfaceGui") as ChallengeGui;
+// }
 
 export function getDisplayName(humanoid: Humanoid) {
     return humanoid.DisplayName === "" ? (humanoid.Parent?.Name ?? "???") : humanoid.DisplayName;

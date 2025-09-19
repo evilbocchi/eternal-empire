@@ -853,7 +853,7 @@ export default class DataService implements OnInit, OnPlayerJoined {
             }
         });
         pcall(() => {
-            BadgeService.AwardBadge(player.UserId, 3498765777753358); // join badge
+            BadgeService.AwardBadge(player.UserId, 3498765777753358); // join badge // TODO: change badge
         });
 
         const playerProfile = this.loadPlayerProfile(player.UserId);
@@ -928,9 +928,7 @@ export default class DataService implements OnInit, OnPlayerJoined {
         task.spawn(() => {
             if (IS_SINGLE_SERVER || !IS_PUBLIC_SERVER) {
                 while (task.wait(60)) {
-                    Packets.savingEmpire.toAllClients(100);
-                    const success = this.saveEmpireProfile(this.empireId);
-                    Packets.savingEmpire.toAllClients(success ? 200 : 500);
+                    this.saveEmpireProfile(this.empireId);
                 }
             }
         });

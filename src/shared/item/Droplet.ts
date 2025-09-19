@@ -32,21 +32,21 @@ declare global {
 
 export default class Droplet {
     static readonly STORAGE = (function () {
+        const key = "Droplets";
+        const cached = Workspace.FindFirstChild(key);
+        if (cached !== undefined) return cached as Model;
+
         if (IS_SERVER || IS_CI) {
-            if (IS_CI) {
-                const cached = Workspace.FindFirstChild("Droplets");
-                if (cached !== undefined) return cached as Model;
-            }
             const storage = new Instance("Model");
             storage.ModelStreamingMode = Enum.ModelStreamingMode.Persistent;
-            storage.Name = "Droplets";
+            storage.Name = key;
             storage.Parent = Workspace;
             if (IS_CI) {
                 Debris.AddItem(storage, 30); // Automatically clean up the storage after 30 seconds
             }
             return storage;
         }
-        return Workspace.WaitForChild("Droplets") as Model;
+        return Workspace.WaitForChild(key) as Model;
     })();
 
     static readonly DROPLETS = new Array<Droplet>();

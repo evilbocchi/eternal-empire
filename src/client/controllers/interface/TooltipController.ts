@@ -92,32 +92,7 @@ export class Tooltip {
         itemSlot.Visible = item !== undefined;
 
         if (item !== undefined) {
-            const difficulty = item.difficulty;
-            itemSlot.TitleLabel.Text = item.name;
-
-            let description = item.tooltipDescription ?? item.description;
-
-            // Use unique item description if this is a unique item
-            if (this.uuid !== undefined) {
-                const uniqueInstance = Packets.uniqueInstances.get()?.get(this.uuid);
-                if (uniqueInstance !== undefined) {
-                    description = item.trait(Unique).formatWithPots(description, uniqueInstance);
-                }
-            }
-
-            const builder = buildRichText(
-                undefined,
-                item.format(description),
-                Color3.fromRGB(195, 195, 195),
-                18,
-                "Medium",
-            );
-            builder.appendAll(this.metadata!.builder);
-            itemSlot.MessageLabel.Text = builder.toString();
-
-            ItemSlot.loadDifficultyLabel(itemSlot.Difficulty, difficulty);
-            ItemSlot.colorItemSlot(itemSlot, difficulty);
-            return;
+            // Moved to React tooltips
         }
 
         TOOLTIP_WINDOW.MessageLabel.Text = this.message;
@@ -254,7 +229,5 @@ export default class TooltipController implements OnInit, OnPhysics {
                 item.description = description;
             }
         }
-
-        ItemSlot.hookMetadata(METADATA_PER_ITEM);
     }
 }

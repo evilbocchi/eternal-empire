@@ -6,14 +6,14 @@ import { WAYPOINTS } from "shared/constants";
 import { Server } from "shared/item/ItemUtils";
 import LostPendant from "shared/items/0/winsome/LostPendant";
 import FreddysUpgrader from "shared/items/negative/friendliness/FreddysUpgrader";
-import { AREAS } from "shared/world/Area";
+import BasicObstacleCourse from "shared/world/nodes/BasicObstacleCourse";
 
 const freddyToRequest = Freddy.createPathfindingOperation(
     Freddy.rootPart?.CFrame,
     WAYPOINTS.AHelpingHandFreddyRequest.CFrame,
 );
 
-const obstacleCourse = AREAS.BarrenIslands.map.WaitForChild("ObstacleCourse");
+const obstacleCourse = BasicObstacleCourse.waitForInstance();
 const ladder = obstacleCourse.WaitForChild("Ladder");
 const ladderHandles = new Array<BasePart>();
 for (let i = 1; i < 9; i++) {

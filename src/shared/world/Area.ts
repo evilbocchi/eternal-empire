@@ -1,7 +1,8 @@
-import { RunService, Workspace } from "@rbxts/services";
+import { RunService } from "@rbxts/services";
 import { IS_CI } from "shared/Context";
 import Sandbox from "shared/Sandbox";
 import BuildBounds from "shared/placement/BuildBounds";
+import { SingleWorldNode } from "shared/world/nodes/WorldNode";
 
 declare global {
     /**
@@ -75,26 +76,19 @@ export default class Area {
      * The display name of the area.
      * This is used for UI elements and identification.
      */
-
     readonly name: string;
-    /**
-     * The map instance representing the area in the game world.
-     * This is where all the area-specific models and parts are located.
-     */
-    readonly map = Workspace as Instance;
 
     /**
-     * The droplet limit for this area.
-     * This is an IntValue that can be modified by game mechanics.
-     * It represents the maximum number of droplets that can exist in this area.
+     * The reference to the folder in the Workspace that contains all area-related parts and models.
      */
-    readonly dropletLimit = Area.globalDropletLimit;
+    readonly worldNode: SingleWorldNode;
 
     /**
-     * Whether this area has been reached by the player.
-     * This is a BoolValue that indicates if the area is accessible.
+     * The maximum number of droplets allowed in this area.
      */
-    readonly unlocked = Area.globalUnlocked;
+    readonly defaultDropletLimit?: number;
+
+    private readonly dropletLimitBoosts = new Map<string, number>();
 
     /**
      * Whether this area will show in item descriptions and other UI elements.
@@ -107,6 +101,11 @@ export default class Area {
     readonly buildBounds: BuildBounds | undefined;
 
     // UI and visual components
+
+    /**
+     * @deprecated TODO
+     */
+    areaFolder: Folder;
 
     /**
      * The physical board model in the game world.
@@ -123,9 +122,8 @@ export default class Area {
     /**
      * The lighting configuration for this area.
      * This is a custom Lighting object that can modify the game's lighting settings.
-     * It is loaded from a ModuleScript in the area folder if available.
      */
-    lightingConfiguration: Lighting | undefined;
+    lightingConfiguration: Partial<Lighting> | undefined;
 
     /**
      * Returns the spawn location for this area.
@@ -144,7 +142,7 @@ export default class Area {
      * @returns The Grid BasePart or undefined if none exists
      */
     getGrid() {
-        return this.areaFolder.FindFirstChild("Grid") as BasePart | undefined;
+        return this.areaFolder.FindFirstChild("BuildGrid") as BasePart | undefined;
     }
 
     /**
@@ -169,103 +167,142 @@ export default class Area {
 
     /**
      * Creates a new Area instance.
-     *
-     * @param areaFolder The folder containing all area components and configuration
      * @param buildable Whether items can be placed/built in this area
      */
-    constructor(
-        public readonly areaFolder: Instance,
-        buildable: boolean,
-    ) {
-        if (!areaFolder.IsA("Folder")) {
-            error(areaFolder.Name + " is not a folder.");
-        }
-        const id = areaFolder.Name as AreaId;
-        this.id = id;
+    constructor({
+        id,
+        name,
+        dropletLimit,
+        buildable,
+        hidden,
+        lightingConfiguration,
+    }: {
+        id: string;
+        name?: string;
+        dropletLimit?: number;
+        buildable: boolean;
+        hidden?: boolean;
+        lightingConfiguration?: Partial<Lighting>;
+    }) {
+        this.id = id as AreaId;
+        this.name = name ?? id;
+        this.worldNode = new SingleWorldNode(id);
+        this.hidden = hidden ?? false;
+        this.defaultDropletLimit = dropletLimit;
+        this.lightingConfiguration = lightingConfiguration;
+
+        this.areaFolder = this.worldNode.waitForInstance() as Folder;
 
         // Skip further initialization in sandbox mode
         if (Sandbox.getEnabled() || IS_CI) {
-            this.name = id;
             return this;
         }
 
-        // Initialize area properties from children in the area folder
-        this.name = (areaFolder.WaitForChild("Name") as StringValue).Value;
-        this.map = areaFolder.WaitForChild("Map") as Folder;
-        this.dropletLimit = areaFolder.WaitForChild("DropletLimit") as IntValue;
-        this.dropletLimit.SetAttribute("Default", this.dropletLimit.Value);
         this.buildBounds = BuildBounds.fromArea(this);
-
-        // Initialize UI components if they exist
-        this.islandInfoBoard = (
-            buildable ? areaFolder.WaitForChild("IslandInfoBoard") : areaFolder.FindFirstChild("IslandInfoBoard")
-        ) as Model | undefined;
-        this.boardGui = this.islandInfoBoard?.WaitForChild("GuiPart").FindFirstChildOfClass("SurfaceGui") as
-            | BoardGui
-            | undefined;
-        this.unlocked = areaFolder.WaitForChild("Unlocked") as BoolValue;
-        this.hidden = (areaFolder.FindFirstChild("Hidden") as BoolValue | undefined)?.Value === true;
-
-        // Load custom lighting configuration if available
-        const lightingConfigModule = areaFolder.FindFirstChild("LightingConfiguration");
-        if (lightingConfigModule !== undefined) {
-            this.lightingConfiguration = require(lightingConfigModule as ModuleScript) as Lighting;
-        }
-
-        // Server-side droplet limit update loop
-        if (IS_SERVER) {
-            task.spawn(() => {
-                while (task.wait(1)) {
-                    // Calculate the total droplet limit by adding up all modifiers
-                    let limit = this.dropletLimit.GetAttribute("Default") as number;
-                    for (const a of this.dropletLimit.GetChildren()) {
-                        if (a.IsA("IntValue")) {
-                            limit += a.Value;
-                        }
-                    }
-                    this.dropletLimit.Value = limit;
-                }
-            });
-        }
     }
-}
 
-/**
- * Helper function to create an Area instance.
- * Uses different initialization strategies depending on whether sandbox mode is enabled.
- *
- * @param name Name of the area folder in Workspace
- * @param buildable Whether items can be placed in this area
- * @returns A new Area instance
- */
-function createArea(name: string, buildable: boolean) {
-    if ((Sandbox.getEnabled() && IS_SERVER) || IS_CI) {
-        // In sandbox mode on the server, create a new folder
-        let folder = Workspace.FindFirstChild(name);
-        if (!folder) {
-            folder = new Instance("Folder");
-            folder.Name = name;
-            folder.Parent = Workspace;
+    boostDropletLimit(source: string, amount?: number) {
+        if (amount === undefined) {
+            this.dropletLimitBoosts.delete(source);
+            return;
         }
-        return new Area(folder, buildable);
+        this.dropletLimitBoosts.set(source, amount);
     }
-    // Otherwise use existing folder from Workspace
-    return new Area(Workspace.WaitForChild(name), buildable);
+
+    getDropletLimit() {
+        let limit = this.defaultDropletLimit ?? 0;
+        for (const [, boost] of this.dropletLimitBoosts) {
+            limit += boost;
+        }
+        return limit;
+    }
 }
 
 /**
  * Collection of all game areas.
  * Provides easy access to all areas for other systems.
- * The boolean in createArea indicates if the area is buildable (items can be placed).
  */
 export const AREAS = {
-    ToxicWaterfall: createArea("ToxicWaterfall", false),
-    MagicalHideout: createArea("MagicalHideout", false),
-    SecretLab: createArea("SecretLab", false),
-    IntermittentIsles: createArea("IntermittentIsles", true),
-    Eden: createArea("Eden", false),
+    // Intermediate areas
+    ToxicWaterfall: new Area({
+        id: "ToxicWaterfall",
+        name: "Toxic Waterfall",
+        buildable: false,
+        hidden: true,
+    }),
+    MagicalHideout: new Area({
+        id: "MagicalHideout",
+        name: "Magical Hideout",
+        buildable: false,
+        hidden: true,
+    }),
+    SecretLab: new Area({
+        id: "SecretLab",
+        name: "Secret Laboratory",
+        buildable: false,
+        hidden: true,
+        lightingConfiguration: {
+            Ambient: Color3.fromRGB(31, 31, 31),
+            OutdoorAmbient: Color3.fromRGB(0, 0, 0),
+            EnvironmentDiffuseScale: 0,
+            EnvironmentSpecularScale: 0,
+            FogEnd: 70,
+            FogStart: 20,
+            FogColor: Color3.fromRGB(0, 0, 0),
+            Brightness: 0,
+        },
+    }),
 
-    BarrenIslands: createArea("BarrenIslands", true),
-    SlamoVillage: createArea("SlamoVillage", true),
-    SkyPavilion: createArea("SkyPavilion", true),
+    // Secondary areas
+    IntermittentIsles: new Area({
+        id: "IntermittentIsles",
+        name: "Intermittent Isles",
+        dropletLimit: 1,
+        buildable: true,
+        hidden: false,
+    }),
+    AbandonedRig: new Area({
+        id: "AbandonedRig",
+        name: "Abandoned Rig",
+        dropletLimit: 15,
+        buildable: true,
+        hidden: false,
+    }),
+    DespairPlantation: new Area({
+        id: "DespairPlantation",
+        name: "Despair Plantation",
+        dropletLimit: 75,
+        buildable: true,
+        hidden: false,
+    }),
+    Eden: new Area({
+        id: "Eden",
+        name: "Eden",
+        dropletLimit: 5,
+        buildable: true,
+        hidden: false,
+    }),
+
+    // Primary areas
+    BarrenIslands: new Area({
+        id: "BarrenIslands",
+        name: "Barren Islands",
+        dropletLimit: 75,
+        buildable: true,
+        hidden: false,
+    }),
+    SlamoVillage: new Area({
+        id: "SlamoVillage",
+        name: "Slamo Village",
+        dropletLimit: 40,
+        buildable: true,
+        hidden: false,
+    }),
+    SkyPavilion: new Area({
+        id: "SkyPavilion",
+        name: "Sky Pavilion",
+        dropletLimit: 20,
+        buildable: true,
+        hidden: false,
+    }),
 };

@@ -1,18 +1,16 @@
 import { BaseOnoeNum, OnoeNum } from "@antivivi/serikanum";
 import { buildRichText, combineHumanReadable, formatRichText } from "@antivivi/vrldk";
 import StringBuilder from "@rbxts/stringbuilder";
+import { IS_SERVER } from "shared/Context";
 import Packets from "shared/Packets";
-import Sandbox from "shared/Sandbox";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import { CURRENCY_DETAILS } from "shared/currency/CurrencyDetails";
 import { RESET_LAYERS } from "shared/currency/mechanics/ResetLayer";
 import Item from "shared/item/Item";
 import Unique from "shared/item/traits/Unique";
 import Items from "shared/items/Items";
-import { AREAS } from "shared/world/Area";
 
-const RESET_LAYERS_UNLOCKED = AREAS.SlamoVillage.unlocked;
-const SANDBOX_ENABLED = Sandbox.getEnabled();
+let RESET_LAYERS_UNLOCKED = false;
 
 export default class ItemMetadata {
     static readonly DESCRIPTION_PER_ITEM = (() => {
@@ -65,7 +63,7 @@ export default class ItemMetadata {
     }
 
     spacing() {
-        if (this.item.formula !== undefined || RESET_LAYERS_UNLOCKED.Value) {
+        if (this.item.formula !== undefined || RESET_LAYERS_UNLOCKED) {
             this.builder[ItemMetadata.INDICES.SPACING] = `\n<font size="7"> </font>`;
         } else {
             this.builder[ItemMetadata.INDICES.SPACING] = "";
@@ -121,7 +119,7 @@ export default class ItemMetadata {
     placeableAreas(color = Color3.fromRGB(248, 255, 221)) {
         const item = this.item;
         const isEmpty = item.placeableAreas.isEmpty();
-        if (item.bounds !== undefined || (!RESET_LAYERS_UNLOCKED.Value && !isEmpty && !SANDBOX_ENABLED)) {
+        if (item.bounds !== undefined || (!RESET_LAYERS_UNLOCKED && !isEmpty)) {
             this.builder[ItemMetadata.INDICES.PLACEABLE_AREAS] = "";
             return;
         }
@@ -135,7 +133,7 @@ export default class ItemMetadata {
         const builder = new StringBuilder("Placeable in ");
         const vals = new Array<string>();
         for (const area of item.placeableAreas) {
-            if (area.hidden && !SANDBOX_ENABLED) continue;
+            if (area.hidden) continue;
             vals.push(area.name);
         }
         builder.append(combineHumanReadable(...vals));
@@ -145,7 +143,7 @@ export default class ItemMetadata {
     }
 
     resetLayer(color = Color3.fromRGB(255, 156, 99)) {
-        if (RESET_LAYERS_UNLOCKED.Value === false) {
+        if (RESET_LAYERS_UNLOCKED === false) {
             this.builder[ItemMetadata.INDICES.RESET_LAYER] = "";
             return;
         }
@@ -254,5 +252,13 @@ export default class ItemMetadata {
             }
         }
         return item.format(description);
+    }
+
+    static {
+        if (!IS_SERVER) {
+            Packets.unlockedAreas.observe((areas) => {
+                RESET_LAYERS_UNLOCKED = areas.has("SlamoVillage");
+            });
+        }
     }
 }

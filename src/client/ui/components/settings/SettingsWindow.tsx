@@ -12,6 +12,7 @@ import { getAsset } from "shared/asset/AssetMap";
 import { playSound } from "shared/asset/GameAssets";
 import Packets from "shared/Packets";
 import SingleDocumentManager from "../sidebar/SingleDocumentManager";
+import SerikaNum from "@antivivi/serikanum";
 
 export function SettingsButton() {
     const tooltipProps = useHotkeyWithTooltip({
@@ -38,7 +39,15 @@ export function SettingsButton() {
 export default function SettingsWindow() {
     const { id, visible } = useSingleDocument({ id: "Settings", priority: 10 });
     const [selectedHotkey, setSelectedHotkey] = useState<string | undefined>();
-    const settings = useProperty(Packets.settings);
+    const [settings, setSettings] = useState(Packets.settings.get());
+
+    useEffect(() => {
+        const connection = Packets.settings.observe((newSettings) => {
+            SerikaNum.changeDefaultAbbreviation(newSettings.ScientificNotation === true ? "scientific" : "suffix");
+            setSettings(newSettings);
+        });
+        return () => connection.disconnect();
+    }, []);
 
     // Cleanup hotkey setting state when component unmounts or window closes
     useEffect(() => {

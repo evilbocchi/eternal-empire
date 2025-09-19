@@ -26,6 +26,7 @@ import BuildBounds from "shared/placement/BuildBounds";
 import ItemPlacement from "shared/placement/ItemPlacement";
 import Sandbox from "shared/Sandbox";
 import { AREAS } from "shared/world/Area";
+import BuildGrid from "shared/world/nodes/BuildGrid";
 
 /**
  * Controller responsible for managing build mode, item placement, selection, and related UI and hotkeys.
@@ -62,7 +63,6 @@ export default class BuildController implements OnInit, OnStart {
     animationsEnabled = true;
     debounce = 0;
     readonly MOVETWEENINFO = new TweenInfo(0.25, Enum.EasingStyle.Back, Enum.EasingDirection.Out);
-    readonly OPTIONSTWEENINFO = new TweenInfo(0.3, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out);
     private lastRotate = 0;
     private lastMovedTo = 0;
     private lastMovedToCFrame = new CFrame();
@@ -70,7 +70,7 @@ export default class BuildController implements OnInit, OnStart {
     private lastCameraCFrame = new CFrame();
 
     // State change listeners for React integration
-    private stateChangeCallbacks = new Set<() => void>();
+    private readonly stateChangeCallbacks = new Set<() => void>();
 
     hasSelection(): boolean {
         return !this.selected.isEmpty();
@@ -134,11 +134,11 @@ export default class BuildController implements OnInit, OnStart {
             }
             this.preselectCFrame = undefined;
             this.mainSelected = undefined;
-            this.setGridTransparency(1);
+            BuildGrid.setTransparency(1);
             Workspace.SetAttribute("BuildMode", false);
             DocumentManager.setVisible("Build", false);
         } else {
-            this.setGridTransparency(0.8);
+            BuildGrid.setTransparency(0.8);
             Workspace.SetAttribute("BuildMode", true);
             DocumentManager.setVisible("Build", true);
         }
@@ -200,20 +200,6 @@ export default class BuildController implements OnInit, OnStart {
         for (const [model] of this.selected) model.Destroy();
         this.selected.clear();
         if (noRefresh !== true) this.refresh();
-    }
-
-    /**
-     * Sets the transparency of build area grids.
-     * @param transparency The transparency value to set.
-     */
-    setGridTransparency(transparency: number) {
-        for (const [_id, area] of pairs(AREAS)) {
-            const grid = area.getGrid();
-            if (grid === undefined) continue;
-            const texture = grid.FindFirstChildOfClass("Texture");
-            if (texture === undefined) continue;
-            TweenService.Create(texture, this.OPTIONSTWEENINFO, { Transparency: transparency }).Play();
-        }
     }
 
     /**

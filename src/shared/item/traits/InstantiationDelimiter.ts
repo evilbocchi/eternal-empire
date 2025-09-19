@@ -1,7 +1,7 @@
-import { AREAS } from "shared/world/Area";
+import { getInstanceInfo } from "@antivivi/vrldk";
 import Item from "shared/item/Item";
 import ItemTrait from "shared/item/traits/ItemTrait";
-import { getInstanceInfo } from "@antivivi/vrldk";
+import { AREAS } from "shared/world/Area";
 
 declare global {
     interface ItemTraits {
@@ -20,17 +20,18 @@ export default class InstantiationDelimiter extends ItemTrait {
         const area = model.GetAttribute("Area") as AreaId | undefined;
         if (area === undefined) throw `InstantiationDelimiter: ${model.Name} is not in an area`;
 
-        const indicator = new Instance("IntValue");
-        indicator.Name = model.Name;
-        indicator.Parent = AREAS[area].dropletLimit;
-        item.repeat(model, () => {
-            const actual =
-                getInstanceInfo(model, "Maintained") === true
-                    ? (getInstanceInfo(model, "DropletIncrease") ?? delimiter.dropletIncrease)
-                    : 0;
-            if (actual !== indicator.Value && actual !== undefined) indicator.Value = actual;
-        });
-        model.Destroying.Once(() => indicator.Destroy());
+        item.repeat(
+            model,
+            () => {
+                const actual =
+                    getInstanceInfo(model, "Maintained") === true
+                        ? (getInstanceInfo(model, "DropletIncrease") ?? delimiter.dropletIncrease)
+                        : 0;
+                AREAS[area].boostDropletLimit(model.Name, actual);
+            },
+            1,
+        );
+        model.Destroying.Once(() => AREAS[area].boostDropletLimit(model.Name));
         item.maintain(model);
     }
 

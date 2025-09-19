@@ -6,7 +6,6 @@ import useSingleDocument from "client/ui/components/sidebar/useSingleDocumentWin
 import TechWindow from "client/ui/components/window/TechWindow";
 import { RobotoSlab, RobotoSlabMedium } from "client/ui/GameFonts";
 import { getAsset } from "shared/asset/AssetMap";
-import { playSound } from "shared/asset/GameAssets";
 import Command from "shared/commands/Command";
 
 interface CommandsWindowProps {

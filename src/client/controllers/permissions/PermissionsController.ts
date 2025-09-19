@@ -15,6 +15,7 @@ import { Controller, OnInit } from "@flamework/core";
 import CameraShaker from "@rbxts/camera-shaker";
 import { UserInputService } from "@rbxts/services";
 import EffectController from "client/controllers/world/EffectController";
+import ShakeController from "client/controllers/world/ShakeController";
 import { playSound } from "shared/asset/GameAssets";
 import { IS_STUDIO } from "shared/Context";
 import Items from "shared/items/Items";
@@ -28,7 +29,7 @@ import Packets from "shared/Packets";
  */
 @Controller()
 export default class PermissionsController implements OnInit {
-    constructor(private effectController: EffectController) {}
+    constructor(private shakeController: ShakeController) {}
 
     /**
      * Initializes the PermissionsController, sets up listeners for donations and game modifications.
@@ -36,7 +37,7 @@ export default class PermissionsController implements OnInit {
     onInit() {
         Packets.donationGiven.fromServer(() => {
             playSound("PowerUp.mp3");
-            this.effectController.camShake.Shake(CameraShaker.Presets.Bump);
+            this.shakeController.shake();
         });
 
         Packets.modifyGame.fromServer((param) => {

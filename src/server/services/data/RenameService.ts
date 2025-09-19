@@ -122,7 +122,7 @@ export class RenameService implements OnInit {
 
         // Play rename effects
         playSound("MagicPowerUp.mp3", Workspace);
-        Packets.camShake.toAllClients();
+        Packets.shakeCamera.toAllClients("Bump");
         this.chatHookService.sendServerMessage("The empire has been renamed to: " + name);
 
         // Update empire data
