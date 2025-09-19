@@ -11,39 +11,15 @@
  *
  * @since 1.0.0
  */
-import { combineHumanReadable } from "@antivivi/vrldk";
 import { Controller, OnInit } from "@flamework/core";
 import ReactRoblox from "@rbxts/react-roblox";
-import { Debris, ReplicatedStorage, TweenService } from "@rbxts/services";
+import { Debris, TweenService } from "@rbxts/services";
 import { INTERFACE } from "client/controllers/core/UIController";
 import EffectController from "client/controllers/world/EffectController";
-import { questState } from "client/ui/components/quest/QuestState";
 import { ASSETS, playSound } from "shared/asset/GameAssets";
-import Items from "shared/items/Items";
 import Packets from "shared/Packets";
 
 declare global {
-    type QuestOption = Frame & {
-        UIStroke: UIStroke;
-        Content: Frame & {
-            CurrentStepLabel: TextLabel;
-            RewardLabel: TextLabel;
-            LengthLabel: TextLabel;
-            Track: TextButton & {
-                UIStroke: UIStroke;
-            };
-        };
-        Dropdown: TextButton & {
-            ImageLabel: ImageLabel;
-            LevelLabel: TextLabel & {
-                UIStroke: UIStroke;
-            };
-            NameLabel: TextLabel & {
-                UIStroke: UIStroke;
-            };
-        };
-    };
-
     type LootTableItemSlot = Frame & {
         ViewportFrame: ViewportFrame;
         TitleLabel: TextLabel;
@@ -54,9 +30,6 @@ declare global {
 
     interface Assets {
         LootTableItemSlot: LootTableItemSlot;
-        QuestsWindow: Folder & {
-            QuestOption: QuestOption;
-        };
     }
 }
 
@@ -67,35 +40,6 @@ export type CompletionFrame = Frame & {
     };
     RewardLabel: TextLabel & {
         UIStroke: UIStroke;
-    };
-};
-
-export type LPUpgradeOption = Frame & {
-    Button: ImageButton & {
-        ValueLabel: TextLabel;
-    };
-    DescriptionLabel: TextLabel;
-};
-
-export const TRACKED_QUEST_WINDOW = INTERFACE.WaitForChild("TrackedQuestWindow") as Frame & {
-    Background: Folder & {
-        Frame: Frame;
-    };
-    Completion: CompletionFrame;
-    ChallengeCompletion: CompletionFrame;
-    Reset: Frame & {
-        ImageLabel: ImageLabel;
-        TextLabel: TextLabel & {
-            UIStroke: UIStroke;
-        };
-        AmountLabel: TextLabel & {
-            UIStroke: UIStroke;
-        };
-    };
-    DescriptionLabel: TextLabel;
-    TitleLabel: TextLabel;
-    ProgressBar: CanvasGroup & {
-        Bar: Bar;
     };
 };
 
@@ -130,149 +74,6 @@ export default class QuestsController implements OnInit {
         this.questWindowContainer.Parent = INTERFACE;
     }
 
-    /**
-     * Shows the standalone quest window.
-     */
-    showQuestWindow() {
-        if (this.isQuestWindowVisible) return;
-
-        this.isQuestWindowVisible = true;
-        playSound("MenuOpen.mp3");
-    }
-
-    /**
-     * Hides the standalone quest window.
-     */
-    hideQuestWindow() {
-        if (!this.isQuestWindowVisible) return;
-
-        this.isQuestWindowVisible = false;
-        playSound("MenuClose.mp3");
-    }
-
-    /**
-     * Toggles the standalone quest window visibility.
-     * @returns True if the window was shown, false if hidden.
-     */
-    toggleQuestWindow(): boolean {
-        if (this.isQuestWindowVisible) {
-            this.hideQuestWindow();
-            return false;
-        } else {
-            this.showQuestWindow();
-            return true;
-        }
-    }
-
-    /**
-     * Returns the human-readable name for a quest length value.
-     * @param length The quest length value.
-     */
-    getLengthName(length: number) {
-        switch (length) {
-            case 0:
-                return "Tiny";
-            case 1:
-                return "Short";
-            case 2:
-                return "Medium";
-            case 3:
-                return "Long";
-            case 4:
-                return "Journey";
-            default:
-                return "???";
-        }
-    }
-
-    /**
-     * Returns the color associated with a quest length value.
-     * @param length The quest length value.
-     */
-    getLengthColor(length: number) {
-        switch (length) {
-            case 0:
-                return Color3.fromRGB(143, 255, 115);
-            case 1:
-                return Color3.fromRGB(0, 255, 56);
-            case 2:
-                return Color3.fromRGB(255, 250, 0);
-            case 3:
-                return Color3.fromRGB(255, 123, 28);
-            case 4:
-                return Color3.fromRGB(255, 20, 20);
-            default:
-                return Color3.fromRGB(255, 255, 255);
-        }
-    }
-
-    /**
-     * Returns the formatted quest description for a given quest and stage.
-     * @param id The quest ID.
-     * @param quest The quest info.
-     * @param stageNum The stage number.
-     */
-    getFormattedDescription(id: string, quest: QuestInfo, stageNum: number) {
-        if (stageNum < 0) {
-            return "Quest complete.";
-        }
-        const stage = quest.stages[stageNum];
-        let desc = stage.description;
-        if (desc === undefined) {
-            return "<no description provided>";
-        }
-        const position = ReplicatedStorage.GetAttribute(id + stageNum) as Vector3 | undefined;
-        if (position !== undefined) {
-            desc = desc.gsub(
-                "%%coords%%",
-                `(${math.round(position.X)}, ${math.round(position.Y)}, ${math.round(position.Z)})`,
-            )[0];
-        }
-        return desc;
-    }
-
-    /**
-     * Updates the tracked quest window with the current quest and stage.
-     * Now only handles beam positioning and sound effects since React handles UI.
-     * @param questId The quest ID.
-     * @param index The quest stage index (optional).
-     */
-    refreshTrackedQuestWindow(questId: string | undefined, index?: number) {
-        const hasQuest = questId !== undefined && (index === undefined || index > -1);
-        if (!hasQuest) {
-            this.indexer = undefined;
-            return;
-        }
-        const quest = Packets.questInfo.get()?.get(questId);
-        if (quest === undefined) {
-            warn("Quest not found");
-            return;
-        }
-        if (index === undefined) {
-            index = Packets.stagePerQuest.get()?.get(questId) ?? 0;
-        }
-
-        // Play sound for quest progression
-        if (this.oldIndex !== index && (questId !== "NewBeginnings" || index !== 0)) {
-            playSound("QuestNextStage.mp3");
-        }
-        this.oldIndex = index;
-        this.indexer = questId + index;
-    }
-
-    getRewardLabel(reward: Reward) {
-        const items = new Array<string>();
-        if (reward.xp !== undefined) {
-            items.push(`${reward.xp} XP`);
-        }
-        if (reward.items !== undefined) {
-            for (const [item, amount] of reward.items) {
-                items.push(`${amount} ${Items.getItem(item)?.name}`);
-            }
-        }
-        return combineHumanReadable(...items);
-    }
-
     showCompletion(completionFrame: CompletionFrame, message: string) {
         playSound("QuestComplete.mp3");
         // TODO: Update React components to show completion message
@@ -296,7 +97,6 @@ export default class QuestsController implements OnInit {
     }
 
     onInit() {
-        // Remove old UI management code - now handled by React components
         let lastLevel = -1;
         Packets.level.observe((level) => {
             if (lastLevel > -1) {
@@ -321,14 +121,6 @@ export default class QuestsController implements OnInit {
             }
         });
 
-        //this.trackedQuestChanged.connect((questId) => this.refreshTrackedQuestWindow(questId));
-
-        Packets.stagePerQuest.observe((quests) => {
-            const trackedQuest = questState.getTrackedQuest();
-            const index = trackedQuest === undefined ? 0 : (quests.get(trackedQuest) ?? 0);
-            this.indexer = trackedQuest === undefined ? undefined : trackedQuest + index;
-            this.refreshTrackedQuestWindow(trackedQuest, index);
-        });
         // TODO: Implement reward notifications in React components
         Packets.showXpReward.fromServer((xp) => {
             playSound("UnlockItem.mp3");

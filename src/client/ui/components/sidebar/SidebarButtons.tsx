@@ -13,14 +13,13 @@
  * - Glow effects for active states
  */
 
-import React, { useCallback, useRef, useState } from "@rbxts/react";
+import React, { useCallback, useEffect, useRef, useState } from "@rbxts/react";
 import { TweenService } from "@rbxts/services";
 import useHotkeyWithTooltip from "client/ui/components/hotkeys/useHotkeyWithTooltip";
 import SingleDocumentManager from "client/ui/components/sidebar/SingleDocumentManager";
-import { useWindow } from "client/ui/components/window/WindowManager";
+import { useDocument } from "client/ui/components/window/WindowManager";
 import { RobotoSlabBold } from "client/ui/GameFonts";
 import { getAsset } from "shared/asset/AssetMap";
-import { playSound } from "shared/asset/GameAssets";
 
 interface SidebarButtonProps {
     /** Button configuration data */
@@ -224,32 +223,23 @@ export default function SidebarButtons({
     animationsEnabled = true,
     buttons = SidebarButtonConfiguration,
 }: SidebarButtonsProps) {
-    const [visible, setVisible] = useState(true);
     const sidebarRef = useRef<Frame>();
     const size = new UDim2(0.025, 40, 0.5, 0);
     const sizeX = new UDim2(size.Width, new UDim(0, 0));
     const closePos = position.sub(sizeX);
 
-    useWindow({
+    const { visible } = useDocument({
         id: "Sidebar",
-        visible,
-        onOpen: () => {
-            setVisible(true);
-            sidebarRef.current?.TweenPosition(position, Enum.EasingDirection.Out, Enum.EasingStyle.Quart, 1, true);
-        },
-        onClose: () => {
-            setVisible(false);
-            sidebarRef.current?.TweenPosition(closePos, Enum.EasingDirection.In, Enum.EasingStyle.Quart, 1, true);
-        },
         priority: -1, // Negative priority so close hotkey does not work
     });
 
-    // Button click handler
-    const handleButtonClick = useCallback((buttonName: string) => {
-        const result = SingleDocumentManager.toggleWindow(buttonName);
-        if (result) playSound("MenuOpen.mp3");
-        else playSound("MenuClose.mp3");
-    }, []);
+    useEffect(() => {
+        if (visible) {
+            sidebarRef.current?.TweenPosition(position, Enum.EasingDirection.Out, Enum.EasingStyle.Quart, 1, true);
+        } else {
+            sidebarRef.current?.TweenPosition(closePos, Enum.EasingDirection.In, Enum.EasingStyle.Quart, 1, true);
+        }
+    }, [visible]);
 
     return (
         <frame
@@ -275,7 +265,7 @@ export default function SidebarButtons({
                         key={button.label}
                         data={button}
                         layoutOrder={index + 1}
-                        onClick={() => handleButtonClick(button.label)}
+                        onClick={() => SingleDocumentManager.toggle(button.label)}
                         animationsEnabled={animationsEnabled}
                     />
                 ))}

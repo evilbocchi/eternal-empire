@@ -5,8 +5,7 @@
  * Replaces the traditional Roblox Studio ItemSlot with React implementation.
  */
 
-import React, { forwardRef, Ref, useRef } from "@rbxts/react";
-import { ItemViewportManagement } from "client/ui/components/item/ItemViewport";
+import React, { forwardRef, useRef } from "@rbxts/react";
 import { useItemViewport } from "client/ui/components/item/useCIViewportManagement";
 import { useItemTooltip } from "client/ui/components/tooltip/TooltipManager";
 import { RobotoSlab } from "client/ui/GameFonts";

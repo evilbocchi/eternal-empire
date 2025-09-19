@@ -1,7 +1,6 @@
 import { OnoeNum } from "@antivivi/serikanum";
 import React, { Fragment, useEffect, useRef, useState } from "@rbxts/react";
 import displayBalanceCurrency from "client/ui/components/balance/displayBalanceCurrency";
-import { ItemViewportManagement } from "client/ui/components/item/ItemViewport";
 import { useItemViewport } from "client/ui/components/item/useCIViewportManagement";
 import { RobotoSlabHeavy } from "client/ui/GameFonts";
 import { getAsset } from "shared/asset/AssetMap";
@@ -85,14 +84,16 @@ function ShopPriceOption({
                     SizeConstraint={Enum.SizeConstraint.RelativeYY}
                 />
             ) : (
-                <viewportframe
-                    ref={viewportRef}
-                    BackgroundTransparency={1}
-                    Size={new UDim2(1, 0, 1, 0)}
-                    SizeConstraint={Enum.SizeConstraint.RelativeYY}
-                />
+                item !== undefined && (
+                    <viewportframe
+                        ref={viewportRef}
+                        BackgroundTransparency={1}
+                        Size={new UDim2(1, 0, 1, 0)}
+                        SizeConstraint={Enum.SizeConstraint.RelativeYY}
+                    />
+                )
             )}
-            {(currency !== undefined || item !== undefined) && (
+            {currency !== undefined || item !== undefined ? (
                 <textlabel
                     ref={textLabelRef}
                     AutomaticSize={Enum.AutomaticSize.X}
@@ -100,6 +101,17 @@ function ShopPriceOption({
                     FontFace={RobotoSlabHeavy}
                     Size={new UDim2(0, 0, 1, 0)}
                     Text={currency !== undefined ? displayBalanceCurrency(currency, amount) : tostring(amount)}
+                    TextScaled={true}
+                >
+                    <uistroke Color={Color3.fromRGB(0, 0, 0)} Thickness={2} />
+                </textlabel>
+            ) : (
+                <textlabel
+                    BackgroundTransparency={1}
+                    FontFace={RobotoSlabHeavy}
+                    Size={new UDim2(1, 0, 1, 0)}
+                    Text={"MAXED"}
+                    TextColor3={Color3.fromRGB(199, 199, 199)}
                     TextScaled={true}
                 >
                     <uistroke Color={Color3.fromRGB(0, 0, 0)} Thickness={2} />
@@ -149,6 +161,7 @@ export function ShopItemSlotStyling({ gridTransparency = 0.85 }: { gridTranspare
  */
 export default function ShopItemSlot({
     item,
+    hideMaxedItems,
     ownedAmount,
     onClick,
     layoutOrder = 0,
@@ -157,6 +170,8 @@ export default function ShopItemSlot({
 }: {
     /** The item to display in the slot */
     item: Item;
+    /** Whether to hide items that are already maxed out */
+    hideMaxedItems: boolean;
     /** Amount of the item the player currently owns */
     ownedAmount: number;
     /** Callback when the slot is clicked */
@@ -213,9 +228,10 @@ export default function ShopItemSlot({
     const currency = isCurrency ? (viewing as Currency) : undefined;
     const reqItem = !isCurrency ? (viewing as Item) : undefined;
     const amount = currency ? price?.get(currency) : reqItem !== undefined ? requiredItems.get(reqItem) : 0;
+    const shouldHide = hideMaxedItems && price === undefined;
 
     return (
-        <frame BackgroundTransparency={1} LayoutOrder={layoutOrder} Visible={visible}>
+        <frame BackgroundTransparency={1} LayoutOrder={layoutOrder} Visible={shouldHide ? false : visible}>
             <textbutton
                 BackgroundColor3={color}
                 BorderColor3={Color3.fromRGB(0, 0, 0)}

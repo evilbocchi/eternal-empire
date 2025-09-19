@@ -1,37 +1,33 @@
-import React, { useEffect, useRef, useState } from "@rbxts/react";
+import React, { RefObject, useEffect, useRef, useState } from "@rbxts/react";
 import { TweenService } from "@rbxts/services";
 import WindowCloseButton from "client/ui/components/window/WindowCloseButton";
-import { useWindow } from "client/ui/components/window/WindowManager";
+import DocumentManager from "client/ui/components/window/WindowManager";
 import WindowTitle from "client/ui/components/window/WindowTitle";
 import { getAsset } from "shared/asset/AssetMap";
+import { playSound } from "shared/asset/GameAssets";
 
 declare global {
     interface WindowProps {
-        visible: boolean;
         icon: string;
-        title: string;
+        id: string;
+        title?: string;
+        visible: boolean;
         strokeColor?: ColorSequence;
-        onClose: () => void;
         children: React.ReactNode;
-        priority?: number; // Optional priority for close order
         size?: UDim2; // Optional size for the window
     }
 }
 
-export default function BasicWindow({
+export function useWindowAnimation({
+    frameRef,
+    initialPosition,
     visible,
-    icon,
-    title,
-    children,
-    onClose,
-    strokeColor,
-    priority = 0,
-}: WindowProps) {
-    const frameRef = useRef<Frame>();
+}: {
+    frameRef: RefObject<GuiObject>;
+    initialPosition: UDim2;
+    visible: boolean;
+}) {
     const [previousVisible, setPreviousVisible] = useState(visible);
-    const initialPosition = new UDim2(0.5, 0, 1, -40);
-
-    useWindow({ id: title, visible, onClose, priority });
 
     useEffect(() => {
         const action = visible && !previousVisible ? "open" : !visible && previousVisible ? "close" : undefined;
@@ -39,7 +35,12 @@ export default function BasicWindow({
         if (action) {
             const frame = frameRef.current!;
 
-            if (action === "open") frame.Visible = true;
+            if (action === "open") {
+                frame.Visible = true;
+                playSound("MenuOpen.mp3");
+            } else {
+                playSound("MenuClose.mp3");
+            }
 
             const middle = initialPosition;
             const below = middle.sub(new UDim2(0, 0, 0, 30));
@@ -57,6 +58,17 @@ export default function BasicWindow({
         }
         setPreviousVisible(visible);
     }, [visible]);
+}
+
+export default function BasicWindow({ icon, id, title, visible, children, strokeColor }: WindowProps) {
+    const frameRef = useRef<Frame>();
+    const initialPosition = new UDim2(0.5, 0, 1, -40);
+
+    useWindowAnimation({
+        frameRef,
+        initialPosition,
+        visible,
+    });
 
     return (
         <frame
@@ -71,8 +83,8 @@ export default function BasicWindow({
             ZIndex={0}
             Visible={false}
         >
-            <WindowTitle icon={icon} title={title} />
-            <WindowCloseButton onClick={onClose} />
+            <WindowTitle icon={icon} title={title ?? id} />
+            <WindowCloseButton onClick={() => DocumentManager.setVisible(id, false)} />
             <frame
                 key="MainWindow"
                 AnchorPoint={new Vector2(0.5, 0)}

@@ -1,40 +1,47 @@
-import { useCallback, useState } from "@rbxts/react";
+import { useEffect } from "@rbxts/react";
+import { useDocument } from "client/ui/components/window/WindowManager";
 import SingleDocumentManager from "./SingleDocumentManager";
-import { useWindow } from "client/ui/components/window/WindowManager";
 
 /**
  * A custom hook for managing window visibility state with the SingleDocumentManager.
- *
- * This hook automatically handles:
- * - Initial visibility state based on SingleDocumentManager.activeWindow
- * - Listening to window toggle events
- * - Cleanup of event connections
- *
  * @param windowName The name of the window to manage visibility for
  * @returns An object containing the current visibility state and helper functions
  */
-export default function useSingleDocumentWindow(windowName: string) {
-    const [visible, setVisible] = useState(SingleDocumentManager.activeWindow === windowName);
-    const closeWindow = useCallback(() => SingleDocumentManager.closeWindow(windowName), [windowName]);
-    const openWindow = useCallback(() => SingleDocumentManager.openWindow(windowName), [windowName]);
-    const toggleWindow = useCallback(() => SingleDocumentManager.toggleWindow(windowName), [windowName]);
-    useWindow({
-        id: windowName,
-        visible,
-        onClose: () => {
-            setVisible(false);
-            closeWindow();
-        },
-        onOpen: () => {
-            setVisible(true);
-            openWindow();
-        },
-    });
+export default function useSingleDocument({
+    id,
+    defaultVisible = false,
+    priority,
+    onClose,
+    onOpen,
+}: {
+    /** Unique identifier for the document */
+    id: string;
+    /** Initial visibility state of the document */
+    defaultVisible?: boolean;
+    /** Priority for closing documents (higher priority closes first) */
+    priority?: number;
+    /** Optional callback after the document is closed. */
+    onClose?: () => void;
+    /** Optional callback after the document is opened. */
+    onOpen?: () => void;
+}) {
+    const { visible, setVisible } = useDocument({ id, defaultVisible, priority });
+
+    useEffect(() => {
+        if (visible) {
+            SingleDocumentManager.open(id);
+            onOpen?.();
+        } else {
+            SingleDocumentManager.close(id);
+            onClose?.();
+        }
+    }, [visible]);
 
     return {
+        id,
         visible,
-        closeWindow,
-        openWindow,
-        toggleWindow,
+        closeDocument: () => setVisible(false),
+        openDocument: () => setVisible(true),
+        toggleDocument: () => setVisible(!visible),
     };
 }

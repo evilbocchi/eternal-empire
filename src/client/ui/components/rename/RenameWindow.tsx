@@ -15,7 +15,7 @@ import { OnoeNum } from "@antivivi/serikanum";
 import React, { useCallback, useState } from "@rbxts/react";
 import EmpireNameInput from "client/ui/components/rename/EmpireNameInput";
 import PurchaseButton from "client/ui/components/rename/PurchaseButton";
-import useSingleDocumentWindow from "client/ui/components/sidebar/useSingleDocumentWindow";
+import useSingleDocument from "client/ui/components/sidebar/useSingleDocumentWindow";
 import TechWindow from "client/ui/components/window/TechWindow";
 import { RobotoSlab, RobotoSlabBold } from "client/ui/GameFonts";
 import useProperty from "client/ui/hooks/useProperty";
@@ -29,7 +29,7 @@ import Packets from "shared/Packets";
  * Features modern design with validation and smooth user interactions
  */
 export default function RenameWindow() {
-    const { visible, closeWindow } = useSingleDocumentWindow("Rename");
+    const { id, visible, closeDocument } = useSingleDocument({ id: "Rename", priority: 3 });
 
     // Observe data from packets
     const renameCost = useProperty(Packets.renameCost);
@@ -58,9 +58,9 @@ export default function RenameWindow() {
         setIsProcessing(false);
 
         if (result) {
-            closeWindow();
+            closeDocument();
         }
-    }, [inputText, isProcessing, closeWindow]);
+    }, [inputText, isProcessing, closeDocument]);
 
     const handleFundsPurchase = useCallback(() => {
         if (isProcessing || inputText.size() < 5 || inputText.size() > 16) return;
@@ -70,25 +70,19 @@ export default function RenameWindow() {
 
         if (result === true) {
             playSound("ItemPurchase.mp3");
-            closeWindow();
+            closeDocument();
         } else {
             playSound("Error.mp3");
         }
 
         setIsProcessing(false);
-    }, [inputText, isProcessing, closeWindow]);
+    }, [inputText, isProcessing, closeDocument]);
 
     const isInputValid = inputText.size() >= 5 && inputText.size() <= 16;
     const fundsPrice = CurrencyBundle.getFormatted("Funds", renameCost || new OnoeNum(0));
 
     return (
-        <TechWindow
-            visible={visible}
-            icon={getAsset("assets/Settings.png")}
-            title="Rename Empire"
-            onClose={closeWindow}
-            priority={3}
-        >
+        <TechWindow icon={getAsset("assets/Settings.png")} id={id} title="Rename Empire" visible={visible}>
             <frame BackgroundTransparency={1} Size={new UDim2(1, 0, 1, 0)} Visible={!isProcessing}>
                 <uilistlayout
                     HorizontalAlignment={Enum.HorizontalAlignment.Center}

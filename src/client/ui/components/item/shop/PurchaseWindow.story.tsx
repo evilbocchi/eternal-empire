@@ -2,6 +2,7 @@ import React, { StrictMode, useEffect } from "@rbxts/react";
 import ReactRoblox from "@rbxts/react-roblox";
 import { Choose, CreateReactStory } from "@rbxts/ui-labs";
 import PurchaseWindow, { PurchaseManager } from "client/ui/components/item/shop/PurchaseWindow";
+import useCIViewportManagement from "client/ui/components/item/useCIViewportManagement";
 import StoryMocking from "client/ui/components/StoryMocking";
 import TooltipWindow from "client/ui/components/tooltip/TooltipWindow";
 import { useSingleDocumentVisibility } from "client/ui/hooks/useVisibility";
@@ -38,10 +39,12 @@ export = CreateReactStory(
             PurchaseManager.select(item);
         }, [item]);
 
+        const viewportManagement = useCIViewportManagement({ enabled: props.controls.viewportsEnabled });
+
         return (
             <StrictMode>
                 <TooltipWindow />
-                <PurchaseWindow viewportsEnabled={props.controls.viewportsEnabled} />
+                <PurchaseWindow viewportManagement={viewportManagement} />
             </StrictMode>
         );
     },

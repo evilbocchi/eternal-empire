@@ -26,7 +26,6 @@ import CurrencyService from "server/services/data/CurrencyService";
 import DataService from "server/services/data/DataService";
 import { OnGameAPILoaded } from "server/services/ModdingService";
 import { log } from "server/services/permissions/LogService";
-import { AREAS } from "shared/world/Area";
 import { PLACED_ITEMS_FOLDER } from "shared/constants";
 import Item from "shared/item/Item";
 import Items from "shared/items/Items";
@@ -34,6 +33,7 @@ import Packets from "shared/Packets";
 import BuildBounds from "shared/placement/BuildBounds";
 import ItemPlacement from "shared/placement/ItemPlacement";
 import Sandbox from "shared/Sandbox";
+import { AREAS } from "shared/world/Area";
 
 declare global {
     /** A {@link PlacedItem} that has an associated placement ID. */
@@ -549,7 +549,6 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
         }
         const item = Items.getItem(itemId);
         if (item === undefined) return false;
-
         const success = this.serverBuy(item);
         if (success) {
             this.itemsBought.fire(player, [item]);
@@ -703,7 +702,10 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
         this.refreshEffects();
 
         // Set up packet handlers for item operations
-        Packets.buyItem.fromClient((player, itemId) => this.buyItem(player, itemId));
+        Packets.buyItem.fromClient((player, itemId) => {
+            print("Player " + player.Name + " is attempting to buy item " + itemId);
+            return this.buyItem(player, itemId);
+        });
         Packets.buyAllItems.fromClient((player, itemIds) => this.buyAllItems(player, itemIds));
 
         // Set up placement handlers with queue protection

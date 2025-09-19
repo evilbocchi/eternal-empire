@@ -14,7 +14,7 @@ import { OnoeNum } from "@antivivi/serikanum";
 import { convertToHHMMSS } from "@antivivi/vrldk";
 import React, { Fragment, useEffect, useState } from "@rbxts/react";
 import { LOCAL_PLAYER } from "client/constants";
-import useSingleDocumentWindow from "client/ui/components/sidebar/useSingleDocumentWindow";
+import useSingleDocument from "client/ui/components/sidebar/useSingleDocumentWindow";
 import SectionHeader from "client/ui/components/stats/SectionHeader";
 import StatItem from "client/ui/components/stats/StatItem";
 import TechWindow from "client/ui/components/window/TechWindow";
@@ -42,7 +42,7 @@ export class PingManager {
  * Features enhanced visual design with modern styling and smooth interactions
  */
 export default function StatsWindow() {
-    const { visible, closeWindow } = useSingleDocumentWindow("Stats");
+    const { id, visible } = useSingleDocument({ id: "Stats" });
 
     // Observe data from packets
     const empirePlaytime = useProperty(Packets.empirePlaytime);
@@ -96,13 +96,7 @@ export default function StatsWindow() {
     currencyStats.sort((a, b) => a.layoutOrder < b.layoutOrder);
 
     return (
-        <TechWindow
-            visible={visible}
-            icon={getAsset("assets/Stats.png")}
-            title="Statistics"
-            onClose={closeWindow}
-            priority={5}
-        >
+        <TechWindow visible={visible} icon={getAsset("assets/Stats.png")} id={id} title="Statistics">
             <frame BackgroundTransparency={1} Size={new UDim2(1, 0, 1, 0)}>
                 <scrollingframe
                     key="StatList"

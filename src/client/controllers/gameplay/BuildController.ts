@@ -15,8 +15,7 @@ import { weldModel } from "@antivivi/vrldk";
 import { Controller, OnInit, OnStart } from "@flamework/core";
 import { Debris, HttpService, ReplicatedStorage, TweenService, UserInputService, Workspace } from "@rbxts/services";
 import { LOCAL_PLAYER, MOUSE, NONCOLLISION_COLOR } from "client/constants";
-import { SHOP_GUI } from "client/controllers/interface/ShopController";
-import { AREAS } from "shared/world/Area";
+import { SHOP_GUI } from "client/controllers/core/Guis";
 import { getSound, playSound } from "shared/asset/GameAssets";
 import { PLACED_ITEMS_FOLDER } from "shared/constants";
 import Item from "shared/item/Item";
@@ -25,6 +24,7 @@ import Packets from "shared/Packets";
 import BuildBounds from "shared/placement/BuildBounds";
 import ItemPlacement from "shared/placement/ItemPlacement";
 import Sandbox from "shared/Sandbox";
+import { AREAS } from "shared/world/Area";
 
 /**
  * Controller responsible for managing build mode, item placement, selection, and related UI and hotkeys.

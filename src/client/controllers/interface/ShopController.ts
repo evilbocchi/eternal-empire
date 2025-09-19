@@ -14,26 +14,14 @@
  * @since 1.0.0
  */
 
-import { Connection } from "@antivivi/lemon-signal";
-import { OnoeNum } from "@antivivi/serikanum";
-import { buildRichText } from "@antivivi/vrldk";
 import { Controller, OnInit, OnStart } from "@flamework/core";
-import { CollectionService, Debris, RunService, TweenService } from "@rbxts/services";
-import ItemFilter from "client/ItemFilter";
+import { CollectionService, Debris, TweenService } from "@rbxts/services";
 import ItemSlot from "client/ItemSlot";
-import { LOCAL_PLAYER, PLAYER_GUI } from "client/constants";
-import AdaptiveTabController, {
-    ADAPTIVE_TAB,
-    ADAPTIVE_TAB_MAIN_WINDOW,
-} from "client/controllers/core/AdaptiveTabController";
-import HotkeysController from "client/controllers/core/HotkeysController";
-import { IS_STUDIO } from "shared/Context";
-import Packets from "shared/Packets";
-import { ASSETS, getSound, playSound } from "shared/asset/GameAssets";
-import CurrencyBundle from "shared/currency/CurrencyBundle";
-import { CURRENCY_DETAILS } from "shared/currency/CurrencyDetails";
+import { LOCAL_PLAYER } from "client/constants";
+import { SHOP_GUI } from "client/controllers/core/Guis";
+import { ShopManager } from "client/ui/components/item/shop/ShopWindow";
+import { getSound } from "shared/asset/GameAssets";
 import Item from "shared/item/Item";
-import ItemCounter from "shared/item/ItemCounter";
 import ItemMetadata from "shared/item/ItemMetadata";
 import Shop from "shared/item/traits/Shop";
 import Items from "shared/items/Items";
@@ -47,16 +35,6 @@ declare global {
         TextLabel: TextLabel;
     };
 }
-
-/**
- * The main GUI for the shop, containing a filter tab and an item list container.
- */
-export const SHOP_GUI = (function () {
-    const shopGui = ASSETS.ShopWindow.ShopGui.Clone();
-    shopGui.ResetOnSpawn = false;
-    shopGui.Parent = PLAYER_GUI;
-    return shopGui;
-})();
 
 /**
  * The metadata for each item in the shop, used to display additional information.
@@ -74,13 +52,6 @@ for (const item of Items.sortedItems) {
  */
 @Controller()
 export default class ShopController implements OnInit, OnStart {
-    /** Item filter logic for the shop GUI. */
-    readonly filterItems = ItemFilter.loadFilterOptions(SHOP_GUI.FilterOptions, (query, whitelistedTraits) => {
-        const items = this.currentShop?.items;
-        if (items === undefined) return;
-        ItemSlot.filterItems(this.itemSlotsPerItem, items, query, whitelistedTraits);
-    });
-
     /** Mapping of items to their GUI slots. */
     itemSlotsPerItem = new Map<Item, ItemSlot>();
     /** Currently selected item in the shop. */
@@ -92,19 +63,12 @@ export default class ShopController implements OnInit, OnStart {
     currentShop: Shop | undefined;
     /** Tracks which currency index is shown for each item. */
     currencyIndexPerItem = new Map<Item, number>();
-    /** Counter for price containers. */
-    priceContainerCounter = 0;
-    /** Remaining space in the current price container. */
-    availableContainerSpace = 0;
     /** Whether to hide maxed items. */
     hideMaxedItems: boolean | undefined;
     /** Debounce for switching items. */
     switchDebounce = 0;
 
-    constructor(
-        private hotkeysController: HotkeysController,
-        private adaptiveTabController: AdaptiveTabController,
-    ) {}
+    constructor() {}
 
     /**
      * Animates and hides the shop GUI part.
@@ -138,6 +102,7 @@ export default class ShopController implements OnInit, OnStart {
         SHOP_GUI.Adornee = shopGuiPart;
         if (shopGuiPart === undefined || shop === undefined) {
             SHOP_GUI.Enabled = false;
+            ShopManager.closeShop();
             return;
         }
 
@@ -148,91 +113,7 @@ export default class ShopController implements OnInit, OnStart {
 
         TweenService.Create(shopGuiPart, new TweenInfo(0.3), { LocalTransparencyModifier: 0 }).Play();
         SHOP_GUI.Enabled = true;
-
-        const item = shop.item;
-        const color = item.difficulty.color;
-        if (color !== undefined) {
-            SHOP_GUI.ItemList.UIStroke.Color = color;
-        }
-
-        this.filterItems();
-        this.priceCycle();
-    }
-
-    /**
-     * Loads item slots for all items in the shop.
-     */
-    loadItemSlots() {
-        for (const [_id, item] of Items.itemsPerId) {
-            const itemSlot = ItemSlot.loadItemSlot(ASSETS.ShopWindow.ItemSlot.Clone(), item);
-            const diff = item.difficulty;
-            if (diff === undefined) {
-                error("No difficulty found");
-            }
-            itemSlot.Visible = false;
-            itemSlot.Activated.Connect(() => {
-                playSound("MenuClick.mp3");
-                //this.refreshPurchaseWindow(item);
-                this.adaptiveTabController.showAdaptiveTab("Purchase");
-                ADAPTIVE_TAB.UIStroke.Color = diff.color ?? Color3.fromRGB(255, 255, 255);
-            });
-            this.itemSlotsPerItem.set(item, itemSlot);
-            itemSlot.Parent = SHOP_GUI.ItemList;
-        }
-    }
-
-    /**
-     * Cycles through each currency for all visible item slots, updating the price label and color.
-     */
-    priceCycle() {
-        const hideMaxedItems = this.hideMaxedItems;
-        const bought = Packets.bought.get();
-        if (bought === undefined) return;
-        for (const [item, itemSlot] of this.itemSlotsPerItem) {
-            if (itemSlot.Visible === false) {
-                continue;
-            }
-            const price = item.getPrice((bought.get(item.id) ?? 0) + 1);
-
-            if (price === undefined) {
-                itemSlot.Visible = !hideMaxedItems;
-                if (hideMaxedItems !== true) {
-                    itemSlot.AmountLabel.Text = "MAXED";
-                    itemSlot.AmountLabel.TextColor3 = Color3.fromRGB(255, 156, 5);
-                }
-                continue;
-            }
-
-            let amount: OnoeNum | undefined = undefined;
-            let firstCurrency: Currency | undefined;
-            let firstAmount: OnoeNum | undefined;
-            const getCurrencyAtIndex = () => {
-                let currencyIndex = 0;
-                const index = this.currencyIndexPerItem.get(item);
-                for (const [iCurrency, iAmount] of price.amountPerCurrency) {
-                    if (currencyIndex === 0) {
-                        firstCurrency = iCurrency;
-                        firstAmount = iAmount;
-                    }
-                    if (index === undefined || currencyIndex === index + 1) {
-                        this.currencyIndexPerItem.set(item, currencyIndex);
-                        amount = iAmount;
-                        return iCurrency;
-                    }
-                    ++currencyIndex;
-                }
-                this.currencyIndexPerItem.set(item, 0);
-                amount = firstAmount;
-                return firstCurrency;
-            };
-            const currency = getCurrencyAtIndex();
-            if (currency !== undefined) {
-                itemSlot.AmountLabel.Text = CurrencyBundle.getFormatted(currency, amount);
-                TweenService.Create(itemSlot.AmountLabel, new TweenInfo(0.5), {
-                    TextColor3: CURRENCY_DETAILS[currency].color,
-                }).Play();
-            }
-        }
+        ShopManager.openShop(shop);
     }
 
     /**
@@ -240,54 +121,13 @@ export default class ShopController implements OnInit, OnStart {
      */
     onInit() {
         this.refreshShop();
-
-        Packets.settings.observe((settings) => {
-            if (settings.HideMaxedItems === this.hideMaxedItems) return;
-            this.hideMaxedItems = settings.HideMaxedItems;
-        });
-
-        this.hotkeysController.setHotkey(
-            SHOP_GUI.ItemList.BuyAll.Button,
-            Enum.KeyCode.O,
-            () => {
-                if (SHOP_GUI.Enabled && this.currentShop !== undefined) {
-                    const items = new Array<string>();
-                    for (const [item, slot] of this.itemSlotsPerItem) {
-                        if (slot.Visible === false) continue;
-                        items.push(item.id);
-                    }
-                    if (Packets.buyAllItems.toServer(items)) {
-                        playSound("ItemPurchase.mp3");
-                    } else {
-                        playSound("Error.mp3");
-                    }
-                    return true;
-                }
-                return false;
-            },
-            "Buy All Items",
-            5,
-        );
-
         ItemSlot.hookMetadata(METADATA_PER_ITEM);
-
-        this.loadItemSlots();
     }
 
     /**
      * Starts the ShopController, binds render steps for price cycling and shop detection.
      */
     onStart() {
-        let elapsedTime = 0;
-        RunService.BindToRenderStep("Shop CurrencyBundle Cycle", 1, (dt) => {
-            elapsedTime += dt;
-            if (elapsedTime < 2) {
-                return;
-            }
-            elapsedTime = 0;
-            this.priceCycle();
-        });
-
         task.spawn(() => {
             while (task.wait(0.1)) {
                 const primaryPart = LOCAL_PLAYER.Character?.PrimaryPart;

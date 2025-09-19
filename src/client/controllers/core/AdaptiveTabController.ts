@@ -102,12 +102,6 @@ export default class AdaptiveTabController implements OnInit {
      * @param windowName The name of the window to show.
      */
     showAdaptiveTab(windowName: string) {
-        // Special case: Redirect quest window to standalone implementation
-        if (windowName === "Quests") {
-            this.questsController.showQuestWindow();
-            return;
-        }
-
         const tweenInfo = new TweenInfo(0.3, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out);
 
         if (this.currentWindow !== undefined && this.currentWindow.Name !== windowName) {
@@ -148,11 +142,6 @@ export default class AdaptiveTabController implements OnInit {
      * @returns True if the tab was shown, false if hidden or unchanged.
      */
     toggleAdaptiveTab(windowName?: string) {
-        // Special case: Redirect quest window to standalone implementation
-        if (windowName === "Quests") {
-            return this.questsController.toggleQuestWindow();
-        }
-
         if (ADAPTIVE_TAB.Active && windowName === this.currentWindow?.Name) {
             this.hideAdaptiveTab();
             return false;

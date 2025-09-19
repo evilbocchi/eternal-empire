@@ -5,23 +5,18 @@ import IconButton from "client/ui/components/IconButton";
 import HotkeyOption from "client/ui/components/settings/HotkeyOption";
 import SettingSection from "client/ui/components/settings/SettingSection";
 import SettingToggle from "client/ui/components/settings/SettingToggle";
-import SingleDocumentManager from "../sidebar/SingleDocumentManager";
-import useSingleDocumentWindow from "client/ui/components/sidebar/useSingleDocumentWindow";
+import useSingleDocument from "client/ui/components/sidebar/useSingleDocumentWindow";
 import TechWindow from "client/ui/components/window/TechWindow";
 import useProperty from "client/ui/hooks/useProperty";
 import { getAsset } from "shared/asset/AssetMap";
 import { playSound } from "shared/asset/GameAssets";
 import Packets from "shared/Packets";
+import SingleDocumentManager from "../sidebar/SingleDocumentManager";
 
 export function SettingsButton() {
     const tooltipProps = useHotkeyWithTooltip({
         action: () => {
-            const enabled = SingleDocumentManager.toggleWindow("Settings");
-            if (enabled) {
-                playSound("MenuOpen.mp3");
-            } else {
-                playSound("MenuClose.mp3");
-            }
+            SingleDocumentManager.toggle("Settings");
             return true;
         },
         label: "Settings",
@@ -41,7 +36,7 @@ export function SettingsButton() {
 }
 
 export default function SettingsWindow() {
-    const { visible, closeWindow } = useSingleDocumentWindow("Settings");
+    const { id, visible } = useSingleDocument({ id: "Settings", priority: 10 });
     const [selectedHotkey, setSelectedHotkey] = useState<string | undefined>();
     const settings = useProperty(Packets.settings);
 
@@ -52,14 +47,6 @@ export default function SettingsWindow() {
             HotkeyManager.setIsSettingHotkey(false);
         }
     }, [visible]);
-
-    const handleClose = useCallback(() => {
-        if (selectedHotkey !== undefined) {
-            setSelectedHotkey(undefined);
-            HotkeyManager.setIsSettingHotkey(false);
-        }
-        closeWindow();
-    }, [selectedHotkey]);
 
     const onHotkeySelect = useCallback(
         (hotkeyName: string) => {
@@ -103,13 +90,7 @@ export default function SettingsWindow() {
     }
 
     return (
-        <TechWindow
-            visible={visible}
-            icon={getAsset("assets/Settings.png")}
-            title="Settings"
-            onClose={handleClose}
-            priority={10}
-        >
+        <TechWindow icon={getAsset("assets/Settings.png")} id={id} visible={visible}>
             <scrollingframe
                 key="InteractionOptions"
                 AnchorPoint={new Vector2(0.5, 0.5)}

@@ -1,6 +1,6 @@
-import React, { useRef, useState } from "@rbxts/react";
+import React, { useEffect, useRef } from "@rbxts/react";
 import { RobotoSlabHeavy } from "client/ui/GameFonts";
-import { useWindow } from "client/ui/components/window/WindowManager";
+import { useDocument } from "client/ui/components/window/WindowManager";
 import { getAsset } from "shared/asset/AssetMap";
 import { useMessageTooltip } from "../tooltip/TooltipManager";
 
@@ -26,23 +26,20 @@ export default function PositionWindow({
     size?: UDim2;
 }) {
     const ref = useRef<Frame>();
-    const [visible, setVisible] = useState(true);
     const closedPosition = windowPosition.add(new UDim2(0, 0, 0, -50));
 
-    useWindow({
+    const { visible } = useDocument({
         id: "Position",
-        visible,
-        onOpen: () => {
-            setVisible(true);
-            ref.current?.TweenPosition(windowPosition, Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 1.5, true);
-        },
-        onClose: () => {
-            setVisible(false);
-
-            ref.current?.TweenPosition(closedPosition, Enum.EasingDirection.In, Enum.EasingStyle.Quad, 1.5, true);
-        },
         priority: 10, // High priority so it closes first
     });
+
+    useEffect(() => {
+        if (visible) {
+            ref.current?.TweenPosition(windowPosition, Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 1.5, true);
+        } else {
+            ref.current?.TweenPosition(closedPosition, Enum.EasingDirection.In, Enum.EasingStyle.Quad, 1.5, true);
+        }
+    }, [visible]);
 
     const positionText = `${math.round(characterPosition.X)}, ${math.round(characterPosition.Y)}, ${math.round(characterPosition.Z)}`;
     const { events } = useMessageTooltip(

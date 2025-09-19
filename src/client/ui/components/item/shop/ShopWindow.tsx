@@ -1,4 +1,5 @@
-import React, { Fragment, memo, useCallback, useMemo } from "@rbxts/react";
+import Signal from "@antivivi/lemon-signal";
+import React, { Fragment, memo, useCallback, useEffect, useMemo, useState } from "@rbxts/react";
 import useHotkeyWithTooltip from "client/ui/components/hotkeys/useHotkeyWithTooltip";
 import InventoryFilter, {
     filterItems,
@@ -6,7 +7,6 @@ import InventoryFilter, {
 } from "client/ui/components/item/inventory/InventoryFilter";
 import { PurchaseManager } from "client/ui/components/item/shop/PurchaseWindow";
 import ShopItemSlot from "client/ui/components/item/shop/ShopItemSlot";
-import useCIViewportManagement from "client/ui/components/item/useCIViewportManagement";
 import { RobotoSlabHeavy } from "client/ui/GameFonts";
 import useProperty from "client/ui/hooks/useProperty";
 import { playSound } from "shared/asset/GameAssets";
@@ -17,14 +17,47 @@ import Packets from "shared/Packets";
 
 const MemoizedShopItemSlot = memo(ShopItemSlot);
 
+export class ShopManager {
+    static readonly opened = new Signal<(shop?: Shop) => void>();
+
+    static openShop(shop: Shop) {
+        this.opened.fire(shop);
+    }
+
+    static closeShop() {
+        this.opened.fire();
+    }
+}
+
 /**
  * Main shop window component with integrated filtering
  */
-export default function ShopWindow({ shop }: { shop: Shop }) {
+export default function ShopWindow({
+    defaultShop,
+    viewportManagement,
+}: {
+    defaultShop?: Shop;
+    viewportManagement?: ItemViewportManagement;
+}) {
+    const [shop, setShop] = useState<Shop | undefined>(defaultShop);
     const { searchQuery, props: filterProps } = useBasicInventoryFilter();
-    const viewportManagement = useCIViewportManagement({});
+    const [hideMaxedItems, setHideMaxedItems] = useState(Packets.settings.get().HideMaxedItems);
     const ownedPerItem = useProperty(Packets.bought);
-    const shopItems = shop.items;
+    const shopItems = shop?.items ?? [];
+    const shopItemIds = useMemo(() => new Set(shopItems.map((item) => item.id)), [shopItems]);
+
+    useEffect(() => {
+        const settingsConnection = Packets.settings.observe((settings) => {
+            setHideMaxedItems(settings.HideMaxedItems);
+        });
+        const openedConnection = ShopManager.opened.connect((newShop) => {
+            setShop(newShop);
+        });
+        return () => {
+            settingsConnection.disconnect();
+            openedConnection.disconnect();
+        };
+    }, []);
 
     const dataPerItem = useMemo(() => {
         return filterItems(searchQuery, filterProps.traitFilters);
@@ -37,6 +70,7 @@ export default function ShopWindow({ shop }: { shop: Shop }) {
 
     const { events } = useHotkeyWithTooltip({
         action: () => {
+            if (!shop) return false;
             if (Packets.buyAllItems.toServer(shop.items.map((item) => item.id))) {
                 playSound("ItemPurchase.mp3");
             } else {
@@ -64,7 +98,7 @@ export default function ShopWindow({ shop }: { shop: Shop }) {
             />
 
             {/* Filter options */}
-            <InventoryFilter color={shop.item.difficulty.color} {...filterProps} />
+            <InventoryFilter color={shop?.item.difficulty.color} {...filterProps} />
 
             {/* Item list scrolling frame */}
             <scrollingframe
@@ -97,18 +131,20 @@ export default function ShopWindow({ shop }: { shop: Shop }) {
                 />
 
                 {/* Border stroke */}
-                <uistroke Color={shop.item.difficulty.color} Thickness={3} />
+                <uistroke Color={shop?.item.difficulty.color} Thickness={3} />
 
                 {Items.sortedItems.map((item) => {
-                    const data = dataPerItem.get(item.id);
+                    const itemId = item.id;
+                    const data = dataPerItem.get(itemId);
 
                     return (
                         <MemoizedShopItemSlot
-                            key={item.id}
+                            key={itemId}
                             item={item}
-                            ownedAmount={ownedPerItem.get(item.id) ?? 0}
+                            hideMaxedItems={hideMaxedItems}
+                            ownedAmount={ownedPerItem.get(itemId) ?? 0}
                             layoutOrder={data?.layoutOrder}
-                            visible={data?.visible === true}
+                            visible={shopItemIds.has(itemId) && data?.visible === true}
                             onClick={() => handleItemClick(item)}
                             viewportManagement={viewportManagement}
                         />

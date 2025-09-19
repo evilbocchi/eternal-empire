@@ -12,16 +12,16 @@ import InventoryFilter, {
     filterItems,
     ItemFilterData,
     SEARCHABLE_ITEMS,
-    traitOptions,
     useBasicInventoryFilter,
 } from "client/ui/components/item/inventory/InventoryFilter";
 import InventoryItemSlot from "client/ui/components/item/inventory/InventoryItemSlot";
 import useCIViewportManagement from "client/ui/components/item/useCIViewportManagement";
-import useSingleDocumentWindow from "client/ui/components/sidebar/useSingleDocumentWindow";
+import useSingleDocument from "client/ui/components/sidebar/useSingleDocumentWindow";
 import BasicWindow from "client/ui/components/window/BasicWindow";
 import { RobotoMono } from "client/ui/GameFonts";
 import useProperty from "client/ui/hooks/useProperty";
 import { getAsset } from "shared/asset/AssetMap";
+import { playSound } from "shared/asset/GameAssets";
 import type Item from "shared/item/Item";
 import Packets from "shared/Packets";
 
@@ -66,7 +66,7 @@ export default function InventoryWindow({
     inventoryController?: InventoryController;
     viewportsEnabled?: boolean;
 }) {
-    const { visible, closeWindow } = useSingleDocumentWindow("Inventory");
+    const { id, visible, closeDocument } = useSingleDocument({ id: "Inventory" });
     const { searchQuery, props: filterProps } = useBasicInventoryFilter();
     const [queryTime, setQueryTime] = useState(0);
     const [cellSize, setCellSize] = useState(new UDim2(0, 65, 0, 65));
@@ -158,25 +158,23 @@ export default function InventoryWindow({
 
             // Close the inventory window if activation was successful
             if (success) {
-                closeWindow();
+                closeDocument();
             }
         },
-        [inventoryController, closeWindow],
+        [inventoryController, closeDocument],
     );
 
     return (
         <BasicWindow
-            visible={visible}
             icon={getAsset("assets/Inventory.png")}
-            title="Inventory"
+            id={id}
             strokeColor={
                 new ColorSequence([
                     new ColorSequenceKeypoint(0, Color3.fromRGB(255, 186, 125)),
                     new ColorSequenceKeypoint(1, Color3.fromRGB(255, 123, 123)),
                 ])
             }
-            onClose={closeWindow}
-            priority={1}
+            visible={visible}
         >
             {/* Empty state */}
             <InventoryEmptyState visible={isEmpty} />

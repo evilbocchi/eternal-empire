@@ -10,8 +10,7 @@ import InventoryItemSlot from "client/ui/components/item/inventory/InventoryItem
 import { loadItemIntoViewport } from "client/ui/components/item/ItemViewport";
 import ItemWindow from "client/ui/components/item/shop/ItemWindow";
 import { WrappingPriceOptions } from "client/ui/components/item/shop/PriceOption";
-import useCIViewportManagement from "client/ui/components/item/useCIViewportManagement";
-import useSingleDocumentWindow from "client/ui/components/sidebar/useSingleDocumentWindow";
+import useSingleDocument from "client/ui/components/sidebar/useSingleDocumentWindow";
 import getDifficultyDisplayColors from "client/ui/components/tooltip/getDifficultyDisplayColors";
 import { METADATA_PER_ITEM, TooltipManager } from "client/ui/components/tooltip/TooltipWindow";
 import { RobotoMono, RobotoSlab, RobotoSlabHeavy, RobotoSlabMedium } from "client/ui/GameFonts";
@@ -35,28 +34,22 @@ export class PurchaseManager {
 /**
  * Purchase window component for buying shop items
  */
-export default function PurchaseWindow({
-    viewportsEnabled,
-}: {
-    /** Whether 3D model viewports are enabled */
-    viewportsEnabled?: boolean;
-}) {
+export default function PurchaseWindow({ viewportManagement }: { viewportManagement?: ItemViewportManagement }) {
     const windowWrapperRef = useRef<Frame>();
     const paddingRef = useRef<UIPadding>();
     const itemSlotRef = useRef<TextButton>();
-    const { visible, closeWindow, openWindow } = useSingleDocumentWindow("Purchase");
+    const { id, visible, openDocument } = useSingleDocument({ id: "Purchase" });
     const [{ bought, price }, setBoughtData] = useState({ bought: 0, price: new CurrencyBundle() });
     const [unaffordableLabel, setUnaffordableLabel] = useState("UNAFFORDABLE");
     const [affordablePerCurrency, setAffordablePerCurrency] = useState(new Map<Currency, boolean>());
     const [affordablePerItem, setAffordablePerItem] = useState(new Map<Item, boolean>());
-    const viewportManagement = useCIViewportManagement({ enabled: viewportsEnabled });
     const [item, setItem] = useState<Item>(TheFirstDropper);
     const metadata = METADATA_PER_ITEM.get(item);
 
     useEffect(() => {
         const connection = PurchaseManager.itemSelected.connect((newItem) => {
             setItem(newItem);
-            openWindow();
+            openDocument();
         });
 
         return () => {
@@ -126,7 +119,9 @@ export default function PurchaseWindow({
     const purchase = useCallback(() => {
         if (!visible) return false;
 
-        if (Packets.buyItem.toServer(item.id)) {
+        const success = Packets.buyItem.toServer(item.id);
+        print(success);
+        if (success) {
             playSound("ItemPurchase.mp3");
             if (!itemSlot) return true;
 
@@ -197,9 +192,8 @@ export default function PurchaseWindow({
 
     const window = (
         <ItemWindow
-            visible={visible}
             icon={getAsset("assets/Purchase.png")}
-            title="Purchase"
+            id={id}
             backgroundColor={backgroundColor}
             strokeColor={
                 new ColorSequence([
@@ -207,8 +201,7 @@ export default function PurchaseWindow({
                     new ColorSequenceKeypoint(1, Color3.fromRGB(122, 255, 214)),
                 ])
             }
-            onClose={closeWindow}
-            priority={1}
+            visible={visible}
         >
             {/* Main layout */}
             <uilistlayout

@@ -9,7 +9,7 @@ import React, { useEffect, useState } from "@rbxts/react";
 import { Environment } from "@rbxts/ui-labs";
 import { LOCAL_PLAYER } from "client/constants";
 import GearOption, { layoutOrderFromGear } from "client/ui/components/backpack/GearOption";
-import { useWindow } from "client/ui/components/window/WindowManager";
+import { useDocument } from "client/ui/components/window/WindowManager";
 import { playSound } from "shared/asset/GameAssets";
 import Gear from "shared/item/traits/Gear";
 import Items from "shared/items/Items";
@@ -51,20 +51,9 @@ const equipGear = (gear: Gear) => {
  * Main backpack window component that displays tool options
  */
 export default function BackpackWindow() {
-    const [visible, setVisible] = useState(true);
     const [gears, setGears] = useState<Set<Gear>>(new Set());
     const [equippedGear, setEquippedGear] = useState<Gear | undefined>(undefined);
-
-    useWindow({
-        id: "Backpack",
-        visible,
-        onOpen: () => {
-            setVisible(true);
-        },
-        onClose: () => {
-            setVisible(false);
-        },
-    });
+    const { visible } = useDocument({ id: "Backpack" });
 
     useEffect(() => {
         const onCharacterAdded = (character: Model) => {

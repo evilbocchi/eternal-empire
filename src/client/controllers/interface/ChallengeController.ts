@@ -1,24 +1,9 @@
-/**
- * @fileoverviewrelated actions.
- *
- * Handles:
- * - Displaying and updating the current challenge window
- * - Managing challenge start/confirmation and leave actions
- * - Integrating with UI and quests controllers
- * - Observing challenge state and completion for live updates
- *
- * The controller manages challenge option buttons, confirmation logic, and reward display, coordinating with other controllers for UI and quest completion.
- *
- * @since 1.0.0
- */
-
 import { Controller, OnInit, OnPhysics } from "@flamework/core";
-import { RunService } from "@rbxts/services";
+import { RunService, Workspace } from "@rbxts/services";
 import QuestsController from "client/controllers/interface/QuestsController";
 import { ASSETS, playSound } from "shared/asset/GameAssets";
 import { getChallengeGui } from "shared/constants";
 import Packets from "shared/Packets";
-import { TRACKED_QUEST_WINDOW } from "./QuestsController";
 
 declare global {
     type ChallengeGui = SurfaceGui & {
@@ -33,6 +18,7 @@ declare global {
     };
 }
 
+const TRACKED_QUEST_WINDOW = Workspace; // TODO: Port to React
 export const CHALLENGE_TASK_WINDOW = TRACKED_QUEST_WINDOW.WaitForChild("ChallengeTaskWindow") as Frame & {
     TitleLabel: TextLabel & {
         UIGradient: UIGradient;
@@ -139,10 +125,10 @@ export default class ChallengeController implements OnPhysics, OnInit {
             CHALLENGE_TASK_WINDOW.RequirementLabel.Text = challengeInfo.description;
         });
         Packets.challengeCompleted.fromServer((challenge, rewardLabel) => {
-            this.questsController.showCompletion(
-                TRACKED_QUEST_WINDOW.ChallengeCompletion,
-                `${challenge} rewards:\n${rewardLabel}`,
-            );
+            // this.questsController.showCompletion(
+            //     TRACKED_QUEST_WINDOW.ChallengeCompletion,
+            //     `${challenge} rewards:\n${rewardLabel}`,
+            // );
         });
     }
 }

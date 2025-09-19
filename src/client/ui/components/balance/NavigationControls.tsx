@@ -1,6 +1,6 @@
 import React, { createRef, Fragment } from "@rbxts/react";
 import useHotkeyWithTooltip from "client/ui/components/hotkeys/useHotkeyWithTooltip";
-import WindowManager from "client/ui/components/window/WindowManager";
+import DocumentManager from "client/ui/components/window/WindowManager";
 import { RobotoMonoBold } from "client/ui/GameFonts";
 import { getAsset } from "shared/asset/AssetMap";
 import { playSound } from "shared/asset/GameAssets";
@@ -26,7 +26,7 @@ export default function NavigationControls({
     const leftTooltipProps = useHotkeyWithTooltip({
         label: "Previous Page",
         action: () => {
-            if (!WindowManager.isWindowVisible("Balance")) return false;
+            if (!DocumentManager.isVisible("Balance")) return false;
             onPageChange(currentPage - 1);
             playSound("MenuClick.mp3");
             return true;
@@ -41,7 +41,7 @@ export default function NavigationControls({
     const rightTooltipProps = useHotkeyWithTooltip({
         label: "Next Page",
         action: () => {
-            if (!WindowManager.isWindowVisible("Balance")) return false;
+            if (!DocumentManager.isVisible("Balance")) return false;
             onPageChange(currentPage + 1);
             playSound("MenuClick.mp3");
             return true;

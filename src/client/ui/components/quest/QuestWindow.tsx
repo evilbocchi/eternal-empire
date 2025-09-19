@@ -1,7 +1,7 @@
 import React, { useCallback, useMemo, useState } from "@rbxts/react";
 import QuestOption from "client/ui/components/quest/QuestOption";
 import { useQuestData } from "client/ui/components/quest/useQuestData";
-import useSingleDocumentWindow from "client/ui/components/sidebar/useSingleDocumentWindow";
+import useSingleDocument from "client/ui/components/sidebar/useSingleDocumentWindow";
 import BasicWindow from "client/ui/components/window/BasicWindow";
 import ProgressBar from "client/ui/components/window/ProgressBar";
 import { RobotoSlabHeavy } from "client/ui/GameFonts";
@@ -10,7 +10,7 @@ import { playSound } from "shared/asset/GameAssets";
 import { getMaxXp } from "shared/constants";
 
 export default function QuestWindow() {
-    const { visible, closeWindow } = useSingleDocumentWindow("Quests");
+    const { id, visible } = useSingleDocument({ id: "Quests" });
     const { questInfo, stagePerQuest, level, xp, trackedQuest, onTrackQuest } = useQuestData();
     const maxXp = getMaxXp(level);
 
@@ -86,11 +86,9 @@ export default function QuestWindow() {
                     new ColorSequenceKeypoint(1, Color3.fromRGB(255, 18, 18)),
                 ])
             }
-            title="Quests"
+            id={id}
             icon={getAsset("assets/Quests.png")}
             visible={visible}
-            onClose={() => closeWindow()}
-            priority={1}
         >
             <uilistlayout
                 HorizontalAlignment={Enum.HorizontalAlignment.Center}

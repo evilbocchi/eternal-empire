@@ -2,10 +2,11 @@ import { FuzzySearch } from "@rbxts/fuzzy-search";
 import React, { useEffect, useState } from "@rbxts/react";
 import { LOCAL_PLAYER } from "client/constants";
 import CommandOption from "client/ui/components/commands/CommandOption";
-import useSingleDocumentWindow from "client/ui/components/sidebar/useSingleDocumentWindow";
+import useSingleDocument from "client/ui/components/sidebar/useSingleDocumentWindow";
 import TechWindow from "client/ui/components/window/TechWindow";
 import { RobotoSlab, RobotoSlabMedium } from "client/ui/GameFonts";
 import { getAsset } from "shared/asset/AssetMap";
+import { playSound } from "shared/asset/GameAssets";
 import Command from "shared/commands/Command";
 
 interface CommandsWindowProps {
@@ -20,7 +21,7 @@ const COMMAND_PER_ID = Command.listAllCommands();
 
 export default function CommandsWindow({ defaultPermissionLevel }: CommandsWindowProps) {
     const [userPermissionLevel, setUserPermissionLevel] = useState(defaultPermissionLevel ?? 0);
-    const { visible, closeWindow } = useSingleDocumentWindow("Commands");
+    const { visible, id } = useSingleDocument({ id: "Commands" });
     const [filteredCommands, setFilteredCommands] = useState<Set<CommandInfo>>(new Set());
     const [searchText, setSearchText] = useState("");
 
@@ -85,13 +86,7 @@ export default function CommandsWindow({ defaultPermissionLevel }: CommandsWindo
     }
 
     return (
-        <TechWindow
-            visible={visible}
-            icon={getAsset("assets/Settings.png")}
-            title="Commands"
-            onClose={closeWindow}
-            priority={9}
-        >
+        <TechWindow icon={getAsset("assets/Settings.png")} id={id} visible={visible}>
             <frame BackgroundTransparency={1} Size={new UDim2(1, 0, 1, 0)}>
                 {/* Search Bar */}
                 <frame

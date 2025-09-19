@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "@rbxts/react";
 import { ReplicatedStorage, RunService, Workspace } from "@rbxts/services";
 import { LOCAL_PLAYER } from "client/constants";
-import { useWindow } from "client/ui/components/window/WindowManager";
+import { useDocument } from "client/ui/components/window/WindowManager";
 import { RobotoSlabBold } from "client/ui/GameFonts";
 import { getAsset } from "shared/asset/AssetMap";
 import { playSound } from "shared/asset/GameAssets";
@@ -36,32 +36,28 @@ export function getPositionDetails(id?: string, quest?: QuestInfo, stageNum = 0)
 
 export default function TrackedQuestWindow() {
     const ref = useRef<Frame>();
-    const [visible, setVisible] = useState(true);
     const [trackerBeam, setTrackerBeam] = useState<Beam>();
     const [trackerPart, setTrackerPart] = useState<Part>();
     const { questInfo, stagePerQuest, trackedQuest } = useQuestData();
     const currentQuest = trackedQuest ? questInfo.get(trackedQuest) : undefined;
     const currentStage = trackedQuest ? (stagePerQuest.get(trackedQuest) ?? 0) : 0;
-    const hasQuest = currentQuest !== undefined && currentStage >= 0;
     const { description, key } = getPositionDetails(trackedQuest, currentQuest, currentStage);
 
     const openPosition = new UDim2(1, -5, 0, 30);
     const closedPosition = openPosition.add(new UDim2(0, 0, 0, -100));
 
-    useWindow({
+    const { visible } = useDocument({
         id: "TrackedQuest",
-        visible,
-        onOpen: () => {
-            setVisible(true);
-            ref.current?.TweenPosition(openPosition, Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 1, true);
-        },
-        onClose: () => {
-            setVisible(false);
-
-            ref.current?.TweenPosition(closedPosition, Enum.EasingDirection.In, Enum.EasingStyle.Quad, 1, true);
-        },
         priority: 10, // High priority so it closes first
     });
+
+    useEffect(() => {
+        if (visible) {
+            ref.current?.TweenPosition(openPosition, Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 1, true);
+        } else {
+            ref.current?.TweenPosition(closedPosition, Enum.EasingDirection.In, Enum.EasingStyle.Quad, 1, true);
+        }
+    }, [visible]);
 
     useEffect(() => {
         if (currentQuest && trackedQuest) {
@@ -115,6 +111,7 @@ export default function TrackedQuestWindow() {
         beam.Width0 = 2;
         beam.Width1 = 2;
         beam.FaceCamera = true;
+        beam.Enabled = false;
 
         const beamContainer = new Instance("Part");
         beamContainer.Transparency = 1;

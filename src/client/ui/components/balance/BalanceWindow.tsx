@@ -2,7 +2,7 @@ import { BaseOnoeNum, OnoeNum } from "@antivivi/serikanum";
 import React, { Fragment, useEffect, useRef, useState } from "@rbxts/react";
 import BalanceOption from "client/ui/components/balance/BalanceOption";
 import NavigationControls from "client/ui/components/balance/NavigationControls";
-import { useWindow } from "client/ui/components/window/WindowManager";
+import { useDocument } from "client/ui/components/window/WindowManager";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import { CURRENCY_DETAILS } from "shared/currency/CurrencyDetails";
 import CurrencyBomb from "shared/currency/mechanics/CurrencyBomb";
@@ -22,7 +22,6 @@ const ZERO = new OnoeNum(0);
  */
 export default function BalanceWindow() {
     const wrapperRef = useRef<Frame>();
-    const [visible, setVisible] = useState(true);
     const [balance, setBalance] = useState<Map<Currency, BaseOnoeNum>>(new Map());
     const [revenue, setRevenue] = useState<Map<Currency, BaseOnoeNum>>(new Map());
     const [difference, setDifference] = useState<Map<Currency, BaseOnoeNum>>(new Map());
@@ -30,21 +29,20 @@ export default function BalanceWindow() {
     const [maxPage, setMaxPage] = useState(1);
     const [bombBoosts, setBombBoosts] = useState<CurrencyBundle | undefined>(new CurrencyBundle());
 
-    const openPosition = new UDim2(1, 0, 1, -70);
-    const closePosition = openPosition.add(new UDim2(0, 250, 0, 0));
-    useWindow({
+    const { visible } = useDocument({
         id: "Balance",
-        visible,
-        onOpen: () => {
-            setVisible(true);
-            wrapperRef.current?.TweenPosition(openPosition, Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 1, true);
-        },
-        onClose: () => {
-            setVisible(false);
-            wrapperRef.current?.TweenPosition(closePosition, Enum.EasingDirection.In, Enum.EasingStyle.Quad, 1, true);
-        },
         priority: -1, // Negative priority so close hotkey does not work
     });
+
+    const openPosition = new UDim2(1, 0, 1, -70);
+    const closePosition = openPosition.add(new UDim2(0, 250, 0, 0));
+    useEffect(() => {
+        if (visible) {
+            wrapperRef.current?.TweenPosition(openPosition, Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 1, true);
+        } else {
+            wrapperRef.current?.TweenPosition(closePosition, Enum.EasingDirection.In, Enum.EasingStyle.Quad, 1, true);
+        }
+    }, [visible]);
 
     // Subscribe to balance and revenue updates
     useEffect(() => {

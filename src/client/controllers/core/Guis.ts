@@ -22,3 +22,17 @@ export const LOGS_GUI = createScreenGui("Logs");
 export const QUESTS_GUI = createScreenGui("Quests");
 export const BACKPACK_GUI = createScreenGui("Backpack");
 export const STATS_GUI = createScreenGui("Stats");
+export const PURCHASE_GUI = createScreenGui("Purchase");
+export const SHOP_GUI = (() => {
+    const gui = new Instance("SurfaceGui");
+    gui.AlwaysOnTop = true;
+    gui.Face = Enum.NormalId.Front;
+    gui.LightInfluence = 0;
+    gui.PixelsPerStud = 50;
+    gui.SizingMode = Enum.SurfaceGuiSizingMode.PixelsPerStud;
+    gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling;
+    gui.ResetOnSpawn = false;
+    gui.Name = "Shop";
+    gui.Parent = PLAYER_GUI;
+    return gui;
+})();

@@ -21,7 +21,6 @@ import { ASSETS, playSound } from "shared/asset/GameAssets";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Packets from "shared/Packets";
 import { RESET_LAYERS } from "shared/currency/mechanics/ResetLayer";
-import { TRACKED_QUEST_WINDOW } from "../interface/QuestsController";
 
 declare global {
     interface Assets {
@@ -73,7 +72,7 @@ export default class ResetController implements OnInit {
                     }
                     currentCamera.CameraType = Enum.CameraType.Custom;
                     this.effectController.camShake.Shake(CameraShaker.Presets.Bump);
-                    this.effectController.showQuestMessage(TRACKED_QUEST_WINDOW.Reset);
+                    // this.effectController.showQuestMessage(TRACKED_QUEST_WINDOW.Reset); TODO: Port to React
                 });
                 Debris.AddItem(lightning, 2);
             });
@@ -87,10 +86,10 @@ export default class ResetController implements OnInit {
         Packets.reset.fromServer((layer, amount) => {
             if (Packets.settings.get()?.ResetAnimation === false) return;
             const resetLayer = RESET_LAYERS[layer];
-            TRACKED_QUEST_WINDOW.Reset.AmountLabel.Text = CurrencyBundle.getFormatted(
-                resetLayer.gives,
-                new OnoeNum(amount),
-            ).upper();
+            // TRACKED_QUEST_WINDOW.Reset.AmountLabel.Text = CurrencyBundle.getFormatted(
+            //     resetLayer.gives,
+            //     new OnoeNum(amount),
+            // ).upper(); TODO: Port to React
             this.moveCamera(resetLayer.area.areaFolder.WaitForChild("ResetCamera"));
             playSound("MagicCast.mp3");
         });

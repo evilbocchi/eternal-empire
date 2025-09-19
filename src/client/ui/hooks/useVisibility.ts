@@ -1,6 +1,6 @@
 import { useEffect } from "@rbxts/react";
 import SingleDocumentManager from "client/ui/components/sidebar/SingleDocumentManager";
-import WindowManager from "client/ui/components/window/WindowManager";
+import DocumentManager from "client/ui/components/window/WindowManager";
 
 /**
  * A custom hook to manage the visibility of a window.
@@ -13,7 +13,7 @@ import WindowManager from "client/ui/components/window/WindowManager";
  */
 export default function useVisibility(id: string, visible: boolean) {
     useEffect(() => {
-        WindowManager.setWindowVisible(id, visible);
+        DocumentManager.setVisible(id, visible);
     }, [id, visible]);
 }
 
@@ -29,9 +29,9 @@ export default function useVisibility(id: string, visible: boolean) {
 export function useSingleDocumentVisibility(id: string, visible: boolean) {
     useEffect(() => {
         if (visible) {
-            SingleDocumentManager.openWindow(id);
+            SingleDocumentManager.open(id);
         } else {
-            SingleDocumentManager.closeWindow(id);
+            SingleDocumentManager.close(id);
         }
     }, [id, visible]);
 }

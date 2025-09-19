@@ -5,11 +5,11 @@
  * Manages visibility, animations, and user interactions for the build system.
  */
 
-import React, { useRef, useState } from "@rbxts/react";
+import React, { useEffect, useRef } from "@rbxts/react";
 import { TweenService } from "@rbxts/services";
 import { Environment } from "@rbxts/ui-labs";
 import BuildButton from "client/ui/components/build/BuildButton";
-import { useWindow } from "client/ui/components/window/WindowManager";
+import { useDocument } from "client/ui/components/window/WindowManager";
 import { getAsset } from "shared/asset/AssetMap";
 
 export interface BuildWindowState {
@@ -44,24 +44,19 @@ interface BuildWindowProps {
  */
 export default function BuildWindow({ state, callbacks }: BuildWindowProps) {
     const ref = useRef<Frame>();
-    const [visible, setVisible] = useState<boolean>(false);
+    const { visible } = useDocument({ id: "Build" });
     const { hasSelection, isRestricted, animationsEnabled } = state;
     const { onDeselect, onRotate, onDelete, onPlace } = callbacks;
     const size = new UDim2(0.3, 0, 0, 75);
     const closeSize = new UDim2(0, 0, 0, 0);
 
-    useWindow({
-        id: "Build",
-        visible,
-        onOpen: () => {
-            setVisible(true);
+    useEffect(() => {
+        if (visible) {
             const frame = ref.current;
             if (!frame) return;
             frame.Visible = true;
             TweenService.Create(frame, new TweenInfo(0.2), { Size: size }).Play();
-        },
-        onClose: () => {
-            setVisible(false);
+        } else {
             const frame = ref.current;
             if (!frame) return;
             const tween = TweenService.Create(frame, new TweenInfo(0.2), { Size: closeSize });
@@ -70,11 +65,8 @@ export default function BuildWindow({ state, callbacks }: BuildWindowProps) {
                 frame.Visible = false;
             });
             tween.Play();
-        },
-    });
-
-    // Don't render if there's no selection or building is restricted
-    const shouldShow = visible && hasSelection && !isRestricted;
+        }
+    }, [visible]);
 
     return (
         <frame

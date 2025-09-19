@@ -1,7 +1,6 @@
 import React, { useRef } from "@rbxts/react";
 import { TweenService } from "@rbxts/services";
 import { getAsset } from "shared/asset/AssetMap";
-import { playSound } from "shared/asset/GameAssets";
 import { useTooltipProps } from "../tooltip/TooltipManager";
 
 interface WindowCloseButtonProps {
@@ -41,10 +40,7 @@ export default function WindowCloseButton({ onClick, color = Color3.fromRGB(255,
             BorderSizePixel={3}
             Event={{
                 ...tooltipProps.events,
-                Activated: () => {
-                    playSound("MenuClose.mp3");
-                    onClick();
-                },
+                Activated: onClick,
             }}
             Position={new UDim2(1, -10, 0, 10)}
             Size={new UDim2(0, 30, 0, 30)}

@@ -6,99 +6,95 @@
  * Works across multiple React render cycles using static methods.
  */
 
-import { useEffect, useRef } from "@rbxts/react";
+import { useEffect, useState } from "@rbxts/react";
 import HotkeyManager from "client/ui/components/hotkeys/HotkeyManager";
 import Packets from "shared/Packets";
 
 /**
- * Information about a registered window.
+ * Information about a registered document.
  */
-export interface WindowInfo {
-    /** Unique identifier for the window */
+export interface DocumentInfo {
+    /** Unique identifier for the document */
     id: string;
 
-    /** Whether the window is currently visible */
     visible: boolean;
 
-    /** Callback function to be called when the window is opened */
-    onOpen?: () => void;
+    setVisible: (visible: boolean) => void;
 
-    /** Callback function to be called when the window is closed */
-    onClose?: () => void;
-
-    /** Priority for closing windows (higher priority closes first) */
+    /** Priority for closing documents (higher priority closes first) */
     priority?: number;
 }
 
 /**
- * Global window manager with static methods for managing windows across React roots
+ * Global document manager with static methods for managing documents across React roots
  */
-export default class WindowManager {
-    private static windows = new Map<string, WindowInfo>();
+export default class DocumentManager {
+    static readonly INFO_PER_DOCUMENT = new Map<string, DocumentInfo>();
     private static tabOpenedConnection: RBXScriptConnection;
     private static initialized = false;
 
     /**
-     * Registers a new window with the window manager, allowing it to be tracked and managed
+     * Registers a new document with the document manager, allowing it to be tracked and managed
      * with features like the global close hotkey.
-     *
-     * @param windowInfo Information about the window to register (id, onClose, priority).
+     * @param documentInfo Information about the document to register (id, onClose, priority).
      */
-    static registerWindow(windowInfo: Omit<WindowInfo, "visible">): void {
-        const { id, onOpen, onClose, priority = 0 } = windowInfo;
-        this.windows.set(id, {
-            id,
-            visible: false,
-            onOpen,
-            onClose,
-            priority,
-        });
+    static register(documentInfo: DocumentInfo): void {
+        this.INFO_PER_DOCUMENT.set(documentInfo.id, documentInfo);
     }
 
     /**
-     * Unregisters a window from the window manager, removing it from tracking.
-     *
-     * @param id The unique identifier of the window to unregister.
+     * Unregisters a document from the document manager, removing it from tracking.
+     * @param id The unique identifier of the document to unregister.
      */
-    static unregisterWindow(id: string): void {
-        this.windows.delete(id);
+    static unregister(id: string): void {
+        this.INFO_PER_DOCUMENT.delete(id);
     }
 
     /**
-     * Sets the visibility of a registered window.
-     * @param id The unique identifier of the window.
-     * @param visible Whether the window should be visible or not.
-     * @returns True if the window was found and updated, false otherwise.
+     * Triggers the `setVisible` function of the specified document to change its visibility.
+     * @param id The unique identifier of the document to modify.
+     * @param visible The new visibility state to set.
+     * @returns Whether the visibility change was successful.
      */
-    static setWindowVisible(id: string, visible: boolean): boolean {
-        const window = this.windows.get(id);
-        if (!window) return false;
-        window.visible = visible;
-        if (visible) window.onOpen?.();
-        else window.onClose?.();
+    static setVisible(id: string, visible: boolean) {
+        const documentInfo = this.INFO_PER_DOCUMENT.get(id);
+        if (!documentInfo) return false;
+        documentInfo.setVisible(visible);
         return true;
     }
 
     /**
-     * Gets a list of all currently visible windows, sorted by priority (higher priority first).
-     *
-     * @returns Array of visible WindowInfo objects.
+     * Toggles the `visible` state of the specified document with `setVisible`.
+     * @param id The unique identifier of the document to toggle.
+     * @returns Whether the toggle was successful.
      */
-    static getVisibleWindows(): WindowInfo[] {
-        const visibleWindows: WindowInfo[] = [];
-        for (const [_, window] of this.windows) {
-            if (window.visible) {
-                visibleWindows.push(window);
+    static toggle(id: string) {
+        const documentInfo = this.INFO_PER_DOCUMENT.get(id);
+        if (!documentInfo) return false;
+        documentInfo.setVisible(!documentInfo.visible);
+        return true;
+    }
+
+    /**
+     * Gets a list of all currently visible documents, sorted by priority (higher priority first).
+     *
+     * @returns Array of visible DocumentInfo objects.
+     */
+    static getVisibleDocuments(): DocumentInfo[] {
+        const visibleDocuments: DocumentInfo[] = [];
+        for (const [_, document] of this.INFO_PER_DOCUMENT) {
+            if (document.visible) {
+                visibleDocuments.push(document);
             }
         }
         // Sort by priority (higher priority first)
-        table.sort(visibleWindows, (a, b) => (b.priority || 0) < (a.priority || 0));
-        return visibleWindows;
+        table.sort(visibleDocuments, (a, b) => (b.priority || 0) < (a.priority || 0));
+        return visibleDocuments;
     }
 
-    static isWindowVisible(id: string): boolean {
-        const window = this.windows.get(id);
-        return window ? window.visible : false;
+    static isVisible(id: string): boolean {
+        const documentInfo = this.INFO_PER_DOCUMENT.get(id);
+        return documentInfo ? documentInfo.visible : false;
     }
 
     private static initialize(): void {
@@ -109,25 +105,26 @@ export default class WindowManager {
         // Register global close hotkey
         HotkeyManager.bindHotkey({
             action: () => {
-                const visibleWindows = this.getVisibleWindows();
+                const visibleWindows = this.getVisibleDocuments();
                 if (visibleWindows.size() > 0) {
                     // Close the highest priority visible window
                     const windowToClose = visibleWindows[0];
                     if (windowToClose.priority !== undefined && windowToClose.priority < 0) return false; // Ignore windows with negative priority
 
-                    return this.setWindowVisible(windowToClose.id, false);
+                    windowToClose.setVisible(false);
+                    return true;
                 }
                 return false;
             },
             label: "Close Window",
         });
 
-        this.tabOpenedConnection = Packets.tabOpened.fromServer((tab) => this.setWindowVisible(tab, true));
+        this.tabOpenedConnection = Packets.tabOpened.fromServer((tab) => this.setVisible(tab, true));
         this.initialized = true;
     }
 
     private static cleanup(): void {
-        this.windows.clear();
+        this.INFO_PER_DOCUMENT.clear();
         this.tabOpenedConnection?.Disconnect();
         this.initialized = false;
     }
@@ -138,34 +135,40 @@ export default class WindowManager {
 }
 
 /**
- * Hook for window components to register themselves with the window manager
- * Works across different React roots
+ * Hook for document components to register themselves with the {@link DocumentManager} that
+ * works across different React roots.
  */
-export function useWindow({ id, visible, onOpen, onClose, priority = 0 }: WindowInfo) {
-    const onOpenRef = useRef(onOpen);
-    const onCloseRef = useRef(onClose);
+export function useDocument({
+    id,
+    defaultVisible = false,
+    priority = 0,
+}: {
+    /** Unique identifier for the document */
+    id: string;
+    /** Initial visibility state of the document */
+    defaultVisible?: boolean;
+    /** Priority for closing documents (higher priority closes first) */
+    priority?: number;
+}) {
+    const [visible, setVisible] = useState(defaultVisible);
 
+    // Register/unregister the document (only when id or priority changes)
     useEffect(() => {
-        onOpenRef.current = onOpen;
-    }, [onOpen]);
-
-    useEffect(() => {
-        onCloseRef.current = onClose;
-    }, [onClose]);
-
-    // Register/unregister the window (only when id or priority changes)
-    useEffect(() => {
-        WindowManager.registerWindow({
+        DocumentManager.register({
             id,
-            onOpen: () => onOpenRef.current?.(),
-            onClose: () => onCloseRef.current?.(),
+            visible,
+            setVisible,
             priority,
         });
-        return () => WindowManager.unregisterWindow(id);
+        return () => DocumentManager.unregister(id);
     }, [id, priority]);
 
     // Update visibility when it changes
     useEffect(() => {
-        WindowManager.setWindowVisible(id, visible);
+        const documentInfo = DocumentManager.INFO_PER_DOCUMENT.get(id);
+        if (!documentInfo) return;
+        documentInfo.visible = visible;
     }, [id, visible]);
+
+    return { id, visible, setVisible };
 }

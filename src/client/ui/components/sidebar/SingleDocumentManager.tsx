@@ -1,61 +1,61 @@
-import WindowManager from "client/ui/components/window/WindowManager";
+import DocumentManager from "client/ui/components/window/WindowManager";
 
 /**
  * Manages single-document interface behavior for sidebar windows
  */
 export default class SingleDocumentManager {
-    static activeWindow?: string;
+    static activeDocument?: string;
 
     /**
-     * Toggles the visibility of a window by its name, disabling the last opened window if necessary.
-     * @param windowName The unique name of the window to toggle.
-     * @returns True if the window was opened, false if it was closed.
+     * Toggles the visibility of a document by its name, disabling the last opened document if necessary.
+     * @param documentName The unique name of the document to toggle.
+     * @returns True if the document was opened, false if it was closed.
      */
-    static toggleWindow(windowName: string) {
-        if (this.activeWindow === windowName) {
-            this.activeWindow = undefined;
-            WindowManager.setWindowVisible(windowName, false);
+    static toggle(documentName: string) {
+        if (this.activeDocument === documentName) {
+            this.activeDocument = undefined;
+            DocumentManager.setVisible(documentName, false);
             return false;
         }
 
-        if (this.activeWindow) {
-            WindowManager.setWindowVisible(this.activeWindow, false);
+        if (this.activeDocument) {
+            DocumentManager.setVisible(this.activeDocument, false);
         }
 
-        this.activeWindow = windowName;
-        WindowManager.setWindowVisible(windowName, true);
+        this.activeDocument = documentName;
+        DocumentManager.setVisible(documentName, true);
         return true;
     }
 
     /**
-     * Opens a window by its name, closing any previously opened window.
-     * @param windowName The unique name of the window to open.
-     * @returns True if the window was opened, false if it was already open.
+     * Opens a document by its name, closing any previously opened document.
+     * @param documentName The unique name of the window to open.
+     * @returns True if the document was opened, false if it was already open.
      */
-    static openWindow(windowName: string) {
-        if (this.activeWindow === windowName) {
+    static open(documentName: string) {
+        if (this.activeDocument === documentName) {
             return false;
         }
 
-        if (this.activeWindow) {
-            WindowManager.setWindowVisible(this.activeWindow, false);
+        if (this.activeDocument) {
+            DocumentManager.setVisible(this.activeDocument, false);
         }
-        this.activeWindow = windowName;
-        WindowManager.setWindowVisible(windowName, true);
+        this.activeDocument = documentName;
+        DocumentManager.setVisible(documentName, true);
     }
 
     /**
-     * Closes a window by its name if it is currently open.
-     * @param windowName The unique name of the window to close.
-     * @returns True if the window was closed, false if it was not open.
+     * Closes a document by its name if it is currently open.
+     * @param documentName The unique name of the document to close.
+     * @returns True if the document was closed, false if it was not open.
      */
-    static closeWindow(windowName: string) {
-        if (this.activeWindow !== windowName) {
+    static close(documentName: string) {
+        if (this.activeDocument !== documentName) {
             return false;
         }
 
-        this.activeWindow = undefined;
-        WindowManager.setWindowVisible(windowName, false);
+        this.activeDocument = undefined;
+        DocumentManager.setVisible(documentName, false);
         return true;
     }
 }

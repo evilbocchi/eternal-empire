@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from "@rbxts/react";
 import LogEntry from "client/ui/components/logs/LogEntry";
 import PaginationControls from "client/ui/components/logs/PaginationControls";
-import useSingleDocumentWindow from "client/ui/components/sidebar/useSingleDocumentWindow";
+import useSingleDocument from "client/ui/components/sidebar/useSingleDocumentWindow";
 import TechWindow from "client/ui/components/window/TechWindow";
 import { RobotoMonoBold } from "client/ui/GameFonts";
 import { getAsset } from "shared/asset/AssetMap";
@@ -14,7 +14,7 @@ const LOGS_PER_PAGE = 20;
  * Features enhanced visual design with modern styling and smooth interactions
  */
 export default function LogsWindow() {
-    const { visible, closeWindow } = useSingleDocumentWindow("Logs");
+    const { id, visible } = useSingleDocument({ id: "Logs" });
 
     // State for logs and pagination
     const [logs, setLogs] = useState<Log[]>([]);
@@ -69,7 +69,7 @@ export default function LogsWindow() {
     }, [totalPages]);
 
     return (
-        <TechWindow visible={visible} icon={getAsset("assets/Settings.png")} title="Logs" onClose={closeWindow}>
+        <TechWindow visible={visible} icon={getAsset("assets/Settings.png")} id={id}>
             <frame BackgroundTransparency={1} Size={new UDim2(1, 0, 1, 0)}>
                 {/* Header with info text */}
                 <textlabel
