@@ -78,10 +78,18 @@ export default class Area {
      */
     readonly name: string;
 
-    /**
-     * The reference to the folder in the Workspace that contains all area-related parts and models.
-     */
+    /** The reference to the folder in the Workspace that contains all area-related parts and models. */
     readonly worldNode: SingleWorldNode;
+    /** The reference to the the area's boundary part. */
+    readonly areaBoundsWorldNode?: SingleWorldNode<Part>;
+    /** The reference to the the area's board part. */
+    readonly boardWorldNode?: SingleWorldNode<BasePart>;
+    /** The reference to the the area's grid part. */
+    readonly gridWorldNode?: SingleWorldNode<Part>;
+    /** The reference to the the area's catch area part. */
+    readonly catchAreaWorldNode?: SingleWorldNode<Part>;
+    /** The reference to the the area's spawn location part. */
+    readonly spawnLocationWorldNode?: SingleWorldNode<SpawnLocation>;
 
     /**
      * The maximum number of droplets allowed in this area.
@@ -126,46 +134,6 @@ export default class Area {
     lightingConfiguration: Partial<Lighting> | undefined;
 
     /**
-     * Returns the spawn location for this area.
-     * Players will teleport here when using teleporters to visit the area.
-     *
-     * @returns The SpawnLocation instance or undefined if none exists
-     */
-    getSpawnLocation() {
-        return this.areaFolder.FindFirstChild("SpawnLocation") as SpawnLocation | undefined;
-    }
-
-    /**
-     * Returns the grid part that defines where items can be placed.
-     * The grid is a BasePart that marks the buildable region.
-     *
-     * @returns The Grid BasePart or undefined if none exists
-     */
-    getGrid() {
-        return this.areaFolder.FindFirstChild("BuildGrid") as BasePart | undefined;
-    }
-
-    /**
-     * Returns the part that defines where characters have fallen off the map.
-     * When characters touch this part, they're considered to have fallen out of bounds.
-     *
-     * @returns The CatchArea BasePart or undefined if none exists
-     */
-    getCatchArea() {
-        return this.areaFolder.FindFirstChild("CatchArea") as BasePart | undefined;
-    }
-
-    /**
-     * Returns the part that defines the region containing the area.
-     * Used for determining when a player is within the area's boundaries.
-     *
-     * @returns The AreaBounds BasePart or undefined if none exists
-     */
-    getAreaBounds() {
-        return this.areaFolder.FindFirstChild("AreaBounds") as BasePart | undefined;
-    }
-
-    /**
      * Creates a new Area instance.
      * @param buildable Whether items can be placed/built in this area
      */
@@ -187,6 +155,13 @@ export default class Area {
         this.id = id as AreaId;
         this.name = name ?? id;
         this.worldNode = new SingleWorldNode(id);
+        this.areaBoundsWorldNode = new SingleWorldNode<Part>(`${id}AreaBounds`);
+        if (buildable) {
+            this.boardWorldNode = new SingleWorldNode<BasePart>(`${id}Board`);
+            this.gridWorldNode = new SingleWorldNode<Part>(`${id}Grid`);
+        }
+        this.catchAreaWorldNode = new SingleWorldNode<Part>(`${id}CatchArea`);
+        this.spawnLocationWorldNode = new SingleWorldNode<SpawnLocation>(`${id}SpawnLocation`);
         this.hidden = hidden ?? false;
         this.defaultDropletLimit = dropletLimit;
         this.lightingConfiguration = lightingConfiguration;

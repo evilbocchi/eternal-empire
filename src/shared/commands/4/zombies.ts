@@ -1,5 +1,5 @@
 import { ServerStorage, Workspace } from "@rbxts/services";
-import Command, { CommandAPI } from "shared/commands/Command";
+import Command from "shared/commands/Command";
 import { AREAS } from "shared/world/Area";
 
 export = new Command(script.Name)
@@ -9,7 +9,7 @@ export = new Command(script.Name)
         const asset = ServerStorage.WaitForChild("Fun").WaitForChild("Zombie") as Model;
         for (let i = 0; i < 15; i++) {
             for (const [_, area] of pairs(AREAS)) {
-                const spawnLocation = area.getSpawnLocation();
+                const spawnLocation = area.spawnLocationWorldNode?.getInstance();
                 if (spawnLocation === undefined) continue;
                 const zombie = asset.Clone();
                 const humanoid = zombie.FindFirstChildOfClass("Humanoid");

@@ -1,15 +1,13 @@
-import React, { useMemo } from "@rbxts/react";
+import React, { InstanceProps, useMemo } from "@rbxts/react";
 import { RobotoSlabBold } from "client/ui/GameFonts";
 
-interface ProgressBarProps {
+export default function ProgressBar(props: {
     current: number;
     max: number;
-    text: string;
+    text?: string;
     colorSequence: ColorSequence;
-    frameProps: React.InstanceProps<Frame>;
-}
-
-export default function ProgressBar(props: ProgressBarProps) {
+    frameProps: InstanceProps<Frame>;
+}) {
     const tintedColorSequence = useMemo(() => {
         const keypoints = new Array<ColorSequenceKeypoint>();
         const size = props.colorSequence.Keypoints.size();
@@ -38,7 +36,7 @@ export default function ProgressBar(props: ProgressBarProps) {
                 FontFace={RobotoSlabBold}
                 Position={new UDim2(0.5, 0, 0.5, 0)}
                 Size={new UDim2(0.8, 0, 0.8, 0)}
-                Text={props.text}
+                Text={props.text ?? `${props.current}/${props.max}`}
                 TextColor3={Color3.fromRGB(255, 255, 255)}
                 TextScaled={true}
                 ZIndex={2}

@@ -45,7 +45,7 @@ namespace Challenges {
     const cataclysicWorldCd = (level: number) => 22 - level * 7;
     const spawnMeteor = () => {
         const meteor = ASSETS.VFX.WaitForChild("Meteor").Clone() as BasePart;
-        const grid = AREAS.BarrenIslands.getGrid()!;
+        const grid = AREAS.BarrenIslands.gridWorldNode!.waitForInstance();
         const rand = grid.Size.X * 0.25;
         const target = grid.Position.add(new Vector3((math.random() - 0.5) * rand, 0, (math.random() - 0.5) * rand));
         meteor.CFrame = CFrame.lookAt(target.add(new Vector3(math.random(-50, 50), 300, math.random(-50, 50))), target);

@@ -135,11 +135,15 @@ export default class ResetService implements OnInit, OnStart {
      * @param required The required currency bundle to reset
      * @param action Callback for when players are touching and countdown updates
      */
-    hookTouch(
-        touchPart: BasePart,
-        required: CurrencyBundle,
-        action: (touching: Set<Player>, countdown: number) => void,
-    ) {
+    hookTouch({
+        touchPart,
+        required,
+        action,
+    }: {
+        touchPart: BasePart;
+        required: CurrencyBundle;
+        action: (touching: Set<Player>, countdown: number) => void;
+    }) {
         const players = new Set<Player>();
         let t = 0;
         let countdownStarted = false;
@@ -255,10 +259,10 @@ export default class ResetService implements OnInit, OnStart {
 
     onStart() {
         for (const [name, resetLayer] of pairs(RESET_LAYERS)) {
-            this.hookTouch(
-                resetLayer.touchPart.waitForInstance(),
-                new CurrencyBundle().set(resetLayer.scalesWith, resetLayer.minimum),
-                (players, countdown) => {
+            this.hookTouch({
+                touchPart: resetLayer.touchPart.waitForInstance(),
+                required: new CurrencyBundle().set(resetLayer.scalesWith, resetLayer.minimum),
+                action: (players, countdown) => {
                     Packets.resetCountdown.toAllClients(name, countdown);
                     if (countdown <= 0) {
                         const reward = this.getResetReward(resetLayer);
@@ -267,7 +271,7 @@ export default class ResetService implements OnInit, OnStart {
                         if (amount === undefined) return;
                         Packets.reset.toAllClients(name, amount);
                         let p: Player | undefined;
-                        const spawnCframe = AREAS[resetLayer.area].getSpawnLocation()?.CFrame;
+                        const spawnCframe = AREAS[resetLayer.area].spawnLocationWorldNode?.getInstance()?.CFrame;
                         for (const player of players) {
                             p = player;
                             if (player.Character !== undefined && spawnCframe !== undefined) {
@@ -288,7 +292,7 @@ export default class ResetService implements OnInit, OnStart {
                         });
                     }
                 },
-            );
+            });
         }
     }
 }

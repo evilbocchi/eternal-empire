@@ -21,7 +21,7 @@
  */
 
 import { getAllInstanceInfo, isInside } from "@antivivi/vrldk";
-import { OnInit, Service } from "@flamework/core";
+import { OnInit, OnStart, Service } from "@flamework/core";
 import { Players } from "@rbxts/services";
 import DataService from "server/services/data/DataService";
 import NamedUpgradeService from "server/services/data/NamedUpgradeService";
@@ -47,18 +47,20 @@ AREA_CHECK_PARAMS.CollisionGroup = "PlayerHitbox";
  * teleportation, and droplet management.
  */
 @Service()
-export default class AreaService implements OnInit, OnPlayerJoined {
+export default class AreaService implements OnInit, OnStart, OnPlayerJoined {
+    readonly ORIGINAL_SIZE_PER_AREA = new Map<AreaId, Vector3>();
+
     /**
      * Maps area IDs to the number of droplets currently present in that area.
      */
-    dropletCountPerArea = new Map<AreaId, number>();
+    readonly dropletCountPerArea = new Map<AreaId, number>();
 
     /**
      * Stores bounding box information for each area to enable efficient player position checks.
      * Maps area ID to a tuple of [CFrame, Vector3] representing the area's bounds.
      * This is populated during area loading and used for real-time player tracking.
      */
-    boundingBoxPerArea = new Map<AreaId, [CFrame, Vector3]>();
+    readonly boundingBoxPerArea = new Map<AreaId, [CFrame, Vector3]>();
 
     constructor(
         private dataService: DataService,
@@ -105,14 +107,14 @@ export default class AreaService implements OnInit, OnPlayerJoined {
     loadArea(id: AreaId, area: Area) {
         // Configure the building grid for this area, setting up collision groups
         // and preserving original size for upgrade calculations
-        const grid = area.getGrid();
+        const grid = area.gridWorldNode?.getInstance();
         if (grid !== undefined) {
             grid.CollisionGroup = "BuildGrid";
-            grid.SetAttribute("OriginalSize", grid.Size); // Store for upgrade scaling
+            this.ORIGINAL_SIZE_PER_AREA.set(id, grid.Size); // Store for upgrade scaling
         }
 
         // Set up area-specific music groups and sound management
-        const areaBounds = area.getAreaBounds();
+        const areaBounds = area.areaBoundsWorldNode?.getInstance();
         if (areaBounds !== undefined) {
             // Create dedicated sound group for this area's audio
             const areaSoundGroup = new Instance("SoundGroup");
@@ -143,32 +145,8 @@ export default class AreaService implements OnInit, OnPlayerJoined {
         // Initialize droplet systems
         this.loadDropletTracking(id);
 
-        // Connect to upgrade changes to dynamically resize the building grid
-        this.namedUpgradeService.upgradesChanged.connect((data) => {
-            if (grid === undefined) return;
-
-            // Get the original grid size as baseline
-            let size = grid.GetAttribute("OriginalSize") as Vector3 | undefined;
-            if (size === undefined) {
-                return;
-            }
-
-            // Apply all relevant grid size upgrades for this area
-            GRID_SIZE_UPGRADES.forEach((upgrade, upgradeId) => {
-                if (upgrade.area === id) size = upgrade.apply(size!, data.get(upgradeId));
-            });
-
-            // Update the grid size if it has changed
-            if (grid.Size !== size) {
-                grid.Size = size;
-            }
-        });
-
-        // Trigger initial upgrade application (hacky but functional)
-        this.namedUpgradeService.upgradesChanged.fire(this.dataService.empireData.upgrades);
-
         // Set up catch areas to prevent players from falling into the void
-        const catchArea = area.getCatchArea();
+        const catchArea = area.catchAreaWorldNode?.getInstance();
         if (catchArea !== undefined) {
             catchArea.CanTouch = true;
             catchArea.Touched.Connect((o) => {
@@ -181,7 +159,7 @@ export default class AreaService implements OnInit, OnPlayerJoined {
                 const rootPart = humanoid.RootPart;
                 if (rootPart === undefined) return;
 
-                const spawnLocation = area.getSpawnLocation();
+                const spawnLocation = area.spawnLocationWorldNode?.getInstance();
                 if (spawnLocation === undefined) {
                     // No safe spawn location - eliminate the player
                     humanoid.TakeDamage(999);
@@ -327,14 +305,6 @@ export default class AreaService implements OnInit, OnPlayerJoined {
         task.spawn(checkAreaChange);
     }
 
-    /**
-     * Initializes the AreaService and sets up all game areas and teleportation systems.
-     *
-     * This method is called during server startup and handles:
-     * - Loading and initializing all areas in the game
-     * - Setting up the area teleportation packet handler
-     * - Configuring safety checks for teleportation requests
-     */
     onInit() {
         // Load all areas defined in the AREAS configuration
         for (const [id, area] of pairs(AREAS)) {
@@ -345,7 +315,7 @@ export default class AreaService implements OnInit, OnPlayerJoined {
         Packets.tpToArea.fromClient((player, areaId) => {
             const character = player.Character;
             const area = AREAS[areaId];
-            const spawnLocation = area.getSpawnLocation();
+            const spawnLocation = area.spawnLocationWorldNode?.getInstance();
 
             if (
                 character === undefined ||
@@ -358,5 +328,31 @@ export default class AreaService implements OnInit, OnPlayerJoined {
             character.PivotTo(spawnLocation.CFrame);
             return true;
         });
+    }
+
+    onStart() {
+        const onUpgradesChanged = (data: Map<string, number>) => {
+            for (const [id, area] of pairs(AREAS)) {
+                const grid = area.gridWorldNode?.getInstance();
+                if (grid === undefined) continue;
+
+                // Get the original grid size as baseline
+                let size = this.ORIGINAL_SIZE_PER_AREA.get(id);
+                if (size === undefined) continue;
+
+                // Apply all relevant grid size upgrades for this area
+                GRID_SIZE_UPGRADES.forEach((upgrade, upgradeId) => {
+                    if (upgrade.area === id) size = upgrade.apply(size!, data.get(upgradeId));
+                });
+
+                // Update the grid size if it has changed
+                if (grid.Size !== size) {
+                    grid.Size = size;
+                }
+            }
+        };
+
+        this.namedUpgradeService.upgradesChanged.connect(onUpgradesChanged);
+        onUpgradesChanged(this.dataService.empireData.upgrades);
     }
 }
