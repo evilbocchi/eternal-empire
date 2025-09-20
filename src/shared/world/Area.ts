@@ -78,6 +78,9 @@ export default class Area {
      */
     readonly name: string;
 
+    /** Optional description of the area. */
+    readonly description?: string;
+
     /** The reference to the folder in the Workspace that contains all area-related parts and models. */
     readonly worldNode: SingleWorldNode;
     /** The reference to the the area's boundary part. */
@@ -140,6 +143,7 @@ export default class Area {
     constructor({
         id,
         name,
+        description,
         dropletLimit,
         buildable,
         hidden,
@@ -147,6 +151,7 @@ export default class Area {
     }: {
         id: string;
         name?: string;
+        description?: string;
         dropletLimit?: number;
         buildable: boolean;
         hidden?: boolean;
@@ -154,6 +159,7 @@ export default class Area {
     }) {
         this.id = id as AreaId;
         this.name = name ?? id;
+        this.description = description;
         this.worldNode = new SingleWorldNode(id);
         this.areaBoundsWorldNode = new SingleWorldNode<Part>(`${id}AreaBounds`);
         if (buildable) {
@@ -232,6 +238,7 @@ export const AREAS = {
     IntermittentIsles: new Area({
         id: "IntermittentIsles",
         name: "Intermittent Isles",
+        description: "An unstable region that holds the bridge to Slamo Village.",
         dropletLimit: 1,
         buildable: true,
         hidden: false,
@@ -239,6 +246,8 @@ export const AREAS = {
     AbandonedRig: new Area({
         id: "AbandonedRig",
         name: "Abandoned Rig",
+        description:
+            "A famous mining company used to harvest resources in the suburbs of Slamo Village. Nobody is coming back.",
         dropletLimit: 15,
         buildable: true,
         hidden: false,
@@ -246,6 +255,7 @@ export const AREAS = {
     DespairPlantation: new Area({
         id: "DespairPlantation",
         name: "Despair Plantation",
+        description: "Where the vilest of Obbyists are banished to.",
         dropletLimit: 75,
         buildable: true,
         hidden: false,
@@ -253,6 +263,7 @@ export const AREAS = {
     Eden: new Area({
         id: "Eden",
         name: "Eden",
+        description: "Welcome home.",
         dropletLimit: 5,
         buildable: true,
         hidden: false,
@@ -262,6 +273,8 @@ export const AREAS = {
     BarrenIslands: new Area({
         id: "BarrenIslands",
         name: "Barren Islands",
+        description:
+            "An abandoned region inhabited by only the most unfortunate. Desolate and devoid of resources, the only beacon of hope shining upon this forbidden wasteland is the beginning of a capitalistic empire.",
         dropletLimit: 75,
         buildable: true,
         hidden: false,
@@ -269,6 +282,8 @@ export const AREAS = {
     SlamoVillage: new Area({
         id: "SlamoVillage",
         name: "Slamo Village",
+        description:
+            "A humble settlement built by the Slamos, where time itself seems to slow. Peace has reigned for decades, untouched by conflict or ambition.",
         dropletLimit: 40,
         buildable: true,
         hidden: false,
@@ -276,6 +291,8 @@ export const AREAS = {
     SkyPavilion: new Area({
         id: "SkyPavilion",
         name: "Sky Pavilion",
+        description:
+            "When the world below grew dangerous, Noobs looked up and found salvation in the sky. Built atop a floating landmass no one fully understands, the Sky Pavilion rose as a fortified sanctuary of sleek architecture and modern ambition. Its citizens live in comfort and denial, trusting the ground beneath their feet… even if no one remembers why it stays in the air.",
         dropletLimit: 20,
         buildable: true,
         hidden: false,

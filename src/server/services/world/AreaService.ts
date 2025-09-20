@@ -143,7 +143,7 @@ export default class AreaService implements OnInit, OnStart, OnPlayerJoined {
         }
 
         // Initialize droplet systems
-        this.loadDropletTracking(id);
+        this.loadDropletTracking(area);
 
         // Set up catch areas to prevent players from falling into the void
         const catchArea = area.catchAreaWorldNode?.getInstance();
@@ -181,11 +181,11 @@ export default class AreaService implements OnInit, OnStart, OnPlayerJoined {
      * counts in each area, which is crucial for UI display and area limit enforcement.
      * It includes a safety check to prevent unnecessary network traffic during server startup.
      *
-     * @param id The area ID where the droplet count changed
+     * @param area The area where the droplet count changed
      * @param newCount The new droplet count for the area
      */
-    propagateDropletCountChange(id: AreaId, newCount: number) {
-        this.dropletCountPerArea.set(id, newCount);
+    propagateDropletCountChange(area: Area, newCount: number) {
+        this.dropletCountPerArea.set(area.id, newCount);
 
         // Prevent network spam during server initialization
         if (os.clock() < 10) {
@@ -193,7 +193,7 @@ export default class AreaService implements OnInit, OnStart, OnPlayerJoined {
         }
 
         // Broadcast the change to all connected clients
-        Packets.dropletCountChanged.toAllClients(id, newCount);
+        Packets.dropletCountChanged.toAllClients(area.id, newCount, area.getDropletLimit());
     }
 
     /**
@@ -203,10 +203,10 @@ export default class AreaService implements OnInit, OnStart, OnPlayerJoined {
      * and periodic recalibration to prevent desynchronization issues. It handles
      * both droplet creation and destruction events while maintaining accurate counts.
      *
-     * @param id The area ID to set up droplet tracking for
-     * @param area The Area object containing droplet limit configuration
+     * @param area The Area object to set up droplet tracking for
      */
-    loadDropletTracking(id: AreaId) {
+    loadDropletTracking(area: Area) {
+        const id = area.id;
         const dropletCountPerArea = this.dropletCountPerArea;
         dropletCountPerArea.set(id, 0);
 
@@ -217,13 +217,13 @@ export default class AreaService implements OnInit, OnStart, OnPlayerJoined {
             // Only count non-incinerated droplets in this specific area
             if (info.Incinerated !== true && info.Area === id) {
                 const newCurrent = dropletCountPerArea.get(id)! + 1;
-                this.propagateDropletCountChange(id, newCurrent);
+                this.propagateDropletCountChange(area, newCurrent);
                 dropletCountPerArea.set(id, newCurrent);
 
                 // Set up cleanup tracking when the droplet is destroyed
                 d.Destroying.Once(() => {
                     const newCurrent = dropletCountPerArea.get(id)! - 1;
-                    this.propagateDropletCountChange(id, newCurrent);
+                    this.propagateDropletCountChange(area, newCurrent);
                     dropletCountPerArea.set(id, newCurrent);
                 });
             }
@@ -242,7 +242,7 @@ export default class AreaService implements OnInit, OnStart, OnPlayerJoined {
                 }
             }
 
-            this.propagateDropletCountChange(id, i);
+            this.propagateDropletCountChange(area, i);
             task.delay(5, resynchronize);
         };
         task.spawn(resynchronize);

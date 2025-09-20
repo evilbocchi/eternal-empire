@@ -1,8 +1,17 @@
-import React, { ReactNode, useEffect, useMemo, useState } from "@rbxts/react";
+import React, { ReactNode, useEffect, useState } from "@rbxts/react";
 import ProgressBar from "client/ui/components/window/ProgressBar";
 import { RobotoMonoBold, RobotoSlabHeavy } from "client/ui/GameFonts";
-import { AREAS } from "shared/world/Area";
-import { SingleWorldNode } from "shared/world/nodes/WorldNode";
+import Area from "shared/world/Area";
+
+declare global {
+    interface AreaBoardGuiProps {
+        area: Area;
+        children?: ReactNode;
+        dropletCount?: number;
+        dropletLimit?: number;
+        placedItemsText?: string;
+    }
+}
 
 export function AreaStatEntry({ title, children }: { title: string; children?: ReactNode }) {
     return (
@@ -31,23 +40,16 @@ export function AreaStatEntry({ title, children }: { title: string; children?: R
 }
 
 export default function AreaBoardGui({
-    areaId,
+    area,
     children,
-    dropletCount,
-    dropletLimit,
+    dropletCount = 0,
+    dropletLimit = 100,
     placedItemsText = "0",
-}: {
-    areaId: AreaId;
-    children?: ReactNode;
-    dropletCount: number;
-    dropletLimit: number;
-    placedItemsText?: string;
-}) {
-    const area = AREAS[areaId];
+}: AreaBoardGuiProps) {
     const boardWorldNode = area.boardWorldNode;
-    if (boardWorldNode === undefined) throw `Area ${areaId} does not have a board world node.`;
+    if (boardWorldNode === undefined) throw `Area ${area.id} does not have a board world node.`;
     const gridWorldNode = area.gridWorldNode;
-    if (gridWorldNode === undefined) throw `Area ${areaId} does not have a grid world node.`;
+    if (gridWorldNode === undefined) throw `Area ${area.id} does not have a grid world node.`;
 
     const [gridSize, setGridSize] = useState<Vector3>(new Vector3(0, 0, 0));
 
@@ -137,5 +139,48 @@ export default function AreaBoardGui({
                 </textlabel>
             </AreaStatEntry>
         </surfacegui>
+    );
+}
+
+export function BasicAreaBoardGui(props: AreaBoardGuiProps) {
+    return (
+        <AreaBoardGui {...props}>
+            <textlabel
+                BackgroundTransparency={1}
+                FontFace={RobotoSlabHeavy}
+                Size={new UDim2(1, 0, 0.1, 0)}
+                Text={props.area.name}
+                TextColor3={Color3.fromRGB(255, 255, 255)}
+                TextScaled={true}
+                TextSize={14}
+                TextWrapped={true}
+            >
+                <uistroke Color={Color3.fromRGB(121, 177, 88)} Thickness={4}>
+                    <uigradient
+                        Color={
+                            new ColorSequence([
+                                new ColorSequenceKeypoint(0, Color3.fromRGB(255, 255, 255)),
+                                new ColorSequenceKeypoint(1, Color3.fromRGB(20, 29, 14)),
+                            ])
+                        }
+                        Rotation={90}
+                    />
+                </uistroke>
+            </textlabel>
+            <textlabel
+                BackgroundTransparency={1}
+                FontFace={RobotoMonoBold}
+                Size={new UDim2(1, 0, 0.25, 0)}
+                Text={props.area.description}
+                TextColor3={Color3.fromRGB(195, 195, 195)}
+                TextScaled={true}
+                TextSize={25}
+                TextWrapped={true}
+                TextYAlignment={Enum.TextYAlignment.Top}
+            >
+                <uistroke Thickness={2} />
+                <uitextsizeconstraint MaxTextSize={50} />
+            </textlabel>
+        </AreaBoardGui>
     );
 }

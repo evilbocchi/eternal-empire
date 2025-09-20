@@ -91,15 +91,13 @@ declare global {
         rawRotation?: number;
 
         /**
-         * The ID of the placement, used to identify the item in the world.
-         *
+         * The area of the placement, used to identify the item in the world.
          * This is automatically generated when the item is placed.
          */
-        area?: string;
+        area?: AreaId;
 
         /**
-         * The ID of the placement, used to identify the item in the world.
-         *
+         * The metadata for the placed item, used to store additional information about the item.
          * This is automatically generated when the item is placed.
          */
         meta?: PlacedItemMetadata;
