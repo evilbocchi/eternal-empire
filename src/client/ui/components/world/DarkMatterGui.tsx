@@ -1,7 +1,6 @@
 import { OnoeNum } from "@antivivi/serikanum";
 import React, { useEffect, useState } from "@rbxts/react";
 import { RobotoSlabBold, RobotoSlabHeavy } from "client/ui/GameFonts";
-import CurrencyBundle from "shared/currency/CurrencyBundle";
 import DarkMatter from "shared/currency/mechanics/DarkMatter";
 import Packets from "shared/Packets";
 import DarkMatterPart from "shared/world/nodes/DarkMatterPart";
@@ -24,6 +23,7 @@ export default function DarkMatterGui() {
     }, []);
 
     const remainingForPower = DarkMatter.BOOSTING_CURRENCIES.Power.requirement.sub(amount ?? 0);
+    const powerLocked = remainingForPower.moreThan(0);
 
     return (
         <surfacegui
@@ -115,14 +115,14 @@ export default function DarkMatterGui() {
                 BackgroundTransparency={1}
                 FontFace={RobotoSlabHeavy}
                 LayoutOrder={5}
-                Size={new UDim2(0.5, 0, 0, 70)}
+                Size={new UDim2(0.5, 0, 0, powerLocked ? 50 : 70)}
                 Text={
-                    remainingForPower.moreThan(0)
+                    powerLocked
                         ? `(${remainingForPower.toString()} more to unlock!)`
                         : `x${boost?.get("Power")?.toString() ?? "1"} Power`
                 }
                 TextColor3={Color3.fromRGB(255, 255, 255)}
-                TextSize={70}
+                TextSize={powerLocked ? 50 : 70}
                 TextWrapped={true}
             >
                 <uistroke Thickness={2} />
