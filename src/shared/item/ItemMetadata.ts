@@ -36,7 +36,7 @@ export default class ItemMetadata {
     constructor(
         public item: Item,
         public size = 15,
-        public weight = "Medium",
+        public weight: keyof typeof Enum.FontWeight = "Medium",
     ) {
         for (const [_, value] of pairs(ItemMetadata.INDICES)) {
             this.builder[value] = "";
@@ -189,7 +189,7 @@ export default class ItemMetadata {
         description: string,
         color = Color3.fromRGB(195, 195, 195),
         size = 18,
-        weight?: string | number,
+        weight?: keyof typeof Enum.FontWeight | number,
     ) {
         const builder = buildRichText(undefined, description, color, size, weight);
         return builder.appendAll(this.builder).toString();
@@ -210,7 +210,7 @@ export default class ItemMetadata {
         useTooltipDescription?: boolean,
         color?: Color3,
         size?: number,
-        weight?: string | number,
+        weight?: keyof typeof Enum.FontWeight | number,
     ) {
         const description = ItemMetadata.formatDescription(this.item, uuid, useTooltipDescription);
         return this.appendMetadata(description, color, size, weight);

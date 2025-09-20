@@ -116,6 +116,8 @@ namespace Packets {
     export const buyUpgrade = packet<(upgradeId: string, to: DataType.i32 | undefined) => boolean>();
 
     // resets
+    export const resetCountdown = packet<(layer: ResetLayerId, countdown: number) => void>();
+    export const gainPerResetLayer = property<Map<ResetLayerId, BaseOnoeNum>>(new Map());
     export const reset = packet<(layer: ResetLayerId, amount: BaseOnoeNum) => void>();
     export const printedSetups = property<Array<Setup>>(EmpireProfileTemplate.printedSetups);
     export const renameSetup = packet<(currentName: string, renameTo: string) => void>();

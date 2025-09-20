@@ -1,5 +1,7 @@
 import { OnoeNum } from "@antivivi/serikanum";
 import Formula from "shared/currency/Formula";
+import SkillificationZone from "shared/world/nodes/SkillificationZone";
+import WinificationZone from "shared/world/nodes/WinificationZone";
 
 declare global {
     type ResetLayerId = keyof typeof RESET_LAYERS;
@@ -16,6 +18,7 @@ export const RESET_LAYERS = {
         gives: "Skill" as Currency,
         resettingCurrencies: ["Funds", "Power", "Purifier Clicks"] as Currency[],
         resettingUpgrades: ["MoreFunds", "MorePower"],
+        touchPart: SkillificationZone,
         badgeId: 1485187140296844, // TODO: change badge
     },
     Winification: {
@@ -34,6 +37,7 @@ export const RESET_LAYERS = {
             "DarkerMatter",
             "EfficientLearning",
         ],
+        touchPart: WinificationZone,
         badgeId: 645025346348557, // TODO: change badge
     },
 };

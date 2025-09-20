@@ -1,5 +1,5 @@
 import Signal from "@antivivi/lemon-signal";
-import { getRootPart, loadAnimation } from "@antivivi/vrldk";
+import { getRootPart, loadAnimation, simpleInterval } from "@antivivi/vrldk";
 import {
     CollectionService,
     PathfindingService,
@@ -108,23 +108,19 @@ export default class NPC extends Reloadable<NPC> {
         this.playAnimation("Default");
 
         // Track the NPC's position and stop the walk animation if it hasn't moved
-        let active = true;
         let last = humanoid.RootPart?.Position;
-        task.spawn(() => {
-            while (task.wait(1)) {
-                if (active === false) break;
-                const rootPart = humanoid.RootPart;
-                if (rootPart === undefined) {
-                    continue;
-                }
-
-                const newPosition = rootPart.Position;
-                if (last === undefined || newPosition.sub(last).Magnitude < 1) {
-                    last = newPosition;
-                    this.stopAnimation("Walk");
-                }
+        const cleanupInterval = simpleInterval(() => {
+            const rootPart = humanoid.RootPart;
+            if (rootPart === undefined) {
+                return;
             }
-        });
+
+            const newPosition = rootPart.Position;
+            if (last === undefined || newPosition.sub(last).Magnitude < 1) {
+                last = newPosition;
+                this.stopAnimation("Walk");
+            }
+        }, 1);
 
         // Automatically play walk and jump animations based on humanoid events
         const runningConnection = humanoid.Running.Connect((speed) => {
@@ -179,7 +175,7 @@ export default class NPC extends Reloadable<NPC> {
         });
         Dialogue.proximityPrompts.add(prompt);
         return () => {
-            active = false;
+            cleanupInterval();
             runningConnection.Disconnect();
             jumpingConnection.Disconnect();
             displayNameConnection.Disconnect();

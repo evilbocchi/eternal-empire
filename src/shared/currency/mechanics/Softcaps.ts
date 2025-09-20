@@ -50,8 +50,7 @@ export const performSoftcap = (amount?: OnoeNum, softcap?: Softcap) => {
 };
 
 /**
- * Applies softcaps to a value based on the balance.
- *
+ * Mutably applies softcaps to a value based on the balance.
  * @param balance The balance the server currently has.
  * @param value The value to apply softcaps to.
  * @returns The value with softcaps applied.

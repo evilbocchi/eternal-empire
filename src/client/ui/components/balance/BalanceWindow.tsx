@@ -3,6 +3,7 @@ import React, { Fragment, useEffect, useRef, useState } from "@rbxts/react";
 import BalanceOption from "client/ui/components/balance/BalanceOption";
 import NavigationControls from "client/ui/components/balance/NavigationControls";
 import { useDocument } from "client/ui/components/window/WindowManager";
+import useInterval from "client/ui/hooks/useInterval";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import { CURRENCY_DETAILS } from "shared/currency/CurrencyDetails";
 import CurrencyBomb from "shared/currency/mechanics/CurrencyBomb";
@@ -65,19 +66,9 @@ export default function BalanceWindow() {
         };
     }, []);
 
-    useEffect(() => {
-        let active = true;
-        const checkBomb = () => {
-            setBombBoosts(CurrencyBomb.getBombBoosts(Packets.bombEndTimes.get(), os.time()));
-
-            if (active) {
-                task.delay(1, checkBomb);
-            }
-        };
-        checkBomb();
-        return () => {
-            active = false;
-        };
+    useInterval(() => {
+        setBombBoosts(CurrencyBomb.getBombBoosts(Packets.bombEndTimes.get(), os.time()));
+        return 1;
     }, []);
 
     // Calculate max pages and filter currencies

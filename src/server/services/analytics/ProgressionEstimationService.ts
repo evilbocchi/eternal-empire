@@ -440,6 +440,7 @@ export default class ProgressionEstimationService implements OnGameAPILoaded, On
         // lastly, account for reset layer gains
         for (const [_, resetLayer] of pairs(RESET_LAYERS)) {
             const reward = this.resetService.getResetReward(resetLayer);
+            if (reward === undefined) continue;
             revenue = revenue.add(reward.div(500)); // assume reset recovery is 500s
         }
 

@@ -174,9 +174,10 @@ class Formula {
     /**
      * Returns a string representation of the formula, using the provided variable name.
      * @param nameOfX The variable name to use (e.g., "x").
+     * @param subFontSize The font size for logarithm bases in the string representation.
      * @returns The formula as a string.
      */
-    tostring(nameOfX: string) {
+    tostring(nameOfX: string, subFontSize = 16) {
         let lastOperator: number | undefined;
         for (const operation of this.operations) {
             switch (operation.type) {
@@ -208,7 +209,7 @@ class Formula {
                     nameOfX = "√(" + nameOfX + ")";
                     break;
                 case OPERATION_LOG:
-                    nameOfX = "log<font size='16'>" + operation.base + "</font>(" + nameOfX + ")";
+                    nameOfX = `log<font size='${subFontSize}'>${operation.base}</font>(${nameOfX})`;
                     break;
                 case OPERATION_LN:
                     nameOfX = "ln(" + nameOfX + ")";

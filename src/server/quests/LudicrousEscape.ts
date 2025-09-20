@@ -10,6 +10,7 @@ import SlamoBook from "server/interactive/object/SlamoBook";
 import Quest, { Stage } from "server/quests/Quest";
 import { emitEffect, playSound } from "shared/asset/GameAssets";
 import { PLACED_ITEMS_FOLDER, WAYPOINTS } from "shared/constants";
+import CurrencyBundle from "shared/currency/CurrencyBundle";
 import { RESET_LAYERS } from "shared/currency/mechanics/ResetLayer";
 import { Server } from "shared/item/ItemUtils";
 import SkillPod from "shared/items/0/millisecondless/SkillPod";
@@ -451,9 +452,8 @@ export = new Quest(script.Name)
                     new Dialogue(Andy, "As your reward, here's a Funds Bomb! Enjoy!").talk();
                     CurrencyService.increment("Funds Bombs", new OnoeNum(1));
                 } else if (rng === 2) {
-                    const amount = Server.Reset.getResetReward(RESET_LAYERS.Skillification).div(5);
-                    const skill = amount.get("Skill");
-                    if (skill === undefined || skill.equals(0)) {
+                    const skillDelta = Server.Reset.getResetReward(RESET_LAYERS.Skillification)?.div(5)?.get("Skill");
+                    if (skillDelta === undefined || skillDelta.equals(0)) {
                         new Dialogue(
                             Andy,
                             "As your reward, I wanted to give you some Skill... but I'm all out. Here's some resources instead!",
@@ -467,7 +467,7 @@ export = new Quest(script.Name)
                         Andy,
                         "As your reward, I gave you a bit of my Skill. Hopefully, it'll help you out!",
                     ).talk();
-                    CurrencyService.incrementAll(amount.amountPerCurrency);
+                    CurrencyService.incrementAll(new CurrencyBundle().set("Skill", skillDelta).amountPerCurrency);
                 } else if (rng === 3) {
                     new Dialogue(
                         Andy,

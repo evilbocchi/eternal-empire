@@ -28,12 +28,13 @@ import { log } from "server/services/permissions/LogService";
 import RevenueService from "server/services/RevenueService";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import { CURRENCY_DETAILS } from "shared/currency/CurrencyDetails";
+import { RESET_LAYERS } from "shared/currency/mechanics/ResetLayer";
 import Operative from "shared/item/traits/Operative";
 import Items from "shared/items/Items";
 import NamedUpgrades from "shared/namedupgrade/NamedUpgrades";
 import Packets from "shared/Packets";
-import { RESET_LAYERS } from "shared/currency/mechanics/ResetLayer";
 import Sandbox from "shared/Sandbox";
+import { AREAS } from "shared/world/Area";
 
 const RESET_UPGRADES = NamedUpgrades.getUpgrades("Reset");
 
@@ -50,10 +51,6 @@ export default class ResetService implements OnInit, OnStart {
      * @param amount The amount of reward given
      */
     reset = new Signal<(player: Player, layer: ResetLayerId, amount: OnoeNum) => void>();
-    /**
-     * Tracks whether a reset is currently in progress per layer.
-     */
-    resettingPerLayer = new Map<ResetLayerId, boolean>();
 
     /**
      * Constructs the ResetService with all required dependencies.
@@ -209,19 +206,15 @@ export default class ResetService implements OnInit, OnStart {
      */
     getResetReward(resetLayer: ResetLayer, balance = this.currencyService.balance) {
         const amount = balance.get(resetLayer.scalesWith);
-        let value = new CurrencyBundle();
-        if (amount === undefined) {
-            return value;
-        }
-        if (resetLayer.minimum.moreThan(amount)) return value;
+        if (amount === undefined || resetLayer.minimum.moreThan(amount)) return;
 
-        value = value.set(resetLayer.gives, resetLayer.formula.evaluate(amount));
+        let value = new CurrencyBundle().set(resetLayer.gives, resetLayer.formula.evaluate(amount));
 
         let [totalAdd, totalMul, totalPow] = Operative.template();
         [totalAdd, totalMul, totalPow] = this.revenueService.applyGlobal(totalAdd, totalMul, totalPow, RESET_UPGRADES);
-        const worth = Operative.coalesce(value, totalAdd, totalMul, totalPow);
-        this.revenueService.performSoftcaps(worth.amountPerCurrency);
-        return worth;
+        value = Operative.coalesce(value, totalAdd, totalMul, totalPow);
+        this.revenueService.performSoftcaps(value.amountPerCurrency);
+        return value;
     }
 
     /**
@@ -231,24 +224,16 @@ export default class ResetService implements OnInit, OnStart {
     onInit() {
         if (Sandbox.getEnabled()) return;
 
-        // const balanceChanged = (balance: CurrencyBundle) => {
-        //     for (const [name, resetLayer] of pairs(RESET_LAYERS)) {
-        //         const reward = this.getResetReward(resetLayer, balance);
-        //         const isNoBaseAmount = reward.amountPerCurrency.isEmpty();
-        //         this.resettingPerLayer.set(name, !isNoBaseAmount);
-        //         resetLayer.gainLabel.Text = isNoBaseAmount ? `0 ${resetLayer.gives}` : reward.toString();
-        //         const msgLabel = resetLayer.touchPart.BillboardGui.TextLabel;
-        //         if (isNoBaseAmount === true) {
-        //             msgLabel.Text = `You need ${CurrencyBundle.getFormatted(resetLayer.scalesWith, resetLayer.minimum)} to reset`;
-        //             msgLabel.LayoutOrder = 2;
-        //         } else if (msgLabel.LayoutOrder === 2) {
-        //             msgLabel.Text = "Stand on the altar for 3 seconds to reset";
-        //             msgLabel.LayoutOrder = 1;
-        //         }
-        //     }
-        // };
-        // this.currencyService.balanceChanged.connect(balanceChanged);
-        // balanceChanged(this.currencyService.balance);
+        const balanceChanged = (balance: CurrencyBundle) => {
+            const gainPerResetLayer = new Map<ResetLayerId, OnoeNum>();
+            for (const [name, resetLayer] of pairs(RESET_LAYERS)) {
+                const reward = this.getResetReward(resetLayer, balance)?.get(resetLayer.gives);
+                if (reward !== undefined) gainPerResetLayer.set(name, reward);
+            }
+            Packets.gainPerResetLayer.set(gainPerResetLayer);
+        };
+        this.currencyService.balanceChanged.connect(balanceChanged);
+        balanceChanged(this.currencyService.balance);
 
         this.reset.connect((player, layer, amount) => {
             const resetLayer = RESET_LAYERS[layer];
@@ -269,43 +254,41 @@ export default class ResetService implements OnInit, OnStart {
     }
 
     onStart() {
-        // for (const [name, resetLayer] of pairs(RESET_LAYERS)) {
-        //     resetLayer.touchPart.BillboardGui.TextLabel.LayoutOrder = 2;
-        //     this.hookTouch(
-        //         resetLayer.touchPart,
-        //         new CurrencyBundle().set(resetLayer.scalesWith, resetLayer.minimum),
-        //         (players, countdown) => {
-        //             resetLayer.touchPart.BillboardGui.TextLabel.Text = `Stand on the altar for ${math.floor(countdown * 100) / 100} seconds to reset`;
-        //             if (countdown <= 0) {
-        //                 const reward = this.getResetReward(resetLayer);
-        //                 if (reward === undefined) return;
-        //                 const [currency, amount] = reward.getFirst();
-        //                 if (amount === undefined) return;
-        //                 Packets.reset.toAllClients(name, amount);
-        //                 let p: Player | undefined;
-        //                 const spawnCframe = resetLayer.tpLocation?.CFrame;
-        //                 for (const player of players) {
-        //                     p = player;
-        //                     if (player.Character !== undefined && spawnCframe !== undefined) {
-        //                         player.Character.PivotTo(spawnCframe);
-        //                     }
-        //                 }
-        //                 if (p === undefined) {
-        //                     return;
-        //                 }
-        //                 this.resettingPerLayer.set(name, false);
-        //                 this.reset.fire(p, name, amount);
-        //                 task.delay(2, () => {
-        //                     if (p === undefined) return;
-        //                     this.performReset(resetLayer);
-        //                     this.currencyService.increment(currency!, amount);
-        //                     for (const player of Players.GetPlayers()) {
-        //                         pcall(() => BadgeService.AwardBadge(player.UserId, resetLayer.badgeId));
-        //                     }
-        //                 });
-        //             }
-        //         },
-        //     );
-        // }
+        for (const [name, resetLayer] of pairs(RESET_LAYERS)) {
+            this.hookTouch(
+                resetLayer.touchPart.waitForInstance(),
+                new CurrencyBundle().set(resetLayer.scalesWith, resetLayer.minimum),
+                (players, countdown) => {
+                    Packets.resetCountdown.toAllClients(name, countdown);
+                    if (countdown <= 0) {
+                        const reward = this.getResetReward(resetLayer);
+                        if (reward === undefined) return;
+                        const [currency, amount] = reward.getFirst();
+                        if (amount === undefined) return;
+                        Packets.reset.toAllClients(name, amount);
+                        let p: Player | undefined;
+                        const spawnCframe = AREAS[resetLayer.area].getSpawnLocation()?.CFrame;
+                        for (const player of players) {
+                            p = player;
+                            if (player.Character !== undefined && spawnCframe !== undefined) {
+                                player.Character.PivotTo(spawnCframe);
+                            }
+                        }
+                        if (p === undefined) {
+                            return;
+                        }
+                        this.reset.fire(p, name, amount);
+                        task.delay(2, () => {
+                            if (p === undefined) return;
+                            this.performReset(resetLayer);
+                            this.currencyService.increment(currency!, amount);
+                            for (const player of Players.GetPlayers()) {
+                                pcall(() => BadgeService.AwardBadge(player.UserId, resetLayer.badgeId));
+                            }
+                        });
+                    }
+                },
+            );
+        }
     }
 }

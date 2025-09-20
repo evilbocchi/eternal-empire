@@ -14,6 +14,7 @@ import useSingleDocument from "client/ui/components/sidebar/useSingleDocumentWin
 import getDifficultyDisplayColors from "client/ui/components/tooltip/getDifficultyDisplayColors";
 import { METADATA_PER_ITEM, TooltipManager } from "client/ui/components/tooltip/TooltipWindow";
 import { RobotoMono, RobotoSlab, RobotoSlabHeavy, RobotoSlabMedium } from "client/ui/GameFonts";
+import useInterval from "client/ui/hooks/useInterval";
 import { getAsset } from "shared/asset/AssetMap";
 import { playSound } from "shared/asset/GameAssets";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
@@ -58,21 +59,12 @@ export default function PurchaseWindow({ viewportManagement }: { viewportManagem
     }, []);
 
     // Hidden cycle for unaffordable label changes
-    useEffect(() => {
-        if (visible) return;
+    useInterval(() => {
+        if (visible) return 5;
 
-        let active = true;
-        const updateUnaffordableLabel = () => {
-            if (!active) return;
-            const options = ["UNAFFORDABLE", "YOU ARE BROKE", "GET MORE STUFF", "WORK HARDER", "NOPE", "YOU WISH"];
-            setUnaffordableLabel(options[math.floor(math.random(0, options.size() - 1))]);
-            task.delay(5, updateUnaffordableLabel);
-        };
-        updateUnaffordableLabel();
-
-        return () => {
-            active = false;
-        };
+        const options = ["UNAFFORDABLE", "YOU ARE BROKE", "GET MORE STUFF", "WORK HARDER", "NOPE", "YOU WISH"];
+        setUnaffordableLabel(options[math.floor(math.random(0, options.size() - 1))]);
+        return 5;
     }, [visible]);
 
     useEffect(() => {
