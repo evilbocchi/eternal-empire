@@ -20,19 +20,19 @@ namespace DarkMatter {
      * @param balance The currency bundle to use (defaults to current balance).
      * @returns Tuple of (boost bundle, dark matter amount).
      */
-    export function getBoost(balance: CurrencyBundle) {
+    export function getBoost(balance: BaseCurrencyMap) {
         const darkMatter = balance.get("Dark Matter");
 
         const ZERO = new OnoeNum(0);
-        if (!darkMatter || darkMatter.equals(ZERO)) {
+        if (!darkMatter || ZERO.equals(darkMatter)) {
             return $tuple(undefined, ZERO);
         }
 
         let boost = new CurrencyBundle();
         for (const [currency, boostingDetails] of pairs(BOOSTING_CURRENCIES)) {
-            if (darkMatter.lessThan(boostingDetails.requirement)) continue;
+            if (boostingDetails.requirement.moreThan(darkMatter)) continue;
 
-            boost = boost.set(currency, boostingDetails.formula.evaluate(darkMatter));
+            boost = boost.set(currency, boostingDetails.formula.evaluate(new OnoeNum(darkMatter)));
         }
 
         return $tuple(boost, darkMatter);

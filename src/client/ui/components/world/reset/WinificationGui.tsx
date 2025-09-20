@@ -4,7 +4,7 @@ import BasicResetBoardFrontGui, {
     BasicResetBoardBackGui,
     BasicResetBoardTitle,
     BasicZoneGui,
-} from "client/ui/components/reset/ResetBoard";
+} from "client/ui/components/world/reset/ResetBoard";
 import { RobotoSlabBold, RobotoSlabHeavy } from "client/ui/GameFonts";
 import { RESET_LAYERS } from "shared/currency/mechanics/ResetLayer";
 import WinificationDetails from "shared/world/nodes/WinificationDetails";

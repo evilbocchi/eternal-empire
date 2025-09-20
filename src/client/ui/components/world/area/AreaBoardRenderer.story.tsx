@@ -1,7 +1,7 @@
 import React from "@rbxts/react";
 import ReactRoblox from "@rbxts/react-roblox";
 import { CreateReactStory } from "@rbxts/ui-labs";
-import ResetBoardRenderer from "client/ui/components/reset/ResetBoardRenderer";
+import AreaBoardRenderer from "client/ui/components/world/area/AreaBoardRenderer";
 
 export = CreateReactStory(
     {
@@ -10,6 +10,6 @@ export = CreateReactStory(
     },
     () => {
         // NOTE: You need to switch to Viewport mode to see this story in the world
-        return <ResetBoardRenderer />;
+        return <AreaBoardRenderer />;
     },
 );

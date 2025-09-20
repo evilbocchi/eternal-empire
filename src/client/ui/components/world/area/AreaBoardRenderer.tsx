@@ -4,7 +4,7 @@ import {
     OminousAreaBoardGui,
     SereneAreaBoardGui,
     SimpleAreaBoardGui,
-} from "client/ui/components/area/AreaBoardGui";
+} from "client/ui/components/world/area/AreaBoardGui";
 import Packets from "shared/Packets";
 import { AREAS } from "shared/world/Area";
 

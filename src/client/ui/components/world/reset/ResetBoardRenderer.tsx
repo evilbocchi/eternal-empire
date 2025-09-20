@@ -1,6 +1,6 @@
 import React, { Fragment, useEffect, useState } from "@rbxts/react";
-import { SkillificationGui } from "client/ui/components/reset/SkillificationGui";
-import WinificationGui from "client/ui/components/reset/WinificationGui";
+import { SkillificationGui } from "client/ui/components/world/reset/SkillificationGui";
+import WinificationGui from "client/ui/components/world/reset/WinificationGui";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import { RESET_LAYERS } from "shared/currency/mechanics/ResetLayer";
 import Packets from "shared/Packets";

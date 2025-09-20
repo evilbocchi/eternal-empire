@@ -20,7 +20,6 @@
 import { getAllInstanceInfo } from "@antivivi/vrldk";
 import { Service } from "@flamework/core";
 import BombsService from "server/services/boosts/BombsService";
-import DarkMatterService from "server/services/boosts/DarkMatterService";
 import CurrencyService from "server/services/data/CurrencyService";
 import DataService from "server/services/data/DataService";
 import AtmosphereService from "server/services/world/AtmosphereService";
@@ -47,7 +46,6 @@ export default class RevenueService {
      */
     constructor(
         private dataService: DataService,
-        private darkMatterService: DarkMatterService,
         private bombsService: BombsService,
         private currencyService: CurrencyService,
         private atmosphereService: AtmosphereService,
@@ -64,7 +62,7 @@ export default class RevenueService {
         let [add, mul, pow] = Operative.template();
 
         // dark matter
-        const [darkMatterBoost] = DarkMatter.getBoost(this.currencyService.balance);
+        const [darkMatterBoost] = DarkMatter.getBoost(this.currencyService.balance.amountPerCurrency);
         if (darkMatterBoost !== undefined) {
             mul = mul.mul(darkMatterBoost);
         }
