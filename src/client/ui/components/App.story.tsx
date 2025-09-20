@@ -1,15 +1,18 @@
 import React, { StrictMode } from "@rbxts/react";
 import ReactRoblox from "@rbxts/react-roblox";
 import { CreateReactStory } from "@rbxts/ui-labs";
+import AreaBoardRenderer from "client/ui/components/area/AreaBoardRenderer";
 import BackpackWindow from "client/ui/components/backpack/BackpackWindow";
 import BalanceWindow from "client/ui/components/balance/BalanceWindow";
 import BuildManager from "client/ui/components/build/BuildManager";
+import { ChangelogGui } from "client/ui/components/changelog/Changelog";
 import ClickSparkManager from "client/ui/components/effect/ClickSparkManager";
 import InventoryWindow from "client/ui/components/item/inventory/InventoryWindow";
 import useCIViewportManagement from "client/ui/components/item/useCIViewportManagement";
 import MainLayout from "client/ui/components/MainLayout";
 import { questState } from "client/ui/components/quest/QuestState";
 import QuestWindow from "client/ui/components/quest/QuestWindow";
+import ResetBoardRenderer from "client/ui/components/reset/ResetBoardRenderer";
 import SettingsManager from "client/ui/components/settings/SettingsManager";
 import StoryMocking from "client/ui/components/StoryMocking";
 import TooltipWindow from "client/ui/components/tooltip/TooltipWindow";
@@ -49,6 +52,9 @@ export = CreateReactStory(
                 <QuestWindow />
                 <BackpackWindow />
                 <BalanceWindow />
+                <AreaBoardRenderer />
+                <ResetBoardRenderer />
+                <ChangelogGui />
             </StrictMode>
         );
     },

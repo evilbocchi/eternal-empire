@@ -1,9 +1,8 @@
 //!native
 //!optimize 2
 
-import { CollectionService } from "@rbxts/services";
-import Area from "shared/world/Area";
 import { isCompletelyInside, isInsidePart } from "@antivivi/vrldk";
+import Area from "shared/world/Area";
 
 /**
  * Represents the bounds of a build area.
@@ -37,16 +36,10 @@ class BuildBounds {
     canvasSize?: Vector2;
 
     static fromArea(area: Area) {
+        const gridWorldNode = area.gridWorldNode;
+        if (gridWorldNode === undefined) throw `Area ${area.id} does not have a grid world node.`;
         const buildBounds = new BuildBounds();
-
-        const load = (grid?: Instance) => {
-            if (grid === undefined || grid.Parent !== areaFolder) return;
-            buildBounds.draw(grid as BasePart);
-        };
-        const areaFolder = area.areaFolder;
-        CollectionService.GetInstanceAddedSignal("BuildGrid").Connect(load);
-        load(areaFolder.FindFirstChild("BuildGrid"));
-
+        buildBounds.draw(gridWorldNode.waitForInstance());
         return buildBounds;
     }
 

@@ -192,7 +192,7 @@ export default class ToolController implements OnInit, OnCharacterAdded {
         });
 
         for (const [_id, area] of pairs(AREAS)) {
-            const folder = area.areaFolder.FindFirstChild("Harvestable");
+            const folder = area.worldNode.getInstance()?.FindFirstChild("Harvestable");
             if (folder === undefined) continue;
             const harvestables = folder.GetChildren();
             folder.ChildAdded.Connect((model) => this.loadHarvestable(model));

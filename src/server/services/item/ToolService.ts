@@ -193,7 +193,7 @@ export class ToolService implements OnInit, OnPlayerJoined, OnPlayerJoined {
         });
 
         for (const [_id, area] of pairs(AREAS)) {
-            const harvestables = area.areaFolder.FindFirstChild("Harvestable")?.GetChildren();
+            const harvestables = area.worldNode.getInstance()?.FindFirstChild("Harvestable")?.GetChildren();
             if (harvestables === undefined) continue;
             for (const model of harvestables) {
                 const harvestable = Harvestable[model.Name as HarvestableId];

@@ -303,7 +303,7 @@ export default class ChestService implements OnInit, OnStart {
      */
     onStart() {
         for (const [_id, area] of pairs(AREAS)) {
-            const chestsFolder = area.areaFolder.FindFirstChild("Chests");
+            const chestsFolder = area.worldNode.getInstance()?.FindFirstChild("Chests");
             if (chestsFolder === undefined) continue;
             const chestLocations = chestsFolder.GetChildren();
             for (const chestLocationMarker of chestLocations) {

@@ -9,6 +9,7 @@ export = CreateReactStory(
         reactRoblox: ReactRoblox,
     },
     () => {
+        // NOTE: You need to switch to Viewport mode to see this story in the world
         return <AreaBoardRenderer />;
     },
 );

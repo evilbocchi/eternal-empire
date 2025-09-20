@@ -25,9 +25,7 @@ export default class DarkMatterService implements OnInit {
     boost = new CurrencyBundle();
 
     /** Reference to the SurfaceGui for Dark Matter display. */
-    gui = AREAS.SlamoVillage.areaFolder.FindFirstChild("DarkMatter")?.FindFirstChild("SurfaceGui") as
-        | SurfaceGui
-        | undefined;
+    gui?: SurfaceGui | undefined; // TODO
 
     /** Label displaying the current Dark Matter amount. */
     darkMatterLabel = this.gui?.WaitForChild("DarkMatterLabel") as TextLabel | undefined;

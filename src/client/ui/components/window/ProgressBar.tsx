@@ -6,6 +6,7 @@ export default function ProgressBar(props: {
     max: number;
     text?: string;
     colorSequence: ColorSequence;
+    fontFace?: Font;
     frameProps: InstanceProps<Frame>;
 }) {
     const tintedColorSequence = useMemo(() => {
@@ -33,7 +34,7 @@ export default function ProgressBar(props: {
                 key="BarLabel"
                 AnchorPoint={new Vector2(0.5, 0.5)}
                 BackgroundTransparency={1}
-                FontFace={RobotoSlabBold}
+                FontFace={props.fontFace ?? RobotoSlabBold}
                 Position={new UDim2(0.5, 0, 0.5, 0)}
                 Size={new UDim2(0.8, 0, 0.8, 0)}
                 Text={props.text ?? `${props.current}/${props.max}`}

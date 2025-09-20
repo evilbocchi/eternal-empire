@@ -1,7 +1,44 @@
 import React, { Fragment, useEffect, useState } from "@rbxts/react";
-import { BasicAreaBoardGui } from "client/ui/components/area/AreaBoardGui";
+import {
+    EmphasizedHeaderAreaBoardGui,
+    OminousAreaBoardGui,
+    SereneAreaBoardGui,
+    SimpleAreaBoardGui,
+} from "client/ui/components/area/AreaBoardGui";
 import Packets from "shared/Packets";
 import { AREAS } from "shared/world/Area";
+
+const COLOR_SEQUENCE_PER_AREA: { [key in AreaId]?: ColorSequence } = {
+    IntermittentIsles: new ColorSequence([
+        new ColorSequenceKeypoint(0, Color3.fromRGB(170, 0, 255)),
+        new ColorSequenceKeypoint(1, Color3.fromRGB(85, 0, 255)),
+    ]),
+    AbandonedRig: new ColorSequence([
+        new ColorSequenceKeypoint(0, Color3.fromRGB(255, 0, 170)),
+        new ColorSequenceKeypoint(1, Color3.fromRGB(255, 0, 85)),
+    ]),
+    Eden: new ColorSequence([
+        new ColorSequenceKeypoint(0, Color3.fromRGB(211, 99, 255)),
+        new ColorSequenceKeypoint(1, Color3.fromRGB(255, 229, 239)),
+    ]),
+    DespairPlantation: new ColorSequence([
+        new ColorSequenceKeypoint(0, Color3.fromRGB(0, 0, 0)),
+        new ColorSequenceKeypoint(1, Color3.fromRGB(0, 0, 0)),
+    ]),
+
+    BarrenIslands: new ColorSequence([
+        new ColorSequenceKeypoint(0, Color3.fromRGB(0, 48, 0)),
+        new ColorSequenceKeypoint(1, Color3.fromRGB(69, 112, 43)),
+    ]),
+    SlamoVillage: new ColorSequence([
+        new ColorSequenceKeypoint(0, Color3.fromRGB(255, 170, 0)),
+        new ColorSequenceKeypoint(1, Color3.fromRGB(255, 85, 0)),
+    ]),
+    SkyPavilion: new ColorSequence([
+        new ColorSequenceKeypoint(0, Color3.fromRGB(0, 170, 255)),
+        new ColorSequenceKeypoint(1, Color3.fromRGB(0, 85, 255)),
+    ]),
+};
 
 export default function AreaBoardRenderer() {
     const [dropletCounts, setDropletCounts] = useState<Map<string, { current: number; max: number }>>(new Map());
@@ -30,17 +67,34 @@ export default function AreaBoardRenderer() {
     }, []);
 
     const elements = new Array<JSX.Element>();
-    for (const area of [AREAS.BarrenIslands, AREAS.SlamoVillage]) {
+    for (const [id, colorSequence] of pairs(COLOR_SEQUENCE_PER_AREA)) {
+        const area = AREAS[id];
         const counts = dropletCounts.get(area.id);
-        elements.push(
-            <BasicAreaBoardGui
-                key={area.id}
-                area={area}
-                dropletCount={counts?.current}
-                dropletLimit={counts?.max}
-                placedItemsText={tostring(placedItemsPerArea.get(area.id)) ?? "0"}
-            />,
-        );
+        const props: AreaBoardGuiProps = {
+            area,
+            colorSequence,
+            dropletCount: counts?.current,
+            dropletLimit: counts?.max,
+            placedItemsText: tostring(placedItemsPerArea.get(area.id)) ?? "0",
+        };
+        switch (id) {
+            case "BarrenIslands":
+            case "SlamoVillage":
+            case "SkyPavilion":
+                elements.push(<EmphasizedHeaderAreaBoardGui {...props} />);
+                break;
+            case "DespairPlantation":
+                elements.push(<OminousAreaBoardGui {...props} />);
+                break;
+            case "Eden":
+                elements.push(<SereneAreaBoardGui {...props} />);
+                break;
+            case "IntermittentIsles":
+            case "AbandonedRig":
+            default:
+                elements.push(<SimpleAreaBoardGui {...props} />);
+                break;
+        }
     }
 
     return <Fragment>{elements}</Fragment>;

@@ -114,23 +114,6 @@ export default class Area {
     // UI and visual components
 
     /**
-     * @deprecated TODO
-     */
-    areaFolder: Folder;
-
-    /**
-     * The physical board model in the game world.
-     * This is a Model that contains the visual representation of the area board.
-     */
-    islandInfoBoard: Model | undefined;
-
-    /**
-     * The GUI displayed on the island info board.
-     * This is a SurfaceGui that contains UI elements for displaying area information.
-     */
-    boardGui: BoardGui | undefined;
-
-    /**
      * The lighting configuration for this area.
      * This is a custom Lighting object that can modify the game's lighting settings.
      */
@@ -171,8 +154,6 @@ export default class Area {
         this.hidden = hidden ?? false;
         this.defaultDropletLimit = dropletLimit;
         this.lightingConfiguration = lightingConfiguration;
-
-        this.areaFolder = this.worldNode.waitForInstance() as Folder;
 
         // Skip further initialization in sandbox mode
         if (Sandbox.getEnabled() || IS_CI) {
