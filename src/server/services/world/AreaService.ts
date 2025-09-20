@@ -280,6 +280,8 @@ export default class AreaService implements OnInit, OnStart, OnPlayerJoined {
 
         // Continuously monitor player position to detect area changes
         const checkAreaChange = () => {
+            task.delay(0.1, checkAreaChange);
+
             const character = player.Character;
             if (character === undefined) return;
 
@@ -300,7 +302,6 @@ export default class AreaService implements OnInit, OnStart, OnPlayerJoined {
                     break; // Found the area, no need to check others
                 }
             }
-            task.delay(0.1, checkAreaChange);
         };
         task.spawn(checkAreaChange);
     }
@@ -310,24 +311,6 @@ export default class AreaService implements OnInit, OnStart, OnPlayerJoined {
         for (const [id, area] of pairs(AREAS)) {
             this.loadArea(id, area);
         }
-
-        // Handle client requests for area teleportation
-        Packets.tpToArea.fromClient((player, areaId) => {
-            const character = player.Character;
-            const area = AREAS[areaId];
-            const spawnLocation = area.spawnLocationWorldNode?.getInstance();
-
-            if (
-                character === undefined ||
-                !this.dataService.empireData.unlockedAreas.has(areaId) ||
-                spawnLocation === undefined
-            ) {
-                return false;
-            }
-
-            character.PivotTo(spawnLocation.CFrame);
-            return true;
-        });
     }
 
     onStart() {
@@ -354,5 +337,22 @@ export default class AreaService implements OnInit, OnStart, OnPlayerJoined {
 
         this.namedUpgradeService.upgradesChanged.connect(onUpgradesChanged);
         onUpgradesChanged(this.dataService.empireData.upgrades);
+
+        Packets.tpToArea.fromClient((player, areaId) => {
+            const character = player.Character;
+            const area = AREAS[areaId];
+            const spawnLocation = area.spawnLocationWorldNode?.getInstance();
+
+            if (
+                character === undefined ||
+                !this.dataService.empireData.unlockedAreas.has(areaId) ||
+                spawnLocation === undefined
+            ) {
+                return false;
+            }
+
+            character.PivotTo(spawnLocation.CFrame);
+            return true;
+        });
     }
 }

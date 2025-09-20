@@ -93,6 +93,7 @@ export const assets = {
   "assets/Speed.png": "rbxassetid://130847918296215",
   "assets/Stamina.png": "rbxassetid://134628132514261",
   "assets/Stats.png": "rbxassetid://134742948633734",
+  "assets/StripedRadialBeams.png": "rbxassetid://94690874746153",
   "assets/SubsonicTreads.png": "rbxassetid://78622569008481",
   "assets/Vignette.png": "rbxassetid://116504550232726",
   "assets/Winification.png": "rbxassetid://89833078760947",

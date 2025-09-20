@@ -18,6 +18,7 @@ import StoryMocking from "client/ui/components/StoryMocking";
 import TooltipWindow from "client/ui/components/tooltip/TooltipWindow";
 import { useVisibilityMain } from "client/ui/hooks/useVisibility";
 import Packets from "shared/Packets";
+import WorldRenderer from "client/ui/components/world/WorldRenderer";
 
 export = CreateReactStory(
     {
@@ -52,9 +53,7 @@ export = CreateReactStory(
                 <QuestWindow />
                 <BackpackWindow />
                 <BalanceWindow />
-                <AreaBoardRenderer />
-                <ResetBoardRenderer />
-                <ChangelogGui />
+                <WorldRenderer />
             </StrictMode>
         );
     },

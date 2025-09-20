@@ -16,6 +16,7 @@ import {
     SHOP_GUI,
     STATS_GUI,
     TOOLTIPS_GUI,
+    WORLD_GUI,
 } from "client/controllers/core/Guis";
 import BuildController from "client/controllers/gameplay/BuildController";
 import InventoryController from "client/controllers/interface/InventoryController";
@@ -36,6 +37,7 @@ import CopyWindow from "client/ui/components/settings/CopyWindow";
 import SettingsManager from "client/ui/components/settings/SettingsManager";
 import StatsWindow from "client/ui/components/stats/StatsWindow";
 import TooltipWindow from "client/ui/components/tooltip/TooltipWindow";
+import WorldRenderer from "client/ui/components/world/WorldRenderer";
 import { useVisibilityMain } from "client/ui/hooks/useVisibility";
 
 export function Hamster() {
@@ -77,6 +79,7 @@ export default class AppController implements OnStart {
         createRoot(STATS_GUI).render(<StatsWindow />);
         createRoot(PURCHASE_GUI).render(<PurchaseWindow />);
         createRoot(SHOP_GUI).render(<ShopWindow />);
+        createRoot(WORLD_GUI).render(<WorldRenderer />);
 
         task.wait(1);
         createRoot(HAMSTER_GUI).render(<Hamster />);

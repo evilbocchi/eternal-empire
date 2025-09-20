@@ -20,7 +20,7 @@ export default function ProgressBar(props: {
             );
         }
         return new ColorSequence(keypoints);
-    }, []);
+    }, [props.colorSequence]);
 
     return (
         <frame

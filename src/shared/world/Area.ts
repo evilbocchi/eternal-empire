@@ -148,19 +148,15 @@ export default class Area {
         if (buildable) {
             this.boardWorldNode = new SingleWorldNode<BasePart>(`${id}Board`);
             this.gridWorldNode = new SingleWorldNode<Part>(`${id}Grid`);
+            if (!Sandbox.getEnabled() && !IS_CI) {
+                this.buildBounds = BuildBounds.fromArea(this);
+            }
         }
         this.catchAreaWorldNode = new SingleWorldNode<Part>(`${id}CatchArea`);
         this.spawnLocationWorldNode = new SingleWorldNode<SpawnLocation>(`${id}SpawnLocation`);
         this.hidden = hidden ?? false;
         this.defaultDropletLimit = dropletLimit;
         this.lightingConfiguration = lightingConfiguration;
-
-        // Skip further initialization in sandbox mode
-        if (Sandbox.getEnabled() || IS_CI) {
-            return this;
-        }
-
-        this.buildBounds = BuildBounds.fromArea(this);
     }
 
     boostDropletLimit(source: string, amount?: number) {

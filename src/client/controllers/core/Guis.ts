@@ -37,3 +37,9 @@ export const SHOP_GUI = (() => {
     gui.Parent = PLAYER_GUI;
     return gui;
 })();
+export const WORLD_GUI = (() => {
+    const folder = new Instance("Folder");
+    folder.Name = "WorldGuis";
+    folder.Parent = PLAYER_GUI;
+    return folder;
+})();
