@@ -18,7 +18,7 @@ import { Players, ReplicatedFirst, TweenService, Workspace } from "@rbxts/servic
 import { LOCAL_PLAYER, PLAYER_GUI } from "client/constants";
 import IntroController from "client/controllers/interface/IntroController";
 import LoadingWindowController from "client/controllers/interface/LoadingWindowController";
-import SoundController from "client/controllers/interface/SoundController";
+import { SoundManager } from "client/ui/components/SoundWindow";
 import { ASSETS, playSound } from "shared/asset/GameAssets";
 import { getNameFromUserId, getStartCamera, isStartScreenEnabled } from "shared/constants";
 import { IS_PUBLIC_SERVER, IS_SINGLE_SERVER, IS_STUDIO } from "shared/Context";
@@ -99,7 +99,6 @@ export default class StartWindowController implements OnInit {
     constructor(
         private loadingWindowController: LoadingWindowController,
         private introController: IntroController,
-        private soundController: SoundController,
     ) {}
 
     /**
@@ -113,7 +112,7 @@ export default class StartWindowController implements OnInit {
                 Workspace.CurrentCamera.CameraType = Enum.CameraType.Custom;
                 Workspace.CurrentCamera.CameraSubject = getHumanoid(LOCAL_PLAYER);
             }
-            this.soundController.refreshMusic();
+            SoundManager.refreshMusic();
             //this.balanceWindowController.showBalanceWindow(); TODO
             //this.adaptiveTabController.showSidebarButtons(); TODO
             this.loadingWindowController.refreshLoadingWindow("Done loading");
@@ -226,7 +225,7 @@ export default class StartWindowController implements OnInit {
             newWave();
         });
         START_WINDOW.Parent = PLAYER_GUI;
-        this.soundController.refreshMusic();
+        SoundManager.refreshMusic();
     }
 
     /**

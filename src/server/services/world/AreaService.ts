@@ -28,7 +28,6 @@ import NamedUpgradeService from "server/services/data/NamedUpgradeService";
 import LeaderstatsService from "server/services/leaderboard/LeaderstatsService";
 import { OnPlayerJoined } from "server/services/ModdingService";
 import { getSound, playSound } from "shared/asset/GameAssets";
-import { MUSIC_GROUP } from "shared/constants";
 import { DROPLET_STORAGE } from "shared/item/Droplet";
 import NamedUpgrades from "shared/namedupgrade/NamedUpgrades";
 import Packets from "shared/Packets";
@@ -116,30 +115,8 @@ export default class AreaService implements OnInit, OnStart, OnPlayerJoined {
         // Set up area-specific music groups and sound management
         const areaBounds = area.areaBoundsWorldNode?.getInstance();
         if (areaBounds !== undefined) {
-            // Create dedicated sound group for this area's audio
-            const areaSoundGroup = new Instance("SoundGroup");
-            areaSoundGroup.Name = id;
-            areaSoundGroup.Volume = 1;
-            areaSoundGroup.Parent = MUSIC_GROUP;
-
-            // Helper function to configure individual sound objects
-            const loadSound = (sound: Instance) => {
-                if (!sound.IsA("Sound")) return;
-                sound.SoundGroup = areaSoundGroup; // Assign to area's sound group
-                sound.SetAttribute("OriginalVolume", sound.Volume); // Store original volume
-            };
-
-            // Process all sound objects in the area bounds
-            areaBounds.GetChildren().forEach((group) => {
-                group.Parent = areaSoundGroup;
-                loadSound(group);
-                // Process nested sound objects
-                for (const child of group.GetChildren()) loadSound(child);
-            });
-
             // Store bounding box for player tracking, then clean up the bounds object
             this.boundingBoxPerArea.set(id, [areaBounds.CFrame, areaBounds.Size]);
-            areaBounds.Destroy();
         }
 
         // Initialize droplet systems
@@ -259,25 +236,6 @@ export default class AreaService implements OnInit, OnStart, OnPlayerJoined {
      * @param player The player who just joined the game
      */
     onPlayerJoined(player: Player) {
-        const onCharacterAdded = (character: Model | undefined) => {
-            if (character === undefined) return;
-
-            const rootPart = character.WaitForChild("HumanoidRootPart") as BasePart;
-
-            // Configure collision groups for proper interaction with area systems
-            for (const part of character.GetChildren()) {
-                if (part.IsA("BasePart")) {
-                    // Root part uses PlayerHitbox for area detection, other parts use Player group
-                    part.CollisionGroup = part === rootPart ? "PlayerHitbox" : "Player";
-                }
-            }
-
-            // Clone teleportation sound to the character for portal usage
-            getSound("Teleport.mp3").Clone().Parent = rootPart;
-        };
-        player.CharacterAdded.Connect((character) => onCharacterAdded(character));
-        onCharacterAdded(player.Character);
-
         // Continuously monitor player position to detect area changes
         const checkAreaChange = () => {
             task.delay(0.1, checkAreaChange);

@@ -13,8 +13,8 @@
  */
 import { Controller, OnInit } from "@flamework/core";
 import { Debris, TweenService, Workspace } from "@rbxts/services";
-import SoundController from "client/controllers/interface/SoundController";
 import ShakeController from "client/controllers/world/ShakeController";
+import { SoundManager } from "client/ui/components/SoundWindow";
 import { ASSETS, playSound } from "shared/asset/GameAssets";
 import { RESET_LAYERS } from "shared/currency/mechanics/ResetLayer";
 import Packets from "shared/Packets";
@@ -30,10 +30,7 @@ declare global {
  */
 @Controller()
 export default class ResetController implements OnInit {
-    constructor(
-        private shakeController: ShakeController,
-        private soundController: SoundController,
-    ) {}
+    constructor(private shakeController: ShakeController) {}
 
     /**
      * Moves the camera to a given instance and plays reset effects and sounds.
@@ -45,11 +42,10 @@ export default class ResetController implements OnInit {
             return;
         }
         if (currentCamera.CameraType !== Enum.CameraType.Scriptable) {
-            if (this.soundController.playing !== undefined) {
-                this.soundController.fadeOut(this.soundController.playing);
+            if (SoundManager.playing !== undefined) {
+                SoundManager.fadeOut(SoundManager.playing);
                 task.delay(1.35, () => {
-                    if (this.soundController.playing !== undefined)
-                        this.soundController.fadeIn(this.soundController.playing);
+                    if (SoundManager.playing !== undefined) SoundManager.fadeIn(SoundManager.playing);
                 });
             }
             currentCamera.CameraType = Enum.CameraType.Scriptable;

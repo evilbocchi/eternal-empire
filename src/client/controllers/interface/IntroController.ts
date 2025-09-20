@@ -16,8 +16,8 @@ import { Controller, OnInit } from "@flamework/core";
 import { ContentProvider, ReplicatedStorage, TweenService, Workspace } from "@rbxts/services";
 import { LOCAL_PLAYER } from "client/constants";
 import { INTERFACE } from "client/controllers/core/UIController";
-import SoundController from "client/controllers/interface/SoundController";
 import { questState } from "client/ui/components/quest/QuestState";
+import { SoundManager } from "client/ui/components/SoundWindow";
 import { assets, getAsset } from "shared/asset/AssetMap";
 import { playSound } from "shared/asset/GameAssets";
 import { WAYPOINTS } from "shared/constants";
@@ -34,8 +34,6 @@ export const INTRO_WINDOW = INTERFACE.WaitForChild("IntroWindow") as Frame;
 export default class IntroController implements OnInit {
     isIntroSequenceDone = false;
     isCurrentlyInIntroSequence = false;
-
-    constructor(private soundController: SoundController) {}
 
     /**
      * Plays the intro cutscene sequence, including camera, animation, and UI transitions.
@@ -105,7 +103,7 @@ export default class IntroController implements OnInit {
         if (shouldIntro === true) this.doIntroSequence();
         else {
             math.randomseed(42);
-            this.soundController.refreshMusic(true);
+            SoundManager.refreshMusic(true);
             math.randomseed(tick());
             //this.adaptiveTabController.showSidebarButtons(); TODO
             //this.balanceWindowController.showBalanceWindow(); TODO
