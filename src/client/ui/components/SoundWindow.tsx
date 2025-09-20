@@ -1,8 +1,9 @@
 import React, { Fragment, useEffect, useState } from "@rbxts/react";
 import { Lighting, ReplicatedStorage, SoundService, TweenService, Workspace } from "@rbxts/services";
-import { LOCAL_PLAYER, PLAYER_GUI } from "client/constants";
-import { START_WINDOW } from "client/controllers/interface/StartWindowController";
+import { Environment } from "@rbxts/ui-labs";
+import { LOCAL_PLAYER } from "client/constants";
 import { ASSETS, SOUND_EFFECTS_GROUP, getSound } from "shared/asset/GameAssets";
+import { IS_CI } from "shared/Context";
 import Packets from "shared/Packets";
 import { AREAS } from "shared/world/Area";
 
@@ -34,30 +35,31 @@ export default function SoundWindow() {
         const MUSIC_GROUP = new Instance("SoundGroup");
         MUSIC_GROUP.Name = "Music";
         MUSIC_GROUP.Volume = 1;
-        MUSIC_GROUP.Parent = SoundService;
+        MUSIC_GROUP.Parent = IS_CI ? Environment.PluginWidget : SoundService;
 
         const START_MUSIC = ASSETS.WaitForChild("JJT Money Empire!") as Sound;
 
         for (const [id, area] of pairs(AREAS)) {
             const areaBounds = area.areaBoundsWorldNode?.getInstance();
-            if (areaBounds !== undefined) {
-                // Create dedicated sound group for this area's audio
-                const areaSoundGroup = new Instance("SoundGroup");
-                areaSoundGroup.Name = id;
-                areaSoundGroup.Volume = 1;
-                areaSoundGroup.Parent = MUSIC_GROUP;
+            if (!areaBounds) continue;
 
-                const loadSound = (sound: Instance) => {
-                    if (!sound.IsA("Sound")) return;
-                    sound.SoundGroup = areaSoundGroup;
-                    sound.SetAttribute("OriginalVolume", sound.Volume);
-                };
-                areaBounds.GetChildren().forEach((group) => {
-                    group.Parent = areaSoundGroup;
-                    loadSound(group);
-                    for (const child of group.GetChildren()) loadSound(child);
-                });
-            }
+            // Create dedicated sound group for this area's audio
+            const areaSoundGroup = new Instance("SoundGroup");
+            areaSoundGroup.Name = id;
+            areaSoundGroup.Volume = 1;
+            areaSoundGroup.Parent = MUSIC_GROUP;
+
+            const loadSound = (sound: Instance) => {
+                if (!sound.IsA("Sound")) return;
+                sound.SoundGroup = areaSoundGroup;
+                sound.SetAttribute("OriginalVolume", sound.Volume);
+            };
+            areaBounds.GetChildren().forEach((group) => {
+                group = group.Clone();
+                group.Parent = areaSoundGroup;
+                loadSound(group);
+                for (const child of group.GetChildren()) loadSound(child);
+            });
         }
 
         let inChallenge = false;
@@ -114,11 +116,11 @@ export default function SoundWindow() {
         SoundManager.refreshMusic = (force?: boolean) => {
             let retrieved: Sound | undefined;
             let area: AreaId | undefined;
-            if (START_WINDOW.Parent === PLAYER_GUI) {
-                retrieved = START_MUSIC;
-            } else {
-                area = LOCAL_PLAYER.GetAttribute("Area") as AreaId;
-            }
+            // if (START_WINDOW.Parent === PLAYER_GUI) { TODO
+            //     retrieved = START_MUSIC;
+            // } else {
+            // }
+            area = LOCAL_PLAYER.GetAttribute("Area") as AreaId;
 
             if (retrieved === SoundManager.playing && retrieved !== undefined) return;
 
@@ -167,11 +169,13 @@ export default function SoundWindow() {
         });
 
         const oceanWaves = getSound("OceanWaves.mp3");
+        oceanWaves.Parent = IS_CI ? Environment.PluginWidget : SOUND_EFFECTS_GROUP;
         oceanWaves.Volume = 0;
+        oceanWaves.Looped = true;
         oceanWaves.Play();
         const cameraConnection = Workspace.CurrentCamera!.GetPropertyChangedSignal("CFrame").Connect(() => {
-            const y = Workspace.CurrentCamera!.CFrame.Y;
-            oceanWaves.Volume = (1 - math.abs(y) / 100) / 14;
+            const dist = Workspace.CurrentCamera!.CFrame.Y - -16.5; // Ocean level
+            oceanWaves.Volume = (1 - math.abs(dist) / 100) / 10;
         });
 
         Workspace.SetAttribute("ChangeMusic", false);
@@ -189,6 +193,7 @@ export default function SoundWindow() {
             debugConnection.Disconnect();
             connection?.Disconnect();
             MUSIC_GROUP.Destroy();
+            oceanWaves.Destroy();
         };
     }, []);
 

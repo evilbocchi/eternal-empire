@@ -20,14 +20,13 @@
  * @since 1.0.0
  */
 
-import { getAllInstanceInfo, isInside } from "@antivivi/vrldk";
+import { getAllInstanceInfo } from "@antivivi/vrldk";
 import { OnInit, OnStart, Service } from "@flamework/core";
 import { Players } from "@rbxts/services";
 import DataService from "server/services/data/DataService";
 import NamedUpgradeService from "server/services/data/NamedUpgradeService";
 import LeaderstatsService from "server/services/leaderboard/LeaderstatsService";
-import { OnPlayerJoined } from "server/services/ModdingService";
-import { getSound, playSound } from "shared/asset/GameAssets";
+import { playSound } from "shared/asset/GameAssets";
 import { DROPLET_STORAGE } from "shared/item/Droplet";
 import NamedUpgrades from "shared/namedupgrade/NamedUpgrades";
 import Packets from "shared/Packets";
@@ -46,20 +45,11 @@ AREA_CHECK_PARAMS.CollisionGroup = "PlayerHitbox";
  * teleportation, and droplet management.
  */
 @Service()
-export default class AreaService implements OnInit, OnStart, OnPlayerJoined {
-    readonly ORIGINAL_SIZE_PER_AREA = new Map<AreaId, Vector3>();
-
+export default class AreaService implements OnInit, OnStart {
     /**
      * Maps area IDs to the number of droplets currently present in that area.
      */
     readonly dropletCountPerArea = new Map<AreaId, number>();
-
-    /**
-     * Stores bounding box information for each area to enable efficient player position checks.
-     * Maps area ID to a tuple of [CFrame, Vector3] representing the area's bounds.
-     * This is populated during area loading and used for real-time player tracking.
-     */
-    readonly boundingBoxPerArea = new Map<AreaId, [CFrame, Vector3]>();
 
     constructor(
         private dataService: DataService,
@@ -104,51 +94,8 @@ export default class AreaService implements OnInit, OnStart, OnPlayerJoined {
      * @param area The Area object containing all area configuration and components
      */
     loadArea(id: AreaId, area: Area) {
-        // Configure the building grid for this area, setting up collision groups
-        // and preserving original size for upgrade calculations
-        const grid = area.gridWorldNode?.getInstance();
-        if (grid !== undefined) {
-            grid.CollisionGroup = "BuildGrid";
-            this.ORIGINAL_SIZE_PER_AREA.set(id, grid.Size); // Store for upgrade scaling
-        }
-
-        // Set up area-specific music groups and sound management
-        const areaBounds = area.areaBoundsWorldNode?.getInstance();
-        if (areaBounds !== undefined) {
-            // Store bounding box for player tracking, then clean up the bounds object
-            this.boundingBoxPerArea.set(id, [areaBounds.CFrame, areaBounds.Size]);
-        }
-
         // Initialize droplet systems
         this.loadDropletTracking(area);
-
-        // Set up catch areas to prevent players from falling into the void
-        const catchArea = area.catchAreaWorldNode?.getInstance();
-        if (catchArea !== undefined) {
-            catchArea.CanTouch = true;
-            catchArea.Touched.Connect((o) => {
-                const player = Players.GetPlayerFromCharacter(o.Parent);
-                if (player === undefined || player.Character === undefined) return;
-
-                const humanoid = player.Character.FindFirstChildOfClass("Humanoid");
-                if (humanoid === undefined) return;
-
-                const rootPart = humanoid.RootPart;
-                if (rootPart === undefined) return;
-
-                const spawnLocation = area.spawnLocationWorldNode?.getInstance();
-                if (spawnLocation === undefined) {
-                    // No safe spawn location - eliminate the player
-                    humanoid.TakeDamage(999);
-                    return;
-                }
-
-                // Teleport player back to safety with effects
-                rootPart.CFrame = spawnLocation.CFrame;
-                Packets.shakeCamera.toClient(player, "Bump"); // Visual feedback
-                playSound("Splash.mp3", rootPart); // Audio feedback
-            });
-        }
     }
 
     /**
@@ -225,45 +172,6 @@ export default class AreaService implements OnInit, OnStart, OnPlayerJoined {
         task.spawn(resynchronize);
     }
 
-    /**
-     * Handles player joining events and sets up area tracking systems.
-     *
-     * This method initializes all player-specific area functionality including
-     * character collision group setup, teleportation sound preparation, and
-     * real-time position tracking for area detection. It ensures that players
-     * are properly integrated into the area system from the moment they join.
-     *
-     * @param player The player who just joined the game
-     */
-    onPlayerJoined(player: Player) {
-        // Continuously monitor player position to detect area changes
-        const checkAreaChange = () => {
-            task.delay(0.1, checkAreaChange);
-
-            const character = player.Character;
-            if (character === undefined) return;
-
-            const rootPart = character.FindFirstChild("HumanoidRootPart") as BasePart | undefined;
-            if (rootPart === undefined) return;
-
-            const position = rootPart.Position;
-
-            // Check against all area bounding boxes to find current area
-            for (const [id, [cframe, size]] of this.boundingBoxPerArea) {
-                if (isInside(position, cframe, size)) {
-                    const cached = this.getArea(player);
-
-                    // Only update if the area has actually changed
-                    if (cached !== id) {
-                        this.setArea(player, id);
-                    }
-                    break; // Found the area, no need to check others
-                }
-            }
-        };
-        task.spawn(checkAreaChange);
-    }
-
     onInit() {
         // Load all areas defined in the AREAS configuration
         for (const [id, area] of pairs(AREAS)) {
@@ -274,14 +182,13 @@ export default class AreaService implements OnInit, OnStart, OnPlayerJoined {
     onStart() {
         const onUpgradesChanged = (data: Map<string, number>) => {
             for (const [id, area] of pairs(AREAS)) {
-                const grid = area.gridWorldNode?.getInstance();
+                const gridWorldNode = area.gridWorldNode;
+                if (gridWorldNode === undefined) continue;
+                const grid = gridWorldNode?.getInstance();
                 if (grid === undefined) continue;
 
-                // Get the original grid size as baseline
-                let size = this.ORIGINAL_SIZE_PER_AREA.get(id);
-                if (size === undefined) continue;
-
-                // Apply all relevant grid size upgrades for this area
+                // Calculate the new grid size based on applied upgrades
+                let size = gridWorldNode.originalSize;
                 GRID_SIZE_UPGRADES.forEach((upgrade, upgradeId) => {
                     if (upgrade.area === id) size = upgrade.apply(size!, data.get(upgradeId));
                 });

@@ -19,6 +19,7 @@ import TooltipWindow from "client/ui/components/tooltip/TooltipWindow";
 import { useVisibilityMain } from "client/ui/hooks/useVisibility";
 import Packets from "shared/Packets";
 import WorldRenderer from "client/ui/components/world/WorldRenderer";
+import SoundWindow from "client/ui/components/SoundWindow";
 
 export = CreateReactStory(
     {
@@ -54,6 +55,7 @@ export = CreateReactStory(
                 <BackpackWindow />
                 <BalanceWindow />
                 <WorldRenderer />
+                <SoundWindow />
             </StrictMode>
         );
     },

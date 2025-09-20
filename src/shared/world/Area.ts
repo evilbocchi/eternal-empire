@@ -1,6 +1,9 @@
-import { RunService } from "@rbxts/services";
-import { IS_CI } from "shared/Context";
+import { isInside } from "@antivivi/vrldk";
+import { Players, Workspace } from "@rbxts/services";
+import { IS_CI, IS_SERVER } from "shared/Context";
+import Packets from "shared/Packets";
 import Sandbox from "shared/Sandbox";
+import { playSound } from "shared/asset/GameAssets";
 import BuildBounds from "shared/placement/BuildBounds";
 import { SingleWorldNode } from "shared/world/nodes/WorldNode";
 
@@ -36,8 +39,15 @@ declare global {
     type AreaId = keyof typeof AREAS;
 }
 
-// Determine if the code is running on the server or client
-const IS_SERVER = RunService.IsServer();
+export class GridWorldNode extends SingleWorldNode<Part> {
+    originalSize = new Vector3();
+    constructor(tag: string) {
+        super(tag, (instance) => {
+            instance.CollisionGroup = "BuildGrid";
+            this.originalSize = instance.Size;
+        });
+    }
+}
 
 /**
  * Represents an area in the game.
@@ -88,11 +98,15 @@ export default class Area {
     /** The reference to the the area's board part. */
     readonly boardWorldNode?: SingleWorldNode<BasePart>;
     /** The reference to the the area's grid part. */
-    readonly gridWorldNode?: SingleWorldNode<Part>;
+    readonly gridWorldNode?: GridWorldNode;
     /** The reference to the the area's catch area part. */
     readonly catchAreaWorldNode?: SingleWorldNode<Part>;
     /** The reference to the the area's spawn location part. */
     readonly spawnLocationWorldNode?: SingleWorldNode<SpawnLocation>;
+
+    private readonly boundingBox?: [CFrame, Vector3];
+    private readonly cleanupCallback: () => void;
+    private static PLAYER_ADDED_CONNECTION?: RBXScriptConnection;
 
     /**
      * The maximum number of droplets allowed in this area.
@@ -147,7 +161,7 @@ export default class Area {
         this.areaBoundsWorldNode = new SingleWorldNode<Part>(`${id}AreaBounds`);
         if (buildable) {
             this.boardWorldNode = new SingleWorldNode<BasePart>(`${id}Board`);
-            this.gridWorldNode = new SingleWorldNode<Part>(`${id}Grid`);
+            this.gridWorldNode = new GridWorldNode(`${id}Grid`);
             if (!Sandbox.getEnabled() && !IS_CI) {
                 this.buildBounds = BuildBounds.fromArea(this);
             }
@@ -157,6 +171,42 @@ export default class Area {
         this.hidden = hidden ?? false;
         this.defaultDropletLimit = dropletLimit;
         this.lightingConfiguration = lightingConfiguration;
+
+        const areaBounds = this.areaBoundsWorldNode.getInstance();
+        if (areaBounds !== undefined) {
+            this.boundingBox = [areaBounds.CFrame, areaBounds.Size];
+        }
+
+        const catchArea = this.catchAreaWorldNode.getInstance();
+        let touchConnection: RBXScriptConnection | undefined;
+        if (catchArea !== undefined && IS_SERVER) {
+            catchArea.CanTouch = true;
+            touchConnection = catchArea.Touched.Connect((o) => {
+                const player = Players.GetPlayerFromCharacter(o.Parent);
+                if (player === undefined || player.Character === undefined) return;
+
+                const humanoid = player.Character.FindFirstChildOfClass("Humanoid");
+                if (humanoid === undefined) return;
+
+                const rootPart = humanoid.RootPart;
+                if (rootPart === undefined) return;
+
+                const spawnLocation = this.spawnLocationWorldNode?.getInstance();
+                if (spawnLocation === undefined) {
+                    // No safe spawn location - eliminate the player
+                    humanoid.TakeDamage(999);
+                    return;
+                }
+
+                // Teleport player back to safety with effects
+                rootPart.CFrame = spawnLocation.CFrame;
+                Packets.shakeCamera.toClient(player, "Bump"); // Visual feedback
+                playSound("Splash.mp3", rootPart); // Audio feedback
+            });
+        }
+        this.cleanupCallback = () => {
+            touchConnection?.Disconnect();
+        };
     }
 
     boostDropletLimit(source: string, amount?: number) {
@@ -173,6 +223,62 @@ export default class Area {
             limit += boost;
         }
         return limit;
+    }
+
+    private static onPlayerAdded(player: Player) {
+        // Continuously monitor player position to detect area changes
+        const checkAreaChange = () => {
+            task.delay(0.25, checkAreaChange);
+
+            let position: Vector3 | undefined;
+
+            if (IS_CI) {
+                position = Workspace.CurrentCamera?.CFrame.Position;
+            } else {
+                const character = player.Character;
+                if (character === undefined) return;
+
+                const rootPart = character.FindFirstChild("HumanoidRootPart") as BasePart | undefined;
+                if (rootPart === undefined) return;
+
+                position = rootPart.Position;
+            }
+            if (position === undefined) return;
+
+            // Check against all area bounding boxes to find current area
+            for (const [id, area] of pairs(AREAS)) {
+                const bounds = area.boundingBox;
+                if (bounds === undefined) continue;
+                const [cframe, size] = bounds;
+                if (isInside(position, cframe, size)) {
+                    // Only update if the area has actually changed
+                    if (player.GetAttribute("Area") !== id) {
+                        player.SetAttribute("Area", id);
+                    }
+                    break; // Found the area, no need to check others
+                }
+            }
+        };
+        task.spawn(checkAreaChange);
+    }
+
+    static cleanup() {
+        this.PLAYER_ADDED_CONNECTION?.Disconnect();
+        for (const [, area] of pairs(AREAS)) {
+            area.cleanupCallback();
+        }
+    }
+
+    static {
+        if (IS_SERVER || IS_CI) {
+            // Set up player area tracking when players join
+            this.PLAYER_ADDED_CONNECTION = Players.PlayerAdded.Connect((player) => {
+                this.onPlayerAdded(player);
+            });
+            for (const player of Players.GetPlayers()) {
+                this.onPlayerAdded(player);
+            }
+        }
     }
 }
 

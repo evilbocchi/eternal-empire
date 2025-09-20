@@ -8,6 +8,7 @@ import PlayerProfileTemplate from "shared/data/PlayerProfileTemplate";
 import Unique from "shared/item/traits/Unique";
 import Items from "shared/items/Items";
 import Packets from "shared/Packets";
+import Area from "shared/world/Area";
 
 class StoryMocking {
     static mockData() {
@@ -145,6 +146,13 @@ class StoryMocking {
 
         Packets.balance.set(this.mockCurrencies().amountPerCurrency);
         Packets.revenue.set(this.mockCurrencies().amountPerCurrency);
+
+        // Extra cleanup for uncaught connections
+        useEffect(() => {
+            return () => {
+                Area.cleanup();
+            };
+        }, []);
     }
 
     static mockCharacter() {
