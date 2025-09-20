@@ -76,11 +76,21 @@ export class SingleWorldNode<T extends Instance = Instance> extends WorldNode<T>
     waitForInstance(timeout?: number): T {
         let instance = this.getInstance();
         const startTime = tick();
+        let warned = false;
         while (instance === undefined) {
             task.wait();
             instance = this.getInstance();
-            if (timeout && tick() - startTime > timeout) {
-                throw `Timed out waiting for instance with tag ${this.tag}`;
+
+            const elapsed = tick() - startTime;
+            if (timeout) {
+                if (elapsed > timeout) {
+                    throw `Timed out waiting for instance with tag ${this.tag}`;
+                }
+            } else {
+                if (elapsed > 10 || !warned) {
+                    warn(`Waiting for instance with tag ${this.tag}...`);
+                    warned = true;
+                }
             }
         }
         return instance;

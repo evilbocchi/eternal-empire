@@ -5,12 +5,13 @@
  * Manages visibility based on adaptive tab and build mode states.
  */
 
-import React, { useEffect, useState } from "@rbxts/react";
+import React, { useEffect, useRef, useState } from "@rbxts/react";
 import { Environment } from "@rbxts/ui-labs";
 import { LOCAL_PLAYER } from "client/constants";
 import GearOption, { layoutOrderFromGear } from "client/ui/components/backpack/GearOption";
 import { useDocument } from "client/ui/components/window/WindowManager";
 import { playSound } from "shared/asset/GameAssets";
+import { IS_CI } from "shared/Context";
 import Gear from "shared/item/traits/Gear";
 import Items from "shared/items/Items";
 import Packets from "shared/Packets";
@@ -28,29 +29,35 @@ const KEY_CODES = new Map<number, Enum.KeyCode>([
     [10, Enum.KeyCode.Zero],
 ]);
 
-const equipGear = (gear: Gear) => {
+const equipGear = (itemId: string) => {
     const backpack = LOCAL_PLAYER.FindFirstChildOfClass("Backpack");
 
     const currentlyEquippedTool = LOCAL_PLAYER.Character?.FindFirstChildOfClass("Tool");
     if (currentlyEquippedTool) {
         currentlyEquippedTool.Parent = backpack;
-        if (currentlyEquippedTool.Name === gear.item.id) {
+        if (currentlyEquippedTool.Name === itemId) {
             playSound("Unequip.mp3");
-            return;
+            return false;
         }
     }
+    let tool: Tool | undefined;
+    if (IS_CI) {
+        tool = Items.getItem(itemId)?.MODEL?.Clone() as Tool | undefined;
+    } else {
+        tool = backpack?.FindFirstChild(itemId) as Tool | undefined;
+    }
 
-    const tool = backpack?.FindFirstChild(gear.item.id) as Tool | undefined;
-    if (tool === undefined) return;
+    if (tool === undefined) return false;
     tool.Parent = LOCAL_PLAYER.Character;
     playSound("Equip.mp3");
-    return gear;
+    return true;
 };
 
 /**
  * Main backpack window component that displays tool options
  */
 export default function BackpackWindow() {
+    const ref = useRef<Frame>();
     const [gears, setGears] = useState<Set<Gear>>(new Set());
     const [equippedGear, setEquippedGear] = useState<Gear | undefined>(undefined);
     const { visible } = useDocument({ id: "Backpack" });
@@ -93,7 +100,6 @@ export default function BackpackWindow() {
     useEffect(() => {
         const connection = Environment.UserInput.InputBegan.Connect((input, gameProcessed) => {
             if (gameProcessed === true) return;
-
             let index = -1;
             for (const [i, v] of KEY_CODES) {
                 if (input.KeyCode === v) {
@@ -109,8 +115,8 @@ export default function BackpackWindow() {
             sortedGears = sortedGears.sort((a, b) => layoutOrderFromGear(a) < layoutOrderFromGear(b));
             const equipping = sortedGears[index - 1];
             if (equipping === undefined) return;
-            print("Equipping gear via hotkey:", equipping.item.name);
-            setEquippedGear(equipGear(equipping));
+            print("Equipping gear via hotkey:", equipping.item.name); // TODO this does not work for some reason
+            equipGear(equipping.item.id);
         });
 
         return () => connection.Disconnect();
@@ -127,22 +133,17 @@ export default function BackpackWindow() {
     const gearOptions = new Array<JSX.Element>();
     for (const gear of gears) {
         gearOptions.push(
-            <GearOption
-                gear={gear}
-                isEquipped={equippedGear === gear}
-                onClick={() => setEquippedGear(equipGear(gear))}
-            />,
+            <GearOption gear={gear} isEquipped={equippedGear === gear} onClick={() => equipGear(gear.item.id)} />,
         );
     }
 
     return (
         <frame
-            key="BackpackWindow"
+            ref={ref}
             AnchorPoint={new Vector2(0.5, 1)}
             BackgroundTransparency={1}
             Position={new UDim2(0.5, 0, 0.985, -5)}
             Size={new UDim2(0.45, 200, 0.03, 20)}
-            Visible={visible}
             ZIndex={-3}
         >
             {/* Gear options */}

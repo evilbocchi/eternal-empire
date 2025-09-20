@@ -11,9 +11,8 @@
  *
  * @since 1.0.0
  */
-import { OnoeNum } from "@antivivi/serikanum";
 import { Controller, OnInit, OnStart } from "@flamework/core";
-import { ReplicatedStorage, TweenService } from "@rbxts/services";
+import { ReplicatedStorage } from "@rbxts/services";
 import ShakeController from "client/controllers/world/ShakeController";
 import { playSound } from "shared/asset/GameAssets";
 import Packets from "shared/Packets";

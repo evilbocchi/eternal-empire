@@ -1,11 +1,11 @@
 import Difficulty from "@antivivi/jjt-difficulties";
-import React, { useState } from "@rbxts/react";
+import React, { Fragment, useState } from "@rbxts/react";
 import { RobotoSlabBold, RobotoSlabHeavy } from "client/ui/GameFonts";
 
-export default function SkillificationBoard() {
+export default function SkillificationBoardGui() {
     const [amountLabel, setAmountLabel] = useState("0 Skill");
 
-    return (
+    const front = (
         <imagelabel
             BackgroundTransparency={1}
             Image={`rbxassetid://${Difficulty.TheFirstDifficulty.image}`}
@@ -168,5 +168,47 @@ export default function SkillificationBoard() {
                 VerticalAlignment={Enum.VerticalAlignment.Center}
             />
         </imagelabel>
+    );
+
+    const back = (
+        <textlabel
+            AnchorPoint={new Vector2(0.5, 0.5)}
+            BackgroundTransparency={1}
+            FontFace={RobotoSlabBold}
+            LayoutOrder={4}
+            Position={new UDim2(0.5, 0, 0.5, 0)}
+            Size={new UDim2(0.6, 0, 0.1, 0)}
+            Text="<(0.8 * log16(power / 1T + 1)) ^ 1.1 + 1>"
+            TextColor3={Color3.fromRGB(255, 255, 255)}
+            TextScaled={true}
+            TextSize={60}
+            TextStrokeTransparency={0}
+            TextWrapped={true}
+        >
+            <uistroke Thickness={3} />
+        </textlabel>
+    );
+
+    return (
+        <Fragment>
+            <surfacegui
+                ClipsDescendants={true}
+                Face={Enum.NormalId.Front}
+                MaxDistance={200}
+                SizingMode={Enum.SurfaceGuiSizingMode.PixelsPerStud}
+                ZIndexBehavior={Enum.ZIndexBehavior.Sibling}
+            >
+                {front}
+            </surfacegui>
+            <surfacegui
+                ClipsDescendants={true}
+                Face={Enum.NormalId.Back}
+                MaxDistance={200}
+                SizingMode={Enum.SurfaceGuiSizingMode.PixelsPerStud}
+                ZIndexBehavior={Enum.ZIndexBehavior.Sibling}
+            >
+                {back}
+            </surfacegui>
+        </Fragment>
     );
 }

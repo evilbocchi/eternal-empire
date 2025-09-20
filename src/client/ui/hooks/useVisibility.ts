@@ -3,11 +3,8 @@ import SingleDocumentManager from "client/ui/components/sidebar/SingleDocumentMa
 import DocumentManager from "client/ui/components/window/WindowManager";
 
 /**
- * A custom hook to manage the visibility of a window.
- *
- * This hook sets the visibility of a window based on the provided `visible` state.
- * It updates the visibility whenever the `id` or `visible` parameters change.
- *
+ * A custom hook that sets the visibility of a window whenever the `id` or `visible` parameters change.
+ * @internal Should only be used in storybooks.
  * @param id The unique identifier for the window
  * @param visible A boolean indicating whether the window should be visible
  */
@@ -18,11 +15,8 @@ export default function useVisibility(id: string, visible: boolean) {
 }
 
 /**
- * A custom hook to manage the visibility of a single document window.
- *
- * This hook opens or closes a window in the SingleDocumentManager based on the provided `visible` state.
- * It updates the visibility whenever the `id` or `visible` parameters change.
- *
+ * A custom hook that opens or closes a window in the SingleDocumentManager whenever the `id` or `visible` parameters change.
+ * @internal Should only be used in storybooks.
  * @param id The unique identifier for the window
  * @param visible A boolean indicating whether the window should be visible
  */
@@ -36,6 +30,11 @@ export function useSingleDocumentVisibility(id: string, visible: boolean) {
     }, [id, visible]);
 }
 
+/**
+ * Manages HUD visibility for main gameplay UI elements.
+ * Intended for use in main app controller to toggle HUD visibility.
+ * @param visible Whether the main HUD elements should be visible
+ */
 export function useVisibilityMain(visible: boolean) {
     useEffect(() => {
         DocumentManager.setVisible("Backpack", visible);

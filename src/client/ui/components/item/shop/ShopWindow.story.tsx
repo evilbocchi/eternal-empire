@@ -1,4 +1,4 @@
-import React, { StrictMode, useEffect } from "@rbxts/react";
+import React, { StrictMode, useEffect, useMemo, useState } from "@rbxts/react";
 import ReactRoblox, { createRoot } from "@rbxts/react-roblox";
 import { StarterGui, Workspace } from "@rbxts/services";
 import { CreateReactStory, EnumList } from "@rbxts/ui-labs";
@@ -33,13 +33,12 @@ export = CreateReactStory(
         StoryMocking.mockData();
 
         const item = Items.getItem(props.controls.shop as string) ?? ClassLowerNegativeShop;
+        const shop = item.findTrait("Shop")!;
         const viewportManagement = useCIViewportManagement({ enabled: true });
-        const shopWindow = <ShopWindow shop={item.findTrait("Shop")!} viewportManagement={viewportManagement} />;
+        const shopWindow = <ShopWindow shop={shop} viewportManagement={viewportManagement} />;
 
+        const [surfaceGui, setSurfaceGui] = useState<SurfaceGui>();
         useEffect(() => {
-            if (!props.controls.onSurface) {
-                return;
-            }
             const part = new Instance("Part");
             part.Color = Color3.fromRGB(27, 42, 53);
             part.Size = new Vector3(20, 11, 0.5);
@@ -54,14 +53,23 @@ export = CreateReactStory(
             surfaceGui.PixelsPerStud = 50;
             surfaceGui.ClipsDescendants = true;
             surfaceGui.Parent = StarterGui;
-            const root = createRoot(surfaceGui);
+            setSurfaceGui(surfaceGui);
+
+            return () => part.Destroy();
+        }, []);
+
+        const root = useMemo(() => {
+            if (!surfaceGui) return;
+            return createRoot(surfaceGui);
+        }, [surfaceGui]);
+
+        useEffect(() => {
+            if (!props.controls.onSurface || !root || !surfaceGui) return;
             root.render(shopWindow);
             return () => {
                 root.unmount();
-                surfaceGui.Destroy();
-                part.Destroy();
             };
-        }, [props.controls.onSurface, shopWindow, item]);
+        }, [props.controls.onSurface, root, item]);
 
         useEffect(() => {
             const settings = Packets.settings.get();

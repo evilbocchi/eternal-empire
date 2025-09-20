@@ -16,6 +16,7 @@ export = CreateReactStory(
     },
     (props) => {
         StoryMocking.mockData();
+        StoryMocking.mockCharacter();
         useVisibility("Backpack", props.controls.visible);
 
         return (

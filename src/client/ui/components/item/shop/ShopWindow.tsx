@@ -15,6 +15,11 @@ import Shop from "shared/item/traits/Shop";
 import Items from "shared/items/Items";
 import Packets from "shared/Packets";
 
+interface ShopWindowProps {
+    shop?: Shop;
+    viewportManagement?: ItemViewportManagement;
+}
+
 const MemoizedShopItemSlot = memo(ShopItemSlot);
 
 export class ShopManager {
@@ -32,13 +37,7 @@ export class ShopManager {
 /**
  * Main shop window component with integrated filtering
  */
-export default function ShopWindow({
-    shop: shopOverride,
-    viewportManagement,
-}: {
-    shop?: Shop;
-    viewportManagement?: ItemViewportManagement;
-}) {
+export default function ShopWindow({ shop: shopOverride, viewportManagement }: ShopWindowProps) {
     const [shop, setShop] = useState<Shop | undefined>(shopOverride);
     const { searchQuery, props: filterProps } = useBasicInventoryFilter();
     const [hideMaxedItems, setHideMaxedItems] = useState(Packets.settings.get().HideMaxedItems);
