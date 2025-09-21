@@ -6,6 +6,7 @@ import {
     BALANCE_GUI,
     BUILD_GUI,
     CLICK_SPARKS_GUI,
+    DIALOGUE_GUI,
     HAMSTER_GUI,
     INVENTORY_GUI,
     LOGS_GUI,
@@ -31,6 +32,7 @@ import InventoryWindow from "client/ui/components/item/inventory/InventoryWindow
 import PurchaseWindow from "client/ui/components/item/shop/PurchaseWindow";
 import ShopWindow from "client/ui/components/item/shop/ShopWindow";
 import LogsWindow from "client/ui/components/logs/LogsWindow";
+import DialogueWindow from "client/ui/components/npc/DialogueWindow";
 import QuestWindow from "client/ui/components/quest/QuestWindow";
 import TrackedQuestWindow from "client/ui/components/quest/TrackedQuestWindow";
 import RenameWindow from "client/ui/components/rename/RenameWindow";
@@ -58,6 +60,7 @@ export default class AppController implements OnStart {
         createRoot(MAIN_LAYOUT_GUI).render(<MainLayout />);
         createRoot(CLICK_SPARKS_GUI).render(<ClickSparkManager />);
         createRoot(TOOLTIPS_GUI).render(<TooltipWindow />);
+        createRoot(DIALOGUE_GUI).render(<DialogueWindow />);
         createRoot(BALANCE_GUI).render(<BalanceWindow />);
         createRoot(BUILD_GUI).render(<BuildManager buildController={this.buildController} />);
         createRoot(SETTINGS_GUI).render(
