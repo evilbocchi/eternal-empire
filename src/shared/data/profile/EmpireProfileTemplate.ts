@@ -1,4 +1,4 @@
-import { BaseOnoeNum } from "@antivivi/serikanum";
+import type { BaseOnoeNum } from "@antivivi/serikanum";
 
 declare global {
     /**
