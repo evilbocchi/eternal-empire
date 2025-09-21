@@ -8,7 +8,7 @@ export = new Command(script.Name)
     .setExecute((o) => {
         const placedItems = CommandAPI.Data.empireData.items.worldPlaced;
         const toRemove = new Array<string>();
-        const area = Sandbox.getEnabled() ? undefined : CommandAPI.Area.getArea(o);
+        const area = Sandbox.getEnabled() ? undefined : (o.GetAttribute("Area") as AreaId | undefined);
         for (const [id, placedItem] of placedItems)
             if (area === undefined || placedItem.area === area) toRemove.push(id);
 

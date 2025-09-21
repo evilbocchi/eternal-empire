@@ -1,7 +1,7 @@
 import Signal, { Connection } from "@antivivi/lemon-signal";
 import { ProximityPromptService } from "@rbxts/services";
 import { Dialogue } from "server/interactive/npc/NPC";
-import { HotReloader, Reloadable } from "shared/HotReload";
+import { HotReloader, Reloadable } from "shared/hamster/HotReload";
 import { SingleWorldNode } from "shared/world/nodes/WorldNode";
 
 class InteractableObject extends Reloadable<InteractableObject> {

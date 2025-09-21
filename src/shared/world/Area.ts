@@ -4,6 +4,8 @@ import { IS_CI, IS_SERVER } from "shared/Context";
 import Packets from "shared/Packets";
 import Sandbox from "shared/Sandbox";
 import { playSound } from "shared/asset/GameAssets";
+import Leaderstats from "shared/data/Leaderstats";
+import eat from "shared/hamster/eat";
 import BuildBounds from "shared/placement/BuildBounds";
 import { SingleWorldNode } from "shared/world/nodes/WorldNode";
 
@@ -105,8 +107,6 @@ export default class Area {
     readonly spawnLocationWorldNode?: SingleWorldNode<SpawnLocation>;
 
     private readonly boundingBox?: [CFrame, Vector3];
-    private readonly cleanupCallback: () => void;
-    private static staticCleanupCallback: () => void;
 
     /** The current number of droplets in this area. Server-side only. */
     dropletCount = 0;
@@ -180,10 +180,9 @@ export default class Area {
         }
 
         const catchArea = this.catchAreaWorldNode.getInstance();
-        let touchConnection: RBXScriptConnection | undefined;
         if (catchArea !== undefined && IS_SERVER) {
             catchArea.CanTouch = true;
-            touchConnection = catchArea.Touched.Connect((o) => {
+            const connection = catchArea.Touched.Connect((o) => {
                 const player = Players.GetPlayerFromCharacter(o.Parent);
                 if (player === undefined || player.Character === undefined) return;
 
@@ -205,10 +204,8 @@ export default class Area {
                 Packets.shakeCamera.toClient(player, "Bump"); // Visual feedback
                 playSound("Splash.mp3", rootPart); // Audio feedback
             });
+            eat(connection);
         }
-        this.cleanupCallback = () => {
-            touchConnection?.Disconnect();
-        };
     }
 
     boostDropletLimit(source: string, amount?: number) {
@@ -256,6 +253,7 @@ export default class Area {
                     // Only update if the area has actually changed
                     if (player.GetAttribute("Area") !== id) {
                         player.SetAttribute("Area", id);
+                        Leaderstats.setLeaderstat(player, "Area", area.name);
                     }
                     break; // Found the area, no need to check others
                 }
@@ -271,13 +269,6 @@ export default class Area {
         }
         // Broadcast the change to all connected clients
         Packets.dropletCountChanged.toAllClients(this.id, this.dropletCount, this.getDropletLimit());
-    }
-
-    static cleanup() {
-        this.staticCleanupCallback();
-        for (const [, area] of pairs(AREAS)) {
-            area.cleanupCallback();
-        }
     }
 
     static {
@@ -305,10 +296,10 @@ export default class Area {
                 });
             });
 
-            this.staticCleanupCallback = () => {
+            eat(() => {
                 playerAddedConnection.Disconnect();
                 addedConnection.Disconnect();
-            };
+            });
         }
     }
 }

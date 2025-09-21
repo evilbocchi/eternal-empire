@@ -22,14 +22,8 @@
 
 import { OnStart, Service } from "@flamework/core";
 import DataService from "server/services/data/DataService";
-import NamedUpgradeService from "server/services/data/NamedUpgradeService";
-import LeaderstatsService from "server/services/leaderboard/LeaderstatsService";
-import NamedUpgrades from "shared/namedupgrade/NamedUpgrades";
 import Packets from "shared/Packets";
 import { AREAS } from "shared/world/Area";
-
-/** Grid size upgrades that affect area building grids */
-const GRID_SIZE_UPGRADES = NamedUpgrades.getUpgrades("GridSize");
 
 /**
  * This service orchestrates all area-related functionality in the game, from basic
@@ -38,67 +32,9 @@ const GRID_SIZE_UPGRADES = NamedUpgrades.getUpgrades("GridSize");
  */
 @Service()
 export default class AreaService implements OnStart {
-    /**
-     * Maps area IDs to the number of droplets currently present in that area.
-     */
-    readonly DROPLET_COUNT_PER_AREA = new Map<AreaId, number>();
-
-    constructor(
-        private dataService: DataService,
-        private leaderstatsService: LeaderstatsService,
-        private namedUpgradeService: NamedUpgradeService,
-    ) {}
-
-    /**
-     * Retrieves the current area ID for a player.
-     *
-     * @param player The player to get the area for
-     * @returns The area ID where the player is currently located
-     */
-    getArea(player: Player): AreaId {
-        return player.GetAttribute("Area") as AreaId;
-    }
-
-    /**
-     * Sets a player's current area and updates their leaderstat display.
-     *
-     * This method handles both the internal area tracking (via player attributes)
-     * and the visual display (via leaderstats) to ensure consistency across
-     * all area-related systems.
-     *
-     * @param player The player to set the area for
-     * @param id The area ID to assign to the player
-     */
-    setArea(player: Player, id: AreaId) {
-        this.leaderstatsService.setLeaderstat(player, "Area", AREAS[id].name);
-        player.SetAttribute("Area", id);
-    }
+    constructor(private dataService: DataService) {}
 
     onStart() {
-        const onUpgradesChanged = (data: Map<string, number>) => {
-            for (const [id, area] of pairs(AREAS)) {
-                const gridWorldNode = area.gridWorldNode;
-                if (gridWorldNode === undefined) continue;
-                const grid = gridWorldNode?.getInstance();
-                if (grid === undefined) continue;
-
-                // Calculate the new grid size based on applied upgrades
-                let size = gridWorldNode.originalSize;
-                if (size === undefined) continue;
-                GRID_SIZE_UPGRADES.forEach((upgrade, upgradeId) => {
-                    if (upgrade.area === id) size = upgrade.apply(size!, data.get(upgradeId));
-                });
-
-                // Update the grid size if it has changed
-                if (grid.Size !== size) {
-                    grid.Size = size;
-                }
-            }
-        };
-
-        this.namedUpgradeService.upgradesChanged.connect(onUpgradesChanged);
-        onUpgradesChanged(this.dataService.empireData.upgrades);
-
         Packets.tpToArea.fromClient((player, areaId) => {
             const character = player.Character;
             const area = AREAS[areaId];

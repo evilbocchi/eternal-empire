@@ -1,9 +1,8 @@
 import { CollectionService } from "@rbxts/services";
+import eat from "shared/hamster/eat";
 
 export default class WorldNode<T extends Instance = Instance> {
     readonly INSTANCES = new Set<T>();
-
-    private cleanup?: () => void;
 
     constructor(
         public tag: string,
@@ -17,11 +16,11 @@ export default class WorldNode<T extends Instance = Instance> {
         const removedConnection = CollectionService.GetInstanceRemovedSignal(tag).Connect((instance) => {
             this.unregisterInstance(instance as T);
         });
-        this.cleanup = () => {
+        eat(() => {
             addedConnection.Disconnect();
             removedConnection.Disconnect();
             table.clear(this);
-        };
+        });
     }
 
     private registerInstance(instance: T) {
@@ -37,10 +36,6 @@ export default class WorldNode<T extends Instance = Instance> {
     private unregisterInstance(instance: T) {
         this.onUnregister?.(instance);
         this.INSTANCES.delete(instance);
-    }
-
-    destroy() {
-        this.cleanup?.();
     }
 }
 

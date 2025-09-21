@@ -8,7 +8,7 @@
 import Signal from "@antivivi/lemon-signal";
 import { AnalyticsService, Players, ReplicatedStorage } from "@rbxts/services";
 import NPC, { Dialogue } from "server/interactive/npc/NPC";
-import { HotReloader, Reloadable } from "shared/HotReload";
+import { HotReloader, Reloadable } from "shared/hamster/HotReload";
 import { Server } from "shared/item/ItemUtils";
 import Packets from "shared/Packets";
 

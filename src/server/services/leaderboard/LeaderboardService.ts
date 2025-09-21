@@ -14,10 +14,10 @@ import { OnoeNum } from "@antivivi/serikanum";
 import { OnStart, Service } from "@flamework/core";
 import { CollectionService, DataStoreService, Players } from "@rbxts/services";
 import DataService from "server/services/data/DataService";
-import LeaderstatsService from "server/services/leaderboard/LeaderstatsService";
 import { getNameFromUserId } from "shared/constants";
 import { IS_STUDIO } from "shared/Context";
-import { CURRENCIES, CURRENCY_DETAILS } from "shared/currency/CurrencyDetails";
+import { CURRENCY_DETAILS } from "shared/currency/CurrencyDetails";
+import Leaderstats from "shared/data/Leaderstats";
 import Packets from "shared/Packets";
 import Sandbox from "shared/Sandbox";
 
@@ -49,7 +49,7 @@ export class LeaderboardService implements OnStart {
 
     constructor(
         private readonly dataService: DataService,
-        private readonly leaderstatsService: LeaderstatsService,
+        private readonly leaderstatsService: Leaderstats,
     ) {}
 
     /**
@@ -153,9 +153,7 @@ export class LeaderboardService implements OnStart {
         for (const player of Players.GetPlayers()) {
             this.donatedStore.SetAsync(
                 tostring(player.UserId),
-                new OnoeNum(
-                    (this.leaderstatsService.getLeaderstat(player, "Donated") as number | undefined) ?? 0,
-                ).toSingle(),
+                new OnoeNum((Leaderstats.getLeaderstat(player, "Donated") as number | undefined) ?? 0).toSingle(),
             );
         }
         this.leaderboardData.set(

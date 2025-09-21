@@ -12,10 +12,10 @@ import { OnStart, Service } from "@flamework/core";
 import { MarketplaceService, MessagingService } from "@rbxts/services";
 import { OnPlayerJoined } from "server/services/ModdingService";
 import DataService from "server/services/data/DataService";
-import LeaderstatsService from "server/services/leaderboard/LeaderstatsService";
 import ChatHookService from "server/services/permissions/ChatHookService";
 import ProductService from "server/services/product/ProductService";
 import Packets from "shared/Packets";
+import Leaderstats from "shared/data/Leaderstats";
 import { DONATION_PRODUCTS } from "shared/devproducts/DonationProducts";
 
 /**
@@ -26,7 +26,7 @@ export class DonationService implements OnStart, OnPlayerJoined {
     constructor(
         private chatHookService: ChatHookService,
         private dataService: DataService,
-        private leaderstatsService: LeaderstatsService,
+        private leaderstatsService: Leaderstats,
         private productService: ProductService,
     ) {}
 
@@ -54,7 +54,7 @@ export class DonationService implements OnStart, OnPlayerJoined {
     }
 
     updateLeaderstats(player: Player, donated = this.getDonated(player)) {
-        this.leaderstatsService.setLeaderstat(player, "Donated", donated);
+        Leaderstats.setLeaderstat(player, "Donated", donated);
     }
 
     onPlayerJoined(player: Player) {

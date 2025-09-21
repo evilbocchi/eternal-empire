@@ -2,7 +2,7 @@
 //!optimize 2
 
 import { isCompletelyInside, isInsidePart } from "@antivivi/vrldk";
-import Area from "shared/world/Area";
+import type Area from "shared/world/Area";
 
 /**
  * Represents the bounds of a build area.

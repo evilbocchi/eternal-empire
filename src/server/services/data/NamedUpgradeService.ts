@@ -21,6 +21,7 @@ import DataService from "server/services/data/DataService";
 import { log } from "server/services/permissions/LogService";
 import NamedUpgrades from "shared/namedupgrade/NamedUpgrades";
 import Packets from "shared/Packets";
+import { AREAS } from "shared/world/Area";
 
 /**
  * Service that manages upgrades for the current empire, including purchase and effects.
@@ -128,11 +129,13 @@ export default class NamedUpgradeService implements OnInit {
             return this.buyUpgrade(upgradeId, to, player);
         });
 
-        const wsUpgs = NamedUpgrades.getUpgrades("WalkSpeed");
-        this.upgradesChanged.connect((data) => {
+        const WALKSPEED_UPGRADES = NamedUpgrades.getUpgrades("WalkSpeed");
+        const GRID_SIZE_UPGRADES = NamedUpgrades.getUpgrades("GridSize");
+
+        const onUpgradesChanged = (data: Map<string, number>) => {
             const oldWs = Workspace.GetAttribute("WalkSpeed") as number | undefined;
             let ws = 16;
-            wsUpgs.forEach((value, key) => (ws = value.apply(ws, data.get(key)!)));
+            WALKSPEED_UPGRADES.forEach((value, key) => (ws = value.apply(ws, data.get(key)!)));
             Workspace.SetAttribute("WalkSpeed", ws);
             StarterPlayer.CharacterWalkSpeed = ws;
             for (const player of Players.GetPlayers()) {
@@ -144,8 +147,28 @@ export default class NamedUpgradeService implements OnInit {
                     humanoid.WalkSpeed = ws;
                 }
             }
-        });
-        this.upgradesChanged.fire(this.upgrades);
+
+            for (const [id, area] of pairs(AREAS)) {
+                const gridWorldNode = area.gridWorldNode;
+                if (gridWorldNode === undefined) continue;
+                const grid = gridWorldNode?.getInstance();
+                if (grid === undefined) continue;
+
+                // Calculate the new grid size based on applied upgrades
+                let size = gridWorldNode.originalSize;
+                if (size === undefined) continue;
+                GRID_SIZE_UPGRADES.forEach((upgrade, upgradeId) => {
+                    if (upgrade.area === id) size = upgrade.apply(size!, data.get(upgradeId));
+                });
+
+                // Update the grid size if it has changed
+                if (grid.Size !== size) {
+                    grid.Size = size;
+                }
+            }
+        };
+        this.upgradesChanged.connect(onUpgradesChanged);
+        onUpgradesChanged(this.upgrades);
 
         this.upgradeBought.connect((player, upgrade, to) =>
             log({

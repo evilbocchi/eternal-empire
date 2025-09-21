@@ -1,6 +1,5 @@
 import { OnoeNum } from "@antivivi/serikanum";
 import { getAllInstanceInfo, setInstanceInfo } from "@antivivi/vrldk";
-import { AREAS } from "shared/world/Area";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
 import { Server } from "shared/item/ItemUtils";
@@ -8,6 +7,7 @@ import Dropper from "shared/item/traits/dropper/Dropper";
 import Furnace from "shared/item/traits/Furnace";
 import ItemTrait from "shared/item/traits/ItemTrait";
 import Packets from "shared/Packets";
+import { AREAS } from "shared/world/Area";
 import Droplet from "../../Droplet";
 
 declare global {
@@ -41,7 +41,6 @@ export default class Condenser extends ItemTrait {
         const areaId = Server.Item.getPlacedItem(model.Name)?.area;
         if (areaId === undefined) return;
         const area = AREAS[areaId as AreaId];
-        const dropletCountPerArea = Server.Area.DROPLET_COUNT_PER_AREA;
         const instantiatorsPerDroplet = new Map<Droplet, () => BasePart>();
         const pricePerDroplet = new Map<Droplet, CurrencyBundle>();
         const maxCosts = new Map<Currency, OnoeNum>();
@@ -60,7 +59,6 @@ export default class Condenser extends ItemTrait {
             );
         }
         const surfaceGui = model.WaitForChild("GuiPart").FindFirstChildOfClass("SurfaceGui");
-        const lava = model.WaitForChild("Lava");
         if (surfaceGui === undefined) {
             return;
         }
@@ -69,8 +67,7 @@ export default class Condenser extends ItemTrait {
 
         const check = () => {
             pricePerDroplet.forEach((price, droplet) => {
-                const dropletCount = dropletCountPerArea.get(areaId as AreaId);
-                if (dropletCount === undefined || dropletCount > area.getDropletLimit()) {
+                if (area.dropletCount > area.getDropletLimit()) {
                     return;
                 }
                 let dontResetUpgrades = false;

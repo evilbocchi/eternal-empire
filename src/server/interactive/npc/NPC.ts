@@ -12,7 +12,7 @@ import {
 import { playSound } from "shared/asset/GameAssets";
 import { getDisplayName } from "shared/constants";
 import { IS_CI, IS_STUDIO } from "shared/Context";
-import { HotReloader, Reloadable } from "shared/HotReload";
+import { HotReloader, Reloadable } from "shared/hamster/HotReload";
 import Packets from "shared/Packets";
 
 /**

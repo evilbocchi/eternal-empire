@@ -245,8 +245,8 @@ export default class Dropper extends ItemTrait {
                 if (dropRate === 0) continue;
 
                 if (t > info.LastDrop + 1 / dropRate / speed) {
-                    const dropletCount = Server.Area.DROPLET_COUNT_PER_AREA.get(info.Area!);
-                    if (dropletCount !== undefined && dropletCount > AREAS[info.Area!].getDropletLimit()) continue;
+                    const area = AREAS[info.Area!];
+                    if (area.dropletCount > area.getDropletLimit()) continue;
                     info.LastDrop = t;
                     info.Instantiator!();
                 }
