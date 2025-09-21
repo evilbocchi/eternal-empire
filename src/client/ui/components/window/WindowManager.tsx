@@ -8,6 +8,7 @@
 
 import { useEffect, useState } from "@rbxts/react";
 import HotkeyManager from "client/ui/components/hotkeys/HotkeyManager";
+import eat from "shared/hamster/eat";
 import Packets from "shared/Packets";
 
 /**
@@ -30,8 +31,6 @@ export interface DocumentInfo {
  */
 export default class DocumentManager {
     static readonly INFO_PER_DOCUMENT = new Map<string, DocumentInfo>();
-    private static tabOpenedConnection: RBXScriptConnection;
-    private static initialized = false;
 
     /**
      * Registers a new document with the document manager, allowing it to be tracked and managed
@@ -97,11 +96,7 @@ export default class DocumentManager {
         return documentInfo ? documentInfo.visible : false;
     }
 
-    private static initialize(): void {
-        if (this.initialized) {
-            this.cleanup();
-        }
-
+    static {
         // Register global close hotkey
         HotkeyManager.bindHotkey({
             action: () => {
@@ -119,18 +114,8 @@ export default class DocumentManager {
             label: "Close Window",
         });
 
-        this.tabOpenedConnection = Packets.tabOpened.fromServer((tab) => this.setVisible(tab, true));
-        this.initialized = true;
-    }
-
-    private static cleanup(): void {
-        this.INFO_PER_DOCUMENT.clear();
-        this.tabOpenedConnection?.Disconnect();
-        this.initialized = false;
-    }
-
-    static {
-        this.initialize();
+        const tabOpenedConnection = Packets.tabOpened.fromServer((tab) => this.setVisible(tab, true));
+        eat(tabOpenedConnection);
     }
 }
 

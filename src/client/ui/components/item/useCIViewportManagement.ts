@@ -22,7 +22,7 @@ export default function useCIViewportManagement({ enabled = IS_CI }): ItemViewpo
         }
         // Cleanup when component unmounts
         return () => {
-            newViewportManagement?.cleanup();
+            newViewportManagement?.destroy();
             setViewportManagement(undefined);
         };
     }, [enabled]);

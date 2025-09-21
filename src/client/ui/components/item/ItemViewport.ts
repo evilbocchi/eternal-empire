@@ -143,7 +143,7 @@ export function loadItemViewportManagement() {
         runningViewports,
         relsPerItem,
         loadItemIntoViewport,
-        cleanup: () => {
+        destroy: () => {
             RunService.UnbindFromRenderStep(KEY);
             for (const rv of runningViewports) {
                 rv.viewportFrame.ClearAllChildren();

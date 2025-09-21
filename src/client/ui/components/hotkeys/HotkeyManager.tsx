@@ -8,6 +8,7 @@
 
 import { DependencyList, useEffect } from "@rbxts/react";
 import { Environment } from "@rbxts/ui-labs";
+import eat from "shared/hamster/eat";
 import Packets from "shared/Packets";
 
 declare global {
@@ -91,7 +92,6 @@ export const HOTKEY_BINDINGS = [
  */
 export default class HotkeyManager {
     private static optionsPerLabel = new Map<string, HotkeyOptions>();
-    private static inputConnections: RBXScriptConnection[] = [];
     private static isSettingHotkey = false;
     private static settingHotkeyCallbacks = new Set<(setting: boolean) => void>();
 
@@ -103,6 +103,11 @@ export default class HotkeyManager {
         }
     }
 
+    /**
+     * Binds a hotkey with the specified options, returning an unbind function for cleanup.
+     * @param options Hotkey options including label, action, and optional endAction.
+     * @returns Unbind function to remove the hotkey binding.
+     */
     static bindHotkey(options: HotkeyOptions): () => void {
         this.optionsPerLabel.set(options.label, options);
         return () => {
@@ -142,11 +147,14 @@ export default class HotkeyManager {
         return false;
     }
 
-    static initialize() {
-        // Cleanup existing connections
-        this.cleanup();
+    static subscribeToSettingHotkey(callback: (setting: boolean) => void): () => void {
+        this.settingHotkeyCallbacks.add(callback);
+        return () => {
+            this.settingHotkeyCallbacks.delete(callback);
+        };
+    }
 
-        // Set up input listeners
+    static {
         const inputBeganConnection = Environment.UserInput.InputBegan.Connect((input, gameProcessed) => {
             if (gameProcessed) return;
             this.executeHotkey(input.KeyCode);
@@ -157,25 +165,10 @@ export default class HotkeyManager {
             this.executeHotkey(input.KeyCode, true);
         });
 
-        this.inputConnections = [inputBeganConnection, inputEndedConnection];
-    }
-
-    static cleanup() {
-        for (const connection of this.inputConnections) {
-            connection.Disconnect();
-        }
-        this.inputConnections = [];
-    }
-
-    static subscribeToSettingHotkey(callback: (setting: boolean) => void): () => void {
-        this.settingHotkeyCallbacks.add(callback);
-        return () => {
-            this.settingHotkeyCallbacks.delete(callback);
-        };
-    }
-
-    static {
-        this.initialize();
+        eat(() => {
+            inputBeganConnection.Disconnect();
+            inputEndedConnection.Disconnect();
+        });
     }
 }
 
@@ -186,9 +179,7 @@ export function useHotkey(options?: HotkeyOptions, deps?: DependencyList) {
     useEffect(
         () => {
             if (!options) return;
-
-            const cleanup = HotkeyManager.bindHotkey(options);
-            return cleanup;
+            return HotkeyManager.bindHotkey(options);
         },
         deps ? [options, ...deps] : [options],
     );
