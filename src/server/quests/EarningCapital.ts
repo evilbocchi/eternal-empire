@@ -2,6 +2,7 @@ import { Dialogue } from "server/interactive/npc/NPC";
 import Ricarg from "server/interactive/npc/Ricarg";
 import Quest, { Stage } from "server/quests/Quest";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
+import ThisEmpire from "shared/data/ThisEmpire";
 import countItemEverywhere from "shared/item/countItemEverywhere";
 import { Server } from "shared/item/ItemUtils";
 import RustyFactory from "shared/items/negative/negativity/RustyFactory";
@@ -77,7 +78,7 @@ export = new Quest(script.Name)
     .onInit((quest) => {
         Dialogue.finished.connect((dialogue) => {
             if (dialogue === quest.completionDialogue) {
-                const items = Server.empireData.items;
+                const items = ThisEmpire.data.items;
                 const [invCount, placedCount] = countItemEverywhere(
                     items.inventory,
                     items.worldPlaced,

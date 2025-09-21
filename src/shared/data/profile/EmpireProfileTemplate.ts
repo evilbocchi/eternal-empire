@@ -2,6 +2,143 @@ import type { BaseOnoeNum } from "@antivivi/serikanum";
 
 declare global {
     /**
+     * Represents an item that has been placed in the world.
+     */
+    interface PlacedItem {
+        /**
+         * The ID of the item that has been placed.
+         */
+        item: string;
+
+        /**
+         * The X value of the position in the world.
+         */
+        posX: number;
+
+        /**
+         * The Y value of the position in the world.
+         */
+        posY: number;
+
+        /**
+         * The Z value of the position in the world.
+         */
+        posZ: number;
+
+        /**
+         * The rotation value around the X axis in degrees.
+         */
+        rotX: number;
+
+        /**
+         * The rotation value around the Y axis in degrees.
+         */
+        rotY: number;
+
+        /**
+         * The rotation value around the Z axis in degrees.
+         */
+        rotZ: number;
+
+        /**
+         * The rotation value in degrees.
+         */
+        rawRotation?: number;
+
+        /**
+         * The area of the placement, used to identify the item in the world.
+         * This is automatically generated when the item is placed.
+         */
+        area?: AreaId;
+
+        /**
+         * The metadata for the placed item, used to store additional information about the item.
+         * This is automatically generated when the item is placed.
+         */
+        meta?: PlacedItemMetadata;
+
+        /**
+         * The UUID of the unique item instance, if this placed item is a unique item.
+         */
+        uniqueItemId?: string;
+    }
+
+    /**
+     * Represents a unique item instance with its randomly generated pots.
+     */
+    interface UniqueItemInstance {
+        /**
+         * The base item ID that this unique item is based on.
+         */
+        baseItemId: string;
+
+        /**
+         * The pots (unique stats) for this item instance.
+         * Key is the pot name, value is the raw percentage value (0-100).
+         * These values are scaled to actual ranges when accessed via the Unique trait.
+         */
+        pots: Map<string, number>;
+
+        /**
+         * The timestamp when this unique item was created.
+         */
+        created: number;
+
+        /**
+         * The ID of the placement in the world, if this unique item is placed.
+         */
+        placed?: string;
+    }
+
+    /**
+     * Metadata for a placed item.
+     *
+     * Use this to store additional information about the item, such as its state or configuration.
+     */
+    interface PlacedItemMetadata {}
+
+    type Inventory = Map<string, number>;
+
+    /**
+     * Represents the data structure of a player's items.
+     */
+    interface ItemsData {
+        /**
+         * The inventory of the empire, containing item IDs and their respective amounts.
+         */
+        inventory: Inventory;
+
+        /**
+         * The items that the empire has bought. Used to fetch the price of items in {@link Shop} items.
+         */
+        bought: Inventory;
+
+        /**
+         * The items that the empire has placed in the world.
+         * @deprecated Use `worldPlaced` instead.
+         */
+        placed: PlacedItem[];
+
+        /**
+         * The items that the empire has placed in the world, mapped by their placement ID.
+         *
+         * This is used to identify items in the world and allows for easy access to their properties.
+         */
+        worldPlaced: Map<string, PlacedItem>;
+
+        /**
+         * The next ID to use for a placed item.
+         */
+        nextId: number;
+
+        /**
+         * The unique items that the empire owns, mapped by their UUID.
+         *
+         * Unique items that are placed will *not* be removed from this map.
+         */
+        uniqueInstances: Map<string, UniqueItemInstance>;
+    }
+    /**
      * Represents the data structure of an empire profile.
      */
     type EmpireData = typeof EmpireProfileTemplate;

@@ -21,11 +21,17 @@ import { OnPlayerJoined } from "server/services/ModdingService";
 import ChatHookService from "server/services/permissions/ChatHookService";
 import { getNameFromUserId } from "shared/constants";
 import { IS_SINGLE_SERVER } from "shared/Context";
+import Packets from "shared/Packets";
 
 declare global {
     interface Assets {
         ClassicSword: Tool;
     }
+
+    /**
+     * Represents the keys for each permission to manage an empire.
+     */
+    type PermissionKey = keyof EmpireData["permLevels"];
 }
 
 type PermissionList = "banned" | "trusted" | "managers";
@@ -232,5 +238,6 @@ export default class PermissionsService implements OnInit, OnPlayerJoined {
             const name = getNameFromUserId(data.player);
             this.chatHookService.sendServerMessage(`${name}:  ${data.message}`, "tag:hidden;color:180,180,180;");
         });
+        Packets.permLevels.set(this.dataService.empireData.permLevels);
     }
 }

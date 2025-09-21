@@ -11,7 +11,6 @@
 
 import { OnInit, Service } from "@flamework/core";
 import CurrencyService from "server/services/data/CurrencyService";
-import DataService from "server/services/data/DataService";
 import EventService from "server/services/data/EventService";
 import HamsterService from "server/services/data/HamsterService";
 import LevelService from "server/services/data/LevelService";
@@ -53,7 +52,6 @@ export default class APIExposeService implements OnInit {
         private readonly chatHookService: ChatHookService,
         private readonly chestService: ChestService,
         private readonly currencyService: CurrencyService,
-        private readonly dataService: DataService,
         private readonly donationService: DonationService,
         private readonly eventService: EventService,
         private readonly hamsterService: HamsterService,
@@ -81,21 +79,6 @@ export default class APIExposeService implements OnInit {
         const t = {
             /** Whether the Server object is ready for use */
             ready: true,
-
-            /**
-             * The mutable empire data table.
-             *
-             * @see {@link DataService.loadedInformation} for information on how this is loaded.
-             */
-            empireData: this.dataService.empireData,
-
-            /**
-             * Empire and player data management service.
-             *
-             * @borrows DataService as dataService
-             * @see {@link DataService} for more details.
-             */
-            Data: this.dataService,
 
             /**
              * Area management service.

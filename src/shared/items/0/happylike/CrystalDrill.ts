@@ -1,5 +1,6 @@
 import Difficulty from "@antivivi/jjt-difficulties";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
+import ThisEmpire from "shared/data/ThisEmpire";
 import Droplet from "shared/item/Droplet";
 import Item from "shared/item/Item";
 import { Server } from "shared/item/ItemUtils";
@@ -25,7 +26,7 @@ export = new Item(script.Name)
     .setDroplet(Droplet.CrystalDroplet)
     .setDropRate(1)
     .onDropletProduced(() => {
-        const questMetadata = Server.empireData.questMetadata;
+        const questMetadata = ThisEmpire.data.questMetadata;
         let prevCount = (questMetadata.get("CrystalDrillCount") as number) ?? 0;
         prevCount += 1;
         if (math.random(1, 60 * math.pow(prevCount, 2)) === 1) {

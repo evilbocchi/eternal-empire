@@ -12,6 +12,7 @@ import { emitEffect, playSound } from "shared/asset/GameAssets";
 import { PLACED_ITEMS_FOLDER, WAYPOINTS } from "shared/constants";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import { RESET_LAYERS } from "shared/currency/mechanics/ResetLayer";
+import ThisEmpire from "shared/data/ThisEmpire";
 import { Server } from "shared/item/ItemUtils";
 import SkillPod from "shared/items/0/millisecondless/SkillPod";
 import SlamoStatue from "shared/items/0/millisecondless/SlamoStatue";
@@ -315,7 +316,7 @@ export = new Quest(script.Name)
                         new Dialogue(SlamoReceptionist, "Alright, pour the bucket on him!").talk(false),
                     );
                 };
-                const placedItems = Server.empireData.items.worldPlaced;
+                const placedItems = ThisEmpire.data.items.worldPlaced;
                 for (const [placementId, placedItem] of placedItems)
                     if (placedItem.item === SlamoStatue.id) {
                         update(placementId);
@@ -420,7 +421,7 @@ export = new Quest(script.Name)
             Simpul.rootPart!.CFrame = new CFrame(0, -200, 0);
         });
 
-        const questMetadata = Server.empireData.questMetadata;
+        const questMetadata = ThisEmpire.data.questMetadata;
 
         const start = new Dialogue(
             Andy,

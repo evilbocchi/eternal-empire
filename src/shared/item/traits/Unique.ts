@@ -1,9 +1,9 @@
 import { OnoeNum } from "@antivivi/serikanum";
 import { formatRichText } from "@antivivi/vrldk";
+import ThisEmpire from "shared/data/ThisEmpire";
 import Item from "shared/item/Item";
 import { Server } from "shared/item/ItemUtils";
 import ItemTrait from "shared/item/traits/ItemTrait";
-import DropperBooster from "shared/item/traits/boost/DropperBooster";
 
 declare global {
     interface ItemTraits {
@@ -70,7 +70,7 @@ export default class Unique extends ItemTrait {
             throw `Unique item model ${model.Name} does not have a unique item UUID.`;
         }
 
-        const uniqueInstance = Server.empireData.items.uniqueInstances.get(uuid);
+        const uniqueInstance = ThisEmpire.data.items.uniqueInstances.get(uuid);
         if (uniqueInstance === undefined) {
             throw `Unique item instance for UUID ${uuid} not found.`;
         }

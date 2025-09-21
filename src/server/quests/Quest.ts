@@ -8,6 +8,7 @@
 import Signal from "@antivivi/lemon-signal";
 import { AnalyticsService, Players, ReplicatedStorage } from "@rbxts/services";
 import NPC, { Dialogue } from "server/interactive/npc/NPC";
+import ThisEmpire from "shared/data/ThisEmpire";
 import { HotReloader, Reloadable } from "shared/hamster/HotReload";
 import { Server } from "shared/item/ItemUtils";
 import Packets from "shared/Packets";
@@ -415,7 +416,7 @@ export default class Quest extends Reloadable<Quest> {
      * @returns The new stage number, or undefined if advancement failed.
      *          Returns -1 if the quest is now completed.
      */
-    advance(current: number, stagePerQuest = Server.empireData.quests) {
+    advance(current: number, stagePerQuest = ThisEmpire.data.quests) {
         const currentStage = stagePerQuest.get(this.id);
 
         // Skip if quest is already completed
@@ -475,9 +476,9 @@ export default class Quest extends Reloadable<Quest> {
      */
     static async reachStages(level?: number) {
         if (level === undefined) {
-            level = Server.empireData.level;
+            level = ThisEmpire.data.level;
         }
-        const stagePerQuest = Server.empireData.quests;
+        const stagePerQuest = ThisEmpire.data.quests;
         if (stagePerQuest === undefined) {
             return;
         }

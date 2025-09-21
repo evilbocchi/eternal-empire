@@ -1,10 +1,11 @@
 import Difficulty from "@antivivi/jjt-difficulties";
 import { OnoeNum } from "@antivivi/serikanum";
-import Generator from "shared/item/traits/generator/Generator";
-import Item from "shared/item/Item";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Formula from "shared/currency/Formula";
+import ThisEmpire from "shared/data/ThisEmpire";
+import Item from "shared/item/Item";
 import { Server } from "shared/item/ItemUtils";
+import Generator from "shared/item/traits/generator/Generator";
 
 const amt = new OnoeNum(100e12);
 const base = new CurrencyBundle().set("Power", amt);
@@ -28,7 +29,7 @@ export = new Item(script.Name)
         (v, item) => {
             return item.setPassiveGain(base.set("Power", amt.mul(v)));
         },
-        () => Server.Currency.get("Skill").mul(Server.empireData.playtime),
+        () => Server.Currency.get("Skill").mul(ThisEmpire.data.playtime),
     )
 
     .exit();

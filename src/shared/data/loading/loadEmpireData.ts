@@ -6,16 +6,16 @@ import { IS_CI, IS_PUBLIC_SERVER, IS_SERVER, IS_SINGLE_SERVER, IS_STUDIO } from 
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import { CURRENCY_DETAILS } from "shared/currency/CurrencyDetails";
 import fixDuplicatedItemsData from "shared/data/loading/fixDuplicatedItemsData";
+import ThisEmpire from "shared/data/ThisEmpire";
 import { EmpireProfileManager } from "shared/data/profile/ProfileManager";
-import type Item from "shared/item/Item";
+import Item from "shared/item/Item";
+import Items from "shared/items/Items";
 import Packets from "shared/Packets";
 import Sandbox from "shared/Sandbox";
+import EmpireIdOverrideValue from "shared/world/nodes/EmpireIdOverrideValue";
+import StartScreenValue from "shared/world/nodes/StartScreenValue";
 
 export default async function loadEmpireData() {
-    const Items = (await import("shared/items/Items")).default;
-    const EmpireIdOverrideValue = (await import("shared/world/nodes/EmpireIdOverrideValue")).default;
-    const StartScreenValue = (await import("shared/world/nodes/StartScreenValue")).default;
-
     const startScreenValue = StartScreenValue.waitForInstance();
     let empireId: string;
 
@@ -211,7 +211,7 @@ export default async function loadEmpireData() {
         empireData.lastReset = tick();
     }
 
-    Packets.permLevels.set(empireData.permLevels);
-
-    return { empireProfile, empireData, empireId };
+    const data = { empireProfile, empireData, empireId };
+    ThisEmpire.loadWith(data);
+    return data;
 }

@@ -4,6 +4,7 @@
 import { findBaseParts, formatRichText, getAllInstanceInfo } from "@antivivi/vrldk";
 import { Players, RunService, Workspace } from "@rbxts/services";
 import { CURRENCY_DETAILS } from "shared/currency/CurrencyDetails";
+import ThisEmpire from "shared/data/ThisEmpire";
 import GameSpeed from "shared/GameSpeed";
 import Droplet from "shared/item/Droplet";
 import Item from "shared/item/Item";
@@ -41,7 +42,7 @@ export default class Dropper extends ItemTrait {
             const droplet = instantiator();
             droplet.Parent = Workspace;
 
-            const player = Players.GetPlayerByUserId(Server.empireData.owner) ?? Players.GetPlayers()[0];
+            const player = Players.GetPlayerByUserId(ThisEmpire.data.owner) ?? Players.GetPlayers()[0];
             if (player !== undefined) {
                 droplet.SetNetworkOwner(player);
             }

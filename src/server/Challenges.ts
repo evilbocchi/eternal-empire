@@ -1,16 +1,16 @@
 import { OnoeNum } from "@antivivi/serikanum";
 import { Debris, TweenService, Workspace } from "@rbxts/services";
-import { AREAS } from "shared/world/Area";
 import { ASSETS, playSound } from "shared/asset/GameAssets";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
+import ThisEmpire from "shared/data/ThisEmpire";
 import Item from "shared/item/Item";
-import { Server } from "shared/item/ItemUtils";
 import Upgrader from "shared/item/traits/upgrader/Upgrader";
 import Admiration from "shared/items/negative/instantwin/Admiration";
 import Codependence from "shared/items/negative/instantwin/Codependence";
 import { GainUpgrade } from "shared/namedupgrade/NamedUpgrade";
 import NamedUpgrades from "shared/namedupgrade/NamedUpgrades";
 import Packets from "shared/Packets";
+import { AREAS } from "shared/world/Area";
 
 declare global {
     type ChallengeId = keyof typeof CHALLENGES;
@@ -97,12 +97,11 @@ namespace Challenges {
         cap: 3,
         challengeEffectInterval: 1,
         challengeEffect: (dt: number, level: number, forceEnd: (message: string) => void) => {
-            const empireData = Server.empireData;
-            const challengeStart = empireData.currentChallengeStartTime;
-            const questMetadata = empireData.questMetadata;
+            const challengeStart = ThisEmpire.data.currentChallengeStartTime;
+            const questMetadata = ThisEmpire.data.questMetadata;
             let meteorCooldown = questMetadata.get("CataclysmicWorldCooldown") as number | undefined;
             if (meteorCooldown === undefined || meteorCooldown <= 0) {
-                const elapsed = math.floor((empireData.playtime - challengeStart) / 240);
+                const elapsed = math.floor((ThisEmpire.data.playtime - challengeStart) / 240);
                 meteorCooldown = cataclysicWorldCd(level) / math.pow(2, elapsed);
                 if (meteorCooldown < 0.5) {
                     forceEnd(
