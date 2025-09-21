@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "@rbxts/react";
 import useSingleDocument from "client/ui/components/sidebar/useSingleDocumentWindow";
 import TechWindow from "client/ui/components/window/TechWindow";
 import { getAsset } from "shared/asset/AssetMap";
+import Packets from "shared/Packets";
 
 export default function PortableBeaconWindow() {
     const { id, visible, closeDocument } = useSingleDocument({ id: "PortableBeacon" });
@@ -9,6 +10,13 @@ export default function PortableBeaconWindow() {
     useEffect(() => {
         const connections = new Array<RBXScriptConnection>();
         const initial = new Set<string>();
+        connections.push(
+            Packets.unlockedAreas.observe((areas) => {
+                for (const areaId of areas) {
+                    initial.add(areaId);
+                }
+            }),
+        );
 
         return () => {
             for (const connection of connections) {
