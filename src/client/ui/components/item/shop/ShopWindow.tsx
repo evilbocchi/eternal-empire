@@ -22,15 +22,15 @@ interface ShopWindowProps {
 
 const MemoizedShopItemSlot = memo(ShopItemSlot);
 
-export class ShopManager {
-    static readonly opened = new Signal<(shop?: Shop) => void>();
+export namespace ShopManager {
+    export const opened = new Signal<(shop?: Shop) => void>();
 
-    static openShop(shop: Shop) {
-        this.opened.fire(shop);
+    export function openShop(shop: Shop) {
+        opened.fire(shop);
     }
 
-    static closeShop() {
-        this.opened.fire();
+    export function closeShop() {
+        opened.fire();
     }
 }
 

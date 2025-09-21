@@ -3,26 +3,26 @@ import DocumentManager from "client/ui/components/window/DocumentManager";
 /**
  * Manages single-document interface behavior for sidebar windows
  */
-export default class SingleDocumentManager {
-    static activeDocument?: string;
+namespace SingleDocumentManager {
+    export let activeDocument: string | undefined;
 
     /**
      * Toggles the visibility of a document by its name, disabling the last opened document if necessary.
      * @param documentName The unique name of the document to toggle.
      * @returns True if the document was opened, false if it was closed.
      */
-    static toggle(documentName: string) {
-        if (this.activeDocument === documentName) {
-            this.activeDocument = undefined;
+    export function toggle(documentName: string) {
+        if (activeDocument === documentName) {
+            activeDocument = undefined;
             DocumentManager.setVisible(documentName, false);
             return false;
         }
 
-        if (this.activeDocument) {
-            DocumentManager.setVisible(this.activeDocument, false);
+        if (activeDocument) {
+            DocumentManager.setVisible(activeDocument, false);
         }
 
-        this.activeDocument = documentName;
+        activeDocument = documentName;
         DocumentManager.setVisible(documentName, true);
         return true;
     }
@@ -32,15 +32,15 @@ export default class SingleDocumentManager {
      * @param documentName The unique name of the window to open.
      * @returns True if the document was opened, false if it was already open.
      */
-    static open(documentName: string) {
-        if (this.activeDocument === documentName) {
+    export function open(documentName: string) {
+        if (activeDocument === documentName) {
             return false;
         }
 
-        if (this.activeDocument) {
-            DocumentManager.setVisible(this.activeDocument, false);
+        if (activeDocument) {
+            DocumentManager.setVisible(activeDocument, false);
         }
-        this.activeDocument = documentName;
+        activeDocument = documentName;
         DocumentManager.setVisible(documentName, true);
     }
 
@@ -49,13 +49,15 @@ export default class SingleDocumentManager {
      * @param documentName The unique name of the document to close.
      * @returns True if the document was closed, false if it was not open.
      */
-    static close(documentName: string) {
-        if (this.activeDocument !== documentName) {
+    export function close(documentName: string) {
+        if (activeDocument !== documentName) {
             return false;
         }
 
-        this.activeDocument = undefined;
+        activeDocument = undefined;
         DocumentManager.setVisible(documentName, false);
         return true;
     }
 }
+
+export default SingleDocumentManager;

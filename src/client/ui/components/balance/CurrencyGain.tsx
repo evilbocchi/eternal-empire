@@ -1,7 +1,7 @@
 import { BaseOnoeNum, OnoeNum } from "@antivivi/serikanum";
 import React, { Fragment, useEffect, useRef } from "@rbxts/react";
 import { CollectionService, Debris, TweenService, Workspace } from "@rbxts/services";
-import { BalanceOptionManager } from "client/ui/components/balance/BalanceOption";
+import { balanceOptionImagePerCurrency } from "client/ui/components/balance/BalanceOption";
 import displayBalanceCurrency from "client/ui/components/balance/displayBalanceCurrency";
 import { RobotoSlabExtraBold } from "client/ui/GameFonts";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
@@ -37,7 +37,7 @@ export default function CurrencyGain({
         const size = frame.AbsoluteSize;
         frame.Position = UDim2.fromOffset(start.X - size.X / 2, start.Y + offsetIndex * 20 + size.Y / 2);
 
-        const balanceOptionImage = BalanceOptionManager.imagePerCurrency.get(currency);
+        const balanceOptionImage = balanceOptionImagePerCurrency.get(currency);
         if (balanceOptionImage === undefined) return;
         const destination = balanceOptionImage.AbsolutePosition.add(balanceOptionImage.AbsoluteSize.div(2));
 

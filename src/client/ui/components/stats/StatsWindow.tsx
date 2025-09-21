@@ -25,15 +25,15 @@ import { CURRENCY_CATEGORIES, CURRENCY_DETAILS } from "shared/currency/CurrencyD
 import Queue from "shared/currency/Queue";
 import Packets from "shared/Packets";
 
-export class PingManager {
-    static queue = new Queue();
+export namespace PingManager {
+    const queue = new Queue();
 
-    static logPing(delayInSeconds: number): void {
-        this.queue.add(new OnoeNum(delayInSeconds * 1000000));
+    export function logPing(delayInSeconds: number): void {
+        queue.add(new OnoeNum(delayInSeconds * 1000000));
     }
 
-    static getPing() {
-        return math.round(this.queue.mean().div(1000).revert()) + "ms";
+    export function getPing() {
+        return math.round(queue.mean().div(1000).revert()) + "ms";
     }
 }
 

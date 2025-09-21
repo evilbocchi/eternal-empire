@@ -90,15 +90,15 @@ export const HOTKEY_BINDINGS = [
 /**
  * Global hotkey manager with static methods for managing hotkeys across React roots
  */
-export default class HotkeyManager {
-    private static optionsPerLabel = new Map<string, HotkeyOptions>();
-    private static isSettingHotkey = false;
-    private static settingHotkeyCallbacks = new Set<(setting: boolean) => void>();
+namespace HotkeyManager {
+    export const optionsPerLabel = new Map<string, HotkeyOptions>();
+    export let isSettingHotkey = false;
+    export const settingHotkeyCallbacks = new Set<(setting: boolean) => void>();
 
-    static setIsSettingHotkey(setting: boolean) {
-        this.isSettingHotkey = setting;
+    export function setIsSettingHotkey(setting: boolean) {
+        isSettingHotkey = setting;
         // Notify all subscribers
-        for (const callback of this.settingHotkeyCallbacks) {
+        for (const callback of settingHotkeyCallbacks) {
             callback(setting);
         }
     }
@@ -108,16 +108,16 @@ export default class HotkeyManager {
      * @param options Hotkey options including label, action, and optional endAction.
      * @returns Unbind function to remove the hotkey binding.
      */
-    static bindHotkey(options: HotkeyOptions): () => void {
-        this.optionsPerLabel.set(options.label, options);
+    export function bindHotkey(options: HotkeyOptions): () => void {
+        optionsPerLabel.set(options.label, options);
         return () => {
-            this.optionsPerLabel.delete(options.label);
+            optionsPerLabel.delete(options.label);
         };
     }
 
-    static executeHotkey(keyCode: Enum.KeyCode, endAction?: boolean): boolean {
+    export function executeHotkey(keyCode: Enum.KeyCode, endAction?: boolean): boolean {
         // Don't execute hotkeys when setting hotkeys
-        if (this.isSettingHotkey) return false;
+        if (isSettingHotkey) return false;
 
         // Get all bindings for this key and sort by priority
         const allBindings: HotkeyBinding[] = [];
@@ -133,7 +133,7 @@ export default class HotkeyManager {
         table.sort(allBindings, (a, b) => (b.priority || 0) > (a.priority || 0));
 
         for (const binding of allBindings) {
-            const options = this.optionsPerLabel.get(binding.label);
+            const options = optionsPerLabel.get(binding.label);
             if (!options) continue;
 
             if (endAction === true) {
@@ -147,30 +147,30 @@ export default class HotkeyManager {
         return false;
     }
 
-    static subscribeToSettingHotkey(callback: (setting: boolean) => void): () => void {
-        this.settingHotkeyCallbacks.add(callback);
+    export function subscribeToSettingHotkey(callback: (setting: boolean) => void): () => void {
+        settingHotkeyCallbacks.add(callback);
         return () => {
-            this.settingHotkeyCallbacks.delete(callback);
+            settingHotkeyCallbacks.delete(callback);
         };
     }
 
-    static {
-        const inputBeganConnection = Environment.UserInput.InputBegan.Connect((input, gameProcessed) => {
-            if (gameProcessed) return;
-            this.executeHotkey(input.KeyCode);
-        });
+    const inputBeganConnection = Environment.UserInput.InputBegan.Connect((input, gameProcessed) => {
+        if (gameProcessed) return;
+        executeHotkey(input.KeyCode);
+    });
 
-        const inputEndedConnection = Environment.UserInput.InputEnded.Connect((input, gameProcessed) => {
-            if (gameProcessed) return;
-            this.executeHotkey(input.KeyCode, true);
-        });
+    const inputEndedConnection = Environment.UserInput.InputEnded.Connect((input, gameProcessed) => {
+        if (gameProcessed) return;
+        executeHotkey(input.KeyCode, true);
+    });
 
-        eat(() => {
-            inputBeganConnection.Disconnect();
-            inputEndedConnection.Disconnect();
-        });
-    }
+    eat(() => {
+        inputBeganConnection.Disconnect();
+        inputEndedConnection.Disconnect();
+    });
 }
+
+export default HotkeyManager;
 
 /**
  * Hook to bind a hotkey with automatic cleanup - works across different React roots

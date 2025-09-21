@@ -63,9 +63,7 @@ export function BalanceOptionStyling({ details }: { details: CurrencyDetails }) 
     );
 }
 
-export class BalanceOptionManager {
-    static readonly imagePerCurrency = new Map<Currency, ImageLabel>();
-}
+export const balanceOptionImagePerCurrency = new Map<Currency, ImageLabel>();
 
 /**
  * Individual currency balance display component.
@@ -97,7 +95,7 @@ export default function BalanceOption({
 
     const imageLabel = imageRef.current;
     if (imageLabel !== undefined) {
-        BalanceOptionManager.imagePerCurrency.set(currency, imageLabel);
+        balanceOptionImagePerCurrency.set(currency, imageLabel);
     }
 
     // Calculate softcap information

@@ -18,7 +18,7 @@ import { Players, ReplicatedFirst, TweenService, Workspace } from "@rbxts/servic
 import { LOCAL_PLAYER, PLAYER_GUI } from "client/constants";
 import IntroController from "client/controllers/interface/IntroController";
 import LoadingWindowController from "client/controllers/interface/LoadingWindowController";
-import { SoundManager } from "client/ui/components/SoundWindow";
+import SoundManager from "client/ui/components/SoundManager";
 import { ASSETS, playSound } from "shared/asset/GameAssets";
 import { getNameFromUserId, getStartCamera, isStartScreenEnabled } from "shared/constants";
 import { IS_PUBLIC_SERVER, IS_SINGLE_SERVER, IS_STUDIO } from "shared/Context";

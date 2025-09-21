@@ -22,7 +22,6 @@ import {
 import BuildController from "client/controllers/gameplay/BuildController";
 import InventoryController from "client/controllers/interface/InventoryController";
 import MainLayout from "client/ui/components/MainLayout";
-import SoundWindow from "client/ui/components/SoundWindow";
 import BackpackWindow from "client/ui/components/backpack/BackpackWindow";
 import BalanceWindow from "client/ui/components/balance/BalanceWindow";
 import BuildManager from "client/ui/components/build/BuildManager";
@@ -69,7 +68,6 @@ export default class AppController implements OnStart {
                 <SettingsManager />
                 <CommandsWindow />
                 <RenameWindow />
-                <SoundWindow />
             </Fragment>,
         );
         createRoot(INVENTORY_GUI).render(<InventoryWindow inventoryController={this.inventoryController} />);

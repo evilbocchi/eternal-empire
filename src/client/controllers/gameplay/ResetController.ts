@@ -14,7 +14,7 @@
 import { Controller, OnInit } from "@flamework/core";
 import { Debris, TweenService, Workspace } from "@rbxts/services";
 import ShakeController from "client/controllers/world/ShakeController";
-import { SoundManager } from "client/ui/components/SoundWindow";
+import SoundManager from "client/ui/components/SoundManager";
 import { ASSETS, playSound } from "shared/asset/GameAssets";
 import { RESET_LAYERS } from "shared/currency/mechanics/ResetLayer";
 import Packets from "shared/Packets";

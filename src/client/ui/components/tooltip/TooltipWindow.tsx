@@ -19,20 +19,20 @@ for (const item of Items.sortedItems) {
 /**
  * Global tooltip manager with static methods for showing/hiding tooltips
  */
-export class TooltipManager {
-    static tooltipData?: TooltipData;
-    static isVisible: boolean = false;
-    static tooltipUpdated = new Signal<(visible: boolean, data?: TooltipData) => void>();
+export namespace TooltipManager {
+    let tooltipData: TooltipData | undefined;
+    let isVisible = false;
+    export const tooltipUpdated = new Signal<(visible: boolean, data?: TooltipData) => void>();
 
-    static showTooltip(data: TooltipData) {
-        this.tooltipData = data;
-        this.isVisible = true;
-        this.tooltipUpdated.fire(this.isVisible, this.tooltipData);
+    export function showTooltip(data: TooltipData) {
+        tooltipData = data;
+        isVisible = true;
+        tooltipUpdated.fire(isVisible, tooltipData);
     }
 
-    static hideTooltip() {
-        this.isVisible = false;
-        this.tooltipUpdated.fire(this.isVisible, this.tooltipData);
+    export function hideTooltip() {
+        isVisible = false;
+        tooltipUpdated.fire(isVisible, tooltipData);
     }
 }
 
