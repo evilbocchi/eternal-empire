@@ -4,12 +4,16 @@ import { OnoeNum } from "@antivivi/serikanum";
 import CurrencyService from "server/services/data/CurrencyService";
 import DataService from "server/services/data/DataService";
 import ItemService from "server/services/item/ItemService";
+import ChatHookService from "server/services/permissions/ChatHookService";
+import PermissionsService from "server/services/permissions/PermissionsService";
 import fixDuplicatedItemsData from "shared/data/loading/fixDuplicatedItemsData";
 
 export = function () {
     const dataService = new DataService();
     const currencyService = new CurrencyService(dataService);
-    const itemService = new ItemService(dataService, currencyService);
+    const chatHookService = new ChatHookService();
+    const permissionsService = new PermissionsService(dataService, chatHookService);
+    const itemService = new ItemService(dataService, currencyService, permissionsService);
 
     describe("loading", () => {
         it("loads data", () => {

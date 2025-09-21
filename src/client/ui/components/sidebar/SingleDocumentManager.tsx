@@ -1,4 +1,4 @@
-import DocumentManager from "client/ui/components/window/WindowManager";
+import DocumentManager from "client/ui/components/window/DocumentManager";
 
 /**
  * Manages single-document interface behavior for sidebar windows

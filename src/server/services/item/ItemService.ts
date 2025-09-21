@@ -26,6 +26,7 @@ import CurrencyService from "server/services/data/CurrencyService";
 import DataService from "server/services/data/DataService";
 import { OnGameAPILoaded } from "server/services/ModdingService";
 import { log } from "server/services/permissions/LogService";
+import PermissionsService from "server/services/permissions/PermissionsService";
 import { PLACED_ITEMS_FOLDER } from "shared/constants";
 import Item from "shared/item/Item";
 import Items from "shared/items/Items";
@@ -110,15 +111,10 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
         return isRendering;
     })();
 
-    /**
-     * Initializes the ItemService with required dependencies.
-     *
-     * @param dataService Service providing persistent empire and player data.
-     * @param currencyService Service handling currency transactions for purchases.
-     */
     constructor(
         private dataService: DataService,
         private currencyService: CurrencyService,
+        private permissionsService: PermissionsService,
     ) {
         this.items = dataService.empireData.items;
     }
@@ -239,7 +235,7 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
      * @returns List of unplaced items. If nothing happened, this will be undefined.
      */
     unplaceItems(player: Player, placementIds: string[]): PlacedItem[] | undefined {
-        if (!this.dataService.checkPermLevel(player, "build")) return undefined;
+        if (!this.permissionsService.checkPermLevel(player, "build")) return undefined;
         const unplacing = new Array<PlacedItem>();
         const itemsData = this.dataService.empireData.items;
         const placedItems = itemsData.worldPlaced;
@@ -317,7 +313,7 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
      * @returns 0 if no items were placed, 1 if items were placed, 2 if items were placed and is allowed to place the same item again
      */
     placeItems(player: Player, items: PlacingInfo[]) {
-        if (!this.dataService.checkPermLevel(player, "build")) {
+        if (!this.permissionsService.checkPermLevel(player, "build")) {
             return 0;
         }
 
@@ -547,7 +543,7 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
      * @returns Whether the purchase was successful.
      */
     buyItem(player: Player | undefined, itemId: string) {
-        if (player !== undefined && !this.dataService.checkPermLevel(player, "purchase")) {
+        if (player !== undefined && !this.permissionsService.checkPermLevel(player, "purchase")) {
             return false;
         }
         const item = Items.getItem(itemId);
@@ -567,7 +563,7 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
      * @returns Whether at least one purchase was successful.
      */
     buyAllItems(player: Player, itemIds: string[]) {
-        if (!this.dataService.checkPermLevel(player, "purchase")) return false;
+        if (!this.permissionsService.checkPermLevel(player, "purchase")) return false;
 
         let oneSucceeded = false;
         const bought = new Array<Item>();

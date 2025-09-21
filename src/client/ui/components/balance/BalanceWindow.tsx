@@ -2,7 +2,7 @@ import { BaseOnoeNum, OnoeNum } from "@antivivi/serikanum";
 import React, { Fragment, useEffect, useRef, useState } from "@rbxts/react";
 import BalanceOption from "client/ui/components/balance/BalanceOption";
 import NavigationControls from "client/ui/components/balance/NavigationControls";
-import { useDocument } from "client/ui/components/window/WindowManager";
+import { useDocument } from "client/ui/components/window/DocumentManager";
 import useInterval from "client/ui/hooks/useInterval";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import { CURRENCY_DETAILS } from "shared/currency/CurrencyDetails";

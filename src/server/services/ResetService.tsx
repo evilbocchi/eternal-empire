@@ -25,6 +25,7 @@ import NamedUpgradeService from "server/services/data/NamedUpgradeService";
 import ItemService from "server/services/item/ItemService";
 import ChatHookService from "server/services/permissions/ChatHookService";
 import { log } from "server/services/permissions/LogService";
+import PermissionsService from "server/services/permissions/PermissionsService";
 import RevenueService from "server/services/RevenueService";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import { CURRENCY_DETAILS } from "shared/currency/CurrencyDetails";
@@ -63,6 +64,7 @@ export default class ResetService implements OnInit, OnStart {
         private currencyService: CurrencyService,
         private namedUpgradeService: NamedUpgradeService,
         private revenueService: RevenueService,
+        private permissionsService: PermissionsService,
     ) {}
 
     /**
@@ -157,7 +159,7 @@ export default class ResetService implements OnInit, OnStart {
         touchPart.CanTouch = true;
         touchPart.Touched.Connect((otherPart) => {
             const player = getPlayer(otherPart);
-            if (player === undefined || !this.dataService.checkPermLevel(player, "reset")) return;
+            if (player === undefined || !this.permissionsService.checkPermLevel(player, "reset")) return;
             const [affordable] = this.currencyService.canAfford(required);
             if (affordable === true) {
                 players.add(player);
@@ -166,7 +168,7 @@ export default class ResetService implements OnInit, OnStart {
         });
         touchPart.TouchEnded.Connect((otherPart) => {
             const player = getPlayer(otherPart);
-            if (player === undefined || !this.dataService.checkPermLevel(player, "reset")) return;
+            if (player === undefined || !this.permissionsService.checkPermLevel(player, "reset")) return;
             const changed = players.delete(player);
             if (changed === true) {
                 update();

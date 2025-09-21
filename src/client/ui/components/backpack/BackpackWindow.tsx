@@ -11,7 +11,7 @@ import { StarterGui, UserInputService, Workspace } from "@rbxts/services";
 import { Environment } from "@rbxts/ui-labs";
 import { LOCAL_PLAYER } from "client/constants";
 import GearOption, { layoutOrderFromGear } from "client/ui/components/backpack/GearOption";
-import { useDocument } from "client/ui/components/window/WindowManager";
+import { useDocument } from "client/ui/components/window/DocumentManager";
 import { playSound } from "shared/asset/GameAssets";
 import { IS_CI } from "shared/Context";
 import Gear from "shared/item/traits/Gear";

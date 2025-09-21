@@ -10,6 +10,7 @@ import Packets from "shared/Packets";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Formula from "shared/currency/Formula";
 import { RESET_LAYERS } from "shared/currency/mechanics/ResetLayer";
+import eat from "shared/hamster/eat";
 import { ITEM_MODELS } from "shared/item/ItemModels";
 import ItemUtils, { Server } from "shared/item/ItemUtils";
 import Area, { AREAS } from "shared/world/Area";
@@ -150,7 +151,7 @@ export default class Item {
     /**
      * A function that will return the value of the variable that will be used in the {@link formula}.
      */
-    formulaXGet?: (utils: Server) => OnoeNum;
+    formulaXGet?: () => OnoeNum;
 
     /**
      * The maximum value that {@link formulaXGet} can return.
@@ -168,7 +169,7 @@ export default class Item {
     /**
      * A callback function that will be called every second with the result of the {@link formula}.
      */
-    formulaCallback?: <T extends this>(value: OnoeNum, item: T, utils: Server) => unknown;
+    formulaCallback?: <T extends this>(value: OnoeNum, item: T) => unknown;
 
     /**
      * The result of the {@link formula} applied to the value of {@link formulaXGet}.
@@ -592,7 +593,7 @@ export default class Item {
     performFormula() {
         if (this.formula === undefined || this.formulaXGet === undefined || this.formulaCallback === undefined) return;
 
-        let value = this.formulaXGet(Server);
+        let value = this.formulaXGet();
         const cap = this.formulaXCapValue;
         if (cap !== undefined && value.moreThan(cap) === true) {
             value = cap;
@@ -600,7 +601,7 @@ export default class Item {
 
         const result = this.formula.evaluate(value);
         this.formulaResult = result;
-        this.formulaCallback(result, this, Server);
+        this.formulaCallback(result, this);
         return result;
     }
 
@@ -734,48 +735,43 @@ export default class Item {
         return str;
     }
 
-    static init() {
-        const start = tick();
-
-        ItemUtils.REPEATS.set(
-            () => {
-                const formulaResults = new Map<string, OnoeNum>();
-                for (const [_id, item] of ItemUtils.itemsPerId) {
-                    formulaResults.set(item.id, item.performFormula()!);
-                }
-                if (tick() - start > 10) {
-                    // simple delay to ensure clients are ready
-                    Packets.boostChanged.toAllClients(formulaResults);
-                }
-            },
-            {
-                delta: 1,
-                lastCall: 0,
-            },
-        );
-        RunService.Heartbeat.Connect((dt) => {
-            if (Server.ready === false) return;
-
-            const t = tick();
-            const gameSpeed = GameSpeed.speed;
-            for (const [callback, rep] of ItemUtils.REPEATS) {
-                const last = rep.lastCall;
-                if (last === undefined) {
-                    rep.lastCall = t;
-                    continue;
-                }
-                const diff = t - last;
-                if (rep.delta === undefined || diff > rep.delta / gameSpeed) {
-                    callback(diff);
-                    rep.lastCall = t;
-                }
-            }
-        });
-    }
-
     static {
         if (RunService.IsServer()) {
-            this.init();
+            ItemUtils.REPEATS.set(
+                () => {
+                    const formulaResults = new Map<string, OnoeNum>();
+                    for (const [_id, item] of ItemUtils.itemsPerId) {
+                        formulaResults.set(item.id, item.performFormula()!);
+                    }
+                    if (os.clock() > 10) {
+                        // simple delay to ensure clients are ready
+                        Packets.boostChanged.toAllClients(formulaResults);
+                    }
+                },
+                {
+                    delta: 1,
+                    lastCall: 0,
+                },
+            );
+            const connection = RunService.Heartbeat.Connect(() => {
+                if (Server.ready === false) return;
+
+                const t = tick();
+                const gameSpeed = GameSpeed.speed;
+                for (const [callback, rep] of ItemUtils.REPEATS) {
+                    const last = rep.lastCall;
+                    if (last === undefined) {
+                        rep.lastCall = t;
+                        continue;
+                    }
+                    const diff = t - last;
+                    if (rep.delta === undefined || diff > rep.delta / gameSpeed) {
+                        callback(diff);
+                        rep.lastCall = t;
+                    }
+                }
+            });
+            eat(connection);
         }
     }
 }

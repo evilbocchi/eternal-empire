@@ -22,6 +22,7 @@ import CurrencyService from "server/services/data/CurrencyService";
 import DataService from "server/services/data/DataService";
 import ChatHookService from "server/services/permissions/ChatHookService";
 import { log } from "server/services/permissions/LogService";
+import PermissionsService from "server/services/permissions/PermissionsService";
 import ProductService from "server/services/product/ProductService";
 import Packets from "shared/Packets";
 import { getNameFromUserId } from "shared/constants";
@@ -70,6 +71,7 @@ export default class BombsService implements OnInit, OnStart {
         private chatHookService: ChatHookService,
         private currencyService: CurrencyService,
         private dataService: DataService,
+        private permissionsService: PermissionsService,
         private productService: ProductService,
     ) {}
 
@@ -118,7 +120,7 @@ export default class BombsService implements OnInit, OnStart {
      */
     onInit() {
         Packets.useBomb.fromClient((player, bombType) => {
-            if (!this.dataService.checkPermLevel(player, "purchase")) {
+            if (!this.permissionsService.checkPermLevel(player, "purchase")) {
                 return false;
             }
 

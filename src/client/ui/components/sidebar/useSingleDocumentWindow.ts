@@ -1,5 +1,5 @@
 import { useEffect } from "@rbxts/react";
-import { useDocument } from "client/ui/components/window/WindowManager";
+import { useDocument } from "client/ui/components/window/DocumentManager";
 import SingleDocumentManager from "./SingleDocumentManager";
 
 /**

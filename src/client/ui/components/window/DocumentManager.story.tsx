@@ -2,7 +2,7 @@ import React, { StrictMode } from "@rbxts/react";
 import ReactRoblox from "@rbxts/react-roblox";
 import { CreateReactStory } from "@rbxts/ui-labs";
 import BasicWindow from "client/ui/components/window/BasicWindow";
-import WindowManager, { useDocument } from "client/ui/components/window/WindowManager";
+import DocumentManager, { useDocument } from "client/ui/components/window/DocumentManager";
 import { getAsset } from "shared/asset/AssetMap";
 
 export = CreateReactStory(
@@ -52,7 +52,7 @@ export = CreateReactStory(
                     <textbutton
                         Size={new UDim2(0, 80, 0, 40)}
                         Text="Window 3"
-                        Event={{ Activated: () => WindowManager.toggle("Low Priority Window") }}
+                        Event={{ Activated: () => DocumentManager.toggle("Low Priority Window") }}
                     />
                 </frame>
 

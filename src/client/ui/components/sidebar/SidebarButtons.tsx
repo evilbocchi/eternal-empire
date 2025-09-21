@@ -17,7 +17,7 @@ import React, { useCallback, useEffect, useRef, useState } from "@rbxts/react";
 import { TweenService } from "@rbxts/services";
 import useHotkeyWithTooltip from "client/ui/components/hotkeys/useHotkeyWithTooltip";
 import SingleDocumentManager from "client/ui/components/sidebar/SingleDocumentManager";
-import { useDocument } from "client/ui/components/window/WindowManager";
+import { useDocument } from "client/ui/components/window/DocumentManager";
 import { RobotoSlabBold } from "client/ui/GameFonts";
 import { getAsset } from "shared/asset/AssetMap";
 

@@ -244,7 +244,15 @@ export default class DataService implements OnInit, OnPlayerJoined {
      * Lazy-loaded information about the current empire and server state.
      * Initializes empire profile, performs data migrations, and fixes data corruption.
      */
-    readonly loadedInformation = loadEmpireData();
+    readonly loadedInformation = (() => {
+        const [success, data] = loadEmpireData().await();
+        if (!success) throw data;
+
+        const { empireProfile, empireData, empireId } = data;
+
+        this.empireProfile = empireProfile;
+        return { empireProfile, empireData, empireId };
+    })();
 
     /**
      * The loaded empire data for the current server.
@@ -435,22 +443,6 @@ export default class DataService implements OnInit, OnPlayerJoined {
     }
 
     /**
-     * Checks if a player has the required permission level for an action.
-     *
-     * @param player The player to check permissions for.
-     * @param action The action requiring permission.
-     * @returns Whether the player has sufficient permissions.
-     */
-    checkPermLevel(player: Player, action: PermissionKey) {
-        const minimumPerm = this.empireData.permLevels[action];
-        const permLevel = player.GetAttribute("PermissionLevel") as number;
-        if (permLevel === undefined || permLevel < minimumPerm) {
-            return false;
-        }
-        return true;
-    }
-
-    /**
      * Handles player joining logic.
      * Sets up player data, available empires, and player attributes.
      *
@@ -553,6 +545,5 @@ export default class DataService implements OnInit, OnPlayerJoined {
 
         Packets.createNewEmpire.fromClient((player: Player) => this.createNewEmpire(player));
         Packets.teleportToEmpire.fromClient((player, empireId) => this.teleportToEmpire(player, empireId));
-        Packets.permLevels.set(this.empireData.permLevels);
     }
 }

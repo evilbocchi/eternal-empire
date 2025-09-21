@@ -1,6 +1,6 @@
 import Difficulty from "@antivivi/jjt-difficulties";
 import Item from "shared/item/Item";
-import ItemCounter from "shared/item/ItemCounter";
+import countItemEverywhere from "shared/item/countItemEverywhere";
 import Items from "shared/items/Items";
 
 const maxItemAmounts = new Map<string, number>();
@@ -17,7 +17,7 @@ export default function fixDuplicatedItemsData(items: ItemsData) {
             return;
 
         const itemId = item.id;
-        const [invCount, placedCount] = ItemCounter.getAmounts(items.inventory, items.worldPlaced, itemId);
+        const [invCount, placedCount] = countItemEverywhere(items.inventory, items.worldPlaced, itemId);
         const totalCount = invCount + placedCount;
 
         let max = maxItemAmounts.get(itemId);

@@ -7,14 +7,15 @@ import CurrencyBundle from "shared/currency/CurrencyBundle";
 import { CURRENCY_DETAILS } from "shared/currency/CurrencyDetails";
 import fixDuplicatedItemsData from "shared/data/loading/fixDuplicatedItemsData";
 import { EmpireProfileManager } from "shared/data/profile/ProfileManager";
-import Item from "shared/item/Item";
-import Items from "shared/items/Items";
+import type Item from "shared/item/Item";
 import Packets from "shared/Packets";
 import Sandbox from "shared/Sandbox";
-import EmpireIdOverrideValue from "shared/world/nodes/EmpireIdOverrideValue";
-import StartScreenValue from "shared/world/nodes/StartScreenValue";
 
-export default function loadEmpireData() {
+export default async function loadEmpireData() {
+    const Items = (await import("shared/items/Items")).default;
+    const EmpireIdOverrideValue = (await import("shared/world/nodes/EmpireIdOverrideValue")).default;
+    const StartScreenValue = (await import("shared/world/nodes/StartScreenValue")).default;
+
     const startScreenValue = StartScreenValue.waitForInstance();
     let empireId: string;
 
@@ -60,10 +61,10 @@ export default function loadEmpireData() {
     // Initialize empire name if not set
     if (empireData.previousNames.size() === 0 && IS_SERVER) {
         if (game.PrivateServerOwnerId === 0) {
-            empireData.name = getNameFromUserId(empireData.owner) + "'s Empire";
+            empireData.name = `${getNameFromUserId(empireData.owner)}'s Empire`;
         } else {
             empireData.owner = game.PrivateServerOwnerId;
-            empireData.name = getNameFromUserId(game.PrivateServerOwnerId) + "'s Private Server";
+            empireData.name = `${getNameFromUserId(game.PrivateServerOwnerId)}'s Private Server`;
         }
     }
 
@@ -209,6 +210,8 @@ export default function loadEmpireData() {
     if (empireData.lastReset === 0) {
         empireData.lastReset = tick();
     }
+
+    Packets.permLevels.set(empireData.permLevels);
 
     return { empireProfile, empireData, empireId };
 }

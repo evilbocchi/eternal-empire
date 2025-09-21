@@ -11,7 +11,7 @@
 
 import Difficulty from "@antivivi/jjt-difficulties";
 import { OnStart, Service } from "@flamework/core";
-import Harvestable from "shared/world/harvestable/Harvestable";
+import HARVESTABLES from "shared/world/harvestable/Harvestable";
 import Item from "shared/item/Item";
 import Items from "shared/items/Items";
 
@@ -82,7 +82,7 @@ export default class SanityService implements OnStart {
      * @param harvestableId The harvestable's ID.
      */
     checkHarvestable(harvestableId: string) {
-        const harvestable = Harvestable[harvestableId];
+        const harvestable = HARVESTABLES[harvestableId];
         if (harvestable === undefined) {
             return;
         }
@@ -117,7 +117,7 @@ export default class SanityService implements OnStart {
         }
 
         // Check all harvestables for craftable uses
-        for (const [id] of pairs(Harvestable)) {
+        for (const [id] of pairs(HARVESTABLES)) {
             this.checkHarvestable(id as string);
         }
     }

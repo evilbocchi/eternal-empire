@@ -1,7 +1,7 @@
 import React, { RefObject, useEffect, useRef, useState } from "@rbxts/react";
 import { TweenService } from "@rbxts/services";
 import WindowCloseButton from "client/ui/components/window/WindowCloseButton";
-import DocumentManager from "client/ui/components/window/WindowManager";
+import DocumentManager from "client/ui/components/window/DocumentManager";
 import WindowTitle from "client/ui/components/window/WindowTitle";
 import { getAsset } from "shared/asset/AssetMap";
 import { playSound } from "shared/asset/GameAssets";

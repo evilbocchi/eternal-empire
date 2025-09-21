@@ -1,6 +1,6 @@
 import { useEffect } from "@rbxts/react";
 import SingleDocumentManager from "client/ui/components/sidebar/SingleDocumentManager";
-import DocumentManager from "client/ui/components/window/WindowManager";
+import DocumentManager from "client/ui/components/window/DocumentManager";
 
 /**
  * A custom hook that sets the visibility of a window whenever the `id` or `visible` parameters change.

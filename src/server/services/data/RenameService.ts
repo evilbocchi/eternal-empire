@@ -29,6 +29,7 @@ import CurrencyService from "server/services/data/CurrencyService";
 import DataService from "server/services/data/DataService";
 import { LeaderboardService } from "server/services/leaderboard/LeaderboardService";
 import ChatHookService from "server/services/permissions/ChatHookService";
+import PermissionsService from "server/services/permissions/PermissionsService";
 import ProductService from "server/services/product/ProductService";
 import { playSound } from "shared/asset/GameAssets";
 import { getNameFromUserId } from "shared/constants";
@@ -59,6 +60,7 @@ export class RenameService implements OnInit {
         private leaderboardService: LeaderboardService,
         private currencyService: CurrencyService,
         private chatHookService: ChatHookService,
+        private permissionsService: PermissionsService,
     ) {}
 
     // Cost Management
@@ -153,7 +155,7 @@ export class RenameService implements OnInit {
         // Handle rename requests
         Packets.promptRename.fromClient((player, name, method) => {
             // Check permissions
-            if (this.dataService.checkPermLevel(player, "purchase") === false) {
+            if (this.permissionsService.checkPermLevel(player, "purchase") === false) {
                 return false;
             }
 

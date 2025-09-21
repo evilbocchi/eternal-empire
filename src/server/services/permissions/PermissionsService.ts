@@ -136,6 +136,22 @@ export default class PermissionsService implements OnInit, OnPlayerJoined {
     }
 
     /**
+     * Checks if a player has the required permission level for an action.
+     *
+     * @param player The player to check permissions for.
+     * @param action The action requiring permission.
+     * @returns Whether the player has sufficient permissions.
+     */
+    checkPermLevel(player: Player, action: PermissionKey) {
+        const minimumPerm = this.dataService.empireData.permLevels[action];
+        const permLevel = player.GetAttribute("PermissionLevel") as number;
+        if (permLevel === undefined || permLevel < minimumPerm) {
+            return false;
+        }
+        return true;
+    }
+
+    /**
      * Updates the permission level attribute for a user.
      * @param userId User ID
      * @returns New permission level

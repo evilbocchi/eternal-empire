@@ -6,10 +6,10 @@ import { RobotoSlabExtraBold } from "client/ui/GameFonts";
 import { emitEffect, playSound } from "shared/asset/GameAssets";
 import Items from "shared/items/Items";
 import { AREAS } from "shared/world/Area";
-import Harvestable from "shared/world/harvestable/Harvestable";
+import HARVESTABLES from "shared/world/harvestable/Harvestable";
 
 export default function HarvestableGui({ enabled, model }: { enabled: boolean; model: PVInstance }) {
-    const harvestable = Harvestable[model.Name as HarvestableId] as HarvestableData | undefined;
+    const harvestable = HARVESTABLES[model.Name as HarvestableId] as HarvestableData | undefined;
     if (harvestable === undefined) return <Fragment />;
 
     const [health, setHealth] = useState(harvestable.health);
@@ -19,7 +19,7 @@ export default function HarvestableGui({ enabled, model }: { enabled: boolean; m
 
     useEffect(() => {
         if (!model.IsA("PVInstance")) return;
-        const harvestable = Harvestable[model.Name as HarvestableId];
+        const harvestable = HARVESTABLES[model.Name as HarvestableId];
         if (harvestable === undefined) return;
         let isNew = true;
         let prevHealth = 0;
@@ -144,7 +144,7 @@ export function HarvestableGuiRenderer() {
             const folder = area.worldNode.getInstance()?.FindFirstChild("Harvestable");
             if (folder === undefined) continue;
             for (const child of folder.GetChildren()) {
-                if (child.IsA("PVInstance") && Harvestable[child.Name as HarvestableId] !== undefined) {
+                if (child.IsA("PVInstance") && HARVESTABLES[child.Name as HarvestableId] !== undefined) {
                     models.push(child);
                 }
             }

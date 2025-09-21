@@ -397,7 +397,7 @@ export class ChallengeService implements OnStart {
         if (Sandbox.getEnabled()) return;
 
         Packets.startChallenge.fromClient((player, challengeId) => {
-            if (!this.dataService.checkPermLevel(player, "reset")) return;
+            if (!this.permissionsService.checkPermLevel(player, "reset")) return;
             const challenge = this.startChallenge(player, challengeId as ChallengeId);
             if (challenge === undefined) return;
             this.chatHookService.sendServerMessage(
@@ -405,7 +405,7 @@ export class ChallengeService implements OnStart {
             );
         });
         Packets.quitChallenge.fromClient((player) => {
-            if (!this.dataService.checkPermLevel(player, "reset")) return;
+            if (!this.permissionsService.checkPermLevel(player, "reset")) return;
             const [challenge, challengeId] = this.endChallenge(false);
             if (challenge === undefined) return;
             this.chatHookService.sendServerMessage(

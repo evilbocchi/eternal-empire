@@ -1,6 +1,6 @@
-import { BaseOnoeNum } from "@antivivi/serikanum";
-import CameraShaker from "@rbxts/camera-shaker";
-import { DataType } from "@rbxts/flamework-binary-serializer";
+import type { BaseOnoeNum } from "@antivivi/serikanum";
+import type CameraShaker from "@rbxts/camera-shaker";
+import type { DataType } from "@rbxts/flamework-binary-serializer";
 import { packet, property } from "@rbxts/fletchette";
 import EmpireProfileTemplate from "shared/data/profile/EmpireProfileTemplate";
 import PlayerProfileTemplate from "shared/data/profile/PlayerProfileTemplate";

@@ -16,7 +16,7 @@ import { createRoot } from "@rbxts/react-roblox";
 import { TextChatService } from "@rbxts/services";
 import DialogueHeadshot from "client/ui/components/npc/DialogueHeadshot";
 import NPCNotification from "client/ui/components/npc/NPCNotification";
-import { useDocument } from "client/ui/components/window/WindowManager";
+import { useDocument } from "client/ui/components/window/DocumentManager";
 import { RobotoSlab, RobotoSlabBold } from "client/ui/GameFonts";
 import { useTextAnimation } from "client/ui/hooks/useTextAnimation";
 import { getAsset } from "shared/asset/AssetMap";

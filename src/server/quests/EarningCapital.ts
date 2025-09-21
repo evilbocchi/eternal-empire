@@ -2,7 +2,7 @@ import { Dialogue } from "server/interactive/npc/NPC";
 import Ricarg from "server/interactive/npc/Ricarg";
 import Quest, { Stage } from "server/quests/Quest";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
-import ItemCounter from "shared/item/ItemCounter";
+import countItemEverywhere from "shared/item/countItemEverywhere";
 import { Server } from "shared/item/ItemUtils";
 import RustyFactory from "shared/items/negative/negativity/RustyFactory";
 import TheFirstUpgraderBooster from "shared/items/negative/tfd/TheFirstUpgraderBooster";
@@ -78,7 +78,7 @@ export = new Quest(script.Name)
         Dialogue.finished.connect((dialogue) => {
             if (dialogue === quest.completionDialogue) {
                 const items = Server.empireData.items;
-                const [invCount, placedCount] = ItemCounter.getAmounts(
+                const [invCount, placedCount] = countItemEverywhere(
                     items.inventory,
                     items.worldPlaced,
                     RustyFactory.id,

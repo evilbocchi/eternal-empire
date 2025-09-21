@@ -29,24 +29,24 @@ export interface DocumentInfo {
 /**
  * Global document manager with static methods for managing documents across React roots
  */
-export default class DocumentManager {
-    static readonly INFO_PER_DOCUMENT = new Map<string, DocumentInfo>();
+namespace DocumentManager {
+    export const INFO_PER_DOCUMENT = new Map<string, DocumentInfo>();
 
     /**
      * Registers a new document with the document manager, allowing it to be tracked and managed
      * with features like the global close hotkey.
      * @param documentInfo Information about the document to register (id, onClose, priority).
      */
-    static register(documentInfo: DocumentInfo): void {
-        this.INFO_PER_DOCUMENT.set(documentInfo.id, documentInfo);
+    export function register(documentInfo: DocumentInfo): void {
+        INFO_PER_DOCUMENT.set(documentInfo.id, documentInfo);
     }
 
     /**
      * Unregisters a document from the document manager, removing it from tracking.
      * @param id The unique identifier of the document to unregister.
      */
-    static unregister(id: string): void {
-        this.INFO_PER_DOCUMENT.delete(id);
+    export function unregister(id: string): void {
+        INFO_PER_DOCUMENT.delete(id);
     }
 
     /**
@@ -55,8 +55,8 @@ export default class DocumentManager {
      * @param visible The new visibility state to set.
      * @returns Whether the visibility change was successful.
      */
-    static setVisible(id: string, visible: boolean) {
-        const documentInfo = this.INFO_PER_DOCUMENT.get(id);
+    export function setVisible(id: string, visible: boolean) {
+        const documentInfo = INFO_PER_DOCUMENT.get(id);
         if (!documentInfo) return false;
         documentInfo.setVisible(visible);
         return true;
@@ -67,8 +67,8 @@ export default class DocumentManager {
      * @param id The unique identifier of the document to toggle.
      * @returns Whether the toggle was successful.
      */
-    static toggle(id: string) {
-        const documentInfo = this.INFO_PER_DOCUMENT.get(id);
+    export function toggle(id: string) {
+        const documentInfo = INFO_PER_DOCUMENT.get(id);
         if (!documentInfo) return false;
         documentInfo.setVisible(!documentInfo.visible);
         return true;
@@ -79,9 +79,9 @@ export default class DocumentManager {
      *
      * @returns Array of visible DocumentInfo objects.
      */
-    static getVisibleDocuments(): DocumentInfo[] {
+    export function getVisibleDocuments(): DocumentInfo[] {
         const visibleDocuments: DocumentInfo[] = [];
-        for (const [_, document] of this.INFO_PER_DOCUMENT) {
+        for (const [_, document] of INFO_PER_DOCUMENT) {
             if (document.visible) {
                 visibleDocuments.push(document);
             }
@@ -91,33 +91,33 @@ export default class DocumentManager {
         return visibleDocuments;
     }
 
-    static isVisible(id: string): boolean {
-        const documentInfo = this.INFO_PER_DOCUMENT.get(id);
+    export function isVisible(id: string): boolean {
+        const documentInfo = INFO_PER_DOCUMENT.get(id);
         return documentInfo ? documentInfo.visible : false;
     }
 
-    static {
-        // Register global close hotkey
-        HotkeyManager.bindHotkey({
-            action: () => {
-                const visibleWindows = this.getVisibleDocuments();
-                if (visibleWindows.size() > 0) {
-                    // Close the highest priority visible window
-                    const windowToClose = visibleWindows[0];
-                    if (windowToClose.priority !== undefined && windowToClose.priority < 0) return false; // Ignore windows with negative priority
+    // Register global close hotkey
+    HotkeyManager.bindHotkey({
+        action: () => {
+            const visibleWindows = getVisibleDocuments();
+            if (visibleWindows.size() > 0) {
+                // Close the highest priority visible window
+                const windowToClose = visibleWindows[0];
+                if (windowToClose.priority !== undefined && windowToClose.priority < 0) return false; // Ignore windows with negative priority
 
-                    windowToClose.setVisible(false);
-                    return true;
-                }
-                return false;
-            },
-            label: "Close Window",
-        });
+                windowToClose.setVisible(false);
+                return true;
+            }
+            return false;
+        },
+        label: "Close Window",
+    });
 
-        const tabOpenedConnection = Packets.tabOpened.fromServer((tab) => this.setVisible(tab, true));
-        eat(tabOpenedConnection);
-    }
+    const tabOpenedConnection = Packets.tabOpened.fromServer((tab) => setVisible(tab, true));
+    eat(tabOpenedConnection);
 }
+
+export default DocumentManager;
 
 /**
  * Hook for document components to register themselves with the {@link DocumentManager} that

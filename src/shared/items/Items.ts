@@ -1,5 +1,5 @@
 import Difficulty from "@antivivi/jjt-difficulties";
-import Harvestable from "shared/world/harvestable/Harvestable";
+import HARVESTABLES from "shared/world/harvestable/Harvestable";
 import Item from "shared/item/Item";
 import ItemUtils from "shared/item/ItemUtils";
 import type Charm from "shared/item/traits/Charm";
@@ -23,7 +23,7 @@ abstract class Items {
                 }
             }
         }
-        for (const [i, harvestable] of pairs(Harvestable)) {
+        for (const [i, harvestable] of pairs(HARVESTABLES)) {
             if (harvestable.description === undefined) continue;
             const id = i as string;
             const item = new Item(id)

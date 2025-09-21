@@ -4,7 +4,7 @@ import CurrencyBundle from "shared/currency/CurrencyBundle";
 import "shared/marketplace/MarketplaceListing";
 import Packets from "shared/Packets";
 import { RobotoSlab, RobotoSlabBold } from "client/ui/GameFonts";
-import { useDocument } from "client/ui/components/window/WindowManager";
+import { useDocument } from "client/ui/components/window/DocumentManager";
 import ActionButton from "../printer/ActionButton";
 import CurrencyDisplay from "./CurrencyDisplay";
 

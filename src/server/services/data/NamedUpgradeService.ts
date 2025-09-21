@@ -19,6 +19,7 @@ import { Players, StarterPlayer, Workspace } from "@rbxts/services";
 import CurrencyService from "server/services/data/CurrencyService";
 import DataService from "server/services/data/DataService";
 import { log } from "server/services/permissions/LogService";
+import PermissionsService from "server/services/permissions/PermissionsService";
 import NamedUpgrades from "shared/namedupgrade/NamedUpgrades";
 import Packets from "shared/Packets";
 import { AREAS } from "shared/world/Area";
@@ -40,6 +41,7 @@ export default class NamedUpgradeService implements OnInit {
     constructor(
         private dataService: DataService,
         private currencyService: CurrencyService,
+        private permissionsService: PermissionsService,
     ) {
         this.upgrades = this.dataService.empireData.upgrades;
     }
@@ -123,7 +125,7 @@ export default class NamedUpgradeService implements OnInit {
     onInit() {
         Packets.upgrades.set(this.upgrades);
         Packets.buyUpgrade.fromClient((player, upgradeId, to) => {
-            if (!this.dataService.checkPermLevel(player, "purchase") || to === undefined) {
+            if (!this.permissionsService.checkPermLevel(player, "purchase") || to === undefined) {
                 return false;
             }
             return this.buyUpgrade(upgradeId, to, player);

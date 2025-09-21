@@ -140,6 +140,6 @@ const RawHarvestable = {
     },
 };
 
-const Harvestable = RawHarvestable as { [id: string]: HarvestableData };
+const HARVESTABLES = RawHarvestable as { [id: string]: HarvestableData };
 
-export default Harvestable;
+export default HARVESTABLES;

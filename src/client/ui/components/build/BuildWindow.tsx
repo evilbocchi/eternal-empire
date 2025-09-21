@@ -9,7 +9,7 @@ import React, { useEffect, useRef } from "@rbxts/react";
 import { TweenService } from "@rbxts/services";
 import { Environment } from "@rbxts/ui-labs";
 import BuildButton from "client/ui/components/build/BuildButton";
-import { useDocument } from "client/ui/components/window/WindowManager";
+import { useDocument } from "client/ui/components/window/DocumentManager";
 import { getAsset } from "shared/asset/AssetMap";
 
 export interface BuildWindowState {

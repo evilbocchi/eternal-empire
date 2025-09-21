@@ -21,6 +21,7 @@ import DataService from "server/services/data/DataService";
 import ItemService from "server/services/item/ItemService";
 import ChatHookService from "server/services/permissions/ChatHookService";
 import { log } from "server/services/permissions/LogService";
+import PermissionsService from "server/services/permissions/PermissionsService";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
 import Items from "shared/items/Items";
@@ -42,6 +43,7 @@ export default class SetupService implements OnInit, OnStart {
         private chatHookService: ChatHookService,
         private currencyService: CurrencyService,
         private itemService: ItemService,
+        private permissionsService: PermissionsService,
     ) {}
 
     /**
@@ -54,7 +56,7 @@ export default class SetupService implements OnInit, OnStart {
      * @returns Map of items and their counts in the setup.
      */
     saveSetup(player: Player, area: AreaId, name: string) {
-        if (!this.dataService.checkPermLevel(player, "build")) {
+        if (!this.permissionsService.checkPermLevel(player, "build")) {
             return;
         }
         const data = this.dataService.empireData;
@@ -110,7 +112,10 @@ export default class SetupService implements OnInit, OnStart {
      * @returns True if loaded successfully, false otherwise.
      */
     loadSetup(player: Player, name: string) {
-        if (!this.dataService.checkPermLevel(player, "build") || !this.dataService.checkPermLevel(player, "purchase")) {
+        if (
+            !this.permissionsService.checkPermLevel(player, "build") ||
+            !this.permissionsService.checkPermLevel(player, "purchase")
+        ) {
             return false;
         }
         let setup: Setup | undefined;
@@ -159,7 +164,7 @@ export default class SetupService implements OnInit, OnStart {
         Packets.printedSetups.set(this.dataService.empireData.printedSetups);
 
         Packets.renameSetup.fromClient((player, currentName, renameTo) => {
-            if (!this.dataService.checkPermLevel(player, "build")) return;
+            if (!this.permissionsService.checkPermLevel(player, "build")) return;
             renameTo = TextService.FilterStringAsync(renameTo, player.UserId).GetNonChatStringForBroadcastAsync();
             const setups = this.dataService.empireData.printedSetups;
             for (const setup of setups) {
@@ -171,7 +176,7 @@ export default class SetupService implements OnInit, OnStart {
             Packets.printedSetups.set(setups);
         });
         Packets.autoloadSetup.fromClient((player, name) => {
-            if (!this.dataService.checkPermLevel(player, "build")) return;
+            if (!this.permissionsService.checkPermLevel(player, "build")) return;
             const setups = this.dataService.empireData.printedSetups;
             for (const setup of setups) {
                 if (setup.name === name) {

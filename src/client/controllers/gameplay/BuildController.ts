@@ -16,7 +16,7 @@ import { Controller, OnInit, OnStart } from "@flamework/core";
 import { Debris, HttpService, ReplicatedStorage, TweenService, UserInputService, Workspace } from "@rbxts/services";
 import { LOCAL_PLAYER, MOUSE, NONCOLLISION_COLOR } from "client/constants";
 import { SHOP_GUI } from "client/controllers/core/Guis";
-import DocumentManager from "client/ui/components/window/WindowManager";
+import DocumentManager from "client/ui/components/window/DocumentManager";
 import { getSound, playSound } from "shared/asset/GameAssets";
 import { PLACED_ITEMS_FOLDER } from "shared/constants";
 import Item from "shared/item/Item";

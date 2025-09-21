@@ -4,7 +4,7 @@ import Gear from "shared/item/traits/Gear";
 import Items from "shared/items/Items";
 import Packets from "shared/Packets";
 import { AREAS } from "shared/world/Area";
-import Harvestable from "shared/world/harvestable/Harvestable";
+import HARVESTABLES from "shared/world/harvestable/Harvestable";
 
 export default class HarvestableManager {
     static readonly originalPosPerHarvestable = new Map<Instance, Vector3>();
@@ -58,7 +58,7 @@ export default class HarvestableManager {
             const harvestables = area.worldNode.getInstance()?.FindFirstChild("Harvestable")?.GetChildren();
             if (harvestables === undefined) continue;
             for (const model of harvestables) {
-                const harvestable = Harvestable[model.Name as HarvestableId];
+                const harvestable = HARVESTABLES[model.Name as HarvestableId];
                 if (harvestable === undefined) {
                     warn(model.Name + " does not have a harvestable");
                     continue;
@@ -92,7 +92,7 @@ export default class HarvestableManager {
             const t = tick();
             if (lastUse !== undefined && t + 0.5 + 8 / (gear.speed ?? 1) < lastUse) return;
             lastUsePerPlayer.set(player, t);
-            const harvestableData = Harvestable[harvestable.Name as HarvestableId];
+            const harvestableData = HARVESTABLES[harvestable.Name as HarvestableId];
             let damage = gear.type === harvestableData.tool ? gear.damage! : gear.damage! * 0.05;
             if (math.random(1, 100) / 100 <= this.getCritChance(gear, itemService)) {
                 damage *= 2;

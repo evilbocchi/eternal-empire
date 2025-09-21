@@ -1,6 +1,6 @@
 import React, { createRef, Fragment } from "@rbxts/react";
 import useHotkeyWithTooltip from "client/ui/components/hotkeys/useHotkeyWithTooltip";
-import DocumentManager from "client/ui/components/window/WindowManager";
+import DocumentManager from "client/ui/components/window/DocumentManager";
 import { RobotoMonoBold } from "client/ui/GameFonts";
 import { getAsset } from "shared/asset/AssetMap";
 import { playSound } from "shared/asset/GameAssets";
