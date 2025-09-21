@@ -6,29 +6,6 @@ declare global {
     interface ItemTraits {
         Shop: Shop;
     }
-
-    interface ShopAssets {
-        ShopGui: SurfaceGui & {
-            FilterOptions: FilterOptions;
-            ItemList: ScrollingFrame & {
-                UIStroke: UIStroke;
-                BuyAll: Frame & {
-                    Button: TextButton;
-                };
-            };
-        };
-        PriceOptionsContainer: Frame;
-        PriceOption: Frame & {
-            ImageLabel: ImageLabel;
-            ViewportFrame: ViewportFrame;
-            AmountLabel: TextLabel;
-        };
-        ItemSlot: ItemSlot & {};
-    }
-
-    interface Assets {
-        ShopWindow: ShopAssets;
-    }
 }
 
 export default class Shop extends ItemTrait {

@@ -8,17 +8,13 @@
  * It also processes item descriptions to highlight currencies and hooks item metadata for display.
  */
 
-import { buildRichText } from "@antivivi/vrldk";
 import { Controller, OnInit, OnPhysics } from "@flamework/core";
 import { TweenService, Workspace } from "@rbxts/services";
-import ItemSlot from "client/ItemSlot";
 import { MOUSE } from "client/constants";
 import { INTERFACE } from "client/controllers/core/UIController";
-import Packets from "shared/Packets";
 import { CURRENCY_DETAILS } from "shared/currency/CurrencyDetails";
 import Item from "shared/item/Item";
 import ItemMetadata from "shared/item/ItemMetadata";
-import Unique from "shared/item/traits/Unique";
 import Items from "shared/items/Items";
 
 /**
@@ -27,15 +23,6 @@ import Items from "shared/items/Items";
 export const TOOLTIP_WINDOW = INTERFACE.WaitForChild("TooltipWindow") as Frame & {
     UIStroke: UIStroke;
     MessageLabel: TextLabel;
-    ItemSlot: ItemSlot & {
-        UIPadding: UIPadding;
-        Difficulty: Frame & {
-            ImageLabel: ImageLabel;
-            TextLabel: TextLabel;
-        };
-        MessageLabel: TextLabel;
-        TitleLabel: TextLabel;
-    };
 };
 
 // Precompute item metadata for all items for efficient tooltip rendering.
@@ -87,9 +74,7 @@ export class Tooltip {
      */
     display() {
         const item = this.item;
-        const itemSlot = TOOLTIP_WINDOW.ItemSlot;
         TOOLTIP_WINDOW.MessageLabel.Visible = item === undefined;
-        itemSlot.Visible = item !== undefined;
 
         if (item !== undefined) {
             // Moved to React tooltips
@@ -120,11 +105,6 @@ export default class TooltipController implements OnInit, OnPhysics {
         }).Play();
         TweenService.Create(TOOLTIP_WINDOW.UIStroke, tweenInfo, { Transparency: 1 }).Play();
 
-        TweenService.Create(TOOLTIP_WINDOW.ItemSlot.UIPadding, tweenInfo, {
-            PaddingTop: new UDim(0, 5),
-            PaddingBottom: new UDim(0, 5),
-        }).Play();
-
         tween.Play();
         tween.Completed.Connect(() => (TOOLTIP_WINDOW.Visible = false));
     }
@@ -141,12 +121,6 @@ export default class TooltipController implements OnInit, OnPhysics {
             TextTransparency: 0,
             TextStrokeTransparency: 0,
         }).Play();
-
-        TweenService.Create(
-            TOOLTIP_WINDOW.ItemSlot.UIPadding,
-            new TweenInfo(0.3, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out),
-            { PaddingTop: new UDim(0, 10), PaddingBottom: new UDim(0, 10) },
-        ).Play();
     }
 
     /**

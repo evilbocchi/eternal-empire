@@ -28,17 +28,11 @@ import Items from "shared/items/Items";
 import Packets from "shared/Packets";
 
 declare global {
-    type ToolOption = ItemSlot & {
-        UIStroke: UIStroke;
-    };
-
     interface Assets {
         HarvestableGui: BillboardGui & {
             HealthBar: Bar;
             NameLabel: TextLabel;
         };
-
-        ToolOption: ToolOption;
     }
 }
 
@@ -200,16 +194,6 @@ export default class ToolController implements OnInit, OnCharacterAdded {
                 this.loadHarvestable(model);
             }
         }
-    }
-
-    /**
-     * Recalculates tool option indices and updates their labels.
-     * @returns The sorted array of ToolOption instances.
-     * @deprecated UI is now handled by React components
-     */
-    recalculateIndex() {
-        // Legacy method - UI is now handled by React
-        return [];
     }
 
     /**

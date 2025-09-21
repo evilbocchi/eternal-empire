@@ -6,13 +6,11 @@ import Item from "shared/item/Item";
 import Items from "shared/items/Items";
 import { useMessageTooltip } from "../../tooltip/TooltipManager";
 
-interface TraitFilterOption {
-    id: TraitFilterId;
-    image: string;
-    color: Color3;
+declare global {
+    type TraitFilterId = (typeof TRAIT_OPTIONS)[number]["id"];
 }
 
-export const traitOptions: TraitFilterOption[] = [
+export const TRAIT_OPTIONS = [
     {
         id: "Dropper",
         image: getAsset("assets/indexing/Dropper.png"),
@@ -48,7 +46,7 @@ export const traitOptions: TraitFilterOption[] = [
         image: getAsset("assets/indexing/Miscellaneous.png"),
         color: Color3.fromRGB(170, 85, 255),
     },
-];
+] as const;
 
 /**
  * Checks if the item has any of the whitelisted traits enabled.
@@ -61,8 +59,8 @@ export const traitOptions: TraitFilterOption[] = [
 export function isWhitelisted(item: Item, whitelistedTraits: Set<TraitFilterId>) {
     if (whitelistedTraits.isEmpty()) return true;
     let isMisc = true;
-    for (const traitOption of traitOptions) {
-        const traitId = traitOption.id as TraitFilterId;
+    for (const traitOption of TRAIT_OPTIONS) {
+        const traitId = traitOption.id;
         if (item.isA(traitId as keyof ItemTraits)) {
             isMisc = false;
             if (whitelistedTraits.has(traitId)) return true;
@@ -166,7 +164,7 @@ export default function InventoryFilter({
     );
 
     // Generate tooltip props for each trait at the top level
-    const tooltipPropsArray = traitOptions.map((trait) => ({
+    const tooltipPropsArray = TRAIT_OPTIONS.map((trait) => ({
         id: trait.id,
         props: useMessageTooltip(trait.id),
     }));
@@ -265,7 +263,7 @@ export default function InventoryFilter({
                 />
 
                 {/* Render trait filter buttons */}
-                {traitOptions.map((trait, index) => (
+                {TRAIT_OPTIONS.map((trait, index) => (
                     <imagebutton
                         key={trait.id}
                         BackgroundTransparency={1}
