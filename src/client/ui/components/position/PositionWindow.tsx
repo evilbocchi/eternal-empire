@@ -27,11 +27,7 @@ export default function PositionWindow({
 }) {
     const ref = useRef<Frame>();
     const closedPosition = windowPosition.add(new UDim2(0, 0, 0, -50));
-
-    const { visible } = useDocument({
-        id: "Position",
-        priority: 10, // High priority so it closes first
-    });
+    const { visible } = useDocument({ id: "Position", priority: -1 });
 
     useEffect(() => {
         if (visible) {

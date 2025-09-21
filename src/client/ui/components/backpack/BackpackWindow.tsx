@@ -60,7 +60,16 @@ export default function BackpackWindow() {
     const ref = useRef<Frame>();
     const [gears, setGears] = useState<Set<Gear>>(new Set());
     const [equippedGear, setEquippedGear] = useState<Gear | undefined>(undefined);
-    const { visible } = useDocument({ id: "Backpack" });
+    const { visible } = useDocument({ id: "Backpack", priority: -1 });
+    const openPosition = new UDim2(0.5, 0, 0.985, -5);
+    const closedPosition = new UDim2(0.5, 0, 1.2, 0);
+    useEffect(() => {
+        if (visible) {
+            ref.current?.TweenPosition(openPosition, Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 1, true);
+        } else {
+            ref.current?.TweenPosition(closedPosition, Enum.EasingDirection.In, Enum.EasingStyle.Quad, 1, true);
+        }
+    }, [visible]);
 
     useEffect(() => {
         const onCharacterAdded = (character: Model) => {
@@ -142,7 +151,7 @@ export default function BackpackWindow() {
             ref={ref}
             AnchorPoint={new Vector2(0.5, 1)}
             BackgroundTransparency={1}
-            Position={new UDim2(0.5, 0, 0.985, -5)}
+            Position={closedPosition}
             Size={new UDim2(0.45, 200, 0.03, 20)}
             ZIndex={-3}
         >

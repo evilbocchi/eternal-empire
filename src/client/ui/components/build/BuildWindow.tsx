@@ -44,7 +44,7 @@ interface BuildWindowProps {
  */
 export default function BuildWindow({ state, callbacks }: BuildWindowProps) {
     const ref = useRef<Frame>();
-    const { visible } = useDocument({ id: "Build" });
+    const { visible } = useDocument({ id: "Build", priority: -1 });
     const { animationsEnabled } = state;
     const { onDeselect, onRotate, onDelete, onPlace } = callbacks;
     const size = new UDim2(0.3, 0, 0, 75);

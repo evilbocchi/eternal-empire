@@ -264,13 +264,13 @@ export default class Area {
         task.spawn(checkAreaChange);
     }
 
-    private propagateDropletCountChange(current: number) {
+    private propagateDropletCountChange() {
         // Prevent network spam during server initialization
         if (os.clock() < 10) {
             return;
         }
         // Broadcast the change to all connected clients
-        Packets.dropletCountChanged.toAllClients(this.id, current, this.getDropletLimit());
+        Packets.dropletCountChanged.toAllClients(this.id, this.dropletCount, this.getDropletLimit());
     }
 
     static cleanup() {
@@ -290,47 +290,25 @@ export default class Area {
                 this.onPlayerAdded(player);
             }
 
-            // Monitor droplet creation and track them by area
-            CollectionService.GetInstanceAddedSignal("Droplet").Connect((instance) => {
+            const addedConnection = CollectionService.GetInstanceAddedSignal("Droplet").Connect((instance) => {
                 const info = getAllInstanceInfo(instance);
-
-                // Only count non-incinerated droplets in this specific area
                 if (info.Incinerated) return;
                 const areaId = info.Area;
                 if (areaId === undefined) return;
                 const area = AREAS[areaId];
                 if (area === undefined) return;
-                const newCurrent = area.dropletCount + 1;
-                area.propagateDropletCountChange(newCurrent);
-
-                // Set up cleanup tracking when the droplet is destroyed
+                area.dropletCount++;
+                area.propagateDropletCountChange();
                 instance.Destroying.Once(() => {
-                    const newCurrent = area.dropletCount - 1;
-                    area.propagateDropletCountChange(newCurrent);
+                    area.dropletCount = math.max(0, area.dropletCount - 1);
+                    area.propagateDropletCountChange();
                 });
             });
 
-            // Prevent desynchronization by periodically recounting all droplets
-            const resynchronize = () => {
-                // Manual recount of all droplets in this area
-                const dropletCountPerArea = new Map<AreaId, number>();
-                for (const instance of CollectionService.GetTagged("Droplet")) {
-                    const info = getAllInstanceInfo(instance);
-                    if (info.Incinerated) continue;
-                    const areaId = info.Area;
-                    if (areaId === undefined) continue;
-                    dropletCountPerArea.set(areaId, (dropletCountPerArea.get(areaId) ?? 0) + 1);
-                }
-                for (const [areaId, count] of dropletCountPerArea) {
-                    const area = AREAS[areaId];
-                    if (area === undefined) continue;
-                    area.dropletCount = count;
-                }
-                Packets.dropletCountsChanged.toAllClients(dropletCountPerArea);
-
-                task.delay(5, resynchronize);
+            this.staticCleanupCallback = () => {
+                playerAddedConnection.Disconnect();
+                addedConnection.Disconnect();
             };
-            task.spawn(resynchronize);
         }
     }
 }

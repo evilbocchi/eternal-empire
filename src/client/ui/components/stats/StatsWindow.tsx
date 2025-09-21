@@ -83,11 +83,21 @@ export default function StatsWindow() {
     const currencyStats = [];
     for (const [currency, details] of pairs(CURRENCY_DETAILS)) {
         const amount = mostBalance.get(currency);
+
+        if (currency === "Funds") {
+            currencyStats.push({
+                currency,
+                amount: new OnoeNum(amount ?? 0),
+                layoutOrder: details.layoutOrder,
+            });
+            continue;
+        }
+
         if (amount && !new OnoeNum(amount).lessEquals(0)) {
             currencyStats.push({
                 currency,
                 amount: new OnoeNum(amount),
-                layoutOrder: 50 + details.layoutOrder,
+                layoutOrder: details.layoutOrder,
             });
         }
     }
@@ -155,12 +165,10 @@ export default function StatsWindow() {
                     <StatItem key="CurrentPing" label="Droplet Ping" value={currentPing} />
 
                     {/* Currency Statistics Section */}
-                    {currencyStats.size() > 0 ? (
-                        <Fragment>
-                            <frame BackgroundTransparency={1} Size={new UDim2(1, 0, 0, 25)} />
-                            <SectionHeader title="Currency Records" icon={getAsset("assets/Currency.png")} />
-                        </Fragment>
-                    ) : undefined}
+                    <Fragment>
+                        <frame BackgroundTransparency={1} Size={new UDim2(1, 0, 0, 25)} />
+                        <SectionHeader title="Currency Records" icon={getAsset("assets/Currency.png")} />
+                    </Fragment>
 
                     {currencyStats.map((stat) => (
                         <StatItem

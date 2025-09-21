@@ -29,11 +29,7 @@ export default function BalanceWindow() {
     const [currentPage, setCurrentPage] = useState(1);
     const [maxPage, setMaxPage] = useState(1);
     const [bombBoosts, setBombBoosts] = useState<CurrencyBundle | undefined>(new CurrencyBundle());
-
-    const { visible } = useDocument({
-        id: "Balance",
-        priority: -1, // Negative priority so close hotkey does not work
-    });
+    const { visible } = useDocument({ id: "Balance", priority: -1 });
 
     const openPosition = new UDim2(1, 0, 1, -70);
     const closePosition = openPosition.add(new UDim2(0, 250, 0, 0));

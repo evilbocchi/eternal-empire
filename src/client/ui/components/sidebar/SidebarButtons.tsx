@@ -227,11 +227,7 @@ export default function SidebarButtons({
     const size = new UDim2(0.025, 40, 0.5, 0);
     const sizeX = new UDim2(size.Width, new UDim(0, 0));
     const closePos = position.sub(sizeX);
-
-    const { visible } = useDocument({
-        id: "Sidebar",
-        priority: -1, // Negative priority so close hotkey does not work
-    });
+    const { visible } = useDocument({ id: "Sidebar", priority: -1 });
 
     useEffect(() => {
         if (visible) {
