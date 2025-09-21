@@ -1,9 +1,10 @@
 /// <reference types="@rbxts/testez/globals" />
 
 import { OnoeNum } from "@antivivi/serikanum";
-import ItemService from "server/services/item/ItemService";
 import CurrencyService from "server/services/data/CurrencyService";
 import DataService from "server/services/data/DataService";
+import ItemService from "server/services/item/ItemService";
+import fixDuplicatedItemsData from "shared/data/loading/fixDuplicatedItemsData";
 
 export = function () {
     const dataService = new DataService();
@@ -57,8 +58,8 @@ export = function () {
                 uniqueInstances: new Map<string, UniqueItemInstance>(),
             } as ItemsData;
 
-            dataService.dupeCheck(duped);
-            dataService.dupeCheck(unduped);
+            fixDuplicatedItemsData(duped);
+            fixDuplicatedItemsData(unduped);
 
             expect(duped.inventory.get("ClassLowerNegativeShop")).to.be.equal(1);
             expect(duped.inventory.get("TheFirstDropper")).to.be.equal(3);
@@ -78,7 +79,7 @@ export = function () {
                 uniqueInstances: new Map<string, UniqueItemInstance>(),
             } as ItemsData;
 
-            dataService.dupeCheck(duped);
+            fixDuplicatedItemsData(duped);
 
             expect(duped.inventory.get("ClassLowerNegativeShop")).to.be.equal(1);
             expect(duped.inventory.get("TheFirstDropper")).to.be.equal(3);

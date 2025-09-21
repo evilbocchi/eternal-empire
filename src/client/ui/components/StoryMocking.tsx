@@ -4,7 +4,7 @@ import { HttpService, ReplicatedStorage, RunService, Workspace } from "@rbxts/se
 import { LOCAL_PLAYER } from "client/constants";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import { CURRENCY_DETAILS } from "shared/currency/CurrencyDetails";
-import PlayerProfileTemplate from "shared/data/PlayerProfileTemplate";
+import PlayerProfileTemplate from "shared/data/profile/PlayerProfileTemplate";
 import Unique from "shared/item/traits/Unique";
 import Items from "shared/items/Items";
 import Packets from "shared/Packets";

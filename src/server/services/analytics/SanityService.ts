@@ -11,7 +11,7 @@
 
 import Difficulty from "@antivivi/jjt-difficulties";
 import { OnStart, Service } from "@flamework/core";
-import Harvestable from "shared/world/Harvestable";
+import Harvestable from "shared/world/harvestable/Harvestable";
 import Item from "shared/item/Item";
 import Items from "shared/items/Items";
 

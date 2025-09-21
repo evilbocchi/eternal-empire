@@ -12,9 +12,10 @@
  * @since 1.0.0
  */
 import { OnInit, Service } from "@flamework/core";
-import { OnPlayerJoined } from "server/services/ModdingService";
-import Packets from "shared/Packets";
 import DataService from "server/services/data/DataService";
+import { OnPlayerJoined } from "server/services/ModdingService";
+import { PlayerProfileManager } from "shared/data/profile/ProfileManager";
+import Packets from "shared/Packets";
 
 /**
  * Service for managing player settings and hotkeys.
@@ -23,16 +24,11 @@ import DataService from "server/services/data/DataService";
 @Service()
 export default class SettingsService implements OnInit, OnPlayerJoined {
     /**
-     * Constructs the SettingsService with required dependencies.
-     */
-    constructor(private dataService: DataService) {}
-
-    /**
      * Loads and sends player settings to the client when they join.
      * @param player The player who joined
      */
     onPlayerJoined(player: Player) {
-        const playerProfile = this.dataService.loadPlayerProfile(player.UserId);
+        const playerProfile = PlayerProfileManager.load(player.UserId);
         if (playerProfile !== undefined) {
             Packets.settings.setFor(player, playerProfile.Data.settings);
         }
@@ -43,7 +39,7 @@ export default class SettingsService implements OnInit, OnPlayerJoined {
      */
     onInit() {
         Packets.setHotkey.fromClient((player, name, key) => {
-            const playerProfile = this.dataService.loadPlayerProfile(player.UserId);
+            const playerProfile = PlayerProfileManager.load(player.UserId);
             if (playerProfile === undefined) {
                 error("Player profile not loaded");
             }
@@ -51,7 +47,7 @@ export default class SettingsService implements OnInit, OnPlayerJoined {
             Packets.settings.setFor(player, playerProfile.Data.settings);
         });
         Packets.setSetting.fromClient((player, setting, value) => {
-            const playerProfile = this.dataService.loadPlayerProfile(player.UserId);
+            const playerProfile = PlayerProfileManager.load(player.UserId);
             if (playerProfile === undefined) {
                 error("Player profile not loaded");
             }

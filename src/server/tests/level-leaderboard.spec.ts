@@ -2,13 +2,11 @@
 
 import DataService from "server/services/data/DataService";
 import { LeaderboardService } from "server/services/leaderboard/LeaderboardService";
-import Leaderstats from "shared/data/Leaderstats";
 
 export = function () {
     describe("Level Leaderboard", () => {
         const dataService = new DataService();
-        const leaderstatsService = new Leaderstats();
-        const leaderboardService = new LeaderboardService(dataService, leaderstatsService);
+        const leaderboardService = new LeaderboardService(dataService);
 
         it("has a level store", () => {
             expect(leaderboardService.levelStore).to.be.ok();

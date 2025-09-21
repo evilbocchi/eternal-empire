@@ -5,7 +5,9 @@
  * Manages visibility based on adaptive tab and build mode states.
  */
 
+import { loadAnimation } from "@antivivi/vrldk";
 import React, { useEffect, useRef, useState } from "@rbxts/react";
+import { StarterGui, UserInputService, Workspace } from "@rbxts/services";
 import { Environment } from "@rbxts/ui-labs";
 import { LOCAL_PLAYER } from "client/constants";
 import GearOption, { layoutOrderFromGear } from "client/ui/components/backpack/GearOption";
@@ -72,7 +74,11 @@ export default function BackpackWindow() {
     }, [visible]);
 
     useEffect(() => {
+        let swingAnimation: AnimationTrack | undefined;
         const onCharacterAdded = (character: Model) => {
+            const humanoid = character.WaitForChild("Humanoid") as Humanoid;
+            swingAnimation = loadAnimation(humanoid, 16920778613);
+
             const onToolAdded = (tool: Instance) => {
                 if (tool.IsA("Tool")) {
                     const item = Items.itemsPerId.get(tool.Name);
@@ -95,6 +101,68 @@ export default function BackpackWindow() {
                 onToolAdded(existingTool);
             }
         };
+
+        const OVERLAP_PARAMS = new OverlapParams();
+        OVERLAP_PARAMS.CollisionGroup = "ItemHitbox";
+        /**
+         * Checks for a harvestable object in range of the tool.
+         * @param tool The tool model to check from.
+         * @returns The harvestable model or part, if found.
+         */
+        const checkHarvestable = (tool: Model) => {
+            const blade = (tool.FindFirstChild("Blade") as BasePart | undefined) ?? tool.PrimaryPart;
+            if (blade === undefined) return undefined;
+
+            const inside = Workspace.GetPartBoundsInBox(
+                blade.CFrame,
+                blade.Size.add(new Vector3(1, 5, 1)),
+                OVERLAP_PARAMS,
+            );
+            for (const touching of inside) {
+                const tParent = touching.Parent;
+                if (tParent === undefined) continue;
+                if (tParent.IsA("Model")) {
+                    if (tParent.Parent?.Name === "Harvestable") return tParent;
+                } else if (tParent.Name === "Harvestable") return touching;
+            }
+        };
+
+        StarterGui.SetCoreGuiEnabled("Backpack", false);
+        let lastUse = 0;
+        UserInputService.InputBegan.Connect((input, gameProcessed) => {
+            if (gameProcessed === true) return;
+
+            if (
+                input.UserInputType === Enum.UserInputType.MouseButton1 ||
+                input.UserInputType === Enum.UserInputType.Touch ||
+                input.KeyCode === Enum.KeyCode.ButtonL1
+            ) {
+                const currentTool = LOCAL_PLAYER.Character?.FindFirstChildOfClass("Tool");
+                if (currentTool === undefined) return;
+
+                const item = Items.getItem(currentTool.Name);
+                if (item === undefined) return;
+                const gear = item.findTrait("Gear");
+                if (gear === undefined || gear.type === "None") return;
+
+                const t = tick();
+                if (lastUse + 8 / (gear.speed ?? 1) > t) return;
+                lastUse = t;
+                if (swingAnimation === undefined) return;
+                const registerHit = () => {
+                    const hit = checkHarvestable(currentTool);
+                    if (hit === undefined) return;
+                    Packets.useTool.toServer(hit);
+                };
+                if (IS_CI) {
+                    registerHit();
+                } else {
+                    swingAnimation.Stopped.Once(registerHit);
+                }
+                swingAnimation.Play();
+                playSound("ToolSwing.mp3");
+            }
+        });
 
         const connection = LOCAL_PLAYER.CharacterAdded.Connect(onCharacterAdded);
         if (LOCAL_PLAYER.Character) {

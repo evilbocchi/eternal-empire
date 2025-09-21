@@ -29,6 +29,7 @@ import RevenueService from "server/services/RevenueService";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import { CURRENCY_DETAILS } from "shared/currency/CurrencyDetails";
 import { RESET_LAYERS } from "shared/currency/mechanics/ResetLayer";
+import fixDuplicatedItemsData from "shared/data/loading/fixDuplicatedItemsData";
 import Operative from "shared/item/traits/Operative";
 import Items from "shared/items/Items";
 import NamedUpgrades from "shared/namedupgrade/NamedUpgrades";
@@ -125,7 +126,7 @@ export default class ResetService implements OnInit, OnStart {
         const inventory = this.unplaceItems(resetLayer, items);
         items.bought = this.filterExcludeInventory(items.bought, resetLayer);
         items.inventory = this.filterExcludeInventory(inventory, resetLayer);
-        this.dataService.dupeCheck(items);
+        fixDuplicatedItemsData(items);
         this.itemService.requestChanges();
     }
 

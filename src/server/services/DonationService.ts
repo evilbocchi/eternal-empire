@@ -11,11 +11,11 @@
 import { OnStart, Service } from "@flamework/core";
 import { MarketplaceService, MessagingService } from "@rbxts/services";
 import { OnPlayerJoined } from "server/services/ModdingService";
-import DataService from "server/services/data/DataService";
 import ChatHookService from "server/services/permissions/ChatHookService";
 import ProductService from "server/services/product/ProductService";
 import Packets from "shared/Packets";
 import Leaderstats from "shared/data/Leaderstats";
+import { PlayerProfileManager } from "shared/data/profile/ProfileManager";
 import { DONATION_PRODUCTS } from "shared/devproducts/DonationProducts";
 
 /**
@@ -25,8 +25,6 @@ import { DONATION_PRODUCTS } from "shared/devproducts/DonationProducts";
 export class DonationService implements OnStart, OnPlayerJoined {
     constructor(
         private chatHookService: ChatHookService,
-        private dataService: DataService,
-        private leaderstatsService: Leaderstats,
         private productService: ProductService,
     ) {}
 
@@ -36,7 +34,7 @@ export class DonationService implements OnStart, OnPlayerJoined {
      * @param player The player to check.
      */
     getDonated(player: Player) {
-        return this.dataService.loadPlayerProfile(player.UserId, true)?.Data.donated ?? 0;
+        return PlayerProfileManager.load(player.UserId, true)?.Data.donated ?? 0;
     }
 
     /**
@@ -46,7 +44,7 @@ export class DonationService implements OnStart, OnPlayerJoined {
      * @param donated The new donation amount.
      */
     setDonated(player: Player, donated: number) {
-        const playerProfile = this.dataService.loadPlayerProfile(player.UserId);
+        const playerProfile = PlayerProfileManager.load(player.UserId);
         if (playerProfile !== undefined) {
             playerProfile.Data.donated = donated;
             this.updateLeaderstats(player, donated);

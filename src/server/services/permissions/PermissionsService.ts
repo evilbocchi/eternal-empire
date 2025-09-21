@@ -107,7 +107,7 @@ export default class PermissionsService implements OnInit, OnPlayerJoined {
      */
     getPermissionLevel(userId: number) {
         const data = this.dataService.empireData;
-        if (this.dataService.testing) {
+        if (game.PlaceId === 16438564807) {
             return 4;
         } else {
             const p = Players.GetPlayerByUserId(userId);

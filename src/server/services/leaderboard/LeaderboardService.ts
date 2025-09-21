@@ -47,10 +47,7 @@ export class LeaderboardService implements OnStart {
     /** Cached leaderboard data for React components */
     private readonly leaderboardData = new Map<LeaderboardType, LeaderboardEntry[]>();
 
-    constructor(
-        private readonly dataService: DataService,
-        private readonly leaderstatsService: Leaderstats,
-    ) {}
+    constructor(private readonly dataService: DataService) {}
 
     /**
      * Converts DataStore entries to LeaderboardEntry format.

@@ -57,6 +57,7 @@ const queue = new Array<() => void>();
  */
 @Service()
 export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
+    readonly items: ItemsData;
     private hasInventoryChanged = false;
     private hasUniqueChanged = false;
     private hasBoughtChanged = false;
@@ -118,7 +119,9 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
     constructor(
         private dataService: DataService,
         private currencyService: CurrencyService,
-    ) {}
+    ) {
+        this.items = dataService.empireData.items;
+    }
 
     // Data Management Methods
 

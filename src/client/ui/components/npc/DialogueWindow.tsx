@@ -77,15 +77,9 @@ export default function DialogueWindow() {
 
     useEffect(() => {
         if (visible) {
-            frameRef.current?.TweenPosition(openPosition, Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 1, true);
+            frameRef.current?.TweenPosition(openPosition, Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 1);
         } else {
-            frameRef.current?.TweenPosition(
-                closedPosition,
-                Enum.EasingDirection.In,
-                Enum.EasingStyle.Linear,
-                0.5,
-                true,
-            );
+            frameRef.current?.TweenPosition(closedPosition, Enum.EasingDirection.In, Enum.EasingStyle.Linear, 0.5);
         }
     }, [visible]);
 
