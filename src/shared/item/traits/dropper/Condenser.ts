@@ -41,7 +41,7 @@ export default class Condenser extends ItemTrait {
         const areaId = Server.Item.getPlacedItem(model.Name)?.area;
         if (areaId === undefined) return;
         const area = AREAS[areaId as AreaId];
-        const dropletCountPerArea = Server.Area.dropletCountPerArea;
+        const dropletCountPerArea = Server.Area.DROPLET_COUNT_PER_AREA;
         const instantiatorsPerDroplet = new Map<Droplet, () => BasePart>();
         const pricePerDroplet = new Map<Droplet, CurrencyBundle>();
         const maxCosts = new Map<Currency, OnoeNum>();

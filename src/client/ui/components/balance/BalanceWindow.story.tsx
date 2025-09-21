@@ -1,7 +1,7 @@
 import { OnoeNum } from "@antivivi/serikanum";
 import React, { StrictMode, useEffect } from "@rbxts/react";
 import ReactRoblox from "@rbxts/react-roblox";
-import { Debris } from "@rbxts/services";
+import { Debris, Workspace } from "@rbxts/services";
 import { CreateReactStory, Number } from "@rbxts/ui-labs";
 import BalanceWindow from "client/ui/components/balance/BalanceWindow";
 import { CurrencyGainManager } from "client/ui/components/balance/CurrencyGain";
@@ -10,7 +10,7 @@ import TooltipWindow from "client/ui/components/tooltip/TooltipWindow";
 import useVisibility from "client/ui/hooks/useVisibility";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import { CURRENCIES } from "shared/currency/CurrencyDetails";
-import Droplet, { DROPLET_STORAGE } from "shared/item/Droplet";
+import Droplet from "shared/item/Droplet";
 import Packets from "shared/Packets";
 
 export = CreateReactStory(
@@ -63,7 +63,7 @@ export = CreateReactStory(
 
         useEffect(() => {
             const mockDroplet = Droplet.TheFirstDroplet.model.Clone();
-            mockDroplet.Parent = DROPLET_STORAGE;
+            mockDroplet.Parent = Workspace;
             mockDroplet.Position = new Vector3(0, 0, 0);
             Debris.AddItem(mockDroplet, 5);
 

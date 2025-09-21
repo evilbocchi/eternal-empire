@@ -7,8 +7,8 @@ export default class WorldNode<T extends Instance = Instance> {
 
     constructor(
         public tag: string,
-        private onRegistered?: (instance: T) => void,
-        private onUnregistered?: (instance: T) => void,
+        private onRegister?: (instance: T) => void,
+        private onUnregister?: (instance: T) => void,
     ) {
         CollectionService.GetTagged(tag).forEach((instance) => this.registerInstance(instance as T));
         const addedConnection = CollectionService.GetInstanceAddedSignal(tag).Connect((instance) => {
@@ -25,18 +25,18 @@ export default class WorldNode<T extends Instance = Instance> {
     }
 
     private registerInstance(instance: T) {
+        this.onRegister?.(instance);
         this.INSTANCES.add(instance);
         instance.AncestryChanged.Connect(() => {
             if (instance.Parent === undefined) {
                 this.unregisterInstance(instance);
             }
         });
-        this.onRegistered?.(instance);
     }
 
     private unregisterInstance(instance: T) {
+        this.onUnregister?.(instance);
         this.INSTANCES.delete(instance);
-        this.onUnregistered?.(instance);
     }
 
     destroy() {
@@ -47,14 +47,14 @@ export default class WorldNode<T extends Instance = Instance> {
 export class SingleWorldNode<T extends Instance = Instance> extends WorldNode<T> {
     originalParent?: Instance;
 
-    constructor(tag: string, onRegistered?: (instance: T) => void, onUnregistered?: (instance: T) => void) {
+    constructor(tag: string, onRegister?: (instance: T) => void, onUnregister?: (instance: T) => void) {
         super(
             tag,
             (instance) => {
                 this.originalParent = instance.Parent;
-                onRegistered?.(instance);
+                onRegister?.(instance);
             },
-            onUnregistered,
+            onUnregister,
         );
     }
 

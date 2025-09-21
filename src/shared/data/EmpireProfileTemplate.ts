@@ -231,6 +231,11 @@ const EmpireProfileTemplate = {
      * Undefined or 0 means not in top 100.
      */
     leaderboardPositions: new Map<string, number>(),
+
+    /**
+     * Areas that the player has been to before.
+     */
+    visitedAreas: new Set<AreaId>(["BarrenIslands"]),
 };
 
 export = EmpireProfileTemplate;

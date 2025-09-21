@@ -3,18 +3,21 @@ import useSingleDocument from "client/ui/components/sidebar/useSingleDocumentWin
 import TechWindow from "client/ui/components/window/TechWindow";
 import { getAsset } from "shared/asset/AssetMap";
 import Packets from "shared/Packets";
+import Area, { AREAS } from "shared/world/Area";
 
 export default function PortableBeaconWindow() {
     const { id, visible, closeDocument } = useSingleDocument({ id: "PortableBeacon" });
+    const [areas, setAreas] = useState<Set<Area>>(new Set([AREAS.BarrenIslands]));
 
     useEffect(() => {
         const connections = new Array<RBXScriptConnection>();
-        const initial = new Set<string>();
         connections.push(
             Packets.unlockedAreas.observe((areas) => {
+                const newAreas = new Set<Area>([AREAS.BarrenIslands]);
                 for (const areaId of areas) {
-                    initial.add(areaId);
+                    newAreas.add(AREAS[areaId]);
                 }
+                setAreas(newAreas);
             }),
         );
 
@@ -25,7 +28,12 @@ export default function PortableBeaconWindow() {
         };
     }, []);
 
-    print();
+    const elements = new Array<JSX.Element>();
+    // BarrenIslands, SlamoVillage, SkyPavilion
+
+    getAsset("assets/area/BarrenIslandsLandscape.png");
+    getAsset("assets/area/SlamoVillageLandscape.png");
+    getAsset("assets/area/SkyPavilionLandscape.png");
 
     return (
         <TechWindow icon={getAsset("assets/PortableBeacon.png")} id={id} title="Portable Beacon" visible={visible}>

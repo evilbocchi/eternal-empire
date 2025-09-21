@@ -1,5 +1,5 @@
-import { isInside } from "@antivivi/vrldk";
-import { Players, Workspace } from "@rbxts/services";
+import { getAllInstanceInfo, isInside } from "@antivivi/vrldk";
+import { CollectionService, Players, Workspace } from "@rbxts/services";
 import { IS_CI, IS_SERVER } from "shared/Context";
 import Packets from "shared/Packets";
 import Sandbox from "shared/Sandbox";
@@ -40,7 +40,7 @@ declare global {
 }
 
 export class GridWorldNode extends SingleWorldNode<Part> {
-    originalSize = new Vector3();
+    originalSize?: Vector3;
     constructor(tag: string) {
         super(tag, (instance) => {
             instance.CollisionGroup = "BuildGrid";
@@ -106,8 +106,10 @@ export default class Area {
 
     private readonly boundingBox?: [CFrame, Vector3];
     private readonly cleanupCallback: () => void;
-    private static PLAYER_ADDED_CONNECTION?: RBXScriptConnection;
+    private static staticCleanupCallback: () => void;
 
+    /** The current number of droplets in this area. Server-side only. */
+    dropletCount = 0;
     /**
      * The maximum number of droplets allowed in this area.
      */
@@ -262,8 +264,17 @@ export default class Area {
         task.spawn(checkAreaChange);
     }
 
+    private propagateDropletCountChange(current: number) {
+        // Prevent network spam during server initialization
+        if (os.clock() < 10) {
+            return;
+        }
+        // Broadcast the change to all connected clients
+        Packets.dropletCountChanged.toAllClients(this.id, current, this.getDropletLimit());
+    }
+
     static cleanup() {
-        this.PLAYER_ADDED_CONNECTION?.Disconnect();
+        this.staticCleanupCallback();
         for (const [, area] of pairs(AREAS)) {
             area.cleanupCallback();
         }
@@ -272,12 +283,54 @@ export default class Area {
     static {
         if (IS_SERVER || IS_CI) {
             // Set up player area tracking when players join
-            this.PLAYER_ADDED_CONNECTION = Players.PlayerAdded.Connect((player) => {
+            const playerAddedConnection = Players.PlayerAdded.Connect((player) => {
                 this.onPlayerAdded(player);
             });
             for (const player of Players.GetPlayers()) {
                 this.onPlayerAdded(player);
             }
+
+            // Monitor droplet creation and track them by area
+            CollectionService.GetInstanceAddedSignal("Droplet").Connect((instance) => {
+                const info = getAllInstanceInfo(instance);
+
+                // Only count non-incinerated droplets in this specific area
+                if (info.Incinerated) return;
+                const areaId = info.Area;
+                if (areaId === undefined) return;
+                const area = AREAS[areaId];
+                if (area === undefined) return;
+                const newCurrent = area.dropletCount + 1;
+                area.propagateDropletCountChange(newCurrent);
+
+                // Set up cleanup tracking when the droplet is destroyed
+                instance.Destroying.Once(() => {
+                    const newCurrent = area.dropletCount - 1;
+                    area.propagateDropletCountChange(newCurrent);
+                });
+            });
+
+            // Prevent desynchronization by periodically recounting all droplets
+            const resynchronize = () => {
+                // Manual recount of all droplets in this area
+                const dropletCountPerArea = new Map<AreaId, number>();
+                for (const instance of CollectionService.GetTagged("Droplet")) {
+                    const info = getAllInstanceInfo(instance);
+                    if (info.Incinerated) continue;
+                    const areaId = info.Area;
+                    if (areaId === undefined) continue;
+                    dropletCountPerArea.set(areaId, (dropletCountPerArea.get(areaId) ?? 0) + 1);
+                }
+                for (const [areaId, count] of dropletCountPerArea) {
+                    const area = AREAS[areaId];
+                    if (area === undefined) continue;
+                    area.dropletCount = count;
+                }
+                Packets.dropletCountsChanged.toAllClients(dropletCountPerArea);
+
+                task.delay(5, resynchronize);
+            };
+            task.spawn(resynchronize);
         }
     }
 }

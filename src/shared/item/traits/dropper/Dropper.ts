@@ -2,10 +2,10 @@
 //!optimize 2
 
 import { findBaseParts, formatRichText, getAllInstanceInfo } from "@antivivi/vrldk";
-import { Players, RunService } from "@rbxts/services";
+import { Players, RunService, Workspace } from "@rbxts/services";
 import { CURRENCY_DETAILS } from "shared/currency/CurrencyDetails";
 import GameSpeed from "shared/GameSpeed";
-import Droplet, { DROPLET_STORAGE } from "shared/item/Droplet";
+import Droplet from "shared/item/Droplet";
 import Item from "shared/item/Item";
 import { Server } from "shared/item/ItemUtils";
 import ItemTrait from "shared/item/traits/ItemTrait";
@@ -26,7 +26,7 @@ declare global {
 export default class Dropper extends ItemTrait {
     /**
      * Wraps an instantiator function to create a droplet.
-     * This function will set the parent of the droplet to the DROPLET_STORAGE,
+     * This function will set the parent of the droplet to the Workspace,
      * set the network owner to the player, and handle lucky droplet spawning.
      *
      * @param instantiator The function that creates the droplet.
@@ -39,7 +39,7 @@ export default class Dropper extends ItemTrait {
         const callback = dropper.dropletProduced;
         return () => {
             const droplet = instantiator();
-            droplet.Parent = DROPLET_STORAGE;
+            droplet.Parent = Workspace;
 
             const player = Players.GetPlayerByUserId(Server.empireData.owner) ?? Players.GetPlayers()[0];
             if (player !== undefined) {
@@ -52,7 +52,7 @@ export default class Dropper extends ItemTrait {
                     const luckyDropletInstantiator = Droplet.LuckyDroplet.getInstantiator(model, drop);
                     if (luckyDropletInstantiator !== undefined) {
                         const luckyDroplet = luckyDropletInstantiator();
-                        luckyDroplet.Parent = DROPLET_STORAGE;
+                        luckyDroplet.Parent = Workspace;
                         if (player !== undefined) {
                             luckyDroplet.SetNetworkOwner(player);
                         }
@@ -245,7 +245,7 @@ export default class Dropper extends ItemTrait {
                 if (dropRate === 0) continue;
 
                 if (t > info.LastDrop + 1 / dropRate / speed) {
-                    const dropletCount = Server.Area.dropletCountPerArea.get(info.Area!);
+                    const dropletCount = Server.Area.DROPLET_COUNT_PER_AREA.get(info.Area!);
                     if (dropletCount !== undefined && dropletCount > AREAS[info.Area!].getDropletLimit()) continue;
                     info.LastDrop = t;
                     info.Instantiator!();

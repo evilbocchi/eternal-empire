@@ -1,12 +1,11 @@
 import { BaseOnoeNum, OnoeNum } from "@antivivi/serikanum";
 import React, { Fragment, useEffect, useRef } from "@rbxts/react";
-import { Debris, TweenService, Workspace } from "@rbxts/services";
+import { CollectionService, Debris, TweenService, Workspace } from "@rbxts/services";
 import { BalanceOptionManager } from "client/ui/components/balance/BalanceOption";
 import displayBalanceCurrency from "client/ui/components/balance/displayBalanceCurrency";
 import { RobotoSlabExtraBold } from "client/ui/GameFonts";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import { CURRENCY_DETAILS } from "shared/currency/CurrencyDetails";
-import { DROPLET_STORAGE } from "shared/item/Droplet";
 import ItemUtils from "shared/item/ItemUtils";
 import Packets from "shared/Packets";
 
@@ -137,7 +136,9 @@ export function CurrencyGainManager() {
         ItemUtils.showCurrencyGain = showCurrencyGain;
 
         const gainConnection = Packets.dropletBurnt.fromServer((dropletModelId, amountPerCurrency) => {
-            const dropletModel = DROPLET_STORAGE.FindFirstChild(dropletModelId) as BasePart | undefined;
+            const dropletModel = CollectionService.GetTagged("Droplet").find(
+                (droplet) => droplet.Name === dropletModelId, // TODO: optimize by using a map
+            ) as BasePart | undefined;
             if (dropletModel === undefined) {
                 return;
             }

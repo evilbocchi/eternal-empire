@@ -1,14 +1,11 @@
-import Signal from "@antivivi/lemon-signal";
+import { OnoeNum } from "@antivivi/serikanum";
+import { findBaseParts, getAllInstanceInfo } from "@antivivi/vrldk";
 import { Debris } from "@rbxts/services";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
-import { DROPLET_STORAGE } from "shared/item/Droplet";
 import Item from "shared/item/Item";
+import { Server } from "shared/item/ItemUtils";
 import Operative from "shared/item/traits/Operative";
 import Packets from "shared/Packets";
-import { getAllInstanceInfo, getInstanceInfo } from "@antivivi/vrldk";
-import { Server } from "shared/item/ItemUtils";
-import { findBaseParts } from "@antivivi/vrldk";
-import { OnoeNum } from "@antivivi/serikanum";
 
 declare global {
     interface ItemTraits {
@@ -35,7 +32,7 @@ export default class Furnace extends Operative {
                 droplet.Anchored = true;
 
                 const dropletInfo = getAllInstanceInfo(droplet);
-                if (droplet.Parent !== DROPLET_STORAGE || dropletInfo.Incinerated === true) return;
+                if (dropletInfo.Incinerated === true) return;
 
                 dropletInfo.Incinerated = true;
                 Debris.AddItem(droplet, 6);

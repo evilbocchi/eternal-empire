@@ -2,7 +2,6 @@ import Signal from "@antivivi/lemon-signal";
 import { findBaseParts, getAllInstanceInfo, getInstanceInfo, setInstanceInfo } from "@antivivi/vrldk";
 import { RunService } from "@rbxts/services";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
-import { DROPLET_STORAGE } from "shared/item/Droplet";
 import Item from "shared/item/Item";
 import Boostable from "shared/item/traits/boost/Boostable";
 import Operative, { IOperative } from "shared/item/traits/Operative";
@@ -89,7 +88,7 @@ export default class Upgrader extends Operative {
         const laserInfo = getAllInstanceInfo(laser);
         const laserId = upgrader.isStacks === false ? item.id : model.Name + laserInfo.LaserId;
         laserInfo.DropletTouched = (droplet) => {
-            if (droplet.Parent !== DROPLET_STORAGE || getInstanceInfo(droplet, "Incinerated") === true) return;
+            if (getInstanceInfo(droplet, "Incinerated") === true) return;
             const instanceInfo = getAllInstanceInfo(droplet);
             if (upgrader.requirement !== undefined && !upgrader.requirement(instanceInfo)) return;
 

@@ -3,9 +3,8 @@
 
 import Difficulty from "@antivivi/jjt-difficulties";
 import { getAllInstanceInfo, getInstanceInfo } from "@antivivi/vrldk";
-import { Debris, RunService, TweenService, Workspace } from "@rbxts/services";
+import { Debris, RunService, TweenService } from "@rbxts/services";
 import { ASSETS } from "shared/asset/GameAssets";
-import { IS_CI, IS_SERVER } from "shared/Context";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import { Server } from "shared/item/ItemUtils";
 import Operative from "shared/item/traits/Operative";
@@ -31,24 +30,6 @@ declare global {
 }
 
 export default class Droplet {
-    static readonly STORAGE = (function () {
-        const key = "Droplets";
-        const cached = Workspace.FindFirstChild(key);
-        if (cached !== undefined) return cached as Model;
-
-        if (IS_SERVER || IS_CI) {
-            const storage = new Instance("Model");
-            storage.ModelStreamingMode = Enum.ModelStreamingMode.Persistent;
-            storage.Name = key;
-            storage.Parent = Workspace;
-            if (IS_CI) {
-                Debris.AddItem(storage, 30); // Automatically clean up the storage after 30 seconds
-            }
-            return storage;
-        }
-        return Workspace.WaitForChild(key) as Model;
-    })();
-
     static readonly DROPLETS = new Array<Droplet>();
 
     static TheFirstDroplet = Droplet.registerDroplet(
@@ -774,10 +755,6 @@ export default class Droplet {
         const cframe = drop === undefined ? undefined : drop.CFrame;
 
         const model = this.model.Clone();
-        model.CanQuery = false;
-        model.CanTouch = true;
-        model.CastShadow = false;
-        model.CustomPhysicalProperties = Droplet.PHYSICAL_PROPERTIES;
         if (cframe !== undefined) {
             model.CFrame = cframe;
         }
@@ -844,6 +821,11 @@ export default class Droplet {
         const model = modelFunc();
         model.Name = "Droplet";
         model.CollisionGroup = "Droplet";
+        model.CanQuery = false;
+        model.CanTouch = true;
+        model.CastShadow = false;
+        model.CustomPhysicalProperties = Droplet.PHYSICAL_PROPERTIES;
+        model.AddTag("Droplet");
         this.model = model;
         return this;
     }
@@ -945,5 +927,3 @@ export default class Droplet {
         });
     }
 }
-
-export const DROPLET_STORAGE = Droplet.STORAGE;

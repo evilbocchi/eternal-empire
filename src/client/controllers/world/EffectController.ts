@@ -17,16 +17,11 @@
 
 import { observeTagAdded, rainbowEffect } from "@antivivi/vrldk";
 import { Controller, OnInit } from "@flamework/core";
-import { Debris, Lighting, TweenService } from "@rbxts/services";
-import { LOCAL_PLAYER } from "client/constants";
+import { CollectionService, Debris, TweenService } from "@rbxts/services";
 import { PingManager } from "client/ui/components/stats/StatsWindow";
 import { getSound, SOUND_EFFECTS_GROUP } from "shared/asset/GameAssets";
-import { PLACED_ITEMS_FOLDER } from "shared/constants";
-import { DROPLET_STORAGE } from "shared/item/Droplet";
 import ItemUtils from "shared/item/ItemUtils";
-import Items from "shared/items/Items";
 import Packets from "shared/Packets";
-import { AREAS } from "shared/world/Area";
 
 /**
  * Controller responsible for managing world effects, item visuals, and area lighting.
@@ -140,7 +135,9 @@ export default class EffectController implements OnInit {
         });
 
         Packets.dropletBurnt.fromServer((dropletModelId) => {
-            const droplet = DROPLET_STORAGE.FindFirstChild(dropletModelId) as BasePart | undefined;
+            const droplet = CollectionService.GetTagged("Droplet").find(
+                (droplet) => droplet.Name === dropletModelId, // TODO: optimize by using a map
+            ) as BasePart | undefined;
             if (droplet === undefined)
                 // streamed out
                 return;
@@ -177,7 +174,9 @@ export default class EffectController implements OnInit {
             PingManager.logPing(tick() - t);
         });
         Packets.applyImpulse.fromServer((dropletModelId, impulse) => {
-            const model = DROPLET_STORAGE.FindFirstChild(dropletModelId) as BasePart | undefined;
+            const model = CollectionService.GetTagged("Droplet").find(
+                (droplet) => droplet.Name === dropletModelId, // TODO: optimize by using a map
+            ) as BasePart | undefined;
             if (model === undefined)
                 // streamed out
                 return;

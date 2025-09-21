@@ -140,9 +140,11 @@ namespace Packets {
     export const tpToArea = packet<(area: AreaId) => boolean>();
     export const areaUnlocked = packet<(area: AreaId) => void>();
     export const unlockedAreas = property<Set<AreaId>>(new Set<AreaId>());
+    export const visitedAreas = property<Set<AreaId>>(new Set<AreaId>());
     export const dropletCountChanged = packet<(area: AreaId, current: number, max: number) => void>({
         isUnreliable: true,
     });
+    export const dropletCountsChanged = packet<(counts: Map<AreaId, number>) => void>({ isUnreliable: true });
 
     // quests
     export const questInfo = property<Map<string, DataType.Packed<QuestInfo>>>();

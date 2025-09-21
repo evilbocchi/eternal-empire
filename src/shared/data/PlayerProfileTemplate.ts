@@ -76,11 +76,6 @@ const PlayerProfileTemplate = {
     },
 
     /**
-     * Whether the player has used the portal feature.
-     */
-    usedPortal: false,
-
-    /**
      * Raw number of purifier clicks the player has made.
      */
     rawPurifierClicks: 0,

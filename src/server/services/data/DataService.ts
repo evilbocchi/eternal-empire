@@ -879,10 +879,6 @@ export default class DataService implements OnInit, OnPlayerJoined {
             print(availableEmpires);
             warn("Player data was modified to fix lossy and old data");
         }
-        player.SetAttribute("UsedPortal", playerProfile.Data.usedPortal);
-        player
-            .GetAttributeChangedSignal("UsedPortal")
-            .Connect(() => (playerProfile.Data.usedPortal = player.GetAttribute("UsedPortal") as boolean));
         player.SetAttribute("RawPurifierClicks", math.floor(playerProfile.Data.rawPurifierClicks));
         player
             .GetAttributeChangedSignal("RawPurifierClicks")
