@@ -27,7 +27,7 @@ const COLOR_SEQUENCE_PER_AREA: { [key in AreaId]?: ColorSequence } = {
     ]),
 
     BarrenIslands: new ColorSequence([
-        new ColorSequenceKeypoint(0, Color3.fromRGB(0, 48, 0)),
+        new ColorSequenceKeypoint(0, Color3.fromRGB(0, 150, 0)),
         new ColorSequenceKeypoint(1, Color3.fromRGB(69, 112, 43)),
     ]),
     SlamoVillage: new ColorSequence([
@@ -75,7 +75,7 @@ export default function AreaBoardRenderer() {
             colorSequence,
             dropletCount: counts?.current,
             dropletLimit: counts?.max,
-            placedItemsText: tostring(placedItemsPerArea.get(area.id)) ?? "0",
+            placedItemsText: tostring(placedItemsPerArea.get(area.id) ?? 0),
         };
         switch (id) {
             case "BarrenIslands":

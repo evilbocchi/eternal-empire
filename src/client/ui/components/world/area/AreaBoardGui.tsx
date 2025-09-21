@@ -1,6 +1,6 @@
 import React, { ReactNode, useEffect, useState } from "@rbxts/react";
 import ProgressBar from "client/ui/components/window/ProgressBar";
-import { RobotoMonoBold, RobotoSlabHeavy } from "client/ui/GameFonts";
+import { RobotoMono, RobotoMonoBold, RobotoSlabHeavy } from "client/ui/GameFonts";
 import Area from "shared/world/Area";
 
 declare global {
@@ -20,7 +20,7 @@ export function AreaStatEntry({ title, children }: { title: string; children?: R
             <textlabel
                 BackgroundTransparency={1}
                 FontFace={RobotoMonoBold}
-                Size={new UDim2(0.4, 0, 0.8, 0)}
+                Size={new UDim2(0.35, 0, 0.8, 0)}
                 Text={title}
                 TextColor3={Color3.fromRGB(255, 255, 255)}
                 TextScaled={true}
@@ -105,7 +105,7 @@ export default function AreaBoardGui({
                     max={dropletLimit}
                     colorSequence={colorSequence}
                     fontFace={RobotoMonoBold}
-                    frameProps={{ Size: new UDim2(0.5, 0, 0.8, 0) }}
+                    frameProps={{ Size: new UDim2(0.35, 0, 0.8, 0) }}
                 />
             </AreaStatEntry>
             <AreaStatEntry title="Grid Size:">
@@ -114,7 +114,7 @@ export default function AreaBoardGui({
                     BackgroundTransparency={1}
                     FontFace={RobotoMonoBold}
                     Position={new UDim2(0.5, 0, 0.5, 0)}
-                    Size={new UDim2(0.5, 0, 0.8, 0)}
+                    Size={new UDim2(0.35, 0, 0.8, 0)}
                     Text={`${gridSize.X} x ${gridSize.Z}`}
                     TextColor3={Color3.fromRGB(255, 255, 255)}
                     TextScaled={true}
@@ -130,7 +130,7 @@ export default function AreaBoardGui({
                     BackgroundTransparency={1}
                     FontFace={RobotoMonoBold}
                     Position={new UDim2(0.5, 0, 0.5, 0)}
-                    Size={new UDim2(0.5, 0, 0.8, 0)}
+                    Size={new UDim2(0.35, 0, 0.8, 0)}
                     Text={placedItemsText}
                     TextColor3={Color3.fromRGB(255, 255, 255)}
                     TextScaled={true}
@@ -141,6 +141,55 @@ export default function AreaBoardGui({
                 </textlabel>
             </AreaStatEntry>
         </surfacegui>
+    );
+}
+
+export function SimpleAreaBoardDescription(props: AreaBoardGuiProps) {
+    const dampenedKeypoints = props.colorSequence?.Keypoints.map((keypoint) => {
+        return new ColorSequenceKeypoint(keypoint.Time, keypoint.Value.Lerp(Color3.fromRGB(255, 255, 255), 0.8));
+    });
+    const dampenedColorSequence = new ColorSequence(
+        dampenedKeypoints ?? [
+            new ColorSequenceKeypoint(0, Color3.fromRGB(255, 255, 255)),
+            new ColorSequenceKeypoint(1, Color3.fromRGB(255, 255, 255)),
+        ],
+    );
+    return (
+        <textlabel
+            BackgroundTransparency={1}
+            FontFace={RobotoMono}
+            Size={new UDim2(0.8, 0, 0.3, 0)}
+            Text={props.area.description}
+            TextColor3={Color3.fromRGB(237, 237, 237)}
+            TextScaled={true}
+            TextWrapped={true}
+            TextYAlignment={Enum.TextYAlignment.Top}
+        >
+            <uigradient Color={dampenedColorSequence} Rotation={90} />
+            <uistroke Thickness={2} />
+            <uitextsizeconstraint MaxTextSize={60} />
+            <uipadding PaddingBottom={new UDim(0, 50)} />
+        </textlabel>
+    );
+}
+
+export function SimpleAreaBoardGui(props: AreaBoardGuiProps) {
+    return (
+        <AreaBoardGui {...props}>
+            <textlabel
+                BackgroundTransparency={1}
+                FontFace={RobotoSlabHeavy}
+                Size={new UDim2(1, 0, 0.15, 0)}
+                Text={props.area.name}
+                TextColor3={Color3.fromRGB(255, 255, 255)}
+                TextScaled={true}
+                TextWrapped={true}
+            >
+                <uigradient Color={props.colorSequence} Rotation={90} />
+                <uistroke Color={Color3.fromRGB(0, 0, 0)} Thickness={3} />
+            </textlabel>
+            <SimpleAreaBoardDescription {...props} />
+        </AreaBoardGui>
     );
 }
 
@@ -160,51 +209,7 @@ export function EmphasizedHeaderAreaBoardGui(props: AreaBoardGuiProps) {
                 <uigradient Color={props.colorSequence} Rotation={90} />
                 <uistroke Color={Color3.fromRGB(0, 0, 0)} Thickness={3} />
             </textlabel>
-            <textlabel
-                BackgroundTransparency={1}
-                FontFace={RobotoMonoBold}
-                Size={new UDim2(0.8, 0, 0.25, 0)}
-                Text={props.area.description}
-                TextColor3={Color3.fromRGB(195, 195, 195)}
-                TextScaled={true}
-                TextWrapped={true}
-                TextYAlignment={Enum.TextYAlignment.Top}
-            >
-                <uistroke Thickness={2} />
-                <uitextsizeconstraint MaxTextSize={50} />
-            </textlabel>
-        </AreaBoardGui>
-    );
-}
-
-export function SimpleAreaBoardGui(props: AreaBoardGuiProps) {
-    return (
-        <AreaBoardGui {...props}>
-            <textlabel
-                BackgroundTransparency={1}
-                FontFace={RobotoSlabHeavy}
-                Size={new UDim2(1, 0, 0.15, 0)}
-                Text={props.area.name}
-                TextColor3={Color3.fromRGB(255, 255, 255)}
-                TextScaled={true}
-                TextWrapped={true}
-            >
-                <uigradient Color={props.colorSequence} Rotation={90} />
-                <uistroke Color={Color3.fromRGB(0, 0, 0)} Thickness={3} />
-            </textlabel>
-            <textlabel
-                BackgroundTransparency={1}
-                FontFace={RobotoMonoBold}
-                Size={new UDim2(0.8, 0, 0.25, 0)}
-                Text={props.area.description}
-                TextColor3={Color3.fromRGB(195, 195, 195)}
-                TextScaled={true}
-                TextWrapped={true}
-                TextYAlignment={Enum.TextYAlignment.Top}
-            >
-                <uistroke Thickness={2} />
-                <uitextsizeconstraint MaxTextSize={50} />
-            </textlabel>
+            <SimpleAreaBoardDescription {...props} />
         </AreaBoardGui>
     );
 }
