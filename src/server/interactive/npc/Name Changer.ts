@@ -7,12 +7,14 @@ class NameChanger extends NPC {
 
     override load() {
         super.load();
-        this.rootPart!.Anchored = true;
+        if (this.rootPart) {
+            this.rootPart.Anchored = true;
+        }
         return () => {};
     }
 
     toggleAvailability(available: boolean) {
-        this.rootPart!.CFrame = available ? this.startingCFrame : new CFrame(0, -1000, 0);
+        if (this.rootPart) this.rootPart.CFrame = available ? this.startingCFrame : new CFrame(0, -1000, 0);
         return this;
     }
 }
