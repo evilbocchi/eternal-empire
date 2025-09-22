@@ -1,4 +1,3 @@
-import type ShopController from "client/controllers/interface/ShopController";
 import Item from "shared/item/Item";
 import ItemTrait from "shared/item/traits/ItemTrait";
 

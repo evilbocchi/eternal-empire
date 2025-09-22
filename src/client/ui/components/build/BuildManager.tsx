@@ -8,7 +8,7 @@
 import { weldModel } from "@antivivi/vrldk";
 import { Debris, HttpService, ReplicatedStorage, TweenService, UserInputService, Workspace } from "@rbxts/services";
 import { LOCAL_PLAYER, MOUSE, NONCOLLISION_COLOR } from "client/constants";
-import { SHOP_GUI } from "client/controllers/core/Guis";
+import { ShopManager } from "client/ui/components/item/shop/ShopGui";
 import DocumentManager from "client/ui/components/window/DocumentManager";
 import { getSound, playSound } from "shared/asset/GameAssets";
 import { PLACED_ITEMS_FOLDER } from "shared/constants";
@@ -54,6 +54,7 @@ namespace BuildManager {
     let lastMovedToCFrame = new CFrame();
     let lastSelectingCFrame = new CFrame();
     let lastCameraCFrame = new CFrame();
+    let isShopOpen = false;
 
     export function hasSelection(): boolean {
         return !selected.isEmpty();
@@ -91,7 +92,7 @@ namespace BuildManager {
      */
     export function getRestricted() {
         const buildLevel = (LOCAL_PLAYER.GetAttribute("PermissionLevel") as number | undefined) ?? 0;
-        return (Packets.permLevels.get().build ?? 0) > buildLevel || SHOP_GUI.Enabled;
+        return (Packets.permLevels.get().build ?? 0) > buildLevel || isShopOpen;
     }
 
     /**
@@ -524,7 +525,10 @@ namespace BuildManager {
 
         const permLevelsConnection = Packets.permLevels.observe(() => refresh());
         const permLevelConnection = LOCAL_PLAYER.GetAttributeChangedSignal("PermissionLevel").Connect(() => refresh());
-        const shopGuiEnabledConnection = SHOP_GUI.GetPropertyChangedSignal("Enabled").Connect(() => refresh());
+        const shopGuiEnabledConnection = ShopManager.opened.connect((shop) => {
+            isShopOpen = shop !== undefined;
+            refresh();
+        });
 
         const childRemovedConnection = PLACED_ITEMS_FOLDER.ChildRemoved.Connect((model) => {
             if (model.IsA("Model") && selected.has(model)) {

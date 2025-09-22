@@ -1,4 +1,7 @@
+import { StarterGui } from "@rbxts/services";
 import { PLAYER_GUI } from "client/constants";
+import { IS_CI } from "shared/Context";
+import eat from "shared/hamster/eat";
 
 const createScreenGui = (name: string, displayOrder = 0): ScreenGui => {
     const screenGui = new Instance("ScreenGui");
@@ -26,18 +29,15 @@ export const BACKPACK_GUI = createScreenGui("Backpack");
 export const STATS_GUI = createScreenGui("Stats");
 export const PURCHASE_GUI = createScreenGui("Purchase");
 export const SHOP_GUI = (() => {
-    const gui = new Instance("SurfaceGui");
-    gui.AlwaysOnTop = true;
-    gui.Face = Enum.NormalId.Front;
-    gui.LightInfluence = 0;
-    gui.PixelsPerStud = 50;
-    gui.SizingMode = Enum.SurfaceGuiSizingMode.PixelsPerStud;
-    gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling;
-    gui.ResetOnSpawn = false;
-    gui.Enabled = false;
-    gui.Name = "Shop";
-    gui.Parent = PLAYER_GUI;
-    return gui;
+    const folder = new Instance("Folder");
+    folder.Name = "ShopGui";
+    if (IS_CI) {
+        folder.Parent = StarterGui;
+        eat(folder);
+    } else {
+        folder.Parent = PLAYER_GUI;
+    }
+    return folder;
 })();
 export const WORLD_GUI = (() => {
     const folder = new Instance("Folder");

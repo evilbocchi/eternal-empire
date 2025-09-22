@@ -4,6 +4,7 @@
 import { findBaseParts, formatRichText, getAllInstanceInfo, simpleInterval } from "@antivivi/vrldk";
 import { Players, RunService, Workspace } from "@rbxts/services";
 import { Server } from "shared/api/APIExpose";
+import { IS_CI } from "shared/Context";
 import { CURRENCY_DETAILS } from "shared/currency/CurrencyDetails";
 import ThisEmpire from "shared/data/ThisEmpire";
 import GameSpeed from "shared/GameSpeed";
@@ -44,7 +45,7 @@ export default class Dropper extends ItemTrait {
             droplet.Parent = Workspace;
 
             const player = Players.GetPlayerByUserId(ThisEmpire.data.owner) ?? Players.GetPlayers()[0];
-            if (player !== undefined) {
+            if (player !== undefined && !IS_CI) {
                 droplet.SetNetworkOwner(player);
             }
 
@@ -55,7 +56,7 @@ export default class Dropper extends ItemTrait {
                     if (luckyDropletInstantiator !== undefined) {
                         const luckyDroplet = luckyDropletInstantiator();
                         luckyDroplet.Parent = Workspace;
-                        if (player !== undefined) {
+                        if (player !== undefined && !IS_CI) {
                             luckyDroplet.SetNetworkOwner(player);
                         }
                     }

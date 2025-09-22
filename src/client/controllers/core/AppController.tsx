@@ -28,7 +28,7 @@ import CommandsWindow from "client/ui/components/commands/CommandsWindow";
 import ClickSparkManager from "client/ui/components/effect/ClickSparkManager";
 import InventoryWindow from "client/ui/components/item/inventory/InventoryWindow";
 import PurchaseWindow from "client/ui/components/item/shop/PurchaseWindow";
-import ShopWindow from "client/ui/components/item/shop/ShopWindow";
+import ShopGui from "client/ui/components/item/shop/ShopGui";
 import LogsWindow from "client/ui/components/logs/LogsWindow";
 import DialogueWindow from "client/ui/components/npc/DialogueWindow";
 import QuestWindow from "client/ui/components/quest/QuestWindow";
@@ -76,7 +76,7 @@ export default class AppController implements OnStart {
         createRoot(BACKPACK_GUI).render(<BackpackWindow />);
         createRoot(STATS_GUI).render(<StatsWindow />);
         createRoot(PURCHASE_GUI).render(<PurchaseWindow />);
-        createRoot(SHOP_GUI).render(<ShopWindow />);
+        createRoot(SHOP_GUI).render(<ShopGui />);
         createRoot(WORLD_GUI).render(<WorldRenderer />);
 
         task.wait(1);

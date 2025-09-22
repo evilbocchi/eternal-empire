@@ -13,6 +13,7 @@
  */
 import { OnInit, Service } from "@flamework/core";
 import { OnPlayerAdded } from "server/services/ModdingService";
+import { IS_CI } from "shared/Context";
 import { PlayerProfileManager } from "shared/data/profile/ProfileManager";
 import Packets from "shared/Packets";
 
@@ -29,7 +30,16 @@ export default class SettingsService implements OnInit, OnPlayerAdded {
     onPlayerAdded(player: Player) {
         const playerProfile = PlayerProfileManager.load(player.UserId);
         if (playerProfile !== undefined) {
-            Packets.settings.setFor(player, playerProfile.Data.settings);
+            let loadedSettings: Settings;
+            if (IS_CI) {
+                // For convenience (aka so you can listen to your music without the game music blasting at you)
+                loadedSettings = table.clone(playerProfile.Data.settings);
+                loadedSettings.Music = false;
+            } else {
+                loadedSettings = playerProfile.Data.settings;
+            }
+
+            Packets.settings.setFor(player, loadedSettings);
         }
     }
 

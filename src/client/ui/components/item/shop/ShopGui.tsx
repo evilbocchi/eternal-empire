@@ -1,5 +1,7 @@
 import Signal from "@antivivi/lemon-signal";
-import React, { Fragment, memo, useCallback, useEffect, useMemo, useState } from "@rbxts/react";
+import React, { memo, useCallback, useEffect, useMemo, useState } from "@rbxts/react";
+import { CollectionService, Debris, TweenService } from "@rbxts/services";
+import { LOCAL_PLAYER } from "client/constants";
 import useHotkeyWithTooltip from "client/ui/components/hotkeys/useHotkeyWithTooltip";
 import InventoryFilter, {
     filterItems,
@@ -9,36 +11,98 @@ import { PurchaseManager } from "client/ui/components/item/shop/PurchaseWindow";
 import ShopItemSlot from "client/ui/components/item/shop/ShopItemSlot";
 import { RobotoSlabHeavy } from "client/ui/GameFonts";
 import useProperty from "client/ui/hooks/useProperty";
-import { playSound } from "shared/asset/GameAssets";
+import { getSound, playSound } from "shared/asset/GameAssets";
 import Item from "shared/item/Item";
 import Shop from "shared/item/traits/Shop";
 import Items from "shared/items/Items";
 import Packets from "shared/Packets";
 
-interface ShopWindowProps {
-    shop?: Shop;
-    viewportManagement?: ItemViewportManagement;
-}
-
 const MemoizedShopItemSlot = memo(ShopItemSlot);
 
-export namespace ShopManager {
-    export const opened = new Signal<(shop?: Shop) => void>();
+type ShopCandidate = { guiPart: Part; shop: Shop };
 
-    export function openShop(shop: Shop) {
-        opened.fire(shop);
+export namespace ShopManager {
+    /** The current shop GUI part being displayed. */
+    let shopGuiPart: Part | undefined;
+
+    export const opened = new Signal<(shop?: Shop, adornee?: Part) => void>();
+
+    /**
+     * Animates and hides the shop GUI part.
+     * @param shopGuiPart The shop GUI part to hide.
+     */
+    export function hideShopGuiPart(shopGuiPart: Part) {
+        TweenService.Create(shopGuiPart, new TweenInfo(0.3), { LocalTransparencyModifier: 1 }).Play();
+
+        const sound = getSound("ShopClose.mp3");
+        sound.Play();
+        sound.Parent = shopGuiPart;
+        Debris.AddItem(sound, 5);
     }
 
-    export function closeShop() {
-        opened.fire();
+    /**
+     * Refreshes the shop interface and updates the displayed shop and items.
+     * @param guiPart The shop GUI part to display.
+     * @param shop The shop data to display.
+     */
+    export function refreshShop(guiPart?: Part, shop?: Shop) {
+        if (shopGuiPart === guiPart) return;
+        shopGuiPart = guiPart;
+
+        const previousShopGuiPart = shopGuiPart;
+        if (previousShopGuiPart !== undefined && previousShopGuiPart !== guiPart) {
+            hideShopGuiPart(previousShopGuiPart);
+        }
+
+        if (guiPart === undefined || shop === undefined) {
+            opened.fire();
+            return;
+        }
+
+        const sound = getSound("ShopOpen.mp3");
+        sound.Play();
+        sound.Parent = guiPart;
+        Debris.AddItem(sound, 5);
+
+        TweenService.Create(guiPart, new TweenInfo(0.3), { LocalTransparencyModifier: 0 }).Play();
+        opened.fire(shop, guiPart);
+    }
+
+    export function checkForShop(candidates: Map<BasePart, ShopCandidate>) {
+        const primaryPart = LOCAL_PLAYER.Character?.PrimaryPart;
+        if (primaryPart === undefined) return;
+
+        let shopFound = false;
+        for (const [hitbox, { guiPart, shop }] of candidates) {
+            const localPosition = hitbox.CFrame.PointToObjectSpace(primaryPart.Position);
+            if (math.abs(localPosition.X) > hitbox.Size.X / 2 || math.abs(localPosition.Z) > hitbox.Size.Z / 2)
+                continue;
+
+            refreshShop(guiPart, shop);
+            shopGuiPart = guiPart;
+            shopFound = true;
+            break;
+        }
+
+        if (shopFound === false) {
+            refreshShop();
+        }
     }
 }
 
 /**
  * Main shop window component with integrated filtering
  */
-export default function ShopWindow({ shop: shopOverride, viewportManagement }: ShopWindowProps) {
-    const [shop, setShop] = useState<Shop | undefined>(shopOverride);
+export default function ShopGui({
+    shop: shopOverride,
+    adornee: adorneeOverride,
+    viewportManagement,
+}: {
+    shop?: Shop;
+    adornee?: Part;
+    viewportManagement?: ItemViewportManagement;
+}) {
+    const [{ shop, adornee }, setShopInfo] = useState({ shop: shopOverride, adornee: adorneeOverride });
     const { searchQuery, props: filterProps } = useBasicInventoryFilter();
     const [hideMaxedItems, setHideMaxedItems] = useState(Packets.settings.get().HideMaxedItems);
     const ownedPerItem = useProperty(Packets.bought);
@@ -49,19 +113,48 @@ export default function ShopWindow({ shop: shopOverride, viewportManagement }: S
         const settingsConnection = Packets.settings.observe((settings) => {
             setHideMaxedItems(settings.HideMaxedItems);
         });
-        const openedConnection = ShopManager.opened.connect((newShop) => {
-            setShop(newShop);
+        const openedConnection = ShopManager.opened.connect((shop, adornee) => {
+            setShopInfo({ shop, adornee });
         });
+
+        const candidates = new Map<BasePart, ShopCandidate>();
+        const addCandidate = (hitbox: BasePart) => {
+            const model = hitbox.Parent;
+            if (model === undefined) return;
+            const itemId = model.GetAttribute("ItemId") as string | undefined;
+            if (itemId === undefined) return;
+            const item = Items.getItem(itemId);
+            if (item === undefined) return;
+            const shop = item.findTrait("Shop");
+            if (shop === undefined) return;
+            const shopGuiPart = model.FindFirstChild("ShopGuiPart") as Part;
+            if (shopGuiPart === undefined) return;
+            shopGuiPart.LocalTransparencyModifier = 1;
+            candidates.set(hitbox, { guiPart: shopGuiPart, shop });
+        };
+        for (const hitbox of CollectionService.GetTagged("Shop")) {
+            addCandidate(hitbox as BasePart);
+        }
+        CollectionService.GetInstanceAddedSignal("Shop").Connect((hitbox) => {
+            addCandidate(hitbox as BasePart);
+        });
+        CollectionService.GetInstanceRemovedSignal("Shop").Connect((hitbox) => {
+            candidates.delete(hitbox as BasePart);
+        });
+
+        let active = true;
+        const loop = () => {
+            if (active === false) return;
+            ShopManager.checkForShop(candidates);
+            task.delay(0.1, loop);
+        };
+        loop();
         return () => {
+            active = false;
             settingsConnection.disconnect();
             openedConnection.disconnect();
         };
     }, []);
-
-    useEffect(() => {
-        if (!shopOverride) return;
-        setShop(shopOverride);
-    }, [shopOverride]);
 
     const dataPerItem = useMemo(() => {
         return filterItems(shopItems, searchQuery, filterProps.traitFilters);
@@ -86,7 +179,19 @@ export default function ShopWindow({ shop: shopOverride, viewportManagement }: S
     });
 
     return (
-        <Fragment>
+        <surfacegui
+            key={"Shop"}
+            Adornee={adornee}
+            AlwaysOnTop={true}
+            ClipsDescendants={true}
+            Enabled={adornee !== undefined && shop !== undefined}
+            Face={Enum.NormalId.Front}
+            LightInfluence={0}
+            PixelsPerStud={50}
+            SizingMode={Enum.SurfaceGuiSizingMode.PixelsPerStud}
+            ZIndexBehavior={Enum.ZIndexBehavior.Sibling}
+            ResetOnSpawn={false}
+        >
             {/* Main container */}
             <uipadding
                 PaddingBottom={new UDim(0, 5)}
@@ -231,6 +336,6 @@ export default function ShopWindow({ shop: shopOverride, viewportManagement }: S
                     </textbutton>
                 </frame>
             </scrollingframe>
-        </Fragment>
+        </surfacegui>
     );
 }

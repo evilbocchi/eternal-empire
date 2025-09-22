@@ -1,10 +1,10 @@
-import React, { StrictMode, useEffect, useMemo, useState } from "@rbxts/react";
-import ReactRoblox, { createRoot } from "@rbxts/react-roblox";
-import { StarterGui, Workspace } from "@rbxts/services";
+import React, { StrictMode, useEffect } from "@rbxts/react";
+import ReactRoblox from "@rbxts/react-roblox";
+import { Workspace } from "@rbxts/services";
 import { CreateReactStory, EnumList } from "@rbxts/ui-labs";
 import { ChooseOptionType } from "@rbxts/ui-labs/src/ControlTypings/Advanced";
 import PurchaseWindow from "client/ui/components/item/shop/PurchaseWindow";
-import ShopWindow from "client/ui/components/item/shop/ShopWindow";
+import ShopGui from "client/ui/components/item/shop/ShopGui";
 import useCIViewportManagement from "client/ui/components/item/useCIViewportManagement";
 import StoryMocking from "client/ui/components/StoryMocking";
 import TooltipWindow from "client/ui/components/tooltip/TooltipWindow";
@@ -25,7 +25,6 @@ export = CreateReactStory(
         reactRoblox: ReactRoblox,
         controls: {
             hideMaxedItems: false,
-            onSurface: false,
             shop: EnumList(shops, ClassLowerNegativeShop.name),
         },
     },
@@ -35,9 +34,8 @@ export = CreateReactStory(
         const item = Items.getItem(props.controls.shop as string) ?? ClassLowerNegativeShop;
         const shop = item.findTrait("Shop")!;
         const viewportManagement = useCIViewportManagement({ enabled: true });
-        const shopWindow = <ShopWindow shop={shop} viewportManagement={viewportManagement} />;
 
-        const [surfaceGui, setSurfaceGui] = useState<SurfaceGui>();
+        const [adornee, setAdornee] = React.useState<Part | undefined>(undefined);
         useEffect(() => {
             const part = new Instance("Part");
             part.Color = Color3.fromRGB(27, 42, 53);
@@ -45,31 +43,10 @@ export = CreateReactStory(
             part.Anchored = true;
             part.Position = new Vector3(0, 5, 0);
             part.Parent = Workspace;
-            const surfaceGui = new Instance("SurfaceGui");
-            surfaceGui.Face = Enum.NormalId.Front;
-            surfaceGui.Adornee = part;
-            surfaceGui.SizingMode = Enum.SurfaceGuiSizingMode.PixelsPerStud;
-            surfaceGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling;
-            surfaceGui.PixelsPerStud = 50;
-            surfaceGui.ClipsDescendants = true;
-            surfaceGui.Parent = StarterGui;
-            setSurfaceGui(surfaceGui);
+            setAdornee(part);
 
             return () => part.Destroy();
         }, []);
-
-        const root = useMemo(() => {
-            if (!surfaceGui) return;
-            return createRoot(surfaceGui);
-        }, [surfaceGui]);
-
-        useEffect(() => {
-            if (!props.controls.onSurface || !root || !surfaceGui) return;
-            root.render(shopWindow);
-            return () => {
-                root.unmount();
-            };
-        }, [props.controls.onSurface, root, item]);
 
         useEffect(() => {
             const settings = Packets.settings.get();
@@ -80,9 +57,7 @@ export = CreateReactStory(
         return (
             <StrictMode>
                 <TooltipWindow />
-                <frame Size={new UDim2(1, 0, 1, 0)} BackgroundTransparency={1} ZIndex={-10}>
-                    {!props.controls.onSurface && shopWindow}
-                </frame>
+                <ShopGui shop={shop} adornee={adornee} viewportManagement={viewportManagement} />
                 <PurchaseWindow viewportManagement={viewportManagement} />
             </StrictMode>
         );

@@ -3,6 +3,8 @@ import eat from "shared/hamster/eat";
 
 export default class WorldNode<T extends Instance = Instance> {
     readonly INSTANCES = new Set<T>();
+    private addedConnection?: RBXScriptConnection;
+    private removedConnection?: RBXScriptConnection;
 
     constructor(
         public tag: string,
@@ -10,16 +12,17 @@ export default class WorldNode<T extends Instance = Instance> {
         private onUnregister?: (instance: T) => void,
     ) {
         CollectionService.GetTagged(tag).forEach((instance) => this.registerInstance(instance as T));
-        const addedConnection = CollectionService.GetInstanceAddedSignal(tag).Connect((instance) => {
+        this.addedConnection?.Disconnect();
+        this.removedConnection?.Disconnect();
+        this.addedConnection = CollectionService.GetInstanceAddedSignal(tag).Connect((instance) => {
             this.registerInstance(instance as T);
         });
-        const removedConnection = CollectionService.GetInstanceRemovedSignal(tag).Connect((instance) => {
+        this.removedConnection = CollectionService.GetInstanceRemovedSignal(tag).Connect((instance) => {
             this.unregisterInstance(instance as T);
         });
         eat(() => {
-            addedConnection.Disconnect();
-            removedConnection.Disconnect();
-            table.clear(this);
+            this.addedConnection?.Disconnect();
+            this.removedConnection?.Disconnect();
         });
     }
 
