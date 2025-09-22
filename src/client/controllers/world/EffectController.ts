@@ -19,8 +19,8 @@ import { observeTagAdded, rainbowEffect } from "@antivivi/vrldk";
 import { Controller, OnInit } from "@flamework/core";
 import { CollectionService, Debris, TweenService } from "@rbxts/services";
 import { PingManager } from "client/ui/components/stats/StatsWindow";
+import UserGameSettings from "shared/api/UserGameSettings";
 import { getSound, SOUND_EFFECTS_GROUP } from "shared/asset/GameAssets";
-import ItemUtils from "shared/item/ItemUtils";
 import Packets from "shared/Packets";
 
 /**
@@ -128,7 +128,7 @@ export default class EffectController implements OnInit {
             const originalSize = drop.GetAttribute("OriginalSize") as Vector3 | undefined;
             if (originalSize === undefined) return;
 
-            if (ItemUtils.UserGameSettings!.SavedQualityLevel.Value > 1) {
+            if (UserGameSettings!.SavedQualityLevel.Value > 1) {
                 drop.Size = originalSize.add(new Vector3(0.15, 0.825, 0.15));
                 TweenService.Create(drop, new TweenInfo(0.3), { Size: originalSize }).Play();
             }

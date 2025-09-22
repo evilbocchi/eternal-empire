@@ -17,7 +17,7 @@ import { ContentProvider, ReplicatedStorage, TweenService, Workspace } from "@rb
 import { LOCAL_PLAYER } from "client/constants";
 import { INTERFACE } from "client/controllers/core/UIController";
 import { questState } from "client/ui/components/quest/QuestState";
-import SoundManager from "client/ui/components/SoundManager";
+import SoundManager from "client/ui/SoundManager";
 import { assets, getAsset } from "shared/asset/AssetMap";
 import { playSound } from "shared/asset/GameAssets";
 import { WAYPOINTS } from "shared/constants";

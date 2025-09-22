@@ -204,7 +204,7 @@ export default function ShopItemSlot({
             options.push(currency);
         }
         for (const item of Items.sortedItems) {
-            if (!requiredItems.has(item)) continue;
+            if (!requiredItems.has(item.id)) continue;
             options.push(item);
         }
         let active = true;
@@ -229,7 +229,7 @@ export default function ShopItemSlot({
     const isCurrency = typeIs(viewing, "string");
     const currency = isCurrency ? (viewing as Currency) : undefined;
     const reqItem = !isCurrency ? (viewing as Item) : undefined;
-    const amount = currency ? price?.get(currency) : reqItem !== undefined ? requiredItems.get(reqItem) : 0;
+    const amount = currency ? price?.get(currency) : reqItem !== undefined ? requiredItems.get(reqItem.id) : 0;
     const shouldHide = hideMaxedItems && price === undefined;
 
     return (

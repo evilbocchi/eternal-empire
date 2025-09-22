@@ -1,10 +1,10 @@
 import { getAllInstanceInfo } from "@antivivi/vrldk";
 import { Players, TweenService } from "@rbxts/services";
+import { Server, UISignals } from "shared/api/APIExpose";
+import UserGameSettings from "shared/api/UserGameSettings";
 import { playSound } from "shared/asset/GameAssets";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
-import { Server } from "shared/api/APIExpose";
 import Item from "shared/item/Item";
-import ItemUtils from "shared/item/ItemUtils";
 import Boostable from "shared/item/traits/boost/Boostable";
 import Operative from "shared/item/traits/Operative";
 import NamedUpgrades from "shared/namedupgrade/NamedUpgrades";
@@ -126,7 +126,7 @@ export default class Generator extends Boostable {
             const clickPartOriginalSize = clickPart?.Size;
 
             remoteEvent.OnClientEvent.Connect((amountPerCurrency?: CurrencyMap) => {
-                if (ItemUtils.UserGameSettings!.SavedQualityLevel.Value > 5) {
+                if (UserGameSettings!.SavedQualityLevel.Value > 5) {
                     for (const [part, position] of positions) {
                         TweenService.Create(part, tween1, {
                             Position: position.sub(new Vector3(0, 0.125, 0)),
@@ -149,7 +149,7 @@ export default class Generator extends Boostable {
                         }).Play();
                     }
                 } else {
-                    ItemUtils.showCurrencyGain?.(part.Position, amountPerCurrency);
+                    UISignals.showCurrencyGain.fire(part.Position, amountPerCurrency);
                 }
             });
         });

@@ -4,10 +4,9 @@ import { Streaming } from "@antivivi/vrldk";
 import PartCacheModule from "@rbxts/partcache";
 import { PartCache } from "@rbxts/partcache/out/class";
 import { TweenService, Workspace } from "@rbxts/services";
+import { Server, UISignals } from "shared/api/APIExpose";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
-import { Server } from "shared/api/APIExpose";
 import Item from "shared/item/Item";
-import ItemUtils from "shared/item/ItemUtils";
 import Clickable from "shared/item/traits/action/Clickable";
 import Manumatic from "shared/item/traits/action/Manumatic";
 import Operative from "shared/item/traits/Operative";
@@ -92,7 +91,7 @@ export = new Item(script.Name)
         let newSize: Vector3;
 
         Streaming.onStreamableRemote(model, (amountPerCurrency) => {
-            ItemUtils.showCurrencyGain?.(model.PrimaryPart!.Position, amountPerCurrency);
+            UISignals.showCurrencyGain.fire(model.PrimaryPart!.Position, amountPerCurrency);
             model.PrimaryPart!.FindFirstChildOfClass("Sound")?.Play();
 
             if (shadow === undefined) {

@@ -5,6 +5,7 @@ import {
     HttpService,
     MarketplaceService,
     Players,
+    RunService,
     TeleportService,
 } from "@rbxts/services";
 import { IS_CI, IS_PUBLIC_SERVER, IS_SINGLE_SERVER, IS_STUDIO } from "shared/Context";
@@ -48,7 +49,7 @@ namespace AvailableEmpire {
     /**
      * DataStore for tracking which empires each player has access to.
      */
-    const availableEmpiresStore = DataStoreService.GetDataStore("AvailableEmpires");
+    const availableEmpiresStore = RunService.IsClient() ? undefined : DataStoreService.GetDataStore("AvailableEmpires");
 
     /**
      * Cache of available empires per player to reduce DataStore calls.
@@ -96,6 +97,10 @@ namespace AvailableEmpire {
      * @returns Map of empire IDs to empire information.
      */
     export function get(userId: number): Map<string, EmpireInfo> {
+        if (availableEmpiresStore === undefined) {
+            throw "Cannot get available empires on client";
+        }
+
         const cached = availableEmpiresPerPlayer.get(userId);
         if (cached !== undefined) {
             return cached;
@@ -124,6 +129,10 @@ namespace AvailableEmpire {
      * @param empire The empire ID to add.
      */
     export function add(userId: number, empire: string) {
+        if (availableEmpiresStore === undefined) {
+            throw "Cannot add available empires on client";
+        }
+
         const [availableEmpires] = availableEmpiresStore.UpdateAsync(
             "Player_" + userId,
             (oldValue: Map<string, EmpireInfo> | undefined) => {
@@ -149,6 +158,10 @@ namespace AvailableEmpire {
      * @param empire The empire ID to remove.
      */
     export function remove(userId: number, empire: string) {
+        if (availableEmpiresStore === undefined) {
+            throw "Cannot remove available empires on client";
+        }
+
         const [availableEmpires] = availableEmpiresStore.UpdateAsync(
             "Player_" + userId,
             (oldValue: Map<string, EmpireInfo> | undefined) => {
@@ -236,6 +249,10 @@ namespace AvailableEmpire {
     }
 
     export function registerPlayer(player: Player) {
+        if (availableEmpiresStore === undefined) {
+            throw "Cannot register player on client";
+        }
+
         const availableEmpires = get(player.UserId);
         pcall(() => {
             for (const [id, empire] of availableEmpires) {

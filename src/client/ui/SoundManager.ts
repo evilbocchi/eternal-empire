@@ -3,11 +3,13 @@ import { Environment } from "@rbxts/ui-labs";
 import { LOCAL_PLAYER } from "client/constants";
 import { ASSETS, SOUND_EFFECTS_GROUP, getSound } from "shared/asset/GameAssets";
 import { IS_CI } from "shared/Context";
-import eat from "shared/hamster/eat";
 import Packets from "shared/Packets";
 import { AREAS } from "shared/world/Area";
 
 namespace SoundManager {
+    let inChallenge = false;
+    let connection: RBXScriptConnection | undefined = undefined;
+
     export const MUSIC_GROUP = new Instance("SoundGroup");
     MUSIC_GROUP.Name = "Music";
     MUSIC_GROUP.Volume = 1;
@@ -38,15 +40,12 @@ namespace SoundManager {
         });
     }
 
-    let inChallenge = false;
-    let connection: RBXScriptConnection | undefined = undefined;
-
     /**
      * Selects a random music track for a given area, considering challenge and time of day.
      * @param id The AreaId to select music for.
      * @returns The selected Sound instance, or undefined.
      */
-    const getRandomMusic = (id: AreaId): Sound | undefined => {
+    function getRandomMusic(id: AreaId): Sound | undefined {
         const areaMusicFolder = MUSIC_GROUP.FindFirstChild(id);
         if (areaMusicFolder === undefined) return undefined;
         let folder = inChallenge
@@ -62,8 +61,12 @@ namespace SoundManager {
         }
         folder.SetAttribute("Current", newCurrent);
         return sounds[newCurrent] as Sound;
-    };
-    const isNight = () => math.abs(Lighting.ClockTime - 12) / 12 > 0.5;
+    }
+
+    /** Checks if night music should be played based on the current time. */
+    function isNight() {
+        return math.abs(Lighting.ClockTime - 12) / 12 > 0.5;
+    }
 
     export let playing: Sound | undefined = undefined;
 
@@ -133,44 +136,45 @@ namespace SoundManager {
         });
     }
 
-    let ready = false;
-    const settingsConnection = Packets.settings.observe((value) => {
-        MUSIC_GROUP.Volume = value.Music ? 0.5 : 0;
-        SOUND_EFFECTS_GROUP.Volume = value.SoundEffects ? 1 : 0;
-        if (ready === false) {
-            ready = true;
-            refreshMusic();
-        }
-    });
-    LOCAL_PLAYER.GetAttributeChangedSignal("Area").Connect(refreshMusic);
-    const challengeConnection = Packets.currentChallenge.observe((challenge) => {
-        inChallenge = challenge.name !== "";
-        if (ready === true) refreshMusic(true);
-    });
+    export function init() {
+        let ready = false;
+        const settingsConnection = Packets.settings.observe((value) => {
+            MUSIC_GROUP.Volume = value.Music ? 0.5 : 0;
+            SOUND_EFFECTS_GROUP.Volume = value.SoundEffects ? 1 : 0;
+            if (ready === false) {
+                ready = true;
+                refreshMusic();
+            }
+        });
+        const challengeConnection = Packets.currentChallenge.observe((challenge) => {
+            inChallenge = challenge.name !== "";
+            if (ready === true) refreshMusic(true);
+        });
+        const areaConnection = LOCAL_PLAYER.GetAttributeChangedSignal("Area").Connect(() => {
+            if (ready === true) refreshMusic();
+        });
 
-    const oceanWaves = getSound("OceanWaves.mp3");
-    oceanWaves.Parent = IS_CI ? Environment.PluginWidget : SOUND_EFFECTS_GROUP;
-    oceanWaves.Volume = 0;
-    oceanWaves.Looped = true;
-    oceanWaves.Play();
-    const cameraConnection = Workspace.CurrentCamera!.GetPropertyChangedSignal("CFrame").Connect(() => {
-        const dist = Workspace.CurrentCamera!.CFrame.Y - -16.5; // Ocean level
-        oceanWaves.Volume = (1 - math.abs(dist) / 100) / 10;
-    });
+        const oceanWaves = getSound("OceanWaves.mp3");
+        oceanWaves.Parent = IS_CI ? Environment.PluginWidget : SOUND_EFFECTS_GROUP;
+        oceanWaves.Volume = 0;
+        oceanWaves.Looped = true;
+        oceanWaves.Play();
+        const cameraConnection = Workspace.CurrentCamera!.GetPropertyChangedSignal("CFrame").Connect(() => {
+            const dist = Workspace.CurrentCamera!.CFrame.Y - -16.5; // Ocean level
+            oceanWaves.Volume = (1 - math.abs(dist) / 100) / 10;
+        });
 
-    Workspace.SetAttribute("ChangeMusic", false);
-    const debugConnection = Workspace.GetAttributeChangedSignal("ChangeMusic").Connect(() => refreshMusic(true));
-
-    eat(() => {
-        playing?.Stop();
-        settingsConnection.Disconnect();
-        challengeConnection.Disconnect();
-        cameraConnection.Disconnect();
-        debugConnection.Disconnect();
-        connection?.Disconnect();
-        MUSIC_GROUP.Destroy();
-        oceanWaves.Destroy();
-    });
+        return () => {
+            playing?.Stop();
+            settingsConnection.Disconnect();
+            challengeConnection.Disconnect();
+            areaConnection.Disconnect();
+            cameraConnection.Disconnect();
+            connection?.Disconnect();
+            MUSIC_GROUP.Destroy();
+            oceanWaves.Destroy();
+        };
+    }
 }
 
 export default SoundManager;

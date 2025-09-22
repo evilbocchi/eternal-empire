@@ -63,10 +63,13 @@ export default function fixDuplicatedItemsData(items: ItemsData) {
 
     const nestCheck = (base: Map<string, number>, item: Item, amount?: number) => {
         if (amount === undefined) return;
-        for (const [subItem, requiredAmount] of item.requiredItems) {
+        for (const [subItemId, requiredAmount] of item.requiredItems) {
             const totalAmount = requiredAmount * amount;
-            addAmount(base, subItem.id, totalAmount);
-            nestCheck(base, subItem, totalAmount);
+            addAmount(base, subItemId, totalAmount);
+            const subItem = Items.getItem(subItemId);
+            if (subItem !== undefined) {
+                nestCheck(base, subItem, totalAmount);
+            }
         }
     };
     const addedAmounts = new Map<string, number>();

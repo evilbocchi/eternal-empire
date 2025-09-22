@@ -1,11 +1,11 @@
 import Difficulty from "@antivivi/jjt-difficulties";
 import { OnoeNum } from "@antivivi/serikanum";
 import { getInstanceInfo } from "@antivivi/vrldk";
+import applyDropletImpulse from "shared/api/applyDropletImpulse";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import eat from "shared/hamster/eat";
 import Droplet from "shared/item/Droplet";
 import Item from "shared/item/Item";
-import ItemUtils from "shared/item/ItemUtils";
 import Conveyor from "shared/item/traits/conveyor/Conveyor";
 import Upgrader from "shared/item/traits/upgrader/Upgrader";
 import ExcavationStone from "shared/items/excavation/ExcavationStone";
@@ -65,7 +65,7 @@ export = new Item(script.Name)
             }
 
             const impulse = right.mul(side).mul(dropletModel.Mass).mul(25);
-            ItemUtils.applyImpulse(dropletModel, impulse);
+            applyDropletImpulse(dropletModel, impulse);
         });
         eat(() => {
             connection?.Disconnect();

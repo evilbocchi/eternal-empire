@@ -116,15 +116,15 @@ export function WrappingPriceOptions({
     requiredItems,
     viewportManagement,
     affordablePerCurrency,
-    affordablePerItem,
+    affordablePerItemId,
 }: {
     priceOptionHeight?: number;
     padding?: number;
     price: CurrencyBundle;
-    requiredItems: Map<Item, number>;
+    requiredItems: Map<string, number>;
     viewportManagement?: ItemViewportManagement;
     affordablePerCurrency: Map<Currency, boolean>;
-    affordablePerItem: Map<Item, boolean>;
+    affordablePerItemId: Map<string, boolean>;
 }) {
     const ref = useRef<Frame>();
     const containerXPixels = ref.current?.AbsoluteSize.X;
@@ -134,7 +134,7 @@ export function WrappingPriceOptions({
         const currencyKey = price.amountPerCurrency.isEmpty()
             ? ""
             : [...price.amountPerCurrency].map(([c, a]) => `${c}:${a.toString()}`).join(",");
-        const itemKey = requiredItems.size() === 0 ? "" : [...requiredItems].map(([i, a]) => `${i.id}:${a}`).join(",");
+        const itemKey = requiredItems.size() === 0 ? "" : [...requiredItems].map(([i, a]) => `${i}:${a}`).join(",");
         return `${currencyKey}|${itemKey}`;
     }, [price, requiredItems]);
 
@@ -152,7 +152,7 @@ export function WrappingPriceOptions({
         sortedInfos.push({ text: getText(currency, undefined, amount), currency });
     }
     for (const requiredItem of Items.sortedItems) {
-        const amount = requiredItems.get(requiredItem);
+        const amount = requiredItems.get(requiredItem.id);
         if (amount === undefined) continue;
         sortedInfos.push({ text: getText(undefined, requiredItem, amount), item: requiredItem });
     }
@@ -235,7 +235,7 @@ export function WrappingPriceOptions({
                 const affordable = info.currency
                     ? (affordablePerCurrency.get(info.currency) ?? false)
                     : info.item
-                      ? (affordablePerItem.get(info.item) ?? false)
+                      ? (affordablePerItemId.get(info.item.id) ?? false)
                       : false;
 
                 return (

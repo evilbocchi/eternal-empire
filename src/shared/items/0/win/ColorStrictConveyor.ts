@@ -1,13 +1,13 @@
 import Difficulty from "@antivivi/jjt-difficulties";
 import { OnoeNum } from "@antivivi/serikanum";
 import { getAllInstanceInfo } from "@antivivi/vrldk";
+import { Server } from "shared/api/APIExpose";
+import applyDropletImpulse from "shared/api/applyDropletImpulse";
 import { playSound } from "shared/asset/GameAssets";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import { CURRENCY_DETAILS } from "shared/currency/CurrencyDetails";
-import { Server } from "shared/api/APIExpose";
 import Droplet from "shared/item/Droplet";
 import Item from "shared/item/Item";
-import ItemUtils from "shared/item/ItemUtils";
 import Conveyor from "shared/item/traits/conveyor/Conveyor";
 
 declare global {
@@ -77,6 +77,6 @@ export = new Item(script.Name)
 
             if (bestCurrency !== placedItem.currency) return;
 
-            ItemUtils.applyImpulse(part, forward.mul(part.Mass).mul(40));
+            applyDropletImpulse(part, forward.mul(part.Mass).mul(40));
         });
     });

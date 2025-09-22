@@ -21,6 +21,7 @@ import {
 } from "client/controllers/core/Guis";
 import BuildController from "client/controllers/gameplay/BuildController";
 import InventoryController from "client/controllers/interface/InventoryController";
+import SoundManager from "client/ui/SoundManager";
 import MainLayout from "client/ui/components/MainLayout";
 import BackpackWindow from "client/ui/components/backpack/BackpackWindow";
 import BalanceWindow from "client/ui/components/balance/BalanceWindow";
@@ -41,6 +42,7 @@ import StatsWindow from "client/ui/components/stats/StatsWindow";
 import TooltipWindow from "client/ui/components/tooltip/TooltipWindow";
 import WorldRenderer from "client/ui/components/world/WorldRenderer";
 import { useVisibilityMain } from "client/ui/hooks/useVisibility";
+import eat from "shared/hamster/eat";
 
 export function Hamster() {
     useVisibilityMain(true);
@@ -86,5 +88,7 @@ export default class AppController implements OnStart {
 
         task.wait(1);
         createRoot(HAMSTER_GUI).render(<Hamster />);
+
+        eat(SoundManager.init());
     }
 }

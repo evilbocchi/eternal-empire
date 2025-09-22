@@ -153,7 +153,9 @@ export default class ProgressionEstimationService implements OnGameAPILoaded, On
 
             // check if required items is in items
             let canObtain = true;
-            for (const [requiredItem, requiredAmount] of item.requiredItems) {
+            for (const [requiredItemId, requiredAmount] of item.requiredItems) {
+                const requiredItem = Items.getItem(requiredItemId);
+                if (requiredItem === undefined) continue;
                 if (!inventory.has(requiredItem) || inventory.get(requiredItem)! < requiredAmount) {
                     canObtain = false;
                     break;
@@ -214,7 +216,9 @@ export default class ProgressionEstimationService implements OnGameAPILoaded, On
 
             inventory.set(item, (inventory.get(item) ?? 0) + 1);
             bought.set(item, (bought.get(item) ?? 0) + 1);
-            for (const [requiredItem, amount] of item.requiredItems) {
+            for (const [requiredItemId, amount] of item.requiredItems) {
+                const requiredItem = Items.getItem(requiredItemId);
+                if (requiredItem === undefined) continue;
                 inventory.set(requiredItem, inventory.get(requiredItem)! - amount);
             }
             totalTime = totalTime.add(stats.timeToObtain);

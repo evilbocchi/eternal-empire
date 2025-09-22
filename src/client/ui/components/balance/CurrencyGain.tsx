@@ -1,12 +1,13 @@
 import { BaseOnoeNum, OnoeNum } from "@antivivi/serikanum";
-import React, { Fragment, useEffect, useRef } from "@rbxts/react";
+import React, { Fragment, useEffect, useRef, useState } from "@rbxts/react";
 import { CollectionService, Debris, TweenService, Workspace } from "@rbxts/services";
 import { balanceOptionImagePerCurrency } from "client/ui/components/balance/BalanceOption";
 import displayBalanceCurrency from "client/ui/components/balance/displayBalanceCurrency";
 import { RobotoSlabExtraBold } from "client/ui/GameFonts";
+import { UISignals } from "shared/api/APIExpose";
+import UserGameSettings from "shared/api/UserGameSettings";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import { CURRENCY_DETAILS } from "shared/currency/CurrencyDetails";
-import ItemUtils from "shared/item/ItemUtils";
 import Packets from "shared/Packets";
 
 export default function CurrencyGain({
@@ -48,7 +49,7 @@ export default function CurrencyGain({
             Rotation: frame.Rotation + math.random(-45, 45),
         }).Play();
 
-        if (ItemUtils.UserGameSettings!.SavedQualityLevel.Value > 5) {
+        if (UserGameSettings!.SavedQualityLevel.Value > 5) {
             TweenService.Create(imageLabel, tweenInfo, { ImageTransparency: 1 }).Play();
             TweenService.Create(textLabel, tweenInfo, { TextTransparency: 1 }).Play();
             TweenService.Create(stroke, tweenInfo, { Transparency: 1 }).Play();
@@ -107,7 +108,7 @@ export function CurrencyBundleGain({ currencyBundle, start }: { currencyBundle: 
 }
 
 export function CurrencyGainManager() {
-    const [currencyGainInfos, setCurrencyGainInfos] = React.useState<
+    const [currencyGainInfos, setCurrencyGainInfos] = useState<
         Set<{ currencyBundle: CurrencyBundle; location: Vector3 }>
     >(new Set());
 
@@ -133,7 +134,7 @@ export function CurrencyGainManager() {
             });
             setCurrencyGainInfos(currencyGainInfos);
         };
-        ItemUtils.showCurrencyGain = showCurrencyGain;
+        const connection = UISignals.showCurrencyGain.connect(showCurrencyGain);
 
         const gainConnection = Packets.dropletBurnt.fromServer((dropletModelId, amountPerCurrency) => {
             const dropletModel = CollectionService.GetTagged("Droplet").find(
@@ -146,7 +147,7 @@ export function CurrencyGainManager() {
         });
 
         return () => {
-            ItemUtils.showCurrencyGain = undefined;
+            connection.Disconnect();
             gainConnection.Disconnect();
         };
     }, []);

@@ -11,9 +11,9 @@
 
 import Difficulty from "@antivivi/jjt-difficulties";
 import { OnStart, Service } from "@flamework/core";
-import HARVESTABLES from "shared/world/harvestable/Harvestable";
 import Item from "shared/item/Item";
 import Items from "shared/items/Items";
+import HARVESTABLES from "shared/world/harvestable/Harvestable";
 
 /**
  * Ensures that game content is logical and consistent.
@@ -54,7 +54,9 @@ export default class SanityService implements OnStart {
 
         // Check for mismatched reset layers between item and its requirements
         const a = item.getResetLayer();
-        for (const [requiredItem, _] of item.requiredItems) {
+        for (const [requiredItemId] of item.requiredItems) {
+            const requiredItem = Items.getItem(requiredItemId);
+            if (requiredItem === undefined) continue;
             const b = requiredItem.getResetLayer();
             if (a !== b && a < 100 && b < 100) {
                 warn(
@@ -96,7 +98,7 @@ export default class SanityService implements OnStart {
         // Count how many items can be crafted using this harvestable
         let craftables = 0;
         for (const [_, craftable] of Items.itemsPerId) {
-            if (craftable.requiredItems.has(item)) {
+            if (craftable.requiredItems.has(item.id)) {
                 craftables += 1;
             }
         }

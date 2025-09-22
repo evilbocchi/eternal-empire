@@ -7,13 +7,12 @@ import { getAllInstanceInfo } from "@antivivi/vrldk";
 import { RunService } from "@rbxts/services";
 import GameSpeed from "shared/GameSpeed";
 import Packets from "shared/Packets";
+import { Server } from "shared/api/APIExpose";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Formula from "shared/currency/Formula";
 import { RESET_LAYERS } from "shared/currency/mechanics/ResetLayer";
-import { Server } from "shared/api/APIExpose";
 import eat from "shared/hamster/eat";
 import { ITEM_MODELS } from "shared/item/ItemModels";
-import ItemUtils from "shared/item/ItemUtils";
 import Area, { AREAS } from "shared/world/Area";
 
 declare global {
@@ -43,6 +42,7 @@ declare global {
 }
 
 const EMPTY_DIFFICULTY = new Difficulty();
+const REPEATS = new Map<(dt: number) => void, { delta?: number; lastCall?: number }>();
 
 /**
  * Represents an item in the game.
@@ -136,7 +136,7 @@ export default class Item {
     /**
      * The items required to purchase this item.
      */
-    requiredItems = new Map<Item, number>();
+    requiredItems = new Map<string, number>();
 
     /**
      * A formula that will be applied to the value of {@link formulaXGet} every second.
@@ -207,6 +207,8 @@ export default class Item {
      */
     image?: string;
 
+    private static readonly itemPerId = new Map<string, Item>();
+
     /**
      * Define a new item with the specified ID and name.
      *
@@ -220,6 +222,7 @@ export default class Item {
     ) {
         this.MODEL = ITEM_MODELS.get(id);
         this.description = id;
+        Item.itemPerId.set(id, this);
     }
 
     /**
@@ -346,7 +349,7 @@ export default class Item {
      * @param required The items required to purchase this item.
      * @returns The item instance.
      */
-    setRequiredItems(required: Map<Item, number>) {
+    setRequiredItems(required: Map<string, number>) {
         this.requiredItems = required;
         return this;
     }
@@ -359,7 +362,7 @@ export default class Item {
      * @returns The item instance.
      */
     setRequiredItemAmount(item: Item, amount: number) {
-        this.requiredItems.set(item, amount);
+        this.requiredItems.set(item.id, amount);
         return this;
     }
 
@@ -371,14 +374,7 @@ export default class Item {
      * @returns The item instance.
      */
     setRequiredHarvestableAmount(id: HarvestableId, amount: number) {
-        if (ItemUtils.itemsPerId === undefined) {
-            task.spawn(() => {
-                while (ItemUtils.itemsPerId === undefined) task.wait();
-                this.requiredItems.set(ItemUtils.itemsPerId.get(id)!, amount);
-            });
-        } else {
-            this.requiredItems.set(ItemUtils.itemsPerId.get(id)!, amount);
-        }
+        this.requiredItems.set(id, amount);
         return this;
     }
 
@@ -511,8 +507,8 @@ export default class Item {
      */
     repeat(instance: Instance | undefined, callback: (dt: number) => unknown, delta?: number) {
         const ref = { delta: delta };
-        ItemUtils.REPEATS.set(callback, ref);
-        if (instance !== undefined) instance.Destroying.Once(() => ItemUtils.REPEATS.delete(callback));
+        REPEATS.set(callback, ref);
+        if (instance !== undefined) instance.Destroying.Once(() => REPEATS.delete(callback));
         return ref;
     }
 
@@ -738,11 +734,11 @@ export default class Item {
 
     static {
         if (RunService.IsServer()) {
-            ItemUtils.REPEATS.set(
+            REPEATS.set(
                 () => {
                     const formulaResults = new Map<string, OnoeNum>();
-                    for (const [_id, item] of ItemUtils.itemsPerId) {
-                        formulaResults.set(item.id, item.performFormula()!);
+                    for (const [id, item] of Item.itemPerId) {
+                        formulaResults.set(id, item.performFormula()!);
                     }
                     if (os.clock() > 15) {
                         // simple delay to ensure clients are ready
@@ -759,7 +755,7 @@ export default class Item {
 
                 const t = tick();
                 const gameSpeed = GameSpeed.speed;
-                for (const [callback, rep] of ItemUtils.REPEATS) {
+                for (const [callback, rep] of REPEATS) {
                     const last = rep.lastCall;
                     if (last === undefined) {
                         rep.lastCall = t;

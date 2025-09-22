@@ -1,7 +1,7 @@
 import { RunService } from "@rbxts/services";
 import { Server } from "shared/api/APIExpose";
+import getPlacedItemsInBounds from "shared/api/getPlacedItemsInBounds";
 import Item from "shared/item/Item";
-import { getPlacedItemsInArea } from "shared/item/ItemUtils";
 import Operative from "shared/item/traits/Operative";
 
 export default abstract class Booster extends Operative {
@@ -22,7 +22,7 @@ export default abstract class Booster extends Operative {
                 if (t > 0.1) {
                     t = 0;
 
-                    const found = getPlacedItemsInArea(clickArea, Items);
+                    const found = getPlacedItemsInBounds(clickArea, Items);
                     for (const [model, item] of found) {
                         if (whitelist !== undefined && !whitelist(model, item)) {
                             continue;

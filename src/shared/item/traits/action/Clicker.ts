@@ -1,10 +1,10 @@
 import { OnoeNum } from "@antivivi/serikanum";
 import { formatRichText, getAllInstanceInfo, Streaming } from "@antivivi/vrldk";
 import { RunService } from "@rbxts/services";
-import { CURRENCY_DETAILS } from "shared/currency/CurrencyDetails";
 import { Server } from "shared/api/APIExpose";
+import getPlacedItemsInBounds from "shared/api/getPlacedItemsInBounds";
+import { CURRENCY_DETAILS } from "shared/currency/CurrencyDetails";
 import Item from "shared/item/Item";
-import { getPlacedItemsInArea } from "shared/item/ItemUtils";
 import ItemTrait from "shared/item/traits/ItemTrait";
 
 declare global {
@@ -44,7 +44,7 @@ export default class Clicker extends ItemTrait {
             if (target === undefined || target.Parent === undefined) {
                 if (t > 0.05) {
                     t = 0;
-                    const found = getPlacedItemsInArea(clickArea, Items);
+                    const found = getPlacedItemsInBounds(clickArea, Items);
                     for (const [model, item] of found)
                         if (item.isA("Clickable")) {
                             target = model;

@@ -43,7 +43,7 @@ export default function PurchaseWindow({ viewportManagement }: { viewportManagem
     const [{ bought, price }, setBoughtData] = useState({ bought: 0, price: new CurrencyBundle() });
     const [unaffordableLabel, setUnaffordableLabel] = useState("UNAFFORDABLE");
     const [affordablePerCurrency, setAffordablePerCurrency] = useState(new Map<Currency, boolean>());
-    const [affordablePerItem, setAffordablePerItem] = useState(new Map<Item, boolean>());
+    const [affordablePerItemId, setAffordablePerItemId] = useState(new Map<string, boolean>());
     const [item, setItem] = useState<Item>(TheFirstDropper);
     const metadata = METADATA_PER_ITEM.get(item);
 
@@ -93,12 +93,12 @@ export default function PurchaseWindow({ viewportManagement }: { viewportManagem
         const inventoryConnection = Packets.inventory.observe((inventory) => {
             if (!price) return;
 
-            const affordablePerItem = new Map<Item, boolean>();
-            for (const [requiredItem, amount] of item.requiredItems) {
-                const inInventory = inventory.get(requiredItem.id) ?? 0;
-                affordablePerItem.set(requiredItem, inInventory >= amount);
+            const affordablePerItemId = new Map<string, boolean>();
+            for (const [requiredItemId, amount] of item.requiredItems) {
+                const inInventory = inventory.get(requiredItemId) ?? 0;
+                affordablePerItemId.set(requiredItemId, inInventory >= amount);
             }
-            setAffordablePerItem(affordablePerItem);
+            setAffordablePerItemId(affordablePerItemId);
         });
 
         return () => {
@@ -185,14 +185,14 @@ export default function PurchaseWindow({ viewportManagement }: { viewportManagem
                 break;
             }
         }
-        for (const [, affordable] of affordablePerItem) {
+        for (const [, affordable] of affordablePerItemId) {
             if (!affordable) {
                 totalAffordable = false;
                 break;
             }
         }
         return totalAffordable;
-    }, [affordablePerCurrency, affordablePerItem]);
+    }, [affordablePerCurrency, affordablePerItemId]);
 
     const window = (
         <ItemWindow
@@ -412,7 +412,7 @@ export default function PurchaseWindow({ viewportManagement }: { viewportManagem
                                                 .append("</font>");
                                         }
                                         for (const requiredItem of Items.sortedItems) {
-                                            if (affordablePerItem.get(requiredItem) ?? true) continue;
+                                            if (affordablePerItemId.get(requiredItem.id) ?? true) continue;
                                             const color =
                                                 requiredItem.difficulty.color ?? Color3.fromRGB(255, 255, 255);
                                             builder
@@ -421,7 +421,7 @@ export default function PurchaseWindow({ viewportManagement }: { viewportManagem
                                                 .append("'>\n- ")
                                                 .append(inventory.get(requiredItem.id) ?? 0)
                                                 .append("/")
-                                                .append(requiredItems.get(requiredItem))
+                                                .append(requiredItems.get(requiredItem.id))
                                                 .append(" ")
                                                 .append(requiredItem.name)
                                                 .append("</font>");
@@ -440,7 +440,7 @@ export default function PurchaseWindow({ viewportManagement }: { viewportManagem
                                         requiredItems={requiredItems}
                                         viewportManagement={viewportManagement}
                                         affordablePerCurrency={affordablePerCurrency}
-                                        affordablePerItem={affordablePerItem}
+                                        affordablePerItemId={affordablePerItemId}
                                     />
                                 }
                                 <uipadding

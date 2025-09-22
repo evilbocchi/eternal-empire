@@ -1,8 +1,7 @@
 import Difficulty from "@antivivi/jjt-difficulties";
-import HARVESTABLES from "shared/world/harvestable/Harvestable";
 import Item from "shared/item/Item";
-import ItemUtils from "shared/item/ItemUtils";
 import type Charm from "shared/item/traits/Charm";
+import HARVESTABLES from "shared/world/harvestable/Harvestable";
 
 /**
  * Utility class to manage all items.
@@ -32,7 +31,6 @@ abstract class Items {
                 .setDifficulty(Difficulty.Excavation);
             itemsPerId.set(id, item);
         }
-        ItemUtils.itemsPerId = itemsPerId;
         return itemsPerId;
     })();
 

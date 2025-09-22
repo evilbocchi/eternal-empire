@@ -12,9 +12,8 @@
  * @since 1.0.0
  */
 import { Controller, OnInit, OnStart } from "@flamework/core";
-import { Lighting, Workspace } from "@rbxts/services";
-import { AREAS } from "shared/world/Area";
-import ItemUtils from "shared/item/ItemUtils";
+import { Lighting } from "@rbxts/services";
+import UserGameSettings from "shared/api/UserGameSettings";
 import Packets from "shared/Packets";
 import { WeatherState, WeatherType } from "shared/weather/WeatherTypes";
 import WorldNode from "shared/world/nodes/WorldNode";
@@ -71,16 +70,15 @@ export default class AtmosphereController implements OnInit, OnStart {
      * Starts the AtmosphereController, updates light brightness and shadows based on quality and time of day.
      */
     onStart() {
-        const cyclingLightWorldNode = new WorldNode("CyclingLight", (container) => {
+        new WorldNode("CyclingLight", (container) => {
             const light = this.findLight(container);
             if (light !== undefined) this.cyclingLights.set(light, light.Brightness);
         });
 
-        const UserGameSettings = ItemUtils.UserGameSettings!;
-        let oldQualityLevel = UserGameSettings.SavedQualityLevel.Value;
+        let oldQualityLevel = UserGameSettings!.SavedQualityLevel.Value;
         task.spawn(() => {
             while (true) {
-                const qualityLevel = UserGameSettings.SavedQualityLevel.Value;
+                const qualityLevel = UserGameSettings!.SavedQualityLevel.Value;
                 task.wait(qualityLevel >= 5 ? 1 / 60 : 1);
 
                 for (const [light, base] of this.cyclingLights) {

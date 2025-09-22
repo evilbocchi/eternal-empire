@@ -507,7 +507,7 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
     serverBuy(item: Item) {
         // Check required items
         for (const [required, amount] of item.requiredItems) {
-            if (this.getItemAmount(required.id) < amount) {
+            if (this.getItemAmount(required) < amount) {
                 return false;
             }
         }
@@ -526,7 +526,7 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
         if (success === true) {
             // Consume required items
             for (const [required, amount] of item.requiredItems) {
-                this.setItemAmount(required.id, this.getItemAmount(required.id) - amount);
+                this.setItemAmount(required, this.getItemAmount(required) - amount);
             }
             this.setBoughtAmount(itemId, nextBought);
             // Add item to inventory

@@ -2,6 +2,7 @@ import { OnoeNum } from "@antivivi/serikanum";
 import { useEffect, useState } from "@rbxts/react";
 import { HttpService, ReplicatedStorage, RunService, Workspace } from "@rbxts/services";
 import { LOCAL_PLAYER } from "client/constants";
+import SoundManager from "client/ui/SoundManager";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import { CURRENCY_DETAILS } from "shared/currency/CurrencyDetails";
 import PlayerProfileTemplate from "shared/data/profile/PlayerProfileTemplate";
@@ -35,9 +36,12 @@ class StoryMocking {
                 Packets.settings.setFor(player, mockPlayerData.settings);
             });
 
+            const cleanup = SoundManager.init();
+
             return () => {
                 setSetting.Disconnect();
                 setHotkey.Disconnect();
+                cleanup();
             };
         }, []);
 
