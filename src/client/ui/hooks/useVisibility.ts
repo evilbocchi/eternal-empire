@@ -31,16 +31,14 @@ export function useSingleDocumentVisibility(id: string, visible: boolean) {
 }
 
 /**
- * Manages HUD visibility for main gameplay UI elements.
- * Intended for use in main app controller to toggle HUD visibility.
- * @param visible Whether the main HUD elements should be visible
+ * Sets the visibility of main UI documents.
+ * @param visible Whether the main UI documents should be visible
+ * @internal Should only be used in storybooks.
  */
-export function useVisibilityMain(visible: boolean) {
-    useEffect(() => {
-        DocumentManager.setVisible("Backpack", visible);
-        DocumentManager.setVisible("Balance", visible);
-        DocumentManager.setVisible("Sidebar", visible);
-        DocumentManager.setVisible("Position", visible);
-        DocumentManager.setVisible("TrackedQuest", visible);
-    }, [visible]);
+export function setVisibilityMain(visible: boolean) {
+    DocumentManager.setVisible("Backpack", visible);
+    DocumentManager.setVisible("Balance", visible);
+    DocumentManager.setVisible("Sidebar", visible);
+    DocumentManager.setVisible("Position", visible);
+    DocumentManager.setVisible("TrackedQuest", visible);
 }

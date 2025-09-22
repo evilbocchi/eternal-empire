@@ -1,10 +1,10 @@
-import React from "@rbxts/react";
+import React, { useEffect } from "@rbxts/react";
 import ReactRoblox from "@rbxts/react-roblox";
 import { CreateReactStory } from "@rbxts/ui-labs";
 import App from "client/ui/components/App";
 import { questState } from "client/ui/components/quest/QuestState";
 import StoryMocking from "client/ui/components/StoryMocking";
-import { useVisibilityMain } from "client/ui/hooks/useVisibility";
+import { setVisibilityMain } from "client/ui/hooks/useVisibility";
 import Packets from "shared/Packets";
 
 export = CreateReactStory(
@@ -24,7 +24,9 @@ export = CreateReactStory(
             Packets.inventory.set(new Map());
         }
 
-        useVisibilityMain(props.controls.visible);
+        useEffect(() => {
+            setVisibilityMain(props.controls.visible);
+        }, [props.controls.visible]);
 
         return <App viewportsEnabled={props.controls.viewportsEnabled} />;
     },

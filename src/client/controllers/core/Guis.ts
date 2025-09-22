@@ -10,7 +10,12 @@ const createScreenGui = (name: string, displayOrder = 0): ScreenGui => {
     screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling;
     screenGui.Name = name;
     screenGui.DisplayOrder = displayOrder;
-    screenGui.Parent = PLAYER_GUI;
+    if (IS_CI) {
+        screenGui.Parent = StarterGui;
+        eat(screenGui);
+    } else {
+        screenGui.Parent = PLAYER_GUI;
+    }
     return screenGui;
 };
 

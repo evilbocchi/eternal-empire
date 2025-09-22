@@ -47,9 +47,10 @@ export namespace ShopManager {
      */
     export function refreshShop(guiPart?: Part, shop?: Shop) {
         if (shopGuiPart === guiPart) return;
-        shopGuiPart = guiPart;
 
         const previousShopGuiPart = shopGuiPart;
+        shopGuiPart = guiPart;
+
         if (previousShopGuiPart !== undefined && previousShopGuiPart !== guiPart) {
             hideShopGuiPart(previousShopGuiPart);
         }
@@ -114,7 +115,12 @@ export default function ShopGui({
             setHideMaxedItems(settings.HideMaxedItems);
         });
         const openedConnection = ShopManager.opened.connect((shop, adornee) => {
-            setShopInfo({ shop, adornee });
+            setShopInfo((prev) => {
+                if (shop === undefined) {
+                    return { shop: prev.shop, adornee: undefined };
+                }
+                return { shop, adornee };
+            });
         });
 
         const candidates = new Map<BasePart, ShopCandidate>();
