@@ -8,12 +8,12 @@ import Simpul from "server/interactive/npc/Simpul";
 import SlamoReceptionist from "server/interactive/npc/Slamo Receptionist";
 import SlamoBook from "server/interactive/object/SlamoBook";
 import Quest, { Stage } from "server/quests/Quest";
+import { Server } from "shared/api/APIExpose";
 import { emitEffect, playSound } from "shared/asset/GameAssets";
-import { PLACED_ITEMS_FOLDER, WAYPOINTS } from "shared/constants";
+import { WAYPOINTS } from "shared/constants";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import { RESET_LAYERS } from "shared/currency/mechanics/ResetLayer";
 import ThisEmpire from "shared/data/ThisEmpire";
-import { Server } from "shared/api/APIExpose";
 import SkillPod from "shared/items/0/millisecondless/SkillPod";
 import SlamoStatue from "shared/items/0/millisecondless/SlamoStatue";
 import Stone from "shared/items/0/millisecondless/Stone";
@@ -296,7 +296,7 @@ export = new Quest(script.Name)
                 const simpulSad = new Dialogue(Simpul, "This can't be... No... NOO!!!");
                 let initiated = false;
                 const update = (placementId: string) => {
-                    statue = PLACED_ITEMS_FOLDER.FindFirstChild(placementId) as Model | undefined;
+                    statue = Server.Item.modelPerPlacementId.get(placementId);
                     task.wait(0.5);
                     if (statue === undefined || statue.Parent === undefined || initiated === true) return;
 

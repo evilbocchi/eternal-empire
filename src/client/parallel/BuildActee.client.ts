@@ -17,13 +17,13 @@
 
 import { CollectionService, RunService, Workspace } from "@rbxts/services";
 import { COLLISION_COLOR, MOUSE, NONCOLLISION_COLOR } from "client/constants";
-import Area from "shared/world/Area";
-import { PLACED_ITEMS_FOLDER } from "shared/constants";
 import { ASSETS } from "shared/asset/GameAssets";
+import { PLACED_ITEMS_FOLDER } from "shared/constants";
 import Conveyor from "shared/item/traits/conveyor/Conveyor";
 import Items from "shared/items/Items";
-import Sandbox from "shared/Sandbox";
 import ItemPlacement from "shared/placement/ItemPlacement";
+import Sandbox from "shared/Sandbox";
+import Area from "shared/world/Area";
 
 declare global {
     interface Assets {
@@ -37,8 +37,7 @@ let area: Area | undefined;
 
 // Continuously load models for placed items in the workspace
 RunService.BindToRenderStep("Build Load", 1, () => {
-    const placedItems = PLACED_ITEMS_FOLDER.GetChildren();
-    for (const child of placedItems) {
+    for (const child of PLACED_ITEMS_FOLDER.GetChildren()) {
         onModelAdded(child);
     }
 });

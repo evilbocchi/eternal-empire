@@ -15,7 +15,7 @@
 
 import { setInstanceInfo } from "@antivivi/vrldk";
 import { OnInit, OnPhysics, Service } from "@flamework/core";
-import { Lighting, TweenService, Workspace } from "@rbxts/services";
+import { CollectionService, Lighting, TweenService, Workspace } from "@rbxts/services";
 import DataService from "server/services/data/DataService";
 import { getSound } from "shared/asset/GameAssets";
 import Packets from "shared/Packets";
@@ -241,10 +241,7 @@ export default class AtmosphereService implements OnInit, OnPhysics {
      */
     private triggerLightningStrike() {
         // Find a random droplet to strike
-        const droplets = Workspace.FindFirstChild("Droplets") as Model | undefined;
-        if (!droplets) return;
-
-        const children = droplets.GetChildren();
+        const children = CollectionService.GetTagged("Droplet");
         if (children.size() === 0) return;
 
         const randomDroplet = children[math.random(0, children.size() - 1)] as BasePart;

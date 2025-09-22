@@ -1,9 +1,8 @@
 import { Controller, OnStart } from "@flamework/core";
-import { Workspace } from "@rbxts/services";
 import { LOCAL_PLAYER } from "client/constants";
 import { PLACED_ITEMS_FOLDER } from "shared/constants";
+import eat from "shared/hamster/eat";
 import Items from "shared/items/Items";
-import Packets from "shared/Packets";
 
 @Controller()
 export default class ItemModelParityController implements OnStart {
@@ -28,41 +27,47 @@ export default class ItemModelParityController implements OnStart {
     }
 
     onStart() {
-        task.spawn(() => {
-            while (task.wait(2)) {
-                for (const child of PLACED_ITEMS_FOLDER.GetChildren()) {
-                    this.load(child);
-                }
-            }
-        });
-        PLACED_ITEMS_FOLDER.ChildAdded.Connect((child) => this.load(child));
-        for (const item of PLACED_ITEMS_FOLDER.GetChildren()) {
-            this.load(item);
-        }
-        if (PLACED_ITEMS_FOLDER.Parent === Workspace) return;
-
-        Packets.placedItems.observe((placedItems) => {
+        const loadAll = () => {
             for (const child of PLACED_ITEMS_FOLDER.GetChildren()) {
-                if (!placedItems.has(child.Name) && !child.HasTag("Placing")) {
-                    child.Destroy();
-                }
+                this.load(child);
             }
+        };
 
-            for (const [placementId, placedItem] of placedItems) {
-                const itemModel = PLACED_ITEMS_FOLDER.FindFirstChild(placementId) as Model | undefined;
-                if (!itemModel) {
-                    const item = Items.getItem(placedItem.item);
-                    if (item === undefined) {
-                        continue;
-                    }
-                    const itemModel = item.createModel(placedItem);
-                    if (!itemModel) {
-                        continue;
-                    }
-                    itemModel.Name = placementId;
-                    itemModel.Parent = PLACED_ITEMS_FOLDER;
-                }
-            }
+        let active = true;
+        const loop = () => {
+            if (!active) return;
+            loadAll();
+            task.delay(2, loop);
+        };
+        loop();
+        eat(() => (active = false));
+
+        PLACED_ITEMS_FOLDER.ChildAdded.Connect((instance) => {
+            this.load(instance);
         });
+
+        // Packets.placedItems.observe((placedItems) => {
+        //     for (const child of PLACED_ITEMS_FOLDER.GetChildren()) {
+        //         if (!placedItems.has(child.Name) && !child.HasTag("Placing")) {
+        //             child.Destroy();
+        //         }
+        //     }
+
+        //     for (const [placementId, placedItem] of placedItems) {
+        //         const itemModel = PLACED_ITEMS_FOLDER.FindFirstChild(placementId) as Model | undefined;
+        //         if (!itemModel) {
+        //             const item = Items.getItem(placedItem.item);
+        //             if (item === undefined) {
+        //                 continue;
+        //             }
+        //             const itemModel = item.createModel(placedItem);
+        //             if (!itemModel) {
+        //                 continue;
+        //             }
+        //             itemModel.Name = placementId;
+        //             itemModel.Parent = PLACED_ITEMS_FOLDER;
+        //         }
+        //     }
+        // });
     }
 }

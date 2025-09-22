@@ -59,6 +59,7 @@ const queue = new Array<() => void>();
  */
 @Service()
 export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
+    readonly modelPerPlacementId = new Map<string, Model>();
     readonly items: ItemsData;
     private hasInventoryChanged = false;
     private hasUniqueChanged = false;
@@ -244,9 +245,10 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
         let somethingHappened = false;
         for (const placementId of placementIds) {
             somethingHappened = true;
-            const model = PLACED_ITEMS_FOLDER.FindFirstChild(placementId);
+            const model = this.modelPerPlacementId.get(placementId);
             if (model !== undefined) {
                 model.Destroy();
+                this.modelPerPlacementId.delete(placementId);
             }
             const placedItem = placedItems.get(placementId);
             if (placedItem !== undefined) {
@@ -284,7 +286,7 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
      * @returns The model that was added, or undefined if it already exists.
      */
     addItemModel(placementId: string, placedItem: PlacedItem) {
-        if (PLACED_ITEMS_FOLDER.FindFirstChild(placementId) !== undefined || this.isRendering === true) return;
+        if (this.modelPerPlacementId.has(placementId) || this.isRendering === true) return;
 
         const item = Items.getItem(placedItem.item);
         if (item === undefined) {
@@ -298,6 +300,7 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
         }
         model.Name = placementId;
         model.Parent = PLACED_ITEMS_FOLDER;
+        this.modelPerPlacementId.set(placementId, model);
 
         // Execute item-specific load callbacks
         item.LOADS.forEach((callback) => callback(model, item));
@@ -492,6 +495,7 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
                 model.Destroy();
             }
         }
+        this.modelPerPlacementId.clear();
 
         // Add missing models
         for (const [placementId, placedItem] of placedItems) this.addItemModel(placementId, placedItem);
@@ -801,6 +805,7 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
             for (const model of PLACED_ITEMS_FOLDER.GetChildren()) {
                 model.Destroy();
             }
+            this.modelPerPlacementId.clear();
         });
     }
 }

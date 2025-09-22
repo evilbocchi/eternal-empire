@@ -4,9 +4,9 @@
 import Difficulty from "@antivivi/jjt-difficulties";
 import { getAllInstanceInfo, getInstanceInfo } from "@antivivi/vrldk";
 import { Debris, RunService, TweenService } from "@rbxts/services";
+import { Server } from "shared/api/APIExpose";
 import { ASSETS } from "shared/asset/GameAssets";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
-import { Server } from "shared/api/APIExpose";
 import Operative from "shared/item/traits/Operative";
 import Packets from "shared/Packets";
 
@@ -795,18 +795,18 @@ export default class Droplet {
                 Droplet.SPAWNED_DROPLETS.delete(clone);
             });
 
-            task.spawn(() => {
-                let prev: Vector3 | undefined;
-                while (task.wait(10)) {
-                    if (destroyed === true) break;
-                    if (prev !== undefined && (clone as BasePart).Position.sub(prev).Magnitude < 0.5) {
-                        Debris.AddItem(clone, 1);
-                        TweenService.Create(clone as BasePart, new TweenInfo(0.5), { Transparency: 1 }).Play();
-                        break;
-                    }
-                    prev = (clone as BasePart).Position;
+            let prev: Vector3 | undefined;
+            const checkStillness = () => {
+                if (destroyed === true) return;
+                if (prev !== undefined && (clone as BasePart).Position.sub(prev).Magnitude < 0.5) {
+                    Debris.AddItem(clone, 1);
+                    TweenService.Create(clone as BasePart, new TweenInfo(0.5), { Transparency: 1 }).Play();
+                    return;
                 }
-            });
+                prev = (clone as BasePart).Position;
+                task.delay(10, checkStillness);
+            };
+            task.delay(10, checkStillness);
             return clone;
         };
     }

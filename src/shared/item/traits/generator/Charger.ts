@@ -124,8 +124,8 @@ export default class Charger extends Operative {
         for (const m of PLACED_ITEMS_FOLDER.GetChildren()) {
             task.spawn(() => checkAdd(m));
         }
-        const connection1 = PLACED_ITEMS_FOLDER.ChildAdded.Connect((m) => checkAdd(m));
-        const connection2 = PLACED_ITEMS_FOLDER.ChildRemoved.Connect((m) => checkRemove(m));
+        const connection1 = PLACED_ITEMS_FOLDER.ChildAdded.Connect(checkAdd);
+        const connection2 = PLACED_ITEMS_FOLDER.ChildRemoved.Connect(checkRemove);
         model.Destroying.Connect(() => {
             connection1.Disconnect();
             connection2.Disconnect();
