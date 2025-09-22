@@ -28,6 +28,7 @@ import { OnGameAPILoaded } from "server/services/ModdingService";
 import { log } from "server/services/permissions/LogService";
 import PermissionsService from "server/services/permissions/PermissionsService";
 import { PLACED_ITEMS_FOLDER } from "shared/constants";
+import eat from "shared/hamster/eat";
 import Item from "shared/item/Item";
 import Items from "shared/items/Items";
 import Packets from "shared/Packets";
@@ -793,6 +794,12 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
         task.spawn(() => {
             while (task.wait(0.1)) {
                 this.propagateChanges();
+            }
+        });
+
+        eat(() => {
+            for (const model of PLACED_ITEMS_FOLDER.GetChildren()) {
+                model.Destroy();
             }
         });
     }

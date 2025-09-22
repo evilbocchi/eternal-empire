@@ -2,7 +2,7 @@ import { Storybook } from "@rbxts/ui-labs";
 
 const storybook: Storybook = {
     name: "Stories",
-    storyRoots: [script.Parent!.WaitForChild("components")],
+    storyRoots: [script.Parent!],
 };
 
 export = storybook;
