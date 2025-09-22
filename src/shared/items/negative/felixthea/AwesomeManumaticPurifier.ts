@@ -5,12 +5,13 @@ import PartCacheModule from "@rbxts/partcache";
 import { PartCache } from "@rbxts/partcache/out/class";
 import { TweenService, Workspace } from "@rbxts/services";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
+import { Server } from "shared/api/APIExpose";
 import Item from "shared/item/Item";
-import ItemUtils, { Server } from "shared/item/ItemUtils";
-import Operative from "shared/item/traits/Operative";
-import Upgrader from "shared/item/traits/upgrader/Upgrader";
+import ItemUtils from "shared/item/ItemUtils";
 import Clickable from "shared/item/traits/action/Clickable";
 import Manumatic from "shared/item/traits/action/Manumatic";
+import Operative from "shared/item/traits/Operative";
+import Upgrader from "shared/item/traits/upgrader/Upgrader";
 import NamedUpgrades from "shared/namedupgrade/NamedUpgrades";
 
 export = new Item(script.Name)

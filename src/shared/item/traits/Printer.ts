@@ -3,7 +3,7 @@ import { TweenService } from "@rbxts/services";
 import { ASSETS, playSound } from "shared/asset/GameAssets";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
-import { Server } from "shared/item/ItemUtils";
+import { Server } from "shared/api/APIExpose";
 import ItemTrait from "shared/item/traits/ItemTrait";
 import Packets from "shared/Packets";
 

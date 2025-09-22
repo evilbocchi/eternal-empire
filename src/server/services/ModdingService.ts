@@ -10,7 +10,7 @@ import Signal from "@antivivi/lemon-signal";
 import { Modding, OnInit, Service } from "@flamework/core";
 import { Players } from "@rbxts/services";
 import eat from "shared/hamster/eat";
-import { Server } from "shared/item/ItemUtils";
+import { Server } from "shared/api/APIExpose";
 
 export interface OnPlayerAdded {
     /**

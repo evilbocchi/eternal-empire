@@ -3,7 +3,7 @@ import { OnoeNum } from "@antivivi/serikanum";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Formula from "shared/currency/Formula";
 import Item from "shared/item/Item";
-import { Server } from "shared/item/ItemUtils";
+import { Server } from "shared/api/APIExpose";
 import Conveyor from "shared/item/traits/conveyor/Conveyor";
 import FormulaBundled from "shared/item/traits/FormulaBundled";
 import Upgrader from "shared/item/traits/upgrader/Upgrader";

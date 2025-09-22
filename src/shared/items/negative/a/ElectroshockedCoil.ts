@@ -2,7 +2,7 @@ import Difficulty from "@antivivi/jjt-difficulties";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import eat from "shared/hamster/eat";
 import Item from "shared/item/Item";
-import { Server } from "shared/item/ItemUtils";
+import { Server } from "shared/api/APIExpose";
 import Conveyor from "shared/item/traits/conveyor/Conveyor";
 import Upgrader from "shared/item/traits/upgrader/Upgrader";
 import Crystal from "shared/items/excavation/Crystal";

@@ -4,7 +4,7 @@ import OldNoob from "server/interactive/npc/Old Noob";
 import Prest from "server/interactive/npc/Prest";
 import Tria from "server/interactive/npc/Tria";
 import Quest, { Stage } from "server/quests/Quest";
-import { Server } from "shared/item/ItemUtils";
+import { Server } from "shared/api/APIExpose";
 
 export = new Quest(script.Name)
     .setName("Sailing Away")

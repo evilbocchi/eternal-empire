@@ -4,7 +4,7 @@ import Upgrader from "shared/item/traits/upgrader/Upgrader";
 import AdvancedBlankEssence from "shared/items/0/ifinitude/AdvancedBlankEssence";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Formula from "shared/currency/Formula";
-import { Server } from "shared/item/ItemUtils";
+import { Server } from "shared/api/APIExpose";
 
 const mul = new CurrencyBundle();
 

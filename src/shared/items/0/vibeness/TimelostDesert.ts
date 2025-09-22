@@ -4,7 +4,7 @@ import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Formula from "shared/currency/Formula";
 import ThisEmpire from "shared/data/ThisEmpire";
 import Item from "shared/item/Item";
-import { Server } from "shared/item/ItemUtils";
+import { Server } from "shared/api/APIExpose";
 import Generator from "shared/item/traits/generator/Generator";
 
 const amt = new OnoeNum(100e12);

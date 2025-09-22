@@ -2,7 +2,7 @@ import Difficulty from "@antivivi/jjt-difficulties";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Formula from "shared/currency/Formula";
 import Item from "shared/item/Item";
-import { Server } from "shared/item/ItemUtils";
+import { Server } from "shared/api/APIExpose";
 import Furnace from "shared/item/traits/Furnace";
 import FormulaBundled from "shared/item/traits/FormulaBundled";
 

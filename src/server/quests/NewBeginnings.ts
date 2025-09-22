@@ -4,7 +4,7 @@ import NameChanger from "server/interactive/npc/Name Changer";
 import Tria from "server/interactive/npc/Tria";
 import Quest, { Stage } from "server/quests/Quest";
 import { WAYPOINTS } from "shared/constants";
-import { Server } from "shared/item/ItemUtils";
+import { Server } from "shared/api/APIExpose";
 import TheFirstDropper from "shared/items/negative/tfd/TheFirstDropper";
 import TheFirstFurnace from "shared/items/negative/tfd/TheFirstFurnace";
 import Packets from "shared/Packets";

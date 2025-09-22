@@ -4,7 +4,7 @@ import Ricarg from "server/interactive/npc/Ricarg";
 import EarningCapital from "server/quests/EarningCapital";
 import Quest, { Stage } from "server/quests/Quest";
 import { WAYPOINTS } from "shared/constants";
-import { Server } from "shared/item/ItemUtils";
+import { Server } from "shared/api/APIExpose";
 import Shop from "shared/item/traits/Shop";
 import ExcavationStone from "shared/items/excavation/ExcavationStone";
 import WhiteGem from "shared/items/excavation/WhiteGem";

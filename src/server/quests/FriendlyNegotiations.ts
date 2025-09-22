@@ -6,7 +6,7 @@ import { Dialogue } from "server/interactive/npc/NPC";
 import Prest from "server/interactive/npc/Prest";
 import Tria from "server/interactive/npc/Tria";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
-import { Server } from "shared/item/ItemUtils";
+import { Server } from "shared/api/APIExpose";
 
 const prestAnnoyance = new Dialogue(
     Prest,

@@ -3,7 +3,7 @@ import CurrencyBundle from "shared/currency/CurrencyBundle";
 import ThisEmpire from "shared/data/ThisEmpire";
 import Droplet from "shared/item/Droplet";
 import Item from "shared/item/Item";
-import { Server } from "shared/item/ItemUtils";
+import { Server } from "shared/api/APIExpose";
 import Conveyor from "shared/item/traits/conveyor/Conveyor";
 import Dropper from "shared/item/traits/dropper/Dropper";
 import Crystal from "shared/items/excavation/Crystal";

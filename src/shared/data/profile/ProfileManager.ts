@@ -1,4 +1,5 @@
 import { ProfileManager } from "@antivivi/vrldk";
+import { IS_SERVER } from "shared/Context";
 import EmpireProfileTemplate from "shared/data/profile/EmpireProfileTemplate";
 import PlayerProfileTemplate from "shared/data/profile/PlayerProfileTemplate";
 
@@ -6,14 +7,16 @@ import PlayerProfileTemplate from "shared/data/profile/PlayerProfileTemplate";
  * Wrapper class for ProfileManager to handle key prefixing and provide utility methods.
  */
 export class ProfileManagerWrapper<T extends object> {
-    profileManager: ProfileManager<T, unknown>;
+    profileManager!: ProfileManager<T, unknown>;
 
     constructor(
         storeName: string,
         template: T,
         private readonly prefix: string,
     ) {
-        this.profileManager = new ProfileManager(storeName, template);
+        if (IS_SERVER) {
+            this.profileManager = new ProfileManager(storeName, template);
+        }
     }
 
     /**

@@ -1,5 +1,5 @@
 import eat from "shared/hamster/eat";
-import { Server } from "shared/item/ItemUtils";
+import { Server } from "shared/api/APIExpose";
 import Gear from "shared/item/traits/Gear";
 import Items from "shared/items/Items";
 import Packets from "shared/Packets";

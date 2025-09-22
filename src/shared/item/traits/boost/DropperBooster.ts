@@ -1,10 +1,6 @@
 import { getAllInstanceInfo } from "@antivivi/vrldk";
-import { RunService } from "@rbxts/services";
 import Item from "shared/item/Item";
-import { Server, getPlacedItemsInArea } from "shared/item/ItemUtils";
 import Booster from "shared/item/traits/boost/Booster";
-import ItemTrait from "shared/item/traits/ItemTrait";
-import { IOperative } from "shared/item/traits/Operative";
 
 declare global {
     interface ItemTraits {

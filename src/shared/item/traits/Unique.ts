@@ -2,7 +2,7 @@ import { OnoeNum } from "@antivivi/serikanum";
 import { formatRichText } from "@antivivi/vrldk";
 import ThisEmpire from "shared/data/ThisEmpire";
 import Item from "shared/item/Item";
-import { Server } from "shared/item/ItemUtils";
+import { Server } from "shared/api/APIExpose";
 import ItemTrait from "shared/item/traits/ItemTrait";
 
 declare global {

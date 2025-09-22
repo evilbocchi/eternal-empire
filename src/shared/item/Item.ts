@@ -10,9 +10,10 @@ import Packets from "shared/Packets";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Formula from "shared/currency/Formula";
 import { RESET_LAYERS } from "shared/currency/mechanics/ResetLayer";
+import { Server } from "shared/api/APIExpose";
 import eat from "shared/hamster/eat";
 import { ITEM_MODELS } from "shared/item/ItemModels";
-import ItemUtils, { Server } from "shared/item/ItemUtils";
+import ItemUtils from "shared/item/ItemUtils";
 import Area, { AREAS } from "shared/world/Area";
 
 declare global {

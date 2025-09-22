@@ -3,7 +3,7 @@ import { findBaseParts, getAllInstanceInfo } from "@antivivi/vrldk";
 import { Debris } from "@rbxts/services";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
-import { Server } from "shared/item/ItemUtils";
+import { Server } from "shared/api/APIExpose";
 import Operative from "shared/item/traits/Operative";
 import Packets from "shared/Packets";
 

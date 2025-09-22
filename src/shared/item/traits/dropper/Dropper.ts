@@ -8,7 +8,7 @@ import ThisEmpire from "shared/data/ThisEmpire";
 import GameSpeed from "shared/GameSpeed";
 import Droplet from "shared/item/Droplet";
 import Item from "shared/item/Item";
-import { Server } from "shared/item/ItemUtils";
+import { Server } from "shared/api/APIExpose";
 import ItemTrait from "shared/item/traits/ItemTrait";
 import { AREAS } from "shared/world/Area";
 

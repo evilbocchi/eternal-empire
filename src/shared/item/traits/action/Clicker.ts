@@ -2,8 +2,9 @@ import { OnoeNum } from "@antivivi/serikanum";
 import { formatRichText, getAllInstanceInfo, Streaming } from "@antivivi/vrldk";
 import { RunService } from "@rbxts/services";
 import { CURRENCY_DETAILS } from "shared/currency/CurrencyDetails";
+import { Server } from "shared/api/APIExpose";
 import Item from "shared/item/Item";
-import { Server, getPlacedItemsInArea } from "shared/item/ItemUtils";
+import { getPlacedItemsInArea } from "shared/item/ItemUtils";
 import ItemTrait from "shared/item/traits/ItemTrait";
 
 declare global {
@@ -22,7 +23,7 @@ declare global {
 
 export default class Clicker extends ItemTrait {
     static load(model: Model, clicker: Clicker) {
-        const Items = Server.items;
+        const Items = Server.Items;
 
         const instanceInfo = getAllInstanceInfo(model);
         const modifiers = new Set<Modifier>();

@@ -7,7 +7,7 @@ import SlamoRefugee from "server/interactive/npc/Slamo Refugee";
 import Quest, { Stage } from "server/quests/Quest";
 import { getEffect, getSound, playSound } from "shared/asset/GameAssets";
 import { WAYPOINTS } from "shared/constants";
-import { Server } from "shared/item/ItemUtils";
+import { Server } from "shared/api/APIExpose";
 import ChargedEmpoweredBrick from "shared/items/negative/instantwin/ChargedEmpoweredBrick";
 import EmpoweredBrick from "shared/items/negative/instantwin/EmpoweredBrick";
 import XLWool from "shared/items/negative/relax/XLWool";

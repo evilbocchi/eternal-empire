@@ -1,5 +1,7 @@
 import Command, { CommandAPI } from "shared/commands/Command";
 import { IS_STUDIO } from "shared/Context";
+import AvailableEmpire from "shared/data/AvailableEmpire";
+import ThisEmpire from "shared/data/ThisEmpire";
 
 export = new Command(script.Name)
     .addAlias("inv")
@@ -11,7 +13,7 @@ export = new Command(script.Name)
                 CommandAPI.ChatHook.sendPrivateMessage(o, "You cannot use /invite in this server.", "color:255,43,43");
                 return;
             }
-            CommandAPI.Data.addAvailableEmpire(userId, CommandAPI.Data.empireId);
+            AvailableEmpire.add(userId, ThisEmpire.id);
             CommandAPI.ChatHook.sendPrivateMessage(
                 o,
                 "Invited " + CommandAPI.Command.fp(p, userId),

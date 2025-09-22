@@ -6,7 +6,7 @@ import { getAllInstanceInfo, getInstanceInfo } from "@antivivi/vrldk";
 import { Debris, RunService, TweenService } from "@rbxts/services";
 import { ASSETS } from "shared/asset/GameAssets";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
-import { Server } from "shared/item/ItemUtils";
+import { Server } from "shared/api/APIExpose";
 import Operative from "shared/item/traits/Operative";
 import Packets from "shared/Packets";
 

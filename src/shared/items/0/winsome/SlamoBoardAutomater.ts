@@ -1,7 +1,7 @@
 import Difficulty from "@antivivi/jjt-difficulties";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
-import { Server } from "shared/item/ItemUtils";
+import { Server } from "shared/api/APIExpose";
 import Generator from "shared/item/traits/generator/Generator";
 import UpgradeBoard from "shared/item/traits/UpgradeBoard";
 import UpgradeBoardI from "shared/items/negative/trueease/UpgradeBoardI";

@@ -3,7 +3,7 @@ import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
 import Upgrader from "shared/item/traits/upgrader/Upgrader";
 import Formula from "shared/currency/Formula";
-import { Server } from "shared/item/ItemUtils";
+import { Server } from "shared/api/APIExpose";
 
 const mul = new CurrencyBundle().set("Funds", 0);
 

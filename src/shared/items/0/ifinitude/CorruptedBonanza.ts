@@ -6,7 +6,7 @@ import AdvancedBlankEssence from "shared/items/0/ifinitude/AdvancedBlankEssence"
 import PassiveBonanza from "shared/items/negative/instantwin/PassiveBonanza";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Formula from "shared/currency/Formula";
-import { Server } from "shared/item/ItemUtils";
+import { Server } from "shared/api/APIExpose";
 
 const amt = new OnoeNum(4e9);
 const base = new CurrencyBundle().set("Power", amt);

@@ -3,7 +3,7 @@ import { OnoeNum } from "@antivivi/serikanum";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Formula from "shared/currency/Formula";
 import Item from "shared/item/Item";
-import { Server } from "shared/item/ItemUtils";
+import { Server } from "shared/api/APIExpose";
 import Generator from "shared/item/traits/generator/Generator";
 import CorruptedBonanza from "shared/items/0/ifinitude/CorruptedBonanza";
 import TimelostDesert from "shared/items/0/vibeness/TimelostDesert";

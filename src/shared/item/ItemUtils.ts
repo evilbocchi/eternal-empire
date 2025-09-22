@@ -3,6 +3,7 @@ import { Debris, RunService, TweenService } from "@rbxts/services";
 import StringBuilder from "@rbxts/stringbuilder";
 import { ASSETS } from "shared/asset/GameAssets";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
+import { Server } from "shared/api/APIExpose";
 import type Item from "shared/item/Item";
 import Packets from "shared/Packets";
 
@@ -21,10 +22,6 @@ declare global {
 namespace ItemUtils {
     /** Shared access to id-item object map. Initialized by Items */
     export let itemsPerId: Map<string, Item>;
-    /** Shared access to game utilities. Initalized by server service */
-    export const Server = {
-        ready: false,
-    } as Server;
 
     export const UserGameSettings = RunService.IsClient() ? UserSettings().GetService("UserGameSettings") : undefined;
 
@@ -35,7 +32,7 @@ namespace ItemUtils {
     placedItemOverlapParams.FilterType = Enum.RaycastFilterType.Include;
     placedItemOverlapParams.CollisionGroup = "ItemHitbox";
 
-    export const getPlacedItemsInArea = (area: BasePart, Items = Server.items) => {
+    export const getPlacedItemsInArea = (area: BasePart, Items = Server.Items) => {
         const array = area.GetTouchingParts();
         const items = new Map<Model, Item>();
         for (const touching of array) {

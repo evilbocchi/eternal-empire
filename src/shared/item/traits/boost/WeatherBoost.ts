@@ -1,5 +1,5 @@
 import { getInstanceInfo } from "@antivivi/vrldk";
-import { Server } from "shared/item/ItemUtils";
+import { Server } from "shared/api/APIExpose";
 import Dropper from "shared/item/traits/dropper/Dropper";
 
 declare global {

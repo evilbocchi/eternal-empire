@@ -3,7 +3,7 @@ import { ReplicatedStorage } from "@rbxts/services";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
 import Upgrader from "shared/item/traits/upgrader/Upgrader";
-import { Server } from "shared/item/ItemUtils";
+import { Server } from "shared/api/APIExpose";
 
 export = new Item(script.Name)
     .setName("Automatic Radiowave Connector")

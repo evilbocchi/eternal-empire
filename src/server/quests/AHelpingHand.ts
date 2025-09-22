@@ -3,7 +3,7 @@ import { Dialogue } from "server/interactive/npc/NPC";
 import Quest, { Stage } from "server/quests/Quest";
 import { emitEffect, getSound } from "shared/asset/GameAssets";
 import { WAYPOINTS } from "shared/constants";
-import { Server } from "shared/item/ItemUtils";
+import { Server } from "shared/api/APIExpose";
 import LostPendant from "shared/items/0/winsome/LostPendant";
 import FreddysUpgrader from "shared/items/negative/friendliness/FreddysUpgrader";
 import BasicObstacleCourse from "shared/world/nodes/BasicObstacleCourse";

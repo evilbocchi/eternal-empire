@@ -1,6 +1,7 @@
 import { RunService } from "@rbxts/services";
+import { Server } from "shared/api/APIExpose";
 import Item from "shared/item/Item";
-import { Server, getPlacedItemsInArea } from "shared/item/ItemUtils";
+import { getPlacedItemsInArea } from "shared/item/ItemUtils";
 import Operative from "shared/item/traits/Operative";
 
 export default abstract class Booster extends Operative {
@@ -9,7 +10,7 @@ export default abstract class Booster extends Operative {
         clickArea.CanTouch = true;
         clickArea.CollisionGroup = "ItemHitbox";
         clickArea.Touched.Connect(() => {});
-        const Items = Server.items;
+        const Items = Server.Items;
         const whitelist = this.whitelist;
 
         let t = 0;

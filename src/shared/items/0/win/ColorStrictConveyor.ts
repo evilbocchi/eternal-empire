@@ -4,9 +4,10 @@ import { getAllInstanceInfo } from "@antivivi/vrldk";
 import { playSound } from "shared/asset/GameAssets";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import { CURRENCY_DETAILS } from "shared/currency/CurrencyDetails";
+import { Server } from "shared/api/APIExpose";
 import Droplet from "shared/item/Droplet";
 import Item from "shared/item/Item";
-import ItemUtils, { Server } from "shared/item/ItemUtils";
+import ItemUtils from "shared/item/ItemUtils";
 import Conveyor from "shared/item/traits/conveyor/Conveyor";
 
 declare global {

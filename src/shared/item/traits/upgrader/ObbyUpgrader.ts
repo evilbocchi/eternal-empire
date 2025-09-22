@@ -4,7 +4,7 @@ import { getSound } from "shared/asset/GameAssets";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Formula from "shared/currency/Formula";
 import Item from "shared/item/Item";
-import { Server } from "shared/item/ItemUtils";
+import { Server } from "shared/api/APIExpose";
 import ItemTrait from "shared/item/traits/ItemTrait";
 import UpgradeBoard from "shared/item/traits/UpgradeBoard";
 import Upgrader from "shared/item/traits/upgrader/Upgrader";

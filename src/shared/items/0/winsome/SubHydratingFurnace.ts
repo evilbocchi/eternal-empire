@@ -3,7 +3,7 @@ import { OnoeNum } from "@antivivi/serikanum";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Furnace from "shared/item/traits/Furnace";
 import Item from "shared/item/Item";
-import { Server } from "shared/item/ItemUtils";
+import { Server } from "shared/api/APIExpose";
 
 let meetsRequirement = false;
 const requirement = new OnoeNum(10);

@@ -4,7 +4,7 @@ import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Charger from "shared/item/traits/generator/Charger";
 import Item from "shared/item/Item";
 import Formula from "shared/currency/Formula";
-import { Server } from "shared/item/ItemUtils";
+import { Server } from "shared/api/APIExpose";
 import BasicBlankEssence from "./BasicBlankEssence";
 
 const div = OnoeNum.fromSerika(5, 12);

@@ -31,7 +31,7 @@ import AreaService from "server/services/world/AreaService";
 import AtmosphereService from "server/services/world/AtmosphereService";
 import ChestService from "server/services/world/ChestService";
 import UnlockedAreasService from "server/services/world/UnlockedAreasService";
-import ItemUtils from "shared/item/ItemUtils";
+import { Server } from "shared/api/APIExpose";
 import Items from "shared/items/Items";
 
 declare global {
@@ -245,11 +245,11 @@ export default class APIExposeService implements OnInit {
              *
              * @see {@link Items} for more details.
              */
-            items: Items,
+            Items,
         };
         type noChecking = { [k: string]: unknown };
 
-        for (const [k, v] of pairs(t)) (ItemUtils.Server as noChecking)[k] = v;
+        for (const [k, v] of pairs(t)) (Server as noChecking)[k] = v;
 
         this.moddingService.gameAPILoaded.fire();
 

@@ -1,6 +1,6 @@
 import Command, { CommandAPI } from "shared/commands/Command";
 import ThisEmpire from "shared/data/ThisEmpire";
-import { Server } from "shared/item/ItemUtils";
+import { Server } from "shared/api/APIExpose";
 
 export = new Command(script.Name)
     .addAlias("sset")

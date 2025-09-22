@@ -1,6 +1,6 @@
 import { TweenService } from "@rbxts/services";
 import Item from "shared/item/Item";
-import { Server } from "shared/item/ItemUtils";
+import { Server } from "shared/api/APIExpose";
 import { weldModel } from "@antivivi/vrldk";
 
 declare global {

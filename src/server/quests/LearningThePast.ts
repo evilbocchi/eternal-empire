@@ -11,7 +11,7 @@ import SuspiciousWall from "server/interactive/object/SuspiciousWall";
 import Quest, { Stage } from "server/quests/Quest";
 import { emitEffect, playSound } from "shared/asset/GameAssets";
 import { WAYPOINTS } from "shared/constants";
-import { Server } from "shared/item/ItemUtils";
+import { Server } from "shared/api/APIExpose";
 import ExcavationStone from "shared/items/excavation/ExcavationStone";
 import IrregularlyShapedKey from "shared/items/negative/skip/IrregularlyShapedKey";
 

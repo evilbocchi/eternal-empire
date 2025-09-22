@@ -11,7 +11,7 @@ import NPC, { Dialogue } from "server/interactive/npc/NPC";
 import ThisEmpire from "shared/data/ThisEmpire";
 import eat from "shared/hamster/eat";
 import { HotReloader, Reloadable } from "shared/hamster/HotReload";
-import { Server } from "shared/item/ItemUtils";
+import { Server } from "shared/api/APIExpose";
 import Packets from "shared/Packets";
 
 /**

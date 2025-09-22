@@ -2,7 +2,7 @@ import { OnoeNum } from "@antivivi/serikanum";
 import { getAllInstanceInfo, setInstanceInfo } from "@antivivi/vrldk";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
-import { Server } from "shared/item/ItemUtils";
+import { Server } from "shared/api/APIExpose";
 import Dropper from "shared/item/traits/dropper/Dropper";
 import Furnace from "shared/item/traits/Furnace";
 import ItemTrait from "shared/item/traits/ItemTrait";

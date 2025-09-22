@@ -13,7 +13,7 @@ import { PLACED_ITEMS_FOLDER, WAYPOINTS } from "shared/constants";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import { RESET_LAYERS } from "shared/currency/mechanics/ResetLayer";
 import ThisEmpire from "shared/data/ThisEmpire";
-import { Server } from "shared/item/ItemUtils";
+import { Server } from "shared/api/APIExpose";
 import SkillPod from "shared/items/0/millisecondless/SkillPod";
 import SlamoStatue from "shared/items/0/millisecondless/SlamoStatue";
 import Stone from "shared/items/0/millisecondless/Stone";

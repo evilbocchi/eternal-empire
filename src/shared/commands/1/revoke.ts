@@ -1,4 +1,6 @@
 import Command, { CommandAPI } from "shared/commands/Command";
+import AvailableEmpire from "shared/data/AvailableEmpire";
+import ThisEmpire from "shared/data/ThisEmpire";
 
 export = new Command(script.Name)
     .addAlias("rv")
@@ -16,8 +18,8 @@ export = new Command(script.Name)
                 );
                 return;
             }
-            const empireId = CommandAPI.Data.empireId;
-            CommandAPI.Data.removeAvailableEmpire(userId, empireId);
+            const empireId = ThisEmpire.id;
+            AvailableEmpire.remove(userId, empireId);
             CommandAPI.ChatHook.sendPrivateMessage(
                 o,
                 `Revoked ${CommandAPI.Command.fp(p, userId)}`,
