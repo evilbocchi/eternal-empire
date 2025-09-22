@@ -141,6 +141,11 @@ namespace SoundManager {
         const settingsConnection = Packets.settings.observe((value) => {
             MUSIC_GROUP.Volume = value.Music ? 0.5 : 0;
             SOUND_EFFECTS_GROUP.Volume = value.SoundEffects ? 1 : 0;
+            if (!value.Music) {
+                playing?.Stop();
+                playing = undefined;
+                return;
+            }
             if (ready === false) {
                 ready = true;
                 refreshMusic();

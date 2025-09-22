@@ -12,7 +12,6 @@
  * @since 1.0.0
  */
 import { OnInit, Service } from "@flamework/core";
-import DataService from "server/services/data/DataService";
 import { OnPlayerAdded } from "server/services/ModdingService";
 import { PlayerProfileManager } from "shared/data/profile/ProfileManager";
 import Packets from "shared/Packets";

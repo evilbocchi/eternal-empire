@@ -367,7 +367,6 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
         const itemsData = empireData.items;
         const itemAmount = itemsData.inventory.get(id);
         let uniqueInstance: UniqueItemInstance | undefined;
-
         if (itemAmount === undefined) {
             uniqueInstance = itemsData.uniqueInstances.get(id);
             if (uniqueInstance === undefined) {
@@ -626,6 +625,7 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
      */
     addMapItems() {
         let i = 0;
+        const mapItemModels = new Set<Model>();
         for (const waypoint of CollectionService.GetTagged("MapItem")) {
             if (!waypoint.IsA("BasePart")) continue;
             const item = Items.getItem(waypoint.Name);
@@ -639,11 +639,18 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
                 rotY: waypoint.Rotation.Y,
                 rotZ: waypoint.Rotation.Z,
             });
-            if (model !== undefined) model.Parent = Workspace;
-            else warn(`Model for ${item.id} not found`);
+            if (model !== undefined) {
+                mapItemModels.add(model);
+                model.Parent = Workspace;
+            } else warn(`Model for ${item.id} not found`);
 
             i++;
         }
+        eat(() => {
+            for (const model of mapItemModels) {
+                model.Destroy();
+            }
+        });
     }
 
     /**

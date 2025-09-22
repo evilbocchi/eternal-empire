@@ -42,16 +42,15 @@ declare global {
 }
 
 export class GridWorldNode extends SingleWorldNode<Part> {
+    buildBounds?: BuildBounds;
     originalSize?: Vector3;
-    constructor(
-        tag: string,
-        private readonly buildBounds?: BuildBounds,
-    ) {
+    constructor(tag: string, buildBounds?: BuildBounds) {
         super(tag, (instance) => {
             instance.CollisionGroup = "BuildGrid";
             this.originalSize = instance.Size;
-            this.buildBounds?.draw(instance);
+            buildBounds?.draw(instance);
         });
+        this.buildBounds = buildBounds;
     }
 }
 

@@ -2,7 +2,7 @@ import { OnStart, Service } from "@flamework/core";
 import NPC from "server/interactive/npc/NPC";
 import InteractableObject from "server/interactive/object/InteractableObject";
 import Quest from "server/quests/Quest";
-import { IS_STUDIO } from "shared/Context";
+import { IS_CI, IS_STUDIO } from "shared/Context";
 import Packets from "shared/Packets";
 
 class Food {
@@ -193,7 +193,9 @@ export default class HamsterService implements OnStart {
     onStart() {
         NPC.HOT_RELOADER.load();
         InteractableObject.HOT_RELOADER.load();
-        Quest.HOT_RELOADER.load();
+        if (!IS_CI) {
+            Quest.HOT_RELOADER.load(); // TODO: Finish quest cleanup for CI
+        }
 
         Packets.requestReload.fromClient(() => this.reload());
     }

@@ -1,3 +1,4 @@
+import { Profile } from "@antivivi/profileservice/globals";
 import { ProfileManager } from "@antivivi/vrldk";
 import { IS_CI, IS_SERVER } from "shared/Context";
 import EmpireProfileTemplate from "shared/data/profile/EmpireProfileTemplate";
@@ -8,6 +9,8 @@ import PlayerProfileTemplate from "shared/data/profile/PlayerProfileTemplate";
  */
 export class ProfileManagerWrapper<T extends object> {
     profileManager!: ProfileManager<T, unknown>;
+
+    readonly mockLoadedProfiles = new Map<string, Profile<T, unknown>>();
 
     constructor(
         storeName: string,
@@ -34,6 +37,10 @@ export class ProfileManagerWrapper<T extends object> {
      * @returns Whether the save was successful.
      */
     save(id: string | unknown) {
+        if (IS_CI) {
+            return true;
+        }
+
         return this.profileManager.save(this.getKey(id));
     }
 
@@ -45,6 +52,19 @@ export class ProfileManagerWrapper<T extends object> {
      */
     load(id: string | unknown, view?: boolean) {
         const key = this.getKey(id);
+
+        if (IS_CI) {
+            const cached = this.mockLoadedProfiles.get(key);
+            if (cached) {
+                return cached;
+            }
+
+            const mockLoaded = this.profileManager.profileStore.Mock.LoadProfileAsync(key);
+            if (mockLoaded) {
+                this.mockLoadedProfiles.set(key, mockLoaded);
+                return mockLoaded;
+            }
+        }
         return view ? this.profileManager.view(key) : this.profileManager.load(key);
     }
 
@@ -54,6 +74,10 @@ export class ProfileManagerWrapper<T extends object> {
      * @returns Whether the unload was successful.
      */
     unload(id: string | unknown) {
+        if (IS_CI) {
+            return true;
+        }
+
         return this.profileManager.unload(this.getKey(id));
     }
 }

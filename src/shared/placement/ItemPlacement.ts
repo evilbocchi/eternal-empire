@@ -1,6 +1,7 @@
 import { Workspace } from "@rbxts/services";
-import Area from "shared/world/Area";
+import { IS_CI } from "shared/Context";
 import Item from "shared/item/Item";
+import Area from "shared/world/Area";
 
 const overlapParams = new OverlapParams();
 overlapParams.CollisionGroup = "ItemHitbox";
@@ -30,7 +31,14 @@ namespace ItemPlacement {
                 overlapParams,
             );
             for (const part of parts) {
-                if (part.Name === "Hitbox" && part.Parent?.Name !== itemModel.Name) {
+                if (part.Name !== "Hitbox") continue;
+                const comparingModel = part.Parent;
+                if (comparingModel?.Name !== itemModel.Name) {
+                    if (IS_CI && comparingModel?.HasTag("Placing")) {
+                        // Server can see item previews, ignore them
+                        continue;
+                    }
+
                     return true;
                 }
             }
