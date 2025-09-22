@@ -9,6 +9,7 @@ import Signal from "@antivivi/lemon-signal";
 import { AnalyticsService, Players, ReplicatedStorage } from "@rbxts/services";
 import NPC, { Dialogue } from "server/interactive/npc/NPC";
 import ThisEmpire from "shared/data/ThisEmpire";
+import eat from "shared/hamster/eat";
 import { HotReloader, Reloadable } from "shared/hamster/HotReload";
 import { Server } from "shared/item/ItemUtils";
 import Packets from "shared/Packets";
@@ -403,7 +404,7 @@ export default class Quest extends Reloadable<Quest> {
      * @returns This quest instance.
      */
     onInit(callback: (quest: this) => void) {
-        this.initialized.connect(() => callback(this));
+        eat(this.initialized.connect(() => callback(this)));
         return this;
     }
 

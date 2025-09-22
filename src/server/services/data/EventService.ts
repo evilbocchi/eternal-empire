@@ -22,6 +22,7 @@
 import Signal from "@antivivi/lemon-signal";
 import { Service } from "@flamework/core";
 import DataService from "server/services/data/DataService";
+import eat from "shared/hamster/eat";
 
 /**
  * Service for tracking and managing completion status of game events.
@@ -91,8 +92,10 @@ export default class EventService {
         if (this.isEventCompleted(event)) callback(true);
 
         // Set up listener for future changes
-        return this.eventCompleted.connect((e, isCompleted) => {
+        const connection = this.eventCompleted.connect((e, isCompleted) => {
             if (event === e) callback(isCompleted);
         });
+        eat(connection, "disconnect");
+        return connection;
     }
 }

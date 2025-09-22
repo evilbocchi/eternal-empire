@@ -1,6 +1,7 @@
 import { OnoeNum } from "@antivivi/serikanum";
 import Command, { CommandAPI } from "shared/commands/Command";
 import { CURRENCY_DETAILS } from "shared/currency/CurrencyDetails";
+import ThisEmpire from "shared/data/ThisEmpire";
 
 export = new Command(script.Name)
     .addAlias("ecoset")
@@ -16,7 +17,7 @@ export = new Command(script.Name)
         if (currency === "all") {
             for (const [c, _] of pairs(CURRENCY_DETAILS)) {
                 CommandAPI.Currency.set(c as Currency, amount);
-                CommandAPI.Data.empireData.mostCurrencies.set(c as Currency, amount);
+                ThisEmpire.data.mostCurrencies.set(c as Currency, amount);
             }
             return;
         }
@@ -24,6 +25,6 @@ export = new Command(script.Name)
         currency = currency.gsub("_", " ")[0];
         if (CURRENCY_DETAILS[currency as Currency] === undefined) return;
         CommandAPI.Currency.set(currency as Currency, amount);
-        CommandAPI.Data.empireData.mostCurrencies.set(currency as Currency, amount);
+        ThisEmpire.data.mostCurrencies.set(currency as Currency, amount);
     })
     .setPermissionLevel(4);

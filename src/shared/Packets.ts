@@ -144,7 +144,6 @@ namespace Packets {
     export const dropletCountChanged = packet<(area: AreaId, current: number, max: number) => void>({
         isUnreliable: true,
     });
-    export const dropletCountsChanged = packet<(counts: Map<AreaId, number>) => void>({ isUnreliable: true });
 
     // quests
     export const questInfo = property<Map<string, DataType.Packed<QuestInfo>>>();

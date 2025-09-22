@@ -1,11 +1,12 @@
 import Command, { CommandAPI } from "shared/commands/Command";
+import ThisEmpire from "shared/data/ThisEmpire";
 import Packets from "shared/Packets";
 
 export = new Command(script.Name)
     .addAlias("pl")
     .setDescription("<permlevel> : Sets the minimum permission level required to purchase items.")
     .setExecute((o, level) => {
-        const setPermLevel = (o: Player, perm: keyof typeof CommandAPI.Data.empireData.permLevels, level: string) => {
+        const setPermLevel = (o: Player, perm: keyof typeof ThisEmpire.data.permLevels, level: string) => {
             const lvl = tonumber(level);
             if (lvl === undefined) {
                 CommandAPI.ChatHook.sendPrivateMessage(
@@ -22,8 +23,8 @@ export = new Command(script.Name)
                 );
                 return;
             }
-            CommandAPI.Data.empireData.permLevels[perm] = math.min(3, lvl);
-            Packets.permLevels.set(CommandAPI.Data.empireData.permLevels);
+            ThisEmpire.data.permLevels[perm] = math.min(3, lvl);
+            Packets.permLevels.set(ThisEmpire.data.permLevels);
             CommandAPI.ChatHook.sendServerMessage(
                 `Permission level ${lvl} set for permission ${perm}`,
                 "color:138,255,138",

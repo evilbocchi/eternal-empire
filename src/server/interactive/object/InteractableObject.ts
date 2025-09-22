@@ -1,6 +1,7 @@
 import Signal, { Connection } from "@antivivi/lemon-signal";
 import { ProximityPromptService } from "@rbxts/services";
 import { Dialogue } from "server/interactive/npc/NPC";
+import eat from "shared/hamster/eat";
 import { HotReloader, Reloadable } from "shared/hamster/HotReload";
 import { SingleWorldNode } from "shared/world/nodes/WorldNode";
 
@@ -27,7 +28,7 @@ class InteractableObject extends Reloadable<InteractableObject> {
     }
 
     onInteract(callback: (player: Player, object: this) => void) {
-        this.interacted.connect((player) => callback(player, this));
+        eat(this.interacted.connect((player) => callback(player, this)));
         return this;
     }
 

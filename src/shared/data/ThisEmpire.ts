@@ -1,7 +1,5 @@
 import { Profile } from "@antivivi/profileservice/globals";
 import { Players } from "@rbxts/services";
-import { IS_CI, IS_PUBLIC_SERVER, IS_SERVER, IS_SINGLE_SERVER } from "shared/Context";
-import { EmpireProfileManager } from "shared/data/profile/ProfileManager";
 import eat from "shared/hamster/eat";
 
 namespace ThisEmpire {
@@ -73,21 +71,6 @@ namespace ThisEmpire {
             }
         });
         eat(connection);
-    }
-
-    if (IS_SERVER && !IS_CI) {
-        task.spawn(() => {
-            if (IS_SINGLE_SERVER || !IS_PUBLIC_SERVER) {
-                const loop = () => {
-                    EmpireProfileManager.save(ThisEmpire.id);
-                    task.delay(60, loop);
-                };
-                task.delay(60, loop);
-            }
-        });
-
-        // check for no testing environment
-        game.BindToClose(() => EmpireProfileManager.unload(ThisEmpire.id));
     }
 }
 

@@ -42,15 +42,15 @@ declare global {
 }
 
 export class GridWorldNode extends SingleWorldNode<Part> {
-    readonly buildBounds = new BuildBounds();
     originalSize?: Vector3;
-    constructor(tag: string) {
+    constructor(
+        tag: string,
+        private readonly buildBounds?: BuildBounds,
+    ) {
         super(tag, (instance) => {
             instance.CollisionGroup = "BuildGrid";
             this.originalSize = instance.Size;
-            if (!Sandbox.getEnabled() && !IS_CI) {
-                this.buildBounds.draw(instance);
-            }
+            this.buildBounds?.draw(instance);
         });
     }
 }
@@ -167,9 +167,9 @@ export default class Area {
         this.areaBoundsWorldNode = new SingleWorldNode<Part>(`${id}AreaBounds`);
         if (buildable) {
             this.boardWorldNode = new SingleWorldNode<BasePart>(`${id}Board`);
-            this.gridWorldNode = new GridWorldNode(`${id}Grid`);
-            if (!Sandbox.getEnabled() && !IS_CI) {
-                this.buildBounds = this.gridWorldNode.buildBounds;
+            if (!Sandbox.getEnabled()) {
+                this.buildBounds = new BuildBounds();
+                this.gridWorldNode = new GridWorldNode(`${id}Grid`, this.buildBounds);
             }
         }
         this.catchAreaWorldNode = new SingleWorldNode<Part>(`${id}CatchArea`);
@@ -268,7 +268,7 @@ export default class Area {
 
     private propagateDropletCountChange() {
         // Prevent network spam during server initialization
-        if (os.clock() < 10) {
+        if (os.clock() < 15) {
             return;
         }
         // Broadcast the change to all connected clients
