@@ -7,6 +7,7 @@
 
 import React, { useCallback, useRef, useState } from "@rbxts/react";
 import { TweenService } from "@rbxts/services";
+import BuildManager from "client/ui/components/build/BuildManager";
 import { RobotoSlabMedium } from "client/ui/GameFonts";
 
 interface BuildButtonProps {
@@ -24,8 +25,6 @@ interface BuildButtonProps {
     visible?: boolean;
     /** Click event handler */
     onClick?: () => void;
-    /** Whether to enable hover and click animations */
-    animationsEnabled?: boolean;
     /** Button position */
     position?: UDim2;
     /** Button size (defaults to standard build button size) */
@@ -51,7 +50,6 @@ export default function BuildButton({
     layoutOrder,
     visible = true,
     onClick,
-    animationsEnabled = true,
     position,
     size = new UDim2(0.5, 0, 1, 0),
     backgroundColor = DEFAULT_BACKGROUND_COLOR,
@@ -63,6 +61,7 @@ export default function BuildButton({
     const scaleRef = useRef<UIScale>();
     const [isHovered, setIsHovered] = useState(false);
     const [isPressed, setIsPressed] = useState(false);
+    const animationsEnabled = BuildManager.animationsEnabled;
 
     const handleClick = useCallback(() => {
         if (disabled || !onClick) return;

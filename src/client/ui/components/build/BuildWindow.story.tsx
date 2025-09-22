@@ -1,8 +1,13 @@
-import React from "@rbxts/react";
+import React, { Fragment } from "@rbxts/react";
 import ReactRoblox from "@rbxts/react-roblox";
 import { CreateReactStory } from "@rbxts/ui-labs";
+import BuildManager from "client/ui/components/build/BuildManager";
 import BuildWindow from "client/ui/components/build/BuildWindow";
-import useVisibility from "client/ui/hooks/useVisibility";
+import InventoryWindow from "client/ui/components/item/inventory/InventoryWindow";
+import SidebarButtons from "client/ui/components/sidebar/SidebarButtons";
+import StoryMocking from "client/ui/components/StoryMocking";
+import useVisibility, { useVisibilityMain } from "client/ui/hooks/useVisibility";
+import Packets from "shared/Packets";
 
 export = CreateReactStory(
     {
@@ -13,24 +18,32 @@ export = CreateReactStory(
             hasSelection: true,
             isRestricted: false,
             animationsEnabled: true,
+            fullBuildMode: false,
         },
     },
     (props) => {
-        const state = {
-            hasSelection: props.controls.hasSelection,
-            isRestricted: props.controls.isRestricted,
-            animationsEnabled: props.controls.animationsEnabled,
-        };
-
-        const callbacks = {
-            onDeselect: () => print("Deselect clicked"),
-            onRotate: () => print("Rotate clicked"),
-            onDelete: () => print("Delete clicked"),
-            onPlace: () => print("Place clicked"),
-        };
-
+        StoryMocking.mockData();
+        Packets.permLevels.set({ build: -1 });
         useVisibility("Build", props.controls.visible);
+        BuildManager.animationsEnabled = props.controls.animationsEnabled;
 
-        return <BuildWindow state={state} callbacks={callbacks} />;
+        useVisibilityMain(props.controls.fullBuildMode);
+
+        if (props.controls.fullBuildMode) {
+            return (
+                <Fragment>
+                    <BuildWindow />
+                    <InventoryWindow />
+                    <SidebarButtons />
+                </Fragment>
+            );
+        }
+
+        return (
+            <BuildWindow
+                getRestricted={() => props.controls.isRestricted}
+                hasSelection={() => props.controls.hasSelection}
+            />
+        );
     },
 );

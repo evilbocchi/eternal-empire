@@ -34,6 +34,7 @@ export const SHOP_GUI = (() => {
     gui.SizingMode = Enum.SurfaceGuiSizingMode.PixelsPerStud;
     gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling;
     gui.ResetOnSpawn = false;
+    gui.Enabled = false;
     gui.Name = "Shop";
     gui.Parent = PLAYER_GUI;
     return gui;

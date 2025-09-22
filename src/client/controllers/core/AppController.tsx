@@ -19,13 +19,11 @@ import {
     TOOLTIPS_GUI,
     WORLD_GUI,
 } from "client/controllers/core/Guis";
-import BuildController from "client/controllers/gameplay/BuildController";
-import InventoryController from "client/controllers/interface/InventoryController";
 import SoundManager from "client/ui/SoundManager";
 import MainLayout from "client/ui/components/MainLayout";
 import BackpackWindow from "client/ui/components/backpack/BackpackWindow";
 import BalanceWindow from "client/ui/components/balance/BalanceWindow";
-import BuildManager from "client/ui/components/build/BuildManager";
+import BuildWindow from "client/ui/components/build/BuildWindow";
 import CommandsWindow from "client/ui/components/commands/CommandsWindow";
 import ClickSparkManager from "client/ui/components/effect/ClickSparkManager";
 import InventoryWindow from "client/ui/components/item/inventory/InventoryWindow";
@@ -52,18 +50,13 @@ export function Hamster() {
 
 @Controller()
 export default class AppController implements OnStart {
-    constructor(
-        private readonly buildController: BuildController,
-        private readonly inventoryController: InventoryController,
-    ) {}
-
     onStart() {
         createRoot(MAIN_LAYOUT_GUI).render(<MainLayout />);
         createRoot(CLICK_SPARKS_GUI).render(<ClickSparkManager />);
         createRoot(TOOLTIPS_GUI).render(<TooltipWindow />);
         createRoot(DIALOGUE_GUI).render(<DialogueWindow />);
         createRoot(BALANCE_GUI).render(<BalanceWindow />);
-        createRoot(BUILD_GUI).render(<BuildManager buildController={this.buildController} />);
+        createRoot(BUILD_GUI).render(<BuildWindow />);
         createRoot(SETTINGS_GUI).render(
             <Fragment>
                 <CopyWindow />
@@ -72,7 +65,7 @@ export default class AppController implements OnStart {
                 <RenameWindow />
             </Fragment>,
         );
-        createRoot(INVENTORY_GUI).render(<InventoryWindow inventoryController={this.inventoryController} />);
+        createRoot(INVENTORY_GUI).render(<InventoryWindow />);
         createRoot(LOGS_GUI).render(<LogsWindow />);
         createRoot(QUESTS_GUI).render(
             <Fragment>

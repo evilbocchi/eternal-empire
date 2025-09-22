@@ -1,7 +1,7 @@
 import React, { StrictMode } from "@rbxts/react";
 import BackpackWindow from "client/ui/components/backpack/BackpackWindow";
 import BalanceWindow from "client/ui/components/balance/BalanceWindow";
-import BuildManager from "client/ui/components/build/BuildManager";
+import BuildWindow from "client/ui/components/build/BuildWindow";
 import ClickSparkManager from "client/ui/components/effect/ClickSparkManager";
 import InventoryWindow from "client/ui/components/item/inventory/InventoryWindow";
 import useCIViewportManagement from "client/ui/components/item/useCIViewportManagement";
@@ -19,7 +19,7 @@ export default function App({ viewportsEnabled }: { viewportsEnabled: boolean })
             <MainLayout />
             <ClickSparkManager />
             <TooltipWindow />
-            <BuildManager />
+            <BuildWindow />
             <SettingsManager />
             <InventoryWindow viewportManagement={viewportManagement} />
             <QuestWindow />

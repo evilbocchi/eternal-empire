@@ -6,7 +6,7 @@
  */
 
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from "@rbxts/react";
-import type InventoryController from "client/controllers/interface/InventoryController";
+import BuildManager from "client/ui/components/build/BuildManager";
 import InventoryEmptyState from "client/ui/components/item/inventory/InventoryEmptyState";
 import InventoryFilter, {
     filterItems,
@@ -19,6 +19,7 @@ import BasicWindow from "client/ui/components/window/BasicWindow";
 import { RobotoMono } from "client/ui/GameFonts";
 import useProperty from "client/ui/hooks/useProperty";
 import { getAsset } from "shared/asset/AssetMap";
+import { playSound } from "shared/asset/GameAssets";
 import type Item from "shared/item/Item";
 import Items from "shared/items/Items";
 import Packets from "shared/Packets";
@@ -54,18 +55,47 @@ export function getBestUniqueInstances(uniqueInstances: Map<string, UniqueItemIn
     return bestUuidPerItem;
 }
 
+/**
+ * Handle item activation for placement in the game world.
+ * This method encapsulates the business logic for item placement.
+ *
+ * @param item The item to activate/place
+ * @returns True if the item was successfully activated, false otherwise
+ */
+export function activateItem(item: Item): boolean {
+    const isPlaceable = item.placeableAreas.size() > 0 || item.bounds !== undefined;
+    const level = Packets.level.get() ?? 0;
+
+    // Check restrictions
+    if (
+        BuildManager.getRestricted() === true ||
+        isPlaceable === false ||
+        (item.levelReq !== undefined && item.levelReq > level)
+    ) {
+        playSound("Error.mp3");
+        return false;
+    }
+
+    playSound("MenuClick.mp3");
+
+    // Find best unique instance if applicable
+    let bestUuid: string | undefined;
+    if (Items.uniqueItems.has(item)) {
+        bestUuid = getBestUniqueInstances(Packets.uniqueInstances.get() ?? new Map()).get(item.id);
+    }
+
+    // Add placing model and select it
+    BuildManager.mainSelect(BuildManager.addPlacingModel(item, bestUuid));
+
+    return true;
+}
+
 const NON_GEAR_ITEMS = Items.sortedItems.filter((item) => !item.findTrait("Gear"));
 
 /**
  * Main inventory window component following the QuestWindow pattern
  */
-export default function InventoryWindow({
-    inventoryController,
-    viewportManagement,
-}: {
-    inventoryController?: InventoryController;
-    viewportManagement?: ItemViewportManagement;
-}) {
+export default function InventoryWindow({ viewportManagement }: { viewportManagement?: ItemViewportManagement }) {
     const { id, visible, closeDocument } = useSingleDocument({ id: "Inventory" });
     const { searchQuery, props: filterProps } = useBasicInventoryFilter();
     const [queryTime, setQueryTime] = useState(0);
@@ -152,17 +182,15 @@ export default function InventoryWindow({
     // Handle item activation
     const handleItemActivated = useCallback(
         (item: Item) => {
-            if (!inventoryController) return;
-
             // Use the controller's activation logic
-            const success = inventoryController.activateItem(item);
+            const success = activateItem(item);
 
             // Close the inventory window if activation was successful
             if (success) {
                 closeDocument();
             }
         },
-        [inventoryController, closeDocument],
+        [closeDocument],
     );
 
     return (

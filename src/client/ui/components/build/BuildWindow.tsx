@@ -6,67 +6,67 @@
  */
 
 import React, { useEffect, useRef } from "@rbxts/react";
-import { TweenService } from "@rbxts/services";
 import { Environment } from "@rbxts/ui-labs";
 import BuildButton from "client/ui/components/build/BuildButton";
+import BuildManager from "client/ui/components/build/BuildManager";
+import useHotkeyWithTooltip from "client/ui/components/hotkeys/useHotkeyWithTooltip";
 import { useDocument } from "client/ui/components/window/DocumentManager";
 import { getAsset } from "shared/asset/AssetMap";
-
-export interface BuildWindowState {
-    /** Whether there are items currently selected */
-    hasSelection: boolean;
-    /** Whether building is currently restricted */
-    isRestricted: boolean;
-    /** Whether animations are enabled */
-    animationsEnabled: boolean;
-}
-
-export interface BuildWindowCallbacks {
-    /** Called when deselect button is pressed */
-    onDeselect: () => void;
-    /** Called when rotate button is pressed */
-    onRotate: () => void;
-    /** Called when delete button is pressed */
-    onDelete: () => void;
-    /** Called when place button is pressed */
-    onPlace: () => void;
-}
-
-interface BuildWindowProps {
-    /** Current build window state */
-    state: BuildWindowState;
-    /** Event callbacks */
-    callbacks: BuildWindowCallbacks;
-}
 
 /**
  * Main build window component that displays build controls
  */
-export default function BuildWindow({ state, callbacks }: BuildWindowProps) {
+export default function BuildWindow({
+    hasSelection = BuildManager.hasSelection,
+    getRestricted = BuildManager.getRestricted,
+}: {
+    hasSelection?: () => boolean;
+    getRestricted?: () => boolean;
+}) {
     const ref = useRef<Frame>();
     const { visible } = useDocument({ id: "Build", priority: -1 });
-    const { animationsEnabled } = state;
-    const { onDeselect, onRotate, onDelete, onPlace } = callbacks;
-    const size = new UDim2(0.3, 0, 0, 75);
-    const closeSize = new UDim2(0, 0, 0, 0);
+    const openPosition = new UDim2(0.5, 0, 0.95, -5);
+    const closedPosition = new UDim2(0.5, 0, 1.2, 0);
 
     useEffect(() => {
         if (visible) {
-            const frame = ref.current;
-            if (!frame) return;
-            frame.Visible = true;
-            TweenService.Create(frame, new TweenInfo(0.2), { Size: size }).Play();
+            ref.current?.TweenPosition(openPosition, Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.2, true);
         } else {
-            const frame = ref.current;
-            if (!frame) return;
-            const tween = TweenService.Create(frame, new TweenInfo(0.2), { Size: closeSize });
-            tween.Completed.Once((playbackState) => {
-                if (playbackState !== Enum.PlaybackState.Completed) return;
-                frame.Visible = false;
-            });
-            tween.Play();
+            ref.current?.TweenPosition(closedPosition, Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.2, true);
         }
     }, [visible]);
+
+    useEffect(() => {
+        return BuildManager.init();
+    }, []);
+
+    const { events: deselectEvents } = useHotkeyWithTooltip({
+        label: "Deselect Build",
+        action: () => {
+            if (!hasSelection() || getRestricted()) return false;
+            BuildManager.revertSelected();
+            BuildManager.deselectAll();
+            return true;
+        },
+    });
+
+    const { events: rotateEvents } = useHotkeyWithTooltip({
+        label: "Rotate Build",
+        action: () => {
+            if (!hasSelection() || getRestricted()) return false;
+            BuildManager.rotateSelection();
+            return true;
+        },
+    });
+
+    const { events: deleteEvents } = useHotkeyWithTooltip({
+        label: "Delete Build",
+        action: () => {
+            if (!hasSelection() || getRestricted()) return false;
+            BuildManager.deleteSelection();
+            return true;
+        },
+    });
 
     return (
         <frame
@@ -74,8 +74,8 @@ export default function BuildWindow({ state, callbacks }: BuildWindowProps) {
             Active={true}
             AnchorPoint={new Vector2(0.5, 1)}
             BackgroundTransparency={1}
-            Position={new UDim2(0.5, 0, 0.95, -5)}
-            Size={closeSize}
+            Position={closedPosition}
+            Size={new UDim2(0.3, 0, 0, 75)}
         >
             {/* Deselect button */}
             <BuildButton
@@ -83,8 +83,7 @@ export default function BuildWindow({ state, callbacks }: BuildWindowProps) {
                 text="Deselect"
                 position={new UDim2(0.5, 0, 0.05, 0)}
                 size={new UDim2(0.7, 0, 0.4, -2)}
-                animationsEnabled={animationsEnabled}
-                onClick={onDeselect}
+                onClick={deselectEvents.Activated}
             />
 
             {/* Options container */}
@@ -99,18 +98,7 @@ export default function BuildWindow({ state, callbacks }: BuildWindowProps) {
                     text="Rotate"
                     icon={getAsset("assets/Build/Rotate.png")}
                     layoutOrder={4}
-                    animationsEnabled={animationsEnabled}
-                    onClick={onRotate}
-                />
-
-                {/* Delete button */}
-                <BuildButton
-                    text="Delete"
-                    icon={getAsset("assets/Build/Delete.png")}
-                    iconColor={Color3.fromRGB(255, 70, 70)}
-                    layoutOrder={6}
-                    animationsEnabled={animationsEnabled}
-                    onClick={onDelete}
+                    onClick={rotateEvents.Activated}
                 />
 
                 {/* Place button (only visible on touch devices) */}
@@ -120,8 +108,18 @@ export default function BuildWindow({ state, callbacks }: BuildWindowProps) {
                     iconColor={Color3.fromRGB(170, 255, 127)}
                     layoutOrder={5}
                     visible={Environment.UserInput.TouchEnabled}
-                    animationsEnabled={animationsEnabled}
-                    onClick={onPlace}
+                    onClick={() => {
+                        BuildManager.placeSelection();
+                    }}
+                />
+
+                {/* Delete button */}
+                <BuildButton
+                    text="Delete"
+                    icon={getAsset("assets/Build/Delete.png")}
+                    iconColor={Color3.fromRGB(255, 70, 70)}
+                    layoutOrder={6}
+                    onClick={deleteEvents.Activated}
                 />
 
                 {/* Layout for option buttons */}
