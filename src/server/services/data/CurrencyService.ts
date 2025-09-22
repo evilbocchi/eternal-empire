@@ -20,6 +20,7 @@
 
 import Signal from "@antivivi/lemon-signal";
 import { OnoeNum } from "@antivivi/serikanum";
+import { simpleInterval } from "@antivivi/vrldk";
 import { OnStart, Service } from "@flamework/core";
 import DataService from "server/services/data/DataService";
 import Packets from "shared/Packets";
@@ -27,6 +28,7 @@ import CurrencyBundle from "shared/currency/CurrencyBundle";
 import { CURRENCIES, CURRENCY_DETAILS } from "shared/currency/CurrencyDetails";
 import CurrencyMap from "shared/currency/CurrencyMap";
 import Queue from "shared/currency/Queue";
+import eat from "shared/hamster/eat";
 
 /** Constant zero value for performance optimization. */
 const ZERO = new OnoeNum(0);
@@ -214,7 +216,6 @@ export default class CurrencyService implements OnStart {
         return new CurrencyBundle(this.mostCurrenciesSinceReset).div(t - this.dataService.empireData.lastReset);
     }
 
-    // Lifecycle Methods
     onStart() {
         // Create revenue tracking queues for each currency
         const queuePerCurrency = new Map<Currency, Queue>();
@@ -222,52 +223,50 @@ export default class CurrencyService implements OnStart {
             queuePerCurrency.set(currency, new Queue());
         }
 
-        task.spawn(() => {
-            while (task.wait(1)) {
-                const revenue = new Map<Currency, OnoeNum>();
+        const unimportantCleanup = simpleInterval(() => {
+            const revenue = new Map<Currency, OnoeNum>();
 
-                for (const [currency, amount] of this.currencies) {
-                    // Remove invalid currencies
-                    if (CURRENCY_DETAILS[currency] === undefined) {
-                        this.currencies.delete(currency);
-                        continue;
-                    }
-
-                    // Update all-time maximum
-                    const most = this.mostCurrencies.get(currency);
-                    if (most === undefined || amount.moreThan(most)) {
-                        this.mostCurrencies.set(currency, amount);
-                    }
-
-                    // Update maximum since reset
-                    const mostSinceReset = this.mostCurrenciesSinceReset.get(currency);
-                    if (mostSinceReset === undefined || amount.moreThan(mostSinceReset)) {
-                        this.mostCurrenciesSinceReset.set(currency, amount);
-                    }
-
-                    // Calculate revenue using queue averaging
-                    const queue = queuePerCurrency.get(currency);
-                    if (queue === undefined) {
-                        continue;
-                    }
-                    queue.addDelta(amount);
-                    revenue.set(currency, queue.meanDelta());
+            for (const [currency, amount] of this.currencies) {
+                // Remove invalid currencies
+                if (CURRENCY_DETAILS[currency] === undefined) {
+                    this.currencies.delete(currency);
+                    continue;
                 }
 
-                // Propagate updates to clients
-                Packets.mostBalance.set(this.mostCurrencies);
-                Packets.revenue.set(revenue);
-            }
-        });
+                // Update all-time maximum
+                const most = this.mostCurrencies.get(currency);
+                if (most === undefined || amount.moreThan(most)) {
+                    this.mostCurrencies.set(currency, amount);
+                }
 
-        // High-frequency balance propagation loop - runs every 0.1 seconds
-        task.spawn(() => {
-            // Ensure Funds currency exists
-            if (!this.currencies.has("Funds")) this.currencies.set("Funds", new OnoeNum(0));
+                // Update maximum since reset
+                const mostSinceReset = this.mostCurrenciesSinceReset.get(currency);
+                if (mostSinceReset === undefined || amount.moreThan(mostSinceReset)) {
+                    this.mostCurrenciesSinceReset.set(currency, amount);
+                }
 
-            while (task.wait(0.1)) {
-                this.propagate();
+                // Calculate revenue using queue averaging
+                const queue = queuePerCurrency.get(currency);
+                if (queue === undefined) {
+                    continue;
+                }
+                queue.addDelta(amount);
+                revenue.set(currency, queue.meanDelta());
             }
-        });
+
+            // Propagate updates to clients
+            Packets.mostBalance.set(this.mostCurrencies);
+            Packets.revenue.set(revenue);
+        }, 1);
+
+        // Ensure Funds currency exists
+        if (!this.currencies.has("Funds")) this.currencies.set("Funds", new OnoeNum(0));
+
+        const importantCleanup = simpleInterval(() => {
+            this.propagate();
+        }, 0.1);
+
+        eat(importantCleanup);
+        eat(unimportantCleanup);
     }
 }

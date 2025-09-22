@@ -15,7 +15,7 @@
 
 import Signal from "@antivivi/lemon-signal";
 import { OnoeNum } from "@antivivi/serikanum";
-import { convertToHHMMSS } from "@antivivi/vrldk";
+import { convertToHHMMSS, simpleInterval } from "@antivivi/vrldk";
 import { OnInit, OnStart, Service } from "@flamework/core";
 import { DataStoreService, MessagingService } from "@rbxts/services";
 import CurrencyService from "server/services/data/CurrencyService";
@@ -30,6 +30,7 @@ import { getNameFromUserId } from "shared/constants";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import CurrencyBomb from "shared/currency/mechanics/CurrencyBomb";
 import { BOMBS_PRODUCTS } from "shared/devproducts/BombsProducts";
+import eat from "shared/hamster/eat";
 
 /**
  * Structure for bomb event messages sent via MessagingService.
@@ -181,11 +182,10 @@ export default class BombsService implements OnInit, OnStart {
     }
 
     onStart() {
-        task.spawn(() => {
-            while (task.wait(1)) {
-                this.boost = CurrencyBomb.getBombBoosts(Packets.bombEndTimes.get(), os.time());
-            }
-        });
+        const cleanup = simpleInterval(() => {
+            this.boost = CurrencyBomb.getBombBoosts(Packets.bombEndTimes.get(), os.time());
+        }, 1);
+        eat(cleanup);
 
         this.buildInitialBombTimes();
     }

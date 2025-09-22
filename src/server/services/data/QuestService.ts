@@ -20,13 +20,15 @@
  * @since 1.0.0
  */
 
-import { OnInit, OnStart, Service } from "@flamework/core";
+import { simpleInterval } from "@antivivi/vrldk";
+import { OnStart, Service } from "@flamework/core";
 import Quest from "server/quests/Quest";
 import DataService from "server/services/data/DataService";
 import ItemService from "server/services/item/ItemService";
 import ChatHookService from "server/services/permissions/ChatHookService";
 import { WAYPOINTS } from "shared/constants";
 import { IS_CI } from "shared/Context";
+import eat from "shared/hamster/eat";
 import Items from "shared/items/Items";
 import Packets from "shared/Packets";
 import Sandbox from "shared/Sandbox";
@@ -95,7 +97,7 @@ export default class QuestService implements OnStart {
 
         // Monitor quest stage changes
         let lastStagesPerQuest = new Map<string, number>();
-        while (task.wait(0.1)) {
+        const cleanup = simpleInterval(() => {
             const stagesPerQuest = this.dataService.empireData.quests;
             let changed = false;
             for (const [questId, stage] of stagesPerQuest) {
@@ -106,10 +108,11 @@ export default class QuestService implements OnStart {
                 }
             }
             if (!changed) {
-                continue;
+                return;
             }
             lastStagesPerQuest = table.clone(stagesPerQuest);
             Packets.stagePerQuest.set(stagesPerQuest);
-        }
+        }, 0.1);
+        eat(cleanup);
     }
 }

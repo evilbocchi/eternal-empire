@@ -10,7 +10,7 @@
  * @since 1.0.0
  */
 
-import { convertToMMSS, weldModel } from "@antivivi/vrldk";
+import { convertToMMSS, simpleInterval, weldModel } from "@antivivi/vrldk";
 import { OnInit, OnStart, Service } from "@flamework/core";
 import { TweenService, Workspace } from "@rbxts/services";
 import DataService from "server/services/data/DataService";
@@ -303,6 +303,7 @@ export default class ChestService implements OnInit, OnStart {
      */
     onStart() {
         const createdChests = new Set<Model>();
+        const cleanups = new Array<() => void>();
         for (const [_id, area] of pairs(AREAS)) {
             const chestsFolder = area.worldNode.getInstance()?.FindFirstChild("Chests");
             if (chestsFolder === undefined) continue;
@@ -337,20 +338,19 @@ export default class ChestService implements OnInit, OnStart {
                     prompt.Enabled = !isOpened;
                     chestModel.Hitbox.CooldownGui.Enabled = isOpened;
                 };
-                task.spawn(() => {
-                    while (task.wait(1)) {
-                        const elapsed = tick() - lastOpen;
-                        if (elapsed > this.cooldown && isOpened === true) {
-                            isOpened = false;
-                            markLastOpen(lastOpen);
-                        }
-                        if (isOpened) {
-                            chestModel.Hitbox.CooldownGui.CooldownLabel.Text = convertToMMSS(
-                                math.floor(this.cooldown - elapsed),
-                            );
-                        }
+                const cleanup = simpleInterval(() => {
+                    const elapsed = tick() - lastOpen;
+                    if (elapsed > this.cooldown && isOpened === true) {
+                        isOpened = false;
+                        markLastOpen(lastOpen);
                     }
-                });
+                    if (isOpened) {
+                        chestModel.Hitbox.CooldownGui.CooldownLabel.Text = convertToMMSS(
+                            math.floor(this.cooldown - elapsed),
+                        );
+                    }
+                }, 1);
+                cleanups.push(cleanup);
                 const bindableEvent = new Instance("BindableEvent");
                 bindableEvent.Name = "MarkLastOpen";
                 bindableEvent.Event.Connect((lastOpen: number) => markLastOpen(lastOpen));
@@ -381,6 +381,9 @@ export default class ChestService implements OnInit, OnStart {
         eat(() => {
             for (const chest of createdChests) {
                 chest.Destroy();
+            }
+            for (const cleanup of cleanups) {
+                cleanup();
             }
             createdChests.clear();
         });

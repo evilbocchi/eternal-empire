@@ -11,9 +11,11 @@
  * @since 1.0.0
  */
 import ComputeNameColor from "@antivivi/rbxnamecolor";
+import { simpleInterval } from "@antivivi/vrldk";
 import { Controller, OnInit, OnStart } from "@flamework/core";
 import { LOCAL_PLAYER } from "client/constants";
 import { getTextChannels } from "shared/constants";
+import eat from "shared/hamster/eat";
 import Packets from "shared/Packets";
 
 /**
@@ -22,7 +24,7 @@ import Packets from "shared/Packets";
  * Handles chat message formatting, color overrides, and system/personal message display.
  */
 @Controller()
-export default class ChatHookController implements OnInit, OnStart {
+export default class ChatHookController implements OnStart {
     /** Hex color string for system messages. */
     systemColor = new Color3(0.05, 0.75, 0.05).ToHex();
 
@@ -66,12 +68,12 @@ export default class ChatHookController implements OnInit, OnStart {
             if (c !== undefined) overrideProperties.Text = text;
             return overrideProperties;
         };
-        task.spawn(() => {
-            // annoyance workaround
-            while (task.wait(1)) {
+        eat(
+            // for some reason OnIncomingMessage can get overridden by other scripts, so we need to keep setting it
+            simpleInterval(() => {
                 channel.OnIncomingMessage = onMessageAdded;
-            }
-        });
+            }, 1),
+        );
     }
 
     /**
@@ -94,16 +96,11 @@ export default class ChatHookController implements OnInit, OnStart {
     }
 
     /**
-     * Initializes the ChatHookController, sets up system message listener.
-     */
-    onInit() {
-        Packets.systemMessageSent.fromServer((channel, message, metadata) => this.display(channel, message, metadata));
-    }
-
-    /**
      * Starts the ChatHookController, sets up chat channel listeners for formatting.
      */
     onStart() {
+        Packets.systemMessageSent.fromServer((channel, message, metadata) => this.display(channel, message, metadata));
+
         const TEXT_CHANNELS = getTextChannels();
         TEXT_CHANNELS.ChildAdded.Connect((child) => this.onChannelAdded(child));
         for (const channel of TEXT_CHANNELS.GetChildren()) {

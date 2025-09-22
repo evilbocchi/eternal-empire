@@ -1,14 +1,15 @@
 //!native
 //!optimize 2
 
-import { findBaseParts, formatRichText, getAllInstanceInfo } from "@antivivi/vrldk";
+import { findBaseParts, formatRichText, getAllInstanceInfo, simpleInterval } from "@antivivi/vrldk";
 import { Players, RunService, Workspace } from "@rbxts/services";
+import { Server } from "shared/api/APIExpose";
 import { CURRENCY_DETAILS } from "shared/currency/CurrencyDetails";
 import ThisEmpire from "shared/data/ThisEmpire";
 import GameSpeed from "shared/GameSpeed";
+import eat from "shared/hamster/eat";
 import Droplet from "shared/item/Droplet";
 import Item from "shared/item/Item";
-import { Server } from "shared/api/APIExpose";
 import ItemTrait from "shared/item/traits/ItemTrait";
 import { AREAS } from "shared/world/Area";
 
@@ -214,13 +215,12 @@ export default class Dropper extends ItemTrait {
     }
 
     static {
-        task.spawn(() => {
-            while (task.wait(1)) {
-                this.hasLuckyWindow = this.luckyChance > 0 && math.random(1, this.luckyChance) === 1;
-            }
-        });
+        const cleanup = simpleInterval(() => {
+            this.hasLuckyWindow = this.luckyChance > 0 && math.random(1, this.luckyChance) === 1;
+        }, 1);
+        eat(cleanup);
 
-        RunService.Heartbeat.Connect(() => {
+        const connection = RunService.Heartbeat.Connect(() => {
             const speed = GameSpeed.speed;
             const t = tick();
             for (const [_d, info] of this.SPAWNED_DROPS) {
@@ -253,5 +253,6 @@ export default class Dropper extends ItemTrait {
                 }
             }
         });
+        eat(connection);
     }
 }

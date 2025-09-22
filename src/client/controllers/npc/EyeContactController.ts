@@ -7,9 +7,10 @@
  *
  * @since 1.0.0
  */
-import { observeTag } from "@antivivi/vrldk";
+import { observeTag, simpleInterval } from "@antivivi/vrldk";
 import { Controller, OnInit, OnStart } from "@flamework/core";
 import { Workspace } from "@rbxts/services";
+import eat from "shared/hamster/eat";
 
 /**
  * Details for tracking an NPC's head and neck for eye contact.
@@ -153,18 +154,17 @@ export default class EyeContactController implements OnInit, OnStart {
      * Every 0.05s, updates each tracked NPC to look at the closest player/character.
      */
     onStart() {
-        task.spawn(() => {
-            while (task.wait(0.05)) {
-                for (const [model] of this.tracking) {
-                    const closest = this.getClosestTarget(model);
-                    if (closest) {
-                        const lookAtPart = closest.FindFirstChild("Head") as BasePart | undefined;
-                        this.lookAt(model, lookAtPart);
-                    } else {
-                        this.lookAt(model, undefined); // Reset to original neck C0 if no player is found
-                    }
+        const cleanup = simpleInterval(() => {
+            for (const [model] of this.tracking) {
+                const closest = this.getClosestTarget(model);
+                if (closest) {
+                    const lookAtPart = closest.FindFirstChild("Head") as BasePart | undefined;
+                    this.lookAt(model, lookAtPart);
+                } else {
+                    this.lookAt(model, undefined); // Reset to original neck C0 if no player is found
                 }
             }
-        });
+        }, 0.05);
+        eat(cleanup);
     }
 }

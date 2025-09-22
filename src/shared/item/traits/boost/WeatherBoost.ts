@@ -1,5 +1,6 @@
-import { getInstanceInfo } from "@antivivi/vrldk";
+import { getInstanceInfo, simpleInterval } from "@antivivi/vrldk";
 import { Server } from "shared/api/APIExpose";
+import eat from "shared/hamster/eat";
 import Dropper from "shared/item/traits/dropper/Dropper";
 
 declare global {
@@ -70,14 +71,13 @@ export default class WeatherBoost {
      */
     static initialize() {
         // Update weather multipliers every second
-        task.spawn(() => {
-            while (task.wait(1)) {
-                if (Server.Atmosphere) {
-                    const multipliers = Server.Atmosphere.getWeatherMultipliers();
-                    this.updateWeatherMultipliers(multipliers);
-                }
+        const cleanup = simpleInterval(() => {
+            if (Server.Atmosphere) {
+                const multipliers = Server.Atmosphere.getWeatherMultipliers();
+                this.updateWeatherMultipliers(multipliers);
             }
-        });
+        }, 1);
+        eat(cleanup);
 
         print("Weather boost system initialized");
     }

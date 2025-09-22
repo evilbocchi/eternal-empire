@@ -13,8 +13,10 @@
  * @since 1.0.0
  */
 
+import { simpleInterval } from "@antivivi/vrldk";
 import { OnStart, Service } from "@flamework/core";
-import { RunService, Workspace } from "@rbxts/services";
+import { Workspace } from "@rbxts/services";
+import eat from "shared/hamster/eat";
 
 /**
  * Service that monitors game performance and system health.
@@ -37,13 +39,12 @@ export default class DiagnosticService implements OnStart {
      * every 2 seconds and warns when performance degrades below acceptable levels.
      */
     onStart() {
-        task.spawn(() => {
-            while (task.wait(2)) {
-                const throttling = Workspace.GetPhysicsThrottling();
-                if (throttling < 100) {
-                    warn("Physics is being throttled!", throttling);
-                }
+        const cleanup = simpleInterval(() => {
+            const throttling = Workspace.GetPhysicsThrottling();
+            if (throttling < 100) {
+                warn("Physics is being throttled!", throttling);
             }
-        });
+        }, 2);
+        eat(cleanup);
     }
 }

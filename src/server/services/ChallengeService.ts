@@ -14,6 +14,7 @@
  */
 
 import { OnoeNum } from "@antivivi/serikanum";
+import { simpleInterval } from "@antivivi/vrldk";
 import { OnStart, Service } from "@flamework/core";
 import { toNumeral } from "@rbxts/roman-numerals";
 import StringBuilder from "@rbxts/stringbuilder";
@@ -27,6 +28,7 @@ import ChatHookService from "server/services/permissions/ChatHookService";
 import PermissionsService from "server/services/permissions/PermissionsService";
 import ResetService from "server/services/ResetService";
 import { RESET_LAYERS } from "shared/currency/mechanics/ResetLayer";
+import eat from "shared/hamster/eat";
 import Item from "shared/item/Item";
 import Packets from "shared/Packets";
 import Sandbox from "shared/Sandbox";
@@ -414,10 +416,9 @@ export class ChallengeService implements OnStart {
         });
         this.refreshChallenges();
 
-        task.spawn(() => {
-            while (task.wait(0.5)) {
-                this.challengeEffect();
-            }
-        });
+        const cleanup = simpleInterval(() => {
+            this.challengeEffect();
+        }, 0.5);
+        eat(cleanup);
     }
 }

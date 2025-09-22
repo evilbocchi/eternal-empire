@@ -20,6 +20,7 @@ import { LOCAL_PLAYER } from "client/constants";
 import { SHOP_GUI } from "client/controllers/core/Guis";
 import { ShopManager } from "client/ui/components/item/shop/ShopWindow";
 import { getSound } from "shared/asset/GameAssets";
+import eat from "shared/hamster/eat";
 import Shop from "shared/item/traits/Shop";
 import Items from "shared/items/Items";
 
@@ -82,54 +83,65 @@ export default class ShopController implements OnStart {
         ShopManager.openShop(shop);
     }
 
+    private checkForShop() {
+        while (task.wait(0.1)) {
+            const primaryPart = LOCAL_PLAYER.Character?.PrimaryPart;
+            if (primaryPart === undefined) continue;
+
+            const shopHitboxes = CollectionService.GetTagged("Shop");
+            let shopFound = false;
+            for (const shopHitbox of shopHitboxes) {
+                if (!shopHitbox.IsA("Part")) continue;
+                const shopModel = shopHitbox.Parent;
+                if (shopModel === undefined || shopModel.GetAttribute("Selected")) continue;
+
+                const shopGuiPart = shopModel.FindFirstChild("ShopGuiPart") as Part | undefined;
+                if (shopGuiPart === undefined) continue;
+
+                if (shopGuiPart.GetAttribute("ClientLoaded") !== true) {
+                    this.hideShopGuiPart(shopGuiPart);
+                    shopGuiPart.SetAttribute("ClientLoaded", true);
+                }
+
+                const localPosition = shopHitbox.CFrame.PointToObjectSpace(primaryPart.Position);
+                if (
+                    math.abs(localPosition.X) > shopHitbox.Size.X / 2 ||
+                    math.abs(localPosition.Z) > shopHitbox.Size.Z / 2
+                )
+                    continue;
+
+                const itemId = shopModel.GetAttribute("ItemId") as string | undefined;
+                if (itemId === undefined) continue;
+
+                const item = Items.getItem(itemId);
+                if (item === undefined) continue;
+
+                this.refreshShop(shopGuiPart, item.trait(Shop));
+                shopFound = true;
+                break;
+            }
+
+            if (shopFound === false) {
+                this.refreshShop();
+            }
+        }
+    }
+
     /**
      * Starts the ShopController, binds render steps for price cycling and shop detection.
      */
     onStart() {
         this.refreshShop();
 
-        task.spawn(() => {
-            while (task.wait(0.1)) {
-                const primaryPart = LOCAL_PLAYER.Character?.PrimaryPart;
-                if (primaryPart === undefined) continue;
-
-                const shopHitboxes = CollectionService.GetTagged("Shop");
-                let shopFound = false;
-                for (const shopHitbox of shopHitboxes) {
-                    if (!shopHitbox.IsA("Part")) continue;
-                    const shopModel = shopHitbox.Parent;
-                    if (shopModel === undefined || shopModel.GetAttribute("Selected")) continue;
-
-                    const shopGuiPart = shopModel.FindFirstChild("ShopGuiPart") as Part | undefined;
-                    if (shopGuiPart === undefined) continue;
-
-                    if (shopGuiPart.GetAttribute("ClientLoaded") !== true) {
-                        this.hideShopGuiPart(shopGuiPart);
-                        shopGuiPart.SetAttribute("ClientLoaded", true);
-                    }
-
-                    const localPosition = shopHitbox.CFrame.PointToObjectSpace(primaryPart.Position);
-                    if (
-                        math.abs(localPosition.X) > shopHitbox.Size.X / 2 ||
-                        math.abs(localPosition.Z) > shopHitbox.Size.Z / 2
-                    )
-                        continue;
-
-                    const itemId = shopModel.GetAttribute("ItemId") as string | undefined;
-                    if (itemId === undefined) continue;
-
-                    const item = Items.getItem(itemId);
-                    if (item === undefined) continue;
-
-                    this.refreshShop(shopGuiPart, item.trait(Shop));
-                    shopFound = true;
-                    break;
-                }
-
-                if (shopFound === false) {
-                    this.refreshShop();
-                }
-            }
+        let active = true;
+        const loop = () => {
+            if (active === false) return;
+            this.checkForShop();
+            task.delay(0.1, loop);
+        };
+        loop();
+        eat(() => {
+            active = false;
         });
     }
 }

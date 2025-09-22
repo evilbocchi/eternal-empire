@@ -18,6 +18,7 @@ import useSingleDocument from "client/ui/components/sidebar/useSingleDocumentWin
 import SectionHeader from "client/ui/components/stats/SectionHeader";
 import StatItem from "client/ui/components/stats/StatItem";
 import TechWindow from "client/ui/components/window/TechWindow";
+import useInterval from "client/ui/hooks/useInterval";
 import useProperty from "client/ui/hooks/useProperty";
 import { getAsset } from "shared/asset/AssetMap";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
@@ -64,19 +65,14 @@ export default function StatsWindow() {
         const attributeConnection =
             LOCAL_PLAYER.GetAttributeChangedSignal("RawPurifierClicks").Connect(updateRawPurifierClicks);
 
-        // Listen to ping updates
-        let active = true;
-        task.spawn(() => {
-            while (active) {
-                setCurrentPing(PingManager.getPing());
-                task.wait(1);
-            }
-        });
-
         return () => {
             attributeConnection.Disconnect();
-            active = false;
         };
+    }, []);
+
+    useInterval(() => {
+        setCurrentPing(PingManager.getPing());
+        return 1;
     }, []);
 
     // Prepare currency stats

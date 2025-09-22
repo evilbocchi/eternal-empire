@@ -11,9 +11,11 @@
  *
  * @since 1.0.0
  */
+import { variableInterval } from "@antivivi/vrldk";
 import { Controller, OnInit, OnStart } from "@flamework/core";
 import { Lighting } from "@rbxts/services";
 import UserGameSettings from "shared/api/UserGameSettings";
+import eat from "shared/hamster/eat";
 import Packets from "shared/Packets";
 import { WeatherState, WeatherType } from "shared/weather/WeatherTypes";
 import WorldNode from "shared/world/nodes/WorldNode";
@@ -76,32 +78,31 @@ export default class AtmosphereController implements OnInit, OnStart {
         });
 
         let oldQualityLevel = UserGameSettings!.SavedQualityLevel.Value;
-        task.spawn(() => {
-            while (true) {
-                const qualityLevel = UserGameSettings!.SavedQualityLevel.Value;
-                task.wait(qualityLevel >= 5 ? 1 / 60 : 1);
-
-                for (const [light, base] of this.cyclingLights) {
-                    if (oldQualityLevel !== qualityLevel) {
-                        light.Shadows = qualityLevel === 10;
-                    }
-                    let brightness = qualityLevel === 1 ? 0 : (math.abs(Lighting.ClockTime - 12) / 8 - 0.25) * base * 2;
-
-                    // Apply weather dimming effects
-                    if (this.currentWeather.type === WeatherType.Cloudy) {
-                        brightness *= 0.8; // Slightly dimmer for cloudy weather
-                    } else if (
-                        this.currentWeather.type === WeatherType.Rainy ||
-                        this.currentWeather.type === WeatherType.Thunderstorm
-                    ) {
-                        brightness *= 0.6; // Much dimmer for rain/thunderstorm
-                    }
-
-                    light.Brightness = brightness;
+        const options = { interval: 1 };
+        const cleanup = variableInterval(() => {
+            const qualityLevel = UserGameSettings!.SavedQualityLevel.Value;
+            for (const [light, base] of this.cyclingLights) {
+                if (oldQualityLevel !== qualityLevel) {
+                    light.Shadows = qualityLevel === 10;
                 }
-                oldQualityLevel = qualityLevel;
+                let brightness = qualityLevel === 1 ? 0 : (math.abs(Lighting.ClockTime - 12) / 8 - 0.25) * base * 2;
+
+                // Apply weather dimming effects
+                if (this.currentWeather.type === WeatherType.Cloudy) {
+                    brightness *= 0.8; // Slightly dimmer for cloudy weather
+                } else if (
+                    this.currentWeather.type === WeatherType.Rainy ||
+                    this.currentWeather.type === WeatherType.Thunderstorm
+                ) {
+                    brightness *= 0.6; // Much dimmer for rain/thunderstorm
+                }
+
+                light.Brightness = brightness;
             }
-        });
+            oldQualityLevel = qualityLevel;
+            options.interval = qualityLevel >= 5 ? 1 / 60 : 1;
+        }, options);
+        eat(cleanup);
     }
 
     /**

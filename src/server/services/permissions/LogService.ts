@@ -1,6 +1,8 @@
 import { BaseOnoeNum } from "@antivivi/serikanum";
-import { OnInit, OnStart, Service } from "@flamework/core";
+import { simpleInterval } from "@antivivi/vrldk";
+import { OnStart, Service } from "@flamework/core";
 import DataService from "server/services/data/DataService";
+import eat from "shared/hamster/eat";
 import Packets from "shared/Packets";
 
 declare global {
@@ -103,14 +105,10 @@ export let log = (log: Log) => {
 };
 
 @Service()
-export default class LogService implements OnInit, OnStart {
+export default class LogService implements OnStart {
     readonly unpropagatedLogs = new Array<Log>();
 
-    constructor(private dataService: DataService) {}
-
-    onInit() {
-        Packets.getLogs.fromClient(() => this.dataService.empireData.logs);
-
+    constructor(private dataService: DataService) {
         log = (log: Log) => {
             const data = this.dataService.empireData;
             data.logs = data.logs.filter((value) => tick() - value.time < 604800);
@@ -123,12 +121,14 @@ export default class LogService implements OnInit, OnStart {
     }
 
     onStart() {
-        task.spawn(() => {
-            while (task.wait(1)) {
+        Packets.getLogs.fromClient(() => this.dataService.empireData.logs);
+
+        eat(
+            simpleInterval(() => {
                 if (this.unpropagatedLogs.size() === 0) return;
                 Packets.logsAdded.toAllClients(this.unpropagatedLogs);
                 this.unpropagatedLogs.clear();
-            }
-        });
+            }, 1),
+        );
     }
 }

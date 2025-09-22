@@ -14,6 +14,7 @@
  */
 
 import Signal from "@antivivi/lemon-signal";
+import { simpleInterval } from "@antivivi/vrldk";
 import { OnInit, OnStart, Service } from "@flamework/core";
 import { TextService } from "@rbxts/services";
 import CurrencyService from "server/services/data/CurrencyService";
@@ -23,6 +24,7 @@ import ChatHookService from "server/services/permissions/ChatHookService";
 import { log } from "server/services/permissions/LogService";
 import PermissionsService from "server/services/permissions/PermissionsService";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
+import eat from "shared/hamster/eat";
 import Item from "shared/item/Item";
 import Items from "shared/items/Items";
 import Packets from "shared/Packets";
@@ -207,23 +209,15 @@ export default class SetupService implements OnInit, OnStart {
 
     onStart() {
         const setups = this.dataService.empireData.printedSetups;
-        task.spawn(() => {
-            while (task.wait(1)) {
-                const balance = this.currencyService.balance;
-                for (const setup of setups) {
-                    if (
-                        setup.alerted === false &&
-                        setup.autoloads === true &&
-                        balance.canAfford(setup.calculatedPrice)
-                    ) {
-                        setup.alerted = true;
-                        this.chatHookService.sendServerMessage(
-                            `${setup.name} can now be purchased!`,
-                            "color:255,255,127",
-                        );
-                    }
+        const cleanup = simpleInterval(() => {
+            const balance = this.currencyService.balance;
+            for (const setup of setups) {
+                if (setup.alerted === false && setup.autoloads === true && balance.canAfford(setup.calculatedPrice)) {
+                    setup.alerted = true;
+                    this.chatHookService.sendServerMessage(`${setup.name} can now be purchased!`, "color:255,255,127");
                 }
             }
-        });
+        }, 1);
+        eat(cleanup);
     }
 }

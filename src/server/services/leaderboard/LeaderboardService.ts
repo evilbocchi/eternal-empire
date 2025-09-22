@@ -11,6 +11,7 @@
  */
 
 import { OnoeNum } from "@antivivi/serikanum";
+import { simpleInterval } from "@antivivi/vrldk";
 import { OnStart, Service } from "@flamework/core";
 import { CollectionService, DataStoreService, Players } from "@rbxts/services";
 import DataService from "server/services/data/DataService";
@@ -18,6 +19,7 @@ import { getNameFromUserId } from "shared/constants";
 import { IS_STUDIO } from "shared/Context";
 import { CURRENCY_DETAILS } from "shared/currency/CurrencyDetails";
 import Leaderstats from "shared/data/Leaderstats";
+import eat from "shared/hamster/eat";
 import Packets from "shared/Packets";
 import Sandbox from "shared/Sandbox";
 
@@ -167,17 +169,10 @@ export class LeaderboardService implements OnStart {
         Packets.leaderboardData.set(this.leaderboardData);
     }
 
-    /**
-     * Starts the leaderboard update loop and initializes leaderboards.
-     */
     onStart() {
         if (Sandbox.getEnabled()) return;
 
-        task.spawn(() => {
-            this.updateLeaderboards();
-            while (task.wait(180)) {
-                this.updateLeaderboards();
-            }
-        });
+        this.updateLeaderboards();
+        eat(simpleInterval(() => this.updateLeaderboards(), 180));
     }
 }

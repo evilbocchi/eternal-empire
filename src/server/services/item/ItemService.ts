@@ -19,6 +19,7 @@
  */
 
 import Signal from "@antivivi/lemon-signal";
+import { simpleInterval } from "@antivivi/vrldk";
 import { OnInit, OnStart, Service } from "@flamework/core";
 import { CollectionService, HttpService, Workspace } from "@rbxts/services";
 import { CHALLENGES } from "server/Challenges";
@@ -795,12 +796,7 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
         this.addMapItems();
 
         this.requestChanges();
-        task.spawn(() => {
-            while (task.wait(0.1)) {
-                this.propagateChanges();
-            }
-        });
-
+        eat(simpleInterval(() => this.propagateChanges(), 0.1));
         eat(() => {
             for (const model of PLACED_ITEMS_FOLDER.GetChildren()) {
                 model.Destroy();
