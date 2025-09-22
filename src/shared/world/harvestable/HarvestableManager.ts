@@ -123,6 +123,6 @@ export default class HarvestableManager {
                 });
             }
         });
-        eat(connection);
+        eat(connection, "Disconnect");
     }
 }

@@ -768,7 +768,7 @@ export default class Item {
                     }
                 }
             });
-            eat(connection);
+            eat(connection, "Disconnect");
         }
     }
 }

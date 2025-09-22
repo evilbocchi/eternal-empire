@@ -102,6 +102,9 @@ export default class LevelService implements OnInit {
         Packets.xp.set(this.dataService.empireData.xp);
 
         // Handle quest checks on level change
-        eat(this.levelChanged.connect(() => Quest.reachStages()));
+        eat(
+            this.levelChanged.connect(() => Quest.reachStages()),
+            "Disconnect",
+        );
     }
 }

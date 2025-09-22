@@ -32,5 +32,5 @@ export = new Item(script.Name)
         const loop = tween.Completed.Connect(() => tween.Play());
         tween.Play();
         model.Destroying.Once(() => loop.Disconnect());
-        eat(loop);
+        eat(loop, "Disconnect");
     });

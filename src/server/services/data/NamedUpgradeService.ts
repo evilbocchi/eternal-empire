@@ -170,19 +170,21 @@ export default class NamedUpgradeService implements OnInit {
                 }
             }
         };
-        eat(this.upgradesChanged.connect(onUpgradesChanged), "disconnect");
+        const changedConnection = this.upgradesChanged.connect(onUpgradesChanged);
         onUpgradesChanged(this.upgrades);
 
-        eat(
-            this.upgradeBought.connect((player, upgrade, to) =>
-                log({
-                    time: tick(),
-                    type: "Upgrade",
-                    player: player.UserId,
-                    upgrade: upgrade,
-                    amount: to,
-                }),
-            ),
+        const boughtConnection = this.upgradeBought.connect((player, upgrade, to) =>
+            log({
+                time: tick(),
+                type: "Upgrade",
+                player: player.UserId,
+                upgrade: upgrade,
+                amount: to,
+            }),
         );
+        eat(() => {
+            changedConnection.Disconnect();
+            boughtConnection.Disconnect();
+        });
     }
 }

@@ -114,7 +114,7 @@ namespace DocumentManager {
     });
 
     const tabOpenedConnection = Packets.tabOpened.fromServer((tab) => setVisible(tab, true));
-    eat(tabOpenedConnection);
+    eat(tabOpenedConnection, "Disconnect");
 }
 
 export default DocumentManager;

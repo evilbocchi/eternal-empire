@@ -14,13 +14,13 @@
  * @since 1.0.0
  */
 
-import { OnInit, Service } from "@flamework/core";
+import { OnStart, Service } from "@flamework/core";
 import { MessagingService, Players, TeleportService, TextService } from "@rbxts/services";
 import DataService from "server/services/data/DataService";
 import { OnPlayerAdded } from "server/services/ModdingService";
 import ChatHookService from "server/services/permissions/ChatHookService";
 import { getNameFromUserId } from "shared/constants";
-import { IS_SINGLE_SERVER } from "shared/Context";
+import { IS_CI, IS_SINGLE_SERVER } from "shared/Context";
 import Packets from "shared/Packets";
 
 declare global {
@@ -43,7 +43,7 @@ type PermissionList = "banned" | "trusted" | "managers";
  * Integrates with other services for data, items, upgrades, and messaging.
  */
 @Service()
-export default class PermissionsService implements OnInit, OnPlayerAdded {
+export default class PermissionsService implements OnStart, OnPlayerAdded {
     /**
      * Constructs the PermissionsService with all required dependencies.
      */
@@ -222,22 +222,21 @@ export default class PermissionsService implements OnInit, OnPlayerAdded {
         });
     }
 
-    /**
-     * Initializes the PermissionsService, setting up messaging subscriptions.
-     */
-    onInit() {
-        MessagingService.SubscribeAsync("GlobalChat", (message) => {
-            if (this.dataService.empireData.globalChat !== true) return;
-            const data = message.Data as { player: number; message: string };
-            if (this.dataService.empireData.blocking.has(data.player)) return;
-            for (const player of Players.GetPlayers()) {
-                if (player.UserId === data.player) {
-                    return;
+    onStart() {
+        if (!IS_CI) {
+            MessagingService.SubscribeAsync("GlobalChat", (message) => {
+                if (this.dataService.empireData.globalChat !== true) return;
+                const data = message.Data as { player: number; message: string };
+                if (this.dataService.empireData.blocking.has(data.player)) return;
+                for (const player of Players.GetPlayers()) {
+                    if (player.UserId === data.player) {
+                        return;
+                    }
                 }
-            }
-            const name = getNameFromUserId(data.player);
-            this.chatHookService.sendServerMessage(`${name}:  ${data.message}`, "tag:hidden;color:180,180,180;");
-        });
+                const name = getNameFromUserId(data.player);
+                this.chatHookService.sendServerMessage(`${name}:  ${data.message}`, "tag:hidden;color:180,180,180;");
+            });
+        }
         Packets.permLevels.set(this.dataService.empireData.permLevels);
     }
 }

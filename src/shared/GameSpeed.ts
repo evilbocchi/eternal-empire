@@ -20,7 +20,7 @@ class GameSpeed {
                 }
             }
         });
-        eat(connection);
+        eat(connection, "Disconnect");
     }
 }
 

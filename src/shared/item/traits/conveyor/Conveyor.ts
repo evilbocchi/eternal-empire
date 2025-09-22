@@ -78,9 +78,21 @@ export default class Conveyor extends ItemTrait {
      * @param model The model to load.
      * @param conveyor The conveyor to load.
      */
-    static load(model: Model, _conveyor: Conveyor) {
+    static load(model: Model, conveyor: Conveyor) {
         const instanceInfo = getAllInstanceInfo(model);
         const conveyors = findBaseParts(model, "Conveyor");
+        const statsPerPart = new Map<BasePart, { speed: number; inverted: boolean }>();
+
+        for (const conveyorPart of conveyors) {
+            conveyorPart.FrontSurface = Enum.SurfaceType.Studs;
+            conveyorPart.CustomPhysicalProperties = Conveyor.PHYSICAL_PROPERTIES;
+            const overwrite = conveyorPart.FindFirstChild("BaseSpeed") as IntValue | undefined;
+            statsPerPart.set(conveyorPart, {
+                speed: overwrite?.Value ?? conveyor.getSpeed() ?? 1,
+                inverted: (conveyorPart.FindFirstChild("Inverted") as BoolValue | undefined)?.Value ?? false,
+            });
+        }
+
         const updateSpeed = () => {
             let speedBoost = 0;
             const boosts = instanceInfo.Boosts;
@@ -89,14 +101,13 @@ export default class Conveyor extends ItemTrait {
                     speedBoost += boost.charger?.item.findTrait("Accelerator")?.boost ?? 0;
                 }
             }
-            for (const part of conveyors) {
-                let speed = part.GetAttribute("BaseSpeed") as number;
+            for (const conveyorPart of conveyors) {
+                const { speed: baseSpeed, inverted } = statsPerPart.get(conveyorPart)!;
+                let speed = baseSpeed;
                 speed += speedBoost;
-                part.SetAttribute("Speed", speed);
-                part.AddTag("Conveyor");
-                part.AssemblyLinearVelocity = part.CFrame.LookVector.mul(
-                    (part.GetAttribute("Inverted") ? -1 : 1) * speed,
-                );
+                conveyorPart.SetAttribute("Speed", speed);
+                conveyorPart.AddTag("Conveyor");
+                conveyorPart.AssemblyLinearVelocity = conveyorPart.CFrame.LookVector.mul((inverted ? -1 : 1) * speed);
             }
         };
         updateSpeed();
@@ -120,21 +131,6 @@ export default class Conveyor extends ItemTrait {
      */
     constructor(item: Item) {
         super(item);
-        item.onInit((item) => {
-            const model = item.MODEL;
-            if (model === undefined) return;
-            for (const part of findBaseParts(model, "Conveyor")) {
-                part.FrontSurface = Enum.SurfaceType.Studs;
-                part.CustomPhysicalProperties = Conveyor.PHYSICAL_PROPERTIES;
-                const overwrite = part.FindFirstChild("BaseSpeed") as IntValue | undefined;
-                part.SetAttribute("BaseSpeed", overwrite?.Value ?? this.getSpeed());
-                const invertedValue = part.FindFirstChild("Inverted") as BoolValue | undefined;
-                if (invertedValue !== undefined) {
-                    part.SetAttribute("Inverted", invertedValue.Value);
-                    invertedValue.Destroy();
-                }
-            }
-        });
         item.onLoad((model) => Conveyor.load(model, this));
     }
 

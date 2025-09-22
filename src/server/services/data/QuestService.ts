@@ -26,6 +26,7 @@ import DataService from "server/services/data/DataService";
 import ItemService from "server/services/item/ItemService";
 import ChatHookService from "server/services/permissions/ChatHookService";
 import { WAYPOINTS } from "shared/constants";
+import { IS_CI } from "shared/Context";
 import Items from "shared/items/Items";
 import Packets from "shared/Packets";
 import Sandbox from "shared/Sandbox";
@@ -37,7 +38,7 @@ import Sandbox from "shared/Sandbox";
  * completion validation, and waypoint management for navigation.
  */
 @Service()
-export default class QuestService implements OnInit, OnStart {
+export default class QuestService implements OnStart {
     /** Exposed Quest class for command access */
     readonly Quest = Quest;
 
@@ -78,27 +79,20 @@ export default class QuestService implements OnInit, OnStart {
         return true;
     }
 
-    /**
-     * Initializes the QuestService.
-     * Sets up waypoints and synchronizes quest data with clients.
-     */
-    onInit() {
-        // Skip quest initialization in sandbox mode
-        if (Sandbox.getEnabled()) return;
-
-        // Configure waypoint objects for quest navigation
-        for (const waypoint of WAYPOINTS.GetChildren()) {
-            if (!waypoint.IsA("BasePart")) continue;
-
-            // Make waypoints invisible and non-interactive
-            waypoint.Transparency = 1;
-            waypoint.CanCollide = false;
-            waypoint.CanTouch = false;
-            waypoint.CanQuery = false;
-        }
-    }
-
     onStart() {
+        if (!Sandbox.getEnabled() && !IS_CI) {
+            // Configure waypoint objects for quest navigation
+            for (const waypoint of WAYPOINTS.GetChildren()) {
+                if (!waypoint.IsA("BasePart")) continue;
+
+                // Make waypoints invisible and non-interactive
+                waypoint.Transparency = 1;
+                waypoint.CanCollide = false;
+                waypoint.CanTouch = false;
+                waypoint.CanQuery = false;
+            }
+        }
+
         // Monitor quest stage changes
         let lastStagesPerQuest = new Map<string, number>();
         while (task.wait(0.1)) {

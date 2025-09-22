@@ -229,8 +229,10 @@ export default class Area {
     }
 
     private static onPlayerAdded(player: Player) {
+        let active = true;
         // Continuously monitor player position to detect area changes
         const checkAreaChange = () => {
+            if (!active) return;
             task.delay(0.25, checkAreaChange);
 
             let position: Vector3 | undefined;
@@ -263,7 +265,10 @@ export default class Area {
                 }
             }
         };
-        task.spawn(checkAreaChange);
+        task.delay(0.25, checkAreaChange);
+        eat(() => {
+            active = false;
+        });
     }
 
     private propagateDropletCountChange() {

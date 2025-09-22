@@ -13,12 +13,12 @@
 import { convertToMMSS, weldModel } from "@antivivi/vrldk";
 import { OnInit, OnStart, Service } from "@flamework/core";
 import { TweenService, Workspace } from "@rbxts/services";
-import ItemService from "server/services/item/ItemService";
 import DataService from "server/services/data/DataService";
 import LevelService from "server/services/data/LevelService";
-import UnlockedAreasService from "server/services/world/UnlockedAreasService";
-import { AREAS } from "shared/world/Area";
+import ItemService from "server/services/item/ItemService";
 import { ASSETS, getSound, SOUND_EFFECTS_GROUP } from "shared/asset/GameAssets";
+import { IS_CI } from "shared/Context";
+import eat from "shared/hamster/eat";
 import Item from "shared/item/Item";
 import Crystal from "shared/items/excavation/Crystal";
 import ExcavationStone from "shared/items/excavation/ExcavationStone";
@@ -32,6 +32,7 @@ import Quartz from "shared/items/excavation/Quartz";
 import WhiteGem from "shared/items/excavation/WhiteGem";
 import Items from "shared/items/Items";
 import Packets from "shared/Packets";
+import { AREAS } from "shared/world/Area";
 
 declare global {
     type ChestModel = Model & {
@@ -179,7 +180,6 @@ export default class ChestService implements OnInit, OnStart {
         private dataService: DataService,
         private levelService: LevelService,
         private itemService: ItemService,
-        private unlockedAreasService: UnlockedAreasService,
     ) {}
 
     /**
@@ -302,14 +302,17 @@ export default class ChestService implements OnInit, OnStart {
      * Spawns chests in all areas, sets up chest logic, and restores previous state.
      */
     onStart() {
+        const createdChests = new Set<Model>();
         for (const [_id, area] of pairs(AREAS)) {
             const chestsFolder = area.worldNode.getInstance()?.FindFirstChild("Chests");
             if (chestsFolder === undefined) continue;
             const chestLocations = chestsFolder.GetChildren();
             for (const chestLocationMarker of chestLocations) {
                 if (!chestLocationMarker.IsA("BasePart")) continue;
-                chestLocationMarker.FrontSurface = Enum.SurfaceType.Smooth;
-                chestLocationMarker.Transparency = 1;
+                if (!IS_CI) {
+                    chestLocationMarker.FrontSurface = Enum.SurfaceType.Smooth;
+                    chestLocationMarker.Transparency = 1;
+                }
                 const chestModel = ASSETS.Chest.Clone();
                 chestModel.PivotTo(chestLocationMarker.CFrame);
                 const sound = getSound("ChestOpen.mp3").Clone();
@@ -372,8 +375,15 @@ export default class ChestService implements OnInit, OnStart {
 
                 prompt.Parent = chestModel.PrimaryPart;
                 chestModel.Parent = Workspace;
+                createdChests.add(chestModel);
             }
         }
+        eat(() => {
+            for (const chest of createdChests) {
+                chest.Destroy();
+            }
+            createdChests.clear();
+        });
 
         const lastOpenPerLocation = this.dataService.empireData.openedChests;
         for (const [location, lastOpen] of lastOpenPerLocation) {

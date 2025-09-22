@@ -254,7 +254,7 @@ export default class DataService implements OnStart, OnPlayerAdded {
     onStart() {
         Packets.createNewEmpire.fromClient(AvailableEmpire.create);
         Packets.teleportToEmpire.fromClient(AvailableEmpire.teleport);
-        eat(Players.PlayerRemoving.Connect(AvailableEmpire.unregisterPlayer));
+        eat(Players.PlayerRemoving.Connect(AvailableEmpire.unregisterPlayer), "Disconnect");
 
         if (IS_SERVER && !IS_CI) {
             task.spawn(() => {

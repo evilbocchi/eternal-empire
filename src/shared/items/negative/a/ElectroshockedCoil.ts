@@ -1,8 +1,8 @@
 import Difficulty from "@antivivi/jjt-difficulties";
+import { Server } from "shared/api/APIExpose";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import eat from "shared/hamster/eat";
 import Item from "shared/item/Item";
-import { Server } from "shared/api/APIExpose";
 import Conveyor from "shared/item/traits/conveyor/Conveyor";
 import Upgrader from "shared/item/traits/upgrader/Upgrader";
 import Crystal from "shared/items/excavation/Crystal";
@@ -47,7 +47,7 @@ export = new Item(script.Name)
                 mode = 3;
             }
         });
-        eat(connection);
+        eat(connection, "Disconnect");
     })
     .onLoad((model, item) => {
         const rings = [model.WaitForChild(1), model.WaitForChild(2), model.WaitForChild(3)] as BasePart[];

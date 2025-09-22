@@ -70,7 +70,7 @@ namespace ThisEmpire {
                 observers.add(() => callback(player));
             }
         });
-        eat(connection);
+        eat(connection, "Disconnect");
     }
 }
 

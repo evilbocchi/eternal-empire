@@ -10,14 +10,16 @@
  */
 
 import { Service } from "@flamework/core";
+import { OnPlayerAdded } from "server/services/ModdingService";
 import { getTextChannels } from "shared/constants";
+import { IS_CI } from "shared/Context";
 import Packets from "shared/Packets";
 
 /**
  * Service for sending system and private chat messages to players.
  */
 @Service()
-export default class ChatHookService {
+export default class ChatHookService implements OnPlayerAdded {
     readonly plrChannels = new Map<Player, TextChannel>();
 
     /**
@@ -28,6 +30,8 @@ export default class ChatHookService {
      * @param metadata Optional message metadata
      */
     sendPrivateMessage(player: Player, message: string, metadata?: string) {
+        if (IS_CI) return;
+
         const plrChannel = this.plrChannels.get(player) ?? this.createChannel(player);
         Packets.systemMessageSent.toClient(player, plrChannel.Name, message, metadata ?? "");
     }
@@ -39,6 +43,8 @@ export default class ChatHookService {
      * @param metadata Optional message metadata
      */
     sendServerMessage(message: string, metadata?: string) {
+        if (IS_CI) return;
+
         const rbxGeneral = getTextChannels().WaitForChild("RBXGeneral") as TextChannel;
         Packets.systemMessageSent.toAllClients(rbxGeneral.Name, message, metadata ?? "");
     }
@@ -60,12 +66,9 @@ export default class ChatHookService {
         return plrChannel;
     }
 
-    /**
-     * Handles logic when a player joins the server.
-     *
-     * @param player Player who joined
-     */
-    onPlayerJoined(player: Player) {
-        this.createChannel(player);
+    onPlayerAdded(player: Player) {
+        if (!IS_CI) {
+            this.createChannel(player);
+        }
     }
 }

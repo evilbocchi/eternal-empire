@@ -1,5 +1,5 @@
 import { ProfileManager } from "@antivivi/vrldk";
-import { IS_SERVER } from "shared/Context";
+import { IS_CI, IS_SERVER } from "shared/Context";
 import EmpireProfileTemplate from "shared/data/profile/EmpireProfileTemplate";
 import PlayerProfileTemplate from "shared/data/profile/PlayerProfileTemplate";
 
@@ -14,7 +14,7 @@ export class ProfileManagerWrapper<T extends object> {
         template: T,
         private readonly prefix: string,
     ) {
-        if (IS_SERVER) {
+        if (IS_SERVER || IS_CI) {
             this.profileManager = new ProfileManager(storeName, template);
         }
     }

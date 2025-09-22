@@ -26,11 +26,13 @@ export default class WorldNode<T extends Instance = Instance> {
     private registerInstance(instance: T) {
         this.onRegister?.(instance);
         this.INSTANCES.add(instance);
-        instance.AncestryChanged.Connect(() => {
-            if (instance.Parent === undefined) {
-                this.unregisterInstance(instance);
-            }
-        });
+        eat(
+            instance.AncestryChanged.Connect(() => {
+                if (instance.Parent === undefined) {
+                    this.unregisterInstance(instance);
+                }
+            }),
+        );
     }
 
     private unregisterInstance(instance: T) {
@@ -88,6 +90,9 @@ export class SingleWorldNode<T extends Instance = Instance> extends WorldNode<T>
                 }
             }
         }
+        eat(() => {
+            timeout = 0; // Timeout if cleanup is called
+        });
         return instance;
     }
 }
