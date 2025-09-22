@@ -20,6 +20,7 @@ import CurrencyService from "server/services/data/CurrencyService";
 import DataService from "server/services/data/DataService";
 import { log } from "server/services/permissions/LogService";
 import PermissionsService from "server/services/permissions/PermissionsService";
+import eat from "shared/hamster/eat";
 import NamedUpgrades from "shared/namedupgrade/NamedUpgrades";
 import Packets from "shared/Packets";
 import { AREAS } from "shared/world/Area";
@@ -169,17 +170,19 @@ export default class NamedUpgradeService implements OnInit {
                 }
             }
         };
-        this.upgradesChanged.connect(onUpgradesChanged);
+        eat(this.upgradesChanged.connect(onUpgradesChanged), "disconnect");
         onUpgradesChanged(this.upgrades);
 
-        this.upgradeBought.connect((player, upgrade, to) =>
-            log({
-                time: tick(),
-                type: "Upgrade",
-                player: player.UserId,
-                upgrade: upgrade,
-                amount: to,
-            }),
+        eat(
+            this.upgradeBought.connect((player, upgrade, to) =>
+                log({
+                    time: tick(),
+                    type: "Upgrade",
+                    player: player.UserId,
+                    upgrade: upgrade,
+                    amount: to,
+                }),
+            ),
         );
     }
 }

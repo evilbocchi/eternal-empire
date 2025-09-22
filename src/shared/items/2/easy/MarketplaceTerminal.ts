@@ -14,7 +14,7 @@ export = new Item(script.Name)
     .addPlaceableArea("IntermittentIsles")
     .persists()
 
-    .onLoad((model, item) => {
+    .onLoad((model) => {
         // Create detection region around the terminal
         const DETECTION_RANGE = 7.5; // 15x15 grid = 15 studs radius, so 7.5 from center to edge
         const detectionRegion = new Instance("Part");
@@ -102,12 +102,8 @@ export = new Item(script.Name)
                 }
             }
         });
-
-        // Clean up when model is destroyed
-        model.AncestryChanged.Connect(() => {
-            if (!model.Parent) {
-                connection.Disconnect();
-            }
+        model.Destroying.Once(() => {
+            connection.Disconnect();
         });
     })
 

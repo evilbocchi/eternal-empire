@@ -2,6 +2,7 @@ import Difficulty from "@antivivi/jjt-difficulties";
 import { OnoeNum } from "@antivivi/serikanum";
 import { getInstanceInfo } from "@antivivi/vrldk";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
+import eat from "shared/hamster/eat";
 import Droplet from "shared/item/Droplet";
 import Item from "shared/item/Item";
 import ItemUtils from "shared/item/ItemUtils";
@@ -9,7 +10,6 @@ import Conveyor from "shared/item/traits/conveyor/Conveyor";
 import Upgrader from "shared/item/traits/upgrader/Upgrader";
 import ExcavationStone from "shared/items/excavation/ExcavationStone";
 import WhiteGem from "shared/items/excavation/WhiteGem";
-import Packets from "shared/Packets";
 
 export = new Item(script.Name)
     .setName("Droplet Diverger")
@@ -31,7 +31,7 @@ export = new Item(script.Name)
     .onLoad((model) => {
         const right = model.GetPivot().mul(CFrame.Angles(0, math.pi / 2, 0)).LookVector.Unit;
 
-        getInstanceInfo(model, "OnUpgraded")?.connect((dropletModel) => {
+        const connection = getInstanceInfo(model, "OnUpgraded")?.connect((dropletModel) => {
             const dropletId = getInstanceInfo(dropletModel, "DropletId");
             if (dropletId === undefined) return;
             const droplet = Droplet.getDroplet(dropletId);
@@ -66,5 +66,8 @@ export = new Item(script.Name)
 
             const impulse = right.mul(side).mul(dropletModel.Mass).mul(25);
             ItemUtils.applyImpulse(dropletModel, impulse);
+        });
+        eat(() => {
+            connection?.Disconnect();
         });
     });

@@ -42,11 +42,15 @@ declare global {
 }
 
 export class GridWorldNode extends SingleWorldNode<Part> {
+    readonly buildBounds = new BuildBounds();
     originalSize?: Vector3;
     constructor(tag: string) {
         super(tag, (instance) => {
             instance.CollisionGroup = "BuildGrid";
             this.originalSize = instance.Size;
+            if (!Sandbox.getEnabled() && !IS_CI) {
+                this.buildBounds.draw(instance);
+            }
         });
     }
 }
@@ -165,7 +169,7 @@ export default class Area {
             this.boardWorldNode = new SingleWorldNode<BasePart>(`${id}Board`);
             this.gridWorldNode = new GridWorldNode(`${id}Grid`);
             if (!Sandbox.getEnabled() && !IS_CI) {
-                this.buildBounds = BuildBounds.fromArea(this);
+                this.buildBounds = this.gridWorldNode.buildBounds;
             }
         }
         this.catchAreaWorldNode = new SingleWorldNode<Part>(`${id}CatchArea`);

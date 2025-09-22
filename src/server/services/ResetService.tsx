@@ -31,6 +31,7 @@ import CurrencyBundle from "shared/currency/CurrencyBundle";
 import { CURRENCY_DETAILS } from "shared/currency/CurrencyDetails";
 import { RESET_LAYERS } from "shared/currency/mechanics/ResetLayer";
 import fixDuplicatedItemsData from "shared/data/loading/fixDuplicatedItemsData";
+import eat from "shared/hamster/eat";
 import Operative from "shared/item/traits/Operative";
 import Items from "shared/items/Items";
 import NamedUpgrades from "shared/namedupgrade/NamedUpgrades";
@@ -239,10 +240,10 @@ export default class ResetService implements OnInit, OnStart {
             }
             Packets.gainPerResetLayer.set(gainPerResetLayer);
         };
-        this.currencyService.balanceChanged.connect(balanceChanged);
+        eat(this.currencyService.balanceChanged.connect(balanceChanged), "disconnect");
         balanceChanged(this.currencyService.balance);
 
-        this.reset.connect((player, layer, amount) => {
+        const connection = this.reset.connect((player, layer, amount) => {
             const resetLayer = RESET_LAYERS[layer];
             const color = CURRENCY_DETAILS[resetLayer.gives].color;
             this.chatHookService.sendServerMessage(
@@ -258,6 +259,7 @@ export default class ResetService implements OnInit, OnStart {
                 currency: resetLayer.gives,
             });
         });
+        eat(connection, "disconnect");
     }
 
     onStart() {

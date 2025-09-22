@@ -1,6 +1,7 @@
 import Difficulty from "@antivivi/jjt-difficulties";
 import { getAllInstanceInfo } from "@antivivi/vrldk";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
+import eat from "shared/hamster/eat";
 import Droplet from "shared/item/Droplet";
 import Item from "shared/item/Item";
 import Conveyor from "shared/item/traits/conveyor/Conveyor";
@@ -32,7 +33,7 @@ export = new Item(script.Name)
     .onLoad((model, item) => {
         const thitbox = model.WaitForChild("TreadmillHitbox") as BasePart;
         thitbox.CanTouch = true;
-        thitbox.Touched.Connect(() => {});
+        eat(thitbox.Touched.Connect(() => {}));
 
         const drop = model.WaitForChild("Drop");
         const instanceInfo = getAllInstanceInfo(drop);

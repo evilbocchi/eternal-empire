@@ -8,9 +8,8 @@ import {
     TeleportService,
 } from "@rbxts/services";
 import { IS_CI, IS_PUBLIC_SERVER, IS_SINGLE_SERVER, IS_STUDIO } from "shared/Context";
-import ThisEmpire from "shared/data/ThisEmpire";
 import { EmpireProfileManager, PlayerProfileManager } from "shared/data/profile/ProfileManager";
-import eat from "shared/hamster/eat";
+import ThisEmpire from "shared/data/ThisEmpire";
 import Packets from "shared/Packets";
 
 declare global {
@@ -236,92 +235,83 @@ namespace AvailableEmpire {
         return false;
     }
 
-    export function init() {
-        Packets.createNewEmpire.fromClient(create);
-        Packets.teleportToEmpire.fromClient(teleport);
-
-        ThisEmpire.observePlayerAdded((player: Player) => {
-            const availableEmpires = get(player.UserId);
-            pcall(() => {
-                for (const [id, empire] of availableEmpires) {
-                    if (empire.owner === 0) {
-                        availableEmpires.delete(id);
-                        warn("ridded public from available empires");
-                    }
-                }
-                if (!IS_PUBLIC_SERVER) {
-                    availableEmpires.set(ThisEmpire.id, getInfo(ThisEmpire.id));
-                }
-            });
-            pcall(() => {
-                if (IS_CI) return;
-                BadgeService.AwardBadge(player.UserId, 3498765777753358); // join badge // TODO: change badge
-            });
-
-            const playerProfile = PlayerProfileManager.load(player.UserId);
-            if (playerProfile === undefined) throw "No player profile for player " + player.Name;
-
-            let changed = false;
-            if (playerProfile.Data.availableEmpires !== undefined) {
-                for (const empireId of playerProfile.Data.availableEmpires) {
-                    availableEmpires.set(empireId, getInfo(empireId));
-                }
-                playerProfile.Data.availableEmpires = undefined;
-                changed = true;
-            }
-            if (playerProfile.Data.ownedEmpires !== undefined) {
-                for (const owned of playerProfile.Data.ownedEmpires) {
-                    if (!availableEmpires.has(owned)) {
-                        availableEmpires.set(owned, getInfo(owned));
-                        changed = true;
-                    }
+    export function registerPlayer(player: Player) {
+        const availableEmpires = get(player.UserId);
+        pcall(() => {
+            for (const [id, empire] of availableEmpires) {
+                if (empire.owner === 0) {
+                    availableEmpires.delete(id);
+                    warn("ridded public from available empires");
                 }
             }
-            if (changed === true) {
-                availableEmpiresStore.SetAsync("Player_" + player.UserId, availableEmpires);
-                update(player.UserId, availableEmpires);
-                print(availableEmpires);
-                warn("Player data was modified to fix lossy and old data");
-            }
-            player.SetAttribute("RawPurifierClicks", math.floor(playerProfile.Data.rawPurifierClicks));
-            player
-                .GetAttributeChangedSignal("RawPurifierClicks")
-                .Connect(
-                    () => (playerProfile.Data.rawPurifierClicks = player.GetAttribute("RawPurifierClicks") as number),
-                );
-            if (playerProfile.Data.rawPurifierClicks === 0 && (ThisEmpire.data.owner === player.UserId || IS_STUDIO)) {
-                const c = ThisEmpire.data.currencies.get("Purifier Clicks");
-                if (c !== undefined) {
-                    const clicks = new OnoeNum(c);
-                    if (clicks !== undefined) {
-                        player.SetAttribute(
-                            "RawPurifierClicks",
-                            math.min(math.floor(clicks.div(3).add(1).revert()), 10000000),
-                        );
-                        print("Awarded player with clicks as compensation");
-                    }
-                }
-            }
-
-            const ownedEmpires = playerProfile?.Data.ownedEmpires;
-            if (
-                ownedEmpires !== undefined &&
-                !ownedEmpires.includes(ThisEmpire.id) &&
-                ThisEmpire.data.owner === player.UserId
-            ) {
-                ownedEmpires.push(ThisEmpire.id);
-            }
-            if (IS_PUBLIC_SERVER) {
-                Packets.availableEmpires.setFor(player, availableEmpires);
+            if (!IS_PUBLIC_SERVER) {
+                availableEmpires.set(ThisEmpire.id, getInfo(ThisEmpire.id));
             }
         });
+        pcall(() => {
+            if (IS_CI) return;
+            BadgeService.AwardBadge(player.UserId, 3498765777753358); // join badge // TODO: change badge
+        });
 
-        eat(
-            Players.PlayerRemoving.Connect((player) => {
-                PlayerProfileManager.unload(player.UserId);
-                availableEmpiresPerPlayer.delete(player.UserId);
-            }),
-        );
+        const playerProfile = PlayerProfileManager.load(player.UserId);
+        if (playerProfile === undefined) throw "No player profile for player " + player.Name;
+
+        let changed = false;
+        if (playerProfile.Data.availableEmpires !== undefined) {
+            for (const empireId of playerProfile.Data.availableEmpires) {
+                availableEmpires.set(empireId, getInfo(empireId));
+            }
+            playerProfile.Data.availableEmpires = undefined;
+            changed = true;
+        }
+        if (playerProfile.Data.ownedEmpires !== undefined) {
+            for (const owned of playerProfile.Data.ownedEmpires) {
+                if (!availableEmpires.has(owned)) {
+                    availableEmpires.set(owned, getInfo(owned));
+                    changed = true;
+                }
+            }
+        }
+        if (changed === true) {
+            availableEmpiresStore.SetAsync("Player_" + player.UserId, availableEmpires);
+            update(player.UserId, availableEmpires);
+            print(availableEmpires);
+            warn("Player data was modified to fix lossy and old data");
+        }
+        player.SetAttribute("RawPurifierClicks", math.floor(playerProfile.Data.rawPurifierClicks));
+        player
+            .GetAttributeChangedSignal("RawPurifierClicks")
+            .Connect(() => (playerProfile.Data.rawPurifierClicks = player.GetAttribute("RawPurifierClicks") as number));
+        if (playerProfile.Data.rawPurifierClicks === 0 && (ThisEmpire.data.owner === player.UserId || IS_STUDIO)) {
+            const c = ThisEmpire.data.currencies.get("Purifier Clicks");
+            if (c !== undefined) {
+                const clicks = new OnoeNum(c);
+                if (clicks !== undefined) {
+                    player.SetAttribute(
+                        "RawPurifierClicks",
+                        math.min(math.floor(clicks.div(3).add(1).revert()), 10000000),
+                    );
+                    print("Awarded player with clicks as compensation");
+                }
+            }
+        }
+
+        const ownedEmpires = playerProfile?.Data.ownedEmpires;
+        if (
+            ownedEmpires !== undefined &&
+            !ownedEmpires.includes(ThisEmpire.id) &&
+            ThisEmpire.data.owner === player.UserId
+        ) {
+            ownedEmpires.push(ThisEmpire.id);
+        }
+        if (IS_PUBLIC_SERVER) {
+            Packets.availableEmpires.setFor(player, availableEmpires);
+        }
+    }
+
+    export function unregisterPlayer(player: Player) {
+        PlayerProfileManager.unload(player.UserId);
+        availableEmpiresPerPlayer.delete(player.UserId);
     }
 }
 

@@ -1,4 +1,3 @@
-import AvailableEmpire from "shared/data/AvailableEmpire";
 import loadEmpireData from "shared/data/loading/loadEmpireData";
 
 /**
@@ -8,7 +7,5 @@ import loadEmpireData from "shared/data/loading/loadEmpireData";
 export default function setupDataFully() {
     const [success, data] = loadEmpireData().await();
     if (!success) throw data;
-
-    AvailableEmpire.init();
     return data;
 }

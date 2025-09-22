@@ -1,5 +1,6 @@
 import Difficulty from "@antivivi/jjt-difficulties";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
+import eat from "shared/hamster/eat";
 import Item from "shared/item/Item";
 import { Server } from "shared/item/ItemUtils";
 import Conveyor from "shared/item/traits/conveyor/Conveyor";
@@ -33,7 +34,7 @@ export = new Item(script.Name)
     .onInit((item) => {
         const upgrader = item.trait(Upgrader);
 
-        Server.Currency.balanceChanged.connect((balance) => {
+        const connection = Server.Currency.balanceChanged.connect((balance) => {
             const power = balance.get("Power");
             if (power === undefined || power.lessThan(1000000)) {
                 upgrader.setAdd(first);
@@ -46,6 +47,7 @@ export = new Item(script.Name)
                 mode = 3;
             }
         });
+        eat(connection);
     })
     .onLoad((model, item) => {
         const rings = [model.WaitForChild(1), model.WaitForChild(2), model.WaitForChild(3)] as BasePart[];

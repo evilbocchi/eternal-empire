@@ -1,14 +1,16 @@
 import Difficulty from "@antivivi/jjt-difficulties";
-import Signal from "@antivivi/lemon-signal";
+import { setInstanceInfo } from "@antivivi/vrldk";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
 import InstantiationDelimiter from "shared/item/traits/InstantiationDelimiter";
 import ExcavationStone from "shared/items/excavation/ExcavationStone";
-import { setInstanceInfo } from "@antivivi/vrldk";
 
 let breakerCount = 0;
-const update = new Signal();
 let firstBreaker: Model | undefined;
+const update = () => {
+    if (firstBreaker === undefined) return;
+    setInstanceInfo(firstBreaker, "DropletIncrease", 10 + 15 * math.pow(breakerCount, 0.75));
+};
 
 export = new Item(script.Name)
     .setName("Limit Breaker")
@@ -25,22 +27,17 @@ export = new Item(script.Name)
     .exit()
 
     .onLoad((model) => {
-        breakerCount += 1;
-        const connection = update.connect(() => {
-            if (firstBreaker === undefined) {
-                firstBreaker = model;
-            }
-            if (firstBreaker === model) {
-                setInstanceInfo(model, "DropletIncrease", 10 + 15 * math.pow(breakerCount, 0.75));
-            }
-        });
-        update.fire();
-        model.Destroying.Connect(() => {
-            connection.disconnect();
+        model.Destroying.Once(() => {
             breakerCount -= 1;
             if (firstBreaker === model) {
                 firstBreaker = undefined;
             }
-            update.fire();
+            update();
         });
+
+        breakerCount += 1;
+        if (firstBreaker === undefined) {
+            firstBreaker = model;
+        }
+        update();
     });

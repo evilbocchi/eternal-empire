@@ -9,6 +9,7 @@
 import Signal from "@antivivi/lemon-signal";
 import { Modding, OnInit, Service } from "@flamework/core";
 import { Players } from "@rbxts/services";
+import eat from "shared/hamster/eat";
 import { Server } from "shared/item/ItemUtils";
 
 export interface OnPlayerJoined {
@@ -54,10 +55,13 @@ export default class ModdingService implements OnInit {
         const listeners = new Set<OnGameAPILoaded>();
         Modding.onListenerAdded<OnGameAPILoaded>((object) => listeners.add(object));
         Modding.onListenerRemoved<OnGameAPILoaded>((object) => listeners.delete(object));
-        this.gameAPILoaded.connect(() => {
+        const connection = this.gameAPILoaded.connect(() => {
             for (const listener of listeners) {
                 task.spawn(() => listener.onGameAPILoaded());
             }
+        });
+        eat(() => {
+            connection.disconnect();
         });
         if (Server.ready) {
             this.gameAPILoaded.fire();

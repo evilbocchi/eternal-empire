@@ -1,4 +1,5 @@
 import Command, { CommandAPI } from "shared/commands/Command";
+import ThisEmpire from "shared/data/ThisEmpire";
 import { Server } from "shared/item/ItemUtils";
 
 export = new Command(script.Name)
@@ -7,7 +8,7 @@ export = new Command(script.Name)
         "<questId> <stage> : Set the stage number for the quest. Do not specify any parameters for a simple hot reload.",
     )
     .setExecute((_o, questId, stage) => {
-        const stagePerQuest = CommandAPI.empireData.quests;
+        const stagePerQuest = ThisEmpire.data.quests;
         if (stagePerQuest === undefined) {
             return;
         }

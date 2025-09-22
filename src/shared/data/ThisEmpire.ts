@@ -26,6 +26,16 @@ namespace ThisEmpire {
         observers.clear();
     }
 
+    export function await() {
+        if (data !== undefined) {
+            return data;
+        }
+        while (data === undefined) {
+            task.wait();
+        }
+        return data;
+    }
+
     /**
      * Observes when the empire data is loaded, calling the callback immediately if already loaded.
      * @param callback Function to call when data is loaded.

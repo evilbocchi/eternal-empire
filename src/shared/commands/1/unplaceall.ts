@@ -1,12 +1,13 @@
 import Command, { CommandAPI } from "shared/commands/Command";
 import { AREAS } from "shared/world/Area";
 import Sandbox from "shared/Sandbox";
+import ThisEmpire from "shared/data/ThisEmpire";
 
 export = new Command(script.Name)
     .addAlias("ua")
     .setDescription("Unplace all items in the area you are currently in.")
     .setExecute((o) => {
-        const placedItems = CommandAPI.Data.empireData.items.worldPlaced;
+        const placedItems = ThisEmpire.data.items.worldPlaced;
         const toRemove = new Array<string>();
         const area = Sandbox.getEnabled() ? undefined : (o.GetAttribute("Area") as AreaId | undefined);
         for (const [id, placedItem] of placedItems)

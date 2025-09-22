@@ -20,7 +20,7 @@
 
 import Signal from "@antivivi/lemon-signal";
 import { OnoeNum } from "@antivivi/serikanum";
-import { OnInit, OnStart, Service } from "@flamework/core";
+import { OnStart, Service } from "@flamework/core";
 import DataService from "server/services/data/DataService";
 import Packets from "shared/Packets";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
@@ -38,7 +38,7 @@ const ZERO = new OnoeNum(0);
  * calculates revenue rates, and synchronizes currency data with clients.
  */
 @Service()
-export default class CurrencyService implements OnInit, OnStart {
+export default class CurrencyService implements OnStart {
     // Core Currency Data
 
     /**
@@ -215,19 +215,13 @@ export default class CurrencyService implements OnInit, OnStart {
     }
 
     // Lifecycle Methods
-
-    /**
-     * Initializes the currency service.
-     * Sets up revenue tracking queues and starts the main currency update loop.
-     */
-    onInit() {
+    onStart() {
         // Create revenue tracking queues for each currency
         const queuePerCurrency = new Map<Currency, Queue>();
         for (const currency of CURRENCIES) {
             queuePerCurrency.set(currency, new Queue());
         }
 
-        // Main currency update loop - runs every second
         task.spawn(() => {
             while (task.wait(1)) {
                 const revenue = new Map<Currency, OnoeNum>();
@@ -265,13 +259,7 @@ export default class CurrencyService implements OnInit, OnStart {
                 Packets.revenue.set(revenue);
             }
         });
-    }
 
-    /**
-     * Starts the currency service.
-     * Begins the high-frequency balance propagation loop.
-     */
-    onStart() {
         // High-frequency balance propagation loop - runs every 0.1 seconds
         task.spawn(() => {
             // Ensure Funds currency exists

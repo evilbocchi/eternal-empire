@@ -2,7 +2,7 @@
 //!optimize 2
 
 import { isCompletelyInside, isInsidePart } from "@antivivi/vrldk";
-import type Area from "shared/world/Area";
+import eat from "shared/hamster/eat";
 
 /**
  * Represents the bounds of a build area.
@@ -20,6 +20,8 @@ class BuildBounds {
      */
     private region?: BasePart;
 
+    private sizeConnection?: RBXScriptConnection;
+
     /**
      * The CFrame of the canvas.
      */
@@ -35,16 +37,11 @@ class BuildBounds {
      */
     canvasSize?: Vector2;
 
-    static fromArea(area: Area) {
-        const gridWorldNode = area.gridWorldNode;
-        if (gridWorldNode === undefined) throw `Area ${area.id} does not have a grid world node.`;
-        const buildBounds = new BuildBounds();
-        buildBounds.draw(gridWorldNode.waitForInstance());
-        return buildBounds;
-    }
-
     constructor(part?: BasePart) {
         if (part !== undefined) this.draw(part);
+        eat(() => {
+            this.sizeConnection?.Disconnect();
+        });
     }
 
     /**
@@ -78,7 +75,8 @@ class BuildBounds {
                 this.canvasAltitude = canvasCFrame.Y;
             }
         };
-        grid.GetPropertyChangedSignal("Size").Connect(onSizeChanged);
+        this.sizeConnection?.Disconnect();
+        this.sizeConnection = grid.GetPropertyChangedSignal("Size").Connect(onSizeChanged);
         onSizeChanged();
         return grid;
     }

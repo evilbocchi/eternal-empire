@@ -21,8 +21,7 @@ namespace CurrencyMap {
     const ONE = new OnoeNum(1);
 
     /**
-     * Wraps a base currency map into a currency map.
-     *
+     * Mutates the given base currency map to use OnoeNum for all amounts.
      * @param baseCurrencyMap The base currency map to wrap.
      * @returns The wrapped currency map.
      */

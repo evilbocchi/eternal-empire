@@ -25,6 +25,7 @@ import { OnInit, Service } from "@flamework/core";
 import Quest from "server/quests/Quest";
 import DataService from "server/services/data/DataService";
 import { getMaxXp } from "shared/constants";
+import eat from "shared/hamster/eat";
 import Packets from "shared/Packets";
 
 /**
@@ -101,6 +102,6 @@ export default class LevelService implements OnInit {
         Packets.xp.set(this.dataService.empireData.xp);
 
         // Handle quest checks on level change
-        this.levelChanged.connect(() => Quest.reachStages());
+        eat(this.levelChanged.connect(() => Quest.reachStages()));
     }
 }
