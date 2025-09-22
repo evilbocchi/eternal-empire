@@ -10,7 +10,7 @@
 
 import { OnStart, Service } from "@flamework/core";
 import { MarketplaceService, MessagingService } from "@rbxts/services";
-import { OnPlayerJoined } from "server/services/ModdingService";
+import { OnPlayerAdded } from "server/services/ModdingService";
 import ChatHookService from "server/services/permissions/ChatHookService";
 import ProductService from "server/services/product/ProductService";
 import Packets from "shared/Packets";
@@ -22,7 +22,7 @@ import { DONATION_PRODUCTS } from "shared/devproducts/DonationProducts";
  * Service that manages player donation stats and leaderboard updates.
  */
 @Service()
-export class DonationService implements OnStart, OnPlayerJoined {
+export class DonationService implements OnStart, OnPlayerAdded {
     constructor(
         private chatHookService: ChatHookService,
         private productService: ProductService,
@@ -55,7 +55,7 @@ export class DonationService implements OnStart, OnPlayerJoined {
         Leaderstats.setLeaderstat(player, "Donated", donated);
     }
 
-    onPlayerJoined(player: Player) {
+    onPlayerAdded(player: Player) {
         this.updateLeaderstats(player);
     }
 

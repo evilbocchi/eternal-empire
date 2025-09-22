@@ -11,14 +11,14 @@
 
 import { OnInit, Service } from "@flamework/core";
 import { PhysicsService } from "@rbxts/services";
-import { OnPlayerJoined } from "server/services/ModdingService";
+import { OnPlayerAdded } from "server/services/ModdingService";
 
 /**
  * Service that sets up and manages collision groups and their interactions.
  */
 @Service()
-export default class CollisionGroupService implements OnInit, OnPlayerJoined {
-    onPlayerJoined(player: Player) {
+export default class CollisionGroupService implements OnInit, OnPlayerAdded {
+    onPlayerAdded(player: Player) {
         const onCharacterAdded = (character: Model | undefined) => {
             if (character === undefined) return;
             const rootPart = character.WaitForChild("HumanoidRootPart") as BasePart;

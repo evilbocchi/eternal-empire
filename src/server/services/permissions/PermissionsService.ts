@@ -17,7 +17,7 @@
 import { OnInit, Service } from "@flamework/core";
 import { MessagingService, Players, TeleportService, TextService } from "@rbxts/services";
 import DataService from "server/services/data/DataService";
-import { OnPlayerJoined } from "server/services/ModdingService";
+import { OnPlayerAdded } from "server/services/ModdingService";
 import ChatHookService from "server/services/permissions/ChatHookService";
 import { getNameFromUserId } from "shared/constants";
 import { IS_SINGLE_SERVER } from "shared/Context";
@@ -43,7 +43,7 @@ type PermissionList = "banned" | "trusted" | "managers";
  * Integrates with other services for data, items, upgrades, and messaging.
  */
 @Service()
-export default class PermissionsService implements OnInit, OnPlayerJoined {
+export default class PermissionsService implements OnInit, OnPlayerAdded {
     /**
      * Constructs the PermissionsService with all required dependencies.
      */
@@ -183,7 +183,7 @@ export default class PermissionsService implements OnInit, OnPlayerJoined {
      * Handles logic when a player joins the server.
      * @param player Player who joined
      */
-    onPlayerJoined(player: Player) {
+    onPlayerAdded(player: Player) {
         const joinData = player.GetJoinData();
         if (joinData.LaunchData !== undefined && !IS_SINGLE_SERVER) {
             const [ac, id] = joinData.LaunchData.split("|");

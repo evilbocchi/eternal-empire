@@ -12,13 +12,13 @@ import { Players } from "@rbxts/services";
 import eat from "shared/hamster/eat";
 import { Server } from "shared/item/ItemUtils";
 
-export interface OnPlayerJoined {
+export interface OnPlayerAdded {
     /**
      * Called when a player joins the game.
      * Also called for players already in the game when the service starts.
      * @param player The player who joined.
      */
-    onPlayerJoined(player: Player): void;
+    onPlayerAdded(player: Player): void;
 }
 
 export interface OnGameAPILoaded {
@@ -33,20 +33,20 @@ export interface OnGameAPILoaded {
 export default class ModdingService implements OnInit {
     readonly gameAPILoaded = new Signal();
 
-    private hookPlayerJoined() {
-        const listeners = new Set<OnPlayerJoined>();
-        Modding.onListenerAdded<OnPlayerJoined>((object) => listeners.add(object));
-        Modding.onListenerRemoved<OnPlayerJoined>((object) => listeners.delete(object));
+    private hookPlayerAdded() {
+        const listeners = new Set<OnPlayerAdded>();
+        Modding.onListenerAdded<OnPlayerAdded>((object) => listeners.add(object));
+        Modding.onListenerRemoved<OnPlayerAdded>((object) => listeners.delete(object));
 
         Players.PlayerAdded.Connect((player) => {
             for (const listener of listeners) {
-                task.spawn(() => listener.onPlayerJoined(player));
+                task.spawn(() => listener.onPlayerAdded(player));
             }
         });
 
         for (const player of Players.GetPlayers()) {
             for (const listener of listeners) {
-                task.spawn(() => listener.onPlayerJoined(player));
+                task.spawn(() => listener.onPlayerAdded(player));
             }
         }
     }
@@ -72,7 +72,7 @@ export default class ModdingService implements OnInit {
      * Initializes the modding service and sets up player join listeners.
      */
     onInit() {
-        this.hookPlayerJoined();
+        this.hookPlayerAdded();
         this.hookGameAPILoaded();
     }
 }

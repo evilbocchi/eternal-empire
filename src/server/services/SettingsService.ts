@@ -13,7 +13,7 @@
  */
 import { OnInit, Service } from "@flamework/core";
 import DataService from "server/services/data/DataService";
-import { OnPlayerJoined } from "server/services/ModdingService";
+import { OnPlayerAdded } from "server/services/ModdingService";
 import { PlayerProfileManager } from "shared/data/profile/ProfileManager";
 import Packets from "shared/Packets";
 
@@ -22,12 +22,12 @@ import Packets from "shared/Packets";
  * Loads settings on player join and listens for updates from the client.
  */
 @Service()
-export default class SettingsService implements OnInit, OnPlayerJoined {
+export default class SettingsService implements OnInit, OnPlayerAdded {
     /**
      * Loads and sends player settings to the client when they join.
      * @param player The player who joined
      */
-    onPlayerJoined(player: Player) {
+    onPlayerAdded(player: Player) {
         const playerProfile = PlayerProfileManager.load(player.UserId);
         if (playerProfile !== undefined) {
             Packets.settings.setFor(player, playerProfile.Data.settings);

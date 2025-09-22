@@ -1,7 +1,7 @@
 import { Profile } from "@antivivi/profileservice/globals";
 import { OnStart, Service } from "@flamework/core";
 import { Players } from "@rbxts/services";
-import { OnPlayerJoined } from "server/services/ModdingService";
+import { OnPlayerAdded } from "server/services/ModdingService";
 import AvailableEmpire from "shared/data/AvailableEmpire";
 import setupDataFully from "shared/data/setupDataFully";
 import eat from "shared/hamster/eat";
@@ -12,7 +12,7 @@ import Packets from "shared/Packets";
  * Handles data loading, saving, empire creation, teleportation, and permissions.
  */
 @Service()
-export default class DataService implements OnStart, OnPlayerJoined {
+export default class DataService implements OnStart, OnPlayerAdded {
     /** Empire profile for the current server. */
     readonly empireProfile: Profile<EmpireData>;
     /**
@@ -31,7 +31,7 @@ export default class DataService implements OnStart, OnPlayerJoined {
         this.empireId = empireId;
     }
 
-    onPlayerJoined(player: Player) {
+    onPlayerAdded(player: Player) {
         AvailableEmpire.registerPlayer(player);
     }
 

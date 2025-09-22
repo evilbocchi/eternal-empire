@@ -17,7 +17,7 @@ import { OnInit, Service } from "@flamework/core";
 import { Players } from "@rbxts/services";
 import DataService from "server/services/data/DataService";
 import ItemService from "server/services/item/ItemService";
-import { OnPlayerJoined } from "server/services/ModdingService";
+import { OnPlayerAdded } from "server/services/ModdingService";
 import Gear from "shared/item/traits/Gear";
 import Items from "shared/items/Items";
 
@@ -25,7 +25,7 @@ import Items from "shared/items/Items";
  * Service that manages player tools and harvestable object interactions.
  */
 @Service()
-export class ToolService implements OnInit, OnPlayerJoined, OnPlayerJoined {
+export class ToolService implements OnInit, OnPlayerAdded, OnPlayerAdded {
     /** Original position of each harvestable for respawn logic. */
     originalPosPerHarvestable = new Map<Instance, Vector3>();
 
@@ -71,7 +71,7 @@ export class ToolService implements OnInit, OnPlayerJoined, OnPlayerJoined {
      * Handles player join events, refreshing tools and clearing backpack on death.
      * @param player The player who joined.
      */
-    onPlayerJoined(player: Player) {
+    onPlayerAdded(player: Player) {
         player.CharacterAdded.Connect((character) => {
             (character.WaitForChild("Humanoid") as Humanoid).Died.Once(() => {
                 player.FindFirstChildOfClass("Backpack")?.ClearAllChildren();
