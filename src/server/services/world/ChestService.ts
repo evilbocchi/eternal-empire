@@ -60,7 +60,7 @@ interface Loot {
     /**
      * The item that was dropped.
      */
-    item?: Item;
+    itemId?: string;
 
     /**
      * The harvestable ID that was dropped.
@@ -68,7 +68,7 @@ interface Loot {
     harvestable?: HarvestableId;
 
     /**
-     * The amount of XP that was dropped.
+     * The amount that was dropped.
      */
     xp?: number;
 }
@@ -91,7 +91,7 @@ class LootPool {
      * @param weight The weight for random selection.
      */
     addItem(item: Item, weight: number) {
-        this.pool.set({ item: item }, weight);
+        this.pool.set({ itemId: item.id }, weight);
         return this;
     }
 
@@ -220,16 +220,21 @@ export default class ChestService implements OnInit, OnStart {
         };
         for (const loot of loots) {
             if (loot.xp !== undefined) totalXp += loot.xp;
-            if (loot.item !== undefined) addItem(loot.item);
+            if (loot.itemId !== undefined) addItem(Items.getItem(loot.itemId)!);
             if (loot.harvestable !== undefined) addItem(Items.getItem(loot.harvestable)!);
         }
         const current = this.levelService.getXp();
+        const serialized = new Array<{ id: string | "xp"; amount: number }>();
+
         if (totalXp > 0) {
             this.levelService.setXp(current + totalXp);
-            Packets.showXpReward.toAllClients(totalXp);
+            serialized.push({ id: "xp", amount: totalXp });
+        }
+        for (const [id, amount] of items) {
+            serialized.push({ id, amount });
         }
 
-        Packets.showItemReward.toAllClients(items);
+        Packets.showLoot.toAllClients(serialized);
     }
 
     /**

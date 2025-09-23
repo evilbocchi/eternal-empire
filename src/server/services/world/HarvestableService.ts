@@ -1,20 +1,24 @@
+import { OnStart, Service } from "@flamework/core";
+import ItemService from "server/services/item/ItemService";
 import eat from "shared/hamster/eat";
-import { Server } from "shared/api/APIExpose";
 import Gear from "shared/item/traits/Gear";
 import Items from "shared/items/Items";
 import Packets from "shared/Packets";
 import { AREAS } from "shared/world/Area";
 import HARVESTABLES from "shared/world/harvestable/Harvestable";
 
-export default class HarvestableManager {
-    static readonly originalPosPerHarvestable = new Map<Instance, Vector3>();
+@Service()
+export default class HarvestableService implements OnStart {
+    readonly originalPosPerHarvestable = new Map<Instance, Vector3>();
+
+    constructor(private readonly itemService: ItemService) {}
 
     /**
      * Moves a harvestable instance to a new position.
      * @param harvestable The harvestable instance.
      * @param pos The new position.
      */
-    static moveHarvestable(harvestable: Instance, pos: Vector3) {
+    moveHarvestable(harvestable: Instance, pos: Vector3) {
         if (harvestable.IsA("Model")) harvestable.PivotTo(new CFrame(pos));
         else if (harvestable.IsA("BasePart")) harvestable.Position = pos;
     }
@@ -24,7 +28,7 @@ export default class HarvestableManager {
      * @param tool The tool model.
      * @param harvestable The harvestable instance.
      */
-    static isWithin(tool: Model, harvestable: Instance) {
+    isWithin(tool: Model, harvestable: Instance) {
         let position: Vector3;
         if (harvestable.IsA("Model") && harvestable.PrimaryPart !== undefined)
             position = harvestable.PrimaryPart!.Position;
@@ -41,9 +45,9 @@ export default class HarvestableManager {
      * Calculates the critical hit chance for a harvesting tool.
      * @param _item The harvesting tool.
      */
-    static getCritChance(_item: Gear, itemService: typeof Server.Item) {
+    getCritChance(_item: Gear) {
         let critChance = 5;
-        const inventory = itemService.items.inventory;
+        const inventory = this.itemService.items.inventory;
         for (const charm of Items.charms) {
             const amount = inventory.get(charm.item.id);
             if (amount !== undefined && amount > 0) {
@@ -53,7 +57,7 @@ export default class HarvestableManager {
         return critChance / 100;
     }
 
-    static load(itemService: typeof Server.Item) {
+    onStart() {
         for (const [_id, area] of pairs(AREAS)) {
             const harvestables = area.worldNode.getInstance()?.FindFirstChild("Harvestable")?.GetChildren();
             if (harvestables === undefined) continue;
@@ -94,7 +98,7 @@ export default class HarvestableManager {
             lastUsePerPlayer.set(player, t);
             const harvestableData = HARVESTABLES[harvestable.Name as HarvestableId];
             let damage = gear.type === harvestableData.tool ? gear.damage! : gear.damage! * 0.05;
-            if (math.random(1, 100) / 100 <= this.getCritChance(gear, itemService)) {
+            if (math.random(1, 100) / 100 <= this.getCritChance(gear)) {
                 damage *= 2;
             }
             damage *= math.random(80, 120) * 0.01;
@@ -108,10 +112,13 @@ export default class HarvestableManager {
                 } else {
                     receiving.set(harvestable.Name, math.random(1, 2));
                 }
+
+                const serialized = new Array<{ id: string | "xp"; amount: number }>();
                 for (const [id, amount] of receiving) {
-                    itemService.giveItem(id, amount);
+                    this.itemService.giveItem(id, amount);
+                    serialized.push({ id, amount });
                 }
-                Packets.showItemReward.toAllClients(receiving);
+                Packets.showLoot.toAllClients(serialized);
 
                 this.moveHarvestable(
                     harvestable,

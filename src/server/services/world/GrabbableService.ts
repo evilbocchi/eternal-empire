@@ -104,7 +104,7 @@ export default class GrabbableService implements OnInit {
                 // Mark the item as collected and give it to the player
                 this.eventService.setEventCompleted(eventId, true);
                 this.itemService.giveItem(itemId, 1);
-                Packets.showItemReward.toClient(player, new Map([[itemId, 1]]));
+                Packets.showLoot.toAllClients([{ id: itemId, amount: 1 }]);
 
                 // Remove the grabbable object from the world
                 if (!IS_EDIT) proximityPrompt.Parent?.Destroy();

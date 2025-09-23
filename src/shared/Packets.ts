@@ -190,15 +190,8 @@ namespace Packets {
     // chests
     /**
      * Show the item reward UI.
-     * @param items The items to show in the reward UI.
      */
-    export const showItemReward = packet<(items: Map<string, number>) => void>();
-
-    /**
-     * Show the XP reward UI.
-     * @param xp The amount of XP to show in the reward UI.
-     */
-    export const showXpReward = packet<(xp: number) => void>();
+    export const showLoot = packet<(loot: { id: string | "xp"; amount: number }[]) => void>();
 
     // leaderboard
     export const leaderboardData = property<Map<LeaderboardType, LeaderboardEntry[]>>(new Map());
