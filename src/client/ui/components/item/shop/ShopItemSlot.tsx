@@ -195,7 +195,10 @@ export default function ShopItemSlot({
 
     const [viewing, setViewing] = useState<Currency | Item>();
     useEffect(() => {
-        if (price === undefined || !visible) return;
+        if (price === undefined || !visible) {
+            setViewing(undefined);
+            return;
+        }
 
         const options = new Array<Currency | Item>();
         for (const [currency] of CurrencyBundle.SORTED_DETAILS) {

@@ -132,21 +132,25 @@ namespace SoundManager {
                 playing = undefined;
                 //this.currentlyPlayingLabel.Text = "Currently not playing anything";
             }
-            task.delay(math.random(5, 40), () => refreshMusic());
+            task.delay(math.random(5, 40), refreshMusic);
         });
     }
 
     export function init() {
         let ready = false;
+        let oldMusicEnabled = false;
         const settingsConnection = Packets.settings.observe((value) => {
-            MUSIC_GROUP.Volume = value.Music ? 0.5 : 0;
+            const musicEnabled = value.Music;
+            MUSIC_GROUP.Volume = musicEnabled ? 0.5 : 0;
             SOUND_EFFECTS_GROUP.Volume = value.SoundEffects ? 1 : 0;
-            if (!value.Music) {
+            if (!musicEnabled) {
+                oldMusicEnabled = false;
                 playing?.Stop();
                 playing = undefined;
                 return;
             }
-            if (ready === false) {
+            if (oldMusicEnabled !== musicEnabled) {
+                oldMusicEnabled = musicEnabled;
                 ready = true;
                 refreshMusic();
             }
