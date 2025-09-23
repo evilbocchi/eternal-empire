@@ -43,6 +43,12 @@ export const CHALLENGECOMPLETION_GUI = createScreenGui("ChallengeCompletion", 8)
 export const CHESTLOOT_GUI = createScreenGui("ChestLoot", 9);
 export const CHALLENGE_GUI = createScreenGui("Challenge", 7);
 export const CHALLENGE_HUD_GUI = createScreenGui("ChallengeHud", 4);
+export const UPGRADEBOARD_GUI = (() => {
+    const folder = new Instance("Folder");
+    folder.Name = "UpgradeBoard";
+    setParent(folder);
+    return folder;
+})();
 export const SHOP_GUI = (() => {
     const folder = new Instance("Folder");
     folder.Name = "ShopGui";
