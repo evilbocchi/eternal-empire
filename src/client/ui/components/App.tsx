@@ -4,6 +4,8 @@ import {
     BACKPACK_GUI,
     BALANCE_GUI,
     BUILD_GUI,
+    CHALLENGE_GUI,
+    CHALLENGE_HUD_GUI,
     CLICK_SPARKS_GUI,
     DIALOGUE_GUI,
     INVENTORY_GUI,
@@ -32,6 +34,8 @@ import LogsWindow from "client/ui/components/logs/LogsWindow";
 import DialogueWindow from "client/ui/components/npc/DialogueWindow";
 import LevelUpManager from "client/ui/components/levelup/LevelUpManager";
 import QuestCompletionManager from "client/ui/components/levelup/QuestCompletionManager";
+import ChallengeManager from "client/ui/components/challenge/ChallengeManager";
+import ChallengeHudManager from "client/ui/components/challenge/ChallengeHudManager";
 import PositionManager from "client/ui/components/position/PositionManager";
 import QuestWindow from "client/ui/components/quest/QuestWindow";
 import TrackedQuestWindow from "client/ui/components/quest/TrackedQuestWindow";
@@ -95,6 +99,8 @@ export default function App({ viewportsEnabled }: { viewportsEnabled: boolean })
         addRoot(roots, SHOP_GUI).render(<ShopGui viewportManagement={viewportManagement} />);
         addRoot(roots, LEVELUP_GUI).render(<LevelUpManager />);
         addRoot(roots, QUESTCOMPLETION_GUI).render(<QuestCompletionManager />);
+        addRoot(roots, CHALLENGE_GUI).render(<ChallengeManager />);
+        addRoot(roots, CHALLENGE_HUD_GUI).render(<ChallengeHudManager />);
         addRoot(roots, WORLD_GUI).render(<WorldRenderer />);
 
         const cleanup = SoundManager.init();

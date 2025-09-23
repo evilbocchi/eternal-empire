@@ -18,7 +18,7 @@ import { simpleInterval } from "@antivivi/vrldk";
 import { OnStart, Service } from "@flamework/core";
 import { toNumeral } from "@rbxts/roman-numerals";
 import StringBuilder from "@rbxts/stringbuilder";
-import { CHALLENGES } from "server/Challenges";
+import { CHALLENGE_UPGRADES, CHALLENGES, REWARD_UPGRADES } from "server/Challenges";
 import CurrencyService from "server/services/data/CurrencyService";
 import DataService from "server/services/data/DataService";
 import NamedUpgradeService from "server/services/data/NamedUpgradeService";
@@ -32,25 +32,6 @@ import eat from "shared/hamster/eat";
 import Item from "shared/item/Item";
 import Packets from "shared/Packets";
 import Sandbox from "shared/Sandbox";
-
-declare global {
-    interface Assets {
-        ChallengeOption: Frame & {
-            Description: Frame & {
-                DescriptionLabel: TextLabel;
-                NoticeLabel: TextLabel;
-                RequirementLabel: TextLabel;
-            };
-            StartButton: TextButton & {
-                Label: TextLabel;
-            };
-            RewardLabel: TextLabel;
-            TitleLabel: TextLabel & {
-                UIGradient: UIGradient;
-            };
-        };
-    }
-}
 
 /**
  * Service that manages challenge logic, UI, and progression.
@@ -110,7 +91,7 @@ export class ChallengeService implements OnStart {
             const resetLayer = RESET_LAYERS[challengeDetails.resets as ResetLayerId];
             if (resetLayer !== undefined) {
                 // save the setup first
-                // this.setupService.saveSetup(player, resetLayer.area.id, "Autosaved"); TODO
+                this.setupService.saveSetup(player, resetLayer.area, "Autosaved");
 
                 empireData.backup.upgrades = new Map();
                 for (const [upgrade, amount] of empireData.upgrades)
@@ -194,53 +175,40 @@ export class ChallengeService implements OnStart {
      */
     refreshCurrentChallenge() {
         const challengeId = this.dataService.empireData.currentChallenge as ChallengeId | undefined;
-        // const gui = getChallengeGui();
-        // if (gui === undefined) {
-        //     throw "No challenge gui found";
-        // }
-        // const challengeOptions = gui.ChallengeOptions;
-        // const currentChallengeWindow = gui.CurrentChallenge;
-        // if (challengeId === undefined) {
-        //     currentChallengeWindow.Visible = false;
-        //     challengeOptions.Visible = true;
-        //     Packets.currentChallenge.set({
-        //         name: "",
-        //         r1: 0,
-        //         g1: 0,
-        //         b1: 0,
-        //         r2: 0,
-        //         g2: 0,
-        //         b2: 0,
-        //         description: "",
-        //     });
-        //     for (const [_, id] of CHALLENGE_UPGRADES) this.namedUpgradeService.setUpgradeAmount(id, 0);
-        // } else {
-        //     currentChallengeWindow.Visible = true;
-        //     challengeOptions.Visible = false;
-        //     const challenge = CHALLENGES[challengeId];
-        //     const requirement = "Requirement: " + this.getRequirementLabel(challenge);
-        //     currentChallengeWindow.RequirementLabel.Text = requirement;
-        //     const currentLevel = this.getChallengeLevel(challengeId);
-        //     const title = this.getTitleLabel(challenge, challengeId, currentLevel);
-        //     currentChallengeWindow.TitleLabel.Text = title;
-        //     currentChallengeWindow.TitleLabel.UIGradient.Color = challenge.color;
+        if (challengeId === undefined) {
+            Packets.currentChallenge.set({
+                name: "",
+                r1: 0,
+                g1: 0,
+                b1: 0,
+                r2: 0,
+                g2: 0,
+                b2: 0,
+                description: "",
+            });
+            for (const [_, id] of CHALLENGE_UPGRADES) this.namedUpgradeService.setUpgradeAmount(id, 0);
+        } else {
+            const challenge = CHALLENGES[challengeId];
+            const requirement = "Requirement: " + this.getRequirementLabel(challenge);
+            const currentLevel = this.getChallengeLevel(challengeId);
+            const title = this.getTitleLabel(challenge, challengeId, currentLevel);
 
-        //     const colors = challenge.color.Keypoints;
-        //     const c1 = colors[0].Value;
-        //     const c2 = colors[1].Value;
-        //     Packets.currentChallenge.set({
-        //         name: title,
-        //         r1: c1.R,
-        //         g1: c1.G,
-        //         b1: c1.B,
-        //         r2: c2.R,
-        //         g2: c2.G,
-        //         b2: c2.B,
-        //         description: challenge.description(currentLevel) + "\n" + requirement,
-        //     });
-        //     for (const [id, upgId] of CHALLENGE_UPGRADES)
-        //         this.namedUpgradeService.setUpgradeAmount(upgId, id === challengeId ? currentLevel : 0);
-        // }
+            const colors = challenge.color.Keypoints;
+            const c1 = colors[0].Value;
+            const c2 = colors[1].Value;
+            Packets.currentChallenge.set({
+                name: title,
+                r1: c1.R,
+                g1: c1.G,
+                b1: c1.B,
+                r2: c2.R,
+                g2: c2.G,
+                b2: c2.B,
+                description: challenge.description(currentLevel) + "\n" + requirement,
+            });
+            for (const [id, upgId] of CHALLENGE_UPGRADES)
+                this.namedUpgradeService.setUpgradeAmount(upgId, id === challengeId ? currentLevel : 0);
+        }
     }
 
     /**
@@ -361,34 +329,15 @@ export class ChallengeService implements OnStart {
      */
     refreshChallenges() {
         let i = 0;
-        // const gui = getChallengeGui();
-        // if (gui === undefined) {
-        //     throw "No challenge gui found";
-        // }
-        // TODO
-        // const challengeOptions = gui.ChallengeOptions;
-        // challengeOptions.GetChildren().forEach((instance) => {
-        //     if (instance.IsA("Frame")) instance.Destroy();
-        // });
-        // for (const [key, challenge] of pairs(CHALLENGES)) {
-        //     const currentLevel = this.getChallengeLevel(key);
-        //     if (currentLevel > challenge.cap) continue;
-        //     const challengeOption = ASSETS.ChallengeOption.Clone();
-        //     challengeOption.TitleLabel.Text = this.getTitleLabel(challenge, key, currentLevel);
-        //     challengeOption.TitleLabel.UIGradient.Color = challenge.color;
-        //     challengeOption.Description.DescriptionLabel.Text = challenge.description(currentLevel);
-        //     challengeOption.Description.NoticeLabel.Text = this.getNotice(challenge);
-        //     challengeOption.Description.RequirementLabel.Text = "Requirement: " + this.getRequirementLabel(challenge);
-        //     challengeOption.RewardLabel.Text = "Boost: " + this.getRewardLabel(challenge, currentLevel);
-        //     challengeOption.LayoutOrder = challenge.order ?? -i;
-        //     challengeOption.Name = key;
-        //     challengeOption.Parent = challengeOptions;
-        //     if (currentLevel > 1) {
-        //         const upgradeId = REWARD_UPGRADES.get(key);
-        //         if (upgradeId !== undefined) this.namedUpgradeService.setUpgradeAmount(upgradeId, currentLevel - 1);
-        //     }
-        //     ++i;
-        // }
+        for (const [key, challenge] of pairs(CHALLENGES)) {
+            const currentLevel = this.getChallengeLevel(key);
+            if (currentLevel > challenge.cap) continue;
+            if (currentLevel > 1) {
+                const upgradeId = REWARD_UPGRADES.get(key);
+                if (upgradeId !== undefined) this.namedUpgradeService.setUpgradeAmount(upgradeId, currentLevel - 1);
+            }
+            ++i;
+        }
         this.refreshCurrentChallenge();
     }
 
