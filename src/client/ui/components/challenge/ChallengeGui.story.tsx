@@ -27,7 +27,7 @@ export = CreateReactStory(
                     {
                         name: "Melting Economy I",
                         description: "Funds gain is heavily nerfed by ^0.95.",
-                        requirement: "Purchase Admiration or Codependence",
+                        task: "Purchase Admiration or Codependence",
                         notice: "A Skillification will be simulated. Your progress is not lost.",
                         reward: "Boost: x$1 > x$2",
                         r1: 170,
@@ -43,7 +43,7 @@ export = CreateReactStory(
                     {
                         name: "Burning Bridges II",
                         description: "All droplets take 50% longer to process.",
-                        requirement: "Purchase Melting Economy I",
+                        task: "Purchase Melting Economy I",
                         notice: "Challenge mode activated. Progress is preserved.",
                         reward: "Boost: x$2 > x$3",
                         r1: 255,
