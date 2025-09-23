@@ -1,6 +1,6 @@
 import { Profile } from "@antivivi/profileservice/globals";
 import { ProfileManager } from "@antivivi/vrldk";
-import { IS_CI, IS_SERVER } from "shared/Context";
+import { IS_EDIT, IS_SERVER } from "shared/Context";
 import EmpireProfileTemplate from "shared/data/profile/EmpireProfileTemplate";
 import PlayerProfileTemplate from "shared/data/profile/PlayerProfileTemplate";
 
@@ -17,7 +17,7 @@ export class ProfileManagerWrapper<T extends object> {
         template: T,
         private readonly prefix: string,
     ) {
-        if (IS_SERVER || IS_CI) {
+        if (IS_SERVER || IS_EDIT) {
             this.profileManager = new ProfileManager(storeName, template);
         }
     }
@@ -37,7 +37,7 @@ export class ProfileManagerWrapper<T extends object> {
      * @returns Whether the save was successful.
      */
     save(id: string | unknown) {
-        if (IS_CI) {
+        if (IS_EDIT) {
             return true;
         }
 
@@ -53,7 +53,7 @@ export class ProfileManagerWrapper<T extends object> {
     load(id: string | unknown, view?: boolean) {
         const key = this.getKey(id);
 
-        if (IS_CI) {
+        if (IS_EDIT) {
             const cached = this.mockLoadedProfiles.get(key);
             if (cached) {
                 return cached;
@@ -74,7 +74,7 @@ export class ProfileManagerWrapper<T extends object> {
      * @returns Whether the unload was successful.
      */
     unload(id: string | unknown) {
-        if (IS_CI) {
+        if (IS_EDIT) {
             return true;
         }
 

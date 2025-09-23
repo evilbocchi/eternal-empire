@@ -9,7 +9,7 @@ import Signal from "@antivivi/lemon-signal";
 import { AnalyticsService, Players, ReplicatedStorage } from "@rbxts/services";
 import NPC, { Dialogue } from "server/interactive/npc/NPC";
 import { Server } from "shared/api/APIExpose";
-import { IS_CI } from "shared/Context";
+import { IS_EDIT } from "shared/Context";
 import ThisEmpire from "shared/data/ThisEmpire";
 import eat from "shared/hamster/eat";
 import { HotReloader, Reloadable } from "shared/hamster/HotReload";
@@ -477,7 +477,7 @@ export default class Quest extends Reloadable<Quest> {
      * @param level The player level to check quest reachability (defaults to current level).
      */
     static async reachStages(level?: number) {
-        if (IS_CI) return; // TODO: Make quests have cleanup so they can be tested in CI
+        if (IS_EDIT) return; // TODO: Make quests have cleanup so they can be tested in CI
 
         if (level === undefined) {
             level = ThisEmpire.data.level;

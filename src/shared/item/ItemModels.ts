@@ -1,7 +1,7 @@
 import { findModels } from "@antivivi/vrldk";
 import { CollectionService, ReplicatedStorage, Workspace } from "@rbxts/services";
 import { SOUND_EFFECTS_GROUP } from "shared/asset/GameAssets";
-import { IS_CI, IS_SERVER } from "shared/Context";
+import { IS_EDIT, IS_SERVER } from "shared/Context";
 
 const itemModels = new Map<string, Model>();
 const folder = Workspace.FindFirstChild("ItemModels") ?? ReplicatedStorage.WaitForChild("ItemModels");
@@ -35,7 +35,7 @@ const served = findModels(folder);
 for (const model of served) {
     itemModels.set(model.Name, model);
 
-    if (!IS_SERVER || IS_CI) continue;
+    if (!IS_SERVER || IS_EDIT) continue;
 
     for (const instance of model.GetDescendants()) {
         const name = instance.Name;

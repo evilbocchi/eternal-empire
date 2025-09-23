@@ -22,7 +22,7 @@ import { useTextAnimation } from "client/ui/hooks/useTextAnimation";
 import { getAsset } from "shared/asset/AssetMap";
 import { ASSETS } from "shared/asset/GameAssets";
 import { getDisplayName, getTextChannels } from "shared/constants";
-import { IS_CI } from "shared/Context";
+import { IS_EDIT } from "shared/Context";
 import Packets from "shared/Packets";
 
 interface DialogueData {
@@ -84,7 +84,7 @@ export default function DialogueWindow() {
     }, [visible]);
 
     useEffect(() => {
-        const channel = IS_CI ? undefined : (getTextChannels().WaitForChild("RBXGeneral") as TextChannel);
+        const channel = IS_EDIT ? undefined : (getTextChannels().WaitForChild("RBXGeneral") as TextChannel);
         const npcTagColor = Color3.fromRGB(201, 255, 13).ToHex();
         const emptyColor = Color3.fromRGB(0, 181, 28).ToHex();
         const connection = Packets.npcMessage.fromServer((message, pos, endPos, prompt, model) => {

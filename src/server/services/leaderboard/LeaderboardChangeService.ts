@@ -15,7 +15,7 @@ import { OnStart, Service } from "@flamework/core";
 import { CollectionService, DataStoreService, HttpService } from "@rbxts/services";
 import { $env } from "rbxts-transform-env";
 import DataService from "server/services/data/DataService";
-import { IS_CI } from "shared/Context";
+import { IS_EDIT } from "shared/Context";
 import Sandbox from "shared/Sandbox";
 import { getNameFromUserId } from "shared/constants";
 import { CURRENCY_DETAILS } from "shared/currency/CurrencyDetails";
@@ -214,7 +214,7 @@ export default class LeaderboardChangeService implements OnStart {
      * Starts the leaderboard monitoring loop.
      */
     onStart() {
-        if (Sandbox.getEnabled() || IS_CI) {
+        if (Sandbox.getEnabled() || IS_EDIT) {
             return;
         }
 

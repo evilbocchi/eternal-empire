@@ -8,7 +8,7 @@ import {
     RunService,
     TeleportService,
 } from "@rbxts/services";
-import { IS_CI, IS_PUBLIC_SERVER, IS_SERVER, IS_SINGLE_SERVER, IS_STUDIO } from "shared/Context";
+import { IS_EDIT, IS_PUBLIC_SERVER, IS_SERVER, IS_SINGLE_SERVER, IS_STUDIO } from "shared/Context";
 import { EmpireProfileManager, PlayerProfileManager } from "shared/data/profile/ProfileManager";
 import ThisEmpire from "shared/data/ThisEmpire";
 import Packets from "shared/Packets";
@@ -49,7 +49,7 @@ namespace AvailableEmpire {
     /**
      * DataStore for tracking which empires each player has access to.
      */
-    const availableEmpiresStore = IS_SERVER || IS_CI ? DataStoreService.GetDataStore("AvailableEmpires") : undefined;
+    const availableEmpiresStore = IS_SERVER || IS_EDIT ? DataStoreService.GetDataStore("AvailableEmpires") : undefined;
 
     /**
      * Cache of available empires per player to reduce DataStore calls.
@@ -266,7 +266,7 @@ namespace AvailableEmpire {
             }
         });
         pcall(() => {
-            if (IS_CI) return;
+            if (IS_EDIT) return;
             BadgeService.AwardBadge(player.UserId, 3498765777753358); // join badge // TODO: change badge
         });
 

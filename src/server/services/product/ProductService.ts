@@ -11,7 +11,7 @@
 
 import { OnStart, Service } from "@flamework/core";
 import { MarketplaceService, Players } from "@rbxts/services";
-import { IS_CI } from "shared/Context";
+import { IS_EDIT } from "shared/Context";
 
 declare global {
     /** Function type for handling product purchases. */
@@ -39,7 +39,7 @@ export default class ProductService implements OnStart {
     }
 
     onStart() {
-        if (!IS_CI) {
+        if (!IS_EDIT) {
             MarketplaceService.ProcessReceipt = (receiptInfo: ReceiptInfo) => {
                 const productFunction = this.productFunctions.get(receiptInfo.ProductId);
                 const player = Players.GetPlayerByUserId(receiptInfo.PlayerId);

@@ -1,6 +1,6 @@
 import { getAllInstanceInfo, isInside } from "@antivivi/vrldk";
 import { CollectionService, Players, Workspace } from "@rbxts/services";
-import { IS_CI, IS_SERVER } from "shared/Context";
+import { IS_EDIT, IS_SERVER } from "shared/Context";
 import Packets from "shared/Packets";
 import Sandbox from "shared/Sandbox";
 import { playSound } from "shared/asset/GameAssets";
@@ -236,7 +236,7 @@ export default class Area {
 
             let position: Vector3 | undefined;
 
-            if (IS_CI) {
+            if (IS_EDIT) {
                 position = Workspace.CurrentCamera?.CFrame.Position;
             } else {
                 const character = player.Character;
@@ -280,7 +280,7 @@ export default class Area {
     }
 
     static {
-        if (IS_SERVER || IS_CI) {
+        if (IS_SERVER || IS_EDIT) {
             // Set up player area tracking when players join
             const playerAddedConnection = Players.PlayerAdded.Connect((player) => {
                 this.onPlayerAdded(player);

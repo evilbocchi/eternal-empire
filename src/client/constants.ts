@@ -6,7 +6,7 @@
  */
 
 import { Players } from "@rbxts/services";
-import { IS_CI } from "shared/Context";
+import { IS_EDIT } from "shared/Context";
 
 /**
  * Reference to the local player.
@@ -21,7 +21,7 @@ export const MOUSE = LOCAL_PLAYER.GetMouse();
 /**
  * Reference to the local player's PlayerGui.
  */
-export const PLAYER_GUI = (IS_CI ? undefined : LOCAL_PLAYER.WaitForChild("PlayerGui")) as StarterGui;
+export const PLAYER_GUI = (IS_EDIT ? undefined : LOCAL_PLAYER.WaitForChild("PlayerGui")) as StarterGui;
 
 /**
  * Reference to the Actor instance for parallel execution, if present.

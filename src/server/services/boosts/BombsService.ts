@@ -24,7 +24,7 @@ import ChatHookService from "server/services/permissions/ChatHookService";
 import { log } from "server/services/permissions/LogService";
 import PermissionsService from "server/services/permissions/PermissionsService";
 import ProductService from "server/services/product/ProductService";
-import { IS_CI } from "shared/Context";
+import { IS_EDIT } from "shared/Context";
 import Packets from "shared/Packets";
 import { getNameFromUserId } from "shared/constants";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
@@ -176,7 +176,7 @@ export default class BombsService implements OnInit, OnStart {
             });
         }
 
-        if (!IS_CI) {
+        if (!IS_EDIT) {
             MessagingService.SubscribeAsync("Bomb", (message) => this.activateBomb(message.Data as BombMessage));
         }
     }

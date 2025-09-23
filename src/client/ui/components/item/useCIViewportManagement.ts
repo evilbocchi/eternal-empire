@@ -1,13 +1,13 @@
 import { RefObject, useEffect, useState } from "@rbxts/react";
 import { PARALLEL } from "client/constants";
 import { loadItemIntoViewport, loadItemViewportManagement } from "client/ui/components/item/ItemViewport";
-import { IS_CI } from "shared/Context";
+import { IS_EDIT } from "shared/Context";
 
 /**
  * A special hook to manage item viewports in CI environments.
  * @returns The shared ItemViewportManagement instance, or undefined if not in CI.
  */
-export default function useCIViewportManagement({ enabled = IS_CI }): ItemViewportManagement | undefined {
+export default function useCIViewportManagement({ enabled = IS_EDIT }): ItemViewportManagement | undefined {
     const [viewportManagement, setViewportManagement] = useState<ItemViewportManagement | undefined>();
 
     // Initialize viewport management when component mounts

@@ -11,7 +11,7 @@
  */
 
 import { RunService } from "@rbxts/services";
-import { IS_CI } from "shared/Context";
+import { IS_EDIT } from "shared/Context";
 import { ITEM_MODELS } from "shared/item/ItemModels";
 
 declare global {
@@ -169,7 +169,7 @@ export function loadItemIntoViewport(
     itemId: string,
     management?: ItemViewportManagement,
 ) {
-    if (IS_CI) {
+    if (IS_EDIT) {
         management?.loadItemIntoViewport(viewportFrame, itemId);
     } else {
         actor.SendMessage(KEY, viewportFrame, itemId);

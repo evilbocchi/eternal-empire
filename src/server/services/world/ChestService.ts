@@ -17,7 +17,7 @@ import DataService from "server/services/data/DataService";
 import LevelService from "server/services/data/LevelService";
 import ItemService from "server/services/item/ItemService";
 import { ASSETS, getSound, SOUND_EFFECTS_GROUP } from "shared/asset/GameAssets";
-import { IS_CI } from "shared/Context";
+import { IS_EDIT } from "shared/Context";
 import eat from "shared/hamster/eat";
 import Item from "shared/item/Item";
 import Crystal from "shared/items/excavation/Crystal";
@@ -310,7 +310,7 @@ export default class ChestService implements OnInit, OnStart {
             const chestLocations = chestsFolder.GetChildren();
             for (const chestLocationMarker of chestLocations) {
                 if (!chestLocationMarker.IsA("BasePart")) continue;
-                if (!IS_CI) {
+                if (!IS_EDIT) {
                     chestLocationMarker.FrontSurface = Enum.SurfaceType.Smooth;
                     chestLocationMarker.Transparency = 1;
                 }

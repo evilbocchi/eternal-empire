@@ -1,6 +1,6 @@
 import { useEffect, useMemo } from "@rbxts/react";
 import { createRoot } from "@rbxts/react-roblox";
-import { IS_CI } from "shared/Context";
+import { IS_EDIT } from "shared/Context";
 
 export default function useExternalRender({ element, parent }: { element: JSX.Element; parent: Instance }) {
     const root = useMemo(() => {
@@ -8,7 +8,7 @@ export default function useExternalRender({ element, parent }: { element: JSX.El
     }, [parent]);
     useEffect(() => {
         root.render(element);
-        if (IS_CI) {
+        if (IS_EDIT) {
             print("Rendered to", parent);
         }
         return () => root.unmount();

@@ -19,7 +19,7 @@ import { OnInit, Service } from "@flamework/core";
 import { CollectionService } from "@rbxts/services";
 import EventService from "server/services/data/EventService";
 import ItemService from "server/services/item/ItemService";
-import { IS_CI } from "shared/Context";
+import { IS_EDIT } from "shared/Context";
 import Items from "shared/items/Items";
 import Packets from "shared/Packets";
 
@@ -90,7 +90,7 @@ export default class GrabbableService implements OnInit {
             // Check if this item has already been collected
             const eventId = itemId + "_grabbed";
             if (this.eventService.isEventCompleted(eventId)) {
-                if (!IS_CI) proximityPrompt.Parent?.Destroy();
+                if (!IS_EDIT) proximityPrompt.Parent?.Destroy();
                 continue;
             }
 
@@ -107,7 +107,7 @@ export default class GrabbableService implements OnInit {
                 Packets.showItemReward.toClient(player, new Map([[itemId, 1]]));
 
                 // Remove the grabbable object from the world
-                if (!IS_CI) proximityPrompt.Parent?.Destroy();
+                if (!IS_EDIT) proximityPrompt.Parent?.Destroy();
             });
         }
     }

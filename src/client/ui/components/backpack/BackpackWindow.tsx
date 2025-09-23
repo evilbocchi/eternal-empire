@@ -13,7 +13,7 @@ import { LOCAL_PLAYER } from "client/constants";
 import GearOption, { layoutOrderFromGear } from "client/ui/components/backpack/GearOption";
 import { useDocument } from "client/ui/components/window/DocumentManager";
 import { playSound } from "shared/asset/GameAssets";
-import { IS_CI } from "shared/Context";
+import { IS_EDIT } from "shared/Context";
 import Gear from "shared/item/traits/Gear";
 import Items from "shared/items/Items";
 import Packets from "shared/Packets";
@@ -43,7 +43,7 @@ const equipGear = (itemId: string) => {
         }
     }
     let tool: Tool | undefined;
-    if (IS_CI) {
+    if (IS_EDIT) {
         tool = Items.getItem(itemId)?.MODEL?.Clone() as Tool | undefined;
     } else {
         tool = backpack?.FindFirstChild(itemId) as Tool | undefined;
@@ -154,7 +154,7 @@ export default function BackpackWindow() {
                     if (hit === undefined) return;
                     Packets.useTool.toServer(hit);
                 };
-                if (IS_CI) {
+                if (IS_EDIT) {
                     registerHit();
                 } else {
                     swingAnimation.Stopped.Once(registerHit);

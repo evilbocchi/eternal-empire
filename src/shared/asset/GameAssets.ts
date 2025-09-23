@@ -1,7 +1,7 @@
 import { Debris, ReplicatedStorage, SoundService, StarterGui } from "@rbxts/services";
 import { Environment } from "@rbxts/ui-labs";
 import { assets } from "shared/asset/AssetMap";
-import { IS_CI } from "shared/Context";
+import { IS_EDIT } from "shared/Context";
 
 declare global {
     /**
@@ -62,7 +62,7 @@ export function getSound(path: Filename<SoundAssetPath>) {
  */
 export function playSound(path: Filename<SoundAssetPath>, part?: Instance, modifier?: (sound: Sound) => void) {
     let sound = getSound(path);
-    if (IS_CI) {
+    if (IS_EDIT) {
         sound.Parent = Environment.PluginWidget; // Sounds can only play in PluginWidget when not in-game
     } else {
         sound = sound.Clone();

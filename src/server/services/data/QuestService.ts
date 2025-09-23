@@ -27,7 +27,7 @@ import DataService from "server/services/data/DataService";
 import ItemService from "server/services/item/ItemService";
 import ChatHookService from "server/services/permissions/ChatHookService";
 import { WAYPOINTS } from "shared/constants";
-import { IS_CI } from "shared/Context";
+import { IS_EDIT } from "shared/Context";
 import eat from "shared/hamster/eat";
 import Items from "shared/items/Items";
 import Packets from "shared/Packets";
@@ -82,7 +82,7 @@ export default class QuestService implements OnStart {
     }
 
     onStart() {
-        if (!Sandbox.getEnabled() && !IS_CI) {
+        if (!Sandbox.getEnabled() && !IS_EDIT) {
             // Configure waypoint objects for quest navigation
             for (const waypoint of WAYPOINTS.GetChildren()) {
                 if (!waypoint.IsA("BasePart")) continue;

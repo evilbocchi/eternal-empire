@@ -26,7 +26,7 @@ import { OnInit, Service } from "@flamework/core";
 import { Players, TextChatService } from "@rbxts/services";
 import APIExposeService from "server/services/APIExposeService";
 import Command, { CommandAPI } from "shared/commands/Command";
-import { IS_CI } from "shared/Context";
+import { IS_EDIT } from "shared/Context";
 
 declare global {
     type CommandAPI = APIExposeService["Server"] & {
@@ -56,7 +56,7 @@ export default class CommandsService implements OnInit {
      * @param command The command to register
      */
     registerCommand(command: Command) {
-        if (IS_CI) return;
+        if (IS_EDIT) return;
 
         const textChatCommand = new Instance("TextChatCommand");
         textChatCommand.PrimaryAlias = "/" + command.id;

@@ -2,7 +2,7 @@ import { Lighting, ReplicatedStorage, SoundService, TweenService, Workspace } fr
 import { Environment } from "@rbxts/ui-labs";
 import { LOCAL_PLAYER } from "client/constants";
 import { ASSETS, SOUND_EFFECTS_GROUP, getSound } from "shared/asset/GameAssets";
-import { IS_CI } from "shared/Context";
+import { IS_EDIT } from "shared/Context";
 import Packets from "shared/Packets";
 import { AREAS } from "shared/world/Area";
 
@@ -13,7 +13,7 @@ namespace SoundManager {
     export const MUSIC_GROUP = new Instance("SoundGroup");
     MUSIC_GROUP.Name = "Music";
     MUSIC_GROUP.Volume = 1;
-    MUSIC_GROUP.Parent = IS_CI ? Environment.PluginWidget : SoundService;
+    MUSIC_GROUP.Parent = IS_EDIT ? Environment.PluginWidget : SoundService;
 
     export const START_MUSIC = ASSETS.WaitForChild("JJT Money Empire!") as Sound;
 
@@ -164,7 +164,7 @@ namespace SoundManager {
         });
 
         const oceanWaves = getSound("OceanWaves.mp3");
-        oceanWaves.Parent = IS_CI ? Environment.PluginWidget : SOUND_EFFECTS_GROUP;
+        oceanWaves.Parent = IS_EDIT ? Environment.PluginWidget : SOUND_EFFECTS_GROUP;
         oceanWaves.Volume = 0;
         oceanWaves.Looped = true;
         oceanWaves.Play();

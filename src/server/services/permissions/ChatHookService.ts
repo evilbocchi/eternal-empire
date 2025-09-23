@@ -12,7 +12,7 @@
 import { Service } from "@flamework/core";
 import { OnPlayerAdded } from "server/services/ModdingService";
 import { getTextChannels } from "shared/constants";
-import { IS_CI } from "shared/Context";
+import { IS_EDIT } from "shared/Context";
 import Packets from "shared/Packets";
 
 /**
@@ -30,7 +30,7 @@ export default class ChatHookService implements OnPlayerAdded {
      * @param metadata Optional message metadata
      */
     sendPrivateMessage(player: Player, message: string, metadata?: string) {
-        if (IS_CI) return;
+        if (IS_EDIT) return;
 
         const plrChannel = this.plrChannels.get(player) ?? this.createChannel(player);
         Packets.systemMessageSent.toClient(player, plrChannel.Name, message, metadata ?? "");
@@ -43,7 +43,7 @@ export default class ChatHookService implements OnPlayerAdded {
      * @param metadata Optional message metadata
      */
     sendServerMessage(message: string, metadata?: string) {
-        if (IS_CI) return;
+        if (IS_EDIT) return;
 
         const rbxGeneral = getTextChannels().WaitForChild("RBXGeneral") as TextChannel;
         Packets.systemMessageSent.toAllClients(rbxGeneral.Name, message, metadata ?? "");
@@ -67,7 +67,7 @@ export default class ChatHookService implements OnPlayerAdded {
     }
 
     onPlayerAdded(player: Player) {
-        if (!IS_CI) {
+        if (!IS_EDIT) {
             this.createChannel(player);
         }
     }

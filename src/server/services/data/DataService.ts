@@ -4,7 +4,7 @@ import { OnStart, Service } from "@flamework/core";
 import { HttpService, Players } from "@rbxts/services";
 import { OnPlayerAdded } from "server/services/ModdingService";
 import { getNameFromUserId } from "shared/constants";
-import { IS_CI, IS_PUBLIC_SERVER, IS_SERVER, IS_SINGLE_SERVER, IS_STUDIO } from "shared/Context";
+import { IS_EDIT, IS_PUBLIC_SERVER, IS_SERVER, IS_SINGLE_SERVER, IS_STUDIO } from "shared/Context";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import { CURRENCY_DETAILS } from "shared/currency/CurrencyDetails";
 import AvailableEmpire from "shared/data/AvailableEmpire";
@@ -48,7 +48,7 @@ export default class DataService implements OnStart, OnPlayerAdded {
         let empireId: string;
 
         // Determine empire ID based on server type and environment
-        if (IS_CI) {
+        if (IS_EDIT) {
             empireId = HttpService.GenerateGUID(false);
         } else if (!IS_STUDIO || startScreenValue.Value) {
             // Production environment
@@ -73,7 +73,7 @@ export default class DataService implements OnStart, OnPlayerAdded {
         if (empireId === undefined) throw "Could not load empire ID";
 
         let empireProfile: Profile<EmpireData> | undefined;
-        if (IS_CI) {
+        if (IS_EDIT) {
             empireProfile = EmpireProfileManager.profileManager.profileStore.Mock.LoadProfileAsync(
                 empireId,
                 "ForceLoad",
@@ -256,7 +256,7 @@ export default class DataService implements OnStart, OnPlayerAdded {
         Packets.teleportToEmpire.fromClient(AvailableEmpire.teleport);
         eat(Players.PlayerRemoving.Connect(AvailableEmpire.unregisterPlayer), "Disconnect");
 
-        if (IS_SERVER && !IS_CI) {
+        if (IS_SERVER && !IS_EDIT) {
             task.spawn(() => {
                 if (IS_SINGLE_SERVER || !IS_PUBLIC_SERVER) {
                     const loop = () => {

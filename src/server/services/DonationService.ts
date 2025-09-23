@@ -13,7 +13,7 @@ import { MarketplaceService, MessagingService } from "@rbxts/services";
 import { OnPlayerAdded } from "server/services/ModdingService";
 import ChatHookService from "server/services/permissions/ChatHookService";
 import ProductService from "server/services/product/ProductService";
-import { IS_CI } from "shared/Context";
+import { IS_EDIT } from "shared/Context";
 import Packets from "shared/Packets";
 import Leaderstats from "shared/data/Leaderstats";
 import { PlayerProfileManager } from "shared/data/profile/ProfileManager";
@@ -61,7 +61,7 @@ export class DonationService implements OnStart, OnPlayerAdded {
     }
 
     onStart() {
-        if (!IS_CI) {
+        if (!IS_EDIT) {
             MessagingService.SubscribeAsync("Donation", (message) => {
                 Packets.donationGiven.toAllClients();
                 this.chatHookService.sendServerMessage(message.Data as string, "color:3,207,252");

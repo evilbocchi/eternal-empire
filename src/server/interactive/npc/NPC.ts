@@ -11,7 +11,7 @@ import {
 } from "@rbxts/services";
 import { playSound } from "shared/asset/GameAssets";
 import { getDisplayName } from "shared/constants";
-import { IS_CI, IS_STUDIO } from "shared/Context";
+import { IS_EDIT, IS_STUDIO } from "shared/Context";
 import { HotReloader, Reloadable } from "shared/hamster/HotReload";
 import Packets from "shared/Packets";
 
@@ -72,7 +72,7 @@ export default class NPC extends Reloadable<NPC> {
      * @returns The NPC instance for chaining.
      */
     load() {
-        if (IS_CI || this.id === "Empty") return;
+        if (IS_EDIT || this.id === "Empty") return;
 
         const model = NPC_MODELS?.FindFirstChild(this.id) as Model | undefined;
         if (model === undefined) return;
@@ -188,7 +188,7 @@ export default class NPC extends Reloadable<NPC> {
             }
 
             // Restore the initial model if it was replaced or removed
-            if (this.model !== undefined && this.initialModelSnapshot !== undefined && !IS_CI) {
+            if (this.model !== undefined && this.initialModelSnapshot !== undefined && !IS_EDIT) {
                 const recovered = this.initialModelSnapshot.Clone();
                 recovered.Parent = this.model.Parent;
                 this.model.Destroy();

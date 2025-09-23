@@ -20,7 +20,7 @@ import DataService from "server/services/data/DataService";
 import { OnPlayerAdded } from "server/services/ModdingService";
 import ChatHookService from "server/services/permissions/ChatHookService";
 import { getNameFromUserId } from "shared/constants";
-import { IS_CI, IS_SINGLE_SERVER } from "shared/Context";
+import { IS_EDIT, IS_SINGLE_SERVER } from "shared/Context";
 import Packets from "shared/Packets";
 
 declare global {
@@ -223,7 +223,7 @@ export default class PermissionsService implements OnStart, OnPlayerAdded {
     }
 
     onStart() {
-        if (!IS_CI) {
+        if (!IS_EDIT) {
             MessagingService.SubscribeAsync("GlobalChat", (message) => {
                 if (this.dataService.empireData.globalChat !== true) return;
                 const data = message.Data as { player: number; message: string };

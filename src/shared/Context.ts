@@ -7,11 +7,11 @@ import { RunService, Workspace } from "@rbxts/services";
 export const IS_SERVER = RunService.IsServer();
 
 /**
- * Whether the game is running in a Continuous Integration (CI) environment.
- *
- * This is true when physics simulation is not running.
+ * Whether the game is running in an "edit" environment, where the experience is not running
+ * and scripts are being run directly on the development server.
  */
-export const IS_CI = !RunService.IsRunning();
+export const IS_EDIT =
+    RunService.IsStudio() && (!RunService.IsRunning() || (RunService.IsServer() && RunService.IsClient()));
 
 /**
  * Whether the current context is Roblox Studio.
@@ -24,7 +24,7 @@ export const IS_STUDIO = RunService.IsStudio();
 export const IS_SINGLE_SERVER = game.PlaceId === 17479698702;
 
 export const IS_PUBLIC_SERVER = (() => {
-    if (IS_CI) return false;
+    if (IS_EDIT) return false;
     let key = "IsPublicServer";
     if (!IS_SERVER) return Workspace.GetAttribute(key) === true;
 

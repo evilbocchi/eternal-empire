@@ -16,7 +16,7 @@ import { OnStart, Service } from "@flamework/core";
 import { CollectionService, DataStoreService, Players } from "@rbxts/services";
 import DataService from "server/services/data/DataService";
 import { getNameFromUserId } from "shared/constants";
-import { IS_CI, IS_STUDIO } from "shared/Context";
+import { IS_EDIT, IS_STUDIO } from "shared/Context";
 import { CURRENCY_DETAILS } from "shared/currency/CurrencyDetails";
 import Leaderstats from "shared/data/Leaderstats";
 import eat from "shared/hamster/eat";
@@ -170,7 +170,7 @@ export class LeaderboardService implements OnStart {
     }
 
     onStart() {
-        if (Sandbox.getEnabled() || IS_CI) return;
+        if (Sandbox.getEnabled() || IS_EDIT) return;
 
         this.updateLeaderboards();
         eat(simpleInterval(() => this.updateLeaderboards(), 180));

@@ -1,5 +1,5 @@
 import { Workspace } from "@rbxts/services";
-import { IS_CI } from "shared/Context";
+import { IS_EDIT } from "shared/Context";
 import Item from "shared/item/Item";
 import Area from "shared/world/Area";
 
@@ -34,7 +34,7 @@ namespace ItemPlacement {
                 if (part.Name !== "Hitbox") continue;
                 const comparingModel = part.Parent;
                 if (comparingModel?.Name !== itemModel.Name) {
-                    if (IS_CI && comparingModel?.HasTag("Placing")) {
+                    if (IS_EDIT && comparingModel?.HasTag("Placing")) {
                         // Server can see item previews, ignore them
                         continue;
                     }

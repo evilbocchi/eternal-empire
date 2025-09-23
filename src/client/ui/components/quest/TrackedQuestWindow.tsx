@@ -5,7 +5,7 @@ import { useDocument } from "client/ui/components/window/DocumentManager";
 import { RobotoSlabBold } from "client/ui/GameFonts";
 import { getAsset } from "shared/asset/AssetMap";
 import { playSound } from "shared/asset/GameAssets";
-import { IS_CI } from "shared/Context";
+import { IS_EDIT } from "shared/Context";
 import { useQuestData } from "./useQuestData";
 
 /**
@@ -120,7 +120,7 @@ export default function TrackedQuestWindow() {
 
         let dummyCharacter: Part | undefined;
         let connection: RBXScriptConnection;
-        if (IS_CI) {
+        if (IS_EDIT) {
             dummyCharacter = new Instance("Part");
             dummyCharacter.Anchored = true;
             dummyCharacter.CanCollide = false;
