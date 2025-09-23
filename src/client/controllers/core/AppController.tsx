@@ -1,8 +1,16 @@
 import { Controller, OnStart } from "@flamework/core";
-
-export function Hamster() {}
+import React from "@rbxts/react";
+import { createRoot } from "@rbxts/react-roblox";
+import { ReplicatedStorage } from "@rbxts/services";
+import App from "client/ui/components/App";
 
 @Controller()
 export default class AppController implements OnStart {
-    onStart() {}
+    onStart() {
+        const container = new Instance("Folder");
+        container.Name = "AppContainer";
+        container.Parent = ReplicatedStorage;
+        const root = createRoot(container);
+        root.render(<App viewportsEnabled={true} />);
+    }
 }

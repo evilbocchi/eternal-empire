@@ -49,6 +49,8 @@ function addRoot(roots: Set<Root>, container: Instance): Root {
 
 /**
  * Entry point for the app's UI.
+ * This creates roots for each major UI section and manages their lifecycle, so
+ * do not rely on the returned JSX element for rendering anything.
  * @param viewportsEnabled Whether to enable viewports in item windows.
  */
 export default function App({ viewportsEnabled }: { viewportsEnabled: boolean }) {

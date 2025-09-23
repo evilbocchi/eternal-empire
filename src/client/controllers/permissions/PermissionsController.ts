@@ -12,9 +12,7 @@
  * @since 1.0.0
  */
 import { Controller, OnInit } from "@flamework/core";
-import CameraShaker from "@rbxts/camera-shaker";
 import { UserInputService } from "@rbxts/services";
-import EffectController from "client/controllers/world/EffectController";
 import ShakeController from "client/controllers/world/ShakeController";
 import { playSound } from "shared/asset/GameAssets";
 import { IS_STUDIO } from "shared/Context";

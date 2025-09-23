@@ -49,7 +49,7 @@ export default class DataService implements OnStart, OnPlayerAdded {
 
         // Determine empire ID based on server type and environment
         if (IS_CI) {
-            empireId = HttpService.GenerateGUID(false); // Clean empire for CI testing
+            empireId = HttpService.GenerateGUID(false);
         } else if (!IS_STUDIO || startScreenValue.Value) {
             // Production environment
             if (IS_SINGLE_SERVER) {

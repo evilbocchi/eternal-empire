@@ -3,6 +3,15 @@ import { PLAYER_GUI } from "client/constants";
 import { IS_CI } from "shared/Context";
 import eat from "shared/hamster/eat";
 
+const setParent = (instance: Instance) => {
+    if (IS_CI) {
+        instance.Parent = StarterGui;
+        eat(instance);
+    } else {
+        instance.Parent = PLAYER_GUI;
+    }
+};
+
 const createScreenGui = (name: string, displayOrder = 0): ScreenGui => {
     const screenGui = new Instance("ScreenGui");
     screenGui.IgnoreGuiInset = true;
@@ -10,12 +19,7 @@ const createScreenGui = (name: string, displayOrder = 0): ScreenGui => {
     screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling;
     screenGui.Name = name;
     screenGui.DisplayOrder = displayOrder;
-    if (IS_CI) {
-        screenGui.Parent = StarterGui;
-        eat(screenGui);
-    } else {
-        screenGui.Parent = PLAYER_GUI;
-    }
+    setParent(screenGui);
     return screenGui;
 };
 
@@ -36,17 +40,12 @@ export const PURCHASE_GUI = createScreenGui("Purchase");
 export const SHOP_GUI = (() => {
     const folder = new Instance("Folder");
     folder.Name = "ShopGui";
-    if (IS_CI) {
-        folder.Parent = StarterGui;
-        eat(folder);
-    } else {
-        folder.Parent = PLAYER_GUI;
-    }
+    setParent(folder);
     return folder;
 })();
 export const WORLD_GUI = (() => {
     const folder = new Instance("Folder");
     folder.Name = "WorldGuis";
-    folder.Parent = PLAYER_GUI;
+    setParent(folder);
     return folder;
 })();
