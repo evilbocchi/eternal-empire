@@ -1,8 +1,7 @@
-import { playSoundAtPart } from "@antivivi/vrldk";
 import React, { Fragment, useEffect, useMemo, useState } from "@rbxts/react";
-import { UpgradeActionsPanel } from "client/ui/components/upgrade/UpgradeActionsPanel";
-import { UpgradeOptionsPanel } from "client/ui/components/upgrade/UpgradeOptionsPanel";
-import { getSound } from "shared/asset/GameAssets";
+import UpgradeActionsPanel from "client/ui/components/upgrade/UpgradeActionsPanel";
+import UpgradeOptionsPanel from "client/ui/components/upgrade/UpgradeOptionsPanel";
+import { playSound } from "shared/asset/GameAssets";
 import NamedUpgrade from "shared/namedupgrade/NamedUpgrade";
 import Packets from "shared/Packets";
 
@@ -66,16 +65,15 @@ export default function UpgradeBoardGui({
     }, [selectedUpgrade, upgradeAmount, isMaxed]);
 
     // Sound feedback function
-    const playSound = (success: boolean) => {
-        const sound = success ? getSound("UpgradeBought.mp3") : getSound("Error.mp3");
-        playSoundAtPart(model.PrimaryPart, sound);
+    const playPurchaseSound = (success: boolean) => {
+        const sound = success ? playSound("UpgradeBought.mp3") : playSound("Error.mp3");
     };
 
     // Purchase handlers
     const handleBuy1 = () => {
         if (selectedUpgrade) {
             const success = Packets.buyUpgrade.toServer(selectedUpgrade.id, upgradeAmount + 1);
-            playSound(success);
+            playPurchaseSound(success);
         }
     };
 
@@ -83,14 +81,14 @@ export default function UpgradeBoardGui({
         if (selectedUpgrade) {
             const nextAmount = getNext(upgradeAmount, selectedUpgrade.step);
             const success = Packets.buyUpgrade.toServer(selectedUpgrade.id, nextAmount);
-            playSound(success);
+            playPurchaseSound(success);
         }
     };
 
     const handleBuyMax = () => {
         if (selectedUpgrade?.cap !== undefined) {
             const success = Packets.buyUpgrade.toServer(selectedUpgrade.id, selectedUpgrade.cap);
-            playSound(success);
+            playPurchaseSound(success);
         }
     };
 
@@ -105,31 +103,40 @@ export default function UpgradeBoardGui({
 
     return (
         <Fragment>
+            {/* Options Panel Surface GUI */}
             <surfacegui
                 Adornee={optionsContainer as BasePart}
                 ClipsDescendants={true}
-                LightInfluence={1}
-                MaxDistance={1000}
+                LightInfluence={0.5}
+                MaxDistance={200}
                 SizingMode={Enum.SurfaceGuiSizingMode.PixelsPerStud}
                 ZIndexBehavior={Enum.ZIndexBehavior.Sibling}
                 ResetOnSpawn={false}
+                Face={Enum.NormalId.Front}
+                PixelsPerStud={50}
             >
                 <UpgradeOptionsPanel
                     upgrades={upgrades}
                     upgradeAmounts={upgradeAmounts}
                     selectedUpgradeId={selectedUpgradeId}
-                    onSelectUpgrade={setSelectedUpgradeId}
+                    onSelectUpgrade={(upgradeId) => {
+                        setSelectedUpgradeId(upgradeId);
+                        playSound("MenuClick.mp3");
+                    }}
                 />
             </surfacegui>
 
+            {/* Actions Panel Surface GUI */}
             <surfacegui
                 Adornee={actionsContainer as BasePart}
-                ClipsDescendants={true}
-                LightInfluence={1}
-                MaxDistance={1000}
+                ClipsDescendants={false}
+                LightInfluence={0.5}
+                MaxDistance={200}
                 SizingMode={Enum.SurfaceGuiSizingMode.PixelsPerStud}
                 ZIndexBehavior={Enum.ZIndexBehavior.Sibling}
                 ResetOnSpawn={false}
+                Face={Enum.NormalId.Front}
+                PixelsPerStud={50}
             >
                 <UpgradeActionsPanel
                     selectedUpgrade={selectedUpgrade}

@@ -27,7 +27,7 @@ namespace NamedUpgrades {
             "Increases Funds gain by 4% per upgrade compounding. Every 10 upgrades multiplies the upgrade by x1.2.",
         )
         .setCap(100)
-        .setImage(getAsset("assets/MoreFunds.png"))
+        .setImage(getAsset("assets/Funds.png"))
         .setPriceFormula((amount) =>
             new CurrencyBundle().set("Funds", OnoeNum.fromSerika(1, 9).mul(new OnoeNum(1.55).pow(amount))),
         )
@@ -40,7 +40,7 @@ namespace NamedUpgrades {
             "Increases Power gain by 3% per upgrade compounding. Every 10 upgrades multiplies the upgrade by x1.2.",
         )
         .setCap(100)
-        .setImage(getAsset("assets/MorePower.png"))
+        .setImage(getAsset("assets/Power.png"))
         .setPriceFormula((amount) =>
             new CurrencyBundle().set("Power", OnoeNum.fromSerika(4, 1).mul(new OnoeNum(1.45).pow(amount))),
         )

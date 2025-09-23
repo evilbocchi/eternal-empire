@@ -2,26 +2,24 @@ import React from "@rbxts/react";
 import UpgradeOption from "client/ui/components/upgrade/UpgradeOption";
 import NamedUpgrade from "shared/namedupgrade/NamedUpgrade";
 
-interface UpgradeOptionsPanelProps {
-    upgrades: Array<NamedUpgrade>;
-    upgradeAmounts: Map<string, number>;
-    selectedUpgradeId?: string;
-    onSelectUpgrade: (upgradeId: string) => void;
-}
-
-export const UpgradeOptionsPanel: React.FC<UpgradeOptionsPanelProps> = ({
+export default function UpgradeOptionsPanel({
     upgrades,
     upgradeAmounts,
     selectedUpgradeId,
     onSelectUpgrade,
-}) => {
+}: {
+    upgrades: Array<NamedUpgrade>;
+    upgradeAmounts: Map<string, number>;
+    selectedUpgradeId?: string;
+    onSelectUpgrade: (upgradeId: string) => void;
+}) {
     return (
         <frame Size={new UDim2(1, 0, 1, 0)} BackgroundTransparency={1}>
             <uipadding
-                PaddingBottom={new UDim(0, 25)}
-                PaddingLeft={new UDim(0, 25)}
-                PaddingRight={new UDim(0, 25)}
-                PaddingTop={new UDim(0, 25)}
+                PaddingBottom={new UDim(0, 30)}
+                PaddingLeft={new UDim(0, 30)}
+                PaddingRight={new UDim(0, 30)}
+                PaddingTop={new UDim(0, 30)}
             />
             <uilistlayout
                 FillDirection={Enum.FillDirection.Horizontal}
@@ -49,4 +47,4 @@ export const UpgradeOptionsPanel: React.FC<UpgradeOptionsPanelProps> = ({
             })}
         </frame>
     );
-};
+}
