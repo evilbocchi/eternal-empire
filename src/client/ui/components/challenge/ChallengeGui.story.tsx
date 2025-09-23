@@ -6,7 +6,7 @@
 import React, { StrictMode, useState } from "@rbxts/react";
 import ReactRoblox from "@rbxts/react-roblox";
 import { CreateReactStory } from "@rbxts/ui-labs";
-import ChallengeGui, { Challenge, CurrentChallengeInfo } from "./ChallengeGui";
+import ChallengeGui, { CurrentChallengeInfo } from "./ChallengeGui";
 import ChallengeHudDisplay from "./ChallengeHudDisplay";
 
 export = CreateReactStory(
@@ -16,45 +16,51 @@ export = CreateReactStory(
         controls: {
             showChallenges: true,
             inChallenge: false,
-            challengeName: "Melting Economy I",
-            challengeDescription: "Funds gain is heavily nerfed",
             showHudDisplay: true,
         },
     },
     (props) => {
-        const [challenges] = useState<Challenge[]>([
-            {
-                id: "melting-economy-1",
-                name: "Melting Economy I",
-                description: "Funds gain is heavily nerfed by ^0.95.",
-                notice: "A Skillification will be simulated. Your progress is not lost.",
-                requirement: "Requirement: Purchase Admiration or Codependence",
-                reward: "Boost: x$1 > x$2",
-                colors: {
-                    primary: Color3.fromRGB(170, 255, 151),
-                    secondary: Color3.fromRGB(0, 170, 255),
-                },
-                isUnlocked: false,
-            },
-            {
-                id: "burning-bridges",
-                name: "Burning Bridges II",
-                description: "All droplets take 50% longer to process.",
-                notice: "Challenge mode activated. Progress is preserved.",
-                requirement: "Requirement: Complete Melting Economy I",
-                reward: "Boost: x$2 > x$3",
-                colors: {
-                    primary: Color3.fromRGB(255, 151, 151),
-                    secondary: Color3.fromRGB(255, 70, 70),
-                },
-                isUnlocked: true,
-            },
-        ]);
+        const [challenges] = useState<Map<string, ChallengeInfo>>(
+            new Map([
+                [
+                    "melting-economy-1",
+                    {
+                        name: "Melting Economy I",
+                        description: "Funds gain is heavily nerfed by ^0.95.",
+                        requirement: "Purchase Admiration or Codependence",
+                        notice: "A Skillification will be simulated. Your progress is not lost.",
+                        reward: "Boost: x$1 > x$2",
+                        r1: 170,
+                        g1: 255,
+                        b1: 151,
+                        r2: 0,
+                        g2: 170,
+                        b2: 255,
+                    },
+                ],
+                [
+                    "burning-bridges-2",
+                    {
+                        name: "Burning Bridges II",
+                        description: "All droplets take 50% longer to process.",
+                        requirement: "Purchase Melting Economy I",
+                        notice: "Challenge mode activated. Progress is preserved.",
+                        reward: "Boost: x$2 > x$3",
+                        r1: 255,
+                        g1: 151,
+                        b1: 151,
+                        r2: 255,
+                        g2: 70,
+                        b2: 70,
+                    },
+                ],
+            ]),
+        );
 
         const currentChallenge: CurrentChallengeInfo | undefined = props.controls.inChallenge
             ? {
-                  name: props.controls.challengeName,
-                  description: props.controls.challengeDescription,
+                  name: challenges.get("melting-economy-1")!.name,
+                  description: challenges.get("melting-economy-1")!.description,
                   colors: {
                       primary: Color3.fromRGB(170, 255, 151),
                       secondary: Color3.fromRGB(0, 170, 255),
@@ -70,7 +76,7 @@ export = CreateReactStory(
             print("Quitting challenge");
         };
 
-        const displayChallenges = props.controls.showChallenges ? challenges : [];
+        const displayChallenges = props.controls.showChallenges ? challenges : new Map<string, ChallengeInfo>();
 
         return (
             <StrictMode>
@@ -78,13 +84,9 @@ export = CreateReactStory(
                     {/* Challenge HUD Display */}
                     {props.controls.showHudDisplay && props.controls.inChallenge && (
                         <ChallengeHudDisplay
-                            challengeName={props.controls.challengeName}
-                            challengeDescription={props.controls.challengeDescription}
-                            challengeColors={{
-                                primary: Color3.fromRGB(170, 255, 151),
-                                secondary: Color3.fromRGB(0, 170, 255),
-                            }}
-                            visible={true}
+                            challengeName={currentChallenge!.name}
+                            challengeDescription={currentChallenge!.description}
+                            challengeColors={currentChallenge!.colors}
                         />
                     )}
 
@@ -105,9 +107,7 @@ export = CreateReactStory(
                         Text={`Controls:
 - Show Challenges: ${props.controls.showChallenges ? "Yes" : "No"}
 - In Challenge: ${props.controls.inChallenge ? "Yes" : "No"}
-- Show HUD Display: ${props.controls.showHudDisplay ? "Yes" : "No"}
-- Challenge: ${props.controls.challengeName}
-- Description: ${props.controls.challengeDescription}`}
+- Show HUD Display: ${props.controls.showHudDisplay ? "Yes" : "No"}`}
                         TextColor3={Color3.fromRGB(255, 255, 255)}
                         TextScaled={true}
                         TextWrapped={true}

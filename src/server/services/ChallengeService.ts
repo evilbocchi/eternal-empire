@@ -144,16 +144,16 @@ export class ChallengeService implements OnStart {
     }
 
     /**
-     * Returns the requirement label for a challenge.
+     * Returns the task label for a challenge.
      * @param challenge The challenge details.
      */
-    getRequirementLabel(challenge: ChallengeDetails) {
+    getTaskLabel(challenge: ChallengeDetails) {
         if (typeIs(challenge.goal, "table")) {
             const builder = new StringBuilder("Get ");
             (challenge.goal as Item[]).forEach((item, i) => builder.append(i === 0 ? item.name : "/" + item.name));
             return builder.toString();
         }
-        return "No requirement";
+        return "No task";
     }
 
     /**
@@ -176,36 +176,11 @@ export class ChallengeService implements OnStart {
     refreshCurrentChallenge() {
         const challengeId = this.dataService.empireData.currentChallenge as ChallengeId | undefined;
         if (challengeId === undefined) {
-            Packets.currentChallenge.set({
-                name: "",
-                r1: 0,
-                g1: 0,
-                b1: 0,
-                r2: 0,
-                g2: 0,
-                b2: 0,
-                description: "",
-            });
+            Packets.currentChallenge.set("");
             for (const [_, id] of CHALLENGE_UPGRADES) this.namedUpgradeService.setUpgradeAmount(id, 0);
         } else {
-            const challenge = CHALLENGES[challengeId];
-            const requirement = "Requirement: " + this.getRequirementLabel(challenge);
             const currentLevel = this.getChallengeLevel(challengeId);
-            const title = this.getTitleLabel(challenge, challengeId, currentLevel);
-
-            const colors = challenge.color.Keypoints;
-            const c1 = colors[0].Value;
-            const c2 = colors[1].Value;
-            Packets.currentChallenge.set({
-                name: title,
-                r1: c1.R,
-                g1: c1.G,
-                b1: c1.B,
-                r2: c2.R,
-                g2: c2.G,
-                b2: c2.B,
-                description: challenge.description(currentLevel) + "\n" + requirement,
-            });
+            Packets.currentChallenge.set(challengeId);
             for (const [id, upgId] of CHALLENGE_UPGRADES)
                 this.namedUpgradeService.setUpgradeAmount(upgId, id === challengeId ? currentLevel : 0);
         }
@@ -329,6 +304,7 @@ export class ChallengeService implements OnStart {
      */
     refreshChallenges() {
         let i = 0;
+        const infoPerChallenge = new Map<string, ChallengeInfo>();
         for (const [key, challenge] of pairs(CHALLENGES)) {
             const currentLevel = this.getChallengeLevel(key);
             if (currentLevel > challenge.cap) continue;
@@ -336,8 +312,27 @@ export class ChallengeService implements OnStart {
                 const upgradeId = REWARD_UPGRADES.get(key);
                 if (upgradeId !== undefined) this.namedUpgradeService.setUpgradeAmount(upgradeId, currentLevel - 1);
             }
+            const title = this.getTitleLabel(challenge, key, currentLevel);
+            const colors = challenge.color.Keypoints;
+            const c1 = colors[0].Value;
+            const c2 = colors[1].Value;
+
+            infoPerChallenge.set(key, {
+                name: title,
+                r1: c1.R * 255,
+                g1: c1.G * 255,
+                b1: c1.B * 255,
+                r2: c2.R * 255,
+                g2: c2.G * 255,
+                b2: c2.B * 255,
+                description: challenge.description(currentLevel),
+                task: this.getTaskLabel(challenge),
+                notice: this.getNotice(challenge),
+                reward: this.getRewardLabel(challenge, currentLevel),
+            });
             ++i;
         }
+        Packets.challenges.set(infoPerChallenge);
         this.refreshCurrentChallenge();
     }
 

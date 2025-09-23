@@ -1,42 +1,21 @@
-/**
- * @fileoverview ChallengeManager handles challenge state and integration with the packets system.
- * Manages the current challenge, available challenges, and user interactions.
- */
-
-import React, { Fragment } from "@rbxts/react";
-import ChallengeGui, { Challenge, CurrentChallengeInfo } from "./ChallengeGui";
+import React from "@rbxts/react";
+import useProperty from "client/ui/hooks/useProperty";
 import Packets from "shared/Packets";
 import { playSound } from "shared/asset/GameAssets";
-
-// Sample challenge data - this would typically come from your game data
-const sampleChallenges: Challenge[] = [
-    {
-        id: "melting-economy-1",
-        name: "Melting Economy I",
-        description: "Funds gain is heavily nerfed by ^0.95.",
-        notice: "A Skillification will be simulated. Your progress is not lost.",
-        requirement: "Requirement: Purchase Admiration or Codependence",
-        reward: "Boost: x$1 > x$2",
-        colors: {
-            primary: Color3.fromRGB(170, 255, 151),
-            secondary: Color3.fromRGB(0, 170, 255),
-        },
-        isUnlocked: false,
-    },
-    // Add more challenges as needed
-];
+import ChallengeGui, { CurrentChallengeInfo } from "./ChallengeGui";
 
 /**
  * ChallengeManager component that manages challenge state and UI
  */
 export default function ChallengeManager() {
-    const [challenges, setChallenges] = React.useState<Challenge[]>(sampleChallenges);
+    const challengeInfos = useProperty(Packets.challenges);
     const [currentChallenge, setCurrentChallenge] = React.useState<CurrentChallengeInfo | undefined>(undefined);
 
     // Listen for current challenge updates
     React.useEffect(() => {
-        const connection = Packets.currentChallenge.observe((challengeInfo) => {
-            if (challengeInfo.name === "") {
+        const connection = Packets.currentChallenge.observe((key) => {
+            const challengeInfo = challengeInfos.get(key);
+            if (!challengeInfo || key === "") {
                 setCurrentChallenge(undefined);
                 return;
             }
@@ -87,14 +66,9 @@ export default function ChallengeManager() {
         Packets.quitChallenge.toServer();
     };
 
-    // Don't render if no challenges and not in a challenge
-    if (challenges.size() === 0 && !currentChallenge) {
-        return <Fragment />;
-    }
-
     return (
         <ChallengeGui
-            challenges={challenges}
+            challenges={challengeInfos}
             currentChallenge={currentChallenge}
             onStartChallenge={handleStartChallenge}
             onQuitChallenge={handleQuitChallenge}

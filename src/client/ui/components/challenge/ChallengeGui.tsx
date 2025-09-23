@@ -3,40 +3,27 @@ import { RobotoSlabBold, RobotoSlabExtraBold, RobotoSlabHeavy, RobotoSlabMedium 
 import { getAsset } from "shared/asset/AssetMap";
 import ChallengesBoard from "shared/world/nodes/ChallengesBoard";
 
-interface Challenge {
-    id: string;
-    name: string;
-    description: string;
-    notice: string;
-    requirement: string;
-    reward: string;
-    colors: {
-        primary: Color3;
-        secondary: Color3;
-    };
-    isUnlocked: boolean;
-}
-
-interface CurrentChallengeInfo {
+export interface CurrentChallengeInfo {
     name: string;
     description: string;
     colors: {
         primary: Color3;
         secondary: Color3;
     };
-}
-
-interface ChallengeGuiProps {
-    challenges: Challenge[];
-    currentChallenge?: CurrentChallengeInfo;
-    onStartChallenge: (challengeId: string) => void;
-    onQuitChallenge: () => void;
 }
 
 /**
  * Individual challenge option component
  */
-function ChallengeOption({ challenge, onStart }: { challenge: Challenge; onStart: (id: string) => void }) {
+function ChallengeOption({
+    key,
+    challenge,
+    onStart,
+}: {
+    key: string;
+    challenge: ChallengeInfo;
+    onStart: (id: string) => void;
+}) {
     const [confirmationState, setConfirmationState] = React.useState<{
         showConfirmation: boolean;
         lastClickTime: number;
@@ -47,13 +34,16 @@ function ChallengeOption({ challenge, onStart }: { challenge: Challenge; onStart
 
         if (confirmationState.showConfirmation && currentTime - confirmationState.lastClickTime < 3) {
             // Confirmed start
-            onStart(challenge.id);
+            onStart(key);
             setConfirmationState({ showConfirmation: false, lastClickTime: currentTime });
         } else {
             // Show confirmation
             setConfirmationState({ showConfirmation: true, lastClickTime: currentTime });
         }
     };
+
+    const primaryColor = Color3.fromRGB(challenge.r1, challenge.g1, challenge.b1);
+    const secondaryColor = Color3.fromRGB(challenge.r2, challenge.g2, challenge.b2);
 
     return (
         <frame BackgroundTransparency={1} Size={new UDim2(1, 0, 0, 150)}>
@@ -73,8 +63,8 @@ function ChallengeOption({ challenge, onStart }: { challenge: Challenge; onStart
                 <uigradient
                     Color={
                         new ColorSequence([
-                            new ColorSequenceKeypoint(0, challenge.colors.primary),
-                            new ColorSequenceKeypoint(1, challenge.colors.secondary),
+                            new ColorSequenceKeypoint(0, primaryColor),
+                            new ColorSequenceKeypoint(1, secondaryColor),
                         ])
                     }
                 />
@@ -199,8 +189,8 @@ function ChallengeOption({ challenge, onStart }: { challenge: Challenge; onStart
                     FontFace={RobotoSlabMedium}
                     LayoutOrder={99}
                     Size={new UDim2(1, 0, 0, 0)}
-                    Text={challenge.requirement}
-                    TextColor3={challenge.isUnlocked ? Color3.fromRGB(126, 255, 145) : Color3.fromRGB(255, 0, 0)}
+                    Text={`Task: ${challenge.task}`}
+                    TextColor3={Color3.fromRGB(126, 255, 145)}
                     TextScaled={true}
                     TextStrokeTransparency={0}
                     TextWrapped={true}
@@ -370,11 +360,21 @@ export default function ChallengeGui({
     currentChallenge,
     onStartChallenge,
     onQuitChallenge,
-}: ChallengeGuiProps) {
+}: {
+    challenges: Map<string, ChallengeInfo>;
+    currentChallenge?: CurrentChallengeInfo;
+    onStartChallenge: (challengeId: string) => void;
+    onQuitChallenge: () => void;
+}) {
     const isInChallenge = currentChallenge !== undefined;
 
     if (!isInChallenge && challenges.size() === 0) {
         return <Fragment />;
+    }
+
+    const challengeOptions = new Array<JSX.Element>();
+    for (const [key, challenge] of challenges) {
+        challengeOptions.push(<ChallengeOption key={key} challenge={challenge} onStart={onStartChallenge} />);
     }
 
     return (
@@ -422,9 +422,7 @@ export default function ChallengeGui({
                         SortOrder={Enum.SortOrder.LayoutOrder}
                     />
 
-                    {challenges.map((challenge) => (
-                        <ChallengeOption key={challenge.id} challenge={challenge} onStart={onStartChallenge} />
-                    ))}
+                    {challengeOptions}
                 </scrollingframe>
             )}
 
@@ -435,5 +433,3 @@ export default function ChallengeGui({
         </surfacegui>
     );
 }
-
-export type { Challenge, CurrentChallengeInfo };

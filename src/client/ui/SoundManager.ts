@@ -156,7 +156,7 @@ namespace SoundManager {
             }
         });
         const challengeConnection = Packets.currentChallenge.observe((challenge) => {
-            inChallenge = challenge.name !== "";
+            inChallenge = challenge !== "" && challenge !== undefined;
             if (ready === true) refreshMusic(true);
         });
         const areaConnection = LOCAL_PLAYER.GetAttributeChangedSignal("Area").Connect(() => {

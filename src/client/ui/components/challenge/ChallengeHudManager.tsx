@@ -4,40 +4,26 @@
  */
 
 import React, { Fragment } from "@rbxts/react";
-import ChallengeHudDisplay from "./ChallengeHudDisplay";
+import useProperty from "client/ui/hooks/useProperty";
 import Packets from "shared/Packets";
-
-interface CurrentChallengeHudInfo {
-    name: string;
-    description: string;
-    colors: {
-        primary: Color3;
-        secondary: Color3;
-    };
-}
-
+import ChallengeHudDisplay from "./ChallengeHudDisplay";
 /**
  * ChallengeHudManager component that manages just the HUD display for challenges
  */
 export default function ChallengeHudManager() {
-    const [currentChallenge, setCurrentChallenge] = React.useState<CurrentChallengeHudInfo | undefined>(undefined);
+    const challengeInfos = useProperty(Packets.challenges);
+    const [currentChallenge, setCurrentChallenge] = React.useState<ChallengeInfo | undefined>(undefined);
 
     // Listen for current challenge updates
     React.useEffect(() => {
-        const connection = Packets.currentChallenge.observe((challengeInfo) => {
-            if (challengeInfo.name === "") {
+        const connection = Packets.currentChallenge.observe((key) => {
+            if (key === "") {
                 setCurrentChallenge(undefined);
                 return;
             }
+            const challengeInfo = challengeInfos.get(key);
 
-            setCurrentChallenge({
-                name: challengeInfo.name,
-                description: challengeInfo.description,
-                colors: {
-                    primary: new Color3(challengeInfo.r1, challengeInfo.g1, challengeInfo.b1),
-                    secondary: new Color3(challengeInfo.r2, challengeInfo.g2, challengeInfo.b2),
-                },
-            });
+            setCurrentChallenge(challengeInfo);
         });
 
         return () => {
@@ -45,17 +31,18 @@ export default function ChallengeHudManager() {
         };
     }, []);
 
+    if (!currentChallenge) {
+        return <Fragment />;
+    }
+
     return (
         <ChallengeHudDisplay
-            challengeName={currentChallenge?.name || ""}
-            challengeDescription={currentChallenge?.description || ""}
-            challengeColors={
-                currentChallenge?.colors || {
-                    primary: Color3.fromRGB(255, 255, 255),
-                    secondary: Color3.fromRGB(255, 255, 255),
-                }
-            }
-            visible={currentChallenge !== undefined}
+            challengeName={currentChallenge.name}
+            challengeDescription={currentChallenge.description}
+            challengeColors={{
+                primary: Color3.fromRGB(currentChallenge.r1, currentChallenge.g1, currentChallenge.b1),
+                secondary: Color3.fromRGB(currentChallenge.r2, currentChallenge.g2, currentChallenge.b2),
+            }}
         />
     );
 }

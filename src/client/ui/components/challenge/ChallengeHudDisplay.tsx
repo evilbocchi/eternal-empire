@@ -1,20 +1,5 @@
-/**
- * @fileoverview ChallengeHudDisplay shows the current challenge information on the HUD.
- * This was previously part of TrackedQuestWindow but is now a separate component.
- */
-
-import React, { Fragment } from "@rbxts/react";
+import React from "@rbxts/react";
 import { RobotoSlabBold } from "client/ui/GameFonts";
-
-interface ChallengeHudDisplayProps {
-    challengeName: string;
-    challengeDescription: string;
-    challengeColors: {
-        primary: Color3;
-        secondary: Color3;
-    };
-    visible: boolean;
-}
 
 /**
  * Displays current challenge information as a HUD overlay
@@ -23,12 +8,14 @@ export default function ChallengeHudDisplay({
     challengeName,
     challengeDescription,
     challengeColors,
-    visible,
-}: ChallengeHudDisplayProps) {
-    if (!visible) {
-        return <Fragment />;
-    }
-
+}: {
+    challengeName: string;
+    challengeDescription: string;
+    challengeColors: {
+        primary: Color3;
+        secondary: Color3;
+    };
+}) {
     return (
         <frame
             AnchorPoint={new Vector2(0.5, 0)}

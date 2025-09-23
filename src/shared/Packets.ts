@@ -33,6 +33,20 @@ declare global {
         position: Vector3;
         rotation: DataType.u16;
     };
+
+    type ChallengeInfo = {
+        name: string;
+        r1: DataType.u8;
+        g1: DataType.u8;
+        b1: DataType.u8;
+        r2: DataType.u8;
+        g2: DataType.u8;
+        b2: DataType.u8;
+        description: string;
+        task: string;
+        notice: string;
+        reward: string;
+    };
 }
 
 const unloadedSettings = table.clone(PlayerProfileTemplate.settings);
@@ -127,16 +141,8 @@ namespace Packets {
     export const autoloadSetup = packet<(name: string) => void>();
     export const startChallenge = packet<(challenge: string) => void>();
     export const quitChallenge = packet<() => void>();
-    export const currentChallenge = property<{
-        name: string;
-        r1: DataType.f32;
-        g1: DataType.f32;
-        b1: DataType.f32;
-        r2: DataType.f32;
-        g2: DataType.f32;
-        b2: DataType.f32;
-        description: string;
-    }>();
+    export const challenges = property<Map<string, ChallengeInfo>>(new Map());
+    export const currentChallenge = property<string>();
     export const challengeCompleted = packet<(challenge: string, rewardLabel: string) => void>();
 
     // areas
