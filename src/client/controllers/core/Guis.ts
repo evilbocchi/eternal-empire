@@ -40,6 +40,7 @@ export const PURCHASE_GUI = createScreenGui("Purchase");
 export const LEVELUP_GUI = createScreenGui("LevelUp", 5);
 export const QUESTCOMPLETION_GUI = createScreenGui("QuestCompletion", 6);
 export const CHALLENGECOMPLETION_GUI = createScreenGui("ChallengeCompletion", 8);
+export const CHESTLOOT_GUI = createScreenGui("ChestLoot", 9);
 export const CHALLENGE_GUI = createScreenGui("Challenge", 7);
 export const CHALLENGE_HUD_GUI = createScreenGui("ChallengeHud", 4);
 export const SHOP_GUI = (() => {
