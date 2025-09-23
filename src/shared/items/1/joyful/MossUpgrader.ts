@@ -15,7 +15,7 @@ export = new Item(script.Name)
     .setRequiredItemAmount(EnchantedGrass, 20)
     .setRequiredItemAmount(CorruptedGrass, 5)
     .setRequiredItemAmount(Jade, 1)
-    .setCreator("supergirlygamer8o")
+    .setCreator("superGirlygamer8o")
     .addPlaceableArea("BarrenIslands", "SlamoVillage")
     .persists()
 

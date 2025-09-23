@@ -55,4 +55,4 @@ If you responsibly report a real exploit, you can get your name here (or stay an
 
 ---
 
-Thanks for keeping JME (mostly) unbusted! 🚀
+Thanks for keeping jme (mostly) unbusted! 🚀

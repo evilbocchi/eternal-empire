@@ -1,4 +1,6 @@
+import SerikaNum from "@antivivi/serikanum";
 import React, { useCallback, useEffect, useState } from "@rbxts/react";
+import { LOCAL_PLAYER } from "client/constants";
 import HotkeyManager, { HOTKEY_BINDINGS } from "client/ui/components/hotkeys/HotkeyManager";
 import useHotkeyWithTooltip from "client/ui/components/hotkeys/useHotkeyWithTooltip";
 import IconButton from "client/ui/components/IconButton";
@@ -7,12 +9,9 @@ import SettingSection from "client/ui/components/settings/SettingSection";
 import SettingToggle from "client/ui/components/settings/SettingToggle";
 import useSingleDocument from "client/ui/components/sidebar/useSingleDocumentWindow";
 import TechWindow from "client/ui/components/window/TechWindow";
-import useProperty from "client/ui/hooks/useProperty";
 import { getAsset } from "shared/asset/AssetMap";
-import { playSound } from "shared/asset/GameAssets";
 import Packets from "shared/Packets";
 import SingleDocumentManager from "../sidebar/SingleDocumentManager";
-import SerikaNum from "@antivivi/serikanum";
 
 export function SettingsButton() {
     const tooltipProps = useHotkeyWithTooltip({

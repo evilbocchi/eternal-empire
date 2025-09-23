@@ -74,7 +74,7 @@ function ChallengeOption({
             <imagelabel
                 AnchorPoint={new Vector2(0, 1)}
                 BackgroundTransparency={1}
-                Image={getAsset("assets/SlantedRight.png")}
+                Image={getAsset("assets/challenge/ChallengeOptionBackground.png")}
                 ImageColor3={Color3.fromRGB(0, 0, 0)}
                 ImageTransparency={0.6}
                 Position={new UDim2(0, 2, 1, 0)}
@@ -83,7 +83,7 @@ function ChallengeOption({
             >
                 <imagelabel
                     BackgroundTransparency={1}
-                    Image={getAsset("assets/WrinkledTexture.png")}
+                    Image={getAsset("assets/challenge/ChallengeOptionOverlay.png")}
                     ImageTransparency={0.95}
                     Size={new UDim2(1, 0, 1, 0)}
                     ZIndex={-2}

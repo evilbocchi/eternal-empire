@@ -6,6 +6,7 @@
  * Works across multiple React render cycles using static methods.
  */
 
+import Signal from "@antivivi/lemon-signal";
 import { useEffect, useState } from "@rbxts/react";
 import HotkeyManager from "client/ui/components/hotkeys/HotkeyManager";
 import eat from "shared/hamster/eat";
@@ -31,6 +32,7 @@ export interface DocumentInfo {
  */
 namespace DocumentManager {
     export const INFO_PER_DOCUMENT = new Map<string, DocumentInfo>();
+    export const visibilityChanged = new Signal<(id: string, visible: boolean) => void>();
 
     /**
      * Registers a new document with the document manager, allowing it to be tracked and managed
@@ -58,6 +60,7 @@ namespace DocumentManager {
     export function setVisible(id: string, visible: boolean) {
         const documentInfo = INFO_PER_DOCUMENT.get(id);
         if (!documentInfo) return false;
+        visibilityChanged.fire(id, visible);
         documentInfo.setVisible(visible);
         return true;
     }

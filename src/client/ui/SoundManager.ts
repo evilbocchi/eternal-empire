@@ -100,10 +100,9 @@ namespace SoundManager {
     export function refreshMusic(force?: boolean) {
         let retrieved: Sound | undefined;
         let area: AreaId | undefined;
-        // if (START_WINDOW.Parent === PLAYER_GUI) { TODO
-        //     retrieved = START_MUSIC;
-        // } else {
-        // }
+        if (LOCAL_PLAYER.GetAttribute("Start") === true) {
+            retrieved = START_MUSIC;
+        }
         area = LOCAL_PLAYER.GetAttribute("Area") as AreaId;
 
         if (retrieved === playing && retrieved !== undefined) return;

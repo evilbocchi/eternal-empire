@@ -24,12 +24,13 @@ const createScreenGui = (name: string, displayOrder = 0): ScreenGui => {
 };
 
 export const HAMSTER_GUI = createScreenGui("Hamster", 10);
+export const START_GUI = createScreenGui("Start", 20);
 export const MAIN_LAYOUT_GUI = createScreenGui("MainLayout");
 export const CLICK_SPARKS_GUI = createScreenGui("ClickSparks", 2);
 export const TOOLTIPS_GUI = createScreenGui("Tooltips", 3);
 export const DIALOGUE_GUI = createScreenGui("Dialogue", 1);
 export const BALANCE_GUI = createScreenGui("Balance");
-export const BUILD_GUI = createScreenGui("BuildManager");
+export const BUILD_GUI = createScreenGui("Build");
 export const SETTINGS_GUI = createScreenGui("Settings");
 export const INVENTORY_GUI = createScreenGui("Inventory");
 export const LOGS_GUI = createScreenGui("Logs");

@@ -2,7 +2,7 @@
   <img width="350" src="assets/Logo.png" href="https://www.roblox.com/games/16438564807/JJT-Money-Empire">
 </p>
 
-# JME
+# jme
 
 [![Continuous Integration](https://github.com/evilbocchi/jme/actions/workflows/ci.yml/badge.svg?branch=main&event=push)](https://github.com/evilbocchi/jme/actions/workflows/ci.yml)
 [![GitHub](https://img.shields.io/github/release/evilbocchi/jme.svg)](https://github.com/evilbocchi/jme/releases/latest)
@@ -27,7 +27,7 @@ However, note that we strive to maintain things in a stable state. As such, chan
 
 > If you are using VS Code, an [automatic task](.vscode/tasks.json) is run when opening the project folder that sets up the development environment for you.
 
-To set up the development environment for JME, follow these steps:
+To set up the development environment for jme, follow these steps:
 
 1. Clone the repository:
     ```sh
@@ -53,7 +53,7 @@ To set up the development environment for JME, follow these steps:
 
 ## Contributing
 
-We warmly welcome contributions to improve JME! To contribute:
+We warmly welcome contributions to improve jme! To contribute:
 
 1. Fork the repository.
 2. Create a new branch for your feature or bugfix.

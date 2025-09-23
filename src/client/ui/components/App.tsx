@@ -22,6 +22,7 @@ import {
     STATS_GUI,
     TOOLTIPS_GUI,
     WORLD_GUI,
+    START_GUI,
 } from "client/controllers/core/Guis";
 import BackpackWindow from "client/ui/components/backpack/BackpackWindow";
 import BalanceWindow from "client/ui/components/balance/BalanceWindow";
@@ -52,6 +53,7 @@ import TooltipWindow from "client/ui/components/tooltip/TooltipWindow";
 import WorldRenderer from "client/ui/components/world/WorldRenderer";
 import { setVisibilityMain } from "client/ui/hooks/useVisibility";
 import SoundManager from "client/ui/SoundManager";
+import StartWindow from "client/ui/components/start/StartWindow";
 
 function addRoot(roots: Set<Root>, container: Instance): Root {
     const root = createRoot(container);
@@ -70,6 +72,7 @@ export default function App({ viewportsEnabled }: { viewportsEnabled: boolean })
 
     useEffect(() => {
         const roots = new Set<Root>();
+        addRoot(roots, START_GUI).render(<StartWindow />);
         addRoot(roots, MAIN_LAYOUT_GUI).render(
             <Fragment>
                 <PositionManager />

@@ -18,7 +18,6 @@
  *
  * Name changes include visual/audio effects and server notifications.
  *
- * @author JME Development Team
  * @since 1.0.0
  */
 

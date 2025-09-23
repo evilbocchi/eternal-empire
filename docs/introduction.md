@@ -4,11 +4,11 @@ title: Introduction
 
 # Introduction
 
-**JME (JJT Money Empire)** is a Roblox game and open-source project where players build and manage their own money-making empires in the world of Obbysia. The game blends tycoon mechanics, creative building, and RPG-style progression, offering a unique experience that rewards both strategic planning and exploration.
+**jme** is a Roblox game and open-source project where players build and manage their own money-making empires in the world of Obbysia. The game blends tycoon mechanics, creative building, and RPG-style progression, offering a unique experience that rewards both strategic planning and exploration.
 
-## What is JME?
+## What is jme?
 
-JME challenges players to:
+jme challenges players to:
 - **Build and expand** their empires using a wide variety of items, tools, and upgraders.
 - **Interact with NPCs** who provide quests, lore, and unique upgrades.
 - **Progress through difficulties** inspired by the EJT Difficulty Chart, unlocking new areas and mechanics as they advance.
@@ -18,7 +18,7 @@ The game is under active development, with frequent updates, new content, and on
 
 ## Project Structure
 
-JME is built with TypeScript and designed for modularity and extensibility:
+jme is built with TypeScript and designed for modularity and extensibility:
 - **Items, NPCs, and upgrades** are organized by type and category in the `src/shared/items`, `src/shared/npcs`, and `src/shared/upgrades` folders.
 - **Each file** typically exports a single object or class instance, using method chaining for configuration (e.g., `.setName()`, `.setDescription()`, `.setDifficulty()`).
 - **Custom types and classes** such as `Item`, `NPC`, `CurrencyBundle`, and `Difficulty` provide a robust foundation for gameplay systems.
@@ -50,4 +50,4 @@ For a step-by-step guide to contributing, see [CONTRIBUTING.md](../CONTRIBUTING.
 
 ## License
 
-JME is licensed under the Creative Commons Attribution-NonCommercial 4.0 International License. You are free to use, share, and modify the code for personal or non-commercial purposes. Commercial use is not permitted. See [LICENSE](../LICENSE) for details.
+jme is licensed under the Creative Commons Attribution-NonCommercial 4.0 International License. You are free to use, share, and modify the code for personal or non-commercial purposes. Commercial use is not permitted. See [LICENSE](../LICENSE) for details.

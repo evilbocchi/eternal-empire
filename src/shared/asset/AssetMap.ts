@@ -88,7 +88,6 @@ export const assets = {
   "assets/Skill.png": "rbxassetid://125836127334422",
   "assets/SkilledMining.png": "rbxassetid://94954014719981",
   "assets/Skillification.png": "rbxassetid://112143941242972",
-  "assets/SlantedRight.png": "rbxassetid://106234955216723",
   "assets/Spark.png": "rbxassetid://107747327911072",
   "assets/Speed.png": "rbxassetid://114665147438677",
   "assets/Stamina.png": "rbxassetid://134628132514261",
@@ -98,11 +97,12 @@ export const assets = {
   "assets/Vignette.png": "rbxassetid://116504550232726",
   "assets/Winification.png": "rbxassetid://89833078760947",
   "assets/Wins.png": "rbxassetid://105073626469266",
-  "assets/WrinkledTexture.png": "rbxassetid://122627994387562",
   "assets/YouJoined.png": "rbxassetid://99376557633527",
   "assets/area/BarrenIslandsLandscape.png": "rbxassetid://122983813185796",
   "assets/area/SkyPavilionLandscape.png": "rbxassetid://138394732545720",
   "assets/area/SlamoVillageLandscape.png": "rbxassetid://125875327366235",
+  "assets/challenge/ChallengeOptionBackground.png": "rbxassetid://106234955216723",
+  "assets/challenge/ChallengeOptionOverlay.png": "rbxassetid://122627994387562",
   "assets/indexing/Charger.png": "rbxassetid://128831358934458",
   "assets/indexing/Clear.png": "rbxassetid://111124179228986",
   "assets/indexing/Conveyor.png": "rbxassetid://120185568278806",
@@ -174,6 +174,9 @@ export const assets = {
   "assets/sounds/UnlockItem.mp3": "rbxassetid://86492937282933",
   "assets/sounds/Unplace.mp3": "rbxassetid://101203930114593",
   "assets/sounds/UpgradeBought.mp3": "rbxassetid://80736831159506",
+  "assets/start/MenuOptionBackground.png": "rbxassetid://89276614000567",
+  "assets/start/MenuOptionOverlay.png": "rbxassetid://80583428762513",
+  "assets/start/SideBackground.png": "rbxassetid://126588160544158",
 } as const;
 
 export function getAsset(path: keyof typeof assets): string {

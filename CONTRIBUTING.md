@@ -1,6 +1,6 @@
-# Contributing to JME
+# Contributing to jme
 
-Thank you for your interest in contributing! We welcome all contributions that help improve JME.
+Thank you for your interest in contributing! We welcome all contributions that help improve jme.
 
 ## Getting Started
 
@@ -43,4 +43,4 @@ Please be respectful and follow our [Code of Conduct](CODE_OF_CONDUCT.md).
 
 ---
 
-Thank you for helping make JME better!
+Thank you for helping make jme better!
