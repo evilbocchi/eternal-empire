@@ -37,6 +37,8 @@ export const QUESTS_GUI = createScreenGui("Quests");
 export const BACKPACK_GUI = createScreenGui("Backpack");
 export const STATS_GUI = createScreenGui("Stats");
 export const PURCHASE_GUI = createScreenGui("Purchase");
+export const LEVELUP_GUI = createScreenGui("LevelUp", 5);
+export const QUESTCOMPLETION_GUI = createScreenGui("QuestCompletion", 6);
 export const SHOP_GUI = (() => {
     const folder = new Instance("Folder");
     folder.Name = "ShopGui";

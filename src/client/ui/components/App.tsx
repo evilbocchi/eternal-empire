@@ -7,9 +7,11 @@ import {
     CLICK_SPARKS_GUI,
     DIALOGUE_GUI,
     INVENTORY_GUI,
+    LEVELUP_GUI,
     LOGS_GUI,
     MAIN_LAYOUT_GUI,
     PURCHASE_GUI,
+    QUESTCOMPLETION_GUI,
     QUESTS_GUI,
     SETTINGS_GUI,
     SHOP_GUI,
@@ -28,6 +30,8 @@ import ShopGui from "client/ui/components/item/shop/ShopGui";
 import useCIViewportManagement from "client/ui/components/item/useCIViewportManagement";
 import LogsWindow from "client/ui/components/logs/LogsWindow";
 import DialogueWindow from "client/ui/components/npc/DialogueWindow";
+import LevelUpManager from "client/ui/components/levelup/LevelUpManager";
+import QuestCompletionManager from "client/ui/components/levelup/QuestCompletionManager";
 import PositionManager from "client/ui/components/position/PositionManager";
 import QuestWindow from "client/ui/components/quest/QuestWindow";
 import TrackedQuestWindow from "client/ui/components/quest/TrackedQuestWindow";
@@ -89,6 +93,8 @@ export default function App({ viewportsEnabled }: { viewportsEnabled: boolean })
         addRoot(roots, STATS_GUI).render(<StatsWindow />);
         addRoot(roots, PURCHASE_GUI).render(<PurchaseWindow viewportManagement={viewportManagement} />);
         addRoot(roots, SHOP_GUI).render(<ShopGui viewportManagement={viewportManagement} />);
+        addRoot(roots, LEVELUP_GUI).render(<LevelUpManager />);
+        addRoot(roots, QUESTCOMPLETION_GUI).render(<QuestCompletionManager />);
         addRoot(roots, WORLD_GUI).render(<WorldRenderer />);
 
         const cleanup = SoundManager.init();
