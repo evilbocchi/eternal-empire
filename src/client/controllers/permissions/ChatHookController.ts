@@ -12,7 +12,7 @@
  */
 import ComputeNameColor from "@antivivi/rbxnamecolor";
 import { simpleInterval } from "@antivivi/vrldk";
-import { Controller, OnInit, OnStart } from "@flamework/core";
+import { Controller, OnStart } from "@flamework/core";
 import { LOCAL_PLAYER } from "client/constants";
 import { getTextChannels } from "shared/constants";
 import eat from "shared/hamster/eat";

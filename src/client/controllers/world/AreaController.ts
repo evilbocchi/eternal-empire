@@ -1,7 +1,8 @@
 import { Controller, OnStart } from "@flamework/core";
 import { ReplicatedStorage } from "@rbxts/services";
-import ShakeController from "client/controllers/world/ShakeController";
+import Shaker from "client/ui/components/effect/Shaker";
 import { playSound } from "shared/asset/GameAssets";
+import eat from "shared/hamster/eat";
 import Packets from "shared/Packets";
 import SlamoVillageConnection from "shared/world/nodes/SlamoVillageConnection";
 
@@ -12,24 +13,29 @@ import SlamoVillageConnection from "shared/world/nodes/SlamoVillageConnection";
  */
 @Controller()
 export default class AreaController implements OnStart {
-    constructor(private shakeController: ShakeController) {}
-
     /**
      * Starts the AreaController, manages special area connections and unlock state.
      */
     onStart() {
-        Packets.areaUnlocked.fromServer(() => {
-            this.shakeController.shake();
-            playSound("Thunder.mp3");
-        });
+        eat(
+            Packets.areaUnlocked.fromServer(() => {
+                Shaker.shake();
+                playSound("Thunder.mp3");
+            }),
+            "Disconnect",
+        );
 
         const connectionInstance = SlamoVillageConnection.waitForInstance();
-        Packets.unlockedAreas.observe((areas) => {
+        const connection = Packets.unlockedAreas.observe((areas) => {
             if (areas.has("SlamoVillage")) {
                 connectionInstance.Parent = SlamoVillageConnection.originalParent;
             } else {
                 connectionInstance.Parent = ReplicatedStorage;
             }
+        });
+        eat(() => {
+            connection.disconnect();
+            connectionInstance.Parent = SlamoVillageConnection.originalParent;
         });
     }
 }

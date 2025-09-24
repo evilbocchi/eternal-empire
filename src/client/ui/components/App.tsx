@@ -42,14 +42,15 @@ import PurchaseWindow from "client/ui/components/item/shop/PurchaseWindow";
 import ShopGui from "client/ui/components/item/shop/ShopGui";
 import useCIViewportManagement from "client/ui/components/item/useCIViewportManagement";
 import LevelUpManager from "client/ui/components/levelup/LevelUpManager";
-import QuestCompletionManager from "client/ui/components/quest/QuestCompletionManager";
 import LogsWindow from "client/ui/components/logs/LogsWindow";
 import DialogueWindow from "client/ui/components/npc/DialogueWindow";
 import PositionManager from "client/ui/components/position/PositionManager";
+import QuestCompletionManager from "client/ui/components/quest/QuestCompletionManager";
 import { questState } from "client/ui/components/quest/QuestState";
 import QuestWindow from "client/ui/components/quest/QuestWindow";
 import TrackedQuestWindow from "client/ui/components/quest/TrackedQuestWindow";
 import RenameWindow from "client/ui/components/rename/RenameWindow";
+import ResetRenderer from "client/ui/components/reset/ResetRenderer";
 import CopyWindow from "client/ui/components/settings/CopyWindow";
 import SettingsManager from "client/ui/components/settings/SettingsManager";
 import SidebarButtons from "client/ui/components/sidebar/SidebarButtons";
@@ -247,5 +248,9 @@ export default function App({ viewportsEnabled }: { viewportsEnabled: boolean })
         };
     }, []);
 
-    return <Fragment />;
+    return (
+        <Fragment>
+            <ResetRenderer />
+        </Fragment>
+    );
 }

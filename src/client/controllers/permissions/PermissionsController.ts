@@ -13,7 +13,7 @@
  */
 import { Controller, OnInit } from "@flamework/core";
 import { UserInputService } from "@rbxts/services";
-import ShakeController from "client/controllers/world/ShakeController";
+import Shaker from "client/ui/components/effect/Shaker";
 import { playSound } from "shared/asset/GameAssets";
 import { IS_STUDIO } from "shared/Context";
 import Items from "shared/items/Items";
@@ -27,15 +27,13 @@ import Packets from "shared/Packets";
  */
 @Controller()
 export default class PermissionsController implements OnInit {
-    constructor(private shakeController: ShakeController) {}
-
     /**
      * Initializes the PermissionsController, sets up listeners for donations and game modifications.
      */
     onInit() {
         Packets.donationGiven.fromServer(() => {
             playSound("PowerUp.mp3");
-            this.shakeController.shake();
+            Shaker.shake();
         });
 
         Packets.modifyGame.fromServer((param) => {
