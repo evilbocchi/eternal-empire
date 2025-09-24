@@ -113,9 +113,9 @@ namespace Packets {
 
     // droplets
     export const dropletAdded = packet<(drop: BasePart) => void>({ isUnreliable: true });
-    export const dropletBurnt = packet<(dropletModelId: string, amountPerCurrency: Map<Currency, BaseOnoeNum>) => void>(
-        { isUnreliable: true },
-    );
+    export const dropletBurnt = packet<(dropletModelId: string, amountPerCurrency: BaseCurrencyMap) => void>({
+        isUnreliable: true,
+    });
     export const applyImpulse = packet<(dropletModelId: string, impulse: Vector3) => void>({ isUnreliable: true });
 
     // weather
@@ -123,10 +123,10 @@ namespace Packets {
     export const getWeatherState = packet<() => object>();
 
     // currencies
-    export const balance = property<Map<Currency, BaseOnoeNum>>(EmpireProfileTemplate.currencies, true);
-    export const mostBalance = property<Map<Currency, BaseOnoeNum>>(EmpireProfileTemplate.mostCurrencies, true);
-    export const revenue = property<Map<Currency, BaseOnoeNum>>(new Map(), true);
-    export const showDifference = packet<(differencePerCurrency: Map<Currency, BaseOnoeNum>) => void>();
+    export const balance = property<BaseCurrencyMap>(EmpireProfileTemplate.currencies, true);
+    export const mostBalance = property<BaseCurrencyMap>(EmpireProfileTemplate.mostCurrencies, true);
+    export const revenue = property<BaseCurrencyMap>(new Map(), true);
+    export const showDifference = packet<(differencePerCurrency: BaseCurrencyMap) => void>();
 
     // upgrade board
     export const upgrades = property<Map<string, DataType.i32>>(EmpireProfileTemplate.upgrades);

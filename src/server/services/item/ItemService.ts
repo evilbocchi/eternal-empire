@@ -786,7 +786,7 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
         // Initialize all items and their callbacks
         let itemCount = 0;
         Items.itemsPerId.forEach((item) => {
-            item.INITALIZES.forEach((callback) => callback(item));
+            item.INITIALIZES.forEach((callback) => callback(item));
             ++itemCount;
         });
         print("Initialized " + itemCount + " items.");

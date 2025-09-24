@@ -5,6 +5,7 @@ import Difficulty from "@antivivi/jjt-difficulties";
 import { OnoeNum } from "@antivivi/serikanum";
 import { getAllInstanceInfo } from "@antivivi/vrldk";
 import { RunService } from "@rbxts/services";
+import { IS_EDIT, IS_SERVER } from "shared/Context";
 import GameSpeed from "shared/GameSpeed";
 import Packets from "shared/Packets";
 import { Server } from "shared/api/APIExpose";
@@ -67,9 +68,9 @@ export default class Item {
     readonly MODEL?: Model;
 
     /**
-     * Called when {@link NPCNavigationService} is initialized.
+     * Called when the {@link Server} API is first initialized. This is only called once per item.
      */
-    readonly INITALIZES = new Array<<T extends this>(item: T) => void>();
+    readonly INITIALIZES = new Array<<T extends this>(item: T) => void>();
 
     /**
      * Called when the item's model is loaded into the world.
@@ -471,7 +472,7 @@ export default class Item {
      * @returns The item instance.
      */
     onInit(initCallback: (item: this) => void) {
-        this.INITALIZES.push(initCallback);
+        this.INITIALIZES.push(initCallback);
         return this;
     }
 
@@ -733,7 +734,7 @@ export default class Item {
     }
 
     static {
-        if (RunService.IsServer()) {
+        if (IS_SERVER || IS_EDIT) {
             REPEATS.set(
                 () => {
                     const formulaResults = new Map<string, OnoeNum>();

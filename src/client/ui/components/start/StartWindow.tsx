@@ -27,21 +27,6 @@ export default function StartWindow() {
         return timeSinceFirstRender > 5; // Fast mode after 5 seconds
     }, []);
 
-    useEffect(() => {
-        if (!visible) return;
-
-        const connection = DocumentManager.visibilityChanged.connect((id, isVisible) => {
-            if (id !== "Settings") return;
-            if (isVisible) {
-                transitionToView("none");
-            } else {
-                transitionToView("main");
-            }
-        });
-
-        return () => connection.Disconnect();
-    }, [visible]);
-
     // Animation entrance effect when component becomes visible
     useEffect(() => {
         if (visible && !hasEnteredScreen) {
@@ -158,9 +143,28 @@ export default function StartWindow() {
         [isAnimating, currentView],
     );
 
+    useEffect(() => {
+        if (!visible) return;
+
+        const connection = DocumentManager.visibilityChanged.connect((id, isVisible) => {
+            if (id !== "Settings") return;
+            if (isVisible) {
+                transitionToView("none");
+            } else {
+                transitionToView("main");
+            }
+        });
+
+        return () => connection.Disconnect();
+    }, [visible, transitionToView]);
+
     const handleBackToMain = useCallback(() => {
         transitionToView("main");
     }, [transitionToView]);
+
+    if (!visible) {
+        return <Fragment />;
+    }
 
     return (
         <Fragment>
@@ -170,6 +174,7 @@ export default function StartWindow() {
                 AnchorPoint={new Vector2(0.5, 0.5)}
                 BackgroundColor3={Color3.fromRGB(255, 255, 255)}
                 BackgroundTransparency={0}
+                BorderSizePixel={0}
                 Image={getAsset("assets/start/SideBackground.png")}
                 ImageTransparency={0.7}
                 Position={new UDim2(0, 0, 0.5, 0)}
@@ -190,6 +195,7 @@ export default function StartWindow() {
                 />
                 <imagelabel
                     BackgroundTransparency={1}
+                    BorderSizePixel={0}
                     Image={getAsset("assets/GridHighContrast.png")}
                     ImageColor3={Color3.fromRGB(0, 0, 0)}
                     ImageTransparency={0.8}
@@ -198,7 +204,9 @@ export default function StartWindow() {
                     ScaleType={Enum.ScaleType.Tile}
                     Size={new UDim2(1, 2, 1, 2)}
                     TileSize={new UDim2(0, 200, 0, 200)}
-                />
+                >
+                    <uistroke Color={Color3.fromRGB(255, 255, 255)} Thickness={3} />
+                </imagelabel>
             </imagelabel>
 
             {/* Logo */}

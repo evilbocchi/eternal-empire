@@ -7,6 +7,10 @@ export = new Command(script.Name)
     .setExecute((_o, item, amount) => {
         const a = tonumber(amount) ?? 0;
         const giveItem = (id: string) => {
+            if (!Items.itemsPerId.has(id)) {
+                warn(`Item with id ${id} does not exist.`);
+                return;
+            }
             CommandAPI.Item.setItemAmount(id, a);
             CommandAPI.Item.setBoughtAmount(id, a);
         };

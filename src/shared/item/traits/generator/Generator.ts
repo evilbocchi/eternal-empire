@@ -1,9 +1,12 @@
-import { getAllInstanceInfo } from "@antivivi/vrldk";
+import { getAllInstanceInfo, getInstanceInfo, setInstanceInfo } from "@antivivi/vrldk";
+import { packet } from "@rbxts/fletchette";
 import { Players, TweenService } from "@rbxts/services";
 import { Server, UISignals } from "shared/api/APIExpose";
 import UserGameSettings from "shared/api/UserGameSettings";
 import { playSound } from "shared/asset/GameAssets";
+import { PLACED_ITEMS_FOLDER } from "shared/constants";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
+import eat from "shared/hamster/eat";
 import Item from "shared/item/Item";
 import Boostable from "shared/item/traits/boost/Boostable";
 import Operative from "shared/item/traits/Operative";
@@ -13,19 +16,23 @@ declare global {
     interface ItemTraits {
         Generator: Generator;
     }
+
+    interface InstanceInfo {
+        OnGenerated?: (amountPerCurrency: BaseCurrencyMap) => void;
+    }
 }
 
+const generatedPacket = packet<(id: string, amountPerCurrency: BaseCurrencyMap) => void>();
 const GENERATOR_UPGRADES = NamedUpgrades.getUpgrades("Generator");
 
 export default class Generator extends Boostable {
     passiveGain: CurrencyBundle | undefined;
 
     static load(model: Model, generator: Generator) {
+        const placementId = model.Name;
         const item = generator.item;
 
         const centre = model.PrimaryPart!.Position;
-        const remoteEvent = new Instance("UnreliableRemoteEvent", model);
-
         const ItemService = Server.Item;
         const RevenueService = Server.Revenue;
 
@@ -38,7 +45,7 @@ export default class Generator extends Boostable {
             const clickDetector = new Instance("ClickDetector");
             clickDetector.MouseClick.Connect((player) => {
                 lastClicked = tick();
-                remoteEvent.FireClient(player);
+                generatedPacket.toClient(player, placementId, new Map());
             });
             clickDetector.Parent = clickPart;
         }
@@ -98,7 +105,7 @@ export default class Generator extends Boostable {
                     const rootPart = character.FindFirstChild("HumanoidRootPart") as BasePart | undefined;
                     if (rootPart === undefined) continue;
                     if (rootPart.Position.sub(centre).Magnitude < 50) {
-                        remoteEvent.FireClient(player, amountPerCurrency);
+                        generatedPacket.toClient(player, placementId, amountPerCurrency);
                     }
                 }
                 Server.Currency.incrementAll(amountPerCurrency);
@@ -107,52 +114,60 @@ export default class Generator extends Boostable {
         );
     }
 
+    static clientLoad(model: Model) {
+        const part = (model.FindFirstChild("Marker") ?? model.PrimaryPart) as BasePart;
+        const positions = new Map<BasePart, Vector3>();
+        for (const part of model.GetDescendants()) {
+            if (!part.IsA("BasePart") || part.Name === "Base" || part.Parent!.Name === "Base") continue;
+            positions.set(part, part.Position);
+        }
+        const tween1 = new TweenInfo(0.1, Enum.EasingStyle.Quad, Enum.EasingDirection.In);
+        const tween2 = new TweenInfo(0.4, Enum.EasingStyle.Quad, Enum.EasingDirection.Out);
+        const clickTween = new TweenInfo(1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out);
+
+        const clickPart = model.FindFirstChild("ClickPart") as BasePart | undefined;
+        const clickPartOriginalSize = clickPart?.Size;
+
+        setInstanceInfo(model, "OnGenerated", (amountPerCurrency: BaseCurrencyMap) => {
+            if (UserGameSettings!.SavedQualityLevel.Value > 5) {
+                for (const [part, position] of positions) {
+                    TweenService.Create(part, tween1, {
+                        Position: position.sub(new Vector3(0, 0.125, 0)),
+                    }).Play();
+                    task.delay(0.1, () => {
+                        TweenService.Create(part, tween2, {
+                            Position: position,
+                        }).Play();
+                    });
+                }
+            }
+
+            if (amountPerCurrency.isEmpty()) {
+                // clickpart was pressed
+                if (clickPart !== undefined) {
+                    playSound("MechanicalPress.mp3", clickPart);
+                    clickPart.Size = clickPartOriginalSize!.mul(1.2);
+                    TweenService.Create(clickPart, clickTween, {
+                        Size: clickPartOriginalSize!,
+                    }).Play();
+                }
+            } else {
+                UISignals.showCurrencyGain.fire(part.Position, amountPerCurrency);
+            }
+        });
+    }
+
     constructor(item: Item) {
         super(item);
         item.onLoad((model) => Generator.load(model, this));
-        item.onClientLoad((model) => {
-            const remoteEvent = model.WaitForChild("UnreliableRemoteEvent") as UnreliableRemoteEvent;
-            const part = (model.FindFirstChild("Marker") ?? model.PrimaryPart) as BasePart;
-            const positions = new Map<BasePart, Vector3>();
-            for (const part of model.GetDescendants()) {
-                if (!part.IsA("BasePart") || part.Name === "Base" || part.Parent!.Name === "Base") continue;
-                positions.set(part, part.Position);
-            }
-            const tween1 = new TweenInfo(0.1, Enum.EasingStyle.Quad, Enum.EasingDirection.In);
-            const tween2 = new TweenInfo(0.4, Enum.EasingStyle.Quad, Enum.EasingDirection.Out);
-            const clickTween = new TweenInfo(1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out);
+        item.onClientLoad((model) => Generator.clientLoad(model));
 
-            const clickPart = model.FindFirstChild("ClickPart") as BasePart | undefined;
-            const clickPartOriginalSize = clickPart?.Size;
-
-            remoteEvent.OnClientEvent.Connect((amountPerCurrency?: CurrencyMap) => {
-                if (UserGameSettings!.SavedQualityLevel.Value > 5) {
-                    for (const [part, position] of positions) {
-                        TweenService.Create(part, tween1, {
-                            Position: position.sub(new Vector3(0, 0.125, 0)),
-                        }).Play();
-                        task.delay(0.1, () => {
-                            TweenService.Create(part, tween2, {
-                                Position: position,
-                            }).Play();
-                        });
-                    }
-                }
-
-                if (amountPerCurrency === undefined) {
-                    // clickpart was pressed
-                    if (clickPart !== undefined) {
-                        playSound("MechanicalPress.mp3", clickPart);
-                        clickPart.Size = clickPartOriginalSize!.mul(1.2);
-                        TweenService.Create(clickPart, clickTween, {
-                            Size: clickPartOriginalSize!,
-                        }).Play();
-                    }
-                } else {
-                    UISignals.showCurrencyGain.fire(part.Position, amountPerCurrency);
-                }
-            });
+        const connection = generatedPacket.fromServer((placementId, amountPerCurrency) => {
+            const model = PLACED_ITEMS_FOLDER.FindFirstChild(placementId) as Model | undefined;
+            if (model === undefined) return;
+            getInstanceInfo(model, "OnGenerated")?.(amountPerCurrency);
         });
+        eat(connection);
     }
 
     setPassiveGain(passiveGain: CurrencyBundle) {

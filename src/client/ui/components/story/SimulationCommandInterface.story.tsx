@@ -1,7 +1,6 @@
-import React, { Fragment, useEffect } from "@rbxts/react";
+import React, { useEffect } from "@rbxts/react";
 import ReactRoblox from "@rbxts/react-roblox";
 import { CreateReactStory } from "@rbxts/ui-labs";
-import App from "client/ui/components/App";
 import StoryMocking from "client/ui/components/StoryMocking";
 import SimulationCommandInterface from "client/ui/components/story/SimulationCommandInterface";
 
@@ -9,9 +8,7 @@ export = CreateReactStory(
     {
         react: React,
         reactRoblox: ReactRoblox,
-        controls: {
-            viewportsEnabled: false,
-        },
+        controls: {},
     },
     (props) => {
         StoryMocking.mockCharacter();
@@ -20,11 +17,6 @@ export = CreateReactStory(
             StoryMocking.mockFlamework();
         }, []);
 
-        return (
-            <Fragment>
-                <App viewportsEnabled={props.controls.viewportsEnabled} />
-                <SimulationCommandInterface />
-            </Fragment>
-        );
+        return <SimulationCommandInterface />;
     },
 );
