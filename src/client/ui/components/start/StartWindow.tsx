@@ -1,13 +1,18 @@
 import React, { Fragment, useCallback, useEffect, useRef, useState } from "@rbxts/react";
-import { RunService, TweenService } from "@rbxts/services";
+import { RunService, TweenService, Workspace } from "@rbxts/services";
+import { LOCAL_PLAYER } from "client/constants";
 import SingleDocumentManager from "client/ui/components/sidebar/SingleDocumentManager";
 import AboutWindow from "client/ui/components/start/AboutWindow";
 import EmpiresWindow from "client/ui/components/start/EmpiresWindow";
 import MenuOption from "client/ui/components/start/MenuOption";
+import performIntroSequence from "client/ui/components/start/performIntroSequence";
 import DocumentManager, { useDocument } from "client/ui/components/window/DocumentManager";
 import MusicManager from "client/ui/MusicManager";
 import { getAsset } from "shared/asset/AssetMap";
 import { playSound } from "shared/asset/GameAssets";
+import StartCamera from "shared/world/nodes/StartCamera";
+
+const SCENES = StartCamera.INSTANCES;
 
 /**
  * Main start window component that handles the title screen, empire selection, and about page
@@ -16,11 +21,13 @@ export default function StartWindow({ fastTransitions = false }: { fastTransitio
     const sideBackgroundRef = useRef<ImageLabel>();
     const logoRef = useRef<ImageLabel>();
     const mainMenuRef = useRef<Frame>();
-    const { visible } = useDocument({ id: "Start" });
+    const { visible, setVisible } = useDocument({ id: "Start" });
     const [currentView, setCurrentView] = useState<"main" | "empires" | "about" | "none">("main");
     const [isAnimating, setIsAnimating] = useState(false);
     const [hasEnteredScreen, setHasEnteredScreen] = useState(false);
     const firstRenderTime = useRef<number>(fastTransitions ? 0 : tick());
+    const [currentSceneIndex, setCurrentSceneIndex] = useState(0);
+    const intervalRef = useRef<RBXScriptConnection>();
 
     // Helper function to determine if we should use fast animations
     const shouldUseFastAnimations = useCallback(() => {
@@ -91,6 +98,60 @@ export default function StartWindow({ fastTransitions = false }: { fastTransitio
 
         return () => connection.Disconnect();
     }, []);
+
+    // Camera transition effect - cycles through StartCamera scenes every 10 seconds
+    useEffect(() => {
+        if (!visible) return;
+
+        const transitionToNextScene = () => {
+            const camera = Workspace.CurrentCamera;
+            if (!camera) return;
+
+            // Convert Set to array to access by index
+            const sceneArray = [...SCENES];
+            if (sceneArray.size() === 0) return;
+
+            // Get the next scene (cycle back to 0 if at end)
+            const nextIndex = (currentSceneIndex + 1) % sceneArray.size();
+            const nextScene = sceneArray[nextIndex];
+
+            // Set camera to scriptable mode and tween to the new position
+            camera.CameraType = Enum.CameraType.Scriptable;
+            TweenService.Create(camera, new TweenInfo(2, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
+                CFrame: nextScene.CFrame,
+            }).Play();
+
+            setCurrentSceneIndex(nextIndex);
+        };
+
+        // Set initial camera position to first scene
+        const camera = Workspace.CurrentCamera;
+        if (camera && SCENES.size() > 0) {
+            const sceneArray = [...SCENES];
+            camera.CameraType = Enum.CameraType.Scriptable;
+            camera.CFrame = sceneArray[0].CFrame;
+        }
+
+        // Start the interval for transitions
+        let lastTransitionTime = tick();
+        const connection = RunService.Heartbeat.Connect(() => {
+            const currentTime = tick();
+            if (currentTime - lastTransitionTime >= 10) {
+                transitionToNextScene();
+                lastTransitionTime = currentTime;
+            }
+        });
+
+        intervalRef.current = connection;
+
+        return () => {
+            connection.Disconnect();
+            intervalRef.current = undefined;
+            if (camera) {
+                camera.CameraType = Enum.CameraType.Custom;
+            }
+        };
+    }, [visible, currentSceneIndex]);
 
     // Handle smooth transitions between views
     const transitionToView = useCallback(
@@ -166,6 +227,21 @@ export default function StartWindow({ fastTransitions = false }: { fastTransitio
 
         return () => connection.Disconnect();
     }, [visible, transitionToView]);
+
+    // Cleanup camera when component becomes invisible
+    useEffect(() => {
+        if (!visible) {
+            // Clean up the camera transition interval
+            intervalRef.current?.Disconnect();
+            intervalRef.current = undefined;
+
+            // Reset camera to custom mode when leaving start window
+            const camera = Workspace.CurrentCamera;
+            if (camera) {
+                camera.CameraType = Enum.CameraType.Custom;
+            }
+        }
+    }, [visible]);
 
     const handleBackToMain = useCallback(() => {
         transitionToView("main");
@@ -290,7 +366,20 @@ export default function StartWindow({ fastTransitions = false }: { fastTransitio
             )}
 
             {/* Empires Selection View */}
-            {currentView === "empires" && <EmpiresWindow onClose={handleBackToMain} />}
+            {currentView === "empires" && (
+                <EmpiresWindow
+                    onClose={handleBackToMain}
+                    exitStart={() => {
+                        setCurrentView("none");
+                        setVisible(false);
+                        const camera = Workspace.CurrentCamera;
+                        if (camera) {
+                            camera.CameraType = Enum.CameraType.Custom;
+                        }
+                        performIntroSequence();
+                    }}
+                />
+            )}
 
             {/* About View */}
             {currentView === "about" && <AboutWindow onClose={handleBackToMain} />}

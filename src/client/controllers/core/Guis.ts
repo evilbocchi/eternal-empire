@@ -31,6 +31,7 @@ export const CLICK_SPARKS_GUI = createScreenGui("ClickSparks", 2);
 export const TOOLTIPS_GUI = createScreenGui("Tooltips", 3);
 export const DIALOGUE_GUI = createScreenGui("Dialogue", 1);
 export const BALANCE_GUI = createScreenGui("Balance");
+export const CURRENCY_GAIN_GUI = createScreenGui("CurrencyGain");
 export const BUILD_GUI = createScreenGui("Build");
 export const SETTINGS_GUI = createScreenGui("Settings");
 export const INVENTORY_GUI = createScreenGui("Inventory");

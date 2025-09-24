@@ -172,8 +172,8 @@ export default function InventoryWindow({ viewportManagement }: { viewportManage
 
     // Check if user has any items at all (for empty state)
     let hasAnyItems = false;
-    for (const [, amount] of inventory) {
-        if (amount > 0) {
+    for (const [, { amount }] of dataPerItem) {
+        if (amount !== undefined && amount > 0) {
             hasAnyItems = true;
             break;
         }

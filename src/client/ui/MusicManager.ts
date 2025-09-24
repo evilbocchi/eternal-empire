@@ -115,7 +115,7 @@ namespace MusicManager {
         }
 
         if (retrieved === undefined) {
-            if (area === undefined || ReplicatedStorage.GetAttribute("Intro") === true) return;
+            if (area === undefined || ReplicatedStorage.GetAttribute("Intro")) return;
             retrieved = getRandomMusic(area);
         }
 

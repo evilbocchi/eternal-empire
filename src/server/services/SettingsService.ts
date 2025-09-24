@@ -11,7 +11,7 @@
  *
  * @since 1.0.0
  */
-import { OnInit, Service } from "@flamework/core";
+import { OnStart, Service } from "@flamework/core";
 import { OnPlayerAdded } from "server/services/ModdingService";
 import { IS_EDIT } from "shared/Context";
 import { PlayerProfileManager } from "shared/data/profile/ProfileManager";
@@ -22,7 +22,7 @@ import Packets from "shared/Packets";
  * Loads settings on player join and listens for updates from the client.
  */
 @Service()
-export default class SettingsService implements OnInit, OnPlayerAdded {
+export default class SettingsService implements OnStart, OnPlayerAdded {
     /**
      * Loads and sends player settings to the client when they join.
      * @param player The player who joined
@@ -46,7 +46,7 @@ export default class SettingsService implements OnInit, OnPlayerAdded {
     /**
      * Initializes the SettingsService, setting up listeners for setting and hotkey changes.
      */
-    onInit() {
+    onStart() {
         Packets.setHotkey.fromClient((player, name, key) => {
             const playerProfile = PlayerProfileManager.load(player.UserId);
             if (playerProfile === undefined) {

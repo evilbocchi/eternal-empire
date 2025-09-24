@@ -17,7 +17,6 @@ import Items from "shared/items/Items";
 import Packets from "shared/Packets";
 import Sandbox from "shared/Sandbox";
 import EmpireIdOverrideValue from "shared/world/nodes/EmpireIdOverrideValue";
-import StartScreenValue from "shared/world/nodes/StartScreenValue";
 
 /**
  * Main data service responsible for managing empire and player data.
@@ -44,13 +43,15 @@ export default class DataService implements OnStart, OnPlayerAdded {
     }
 
     private loadThisEmpire() {
-        const startScreenValue = StartScreenValue.waitForInstance();
         let empireId: string;
 
         // Determine empire ID based on server type and environment
         if (IS_EDIT) {
             empireId = HttpService.GenerateGUID(false);
-        } else if (!IS_STUDIO || startScreenValue.Value) {
+        } else if (IS_STUDIO) {
+            // Studio environment - get ID from start camera
+            empireId = EmpireIdOverrideValue.waitForInstance().Value;
+        } else {
             // Production environment
             if (IS_SINGLE_SERVER) {
                 empireId = "SingleServer";
@@ -65,9 +66,6 @@ export default class DataService implements OnStart, OnPlayerAdded {
                 const tpData = player.GetJoinData().TeleportData as string;
                 empireId ??= tpData === undefined ? game.PrivateServerId : tpData;
             }
-        } else {
-            // Studio environment - get ID from start camera
-            empireId = EmpireIdOverrideValue.waitForInstance().Value;
         }
 
         if (empireId === undefined) throw "Could not load empire ID";

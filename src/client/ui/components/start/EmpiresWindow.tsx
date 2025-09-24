@@ -175,7 +175,7 @@ function EmpireOption({ empireId, empireInfo }: { empireId: string; empireInfo: 
 /**
  * Empires window component for empire selection and creation
  */
-export default function EmpiresWindow({ onClose }: { onClose: () => void }) {
+export default function EmpiresWindow({ exitStart, onClose }: { exitStart: () => void; onClose: () => void }) {
     const labelRef = useRef<TextLabel>();
     const availableEmpires = useProperty(Packets.availableEmpires);
     const [isCreatingEmpire, setIsCreatingEmpire] = useState(false);
@@ -194,11 +194,6 @@ export default function EmpiresWindow({ onClose }: { onClose: () => void }) {
         // Reset state after delay
         task.delay(3, () => setIsCreatingEmpire(false));
     }, [isCreatingEmpire]);
-
-    const handleJoinPublic = useCallback(() => {
-        playSound("MenuClick.mp3");
-        // TODO: Implement joining a public empire
-    }, []);
 
     return (
         <frame BackgroundTransparency={1} Position={new UDim2(0, 0, 0, 0)} Size={new UDim2(1, 0, 1, 0)}>
@@ -275,7 +270,7 @@ export default function EmpiresWindow({ onClose }: { onClose: () => void }) {
                 gradientColors={[Color3.fromRGB(84, 255, 159), Color3.fromRGB(5, 171, 105)]}
                 onClick={() => {
                     playSound("EmphasisMenuSelect.mp3", undefined, (sound) => (sound.Volume = 0.4));
-                    handleJoinPublic();
+                    exitStart();
                 }}
                 size={new UDim2(0.1, 400, 0, 60)}
                 fast={true}
