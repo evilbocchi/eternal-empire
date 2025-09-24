@@ -75,12 +75,11 @@ export default function MenuOption({
     }, [shouldAnimate, animationDelay, fast]);
 
     const handleClick = useCallback(() => {
-        playSound("EmphasisMenuSelect.mp3");
         onClick();
     }, [onClick]);
 
     const handleMouseEnter = useCallback(() => {
-        playSound("EmphasisButtonHover.mp3");
+        playSound("EmphasisButtonHover.mp3", undefined, (sound) => (sound.Volume = 0.25));
         setIsHovered(true);
     }, []);
 

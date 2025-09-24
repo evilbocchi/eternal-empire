@@ -1,5 +1,6 @@
 import { Flamework } from "@flamework/core";
 import { RunService, Workspace } from "@rbxts/services";
+import StartScreenValue from "shared/world/nodes/StartScreenValue";
 
 /**
  * Whether the current context is the server.
@@ -24,19 +25,14 @@ export const IS_STUDIO = RunService.IsStudio();
 export const IS_SINGLE_SERVER = game.PlaceId === 17479698702;
 
 export const IS_PUBLIC_SERVER = (() => {
-    if (IS_EDIT) return false;
+    if (IS_STUDIO) {
+        return StartScreenValue.getInstance()?.Value ?? false;
+    }
+
     let key = "IsPublicServer";
     if (!IS_SERVER) return Workspace.GetAttribute(key) === true;
 
-    let value = false;
-    if (IS_STUDIO) {
-        const boolValue = Workspace.FindFirstChild("StartCamera")?.FindFirstChild("StartScreen") as
-            | BoolValue
-            | undefined;
-        value = boolValue?.Value ?? false;
-    }
-
-    value = game.PrivateServerId === "";
+    let value = game.PrivateServerId === "";
     Workspace.SetAttribute(key, value);
     return value;
 })();

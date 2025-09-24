@@ -1,10 +1,11 @@
 import React, { Fragment, useCallback, useEffect, useRef, useState } from "@rbxts/react";
-import { TweenService } from "@rbxts/services";
+import { RunService, TweenService } from "@rbxts/services";
 import SingleDocumentManager from "client/ui/components/sidebar/SingleDocumentManager";
 import AboutWindow from "client/ui/components/start/AboutWindow";
 import EmpiresWindow from "client/ui/components/start/EmpiresWindow";
 import MenuOption from "client/ui/components/start/MenuOption";
 import DocumentManager, { useDocument } from "client/ui/components/window/DocumentManager";
+import SoundManager from "client/ui/SoundManager";
 import { getAsset } from "shared/asset/AssetMap";
 import { playSound } from "shared/asset/GameAssets";
 
@@ -63,28 +64,33 @@ export default function StartWindow() {
                     }).Play();
                 }
             });
-
-            // Add logo pulse effect after entrance animations complete (reduced if fast)
-            const pulseDelay = fast ? 1 : 3.5;
-            task.delay(pulseDelay, () => {
-                if (logoRef.current) {
-                    const createWave = () => {
-                        const wave = logoRef.current!.Clone();
-                        wave.ClearAllChildren();
-                        wave.Position = new UDim2(0.5, 0, 0.5, 0);
-                        wave.AnchorPoint = new Vector2(0.5, 0.5);
-                        wave.Size = new UDim2(1, 0, 1, 0);
-                        wave.Parent = logoRef.current;
-                        TweenService.Create(wave, new TweenInfo(0.5), {
-                            Size: new UDim2(1.15, 5, 1.15, 5),
-                            ImageTransparency: 1,
-                        }).Play();
-                    };
-                    createWave();
-                }
-            });
         }
     }, [visible, hasEnteredScreen]);
+
+    useEffect(() => {
+        let pulsed = false;
+        const connection = RunService.Heartbeat.Connect(() => {
+            if (SoundManager.START_MUSIC.TimePosition > 3.5 && !pulsed && logoRef.current) {
+                pulsed = true;
+                const createWave = () => {
+                    const wave = logoRef.current!.Clone();
+                    wave.ClearAllChildren();
+                    wave.Position = new UDim2(0.5, 0, 0.5, 0);
+                    wave.AnchorPoint = new Vector2(0.5, 0.5);
+                    wave.Size = new UDim2(1, 0, 1, 0);
+                    wave.Parent = logoRef.current;
+                    TweenService.Create(wave, new TweenInfo(0.5), {
+                        Size: new UDim2(1.15, 5, 1.15, 5),
+                        ImageTransparency: 1,
+                    }).Play();
+                };
+                createWave();
+            }
+        });
+        task.delay(30, () => connection?.Disconnect());
+
+        return () => connection.Disconnect();
+    }, []);
 
     // Handle smooth transitions between views
     const transitionToView = useCallback(
@@ -92,7 +98,7 @@ export default function StartWindow() {
             if (isAnimating) return;
 
             setIsAnimating(true);
-            playSound("EmphasisMenuSelect.mp3");
+            playSound("EmphasisMenuSelect.mp3", undefined, (sound) => (sound.Volume = 0.35));
 
             // If transitioning away from main, hide title screen with animation
             if (currentView === "main" && view !== "main") {

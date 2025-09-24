@@ -1,4 +1,5 @@
-import React, { useCallback } from "@rbxts/react";
+import React, { useCallback, useEffect, useRef, useState } from "@rbxts/react";
+import { TweenService } from "@rbxts/services";
 import { RobotoMono, RobotoSlabBold, RobotoSlabExtraBold, RobotoSlabMedium } from "client/ui/GameFonts";
 import { getAsset } from "shared/asset/AssetMap";
 import { playSound } from "shared/asset/GameAssets";
@@ -13,18 +14,56 @@ export default function AboutWindow({
     /** Close callback */
     onClose: () => void;
 }) {
+    const scrollFrameRef = useRef<ScrollingFrame>();
+    const [hasAnimated, setHasAnimated] = useState(false);
+
     const contributors = new Set<string>();
     for (const item of Items.sortedItems) {
         if (item.creator !== undefined) contributors.add(item.creator);
     }
 
+    // Entrance animation
+    useEffect(() => {
+        if (!hasAnimated && scrollFrameRef.current) {
+            setHasAnimated(true);
+
+            // Start the window below the screen
+            scrollFrameRef.current.Position = new UDim2(0, 0, 1.5, 0);
+
+            // Animate sliding up to final position
+            const slideUpTween = TweenService.Create(
+                scrollFrameRef.current,
+                new TweenInfo(0.6, Enum.EasingStyle.Quart, Enum.EasingDirection.Out),
+                { Position: new UDim2(0, 0, 0.5, 0) },
+            );
+            slideUpTween.Play();
+        }
+    }, [hasAnimated]);
+
     const handleClose = useCallback(() => {
         playSound("MenuClose.mp3");
-        onClose();
+
+        // Animate sliding down before closing
+        if (scrollFrameRef.current) {
+            const slideDownTween = TweenService.Create(
+                scrollFrameRef.current,
+                new TweenInfo(0.4, Enum.EasingStyle.Quart, Enum.EasingDirection.In),
+                { Position: new UDim2(0, 0, 1.5, 0) },
+            );
+
+            slideDownTween.Play();
+            slideDownTween.Completed.Connect(() => {
+                onClose();
+            });
+        } else {
+            // Fallback if ref is not available
+            onClose();
+        }
     }, [onClose]);
 
     return (
         <scrollingframe
+            ref={scrollFrameRef}
             AnchorPoint={new Vector2(0, 0.5)}
             AutomaticCanvasSize={Enum.AutomaticSize.Y}
             BackgroundColor3={Color3.fromRGB(25, 25, 35)}

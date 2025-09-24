@@ -60,16 +60,6 @@ export default class Sandbox {
         startCamera.Anchored = true;
         startCamera.Parent = Workspace;
 
-        const startScreen = new Instance("BoolValue");
-        startScreen.Name = "StartScreen";
-        startScreen.Value = false;
-        startScreen.Parent = startCamera;
-
-        const startId = new Instance("StringValue");
-        startId.Name = "Id";
-        startId.Value = (this.sandboxValue?.GetAttribute("Id") as string) ?? "";
-        startId.Parent = startCamera;
-
         Workspace.WaitForChild("ItemModels").Parent = ReplicatedStorage;
 
         return true;

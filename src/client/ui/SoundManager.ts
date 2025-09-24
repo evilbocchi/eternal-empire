@@ -15,7 +15,8 @@ namespace SoundManager {
     MUSIC_GROUP.Volume = 1;
     MUSIC_GROUP.Parent = IS_EDIT ? Environment.PluginWidget : SoundService;
 
-    export const START_MUSIC = ASSETS.WaitForChild("JJT Money Empire!") as Sound;
+    export const START_MUSIC = (ASSETS.WaitForChild("JJT Money Empire!") as Sound).Clone();
+    START_MUSIC.Parent = MUSIC_GROUP;
 
     for (const [id, area] of pairs(AREAS)) {
         const areaBounds = area.areaBoundsWorldNode?.getInstance();
