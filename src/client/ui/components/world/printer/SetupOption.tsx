@@ -1,7 +1,7 @@
 import React from "@rbxts/react";
 import { playSound } from "shared/asset/GameAssets";
-import SetupBody from "client/ui/components/printer/SetupBody";
-import SetupHeader from "client/ui/components/printer/SetupHeader";
+import SetupBody from "client/ui/components/world/printer/SetupBody";
+import SetupHeader from "client/ui/components/world/printer/SetupHeader";
 
 interface SetupOptionProps {
     setupName?: string;

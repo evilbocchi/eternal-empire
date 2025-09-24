@@ -1,6 +1,6 @@
 import React, { Fragment, useEffect, useState } from "@rbxts/react";
 import { CollectionService } from "@rbxts/services";
-import UpgradeBoardGui from "client/ui/components/upgrade/UpgradeBoardGui";
+import UpgradeBoardGui from "client/ui/components/world/upgrade/UpgradeBoardGui";
 import Items from "shared/items/Items";
 
 export default function UpgradeBoardRenderer() {

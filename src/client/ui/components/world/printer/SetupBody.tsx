@@ -1,6 +1,6 @@
 import React from "@rbxts/react";
-import ActionButton from "client/ui/components/printer/ActionButton";
-import ToggleSwitch from "client/ui/components/printer/ToggleSwitch";
+import ActionButton from "client/ui/components/world/printer/ActionButton";
+import ToggleSwitch from "client/ui/components/world/printer/ToggleSwitch";
 
 interface SetupBodyProps {
     isAutoloadEnabled: boolean;

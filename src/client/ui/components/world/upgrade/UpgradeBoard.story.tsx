@@ -7,7 +7,7 @@ import React, { StrictMode, useEffect } from "@rbxts/react";
 import ReactRoblox from "@rbxts/react-roblox";
 import { Workspace } from "@rbxts/services";
 import { CreateReactStory } from "@rbxts/ui-labs";
-import UpgradeBoardRenderer from "client/ui/components/upgrade/UpgradeBoardRenderer";
+import UpgradeBoardRenderer from "client/ui/components/world/upgrade/UpgradeBoardRenderer";
 import Item from "shared/item/Item";
 import Items from "shared/items/Items";
 import NamedUpgrades from "shared/namedupgrade/NamedUpgrades";

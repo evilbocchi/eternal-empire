@@ -1,5 +1,5 @@
 import React from "@rbxts/react";
-import UpgradeOption from "client/ui/components/upgrade/UpgradeOption";
+import UpgradeOption from "client/ui/components/world/upgrade/UpgradeOption";
 import NamedUpgrade from "shared/namedupgrade/NamedUpgrade";
 
 export default function UpgradeOptionsPanel({
