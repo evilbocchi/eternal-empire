@@ -6,9 +6,10 @@ import {
     SimpleAreaBoardGui,
 } from "client/ui/components/world/area/AreaBoardGui";
 import Packets from "shared/Packets";
+import Sandbox from "shared/Sandbox";
 import { AREAS } from "shared/world/Area";
 
-const COLOR_SEQUENCE_PER_AREA: { [key in AreaId]?: ColorSequence } = {
+export const COLOR_SEQUENCE_PER_AREA: { [key in AreaId]?: ColorSequence } = {
     IntermittentIsles: new ColorSequence([
         new ColorSequenceKeypoint(0, Color3.fromRGB(170, 0, 255)),
         new ColorSequenceKeypoint(1, Color3.fromRGB(85, 0, 255)),

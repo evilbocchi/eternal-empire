@@ -268,6 +268,8 @@ export default class ResetService implements OnInit, OnStart {
     }
 
     onStart() {
+        if (Sandbox.getEnabled()) return;
+
         for (const [name, resetLayer] of pairs(RESET_LAYERS)) {
             this.hookTouch({
                 touchPart: resetLayer.touchPart.waitForInstance(),

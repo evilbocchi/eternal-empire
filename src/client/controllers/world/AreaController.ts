@@ -4,6 +4,7 @@ import Shaker from "client/ui/components/effect/Shaker";
 import { playSound } from "shared/asset/GameAssets";
 import eat from "shared/hamster/eat";
 import Packets from "shared/Packets";
+import Sandbox from "shared/Sandbox";
 import SlamoVillageConnection from "shared/world/nodes/SlamoVillageConnection";
 
 /**
@@ -17,6 +18,8 @@ export default class AreaController implements OnStart {
      * Starts the AreaController, manages special area connections and unlock state.
      */
     onStart() {
+        if (Sandbox.getEnabled()) return;
+
         eat(
             Packets.areaUnlocked.fromServer(() => {
                 Shaker.shake();

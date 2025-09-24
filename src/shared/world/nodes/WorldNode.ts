@@ -87,7 +87,7 @@ export class SingleWorldNode<T extends Instance = Instance> extends WorldNode<T>
                     throw `Timed out waiting for instance with tag ${this.tag}`;
                 }
             } else {
-                if (elapsed > 10 || !warned) {
+                if (elapsed > 10 && !warned) {
                     warn(`Waiting for instance with tag ${this.tag}...`);
                     warned = true;
                 }

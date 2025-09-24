@@ -4,6 +4,7 @@ import InteractableObject from "server/interactive/object/InteractableObject";
 import Quest from "server/quests/Quest";
 import { IS_EDIT, IS_STUDIO } from "shared/Context";
 import Packets from "shared/Packets";
+import Sandbox from "shared/Sandbox";
 
 class Food {
     constructor(public size: number) {}
@@ -191,6 +192,8 @@ export default class HamsterService implements OnStart {
     }
 
     onStart() {
+        if (Sandbox.getEnabled()) return;
+
         NPC.HOT_RELOADER.load();
         InteractableObject.HOT_RELOADER.load();
         if (!IS_EDIT) {

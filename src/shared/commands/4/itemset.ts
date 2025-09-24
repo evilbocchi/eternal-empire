@@ -1,21 +1,27 @@
 import Command, { CommandAPI } from "shared/commands/Command";
-import Items from "shared/items/Items";
 
 export = new Command(script.Name)
     .addAlias("iset")
-    .setDescription("<item> <amount> : Set the quantity for an item.")
+    .setDescription(
+        "<item> <amount> : Set the quantity for an item. If item is 'all', sets all items. If item is a unique item, gives the specified amount.",
+    )
     .setExecute((_o, item, amount) => {
         const a = tonumber(amount) ?? 0;
         const giveItem = (id: string) => {
-            if (!Items.itemsPerId.has(id)) {
+            const item = CommandAPI.Items.itemsPerId.get(id);
+            if (!item) {
                 warn(`Item with id ${id} does not exist.`);
                 return;
             }
-            CommandAPI.Item.setItemAmount(id, a);
-            CommandAPI.Item.setBoughtAmount(id, a);
+            if (item.findTrait("Unique")) {
+                CommandAPI.Item.giveItem(id, a);
+            } else {
+                CommandAPI.Item.setItemAmount(id, a);
+                CommandAPI.Item.setBoughtAmount(id, a);
+            }
         };
         if (item === "all") {
-            for (const [id, _] of Items.itemsPerId) {
+            for (const [id, _] of CommandAPI.Items.itemsPerId) {
                 giveItem(id);
             }
             return;

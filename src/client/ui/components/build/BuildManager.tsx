@@ -420,7 +420,8 @@ namespace BuildManager {
         const size = selected.size();
         if (size === 0) {
             // nothing selected, handle dragging
-            if (hovering !== undefined) {
+            const main = hovering;
+            if (main !== undefined) {
                 playSound("Pickup.mp3");
                 const names = new Array<string>();
                 for (const model of dragging) {
@@ -431,13 +432,10 @@ namespace BuildManager {
                         model.PrimaryPart?.Position,
                         (model.GetAttribute("Rotation") as number | undefined) ?? 0,
                     );
-                    if (model === hovering) {
+                    if (model === main) {
                         mainSelect(placingModel);
                     } else {
-                        selected.set(
-                            placingModel,
-                            hovering.PrimaryPart!.CFrame.Inverse().mul(model.PrimaryPart!.CFrame),
-                        );
+                        selected.set(placingModel, main.PrimaryPart!.CFrame.Inverse().mul(model.PrimaryPart!.CFrame));
                     }
                 }
                 Packets.unplaceItems.toServer(names);

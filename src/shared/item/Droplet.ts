@@ -3,7 +3,6 @@
 
 import Difficulty from "@antivivi/jjt-difficulties";
 import { getAllInstanceInfo, getInstanceInfo } from "@antivivi/vrldk";
-import { packet } from "@rbxts/fletchette";
 import { CollectionService, Debris, RunService, TweenService } from "@rbxts/services";
 import { Server } from "shared/api/APIExpose";
 import UserGameSettings from "shared/api/UserGameSettings";
@@ -32,8 +31,6 @@ declare global {
         Droplet: DropletAssets;
     }
 }
-
-export const dropletAddedPacket = packet<(drop: BasePart) => void>({ isUnreliable: true });
 
 export default class Droplet {
     static readonly DROPLETS = new Array<Droplet>();
@@ -791,7 +788,7 @@ export default class Droplet {
 
             clone.Name = tostring(++Droplet.instatiationCount);
             if (cframe !== undefined) {
-                dropletAddedPacket.toClientsInRadius(cframe.Position, 128, drop!);
+                Packets.dropletAdded.toClientsInRadius(cframe.Position, 128, drop!);
             }
 
             Droplet.SPAWNED_DROPLETS.set(clone, instanceInfo);
@@ -934,7 +931,7 @@ export default class Droplet {
         eat(heartbeatConnection);
 
         if (!IS_SERVER) {
-            const addedConnection = dropletAddedPacket.fromServer((drop?: BasePart) => {
+            const addedConnection = Packets.dropletAdded.fromServer((drop?: BasePart) => {
                 if (!drop) return;
 
                 const originalSize = drop.GetAttribute("OriginalSize") as Vector3 | undefined;

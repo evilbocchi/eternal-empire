@@ -33,10 +33,13 @@ const KEY_CODES = new Map<number, Enum.KeyCode>([
 
 const equipGear = (itemId: string) => {
     const backpack = LOCAL_PLAYER.FindFirstChildOfClass("Backpack");
+    const character = LOCAL_PLAYER.Character;
+    const humanoid = character?.FindFirstChildOfClass("Humanoid");
+    if (backpack === undefined || character === undefined || humanoid === undefined) return false;
 
-    const currentlyEquippedTool = LOCAL_PLAYER.Character?.FindFirstChildOfClass("Tool");
+    const currentlyEquippedTool = character?.FindFirstChildOfClass("Tool");
     if (currentlyEquippedTool) {
-        currentlyEquippedTool.Parent = backpack;
+        humanoid.UnequipTools();
         if (currentlyEquippedTool.Name === itemId) {
             playSound("Unequip.mp3");
             return false;
@@ -50,7 +53,7 @@ const equipGear = (itemId: string) => {
     }
 
     if (tool === undefined) return false;
-    tool.Parent = LOCAL_PLAYER.Character;
+    humanoid.EquipTool(tool);
     playSound("Equip.mp3");
     return true;
 };

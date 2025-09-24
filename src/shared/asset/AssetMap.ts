@@ -49,6 +49,7 @@ export const assets = {
   "assets/JadeScythe.png": "rbxassetid://82073727478202",
   "assets/LandReclaimation.png": "rbxassetid://114590541643888",
   "assets/LandReclaimationII.png": "rbxassetid://140380267491326",
+  "assets/Lock.png": "rbxassetid://92190853815511",
   "assets/Logo.png": "rbxassetid://86137985577570",
   "assets/LogoSmall.png": "rbxassetid://119850060078283",
   "assets/MasteryOfTheObbyI.png": "rbxassetid://96624271617902",

@@ -1,8 +1,9 @@
 import { OnoeNum } from "@antivivi/serikanum";
-import React, { useEffect, useState } from "@rbxts/react";
+import React, { Fragment, useEffect, useState } from "@rbxts/react";
 import { RobotoSlabBold, RobotoSlabHeavy } from "client/ui/GameFonts";
 import DarkMatter from "shared/currency/mechanics/DarkMatter";
 import Packets from "shared/Packets";
+import Sandbox from "shared/Sandbox";
 import DarkMatterPart from "shared/world/nodes/DarkMatterPart";
 
 function calculateDetails(balance: BaseCurrencyMap) {

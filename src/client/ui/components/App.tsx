@@ -59,9 +59,11 @@ import StatsWindow from "client/ui/components/stats/StatsWindow";
 import TooltipWindow from "client/ui/components/tooltip/TooltipWindow";
 import DocumentManager from "client/ui/components/window/DocumentManager";
 import WorldRenderer from "client/ui/components/world/WorldRenderer";
+import { setVisibilityMain } from "client/ui/hooks/useVisibility";
 import MusicManager from "client/ui/MusicManager";
 import { assets, getAsset } from "shared/asset/AssetMap";
 import { IS_EDIT, IS_PUBLIC_SERVER, IS_STUDIO } from "shared/Context";
+import Sandbox from "shared/Sandbox";
 
 function addRoot(roots: Set<Root>, container: Instance): Root {
     const root = createRoot(container);
@@ -118,7 +120,9 @@ export default function App({ viewportsEnabled }: { viewportsEnabled: boolean })
         addRoot(roots, CHESTLOOT_GUI).render(<ChestLootManager />);
         addRoot(roots, CHALLENGE_GUI).render(<ChallengeManager />);
         addRoot(roots, CHALLENGE_HUD_GUI).render(<ChallengeHudManager />);
-        addRoot(roots, WORLD_GUI).render(<WorldRenderer />);
+        if (!Sandbox.getEnabled()) {
+            addRoot(roots, WORLD_GUI).render(<WorldRenderer />);
+        }
 
         LOCAL_PLAYER.SetAttribute("Start", IS_PUBLIC_SERVER);
 
@@ -127,6 +131,8 @@ export default function App({ viewportsEnabled }: { viewportsEnabled: boolean })
         task.delay(1, () => {
             if (IS_PUBLIC_SERVER) {
                 DocumentManager.setVisible("Start", true);
+            } else if (Sandbox.getEnabled()) {
+                setVisibilityMain(true);
             } else {
                 performIntroSequence();
             }

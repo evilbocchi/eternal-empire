@@ -114,6 +114,7 @@ namespace Packets {
     export const boostChanged = packet<(boostPerItem: Map<string, BaseOnoeNum>) => void>({ isUnreliable: true });
 
     // droplets
+    export const dropletAdded = packet<(drop: BasePart) => void>({ isUnreliable: true });
     export const dropletBurnt = packet<(dropletModelId: string, amountPerCurrency: BaseCurrencyMap) => void>({
         isUnreliable: true,
     });
