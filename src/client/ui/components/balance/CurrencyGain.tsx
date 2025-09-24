@@ -100,15 +100,20 @@ export function CurrencyGainManager() {
         const container = containerRef.current;
         if (!container) return;
 
-        const showCurrencyGain = (at: Vector3, amountPerCurrency: BaseCurrencyMap) => {
+        const showCurrencyGain = (at: Vector3 | undefined, amountPerCurrency: BaseCurrencyMap) => {
             const camera = Workspace.CurrentCamera;
             if (camera === undefined) return;
-            if (at.sub(camera.CFrame.Position).Magnitude > 50) {
-                return;
+            let location: Vector3;
+            if (at) {
+                if (at.sub(camera.CFrame.Position).Magnitude > 50) {
+                    return;
+                }
+                const [loc, withinBounds] = camera.WorldToScreenPoint(at);
+                if (!withinBounds) return;
+                location = loc;
+            } else {
+                location = new Vector3(camera.ViewportSize.X / 2, camera.ViewportSize.Y / 2, 0);
             }
-            const [location, withinBounds] = camera.WorldToScreenPoint(at);
-            if (!withinBounds) return;
-
             // Create currency gains directly without React components
             let index = 0;
             for (const [currency] of CurrencyBundle.SORTED_DETAILS) {

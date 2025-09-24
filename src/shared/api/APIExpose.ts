@@ -10,5 +10,5 @@ export const Server = {
 
 /** Exposed signals that allow the UI to interact outside `src/client`. */
 export namespace UISignals {
-    export const showCurrencyGain = new Signal<(at: Vector3, amountPerCurrency: BaseCurrencyMap) => void>();
+    export const showCurrencyGain = new Signal<(at: Vector3 | undefined, amountPerCurrency: BaseCurrencyMap) => void>();
 }

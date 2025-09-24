@@ -1,8 +1,9 @@
-import { BaseOnoeNum } from "@antivivi/serikanum";
+import { BaseOnoeNum, OnoeNum } from "@antivivi/serikanum";
 import { Debris, StarterGui, TextService, TweenService, Workspace } from "@rbxts/services";
 import { PLAYER_GUI } from "client/constants";
 import Shaker from "client/ui/components/effect/Shaker";
 import MusicManager from "client/ui/MusicManager";
+import { UISignals } from "shared/api/APIExpose";
 import { ASSETS, playSound } from "shared/asset/GameAssets";
 import { IS_EDIT } from "shared/Context";
 import { AREAS } from "shared/world/Area";
@@ -51,11 +52,10 @@ function createDramaticIntro(): ScreenGui {
     textLabel.TextTransparency = 0; // Make visible since we'll control character appearance
     textLabel.Parent = screenGui;
 
-    // Text stroke for better visibility
     const textStroke = new Instance("UIStroke");
     textStroke.Color = new Color3(0, 0, 0);
-    textStroke.Thickness = 4;
-    textStroke.Transparency = 0; // Make stroke visible
+    textStroke.Thickness = 3;
+    textStroke.Transparency = 0;
     textStroke.Parent = textLabel;
 
     return screenGui;
@@ -79,12 +79,19 @@ async function animateTextCharacterByCharacter(textLabel: TextLabel, fullText: s
         charLabel.BackgroundTransparency = 1;
         charLabel.Font = textLabel.Font;
         charLabel.Text = char;
+        charLabel.TextSize = 30;
         charLabel.TextColor3 = textLabel.TextColor3;
         charLabel.TextSize = textLabel.TextSize;
         charLabel.TextXAlignment = Enum.TextXAlignment.Left;
         charLabel.TextYAlignment = Enum.TextYAlignment.Center;
         charLabel.TextTransparency = 1; // Start invisible
         charLabel.ZIndex = textLabel.ZIndex;
+
+        const stroke = new Instance("UIStroke");
+        stroke.Color = new Color3(0, 0, 0);
+        stroke.Thickness = 3;
+        stroke.Transparency = 1;
+        stroke.Parent = charLabel;
 
         // Calculate position for this character
         const precedingText = fullText.sub(1, i);
@@ -104,13 +111,18 @@ async function animateTextCharacterByCharacter(textLabel: TextLabel, fullText: s
         const currentChar = fullText.sub(currentIndex + 1, currentIndex + 1);
 
         // Fade in the character
-        const fadeIn = TweenService.Create(
-            charLabel,
-            new TweenInfo(fadeInDuration, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
-            { TextTransparency: 0 },
-        );
+        TweenService.Create(charLabel, new TweenInfo(fadeInDuration, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+            TextTransparency: 0,
+        }).Play();
 
-        fadeIn.Play();
+        const stroke = charLabel.FindFirstChildOfClass("UIStroke");
+        if (stroke) {
+            TweenService.Create(
+                stroke,
+                new TweenInfo(fadeInDuration, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+                { Transparency: 0 },
+            ).Play();
+        }
 
         if (currentIndex < fullText.size() - 1) {
             // Add extra delay for punctuation marks
@@ -144,27 +156,32 @@ async function animateTextCharacterByCharacter(textLabel: TextLabel, fullText: s
     }
 }
 
-async function fadeOutTextElements(textLabel: TextLabel, textStroke: UIStroke): Promise<void> {
+async function fadeOutTextElements(textLabel: TextLabel, textStroke?: UIStroke): Promise<void> {
     // Fade out all individual character labels
     const characterLabels = textLabel.GetChildren();
     for (const charLabel of characterLabels) {
         if (charLabel.IsA("TextLabel")) {
-            const charFadeOut = TweenService.Create(
-                charLabel,
-                new TweenInfo(1, Enum.EasingStyle.Quad, Enum.EasingDirection.In),
-                { TextTransparency: 1 },
-            );
-            charFadeOut.Play();
+            TweenService.Create(charLabel, new TweenInfo(1, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
+                TextTransparency: 1,
+            }).Play();
+            const stroke = charLabel.FindFirstChildOfClass("UIStroke");
+            if (stroke) {
+                TweenService.Create(stroke, new TweenInfo(1, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
+                    Transparency: 1,
+                }).Play();
+            }
         }
     }
 
     // Also fade out the stroke
-    const strokeFadeOut = TweenService.Create(
-        textStroke,
-        new TweenInfo(1, Enum.EasingStyle.Quad, Enum.EasingDirection.In),
-        { Transparency: 1 },
-    );
-    strokeFadeOut.Play();
+    if (textStroke) {
+        const strokeFadeOut = TweenService.Create(
+            textStroke,
+            new TweenInfo(1, Enum.EasingStyle.Quad, Enum.EasingDirection.In),
+            { Transparency: 1 },
+        );
+        strokeFadeOut.Play();
+    }
 
     // Wait for fade out to complete
     await new Promise<void>((resolve) => {
@@ -245,18 +262,13 @@ export default async function playSkillificationSequence(amount: BaseOnoeNum) {
     }
 
     // Wait initial delay
-    await new Promise<void>((resolve) => {
-        task.delay(0.5, () => resolve());
-    });
+    task.wait(0.5);
 
     // Phase 1: Animate text character by character
-    const dramaticText = "You sacrificed everything for power... Now, embrace it.";
-    await animateTextCharacterByCharacter(textLabel, dramaticText);
+    await animateTextCharacterByCharacter(textLabel, "You sacrificed everything for power... Now, embrace it.");
 
     // Phase 2: Hold the text for dramatic effect (2 seconds)
-    await new Promise<void>((resolve) => {
-        task.delay(2, () => resolve());
-    });
+    task.wait(2);
 
     // Phase 3: Fade out the text (1 second)
     await fadeOutTextElements(textLabel, textStroke);
@@ -270,4 +282,6 @@ export default async function playSkillificationSequence(amount: BaseOnoeNum) {
     });
 
     await playThunderSequence(currentCamera);
+
+    UISignals.showCurrencyGain.fire(undefined, new Map([["Skill", new OnoeNum(amount)]]));
 }
