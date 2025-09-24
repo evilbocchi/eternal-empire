@@ -63,7 +63,7 @@ export function BalanceOptionStyling({ details }: { details: CurrencyDetails }) 
     );
 }
 
-export const balanceOptionImagePerCurrency = new Map<Currency, ImageLabel>();
+export const balanceOptionImagePerCurrency = new Map<Currency | "none", GuiObject>();
 
 /**
  * Individual currency balance display component.

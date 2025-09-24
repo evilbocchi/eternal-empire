@@ -1,5 +1,5 @@
 import { BaseOnoeNum, OnoeNum } from "@antivivi/serikanum";
-import React, { Fragment, useEffect, useRef, useState } from "@rbxts/react";
+import React, { useEffect, useRef } from "@rbxts/react";
 import { CollectionService, Debris, TweenService, Workspace } from "@rbxts/services";
 import { balanceOptionImagePerCurrency } from "client/ui/components/balance/BalanceOption";
 import displayBalanceCurrency from "client/ui/components/balance/displayBalanceCurrency";
@@ -10,109 +10,96 @@ import CurrencyBundle from "shared/currency/CurrencyBundle";
 import { CURRENCY_DETAILS } from "shared/currency/CurrencyDetails";
 import Packets from "shared/Packets";
 
-export default function CurrencyGain({
-    currency,
-    amount,
-    start,
-    offsetIndex,
-}: {
-    currency: Currency;
-    amount: BaseOnoeNum;
-    start: Vector3;
-    offsetIndex: number;
-}) {
-    const frameRef = useRef<Frame>();
-    const imageLabelRef = useRef<ImageLabel>();
-    const textLabelRef = useRef<TextLabel>();
-    const strokeRef = useRef<UIStroke>();
+/**
+ * Creates and animates a currency gain element imperatively for better performance
+ */
+function createCurrencyGain(
+    parent: GuiObject,
+    currency: Currency,
+    amount: BaseOnoeNum,
+    start: Vector3,
+    offsetIndex: number,
+) {
     const details = CURRENCY_DETAILS[currency];
 
-    useEffect(() => {
-        const frame = frameRef.current;
-        const imageLabel = imageLabelRef.current;
-        const textLabel = textLabelRef.current;
-        const stroke = strokeRef.current;
-        if (frame === undefined || imageLabel === undefined || textLabel === undefined || stroke === undefined) return;
+    // Create the main frame
+    const frame = new Instance("Frame");
+    frame.AutomaticSize = Enum.AutomaticSize.XY;
+    frame.BackgroundTransparency = 1;
+    frame.Parent = parent;
 
-        Debris.AddItem(frame, 1);
-        const size = frame.AbsoluteSize;
-        frame.Position = UDim2.fromOffset(start.X - size.X / 2, start.Y + offsetIndex * 20 + size.Y / 2);
+    // Create the currency image
+    const imageLabel = new Instance("ImageLabel");
+    imageLabel.AnchorPoint = new Vector2(0, 0.5);
+    imageLabel.BackgroundTransparency = 1;
+    imageLabel.Image = details.image;
+    imageLabel.LayoutOrder = 2;
+    imageLabel.Size = new UDim2(0, 20, 0, 20);
+    imageLabel.ZIndex = 4;
+    imageLabel.Parent = frame;
 
-        const balanceOptionImage = balanceOptionImagePerCurrency.get(currency);
-        if (balanceOptionImage === undefined) return;
-        const destination = balanceOptionImage.AbsolutePosition.add(balanceOptionImage.AbsoluteSize.div(2));
+    // Create the currency amount text
+    const textLabel = new Instance("TextLabel");
+    textLabel.AutomaticSize = Enum.AutomaticSize.X;
+    textLabel.BackgroundTransparency = 1;
+    textLabel.Font = Enum.Font.Unknown;
+    textLabel.FontFace = RobotoSlabExtraBold;
+    textLabel.Size = new UDim2(0, 0, 0, 20);
+    textLabel.Text = displayBalanceCurrency(currency, new OnoeNum(amount));
+    textLabel.TextColor3 = details.color;
+    textLabel.TextScaled = true;
+    textLabel.TextSize = 14;
+    textLabel.TextWrapped = true;
+    textLabel.Parent = frame;
 
-        const tweenInfo = new TweenInfo(1, Enum.EasingStyle.Quart, Enum.EasingDirection.In);
+    // Create the text stroke
+    const stroke = new Instance("UIStroke");
+    stroke.Thickness = 2;
+    stroke.Parent = textLabel;
 
-        TweenService.Create(frame, tweenInfo, {
-            Position: UDim2.fromOffset(destination.X, destination.Y),
-            Rotation: frame.Rotation + math.random(-45, 45),
-        }).Play();
+    // Create the layout
+    const layout = new Instance("UIListLayout");
+    layout.FillDirection = Enum.FillDirection.Horizontal;
+    layout.Padding = new UDim(0, 3);
+    layout.SortOrder = Enum.SortOrder.LayoutOrder;
+    layout.VerticalAlignment = Enum.VerticalAlignment.Center;
+    layout.Parent = frame;
 
-        if (UserGameSettings!.SavedQualityLevel.Value > 5) {
-            TweenService.Create(imageLabel, tweenInfo, { ImageTransparency: 1 }).Play();
-            TweenService.Create(textLabel, tweenInfo, { TextTransparency: 1 }).Play();
-            TweenService.Create(stroke, tweenInfo, { Transparency: 1 }).Play();
-        }
-    }, []);
+    // Set up cleanup
+    Debris.AddItem(frame, 1);
 
-    return (
-        <frame ref={frameRef} AutomaticSize={Enum.AutomaticSize.XY} BackgroundTransparency={1}>
-            <imagelabel
-                ref={imageLabelRef}
-                AnchorPoint={new Vector2(0, 0.5)}
-                BackgroundTransparency={1}
-                Image={details.image}
-                LayoutOrder={2}
-                Size={new UDim2(0, 20, 0, 20)}
-                ZIndex={4}
-            />
-            <textlabel
-                ref={textLabelRef}
-                AutomaticSize={Enum.AutomaticSize.X}
-                BackgroundTransparency={1}
-                Font={Enum.Font.Unknown}
-                FontFace={RobotoSlabExtraBold}
-                Size={new UDim2(0, 0, 0, 20)}
-                Text={displayBalanceCurrency(currency, new OnoeNum(amount))}
-                TextColor3={details.color}
-                TextScaled={true}
-                TextSize={14}
-                TextWrapped={true}
-            >
-                <uistroke ref={strokeRef} Thickness={2} />
-            </textlabel>
-            <uilistlayout
-                FillDirection={Enum.FillDirection.Horizontal}
-                Padding={new UDim(0, 3)}
-                SortOrder={Enum.SortOrder.LayoutOrder}
-                VerticalAlignment={Enum.VerticalAlignment.Center}
-            />
-        </frame>
-    );
-}
+    // Position the frame
+    const size = frame.AbsoluteSize;
+    frame.Position = UDim2.fromOffset(start.X - size.X / 2, start.Y + offsetIndex * 20 + size.Y / 2);
 
-export function CurrencyBundleGain({ currencyBundle, start }: { currencyBundle: CurrencyBundle; start: Vector3 }) {
-    const currencyGainElements = new Array<JSX.Element>();
-    let index = 0;
-    for (const [currency] of CurrencyBundle.SORTED_DETAILS) {
-        const amount = currencyBundle.get(currency);
-        if (amount === undefined || amount.lessEquals(0)) continue;
-        currencyGainElements.push(
-            <CurrencyGain currency={currency} amount={amount} start={start} offsetIndex={index} />,
-        );
-        index++;
+    // Get destination for animation
+    const balanceOptionImage = balanceOptionImagePerCurrency.get(currency) ?? balanceOptionImagePerCurrency.get("none");
+    if (balanceOptionImage === undefined) return;
+    const destination = balanceOptionImage.AbsolutePosition.add(balanceOptionImage.AbsoluteSize.div(2));
+
+    // Create and play animation
+    const tweenInfo = new TweenInfo(1, Enum.EasingStyle.Quart, Enum.EasingDirection.In);
+
+    TweenService.Create(frame, tweenInfo, {
+        Position: UDim2.fromOffset(destination.X, destination.Y),
+        Rotation: frame.Rotation + math.random(-45, 45),
+    }).Play();
+
+    // Animate transparency if quality is high enough
+    if (UserGameSettings!.SavedQualityLevel.Value > 5) {
+        TweenService.Create(imageLabel, tweenInfo, { ImageTransparency: 1 }).Play();
+        TweenService.Create(textLabel, tweenInfo, { TextTransparency: 1 }).Play();
+        TweenService.Create(stroke, tweenInfo, { Transparency: 1 }).Play();
     }
-
-    return <Fragment>{currencyGainElements}</Fragment>;
 }
 
 export function CurrencyGainManager() {
-    const [currencyGainInfos, setCurrencyGainInfos] = useState<
-        Set<{ currencyBundle: CurrencyBundle; location: Vector3 }>
-    >(new Set());
+    const containerRef = useRef<Frame>();
 
     useEffect(() => {
+        const container = containerRef.current;
+        if (!container) return;
+
         const showCurrencyGain = (at: Vector3, amountPerCurrency: BaseCurrencyMap) => {
             const camera = Workspace.CurrentCamera;
             if (camera === undefined) return;
@@ -122,18 +109,17 @@ export function CurrencyGainManager() {
             const [location, withinBounds] = camera.WorldToScreenPoint(at);
             if (!withinBounds) return;
 
-            const currencyBundle = new CurrencyBundle();
-            for (const [currency, amount] of pairs(amountPerCurrency)) {
-                currencyBundle.set(currency, new OnoeNum(amount));
+            // Create currency gains directly without React components
+            let index = 0;
+            for (const [currency] of CurrencyBundle.SORTED_DETAILS) {
+                const amount = amountPerCurrency.get(currency);
+                if (amount === undefined || new OnoeNum(amount).lessEquals(0)) continue;
+
+                createCurrencyGain(container, currency, amount, location, index);
+                index++;
             }
-            const currencyGainInfo = { currencyBundle, location };
-            currencyGainInfos.add(currencyGainInfo);
-            task.delay(1, () => {
-                currencyGainInfos.delete(currencyGainInfo);
-                setCurrencyGainInfos(currencyGainInfos);
-            });
-            setCurrencyGainInfos(currencyGainInfos);
         };
+
         const connection = UISignals.showCurrencyGain.connect(showCurrencyGain);
 
         const gainConnection = Packets.dropletBurnt.fromServer((dropletModelId, amountPerCurrency) => {
@@ -152,11 +138,5 @@ export function CurrencyGainManager() {
         };
     }, []);
 
-    return (
-        <Fragment>
-            {[...currencyGainInfos].map((info, index) => (
-                <CurrencyBundleGain key={index} currencyBundle={info.currencyBundle} start={info.location} />
-            ))}
-        </Fragment>
-    );
+    return <frame ref={containerRef} BackgroundTransparency={1} Size={new UDim2(1, 0, 1, 0)} ZIndex={1000} />;
 }

@@ -1,6 +1,6 @@
 import { BaseOnoeNum, OnoeNum } from "@antivivi/serikanum";
 import React, { Fragment, useEffect, useRef, useState } from "@rbxts/react";
-import BalanceOption from "client/ui/components/balance/BalanceOption";
+import BalanceOption, { balanceOptionImagePerCurrency } from "client/ui/components/balance/BalanceOption";
 import NavigationControls from "client/ui/components/balance/NavigationControls";
 import { useDocument } from "client/ui/components/window/DocumentManager";
 import useInterval from "client/ui/hooks/useInterval";
@@ -23,6 +23,7 @@ const ZERO = new OnoeNum(0);
  */
 export default function BalanceWindow() {
     const wrapperRef = useRef<Frame>();
+    const navigationRef = useRef<Frame>();
     const [balance, setBalance] = useState<BaseCurrencyMap>(new Map());
     const [revenue, setRevenue] = useState<BaseCurrencyMap>(new Map());
     const [difference, setDifference] = useState<BaseCurrencyMap>(new Map());
@@ -127,6 +128,10 @@ export default function BalanceWindow() {
 
     const currentCurrencies = getCurrentPageCurrencies();
 
+    if (navigationRef.current) {
+        balanceOptionImagePerCurrency.set("none", navigationRef.current);
+    }
+
     return (
         <frame
             ref={wrapperRef}
@@ -144,7 +149,7 @@ export default function BalanceWindow() {
                 VerticalAlignment={Enum.VerticalAlignment.Top}
             />
 
-            <frame BackgroundTransparency={1} LayoutOrder={-999} Size={new UDim2(1, 0, 0, 20)}>
+            <frame ref={navigationRef} BackgroundTransparency={1} LayoutOrder={-999} Size={new UDim2(1, 0, 0, 20)}>
                 {/* Navigation Controls */}
                 {maxPage > 1 ? (
                     <NavigationControls

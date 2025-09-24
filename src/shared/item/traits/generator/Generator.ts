@@ -5,6 +5,7 @@ import { Server, UISignals } from "shared/api/APIExpose";
 import UserGameSettings from "shared/api/UserGameSettings";
 import { playSound } from "shared/asset/GameAssets";
 import { PLACED_ITEMS_FOLDER } from "shared/constants";
+import { IS_SERVER } from "shared/Context";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import eat from "shared/hamster/eat";
 import Item from "shared/item/Item";
@@ -16,14 +17,11 @@ declare global {
     interface ItemTraits {
         Generator: Generator;
     }
-
-    interface InstanceInfo {
-        OnGenerated?: (amountPerCurrency: BaseCurrencyMap) => void;
-    }
 }
 
 const generatedPacket = packet<(id: string, amountPerCurrency: BaseCurrencyMap) => void>();
 const GENERATOR_UPGRADES = NamedUpgrades.getUpgrades("Generator");
+const onGeneratedPerPlacementId = new Map<string, (amountPerCurrency: BaseCurrencyMap) => void>();
 
 export default class Generator extends Boostable {
     passiveGain: CurrencyBundle | undefined;
@@ -128,7 +126,7 @@ export default class Generator extends Boostable {
         const clickPart = model.FindFirstChild("ClickPart") as BasePart | undefined;
         const clickPartOriginalSize = clickPart?.Size;
 
-        setInstanceInfo(model, "OnGenerated", (amountPerCurrency: BaseCurrencyMap) => {
+        const onGenerated = (amountPerCurrency: BaseCurrencyMap) => {
             if (UserGameSettings!.SavedQualityLevel.Value > 5) {
                 for (const [part, position] of positions) {
                     TweenService.Create(part, tween1, {
@@ -154,6 +152,10 @@ export default class Generator extends Boostable {
             } else {
                 UISignals.showCurrencyGain.fire(part.Position, amountPerCurrency);
             }
+        };
+        onGeneratedPerPlacementId.set(model.Name, onGenerated);
+        model.Destroying.Once(() => {
+            onGeneratedPerPlacementId.delete(model.Name);
         });
     }
 
@@ -161,13 +163,6 @@ export default class Generator extends Boostable {
         super(item);
         item.onLoad((model) => Generator.load(model, this));
         item.onClientLoad((model) => Generator.clientLoad(model));
-
-        const connection = generatedPacket.fromServer((placementId, amountPerCurrency) => {
-            const model = PLACED_ITEMS_FOLDER.FindFirstChild(placementId) as Model | undefined;
-            if (model === undefined) return;
-            getInstanceInfo(model, "OnGenerated")?.(amountPerCurrency);
-        });
-        eat(connection);
     }
 
     setPassiveGain(passiveGain: CurrencyBundle) {
@@ -180,5 +175,18 @@ export default class Generator extends Boostable {
             str = str.gsub("%%gain%%", this.passiveGain.toString(true, undefined, "/s"))[0];
 
         return str;
+    }
+
+    static {
+        if (!IS_SERVER) {
+            const connection = generatedPacket.fromServer((placementId, amountPerCurrency) => {
+                const model = PLACED_ITEMS_FOLDER.FindFirstChild(placementId) as Model | undefined;
+                if (model === undefined) return;
+                const onGenerated = onGeneratedPerPlacementId.get(model.Name);
+                if (onGenerated === undefined) return;
+                onGenerated(amountPerCurrency);
+            });
+            eat(connection);
+        }
     }
 }
