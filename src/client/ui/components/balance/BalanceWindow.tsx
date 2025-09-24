@@ -23,9 +23,9 @@ const ZERO = new OnoeNum(0);
  */
 export default function BalanceWindow() {
     const wrapperRef = useRef<Frame>();
-    const [balance, setBalance] = useState<Map<Currency, BaseOnoeNum>>(new Map());
-    const [revenue, setRevenue] = useState<Map<Currency, BaseOnoeNum>>(new Map());
-    const [difference, setDifference] = useState<Map<Currency, BaseOnoeNum>>(new Map());
+    const [balance, setBalance] = useState<BaseCurrencyMap>(new Map());
+    const [revenue, setRevenue] = useState<BaseCurrencyMap>(new Map());
+    const [difference, setDifference] = useState<BaseCurrencyMap>(new Map());
     const [currentPage, setCurrentPage] = useState(1);
     const [maxPage, setMaxPage] = useState(1);
     const [bombBoosts, setBombBoosts] = useState<CurrencyBundle | undefined>(new CurrencyBundle());

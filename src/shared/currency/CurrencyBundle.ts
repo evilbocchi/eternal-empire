@@ -88,7 +88,7 @@ class CurrencyBundle {
      * @returns A formatted string of all amounts
      */
     static currenciesToString(
-        amountPerCurrency: Map<Currency, BaseOnoeNum>,
+        amountPerCurrency: BaseCurrencyMap,
         isColored?: boolean,
         prefix?: string,
         suffix?: string,

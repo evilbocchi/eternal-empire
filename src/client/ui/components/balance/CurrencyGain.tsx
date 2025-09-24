@@ -113,7 +113,7 @@ export function CurrencyGainManager() {
     >(new Set());
 
     useEffect(() => {
-        const showCurrencyGain = (at: Vector3, amountPerCurrency: Map<Currency, BaseOnoeNum>) => {
+        const showCurrencyGain = (at: Vector3, amountPerCurrency: BaseCurrencyMap) => {
             const camera = Workspace.CurrentCamera;
             if (camera === undefined) return;
             if (at.sub(camera.CFrame.Position).Magnitude > 50) {

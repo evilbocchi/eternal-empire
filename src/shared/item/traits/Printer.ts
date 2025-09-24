@@ -16,7 +16,7 @@ declare global {
         name: string;
         area: AreaId;
         autoloads: boolean;
-        calculatedPrice: Map<Currency, BaseOnoeNum>;
+        calculatedPrice: BaseCurrencyMap;
         items: Array<PlacedItem>;
         alerted: boolean;
     }
