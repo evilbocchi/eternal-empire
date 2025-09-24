@@ -4,7 +4,7 @@ import { isConstructor } from "@flamework/core/out/utility";
 import { useEffect, useState } from "@rbxts/react";
 import { HttpService, Players, ReplicatedStorage, RunService, Workspace } from "@rbxts/services";
 import { LOCAL_PLAYER } from "client/constants";
-import SoundManager from "client/ui/SoundManager";
+import MusicManager from "client/ui/MusicManager";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import { CURRENCY_DETAILS } from "shared/currency/CurrencyDetails";
 import PlayerProfileTemplate from "shared/data/profile/PlayerProfileTemplate";
@@ -44,7 +44,7 @@ class StoryMocking {
                 Packets.settings.setFor(player, mockPlayerData.settings);
             });
 
-            const cleanup = SoundManager.init();
+            const cleanup = MusicManager.init();
 
             return () => {
                 setSetting.Disconnect();

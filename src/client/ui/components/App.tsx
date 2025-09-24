@@ -60,7 +60,7 @@ import TooltipWindow from "client/ui/components/tooltip/TooltipWindow";
 import DocumentManager from "client/ui/components/window/DocumentManager";
 import WorldRenderer from "client/ui/components/world/WorldRenderer";
 import { setVisibilityMain } from "client/ui/hooks/useVisibility";
-import SoundManager from "client/ui/SoundManager";
+import MusicManager from "client/ui/MusicManager";
 import { assets, getAsset } from "shared/asset/AssetMap";
 import { playSound } from "shared/asset/GameAssets";
 import { WAYPOINTS } from "shared/constants";
@@ -151,7 +151,7 @@ function onIntroMarkerChanged() {
     if (ReplicatedStorage.GetAttribute("Intro")) doIntroSequence();
     else {
         math.randomseed(42);
-        SoundManager.refreshMusic(true);
+        MusicManager.refreshMusic(true);
         math.randomseed(tick());
         setVisibilityMain(true);
     }
@@ -210,7 +210,7 @@ export default function App({ viewportsEnabled }: { viewportsEnabled: boolean })
 
         LOCAL_PLAYER.SetAttribute("Start", IS_PUBLIC_SERVER);
 
-        const cleanup = SoundManager.init();
+        const cleanup = MusicManager.init();
 
         task.delay(1, () => {
             if (IS_PUBLIC_SERVER) {

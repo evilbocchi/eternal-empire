@@ -6,7 +6,7 @@ import { IS_EDIT } from "shared/Context";
 import Packets from "shared/Packets";
 import { AREAS } from "shared/world/Area";
 
-namespace SoundManager {
+namespace MusicManager {
     let inChallenge = false;
     let connection: RBXScriptConnection | undefined = undefined;
 
@@ -186,4 +186,4 @@ namespace SoundManager {
     }
 }
 
-export default SoundManager;
+export default MusicManager;

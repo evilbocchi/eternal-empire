@@ -5,7 +5,7 @@ import AboutWindow from "client/ui/components/start/AboutWindow";
 import EmpiresWindow from "client/ui/components/start/EmpiresWindow";
 import MenuOption from "client/ui/components/start/MenuOption";
 import DocumentManager, { useDocument } from "client/ui/components/window/DocumentManager";
-import SoundManager from "client/ui/SoundManager";
+import MusicManager from "client/ui/MusicManager";
 import { getAsset } from "shared/asset/AssetMap";
 import { playSound } from "shared/asset/GameAssets";
 
@@ -70,7 +70,7 @@ export default function StartWindow({ fastTransitions = false }: { fastTransitio
     useEffect(() => {
         let pulsed = false;
         const connection = RunService.Heartbeat.Connect(() => {
-            if (SoundManager.START_MUSIC.TimePosition > 3.5 && !pulsed && logoRef.current) {
+            if (MusicManager.START_MUSIC.TimePosition > 3.5 && !pulsed && logoRef.current) {
                 pulsed = true;
                 const createWave = () => {
                     const wave = logoRef.current!.Clone();
