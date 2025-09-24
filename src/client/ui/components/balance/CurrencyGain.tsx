@@ -26,6 +26,7 @@ function createCurrencyGain(
 
     // Create the main frame
     const frame = new Instance("Frame");
+    frame.AnchorPoint = new Vector2(0.5, 0.5);
     frame.AutomaticSize = Enum.AutomaticSize.XY;
     frame.BackgroundTransparency = 1;
     frame.Parent = parent;
@@ -71,8 +72,7 @@ function createCurrencyGain(
     Debris.AddItem(frame, 1);
 
     // Position the frame
-    const size = frame.AbsoluteSize;
-    frame.Position = UDim2.fromOffset(start.X - size.X / 2, start.Y + offsetIndex * 20 + size.Y / 2);
+    frame.Position = UDim2.fromOffset(start.X, start.Y + offsetIndex * 20);
 
     // Get destination for animation
     const balanceOptionImage = balanceOptionImagePerCurrency.get(currency) ?? balanceOptionImagePerCurrency.get("none");

@@ -224,7 +224,7 @@ export default class ChestService implements OnInit, OnStart {
             if (loot.harvestable !== undefined) addItem(Items.getItem(loot.harvestable)!);
         }
         const current = this.levelService.getXp();
-        const serialized = new Array<{ id: string | "xp"; amount: number }>();
+        const serialized = new Array<LootInfo>();
 
         if (totalXp > 0) {
             this.levelService.setXp(current + totalXp);
@@ -355,14 +355,13 @@ export default class ChestService implements OnInit, OnStart {
                         );
                     }
                 }, 1);
-                cleanups.push(cleanup);
                 const bindableEvent = new Instance("BindableEvent");
                 bindableEvent.Name = "MarkLastOpen";
-                bindableEvent.Event.Connect((lastOpen: number) => markLastOpen(lastOpen));
+                const eventConnection = bindableEvent.Event.Connect((lastOpen: number) => markLastOpen(lastOpen));
                 bindableEvent.Parent = chestModel;
                 const chestLocation = this.round(chestLocationMarker.Position);
                 this.chestPerChestLocation.set(chestLocation, chestModel);
-                prompt.Triggered.Connect(() => {
+                const triggerConnection = prompt.Triggered.Connect(() => {
                     if (!prompt.Enabled) return;
                     if (this.dataService.empireData.unlockedAreas.has(area.name as AreaId)) return;
                     sound.Play();
@@ -377,7 +376,11 @@ export default class ChestService implements OnInit, OnStart {
                         this.openChest(chestLocationMarker.Name, amount);
                     });
                 });
-
+                cleanups.push(() => {
+                    cleanup();
+                    eventConnection.Disconnect();
+                    triggerConnection.Disconnect();
+                });
                 prompt.Parent = chestModel.PrimaryPart;
                 chestModel.Parent = Workspace;
                 createdChests.add(chestModel);

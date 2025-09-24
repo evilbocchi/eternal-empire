@@ -1,7 +1,7 @@
 import Signal from "@antivivi/lemon-signal";
 import { OnoeNum } from "@antivivi/serikanum";
 import React, { Fragment, useEffect, useMemo, useRef, useState } from "@rbxts/react";
-import { Debris, GuiService, TweenService } from "@rbxts/services";
+import { Debris, TweenService } from "@rbxts/services";
 import StringBuilder from "@rbxts/stringbuilder";
 import { Environment } from "@rbxts/ui-labs";
 import { PARALLEL } from "client/constants";
@@ -135,9 +135,7 @@ export default function PurchaseWindow({ viewportManagement }: { viewportManagem
             }
             frame.Position = new UDim2(0, mousePosition.X, 0, mousePosition.Y);
 
-            const destination = itemSlot.AbsolutePosition.add(itemSlot.AbsoluteSize.div(2)).add(
-                GuiService.GetGuiInset()[0],
-            );
+            const destination = itemSlot.AbsolutePosition.add(itemSlot.AbsoluteSize.div(2));
             TweenService.Create(frame, new TweenInfo(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
                 Position: new UDim2(0, destination.X, 0, destination.Y),
                 Size: new UDim2(0, 0, 0, 0),

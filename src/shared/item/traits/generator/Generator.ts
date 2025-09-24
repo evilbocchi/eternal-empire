@@ -102,7 +102,7 @@ export default class Generator extends Boostable {
                     if (character === undefined) continue;
                     const rootPart = character.FindFirstChild("HumanoidRootPart") as BasePart | undefined;
                     if (rootPart === undefined) continue;
-                    if (rootPart.Position.sub(centre).Magnitude < 50) {
+                    if (rootPart.Position.sub(centre).Magnitude < 50 && os.clock() > 10) {
                         generatedPacket.toClient(player, placementId, amountPerCurrency);
                     }
                 }

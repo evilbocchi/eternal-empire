@@ -21,6 +21,7 @@ import { OnPlayerAdded } from "server/services/ModdingService";
 import ChatHookService from "server/services/permissions/ChatHookService";
 import { getNameFromUserId } from "shared/constants";
 import { IS_EDIT, IS_SINGLE_SERVER } from "shared/Context";
+import eat from "shared/hamster/eat";
 import Packets from "shared/Packets";
 
 declare global {
@@ -202,7 +203,7 @@ export default class PermissionsService implements OnStart, OnPlayerAdded {
             "color:138,255,138",
         );
         let counter = 0;
-        player.Chatted.Connect((message) => {
+        const connection = player.Chatted.Connect((message) => {
             if (this.dataService.empireData.globalChat === true && message.sub(1, 1) !== "/") {
                 ++counter;
                 task.delay(5, () => --counter);
@@ -220,6 +221,7 @@ export default class PermissionsService implements OnStart, OnPlayerAdded {
                 });
             }
         });
+        eat(connection, "Disconnect");
     }
 
     onStart() {

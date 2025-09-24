@@ -113,7 +113,7 @@ export default class HarvestableService implements OnStart {
                     receiving.set(harvestable.Name, math.random(1, 2));
                 }
 
-                const serialized = new Array<{ id: string | "xp"; amount: number }>();
+                const serialized = new Array<LootInfo>();
                 for (const [id, amount] of receiving) {
                     this.itemService.giveItem(id, amount);
                     serialized.push({ id, amount });

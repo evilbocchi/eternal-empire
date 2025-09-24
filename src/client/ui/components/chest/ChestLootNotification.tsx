@@ -1,16 +1,5 @@
-/**
- * @fileoverview Chest loot notification component with item viewports and smooth animations.
- *
- * Features:
- * - Smooth slide-in from bottom
- * - Viewport previews of items with amounts
- * - Organized loot display (XP, Items)
- * - Understated animations appropriate for frequent chest openings
- * - Clean, modern design with subtle effects
- */
-
 import React, { Fragment, useEffect, useRef, useState } from "@rbxts/react";
-import { RunService, TweenService } from "@rbxts/services";
+import { TweenService } from "@rbxts/services";
 import { useItemViewport } from "client/ui/components/item/useCIViewportManagement";
 import { TooltipManager } from "client/ui/components/tooltip/TooltipWindow";
 import { RobotoSlab, RobotoSlabBold } from "client/ui/GameFonts";
@@ -18,21 +7,17 @@ import { getAsset } from "shared/asset/AssetMap";
 import { playSound } from "shared/asset/GameAssets";
 import Items from "shared/items/Items";
 
-export interface ChestLootData {
-    loot: Array<{
-        id: string | "xp";
-        amount: number;
-    }>;
+export default function ChestLootNotification({
+    loot,
+    visible,
+    onComplete,
+    viewportManagement,
+}: {
+    loot: Array<LootInfo>;
     visible: boolean;
-}
-
-interface ChestLootNotificationProps {
-    data: ChestLootData;
     onComplete: () => void;
     viewportManagement?: ItemViewportManagement;
-}
-
-export default function ChestLootNotification({ data, onComplete, viewportManagement }: ChestLootNotificationProps) {
+}) {
     const mainFrameRef = useRef<Frame>();
     const animationStarted = useRef(false);
     const exitTweenRef = useRef<Tween>();
@@ -41,8 +26,7 @@ export default function ChestLootNotification({ data, onComplete, viewportManage
 
     // Main animation sequence
     useEffect(() => {
-        if (!data.visible || !mainFrameRef.current) return;
-
+        if (!visible || !mainFrameRef.current) return;
         // If animation is already running, clean up and restart
         if (animationStarted.current) {
             // Cancel existing tweens and timeouts
@@ -128,15 +112,15 @@ export default function ChestLootNotification({ data, onComplete, viewportManage
                 exitTimeoutRef.current = undefined;
             }
         };
-    }, [data.visible, data.loot, onComplete]);
+    }, [visible, onComplete]);
 
-    if (!data.visible) {
+    if (!visible) {
         return <Fragment />;
     }
 
     // Organize loot by type
-    const xpReward = data.loot.find((item) => item.id === "xp");
-    const itemRewards = data.loot.filter((item) => item.id !== "xp");
+    const xpReward = loot.find((item) => item.id === "xp");
+    const itemRewards = loot.filter((item) => item.id !== "xp");
 
     return (
         <frame
@@ -179,7 +163,6 @@ export default function ChestLootNotification({ data, onComplete, viewportManage
                 {/* Item Rewards */}
                 {itemRewards.map((lootItem, index) => (
                     <LootItemSlot
-                        key={`${lootItem.id}_${index}`}
                         itemId={lootItem.id}
                         amount={lootItem.amount}
                         layoutOrder={index + 2}

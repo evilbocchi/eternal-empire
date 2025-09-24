@@ -8,7 +8,7 @@ import ReactRoblox from "@rbxts/react-roblox";
 import { CreateReactStory } from "@rbxts/ui-labs";
 import useCIViewportManagement from "client/ui/components/item/useCIViewportManagement";
 import TooltipWindow from "client/ui/components/tooltip/TooltipWindow";
-import ChestLootNotification, { ChestLootData } from "./ChestLootNotification";
+import ChestLootNotification from "./ChestLootNotification";
 
 export = CreateReactStory(
     {
@@ -26,14 +26,14 @@ export = CreateReactStory(
         },
     },
     (props) => {
-        const [lootData, setLootData] = useState<ChestLootData>({
+        const [lootData, setLootData] = useState<{ loot: Array<LootInfo>; visible: boolean }>({
             loot: [],
             visible: false,
         });
         const viewportManagement = useCIViewportManagement({ enabled: true });
 
         const triggerLoot = () => {
-            const loot: Array<{ id: string | "xp"; amount: number }> = [];
+            const loot: Array<LootInfo> = [];
 
             if (props.controls.includeXP) {
                 loot.push({ id: "xp", amount: props.controls.xpAmount });
@@ -81,7 +81,8 @@ export = CreateReactStory(
                     </frame>
 
                     <ChestLootNotification
-                        data={lootData}
+                        loot={lootData.loot}
+                        visible={lootData.visible}
                         onComplete={handleComplete}
                         viewportManagement={viewportManagement}
                     />

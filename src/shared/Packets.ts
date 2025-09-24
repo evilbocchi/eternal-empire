@@ -47,6 +47,8 @@ declare global {
         notice: string;
         reward: string;
     };
+
+    type LootInfo = { id: string | "xp"; amount: number };
 }
 
 const unloadedSettings = table.clone(PlayerProfileTemplate.settings);
@@ -192,7 +194,7 @@ namespace Packets {
     /**
      * Show the item reward UI.
      */
-    export const showLoot = packet<(loot: { id: string | "xp"; amount: number }[]) => void>();
+    export const showLoot = packet<(loot: LootInfo[]) => void>();
 
     // leaderboard
     export const leaderboardData = property<Map<LeaderboardType, LeaderboardEntry[]>>(new Map());

@@ -38,11 +38,12 @@ export default class ModdingService implements OnInit {
         Modding.onListenerAdded<OnPlayerAdded>((object) => listeners.add(object));
         Modding.onListenerRemoved<OnPlayerAdded>((object) => listeners.delete(object));
 
-        Players.PlayerAdded.Connect((player) => {
+        const connection = Players.PlayerAdded.Connect((player) => {
             for (const listener of listeners) {
                 task.spawn(() => listener.onPlayerAdded(player));
             }
         });
+        eat(connection, "Disconnect");
 
         for (const player of Players.GetPlayers()) {
             for (const listener of listeners) {
@@ -60,9 +61,7 @@ export default class ModdingService implements OnInit {
                 task.spawn(() => listener.onGameAPILoaded());
             }
         });
-        eat(() => {
-            connection.disconnect();
-        });
+        eat(connection, "Disconnect");
         if (Server.ready) {
             this.gameAPILoaded.fire();
         }

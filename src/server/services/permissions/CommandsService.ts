@@ -27,6 +27,7 @@ import { Players, TextChatService } from "@rbxts/services";
 import APIExposeService from "server/services/APIExposeService";
 import Command, { CommandAPI } from "shared/commands/Command";
 import { IS_EDIT } from "shared/Context";
+import eat from "shared/hamster/eat";
 
 declare global {
     type CommandAPI = APIExposeService["Server"] & {
@@ -62,7 +63,7 @@ export default class CommandsService implements OnInit {
         textChatCommand.PrimaryAlias = "/" + command.id;
         textChatCommand.SecondaryAlias = "/" + command.aliases[0] || "";
         textChatCommand.Name = command.id + "Command";
-        textChatCommand.Triggered.Connect((o, u) => {
+        const connection = textChatCommand.Triggered.Connect((o, u) => {
             const params = u.split(" ");
             params.remove(0);
             const p = Players.WaitForChild(o.Name) as Player;
@@ -73,6 +74,7 @@ export default class CommandsService implements OnInit {
             }
             command.execute(p, ...params);
         });
+        eat(connection, "Disconnect");
         textChatCommand.Parent = TextChatService.WaitForChild("TextChatCommands");
     }
 

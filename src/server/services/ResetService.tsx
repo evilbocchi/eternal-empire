@@ -158,7 +158,7 @@ export default class ResetService implements OnInit, OnStart {
             countdownStarted = !players.isEmpty();
         };
         touchPart.CanTouch = true;
-        touchPart.Touched.Connect((otherPart) => {
+        const touchBeganConnection = touchPart.Touched.Connect((otherPart) => {
             const player = getPlayer(otherPart);
             if (player === undefined || !this.permissionsService.checkPermLevel(player, "reset")) return;
             const [affordable] = this.currencyService.canAfford(required);
@@ -167,7 +167,7 @@ export default class ResetService implements OnInit, OnStart {
                 update();
             }
         });
-        touchPart.TouchEnded.Connect((otherPart) => {
+        const touchEndedConnection = touchPart.TouchEnded.Connect((otherPart) => {
             const player = getPlayer(otherPart);
             if (player === undefined || !this.permissionsService.checkPermLevel(player, "reset")) return;
             const changed = players.delete(player);
@@ -176,7 +176,7 @@ export default class ResetService implements OnInit, OnStart {
                 action(players, 3);
             }
         });
-        RunService.Heartbeat.Connect(() => {
+        const heartbeatConnection = RunService.Heartbeat.Connect(() => {
             const countdown = t + 3 - tick();
             if (countdownStarted) {
                 action(players, countdown);
@@ -185,6 +185,11 @@ export default class ResetService implements OnInit, OnStart {
                     countdownStarted = false;
                 }
             }
+        });
+        eat(() => {
+            touchBeganConnection.Disconnect();
+            touchEndedConnection.Disconnect();
+            heartbeatConnection.Disconnect();
         });
     }
 
