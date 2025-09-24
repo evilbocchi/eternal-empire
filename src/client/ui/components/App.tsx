@@ -38,6 +38,7 @@ import ChestLootManager from "client/ui/components/chest/ChestLootManager";
 import CommandsWindow from "client/ui/components/commands/CommandsWindow";
 import ClickSparkManager from "client/ui/components/effect/ClickSparkManager";
 import InventoryWindow from "client/ui/components/item/inventory/InventoryWindow";
+import PortableBeaconWindow from "client/ui/components/item/PortableBeaconWindow";
 import PurchaseWindow from "client/ui/components/item/shop/PurchaseWindow";
 import ShopGui from "client/ui/components/item/shop/ShopGui";
 import useCIViewportManagement from "client/ui/components/item/useCIViewportManagement";
@@ -110,7 +111,12 @@ export default function App({ viewportsEnabled }: { viewportsEnabled: boolean })
                 <TrackedQuestWindow />
             </Fragment>,
         );
-        addRoot(roots, BACKPACK_GUI).render(<BackpackWindow />);
+        addRoot(roots, BACKPACK_GUI).render(
+            <Fragment>
+                <BackpackWindow />
+                <PortableBeaconWindow />
+            </Fragment>,
+        );
         addRoot(roots, STATS_GUI).render(<StatsWindow />);
         addRoot(roots, PURCHASE_GUI).render(<PurchaseWindow viewportManagement={viewportManagement} />);
         addRoot(roots, SHOP_GUI).render(<ShopGui viewportManagement={viewportManagement} />);

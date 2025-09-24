@@ -7,6 +7,7 @@ import { COLOR_SEQUENCE_PER_AREA } from "client/ui/components/world/area/AreaBoa
 import { RobotoMono, RobotoMonoBold } from "client/ui/GameFonts";
 import { getAsset } from "shared/asset/AssetMap";
 import { playSound } from "shared/asset/GameAssets";
+import PortableBeacon from "shared/items/tools/PortableBeacon";
 import Packets from "shared/Packets";
 
 interface AreaInfo {
@@ -41,7 +42,7 @@ const TELEPORTABLE_AREAS: {
 };
 
 export default function PortableBeaconWindow() {
-    const { id, visible, closeDocument } = useSingleDocument({ id: "PortableBeacon" });
+    const { id, visible, openDocument, closeDocument } = useSingleDocument({ id: "PortableBeacon" });
     const [unlockedAreas, setUnlockedAreas] = useState<Set<AreaId>>(new Set(["BarrenIslands"]));
 
     useEffect(() => {
@@ -53,10 +54,40 @@ export default function PortableBeaconWindow() {
             setUnlockedAreas(newAreas);
         });
 
+        let childAddedConnection: RBXScriptConnection | undefined;
+        let childRemovedConnection: RBXScriptConnection | undefined;
+        const onCharacterAdded = (character: Model) => {
+            childAddedConnection?.Disconnect();
+            childRemovedConnection?.Disconnect();
+            childAddedConnection = character.ChildAdded.Connect((child) => {
+                if (child.Name === PortableBeacon.id) {
+                    openDocument();
+                }
+            });
+            childRemovedConnection = character.ChildRemoved.Connect((child) => {
+                if (child.Name === PortableBeacon.id) {
+                    closeDocument();
+                }
+            });
+        };
+        const connection = LOCAL_PLAYER.CharacterAdded.Connect(onCharacterAdded);
+        if (LOCAL_PLAYER.Character !== undefined) {
+            onCharacterAdded(LOCAL_PLAYER.Character);
+        }
+
         return () => {
             unlockedAreasConnection.Disconnect();
+            childAddedConnection?.Disconnect();
+            childRemovedConnection?.Disconnect();
+            connection.Disconnect();
         };
     }, []);
+
+    useEffect(() => {
+        if (!visible) {
+            LOCAL_PLAYER.Character?.FindFirstChildOfClass("Humanoid")?.UnequipTools();
+        }
+    }, [visible]);
 
     const areaElements = new Array<JSX.Element>();
 

@@ -153,13 +153,17 @@ export function HarvestableGuiRenderer() {
     }, []);
 
     useEffect(() => {
+        let childAddedConnection: RBXScriptConnection | undefined;
+        let childRemovedConnection: RBXScriptConnection | undefined;
         const onCharacterAdded = (character: Model) => {
-            character.ChildAdded.Connect((child) => {
+            childAddedConnection?.Disconnect();
+            childRemovedConnection?.Disconnect();
+            childAddedConnection = character.ChildAdded.Connect((child) => {
                 if (child.IsA("Tool")) {
                     setEnabled(true);
                 }
             });
-            character.ChildRemoved.Connect((child) => {
+            childRemovedConnection = character.ChildRemoved.Connect((child) => {
                 if (child.IsA("Tool")) {
                     setEnabled(false);
                 }
@@ -171,6 +175,8 @@ export function HarvestableGuiRenderer() {
         }
 
         return () => {
+            childAddedConnection?.Disconnect();
+            childRemovedConnection?.Disconnect();
             connection.Disconnect();
         };
     }, []);

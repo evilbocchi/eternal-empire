@@ -13,11 +13,13 @@
  * @since 1.0.0
  */
 
+import { weldModel } from "@antivivi/vrldk";
 import { OnInit, Service } from "@flamework/core";
 import { Players } from "@rbxts/services";
 import DataService from "server/services/data/DataService";
 import ItemService from "server/services/item/ItemService";
 import { OnPlayerAdded } from "server/services/ModdingService";
+import eat from "shared/hamster/eat";
 import Gear from "shared/item/traits/Gear";
 import Items from "shared/items/Items";
 
@@ -55,6 +57,11 @@ export class ToolService implements OnInit, OnPlayerAdded, OnPlayerAdded {
             const toolModel = item.MODEL?.Clone();
             if (toolModel !== undefined) {
                 (toolModel as Tool).TextureId = item.image ?? "";
+                weldModel(toolModel);
+                const primaryPart = toolModel.PrimaryPart;
+                if (primaryPart) {
+                    primaryPart.Anchored = false;
+                }
                 toolModel.Parent = backpack;
             }
         }
@@ -72,19 +79,23 @@ export class ToolService implements OnInit, OnPlayerAdded, OnPlayerAdded {
      * @param player The player who joined.
      */
     onPlayerAdded(player: Player) {
-        player.CharacterAdded.Connect((character) => {
+        const onCharacterAdded = (character: Model) => {
             (character.WaitForChild("Humanoid") as Humanoid).Died.Once(() => {
                 player.FindFirstChildOfClass("Backpack")?.ClearAllChildren();
             });
             this.refreshTools(player);
-        });
+        };
+        eat(player.CharacterAdded.Connect(onCharacterAdded));
+        if (player.Character !== undefined) {
+            onCharacterAdded(player.Character);
+        }
     }
 
     /**
      * Initializes the ToolService, sets up listeners and harvestable objects.
      */
     onInit() {
-        this.itemService.itemsBought.connect((_player, items) => {
+        const connection = this.itemService.itemsBought.connect((_player, items) => {
             for (const item of items) {
                 if (item.isA("Gear")) {
                     for (const player of Players.GetPlayers()) this.refreshTools(player);
@@ -92,5 +103,6 @@ export class ToolService implements OnInit, OnPlayerAdded, OnPlayerAdded {
                 }
             }
         });
+        eat(connection);
     }
 }

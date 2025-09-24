@@ -31,12 +31,11 @@ function validateBasePart(instance: Instance): instance is BasePart {
     return true;
 }
 
-const served = findModels(folder);
-for (const model of served) {
-    itemModels.set(model.Name, model);
-
-    if (!IS_SERVER || IS_EDIT) continue;
-
+/**
+ * Preprocesses a model to set up collision groups, tags, and other properties for its descendants.
+ * @param model The model to preprocess.
+ */
+export function preprocessModel(model: Model) {
     for (const instance of model.GetDescendants()) {
         const name = instance.Name;
 
@@ -154,6 +153,14 @@ for (const model of served) {
             continue;
         }
     }
+}
+
+const served = findModels(folder);
+for (const model of served) {
+    itemModels.set(model.Name, model);
+
+    if (!IS_SERVER || IS_EDIT) continue;
+    preprocessModel(model);
 }
 
 export const ITEM_MODELS = itemModels;

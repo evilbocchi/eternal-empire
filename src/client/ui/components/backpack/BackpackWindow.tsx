@@ -7,7 +7,7 @@
 
 import { loadAnimation } from "@antivivi/vrldk";
 import React, { useEffect, useRef, useState } from "@rbxts/react";
-import { StarterGui, UserInputService, Workspace } from "@rbxts/services";
+import { StarterGui, Workspace } from "@rbxts/services";
 import { Environment } from "@rbxts/ui-labs";
 import { LOCAL_PLAYER } from "client/constants";
 import GearOption, { layoutOrderFromGear } from "client/ui/components/backpack/GearOption";
@@ -78,6 +78,8 @@ export default function BackpackWindow() {
 
     useEffect(() => {
         let swingAnimation: AnimationTrack | undefined;
+        let childAddedConnection: RBXScriptConnection | undefined;
+        let childRemovedConnection: RBXScriptConnection | undefined;
         const onCharacterAdded = (character: Model) => {
             const humanoid = character.WaitForChild("Humanoid") as Humanoid;
             swingAnimation = loadAnimation(humanoid, 16920778613);
@@ -97,8 +99,10 @@ export default function BackpackWindow() {
                     setEquippedGear(undefined);
                 }
             };
-            character.ChildAdded.Connect(onToolAdded);
-            character.ChildRemoved.Connect(onToolRemoved);
+            childAddedConnection?.Disconnect();
+            childRemovedConnection?.Disconnect();
+            childAddedConnection = character.ChildAdded.Connect(onToolAdded);
+            childRemovedConnection = character.ChildRemoved.Connect(onToolRemoved);
             const existingTool = character.FindFirstChildOfClass("Tool");
             if (existingTool) {
                 onToolAdded(existingTool);
@@ -132,7 +136,7 @@ export default function BackpackWindow() {
 
         StarterGui.SetCoreGuiEnabled("Backpack", false);
         let lastUse = 0;
-        UserInputService.InputBegan.Connect((input, gameProcessed) => {
+        const inputBeganConnection = Environment.UserInput.InputBegan.Connect((input, gameProcessed) => {
             if (gameProcessed === true) return;
 
             if (
@@ -173,6 +177,9 @@ export default function BackpackWindow() {
         }
 
         return () => {
+            inputBeganConnection.Disconnect();
+            childAddedConnection?.Disconnect();
+            childRemovedConnection?.Disconnect();
             connection.Disconnect();
         };
     }, []);
@@ -195,12 +202,11 @@ export default function BackpackWindow() {
             sortedGears = sortedGears.sort((a, b) => layoutOrderFromGear(a) < layoutOrderFromGear(b));
             const equipping = sortedGears[index - 1];
             if (equipping === undefined) return;
-            print("Equipping gear via hotkey:", equipping.item.name); // TODO this does not work for some reason
             equipGear(equipping.item.id);
         });
 
         return () => connection.Disconnect();
-    }, []);
+    }, [gears]);
 
     useEffect(() => {
         const connection = Packets.inventory.observe((inventory) => {

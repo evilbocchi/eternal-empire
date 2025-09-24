@@ -33,6 +33,7 @@ export interface DocumentInfo {
 namespace DocumentManager {
     export const INFO_PER_DOCUMENT = new Map<string, DocumentInfo>();
     export const visibilityChanged = new Signal<(id: string, visible: boolean) => void>();
+    const queue = new Array<{ id: string; visible: boolean }>();
 
     /**
      * Registers a new document with the document manager, allowing it to be tracked and managed
@@ -41,6 +42,16 @@ namespace DocumentManager {
      */
     export function register(documentInfo: DocumentInfo): void {
         INFO_PER_DOCUMENT.set(documentInfo.id, documentInfo);
+        if (queue.size() > 0) {
+            // Process any queued visibility changes for this document
+            for (let i = queue.size(); i > 0; i--) {
+                const entry = queue[i - 1];
+                if (entry.id === documentInfo.id) {
+                    documentInfo.setVisible(entry.visible);
+                    queue.remove(i - 1);
+                }
+            }
+        }
     }
 
     /**
@@ -59,7 +70,10 @@ namespace DocumentManager {
      */
     export function setVisible(id: string, visible: boolean) {
         const documentInfo = INFO_PER_DOCUMENT.get(id);
-        if (!documentInfo) return false;
+        if (!documentInfo) {
+            queue.push({ id, visible });
+            return false;
+        }
         visibilityChanged.fire(id, visible);
         documentInfo.setVisible(visible);
         return true;
