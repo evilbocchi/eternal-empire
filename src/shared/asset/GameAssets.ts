@@ -1,7 +1,8 @@
-import { Debris, ReplicatedStorage, SoundService, StarterGui } from "@rbxts/services";
+import { Debris, ReplicatedStorage, SoundService } from "@rbxts/services";
 import { Environment } from "@rbxts/ui-labs";
 import { assets } from "shared/asset/AssetMap";
 import { IS_EDIT } from "shared/Context";
+import eat from "shared/hamster/eat";
 
 declare global {
     /**
@@ -22,16 +23,28 @@ declare global {
 }
 
 /**
- * The Assets folder in StarterGui containing game assets.
+ * Contains game assets.
  */
-export const ASSETS = StarterGui.WaitForChild("Assets") as Assets;
+export const ASSETS = ReplicatedStorage.WaitForChild("Assets") as Assets;
 
 /**
  * The sound group for sound effects.
  *
  * This group is used to categorize and manage sound effects in the game.
  */
-export const SOUND_EFFECTS_GROUP = SoundService.WaitForChild("SoundEffectsGroup") as SoundGroup;
+export const SOUND_EFFECTS_GROUP = (() => {
+    const key = "SoundEffects";
+    let group = SoundService.FindFirstChild(key) as SoundGroup | undefined;
+    if (group === undefined) {
+        group = new Instance("SoundGroup");
+        group.Name = key;
+        group.Parent = SoundService;
+    }
+    if (IS_EDIT) {
+        eat(group);
+    }
+    return group;
+})();
 
 /**
  * Returns a sound from the Assets folder.
