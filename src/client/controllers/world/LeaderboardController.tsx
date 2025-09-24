@@ -39,9 +39,8 @@ export class LeaderboardController implements OnStart, LeaderboardDataManager {
      * When a button is clicked, it prompts the user to donate the corresponding amount.
      *
      * @param donationOption The TextButton representing the donation option.
-     * @param productId The ID of the product to be purchased when the button is clicked.
      */
-    setupDonationButton(donationOption: TextButton, productId: number) {
+    setupDonationButton(donationOption: TextButton) {
         const amount = donationOption.LayoutOrder;
         let donationProduct = 0;
         for (const dp of DONATION_PRODUCTS) {
@@ -74,10 +73,7 @@ export class LeaderboardController implements OnStart, LeaderboardDataManager {
                     const donationPart = leaderboard.WaitForChild("DonationPart") as DonationPart;
                     for (const donationOption of donationPart.SurfaceGui.Display.GetChildren()) {
                         if (!donationOption.IsA("TextButton")) continue;
-                        this.setupDonationButton(
-                            donationOption as TextButton,
-                            DONATION_PRODUCTS[donationOption.LayoutOrder - 1]?.id || 0,
-                        );
+                        this.setupDonationButton(donationOption as TextButton);
                     }
                 }
             },

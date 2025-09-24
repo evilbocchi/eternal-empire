@@ -3,10 +3,14 @@
 
 import Difficulty from "@antivivi/jjt-difficulties";
 import { getAllInstanceInfo, getInstanceInfo } from "@antivivi/vrldk";
-import { Debris, RunService, TweenService } from "@rbxts/services";
+import { packet } from "@rbxts/fletchette";
+import { CollectionService, Debris, RunService, TweenService } from "@rbxts/services";
 import { Server } from "shared/api/APIExpose";
+import UserGameSettings from "shared/api/UserGameSettings";
 import { ASSETS } from "shared/asset/GameAssets";
+import { IS_SERVER } from "shared/Context";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
+import eat from "shared/hamster/eat";
 import Operative from "shared/item/traits/Operative";
 import Packets from "shared/Packets";
 
@@ -28,6 +32,8 @@ declare global {
         Droplet: DropletAssets;
     }
 }
+
+export const dropletAddedPacket = packet<(drop: BasePart) => void>({ isUnreliable: true });
 
 export default class Droplet {
     static readonly DROPLETS = new Array<Droplet>();
@@ -785,7 +791,7 @@ export default class Droplet {
 
             clone.Name = tostring(++Droplet.instatiationCount);
             if (cframe !== undefined) {
-                Packets.dropletAdded.toClientsInRadius(cframe.Position, 128, drop!);
+                dropletAddedPacket.toClientsInRadius(cframe.Position, 128, drop!);
             }
 
             Droplet.SPAWNED_DROPLETS.set(clone, instanceInfo);
@@ -897,7 +903,7 @@ export default class Droplet {
     static {
         // let this run on both client and server; the instantiatior functions are on the same side
         const offset = new Vector3(0, 1.5, 0);
-        RunService.Heartbeat.Connect(() => {
+        const heartbeatConnection = RunService.Heartbeat.Connect(() => {
             for (const [dropletModel, instanceInfo] of this.SPAWNED_DROPLETS) {
                 if (instanceInfo.Health === undefined) continue;
 
@@ -925,5 +931,32 @@ export default class Droplet {
                 //     touched(dropletModel);
             }
         });
+        eat(heartbeatConnection);
+
+        if (!IS_SERVER) {
+            const addedConnection = dropletAddedPacket.fromServer((drop?: BasePart) => {
+                if (!drop) return;
+
+                const originalSize = drop.GetAttribute("OriginalSize") as Vector3 | undefined;
+                if (originalSize === undefined) return;
+
+                if (UserGameSettings!.SavedQualityLevel.Value > 1) {
+                    drop.Size = originalSize.add(new Vector3(0.15, 0.825, 0.15));
+                    TweenService.Create(drop, new TweenInfo(0.3), { Size: originalSize }).Play();
+                }
+            });
+            eat(addedConnection);
+
+            const impulseConnection = Packets.applyImpulse.fromServer((dropletModelId, impulse) => {
+                const model = CollectionService.GetTagged("Droplet").find(
+                    (droplet) => droplet.Name === dropletModelId, // TODO: optimize by using a map
+                ) as BasePart | undefined;
+                if (model === undefined)
+                    // streamed out
+                    return;
+                model.ApplyImpulse(impulse);
+            });
+            eat(impulseConnection);
+        }
     }
 }

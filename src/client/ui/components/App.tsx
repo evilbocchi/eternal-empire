@@ -248,6 +248,16 @@ export default function App({ viewportsEnabled }: { viewportsEnabled: boolean })
         };
     }, []);
 
+    useEffect(() => {
+        if (!IS_EDIT) return;
+
+        const [success, processing] = import("client/ui/components/build/loadBuildProcessing").await();
+        if (!success) return;
+
+        const instance = processing.default();
+        return () => instance.destroy();
+    }, []);
+
     return (
         <Fragment>
             <ResetRenderer />

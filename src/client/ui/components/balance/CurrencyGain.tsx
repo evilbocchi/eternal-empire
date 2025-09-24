@@ -3,9 +3,11 @@ import React, { useEffect, useRef } from "@rbxts/react";
 import { CollectionService, Debris, TweenService, Workspace } from "@rbxts/services";
 import { balanceOptionImagePerCurrency } from "client/ui/components/balance/BalanceOption";
 import displayBalanceCurrency from "client/ui/components/balance/displayBalanceCurrency";
+import { PingManager } from "client/ui/components/stats/StatsWindow";
 import { RobotoSlabExtraBold } from "client/ui/GameFonts";
 import { UISignals } from "shared/api/APIExpose";
 import UserGameSettings from "shared/api/UserGameSettings";
+import { getSound, SOUND_EFFECTS_GROUP } from "shared/asset/GameAssets";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import { CURRENCY_DETAILS } from "shared/currency/CurrencyDetails";
 import Packets from "shared/Packets";
@@ -134,6 +136,38 @@ export function CurrencyGainManager() {
             if (dropletModel === undefined) {
                 return;
             }
+
+            const t = tick();
+            let burnSound: Sound;
+            const sizeMagnitude = dropletModel.Size.Magnitude / 2;
+            const tweenInfo = new TweenInfo(sizeMagnitude / 2);
+
+            const light = dropletModel.FindFirstChildOfClass("PointLight") as PointLight | undefined;
+            if (light !== undefined) {
+                TweenService.Create(light, tweenInfo, { Range: 0 }).Play();
+                burnSound = getSound("LuckyDropletBurn.mp3");
+            } else {
+                burnSound = getSound("DropletBurn.mp3");
+            }
+
+            burnSound.PlaybackSpeed = (math.random() * 0.3 + 0.85) / sizeMagnitude;
+            if (sizeMagnitude > 0.666) {
+                const reverb = new Instance("ReverbSoundEffect");
+                reverb.DecayTime = sizeMagnitude / 2;
+                reverb.DryLevel = 0.5;
+                reverb.WetLevel = 0.5;
+                reverb.Parent = burnSound;
+            }
+            burnSound.SoundGroup = SOUND_EFFECTS_GROUP;
+            burnSound.Parent = dropletModel;
+            burnSound.Play();
+            TweenService.Create(dropletModel, tweenInfo, { Color: new Color3(), Size: new Vector3() }).Play();
+
+            Debris.AddItem(dropletModel, 6);
+            dropletModel.Anchored = true;
+
+            PingManager.logPing(tick() - t);
+
             showCurrencyGain(dropletModel.Position, amountPerCurrency);
         });
 
