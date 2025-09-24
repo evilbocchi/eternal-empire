@@ -45,7 +45,7 @@ export default function TrackedQuestWindow() {
 
     const openPosition = new UDim2(1, -5, 0, 30);
     const closedPosition = openPosition.add(new UDim2(0, 0, 0, -100));
-    const { visible } = useDocument({ id: "TrackedQuest", priority: -1 });
+    const { visible, setVisible } = useDocument({ id: "TrackedQuest", priority: -1 });
 
     useEffect(() => {
         if (visible) {
@@ -56,8 +56,11 @@ export default function TrackedQuestWindow() {
     }, [visible]);
 
     useEffect(() => {
-        if (currentQuest && trackedQuest) {
+        if (currentQuest && trackedQuest && currentStage >= 0) {
             playSound("QuestNextStage.mp3");
+            setVisible(true);
+        } else {
+            setVisible(false);
         }
 
         const onPositionUpdated = (newPosition: Vector3 | undefined) => {
@@ -79,7 +82,7 @@ export default function TrackedQuestWindow() {
         return () => {
             connection?.Disconnect();
         };
-    }, [key]);
+    }, [key, currentStage]);
 
     useEffect(() => {
         if (trackerBeam === undefined || currentQuest === undefined) return;
@@ -175,7 +178,6 @@ export default function TrackedQuestWindow() {
             BackgroundTransparency={1}
             Position={closedPosition}
             Size={new UDim2(0.2, 200, 0, 0)}
-            Visible={visible}
             ZIndex={-1}
         >
             <uilistlayout

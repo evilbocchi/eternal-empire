@@ -18,7 +18,7 @@ class StoryMocking {
         const mockPlayerData = table.clone(PlayerProfileTemplate);
 
         Packets.buyItem.fromClient((player, itemId) => {
-            print(player.Name + " is buying item " + itemId);
+            print(`${player.Name} is buying item ${itemId}`);
             const inventory = Packets.inventory.get();
             inventory.set(itemId, (inventory.get(itemId) ?? 0) + 1);
             const bought = Packets.bought.get();
@@ -26,6 +26,11 @@ class StoryMocking {
             Packets.inventory.set(inventory);
             Packets.bought.set(bought);
             return true;
+        });
+
+        Packets.getLogs.fromClient((player) => {
+            print(`${player.Name} is requesting logs`);
+            return [];
         });
 
         useEffect(() => {

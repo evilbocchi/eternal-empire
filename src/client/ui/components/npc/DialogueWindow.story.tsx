@@ -41,7 +41,9 @@ export = CreateReactStory(
             model.PrimaryPart = head;
             model.Parent = Workspace;
 
-            Packets.npcMessage.toAllClients(props.controls.dialogueText, 1, 1, true, model);
+            task.delay(0.5, () => {
+                Packets.npcMessage.toAllClients(props.controls.dialogueText, 1, 1, true, model);
+            });
 
             return () => {
                 model.Destroy();

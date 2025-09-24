@@ -8,8 +8,10 @@
  * - Handles multiple quest completions in sequence
  */
 
-import React, { useEffect, useState } from "@rbxts/react";
-import QuestCompletionNotification, { QuestCompletionData } from "./QuestCompletionNotification";
+import React, { Fragment, useEffect, useState } from "@rbxts/react";
+import QuestCompletionNotification, {
+    QuestCompletionData,
+} from "client/ui/components/quest/QuestCompletionNotification";
 import Packets from "shared/Packets";
 
 interface QuestCompletionQueue {
@@ -76,8 +78,8 @@ export default function QuestCompletionManager() {
     };
 
     return (
-        <React.Fragment>
+        <Fragment>
             {currentQuest && <QuestCompletionNotification data={currentQuest.data} onComplete={handleQuestComplete} />}
-        </React.Fragment>
+        </Fragment>
     );
 }

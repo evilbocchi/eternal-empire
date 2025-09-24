@@ -54,7 +54,7 @@ namespace BuildManager {
     let lastMovedToCFrame = new CFrame();
     let lastSelectingCFrame = new CFrame();
     let lastCameraCFrame = new CFrame();
-    let isShopOpen = false;
+    export let isShopOpen = false;
 
     export function hasSelection(): boolean {
         return !selected.isEmpty();

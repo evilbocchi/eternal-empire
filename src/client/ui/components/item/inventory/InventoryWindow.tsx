@@ -69,6 +69,7 @@ export function activateItem(item: Item): boolean {
     // Check restrictions
     if (
         BuildManager.getRestricted() === true ||
+        BuildManager.hasSelection() === true ||
         isPlaceable === false ||
         (item.levelReq !== undefined && item.levelReq > level)
     ) {

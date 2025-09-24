@@ -76,10 +76,12 @@ export default function DialogueWindow() {
     const closedPosition = new UDim2(0.5, 0, 1.5, 0);
 
     useEffect(() => {
+        const frame = frameRef.current;
+        if (!frame) return;
         if (visible) {
-            frameRef.current?.TweenPosition(openPosition, Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 1);
+            frame.TweenPosition(openPosition, Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.3, true);
         } else {
-            frameRef.current?.TweenPosition(closedPosition, Enum.EasingDirection.In, Enum.EasingStyle.Linear, 0.5);
+            frame.TweenPosition(closedPosition, Enum.EasingDirection.In, Enum.EasingStyle.Linear, 0.2, true);
         }
     }, [visible]);
 
@@ -181,11 +183,9 @@ export default function DialogueWindow() {
                         skipToEnd();
                         return;
                     }
-                    const success = Packets.nextDialogue.toServer();
-                    if (success) {
+                    if (Packets.nextDialogue.toServer()) {
                         setVisible(false);
                     }
-                    return success;
                 },
             }}
         >

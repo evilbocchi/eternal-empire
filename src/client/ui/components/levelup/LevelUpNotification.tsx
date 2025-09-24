@@ -277,7 +277,7 @@ export default function LevelUpNotification({ data, onComplete }: LevelUpNotific
                 BackgroundTransparency={0.3}
                 BorderSizePixel={0}
                 Position={new UDim2(0.5, 0, 0.5, 0)}
-                Size={new UDim2(1, 30, 1, 30)}
+                Size={new UDim2(1, 15, 1, 15)}
                 ZIndex={-1}
             >
                 <uigradient

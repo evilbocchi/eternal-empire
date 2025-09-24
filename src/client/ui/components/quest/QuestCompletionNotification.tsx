@@ -97,8 +97,8 @@ export default function QuestCompletionNotification({ data, onComplete }: QuestC
         // Play quest completion sound
         playSound("QuestComplete.mp3");
 
-        // Initial setup - start off-screen from right
-        mainFrame.Position = new UDim2(1.2, 0, 0.2, 0);
+        // Initial setup - start off-screen from bottom
+        mainFrame.Position = new UDim2(0.5, 0, 1.2, 0);
         mainFrame.Size = new UDim2(0, 0, 0, 0);
 
         // Initialize text elements
@@ -138,12 +138,12 @@ export default function QuestCompletionNotification({ data, onComplete }: QuestC
         // Create celebration particles
         createCelebrationParticles();
 
-        // Phase 1: Dramatic entrance from right (0.6s)
+        // Phase 1: Dramatic entrance from bottom (0.6s)
         const entranceTween = TweenService.Create(
             mainFrame,
             new TweenInfo(0.6, Enum.EasingStyle.Back, Enum.EasingDirection.Out),
             {
-                Position: new UDim2(0.72, 0, 0.2, 0), // Positioned to the right side
+                Position: new UDim2(0.5, 0, 0.8, 0), // Centered horizontally, positioned near bottom
                 Size: new UDim2(0.3, 0, 0.2, 0), // Responsive sizing
             },
         );
@@ -247,7 +247,7 @@ export default function QuestCompletionNotification({ data, onComplete }: QuestC
                 mainFrame,
                 new TweenInfo(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.In),
                 {
-                    Position: new UDim2(1.2, 0, 0.2, 0),
+                    Position: new UDim2(0.5, 0, 1.2, 0),
                     Size: new UDim2(0.1, 0, 0.05, 0),
                 },
             );
@@ -353,7 +353,7 @@ export default function QuestCompletionNotification({ data, onComplete }: QuestC
                 BackgroundTransparency={0.4}
                 BorderSizePixel={0}
                 Position={new UDim2(0.5, 0, 0.5, 0)}
-                Size={new UDim2(1, 20, 1, 20)}
+                Size={new UDim2(1, 15, 1, 15)}
                 ZIndex={-1}
             >
                 <uigradient

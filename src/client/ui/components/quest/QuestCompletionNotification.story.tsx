@@ -6,9 +6,11 @@
 import React, { StrictMode, useState } from "@rbxts/react";
 import ReactRoblox from "@rbxts/react-roblox";
 import { CreateReactStory } from "@rbxts/ui-labs";
+import QuestCompletionNotification, {
+    QuestCompletionData,
+} from "client/ui/components/quest/QuestCompletionNotification";
 import TheFirstConveyor from "shared/items/negative/tfd/TheFirstConveyor";
 import CopperPickaxe from "shared/items/tools/CopperPickaxe";
-import QuestCompletionNotification, { QuestCompletionData } from "./QuestCompletionNotification";
 
 export = CreateReactStory(
     {
