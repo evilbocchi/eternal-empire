@@ -103,7 +103,8 @@ export default function StartWindow({ fastTransitions = false }: { fastTransitio
             if (currentView === "main" && view !== "main") {
                 const tweenInfo = new TweenInfo(1, Enum.EasingStyle.Circular, Enum.EasingDirection.Out);
 
-                if (sideBackgroundRef.current) {
+                // Only hide the background if NOT going to empires view
+                if (view !== "empires" && sideBackgroundRef.current) {
                     TweenService.Create(sideBackgroundRef.current, tweenInfo, {
                         Position: new UDim2(-0.5, 0, 0.5, 0),
                     }).Play();
@@ -122,7 +123,8 @@ export default function StartWindow({ fastTransitions = false }: { fastTransitio
                 task.delay(0.2, () => {
                     const tweenInfo = new TweenInfo(1, Enum.EasingStyle.Circular, Enum.EasingDirection.Out);
 
-                    if (sideBackgroundRef.current) {
+                    // Only show the background if coming from a non-empires view (or if it was hidden)
+                    if (currentView !== "empires" && sideBackgroundRef.current) {
                         TweenService.Create(sideBackgroundRef.current, tweenInfo, {
                             Position: new UDim2(0, 0, 0.5, 0),
                         }).Play();
@@ -136,8 +138,10 @@ export default function StartWindow({ fastTransitions = false }: { fastTransitio
                     }
                 });
 
-                // Reset the entrance state so animations can trigger again (but fast)
-                setHasEnteredScreen(false);
+                // Only reset the entrance state if NOT coming from empires (to prevent menu re-animation)
+                if (currentView !== "empires") {
+                    setHasEnteredScreen(false);
+                }
             }
 
             // Change view state
@@ -250,7 +254,6 @@ export default function StartWindow({ fastTransitions = false }: { fastTransitio
                             transitionToView("empires");
                         }}
                         height={70}
-                        shouldAnimate={hasEnteredScreen}
                         animationDelay={0}
                         fast={shouldUseFastAnimations()}
                     />
@@ -268,7 +271,6 @@ export default function StartWindow({ fastTransitions = false }: { fastTransitio
                             SingleDocumentManager.open("Settings");
                         }}
                         height={60}
-                        shouldAnimate={hasEnteredScreen}
                         animationDelay={0.2}
                         fast={shouldUseFastAnimations()}
                     />
@@ -281,7 +283,6 @@ export default function StartWindow({ fastTransitions = false }: { fastTransitio
                             transitionToView("about");
                         }}
                         height={60}
-                        shouldAnimate={hasEnteredScreen}
                         animationDelay={0.4}
                         fast={shouldUseFastAnimations()}
                     />

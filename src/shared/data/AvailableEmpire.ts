@@ -5,7 +5,6 @@ import {
     HttpService,
     MarketplaceService,
     Players,
-    RunService,
     TeleportService,
 } from "@rbxts/services";
 import { IS_EDIT, IS_PUBLIC_SERVER, IS_SERVER, IS_SINGLE_SERVER, IS_STUDIO } from "shared/Context";
@@ -26,10 +25,6 @@ declare global {
          * The ID of the owner of the empire.
          */
         owner: number;
-        /**
-         * The number of placed items in the empire.
-         */
-        items: number;
         /**
          * The UNIX timestamp when the empire was created.
          */
@@ -65,11 +60,9 @@ namespace AvailableEmpire {
     export function getInfo(empireId: string) {
         const empire = EmpireProfileManager.load(empireId, true);
         if (empire === undefined) throw "No such empire " + empireId;
-        const items = empire.Data.items;
         return {
             name: empire.Data.name,
             owner: empire.Data.owner,
-            items: (items.worldPlaced ?? items.placed).size(),
             created: empire.Data.created,
             playtime: empire.Data.playtime,
         };

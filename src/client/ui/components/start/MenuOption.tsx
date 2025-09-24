@@ -1,82 +1,74 @@
-import React, { useCallback, useEffect, useRef, useState } from "@rbxts/react";
+import React, { ReactNode, RefObject, useCallback, useEffect, useRef, useState } from "@rbxts/react";
 import { TweenService } from "@rbxts/services";
 import { RobotoSlabHeavy } from "client/ui/GameFonts";
 import { getAsset } from "shared/asset/AssetMap";
 import { playSound } from "shared/asset/GameAssets";
 
-/**
- * Reusable menu option component with modern styling and hover effects
- */
-export default function MenuOption({
-    label,
+export function BaseMenuOption({
+    children,
     gradientColors,
+    size,
     onClick,
-    height,
     animationDelay = 0,
-    shouldAnimate = false,
     fast = false,
+    labelRef,
 }: {
-    /** Display text for the option */
-    label: string;
-    /** Gradient colors for the button [start, end] */
+    children: ReactNode;
     gradientColors: [Color3, Color3];
-    /** Click handler */
-    onClick: () => void;
-    /** Height of the option */
-    height: number;
-    /** Delay before starting entrance animation (in seconds) */
+    size: UDim2;
+    onClick?: () => void;
     animationDelay?: number;
-    /** Whether to animate entrance */
-    shouldAnimate?: boolean;
-    /** Whether to use fast animations (skip delays) */
     fast?: boolean;
+    labelRef?: RefObject<TextLabel>;
 }) {
     const [isHovered, setIsHovered] = useState(false);
     const buttonRef = useRef<ImageButton>();
     const shadowRef = useRef<ImageLabel>();
-    const labelRef = useRef<TextLabel>();
 
     // Entrance animation effect
     useEffect(() => {
-        if (shouldAnimate && buttonRef.current && shadowRef.current && labelRef.current) {
+        const button = buttonRef.current;
+        const label = labelRef?.current;
+        const shadow = shadowRef.current;
+        if (button && shadow) {
             // Set initial off-screen positions
-            const originalButtonPos = buttonRef.current.Position;
-            const originalShadowPos = shadowRef.current.Position;
+            const originalButtonPos = button.Position;
+            const originalShadowPos = shadow.Position;
 
-            buttonRef.current.Position = new UDim2(0, -600, originalButtonPos.Y.Scale, originalButtonPos.Y.Offset);
-            shadowRef.current.Position = new UDim2(0, -594, originalShadowPos.Y.Scale, originalShadowPos.Y.Offset);
-            labelRef.current.TextTransparency = 1;
-            if (labelRef.current.FindFirstChild("UIStroke")) {
-                (labelRef.current.FindFirstChild("UIStroke") as UIStroke).Transparency = 1;
+            button.Position = new UDim2(0, -600, originalButtonPos.Y.Scale, originalButtonPos.Y.Offset);
+            shadow.Position = new UDim2(0, -594, originalShadowPos.Y.Scale, originalShadowPos.Y.Offset);
+            if (label) {
+                label.TextTransparency = 1;
+                if (label.FindFirstChild("UIStroke")) {
+                    (label.FindFirstChild("UIStroke") as UIStroke).Transparency = 1;
+                }
             }
 
             // Use reduced delays if fast mode is enabled
-            const baseDelay = fast ? 0.75 : 2;
+            const baseDelay = fast ? 0 : 2;
             const animDelay = fast ? animationDelay * 0.1 : animationDelay;
 
             // Start entrance animation after delay
             task.delay(baseDelay + animDelay, () => {
-                if (buttonRef.current && shadowRef.current && labelRef.current) {
+                if (button && shadow) {
                     const bounce = new TweenInfo(fast ? 0.75 : 1, Enum.EasingStyle.Back, Enum.EasingDirection.Out);
 
-                    TweenService.Create(buttonRef.current, bounce, { Position: originalButtonPos }).Play();
-                    TweenService.Create(shadowRef.current, bounce, { Position: originalShadowPos }).Play();
-                    TweenService.Create(labelRef.current, new TweenInfo(fast ? 1 : 1.4), {
+                    TweenService.Create(button, bounce, { Position: originalButtonPos }).Play();
+                    TweenService.Create(shadow, bounce, { Position: originalShadowPos }).Play();
+                }
+                if (label) {
+                    TweenService.Create(label, new TweenInfo(fast ? 1 : 1.4), {
                         TextTransparency: 0,
                     }).Play();
 
-                    const stroke = labelRef.current.FindFirstChild("UIStroke") as UIStroke;
+                    const stroke = label.FindFirstChild("UIStroke") as UIStroke;
                     if (stroke) {
                         TweenService.Create(stroke, new TweenInfo(fast ? 1 : 1.4), { Transparency: 0 }).Play();
                     }
                 }
             });
         }
-    }, [shouldAnimate, animationDelay, fast]);
-
-    const handleClick = useCallback(() => {
-        onClick();
-    }, [onClick]);
+    }, [animationDelay, fast]);
 
     const handleMouseEnter = useCallback(() => {
         playSound("EmphasisButtonHover.mp3", undefined, (sound) => (sound.Volume = 0.25));
@@ -88,7 +80,7 @@ export default function MenuOption({
     }, []);
 
     return (
-        <frame Active={true} BackgroundTransparency={1} Size={new UDim2(1, 0, 0, height)}>
+        <frame Active={true} BackgroundTransparency={1} Size={size}>
             <uiflexitem FlexMode={Enum.UIFlexMode.None} ItemLineAlignment={Enum.ItemLineAlignment.Start} />
             {/* Shadow */}
             <imagelabel
@@ -100,7 +92,7 @@ export default function MenuOption({
                 ImageColor3={Color3.fromRGB(0, 0, 0)}
                 ImageTransparency={0.4}
                 Position={new UDim2(0, -100, 1, -7)}
-                Size={new UDim2(0.1, 400, 0.6, -10)}
+                Size={new UDim2(1, 0, 0.6, -10)}
                 ZIndex={-5}
             />
 
@@ -113,10 +105,10 @@ export default function MenuOption({
                 Image={getAsset("assets/start/MenuOptionBackground.png")}
                 LayoutOrder={1}
                 Position={new UDim2(0, -106, 1, -10)}
-                Size={new UDim2(0.1, 400, 0.6, -10)}
+                Size={new UDim2(1, 0, 0.6, -10)}
                 ZIndex={0}
                 Event={{
-                    Activated: handleClick,
+                    Activated: onClick,
                     MouseEnter: handleMouseEnter,
                     MouseLeave: handleMouseLeave,
                 }}
@@ -156,6 +148,45 @@ export default function MenuOption({
                 )}
             </imagebutton>
 
+            {children}
+        </frame>
+    );
+}
+
+/**
+ * Reusable menu option component with modern styling and hover effects
+ */
+export default function MenuOption({
+    label,
+    gradientColors,
+    onClick,
+    height,
+    animationDelay = 0,
+    fast = false,
+}: {
+    /** Display text for the option */
+    label: string;
+    /** Gradient colors for the button [start, end] */
+    gradientColors: [Color3, Color3];
+    /** Click handler */
+    onClick: () => void;
+    /** Height of the option */
+    height: number;
+    /** Delay before starting entrance animation (in seconds) */
+    animationDelay?: number;
+    /** Whether to use fast animations (skip delays) */
+    fast?: boolean;
+}) {
+    const labelRef = useRef<TextLabel>();
+    return (
+        <BaseMenuOption
+            labelRef={labelRef}
+            gradientColors={gradientColors}
+            size={new UDim2(0.1, 400, 0, height)}
+            onClick={onClick}
+            animationDelay={animationDelay}
+            fast={fast}
+        >
             {/* Label */}
             <textlabel
                 ref={labelRef}
@@ -171,7 +202,6 @@ export default function MenuOption({
                 TextSize={60}
                 TextWrapped={true}
                 TextXAlignment={Enum.TextXAlignment.Left}
-                TextTransparency={isHovered ? 0.1 : 0}
             >
                 <uistroke key={"UIStroke"} Thickness={3}>
                     <uigradient
@@ -185,6 +215,6 @@ export default function MenuOption({
                     />
                 </uistroke>
             </textlabel>
-        </frame>
+        </BaseMenuOption>
     );
 }
