@@ -110,10 +110,11 @@ export default class SetupService implements OnInit, OnStart {
      * Loads a setup by name for a player, placing items as needed.
      *
      * @param player The player loading the setup.
+     * @param area The area ID of the setup.
      * @param name The name of the setup to load.
      * @returns True if loaded successfully, false otherwise.
      */
-    loadSetup(player: Player, name: string) {
+    loadSetup(player: Player, area: AreaId | undefined, name: string) {
         if (
             !this.permissionsService.checkPermLevel(player, "build") ||
             !this.permissionsService.checkPermLevel(player, "purchase")
@@ -131,6 +132,11 @@ export default class SetupService implements OnInit, OnStart {
             warn("No such setup", name);
             return false;
         }
+        if (setup.area !== area) {
+            warn("Setup area mismatch", setup.area, area);
+            return false;
+        }
+
         const savedItems = setup.items;
         if (savedItems === undefined) {
             warn(setup);
@@ -154,9 +160,11 @@ export default class SetupService implements OnInit, OnStart {
             });
         }
         this.setupLoaded.fire(player, setup.area);
-        return this.itemService.waitInQueue(() => {
-            return this.itemService.placeItems(player, items);
-        });
+        return (
+            this.itemService.waitInQueue(() => {
+                return this.itemService.placeItems(player, items);
+            }) !== 0
+        );
     }
 
     /**
@@ -164,6 +172,42 @@ export default class SetupService implements OnInit, OnStart {
      */
     onInit() {
         Packets.printedSetups.set(this.dataService.empireData.printedSetups);
+
+        let debounce = 0;
+
+        Packets.saveSetup.fromClient((player, placementId, name) => {
+            const printedItem = this.dataService.empireData.items.worldPlaced.get(placementId);
+            if (printedItem === undefined) return false;
+            const item = Items.getItem(printedItem.item);
+            if (item === undefined) return false;
+            const printer = item.findTrait("Printer");
+            if (printer === undefined) return false;
+            if (printer.area === undefined) return false;
+
+            if (tick() - debounce < 1) {
+                return false;
+            }
+            debounce = tick();
+
+            name = TextService.FilterStringAsync(name, player.UserId).GetNonChatStringForBroadcastAsync();
+            this.saveSetup(player, printer.area, name);
+            return true;
+        });
+        Packets.loadSetup.fromClient((player, placementId, name) => {
+            const placedItem = this.dataService.empireData.items.worldPlaced.get(placementId);
+            if (placedItem === undefined) return false;
+            const item = Items.getItem(placedItem.item);
+            if (item === undefined) return false;
+            const printer = item.findTrait("Printer");
+            if (printer === undefined) return false;
+
+            if (tick() - debounce < 1) {
+                return false;
+            }
+            debounce = tick();
+
+            return this.loadSetup(player, printer.area, name);
+        });
 
         Packets.renameSetup.fromClient((player, currentName, renameTo) => {
             if (!this.permissionsService.checkPermLevel(player, "build")) return;
@@ -178,15 +222,18 @@ export default class SetupService implements OnInit, OnStart {
             Packets.printedSetups.set(setups);
         });
         Packets.autoloadSetup.fromClient((player, name) => {
-            if (!this.permissionsService.checkPermLevel(player, "build")) return;
+            if (!this.permissionsService.checkPermLevel(player, "build")) return false;
             const setups = this.dataService.empireData.printedSetups;
+            let newState: boolean | undefined;
             for (const setup of setups) {
                 if (setup.name === name) {
-                    setup.autoloads = !setup.autoloads;
+                    newState = !setup.autoloads;
+                    setup.autoloads = newState;
                     break;
                 }
             }
             Packets.printedSetups.set(setups);
+            return newState ?? false;
         });
 
         this.setupSaved.connect((player, area) =>

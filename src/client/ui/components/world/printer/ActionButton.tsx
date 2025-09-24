@@ -2,14 +2,17 @@ import React, { useRef, useState } from "@rbxts/react";
 import { TweenService } from "@rbxts/services";
 import { RobotoSlabBold } from "client/ui/GameFonts";
 
-interface ActionButtonProps {
+export default function ActionButton({
+    text,
+    backgroundColor,
+    layoutOrder,
+    onClick,
+}: {
     text: string;
     backgroundColor: Color3;
     layoutOrder?: number;
     onClick?: () => void;
-}
-
-export default function ActionButton({ text, backgroundColor, layoutOrder, onClick }: ActionButtonProps) {
+}) {
     const buttonRef = useRef<TextButton>();
     const [isAnimating, setIsAnimating] = useState(false);
     const [isHovered, setIsHovered] = useState(false);
@@ -103,7 +106,6 @@ export default function ActionButton({ text, backgroundColor, layoutOrder, onCli
                 Transparency={0}
             />
             <textlabel
-                key="Label"
                 AnchorPoint={new Vector2(0.5, 0.5)}
                 BackgroundTransparency={1}
                 FontFace={RobotoSlabBold}

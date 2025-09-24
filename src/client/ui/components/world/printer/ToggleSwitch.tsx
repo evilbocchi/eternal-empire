@@ -1,21 +1,26 @@
-import React, { useState, useRef } from "@rbxts/react";
+import React, { useState, useRef, useEffect } from "@rbxts/react";
 import { TweenService } from "@rbxts/services";
 import { playSound } from "shared/asset/GameAssets";
 import { RobotoSlab } from "client/ui/GameFonts";
+import Packets from "shared/Packets";
 
-interface ToggleSwitchProps {
+export default function ToggleSwitch({
+    setupName,
+    label,
+    initialEnabled = false,
+    onToggle,
+}: {
+    setupName: string;
     label: string;
     initialEnabled?: boolean;
     onToggle?: (newState: boolean) => void;
-}
-
-export default function ToggleSwitch({ label, initialEnabled = false, onToggle }: ToggleSwitchProps) {
+}) {
     const [isEnabled, setIsEnabled] = useState(initialEnabled);
     const toggleRef = useRef<Frame>();
     const buttonRef = useRef<TextButton>();
 
     const handleToggle = () => {
-        const newState = !isEnabled;
+        const newState = Packets.autoloadSetup.toServer(setupName);
         if (newState) {
             playSound("CheckOn.mp3");
         } else {
@@ -49,7 +54,7 @@ export default function ToggleSwitch({ label, initialEnabled = false, onToggle }
     const toggleAnchor = isEnabled ? new Vector2(1, 0.5) : new Vector2(0, 0.5);
 
     return (
-        <frame key="ToggleContainer" BackgroundTransparency={1} LayoutOrder={-5} Size={new UDim2(0.4, 0, 1, 0)}>
+        <frame BackgroundTransparency={1} LayoutOrder={-5} Size={new UDim2(0.4, 0, 1, 0)}>
             <textlabel
                 BackgroundTransparency={1}
                 FontFace={RobotoSlab}
@@ -68,7 +73,6 @@ export default function ToggleSwitch({ label, initialEnabled = false, onToggle }
                 VerticalAlignment={Enum.VerticalAlignment.Center}
             />
             <textbutton
-                key="ToggleButton"
                 ref={buttonRef}
                 BackgroundColor3={toggleColor.Lerp(Color3.fromRGB(0, 0, 0), 0.8)}
                 BorderSizePixel={0}

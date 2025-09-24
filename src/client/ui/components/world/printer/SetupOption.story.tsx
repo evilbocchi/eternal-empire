@@ -7,12 +7,8 @@ export = CreateReactStory(
     {
         react: React,
         reactRoblox: ReactRoblox,
-        controls: {
-            Visible: true,
-        },
     },
-    (props) => {
-        const component = <SetupOption />;
-        return component;
+    () => {
+        return <SetupOption />;
     },
 );

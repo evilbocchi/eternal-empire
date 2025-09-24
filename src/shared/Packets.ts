@@ -137,8 +137,10 @@ namespace Packets {
     export const gainPerResetLayer = property<Map<ResetLayerId, BaseOnoeNum>>(new Map());
     export const reset = packet<(layer: ResetLayerId, amount: BaseOnoeNum) => void>();
     export const printedSetups = property<Array<Setup>>(EmpireProfileTemplate.printedSetups);
+    export const saveSetup = packet<(printerPlacementId: string, name: string) => boolean>();
+    export const loadSetup = packet<(printerPlacementId: string, name: string) => boolean>();
     export const renameSetup = packet<(currentName: string, renameTo: string) => void>();
-    export const autoloadSetup = packet<(name: string) => void>();
+    export const autoloadSetup = packet<(name: string) => boolean>();
     export const startChallenge = packet<(challenge: string) => void>();
     export const quitChallenge = packet<() => void>();
     export const challenges = property<Map<string, ChallengeInfo>>(new Map());

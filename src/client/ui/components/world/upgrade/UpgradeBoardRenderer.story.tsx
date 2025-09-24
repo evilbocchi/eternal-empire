@@ -67,10 +67,6 @@ export = CreateReactStory(
             };
         }, []);
 
-        return (
-            <StrictMode>
-                <UpgradeBoardRenderer />
-            </StrictMode>
-        );
+        return <UpgradeBoardRenderer />;
     },
 );
