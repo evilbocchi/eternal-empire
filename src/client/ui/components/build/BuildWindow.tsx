@@ -96,7 +96,7 @@ export default function BuildWindow({
                 {/* Rotate button */}
                 <BuildButton
                     text="Rotate"
-                    icon={getAsset("assets/Build/Rotate.png")}
+                    icon={getAsset("assets/building/Rotate.png")}
                     layoutOrder={4}
                     onClick={rotateEvents.Activated}
                 />
@@ -104,7 +104,7 @@ export default function BuildWindow({
                 {/* Place button (only visible on touch devices) */}
                 <BuildButton
                     text="Place"
-                    icon={getAsset("assets/Build/Place.png")}
+                    icon={getAsset("assets/building/Place.png")}
                     iconColor={Color3.fromRGB(170, 255, 127)}
                     layoutOrder={5}
                     visible={Environment.UserInput.TouchEnabled}
@@ -116,7 +116,7 @@ export default function BuildWindow({
                 {/* Delete button */}
                 <BuildButton
                     text="Delete"
-                    icon={getAsset("assets/Build/Delete.png")}
+                    icon={getAsset("assets/building/Delete.png")}
                     iconColor={Color3.fromRGB(255, 70, 70)}
                     layoutOrder={6}
                     onClick={deleteEvents.Activated}

@@ -19,6 +19,10 @@ declare global {
     // Only asset paths that start with "assets/sounds/"
     type SoundAssetPath = Extract<AssetPath, `assets/sounds/${string}`>;
 
+    // Extract the path after "assets/sounds/" while preserving subdirectories
+    type SoundPath<T extends SoundAssetPath> = T extends `assets/sounds/${infer Rest}` ? Rest : never;
+    type SoundAssetSubPath = SoundPath<SoundAssetPath>;
+
     type Filename<T extends string> = T extends `${string}/${infer Rest}` ? Filename<Rest> : T;
 }
 
@@ -49,11 +53,11 @@ export const SOUND_EFFECTS_GROUP = (() => {
 /**
  * Returns a sound from the Assets folder.
  *
- * @param soundName The name of the sound to retrieve.
+ * @param soundPath The path to the sound relative to the sounds folder (preserving subdirectories).
  * @returns The sound instance from the Assets folder.
  */
-export function getSound(path: Filename<SoundAssetPath>) {
-    const fullPath = ("assets/sounds/" + path) as AssetPath;
+export function getSound(soundPath: SoundAssetSubPath) {
+    const fullPath = ("assets/sounds/" + soundPath) as AssetPath;
     const cached = ReplicatedStorage.FindFirstChild(fullPath) as Sound | undefined;
     if (cached !== undefined) {
         return cached;
@@ -69,12 +73,12 @@ export function getSound(path: Filename<SoundAssetPath>) {
 /**
  * Plays a sound at a specific part's position.
  *
- * @param path The path to the sound asset.
+ * @param soundPath The path to the sound relative to the sounds folder (preserving subdirectories).
  * @param part The part where the sound should be played. If not provided, it plays in ReplicatedStorage.
  * @param modifier An optional function to modify the sound instance before playing it.
  */
-export function playSound(path: Filename<SoundAssetPath>, part?: Instance, modifier?: (sound: Sound) => void) {
-    let sound = getSound(path);
+export function playSound(soundPath: SoundAssetSubPath, part?: Instance, modifier?: (sound: Sound) => void) {
+    let sound = getSound(soundPath);
     if (IS_EDIT) {
         sound.Parent = Environment.PluginWidget; // Sounds can only play in PluginWidget when not in-game
     } else {
