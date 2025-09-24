@@ -12,7 +12,7 @@ import { playSound } from "shared/asset/GameAssets";
 /**
  * Main start window component that handles the title screen, empire selection, and about page
  */
-export default function StartWindow() {
+export default function StartWindow({ fastTransitions = false }: { fastTransitions?: boolean }) {
     const sideBackgroundRef = useRef<ImageLabel>();
     const logoRef = useRef<ImageLabel>();
     const mainMenuRef = useRef<Frame>();
@@ -20,7 +20,7 @@ export default function StartWindow() {
     const [currentView, setCurrentView] = useState<"main" | "empires" | "about" | "none">("main");
     const [isAnimating, setIsAnimating] = useState(false);
     const [hasEnteredScreen, setHasEnteredScreen] = useState(false);
-    const firstRenderTime = useRef<number>(tick());
+    const firstRenderTime = useRef<number>(fastTransitions ? 0 : tick());
 
     // Helper function to determine if we should use fast animations
     const shouldUseFastAnimations = useCallback(() => {
@@ -98,7 +98,6 @@ export default function StartWindow() {
             if (isAnimating) return;
 
             setIsAnimating(true);
-            playSound("EmphasisMenuSelect.mp3", undefined, (sound) => (sound.Volume = 0.35));
 
             // If transitioning away from main, hide title screen with animation
             if (currentView === "main" && view !== "main") {
@@ -247,6 +246,7 @@ export default function StartWindow() {
                         label="Play"
                         gradientColors={[Color3.fromRGB(85, 255, 127), Color3.fromRGB(5, 170, 60)]}
                         onClick={() => {
+                            playSound("EmphasisMenuSelect.mp3", undefined, (sound) => (sound.Volume = 0.4));
                             transitionToView("empires");
                         }}
                         height={70}
@@ -264,6 +264,7 @@ export default function StartWindow() {
                         label="Settings"
                         gradientColors={[Color3.fromRGB(172, 172, 172), Color3.fromRGB(102, 102, 102)]}
                         onClick={() => {
+                            playSound("EmphasisMenuSelect.mp3", undefined, (sound) => (sound.Volume = 0.35));
                             SingleDocumentManager.open("Settings");
                         }}
                         height={60}
@@ -276,6 +277,7 @@ export default function StartWindow() {
                         label="About"
                         gradientColors={[Color3.fromRGB(34, 189, 255), Color3.fromRGB(8, 127, 255)]}
                         onClick={() => {
+                            playSound("EmphasisMenuSelect.mp3", undefined, (sound) => (sound.Volume = 0.35));
                             transitionToView("about");
                         }}
                         height={60}

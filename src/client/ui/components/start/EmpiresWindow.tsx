@@ -2,7 +2,7 @@ import ComputeNameColor from "@antivivi/rbxnamecolor";
 import { convertToHHMMSS } from "@antivivi/vrldk";
 import React, { useCallback, useEffect, useState } from "@rbxts/react";
 import { Players } from "@rbxts/services";
-import { RobotoSlabBold } from "client/ui/GameFonts";
+import { RobotoSlab, RobotoSlabBold } from "client/ui/GameFonts";
 import useProperty from "client/ui/hooks/useProperty";
 import { getAsset } from "shared/asset/AssetMap";
 import { playSound } from "shared/asset/GameAssets";
@@ -44,150 +44,207 @@ function EmpireOption({ empireId, empireInfo }: { empireId: string; empireInfo: 
 
     return (
         <textbutton
-            BackgroundColor3={color}
+            BackgroundColor3={Color3.fromRGB(0, 170, 0)}
+            BackgroundTransparency={0.5}
             BorderSizePixel={0}
-            Size={new UDim2(1, -20, 0, 120)}
-            Text=""
-            Event={{ Activated: handleClick }}
+            Selectable={false}
+            Size={new UDim2(1, 0, 0, 85)}
+            Text={""}
         >
-            <uicorner CornerRadius={new UDim(0, 8)} />
             <uigradient
                 Color={
                     new ColorSequence([
-                        new ColorSequenceKeypoint(0, color),
-                        new ColorSequenceKeypoint(1, color.Lerp(Color3.fromRGB(0, 0, 0), 0.3)),
+                        new ColorSequenceKeypoint(0, Color3.fromRGB(255, 255, 255)),
+                        new ColorSequenceKeypoint(1, Color3.fromRGB(156, 156, 156)),
                     ])
                 }
                 Rotation={90}
             />
-            <uistroke
-                ApplyStrokeMode={Enum.ApplyStrokeMode.Border}
-                Color={color.Lerp(Color3.fromRGB(255, 255, 255), 0.3)}
-                Thickness={2}
-            />
-
-            {/* Empire ID Label */}
-            <textlabel
-                AnchorPoint={new Vector2(1, 0)}
-                BackgroundTransparency={1}
-                FontFace={RobotoSlabBold}
-                Position={new UDim2(1, -10, 0, 5)}
-                Size={new UDim2(0.3, 0, 0.2, 0)}
-                Text={empireId}
-                TextColor3={Color3.fromRGB(255, 255, 255)}
-                TextScaled={true}
-                TextSize={14}
-                TextTransparency={0.3}
-                TextWrapped={true}
-                TextXAlignment={Enum.TextXAlignment.Right}
-            >
-                <uistroke Thickness={2} />
-            </textlabel>
-
-            {/* Empire Information */}
-            <frame BackgroundTransparency={1} Position={new UDim2(0, 10, 0, 10)} Size={new UDim2(0.7, 0, 0.6, 0)}>
-                {/* Owner Avatar */}
-                <imagelabel
-                    BackgroundColor3={Color3.fromRGB(255, 255, 255)}
-                    BackgroundTransparency={0.1}
-                    BorderSizePixel={0}
-                    Image={avatarImage}
-                    Size={new UDim2(0, 40, 0, 40)}
-                >
-                    <uicorner CornerRadius={new UDim(0, 6)} />
-                    <uistroke Color={Color3.fromRGB(255, 255, 255)} Thickness={2} />
-                </imagelabel>
-
-                {/* Labels */}
-                <frame BackgroundTransparency={1} Position={new UDim2(0, 50, 0, 0)} Size={new UDim2(1, -50, 1, 0)}>
+            <uistroke ApplyStrokeMode={Enum.ApplyStrokeMode.Border} Color={Color3.fromRGB(0, 170, 0)} />
+            <uicorner CornerRadius={new UDim(0, 4)} />
+            <uipadding PaddingLeft={new UDim(0, 5)} PaddingRight={new UDim(0, 5)} />
+            <frame BackgroundTransparency={1} Size={new UDim2(0.65, 0, 1, 0)}>
+                <frame BackgroundTransparency={1} Size={new UDim2(0.65, 0, 1, -10)}>
                     <textlabel
+                        Active={true}
+                        AnchorPoint={new Vector2(0.5, 0)}
                         BackgroundTransparency={1}
                         FontFace={RobotoSlabBold}
-                        Size={new UDim2(1, 0, 0.5, 0)}
-                        Text={empireInfo.name ?? "error"}
+                        LayoutOrder={1}
+                        Position={new UDim2(0.5, 0, 0, 0)}
+                        Size={new UDim2(1, 0, 0.3, 0)}
+                        Text={
+                            empireInfo.owner ? "Owned by " + getNameFromUserId(empireInfo.owner) : "could not load info"
+                        }
                         TextColor3={Color3.fromRGB(255, 255, 255)}
                         TextScaled={true}
                         TextSize={14}
                         TextWrapped={true}
                         TextXAlignment={Enum.TextXAlignment.Left}
                     >
-                        <uistroke Thickness={2} />
+                        <uistroke Color={Color3.fromRGB(0, 170, 0)} Thickness={2}>
+                            <uigradient
+                                Color={
+                                    new ColorSequence([
+                                        new ColorSequenceKeypoint(0, Color3.fromRGB(150, 150, 150)),
+                                        new ColorSequenceKeypoint(1, Color3.fromRGB(89, 89, 89)),
+                                    ])
+                                }
+                                Rotation={90}
+                            />
+                        </uistroke>
                     </textlabel>
-
                     <textlabel
+                        Active={true}
+                        AnchorPoint={new Vector2(0.5, 0)}
                         BackgroundTransparency={1}
                         FontFace={RobotoSlabBold}
-                        Position={new UDim2(0, 0, 0.5, 0)}
-                        Size={new UDim2(1, 0, 0.5, 0)}
-                        Text={
-                            empireInfo.owner ? "Owned by " + getNameFromUserId(empireInfo.owner) : "could not load info"
-                        }
-                        TextColor3={Color3.fromRGB(200, 200, 200)}
+                        Position={new UDim2(0.5, 0, 0.25, 0)}
+                        Size={new UDim2(1, 0, 0.4, 0)}
+                        Text={empireInfo.name}
+                        TextColor3={Color3.fromRGB(255, 255, 255)}
                         TextScaled={true}
                         TextSize={14}
                         TextWrapped={true}
                         TextXAlignment={Enum.TextXAlignment.Left}
                     >
-                        <uistroke Thickness={2} />
+                        <uistroke Color={Color3.fromRGB(0, 170, 0)} Thickness={2}>
+                            <uigradient
+                                Color={
+                                    new ColorSequence([
+                                        new ColorSequenceKeypoint(0, Color3.fromRGB(150, 150, 150)),
+                                        new ColorSequenceKeypoint(1, Color3.fromRGB(89, 89, 89)),
+                                    ])
+                                }
+                                Rotation={90}
+                            />
+                        </uistroke>
                     </textlabel>
+                    <uilistlayout
+                        HorizontalAlignment={Enum.HorizontalAlignment.Center}
+                        SortOrder={Enum.SortOrder.LayoutOrder}
+                        VerticalAlignment={Enum.VerticalAlignment.Center}
+                    />
                 </frame>
-            </frame>
-
-            {/* Stats */}
-            <frame BackgroundTransparency={1} Position={new UDim2(0, 10, 0.6, 0)} Size={new UDim2(1, -20, 0.35, 0)}>
                 <uilistlayout
                     FillDirection={Enum.FillDirection.Horizontal}
-                    HorizontalAlignment={Enum.HorizontalAlignment.Left}
-                    Padding={new UDim(0, 15)}
+                    Padding={new UDim(0.05, 0)}
                     SortOrder={Enum.SortOrder.LayoutOrder}
                     VerticalAlignment={Enum.VerticalAlignment.Center}
                 />
-
-                <textlabel
-                    AutomaticSize={Enum.AutomaticSize.X}
+                <imagelabel
                     BackgroundTransparency={1}
-                    FontFace={RobotoSlabBold}
-                    LayoutOrder={1}
-                    Size={new UDim2(0, 0, 1, 0)}
+                    Image={avatarImage}
+                    LayoutOrder={-1}
+                    Size={new UDim2(1, -10, 1, -10)}
+                    SizeConstraint={Enum.SizeConstraint.RelativeYY}
+                />
+            </frame>
+            <frame
+                AnchorPoint={new Vector2(1, 0.5)}
+                BackgroundTransparency={1}
+                LayoutOrder={1}
+                Position={new UDim2(1, 0, 0.5, 0)}
+                Size={new UDim2(0.25, 0, 1, -10)}
+            >
+                <uilistlayout
+                    HorizontalAlignment={Enum.HorizontalAlignment.Center}
+                    Padding={new UDim(0.05, 0)}
+                    SortOrder={Enum.SortOrder.LayoutOrder}
+                    VerticalAlignment={Enum.VerticalAlignment.Center}
+                />
+                <textlabel
+                    Active={true}
+                    AnchorPoint={new Vector2(0.5, 0)}
+                    BackgroundTransparency={1}
+                    FontFace={RobotoSlab}
+                    Position={new UDim2(0.5, 0, 0.25, 0)}
+                    Size={new UDim2(1, 0, 0.25, 0)}
                     Text={`Items: ${empireInfo.items}`}
                     TextColor3={Color3.fromRGB(255, 255, 255)}
                     TextScaled={true}
                     TextSize={14}
                     TextWrapped={true}
                 >
-                    <uistroke Thickness={2} />
+                    <uistroke Color={Color3.fromRGB(0, 170, 0)} Thickness={2}>
+                        <uigradient
+                            Color={
+                                new ColorSequence([
+                                    new ColorSequenceKeypoint(0, Color3.fromRGB(150, 150, 150)),
+                                    new ColorSequenceKeypoint(1, Color3.fromRGB(89, 89, 89)),
+                                ])
+                            }
+                            Rotation={90}
+                        />
+                    </uistroke>
                 </textlabel>
-
                 <textlabel
-                    AutomaticSize={Enum.AutomaticSize.X}
+                    Active={true}
+                    AnchorPoint={new Vector2(0.5, 0)}
                     BackgroundTransparency={1}
-                    FontFace={RobotoSlabBold}
+                    FontFace={RobotoSlab}
+                    LayoutOrder={1}
+                    Position={new UDim2(0.5, 0, 0.25, 0)}
+                    Size={new UDim2(1, 0, 0.25, 0)}
+                    Text={`Playtime: ${convertToHHMMSS(empireInfo.playtime)}`}
+                    TextColor3={Color3.fromRGB(255, 255, 255)}
+                    TextScaled={true}
+                    TextSize={14}
+                    TextWrapped={true}
+                >
+                    <uistroke Color={Color3.fromRGB(0, 170, 0)} Thickness={2}>
+                        <uigradient
+                            Color={
+                                new ColorSequence([
+                                    new ColorSequenceKeypoint(0, Color3.fromRGB(150, 150, 150)),
+                                    new ColorSequenceKeypoint(1, Color3.fromRGB(89, 89, 89)),
+                                ])
+                            }
+                            Rotation={90}
+                        />
+                    </uistroke>
+                </textlabel>
+                <textlabel
+                    Active={true}
+                    AnchorPoint={new Vector2(0.5, 0)}
+                    BackgroundTransparency={1}
+                    FontFace={RobotoSlab}
                     LayoutOrder={2}
-                    Size={new UDim2(0, 0, 1, 0)}
+                    Position={new UDim2(0.5, 0, 0.25, 0)}
+                    Size={new UDim2(1, 0, 0.25, 0)}
                     Text={`Created: ${os.date("%x", empireInfo.created)}`}
                     TextColor3={Color3.fromRGB(255, 255, 255)}
                     TextScaled={true}
                     TextSize={14}
                     TextWrapped={true}
                 >
-                    <uistroke Thickness={2} />
-                </textlabel>
-
-                <textlabel
-                    AutomaticSize={Enum.AutomaticSize.X}
-                    BackgroundTransparency={1}
-                    FontFace={RobotoSlabBold}
-                    LayoutOrder={3}
-                    Size={new UDim2(0, 0, 1, 0)}
-                    Text={`Playtime: ${convertToHHMMSS(empireInfo.playtime ?? 0)}`}
-                    TextColor3={Color3.fromRGB(255, 255, 255)}
-                    TextScaled={true}
-                    TextSize={14}
-                    TextWrapped={true}
-                >
-                    <uistroke Thickness={2} />
+                    <uistroke Color={Color3.fromRGB(0, 170, 0)} Thickness={2}>
+                        <uigradient
+                            Color={
+                                new ColorSequence([
+                                    new ColorSequenceKeypoint(0, Color3.fromRGB(150, 150, 150)),
+                                    new ColorSequenceKeypoint(1, Color3.fromRGB(89, 89, 89)),
+                                ])
+                            }
+                            Rotation={90}
+                        />
+                    </uistroke>
                 </textlabel>
             </frame>
+            <textlabel
+                Active={true}
+                AnchorPoint={new Vector2(0.5, 1)}
+                BackgroundTransparency={1}
+                FontFace={RobotoSlab}
+                Position={new UDim2(0.5, 0, 0.95, 0)}
+                Size={new UDim2(1, 0, 0.01, 15)}
+                Text={empireId}
+                TextColor3={Color3.fromRGB(156, 156, 156)}
+                TextScaled={true}
+                TextSize={14}
+                TextTransparency={0.9}
+                TextWrapped={true}
+            />
         </textbutton>
     );
 }

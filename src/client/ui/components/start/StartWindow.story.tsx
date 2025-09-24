@@ -14,10 +14,36 @@ export = CreateReactStory(
         reactRoblox: ReactRoblox,
         controls: {
             visible: true,
+            fastTransitions: false,
         },
     },
     (props) => {
         useVisibility("Start", props.controls.visible);
+
+        Packets.availableEmpires.set(
+            new Map([
+                [
+                    "Empire1",
+                    {
+                        name: "The First Empire",
+                        owner: 1,
+                        created: 500,
+                        items: 55,
+                        playtime: 2599,
+                    },
+                ],
+                [
+                    "Empire2",
+                    {
+                        name: "The Second Empire",
+                        owner: 2,
+                        created: 1500,
+                        items: 150,
+                        playtime: 3600,
+                    },
+                ],
+            ]),
+        );
 
         useEffect(() => {
             LOCAL_PLAYER.SetAttribute("Start", true);
@@ -29,7 +55,7 @@ export = CreateReactStory(
 
         return (
             <Fragment>
-                <StartWindow />
+                <StartWindow fastTransitions={props.controls.fastTransitions} />
                 <SettingsWindow />
             </Fragment>
         );
