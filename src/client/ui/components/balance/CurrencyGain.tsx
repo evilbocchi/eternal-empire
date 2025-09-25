@@ -131,7 +131,7 @@ export function CurrencyGainManager() {
 
         const gainConnection = Packets.dropletBurnt.fromServer((dropletModelId, amountPerCurrency) => {
             const dropletModel = CollectionService.GetTagged("Droplet").find(
-                (droplet) => droplet.Name === dropletModelId, // TODO: optimize by using a map
+                (droplet) => droplet.Name === dropletModelId,
             ) as BasePart | undefined;
             if (dropletModel === undefined) {
                 return;

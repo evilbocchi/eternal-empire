@@ -934,7 +934,7 @@ export default class Droplet {
 
             const impulseConnection = Packets.applyImpulse.fromServer((dropletModelId, impulse) => {
                 const model = CollectionService.GetTagged("Droplet").find(
-                    (droplet) => droplet.Name === dropletModelId, // TODO: optimize by using a map
+                    (droplet) => droplet.Name === dropletModelId,
                 ) as BasePart | undefined;
                 if (model === undefined)
                     // streamed out

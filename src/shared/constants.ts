@@ -1,7 +1,13 @@
 import { Players, TextChatService, Workspace } from "@rbxts/services";
+import type ItemModelParityController from "client/controllers/world/ItemModelParityController";
 import { Workspace_Waypoints } from "services";
 import eat from "shared/hamster/eat";
 
+/**
+ * Returns the display name of a humanoid, falling back to the parent name if the display name is empty.
+ * @param humanoid The humanoid to get the display name from.
+ * @returns The display name of the humanoid, or the parent name if the display name is empty.
+ */
 export function getDisplayName(humanoid: Humanoid) {
     return humanoid.DisplayName === "" ? (humanoid.Parent?.Name ?? "???") : humanoid.DisplayName;
 }
@@ -16,6 +22,11 @@ export function getMaxXp(currentLevel: number) {
     return math.floor((math.pow(1.1, currentLevel + 25) * 80 - 853) / 10 + 0.5) * 10;
 }
 
+/**
+ * Caches and returns the name associated with a userId.
+ * @param userId The userId to get the name for.
+ * @returns The name associated with the userId, or "Server" if the userId is undefined.
+ */
 export function getNameFromUserId(userId: number | undefined) {
     if (userId === undefined) return "Server";
     const name = NAMES_PER_USER_ID.get(userId);
@@ -30,11 +41,18 @@ export function getNameFromUserId(userId: number | undefined) {
     return value;
 }
 
+/** The map storing names associated with userIds */
 export const NAMES_PER_USER_ID = new Map<number, string>();
 
-// TODO: We want to prevent Roblox's built-in replication of items, so we moved the folder to the Camera.
+/** The camera instance */
 export const CAMERA = Workspace.WaitForChild("Camera") as Camera;
 
+/**
+ * The folder where all placed items are stored.
+ *
+ * Note that the contents of this folder does **not** replicate to clients automatically.
+ * See how placed items are manually replicated in {@link ItemModelParityController}.
+ */
 export const PLACED_ITEMS_FOLDER = (() => {
     const key = "PlacedItems";
     let folder = CAMERA.FindFirstChild(key) as Folder | undefined;
@@ -53,4 +71,5 @@ export const PLACED_ITEMS_FOLDER = (() => {
  */
 export const getTextChannels = () => TextChatService.WaitForChild("TextChannels", 5) as Folder;
 
+/** The folder containing all waypoints. */
 export const WAYPOINTS = Workspace.WaitForChild("Waypoints") as Workspace_Waypoints;
