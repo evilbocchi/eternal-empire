@@ -66,5 +66,4 @@ export = new NPC(script.Name)
     .setAnimation("Default", 17708029763)
     .createDefaultMonologue("New here? Well, welcome to the Barren Islands. Not much to do, I guess.")
     .monologue("Try making some Funds. It'll help you out.")
-    .monologue("Talk to me again when you're Level 3. I have a proposition to make with you later.")
-    .npc.reconcile();
+    .monologue("Talk to me again when you're Level 3. I have a proposition to make with you later.").npc;

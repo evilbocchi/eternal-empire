@@ -1,12 +1,9 @@
-import Command, { CommandAPI } from "shared/commands/Command";
+import Command from "shared/commands/Command";
 import ThisEmpire from "shared/data/ThisEmpire";
-import { Server } from "shared/api/APIExpose";
 
 export = new Command(script.Name)
     .addAlias("sset")
-    .setDescription(
-        "<questId> <stage> : Set the stage number for the quest. Do not specify any parameters for a simple hot reload.",
-    )
+    .setDescription("<questId> <stage> : Set the stage number for the quest.")
     .setExecute((_o, questId, stage) => {
         const stagePerQuest = ThisEmpire.data.quests;
         if (stagePerQuest === undefined) {
@@ -16,7 +13,5 @@ export = new Command(script.Name)
         if (stage) {
             stagePerQuest.set(questId, tonumber(stage) ?? 0);
         }
-
-        Server.Hamster.reload();
     })
     .setPermissionLevel(4);

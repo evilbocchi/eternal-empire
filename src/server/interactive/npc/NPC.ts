@@ -12,7 +12,7 @@ import {
 import { playSound } from "shared/asset/GameAssets";
 import { getDisplayName } from "shared/constants";
 import { IS_EDIT, IS_STUDIO } from "shared/Context";
-import { HotReloader, Reloadable } from "shared/hamster/HotReload";
+import { Identifiable, ModuleRegistry } from "shared/hamster/ModuleRegistry";
 import Packets from "shared/Packets";
 
 /**
@@ -25,8 +25,8 @@ export const NPC_MODELS = Workspace.FindFirstChild("NPCs") as Folder | undefined
 /**
  * Represents a non-player character (NPC) with animations, dialogue, and interaction logic.
  */
-export default class NPC extends Reloadable<NPC> {
-    static readonly HOT_RELOADER = new HotReloader<NPC>(script.Parent!, new Set([script]));
+export default class NPC extends Identifiable {
+    static readonly HOT_RELOADER = new ModuleRegistry<NPC>(script.Parent!, new Set([script]));
 
     /** Material costs for pathfinding calculations. Higher costs make NPCs avoid certain materials. */
     static readonly PATHFINDING_COSTS = {
@@ -62,7 +62,7 @@ export default class NPC extends Reloadable<NPC> {
     interact?: () => void;
 
     constructor(public readonly id: string) {
-        super(id, NPC.HOT_RELOADER);
+        super(id);
         this.defaultName = id;
     }
 

@@ -1,7 +1,5 @@
 import NPC from "server/interactive/npc/NPC";
 
-export = new NPC(script.Name)
-    .createDefaultMonologue(
-        `Welcome to our humble factory! We produce Conveyors, Conveyors and Conveyors. Feel free to browse our selection!`,
-    )
-    .npc.reconcile();
+export = new NPC(script.Name).createDefaultMonologue(
+    `Welcome to our humble factory! We produce Conveyors, Conveyors and Conveyors. Feel free to browse our selection!`,
+).npc;

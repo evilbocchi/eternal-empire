@@ -12,7 +12,7 @@ import { Server } from "shared/api/APIExpose";
 import { IS_EDIT } from "shared/Context";
 import ThisEmpire from "shared/data/ThisEmpire";
 import eat from "shared/hamster/eat";
-import { HotReloader, Reloadable } from "shared/hamster/HotReload";
+import { ModuleRegistry, Identifiable } from "shared/hamster/ModuleRegistry";
 import Packets from "shared/Packets";
 
 /**
@@ -187,8 +187,8 @@ export class Stage {
  * Represents a multi-stage quest, including its metadata, stages, rewards, and completion dialogue.
  * Provides methods for configuring quest properties, managing stages, and handling quest initialization.
  */
-export default class Quest extends Reloadable<Quest> {
-    static readonly HOT_RELOADER = new HotReloader<Quest>(script.Parent!, new Set([script])).setLoadCallback(
+export default class Quest extends Identifiable {
+    static readonly HOT_RELOADER = new ModuleRegistry<Quest>(script.Parent!, new Set([script])).setLoadCallback(
         (questPerId) => {
             print(`Loaded ${questPerId.size()} quests`);
 
@@ -253,7 +253,7 @@ export default class Quest extends Reloadable<Quest> {
      * @param id The unique quest identifier.
      */
     constructor(public readonly id: string) {
-        super(id, Quest.HOT_RELOADER);
+        super(id);
         this.color = Quest.colors[string.byte(id)[0] % Quest.colors.size()];
     }
 
@@ -359,7 +359,7 @@ export default class Quest extends Reloadable<Quest> {
         const stage = new Stage()
             .setDescription(`Complete the quest "${depQuest.name}" before starting this.`)
             .onReached(() => {
-                while (!Quest.HOT_RELOADER.RELOADABLE_PER_ID.get(questId)?.completed) {
+                while (!Quest.HOT_RELOADER.OBJECTS.get(questId)?.completed) {
                     task.wait(2);
                 }
                 stage.complete();
@@ -487,7 +487,7 @@ export default class Quest extends Reloadable<Quest> {
             return;
         }
 
-        for (const [id, quest] of Quest.HOT_RELOADER.RELOADABLE_PER_ID) {
+        for (const [id, quest] of Quest.HOT_RELOADER.OBJECTS) {
             const current = stagePerQuest.get(id) ?? 0;
 
             // Clean up all other stages

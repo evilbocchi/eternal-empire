@@ -1,8 +1,6 @@
 import { Controller, OnInit } from "@flamework/core";
-import { UserInputService } from "@rbxts/services";
 import Shaker from "client/ui/components/effect/Shaker";
 import { playSound } from "shared/asset/GameAssets";
-import { IS_STUDIO } from "shared/Context";
 import Items from "shared/items/Items";
 import Packets from "shared/Packets";
 
@@ -20,13 +18,6 @@ export default class PermissionsController implements OnInit {
         Packets.modifyGame.fromServer((param) => {
             if (param === "markplaceableeverywhere") {
                 Items.itemsPerId.forEach((item) => item.placeableEverywhere());
-            }
-        });
-
-        UserInputService.InputBegan.Connect((input, gameProcessed) => {
-            if (gameProcessed === true || !IS_STUDIO) return;
-            if (input.KeyCode === Enum.KeyCode.F2) {
-                Packets.requestReload.toServer();
             }
         });
     }
