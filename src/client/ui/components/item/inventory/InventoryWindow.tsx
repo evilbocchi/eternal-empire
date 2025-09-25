@@ -108,6 +108,10 @@ export default function InventoryWindow({ viewportManagement }: { viewportManage
     const { searchQuery, props: filterProps } = useBasicInventoryFilter();
     const [queryTime, setQueryTime] = useState(0);
     const [cellSize, setCellSize] = useState(new UDim2(0, 65, 0, 65));
+    const cellSizeRef = useRef(cellSize);
+    useEffect(() => {
+        cellSizeRef.current = cellSize;
+    }, [cellSize]);
 
     // Observe inventory data from packets
     const inventory = useProperty(Packets.inventory) ?? new Map<string, number>();
@@ -126,6 +130,10 @@ export default function InventoryWindow({ viewportManagement }: { viewportManage
         },
         [closeDocument],
     );
+    const handleItemActivatedRef = useRef(handleItemActivated);
+    useEffect(() => {
+        handleItemActivatedRef.current = handleItemActivated;
+    }, [handleItemActivated]);
 
     // Calculate cell size based on container width
     const updateCellSize = useCallback((width: number) => {
@@ -205,32 +213,44 @@ export default function InventoryWindow({ viewportManagement }: { viewportManage
         const slots = itemSlotsRef.current;
 
         for (const item of NON_GEAR_ITEMS) {
-            let slot = slots.get(item.id);
-            if (slot === undefined) {
-                slot = createInventorySlot(item, {
-                    parent: frame,
-                    size: cellSize,
-                    layoutOrder: item.layoutOrder,
-                    visible: false,
-                    viewportManagement,
-                    onActivated: handleItemActivated,
-                });
-                slots.set(item.id, slot);
-            }
+            if (slots.has(item.id)) continue;
+
+            const slot = createInventorySlot(item, {
+                parent: frame,
+                size: cellSizeRef.current,
+                layoutOrder: item.layoutOrder,
+                visible: false,
+                viewportManagement,
+                onActivated: () => handleItemActivatedRef.current(item),
+            });
+            slots.set(item.id, slot);
+        }
+    }, [viewportManagement]);
+
+    useEffect(() => {
+        const slots = itemSlotsRef.current;
+        for (const [, slot] of slots) {
+            updateInventorySlot(slot, { size: cellSize });
+        }
+    }, [cellSize]);
+
+    useEffect(() => {
+        const slots = itemSlotsRef.current;
+
+        for (const item of NON_GEAR_ITEMS) {
+            const slot = slots.get(item.id);
+            if (slot === undefined) continue;
 
             const slotData = dataPerItem.get(item.id);
             const layoutOrder = slotData === undefined ? item.layoutOrder : -slotData.layoutOrder;
             updateInventorySlot(slot, {
-                parent: frame,
-                size: cellSize,
                 layoutOrder,
                 visible: slotData?.visible === true,
                 amount: slotData?.amount ?? 0,
                 uuid: slotData?.uuid,
-                viewportManagement,
             });
         }
-    }, [cellSize, dataPerItem, viewportManagement, handleItemActivated]);
+    }, [dataPerItem]);
 
     // Check if user has any items at all (for empty state)
     let hasAnyItems = false;
