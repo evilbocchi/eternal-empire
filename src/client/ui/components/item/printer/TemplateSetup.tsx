@@ -1,6 +1,6 @@
 import React, { createRef } from "@rbxts/react";
 import { TweenService } from "@rbxts/services";
-import ActionButton from "client/ui/components/world/printer/ActionButton";
+import ActionButton from "client/ui/components/item/printer/ActionButton";
 import { RobotoSlabBold } from "client/ui/GameFonts";
 import { getAsset } from "shared/asset/AssetMap";
 import { playSound } from "shared/asset/GameAssets";

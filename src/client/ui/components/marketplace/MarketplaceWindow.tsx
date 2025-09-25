@@ -5,7 +5,7 @@ import "shared/marketplace/MarketplaceListing";
 import Packets from "shared/Packets";
 import { RobotoSlab, RobotoSlabBold } from "client/ui/GameFonts";
 import { useDocument } from "client/ui/components/window/DocumentManager";
-import ActionButton from "../world/printer/ActionButton";
+import ActionButton from "../item/printer/ActionButton";
 import CurrencyDisplay from "./CurrencyDisplay";
 
 interface MarketplaceWindowProps {

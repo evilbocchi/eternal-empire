@@ -1,5 +1,5 @@
 import React, { Fragment } from "@rbxts/react";
-import UpgradeBoardGui from "client/ui/components/world/upgrade/UpgradeBoardGui";
+import UpgradeBoardGui from "client/ui/components/item/upgrade/UpgradeBoardGui";
 import useTaggedItemModels from "client/ui/components/world/useTaggedItemModels";
 
 export default function UpgradeBoardRenderer() {

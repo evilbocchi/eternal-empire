@@ -8,7 +8,7 @@ import React, { useEffect } from "@rbxts/react";
 import ReactRoblox from "@rbxts/react-roblox";
 import { Workspace } from "@rbxts/services";
 import { CreateReactStory } from "@rbxts/ui-labs";
-import PrinterRenderer from "client/ui/components/world/printer/PrinterRenderer";
+import PrinterRenderer from "client/ui/components/item/printer/PrinterRenderer";
 import Item from "shared/item/Item";
 import Items from "shared/items/Items";
 import Packets from "shared/Packets";

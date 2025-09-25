@@ -1,8 +1,8 @@
 import React, { Fragment } from "@rbxts/react";
+import PurchaseOption from "client/ui/components/item/upgrade/PurchaseOption";
 import { RobotoMono, RobotoMonoBold } from "client/ui/GameFonts";
 import { getAsset } from "shared/asset/AssetMap";
 import NamedUpgrade from "shared/namedupgrade/NamedUpgrade";
-import PurchaseOption from "./PurchaseOption";
 
 export default function UpgradeActionsPanel({
     selectedUpgrade,

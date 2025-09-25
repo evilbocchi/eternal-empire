@@ -52,15 +52,21 @@ export const UPGRADEBOARD_GUI = (() => {
     setParent(folder);
     return folder;
 })();
+export const PRINTER_GUI = (() => {
+    const folder = new Instance("Folder");
+    folder.Name = "Printer";
+    setParent(folder);
+    return folder;
+})();
 export const SHOP_GUI = (() => {
     const folder = new Instance("Folder");
-    folder.Name = "ShopGui";
+    folder.Name = "Shop";
     setParent(folder);
     return folder;
 })();
 export const WORLD_GUI = (() => {
     const folder = new Instance("Folder");
-    folder.Name = "WorldGuis";
+    folder.Name = "World";
     setParent(folder);
     return folder;
 })();

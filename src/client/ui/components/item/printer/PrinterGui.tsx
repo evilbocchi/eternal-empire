@@ -1,7 +1,7 @@
 import { OnoeNum } from "@antivivi/serikanum";
 import React from "@rbxts/react";
-import SetupOption from "client/ui/components/world/printer/SetupOption";
-import TemplateSetup from "client/ui/components/world/printer/TemplateSetup";
+import SetupOption from "client/ui/components/item/printer/SetupOption";
+import TemplateSetup from "client/ui/components/item/printer/TemplateSetup";
 import useProperty from "client/ui/hooks/useProperty";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Packets from "shared/Packets";

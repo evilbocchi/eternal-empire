@@ -421,7 +421,6 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
         } else {
             // Sandbox mode
             buildBounds = baseplateBounds;
-            areaId = AREAS.BarrenIslands.id;
         }
 
         const model = item.MODEL?.Clone();

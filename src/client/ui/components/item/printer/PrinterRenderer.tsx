@@ -1,5 +1,5 @@
 import React, { Fragment } from "@rbxts/react";
-import PrinterGui from "client/ui/components/world/printer/PrinterGui";
+import PrinterGui from "client/ui/components/item/printer/PrinterGui";
 import useTaggedItemModels from "client/ui/components/world/useTaggedItemModels";
 
 export default function PrinterRenderer() {

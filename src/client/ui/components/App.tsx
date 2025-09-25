@@ -17,6 +17,7 @@ import {
     LEVELUP_GUI,
     LOGS_GUI,
     MAIN_LAYOUT_GUI,
+    PRINTER_GUI,
     PURCHASE_GUI,
     QUESTCOMPLETION_GUI,
     QUESTS_GUI,
@@ -25,6 +26,7 @@ import {
     START_GUI,
     STATS_GUI,
     TOOLTIPS_GUI,
+    UPGRADEBOARD_GUI,
     WORLD_GUI,
 } from "client/controllers/core/Guis";
 import BackpackWindow from "client/ui/components/backpack/BackpackWindow";
@@ -39,8 +41,10 @@ import CommandsWindow from "client/ui/components/commands/CommandsWindow";
 import ClickSparkManager from "client/ui/components/effect/ClickSparkManager";
 import InventoryWindow from "client/ui/components/item/inventory/InventoryWindow";
 import PortableBeaconWindow from "client/ui/components/item/PortableBeaconWindow";
+import PrinterRenderer from "client/ui/components/item/printer/PrinterRenderer";
 import PurchaseWindow from "client/ui/components/item/shop/PurchaseWindow";
 import ShopGui from "client/ui/components/item/shop/ShopGui";
+import UpgradeBoardRenderer from "client/ui/components/item/upgrade/UpgradeBoardRenderer";
 import useCIViewportManagement from "client/ui/components/item/useCIViewportManagement";
 import LevelUpManager from "client/ui/components/levelup/LevelUpManager";
 import LogsWindow from "client/ui/components/logs/LogsWindow";
@@ -119,6 +123,8 @@ export default function App({ viewportsEnabled }: { viewportsEnabled: boolean })
         );
         addRoot(roots, STATS_GUI).render(<StatsWindow />);
         addRoot(roots, PURCHASE_GUI).render(<PurchaseWindow viewportManagement={viewportManagement} />);
+        addRoot(roots, UPGRADEBOARD_GUI).render(<UpgradeBoardRenderer />);
+        addRoot(roots, PRINTER_GUI).render(<PrinterRenderer />);
         addRoot(roots, SHOP_GUI).render(<ShopGui viewportManagement={viewportManagement} />);
         addRoot(roots, LEVELUP_GUI).render(<LevelUpManager />);
         addRoot(roots, QUESTCOMPLETION_GUI).render(<QuestCompletionManager />);

@@ -4,6 +4,7 @@ import { packet } from "@rbxts/fletchette";
 import { Debris, Players } from "@rbxts/services";
 import { Server } from "shared/api/APIExpose";
 import { getSound } from "shared/asset/GameAssets";
+import { IS_SERVER } from "shared/Context";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Formula from "shared/currency/Formula";
 import eat from "shared/hamster/eat";
@@ -102,38 +103,40 @@ export default class ObbyUpgrader extends ItemTrait {
     }
 
     static {
-        let debounce = false;
-        const connection = obbyCompletedPacket.fromClient((player, itemId, placementId) => {
-            if (debounce) return;
-            const item = Server.Items.getItem(itemId);
-            if (item === undefined) return;
-            const obbyUpgrader = item.trait(ObbyUpgrader);
-            if (obbyUpgrader === undefined) return;
+        if (IS_SERVER) {
+            let debounce = false;
+            const connection = obbyCompletedPacket.fromClient((player, itemId, placementId) => {
+                if (debounce) return;
+                const item = Server.Items.getItem(itemId);
+                if (item === undefined) return;
+                const obbyUpgrader = item.trait(ObbyUpgrader);
+                if (obbyUpgrader === undefined) return;
 
-            const reward = obbyUpgrader.reward;
-            Server.Currency.increment("Obby Points", reward);
-            const color = item.difficulty.color ?? new Color3(1, 1, 1);
-            const r = color.R * 255;
-            const g = color.G * 255;
-            const b = color.B * 255;
-            Server.ChatHook.sendServerMessage(
-                `${player.Name} has completed the ${item.name} and earned ${reward.toString()} Obby Points!`,
-                `tag:hidden;color:${r},${g},${b}`,
-            );
-            const sound = getSound("ObbyPointGet.mp3");
-            sound.Play();
-            sound.Parent = player.Character;
-            Debris.AddItem(sound, 5);
-            const model = Server.Item.modelPerPlacementId.get(placementId);
-            if (model === undefined) return;
-            const returnPart = model.WaitForChild("ReturnPart") as BasePart;
-            player.Character?.PivotTo(returnPart.CFrame);
-            print(item.name, "completed");
-            debounce = true;
-            task.delay(1, () => {
-                debounce = false;
+                const reward = obbyUpgrader.reward;
+                Server.Currency.increment("Obby Points", reward);
+                const color = item.difficulty.color ?? new Color3(1, 1, 1);
+                const r = color.R * 255;
+                const g = color.G * 255;
+                const b = color.B * 255;
+                Server.ChatHook.sendServerMessage(
+                    `${player.Name} has completed the ${item.name} and earned ${reward.toString()} Obby Points!`,
+                    `tag:hidden;color:${r},${g},${b}`,
+                );
+                const sound = getSound("ObbyPointGet.mp3");
+                sound.Play();
+                sound.Parent = player.Character;
+                Debris.AddItem(sound, 5);
+                const model = Server.Item.modelPerPlacementId.get(placementId);
+                if (model === undefined) return;
+                const returnPart = model.WaitForChild("ReturnPart") as BasePart;
+                player.Character?.PivotTo(returnPart.CFrame);
+                print(item.name, "completed");
+                debounce = true;
+                task.delay(1, () => {
+                    debounce = false;
+                });
             });
-        });
-        eat(connection);
+            eat(connection, "Disconnect");
+        }
     }
 }

@@ -1,8 +1,8 @@
 import { OnoeNum } from "@antivivi/serikanum";
 import { getAllInstanceInfo, setInstanceInfo } from "@antivivi/vrldk";
+import { Server } from "shared/api/APIExpose";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
-import { Server } from "shared/api/APIExpose";
 import Dropper from "shared/item/traits/dropper/Dropper";
 import Furnace from "shared/item/traits/Furnace";
 import ItemTrait from "shared/item/traits/ItemTrait";
@@ -67,7 +67,7 @@ export default class Condenser extends ItemTrait {
 
         const check = () => {
             pricePerDroplet.forEach((price, droplet) => {
-                if (area.dropletCount > area.getDropletLimit()) {
+                if (area !== undefined && area.dropletCount > area.getDropletLimit()) {
                     return;
                 }
                 let dontResetUpgrades = false;

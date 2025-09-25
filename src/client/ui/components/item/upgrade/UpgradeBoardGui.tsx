@@ -1,6 +1,7 @@
 import React, { Fragment, useEffect, useMemo, useState } from "@rbxts/react";
-import UpgradeActionsPanel from "client/ui/components/world/upgrade/UpgradeActionsPanel";
-import UpgradeOptionsPanel from "client/ui/components/world/upgrade/UpgradeOptionsPanel";
+import UpgradeActionsPanel from "client/ui/components/item/upgrade/UpgradeActionsPanel";
+import UpgradeOptionsPanel from "client/ui/components/item/upgrade/UpgradeOptionsPanel";
+
 import { playSound } from "shared/asset/GameAssets";
 import NamedUpgrade from "shared/namedupgrade/NamedUpgrade";
 import Packets from "shared/Packets";
