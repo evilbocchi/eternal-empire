@@ -1,5 +1,5 @@
 import Signal from "@antivivi/lemon-signal";
-import React, { memo, useCallback, useEffect, useMemo, useState } from "@rbxts/react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "@rbxts/react";
 import { CollectionService, Debris, TweenService } from "@rbxts/services";
 import { LOCAL_PLAYER } from "client/constants";
 import useHotkeyWithTooltip from "client/ui/components/hotkeys/useHotkeyWithTooltip";
@@ -7,8 +7,8 @@ import InventoryFilter, {
     filterItems,
     useBasicInventoryFilter,
 } from "client/ui/components/item/inventory/InventoryFilter";
+import { createShopSlot, updateShopSlot, type ShopSlotHandle } from "client/ui/components/item/shop/ShopSlot";
 import { PurchaseManager } from "client/ui/components/item/shop/PurchaseWindow";
-import ShopItemSlot from "client/ui/components/item/shop/ShopItemSlot";
 import { RobotoSlabHeavy } from "client/ui/GameFonts";
 import useProperty from "client/ui/hooks/useProperty";
 import { getSound, playSound } from "shared/asset/GameAssets";
@@ -16,8 +16,6 @@ import Item from "shared/item/Item";
 import Shop from "shared/item/traits/Shop";
 import Items from "shared/items/Items";
 import Packets from "shared/Packets";
-
-const MemoizedShopItemSlot = memo(ShopItemSlot);
 
 type ShopCandidate = { guiPart: Part; shop: Shop };
 
@@ -94,21 +92,19 @@ export namespace ShopManager {
 /**
  * Main shop window component with integrated filtering
  */
-export default function ShopGui({
-    shop: shopOverride,
-    adornee: adorneeOverride,
-    viewportManagement,
-}: {
-    shop?: Shop;
-    adornee?: Part;
-    viewportManagement?: ItemViewportManagement;
-}) {
-    const [{ shop, adornee }, setShopInfo] = useState({ shop: shopOverride, adornee: adorneeOverride });
+export default function ShopGui({ viewportManagement }: { viewportManagement?: ItemViewportManagement }) {
+    const [{ shop, adornee }, setShopInfo] = useState<{ shop?: Shop; adornee?: Part }>({});
     const { searchQuery, props: filterProps } = useBasicInventoryFilter();
     const [hideMaxedItems, setHideMaxedItems] = useState(Packets.settings.get().HideMaxedItems);
-    const ownedPerItem = useProperty(Packets.bought);
+    const ownedPerItem = useProperty(Packets.bought) ?? new Map<string, number>();
     const shopItems = shop?.items ?? [];
     const shopItemIds = useMemo(() => new Set(shopItems.map((item) => item.id)), [shopItems]);
+    const scrollingFrameRef = useRef<ScrollingFrame>();
+    const itemSlotsRef = useRef(new Map<string, ShopSlotHandle>());
+    const handleItemClick = useCallback((item: Item) => {
+        playSound("MenuClick.mp3");
+        PurchaseManager.select(item);
+    }, []);
 
     useEffect(() => {
         const settingsConnection = Packets.settings.observe((settings) => {
@@ -162,14 +158,64 @@ export default function ShopGui({
         };
     }, []);
 
+    useEffect(() => {
+        return () => {
+            const slots = itemSlotsRef.current;
+            for (const [, slot] of slots) {
+                slot.destroy();
+            }
+            slots.clear();
+        };
+    }, []);
+
+    useEffect(() => {
+        const frame = scrollingFrameRef.current;
+        if (!frame) return;
+
+        const slots = itemSlotsRef.current;
+        for (const item of Items.sortedItems) {
+            if (slots.has(item.id)) continue;
+
+            const slot = createShopSlot(item, {
+                parent: frame,
+                layoutOrder: item.layoutOrder,
+                visible: false,
+                viewportManagement,
+                onActivated: handleItemClick,
+            });
+            slots.set(item.id, slot);
+        }
+    }, [viewportManagement, handleItemClick]);
+
     const dataPerItem = useMemo(() => {
         return filterItems(shopItems, searchQuery, filterProps.traitFilters);
     }, [shopItems, searchQuery, filterProps.traitFilters]);
 
-    const handleItemClick = useCallback((item: Item) => {
-        playSound("MenuClick.mp3");
-        PurchaseManager.select(item);
-    }, []);
+    useEffect(() => {
+        const frame = scrollingFrameRef.current;
+        if (!frame) return;
+
+        const slots = itemSlotsRef.current;
+        for (const item of Items.sortedItems) {
+            const slot = slots.get(item.id);
+            if (slot === undefined) continue;
+
+            const slotData = dataPerItem.get(item.id);
+            const layoutOrder = slotData?.layoutOrder ?? item.layoutOrder;
+            const baseVisible = shopItemIds.has(item.id) && slotData?.visible === true;
+            const ownedAmount = ownedPerItem.get(item.id) ?? 0;
+
+            updateShopSlot(slot, {
+                parent: frame,
+                layoutOrder,
+                baseVisible,
+                hideMaxedItems,
+                ownedAmount,
+                viewportManagement,
+                onActivated: handleItemClick,
+            });
+        }
+    }, [dataPerItem, shopItemIds, hideMaxedItems, ownedPerItem, viewportManagement, handleItemClick]);
 
     const { events } = useHotkeyWithTooltip({
         action: () => {
@@ -217,6 +263,7 @@ export default function ShopGui({
 
             {/* Item list scrolling frame */}
             <scrollingframe
+                ref={scrollingFrameRef}
                 Active={true}
                 AnchorPoint={new Vector2(0.5, 1)}
                 AutomaticCanvasSize={Enum.AutomaticSize.Y}
@@ -247,24 +294,6 @@ export default function ShopGui({
 
                 {/* Border stroke */}
                 <uistroke Color={shop?.item.difficulty.color} Thickness={3} />
-
-                {Items.sortedItems.map((item) => {
-                    const itemId = item.id;
-                    const data = dataPerItem.get(itemId);
-
-                    return (
-                        <MemoizedShopItemSlot
-                            key={itemId}
-                            item={item}
-                            hideMaxedItems={hideMaxedItems}
-                            ownedAmount={ownedPerItem.get(itemId) ?? 0}
-                            layoutOrder={data?.layoutOrder}
-                            visible={shopItemIds.has(itemId) && data?.visible === true}
-                            onClick={() => handleItemClick(item)}
-                            viewportManagement={viewportManagement}
-                        />
-                    );
-                })}
 
                 {/* Buy All button */}
                 <frame BackgroundTransparency={1} LayoutOrder={99999} Size={new UDim2(0, 100, 0, 100)}>

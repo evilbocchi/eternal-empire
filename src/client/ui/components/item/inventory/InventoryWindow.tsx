@@ -197,16 +197,7 @@ export default function InventoryWindow({ viewportManagement }: { viewportManage
     }, [inventory, uniqueInstances, searchQuery, filterProps.traitFilters]);
 
     useEffect(() => {
-        return () => {
-            const slots = itemSlotsRef.current;
-            for (const [, slot] of slots) {
-                slot.destroy();
-            }
-            slots.clear();
-        };
-    }, []);
-
-    useEffect(() => {
+        // Always regenerate slots when viewport management changes since it only changes in stories
         const frame = scrollingFrameRef.current;
         if (!frame) return;
 
@@ -225,6 +216,14 @@ export default function InventoryWindow({ viewportManagement }: { viewportManage
             });
             slots.set(item.id, slot);
         }
+
+        return () => {
+            const slots = itemSlotsRef.current;
+            for (const [, slot] of slots) {
+                slot.destroy();
+            }
+            slots.clear();
+        };
     }, [viewportManagement]);
 
     useEffect(() => {

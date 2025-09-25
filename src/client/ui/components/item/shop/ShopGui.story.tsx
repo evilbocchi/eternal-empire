@@ -4,7 +4,7 @@ import { Workspace } from "@rbxts/services";
 import { CreateReactStory, EnumList } from "@rbxts/ui-labs";
 import { ChooseOptionType } from "@rbxts/ui-labs/src/ControlTypings/Advanced";
 import PurchaseWindow from "client/ui/components/item/shop/PurchaseWindow";
-import ShopGui from "client/ui/components/item/shop/ShopGui";
+import ShopGui, { ShopManager } from "client/ui/components/item/shop/ShopGui";
 import useCIViewportManagement from "client/ui/components/item/useCIViewportManagement";
 import StoryMocking from "client/ui/components/StoryMocking";
 import TooltipWindow from "client/ui/components/tooltip/TooltipWindow";
@@ -41,7 +41,7 @@ export = CreateReactStory(
             part.Color = Color3.fromRGB(27, 42, 53);
             part.Size = new Vector3(20, 11, 0.5);
             part.Anchored = true;
-            part.Position = new Vector3(0, 5, 0);
+            part.Position = new Vector3(0, 10, 0);
             part.Parent = Workspace;
             setAdornee(part);
 
@@ -54,10 +54,12 @@ export = CreateReactStory(
             Packets.settings.set(settings);
         }, [props.controls.hideMaxedItems]);
 
+        ShopManager.refreshShop(adornee, shop);
+
         return (
             <StrictMode>
                 <TooltipWindow />
-                <ShopGui shop={shop} adornee={adornee} viewportManagement={viewportManagement} />
+                <ShopGui viewportManagement={viewportManagement} />
                 <PurchaseWindow viewportManagement={viewportManagement} />
             </StrictMode>
         );
