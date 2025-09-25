@@ -1,4 +1,4 @@
-import { getAllInstanceInfo, getInstanceInfo, setInstanceInfo } from "@antivivi/vrldk";
+import { getAllInstanceInfo } from "@antivivi/vrldk";
 import { packet } from "@rbxts/fletchette";
 import { Players, TweenService } from "@rbxts/services";
 import { Server, UISignals } from "shared/api/APIExpose";
@@ -20,10 +20,13 @@ declare global {
 }
 
 const generatedPacket = packet<(id: string, amountPerCurrency: BaseCurrencyMap) => void>();
+const clientClickedPacket = packet<(placementId: string) => void>();
 const GENERATOR_UPGRADES = NamedUpgrades.getUpgrades("Generator");
 const onGeneratedPerPlacementId = new Map<string, (amountPerCurrency: BaseCurrencyMap) => void>();
 
 export default class Generator extends Boostable {
+    static readonly CLIENT_CLICK_CALLBACKS = new Map<string, (player: Player) => void>();
+
     passiveGain: CurrencyBundle | undefined;
 
     static load(model: Model, generator: Generator) {
@@ -38,15 +41,13 @@ export default class Generator extends Boostable {
         const boosts = instanceInfo.Boosts!;
 
         let lastClicked = 0;
-        const clickPart = model.FindFirstChild("ClickPart") as BasePart | undefined;
-        if (clickPart !== undefined) {
-            const clickDetector = new Instance("ClickDetector");
-            clickDetector.MouseClick.Connect((player) => {
-                lastClicked = tick();
-                generatedPacket.toClient(player, placementId, new Map());
-            });
-            clickDetector.Parent = clickPart;
-        }
+        this.CLIENT_CLICK_CALLBACKS.set(placementId, (player) => {
+            lastClicked = tick();
+            generatedPacket.toClient(player, placementId, new Map());
+        });
+        model.Destroying.Once(() => {
+            this.CLIENT_CLICK_CALLBACKS.delete(placementId);
+        });
 
         item.repeat(
             model,
@@ -126,6 +127,12 @@ export default class Generator extends Boostable {
         const clickPart = model.FindFirstChild("ClickPart") as BasePart | undefined;
         const clickPartOriginalSize = clickPart?.Size;
 
+        if (clickPart !== undefined) {
+            const clickDetector = new Instance("ClickDetector");
+            clickDetector.MouseClick.Connect(() => clientClickedPacket.toServer(model.Name));
+            clickDetector.Parent = clickPart;
+        }
+
         const onGenerated = (amountPerCurrency: BaseCurrencyMap) => {
             if (UserGameSettings!.SavedQualityLevel.Value > 5) {
                 for (const [part, position] of positions) {
@@ -178,7 +185,15 @@ export default class Generator extends Boostable {
     }
 
     static {
-        if (!IS_SERVER) {
+        if (IS_SERVER) {
+            const connection = clientClickedPacket.fromClient((player, placementId) => {
+                const callback = this.CLIENT_CLICK_CALLBACKS.get(placementId);
+                if (callback !== undefined) {
+                    callback(player);
+                }
+            });
+            eat(connection, "Disconnect");
+        } else {
             const connection = generatedPacket.fromServer((placementId, amountPerCurrency) => {
                 const model = PLACED_ITEMS_FOLDER.FindFirstChild(placementId) as Model | undefined;
                 if (model === undefined) return;
@@ -186,7 +201,7 @@ export default class Generator extends Boostable {
                 if (onGenerated === undefined) return;
                 onGenerated(amountPerCurrency);
             });
-            eat(connection);
+            eat(connection, "Disconnect");
         }
     }
 }

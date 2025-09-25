@@ -716,6 +716,7 @@ export default class Droplet {
      * Spawned droplets in the world with their {@link InstanceInfo}.
      */
     static readonly SPAWNED_DROPLETS = new Map<BasePart, InstanceInfo>();
+    static readonly MODEL_PER_SPAWN_ID = new Map<string, BasePart>();
 
     /**
      * Basic counter for droplet instantiation.
@@ -774,28 +775,23 @@ export default class Droplet {
             instanceInfo.ItemId = itemId;
             instanceInfo.Area = areaId;
 
-            // raycast method of detecting collisions
-            // const raycastParams = new RaycastParams();
-            // raycastParams.FilterType = Enum.RaycastFilterType.Exclude;
-            // raycastParams.CollisionGroup = "QueryableGhost";
-            // raycastParams.RespectCanCollide = false;
-            // instanceInfo.RaycastParams = raycastParams;
-
-            // traditional method of detecting collisions
             clone.Touched.Connect((part) => {
                 getInstanceInfo(part, "DropletTouched")?.(clone);
             });
 
-            clone.Name = tostring(++Droplet.instatiationCount);
+            const spawnId = tostring(++Droplet.instatiationCount);
+            clone.Name = spawnId;
             if (cframe !== undefined) {
                 Packets.dropletAdded.toClientsInRadius(cframe.Position, 128, drop!);
             }
 
             Droplet.SPAWNED_DROPLETS.set(clone, instanceInfo);
+            Droplet.MODEL_PER_SPAWN_ID.set(spawnId, clone);
             let destroyed = false;
             clone.Destroying.Once(() => {
                 destroyed = true;
                 Droplet.SPAWNED_DROPLETS.delete(clone);
+                Droplet.MODEL_PER_SPAWN_ID.delete(spawnId);
             });
 
             let prev: Vector3 | undefined;
@@ -906,6 +902,7 @@ export default class Droplet {
 
                 if (instanceInfo.Health <= 0 || dropletModel.Position.Y > 1000) {
                     this.SPAWNED_DROPLETS.delete(dropletModel);
+                    this.MODEL_PER_SPAWN_ID.delete(dropletModel.Name);
                     dropletModel.Anchored = true;
                     dropletModel.Transparency = 1;
                     Debris.AddItem(dropletModel, 2);
@@ -917,15 +914,6 @@ export default class Droplet {
                     explosion.Parent = dropletModel;
                     continue;
                 }
-                // const raycastParams = instanceInfo.RaycastParams!;
-                // const raycast = Workspace.Raycast(position.sub(offset), offset, raycastParams);
-                // if (raycast === undefined)
-                //     continue;
-                // const target = raycast.Instance;
-                // raycastParams.AddToFilter(target);
-                // const touched = getInstanceInfo(target, "DropletTouched");
-                // if (touched !== undefined)
-                //     touched(dropletModel);
             }
         });
         eat(heartbeatConnection);

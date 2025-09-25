@@ -1,7 +1,7 @@
 import Difficulty from "@antivivi/jjt-difficulties";
 import { OnoeNum } from "@antivivi/serikanum";
 import { getInstanceInfo } from "@antivivi/vrldk";
-import applyDropletImpulse from "shared/api/applyDropletImpulse";
+import applyDropletImpulse from "shared/item/utils/applyDropletImpulse";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import eat from "shared/hamster/eat";
 import Droplet from "shared/item/Droplet";

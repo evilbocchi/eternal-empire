@@ -23,13 +23,15 @@ export = new Item(script.Name)
         const modelPosition = model.GetPivot().Position;
         const dropInfo = getAllInstanceInfo(model.WaitForChild("Drop"));
 
-        const lastPositions = new WeakMap<Player, Vector3>();
+        const lastPositions = new Map<Player, Vector3>();
         item.repeat(
             model,
             () => {
                 const players = Players.GetPlayers();
                 let moving = false;
+                const playerSet = new Set<Player>();
                 for (const player of players) {
+                    playerSet.add(player);
                     const character = player.Character;
                     if (!character || !character.PrimaryPart) continue;
 
@@ -46,6 +48,11 @@ export = new Item(script.Name)
                     if (!lastPosition || position.sub(lastPosition).Magnitude > 2) {
                         moving = true;
                         lastPositions.set(player, position);
+                    }
+                }
+                for (const [player] of lastPositions) {
+                    if (!playerSet.has(player)) {
+                        lastPositions.delete(player);
                     }
                 }
 

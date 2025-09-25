@@ -1,5 +1,6 @@
 import { Players, TextChatService, Workspace } from "@rbxts/services";
 import { Workspace_Waypoints } from "services";
+import eat from "shared/hamster/eat";
 
 export function getDisplayName(humanoid: Humanoid) {
     return humanoid.DisplayName === "" ? (humanoid.Parent?.Name ?? "???") : humanoid.DisplayName;
@@ -32,21 +33,19 @@ export function getNameFromUserId(userId: number | undefined) {
 export const NAMES_PER_USER_ID = new Map<number, string>();
 
 // TODO: We want to prevent Roblox's built-in replication of items, so we moved the folder to the Camera.
-// export const CAMERA = Workspace.WaitForChild("Camera") as Camera;
+export const CAMERA = Workspace.WaitForChild("Camera") as Camera;
 
-// export const PLACED_ITEMS_FOLDER = (() => {
-//     const key = "PlacedItems";
-//     let folder = CAMERA.FindFirstChild(key) as Folder | undefined;
-//     if (folder === undefined) {
-//         folder = new Instance("Folder");
-//         folder.Name = key;
-//         folder.Parent = CAMERA;
-//     }
-//     eat(folder);
-//     return folder;
-// })();
-
-export const PLACED_ITEMS_FOLDER = Workspace.WaitForChild("PlacedItems") as Folder;
+export const PLACED_ITEMS_FOLDER = (() => {
+    const key = "PlacedItems";
+    let folder = CAMERA.FindFirstChild(key) as Folder | undefined;
+    if (folder === undefined) {
+        folder = new Instance("Folder");
+        folder.Name = key;
+        folder.Parent = CAMERA;
+    }
+    eat(folder);
+    return folder;
+})();
 
 /**
  * Returns the folder automatically created containing all the text channels.

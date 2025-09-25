@@ -1,7 +1,8 @@
+import { getAllInstanceInfo } from "@antivivi/vrldk";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
 import Upgrader from "shared/item/traits/upgrader/Upgrader";
-import { getAllInstanceInfo, setInstanceInfo } from "@antivivi/vrldk";
+import { VirtualCollision } from "shared/item/utils/VirtualReplication";
 
 declare global {
     interface ItemTraits {
@@ -22,18 +23,28 @@ export default class OmniUpgrader extends Upgrader {
     mulsPerLaser = new Map<string, CurrencyBundle>();
     readonly lasers = new Set<string>();
 
+    static load(model: Model, omniUpgrader: OmniUpgrader) {
+        for (const laserName of omniUpgrader.lasers) {
+            const laser = model.WaitForChild(laserName) as BasePart;
+            laser.CanTouch = true;
+            const laserInfo = getAllInstanceInfo(laser);
+            laserInfo.LaserId = laser.Name;
+            laserInfo.Sky = omniUpgrader.skysPerLaser.get(laser.Name) ?? omniUpgrader.sky;
+            super.hookLaser(model, omniUpgrader, laser, (indicator) => (indicator.Omni = laserName));
+        }
+    }
+
+    static clientLoad(model: Model, omniUpgrader: OmniUpgrader) {
+        for (const laserName of omniUpgrader.lasers) {
+            const laser = model.WaitForChild(laserName) as BasePart;
+            VirtualCollision.listenForDropletTouches(model, laser);
+        }
+    }
+
     constructor(item: Item) {
         super(item);
-        item.onLoad((model) => {
-            for (const laserName of this.lasers) {
-                const laser = model.WaitForChild(laserName) as BasePart;
-                laser.CanTouch = true;
-                const laserInfo = getAllInstanceInfo(laser);
-                laserInfo.LaserId = laser.Name;
-                laserInfo.Sky = this.skysPerLaser.get(laser.Name) ?? this.sky;
-                Upgrader.hookLaser(model, this, laser, (indicator) => (indicator.Omni = laserName));
-            }
-        });
+        item.onLoad((model) => OmniUpgrader.load(model, this));
+        item.onClientLoad((model) => OmniUpgrader.clientLoad(model, this));
     }
 
     setSkys(skysPerLaser: Map<string, boolean>) {

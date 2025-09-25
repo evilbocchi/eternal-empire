@@ -233,11 +233,12 @@ export default class Item {
      * @returns The created model or undefined if creation failed.
      */
     createModel(placedItem: PlacedItem) {
-        const model = this.MODEL?.Clone();
-        if (model === undefined) {
+        const baseModel = this.MODEL;
+        if (baseModel === undefined) {
             warn("Cannot find model for item " + placedItem.item);
             return;
         }
+        const model = baseModel.Clone();
 
         // Position and rotate the model based on placed item data
         model.PivotTo(
@@ -478,7 +479,8 @@ export default class Item {
 
     /**
      * Calls the callback function when the item is loaded.
-     *
+     * Note that item models are manually created on the client, which means any properties
+     * set on the model on the server with this lifecycle will not be present on the client.
      * @param loadCallback Callback function that will be called when the item is loaded.
      * @returns The item instance.
      */
@@ -489,12 +491,23 @@ export default class Item {
 
     /**
      * Calls the callback function when the item is loaded on the client.
-     *
      * @param loadCallback Callback function that will be called when the item is loaded on the client.
      * @returns The item instance.
      */
     onClientLoad(loadCallback: (model: Model, item: this, player: Player) => void) {
         this.CLIENT_LOADS.push(loadCallback);
+        return this;
+    }
+
+    /**
+     * Calls the callback function when the item is loaded on both the server and client.
+     *
+     * @param loadCallback Callback function that will be called when the item is loaded.
+     * @returns The item instance.
+     */
+    onSharedLoad(loadCallback: (model: Model, item: this, player: Player | undefined) => void) {
+        this.onLoad((model, item) => loadCallback(model, item, undefined));
+        this.onClientLoad((model, item, player) => loadCallback(model, item, player));
         return this;
     }
 

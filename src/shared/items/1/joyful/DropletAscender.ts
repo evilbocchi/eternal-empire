@@ -1,6 +1,6 @@
 import Difficulty from "@antivivi/jjt-difficulties";
 import { getInstanceInfo } from "@antivivi/vrldk";
-import applyDropletImpulse from "shared/api/applyDropletImpulse";
+import applyDropletImpulse from "shared/item/utils/applyDropletImpulse";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
 import Conveyor from "shared/item/traits/conveyor/Conveyor";

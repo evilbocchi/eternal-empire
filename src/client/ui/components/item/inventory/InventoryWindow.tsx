@@ -141,6 +141,7 @@ export default function InventoryWindow({ viewportManagement }: { viewportManage
         }
         for (const [, uniqueInstance] of uniqueInstances) {
             const itemId = uniqueInstance.baseItemId;
+            if (uniqueInstance.placed) continue; // Skip placed instances
             amountsPerItem.set(itemId, (amountsPerItem.get(itemId) ?? 0) + 1);
         }
 

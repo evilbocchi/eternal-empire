@@ -1,6 +1,6 @@
 import Difficulty from "@antivivi/jjt-difficulties";
 import Item from "shared/item/Item";
-import countItemEverywhere from "shared/item/countItemEverywhere";
+import countItemEverywhere from "shared/item/utils/countItemEverywhere";
 import Items from "shared/items/Items";
 
 const maxItemAmounts = new Map<string, number>();

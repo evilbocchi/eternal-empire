@@ -32,20 +32,37 @@ function validateBasePart(instance: Instance): instance is BasePart {
 }
 
 /**
+ * Unpacks the children of an instance into its parent and destroys the original instance.
+ * @param parent The parent instance to which the children will be moved.
+ * @param instance The Folder or Model instance to unpack.
+ */
+function unpackInstance(parent: Instance, instance: Instance) {
+    for (const unpacking of instance.GetChildren()) unpacking.Parent = parent;
+    instance.Destroy();
+}
+
+/**
  * Preprocesses a model to set up collision groups, tags, and other properties for its descendants.
  * @param model The model to preprocess.
  */
 export function preprocessModel(model: Model) {
+    const isTool = model.IsA("Tool");
+    const characters = new Set<Model>();
+    let i = 0;
     for (const instance of model.GetDescendants()) {
         const name = instance.Name;
+        instance.SetAttribute("uid", i++);
 
         if (name === "Hitbox") {
+            // A part with the main purpose of checking for collision with other items.
             if (!validateBasePart(instance)) continue;
             instance.CollisionGroup = "ItemHitbox";
+            instance.CanQuery = true;
             continue;
         }
 
         if (name === "Laser" || name === "Transformer") {
+            // A part that can interact with droplets to apply an effect.
             if (!validateBasePart(instance)) continue;
             dropletInteractive(instance);
             CollectionService.AddTag(instance, "Laser");
@@ -53,6 +70,7 @@ export function preprocessModel(model: Model) {
         }
 
         if (name === "Lava") {
+            // A part that can interact with droplets to destroy them.
             if (!validateBasePart(instance)) continue;
             dropletInteractive(instance);
             CollectionService.AddTag(instance, "Lava");
@@ -60,7 +78,8 @@ export function preprocessModel(model: Model) {
         }
 
         if (name === "Decoration" || name === "Connector" || name === "Spinner") {
-            // part that can only interact with players, not droplets
+            // A part that can only collide and interact with players, not droplets.
+            // Use this for decorative parts to reduce the number of collision checks with droplets.
             if (!validateBasePart(instance)) continue;
             instance.CollisionGroup = "Decoration";
             instance.CanCollide = true;
@@ -70,7 +89,7 @@ export function preprocessModel(model: Model) {
         }
 
         if (name === "Ghost") {
-            // part that cannot interact with anything
+            // A part that cannot interact with anything at all.
             if (!validateBasePart(instance)) continue;
             instance.CollisionGroup = "Decoration";
             instance.CanCollide = false;
@@ -80,7 +99,8 @@ export function preprocessModel(model: Model) {
         }
 
         if (name === "Antighost") {
-            // part that can only interact with droplets, not players
+            // A part that can only collide and interact with droplets, not players.
+            // Use Antighosts to replace Decoration parts to simplify geometry and collision checks.
             if (!validateBasePart(instance)) continue;
             instance.CollisionGroup = "Antighost";
             instance.CanCollide = true;
@@ -91,6 +111,7 @@ export function preprocessModel(model: Model) {
         }
 
         if (name === "ShopGuiPart") {
+            // A part that can be used to adorn a SurfaceGui for a shop.
             if (!validateBasePart(instance)) continue;
             instance.CollisionGroup = "Decoration";
             instance.CanQuery = true;
@@ -99,12 +120,16 @@ export function preprocessModel(model: Model) {
         }
 
         if (instance.IsA("BasePart") && instance.CollisionGroup === "Default") {
+            // All other parts that can collide and interact with droplets and players.
+            // This is the default case for parts that are not explicitly named.
             instance.CollisionGroup = "Item";
             instance.CanTouch = false;
             continue;
         }
 
         if (instance.IsA("MeshPart") || instance.IsA("UnionOperation")) {
+            // Warn if a MeshPart or UnionOperation is using PreciseConvexDecomposition collision fidelity.
+            // This collision fidelity is expensive and should be avoided.
             if (instance.CollisionFidelity === Enum.CollisionFidelity.PreciseConvexDecomposition) {
                 warn("PreciseConvexDecomposition used in " + instance.GetFullName());
             }
@@ -112,6 +137,8 @@ export function preprocessModel(model: Model) {
         }
 
         if (instance.IsA("Sound")) {
+            // All sounds are set to the sound effects group.
+            // Ambience sounds are looped and tagged as ambience.
             if (name === "AmbienceSound") {
                 instance.Looped = true;
                 CollectionService.AddTag(instance, "Ambience");
@@ -121,36 +148,56 @@ export function preprocessModel(model: Model) {
         }
 
         if (instance.IsA("ProximityPrompt")) {
+            // All proximity prompts are made interactive.
             CollectionService.AddTag(instance, "Interactive");
             continue;
         }
 
-        const isScript = instance.IsA("Script");
-        if ((instance.IsA("ParticleEmitter") || instance.IsA("Beam") || isScript) && instance.Enabled === true) {
+        if (
+            (instance.IsA("ParticleEmitter") || instance.IsA("Beam") || instance.IsA("Script")) &&
+            instance.Enabled === true
+        ) {
+            // All particle emitters and beams are tagged as effects.
+            // All scripts are disabled to prevent them from running in-game.
             instance.AddTag("Effect");
-            if (isScript) instance.Enabled = false;
+            if (instance.IsA("Script")) {
+                instance.Enabled = false;
+            }
             continue;
         }
 
         if (instance.IsA("SurfaceGui") || instance.IsA("BillboardGui") || instance.IsA("ClickDetector")) {
+            // All GUIs and click detectors are made interactive.
             const parent = instance.Parent!;
             if (parent.IsA("BasePart")) {
                 parent.CanQuery = true;
                 CollectionService.AddTag(parent, "Unhoverable");
             }
+            continue;
         }
 
-        // ungroup descendants to improve performance
-        if (
-            instance.IsA("Folder") ||
-            (instance.IsA("Model") &&
-                instance.PrimaryPart?.Name !== "HumanoidRootPart" &&
-                (name === "Model" || instance.PrimaryPart === undefined))
-        ) {
-            if (instance.IsA("Tool")) continue;
-            for (const unpacking of instance.GetChildren()) unpacking.Parent = model;
-            instance.Destroy();
-            continue;
+        if (!isTool) {
+            if (instance.IsA("Folder")) {
+                unpackInstance(model, instance);
+                continue;
+            } else if (instance.IsA("Model")) {
+                const primaryPart = instance.PrimaryPart;
+                if (primaryPart !== undefined) {
+                    if (primaryPart.Name === "HumanoidRootPart") {
+                        characters.add(instance);
+                    }
+                } else {
+                    unpackInstance(model, instance);
+                }
+            }
+        }
+    }
+
+    for (const character of characters) {
+        const primaryPart = character.PrimaryPart;
+        for (const part of character.GetChildren()) {
+            if (part === primaryPart || !part.IsA("BasePart")) continue;
+            part.Anchored = false;
         }
     }
 }

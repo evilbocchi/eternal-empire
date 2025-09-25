@@ -1,8 +1,7 @@
+import { findBaseParts, getAllInstanceInfo } from "@antivivi/vrldk";
 import Droplet from "shared/item/Droplet";
 import Item from "shared/item/Item";
 import Conveyor from "shared/item/traits/conveyor/Conveyor";
-import { getAllInstanceInfo } from "@antivivi/vrldk";
-import { findBaseParts } from "@antivivi/vrldk";
 
 declare global {
     interface ItemTraits {
@@ -41,7 +40,7 @@ class Transformer extends Conveyor {
 
     constructor(item: Item) {
         super(item);
-        item.onLoad((model) => {});
+        item.onLoad((model) => Transformer.load(model, this));
     }
 
     getResult(droplet?: Droplet) {

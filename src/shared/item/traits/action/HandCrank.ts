@@ -1,34 +1,70 @@
-import { RunService, TweenService } from "@rbxts/services";
 import { weldModel } from "@antivivi/vrldk";
+import { packet } from "@rbxts/fletchette";
+import { RunService, TweenService } from "@rbxts/services";
+import Item from "shared/item/Item";
+import ItemTrait from "shared/item/traits/ItemTrait";
 
-export namespace HandCrank {
-    export function load(model: Model, callback: (timeSinceCrank: number) => void) {
+const crankedPacket = packet<(placementId: string) => void>();
+
+export default class HandCrank extends ItemTrait {
+    callback?: (timeSinceCrank: number, model: Model) => void;
+
+    static load(model: Model, handCrank: HandCrank) {
         let t = 0;
+        handCrank.item.repeat(model, () => handCrank.callback?.(os.clock() - t, model), 0.1);
+        const connection = crankedPacket.fromClient((player, placementId) => {
+            const character = player.Character;
+            if (character === undefined) return;
+            const distance = character.GetPivot().Position.sub(model.GetPivot().Position).Magnitude;
+            if (distance > 10) return;
+            if (model.Name !== placementId) return;
+            t = os.clock();
+            crankedPacket.toAllClients(placementId);
+        });
+        model.Destroying.Once(() => connection.Disconnect());
+    }
+
+    static clientLoad(model: Model, _handCrank: HandCrank) {
         const crank = model.WaitForChild("Crank") as Model;
-        const v = new Instance("IntValue");
-        const bp = weldModel(crank);
-        const o = bp.CFrame;
-        v.Value = 0;
-        v.Parent = crank;
-        const c1 = RunService.Heartbeat.Connect(() => {
-            bp.CFrame = o.mul(CFrame.Angles(0, 0, math.rad(v.Value)));
-            callback(tick() - t);
-        });
+        const crankPrimaryPart = weldModel(crank);
+        const crankPrimaryPartOriginal = crankPrimaryPart.CFrame;
         const sound = crank.FindFirstChildOfClass("Sound");
-        const pp = bp.FindFirstChildOfClass("ProximityPrompt");
-        if (pp === undefined || sound === undefined) return;
-        let tween: Tween | undefined = undefined;
-        pp.Triggered.Connect(() => {
-            if (tick() - t > 1) {
-                t = tick();
-                sound.Play();
-                if (tween === undefined || tween.PlaybackState === Enum.PlaybackState.Completed) {
-                    v.Value = 0;
-                    tween = TweenService.Create(v, new TweenInfo(1), { Value: 360 });
-                    tween.Play();
+        const proximityPrompt = crankPrimaryPart.FindFirstChildOfClass("ProximityPrompt");
+        if (proximityPrompt === undefined || sound === undefined) return;
+        const performSpinSequence = () => {
+            const update = (rotation: number) => {
+                return (crankPrimaryPart.CFrame = crankPrimaryPartOriginal.mul(
+                    CFrame.Angles(0, 0, math.rad(rotation)),
+                ));
+            };
+            sound.Play();
+            let t = 0;
+            const connection = RunService.Heartbeat.Connect((dt) => {
+                t += dt;
+                const rotation = TweenService.GetValue(t, Enum.EasingStyle.Quad, Enum.EasingDirection.Out) * 360;
+                update(rotation);
+                if (rotation >= 360) {
+                    update(0);
+                    connection.Disconnect();
                 }
-            }
+            });
+        };
+
+        proximityPrompt.Triggered.Connect(() => crankedPacket.toServer(model.Name));
+        const connection = crankedPacket.fromServer((placementId) => {
+            if (model.Name !== placementId) return;
+            performSpinSequence();
         });
-        model.Destroying.Once(() => c1.Disconnect());
+        model.Destroying.Once(() => connection.Disconnect());
+    }
+
+    constructor(item: Item) {
+        super(item);
+        item.onLoad((model) => HandCrank.load(model, this));
+    }
+
+    setCallback(callback: (timeSinceCrank: number, model: Model) => void) {
+        this.callback = callback;
+        return this;
     }
 }

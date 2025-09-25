@@ -1,9 +1,10 @@
 import { OnoeNum } from "@antivivi/serikanum";
 import { formatRichText } from "@antivivi/vrldk";
+import { Server } from "shared/api/APIExpose";
 import ThisEmpire from "shared/data/ThisEmpire";
 import Item from "shared/item/Item";
-import { Server } from "shared/api/APIExpose";
 import ItemTrait from "shared/item/traits/ItemTrait";
+import { VirtualAttribute } from "shared/item/utils/VirtualReplication";
 
 declare global {
     interface ItemTraits {
@@ -84,7 +85,7 @@ export default class Unique extends ItemTrait {
                 maxValue += 100;
                 totalValue += potValue;
             }
-            aura.Color = unique.MIN_COLOR.Lerp(unique.MAX_COLOR, totalValue / maxValue);
+            VirtualAttribute.setNumber(model, aura, "Potential", totalValue / maxValue);
         }
 
         const scaledPots = unique.getScaledPots(uniqueInstance);
@@ -93,9 +94,21 @@ export default class Unique extends ItemTrait {
         }
     }
 
+    static clientLoad(model: Model, unique: Unique) {
+        const aura = model.FindFirstChild("Aura") as BasePart | undefined;
+        if (aura !== undefined) {
+            VirtualAttribute.observeNumber(model, aura, "Potential", (value) => {
+                const alpha = math.clamp(value, 0, 1);
+                const color = unique.MIN_COLOR.Lerp(unique.MAX_COLOR, alpha);
+                aura.Color = color;
+            });
+        }
+    }
+
     constructor(item: Item) {
         super(item);
         item.onLoad((model) => Unique.load(model, this));
+        item.onClientLoad((model) => Unique.clientLoad(model, this));
     }
 
     onLoad(callback: (model: Model, unique: Unique, scaledPots: Map<string, number>) => void) {

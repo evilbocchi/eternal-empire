@@ -1,11 +1,10 @@
 import { OnoeNum } from "@antivivi/serikanum";
 import { formatRichText, getAllInstanceInfo, Streaming } from "@antivivi/vrldk";
-import { RunService } from "@rbxts/services";
 import { Server } from "shared/api/APIExpose";
-import getPlacedItemsInBounds from "shared/api/getPlacedItemsInBounds";
 import { CURRENCY_DETAILS } from "shared/currency/CurrencyDetails";
 import Item from "shared/item/Item";
 import ItemTrait from "shared/item/traits/ItemTrait";
+import getPlacedItemsInBounds from "shared/item/utils/getPlacedItemsInBounds";
 
 declare global {
     interface ItemTraits {
@@ -39,7 +38,7 @@ export default class Clicker extends ItemTrait {
         let target: Model | undefined;
         let event: BindableEvent | undefined;
         let t = 0;
-        const connection = RunService.Heartbeat.Connect((dt) => {
+        clicker.item.repeat(model, (dt) => {
             t += dt;
             if (target === undefined || target.Parent === undefined) {
                 if (t > 0.05) {
@@ -54,7 +53,7 @@ export default class Clicker extends ItemTrait {
             } else if (t > 1 / (clicker.clickRate ?? 999)) {
                 t = 0;
                 if (event === undefined || event.Parent === undefined) {
-                    event = target.WaitForChild("MenuClick.mp3") as BindableEvent;
+                    event = target.WaitForChild("Click") as BindableEvent;
                 }
 
                 let rate = 1;
@@ -67,7 +66,6 @@ export default class Clicker extends ItemTrait {
                 if (clicker.replicatingClicks === true) fireClickRemote();
             }
         });
-        model.Destroying.Once(() => connection.Disconnect());
     }
 
     replicatingClicks = false;

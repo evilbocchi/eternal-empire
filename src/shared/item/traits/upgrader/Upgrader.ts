@@ -6,6 +6,7 @@ import Item from "shared/item/Item";
 import Boostable from "shared/item/traits/boost/Boostable";
 import Operative, { IOperative } from "shared/item/traits/Operative";
 import type OmniUpgrader from "shared/item/traits/upgrader/OmniUpgrader";
+import { VirtualCollision } from "shared/item/utils/VirtualReplication";
 
 declare global {
     interface ItemTraits {
@@ -129,6 +130,7 @@ export default class Upgrader extends Operative {
             instanceInfo.Upgrades = upgrades;
             modelInfo.OnUpgraded?.fire(droplet);
         };
+        VirtualCollision.handleDropletTouched(model, laser, laserInfo.DropletTouched);
         laserInfo.ParentInfo = modelInfo;
         laserInfo.OriginalTransparency = laser.Transparency;
         this.SPAWNED_LASERS.set(laser, laserInfo);
@@ -141,9 +143,8 @@ export default class Upgrader extends Operative {
     static load(model: Model, upgrader: Upgrader) {
         setInstanceInfo(model, "OnUpgraded", new Signal());
         const item = upgrader.item;
-        const lasers = findBaseParts(model, "Laser");
         let i = 0;
-        for (const laser of lasers) {
+        for (const laser of findBaseParts(model, "Laser")) {
             const laserInfo = getAllInstanceInfo(laser);
             laserInfo.LaserId = tostring(i);
             laserInfo.Sky = upgrader.sky;
@@ -153,10 +154,17 @@ export default class Upgrader extends Operative {
         item.maintain(model);
     }
 
+    static clientLoad(model: Model, _upgrader: Upgrader) {
+        for (const laser of findBaseParts(model, "Laser")) {
+            VirtualCollision.listenForDropletTouches(model, laser);
+        }
+    }
+
     constructor(item: Item) {
         super(item);
         item.trait(Boostable).addToWhitelist("dummy"); // Enable whitelist to stop charger connection
         item.onLoad((model) => Upgrader.load(model, this));
+        item.onClientLoad((model) => Upgrader.clientLoad(model, this));
     }
 
     /**

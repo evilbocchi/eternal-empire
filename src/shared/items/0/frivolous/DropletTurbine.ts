@@ -1,8 +1,8 @@
 import Difficulty from "@antivivi/jjt-difficulties";
+import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
 import Conveyor from "shared/item/traits/conveyor/Conveyor";
-import { LaserFan } from "shared/item/traits/other/LaserFan";
-import CurrencyBundle from "shared/currency/CurrencyBundle";
+import LaserFan from "shared/item/traits/other/LaserFan";
 
 export = new Item(script.Name)
     .setName("Droplet Turbine")
@@ -16,4 +16,7 @@ export = new Item(script.Name)
     .setSpeed(20)
     .exit()
 
-    .onLoad((model, item) => LaserFan.load(model, item, 80));
+    .trait(LaserFan)
+    .setSpeed(80)
+
+    .exit();

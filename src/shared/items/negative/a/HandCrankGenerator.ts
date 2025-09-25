@@ -1,8 +1,8 @@
 import Difficulty from "@antivivi/jjt-difficulties";
-import Item from "shared/item/Item";
-import Generator from "shared/item/traits/generator/Generator";
-import { HandCrank } from "shared/item/traits/action/HandCrank";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
+import Item from "shared/item/Item";
+import HandCrank from "shared/item/traits/action/HandCrank";
+import Generator from "shared/item/traits/generator/Generator";
 
 export = new Item(script.Name)
     .setName("Hand Crank Generator")
@@ -16,8 +16,8 @@ export = new Item(script.Name)
 
     .trait(Generator)
     .setPassiveGain(new CurrencyBundle().set("Power", 26).set("Funds", 1e9))
-    .exit()
 
-    .onLoad((model) => {
-        HandCrank.load(model, (t) => model.SetAttribute("GeneratorBoost", t < 10 ? 3 : 1));
-    });
+    .trait(HandCrank)
+    .setCallback((t, model) => model.SetAttribute("GeneratorBoost", t < 10 ? 3 : 1))
+
+    .exit();

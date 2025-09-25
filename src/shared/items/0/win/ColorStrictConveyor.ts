@@ -2,7 +2,7 @@ import Difficulty from "@antivivi/jjt-difficulties";
 import { OnoeNum } from "@antivivi/serikanum";
 import { getAllInstanceInfo } from "@antivivi/vrldk";
 import { Server } from "shared/api/APIExpose";
-import applyDropletImpulse from "shared/api/applyDropletImpulse";
+import applyDropletImpulse from "shared/item/utils/applyDropletImpulse";
 import { playSound } from "shared/asset/GameAssets";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import { CURRENCY_DETAILS } from "shared/currency/CurrencyDetails";

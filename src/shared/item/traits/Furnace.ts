@@ -1,10 +1,11 @@
 import { OnoeNum } from "@antivivi/serikanum";
 import { findBaseParts, getAllInstanceInfo } from "@antivivi/vrldk";
 import { Debris } from "@rbxts/services";
+import { Server } from "shared/api/APIExpose";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
-import { Server } from "shared/api/APIExpose";
 import Operative from "shared/item/traits/Operative";
+import { VirtualCollision } from "shared/item/utils/VirtualReplication";
 import Packets from "shared/Packets";
 
 declare global {
@@ -34,6 +35,11 @@ export default class Furnace extends Operative {
                 const dropletInfo = getAllInstanceInfo(droplet);
                 if (dropletInfo.Incinerated === true) return;
 
+                if (instanceInfo.Area !== dropletInfo.Area && dropletInfo.LastTeleport === undefined) {
+                    // Sanity check: droplet should be in the same area as the furnace unless it was teleported
+                    return;
+                }
+
                 dropletInfo.Incinerated = true;
                 Debris.AddItem(droplet, 6);
 
@@ -62,8 +68,15 @@ export default class Furnace extends Operative {
                 Packets.dropletBurnt.toAllClients(droplet.Name, result.amountPerCurrency);
                 instanceInfo.OnProcessed?.(result, worth, droplet);
             };
+            VirtualCollision.handleDropletTouched(model, lava, lavaInfo.DropletTouched);
         }
         item.maintain(model);
+    }
+
+    static onClientLoad(model: Model) {
+        for (const lava of findBaseParts(model, "Lava")) {
+            VirtualCollision.listenForDropletTouches(model, lava);
+        }
     }
 
     variance?: number;
@@ -96,6 +109,7 @@ export default class Furnace extends Operative {
             );
         });
         item.onLoad((model) => Furnace.load(model, this));
+        item.onClientLoad((model) => Furnace.onClientLoad(model));
     }
 
     setVariance(variance: number) {
@@ -112,6 +126,4 @@ export default class Furnace extends Operative {
         this.includesUpgrades = includesUpgrades;
         return this;
     }
-
-    process(dropletInfo: InstanceInfo, furnaceModel: Model) {}
 }

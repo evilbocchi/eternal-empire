@@ -9,7 +9,7 @@ declare global {
 }
 
 export default class UpgradeBoard extends ItemTrait {
-    static load(model: Model, _upgradeBoard: UpgradeBoard) {
+    static clientLoad(model: Model) {
         model.AddTag("UpgradeBoard");
     }
 
@@ -17,7 +17,7 @@ export default class UpgradeBoard extends ItemTrait {
 
     constructor(item: Item) {
         super(item);
-        item.onLoad((model) => UpgradeBoard.load(model, this));
+        item.onClientLoad((model) => UpgradeBoard.clientLoad(model));
     }
 
     addUpgrade(upgrade: NamedUpgrade) {

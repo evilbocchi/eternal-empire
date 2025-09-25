@@ -1,8 +1,8 @@
 import Difficulty from "@antivivi/jjt-difficulties";
-import Item from "shared/item/Item";
-import { LaserFan } from "shared/item/traits/other/LaserFan";
-import Upgrader from "shared/item/traits/upgrader/Upgrader";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
+import Item from "shared/item/Item";
+import LaserFan from "shared/item/traits/other/LaserFan";
+import Upgrader from "shared/item/traits/upgrader/Upgrader";
 
 export = new Item(script.Name)
     .setName("Laser Fan")
@@ -14,6 +14,8 @@ export = new Item(script.Name)
 
     .trait(Upgrader)
     .setMul(new CurrencyBundle().set("Funds", 1.3))
-    .exit()
 
-    .onLoad((model, item) => LaserFan.load(model, item));
+    .trait(LaserFan)
+    .setSpeed(3)
+
+    .exit();

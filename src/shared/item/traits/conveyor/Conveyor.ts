@@ -1,9 +1,9 @@
 import { findBaseParts, getAllInstanceInfo } from "@antivivi/vrldk";
-import { CollectionService, RunService } from "@rbxts/services";
 import { getAsset } from "shared/asset/AssetMap";
 import GameSpeed from "shared/GameSpeed";
 import Item from "shared/item/Item";
 import ItemTrait from "shared/item/traits/ItemTrait";
+import { VirtualAttribute } from "shared/item/utils/VirtualReplication";
 
 declare global {
     interface ItemTraits {
@@ -20,56 +20,75 @@ declare global {
  */
 export default class Conveyor extends ItemTrait {
     /**
-     * Loads the conveyor arrow visual effect on the given conveyor part.
+     * Loads the conveyor arrow visual effect on the given conveyor model.
      * By default, the conveyor arrow is disabled.
      *
-     * @param part The conveyor BasePart to which the arrow will be attached.
-     * @param conveyor The conveyor instance to which the part belongs.
-     * @returns The Beam instance representing the conveyor arrow.
+     * @param model The model to load the conveyor arrow on.
+     * @param conveyor The conveyor to load the conveyor arrow for.
+     * @returns A map of each conveyor part to its beam and speed updater.
      */
-    static loadConveyorArrow(part: BasePart, conveyor?: Conveyor) {
-        const width = part.Size.X;
-        const beam = new Instance("Beam");
-        beam.Name = "ConveyorArrow";
-        beam.Texture = getAsset("assets/ConveyorArrow.png");
-        beam.Segments = 10;
-        beam.Width0 = width;
-        beam.Width1 = width;
-        beam.TextureMode = Enum.TextureMode.Static;
-        beam.TextureLength = beam.Width0;
-        beam.Transparency = new NumberSequence(0.25);
-        beam.Color = new ColorSequence(Color3.fromRGB(0, 209, 255));
-        beam.LightInfluence = 1;
-        beam.LightEmission = 1;
-        beam.ZOffset = 0.2;
-        beam.Enabled = false;
+    static loadConveyorArrow(model: Model, conveyor: Conveyor) {
+        const statsPerPart = this.getStats(model, conveyor);
+        const beamPerPart = new Map<BasePart, { beam: Beam; updateSpeed: (speed: number) => void }>();
+        for (const [part, stats] of statsPerPart) {
+            const width = part.Size.X;
+            const beam = new Instance("Beam");
+            beam.Name = "ConveyorArrow";
+            beam.Texture = getAsset("assets/ConveyorArrow.png");
+            beam.Segments = 10;
+            beam.Width0 = width;
+            beam.Width1 = width;
+            beam.TextureMode = Enum.TextureMode.Static;
+            beam.TextureLength = beam.Width0;
+            beam.Transparency = new NumberSequence(0.25);
+            beam.Color = new ColorSequence(Color3.fromRGB(0, 209, 255));
+            beam.LightInfluence = 1;
+            beam.LightEmission = 1;
+            beam.ZOffset = 0.2;
+            beam.Enabled = false;
 
-        const attachment0 = part.FindFirstChild("Attachment0") as Attachment | undefined;
-        const attachment1 = part.FindFirstChild("Attachment1") as Attachment | undefined;
-        if (part.GetAttribute("Inverted")) {
-            beam.Attachment0 = attachment1;
-            beam.Attachment1 = attachment0;
-        } else {
-            beam.Attachment0 = attachment0;
-            beam.Attachment1 = attachment1;
+            const attachment0 = part.FindFirstChild("Attachment0") as Attachment | undefined;
+            const attachment1 = part.FindFirstChild("Attachment1") as Attachment | undefined;
+            if (part.GetAttribute("Inverted")) {
+                beam.Attachment0 = attachment1;
+                beam.Attachment1 = attachment0;
+            } else {
+                beam.Attachment0 = attachment0;
+                beam.Attachment1 = attachment1;
+            }
+
+            part.FrontSurface = Enum.SurfaceType.Studs;
+            part.CustomPhysicalProperties = Conveyor.PHYSICAL_PROPERTIES;
+
+            const updateSpeed = (speed: number) => {
+                beam.TextureSpeed = speed / beam.TextureLength;
+                part.AssemblyLinearVelocity = part.CFrame.LookVector.mul((stats.inverted ? -1 : 1) * speed);
+            };
+            updateSpeed(stats.speed);
+            beam.Parent = part;
+            beamPerPart.set(part, { beam, updateSpeed });
         }
+        return beamPerPart;
+    }
 
-        const updateSpeed = () => {
-            let speed = part.GetAttribute("Speed") as number | undefined;
-            if (speed === undefined) {
-                speed = conveyor?.getSpeed() ?? 1;
-            }
-            beam.TextureSpeed = speed / beam.TextureLength;
-        };
-        const connection = part.GetAttributeChangedSignal("Speed").Connect(updateSpeed);
-        part.AncestryChanged.Connect((_, parent) => {
-            if (parent === undefined) {
-                connection.Disconnect();
-            }
-        });
-        updateSpeed();
-        beam.Parent = part;
-        return beam;
+    /**
+     * Retrieves all conveyor parts and their stats from the given model and conveyor.
+     * @param model The model to search.
+     * @param conveyor The conveyor to get stats for.
+     * @returns The conveyor parts and their stats.
+     */
+    static getStats(model: Model, conveyor: Conveyor) {
+        const conveyors = findBaseParts(model, "Conveyor");
+        const statsPerPart = new Map<BasePart, { speed: number; inverted: boolean }>();
+
+        for (const conveyorPart of conveyors) {
+            const overwrite = conveyorPart.FindFirstChild("BaseSpeed") as IntValue | undefined;
+            statsPerPart.set(conveyorPart, {
+                speed: (overwrite?.Value ?? conveyor.speed ?? 1) * GameSpeed.speed,
+                inverted: (conveyorPart.FindFirstChild("Inverted") as BoolValue | undefined)?.Value ?? false,
+            });
+        }
+        return statsPerPart;
     }
 
     /**
@@ -80,18 +99,7 @@ export default class Conveyor extends ItemTrait {
      */
     static load(model: Model, conveyor: Conveyor) {
         const instanceInfo = getAllInstanceInfo(model);
-        const conveyors = findBaseParts(model, "Conveyor");
-        const statsPerPart = new Map<BasePart, { speed: number; inverted: boolean }>();
-
-        for (const conveyorPart of conveyors) {
-            conveyorPart.FrontSurface = Enum.SurfaceType.Studs;
-            conveyorPart.CustomPhysicalProperties = Conveyor.PHYSICAL_PROPERTIES;
-            const overwrite = conveyorPart.FindFirstChild("BaseSpeed") as IntValue | undefined;
-            statsPerPart.set(conveyorPart, {
-                speed: overwrite?.Value ?? conveyor.getSpeed() ?? 1,
-                inverted: (conveyorPart.FindFirstChild("Inverted") as BoolValue | undefined)?.Value ?? false,
-            });
-        }
+        const statsPerPart = this.getStats(model, conveyor);
 
         const updateSpeed = () => {
             let speedBoost = 0;
@@ -101,17 +109,22 @@ export default class Conveyor extends ItemTrait {
                     speedBoost += boost.charger?.item.findTrait("Accelerator")?.boost ?? 0;
                 }
             }
-            for (const conveyorPart of conveyors) {
-                const { speed: baseSpeed, inverted } = statsPerPart.get(conveyorPart)!;
+            for (const [part, { speed: baseSpeed, inverted }] of statsPerPart) {
                 let speed = baseSpeed;
                 speed += speedBoost;
-                conveyorPart.SetAttribute("Speed", speed);
-                conveyorPart.AddTag("Conveyor");
-                conveyorPart.AssemblyLinearVelocity = conveyorPart.CFrame.LookVector.mul((inverted ? -1 : 1) * speed);
+                VirtualAttribute.setNumber(model, part, "Speed", speed);
+                part.AssemblyLinearVelocity = part.CFrame.LookVector.mul((inverted ? -1 : 1) * speed);
             }
         };
         updateSpeed();
         instanceInfo.UpdateSpeed = updateSpeed;
+    }
+
+    static clientLoad(model: Model, conveyor: Conveyor) {
+        const loadedArrows = this.loadConveyorArrow(model, conveyor);
+        for (const [basePart, { updateSpeed }] of loadedArrows) {
+            VirtualAttribute.observeNumber(model, basePart, "Speed", updateSpeed);
+        }
     }
 
     /**
@@ -132,6 +145,7 @@ export default class Conveyor extends ItemTrait {
     constructor(item: Item) {
         super(item);
         item.onLoad((model) => Conveyor.load(model, this));
+        item.onClientLoad((model) => Conveyor.clientLoad(model, this));
     }
 
     /**
@@ -143,22 +157,5 @@ export default class Conveyor extends ItemTrait {
     setSpeed(speed: number) {
         this.speed = speed;
         return this;
-    }
-
-    /**
-     * Retrieves the current speed of the conveyor adjusted by the game speed.
-     *
-     * @returns The adjusted speed of the conveyor.
-     */
-    getSpeed() {
-        return this.speed * GameSpeed.speed;
-    }
-
-    static {
-        if (RunService.IsClient()) {
-            CollectionService.GetInstanceAddedSignal("Conveyor").Connect((part) => {
-                this.loadConveyorArrow(part as BasePart);
-            });
-        }
     }
 }

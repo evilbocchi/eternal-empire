@@ -1,14 +1,20 @@
 import { OnoeNum } from "@antivivi/serikanum";
-import { Debris } from "@rbxts/services";
+import { simpleInterval } from "@antivivi/vrldk";
+import { packet } from "@rbxts/fletchette";
+import { Debris, Players } from "@rbxts/services";
+import { Server } from "shared/api/APIExpose";
 import { getSound } from "shared/asset/GameAssets";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Formula from "shared/currency/Formula";
+import eat from "shared/hamster/eat";
 import Item from "shared/item/Item";
-import { Server } from "shared/api/APIExpose";
 import ItemTrait from "shared/item/traits/ItemTrait";
 import UpgradeBoard from "shared/item/traits/UpgradeBoard";
 import Upgrader from "shared/item/traits/upgrader/Upgrader";
 import NamedUpgrade from "shared/namedupgrade/NamedUpgrade";
+import Packets from "shared/Packets";
+
+const obbyCompletedPacket = packet<(itemId: string, placementId: string) => void>();
 
 export default class ObbyUpgrader extends ItemTrait {
     static init(obbyUpgrader: ObbyUpgrader) {
@@ -29,20 +35,16 @@ export default class ObbyUpgrader extends ItemTrait {
         );
     }
 
-    static load(model: Model, obbyUpgrader: ObbyUpgrader) {
-        const item = obbyUpgrader.item;
+    static onClientLoad(model: Model, obbyUpgrader: ObbyUpgrader) {
         const obbyPointsGuiPart = model.WaitForChild("ObbyPointsGuiPart") as BasePart;
         const label = obbyPointsGuiPart.FindFirstChildOfClass("SurfaceGui")?.FindFirstChild("TextLabel") as
             | TextLabel
             | undefined;
         if (label === undefined) throw "ObbyPointsGuiPart does not have a TextLabel in its SurfaceGui";
-        item.repeat(
-            model,
-            () => {
-                label.Text = `OBBY POINTS: ${Server.Currency.get("Obby Points").toString()}`;
-            },
-            1,
-        );
+        const cleanup = simpleInterval(() => {
+            label.Text = `OBBY POINTS: ${new OnoeNum(Packets.balance.get().get("Obby Points") ?? 0).toString()}`;
+        }, 1);
+        model.Destroying.Once(cleanup);
 
         for (const part of model.GetChildren()) {
             if (!part.IsA("BasePart")) continue;
@@ -61,34 +63,13 @@ export default class ObbyUpgrader extends ItemTrait {
                     break;
             }
         }
+
         const winPart = model.WaitForChild("WinPart") as BasePart;
-        const returnPart = model.WaitForChild("ReturnPart") as BasePart;
-        let debounce = false;
         winPart.Touched.Connect((hit) => {
-            if (debounce) return;
             const parent = hit.Parent;
             if (parent === undefined || !parent.IsA("Model")) return;
-            parent.PivotTo(returnPart.CFrame);
-            const reward = obbyUpgrader.reward;
-            Server.Currency.increment("Obby Points", reward);
-            const color = item.difficulty.color ?? new Color3(1, 1, 1);
-            const r = color.R * 255;
-            const g = color.G * 255;
-            const b = color.B * 255;
-            Server.ChatHook.sendServerMessage(
-                `${parent.Name} has completed the ${item.name} and earned ${reward.toString()} Obby Points!`,
-                `tag:hidden;color:${r},${g},${b}`,
-            );
-            const sound = getSound("ObbyPointGet.mp3");
-            sound.Play();
-            sound.Parent = parent;
-            Debris.AddItem(sound, 5);
-
-            print(item.name, "completed");
-            debounce = true;
-            task.delay(1, () => {
-                debounce = false;
-            });
+            if (Players.GetPlayerFromCharacter(parent) !== Players.LocalPlayer) return;
+            obbyCompletedPacket.toServer(obbyUpgrader.item.id, model.Name);
         });
     }
 
@@ -106,7 +87,7 @@ export default class ObbyUpgrader extends ItemTrait {
         super(item);
         item.trait(Upgrader);
         item.onInit(() => ObbyUpgrader.init(this));
-        item.onLoad((model) => ObbyUpgrader.load(model, this));
+        item.onClientLoad((model) => ObbyUpgrader.onClientLoad(model, this));
     }
 
     setBoost(upgrade: NamedUpgrade, currency: Currency, formula: Formula) {
@@ -118,5 +99,41 @@ export default class ObbyUpgrader extends ItemTrait {
     setReward(reward: OnoeNum | number) {
         this.reward = new OnoeNum(reward);
         return this;
+    }
+
+    static {
+        let debounce = false;
+        const connection = obbyCompletedPacket.fromClient((player, itemId, placementId) => {
+            if (debounce) return;
+            const item = Server.Items.getItem(itemId);
+            if (item === undefined) return;
+            const obbyUpgrader = item.trait(ObbyUpgrader);
+            if (obbyUpgrader === undefined) return;
+
+            const reward = obbyUpgrader.reward;
+            Server.Currency.increment("Obby Points", reward);
+            const color = item.difficulty.color ?? new Color3(1, 1, 1);
+            const r = color.R * 255;
+            const g = color.G * 255;
+            const b = color.B * 255;
+            Server.ChatHook.sendServerMessage(
+                `${player.Name} has completed the ${item.name} and earned ${reward.toString()} Obby Points!`,
+                `tag:hidden;color:${r},${g},${b}`,
+            );
+            const sound = getSound("ObbyPointGet.mp3");
+            sound.Play();
+            sound.Parent = player.Character;
+            Debris.AddItem(sound, 5);
+            const model = Server.Item.modelPerPlacementId.get(placementId);
+            if (model === undefined) return;
+            const returnPart = model.WaitForChild("ReturnPart") as BasePart;
+            player.Character?.PivotTo(returnPart.CFrame);
+            print(item.name, "completed");
+            debounce = true;
+            task.delay(1, () => {
+                debounce = false;
+            });
+        });
+        eat(connection);
     }
 }

@@ -18,11 +18,8 @@ declare global {
 }
 
 export default class Printer extends ItemTrait {
-    static load(model: Model) {
-        model.AddTag("Printer");
-    }
-
     static clientLoad(model: Model) {
+        model.AddTag("Printer");
         const fill = model.WaitForChild("Fill") as BasePart;
         const connection = Packets.printedSetups.observe((value) => {
             if (fill !== undefined) fill.Transparency = value.size() > 0 ? 0.25 : 0.8;
@@ -34,7 +31,6 @@ export default class Printer extends ItemTrait {
 
     constructor(item: Item) {
         super(item);
-        item.onLoad((model) => Printer.load(model));
         item.onClientLoad((model) => Printer.clientLoad(model));
     }
 

@@ -60,21 +60,19 @@ export default function loadBuildProcessing() {
         const arrows = new Set<Beam>();
         const connections = new Set<RBXScriptConnection>();
 
+        if (conveyor !== undefined) {
+            const loadedArrows = Conveyor.loadConveyorArrow(model, conveyor);
+            for (const [, { beam }] of loadedArrows) {
+                beam.Enabled = isPlacing;
+                arrows.add(beam);
+            }
+        }
+
         /**
          * Loads and configures a child instance of the model for placement visuals.
          * @param instance The instance to process.
          */
         function loadInstance(instance: Instance) {
-            // Handle conveyor trait: show arrows if present
-            if (instance.Name === "Conveyor" && conveyor !== undefined) {
-                if (isPlacing) {
-                    Conveyor.loadConveyorArrow(instance as BasePart, conveyor).Enabled = true;
-                } else {
-                    const arrow = instance.FindFirstChildOfClass("Beam");
-                    if (arrow !== undefined) arrows.add(arrow);
-                }
-            }
-
             // Remove certain GUIs and beams during placement
             if (
                 instance.IsA("BillboardGui") ||

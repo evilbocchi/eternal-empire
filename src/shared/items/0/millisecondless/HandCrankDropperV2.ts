@@ -3,8 +3,10 @@ import { getAllInstanceInfo } from "@antivivi/vrldk";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Droplet from "shared/item/Droplet";
 import Item from "shared/item/Item";
-import { HandCrank } from "shared/item/traits/action/HandCrank";
+import HandCrank from "shared/item/traits/action/HandCrank";
 import Dropper from "shared/item/traits/dropper/Dropper";
+
+const modifier: ItemBoost = { placementId: "", ignoresLimitations: false, dropRateMultiplier: 3 };
 
 export = new Item(script.Name)
     .setName("Hand Crank Dropper V2")
@@ -16,15 +18,18 @@ export = new Item(script.Name)
     .setPrice(new CurrencyBundle().set("Funds", 242e21), 2)
     .addPlaceableArea("BarrenIslands")
 
+    .onLoad((model) => {
+        modifier.placementId = model.Name;
+        const drop = model.WaitForChild("Drop");
+        const instanceInfo = getAllInstanceInfo(drop);
+        instanceInfo.Boosts!.set("HandCrank", modifier);
+    })
+
     .trait(Dropper)
     .setDroplet(Droplet.ManualV2Droplet)
     .setDropRate(1)
-    .exit()
 
-    .onLoad((model) => {
-        const drop = model.WaitForChild("Drop");
-        const instanceInfo = getAllInstanceInfo(drop);
-        const modifier: ItemBoost = { placementId: model.Name, ignoresLimitations: false, dropRateMultiplier: 3 };
-        instanceInfo.Boosts!.set("HandCrank", modifier);
-        HandCrank.load(model, (t) => (modifier.dropRateMultiplier = t < 5 ? 3 : 1));
-    });
+    .trait(HandCrank)
+    .setCallback((t) => (modifier.dropRateMultiplier = t < 5 ? 3 : 1))
+
+    .exit();

@@ -3,7 +3,7 @@ import Ricarg from "server/interactive/npc/Ricarg";
 import Quest, { Stage } from "server/quests/Quest";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import ThisEmpire from "shared/data/ThisEmpire";
-import countItemEverywhere from "shared/item/countItemEverywhere";
+import countItemEverywhere from "shared/item/utils/countItemEverywhere";
 import { Server } from "shared/api/APIExpose";
 import RustyFactory from "shared/items/negative/negativity/RustyFactory";
 import TheFirstUpgraderBooster from "shared/items/negative/tfd/TheFirstUpgraderBooster";

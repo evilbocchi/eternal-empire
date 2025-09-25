@@ -1,8 +1,7 @@
-import { RunService } from "@rbxts/services";
 import { Server } from "shared/api/APIExpose";
-import getPlacedItemsInBounds from "shared/api/getPlacedItemsInBounds";
 import Item from "shared/item/Item";
 import Operative from "shared/item/traits/Operative";
+import getPlacedItemsInBounds from "shared/item/utils/getPlacedItemsInBounds";
 
 export default abstract class Booster extends Operative {
     observeTarget(model: Model, callback: (model: Model | undefined, item: Item | undefined) => boolean) {
@@ -16,7 +15,7 @@ export default abstract class Booster extends Operative {
         let t = 0;
         let target: Model | undefined;
         let targetItem: Item | undefined;
-        const connection = RunService.Heartbeat.Connect((dt) => {
+        this.item.repeat(model, (dt) => {
             t += dt;
             if (target === undefined) {
                 if (t > 0.1) {
@@ -46,7 +45,6 @@ export default abstract class Booster extends Operative {
 
         model.Destroying.Once(() => {
             callback(undefined, undefined);
-            connection.Disconnect();
         });
     }
 

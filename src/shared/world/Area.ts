@@ -272,7 +272,7 @@ export default class Area {
 
     private propagateDropletCountChange() {
         // Prevent network spam during server initialization
-        if (os.clock() < 15) {
+        if (os.clock() < 15 || Sandbox.getEnabled()) {
             return;
         }
         // Broadcast the change to all connected clients
