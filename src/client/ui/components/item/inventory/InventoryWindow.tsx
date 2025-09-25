@@ -5,7 +5,7 @@
  * Follows the same pattern as QuestWindow for consistency.
  */
 
-import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from "@rbxts/react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "@rbxts/react";
 import BuildManager from "client/ui/components/build/BuildManager";
 import InventoryEmptyState from "client/ui/components/item/inventory/InventoryEmptyState";
 import InventoryFilter, {
@@ -13,7 +13,11 @@ import InventoryFilter, {
     ItemFilterData,
     useBasicInventoryFilter,
 } from "client/ui/components/item/inventory/InventoryFilter";
-import InventoryItemSlot from "client/ui/components/item/inventory/InventoryItemSlot";
+import {
+    createInventorySlot,
+    updateInventorySlot,
+    type InventorySlotHandle,
+} from "client/ui/components/item/inventory/InventorySlot";
 import useSingleDocument from "client/ui/components/sidebar/useSingleDocumentWindow";
 import BasicWindow from "client/ui/components/window/BasicWindow";
 import { RobotoMono } from "client/ui/GameFonts";
@@ -24,14 +28,17 @@ import type Item from "shared/item/Item";
 import Items from "shared/items/Items";
 import Packets from "shared/Packets";
 
-const MemoizedInventoryItemSlot = memo(InventoryItemSlot);
-
 /**
  * Calculate optimal cell count for the inventory grid.
  */
 function calculateOptimalCellCount(containerX: number): number {
     return math.max(math.round((containerX - 50) / 65), 3);
 }
+
+type InventorySlotData = ItemFilterData & {
+    amount?: number;
+    uuid?: string;
+};
 
 export function getBestUniqueInstances(uniqueInstances: Map<string, UniqueItemInstance>) {
     // Find the best unique item instance for the given base item ID
@@ -103,10 +110,22 @@ export default function InventoryWindow({ viewportManagement }: { viewportManage
     const [cellSize, setCellSize] = useState(new UDim2(0, 65, 0, 65));
 
     // Observe inventory data from packets
-    const inventory = useProperty(Packets.inventory);
-    const uniqueInstances = useProperty(Packets.uniqueInstances);
+    const inventory = useProperty(Packets.inventory) ?? new Map<string, number>();
+    const uniqueInstances = useProperty(Packets.uniqueInstances) ?? new Map<string, UniqueItemInstance>();
 
     const scrollingFrameRef = useRef<ScrollingFrame>();
+    const itemSlotsRef = useRef(new Map<string, InventorySlotHandle>());
+
+    // Handle item activation
+    const handleItemActivated = useCallback(
+        (item: Item) => {
+            const success = activateItem(item);
+            if (success) {
+                closeDocument();
+            }
+        },
+        [closeDocument],
+    );
 
     // Calculate cell size based on container width
     const updateCellSize = useCallback((width: number) => {
@@ -145,13 +164,11 @@ export default function InventoryWindow({ viewportManagement }: { viewportManage
             amountsPerItem.set(itemId, (amountsPerItem.get(itemId) ?? 0) + 1);
         }
 
-        const dataPerItem: Map<
-            string,
-            ItemFilterData & {
-                amount?: number;
-                uuid?: string;
-            }
-        > = filterItems(NON_GEAR_ITEMS, searchQuery, filterProps.traitFilters);
+        const dataPerItem: Map<string, InventorySlotData> = filterItems(
+            NON_GEAR_ITEMS,
+            searchQuery,
+            filterProps.traitFilters,
+        );
 
         const bestInstancePerItem = getBestUniqueInstances(uniqueInstances);
         for (const [id, data] of dataPerItem) {
@@ -171,6 +188,50 @@ export default function InventoryWindow({ viewportManagement }: { viewportManage
         return dataPerItem;
     }, [inventory, uniqueInstances, searchQuery, filterProps.traitFilters]);
 
+    useEffect(() => {
+        return () => {
+            const slots = itemSlotsRef.current;
+            for (const [, slot] of slots) {
+                slot.destroy();
+            }
+            slots.clear();
+        };
+    }, []);
+
+    useEffect(() => {
+        const frame = scrollingFrameRef.current;
+        if (!frame) return;
+
+        const slots = itemSlotsRef.current;
+
+        for (const item of NON_GEAR_ITEMS) {
+            let slot = slots.get(item.id);
+            if (slot === undefined) {
+                slot = createInventorySlot(item, {
+                    parent: frame,
+                    size: cellSize,
+                    layoutOrder: item.layoutOrder,
+                    visible: false,
+                    viewportManagement,
+                    onActivated: handleItemActivated,
+                });
+                slots.set(item.id, slot);
+            }
+
+            const slotData = dataPerItem.get(item.id);
+            const layoutOrder = slotData === undefined ? item.layoutOrder : -slotData.layoutOrder;
+            updateInventorySlot(slot, {
+                parent: frame,
+                size: cellSize,
+                layoutOrder,
+                visible: slotData?.visible === true,
+                amount: slotData?.amount ?? 0,
+                uuid: slotData?.uuid,
+                viewportManagement,
+            });
+        }
+    }, [cellSize, dataPerItem, viewportManagement, handleItemActivated]);
+
     // Check if user has any items at all (for empty state)
     let hasAnyItems = false;
     for (const [, { amount }] of dataPerItem) {
@@ -180,20 +241,6 @@ export default function InventoryWindow({ viewportManagement }: { viewportManage
         }
     }
     const isEmpty = !hasAnyItems; // Only show empty state if user has no items at all
-
-    // Handle item activation
-    const handleItemActivated = useCallback(
-        (item: Item) => {
-            // Use the controller's activation logic
-            const success = activateItem(item);
-
-            // Close the inventory window if activation was successful
-            if (success) {
-                closeDocument();
-            }
-        },
-        [closeDocument],
-    );
 
     return (
         <BasicWindow
@@ -243,23 +290,7 @@ export default function InventoryWindow({ viewportManagement }: { viewportManage
                     >
                         <uiaspectratioconstraint />
                     </uigridlayout>
-
-                    {/* Render inventory items TODO Decouple from React render loop for max performance */}
-                    {NON_GEAR_ITEMS.map((item) => {
-                        const data = dataPerItem.get(item.id);
-
-                        return (
-                            <MemoizedInventoryItemSlot
-                                key={item.id}
-                                item={item}
-                                amount={data?.amount}
-                                layoutOrder={data === undefined ? item.layoutOrder : -data.layoutOrder}
-                                visible={data?.visible === true}
-                                onActivated={() => handleItemActivated(item)}
-                                viewportManagement={viewportManagement}
-                            />
-                        );
-                    })}
+                    {/* Item slots are managed imperatively via createInventorySlot */}
                 </scrollingframe>
 
                 {/* Layout for filter and item list */}

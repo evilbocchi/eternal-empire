@@ -6,7 +6,11 @@ import StringBuilder from "@rbxts/stringbuilder";
 import { Environment } from "@rbxts/ui-labs";
 import { PARALLEL } from "client/constants";
 import { useHotkey } from "client/ui/components/hotkeys/HotkeyManager";
-import InventoryItemSlot from "client/ui/components/item/inventory/InventoryItemSlot";
+import {
+    createInventorySlot,
+    updateInventorySlot,
+    type InventorySlotHandle,
+} from "client/ui/components/item/inventory/InventorySlot";
 import { loadItemIntoViewport } from "client/ui/components/item/ItemViewport";
 import ItemWindow from "client/ui/components/item/shop/ItemWindow";
 import { WrappingPriceOptions } from "client/ui/components/item/shop/PriceOption";
@@ -39,6 +43,8 @@ export default function PurchaseWindow({ viewportManagement }: { viewportManagem
     const windowWrapperRef = useRef<Frame>();
     const paddingRef = useRef<UIPadding>();
     const itemSlotRef = useRef<TextButton>();
+    const itemSlotContainerRef = useRef<Frame>();
+    const itemSlotHandleRef = useRef<InventorySlotHandle>();
     const { id, visible, openDocument } = useSingleDocument({ id: "Purchase" });
     const [{ bought, price }, setBoughtData] = useState({ bought: 0, price: new CurrencyBundle() });
     const [unaffordableLabel, setUnaffordableLabel] = useState("UNAFFORDABLE");
@@ -106,6 +112,56 @@ export default function PurchaseWindow({ viewportManagement }: { viewportManagem
             inventoryConnection.disconnect();
         };
     }, [item, price]);
+
+    useEffect(() => {
+        return () => {
+            const handle = itemSlotHandleRef.current;
+            if (handle) {
+                handle.destroy();
+                itemSlotHandleRef.current = undefined;
+            }
+            itemSlotRef.current = undefined;
+        };
+    }, []);
+
+    useEffect(() => {
+        const parent = itemSlotContainerRef.current;
+        if (!parent) return;
+
+        let handle = itemSlotHandleRef.current;
+        if (handle && handle.item !== item) {
+            if (itemSlotRef.current === handle.button) {
+                itemSlotRef.current = undefined;
+            }
+            handle.destroy();
+            handle = undefined;
+            itemSlotHandleRef.current = undefined;
+        }
+
+        if (!handle) {
+            handle = createInventorySlot(item, {
+                parent,
+                size: new UDim2(0, 0, 1, 0),
+                layoutOrder: -1,
+                visible: true,
+                tooltip: false,
+                viewportManagement,
+                onActivated: () => {},
+            });
+            itemSlotHandleRef.current = handle;
+        }
+
+        itemSlotRef.current = handle.button;
+
+        updateInventorySlot(handle, {
+            parent,
+            size: new UDim2(0, 0, 1, 0),
+            layoutOrder: -1,
+            visible: true,
+            amount: bought,
+            viewportManagement,
+        });
+    }, [item, bought, viewportManagement]);
 
     const itemSlot = itemSlotRef.current;
     const purchase = () => {
@@ -214,7 +270,12 @@ export default function PurchaseWindow({ viewportManagement }: { viewportManagem
             />
 
             {/* Item slot display */}
-            <frame BackgroundTransparency={1} LayoutOrder={1} Size={new UDim2(0.9, 0, 0.075, 30)}>
+            <frame
+                ref={itemSlotContainerRef}
+                BackgroundTransparency={1}
+                LayoutOrder={1}
+                Size={new UDim2(0.9, 0, 0.075, 30)}
+            >
                 <uilistlayout
                     FillDirection={Enum.FillDirection.Horizontal}
                     HorizontalAlignment={Enum.HorizontalAlignment.Left}
@@ -222,19 +283,7 @@ export default function PurchaseWindow({ viewportManagement }: { viewportManagem
                     SortOrder={Enum.SortOrder.LayoutOrder}
                     VerticalAlignment={Enum.VerticalAlignment.Center}
                 />
-
-                {/* Item slot */}
-                <InventoryItemSlot
-                    ref={itemSlotRef}
-                    item={item}
-                    amount={bought}
-                    layoutOrder={-1}
-                    visible={true}
-                    onActivated={() => {}}
-                    size={new UDim2(0, 0, 1, 0)}
-                    tooltipEnabled={false}
-                    viewportManagement={viewportManagement}
-                />
+                {/* Item slot is managed imperatively */}
 
                 <frame AutomaticSize={Enum.AutomaticSize.X} BackgroundTransparency={1} Size={new UDim2(0, 0, 1, 0)}>
                     <textlabel
@@ -296,7 +345,7 @@ export default function PurchaseWindow({ viewportManagement }: { viewportManagem
                                 Color={
                                     new ColorSequence([
                                         new ColorSequenceKeypoint(0, Color3.fromRGB(255, 255, 255)),
-                                        new ColorSequenceKeypoint(0.47800000000000004, Color3.fromRGB(225, 225, 225)),
+                                        new ColorSequenceKeypoint(0.5, Color3.fromRGB(225, 225, 225)),
                                         new ColorSequenceKeypoint(1, Color3.fromRGB(148, 148, 148)),
                                     ])
                                 }
