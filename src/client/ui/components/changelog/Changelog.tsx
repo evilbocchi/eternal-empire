@@ -66,6 +66,8 @@ const CHANGELOGS = [
         "Added new areas",
         "Added many more crafting items",
         "Added level leaderboard",
+        "Updated leaderboards to look cleaner",
+        "Revamped UI",
     ]),
 ];
 
