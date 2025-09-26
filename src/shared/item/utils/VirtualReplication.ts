@@ -1,8 +1,10 @@
 import { getAllInstanceInfo } from "@antivivi/vrldk";
 import { DataType } from "@rbxts/flamework-binary-serializer";
 import { request, RequestPacket, signal, SignalPacket } from "@rbxts/fletchette";
+import { Players } from "@rbxts/services";
 import { PLACED_ITEMS_FOLDER } from "shared/constants";
 import { IS_EDIT, IS_SERVER } from "shared/Context";
+import ThisEmpire from "shared/data/ThisEmpire";
 import eat from "shared/hamster/eat";
 import Droplet from "shared/item/Droplet";
 import type Item from "shared/item/Item";
@@ -167,12 +169,16 @@ export namespace VirtualCollision {
     const dropletTouchedPacket = signal<(placementId: string, partUid: DataType.u16, spawnId: string) => void>(true);
     const requestToListenPacket = signal<(placementId: string, partUids: Array<DataType.u16>) => void>();
     const findListeningPacket = request<() => Map<string, Set<DataType.u16>>>();
+    const collisionOwnerChangedPacket = signal<(userId: number | undefined) => void>();
+    const collisionOwnerRequestPacket = request<() => number | undefined>();
 
     const listeningPlacements = new Map<string, Set<DataType.u16>>();
     const pendingListeningPlacements = new Map<string, Set<DataType.u16>>();
 
     const BATCH_FLUSH_INTERVAL = 1;
     let batchFlushScheduled = false;
+    let collisionOwnerPlayer: Player | undefined;
+    let collisionOwnerUserId: number | undefined;
 
     function scheduleBatchFlush() {
         if (batchFlushScheduled) return;
@@ -184,6 +190,86 @@ export namespace VirtualCollision {
                 scheduleBatchFlush();
             }
         });
+    }
+
+    function sendListenersToPlayer(player: Player) {
+        for (const [placementId, uidSet] of listeningPlacements) {
+            if (uidSet.size() === 0) continue;
+            const uids = new Array<DataType.u16>();
+            for (const uid of uidSet) {
+                uids.push(uid);
+            }
+            if (uids.size() === 0) continue;
+            requestToListenPacket.toClient(player, placementId, uids);
+        }
+
+        for (const [placementId, uidSet] of pendingListeningPlacements) {
+            if (uidSet.size() === 0) continue;
+            const uids = new Array<DataType.u16>();
+            for (const uid of uidSet) {
+                uids.push(uid);
+            }
+            if (uids.size() === 0) continue;
+            requestToListenPacket.toClient(player, placementId, uids);
+        }
+    }
+
+    function setCollisionOwner(player: Player | undefined) {
+        const userId = player?.UserId;
+        if (collisionOwnerUserId === userId) return;
+
+        collisionOwnerPlayer = player;
+        collisionOwnerUserId = userId;
+
+        collisionOwnerChangedPacket.toAllClients(userId);
+
+        if (collisionOwnerPlayer !== undefined) {
+            flushPendingBroadcasts();
+            sendListenersToPlayer(collisionOwnerPlayer);
+        }
+    }
+
+    function computePreferredOwner(): Player | undefined {
+        const players = Players.GetPlayers();
+        if (players.size() === 0) return undefined;
+
+        if (IS_SERVER) {
+            const ownerUserId = ThisEmpire.data?.owner;
+            if (ownerUserId !== undefined && ownerUserId !== 0) {
+                const ownerPlayer = Players.GetPlayerByUserId(ownerUserId);
+                if (ownerPlayer !== undefined) return ownerPlayer;
+            }
+        }
+
+        return players[0];
+    }
+
+    function updateCollisionOwner() {
+        if (!IS_SERVER) return;
+        setCollisionOwner(computePreferredOwner());
+    }
+
+    if (IS_SERVER) {
+        ThisEmpire.observe(updateCollisionOwner);
+
+        eat(
+            Players.PlayerAdded.Connect(() => task.defer(updateCollisionOwner)),
+            "Disconnect",
+        );
+
+        eat(
+            Players.PlayerRemoving.Connect((player) => {
+                if (player === collisionOwnerPlayer) {
+                    setCollisionOwner(undefined);
+                }
+                task.defer(updateCollisionOwner);
+            }),
+            "Disconnect",
+        );
+
+        collisionOwnerRequestPacket.fromClient(() => collisionOwnerUserId);
+
+        task.defer(updateCollisionOwner);
     }
 
     function ensurePlacementSet(placementId: string) {
@@ -230,6 +316,9 @@ export namespace VirtualCollision {
     function flushPendingBroadcasts() {
         if (pendingListeningPlacements.size() === 0) return;
 
+        const targetPlayer = collisionOwnerPlayer;
+        if (targetPlayer === undefined) return;
+
         const payloads = new Array<[string, Array<DataType.u16>]>();
         for (const [placementId, uidSet] of pendingListeningPlacements) {
             if (uidSet.size() === 0) continue;
@@ -246,7 +335,7 @@ export namespace VirtualCollision {
         pendingListeningPlacements.clear();
 
         for (const [placementId, partUids] of payloads) {
-            requestToListenPacket.toAllClients(placementId, partUids);
+            requestToListenPacket.toClient(targetPlayer, placementId, partUids);
         }
     }
 
@@ -281,7 +370,10 @@ export namespace VirtualCollision {
     }
 
     if (IS_SERVER || IS_EDIT) {
-        const connection = dropletTouchedPacket.fromClient((_, placementId, partUid, spawnId) => {
+        const connection = dropletTouchedPacket.fromClient((player, placementId, partUid, spawnId) => {
+            if (IS_SERVER && collisionOwnerUserId !== undefined && player.UserId !== collisionOwnerUserId) {
+                return;
+            }
             const modelReference = trackedModels.get(placementId);
             if (modelReference === undefined) return;
 
@@ -304,7 +396,10 @@ export namespace VirtualCollision {
         });
         eat(connection, "Disconnect");
 
-        findListeningPacket.fromClient(() => {
+        findListeningPacket.fromClient((player) => {
+            if (IS_SERVER && collisionOwnerUserId !== undefined && player.UserId !== collisionOwnerUserId) {
+                return new Map<string, Set<DataType.u16>>();
+            }
             const result = new Map<string, Set<DataType.u16>>();
             for (const [placementId, uidSet] of listeningPlacements) {
                 const copy = new Set<DataType.u16>();
@@ -332,6 +427,52 @@ export namespace VirtualCollision {
         const DROPLET_CONNECTION_KEY = "__DropletTouchedConnection";
 
         const clientPlacementParts = new Map<string, Map<DataType.u16, BasePart>>();
+
+        const shouldEnforceOwnership = !IS_EDIT;
+        const localPlayer = Players.LocalPlayer;
+        const localUserId = localPlayer?.UserId;
+
+        let collisionOwnerId: number | undefined = shouldEnforceOwnership
+            ? collisionOwnerRequestPacket.toServer()
+            : undefined;
+
+        const hasOwnership = () => {
+            if (!shouldEnforceOwnership) {
+                return true;
+            }
+            if (localUserId === undefined) {
+                return false;
+            }
+            return collisionOwnerId === localUserId;
+        };
+
+        const clearAllConnections = () => {
+            for (const [, placementMap] of clientPlacementParts) {
+                for (const [, part] of placementMap) {
+                    const model = part.Parent;
+                    if (model === undefined || !model.IsA("Model")) continue;
+
+                    const [reference] = trackInstance(model, part);
+                    const storedConnection = reference.get(DROPLET_CONNECTION_KEY) as RBXScriptConnection | undefined;
+                    if (storedConnection !== undefined) {
+                        storedConnection.Disconnect();
+                        reference.delete(DROPLET_CONNECTION_KEY);
+                    }
+                }
+            }
+        };
+
+        if (shouldEnforceOwnership) {
+            const ownerConnection = collisionOwnerChangedPacket.fromServer((userId) => {
+                const previousOwnerId = collisionOwnerId;
+                collisionOwnerId = userId;
+
+                if (previousOwnerId === localUserId && userId !== localUserId) {
+                    clearAllConnections();
+                }
+            });
+            eat(ownerConnection, "Disconnect");
+        }
 
         const getModelForPlacement = (placementId: string) => {
             const existing = PLACED_ITEMS_FOLDER.FindFirstChild(placementId);
@@ -374,8 +515,11 @@ export namespace VirtualCollision {
             const [reference] = trackInstance(model, part);
             if (reference.get(DROPLET_CONNECTION_KEY) !== undefined) return;
 
+            if (!hasOwnership()) return;
+
             part.CanTouch = true;
             const connection = part.Touched.Connect((otherPart) => {
+                if (!hasOwnership()) return;
                 if (!otherPart.HasTag("Droplet")) return;
                 dropletTouchedPacket.toServer(model.Name, partUid, otherPart.Name);
             });
@@ -402,9 +546,12 @@ export namespace VirtualCollision {
         };
 
         const handleRequests = (placementId: string, partUids: Array<DataType.u16>) => {
-            for (const partUid of partUids) {
-                handleRequest(placementId, partUid);
-            }
+            task.spawn(() => {
+                if (!hasOwnership()) return;
+                for (const partUid of partUids) {
+                    handleRequest(placementId, partUid);
+                }
+            });
         };
 
         for (const [placementId, uidSet] of findListeningPacket.toServer()) {
