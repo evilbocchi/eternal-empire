@@ -262,6 +262,7 @@ export namespace VirtualCollision {
         part: BasePart,
         callback: (droplet: BasePart, dropletInfo: InstanceInfo) => void,
     ) {
+        part.CanTouch = true;
         const instanceInfo = getAllInstanceInfo(part);
         instanceInfo.DropletTouched = callback;
         const [reference, partUid] = trackInstance(model, part);
@@ -373,6 +374,7 @@ export namespace VirtualCollision {
             const [reference] = trackInstance(model, part);
             if (reference.get(DROPLET_CONNECTION_KEY) !== undefined) return;
 
+            part.CanTouch = true;
             const connection = part.Touched.Connect((otherPart) => {
                 if (!otherPart.HasTag("Droplet")) return;
                 dropletTouchedPacket.toServer(model.Name, partUid, otherPart.Name);

@@ -118,7 +118,7 @@ export default class Dropper extends ItemTrait {
     /**
      * Chance to spawn a lucky droplet every second.
      */
-    static luckyChance = 200;
+    static luckyChance = 1000;
 
     /**
      * A map of droplet parts to their droplet instances.

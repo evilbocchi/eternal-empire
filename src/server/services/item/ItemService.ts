@@ -74,27 +74,27 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
      * @param player The player who placed the items.
      * @param placedItems Array of items that were placed with their IDs.
      */
-    itemsPlaced = new Signal<(player: Player | undefined, placedItems: IdPlacedItem[]) => void>();
+    readonly itemsPlaced = new Signal<(player: Player | undefined, placedItems: IdPlacedItem[]) => void>();
 
     /**
      * Fired when items are removed from the world.
      * @param player The player who removed the items.
      * @param placedItems Array of items that were removed.
      */
-    itemsUnplaced = new Signal<(player: Player | undefined, placedItems: PlacedItem[]) => void>();
+    readonly itemsUnplaced = new Signal<(player: Player | undefined, placedItems: PlacedItem[]) => void>();
 
     /**
      * Fired when items are purchased from the shop.
      * @param player The player who bought the items (undefined for system purchases).
      * @param items Array of items that were bought.
      */
-    itemsBought = new Signal<(player: Player | undefined, items: Item[]) => void>();
+    readonly itemsBought = new Signal<(player: Player | undefined, items: Item[]) => void>();
 
     /**
      * Fired when the placed items collection is updated.
      * @param placedItems The updated map of placed items.
      */
-    placedItemsUpdated = new Signal<(placedItems: Map<string, PlacedItem>) => void>();
+    readonly placedItemsUpdated = new Signal<(placedItems: Map<string, PlacedItem>) => void>();
 
     // State Management
 
@@ -102,13 +102,13 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
      * Maps placed items to their corresponding 3D models in the world.
      * Used for efficient model lookup and cleanup.
      */
-    modelPerPlacedItem = new Map<PlacedItem, Model>();
+    readonly modelPerPlacedItem = new Map<PlacedItem, Model>();
 
     /**
      * Whether the service is in rendering mode (no 3D models created).
      * Used for headless operations and testing.
      */
-    isRendering = (() => {
+    readonly isRendering = (() => {
         const isRendering = this.dataService.empireId === "RENDER";
         if (isRendering === true) print("Rendering set to true. Will not spawn item models.");
         return isRendering;
@@ -734,14 +734,14 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
         });
 
         // Set up automatic model creation for new placed items
-        this.placedItemsUpdated.connect((placedItems) => {
+        const placedItemsUpdatedConnection = this.placedItemsUpdated.connect((placedItems) => {
             for (const [placementId, placedItem] of placedItems) {
                 this.addItemModel(placementId, placedItem);
             }
         });
 
         // Set up logging for item actions
-        this.itemsBought.connect((player, items) =>
+        const itemsBoughtConnection = this.itemsBought.connect((player, items) =>
             log({
                 time: tick(),
                 type: "Purchase",
@@ -750,7 +750,7 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
             }),
         );
 
-        this.itemsPlaced.connect((player, placedItems) => {
+        const itemsPlacedConnection = this.itemsPlaced.connect((player, placedItems) => {
             const time = tick();
             let i = 0;
             for (const placedItem of placedItems) {
@@ -766,7 +766,7 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
             }
         });
 
-        this.itemsUnplaced.connect((player, placedItems) => {
+        const itemsUnplacedConnection = this.itemsUnplaced.connect((player, placedItems) => {
             const time = tick();
             let i = 0;
             for (const placedItem of placedItems) {
@@ -780,6 +780,13 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
                     z: placedItem.posZ,
                 });
             }
+        });
+
+        eat(() => {
+            placedItemsUpdatedConnection.disconnect();
+            itemsBoughtConnection.disconnect();
+            itemsPlacedConnection.disconnect();
+            itemsUnplacedConnection.disconnect();
         });
     }
 

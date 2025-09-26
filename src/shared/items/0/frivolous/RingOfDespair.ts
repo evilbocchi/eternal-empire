@@ -1,5 +1,6 @@
 import Difficulty from "@antivivi/jjt-difficulties";
-import { findBaseParts, getInstanceInfo } from "@antivivi/vrldk";
+import { findBaseParts } from "@antivivi/vrldk";
+import { Workspace } from "@rbxts/services";
 import { playSound } from "shared/asset/GameAssets";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
@@ -23,20 +24,18 @@ export = new Item(script.Name)
         for (const part of findBaseParts(model, "SadLaser")) {
             part.CanTouch = true;
             let debounce = false;
-            VirtualCollision.onDropletTouched(model, part, (otherPart: BasePart) => {
+            VirtualCollision.onDropletTouched(model, part, (dropletModel) => {
                 if (debounce === true) return;
-                if (getInstanceInfo(otherPart, "DropletId") !== undefined) {
-                    debounce = true;
-                    task.delay(1, () => (debounce = false));
-                    const explosion = new Instance("Explosion");
-                    explosion.ExplosionType = Enum.ExplosionType.NoCraters;
-                    explosion.BlastRadius = 50;
-                    explosion.BlastPressure = 2500000;
-                    explosion.DestroyJointRadiusPercent = 0;
-                    explosion.Position = part.Position;
-                    playSound("Explosion.mp3", part);
-                    explosion.Parent = part;
-                }
+                debounce = true;
+                task.delay(1, () => (debounce = false));
+                const explosion = new Instance("Explosion");
+                explosion.ExplosionType = Enum.ExplosionType.NoCraters;
+                explosion.BlastRadius = 50;
+                explosion.BlastPressure = 2500000;
+                explosion.DestroyJointRadiusPercent = 0;
+                explosion.Position = dropletModel.Position;
+                playSound("Explosion.mp3", dropletModel);
+                explosion.Parent = Workspace;
             });
         }
     });

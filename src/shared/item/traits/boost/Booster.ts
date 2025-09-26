@@ -6,9 +6,6 @@ import getPlacedItemsInBounds from "shared/item/utils/getPlacedItemsInBounds";
 export default abstract class Booster extends Operative {
     observeTarget(model: Model, callback: (model: Model | undefined, item: Item | undefined) => boolean) {
         const clickArea = model.WaitForChild("ClickArea") as BasePart;
-        clickArea.CanTouch = true;
-        clickArea.CollisionGroup = "ItemHitbox";
-        clickArea.Touched.Connect(() => {});
         const Items = Server.Items;
         const whitelist = this.whitelist;
 
@@ -20,7 +17,6 @@ export default abstract class Booster extends Operative {
             if (target === undefined) {
                 if (t > 0.1) {
                     t = 0;
-
                     const found = getPlacedItemsInBounds(clickArea, Items);
                     for (const [model, item] of found) {
                         if (whitelist !== undefined && !whitelist(model, item)) {
