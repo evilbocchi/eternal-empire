@@ -2,6 +2,7 @@ import { Profile } from "@antivivi/profileservice/globals";
 import { OnoeNum } from "@antivivi/serikanum";
 import { OnStart, Service } from "@flamework/core";
 import { HttpService, Players } from "@rbxts/services";
+import { Environment } from "@rbxts/ui-labs";
 import { OnPlayerAdded } from "server/services/ModdingService";
 import { getNameFromUserId } from "shared/constants";
 import { IS_EDIT, IS_PUBLIC_SERVER, IS_SERVER, IS_SINGLE_SERVER, IS_STUDIO } from "shared/Context";
@@ -17,6 +18,12 @@ import Items from "shared/items/Items";
 import Packets from "shared/Packets";
 import Sandbox from "shared/Sandbox";
 import EmpireIdOverrideValue from "shared/world/nodes/EmpireIdOverrideValue";
+
+declare global {
+    interface _G {
+        empireData: EmpireData;
+    }
+}
 
 /**
  * Main data service responsible for managing empire and player data.
@@ -83,6 +90,17 @@ export default class DataService implements OnStart, OnPlayerAdded {
         if (empireProfile === undefined) throw "Could not load empire";
 
         const empireData = empireProfile.Data;
+
+        if (IS_EDIT) {
+            // Merge existing data in edit mode to preserve changes across reloads
+            const existing = Environment.OriginalG.empireData;
+            if (existing !== undefined) {
+                for (const [key, value] of pairs(existing)) {
+                    (empireData as unknown as { [key: string]: unknown })[key] = value;
+                }
+            }
+            Environment.OriginalG.empireData = empireData;
+        }
 
         // Set default names for public servers
         if (IS_PUBLIC_SERVER) empireData.name = IS_SINGLE_SERVER ? "Single Server" : "Public Server";
