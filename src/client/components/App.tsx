@@ -36,7 +36,6 @@ import StatsWindow from "client/components/stats/StatsWindow";
 import TooltipWindow from "client/components/tooltip/TooltipWindow";
 import DocumentManager from "client/components/window/DocumentManager";
 import WorldRenderer from "client/components/world/WorldRenderer";
-import { LOCAL_PLAYER } from "client/constants";
 import {
     BACKPACK_GUI,
     BALANCE_GUI,
@@ -70,6 +69,13 @@ import MusicManager from "client/MusicManager";
 import { assets, getAsset } from "shared/asset/AssetMap";
 import { IS_EDIT, IS_PUBLIC_SERVER, IS_STUDIO } from "shared/Context";
 import Sandbox from "shared/Sandbox";
+
+declare global {
+    interface RunService {
+        Run: (this: RunService) => void;
+        Stop: (this: RunService) => void;
+    }
+}
 
 function addRoot(roots: Set<Root>, container: Instance): Root {
     const root = createRoot(container);
@@ -184,6 +190,33 @@ export default function App({ viewportsEnabled }: { viewportsEnabled: boolean })
 
         const instance = processing.default();
         return () => instance.destroy();
+    }, []);
+
+    useEffect(() => {
+        if (!IS_EDIT) return;
+
+        const t = os.clock();
+        let safeToStartPhysics = true;
+        for (const part of Workspace.GetDescendants()) {
+            if (part.IsA("BasePart") && !part.Anchored) {
+                if (part.HasTag("Droplet")) continue;
+                safeToStartPhysics = false;
+                print("Unanchored part found", part);
+            }
+        }
+        if (os.clock() - t > 0.05) {
+            warn("App: Part scan took too long, took", os.clock() - t, "seconds");
+        }
+
+        if (safeToStartPhysics) {
+            RunService.Run();
+        }
+
+        return () => {
+            if (safeToStartPhysics) {
+                RunService.Stop();
+            }
+        };
     }, []);
 
     useManualItemReplication();

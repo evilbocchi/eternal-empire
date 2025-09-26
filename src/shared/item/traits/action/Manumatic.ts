@@ -60,7 +60,7 @@ export default class Manumatic extends ItemTrait {
                     callback(player);
                 }
             });
-            eat(connection);
+            eat(connection, "Disconnect");
         }
     }
 }

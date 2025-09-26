@@ -329,18 +329,17 @@ namespace BuildManager {
             viewRay.Direction.mul(100),
             nothingSelected ? SELECTING_RAYCAST_PARAMS : PLACING_RAYCAST_PARAMS,
         );
-        if (ray === undefined) return;
 
         if (nothingSelected === true) {
             // nothing selected, perform hovering logic
-            const target = ray.Instance;
-            let hovering = target.Parent;
+            const target = ray?.Instance;
+            let hovering = target?.Parent;
             if (
                 hovering === undefined ||
                 !hovering.IsA("Model") ||
                 hovering.Parent !== PLACED_ITEMS_FOLDER ||
-                target.HasTag("Unhoverable") === true ||
-                target.FindFirstChildOfClass("ClickDetector") !== undefined
+                target?.HasTag("Unhoverable") === true ||
+                target?.FindFirstChildOfClass("ClickDetector") !== undefined
             ) {
                 hovering = undefined;
             }
@@ -353,6 +352,7 @@ namespace BuildManager {
             hover(hovering);
             return;
         }
+        if (ray === undefined) return;
 
         // something is selected, perform moving logic
         const areaId = Packets.currentArea.get();

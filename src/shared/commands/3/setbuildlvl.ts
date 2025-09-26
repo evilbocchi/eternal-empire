@@ -1,4 +1,4 @@
-import setPermLevel from "shared/commands/3/setPermLevel";
+import setPermLevel from "shared/commands/setPermLevel";
 import Command from "shared/commands/Command";
 
 export = new Command(script.Name)

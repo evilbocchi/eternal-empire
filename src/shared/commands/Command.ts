@@ -57,6 +57,7 @@ export default class Command {
             if (commandModule.Name === "Command" || !commandModule.IsA("ModuleScript")) continue;
 
             const command = require(commandModule) as Command;
+            if (command.id === undefined) continue;
             commands.set(command.id, command);
         }
         return commands;
