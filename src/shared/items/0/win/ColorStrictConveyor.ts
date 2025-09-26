@@ -1,20 +1,25 @@
 import Difficulty from "@antivivi/jjt-difficulties";
 import { OnoeNum } from "@antivivi/serikanum";
-import { getAllInstanceInfo } from "@antivivi/vrldk";
+import { packet, property } from "@rbxts/fletchette";
 import { Server } from "shared/api/APIExpose";
-import applyDropletImpulse from "shared/item/utils/applyDropletImpulse";
 import { playSound } from "shared/asset/GameAssets";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import { CURRENCY_DETAILS } from "shared/currency/CurrencyDetails";
 import Droplet from "shared/item/Droplet";
 import Item from "shared/item/Item";
 import Conveyor from "shared/item/traits/conveyor/Conveyor";
+import applyDropletImpulse from "shared/item/utils/applyDropletImpulse";
+import { VirtualCollision } from "shared/item/utils/VirtualReplication";
 
 declare global {
     interface PlacedItem {
         currency?: Currency;
     }
 }
+
+const clickedPacket = packet<() => void>();
+const modePacket = property<Currency>();
+const getSortingPoint = (model: Model) => model.WaitForChild("SortingPoint") as BasePart;
 
 export = new Item(script.Name)
     .setName("Currency Strict Conveyor")
@@ -31,17 +36,15 @@ export = new Item(script.Name)
 
     .onLoad((model) => {
         const forward = model.GetPivot().LookVector.Unit;
-        const sortingPoint = model.WaitForChild("SortingPoint") as BasePart;
-        sortingPoint.CanTouch = true;
 
-        const modeButton = model.WaitForChild("Mode") as BasePart;
         const placedItem = Server.Item.getPlacedItem(model.Name)!;
         placedItem.currency ??= "Funds";
-        const updateMode = () => (modeButton.Color = CURRENCY_DETAILS[placedItem.currency!].color);
-        updateMode();
         const modes = ["Funds", "Power", "Bitcoin", "Skill"] as Currency[];
+        modePacket.set(placedItem.currency);
 
-        (modeButton.WaitForChild("ClickDetector") as ClickDetector).MouseClick.Connect(() => {
+        const connection = clickedPacket.fromClient((player) => {
+            if (!Server.Permissions.checkPermLevel(player, "build")) return;
+
             let currentIndex = 0;
             for (let i = 0; i < modes.size(); i++) {
                 if (modes[i] === placedItem.currency) {
@@ -50,14 +53,15 @@ export = new Item(script.Name)
                 }
             }
             const nextIndex = (currentIndex + 1) % modes.size();
-            placedItem.currency = modes[nextIndex];
-            updateMode();
-            playSound("SwitchFlick.mp3", modeButton);
+            const currency = modes[nextIndex];
+            placedItem.currency = currency;
+            modePacket.set(currency);
+            clickedPacket.toAllClients();
         });
 
         const touched = new Set<BasePart>();
-        sortingPoint.Touched.Connect((part) => {
-            const instanceInfo = getAllInstanceInfo(part);
+
+        VirtualCollision.onDropletTouched(model, getSortingPoint(model), (part, instanceInfo) => {
             if (instanceInfo.DropletId === undefined || touched.has(part)) return;
             const droplet = Droplet.getDroplet(instanceInfo.DropletId);
             if (droplet === undefined) throw "Unknown droplet ID: " + instanceInfo.DropletId;
@@ -79,4 +83,23 @@ export = new Item(script.Name)
 
             applyDropletImpulse(part, forward.mul(part.Mass).mul(40));
         });
+
+        model.Destroying.Once(() => {
+            connection.Disconnect();
+        });
+    })
+    .onClientLoad((model) => {
+        const modeButton = model.WaitForChild("Mode") as BasePart;
+        (modeButton.WaitForChild("ClickDetector") as ClickDetector).MouseClick.Connect(() => {
+            clickedPacket.toServer();
+        });
+
+        modePacket.observe((currency) => {
+            modeButton.Color = CURRENCY_DETAILS[currency].color;
+        });
+
+        const connection = clickedPacket.fromServer(() => {
+            playSound("SwitchFlick.mp3", modeButton);
+        });
+        model.Destroying.Once(() => connection.Disconnect());
     });

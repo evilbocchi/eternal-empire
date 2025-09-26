@@ -1,18 +1,30 @@
-import { Players, ReplicatedStorage, Workspace } from "@rbxts/services";
-import { igniteFlameworkServer } from "shared/Context";
-import Sandbox from "shared/Sandbox";
+import { Players, ReplicatedStorage, RunService, Workspace } from "@rbxts/services";
 
-if (!Sandbox.synthesise()) {
-    Players.CharacterAutoLoads = false;
-    const cso = Workspace.FindFirstChild("ClientSidedObjects");
-    if (cso !== undefined) cso.Parent = ReplicatedStorage; // jtoh kit expects ClientSidedObjects to be in ReplicatedStorage
-}
+const IS_EDIT = RunService.IsStudio() && (!RunService.IsRunning() || (RunService.IsServer() && RunService.IsClient()));
+if (!IS_EDIT) {
+    // Only import modules if not in edit mode to avoid duplicate runtime errors in simulation stories.
 
-igniteFlameworkServer();
+    const [s1, sandbox] = import("shared/Sandbox").await();
+    if (!s1) {
+        throw "Failed to load sandbox";
+    }
+    const Sandbox = sandbox.default;
+    if (!Sandbox.synthesise()) {
+        Players.CharacterAutoLoads = false;
+        const cso = Workspace.FindFirstChild("ClientSidedObjects");
+        if (cso !== undefined) cso.Parent = ReplicatedStorage; // jtoh kit expects ClientSidedObjects to be in ReplicatedStorage
+    }
 
-if (!Sandbox.getEnabled()) {
-    Players.CharacterAutoLoads = true;
-    for (const player of Players.GetPlayers()) {
-        player.LoadCharacter();
+    const [s2, context] = import("shared/Context").await();
+    if (!s2) {
+        throw "Failed to load context";
+    }
+    context.igniteFlameworkServer();
+
+    if (!Sandbox.getEnabled()) {
+        Players.CharacterAutoLoads = true;
+        for (const player of Players.GetPlayers()) {
+            player.LoadCharacter();
+        }
     }
 }

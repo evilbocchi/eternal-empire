@@ -19,7 +19,7 @@ declare global {
         DropletId?: string;
         ItemId?: string;
         Area?: AreaId;
-        DropletTouched?: (droplet: BasePart) => void;
+        DropletTouched?: (droplet: BasePart, dropletInfo: InstanceInfo) => void;
         //RaycastParams?: RaycastParams;
     }
 
@@ -776,7 +776,7 @@ export default class Droplet {
             instanceInfo.Area = areaId;
 
             clone.Touched.Connect((part) => {
-                getInstanceInfo(part, "DropletTouched")?.(clone);
+                getInstanceInfo(part, "DropletTouched")?.(clone, instanceInfo);
             });
 
             const spawnId = tostring(++Droplet.instatiationCount);

@@ -1,5 +1,5 @@
 import Signal from "@antivivi/lemon-signal";
-import { findBaseParts, getAllInstanceInfo, getInstanceInfo, setInstanceInfo } from "@antivivi/vrldk";
+import { findBaseParts, getAllInstanceInfo, setInstanceInfo } from "@antivivi/vrldk";
 import { RunService } from "@rbxts/services";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
@@ -88,9 +88,8 @@ export default class Upgrader extends Operative {
         const modelInfo = getAllInstanceInfo(model);
         const laserInfo = getAllInstanceInfo(laser);
         const laserId = upgrader.isStacks === false ? item.id : model.Name + laserInfo.LaserId;
-        laserInfo.DropletTouched = (droplet) => {
-            if (getInstanceInfo(droplet, "Incinerated") === true) return;
-            const instanceInfo = getAllInstanceInfo(droplet);
+        VirtualCollision.onDropletTouched(model, laser, (droplet, instanceInfo) => {
+            if (instanceInfo.Incinerated === true) return;
             if (upgrader.requirement !== undefined && !upgrader.requirement(instanceInfo)) return;
 
             if (laserInfo.Sky === true) instanceInfo.Sky = true;
@@ -129,8 +128,7 @@ export default class Upgrader extends Operative {
             upgrades.set(laserId, upgrade);
             instanceInfo.Upgrades = upgrades;
             modelInfo.OnUpgraded?.fire(droplet);
-        };
-        VirtualCollision.handleDropletTouched(model, laser, laserInfo.DropletTouched);
+        });
         laserInfo.ParentInfo = modelInfo;
         laserInfo.OriginalTransparency = laser.Transparency;
         this.SPAWNED_LASERS.set(laser, laserInfo);
@@ -154,17 +152,10 @@ export default class Upgrader extends Operative {
         item.maintain(model);
     }
 
-    static clientLoad(model: Model, _upgrader: Upgrader) {
-        for (const laser of findBaseParts(model, "Laser")) {
-            VirtualCollision.listenForDropletTouches(model, laser);
-        }
-    }
-
     constructor(item: Item) {
         super(item);
         item.trait(Boostable).addToWhitelist("dummy"); // Enable whitelist to stop charger connection
         item.onLoad((model) => Upgrader.load(model, this));
-        item.onClientLoad((model) => Upgrader.clientLoad(model, this));
     }
 
     /**

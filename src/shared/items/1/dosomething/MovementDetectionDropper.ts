@@ -1,7 +1,9 @@
 import Difficulty from "@antivivi/jjt-difficulties";
 import { getAllInstanceInfo } from "@antivivi/vrldk";
 import { Players } from "@rbxts/services";
+import { IS_EDIT } from "shared/Context";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
+import { getPlayerCharacter } from "shared/hamster/getPlayerCharacter";
 import Droplet from "shared/item/Droplet";
 import Item from "shared/item/Item";
 import Dropper from "shared/item/traits/dropper/Dropper";
@@ -23,36 +25,38 @@ export = new Item(script.Name)
         const modelPosition = model.GetPivot().Position;
         const dropInfo = getAllInstanceInfo(model.WaitForChild("Drop"));
 
-        const lastPositions = new Map<Player, Vector3>();
+        const lastPositions = new Map<Model, Vector3>();
         item.repeat(
             model,
             () => {
-                const players = Players.GetPlayers();
                 let moving = false;
-                const playerSet = new Set<Player>();
-                for (const player of players) {
-                    playerSet.add(player);
-                    const character = player.Character;
-                    if (!character || !character.PrimaryPart) continue;
+                const checkCharacter = (character?: Model) => {
+                    if (!character || !character.PrimaryPart) return;
 
                     const position = character.PrimaryPart.Position;
                     if (modelPosition.sub(position).Magnitude > 50) {
-                        // Player is too far away, skip movement detection
-                        lastPositions.delete(player);
-                        continue;
+                        return;
                     }
 
-                    const lastPosition = lastPositions.get(player);
-
-                    // Check if the player has moved significantly
+                    const lastPosition = lastPositions.get(character);
+                    // Check for significant movement (more than 2 studs)
                     if (!lastPosition || position.sub(lastPosition).Magnitude > 2) {
                         moving = true;
-                        lastPositions.set(player, position);
+                        lastPositions.set(character, position);
                     }
+                };
+
+                for (const player of Players.GetPlayers()) {
+                    checkCharacter(player.Character);
                 }
-                for (const [player] of lastPositions) {
-                    if (!playerSet.has(player)) {
-                        lastPositions.delete(player);
+                if (IS_EDIT) {
+                    checkCharacter(getPlayerCharacter());
+                }
+
+                for (const [character] of lastPositions) {
+                    if (character === undefined || character.Parent === undefined) {
+                        lastPositions.delete(character);
+                        continue;
                     }
                 }
 

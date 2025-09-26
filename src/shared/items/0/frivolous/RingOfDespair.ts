@@ -1,9 +1,10 @@
 import Difficulty from "@antivivi/jjt-difficulties";
-import { findBaseParts, getAllInstanceInfo, getInstanceInfo } from "@antivivi/vrldk";
+import { findBaseParts, getInstanceInfo } from "@antivivi/vrldk";
 import { playSound } from "shared/asset/GameAssets";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
 import Upgrader from "shared/item/traits/upgrader/Upgrader";
+import { VirtualCollision } from "shared/item/utils/VirtualReplication";
 
 export = new Item(script.Name)
     .setName("Ring Of Despair")
@@ -22,8 +23,7 @@ export = new Item(script.Name)
         for (const part of findBaseParts(model, "SadLaser")) {
             part.CanTouch = true;
             let debounce = false;
-            const instanceInfo = getAllInstanceInfo(part);
-            instanceInfo.DropletTouched = (otherPart: BasePart) => {
+            VirtualCollision.onDropletTouched(model, part, (otherPart: BasePart) => {
                 if (debounce === true) return;
                 if (getInstanceInfo(otherPart, "DropletId") !== undefined) {
                     debounce = true;
@@ -37,6 +37,6 @@ export = new Item(script.Name)
                     playSound("Explosion.mp3", part);
                     explosion.Parent = part;
                 }
-            };
+            });
         }
     });

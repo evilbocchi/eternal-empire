@@ -1,12 +1,13 @@
 import Difficulty from "@antivivi/jjt-difficulties";
-import { findBaseParts, getAllInstanceInfo, getInstanceInfo } from "@antivivi/vrldk";
+import { findBaseParts, getInstanceInfo } from "@antivivi/vrldk";
 import { CollectionService } from "@rbxts/services";
+import { Server } from "shared/api/APIExpose";
 import { playSound } from "shared/asset/GameAssets";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Formula from "shared/currency/Formula";
 import Item from "shared/item/Item";
-import { Server } from "shared/api/APIExpose";
 import Upgrader from "shared/item/traits/upgrader/Upgrader";
+import { VirtualCollision } from "shared/item/utils/VirtualReplication";
 
 const mul = new CurrencyBundle().set("Funds", 0);
 
@@ -33,8 +34,7 @@ export = new Item(script.Name)
         for (const part of findBaseParts(model, "SadLaser")) {
             CollectionService.AddTag(part, "Laser");
             let debounce = false;
-            const instanceInfo = getAllInstanceInfo(part);
-            instanceInfo.DropletTouched = (otherPart: BasePart) => {
+            VirtualCollision.onDropletTouched(model, part, (otherPart) => {
                 if (debounce === true) return;
                 if (getInstanceInfo(otherPart, "DropletId") !== undefined) {
                     debounce = true;
@@ -48,6 +48,6 @@ export = new Item(script.Name)
                     playSound("Explosion.mp3", part);
                     explosion.Parent = part;
                 }
-            };
+            });
         }
     });

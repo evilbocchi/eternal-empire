@@ -84,24 +84,23 @@ function loadWanderer(character: Model) {
 }
 
 const enabled = false;
-for (const startPos of Workspace.WaitForChild("Wanderers").GetChildren()) {
-    if (!startPos.IsA("BasePart")) continue;
+if (enabled) {
+    for (const startPos of Workspace.WaitForChild("Wanderers").GetChildren()) {
+        if (!startPos.IsA("BasePart")) continue;
 
-    startPos.Transparency = 1;
-    if (!enabled) {
-        continue; // Skip loading wanderers if not enabled
+        startPos.Transparency = 1;
+
+        const name = startPos.Name;
+        const character = ASSETS.Wanderers.WaitForChild(name).Clone() as Model;
+        const animateScript = character.FindFirstChild("Animate") as Script | undefined;
+
+        character.PivotTo(startPos.CFrame);
+        character.Parent = Workspace;
+        loadWanderer(character);
+        if (animateScript !== undefined) {
+            animateScript.Enabled = true;
+        }
+
+        startPos.Destroy();
     }
-
-    const name = startPos.Name;
-    const character = ASSETS.Wanderers.WaitForChild(name).Clone() as Model;
-    const animateScript = character.FindFirstChild("Animate") as Script | undefined;
-
-    character.PivotTo(startPos.CFrame);
-    character.Parent = Workspace;
-    loadWanderer(character);
-    if (animateScript !== undefined) {
-        animateScript.Enabled = true;
-    }
-
-    startPos.Destroy();
 }

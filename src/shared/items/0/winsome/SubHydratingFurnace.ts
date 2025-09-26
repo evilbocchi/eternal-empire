@@ -4,8 +4,9 @@ import { Server } from "shared/api/APIExpose";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
 import Furnace from "shared/item/traits/Furnace";
+import Packets from "shared/Packets";
 
-let meetsRequirement = false;
+const isMeetsRequirement = (skill: OnoeNum) => skill !== undefined && !skill.lessThan(requirement);
 const requirement = new OnoeNum(10);
 
 export = new Item(script.Name)
@@ -24,19 +25,25 @@ export = new Item(script.Name)
         item.repeat(
             undefined,
             () => {
-                const skill = CurrencyService.get("Skill");
-                meetsRequirement = skill !== undefined && !skill.lessThan(requirement);
+                const meetsRequirement = isMeetsRequirement(CurrencyService.get("Skill"));
                 const mul = new OnoeNum(meetsRequirement ? 5 : 2);
                 furnace.setMul(new CurrencyBundle().set("Funds", mul));
             },
             0.5,
         );
     })
-    .onLoad((model, item) => {
+    .onClientLoad((model, item) => {
         const children = model.GetChildren();
+        const glows = new Array<BasePart>();
         for (const glow of children) {
             if (glow.IsA("BasePart") && glow.Name === "Glow") {
-                item.repeat(model, () => (glow.Transparency = meetsRequirement ? 0 : 0.5));
+                glows.push(glow);
             }
         }
+        item.repeat(model, () => {
+            const meetsRequirement = isMeetsRequirement(new OnoeNum(Packets.balance.get().get("Skill") ?? 0));
+            for (const glow of glows) {
+                glow.Transparency = meetsRequirement ? 0 : 0.5;
+            }
+        });
     });

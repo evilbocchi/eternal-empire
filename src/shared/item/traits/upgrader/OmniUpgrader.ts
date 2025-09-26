@@ -2,7 +2,6 @@ import { getAllInstanceInfo } from "@antivivi/vrldk";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
 import Upgrader from "shared/item/traits/upgrader/Upgrader";
-import { VirtualCollision } from "shared/item/utils/VirtualReplication";
 
 declare global {
     interface ItemTraits {
@@ -34,17 +33,9 @@ export default class OmniUpgrader extends Upgrader {
         }
     }
 
-    static clientLoad(model: Model, omniUpgrader: OmniUpgrader) {
-        for (const laserName of omniUpgrader.lasers) {
-            const laser = model.WaitForChild(laserName) as BasePart;
-            VirtualCollision.listenForDropletTouches(model, laser);
-        }
-    }
-
     constructor(item: Item) {
         super(item);
         item.onLoad((model) => OmniUpgrader.load(model, this));
-        item.onClientLoad((model) => OmniUpgrader.clientLoad(model, this));
     }
 
     setSkys(skysPerLaser: Map<string, boolean>) {

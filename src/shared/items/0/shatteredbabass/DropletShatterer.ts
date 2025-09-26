@@ -21,7 +21,7 @@ export = new Item(script.Name)
     .exit()
 
     .onLoad((model) => {
-        setInstanceInfo(model, "OnProcessed", () => {
+        setInstanceInfo(model, "FurnaceProcessed", () => {
             getInstanceInfo(model.WaitForChild("Drop"), "Instantiator")?.();
         });
     });

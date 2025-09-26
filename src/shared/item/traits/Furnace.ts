@@ -14,6 +14,20 @@ declare global {
     }
     interface InstanceInfo {
         Incinerated?: boolean;
+
+        /**
+         * Fired when a droplet is processed by this furnace model.
+         * @param result The resulting value gained from processing the droplet.
+         * @param raw The raw value of the droplet before any furnace modifications.
+         * @param droplet The droplet being processed.
+         * @param dropletInfo The instance info of the droplet being processed.
+         */
+        FurnaceProcessed?: (
+            result: CurrencyBundle,
+            raw: CurrencyBundle,
+            droplet: BasePart,
+            dropletInfo: InstanceInfo,
+        ) => void;
     }
 }
 
@@ -28,18 +42,14 @@ export default class Furnace extends Operative {
 
         for (const lava of findBaseParts(model, "Lava")) {
             lava.SetAttribute("ItemId", item.id);
-            const lavaInfo = getAllInstanceInfo(lava);
-            lavaInfo.DropletTouched = (droplet: BasePart) => {
-                droplet.Anchored = true;
-
-                const dropletInfo = getAllInstanceInfo(droplet);
+            VirtualCollision.onDropletTouched(model, lava, (droplet: BasePart, dropletInfo: InstanceInfo) => {
                 if (dropletInfo.Incinerated === true) return;
-
                 if (instanceInfo.Area !== dropletInfo.Area && dropletInfo.LastTeleport === undefined) {
                     // Sanity check: droplet should be in the same area as the furnace unless it was teleported
                     return;
                 }
 
+                droplet.Anchored = true;
                 dropletInfo.Incinerated = true;
                 Debris.AddItem(droplet, 6);
 
@@ -66,17 +76,10 @@ export default class Furnace extends Operative {
                     if (amount.equals(ZERO)) result.amountPerCurrency.delete(currency);
                 }
                 Packets.dropletBurnt.toAllClients(droplet.Name, result.amountPerCurrency);
-                instanceInfo.OnProcessed?.(result, worth, droplet);
-            };
-            VirtualCollision.handleDropletTouched(model, lava, lavaInfo.DropletTouched);
+                instanceInfo.FurnaceProcessed?.(result, worth, droplet, dropletInfo);
+            });
         }
         item.maintain(model);
-    }
-
-    static onClientLoad(model: Model) {
-        for (const lava of findBaseParts(model, "Lava")) {
-            VirtualCollision.listenForDropletTouches(model, lava);
-        }
     }
 
     variance?: number;
@@ -109,7 +112,6 @@ export default class Furnace extends Operative {
             );
         });
         item.onLoad((model) => Furnace.load(model, this));
-        item.onClientLoad((model) => Furnace.onClientLoad(model));
     }
 
     setVariance(variance: number) {

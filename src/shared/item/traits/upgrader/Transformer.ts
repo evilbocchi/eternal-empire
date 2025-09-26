@@ -2,6 +2,7 @@ import { findBaseParts, getAllInstanceInfo } from "@antivivi/vrldk";
 import Droplet from "shared/item/Droplet";
 import Item from "shared/item/Item";
 import Conveyor from "shared/item/traits/conveyor/Conveyor";
+import { VirtualCollision } from "shared/item/utils/VirtualReplication";
 
 declare global {
     interface ItemTraits {
@@ -14,7 +15,7 @@ class Transformer extends Conveyor {
         const item = transformer.item;
 
         for (const part of findBaseParts(model, "Transformer")) {
-            getAllInstanceInfo(part).DropletTouched = (otherPart) => {
+            VirtualCollision.onDropletTouched(model, part, (otherPart) => {
                 const instanceInfo = getAllInstanceInfo(otherPart);
                 if (instanceInfo.Incinerated === true) return;
                 const dropletId = instanceInfo.DropletId;
@@ -30,7 +31,7 @@ class Transformer extends Conveyor {
                 otherPart.Size = model.Size;
                 for (const tag of model.GetTags()) otherPart.AddTag(tag);
                 instanceInfo.DropletId = res.id;
-            };
+            });
         }
     }
 
