@@ -85,10 +85,10 @@ export default class CommandsService implements OnInit {
      * @param str The string to search for
      * @returns An array of matching players
      */
-    findPlayers(sender: Player, str: string) {
+    findPlayers(sender: Player | undefined, str: string): Player[] {
         switch (str) {
             case "me":
-                return [sender];
+                return sender ? [sender] : [];
             case "others":
                 return Players.GetPlayers().filter((value) => value !== sender);
             case "all":

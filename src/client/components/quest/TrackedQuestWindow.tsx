@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "@rbxts/react";
 import { ReplicatedStorage, RunService, Workspace } from "@rbxts/services";
-import { LOCAL_PLAYER } from "client/constants";
 import { useDocument } from "client/components/window/DocumentManager";
+import { observeCharacter } from "client/constants";
 import { RobotoSlabBold } from "client/GameFonts";
 import { getAsset } from "shared/asset/AssetMap";
 import { playSound } from "shared/asset/GameAssets";
@@ -122,7 +122,7 @@ export default function TrackedQuestWindow() {
         beam.Attachment0 = new Instance("Attachment", beamContainer);
 
         let dummyCharacter: Part | undefined;
-        let connection: RBXScriptConnection;
+        let cleanup: () => void;
         if (IS_EDIT) {
             dummyCharacter = new Instance("Part");
             dummyCharacter.Anchored = true;
@@ -133,7 +133,7 @@ export default function TrackedQuestWindow() {
             dummyCharacter.Transparency = 1;
             beam.Attachment1 = new Instance("Attachment", dummyCharacter);
             dummyCharacter.Parent = beamContainer;
-            connection = RunService.Heartbeat.Connect(() => {
+            const connection = RunService.Heartbeat.Connect(() => {
                 if (!dummyCharacter) {
                     connection.Disconnect();
                     return;
@@ -141,14 +141,13 @@ export default function TrackedQuestWindow() {
                 const cframe = Workspace.CurrentCamera?.CFrame ?? new CFrame();
                 dummyCharacter.CFrame = cframe.add(cframe.LookVector.mul(20));
             });
-        } else {
-            const onCharacterAdded = (char: Model) => {
-                beam.Attachment1 = new Instance("Attachment", char.WaitForChild("HumanoidRootPart", 10));
+            cleanup = () => {
+                connection.Disconnect();
             };
-            if (LOCAL_PLAYER.Character !== undefined) {
-                onCharacterAdded(LOCAL_PLAYER.Character);
-            }
-            connection = LOCAL_PLAYER.CharacterAdded.Connect(onCharacterAdded);
+        } else {
+            cleanup = observeCharacter((char: Model) => {
+                beam.Attachment1 = new Instance("Attachment", char.WaitForChild("HumanoidRootPart", 10));
+            });
         }
 
         beam.Parent = beamContainer;
@@ -161,7 +160,7 @@ export default function TrackedQuestWindow() {
             beam.Destroy();
             beamContainer.Destroy();
             dummyCharacter?.Destroy();
-            connection.Disconnect();
+            cleanup();
         };
     }, []);
 

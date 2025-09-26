@@ -1,7 +1,8 @@
 import Command, { CommandAPI } from "shared/commands/Command";
-import { AREAS } from "shared/world/Area";
-import Sandbox from "shared/Sandbox";
 import ThisEmpire from "shared/data/ThisEmpire";
+import Packets from "shared/Packets";
+import Sandbox from "shared/Sandbox";
+import { AREAS } from "shared/world/Area";
 
 export = new Command(script.Name)
     .addAlias("ua")
@@ -9,7 +10,7 @@ export = new Command(script.Name)
     .setExecute((o) => {
         const placedItems = ThisEmpire.data.items.worldPlaced;
         const toRemove = new Array<string>();
-        const area = Sandbox.getEnabled() ? undefined : (o.GetAttribute("Area") as AreaId | undefined);
+        const area = Sandbox.getEnabled() ? undefined : Packets.currentArea.get(o);
         for (const [id, placedItem] of placedItems)
             if (area === undefined || placedItem.area === area) toRemove.push(id);
 

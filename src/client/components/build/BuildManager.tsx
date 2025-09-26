@@ -7,11 +7,12 @@
 
 import { weldModel } from "@antivivi/vrldk";
 import { Debris, HttpService, ReplicatedStorage, TweenService, UserInputService, Workspace } from "@rbxts/services";
-import { LOCAL_PLAYER, MOUSE, NONCOLLISION_COLOR } from "client/constants";
-import { ShopManager } from "client/ui/components/item/shop/ShopGui";
-import DocumentManager from "client/ui/components/window/DocumentManager";
+import { Environment } from "@rbxts/ui-labs";
+import { ShopManager } from "client/components/item/shop/ShopGui";
+import DocumentManager from "client/components/window/DocumentManager";
+import { NONCOLLISION_COLOR } from "client/constants";
 import { getSound, playSound } from "shared/asset/GameAssets";
-import { PLACED_ITEMS_FOLDER } from "shared/constants";
+import { CAMERA, PLACED_ITEMS_FOLDER } from "shared/constants";
 import Item from "shared/item/Item";
 import Items from "shared/items/Items";
 import Packets from "shared/Packets";
@@ -49,6 +50,13 @@ namespace BuildManager {
     export let animationsEnabled = true;
     export let debounce = 0;
     export const MOVETWEENINFO = new TweenInfo(0.25, Enum.EasingStyle.Back, Enum.EasingDirection.Out);
+    const PLACING_RAYCAST_PARAMS = new RaycastParams();
+    PLACING_RAYCAST_PARAMS.FilterType = Enum.RaycastFilterType.Exclude;
+    PLACING_RAYCAST_PARAMS.FilterDescendantsInstances = [PLACED_ITEMS_FOLDER];
+    const SELECTING_RAYCAST_PARAMS = new RaycastParams();
+    SELECTING_RAYCAST_PARAMS.FilterType = Enum.RaycastFilterType.Include;
+    SELECTING_RAYCAST_PARAMS.FilterDescendantsInstances = [PLACED_ITEMS_FOLDER];
+
     let lastRotate = 0;
     let lastMovedTo = 0;
     let lastMovedToCFrame = new CFrame();
@@ -91,8 +99,7 @@ namespace BuildManager {
      * @returns True if restricted, false otherwise.
      */
     export function getRestricted() {
-        const buildLevel = (LOCAL_PLAYER.GetAttribute("PermissionLevel") as number | undefined) ?? 0;
-        return (Packets.permLevels.get().build ?? 0) > buildLevel || isShopOpen;
+        return Packets.permLevels.get().build > Packets.permLevel.get() || isShopOpen;
     }
 
     /**
@@ -255,7 +262,7 @@ namespace BuildManager {
         const data = new Array<PlacingInfo>();
         let item: Item | undefined;
 
-        const areaId = LOCAL_PLAYER.GetAttribute("Area") as AreaId | undefined;
+        const areaId = Packets.currentArea.get();
         let buildBounds = baseplateBounds;
         if (areaId !== undefined) {
             buildBounds ??= AREAS[areaId].buildBounds;
@@ -313,12 +320,20 @@ namespace BuildManager {
      */
     export function onMouseMove(changePos = true, animate = animationsEnabled) {
         const size = selected.size();
-        if (size === 0) {
-            // nothing selected, perform hovering logic
-            MOUSE.TargetFilter = undefined;
-            const target = MOUSE.Target;
-            if (target === undefined) return;
+        const nothingSelected = size === 0;
 
+        const mouseLocation = Environment.UserInput.GetMouseLocation();
+        const viewRay = CAMERA.ViewportPointToRay(mouseLocation.X, mouseLocation.Y);
+        const ray = Workspace.Raycast(
+            viewRay.Origin,
+            viewRay.Direction.mul(100),
+            nothingSelected ? SELECTING_RAYCAST_PARAMS : PLACING_RAYCAST_PARAMS,
+        );
+        if (ray === undefined) return;
+
+        if (nothingSelected === true) {
+            // nothing selected, perform hovering logic
+            const target = ray.Instance;
             let hovering = target.Parent;
             if (
                 hovering === undefined ||
@@ -340,19 +355,17 @@ namespace BuildManager {
         }
 
         // something is selected, perform moving logic
-        const areaId = LOCAL_PLAYER.GetAttribute("Area") as AreaId | undefined;
+        const areaId = Packets.currentArea.get();
         let buildBounds = baseplateBounds;
         if (areaId !== undefined) {
             buildBounds ??= AREAS[areaId].buildBounds;
         }
         if (buildBounds === undefined) return;
 
-        MOUSE.TargetFilter = PLACED_ITEMS_FOLDER;
-
         const rotation = rotationValue.Value;
         let cframe: CFrame | undefined;
         if (changePos === true) {
-            cframe = MOUSE.Hit;
+            cframe = new CFrame(ray.Position);
         } else {
             cframe = mainSelected!.PrimaryPart!.CFrame;
         }
@@ -480,12 +493,12 @@ namespace BuildManager {
     export function init() {
         const settingsConnection = Packets.settings.observe((value) => (animationsEnabled = value.BuildAnimation));
 
-        const cframeConnection = Workspace.CurrentCamera?.GetPropertyChangedSignal("CFrame").Connect(() => {
+        const cframeConnection = CAMERA.GetPropertyChangedSignal("CFrame").Connect(() => {
             if (UserInputService.TouchEnabled === true && !selected.isEmpty()) return;
             onMouseMove();
         });
 
-        const inputBeganConnection = UserInputService.InputBegan.Connect((input, gameProcessed) => {
+        const inputBeganConnection = Environment.UserInput.InputBegan.Connect((input, gameProcessed) => {
             if (gameProcessed === true) return;
 
             if (
@@ -500,19 +513,19 @@ namespace BuildManager {
             }
         });
 
-        const touchEndedConnection = UserInputService.TouchEnded.Connect((_touch, gameProcessed) => {
+        const touchEndedConnection = Environment.UserInput.TouchEnded.Connect((_touch, gameProcessed) => {
             if (gameProcessed === true) return;
             onMouseUp();
         });
 
-        const inputChangedConnection = UserInputService.InputChanged.Connect((input, gameProcessed) => {
+        const inputChangedConnection = Environment.UserInput.InputChanged.Connect((input, gameProcessed) => {
             if (gameProcessed === true) return;
             if (input.UserInputType === Enum.UserInputType.MouseMovement) {
                 onMouseMove();
             }
         });
 
-        const inputEndedConnection = UserInputService.InputEnded.Connect((input, gameProcessed) => {
+        const inputEndedConnection = Environment.UserInput.InputEnded.Connect((input, gameProcessed) => {
             if (gameProcessed === true) return;
 
             if (input.UserInputType !== Enum.UserInputType.MouseButton1 && input.KeyCode !== Enum.KeyCode.ButtonL1)
@@ -521,8 +534,8 @@ namespace BuildManager {
             onMouseUp();
         });
 
-        const permLevelsConnection = Packets.permLevels.observe(() => refresh());
-        const permLevelConnection = LOCAL_PLAYER.GetAttributeChangedSignal("PermissionLevel").Connect(() => refresh());
+        const permLevelsConnection = Packets.permLevels.observe(refresh);
+        const permLevelConnection = Packets.permLevel.observe(refresh);
         const shopGuiEnabledConnection = ShopManager.opened.connect((shop) => {
             isShopOpen = shop !== undefined;
             refresh();

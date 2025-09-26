@@ -1,21 +1,18 @@
 import { Players } from "@rbxts/services";
-import Command, { CommandAPI } from "shared/commands/Command";
 import { playSound } from "shared/asset/GameAssets";
+import Command, { CommandAPI } from "shared/commands/Command";
 
 export = new Command(script.Name)
     .addAlias("b")
     .setDescription("<player> <useId: boolean> : Bans a player from the server.")
-    .setExecute((o, p, useId) => {
-        const targets = CommandAPI.Command.findPlayers(o, p);
+    .setExecute((sender, p, useId) => {
+        const targets = CommandAPI.Command.findPlayers(sender, p);
         if (targets.size() < 1) {
             const userId = useId === "true" ? tonumber(p) : Players.GetUserIdFromNameAsync(p);
             if (userId !== undefined) {
-                if (
-                    CommandAPI.Permissions.getPermissionLevel(userId) >=
-                    CommandAPI.Permissions.getPermissionLevel(o.UserId)
-                ) {
+                if (CommandAPI.Permissions.isLowerLevel(sender, userId)) {
                     CommandAPI.ChatHook.sendPrivateMessage(
-                        o,
+                        sender,
                         "You can't ban someone with an equal/higher permission level.",
                         "color:255,43,43",
                     );
@@ -24,39 +21,36 @@ export = new Command(script.Name)
                 const success = CommandAPI.Permissions.add("banned", userId);
                 if (success) {
                     CommandAPI.ChatHook.sendPrivateMessage(
-                        o,
+                        sender,
                         `Banned ${CommandAPI.Command.fp(p, userId)}`,
                         "color:138,255,138",
                     );
                 } else {
                     CommandAPI.ChatHook.sendPrivateMessage(
-                        o,
+                        sender,
                         `${CommandAPI.Command.fp(p, userId)} is already banned`,
                         "color:255,43,43",
                     );
                 }
                 return;
             }
-            CommandAPI.ChatHook.sendPrivateMessage(o, `Could not find matching players ${p}`, "color:255,43,43");
+            CommandAPI.ChatHook.sendPrivateMessage(sender, `Could not find matching players ${p}`, "color:255,43,43");
             return;
         }
         for (const target of targets) {
-            if (target === o) {
-                CommandAPI.ChatHook.sendPrivateMessage(o, "You can't ban yourself.", "color:255,43,43");
+            if (target === sender) {
+                CommandAPI.ChatHook.sendPrivateMessage(sender, "You can't ban yourself.", "color:255,43,43");
                 continue;
             }
-            if (
-                CommandAPI.Permissions.getPermissionLevel(target.UserId) >=
-                CommandAPI.Permissions.getPermissionLevel(o.UserId)
-            ) {
+            if (CommandAPI.Permissions.isLowerLevel(sender, target.UserId)) {
                 CommandAPI.ChatHook.sendPrivateMessage(
-                    o,
+                    sender,
                     "You can't ban someone with an equal/higher permission level.",
                     "color:255,43,43",
                 );
                 continue;
             }
-            CommandAPI.ChatHook.sendPrivateMessage(o, `Banned player ${target.Name}`, "color:138,255,138");
+            CommandAPI.ChatHook.sendPrivateMessage(sender, `Banned player ${target.Name}`, "color:138,255,138");
             const h = target.Character?.FindFirstChildOfClass("Humanoid");
             if (h !== undefined && h.RootPart !== undefined) {
                 const smoke = new Instance("Smoke");
@@ -77,7 +71,7 @@ export = new Command(script.Name)
             CommandAPI.Permissions.add("banned", target.UserId);
             task.delay(1, () => {
                 if (target !== undefined) {
-                    target.Kick(`You were banned by ${o.Name}`);
+                    target.Kick(`You were banned by ${sender?.Name ?? "an administrator"}.`);
                 }
             });
         }

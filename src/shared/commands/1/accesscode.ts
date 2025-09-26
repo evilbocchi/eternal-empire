@@ -7,13 +7,21 @@ export = new Command(script.Name)
     .setDescription(
         "View the access code for this empire. Anyone with the access code is able to join this empire. Only available for private empires.",
     )
-    .setExecute((o) => {
+    .setExecute((sender) => {
         if (IS_STUDIO || (game.PrivateServerOwnerId === 0 && game.PrivateServerId !== "")) {
             const code = CommandAPI.Permissions.getAccessCode();
-            CommandAPI.ChatHook.sendPrivateMessage(o, "The server access code is: " + code);
-            Packets.codeReceived.toClient(o, code);
+            CommandAPI.ChatHook.sendPrivateMessage(sender, "The server access code is: " + code);
+            if (sender !== undefined) {
+                Packets.codeReceived.toClient(sender, code);
+            } else {
+                Packets.codeReceived.toAllClients(code);
+            }
         } else {
-            CommandAPI.ChatHook.sendPrivateMessage(o, "You cannot use this command on this server", "color:255,43,43");
+            CommandAPI.ChatHook.sendPrivateMessage(
+                sender,
+                "You cannot use this command on this server",
+                "color:255,43,43",
+            );
         }
     })
     .setPermissionLevel(1);

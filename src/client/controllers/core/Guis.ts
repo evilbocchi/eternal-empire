@@ -1,14 +1,11 @@
-import { StarterGui } from "@rbxts/services";
 import { PLAYER_GUI } from "client/constants";
 import { IS_EDIT } from "shared/Context";
 import eat from "shared/hamster/eat";
 
 const setParent = (instance: Instance) => {
+    instance.Parent = PLAYER_GUI;
     if (IS_EDIT) {
-        instance.Parent = StarterGui;
         eat(instance);
-    } else {
-        instance.Parent = PLAYER_GUI;
     }
 };
 

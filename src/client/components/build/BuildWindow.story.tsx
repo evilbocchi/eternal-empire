@@ -5,7 +5,6 @@ import BuildManager from "client/components/build/BuildManager";
 import BuildWindow from "client/components/build/BuildWindow";
 import StoryMocking from "client/components/StoryMocking";
 import useVisibility from "client/hooks/useVisibility";
-import Packets from "shared/Packets";
 
 export = CreateReactStory(
     {
@@ -20,7 +19,6 @@ export = CreateReactStory(
     },
     (props) => {
         StoryMocking.mockData();
-        Packets.permLevels.set({ build: -1 });
         useVisibility("Build", props.controls.visible);
         BuildManager.animationsEnabled = props.controls.animationsEnabled;
 

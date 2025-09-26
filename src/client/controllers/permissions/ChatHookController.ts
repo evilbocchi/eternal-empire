@@ -82,7 +82,7 @@ export default class ChatHookController implements OnStart {
      * @param metadata Optional metadata for formatting.
      */
     showPersonalMessage(message: string, metadata = "") {
-        this.display(LOCAL_PLAYER.Name, message, metadata);
+        this.display(LOCAL_PLAYER!.Name, message, metadata);
     }
 
     /**

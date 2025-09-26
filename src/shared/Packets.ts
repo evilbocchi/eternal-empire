@@ -109,7 +109,6 @@ namespace Packets {
     export const uniqueInstances = property<Map<string, DataType.Packed<UniqueItemInstance>>>(
         EmpireProfileTemplate.items.uniqueInstances,
     );
-
     export const unplaceItems = packet<(placementIds: string[]) => void>();
     export const boostChanged = packet<(boostPerItem: Map<string, BaseOnoeNum>) => void>({ isUnreliable: true });
 
@@ -129,6 +128,7 @@ namespace Packets {
     export const mostBalance = property<BaseCurrencyMap>(EmpireProfileTemplate.mostCurrencies, true);
     export const revenue = property<BaseCurrencyMap>(new Map(), true);
     export const showDifference = packet<(differencePerCurrency: BaseCurrencyMap) => void>();
+    export const rawPurifierClicks = property<DataType.u32>(0, true);
 
     // upgrade board
     export const upgrades = property<Map<string, DataType.i32>>(EmpireProfileTemplate.upgrades);
@@ -150,6 +150,7 @@ namespace Packets {
     export const challengeCompleted = packet<(challenge: string, rewardLabel: string) => void>();
 
     // areas
+    export const currentArea = property<AreaId | undefined>(undefined);
     export const tpToArea = packet<(area: AreaId) => boolean>();
     export const areaUnlocked = packet<(area: AreaId) => void>();
     export const unlockedAreas = property<Set<AreaId>>(new Set<AreaId>());
@@ -172,7 +173,8 @@ namespace Packets {
     export const playerPlaytime = property<DataType.i32>(0, true);
 
     // permissions
-    export const permLevels = property<{ [key in PermissionKey]?: number }>(EmpireProfileTemplate.permLevels);
+    export const permLevel = property<DataType.u8>(0);
+    export const permLevels = property<{ [key in PermissionKey]: number }>(EmpireProfileTemplate.permLevels);
     export const getLogs = packet<() => Log[]>();
     export const systemMessageSent = packet<(channel: string, message: string, metadata: string) => void>();
     export const codeReceived = packet<(code: string) => void>();

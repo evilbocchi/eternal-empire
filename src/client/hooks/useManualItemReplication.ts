@@ -22,7 +22,7 @@ function load(model: Instance) {
         return;
     }
     model.SetAttribute("applied", true);
-    task.spawn(() => item.CLIENT_LOADS.forEach((callback) => callback(model, item, LOCAL_PLAYER)));
+    task.spawn(() => item.CLIENT_LOADS.forEach((callback) => callback(model, item, LOCAL_PLAYER!)));
 }
 
 /**

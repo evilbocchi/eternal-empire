@@ -1,6 +1,6 @@
 import { Controller, OnStart } from "@flamework/core";
 import { Lighting } from "@rbxts/services";
-import { LOCAL_PLAYER } from "client/constants";
+import Packets from "shared/Packets";
 import { AREAS } from "shared/world/Area";
 
 @Controller()
@@ -17,7 +17,8 @@ export default class LightingController implements OnStart {
     };
 
     onAreaChanged() {
-        const lightingConfig = AREAS[LOCAL_PLAYER.GetAttribute("Area") as AreaId]?.lightingConfiguration;
+        const areaId = Packets.currentArea.get();
+        const lightingConfig = areaId !== undefined ? AREAS[areaId]?.lightingConfiguration : undefined;
         if (lightingConfig === undefined) {
             for (const [key, value] of pairs(this.DEFAULT_LIGHTING)) {
                 (Lighting as unknown as { [key: string]: unknown })[key] = value;
@@ -31,7 +32,7 @@ export default class LightingController implements OnStart {
     }
 
     onStart() {
-        LOCAL_PLAYER.GetAttributeChangedSignal("Area").Connect(() => this.onAreaChanged());
+        Packets.currentArea.observe(() => this.onAreaChanged());
         this.onAreaChanged();
     }
 }

@@ -137,7 +137,7 @@ export default function App({ viewportsEnabled }: { viewportsEnabled: boolean })
             addRoot(roots, WORLD_GUI).render(<WorldRenderer />);
         }
 
-        LOCAL_PLAYER.SetAttribute("Start", IS_PUBLIC_SERVER);
+        Workspace.SetAttribute("Start", IS_PUBLIC_SERVER);
 
         const cleanup = MusicManager.init();
 

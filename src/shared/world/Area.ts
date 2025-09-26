@@ -227,7 +227,7 @@ export default class Area {
         return limit;
     }
 
-    private static onPlayerAdded(player: Player) {
+    private static onPlayerAdded(player?: Player) {
         let active = true;
         // Continuously monitor player position to detect area changes
         const checkAreaChange = () => {
@@ -239,7 +239,7 @@ export default class Area {
             if (IS_EDIT) {
                 position = Workspace.CurrentCamera?.CFrame.Position;
             } else {
-                const character = player.Character;
+                let character = player?.Character ?? Workspace.FindFirstChild("Player");
                 if (character === undefined) return;
 
                 const rootPart = character.FindFirstChild("HumanoidRootPart") as BasePart | undefined;
@@ -256,11 +256,15 @@ export default class Area {
                 const [cframe, size] = bounds;
                 if (isInside(position, cframe, size)) {
                     // Only update if the area has actually changed
-                    if (player.GetAttribute("Area") !== id) {
-                        player.SetAttribute("Area", id);
+                    if (Packets.currentArea.get(player) === id) break;
+
+                    if (player === undefined) {
+                        Packets.currentArea.set(id);
+                    } else {
+                        Packets.currentArea.setFor(player, id);
                         Leaderstats.setLeaderstat(player, "Area", area.name);
                     }
-                    break; // Found the area, no need to check others
+                    break;
                 }
             }
         };
@@ -282,11 +286,16 @@ export default class Area {
     static {
         if (IS_SERVER || IS_EDIT) {
             // Set up player area tracking when players join
-            const playerAddedConnection = Players.PlayerAdded.Connect((player) => {
-                this.onPlayerAdded(player);
-            });
-            for (const player of Players.GetPlayers()) {
-                this.onPlayerAdded(player);
+            if (IS_EDIT && Players.LocalPlayer === undefined) {
+                this.onPlayerAdded(); // Single-player mode
+            } else {
+                const playerAddedConnection = Players.PlayerAdded.Connect((player) => {
+                    this.onPlayerAdded(player);
+                });
+                eat(playerAddedConnection, "Disconnect");
+                for (const player of Players.GetPlayers()) {
+                    this.onPlayerAdded(player);
+                }
             }
 
             const addedConnection = CollectionService.GetInstanceAddedSignal("Droplet").Connect((instance) => {
@@ -303,11 +312,7 @@ export default class Area {
                     area.propagateDropletCountChange();
                 });
             });
-
-            eat(() => {
-                playerAddedConnection.Disconnect();
-                addedConnection.Disconnect();
-            });
+            eat(addedConnection, "Disconnect");
         }
     }
 }

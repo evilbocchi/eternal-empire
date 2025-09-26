@@ -143,6 +143,26 @@ export default class PermissionsService implements OnStart, OnPlayerAdded {
     }
 
     /**
+     * Checks if the sender has a lower permission level than the target.
+     * @param sender The player sending the command (undefined if from console)
+     * @param target The target user's ID
+     * @param disallowEqual Whether to return false if levels are equal (default false)
+     * @returns True if sender has lower permission level, false otherwise
+     */
+    isLowerLevel(sender: Player | undefined, target: number, disallowEqual = false) {
+        if (sender === undefined) {
+            return false;
+        }
+        const permLevelA = this.getPermissionLevel(sender.UserId);
+        const permLevelB = this.getPermissionLevel(target);
+        if (disallowEqual) {
+            return permLevelA < permLevelB;
+        } else {
+            return permLevelA <= permLevelB;
+        }
+    }
+
+    /**
      * Checks if a player has the required permission level for an action.
      *
      * @param player The player to check permissions for.
@@ -151,7 +171,7 @@ export default class PermissionsService implements OnStart, OnPlayerAdded {
      */
     checkPermLevel(player: Player, action: PermissionKey) {
         const minimumPerm = this.dataService.empireData.permLevels[action];
-        const permLevel = player.GetAttribute("PermissionLevel") as number;
+        const permLevel = Packets.permLevel.get(player);
         if (permLevel === undefined || permLevel < minimumPerm) {
             return false;
         }
@@ -167,7 +187,7 @@ export default class PermissionsService implements OnStart, OnPlayerAdded {
         const target = Players.GetPlayerByUserId(userId);
         const permLevel = this.getPermissionLevel(userId);
         if (target !== undefined) {
-            target.SetAttribute("PermissionLevel", permLevel);
+            Packets.permLevel.setFor(target, permLevel);
         }
         return permLevel;
     }

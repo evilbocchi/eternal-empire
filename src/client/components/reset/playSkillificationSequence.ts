@@ -1,11 +1,10 @@
 import { BaseOnoeNum, OnoeNum } from "@antivivi/serikanum";
-import { Debris, StarterGui, TextService, TweenService, Workspace } from "@rbxts/services";
-import { PLAYER_GUI } from "client/constants";
+import { Debris, TextService, TweenService, Workspace } from "@rbxts/services";
 import Shaker from "client/components/effect/Shaker";
+import { PLAYER_GUI } from "client/constants";
 import MusicManager from "client/MusicManager";
 import { UISignals } from "shared/api/APIExpose";
 import { ASSETS, playSound } from "shared/asset/GameAssets";
-import { IS_EDIT } from "shared/Context";
 import { AREAS } from "shared/world/Area";
 
 declare global {
@@ -22,7 +21,7 @@ function createDramaticIntro(): ScreenGui {
     screenGui.IgnoreGuiInset = true;
     screenGui.ResetOnSpawn = false;
     screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling;
-    screenGui.Parent = IS_EDIT ? StarterGui : PLAYER_GUI;
+    screenGui.Parent = PLAYER_GUI;
 
     // Black background frame
     const blackFrame = new Instance("Frame");

@@ -1,9 +1,10 @@
 //!optimize 2
 //!native
 import { CollectionService, RunService, Workspace } from "@rbxts/services";
-import { COLLISION_COLOR, MOUSE, NONCOLLISION_COLOR } from "client/constants";
+import { Environment } from "@rbxts/ui-labs";
+import { COLLISION_COLOR, NONCOLLISION_COLOR } from "client/constants";
 import { ASSETS } from "shared/asset/GameAssets";
-import { PLACED_ITEMS_FOLDER } from "shared/constants";
+import { CAMERA, PLACED_ITEMS_FOLDER } from "shared/constants";
 import Conveyor from "shared/item/traits/conveyor/Conveyor";
 import Items from "shared/items/Items";
 import ItemPlacement from "shared/placement/ItemPlacement";
@@ -105,7 +106,12 @@ export default function loadBuildProcessing() {
         if (isPlacing === true) {
             // Snap model to mouse if in a valid area
             if (area !== undefined && item.placeableAreas.includes(area)) {
-                model.PivotTo(MOUSE.Hit);
+                const mouseLocation = Environment.UserInput.GetMouseLocation();
+                const viewRay = CAMERA.ViewportPointToRay(mouseLocation.X, mouseLocation.Y);
+                const ray = Workspace.Raycast(viewRay.Origin, viewRay.Direction.mul(1000));
+                if (ray !== undefined) {
+                    model.PivotTo(new CFrame(ray.Position));
+                }
             }
             // Show charger ring VFX if item has Charger trait
             const charger = item.findTrait("Charger");

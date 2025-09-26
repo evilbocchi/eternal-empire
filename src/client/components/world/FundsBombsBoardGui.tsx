@@ -1,5 +1,5 @@
 import { OnoeNum } from "@antivivi/serikanum";
-import React, { Fragment, useEffect } from "@rbxts/react";
+import React, { useEffect } from "@rbxts/react";
 import { MarketplaceService } from "@rbxts/services";
 import { LOCAL_PLAYER } from "client/constants";
 import { RobotoSlabBold, RobotoSlabHeavy, RobotoSlabMedium } from "client/GameFonts";
@@ -7,7 +7,6 @@ import { getAsset } from "shared/asset/AssetMap";
 import { playSound } from "shared/asset/GameAssets";
 import { BOMBS_PRODUCTS } from "shared/devproducts/BombsProducts";
 import Packets from "shared/Packets";
-import Sandbox from "shared/Sandbox";
 import FundsBombsBoard from "shared/world/nodes/FundsBombsBoard";
 
 export default function FundsBombsBoardGui() {
@@ -170,6 +169,7 @@ export default function FundsBombsBoardGui() {
                 Event={{
                     Activated: () => {
                         playSound("MenuClick.mp3");
+                        if (LOCAL_PLAYER === undefined) return;
                         MarketplaceService.PromptProductPurchase(LOCAL_PLAYER, BOMBS_PRODUCTS["Funds Bombs"]);
                     },
                 }}

@@ -1,7 +1,8 @@
 import React, { Fragment, useEffect, useMemo, useState } from "@rbxts/react";
 import { Debris, TweenService } from "@rbxts/services";
-import { LOCAL_PLAYER } from "client/constants";
 import ProgressBar from "client/components/window/ProgressBar";
+import { observeCharacter } from "client/constants";
+import { getPlayerCharacter } from "shared/hamster/getPlayerCharacter";
 import { RobotoSlabExtraBold } from "client/GameFonts";
 import { emitEffect, playSound } from "shared/asset/GameAssets";
 import Items from "shared/items/Items";
@@ -34,7 +35,7 @@ export default function HarvestableGui({ enabled, model }: { enabled: boolean; m
                 return;
             }
 
-            const currentTool = LOCAL_PLAYER.Character?.FindFirstChildOfClass("Tool");
+            const currentTool = getPlayerCharacter()?.FindFirstChildOfClass("Tool");
             if (currentTool === undefined) return;
 
             const highlight = new Instance("Highlight");
@@ -169,15 +170,12 @@ export function HarvestableGuiRenderer() {
                 }
             });
         };
-        const connection = LOCAL_PLAYER.CharacterAdded.Connect(onCharacterAdded);
-        if (LOCAL_PLAYER.Character !== undefined) {
-            onCharacterAdded(LOCAL_PLAYER.Character);
-        }
+        const cleanup = observeCharacter(onCharacterAdded);
 
         return () => {
             childAddedConnection?.Disconnect();
             childRemovedConnection?.Disconnect();
-            connection.Disconnect();
+            cleanup();
         };
     }, []);
 

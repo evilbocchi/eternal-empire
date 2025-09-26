@@ -1,6 +1,6 @@
 import React, { Fragment, useCallback, useEffect, useState } from "@rbxts/react";
-import { LOCAL_PLAYER } from "client/constants";
 import { RobotoSlab, RobotoSlabMedium } from "client/GameFonts";
+import { getPlayerCharacter } from "shared/hamster/getPlayerCharacter";
 
 interface ProximityPromptInfo {
     prompt: ProximityPrompt;
@@ -18,9 +18,9 @@ export default function ProximityPromptTrigger() {
     const [proximityPrompts, setProximityPrompts] = useState<ProximityPromptInfo[]>([]);
 
     const refreshProximityPrompts = useCallback(() => {
-        if (!LOCAL_PLAYER.Character) return;
+        const character = getPlayerCharacter();
+        if (!character) return;
 
-        const character = LOCAL_PLAYER.Character;
         const humanoidRootPart = character.FindFirstChild("HumanoidRootPart") as BasePart | undefined;
         if (!humanoidRootPart) return;
 

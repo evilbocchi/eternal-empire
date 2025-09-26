@@ -1,14 +1,12 @@
 import { loadAnimation } from "@antivivi/vrldk";
-import { ReplicatedStorage, StarterGui, TweenService, Workspace } from "@rbxts/services";
-import { LOCAL_PLAYER, PLAYER_GUI } from "client/constants";
-import { INTRO_GUI } from "client/controllers/core/Guis";
+import { ReplicatedStorage, TweenService, Workspace } from "@rbxts/services";
 import { questState } from "client/components/quest/QuestState";
+import { getPlayerCharacter } from "shared/hamster/getPlayerCharacter";
+import { INTRO_GUI } from "client/controllers/core/Guis";
 import { setVisibilityMain } from "client/hooks/useVisibility";
 import MusicManager from "client/MusicManager";
 import { playSound } from "shared/asset/GameAssets";
 import { WAYPOINTS } from "shared/constants";
-import { IS_EDIT } from "shared/Context";
-import eat from "shared/hamster/eat";
 
 let isIntroSequenceDone = false;
 let isCurrentlyInIntroSequence = false;
@@ -23,7 +21,7 @@ function exit() {
  * Plays the intro cutscene sequence, including camera, animation, and UI transitions.
  */
 export default function performIntroSequence() {
-    LOCAL_PLAYER.SetAttribute("Start", false);
+    Workspace.SetAttribute("Start", false);
     if (ReplicatedStorage.GetAttribute("Intro") !== true) return exit();
 
     const connection = ReplicatedStorage.GetAttributeChangedSignal("Intro").Connect(() => {
@@ -34,7 +32,7 @@ export default function performIntroSequence() {
     });
 
     print("performing intro sequence");
-    const humanoid = LOCAL_PLAYER.Character?.FindFirstChildOfClass("Humanoid");
+    const humanoid = getPlayerCharacter()?.FindFirstChildOfClass("Humanoid");
     if (humanoid === undefined) return exit();
     const camera = Workspace.CurrentCamera;
     if (camera === undefined) return exit();
@@ -62,12 +60,6 @@ export default function performIntroSequence() {
     blackWindow.BackgroundTransparency = 0;
     blackWindow.Visible = true;
     blackWindow.Parent = INTRO_GUI;
-    if (IS_EDIT) {
-        blackWindow.Parent = StarterGui;
-        eat(blackWindow);
-    } else {
-        blackWindow.Parent = PLAYER_GUI;
-    }
     const fabricRustle = () => playSound("FabricRustle.mp3");
     task.delay(2, () => {
         fabricRustle();

@@ -1,14 +1,14 @@
 import Signal from "@antivivi/lemon-signal";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "@rbxts/react";
 import { CollectionService, Debris, TweenService } from "@rbxts/services";
-import { LOCAL_PLAYER } from "client/constants";
 import useHotkeyWithTooltip from "client/components/hotkeys/useHotkeyWithTooltip";
 import InventoryFilter, {
     filterItems,
     useBasicInventoryFilter,
 } from "client/components/item/inventory/InventoryFilter";
-import { createShopSlot, updateShopSlot, type ShopSlotHandle } from "client/components/item/shop/ShopSlot";
 import { PurchaseManager } from "client/components/item/shop/PurchaseWindow";
+import { createShopSlot, updateShopSlot, type ShopSlotHandle } from "client/components/item/shop/ShopSlot";
+import { getPlayerCharacter } from "shared/hamster/getPlayerCharacter";
 import { RobotoSlabHeavy } from "client/GameFonts";
 import useProperty from "client/hooks/useProperty";
 import { getSound, playSound } from "shared/asset/GameAssets";
@@ -68,7 +68,7 @@ export namespace ShopManager {
     }
 
     export function checkForShop(candidates: Map<BasePart, ShopCandidate>) {
-        const primaryPart = LOCAL_PLAYER.Character?.PrimaryPart;
+        const primaryPart = getPlayerCharacter()?.PrimaryPart;
         if (primaryPart === undefined) return;
 
         let shopFound = false;

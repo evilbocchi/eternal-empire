@@ -20,6 +20,8 @@ import DataService from "server/services/data/DataService";
 import ItemService from "server/services/item/ItemService";
 import { OnPlayerAdded } from "server/services/ModdingService";
 import eat from "shared/hamster/eat";
+import getPlayerBackpack from "shared/hamster/getPlayerBackpack";
+import { getPlayerCharacter } from "shared/hamster/getPlayerCharacter";
 import Gear from "shared/item/traits/Gear";
 import Items from "shared/items/Items";
 
@@ -40,19 +42,20 @@ export class ToolService implements OnInit, OnPlayerAdded, OnPlayerAdded {
      * Refreshes the player's tools, giving best tools and removing worse ones.
      * @param player The player whose tools are refreshed.
      */
-    refreshTools(player: Player) {
+    refreshTools(player?: Player) {
         const [tools, worse] = Gear.getBestGearsFromInventory(
             this.dataService.empireData.items.inventory,
             Items.itemsPerId,
         );
+        const character = getPlayerCharacter(player);
+        if (character === undefined) return;
         if (tools.size() === 0 && worse.size() === 0) return;
-        if (player.Character === undefined) return;
-        const backpack = player.FindFirstChildOfClass("Backpack");
+        const backpack = getPlayerBackpack(player);
         if (backpack === undefined) return;
         for (const tool of tools) {
             const item = tool.item;
             const itemId = item.id;
-            if (player.Character?.FindFirstChild(itemId) !== undefined || backpack.FindFirstChild(itemId) !== undefined)
+            if (character?.FindFirstChild(itemId) !== undefined || backpack.FindFirstChild(itemId) !== undefined)
                 continue;
             const toolModel = item.MODEL?.Clone();
             if (toolModel !== undefined) {
@@ -67,7 +70,7 @@ export class ToolService implements OnInit, OnPlayerAdded, OnPlayerAdded {
         }
         for (const tool of worse) {
             const itemId = tool.item.id;
-            const holding = player.Character?.FindFirstChild(itemId);
+            const holding = character?.FindFirstChild(itemId);
             if (holding !== undefined) holding.Destroy();
             const inInv = backpack.FindFirstChild(itemId);
             if (inInv !== undefined) inInv.Destroy();

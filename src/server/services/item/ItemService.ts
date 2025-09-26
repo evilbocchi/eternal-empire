@@ -74,14 +74,14 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
      * @param player The player who placed the items.
      * @param placedItems Array of items that were placed with their IDs.
      */
-    itemsPlaced = new Signal<(player: Player, placedItems: IdPlacedItem[]) => void>();
+    itemsPlaced = new Signal<(player: Player | undefined, placedItems: IdPlacedItem[]) => void>();
 
     /**
      * Fired when items are removed from the world.
      * @param player The player who removed the items.
      * @param placedItems Array of items that were removed.
      */
-    itemsUnplaced = new Signal<(player: Player, placedItems: PlacedItem[]) => void>();
+    itemsUnplaced = new Signal<(player: Player | undefined, placedItems: PlacedItem[]) => void>();
 
     /**
      * Fired when items are purchased from the shop.
@@ -237,8 +237,10 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
      * @param placementIds List of placement ids
      * @returns List of unplaced items. If nothing happened, this will be undefined.
      */
-    unplaceItems(player: Player, placementIds: string[]): PlacedItem[] | undefined {
-        if (!this.permissionsService.checkPermLevel(player, "build")) return undefined;
+    unplaceItems(player: Player | undefined, placementIds: string[]): PlacedItem[] | undefined {
+        if (player !== undefined && !this.permissionsService.checkPermLevel(player, "build")) {
+            return undefined;
+        }
         const unplacing = new Array<PlacedItem>();
         const itemsData = this.dataService.empireData.items;
         const placedItems = itemsData.worldPlaced;
@@ -317,15 +319,15 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
      * @param items List of items to place
      * @returns 0 if no items were placed, 1 if items were placed, 2 if items were placed and is allowed to place the same item again
      */
-    placeItems(player: Player, items: PlacingInfo[]) {
-        if (!this.permissionsService.checkPermLevel(player, "build")) {
+    placeItems(player: Player | undefined, items: PlacingInfo[]) {
+        if (player !== undefined && !this.permissionsService.checkPermLevel(player, "build")) {
             return 0;
         }
 
         let area: AreaId | undefined;
         if (baseplateBounds === undefined) {
             // normal placement
-            area = player.GetAttribute("Area") as AreaId | undefined;
+            area = Packets.currentArea.get(player);
             if (area === undefined) return 0;
         }
 
@@ -755,7 +757,7 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
                 log({
                     time: time + ++i / 1000, // not a hack i swear
                     type: "Place",
-                    player: player.UserId,
+                    player: player?.UserId,
                     item: placedItem.item,
                     x: placedItem.posX,
                     y: placedItem.posY,
@@ -771,7 +773,7 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
                 log({
                     time: time + ++i / 1000,
                     type: "Unplace",
-                    player: player.UserId,
+                    player: player?.UserId,
                     item: placedItem.item,
                     x: placedItem.posX,
                     y: placedItem.posY,

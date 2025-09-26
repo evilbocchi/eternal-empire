@@ -1,6 +1,5 @@
 import { Lighting, ReplicatedStorage, SoundService, TweenService, Workspace } from "@rbxts/services";
 import { Environment } from "@rbxts/ui-labs";
-import { LOCAL_PLAYER } from "client/constants";
 import { ASSETS, SOUND_EFFECTS_GROUP, getSound } from "shared/asset/GameAssets";
 import { IS_EDIT } from "shared/Context";
 import Packets from "shared/Packets";
@@ -101,10 +100,10 @@ namespace MusicManager {
     export function refreshMusic(force?: boolean) {
         let retrieved: Sound | undefined;
         let area: AreaId | undefined;
-        if (LOCAL_PLAYER.GetAttribute("Start") === true) {
+        if (Workspace.GetAttribute("Start") === true) {
             retrieved = START_MUSIC;
         }
-        area = LOCAL_PLAYER.GetAttribute("Area") as AreaId;
+        area = Packets.currentArea.get();
 
         if (retrieved === playing && retrieved !== undefined) return;
 
@@ -159,7 +158,7 @@ namespace MusicManager {
             inChallenge = challenge !== "" && challenge !== undefined;
             if (ready === true) refreshMusic(true);
         });
-        const areaConnection = LOCAL_PLAYER.GetAttributeChangedSignal("Area").Connect(() => {
+        const areaConnection = Packets.currentArea.observe(() => {
             if (ready === true) refreshMusic();
         });
 

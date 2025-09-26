@@ -50,25 +50,10 @@ export default function StatsWindow() {
     const sessionTime = useProperty(Packets.sessionTime);
     const longestSessionTime = useProperty(Packets.longestSessionTime);
     const mostBalance = useProperty(Packets.mostBalance);
+    const rawPurifierClicks = useProperty(Packets.rawPurifierClicks);
 
     // State for player attributes
-    const [rawPurifierClicks, setRawPurifierClicks] = useState(0);
     const [currentPing, setCurrentPing] = useState("N/A");
-
-    // Listen to player attributes
-    useEffect(() => {
-        const updateRawPurifierClicks = () => {
-            setRawPurifierClicks((LOCAL_PLAYER.GetAttribute("RawPurifierClicks") as number) ?? 0);
-        };
-
-        updateRawPurifierClicks();
-        const attributeConnection =
-            LOCAL_PLAYER.GetAttributeChangedSignal("RawPurifierClicks").Connect(updateRawPurifierClicks);
-
-        return () => {
-            attributeConnection.Disconnect();
-        };
-    }, []);
 
     useInterval(() => {
         setCurrentPing(PingManager.getPing());

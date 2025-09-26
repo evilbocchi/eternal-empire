@@ -1,7 +1,7 @@
 import React, { Fragment, useEffect } from "@rbxts/react";
 import ReactRoblox from "@rbxts/react-roblox";
+import { Workspace } from "@rbxts/services";
 import { CreateReactStory } from "@rbxts/ui-labs";
-import { LOCAL_PLAYER } from "client/constants";
 import SettingsWindow from "client/components/settings/SettingsWindow";
 import StartWindow from "client/components/start/StartWindow";
 import useVisibility from "client/hooks/useVisibility";
@@ -46,7 +46,7 @@ export = CreateReactStory(
         );
 
         useEffect(() => {
-            LOCAL_PLAYER.SetAttribute("Start", true);
+            Workspace.SetAttribute("Start", true);
             const settings = table.clone(Packets.settings.get());
             settings.Music = true;
             Packets.settings.set(settings);

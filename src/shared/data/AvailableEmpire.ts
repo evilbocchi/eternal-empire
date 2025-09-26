@@ -1,4 +1,3 @@
-import { OnoeNum } from "@antivivi/serikanum";
 import {
     BadgeService,
     DataStoreService,
@@ -8,6 +7,7 @@ import {
     TeleportService,
 } from "@rbxts/services";
 import { IS_EDIT, IS_PUBLIC_SERVER, IS_SERVER, IS_SINGLE_SERVER, IS_STUDIO } from "shared/Context";
+import PlayerProfileTemplate from "shared/data/profile/PlayerProfileTemplate";
 import { EmpireProfileManager, PlayerProfileManager } from "shared/data/profile/ProfileManager";
 import ThisEmpire from "shared/data/ThisEmpire";
 import Packets from "shared/Packets";
@@ -50,6 +50,8 @@ namespace AvailableEmpire {
      * Cache of available empires per player to reduce DataStore calls.
      */
     const availableEmpiresPerPlayer = new Map<number, Map<string, EmpireInfo>>();
+
+    export const dataPerPlayer = new Map<number, typeof PlayerProfileTemplate>();
 
     /**
      * Gets basic information about an empire.
@@ -265,17 +267,19 @@ namespace AvailableEmpire {
 
         const playerProfile = PlayerProfileManager.load(player.UserId);
         if (playerProfile === undefined) throw "No player profile for player " + player.Name;
+        const playerData = playerProfile.Data;
+        dataPerPlayer.set(player.UserId, playerData);
 
         let changed = false;
-        if (playerProfile.Data.availableEmpires !== undefined) {
-            for (const empireId of playerProfile.Data.availableEmpires) {
+        if (playerData.availableEmpires !== undefined) {
+            for (const empireId of playerData.availableEmpires) {
                 availableEmpires.set(empireId, getInfo(empireId));
             }
-            playerProfile.Data.availableEmpires = undefined;
+            playerData.availableEmpires = undefined;
             changed = true;
         }
-        if (playerProfile.Data.ownedEmpires !== undefined) {
-            for (const owned of playerProfile.Data.ownedEmpires) {
+        if (playerData.ownedEmpires !== undefined) {
+            for (const owned of playerData.ownedEmpires) {
                 if (!availableEmpires.has(owned)) {
                     availableEmpires.set(owned, getInfo(owned));
                     changed = true;
@@ -288,23 +292,7 @@ namespace AvailableEmpire {
             print(availableEmpires);
             warn("Player data was modified to fix lossy and old data");
         }
-        player.SetAttribute("RawPurifierClicks", math.floor(playerProfile.Data.rawPurifierClicks));
-        player
-            .GetAttributeChangedSignal("RawPurifierClicks")
-            .Connect(() => (playerProfile.Data.rawPurifierClicks = player.GetAttribute("RawPurifierClicks") as number));
-        if (playerProfile.Data.rawPurifierClicks === 0 && (ThisEmpire.data.owner === player.UserId || IS_STUDIO)) {
-            const c = ThisEmpire.data.currencies.get("Purifier Clicks");
-            if (c !== undefined) {
-                const clicks = new OnoeNum(c);
-                if (clicks !== undefined) {
-                    player.SetAttribute(
-                        "RawPurifierClicks",
-                        math.min(math.floor(clicks.div(3).add(1).revert()), 10000000),
-                    );
-                    print("Awarded player with clicks as compensation");
-                }
-            }
-        }
+        Packets.rawPurifierClicks.setFor(player, playerData.rawPurifierClicks);
 
         const ownedEmpires = playerProfile?.Data.ownedEmpires;
         if (
@@ -322,6 +310,7 @@ namespace AvailableEmpire {
     export function unregisterPlayer(player: Player) {
         PlayerProfileManager.unload(player.UserId);
         availableEmpiresPerPlayer.delete(player.UserId);
+        dataPerPlayer.delete(player.UserId);
     }
 }
 

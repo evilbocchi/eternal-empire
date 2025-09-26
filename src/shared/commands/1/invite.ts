@@ -6,16 +6,20 @@ import ThisEmpire from "shared/data/ThisEmpire";
 export = new Command(script.Name)
     .addAlias("inv")
     .setDescription("<player> : Allows the specified player to join this empire.")
-    .setExecute((o, p, useId) => {
+    .setExecute((sender, p, useId) => {
         const userId = CommandAPI.Command.id(p, useId);
-        if (userId !== undefined && (userId !== o.UserId || IS_STUDIO)) {
+        if (userId !== undefined && (userId !== sender?.UserId || IS_STUDIO)) {
             if (!IS_STUDIO && (game.PrivateServerOwnerId !== 0 || game.PrivateServerId === "")) {
-                CommandAPI.ChatHook.sendPrivateMessage(o, "You cannot use /invite in this server.", "color:255,43,43");
+                CommandAPI.ChatHook.sendPrivateMessage(
+                    sender,
+                    "You cannot use /invite in this server.",
+                    "color:255,43,43",
+                );
                 return;
             }
             AvailableEmpire.add(userId, ThisEmpire.id);
             CommandAPI.ChatHook.sendPrivateMessage(
-                o,
+                sender,
                 "Invited " + CommandAPI.Command.fp(p, userId),
                 "color:138,255,138",
             );

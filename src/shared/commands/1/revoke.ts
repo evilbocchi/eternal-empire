@@ -5,14 +5,12 @@ import ThisEmpire from "shared/data/ThisEmpire";
 export = new Command(script.Name)
     .addAlias("rv")
     .setDescription("<player> : Removes the player's access to join the empire.")
-    .setExecute((o, p, useId) => {
+    .setExecute((sender, p, useId) => {
         const userId = CommandAPI.Command.id(p, useId);
         if (userId !== undefined) {
-            if (
-                CommandAPI.Permissions.getPermissionLevel(userId) >= CommandAPI.Permissions.getPermissionLevel(o.UserId)
-            ) {
+            if (CommandAPI.Permissions.isLowerLevel(sender, userId)) {
                 CommandAPI.ChatHook.sendPrivateMessage(
-                    o,
+                    sender,
                     "You can't revoke someone with an equal/higher permission level.",
                     "color:255,43,43",
                 );
@@ -21,7 +19,7 @@ export = new Command(script.Name)
             const empireId = ThisEmpire.id;
             AvailableEmpire.remove(userId, empireId);
             CommandAPI.ChatHook.sendPrivateMessage(
-                o,
+                sender,
                 `Revoked ${CommandAPI.Command.fp(p, userId)}`,
                 "color:138,255,138",
             );

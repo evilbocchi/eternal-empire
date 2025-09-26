@@ -7,13 +7,21 @@ export = new Command(script.Name)
     .setDescription(
         "Gets a URL in which players can use to join this empire. Utilises the empire's access code. Only available for private empires.",
     )
-    .setExecute((o) => {
+    .setExecute((sender) => {
         if (IS_STUDIO || (game.PrivateServerOwnerId === 0 && game.PrivateServerId !== "")) {
             const joinLink = `https://www.roblox.com/games/start?placeId=${game.PlaceId}&launchData=${CommandAPI.Permissions.getAccessCode()}`;
-            CommandAPI.ChatHook.sendPrivateMessage(o, "Join link: " + joinLink);
-            Packets.codeReceived.toClient(o, joinLink);
+            CommandAPI.ChatHook.sendPrivateMessage(sender, "Join link: " + joinLink);
+            if (sender !== undefined) {
+                Packets.codeReceived.toClient(sender, joinLink);
+            } else {
+                Packets.codeReceived.toAllClients(joinLink);
+            }
         } else {
-            CommandAPI.ChatHook.sendPrivateMessage(o, "You cannot use this command on this server", "color:255,43,43");
+            CommandAPI.ChatHook.sendPrivateMessage(
+                sender,
+                "You cannot use this command on this server",
+                "color:255,43,43",
+            );
         }
     })
     .setPermissionLevel(1);

@@ -48,10 +48,10 @@ export = new Item(script.Name)
         // Fortunately this is a singleton
         clickable.setOnClick((_model, _item, player, value) => {
             if (player !== undefined) {
-                player.SetAttribute(
-                    "RawPurifierClicks",
-                    ((player.GetAttribute("RawPurifierClicks") as number) ?? 0) + 1,
-                );
+                const data = Server.dataPerPlayer.get(player.UserId);
+                if (data === undefined) return;
+                const newRawClicks = ++data.rawPurifierClicks;
+                Packets.rawPurifierClicks.setFor(player, newRawClicks);
             }
             let [totalAdd, totalMul, totalPow] = Operative.template();
             [totalAdd, totalMul, totalPow] = RevenueService.applyGlobal(

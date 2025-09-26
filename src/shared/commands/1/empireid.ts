@@ -5,9 +5,13 @@ import Packets from "shared/Packets";
 export = new Command(script.Name)
     .addAlias("ei")
     .setDescription("View the empire ID for this empire. Only useful for diagnostics.")
-    .setExecute((o) => {
+    .setExecute((sender) => {
         const id = ThisEmpire.id;
-        CommandAPI.ChatHook.sendPrivateMessage(o, "The empire ID is: " + id);
-        Packets.codeReceived.toClient(o, id);
+        CommandAPI.ChatHook.sendPrivateMessage(sender, "The empire ID is: " + id);
+        if (sender !== undefined) {
+            Packets.codeReceived.toClient(sender, id);
+        } else {
+            Packets.codeReceived.toAllClients(id);
+        }
     })
     .setPermissionLevel(1);

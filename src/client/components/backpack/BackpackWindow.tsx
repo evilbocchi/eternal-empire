@@ -9,9 +9,10 @@ import { loadAnimation } from "@antivivi/vrldk";
 import React, { useEffect, useRef, useState } from "@rbxts/react";
 import { StarterGui, Workspace } from "@rbxts/services";
 import { Environment } from "@rbxts/ui-labs";
-import { LOCAL_PLAYER } from "client/constants";
 import GearOption, { layoutOrderFromGear } from "client/components/backpack/GearOption";
 import { useDocument } from "client/components/window/DocumentManager";
+import { LOCAL_PLAYER, observeCharacter } from "client/constants";
+import { getPlayerCharacter } from "shared/hamster/getPlayerCharacter";
 import { playSound } from "shared/asset/GameAssets";
 import { IS_EDIT } from "shared/Context";
 import Gear from "shared/item/traits/Gear";
@@ -32,8 +33,8 @@ const KEY_CODES = new Map<number, Enum.KeyCode>([
 ]);
 
 const equipGear = (itemId: string) => {
-    const backpack = LOCAL_PLAYER.FindFirstChildOfClass("Backpack");
-    const character = LOCAL_PLAYER.Character;
+    const backpack = (LOCAL_PLAYER ?? Workspace).FindFirstChildOfClass("Backpack");
+    const character = getPlayerCharacter();
     const humanoid = character?.FindFirstChildOfClass("Humanoid");
     if (backpack === undefined || character === undefined || humanoid === undefined) return false;
 
@@ -108,6 +109,7 @@ export default function BackpackWindow() {
                 onToolAdded(existingTool);
             }
         };
+        const cleanup = observeCharacter(onCharacterAdded);
 
         const OVERLAP_PARAMS = new OverlapParams();
         OVERLAP_PARAMS.CollisionGroup = "ItemHitbox";
@@ -144,7 +146,7 @@ export default function BackpackWindow() {
                 input.UserInputType === Enum.UserInputType.Touch ||
                 input.KeyCode === Enum.KeyCode.ButtonL1
             ) {
-                const currentTool = LOCAL_PLAYER.Character?.FindFirstChildOfClass("Tool");
+                const currentTool = getPlayerCharacter()?.FindFirstChildOfClass("Tool");
                 if (currentTool === undefined) return;
 
                 const item = Items.getItem(currentTool.Name);
@@ -171,16 +173,11 @@ export default function BackpackWindow() {
             }
         });
 
-        const connection = LOCAL_PLAYER.CharacterAdded.Connect(onCharacterAdded);
-        if (LOCAL_PLAYER.Character) {
-            onCharacterAdded(LOCAL_PLAYER.Character);
-        }
-
         return () => {
             inputBeganConnection.Disconnect();
             childAddedConnection?.Disconnect();
             childRemovedConnection?.Disconnect();
-            connection.Disconnect();
+            cleanup();
         };
     }, []);
 

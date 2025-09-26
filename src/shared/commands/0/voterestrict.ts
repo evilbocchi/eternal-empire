@@ -5,29 +5,34 @@ import ThisEmpire from "shared/data/ThisEmpire";
 export = new Command(script.Name)
     .addAlias("vr")
     .setDescription("<player> : Vote to restrict a player.")
-    .setExecute((o, p) => {
-        const targets = CommandAPI.Command.findPlayers(o, p);
+    .setExecute((sender, p) => {
+        if (sender === undefined) {
+            warn("voterestrict command can only be run by a player.");
+            return;
+        }
+
+        const targets = CommandAPI.Command.findPlayers(sender, p);
         if (targets.size() < 1) {
-            CommandAPI.ChatHook.sendPrivateMessage(o, `Could not find matching players ${p}`, "color:255,43,43");
+            CommandAPI.ChatHook.sendPrivateMessage(sender, `Could not find matching players ${p}`, "color:255,43,43");
             return;
         }
         const data = ThisEmpire.data;
         const playerCount = Players.GetPlayers()
-            .filter((player) => ((player.GetAttribute("PermissionLevel") as number) ?? 0) > -1)
+            .filter((player) => CommandAPI.Permissions.getPermissionLevel(player.UserId) > -1)
             .size();
         for (const target of targets) {
             const userId = target.UserId;
             if (CommandAPI.Permissions.getPermissionLevel(userId) >= 1) {
                 CommandAPI.ChatHook.sendPrivateMessage(
-                    o,
+                    sender,
                     "You can't vote to restrict a trusted player",
                     "color:255,43,43",
                 );
                 continue;
             }
-            if (o.FindFirstChild(userId) !== undefined) {
+            if (sender.FindFirstChild(userId) !== undefined) {
                 CommandAPI.ChatHook.sendPrivateMessage(
-                    o,
+                    sender,
                     "You have already voted to restrict this player",
                     "color:255,43,43",
                 );
@@ -46,7 +51,7 @@ export = new Command(script.Name)
             const voteToken = new Instance("NumberValue");
             voteToken.Value = tick();
             voteToken.Name = tostring(userId);
-            voteToken.Parent = o;
+            voteToken.Parent = sender;
             Debris.AddItem(voteToken, 60);
             task.delay(60, () => {
                 if (target === undefined) {
@@ -55,14 +60,14 @@ export = new Command(script.Name)
                 target.SetAttribute("Votes", (target.GetAttribute("Votes") as number) - 1);
                 if ((target.GetAttribute("RestrictionTime") as number) ?? 0 < tick()) {
                     CommandAPI.ChatHook.sendPrivateMessage(
-                        o,
+                        sender,
                         `Your vote to restrict ${target.Name} has worn off.`,
                         "color:138,255,138",
                     );
                 }
             });
             CommandAPI.ChatHook.sendPrivateMessage(
-                o,
+                sender,
                 `Voted to restrict ${target.Name}. Your vote will wear off after 60 seconds.`,
                 "color:138,255,138",
             );

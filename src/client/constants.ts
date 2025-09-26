@@ -5,23 +5,38 @@
  * @since 1.0.0
  */
 
-import { Players } from "@rbxts/services";
+import { Players, StarterGui } from "@rbxts/services";
+import { getPlayerCharacter } from "shared/hamster/getPlayerCharacter";
 import { IS_EDIT } from "shared/Context";
 
 /**
  * Reference to the local player.
  */
-export const LOCAL_PLAYER = Players.LocalPlayer;
+export const LOCAL_PLAYER = Players.LocalPlayer as Player | undefined;
 
 /**
- * Reference to the local player's mouse.
+ * Observes changes to the local player's character and invokes the provided callback when it changes.
+ * Also invokes the callback immediately if the character is already loaded.
+ * @param callback Function to call with the new character model when it changes.
+ * @returns A function to disconnect the observer.
  */
-export const MOUSE = LOCAL_PLAYER.GetMouse();
+export const observeCharacter = (callback: (character: Model) => void) => {
+    const dummy = getPlayerCharacter();
+    if (dummy !== undefined) {
+        callback(dummy);
+    }
+    if (LOCAL_PLAYER) {
+        const connection = LOCAL_PLAYER.CharacterAdded.Connect(callback);
+        return () => connection.Disconnect();
+    } else {
+        return () => {};
+    }
+};
 
 /**
  * Reference to the local player's PlayerGui.
  */
-export const PLAYER_GUI = (IS_EDIT ? undefined : LOCAL_PLAYER.WaitForChild("PlayerGui")) as StarterGui;
+export const PLAYER_GUI = (IS_EDIT ? StarterGui : LOCAL_PLAYER!.WaitForChild("PlayerGui")) as StarterGui;
 
 /**
  * Reference to the Actor instance for parallel execution, if present.

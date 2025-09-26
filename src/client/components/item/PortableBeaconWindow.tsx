@@ -1,9 +1,10 @@
 import React, { useEffect, useRef, useState } from "@rbxts/react";
 import { TweenService } from "@rbxts/services";
-import { LOCAL_PLAYER } from "client/constants";
 import useSingleDocument from "client/components/sidebar/useSingleDocumentWindow";
 import TechWindow from "client/components/window/TechWindow";
 import { COLOR_SEQUENCE_PER_AREA } from "client/components/world/area/AreaBoardRenderer";
+import { observeCharacter } from "client/constants";
+import { getPlayerCharacter } from "shared/hamster/getPlayerCharacter";
 import { RobotoMono, RobotoMonoBold } from "client/GameFonts";
 import { getAsset } from "shared/asset/AssetMap";
 import { playSound } from "shared/asset/GameAssets";
@@ -70,22 +71,19 @@ export default function PortableBeaconWindow() {
                 }
             });
         };
-        const connection = LOCAL_PLAYER.CharacterAdded.Connect(onCharacterAdded);
-        if (LOCAL_PLAYER.Character !== undefined) {
-            onCharacterAdded(LOCAL_PLAYER.Character);
-        }
+        const cleanup = observeCharacter(onCharacterAdded);
 
         return () => {
             unlockedAreasConnection.Disconnect();
             childAddedConnection?.Disconnect();
             childRemovedConnection?.Disconnect();
-            connection.Disconnect();
+            cleanup();
         };
     }, []);
 
     useEffect(() => {
         if (!visible) {
-            LOCAL_PLAYER.Character?.FindFirstChildOfClass("Humanoid")?.UnequipTools();
+            getPlayerCharacter()?.FindFirstChildOfClass("Humanoid")?.UnequipTools();
         }
     }, [visible]);
 
@@ -168,7 +166,7 @@ function PortableBeaconOption({
                     const success = Packets.tpToArea.toServer(areaId);
                     if (success) {
                         playSound("Teleport.mp3");
-                        LOCAL_PLAYER.Character?.FindFirstChildOfClass("Humanoid")?.UnequipTools();
+                        getPlayerCharacter()?.FindFirstChildOfClass("Humanoid")?.UnequipTools();
                     } else {
                         playSound("Error.mp3");
                     }

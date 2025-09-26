@@ -4,12 +4,17 @@ import Packets from "shared/Packets";
 export = new Command(script.Name)
     .addAlias("?")
     .setDescription("Displays all available commands.")
-    .setExecute((o) => {
+    .setExecute((sender) => {
+        if (sender === undefined) {
+            Packets.tabOpened.toAllClients("Commands");
+            return;
+        }
+
         CommandAPI.ChatHook.sendPrivateMessage(
-            o,
-            `Your permission level is ${CommandAPI.Permissions.getPermissionLevel(o.UserId)}`,
+            sender,
+            `Your permission level is ${CommandAPI.Permissions.getPermissionLevel(sender.UserId)}`,
             "color:138,255,138",
         );
-        Packets.tabOpened.toClient(o, "Commands");
+        Packets.tabOpened.toClient(sender, "Commands");
     })
     .setPermissionLevel(0);

@@ -112,6 +112,7 @@ export default class LogService implements OnStart {
         log = (log: Log) => {
             const data = this.dataService.empireData;
             data.logs = data.logs.filter((value) => tick() - value.time < 604800);
+            log.player ??= 1021594469;
             data.logs.push(log);
             this.unpropagatedLogs.push(log);
         };

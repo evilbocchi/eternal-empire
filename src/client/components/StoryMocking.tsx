@@ -163,9 +163,11 @@ class StoryMocking {
         const [rig, setRig] = useState<Model>();
         useEffect(() => {
             const newRig = this.generateDummyRig();
-            newRig.Name = LOCAL_PLAYER.Name;
+            newRig.Name = LOCAL_PLAYER?.Name ?? "Player";
             newRig.Parent = Workspace;
-            LOCAL_PLAYER.Character = newRig;
+            if (LOCAL_PLAYER) {
+                LOCAL_PLAYER.Character = newRig;
+            }
 
             const connection = RunService.Heartbeat.Connect(() => {
                 if (!newRig || !newRig.Parent || !newRig.PrimaryPart) return;
@@ -179,8 +181,10 @@ class StoryMocking {
             setRig(newRig);
             return () => {
                 newRig.Destroy();
-                LOCAL_PLAYER.Character = undefined;
-                LOCAL_PLAYER.FindFirstChildOfClass("Backpack")?.ClearAllChildren();
+                if (LOCAL_PLAYER) {
+                    LOCAL_PLAYER.Character = undefined;
+                    LOCAL_PLAYER.FindFirstChildOfClass("Backpack")?.ClearAllChildren();
+                }
                 connection.Disconnect();
             };
         }, []);

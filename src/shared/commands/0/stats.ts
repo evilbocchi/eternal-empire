@@ -4,7 +4,11 @@ import Packets from "shared/Packets";
 export = new Command(script.Name)
     .addAlias("statistics")
     .setDescription("Open the statistics window, where you can view various game stats.")
-    .setExecute((o) => {
-        Packets.tabOpened.toClient(o, "Stats");
+    .setExecute((sender) => {
+        if (sender === undefined) {
+            Packets.tabOpened.toAllClients("Stats");
+            return;
+        }
+        Packets.tabOpened.toClient(sender, "Stats");
     })
     .setPermissionLevel(0);

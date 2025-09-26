@@ -29,8 +29,12 @@ export default class ChatHookService implements OnPlayerAdded {
      * @param message Message text
      * @param metadata Optional message metadata
      */
-    sendPrivateMessage(player: Player, message: string, metadata?: string) {
-        if (IS_EDIT) return;
+    sendPrivateMessage(player: Player | undefined, message: string, metadata?: string) {
+        if (IS_EDIT) {
+            print(message);
+            return;
+        }
+        if (player === undefined) return;
 
         const plrChannel = this.plrChannels.get(player) ?? this.createChannel(player);
         Packets.systemMessageSent.toClient(player, plrChannel.Name, message, metadata ?? "");
