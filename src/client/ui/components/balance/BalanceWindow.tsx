@@ -122,10 +122,6 @@ export default function BalanceWindow() {
         }
     };
 
-    const getCurrentPageName = (): string => {
-        return CurrencyBundle.getCategory(currentPage) ?? "Main";
-    };
-
     const currentCurrencies = getCurrentPageCurrencies();
 
     if (navigationRef.current) {
@@ -155,7 +151,7 @@ export default function BalanceWindow() {
                     <NavigationControls
                         currentPage={currentPage}
                         maxPage={maxPage}
-                        currentPageName={getCurrentPageName()}
+                        currentPageName={CurrencyBundle.getCategory(currentPage) ?? "Main"}
                         onPageChange={handlePageChange}
                     />
                 ) : (

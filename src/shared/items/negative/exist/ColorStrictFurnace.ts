@@ -28,7 +28,7 @@ export = new Item(script.Name)
             setInstanceInfo(ReplicatedStorage, "ColorStrictTime", tick());
         };
         randomColor();
-        item.repeat(undefined, () => randomColor(), 300);
+        item.repeat(undefined, randomColor, 300);
     })
     .onLoad((model, item) => {
         const furnace = item.trait(Furnace);

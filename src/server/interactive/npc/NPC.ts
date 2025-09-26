@@ -71,7 +71,7 @@ export default class NPC extends Identifiable {
      * This method should be called after the NPC instance is created.
      * @returns The NPC instance for chaining.
      */
-    load() {
+    override init() {
         if (IS_EDIT || this.id === "Empty") return;
 
         const model = NPC_MODELS?.FindFirstChild(this.id) as Model | undefined;

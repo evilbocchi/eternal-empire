@@ -21,7 +21,6 @@ export default class ObbyUpgrader extends ItemTrait {
     static init(obbyUpgrader: ObbyUpgrader) {
         const item = obbyUpgrader.item;
         const upgrader = item.trait(Upgrader);
-
         item.repeat(
             undefined,
             () => {

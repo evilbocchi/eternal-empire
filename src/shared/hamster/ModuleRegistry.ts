@@ -5,11 +5,11 @@ import eat from "shared/hamster/eat";
  */
 export abstract class Identifiable {
     /**
-     * Abstract method to load the module, called the entire module is loaded.
-     * Should return a cleanup function to be called on unload, or undefined if no cleanup is needed.
+     * Abstract method to initialize the module, called the entire module is required.
+     * Should return a cleanup function to be called on story unmount, or undefined if no cleanup is needed.
      * @returns A cleanup function or undefined.
      */
-    abstract load(): (() => void) | undefined;
+    abstract init(): (() => void) | undefined;
 
     /**
      * Constructs an identifiable object with a unique ID.
@@ -80,7 +80,7 @@ export class ModuleRegistry<T extends Identifiable> {
             if (i !== undefined) {
                 const reloadable = i as T;
                 this.OBJECTS.set(reloadable.id, reloadable);
-                const cleanup = reloadable.load();
+                const cleanup = reloadable.init();
                 if (cleanup !== undefined) {
                     eat(cleanup);
                 }

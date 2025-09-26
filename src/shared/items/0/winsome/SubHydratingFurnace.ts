@@ -1,9 +1,9 @@
 import Difficulty from "@antivivi/jjt-difficulties";
 import { OnoeNum } from "@antivivi/serikanum";
-import CurrencyBundle from "shared/currency/CurrencyBundle";
-import Furnace from "shared/item/traits/Furnace";
-import Item from "shared/item/Item";
 import { Server } from "shared/api/APIExpose";
+import CurrencyBundle from "shared/currency/CurrencyBundle";
+import Item from "shared/item/Item";
+import Furnace from "shared/item/traits/Furnace";
 
 let meetsRequirement = false;
 const requirement = new OnoeNum(10);
@@ -20,7 +20,6 @@ export = new Item(script.Name)
 
     .onInit((item) => {
         const furnace = item.trait(Furnace);
-
         const CurrencyService = Server.Currency;
         item.repeat(
             undefined,

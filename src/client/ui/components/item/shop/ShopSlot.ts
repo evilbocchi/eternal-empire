@@ -16,9 +16,9 @@ import Items from "shared/items/Items";
 
 const BUTTON_STROKE_GRADIENT = new ColorSequence([
     new ColorSequenceKeypoint(0, Color3.fromRGB(255, 255, 255)),
-    new ColorSequenceKeypoint(0.299, Color3.fromRGB(255, 255, 255)),
-    new ColorSequenceKeypoint(0.51, Color3.fromRGB(118, 118, 118)),
-    new ColorSequenceKeypoint(0.822, Color3.fromRGB(255, 255, 255)),
+    new ColorSequenceKeypoint(0.3, Color3.fromRGB(255, 255, 255)),
+    new ColorSequenceKeypoint(0.5, Color3.fromRGB(118, 118, 118)),
+    new ColorSequenceKeypoint(0.8, Color3.fromRGB(255, 255, 255)),
     new ColorSequenceKeypoint(1, Color3.fromRGB(255, 255, 255)),
 ]);
 

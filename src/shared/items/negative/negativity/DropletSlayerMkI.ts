@@ -4,6 +4,9 @@ import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
 import Upgrader from "shared/item/traits/upgrader/Upgrader";
 import { getAllInstanceInfo } from "@antivivi/vrldk";
+import { packet } from "@rbxts/fletchette";
+
+const firedPacket = packet<() => void>(); // parameterless is fine; there's only 1 of this item
 
 export = new Item(script.Name)
     .setName("Droplet Slayer Mk. I")
@@ -19,17 +22,25 @@ export = new Item(script.Name)
     .onLoad((model, item) => {
         const laser = model.WaitForChild("Laser") as BasePart;
         const laserInfo = getAllInstanceInfo(laser);
-        const sound = laser.WaitForChild("Sound") as Sound;
-        laser.Transparency = 1;
         item.repeat(
             model,
             () => {
-                sound.Play();
                 laserInfo.Enabled = true;
-                laser.Transparency = 0.3;
-                TweenService.Create(laser, new TweenInfo(0.5), { Transparency: 1 }).Play();
+                firedPacket.toAllClients();
                 task.delay(0.5, () => (laserInfo.Enabled = false));
             },
             4,
         );
+    })
+    .onClientLoad((model) => {
+        const laser = model.WaitForChild("Laser") as BasePart;
+        const sound = laser.WaitForChild("Sound") as Sound;
+        laser.Transparency = 1;
+        const connection = firedPacket.fromServer(() => {
+            sound.Play();
+
+            laser.Transparency = 0.3;
+            TweenService.Create(laser, new TweenInfo(0.5), { Transparency: 1 }).Play();
+        });
+        model.Destroying.Once(() => connection.Disconnect());
     });

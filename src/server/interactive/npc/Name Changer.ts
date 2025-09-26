@@ -5,8 +5,8 @@ class NameChanger extends NPC {
         super(id);
     }
 
-    override load() {
-        super.load();
+    override init() {
+        super.init();
         if (this.rootPart) {
             this.rootPart.Anchored = true;
         }

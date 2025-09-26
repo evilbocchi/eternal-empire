@@ -24,7 +24,7 @@ export = new Item(script.Name)
     .setSpeed(5)
     .exit()
 
-    .onLoad((model) => {
+    .onClientLoad((model) => {
         const spin = model.WaitForChild("Spin") as BasePart;
         const tween = TweenService.Create(spin, new TweenInfo(2, Enum.EasingStyle.Linear), {
             Rotation: new Vector3(0, 360, 0),

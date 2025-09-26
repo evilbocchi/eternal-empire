@@ -257,7 +257,7 @@ export default class Quest extends Identifiable {
         this.color = Quest.colors[string.byte(id)[0] % Quest.colors.size()];
     }
 
-    load() {
+    override init() {
         this.initialized.fire();
 
         // Set up stage completion handling

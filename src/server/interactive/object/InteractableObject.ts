@@ -32,7 +32,7 @@ class InteractableObject extends Identifiable {
         return this.worldNode;
     }
 
-    load() {
+    override init() {
         return () => {
             this.dialogueInteractConnection?.disconnect();
             table.clear(this);

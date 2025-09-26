@@ -1,4 +1,5 @@
 import Difficulty from "@antivivi/jjt-difficulties";
+import { packet } from "@rbxts/fletchette";
 import { Server } from "shared/api/APIExpose";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import eat from "shared/hamster/eat";
@@ -8,10 +9,7 @@ import Upgrader from "shared/item/traits/upgrader/Upgrader";
 import Crystal from "shared/items/excavation/Crystal";
 import WhiteGem from "shared/items/excavation/WhiteGem";
 
-const first = new CurrencyBundle().set("Power", 3);
-const second = new CurrencyBundle().set("Power", 50);
-const third = new CurrencyBundle().set("Power", 1000);
-let mode = 0;
+const modePacket = packet<number>();
 
 export = new Item(script.Name)
     .setName("Electroshocked Coil")
@@ -33,6 +31,11 @@ export = new Item(script.Name)
 
     .onInit((item) => {
         const upgrader = item.trait(Upgrader);
+        const first = new CurrencyBundle().set("Power", 3);
+        const second = new CurrencyBundle().set("Power", 50);
+        const third = new CurrencyBundle().set("Power", 1000);
+        let lastMode = -1;
+        let mode = 0;
 
         const connection = Server.Currency.balanceChanged.connect((balance) => {
             const power = balance.get("Power");
@@ -46,12 +49,16 @@ export = new Item(script.Name)
                 upgrader.setAdd(third);
                 mode = 3;
             }
+            if (mode !== lastMode) {
+                lastMode = mode;
+                modePacket.set(mode);
+            }
         });
         eat(connection, "Disconnect");
     })
-    .onLoad((model, item) => {
+    .onClientLoad((model) => {
         const rings = [model.WaitForChild(1), model.WaitForChild(2), model.WaitForChild(3)] as BasePart[];
-        item.repeat(model, () => {
+        modePacket.observe((mode) => {
             for (let i = 0; i < 3; i++) {
                 const ring = rings[i];
                 ring.Transparency = mode > i ? 0 : 0.7;

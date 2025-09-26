@@ -93,10 +93,17 @@ export default function BalanceOption({
         return details.color.Lerp(Color3.fromRGB(255, 255, 255), 0.8).ToHex();
     }, []);
 
-    const imageLabel = imageRef.current;
-    if (imageLabel !== undefined) {
-        balanceOptionImagePerCurrency.set(currency, imageLabel);
-    }
+    useEffect(() => {
+        const imageLabel = imageRef.current;
+        if (imageLabel !== undefined) {
+            balanceOptionImagePerCurrency.set(currency, imageLabel);
+        }
+        return () => {
+            if (balanceOptionImagePerCurrency.get(currency) === imageLabel) {
+                balanceOptionImagePerCurrency.delete(currency);
+            }
+        };
+    }, []);
 
     // Calculate softcap information
     const { capped, softcapText, softcapStart } = useMemo(() => {
