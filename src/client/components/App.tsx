@@ -1,34 +1,6 @@
 import React, { Fragment, useEffect } from "@rbxts/react";
 import { createRoot, Root } from "@rbxts/react-roblox";
-import { ContentProvider } from "@rbxts/services";
-import { LOCAL_PLAYER } from "client/constants";
-import {
-    BACKPACK_GUI,
-    BALANCE_GUI,
-    BUILD_GUI,
-    CHALLENGE_GUI,
-    CHALLENGE_HUD_GUI,
-    CHALLENGECOMPLETION_GUI,
-    CHESTLOOT_GUI,
-    CLICK_SPARKS_GUI,
-    CURRENCY_GAIN_GUI,
-    DIALOGUE_GUI,
-    INVENTORY_GUI,
-    LEVELUP_GUI,
-    LOGS_GUI,
-    MAIN_LAYOUT_GUI,
-    PRINTER_GUI,
-    PURCHASE_GUI,
-    QUESTCOMPLETION_GUI,
-    QUESTS_GUI,
-    SETTINGS_GUI,
-    SHOP_GUI,
-    START_GUI,
-    STATS_GUI,
-    TOOLTIPS_GUI,
-    UPGRADEBOARD_GUI,
-    WORLD_GUI,
-} from "client/controllers/core/Guis";
+import { ContentProvider, RunService, Workspace } from "@rbxts/services";
 import BackpackWindow from "client/components/backpack/BackpackWindow";
 import BalanceWindow from "client/components/balance/BalanceWindow";
 import { CurrencyGainManager } from "client/components/balance/CurrencyGain";
@@ -64,6 +36,35 @@ import StatsWindow from "client/components/stats/StatsWindow";
 import TooltipWindow from "client/components/tooltip/TooltipWindow";
 import DocumentManager from "client/components/window/DocumentManager";
 import WorldRenderer from "client/components/world/WorldRenderer";
+import { LOCAL_PLAYER } from "client/constants";
+import {
+    BACKPACK_GUI,
+    BALANCE_GUI,
+    BUILD_GUI,
+    CHALLENGE_GUI,
+    CHALLENGE_HUD_GUI,
+    CHALLENGECOMPLETION_GUI,
+    CHESTLOOT_GUI,
+    CLICK_SPARKS_GUI,
+    CURRENCY_GAIN_GUI,
+    DIALOGUE_GUI,
+    INVENTORY_GUI,
+    LEVELUP_GUI,
+    LOGS_GUI,
+    MAIN_LAYOUT_GUI,
+    PRINTER_GUI,
+    PURCHASE_GUI,
+    QUESTCOMPLETION_GUI,
+    QUESTS_GUI,
+    SETTINGS_GUI,
+    SHOP_GUI,
+    START_GUI,
+    STATS_GUI,
+    TOOLTIPS_GUI,
+    UPGRADEBOARD_GUI,
+    WORLD_GUI,
+} from "client/controllers/core/Guis";
+import useManualItemReplication from "client/hooks/useManualItemReplication";
 import { setVisibilityMain } from "client/hooks/useVisibility";
 import MusicManager from "client/MusicManager";
 import { assets, getAsset } from "shared/asset/AssetMap";
@@ -175,6 +176,7 @@ export default function App({ viewportsEnabled }: { viewportsEnabled: boolean })
     }, []);
 
     useEffect(() => {
+        // Special hook to load build processing directly in this thread in edit mode
         if (!IS_EDIT) return;
 
         const [success, processing] = import("client/components/build/loadBuildProcessing").await();
@@ -183,6 +185,8 @@ export default function App({ viewportsEnabled }: { viewportsEnabled: boolean })
         const instance = processing.default();
         return () => instance.destroy();
     }, []);
+
+    useManualItemReplication();
 
     return (
         <Fragment>

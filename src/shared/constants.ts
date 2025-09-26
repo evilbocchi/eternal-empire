@@ -1,5 +1,5 @@
 import { Players, TextChatService, Workspace } from "@rbxts/services";
-import type ItemModelParityController from "client/controllers/world/ItemModelParityController";
+import type useManualItemReplication from "client/hooks/useManualItemReplication";
 import { Workspace_Waypoints } from "services";
 import eat from "shared/hamster/eat";
 
@@ -51,7 +51,7 @@ export const CAMERA = Workspace.WaitForChild("Camera") as Camera;
  * The folder where all placed items are stored.
  *
  * Note that the contents of this folder does **not** replicate to clients automatically.
- * See how placed items are manually replicated in {@link ItemModelParityController}.
+ * See how placed items are manually replicated in {@link useManualItemReplication}.
  */
 export const PLACED_ITEMS_FOLDER = (() => {
     const key = "PlacedItems";

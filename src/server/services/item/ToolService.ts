@@ -85,7 +85,7 @@ export class ToolService implements OnInit, OnPlayerAdded, OnPlayerAdded {
             });
             this.refreshTools(player);
         };
-        eat(player.CharacterAdded.Connect(onCharacterAdded));
+        eat(player.CharacterAdded.Connect(onCharacterAdded), "Disconnect");
         if (player.Character !== undefined) {
             onCharacterAdded(player.Character);
         }
@@ -103,6 +103,6 @@ export class ToolService implements OnInit, OnPlayerAdded, OnPlayerAdded {
                 }
             }
         });
-        eat(connection);
+        eat(connection, "Disconnect");
     }
 }

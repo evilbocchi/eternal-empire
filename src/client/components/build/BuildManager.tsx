@@ -8,8 +8,8 @@
 import { weldModel } from "@antivivi/vrldk";
 import { Debris, HttpService, ReplicatedStorage, TweenService, UserInputService, Workspace } from "@rbxts/services";
 import { LOCAL_PLAYER, MOUSE, NONCOLLISION_COLOR } from "client/constants";
-import { ShopManager } from "client/components/item/shop/ShopGui";
-import DocumentManager from "client/components/window/DocumentManager";
+import { ShopManager } from "client/ui/components/item/shop/ShopGui";
+import DocumentManager from "client/ui/components/window/DocumentManager";
 import { getSound, playSound } from "shared/asset/GameAssets";
 import { PLACED_ITEMS_FOLDER } from "shared/constants";
 import Item from "shared/item/Item";

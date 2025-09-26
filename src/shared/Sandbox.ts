@@ -46,22 +46,10 @@ export default class Sandbox {
         if (!this.getEnabled()) {
             return false;
         }
-
-        const wanderers = new Instance("Folder");
-        wanderers.Name = "Wanderers";
-        wanderers.Parent = Workspace;
-
-        const waypoints = new Instance("Folder");
-        waypoints.Name = "Waypoints";
-        waypoints.Parent = Workspace;
-
-        const startCamera = new Instance("Part");
-        startCamera.Name = "StartCamera";
-        startCamera.Anchored = true;
-        startCamera.Parent = Workspace;
-
-        Workspace.WaitForChild("ItemModels").Parent = ReplicatedStorage;
-
+        const workspaceModels = Workspace.FindFirstChild("ItemModels");
+        if (workspaceModels !== undefined) {
+            workspaceModels.Parent = ReplicatedStorage;
+        }
         return true;
     }
 

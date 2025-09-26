@@ -13,7 +13,7 @@ import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Formula from "shared/currency/Formula";
 import { RESET_LAYERS } from "shared/currency/mechanics/ResetLayer";
 import eat from "shared/hamster/eat";
-import { ITEM_MODELS } from "shared/item/ItemModels";
+import { ITEM_MODELS, preprocessModel } from "shared/item/ItemModels";
 import Area, { AREAS } from "shared/world/Area";
 
 declare global {
@@ -239,6 +239,11 @@ export default class Item {
             return;
         }
         const model = baseModel.Clone();
+
+        if (IS_EDIT) {
+            // We didn't preprocess models in edit mode before, so we need to do it now.
+            preprocessModel(model);
+        }
 
         // Position and rotate the model based on placed item data
         model.PivotTo(

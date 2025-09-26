@@ -1,6 +1,6 @@
 import { DataType } from "@rbxts/flamework-binary-serializer";
 import { request, RequestPacket, signal, SignalPacket } from "@rbxts/fletchette";
-import { RunService } from "@rbxts/services";
+import { IS_EDIT, IS_SERVER } from "shared/Context";
 import eat from "shared/hamster/eat";
 import Droplet from "shared/item/Droplet";
 import type Item from "shared/item/Item";
@@ -92,7 +92,11 @@ export namespace VirtualAttribute {
         const [reference, instanceUid] = trackInstance(model, instance);
         const initial = packet.toServer(model.Name, instanceUid, attribute);
         if (initial !== undefined) callback(initial);
-        reference.set(attribute, callback);
+        if (IS_EDIT) {
+            reference.set("client_" + attribute, callback); // Prevent clashing with server callbacks
+        } else {
+            reference.set(attribute, callback);
+        }
     }
 
     /** Sends a number update to all clients */
@@ -110,7 +114,7 @@ export namespace VirtualAttribute {
         observe(model, instance, attribute, callback, requestNumberPacket);
     }
 
-    if (RunService.IsServer()) {
+    if (IS_SERVER || IS_EDIT) {
         const handleRequest = <T>(_: Player, placementId: string, uid: DataType.u16, attribute: string) => {
             const instance = trackedModels.get(placementId);
             if (instance === undefined) return undefined;
@@ -119,7 +123,9 @@ export namespace VirtualAttribute {
         };
 
         requestNumberPacket.fromClient(handleRequest);
-    } else {
+    }
+
+    if (!IS_SERVER || IS_EDIT) {
         const handleSend = <T>(placementId: string, uid: DataType.u16, attribute: string, value: T) => {
             const modelReference = trackedModels.get(placementId);
             if (modelReference === undefined) return;
@@ -128,7 +134,7 @@ export namespace VirtualAttribute {
             const reference = trackedInstances.get(instance);
             if (reference === undefined) return;
 
-            const callback = reference?.get(attribute);
+            const callback = reference?.get(IS_EDIT ? "client_" + attribute : attribute);
             if (callback !== undefined) {
                 (callback as (value: T) => void)(value);
             }
@@ -186,7 +192,7 @@ export namespace VirtualCollision {
         });
     }
 
-    if (RunService.IsServer()) {
+    if (IS_SERVER || IS_EDIT) {
         const connection = dropletTouchedPacket.fromClient((_, placementId, partUid, spawnId) => {
             const modelReference = trackedModels.get(placementId);
             if (modelReference === undefined) return;
