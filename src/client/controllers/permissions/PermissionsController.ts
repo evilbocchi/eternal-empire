@@ -1,5 +1,5 @@
 import { Controller, OnInit } from "@flamework/core";
-import Shaker from "client/ui/components/effect/Shaker";
+import Shaker from "client/components/effect/Shaker";
 import { playSound } from "shared/asset/GameAssets";
 import Items from "shared/items/Items";
 import Packets from "shared/Packets";

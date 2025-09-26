@@ -2,7 +2,7 @@ import { Controller, OnStart } from "@flamework/core";
 import React from "@rbxts/react";
 import { createRoot } from "@rbxts/react-roblox";
 import { ReplicatedStorage } from "@rbxts/services";
-import App from "client/ui/components/App";
+import App from "client/components/App";
 import eat from "shared/hamster/eat";
 
 @Controller()

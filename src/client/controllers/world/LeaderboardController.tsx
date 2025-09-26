@@ -3,7 +3,7 @@ import { observeTag } from "@antivivi/vrldk";
 import { Controller, OnStart } from "@flamework/core";
 import React from "@rbxts/react";
 import { createRoot, Root } from "@rbxts/react-roblox";
-import LiveLeaderboard from "client/ui/components/leaderboard/LiveLeaderboard";
+import LiveLeaderboard from "client/components/leaderboard/LiveLeaderboard";
 import { playSound } from "shared/asset/GameAssets";
 import { DONATION_PRODUCTS } from "shared/devproducts/DonationProducts";
 import Packets from "shared/Packets";

@@ -1,7 +1,7 @@
 //!optimize 2
 //!native
 
-import loadBuildProcessing from "client/ui/components/build/loadBuildProcessing";
+import loadBuildProcessing from "client/components/build/loadBuildProcessing";
 
 declare global {
     interface Assets {

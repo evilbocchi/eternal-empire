@@ -1,0 +1,154 @@
+import React, { Fragment, useEffect, useMemo, useState } from "@rbxts/react";
+import UpgradeActionsPanel from "client/components/item/upgrade/UpgradeActionsPanel";
+import UpgradeOptionsPanel from "client/components/item/upgrade/UpgradeOptionsPanel";
+
+import { playSound } from "shared/asset/GameAssets";
+import NamedUpgrade from "shared/namedupgrade/NamedUpgrade";
+import Packets from "shared/Packets";
+
+export default function UpgradeBoardGui({
+    upgrades,
+    model,
+    actionsContainer,
+    optionsContainer,
+}: {
+    upgrades: NamedUpgrade[];
+    model: Model;
+    actionsContainer: Instance;
+    optionsContainer: Instance;
+}) {
+    const [selectedUpgradeId, setSelectedUpgradeId] = useState<string | undefined>(undefined);
+    const [upgradeAmounts, setUpgradeAmounts] = useState<Map<string, number>>(new Map());
+
+    // Find selected upgrade object
+    const selectedUpgrade = useMemo(() => {
+        return selectedUpgradeId ? upgrades.find((u) => u.id === selectedUpgradeId) : undefined;
+    }, [selectedUpgradeId, upgrades]);
+
+    // Get upgrade amount for selected upgrade
+    const upgradeAmount = selectedUpgradeId ? (upgradeAmounts.get(selectedUpgradeId) ?? 0) : 0;
+
+    // Check if upgrade is maxed
+    const isMaxed = selectedUpgrade?.cap !== undefined && upgradeAmount >= selectedUpgrade.cap;
+
+    // Calculate next amounts for different purchase options
+    const getNext = (amount: number, step?: number) =>
+        step === undefined ? amount + 1 : amount + step - (amount % step);
+
+    // Calculate costs for purchase options
+    const costs = useMemo(() => {
+        if (!selectedUpgrade) {
+            return {
+                buy1: "Select an upgrade!",
+                buyNext: "Select an upgrade!",
+                buyMax: "Select an upgrade!",
+            };
+        }
+
+        if (isMaxed) {
+            return {
+                buy1: "MAXED",
+                buyNext: "MAXED",
+                buyMax: "MAXED",
+            };
+        }
+
+        const buy1Cost = selectedUpgrade.getPrice(upgradeAmount + 1)?.toString() ?? "Error";
+        const nextAmount = getNext(upgradeAmount, selectedUpgrade.step);
+        const buyNextCost = selectedUpgrade.getPrice(upgradeAmount + 1, nextAmount)?.toString() ?? "Error";
+        const buyMaxCost = selectedUpgrade.getPrice(upgradeAmount + 1, selectedUpgrade.cap)?.toString() ?? "Error";
+
+        return {
+            buy1: buy1Cost,
+            buyNext: `${buyNextCost} (to ${nextAmount})`,
+            buyMax: buyMaxCost,
+        };
+    }, [selectedUpgrade, upgradeAmount, isMaxed]);
+
+    // Sound feedback function
+    const playPurchaseSound = (success: boolean) => {
+        const sound = success ? playSound("UpgradeBought.mp3") : playSound("Error.mp3");
+    };
+
+    // Purchase handlers
+    const handleBuy1 = () => {
+        if (selectedUpgrade) {
+            const success = Packets.buyUpgrade.toServer(selectedUpgrade.id, upgradeAmount + 1);
+            playPurchaseSound(success);
+        }
+    };
+
+    const handleBuyNext = () => {
+        if (selectedUpgrade) {
+            const nextAmount = getNext(upgradeAmount, selectedUpgrade.step);
+            const success = Packets.buyUpgrade.toServer(selectedUpgrade.id, nextAmount);
+            playPurchaseSound(success);
+        }
+    };
+
+    const handleBuyMax = () => {
+        if (selectedUpgrade?.cap !== undefined) {
+            const success = Packets.buyUpgrade.toServer(selectedUpgrade.id, selectedUpgrade.cap);
+            playPurchaseSound(success);
+        }
+    };
+
+    // Observe upgrade amounts from packets
+    useEffect(() => {
+        const connection = Packets.upgrades.observe((value) => {
+            setUpgradeAmounts(value);
+        });
+
+        return () => connection.disconnect();
+    }, []);
+
+    return (
+        <Fragment>
+            {/* Options Panel Surface GUI */}
+            <surfacegui
+                Adornee={optionsContainer as BasePart}
+                ClipsDescendants={true}
+                LightInfluence={0.5}
+                MaxDistance={200}
+                SizingMode={Enum.SurfaceGuiSizingMode.PixelsPerStud}
+                ZIndexBehavior={Enum.ZIndexBehavior.Sibling}
+                ResetOnSpawn={false}
+                Face={Enum.NormalId.Front}
+                PixelsPerStud={50}
+            >
+                <UpgradeOptionsPanel
+                    upgrades={upgrades}
+                    upgradeAmounts={upgradeAmounts}
+                    selectedUpgradeId={selectedUpgradeId}
+                    onSelectUpgrade={(upgradeId) => {
+                        setSelectedUpgradeId(upgradeId);
+                        playSound("MenuClick.mp3");
+                    }}
+                />
+            </surfacegui>
+
+            {/* Actions Panel Surface GUI */}
+            <surfacegui
+                Adornee={actionsContainer as BasePart}
+                ClipsDescendants={false}
+                LightInfluence={0.5}
+                MaxDistance={200}
+                SizingMode={Enum.SurfaceGuiSizingMode.PixelsPerStud}
+                ZIndexBehavior={Enum.ZIndexBehavior.Sibling}
+                ResetOnSpawn={false}
+                Face={Enum.NormalId.Front}
+                PixelsPerStud={50}
+            >
+                <UpgradeActionsPanel
+                    selectedUpgrade={selectedUpgrade}
+                    upgradeAmount={upgradeAmount}
+                    costs={costs}
+                    isMaxed={isMaxed}
+                    onBuy1={handleBuy1}
+                    onBuyNext={handleBuyNext}
+                    onBuyMax={handleBuyMax}
+                />
+            </surfacegui>
+        </Fragment>
+    );
+}

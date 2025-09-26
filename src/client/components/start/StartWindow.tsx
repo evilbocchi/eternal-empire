@@ -1,0 +1,388 @@
+import React, { Fragment, useCallback, useEffect, useRef, useState } from "@rbxts/react";
+import { RunService, TweenService, Workspace } from "@rbxts/services";
+import { LOCAL_PLAYER } from "client/constants";
+import SingleDocumentManager from "client/components/sidebar/SingleDocumentManager";
+import AboutWindow from "client/components/start/AboutWindow";
+import EmpiresWindow from "client/components/start/EmpiresWindow";
+import MenuOption from "client/components/start/MenuOption";
+import performIntroSequence from "client/components/start/performIntroSequence";
+import DocumentManager, { useDocument } from "client/components/window/DocumentManager";
+import MusicManager from "client/MusicManager";
+import { getAsset } from "shared/asset/AssetMap";
+import { playSound } from "shared/asset/GameAssets";
+import StartCamera from "shared/world/nodes/StartCamera";
+
+const SCENES = StartCamera.INSTANCES;
+
+/**
+ * Main start window component that handles the title screen, empire selection, and about page
+ */
+export default function StartWindow({ fastTransitions = false }: { fastTransitions?: boolean }) {
+    const sideBackgroundRef = useRef<ImageLabel>();
+    const logoRef = useRef<ImageLabel>();
+    const mainMenuRef = useRef<Frame>();
+    const { visible, setVisible } = useDocument({ id: "Start" });
+    const [currentView, setCurrentView] = useState<"main" | "empires" | "about" | "none">("main");
+    const [isAnimating, setIsAnimating] = useState(false);
+    const [hasEnteredScreen, setHasEnteredScreen] = useState(false);
+    const firstRenderTime = useRef<number>(fastTransitions ? 0 : tick());
+    const [currentSceneIndex, setCurrentSceneIndex] = useState(0);
+    const intervalRef = useRef<RBXScriptConnection>();
+
+    // Helper function to determine if we should use fast animations
+    const shouldUseFastAnimations = useCallback(() => {
+        const timeSinceFirstRender = tick() - firstRenderTime.current;
+        return timeSinceFirstRender > 5; // Fast mode after 5 seconds
+    }, []);
+
+    // Animation entrance effect when component becomes visible
+    useEffect(() => {
+        if (visible && !hasEnteredScreen) {
+            setHasEnteredScreen(true);
+
+            // Check if enough time has passed since first render (5+ seconds = fast mode)
+            const timeSinceFirstRender = tick() - firstRenderTime.current;
+            const fast = timeSinceFirstRender > 5;
+
+            // Set initial positions for entrance animation
+            if (sideBackgroundRef.current) {
+                sideBackgroundRef.current.Position = new UDim2(-0.5, 0, 0.5, 0);
+            }
+            if (logoRef.current) {
+                logoRef.current.Position = new UDim2(-0.15, 0, 0.05, 0);
+                logoRef.current.Rotation = -80;
+            }
+
+            // Animate background entrance
+            const tweenInfo = new TweenInfo(1, Enum.EasingStyle.Circular, Enum.EasingDirection.Out);
+            if (sideBackgroundRef.current) {
+                TweenService.Create(sideBackgroundRef.current, tweenInfo, {
+                    Position: new UDim2(0, 0, 0.5, 0),
+                }).Play();
+            }
+
+            // Animate logo entrance with delay (reduced if fast)
+            const logoDelay = fast ? 0.2 : 0.8;
+            task.delay(logoDelay, () => {
+                if (logoRef.current) {
+                    TweenService.Create(logoRef.current, tweenInfo, {
+                        Position: new UDim2(0.15, 0, 0.05, 0),
+                        Rotation: 0,
+                    }).Play();
+                }
+            });
+        }
+    }, [visible, hasEnteredScreen]);
+
+    useEffect(() => {
+        let pulsed = false;
+        const connection = RunService.Heartbeat.Connect(() => {
+            if (MusicManager.START_MUSIC.TimePosition > 3.5 && !pulsed && logoRef.current) {
+                pulsed = true;
+                const createWave = () => {
+                    const wave = logoRef.current!.Clone();
+                    wave.ClearAllChildren();
+                    wave.Position = new UDim2(0.5, 0, 0.5, 0);
+                    wave.AnchorPoint = new Vector2(0.5, 0.5);
+                    wave.Size = new UDim2(1, 0, 1, 0);
+                    wave.Parent = logoRef.current;
+                    TweenService.Create(wave, new TweenInfo(0.5), {
+                        Size: new UDim2(1.15, 5, 1.15, 5),
+                        ImageTransparency: 1,
+                    }).Play();
+                };
+                createWave();
+            }
+        });
+        task.delay(30, () => connection?.Disconnect());
+
+        return () => connection.Disconnect();
+    }, []);
+
+    // Camera transition effect - cycles through StartCamera scenes every 10 seconds
+    useEffect(() => {
+        if (!visible) return;
+
+        const transitionToNextScene = () => {
+            const camera = Workspace.CurrentCamera;
+            if (!camera) return;
+
+            // Convert Set to array to access by index
+            const sceneArray = [...SCENES];
+            if (sceneArray.size() === 0) return;
+
+            // Get the next scene (cycle back to 0 if at end)
+            const nextIndex = (currentSceneIndex + 1) % sceneArray.size();
+            const nextScene = sceneArray[nextIndex];
+
+            // Set camera to scriptable mode and tween to the new position
+            camera.CameraType = Enum.CameraType.Scriptable;
+            TweenService.Create(camera, new TweenInfo(2, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
+                CFrame: nextScene.CFrame,
+            }).Play();
+
+            setCurrentSceneIndex(nextIndex);
+        };
+
+        // Set initial camera position to first scene
+        const camera = Workspace.CurrentCamera;
+        if (camera && SCENES.size() > 0) {
+            const sceneArray = [...SCENES];
+            camera.CameraType = Enum.CameraType.Scriptable;
+            camera.CFrame = sceneArray[0].CFrame;
+        }
+
+        // Start the interval for transitions
+        let lastTransitionTime = tick();
+        const connection = RunService.Heartbeat.Connect(() => {
+            const currentTime = tick();
+            if (currentTime - lastTransitionTime >= 10) {
+                transitionToNextScene();
+                lastTransitionTime = currentTime;
+            }
+        });
+
+        intervalRef.current = connection;
+
+        return () => {
+            connection.Disconnect();
+            intervalRef.current = undefined;
+            if (camera) {
+                camera.CameraType = Enum.CameraType.Custom;
+            }
+        };
+    }, [visible, currentSceneIndex]);
+
+    // Handle smooth transitions between views
+    const transitionToView = useCallback(
+        (view: "main" | "empires" | "about" | "none") => {
+            if (isAnimating) return;
+
+            setIsAnimating(true);
+
+            // If transitioning away from main, hide title screen with animation
+            if (currentView === "main" && view !== "main") {
+                const tweenInfo = new TweenInfo(1, Enum.EasingStyle.Circular, Enum.EasingDirection.Out);
+
+                // Only hide the background if NOT going to empires view
+                if (view !== "empires" && sideBackgroundRef.current) {
+                    TweenService.Create(sideBackgroundRef.current, tweenInfo, {
+                        Position: new UDim2(-0.5, 0, 0.5, 0),
+                    }).Play();
+                }
+
+                if (logoRef.current) {
+                    TweenService.Create(logoRef.current, tweenInfo, {
+                        Position: new UDim2(-0.15, 0, 0.05, 0),
+                        Rotation: -80,
+                    }).Play();
+                }
+            }
+
+            // If transitioning back to main, show title screen with animation
+            if (view === "main" && currentView !== "main") {
+                task.delay(0.2, () => {
+                    const tweenInfo = new TweenInfo(1, Enum.EasingStyle.Circular, Enum.EasingDirection.Out);
+
+                    // Only show the background if coming from a non-empires view (or if it was hidden)
+                    if (currentView !== "empires" && sideBackgroundRef.current) {
+                        TweenService.Create(sideBackgroundRef.current, tweenInfo, {
+                            Position: new UDim2(0, 0, 0.5, 0),
+                        }).Play();
+                    }
+
+                    if (logoRef.current) {
+                        TweenService.Create(logoRef.current, tweenInfo, {
+                            Position: new UDim2(0.15, 0, 0.05, 0),
+                            Rotation: 0,
+                        }).Play();
+                    }
+                });
+
+                // Only reset the entrance state if NOT coming from empires (to prevent menu re-animation)
+                if (currentView !== "empires") {
+                    setHasEnteredScreen(false);
+                }
+            }
+
+            // Change view state
+            setCurrentView(view);
+
+            task.delay(0.5, () => setIsAnimating(false));
+        },
+        [isAnimating, currentView],
+    );
+
+    useEffect(() => {
+        if (!visible) return;
+
+        const connection = DocumentManager.visibilityChanged.connect((id, isVisible) => {
+            if (id !== "Settings") return;
+            if (isVisible) {
+                transitionToView("none");
+            } else {
+                transitionToView("main");
+            }
+        });
+
+        return () => connection.Disconnect();
+    }, [visible, transitionToView]);
+
+    // Cleanup camera when component becomes invisible
+    useEffect(() => {
+        if (!visible) {
+            // Clean up the camera transition interval
+            intervalRef.current?.Disconnect();
+            intervalRef.current = undefined;
+
+            // Reset camera to custom mode when leaving start window
+            const camera = Workspace.CurrentCamera;
+            if (camera) {
+                camera.CameraType = Enum.CameraType.Custom;
+            }
+        }
+    }, [visible]);
+
+    const handleBackToMain = useCallback(() => {
+        transitionToView("main");
+    }, [transitionToView]);
+
+    if (!visible) {
+        return <Fragment />;
+    }
+
+    return (
+        <Fragment>
+            {/* Background Elements */}
+            <imagelabel
+                ref={sideBackgroundRef}
+                AnchorPoint={new Vector2(0.5, 0.5)}
+                BackgroundColor3={Color3.fromRGB(255, 255, 255)}
+                BackgroundTransparency={0}
+                BorderSizePixel={0}
+                Image={getAsset("assets/start/SideBackground.png")}
+                ImageTransparency={0.7}
+                Position={new UDim2(0, 0, 0.5, 0)}
+                Rotation={5}
+                ScaleType={Enum.ScaleType.Tile}
+                Size={new UDim2(0.3, 0, 2, 0)}
+                TileSize={new UDim2(0, 800, 0, 800)}
+                ZIndex={-1}
+            >
+                <uigradient
+                    Color={
+                        new ColorSequence([
+                            new ColorSequenceKeypoint(0, Color3.fromRGB(248, 54, 0)),
+                            new ColorSequenceKeypoint(1, Color3.fromRGB(254, 140, 0)),
+                        ])
+                    }
+                    Rotation={-97}
+                />
+                <imagelabel
+                    BackgroundTransparency={1}
+                    BorderSizePixel={0}
+                    Image={getAsset("assets/GridHighContrast.png")}
+                    ImageColor3={Color3.fromRGB(0, 0, 0)}
+                    ImageTransparency={0.8}
+                    Interactable={false}
+                    Rotation={180}
+                    ScaleType={Enum.ScaleType.Tile}
+                    Size={new UDim2(1, 2, 1, 2)}
+                    TileSize={new UDim2(0, 200, 0, 200)}
+                >
+                    <uistroke Color={Color3.fromRGB(255, 255, 255)} Thickness={3} />
+                </imagelabel>
+            </imagelabel>
+
+            {/* Logo */}
+            <imagelabel
+                ref={logoRef}
+                AnchorPoint={new Vector2(0.5, 0)}
+                BackgroundTransparency={1}
+                Image={getAsset("assets/LogoSmall.png")}
+                Position={new UDim2(0.15, 0, 0.05, 0)}
+                ScaleType={Enum.ScaleType.Fit}
+                Size={new UDim2(0.3, 0, 0.25, 0)}
+                TileSize={new UDim2(0, 200, 0, 200)}
+                ZIndex={1}
+            />
+
+            {/* Main Menu View */}
+            {currentView === "main" && (
+                <frame
+                    ref={mainMenuRef}
+                    BackgroundTransparency={1}
+                    Position={new UDim2(0, 0, 0.4, 0)}
+                    Size={new UDim2(1, 0, 0.55, 0)}
+                >
+                    <uilistlayout
+                        HorizontalAlignment={Enum.HorizontalAlignment.Center}
+                        SortOrder={Enum.SortOrder.LayoutOrder}
+                        VerticalAlignment={Enum.VerticalAlignment.Center}
+                        VerticalFlex={Enum.UIFlexAlignment.Fill}
+                    />
+
+                    <MenuOption
+                        label="Play"
+                        gradientColors={[Color3.fromRGB(85, 255, 127), Color3.fromRGB(5, 170, 60)]}
+                        onClick={() => {
+                            playSound("EmphasisMenuSelect.mp3", undefined, (sound) => (sound.Volume = 0.4));
+                            transitionToView("empires");
+                        }}
+                        height={70}
+                        animationDelay={0}
+                        fast={shouldUseFastAnimations()}
+                    />
+
+                    {/** Spacer */}
+                    <frame Size={new UDim2(1, 0, 0, 35)} BackgroundTransparency={1}>
+                        <uiflexitem FlexMode={Enum.UIFlexMode.Shrink} />
+                    </frame>
+
+                    <MenuOption
+                        label="Settings"
+                        gradientColors={[Color3.fromRGB(172, 172, 172), Color3.fromRGB(102, 102, 102)]}
+                        onClick={() => {
+                            playSound("EmphasisMenuSelect.mp3", undefined, (sound) => (sound.Volume = 0.35));
+                            SingleDocumentManager.open("Settings");
+                        }}
+                        height={60}
+                        animationDelay={0.2}
+                        fast={shouldUseFastAnimations()}
+                    />
+
+                    <MenuOption
+                        label="About"
+                        gradientColors={[Color3.fromRGB(34, 189, 255), Color3.fromRGB(8, 127, 255)]}
+                        onClick={() => {
+                            playSound("EmphasisMenuSelect.mp3", undefined, (sound) => (sound.Volume = 0.35));
+                            transitionToView("about");
+                        }}
+                        height={60}
+                        animationDelay={0.4}
+                        fast={shouldUseFastAnimations()}
+                    />
+                </frame>
+            )}
+
+            {/* Empires Selection View */}
+            {currentView === "empires" && (
+                <EmpiresWindow
+                    onClose={handleBackToMain}
+                    exitStart={() => {
+                        setCurrentView("none");
+                        setVisible(false);
+                        const camera = Workspace.CurrentCamera;
+                        if (camera) {
+                            camera.CameraType = Enum.CameraType.Custom;
+                        }
+                        performIntroSequence();
+                    }}
+                />
+            )}
+
+            {/* About View */}
+            {currentView === "about" && <AboutWindow onClose={handleBackToMain} />}
+        </Fragment>
+    );
+}

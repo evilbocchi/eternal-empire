@@ -1,6 +1,6 @@
 import { Controller, OnStart } from "@flamework/core";
 import { ReplicatedStorage } from "@rbxts/services";
-import Shaker from "client/ui/components/effect/Shaker";
+import Shaker from "client/components/effect/Shaker";
 import { playSound } from "shared/asset/GameAssets";
 import eat from "shared/hamster/eat";
 import Packets from "shared/Packets";
