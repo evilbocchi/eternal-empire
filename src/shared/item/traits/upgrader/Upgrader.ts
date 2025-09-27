@@ -99,7 +99,9 @@ export default class Upgrader extends Operative {
 
             const laserId = upgrader.isStacks === false ? item.id : placementId + "_" + laserInfo.LaserId;
             if (upgrades === undefined) upgrades = new Map();
-            else if (upgrades.has(laserId) || modelInfo.Maintained === false || laserInfo.Enabled === false) return;
+            else if (upgrades.has(laserId)) return;
+
+            if (modelInfo.Maintained === false || laserInfo.Enabled === false) return;
 
             let [totalAdd, totalMul, totalPow] = [upgrader.add, upgrader.mul, upgrader.pow];
 
