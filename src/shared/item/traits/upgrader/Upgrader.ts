@@ -82,12 +82,19 @@ export default class Upgrader extends Operative {
      * @param laser The laser part being hooked.
      * @param upgradedEvent The event fired when the laser is upgraded.
      * @param deco Optional decoration function to modify the upgrade info.
+     * @param laserId Optional unique identifier for the laser. If not provided, it is generated based on the item and model names.
      */
-    static hookLaser(model: Model, upgrader: Upgrader, laser: BasePart, deco?: (upgrade: UpgradeInfo) => void) {
+    static hookLaser(
+        model: Model,
+        upgrader: Upgrader,
+        laser: BasePart,
+        deco?: (upgrade: UpgradeInfo) => void,
+        laserId?: string,
+    ) {
         const item = upgrader.item;
         const modelInfo = getAllInstanceInfo(model);
         const laserInfo = getAllInstanceInfo(laser);
-        const laserId = upgrader.isStacks === false ? item.id : model.Name + laserInfo.LaserId;
+        laserId ??= upgrader.isStacks === false ? item.id : model.Name + laserInfo.LaserId;
         VirtualCollision.onDropletTouched(model, laser, (droplet, instanceInfo) => {
             if (instanceInfo.Incinerated === true) return;
             if (upgrader.requirement !== undefined && !upgrader.requirement(instanceInfo)) return;

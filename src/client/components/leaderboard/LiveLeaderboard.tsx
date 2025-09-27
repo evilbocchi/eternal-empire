@@ -3,20 +3,15 @@
  */
 
 import React from "@rbxts/react";
-import Leaderboard from "client/components/leaderboard/Leaderboard";
+import Leaderboard, { LeaderboardEntry, LeaderboardType } from "client/components/leaderboard/Leaderboard";
 import { useLeaderboardData } from "client/components/leaderboard/useLeaderboardData";
 
-declare global {
-    export interface LeaderboardDataManager {
-        /** Get entries for a specific leaderboard type */
-        getLeaderboardEntries(leaderboardType: LeaderboardType): LeaderboardEntry[];
+export interface LeaderboardDataManager {
+    /** Get entries for a specific leaderboard type */
+    getLeaderboardEntries(leaderboardType: LeaderboardType): LeaderboardEntry[];
 
-        /** Subscribe to leaderboard updates */
-        onLeaderboardUpdate(
-            leaderboardType: LeaderboardType,
-            callback: (entries: LeaderboardEntry[]) => void,
-        ): () => void;
-    }
+    /** Subscribe to leaderboard updates */
+    onLeaderboardUpdate(leaderboardType: LeaderboardType, callback: (entries: LeaderboardEntry[]) => void): () => void;
 }
 
 interface LiveLeaderboardProps {

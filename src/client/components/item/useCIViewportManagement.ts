@@ -1,6 +1,10 @@
 import { RefObject, useEffect, useState } from "@rbxts/react";
+import {
+    ItemViewportManagement,
+    loadItemIntoViewport,
+    loadItemViewportManagement,
+} from "client/components/item/ItemViewport";
 import { PARALLEL } from "client/constants";
-import { loadItemIntoViewport, loadItemViewportManagement } from "client/components/item/ItemViewport";
 import { IS_EDIT } from "shared/Context";
 
 /**

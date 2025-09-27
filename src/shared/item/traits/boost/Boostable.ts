@@ -1,7 +1,6 @@
 import { getAllInstanceInfo } from "@antivivi/vrldk";
 import Item from "shared/item/Item";
 import ItemTrait from "shared/item/traits/ItemTrait";
-import { IOperative } from "shared/item/traits/Operative";
 
 declare global {
     interface ItemTraits {
@@ -24,6 +23,9 @@ declare global {
     }
 
     interface InstanceInfo {
+        /**
+         * The Boostable trait associated with the item of this model.
+         */
         Boostable?: Boostable;
         /**
          * A map of all boosts on this item.
@@ -33,12 +35,15 @@ declare global {
 
         /**
          * Functions that are called when a boost is added to this item.
+         * @param boost The boost that was added.
          */
-        BoostAdded?: Set<() => void>;
+        BoostAdded?: Set<(boost: ItemBoost) => void>;
+
         /**
          * Functions that are called when a boost is removed from this item.
+         * @param boost The boost that was removed.
          */
-        BoostRemoved?: Set<() => void>;
+        BoostRemoved?: Set<(boost: ItemBoost) => void>;
     }
 }
 
@@ -46,13 +51,17 @@ export default class Boostable extends ItemTrait {
     static addBoost(instanceInfo: InstanceInfo, boost: ItemBoost) {
         const boosts = instanceInfo.Boosts ?? new Map<string, ItemBoost>();
         boosts.set(boost.placementId, boost);
-        instanceInfo.BoostAdded?.forEach((callback) => callback());
+        instanceInfo.BoostAdded?.forEach((callback) => callback(boost));
         instanceInfo.Boosts = boosts;
     }
 
     static removeBoost(instanceInfo: InstanceInfo, placementId: string) {
-        instanceInfo.Boosts?.delete(placementId);
-        instanceInfo.BoostRemoved?.forEach((callback) => callback());
+        const boosts = instanceInfo.Boosts;
+        if (boosts === undefined) return;
+        const boost = boosts.get(placementId);
+        if (boost === undefined) return;
+        boosts.delete(placementId);
+        instanceInfo.BoostRemoved?.forEach((callback) => callback(boost));
     }
 
     static load(model: Model, boostable: Boostable) {

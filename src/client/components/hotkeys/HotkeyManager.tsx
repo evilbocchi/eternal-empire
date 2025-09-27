@@ -11,13 +11,11 @@ import { Environment } from "@rbxts/ui-labs";
 import eat from "shared/hamster/eat";
 import Packets from "shared/Packets";
 
-declare global {
-    type HotkeyLabel = (typeof HOTKEY_BINDINGS)[number]["label"];
-    interface HotkeyBinding {
-        keyCode: Enum.KeyCode;
-        label: HotkeyLabel;
-        priority: number;
-    }
+export type HotkeyLabel = (typeof HOTKEY_BINDINGS)[number]["label"];
+export interface HotkeyBinding {
+    keyCode: Enum.KeyCode;
+    label: HotkeyLabel;
+    priority: number;
 }
 
 export interface HotkeyOptions {

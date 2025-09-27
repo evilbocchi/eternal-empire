@@ -14,10 +14,8 @@ import { RunService } from "@rbxts/services";
 import { IS_EDIT } from "shared/Context";
 import { ITEM_MODELS } from "shared/item/ItemModels";
 
-declare global {
-    /** Manages the state and behavior of item viewports. */
-    type ItemViewportManagement = ReturnType<typeof loadItemViewportManagement>;
-}
+/** Manages the state and behavior of item viewports. */
+export type ItemViewportManagement = ReturnType<typeof loadItemViewportManagement>;
 
 /**
  * Represents a running viewport instance for an item slot.

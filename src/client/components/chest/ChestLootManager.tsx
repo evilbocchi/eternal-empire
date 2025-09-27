@@ -4,8 +4,9 @@
  */
 
 import React, { Fragment, useEffect, useState } from "@rbxts/react";
+import ChestLootNotification from "client/components/chest/ChestLootNotification";
+import { ItemViewportManagement } from "client/components/item/ItemViewport";
 import Packets from "shared/Packets";
-import ChestLootNotification from "./ChestLootNotification";
 
 /**
  * Manager component that handles chest loot notifications

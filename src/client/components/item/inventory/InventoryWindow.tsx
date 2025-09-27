@@ -18,13 +18,14 @@ import {
     updateInventorySlot,
     type InventorySlotHandle,
 } from "client/components/item/inventory/InventorySlot";
+import { ItemViewportManagement } from "client/components/item/ItemViewport";
 import useSingleDocument from "client/components/sidebar/useSingleDocumentWindow";
-import BasicWindow from "client/components/window/BasicWindow";
-import { RobotoMono } from "shared/asset/GameFonts";
-import useProperty from "client/hooks/useProperty";
 import { showErrorToast } from "client/components/toast/ToastService";
+import BasicWindow from "client/components/window/BasicWindow";
+import useProperty from "client/hooks/useProperty";
 import { getAsset } from "shared/asset/AssetMap";
 import { playSound } from "shared/asset/GameAssets";
+import { RobotoMono } from "shared/asset/GameFonts";
 import type Item from "shared/item/Item";
 import Items from "shared/items/Items";
 import Packets from "shared/Packets";

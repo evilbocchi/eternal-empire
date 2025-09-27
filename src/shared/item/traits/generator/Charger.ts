@@ -1,9 +1,11 @@
 import { getAllInstanceInfo } from "@antivivi/vrldk";
+import { packet } from "@rbxts/fletchette";
 import { Debris } from "@rbxts/services";
 import { PLACED_ITEMS_FOLDER } from "shared/constants";
 import Item from "shared/item/Item";
 import Generator from "shared/item/traits/generator/Generator";
 import Operative from "shared/item/traits/Operative";
+import perItemPacket from "shared/item/utils/perItemPacket";
 
 declare global {
     interface ItemTraits {
@@ -17,6 +19,10 @@ declare global {
         charger?: Charger;
     }
 }
+
+const generatorChangedPacket =
+    perItemPacket(packet<(placementId: string, generatorPlacementId: string, added: boolean) => void>());
+const currentGeneratorsPacket = perItemPacket(packet<(placementId: string) => string[]>());
 
 /**
  * A charger is an item that 'charges' generators, giving them a boost in {@link Generator.passiveGain}.
@@ -44,13 +50,7 @@ export default class Charger extends Operative {
         const chargerHitbox = model.PrimaryPart;
         if (chargerHitbox === undefined) return;
 
-        const connection = model.FindFirstChild("ConnectionVFX");
-        if (connection !== undefined) {
-            connection.Parent = script;
-        }
-
         const charging = new Set<Instance>();
-        const chargerMarker = model.FindFirstChild("Marker");
         const area = model.GetAttribute("Area");
         const checkAdd = (generatorModel: Instance) => {
             if (!generatorModel.IsA("Model")) return;
@@ -88,16 +88,63 @@ export default class Charger extends Operative {
                 ignoresLimitations: charger.ignoreLimit,
                 charger,
             });
+            generatorChangedPacket.toAllClients(model, generatorModel.Name, true);
+        };
+        const checkRemove = (generatorModel: Instance) => {
+            if (!generatorModel.IsA("Model")) return;
+            charging.delete(generatorModel);
+            const instanceInfo = getAllInstanceInfo(generatorModel);
+            Generator.removeBoost(instanceInfo, placementId);
+            generatorChangedPacket.toAllClients(model, generatorModel.Name, false);
+        };
+
+        currentGeneratorsPacket.fromClient(model, () => {
+            return [...charging].map((g) => g.Name);
+        });
+
+        for (const m of PLACED_ITEMS_FOLDER.GetChildren()) {
+            task.spawn(() => checkAdd(m));
+        }
+        const connection1 = PLACED_ITEMS_FOLDER.ChildAdded.Connect(checkAdd);
+        const connection2 = PLACED_ITEMS_FOLDER.ChildRemoved.Connect(checkRemove);
+        model.Destroying.Connect(() => {
+            connection1.Disconnect();
+            connection2.Disconnect();
+            // Explicitly notify clients to remove VFX for all charged generators
+            for (const m of charging) {
+                // Remove boost and send packet to clients
+                charging.delete(m);
+                const instanceInfo = getAllInstanceInfo(m);
+                Generator.removeBoost(instanceInfo, placementId);
+                generatorChangedPacket.toAllClients(model, m.Name, false);
+            }
+        });
+    }
+
+    static clientLoad(model: Model) {
+        const connection = model.FindFirstChild("ConnectionVFX");
+        if (connection !== undefined) {
+            connection.Parent = script;
+        }
+        const chargerMarker = model.FindFirstChild("Marker");
+        const connectionName = "ConnectionVFX" + model.Name;
+
+        const chargerHitbox = model.PrimaryPart;
+        if (chargerHitbox === undefined) return;
+
+        const checkAdd = (generatorModel: Instance) => {
+            if (!generatorModel.IsA("Model")) return;
+            const generatorHitbox = generatorModel.PrimaryPart;
+            if (generatorHitbox === undefined) return;
 
             if (connection !== undefined) {
-                const name = "ConnectionVFX" + model.Name;
-                if (generatorModel.FindFirstChild(name) === undefined) {
+                if (generatorModel.FindFirstChild(connectionName) === undefined) {
                     const c = connection.Clone();
                     const start = c.WaitForChild("Start") as Attachment;
                     const e = c.WaitForChild("End") as Attachment;
                     start.Parent = chargerMarker ?? chargerHitbox;
                     e.Parent = generatorModel.FindFirstChild("Marker") ?? generatorHitbox;
-                    c.Name = name;
+                    c.Name = connectionName;
                     c.Parent = generatorModel;
                     start.Position = new Vector3();
                     e.Position = new Vector3();
@@ -108,31 +155,33 @@ export default class Charger extends Operative {
                 }
             }
         };
-        const checkRemove = (generatorModel: Instance) => {
-            if (!generatorModel.IsA("Model")) return;
-            charging.delete(generatorModel);
-            const instanceInfo = getAllInstanceInfo(generatorModel);
-            Generator.removeBoost(instanceInfo, placementId);
 
-            const connectionVFX = generatorModel.FindFirstChild("ConnectionVFX" + placementId);
+        const checkRemove = (generatorModel: Instance) => {
+            const connectionVFX = generatorModel.FindFirstChild("ConnectionVFX" + connectionName);
             if (connectionVFX !== undefined) {
                 connectionVFX.ClearAllChildren();
                 Debris.AddItem(connectionVFX, 0.5);
             }
         };
 
-        for (const m of PLACED_ITEMS_FOLDER.GetChildren()) {
-            task.spawn(() => checkAdd(m));
-        }
-        const connection1 = PLACED_ITEMS_FOLDER.ChildAdded.Connect(checkAdd);
-        const connection2 = PLACED_ITEMS_FOLDER.ChildRemoved.Connect(checkRemove);
-        model.Destroying.Connect(() => {
-            connection1.Disconnect();
-            connection2.Disconnect();
-            for (const m of charging) {
-                checkRemove(m);
+        generatorChangedPacket.fromServer(model, (generatorPlacementId, added) => {
+            const generatorModel = PLACED_ITEMS_FOLDER.WaitForChild(generatorPlacementId, 1);
+            if (generatorModel === undefined) return;
+            if (added) {
+                checkAdd(generatorModel);
+            } else {
+                checkRemove(generatorModel);
             }
         });
+
+        const current = currentGeneratorsPacket.toServer(model);
+        if (current !== undefined) {
+            for (const generatorPlacementId of current) {
+                const generatorModel = PLACED_ITEMS_FOLDER.FindFirstChild(generatorPlacementId);
+                if (generatorModel === undefined) continue;
+                checkAdd(generatorModel);
+            }
+        }
     }
 
     /**
@@ -153,6 +202,7 @@ export default class Charger extends Operative {
     constructor(item: Item) {
         super(item);
         item.onLoad((model) => Charger.load(model, this));
+        item.onClientLoad((model) => Charger.clientLoad(model));
     }
 
     /**

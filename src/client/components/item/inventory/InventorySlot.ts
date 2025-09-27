@@ -2,11 +2,11 @@
  * @fileoverview Shared helpers for creating and managing inventory item slot UI elements.
  */
 
-import { PARALLEL } from "client/constants";
-import { loadItemIntoViewport } from "client/components/item/ItemViewport";
+import { ItemViewportManagement, loadItemIntoViewport } from "client/components/item/ItemViewport";
 import { TooltipManager } from "client/components/tooltip/TooltipWindow";
-import { RobotoSlab } from "shared/asset/GameFonts";
+import { PARALLEL } from "client/constants";
 import { getAsset } from "shared/asset/AssetMap";
+import { RobotoSlab } from "shared/asset/GameFonts";
 import type Item from "shared/item/Item";
 
 export type InventorySlotHandle = {

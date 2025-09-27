@@ -6,7 +6,7 @@ import { OnoeNum } from "@antivivi/serikanum";
 import React, { useState } from "@rbxts/react";
 import ReactRoblox from "@rbxts/react-roblox";
 import { CreateReactStory } from "@rbxts/ui-labs";
-import Leaderboard from "client/components/leaderboard/Leaderboard";
+import Leaderboard, { LeaderboardEntry, LeaderboardType } from "client/components/leaderboard/Leaderboard";
 
 // Mock data for different leaderboard types
 const mockEntries: { [key: string]: LeaderboardEntry[] } = {

@@ -1,56 +1,71 @@
-import { SignalPacket } from "@rbxts/fletchette";
+import { RequestPacket, SignalPacket } from "@rbxts/fletchette";
 import { IS_EDIT, IS_SERVER } from "shared/Context";
 import eat from "shared/hamster/eat";
+
+type SignalOrRequestPacket<T extends Callback = Callback> =
+    ReturnType<T> extends void ? SignalPacket<T> : RequestPacket<Parameters<T>, ReturnType<T>, T>;
+
+function isRequestPacket(packet: SignalOrRequestPacket): packet is RequestPacket<unknown[], unknown, Callback> {
+    return packet.className === "RequestPacket";
+}
 
 /**
  * Creates a packet that can send and receive messages tied to specific item placements.
  * This allows for item-specific communication between the server and clients.
- * @param signal The signal packet to wrap for per-item communication.
+ * @param packet The packet to wrap for per-item communication.
  * @returns The wrapped packet with per-item methods.
  */
-export default function perItemPacket<Args extends unknown[]>(
-    signal: SignalPacket<(placementId: string, ...args: Args) => void>,
+export default function perItemPacket<Args extends unknown[], Return>(
+    packet: SignalOrRequestPacket<(placementId: string, ...args: Args) => Return | undefined>,
 ) {
-    const clientHandlers = new Map<string, (...args: Args) => void>();
-    const serverHandlers = new Map<string, (player: Player, ...args: Args) => void>();
+    const isRequest = isRequestPacket(packet);
+    const clientHandlers = new Map<string, (...args: Args) => Return | undefined>();
+    const serverHandlers = new Map<string, (player: Player, ...args: Args) => Return | undefined>();
 
     if (IS_SERVER || IS_EDIT) {
-        const connection = signal.fromClient((player: Player, placementId: string, ...args: Args) => {
+        const connection = packet.fromClient((player: Player, placementId: string, ...args: Args) => {
             const handler = serverHandlers.get(placementId);
             if (handler !== undefined) {
-                handler(player, ...args);
+                return handler(player, ...args);
             }
         });
-        eat(connection, "Disconnect");
+        if (connection !== undefined) {
+            eat(connection, "Disconnect");
+        }
     }
 
     if (!IS_SERVER || IS_EDIT) {
-        const connection = signal.fromServer((placementId: string, ...args: Args) => {
+        const connection = packet.fromServer((placementId: string, ...args: Args) => {
             const handler = clientHandlers.get(placementId);
             if (handler !== undefined) {
-                handler(...args);
+                return handler(...args);
             }
         });
-        eat(connection, "Disconnect");
+        if (connection !== undefined) {
+            eat(connection, "Disconnect");
+        }
     }
 
     return {
         toAllClients: (model: Model, ...args: Args) => {
-            signal.toAllClients(model.Name, ...args);
+            if (isRequest) {
+                throw "Cannot use toAllClients with a RequestPacket. Use toClient instead.";
+            }
+            packet.toAllClients(model.Name, ...args);
         },
-        toClient: (model: Model, player: Player, ...args: Args) => {
-            signal.toClient(player, model.Name, ...args);
+        toClient: (model: Model, player: Player, ...args: Args): Return | undefined => {
+            return packet.toClient(player, model.Name, ...args) as Return | undefined;
         },
-        toServer: (model: Model, ...args: Args) => {
-            signal.toServer(model.Name, ...args);
+        toServer: (model: Model, ...args: Args): Return | undefined => {
+            return packet.toServer(model.Name, ...args) as Return | undefined;
         },
-        fromServer: (model: Model, handler: (...args: Args) => void) => {
+        fromServer: (model: Model, handler: (...args: Args) => Return) => {
             clientHandlers.set(model.Name, handler);
             model.Destroying.Once(() => {
                 clientHandlers.delete(model.Name);
             });
         },
-        fromClient: (model: Model, handler: (player: Player, ...args: Args) => void) => {
+        fromClient: (model: Model, handler: (player: Player, ...args: Args) => Return) => {
             serverHandlers.set(model.Name, handler);
             model.Destroying.Once(() => {
                 serverHandlers.delete(model.Name);

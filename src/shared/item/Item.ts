@@ -102,6 +102,11 @@ export default class Item {
     readonly pricePerIteration = new Map<number, CurrencyBundle>();
 
     /**
+     * The unique identifier for the item.
+     */
+    readonly id: string;
+
+    /**
      * Describes the item.
      */
     description: string;
@@ -218,9 +223,10 @@ export default class Item {
      * @returns The item instance.
      */
     constructor(
-        public readonly id: string,
+        id: string,
         public name = id,
     ) {
+        this.id = id;
         this.MODEL = ITEM_MODELS.get(id);
         this.description = id;
         Item.itemPerId.set(id, this);

@@ -4,24 +4,24 @@ import React, { Fragment, useEffect, useMemo, useRef, useState } from "@rbxts/re
 import { Debris, TweenService } from "@rbxts/services";
 import StringBuilder from "@rbxts/stringbuilder";
 import { Environment } from "@rbxts/ui-labs";
-import { PARALLEL } from "client/constants";
 import { useHotkey } from "client/components/hotkeys/HotkeyManager";
 import {
     createInventorySlot,
     updateInventorySlot,
     type InventorySlotHandle,
 } from "client/components/item/inventory/InventorySlot";
-import { loadItemIntoViewport } from "client/components/item/ItemViewport";
+import { ItemViewportManagement, loadItemIntoViewport } from "client/components/item/ItemViewport";
 import ItemWindow from "client/components/item/shop/ItemWindow";
 import { WrappingPriceOptions } from "client/components/item/shop/PriceOption";
 import useSingleDocument from "client/components/sidebar/useSingleDocumentWindow";
+import { showErrorToast } from "client/components/toast/ToastService";
 import getDifficultyDisplayColors from "client/components/tooltip/getDifficultyDisplayColors";
 import { METADATA_PER_ITEM, TooltipManager } from "client/components/tooltip/TooltipWindow";
-import { RobotoMono, RobotoSlab, RobotoSlabHeavy, RobotoSlabMedium } from "shared/asset/GameFonts";
+import { PARALLEL } from "client/constants";
 import useInterval from "client/hooks/useInterval";
 import { getAsset } from "shared/asset/AssetMap";
-import { showErrorToast } from "client/components/toast/ToastService";
 import { playSound } from "shared/asset/GameAssets";
+import { RobotoMono, RobotoSlab, RobotoSlabHeavy, RobotoSlabMedium } from "shared/asset/GameFonts";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import { CURRENCY_DETAILS } from "shared/currency/CurrencyDetails";
 import Item from "shared/item/Item";

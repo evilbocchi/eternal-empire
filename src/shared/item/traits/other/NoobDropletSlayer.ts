@@ -1,10 +1,9 @@
-import { getAllInstanceInfo, loadAnimation, setInstanceInfo } from "@antivivi/vrldk";
+import { getAllInstanceInfo, loadAnimation } from "@antivivi/vrldk";
 import { packet } from "@rbxts/fletchette";
-import { HttpService, TweenService } from "@rbxts/services";
+import { TweenService } from "@rbxts/services";
 import Item from "shared/item/Item";
 import Boostable from "shared/item/traits/boost/Boostable";
 import ItemTrait from "shared/item/traits/ItemTrait";
-import Upgrader from "shared/item/traits/upgrader/Upgrader";
 import perItemPacket from "shared/item/utils/perItemPacket";
 
 export default class NoobDropletSlayer extends ItemTrait {
@@ -12,51 +11,32 @@ export default class NoobDropletSlayer extends ItemTrait {
 
     static load(model: Model, slayer: NoobDropletSlayer) {
         const item = slayer.item;
-        const upgrader = item.trait(Upgrader);
         const instanceInfo = getAllInstanceInfo(model);
         const baseLaser = model.WaitForChild("Laser") as BasePart;
-        setInstanceInfo(baseLaser, "Enabled", false);
-        const lasers = [baseLaser];
-
-        const createLaser = () => {
-            const laser = baseLaser.Clone();
-            const laserInfo = getAllInstanceInfo(laser);
-            laser.Parent = model;
-            const laserId = HttpService.GenerateGUID(false);
-            laser.Name = laserId;
-            laserInfo.LaserId = laserId;
-            laserInfo.Enabled = false;
-            laser.Touched.Connect(() => {});
-            Upgrader.hookLaser(model, upgrader, laser);
-            return laser;
-        };
-
+        const laserInfo = getAllInstanceInfo(baseLaser);
+        laserInfo.Enabled = false;
         let i = 0;
+        let hasRadioNoob = false;
         const ref = item.repeat(
             model,
             () => {
                 this.activatePacket.toAllClients(model);
-                let cycled = lasers[++i];
-                if (cycled === undefined) {
-                    i = 0;
-                    cycled = lasers[i];
-                }
-                setInstanceInfo(cycled, "Enabled", true);
-                task.delay(0.5, () => setInstanceInfo(cycled, "Enabled", false));
+                laserInfo.Enabled = true;
+                task.delay(0.5, () => (laserInfo.Enabled = false));
             },
             slayer.cooldown,
         );
 
-        const radioNoobLaser = createLaser();
-
-        instanceInfo.BoostAdded!.add(() => {
-            lasers[1] = radioNoobLaser;
-            ref.delta = slayer.cooldown / lasers.size();
+        instanceInfo.BoostAdded!.add((boost) => {
+            if (boost.charger?.item.id !== "RadioNoob") return;
+            hasRadioNoob = true;
+            ref.delta = slayer.cooldown / (hasRadioNoob ? 2 : 1);
         });
 
-        instanceInfo.BoostRemoved!.add(() => {
-            delete lasers[1];
-            ref.delta = slayer.cooldown / lasers.size();
+        instanceInfo.BoostRemoved!.add((boost) => {
+            if (boost.charger?.item.id !== "RadioNoob") return;
+            hasRadioNoob = false;
+            ref.delta = slayer.cooldown / (hasRadioNoob ? 2 : 1);
         });
     }
 

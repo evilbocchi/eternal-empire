@@ -6,13 +6,14 @@ import InventoryFilter, {
     filterItems,
     useBasicInventoryFilter,
 } from "client/components/item/inventory/InventoryFilter";
+import { ItemViewportManagement } from "client/components/item/ItemViewport";
 import { PurchaseManager } from "client/components/item/shop/PurchaseWindow";
 import { createShopSlot, updateShopSlot, type ShopSlotHandle } from "client/components/item/shop/ShopSlot";
-import { getPlayerCharacter } from "shared/hamster/getPlayerCharacter";
 import { showErrorToast } from "client/components/toast/ToastService";
-import { RobotoSlabHeavy } from "shared/asset/GameFonts";
 import useProperty from "client/hooks/useProperty";
 import { getSound, playSound } from "shared/asset/GameAssets";
+import { RobotoSlabHeavy } from "shared/asset/GameFonts";
+import { getPlayerCharacter } from "shared/hamster/getPlayerCharacter";
 import Item from "shared/item/Item";
 import Shop from "shared/item/traits/Shop";
 import Items from "shared/items/Items";

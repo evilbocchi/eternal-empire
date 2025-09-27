@@ -7,6 +7,7 @@ import { playSound } from "shared/asset/GameAssets";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
 import Boostable from "shared/item/traits/boost/Boostable";
+import type Charger from "shared/item/traits/generator/Charger";
 import Operative from "shared/item/traits/Operative";
 import perItemPacket from "shared/item/utils/perItemPacket";
 import NamedUpgrades from "shared/namedupgrade/NamedUpgrades";
@@ -21,7 +22,13 @@ const generatedPacket = perItemPacket(packet<(id: string, amountPerCurrency: Bas
 const clientClickedPacket = perItemPacket(packet<(placementId: string) => void>());
 const GENERATOR_UPGRADES = NamedUpgrades.getUpgrades("Generator");
 
+/**
+ * A generator is an item that generates currency over time, which can be boosted by {@link Charger}s.
+ */
 export default class Generator extends Boostable {
+    /**
+     * The amount of currency this generator generates per second, before boosts.
+     */
     passiveGain: CurrencyBundle | undefined;
 
     static load(model: Model, generator: Generator) {

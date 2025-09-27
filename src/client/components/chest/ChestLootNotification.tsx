@@ -6,6 +6,7 @@ import { RobotoSlab, RobotoSlabBold } from "shared/asset/GameFonts";
 import { getAsset } from "shared/asset/AssetMap";
 import { playSound } from "shared/asset/GameAssets";
 import Items from "shared/items/Items";
+import { ItemViewportManagement } from "client/components/item/ItemViewport";
 
 export default function ChestLootNotification({
     loot,

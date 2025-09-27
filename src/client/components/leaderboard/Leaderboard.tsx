@@ -6,19 +6,17 @@ import React, { useState } from "@rbxts/react";
 import LeaderboardHeader, { ColumnHeader } from "client/components/leaderboard/LeaderboardHeader";
 import LeaderboardSlot from "client/components/leaderboard/LeaderboardSlot";
 
-declare global {
-    /** A single entry in the leaderboard */
-    export interface LeaderboardEntry {
-        /** The player's position on the leaderboard */
-        place: number;
-        /** The player's name or empire name */
-        name: string;
-        /** The value being ranked (currency, time, etc.) */
-        amount: number;
-    }
-
-    export type LeaderboardType = Currency | "TimePlayed" | "Donated" | "Level";
+/** A single entry in the leaderboard */
+export interface LeaderboardEntry {
+    /** The player's position on the leaderboard */
+    place: number;
+    /** The player's name or empire name */
+    name: string;
+    /** The value being ranked (currency, time, etc.) */
+    amount: number;
 }
+
+export type LeaderboardType = Currency | "TimePlayed" | "Donated" | "Level";
 
 /** Props for the main Leaderboard component */
 export interface LeaderboardProps {

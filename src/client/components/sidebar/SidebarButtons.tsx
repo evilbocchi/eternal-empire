@@ -15,11 +15,12 @@
 
 import React, { useCallback, useEffect, useRef, useState } from "@rbxts/react";
 import { TweenService } from "@rbxts/services";
+import { HotkeyLabel } from "client/components/hotkeys/HotkeyManager";
 import useHotkeyWithTooltip from "client/components/hotkeys/useHotkeyWithTooltip";
 import SingleDocumentManager from "client/components/sidebar/SingleDocumentManager";
 import { useDocument } from "client/components/window/DocumentManager";
-import { RobotoSlabBold } from "shared/asset/GameFonts";
 import { getAsset } from "shared/asset/AssetMap";
+import { RobotoSlabBold } from "shared/asset/GameFonts";
 
 interface SidebarButtonProps {
     /** Button configuration data */
