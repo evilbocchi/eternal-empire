@@ -3,8 +3,9 @@ import { packet } from "@rbxts/fletchette";
 import { RunService, TweenService } from "@rbxts/services";
 import Item from "shared/item/Item";
 import ItemTrait from "shared/item/traits/ItemTrait";
+import perItemPacket from "shared/item/utils/perItemPacket";
 
-const crankedPacket = packet<(placementId: string) => void>();
+const crankedPacket = perItemPacket(packet<(placementId: string) => void>());
 
 export default class HandCrank extends ItemTrait {
     callback?: (timeSinceCrank: number, model: Model) => void;
@@ -12,16 +13,14 @@ export default class HandCrank extends ItemTrait {
     static load(model: Model, handCrank: HandCrank) {
         let t = 0;
         handCrank.item.repeat(model, () => handCrank.callback?.(os.clock() - t, model), 0.1);
-        const connection = crankedPacket.fromClient((player, placementId) => {
+        crankedPacket.fromClient(model, (player) => {
             const character = player.Character;
             if (character === undefined) return;
             const distance = character.GetPivot().Position.sub(model.GetPivot().Position).Magnitude;
             if (distance > 10) return;
-            if (model.Name !== placementId) return;
             t = os.clock();
-            crankedPacket.toAllClients(placementId);
+            crankedPacket.toAllClients(model);
         });
-        model.Destroying.Once(() => connection.Disconnect());
     }
 
     static clientLoad(model: Model, _handCrank: HandCrank) {
@@ -50,12 +49,8 @@ export default class HandCrank extends ItemTrait {
             });
         };
 
-        proximityPrompt.Triggered.Connect(() => crankedPacket.toServer(model.Name));
-        const connection = crankedPacket.fromServer((placementId) => {
-            if (model.Name !== placementId) return;
-            performSpinSequence();
-        });
-        model.Destroying.Once(() => connection.Disconnect());
+        proximityPrompt.Triggered.Connect(() => crankedPacket.toServer(model));
+        crankedPacket.fromServer(model, performSpinSequence);
     }
 
     constructor(item: Item) {

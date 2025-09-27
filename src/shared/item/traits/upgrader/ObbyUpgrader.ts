@@ -4,7 +4,7 @@ import { packet } from "@rbxts/fletchette";
 import { Debris, Players } from "@rbxts/services";
 import { Server } from "shared/api/APIExpose";
 import { getSound } from "shared/asset/GameAssets";
-import { IS_SERVER } from "shared/Context";
+import { IS_EDIT, IS_SERVER } from "shared/Context";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Formula from "shared/currency/Formula";
 import eat from "shared/hamster/eat";
@@ -102,7 +102,7 @@ export default class ObbyUpgrader extends ItemTrait {
     }
 
     static {
-        if (IS_SERVER) {
+        if (IS_SERVER || IS_EDIT) {
             let debounce = false;
             const connection = obbyCompletedPacket.fromClient((player, itemId, placementId) => {
                 if (debounce) return;

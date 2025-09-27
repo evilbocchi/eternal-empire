@@ -23,7 +23,7 @@
 
 ## Item & trait system
 - Items live in `src/shared/items`; each module returns a configured `Item` with chained helpers (`setName`, `setPrice`, `setDifficulty`, etc.) and registered traits.
-- Traits extend `shared/item/traits/ItemTrait.ts` and attach behaviour via `item.trait(TraitCtor)`, `item.onLoad`, and `item.onClientLoad`. Keep constructors light and use shared helpers like `Boostable`, `Upgrader`, and `Streaming` from `@antivivi/vrldk`.
+- Traits extend `shared/item/traits/ItemTrait.ts` and attach behaviour via `item.trait(TraitCtor)`, `item.onLoad`, and `item.onClientLoad`. Keep constructors light and use shared helpers like `Boostable` and `Upgrader`.
 - Stick to roblox-ts conventions: use `array.size()`, boolean comparators in `array.sort`, `map.get(key)`, `undefined` instead of `null`, and avoid `any` (prefer concrete types or `unknown`).
 - Use `print` for logging, `math` for math helpers, and prefer declaring shared interfaces in `declare global` blocks.
 

@@ -1,5 +1,5 @@
 import Difficulty from "@antivivi/jjt-difficulties";
-import { loadAnimation, Streaming } from "@antivivi/vrldk";
+import { loadAnimation } from "@antivivi/vrldk";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
 import Clicker from "shared/item/traits/action/Clicker";
@@ -18,12 +18,12 @@ export = new Item(script.Name)
     .replicateClicks()
     .exit()
 
-    .onClientLoad((model) => {
+    .onClientLoad((model, item) => {
         const slamo = model.WaitForChild("Slamo") as Model;
         const animationController = slamo.FindFirstChildOfClass("AnimationController");
         if (animationController === undefined) return;
         const animTrack = loadAnimation(animationController, 17441475234);
         if (animTrack !== undefined) {
-            Streaming.onStreamableRemote(model, () => animTrack.Play());
+            item.trait(Clicker).fromServerClicked(model, () => animTrack.Play());
         }
     });

@@ -1,12 +1,13 @@
 import Difficulty from "@antivivi/jjt-difficulties";
+import { getAllInstanceInfo } from "@antivivi/vrldk";
+import { packet } from "@rbxts/fletchette";
 import { TweenService } from "@rbxts/services";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
 import Upgrader from "shared/item/traits/upgrader/Upgrader";
-import { getAllInstanceInfo } from "@antivivi/vrldk";
-import { packet } from "@rbxts/fletchette";
+import perItemPacket from "shared/item/utils/perItemPacket";
 
-const firedPacket = packet<() => void>(); // parameterless is fine; there's only 1 of this item
+const firedPacket = perItemPacket(packet<() => void>());
 
 export = new Item(script.Name)
     .setName("Droplet Slayer Mk. I")
@@ -26,7 +27,7 @@ export = new Item(script.Name)
             model,
             () => {
                 laserInfo.Enabled = true;
-                firedPacket.toAllClients();
+                firedPacket.toAllClients(model);
                 task.delay(0.5, () => (laserInfo.Enabled = false));
             },
             4,
@@ -36,11 +37,10 @@ export = new Item(script.Name)
         const laser = model.WaitForChild("Laser") as BasePart;
         const sound = laser.WaitForChild("Sound") as Sound;
         laser.Transparency = 1;
-        const connection = firedPacket.fromServer(() => {
+        firedPacket.fromServer(model, () => {
             sound.Play();
 
             laser.Transparency = 0.3;
             TweenService.Create(laser, new TweenInfo(0.5), { Transparency: 1 }).Play();
         });
-        model.Destroying.Once(() => connection.Disconnect());
     });

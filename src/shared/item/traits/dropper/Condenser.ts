@@ -2,13 +2,12 @@ import { OnoeNum } from "@antivivi/serikanum";
 import { getAllInstanceInfo, setInstanceInfo } from "@antivivi/vrldk";
 import { packet } from "@rbxts/fletchette";
 import { Server } from "shared/api/APIExpose";
-import { IS_EDIT, IS_SERVER } from "shared/Context";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
-import eat from "shared/hamster/eat";
 import Item from "shared/item/Item";
 import Dropper from "shared/item/traits/dropper/Dropper";
 import Furnace from "shared/item/traits/Furnace";
 import ItemTrait from "shared/item/traits/ItemTrait";
+import perItemPacket from "shared/item/utils/perItemPacket";
 import Packets from "shared/Packets";
 import { AREAS } from "shared/world/Area";
 import Droplet from "../../Droplet";
@@ -27,7 +26,7 @@ declare global {
     }
 }
 
-const storeChangedPacket = packet<(placementId: string, current: BaseCurrencyMap) => void>();
+const storeChangedPacket = perItemPacket(packet<(placementId: string, current: BaseCurrencyMap) => void>());
 
 /**
  * A condenser is an item that 'condenses' multiple droplets into a single droplet, usually of higher value.
@@ -37,8 +36,6 @@ export default class Condenser extends ItemTrait {
     totalValue = new CurrencyBundle();
 
     quota = 1;
-
-    static readonly updatePerPlacementId = new Map<string, (current: BaseCurrencyMap) => void>();
 
     static getPricePerDroplet(condenser: Condenser) {
         const pricePerDroplet = new Map<Droplet, CurrencyBundle>();
@@ -111,7 +108,7 @@ export default class Condenser extends ItemTrait {
                 }
             });
             if (changed || force === true) {
-                storeChangedPacket.toAllClients(model.Name, current.amountPerCurrency);
+                storeChangedPacket.toAllClients(model, current.amountPerCurrency);
             }
         };
 
@@ -178,10 +175,7 @@ export default class Condenser extends ItemTrait {
             });
         };
         update(new Map());
-        this.updatePerPlacementId.set(model.Name, update);
-        model.Destroying.Once(() => {
-            this.updatePerPlacementId.delete(model.Name);
-        });
+        storeChangedPacket.fromServer(model, update);
     }
 
     /**
@@ -222,14 +216,5 @@ export default class Condenser extends ItemTrait {
     format(str: string) {
         str = str.gsub("%%val%%", this.totalValue.toString(true))[0];
         return str.gsub("%%quota%%", `${this.quota * 100}%%`)[0];
-    }
-
-    static {
-        if (!IS_SERVER || IS_EDIT) {
-            const connection = storeChangedPacket.fromServer((placementId, current) => {
-                this.updatePerPlacementId.get(placementId)?.(current);
-            });
-            eat(connection, "Disconnect");
-        }
     }
 }

@@ -1,13 +1,15 @@
+import { getAllInstanceInfo, loadAnimation, setInstanceInfo } from "@antivivi/vrldk";
+import { packet } from "@rbxts/fletchette";
 import { HttpService, TweenService } from "@rbxts/services";
 import Item from "shared/item/Item";
 import Boostable from "shared/item/traits/boost/Boostable";
 import ItemTrait from "shared/item/traits/ItemTrait";
 import Upgrader from "shared/item/traits/upgrader/Upgrader";
-import { getAllInstanceInfo, setInstanceInfo } from "@antivivi/vrldk";
-import { Streaming } from "@antivivi/vrldk";
-import { loadAnimation } from "@antivivi/vrldk";
+import perItemPacket from "shared/item/utils/perItemPacket";
 
 export default class NoobDropletSlayer extends ItemTrait {
+    static readonly activatePacket = perItemPacket(packet<(placementId: string) => void>());
+
     static load(model: Model, slayer: NoobDropletSlayer) {
         const item = slayer.item;
         const upgrader = item.trait(Upgrader);
@@ -29,12 +31,11 @@ export default class NoobDropletSlayer extends ItemTrait {
             return laser;
         };
 
-        const fireActiveRemote = Streaming.createStreamableRemote(model, true);
         let i = 0;
         const ref = item.repeat(
             model,
             () => {
-                fireActiveRemote();
+                this.activatePacket.toAllClients(model);
                 let cycled = lasers[++i];
                 if (cycled === undefined) {
                     i = 0;
@@ -65,20 +66,13 @@ export default class NoobDropletSlayer extends ItemTrait {
         if (animationController === undefined) return;
         const animTrack = loadAnimation(animationController, 16920778613);
 
-        let laser: BasePart;
-        let slash: BasePart;
-        let sound: Sound;
-        let slashOriginalCFrame: CFrame;
+        const laser = model.WaitForChild("Laser") as BasePart;
+        const slash = model.WaitForChild("Slash") as BasePart;
+        slash.Transparency = 1;
+        const sound = laser.WaitForChild("Sound") as Sound;
+        const slashOriginalCFrame = slash.CFrame;
 
-        Streaming.onModelStreamIn(model, () => {
-            laser = model.WaitForChild("Laser") as BasePart;
-            slash = model.WaitForChild("Slash") as BasePart;
-            slash.Transparency = 1;
-            sound = laser.WaitForChild("Sound") as Sound;
-            slashOriginalCFrame = slash.CFrame;
-        });
-
-        Streaming.onStreamableRemote(model, () => {
+        this.activatePacket.fromServer(model, () => {
             if (slash === undefined) return;
             slash.Transparency = 0.011;
             slash.CFrame = slashOriginalCFrame;

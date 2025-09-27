@@ -9,6 +9,7 @@ import Droplet from "shared/item/Droplet";
 import Item from "shared/item/Item";
 import Conveyor from "shared/item/traits/conveyor/Conveyor";
 import applyDropletImpulse from "shared/item/utils/applyDropletImpulse";
+import perItemPacket from "shared/item/utils/perItemPacket";
 import { VirtualCollision } from "shared/item/utils/VirtualReplication";
 
 declare global {
@@ -17,7 +18,7 @@ declare global {
     }
 }
 
-const clickedPacket = packet<() => void>();
+const clickedPacket = perItemPacket(packet<(placementId: string) => void>());
 const modePacket = property<Currency>();
 const getSortingPoint = (model: Model) => model.WaitForChild("SortingPoint") as BasePart;
 
@@ -42,7 +43,7 @@ export = new Item(script.Name)
         const modes = ["Funds", "Power", "Bitcoin", "Skill"] as Currency[];
         modePacket.set(placedItem.currency);
 
-        const connection = clickedPacket.fromClient((player) => {
+        clickedPacket.fromClient(model, (player) => {
             if (!Server.Permissions.checkPermLevel(player, "build")) return;
 
             let currentIndex = 0;
@@ -56,7 +57,7 @@ export = new Item(script.Name)
             const currency = modes[nextIndex];
             placedItem.currency = currency;
             modePacket.set(currency);
-            clickedPacket.toAllClients();
+            clickedPacket.toAllClients(model);
         });
 
         const touched = new Set<BasePart>();
@@ -83,23 +84,18 @@ export = new Item(script.Name)
 
             applyDropletImpulse(part, forward.mul(part.Mass).mul(40));
         });
-
-        model.Destroying.Once(() => {
-            connection.Disconnect();
-        });
     })
     .onClientLoad((model) => {
         const modeButton = model.WaitForChild("Mode") as BasePart;
         (modeButton.WaitForChild("ClickDetector") as ClickDetector).MouseClick.Connect(() => {
-            clickedPacket.toServer();
+            clickedPacket.toServer(model);
         });
 
         modePacket.observe((currency) => {
             modeButton.Color = CURRENCY_DETAILS[currency].color;
         });
 
-        const connection = clickedPacket.fromServer(() => {
+        clickedPacket.fromServer(model, () => {
             playSound("SwitchFlick.mp3", modeButton);
         });
-        model.Destroying.Once(() => connection.Disconnect());
     });

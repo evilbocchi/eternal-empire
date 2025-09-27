@@ -1,11 +1,9 @@
 import Difficulty from "@antivivi/jjt-difficulties";
+import { getAllInstanceInfo, loadAnimation } from "@antivivi/vrldk";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
-import Boostable from "shared/item/traits/boost/Boostable";
 import Clicker from "shared/item/traits/action/Clicker";
-import { getAllInstanceInfo } from "@antivivi/vrldk";
-import { Streaming } from "@antivivi/vrldk";
-import { loadAnimation } from "@antivivi/vrldk";
+import Boostable from "shared/item/traits/boost/Boostable";
 
 export = new Item(script.Name)
     .setName("Noob Clicker")
@@ -30,12 +28,12 @@ export = new Item(script.Name)
         instanceInfo.BoostAdded!.add(() => instanceInfo.ClickRateModifiers?.add(modifier));
         instanceInfo.BoostRemoved!.add(() => instanceInfo.ClickRateModifiers?.delete(modifier));
     })
-    .onClientLoad((model) => {
+    .onClientLoad((model, item) => {
         const noob = model.WaitForChild("Noob") as Model;
         const animationController = noob.FindFirstChildOfClass("AnimationController");
         if (animationController === undefined) return;
         const animTrack = loadAnimation(animationController, 16920778613);
         if (animTrack !== undefined) {
-            Streaming.onStreamableRemote(model, () => animTrack.Play());
+            item.trait(Clicker).fromServerClicked(model, () => animTrack.Play());
         }
     });

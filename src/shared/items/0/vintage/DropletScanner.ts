@@ -2,16 +2,21 @@
 //!optimize 2
 import Difficulty from "@antivivi/jjt-difficulties";
 import { OnoeNum } from "@antivivi/serikanum";
-import { formatRichText, getAllInstanceInfo, getInstanceInfo, Streaming } from "@antivivi/vrldk";
+import { formatRichText, getAllInstanceInfo, getInstanceInfo } from "@antivivi/vrldk";
+import { packet } from "@rbxts/fletchette";
 import StringBuilder from "@rbxts/stringbuilder";
+import { Server } from "shared/api/APIExpose";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import { CURRENCY_DETAILS } from "shared/currency/CurrencyDetails";
 import Droplet from "shared/item/Droplet";
 import Item from "shared/item/Item";
-import { Server } from "shared/api/APIExpose";
 import WeatherBoost from "shared/item/traits/boost/WeatherBoost";
 import Upgrader from "shared/item/traits/upgrader/Upgrader";
+import perItemPacket from "shared/item/utils/perItemPacket";
 import NamedUpgrades from "shared/namedupgrade/NamedUpgrades";
+
+const textChangedPacket =
+    perItemPacket(packet<(placementId: string, dropletId: string, value: string, color: string) => void>());
 
 export = new Item(script.Name)
     .setName("Droplet Scanner")
@@ -27,8 +32,6 @@ export = new Item(script.Name)
     .exit()
 
     .onLoad((model, item) => {
-        const fireTextRemote = Streaming.createStreamableRemote(model);
-
         const RevenueService = Server.Revenue;
         const removeOnes = (price: CurrencyBundle) => {
             const newPrice = new CurrencyBundle();
@@ -123,30 +126,30 @@ export = new Item(script.Name)
             if (nerf !== 1) builder.append("\nNERF: /").append(OnoeNum.toString(1 / nerf));
 
             builder.append("\nTOTAL: ").append(total.toString(true));
-
-            fireTextRemote(dropletId, builder.toString(), dropletModel.Color.Lerp(new Color3(1, 1, 1), 0.2).ToHex());
+            textChangedPacket.toAllClients(
+                model,
+                dropletId,
+                builder.toString(),
+                dropletModel.Color.Lerp(new Color3(1, 1, 1), 0.2).ToHex(),
+            );
         });
     })
     .onClientLoad((model) => {
-        let titleLabel: TextLabel | undefined;
-        let valueLabel: TextLabel | undefined;
+        const titleLabel = model
+            .WaitForChild("TitlePart")
+            .WaitForChild("SurfaceGui")
+            .WaitForChild("TextLabel") as TextLabel;
+        const valueLabel = model
+            .WaitForChild("ValuePart")
+            .WaitForChild("SurfaceGui")
+            .WaitForChild("ScrollingFrame")
+            .WaitForChild("TextLabel") as TextLabel;
         let titleText = "NOTHING READ";
         let valueText = "NO WORTH";
-        Streaming.onModelStreamIn(model, () => {
-            titleLabel = model
-                .WaitForChild("TitlePart")
-                .WaitForChild("SurfaceGui")
-                .WaitForChild("TextLabel") as TextLabel;
-            valueLabel = model
-                .WaitForChild("ValuePart")
-                .WaitForChild("SurfaceGui")
-                .WaitForChild("ScrollingFrame")
-                .WaitForChild("TextLabel") as TextLabel;
-            titleLabel.Text = titleText;
-            valueLabel.Text = valueText;
-        });
+        titleLabel.Text = titleText;
+        valueLabel.Text = valueText;
 
-        Streaming.onStreamableRemote(model, (dropletId: string, value: string, color: string) => {
+        textChangedPacket.fromServer(model, (dropletId, value, color) => {
             titleText = `LAST READ:\n<font color="#${color}">${dropletId.upper()}</font>`;
             valueText = value;
             if (titleLabel !== undefined) titleLabel.Text = titleText;

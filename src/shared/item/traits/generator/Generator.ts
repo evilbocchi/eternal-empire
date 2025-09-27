@@ -4,13 +4,11 @@ import { Players, TweenService } from "@rbxts/services";
 import { Server, UISignals } from "shared/api/APIExpose";
 import UserGameSettings from "shared/api/UserGameSettings";
 import { playSound } from "shared/asset/GameAssets";
-import { PLACED_ITEMS_FOLDER } from "shared/constants";
-import { IS_SERVER } from "shared/Context";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
-import eat from "shared/hamster/eat";
 import Item from "shared/item/Item";
 import Boostable from "shared/item/traits/boost/Boostable";
 import Operative from "shared/item/traits/Operative";
+import perItemPacket from "shared/item/utils/perItemPacket";
 import NamedUpgrades from "shared/namedupgrade/NamedUpgrades";
 
 declare global {
@@ -19,18 +17,14 @@ declare global {
     }
 }
 
-const generatedPacket = packet<(id: string, amountPerCurrency: BaseCurrencyMap) => void>();
-const clientClickedPacket = packet<(placementId: string) => void>();
+const generatedPacket = perItemPacket(packet<(id: string, amountPerCurrency: BaseCurrencyMap) => void>());
+const clientClickedPacket = perItemPacket(packet<(placementId: string) => void>());
 const GENERATOR_UPGRADES = NamedUpgrades.getUpgrades("Generator");
-const onGeneratedPerPlacementId = new Map<string, (amountPerCurrency: BaseCurrencyMap) => void>();
 
 export default class Generator extends Boostable {
-    static readonly CLIENT_CLICK_CALLBACKS = new Map<string, (player: Player) => void>();
-
     passiveGain: CurrencyBundle | undefined;
 
     static load(model: Model, generator: Generator) {
-        const placementId = model.Name;
         const item = generator.item;
 
         const centre = model.PrimaryPart!.Position;
@@ -41,12 +35,9 @@ export default class Generator extends Boostable {
         const boosts = instanceInfo.Boosts!;
 
         let lastClicked = 0;
-        this.CLIENT_CLICK_CALLBACKS.set(placementId, (player) => {
+        clientClickedPacket.fromClient(model, () => {
             lastClicked = tick();
-            generatedPacket.toClient(player, placementId, new Map());
-        });
-        model.Destroying.Once(() => {
-            this.CLIENT_CLICK_CALLBACKS.delete(placementId);
+            generatedPacket.toAllClients(model, new Map());
         });
 
         item.repeat(
@@ -104,7 +95,7 @@ export default class Generator extends Boostable {
                     const rootPart = character.FindFirstChild("HumanoidRootPart") as BasePart | undefined;
                     if (rootPart === undefined) continue;
                     if (rootPart.Position.sub(centre).Magnitude < 50 && os.clock() > 10) {
-                        generatedPacket.toClient(player, placementId, amountPerCurrency);
+                        generatedPacket.toClient(model, player, amountPerCurrency);
                     }
                 }
                 Server.Currency.incrementAll(amountPerCurrency);
@@ -129,11 +120,11 @@ export default class Generator extends Boostable {
 
         if (clickPart !== undefined) {
             const clickDetector = new Instance("ClickDetector");
-            clickDetector.MouseClick.Connect(() => clientClickedPacket.toServer(model.Name));
+            clickDetector.MouseClick.Connect(() => clientClickedPacket.toServer(model));
             clickDetector.Parent = clickPart;
         }
 
-        const onGenerated = (amountPerCurrency: BaseCurrencyMap) => {
+        generatedPacket.fromServer(model, (amountPerCurrency: BaseCurrencyMap) => {
             if (UserGameSettings!.SavedQualityLevel.Value > 5) {
                 for (const [part, position] of positions) {
                     TweenService.Create(part, tween1, {
@@ -159,10 +150,6 @@ export default class Generator extends Boostable {
             } else {
                 UISignals.showCurrencyGain.fire(part.Position, amountPerCurrency);
             }
-        };
-        onGeneratedPerPlacementId.set(model.Name, onGenerated);
-        model.Destroying.Once(() => {
-            onGeneratedPerPlacementId.delete(model.Name);
         });
     }
 
@@ -182,26 +169,5 @@ export default class Generator extends Boostable {
             str = str.gsub("%%gain%%", this.passiveGain.toString(true, undefined, "/s"))[0];
 
         return str;
-    }
-
-    static {
-        if (IS_SERVER) {
-            const connection = clientClickedPacket.fromClient((player, placementId) => {
-                const callback = this.CLIENT_CLICK_CALLBACKS.get(placementId);
-                if (callback !== undefined) {
-                    callback(player);
-                }
-            });
-            eat(connection, "Disconnect");
-        } else {
-            const connection = generatedPacket.fromServer((placementId, amountPerCurrency) => {
-                const model = PLACED_ITEMS_FOLDER.FindFirstChild(placementId) as Model | undefined;
-                if (model === undefined) return;
-                const onGenerated = onGeneratedPerPlacementId.get(model.Name);
-                if (onGenerated === undefined) return;
-                onGenerated(amountPerCurrency);
-            });
-            eat(connection, "Disconnect");
-        }
     }
 }
