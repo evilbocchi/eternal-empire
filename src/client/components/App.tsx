@@ -1,6 +1,6 @@
 import React, { Fragment, useEffect } from "@rbxts/react";
 import { createRoot, Root } from "@rbxts/react-roblox";
-import { ContentProvider, RunService, Workspace } from "@rbxts/services";
+import { ContentProvider, RunService, StarterGui, Workspace } from "@rbxts/services";
 import BackpackWindow from "client/components/backpack/BackpackWindow";
 import BalanceWindow from "client/components/balance/BalanceWindow";
 import { CurrencyGainManager } from "client/components/balance/CurrencyGain";
@@ -30,6 +30,7 @@ import ResetRenderer from "client/components/reset/ResetRenderer";
 import CopyWindow from "client/components/settings/CopyWindow";
 import SettingsManager from "client/components/settings/SettingsManager";
 import SidebarButtons from "client/components/sidebar/SidebarButtons";
+import PlayerListContainer from "client/components/playerlist/PlayerListContainer";
 import performIntroSequence from "client/components/start/performIntroSequence";
 import StartWindow from "client/components/start/StartWindow";
 import StatsWindow from "client/components/stats/StatsWindow";
@@ -63,6 +64,7 @@ import {
     STATS_GUI,
     TOOLTIPS_GUI,
     UPGRADEBOARD_GUI,
+    PLAYERLIST_GUI,
     WORLD_GUI,
 } from "client/controllers/core/Guis";
 import useManualItemReplication from "client/hooks/useManualItemReplication";
@@ -142,6 +144,7 @@ export default function App({ viewportsEnabled }: { viewportsEnabled: boolean })
         addRoot(roots, CHESTLOOT_GUI).render(<ChestLootManager />);
         addRoot(roots, CHALLENGE_GUI).render(<ChallengeManager />);
         addRoot(roots, CHALLENGE_HUD_GUI).render(<ChallengeHudManager />);
+        addRoot(roots, PLAYERLIST_GUI).render(<PlayerListContainer />);
         if (!Sandbox.getEnabled()) {
             addRoot(roots, WORLD_GUI).render(<WorldRenderer />);
         }
@@ -220,6 +223,13 @@ export default function App({ viewportsEnabled }: { viewportsEnabled: boolean })
                 RunService.Stop();
             }
         };
+    }, []);
+
+    useEffect(() => {
+        const wasEnabled = StarterGui.GetCoreGuiEnabled(Enum.CoreGuiType.PlayerList);
+        StarterGui.SetCoreGuiEnabled(Enum.CoreGuiType.PlayerList, false);
+
+        return () => StarterGui.SetCoreGuiEnabled(Enum.CoreGuiType.PlayerList, wasEnabled);
     }, []);
 
     useManualItemReplication();

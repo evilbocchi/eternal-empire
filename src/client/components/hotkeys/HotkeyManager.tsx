@@ -36,6 +36,11 @@ export const HOTKEY_BINDINGS = [
         priority: 0,
     },
     {
+        keyCode: Enum.KeyCode.Tab,
+        label: "Player List",
+        priority: 1,
+    },
+    {
         keyCode: Enum.KeyCode.V,
         label: "Quests",
         priority: 0,

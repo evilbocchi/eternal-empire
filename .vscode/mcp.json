@@ -1,12 +1,6 @@
 {
-    "inputs": [
-        // The "inputs" section defines the inputs required for the MCP server configuration.
-        {
-            "type": "promptString"
-        }
-    ],
+    "inputs": [],
     "servers": {
-        // The "servers" section defines the MCP servers you want to use.
         "robloxstudio-mcp": {
             "command": "npx",
             "args": [

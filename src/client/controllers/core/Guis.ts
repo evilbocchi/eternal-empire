@@ -24,6 +24,7 @@ export const HAMSTER_GUI = createScreenGui("Hamster", 10);
 export const START_GUI = createScreenGui("Start", 20);
 export const INTRO_GUI = createScreenGui("Intro", 30);
 export const MAIN_LAYOUT_GUI = createScreenGui("MainLayout", -1);
+export const PLAYERLIST_GUI = createScreenGui("PlayerList", 15);
 export const CLICK_SPARKS_GUI = createScreenGui("ClickSparks", 2);
 export const TOOLTIPS_GUI = createScreenGui("Tooltips", 3);
 export const TOASTS_GUI = createScreenGui("Toasts", 40);
