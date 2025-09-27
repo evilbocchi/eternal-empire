@@ -6,6 +6,7 @@ import { COLOR_SEQUENCE_PER_AREA } from "client/components/world/area/AreaBoardR
 import { observeCharacter } from "client/constants";
 import { getPlayerCharacter } from "shared/hamster/getPlayerCharacter";
 import { RobotoMono, RobotoMonoBold } from "client/GameFonts";
+import { showErrorToast } from "client/components/toast/ToastService";
 import { getAsset } from "shared/asset/AssetMap";
 import { playSound } from "shared/asset/GameAssets";
 import PortableBeacon from "shared/items/tools/PortableBeacon";
@@ -169,6 +170,7 @@ function PortableBeaconOption({
                         getPlayerCharacter()?.FindFirstChildOfClass("Humanoid")?.UnequipTools();
                     } else {
                         playSound("Error.mp3");
+                        showErrorToast("Teleport failed. Try again in a moment.");
                     }
                 },
                 MouseEnter: () => setHovered(true),

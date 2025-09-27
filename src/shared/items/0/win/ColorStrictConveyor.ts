@@ -8,7 +8,7 @@ import { CURRENCY_DETAILS } from "shared/currency/CurrencyDetails";
 import Droplet from "shared/item/Droplet";
 import Item from "shared/item/Item";
 import Conveyor from "shared/item/traits/conveyor/Conveyor";
-import applyDropletImpulse from "shared/item/utils/applyDropletImpulse";
+import setDropletVelocity from "shared/item/utils/setDropletVelocity";
 import perItemPacket from "shared/item/utils/perItemPacket";
 import { VirtualCollision } from "shared/item/utils/VirtualReplication";
 
@@ -82,7 +82,7 @@ export = new Item(script.Name)
 
             if (bestCurrency !== placedItem.currency) return;
 
-            applyDropletImpulse(part, forward.mul(part.Mass).mul(40));
+            setDropletVelocity(part, forward.mul(part.Mass).mul(40));
         });
     })
     .onClientLoad((model) => {

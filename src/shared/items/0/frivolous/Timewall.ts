@@ -1,11 +1,12 @@
 import Difficulty from "@antivivi/jjt-difficulties";
-import { property } from "@rbxts/fletchette";
+import { packet } from "@rbxts/fletchette";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
 import Conveyor from "shared/item/traits/conveyor/Conveyor";
 import Upgrader from "shared/item/traits/upgrader/Upgrader";
+import perItemPacket from "shared/item/utils/perItemPacket";
 
-const active = property<boolean>();
+const active = perItemPacket(packet<(placementId: string, on: boolean) => void>());
 
 export = new Item(script.Name)
     .setName("Timewall")
@@ -35,7 +36,7 @@ export = new Item(script.Name)
                 } else {
                     on = false;
                 }
-                active.set(on);
+                active.toAllClients(model, on);
                 laser.CanCollide = on;
             },
             2,
@@ -43,9 +44,8 @@ export = new Item(script.Name)
     })
     .onClientLoad((model) => {
         const laser = model.WaitForChild("Laser") as BasePart;
-        const connection = active.observe((on) => {
+        active.fromServer(model, (on) => {
             laser.Transparency = on ? 0 : 0.7;
             laser.CanCollide = on;
         });
-        model.Destroying.Once(() => connection.disconnect());
     });

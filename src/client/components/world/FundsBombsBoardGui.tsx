@@ -2,6 +2,7 @@ import { OnoeNum } from "@antivivi/serikanum";
 import React, { useEffect } from "@rbxts/react";
 import { MarketplaceService } from "@rbxts/services";
 import { LOCAL_PLAYER } from "client/constants";
+import { showErrorToast } from "client/components/toast/ToastService";
 import { RobotoSlabBold, RobotoSlabHeavy, RobotoSlabMedium } from "client/GameFonts";
 import { getAsset } from "shared/asset/AssetMap";
 import { playSound } from "shared/asset/GameAssets";
@@ -229,6 +230,7 @@ export default function FundsBombsBoardGui() {
                         } else {
                             playSound("Error.mp3");
                         }
+                        showErrorToast("Unable to purchase Funds Bombs.");
                     },
                 }}
             >

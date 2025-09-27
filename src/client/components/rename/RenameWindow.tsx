@@ -17,6 +17,7 @@ import EmpireNameInput from "client/components/rename/EmpireNameInput";
 import PurchaseButton from "client/components/rename/PurchaseButton";
 import useSingleDocument from "client/components/sidebar/useSingleDocumentWindow";
 import TechWindow from "client/components/window/TechWindow";
+import { showErrorToast } from "client/components/toast/ToastService";
 import { RobotoSlab, RobotoSlabBold } from "client/GameFonts";
 import useProperty from "client/hooks/useProperty";
 import { getAsset } from "shared/asset/AssetMap";
@@ -73,6 +74,7 @@ export default function RenameWindow() {
             closeDocument();
         } else {
             playSound("Error.mp3");
+            showErrorToast("Renaming failed. Try a different name.");
         }
 
         setIsProcessing(false);

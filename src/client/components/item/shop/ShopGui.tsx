@@ -9,6 +9,7 @@ import InventoryFilter, {
 import { PurchaseManager } from "client/components/item/shop/PurchaseWindow";
 import { createShopSlot, updateShopSlot, type ShopSlotHandle } from "client/components/item/shop/ShopSlot";
 import { getPlayerCharacter } from "shared/hamster/getPlayerCharacter";
+import { showErrorToast } from "client/components/toast/ToastService";
 import { RobotoSlabHeavy } from "client/GameFonts";
 import useProperty from "client/hooks/useProperty";
 import { getSound, playSound } from "shared/asset/GameAssets";
@@ -224,6 +225,7 @@ export default function ShopGui({ viewportManagement }: { viewportManagement?: I
                 playSound("ItemPurchase.mp3");
             } else {
                 playSound("Error.mp3");
+                showErrorToast("Unable to purchase all items.");
             }
             return true;
         },

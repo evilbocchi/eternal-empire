@@ -22,6 +22,7 @@ import useSingleDocument from "client/components/sidebar/useSingleDocumentWindow
 import BasicWindow from "client/components/window/BasicWindow";
 import { RobotoMono } from "client/GameFonts";
 import useProperty from "client/hooks/useProperty";
+import { showErrorToast } from "client/components/toast/ToastService";
 import { getAsset } from "shared/asset/AssetMap";
 import { playSound } from "shared/asset/GameAssets";
 import type Item from "shared/item/Item";
@@ -81,6 +82,7 @@ export function activateItem(item: Item): boolean {
         (item.levelReq !== undefined && item.levelReq > level)
     ) {
         playSound("Error.mp3");
+        showErrorToast("Can't place that item right now.");
         return false;
     }
 

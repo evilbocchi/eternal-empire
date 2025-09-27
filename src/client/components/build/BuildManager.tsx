@@ -11,6 +11,7 @@ import { Environment } from "@rbxts/ui-labs";
 import { ShopManager } from "client/components/item/shop/ShopGui";
 import DocumentManager from "client/components/window/DocumentManager";
 import { NONCOLLISION_COLOR } from "client/constants";
+import { showErrorToast } from "client/components/toast/ToastService";
 import { getSound, playSound } from "shared/asset/GameAssets";
 import { CAMERA, PLACED_ITEMS_FOLDER } from "shared/constants";
 import Item from "shared/item/Item";
@@ -63,6 +64,7 @@ namespace BuildManager {
     let lastSelectingCFrame = new CFrame();
     let lastCameraCFrame = new CFrame();
     export let isShopOpen = false;
+    export let isInventoryOpen = false;
 
     export function hasSelection(): boolean {
         return !selected.isEmpty();
@@ -480,6 +482,7 @@ namespace BuildManager {
                 });
             } else {
                 playSound("Error.mp3");
+                showErrorToast("Can't place that here.");
             }
             lastSelectingCFrame = selectingCFrame;
             return;
@@ -500,6 +503,7 @@ namespace BuildManager {
 
         const inputBeganConnection = Environment.UserInput.InputBegan.Connect((input, gameProcessed) => {
             if (gameProcessed === true) return;
+            if (isInventoryOpen) return;
 
             if (
                 input.UserInputType === Enum.UserInputType.Touch ||
@@ -515,11 +519,13 @@ namespace BuildManager {
 
         const touchEndedConnection = Environment.UserInput.TouchEnded.Connect((_touch, gameProcessed) => {
             if (gameProcessed === true) return;
+            if (isInventoryOpen) return;
             onMouseUp();
         });
 
         const inputChangedConnection = Environment.UserInput.InputChanged.Connect((input, gameProcessed) => {
             if (gameProcessed === true) return;
+            if (isInventoryOpen) return;
             if (input.UserInputType === Enum.UserInputType.MouseMovement) {
                 onMouseMove();
             }
@@ -527,6 +533,7 @@ namespace BuildManager {
 
         const inputEndedConnection = Environment.UserInput.InputEnded.Connect((input, gameProcessed) => {
             if (gameProcessed === true) return;
+            if (isInventoryOpen) return;
 
             if (input.UserInputType !== Enum.UserInputType.MouseButton1 && input.KeyCode !== Enum.KeyCode.ButtonL1)
                 return;
@@ -540,6 +547,14 @@ namespace BuildManager {
             isShopOpen = shop !== undefined;
             refresh();
         });
+        DocumentManager.visibilityChanged.connect((name, visible) => {
+            if (name !== "Inventory") return;
+            isInventoryOpen = visible;
+            refresh();
+        });
+
+        // Listen for inventory open/close events here (replace with actual event)
+        // Example: InventoryManager.opened.connect((open) => { isInventoryOpen = open; });
 
         const childRemovedConnection = PLACED_ITEMS_FOLDER.ChildRemoved.Connect((model) => {
             if (model.IsA("Model") && selected.has(model)) {

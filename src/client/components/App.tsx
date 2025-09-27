@@ -33,6 +33,7 @@ import SidebarButtons from "client/components/sidebar/SidebarButtons";
 import performIntroSequence from "client/components/start/performIntroSequence";
 import StartWindow from "client/components/start/StartWindow";
 import StatsWindow from "client/components/stats/StatsWindow";
+import ToastManager from "client/components/toast/ToastManager";
 import TooltipWindow from "client/components/tooltip/TooltipWindow";
 import DocumentManager from "client/components/window/DocumentManager";
 import WorldRenderer from "client/components/world/WorldRenderer";
@@ -51,6 +52,7 @@ import {
     LEVELUP_GUI,
     LOGS_GUI,
     MAIN_LAYOUT_GUI,
+    TOASTS_GUI,
     PRINTER_GUI,
     PURCHASE_GUI,
     QUESTCOMPLETION_GUI,
@@ -102,6 +104,7 @@ export default function App({ viewportsEnabled }: { viewportsEnabled: boolean })
         );
         addRoot(roots, CLICK_SPARKS_GUI).render(<ClickSparkManager />);
         addRoot(roots, TOOLTIPS_GUI).render(<TooltipWindow />);
+        addRoot(roots, TOASTS_GUI).render(<ToastManager />);
         addRoot(roots, DIALOGUE_GUI).render(<DialogueWindow />);
         addRoot(roots, BALANCE_GUI).render(<BalanceWindow />);
         addRoot(roots, BUILD_GUI).render(<BuildWindow />);

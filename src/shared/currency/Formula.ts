@@ -8,7 +8,7 @@ type Operation = {
     base?: number;
 };
 
-const def = new OnoeNum(0);
+const ZERO = new OnoeNum(0);
 const HALF = new OnoeNum(1 / 2);
 const ONETHIRD = new OnoeNum(1 / 3);
 const E = math.exp(1);
@@ -161,10 +161,12 @@ class Formula {
                     number = number.pow(ONETHIRD);
                     break;
                 case OPERATION_LOG:
-                    number = OnoeNum.log(number, operation.base!) ?? def;
+                    if (number.lessEquals(ZERO)) return ZERO; // Prefer 0 over NaN
+                    number = OnoeNum.log(number, operation.base!) ?? ZERO;
                     break;
                 case OPERATION_LN:
-                    number = OnoeNum.log(number, E) ?? def;
+                    if (number.lessEquals(ZERO)) return ZERO;
+                    number = OnoeNum.log(number, E) ?? ZERO;
                     break;
             }
         }

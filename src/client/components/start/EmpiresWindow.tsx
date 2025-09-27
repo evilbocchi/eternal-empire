@@ -2,6 +2,7 @@ import ComputeNameColor from "@antivivi/rbxnamecolor";
 import { convertToHHMMSS } from "@antivivi/vrldk";
 import React, { useCallback, useEffect, useRef, useState } from "@rbxts/react";
 import { Players } from "@rbxts/services";
+import { showErrorToast } from "client/components/toast/ToastService";
 import MenuOption, { BaseMenuOption } from "client/components/start/MenuOption";
 import { RobotoSlab, RobotoSlabBold, RobotoSlabHeavy } from "client/GameFonts";
 import useProperty from "client/hooks/useProperty";
@@ -189,6 +190,7 @@ export default function EmpiresWindow({ exitStart, onClose }: { exitStart: () =>
             playSound("MenuClick.mp3");
         } else {
             playSound("Error.mp3");
+            showErrorToast("Failed to create a new empire.");
         }
 
         // Reset state after delay

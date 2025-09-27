@@ -2,6 +2,7 @@ import React, { Fragment, useEffect, useMemo, useState } from "@rbxts/react";
 import UpgradeActionsPanel from "client/components/item/upgrade/UpgradeActionsPanel";
 import UpgradeOptionsPanel from "client/components/item/upgrade/UpgradeOptionsPanel";
 
+import { showErrorToast } from "client/components/toast/ToastService";
 import { playSound } from "shared/asset/GameAssets";
 import NamedUpgrade from "shared/namedupgrade/NamedUpgrade";
 import Packets from "shared/Packets";
@@ -66,15 +67,20 @@ export default function UpgradeBoardGui({
     }, [selectedUpgrade, upgradeAmount, isMaxed]);
 
     // Sound feedback function
-    const playPurchaseSound = (success: boolean) => {
-        const sound = success ? playSound("UpgradeBought.mp3") : playSound("Error.mp3");
+    const playPurchaseFeedback = (success: boolean) => {
+        if (success) {
+            playSound("UpgradeBought.mp3");
+        } else {
+            playSound("Error.mp3");
+            showErrorToast("Upgrade purchase failed.");
+        }
     };
 
     // Purchase handlers
     const handleBuy1 = () => {
         if (selectedUpgrade) {
             const success = Packets.buyUpgrade.toServer(selectedUpgrade.id, upgradeAmount + 1);
-            playPurchaseSound(success);
+            playPurchaseFeedback(success);
         }
     };
 
@@ -82,14 +88,14 @@ export default function UpgradeBoardGui({
         if (selectedUpgrade) {
             const nextAmount = getNext(upgradeAmount, selectedUpgrade.step);
             const success = Packets.buyUpgrade.toServer(selectedUpgrade.id, nextAmount);
-            playPurchaseSound(success);
+            playPurchaseFeedback(success);
         }
     };
 
     const handleBuyMax = () => {
         if (selectedUpgrade?.cap !== undefined) {
             const success = Packets.buyUpgrade.toServer(selectedUpgrade.id, selectedUpgrade.cap);
-            playPurchaseSound(success);
+            playPurchaseFeedback(success);
         }
     };
 

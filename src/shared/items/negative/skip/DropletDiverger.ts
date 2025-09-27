@@ -1,7 +1,7 @@
 import Difficulty from "@antivivi/jjt-difficulties";
 import { OnoeNum } from "@antivivi/serikanum";
 import { getInstanceInfo } from "@antivivi/vrldk";
-import applyDropletImpulse from "shared/item/utils/applyDropletImpulse";
+import setDropletVelocity from "shared/item/utils/setDropletVelocity";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import eat from "shared/hamster/eat";
 import Droplet from "shared/item/Droplet";
@@ -65,7 +65,7 @@ export = new Item(script.Name)
             }
 
             const impulse = right.mul(side).mul(dropletModel.Mass).mul(25);
-            applyDropletImpulse(dropletModel, impulse);
+            setDropletVelocity(dropletModel, impulse);
         });
         eat(() => {
             connection?.Disconnect();

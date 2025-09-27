@@ -1,9 +1,46 @@
 import Difficulty from "@antivivi/jjt-difficulties";
 import { ReplicatedStorage } from "@rbxts/services";
+import { Server } from "shared/api/APIExpose";
+import { IS_SERVER } from "shared/Context";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
 import Upgrader from "shared/item/traits/upgrader/Upgrader";
-import { Server } from "shared/api/APIExpose";
+import Packets from "shared/Packets";
+
+function updateLaserCommon(
+    laser: BasePart,
+    primaryPos: Vector3,
+    modelName: string,
+    getOtherPos: (otherId: string) => Vector3 | undefined,
+    setAttribute?: (newConnector?: string) => void,
+    newConnector?: string,
+) {
+    const otherId = ReplicatedStorage.GetAttribute(script.Name) as string | undefined;
+    if (!otherId || otherId === modelName) {
+        if (setAttribute) setAttribute(newConnector ?? modelName);
+        laser.Size = new Vector3(1, 1, 1);
+        laser.Position = primaryPos;
+        return;
+    }
+
+    const posB = getOtherPos(otherId);
+    if (!posB) {
+        if (setAttribute) setAttribute();
+        laser.Size = new Vector3(1, 1, 1);
+        laser.Position = primaryPos;
+        return;
+    }
+
+    const distance = primaryPos.sub(posB).Magnitude;
+    if (distance <= 12) {
+        laser.Size = new Vector3(4.75, 4.75, distance);
+        laser.CFrame = new CFrame(primaryPos, posB).mul(new CFrame(0, 0, -distance / 2));
+    } else {
+        if (setAttribute) setAttribute();
+        laser.Size = new Vector3(1, 1, 1);
+        laser.Position = primaryPos;
+    }
+}
 
 export = new Item(script.Name)
     .setName("Automatic Radiowave Connector")
@@ -22,35 +59,50 @@ export = new Item(script.Name)
 
     .onLoad((model, item) => {
         const laser = model.WaitForChild("Laser") as BasePart;
-        const removeConnection = (newConnector?: string) => {
-            ReplicatedStorage.SetAttribute(script.Name, newConnector);
-            laser.Size = new Vector3(1, 1, 1);
-            laser.Position = model.PrimaryPart!.Position;
+        const primaryPos = model.PrimaryPart!.Position;
+        let lastConnector: string | undefined;
+
+        const setAttribute = (newConnector?: string) => {
+            if (lastConnector !== newConnector) {
+                ReplicatedStorage.SetAttribute(script.Name, newConnector);
+                lastConnector = newConnector;
+            }
         };
-        const ItemService = Server.Item;
+
         item.repeat(
             model,
-            () => {
-                const otherId = ReplicatedStorage.GetAttribute(script.Name);
-                if (otherId === undefined) {
-                    removeConnection(model.Name);
-                } else if (otherId !== model.Name) {
-                    const other = ItemService.getPlacedItem(otherId as string);
-                    if (other === undefined) {
-                        removeConnection();
-                        return;
-                    }
-                    const posA = model.PrimaryPart!.Position;
-                    const posB = new Vector3(other.posX, other.posY, other.posZ);
-                    const distance = posA.sub(posB).Magnitude;
-                    if (distance <= 12) {
-                        laser.Size = new Vector3(4.75, 4.75, distance);
-                        laser.CFrame = new CFrame(posA, posB).mul(new CFrame(0, 0, -distance / 2));
-                    } else {
-                        removeConnection();
-                    }
-                }
-            },
-            0.25,
+            () =>
+                updateLaserCommon(
+                    laser,
+                    primaryPos,
+                    model.Name,
+                    (otherId) => {
+                        const other = Server.Item.getPlacedItem(otherId);
+                        return other ? new Vector3(other.posX, other.posY, other.posZ) : undefined;
+                    },
+                    setAttribute,
+                    model.Name,
+                ),
+            1,
         );
+
+        // Clear attribute when connector is destroyed/unplaced
+        model.Destroying.Connect(() => {
+            ReplicatedStorage.SetAttribute(script.Name, undefined);
+            lastConnector = undefined;
+        });
+    })
+    .onClientLoad((model) => {
+        const laser = model.WaitForChild("Laser") as BasePart;
+        const primaryPos = model.PrimaryPart!.Position;
+
+        const getOtherPos = (otherId: string) => {
+            const otherModel = model.Parent?.FindFirstChild(otherId) as Model | undefined;
+            return otherModel && otherModel.PrimaryPart ? otherModel.PrimaryPart.Position : undefined;
+        };
+
+        const updateLaser = () => updateLaserCommon(laser, primaryPos, model.Name, getOtherPos);
+
+        const heartbeat = game.GetService("RunService").Heartbeat.Connect(updateLaser);
+        model.Destroying.Connect(() => heartbeat.Disconnect());
     });

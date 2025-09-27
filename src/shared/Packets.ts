@@ -117,7 +117,7 @@ namespace Packets {
     export const dropletBurnt = packet<(dropletModelId: string, amountPerCurrency: BaseCurrencyMap) => void>({
         isUnreliable: true,
     });
-    export const applyImpulse = packet<(dropletModelId: string, impulse: Vector3) => void>({ isUnreliable: true });
+    export const setVelocity = packet<(dropletModelId: string, velocity: Vector3) => void>({ isUnreliable: true });
 
     // weather
     export const weatherChanged = packet<(weatherState: object) => void>();

@@ -20,6 +20,7 @@ import { METADATA_PER_ITEM, TooltipManager } from "client/components/tooltip/Too
 import { RobotoMono, RobotoSlab, RobotoSlabHeavy, RobotoSlabMedium } from "client/GameFonts";
 import useInterval from "client/hooks/useInterval";
 import { getAsset } from "shared/asset/AssetMap";
+import { showErrorToast } from "client/components/toast/ToastService";
 import { playSound } from "shared/asset/GameAssets";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import { CURRENCY_DETAILS } from "shared/currency/CurrencyDetails";
@@ -214,6 +215,7 @@ export default function PurchaseWindow({ viewportManagement }: { viewportManagem
             }).Play();
         } else {
             playSound("Error.mp3");
+            showErrorToast("Purchase failed. Check your resources.");
         }
         return true;
     };

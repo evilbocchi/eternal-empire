@@ -26,6 +26,7 @@ export const INTRO_GUI = createScreenGui("Intro", 30);
 export const MAIN_LAYOUT_GUI = createScreenGui("MainLayout", -1);
 export const CLICK_SPARKS_GUI = createScreenGui("ClickSparks", 2);
 export const TOOLTIPS_GUI = createScreenGui("Tooltips", 3);
+export const TOASTS_GUI = createScreenGui("Toasts", 40);
 export const DIALOGUE_GUI = createScreenGui("Dialogue", 1);
 export const BALANCE_GUI = createScreenGui("Balance", -1);
 export const CURRENCY_GAIN_GUI = createScreenGui("CurrencyGain", -1, false);

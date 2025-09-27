@@ -773,46 +773,48 @@ export default class Droplet {
         const areaId = Server.Item.getPlacedItem(dropperModel.Name)?.area as AreaId | undefined;
 
         return () => {
-            const clone = model.Clone();
-            const instanceInfo = getAllInstanceInfo(clone);
+            const spawned = model.Clone();
+            spawned.CustomPhysicalProperties = Droplet.PHYSICAL_PROPERTIES;
+
+            const instanceInfo = getAllInstanceInfo(spawned);
             instanceInfo.Upgrades = new Map();
             instanceInfo.Health = health;
             instanceInfo.DropletId = this.id;
             instanceInfo.ItemId = itemId;
             instanceInfo.Area = areaId;
 
-            clone.Touched.Connect((part) => {
-                getInstanceInfo(part, "DropletTouched")?.(clone, instanceInfo);
+            spawned.Touched.Connect((part) => {
+                getInstanceInfo(part, "DropletTouched")?.(spawned, instanceInfo);
             });
 
             const spawnId = tostring(++Droplet.instatiationCount);
-            clone.Name = spawnId;
+            spawned.Name = spawnId;
             if (cframe !== undefined) {
                 Packets.dropletAdded.toClientsInRadius(cframe.Position, 128, drop!);
             }
 
-            Droplet.SPAWNED_DROPLETS.set(clone, instanceInfo);
-            Droplet.MODEL_PER_SPAWN_ID.set(spawnId, clone);
+            Droplet.SPAWNED_DROPLETS.set(spawned, instanceInfo);
+            Droplet.MODEL_PER_SPAWN_ID.set(spawnId, spawned);
             let destroyed = false;
-            clone.Destroying.Once(() => {
+            spawned.Destroying.Once(() => {
                 destroyed = true;
-                Droplet.SPAWNED_DROPLETS.delete(clone);
+                Droplet.SPAWNED_DROPLETS.delete(spawned);
                 Droplet.MODEL_PER_SPAWN_ID.delete(spawnId);
             });
 
             let prev: Vector3 | undefined;
             const checkStillness = () => {
                 if (destroyed === true) return;
-                if (prev !== undefined && (clone as BasePart).Position.sub(prev).Magnitude < 0.5) {
-                    Debris.AddItem(clone, 1);
-                    TweenService.Create(clone as BasePart, new TweenInfo(0.5), { Transparency: 1 }).Play();
+                if (prev !== undefined && (spawned as BasePart).Position.sub(prev).Magnitude < 0.5) {
+                    Debris.AddItem(spawned, 1);
+                    TweenService.Create(spawned as BasePart, new TweenInfo(0.5), { Transparency: 1 }).Play();
                     return;
                 }
-                prev = (clone as BasePart).Position;
+                prev = (spawned as BasePart).Position;
                 task.delay(10, checkStillness);
             };
             task.delay(10, checkStillness);
-            return clone;
+            return spawned;
         };
     }
 
@@ -829,7 +831,6 @@ export default class Droplet {
         model.CanQuery = false;
         model.CanTouch = true;
         model.CastShadow = false;
-        model.CustomPhysicalProperties = Droplet.PHYSICAL_PROPERTIES;
         model.AddTag("Droplet");
         this.model = model;
         return this;
@@ -938,14 +939,14 @@ export default class Droplet {
             });
             eat(addedConnection);
 
-            const impulseConnection = Packets.applyImpulse.fromServer((dropletModelId, impulse) => {
+            const impulseConnection = Packets.setVelocity.fromServer((dropletModelId, velocity) => {
                 const model = CollectionService.GetTagged("Droplet").find(
                     (droplet) => droplet.Name === dropletModelId,
                 ) as BasePart | undefined;
                 if (model === undefined)
                     // streamed out
                     return;
-                model.ApplyImpulse(impulse);
+                model.AssemblyLinearVelocity = velocity;
             });
             eat(impulseConnection);
         }

@@ -1,10 +1,10 @@
 import Difficulty from "@antivivi/jjt-difficulties";
 import { getInstanceInfo } from "@antivivi/vrldk";
-import applyDropletImpulse from "shared/item/utils/applyDropletImpulse";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
 import Conveyor from "shared/item/traits/conveyor/Conveyor";
 import Upgrader from "shared/item/traits/upgrader/Upgrader";
+import setDropletVelocity from "shared/item/utils/setDropletVelocity";
 import MagicalWood from "shared/items/excavation/harvestable/MagicalWood";
 import Quartz from "shared/items/excavation/Quartz";
 
@@ -33,12 +33,7 @@ export = new Item(script.Name)
     .onLoad((model) => {
         const forward = model.GetPivot().LookVector.Unit;
         getInstanceInfo(model, "OnUpgraded")!.connect((droplet) => {
-            applyDropletImpulse(
-                droplet,
-                forward
-                    .mul(4)
-                    .add(new Vector3(0, 49, 0))
-                    .mul(droplet.Mass),
-            );
+            const baseDirection = forward.mul(12).add(new Vector3(0, 49, 0)).Unit;
+            setDropletVelocity(droplet, baseDirection.mul(50));
         });
     });
