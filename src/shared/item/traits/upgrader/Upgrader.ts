@@ -77,6 +77,84 @@ export default class Upgrader extends Operative {
     static readonly SPAWNED_LASERS = new Map<BasePart, InstanceInfo>();
 
     /**
+     * Upgrades a droplet with the given upgrader.
+     */
+    static upgrade({
+        model,
+        modelInfo,
+        upgrader,
+        dropletInfo,
+        laserId,
+        laserInfo,
+        droplet,
+        deco,
+    }: {
+        /** The upgrader model. */
+        model: Model;
+        /** The information about the upgrader model. */
+        modelInfo: InstanceInfo;
+        /** The upgrader being used. */
+        upgrader: Upgrader;
+        /** The information about the droplet being upgraded. */
+        dropletInfo: InstanceInfo;
+        /** The ID of the laser that is upgrading the droplet. */
+        laserId?: string;
+        /** The information about the laser that is upgrading the droplet. */
+        laserInfo: InstanceInfo;
+        /** The droplet being upgraded. */
+        droplet: BasePart;
+        /** An optional decoration function to modify the upgrade info. */
+        deco?: (upgrade: UpgradeInfo) => void;
+    }) {
+        if (dropletInfo.Incinerated === true) return;
+        if (upgrader.requirement !== undefined && !upgrader.requirement(dropletInfo)) return;
+
+        if (laserInfo.Sky === true) dropletInfo.Sky = true;
+        let upgrades = dropletInfo.Upgrades;
+
+        if (laserId === undefined) {
+            laserId ??= upgrader.isStacks === false ? upgrader.item.id : model.Name + "_" + laserInfo.LaserId;
+        }
+
+        if (upgrades === undefined) upgrades = new Map();
+        else if (upgrades.has(laserId)) return;
+
+        if (modelInfo.Maintained === false || laserInfo.Enabled === false) return;
+
+        if (upgrades === undefined) upgrades = new Map();
+        let [totalAdd, totalMul, totalPow] = [upgrader.add, upgrader.mul, upgrader.pow];
+
+        const boosts = modelInfo.Boosts;
+        if (boosts !== undefined) {
+            for (const [_, boost] of boosts) {
+                const stats = boost.upgradeCompound;
+                if (stats === undefined) continue;
+                [totalAdd, totalMul, totalPow] = Operative.applyOperative(
+                    totalAdd,
+                    totalMul,
+                    totalPow,
+                    stats.add,
+                    stats.mul,
+                    stats.pow,
+                );
+            }
+        }
+
+        const upgrade: UpgradeInfo = {
+            Upgrader: model,
+            Boost: {
+                add: totalAdd,
+                mul: totalMul,
+                pow: totalPow,
+            },
+        };
+        if (deco !== undefined) deco(upgrade);
+        upgrades.set(laserId, upgrade);
+        dropletInfo.Upgrades = upgrades;
+        modelInfo.OnUpgraded?.fire(droplet);
+    }
+
+    /**
      * Hooks a laser to an upgrader.
      *
      * @param model The item model where the laser is located.
@@ -86,54 +164,10 @@ export default class Upgrader extends Operative {
      * @param deco Optional decoration function to modify the upgrade info.
      */
     static hookLaser(model: Model, upgrader: Upgrader, laser: BasePart, deco?: (upgrade: UpgradeInfo) => void) {
-        const item = upgrader.item;
         const modelInfo = getAllInstanceInfo(model);
         const laserInfo = getAllInstanceInfo(laser);
-        const placementId = model.Name;
-        VirtualCollision.onDropletTouched(model, laser, (droplet, instanceInfo) => {
-            if (instanceInfo.Incinerated === true) return;
-            if (upgrader.requirement !== undefined && !upgrader.requirement(instanceInfo)) return;
-
-            if (laserInfo.Sky === true) instanceInfo.Sky = true;
-            let upgrades = instanceInfo.Upgrades;
-
-            const laserId = upgrader.isStacks === false ? item.id : placementId + "_" + laserInfo.LaserId;
-            if (upgrades === undefined) upgrades = new Map();
-            else if (upgrades.has(laserId)) return;
-
-            if (modelInfo.Maintained === false || laserInfo.Enabled === false) return;
-
-            let [totalAdd, totalMul, totalPow] = [upgrader.add, upgrader.mul, upgrader.pow];
-
-            const boosts = modelInfo.Boosts;
-            if (boosts !== undefined) {
-                for (const [_, boost] of boosts) {
-                    const stats = boost.upgradeCompound;
-                    if (stats === undefined) continue;
-                    [totalAdd, totalMul, totalPow] = Operative.applyOperative(
-                        totalAdd,
-                        totalMul,
-                        totalPow,
-                        stats.add,
-                        stats.mul,
-                        stats.pow,
-                    );
-                }
-            }
-
-            const upgrade: UpgradeInfo = {
-                Upgrader: model,
-                Boost: {
-                    add: totalAdd,
-                    mul: totalMul,
-                    pow: totalPow,
-                },
-            };
-
-            if (deco !== undefined) deco(upgrade);
-            upgrades.set(laserId, upgrade);
-            instanceInfo.Upgrades = upgrades;
-            modelInfo.OnUpgraded?.fire(droplet);
+        VirtualCollision.onDropletTouched(model, laser, (droplet, dropletInfo) => {
+            this.upgrade({ model, modelInfo, upgrader, dropletInfo, laserInfo, droplet, deco });
         });
         laserInfo.ParentInfo = modelInfo;
         laserInfo.OriginalTransparency = laser.Transparency;

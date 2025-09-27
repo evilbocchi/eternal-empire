@@ -47,6 +47,7 @@ export default class CollisionGroupService implements OnInit, OnPlayerAdded {
         PhysicsService.RegisterCollisionGroup("QueryableGhost");
         PhysicsService.RegisterCollisionGroup("Antighost");
         PhysicsService.RegisterCollisionGroup("Droplet");
+        PhysicsService.RegisterCollisionGroup("DropletInquirer");
         PhysicsService.RegisterCollisionGroup("Player");
         PhysicsService.RegisterCollisionGroup("PlayerHitbox");
         PhysicsService.RegisterCollisionGroup("NPC");
@@ -58,6 +59,7 @@ export default class CollisionGroupService implements OnInit, OnPlayerAdded {
         PhysicsService.CollisionGroupSetCollidable("Droplet", "Decoration", false);
         PhysicsService.CollisionGroupSetCollidable("Droplet", "Item", true);
         PhysicsService.CollisionGroupSetCollidable("Droplet", "BuildGrid", true);
+        PhysicsService.CollisionGroupSetCollidable("Droplet", "DropletInquirer", true);
 
         // Configure item hitbox interactions
         PhysicsService.CollisionGroupSetCollidable("ItemHitbox", "Droplet", false);
