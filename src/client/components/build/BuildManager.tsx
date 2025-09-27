@@ -209,21 +209,24 @@ namespace BuildManager {
      * Adds a model for placement, setting up attributes and selection visuals.
      * @param item The item to place.
      * @param uuid The unique identifier for the item (optional).
-     * @param initialPosition The initial position for placement (optional).
+     * @param cframe The initial CFrame for placement (optional).
      * @param initialRotation The initial rotation for placement (optional).
      * @returns The created item model.
      */
-    export function addPlacingModel(item: Item, uuid?: string, initialPosition?: Vector3, initialRotation?: number) {
+    export function addPlacingModel(item: Item, uuid?: string, cframe?: CFrame, initialRotation?: number) {
         debounce = tick();
         const itemModel = item.MODEL?.Clone();
         if (itemModel === undefined) throw `Item ${item.name} has no model!`;
 
+        if (cframe !== undefined) {
+            itemModel.PivotTo(cframe);
+        }
         itemModel.Name = HttpService.GenerateGUID(false);
         itemModel.AddTag("Placing");
         itemModel.SetAttribute("Selected", true);
         itemModel.SetAttribute("ItemName", item.name);
         itemModel.SetAttribute("ItemId", item.id);
-        itemModel.SetAttribute("InitialPosition", initialPosition);
+        itemModel.SetAttribute("InitialPosition", cframe?.Position);
         itemModel.SetAttribute("InitialRotation", initialRotation);
         if (uuid !== undefined) {
             itemModel.SetAttribute("UUID", uuid);
@@ -442,8 +445,8 @@ namespace BuildManager {
                     const placingModel = addPlacingModel(
                         Items.getItem(model.GetAttribute("ItemId") as string)!,
                         model.GetAttribute("UUID") as string | undefined,
-                        model.PrimaryPart?.Position,
-                        (model.GetAttribute("Rotation") as number | undefined) ?? 0,
+                        model.GetPivot(),
+                        (model.GetAttribute("RawRotation") as number | undefined) ?? 0,
                     );
                     if (model === main) {
                         mainSelect(placingModel);
@@ -452,7 +455,9 @@ namespace BuildManager {
                     }
                 }
                 Packets.unplaceItems.toServer(names);
-                onMouseMove(true, false);
+                task.delay(0.05, () => {
+                    onMouseMove(true, false);
+                });
             }
 
             for (const model of dragging) model.SetAttribute("Dragging", false);

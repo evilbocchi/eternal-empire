@@ -263,6 +263,7 @@ export default class Item {
         model.SetAttribute("ItemId", this.id);
         model.SetAttribute("ItemName", this.name);
         model.SetAttribute("UUID", placedItem.uniqueItemId);
+        model.SetAttribute("RawRotation", placedItem.rawRotation);
 
         return model;
     }
