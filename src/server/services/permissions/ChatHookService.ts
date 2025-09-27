@@ -15,7 +15,7 @@ import DataService from "server/services/data/DataService";
 import { OnPlayerAdded } from "server/services/ModdingService";
 import { RobotoSlab } from "shared/asset/GameFonts";
 import { getNameFromUserId, getTextChannels } from "shared/constants";
-import { IS_EDIT } from "shared/Context";
+import { IS_EDIT, IS_STUDIO } from "shared/Context";
 import eat from "shared/hamster/eat";
 import Packets from "shared/Packets";
 
@@ -117,6 +117,9 @@ export default class ChatHookService implements OnStart, OnPlayerAdded {
                         return;
                     }
                     task.spawn(() => {
+                        if (IS_STUDIO) {
+                            print(`[Global] ${player.Name}: ${message}`);
+                        }
                         MessagingService.PublishAsync("GlobalChat", {
                             player: player.UserId,
                             message: TextService.FilterStringAsync(
