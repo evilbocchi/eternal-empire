@@ -7,7 +7,7 @@ import Item from "shared/item/Item";
 import Upgrader from "shared/item/traits/upgrader/Upgrader";
 import perItemPacket from "shared/item/utils/perItemPacket";
 
-const firedPacket = perItemPacket(packet<() => void>());
+const firedPacket = perItemPacket(packet<(placementId: string) => void>());
 
 export = new Item(script.Name)
     .setName("Droplet Slayer Mk. I")
@@ -39,7 +39,6 @@ export = new Item(script.Name)
         laser.Transparency = 1;
         firedPacket.fromServer(model, () => {
             sound.Play();
-
             laser.Transparency = 0.3;
             TweenService.Create(laser, new TweenInfo(0.5), { Transparency: 1 }).Play();
         });
