@@ -176,6 +176,7 @@ namespace Packets {
     export const permLevel = property<DataType.u8>(0);
     export const permLevels = property<{ [key in PermissionKey]: number }>(EmpireProfileTemplate.permLevels);
     export const getLogs = packet<() => Log[]>();
+    export const sendGlobalMessage = packet<(message: string) => void>();
     export const systemMessageSent = packet<(channel: string, message: string, metadata: string) => void>();
     export const codeReceived = packet<(code: string) => void>();
     export const tabOpened = packet<(tab: string) => void>();

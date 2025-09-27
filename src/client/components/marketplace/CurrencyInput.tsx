@@ -1,5 +1,5 @@
 import React, { useState } from "@rbxts/react";
-import { RobotoSlab, RobotoSlabBold } from "client/GameFonts";
+import { RobotoSlab, RobotoSlabBold } from "shared/asset/GameFonts";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import CurrencyDisplay from "./CurrencyDisplay";
 

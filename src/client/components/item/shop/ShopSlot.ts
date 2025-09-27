@@ -7,7 +7,7 @@ import { TweenService } from "@rbxts/services";
 import { PARALLEL } from "client/constants";
 import displayBalanceCurrency from "client/components/balance/displayBalanceCurrency";
 import { loadItemIntoViewport } from "client/components/item/ItemViewport";
-import { RobotoSlabHeavy } from "client/GameFonts";
+import { RobotoSlabHeavy } from "shared/asset/GameFonts";
 import { getAsset } from "shared/asset/AssetMap";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import { CURRENCY_DETAILS } from "shared/currency/CurrencyDetails";

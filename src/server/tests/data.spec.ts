@@ -11,7 +11,7 @@ import fixDuplicatedItemsData from "shared/data/loading/fixDuplicatedItemsData";
 export = function () {
     const dataService = new DataService();
     const currencyService = new CurrencyService(dataService);
-    const chatHookService = new ChatHookService();
+    const chatHookService = new ChatHookService(dataService);
     const permissionsService = new PermissionsService(dataService, chatHookService);
     const itemService = new ItemService(dataService, currencyService, permissionsService);
 

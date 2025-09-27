@@ -3,7 +3,7 @@
  */
 
 import React from "@rbxts/react";
-import { RobotoMonoBold, RobotoSlabHeavy } from "client/GameFonts";
+import { RobotoMonoBold, RobotoSlabHeavy } from "shared/asset/GameFonts";
 
 interface LeaderboardHeaderProps {
     title: string;

@@ -1,5 +1,5 @@
 import React, { InstanceProps, useMemo } from "@rbxts/react";
-import { RobotoSlabBold } from "client/GameFonts";
+import { RobotoSlabBold } from "shared/asset/GameFonts";
 
 export default function ProgressBar(props: {
     current: number;

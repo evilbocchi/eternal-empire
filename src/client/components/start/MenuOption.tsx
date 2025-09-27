@@ -1,6 +1,6 @@
 import React, { ReactNode, RefObject, useCallback, useEffect, useRef, useState } from "@rbxts/react";
 import { TweenService } from "@rbxts/services";
-import { RobotoSlabHeavy } from "client/GameFonts";
+import { RobotoSlabHeavy } from "shared/asset/GameFonts";
 import { getAsset } from "shared/asset/AssetMap";
 import { playSound } from "shared/asset/GameAssets";
 

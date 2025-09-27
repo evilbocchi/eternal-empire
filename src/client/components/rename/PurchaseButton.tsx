@@ -1,6 +1,6 @@
 import React, { useCallback, useRef, useState } from "@rbxts/react";
 import { TweenService } from "@rbxts/services";
-import { RobotoSlabBold } from "client/GameFonts";
+import { RobotoSlabBold } from "shared/asset/GameFonts";
 
 interface PurchaseButtonProps {
     text: string;

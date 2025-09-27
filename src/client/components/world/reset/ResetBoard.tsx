@@ -1,6 +1,6 @@
 import Difficulty from "@antivivi/jjt-difficulties";
 import React, { ReactNode } from "@rbxts/react";
-import { RobotoMonoBold, RobotoSlabHeavy } from "client/GameFonts";
+import { RobotoMonoBold, RobotoSlabHeavy } from "shared/asset/GameFonts";
 
 export default function BasicResetBoardFrontGui({
     adornee,

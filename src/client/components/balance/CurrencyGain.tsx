@@ -4,7 +4,7 @@ import { CollectionService, Debris, TweenService, Workspace } from "@rbxts/servi
 import { balanceOptionImagePerCurrency } from "client/components/balance/BalanceOption";
 import displayBalanceCurrency from "client/components/balance/displayBalanceCurrency";
 import { PingManager } from "client/components/stats/StatsWindow";
-import { RobotoSlabExtraBold } from "client/GameFonts";
+import { RobotoSlabExtraBold } from "shared/asset/GameFonts";
 import { UISignals } from "shared/api/APIExpose";
 import UserGameSettings from "shared/api/UserGameSettings";
 import { getSound, SOUND_EFFECTS_GROUP } from "shared/asset/GameAssets";

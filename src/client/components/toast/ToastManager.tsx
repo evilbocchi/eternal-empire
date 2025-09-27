@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "@rbxts/react";
 import { TweenService, Workspace } from "@rbxts/services";
-import { RobotoMono, RobotoSlabBold } from "client/GameFonts";
+import { RobotoMono, RobotoSlabBold } from "shared/asset/GameFonts";
 import {
     DEFAULT_TOAST_DURATION,
     MAX_TOAST_QUEUE,
@@ -114,8 +114,6 @@ export default function ToastManager() {
         const connection = subscribeToasts((toast) => {
             if (!mounted) return;
 
-            let schedule: { id: string; revision: number; duration: number } | undefined;
-
             setToasts((prev) => {
                 const updated = [...prev];
 
@@ -145,7 +143,6 @@ export default function ToastManager() {
                         duration: mergedDuration,
                     };
                     updated[existingIndex] = mergedToast;
-                    schedule = { id: mergedToast.id, revision: mergedToast.revision, duration: mergedDuration };
                     return updated;
                 }
 
@@ -167,22 +164,8 @@ export default function ToastManager() {
                     break;
                 }
 
-                schedule = {
-                    id: managedToast.id,
-                    revision: managedToast.revision,
-                    duration: managedToast.duration,
-                };
-
                 return updated;
             });
-
-            if (schedule) {
-                const { id, revision, duration } = schedule;
-                task.delay(duration, () => {
-                    if (!mounted) return;
-                    dismissToast(id, revision);
-                });
-            }
         });
 
         return () => {
@@ -235,7 +218,7 @@ interface ToastItemProps {
     toast: ManagedToast;
     style: { background: Color3; border: Color3; text: Color3 };
     width: number;
-    onDismiss: (id: string) => void;
+    onDismiss: (id: string, expectedRevision?: number) => void;
     onEnterComplete: (id: string) => void;
     onExitComplete: (id: string) => void;
 }
@@ -246,8 +229,8 @@ function ToastItem({ toast, style, width, onDismiss, onEnterComplete, onExitComp
     const hintTextRef = useRef<TextLabel>();
     const strokeRef = useRef<UIStroke>();
     const scaleRef = useRef<UIScale>();
-    const enterStarted = useRef(false);
-    const exitStarted = useRef(false);
+    const lastEnterRevision = useRef(-1);
+    const lastExitRevision = useRef(-1);
 
     const horizontalPadding = math.floor(math.clamp((20 * width) / DEFAULT_MAX_WIDTH, 12, 20));
     const verticalPadding = math.floor(math.clamp((12 * width) / DEFAULT_MAX_WIDTH, 8, 12));
@@ -256,6 +239,23 @@ function ToastItem({ toast, style, width, onDismiss, onEnterComplete, onExitComp
     const listPadding = math.floor(math.clamp((6 * width) / DEFAULT_MAX_WIDTH, 4, 6));
     const baseMessage = toast.baseMessage ?? toast.message;
     const displayMessage = toast.count > 1 ? `${baseMessage} (x${toast.count})` : baseMessage;
+    const shouldScheduleDismiss = toast.status !== "exiting";
+
+    useEffect(() => {
+        if (!shouldScheduleDismiss) {
+            return undefined;
+        }
+
+        const revision = toast.revision;
+        const duration = toast.duration ?? DEFAULT_TOAST_DURATION;
+        const thread = task.delay(duration, () => {
+            onDismiss(toast.id, revision);
+        });
+
+        return () => {
+            task.cancel(thread);
+        };
+    }, [toast.id, toast.revision, toast.duration, shouldScheduleDismiss, onDismiss]);
 
     useEffect(() => {
         const button = buttonRef.current;
@@ -271,8 +271,9 @@ function ToastItem({ toast, style, width, onDismiss, onEnterComplete, onExitComp
             button.Size = new UDim2(0, width, 0, button.Size.Y.Offset);
         }
 
-        if (toast.status === "entering" && !enterStarted.current) {
-            enterStarted.current = true;
+        if (toast.status === "entering" && lastEnterRevision.current !== toast.revision) {
+            lastEnterRevision.current = toast.revision;
+            lastExitRevision.current = math.max(lastExitRevision.current, toast.revision - 1);
 
             button.BackgroundTransparency = 0.6;
             button.Size = new UDim2(0, width, 0, 0);
@@ -306,8 +307,8 @@ function ToastItem({ toast, style, width, onDismiss, onEnterComplete, onExitComp
             scaleTween.Completed.Once(() => {
                 onEnterComplete(toast.id);
             });
-        } else if (toast.status === "exiting" && !exitStarted.current) {
-            exitStarted.current = true;
+        } else if (toast.status === "exiting" && lastExitRevision.current !== toast.revision) {
+            lastExitRevision.current = toast.revision;
 
             const currentHeight = math.max(button.AbsoluteSize.Y, 4);
             button.ClipsDescendants = true;

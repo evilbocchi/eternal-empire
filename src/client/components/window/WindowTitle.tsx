@@ -1,5 +1,5 @@
 import React from "@rbxts/react";
-import { RobotoSlabBold } from "client/GameFonts";
+import { RobotoSlabBold } from "shared/asset/GameFonts";
 
 interface WindowTitleProps {
     icon: string;

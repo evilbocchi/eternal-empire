@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "@rbxts/react";
 import { TweenService } from "@rbxts/services";
 import { playSound } from "shared/asset/GameAssets";
 import Packets from "shared/Packets";
-import { RobotoMonoBold } from "client/GameFonts";
+import { RobotoMonoBold } from "shared/asset/GameFonts";
 import useProperty from "client/hooks/useProperty";
 
 interface SettingToggleProps {

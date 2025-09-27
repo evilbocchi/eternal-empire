@@ -1,6 +1,6 @@
 import React, { useEffect } from "@rbxts/react";
 import { Environment } from "@rbxts/ui-labs";
-import { RobotoMonoBold } from "client/GameFonts";
+import { RobotoMonoBold } from "shared/asset/GameFonts";
 import { playSound } from "shared/asset/GameAssets";
 
 interface HotkeyOptionProps {

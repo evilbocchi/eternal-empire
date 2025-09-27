@@ -17,7 +17,7 @@ import { TextChatService } from "@rbxts/services";
 import DialogueHeadshot from "client/components/npc/DialogueHeadshot";
 import NPCNotification from "client/components/npc/NPCNotification";
 import { useDocument } from "client/components/window/DocumentManager";
-import { RobotoSlab, RobotoSlabBold } from "client/GameFonts";
+import { RobotoSlab, RobotoSlabBold } from "shared/asset/GameFonts";
 import { useTextAnimation } from "client/hooks/useTextAnimation";
 import { getAsset } from "shared/asset/AssetMap";
 import { ASSETS } from "shared/asset/GameAssets";

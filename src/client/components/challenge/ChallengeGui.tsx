@@ -1,5 +1,5 @@
 import React, { Fragment } from "@rbxts/react";
-import { RobotoSlabBold, RobotoSlabExtraBold, RobotoSlabHeavy, RobotoSlabMedium } from "client/GameFonts";
+import { RobotoSlabBold, RobotoSlabExtraBold, RobotoSlabHeavy, RobotoSlabMedium } from "shared/asset/GameFonts";
 import { getAsset } from "shared/asset/AssetMap";
 import ChallengesBoard from "shared/world/nodes/ChallengesBoard";
 

@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from "@rbxts/react";
 import { TweenService } from "@rbxts/services";
 import { playSound } from "shared/asset/GameAssets";
-import { RobotoSlab } from "client/GameFonts";
+import { RobotoSlab } from "shared/asset/GameFonts";
 import Packets from "shared/Packets";
 
 export default function ToggleSwitch({

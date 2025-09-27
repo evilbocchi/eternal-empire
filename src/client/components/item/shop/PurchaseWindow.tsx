@@ -17,7 +17,7 @@ import { WrappingPriceOptions } from "client/components/item/shop/PriceOption";
 import useSingleDocument from "client/components/sidebar/useSingleDocumentWindow";
 import getDifficultyDisplayColors from "client/components/tooltip/getDifficultyDisplayColors";
 import { METADATA_PER_ITEM, TooltipManager } from "client/components/tooltip/TooltipWindow";
-import { RobotoMono, RobotoSlab, RobotoSlabHeavy, RobotoSlabMedium } from "client/GameFonts";
+import { RobotoMono, RobotoSlab, RobotoSlabHeavy, RobotoSlabMedium } from "shared/asset/GameFonts";
 import useInterval from "client/hooks/useInterval";
 import { getAsset } from "shared/asset/AssetMap";
 import { showErrorToast } from "client/components/toast/ToastService";

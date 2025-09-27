@@ -1,5 +1,5 @@
 import React from "@rbxts/react";
-import { RobotoMonoBold } from "client/GameFonts";
+import { RobotoMonoBold } from "shared/asset/GameFonts";
 
 export default function PurchaseOption({
     label,

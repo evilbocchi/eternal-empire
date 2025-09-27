@@ -1,6 +1,6 @@
 import React, { useRef, useState } from "@rbxts/react";
 import { TweenService } from "@rbxts/services";
-import { RobotoSlabBold } from "client/GameFonts";
+import { RobotoSlabBold } from "shared/asset/GameFonts";
 
 export default function ActionButton({
     text,

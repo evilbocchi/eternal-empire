@@ -5,7 +5,7 @@
 import { OnoeNum } from "@antivivi/serikanum";
 import React, { useEffect, useState } from "@rbxts/react";
 import { RunService } from "@rbxts/services";
-import { RobotoMono } from "client/GameFonts";
+import { RobotoMono } from "shared/asset/GameFonts";
 
 /** Props for individual leaderboard slots */
 export interface LeaderboardSlotProps {

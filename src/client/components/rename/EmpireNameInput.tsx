@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from "@rbxts/react";
 import { TweenService } from "@rbxts/services";
-import { RobotoSlab, RobotoSlabBold } from "client/GameFonts";
+import { RobotoSlab, RobotoSlabBold } from "shared/asset/GameFonts";
 
 interface EmpireNameInputProps {
     prefix: string;

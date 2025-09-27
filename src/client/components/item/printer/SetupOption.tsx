@@ -2,7 +2,7 @@ import React, { createRef } from "@rbxts/react";
 import { TweenService } from "@rbxts/services";
 import ActionButton from "client/components/item/printer/ActionButton";
 import ToggleSwitch from "client/components/item/printer/ToggleSwitch";
-import { RobotoSlabBold } from "client/GameFonts";
+import { RobotoSlabBold } from "shared/asset/GameFonts";
 import { getAsset } from "shared/asset/AssetMap";
 import { playSound } from "shared/asset/GameAssets";
 import Packets from "shared/Packets";

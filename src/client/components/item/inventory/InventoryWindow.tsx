@@ -20,7 +20,7 @@ import {
 } from "client/components/item/inventory/InventorySlot";
 import useSingleDocument from "client/components/sidebar/useSingleDocumentWindow";
 import BasicWindow from "client/components/window/BasicWindow";
-import { RobotoMono } from "client/GameFonts";
+import { RobotoMono } from "shared/asset/GameFonts";
 import useProperty from "client/hooks/useProperty";
 import { showErrorToast } from "client/components/toast/ToastService";
 import { getAsset } from "shared/asset/AssetMap";

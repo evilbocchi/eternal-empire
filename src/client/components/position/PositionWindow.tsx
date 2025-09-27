@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from "@rbxts/react";
-import { RobotoSlabHeavy } from "client/GameFonts";
+import { RobotoSlabHeavy } from "shared/asset/GameFonts";
 import { useDocument } from "client/components/window/DocumentManager";
 import { getAsset } from "shared/asset/AssetMap";
 import { useMessageTooltip } from "../tooltip/TooltipManager";

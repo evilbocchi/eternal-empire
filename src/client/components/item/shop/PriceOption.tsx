@@ -3,7 +3,7 @@ import React, { useMemo, useRef } from "@rbxts/react";
 import { TextService } from "@rbxts/services";
 import displayBalanceCurrency from "client/components/balance/displayBalanceCurrency";
 import { useItemViewport } from "client/components/item/useCIViewportManagement";
-import { RobotoSlabHeavy } from "client/GameFonts";
+import { RobotoSlabHeavy } from "shared/asset/GameFonts";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import { CURRENCY_DETAILS } from "shared/currency/CurrencyDetails";
 import Item from "shared/item/Item";

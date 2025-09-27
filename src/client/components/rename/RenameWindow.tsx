@@ -18,7 +18,7 @@ import PurchaseButton from "client/components/rename/PurchaseButton";
 import useSingleDocument from "client/components/sidebar/useSingleDocumentWindow";
 import TechWindow from "client/components/window/TechWindow";
 import { showErrorToast } from "client/components/toast/ToastService";
-import { RobotoSlab, RobotoSlabBold } from "client/GameFonts";
+import { RobotoSlab, RobotoSlabBold } from "shared/asset/GameFonts";
 import useProperty from "client/hooks/useProperty";
 import { getAsset } from "shared/asset/AssetMap";
 import { playSound } from "shared/asset/GameAssets";

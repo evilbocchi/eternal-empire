@@ -3,7 +3,7 @@ import LogEntry from "client/components/logs/LogEntry";
 import PaginationControls from "client/components/logs/PaginationControls";
 import useSingleDocument from "client/components/sidebar/useSingleDocumentWindow";
 import TechWindow from "client/components/window/TechWindow";
-import { RobotoMonoBold } from "client/GameFonts";
+import { RobotoMonoBold } from "shared/asset/GameFonts";
 import { getAsset } from "shared/asset/AssetMap";
 import Packets from "shared/Packets";
 

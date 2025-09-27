@@ -1,5 +1,5 @@
 import React, { Fragment, useCallback, useEffect, useState } from "@rbxts/react";
-import { RobotoSlab, RobotoSlabMedium } from "client/GameFonts";
+import { RobotoSlab, RobotoSlabMedium } from "shared/asset/GameFonts";
 import { getPlayerCharacter } from "shared/hamster/getPlayerCharacter";
 
 interface ProximityPromptInfo {

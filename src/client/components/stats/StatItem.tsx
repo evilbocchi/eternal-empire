@@ -1,5 +1,5 @@
 import React, { useRef } from "@rbxts/react";
-import { RobotoSlabBold, RobotoSlabMedium } from "client/GameFonts";
+import { RobotoSlabBold, RobotoSlabMedium } from "shared/asset/GameFonts";
 import useHover from "client/hooks/useHover";
 
 interface StatItemProps {

@@ -5,7 +5,7 @@ import TechWindow from "client/components/window/TechWindow";
 import { COLOR_SEQUENCE_PER_AREA } from "client/components/world/area/AreaBoardRenderer";
 import { observeCharacter } from "client/constants";
 import { getPlayerCharacter } from "shared/hamster/getPlayerCharacter";
-import { RobotoMono, RobotoMonoBold } from "client/GameFonts";
+import { RobotoMono, RobotoMonoBold } from "shared/asset/GameFonts";
 import { showErrorToast } from "client/components/toast/ToastService";
 import { getAsset } from "shared/asset/AssetMap";
 import { playSound } from "shared/asset/GameAssets";

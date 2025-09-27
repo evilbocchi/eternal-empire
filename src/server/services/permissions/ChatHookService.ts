@@ -9,18 +9,30 @@
  * @since 1.0.0
  */
 
-import { Service } from "@flamework/core";
+import { OnStart, Service } from "@flamework/core";
+import { MessagingService, Players, TextChatService, TextService } from "@rbxts/services";
+import DataService from "server/services/data/DataService";
 import { OnPlayerAdded } from "server/services/ModdingService";
-import { getTextChannels } from "shared/constants";
+import { RobotoSlab } from "shared/asset/GameFonts";
+import { getNameFromUserId, getTextChannels } from "shared/constants";
 import { IS_EDIT } from "shared/Context";
+import eat from "shared/hamster/eat";
 import Packets from "shared/Packets";
 
 /**
  * Service for sending system and private chat messages to players.
  */
 @Service()
-export default class ChatHookService implements OnPlayerAdded {
-    readonly plrChannels = new Map<Player, TextChannel>();
+export default class ChatHookService implements OnStart, OnPlayerAdded {
+    readonly GLOBAL_CHANNEL = (() => {
+        if (IS_EDIT) return undefined;
+        const globalChatChannel = new Instance("TextChannel");
+        globalChatChannel.Name = "Global";
+        globalChatChannel.Parent = getTextChannels();
+        return globalChatChannel;
+    })();
+
+    constructor(private dataService: DataService) {}
 
     /**
      * Sends a private system message to a player.
@@ -29,15 +41,14 @@ export default class ChatHookService implements OnPlayerAdded {
      * @param message Message text
      * @param metadata Optional message metadata
      */
-    sendPrivateMessage(player: Player | undefined, message: string, metadata?: string) {
+    sendPrivateMessage(player: Player | undefined, message: string, metadata?: string, channel?: TextChannel) {
         if (IS_EDIT) {
             print(message);
             return;
         }
         if (player === undefined) return;
-
-        const plrChannel = this.plrChannels.get(player) ?? this.createChannel(player);
-        Packets.systemMessageSent.toClient(player, plrChannel.Name, message, metadata ?? "");
+        channel ??= getTextChannels().WaitForChild("RBXGeneral") as TextChannel;
+        Packets.systemMessageSent.toClient(player, channel.Name, message, metadata ?? "");
     }
 
     /**
@@ -46,33 +57,79 @@ export default class ChatHookService implements OnPlayerAdded {
      * @param message Message text
      * @param metadata Optional message metadata
      */
-    sendServerMessage(message: string, metadata?: string) {
+    sendServerMessage(message: string, metadata?: string, channel?: TextChannel) {
         if (IS_EDIT) return;
 
-        const rbxGeneral = getTextChannels().WaitForChild("RBXGeneral") as TextChannel;
-        Packets.systemMessageSent.toAllClients(rbxGeneral.Name, message, metadata ?? "");
+        channel ??= getTextChannels().WaitForChild("RBXGeneral") as TextChannel;
+        Packets.systemMessageSent.toAllClients(channel.Name, message, metadata ?? "");
     }
 
-    /**
-     * Creates a private channel for a player.
-     * This is called when a player joins the game to set up their private chat channel.
-     *
-     * @param player Player to create the channel for
-     * @return The created TextChannel instance
-     */
-    createChannel(player: Player) {
-        const plrChannel = new Instance("TextChannel");
-        plrChannel.Name = player.Name;
-        plrChannel.Parent = getTextChannels();
-        plrChannel.AddUserAsync(player.UserId);
-        plrChannel.SetAttribute("Color", Color3.fromRGB(82, 255, 105));
-        this.plrChannels.set(player, plrChannel);
-        return plrChannel;
+    onPlayerAdded(player: Player): void {
+        if (IS_EDIT) return;
+
+        this.GLOBAL_CHANNEL?.AddUserAsync(player.UserId);
     }
 
-    onPlayerAdded(player: Player) {
+    onStart() {
+        const chatWindowConfiguration = TextChatService.FindFirstChildOfClass("ChatWindowConfiguration");
+        if (chatWindowConfiguration) {
+            chatWindowConfiguration.FontFace = RobotoSlab;
+        }
+        const chatInputBarConfiguration = TextChatService.FindFirstChildOfClass("ChatInputBarConfiguration");
+        if (chatInputBarConfiguration) {
+            chatInputBarConfiguration.FontFace = RobotoSlab;
+        }
+        const channelTabsConfiguration = TextChatService.FindFirstChildOfClass("ChannelTabsConfiguration");
+        if (channelTabsConfiguration) {
+            channelTabsConfiguration.FontFace = RobotoSlab;
+            channelTabsConfiguration.Enabled = true;
+        }
+        const bubbleChatConfiguration = TextChatService.FindFirstChildOfClass("BubbleChatConfiguration");
+        if (bubbleChatConfiguration) {
+            bubbleChatConfiguration.FontFace = RobotoSlab;
+        }
+
+        // TODO: Check if global chat works
         if (!IS_EDIT) {
-            this.createChannel(player);
+            const connection = MessagingService.SubscribeAsync("GlobalChat", (message) => {
+                if (this.dataService.empireData.globalChat !== true) return;
+                const data = message.Data as { player: number; message: string };
+                if (this.dataService.empireData.blocking.has(data.player)) return;
+                for (const player of Players.GetPlayers()) {
+                    if (player.UserId === data.player) {
+                        return;
+                    }
+                }
+                const name = getNameFromUserId(data.player);
+                this.sendServerMessage(
+                    `${name}:  ${data.message}`,
+                    "tag:hidden;color:180,180,180;",
+                    this.GLOBAL_CHANNEL,
+                );
+            });
+
+            let counter = 0;
+            const globalMessageConnection = Packets.sendGlobalMessage.fromClient((player, message) => {
+                if (this.dataService.empireData.globalChat === true && message.sub(1, 1) !== "/") {
+                    ++counter;
+                    task.delay(5, () => --counter);
+                    if (counter > 5) {
+                        return;
+                    }
+                    task.spawn(() => {
+                        MessagingService.PublishAsync("GlobalChat", {
+                            player: player.UserId,
+                            message: TextService.FilterStringAsync(
+                                message,
+                                player.UserId,
+                            ).GetNonChatStringForBroadcastAsync(),
+                        });
+                    });
+                }
+            });
+
+            eat(connection, "Disconnect");
+            eat(globalMessageConnection, "Disconnect");
         }
     }
 }

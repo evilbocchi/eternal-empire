@@ -1,6 +1,6 @@
 import { OnoeNum } from "@antivivi/serikanum";
 import React, { Fragment, useEffect, useState } from "@rbxts/react";
-import { RobotoSlabBold, RobotoSlabHeavy } from "client/GameFonts";
+import { RobotoSlabBold, RobotoSlabHeavy } from "shared/asset/GameFonts";
 import DarkMatter from "shared/currency/mechanics/DarkMatter";
 import Packets from "shared/Packets";
 import Sandbox from "shared/Sandbox";

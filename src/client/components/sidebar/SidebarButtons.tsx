@@ -18,7 +18,7 @@ import { TweenService } from "@rbxts/services";
 import useHotkeyWithTooltip from "client/components/hotkeys/useHotkeyWithTooltip";
 import SingleDocumentManager from "client/components/sidebar/SingleDocumentManager";
 import { useDocument } from "client/components/window/DocumentManager";
-import { RobotoSlabBold } from "client/GameFonts";
+import { RobotoSlabBold } from "shared/asset/GameFonts";
 import { getAsset } from "shared/asset/AssetMap";
 
 interface SidebarButtonProps {

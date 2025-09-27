@@ -1,5 +1,5 @@
 import React from "@rbxts/react";
-import { RobotoMonoBold } from "client/GameFonts";
+import { RobotoMonoBold } from "shared/asset/GameFonts";
 import NamedUpgrade from "shared/namedupgrade/NamedUpgrade";
 
 export default function UpgradeOption({

@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "@rbxts/react";
 import CommandOption from "client/components/commands/CommandOption";
 import useSingleDocument from "client/components/sidebar/useSingleDocumentWindow";
 import TechWindow from "client/components/window/TechWindow";
-import { RobotoSlab, RobotoSlabMedium } from "client/GameFonts";
+import { RobotoSlab, RobotoSlabMedium } from "shared/asset/GameFonts";
 import useProperty from "client/hooks/useProperty";
 import { getAsset } from "shared/asset/AssetMap";
 import Command from "shared/commands/Command";

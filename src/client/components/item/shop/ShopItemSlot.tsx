@@ -2,7 +2,7 @@ import { OnoeNum } from "@antivivi/serikanum";
 import React, { Fragment, useEffect, useRef, useState } from "@rbxts/react";
 import displayBalanceCurrency from "client/components/balance/displayBalanceCurrency";
 import { useItemViewport } from "client/components/item/useCIViewportManagement";
-import { RobotoSlabHeavy } from "client/GameFonts";
+import { RobotoSlabHeavy } from "shared/asset/GameFonts";
 import { getAsset } from "shared/asset/AssetMap";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import { CURRENCY_DETAILS } from "shared/currency/CurrencyDetails";

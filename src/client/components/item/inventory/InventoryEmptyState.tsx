@@ -5,7 +5,7 @@
  */
 
 import React from "@rbxts/react";
-import { RobotoSlab, RobotoSlabHeavy } from "client/GameFonts";
+import { RobotoSlab, RobotoSlabHeavy } from "shared/asset/GameFonts";
 
 interface InventoryEmptyStateProps {
     /** Whether the empty state should be visible */

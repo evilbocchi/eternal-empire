@@ -12,7 +12,7 @@
 
 import React, { Fragment, useEffect, useRef, useState } from "@rbxts/react";
 import { RunService, TweenService } from "@rbxts/services";
-import { RobotoSlabBold, RobotoSlabHeavy } from "client/GameFonts";
+import { RobotoSlabBold, RobotoSlabHeavy } from "shared/asset/GameFonts";
 import { getAsset } from "shared/asset/AssetMap";
 import { playSound } from "shared/asset/GameAssets";
 import Items from "shared/items/Items";

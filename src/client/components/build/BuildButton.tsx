@@ -8,7 +8,7 @@
 import React, { useCallback, useRef, useState } from "@rbxts/react";
 import { TweenService } from "@rbxts/services";
 import BuildManager from "client/components/build/BuildManager";
-import { RobotoSlabMedium } from "client/GameFonts";
+import { RobotoSlabMedium } from "shared/asset/GameFonts";
 
 interface BuildButtonProps {
     /** Button anchor point */

@@ -15,13 +15,11 @@
  */
 
 import { OnStart, Service } from "@flamework/core";
-import { MessagingService, Players, TeleportService, TextService } from "@rbxts/services";
+import { Players, TeleportService } from "@rbxts/services";
 import DataService from "server/services/data/DataService";
 import { OnPlayerAdded } from "server/services/ModdingService";
 import ChatHookService from "server/services/permissions/ChatHookService";
-import { getNameFromUserId } from "shared/constants";
-import { IS_EDIT, IS_SINGLE_SERVER } from "shared/Context";
-import eat from "shared/hamster/eat";
+import { IS_SINGLE_SERVER } from "shared/Context";
 import Packets from "shared/Packets";
 
 declare global {
@@ -222,43 +220,9 @@ export default class PermissionsService implements OnStart, OnPlayerAdded {
             `Your permission level is ${permLevel}. Type /help for a list of available commands.`,
             "color:138,255,138",
         );
-        let counter = 0;
-        const connection = player.Chatted.Connect((message) => {
-            if (this.dataService.empireData.globalChat === true && message.sub(1, 1) !== "/") {
-                ++counter;
-                task.delay(5, () => --counter);
-                if (counter > 5) {
-                    return;
-                }
-                task.spawn(() => {
-                    MessagingService.PublishAsync("GlobalChat", {
-                        player: player.UserId,
-                        message: TextService.FilterStringAsync(
-                            message,
-                            player.UserId,
-                        ).GetNonChatStringForBroadcastAsync(),
-                    });
-                });
-            }
-        });
-        eat(connection, "Disconnect");
     }
 
     onStart() {
-        if (!IS_EDIT) {
-            MessagingService.SubscribeAsync("GlobalChat", (message) => {
-                if (this.dataService.empireData.globalChat !== true) return;
-                const data = message.Data as { player: number; message: string };
-                if (this.dataService.empireData.blocking.has(data.player)) return;
-                for (const player of Players.GetPlayers()) {
-                    if (player.UserId === data.player) {
-                        return;
-                    }
-                }
-                const name = getNameFromUserId(data.player);
-                this.chatHookService.sendServerMessage(`${name}:  ${data.message}`, "tag:hidden;color:180,180,180;");
-            });
-        }
         Packets.permLevels.set(this.dataService.empireData.permLevels);
     }
 }

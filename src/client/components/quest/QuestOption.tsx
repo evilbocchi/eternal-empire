@@ -2,7 +2,7 @@ import React, { useEffect, useRef } from "@rbxts/react";
 import { TweenService } from "@rbxts/services";
 import { getPositionDetails } from "client/components/quest/TrackedQuestWindow";
 import { getLengthColor, getLengthName, getRewardLabel } from "client/components/quest/useQuestData";
-import { RobotoSlabBold, RobotoSlabExtraBold, RobotoSlabHeavy, RobotoSlabMedium } from "client/GameFonts";
+import { RobotoSlabBold, RobotoSlabExtraBold, RobotoSlabHeavy, RobotoSlabMedium } from "shared/asset/GameFonts";
 import { getAsset } from "shared/asset/AssetMap";
 
 interface QuestOptionProps {

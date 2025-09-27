@@ -2,7 +2,7 @@ import React, { Fragment, useEffect, useRef, useState } from "@rbxts/react";
 import { TweenService } from "@rbxts/services";
 import { useItemViewport } from "client/components/item/useCIViewportManagement";
 import { TooltipManager } from "client/components/tooltip/TooltipWindow";
-import { RobotoSlab, RobotoSlabBold } from "client/GameFonts";
+import { RobotoSlab, RobotoSlabBold } from "shared/asset/GameFonts";
 import { getAsset } from "shared/asset/AssetMap";
 import { playSound } from "shared/asset/GameAssets";
 import Items from "shared/items/Items";

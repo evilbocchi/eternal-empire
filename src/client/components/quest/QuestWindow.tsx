@@ -4,7 +4,7 @@ import { useQuestData } from "client/components/quest/useQuestData";
 import useSingleDocument from "client/components/sidebar/useSingleDocumentWindow";
 import BasicWindow from "client/components/window/BasicWindow";
 import ProgressBar from "client/components/window/ProgressBar";
-import { RobotoSlabHeavy } from "client/GameFonts";
+import { RobotoSlabHeavy } from "shared/asset/GameFonts";
 import { getAsset } from "shared/asset/AssetMap";
 import { playSound } from "shared/asset/GameAssets";
 import { getMaxXp } from "shared/constants";

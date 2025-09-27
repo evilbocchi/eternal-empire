@@ -5,7 +5,7 @@
 import { PARALLEL } from "client/constants";
 import { loadItemIntoViewport } from "client/components/item/ItemViewport";
 import { TooltipManager } from "client/components/tooltip/TooltipWindow";
-import { RobotoSlab } from "client/GameFonts";
+import { RobotoSlab } from "shared/asset/GameFonts";
 import { getAsset } from "shared/asset/AssetMap";
 import type Item from "shared/item/Item";
 

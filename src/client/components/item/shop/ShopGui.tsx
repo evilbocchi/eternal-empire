@@ -10,7 +10,7 @@ import { PurchaseManager } from "client/components/item/shop/PurchaseWindow";
 import { createShopSlot, updateShopSlot, type ShopSlotHandle } from "client/components/item/shop/ShopSlot";
 import { getPlayerCharacter } from "shared/hamster/getPlayerCharacter";
 import { showErrorToast } from "client/components/toast/ToastService";
-import { RobotoSlabHeavy } from "client/GameFonts";
+import { RobotoSlabHeavy } from "shared/asset/GameFonts";
 import useProperty from "client/hooks/useProperty";
 import { getSound, playSound } from "shared/asset/GameAssets";
 import Item from "shared/item/Item";

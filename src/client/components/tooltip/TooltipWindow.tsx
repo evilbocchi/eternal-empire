@@ -2,7 +2,7 @@ import Signal from "@antivivi/lemon-signal";
 import React, { useEffect, useMemo, useRef } from "@rbxts/react";
 import { RunService, TweenService, Workspace } from "@rbxts/services";
 import { Environment } from "@rbxts/ui-labs";
-import { RobotoSlab, RobotoSlabBold, RobotoSlabExtraBold, RobotoSlabMedium } from "client/GameFonts";
+import { RobotoSlab, RobotoSlabBold, RobotoSlabExtraBold, RobotoSlabMedium } from "shared/asset/GameFonts";
 import getDifficultyDisplayColors from "client/components/tooltip/getDifficultyDisplayColors";
 import Packets from "shared/Packets";
 import { getAsset } from "shared/asset/AssetMap";

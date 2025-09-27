@@ -3,7 +3,7 @@ import React, { useEffect, useState, useMemo } from "@rbxts/react";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import "shared/marketplace/MarketplaceListing";
 import Packets from "shared/Packets";
-import { RobotoSlab, RobotoSlabBold } from "client/GameFonts";
+import { RobotoSlab, RobotoSlabBold } from "shared/asset/GameFonts";
 import { useDocument } from "client/components/window/DocumentManager";
 import ActionButton from "../item/printer/ActionButton";
 import CurrencyDisplay from "./CurrencyDisplay";

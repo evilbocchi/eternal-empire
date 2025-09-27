@@ -1,5 +1,5 @@
 import React from "@rbxts/react";
-import { RobotoSlab, RobotoSlabBold, RobotoSlabMedium } from "client/GameFonts";
+import { RobotoSlab, RobotoSlabBold, RobotoSlabMedium } from "shared/asset/GameFonts";
 import useHover from "client/hooks/useHover";
 
 interface CommandOptionProps {

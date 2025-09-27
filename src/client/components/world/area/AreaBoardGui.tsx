@@ -1,6 +1,6 @@
 import React, { ReactNode, useEffect, useState } from "@rbxts/react";
 import ProgressBar from "client/components/window/ProgressBar";
-import { RobotoMono, RobotoMonoBold, RobotoSlabHeavy } from "client/GameFonts";
+import { RobotoMono, RobotoMonoBold, RobotoSlabHeavy } from "shared/asset/GameFonts";
 import Area from "shared/world/Area";
 
 declare global {

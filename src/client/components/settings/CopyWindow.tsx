@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "@rbxts/react";
 import useSingleDocument from "client/components/sidebar/useSingleDocumentWindow";
 import TechWindow from "client/components/window/TechWindow";
-import { RobotoMono } from "client/GameFonts";
+import { RobotoMono } from "shared/asset/GameFonts";
 import Packets from "shared/Packets";
 
 export default function CopyWindow() {

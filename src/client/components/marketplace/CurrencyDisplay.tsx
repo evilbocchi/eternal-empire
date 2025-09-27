@@ -1,5 +1,5 @@
 import React from "@rbxts/react";
-import { RobotoSlab } from "client/GameFonts";
+import { RobotoSlab } from "shared/asset/GameFonts";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 
 interface CurrencyDisplayProps {

@@ -1,6 +1,6 @@
 import React, { Fragment } from "@rbxts/react";
 import PurchaseOption from "client/components/item/upgrade/PurchaseOption";
-import { RobotoMono, RobotoMonoBold } from "client/GameFonts";
+import { RobotoMono, RobotoMonoBold } from "shared/asset/GameFonts";
 import { getAsset } from "shared/asset/AssetMap";
 import NamedUpgrade from "shared/namedupgrade/NamedUpgrade";
 

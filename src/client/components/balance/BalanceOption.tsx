@@ -4,7 +4,7 @@ import { Debris, TweenService } from "@rbxts/services";
 import StringBuilder from "@rbxts/stringbuilder";
 import displayBalanceCurrency from "client/components/balance/displayBalanceCurrency";
 import { TooltipManager } from "client/components/tooltip/TooltipWindow";
-import { RobotoMono, RobotoSlab, RobotoSlabBold } from "client/GameFonts";
+import { RobotoMono, RobotoSlab, RobotoSlabBold } from "shared/asset/GameFonts";
 import { getAsset } from "shared/asset/AssetMap";
 import { CURRENCY_DETAILS } from "shared/currency/CurrencyDetails";
 import Softcaps, { performSoftcap } from "shared/currency/mechanics/Softcaps";

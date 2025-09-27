@@ -3,7 +3,7 @@ import { Debris, TweenService } from "@rbxts/services";
 import ProgressBar from "client/components/window/ProgressBar";
 import { observeCharacter } from "client/constants";
 import { getPlayerCharacter } from "shared/hamster/getPlayerCharacter";
-import { RobotoSlabExtraBold } from "client/GameFonts";
+import { RobotoSlabExtraBold } from "shared/asset/GameFonts";
 import { emitEffect, playSound } from "shared/asset/GameAssets";
 import Items from "shared/items/Items";
 import { AREAS } from "shared/world/Area";

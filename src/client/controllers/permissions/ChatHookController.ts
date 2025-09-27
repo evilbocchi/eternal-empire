@@ -26,7 +26,7 @@ import Packets from "shared/Packets";
 @Controller()
 export default class ChatHookController implements OnStart {
     /** Hex color string for system messages. */
-    systemColor = new Color3(0.05, 0.75, 0.05).ToHex();
+    readonly SYSTEM_COLOR = new Color3(0.05, 0.75, 0.05).ToHex();
 
     /**
      * Sets up a chat channel for custom message formatting and color overrides.
@@ -36,10 +36,9 @@ export default class ChatHookController implements OnStart {
         if (!channel.IsA("TextChannel")) {
             return;
         }
-        const color = channel.GetAttribute("Color") as Color3 | undefined;
         const onMessageAdded = (message: TextChatMessage) => {
             const metadatas = message.Metadata.split(";");
-            let c = color;
+            let color: Color3 | undefined;
             let showTag = true;
 
             for (const data of metadatas) {
@@ -47,27 +46,37 @@ export default class ChatHookController implements OnStart {
                 if (propName === "color") {
                     const [r, g, b] = prop.split(",");
                     if (r === "255" && g === "255" && b === "255") {
-                        c = undefined;
+                        color = undefined;
                     } else {
-                        c = Color3.fromRGB(tonumber(r) ?? 0, tonumber(g) ?? 0, tonumber(b) ?? 0);
+                        color = Color3.fromRGB(tonumber(r) ?? 0, tonumber(g) ?? 0, tonumber(b) ?? 0);
                     }
                 } else if (propName === "tag" && prop === "hidden") {
                     showTag = false;
                 }
             }
             if (message.PrefixText === "") {
-                if (showTag === true) message.PrefixText = `<font color="#${this.systemColor}">[SYSTEM]:</font>`;
+                if (showTag === true) message.PrefixText = `<font color="#${this.SYSTEM_COLOR}">[SYSTEM]:</font>`;
             } else
                 message.PrefixText = `<font color="#${ComputeNameColor(message.PrefixText.sub(1, message.PrefixText.size() - 1)).ToHex()}">${message.PrefixText}</font>`;
 
             let text = message.Text;
-            if (c !== undefined) {
-                text = `<font color="#${c.ToHex()}">${text}</font>`;
+            if (color !== undefined) {
+                text = `<font color="#${color.ToHex()}">${text}</font>`;
             }
             const overrideProperties = new Instance("TextChatMessageProperties");
-            if (c !== undefined) overrideProperties.Text = text;
+            if (color !== undefined) overrideProperties.Text = text;
             return overrideProperties;
         };
+        const connection = channel.MessageReceived.Connect((incomingMessage) => {
+            if (incomingMessage.TextSource?.UserId !== LOCAL_PLAYER?.UserId) {
+                return;
+            }
+            if (channel.Name === "Global") {
+                Packets.sendGlobalMessage.toServer(incomingMessage.Text);
+            }
+        });
+        eat(connection, "Disconnect");
+
         eat(
             // for some reason OnIncomingMessage can get overridden by other scripts, so we need to keep setting it
             simpleInterval(() => {
@@ -82,7 +91,7 @@ export default class ChatHookController implements OnStart {
      * @param metadata Optional metadata for formatting.
      */
     showPersonalMessage(message: string, metadata = "") {
-        this.display(LOCAL_PLAYER!.Name, message, metadata);
+        this.display("RBXGeneral", message, metadata);
     }
 
     /**

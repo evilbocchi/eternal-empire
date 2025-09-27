@@ -4,7 +4,7 @@ import React, { useCallback, useEffect, useRef, useState } from "@rbxts/react";
 import { Players } from "@rbxts/services";
 import { showErrorToast } from "client/components/toast/ToastService";
 import MenuOption, { BaseMenuOption } from "client/components/start/MenuOption";
-import { RobotoSlab, RobotoSlabBold, RobotoSlabHeavy } from "client/GameFonts";
+import { RobotoSlab, RobotoSlabBold, RobotoSlabHeavy } from "shared/asset/GameFonts";
 import useProperty from "client/hooks/useProperty";
 import { playSound } from "shared/asset/GameAssets";
 import { getNameFromUserId } from "shared/constants";
