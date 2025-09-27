@@ -28,6 +28,7 @@ import NamedUpgradeService from "server/services/data/NamedUpgradeService";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import { CURRENCIES } from "shared/currency/CurrencyDetails";
 import { RESET_LAYERS } from "shared/currency/mechanics/ResetLayer";
+import eat from "shared/hamster/eat";
 import Droplet from "shared/item/Droplet";
 import Item from "shared/item/Item";
 import Furnace from "shared/item/traits/Furnace";
@@ -537,6 +538,7 @@ export default class ProgressionEstimationService implements OnGameAPILoaded, On
         stringValue.Name = "ProgressionEstimationReport";
         stringValue.Value = message;
         stringValue.Parent = Workspace;
+        eat(stringValue, "Destroy");
     }
 
     /**

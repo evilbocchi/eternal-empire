@@ -20,8 +20,10 @@ declare global {
     }
 
     interface InstanceInfo {
+        /** The ID of the laser that this instance is associated with. */
         LaserId?: string;
         Enabled?: boolean;
+        /** The upgrades applied to this instance, keyed by laser ID. */
         Upgrades?: Map<string, UpgradeInfo>;
         ParentInfo?: InstanceInfo;
         OriginalTransparency?: number;
@@ -82,25 +84,20 @@ export default class Upgrader extends Operative {
      * @param laser The laser part being hooked.
      * @param upgradedEvent The event fired when the laser is upgraded.
      * @param deco Optional decoration function to modify the upgrade info.
-     * @param laserId Optional unique identifier for the laser. If not provided, it is generated based on the item and model names.
      */
-    static hookLaser(
-        model: Model,
-        upgrader: Upgrader,
-        laser: BasePart,
-        deco?: (upgrade: UpgradeInfo) => void,
-        laserId?: string,
-    ) {
+    static hookLaser(model: Model, upgrader: Upgrader, laser: BasePart, deco?: (upgrade: UpgradeInfo) => void) {
         const item = upgrader.item;
         const modelInfo = getAllInstanceInfo(model);
         const laserInfo = getAllInstanceInfo(laser);
-        laserId ??= upgrader.isStacks === false ? item.id : model.Name + laserInfo.LaserId;
+        const placementId = model.Name;
         VirtualCollision.onDropletTouched(model, laser, (droplet, instanceInfo) => {
             if (instanceInfo.Incinerated === true) return;
             if (upgrader.requirement !== undefined && !upgrader.requirement(instanceInfo)) return;
 
             if (laserInfo.Sky === true) instanceInfo.Sky = true;
             let upgrades = instanceInfo.Upgrades;
+
+            const laserId = upgrader.isStacks === false ? item.id : placementId + "_" + laserInfo.LaserId;
             if (upgrades === undefined) upgrades = new Map();
             else if (upgrades.has(laserId) || modelInfo.Maintained === false || laserInfo.Enabled === false) return;
 

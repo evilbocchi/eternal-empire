@@ -12,17 +12,27 @@ export default class NoobDropletSlayer extends ItemTrait {
     static load(model: Model, slayer: NoobDropletSlayer) {
         const item = slayer.item;
         const instanceInfo = getAllInstanceInfo(model);
-        const baseLaser = model.WaitForChild("Laser") as BasePart;
-        const laserInfo = getAllInstanceInfo(baseLaser);
+        const laser = model.WaitForChild("Laser") as BasePart;
+        const laserInfo = getAllInstanceInfo(laser);
         laserInfo.Enabled = false;
         let i = 0;
         let hasRadioNoob = false;
         const ref = item.repeat(
             model,
             () => {
-                this.activatePacket.toAllClients(model);
+                if (hasRadioNoob) {
+                    i++;
+                    if (i >= 2) {
+                        i = 0;
+                    }
+                    // Cycle between 0 and 1 to allow double registrations
+                    laserInfo.LaserId = tostring(i);
+                } else {
+                    laserInfo.LaserId = "0";
+                }
                 laserInfo.Enabled = true;
                 task.delay(0.5, () => (laserInfo.Enabled = false));
+                this.activatePacket.toAllClients(model);
             },
             slayer.cooldown,
         );

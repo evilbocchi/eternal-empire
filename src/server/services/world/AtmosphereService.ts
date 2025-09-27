@@ -15,7 +15,7 @@
 
 import { setInstanceInfo } from "@antivivi/vrldk";
 import { OnInit, OnPhysics, Service } from "@flamework/core";
-import { CollectionService, Lighting, TweenService, Workspace } from "@rbxts/services";
+import { CollectionService, Debris, Lighting, TweenService, Workspace } from "@rbxts/services";
 import DataService from "server/services/data/DataService";
 import { getSound } from "shared/asset/GameAssets";
 import Packets from "shared/Packets";
@@ -277,6 +277,7 @@ export default class AtmosphereService implements OnInit, OnPhysics {
         task.delay(2, () => {
             setInstanceInfo(droplet, "LightningSurged", false);
         });
+        Debris.AddItem(light, 2);
     }
 
     /**

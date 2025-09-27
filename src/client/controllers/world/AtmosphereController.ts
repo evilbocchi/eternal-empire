@@ -29,7 +29,7 @@ import WorldNode from "shared/world/nodes/WorldNode";
 @Controller()
 export default class AtmosphereController implements OnInit, OnStart {
     /** Map of Light instances to their base brightness. */
-    cyclingLights = new Map<Light, number>();
+    readonly cyclingLights = new Map<Light, number>();
 
     rainy = false;
 
@@ -72,10 +72,17 @@ export default class AtmosphereController implements OnInit, OnStart {
      * Starts the AtmosphereController, updates light brightness and shadows based on quality and time of day.
      */
     onStart() {
-        new WorldNode("CyclingLight", (container) => {
-            const light = this.findLight(container);
-            if (light !== undefined) this.cyclingLights.set(light, light.Brightness);
-        });
+        new WorldNode(
+            "CyclingLight",
+            (container) => {
+                const light = this.findLight(container);
+                if (light !== undefined) this.cyclingLights.set(light, light.Brightness);
+            },
+            (container) => {
+                const light = this.findLight(container);
+                if (light !== undefined) this.cyclingLights.delete(light);
+            },
+        );
 
         let oldQualityLevel = UserGameSettings!.SavedQualityLevel.Value;
         const options = { interval: 1 };

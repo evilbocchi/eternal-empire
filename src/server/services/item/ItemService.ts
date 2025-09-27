@@ -331,24 +331,34 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
             if (area === undefined) return 0;
         }
 
-        let overallSuccess = true;
-        let i = 0;
         let totalAmount = 0;
         const placedItems = new Array<IdPlacedItem>();
+        const placementIds = new Array<string>();
         for (const item of items) {
             const [placedItem, amount] = this.serverPlace(item.id, item.position, item.rotation, area);
-            if (placedItem !== undefined) {
-                if (amount !== undefined) {
-                    // if this is a normal item
-                    totalAmount += amount;
+            if (placedItem === undefined) {
+                if (placementIds.size() > 0) {
+                    this.unplaceItems(player, placementIds);
                 }
-                placedItems.push(placedItem);
-            } else overallSuccess = false;
-            i++;
+                return 0;
+            }
+
+            if (amount !== undefined) {
+                // if this is a normal item
+                totalAmount += amount;
+            }
+            placedItems.push(placedItem);
+            placementIds.push(placedItem.id);
         }
+        const placedCount = placedItems.size();
+        if (placedCount === 0) {
+            return 0;
+        }
+
         this.itemsPlaced.fire(player, placedItems);
-        if (i === 0 || overallSuccess === false) return 0;
-        if (i === 1) return totalAmount === 0 ? 1 : 2;
+        if (placedCount === 1) {
+            return totalAmount === 0 ? 1 : 2;
+        }
         return 1;
     }
 
@@ -382,11 +392,13 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
                     return $tuple(undefined);
                 }
             }
-        } else if (itemAmount < 1 || rotation % 90 !== 0) {
+        } else if (itemAmount < 1) {
             // Validate item requirements
             return $tuple(undefined);
         }
 
+        // Round rotation to nearest 90 degrees
+        rotation = math.round(rotation / 90) * 90;
         rotation %= 360;
 
         const placedItems = itemsData.worldPlaced;

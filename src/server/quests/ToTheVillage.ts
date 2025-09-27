@@ -1,13 +1,13 @@
 import { playSoundAtPart } from "@antivivi/vrldk";
-import { TweenService, Workspace } from "@rbxts/services";
+import { Debris, TweenService, Workspace } from "@rbxts/services";
 import Freddy from "server/interactive/npc/Freddy";
 import { Dialogue } from "server/interactive/npc/NPC";
 import SlamoReceptionist from "server/interactive/npc/Slamo Receptionist";
 import SlamoRefugee from "server/interactive/npc/Slamo Refugee";
 import Quest, { Stage } from "server/quests/Quest";
+import { Server } from "shared/api/APIExpose";
 import { getEffect, getSound, playSound } from "shared/asset/GameAssets";
 import { WAYPOINTS } from "shared/constants";
-import { Server } from "shared/api/APIExpose";
 import ChargedEmpoweredBrick from "shared/items/negative/instantwin/ChargedEmpoweredBrick";
 import EmpoweredBrick from "shared/items/negative/instantwin/EmpoweredBrick";
 import XLWool from "shared/items/negative/relax/XLWool";
@@ -362,6 +362,7 @@ export = new Quest(script.Name)
                         Range: 0,
                         Brightness: 0,
                     }).Play();
+                    Debris.AddItem(light, 1);
 
                     linkwayEffect.Emit(4);
                     playSoundAtPart(particlePart, getSound("LaserExplosion.mp3"), 2);

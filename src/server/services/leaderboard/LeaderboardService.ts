@@ -14,6 +14,7 @@ import { OnoeNum } from "@antivivi/serikanum";
 import { simpleInterval } from "@antivivi/vrldk";
 import { OnStart, Service } from "@flamework/core";
 import { CollectionService, DataStoreService, Players } from "@rbxts/services";
+import type { LeaderboardEntry, LeaderboardType } from "client/components/leaderboard/Leaderboard";
 import DataService from "server/services/data/DataService";
 import { getNameFromUserId } from "shared/constants";
 import { IS_EDIT, IS_STUDIO } from "shared/Context";
@@ -57,7 +58,7 @@ export class LeaderboardService implements OnStart {
      * @returns Formatted leaderboard entries
      */
     private convertToLeaderboardEntries(lbDatas: { key: string; value: unknown }[]): LeaderboardEntry[] {
-        const entries: LeaderboardEntry[] = [];
+        const entries = new Array<LeaderboardEntry>();
         for (let i = 0; i < lbDatas.size(); i++) {
             const data = lbDatas[i];
             if (data !== undefined) {

@@ -57,12 +57,14 @@ export class LeaderboardController implements OnStart, LeaderboardDataManager {
 
     onStart() {
         const ROOTS_PER_LEADERBOARD = new Map<Instance, Root>();
+        const SURFACE_GUIS_PER_LEADERBOARD = new Map<Instance, SurfaceGui>();
         observeTag(
             "Leaderboard",
             (leaderboard) => {
                 const guiPart = leaderboard.WaitForChild("GuiPart") as BasePart;
                 const surfaceGui = new Instance("SurfaceGui");
                 surfaceGui.Parent = guiPart;
+                SURFACE_GUIS_PER_LEADERBOARD.set(leaderboard, surfaceGui);
                 task.spawn(() => {
                     const root = createRoot(surfaceGui);
                     root.render(
@@ -79,6 +81,11 @@ export class LeaderboardController implements OnStart, LeaderboardDataManager {
                 }
             },
             (leaderboard) => {
+                const surfaceGui = SURFACE_GUIS_PER_LEADERBOARD.get(leaderboard);
+                if (surfaceGui) {
+                    surfaceGui.Destroy();
+                    SURFACE_GUIS_PER_LEADERBOARD.delete(leaderboard);
+                }
                 const root = ROOTS_PER_LEADERBOARD.get(leaderboard);
                 if (root) {
                     root.unmount();

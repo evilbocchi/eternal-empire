@@ -9,9 +9,9 @@ import { weldModel } from "@antivivi/vrldk";
 import { Debris, HttpService, ReplicatedStorage, TweenService, UserInputService, Workspace } from "@rbxts/services";
 import { Environment } from "@rbxts/ui-labs";
 import { ShopManager } from "client/components/item/shop/ShopGui";
+import { showErrorToast } from "client/components/toast/ToastService";
 import DocumentManager from "client/components/window/DocumentManager";
 import { NONCOLLISION_COLOR } from "client/constants";
-import { showErrorToast } from "client/components/toast/ToastService";
 import { getSound, playSound } from "shared/asset/GameAssets";
 import { CAMERA, PLACED_ITEMS_FOLDER } from "shared/constants";
 import Item from "shared/item/Item";
@@ -256,10 +256,9 @@ namespace BuildManager {
 
     /**
      * Attempts to place all selected items in the world.
-     * @returns True if placement succeeded, false otherwise.
      */
     export function placeSelected() {
-        if (mainSelected === undefined) return false;
+        if (mainSelected === undefined) return "Nothing selected.";
 
         const data = new Array<PlacingInfo>();
         let item: Item | undefined;
@@ -269,25 +268,26 @@ namespace BuildManager {
         if (areaId !== undefined) {
             buildBounds ??= AREAS[areaId].buildBounds;
         }
-        if (buildBounds === undefined) return;
+        if (buildBounds === undefined) return "Cannot build here.";
 
         const grid = buildBounds.grid;
-        if (grid === undefined) return;
+        if (grid === undefined) return "Cannot build here.";
         const gridRotation = grid.Orientation.Y;
 
         for (const [selectedModel] of selected) {
             const itemId = selectedModel.GetAttribute("ItemId") as string | undefined;
-            if (itemId === undefined) return false;
+            if (itemId === undefined) return "Item ID missing.";
             item = Items.getItem(itemId);
-            if (item === undefined) return false;
+            if (item === undefined) return `Item ${itemId} does not exist.`;
 
-            if (ItemPlacement.isTouchingPlacedItem(selectedModel)) return false;
+            if (ItemPlacement.isTouchingPlacedItem(selectedModel)) return "Cannot place item here.";
 
-            if (baseplateBounds === undefined && !ItemPlacement.isInPlaceableArea(selectedModel, item)) return false;
+            if (baseplateBounds === undefined && !ItemPlacement.isInPlaceableArea(selectedModel, item))
+                return "Cannot place item here.";
 
             const primaryPart = selectedModel.PrimaryPart!;
             const indicator = primaryPart.FindFirstChild("Indicator") as BasePart;
-            if (indicator === undefined) return false;
+            if (indicator === undefined) return "Indicator not found.";
             const position = indicator.Position;
 
             // find the single number rotation from the CFrame
@@ -302,7 +302,7 @@ namespace BuildManager {
         debounce = tick();
 
         const status = Packets.placeItems.toServer(data);
-        if (status === 0) return false;
+        if (status === 0) return "Server rejected placement.";
 
         if (status === 1) {
             deselectAll();
@@ -311,8 +311,6 @@ namespace BuildManager {
             selectedModel.SetAttribute("InitialPosition", undefined);
             selectedModel.SetAttribute("InitialRotation", undefined);
         }
-
-        return true;
     }
 
     /**
@@ -475,14 +473,15 @@ namespace BuildManager {
                 if (indicator === undefined) continue;
                 primaryPart.CFrame = indicator.CFrame; // snap to indicator
             }
-            if (placeSelected() === true) {
+            const result = placeSelected();
+            if (result === undefined) {
                 playSound("Place.mp3", undefined, (sound) => {
                     sound.PlaybackSpeed = 1 / (size + 5) + 0.84;
                     sound.Volume = 0.7;
                 });
             } else {
                 playSound("Error.mp3");
-                showErrorToast("Can't place that here.");
+                showErrorToast(result);
             }
             lastSelectingCFrame = selectingCFrame;
             return;
