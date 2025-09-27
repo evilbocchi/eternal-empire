@@ -9,6 +9,8 @@ import eat from "shared/hamster/eat";
 import Droplet from "shared/item/Droplet";
 import type Item from "shared/item/Item";
 
+type DropletTouchedCallback = NonNullable<InstanceInfo["DropletTouched"]>;
+
 function uid(instance: Instance) {
     return instance.GetAttribute("uid") as number;
 }
@@ -179,6 +181,7 @@ export namespace VirtualCollision {
     let batchFlushScheduled = false;
     let collisionOwnerPlayer: Player | undefined;
     let collisionOwnerUserId: number | undefined;
+    let collisionOwnerUserIdClient: number | undefined;
 
     function scheduleBatchFlush() {
         if (batchFlushScheduled) return;
@@ -247,6 +250,22 @@ export namespace VirtualCollision {
     function updateCollisionOwner() {
         if (!IS_SERVER) return;
         setCollisionOwner(computePreferredOwner());
+    }
+
+    export function getCollisionOwnerUserId() {
+        if (IS_SERVER) {
+            return collisionOwnerUserId;
+        }
+        return collisionOwnerUserIdClient;
+    }
+
+    export function getCollisionOwnerPlayer() {
+        if (IS_SERVER) {
+            return collisionOwnerPlayer;
+        }
+        const userId = collisionOwnerUserIdClient;
+        if (userId === undefined) return undefined;
+        return Players.GetPlayerByUserId(userId) ?? undefined;
     }
 
     if (IS_SERVER) {
@@ -346,11 +365,7 @@ export namespace VirtualCollision {
      * @param part The part to monitor for droplet touches.
      * @param callback The function to call when a droplet touches the part.
      */
-    export function onDropletTouched(
-        model: Model,
-        part: BasePart,
-        callback: (droplet: BasePart, dropletInfo: InstanceInfo) => void,
-    ) {
+    export function onDropletTouched(model: Model, part: BasePart, callback: DropletTouchedCallback) {
         part.CanTouch = true;
         const instanceInfo = getAllInstanceInfo(part);
         instanceInfo.DropletTouched = callback;
@@ -383,7 +398,7 @@ export namespace VirtualCollision {
             const reference = trackedInstances.get(part);
             if (reference === undefined) return;
 
-            const callback = reference?.get("DropletTouched");
+            const callback = reference?.get("DropletTouched") as DropletTouchedCallback | undefined;
             if (callback === undefined) return;
 
             const droplet = Droplet.MODEL_PER_SPAWN_ID.get(spawnId);
@@ -392,7 +407,7 @@ export namespace VirtualCollision {
             const dropletInfo = Droplet.SPAWNED_DROPLETS.get(droplet);
             if (dropletInfo === undefined) return;
 
-            (callback as (droplet: BasePart, dropletInfo: InstanceInfo) => void)(droplet, dropletInfo);
+            callback(droplet, dropletInfo);
         });
         eat(connection, "Disconnect");
 
@@ -432,9 +447,7 @@ export namespace VirtualCollision {
         const localPlayer = Players.LocalPlayer;
         const localUserId = localPlayer?.UserId;
 
-        let collisionOwnerId: number | undefined = shouldEnforceOwnership
-            ? collisionOwnerRequestPacket.toServer()
-            : undefined;
+        collisionOwnerUserIdClient = shouldEnforceOwnership ? collisionOwnerRequestPacket.toServer() : undefined;
 
         const hasOwnership = () => {
             if (!shouldEnforceOwnership) {
@@ -443,7 +456,7 @@ export namespace VirtualCollision {
             if (localUserId === undefined) {
                 return false;
             }
-            return collisionOwnerId === localUserId;
+            return collisionOwnerUserIdClient === localUserId;
         };
 
         const clearAllConnections = () => {
@@ -464,8 +477,8 @@ export namespace VirtualCollision {
 
         if (shouldEnforceOwnership) {
             const ownerConnection = collisionOwnerChangedPacket.fromServer((userId) => {
-                const previousOwnerId = collisionOwnerId;
-                collisionOwnerId = userId;
+                const previousOwnerId = collisionOwnerUserIdClient;
+                collisionOwnerUserIdClient = userId;
 
                 if (previousOwnerId === localUserId && userId !== localUserId) {
                     clearAllConnections();

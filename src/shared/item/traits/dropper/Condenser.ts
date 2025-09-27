@@ -118,8 +118,8 @@ export default class Condenser extends ItemTrait {
         const ZERO = new OnoeNum(0);
         const CurrencyService = Server.Currency;
         const RevenueService = Server.Revenue;
-        setInstanceInfo(model, "FurnaceProcessed", (result, raw, dropletModel) => {
-            const instanceInfo = getAllInstanceInfo(dropletModel);
+        setInstanceInfo(model, "FurnaceProcessed", (result, raw, droplet) => {
+            const instanceInfo = getAllInstanceInfo(droplet);
             if (instanceInfo.DropletId === undefined || instanceInfo.Condensed === true) {
                 return;
             }
@@ -142,7 +142,7 @@ export default class Condenser extends ItemTrait {
             if (!lostValue.isEmpty()) {
                 const lostCurrencies = RevenueService.performSoftcaps(lostValue);
                 CurrencyService.incrementAll(lostCurrencies);
-                Packets.dropletBurnt.toAllClients(dropletModel.Name, lostCurrencies);
+                Packets.dropletBurnt.toAllClients(droplet.Name, lostCurrencies);
             }
             const u = instanceInfo.Upgrades;
             if (u !== undefined) {

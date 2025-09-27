@@ -128,7 +128,6 @@ export function CurrencyGainManager() {
         };
 
         const connection = UISignals.showCurrencyGain.connect(showCurrencyGain);
-
         const gainConnection = Packets.dropletBurnt.fromServer((dropletModelId, amountPerCurrency) => {
             const dropletModel = CollectionService.GetTagged("Droplet").find(
                 (droplet) => droplet.Name === dropletModelId,
@@ -137,7 +136,7 @@ export function CurrencyGainManager() {
                 return;
             }
 
-            const t = tick();
+            const t = os.clock();
             let burnSound: Sound;
             const sizeMagnitude = dropletModel.Size.Magnitude / 2;
             const tweenInfo = new TweenInfo(sizeMagnitude / 2);
@@ -164,9 +163,9 @@ export function CurrencyGainManager() {
             TweenService.Create(dropletModel, tweenInfo, { Color: new Color3(), Size: new Vector3() }).Play();
 
             Debris.AddItem(dropletModel, 6);
-            dropletModel.Anchored = true;
+            dropletModel.Anchored = true; // NOTE: causes desync, server sees it stop without even touching lava
 
-            PingManager.logPing(tick() - t);
+            PingManager.logPing(os.clock() - t);
 
             showCurrencyGain(dropletModel.Position, amountPerCurrency);
         });

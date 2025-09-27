@@ -19,6 +19,12 @@ declare global {
         DropletId?: string;
         ItemId?: string;
         Area?: AreaId;
+
+        /**
+         * Fired when a droplet is touched by something.
+         * @param droplet The droplet that was touched.
+         * @param dropletInfo The information about the droplet.
+         */
         DropletTouched?: (droplet: BasePart, dropletInfo: InstanceInfo) => void;
         //RaycastParams?: RaycastParams;
     }

@@ -1,3 +1,5 @@
+//!native
+//!optimize 2
 import { OnoeNum } from "@antivivi/serikanum";
 import { findBaseParts, getAllInstanceInfo } from "@antivivi/vrldk";
 import { Debris } from "@rbxts/services";
@@ -42,14 +44,13 @@ export default class Furnace extends Operative {
 
         for (const lava of findBaseParts(model, "Lava")) {
             lava.SetAttribute("ItemId", item.id);
-            VirtualCollision.onDropletTouched(model, lava, (droplet: BasePart, dropletInfo: InstanceInfo) => {
+            VirtualCollision.onDropletTouched(model, lava, (droplet, dropletInfo) => {
                 if (dropletInfo.Incinerated === true) return;
                 if (instanceInfo.Area !== dropletInfo.Area && dropletInfo.LastTeleport === undefined) {
                     // Sanity check: droplet should be in the same area as the furnace unless it was teleported
                     return;
                 }
 
-                droplet.Anchored = true;
                 dropletInfo.Incinerated = true;
                 Debris.AddItem(droplet, 6);
 
@@ -75,8 +76,9 @@ export default class Furnace extends Operative {
                 for (const [currency, amount] of result.amountPerCurrency) {
                     if (amount.equals(ZERO)) result.amountPerCurrency.delete(currency);
                 }
-                Packets.dropletBurnt.toAllClients(droplet.Name, result.amountPerCurrency);
                 instanceInfo.FurnaceProcessed?.(result, worth, droplet, dropletInfo);
+                const amountPerCurrency = result.amountPerCurrency;
+                Packets.dropletBurnt.toAllClients(droplet.Name, amountPerCurrency);
             });
         }
         item.maintain(model);

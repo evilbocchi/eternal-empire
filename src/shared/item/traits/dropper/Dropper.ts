@@ -12,6 +12,7 @@ import eat from "shared/hamster/eat";
 import Droplet from "shared/item/Droplet";
 import Item from "shared/item/Item";
 import ItemTrait from "shared/item/traits/ItemTrait";
+import { VirtualCollision } from "shared/item/utils/VirtualReplication";
 import { AREAS } from "shared/world/Area";
 
 declare global {
@@ -40,12 +41,33 @@ export default class Dropper extends ItemTrait {
      */
     static wrapInstantiator(instantiator: () => BasePart, dropper: Dropper, model: Model, drop: BasePart) {
         const callback = dropper.dropletProduced;
+        const pickNetworkOwner = () => {
+            if (IS_EDIT) {
+                return undefined;
+            }
+
+            const collisionOwner = VirtualCollision.getCollisionOwnerPlayer();
+            if (collisionOwner !== undefined) {
+                return collisionOwner;
+            }
+
+            const empireOwnerId = ThisEmpire.data?.owner;
+            if (empireOwnerId !== undefined && empireOwnerId !== 0) {
+                const empireOwner = Players.GetPlayerByUserId(empireOwnerId);
+                if (empireOwner !== undefined) {
+                    return empireOwner;
+                }
+            }
+
+            const players = Players.GetPlayers();
+            return players.size() > 0 ? players[0] : undefined;
+        };
         return () => {
             const droplet = instantiator();
             droplet.Parent = Workspace;
 
-            const player = Players.GetPlayerByUserId(ThisEmpire.data.owner) ?? Players.GetPlayers()[0];
-            if (player !== undefined && !IS_EDIT) {
+            const player = pickNetworkOwner();
+            if (player !== undefined) {
                 droplet.SetNetworkOwner(player);
             }
 
@@ -56,8 +78,9 @@ export default class Dropper extends ItemTrait {
                     if (luckyDropletInstantiator !== undefined) {
                         const luckyDroplet = luckyDropletInstantiator();
                         luckyDroplet.Parent = Workspace;
-                        if (player !== undefined && !IS_EDIT) {
-                            luckyDroplet.SetNetworkOwner(player);
+                        const luckyOwner = pickNetworkOwner();
+                        if (luckyOwner !== undefined) {
+                            luckyDroplet.SetNetworkOwner(luckyOwner);
                         }
                     }
                 });
