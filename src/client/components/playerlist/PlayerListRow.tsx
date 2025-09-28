@@ -51,7 +51,6 @@ export default function PlayerListRow({ entry }: PlayerListRowProps) {
 
     return (
         <frame
-            key={`player-${entry.userId}`}
             BackgroundColor3={base}
             BorderSizePixel={0}
             LayoutOrder={entry.isLocal ? -1 : entry.joinOrder}
@@ -83,7 +82,6 @@ export default function PlayerListRow({ entry }: PlayerListRowProps) {
             />
 
             <frame
-                key="Identity"
                 AutomaticSize={Enum.AutomaticSize.XY}
                 BackgroundTransparency={1}
                 LayoutOrder={0}
@@ -98,7 +96,6 @@ export default function PlayerListRow({ entry }: PlayerListRowProps) {
                 />
 
                 <imagelabel
-                    key="Avatar"
                     BackgroundColor3={accent}
                     BackgroundTransparency={entry.thumbnail === undefined ? 0 : 1}
                     BorderSizePixel={0}
@@ -110,12 +107,7 @@ export default function PlayerListRow({ entry }: PlayerListRowProps) {
                     <uistroke Color={accent.Lerp(new Color3(0, 0, 0), 0.4)} Transparency={0.4} Thickness={1.5} />
                 </imagelabel>
 
-                <frame
-                    key="IdentityTexts"
-                    AutomaticSize={Enum.AutomaticSize.XY}
-                    BackgroundTransparency={1}
-                    LayoutOrder={1}
-                >
+                <frame AutomaticSize={Enum.AutomaticSize.XY} BackgroundTransparency={1} LayoutOrder={1}>
                     <uilistlayout
                         HorizontalAlignment={Enum.HorizontalAlignment.Left}
                         SortOrder={Enum.SortOrder.LayoutOrder}
@@ -123,7 +115,6 @@ export default function PlayerListRow({ entry }: PlayerListRowProps) {
                     />
 
                     <textlabel
-                        key="DisplayName"
                         AutomaticSize={Enum.AutomaticSize.XY}
                         BackgroundTransparency={1}
                         FontFace={RobotoSlabBold}
@@ -133,7 +124,7 @@ export default function PlayerListRow({ entry }: PlayerListRowProps) {
                         TextSize={18}
                         TextWrapped={true}
                     />
-                    <frame key="Meta" AutomaticSize={Enum.AutomaticSize.XY} BackgroundTransparency={1} LayoutOrder={1}>
+                    <frame AutomaticSize={Enum.AutomaticSize.XY} BackgroundTransparency={1} LayoutOrder={1}>
                         <uilistlayout
                             FillDirection={Enum.FillDirection.Horizontal}
                             HorizontalAlignment={Enum.HorizontalAlignment.Left}
@@ -142,7 +133,6 @@ export default function PlayerListRow({ entry }: PlayerListRowProps) {
                             VerticalAlignment={Enum.VerticalAlignment.Center}
                         />
                         <textlabel
-                            key="Username"
                             AutomaticSize={Enum.AutomaticSize.XY}
                             BackgroundTransparency={1}
                             FontFace={RobotoMono}
@@ -155,7 +145,6 @@ export default function PlayerListRow({ entry }: PlayerListRowProps) {
                         />
                         {entry.isDeveloper && (
                             <textlabel
-                                key="DeveloperBadge"
                                 AutomaticSize={Enum.AutomaticSize.XY}
                                 BackgroundColor3={accent}
                                 FontFace={RobotoMono}
@@ -175,7 +164,6 @@ export default function PlayerListRow({ entry }: PlayerListRowProps) {
                         )}
                         {entry.isLocal && (
                             <textlabel
-                                key="YouBadge"
                                 AutomaticSize={Enum.AutomaticSize.XY}
                                 BackgroundColor3={accent}
                                 FontFace={RobotoMono}
@@ -198,7 +186,6 @@ export default function PlayerListRow({ entry }: PlayerListRowProps) {
             </frame>
 
             <frame
-                key="Stats"
                 AutomaticSize={Enum.AutomaticSize.Y}
                 BackgroundTransparency={1}
                 LayoutOrder={1}
@@ -212,7 +199,6 @@ export default function PlayerListRow({ entry }: PlayerListRowProps) {
                 />
 
                 <textlabel
-                    key="Area"
                     AutomaticSize={Enum.AutomaticSize.Y}
                     BackgroundTransparency={1}
                     FontFace={RobotoMono}
@@ -226,7 +212,6 @@ export default function PlayerListRow({ entry }: PlayerListRowProps) {
                 />
 
                 <textlabel
-                    key="Donated"
                     AutomaticSize={Enum.AutomaticSize.XY}
                     BackgroundTransparency={1}
                     FontFace={RobotoMono}
