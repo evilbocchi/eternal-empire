@@ -96,7 +96,18 @@ export function activateItem(item: Item): boolean {
     }
 
     // Add placing model and select it
-    BuildManager.mainSelect(BuildManager.addPlacingModel(item, bestUuid));
+    BuildManager.mainSelect(
+        BuildManager.addPlacingModel({
+            item: item.id,
+            uniqueItemId: bestUuid,
+            posX: 0,
+            posY: 0,
+            posZ: 0,
+            rotX: 0,
+            rotY: 0,
+            rotZ: 0,
+        }),
+    );
 
     return true;
 }

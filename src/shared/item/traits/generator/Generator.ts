@@ -4,6 +4,7 @@ import { Players, TweenService } from "@rbxts/services";
 import { Server, UISignals } from "shared/api/APIExpose";
 import UserGameSettings from "shared/api/UserGameSettings";
 import { playSound } from "shared/asset/GameAssets";
+import { IS_EDIT } from "shared/Context";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
 import Boostable from "shared/item/traits/boost/Boostable";
@@ -101,24 +102,29 @@ export default class Generator extends Boostable {
                 );
                 const worth = Operative.coalesce(value, totalAdd, totalMul, totalPow).mul(dt);
                 const amountPerCurrency = RevenueService.performSoftcaps(worth.amountPerCurrency);
-                const players = Players.GetPlayers();
-                for (const player of players) {
+                Server.Currency.incrementAll(amountPerCurrency);
+
+                if (IS_EDIT && Players.LocalPlayer === undefined) {
+                    generatedPacket.toAllClients(model, amountPerCurrency);
+                    return;
+                }
+
+                for (const player of Players.GetPlayers()) {
                     const character = player.Character;
                     if (character === undefined) continue;
-                    const rootPart = character.FindFirstChild("HumanoidRootPart") as BasePart | undefined;
-                    if (rootPart === undefined) continue;
-                    if (rootPart.Position.sub(centre).Magnitude < 50 && os.clock() > 10) {
+                    const pivot = character.GetPivot();
+
+                    if (pivot.Position.sub(centre).Magnitude < 50 && os.clock() > 10) {
                         generatedPacket.toClient(model, player, amountPerCurrency);
                     }
                 }
-                Server.Currency.incrementAll(amountPerCurrency);
             },
             1,
         );
     }
 
     static clientLoad(model: Model) {
-        const part = (model.FindFirstChild("Marker") ?? model.PrimaryPart) as BasePart;
+        const marker = (model.FindFirstChild("Marker") ?? model.PrimaryPart) as BasePart;
         const positions = new Map<BasePart, Vector3>();
         for (const part of model.GetDescendants()) {
             if (!part.IsA("BasePart") || part.Name === "Base" || part.Parent!.Name === "Base") continue;
@@ -161,7 +167,7 @@ export default class Generator extends Boostable {
                     }).Play();
                 }
             } else {
-                UISignals.showCurrencyGain.fire(part.Position, amountPerCurrency);
+                UISignals.showCurrencyGain.fire(marker.Position, amountPerCurrency);
             }
         });
     }

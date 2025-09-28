@@ -1,4 +1,4 @@
-import { getAllInstanceInfo } from "@antivivi/vrldk";
+import { getAllInstanceInfo, getInstanceInfo } from "@antivivi/vrldk";
 import { packet } from "@rbxts/fletchette";
 import { Debris } from "@rbxts/services";
 import { PLACED_ITEMS_FOLDER } from "shared/constants";
@@ -56,27 +56,44 @@ export default class Charger extends Operative {
         if (chargerHitbox === undefined) return;
 
         const charging = new Set<Instance>();
-        const area = model.GetAttribute("Area");
+        const chargerArea = getInstanceInfo(model, "Area");
+
         const checkAdd = (generatorModel: Instance) => {
+            // Sanity checks
+
+            // is a model
             if (!generatorModel.IsA("Model")) return;
 
+            // can be charged
             const generatorInfo = getAllInstanceInfo(generatorModel);
             if (generatorInfo.Chargeable !== true) return;
 
+            // in the same area
             const generatorHitbox = generatorModel.PrimaryPart;
             if (
                 generatorHitbox === undefined ||
-                generatorModel.GetAttribute("Area") !== area ||
+                generatorInfo.Area !== chargerArea ||
                 !this.isInRange(charger, chargerHitbox, generatorHitbox)
             )
                 return;
 
+            // not already being charged by this charger
             const boosts = generatorInfo.Boosts;
             if (boosts === undefined || boosts.has(placementId)) return;
 
-            const whitelist = generatorInfo.Generator!.whitelist;
-            if (!whitelist.isEmpty() && !whitelist.has(chargerId)) return;
+            // has valid item IDs
+            const generatorItemId = generatorInfo.ItemId;
+            if (generatorItemId === undefined) return;
 
+            // is whitelisted
+            const chargerWhitelist = charger.whitelist;
+            if (!chargerWhitelist.isEmpty() && !chargerWhitelist.has(generatorItemId)) return;
+
+            const generatorWhitelist = generatorInfo.Generator?.whitelist;
+            if (generatorWhitelist !== undefined && !generatorWhitelist.isEmpty() && !generatorWhitelist.has(chargerId))
+                return;
+
+            // Check limit of two chargers per generator
             if (charger.ignoreLimit !== true) {
                 let existing = 0;
                 for (const [_, boost] of boosts) {
@@ -190,6 +207,8 @@ export default class Charger extends Operative {
         }
     }
 
+    readonly whitelist = new Set<string>();
+
     /**
      * Whether the charger ignores the limit of two chargers per generator.
      */
@@ -209,6 +228,16 @@ export default class Charger extends Operative {
         super(item);
         item.onLoad((model) => Charger.load(model, this));
         item.onClientLoad((model) => Charger.clientLoad(model));
+    }
+
+    /**
+     * Adds an item ID that the charger is allowed to charge.
+     * @param itemId The item ID to add to the whitelist.
+     * @returns This charger.
+     */
+    addToWhitelist(itemId: string) {
+        this.whitelist.add(itemId);
+        return this;
     }
 
     /**

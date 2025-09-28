@@ -127,5 +127,8 @@ export = new Item(script.Name)
             task.wait(1);
             partCache.ReturnPart(clone);
         });
-        model.Destroying.Once(() => connection.Disconnect());
+        model.Destroying.Once(() => {
+            connection.Disconnect();
+            partCache.Dispose();
+        });
     });

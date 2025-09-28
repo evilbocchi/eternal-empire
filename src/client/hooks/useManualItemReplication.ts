@@ -1,3 +1,4 @@
+import { getInstanceInfo } from "@antivivi/vrldk";
 import { useEffect } from "@rbxts/react";
 import { LOCAL_PLAYER } from "client/constants";
 import { PLACED_ITEMS_FOLDER } from "shared/constants";
@@ -13,7 +14,7 @@ function load(model: Instance) {
     if (!model.IsA("Model") || model.GetAttribute("Selected") === true || model.GetAttribute("applied") === true) {
         return;
     }
-    const itemId = model.GetAttribute("ItemId") as string | undefined;
+    const itemId = getInstanceInfo(model, "ItemId");
     if (itemId === undefined) {
         return;
     }

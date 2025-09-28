@@ -3,7 +3,7 @@
 
 import Difficulty from "@antivivi/jjt-difficulties";
 import { OnoeNum } from "@antivivi/serikanum";
-import { getAllInstanceInfo } from "@antivivi/vrldk";
+import { getAllInstanceInfo, setInstanceInfo } from "@antivivi/vrldk";
 import { RunService } from "@rbxts/services";
 import { IS_EDIT, IS_SERVER } from "shared/Context";
 import GameSpeed from "shared/GameSpeed";
@@ -31,6 +31,8 @@ declare global {
          * If {@link Item.drain} is set, this value will be `false` if the price is not affordable.
          */
         Maintained?: boolean;
+
+        PlacedItem?: PlacedItem;
     }
 
     type Toggleable = ParticleEmitter | Beam | Script;
@@ -259,12 +261,12 @@ export default class Item {
         );
 
         // Set model attributes for identification and functionality
+        const modelInfo = getAllInstanceInfo(model);
         model.SetAttribute("Area", placedItem.area);
         model.SetAttribute("ItemId", this.id);
-        model.SetAttribute("ItemName", this.name);
-        model.SetAttribute("UUID", placedItem.uniqueItemId);
-        model.SetAttribute("RawRotation", placedItem.rawRotation);
 
+        modelInfo.PlacedItem = placedItem;
+        modelInfo.ItemId = this.id;
         return model;
     }
 

@@ -1,4 +1,4 @@
-import { getInstanceInfo } from "@antivivi/vrldk";
+import { getAllInstanceInfo } from "@antivivi/vrldk";
 import Item from "shared/item/Item";
 import ItemTrait from "shared/item/traits/ItemTrait";
 import { AREAS } from "shared/world/Area";
@@ -9,6 +9,10 @@ declare global {
     }
 
     interface InstanceInfo {
+        /**
+         * The amount that the item model increases the droplet limit, overriding
+         * the {@link InstantiationDelimiter}'s value if set.
+         */
         DropletIncrease?: number;
     }
 }
@@ -17,16 +21,14 @@ export default class InstantiationDelimiter extends ItemTrait {
     static load(model: Model, delimiter: InstantiationDelimiter) {
         const item = delimiter.item;
 
-        const area = model.GetAttribute("Area") as AreaId | undefined;
-        if (area === undefined) throw `InstantiationDelimiter: ${model.Name} is not in an area`;
+        const modelInfo = getAllInstanceInfo(model);
+        const area = modelInfo.Area;
+        if (area === undefined) throw `InstantiationDelimiter ${model.Name} is not in an area`;
 
         item.repeat(
             model,
             () => {
-                const actual =
-                    getInstanceInfo(model, "Maintained") === true
-                        ? (getInstanceInfo(model, "DropletIncrease") ?? delimiter.dropletIncrease)
-                        : 0;
+                const actual = modelInfo.Maintained ? (modelInfo.DropletIncrease ?? delimiter.dropletIncrease) : 0;
                 AREAS[area].boostDropletLimit(model.Name, actual);
             },
             1,

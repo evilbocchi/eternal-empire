@@ -36,11 +36,17 @@ export = CreateReactStory(
             const testModels = new Array<Instance>();
 
             const createTestModel = (item: Item) => {
-                const testModel = item.MODEL?.Clone();
+                const testModel = item.createModel({
+                    item: item.id,
+                    posX: -testModels.size() * 50,
+                    posY: 30,
+                    posZ: 0,
+                    rotX: 0,
+                    rotY: 0,
+                    rotZ: 0,
+                });
                 if (!testModel) return;
-                testModel.SetAttribute("ItemId", item.id);
                 testModel.AddTag("Printer");
-                testModel.PivotTo(new CFrame(-testModels.size() * 50, 30, 0));
                 testModel.Parent = Workspace;
                 testModels.push(testModel);
             };

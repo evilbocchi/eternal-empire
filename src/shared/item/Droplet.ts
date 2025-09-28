@@ -769,7 +769,7 @@ export default class Droplet {
             model.CFrame = cframe;
         }
         const health = this.health;
-        const itemId = dropperModel.GetAttribute("ItemId") as string;
+        const itemId = getInstanceInfo(dropperModel, "ItemId");
         const areaId = Server.Item.getPlacedItem(dropperModel.Name)?.area as AreaId | undefined;
 
         return () => {

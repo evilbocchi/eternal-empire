@@ -1,3 +1,4 @@
+import { getInstanceInfo } from "@antivivi/vrldk";
 import { useEffect, useState } from "@rbxts/react";
 import { CollectionService } from "@rbxts/services";
 import Item from "shared/item/Item";
@@ -15,7 +16,7 @@ export default function useTaggedItemModels(tag: string) {
         const itemPerModel = new Map<Model, Item>();
         const registerModel = (model: Instance) => {
             if (!model.IsA("Model")) return;
-            const itemId = model.GetAttribute("ItemId") as string | undefined;
+            const itemId = getInstanceInfo(model, "ItemId");
             if (!itemId) return;
             const item = Items.getItem(itemId);
             if (!item) return;

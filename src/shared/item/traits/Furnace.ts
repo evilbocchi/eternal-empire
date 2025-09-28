@@ -1,7 +1,7 @@
 //!native
 //!optimize 2
 import { OnoeNum } from "@antivivi/serikanum";
-import { findBaseParts, getAllInstanceInfo } from "@antivivi/vrldk";
+import { findBaseParts, getAllInstanceInfo, setInstanceInfo } from "@antivivi/vrldk";
 import { Debris } from "@rbxts/services";
 import { Server } from "shared/api/APIExpose";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
@@ -43,7 +43,7 @@ export default class Furnace extends Operative {
         const item = furnace.item;
 
         for (const lava of findBaseParts(model, "Lava")) {
-            lava.SetAttribute("ItemId", item.id);
+            setInstanceInfo(lava, "ItemId", item.id);
             VirtualCollision.onDropletTouched(model, lava, (droplet, dropletInfo) => {
                 if (dropletInfo.Incinerated === true) return;
                 if (instanceInfo.Area !== dropletInfo.Area && dropletInfo.LastTeleport === undefined) {

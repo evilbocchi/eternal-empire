@@ -1,7 +1,7 @@
 import Difficulty from "@antivivi/jjt-difficulties";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
-import Charger from "shared/item/traits/generator/Charger";
 import Item from "shared/item/Item";
+import Charger from "shared/item/traits/generator/Charger";
 import MiniDropletSlayer from "shared/items/negative/relax/MiniDropletSlayer";
 
 export = new Item(script.Name)
@@ -17,5 +17,8 @@ export = new Item(script.Name)
 
     .trait(Charger)
     .setRadius(12)
+    .addToWhitelist("NoobClicker")
+    .addToWhitelist("DropletSlayerMkII")
+    .addToWhitelist("MiniDropletSlayer")
 
     .exit();

@@ -1,4 +1,5 @@
 import Signal from "@antivivi/lemon-signal";
+import { getInstanceInfo } from "@antivivi/vrldk";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "@rbxts/react";
 import { CollectionService, Debris, TweenService } from "@rbxts/services";
 import useHotkeyWithTooltip from "client/components/hotkeys/useHotkeyWithTooltip";
@@ -125,7 +126,7 @@ export default function ShopGui({ viewportManagement }: { viewportManagement?: I
         const addCandidate = (hitbox: BasePart) => {
             const model = hitbox.Parent;
             if (model === undefined) return;
-            const itemId = model.GetAttribute("ItemId") as string | undefined;
+            const itemId = getInstanceInfo(model, "ItemId");
             if (itemId === undefined) return;
             const item = Items.getItem(itemId);
             if (item === undefined) return;

@@ -5,7 +5,7 @@
  * Manages state synchronization and provides callbacks for build operations.
  */
 
-import { weldModel } from "@antivivi/vrldk";
+import { getAllInstanceInfo, weldModel } from "@antivivi/vrldk";
 import { Debris, HttpService, ReplicatedStorage, TweenService, UserInputService, Workspace } from "@rbxts/services";
 import { Environment } from "@rbxts/ui-labs";
 import { ShopManager } from "client/components/item/shop/ShopGui";
@@ -14,13 +14,21 @@ import DocumentManager from "client/components/window/DocumentManager";
 import { NONCOLLISION_COLOR } from "client/constants";
 import { getSound, playSound } from "shared/asset/GameAssets";
 import { CAMERA, PLACED_ITEMS_FOLDER } from "shared/constants";
-import Item from "shared/item/Item";
 import Items from "shared/items/Items";
 import Packets from "shared/Packets";
 import ItemPlacement from "shared/placement/ItemPlacement";
 import Sandbox from "shared/Sandbox";
 import { AREAS } from "shared/world/Area";
 import BuildGrid from "shared/world/nodes/BuildGrid";
+
+declare global {
+    interface InstanceInfo {
+        /** The initial position of the model when it was selected for placement. Client-side only. */
+        InitialPosition?: Vector3;
+        /** The initial rotation of the model when it was selected for placement. Client-side only. */
+        InitialRotation?: number;
+    }
+}
 
 namespace BuildManager {
     /**
@@ -153,7 +161,8 @@ namespace BuildManager {
         selected.set(model, new CFrame());
         preselectCFrame = model.PrimaryPart!.CFrame;
         mainSelected = model;
-        rotationValue.Value = (model.GetAttribute("InitialRotation") as number) ?? 0;
+        const modelInfo = getAllInstanceInfo(model);
+        rotationValue.Value = modelInfo.InitialRotation ?? 0;
 
         hover(undefined);
         model.SetAttribute("Selected", true);
@@ -188,14 +197,23 @@ namespace BuildManager {
         const data = new Array<PlacingInfo>();
         let hasAnyItems = false;
         for (const [selectedModel] of selected) {
-            const position = selectedModel?.GetAttribute("InitialPosition") as Vector3 | undefined;
+            const modelInfo = getAllInstanceInfo(selectedModel);
+
+            const placedItem = modelInfo.PlacedItem;
+            if (placedItem === undefined) continue;
+
+            const position = modelInfo.InitialPosition;
             if (position === undefined) continue;
-            const rotation = selectedModel?.GetAttribute("InitialRotation") as number | undefined;
+
+            const rotation = modelInfo.InitialRotation;
             if (rotation === undefined) continue;
+
+            const id = placedItem.uniqueItemId ?? modelInfo.ItemId;
+            if (id === undefined) continue;
 
             hasAnyItems = true;
             data.push({
-                id: (selectedModel.GetAttribute("UUID") ?? selectedModel.GetAttribute("ItemId")) as string,
+                id,
                 position,
                 rotation,
             });
@@ -207,30 +225,24 @@ namespace BuildManager {
 
     /**
      * Adds a model for placement, setting up attributes and selection visuals.
-     * @param item The item to place.
-     * @param uuid The unique identifier for the item (optional).
-     * @param cframe The initial CFrame for placement (optional).
-     * @param initialRotation The initial rotation for placement (optional).
+     * @param placedItem The placed item data.
      * @returns The created item model.
      */
-    export function addPlacingModel(item: Item, uuid?: string, cframe?: CFrame, initialRotation?: number) {
+    export function addPlacingModel(placedItem: PlacedItem) {
         debounce = tick();
-        const itemModel = item.MODEL?.Clone();
+        const item = Items.getItem(placedItem.item);
+        if (item === undefined) throw `Item ${placedItem.item} does not exist!`;
+
+        const itemModel = item.createModel(placedItem);
         if (itemModel === undefined) throw `Item ${item.name} has no model!`;
 
-        if (cframe !== undefined) {
-            itemModel.PivotTo(cframe);
-        }
+        const modelInfo = getAllInstanceInfo(itemModel);
+        modelInfo.InitialPosition = new Vector3(placedItem.posX, placedItem.posY, placedItem.posZ);
+        modelInfo.InitialRotation = placedItem.rawRotation;
+
         itemModel.Name = HttpService.GenerateGUID(false);
         itemModel.AddTag("Placing");
         itemModel.SetAttribute("Selected", true);
-        itemModel.SetAttribute("ItemName", item.name);
-        itemModel.SetAttribute("ItemId", item.id);
-        itemModel.SetAttribute("InitialPosition", cframe?.Position);
-        itemModel.SetAttribute("InitialRotation", initialRotation);
-        if (uuid !== undefined) {
-            itemModel.SetAttribute("UUID", uuid);
-        }
         weldModel(itemModel); // we are using tweens on primarypart
 
         const primaryPart = itemModel.PrimaryPart!;
@@ -264,7 +276,6 @@ namespace BuildManager {
         if (mainSelected === undefined) return "Nothing selected.";
 
         const data = new Array<PlacingInfo>();
-        let item: Item | undefined;
 
         const areaId = Packets.currentArea.get();
         let buildBounds = baseplateBounds;
@@ -278,9 +289,12 @@ namespace BuildManager {
         const gridRotation = grid.Orientation.Y;
 
         for (const [selectedModel] of selected) {
-            const itemId = selectedModel.GetAttribute("ItemId") as string | undefined;
+            const modelInfo = getAllInstanceInfo(selectedModel);
+
+            const itemId = modelInfo.ItemId;
             if (itemId === undefined) return "Item ID missing.";
-            item = Items.getItem(itemId);
+
+            const item = Items.getItem(itemId);
             if (item === undefined) return `Item ${itemId} does not exist.`;
 
             if (ItemPlacement.isTouchingPlacedItem(selectedModel)) return "Cannot place item here.";
@@ -298,7 +312,7 @@ namespace BuildManager {
             let rotation = math.floor(math.deg(math.atan2(-lookVector.X, -lookVector.Z)) - gridRotation + 180); // angle of look vector in xz plane (0-360)
             rotation %= 360;
 
-            const id = (selectedModel.GetAttribute("UUID") as string | undefined) ?? item.id;
+            const id = modelInfo.PlacedItem?.uniqueItemId ?? item.id;
 
             data.push({ id, position, rotation });
         }
@@ -309,10 +323,6 @@ namespace BuildManager {
 
         if (status === 1) {
             deselectAll();
-        }
-        for (const [selectedModel] of selected) {
-            selectedModel.SetAttribute("InitialPosition", undefined);
-            selectedModel.SetAttribute("InitialRotation", undefined);
         }
     }
 
@@ -442,12 +452,13 @@ namespace BuildManager {
                 const names = new Array<string>();
                 for (const model of dragging) {
                     names.push(model.Name);
-                    const placingModel = addPlacingModel(
-                        Items.getItem(model.GetAttribute("ItemId") as string)!,
-                        model.GetAttribute("UUID") as string | undefined,
-                        model.GetPivot(),
-                        (model.GetAttribute("RawRotation") as number | undefined) ?? 0,
-                    );
+                    const modelInfo = getAllInstanceInfo(model);
+
+                    const placedItem = modelInfo.PlacedItem;
+                    if (placedItem === undefined) continue;
+
+                    const placingModel = addPlacingModel(placedItem);
+
                     if (model === main) {
                         mainSelect(placingModel);
                     } else {

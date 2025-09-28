@@ -1,3 +1,4 @@
+import { getInstanceInfo } from "@antivivi/vrldk";
 import { Workspace } from "@rbxts/services";
 import { Server } from "shared/api/APIExpose";
 import { PLACED_ITEMS_FOLDER } from "shared/constants";
@@ -13,7 +14,7 @@ export default function getPlacedItemsInBounds(bounds: BasePart, Items = Server.
     const items = new Map<Model, Item>();
     for (const touching of array) {
         const target = touching.Parent as Model;
-        const itemId = target.GetAttribute("ItemId") as string;
+        const itemId = getInstanceInfo(target, "ItemId");
         if (itemId === undefined) {
             continue;
         }
