@@ -119,6 +119,40 @@ export default function SimulationCommandInterface() {
         const connection = game.GetService("UserInputService").InputBegan.Connect((input, gameProcessed) => {
             if (gameProcessed) return;
 
+            // Check for Shift+I shortcut to run /iset all 20
+            if (input.KeyCode === Enum.KeyCode.I) {
+                const userInputService = game.GetService("UserInputService");
+                if (
+                    userInputService.IsKeyDown(Enum.KeyCode.LeftShift) ||
+                    userInputService.IsKeyDown(Enum.KeyCode.RightShift)
+                ) {
+                    // Execute /iset all 20 command directly
+                    const commandId = "iset";
+                    const args = ["all", "20"];
+
+                    // Find command
+                    let targetCommand: Command | undefined;
+                    for (const [, command] of availableCommands) {
+                        if (command.id === commandId || command.aliases.includes(commandId)) {
+                            targetCommand = command;
+                            break;
+                        }
+                    }
+
+                    if (targetCommand) {
+                        try {
+                            print("Executing: /iset all 20 (Shift+I shortcut)");
+                            targetCommand.execute(LOCAL_PLAYER, ...args);
+                        } catch (error) {
+                            print(`Command execution failed: ${error}`);
+                        }
+                    } else {
+                        print("Command 'iset' not found");
+                    }
+                    return;
+                }
+            }
+
             // Toggle with F12 or backtick key
             if (input.KeyCode === Enum.KeyCode.F12 || input.KeyCode === Enum.KeyCode.Backquote) {
                 setIsVisible((prev) => {
@@ -240,8 +274,8 @@ export default function SimulationCommandInterface() {
                 BorderSizePixel={0}
                 FontFace={RobotoSlabMedium}
                 Position={new UDim2(0, 10, 1, -60)}
-                Size={new UDim2(0, 200, 0, 20)}
-                Text="Press F12 or ` for commands"
+                Size={new UDim2(0, 300, 0, 20)}
+                Text="Press F12 or ` for commands | Shift+I: /iset all 20"
                 TextColor3={Color3.fromRGB(200, 200, 200)}
                 TextScaled={true}
                 TextSize={12}
@@ -425,7 +459,7 @@ export default function SimulationCommandInterface() {
                     FontFace={RobotoSlab}
                     Position={new UDim2(0, 20, 1, -40)}
                     Size={new UDim2(1, -40, 0, 30)}
-                    Text="Enter/L/Execute: Run | Tab: Autocomplete | ↑↓: Navigate | Esc: Close | F12/`: Toggle | / optional"
+                    Text="Enter/L/Execute: Run | Tab: Autocomplete | ↑↓: Navigate | Esc: Close | F12/`: Toggle | Shift+I: /iset all 20 | / optional"
                     TextColor3={Color3.fromRGB(150, 150, 150)}
                     TextScaled={true}
                     TextSize={10}
