@@ -41,6 +41,8 @@ const FURNACE_UPGRADES = NamedUpgrades.getUpgrades("Furnace");
  */
 @Service()
 export default class RevenueService {
+    weatherBoostEnabled = true;
+
     /**
      * Constructs the RevenueService with all required dependencies.
      */
@@ -150,7 +152,7 @@ export default class RevenueService {
 
         let worth = Droplet.getDroplet(instanceInfo.DropletId!)!.coalesce(totalAdd, totalMul, totalPow);
 
-        if (includesGlobalBoosts === true) {
+        if (includesGlobalBoosts === true && this.weatherBoostEnabled === true) {
             // Apply weather value multipliers
             const weatherMultiplier = WeatherBoost.getDropletValueMultiplier(dropletModel);
             if (weatherMultiplier !== 1) {

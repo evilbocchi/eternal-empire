@@ -5,7 +5,6 @@ local function getEndpoint()
     return `http://localhost:{currentPort}/progression-report`
 end
 
-local lastSentPerValue = setmetatable({}, { __mode = "k" })
 local MAX_CHUNK_SIZE = 50000
 
 local function postPayload(payloadTable)
@@ -64,48 +63,4 @@ local function postReport(content)
     end)
 end
 
-local function sendIfChanged(valueObject)
-    if not valueObject:IsA("StringValue") then
-        return
-    end
-
-    local current = valueObject.Value
-    if lastSentPerValue[valueObject] == current then
-        return
-    end
-
-    lastSentPerValue[valueObject] = current
-    postReport(current)
-end
-
-local function watchValue(valueObject)
-    if not valueObject:IsA("StringValue") then
-        return
-    end
-
-    sendIfChanged(valueObject)
-
-    local changedConnection
-    changedConnection = valueObject:GetPropertyChangedSignal("Value"):Connect(function()
-        sendIfChanged(valueObject)
-    end)
-
-    valueObject.Destroying:Connect(function()
-        if changedConnection then
-            changedConnection:Disconnect()
-            changedConnection = nil
-        end
-        lastSentPerValue[valueObject] = nil
-    end)
-end
-
-local existing = workspace:FindFirstChild("ProgressionEstimationReport")
-if existing and existing:IsA("StringValue") then
-    watchValue(existing)
-end
-
-workspace.ChildAdded:Connect(function(child)
-    if child.Name == "ProgressionEstimationReport" and child:IsA("StringValue") then
-        watchValue(child)
-    end
-end)
+_G.ProgressEstimated = postReport

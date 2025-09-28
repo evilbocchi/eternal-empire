@@ -19,6 +19,7 @@ import { getAllInstanceInfo } from "@antivivi/vrldk";
 import { OnStart, Service } from "@flamework/core";
 import { HttpService, RunService, Workspace } from "@rbxts/services";
 import StringBuilder from "@rbxts/stringbuilder";
+import { Environment } from "@rbxts/ui-labs";
 import { $env } from "rbxts-transform-env";
 import { OnGameAPILoaded } from "server/services/ModdingService";
 import ResetService from "server/services/ResetService";
@@ -30,7 +31,6 @@ import Packets from "shared/Packets";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import { CURRENCIES } from "shared/currency/CurrencyDetails";
 import { RESET_LAYERS } from "shared/currency/mechanics/ResetLayer";
-import eat from "shared/hamster/eat";
 import Droplet from "shared/item/Droplet";
 import Item from "shared/item/Item";
 import Furnace from "shared/item/traits/Furnace";
@@ -41,6 +41,10 @@ import AwesomeManumaticPurifier from "shared/items/negative/felixthea/AwesomeMan
 
 declare global {
     interface Assets {}
+
+    interface _G {
+        ProgressEstimated: (message: string) => void;
+    }
 }
 
 type ItemProgressionStats = {
@@ -499,7 +503,7 @@ export default class ProgressionEstimationService implements OnGameAPILoaded, On
         for (const [_, resetLayer] of pairs(RESET_LAYERS)) {
             const reward = this.resetService.getResetReward(resetLayer);
             if (reward === undefined) continue;
-            revenue = revenue.add(reward.div(500)); // assume reset recovery is 500s
+            revenue = revenue.add(reward); // assume they always get the reset every second
         }
 
         return revenue;
@@ -512,9 +516,11 @@ export default class ProgressionEstimationService implements OnGameAPILoaded, On
     }
 
     estimate() {
-        const startingBalance = this.currencyService.balance.clone();
-        const startingUpgrades = new Map<string, number>();
-        this.namedUpgradeService.upgrades.forEach((value, key) => startingUpgrades.set(key, value));
+        // Reset state
+        const toRecoverCurrencies = this.currencyService.balance.clone();
+        const toRecoverUpgrades = table.clone(this.dataService.empireData.upgrades);
+
+        this.revenueService.weatherBoostEnabled = false;
         this.currencyService.setAll(new Map());
         this.namedUpgradeService.setAmountPerUpgrade(new Map());
 
@@ -546,7 +552,7 @@ export default class ProgressionEstimationService implements OnGameAPILoaded, On
             if (item.formula !== undefined) {
                 builder.append(`\n\t> Formula Result = ${item.formulaResult}`);
                 const upgrader = item.findTrait("Upgrader");
-                if (upgrader !== undefined) {
+                if (upgrader?.mul !== undefined) {
                     builder.append(`\n\t> Upgrader = ${upgrader.mul}`);
                 }
             }
@@ -558,11 +564,18 @@ export default class ProgressionEstimationService implements OnGameAPILoaded, On
         builder.append(`-# Note that this is a rough estimate and does not account for all mechanics in the game.\n`);
         const dt = math.floor((tick() - t) * 100) / 100;
         builder.append(`-# Calculated in ${dt} seconds.\n`);
+        if (this.namedUpgradeService.upgrades.size() > 0) {
+            for (const [id, amount] of this.namedUpgradeService.upgrades) {
+                builder.append(`- Simulated named upgrade: ${id} x${amount}\n`);
+            }
+        }
         print(`Calculated in ${dt} seconds.`);
 
         this.post(builder.toString());
-        this.namedUpgradeService.setAmountPerUpgrade(startingUpgrades);
-        this.currencyService.setAll(startingBalance.amountPerCurrency);
+
+        this.revenueService.weatherBoostEnabled = true;
+        this.currencyService.setAll(toRecoverCurrencies.amountPerCurrency);
+        this.namedUpgradeService.setAmountPerUpgrade(toRecoverUpgrades);
     }
 
     /**
@@ -594,25 +607,12 @@ export default class ProgressionEstimationService implements OnGameAPILoaded, On
     }
 
     /**
-     * Posts a progression report to Workspace for offline usage.
-     *
-     * @param message The report message.
-     */
-    private postOffline(message: string) {
-        const stringValue = new Instance("StringValue");
-        stringValue.Name = "ProgressionEstimationReport";
-        stringValue.Value = message;
-        stringValue.Parent = Workspace;
-        eat(stringValue, "Destroy");
-    }
-
-    /**
      * Posts a progression report to Discord and Workspace.
      *
      * @param message The report message.
      */
     post(message: string) {
-        this.postOffline(message); // post to Workspace for offline usage
+        Environment.OriginalG.ProgressEstimated?.(message);
 
         const webhookUrl = $env.string("PROGRESSION_WEBHOOK");
         if (webhookUrl === undefined) {
