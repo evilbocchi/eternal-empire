@@ -1,10 +1,12 @@
 import Difficulty from "@antivivi/jjt-difficulties";
-import { getAllInstanceInfo, getInstanceInfo, setInstanceInfo } from "@antivivi/vrldk";
-import { ReplicatedStorage, RunService } from "@rbxts/services";
+import { getInstanceInfo, setInstanceInfo } from "@antivivi/vrldk";
+import { packet } from "@rbxts/fletchette";
+import { ReplicatedStorage } from "@rbxts/services";
 import { playSound } from "shared/asset/GameAssets";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
 import Furnace from "shared/item/traits/Furnace";
+import perItemPacket, { perItemProperty } from "shared/item/utils/perItemPacket";
 
 declare global {
     interface InstanceInfo {
@@ -12,6 +14,37 @@ declare global {
         ColorStrictTime?: number;
     }
 }
+
+const SERVER_COLOR_INFO: Record<number, () => { add?: CurrencyBundle; mul: CurrencyBundle }> = {
+    1: () => ({ mul: new CurrencyBundle().set("Funds", 4500).set("Power", 6) }),
+    2: () => ({ mul: new CurrencyBundle().set("Funds", 2500).set("Power", 6) }),
+    3: () => ({ mul: new CurrencyBundle().set("Funds", 2500).set("Power", 10) }),
+    4: () => ({ mul: new CurrencyBundle().set("Funds", 4500).set("Power", 10) }),
+    5: () => ({
+        add: new CurrencyBundle().set("Purifier Clicks", 1),
+        mul: new CurrencyBundle().set("Funds", 3500).set("Power", 8).set("Purifier Clicks", 2),
+    }),
+};
+
+const CLIENT_COLOR_INFO: Record<number, { name: string; boostLabel: string }> = {
+    1: { name: "Green", boostLabel: "x4500 Funds, x6 Power" },
+    2: { name: "Blue", boostLabel: "x2500 Funds, x6 Power" },
+    3: { name: "Orange", boostLabel: "x2500 Funds, x10 Power" },
+    4: { name: "Red", boostLabel: "x4500 Funds, x10 Power" },
+    5: { name: "Violet", boostLabel: "x3500 Funds, x8 Power, +1 then x2 Purifier Clicks" },
+};
+
+interface ColorState {
+    selectedColor: number;
+    strictColor?: number;
+    strictColorTime: number;
+}
+
+const colorStateProperty = perItemProperty(
+    packet<(placementId: string, state: ColorState) => void>(),
+    packet<(placementId: string) => ColorState>(),
+);
+const selectColorPacket = perItemPacket(packet<(placementId: string, selectedColor: number) => void>());
 
 export = new Item(script.Name)
     .setName("Color Strict Furnace")
@@ -32,44 +65,77 @@ export = new Item(script.Name)
     })
     .onLoad((model, item) => {
         const furnace = item.trait(Furnace);
+        let selectedColor = 0;
+        let lastStrictColor = getInstanceInfo(ReplicatedStorage, "ColorStrictColor") as number | undefined;
+        let lastStrictTime = (getInstanceInfo(ReplicatedStorage, "ColorStrictTime") as number | undefined) ?? 0;
 
-        const cInfo = getAllInstanceInfo(ReplicatedStorage);
-        const infoPerId: {
-            [id: number]: { name: string; boostLabel: string; add?: CurrencyBundle; mul: CurrencyBundle };
-        } = {
-            0: {
-                name: "White",
-                boostLabel: "",
-                mul: new CurrencyBundle(),
-            },
-            1: {
-                name: "Green",
-                boostLabel: "x4500 Funds, x6 Power",
-                mul: new CurrencyBundle().set("Funds", 4500).set("Power", 6),
-            },
-            2: {
-                name: "Blue",
-                boostLabel: "x2500 Funds, x6 Power",
-                mul: new CurrencyBundle().set("Funds", 2500).set("Power", 6),
-            },
-            3: {
-                name: "Orange",
-                boostLabel: "x2500 Funds, x10 Power",
-                mul: new CurrencyBundle().set("Funds", 2500).set("Power", 10),
-            },
-            4: {
-                name: "Red",
-                boostLabel: "x4500 Funds, x10 Power",
-                mul: new CurrencyBundle().set("Funds", 4500).set("Power", 10),
-            },
-            5: {
-                name: "Violet",
-                boostLabel: "x3500 Funds, x8 Power, +1 then x2 Purifier Clicks",
-                mul: new CurrencyBundle().set("Funds", 3500).set("Power", 8).set("Purifier Clicks", 2),
-                add: new CurrencyBundle().set("Purifier Clicks", 1),
-            },
+        const applyFurnace = (strictColor?: number) => {
+            if (strictColor === undefined) {
+                furnace.setAdd(undefined).setMul(undefined);
+                return;
+            }
+
+            const buildInfo = SERVER_COLOR_INFO[strictColor];
+            if (buildInfo !== undefined && strictColor === selectedColor) {
+                const info = buildInfo();
+                furnace.setAdd(info.add).setMul(info.mul);
+            } else {
+                furnace.setAdd(undefined).setMul(undefined);
+            }
         };
 
+        const broadcastState = (strictColor?: number, strictTime?: number) => {
+            colorStateProperty.set(model, {
+                selectedColor,
+                strictColor,
+                strictColorTime: strictTime ?? lastStrictTime,
+            });
+        };
+
+        const refreshState = () => {
+            const strictColor = getInstanceInfo(ReplicatedStorage, "ColorStrictColor") as number | undefined;
+            const strictTime = (getInstanceInfo(ReplicatedStorage, "ColorStrictTime") as number | undefined) ?? 0;
+            lastStrictColor = strictColor;
+            lastStrictTime = strictTime;
+            applyFurnace(strictColor);
+            broadcastState(strictColor, strictTime);
+        };
+
+        selectColorPacket.fromClient(model, (_player, newColor) => {
+            const normalized = math.clamp(math.floor(newColor), 0, 5);
+            if (normalized === selectedColor) return;
+            selectedColor = normalized;
+            refreshState();
+        });
+
+        item.repeat(
+            model,
+            () => {
+                const strictColor = getInstanceInfo(ReplicatedStorage, "ColorStrictColor") as number | undefined;
+                const strictTime = (getInstanceInfo(ReplicatedStorage, "ColorStrictTime") as number | undefined) ?? 0;
+                let shouldBroadcast = false;
+
+                if (strictColor !== lastStrictColor) {
+                    lastStrictColor = strictColor;
+                    applyFurnace(strictColor);
+                    shouldBroadcast = true;
+                }
+
+                if (strictTime !== lastStrictTime) {
+                    lastStrictTime = strictTime;
+                    shouldBroadcast = true;
+                }
+
+                if (shouldBroadcast) {
+                    broadcastState(strictColor, strictTime);
+                }
+            },
+            0.1,
+        );
+
+        refreshState();
+    })
+    .onClientLoad((model, item) => {
         const bar = model.WaitForChild("GuiPart").WaitForChild("SurfaceGui").WaitForChild("Bar") as Frame;
         const fill = bar.WaitForChild("Fill") as Frame;
         const colorLabel = bar.WaitForChild("ColorLabel") as TextLabel;
@@ -80,59 +146,80 @@ export = new Item(script.Name)
         const hitbox = model.WaitForChild("Hitbox");
         const alertSound = hitbox.WaitForChild("AlertSound") as Sound;
         const border = model.WaitForChild("Border") as UnionOperation;
-        let color = 0;
-        item.repeat(
-            model,
-            () =>
-                (fill.Size = new UDim2(
-                    (tick() - (getInstanceInfo(ReplicatedStorage, "ColorStrictTime") ?? 0)) / 300,
-                    0,
-                    1,
-                    0,
-                )),
-        );
-        let currentlyWanting: number | undefined = 0;
-        const updateColor = () => {
-            const strictColor = cInfo.ColorStrictColor;
-            if (strictColor === 0 || strictColor === undefined) {
-                return;
-            }
-            const info = infoPerId[strictColor];
-            colorLabel.Text = info.name + "!";
-            const strictColorSwitch = model.FindFirstChild(tostring(strictColor)) as BasePart;
-            const strictColorColor = strictColorSwitch.Color;
-            fill.BackgroundColor3 = strictColorColor;
-            colorLabel.TextColor3 = strictColorColor;
-            if (strictColor === color) {
-                boostLabel.Text = info.boostLabel;
-                furnace.setAdd(info.add).setMul(info.mul);
-                alertSound.Stop();
-            } else {
-                boostLabel.Text = "WRONG COLOR";
-                alertSound.Resume();
-                furnace.setAdd(undefined).setMul(undefined);
-            }
-            border.Color = color === 0 ? new Color3(1, 1, 1) : (model.WaitForChild(tostring(color)) as BasePart).Color;
-        };
+
+        const colorSwitches = new Map<number, BasePart>();
         for (const colorSwitch of model.GetChildren()) {
-            if (colorSwitch.IsA("Part") && colorSwitch.Material === Enum.Material.Neon) {
-                const clickDetector = new Instance("ClickDetector");
+            if (colorSwitch.IsA("BasePart") && colorSwitch.Material === Enum.Material.Neon) {
+                const id = tonumber(colorSwitch.Name);
+                if (id === undefined) continue;
+                let clickDetector = colorSwitch.FindFirstChildOfClass("ClickDetector");
+                if (clickDetector === undefined) {
+                    clickDetector = new Instance("ClickDetector");
+                    clickDetector.Parent = colorSwitch;
+                }
+                colorSwitches.set(id, colorSwitch);
                 clickDetector.MouseClick.Connect(() => {
                     playSound("SwitchFlick.mp3", colorSwitch);
-                    color = tonumber(colorSwitch.Name) ?? 0;
-                    updateColor();
+                    selectColorPacket.toServer(model, id);
                 });
-                clickDetector.Parent = colorSwitch;
             }
         }
-        updateColor();
-        const connection = RunService.Heartbeat.Connect(() => {
-            if (currentlyWanting !== cInfo.ColorStrictColor) {
-                currentlyWanting = cInfo.ColorStrictColor;
-                updateColor();
+
+        let currentSelected = 0;
+        let currentStrictColor: number | undefined;
+        let currentStrictTime = 0;
+
+        const updateUI = () => {
+            const strictColor = currentStrictColor ?? 0;
+            const info = CLIENT_COLOR_INFO[strictColor];
+            const strictSwitch = colorSwitches.get(strictColor);
+            const selectedSwitch = currentSelected === 0 ? undefined : colorSwitches.get(currentSelected);
+
+            if (info !== undefined) {
+                colorLabel.Text = info.name + "!";
+                if (strictSwitch !== undefined) {
+                    fill.BackgroundColor3 = strictSwitch.Color;
+                    colorLabel.TextColor3 = strictSwitch.Color;
+                } else {
+                    fill.BackgroundColor3 = new Color3(1, 1, 1);
+                    colorLabel.TextColor3 = new Color3(1, 1, 1);
+                }
+                if (strictColor !== 0 && strictColor === currentSelected) {
+                    boostLabel.Text = info.boostLabel;
+                    if (alertSound.IsPlaying) alertSound.Stop();
+                } else if (strictColor === 0 && currentSelected === 0) {
+                    boostLabel.Text = info.boostLabel;
+                    if (alertSound.IsPlaying) alertSound.Stop();
+                } else {
+                    boostLabel.Text = "WRONG COLOR";
+                    if (!alertSound.IsPlaying) alertSound.Play();
+                }
+            } else {
+                colorLabel.Text = "NO COLOR";
+                fill.BackgroundColor3 = new Color3(1, 1, 1);
+                colorLabel.TextColor3 = new Color3(1, 1, 1);
+                boostLabel.Text = "";
+                if (alertSound.IsPlaying) alertSound.Stop();
             }
+
+            border.Color = selectedSwitch ? selectedSwitch.Color : new Color3(1, 1, 1);
+        };
+
+        colorStateProperty.observe(model, (state) => {
+            currentSelected = state.selectedColor;
+            currentStrictColor = state.strictColor;
+            currentStrictTime = state.strictColorTime;
+            updateUI();
         });
-        model.Destroying.Once(() => connection.Disconnect());
+
+        item.repeat(
+            model,
+            () => {
+                const progress = math.clamp((tick() - currentStrictTime) / 300, 0, 1);
+                fill.Size = new UDim2(progress, 0, 1, 0);
+            },
+            0.1,
+        );
     })
 
     .trait(Furnace)

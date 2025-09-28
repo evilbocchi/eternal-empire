@@ -4,9 +4,10 @@ import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Droplet from "shared/item/Droplet";
 import Item from "shared/item/Item";
 import HandCrank from "shared/item/traits/action/HandCrank";
+import Boostable from "shared/item/traits/boost/Boostable";
 import Dropper from "shared/item/traits/dropper/Dropper";
 
-const modifier: ItemBoost = { placementId: "", ignoresLimitations: false, dropRateMultiplier: 3 };
+const modifier: ItemBoost = { ignoresLimitations: false, dropRateMultiplier: 3 };
 
 export = new Item(script.Name)
     .setName("Hand Crank Dropper V2")
@@ -19,10 +20,8 @@ export = new Item(script.Name)
     .addPlaceableArea("BarrenIslands")
 
     .onLoad((model) => {
-        modifier.placementId = model.Name;
         const drop = model.WaitForChild("Drop");
-        const instanceInfo = getAllInstanceInfo(drop);
-        instanceInfo.Boosts!.set("HandCrank", modifier);
+        Boostable.addBoost(getAllInstanceInfo(drop), "HandCrank", modifier);
     })
 
     .trait(Dropper)

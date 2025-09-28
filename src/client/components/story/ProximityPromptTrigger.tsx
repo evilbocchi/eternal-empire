@@ -1,4 +1,5 @@
 import React, { Fragment, useCallback, useEffect, useState } from "@rbxts/react";
+import { Environment } from "@rbxts/ui-labs";
 import { RobotoSlab, RobotoSlabMedium } from "shared/asset/GameFonts";
 import { getPlayerCharacter } from "shared/hamster/getPlayerCharacter";
 
@@ -68,7 +69,7 @@ export default function ProximityPromptTrigger() {
 
     // Handle keyboard shortcuts (only R for refresh when visible)
     useEffect(() => {
-        const connection = game.GetService("UserInputService").InputBegan.Connect((input, gameProcessed) => {
+        const connection = Environment.UserInput.InputBegan.Connect((input, gameProcessed) => {
             if (gameProcessed) return;
 
             // Refresh prompts with R when visible

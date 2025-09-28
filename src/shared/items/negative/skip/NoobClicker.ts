@@ -4,6 +4,7 @@ import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
 import Clicker from "shared/item/traits/action/Clicker";
 import Boostable from "shared/item/traits/boost/Boostable";
+import Generator from "shared/item/traits/generator/Generator";
 
 export = new Item(script.Name)
     .setName("Noob Clicker")
@@ -18,15 +19,17 @@ export = new Item(script.Name)
     .replicateClicks()
 
     .trait(Boostable)
+    .trait(Generator)
     .addToWhitelist("RadioNoob")
     .exit()
 
     // radio noob effect
     .onLoad((model) => {
         const modifier = { multi: 200000 };
-        const instanceInfo = getAllInstanceInfo(model);
-        instanceInfo.BoostAdded!.add(() => instanceInfo.ClickRateModifiers?.add(modifier));
-        instanceInfo.BoostRemoved!.add(() => instanceInfo.ClickRateModifiers?.delete(modifier));
+        const modelInfo = getAllInstanceInfo(model);
+        modelInfo.Chargeable = true;
+        modelInfo.BoostAdded!.add(() => modelInfo.ClickRateModifiers?.add(modifier));
+        modelInfo.BoostRemoved!.add(() => modelInfo.ClickRateModifiers?.delete(modifier));
     })
     .onClientLoad((model, item) => {
         const noob = model.WaitForChild("Noob") as Model;

@@ -3,7 +3,6 @@ import { findBaseParts, getAllInstanceInfo, setInstanceInfo } from "@antivivi/vr
 import { RunService } from "@rbxts/services";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
-import Boostable from "shared/item/traits/boost/Boostable";
 import Operative, { IOperative } from "shared/item/traits/Operative";
 import type OmniUpgrader from "shared/item/traits/upgrader/OmniUpgrader";
 import { VirtualCollision } from "shared/item/utils/VirtualReplication";
@@ -194,7 +193,6 @@ export default class Upgrader extends Operative {
 
     constructor(item: Item) {
         super(item);
-        item.trait(Boostable).addToWhitelist("dummy"); // Enable whitelist to stop charger connection
         item.onLoad((model) => Upgrader.load(model, this));
     }
 

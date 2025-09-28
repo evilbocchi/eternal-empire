@@ -1,5 +1,6 @@
 import { FuzzySearch } from "@rbxts/fuzzy-search";
 import React, { Fragment, useCallback, useEffect, useMemo, useRef, useState } from "@rbxts/react";
+import { Environment } from "@rbxts/ui-labs";
 import { LOCAL_PLAYER } from "client/constants";
 import { RobotoMono, RobotoSlab, RobotoSlabMedium } from "shared/asset/GameFonts";
 import Command from "shared/commands/Command";
@@ -116,15 +117,14 @@ export default function SimulationCommandInterface() {
 
     // Handle keyboard shortcuts - separated into its own effect for better performance
     useEffect(() => {
-        const connection = game.GetService("UserInputService").InputBegan.Connect((input, gameProcessed) => {
+        const connection = Environment.UserInput.InputBegan.Connect((input, gameProcessed) => {
             if (gameProcessed) return;
 
             // Check for Shift+I shortcut to run /iset all 20
             if (input.KeyCode === Enum.KeyCode.I) {
-                const userInputService = game.GetService("UserInputService");
                 if (
-                    userInputService.IsKeyDown(Enum.KeyCode.LeftShift) ||
-                    userInputService.IsKeyDown(Enum.KeyCode.RightShift)
+                    Environment.UserInput.IsKeyDown(Enum.KeyCode.LeftShift) ||
+                    Environment.UserInput.IsKeyDown(Enum.KeyCode.RightShift)
                 ) {
                     // Execute /iset all 20 command directly
                     const commandId = "iset";

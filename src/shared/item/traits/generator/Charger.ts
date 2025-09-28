@@ -14,9 +14,14 @@ declare global {
 
     interface ItemBoost {
         /**
-         * The charger that is boosting the generator.
+         * The charger that is boosting this generator model.
          */
-        charger?: Charger;
+        chargedBy?: Charger;
+    }
+
+    interface InstanceInfo {
+        /** Whether the item model can be charged by a charger. */
+        Chargeable?: boolean;
     }
 }
 
@@ -55,6 +60,9 @@ export default class Charger extends Operative {
         const checkAdd = (generatorModel: Instance) => {
             if (!generatorModel.IsA("Model")) return;
 
+            const generatorInfo = getAllInstanceInfo(generatorModel);
+            if (generatorInfo.Chargeable !== true) return;
+
             const generatorHitbox = generatorModel.PrimaryPart;
             if (
                 generatorHitbox === undefined ||
@@ -63,11 +71,10 @@ export default class Charger extends Operative {
             )
                 return;
 
-            const generatorInfo = getAllInstanceInfo(generatorModel);
             const boosts = generatorInfo.Boosts;
             if (boosts === undefined || boosts.has(placementId)) return;
 
-            const whitelist = generatorInfo.Boostable!.whitelist;
+            const whitelist = generatorInfo.Generator!.whitelist;
             if (!whitelist.isEmpty() && !whitelist.has(chargerId)) return;
 
             if (charger.ignoreLimit !== true) {
@@ -83,10 +90,9 @@ export default class Charger extends Operative {
             }
 
             charging.add(generatorModel);
-            Generator.addBoost(generatorInfo, {
-                placementId: placementId,
+            Generator.addBoost(generatorInfo, placementId, {
                 ignoresLimitations: charger.ignoreLimit,
-                charger,
+                chargedBy: charger,
             });
             generatorChangedPacket.toAllClients(model, generatorModel.Name, true);
         };

@@ -1,5 +1,6 @@
 import { getAllInstanceInfo } from "@antivivi/vrldk";
 import Item from "shared/item/Item";
+import Boostable from "shared/item/traits/boost/Boostable";
 import Booster from "shared/item/traits/boost/Booster";
 
 declare global {
@@ -24,34 +25,27 @@ export default class DropperBooster extends Booster {
     createToken(model: Model) {
         const key = this.item.id;
         const modifier: ItemBoost = {
-            placementId: model.Name,
             ignoresLimitations: false,
             dropRateMultiplier: this.dropRateMultiplier,
         };
 
         let target: BasePart | undefined;
-        let targetInfo: InstanceInfo | undefined;
 
         this.observeTarget(model, (model, item) => {
-            if (model === undefined || item === undefined) {
-                targetInfo?.Boosts?.delete(key);
+            const drop = model?.FindFirstChild("Drop");
+
+            if (target !== undefined && target !== drop) {
+                Boostable.removeBoost(getAllInstanceInfo(target), key);
                 target = undefined;
-                targetInfo = undefined;
                 return false;
             }
 
-            if (!item.isA("Dropper")) {
+            if (item === undefined || !item.isA("Dropper") || drop === undefined || !drop.IsA("BasePart")) {
                 return false;
             }
 
-            const drop = model.FindFirstChild("Drop");
-            if (drop === undefined || !drop.IsA("BasePart")) {
-                return false;
-            }
-
-            target = drop as BasePart;
-            targetInfo = getAllInstanceInfo(target);
-            targetInfo.Boosts?.set(key, modifier);
+            target = drop;
+            Boostable.addBoost(getAllInstanceInfo(target), key, modifier);
             return true;
         });
 

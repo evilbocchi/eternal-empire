@@ -1,16 +1,15 @@
 import { OnoeNum } from "@antivivi/serikanum";
 import React, { Fragment, useEffect, useRef, useState } from "@rbxts/react";
+import { TweenService } from "@rbxts/services";
 import displayBalanceCurrency from "client/components/balance/displayBalanceCurrency";
+import { ItemViewportManagement } from "client/components/item/ItemViewport";
 import { useItemViewport } from "client/components/item/useCIViewportManagement";
-import { RobotoSlabHeavy } from "shared/asset/GameFonts";
 import { getAsset } from "shared/asset/AssetMap";
+import { RobotoSlabHeavy } from "shared/asset/GameFonts";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import { CURRENCY_DETAILS } from "shared/currency/CurrencyDetails";
 import Item from "shared/item/Item";
 import Items from "shared/items/Items";
-import { ItemViewportManagement } from "client/components/item/ItemViewport";
-
-const TweenService = game.GetService("TweenService");
 
 function ShopPriceOption({
     currency,

@@ -1,11 +1,10 @@
 import Difficulty from "@antivivi/jjt-difficulties";
+import { simpleInterval } from "@antivivi/vrldk";
 import { ReplicatedStorage } from "@rbxts/services";
 import { Server } from "shared/api/APIExpose";
-import { IS_SERVER } from "shared/Context";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
 import Upgrader from "shared/item/traits/upgrader/Upgrader";
-import Packets from "shared/Packets";
 
 function updateLaserCommon(
     laser: BasePart,
@@ -103,6 +102,6 @@ export = new Item(script.Name)
 
         const updateLaser = () => updateLaserCommon(laser, primaryPos, model.Name, getOtherPos);
 
-        const heartbeat = game.GetService("RunService").Heartbeat.Connect(updateLaser);
-        model.Destroying.Connect(() => heartbeat.Disconnect());
+        const cleanup = simpleInterval(updateLaser, 1);
+        model.Destroying.Once(cleanup);
     });

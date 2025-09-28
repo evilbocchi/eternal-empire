@@ -1,5 +1,6 @@
 import { getAllInstanceInfo } from "@antivivi/vrldk";
 import Item from "shared/item/Item";
+import Boostable from "shared/item/traits/boost/Boostable";
 import Booster from "shared/item/traits/boost/Booster";
 
 export default class UpgraderBooster extends Booster {
@@ -11,28 +12,33 @@ export default class UpgraderBooster extends Booster {
      * @returns A modifier object that can be used to adjust the upgrade.
      */
     createToken(model: Model): ItemBoost {
-        const key = model.GetAttribute("ItemId") as string;
+        const key = this.item.id;
         const boost = {
-            placementId: model.Name,
             ignoresLimitations: false,
             upgradeCompound: this,
         };
 
         let target: Model | undefined;
         this.observeTarget(model, (upgraderModel, item) => {
-            if (upgraderModel === undefined || item === undefined) {
-                if (target !== undefined) {
-                    getAllInstanceInfo(target).Boosts?.delete(key);
-                }
+            if (target !== undefined && target !== upgraderModel) {
+                Boostable.removeBoost(getAllInstanceInfo(target), key);
+                target = undefined;
+            }
+
+            if (upgraderModel === undefined || item === undefined || !item.isA("Upgrader")) {
                 return false;
             }
 
-            if (!item.isA("Upgrader")) return false;
-
             target = upgraderModel;
-            getAllInstanceInfo(target).Boosts?.set(key, boost);
+            Boostable.addBoost(getAllInstanceInfo(target), key, boost);
 
             return true;
+        });
+        model.Destroying.Once(() => {
+            if (target !== undefined) {
+                Boostable.removeBoost(getAllInstanceInfo(target), key);
+                target = undefined;
+            }
         });
         return boost;
     }

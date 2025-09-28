@@ -35,7 +35,6 @@ export default class WeatherBoost {
      */
     private static applyMultipliersToDroppers() {
         const weatherBoost: ItemBoost = {
-            placementId: "weather-system",
             ignoresLimitations: false,
             dropRateMultiplier: this.currentMultipliers.dropRate,
             weatherDropRateMultiplier: this.currentMultipliers.dropRate,
@@ -43,7 +42,7 @@ export default class WeatherBoost {
         };
 
         // Apply to all spawned drops
-        for (const [drop, info] of Dropper.SPAWNED_DROPS) {
+        for (const [, info] of Dropper.SPAWNED_DROPS) {
             if (info.Boosts) {
                 info.Boosts.set("weather", weatherBoost);
             }

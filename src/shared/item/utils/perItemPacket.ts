@@ -71,5 +71,45 @@ export default function perItemPacket<Args extends unknown[], Return>(
                 serverHandlers.delete(model.Name);
             });
         },
+        packet,
+    };
+}
+
+/**
+ * Creates a property-like interface for a per-item packet, allowing setting and observing values tied to specific item placements.
+ * @param signal The signal packet used to send updates.
+ * @param request The request packet used to fetch the current value.
+ * @returns An object with `set` and `observe` methods for managing the property.
+ */
+export function perItemProperty<T>(
+    signal: SignalPacket<(placementId: string, value: T) => void>,
+    request: SignalOrRequestPacket<(placementId: string) => T | undefined>,
+) {
+    const perItemSignal = perItemPacket(signal);
+    const values = new Map<string, T>();
+
+    // Hijack the request packet
+    if (IS_SERVER || IS_EDIT) {
+        request.fromClient((_, placementId) => {
+            return values.get(placementId);
+        });
+    }
+
+    return {
+        set: (model: Model, value: T) => {
+            const placementId = model.Name;
+            values.set(placementId, value);
+            perItemSignal.toAllClients(model, value);
+            model.Destroying.Once(() => {
+                values.delete(placementId);
+            });
+        },
+        observe: (model: Model, handler: (value: T) => void) => {
+            perItemSignal.fromServer(model, handler);
+            const initial = request.toServer(model.Name);
+            if (initial !== undefined) {
+                handler(initial);
+            }
+        },
     };
 }

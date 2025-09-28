@@ -5,7 +5,7 @@ import { Server } from "shared/api/APIExpose";
 import { playSound } from "shared/asset/GameAssets";
 import Item from "shared/item/Item";
 import Operative from "shared/item/traits/Operative";
-import perItemPacket from "shared/item/utils/perItemPacket";
+import perItemPacket, { perItemProperty } from "shared/item/utils/perItemPacket";
 import Packets from "shared/Packets";
 
 declare global {
@@ -14,7 +14,10 @@ declare global {
     }
 }
 
-const lastCollectionPacket = perItemPacket(packet<(placementId: string, lastCollection: number) => void>());
+const lastCollectionPacket = perItemProperty(
+    packet<(placementId: string, lastCollection: number) => void>(),
+    packet<(placementId: string) => number>(),
+);
 const collectPacket = perItemPacket(packet<(placementId: string) => void>());
 
 /**
@@ -38,7 +41,7 @@ export default class Bin extends Operative {
             placedItem.lastCollection = tick();
             const revenue = bin.mul?.mul(CurrencyService.getOfflineRevenue()).mul(diff);
             if (revenue === undefined) return;
-            lastCollectionPacket.toAllClients(model, placedItem.lastCollection);
+            lastCollectionPacket.set(model, placedItem.lastCollection);
             print(`Collected ${revenue} from ${item.name}`);
             CurrencyService.incrementAll(revenue.amountPerCurrency);
             Packets.showDifference.toAllClients(revenue.amountPerCurrency);
@@ -47,6 +50,7 @@ export default class Bin extends Operative {
             onCollected();
             collectPacket.toAllClients(model);
         });
+        lastCollectionPacket.set(model, placedItem.lastCollection);
     }
 
     static clientLoad(model: Model, bin: Bin) {
@@ -54,7 +58,7 @@ export default class Bin extends Operative {
         const fillPosition = fill.Position; // for 1 height
         const fillSize = fill.Size;
         let lastCollection = tick();
-        lastCollectionPacket.fromServer(model, (lc) => {
+        lastCollectionPacket.observe(model, (lc) => {
             lastCollection = lc;
             updateHeight();
         });

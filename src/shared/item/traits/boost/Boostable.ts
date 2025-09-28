@@ -12,11 +12,6 @@ declare global {
      */
     interface ItemBoost {
         /**
-         * The unique identifier for the boost placement.
-         */
-        placementId: string;
-
-        /**
          * Whether the boost ignores the restrictions boosts usually have.
          */
         ignoresLimitations: boolean;
@@ -48,19 +43,20 @@ declare global {
 }
 
 export default class Boostable extends ItemTrait {
-    static addBoost(instanceInfo: InstanceInfo, boost: ItemBoost) {
+    static addBoost(instanceInfo: InstanceInfo, key: string, boost: ItemBoost) {
         const boosts = instanceInfo.Boosts ?? new Map<string, ItemBoost>();
-        boosts.set(boost.placementId, boost);
+        if (boosts.has(key)) return;
+        boosts.set(key, boost);
         instanceInfo.BoostAdded?.forEach((callback) => callback(boost));
         instanceInfo.Boosts = boosts;
     }
 
-    static removeBoost(instanceInfo: InstanceInfo, placementId: string) {
+    static removeBoost(instanceInfo: InstanceInfo, key: string) {
         const boosts = instanceInfo.Boosts;
         if (boosts === undefined) return;
-        const boost = boosts.get(placementId);
+        const boost = boosts.get(key);
         if (boost === undefined) return;
-        boosts.delete(placementId);
+        boosts.delete(key);
         instanceInfo.BoostRemoved?.forEach((callback) => callback(boost));
     }
 
@@ -72,15 +68,8 @@ export default class Boostable extends ItemTrait {
         instanceInfo.BoostRemoved = new Set();
     }
 
-    whitelist = new Set<string>();
-
     constructor(item: Item) {
         super(item);
         item.onLoad((model) => Boostable.load(model, this));
-    }
-
-    addToWhitelist(itemId: string) {
-        this.whitelist.add(itemId);
-        return this;
     }
 }

@@ -16,6 +16,10 @@ declare global {
     interface ItemTraits {
         Generator: Generator;
     }
+
+    interface InstanceInfo {
+        Generator?: Generator;
+    }
 }
 
 const generatedPacket = perItemPacket(packet<(id: string, amountPerCurrency: BaseCurrencyMap) => void>());
@@ -39,6 +43,8 @@ export default class Generator extends Boostable {
         const RevenueService = Server.Revenue;
 
         const instanceInfo = getAllInstanceInfo(model);
+        instanceInfo.Generator = generator;
+        instanceInfo.Chargeable = true;
         const boosts = instanceInfo.Boosts!;
 
         let lastClicked = 0;
@@ -69,7 +75,7 @@ export default class Generator extends Boostable {
                         continue;
                     }
 
-                    const charger = boost.charger;
+                    const charger = boost.chargedBy;
                     if (charger === undefined) {
                         continue;
                     }
@@ -160,10 +166,17 @@ export default class Generator extends Boostable {
         });
     }
 
+    readonly whitelist = new Set<string>();
+
     constructor(item: Item) {
         super(item);
         item.onLoad((model) => Generator.load(model, this));
         item.onClientLoad((model) => Generator.clientLoad(model));
+    }
+
+    addToWhitelist(itemId: string) {
+        this.whitelist.add(itemId);
+        return this;
     }
 
     setPassiveGain(passiveGain: CurrencyBundle) {

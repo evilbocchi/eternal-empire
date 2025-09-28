@@ -217,6 +217,7 @@ namespace Packets {
 
     // admin
     export const modifyGame = packet<(param: string) => void>();
+    export const progressEstimationRequest = packet<() => void>();
 
     // marketplace
     export const marketplaceListings = property<Map<string, DataType.Packed<MarketplaceListing>>>(new Map());

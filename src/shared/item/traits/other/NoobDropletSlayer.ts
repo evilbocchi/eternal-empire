@@ -3,7 +3,7 @@ import { packet } from "@rbxts/fletchette";
 import { TweenService } from "@rbxts/services";
 import { playSound } from "shared/asset/GameAssets";
 import Item from "shared/item/Item";
-import Boostable from "shared/item/traits/boost/Boostable";
+import Generator from "shared/item/traits/generator/Generator";
 import BaseDropletSlayer from "shared/item/traits/other/BaseDropletSlayer";
 import perItemPacket from "shared/item/utils/perItemPacket";
 
@@ -23,14 +23,16 @@ export default class NoobDropletSlayer extends BaseDropletSlayer {
         let hasRadioNoob = false;
 
         const modelInfo = getAllInstanceInfo(model);
+        modelInfo.Chargeable = true;
+
         modelInfo.BoostAdded!.add((boost) => {
-            if (boost.charger?.item.id !== "RadioNoob") return;
+            if (boost.chargedBy?.item.id !== "RadioNoob") return;
             hasRadioNoob = true;
             ref.delta = slayer.cooldown / (hasRadioNoob ? 2 : 1);
         });
 
         modelInfo.BoostRemoved!.add((boost) => {
-            if (boost.charger?.item.id !== "RadioNoob") return;
+            if (boost.chargedBy?.item.id !== "RadioNoob") return;
             hasRadioNoob = false;
             ref.delta = slayer.cooldown / (hasRadioNoob ? 2 : 1);
         });
@@ -61,7 +63,7 @@ export default class NoobDropletSlayer extends BaseDropletSlayer {
 
     constructor(item: Item) {
         super(item);
-        item.trait(Boostable).addToWhitelist("RadioNoob");
+        item.trait(Generator).addToWhitelist("RadioNoob");
 
         item.onLoad((model) => NoobDropletSlayer.load(model, this));
         item.onClientLoad((model) => NoobDropletSlayer.clientLoad(model));

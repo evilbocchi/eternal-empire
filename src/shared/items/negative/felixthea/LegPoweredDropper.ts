@@ -4,6 +4,7 @@ import CurrencyBundle from "shared/currency/CurrencyBundle";
 import eat from "shared/hamster/eat";
 import Droplet from "shared/item/Droplet";
 import Item from "shared/item/Item";
+import Boostable from "shared/item/traits/boost/Boostable";
 import Conveyor from "shared/item/traits/conveyor/Conveyor";
 import Dropper from "shared/item/traits/dropper/Dropper";
 import StaleWood from "shared/items/excavation/harvestable/StaleWood";
@@ -38,11 +39,10 @@ export = new Item(script.Name)
         const drop = model.WaitForChild("Drop");
         const instanceInfo = getAllInstanceInfo(drop);
         const modifier: ItemBoost = {
-            placementId: model.Name,
             ignoresLimitations: false,
             dropRateMultiplier: 0,
         };
-        instanceInfo.Boosts!.set("Treadmill", modifier);
+        Boostable.addBoost(instanceInfo, "Treadmill", modifier);
 
         item.repeat(
             model,

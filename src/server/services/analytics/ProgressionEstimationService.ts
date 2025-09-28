@@ -16,7 +16,7 @@
 import { OnoeNum } from "@antivivi/serikanum";
 import { getAllInstanceInfo } from "@antivivi/vrldk";
 import { OnStart, Service } from "@flamework/core";
-import { HttpService, Workspace } from "@rbxts/services";
+import { HttpService, RunService, Workspace } from "@rbxts/services";
 import StringBuilder from "@rbxts/stringbuilder";
 import { $env } from "rbxts-transform-env";
 import { OnGameAPILoaded } from "server/services/ModdingService";
@@ -25,6 +25,7 @@ import RevenueService from "server/services/RevenueService";
 import CurrencyService from "server/services/data/CurrencyService";
 import DataService from "server/services/data/DataService";
 import NamedUpgradeService from "server/services/data/NamedUpgradeService";
+import Packets from "shared/Packets";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import { CURRENCIES } from "shared/currency/CurrencyDetails";
 import { RESET_LAYERS } from "shared/currency/mechanics/ResetLayer";
@@ -458,12 +459,7 @@ export default class ProgressionEstimationService implements OnGameAPILoaded, On
         }
     }
 
-    /**
-     * Runs the progression estimation and posts the report if in the PROGRESSION empire.
-     */
-    onStart() {
-        if (this.dataService.empireId !== "PROGRESSION") return;
-
+    estimate() {
         const startingBalance = this.currencyService.balance.clone();
         this.currencyService.setAll(new Map());
         this.namedUpgradeService.setAmountPerUpgrade(new Map());
@@ -512,6 +508,20 @@ export default class ProgressionEstimationService implements OnGameAPILoaded, On
 
         this.post(builder.toString());
         this.currencyService.setAll(startingBalance.amountPerCurrency);
+    }
+
+    /**
+     * Runs the progression estimation and posts the report if in the PROGRESSION empire.
+     */
+    onStart() {
+        if (this.dataService.empireId === "PROGRESSION") {
+            this.estimate();
+        }
+        Packets.progressEstimationRequest.fromClient(() => {
+            if (RunService.IsStudio()) {
+                this.estimate();
+            }
+        });
     }
 
     /**

@@ -4,6 +4,7 @@ import { Lighting } from "@rbxts/services";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Droplet from "shared/item/Droplet";
 import Item from "shared/item/Item";
+import Boostable from "shared/item/traits/boost/Boostable";
 import Dropper from "shared/item/traits/dropper/Dropper";
 
 export = new Item(script.Name)
@@ -24,11 +25,10 @@ export = new Item(script.Name)
         const drop = model.WaitForChild("Drop");
         const instanceInfo = getAllInstanceInfo(drop);
         const modifier: ItemBoost = {
-            placementId: model.Name,
             ignoresLimitations: false,
             dropRateMultiplier: 1, // Default multiplier
         };
-        instanceInfo.Boosts!.set("Solar", modifier);
+        Boostable.addBoost(instanceInfo, "Solar", modifier);
         item.repeat(
             model,
             () => {
