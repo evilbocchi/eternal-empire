@@ -21,10 +21,11 @@
 import Signal from "@antivivi/lemon-signal";
 import { OnoeNum } from "@antivivi/serikanum";
 import { OnInit, OnStart, Service } from "@flamework/core";
-import { DataStoreService, HttpService, Players, RunService } from "@rbxts/services";
+import { DataStoreService, HttpService, RunService } from "@rbxts/services";
 import CurrencyService from "server/services/data/CurrencyService";
 import DataService from "server/services/data/DataService";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
+import eat from "shared/hamster/eat";
 import MARKETPLACE_CONFIG from "shared/marketplace/MarketplaceListing";
 import Packets from "shared/Packets";
 
@@ -38,7 +39,6 @@ export default class MarketplaceService implements OnInit, OnStart {
     private historyDataStore = DataStoreService.GetDataStore(MARKETPLACE_CONFIG.HISTORY_DATASTORE_NAME);
 
     private isMarketplaceEnabled = true;
-    private cleanupConnection?: RBXScriptConnection;
 
     // External webhook URL for trade tokens (set via admin commands)
     private tradeTokenWebhook?: string;
@@ -71,23 +71,14 @@ export default class MarketplaceService implements OnInit, OnStart {
         Packets.placeBid.fromClient((player, uuid, bidAmount) => {
             return this.placeBid(player, uuid, bidAmount);
         });
-
-        Packets.getMarketplaceListings.fromClient((player) => {
-            return this.getMarketplaceListings();
-        });
-
-        // Set marketplace enabled state
-        const owner = Players.GetPlayerByUserId(this.dataService.empireData.owner);
-        if (owner !== undefined) {
-            Packets.marketplaceEnabled.set(this.isMarketplaceEnabled);
-        }
     }
 
     onStart() {
         // Start cleanup cycle for expired listings
-        this.cleanupConnection = RunService.Heartbeat.Connect(() => {
+        const connection = RunService.Heartbeat.Connect(() => {
             this.cleanupExpiredListings();
         });
+        eat(connection);
 
         // Recover any interrupted trades on startup
         task.spawn(() => this.recoverInterruptedTrades());
@@ -135,6 +126,19 @@ export default class MarketplaceService implements OnInit, OnStart {
             // Charge listing fee
             if (!this.currencyService.purchase(new CurrencyBundle().set("Diamonds", listingFee))) return false;
 
+            const listingUniquePots = new Map<string, number>();
+            for (const [potName, potValue] of uniqueItem.pots) {
+                listingUniquePots.set(potName, potValue);
+            }
+            const listingUniqueItem: UniqueItemInstance = {
+                baseItemId: uniqueItem.baseItemId,
+                pots: listingUniquePots,
+                created: uniqueItem.created,
+            };
+            if (uniqueItem.placed !== undefined) {
+                listingUniqueItem.placed = uniqueItem.placed;
+            }
+
             // Create the listing
             const expires =
                 duration > 0 ? os.time() + duration : os.time() + MARKETPLACE_CONFIG.DEFAULT_LISTING_DURATION;
@@ -147,6 +151,7 @@ export default class MarketplaceService implements OnInit, OnStart {
                 created: os.time(),
                 expires: expires,
                 listingFee: listingFee,
+                uniqueItem: listingUniqueItem,
                 active: true,
             };
 
@@ -204,22 +209,39 @@ export default class MarketplaceService implements OnInit, OnStart {
                 },
             );
 
-            if (listing === undefined || listing.sellerId !== player.UserId || !listing.active) {
+            if (listing === undefined || listing.sellerId !== player.UserId) {
                 return false;
             }
 
             // Return item to player's inventory
             const empireData = this.dataService.empireData;
 
-            // For now, we'll create a simple unique item entry
-            // In a real implementation, you'd fetch the stored unique item data
-            const uniqueItem: UniqueItemInstance = {
-                baseItemId: "unknown", // This would be fetched from the stored listing data
-                pots: new Map(),
-                created: os.time(),
-            };
+            const uniqueItemData = listing.uniqueItem;
+            if (uniqueItemData !== undefined) {
+                const restoredPots = new Map<string, number>();
+                for (const [potName, potValue] of uniqueItemData.pots) {
+                    restoredPots.set(potName, potValue);
+                }
 
-            empireData.items.uniqueInstances.set(uuid, uniqueItem);
+                const restoredUniqueItem: UniqueItemInstance = {
+                    baseItemId: uniqueItemData.baseItemId,
+                    pots: restoredPots,
+                    created: uniqueItemData.created,
+                };
+                if (uniqueItemData.placed !== undefined) {
+                    restoredUniqueItem.placed = uniqueItemData.placed;
+                }
+
+                empireData.items.uniqueInstances.set(uuid, restoredUniqueItem);
+            } else {
+                warn(`Marketplace listing ${uuid} missing unique item data during cancel; fabricating placeholder.`);
+                const fallbackUniqueItem: UniqueItemInstance = {
+                    baseItemId: "unknown",
+                    pots: new Map(),
+                    created: os.time(),
+                };
+                empireData.items.uniqueInstances.set(uuid, fallbackUniqueItem);
+            }
 
             // Refund listing fee (50% penalty)
             if (listing.listingFee !== undefined) {
@@ -247,14 +269,13 @@ export default class MarketplaceService implements OnInit, OnStart {
         }
 
         // Create processing token before starting transaction
-        const tokenId = HttpService.GenerateGUID(false);
         const token: TradeToken = {
             empireKey: this.dataService.empireId,
             buyerEmpireId: this.dataService.empireId,
             buyerId: player.UserId,
             sellerEmpireId: "",
             sellerId: 0,
-            uuid: uuid,
+            uuid,
             price: 0, // Will be filled from listing
             timestamp: os.time(),
             status: "processing",
@@ -279,7 +300,7 @@ export default class MarketplaceService implements OnInit, OnStart {
                 },
             );
 
-            if (listing === undefined || !listing.active || listing.listingType !== "buyout") {
+            if (listing === undefined || listing.listingType !== "buyout") {
                 return false;
             }
 
@@ -289,13 +310,13 @@ export default class MarketplaceService implements OnInit, OnStart {
             token.price = listing.price;
 
             // Upload processing token to external system
-            this.uploadTradeToken(tokenId, token);
+            this.uploadTradeToken(uuid, token);
 
             // Process payment
             const success = this.currencyService.purchase(new CurrencyBundle().set("Diamonds", listing.price));
             if (!success) {
                 token.status = "failed";
-                this.uploadTradeToken(tokenId, token);
+                this.uploadTradeToken(uuid, token);
                 return false;
             }
 
@@ -305,22 +326,37 @@ export default class MarketplaceService implements OnInit, OnStart {
 
             // Add item to buyer's inventory
             const empireData = this.dataService.empireData;
+            const listingUniqueItem = listing.uniqueItem;
 
-            // For now, we'll create a simple unique item entry
-            // In a real implementation, you'd fetch the full unique item data
-            const uniqueItem: UniqueItemInstance = {
-                baseItemId: "unknown", // This would be fetched from the listing
-                pots: new Map(),
-                created: os.time(),
-            };
+            let grantedUniqueItem: UniqueItemInstance;
+            if (listingUniqueItem !== undefined) {
+                const grantedPots = new Map<string, number>();
+                for (const [potName, potValue] of listingUniqueItem.pots) {
+                    grantedPots.set(potName, potValue);
+                }
+                grantedUniqueItem = {
+                    baseItemId: listingUniqueItem.baseItemId,
+                    pots: grantedPots,
+                    created: listingUniqueItem.created,
+                };
+                if (listingUniqueItem.placed !== undefined) {
+                    grantedUniqueItem.placed = listingUniqueItem.placed;
+                }
+            } else {
+                warn(`Marketplace listing ${uuid} missing unique item data during purchase; fabricating placeholder.`);
+                grantedUniqueItem = {
+                    baseItemId: "unknown",
+                    pots: new Map(),
+                    created: os.time(),
+                };
+            }
 
-            empireData.items.uniqueInstances.set(uuid, uniqueItem);
+            empireData.items.uniqueInstances.set(uuid, grantedUniqueItem);
 
             // Record transaction
             const transaction: MarketplaceTransaction = {
-                id: tokenId,
-                uuid: uuid,
-                baseItemId: "unknown", // This would be fetched from the actual unique item
+                uuid,
+                baseItemId: grantedUniqueItem.baseItemId,
                 sellerId: listing.sellerId,
                 buyerId: player.UserId,
                 price: listing.price,
@@ -328,11 +364,11 @@ export default class MarketplaceService implements OnInit, OnStart {
                 type: "buyout",
             };
 
-            this.historyDataStore.SetAsync(tokenId, transaction);
+            this.historyDataStore.SetAsync(uuid, transaction);
 
             // Complete token
             token.status = "completed";
-            this.uploadTradeToken(tokenId, token);
+            this.uploadTradeToken(uuid, token);
 
             // Fire events
             this.itemSold.fire(transaction);
@@ -345,7 +381,7 @@ export default class MarketplaceService implements OnInit, OnStart {
         } catch (error) {
             warn("Error processing buyout:", error);
             token.status = "failed";
-            this.uploadTradeToken(tokenId, token);
+            this.uploadTradeToken(uuid, token);
             return false;
         }
     }
@@ -524,13 +560,5 @@ export default class MarketplaceService implements OnInit, OnStart {
      */
     setTradeTokenWebhook(webhookUrl: string): void {
         this.tradeTokenWebhook = webhookUrl;
-    }
-
-    /**
-     * Disables/enables the marketplace (admin only).
-     */
-    setMarketplaceEnabled(enabled: boolean): void {
-        this.isMarketplaceEnabled = enabled;
-        Packets.marketplaceEnabled.set(enabled);
     }
 }

@@ -15,6 +15,7 @@ import CrystalDrill from "shared/items/0/happylike/CrystalDrill";
 import FrostSnow from "shared/items/0/justair/FrostSnow";
 import LeashedConveyor from "shared/items/0/locomotion/LeashedConveyor";
 import UnleashedElevatedMiniConveyor from "shared/items/0/locomotion/UnleashedElevatedMiniConveyor";
+import SacredBaptism from "shared/items/0/sleepful/SacredBaptism";
 import CrimsonCemetery from "shared/items/0/unlosable/CrimsonCemetery";
 import BoomboxElevator from "shared/items/0/vibeness/BoomboxElevator";
 import ShrinkflowConveyor from "shared/items/0/vibeness/ShrinkflowConveyor";
@@ -48,6 +49,8 @@ export = new Item(script.Name)
         WinsomeCharm,
 
         SortingConveyor,
+
+        SacredBaptism,
 
         HeavyFoundry,
         LostHeaven,

@@ -35,6 +35,7 @@ import Droplet from "shared/item/Droplet";
 import Item from "shared/item/Item";
 import Furnace from "shared/item/traits/Furnace";
 import Charger from "shared/item/traits/generator/Charger";
+import VoidSkyUpgrader from "shared/items/0/happylike/VoidSkyUpgrader";
 import SlamoStore from "shared/items/0/millisecondless/SlamoStore";
 import Items from "shared/items/Items";
 import AwesomeManumaticPurifier from "shared/items/negative/felixthea/AwesomeManumaticPurifier";
@@ -49,6 +50,7 @@ declare global {
 
 type ItemProgressionStats = {
     revenue: CurrencyBundle;
+    priceLabel?: string;
     item?: Item;
     timeToObtain?: OnoeNum;
     limitingCurrency?: Currency;
@@ -59,18 +61,6 @@ type ItemProgressionStats = {
  */
 @Service()
 export default class ProgressionEstimationService implements OnGameAPILoaded, OnStart {
-    private readonly RESET_CYCLE_SECONDS = 600;
-
-    private readonly AUTO_UPGRADE_ORDER = [
-        "MoreFunds",
-        "MorePower",
-        "CryptographicFunds",
-        "CryptographicPower",
-        "SkilledMining",
-        "EfficientLearning",
-        "DarkerMatter",
-        "ArtOfPurification",
-    ];
     /**
      * Map of Droplet to their corresponding model instance in Workspace.
      * Used for simulating droplet upgrades and value calculations.
@@ -175,6 +165,7 @@ export default class ProgressionEstimationService implements OnGameAPILoaded, On
         let nextItem: Item | undefined;
         let timeToObtain: OnoeNum | undefined;
         let limitingCurrency: Currency | undefined;
+        let nextPrice: CurrencyBundle | undefined;
         revenue = this.calculateRevenue(inventory, revenue.mul(500));
 
         // find time to obtain other items
@@ -182,13 +173,13 @@ export default class ProgressionEstimationService implements OnGameAPILoaded, On
             // check if item is already at the maximum amount
             const currentAmount = bought.get(item) ?? 0;
             const nextIteration = currentAmount === undefined ? 1 : currentAmount + 1;
-            let nextPrice = item.pricePerIteration.get(nextIteration);
-            if (nextPrice === undefined) {
+            let price = item.pricePerIteration.get(nextIteration);
+            if (price === undefined) {
                 if (nextIteration > 1 && item.defaultPrice !== undefined)
                     // prevent infinite loop
                     continue;
-                nextPrice = item.defaultPrice;
-                if (nextPrice === undefined) continue;
+                price = item.defaultPrice;
+                if (price === undefined) continue;
             }
 
             // check if required items is in items
@@ -216,15 +207,16 @@ export default class ProgressionEstimationService implements OnGameAPILoaded, On
                 }
             }
 
-            const [t, limiting] = this.getTimeToReachPrice(revenue, nextPrice);
+            const [t, limiting] = this.getTimeToReachPrice(revenue, price);
             if (t === undefined || t.moreThan(1e6)) continue;
             limitingCurrency = limiting;
             if (timeToObtain === undefined || t.lessThan(timeToObtain)) {
                 timeToObtain = t;
                 nextItem = item;
+                nextPrice = price;
             }
         }
-        return { revenue, item: nextItem, timeToObtain, limitingCurrency };
+        return { revenue, priceLabel: nextPrice?.toString() ?? "N/A", item: nextItem, timeToObtain, limitingCurrency };
     }
 
     /**
@@ -310,6 +302,7 @@ export default class ProgressionEstimationService implements OnGameAPILoaded, On
         if (items.has(AwesomeManumaticPurifier)) {
             generatorRevenue = generatorRevenue.add(new CurrencyBundle().set("Purifier Clicks", 1)); // assume the player is clicking the purifier
         }
+        let canUpgradeInCauldrons = items.has(VoidSkyUpgrader);
 
         const bestChargersPerCurrency = new Map<Currency, Charger[]>();
         const supplementaryChargers = new Set<Charger>();
@@ -457,16 +450,9 @@ export default class ProgressionEstimationService implements OnGameAPILoaded, On
                 dropletUpgrades.set(tostring(i), upgrade);
                 i++;
             }
-            const baseHealth = droplet.health;
             instanceInfo.Health = 100; // override health check to make our own damage calculations
 
             const [upgradedValue] = this.revenueService.calculateDropletValue(dropletModel, true, true);
-            // for (const [currency, amount] of upgradedValue.amountPerCurrency) {
-            //     let damage = (baseHealth - (damagePerCurrency.get(currency) ?? 0)) / 100;
-            //     damage = math.clamp(damage, 0.25, 1); // assume player wont degrade droplet more than 75%
-            //     upgradedValue.set(currency, amount.mul(damage));
-            // }
-
             const [unupgradedValue] = this.revenueService.calculateDropletValue(dropletModel, true, false);
 
             const value = new CurrencyBundle();
@@ -475,7 +461,7 @@ export default class ProgressionEstimationService implements OnGameAPILoaded, On
                 const cauldron = cauldronPerCurrency.get(currency);
                 const furnaceValue =
                     furnace?.apply(new CurrencyBundle().set(currency, upgradedAmount)).get(currency) ?? upgradedAmount;
-                const unupgradedAmount = unupgradedValue.get(currency)!;
+                const unupgradedAmount = canUpgradeInCauldrons ? upgradedAmount : unupgradedValue.get(currency)!;
                 const cauldronValue =
                     cauldron?.apply(new CurrencyBundle().set(currency, unupgradedAmount)).get(currency) ??
                     unupgradedAmount;
@@ -503,7 +489,7 @@ export default class ProgressionEstimationService implements OnGameAPILoaded, On
         for (const [_, resetLayer] of pairs(RESET_LAYERS)) {
             const reward = this.resetService.getResetReward(resetLayer);
             if (reward === undefined) continue;
-            revenue = revenue.add(reward); // assume they always get the reset every second
+            revenue = revenue.add(reward.div(500));
         }
 
         return revenue;
@@ -528,8 +514,10 @@ export default class ProgressionEstimationService implements OnGameAPILoaded, On
         const progression = this.getProgression();
         const builder = new StringBuilder();
         let itemIteration = 1;
+        // Collect TTOs for summary
+        const ttoList: Array<{ item: Item; tto: OnoeNum }> = [];
+
         for (const stats of progression) {
-            const revenue = stats.revenue;
             const item = stats.item;
             const timeToObtain = stats.timeToObtain;
             if (item === undefined || timeToObtain === undefined) continue;
@@ -540,8 +528,8 @@ export default class ProgressionEstimationService implements OnGameAPILoaded, On
             builder.append(item.difficulty.name);
             builder.append("\n\t> **");
             builder.append(timeToObtain.toString());
-            builder.append("s** TTO at revenue ");
-            builder.append(revenue.toString());
+            builder.append("s** TTO at price ");
+            builder.append(stats.priceLabel);
             builder.append(". (Limiting: **");
             builder.append(stats.limitingCurrency);
             builder.append("**)");
@@ -559,16 +547,33 @@ export default class ProgressionEstimationService implements OnGameAPILoaded, On
 
             builder.append("\n");
             itemIteration++;
+            ttoList.push({ item: item, tto: timeToObtain });
         }
         builder.append(`\n\n`);
-        builder.append(`-# Note that this is a rough estimate and does not account for all mechanics in the game.\n`);
-        const dt = math.floor((tick() - t) * 100) / 100;
-        builder.append(`-# Calculated in ${dt} seconds.\n`);
-        if (this.namedUpgradeService.upgrades.size() > 0) {
-            for (const [id, amount] of this.namedUpgradeService.upgrades) {
-                builder.append(`- Simulated named upgrade: ${id} x${amount}\n`);
+
+        // Add top 10 highest TTOs summary
+        if (!ttoList.isEmpty()) {
+            ttoList.sort((a, b) => a.tto.moreThan(b.tto));
+            builder.append(`-# Top 10 Highest Time-To-Obtain (TTO) Items:\n`);
+            for (let i = 0; i < math.min(10, ttoList.size()); i++) {
+                const entry = ttoList[i];
+                builder.append(`  ${i + 1}. **${entry.item.name}**: ${entry.tto.toString()}s\n`);
             }
         }
+
+        builder.append(`-# Note that this is a rough estimate and does not account for all mechanics in the game.\n`);
+        const dt = math.floor((tick() - t) * 100) / 100;
+        for (const [id, amount] of this.namedUpgradeService.upgrades) {
+            builder.append(`- Simulated named upgrade: ${id} x${amount}\n`);
+        }
+        for (const [id, resetLayer] of pairs(RESET_LAYERS)) {
+            const reward = this.resetService.getResetReward(resetLayer);
+            if (reward === undefined) continue;
+            builder.append(`- Simulated reset layer: ${id} (Reward: ${reward})\n`);
+        }
+
+        builder.append(`-# Calculated in ${dt} seconds.\n`);
+
         print(`Calculated in ${dt} seconds.`);
 
         this.post(builder.toString());

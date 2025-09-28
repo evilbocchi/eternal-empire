@@ -199,7 +199,7 @@ export default function App({ viewportsEnabled }: { viewportsEnabled: boolean })
     }, []);
 
     useEffect(() => {
-        if (!IS_EDIT) return;
+        if (!IS_EDIT || !Sandbox.getEnabled()) return;
 
         const t = os.clock();
         let safeToStartPhysics = true;

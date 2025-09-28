@@ -159,7 +159,7 @@ class StoryMocking {
         Packets.revenue.set(this.mockCurrencies().amountPerCurrency);
     }
 
-    static mockCharacter() {
+    static mockCharacter(pivotAroundCamera = true) {
         const [rig, setRig] = useState<Model>();
         useEffect(() => {
             const newRig = this.generateDummyRig();
@@ -169,14 +169,17 @@ class StoryMocking {
                 LOCAL_PLAYER.Character = newRig;
             }
 
-            const connection = RunService.Heartbeat.Connect(() => {
-                if (!newRig || !newRig.Parent || !newRig.PrimaryPart) return;
-                const cameraCframe = Workspace.CurrentCamera?.CFrame;
-                if (!cameraCframe) return;
-                const modelPosition = cameraCframe.Position.sub(new Vector3(0, 10, 0));
-                // Offset the model forward a bit so it faces the camera
-                newRig.PivotTo(new CFrame(modelPosition.add(cameraCframe.LookVector.mul(10))));
-            });
+            let connection: RBXScriptConnection | undefined;
+            if (pivotAroundCamera) {
+                connection = RunService.Heartbeat.Connect(() => {
+                    if (!newRig || !newRig.Parent || !newRig.PrimaryPart) return;
+                    const cameraCframe = Workspace.CurrentCamera?.CFrame;
+                    if (!cameraCframe) return;
+                    const modelPosition = cameraCframe.Position.sub(new Vector3(0, 10, 0));
+                    // Offset the model forward a bit so it faces the camera
+                    newRig.PivotTo(new CFrame(modelPosition.add(cameraCframe.LookVector.mul(10))));
+                });
+            }
 
             setRig(newRig);
             return () => {
@@ -185,7 +188,7 @@ class StoryMocking {
                     LOCAL_PLAYER.Character = undefined;
                     LOCAL_PLAYER.FindFirstChildOfClass("Backpack")?.ClearAllChildren();
                 }
-                connection.Disconnect();
+                connection?.Disconnect();
             };
         }, []);
         return rig;

@@ -11,6 +11,7 @@ import PolarizedRefiner from "shared/items/negative/a/PolarizedRefiner";
 import FictionalUpgrader from "shared/items/negative/exist/FictionalUpgrader";
 import IndustrialOverpass from "shared/items/negative/exist/IndustrialOverpass";
 import LegPoweredDropper from "shared/items/negative/felixthea/LegPoweredDropper";
+import WIPUpgrader from "shared/items/negative/felixthea/WIPUpgrader";
 import LimitBreaker from "shared/items/negative/friendliness/LimitBreaker";
 import EmpoweredBrick from "shared/items/negative/instantwin/EmpoweredBrick";
 import Lamp from "shared/items/negative/negativity/Lamp";
@@ -31,6 +32,7 @@ export = new Item(script.Name)
         Lamp,
 
         LimitBreaker,
+        WIPUpgrader,
 
         OverengineeredGenerator,
 

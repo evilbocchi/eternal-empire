@@ -226,16 +226,10 @@ namespace Packets {
     export const cancelListing = packet<(uuid: string) => boolean>();
     export const buyListing = packet<(uuid: string) => boolean>();
     export const placeBid = packet<(uuid: string, bidAmount: number) => boolean>();
-    export const getMarketplaceListings = packet<() => MarketplaceListing[]>();
     export const marketplaceTransaction = packet<(transaction: MarketplaceTransaction) => void>();
     export const listingUpdated = packet<(listing: MarketplaceListing) => void>();
     export const listingRemoved = packet<(uuid: string) => void>();
     export const myActiveListings = property<Map<string, DataType.Packed<MarketplaceListing>>>(new Map());
-    export const marketplaceEnabled = property<boolean>(true);
-
-    // marketplace terminal
-    export const openMarketplaceTerminal = packet<() => void>();
-    export const closeMarketplaceTerminal = packet<() => void>();
 }
 
 export = Packets;

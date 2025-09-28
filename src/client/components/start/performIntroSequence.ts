@@ -32,6 +32,14 @@ export default function performIntroSequence() {
     });
 
     print("performing intro sequence");
+    const blackWindow = new Instance("Frame");
+    blackWindow.Size = new UDim2(1, 0, 1, 0);
+    blackWindow.BackgroundColor3 = Color3.fromRGB(0, 0, 0);
+    blackWindow.BackgroundTransparency = 0;
+    blackWindow.Visible = true;
+    blackWindow.Parent = INTRO_GUI;
+
+    // Waking up
     const humanoid = getPlayerCharacter()?.FindFirstChildOfClass("Humanoid");
     if (humanoid === undefined) return exit();
     const camera = Workspace.CurrentCamera;
@@ -54,12 +62,7 @@ export default function performIntroSequence() {
     sleepingAnimation?.Play();
     camera.CameraType = Enum.CameraType.Scriptable;
     camera.CFrame = WAYPOINTS.NewBeginningsCamera0.CFrame;
-    const blackWindow = new Instance("Frame");
-    blackWindow.Size = new UDim2(1, 0, 1, 0);
-    blackWindow.BackgroundColor3 = Color3.fromRGB(0, 0, 0);
-    blackWindow.BackgroundTransparency = 0;
-    blackWindow.Visible = true;
-    blackWindow.Parent = INTRO_GUI;
+
     const fabricRustle = () => playSound("FabricRustle.mp3");
     task.delay(2, () => {
         fabricRustle();

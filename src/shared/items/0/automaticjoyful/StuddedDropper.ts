@@ -10,7 +10,7 @@ export = new Item(script.Name)
         "Not sure how it's still in good shape, but drops pretty healthy droplets at %val% every 3 seconds.",
     )
     .setDifficulty(Difficulty.AutomaticJoyful)
-    .setPrice(new CurrencyBundle().set("Funds", 7.5e35).set("Skill", 1200).set("Power", 6000000000000), 1)
+    .setPrice(new CurrencyBundle().set("Funds", 7.5e35).set("Skill", 1200).set("Power", 6e12), 1)
     .addPlaceableArea("BarrenIslands", "SlamoVillage")
     .persists("Skillification")
 

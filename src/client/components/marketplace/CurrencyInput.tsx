@@ -1,13 +1,11 @@
 import React, { useState } from "@rbxts/react";
-import { RobotoSlab, RobotoSlabBold } from "shared/asset/GameFonts";
+import { RobotoSlab } from "shared/asset/GameFonts";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
-import CurrencyDisplay from "./CurrencyDisplay";
 
 interface CurrencyInputProps {
     label: string;
     placeholder?: string;
     onAmountChange: (amount: CurrencyBundle) => void;
-    currencyType?: string;
     minValue?: number;
     maxValue?: number;
     size?: UDim2;
@@ -20,7 +18,6 @@ export default function CurrencyInput({
     label,
     placeholder = "Enter amount...",
     onAmountChange,
-    currencyType = "Funds",
     minValue = 1,
     maxValue = 1e12,
     size = new UDim2(1, 0, 0, 80),

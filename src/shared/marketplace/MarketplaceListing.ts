@@ -70,6 +70,11 @@ declare global {
         listingFee?: number;
 
         /**
+         * Unique item instance data associated with this listing, including raw pot values.
+         */
+        uniqueItem?: DataType.Packed<UniqueItemInstance>;
+
+        /**
          * Whether the listing is active.
          */
         active: boolean;
@@ -165,11 +170,6 @@ declare global {
      */
     interface MarketplaceTransaction {
         /**
-         * Unique transaction ID.
-         */
-        id: string;
-
-        /**
          * The UUID of the item that was traded.
          */
         uuid: string;
@@ -182,12 +182,12 @@ declare global {
         /**
          * The seller's user ID.
          */
-        sellerId: DataType.i32;
+        sellerId: number;
 
         /**
          * The buyer's user ID.
          */
-        buyerId: DataType.i32;
+        buyerId: number;
 
         /**
          * The final sale price.
@@ -197,7 +197,7 @@ declare global {
         /**
          * Unix timestamp of the transaction.
          */
-        timestamp: DataType.i32;
+        timestamp: DataType.f64;
 
         /**
          * Type of transaction.

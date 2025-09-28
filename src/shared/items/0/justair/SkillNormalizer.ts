@@ -24,7 +24,7 @@ export = new Item(script.Name)
 
     .trait(Upgrader)
     .applyFormula(
-        (v, item) => item.setMul(mul.set("Skill", v.mul(1))),
+        (v, item) => item.setMul(mul.set("Skill", v)),
         () => {
             const amount = Server.Reset.getResetReward(RESET_LAYERS.Skillification)?.get("Skill");
             return amount === undefined ? new OnoeNum(1) : amount;
