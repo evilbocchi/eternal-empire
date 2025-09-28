@@ -13,6 +13,7 @@
  * @since 1.0.0
  */
 
+import Difficulty from "@antivivi/jjt-difficulties";
 import { OnoeNum } from "@antivivi/serikanum";
 import { getAllInstanceInfo } from "@antivivi/vrldk";
 import { OnStart, Service } from "@flamework/core";
@@ -34,6 +35,7 @@ import Droplet from "shared/item/Droplet";
 import Item from "shared/item/Item";
 import Furnace from "shared/item/traits/Furnace";
 import Charger from "shared/item/traits/generator/Charger";
+import SlamoStore from "shared/items/0/millisecondless/SlamoStore";
 import Items from "shared/items/Items";
 import AwesomeManumaticPurifier from "shared/items/negative/felixthea/AwesomeManumaticPurifier";
 
@@ -53,6 +55,18 @@ type ItemProgressionStats = {
  */
 @Service()
 export default class ProgressionEstimationService implements OnGameAPILoaded, OnStart {
+    private readonly RESET_CYCLE_SECONDS = 600;
+
+    private readonly AUTO_UPGRADE_ORDER = [
+        "MoreFunds",
+        "MorePower",
+        "CryptographicFunds",
+        "CryptographicPower",
+        "SkilledMining",
+        "EfficientLearning",
+        "DarkerMatter",
+        "ArtOfPurification",
+    ];
     /**
      * Map of Droplet to their corresponding model instance in Workspace.
      * Used for simulating droplet upgrades and value calculations.
@@ -187,7 +201,11 @@ export default class ProgressionEstimationService implements OnGameAPILoaded, On
 
             // check if required shop is available (negative shop is always available)
             const requiredShop = this.findShopForItem(item);
-            if (requiredShop !== undefined && requiredShop.difficulty.name !== "The First Difficulty") {
+            if (
+                requiredShop !== undefined &&
+                requiredShop.difficulty.id !== Difficulty.TheFirstDifficulty.id &&
+                requiredShop.id !== SlamoStore.id
+            ) {
                 if (!inventory.has(requiredShop)) {
                     canObtain = false;
                     continue;
@@ -213,8 +231,13 @@ export default class ProgressionEstimationService implements OnGameAPILoaded, On
     maxUpgradeBoard(upgrades: string[]) {
         for (const id of upgrades) {
             const purchase = () => this.namedUpgradeService.buyUpgrade(id, undefined, undefined, true);
+            let i = 0;
             while (purchase()) {
-                task.wait();
+                i++;
+                if (i > 1000) {
+                    warn(`Max upgrade loop detected for ${id}`);
+                    break;
+                }
             }
         }
     }
@@ -490,6 +513,8 @@ export default class ProgressionEstimationService implements OnGameAPILoaded, On
 
     estimate() {
         const startingBalance = this.currencyService.balance.clone();
+        const startingUpgrades = new Map<string, number>();
+        this.namedUpgradeService.upgrades.forEach((value, key) => startingUpgrades.set(key, value));
         this.currencyService.setAll(new Map());
         this.namedUpgradeService.setAmountPerUpgrade(new Map());
 
@@ -536,6 +561,7 @@ export default class ProgressionEstimationService implements OnGameAPILoaded, On
         print(`Calculated in ${dt} seconds.`);
 
         this.post(builder.toString());
+        this.namedUpgradeService.setAmountPerUpgrade(startingUpgrades);
         this.currencyService.setAll(startingBalance.amountPerCurrency);
     }
 
