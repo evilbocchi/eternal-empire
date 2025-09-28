@@ -4,6 +4,7 @@ import { Environment } from "@rbxts/ui-labs";
 import { LOCAL_PLAYER } from "client/constants";
 import { RobotoMono, RobotoSlab, RobotoSlabMedium } from "shared/asset/GameFonts";
 import Command from "shared/commands/Command";
+import Packets from "shared/Packets";
 
 interface CommandSuggestion {
     command: Command;
@@ -119,7 +120,6 @@ export default function SimulationCommandInterface() {
     useEffect(() => {
         const connection = Environment.UserInput.InputBegan.Connect((input, gameProcessed) => {
             if (gameProcessed) return;
-
             // Check for Shift+I shortcut to run /iset all 20
             if (input.KeyCode === Enum.KeyCode.I) {
                 if (
@@ -149,6 +149,18 @@ export default function SimulationCommandInterface() {
                     } else {
                         print("Command 'iset' not found");
                     }
+                    return;
+                }
+            }
+
+            // Check for Shift+K shortcut to run Packets.progressEstimationRequest.toServer()
+            if (input.KeyCode === Enum.KeyCode.K) {
+                if (
+                    Environment.UserInput.IsKeyDown(Enum.KeyCode.LeftShift) ||
+                    Environment.UserInput.IsKeyDown(Enum.KeyCode.RightShift)
+                ) {
+                    Packets.progressEstimationRequest.toServer();
+                    print("Executed Packets.progressEstimationRequest.toServer() (Shift+K shortcut)");
                     return;
                 }
             }

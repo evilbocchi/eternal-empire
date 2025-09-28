@@ -32,6 +32,12 @@ local function sendInstanceTree()
         return
     end
 
+    -- Check if waypoints has any children
+    local waypointChildren = waypoints:GetChildren()
+    if #waypointChildren == 0 then
+        return
+    end
+
     local trees = {
         {
             name = "Workspace",

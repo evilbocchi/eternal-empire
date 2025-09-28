@@ -1,15 +1,39 @@
 #!/usr/bin/env node
 
 import express from "express";
-import fs from "fs";
+import { appendFile, readFile, writeFile } from "node:fs/promises";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import signale from "signale";
 
 const app = express();
-app.use(express.json());
+app.use(express.json({ limit: "1mb" }));
 
 // Use parsed options
 const PORT = 28354;
-const OUTPUT = "src/services.d.ts";
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const REPO_ROOT = path.resolve(__dirname, "..");
+const OUTPUT = path.resolve(REPO_ROOT, "src/services.d.ts");
+const PROGRESSION_OUTPUT = path.resolve(REPO_ROOT, "PROGRESS_ESTIMATION.md");
+
+async function writeFileIfChanged(filePath, content) {
+    const relativePath = path.relative(REPO_ROOT, filePath);
+
+    try {
+        const currentContent = await readFile(filePath, "utf8");
+        if (currentContent === content) {
+            return { message: `No changes detected in ${relativePath}`, changed: false };
+        }
+    } catch (error) {
+        if (error?.code !== "ENOENT") {
+            throw error;
+        }
+    }
+
+    await writeFile(filePath, content);
+    return { message: `Written to ${relativePath}`, changed: true };
+}
 
 function generateInterfaceDefinition(serviceName, node, depth = 0) {
     const indent = "    ".repeat(depth);
@@ -110,29 +134,61 @@ ${serviceTypeEntries.join("\n")}
 `;
 }
 
-app.post("/write", (req, res) => {
+app.post("/write", async (req, res) => {
     const body = req.body;
     if (!body || typeof body !== "object") {
         return res.status(400).send("Missing or invalid JSON body.");
     }
 
     const content = generateTypeScriptContent(body);
-    // Read the current file contents first
-    fs.readFile(OUTPUT, "utf8", (readErr, currentContent) => {
-        if (!readErr && currentContent === content) {
-            // No change, do not write
-            return res.send(`No changes detected in ${OUTPUT}`);
-        }
-        // Write only if different or file does not exist
-        fs.writeFile(OUTPUT, content, (writeErr) => {
-            if (writeErr) {
-                return res.status(500).send("Failed to write to file.");
-            }
-            res.send(`Written to ${OUTPUT}`);
-        });
-    });
+    try {
+        const result = await writeFileIfChanged(OUTPUT, content);
+        res.send(result.message);
+    } catch (error) {
+        signale.error(error);
+        res.status(500).send(`Failed to write to ${path.relative(REPO_ROOT, OUTPUT)}.`);
+    }
 });
 
-app.fromClient(PORT, () => {
+app.post("/progression-report", async (req, res) => {
+    const body = typeof req.body === "object" && req.body !== null ? req.body : {};
+    const { content, chunk, isFirst, isLast } = body;
+
+    const relativePath = path.relative(REPO_ROOT, PROGRESSION_OUTPUT);
+
+    if (typeof content === "string" && content.length > 0) {
+        const normalizedContent = content.endsWith("\n") ? content : `${content}\n`;
+        try {
+            const result = await writeFileIfChanged(PROGRESSION_OUTPUT, normalizedContent);
+            return res.send(result.message);
+        } catch (error) {
+            signale.error(error);
+            return res.status(500).send(`Failed to write to ${relativePath}.`);
+        }
+    }
+
+    if (typeof chunk === "string" && chunk.length > 0) {
+        try {
+            if (isFirst) {
+                await writeFile(PROGRESSION_OUTPUT, chunk);
+            } else {
+                await appendFile(PROGRESSION_OUTPUT, chunk);
+            }
+
+            if (isLast && !chunk.endsWith("\n")) {
+                await appendFile(PROGRESSION_OUTPUT, "\n");
+            }
+
+            return res.send(`Chunk received for ${relativePath}`);
+        } catch (error) {
+            signale.error(error);
+            return res.status(500).send(`Failed to write chunk to ${relativePath}.`);
+        }
+    }
+
+    return res.status(400).send("Missing progression report content.");
+});
+
+app.listen(PORT, () => {
     signale.info(`Plugin server running at http://localhost:${PORT}`);
 });

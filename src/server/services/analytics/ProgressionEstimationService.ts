@@ -123,6 +123,26 @@ export default class ProgressionEstimationService implements OnGameAPILoaded, On
     }
 
     /**
+     * Finds the shop that sells a given item.
+     *
+     * @param targetItem The item to find a shop for.
+     * @returns The shop item that sells the target item, or undefined if no shop is found.
+     */
+    findShopForItem(targetItem: Item): Item | undefined {
+        for (const [_, shopItem] of Items.itemsPerId) {
+            const shop = shopItem.findTrait("Shop");
+            if (shop !== undefined) {
+                for (const item of shop.items) {
+                    if (item === targetItem) {
+                        return shopItem;
+                    }
+                }
+            }
+        }
+        return undefined;
+    }
+
+    /**
      * Finds the next obtainable item and time to obtain it, given inventory and revenue.
      *
      * @param inventory Map of items and their amounts.
@@ -164,6 +184,15 @@ export default class ProgressionEstimationService implements OnGameAPILoaded, On
                 }
             }
             if (!canObtain) continue;
+
+            // check if required shop is available (negative shop is always available)
+            const requiredShop = this.findShopForItem(item);
+            if (requiredShop !== undefined && requiredShop.difficulty.name !== "The First Difficulty") {
+                if (!inventory.has(requiredShop)) {
+                    canObtain = false;
+                    continue;
+                }
+            }
 
             const [t, limiting] = this.getTimeToReachPrice(revenue, nextPrice);
             if (t === undefined || t.moreThan(1e6)) continue;

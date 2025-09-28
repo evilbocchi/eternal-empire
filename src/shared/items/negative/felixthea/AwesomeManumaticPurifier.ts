@@ -129,6 +129,9 @@ export = new Item(script.Name)
         });
         model.Destroying.Once(() => {
             connection.Disconnect();
-            partCache.Dispose();
+            task.delay(2, () => {
+                // wait for any tweens to finish
+                partCache.Dispose();
+            });
         });
     });
