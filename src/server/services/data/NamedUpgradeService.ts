@@ -185,6 +185,18 @@ export default class NamedUpgradeService implements OnInit {
         eat(() => {
             changedConnection.Disconnect();
             boughtConnection.Disconnect();
+
+            // Restore grid sizes to original after cleanup
+            for (const [, area] of pairs(AREAS)) {
+                const gridWorldNode = area.gridWorldNode;
+                if (gridWorldNode === undefined) continue;
+                const grid = gridWorldNode?.getInstance();
+                if (grid === undefined) continue;
+                const size = gridWorldNode.originalSize;
+                if (size !== undefined && grid.Size !== size) {
+                    grid.Size = size;
+                }
+            }
         });
     }
 }

@@ -18,6 +18,7 @@ import GravityGrounder from "shared/items/1/joyful/GravityGrounder";
 import JoyfulPark from "shared/items/1/joyful/JoyfulPark";
 import TheAmplified from "shared/items/1/joyful/TheAmplified";
 import Baseplate from "shared/items/1/placid/Baseplate";
+import IndustrialUnderpass from "shared/items/1/placid/IndustrialUnderpass";
 import FullConversionRamp from "shared/items/1/walkaslope/FullConversionRamp";
 
 export = new Item(script.Name)
@@ -47,6 +48,7 @@ export = new Item(script.Name)
         IndustrialDropletSpray,
 
         Baseplate,
+        IndustrialUnderpass,
 
         FullConversionRamp,
 
