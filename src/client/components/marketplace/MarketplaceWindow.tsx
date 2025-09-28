@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "@rbxts/react";
+import React, { Fragment, useEffect, useMemo, useState } from "@rbxts/react";
 import CreateListingForm from "client/components/marketplace/CreateListingForm";
 import ListingCard from "client/components/marketplace/ListingCard";
 import SearchFilters from "client/components/marketplace/SearchFilters";
@@ -244,9 +244,9 @@ export default function MarketplaceWindow() {
             </frame>
 
             {/* Content Area */}
-            <frame BackgroundTransparency={1} Size={new UDim2(1, 0, 1, 0)} ZIndex={2}>
+            <frame BackgroundTransparency={1} Size={new UDim2(1, 0, 1, -48)} ZIndex={2}>
                 {/* Browse Tab */}
-                {activeTab === "Browse" && (
+                {activeTab === "Browse" ? (
                     <frame BackgroundTransparency={1} Size={new UDim2(1, 0, 1, 0)}>
                         <uilistlayout
                             FillDirection={Enum.FillDirection.Vertical}
@@ -291,7 +291,7 @@ export default function MarketplaceWindow() {
                                     BackgroundTransparency={1}
                                     FontFace={RobotoMono}
                                     Size={new UDim2(1, 0, 0, 20)}
-                                    Text="No listings found"
+                                    Text="No listings found."
                                     TextColor3={Color3.fromRGB(118, 138, 170)}
                                     TextScaled={true}
                                 >
@@ -300,10 +300,12 @@ export default function MarketplaceWindow() {
                             )}
                         </scrollingframe>
                     </frame>
+                ) : (
+                    <Fragment />
                 )}
 
                 {/* My Listings Tab */}
-                {activeTab === "MyListings" && (
+                {activeTab === "MyListings" ? (
                     <scrollingframe
                         BackgroundTransparency={1}
                         AutomaticCanvasSize={Enum.AutomaticSize.Y}
@@ -329,13 +331,8 @@ export default function MarketplaceWindow() {
                             for (const [uuid, listing] of myListings) {
                                 myListingEntries.push([uuid, listing]);
                             }
-                            return myListingEntries.map(([uuid, listing]) => (
-                                <ListingCard
-                                    key={`my-listing-${uuid}`}
-                                    listing={listing}
-                                    onCancel={handleCancelListing}
-                                    isOwner={true}
-                                />
+                            return myListingEntries.map(([, listing]) => (
+                                <ListingCard listing={listing} onCancel={handleCancelListing} isOwner={true} />
                             ));
                         })()}
 
@@ -343,8 +340,8 @@ export default function MarketplaceWindow() {
                             <textlabel
                                 BackgroundTransparency={1}
                                 FontFace={RobotoMono}
-                                Size={new UDim2(1, 0, 0, 120)}
-                                Text="You have no active listings"
+                                Size={new UDim2(1, 0, 0, 20)}
+                                Text="You have no active listings."
                                 TextColor3={Color3.fromRGB(118, 138, 170)}
                                 TextScaled={true}
                             >
@@ -352,10 +349,12 @@ export default function MarketplaceWindow() {
                             </textlabel>
                         )}
                     </scrollingframe>
+                ) : (
+                    <Fragment />
                 )}
 
                 {/* Create Listing Tab */}
-                {activeTab === "CreateListing" && <CreateListingForm onSubmit={handleCreateListing} />}
+                {activeTab === "CreateListing" ? <CreateListingForm onSubmit={handleCreateListing} /> : <Fragment />}
             </frame>
         </TechWindow>
     );
