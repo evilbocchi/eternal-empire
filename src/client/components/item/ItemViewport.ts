@@ -36,8 +36,13 @@ const KEY = "ItemViewport";
 const VIEWPORT_WORLD_POSITION = new CFrame(0, -500, 0);
 
 namespace ItemViewport {
+    let enabled = true;
     export const runningViewports = new Array<RunningViewport>();
     export const relsPerItem = new Map<string, [Vector3, number]>();
+
+    export function disable() {
+        enabled = false;
+    }
 
     // Precompute model bounding info for each item
     for (const [id, model] of ITEM_MODELS) {
@@ -83,6 +88,8 @@ namespace ItemViewport {
      * @param itemId The ID of the item to display.
      */
     export function loadItemIntoViewport(viewportFrame: ViewportFrame, itemId: string) {
+        if (!enabled) return;
+
         viewportFrame.ClearAllChildren();
 
         const camera = new Instance("Camera");

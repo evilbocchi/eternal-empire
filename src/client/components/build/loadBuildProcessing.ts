@@ -4,6 +4,7 @@
 import { CollectionService, RunService, Workspace } from "@rbxts/services";
 import { Environment } from "@rbxts/ui-labs";
 import { COLLISION_COLOR, NONCOLLISION_COLOR } from "client/constants";
+import { cancelCollision, requestCollision } from "client/parallel/build/PlacementCollisionWorker";
 import { ASSETS } from "shared/asset/GameAssets";
 import { CAMERA, PLACED_ITEMS_FOLDER } from "shared/constants";
 import Conveyor from "shared/item/traits/conveyor/Conveyor";
@@ -67,6 +68,8 @@ export default function loadBuildProcessing() {
         const conveyor = item.findTrait("Conveyor");
         const arrows = new Set<Beam>();
         const connections = new Set<RBXScriptConnection>();
+        let pendingCollisionJob: number | undefined;
+        let collisionRequestVersion = 0;
 
         if (conveyor !== undefined) {
             const loadedArrows = Conveyor.loadConveyorArrow(model, conveyor);
@@ -159,24 +162,49 @@ export default function loadBuildProcessing() {
             }
 
             const indicator = hitbox.WaitForChild("Indicator") as BasePart;
+            collisionRequestVersion = 0;
 
-            // Update collision colors when the hitbox moves
-            const connection = hitbox.GetPropertyChangedSignal("CFrame").Connect(() => {
+            const applyPlacementState = (canPlace: boolean) => {
                 const selectionBox = indicator.FindFirstChildOfClass("SelectionBox");
                 if (selectionBox === undefined) return;
-                let isAcceptable = !ItemPlacement.isTouchingPlacedItem(model);
-                if (!sandboxEnabled && !ItemPlacement.isInPlaceableArea(model, item)) isAcceptable = false;
 
-                // Set indicator color based on placement validity
-                if (isAcceptable) {
+                if (canPlace) {
                     selectionBox.Color3 = NONCOLLISION_COLOR;
                     selectionBox.SurfaceColor3 = NONCOLLISION_COLOR;
                 } else {
                     selectionBox.Color3 = COLLISION_COLOR;
                     selectionBox.SurfaceColor3 = COLLISION_COLOR;
                 }
+            };
+
+            const evaluatePlacement = (colliding: boolean) => {
+                let canPlace = !colliding;
+                if (canPlace && !sandboxEnabled && !ItemPlacement.isInPlaceableArea(model, item)) {
+                    canPlace = false;
+                }
+                applyPlacementState(canPlace);
+            };
+
+            const queueCollisionCheck = () => {
+                const currentVersion = ++collisionRequestVersion;
+
+                if (pendingCollisionJob !== undefined) {
+                    cancelCollision(pendingCollisionJob);
+                    pendingCollisionJob = undefined;
+                }
+
+                pendingCollisionJob = requestCollision(indicator, [model], (colliding) => {
+                    if (currentVersion !== collisionRequestVersion) return;
+                    pendingCollisionJob = undefined;
+                    evaluatePlacement(colliding);
+                });
+            };
+
+            const collisionConnection = hitbox.GetPropertyChangedSignal("CFrame").Connect(() => {
+                queueCollisionCheck();
             });
-            connections.add(connection);
+            connections.add(collisionConnection);
+            queueCollisionCheck();
         }
 
         let previousTransparency = 1;
@@ -237,6 +265,10 @@ export default function loadBuildProcessing() {
             }
             for (const arrow of arrows) {
                 arrow.Destroy();
+            }
+            if (pendingCollisionJob !== undefined) {
+                cancelCollision(pendingCollisionJob);
+                pendingCollisionJob = undefined;
             }
         });
         update();

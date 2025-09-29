@@ -39,11 +39,6 @@ export const observeCharacter = (callback: (character: Model) => void) => {
 export const PLAYER_GUI = (IS_EDIT ? StarterGui : LOCAL_PLAYER!.WaitForChild("PlayerGui")) as StarterGui;
 
 /**
- * Reference to the Actor instance for parallel execution, if present.
- */
-export const PARALLEL = script.Parent!.FindFirstChildOfClass("Actor")!;
-
-/**
  * Color used to indicate collision (red).
  */
 export const COLLISION_COLOR = new Color3(1, 0, 0);
