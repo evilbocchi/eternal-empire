@@ -10,7 +10,7 @@ import ChallengeHudManager from "client/components/challenge/ChallengeHudManager
 import ChallengeManager from "client/components/challenge/ChallengeManager";
 import ChestLootManager from "client/components/chest/ChestLootManager";
 import CommandsWindow from "client/components/commands/CommandsWindow";
-import ClickSparkManager from "client/components/effect/ClickSparkManager";
+import EffectManager from "client/components/effect/EffectManager";
 import InventoryWindow from "client/components/item/inventory/InventoryWindow";
 import PortableBeaconWindow from "client/components/item/PortableBeaconWindow";
 import PrinterRenderer from "client/components/item/printer/PrinterRenderer";
@@ -45,9 +45,9 @@ import {
     CHALLENGE_HUD_GUI,
     CHALLENGECOMPLETION_GUI,
     CHESTLOOT_GUI,
-    CLICK_SPARKS_GUI,
     CURRENCY_GAIN_GUI,
     DIALOGUE_GUI,
+    EFFECTS_GUI,
     INVENTORY_GUI,
     LEVELUP_GUI,
     LOGS_GUI,
@@ -100,7 +100,7 @@ export default function App() {
                 <SidebarButtons />
             </Fragment>,
         );
-        addRoot(roots, CLICK_SPARKS_GUI).render(<ClickSparkManager />);
+        addRoot(roots, EFFECTS_GUI).render(<EffectManager />);
         addRoot(roots, TOOLTIPS_GUI).render(<TooltipWindow />);
         addRoot(roots, TOASTS_GUI).render(<ToastManager />);
         addRoot(roots, DIALOGUE_GUI).render(<DialogueWindow />);

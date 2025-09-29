@@ -54,6 +54,12 @@ export default class AtmosphereService implements OnInit, OnPhysics {
     private readonly WEATHER_CYCLE_DURATION = 1200;
 
     /**
+     * Whether weather is manually controlled by commands.
+     * When true, automatic weather generation is disabled.
+     */
+    private isManuallyControlled = false;
+
+    /**
      * Weather probabilities for each type.
      */
     private readonly WEATHER_PROBABILITIES = {
@@ -88,7 +94,8 @@ export default class AtmosphereService implements OnInit, OnPhysics {
     private updateWeather(dt: number) {
         this.currentWeather.timeRemaining -= dt;
 
-        if (this.currentWeather.timeRemaining <= 0) {
+        // Don't auto-generate weather if manually controlled
+        if (this.currentWeather.timeRemaining <= 0 && !this.isManuallyControlled) {
             this.generateNextWeather();
         }
 
@@ -276,6 +283,63 @@ export default class AtmosphereService implements OnInit, OnPhysics {
      */
     getCurrentWeather(): WeatherState {
         return this.currentWeather;
+    }
+
+    /**
+     * Manually sets the weather to a specific type with default settings.
+     * Enables manual control mode, disabling automatic weather generation.
+     *
+     * @param weatherType The type of weather to set.
+     */
+    public setWeatherManual(weatherType: WeatherType) {
+        this.isManuallyControlled = true;
+        this.setWeather(weatherType);
+    }
+
+    /**
+     * Manually sets the weather with custom intensity and duration.
+     * Enables manual control mode, disabling automatic weather generation.
+     *
+     * @param weatherType The type of weather to set.
+     * @param intensity The intensity of the weather (0-1).
+     * @param duration The duration in seconds.
+     */
+    public setWeatherCustom(weatherType: WeatherType, intensity: number, duration: number) {
+        this.isManuallyControlled = true;
+
+        // Clamp intensity between 0 and 1
+        intensity = math.max(0, math.min(1, intensity));
+
+        this.currentWeather = {
+            type: weatherType,
+            intensity,
+            duration,
+            timeRemaining: duration,
+        };
+
+        print(`Weather manually set to: ${weatherType} with intensity ${intensity} for ${duration} seconds`);
+
+        // Notify clients of weather change
+        Packets.weatherChanged.toAllClients(this.currentWeather);
+    }
+
+    /**
+     * Stops manual weather control and resumes automatic weather generation.
+     */
+    public resumeAutomaticWeather() {
+        this.isManuallyControlled = false;
+        print("Automatic weather generation resumed");
+
+        // Force immediate weather generation
+        this.generateNextWeather();
+    }
+
+    /**
+     * Clears current weather immediately and sets to clear.
+     */
+    public clearWeather() {
+        this.isManuallyControlled = true;
+        this.setWeather(WeatherType.Clear);
     }
 
     /**

@@ -49,27 +49,28 @@ export function cancelCollision(jobId: number) {
     pending.delete(jobId);
 }
 
-const requestConnection = BuildParallel.ACTOR.bindToMessageParallel(
-    REQUEST_CHANNEL,
-    (message: CollisionRequestMessage) => {
-        const { jobId, cframe, size, ignores } = message;
+const requestConnection = BuildParallel.ACTOR.bindToMessage(REQUEST_CHANNEL, (message: CollisionRequestMessage) => {
+    const { jobId, cframe, size, ignores } = message;
 
-        // Set up OverlapParams to ignore specified names
-        overlapParams.FilterType = Enum.RaycastFilterType.Exclude;
-        overlapParams.FilterDescendantsInstances = ignores;
+    // Set up OverlapParams to ignore specified names
+    overlapParams.FilterType = Enum.RaycastFilterType.Exclude;
+    overlapParams.FilterDescendantsInstances = ignores;
 
-        // Perform collision check using GetPartBoundsInBox
-        const parts = Workspace.GetPartBoundsInBox(cframe, size, overlapParams);
-        // Exclude parts that are fully transparent or not collidable
-        const colliding = parts.some((part) => part.CanCollide && part.Transparency < 1);
+    task.desynchronize();
 
-        // Send result back to main thread
-        BuildParallel.ACTOR.sendMessage(RESULT_CHANNEL, {
-            jobId,
-            colliding,
-        } as CollisionResultMessage);
-    },
-);
+    // Perform collision check using GetPartBoundsInBox
+    const parts = Workspace.GetPartBoundsInBox(cframe, size, overlapParams);
+    // Exclude parts that are fully transparent or not collidable
+    const colliding = parts.some((part) => part.CanCollide && part.Transparency < 1);
+
+    // Send result back to main thread
+    BuildParallel.ACTOR.sendMessage(RESULT_CHANNEL, {
+        jobId,
+        colliding,
+    } as CollisionResultMessage);
+
+    task.synchronize();
+});
 eat(requestConnection, "Disconnect");
 
 const resultConnection = BuildParallel.ACTOR.bindToMessage(RESULT_CHANNEL, (message: CollisionResultMessage) => {

@@ -1,13 +1,13 @@
-import { ReplicatedStorage, RunService, Workspace } from "@rbxts/services";
+import { Debris, ReplicatedStorage, RunService, Workspace } from "@rbxts/services";
 import { Environment } from "@rbxts/ui-labs";
 import RainParallel from "client/parallel/rain/RainParallel";
 import { getAsset } from "shared/asset/AssetMap";
+import { CAMERA } from "shared/constants";
 import { IS_EDIT } from "shared/Context";
 import eat from "shared/hamster/eat";
 import { WeatherState, WeatherType } from "shared/weather/WeatherTypes";
 
 // Client Variables
-const camera = Workspace.CurrentCamera!;
 const debris = Workspace.WaitForChild("Terrain") as Terrain;
 const { rainHit, rainPuddle, rainSplash, rainTrail } = (() => {
     const rainHit = new Instance("ParticleEmitter");
@@ -198,7 +198,7 @@ function castRain(): RaycastResult | undefined {
     const directions = getRaycastDirections();
     // Raycasting Our Raindrops & Puddles
     return Workspace.Raycast(
-        camera.CFrame.Position.add(new Vector3(random(-range, range), settings.startHeight, random(-range, range))),
+        CAMERA.CFrame.Position.add(new Vector3(random(-range, range), settings.startHeight, random(-range, range))),
         directions.rainRaycastDirection,
         raycastParams,
     );
@@ -209,17 +209,10 @@ function scaleAmount(base: number, deltaTime: number): number {
     return floor(base * clamp(deltaTime * 60, 0.5, 1.5));
 }
 
-function remove(instance: Instance | undefined): void {
-    // Better Debris "Service"
-    if (instance) {
-        instance.Destroy();
-    }
-}
-
 function inBuilding(): boolean {
     const directions = getRaycastDirections();
     // Raycasting To See If The Player Is Inside Of A Building Or Not
-    const result = Workspace.Raycast(camera.CFrame.Position, directions.buildingRaycastDirection, raycastParams);
+    const result = Workspace.Raycast(CAMERA.CFrame.Position, directions.buildingRaycastDirection, raycastParams);
     return result !== undefined;
 }
 
@@ -237,6 +230,7 @@ const soundEffects: Record<string, number> = {};
 
 // Weather integration
 RainParallel.bindRainEnabled((rainEnabled: boolean) => {
+    print("Rain Enabled:", rainEnabled);
     // Update sound playing state
     rainSFX.Playing = rainEnabled;
     rainSFX.Volume = rainEnabled ? currentWeather.intensity * 0.5 : 0;
@@ -326,7 +320,7 @@ RunService.RenderStepped.Connect(() => {
         trail.Emit(1);
 
         // Remove Attachment
-        task.delay(rainMaxTime, () => remove(attachment));
+        Debris.AddItem(attachment, rainMaxTime);
     }
 
     // Spawn Puddles
@@ -347,7 +341,7 @@ RunService.RenderStepped.Connect(() => {
         puddle.Emit(1);
 
         // Remove Attachment
-        task.delay(puddleMaxTime, () => remove(attachment));
+        Debris.AddItem(attachment, puddleMaxTime);
     }
 
     // Sound Effects (only when rain is enabled)
