@@ -7,7 +7,6 @@ import InventoryFilter, {
     filterItems,
     useBasicInventoryFilter,
 } from "client/components/item/inventory/InventoryFilter";
-import { ItemViewportManagement } from "client/components/item/ItemViewport";
 import { PurchaseManager } from "client/components/item/shop/PurchaseWindow";
 import { createShopSlot, updateShopSlot, type ShopSlotHandle } from "client/components/item/shop/ShopSlot";
 import { showErrorToast } from "client/components/toast/ToastService";
@@ -95,7 +94,7 @@ export namespace ShopManager {
 /**
  * Main shop window component with integrated filtering
  */
-export default function ShopGui({ viewportManagement }: { viewportManagement?: ItemViewportManagement }) {
+export default function ShopGui() {
     const [{ shop, adornee }, setShopInfo] = useState<{ shop?: Shop; adornee?: Part }>({});
     const { searchQuery, props: filterProps } = useBasicInventoryFilter();
     const [hideMaxedItems, setHideMaxedItems] = useState(Packets.settings.get().HideMaxedItems);
@@ -183,12 +182,11 @@ export default function ShopGui({ viewportManagement }: { viewportManagement?: I
                 parent: frame,
                 layoutOrder: item.layoutOrder,
                 visible: false,
-                viewportManagement,
                 onActivated: handleItemClick,
             });
             slots.set(item.id, slot);
         }
-    }, [viewportManagement, handleItemClick]);
+    }, [handleItemClick]);
 
     const dataPerItem = useMemo(() => {
         return filterItems(shopItems, searchQuery, filterProps.traitFilters);
@@ -214,11 +212,10 @@ export default function ShopGui({ viewportManagement }: { viewportManagement?: I
                 baseVisible,
                 hideMaxedItems,
                 ownedAmount,
-                viewportManagement,
                 onActivated: handleItemClick,
             });
         }
-    }, [dataPerItem, shopItemIds, hideMaxedItems, ownedPerItem, viewportManagement, handleItemClick]);
+    }, [dataPerItem, shopItemIds, hideMaxedItems, ownedPerItem, handleItemClick]);
 
     const { events } = useHotkeyWithTooltip({
         action: () => {

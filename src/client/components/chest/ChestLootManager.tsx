@@ -5,13 +5,12 @@
 
 import React, { Fragment, useEffect, useState } from "@rbxts/react";
 import ChestLootNotification from "client/components/chest/ChestLootNotification";
-import { ItemViewportManagement } from "client/components/item/ItemViewport";
 import Packets from "shared/Packets";
 
 /**
  * Manager component that handles chest loot notifications
  */
-export default function ChestLootManager({ viewportManagement }: { viewportManagement?: ItemViewportManagement }) {
+export default function ChestLootManager() {
     const [currentNotification, setCurrentNotification] = useState<
         { loot: Array<LootInfo>; visible: boolean } | undefined
     >(undefined);
@@ -43,7 +42,6 @@ export default function ChestLootManager({ viewportManagement }: { viewportManag
             loot={currentNotification.loot}
             visible={currentNotification.visible}
             onComplete={handleNotificationComplete}
-            viewportManagement={viewportManagement}
         />
     );
 }

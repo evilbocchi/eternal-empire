@@ -1,5 +1,6 @@
 //!optimize 2
 //!native
+//!optimize 2
 import { CollectionService, RunService, Workspace } from "@rbxts/services";
 import { Environment } from "@rbxts/ui-labs";
 import { COLLISION_COLOR, NONCOLLISION_COLOR } from "client/constants";
@@ -10,6 +11,12 @@ import Items from "shared/items/Items";
 import ItemPlacement from "shared/placement/ItemPlacement";
 import Sandbox from "shared/Sandbox";
 import Area from "shared/world/Area";
+
+declare global {
+    interface Assets {
+        ChargerRing: Beam;
+    }
+}
 
 /**
  * Retrieves an instance of a given class and name from a parent, or creates it if missing.
@@ -101,7 +108,6 @@ export default function loadBuildProcessing() {
 
         // Process all children for placement visuals
         model.GetChildren().forEach(loadInstance);
-        connections.add(model.ChildAdded.Connect(loadInstance));
 
         if (isPlacing === true) {
             // Snap model to mouse if in a valid area

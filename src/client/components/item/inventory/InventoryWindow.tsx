@@ -18,7 +18,6 @@ import {
     updateInventorySlot,
     type InventorySlotHandle,
 } from "client/components/item/inventory/InventorySlot";
-import { ItemViewportManagement } from "client/components/item/ItemViewport";
 import useSingleDocument from "client/components/sidebar/useSingleDocumentWindow";
 import { showErrorToast } from "client/components/toast/ToastService";
 import BasicWindow from "client/components/window/BasicWindow";
@@ -117,7 +116,7 @@ const NON_GEAR_ITEMS = Items.sortedItems.filter((item) => !item.findTrait("Gear"
 /**
  * Main inventory window component following the QuestWindow pattern
  */
-export default function InventoryWindow({ viewportManagement }: { viewportManagement?: ItemViewportManagement }) {
+export default function InventoryWindow() {
     const { id, visible, closeDocument } = useSingleDocument({ id: "Inventory" });
     const { searchQuery, props: filterProps } = useBasicInventoryFilter();
     const [queryTime, setQueryTime] = useState(0);
@@ -225,7 +224,6 @@ export default function InventoryWindow({ viewportManagement }: { viewportManage
                 size: cellSizeRef.current,
                 layoutOrder: item.layoutOrder,
                 visible: false,
-                viewportManagement,
                 onActivated: () => handleItemActivatedRef.current(item),
             });
             slots.set(item.id, slot);
@@ -238,7 +236,7 @@ export default function InventoryWindow({ viewportManagement }: { viewportManage
             }
             slots.clear();
         };
-    }, [viewportManagement]);
+    }, []);
 
     useEffect(() => {
         const slots = itemSlotsRef.current;

@@ -14,7 +14,6 @@ export = CreateReactStory(
         controls: {
             visible: true,
             hasItems: true,
-            viewportsEnabled: false,
         },
     },
     (props) => {
@@ -28,6 +27,6 @@ export = CreateReactStory(
             setVisibilityMain(props.controls.visible);
         }, [props.controls.visible]);
 
-        return <App viewportsEnabled={props.controls.viewportsEnabled} />;
+        return <App />;
     },
 );

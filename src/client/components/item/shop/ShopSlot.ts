@@ -4,11 +4,10 @@
 
 import { OnoeNum } from "@antivivi/serikanum";
 import { TweenService } from "@rbxts/services";
-import { PARALLEL } from "client/constants";
 import displayBalanceCurrency from "client/components/balance/displayBalanceCurrency";
-import { ItemViewportManagement, loadItemIntoViewport } from "client/components/item/ItemViewport";
-import { RobotoSlabHeavy } from "shared/asset/GameFonts";
+import ItemViewport from "client/components/item/ItemViewport";
 import { getAsset } from "shared/asset/AssetMap";
+import { RobotoSlabHeavy } from "shared/asset/GameFonts";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import { CURRENCY_DETAILS } from "shared/currency/CurrencyDetails";
 import Item from "shared/item/Item";
@@ -116,12 +115,7 @@ function tweenPriceColor(handle: ShopSlotHandle, target: Color3, shouldTween: bo
     tween.Play();
 }
 
-function applyPriceOption(
-    handle: ShopSlotHandle,
-    option: PriceOption,
-    viewportManagement?: ItemViewportManagement,
-    actor?: Actor,
-) {
+function applyPriceOption(handle: ShopSlotHandle, option: PriceOption) {
     if (option.kind === "currency") {
         const details = CURRENCY_DETAILS[option.currency];
         handle.priceImage.Visible = true;
@@ -157,17 +151,9 @@ function applyPriceOption(
             return;
         }
 
-        const nextViewportManagement = viewportManagement ?? handle.lastPriceViewportManagement;
-        const nextActor = actor ?? handle.lastPriceActor ?? PARALLEL;
-        if (
-            handle.currentPriceItemId !== option.item.id ||
-            nextViewportManagement !== handle.lastPriceViewportManagement ||
-            nextActor !== handle.lastPriceActor
-        ) {
-            loadItemIntoViewport(nextActor, handle.priceViewport, option.item.id, nextViewportManagement);
+        if (handle.currentPriceItemId !== option.item.id) {
+            ItemViewport.loadItemIntoViewport(handle.priceViewport, option.item.id);
             handle.currentPriceItemId = option.item.id;
-            handle.lastPriceViewportManagement = nextViewportManagement;
-            handle.lastPriceActor = nextActor;
         }
         return;
     }
@@ -202,12 +188,7 @@ function buildPriceOptions(item: Item, price: CurrencyBundle | undefined): Price
     return options;
 }
 
-function startPriceRotation(
-    handle: ShopSlotHandle,
-    options: PriceOptionSequence,
-    viewportManagement?: ItemViewportManagement,
-    actor?: Actor,
-) {
+function startPriceRotation(handle: ShopSlotHandle, options: PriceOptionSequence) {
     const token = ++handle.rotationToken;
     let index = 0;
     const rotate = () => {
@@ -216,7 +197,7 @@ function startPriceRotation(
         }
         index = (index + 1) % options.size();
         const option = options[index];
-        applyPriceOption(handle, option, viewportManagement, actor);
+        applyPriceOption(handle, option);
         task.delay(2, rotate);
     };
     task.delay(2, rotate);
@@ -226,8 +207,7 @@ export interface CreateShopSlotOptions {
     parent: GuiObject;
     layoutOrder?: number;
     visible?: boolean;
-    viewportManagement?: ItemViewportManagement;
-    actor?: Actor;
+    viewportsEnabled?: boolean;
     onActivated: (item: Item) => void;
 }
 
@@ -237,8 +217,6 @@ export interface UpdateShopSlotOptions {
     baseVisible?: boolean;
     hideMaxedItems?: boolean;
     ownedAmount: number;
-    viewportManagement?: ItemViewportManagement;
-    actor?: Actor;
     onActivated?: (item: Item) => void;
 }
 
@@ -253,29 +231,19 @@ export type ShopSlotHandle = {
     priceText: TextLabel;
     stroke: UIStroke;
     connections: RBXScriptConnection[];
+    viewportLoaded: boolean;
     itemImage?: ImageLabel;
     itemViewport?: ViewportFrame;
     currentTween?: Tween;
     rotationToken: number;
     onActivated?: (item: Item) => void;
     destroyed?: boolean;
-    lastViewportManagement?: ItemViewportManagement;
-    lastActor?: Actor;
-    lastPriceViewportManagement?: ItemViewportManagement;
-    lastPriceActor?: Actor;
     currentPriceItemId?: string;
     destroy(): void;
 };
 
 export function createShopSlot(item: Item, options: CreateShopSlotOptions): ShopSlotHandle {
-    const {
-        parent,
-        layoutOrder = item.layoutOrder,
-        visible = false,
-        viewportManagement,
-        actor = PARALLEL,
-        onActivated,
-    } = options;
+    const { parent, layoutOrder = item.layoutOrder, visible = false, onActivated, viewportsEnabled = true } = options;
 
     const baseColor = item.difficulty?.color ?? Color3.fromRGB(52, 155, 255);
 
@@ -328,7 +296,7 @@ export function createShopSlot(item: Item, options: CreateShopSlotOptions): Shop
         itemViewport.Position = new UDim2(0.5, 0, 0.5, 0);
         itemViewport.Size = new UDim2(1, 0, 1, 0);
         itemViewport.Parent = button;
-        loadItemIntoViewport(actor, itemViewport, item.id, viewportManagement);
+        if (viewportsEnabled) ItemViewport.loadItemIntoViewport(itemViewport, item.id);
     }
 
     const priceFrame = new Instance("Frame");
@@ -405,11 +373,10 @@ export function createShopSlot(item: Item, options: CreateShopSlotOptions): Shop
         stroke,
         connections,
         itemImage,
+        viewportLoaded: true,
         itemViewport,
         rotationToken: 0,
         onActivated,
-        lastViewportManagement: viewportManagement,
-        lastActor: actor,
         destroy() {
             if (this.destroyed) return;
             this.destroyed = true;
@@ -436,16 +403,7 @@ export function createShopSlot(item: Item, options: CreateShopSlotOptions): Shop
 export function updateShopSlot(handle: ShopSlotHandle, options: UpdateShopSlotOptions) {
     if (handle.destroyed) return;
 
-    const {
-        parent,
-        layoutOrder,
-        baseVisible = false,
-        hideMaxedItems = false,
-        ownedAmount,
-        viewportManagement,
-        actor,
-        onActivated,
-    } = options;
+    const { parent, layoutOrder, baseVisible = false, hideMaxedItems = false, ownedAmount, onActivated } = options;
 
     if (parent && handle.root.Parent !== parent) {
         handle.root.Parent = parent;
@@ -464,14 +422,9 @@ export function updateShopSlot(handle: ShopSlotHandle, options: UpdateShopSlotOp
     handle.stroke.Color = itemColor;
     handle.priceFrame.BackgroundColor3 = itemColor.Lerp(Color3.fromRGB(0, 0, 0), 0.7);
 
-    const nextViewportManagement = viewportManagement ?? handle.lastViewportManagement;
-    const nextActor = actor ?? handle.lastActor ?? PARALLEL;
-    if (handle.itemViewport) {
-        if (nextViewportManagement !== handle.lastViewportManagement || nextActor !== handle.lastActor) {
-            loadItemIntoViewport(nextActor, handle.itemViewport, handle.item.id, nextViewportManagement);
-            handle.lastViewportManagement = nextViewportManagement;
-            handle.lastActor = nextActor;
-        }
+    if (handle.itemViewport && !handle.viewportLoaded) {
+        handle.viewportLoaded = true;
+        ItemViewport.loadItemIntoViewport(handle.itemViewport, handle.item.id);
     } else if (handle.itemImage) {
         handle.itemImage.Image = handle.item.image ?? "";
     }
@@ -494,16 +447,16 @@ export function updateShopSlot(handle: ShopSlotHandle, options: UpdateShopSlotOp
     }
 
     if (optionsList.size() === 0) {
-        applyPriceOption(handle, { kind: "maxed" }, viewportManagement, actor);
+        applyPriceOption(handle, { kind: "maxed" });
         handle.rotationToken++;
         return;
     }
 
     const firstOption = optionsList[0];
-    applyPriceOption(handle, firstOption, viewportManagement, actor);
+    applyPriceOption(handle, firstOption);
 
     if (optionsList.size() > 1 && finalVisible) {
-        startPriceRotation(handle, optionsList, viewportManagement, actor);
+        startPriceRotation(handle, optionsList);
     } else {
         handle.rotationToken++;
     }

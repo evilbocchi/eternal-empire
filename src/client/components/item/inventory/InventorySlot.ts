@@ -2,9 +2,8 @@
  * @fileoverview Shared helpers for creating and managing inventory item slot UI elements.
  */
 
-import { ItemViewportManagement, loadItemIntoViewport } from "client/components/item/ItemViewport";
+import ItemViewport from "client/components/item/ItemViewport";
 import { TooltipManager } from "client/components/tooltip/TooltipWindow";
-import { PARALLEL } from "client/constants";
 import { getAsset } from "shared/asset/AssetMap";
 import { RobotoSlab } from "shared/asset/GameFonts";
 import type Item from "shared/item/Item";
@@ -14,12 +13,11 @@ export type InventorySlotHandle = {
     button: TextButton;
     amountLabel: TextLabel;
     stroke: UIStroke;
+    viewportLoaded: boolean;
     viewportFrame?: ViewportFrame;
     imageLabel?: ImageLabel;
     connections: RBXScriptConnection[];
     currentUuid?: string;
-    lastViewportManagement?: ItemViewportManagement;
-    lastActor?: Actor;
     tooltipEnabled: boolean;
     destroyed?: boolean;
     destroy(): void;
@@ -28,11 +26,10 @@ export type InventorySlotHandle = {
 export interface CreateInventorySlotOptions {
     parent: GuiObject;
     size: UDim2;
+    viewportsEnabled?: boolean;
     layoutOrder?: number;
     visible?: boolean;
     tooltip?: boolean;
-    viewportManagement?: ItemViewportManagement;
-    actor?: Actor;
     onActivated: (item: Item) => void;
 }
 
@@ -43,8 +40,6 @@ export interface UpdateInventorySlotOptions {
     visible?: boolean;
     amount?: number;
     uuid?: string;
-    viewportManagement?: ItemViewportManagement;
-    actor?: Actor;
 }
 
 function createGradient(colorSequence: ColorSequence, parent: Instance) {
@@ -69,9 +64,8 @@ export function createInventorySlot(item: Item, options: CreateInventorySlotOpti
         size,
         layoutOrder = item.layoutOrder,
         visible = false,
+        viewportsEnabled = true,
         tooltip = true,
-        viewportManagement,
-        actor = PARALLEL,
         onActivated,
     } = options;
 
@@ -173,7 +167,7 @@ export function createInventorySlot(item: Item, options: CreateInventorySlotOpti
         viewportFrame.Size = new UDim2(0.8, 0, 0.8, 0);
         viewportFrame.ZIndex = 0;
         viewportFrame.Parent = button;
-        loadItemIntoViewport(actor, viewportFrame, item.id, viewportManagement);
+        ItemViewport.loadItemIntoViewport(viewportFrame, item.id);
     }
 
     const overlay = new Instance("ImageLabel");
@@ -192,12 +186,11 @@ export function createInventorySlot(item: Item, options: CreateInventorySlotOpti
         button,
         amountLabel,
         stroke,
+        viewportLoaded: !viewportsEnabled,
         viewportFrame,
         imageLabel,
         connections,
         tooltipEnabled: tooltip,
-        lastViewportManagement: viewportManagement,
-        lastActor: actor,
         destroy() {
             if (this.destroyed) return;
             this.destroyed = true;
@@ -244,7 +237,7 @@ export function createInventorySlot(item: Item, options: CreateInventorySlotOpti
 export function updateInventorySlot(handle: InventorySlotHandle, options: UpdateInventorySlotOptions) {
     if (handle.destroyed) return;
 
-    const { parent, size, layoutOrder, visible, amount, uuid, viewportManagement, actor } = options;
+    const { parent, size, layoutOrder, visible, amount, uuid } = options;
 
     if (parent && handle.button.Parent !== parent) {
         handle.button.Parent = parent;
@@ -277,15 +270,9 @@ export function updateInventorySlot(handle: InventorySlotHandle, options: Update
     handle.button.BackgroundColor3 = backgroundColor;
     handle.stroke.Color = backgroundColor;
 
-    const nextViewportManagement = viewportManagement ?? handle.lastViewportManagement;
-    const nextActor = actor ?? handle.lastActor ?? PARALLEL;
-
-    if (handle.viewportFrame) {
-        if (nextViewportManagement !== handle.lastViewportManagement || nextActor !== handle.lastActor) {
-            loadItemIntoViewport(nextActor, handle.viewportFrame, handle.item.id, nextViewportManagement);
-            handle.lastViewportManagement = nextViewportManagement;
-            handle.lastActor = nextActor;
-        }
+    if (handle.viewportFrame && !handle.viewportLoaded) {
+        handle.viewportLoaded = true;
+        ItemViewport.loadItemIntoViewport(handle.viewportFrame, handle.item.id);
     } else if (handle.imageLabel) {
         handle.imageLabel.Image = handle.item.image ?? "";
     }

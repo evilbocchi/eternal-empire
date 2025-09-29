@@ -2,8 +2,7 @@ import { OnoeNum } from "@antivivi/serikanum";
 import React, { useMemo, useRef } from "@rbxts/react";
 import { TextService } from "@rbxts/services";
 import displayBalanceCurrency from "client/components/balance/displayBalanceCurrency";
-import { ItemViewportManagement } from "client/components/item/ItemViewport";
-import { useItemViewport } from "client/components/item/useCIViewportManagement";
+import { useItemViewport } from "../ItemViewport";
 import { RobotoSlabHeavy } from "shared/asset/GameFonts";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import { CURRENCY_DETAILS } from "shared/currency/CurrencyDetails";
@@ -32,7 +31,6 @@ function PriceOption({
     item,
     text,
     affordable,
-    viewportManagement,
     position,
     width,
     height = 25,
@@ -41,11 +39,10 @@ function PriceOption({
     currency?: Currency;
     /** Item amount and type */
     item?: Item;
+    /** Text to display */
     text: string;
     /** Whether the price is affordable */
     affordable: boolean;
-    /** Shared viewport management instance */
-    viewportManagement?: ItemViewportManagement;
     /** Position of the price option */
     position?: UDim2;
     /** Width of the price option */
@@ -56,7 +53,7 @@ function PriceOption({
     const viewportRef = useRef<ViewportFrame>();
     const textColor = affordable ? Color3.fromRGB(255, 255, 255) : Color3.fromRGB(255, 80, 80);
     if (item) {
-        useItemViewport(viewportRef, item.id, viewportManagement);
+        useItemViewport(viewportRef, item.id);
     }
 
     return (
@@ -115,7 +112,6 @@ export function WrappingPriceOptions({
     padding = 5,
     price,
     requiredItems,
-    viewportManagement,
     affordablePerCurrency,
     affordablePerItemId,
 }: {
@@ -123,7 +119,6 @@ export function WrappingPriceOptions({
     padding?: number;
     price: CurrencyBundle;
     requiredItems: Map<string, number>;
-    viewportManagement?: ItemViewportManagement;
     affordablePerCurrency: Map<Currency, boolean>;
     affordablePerItemId: Map<string, boolean>;
 }) {
@@ -254,7 +249,6 @@ export function WrappingPriceOptions({
                             item={info.item}
                             text={info.text}
                             width={info.width}
-                            viewportManagement={viewportManagement}
                         />
                     </frame>
                 );

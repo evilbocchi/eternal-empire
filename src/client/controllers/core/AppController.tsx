@@ -12,7 +12,7 @@ export default class AppController implements OnStart {
         container.Name = "AppContainer";
         container.Parent = ReplicatedStorage;
         const root = createRoot(container);
-        root.render(<App viewportsEnabled={true} />);
+        root.render(<App />);
         eat(() => {
             root.unmount();
             container.Destroy();

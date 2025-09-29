@@ -17,10 +17,10 @@ import PrinterRenderer from "client/components/item/printer/PrinterRenderer";
 import PurchaseWindow from "client/components/item/shop/PurchaseWindow";
 import ShopGui from "client/components/item/shop/ShopGui";
 import UpgradeBoardRenderer from "client/components/item/upgrade/UpgradeBoardRenderer";
-import useCIViewportManagement from "client/components/item/useCIViewportManagement";
 import LevelUpManager from "client/components/levelup/LevelUpManager";
 import LogsWindow from "client/components/logs/LogsWindow";
 import DialogueWindow from "client/components/npc/DialogueWindow";
+import PlayerListContainer from "client/components/playerlist/PlayerListContainer";
 import PositionManager from "client/components/position/PositionManager";
 import QuestCompletionManager from "client/components/quest/QuestCompletionManager";
 import QuestWindow from "client/components/quest/QuestWindow";
@@ -30,7 +30,6 @@ import ResetRenderer from "client/components/reset/ResetRenderer";
 import CopyWindow from "client/components/settings/CopyWindow";
 import SettingsManager from "client/components/settings/SettingsManager";
 import SidebarButtons from "client/components/sidebar/SidebarButtons";
-import PlayerListContainer from "client/components/playerlist/PlayerListContainer";
 import performIntroSequence from "client/components/start/performIntroSequence";
 import StartWindow from "client/components/start/StartWindow";
 import StatsWindow from "client/components/stats/StatsWindow";
@@ -53,7 +52,7 @@ import {
     LEVELUP_GUI,
     LOGS_GUI,
     MAIN_LAYOUT_GUI,
-    TOASTS_GUI,
+    PLAYERLIST_GUI,
     PRINTER_GUI,
     PURCHASE_GUI,
     QUESTCOMPLETION_GUI,
@@ -62,9 +61,9 @@ import {
     SHOP_GUI,
     START_GUI,
     STATS_GUI,
+    TOASTS_GUI,
     TOOLTIPS_GUI,
     UPGRADEBOARD_GUI,
-    PLAYERLIST_GUI,
     WORLD_GUI,
 } from "client/controllers/core/Guis";
 import useManualItemReplication from "client/hooks/useManualItemReplication";
@@ -90,11 +89,8 @@ function addRoot(roots: Set<Root>, container: Instance): Root {
  * Entry point for the app's UI.
  * This creates roots for each major UI section and manages their lifecycle, so
  * do not rely on the returned JSX element for rendering anything.
- * @param viewportsEnabled Whether to enable viewports in item windows.
  */
-export default function App({ viewportsEnabled }: { viewportsEnabled: boolean }) {
-    const viewportManagement = useCIViewportManagement({ enabled: viewportsEnabled });
-
+export default function App() {
     useEffect(() => {
         const roots = new Set<Root>();
         addRoot(roots, START_GUI).render(<StartWindow />);
@@ -119,7 +115,7 @@ export default function App({ viewportsEnabled }: { viewportsEnabled: boolean })
                 <RenameWindow />
             </Fragment>,
         );
-        addRoot(roots, INVENTORY_GUI).render(<InventoryWindow viewportManagement={viewportManagement} />);
+        addRoot(roots, INVENTORY_GUI).render(<InventoryWindow />);
         addRoot(roots, LOGS_GUI).render(<LogsWindow />);
         addRoot(roots, QUESTS_GUI).render(
             <Fragment>
@@ -134,10 +130,10 @@ export default function App({ viewportsEnabled }: { viewportsEnabled: boolean })
             </Fragment>,
         );
         addRoot(roots, STATS_GUI).render(<StatsWindow />);
-        addRoot(roots, PURCHASE_GUI).render(<PurchaseWindow viewportManagement={viewportManagement} />);
+        addRoot(roots, PURCHASE_GUI).render(<PurchaseWindow />);
         addRoot(roots, UPGRADEBOARD_GUI).render(<UpgradeBoardRenderer />);
         addRoot(roots, PRINTER_GUI).render(<PrinterRenderer />);
-        addRoot(roots, SHOP_GUI).render(<ShopGui viewportManagement={viewportManagement} />);
+        addRoot(roots, SHOP_GUI).render(<ShopGui />);
         addRoot(roots, LEVELUP_GUI).render(<LevelUpManager />);
         addRoot(roots, QUESTCOMPLETION_GUI).render(<QuestCompletionManager />);
         addRoot(roots, CHALLENGECOMPLETION_GUI).render(<ChallengeCompletionManager />);
@@ -185,17 +181,6 @@ export default function App({ viewportsEnabled }: { viewportsEnabled: boolean })
             }
             cleanup();
         };
-    }, []);
-
-    useEffect(() => {
-        // Special hook to load build processing directly in this thread in edit mode
-        if (!IS_EDIT) return;
-
-        const [success, processing] = import("client/components/build/loadBuildProcessing").await();
-        if (!success) return;
-
-        const instance = processing.default();
-        return () => instance.destroy();
     }, []);
 
     useEffect(() => {

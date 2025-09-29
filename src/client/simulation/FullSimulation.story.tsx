@@ -3,18 +3,15 @@ import ReactRoblox from "@rbxts/react-roblox";
 import { CreateReactStory } from "@rbxts/ui-labs";
 import App from "client/components/App";
 import StoryMocking from "client/components/StoryMocking";
-import SimulationCommandInterface from "client/components/story/SimulationCommandInterface";
 import ProximityPromptTrigger from "client/components/story/ProximityPromptTrigger";
+import SimulationCommandInterface from "client/components/story/SimulationCommandInterface";
 
 export = CreateReactStory(
     {
         react: React,
         reactRoblox: ReactRoblox,
-        controls: {
-            viewportsEnabled: false,
-        },
     },
-    (props) => {
+    () => {
         StoryMocking.mockCharacter();
 
         useEffect(() => {
@@ -23,7 +20,7 @@ export = CreateReactStory(
 
         return (
             <Fragment>
-                <App viewportsEnabled={props.controls.viewportsEnabled} />
+                <App />
                 <SimulationCommandInterface />
                 <ProximityPromptTrigger />
             </Fragment>

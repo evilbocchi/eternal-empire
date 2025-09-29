@@ -34,7 +34,7 @@ export = CreateReactStory(
                     }}
                 />
 
-                <App viewportsEnabled={false} />
+                <App />
             </Fragment>
         );
     },

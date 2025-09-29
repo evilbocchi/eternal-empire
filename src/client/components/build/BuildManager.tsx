@@ -236,6 +236,12 @@ namespace BuildManager {
         const itemModel = item.createModel(placedItem);
         if (itemModel === undefined) throw `Item ${item.name} has no model!`;
 
+        for (const desc of itemModel.GetDescendants()) {
+            if (desc.IsA("BasePart")) {
+                desc.CanCollide = false;
+            }
+        }
+
         const modelInfo = getAllInstanceInfo(itemModel);
         modelInfo.InitialPosition = new Vector3(placedItem.posX, placedItem.posY, placedItem.posZ);
         modelInfo.InitialRotation = placedItem.rawRotation;

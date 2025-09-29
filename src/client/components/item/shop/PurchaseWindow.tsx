@@ -10,14 +10,13 @@ import {
     updateInventorySlot,
     type InventorySlotHandle,
 } from "client/components/item/inventory/InventorySlot";
-import { ItemViewportManagement, loadItemIntoViewport } from "client/components/item/ItemViewport";
+import ItemViewport from "client/components/item/ItemViewport";
 import ItemWindow from "client/components/item/shop/ItemWindow";
 import { WrappingPriceOptions } from "client/components/item/shop/PriceOption";
 import useSingleDocument from "client/components/sidebar/useSingleDocumentWindow";
 import { showErrorToast } from "client/components/toast/ToastService";
 import getDifficultyDisplayColors from "client/components/tooltip/getDifficultyDisplayColors";
 import { METADATA_PER_ITEM, TooltipManager } from "client/components/tooltip/TooltipWindow";
-import { PARALLEL } from "client/constants";
 import useInterval from "client/hooks/useInterval";
 import { getAsset } from "shared/asset/AssetMap";
 import { playSound } from "shared/asset/GameAssets";
@@ -40,7 +39,7 @@ export class PurchaseManager {
 /**
  * Purchase window component for buying shop items
  */
-export default function PurchaseWindow({ viewportManagement }: { viewportManagement?: ItemViewportManagement }) {
+export default function PurchaseWindow() {
     const windowWrapperRef = useRef<Frame>();
     const paddingRef = useRef<UIPadding>();
     const itemSlotRef = useRef<TextButton>();
@@ -146,7 +145,6 @@ export default function PurchaseWindow({ viewportManagement }: { viewportManagem
                 layoutOrder: -1,
                 visible: true,
                 tooltip: false,
-                viewportManagement,
                 onActivated: () => {},
             });
             itemSlotHandleRef.current = handle;
@@ -160,9 +158,8 @@ export default function PurchaseWindow({ viewportManagement }: { viewportManagem
             layoutOrder: -1,
             visible: true,
             amount: bought,
-            viewportManagement,
         });
-    }, [item, bought, viewportManagement]);
+    }, [item, bought]);
 
     const itemSlot = itemSlotRef.current;
     const purchase = () => {
@@ -187,7 +184,7 @@ export default function PurchaseWindow({ viewportManagement }: { viewportManagem
                 viewportFrame.AnchorPoint = new Vector2(0.5, 0.5);
                 viewportFrame.BackgroundTransparency = 1;
                 viewportFrame.Size = new UDim2(0, 60, 0, 60);
-                loadItemIntoViewport(PARALLEL, viewportFrame, item.id, viewportManagement);
+                ItemViewport.loadItemIntoViewport(viewportFrame, item.id);
                 frame = viewportFrame;
             }
             frame.Position = new UDim2(0, mousePosition.X, 0, mousePosition.Y);
@@ -487,7 +484,6 @@ export default function PurchaseWindow({ viewportManagement }: { viewportManagem
                                     <WrappingPriceOptions
                                         price={price}
                                         requiredItems={requiredItems}
-                                        viewportManagement={viewportManagement}
                                         affordablePerCurrency={affordablePerCurrency}
                                         affordablePerItemId={affordablePerItemId}
                                     />

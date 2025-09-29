@@ -1,23 +1,20 @@
 import React, { Fragment, useEffect, useRef, useState } from "@rbxts/react";
 import { TweenService } from "@rbxts/services";
-import { useItemViewport } from "client/components/item/useCIViewportManagement";
+import { useItemViewport } from "../item/ItemViewport";
 import { TooltipManager } from "client/components/tooltip/TooltipWindow";
-import { RobotoSlab, RobotoSlabBold } from "shared/asset/GameFonts";
 import { getAsset } from "shared/asset/AssetMap";
 import { playSound } from "shared/asset/GameAssets";
+import { RobotoSlab, RobotoSlabBold } from "shared/asset/GameFonts";
 import Items from "shared/items/Items";
-import { ItemViewportManagement } from "client/components/item/ItemViewport";
 
 export default function ChestLootNotification({
     loot,
     visible,
     onComplete,
-    viewportManagement,
 }: {
     loot: Array<LootInfo>;
     visible: boolean;
     onComplete: () => void;
-    viewportManagement?: ItemViewportManagement;
 }) {
     const mainFrameRef = useRef<Frame>();
     const animationStarted = useRef(false);
@@ -163,12 +160,7 @@ export default function ChestLootNotification({
 
                 {/* Item Rewards */}
                 {itemRewards.map((lootItem, index) => (
-                    <LootItemSlot
-                        itemId={lootItem.id}
-                        amount={lootItem.amount}
-                        layoutOrder={index + 2}
-                        viewportManagement={viewportManagement}
-                    />
+                    <LootItemSlot itemId={lootItem.id} amount={lootItem.amount} layoutOrder={index + 2} />
                 ))}
             </frame>
         </frame>
@@ -254,22 +246,12 @@ function XPRewardSlot({ amount }: { amount: number }) {
 }
 
 // Individual loot item slot component
-function LootItemSlot({
-    itemId,
-    amount,
-    layoutOrder,
-    viewportManagement,
-}: {
-    itemId: string;
-    amount: number;
-    layoutOrder: number;
-    viewportManagement?: ItemViewportManagement;
-}) {
+function LootItemSlot({ itemId, amount, layoutOrder }: { itemId: string; amount: number; layoutOrder: number }) {
     const viewportRef = useRef<ViewportFrame>();
     const item = Items.getItem(itemId);
     const [sparkParticles, setSparkParticles] = useState<Array<{ id: string; angle: number; delay: number }>>([]);
 
-    useItemViewport(viewportRef, itemId, viewportManagement);
+    useItemViewport(viewportRef, itemId);
 
     // Create spark particles for this slot
     const createSlotSparks = () => {

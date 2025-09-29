@@ -5,6 +5,7 @@
 import { OnoeNum } from "@antivivi/serikanum";
 import React, { useEffect, useState } from "@rbxts/react";
 import { RunService } from "@rbxts/services";
+import { LeaderboardEntry } from "client/components/leaderboard/Leaderboard";
 import { RobotoMono } from "shared/asset/GameFonts";
 
 /** Props for individual leaderboard slots */

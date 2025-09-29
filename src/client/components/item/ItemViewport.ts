@@ -10,12 +10,10 @@
  * @since 1.0.0
  */
 
+import { RefObject, useEffect } from "@rbxts/react";
 import { RunService } from "@rbxts/services";
-import { IS_EDIT } from "shared/Context";
+import eat from "shared/hamster/eat";
 import { ITEM_MODELS } from "shared/item/ItemModels";
-
-/** Manages the state and behavior of item viewports. */
-export type ItemViewportManagement = ReturnType<typeof loadItemViewportManagement>;
 
 /**
  * Represents a running viewport instance for an item slot.
@@ -37,9 +35,9 @@ type RunningViewport = {
 const KEY = "ItemViewport";
 const VIEWPORT_WORLD_POSITION = new CFrame(0, -500, 0);
 
-export function loadItemViewportManagement() {
-    const runningViewports = new Array<RunningViewport>();
-    const relsPerItem = new Map<string, [Vector3, number]>();
+namespace ItemViewport {
+    export const runningViewports = new Array<RunningViewport>();
+    export const relsPerItem = new Map<string, [Vector3, number]>();
 
     // Precompute model bounding info for each item
     for (const [id, model] of ITEM_MODELS) {
@@ -84,7 +82,7 @@ export function loadItemViewportManagement() {
      * @param viewportFrame The ViewportFrame to load the item into.
      * @param itemId The ID of the item to display.
      */
-    function loadItemIntoViewport(viewportFrame: ViewportFrame, itemId: string) {
+    export function loadItemIntoViewport(viewportFrame: ViewportFrame, itemId: string) {
         viewportFrame.ClearAllChildren();
 
         const camera = new Instance("Camera");
@@ -137,39 +135,26 @@ export function loadItemViewportManagement() {
         model.Parent = viewportFrame;
     }
 
-    return {
-        runningViewports,
-        relsPerItem,
-        loadItemIntoViewport,
-        destroy: () => {
-            RunService.UnbindFromRenderStep(KEY);
-            for (const rv of runningViewports) {
-                rv.viewportFrame.ClearAllChildren();
-            }
-            runningViewports.clear();
-        },
-        bind: (actor: Actor) => {
-            actor.BindToMessage(KEY, loadItemIntoViewport);
-        },
-    };
+    eat(() => {
+        RunService.UnbindFromRenderStep(KEY);
+        for (const rv of runningViewports) {
+            rv.viewportFrame.ClearAllChildren();
+        }
+        runningViewports.clear();
+    });
 }
 
+export default ItemViewport;
+
 /**
- * Loads an item model into a ViewportFrame, either directly or via parallel message.
- * @param actor Actor to send message through if not in CI.
- * @param viewportFrame The ViewportFrame to load the item into.
- * @param itemId The ID of the item to display.
- * @param management The ItemViewportManagement instance to use.
+ * Hook to load an item into a viewport frame.
+ * @param viewportRef The reference to the viewport frame.
+ * @param itemId The ID of the item to load.
  */
-export function loadItemIntoViewport(
-    actor: Actor,
-    viewportFrame: ViewportFrame,
-    itemId: string,
-    management?: ItemViewportManagement,
-) {
-    if (IS_EDIT) {
-        management?.loadItemIntoViewport(viewportFrame, itemId);
-    } else {
-        actor.SendMessage(KEY, viewportFrame, itemId);
-    }
+export function useItemViewport(viewportRef: RefObject<ViewportFrame>, itemId: string) {
+    useEffect(() => {
+        const viewport = viewportRef.current;
+        if (!viewport) return;
+        ItemViewport.loadItemIntoViewport(viewport, itemId);
+    }, [itemId]);
 }

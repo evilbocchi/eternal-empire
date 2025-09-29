@@ -6,7 +6,6 @@
 import React, { StrictMode, useState } from "@rbxts/react";
 import ReactRoblox from "@rbxts/react-roblox";
 import { CreateReactStory } from "@rbxts/ui-labs";
-import useCIViewportManagement from "client/components/item/useCIViewportManagement";
 import TooltipWindow from "client/components/tooltip/TooltipWindow";
 import ChestLootNotification from "./ChestLootNotification";
 
@@ -30,7 +29,6 @@ export = CreateReactStory(
             loot: [],
             visible: false,
         });
-        const viewportManagement = useCIViewportManagement({ enabled: true });
 
         const triggerLoot = () => {
             const loot: Array<LootInfo> = [];
@@ -84,7 +82,6 @@ export = CreateReactStory(
                         loot={lootData.loot}
                         visible={lootData.visible}
                         onComplete={handleComplete}
-                        viewportManagement={viewportManagement}
                     />
 
                     {/* Trigger Button */}

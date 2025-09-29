@@ -2,7 +2,9 @@
  * @fileoverview React hook for consuming leaderboard data.
  */
 
-import React, { useEffect, useState } from "@rbxts/react";
+import { useEffect, useState } from "@rbxts/react";
+import { LeaderboardEntry, LeaderboardType } from "client/components/leaderboard/Leaderboard";
+import { LeaderboardDataManager } from "client/components/leaderboard/LiveLeaderboard";
 
 /**
  * React hook to subscribe to leaderboard data updates.

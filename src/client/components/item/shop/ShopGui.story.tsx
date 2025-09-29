@@ -5,7 +5,6 @@ import { CreateReactStory, EnumList } from "@rbxts/ui-labs";
 import { ChooseOptionType } from "@rbxts/ui-labs/src/ControlTypings/Advanced";
 import PurchaseWindow from "client/components/item/shop/PurchaseWindow";
 import ShopGui, { ShopManager } from "client/components/item/shop/ShopGui";
-import useCIViewportManagement from "client/components/item/useCIViewportManagement";
 import StoryMocking from "client/components/StoryMocking";
 import TooltipWindow from "client/components/tooltip/TooltipWindow";
 import Items from "shared/items/Items";
@@ -33,7 +32,6 @@ export = CreateReactStory(
 
         const item = Items.getItem(props.controls.shop as string) ?? ClassLowerNegativeShop;
         const shop = item.findTrait("Shop")!;
-        const viewportManagement = useCIViewportManagement({ enabled: true });
 
         const [adornee, setAdornee] = React.useState<Part | undefined>(undefined);
         useEffect(() => {
@@ -59,8 +57,8 @@ export = CreateReactStory(
         return (
             <StrictMode>
                 <TooltipWindow />
-                <ShopGui viewportManagement={viewportManagement} />
-                <PurchaseWindow viewportManagement={viewportManagement} />
+                <ShopGui />
+                <PurchaseWindow />
             </StrictMode>
         );
     },

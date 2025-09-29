@@ -9,6 +9,7 @@ import React, { useEffect, useRef } from "@rbxts/react";
 import { Environment } from "@rbxts/ui-labs";
 import BuildButton from "client/components/build/BuildButton";
 import BuildManager from "client/components/build/BuildManager";
+import loadBuildProcessing from "client/components/build/loadBuildProcessing";
 import useHotkeyWithTooltip from "client/components/hotkeys/useHotkeyWithTooltip";
 import { useDocument } from "client/components/window/DocumentManager";
 import { getAsset } from "shared/asset/AssetMap";
@@ -38,6 +39,11 @@ export default function BuildWindow({
 
     useEffect(() => {
         return BuildManager.init();
+    }, []);
+
+    useEffect(() => {
+        const { destroy } = loadBuildProcessing();
+        return destroy;
     }, []);
 
     const { events: deselectEvents } = useHotkeyWithTooltip({

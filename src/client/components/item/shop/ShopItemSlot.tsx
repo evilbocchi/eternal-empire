@@ -2,8 +2,7 @@ import { OnoeNum } from "@antivivi/serikanum";
 import React, { Fragment, useEffect, useRef, useState } from "@rbxts/react";
 import { TweenService } from "@rbxts/services";
 import displayBalanceCurrency from "client/components/balance/displayBalanceCurrency";
-import { ItemViewportManagement } from "client/components/item/ItemViewport";
-import { useItemViewport } from "client/components/item/useCIViewportManagement";
+import { useItemViewport } from "../ItemViewport";
 import { getAsset } from "shared/asset/AssetMap";
 import { RobotoSlabHeavy } from "shared/asset/GameFonts";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
@@ -16,13 +15,11 @@ function ShopPriceOption({
     item,
     amount,
     active,
-    viewportManagement,
 }: {
     currency?: Currency;
     item?: Item;
     amount?: OnoeNum | number;
     active?: boolean;
-    viewportManagement?: ItemViewportManagement;
 }) {
     // Always call hooks unconditionally
     const viewportRef = useRef<ViewportFrame>();
@@ -30,7 +27,7 @@ function ShopPriceOption({
     const currentTweenRef = useRef<Tween>();
 
     // Only pass itemId if item is defined, otherwise pass empty string
-    useItemViewport(viewportRef, item?.id ?? "", viewportManagement);
+    useItemViewport(viewportRef, item?.id ?? "");
 
     const image = currency !== undefined ? CURRENCY_DETAILS[currency].image : item?.image;
     let targetColor = Color3.fromRGB(255, 255, 255);
@@ -168,7 +165,6 @@ export default function ShopItemSlot({
     onClick,
     layoutOrder = 0,
     visible,
-    viewportManagement,
 }: {
     /** The item to display in the slot */
     item: Item;
@@ -182,13 +178,11 @@ export default function ShopItemSlot({
     layoutOrder?: number;
     /** Whether the slot is visible */
     visible: boolean;
-    /** Shared viewport management instance */
-    viewportManagement?: ItemViewportManagement;
 }) {
     const viewportRef = useRef<ViewportFrame>();
     const difficulty = item.difficulty;
     const color = difficulty?.color ?? Color3.fromRGB(52, 155, 255);
-    useItemViewport(viewportRef, item.id, viewportManagement);
+    useItemViewport(viewportRef, item.id);
 
     const price = item.getPrice(ownedAmount + 1);
     const requiredItems = item.requiredItems;
@@ -298,13 +292,7 @@ export default function ShopItemSlot({
                 Position={new UDim2(0, 0, 1, 0)}
                 Size={new UDim2(1, 0, 0, 30)}
             >
-                <ShopPriceOption
-                    active={visible}
-                    currency={currency}
-                    item={reqItem}
-                    amount={amount}
-                    viewportManagement={viewportManagement}
-                />
+                <ShopPriceOption active={visible} currency={currency} item={reqItem} amount={amount} />
                 <ShopItemSlotStyling gridTransparency={0.9} />
             </frame>
         </frame>
