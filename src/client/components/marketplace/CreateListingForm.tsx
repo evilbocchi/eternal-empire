@@ -190,20 +190,27 @@ export default function CreateListingForm({
 
                     <textbox
                         BackgroundColor3={Color3.fromRGB(24, 32, 48)}
-                        BorderSizePixel={0}
-                        Size={new UDim2(1, 0, 0, 40)}
+                        BorderColor3={Color3.fromRGB(100, 100, 100)}
+                        BorderSizePixel={1}
+                        Size={new UDim2(1, 0, 0, 26)}
                         Text={price}
-                        PlaceholderText="Enter price"
+                        PlaceholderText="Enter price in Diamonds"
                         PlaceholderColor3={Color3.fromRGB(120, 140, 175)}
                         TextColor3={Color3.fromRGB(226, 238, 255)}
                         TextScaled={true}
+                        TextXAlignment={Enum.TextXAlignment.Left}
                         FontFace={RobotoMono}
                         ClearTextOnFocus={false}
                         Event={{
                             FocusLost: (textBox) => setPrice(textBox.Text),
                         }}
                     >
-                        <uistroke Thickness={1} Color={Color3.fromRGB(74, 140, 255)} Transparency={0.35} />
+                        <uipadding
+                            PaddingTop={new UDim(0, 4)}
+                            PaddingBottom={new UDim(0, 4)}
+                            PaddingLeft={new UDim(0, 8)}
+                            PaddingRight={new UDim(0, 8)}
+                        />
                     </textbox>
                 </frame>
 

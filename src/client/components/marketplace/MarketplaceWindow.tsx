@@ -5,6 +5,7 @@ import SearchFilters from "client/components/marketplace/SearchFilters";
 import { useDocument } from "client/components/window/DocumentManager";
 import TechWindow from "client/components/window/TechWindow";
 import { getAsset } from "shared/asset/AssetMap";
+import { playSound } from "shared/asset/GameAssets";
 import { RobotoMono, RobotoMonoBold } from "shared/asset/GameFonts";
 import Items from "shared/items/Items";
 import "shared/marketplace/MarketplaceListing";
@@ -214,7 +215,16 @@ export default function MarketplaceWindow() {
                             TextScaled={true}
                             FontFace={isActive ? RobotoMonoBold : RobotoMono}
                             Event={{
-                                Activated: () => setActiveTab(tab),
+                                Activated: () => {
+                                    playSound("MenuClick.mp3");
+                                    setActiveTab(tab);
+                                },
+                                MouseEnter: () => {
+                                    playSound("EmphasisButtonHover.mp3", undefined, (sound) => {
+                                        sound.Volume = 0.2;
+                                        sound.PlaybackSpeed = 2;
+                                    });
+                                },
                             }}
                         >
                             <uipadding

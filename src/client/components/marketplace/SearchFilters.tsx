@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from "@rbxts/react";
-import { RobotoMonoBold, RobotoMono } from "shared/asset/GameFonts";
+import React, { useEffect, useState } from "@rbxts/react";
+import { playSound } from "shared/asset/GameAssets";
+import { RobotoMono, RobotoMonoBold } from "shared/asset/GameFonts";
 
 export default function SearchFilters({
     onSearch,
@@ -12,21 +13,13 @@ export default function SearchFilters({
     const [sortBy, setSortBy] = useState<string>("created_desc");
     const [listingTypeFilter, setListingTypeFilter] = useState<string>("all");
 
-    const handleSearch = () => {
-        onSearch(searchQuery);
-    };
-
-    const handleFilterChange = () => {
+    useEffect(() => {
         const filters: MarketplaceFilters = {
             search: searchQuery !== "" ? searchQuery : undefined,
             sortBy: sortBy as "price_asc" | "price_desc" | "created_asc" | "created_desc",
             listingType: listingTypeFilter !== "all" ? (listingTypeFilter as "buyout" | "auction") : undefined,
         };
         onFilter(filters);
-    };
-
-    useEffect(() => {
-        handleFilterChange();
     }, [sortBy, listingTypeFilter]);
 
     const sortLabel = (() => {
@@ -120,7 +113,7 @@ export default function SearchFilters({
                         BorderColor3={Color3.fromRGB(100, 100, 100)}
                         BorderSizePixel={1}
                         Size={new UDim2(1, 0, 0, 26)}
-                        Text={searchQuery}
+                        Text={""}
                         PlaceholderText="Search by item name or ID"
                         PlaceholderColor3={Color3.fromRGB(120, 140, 175)}
                         TextColor3={Color3.fromRGB(226, 238, 255)}
@@ -128,10 +121,33 @@ export default function SearchFilters({
                         TextXAlignment={Enum.TextXAlignment.Left}
                         FontFace={RobotoMono}
                         ClearTextOnFocus={false}
+                        Change={{
+                            Text: (textBox) => {
+                                if (textBox.Text.size() > searchQuery.size()) {
+                                    switch (math.random(1, 4)) {
+                                        case 1:
+                                            playSound("KeyPress1.mp3");
+                                            break;
+                                        case 2:
+                                            playSound("KeyPress2.mp3");
+                                            break;
+                                        case 3:
+                                            playSound("KeyPress3.mp3");
+                                            break;
+                                        case 4:
+                                            playSound("KeyPress4.mp3");
+                                            break;
+                                    }
+                                } else {
+                                    playSound("KeyDelete.mp3");
+                                }
+                                setSearchQuery(textBox.Text);
+                            },
+                        }}
                         Event={{
                             FocusLost: (textBox, enterPressed) => {
                                 setSearchQuery(textBox.Text);
-                                if (enterPressed) handleSearch();
+                                if (enterPressed) onSearch(searchQuery);
                             },
                         }}
                     >
@@ -189,6 +205,7 @@ export default function SearchFilters({
                                 const currentIndex = options.indexOf(sortBy);
                                 const nextIndex = (currentIndex + 1) % options.size();
                                 setSortBy(options[nextIndex]);
+                                playSound("CheckOn.mp3");
                             },
                         }}
                     >
@@ -246,6 +263,7 @@ export default function SearchFilters({
                                 const currentIndex = options.indexOf(listingTypeFilter);
                                 const nextIndex = (currentIndex + 1) % options.size();
                                 setListingTypeFilter(options[nextIndex]);
+                                playSound("CheckOn.mp3");
                             },
                         }}
                     >
