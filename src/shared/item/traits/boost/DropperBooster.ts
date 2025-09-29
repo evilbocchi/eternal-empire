@@ -19,10 +19,10 @@ export default class DropperBooster extends Booster {
     /**
      * Creates a modifier token for the drop rate of droppers in the area of the model.
      *
-     * @param model The model of the dropper booster.
+     * @param boosterModel The model of the dropper booster.
      * @returns A modifier object that can be used to adjust the drop rate.
      */
-    createToken(model: Model) {
+    override createToken(boosterModel: Model) {
         const key = this.item.id;
         const modifier: ItemBoost = {
             ignoresLimitations: false,
@@ -31,8 +31,8 @@ export default class DropperBooster extends Booster {
 
         let target: BasePart | undefined;
 
-        this.observeTarget(model, (model, item) => {
-            const drop = model?.FindFirstChild("Drop");
+        this.observeTarget(boosterModel, (dropperModel, item) => {
+            const drop = dropperModel?.FindFirstChild("Drop");
 
             if (target !== undefined && target !== drop) {
                 Boostable.removeBoost(getAllInstanceInfo(target), key);

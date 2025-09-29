@@ -12,6 +12,7 @@ import eat from "shared/hamster/eat";
 import Droplet from "shared/item/Droplet";
 import Item from "shared/item/Item";
 import ItemTrait from "shared/item/traits/ItemTrait";
+import isPlacedItemUnusable from "shared/item/utils/isPlacedItemUnusable";
 import { VirtualCollision } from "shared/item/utils/VirtualReplication";
 import { AREAS } from "shared/world/Area";
 
@@ -21,8 +22,21 @@ declare global {
     }
 
     interface InstanceInfo {
+        /**
+         * The number of droplets that can be dropped per second from this drop location.
+         */
         DropRate?: number;
+        /**
+         * The last time a droplet was dropped from this drop location.
+         */
         LastDrop?: number;
+        /**
+         * The instance information of the item model that this instance is a part of.
+         */
+        ItemModelInfo?: InstanceInfo;
+        /**
+         * A function that instantiates a droplet at this drop location.
+         */
         Instantiator?: () => void;
     }
 }
@@ -100,6 +114,7 @@ export default class Dropper extends ItemTrait {
      * @param dropper The dropper item to load.
      */
     static load(model: Model, dropper: Dropper) {
+        const modelInfo = getAllInstanceInfo(model);
         const drops = findBaseParts(model, "Drop");
         for (const [drop, _droplet] of dropper.dropletPerDrop) {
             const part = model.FindFirstChild(drop);
@@ -116,6 +131,7 @@ export default class Dropper extends ItemTrait {
             info.Area = areaId;
             info.Boosts = new Map<string, ItemBoost>();
             info.DropRate = dropper.dropRate;
+            info.ItemModelInfo = modelInfo;
 
             if (instantiator !== undefined) {
                 info.Instantiator = Dropper.wrapInstantiator(instantiator, dropper, model, drop);
@@ -248,14 +264,19 @@ export default class Dropper extends ItemTrait {
             const speed = GameSpeed.speed;
             const t = tick();
             for (const [_d, info] of this.SPAWNED_DROPS) {
+                // Sanity check: drop must have boosts and a dropper model
                 const boosts = info.Boosts;
                 if (boosts === undefined) continue;
+                const dropperInfo = info.ItemModelInfo;
+                if (dropperInfo === undefined || isPlacedItemUnusable(dropperInfo)) continue;
 
+                // First drop, just wait for next opportunity
                 if (info.LastDrop === undefined) {
                     info.LastDrop = t;
                     continue;
                 }
 
+                // No drop rate, no droplets
                 let dropRate = info.DropRate;
                 if (dropRate === undefined) continue;
 
@@ -265,10 +286,13 @@ export default class Dropper extends ItemTrait {
                     dropRate *= weatherMultipliers.dropRate;
                 }
 
+                // Apply item boosts
                 for (const [_, boost] of boosts) dropRate *= boost.dropRateMultiplier ?? 1;
 
+                // No dropping if drop rate is zero :(
                 if (dropRate === 0) continue;
 
+                // Drop a droplet if enough time has passed
                 if (t > info.LastDrop + 1 / dropRate / speed) {
                     const area = AREAS[info.Area!];
                     if (area !== undefined && area.dropletCount > area.getDropletLimit()) continue;

@@ -10,6 +10,7 @@ import Item from "shared/item/Item";
 import Boostable from "shared/item/traits/boost/Boostable";
 import type Charger from "shared/item/traits/generator/Charger";
 import Operative from "shared/item/traits/Operative";
+import isPlacedItemUnusable from "shared/item/utils/isPlacedItemUnusable";
 import perItemPacket from "shared/item/utils/perItemPacket";
 import NamedUpgrades from "shared/namedupgrade/NamedUpgrades";
 
@@ -43,10 +44,10 @@ export default class Generator extends Boostable {
         const ItemService = Server.Item;
         const RevenueService = Server.Revenue;
 
-        const instanceInfo = getAllInstanceInfo(model);
-        instanceInfo.Generator = generator;
-        instanceInfo.Chargeable = true;
-        const boosts = instanceInfo.Boosts!;
+        const modelInfo = getAllInstanceInfo(model);
+        modelInfo.Generator = generator;
+        modelInfo.Chargeable = true;
+        const boosts = modelInfo.Boosts!;
 
         let lastClicked = 0;
         clientClickedPacket.fromClient(model, () => {
@@ -58,7 +59,7 @@ export default class Generator extends Boostable {
             model,
             (dt) => {
                 const passiveGain = generator.passiveGain;
-                if (passiveGain === undefined) return;
+                if (passiveGain === undefined || isPlacedItemUnusable(modelInfo)) return;
 
                 let value = passiveGain;
 

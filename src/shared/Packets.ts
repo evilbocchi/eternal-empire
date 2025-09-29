@@ -5,6 +5,7 @@ import { packet, property } from "@rbxts/fletchette";
 import type { LeaderboardEntry, LeaderboardType } from "client/components/leaderboard/Leaderboard";
 import EmpireProfileTemplate from "shared/data/profile/EmpireProfileTemplate";
 import PlayerProfileTemplate from "shared/data/profile/PlayerProfileTemplate";
+import type { ItemBreakEventPayload } from "shared/item/ItemBreakdown";
 
 declare global {
     interface Reward {
@@ -112,6 +113,9 @@ namespace Packets {
     );
     export const unplaceItems = packet<(placementIds: string[]) => void>();
     export const boostChanged = packet<(boostPerItem: Map<string, BaseOnoeNum>) => void>({ isUnreliable: true });
+    export const itemBreakTriggered = packet<(payload: ItemBreakEventPayload) => void>();
+    export const repairItem = packet<(placementId: string) => boolean>();
+    export const itemRepairCompleted = packet<(placementId: string) => void>();
 
     // droplets
     export const dropletBurnt = packet<(dropletModelId: string, amountPerCurrency: BaseCurrencyMap) => void>({

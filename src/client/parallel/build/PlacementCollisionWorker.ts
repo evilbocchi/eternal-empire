@@ -1,17 +1,16 @@
 //!native
 //!optimize 2
-import { Workspace } from "@rbxts/services";
 import BuildParallel from "client/parallel/build/BuildParallel";
+import { IS_EDIT } from "shared/Context";
 import eat from "shared/hamster/eat";
+import ItemPlacement from "shared/placement/ItemPlacement";
 
 const REQUEST_CHANNEL = "buildPlacement/request";
 const RESULT_CHANNEL = "buildPlacement/result";
 
 interface CollisionRequestMessage {
     jobId: number;
-    cframe: CFrame;
-    size: Vector3;
-    ignores: Instance[];
+    model: Model;
 }
 
 interface CollisionResultMessage {
@@ -28,16 +27,13 @@ const overlapParams = new OverlapParams();
 overlapParams.CollisionGroup = "ItemHitbox";
 
 let nextJobId = 0;
-const EPSILON_VECTOR = new Vector3(0.01, 0.01, 0.01);
 
-export function requestCollision(indicator: BasePart, ignores: Instance[], onResult: (colliding: boolean) => void) {
+export function requestCollision(model: Model, onResult: (colliding: boolean) => void) {
     const jobId = ++nextJobId;
 
     const message: CollisionRequestMessage = {
         jobId,
-        cframe: indicator.CFrame,
-        size: indicator.Size.sub(EPSILON_VECTOR), // Slightly reduce size to prevent edge-case false positives
-        ignores,
+        model,
     };
 
     pending.set(jobId, { callback: onResult });
@@ -50,26 +46,21 @@ export function cancelCollision(jobId: number) {
 }
 
 const requestConnection = BuildParallel.ACTOR.bindToMessage(REQUEST_CHANNEL, (message: CollisionRequestMessage) => {
-    const { jobId, cframe, size, ignores } = message;
+    const { jobId, model } = message;
 
-    // Set up OverlapParams to ignore specified names
-    overlapParams.FilterType = Enum.RaycastFilterType.Exclude;
-    overlapParams.FilterDescendantsInstances = ignores;
-
-    task.desynchronize();
-
-    // Perform collision check using GetPartBoundsInBox
-    const parts = Workspace.GetPartBoundsInBox(cframe, size, overlapParams);
-    // Exclude parts that are fully transparent or not collidable
-    const colliding = parts.some((part) => part.CanCollide && part.Transparency < 1);
+    if (!IS_EDIT) {
+        task.desynchronize();
+    }
 
     // Send result back to main thread
     BuildParallel.ACTOR.sendMessage(RESULT_CHANNEL, {
         jobId,
-        colliding,
+        colliding: ItemPlacement.isTouchingPlacedItem(model),
     } as CollisionResultMessage);
 
-    task.synchronize();
+    if (!IS_EDIT) {
+        task.synchronize();
+    }
 });
 eat(requestConnection, "Disconnect");
 

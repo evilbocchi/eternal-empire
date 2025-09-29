@@ -2,6 +2,7 @@ import { findBaseParts, getAllInstanceInfo } from "@antivivi/vrldk";
 import Droplet from "shared/item/Droplet";
 import Item from "shared/item/Item";
 import Conveyor from "shared/item/traits/conveyor/Conveyor";
+import isPlacedItemUnusable from "shared/item/utils/isPlacedItemUnusable";
 import { VirtualCollision } from "shared/item/utils/VirtualReplication";
 
 declare global {
@@ -12,25 +13,33 @@ declare global {
 
 class Transformer extends Conveyor {
     static load(model: Model, transformer: Transformer) {
+        const modelInfo = getAllInstanceInfo(model);
         const item = transformer.item;
 
         for (const part of findBaseParts(model, "Transformer")) {
             VirtualCollision.onDropletTouched(model, part, (otherPart) => {
+                if (isPlacedItemUnusable(modelInfo)) return;
+
                 const instanceInfo = getAllInstanceInfo(otherPart);
                 if (instanceInfo.Incinerated === true) return;
+
                 const dropletId = instanceInfo.DropletId;
                 if (dropletId === item.id) return;
+
                 const droplet = Droplet.getDroplet(dropletId!);
                 if (droplet === undefined) return;
-                const res = transformer.getResult(droplet);
-                if (res === undefined) return;
-                const model = res.model as BasePart | undefined;
-                if (model === undefined) return;
-                otherPart.Color = model.Color;
-                otherPart.Material = model.Material;
-                otherPart.Size = model.Size;
-                for (const tag of model.GetTags()) otherPart.AddTag(tag);
-                instanceInfo.DropletId = res.id;
+
+                const resultingDroplet = transformer.getResult(droplet);
+                if (resultingDroplet === undefined) return;
+
+                const resultingDropletModel = resultingDroplet.model as BasePart | undefined;
+                if (resultingDropletModel === undefined) return;
+
+                otherPart.Color = resultingDropletModel.Color;
+                otherPart.Material = resultingDropletModel.Material;
+                otherPart.Size = resultingDropletModel.Size;
+                for (const tag of resultingDropletModel.GetTags()) otherPart.AddTag(tag);
+                instanceInfo.DropletId = resultingDroplet.id;
             });
         }
     }

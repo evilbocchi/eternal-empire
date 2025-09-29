@@ -1,4 +1,5 @@
 import type { BaseOnoeNum } from "@antivivi/serikanum";
+import type { ItemBreakdownState } from "shared/item/ItemBreakdown";
 
 declare global {
     /**

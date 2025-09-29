@@ -1,6 +1,7 @@
 import { getAllInstanceInfo } from "@antivivi/vrldk";
 import Item from "shared/item/Item";
 import ItemTrait from "shared/item/traits/ItemTrait";
+import isPlacedItemUnusable from "shared/item/utils/isPlacedItemUnusable";
 import { AREAS } from "shared/world/Area";
 
 declare global {
@@ -28,7 +29,8 @@ export default class InstantiationDelimiter extends ItemTrait {
         item.repeat(
             model,
             () => {
-                const actual = modelInfo.Maintained ? (modelInfo.DropletIncrease ?? delimiter.dropletIncrease) : 0;
+                const baseIncrease = modelInfo.DropletIncrease ?? delimiter.dropletIncrease;
+                const actual = isPlacedItemUnusable(modelInfo) ? 0 : baseIncrease;
                 AREAS[area].boostDropletLimit(model.Name, actual);
             },
             1,

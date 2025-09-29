@@ -7,11 +7,11 @@ export default class UpgraderBooster extends Booster {
     /**
      * Creates a modifier token for upgraders in the area of the model.
      *
-     * @param model The model of the upgrader booster.
+     * @param boosterModel The model of the upgrader booster.
      * @param whitelist An optional whitelist function to filter which upgraders are affected by this booster.
      * @returns A modifier object that can be used to adjust the upgrade.
      */
-    createToken(model: Model): ItemBoost {
+    createToken(boosterModel: Model): ItemBoost {
         const key = this.item.id;
         const boost = {
             ignoresLimitations: false,
@@ -19,7 +19,7 @@ export default class UpgraderBooster extends Booster {
         };
 
         let target: Model | undefined;
-        this.observeTarget(model, (upgraderModel, item) => {
+        this.observeTarget(boosterModel, (upgraderModel, item) => {
             if (target !== undefined && target !== upgraderModel) {
                 Boostable.removeBoost(getAllInstanceInfo(target), key);
                 target = undefined;
@@ -34,7 +34,7 @@ export default class UpgraderBooster extends Booster {
 
             return true;
         });
-        model.Destroying.Once(() => {
+        boosterModel.Destroying.Once(() => {
             if (target !== undefined) {
                 Boostable.removeBoost(getAllInstanceInfo(target), key);
                 target = undefined;

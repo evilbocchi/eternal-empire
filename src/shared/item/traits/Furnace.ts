@@ -7,6 +7,7 @@ import { Server } from "shared/api/APIExpose";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
 import Operative from "shared/item/traits/Operative";
+import isPlacedItemUnusable from "shared/item/utils/isPlacedItemUnusable";
 import { VirtualCollision } from "shared/item/utils/VirtualReplication";
 import Packets from "shared/Packets";
 
@@ -51,10 +52,10 @@ export default class Furnace extends Operative {
                     return;
                 }
 
+                if (isPlacedItemUnusable(dropletInfo)) return;
+
                 dropletInfo.Incinerated = true;
                 Debris.AddItem(droplet, 6);
-
-                if (instanceInfo.Maintained === false) return;
 
                 const [worth] = RevenueService.calculateDropletValue(
                     droplet,

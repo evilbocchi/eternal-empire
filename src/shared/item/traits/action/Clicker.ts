@@ -6,6 +6,7 @@ import { CURRENCY_DETAILS } from "shared/currency/CurrencyDetails";
 import Item from "shared/item/Item";
 import ItemTrait from "shared/item/traits/ItemTrait";
 import getPlacedItemsInBounds from "shared/item/utils/getPlacedItemsInBounds";
+import isPlacedItemUnusable from "shared/item/utils/isPlacedItemUnusable";
 import perItemPacket from "shared/item/utils/perItemPacket";
 
 declare global {
@@ -28,9 +29,9 @@ export default class Clicker extends ItemTrait {
     static load(model: Model, clicker: Clicker) {
         const Items = Server.Items;
 
-        const instanceInfo = getAllInstanceInfo(model);
+        const modelInfo = getAllInstanceInfo(model);
         const modifiers = new Set<Modifier>();
-        instanceInfo.ClickRateModifiers = modifiers;
+        modelInfo.ClickRateModifiers = modifiers;
 
         const clickArea = model.WaitForChild("ClickArea") as BasePart;
         clickArea.CanTouch = true;
@@ -57,6 +58,8 @@ export default class Clicker extends ItemTrait {
                 if (event === undefined || event.Parent === undefined) {
                     event = target.WaitForChild("Click") as BindableEvent;
                 }
+
+                if (isPlacedItemUnusable(modelInfo)) return;
 
                 let rate = 1;
                 for (const modifier of modifiers) {

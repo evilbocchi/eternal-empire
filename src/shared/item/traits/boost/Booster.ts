@@ -44,7 +44,7 @@ export default abstract class Booster extends Operative {
         });
     }
 
-    abstract createToken(model: Model, whitelist?: (model: Model, item: Item) => boolean): ItemBoost;
+    abstract createToken(boosterModel: Model, whitelist?: (targetModel: Model, item: Item) => boolean): ItemBoost;
 
     whitelist?: (model: Model, item: Item) => boolean;
 

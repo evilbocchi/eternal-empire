@@ -1,8 +1,9 @@
-import { weldModel } from "@antivivi/vrldk";
+import { getAllInstanceInfo, weldModel } from "@antivivi/vrldk";
 import { packet } from "@rbxts/fletchette";
 import { RunService, TweenService } from "@rbxts/services";
 import Item from "shared/item/Item";
 import ItemTrait from "shared/item/traits/ItemTrait";
+import isPlacedItemUnusable from "shared/item/utils/isPlacedItemUnusable";
 import perItemPacket from "shared/item/utils/perItemPacket";
 
 const crankedPacket = perItemPacket(packet<(placementId: string) => void>());
@@ -11,13 +12,19 @@ export default class HandCrank extends ItemTrait {
     callback?: (timeSinceCrank: number, model: Model) => void;
 
     static load(model: Model, handCrank: HandCrank) {
+        const modelInfo = getAllInstanceInfo(model);
+
         let t = 0;
         handCrank.item.repeat(model, () => handCrank.callback?.(os.clock() - t, model), 0.1);
         crankedPacket.fromClient(model, (player) => {
+            if (isPlacedItemUnusable(modelInfo)) return;
+
             const character = player.Character;
             if (character === undefined) return;
+
             const distance = character.GetPivot().Position.sub(model.GetPivot().Position).Magnitude;
             if (distance > 10) return;
+
             t = os.clock();
             crankedPacket.toAllClients(model);
         });

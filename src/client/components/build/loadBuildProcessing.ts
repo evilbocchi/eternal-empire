@@ -193,7 +193,7 @@ export default function loadBuildProcessing() {
                     pendingCollisionJob = undefined;
                 }
 
-                pendingCollisionJob = requestCollision(indicator, [model], (colliding) => {
+                pendingCollisionJob = requestCollision(model, (colliding) => {
                     if (currentVersion !== collisionRequestVersion) return;
                     pendingCollisionJob = undefined;
                     evaluatePlacement(colliding);

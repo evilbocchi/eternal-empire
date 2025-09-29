@@ -247,17 +247,22 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
 
         let somethingHappened = false;
         for (const placementId of placementIds) {
+            const placedItem = placedItems.get(placementId);
+            if (placedItem === undefined) continue;
+
+            // Prevent unplacing if item is broken
+            const breakdown = placedItem.meta?.breakdown;
+            if (breakdown?.isBroken === true) {
+                continue; // skip broken items
+            }
             somethingHappened = true;
             const model = this.modelPerPlacementId.get(placementId);
             if (model !== undefined) {
                 model.Destroy();
                 this.modelPerPlacementId.delete(placementId);
             }
-            const placedItem = placedItems.get(placementId);
-            if (placedItem !== undefined) {
-                unplacing.push(placedItem);
-                placedItems.delete(placementId);
-            }
+            unplacing.push(placedItem);
+            placedItems.delete(placementId);
         }
         if (somethingHappened === false) {
             return undefined;
@@ -693,6 +698,13 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
         this.hasInventoryChanged = true;
         this.hasUniqueChanged = true;
         this.hasBoughtChanged = true;
+        this.hasPlacedChanged = true;
+    }
+
+    /**
+     * Marks the placed items state as dirty so metadata changes are replicated to clients.
+     */
+    markPlacedItemsDirty() {
         this.hasPlacedChanged = true;
     }
 

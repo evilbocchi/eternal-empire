@@ -32,6 +32,11 @@ declare global {
          */
         Maintained?: boolean;
 
+        /**
+         * Whether the item is currently broken. Broken items should not perform their usual behaviour.
+         */
+        Broken?: boolean;
+
         PlacedItem?: PlacedItem;
     }
 

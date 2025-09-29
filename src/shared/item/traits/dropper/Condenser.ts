@@ -7,6 +7,7 @@ import Item from "shared/item/Item";
 import Dropper from "shared/item/traits/dropper/Dropper";
 import Furnace from "shared/item/traits/Furnace";
 import ItemTrait from "shared/item/traits/ItemTrait";
+import isPlacedItemUnusable from "shared/item/utils/isPlacedItemUnusable";
 import perItemPacket from "shared/item/utils/perItemPacket";
 import Packets from "shared/Packets";
 import { AREAS } from "shared/world/Area";
@@ -49,6 +50,8 @@ export default class Condenser extends ItemTrait {
     }
 
     static load(model: Model, condenser: Condenser) {
+        const modelInfo = getAllInstanceInfo(model);
+
         const item = condenser.item;
         const dropper = item.trait(Dropper);
         const areaId = Server.Item.getPlacedItem(model.Name)?.area;
@@ -73,6 +76,10 @@ export default class Condenser extends ItemTrait {
         const upgrades = new Map<string, UpgradeInfo>();
 
         const check = (force?: boolean) => {
+            if (isPlacedItemUnusable(modelInfo)) {
+                return;
+            }
+
             let changed = false;
             pricePerDroplet.forEach((price, droplet) => {
                 if (area !== undefined && area.dropletCount > area.getDropletLimit()) {

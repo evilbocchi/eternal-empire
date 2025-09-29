@@ -3,8 +3,10 @@ import { findBaseParts, getAllInstanceInfo, setInstanceInfo } from "@antivivi/vr
 import { RunService } from "@rbxts/services";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
+import type Condenser from "shared/item/traits/dropper/Condenser";
 import Operative, { IOperative } from "shared/item/traits/Operative";
 import type OmniUpgrader from "shared/item/traits/upgrader/OmniUpgrader";
+import isPlacedItemUnusable from "shared/item/utils/isPlacedItemUnusable";
 import { VirtualCollision } from "shared/item/utils/VirtualReplication";
 
 declare global {
@@ -13,18 +15,26 @@ declare global {
     }
 
     interface UpgradeInfo {
+        /**
+         * The upgrader model that applied this upgrade. If the model is destroyed,
+         * the upgrade is considered inactive.
+         */
         Upgrader: Model;
+        /**
+         * The upgrade's boost stats.
+         */
         Boost?: IOperative;
+        /**
+         * An upgrade that effectively does nothing. Toggled by {@link Condenser}.
+         */
         EmptyUpgrade?: boolean;
     }
 
     interface InstanceInfo {
         /** The ID of the laser that this instance is associated with. */
         LaserId?: string;
-        Enabled?: boolean;
         /** The upgrades applied to this instance, keyed by laser ID. */
         Upgrades?: Map<string, UpgradeInfo>;
-        ParentInfo?: InstanceInfo;
         OriginalTransparency?: number;
         CurrentTransparency?: number;
         OnUpgraded?: Signal<BasePart>;
@@ -80,7 +90,7 @@ export default class Upgrader extends Operative {
      */
     static upgrade({
         model,
-        modelInfo,
+        modelInfo = getAllInstanceInfo(model),
         upgrader,
         dropletInfo,
         laserId,
@@ -91,7 +101,7 @@ export default class Upgrader extends Operative {
         /** The upgrader model. */
         model: Model;
         /** The information about the upgrader model. */
-        modelInfo: InstanceInfo;
+        modelInfo?: InstanceInfo;
         /** The upgrader being used. */
         upgrader: Upgrader;
         /** The information about the droplet being upgraded. */
@@ -118,7 +128,7 @@ export default class Upgrader extends Operative {
         if (upgrades === undefined) upgrades = new Map();
         else if (upgrades.has(laserId)) return;
 
-        if (modelInfo.Maintained === false || laserInfo.Enabled === false) return;
+        if (isPlacedItemUnusable(modelInfo) || laserInfo.Maintained === false) return;
 
         if (upgrades === undefined) upgrades = new Map();
         let [totalAdd, totalMul, totalPow] = [upgrader.add, upgrader.mul, upgrader.pow];
@@ -168,7 +178,7 @@ export default class Upgrader extends Operative {
         VirtualCollision.onDropletTouched(model, laser, (droplet, dropletInfo) => {
             this.upgrade({ model, modelInfo, upgrader, dropletInfo, laserInfo, droplet, deco });
         });
-        laserInfo.ParentInfo = modelInfo;
+        laserInfo.ItemModelInfo = modelInfo;
         laserInfo.OriginalTransparency = laser.Transparency;
         this.SPAWNED_LASERS.set(laser, laserInfo);
         model.Destroying.Once(() => {
@@ -285,7 +295,8 @@ export default class Upgrader extends Operative {
     static {
         const connection = RunService.Heartbeat.Connect(() => {
             for (const [laser, info] of this.SPAWNED_LASERS) {
-                const toSet = info.ParentInfo!.Maintained === true ? info.OriginalTransparency! : 1;
+                const parentInfo = info.ItemModelInfo!;
+                const toSet = isPlacedItemUnusable(parentInfo) ? 1 : info.OriginalTransparency!;
                 if (info.CurrentTransparency !== toSet) {
                     info.CurrentTransparency = toSet;
                     laser.Transparency = toSet;
