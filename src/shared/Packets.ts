@@ -114,10 +114,10 @@ namespace Packets {
     export const boostChanged = packet<(boostPerItem: Map<string, BaseOnoeNum>) => void>({ isUnreliable: true });
 
     // droplets
-    export const dropletAdded = packet<(drop: BasePart) => void>({ isUnreliable: true });
     export const dropletBurnt = packet<(dropletModelId: string, amountPerCurrency: BaseCurrencyMap) => void>({
         isUnreliable: true,
     });
+    export const dropletSurged = packet<(dropletModelId: string) => void>({ isUnreliable: true });
     export const setVelocity = packet<(dropletModelId: string, velocity: Vector3) => void>({ isUnreliable: true });
 
     // weather

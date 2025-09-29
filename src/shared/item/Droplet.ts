@@ -5,7 +5,6 @@ import Difficulty from "@antivivi/jjt-difficulties";
 import { getAllInstanceInfo, getInstanceInfo } from "@antivivi/vrldk";
 import { CollectionService, Debris, RunService, TweenService } from "@rbxts/services";
 import { Server } from "shared/api/APIExpose";
-import UserGameSettings from "shared/api/UserGameSettings";
 import { ASSETS } from "shared/asset/GameAssets";
 import { IS_SERVER } from "shared/Context";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
@@ -15,9 +14,26 @@ import Packets from "shared/Packets";
 
 declare global {
     interface InstanceInfo {
+        /**
+         * The health of this droplet instance.
+         */
         Health?: number;
+
+        /**
+         * The unique ID of this droplet instance.
+         */
         DropletId?: string;
+
+        /**
+         * The item ID this instance represents.
+         *
+         * If the instance is a droplet model, this will be the item that spawned it.
+         */
         ItemId?: string;
+
+        /**
+         * The area this instance belongs to.
+         */
         Area?: AreaId;
 
         /**
@@ -26,7 +42,6 @@ declare global {
          * @param dropletInfo The information about the droplet.
          */
         DropletTouched?: (droplet: BasePart, dropletInfo: InstanceInfo) => void;
-        //RaycastParams?: RaycastParams;
     }
 
     interface DropletAssets extends Folder {
@@ -789,9 +804,6 @@ export default class Droplet {
 
             const spawnId = tostring(++Droplet.instatiationCount);
             spawned.Name = spawnId;
-            if (cframe !== undefined) {
-                Packets.dropletAdded.toClientsInRadius(cframe.Position, 128, drop!);
-            }
 
             Droplet.SPAWNED_DROPLETS.set(spawned, instanceInfo);
             Droplet.MODEL_PER_SPAWN_ID.set(spawnId, spawned);
@@ -926,29 +938,23 @@ export default class Droplet {
         eat(heartbeatConnection);
 
         if (!IS_SERVER) {
-            const addedConnection = Packets.dropletAdded.fromServer((drop?: BasePart) => {
-                if (!drop) return;
+            const addedConnection = CollectionService.GetInstanceAddedSignal("Droplet").Connect((droplet) => {
+                if (!droplet.IsA("BasePart")) return;
+                const dropletModelId = droplet.Name;
 
-                const originalSize = drop.GetAttribute("OriginalSize") as Vector3 | undefined;
-                if (originalSize === undefined) return;
-
-                if (UserGameSettings!.SavedQualityLevel.Value > 1) {
-                    drop.Size = originalSize.add(new Vector3(0.15, 0.825, 0.15));
-                    TweenService.Create(drop, new TweenInfo(0.3), { Size: originalSize }).Play();
-                }
+                Droplet.MODEL_PER_SPAWN_ID.set(dropletModelId, droplet);
+                droplet.Destroying.Once(() => {
+                    Droplet.MODEL_PER_SPAWN_ID.delete(dropletModelId);
+                });
             });
-            eat(addedConnection);
+            eat(addedConnection, "Disconnect");
 
             const impulseConnection = Packets.setVelocity.fromServer((dropletModelId, velocity) => {
-                const model = CollectionService.GetTagged("Droplet").find(
-                    (droplet) => droplet.Name === dropletModelId,
-                ) as BasePart | undefined;
-                if (model === undefined)
-                    // streamed out
-                    return;
+                const model = this.MODEL_PER_SPAWN_ID.get(dropletModelId);
+                if (model === undefined) return;
                 model.AssemblyLinearVelocity = velocity;
             });
-            eat(impulseConnection);
+            eat(impulseConnection, "Disconnect");
         }
     }
 }

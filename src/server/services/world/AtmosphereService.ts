@@ -15,9 +15,8 @@
 
 import { setInstanceInfo } from "@antivivi/vrldk";
 import { OnInit, OnPhysics, Service } from "@flamework/core";
-import { CollectionService, Debris, Lighting, TweenService, Workspace } from "@rbxts/services";
+import { CollectionService, Lighting } from "@rbxts/services";
 import DataService from "server/services/data/DataService";
-import { getSound } from "shared/asset/GameAssets";
 import Packets from "shared/Packets";
 import { WeatherState, WeatherType } from "shared/weather/WeatherTypes";
 
@@ -250,9 +249,6 @@ export default class AtmosphereService implements OnInit, OnPhysics {
         // Apply lightning surge effect (10x value boost)
         this.surgeDroplet(randomDroplet);
 
-        // Visual and audio effects
-        this.createLightningEffects(randomDroplet.Position);
-
         print(`Lightning struck droplet at position: ${randomDroplet.Position}`);
     }
 
@@ -264,64 +260,13 @@ export default class AtmosphereService implements OnInit, OnPhysics {
     private surgeDroplet(droplet: BasePart) {
         // Add a surge attribute that can be read by the value calculation system
         setInstanceInfo(droplet, "LightningSurged", true);
-
-        // Visual effect for surged droplet
-        const light = new Instance("PointLight");
-        light.Color = Color3.fromRGB(255, 255, 255);
-        light.Brightness = 10;
-        light.Range = 3;
-        light.Parent = droplet;
-
-        // Fade back to original color over time
-        TweenService.Create(light, new TweenInfo(2), { Brightness: 0 }).Play();
         task.delay(2, () => {
-            setInstanceInfo(droplet, "LightningSurged", false);
-        });
-        Debris.AddItem(light, 2);
-    }
-
-    /**
-     * Creates visual and audio effects for lightning strikes.
-     *
-     * @param position The position where lightning struck.
-     */
-    private createLightningEffects(position: Vector3) {
-        // Create lightning bolt effect
-        const lightning = new Instance("Part");
-        lightning.Name = "Lightning";
-        lightning.Size = new Vector3(0.5, 100, 0.5);
-        lightning.Material = Enum.Material.Neon;
-        lightning.Color = Color3.fromRGB(255, 255, 255);
-        lightning.Anchored = true;
-        lightning.CanCollide = false;
-        lightning.CFrame = new CFrame(position.add(new Vector3(0, 50, 0)));
-        lightning.Parent = Workspace;
-
-        // Lightning flash effect
-        const flash = new Instance("PointLight");
-        flash.Color = Color3.fromRGB(200, 200, 255);
-        flash.Brightness = 10;
-        flash.Range = 100;
-        flash.Parent = lightning;
-
-        // Remove effects after short duration
-        task.spawn(() => {
-            task.wait(0.05);
-            lightning.Destroy();
-        });
-
-        // Thunder sound effect
-        try {
-            const thunderSound = getSound("Thunder.mp3");
-            if (thunderSound) {
-                thunderSound.Volume = 0.5;
-                thunderSound.Play();
+            if (droplet && droplet.Parent) {
+                setInstanceInfo(droplet, "LightningSurged", undefined);
             }
-        } catch (error) {
-            print("Could not play thunder sound:", error);
-        }
+        });
 
-        print("⚡ THUNDER! ⚡");
+        Packets.dropletSurged.toAllClients(droplet.Name);
     }
 
     /**

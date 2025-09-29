@@ -1,15 +1,16 @@
 import { BaseOnoeNum, OnoeNum } from "@antivivi/serikanum";
 import React, { useEffect, useRef } from "@rbxts/react";
-import { CollectionService, Debris, TweenService, Workspace } from "@rbxts/services";
+import { Debris, TweenService, Workspace } from "@rbxts/services";
 import { balanceOptionImagePerCurrency } from "client/components/balance/BalanceOption";
 import displayBalanceCurrency from "client/components/balance/displayBalanceCurrency";
 import { PingManager } from "client/components/stats/StatsWindow";
-import { RobotoSlabExtraBold } from "shared/asset/GameFonts";
 import { UISignals } from "shared/api/APIExpose";
 import UserGameSettings from "shared/api/UserGameSettings";
 import { getSound, SOUND_EFFECTS_GROUP } from "shared/asset/GameAssets";
+import { RobotoSlabExtraBold } from "shared/asset/GameFonts";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import { CURRENCY_DETAILS } from "shared/currency/CurrencyDetails";
+import Droplet from "shared/item/Droplet";
 import Packets from "shared/Packets";
 
 /**
@@ -129,9 +130,7 @@ export function CurrencyGainManager() {
 
         const connection = UISignals.showCurrencyGain.connect(showCurrencyGain);
         const gainConnection = Packets.dropletBurnt.fromServer((dropletModelId, amountPerCurrency) => {
-            const dropletModel = CollectionService.GetTagged("Droplet").find(
-                (droplet) => droplet.Name === dropletModelId,
-            ) as BasePart | undefined;
+            const dropletModel = Droplet.MODEL_PER_SPAWN_ID.get(dropletModelId);
             if (dropletModel === undefined) {
                 return;
             }

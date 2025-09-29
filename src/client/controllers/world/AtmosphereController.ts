@@ -14,6 +14,7 @@
 import { variableInterval } from "@antivivi/vrldk";
 import { Controller, OnInit, OnStart } from "@flamework/core";
 import { Lighting } from "@rbxts/services";
+import RainParallel from "client/parallel/rain/RainParallel";
 import UserGameSettings from "shared/api/UserGameSettings";
 import eat from "shared/hamster/eat";
 import Packets from "shared/Packets";
@@ -132,6 +133,7 @@ export default class AtmosphereController implements OnInit, OnStart {
                 this.applyThunderstormWeather();
                 break;
         }
+        RainParallel.setRainEnabled(this.rainy);
     }
 
     /**
