@@ -145,6 +145,9 @@ export default class DataService implements OnStart, OnPlayerAdded {
 
         // Migration: Convert old placed items array to new worldPlaced map
         const items = empireData.items;
+        if (items.repairProtection === undefined) {
+            items.repairProtection = new Map();
+        }
         if (items.placed !== undefined) {
             for (const placedItem of items.placed) {
                 items.worldPlaced.set(

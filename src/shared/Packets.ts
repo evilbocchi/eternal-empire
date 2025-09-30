@@ -2,10 +2,10 @@ import type { BaseOnoeNum } from "@antivivi/serikanum";
 import type CameraShaker from "@rbxts/camera-shaker";
 import type { DataType } from "@rbxts/flamework-binary-serializer";
 import { exactMapProperty, packet, property } from "@rbxts/fletchette";
-import type { RepairResultTier } from "client/components/item/RepairWindow";
 import type { LeaderboardEntry, LeaderboardType } from "client/components/leaderboard/Leaderboard";
 import EmpireProfileTemplate from "shared/data/profile/EmpireProfileTemplate";
 import PlayerProfileTemplate from "shared/data/profile/PlayerProfileTemplate";
+import type { RepairResultTier } from "shared/item/repair";
 
 declare global {
     interface Reward {
@@ -115,7 +115,8 @@ namespace Packets {
     export const boostChanged = packet<(boostPerItem: Map<string, BaseOnoeNum>) => void>({ isUnreliable: true });
     export const brokenPlacedItems = property<Set<string>>(EmpireProfileTemplate.items.brokenPlacedItems);
     export const repairItem = packet<(placementId: string, tier: RepairResultTier) => boolean>();
-    export const itemRepairCompleted = packet<(placementId: string) => void>();
+    export const itemRepairCompleted =
+        packet<(placementId: string, tier: RepairResultTier, protectionExpiresAt: number | undefined) => void>();
 
     // droplets
     export const dropletBurnt = packet<(dropletModelId: string, amountPerCurrency: BaseCurrencyMap) => void>({

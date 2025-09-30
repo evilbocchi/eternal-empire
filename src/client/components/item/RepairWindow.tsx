@@ -9,13 +9,12 @@ import TechWindow from "client/components/window/TechWindow";
 import { getAsset } from "shared/asset/AssetMap";
 import { playSound } from "shared/asset/GameAssets";
 import { RobotoMono, RobotoMonoBold } from "shared/asset/GameFonts";
+import type { RepairResultTier } from "shared/item/repair";
 import Item from "shared/item/Item";
 import Items from "shared/items/Items";
 import Packets from "shared/Packets";
 
 type Phase = "idle" | "countdown" | "running" | "success" | "fail";
-
-export type RepairResultTier = "Perfect" | "Great" | "Good";
 
 const APPROACH_DURATION = 2.1; // seconds for the approach ring to close
 const HOT_WINDOW = 0.2; // acceptable progress window (± from 0)
@@ -279,7 +278,7 @@ export default function RepairWindow() {
     useEffect(() => {
         if (phase === "success") return;
 
-        const connection = Packets.itemRepairCompleted.fromServer((placementId) => {
+        const connection = Packets.itemRepairCompleted.fromServer((placementId, _tier) => {
             // Check if other clients repaired this item
             if (placementId === RepairManager.placementId) {
                 playSound("repair/Complete.mp3");
@@ -327,7 +326,6 @@ export default function RepairWindow() {
         const minSize = 15;
         const maxSize = 75;
         const scale = (Items.length - index) / (Items.length - 1);
-        print(index, scale);
 
         return minSize + (maxSize - minSize) * scale;
     }, [activeItem]);

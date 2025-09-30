@@ -22,7 +22,8 @@ import Signal from "@antivivi/lemon-signal";
 import { getAllInstanceInfo, simpleInterval, variableInterval } from "@antivivi/vrldk";
 import { OnInit, OnStart, Service } from "@flamework/core";
 import { CollectionService, HttpService, Workspace } from "@rbxts/services";
-import type { RepairResultTier } from "client/components/item/RepairWindow";
+import type { RepairResultTier, RepairProtectionState, RepairProtectionTier } from "shared/item/repair";
+import { isProtectionTier, REPAIR_PROTECTION_DURATIONS } from "shared/item/repair";
 import { CHALLENGES } from "server/Challenges";
 import CurrencyService from "server/services/data/CurrencyService";
 import DataService from "server/services/data/DataService";
@@ -67,6 +68,7 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
     readonly modelPerPlacementId = new Map<string, Model>();
 
     private readonly brokenPlacedItems: Set<string>;
+    private readonly repairProtection: Map<string, RepairProtectionState>;
     private readonly worldPlaced: Map<string, PlacedItem>;
     private hasInventoryChanged = false;
     private hasUniqueChanged = false;
@@ -121,6 +123,24 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
     ) {
         this.worldPlaced = dataService.empireData.items.worldPlaced;
         this.brokenPlacedItems = dataService.empireData.items.brokenPlacedItems;
+        this.repairProtection = dataService.empireData.items.repairProtection;
+    }
+
+    private getActiveRepairProtection(placementId: string): RepairProtectionState | undefined {
+        const protection = this.repairProtection.get(placementId);
+        if (protection === undefined) return undefined;
+
+        if (protection.expiresAt <= os.time()) {
+            this.repairProtection.delete(placementId);
+            return undefined;
+        }
+
+        return protection;
+    }
+
+    private applyRepairProtection(placementId: string, tier: RepairProtectionTier) {
+        const expiresAt = os.time() + REPAIR_PROTECTION_DURATIONS[tier];
+        this.repairProtection.set(placementId, { tier, expiresAt });
     }
 
     // Data Management Methods
@@ -268,6 +288,7 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
             }
             unplacing.push(placedItem);
             placedItems.delete(placementId);
+            this.repairProtection.delete(placementId);
         }
         if (somethingHappened === false) {
             return undefined;
@@ -521,6 +542,7 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
         for (const model of PLACED_ITEMS_FOLDER.GetChildren()) {
             if (!placedItems.has(model.Name)) {
                 model.Destroy();
+                this.repairProtection.delete(model.Name);
             }
         }
         this.modelPerPlacementId.clear();
@@ -747,6 +769,7 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
                 info.Broken = true;
             }
             this.brokenPlacedItems.add(placementId);
+            this.repairProtection.delete(placementId);
             changed = true;
         }
         if (changed) {
@@ -758,19 +781,22 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
         const success = this.brokenPlacedItems.delete(placementId);
         if (!success) return false;
 
+        this.repairProtection.delete(placementId);
+
+        let protectionExpiresAt: number | undefined;
+        if (isProtectionTier(tier)) {
+            this.applyRepairProtection(placementId, tier);
+            protectionExpiresAt = this.getActiveRepairProtection(placementId)?.expiresAt;
+        }
+
         const model = this.modelPerPlacementId.get(placementId);
         if (model) {
             const info = getAllInstanceInfo(model);
             info.Broken = false;
-            if (tier === "Great") {
-                // TODO
-            } else if (tier === "Perfect") {
-                // TODO
-            }
         }
 
         Packets.brokenPlacedItems.set(this.brokenPlacedItems);
-        Packets.itemRepairCompleted.toAllClients(placementId);
+        Packets.itemRepairCompleted.toAllClients(placementId, tier, protectionExpiresAt);
         return true;
     }
 
@@ -884,6 +910,7 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
             const placementIds = new Array<string>();
             for (const [placementId] of this.worldPlaced) {
                 if (this.brokenPlacedItems.has(placementId)) continue;
+                if (this.getActiveRepairProtection(placementId) !== undefined) continue;
 
                 if (rng.NextNumber() > 0.95) {
                     placementIds.push(placementId);

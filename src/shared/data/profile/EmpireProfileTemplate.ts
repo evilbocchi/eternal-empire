@@ -1,5 +1,6 @@
 import type { BaseOnoeNum } from "@antivivi/serikanum";
 import { DataType } from "@rbxts/flamework-binary-serializer";
+import type { RepairProtectionState } from "shared/item/repair";
 
 declare global {
     /**
@@ -116,6 +117,11 @@ declare global {
          * The items that are currently broken and placed in the world.
          */
         brokenPlacedItems: Set<string>;
+
+        /**
+         * Temporary durability bonuses granted after successful repairs.
+         */
+        repairProtection: Map<string, RepairProtectionState>;
 
         /**
          * The state of the previous item that was repaired.
@@ -338,6 +344,7 @@ const EmpireProfileTemplate = {
         lastRepair: {},
         nextId: 0,
         uniqueInstances: new Map<string, UniqueItemInstance>(),
+        repairProtection: new Map<string, RepairProtectionState>(),
     } as ItemsData,
 
     /** Data that is saved before a challenge starts. */

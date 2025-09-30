@@ -52,6 +52,7 @@ declare global {
 }
 
 import BrokenItemIndicatorRenderer from "client/components/item/BrokenItemIndicatorRenderer";
+import RepairedItemEffectRenderer from "client/components/item/RepairedItemEffectRenderer";
 import RepairWindow from "client/components/item/RepairWindow";
 import { PLAYER_GUI } from "client/constants";
 import eat from "shared/hamster/eat";
@@ -137,6 +138,7 @@ export default function App() {
         addRoot(roots, createScreenGui("Backpack", -15)).render(<BackpackWindow />);
 
         addRoot(roots, createFolder("BrokenItemIndicators")).render(<BrokenItemIndicatorRenderer />);
+        addRoot(roots, createFolder("RepairedItemEffects")).render(<RepairedItemEffectRenderer />);
         addRoot(roots, createFolder("Printer")).render(<PrinterRenderer />);
         addRoot(roots, createFolder("Shop")).render(<ShopGui />);
         addRoot(roots, createFolder("UpgradeBoard")).render(<UpgradeBoardRenderer />);

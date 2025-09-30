@@ -7,6 +7,7 @@ import ItemService from "server/services/item/ItemService";
 import ChatHookService from "server/services/permissions/ChatHookService";
 import PermissionsService from "server/services/permissions/PermissionsService";
 import fixDuplicatedItemsData from "shared/data/loading/fixDuplicatedItemsData";
+import type { RepairProtectionState } from "shared/item/repair";
 
 export = function () {
     const dataService = new DataService();
@@ -47,6 +48,8 @@ export = function () {
                 ]),
                 bought: new Map<string, number>([["TheFirstDropper", 3]]),
                 worldPlaced: new Map<string, PlacedItem>(),
+                brokenPlacedItems: new Set<string>(),
+                repairProtection: new Map<string, RepairProtectionState>(),
                 nextId: 0,
                 uniqueInstances: new Map<string, UniqueItemInstance>(),
             } as ItemsData;
@@ -58,6 +61,8 @@ export = function () {
                 ]),
                 bought: new Map<string, number>([["TheFirstDropper", 2]]),
                 worldPlaced: new Map<string, PlacedItem>(),
+                brokenPlacedItems: new Set<string>(),
+                repairProtection: new Map<string, RepairProtectionState>(),
                 nextId: 0,
                 uniqueInstances: new Map<string, UniqueItemInstance>(),
             } as ItemsData;
@@ -79,6 +84,8 @@ export = function () {
                 ]),
                 bought: new Map<string, number>([["TheFirstDropper", 1]]),
                 worldPlaced: new Map<string, PlacedItem>(),
+                brokenPlacedItems: new Set<string>(),
+                repairProtection: new Map<string, RepairProtectionState>(),
                 nextId: 0,
                 uniqueInstances: new Map<string, UniqueItemInstance>(),
             } as ItemsData;
