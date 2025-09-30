@@ -39,6 +39,11 @@ export = CreateReactStory(
             RepairManager.placementId = "TestPlacementId";
             RepairManager.modelInfo = undefined;
             RepairManager.updated.fire();
+
+            Packets.repairItem.fromClient(() => {
+                Packets.itemRepairCompleted.toAllClients("TestPlacementId");
+                return true;
+            });
         }, []);
 
         return <RepairWindow />;

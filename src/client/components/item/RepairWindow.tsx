@@ -34,13 +34,13 @@ export class RepairManager {
 }
 
 export default function RepairWindow() {
-    const { id, visible } = useSingleDocument({ id: "Repair" });
+    const { id, visible, closeDocument } = useSingleDocument({ id: "Repair" });
     const [activeItem, setActiveItem] = React.useState<Item | undefined>();
 
     useEffect(() => {
         const connection = Packets.itemRepairCompleted.fromServer((placementId) => {
             if (placementId === RepairManager.placementId) {
-                playSound("UpgradeBought.mp3");
+                playSound("repair/Complete.mp3");
             }
         });
         return () => connection.Disconnect();
@@ -63,10 +63,6 @@ export default function RepairWindow() {
         }
     };
 
-    const handleFailure = () => {
-        // TODO
-    };
-
     return (
         <TechWindow title="Repair Station" icon={getAsset("assets/Broken.png")} id={id} visible={visible}>
             <textlabel
@@ -79,6 +75,7 @@ export default function RepairWindow() {
                 TextColor3={Color3.fromRGB(255, 255, 255)}
                 TextTransparency={0.9}
                 TextScaled={true}
+                ZIndex={-5}
             >
                 <uigradient
                     Color={
@@ -89,7 +86,7 @@ export default function RepairWindow() {
                     }
                 />
             </textlabel>
-            <RepairTimingMiniGame onFailure={handleFailure} onSuccess={handleSuccess} />
+            <RepairTimingMiniGame onSuccess={handleSuccess} />
         </TechWindow>
     );
 }
