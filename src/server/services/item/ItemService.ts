@@ -19,7 +19,7 @@
  */
 
 import Signal from "@antivivi/lemon-signal";
-import { getAllInstanceInfo, simpleInterval } from "@antivivi/vrldk";
+import { getAllInstanceInfo, simpleInterval, variableInterval } from "@antivivi/vrldk";
 import { OnInit, OnStart, Service } from "@flamework/core";
 import { CollectionService, HttpService, Workspace } from "@rbxts/services";
 import { CHALLENGES } from "server/Challenges";
@@ -100,11 +100,6 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
      * @param placedItems The updated map of placed items.
      */
     readonly placedItemsUpdated = new Signal<(placedItems: Map<string, PlacedItem>) => void>();
-
-    /**
-     * Fired when a new item model is added to the world.
-     */
-    readonly itemModelAdded = new Signal<(placementId: string, model: Model, modelInfo: InstanceInfo) => void>();
 
     // Configuration
 
@@ -320,7 +315,9 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
         this.modelPerPlacementId.set(placementId, model);
 
         const modelInfo = getAllInstanceInfo(model);
-        this.itemModelAdded.fire(placementId, model, modelInfo);
+        if (this.brokenPlacedItems.has(placementId)) {
+            modelInfo.Broken = true;
+        }
 
         // Execute item-specific load callbacks
         item.LOADS.forEach((callback) => callback(model, item));
@@ -736,6 +733,39 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
         }
     }
 
+    beginBreakdown(placementIds: string[]) {
+        let changed = false;
+        for (const placementId of placementIds) {
+            if (this.brokenPlacedItems.has(placementId)) {
+                continue;
+            }
+
+            const model = this.modelPerPlacementId.get(placementId);
+            if (model) {
+                const info = getAllInstanceInfo(model);
+                info.Broken = true;
+            }
+            this.brokenPlacedItems.add(placementId);
+            changed = true;
+        }
+        if (changed) {
+            Packets.brokenPlacedItems.set(this.brokenPlacedItems);
+        }
+    }
+
+    completeRepair(placementId: string) {
+        this.brokenPlacedItems.delete(placementId);
+
+        const model = this.modelPerPlacementId.get(placementId);
+        if (model) {
+            const info = getAllInstanceInfo(model);
+            info.Broken = false;
+        }
+
+        Packets.brokenPlacedItems.set(this.brokenPlacedItems);
+        Packets.itemRepairCompleted.toAllClients(placementId);
+    }
+
     onInit() {
         // Set up automatic model creation for new placed items
         const placedItemsUpdatedConnection = this.placedItemsUpdated.connect((placedItems) => {
@@ -833,7 +863,31 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
         });
 
         this.requestChanges();
+
+        // Periodically propagate changes to clients
         eat(simpleInterval(() => this.propagateChanges(), 0.1));
+
+        // Periodically check for items to break down
+        const ref = { interval: 10 };
+        const rng = new Random();
+        const cleanup = variableInterval(() => {
+            const placementIds = new Array<string>();
+            for (const [placementId] of this.worldPlaced) {
+                if (this.brokenPlacedItems.has(placementId)) continue;
+
+                if (rng.NextNumber() > 0.95) {
+                    placementIds.push(placementId);
+                }
+            }
+            if (!placementIds.isEmpty()) {
+                this.beginBreakdown(placementIds);
+            }
+            ref.interval = 10 + rng.NextNumber() * 15;
+        }, ref);
+        eat(cleanup);
+        Packets.brokenPlacedItems.set(this.brokenPlacedItems);
+
+        // Clean up models on shutdown
         eat(() => {
             for (const model of PLACED_ITEMS_FOLDER.GetChildren()) {
                 model.Destroy();

@@ -8,7 +8,9 @@
 import { getAllInstanceInfo, weldModel } from "@antivivi/vrldk";
 import { Debris, HttpService, ReplicatedStorage, TweenService, UserInputService, Workspace } from "@rbxts/services";
 import { Environment } from "@rbxts/ui-labs";
+import { RepairManager } from "client/components/item/RepairWindow";
 import { ShopManager } from "client/components/item/shop/ShopGui";
+import SingleDocumentManager from "client/components/sidebar/SingleDocumentManager";
 import { showErrorToast } from "client/components/toast/ToastService";
 import DocumentManager from "client/components/window/DocumentManager";
 import { NONCOLLISION_COLOR } from "client/constants";
@@ -441,7 +443,7 @@ namespace BuildManager {
     }
 
     /**
-     * Handles mouse up events for placement and dragging.
+     * Handles mouse up events for placement and selection finalization.
      * @param useCurrentPos If true, uses the current position for placement.
      */
     export function onMouseUp(useCurrentPos?: boolean) {
@@ -451,14 +453,17 @@ namespace BuildManager {
 
         const size = selected.size();
         if (size === 0) {
-            // nothing selected, handle dragging
+            // nothing to place, select dragged items
             const main = hovering;
             if (main !== undefined) {
-                playSound("Pickup.mp3");
                 const names = new Array<string>();
                 for (const model of dragging) {
                     names.push(model.Name);
                     const modelInfo = getAllInstanceInfo(model);
+                    if (modelInfo.Broken === true) {
+                        RepairManager.setRepairing(model);
+                        return;
+                    }
 
                     const placedItem = modelInfo.PlacedItem;
                     if (placedItem === undefined) continue;
@@ -471,6 +476,7 @@ namespace BuildManager {
                         selected.set(placingModel, main.PrimaryPart!.CFrame.Inverse().mul(model.PrimaryPart!.CFrame));
                     }
                 }
+                playSound("Pickup.mp3");
                 Packets.unplaceItems.toServer(names);
                 task.delay(0.05, () => {
                     onMouseMove(true, false);

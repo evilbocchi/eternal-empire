@@ -1,12 +1,14 @@
 import { loadAnimation } from "@antivivi/vrldk";
 import { ReplicatedStorage, TweenService, Workspace } from "@rbxts/services";
 import { questState } from "client/components/quest/QuestState";
-import { getPlayerCharacter } from "shared/hamster/getPlayerCharacter";
-import { INTRO_GUI } from "client/controllers/core/Guis";
+import { PLAYER_GUI } from "client/constants";
 import { setVisibilityMain } from "client/hooks/useVisibility";
 import MusicManager from "client/MusicManager";
 import { playSound } from "shared/asset/GameAssets";
 import { WAYPOINTS } from "shared/constants";
+import { IS_EDIT } from "shared/Context";
+import eat from "shared/hamster/eat";
+import { getPlayerCharacter } from "shared/hamster/getPlayerCharacter";
 
 let isIntroSequenceDone = false;
 let isCurrentlyInIntroSequence = false;
@@ -32,12 +34,23 @@ export default function performIntroSequence() {
     });
 
     print("performing intro sequence");
+    const screenGui = new Instance("ScreenGui");
+    screenGui.IgnoreGuiInset = true;
+    screenGui.ResetOnSpawn = false;
+    screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling;
+    screenGui.Name = "Intro";
+    screenGui.DisplayOrder = 30;
+    screenGui.Parent = PLAYER_GUI;
+    if (IS_EDIT) {
+        eat(screenGui, "Destroy");
+    }
+
     const blackWindow = new Instance("Frame");
     blackWindow.Size = new UDim2(1, 0, 1, 0);
     blackWindow.BackgroundColor3 = Color3.fromRGB(0, 0, 0);
     blackWindow.BackgroundTransparency = 0;
     blackWindow.Visible = true;
-    blackWindow.Parent = INTRO_GUI;
+    blackWindow.Parent = screenGui;
 
     // Waking up
     const humanoid = getPlayerCharacter()?.FindFirstChildOfClass("Humanoid");

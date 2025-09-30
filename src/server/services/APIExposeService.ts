@@ -19,7 +19,6 @@ import PlaytimeService from "server/services/data/PlaytimeService";
 import QuestService from "server/services/data/QuestService";
 import SetupService from "server/services/data/SetupService";
 import { DonationService } from "server/services/DonationService";
-import ItemBreakdownService from "server/services/item/ItemBreakdownService";
 import ItemService from "server/services/item/ItemService";
 import { LeaderboardService } from "server/services/leaderboard/LeaderboardService";
 import MarketplaceService from "server/services/marketplace/MarketplaceService";
@@ -58,7 +57,6 @@ export default class APIExposeService implements OnInit {
         private readonly eventService: EventService,
         private readonly hamsterService: HamsterService,
         private readonly itemService: ItemService,
-        private readonly itemBreakdownService: ItemBreakdownService,
         private readonly levelService: LevelService,
         private readonly leaderboardService: LeaderboardService,
         private readonly moddingService: ModdingService,
@@ -154,11 +152,6 @@ export default class APIExposeService implements OnInit {
              * @see {@link ItemService} for more details.
              */
             Item: this.itemService,
-
-            /**
-             * Item breakdown and repair management service.
-             */
-            ItemBreakdown: this.itemBreakdownService,
 
             /**
              * Playtime tracking service.

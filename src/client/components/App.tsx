@@ -11,6 +11,7 @@ import ChallengeManager from "client/components/challenge/ChallengeManager";
 import ChestLootManager from "client/components/chest/ChestLootManager";
 import CommandsWindow from "client/components/commands/CommandsWindow";
 import EffectManager from "client/components/effect/EffectManager";
+import ClientItemReplication from "client/components/item/ClientItemReplication";
 import InventoryWindow from "client/components/item/inventory/InventoryWindow";
 import PortableBeaconWindow from "client/components/item/PortableBeaconWindow";
 import PrinterRenderer from "client/components/item/printer/PrinterRenderer";
@@ -37,36 +38,6 @@ import ToastManager from "client/components/toast/ToastManager";
 import TooltipWindow from "client/components/tooltip/TooltipWindow";
 import DocumentManager from "client/components/window/DocumentManager";
 import WorldRenderer from "client/components/world/WorldRenderer";
-import {
-    BACKPACK_GUI,
-    BALANCE_GUI,
-    BUILD_GUI,
-    CHALLENGE_GUI,
-    CHALLENGE_HUD_GUI,
-    CHALLENGECOMPLETION_GUI,
-    CHESTLOOT_GUI,
-    CURRENCY_GAIN_GUI,
-    DIALOGUE_GUI,
-    EFFECTS_GUI,
-    INVENTORY_GUI,
-    LEVELUP_GUI,
-    LOGS_GUI,
-    MAIN_LAYOUT_GUI,
-    PLAYERLIST_GUI,
-    PRINTER_GUI,
-    PURCHASE_GUI,
-    QUESTCOMPLETION_GUI,
-    QUESTS_GUI,
-    SETTINGS_GUI,
-    SHOP_GUI,
-    START_GUI,
-    STATS_GUI,
-    TOASTS_GUI,
-    TOOLTIPS_GUI,
-    UPGRADEBOARD_GUI,
-    WORLD_GUI,
-} from "client/controllers/core/Guis";
-import useManualItemReplication from "client/hooks/useManualItemReplication";
 import { setVisibilityMain } from "client/hooks/useVisibility";
 import MusicManager from "client/MusicManager";
 import { assets, getAsset } from "shared/asset/AssetMap";
@@ -80,11 +51,42 @@ declare global {
     }
 }
 
+import BrokenItemIndicatorRenderer from "client/components/item/BrokenItemIndicatorRenderer";
+import RepairWindow from "client/components/item/RepairWindow";
+import { PLAYER_GUI } from "client/constants";
+import eat from "shared/hamster/eat";
+
+function setParent(instance: Instance) {
+    instance.Parent = PLAYER_GUI;
+    if (IS_EDIT) {
+        eat(instance, "Destroy");
+    }
+}
+
+function createScreenGui(name: string, displayOrder = 0, ignoreGuiInset = true): ScreenGui {
+    const screenGui = new Instance("ScreenGui");
+    screenGui.IgnoreGuiInset = ignoreGuiInset;
+    screenGui.ResetOnSpawn = false;
+    screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling;
+    screenGui.Name = name;
+    screenGui.DisplayOrder = displayOrder;
+    setParent(screenGui);
+    return screenGui;
+}
+
+function createFolder(name: string): Folder {
+    const folder = new Instance("Folder");
+    folder.Name = name;
+    setParent(folder);
+    return folder;
+}
+
 function addRoot(roots: Set<Root>, container: Instance): Root {
     const root = createRoot(container);
     roots.add(root);
     return root;
 }
+
 /**
  * Entry point for the app's UI.
  * This creates roots for each major UI section and manages their lifecycle, so
@@ -93,56 +95,54 @@ function addRoot(roots: Set<Root>, container: Instance): Root {
 export default function App() {
     useEffect(() => {
         const roots = new Set<Root>();
-        addRoot(roots, START_GUI).render(<StartWindow />);
-        addRoot(roots, MAIN_LAYOUT_GUI).render(
-            <Fragment>
-                <PositionManager />
-                <SidebarButtons />
-            </Fragment>,
-        );
-        addRoot(roots, EFFECTS_GUI).render(<EffectManager />);
-        addRoot(roots, TOOLTIPS_GUI).render(<TooltipWindow />);
-        addRoot(roots, TOASTS_GUI).render(<ToastManager />);
-        addRoot(roots, DIALOGUE_GUI).render(<DialogueWindow />);
-        addRoot(roots, BALANCE_GUI).render(<BalanceWindow />);
-        addRoot(roots, BUILD_GUI).render(<BuildWindow />);
-        addRoot(roots, CURRENCY_GAIN_GUI).render(<CurrencyGainManager />);
-        addRoot(roots, SETTINGS_GUI).render(
-            <Fragment>
-                <CopyWindow />
-                <SettingsManager />
-                <CommandsWindow />
-                <RenameWindow />
-            </Fragment>,
-        );
-        addRoot(roots, INVENTORY_GUI).render(<InventoryWindow />);
-        addRoot(roots, LOGS_GUI).render(<LogsWindow />);
-        addRoot(roots, QUESTS_GUI).render(
-            <Fragment>
-                <QuestWindow />
-                <TrackedQuestWindow />
-            </Fragment>,
-        );
-        addRoot(roots, BACKPACK_GUI).render(
-            <Fragment>
-                <BackpackWindow />
-                <PortableBeaconWindow />
-            </Fragment>,
-        );
-        addRoot(roots, STATS_GUI).render(<StatsWindow />);
-        addRoot(roots, PURCHASE_GUI).render(<PurchaseWindow />);
-        addRoot(roots, UPGRADEBOARD_GUI).render(<UpgradeBoardRenderer />);
-        addRoot(roots, PRINTER_GUI).render(<PrinterRenderer />);
-        addRoot(roots, SHOP_GUI).render(<ShopGui />);
-        addRoot(roots, LEVELUP_GUI).render(<LevelUpManager />);
-        addRoot(roots, QUESTCOMPLETION_GUI).render(<QuestCompletionManager />);
-        addRoot(roots, CHALLENGECOMPLETION_GUI).render(<ChallengeCompletionManager />);
-        addRoot(roots, CHESTLOOT_GUI).render(<ChestLootManager />);
-        addRoot(roots, CHALLENGE_GUI).render(<ChallengeManager />);
-        addRoot(roots, CHALLENGE_HUD_GUI).render(<ChallengeHudManager />);
-        addRoot(roots, PLAYERLIST_GUI).render(<PlayerListContainer />);
+        addRoot(roots, createScreenGui("Start", 20)).render(<StartWindow />);
+
+        addRoot(roots, createScreenGui("PlayerList", 15)).render(<PlayerListContainer />);
+
+        addRoot(roots, createScreenGui("Tooltips", 3)).render(<TooltipWindow />);
+        addRoot(roots, createScreenGui("Effects", 2)).render(<EffectManager />);
+        addRoot(roots, createScreenGui("Dialogue", 1)).render(<DialogueWindow />);
+
+        // Single document windows
+        addRoot(roots, createScreenGui("Build", 0)).render(<BuildWindow />);
+        addRoot(roots, createScreenGui("Challenge", 0)).render(<ChallengeManager />);
+        addRoot(roots, createScreenGui("Commands", 0)).render(<CommandsWindow />);
+        addRoot(roots, createScreenGui("Copy", 0)).render(<CopyWindow />);
+        addRoot(roots, createScreenGui("Inventory", 0)).render(<InventoryWindow />);
+        addRoot(roots, createScreenGui("Logs", 0)).render(<LogsWindow />);
+        addRoot(roots, createScreenGui("Purchase", 0, false)).render(<PurchaseWindow />);
+        addRoot(roots, createScreenGui("PortableBeacon", 0)).render(<PortableBeaconWindow />);
+        addRoot(roots, createScreenGui("Quest", 0)).render(<QuestWindow />);
+        addRoot(roots, createScreenGui("Rename", 0)).render(<RenameWindow />);
+        addRoot(roots, createScreenGui("Repair", 0)).render(<RepairWindow />);
+        addRoot(roots, createScreenGui("Settings", 0)).render(<SettingsManager />);
+        addRoot(roots, createScreenGui("Stats", 0)).render(<StatsWindow />);
+        addRoot(roots, createScreenGui("TrackedQuest", 0)).render(<TrackedQuestWindow />);
+
+        addRoot(roots, createScreenGui("Toasts", -1)).render(<ToastManager />);
+
+        addRoot(roots, createScreenGui("ChallengeCompletion", -3)).render(<ChallengeCompletionManager />);
+        addRoot(roots, createScreenGui("ChestLoot", -3)).render(<ChestLootManager />);
+        addRoot(roots, createScreenGui("QuestCompletion", -3)).render(<QuestCompletionManager />);
+
+        addRoot(roots, createScreenGui("CurrencyGain", -4, false)).render(<CurrencyGainManager />);
+
+        addRoot(roots, createScreenGui("Balance", -5)).render(<BalanceWindow />);
+        addRoot(roots, createScreenGui("LevelUp", -5)).render(<LevelUpManager />);
+        addRoot(roots, createScreenGui("Position", -5)).render(<PositionManager />);
+        addRoot(roots, createScreenGui("Sidebar", -5)).render(<SidebarButtons />);
+
+        addRoot(roots, createScreenGui("ChallengeHud", -10)).render(<ChallengeHudManager />);
+
+        addRoot(roots, createScreenGui("Backpack", -15)).render(<BackpackWindow />);
+
+        addRoot(roots, createFolder("BrokenItemIndicators")).render(<BrokenItemIndicatorRenderer />);
+        addRoot(roots, createFolder("Printer")).render(<PrinterRenderer />);
+        addRoot(roots, createFolder("Shop")).render(<ShopGui />);
+        addRoot(roots, createFolder("UpgradeBoard")).render(<UpgradeBoardRenderer />);
+
         if (!Sandbox.getEnabled()) {
-            addRoot(roots, WORLD_GUI).render(<WorldRenderer />);
+            addRoot(roots, createFolder("World")).render(<WorldRenderer />);
         }
 
         Workspace.SetAttribute("Start", IS_PUBLIC_SERVER);
@@ -217,7 +217,7 @@ export default function App() {
         return () => StarterGui.SetCoreGuiEnabled(Enum.CoreGuiType.PlayerList, wasEnabled);
     }, []);
 
-    useManualItemReplication();
+    ClientItemReplication.useManualItemReplication();
 
     return (
         <Fragment>
