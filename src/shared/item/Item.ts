@@ -241,10 +241,28 @@ export default class Item {
     }
 
     /**
-     * Create a model for the placed item.
+     * Materialises the Roblox model that represents a placed instance of this item.
+     * The model is cloned from `ITEM_MODELS` and then pivoted/annotated so services and
+     * controllers can immediately treat it as gameplay-ready.
      *
-     * @param placedItem The placed item data.
-     * @returns The created model or undefined if creation failed.
+     * @param placedItem The data snapshot produced during placement (position, rotation, area, id, etc.).
+     * @returns The created model, or `undefined` if no base model exists for the item.
+     *
+     * @example
+     * ```ts
+     * const conveyor = new Item("conveyor");
+     * const model = conveyor.createModel({
+     *     item: conveyor.id,
+     *     area: "starter",
+     *     posX: 0,
+     *     posY: 5,
+     *     posZ: 0,
+     *     rotX: 0,
+     *     rotY: 90,
+     *     rotZ: 0,
+     * });
+     * model?.Parent = workspace.Items;
+     * ```
      */
     createModel(placedItem: PlacedItem) {
         const baseModel = this.MODEL;
@@ -277,10 +295,18 @@ export default class Item {
     }
 
     /**
-     * Set the name of the item.
+     * Overrides the display name shown in UI, logs, and tooltips.
+     * Useful when the internal id is terse but the user-facing label needs localisation or flair.
      *
-     * @param name The name of the item.
-     * @returns The item instance.
+     * @param name The name that should be presented to players.
+     * @returns The item instance so builder calls can be chained.
+     *
+     * @example
+     * ```ts
+     * new Item("laser_miner")
+     *     .setName("Laser Miner 3000")
+     *     .setDescription("Vaporises ore into pure value");
+     * ```
      */
     setName(name: string) {
         this.name = name;
@@ -288,10 +314,16 @@ export default class Item {
     }
 
     /**
-     * Set the description of the item.
+     * Provides the rich-text description used in shop cards and detail panels.
+     * Trait placeholders (e.g. `%%drain%%`) will be substituted when the UI renders.
      *
-     * @param description The description of the item.
-     * @returns The item instance.
+     * @param description Markdown-like string describing the item's purpose or flavour.
+     * @returns The item instance for chaining.
+     *
+     * @example
+     * ```ts
+     * conveyor.setDescription("Doubles the speed of items that pass through it.");
+     * ```
      */
     setDescription(description: string) {
         this.description = description;
@@ -299,12 +331,18 @@ export default class Item {
     }
 
     /**
-     * Set the tooltip description of the item.
-     * This description will be shown in the tooltip when hovering over the item in the inventory.
-     * It does **not** support currency coloring or trait formatting, unlike {@link description}.
+     * Supplies the plain-text tooltip copy used when hovering the inventory button.
+     * Unlike `setDescription`, this string is rendered literally and should avoid dynamic tokens.
      *
-     * @param description The tooltip description of the item.
-     * @returns The item instance.
+     * @param description Tooltip-safe text (no currency colour codes or trait placeholders).
+     * @returns The item instance, enabling fluent chains.
+     *
+     * @example
+     * ```ts
+     * item
+     *     .setDescription("Costs %%drain%% to keep running.")
+     *     .setTooltipDescription("Consumes energy each second when enabled.");
+     * ```
      */
     setTooltipDescription(description: string) {
         this.tooltipDescription = description;
@@ -312,10 +350,16 @@ export default class Item {
     }
 
     /**
-     * Set the difficulty of the item. i.e. level of progression that the item is recommended to be obtained and used at.
+     * Tags the item with its intended progression tier. Difficulty influences default
+     * inventory ordering and which reset layer it persists through.
      *
-     * @param difficulty The difficulty level of the item.
+     * @param difficulty A `Difficulty` enum value describing the recommended stage.
      * @returns The item instance.
+     *
+     * @example
+     * ```ts
+     * item.setDifficulty(Difficulty.Miscellaneous); // pushes to persistence queues automatically
+     * ```
      */
     setDifficulty(difficulty: Difficulty) {
         this.difficulty = difficulty;
@@ -332,24 +376,37 @@ export default class Item {
     }
 
     /**
-     * Retrieve the price of the item for the specified iteration.
-     * If the price is not set for the iteration, the default price will be returned.
+     * Resolves the cost for a given purchase iteration.
+     * Prices can be staged so the first few upgrades are cheaper before falling back to the default.
      *
-     * @param iteration The iteration number to get the price for. The first purchase is iteration 1.
-     * @returns The price of the item for the specified iteration.
+     * @param iteration 1-indexed purchase count (1 = first buy).
+     * @returns Matching `CurrencyBundle`, or the default iteration price if no override exists.
+     *
+     * @example
+     * ```ts
+     * const price = item.getPrice(profile.getPurchaseCount(item.id) + 1);
+     * if (price !== undefined && wallet.canAfford(price)) purchase(item);
+     * ```
      */
     getPrice(iteration: number) {
         return this.pricePerIteration.get(iteration) ?? this.defaultPrice;
     }
 
     /**
-     * Set the price of the item for the specified iteration.
-     * If the end iteration is specified, the price will be set for all iterations between the start and end.
+     * Configures the price curve for future purchases.
+     * Prices can be set for a single iteration, a range, or globally when `iteration` is omitted.
      *
-     * @param price The price of the item.
-     * @param iteration The iteration number to set the price for. The first purchase is iteration 1.
-     * @param endIteration The end iteration number to set the price for. If not specified, the price will be set for the specified iteration only.
-     * @returns The item instance.
+     * @param price Currency bundle charged when the iteration is reached.
+     * @param iteration Optional 1-indexed iteration to override. Leave `undefined` to set the default.
+     * @param endIteration Inclusive end of the iteration range to copy the price into.
+     * @returns The item instance for chaining.
+     *
+     * @example
+     * ```ts
+     * item
+     *     .setPrice(CurrencyBundle.fromCash(100))
+     *     .setPrice(CurrencyBundle.fromCash(50), 1, 3); // first three purchases discounted
+     * ```
      */
     setPrice(price: CurrencyBundle, iteration?: number, endIteration?: number) {
         if (iteration === undefined) {
@@ -366,9 +423,10 @@ export default class Item {
     }
 
     /**
-     * Set the items required to purchase this item.
+     * Replaces the prerequisite map used during purchasing.
+     * Each entry maps an item/harvestable id to the amount already owned in order to unlock this item.
      *
-     * @param required The items required to purchase this item.
+     * @param required Map of dependency ids to minimum counts.
      * @returns The item instance.
      */
     setRequiredItems(required: Map<string, number>) {
@@ -377,11 +435,16 @@ export default class Item {
     }
 
     /**
-     * Set the amount of the item required to purchase this item.
+     * Adds or updates a prerequisite on another built item.
      *
-     * @param item The item required to purchase this item.
-     * @param amount The amount of the item required.
+     * @param item The dependency item whose ownership count is checked.
+     * @param amount Quantity required before this item becomes buyable.
      * @returns The item instance.
+     *
+     * @example
+     * ```ts
+     * upgrader.setRequiredItemAmount(conveyor, 2); // need two conveyors first
+     * ```
      */
     setRequiredItemAmount(item: Item, amount: number) {
         this.requiredItems.set(item.id, amount);
@@ -389,11 +452,16 @@ export default class Item {
     }
 
     /**
-     * Set the amount of the harvestable required to purchase this item.
+     * Declares a requirement on a harvestable resource rather than another item.
      *
-     * @param id The ID of the harvestable required to purchase this item.
-     * @param amount The amount of the harvestable required.
+     * @param id Harvestable identifier as defined in the shared harvestable catalogue.
+     * @param amount Amount the player must collect before purchase is permitted.
      * @returns The item instance.
+     *
+     * @example
+     * ```ts
+     * altar.setRequiredHarvestableAmount("dark_matter", 10);
+     * ```
      */
     setRequiredHarvestableAmount(id: HarvestableId, amount: number) {
         this.requiredItems.set(id, amount);
@@ -401,7 +469,14 @@ export default class Item {
     }
 
     /**
-     * Calculates and updates the reset layer for the item based on its placeable areas.
+     * Recalculates which reset layer the item belongs to given its allowed placement areas.
+     * Items outside known reset layers default to the highest tier so they persist across wipes.
+     *
+     * @example
+     * ```ts
+     * item.addPlaceableArea("starter");
+     * // reset layer is recomputed automatically via updateResetLayer
+     * ```
      */
     updateResetLayer() {
         let resetLayer = this.defaultResetLayer;
@@ -423,9 +498,10 @@ export default class Item {
     }
 
     /**
-     * Get the reset layer for the item.
+     * Returns the reset layer index that determines when the item is wiped during prestige cycles.
+     * Takes into account persistent layers configured via `persists`.
      *
-     * @returns The current reset layer for the item.
+     * @returns Numeric layer ordering; higher numbers survive longer. Defaults to 999 for always-on items.
      */
     getResetLayer() {
         if (this.defaultResetLayer !== undefined) {
@@ -439,10 +515,16 @@ export default class Item {
     }
 
     /**
-     * Add a placeable area for the item.
+     * Whitelists one or more placement areas in the world definition.
+     * Reset layer metadata is recalculated automatically afterwards.
      *
-     * @param areas The areas where the item can be placed.
+     * @param areas One or more `AreaId`s defined in `AREAS`.
      * @returns The item instance.
+     *
+     * @example
+     * ```ts
+     * item.addPlaceableArea("starter", "factory_lower");
+     * ```
      */
     addPlaceableArea(...areas: AreaId[]) {
         for (const area of areas) this.placeableAreas.push(AREAS[area]);
@@ -451,7 +533,8 @@ export default class Item {
     }
 
     /**
-     * Adds all areas to the placeable areas for the item.
+     * Marks the item as placeable in every registered area.
+     * Primarily used for admin tools or global utility buildings.
      *
      * @returns The item instance.
      */
@@ -464,10 +547,10 @@ export default class Item {
     }
 
     /**
-     * Set the price that will be drained from balance every second.
-     * If the price is not affordable, the item will be disabled.
+     * Applies an upkeep cost that must be paid each second for the item to remain active.
+     * Item maintenance routines will toggle `InstanceInfo.Maintained` based on affordability.
      *
-     * @param drain The price that will be drained from balance every second.
+     * @param drain Recurring cost bundle (e.g. power, currency) debited via `maintain`.
      * @returns The item instance.
      */
     setDrain(drain: CurrencyBundle) {
@@ -476,9 +559,9 @@ export default class Item {
     }
 
     /**
-     * Set the contributor who originally created the item.
+     * Credits the designer responsible for the item. Displayed in contributor UIs and analytics.
      *
-     * @param creator The contributor who originally created the item.
+     * @param creator Human-readable contributor handle.
      * @returns The item instance.
      */
     setCreator(creator: string) {
@@ -487,10 +570,18 @@ export default class Item {
     }
 
     /**
-     * Calls the callback function when the item is initialized.
+     * Schedules work to run once when the server boots the item catalogue.
+     * Ideal for binding RPC handlers or registering with other systems.
      *
-     * @param initCallback Callback function that will be called when the item is initialized.
+     * @param initCallback Invoked during item bootstrap with the item instance.
      * @returns The item instance.
+     *
+     * @example
+     * ```ts
+     * item.onInit((self) => {
+     *     Packets.activateItem.fromClient((player) => self.tryActivate(player));
+     * });
+     * ```
      */
     onInit(initCallback: (item: this) => void) {
         this.INITIALIZES.push(initCallback);
@@ -498,11 +589,18 @@ export default class Item {
     }
 
     /**
-     * Calls the callback function when the item is loaded.
-     * Note that item models are manually created on the client, which means any properties
-     * set on the model on the server with this lifecycle will not be present on the client.
-     * @param loadCallback Callback function that will be called when the item is loaded.
+     * Registers a callback that fires whenever the server spawns this item's model into the world.
+     * Server-only; use `onClientLoad` for client initialisation.
+     *
+     * @param loadCallback Receives the spawned model and item reference.
      * @returns The item instance.
+     *
+     * @example
+     * ```ts
+     * item.onLoad((model) => {
+     *     model.SetAttribute("IsInteractive", true);
+     * });
+     * ```
      */
     onLoad(loadCallback: (model: Model, item: this) => void) {
         this.LOADS.push(loadCallback);
@@ -510,9 +608,18 @@ export default class Item {
     }
 
     /**
-     * Calls the callback function when the item is loaded on the client.
-     * @param loadCallback Callback function that will be called when the item is loaded on the client.
+     * Hooks into the client-side spawn of the item's model.
+     * Use this to attach particle effects, client-only behaviour, or UI adornments.
+     *
+     * @param loadCallback Receives the client-side clone, the item, and the owning player.
      * @returns The item instance.
+     *
+     * @example
+     * ```ts
+     * item.onClientLoad((model, _item, player) => {
+     *     MusicManager.playAmbientLoopFor(player, model);
+     * });
+     * ```
      */
     onClientLoad(loadCallback: (model: Model, item: this, player: Player) => void) {
         this.CLIENT_LOADS.push(loadCallback);
@@ -520,9 +627,10 @@ export default class Item {
     }
 
     /**
-     * Calls the callback function when the item is loaded on both the server and client.
+     * Convenience helper that wires the same callback to both `onLoad` and `onClientLoad`.
+     * The player argument is `undefined` when executing on the server.
      *
-     * @param loadCallback Callback function that will be called when the item is loaded.
+     * @param loadCallback Fired for both server and client load events.
      * @returns The item instance.
      */
     onSharedLoad(loadCallback: (model: Model, item: this, player: Player | undefined) => void) {
