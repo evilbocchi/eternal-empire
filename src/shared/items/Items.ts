@@ -113,6 +113,9 @@ abstract class Items {
         return sortedItems;
     })();
 
+    /** Total number of items. */
+    static readonly length = Items.itemsPerId.size();
+
     /**
      * Retrieve the Item object at the specified ID.
      *

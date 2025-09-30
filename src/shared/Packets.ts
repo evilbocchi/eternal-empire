@@ -2,6 +2,7 @@ import type { BaseOnoeNum } from "@antivivi/serikanum";
 import type CameraShaker from "@rbxts/camera-shaker";
 import type { DataType } from "@rbxts/flamework-binary-serializer";
 import { exactMapProperty, packet, property } from "@rbxts/fletchette";
+import type { RepairResultTier } from "client/components/item/RepairWindow";
 import type { LeaderboardEntry, LeaderboardType } from "client/components/leaderboard/Leaderboard";
 import EmpireProfileTemplate from "shared/data/profile/EmpireProfileTemplate";
 import PlayerProfileTemplate from "shared/data/profile/PlayerProfileTemplate";
@@ -113,7 +114,7 @@ namespace Packets {
     export const unplaceItems = packet<(placementIds: string[]) => void>();
     export const boostChanged = packet<(boostPerItem: Map<string, BaseOnoeNum>) => void>({ isUnreliable: true });
     export const brokenPlacedItems = property<Set<string>>(EmpireProfileTemplate.items.brokenPlacedItems);
-    export const repairItem = packet<(placementId: string) => boolean>();
+    export const repairItem = packet<(placementId: string, tier: RepairResultTier) => boolean>();
     export const itemRepairCompleted = packet<(placementId: string) => void>();
 
     // droplets

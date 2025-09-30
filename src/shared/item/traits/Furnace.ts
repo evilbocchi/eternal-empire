@@ -40,19 +40,19 @@ export default class Furnace extends Operative {
     static load(model: Model, furnace: Furnace) {
         const RevenueService = Server.Revenue;
         const CurrencyService = Server.Currency;
-        const instanceInfo = getAllInstanceInfo(model);
+        const modelInfo = getAllInstanceInfo(model);
         const item = furnace.item;
 
         for (const lava of findBaseParts(model, "Lava")) {
             setInstanceInfo(lava, "ItemId", item.id);
             VirtualCollision.onDropletTouched(model, lava, (droplet, dropletInfo) => {
                 if (dropletInfo.Incinerated === true) return;
-                if (instanceInfo.Area !== dropletInfo.Area && dropletInfo.LastTeleport === undefined) {
+                if (modelInfo.Area !== dropletInfo.Area && dropletInfo.LastTeleport === undefined) {
                     // Sanity check: droplet should be in the same area as the furnace unless it was teleported
                     return;
                 }
 
-                if (isPlacedItemUnusable(dropletInfo)) return;
+                if (isPlacedItemUnusable(modelInfo)) return;
 
                 dropletInfo.Incinerated = true;
                 Debris.AddItem(droplet, 6);
@@ -77,7 +77,7 @@ export default class Furnace extends Operative {
                 for (const [currency, amount] of result.amountPerCurrency) {
                     if (amount.equals(ZERO)) result.amountPerCurrency.delete(currency);
                 }
-                instanceInfo.FurnaceProcessed?.(result, worth, droplet, dropletInfo);
+                modelInfo.FurnaceProcessed?.(result, worth, droplet, dropletInfo);
                 const amountPerCurrency = result.amountPerCurrency;
                 Packets.dropletBurnt.toAllClients(droplet.Name, amountPerCurrency);
             });

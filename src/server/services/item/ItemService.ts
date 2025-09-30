@@ -22,6 +22,7 @@ import Signal from "@antivivi/lemon-signal";
 import { getAllInstanceInfo, simpleInterval, variableInterval } from "@antivivi/vrldk";
 import { OnInit, OnStart, Service } from "@flamework/core";
 import { CollectionService, HttpService, Workspace } from "@rbxts/services";
+import type { RepairResultTier } from "client/components/item/RepairWindow";
 import { CHALLENGES } from "server/Challenges";
 import CurrencyService from "server/services/data/CurrencyService";
 import DataService from "server/services/data/DataService";
@@ -753,17 +754,24 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
         }
     }
 
-    completeRepair(placementId: string) {
-        this.brokenPlacedItems.delete(placementId);
+    completeRepair(placementId: string, tier: RepairResultTier) {
+        const success = this.brokenPlacedItems.delete(placementId);
+        if (!success) return false;
 
         const model = this.modelPerPlacementId.get(placementId);
         if (model) {
             const info = getAllInstanceInfo(model);
             info.Broken = false;
+            if (tier === "Great") {
+                // TODO
+            } else if (tier === "Perfect") {
+                // TODO
+            }
         }
 
         Packets.brokenPlacedItems.set(this.brokenPlacedItems);
         Packets.itemRepairCompleted.toAllClients(placementId);
+        return true;
     }
 
     onInit() {
@@ -861,6 +869,8 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
                 return 1;
             });
         });
+
+        Packets.repairItem.fromClient((_, placementId, tier) => this.completeRepair(placementId, tier));
 
         this.requestChanges();
 

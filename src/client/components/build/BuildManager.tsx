@@ -74,7 +74,7 @@ namespace BuildManager {
     let lastSelectingCFrame = new CFrame();
     let lastCameraCFrame = new CFrame();
     export let isShopOpen = false;
-    export let isInventoryOpen = false;
+    export let isSingleDocumentOpen = false;
 
     export function hasSelection(): boolean {
         return !selected.isEmpty();
@@ -459,9 +459,12 @@ namespace BuildManager {
                 const names = new Array<string>();
                 for (const model of dragging) {
                     names.push(model.Name);
+
                     const modelInfo = getAllInstanceInfo(model);
                     if (modelInfo.Broken === true) {
                         RepairManager.setRepairing(model);
+                        for (const model of dragging) model.SetAttribute("Dragging", false);
+                        dragging.clear();
                         return;
                     }
 
@@ -475,6 +478,7 @@ namespace BuildManager {
                     } else {
                         selected.set(placingModel, main.PrimaryPart!.CFrame.Inverse().mul(model.PrimaryPart!.CFrame));
                     }
+                    model.SetAttribute("Dragging", false);
                 }
                 playSound("Pickup.mp3");
                 Packets.unplaceItems.toServer(names);
@@ -483,7 +487,6 @@ namespace BuildManager {
                 });
             }
 
-            for (const model of dragging) model.SetAttribute("Dragging", false);
             dragging.clear();
             return;
         }
@@ -530,7 +533,7 @@ namespace BuildManager {
 
         const inputBeganConnection = Environment.UserInput.InputBegan.Connect((input, gameProcessed) => {
             if (gameProcessed === true) return;
-            if (isInventoryOpen) return;
+            if (isSingleDocumentOpen) return;
 
             if (
                 input.UserInputType === Enum.UserInputType.Touch ||
@@ -546,13 +549,13 @@ namespace BuildManager {
 
         const touchEndedConnection = Environment.UserInput.TouchEnded.Connect((_touch, gameProcessed) => {
             if (gameProcessed === true) return;
-            if (isInventoryOpen) return;
+            if (isSingleDocumentOpen) return;
             onMouseUp();
         });
 
         const inputChangedConnection = Environment.UserInput.InputChanged.Connect((input, gameProcessed) => {
             if (gameProcessed === true) return;
-            if (isInventoryOpen) return;
+            if (isSingleDocumentOpen) return;
             if (input.UserInputType === Enum.UserInputType.MouseMovement) {
                 onMouseMove();
             }
@@ -560,7 +563,7 @@ namespace BuildManager {
 
         const inputEndedConnection = Environment.UserInput.InputEnded.Connect((input, gameProcessed) => {
             if (gameProcessed === true) return;
-            if (isInventoryOpen) return;
+            if (isSingleDocumentOpen) return;
 
             if (input.UserInputType !== Enum.UserInputType.MouseButton1 && input.KeyCode !== Enum.KeyCode.ButtonL1)
                 return;
@@ -574,14 +577,9 @@ namespace BuildManager {
             isShopOpen = shop !== undefined;
             refresh();
         });
-        DocumentManager.visibilityChanged.connect((name, visible) => {
-            if (name !== "Inventory") return;
-            isInventoryOpen = visible;
-            refresh();
+        const documentConnection = DocumentManager.visibilityChanged.connect(() => {
+            isSingleDocumentOpen = SingleDocumentManager.activeDocument !== undefined;
         });
-
-        // Listen for inventory open/close events here (replace with actual event)
-        // Example: InventoryManager.opened.connect((open) => { isInventoryOpen = open; });
 
         const childRemovedConnection = PLACED_ITEMS_FOLDER.ChildRemoved.Connect((model) => {
             if (model.IsA("Model") && selected.has(model)) {
@@ -599,6 +597,7 @@ namespace BuildManager {
             permLevelsConnection.Disconnect();
             permLevelConnection.Disconnect();
             shopGuiEnabledConnection.Disconnect();
+            documentConnection.Disconnect();
             childRemovedConnection.Disconnect();
         };
     }

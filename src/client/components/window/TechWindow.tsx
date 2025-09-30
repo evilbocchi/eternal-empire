@@ -1,7 +1,7 @@
 import React, { useRef } from "@rbxts/react";
 import { useWindowAnimation } from "client/components/window/BasicWindow";
-import WindowCloseButton from "client/components/window/WindowCloseButton";
 import DocumentManager from "client/components/window/DocumentManager";
+import WindowCloseButton from "client/components/window/WindowCloseButton";
 import WindowTitle from "client/components/window/WindowTitle";
 
 export default function TechWindow({
@@ -24,6 +24,7 @@ export default function TechWindow({
     return (
         <frame
             ref={frameRef}
+            Active={true}
             AnchorPoint={new Vector2(0.5, 0.5)}
             BackgroundColor3={Color3.fromRGB(13, 13, 13)}
             BorderColor3={Color3.fromRGB(0, 0, 0)}
