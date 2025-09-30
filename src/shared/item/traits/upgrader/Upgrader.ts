@@ -1,7 +1,10 @@
 import Signal from "@antivivi/lemon-signal";
-import { findBaseParts, getAllInstanceInfo, setInstanceInfo } from "@antivivi/vrldk";
-import { RunService } from "@rbxts/services";
+import { findBaseParts, getAllInstanceInfo, setInstanceInfo, simpleInterval } from "@antivivi/vrldk";
+import { exactSetProperty } from "@rbxts/fletchette";
+import { Server } from "shared/api/APIExpose";
+import { IS_EDIT, IS_SERVER } from "shared/Context";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
+import eat from "shared/hamster/eat";
 import Item from "shared/item/Item";
 import type Condenser from "shared/item/traits/dropper/Condenser";
 import Operative, { IOperative } from "shared/item/traits/Operative";
@@ -35,8 +38,6 @@ declare global {
         LaserId?: string;
         /** The upgrades applied to this instance, keyed by laser ID. */
         Upgrades?: Map<string, UpgradeInfo>;
-        OriginalTransparency?: number;
-        CurrentTransparency?: number;
         OnUpgraded?: Signal<BasePart>;
 
         /**
@@ -78,12 +79,7 @@ export default class Upgrader extends Operative {
      */
     isStacks?: boolean;
 
-    /**
-     * A map of lasers that have been spawned by this upgrader class.
-     *
-     * The key is the laser part, and the value is its instance information.
-     */
-    static readonly SPAWNED_LASERS = new Map<BasePart, InstanceInfo>();
+    static readonly SPAWNED_LASERS = new Map<string, Set<BasePart>>();
 
     /**
      * Upgrades a droplet with the given upgrader.
@@ -179,10 +175,7 @@ export default class Upgrader extends Operative {
             this.upgrade({ model, modelInfo, upgrader, dropletInfo, laserInfo, droplet, deco });
         });
         laserInfo.ItemModelInfo = modelInfo;
-        laserInfo.OriginalTransparency = laser.Transparency;
-        this.SPAWNED_LASERS.set(laser, laserInfo);
         model.Destroying.Once(() => {
-            this.SPAWNED_LASERS.delete(laser);
             modelInfo.OnUpgraded?.destroy();
         });
     }
@@ -201,8 +194,18 @@ export default class Upgrader extends Operative {
         item.maintain(model);
     }
 
+    static sharedLoad(model: Model, upgrader: Upgrader) {
+        const set = new Set<BasePart>();
+        for (const laser of findBaseParts(model, "Laser")) {
+            set.add(laser);
+        }
+        this.SPAWNED_LASERS.set(model.Name, set);
+        model.Destroying.Once(() => this.SPAWNED_LASERS.delete(model.Name));
+    }
+
     constructor(item: Item) {
         super(item);
+        item.onSharedLoad((model) => Upgrader.sharedLoad(model, this));
         item.onLoad((model) => Upgrader.load(model, this));
     }
 
@@ -293,15 +296,33 @@ export default class Upgrader extends Operative {
     }
 
     static {
-        const connection = RunService.Heartbeat.Connect(() => {
-            for (const [laser, info] of this.SPAWNED_LASERS) {
-                const parentInfo = info.ItemModelInfo!;
-                const toSet = isPlacedItemUnusable(parentInfo) ? 1 : info.OriginalTransparency!;
-                if (info.CurrentTransparency !== toSet) {
-                    info.CurrentTransparency = toSet;
-                    laser.Transparency = toSet;
+        const hiddenUpgradersPacket = exactSetProperty<string>();
+
+        if (IS_SERVER || IS_EDIT) {
+            const cleanup = simpleInterval(() => {
+                const set = new Set<string>();
+                for (const [placementId] of this.SPAWNED_LASERS) {
+                    const model = Server.Item.modelPerPlacementId.get(placementId);
+                    if (model === undefined) continue;
+                    if (isPlacedItemUnusable(getAllInstanceInfo(model))) {
+                        set.add(placementId);
+                    }
                 }
-            }
-        });
+                hiddenUpgradersPacket.set(set);
+            }, 0.5);
+            eat(cleanup);
+        }
+
+        if (!IS_SERVER || IS_EDIT) {
+            const connection = hiddenUpgradersPacket.observe((placementIds) => {
+                for (const [placementId, lasers] of this.SPAWNED_LASERS) {
+                    const isHidden = placementIds.has(placementId);
+                    for (const laser of lasers) {
+                        laser.LocalTransparencyModifier = isHidden ? 1 : 0;
+                    }
+                }
+            });
+            eat(connection, "Disconnect");
+        }
     }
 }

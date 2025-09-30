@@ -5,7 +5,11 @@
  * @param itemId The ID of the item to count.
  * @returns A tuple containing the count in inventory and the count placed in the world.
  */
-export default function countItemEverywhere(inventory: Inventory, placed: Map<string, PlacedItem>, itemId: string) {
+export default function countItemEverywhere(
+    inventory: Map<string, number>,
+    placed: Map<string, PlacedItem>,
+    itemId: string,
+) {
     const invCount = inventory.get(itemId) ?? 0;
     let placedCount = 0;
     for (const [_, placedItem] of placed) {

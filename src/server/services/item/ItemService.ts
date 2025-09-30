@@ -47,7 +47,7 @@ declare global {
 }
 
 /** Cached baseplate bounds for performance optimization in sandbox mode. */
-const baseplateBounds = Sandbox.createBaseplateBounds(); // cached for performance
+const baseplateBounds = Sandbox.createBaseplateBounds();
 
 /** Queue for serializing item placement operations to prevent race conditions. */
 const queue = new Array<() => void>();
@@ -60,14 +60,24 @@ const queue = new Array<() => void>();
  */
 @Service()
 export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
+    /**
+     * Map of placement IDs to their corresponding 3D models in the world.
+     */
     readonly modelPerPlacementId = new Map<string, Model>();
-    readonly items: ItemsData;
+
+    /** Direct reference to all broken placed items in the world. */
+    private readonly brokenPlacedItems: Set<string>;
+
+    /** Direct reference to all placed items in the world. */
+    private readonly worldPlaced: Map<string, PlacedItem>;
+
+    // Change tracking flags
     private hasInventoryChanged = false;
     private hasUniqueChanged = false;
     private hasBoughtChanged = false;
     private hasPlacedChanged = false;
 
-    // Event Signals
+    // Signals
 
     /**
      * Fired when items are successfully placed in the world.
@@ -96,19 +106,13 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
      */
     readonly placedItemsUpdated = new Signal<(placedItems: Map<string, PlacedItem>) => void>();
 
-    // State Management
-
-    /**
-     * Maps placed items to their corresponding 3D models in the world.
-     * Used for efficient model lookup and cleanup.
-     */
-    readonly modelPerPlacedItem = new Map<PlacedItem, Model>();
+    // Configuration
 
     /**
      * Whether the service is in rendering mode (no 3D models created).
      * Used for headless operations and testing.
      */
-    readonly isRendering = (() => {
+    readonly IS_RENDERING = (() => {
         const isRendering = this.dataService.empireId === "RENDER";
         if (isRendering === true) print("Rendering set to true. Will not spawn item models.");
         return isRendering;
@@ -119,7 +123,8 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
         private currencyService: CurrencyService,
         private permissionsService: PermissionsService,
     ) {
-        this.items = dataService.empireData.items;
+        this.worldPlaced = dataService.empireData.items.worldPlaced;
+        this.brokenPlacedItems = dataService.empireData.items.brokenPlacedItems;
     }
 
     // Data Management Methods
@@ -172,7 +177,11 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
      * @param placedItems The new placed items map to set.
      */
     setPlacedItems(placedItems: Map<string, PlacedItem>) {
-        this.dataService.empireData.items.worldPlaced = placedItems;
+        if (placedItems !== this.worldPlaced) {
+            // only set if different reference
+            this.worldPlaced.clear();
+            for (const [k, v] of placedItems) this.worldPlaced.set(k, v);
+        }
         this.hasPlacedChanged = true;
     }
 
@@ -247,14 +256,14 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
 
         let somethingHappened = false;
         for (const placementId of placementIds) {
+            // Sanity check: does the placed item exist?
             const placedItem = placedItems.get(placementId);
             if (placedItem === undefined) continue;
 
             // Prevent unplacing if item is broken
-            const breakdown = placedItem.meta?.breakdown;
-            if (breakdown?.isBroken === true) {
-                continue; // skip broken items
-            }
+            if (this.brokenPlacedItems.has(placementId)) continue;
+
+            // Destroy model if it exists
             somethingHappened = true;
             const model = this.modelPerPlacementId.get(placementId);
             if (model !== undefined) {
@@ -293,8 +302,8 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
      * @param placedItem Placed item to add an item model for
      * @returns The model that was added, or undefined if it already exists.
      */
-    addItemModel(placementId: string, placedItem: PlacedItem) {
-        if (this.modelPerPlacementId.has(placementId) || this.isRendering === true) return;
+    private addItemModel(placementId: string, placedItem: PlacedItem) {
+        if (this.modelPerPlacementId.has(placementId) || this.IS_RENDERING === true) return;
 
         const item = Items.getItem(placedItem.item);
         if (item === undefined) {
@@ -505,7 +514,7 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
      * If any models belong in the workspace but no placed item corresponds, remove them.
      */
     fullUpdatePlacedItemsModels() {
-        const placedItems = this.dataService.empireData.items.worldPlaced;
+        const placedItems = this.worldPlaced;
 
         // Remove orphaned models
         for (const model of PLACED_ITEMS_FOLDER.GetChildren()) {
@@ -620,21 +629,7 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
      * @returns A mutable PlacedItem object that can be used to modify data
      */
     getPlacedItem(placementId: string) {
-        return this.dataService.empireData.items.worldPlaced.get(placementId);
-    }
-
-    /**
-     * Refreshes particle effects based on empire settings.
-     * Enables or disables all tagged effects based on the particlesEnabled setting.
-     */
-    refreshEffects() {
-        const particlesEnabled = this.dataService.empireData.particlesEnabled;
-        const effects = CollectionService.GetTagged("Effect");
-        for (const effect of effects) {
-            if (effect !== undefined) {
-                (effect as Toggleable).Enabled = particlesEnabled;
-            }
-        }
+        return this.worldPlaced.get(placementId);
     }
 
     /**
@@ -702,10 +697,17 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
     }
 
     /**
-     * Marks the placed items state as dirty so metadata changes are replicated to clients.
+     * Forces propagation of specific placed items to clients.
+     * @param placementIds Array of placement IDs to propagate.
      */
-    markPlacedItemsDirty() {
-        this.hasPlacedChanged = true;
+    propagatePlacedItems(placementIds: string[]) {
+        const entries = new Map<string, PlacedItem>();
+        for (const placementId of placementIds) {
+            const placedItem = this.getPlacedItem(placementId);
+            if (placedItem === undefined) continue;
+            entries.set(placementId, placedItem);
+        }
+        Packets.placedItems.setEntries(entries);
     }
 
     /**
@@ -726,37 +728,12 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
             this.hasBoughtChanged = false;
         }
         if (this.hasPlacedChanged) {
-            Packets.placedItems.set(this.dataService.empireData.items.worldPlaced);
+            Packets.placedItems.set(this.worldPlaced);
             this.hasPlacedChanged = false;
         }
     }
 
-    /**
-     * Initializes the ItemService.
-     * Sets up packet handlers, initializes all items, and synchronizes world state.
-     */
     onInit() {
-        this.refreshEffects();
-
-        // Set up packet handlers for item operations
-        Packets.buyItem.fromClient((player, itemId) => {
-            return this.buyItem(player, itemId);
-        });
-        Packets.buyAllItems.fromClient((player, itemIds) => this.buyAllItems(player, itemIds));
-
-        // Set up placement handlers with queue protection
-        Packets.placeItems.fromClient((player, items) => {
-            return this.waitInQueue(() => {
-                return this.placeItems(player, items);
-            });
-        });
-        Packets.unplaceItems.fromClient((player, placementIds) => {
-            return this.waitInQueue(() => {
-                this.unplaceItems(player, placementIds);
-                return 1;
-            });
-        });
-
         // Set up automatic model creation for new placed items
         const placedItemsUpdatedConnection = this.placedItemsUpdated.connect((placedItems) => {
             for (const [placementId, placedItem] of placedItems) {
@@ -827,14 +804,30 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
 
         // Ensure all placed items have models
         this.fullUpdatePlacedItemsModels();
+
+        // Add static map items to the world
+        this.addMapItems();
     }
 
-    /**
-     * Starts the ItemService.
-     * Adds map items to the world after initialization is complete.
-     */
     onStart() {
-        this.addMapItems();
+        // Set up packet handlers for item operations
+        Packets.buyItem.fromClient((player, itemId) => {
+            return this.buyItem(player, itemId);
+        });
+        Packets.buyAllItems.fromClient((player, itemIds) => this.buyAllItems(player, itemIds));
+
+        // Set up placement handlers with queue protection
+        Packets.placeItems.fromClient((player, items) => {
+            return this.waitInQueue(() => {
+                return this.placeItems(player, items);
+            });
+        });
+        Packets.unplaceItems.fromClient((player, placementIds) => {
+            return this.waitInQueue(() => {
+                this.unplaceItems(player, placementIds);
+                return 1;
+            });
+        });
 
         this.requestChanges();
         eat(simpleInterval(() => this.propagateChanges(), 0.1));

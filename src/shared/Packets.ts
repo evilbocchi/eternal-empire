@@ -1,11 +1,10 @@
 import type { BaseOnoeNum } from "@antivivi/serikanum";
 import type CameraShaker from "@rbxts/camera-shaker";
 import type { DataType } from "@rbxts/flamework-binary-serializer";
-import { packet, property } from "@rbxts/fletchette";
+import { exactMapProperty, packet, property } from "@rbxts/fletchette";
 import type { LeaderboardEntry, LeaderboardType } from "client/components/leaderboard/Leaderboard";
 import EmpireProfileTemplate from "shared/data/profile/EmpireProfileTemplate";
 import PlayerProfileTemplate from "shared/data/profile/PlayerProfileTemplate";
-import type { ItemBreakEventPayload } from "shared/item/ItemBreakdown";
 
 declare global {
     interface Reward {
@@ -100,9 +99,9 @@ namespace Packets {
      * The inventory of the empire, containing owned items and their quantities.
      * Some items may not be present in the inventory if they are not owned.
      */
-    export const inventory = property<DataType.Packed<Inventory>>(EmpireProfileTemplate.items.inventory);
-    export const bought = property<DataType.Packed<Inventory>>(EmpireProfileTemplate.items.bought);
-    export const placedItems = property<Map<string, DataType.Packed<PlacedItem>>>(
+    export const inventory = exactMapProperty<string, number>(EmpireProfileTemplate.items.inventory);
+    export const bought = exactMapProperty<string, number>(EmpireProfileTemplate.items.bought);
+    export const placedItems = exactMapProperty<string, DataType.Packed<PlacedItem>>(
         EmpireProfileTemplate.items.worldPlaced,
     );
     export const buyItem = packet<(itemId: string) => boolean>();
@@ -113,7 +112,7 @@ namespace Packets {
     );
     export const unplaceItems = packet<(placementIds: string[]) => void>();
     export const boostChanged = packet<(boostPerItem: Map<string, BaseOnoeNum>) => void>({ isUnreliable: true });
-    export const itemBreakTriggered = packet<(payload: ItemBreakEventPayload) => void>();
+    export const brokenPlacedItems = property<Set<string>>(EmpireProfileTemplate.items.brokenPlacedItems);
     export const repairItem = packet<(placementId: string) => boolean>();
     export const itemRepairCompleted = packet<(placementId: string) => void>();
 
@@ -129,9 +128,9 @@ namespace Packets {
     export const getWeatherState = packet<() => object>();
 
     // currencies
-    export const balance = property<BaseCurrencyMap>(EmpireProfileTemplate.currencies, true);
-    export const mostBalance = property<BaseCurrencyMap>(EmpireProfileTemplate.mostCurrencies, true);
-    export const revenue = property<BaseCurrencyMap>(new Map(), true);
+    export const balance = exactMapProperty<Currency, BaseOnoeNum>(EmpireProfileTemplate.currencies, true);
+    export const mostBalance = exactMapProperty<Currency, BaseOnoeNum>(EmpireProfileTemplate.mostCurrencies, true);
+    export const revenue = exactMapProperty<Currency, BaseOnoeNum>(new Map(), true);
     export const showDifference = packet<(differencePerCurrency: BaseCurrencyMap) => void>();
     export const rawPurifierClicks = property<DataType.u32>(0, true);
 

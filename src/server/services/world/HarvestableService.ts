@@ -1,4 +1,5 @@
 import { OnStart, Service } from "@flamework/core";
+import DataService from "server/services/data/DataService";
 import ItemService from "server/services/item/ItemService";
 import eat from "shared/hamster/eat";
 import Gear from "shared/item/traits/Gear";
@@ -11,7 +12,10 @@ import HARVESTABLES from "shared/world/harvestable/Harvestable";
 export default class HarvestableService implements OnStart {
     readonly originalPosPerHarvestable = new Map<Instance, Vector3>();
 
-    constructor(private readonly itemService: ItemService) {}
+    constructor(
+        private readonly dataService: DataService,
+        private readonly itemService: ItemService,
+    ) {}
 
     /**
      * Moves a harvestable instance to a new position.
@@ -47,7 +51,7 @@ export default class HarvestableService implements OnStart {
      */
     getCritChance(_item: Gear) {
         let critChance = 5;
-        const inventory = this.itemService.items.inventory;
+        const inventory = this.dataService.empireData.items.inventory;
         for (const charm of Items.charms) {
             const amount = inventory.get(charm.item.id);
             if (amount !== undefined && amount > 0) {

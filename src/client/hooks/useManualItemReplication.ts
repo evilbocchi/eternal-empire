@@ -47,6 +47,11 @@ export default function useManualItemReplication() {
             return () => connection.Disconnect();
         }
 
+        let isParticlesEnabled = true;
+        const settingsConnection = Packets.settings.observe((settings) => {
+            isParticlesEnabled = settings.Particles;
+        });
+
         const modelPerPlacementId = new Map<string, Model>();
 
         const connection = Packets.placedItems.observe((placedItems) => {
@@ -68,6 +73,14 @@ export default function useManualItemReplication() {
                     if (!itemModel) {
                         continue;
                     }
+                    if (!isParticlesEnabled) {
+                        for (const descendant of itemModel.GetDescendants()) {
+                            if (descendant.HasTag("Effect")) {
+                                (descendant as ParticleEmitter).Enabled = false;
+                            }
+                        }
+                    }
+
                     itemModel.Name = placementId;
                     itemModel.Parent = PLACED_ITEMS_FOLDER;
                     modelPerPlacementId.set(placementId, itemModel);
@@ -78,6 +91,7 @@ export default function useManualItemReplication() {
         return () => {
             modelPerPlacementId.forEach((model) => model.Destroy());
             modelPerPlacementId.clear();
+            settingsConnection.Disconnect();
             connection.Disconnect();
         };
     }, []);

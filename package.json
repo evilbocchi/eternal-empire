@@ -67,7 +67,7 @@
         "@rbxts/camera-shaker": "^1.0.8",
         "@rbxts/chat-service": "^1.3.0",
         "@rbxts/flamework-binary-serializer": "^0.6.0",
-        "@rbxts/fletchette": "^4.1.0",
+        "@rbxts/fletchette": "^4.4.0",
         "@rbxts/fuzzy-search": "^1.0.4",
         "@rbxts/luau-thread": "^1.0.1",
         "@rbxts/partcache": "^1.1.1",

@@ -1,6 +1,5 @@
 import SerikaNum from "@antivivi/serikanum";
 import React, { useCallback, useEffect, useState } from "@rbxts/react";
-import { LOCAL_PLAYER } from "client/constants";
 import HotkeyManager, { HOTKEY_BINDINGS } from "client/components/hotkeys/HotkeyManager";
 import useHotkeyWithTooltip from "client/components/hotkeys/useHotkeyWithTooltip";
 import IconButton from "client/components/IconButton";
@@ -138,9 +137,15 @@ export default function SettingsWindow() {
                 <SettingToggle setting="CurrencyGainAnimation" title="Currency Gain Animations" />
 
                 <SettingToggle
+                    setting="Particles"
+                    title="Item Particles"
+                    subtitle="Items may need to be placed again to apply changes."
+                />
+
+                <SettingToggle
+                    setting="ItemShadows"
                     title="Item Shadows"
                     subtitle="Items may need to be placed again to apply changes."
-                    setting="ItemShadows"
                 />
 
                 {/* Layout Section */}

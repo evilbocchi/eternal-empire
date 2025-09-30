@@ -1,4 +1,4 @@
-import { PropertyPacket } from "@rbxts/fletchette";
+import AbstractPropertyPacket from "@rbxts/fletchette/out/AbstractPropertyPacket";
 import { useEffect, useState } from "@rbxts/react";
 import { IS_EDIT } from "shared/Context";
 
@@ -8,7 +8,7 @@ import { IS_EDIT } from "shared/Context";
  * @param propertyPacket The property packet to observe.
  * @returns The current value of the property.
  */
-function useProperty<T>(propertyPacket: PropertyPacket<T>) {
+function useProperty<T>(propertyPacket: AbstractPropertyPacket<T>) {
     // Allow property to be T | undefined for correct typing
     const [property, setProperty] = useState<T | undefined>(propertyPacket.get());
 

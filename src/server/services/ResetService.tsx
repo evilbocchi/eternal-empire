@@ -89,7 +89,7 @@ export default class ResetService implements OnInit, OnStart {
      * @param resetLayer The reset layer
      * @returns The filtered inventory
      */
-    filterExcludeInventory(inventory: Inventory, resetLayer: ResetLayer) {
+    filterExcludeInventory(inventory: Map<string, number>, resetLayer: ResetLayer) {
         for (const [itemId] of inventory) {
             if (this.shouldRemove(itemId, resetLayer) === 2) {
                 inventory.delete(itemId);

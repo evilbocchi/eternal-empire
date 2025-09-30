@@ -73,6 +73,11 @@ const PlayerProfileTemplate = {
          * Whether the player wants to see item shadows in the world.
          */
         ItemShadows: true,
+
+        /**
+         * Whether the player wants to see particle effects.
+         */
+        Particles: true,
     },
 
     /**

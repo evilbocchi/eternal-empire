@@ -1,8 +1,11 @@
-import { findBaseParts, getAllInstanceInfo } from "@antivivi/vrldk";
+import { findBaseParts, getAllInstanceInfo, simpleInterval } from "@antivivi/vrldk";
 import { getAsset } from "shared/asset/AssetMap";
+import { IS_EDIT, IS_SERVER } from "shared/Context";
 import GameSpeed from "shared/GameSpeed";
+import eat from "shared/hamster/eat";
 import Item from "shared/item/Item";
 import ItemTrait from "shared/item/traits/ItemTrait";
+import isPlacedItemUnusable from "shared/item/utils/isPlacedItemUnusable";
 import { VirtualAttribute } from "shared/item/utils/VirtualReplication";
 
 declare global {
@@ -98,26 +101,30 @@ export default class Conveyor extends ItemTrait {
      * @param conveyor The conveyor to load.
      */
     static load(model: Model, conveyor: Conveyor) {
-        const instanceInfo = getAllInstanceInfo(model);
+        const modelInfo = getAllInstanceInfo(model);
         const statsPerPart = this.getStats(model, conveyor);
 
         const updateSpeed = () => {
             let speedBoost = 0;
-            const boosts = instanceInfo.Boosts;
+            const boosts = modelInfo.Boosts;
             if (boosts !== undefined) {
                 for (const [_, boost] of boosts) {
+                    if (boost.chargerInfo === undefined || isPlacedItemUnusable(boost.chargerInfo)) continue;
+
                     speedBoost += boost.chargedBy?.item.findTrait("Accelerator")?.boost ?? 0;
                 }
             }
+            const isUnusable = isPlacedItemUnusable(modelInfo);
+
             for (const [part, { speed: baseSpeed, inverted }] of statsPerPart) {
-                let speed = baseSpeed;
-                speed += speedBoost;
+                let speed = isUnusable === true ? 0 : baseSpeed + speedBoost;
                 VirtualAttribute.setNumber(model, part, "Speed", speed);
                 part.AssemblyLinearVelocity = part.CFrame.LookVector.mul((inverted ? -1 : 1) * speed);
             }
         };
         updateSpeed();
-        instanceInfo.UpdateSpeed = updateSpeed;
+        modelInfo.UpdateSpeed = updateSpeed;
+        this.infoPerModel.set(model, modelInfo);
     }
 
     static clientLoad(model: Model, conveyor: Conveyor) {
@@ -126,6 +133,8 @@ export default class Conveyor extends ItemTrait {
             VirtualAttribute.observeNumber(model, basePart, "Speed", updateSpeed);
         }
     }
+
+    static readonly infoPerModel = new Map<Model, InstanceInfo>();
 
     /**
      * The physical properties of the conveyor.
@@ -157,5 +166,25 @@ export default class Conveyor extends ItemTrait {
     setSpeed(speed: number) {
         this.speed = speed;
         return this;
+    }
+
+    static {
+        if (IS_SERVER || IS_EDIT) {
+            const disabled = new Set<Model>();
+            const cleanup = simpleInterval(() => {
+                for (const [model, info] of this.infoPerModel) {
+                    const isUnusable = isPlacedItemUnusable(info);
+                    const previousUnusable = disabled.has(model);
+                    if (isUnusable && !previousUnusable) {
+                        disabled.add(model);
+                        info.UpdateSpeed?.();
+                    } else if (!isUnusable && previousUnusable) {
+                        disabled.delete(model);
+                        info.UpdateSpeed?.();
+                    }
+                }
+            }, 0.5);
+            eat(cleanup);
+        }
     }
 }

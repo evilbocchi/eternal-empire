@@ -1,4 +1,4 @@
-import { getAllInstanceInfo, getInstanceInfo } from "@antivivi/vrldk";
+import { getAllInstanceInfo } from "@antivivi/vrldk";
 import { packet } from "@rbxts/fletchette";
 import { Debris } from "@rbxts/services";
 import { PLACED_ITEMS_FOLDER } from "shared/constants";
@@ -17,6 +17,10 @@ declare global {
          * The charger that is boosting this generator model.
          */
         chargedBy?: Charger;
+        /**
+         * The InstanceInfo of the charger that is boosting this generator model.
+         */
+        chargerInfo?: InstanceInfo;
     }
 
     interface InstanceInfo {
@@ -56,7 +60,8 @@ export default class Charger extends Operative {
         if (chargerHitbox === undefined) return;
 
         const charging = new Set<Instance>();
-        const chargerArea = getInstanceInfo(model, "Area");
+        const chargerInfo = getAllInstanceInfo(model);
+        const chargerArea = chargerInfo.Area;
 
         const checkAdd = (generatorModel: Instance) => {
             // Sanity checks
@@ -108,6 +113,7 @@ export default class Charger extends Operative {
 
             charging.add(generatorModel);
             Generator.addBoost(generatorInfo, placementId, {
+                chargerInfo,
                 ignoresLimitations: charger.ignoreLimit,
                 chargedBy: charger,
             });

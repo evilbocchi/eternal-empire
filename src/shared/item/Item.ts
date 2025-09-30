@@ -37,19 +37,20 @@ declare global {
          */
         Broken?: boolean;
 
+        /**
+         * The placed item data associated with the item model.
+         */
         PlacedItem?: PlacedItem;
     }
 
-    type Toggleable = ParticleEmitter | Beam | Script;
-
-    type OmitConstructorSignature<T> = { [K in keyof T]: T[K] } & (T extends (...args: infer R) => infer S
-        ? (...args: R) => S
-        : unknown);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     type Constructor<T> = new (...args: any[]) => T;
 }
 
+/** The default difficulty for items. */
 const EMPTY_DIFFICULTY = new Difficulty();
+
+/** A map of repeat callbacks for items. */
 const REPEATS = new Map<(dt: number) => void, { delta?: number; lastCall?: number }>();
 
 /**
