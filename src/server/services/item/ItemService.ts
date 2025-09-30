@@ -19,7 +19,7 @@
  */
 
 import Signal from "@antivivi/lemon-signal";
-import { simpleInterval } from "@antivivi/vrldk";
+import { getAllInstanceInfo, simpleInterval } from "@antivivi/vrldk";
 import { OnInit, OnStart, Service } from "@flamework/core";
 import { CollectionService, HttpService, Workspace } from "@rbxts/services";
 import { CHALLENGES } from "server/Challenges";
@@ -65,13 +65,8 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
      */
     readonly modelPerPlacementId = new Map<string, Model>();
 
-    /** Direct reference to all broken placed items in the world. */
     private readonly brokenPlacedItems: Set<string>;
-
-    /** Direct reference to all placed items in the world. */
     private readonly worldPlaced: Map<string, PlacedItem>;
-
-    // Change tracking flags
     private hasInventoryChanged = false;
     private hasUniqueChanged = false;
     private hasBoughtChanged = false;
@@ -105,6 +100,11 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
      * @param placedItems The updated map of placed items.
      */
     readonly placedItemsUpdated = new Signal<(placedItems: Map<string, PlacedItem>) => void>();
+
+    /**
+     * Fired when a new item model is added to the world.
+     */
+    readonly itemModelAdded = new Signal<(placementId: string, model: Model, modelInfo: InstanceInfo) => void>();
 
     // Configuration
 
@@ -318,6 +318,9 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
         model.Name = placementId;
         model.Parent = PLACED_ITEMS_FOLDER;
         this.modelPerPlacementId.set(placementId, model);
+
+        const modelInfo = getAllInstanceInfo(model);
+        this.itemModelAdded.fire(placementId, model, modelInfo);
 
         // Execute item-specific load callbacks
         item.LOADS.forEach((callback) => callback(model, item));

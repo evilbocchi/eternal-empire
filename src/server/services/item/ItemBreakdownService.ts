@@ -1,7 +1,7 @@
 //!native
 //!optimize 2
 
-import { getAllInstanceInfo } from "@antivivi/vrldk";
+import { getAllInstanceInfo, variableInterval } from "@antivivi/vrldk";
 import { OnInit, OnStart, Service } from "@flamework/core";
 import DataService from "server/services/data/DataService";
 import ItemService from "server/services/item/ItemService";
@@ -27,6 +27,13 @@ export default class ItemBreakdownService implements OnInit, OnStart {
     }
 
     onInit() {
+        const connection = this.itemService.itemModelAdded.connect((placementId, model, modelInfo) => {
+            if (this.brokenPlacedItems.has(placementId)) {
+                modelInfo.Broken = true;
+            }
+        });
+        eat(connection, "Disconnect");
+
         Packets.repairItem.fromClient((player, placementId) => {
             if (player === undefined) return false;
             return false; // TODO
@@ -35,9 +42,8 @@ export default class ItemBreakdownService implements OnInit, OnStart {
 
     onStart() {
         // Periodically check for items to break down
-        let active = true;
-        const loop = () => {
-            if (!active) return;
+        const ref = { interval: 10 };
+        const cleanup = variableInterval(() => {
             let changed = false;
             for (const [placementId] of this.placedItems) {
                 if (this.brokenPlacedItems.has(placementId)) continue;
@@ -50,10 +56,9 @@ export default class ItemBreakdownService implements OnInit, OnStart {
             if (changed) {
                 Packets.brokenPlacedItems.set(this.brokenPlacedItems);
             }
-            task.delay(rng.NextNumber() * 15 + 10, loop);
-        };
-        task.delay(10, loop);
-        eat(() => (active = false));
+            ref.interval = 10 + rng.NextNumber() * 15;
+        }, ref);
+        eat(cleanup);
     }
 
     /** Command hook: breaks all placed items immediately. */
