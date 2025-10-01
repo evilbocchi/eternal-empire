@@ -919,6 +919,10 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
         const ref = { interval: 10 };
         const rng = new Random();
         const cleanup = variableInterval(() => {
+            if (this.dataService.empireData.playtime < 300) {
+                return; // don't break items in first 5 minutes
+            }
+
             const placementIds = new Array<string>();
             for (const [placementId] of this.worldPlaced) {
                 if (this.brokenPlacedItems.has(placementId)) continue;

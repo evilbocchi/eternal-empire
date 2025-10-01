@@ -32,6 +32,10 @@ declare global {
             dropletInfo: InstanceInfo,
         ) => void;
     }
+
+    interface ItemBoost {
+        furnaceMul?: number;
+    }
 }
 
 const ZERO = new OnoeNum(0);
@@ -72,6 +76,16 @@ export default class Furnace extends Operative {
                     if (varianceResult !== undefined) {
                         result = result.mul(varianceResult);
                     }
+
+                    const boosts = modelInfo.Boosts;
+                    if (boosts !== undefined) {
+                        for (const [_, boost] of boosts) {
+                            const mul = boost.furnaceMul;
+                            if (mul === undefined) continue;
+                            result = result.mul(mul);
+                        }
+                    }
+
                     CurrencyService.incrementAll(result.amountPerCurrency);
                 }
                 for (const [currency, amount] of result.amountPerCurrency) {
