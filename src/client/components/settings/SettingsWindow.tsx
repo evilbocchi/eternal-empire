@@ -148,6 +148,8 @@ export default function SettingsWindow() {
                     subtitle="Items may need to be placed again to apply changes."
                 />
 
+                <SettingToggle setting="VisualRain" title="Visual Rain" subtitle="Toggle rain particle effects." />
+
                 {/* Layout Section */}
                 <SettingSection title="Layout" />
 

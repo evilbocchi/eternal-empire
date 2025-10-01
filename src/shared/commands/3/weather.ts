@@ -42,10 +42,7 @@ export = new Command(script.Name)
                 return;
         }
 
-        const atmosphereService = CommandAPI.Atmosphere as {
-            setWeatherManual: (weatherType: WeatherType) => void;
-        };
-
+        const atmosphereService = CommandAPI.Atmosphere;
         if (atmosphereService && atmosphereService.setWeatherManual) {
             atmosphereService.setWeatherManual(targetWeather);
             CommandAPI.ChatHook.sendPrivateMessage(sender, `Weather set to: ${targetWeather}`, "color:138,255,138");

@@ -18,8 +18,8 @@ import { Lighting } from "@rbxts/services";
 import RainParallel from "client/parallel/rain/RainParallel";
 import UserGameSettings from "shared/api/UserGameSettings";
 import Packets from "shared/Packets";
-import { AREAS } from "shared/world/Area";
 import { WeatherState, WeatherType } from "shared/weather/WeatherTypes";
+import { AREAS } from "shared/world/Area";
 import WorldNode from "shared/world/nodes/WorldNode";
 
 interface LightingConfig {
@@ -151,10 +151,7 @@ export default function LightingAtmosphereManager() {
             }
 
             // Update rain effect
-            const rainy =
-                currentWeather.current.type === WeatherType.Rainy ||
-                currentWeather.current.type === WeatherType.Thunderstorm;
-            RainParallel.setRainEnabled(rainy);
+            RainParallel.setWeatherState(currentWeather.current);
         }
 
         // --- Subscribe to area changes ---
@@ -205,8 +202,6 @@ export default function LightingAtmosphereManager() {
 
         // --- Variable interval for updating dynamic lights ---
         let oldQualityLevel = UserGameSettings!.SavedQualityLevel.Value;
-        const weatherMods = getWeatherModifiers(currentWeather.current);
-
         const updateLights = () => {
             const qualityLevel = UserGameSettings!.SavedQualityLevel.Value;
             const currentWeatherMods = getWeatherModifiers(currentWeather.current);
@@ -245,9 +240,6 @@ export default function LightingAtmosphereManager() {
             for (const [key, value] of pairs(defaultLighting.current)) {
                 (Lighting as unknown as { [key: string]: unknown })[key] = value;
             }
-
-            // Disable rain
-            RainParallel.setRainEnabled(false);
 
             // Clear cycling lights
             cyclingLights.current.clear();

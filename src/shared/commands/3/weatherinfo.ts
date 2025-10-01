@@ -1,15 +1,11 @@
 import Command, { CommandAPI } from "shared/commands/Command";
-import { WeatherState } from "shared/weather/WeatherTypes";
 
 export = new Command(script.Name)
     .addAlias("winfo")
     .addAlias("wstatus")
     .setDescription("Display current weather information")
     .setExecute((sender) => {
-        const atmosphereService = CommandAPI.Atmosphere as {
-            getCurrentWeather: () => WeatherState;
-        };
-
+        const atmosphereService = CommandAPI.Atmosphere;
         if (atmosphereService && atmosphereService.getCurrentWeather) {
             const weather = atmosphereService.getCurrentWeather();
             const minutes = math.floor(weather.timeRemaining / 60);

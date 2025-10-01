@@ -78,6 +78,11 @@ const PlayerProfileTemplate = {
          * Whether the player wants to see particle effects.
          */
         Particles: true,
+
+        /**
+         * Whether the player wants to see visual rain effects.
+         */
+        VisualRain: true,
     },
 
     /**

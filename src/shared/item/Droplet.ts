@@ -6,7 +6,7 @@ import { getAllInstanceInfo, getInstanceInfo } from "@antivivi/vrldk";
 import { CollectionService, Debris, RunService, TweenService } from "@rbxts/services";
 import { Server } from "shared/api/APIExpose";
 import { ASSETS } from "shared/asset/GameAssets";
-import { IS_SERVER } from "shared/Context";
+import { IS_EDIT, IS_SERVER } from "shared/Context";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import eat from "shared/hamster/eat";
 import Operative from "shared/item/traits/Operative";
@@ -916,8 +916,6 @@ export default class Droplet {
     }
 
     static {
-        // let this run on both client and server; the instantiatior functions are on the same side
-        const offset = new Vector3(0, 1.5, 0);
         const heartbeatConnection = RunService.Heartbeat.Connect(() => {
             for (const [dropletModel, instanceInfo] of this.SPAWNED_DROPLETS) {
                 if (instanceInfo.Health === undefined) continue;
@@ -927,7 +925,7 @@ export default class Droplet {
                     this.MODEL_PER_SPAWN_ID.delete(dropletModel.Name);
                     dropletModel.Anchored = true;
                     dropletModel.Transparency = 1;
-                    Debris.AddItem(dropletModel, 2);
+                    Debris.AddItem(dropletModel, 6);
                     const explosion = new Instance("Explosion");
                     explosion.ExplosionType = Enum.ExplosionType.NoCraters;
                     explosion.DestroyJointRadiusPercent = 0;
@@ -940,7 +938,7 @@ export default class Droplet {
         });
         eat(heartbeatConnection);
 
-        if (!IS_SERVER) {
+        if (!IS_SERVER || IS_EDIT) {
             const addedConnection = CollectionService.GetInstanceAddedSignal("Droplet").Connect((droplet) => {
                 if (!droplet.IsA("BasePart")) return;
                 const dropletModelId = droplet.Name;

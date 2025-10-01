@@ -74,9 +74,7 @@ export = new Command(script.Name)
             return;
         }
 
-        const atmosphereService = CommandAPI.Atmosphere as {
-            setWeatherCustom: (weatherType: WeatherType, intensity: number, duration: number) => void;
-        };
+        const atmosphereService = CommandAPI.Atmosphere;
 
         if (atmosphereService && atmosphereService.setWeatherCustom) {
             atmosphereService.setWeatherCustom(targetWeather, intensity, duration);

@@ -1,10 +1,13 @@
-import { Debris, ReplicatedStorage, RunService, Workspace } from "@rbxts/services";
+//!native
+//!optimize 2
+import { ReplicatedStorage, RunService, Workspace } from "@rbxts/services";
 import { Environment } from "@rbxts/ui-labs";
 import RainParallel from "client/parallel/rain/RainParallel";
 import { getAsset } from "shared/asset/AssetMap";
 import { CAMERA } from "shared/constants";
 import { IS_EDIT } from "shared/Context";
 import eat from "shared/hamster/eat";
+import Packets from "shared/Packets";
 import { WeatherState, WeatherType } from "shared/weather/WeatherTypes";
 
 // Client Variables
@@ -125,14 +128,17 @@ const range = 50;
 // Weather state
 let currentWeather: WeatherState = { type: WeatherType.Clear, intensity: 0, duration: 300, timeRemaining: 300 };
 let rainEnabled = false;
+let visualRainEnabled = true;
 
 // Dynamic settings based on weather
 function getCurrentSettings() {
     const intensityMultiplier = rainEnabled ? currentWeather.intensity : 0;
+    // Thunderstorms rain more heavily (2x multiplier)
+    const weatherMultiplier = currentWeather.type === WeatherType.Thunderstorm ? 2.0 : 1.0;
     return {
-        puddleAmount: basePuddleAmount * intensityMultiplier,
+        puddleAmount: basePuddleAmount * intensityMultiplier * weatherMultiplier,
         startHeight: baseStartHeight,
-        rainAmount: baseRainAmount * intensityMultiplier,
+        rainAmount: baseRainAmount * intensityMultiplier * weatherMultiplier,
     };
 }
 
@@ -141,9 +147,7 @@ const { rainSFX, rainIndoorEq, rainIndoorReverb } = (() => {
     const Rain = new Instance("Sound");
     Rain.Looped = true;
     Rain.Name = "Rain";
-    Rain.Playing = true;
     Rain.SoundId = getAsset("assets/sounds/Rain.mp3");
-    Rain.TimePosition = 53;
     Rain.Parent = IS_EDIT ? Environment.PluginWidget : ReplicatedStorage;
     eat(Rain, "Destroy");
 
@@ -224,22 +228,138 @@ interface RainHitData {
 const rainHits: RainHitData[] = [];
 const puddleHits: RainHitData[] = [];
 
+// Attachment Cache
+interface CachedRainAttachment {
+    attachment: Attachment;
+    hit: ParticleEmitter;
+    splash: ParticleEmitter;
+    trail: ParticleEmitter;
+    inUse: boolean;
+    releaseTime: number;
+}
+
+interface CachedPuddleAttachment {
+    attachment: Attachment;
+    puddle: ParticleEmitter;
+    inUse: boolean;
+    releaseTime: number;
+}
+
+const rainAttachmentCache: CachedRainAttachment[] = [];
+const puddleAttachmentCache: CachedPuddleAttachment[] = [];
+const maxCacheSize = 100; // Maximum number of cached attachments per type
+let cachePointer = 0; // Round-robin pointer for faster lookups
+
+function getRainAttachment(): CachedRainAttachment {
+    // Fast path: check from last position for better cache locality
+    const cacheSize = rainAttachmentCache.size();
+    for (let i = 0; i < cacheSize; i++) {
+        const index = (cachePointer + i) % cacheSize;
+        const cached = rainAttachmentCache[index];
+        if (!cached.inUse) {
+            cached.inUse = true;
+            cachePointer = (index + 1) % cacheSize;
+            return cached;
+        }
+    }
+
+    // Create new attachment with particles if cache is not full
+    if (cacheSize < maxCacheSize) {
+        const attachment = new Instance("Attachment");
+        attachment.Parent = debris;
+
+        const hit = rainHit.Clone();
+        hit.Parent = attachment;
+        const splash = rainSplash.Clone();
+        splash.Parent = attachment;
+        const trail = rainTrail.Clone();
+        trail.Parent = attachment;
+
+        const cached: CachedRainAttachment = {
+            attachment,
+            hit,
+            splash,
+            trail,
+            inUse: true,
+            releaseTime: 0,
+        };
+        rainAttachmentCache.push(cached);
+        return cached;
+    }
+
+    // Fallback: force reuse oldest (shouldn't happen often)
+    const cached = rainAttachmentCache[0];
+    cached.inUse = true;
+    return cached;
+}
+
+function getPuddleAttachment(): CachedPuddleAttachment {
+    // Fast path: linear search with early exit
+    for (const cached of puddleAttachmentCache) {
+        if (!cached.inUse) {
+            cached.inUse = true;
+            return cached;
+        }
+    }
+
+    // Create new attachment with particles if cache is not full
+    if (puddleAttachmentCache.size() < maxCacheSize) {
+        const attachment = new Instance("Attachment");
+        attachment.Parent = debris;
+
+        const puddle = rainPuddle.Clone();
+        puddle.Parent = attachment;
+
+        const cached: CachedPuddleAttachment = {
+            attachment,
+            puddle,
+            inUse: true,
+            releaseTime: 0,
+        };
+        puddleAttachmentCache.push(cached);
+        return cached;
+    }
+
+    // Fallback: reuse oldest
+    const cached = puddleAttachmentCache[0];
+    cached.inUse = true;
+    return cached;
+}
+
 // Misc Variables
 let insideOfBuilding = false;
 const soundEffects: Record<string, number> = {};
+let currentTime = 0;
+
+// Batch release tracking - avoid creating tons of task.delay calls
+const releaseBatch: Array<{ cached: CachedRainAttachment | CachedPuddleAttachment; releaseTime: number }> = [];
+
+// Player settings integration
+const settingsConnection = Packets.settings.observe((newSettings) => {
+    visualRainEnabled = newSettings.VisualRain;
+});
+eat(settingsConnection, "Disconnect");
 
 // Weather integration
-RainParallel.bindRainEnabled((newEnabled: boolean) => {
+const bindConnection = RainParallel.bindWeatherState((newState: WeatherState) => {
     // Update sound playing state
-    rainSFX.Playing = newEnabled;
+    const newEnabled = newState.type === WeatherType.Rainy || newState.type === WeatherType.Thunderstorm;
+    currentWeather = newState;
+    if (rainEnabled) {
+        rainSFX.Play();
+    } else {
+        rainSFX.Stop();
+    }
     rainSFX.Volume = newEnabled ? currentWeather.intensity * 0.5 : 0;
     rainEnabled = newEnabled;
 });
+eat(bindConnection, "Disconnect");
 
 // Parallel RunService
-RunService.RenderStepped.ConnectParallel((deltaTime) => {
-    if (!rainEnabled) return; // Skip rain logic when not raining
+const parallelConnection = RunService.RenderStepped.ConnectParallel((deltaTime) => {
+    if (!rainEnabled || !visualRainEnabled) return; // Skip rain logic when not raining or visuals disabled
 
+    currentTime += deltaTime;
     const settings = getCurrentSettings();
 
     // Raycast Raindrops
@@ -285,78 +405,107 @@ RunService.RenderStepped.ConnectParallel((deltaTime) => {
         soundEffects.DryLevel = lerp(rainIndoorReverb.DryLevel, 0, 3 * deltaTime);
         soundEffects.WetLevel = lerp(rainIndoorReverb.WetLevel, 0, 3 * deltaTime);
     }
+
+    // Process release batch - check if any attachments can be freed
+    for (let i = releaseBatch.size() - 1; i >= 0; i--) {
+        const item = releaseBatch[i];
+        if (currentTime >= item.releaseTime) {
+            item.cached.inUse = false;
+            releaseBatch.remove(i);
+        }
+    }
 });
+eat(parallelConnection, "Disconnect");
 
 // Serial RunService
-RunService.RenderStepped.Connect(() => {
-    if (!rainEnabled) {
-        // Clear any remaining rain effects when rain is disabled
+const serialConnection = RunService.RenderStepped.Connect(() => {
+    if (!rainEnabled || !visualRainEnabled) {
+        // Clear any remaining rain effects when rain is disabled or visuals disabled
         rainHits.clear();
         puddleHits.clear();
+        releaseBatch.clear();
         return;
     }
 
     // Spawn RainDrops
-    for (let i = rainHits.size() - 1; i >= 0; i--) {
+    const rainCount = rainHits.size();
+    for (let i = rainCount - 1; i >= 0; i--) {
         // Get And Remove Data
         const hitData = rainHits.remove(i)!;
 
-        // Create Attachment
-        const attachment = new Instance("Attachment");
-        attachment.WorldCFrame = hitData.RainHitCFrame;
-        attachment.Parent = debris;
+        // Get Cached Attachment with particles
+        const cached = getRainAttachment();
+        cached.attachment.WorldCFrame = hitData.RainHitCFrame;
 
-        // Particle Variables
-        const hit = rainHit.Clone();
-        hit.Parent = attachment;
-        const splash = rainSplash.Clone();
-        splash.Parent = attachment;
-        const trail = rainTrail.Clone();
-        trail.Parent = attachment;
+        // Emit Particles (reuse existing emitters)
+        cached.hit.Emit(1);
+        cached.splash.Emit(1);
+        cached.trail.Emit(1);
 
-        // Emit Particles
-        hit.Emit(1);
-        splash.Emit(1);
-        trail.Emit(1);
-
-        // Remove Attachment
-        Debris.AddItem(attachment, rainMaxTime);
+        // Schedule Release (batch instead of individual task.delay)
+        cached.releaseTime = currentTime + rainMaxTime;
+        releaseBatch.push({ cached, releaseTime: cached.releaseTime });
     }
 
     // Spawn Puddles
-    for (let i = puddleHits.size() - 1; i >= 0; i--) {
+    const puddleCount = puddleHits.size();
+    for (let i = puddleCount - 1; i >= 0; i--) {
         // Get And Remove Data
         const hitData = puddleHits.remove(i)!;
 
-        // Create Attachment
-        const attachment = new Instance("Attachment");
-        attachment.WorldCFrame = hitData.RainHitCFrame;
-        attachment.Parent = debris;
+        // Get Cached Attachment with particles
+        const cached = getPuddleAttachment();
+        cached.attachment.WorldCFrame = hitData.RainHitCFrame;
 
-        // Particle Variables
-        const puddle = rainPuddle.Clone();
-        puddle.Parent = attachment;
+        // Emit Particles (reuse existing emitter)
+        cached.puddle.Emit(1);
 
-        // Emit Particles
-        puddle.Emit(1);
-
-        // Remove Attachment
-        Debris.AddItem(attachment, puddleMaxTime);
+        // Schedule Release (batch instead of individual task.delay)
+        cached.releaseTime = currentTime + puddleMaxTime;
+        releaseBatch.push({ cached, releaseTime: cached.releaseTime });
     }
 
-    // Sound Effects (only when rain is enabled)
+    // Sound Effects (only when rain is enabled) - Update only if changed significantly
     if (soundEffects["HighGain"] !== undefined) {
-        rainIndoorEq.HighGain = soundEffects.HighGain;
-        rainIndoorReverb.DecayTime = soundEffects.DecayTime;
-        rainIndoorReverb.Density = soundEffects.Density;
-        rainIndoorReverb.Diffusion = soundEffects.Diffusion;
-        rainIndoorReverb.DryLevel = soundEffects.DryLevel;
-        rainIndoorReverb.WetLevel = soundEffects.WetLevel;
+        const highGain = soundEffects.HighGain;
+        if (math.abs(rainIndoorEq.HighGain - highGain) > 0.1) {
+            rainIndoorEq.HighGain = highGain;
+        }
 
-        if (soundEffects.DecayTime < 0.11) {
-            rainIndoorReverb.Enabled = false;
+        const decayTime = soundEffects.DecayTime;
+        if (math.abs(rainIndoorReverb.DecayTime - decayTime) > 0.01) {
+            rainIndoorReverb.DecayTime = decayTime;
+        }
+
+        const density = soundEffects.Density;
+        if (math.abs(rainIndoorReverb.Density - density) > 0.01) {
+            rainIndoorReverb.Density = density;
+        }
+
+        const diffusion = soundEffects.Diffusion;
+        if (math.abs(rainIndoorReverb.Diffusion - diffusion) > 0.01) {
+            rainIndoorReverb.Diffusion = diffusion;
+        }
+
+        const dryLevel = soundEffects.DryLevel;
+        if (math.abs(rainIndoorReverb.DryLevel - dryLevel) > 0.1) {
+            rainIndoorReverb.DryLevel = dryLevel;
+        }
+
+        const wetLevel = soundEffects.WetLevel;
+        if (math.abs(rainIndoorReverb.WetLevel - wetLevel) > 0.01) {
+            rainIndoorReverb.WetLevel = wetLevel;
+        }
+
+        if (decayTime < 0.11) {
+            if (rainIndoorReverb.Enabled) {
+                rainIndoorReverb.Enabled = false;
+            }
         } else {
-            rainIndoorReverb.Enabled = true;
+            if (!rainIndoorReverb.Enabled) {
+                rainIndoorReverb.Enabled = true;
+            }
         }
     }
 });
+eat(serialConnection, "Disconnect");

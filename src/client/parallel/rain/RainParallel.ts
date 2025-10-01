@@ -1,14 +1,15 @@
 import VirtualActor from "shared/hamster/VirtualActor";
+import { WeatherState } from "shared/weather/WeatherTypes";
 
 namespace RainParallel {
     export const ACTOR = new VirtualActor(script.Parent as Actor);
 
-    export function setRainEnabled(enabled: boolean) {
-        ACTOR.sendMessage("SetRainEnabled", enabled);
+    export function setWeatherState(state: WeatherState) {
+        ACTOR.sendMessage("SetWeatherState", state);
     }
 
-    export function bindRainEnabled(callback: (enabled: boolean) => void) {
-        return ACTOR.bindToMessage("SetRainEnabled", callback);
+    export function bindWeatherState(callback: (state: WeatherState) => void) {
+        return ACTOR.bindToMessage("SetWeatherState", callback);
     }
 }
 
