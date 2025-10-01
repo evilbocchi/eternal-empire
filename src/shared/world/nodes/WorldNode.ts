@@ -11,19 +11,19 @@ export default class WorldNode<T extends Instance = Instance> {
         private onRegister?: (instance: T) => void,
         private onUnregister?: (instance: T) => void,
     ) {
-        CollectionService.GetTagged(tag).forEach((instance) => this.registerInstance(instance as T));
-        this.addedConnection?.Disconnect();
-        this.removedConnection?.Disconnect();
+        for (const instance of CollectionService.GetTagged(tag)) {
+            this.registerInstance(instance as T);
+        }
+
+        this.cleanup();
+
         this.addedConnection = CollectionService.GetInstanceAddedSignal(tag).Connect((instance) => {
             this.registerInstance(instance as T);
         });
         this.removedConnection = CollectionService.GetInstanceRemovedSignal(tag).Connect((instance) => {
             this.unregisterInstance(instance as T);
         });
-        eat(() => {
-            this.addedConnection?.Disconnect();
-            this.removedConnection?.Disconnect();
-        });
+        eat(() => this.cleanup());
     }
 
     private registerInstance(instance: T) {
@@ -41,6 +41,11 @@ export default class WorldNode<T extends Instance = Instance> {
     private unregisterInstance(instance: T) {
         this.onUnregister?.(instance);
         this.INSTANCES.delete(instance);
+    }
+
+    cleanup() {
+        this.addedConnection?.Disconnect();
+        this.removedConnection?.Disconnect();
     }
 }
 

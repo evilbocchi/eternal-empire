@@ -14,7 +14,7 @@ import { OnoeNum } from "@antivivi/serikanum";
 import { simpleInterval } from "@antivivi/vrldk";
 import { OnStart, Service } from "@flamework/core";
 import { CollectionService, DataStoreService, Players } from "@rbxts/services";
-import type { LeaderboardEntry, LeaderboardType } from "client/components/leaderboard/Leaderboard";
+import type { LeaderboardEntry, LeaderboardType } from "client/components/world/leaderboard/Leaderboard";
 import DataService from "server/services/data/DataService";
 import { getNameFromUserId } from "shared/constants";
 import { IS_EDIT, IS_STUDIO } from "shared/Context";

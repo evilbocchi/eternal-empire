@@ -108,7 +108,10 @@ export default class ChatHookController implements OnStart {
      * Starts the ChatHookController, sets up chat channel listeners for formatting.
      */
     onStart() {
-        Packets.systemMessageSent.fromServer((channel, message, metadata) => this.display(channel, message, metadata));
+        const connection = Packets.systemMessageSent.fromServer((channel, message, metadata) =>
+            this.display(channel, message, metadata),
+        );
+        eat(connection, "Disconnect");
 
         const TEXT_CHANNELS = getTextChannels();
         TEXT_CHANNELS.ChildAdded.Connect((child) => this.onChannelAdded(child));

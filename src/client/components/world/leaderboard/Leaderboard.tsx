@@ -2,9 +2,9 @@
  * @fileoverview Main leaderboard component that displays rankings.
  */
 
-import React, { useState } from "@rbxts/react";
-import LeaderboardHeader, { ColumnHeader } from "client/components/leaderboard/LeaderboardHeader";
-import LeaderboardSlot from "client/components/leaderboard/LeaderboardSlot";
+import React from "@rbxts/react";
+import LeaderboardHeader, { ColumnHeader } from "client/components/world/leaderboard/LeaderboardHeader";
+import LeaderboardSlot from "client/components/world/leaderboard/LeaderboardSlot";
 
 /** A single entry in the leaderboard */
 export interface LeaderboardEntry {
@@ -17,20 +17,6 @@ export interface LeaderboardEntry {
 }
 
 export type LeaderboardType = Currency | "TimePlayed" | "Donated" | "Level";
-
-/** Props for the main Leaderboard component */
-export interface LeaderboardProps {
-    /** The type/title of the leaderboard */
-    leaderboardType: LeaderboardType;
-    /** Array of leaderboard entries to display */
-    entries: LeaderboardEntry[];
-    /** Title of the leaderboard */
-    title?: string;
-    /** Custom value label (e.g., "Funds", "Hours", "Level") */
-    valueLabel?: string;
-    /** Maximum entries to display */
-    maxEntries?: number;
-}
 
 /** Default titles for different leaderboard types */
 const DEFAULT_TITLES: Record<string, string> = {
@@ -61,7 +47,18 @@ export default function Leaderboard({
     title,
     valueLabel,
     maxEntries = 100,
-}: LeaderboardProps) {
+}: {
+    /** The type/title of the leaderboard */
+    leaderboardType: LeaderboardType;
+    /** Array of leaderboard entries to display */
+    entries: LeaderboardEntry[];
+    /** Title of the leaderboard */
+    title?: string;
+    /** Custom value label (e.g., "Funds", "Hours", "Level") */
+    valueLabel?: string;
+    /** Maximum entries to display */
+    maxEntries?: number;
+}) {
     const displayTitle = title || DEFAULT_TITLES[leaderboardType] || `${leaderboardType} Leaderboard`;
     const displayValueLabel = valueLabel || DEFAULT_VALUE_LABELS[leaderboardType] || leaderboardType;
 

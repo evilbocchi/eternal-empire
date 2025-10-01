@@ -6,7 +6,6 @@ import {
     SimpleAreaBoardGui,
 } from "client/components/world/area/AreaBoardGui";
 import Packets from "shared/Packets";
-import Sandbox from "shared/Sandbox";
 import { AREAS } from "shared/world/Area";
 
 export const COLOR_SEQUENCE_PER_AREA: { [key in AreaId]?: ColorSequence } = {
