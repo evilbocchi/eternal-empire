@@ -181,6 +181,7 @@ export const assets = {
   "assets/sounds/repair/Complete.mp3": "rbxassetid://104213422242689",
   "assets/sounds/repair/Good.mp3": "rbxassetid://136162886418077",
   "assets/sounds/repair/Great.mp3": "rbxassetid://99139701602797",
+  "assets/sounds/repair/Hit.mp3": "rbxassetid://137786989020082",
   "assets/sounds/repair/Perfect.mp3": "rbxassetid://83620945806994",
   "assets/sounds/repair/Start.mp3": "rbxassetid://73160975070677",
   "assets/sounds/resets/Skillification.mp3": "rbxassetid://101157613588588",

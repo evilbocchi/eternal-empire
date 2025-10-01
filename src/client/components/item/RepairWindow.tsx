@@ -1,6 +1,6 @@
 import Signal from "@antivivi/lemon-signal";
 import { getAllInstanceInfo } from "@antivivi/vrldk";
-import React, { useEffect, useMemo, useRef, useState } from "@rbxts/react";
+import React, { Fragment, useEffect, useMemo, useRef, useState } from "@rbxts/react";
 import { RunService, TweenService } from "@rbxts/services";
 import SingleDocumentManager from "client/components/sidebar/SingleDocumentManager";
 import useSingleDocument from "client/components/sidebar/useSingleDocumentWindow";
@@ -9,25 +9,89 @@ import TechWindow from "client/components/window/TechWindow";
 import { getAsset } from "shared/asset/AssetMap";
 import { playSound } from "shared/asset/GameAssets";
 import { RobotoMono, RobotoMonoBold } from "shared/asset/GameFonts";
-import type { RepairResultTier } from "shared/item/repair";
 import Item from "shared/item/Item";
+import type { RepairResultTier } from "shared/item/repair";
 import Items from "shared/items/Items";
 import Packets from "shared/Packets";
 
 type Phase = "idle" | "countdown" | "running" | "success" | "fail";
 
-const APPROACH_DURATION = 2.1; // seconds for the approach ring to close
-const HOT_WINDOW = 0.2; // acceptable progress window (± from 0)
-const PERFECT_WINDOW = 0.035; // perfect tier window (± from 0)
-const TARGET_SPEED = math.pi * 1.4; // radians per second
-const INNER_SIZE = 0.34;
-const NEGATIVE_GRACE_PERIOD = 0.15; // how far negative progress can go before auto-fail
+interface TargetData {
+    id: number;
+    angle: number;
+    size: number;
+    startTime: number; // When this target's approach circle starts closing
+    approachDuration: number;
+    direction: number; // Stores radius for positioning
+    hit: boolean;
+    hitTier?: RepairResultTier;
+    goodWindow: number;
+    greatWindow: number;
+    perfectWindow: number;
+    negativeGracePeriod: number;
+}
 
-function getResultTier(progress: number): RepairResultTier {
+const TARGET_FADE_IN_TWEENINFO = new TweenInfo(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out);
+
+const BASE_APPROACH_DURATION = 2.5; // seconds for the approach ring to close (easiest)
+const FASTEST_APPROACH_DURATION = 0.7; // seconds for the approach ring to close (hardest)
+const BASE_GOOD_WINDOW = 0.6; // acceptable progress window (± from 0) for easiest items
+const MIN_GOOD_WINDOW = 0.3; // acceptable progress window (± from 0) for hardest items
+const BASE_GREAT_WINDOW = 0.25; // great progress window (± from 0) for easiest items
+const MIN_GREAT_WINDOW = 0.125; // great progress window (± from 0) for hardest items
+const BASE_PERFECT_WINDOW = 0.07; // perfect tier window (± from 0) for easiest items
+const MIN_PERFECT_WINDOW = 0.035; // perfect tier window (± from 0) for hardest items
+const BASE_TARGETS_PACING = 1; // seconds between targets for easiest items
+const MIN_TARGETS_PACING = 0.3; // seconds between targets for hardest items
+const MIN_TARGETS = 3;
+const MAX_TARGETS = 8;
+const BASE_TARGET_SIZE = 100; // Largest target size for easiest items
+const MIN_TARGET_SIZE = 50; // Smallest target size for hardest items
+
+function calculateGoodWindow(itemIndex: number, totalItems: number): number {
+    const difficulty = itemIndex / math.max(totalItems - 1, 1);
+    return BASE_GOOD_WINDOW - difficulty * (BASE_GOOD_WINDOW - MIN_GOOD_WINDOW);
+}
+
+function calculateGreatWindow(itemIndex: number, totalItems: number): number {
+    const difficulty = itemIndex / math.max(totalItems - 1, 1);
+    return BASE_GREAT_WINDOW - difficulty * (BASE_GREAT_WINDOW - MIN_GREAT_WINDOW);
+}
+
+function calculatePerfectWindow(itemIndex: number, totalItems: number): number {
+    const difficulty = itemIndex / math.max(totalItems - 1, 1);
+    return BASE_PERFECT_WINDOW - difficulty * (BASE_PERFECT_WINDOW - MIN_PERFECT_WINDOW);
+}
+
+function getResultTier(progress: number, perfectWindow: number, greatWindow: number): RepairResultTier {
     const absProgress = math.abs(progress);
-    if (absProgress <= PERFECT_WINDOW) return "Perfect";
-    if (absProgress <= HOT_WINDOW * 0.55) return "Great";
+    if (absProgress <= perfectWindow) return "Perfect";
+    if (absProgress <= greatWindow) return "Great";
     return "Good";
+}
+
+function calculateTargetCount(itemIndex: number, totalItems: number): number {
+    // Early items get 3 targets, later items get more
+    const difficulty = itemIndex / math.max(totalItems - 1, 1);
+    return math.floor(MIN_TARGETS + difficulty * (MAX_TARGETS - MIN_TARGETS));
+}
+
+function calculateTargetSize(itemIndex: number, totalItems: number): number {
+    // Early items get larger targets, later items get smaller
+    const difficulty = itemIndex / math.max(totalItems - 1, 1);
+    return BASE_TARGET_SIZE - difficulty * (BASE_TARGET_SIZE - MIN_TARGET_SIZE);
+}
+
+function calculateApproachDuration(itemIndex: number, totalItems: number): number {
+    // Early items get slower approach rate, later items get faster
+    const difficulty = itemIndex / math.max(totalItems - 1, 1);
+    return BASE_APPROACH_DURATION - difficulty * (BASE_APPROACH_DURATION - FASTEST_APPROACH_DURATION);
+}
+
+function calculatePacing(itemIndex: number, totalItems: number): number {
+    // Early items get slower pacing, later items get faster
+    const difficulty = itemIndex / math.max(totalItems - 1, 1);
+    return BASE_TARGETS_PACING - difficulty * (BASE_TARGETS_PACING - MIN_TARGETS_PACING);
 }
 
 export class RepairManager {
@@ -66,30 +130,26 @@ export default function RepairWindow() {
     const [activeItem, setActiveItem] = React.useState<Item | undefined>();
     const [phase, setPhase] = useState<Phase>("idle");
     const [countdownValue, setCountdownValue] = useState(3);
-    const [approachProgress, setApproachProgress] = useState(1);
-    const [targetAngle, setTargetAngle] = useState(0);
     const [attemptSeed, setAttemptSeed] = useState(0);
     const [feedback, setFeedback] = useState<string | undefined>();
     const [resultTier, setResultTier] = useState<RepairResultTier | undefined>();
     const [showResultTier, setShowResultTier] = useState(false);
     const random = useMemo(() => new Random(), []);
     const heartbeatRef = useRef<RBXScriptConnection>();
-    const currentProgressRef = useRef(approachProgress);
-    const currentAngleRef = useRef(0);
     const [sparks, setSparks] = useState<
         Array<{ id: string; angle: number; distance: number; delay: number; velocity: number; tier: RepairResultTier }>
     >([]);
 
-    currentProgressRef.current = approachProgress;
+    // Multi-target state
+    const [targets, setTargets] = useState<TargetData[]>([]);
+    const [currentTargetIndex, setCurrentTargetIndex] = useState(0);
+    const [gameStartTime, setGameStartTime] = useState(0);
+    const [currentTime, setCurrentTime] = useState(0);
+    const targetsRef = useRef<TargetData[]>([]);
+    const currentTargetIndexRef = useRef(0);
 
-    useEffect(() => {
-        // Initialize the angle on first mount
-        if (attemptSeed === 0) {
-            const initialAngle = random.NextNumber() * math.pi * 2;
-            setTargetAngle(initialAngle);
-            currentAngleRef.current = initialAngle;
-        }
-    }, []);
+    targetsRef.current = targets;
+    currentTargetIndexRef.current = currentTargetIndex;
 
     useEffect(() => {
         return () => {
@@ -97,6 +157,81 @@ export default function RepairWindow() {
             heartbeatRef.current = undefined;
         };
     }, []);
+
+    // Generate targets when starting a new attempt
+    useEffect(() => {
+        if (phase !== "countdown") return;
+
+        // Calculate target count based on item difficulty
+        const itemIndex = activeItem ? Items.sortedItems.indexOf(activeItem) : 0;
+        const targetCount = calculateTargetCount(itemIndex, Items.length);
+        const targetSize = calculateTargetSize(itemIndex, Items.length);
+        const approachDuration = calculateApproachDuration(itemIndex, Items.length);
+        const goodWindow = calculateGoodWindow(itemIndex, Items.length);
+        const greatWindow = calculateGreatWindow(itemIndex, Items.length);
+        const perfectWindow = calculatePerfectWindow(itemIndex, Items.length);
+        const negativeGracePeriod = goodWindow + 0.05; // let the player witness their miss
+        const pacing = calculatePacing(itemIndex, Items.length);
+
+        // Generate targets with random positions that don't overlap
+        const newTargets: TargetData[] = [];
+        const minDistance = 0.2; // Minimum distance between target centers (in scale units)
+        const maxAttempts = 100; // Maximum attempts to find a non-overlapping position
+
+        for (let i = 0; i < targetCount; i++) {
+            // Space targets out in time
+            const startTime = i * pacing;
+
+            let angle: number;
+            let radius: number;
+            let attempts = 0;
+            let validPosition = false;
+
+            // Try to find a position that doesn't overlap with existing targets
+            while (!validPosition && attempts < maxAttempts) {
+                // Random angle and radius within playable area
+                angle = random.NextNumber() * math.pi * 2;
+                radius = 0.15 + random.NextNumber() * 0.25; // Between 0.15 and 0.4 from center
+
+                // Calculate this position
+                const x = 0.5 + math.cos(angle) * radius;
+                const y = 0.5 + math.sin(angle) * radius;
+
+                // Check distance to all existing targets
+                validPosition = true;
+                for (const existingTarget of newTargets) {
+                    const existingX = 0.5 + math.cos(existingTarget.angle) * existingTarget.direction;
+                    const existingY = 0.5 + math.sin(existingTarget.angle) * existingTarget.direction;
+
+                    const distance = math.sqrt(math.pow(x - existingX, 2) + math.pow(y - existingY, 2));
+                    if (distance < minDistance) {
+                        validPosition = false;
+                        break;
+                    }
+                }
+
+                attempts++;
+            }
+
+            // If we couldn't find a valid position after max attempts, just use the last one
+            newTargets.push({
+                id: i,
+                angle: angle!,
+                size: targetSize,
+                startTime: startTime,
+                approachDuration: approachDuration,
+                direction: radius!, // Store radius in direction field
+                hit: false,
+                goodWindow: goodWindow,
+                greatWindow: greatWindow,
+                perfectWindow: perfectWindow,
+                negativeGracePeriod: negativeGracePeriod,
+            });
+        }
+
+        setTargets(newTargets);
+        setCurrentTargetIndex(0);
+    }, [phase, attemptSeed, activeItem, random]);
 
     useEffect(() => {
         if (phase !== "countdown") return;
@@ -109,11 +244,16 @@ export default function RepairWindow() {
             value -= 1;
             if (value === 0) {
                 setPhase("running");
+                setGameStartTime(tick());
                 return;
             }
 
             setCountdownValue(value);
-            setFeedback("Match the pulse when the rings meet!");
+            setFeedback(
+                targets.size() > 1
+                    ? `Hit ${targets.size()} targets in sequence!`
+                    : "Match the pulse when the rings meet!",
+            );
             playSound("repair/Start.mp3", undefined, (sound) => {
                 sound.PlaybackSpeed = 0.8 + (3 - value) * 0.1;
             });
@@ -129,37 +269,65 @@ export default function RepairWindow() {
         return () => {
             active = false;
         };
-    }, [phase, attemptSeed]);
+    }, [phase, attemptSeed, targets]);
 
     useEffect(() => {
         if (phase !== "running") return;
 
         heartbeatRef.current?.Disconnect();
-
-        let progress = 1;
-        let angle = currentAngleRef.current; // Start from current position instead of random
-        const direction = random.NextNumber() > 0.5 ? 1 : -1;
-        setApproachProgress(1);
-        setTargetAngle(angle);
         setFeedback(undefined);
 
         heartbeatRef.current = RunService.Heartbeat.Connect((dt) => {
             if (phase !== "running") return;
 
-            progress = progress - dt / APPROACH_DURATION;
-            angle = (angle + direction * dt * TARGET_SPEED) % (math.pi * 2);
+            const elapsed = tick() - gameStartTime;
+            setCurrentTime(elapsed);
 
-            currentProgressRef.current = progress;
-            currentAngleRef.current = angle;
-            setApproachProgress(progress);
-            setTargetAngle(angle);
+            // Check if we've failed any target by letting it go too negative
+            const currentTargets = targetsRef.current;
+            for (const target of currentTargets) {
+                if (target.hit) continue;
 
-            if (progress <= -NEGATIVE_GRACE_PERIOD) {
+                const targetElapsed = elapsed - target.startTime;
+                if (targetElapsed > target.approachDuration + target.negativeGracePeriod) {
+                    // Auto-fail if we missed a target completely
+                    heartbeatRef.current?.Disconnect();
+                    heartbeatRef.current = undefined;
+                    setPhase("fail");
+                    setFeedback("Missed a target! The mechanism jammed.");
+                    playSound("Error.mp3");
+                    return;
+                }
+            }
+
+            // Check if all targets are hit
+            const allHit = currentTargets.every((t) => t.hit);
+            if (allHit) {
                 heartbeatRef.current?.Disconnect();
                 heartbeatRef.current = undefined;
-                setPhase("fail");
-                setFeedback("Too late! The mechanism jammed.");
-                playSound("Error.mp3");
+
+                // Calculate overall tier based on all hits
+                const tiers: RepairResultTier[] = [];
+                for (const t of currentTargets) {
+                    if (t.hitTier !== undefined) {
+                        tiers.push(t.hitTier);
+                    }
+                }
+                const perfectCount = tiers.filter((t) => t === "Perfect").size();
+                const greatCount = tiers.filter((t) => t === "Great").size();
+
+                let overallTier: RepairResultTier;
+                if (perfectCount === tiers.size()) {
+                    overallTier = "Perfect";
+                } else if (perfectCount + greatCount === tiers.size()) {
+                    overallTier = "Great";
+                } else {
+                    overallTier = "Good";
+                }
+
+                setResultTier(overallTier);
+                setPhase("success");
+                setFeedback(`All targets hit! ${overallTier} repair sequence!`);
             }
         });
 
@@ -167,7 +335,44 @@ export default function RepairWindow() {
             heartbeatRef.current?.Disconnect();
             heartbeatRef.current = undefined;
         };
-    }, [phase, attemptSeed]);
+    }, [phase, attemptSeed, gameStartTime]);
+
+    const handleTargetActivated = (targetId: number) => {
+        if (phase !== "running") return;
+
+        const currentTargets = [...targetsRef.current];
+        const target = currentTargets.find((t) => t.id === targetId);
+        if (!target || target.hit) return;
+
+        const elapsed = currentTime - target.startTime;
+        const progress = 1 - elapsed / target.approachDuration;
+
+        if (math.abs(progress) <= target.goodWindow) {
+            const tier = getResultTier(progress, target.perfectWindow, target.greatWindow);
+            target.hit = true;
+            target.hitTier = tier;
+            setTargets(currentTargets);
+
+            // Play sound for this hit
+            playSound("repair/Hit.mp3");
+
+            // Move to next target
+            if (targetId === currentTargetIndexRef.current) {
+                setCurrentTargetIndex(currentTargetIndexRef.current + 1);
+            }
+        } else {
+            // Bad hit
+            heartbeatRef.current?.Disconnect();
+            heartbeatRef.current = undefined;
+            setPhase("fail");
+            if (progress > target.goodWindow) {
+                setFeedback("Too early! The calibrators rattled loose.");
+            } else {
+                setFeedback("Too late! The calibrators rattled loose.");
+            }
+            playSound("Error.mp3");
+        }
+    };
 
     useEffect(() => {
         if (phase === "success" && resultTier !== undefined) {
@@ -180,9 +385,15 @@ export default function RepairWindow() {
                 playSound("repair/Good.mp3");
             }
 
+            // Delay showing the tier text for dramatic effect
+            setShowResultTier(false);
+            task.delay(0.2, () => {
+                setShowResultTier(true);
+            });
+
             // Create spark effects for Great and Perfect completions
             if (tier === "Perfect" || tier === "Great") {
-                const sparkCount = tier === "Perfect" ? 16 : 10;
+                const sparkCount = tier === "Perfect" ? 24 : 16;
                 const sparkArray: Array<{
                     id: string;
                     angle: number;
@@ -219,13 +430,6 @@ export default function RepairWindow() {
         }
     }, [phase]);
 
-    const targetPosition = useMemo(() => {
-        const radius = (INNER_SIZE / 2) * 0.8;
-        const x = 0.5 + math.cos(targetAngle) * radius;
-        const y = 0.5 + math.sin(targetAngle) * radius;
-        return new UDim2(x, 0, y, 0);
-    }, [targetAngle]);
-
     const startDisabled = phase === "countdown" || phase === "running";
     const showCountdown = phase === "countdown";
 
@@ -233,11 +437,17 @@ export default function RepairWindow() {
         if (feedback) return feedback;
         switch (phase) {
             case "idle":
-                return "Press start and time your click when the outer ring overlaps the core.";
+                return targets.size() > 1
+                    ? `Hit ${targets.size()} targets in sequence to complete the repair.`
+                    : "Press start and time your click when the outer ring overlaps the core.";
             case "countdown":
                 return "Steady your tools and wait for the pulse.";
-            case "running":
-                return "Click the moving target just as the rings meet!";
+            case "running": {
+                const remainingTargets = targets.filter((t) => !t.hit).size();
+                return remainingTargets > 0
+                    ? `${remainingTargets} target${remainingTargets > 1 ? "s" : ""} remaining!`
+                    : "All targets hit!";
+            }
             case "success":
                 if (resultTier) return `${resultTier} repair!`;
                 return "Repair complete!";
@@ -245,35 +455,6 @@ export default function RepairWindow() {
                 return "Missed the timing—try again.";
         }
     })();
-
-    const handleActivated = () => {
-        if (phase !== "running") return;
-
-        const remaining = currentProgressRef.current;
-        heartbeatRef.current?.Disconnect();
-        heartbeatRef.current = undefined;
-
-        if (math.abs(remaining) <= HOT_WINDOW) {
-            const tier = getResultTier(remaining);
-            setResultTier(tier);
-            setPhase("success");
-            setFeedback(`Stabilized with ${tier} timing!`);
-
-            // Delay showing the tier text for dramatic effect
-            setShowResultTier(false);
-            task.delay(0.2, () => {
-                setShowResultTier(true);
-            });
-        } else {
-            setPhase("fail");
-            if (remaining > HOT_WINDOW) {
-                setFeedback("Too early! The calibrators rattled loose.");
-            } else {
-                setFeedback("Too late! The calibrators rattled loose.");
-            }
-            playSound("Error.mp3");
-        }
-    };
 
     useEffect(() => {
         if (phase === "success") return;
@@ -291,6 +472,8 @@ export default function RepairWindow() {
     useEffect(() => {
         const connection = RepairManager.updated.connect(() => {
             setActiveItem(RepairManager.item);
+            // Reset state when a new item is selected
+            resetToIdle();
         });
         return () => connection.Disconnect();
     }, []);
@@ -302,8 +485,6 @@ export default function RepairWindow() {
         setResultTier(undefined);
         setShowResultTier(false);
         setAttemptSeed((attempt) => attempt + 1);
-        setApproachProgress(1);
-        currentProgressRef.current = 1;
         setPhase("countdown");
     };
 
@@ -313,22 +494,17 @@ export default function RepairWindow() {
         setPhase("idle");
         setFeedback(undefined);
         setShowResultTier(false);
-        setApproachProgress(1);
-        currentProgressRef.current = 1;
+        setTargets([]);
+        setCurrentTargetIndex(0);
     };
 
-    const targetSize = useMemo(() => {
-        if (activeItem === undefined) return 25;
-
-        const index = Items.sortedItems.indexOf(activeItem);
-        if (index === -1) return 25;
-
-        const minSize = 15;
-        const maxSize = 75;
-        const scale = (Items.length - index) / (Items.length - 1);
-
-        return minSize + (maxSize - minSize) * scale;
-    }, [activeItem]);
+    if (!activeItem) {
+        return (
+            <TechWindow title="Repair Station" icon={getAsset("assets/Broken.png")} id={id} visible={visible}>
+                <Fragment />
+            </TechWindow>
+        );
+    }
 
     return (
         <TechWindow title="Repair Station" icon={getAsset("assets/Broken.png")} id={id} visible={visible}>
@@ -338,7 +514,7 @@ export default function RepairWindow() {
                 FontFace={RobotoMonoBold}
                 Position={new UDim2(0.5, 0, 0.5, 0)}
                 Size={new UDim2(1, -10, 0.4, 0)}
-                Text={activeItem?.name.upper() ?? "Unknown Item"}
+                Text={activeItem.name.upper()}
                 TextColor3={Color3.fromRGB(255, 255, 255)}
                 TextTransparency={0.9}
                 TextScaled={true}
@@ -400,55 +576,150 @@ export default function RepairWindow() {
                     </textlabel>
 
                     <frame BackgroundTransparency={1} Size={new UDim2(1, 0, 1, 0)}>
-                        <imagebutton
-                            Active={true}
-                            AnchorPoint={new Vector2(0.5, 0.5)}
-                            AutoButtonColor={false}
-                            BackgroundTransparency={0}
-                            BackgroundColor3={Color3.fromRGB(255, 212, 120)}
-                            Position={targetPosition}
-                            Size={new UDim2(0, targetSize, 0, targetSize)}
-                            Event={{ Activated: handleActivated }}
-                        >
-                            <uicorner CornerRadius={new UDim(1, 0)} />
-                            <uistroke Color={Color3.fromRGB(110, 58, 0)} Thickness={2} />
+                        {/* Render all targets */}
+                        {targets.map((target) => {
+                            const elapsed = currentTime - target.startTime;
+                            const progress = 1 - elapsed / target.approachDuration;
 
-                            <frame
-                                Active={true}
-                                AnchorPoint={new Vector2(0.5, 0.5)}
-                                BackgroundTransparency={1}
-                                Position={new UDim2(0.5, 0, 0.5, 0)}
-                                Size={
-                                    new UDim2(1, math.abs(approachProgress) * 100, 1, math.abs(approachProgress) * 100)
+                            // Calculate fixed position (no movement) - radius stored in direction field
+                            const radius = target.direction; // Radius is stored in direction field
+                            const x = 0.5 + math.cos(target.angle) * radius;
+                            const y = 0.5 + math.sin(target.angle) * radius;
+                            const position = new UDim2(x, 0, y, 0);
+
+                            // Determine visibility - target appears when its approach starts
+                            const isVisible = elapsed >= 0 && !target.hit;
+
+                            // Target color based on state
+                            let targetColor = Color3.fromRGB(255, 212, 120);
+                            let strokeColor = Color3.fromRGB(110, 58, 0);
+                            if (target.hit) {
+                                if (target.hitTier === "Perfect") {
+                                    targetColor = Color3.fromRGB(255, 215, 0);
+                                    strokeColor = Color3.fromRGB(120, 60, 0);
+                                } else if (target.hitTier === "Great") {
+                                    targetColor = Color3.fromRGB(100, 200, 255);
+                                    strokeColor = Color3.fromRGB(20, 60, 120);
+                                } else {
+                                    targetColor = Color3.fromRGB(150, 255, 150);
+                                    strokeColor = Color3.fromRGB(30, 100, 30);
                                 }
-                            >
-                                <uicorner CornerRadius={new UDim(1, 0)} />
-                                <uistroke
-                                    ApplyStrokeMode={Enum.ApplyStrokeMode.Border}
-                                    Color={
-                                        approachProgress >= 0
-                                            ? Color3.fromRGB(255, 148, 117)
-                                            : Color3.fromRGB(255, 100, 100)
-                                    }
-                                    Thickness={2}
-                                    Transparency={0.2}
-                                />
-                                <uigradient
-                                    Color={
-                                        approachProgress >= 0
-                                            ? new ColorSequence([
-                                                  new ColorSequenceKeypoint(0, Color3.fromRGB(44, 82, 136)),
-                                                  new ColorSequenceKeypoint(1, Color3.fromRGB(117, 200, 255)),
-                                              ])
-                                            : new ColorSequence([
-                                                  new ColorSequenceKeypoint(0, Color3.fromRGB(136, 44, 44)),
-                                                  new ColorSequenceKeypoint(1, Color3.fromRGB(255, 100, 100)),
-                                              ])
-                                    }
-                                    Rotation={-45}
-                                />
-                            </frame>
-                        </imagebutton>
+                            }
+
+                            // Number label for sequence
+                            const sequenceNumber = target.id + 1;
+
+                            return (
+                                <imagebutton
+                                    ref={(rbx) => {
+                                        if (rbx === undefined) return;
+                                        if (isVisible) {
+                                            TweenService.Create(rbx, TARGET_FADE_IN_TWEENINFO, {
+                                                BackgroundTransparency: 0,
+                                            }).Play();
+                                        } else {
+                                            rbx.BackgroundTransparency = 1;
+                                        }
+                                    }}
+                                    key={`target-${target.id}`}
+                                    Active={isVisible && !target.hit}
+                                    AnchorPoint={new Vector2(0.5, 0.5)}
+                                    AutoButtonColor={false}
+                                    BackgroundTransparency={1}
+                                    BackgroundColor3={targetColor}
+                                    Position={position}
+                                    Size={new UDim2(0, target.size, 0, target.size)}
+                                    Visible={isVisible || target.hit}
+                                    Event={{
+                                        Activated: () => handleTargetActivated(target.id),
+                                    }}
+                                    ZIndex={target.hit ? 1 : 2}
+                                >
+                                    <uicorner CornerRadius={new UDim(1, 0)} />
+                                    <uistroke Color={strokeColor} Thickness={2} />
+
+                                    {/* Sequence number */}
+                                    <textlabel
+                                        AnchorPoint={new Vector2(0.5, 0.5)}
+                                        BackgroundTransparency={1}
+                                        FontFace={RobotoMonoBold}
+                                        Position={new UDim2(0.5, 0, 0.5, 0)}
+                                        Size={new UDim2(0.6, 0, 0.6, 0)}
+                                        Text={`${sequenceNumber}`}
+                                        TextColor3={Color3.fromRGB(50, 25, 0)}
+                                        TextScaled={true}
+                                        Visible={!target.hit}
+                                        ZIndex={3}
+                                    />
+
+                                    {/* Approach circle */}
+                                    {isVisible && !target.hit && (
+                                        <frame
+                                            Active={true}
+                                            AnchorPoint={new Vector2(0.5, 0.5)}
+                                            BackgroundTransparency={1}
+                                            Position={new UDim2(0.5, 0, 0.5, 0)}
+                                            Size={new UDim2(1, math.abs(progress) * 150, 1, math.abs(progress) * 150)}
+                                        >
+                                            <uicorner CornerRadius={new UDim(1, 0)} />
+                                            <uistroke
+                                                ApplyStrokeMode={Enum.ApplyStrokeMode.Border}
+                                                Color={
+                                                    progress >= 0
+                                                        ? Color3.fromRGB(255, 148, 117)
+                                                        : Color3.fromRGB(255, 100, 100)
+                                                }
+                                                Thickness={3}
+                                                Transparency={0.2}
+                                            />
+                                            <uigradient
+                                                Color={
+                                                    progress >= 0
+                                                        ? new ColorSequence([
+                                                              new ColorSequenceKeypoint(0, Color3.fromRGB(44, 82, 136)),
+                                                              new ColorSequenceKeypoint(
+                                                                  1,
+                                                                  Color3.fromRGB(117, 200, 255),
+                                                              ),
+                                                          ])
+                                                        : new ColorSequence([
+                                                              new ColorSequenceKeypoint(0, Color3.fromRGB(136, 44, 44)),
+                                                              new ColorSequenceKeypoint(
+                                                                  1,
+                                                                  Color3.fromRGB(255, 100, 100),
+                                                              ),
+                                                          ])
+                                                }
+                                                Rotation={-45}
+                                            />
+                                        </frame>
+                                    )}
+
+                                    {/* Hit indicator */}
+                                    {target.hit && target.hitTier && (
+                                        <textlabel
+                                            AnchorPoint={new Vector2(0.5, 0.5)}
+                                            BackgroundTransparency={1}
+                                            FontFace={RobotoMonoBold}
+                                            Position={new UDim2(0.5, 0, 0.5, 0)}
+                                            Size={new UDim2(0.8, 0, 0.4, 0)}
+                                            Text={
+                                                target.hitTier === "Perfect"
+                                                    ? "!!"
+                                                    : target.hitTier === "Great"
+                                                      ? "!"
+                                                      : "✓"
+                                            }
+                                            TextColor3={Color3.fromRGB(255, 255, 255)}
+                                            TextScaled={true}
+                                            ZIndex={3}
+                                        >
+                                            <uistroke Color={strokeColor} Thickness={2} />
+                                        </textlabel>
+                                    )}
+                                </imagebutton>
+                            );
+                        })}
 
                         {phase === "success" && resultTier && showResultTier && <ResultTierDisplay tier={resultTier} />}
 

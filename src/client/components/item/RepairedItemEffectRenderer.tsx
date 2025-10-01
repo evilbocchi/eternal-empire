@@ -16,8 +16,8 @@ interface ActiveEffect {
 }
 
 const EFFECT_DURATION: Record<RepairProtectionTier, number> = {
-    Great: 3.5,
-    Perfect: 5.5,
+    Great: 4.5,
+    Perfect: 8.5,
 };
 
 const FADE_OUT_DURATION = 0.8;
