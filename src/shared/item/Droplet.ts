@@ -826,6 +826,9 @@ export default class Droplet {
                 task.delay(10, checkStillness);
             };
             task.delay(10, checkStillness);
+
+            eat(spawned, "Destroy");
+
             return spawned;
         };
     }
