@@ -1,3 +1,4 @@
+//!optimize 2
 import { PathfindingService, Workspace } from "@rbxts/services";
 import { ASSETS } from "shared/asset/GameAssets";
 
@@ -83,6 +84,7 @@ function loadWanderer(character: Model) {
     });
 }
 
+// disabled until performance is improved
 const enabled = false;
 if (enabled) {
     for (const startPos of Workspace.WaitForChild("Wanderers").GetChildren()) {

@@ -37,15 +37,6 @@ export const IS_PUBLIC_SERVER = (() => {
     return value;
 })();
 
-export function preloadFlameworkClient() {
-    Flamework.addPaths("src/client/controllers");
-}
-
-export function igniteFlameworkClient() {
-    preloadFlameworkClient();
-    Flamework.ignite();
-}
-
 export function preloadFlameworkServer() {
     Flamework.addPaths("src/server/services");
 }
@@ -53,9 +44,4 @@ export function preloadFlameworkServer() {
 export function igniteFlameworkServer() {
     preloadFlameworkServer();
     Flamework.ignite();
-}
-
-export function igniteFlameworkCI() {
-    preloadFlameworkClient();
-    preloadFlameworkServer();
 }

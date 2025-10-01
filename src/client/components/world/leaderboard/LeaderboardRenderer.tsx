@@ -1,4 +1,5 @@
 import React, { Fragment, useEffect, useState } from "@rbxts/react";
+import Shaker from "client/components/effect/Shaker";
 import Leaderboard, { LeaderboardType } from "client/components/world/leaderboard/Leaderboard";
 import useProperty from "client/hooks/useProperty";
 import { playSound } from "shared/asset/GameAssets";
@@ -28,7 +29,13 @@ export default function LeaderboardRenderer() {
             },
         );
 
+        const connection = Packets.donationGiven.fromServer(() => {
+            playSound("PowerUp.mp3");
+            Shaker.shake();
+        });
+
         return () => {
+            connection.Disconnect();
             leaderboardNode.cleanup();
         };
     }, []);

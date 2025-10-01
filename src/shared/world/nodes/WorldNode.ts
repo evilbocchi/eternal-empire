@@ -44,6 +44,9 @@ export default class WorldNode<T extends Instance = Instance> {
     }
 
     cleanup() {
+        for (const instance of this.INSTANCES) {
+            this.unregisterInstance(instance);
+        }
         this.addedConnection?.Disconnect();
         this.removedConnection?.Disconnect();
     }

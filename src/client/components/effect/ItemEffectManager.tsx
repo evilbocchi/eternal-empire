@@ -8,7 +8,7 @@ export default function DropletSurgeManager() {
     useEffect(() => {
         const isReady = (instance: Instance): instance is BasePart => {
             if (!instance.IsA("BasePart")) return false;
-            if (!instance.IsAncestorOf(PLACED_ITEMS_FOLDER)) return false;
+            if (!instance.IsDescendantOf(PLACED_ITEMS_FOLDER)) return false;
             return true;
         };
 
@@ -19,6 +19,7 @@ export default function DropletSurgeManager() {
 
         const spinnerWorldNode = new WorldNode("Spinner", (instance) => {
             if (!isReady(instance)) return;
+
             const createRandomTween = () => {
                 if (instance === undefined || instance.Parent === undefined) return;
 
