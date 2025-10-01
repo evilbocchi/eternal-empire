@@ -1,12 +1,9 @@
 import React, { Fragment, useEffect, useMemo, useState } from "@rbxts/react";
 import { Debris, TweenService } from "@rbxts/services";
-import ProgressBar from "client/components/window/ProgressBar";
-import { observeCharacter } from "client/constants";
-import { getPlayerCharacter } from "shared/hamster/getPlayerCharacter";
-import { RobotoSlabExtraBold } from "shared/asset/GameFonts";
 import { emitEffect, playSound } from "shared/asset/GameAssets";
+import { RobotoMonoBold, RobotoSlabExtraBold } from "shared/asset/GameFonts";
+import { getPlayerCharacter } from "shared/hamster/getPlayerCharacter";
 import Items from "shared/items/Items";
-import { AREAS } from "shared/world/Area";
 import HARVESTABLES from "shared/world/harvestable/Harvestable";
 
 export default function HarvestableGui({ enabled, model }: { enabled: boolean; model: PVInstance }) {
@@ -15,6 +12,28 @@ export default function HarvestableGui({ enabled, model }: { enabled: boolean; m
 
     const [health, setHealth] = useState(harvestable.health);
     const maxHealth = harvestable.health;
+
+    const colorSequence = useMemo(() => {
+        const healthPercent = health / maxHealth;
+
+        // Create a dynamic gradient based on health percentage
+        if (healthPercent > 0.5) {
+            return new ColorSequence([
+                new ColorSequenceKeypoint(0, Color3.fromRGB(46, 204, 113)),
+                new ColorSequenceKeypoint(1, Color3.fromRGB(46, 204, 84)),
+            ]);
+        } else if (healthPercent > 0.25) {
+            return new ColorSequence([
+                new ColorSequenceKeypoint(0, Color3.fromRGB(241, 196, 15)),
+                new ColorSequenceKeypoint(1, Color3.fromRGB(230, 126, 34)),
+            ]);
+        } else {
+            return new ColorSequence([
+                new ColorSequenceKeypoint(0, Color3.fromRGB(230, 126, 34)),
+                new ColorSequenceKeypoint(1, Color3.fromRGB(231, 76, 60)),
+            ]);
+        }
+    }, [health, maxHealth]);
 
     const item = Items.getItem(model.Name);
 
@@ -55,30 +74,60 @@ export default function HarvestableGui({ enabled, model }: { enabled: boolean; m
 
                 const multi = -drop / gear.damage!;
                 effect.Brightness = multi;
-                const color = multi > 1 ? Color3.fromRGB(217, 0, (multi - 1) * 120) : Color3.fromRGB(217, 0, 0);
-                const gui = new Instance("BillboardGui");
-                gui.Size = new UDim2(1, 0, 0.25, 0);
-                gui.StudsOffset = new Vector3(0, 2, 0);
-                gui.AlwaysOnTop = true;
-                gui.Active = true;
-                gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling;
-                gui.Name = "HarvestableGui";
+
+                const baseColor = Color3.fromRGB(217, 0, 0);
+                const critColor = Color3.fromRGB(158, 0, 217);
+                const colorBlend = math.clamp((multi - 1) / 3, 0, 1);
+                const damageColor = baseColor.Lerp(critColor, colorBlend);
+
+                const damageGui = new Instance("BillboardGui");
+                const horizontalJitter = math.random(-25, 25) / 75;
+                const startingOffset = new Vector3(horizontalJitter, 2.75, horizontalJitter);
+                damageGui.Size = new UDim2(5, 0, 1, 0);
+                damageGui.StudsOffsetWorldSpace = startingOffset;
+                damageGui.AlwaysOnTop = true;
+                damageGui.Active = true;
+                damageGui.MaxDistance = 60;
+                damageGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling;
+                damageGui.Name = "HarvestableDamageLabel";
+
                 const valueLabel = new Instance("TextLabel");
+                valueLabel.AnchorPoint = new Vector2(0.5, 0.5);
+                valueLabel.Position = new UDim2(0.5, 0, 0.5, 0);
                 valueLabel.BackgroundTransparency = 1;
                 valueLabel.FontFace = RobotoSlabExtraBold;
                 valueLabel.Text = `-${math.floor(-drop)}`;
                 valueLabel.TextScaled = true;
                 valueLabel.TextSize = 14;
                 valueLabel.TextWrapped = true;
-                valueLabel.Size = new UDim2(1, 0, 0.125 * (math.max(multi, 1) / 2 + 0.5), 0);
-                valueLabel.TextColor3 = color;
+                valueLabel.TextColor3 = damageColor;
+                valueLabel.TextTransparency = 0;
+                valueLabel.Size = new UDim2(1, 0, 0.125 * (math.max(multi, 1) / 2) + 0.7, 0);
 
                 const stroke = new Instance("UIStroke");
                 stroke.Thickness = 4;
                 stroke.Color = Color3.fromRGB(0, 0, 0);
+                stroke.Transparency = 0;
                 stroke.Parent = valueLabel;
-                gui.Adornee = model;
-                gui.Parent = model;
+
+                valueLabel.Parent = damageGui;
+                damageGui.Adornee = model;
+                damageGui.Parent = model;
+
+                const tweenInfo = new TweenInfo(1, Enum.EasingStyle.Cubic, Enum.EasingDirection.In);
+                TweenService.Create(damageGui, tweenInfo, {
+                    StudsOffsetWorldSpace: new Vector3(0, -1.75, 0),
+                }).Play();
+                TweenService.Create(valueLabel, tweenInfo, {
+                    TextTransparency: 1,
+                    Rotation: 15 * (math.random() - 0.5),
+                }).Play();
+                TweenService.Create(stroke, tweenInfo, {
+                    Transparency: 1,
+                }).Play();
+
+                Debris.AddItem(damageGui, 4);
+
                 if (multi > 1.5) {
                     playSound("Critical.mp3");
                 }
@@ -104,86 +153,120 @@ export default function HarvestableGui({ enabled, model }: { enabled: boolean; m
             AlwaysOnTop={true}
             Enabled={enabled}
             MaxDistance={25}
-            Size={new UDim2(4, 0, 2, 0)}
+            Size={new UDim2(5, 0, 2, 0)}
             StudsOffset={new Vector3(0, 2.5, 0)}
             ZIndexBehavior={Enum.ZIndexBehavior.Sibling}
         >
-            <textlabel
-                BackgroundTransparency={1}
-                FontFace={RobotoSlabExtraBold}
-                Size={new UDim2(1, 0, 0.5, 0)}
-                Text={item?.name ?? harvestable?.name ?? model.Name}
-                TextColor3={Color3.fromRGB(255, 255, 255)}
-                TextScaled={true}
-                TextSize={14}
-                TextWrapped={true}
-                TextXAlignment={Enum.TextXAlignment.Left}
-            >
-                <uistroke Thickness={4} />
-            </textlabel>
-
-            <ProgressBar
-                current={health}
-                max={maxHealth}
-                colorSequence={new ColorSequence(Color3.fromRGB(0, 255, 0), Color3.fromRGB(0, 166, 56))}
-                frameProps={{
-                    Size: new UDim2(1, 0, 0.3, 0),
-                }}
+            {/* Window shadow */}
+            <frame
+                BackgroundColor3={Color3.fromRGB(0, 0, 0)}
+                BackgroundTransparency={0.3}
+                BorderSizePixel={0}
+                Position={new UDim2(0.02, 0, 0.02, 0)}
+                Size={new UDim2(1, 0, 1, 0)}
+                ZIndex={0}
             />
 
-            <uilistlayout Padding={new UDim(0.05, 0)} SortOrder={Enum.SortOrder.LayoutOrder} />
+            {/* Main window */}
+            <frame
+                BackgroundColor3={Color3.fromRGB(255, 255, 255)}
+                BackgroundTransparency={0}
+                BorderSizePixel={0}
+                Size={new UDim2(1, 0, 1, 0)}
+                ZIndex={1}
+            >
+                <uigradient
+                    Color={new ColorSequence(Color3.fromRGB(39, 39, 39), Color3.fromRGB(0, 0, 0))}
+                    Rotation={90}
+                />
+                <uipadding
+                    PaddingTop={new UDim(0.05, 0)}
+                    PaddingBottom={new UDim(0.05, 0)}
+                    PaddingLeft={new UDim(0.035, 0)}
+                    PaddingRight={new UDim(0.035, 0)}
+                />
+                <uilistlayout Padding={new UDim(0.05, 0)} FillDirection={Enum.FillDirection.Vertical} />
+
+                {/* Title text container */}
+                <frame BackgroundTransparency={1} Size={new UDim2(1, 0, 0.55, 0)}>
+                    {/* Title main */}
+                    <textlabel
+                        BackgroundTransparency={1}
+                        FontFace={RobotoMonoBold}
+                        Size={new UDim2(1, 0, 1, 0)}
+                        Text={item?.name ?? harvestable?.name ?? model.Name}
+                        TextColor3={Color3.fromRGB(255, 255, 255)}
+                        TextScaled={true}
+                        TextSize={14}
+                        TextWrapped={true}
+                        TextXAlignment={Enum.TextXAlignment.Left}
+                        ZIndex={2}
+                    />
+                </frame>
+
+                {/* Health bar container  */}
+                <frame
+                    BackgroundColor3={Color3.fromRGB(255, 255, 255)}
+                    BorderSizePixel={0}
+                    Size={new UDim2(1, 0, 0.35, 0)}
+                >
+                    <uigradient
+                        Color={new ColorSequence(Color3.fromRGB(255, 255, 255), Color3.fromRGB(200, 200, 200))}
+                        Rotation={90}
+                    />
+                    <frame
+                        AnchorPoint={new Vector2(0.5, 0.5)}
+                        BackgroundColor3={Color3.fromRGB(39, 39, 39)}
+                        BorderSizePixel={0}
+                        Position={new UDim2(0.5, 0, 0.5, 0)}
+                        Size={new UDim2(0.98, 0, 0.86, 0)}
+                    >
+                        {/* Health text shadows (4 corners to simulate stroke) */}
+                        {[
+                            { x: 0.507, y: 0.52 }, // Bottom-right (scaled for aspect ratio)
+                            { x: 0.493, y: 0.52 }, // Bottom-left
+                            { x: 0.507, y: 0.48 }, // Top-right
+                            { x: 0.493, y: 0.48 }, // Top-left
+                        ].map((offset, index) => (
+                            <textlabel
+                                key={index}
+                                AnchorPoint={new Vector2(0.5, 0.5)}
+                                BackgroundTransparency={1}
+                                FontFace={RobotoMonoBold}
+                                Position={new UDim2(offset.x, 0, offset.y, 0)}
+                                Size={new UDim2(0.8, 0, 0.9, 0)}
+                                Text={`${health}/${maxHealth}`}
+                                TextColor3={Color3.fromRGB(0, 0, 0)}
+                                TextScaled={true}
+                                TextTransparency={0}
+                                ZIndex={1}
+                            />
+                        ))}
+                        {/* Health text main */}
+                        <textlabel
+                            AnchorPoint={new Vector2(0.5, 0.5)}
+                            BackgroundTransparency={1}
+                            FontFace={RobotoMonoBold}
+                            Position={new UDim2(0.5, 0, 0.5, 0)}
+                            Size={new UDim2(0.8, 0, 0.9, 0)}
+                            Text={`${health}/${maxHealth}`}
+                            TextColor3={Color3.fromRGB(255, 255, 255)}
+                            TextScaled={true}
+                            ZIndex={2}
+                        />
+
+                        <frame
+                            BackgroundColor3={Color3.fromRGB(255, 255, 255)}
+                            BorderSizePixel={0}
+                            Size={new UDim2(math.clamp(health / maxHealth, 0, 1), 0, 1, 0)}
+                            Visible={health > 0}
+                            ZIndex={0}
+                        >
+                            <uigradient Color={colorSequence} Rotation={90} />
+                        </frame>
+                    </frame>
+                </frame>
+            </frame>
         </billboardgui>
-    );
-}
-
-export function HarvestableGuiRenderer() {
-    const [enabled, setEnabled] = useState(false);
-
-    const harvestableModels = useMemo(() => {
-        const models = new Array<Instance>();
-        for (const [, area] of pairs(AREAS)) {
-            const folder = area.worldNode.getInstance()?.FindFirstChild("Harvestable");
-            if (folder === undefined) continue;
-            for (const child of folder.GetChildren()) {
-                if (child.IsA("PVInstance") && HARVESTABLES[child.Name as HarvestableId] !== undefined) {
-                    models.push(child);
-                }
-            }
-        }
-        return models;
-    }, []);
-
-    useEffect(() => {
-        let childAddedConnection: RBXScriptConnection | undefined;
-        let childRemovedConnection: RBXScriptConnection | undefined;
-        const onCharacterAdded = (character: Model) => {
-            childAddedConnection?.Disconnect();
-            childRemovedConnection?.Disconnect();
-            childAddedConnection = character.ChildAdded.Connect((child) => {
-                if (child.IsA("Tool")) {
-                    setEnabled(true);
-                }
-            });
-            childRemovedConnection = character.ChildRemoved.Connect((child) => {
-                if (child.IsA("Tool")) {
-                    setEnabled(false);
-                }
-            });
-        };
-        const cleanup = observeCharacter(onCharacterAdded);
-
-        return () => {
-            childAddedConnection?.Disconnect();
-            childRemovedConnection?.Disconnect();
-            cleanup();
-        };
-    }, []);
-
-    return (
-        <Fragment>
-            {harvestableModels?.map((model) => (
-                <HarvestableGui enabled={enabled} model={model as PVInstance} />
-            ))}
-        </Fragment>
     );
 }

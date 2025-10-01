@@ -5,6 +5,7 @@ import { useEffect, useState } from "@rbxts/react";
 import { HttpService, Players, ReplicatedStorage, RunService, Workspace } from "@rbxts/services";
 import { LOCAL_PLAYER } from "client/constants";
 import MusicManager from "client/MusicManager";
+import { IS_EDIT } from "shared/Context";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import { CURRENCY_DETAILS } from "shared/currency/CurrencyDetails";
 import PlayerProfileTemplate from "shared/data/profile/PlayerProfileTemplate";
@@ -12,6 +13,7 @@ import eat from "shared/hamster/eat";
 import Unique from "shared/item/traits/Unique";
 import Items from "shared/items/Items";
 import Packets from "shared/Packets";
+import Sandbox from "shared/Sandbox";
 
 class StoryMocking {
     static mockData() {
@@ -385,6 +387,35 @@ class StoryMocking {
         for (const [dependency, identifier] of start) {
             reuseThread(profileYielding(() => dependency.onStart(), identifier));
         }
+    }
+
+    static mockPhysics() {
+        useEffect(() => {
+            if (!IS_EDIT || !Sandbox.getEnabled()) return;
+
+            const t = os.clock();
+            let safeToStartPhysics = true;
+            for (const part of Workspace.GetDescendants()) {
+                if (part.IsA("BasePart") && !part.Anchored) {
+                    if (part.HasTag("Droplet")) continue;
+                    safeToStartPhysics = false;
+                    print("Unanchored part found", part);
+                }
+            }
+            if (os.clock() - t > 0.05) {
+                warn("Part scan took too long, took", os.clock() - t, "seconds");
+            }
+
+            if (safeToStartPhysics) {
+                RunService.Run();
+            }
+
+            return () => {
+                if (safeToStartPhysics) {
+                    RunService.Stop();
+                }
+            };
+        }, []);
     }
 
     /**

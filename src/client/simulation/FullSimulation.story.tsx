@@ -13,6 +13,7 @@ export = CreateReactStory(
         reactRoblox: ReactRoblox,
     },
     () => {
+        StoryMocking.mockPhysics();
         StoryMocking.mockCharacter();
         ItemViewport.disable();
 

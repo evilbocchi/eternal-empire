@@ -5,9 +5,10 @@
  * @since 1.0.0
  */
 
+import { simpleInterval } from "@antivivi/vrldk";
 import { Players, StarterGui } from "@rbxts/services";
-import { getPlayerCharacter } from "shared/hamster/getPlayerCharacter";
 import { IS_EDIT } from "shared/Context";
+import { getPlayerCharacter } from "shared/hamster/getPlayerCharacter";
 
 /**
  * Reference to the local player.
@@ -20,10 +21,17 @@ export const LOCAL_PLAYER = Players.LocalPlayer as Player | undefined;
  * @param callback Function to call with the new character model when it changes.
  * @returns A function to disconnect the observer.
  */
-export const observeCharacter = (callback: (character: Model) => void) => {
-    const dummy = getPlayerCharacter();
-    if (dummy !== undefined) {
-        callback(dummy);
+export function observeCharacter(callback: (character: Model) => void) {
+    if (IS_EDIT) {
+        let dummy: Model | undefined;
+        const cleanup = simpleInterval(() => {
+            const newDummy = getPlayerCharacter();
+            if (newDummy !== dummy) {
+                dummy = newDummy;
+                if (dummy) callback(dummy);
+            }
+        }, 1);
+        return cleanup;
     }
     if (LOCAL_PLAYER) {
         const connection = LOCAL_PLAYER.CharacterAdded.Connect(callback);
@@ -31,7 +39,7 @@ export const observeCharacter = (callback: (character: Model) => void) => {
     } else {
         return () => {};
     }
-};
+}
 
 /**
  * Reference to the local player's PlayerGui.

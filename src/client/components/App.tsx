@@ -186,33 +186,6 @@ export default function App() {
     }, []);
 
     useEffect(() => {
-        if (!IS_EDIT || !Sandbox.getEnabled()) return;
-
-        const t = os.clock();
-        let safeToStartPhysics = true;
-        for (const part of Workspace.GetDescendants()) {
-            if (part.IsA("BasePart") && !part.Anchored) {
-                if (part.HasTag("Droplet")) continue;
-                safeToStartPhysics = false;
-                print("Unanchored part found", part);
-            }
-        }
-        if (os.clock() - t > 0.05) {
-            warn("App: Part scan took too long, took", os.clock() - t, "seconds");
-        }
-
-        if (safeToStartPhysics) {
-            RunService.Run();
-        }
-
-        return () => {
-            if (safeToStartPhysics) {
-                RunService.Stop();
-            }
-        };
-    }, []);
-
-    useEffect(() => {
         const wasEnabled = StarterGui.GetCoreGuiEnabled(Enum.CoreGuiType.PlayerList);
         StarterGui.SetCoreGuiEnabled(Enum.CoreGuiType.PlayerList, false);
 

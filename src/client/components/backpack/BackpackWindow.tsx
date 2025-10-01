@@ -12,9 +12,9 @@ import { Environment } from "@rbxts/ui-labs";
 import GearOption, { layoutOrderFromGear } from "client/components/backpack/GearOption";
 import { useDocument } from "client/components/window/DocumentManager";
 import { LOCAL_PLAYER, observeCharacter } from "client/constants";
-import { getPlayerCharacter } from "shared/hamster/getPlayerCharacter";
 import { playSound } from "shared/asset/GameAssets";
 import { IS_EDIT } from "shared/Context";
+import { getPlayerCharacter } from "shared/hamster/getPlayerCharacter";
 import Gear from "shared/item/traits/Gear";
 import Items from "shared/items/Items";
 import Packets from "shared/Packets";
@@ -33,10 +33,10 @@ const KEY_CODES = new Map<number, Enum.KeyCode>([
 ]);
 
 const equipGear = (itemId: string) => {
-    const backpack = (LOCAL_PLAYER ?? Workspace).FindFirstChildOfClass("Backpack");
+    const backpack = LOCAL_PLAYER?.FindFirstChildOfClass("Backpack");
     const character = getPlayerCharacter();
     const humanoid = character?.FindFirstChildOfClass("Humanoid");
-    if (backpack === undefined || character === undefined || humanoid === undefined) return false;
+    if (character === undefined || humanoid === undefined) return false;
 
     const currentlyEquippedTool = character?.FindFirstChildOfClass("Tool");
     if (currentlyEquippedTool) {
@@ -81,7 +81,9 @@ export default function BackpackWindow() {
         let swingAnimation: AnimationTrack | undefined;
         let childAddedConnection: RBXScriptConnection | undefined;
         let childRemovedConnection: RBXScriptConnection | undefined;
-        const onCharacterAdded = (character: Model) => {
+
+        const cleanup = observeCharacter((character: Model) => {
+            print(character);
             const humanoid = character.WaitForChild("Humanoid") as Humanoid;
             swingAnimation = loadAnimation(humanoid, 16920778613);
 
@@ -108,8 +110,7 @@ export default function BackpackWindow() {
             if (existingTool) {
                 onToolAdded(existingTool);
             }
-        };
-        const cleanup = observeCharacter(onCharacterAdded);
+        });
 
         const OVERLAP_PARAMS = new OverlapParams();
         OVERLAP_PARAMS.CollisionGroup = "ItemHitbox";
@@ -157,7 +158,6 @@ export default function BackpackWindow() {
                 const t = tick();
                 if (lastUse + 8 / (gear.speed ?? 1) > t) return;
                 lastUse = t;
-                if (swingAnimation === undefined) return;
                 const registerHit = () => {
                     const hit = checkHarvestable(currentTool);
                     if (hit === undefined) return;
@@ -165,10 +165,10 @@ export default function BackpackWindow() {
                 };
                 if (IS_EDIT) {
                     registerHit();
-                } else {
+                } else if (swingAnimation) {
                     swingAnimation.Stopped.Once(registerHit);
+                    swingAnimation.Play();
                 }
-                swingAnimation.Play();
                 playSound("ToolSwing.mp3");
             }
         });
