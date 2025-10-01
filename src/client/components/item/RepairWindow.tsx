@@ -139,6 +139,7 @@ export default function RepairWindow() {
     const [sparks, setSparks] = useState<
         Array<{ id: string; angle: number; distance: number; delay: number; velocity: number; tier: RepairResultTier }>
     >([]);
+    const [consecutiveFailures, setConsecutiveFailures] = useState(0);
 
     // Multi-target state
     const [targets, setTargets] = useState<TargetData[]>([]);
@@ -164,14 +165,38 @@ export default function RepairWindow() {
 
         // Calculate target count based on item difficulty
         const itemIndex = activeItem ? Items.sortedItems.indexOf(activeItem) : 0;
-        const targetCount = calculateTargetCount(itemIndex, Items.length);
-        const targetSize = calculateTargetSize(itemIndex, Items.length);
-        const approachDuration = calculateApproachDuration(itemIndex, Items.length);
-        const goodWindow = calculateGoodWindow(itemIndex, Items.length);
-        const greatWindow = calculateGreatWindow(itemIndex, Items.length);
-        const perfectWindow = calculatePerfectWindow(itemIndex, Items.length);
+
+        // Apply difficulty reduction based on consecutive failures
+        // Each failure makes the game progressively easier (up to 5 failures)
+        const failureReduction = math.min(consecutiveFailures * 0.15, 0.75); // Up to 75% easier
+
+        let targetCount = calculateTargetCount(itemIndex, Items.length);
+        // Reduce target count on failures (minimum 2 targets)
+        targetCount = math.max(math.floor(targetCount * (1 - failureReduction * 0.5)), 2);
+
+        let targetSize = calculateTargetSize(itemIndex, Items.length);
+        // Increase target size on failures
+        targetSize = targetSize + failureReduction * 50;
+
+        let approachDuration = calculateApproachDuration(itemIndex, Items.length);
+        // Slow down approach on failures
+        approachDuration = approachDuration + failureReduction * 1.5;
+
+        let goodWindow = calculateGoodWindow(itemIndex, Items.length);
+        // Widen windows on failures
+        goodWindow = goodWindow + failureReduction * 0.3;
+
+        let greatWindow = calculateGreatWindow(itemIndex, Items.length);
+        greatWindow = greatWindow + failureReduction * 0.15;
+
+        let perfectWindow = calculatePerfectWindow(itemIndex, Items.length);
+        perfectWindow = perfectWindow + failureReduction * 0.05;
+
         const negativeGracePeriod = goodWindow + 0.05; // let the player witness their miss
-        const pacing = calculatePacing(itemIndex, Items.length);
+
+        let pacing = calculatePacing(itemIndex, Items.length);
+        // Increase pacing (slower) on failures
+        pacing = pacing + failureReduction * 0.8;
 
         // Generate targets with random positions that don't overlap
         const newTargets: TargetData[] = [];
@@ -231,7 +256,7 @@ export default function RepairWindow() {
 
         setTargets(newTargets);
         setCurrentTargetIndex(0);
-    }, [phase, attemptSeed, activeItem, random]);
+    }, [phase, attemptSeed, activeItem, random, consecutiveFailures]);
 
     useEffect(() => {
         if (phase !== "countdown") return;
@@ -296,6 +321,7 @@ export default function RepairWindow() {
                     setPhase("fail");
                     setFeedback("Missed a target! The mechanism jammed.");
                     playSound("Error.mp3");
+                    setConsecutiveFailures((prev) => prev + 1);
                     return;
                 }
             }
@@ -371,6 +397,7 @@ export default function RepairWindow() {
                 setFeedback("Too late! The calibrators rattled loose.");
             }
             playSound("Error.mp3");
+            setConsecutiveFailures((prev) => prev + 1);
         }
     };
 
@@ -384,6 +411,9 @@ export default function RepairWindow() {
             } else {
                 playSound("repair/Good.mp3");
             }
+
+            // Reset failure counter on success
+            setConsecutiveFailures(0);
 
             // Delay showing the tier text for dramatic effect
             setShowResultTier(false);
@@ -435,11 +465,16 @@ export default function RepairWindow() {
 
     const statusLabel = (() => {
         if (feedback) return feedback;
+
+        // Show difficulty assistance message if player has failed multiple times
+        const assistanceMessage =
+            consecutiveFailures >= 2 ? ` (Difficulty reduced after ${consecutiveFailures} failures)` : "";
+
         switch (phase) {
             case "idle":
                 return targets.size() > 1
-                    ? `Hit ${targets.size()} targets in sequence to complete the repair.`
-                    : "Press start and time your click when the outer ring overlaps the core.";
+                    ? `Hit ${targets.size()} targets in sequence to complete the repair.${assistanceMessage}`
+                    : `Press start and time your click when the outer ring overlaps the core.${assistanceMessage}`;
             case "countdown":
                 return "Steady your tools and wait for the pulse.";
             case "running": {
@@ -474,6 +509,8 @@ export default function RepairWindow() {
             setActiveItem(RepairManager.item);
             // Reset state when a new item is selected
             resetToIdle();
+            // Reset failure counter when switching items
+            setConsecutiveFailures(0);
         });
         return () => connection.Disconnect();
     }, []);
