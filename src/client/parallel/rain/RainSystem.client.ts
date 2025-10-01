@@ -229,11 +229,11 @@ let insideOfBuilding = false;
 const soundEffects: Record<string, number> = {};
 
 // Weather integration
-RainParallel.bindRainEnabled((rainEnabled: boolean) => {
-    print("Rain Enabled:", rainEnabled);
+RainParallel.bindRainEnabled((newEnabled: boolean) => {
     // Update sound playing state
-    rainSFX.Playing = rainEnabled;
-    rainSFX.Volume = rainEnabled ? currentWeather.intensity * 0.5 : 0;
+    rainSFX.Playing = newEnabled;
+    rainSFX.Volume = newEnabled ? currentWeather.intensity * 0.5 : 0;
+    rainEnabled = newEnabled;
 });
 
 // Parallel RunService

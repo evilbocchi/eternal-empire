@@ -13,10 +13,11 @@
  * @since 1.0.0
  */
 
-import { setInstanceInfo } from "@antivivi/vrldk";
-import { OnInit, OnPhysics, Service } from "@flamework/core";
+import { setInstanceInfo, simpleInterval } from "@antivivi/vrldk";
+import { OnInit, OnStart, Service } from "@flamework/core";
 import { CollectionService, Lighting } from "@rbxts/services";
 import DataService from "server/services/data/DataService";
+import eat from "shared/hamster/eat";
 import Packets from "shared/Packets";
 import { WeatherState, WeatherType } from "shared/weather/WeatherTypes";
 
@@ -30,7 +31,7 @@ declare global {
  * Service that manages atmospheric effects and weather.
  */
 @Service()
-export default class AtmosphereService implements OnInit, OnPhysics {
+export default class AtmosphereService implements OnInit, OnStart {
     /**
      * Current weather state.
      */
@@ -73,17 +74,6 @@ export default class AtmosphereService implements OnInit, OnPhysics {
         // Use current UTC time rounded to nearest hour for global sync
         const now = os.time();
         this.weatherSeed = math.floor(now / 3600) * 3600;
-    }
-
-    /**
-     * Advances the in-game clock time and updates weather system.
-     * Called every physics update.
-     *
-     * @param dt Delta time since last update.
-     */
-    onPhysics(dt: number) {
-        Lighting.ClockTime += dt * 0.02;
-        this.updateWeather(dt);
     }
 
     /**
@@ -178,57 +168,10 @@ export default class AtmosphereService implements OnInit, OnPhysics {
      */
     private applyWeatherEffects() {
         switch (this.currentWeather.type) {
-            case WeatherType.Clear:
-                this.applyClearWeather();
-                break;
-            case WeatherType.Cloudy:
-                this.applyCloudyWeather();
-                break;
-            case WeatherType.Rainy:
-                this.applyRainyWeather();
-                break;
             case WeatherType.Thunderstorm:
-                this.applyThunderstormWeather();
+                this.handleLightningStrikes();
                 break;
         }
-    }
-
-    /**
-     * Applies clear weather effects.
-     */
-    private applyClearWeather() {
-        // Clear weather - no special effects needed
-        // Lighting and atmosphere return to normal
-    }
-
-    /**
-     * Applies cloudy weather effects.
-     */
-    private applyCloudyWeather() {
-        // Cloudy weather reduces drop rates to 0.75x
-        // This will be handled by the weather boost system
-    }
-
-    /**
-     * Applies rainy weather effects.
-     */
-    private applyRainyWeather() {
-        // Rainy weather:
-        // - Reduces drop rates to 0.5x
-        // - Increases droplet values by 2.5x
-        // - Shows rain visual effects
-        // This will be handled by the weather boost system and visual effects
-    }
-
-    /**
-     * Applies thunderstorm weather effects.
-     */
-    private applyThunderstormWeather() {
-        // Thunderstorm weather:
-        // - Same effects as rain
-        // - Lightning strikes that surge droplets (10x value boost)
-        // - Thunder sound effects
-        this.handleLightningStrikes();
     }
 
     /**
@@ -368,5 +311,18 @@ export default class AtmosphereService implements OnInit, OnPhysics {
 
         // Set up packet handlers for weather state requests
         Packets.getWeatherState.fromClient(() => this.getCurrentWeather());
+
+        eat(() => {
+            Lighting.ClockTime = 14; // Start at 2 PM
+        });
+    }
+
+    onStart() {
+        const dt = 0.2;
+        const cleanup = simpleInterval(() => {
+            Lighting.ClockTime += dt * 0.02;
+            this.updateWeather(dt);
+        }, dt);
+        eat(cleanup);
     }
 }
