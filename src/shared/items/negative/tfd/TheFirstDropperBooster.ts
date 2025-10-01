@@ -17,7 +17,7 @@ export = new Item(script.Name)
     .trait(Unique)
     .addPot("dropRateMultiplier", 1.1, 3.0)
     .onLoad((_, unique, scaledPots) => {
-        unique.trait(DropperBooster).setDropRateMultiplier(scaledPots.get("dropRateMultiplier")!);
+        unique.trait(DropperBooster).setDropRateMul(scaledPots.get("dropRateMultiplier")!);
     })
 
     .trait(DropperBooster)

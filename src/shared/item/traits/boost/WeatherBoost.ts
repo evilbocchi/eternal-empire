@@ -36,7 +36,7 @@ export default class WeatherBoost {
     private static applyMultipliersToDroppers() {
         const weatherBoost: ItemBoost = {
             ignoresLimitations: false,
-            dropRateMultiplier: this.currentMultipliers.dropRate,
+            dropRateMul: this.currentMultipliers.dropRate,
             weatherDropRateMultiplier: this.currentMultipliers.dropRate,
             weatherValueMultiplier: this.currentMultipliers.dropletValue,
         };

@@ -26,13 +26,13 @@ export = new Item(script.Name)
         const instanceInfo = getAllInstanceInfo(drop);
         const modifier: ItemBoost = {
             ignoresLimitations: false,
-            dropRateMultiplier: 1, // Default multiplier
+            dropRateMul: 1, // Default multiplier
         };
         Boostable.addBoost(instanceInfo, "Solar", modifier);
         item.repeat(
             model,
             () => {
-                modifier.dropRateMultiplier = (12 - math.abs(Lighting.ClockTime - 12)) / 6 + 1;
+                modifier.dropRateMul = (12 - math.abs(Lighting.ClockTime - 12)) / 6 + 1;
             },
             1,
         );

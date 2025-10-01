@@ -9,12 +9,12 @@ declare global {
     }
 
     interface ItemBoost {
-        dropRateMultiplier?: number;
+        dropRateMul?: number;
     }
 }
 
 export default class DropperBooster extends Booster {
-    dropRateMultiplier = 1;
+    dropRateMul = 1;
 
     /**
      * Creates a modifier token for the drop rate of droppers in the area of the model.
@@ -26,7 +26,7 @@ export default class DropperBooster extends Booster {
         const key = this.item.id;
         const modifier: ItemBoost = {
             ignoresLimitations: false,
-            dropRateMultiplier: this.dropRateMultiplier,
+            dropRateMul: this.dropRateMul,
         };
 
         let target: BasePart | undefined;
@@ -67,8 +67,8 @@ export default class DropperBooster extends Booster {
         item.onLoad((model) => DropperBooster.load(model, this));
     }
 
-    setDropRateMultiplier(dropRateMultiplier: number) {
-        this.dropRateMultiplier = dropRateMultiplier;
+    setDropRateMul(dropRateMultiplier: number) {
+        this.dropRateMul = dropRateMultiplier;
         return this;
     }
 }

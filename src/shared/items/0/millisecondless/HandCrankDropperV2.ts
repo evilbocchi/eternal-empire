@@ -7,7 +7,7 @@ import HandCrank from "shared/item/traits/action/HandCrank";
 import Boostable from "shared/item/traits/boost/Boostable";
 import Dropper from "shared/item/traits/dropper/Dropper";
 
-const modifier: ItemBoost = { ignoresLimitations: false, dropRateMultiplier: 3 };
+const modifier: ItemBoost = { ignoresLimitations: false, dropRateMul: 3 };
 
 export = new Item(script.Name)
     .setName("Hand Crank Dropper V2")
@@ -29,6 +29,6 @@ export = new Item(script.Name)
     .setDropRate(1)
 
     .trait(HandCrank)
-    .setCallback((t) => (modifier.dropRateMultiplier = t < 5 ? 3 : 1))
+    .setCallback((t) => (modifier.dropRateMul = t < 5 ? 3 : 1))
 
     .exit();

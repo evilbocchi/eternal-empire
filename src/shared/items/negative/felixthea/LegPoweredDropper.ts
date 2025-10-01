@@ -40,7 +40,7 @@ export = new Item(script.Name)
         const instanceInfo = getAllInstanceInfo(drop);
         const modifier: ItemBoost = {
             ignoresLimitations: false,
-            dropRateMultiplier: 0,
+            dropRateMul: 0,
         };
         Boostable.addBoost(instanceInfo, "Treadmill", modifier);
 
@@ -56,7 +56,7 @@ export = new Item(script.Name)
                         break;
                     }
                 }
-                modifier.dropRateMultiplier = hasCharacter === true ? 1 : 0;
+                modifier.dropRateMul = hasCharacter === true ? 1 : 0;
             },
             0.5,
         );

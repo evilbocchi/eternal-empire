@@ -25,6 +25,6 @@ export = new Item(script.Name)
     .setSpeed(3)
 
     .trait(DropperBooster)
-    .setDropRateMultiplier(1.25)
+    .setDropRateMul(1.25)
 
     .exit();

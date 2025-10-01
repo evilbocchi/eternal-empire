@@ -129,7 +129,15 @@ export default class Dropper extends ItemTrait {
             const areaId = Server.Item.getPlacedItem(model.Name)?.area as AreaId | undefined;
             const info = getAllInstanceInfo(drop);
             info.Area = areaId;
-            info.Boosts = new Map<string, ItemBoost>();
+            if (info.Boosts === undefined) {
+                info.Boosts = new Map<string, ItemBoost>();
+            }
+            if (info.BoostAdded === undefined) {
+                info.BoostAdded = new Set<(boost: ItemBoost) => void>();
+            }
+            if (info.BoostRemoved === undefined) {
+                info.BoostRemoved = new Set<(boost: ItemBoost) => void>();
+            }
             info.DropRate = dropper.dropRate;
             info.ItemModelInfo = modelInfo;
 
@@ -287,7 +295,7 @@ export default class Dropper extends ItemTrait {
                 }
 
                 // Apply item boosts
-                for (const [_, boost] of boosts) dropRate *= boost.dropRateMultiplier ?? 1;
+                for (const [_, boost] of boosts) dropRate *= boost.dropRateMul ?? 1;
 
                 // No dropping if drop rate is zero :(
                 if (dropRate === 0) continue;

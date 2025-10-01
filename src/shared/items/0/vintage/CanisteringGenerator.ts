@@ -17,6 +17,6 @@ export = new Item(script.Name)
     .setPassiveGain(new CurrencyBundle().set("Power", 400e6))
 
     .trait(DropperBooster)
-    .setDropRateMultiplier(2.5)
+    .setDropRateMul(2.5)
 
     .exit();

@@ -16,6 +16,10 @@ declare global {
     interface InstanceInfo {
         UpdateSpeed?: () => void;
     }
+
+    interface ItemBoost {
+        conveyorSpeedMul?: number;
+    }
 }
 
 /**
@@ -102,28 +106,47 @@ export default class Conveyor extends ItemTrait {
      */
     static load(model: Model, conveyor: Conveyor) {
         const modelInfo = getAllInstanceInfo(model);
+        if (modelInfo.Boosts === undefined) {
+            modelInfo.Boosts = new Map<string, ItemBoost>();
+        }
+        if (modelInfo.BoostAdded === undefined) {
+            modelInfo.BoostAdded = new Set<(boost: ItemBoost) => void>();
+        }
+        if (modelInfo.BoostRemoved === undefined) {
+            modelInfo.BoostRemoved = new Set<(boost: ItemBoost) => void>();
+        }
         const statsPerPart = this.getStats(model, conveyor);
 
         const updateSpeed = () => {
             let speedBoost = 0;
+            let speedMultiplier = 1;
             const boosts = modelInfo.Boosts;
             if (boosts !== undefined) {
                 for (const [_, boost] of boosts) {
-                    if (boost.chargerInfo === undefined || isPlacedItemUnusable(boost.chargerInfo)) continue;
+                    const chargerInfo = boost.chargerInfo;
+                    if (chargerInfo !== undefined) {
+                        if (isPlacedItemUnusable(chargerInfo)) continue;
+                        speedBoost += boost.chargedBy?.item.findTrait("Accelerator")?.boost ?? 0;
+                    }
 
-                    speedBoost += boost.chargedBy?.item.findTrait("Accelerator")?.boost ?? 0;
+                    const conveyorBoost = boost.conveyorSpeedMul;
+                    if (conveyorBoost !== undefined) {
+                        speedMultiplier *= conveyorBoost;
+                    }
                 }
             }
             const isUnusable = isPlacedItemUnusable(modelInfo);
 
             for (const [part, { speed: baseSpeed, inverted }] of statsPerPart) {
-                let speed = isUnusable === true ? 0 : baseSpeed + speedBoost;
+                let speed = isUnusable === true ? 0 : (baseSpeed + speedBoost) * speedMultiplier;
                 VirtualAttribute.setNumber(model, part, "Speed", speed);
                 part.AssemblyLinearVelocity = part.CFrame.LookVector.mul((inverted ? -1 : 1) * speed);
             }
         };
         updateSpeed();
         modelInfo.UpdateSpeed = updateSpeed;
+        modelInfo.BoostAdded?.add(() => updateSpeed());
+        modelInfo.BoostRemoved?.add(() => updateSpeed());
         this.infoPerModel.set(model, modelInfo);
     }
 
