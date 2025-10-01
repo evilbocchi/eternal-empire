@@ -25,7 +25,7 @@ const DEFAULT_TITLES: Record<string, string> = {
     Funds: "Richest Empires",
     Power: "Most Powerful",
     Skill: "Most Skilled",
-    Donated: "Top Donors",
+    Donated: "Generous Donors",
 };
 
 /** Default value labels for different leaderboard types */
@@ -119,12 +119,14 @@ export default function Leaderboard({
             <scrollingframe
                 key="Display"
                 AutomaticCanvasSize={Enum.AutomaticSize.Y}
-                BackgroundColor3={Color3.fromRGB(209, 209, 209)}
+                BackgroundTransparency={1}
                 BorderSizePixel={0}
                 CanvasSize={new UDim2(0, 0, 0, 0)}
-                Position={new UDim2(0.1, 0, 0.12, 0)}
+                Position={new UDim2(0, 0, 0.12, 0)}
                 Selectable={false}
-                Size={new UDim2(0.8, 0, 0.8, 0)}
+                ScrollBarImageColor3={Color3.fromRGB(79, 79, 79)}
+                Size={new UDim2(1, 0, 0.8, 0)}
+                ZIndex={-1}
             >
                 <uilistlayout Padding={new UDim(0, 5)} SortOrder={Enum.SortOrder.LayoutOrder} />
                 <uipadding
