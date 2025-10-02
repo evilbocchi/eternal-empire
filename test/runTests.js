@@ -155,6 +155,16 @@ async function runLuauTask(universeId, placeId, scriptContents) {
 }
 
 async function runLuauScript() {
+    // Check if API key is present
+    if (!ROBLOX_API_KEY || !ROBLOX_UNIVERSE_ID || !ROBLOX_PLACE_ID) {
+        logger.warn('Skipping tests: Required environment variables not set');
+        logger.warn('Missing:');
+        if (!ROBLOX_API_KEY) logger.warn('  - LUAU_EXECUTION_API_KEY');
+        if (!ROBLOX_UNIVERSE_ID) logger.warn('  - LUAU_EXECUTION_UNIVERSE_ID');
+        if (!ROBLOX_PLACE_ID) logger.warn('  - LUAU_EXECUTION_PLACE_ID');
+        process.exit(0);
+    }
+
     try {
         // Run the Luau script using that place version
         const success = await runLuauTask(ROBLOX_UNIVERSE_ID, ROBLOX_PLACE_ID, luauScript);
