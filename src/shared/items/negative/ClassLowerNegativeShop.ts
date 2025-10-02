@@ -61,6 +61,7 @@ import OverusedAmethystDropper from "shared/items/negative/reversedperipherality
 import PeripheralGenerator from "shared/items/negative/reversedperipherality/PeripheralGenerator";
 import ReversedUpgrader from "shared/items/negative/reversedperipherality/ReversedUpgrader";
 import AdvancedCondenser from "shared/items/negative/skip/AdvancedCondenser";
+import GetThisLatergrader from "shared/items/negative/skip/GetThisLatergrader";
 import InstantiationDelimiterIII from "shared/items/negative/skip/InstantiationDelimiterIII";
 import LaserTunnel from "shared/items/negative/skip/LaserTunnel";
 import NoobClicker from "shared/items/negative/skip/NoobClicker";
@@ -172,6 +173,7 @@ export = new Item(script.Name)
         PrecisionRefiner,
         MiniDropletSlayer,
 
+        GetThisLatergrader,
         NoobClicker,
         LaserTunnel,
         InstantiationDelimiterIII,

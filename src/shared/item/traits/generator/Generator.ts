@@ -42,6 +42,8 @@ const GENERATOR_UPGRADES = NamedUpgrades.getUpgrades("Generator");
 export default class Generator extends Boostable {
     bounceEffectEnabled = true;
 
+    beforeGainCallback: ((model: Model, generator: Generator) => void) | undefined = undefined;
+
     /**
      * The amount of currency this generator generates per second, before boosts.
      */
@@ -102,6 +104,7 @@ export default class Generator extends Boostable {
         item.repeat(
             model,
             (dt) => {
+                generator.beforeGainCallback?.(model, generator);
                 const passiveGain = generator.passiveGain;
                 if (passiveGain === undefined || isPlacedItemUnusable(modelInfo)) return;
 
@@ -201,6 +204,11 @@ export default class Generator extends Boostable {
 
     setPassiveGain(passiveGain: CurrencyBundle) {
         this.passiveGain = passiveGain;
+        return this;
+    }
+
+    beforeGain(callback: (model: Model, generator: Generator) => void) {
+        this.beforeGainCallback = callback;
         return this;
     }
 

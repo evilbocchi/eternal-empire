@@ -206,7 +206,7 @@ export default class ResetService implements OnInit, OnStart {
             this.namedUpgradeService.setUpgradeAmount(resettingUpgrade, 0);
 
         const empireData = this.dataService.empireData;
-        empireData.lastReset = tick();
+        empireData.lastResetPlaytime = empireData.playtime;
         empireData.mostCurrenciesSinceReset.clear();
     }
 

@@ -309,9 +309,9 @@ const EmpireProfileTemplate = {
     mostCurrenciesSinceReset: new Map<Currency, BaseOnoeNum>(),
 
     /**
-     * The last reset timestamp.
+     * The last reset in playtime seconds.
      */
-    lastReset: 0,
+    lastResetPlaytime: 0,
 
     /**
      * The amount of each challenge the empire has completed.

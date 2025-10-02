@@ -257,10 +257,6 @@ export default class DataService implements OnStart, OnPlayerAdded {
             empireData.logs = [];
         }
         empireData.lastSession = tick();
-        if (empireData.lastReset === 0) {
-            empireData.lastReset = tick();
-        }
-
         const data = { empireProfile, empireData, empireId };
         ThisEmpire.loadWith(data);
         return data;

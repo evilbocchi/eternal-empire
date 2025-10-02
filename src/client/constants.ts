@@ -35,6 +35,9 @@ export function observeCharacter(callback: (character: Model) => void) {
     }
     if (LOCAL_PLAYER) {
         const connection = LOCAL_PLAYER.CharacterAdded.Connect(callback);
+        if (LOCAL_PLAYER.Character) {
+            callback(LOCAL_PLAYER.Character);
+        }
         return () => connection.Disconnect();
     } else {
         return () => {};

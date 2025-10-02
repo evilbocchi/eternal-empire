@@ -25,6 +25,7 @@ import SkillEaser from "shared/items/0/blessing/SkillEaser";
 import TheAmplifier from "shared/items/0/blessing/TheAmplifier";
 import ArbitersKillbricks from "shared/items/0/donothing/ArbitersKillbricks";
 import CoinRefiner from "shared/items/0/donothing/CoinRefiner";
+import DivisionByTwo from "shared/items/0/donothing/DivisionByTwo";
 import TesseractBooster from "shared/items/0/donothing/TesseractBooster";
 import UpgradeBoardII from "shared/items/0/donothing/UpgradeBoardII";
 import AbnormalReactor from "shared/items/0/frivolous/AbnormalReactor";
@@ -146,6 +147,7 @@ export = new Item(script.Name)
         ArbitersKillbricks,
         CoinRefiner,
         TesseractBooster,
+        DivisionByTwo,
 
         AnotherWorld,
         HeavenGarden,

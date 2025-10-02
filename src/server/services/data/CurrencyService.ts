@@ -208,12 +208,13 @@ export default class CurrencyService implements OnStart {
     /**
      * Naive implementation of offline revenue calculation.
      * Assumes revenue generation over the current reset period is linear.
-     *
-     * @param t Current time (defaults to current tick).
      * @returns Revenue generated per second.
      */
-    getOfflineRevenue(t = tick()) {
-        return new CurrencyBundle(this.mostCurrenciesSinceReset).div(t - this.dataService.empireData.lastReset);
+    getOfflineRevenue() {
+        const currentPlaytime = this.dataService.empireData.playtime;
+        const lastResetPlaytime = this.dataService.empireData.lastResetPlaytime;
+
+        return new CurrencyBundle(this.mostCurrenciesSinceReset).div(currentPlaytime - lastResetPlaytime);
     }
 
     onStart() {
