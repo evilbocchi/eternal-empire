@@ -30,11 +30,13 @@ import NamedUpgradeService from "server/services/data/NamedUpgradeService";
 import Packets from "shared/Packets";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import { CURRENCIES } from "shared/currency/CurrencyDetails";
+import CurrencyMap from "shared/currency/CurrencyMap";
 import { RESET_LAYERS } from "shared/currency/mechanics/ResetLayer";
 import Droplet from "shared/item/Droplet";
 import Item from "shared/item/Item";
 import Furnace from "shared/item/traits/Furnace";
 import Charger from "shared/item/traits/generator/Charger";
+import Generator from "shared/item/traits/generator/Generator";
 import VoidSkyUpgrader from "shared/items/0/happylike/VoidSkyUpgrader";
 import SlamoStore from "shared/items/0/millisecondless/SlamoStore";
 import Items from "shared/items/Items";
@@ -365,7 +367,9 @@ export default class ProgressionEstimationService implements OnGameAPILoaded, On
             if (generator !== undefined) {
                 const passiveGain = generator.passiveGain;
                 if (passiveGain !== undefined) {
-                    generatorRevenue = generatorRevenue.add(passiveGain.mul(amount));
+                    const value = Generator.getValue(1, passiveGain, new Map());
+                    CurrencyMap.mulConstant(value, amount, true);
+                    CurrencyMap.add(generatorRevenue.amountPerCurrency, value, true);
                 }
             }
 

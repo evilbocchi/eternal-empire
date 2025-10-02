@@ -669,7 +669,9 @@ export default class Droplet {
                 droplet.Material = Enum.Material.Neon;
                 return droplet;
             })
-            .setValue(new CurrencyBundle().set("Funds", 10000000).set("Power", 10000000).set("Skill", 1)),
+            .setValue(
+                new CurrencyBundle().set("Funds", 10000000).set("Power", 10000000).set("Bitcoin", 1000).set("Skill", 1),
+            ),
     );
 
     static LuckyDroplet = Droplet.registerDroplet(

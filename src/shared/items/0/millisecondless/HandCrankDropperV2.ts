@@ -1,13 +1,11 @@
 import Difficulty from "@antivivi/jjt-difficulties";
-import { getAllInstanceInfo } from "@antivivi/vrldk";
+import { getAllInstanceInfo, getInstanceInfo } from "@antivivi/vrldk";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Droplet from "shared/item/Droplet";
 import Item from "shared/item/Item";
 import HandCrank from "shared/item/traits/action/HandCrank";
 import Boostable from "shared/item/traits/boost/Boostable";
 import Dropper from "shared/item/traits/dropper/Dropper";
-
-const modifier: ItemBoost = { ignoresLimitations: false, dropRateMul: 3 };
 
 export = new Item(script.Name)
     .setName("Hand Crank Dropper V2")
@@ -21,7 +19,7 @@ export = new Item(script.Name)
 
     .onLoad((model) => {
         const drop = model.WaitForChild("Drop");
-        Boostable.addBoost(getAllInstanceInfo(drop), "HandCrank", modifier);
+        Boostable.addBoost(getAllInstanceInfo(drop), "HandCrank", { ignoresLimitations: false });
     })
 
     .trait(Dropper)
@@ -29,6 +27,12 @@ export = new Item(script.Name)
     .setDropRate(1)
 
     .trait(HandCrank)
-    .setCallback((t) => (modifier.dropRateMul = t < 5 ? 3 : 1))
+    .setCallback((t, model) => {
+        const drop = model.WaitForChild("Drop");
+        const modifier = getInstanceInfo(drop, "Boosts")?.get("HandCrank");
+        if (modifier === undefined) return;
+
+        modifier.dropRateMul = t < 5 ? 3 : 1;
+    })
 
     .exit();

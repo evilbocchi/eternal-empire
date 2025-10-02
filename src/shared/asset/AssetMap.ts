@@ -131,6 +131,7 @@ export const assets = {
   "assets/sounds/ExplosiveUnlock.mp3": "rbxassetid://133857531731059",
   "assets/sounds/FabricRustle.mp3": "rbxassetid://72429645813951",
   "assets/sounds/GiantPress.mp3": "rbxassetid://139590901207284",
+  "assets/sounds/HandCrank.mp3": "rbxassetid://123065614220285",
   "assets/sounds/Harvest.mp3": "rbxassetid://71920147787527",
   "assets/sounds/IntermissionEnd.mp3": "rbxassetid://127577234072706",
   "assets/sounds/IntermissionEnter.mp3": "rbxassetid://119094414551118",

@@ -62,11 +62,6 @@ export default function ProximityPromptTrigger() {
         setProximityPrompts(prompts);
     }, []);
 
-    const triggerPrompt = useCallback((prompt: ProximityPrompt) => {
-        // Simulate the proximity prompt being triggered
-        prompt.InputHoldBegin();
-    }, []);
-
     // Handle keyboard shortcuts (only R for refresh when visible)
     useEffect(() => {
         const connection = Environment.UserInput.InputBegan.Connect((input, gameProcessed) => {
@@ -289,7 +284,7 @@ export default function ProximityPromptTrigger() {
                                 TextScaled={true}
                                 TextSize={14}
                                 Event={{
-                                    Activated: () => triggerPrompt(promptInfo.prompt),
+                                    Activated: () => promptInfo.prompt.InputHoldBegin(),
                                 }}
                             >
                                 <uicorner CornerRadius={new UDim(0, 4)} />

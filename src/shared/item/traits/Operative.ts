@@ -99,7 +99,7 @@ export default class Operative extends ItemTrait implements IOperative {
      * @param currency The currency to compare.
      * @returns True if this operative is less than the other in the specified currency.
      */
-    lessThan(other: Operative, currency: Currency) {
+    lessThan(other: IOperative, currency: Currency) {
         const otherPow = other.pow?.get(currency) ?? ONE;
         const otherMul = other.mul?.get(currency) ?? ONE;
         const otherAdd = other.add?.get(currency) ?? ZERO;
@@ -135,7 +135,7 @@ export default class Operative extends ItemTrait implements IOperative {
      * @param repeats Number of times to repeat the operations. Default is 1, which means no repetition.
      * @returns The resulting addition, multiplication, and power terms.
      */
-    static applyOperative(
+    static applySpreadOperative(
         totalAdd?: CurrencyBundle,
         totalMul?: CurrencyBundle,
         totalPow?: CurrencyBundle,
@@ -164,6 +164,36 @@ export default class Operative extends ItemTrait implements IOperative {
     }
 
     /**
+     * Applies an operative to values.
+     * @param totalAdd Addition term to apply to.
+     * @param totalMul Multiplication term to apply to.
+     * @param totalPow Power term to apply to.
+     * @param operative The operative to apply.
+     * @param inverse Whether to apply the inverse of the operations.
+     * @param repeats Number of times to repeat the operations. Default is 1, which means no repetition.
+     * @returns The resulting addition, multiplication, and power terms.
+     */
+    static applyOperative(
+        totalAdd: CurrencyBundle,
+        totalMul: CurrencyBundle,
+        totalPow: CurrencyBundle,
+        operative: IOperative,
+        inverse?: boolean,
+        repeats?: number,
+    ) {
+        return Operative.applySpreadOperative(
+            totalAdd,
+            totalMul,
+            totalPow,
+            operative.add,
+            operative.mul,
+            operative.pow,
+            inverse,
+            repeats,
+        );
+    }
+
+    /**
      * Applies operations to values.
      *
      * @param add Addition term.
@@ -185,7 +215,7 @@ export default class Operative extends ItemTrait implements IOperative {
     apply(value: CurrencyBundle): CurrencyBundle;
     apply(add: CurrencyBundle, mul?: CurrencyBundle, pow?: CurrencyBundle, repeats?: number) {
         if (mul !== undefined && pow !== undefined) {
-            return Operative.applyOperative(add, mul, pow, this.add, this.mul, this.pow, false, repeats);
+            return Operative.applySpreadOperative(add, mul, pow, this.add, this.mul, this.pow, false, repeats);
         }
 
         let totalAdd = this.add;

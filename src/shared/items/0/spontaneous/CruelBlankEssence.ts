@@ -1,6 +1,18 @@
 import Difficulty from "@antivivi/jjt-difficulties";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
+import Generator from "shared/item/traits/generator/Generator";
+import OctupleCoinMiner from "shared/items/0/automaticjoyful/OctupleCoinMiner";
+import DoubleCoinMiner from "shared/items/0/blessing/DoubleCoinMiner";
+import TesseractBooster from "shared/items/0/donothing/TesseractBooster";
+import HappyTesseract from "shared/items/0/happylike/HappyTesseract";
+import QuadrupleCoinMiner from "shared/items/0/justair/QuadrupleCoinMiner";
+import BasicTesseract from "shared/items/0/millisecondless/BasicTesseract";
+import ReinforcedTesseract from "shared/items/0/unlosable/ReinforcedTesseract";
+import SexdecupleCoinMiner from "shared/items/0/unlosable/SexdecupleCoinMiner";
+import AdvancedTesseract from "shared/items/0/vintage/AdvancedTesseract";
+import ImprovedTesseract from "shared/items/0/win/ImprovedTesseract";
+import BasicCoinMiner from "shared/items/0/winsome/BasicCoinMiner";
 
 export = new Item(script.Name)
     .setName("Cruel Blank Essence")
@@ -46,4 +58,20 @@ Whispering,
             .set("Dark Matter", 1e33),
         1,
     )
-    .addPlaceableArea("BarrenIslands", "SlamoVillage");
+    .setRequiredItemAmount(BasicCoinMiner, BasicCoinMiner.pricePerIteration.size())
+    .setRequiredItemAmount(DoubleCoinMiner, DoubleCoinMiner.pricePerIteration.size())
+    .setRequiredItemAmount(QuadrupleCoinMiner, QuadrupleCoinMiner.pricePerIteration.size())
+    .setRequiredItemAmount(OctupleCoinMiner, OctupleCoinMiner.pricePerIteration.size())
+    .setRequiredItemAmount(SexdecupleCoinMiner, SexdecupleCoinMiner.pricePerIteration.size())
+    .setRequiredItemAmount(BasicTesseract, BasicTesseract.pricePerIteration.size())
+    .setRequiredItemAmount(ImprovedTesseract, ImprovedTesseract.pricePerIteration.size())
+    .setRequiredItemAmount(AdvancedTesseract, AdvancedTesseract.pricePerIteration.size())
+    .setRequiredItemAmount(HappyTesseract, HappyTesseract.pricePerIteration.size())
+    .setRequiredItemAmount(ReinforcedTesseract, ReinforcedTesseract.pricePerIteration.size())
+    .setRequiredItemAmount(TesseractBooster, TesseractBooster.pricePerIteration.size())
+    .addPlaceableArea("BarrenIslands", "SlamoVillage")
+
+    .trait(Generator)
+    .setPassiveGain(new CurrencyBundle().set("Dark Matter", 999.99e21))
+
+    .exit();

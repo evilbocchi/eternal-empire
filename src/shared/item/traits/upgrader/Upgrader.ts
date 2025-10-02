@@ -134,7 +134,7 @@ export default class Upgrader extends Operative {
             for (const [_, boost] of boosts) {
                 const stats = boost.upgradeCompound;
                 if (stats === undefined) continue;
-                [totalAdd, totalMul, totalPow] = Operative.applyOperative(
+                [totalAdd, totalMul, totalPow] = Operative.applySpreadOperative(
                     totalAdd,
                     totalMul,
                     totalPow,
@@ -287,7 +287,7 @@ export default class Upgrader extends Operative {
     ) {
         for (const [_id, upgradeInfo] of instanceInfo.Upgrades!) {
             let [add, mul, pow, inverse] = this.getUpgrade(upgradeInfo);
-            [add, mul, pow] = this.applyOperative(totalAdd, totalMul, totalPow, add, mul, pow, inverse);
+            [add, mul, pow] = this.applySpreadOperative(totalAdd, totalMul, totalPow, add, mul, pow, inverse);
             totalAdd = add ?? totalAdd;
             totalMul = mul ?? totalMul;
             totalPow = pow ?? totalPow;

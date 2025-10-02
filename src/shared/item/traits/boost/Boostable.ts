@@ -87,6 +87,16 @@ export default class Boostable extends ItemTrait {
         }
     }
 
+    /**
+     * Checks if an item model has a specific boost.
+     * @param instanceInfo The InstanceInfo of the item model to check.
+     * @param key The key of the boost to check for.
+     * @returns Whether the item model has the specified boost.
+     */
+    static hasBoost(instanceInfo: InstanceInfo, key: string) {
+        return instanceInfo.Boosts?.has(key) ?? false;
+    }
+
     static load(model: Model, boostable: Boostable) {
         const instanceInfo = getAllInstanceInfo(model);
         instanceInfo.Boostable = boostable;
