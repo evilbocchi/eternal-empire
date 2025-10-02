@@ -27,6 +27,7 @@ import DataService from "server/services/data/DataService";
 import { getMaxXp } from "shared/constants";
 import eat from "shared/hamster/eat";
 import Packets from "shared/Packets";
+import Sandbox from "shared/Sandbox";
 
 /**
  * Service for managing player levels, experience points, and level point allocation.
@@ -97,6 +98,10 @@ export default class LevelService implements OnInit {
      * Sets up initial client data and packet handlers for level point spending.
      */
     onInit() {
+        if (Sandbox.getEnabled()) {
+            this.dataService.empireData.level = 100;
+        }
+
         // Send initial level data to clients
         Packets.level.set(this.dataService.empireData.level);
         Packets.xp.set(this.dataService.empireData.xp);

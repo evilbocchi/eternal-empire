@@ -372,6 +372,30 @@ export default class Item {
         if (this.layoutOrder === -100000) {
             this.layoutOrder = difficulty.rating ?? 0;
         }
+        if (this.levelReq === undefined) {
+            this.calculateLevelReq();
+        }
+        return this;
+    }
+
+    private calculateLevelReq() {
+        const rating = this.difficulty.rating;
+        if (rating === undefined) return this;
+
+        if (rating < Difficulty.Exist.rating!) {
+            return this.setLevelReq(0);
+        } else if (rating < Difficulty.InstantWin.rating!) {
+            return this.setLevelReq(2);
+        } else if (rating < Difficulty.Ifinitude.rating!) {
+            return this.setLevelReq(4);
+        } else if (rating < Difficulty.Joyful.rating!) {
+            return this.setLevelReq(6);
+        } else if (rating < Difficulty.Easy.rating!) {
+            return this.setLevelReq(8);
+        } else {
+            return this.setLevelReq(10); // future difficulties
+        }
+
         return this;
     }
 

@@ -2,10 +2,10 @@ import Signal from "@antivivi/lemon-signal";
 import React, { useEffect, useMemo, useRef } from "@rbxts/react";
 import { RunService, TweenService, Workspace } from "@rbxts/services";
 import { Environment } from "@rbxts/ui-labs";
-import { RobotoSlab, RobotoSlabBold, RobotoSlabExtraBold, RobotoSlabMedium } from "shared/asset/GameFonts";
 import getDifficultyDisplayColors from "client/components/tooltip/getDifficultyDisplayColors";
 import Packets from "shared/Packets";
 import { getAsset } from "shared/asset/AssetMap";
+import { RobotoSlab, RobotoSlabBold, RobotoSlabExtraBold, RobotoSlabMedium } from "shared/asset/GameFonts";
 import Item from "shared/item/Item";
 import ItemMetadata from "shared/item/ItemMetadata";
 import Items from "shared/items/Items";
@@ -75,17 +75,10 @@ export default function TooltipWindow() {
             }
         });
 
-        const levelConnection = Packets.level.observe((level) => {
-            for (const [_, metadata] of METADATA_PER_ITEM) {
-                metadata.levelReq(level);
-            }
-        });
-
         return () => {
             tooltipUpdatedConnection.disconnect();
             boostChangedConnection.Disconnect();
             unlockedAreasConnection.disconnect();
-            levelConnection.disconnect();
         };
     }, []);
 

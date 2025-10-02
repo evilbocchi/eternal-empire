@@ -46,7 +46,6 @@ export default class ItemMetadata {
         this.formula();
         this.placeableAreas();
         this.resetLayer();
-        this.levelReq();
     }
 
     tool() {
@@ -162,19 +161,6 @@ export default class ItemMetadata {
         }
 
         this.builder[ItemMetadata.INDICES.RESET_LAYER] = `\n${formatRichText(text, color, this.size, this.weight)}`;
-    }
-
-    levelReq(level = Packets.level.get()) {
-        const levelReq = this.item.levelReq;
-        if (levelReq === undefined || level === undefined) {
-            this.builder[ItemMetadata.INDICES.LEVEL_REQ] = "";
-            return;
-        }
-
-        const color = levelReq < level ? Color3.fromRGB(125, 255, 125) : Color3.fromRGB(255, 105, 105);
-        const text = `Lv. Min: ${levelReq}`;
-
-        this.builder[ItemMetadata.INDICES.LEVEL_REQ] = `\n${formatRichText(text, color, this.size, this.weight)}`;
     }
 
     /**

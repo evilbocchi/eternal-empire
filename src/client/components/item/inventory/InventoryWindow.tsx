@@ -75,14 +75,15 @@ export function activateItem(item: Item): boolean {
     const level = Packets.level.get() ?? 0;
 
     // Check restrictions
-    if (
-        BuildManager.getRestricted() === true ||
-        BuildManager.hasSelection() === true ||
-        isPlaceable === false ||
-        (item.levelReq !== undefined && item.levelReq > level)
-    ) {
+    if (BuildManager.getRestricted() === true || BuildManager.hasSelection() === true || isPlaceable === false) {
         playSound("Error.mp3");
         showErrorToast("Can't place that item right now.");
+        return false;
+    }
+
+    if (item.levelReq !== undefined && item.levelReq > level) {
+        playSound("Error.mp3");
+        showErrorToast(`You need to be Lv. ${item.levelReq} to place that item.`);
         return false;
     }
 
