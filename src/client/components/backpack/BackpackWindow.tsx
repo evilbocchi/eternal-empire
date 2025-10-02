@@ -83,7 +83,6 @@ export default function BackpackWindow() {
         let childRemovedConnection: RBXScriptConnection | undefined;
 
         const cleanup = observeCharacter((character: Model) => {
-            print(character);
             const humanoid = character.WaitForChild("Humanoid") as Humanoid;
             swingAnimation = loadAnimation(humanoid, 16920778613);
 

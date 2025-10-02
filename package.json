@@ -11,7 +11,7 @@
         "build": "npm run asset-sync & rbxtsc",
         "plugin": "cd ./plugin && npx rojo build --plugin jme-tooling.rbxmx && cd .. && node plugin/index.js",
         "docs": "npx typedoc",
-        "dev": "concurrently --prefix none \"rbxtsc -w --writeTransformedFiles --optimizedLoops\" \"npx rojo serve\"",
+        "dev": "concurrently --prefix none \"rbxtsc -w --optimizedLoops\" \"npx rojo serve\"",
         "generate-item-ids": "node scripts/generate-item-ids.js"
     },
     "repository": {
