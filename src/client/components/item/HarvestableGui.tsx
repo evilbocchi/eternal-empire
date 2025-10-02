@@ -1,7 +1,7 @@
 import React, { Fragment, useEffect, useMemo, useState } from "@rbxts/react";
 import { Debris, TweenService } from "@rbxts/services";
 import { emitEffect, playSound } from "shared/asset/GameAssets";
-import { RobotoMonoBold, RobotoSlabExtraBold } from "shared/asset/GameFonts";
+import { RobotoSlabExtraBold, RobotoSlabHeavy } from "shared/asset/GameFonts";
 import { getPlayerCharacter } from "shared/hamster/getPlayerCharacter";
 import Items from "shared/items/Items";
 import HARVESTABLES from "shared/world/harvestable/Harvestable";
@@ -82,7 +82,7 @@ export default function HarvestableGui({ enabled, model }: { enabled: boolean; m
 
                 const damageGui = new Instance("BillboardGui");
                 const horizontalJitter = math.random(-25, 25) / 75;
-                const startingOffset = new Vector3(horizontalJitter, 2.75, horizontalJitter);
+                const startingOffset = new Vector3(horizontalJitter, 0, horizontalJitter);
                 damageGui.Size = new UDim2(5, 0, 1, 0);
                 damageGui.StudsOffsetWorldSpace = startingOffset;
                 damageGui.AlwaysOnTop = true;
@@ -146,6 +146,29 @@ export default function HarvestableGui({ enabled, model }: { enabled: boolean; m
         };
     }, []);
 
+    const accent = useMemo(() => {
+        const colors = new Array<Color3>();
+        for (const part of model.GetChildren()) {
+            if (part.IsA("BasePart")) {
+                colors.push(part.Color);
+            }
+        }
+        if (colors.isEmpty()) return Color3.fromRGB(255, 255, 255);
+
+        let r = 0;
+        let g = 0;
+        let b = 0;
+        for (const color of colors) {
+            r += color.R;
+            g += color.G;
+            b += color.B;
+        }
+        const size = colors.size();
+        return new Color3(r / size, g / size, b / size);
+    }, [model]);
+
+    const changeTweenInfo = new TweenInfo(0.2, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out);
+
     return (
         <billboardgui
             Adornee={model}
@@ -153,7 +176,7 @@ export default function HarvestableGui({ enabled, model }: { enabled: boolean; m
             AlwaysOnTop={true}
             Enabled={enabled}
             MaxDistance={25}
-            Size={new UDim2(5, 0, 2, 0)}
+            Size={new UDim2(8, 0, 2.5, 0)}
             StudsOffset={new Vector3(0, 2.5, 0)}
             ZIndexBehavior={Enum.ZIndexBehavior.Sibling}
         >
@@ -176,7 +199,12 @@ export default function HarvestableGui({ enabled, model }: { enabled: boolean; m
                 ZIndex={1}
             >
                 <uigradient
-                    Color={new ColorSequence(Color3.fromRGB(39, 39, 39), Color3.fromRGB(0, 0, 0))}
+                    Color={
+                        new ColorSequence(
+                            accent.Lerp(Color3.fromRGB(0, 0, 0), 0.35),
+                            accent.Lerp(Color3.fromRGB(0, 0, 0), 0.75),
+                        )
+                    }
                     Rotation={90}
                 />
                 <uipadding
@@ -185,14 +213,18 @@ export default function HarvestableGui({ enabled, model }: { enabled: boolean; m
                     PaddingLeft={new UDim(0.035, 0)}
                     PaddingRight={new UDim(0.035, 0)}
                 />
-                <uilistlayout Padding={new UDim(0.05, 0)} FillDirection={Enum.FillDirection.Vertical} />
 
                 {/* Title text container */}
-                <frame BackgroundTransparency={1} Size={new UDim2(1, 0, 0.55, 0)}>
+                <frame
+                    AnchorPoint={new Vector2(0.5, 0)}
+                    BackgroundTransparency={1}
+                    Position={new UDim2(0.5, 0, 0, 0)}
+                    Size={new UDim2(1, 0, 0.5, 0)}
+                >
                     {/* Title main */}
                     <textlabel
                         BackgroundTransparency={1}
-                        FontFace={RobotoMonoBold}
+                        FontFace={RobotoSlabHeavy}
                         Size={new UDim2(1, 0, 1, 0)}
                         Text={item?.name ?? harvestable?.name ?? model.Name}
                         TextColor3={Color3.fromRGB(255, 255, 255)}
@@ -204,66 +236,69 @@ export default function HarvestableGui({ enabled, model }: { enabled: boolean; m
                     />
                 </frame>
 
-                {/* Health bar container  */}
                 <frame
+                    AnchorPoint={new Vector2(0.5, 0)}
                     BackgroundColor3={Color3.fromRGB(255, 255, 255)}
                     BorderSizePixel={0}
-                    Size={new UDim2(1, 0, 0.35, 0)}
+                    Position={new UDim2(0.51, 0, 0.57, 0)}
+                    Size={new UDim2(1, 0, 0.4, 0)}
+                    ZIndex={-1}
+                />
+
+                {/* Health bar container  */}
+                <frame
+                    AnchorPoint={new Vector2(0.5, 0)}
+                    BackgroundColor3={Color3.fromRGB(0, 0, 0)}
+                    BorderSizePixel={0}
+                    Position={new UDim2(0.5, 0, 0.55, 0)}
+                    Size={new UDim2(1, 0, 0.4, 0)}
                 >
-                    <uigradient
-                        Color={new ColorSequence(Color3.fromRGB(255, 255, 255), Color3.fromRGB(200, 200, 200))}
-                        Rotation={90}
-                    />
-                    <frame
-                        AnchorPoint={new Vector2(0.5, 0.5)}
-                        BackgroundColor3={Color3.fromRGB(39, 39, 39)}
-                        BorderSizePixel={0}
-                        Position={new UDim2(0.5, 0, 0.5, 0)}
-                        Size={new UDim2(0.98, 0, 0.86, 0)}
-                    >
-                        {/* Health text shadows (4 corners to simulate stroke) */}
-                        {[
-                            { x: 0.507, y: 0.52 }, // Bottom-right (scaled for aspect ratio)
-                            { x: 0.493, y: 0.52 }, // Bottom-left
-                            { x: 0.507, y: 0.48 }, // Top-right
-                            { x: 0.493, y: 0.48 }, // Top-left
-                        ].map((offset, index) => (
-                            <textlabel
-                                key={index}
-                                AnchorPoint={new Vector2(0.5, 0.5)}
-                                BackgroundTransparency={1}
-                                FontFace={RobotoMonoBold}
-                                Position={new UDim2(offset.x, 0, offset.y, 0)}
-                                Size={new UDim2(0.8, 0, 0.9, 0)}
-                                Text={`${health}/${maxHealth}`}
-                                TextColor3={Color3.fromRGB(0, 0, 0)}
-                                TextScaled={true}
-                                TextTransparency={0}
-                                ZIndex={1}
-                            />
-                        ))}
-                        {/* Health text main */}
+                    {/* Health text shadows (4 corners to simulate stroke) */}
+                    {[
+                        { x: 0.507, y: 0.55 }, // Bottom-right (scaled for aspect ratio)
+                        { x: 0.493, y: 0.55 }, // Bottom-left
+                        { x: 0.507, y: 0.45 }, // Top-right
+                        { x: 0.493, y: 0.45 }, // Top-left
+                    ].map((offset, index) => (
                         <textlabel
+                            key={index}
                             AnchorPoint={new Vector2(0.5, 0.5)}
                             BackgroundTransparency={1}
-                            FontFace={RobotoMonoBold}
-                            Position={new UDim2(0.5, 0, 0.5, 0)}
-                            Size={new UDim2(0.8, 0, 0.9, 0)}
+                            FontFace={RobotoSlabExtraBold}
+                            Position={new UDim2(offset.x, 0, offset.y, 0)}
+                            Size={new UDim2(0.9, 0, 0.95, 0)}
                             Text={`${health}/${maxHealth}`}
-                            TextColor3={Color3.fromRGB(255, 255, 255)}
+                            TextColor3={Color3.fromRGB(0, 0, 0)}
                             TextScaled={true}
-                            ZIndex={2}
+                            TextTransparency={0}
+                            ZIndex={1}
                         />
+                    ))}
+                    {/* Health text main */}
+                    <textlabel
+                        AnchorPoint={new Vector2(0.5, 0.5)}
+                        BackgroundTransparency={1}
+                        FontFace={RobotoSlabExtraBold}
+                        Position={new UDim2(0.5, 0, 0.5, 0)}
+                        Size={new UDim2(0.9, 0, 0.95, 0)}
+                        Text={`${health}/${maxHealth}`}
+                        TextColor3={Color3.fromRGB(255, 255, 255)}
+                        TextScaled={true}
+                        ZIndex={2}
+                    />
 
-                        <frame
-                            BackgroundColor3={Color3.fromRGB(255, 255, 255)}
-                            BorderSizePixel={0}
-                            Size={new UDim2(math.clamp(health / maxHealth, 0, 1), 0, 1, 0)}
-                            Visible={health > 0}
-                            ZIndex={0}
-                        >
-                            <uigradient Color={colorSequence} Rotation={90} />
-                        </frame>
+                    <frame
+                        ref={(rbx) => {
+                            if (rbx === undefined) return;
+                            TweenService.Create(rbx, changeTweenInfo, {
+                                Size: new UDim2(math.clamp(health / maxHealth, 0, 1), 0, 1, 0),
+                            }).Play();
+                        }}
+                        BackgroundColor3={Color3.fromRGB(255, 255, 255)}
+                        BorderSizePixel={0}
+                        ZIndex={0}
+                    >
+                        <uigradient Color={colorSequence} Rotation={90} />
                     </frame>
                 </frame>
             </frame>
