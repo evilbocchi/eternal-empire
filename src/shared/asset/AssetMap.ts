@@ -165,7 +165,7 @@ export const assets = {
   "assets/sounds/QuestComplete.mp3": "rbxassetid://93987700587977",
   "assets/sounds/QuestConstruct.mp3": "rbxassetid://102745425460847",
   "assets/sounds/QuestNextStage.mp3": "rbxassetid://74780989471447",
-  "assets/sounds/Rain.mp3": "rbxassetid://121699771287224",
+  "assets/sounds/Rain.mp3": "rbxassetid://72212944641164",
   "assets/sounds/Rocket.mp3": "rbxassetid://137711511581134",
   "assets/sounds/ShopClose.mp3": "rbxassetid://133432931277700",
   "assets/sounds/ShopOpen.mp3": "rbxassetid://92451647256481",
