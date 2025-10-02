@@ -704,6 +704,18 @@ export default class Droplet {
             .setValue(new CurrencyBundle().set("Funds", 150000)),
     );
 
+    static BalloonDroplet = Droplet.registerDroplet(
+        new Droplet("BalloonDroplet")
+            .setModel(() => {
+                const droplet = new Instance("Part");
+                droplet.Size = new Vector3(0.6, 0.6, 0.6);
+                droplet.Color = Difficulty.DoSomething.color!;
+                droplet.Material = Enum.Material.Glass;
+                return droplet;
+            })
+            .setValue(new CurrencyBundle().set("Power", 200000)),
+    );
+
     static StuddedDroplet = Droplet.registerDroplet(
         new Droplet("StuddedDroplet")
             .setModel(() => {

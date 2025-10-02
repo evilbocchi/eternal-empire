@@ -20,6 +20,7 @@ import TheAmplified from "shared/items/1/joyful/TheAmplified";
 import Baseplate from "shared/items/1/placid/Baseplate";
 import IndustrialUnderpass from "shared/items/1/placid/IndustrialUnderpass";
 import FullConversionRamp from "shared/items/1/walkaslope/FullConversionRamp";
+import AntiGravityDropper from "shared/items/1/dosomething/AntiGravityDropper";
 
 export = new Item(script.Name)
     .setName("Class 1 Shop")
@@ -46,6 +47,7 @@ export = new Item(script.Name)
         SilentMemory,
         CompressedObbyUpgrader,
         IndustrialDropletSpray,
+        AntiGravityDropper,
 
         Baseplate,
         IndustrialUnderpass,

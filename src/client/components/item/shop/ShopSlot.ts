@@ -218,6 +218,7 @@ export interface UpdateShopSlotOptions {
     hideMaxedItems?: boolean;
     ownedAmount: number;
     onActivated?: (item: Item) => void;
+    playerLevel?: number;
 }
 
 export type ShopSlotHandle = {
@@ -234,11 +235,15 @@ export type ShopSlotHandle = {
     viewportLoaded: boolean;
     itemImage?: ImageLabel;
     itemViewport?: ViewportFrame;
+    lockOverlay: Frame;
+    lockIcon: ImageLabel;
+    lockText: TextLabel;
     currentTween?: Tween;
     rotationToken: number;
     onActivated?: (item: Item) => void;
     destroyed?: boolean;
     currentPriceItemId?: string;
+    isLocked: boolean;
     destroy(): void;
 };
 
@@ -275,6 +280,52 @@ export function createShopSlot(item: Item, options: CreateShopSlotOptions): Shop
 
     const stroke = createStroke(button, baseColor);
     applyStyling(button, 0.85);
+
+    const lockOverlay = new Instance("Frame");
+    lockOverlay.Name = "LockOverlay";
+    lockOverlay.Active = false;
+    lockOverlay.BackgroundColor3 = Color3.fromRGB(0, 0, 0);
+    lockOverlay.BackgroundTransparency = 0.35;
+    lockOverlay.Visible = false;
+    lockOverlay.Size = new UDim2(1, 0, 1, 0);
+    lockOverlay.ZIndex = 10;
+    lockOverlay.Parent = button;
+
+    getAsset("assets/Lock.png");
+
+    const lockCorner = new Instance("UICorner");
+    lockCorner.Parent = lockOverlay;
+
+    const lockIcon = new Instance("ImageLabel");
+    lockIcon.Name = "LockIcon";
+    lockIcon.AnchorPoint = new Vector2(0.5, 0.5);
+    lockIcon.BackgroundTransparency = 1;
+    lockIcon.Image = getAsset("assets/Lock.png");
+    lockIcon.Position = new UDim2(0.5, 0, 0.45, 0);
+    lockIcon.Size = new UDim2(0.35, 0, 0.35, 0);
+    lockIcon.SizeConstraint = Enum.SizeConstraint.RelativeYY;
+    lockIcon.Visible = false;
+    lockIcon.ZIndex = 11;
+    lockIcon.Parent = lockOverlay;
+
+    const lockText = new Instance("TextLabel");
+    lockText.Name = "LockText";
+    lockText.AnchorPoint = new Vector2(0.5, 0.5);
+    lockText.BackgroundTransparency = 1;
+    lockText.FontFace = RobotoSlabHeavy;
+    lockText.Position = new UDim2(0.5, 0, 0.75, 0);
+    lockText.Size = new UDim2(0.7, 0, 0.25, 0);
+    lockText.Text = "";
+    lockText.TextColor3 = Color3.fromRGB(255, 255, 255);
+    lockText.TextScaled = true;
+    lockText.TextStrokeTransparency = 0.1;
+    lockText.TextStrokeColor3 = Color3.fromRGB(0, 0, 0);
+    lockText.TextWrapped = true;
+    lockText.TextXAlignment = Enum.TextXAlignment.Center;
+    lockText.TextYAlignment = Enum.TextYAlignment.Center;
+    lockText.LineHeight = 0.9;
+    lockText.ZIndex = 11;
+    lockText.Parent = lockOverlay;
 
     let itemImage: ImageLabel | undefined;
     let itemViewport: ViewportFrame | undefined;
@@ -375,8 +426,12 @@ export function createShopSlot(item: Item, options: CreateShopSlotOptions): Shop
         itemImage,
         viewportLoaded: true,
         itemViewport,
+        lockOverlay,
+        lockIcon,
+        lockText,
         rotationToken: 0,
         onActivated,
+        isLocked: false,
         destroy() {
             if (this.destroyed) return;
             this.destroyed = true;
@@ -393,6 +448,7 @@ export function createShopSlot(item: Item, options: CreateShopSlotOptions): Shop
 
     connections.push(
         button.Activated.Connect(() => {
+            if (handle.isLocked) return;
             handle.onActivated?.(item);
         }),
     );
@@ -403,7 +459,15 @@ export function createShopSlot(item: Item, options: CreateShopSlotOptions): Shop
 export function updateShopSlot(handle: ShopSlotHandle, options: UpdateShopSlotOptions) {
     if (handle.destroyed) return;
 
-    const { parent, layoutOrder, baseVisible = false, hideMaxedItems = false, ownedAmount, onActivated } = options;
+    const {
+        parent,
+        layoutOrder,
+        baseVisible = false,
+        hideMaxedItems = false,
+        ownedAmount,
+        onActivated,
+        playerLevel,
+    } = options;
 
     if (parent && handle.root.Parent !== parent) {
         handle.root.Parent = parent;
@@ -429,17 +493,43 @@ export function updateShopSlot(handle: ShopSlotHandle, options: UpdateShopSlotOp
         handle.itemImage.Image = handle.item.image ?? "";
     }
 
+    const levelRequirement = handle.item.levelReq;
+    const currentLevel = playerLevel ?? 0;
+    const isLocked = levelRequirement !== undefined && currentLevel < levelRequirement;
+    handle.isLocked = isLocked;
+    handle.button.AutoButtonColor = !isLocked;
+    handle.button.Active = !isLocked;
+    if (handle.itemImage) {
+        handle.itemImage.ImageTransparency = isLocked ? 0.4 : 0;
+    }
+    if (handle.itemViewport) {
+        handle.itemViewport.ImageTransparency = isLocked ? 0.4 : 0;
+    }
+
     const price = handle.item.getPrice(ownedAmount + 1);
     const optionsList = buildPriceOptions(handle.item, price);
 
     const shouldHide = hideMaxedItems && price === undefined;
     const finalVisible = baseVisible && !shouldHide;
 
+    if (levelRequirement !== undefined && isLocked) {
+        handle.lockText.Text = `Lv. ${levelRequirement}`;
+    } else {
+        handle.lockText.Text = "";
+    }
+
+    const showLock = finalVisible && isLocked;
+    handle.lockOverlay.Visible = showLock;
+    handle.lockIcon.Visible = showLock;
+    handle.lockText.Visible = showLock && handle.lockText.Text !== "";
+
     if (!finalVisible) {
         if (handle.root.Visible !== false) {
             handle.root.Visible = false;
         }
         handle.rotationToken++;
+        handle.lockIcon.Visible = false;
+        handle.lockText.Visible = false;
     } else {
         if (handle.root.Visible !== true) {
             handle.root.Visible = true;

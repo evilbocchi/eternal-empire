@@ -1,8 +1,6 @@
-description: 'Copilot mode for drafting new item modules and trait tweaks in jme.'
-tools:
-	- mcp_discord-mcp-s_search-threads
-	- mcp_discord-mcp-s_read-forum-threads
-	- mcp_discord-mcp-s_add-thread-tags
+---
+description: 'Edit files with Roblox Studio context'
+tools: ['createFile', 'createDirectory', 'editFiles', 'search', 'runCommands', 'runTasks', 'usages', 'problems', 'changes', 'todos', 'create_object', 'create_object_with_properties', 'delete_object', 'get_class_info', 'get_file_tree', 'get_instance_children', 'get_instance_properties', 'get_place_info', 'get_project_structure', 'get_script_source', 'get_services', 'mass_get_property', 'search_by_property', 'search_files', 'search_objects', 'smart_duplicate', 'add-thread-tags', 'download-attachment', 'read-forum-threads', 'read-messages', 'search-threads', 'send-message', 'copilotCodingAgent', 'activePullRequest', 'openPullRequest']
 ---
 ## Purpose
 - Help developers add or iterate on modules under `src/shared/items/**`, configuring metadata, traits, and placement for new content.
@@ -10,14 +8,17 @@ tools:
 
 ## Response style
 - Confirm the item concept, target difficulty tier, and destination folder before coding.
+- **Always search Discord first** when the user mentions an item by name—extract the actual creator, description, and concept from the submission thread.
 - Outline required data points: name/description, pricing (`CurrencyBundle`), difficulty helper, image asset, creator credit, placement area, prerequisites, and trait behaviour.
 - Reference at least one similar item file (with path) as an exemplar before proposing an implementation.
 - Deliver complete modules using `export = new Item(script.Name)` chaining and finish with `.exit()`; prefer TypeScript snippets over prose when presenting code.
+- After creating the file, explicitly list follow-up tasks: model import (with Discord download link if available), asset sync, droplet type verification, shop registration, and ItemId generation.
 
 ## Research workflow
 - When the user needs prior art or approvals, search the Discord forum channel `#submissions` using `mcp_discord-mcp-s_search-threads` with `channel: "submissions"` and relevant keywords (item name, author, difficulty, etc.).
-- Fetch thread details via `mcp_discord-mcp-s_read-forum-threads` to gather acceptance criteria, feedback, or required assets; summarize findings before coding.
-- After reviewing or updating a submission, offer to tag the thread with `mcp_discord-mcp-s_add-thread-tags` (e.g., `"Accepted"`, `"Rejected"`, `"Pending"`) so designers know its status.
+- After finding a thread via search, use `mcp_discord-mcp-s_read-messages` with the **thread ID as the channel parameter** to read the actual submission messages, attachments, and approval details. Discord threads are treated as channels by the API.
+- Extract key details from Discord messages: creator username, exact description/concept, attached model files (.rbxm), screenshots, pricing suggestions, and any reviewer feedback.
+- After reviewing or updating a submission, offer to tag the thread with `mcp_discord-mcp-s_add-thread-tags` (e.g., `"Accepted"`, `"Rejected"`, `"Pending"`, `"Implemented"`) so designers know its status.
 - Always report which threads were consulted and call out missing information from Discord so the developer can follow up if needed.
 
 ## Project cues

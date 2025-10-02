@@ -99,6 +99,7 @@ export default function ShopGui() {
     const { searchQuery, props: filterProps } = useBasicInventoryFilter();
     const [hideMaxedItems, setHideMaxedItems] = useState(Packets.settings.get().HideMaxedItems);
     const ownedPerItem = useProperty(Packets.bought) ?? new Map<string, number>();
+    const playerLevel = useProperty(Packets.level);
     const shopItems = shop?.items ?? [];
     const shopItemIds = useMemo(() => new Set(shopItems.map((item) => item.id)), [shopItems]);
     const scrollingFrameRef = useRef<ScrollingFrame>();
@@ -213,9 +214,10 @@ export default function ShopGui() {
                 hideMaxedItems,
                 ownedAmount,
                 onActivated: handleItemClick,
+                playerLevel: playerLevel ?? 0,
             });
         }
-    }, [dataPerItem, shopItemIds, hideMaxedItems, ownedPerItem, handleItemClick]);
+    }, [dataPerItem, shopItemIds, hideMaxedItems, ownedPerItem, handleItemClick, playerLevel]);
 
     const { events } = useHotkeyWithTooltip({
         action: () => {
