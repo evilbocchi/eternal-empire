@@ -1,8 +1,11 @@
 import { getInstanceInfo } from "@antivivi/vrldk";
 import { useEffect } from "@rbxts/react";
+import { Debris, Workspace } from "@rbxts/services";
 import { LOCAL_PLAYER } from "client/constants";
+import { getAsset } from "shared/asset/AssetMap";
 import { PLACED_ITEMS_FOLDER } from "shared/constants";
 import { IS_EDIT } from "shared/Context";
+import eat from "shared/hamster/eat";
 import Items from "shared/items/Items";
 import Packets from "shared/Packets";
 
@@ -43,6 +46,59 @@ namespace ClientItemReplication {
         });
     }
 
+    function placeEffect(model: Model) {
+        const primaryPart = model.PrimaryPart;
+        if (primaryPart === undefined) return;
+
+        const size = primaryPart.Size;
+
+        const sparkles = new Instance("ParticleEmitter");
+        sparkles.Acceleration = new Vector3(0, 0.5, 0);
+        sparkles.Drag = 3;
+        sparkles.Enabled = false;
+        sparkles.EmissionDirection = Enum.NormalId.Front;
+        sparkles.Lifetime = new NumberRange(4, 6);
+        sparkles.LightEmission = 1;
+        sparkles.LockedToPart = true;
+        sparkles.Rate = 500;
+        sparkles.Rotation = new NumberRange(-360, 360);
+        sparkles.Shape = Enum.ParticleEmitterShape.Disc;
+        sparkles.ShapeInOut = Enum.ParticleEmitterShapeInOut.InAndOut;
+        sparkles.Size = new NumberSequence([
+            new NumberSequenceKeypoint(0, 0.4, 0.2),
+            new NumberSequenceKeypoint(0.5, 0.4, 0.2),
+            new NumberSequenceKeypoint(0.51, 0.2, 0.1),
+            new NumberSequenceKeypoint(1, 0.2, 0.1),
+        ]);
+        sparkles.Speed = new NumberRange(6, 10);
+        sparkles.SpreadAngle = new Vector2(0, 360);
+        sparkles.Texture = getAsset("assets/vfx/Sparkle.png");
+        sparkles.Transparency = new NumberSequence([
+            new NumberSequenceKeypoint(0, 0, 0),
+            new NumberSequenceKeypoint(0.228, 0, 0),
+            new NumberSequenceKeypoint(0.23, 1, 0),
+            new NumberSequenceKeypoint(0.523, 1, 0),
+            new NumberSequenceKeypoint(1, 1, 0),
+        ]);
+        sparkles.ZOffset = 1;
+
+        const container = new Instance("Part");
+        container.Anchored = true;
+        container.CanCollide = false;
+        container.CanTouch = false;
+        container.CastShadow = false;
+        container.Transparency = 1;
+        container.Size = new Vector3(size.X, 0.1, size.Z);
+        container.Position = primaryPart.Position.sub(new Vector3(0, size.Y / 2, 0));
+        container.Parent = Workspace;
+        sparkles.Parent = container;
+
+        eat(container, "Destroy");
+        Debris.AddItem(container, 5);
+
+        sparkles.Emit(10);
+    }
+
     /**
      * A hook that ensures item models are replicated to the client when placed.
      * It listens for updates to the placed items and manages the creation and removal of item models in the game world.
@@ -52,10 +108,19 @@ namespace ClientItemReplication {
             if (IS_EDIT) {
                 // Client and server are on the same boundary; just load item effects.
                 const connection = Packets.placedItems.observe((placedItems) => {
+                    const loaded = new Set<Model>();
+                    let size = 0;
                     for (const [placementId] of placedItems) {
                         const model = PLACED_ITEMS_FOLDER.FindFirstChild(placementId);
-                        if (model && model.IsA("Model")) {
-                            load(model, placementId);
+                        if (model === undefined || !model.IsA("Model") || modelPerPlacementId.has(placementId))
+                            continue;
+                        loaded.add(model);
+                        size += 1;
+                        load(model, placementId);
+                    }
+                    if (size < 10) {
+                        for (const model of loaded) {
+                            placeEffect(model);
                         }
                     }
                 });
@@ -75,6 +140,8 @@ namespace ClientItemReplication {
                     }
                 }
 
+                const loaded = new Set<Model>();
+                let size = 0;
                 for (const [placementId, placedItem] of placedItems) {
                     // Already have this model?
                     if (modelPerPlacementId.has(placementId)) {
@@ -100,7 +167,15 @@ namespace ClientItemReplication {
 
                     itemModel.Name = placementId;
                     itemModel.Parent = PLACED_ITEMS_FOLDER;
+                    loaded.add(itemModel);
                     load(itemModel, placementId);
+                    size += 1;
+                }
+
+                if (size < 10) {
+                    for (const model of loaded) {
+                        placeEffect(model);
+                    }
                 }
             });
             return () => {

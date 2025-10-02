@@ -188,6 +188,7 @@ export const assets = {
   "assets/start/MenuOptionBackground.png": "rbxassetid://89276614000567",
   "assets/start/MenuOptionOverlay.png": "rbxassetid://80583428762513",
   "assets/start/SideBackground.png": "rbxassetid://126588160544158",
+  "assets/vfx/Sparkle.png": "rbxassetid://101491858799820",
 } as const;
 
 export function getAsset(path: keyof typeof assets): string {
