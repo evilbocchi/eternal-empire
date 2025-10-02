@@ -70,6 +70,11 @@ const PlayerProfileTemplate = {
         HideMaxedItems: false,
 
         /**
+         * Whether the player wants the camera to focus on shops when they open.
+         */
+        FocusShopCamera: false,
+
+        /**
          * Whether the player wants to see item shadows in the world.
          */
         ItemShadows: true,

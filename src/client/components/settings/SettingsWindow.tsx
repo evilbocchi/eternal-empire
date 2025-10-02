@@ -155,6 +155,8 @@ export default function SettingsWindow() {
 
                 <SettingToggle title="Hide Maxed Items" setting="HideMaxedItems" />
 
+                <SettingToggle title="Focus Camera On Shops" setting="FocusShopCamera" />
+
                 {/* Controls Section */}
                 <SettingSection title="Controls" />
 

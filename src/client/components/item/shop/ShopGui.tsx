@@ -1,7 +1,7 @@
 import Signal from "@antivivi/lemon-signal";
 import { getInstanceInfo } from "@antivivi/vrldk";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "@rbxts/react";
-import { CollectionService, Debris, TweenService } from "@rbxts/services";
+import { CollectionService, Debris, TweenService, Workspace } from "@rbxts/services";
 import useHotkeyWithTooltip from "client/components/hotkeys/useHotkeyWithTooltip";
 import InventoryFilter, {
     filterItems,
@@ -13,6 +13,7 @@ import { showErrorToast } from "client/components/toast/ToastService";
 import useProperty from "client/hooks/useProperty";
 import { getSound, playSound } from "shared/asset/GameAssets";
 import { RobotoSlabHeavy } from "shared/asset/GameFonts";
+import { IS_EDIT } from "shared/Context";
 import { getPlayerCharacter } from "shared/hamster/getPlayerCharacter";
 import Item from "shared/item/Item";
 import Shop from "shared/item/traits/Shop";
@@ -24,6 +25,100 @@ type ShopCandidate = { guiPart: Part; shop: Shop };
 export namespace ShopManager {
     /** The current shop GUI part being displayed. */
     let shopGuiPart: Part | undefined;
+
+    interface CameraState {
+        cframe: CFrame;
+        cameraType: Enum.CameraType;
+        cameraSubject?: Humanoid | BasePart;
+    }
+
+    let cameraState: CameraState | undefined;
+    let cameraTween: Tween | undefined;
+    let focusCameraEnabled = false;
+
+    function cancelCameraTween() {
+        if (cameraTween) {
+            cameraTween.Cancel();
+            cameraTween = undefined;
+        }
+    }
+
+    export function setCameraFocusEnabled(enabled: boolean) {
+        if (focusCameraEnabled === enabled) return;
+        focusCameraEnabled = enabled;
+
+        if (!enabled) {
+            restoreCamera();
+            return;
+        }
+
+        if (shopGuiPart !== undefined) {
+            focusCameraOnShop(shopGuiPart);
+        }
+    }
+
+    function focusCameraOnShop(guiPart: Part) {
+        if (IS_EDIT || focusCameraEnabled === false) return; // Don't mess with camera in edit mode or when disabled
+
+        const camera = Workspace.CurrentCamera;
+        if (camera === undefined) return;
+
+        if (cameraState === undefined) {
+            cameraState = {
+                cframe: camera.CFrame,
+                cameraType: camera.CameraType,
+                cameraSubject: camera.CameraSubject,
+            };
+        }
+
+        const forward = guiPart.CFrame.LookVector;
+        const from = guiPart.Position.add(forward.mul(10));
+
+        camera.CameraType = Enum.CameraType.Scriptable;
+        camera.CameraSubject = undefined;
+
+        const targetCFrame = CFrame.lookAt(from, guiPart.Position);
+        const tweenInfo = new TweenInfo(0.35, Enum.EasingStyle.Quad, Enum.EasingDirection.Out);
+
+        cancelCameraTween();
+        const tween = TweenService.Create(camera, tweenInfo, { CFrame: targetCFrame });
+        cameraTween = tween;
+        tween.Completed.Once(() => {
+            if (cameraTween === tween) {
+                cameraTween = undefined;
+            }
+        });
+        tween.Play();
+    }
+
+    function restoreCamera() {
+        const state = cameraState;
+        const camera = Workspace.CurrentCamera;
+        if (state === undefined || camera === undefined) {
+            cameraState = undefined;
+            cancelCameraTween();
+            return;
+        }
+
+        cancelCameraTween();
+
+        const tweenInfo = new TweenInfo(0.35, Enum.EasingStyle.Quad, Enum.EasingDirection.Out);
+        const tween = TweenService.Create(camera, tweenInfo, { CFrame: state.cframe });
+        camera.CameraType = Enum.CameraType.Scriptable;
+        camera.CameraSubject = undefined;
+        camera.Focus = state.cframe;
+        cameraTween = tween;
+        tween.Completed.Once(() => {
+            if (cameraTween === tween) {
+                cameraTween = undefined;
+            }
+            camera.CameraType = state.cameraType;
+            camera.CameraSubject = state.cameraSubject;
+        });
+
+        cameraState = undefined;
+        tween.Play();
+    }
 
     export const opened = new Signal<(shop?: Shop, adornee?: Part) => void>();
 
@@ -56,6 +151,7 @@ export namespace ShopManager {
         }
 
         if (guiPart === undefined || shop === undefined) {
+            restoreCamera();
             opened.fire();
             return;
         }
@@ -66,6 +162,7 @@ export namespace ShopManager {
         Debris.AddItem(sound, 5);
 
         TweenService.Create(guiPart, new TweenInfo(0.3), { LocalTransparencyModifier: 0 }).Play();
+        focusCameraOnShop(guiPart);
         opened.fire(shop, guiPart);
     }
 
@@ -98,6 +195,7 @@ export default function ShopGui() {
     const [{ shop, adornee }, setShopInfo] = useState<{ shop?: Shop; adornee?: Part }>({});
     const { searchQuery, props: filterProps } = useBasicInventoryFilter();
     const [hideMaxedItems, setHideMaxedItems] = useState(Packets.settings.get().HideMaxedItems);
+    const [focusShopCamera, setFocusShopCamera] = useState(Packets.settings.get().FocusShopCamera === true);
     const ownedPerItem = useProperty(Packets.bought) ?? new Map<string, number>();
     const playerLevel = useProperty(Packets.level);
     const shopItems = shop?.items ?? [];
@@ -112,6 +210,7 @@ export default function ShopGui() {
     useEffect(() => {
         const settingsConnection = Packets.settings.observe((settings) => {
             setHideMaxedItems(settings.HideMaxedItems);
+            setFocusShopCamera(settings.FocusShopCamera === true);
         });
         const openedConnection = ShopManager.opened.connect((shop, adornee) => {
             setShopInfo((prev) => {
@@ -158,8 +257,13 @@ export default function ShopGui() {
             active = false;
             settingsConnection.disconnect();
             openedConnection.disconnect();
+            ShopManager.refreshShop();
         };
     }, []);
+
+    useEffect(() => {
+        ShopManager.setCameraFocusEnabled(focusShopCamera);
+    }, [focusShopCamera]);
 
     useEffect(() => {
         return () => {

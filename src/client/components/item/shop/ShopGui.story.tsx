@@ -49,6 +49,7 @@ export = CreateReactStory(
         useEffect(() => {
             const settings = Packets.settings.get();
             settings.HideMaxedItems = props.controls.hideMaxedItems;
+            settings.FocusShopCamera = true;
             Packets.settings.set(settings);
         }, [props.controls.hideMaxedItems]);
 
