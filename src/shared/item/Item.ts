@@ -667,11 +667,11 @@ export default class Item {
      * Calls the callback function every specified delta time.
      *
      * @param instance Stops the repeat when the instance is destroyed. If undefined, the repeat will continue indefinitely.
-     * @param callback The function to be called every delta time.
+     * @param callback The function to be called every delta time. If the function returns a number, the repeat will be updated to that delta time.
      * @param delta Delta time to specify the interval. If not specified, the function will be called every frame.
      * @returns An object that can be used to manage the repeat.
      */
-    repeat(instance: Instance | undefined, callback: (dt: number) => unknown, delta?: number) {
+    repeat(instance: Instance | undefined, callback: (dt: number) => number | void, delta?: number) {
         const ref = { delta: delta };
         REPEATS.set(callback, ref);
         if (instance !== undefined) instance.Destroying.Once(() => REPEATS.delete(callback));
@@ -929,7 +929,8 @@ export default class Item {
                     }
                     const diff = t - last;
                     if (rep.delta === undefined || diff > rep.delta / gameSpeed) {
-                        callback(diff);
+                        const newDelta = callback(diff);
+                        if (newDelta !== undefined) rep.delta = newDelta;
                         rep.lastCall = t;
                     }
                 }

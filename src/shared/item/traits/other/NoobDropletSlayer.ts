@@ -11,30 +11,24 @@ export default class NoobDropletSlayer extends BaseDropletSlayer {
     static readonly activatePacket = perItemPacket(packet<(placementId: string) => void>());
 
     static load(model: Model, slayer: NoobDropletSlayer) {
+        const modelInfo = getAllInstanceInfo(model);
+
         let i = 0;
-        const { ref } = super.baseLoad(model, slayer, () => {
+        super.baseLoad(model, slayer, () => {
+            let hasRadioNoob = false;
+            if (modelInfo.Boosts !== undefined) {
+                for (const [, boost] of modelInfo.Boosts) {
+                    if (boost.chargedBy?.item.id === "RadioNoob") {
+                        hasRadioNoob = true;
+                        break;
+                    }
+                }
+            }
             if (hasRadioNoob) {
                 i++;
                 i %= 2;
             }
             return tostring(i);
-        });
-
-        let hasRadioNoob = false;
-
-        const modelInfo = getAllInstanceInfo(model);
-        modelInfo.Chargeable = true;
-
-        modelInfo.BoostAdded!.add((boost) => {
-            if (boost.chargedBy?.item.id !== "RadioNoob") return;
-            hasRadioNoob = true;
-            ref.delta = slayer.cooldown / (hasRadioNoob ? 2 : 1);
-        });
-
-        modelInfo.BoostRemoved!.add((boost) => {
-            if (boost.chargedBy?.item.id !== "RadioNoob") return;
-            hasRadioNoob = false;
-            ref.delta = slayer.cooldown / (hasRadioNoob ? 2 : 1);
         });
     }
 

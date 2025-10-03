@@ -14,12 +14,8 @@ declare global {
         Clicker: Clicker;
     }
 
-    interface Modifier {
-        multi: number;
-    }
-
-    interface InstanceInfo {
-        ClickRateModifiers?: Set<Modifier>;
+    interface ItemBoost {
+        clickValueMul?: number;
     }
 }
 
@@ -30,8 +26,6 @@ export default class Clicker extends ItemTrait {
         const Items = Server.Items;
 
         const modelInfo = getAllInstanceInfo(model);
-        const modifiers = new Set<Modifier>();
-        modelInfo.ClickRateModifiers = modifiers;
 
         const clickArea = model.WaitForChild("ClickArea") as BasePart;
         clickArea.CanTouch = true;
@@ -62,8 +56,10 @@ export default class Clicker extends ItemTrait {
                 if (isPlacedItemUnusable(modelInfo)) return;
 
                 let rate = 1;
-                for (const modifier of modifiers) {
-                    rate *= modifier.multi;
+                if (modelInfo.Boosts !== undefined) {
+                    for (const [, boost] of modelInfo.Boosts) {
+                        rate *= boost.clickValueMul ?? 1;
+                    }
                 }
                 event.Fire(clicker.clickValue * rate);
 

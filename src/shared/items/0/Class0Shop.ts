@@ -31,6 +31,7 @@ import UpgradeBoardII from "shared/items/0/donothing/UpgradeBoardII";
 import AbnormalReactor from "shared/items/0/frivolous/AbnormalReactor";
 import DropletTurbine from "shared/items/0/frivolous/DropletTurbine";
 import FlamethrowerUpgrader from "shared/items/0/frivolous/FlamethrowerUpgrader";
+import HandCrankCoinMiner from "shared/items/0/frivolous/HandCrankCoinMiner";
 import RadioNoob from "shared/items/0/frivolous/RadioNoob";
 import RingOfDespair from "shared/items/0/frivolous/RingOfDespair";
 import Timewall from "shared/items/0/frivolous/Timewall";
@@ -227,6 +228,7 @@ export = new Item(script.Name)
         RingOfDespair,
         FlamethrowerUpgrader,
         AbnormalReactor,
+        HandCrankCoinMiner,
 
         TimelostDesert,
         VibePillar,

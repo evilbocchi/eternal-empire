@@ -112,18 +112,25 @@ export default class Charger extends Operative {
             }
 
             charging.add(generatorModel);
-            Generator.addBoost(generatorInfo, placementId, {
+            const boost: ItemBoost = {
                 chargerInfo,
                 ignoresLimitations: charger.ignoreLimit,
                 chargedBy: charger,
-            });
+            };
+            if (charger.boost !== undefined) {
+                for (const [k, v] of pairs(charger.boost)) {
+                    (boost as unknown as { [key: string]: unknown })[k] = v;
+                }
+            }
+
+            Generator.addBoost(generatorInfo, placementId, boost);
             generatorChangedPacket.toAllClients(model, generatorModel.Name, true);
         };
         const checkRemove = (generatorModel: Instance) => {
             if (!generatorModel.IsA("Model")) return;
             charging.delete(generatorModel);
-            const instanceInfo = getAllInstanceInfo(generatorModel);
-            Generator.removeBoost(instanceInfo, placementId);
+            const generatorInfo = getAllInstanceInfo(generatorModel);
+            Generator.removeBoost(generatorInfo, placementId);
             generatorChangedPacket.toAllClients(model, generatorModel.Name, false);
         };
 
@@ -215,6 +222,8 @@ export default class Charger extends Operative {
 
     readonly whitelist = new Set<string>();
 
+    boost?: Partial<ItemBoost>;
+
     /**
      * Whether the charger ignores the limit of two chargers per generator.
      */
@@ -265,6 +274,11 @@ export default class Charger extends Operative {
      */
     setRadius(radius: number) {
         this.radius = radius;
+        return this;
+    }
+
+    setBoost(boost: Partial<ItemBoost>) {
+        this.boost = boost;
         return this;
     }
 

@@ -6,6 +6,12 @@ import ItemTrait from "shared/item/traits/ItemTrait";
 import Upgrader from "shared/item/traits/upgrader/Upgrader";
 import perItemPacket from "shared/item/utils/perItemPacket";
 
+declare global {
+    interface ItemBoost {
+        cooldownMul?: number;
+    }
+}
+
 export default abstract class BaseDropletSlayer extends ItemTrait {
     static readonly activatePacket = perItemPacket(packet<(placementId: string) => void>());
 
@@ -19,6 +25,9 @@ export default abstract class BaseDropletSlayer extends ItemTrait {
         const item = slayer.item;
         const upgrader = item.trait(Upgrader);
         const modelInfo = getAllInstanceInfo(model);
+        modelInfo.Boosts ??= new Map();
+        const boosts = modelInfo.Boosts;
+
         const laser = model.WaitForChild("PulsatingLaser") as BasePart;
         const laserInfo = getAllInstanceInfo(laser);
         laserInfo.Maintained = false;
@@ -45,6 +54,14 @@ export default abstract class BaseDropletSlayer extends ItemTrait {
                 }
                 laserInfo.Maintained = false;
                 this.activatePacket.toAllClients(model);
+
+                let newCooldown = slayer.cooldown;
+                for (const [, boost] of boosts) {
+                    if (boost.cooldownMul !== undefined) {
+                        newCooldown *= boost.cooldownMul;
+                    }
+                }
+                return newCooldown;
             },
             slayer.cooldown,
         );

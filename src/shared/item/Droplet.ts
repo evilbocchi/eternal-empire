@@ -635,6 +635,18 @@ export default class Droplet {
             .setValue(new CurrencyBundle().set("Bitcoin", 16).set("Skill", 0.15)),
     );
 
+    static HandCrankedCoin = Droplet.registerDroplet(
+        new Droplet("HandCrankedCoin")
+            .setModel(() => {
+                const droplet = new Instance("Part");
+                droplet.Size = new Vector3(0.91, 0.91, 0.91);
+                droplet.Color = Difficulty.Frivolous.color!;
+                droplet.Material = Enum.Material.Ice;
+                return droplet;
+            })
+            .setValue(new CurrencyBundle().set("Bitcoin", 24)),
+    );
+
     static SphericalDroplet = Droplet.registerDroplet(
         new Droplet("SphericalDroplet")
             .setModel(() => {
@@ -729,6 +741,18 @@ export default class Droplet {
             })
             .setValue(new CurrencyBundle().set("Skill", 0.05).set("Purifier Clicks", 5000).set("Power", 125000))
             .setHealth(120),
+    );
+
+    static PlacidDroplet = Droplet.registerDroplet(
+        new Droplet("PlacidDroplet")
+            .setModel(() => {
+                const droplet = new Instance("Part");
+                droplet.Size = new Vector3(1, 1, 1);
+                droplet.Color = Difficulty.Placid.color!;
+                droplet.Material = Enum.Material.Slate;
+                return droplet;
+            })
+            .setValue(new CurrencyBundle().set("Skill", 1)),
     );
 
     /**

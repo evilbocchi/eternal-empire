@@ -1,6 +1,6 @@
 ---
 description: 'Edit files with Roblox Studio context'
-tools: ['createFile', 'createDirectory', 'editFiles', 'search', 'runCommands', 'runTasks', 'usages', 'problems', 'changes', 'todos', 'create_object', 'create_object_with_properties', 'delete_object', 'get_class_info', 'get_file_tree', 'get_instance_children', 'get_instance_properties', 'get_place_info', 'get_project_structure', 'get_script_source', 'get_services', 'mass_get_property', 'search_by_property', 'search_files', 'search_objects', 'smart_duplicate', 'add-thread-tags', 'download-attachment', 'read-forum-threads', 'read-messages', 'search-threads', 'send-message', 'copilotCodingAgent', 'activePullRequest', 'openPullRequest']
+tools: ['createFile', 'createDirectory', 'editFiles', 'search', 'runCommands', 'runTasks', 'usages', 'problems', 'changes', 'todos', 'create_object', 'create_object_with_properties', 'delete_object', 'get_class_info', 'get_file_tree', 'get_instance_children', 'get_instance_properties', 'get_place_info', 'get_project_structure', 'get_script_source', 'get_services', 'mass_get_property', 'search_by_property', 'search_files', 'search_objects', 'smart_duplicate', 'discord-mcp-server', 'copilotCodingAgent', 'activePullRequest', 'openPullRequest']
 ---
 ## Purpose
 - Help developers add or iterate on modules under `src/shared/items/**`, configuring metadata, traits, and placement for new content.

@@ -20,5 +20,9 @@ export = new Item(script.Name)
     .addToWhitelist("NoobClicker")
     .addToWhitelist("DropletSlayerMkII")
     .addToWhitelist("MiniDropletSlayer")
+    .setBoost({
+        clickValueMul: 200000,
+        cooldownMul: 0.5,
+    })
 
     .exit();

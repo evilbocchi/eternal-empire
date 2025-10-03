@@ -52,7 +52,8 @@ export default class Boostable extends ItemTrait {
      * @returns Whether a boost was added.
      */
     static addBoost(instanceInfo: InstanceInfo, key: string, boost: ItemBoost) {
-        const boosts = instanceInfo.Boosts ?? new Map<string, ItemBoost>();
+        instanceInfo.Boosts ??= new Map();
+        const boosts = instanceInfo.Boosts;
         if (boosts.has(key)) return;
         boosts.set(key, boost);
         const boostAdded = instanceInfo.BoostAdded;

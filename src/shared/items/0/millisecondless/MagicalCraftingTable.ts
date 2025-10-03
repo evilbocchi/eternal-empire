@@ -11,6 +11,7 @@ import HeavyFoundry from "shared/items/0/blessing/HeavyFoundry";
 import LostHeaven from "shared/items/0/blessing/LostHeaven";
 import SortingConveyor from "shared/items/0/donothing/SortingConveyor";
 import FlamingConveyor from "shared/items/0/frivolous/FlamingConveyor";
+import OverOverheadUpgrader from "shared/items/0/frivolous/OverOverheadUpgrader";
 import CrystalDrill from "shared/items/0/happylike/CrystalDrill";
 import FrostSnow from "shared/items/0/justair/FrostSnow";
 import LeashedConveyor from "shared/items/0/locomotion/LeashedConveyor";
@@ -21,6 +22,7 @@ import BoomboxElevator from "shared/items/0/vibeness/BoomboxElevator";
 import ShrinkflowConveyor from "shared/items/0/vibeness/ShrinkflowConveyor";
 import SolarPoweredDropper from "shared/items/0/walkthrough/SolarPoweredDropper";
 import OverheadUpgrader from "shared/items/0/win/OverheadUpgrader";
+import FriendClicker from "shared/items/0/winsome/FriendClicker";
 import Sideswiper from "shared/items/0/winsome/Sideswiper";
 import WinsomeBucket from "shared/items/0/winsome/WinsomeBucket";
 import WinsomeCharm from "shared/items/0/winsome/WinsomeCharm";
@@ -47,6 +49,7 @@ export = new Item(script.Name)
         Sideswiper,
         WinsomeBucket,
         WinsomeCharm,
+        FriendClicker,
 
         SortingConveyor,
 
@@ -70,6 +73,8 @@ export = new Item(script.Name)
         FlamingConveyor,
 
         CrimsonCemetery,
+
+        OverOverheadUpgrader,
 
         BoomboxElevator,
         ShrinkflowConveyor,
