@@ -1,11 +1,13 @@
 import { getAllInstanceInfo } from "@antivivi/vrldk";
 import { packet } from "@rbxts/fletchette";
 import { Debris } from "@rbxts/services";
+import { Server } from "shared/api/APIExpose";
 import { PLACED_ITEMS_FOLDER } from "shared/constants";
 import Item from "shared/item/Item";
 import Generator from "shared/item/traits/generator/Generator";
 import Operative from "shared/item/traits/Operative";
 import perItemPacket from "shared/item/utils/perItemPacket";
+import isPlacedItemUnusable from "shared/item/utils/isPlacedItemUnusable";
 
 declare global {
     interface ItemTraits {
@@ -62,12 +64,15 @@ export default class Charger extends Operative {
         const charging = new Set<Instance>();
         const chargerInfo = getAllInstanceInfo(model);
         const chargerArea = chargerInfo.Area;
+        let isDisabled = false;
 
         const checkAdd = (generatorModel: Instance) => {
             // Sanity checks
 
             // is a model
             if (!generatorModel.IsA("Model")) return;
+
+            if (isDisabled) return;
 
             // can be charged
             const generatorInfo = getAllInstanceInfo(generatorModel);
@@ -101,8 +106,22 @@ export default class Charger extends Operative {
             // Check limit of two chargers per generator
             if (charger.ignoreLimit !== true) {
                 let existing = 0;
-                for (const [_, boost] of boosts) {
-                    if (!boost.ignoresLimitations) ++existing;
+                const staleBoostKeys = new Array<string>();
+                for (const [boostKey, boost] of boosts) {
+                    if (boost.ignoresLimitations) continue;
+
+                    if (boost.chargedBy !== undefined && Server.Item.getPlacedItem(boostKey) === undefined) {
+                        staleBoostKeys.push(boostKey);
+                        continue;
+                    }
+
+                    ++existing;
+                }
+
+                if (!staleBoostKeys.isEmpty()) {
+                    for (const staleKey of staleBoostKeys) {
+                        Generator.removeBoost(generatorInfo, staleKey);
+                    }
                 }
 
                 if (existing > 1) {
@@ -133,6 +152,43 @@ export default class Charger extends Operative {
             Generator.removeBoost(generatorInfo, placementId);
             generatorChangedPacket.toAllClients(model, generatorModel.Name, false);
         };
+
+        const releaseAll = () => {
+            for (const generatorModel of [...charging]) {
+                checkRemove(generatorModel);
+            }
+        };
+
+        const rescanAll = () => {
+            for (const placed of PLACED_ITEMS_FOLDER.GetChildren()) {
+                task.spawn(() => checkAdd(placed));
+            }
+        };
+
+        isDisabled = isPlacedItemUnusable(chargerInfo);
+        if (isDisabled) {
+            releaseAll();
+        }
+
+        charger.item.repeat(
+            model,
+            () => {
+                const unusable = isPlacedItemUnusable(chargerInfo);
+                if (unusable) {
+                    if (!isDisabled) {
+                        isDisabled = true;
+                        releaseAll();
+                    }
+                    return;
+                }
+
+                if (isDisabled) {
+                    isDisabled = false;
+                    rescanAll();
+                }
+            },
+            0.5,
+        );
 
         currentGeneratorsPacket.fromClient(model, () => {
             return [...charging].map((g) => g.Name);
