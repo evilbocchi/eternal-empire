@@ -131,7 +131,7 @@ export = new Item(script.Name)
             connection.Disconnect();
             task.delay(2, () => {
                 // wait for any tweens to finish
-                partCache.Dispose();
+                partCache?.Dispose();
             });
         });
     });
