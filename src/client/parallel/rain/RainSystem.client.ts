@@ -4,6 +4,7 @@ import { ReplicatedStorage, RunService, Workspace } from "@rbxts/services";
 import { Environment } from "@rbxts/ui-labs";
 import RainParallel from "client/parallel/rain/RainParallel";
 import { getAsset } from "shared/asset/AssetMap";
+import { SOUND_EFFECTS_GROUP } from "shared/asset/GameAssets";
 import { CAMERA } from "shared/constants";
 import { IS_EDIT } from "shared/Context";
 import eat from "shared/hamster/eat";
@@ -148,6 +149,7 @@ const { rainSFX, rainIndoorEq, rainIndoorReverb } = (() => {
     Rain.Looped = true;
     Rain.Name = "Rain";
     Rain.SoundId = getAsset("assets/sounds/Rain.mp3");
+    Rain.SoundGroup = SOUND_EFFECTS_GROUP;
     Rain.Parent = IS_EDIT ? Environment.PluginWidget : ReplicatedStorage;
     eat(Rain, "Destroy");
 
@@ -331,6 +333,11 @@ let insideOfBuilding = false;
 const soundEffects: Record<string, number> = {};
 let currentTime = 0;
 
+// Rain SFX volume targets
+const OUTDOOR_RAIN_VOLUME = 0.2;
+const INDOOR_RAIN_VOLUME = 0.05;
+let rainVolumeTarget = OUTDOOR_RAIN_VOLUME;
+
 // Batch release tracking - avoid creating tons of task.delay calls
 const releaseBatch: Array<{ cached: CachedRainAttachment | CachedPuddleAttachment; releaseTime: number }> = [];
 
@@ -350,7 +357,9 @@ const bindConnection = RainParallel.bindWeatherState((newState: WeatherState) =>
     } else {
         rainSFX.Stop();
     }
-    rainSFX.Volume = newEnabled ? currentWeather.intensity * 0.5 : 0;
+    // Set initial target volume (actual lerp happens in serialConnection)
+    rainVolumeTarget = OUTDOOR_RAIN_VOLUME;
+    rainSFX.Volume = newEnabled ? currentWeather.intensity * OUTDOOR_RAIN_VOLUME : 0;
     rainEnabled = newEnabled;
 });
 eat(bindConnection, "Disconnect");
@@ -425,6 +434,14 @@ const serialConnection = RunService.RenderStepped.Connect(() => {
         puddleHits.clear();
         releaseBatch.clear();
         return;
+    }
+
+    // Adjust rain SFX volume target based on indoor/outdoor
+    rainVolumeTarget = insideOfBuilding ? INDOOR_RAIN_VOLUME : OUTDOOR_RAIN_VOLUME;
+    // Lerp rainSFX.Volume toward target
+    const rainTarget = currentWeather.intensity * rainVolumeTarget;
+    if (math.abs(rainSFX.Volume - rainTarget) > 0.01) {
+        rainSFX.Volume = lerp(rainSFX.Volume, rainTarget, 0.15);
     }
 
     // Spawn RainDrops
