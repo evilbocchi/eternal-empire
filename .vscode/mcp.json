@@ -1,11 +1,10 @@
 {
     "inputs": [],
     "servers": {
-        "robloxstudio-mcp": {
-            "command": "npx",
+        "jme-datamodel": {
+            "command": "node",
             "args": [
-                "-y",
-                "robloxstudio-mcp"
+                "./plugin/index.js"
             ]
         }
     }

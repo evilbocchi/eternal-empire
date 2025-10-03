@@ -4,7 +4,7 @@ local RunService = game:GetService("RunService")
 local INTERVAL = 2 -- seconds
 local function getEndpoint()
     local currentPort = workspace:GetAttribute("WaypointSyncPort") or 28354
-    return `http://localhost:{currentPort}/write`
+    return `http://localhost:{currentPort}/waypointsync`
 end
 
 local connection = nil
