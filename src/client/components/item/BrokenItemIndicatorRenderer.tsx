@@ -70,10 +70,13 @@ export default function BrokenItemIndicatorRenderer() {
     const [models, setModels] = useState<Set<Model>>(new Set());
 
     useEffect(() => {
+        const brokenModels = new Set<Model>();
+
         const connection = Packets.brokenPlacedItems.observe((brokenPlacedItems) => {
-            for (const model of models) {
+            for (const model of brokenModels) {
                 if (!brokenPlacedItems.has(model.Name)) {
-                    setInstanceInfo(model, "Broken", undefined);
+                    setInstanceInfo(model, "Broken", false);
+                    brokenModels.delete(model);
                 }
             }
 
@@ -83,6 +86,7 @@ export default function BrokenItemIndicatorRenderer() {
                 if (model === undefined) continue;
 
                 newModels.add(model as Model);
+                brokenModels.add(model as Model);
                 setInstanceInfo(model, "Broken", true);
             }
             setModels(newModels);

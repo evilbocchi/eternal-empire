@@ -45,7 +45,7 @@ declare global {
         /**
          * The rotation value in degrees.
          */
-        rawRotation?: DataType.u8;
+        rawRotation?: DataType.u16;
 
         /**
          * The area of the placement, used to identify the item in the world.
