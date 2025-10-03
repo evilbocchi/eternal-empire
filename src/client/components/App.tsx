@@ -56,6 +56,7 @@ import RepairedItemEffectRenderer from "client/components/item/RepairedItemEffec
 import RepairWindow from "client/components/item/RepairWindow";
 import { PLAYER_GUI } from "client/constants";
 import eat from "shared/hamster/eat";
+import LoadingScreen from "sharedfirst/LoadingScreen";
 
 function setParent(instance: Instance) {
     instance.Parent = PLAYER_GUI;
@@ -147,8 +148,8 @@ export default function App() {
             addRoot(roots, createFolder("World")).render(<WorldRenderer />);
         }
 
+        LoadingScreen.hideLoadingScreen();
         Workspace.SetAttribute("Start", IS_PUBLIC_SERVER);
-
         const cleanup = MusicManager.init();
 
         task.delay(1, () => {

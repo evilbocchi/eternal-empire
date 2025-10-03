@@ -1,6 +1,5 @@
 import React, { Fragment, useCallback, useEffect, useRef, useState } from "@rbxts/react";
 import { RunService, TweenService, Workspace } from "@rbxts/services";
-import { LOCAL_PLAYER } from "client/constants";
 import SingleDocumentManager from "client/components/sidebar/SingleDocumentManager";
 import AboutWindow from "client/components/start/AboutWindow";
 import EmpiresWindow from "client/components/start/EmpiresWindow";

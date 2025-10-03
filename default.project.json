@@ -1,9 +1,6 @@
 {
     "name": "jme",
-    "globIgnorePaths": [
-        "**/package.json",
-        "**/tsconfig.json"
-    ],
+    "globIgnorePaths": ["**/package.json", "**/tsconfig.json"],
     "tree": {
         "$className": "DataModel",
         "ServerScriptService": {
@@ -12,6 +9,10 @@
                 "$className": "Actor",
                 "$path": "out/server"
             }
+        },
+        "ReplicatedFirst": {
+            "$className": "ReplicatedFirst",
+            "$path": "out/sharedfirst"
         },
         "ReplicatedStorage": {
             "$className": "ReplicatedStorage",

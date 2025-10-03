@@ -31,8 +31,6 @@ export default function ChatHookManager() {
             }
 
             const channel = instance;
-            const previousHandler = channel.OnIncomingMessage;
-
             const onMessageAdded = (message: TextChatMessage) => {
                 const metadatas = message.Metadata.split(";");
                 let color: Color3 | undefined;
@@ -95,7 +93,7 @@ export default function ChatHookManager() {
             channelCleanup.set(channel, () => {
                 messageReceivedConnection.Disconnect();
                 intervalCleanup();
-                channel.OnIncomingMessage = previousHandler ?? noopHandler;
+                channel.OnIncomingMessage = noopHandler;
             });
         };
 

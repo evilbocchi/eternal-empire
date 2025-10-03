@@ -25,6 +25,7 @@ function exit() {
 export default function performIntroSequence() {
     Workspace.SetAttribute("Start", false);
     if (ReplicatedStorage.GetAttribute("Intro") !== true) return exit();
+    if (isIntroSequenceDone === true) return exit();
 
     const connection = ReplicatedStorage.GetAttributeChangedSignal("Intro").Connect(() => {
         if (ReplicatedStorage.GetAttribute("Intro") === false) {
@@ -53,11 +54,23 @@ export default function performIntroSequence() {
     blackWindow.Parent = screenGui;
 
     // Waking up
-    const humanoid = getPlayerCharacter()?.FindFirstChildOfClass("Humanoid");
-    if (humanoid === undefined) return exit();
-    const camera = Workspace.CurrentCamera;
-    if (camera === undefined) return exit();
-    if (isIntroSequenceDone === true) return exit();
+    let character = getPlayerCharacter();
+    if (!character) {
+        while (!character) {
+            character = getPlayerCharacter();
+            task.wait();
+        }
+    }
+    const humanoid = character.WaitForChild("Humanoid") as Humanoid;
+
+    let camera = Workspace.CurrentCamera;
+    if (!camera) {
+        while (!camera) {
+            camera = Workspace.CurrentCamera;
+            task.wait();
+        }
+    }
+
     isIntroSequenceDone = true;
     isCurrentlyInIntroSequence = true;
     MusicManager.refreshMusic(true);

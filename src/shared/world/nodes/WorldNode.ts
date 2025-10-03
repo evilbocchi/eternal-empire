@@ -14,9 +14,6 @@ export default class WorldNode<T extends Instance = Instance> {
         for (const instance of CollectionService.GetTagged(tag)) {
             this.registerInstance(instance as T);
         }
-
-        this.cleanup();
-
         this.addedConnection = CollectionService.GetInstanceAddedSignal(tag).Connect((instance) => {
             this.registerInstance(instance as T);
         });
@@ -27,8 +24,8 @@ export default class WorldNode<T extends Instance = Instance> {
     }
 
     private registerInstance(instance: T) {
-        this.onRegister?.(instance);
         this.INSTANCES.add(instance);
+        this.onRegister?.(instance);
         eat(
             instance.AncestryChanged.Connect(() => {
                 if (instance.Parent === undefined) {
@@ -39,8 +36,8 @@ export default class WorldNode<T extends Instance = Instance> {
     }
 
     private unregisterInstance(instance: T) {
-        this.onUnregister?.(instance);
         this.INSTANCES.delete(instance);
+        this.onUnregister?.(instance);
     }
 
     cleanup() {
@@ -83,13 +80,13 @@ export class SingleWorldNode<T extends Instance = Instance> extends WorldNode<T>
      */
     waitForInstance(timeout?: number): T {
         let instance = this.getInstance();
-        const startTime = tick();
+        const startTime = os.clock();
         let warned = false;
         while (instance === undefined) {
             task.wait();
             instance = this.getInstance();
 
-            const elapsed = tick() - startTime;
+            const elapsed = os.clock() - startTime;
             if (timeout) {
                 if (elapsed > timeout) {
                     throw `Timed out waiting for instance with tag ${this.tag}`;

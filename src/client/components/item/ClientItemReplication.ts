@@ -9,6 +9,7 @@ import eat from "shared/hamster/eat";
 import Item from "shared/item/Item";
 import Items from "shared/items/Items";
 import Packets from "shared/Packets";
+import WorldNode from "shared/world/nodes/WorldNode";
 
 namespace ClientItemReplication {
     export const modelPerPlacementId = new Map<string, Model>();
@@ -20,19 +21,18 @@ namespace ClientItemReplication {
      * @param placementId The unique placement ID of the item.
      * @param showEffects Whether to show placement effects (like sparkles). Defaults to true.
      */
-    export function load(model: Instance, placementId: string, showEffects = true) {
-        if (!model.IsA("Model") || model.GetAttribute("Selected") === true || modelPerPlacementId.has(placementId)) {
-            return;
-        }
+    export function load(model: Instance, placementId?: string, showEffects = true) {
+        if (!model.IsA("Model") || model.GetAttribute("Selected") === true) return;
+        if (placementId !== undefined && modelPerPlacementId.has(placementId)) return;
+
         const itemId = getInstanceInfo(model, "ItemId");
-        if (itemId === undefined) {
-            return;
-        }
+        if (itemId === undefined) return;
         const item = Items.getItem(itemId);
-        if (item === undefined) {
-            return;
+        if (item === undefined) return;
+
+        if (placementId !== undefined) {
+            modelPerPlacementId.set(placementId, model);
         }
-        modelPerPlacementId.set(placementId, model);
         task.spawn(() => item.CLIENT_LOADS.forEach((callback) => callback(model, item, LOCAL_PLAYER!)));
         const cleanups = new Set<() => void>();
         for (const callback of callbacks) {
@@ -45,7 +45,9 @@ namespace ClientItemReplication {
             for (const cleanup of cleanups) {
                 cleanup();
             }
-            modelPerPlacementId.delete(placementId);
+            if (placementId !== undefined) {
+                modelPerPlacementId.delete(placementId);
+            }
         });
 
         if (showEffects) {
@@ -131,6 +133,27 @@ namespace ClientItemReplication {
      */
     export function useManualItemReplication() {
         useEffect(() => {
+            let i = 0;
+            const mapItemWorldNode = new WorldNode("MapItem", (waypoint) => {
+                if (!waypoint.IsA("BasePart")) return;
+                const item = Items.getItem(waypoint.Name);
+                if (item === undefined) throw `Item ${waypoint.Name} not found`;
+                const model = item.createModel({
+                    item: item.id,
+                    posX: waypoint.Position.X,
+                    posY: waypoint.Position.Y,
+                    posZ: waypoint.Position.Z,
+                    rotX: waypoint.Rotation.X,
+                    rotY: waypoint.Rotation.Y,
+                    rotZ: waypoint.Rotation.Z,
+                });
+                if (model !== undefined) {
+                    model.Parent = Workspace;
+                    load(model, undefined, false);
+                } else warn(`Model for ${item.id} not found`);
+                i++;
+            });
+
             if (IS_EDIT) {
                 // Client and server are on the same boundary; just load item effects.
                 const connection = Packets.placedItems.observe((placedItems) => {
@@ -205,6 +228,7 @@ namespace ClientItemReplication {
                 modelPerPlacementId.clear();
                 settingsConnection.Disconnect();
                 connection.Disconnect();
+                mapItemWorldNode.cleanup();
             };
         }, []);
     }

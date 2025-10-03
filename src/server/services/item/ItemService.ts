@@ -645,40 +645,6 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
     }
 
     /**
-     * Adds static map items to the world.
-     * Processes all objects tagged as "MapItem" and creates their 3D models.
-     */
-    addMapItems() {
-        let i = 0;
-        const mapItemModels = new Set<Model>();
-        for (const waypoint of CollectionService.GetTagged("MapItem")) {
-            if (!waypoint.IsA("BasePart")) continue;
-            const item = Items.getItem(waypoint.Name);
-            if (item === undefined) throw `Item ${waypoint.Name} not found`;
-            const model = this.addItemModel(`wm${i}`, {
-                item: item.id,
-                posX: waypoint.Position.X,
-                posY: waypoint.Position.Y,
-                posZ: waypoint.Position.Z,
-                rotX: waypoint.Rotation.X,
-                rotY: waypoint.Rotation.Y,
-                rotZ: waypoint.Rotation.Z,
-            });
-            if (model !== undefined) {
-                mapItemModels.add(model);
-                model.Parent = Workspace;
-            } else warn(`Model for ${item.id} not found`);
-
-            i++;
-        }
-        eat(() => {
-            for (const model of mapItemModels) {
-                model.Destroy();
-            }
-        });
-    }
-
-    /**
      * Waits for the specified callback to finish before returning its value.
      * This is used to prevent race conditions when placing items.
      *
@@ -883,9 +849,6 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
 
         // Ensure all placed items have models
         this.fullUpdatePlacedItemsModels();
-
-        // Add static map items to the world
-        this.addMapItems();
     }
 
     onStart() {

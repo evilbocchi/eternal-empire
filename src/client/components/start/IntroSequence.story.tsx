@@ -1,4 +1,4 @@
-import React, { Fragment } from "@rbxts/react";
+import React, { Fragment, useEffect } from "@rbxts/react";
 import ReactRoblox from "@rbxts/react-roblox";
 import { ReplicatedStorage } from "@rbxts/services";
 import { CreateReactStory } from "@rbxts/ui-labs";
@@ -18,6 +18,10 @@ export = CreateReactStory(
         Packets.getLogs.toServer = () => [];
         ReplicatedStorage.SetAttribute("Intro", undefined);
         StoryMocking.mockCharacter(false);
+
+        useEffect(() => {
+            return () => ReplicatedStorage.SetAttribute("Intro", undefined);
+        }, []);
 
         return (
             <Fragment>

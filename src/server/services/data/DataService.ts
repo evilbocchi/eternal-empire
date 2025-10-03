@@ -56,7 +56,7 @@ export default class DataService implements OnStart, OnPlayerAdded {
         if (IS_EDIT) {
             empireId = HttpService.GenerateGUID(false);
         } else if (IS_STUDIO) {
-            // Studio environment - get ID from start camera
+            // Studio environment - get ID from value in the data model
             empireId = EmpireIdOverrideValue.waitForInstance().Value;
         } else {
             // Production environment
