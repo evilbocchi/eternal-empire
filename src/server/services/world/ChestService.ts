@@ -33,6 +33,7 @@ import WhiteGem from "shared/items/excavation/WhiteGem";
 import Items from "shared/items/Items";
 import Packets from "shared/Packets";
 import { AREAS } from "shared/world/Area";
+import CustomProximityPrompt from "shared/world/CustomProximityPrompt";
 
 declare global {
     type ChestModel = Model & {
@@ -343,7 +344,7 @@ export default class ChestService implements OnInit, OnStart {
                     prompt.Enabled = !isOpened;
                     chestModel.Hitbox.CooldownGui.Enabled = isOpened;
                 };
-                const cleanup = simpleInterval(() => {
+                const intervalCleanup = simpleInterval(() => {
                     const elapsed = tick() - lastOpen;
                     if (elapsed > this.cooldown && isOpened === true) {
                         isOpened = false;
@@ -361,7 +362,7 @@ export default class ChestService implements OnInit, OnStart {
                 bindableEvent.Parent = chestModel;
                 const chestLocation = this.round(chestLocationMarker.Position);
                 this.chestPerChestLocation.set(chestLocation, chestModel);
-                const triggerConnection = prompt.Triggered.Connect(() => {
+                const triggerCleanup = CustomProximityPrompt.onTrigger(prompt, () => {
                     if (!prompt.Enabled) return;
                     if (this.dataService.empireData.unlockedAreas.has(area.name as AreaId)) return;
                     sound.Play();
@@ -377,9 +378,9 @@ export default class ChestService implements OnInit, OnStart {
                     });
                 });
                 cleanups.push(() => {
-                    cleanup();
+                    intervalCleanup();
+                    triggerCleanup();
                     eventConnection.Disconnect();
-                    triggerConnection.Disconnect();
                 });
                 prompt.Parent = chestModel.PrimaryPart;
                 chestModel.Parent = Workspace;

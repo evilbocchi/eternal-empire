@@ -235,6 +235,10 @@ namespace Packets {
     export const listingUpdated = packet<(listing: MarketplaceListing) => void>();
     export const listingRemoved = packet<(uuid: string) => void>();
     export const myActiveListings = property<Map<string, DataType.Packed<MarketplaceListing>>>(new Map());
+
+    // world
+    export const triggerProximityPrompt = packet<(path: string) => void>();
+    export const damaged = packet<(damage: "Normal" | "DoubleDamage" | "HighDamage" | "Instakill") => void>();
 }
 
 export = Packets;

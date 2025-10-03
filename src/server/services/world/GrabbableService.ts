@@ -16,12 +16,14 @@
  */
 
 import { OnInit, Service } from "@flamework/core";
-import { CollectionService } from "@rbxts/services";
+import { CollectionService, Workspace } from "@rbxts/services";
 import EventService from "server/services/data/EventService";
 import ItemService from "server/services/item/ItemService";
 import { IS_EDIT } from "shared/Context";
+import eat from "shared/hamster/eat";
 import Items from "shared/items/Items";
 import Packets from "shared/Packets";
+import CustomProximityPrompt from "shared/world/CustomProximityPrompt";
 
 /**
  * Service that manages grabbable items throughout the world.
@@ -32,28 +34,11 @@ import Packets from "shared/Packets";
  */
 @Service()
 export default class GrabbableService implements OnInit {
-    /**
-     * Initializes the GrabbableService with required dependencies.
-     *
-     * @param eventService Service for tracking item collection completion status.
-     * @param itemService Service for giving collected items to players.
-     */
     constructor(
         private readonly eventService: EventService,
         private readonly itemService: ItemService,
     ) {}
 
-    /**
-     * Initializes all grabbable items in the world by finding ProximityPrompts
-     * tagged as "Grabbable" and setting up their collection mechanics.
-     *
-     * This method:
-     * - Finds all ProximityPrompts with the "Grabbable" tag
-     * - Validates the prompt setup (must have BasePart parent)
-     * - Replaces cyan placeholder parts with actual item models
-     * - Sets up collection event handling for each item
-     * - Destroys already-collected items based on event completion status
-     */
     onInit() {
         for (const proximityPrompt of CollectionService.GetTagged("Grabbable")) {
             // Validate that the tagged object is actually a ProximityPrompt
@@ -77,25 +62,29 @@ export default class GrabbableService implements OnInit {
             }
 
             // Replace cyan placeholder parts (0, 255, 255) with actual item models
+            let model: Model | undefined;
             if (parent.Color === Color3.fromRGB(0, 255, 255) && parent.Transparency === 0.5) {
-                const model = item.MODEL?.Clone();
+                model = item.MODEL?.Clone();
                 if (model) {
                     model.PivotTo(parent.CFrame);
-                    model.Parent = parent;
+                    model.Parent = Workspace;
                 }
                 // Hide the placeholder part
-                parent.Transparency = 1;
+                if (!IS_EDIT) parent.Transparency = 1;
             }
 
             // Check if this item has already been collected
             const eventId = itemId + "_grabbed";
             if (this.eventService.isEventCompleted(eventId)) {
-                if (!IS_EDIT) proximityPrompt.Parent?.Destroy();
+                if (!IS_EDIT) {
+                    proximityPrompt.Parent?.Destroy();
+                }
+                model?.Destroy();
                 continue;
             }
 
             // Set up collection event handler
-            proximityPrompt.Triggered.Connect((player) => {
+            const cleanup = CustomProximityPrompt.onTrigger(proximityPrompt, () => {
                 // Double-check that the item hasn't been collected since initialization
                 if (this.eventService.isEventCompleted(eventId)) {
                     return;
@@ -107,8 +96,12 @@ export default class GrabbableService implements OnInit {
                 Packets.showLoot.toAllClients([{ id: itemId, amount: 1 }]);
 
                 // Remove the grabbable object from the world
-                if (!IS_EDIT) proximityPrompt.Parent?.Destroy();
+                if (!IS_EDIT) {
+                    proximityPrompt.Parent?.Destroy();
+                }
+                model?.Destroy();
             });
+            eat(cleanup);
         }
     }
 }

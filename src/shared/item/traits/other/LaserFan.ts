@@ -1,8 +1,9 @@
-import { TweenService } from "@rbxts/services";
-import Item from "shared/item/Item";
-import { Server } from "shared/api/APIExpose";
 import { weldModel } from "@antivivi/vrldk";
+import { TweenService } from "@rbxts/services";
+import { Server } from "shared/api/APIExpose";
+import Item from "shared/item/Item";
 import ItemTrait from "shared/item/traits/ItemTrait";
+import CustomProximityPrompt from "shared/world/CustomProximityPrompt";
 
 declare global {
     interface PlacedItem {
@@ -27,14 +28,18 @@ export default class LaserFan extends ItemTrait {
             },
             0.1,
         );
-        (bp.FindFirstChild("ProximityPrompt") as ProximityPrompt | undefined)?.Triggered.Connect(() => {
-            d = !d;
-            const pi = ItemService.getPlacedItem(model.Name);
-            if (pi === undefined) {
-                return;
-            }
-            pi.direction = d;
-        });
+        const proximityPrompt = bp.FindFirstChild("ProximityPrompt") as ProximityPrompt | undefined;
+        if (proximityPrompt !== undefined) {
+            const cleanup = CustomProximityPrompt.onTrigger(proximityPrompt, () => {
+                d = !d;
+                const pi = ItemService.getPlacedItem(model.Name);
+                if (pi === undefined) {
+                    return;
+                }
+                pi.direction = d;
+            });
+            model.Destroying.Once(cleanup);
+        }
     }
 
     speed = 3;

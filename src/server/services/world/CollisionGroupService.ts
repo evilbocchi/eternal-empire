@@ -52,6 +52,8 @@ export default class CollisionGroupService implements OnInit, OnPlayerAdded {
         PhysicsService.RegisterCollisionGroup("PlayerHitbox");
         PhysicsService.RegisterCollisionGroup("PlayerInquirer");
         PhysicsService.RegisterCollisionGroup("NPC");
+        PhysicsService.RegisterCollisionGroup("HarvestableHitbox");
+        PhysicsService.RegisterCollisionGroup("HarvestableInquirer");
 
         // Configure collision interactions for droplets
         PhysicsService.CollisionGroupSetCollidable("Droplet", "Default", false);
@@ -77,6 +79,11 @@ export default class CollisionGroupService implements OnInit, OnPlayerAdded {
                 group.name === "Default" || group.name === "BuildGrid",
             );
             PhysicsService.CollisionGroupSetCollidable("PlayerInquirer", group.name, group.name === "PlayerHitbox");
+            PhysicsService.CollisionGroupSetCollidable(
+                "HarvestableHitbox",
+                group.name,
+                group.name === "HarvestableInquirer" || group.name === "Player",
+            );
         }
     }
 }

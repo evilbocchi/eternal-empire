@@ -313,7 +313,7 @@ export default class AtmosphereService implements OnInit, OnStart {
         Packets.getWeatherState.fromClient(() => this.getCurrentWeather());
 
         eat(() => {
-            Lighting.ClockTime = 14; // Start at 2 PM
+            Lighting.ClockTime = 10.5; // Start at 10:30 AM
         });
     }
 

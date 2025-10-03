@@ -13,8 +13,8 @@ export class ProfileManagerWrapper<T extends object> {
     readonly mockLoadedProfiles = new Map<string, Profile<T, unknown>>();
 
     constructor(
-        storeName: string,
-        template: T,
+        public readonly storeName: string,
+        public readonly template: T,
         private readonly prefix: string,
     ) {
         if (IS_SERVER || IS_EDIT) {

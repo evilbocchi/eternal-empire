@@ -26,12 +26,9 @@ import Quest from "server/quests/Quest";
 import DataService from "server/services/data/DataService";
 import ItemService from "server/services/item/ItemService";
 import ChatHookService from "server/services/permissions/ChatHookService";
-import { WAYPOINTS } from "shared/constants";
-import { IS_EDIT } from "shared/Context";
 import eat from "shared/hamster/eat";
 import Items from "shared/items/Items";
 import Packets from "shared/Packets";
-import Sandbox from "shared/Sandbox";
 
 /**
  * Service for managing quest progression and stage tracking.
@@ -82,19 +79,6 @@ export default class QuestService implements OnStart {
     }
 
     onStart() {
-        if (!Sandbox.getEnabled() && !IS_EDIT) {
-            // Configure waypoint objects for quest navigation
-            for (const waypoint of WAYPOINTS.GetChildren()) {
-                if (!waypoint.IsA("BasePart")) continue;
-
-                // Make waypoints invisible and non-interactive
-                waypoint.Transparency = 1;
-                waypoint.CanCollide = false;
-                waypoint.CanTouch = false;
-                waypoint.CanQuery = false;
-            }
-        }
-
         // Monitor quest stage changes
         let lastStagesPerQuest = new Map<string, number>();
         const cleanup = simpleInterval(() => {

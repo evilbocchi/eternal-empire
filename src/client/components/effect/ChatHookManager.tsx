@@ -3,8 +3,8 @@ import { simpleInterval } from "@antivivi/vrldk";
 import React, { Fragment, useEffect, useRef } from "@rbxts/react";
 import { LOCAL_PLAYER } from "client/constants";
 import { getTextChannels } from "shared/constants";
+import { IS_EDIT } from "shared/Context";
 import Packets from "shared/Packets";
-import Sandbox from "shared/Sandbox";
 
 const SYSTEM_COLOR = new Color3(0.05, 0.75, 0.05).ToHex();
 
@@ -12,7 +12,7 @@ export default function ChatHookManager() {
     const channelCleanupRef = useRef(new Map<TextChannel, () => void>());
 
     useEffect(() => {
-        if (Sandbox.getEnabled()) {
+        if (IS_EDIT) {
             return;
         }
 

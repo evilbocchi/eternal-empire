@@ -17,6 +17,7 @@ import React, { Fragment, useEffect, useRef } from "@rbxts/react";
 import { Lighting } from "@rbxts/services";
 import RainParallel from "client/parallel/rain/RainParallel";
 import UserGameSettings from "shared/api/UserGameSettings";
+import { IS_EDIT } from "shared/Context";
 import Packets from "shared/Packets";
 import { WeatherState, WeatherType } from "shared/weather/WeatherTypes";
 import { AREAS } from "shared/world/Area";
@@ -68,6 +69,8 @@ export default function LightingAtmosphereManager() {
     const cleanupFns = useRef<Array<() => void>>([]);
 
     useEffect(() => {
+        if (IS_EDIT) return;
+
         // Capture default lighting on mount
         defaultLighting.current = {
             Ambient: Lighting.Ambient,
@@ -194,10 +197,7 @@ export default function LightingAtmosphereManager() {
             },
         );
         cleanupFns.current.push(() => {
-            // WorldNode cleanup if it has a destroy method
-            if ("destroy" in lightNode && typeIs((lightNode as { destroy: unknown }).destroy, "function")) {
-                (lightNode as { destroy: () => void }).destroy();
-            }
+            lightNode.cleanup();
         });
 
         // --- Variable interval for updating dynamic lights ---

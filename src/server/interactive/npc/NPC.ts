@@ -14,6 +14,7 @@ import { getDisplayName } from "shared/constants";
 import { IS_EDIT, IS_STUDIO } from "shared/Context";
 import { Identifiable, ModuleRegistry } from "shared/hamster/ModuleRegistry";
 import Packets from "shared/Packets";
+import CustomProximityPrompt from "shared/world/CustomProximityPrompt";
 
 /**
  * Represents the animation types available for NPCs.
@@ -152,7 +153,7 @@ export default class NPC extends Identifiable {
         let defaultDialogueIndex = 0;
         const defaultDialoguesCount = defaultDialogues.size();
 
-        const promptConnection = prompt.Triggered.Connect((player) => {
+        const promptCleanup = CustomProximityPrompt.onTrigger(prompt, (player) => {
             print(`${player.Name} interacted`);
             if (this.interact !== undefined) {
                 this.interact();
@@ -173,13 +174,14 @@ export default class NPC extends Identifiable {
                 defaultDialogueIndex++;
             }
         });
+
         Dialogue.proximityPrompts.add(prompt);
         return () => {
             cleanupInterval();
+            promptCleanup();
             runningConnection.Disconnect();
             jumpingConnection.Disconnect();
             displayNameConnection.Disconnect();
-            promptConnection.Disconnect();
             Dialogue.proximityPrompts.delete(prompt);
             prompt.Destroy();
 

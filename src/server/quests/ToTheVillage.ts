@@ -11,6 +11,7 @@ import { WAYPOINTS } from "shared/constants";
 import ChargedEmpoweredBrick from "shared/items/negative/instantwin/ChargedEmpoweredBrick";
 import EmpoweredBrick from "shared/items/negative/instantwin/EmpoweredBrick";
 import XLWool from "shared/items/negative/relax/XLWool";
+import CustomProximityPrompt from "shared/world/CustomProximityPrompt";
 import FreddysCauldron from "shared/world/nodes/FreddysCauldron";
 import SlamoVillageConnection from "shared/world/nodes/SlamoVillageConnection";
 
@@ -199,7 +200,7 @@ export = new Quest(script.Name)
 
                 const proximityPrompt = cauldron.WaitForChild("ProximityPrompt") as ProximityPrompt;
                 proximityPrompt.Enabled = true;
-                const connection = proximityPrompt.Triggered.Connect(() => {
+                const cleanup = CustomProximityPrompt.onTrigger(proximityPrompt, () => {
                     for (const effect of instantWinEffects) {
                         effect.Transparency = 0;
                     }
@@ -210,7 +211,7 @@ export = new Quest(script.Name)
                 });
 
                 return () => {
-                    connection.Disconnect();
+                    cleanup();
                 };
             }),
     )

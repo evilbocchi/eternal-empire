@@ -75,9 +75,9 @@ export default class HarvestableService implements OnStart {
                 if (model.IsA("Model")) {
                     this.originalPosPerHarvestable.set(model, model.GetPivot().Position);
                     for (const part of model.GetDescendants())
-                        if (part.IsA("BasePart")) part.CollisionGroup = "ItemHitbox";
+                        if (part.IsA("BasePart")) part.CollisionGroup = "HarvestableHitbox";
                 } else if (model.IsA("BasePart")) {
-                    model.CollisionGroup = "ItemHitbox";
+                    model.CollisionGroup = "HarvestableHitbox";
                     this.originalPosPerHarvestable.set(model, model.Position);
                 }
             }

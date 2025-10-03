@@ -6,6 +6,7 @@ import Item from "shared/item/Item";
 import ItemTrait from "shared/item/traits/ItemTrait";
 import isPlacedItemUnusable from "shared/item/utils/isPlacedItemUnusable";
 import perItemPacket from "shared/item/utils/perItemPacket";
+import CustomProximityPrompt from "shared/world/CustomProximityPrompt";
 
 const crankedPacket = perItemPacket(packet<(placementId: string) => void>());
 
@@ -54,9 +55,14 @@ export default class HandCrank extends ItemTrait {
             });
         };
 
-        crankPrimaryPart.FindFirstChildOfClass("ProximityPrompt")?.Triggered.Connect(() => {
-            crankedPacket.toServer(model);
-        });
+        const proximityPrompt = crankPrimaryPart.FindFirstChildOfClass("ProximityPrompt");
+
+        if (proximityPrompt !== undefined) {
+            const cleanup = CustomProximityPrompt.onTrigger(proximityPrompt, () => {
+                crankedPacket.toServer(model);
+            });
+            model.Destroying.Once(cleanup);
+        }
         crankedPacket.fromServer(model, performSpinSequence);
     }
 

@@ -2,6 +2,7 @@ import React, { Fragment, useEffect } from "@rbxts/react";
 import { ReplicatedStorage } from "@rbxts/services";
 import Shaker from "client/components/effect/Shaker";
 import { playSound } from "shared/asset/GameAssets";
+import { WAYPOINTS } from "shared/constants";
 import Packets from "shared/Packets";
 import Sandbox from "shared/Sandbox";
 import SlamoVillageConnection from "shared/world/nodes/SlamoVillageConnection";
@@ -26,11 +27,21 @@ export default function AreaEffectManager() {
             }
         });
 
+        WAYPOINTS.GetChildren().forEach((child) => {
+            if (!child.IsA("BasePart")) return;
+            child.LocalTransparencyModifier = 1;
+        });
+
         // Cleanup on unmount
         return () => {
             unlockConnection.Disconnect();
             areaConnection.disconnect();
             connectionInstance.Parent = SlamoVillageConnection.originalParent;
+
+            WAYPOINTS.GetChildren().forEach((child) => {
+                if (!child.IsA("BasePart")) return;
+                child.LocalTransparencyModifier = 0;
+            });
         };
     }, []);
 

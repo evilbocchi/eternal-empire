@@ -243,6 +243,12 @@ namespace AvailableEmpire {
         return false;
     }
 
+    export function viewPlayerData(userId: number) {
+        const playerProfile = PlayerProfileManager.load(userId, true);
+        if (playerProfile === undefined) throw "No player profile for userId " + userId;
+        return playerProfile.Data;
+    }
+
     export function registerPlayer(player: Player) {
         if (availableEmpiresStore === undefined) {
             throw "Cannot register player on client";

@@ -1,9 +1,11 @@
-import React, { useEffect, useRef, useState, useBinding } from "@rbxts/react";
-import { RobotoSlabMedium } from "shared/asset/GameFonts";
-
-const UserInputService = game.GetService("UserInputService");
-const TweenService = game.GetService("TweenService");
-const TextService = game.GetService("TextService");
+import { simpleInterval } from "@antivivi/vrldk";
+import React, { Fragment, useEffect, useRef, useState } from "@rbxts/react";
+import { RunService, TextService, TweenService, UserInputService } from "@rbxts/services";
+import { getAsset } from "shared/asset/AssetMap";
+import { RobotoMono, RobotoMonoBold } from "shared/asset/GameFonts";
+import { getPlayerCharacter } from "shared/hamster/getPlayerCharacter";
+import CustomProximityPrompt from "shared/world/CustomProximityPrompt";
+import WorldNode from "shared/world/nodes/WorldNode";
 
 // Helper functions for button image mappings
 function getGamepadButtonImage(keyCode: Enum.KeyCode): string | undefined {
@@ -66,18 +68,17 @@ function getKeyCodeToText(keyCode: Enum.KeyCode): string | undefined {
     ]);
     return map.get(keyCode);
 }
-interface ProximityPromptGuiProps {
+
+export default function ProximityPromptGui({
+    prompt,
+    inputType,
+}: {
     prompt: ProximityPrompt;
     inputType: Enum.ProximityPromptInputType;
-}
-
-// TODO implement this
-
-export default function ProximityPromptGui({ prompt, inputType }: ProximityPromptGuiProps) {
+}) {
     const [progress, setProgress] = useState(0);
     const [frameSize, setFrameSize] = useState(UDim2.fromScale(1, 1));
     const [frameTransparency, setFrameTransparency] = useState(0.2);
-    const [frameImageTransparency, setFrameImageTransparency] = useState(1);
     const [inputScale, setInputScale] = useState(1);
     const [actionTextTransparency, setActionTextTransparency] = useState(0);
     const [objectTextTransparency, setObjectTextTransparency] = useState(0);
@@ -86,6 +87,8 @@ export default function ProximityPromptGui({ prompt, inputType }: ProximityPromp
     const [objectTextPosition, setObjectTextPosition] = useState(new UDim2(0.5, -24, 0, -10));
     const [actionText, setActionText] = useState(prompt.ActionText);
     const [objectText, setObjectText] = useState(prompt.ObjectText);
+    const [isHolding, setIsHolding] = useState(false);
+    const [holdStartTime, setHoldStartTime] = useState(0);
 
     // Determine button visuals based on input type
     const [buttonImage, setButtonImage] = useState<string | undefined>();
@@ -98,7 +101,6 @@ export default function ProximityPromptGui({ prompt, inputType }: ProximityPromp
     // Refs for tween management
     const frameRef = useRef<ImageLabel>();
     const inputScaleRef = useRef<UIScale>();
-    const progressRef = useRef<NumberValue>();
 
     useEffect(() => {
         // Determine button display based on input type
@@ -197,130 +199,89 @@ export default function ProximityPromptGui({ prompt, inputType }: ProximityPromp
         };
     }, [prompt]);
 
+    // Manage hold progress with React state
     useEffect(() => {
-        // Tween info configurations
-        const tweenInfoFast = new TweenInfo(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out);
-        const tweenInfoInFullDuration = new TweenInfo(
-            prompt.HoldDuration,
-            Enum.EasingStyle.Linear,
-            Enum.EasingDirection.Out,
-        );
-        const tweenInfoInstant = new TweenInfo(0, Enum.EasingStyle.Linear, Enum.EasingDirection.Out);
+        if (!isHolding) return;
 
+        const tweenInfoFast = new TweenInfo(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out);
         const inputFrameScaleFactor = inputType === Enum.ProximityPromptInputType.Touch ? 1.6 : 1.33;
 
-        // Handle PromptButtonHoldBegan
-        let holdBeganConnection: RBXScriptConnection | undefined;
-        let holdEndedConnection: RBXScriptConnection | undefined;
+        // Scale up input frame
+        if (inputScaleRef.current) {
+            TweenService.Create(inputScaleRef.current, tweenInfoFast, {
+                Scale: inputFrameScaleFactor,
+            }).Play();
+        }
 
-        if (prompt.HoldDuration > 0) {
-            holdBeganConnection = prompt.PromptButtonHoldBegan.Connect(() => {
-                // Scale up input frame
-                if (inputScaleRef.current) {
-                    TweenService.Create(inputScaleRef.current, tweenInfoFast, {
-                        Scale: inputFrameScaleFactor,
-                    } as never).Play();
-                }
+        // Shrink frame
+        if (frameRef.current) {
+            TweenService.Create(frameRef.current, tweenInfoFast, {
+                Size: UDim2.fromScale(0.5, 1),
+                BackgroundTransparency: 1,
+                ImageTransparency: 1,
+            }).Play();
+        }
+        setActionTextTransparency(1);
+        setObjectTextTransparency(1);
 
-                // Animate progress bar
-                if (progressRef.current) {
-                    TweenService.Create(progressRef.current, tweenInfoInFullDuration, { Value: 1 } as never).Play();
-                }
+        const startTime = os.clock();
+        const holdDuration = prompt.HoldDuration;
 
-                // Shrink frame
-                if (frameRef.current) {
-                    TweenService.Create(frameRef.current, tweenInfoFast, {
-                        Size: UDim2.fromScale(0.5, 1),
-                        BackgroundTransparency: 1,
-                        ImageTransparency: 1,
-                    } as never).Play();
-                }
-            });
+        let connection: RBXScriptConnection | undefined;
 
-            holdEndedConnection = prompt.PromptButtonHoldEnded.Connect(() => {
-                // Scale down input frame
-                if (inputScaleRef.current) {
-                    TweenService.Create(inputScaleRef.current, tweenInfoFast, {
-                        Scale: 1,
-                    } as never).Play();
-                }
+        if (holdDuration > 0) {
+            // Animate progress over time
+            connection = RunService.Heartbeat.Connect(() => {
+                const elapsed = os.clock() - startTime;
+                const currentProgress = math.min(elapsed / holdDuration, 1);
+                setProgress(currentProgress);
 
-                // Reset progress bar
-                if (progressRef.current) {
-                    TweenService.Create(progressRef.current, tweenInfoInstant, {
-                        Value: 0,
-                    } as never).Play();
-                }
-
-                // Restore frame
-                if (frameRef.current) {
-                    TweenService.Create(frameRef.current, tweenInfoFast, {
-                        Size: UDim2.fromScale(1, 1),
-                        BackgroundTransparency: 0.2,
-                        ImageTransparency: 1,
-                    } as never).Play();
+                if (currentProgress >= 1) {
+                    // Hold completed, trigger the prompt
+                    setIsHolding(false);
+                    triggerPrompt();
                 }
             });
         }
 
-        // Handle Triggered (fade out)
-        const triggeredConnection = prompt.Triggered.Connect(() => {
-            if (frameRef.current) {
-                TweenService.Create(frameRef.current, tweenInfoFast, {
-                    Size: UDim2.fromScale(0.5, 1),
-                    BackgroundTransparency: 1,
-                    ImageTransparency: 1,
-                } as never).Play();
-            }
-            setActionTextTransparency(1);
-            setObjectTextTransparency(1);
-        });
+        return () => {
+            connection?.Disconnect();
 
-        // Handle TriggerEnded (fade in)
-        const triggerEndedConnection = prompt.TriggerEnded.Connect(() => {
+            // Scale down input frame
+            if (inputScaleRef.current) {
+                TweenService.Create(inputScaleRef.current, tweenInfoFast, {
+                    Scale: 1,
+                }).Play();
+            }
+
+            // Reset progress bar
+            setProgress(0);
+
+            // Restore frame
             if (frameRef.current) {
                 TweenService.Create(frameRef.current, tweenInfoFast, {
                     Size: UDim2.fromScale(1, 1),
-                    BackgroundTransparency: 0.2,
-                    ImageTransparency: 1,
-                } as never).Play();
+                    ImageTransparency: 0.2,
+                }).Play();
             }
             setActionTextTransparency(0);
             setObjectTextTransparency(0);
-        });
+        };
+    }, [isHolding, prompt, inputType]);
 
-        // Fade in on mount
+    const triggerPrompt = () => {
+        CustomProximityPrompt.trigger(prompt);
+
+        const tweenInfoFast = new TweenInfo(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out);
+        setActionTextTransparency(0);
+        setObjectTextTransparency(0);
         if (frameRef.current) {
             TweenService.Create(frameRef.current, tweenInfoFast, {
                 Size: UDim2.fromScale(1, 1),
-                BackgroundTransparency: 0.2,
-                ImageTransparency: 1,
-            } as never).Play();
+                ImageTransparency: 0.2,
+            }).Play();
         }
-        setActionTextTransparency(0);
-        setObjectTextTransparency(0);
-
-        return () => {
-            holdBeganConnection?.Disconnect();
-            holdEndedConnection?.Disconnect();
-            triggeredConnection.Disconnect();
-            triggerEndedConnection.Disconnect();
-        };
-    }, [prompt, inputType]);
-
-    // Setup circular progress bar
-    useEffect(() => {
-        if (!progressRef.current) return;
-
-        const progressValue = progressRef.current;
-        const connection = progressValue.Changed.Connect((value) => {
-            setProgress(value);
-        });
-
-        return () => {
-            connection.Disconnect();
-        };
-    }, []);
+    };
 
     // Calculate gradient rotations for circular progress
     const leftGradientRotation = math.clamp(progress * 360, 180, 360);
@@ -333,7 +294,14 @@ export default function ProximityPromptGui({ prompt, inputType }: ProximityPromp
                 input.UserInputType === Enum.UserInputType.MouseButton1) &&
             input.UserInputState !== Enum.UserInputState.Change
         ) {
-            prompt.InputHoldBegin();
+            if (prompt.HoldDuration > 0) {
+                // Start holding
+                setIsHolding(true);
+                setHoldStartTime(os.clock());
+            } else {
+                // Instant trigger
+                triggerPrompt();
+            }
         }
     };
 
@@ -342,7 +310,8 @@ export default function ProximityPromptGui({ prompt, inputType }: ProximityPromp
             input.UserInputType === Enum.UserInputType.Touch ||
             input.UserInputType === Enum.UserInputType.MouseButton1
         ) {
-            prompt.InputHoldEnd();
+            // Stop holding
+            setIsHolding(false);
         }
     };
 
@@ -358,6 +327,7 @@ export default function ProximityPromptGui({ prompt, inputType }: ProximityPromp
             SizeOffset={
                 new Vector2(prompt.UIOffset.X / promptSize.Width.Offset, prompt.UIOffset.Y / promptSize.Height.Offset)
             }
+            MaxDistance={prompt.MaxActivationDistance}
         >
             {isInteractive && (
                 <textbutton
@@ -373,10 +343,9 @@ export default function ProximityPromptGui({ prompt, inputType }: ProximityPromp
             )}
             <imagelabel
                 ref={frameRef}
-                BackgroundColor3={Color3.fromRGB(18, 18, 18)}
-                BackgroundTransparency={frameTransparency}
-                Image="rbxasset://textures/ui/GuiImagePlaceholder.png"
-                ImageTransparency={frameImageTransparency}
+                BackgroundTransparency={1}
+                Image={getAsset("assets/ProximityPromptFrame.png")}
+                ImageTransparency={frameTransparency}
                 Size={frameSize}
             >
                 <frame
@@ -414,10 +383,10 @@ export default function ProximityPromptGui({ prompt, inputType }: ProximityPromp
                                             Rotation={leftGradientRotation}
                                             Transparency={
                                                 new NumberSequence([
-                                                    new NumberSequenceKeypoint(0, 0, 0),
-                                                    new NumberSequenceKeypoint(0.5, 0, 0),
-                                                    new NumberSequenceKeypoint(0.5, 1, 0),
-                                                    new NumberSequenceKeypoint(1, 1, 0),
+                                                    new NumberSequenceKeypoint(0, 0),
+                                                    new NumberSequenceKeypoint(0.4999, 0),
+                                                    new NumberSequenceKeypoint(0.5, 1),
+                                                    new NumberSequenceKeypoint(1, 1),
                                                 ])
                                             }
                                         />
@@ -440,17 +409,15 @@ export default function ProximityPromptGui({ prompt, inputType }: ProximityPromp
                                             Rotation={rightGradientRotation}
                                             Transparency={
                                                 new NumberSequence([
-                                                    new NumberSequenceKeypoint(0, 0, 0),
-                                                    new NumberSequenceKeypoint(0.5, 0, 0),
-                                                    new NumberSequenceKeypoint(0.5, 1, 0),
-                                                    new NumberSequenceKeypoint(1, 1, 0),
+                                                    new NumberSequenceKeypoint(0, 0),
+                                                    new NumberSequenceKeypoint(0.4999, 0),
+                                                    new NumberSequenceKeypoint(0.5, 1),
+                                                    new NumberSequenceKeypoint(1, 1),
                                                 ])
                                             }
                                         />
                                     </imagelabel>
                                 </frame>
-                                {/* Hidden NumberValue for tween target */}
-                                <numbervalue ref={progressRef} Value={0} />
                             </frame>
                         )}
                         {/* Button background */}
@@ -498,7 +465,7 @@ export default function ProximityPromptGui({ prompt, inputType }: ProximityPromp
                         {showButtonText && buttonText !== undefined && (
                             <textlabel
                                 BackgroundTransparency={1}
-                                FontFace={RobotoSlabMedium}
+                                FontFace={RobotoMonoBold}
                                 Position={new UDim2(0, 0, 0, -1)}
                                 Size={new UDim2(1, 0, 1, 0)}
                                 Text={buttonText}
@@ -508,25 +475,10 @@ export default function ProximityPromptGui({ prompt, inputType }: ProximityPromp
                         )}
                     </frame>
                 </frame>
-                <uicorner />
-                {/* Action Text */}
-                <textlabel
-                    BackgroundTransparency={1}
-                    FontFace={RobotoSlabMedium}
-                    Position={actionTextPosition}
-                    Size={new UDim2(1, 0, 1, 0)}
-                    Text={actionText}
-                    TextColor3={Color3.fromRGB(255, 255, 255)}
-                    TextSize={19}
-                    TextTransparency={actionTextTransparency}
-                    TextXAlignment={Enum.TextXAlignment.Left}
-                    AutoLocalize={prompt.AutoLocalize}
-                    RootLocalizationTable={prompt.RootLocalizationTable}
-                />
                 {/* Object Text */}
                 <textlabel
                     BackgroundTransparency={1}
-                    FontFace={RobotoSlabMedium}
+                    FontFace={RobotoMono}
                     Position={objectTextPosition}
                     Size={new UDim2(1, 0, 1, 0)}
                     Text={objectText}
@@ -537,7 +489,85 @@ export default function ProximityPromptGui({ prompt, inputType }: ProximityPromp
                     AutoLocalize={prompt.AutoLocalize}
                     RootLocalizationTable={prompt.RootLocalizationTable}
                 />
+                {/* Action Text */}
+                <textlabel
+                    BackgroundTransparency={1}
+                    FontFace={RobotoMonoBold}
+                    Position={actionTextPosition}
+                    Size={new UDim2(1, 0, 1, 0)}
+                    Text={actionText}
+                    TextColor3={Color3.fromRGB(255, 255, 255)}
+                    TextSize={19}
+                    TextTransparency={actionTextTransparency}
+                    TextXAlignment={Enum.TextXAlignment.Left}
+                    AutoLocalize={prompt.AutoLocalize}
+                    RootLocalizationTable={prompt.RootLocalizationTable}
+                />
             </imagelabel>
         </billboardgui>
     );
+}
+
+export function ProximityPromptGuiRenderer() {
+    const [prompt, setPrompt] = useState<ProximityPrompt | undefined>();
+    const [inputType, setInputType] = useState<Enum.ProximityPromptInputType>(Enum.ProximityPromptInputType.Keyboard);
+
+    useEffect(() => {
+        const prompts = new Set<ProximityPrompt>();
+        const proximityPromptWorldNode = new WorldNode(
+            "ProximityPrompt",
+            (prompt) => {
+                if (!prompt.IsA("ProximityPrompt")) return;
+                prompts.add(prompt);
+            },
+            (instance) => {
+                if (instance.IsA("ProximityPrompt")) {
+                    prompts.delete(instance);
+                }
+            },
+        );
+
+        const intervalCleanup = simpleInterval(() => {
+            const character = getPlayerCharacter();
+            if (!character) return;
+
+            // Find the closest prompt in range
+            let closestPrompt: ProximityPrompt | undefined;
+            let closestDistance = math.huge;
+
+            const position = character.GetPivot().Position;
+            for (const prompt of prompts) {
+                if (!prompt.Enabled || prompt.Parent === undefined || !prompt.Parent.IsA("PVInstance")) continue;
+                const distance = position.sub(prompt.Parent.GetPivot().Position).Magnitude;
+                if (distance < prompt.MaxActivationDistance && distance < closestDistance) {
+                    closestPrompt = prompt;
+                    closestDistance = distance;
+                }
+            }
+            setPrompt(closestPrompt);
+        }, 1);
+
+        const inputTypeChangedConnection = UserInputService.LastInputTypeChanged.Connect((newInputType) => {
+            if (newInputType === Enum.UserInputType.Touch || newInputType === Enum.UserInputType.Accelerometer) {
+                setInputType(Enum.ProximityPromptInputType.Touch);
+            } else if (
+                newInputType === Enum.UserInputType.Gamepad1 ||
+                newInputType === Enum.UserInputType.Gamepad2 ||
+                newInputType === Enum.UserInputType.Gamepad3 ||
+                newInputType === Enum.UserInputType.Gamepad4
+            ) {
+                setInputType(Enum.ProximityPromptInputType.Gamepad);
+            } else {
+                setInputType(Enum.ProximityPromptInputType.Keyboard);
+            }
+        });
+
+        return () => {
+            proximityPromptWorldNode.cleanup();
+            intervalCleanup();
+            inputTypeChangedConnection.Disconnect();
+        };
+    });
+
+    return prompt ? <ProximityPromptGui prompt={prompt} inputType={inputType} /> : <Fragment />;
 }

@@ -133,7 +133,7 @@ namespace ClientItemReplication {
      */
     export function useManualItemReplication() {
         useEffect(() => {
-            let i = 0;
+            const modelPerWaypoint = new Map<string, Model>();
             const mapItemWorldNode = new WorldNode("MapItem", (waypoint) => {
                 if (!waypoint.IsA("BasePart")) return;
                 const item = Items.getItem(waypoint.Name);
@@ -149,9 +149,9 @@ namespace ClientItemReplication {
                 });
                 if (model !== undefined) {
                     model.Parent = Workspace;
+                    modelPerWaypoint.set(waypoint.Name, model);
                     load(model, undefined, false);
                 } else warn(`Model for ${item.id} not found`);
-                i++;
             });
 
             if (IS_EDIT) {
@@ -223,9 +223,15 @@ namespace ClientItemReplication {
             });
             return () => {
                 if (!IS_EDIT) {
-                    modelPerPlacementId.forEach((model) => model.Destroy());
+                    for (const [, model] of modelPerPlacementId) {
+                        model.Destroy();
+                    }
+                }
+                for (const [, model] of modelPerWaypoint) {
+                    model.Destroy();
                 }
                 modelPerPlacementId.clear();
+                modelPerWaypoint.clear();
                 settingsConnection.Disconnect();
                 connection.Disconnect();
                 mapItemWorldNode.cleanup();

@@ -4,11 +4,17 @@ import AreaBoardRenderer from "client/components/world/area/AreaBoardRenderer";
 import DarkMatterGui from "client/components/world/DarkMatterGui";
 import FundsBombsBoardGui from "client/components/world/FundsBombsBoardGui";
 import LeaderboardRenderer from "client/components/world/leaderboard/LeaderboardRenderer";
+import { ProximityPromptGuiRenderer } from "client/components/world/ProximityPromptGui";
 import ResetBoardRenderer from "client/components/world/reset/ResetBoardRenderer";
 import Sandbox from "shared/Sandbox";
 
 export default function WorldRenderer() {
-    if (Sandbox.getEnabled()) return <Fragment />;
+    if (Sandbox.getEnabled())
+        return (
+            <Fragment>
+                <ProximityPromptGuiRenderer />
+            </Fragment>
+        );
 
     return (
         <Fragment>
@@ -18,6 +24,7 @@ export default function WorldRenderer() {
             <DarkMatterGui />
             <FundsBombsBoardGui />
             <LeaderboardRenderer />
+            <ProximityPromptGuiRenderer />
         </Fragment>
     );
 }

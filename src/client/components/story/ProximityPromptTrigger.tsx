@@ -1,4 +1,5 @@
 import React, { Fragment, useCallback, useEffect, useState } from "@rbxts/react";
+import { Workspace } from "@rbxts/services";
 import { Environment } from "@rbxts/ui-labs";
 import { RobotoSlab, RobotoSlabMedium } from "shared/asset/GameFonts";
 import { getPlayerCharacter } from "shared/hamster/getPlayerCharacter";
@@ -54,7 +55,7 @@ export default function ProximityPromptTrigger() {
             }
         };
 
-        findPrompts(game.Workspace);
+        findPrompts(Workspace);
 
         // Sort by distance (closest first)
         prompts.sort((a, b) => a.distance < b.distance);

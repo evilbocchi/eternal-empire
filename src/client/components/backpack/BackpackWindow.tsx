@@ -112,7 +112,7 @@ export default function BackpackWindow() {
         });
 
         const OVERLAP_PARAMS = new OverlapParams();
-        OVERLAP_PARAMS.CollisionGroup = "ItemHitbox";
+        OVERLAP_PARAMS.CollisionGroup = "HarvestableInquirer";
         /**
          * Checks for a harvestable object in range of the tool.
          * @param tool The tool model to check from.
