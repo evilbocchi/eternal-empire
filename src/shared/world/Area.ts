@@ -386,6 +386,15 @@ export const AREAS = {
         buildable: true,
         hidden: false,
     }),
+    ShipwreckIsland: new Area({
+        id: "ShipwreckIsland",
+        name: "Shipwreck Island",
+        description:
+            "A tropical island where Captain Bacon's ship met its untimely end. Now home to quirky natives and the perfect place to start a mini-factory empire.",
+        dropletLimit: 30,
+        buildable: true,
+        hidden: false,
+    }),
 
     // Primary areas
     BarrenIslands: new Area({

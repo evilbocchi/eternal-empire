@@ -5,6 +5,16 @@ import Prest from "server/interactive/npc/Prest";
 import Tria from "server/interactive/npc/Tria";
 import Quest, { Stage } from "server/quests/Quest";
 import { Server } from "shared/api/APIExpose";
+import Packets from "shared/Packets";
+
+// Generate a random sequence for the pillar puzzle
+function generatePuzzleSequence(length: number): number[] {
+    const sequence: number[] = [];
+    for (let i = 0; i < length; i++) {
+        sequence.push(math.random(0, 3));
+    }
+    return sequence;
+}
 
 export = new Quest(script.Name)
     .setName("Sailing Away")
@@ -29,7 +39,7 @@ export = new Quest(script.Name)
                         stage.complete();
                     }
                 });
-                return () => connection.disconnect();
+                return () => connection.Disconnect();
             }),
     )
     .addStage(
@@ -72,7 +82,7 @@ export = new Quest(script.Name)
                 return () => {
                     triaActivation.remove();
                     for (const dialogue of redHerrings) dialogue.remove();
-                    connection.disconnect();
+                    connection.Disconnect();
                 };
             }),
     )
@@ -85,9 +95,134 @@ export = new Quest(script.Name)
                 ).root,
             )
             .onReached((stage) => {
+                const triaReveal = new Dialogue(
+                    Tria,
+                    "Oh! Um... I... I remember now... I think I... I hid it in one of the pillars?",
+                )
+                    .monologue("Like... I wanted to keep it safe... but now I can't remember which one... ugh...")
+                    .monologue(
+                        "There's like... four pillars near the spawn? Maybe... if you check them... you'll find it?",
+                    )
+                    .monologue(
+                        "I'm so sorry... I know this is weird... I just... I panic and hide things sometimes... it's a whole thing...",
+                    ).root;
+
+                triaReveal.add();
+                const connection = Dialogue.finished.connect((dialogue) => {
+                    if (dialogue === triaReveal) {
+                        stage.complete();
+                    }
+                });
+                return () => {
+                    triaReveal.remove();
+                    connection.Disconnect();
+                };
+            }),
+    )
+    .addStage(
+        new Stage()
+            .setDescription(`Find the correct pillar and solve the puzzle.`)
+            .setDialogue(
+                new Dialogue(Tria, "I... I think it's one of those pillars... just... try clicking on them? Maybe?")
+                    .root,
+            )
+            .onReached((stage) => {
+                // Generate puzzle sequence
+                const puzzleSequence = generatePuzzleSequence(4);
+                let puzzleSolved = false;
+
+                // Listen for pillar interactions
+                Packets.startPillarPuzzle.fromClient((player, pillarNumber) => {
+                    if (puzzleSolved) return;
+
+                    // Show the puzzle
+                    Packets.pillarPuzzleVisible.setFor(player, true);
+                    Packets.pillarPuzzleSequence.setFor(player, puzzleSequence);
+                });
+
+                // Listen for puzzle submission
+                Packets.submitPuzzleAnswer.fromClient((player, answer) => {
+                    if (puzzleSolved) return false;
+
+                    // Check if answer matches
+                    let correct = answer.size() === puzzleSequence.size();
+                    if (correct) {
+                        for (let i = 0; i < answer.size(); i++) {
+                            if (answer[i] !== puzzleSequence[i]) {
+                                correct = false;
+                                break;
+                            }
+                        }
+                    }
+
+                    if (correct) {
+                        puzzleSolved = true;
+                        Packets.pillarPuzzleVisible.setFor(player, false);
+                        stage.complete();
+                        return true;
+                    }
+                    return false;
+                });
+
                 return () => {};
+            }),
+    )
+    .addStage(
+        new Stage()
+            .setDescription(`Return the map to Captain Bacon.`)
+            .setNPC(CaptainBacon, true)
+            .setDialogue(
+                new Dialogue(CaptainBacon, "You found it! My precious map! Now we can finally set sail!")
+                    .monologue("Gather 'round, everyone! We're going on an adventure!")
+                    .next(
+                        new Dialogue(
+                            Tria,
+                            "Wait... I'm... I'm coming too? Like... on the actual boat? I... I don't know if...",
+                        ).monologue(
+                            "I mean... I've never really... left the island before... this is... um... a lot...",
+                        ),
+                    )
+                    .next(
+                        new Dialogue(CaptainBacon, "Of course you're coming! You found the map, didn't you?")
+                            .monologue("Now let's set sail to fortune and glory!")
+                            .monologue("Full speed ahead!"),
+                    ).root,
+            )
+            .onReached((stage) => {
+                const connection = Dialogue.finished.connect((dialogue) => {
+                    if (dialogue === stage.dialogue) {
+                        stage.complete();
+                    }
+                });
+                return () => connection.Disconnect();
+            }),
+    )
+    .addStage(
+        new Stage()
+            .setDescription(`Survive the voyage...`)
+            .setDialogue(
+                new Dialogue(
+                    Tria,
+                    "Um... is the ship supposed to be... making that sound? That doesn't seem... right...",
+                )
+                    .monologue("Wait... are we... sinking? Oh no oh no oh no...")
+                    .monologue("I KNEW this was a bad idea! Why did I agree to this?!")
+                    .next(
+                        new Dialogue(CaptainBacon, "Relax! Ships crash all the time! It's part of the adventure!")
+                            .monologue("Look, we made it to land! See? Everything worked out!")
+                            .monologue("Welcome to... uh... wherever this is!"),
+                    ).root,
+            )
+            .onReached((stage) => {
+                const connection = Dialogue.finished.connect((dialogue) => {
+                    if (dialogue === stage.dialogue) {
+                        stage.complete();
+                    }
+                });
+                return () => connection.Disconnect();
             }),
     )
     .setReward({
         xp: 600,
+        area: "ShipwreckIsland",
     });
