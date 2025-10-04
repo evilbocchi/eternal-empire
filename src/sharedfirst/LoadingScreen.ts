@@ -22,6 +22,7 @@ namespace LoadingScreen {
         screenGui.Name = "LoadingScreen";
         screenGui.ResetOnSpawn = false;
         screenGui.IgnoreGuiInset = true;
+        screenGui.DisplayOrder = 1000;
         screenGui.Parent = playerGui;
 
         const backdrop = new Instance("Frame") as Frame;
