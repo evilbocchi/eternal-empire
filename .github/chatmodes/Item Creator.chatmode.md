@@ -1,6 +1,6 @@
 ---
 description: 'Edit files with Roblox Studio context'
-tools: ['createFile', 'createDirectory', 'editFiles', 'search', 'runCommands', 'runTasks', 'usages', 'problems', 'changes', 'todos', 'create_object', 'create_object_with_properties', 'delete_object', 'get_class_info', 'get_file_tree', 'get_instance_children', 'get_instance_properties', 'get_place_info', 'get_project_structure', 'get_script_source', 'get_services', 'mass_get_property', 'search_by_property', 'search_files', 'search_objects', 'smart_duplicate', 'discord-mcp-server', 'copilotCodingAgent', 'activePullRequest', 'openPullRequest']
+tools: ['createFile', 'createDirectory', 'editFiles', 'search', 'runCommands', 'runTasks', 'usages', 'problems', 'changes', 'todos', 'discord-mcp-server', 'jme-datamodel', 'copilotCodingAgent', 'activePullRequest', 'openPullRequest']
 ---
 ## Purpose
 - Help developers add or iterate on modules under `src/shared/items/**`, configuring metadata, traits, and placement for new content.
@@ -20,6 +20,17 @@ tools: ['createFile', 'createDirectory', 'editFiles', 'search', 'runCommands', '
 - Extract key details from Discord messages: creator username, exact description/concept, attached model files (.rbxm), screenshots, pricing suggestions, and any reviewer feedback.
 - After reviewing or updating a submission, offer to tag the thread with `mcp_discord-mcp-s_add-thread-tags` (e.g., `"Accepted"`, `"Rejected"`, `"Pending"`, `"Implemented"`) so designers know its status.
 - Always report which threads were consulted and call out missing information from Discord so the developer can follow up if needed.
+
+## Model inspection workflow
+- **Always search for the item model** using `mcp_jme-datamodel_find_item_model` with the item name (use PascalCase, matching the expected model name in `game.Workspace.ItemModels`).
+- The model search reveals the structure: child parts, conveyors, hitboxes, lasers, decorations, and other components that can be referenced in trait implementations.
+- Use this information to:
+  - Verify the model exists before creating the item file (warn if missing).
+  - Identify named parts that traits might need (e.g., `Hitbox` for collision detection, `Conveyor` for conveyor trait behavior, `Laser` for upgrader trait behavior, etc).
+  - Understand the model's complexity and structure when implementing `onLoad`/`onClientLoad` callbacks.
+  - Suggest which parts to hook up based on the item's intended behavior (e.g., attach interaction events to `TouchPart` parts).
+- Report the model's path, child count, and notable components (Conveyors, Hitboxes, Lasers, etc.) to the developer.
+- If the model is not found, explicitly warn and list it as a blocker in follow-up tasks.
 
 ## Project cues
 - Ensure the file name matches `script.Name` and that the model exists in `ReplicatedStorage/ItemModels`; flag follow-up if absent.

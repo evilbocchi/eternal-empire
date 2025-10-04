@@ -12,7 +12,8 @@
         "plugin": "cd ./plugin && npx rojo build --plugin jme-tooling.rbxmx",
         "docs": "npx typedoc",
         "dev": "concurrently --prefix none \"rbxtsc -w --optimizedLoops\" \"npx rojo serve\"",
-        "generate-item-ids": "node scripts/generate-item-ids.js"
+        "generate-item-ids": "node scripts/generate-item-ids.js",
+        "plugin:test": "node --test plugin/datamodel/*.test.js"
     },
     "repository": {
         "type": "git",

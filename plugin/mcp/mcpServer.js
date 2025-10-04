@@ -119,6 +119,7 @@ export async function startMcpServer(logger) {
                             {
                                 path: segments.join("."),
                                 maxDepth,
+                                version: dataModelState.version ?? null,
                                 receivedAt: dataModelState.updatedAt,
                                 generatedAt: snapshot.generatedAt ?? null,
                                 depthTruncated,
@@ -209,6 +210,7 @@ export async function startMcpServer(logger) {
                                 itemName,
                                 path: foundModel.path ?? `${itemModelsFolderPath}.${itemName}`,
                                 maxDepth,
+                                version: dataModelState.version ?? null,
                                 receivedAt: dataModelState.updatedAt,
                                 generatedAt: snapshot.generatedAt ?? null,
                                 depthTruncated,

@@ -5,6 +5,9 @@
 export const dataModelState = {
     snapshot: null,
     updatedAt: 0,
+    version: 0,
+    index: null,
+    pendingSnapshot: null,
 };
 
 export const connectionState = {
