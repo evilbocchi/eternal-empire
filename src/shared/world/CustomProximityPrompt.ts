@@ -1,4 +1,5 @@
 import { IS_EDIT, IS_SERVER } from "shared/Context";
+import eat from "shared/hamster/eat";
 import { getPlayerCharacter } from "shared/hamster/getPlayerCharacter";
 import Packets from "shared/Packets";
 
@@ -58,13 +59,14 @@ namespace CustomProximityPrompt {
 
     // Listen for server triggers
     if (IS_SERVER || IS_EDIT) {
-        Packets.triggerProximityPrompt.fromClient((player, path) => {
+        const connection = Packets.triggerProximityPrompt.fromClient((player, path) => {
             const prompt = proximityPrompts.get(path);
             print(prompt === undefined ? "Prompt not found!" : "Prompt found.");
             if (prompt) {
                 prompt.callback(player);
             }
         });
+        eat(connection, "Disconnect");
     }
 }
 
