@@ -9,7 +9,6 @@
 - `npm run dev` runs `rbxtsc -w --optimizedLoops` alongside `npx rojo serve`; attach Roblox Studio with the Rojo plugin for live sync.
 - Asset ids live in `shared/asset/AssetMap.ts`; keep it fresh with `npm run asset-sync` or watch with `npm run asset-watch` whenever files in `assets/` change.
 - `npm run build` performs asset sync then a one-off `rbxtsc`. `npm run lint` runs ESLint over `src`, and `npm run docs` builds TypeDoc.
-- Generate the `shared/types/ItemId.ts` union via `npm run generate-item-ids` whenever new item modules are added.
 
 ## Architecture touchpoints
 - Server services sit under `src/server/services`, each an `@Service()` resolved through Flamework DI. `main.server.ts` skips heavy imports when Sandbox mode is active and only ignites Flamework when safe.
