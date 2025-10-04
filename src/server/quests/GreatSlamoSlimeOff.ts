@@ -243,5 +243,4 @@ export = new Quest(script.Name)
     )
     .setReward({
         xp: 450,
-        area: "SlamoVillage",
     });

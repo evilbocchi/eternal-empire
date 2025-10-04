@@ -1,5 +1,4 @@
-import React, { useCallback, useEffect, useState } from "@rbxts/react";
-import { TweenService } from "@rbxts/services";
+import React, { Fragment, useCallback, useEffect, useState } from "@rbxts/react";
 import { RobotoSlabBold } from "shared/asset/GameFonts";
 import Packets from "shared/Packets";
 
@@ -88,7 +87,7 @@ export default function PillarPuzzle() {
     }, [showingSequence, sequence]);
 
     if (!visible) {
-        return <></>;
+        return <Fragment />;
     }
 
     return (
