@@ -1,5 +1,11 @@
-import React, { Fragment, useEffect, useState } from "@rbxts/react";
+import React, { Fragment, useEffect, useMemo, useState } from "@rbxts/react";
+import {
+    createInventorySlot,
+    updateInventorySlot,
+    type InventorySlotHandle,
+} from "client/components/item/inventory/InventorySlot";
 import { ActionButton } from "client/components/marketplace/ListingCard";
+import { playSound } from "shared/asset/GameAssets";
 import { RobotoMono, RobotoMonoBold } from "shared/asset/GameFonts";
 import Items from "shared/items/Items";
 import Packets from "shared/Packets";
@@ -14,6 +20,7 @@ export default function CreateListingForm({
     const [listingType, setListingType] = useState<"buyout" | "auction">("buyout");
     const [duration, setDuration] = useState("7"); // days
     const [availableInstances, setAvailableInstances] = useState<Map<string, UniqueItemInstance>>(new Map());
+    const [slotHandles, setSlotHandles] = useState<Map<string, InventorySlotHandle>>(new Map());
 
     // Load player's available unique items
     useEffect(() => {
@@ -27,6 +34,15 @@ export default function CreateListingForm({
         }
         setAvailableInstances(instances);
     }, []);
+
+    // Cleanup slot handles on unmount
+    useEffect(() => {
+        return () => {
+            for (const [, handle] of slotHandles) {
+                handle.destroy();
+            }
+        };
+    }, [slotHandles]);
 
     const handleSubmit = () => {
         if (selectedUuid === "" || price === "") return;
@@ -47,28 +63,91 @@ export default function CreateListingForm({
 
     const availableInstanceElements = new Array<JSX.Element>();
 
-    for (const [uuid, uniqueInstance] of availableInstances) {
+    // Memoize sorted instances by total pot value (descending)
+    const sortedInstances = useMemo(() => {
+        const arr = new Array<[string, UniqueItemInstance]>();
+        for (const [uuid, uniqueInstance] of availableInstances) {
+            arr.push([uuid, uniqueInstance]);
+        }
+        arr.sort((a, b) => {
+            let aPotTotal = 0;
+            for (const [, val] of a[1].pots) {
+                aPotTotal += val;
+            }
+            let bPotTotal = 0;
+            for (const [, val] of b[1].pots) {
+                bPotTotal += val;
+            }
+            return bPotTotal < aPotTotal;
+        });
+        return arr;
+    }, [availableInstances]);
+
+    for (const [uuid, uniqueInstance] of sortedInstances) {
+        const item = Items.getItem(uniqueInstance.baseItemId);
+        if (!item) continue;
+
         const isSelected = selectedUuid === uuid;
+
         availableInstanceElements.push(
-            <textbutton
-                BackgroundColor3={isSelected ? Color3.fromRGB(55, 189, 255) : Color3.fromRGB(29, 39, 59)}
-                BackgroundTransparency={isSelected ? 0 : 0.1}
-                BorderSizePixel={0}
-                Size={new UDim2(0, 130, 1, -12)}
-                Text={Items.getItem(uniqueInstance.baseItemId)?.name ?? "Unknown Item"}
-                TextColor3={isSelected ? Color3.fromRGB(12, 16, 24) : Color3.fromRGB(226, 238, 255)}
-                TextScaled={true}
-                FontFace={RobotoMono}
-                Event={{
-                    Activated: () => setSelectedUuid(uuid),
-                }}
-            >
-                <uistroke
-                    Thickness={1}
-                    Color={isSelected ? Color3.fromRGB(111, 182, 255) : Color3.fromRGB(58, 86, 142)}
-                    Transparency={isSelected ? 0 : 0.3}
+            <frame BackgroundTransparency={1} Size={new UDim2(0, 68, 0, 68)}>
+                <frame
+                    BackgroundTransparency={1}
+                    Size={new UDim2(1, 0, 1, 0)}
+                    ref={(rbx: Frame | undefined) => {
+                        if (!rbx) return;
+
+                        // Create or update slot handle
+                        const existingHandle = slotHandles.get(uuid);
+                        if (!existingHandle) {
+                            const handle = createInventorySlot(item, {
+                                parent: rbx,
+                                size: new UDim2(1, 0, 1, 0),
+                                visible: true,
+                                tooltip: true,
+                                onActivated: () => {
+                                    playSound("Click.mp3");
+                                    setSelectedUuid(uuid);
+                                },
+                            });
+
+                            // Hide the amount label for marketplace slots
+                            handle.amountLabel.Visible = false;
+
+                            updateInventorySlot(handle, {
+                                amount: 1,
+                                uuid: uuid,
+                            });
+
+                            setSlotHandles((prev) => {
+                                const newMap = new Map<string, InventorySlotHandle>();
+                                for (const [k, v] of prev) {
+                                    newMap.set(k, v);
+                                }
+                                newMap.set(uuid, handle);
+                                return newMap;
+                            });
+                        } else {
+                            updateInventorySlot(existingHandle, {
+                                parent: rbx,
+                                visible: true,
+                                amount: 1,
+                                uuid: uuid,
+                            });
+                        }
+                    }}
                 />
-            </textbutton>,
+                {isSelected && (
+                    <frame
+                        key={`selection-indicator-${uuid}`}
+                        BackgroundTransparency={1}
+                        Size={new UDim2(1, 0, 1, 0)}
+                        ZIndex={10}
+                    >
+                        <uistroke Thickness={2} Color={Color3.fromRGB(55, 189, 255)} Transparency={0} />
+                    </frame>
+                )}
+            </frame>,
         );
     }
 
@@ -136,19 +215,20 @@ export default function CreateListingForm({
                         ScrollBarThickness={6}
                         ScrollBarImageColor3={Color3.fromRGB(74, 140, 255)}
                         ScrollingDirection={Enum.ScrollingDirection.X}
-                        Size={new UDim2(1, 0, 0, 80)}
+                        Size={new UDim2(1, 0, 0, 90)}
                     >
                         <uistroke Thickness={1} Color={Color3.fromRGB(58, 86, 142)} Transparency={0.35} />
                         <uipadding
-                            PaddingTop={new UDim(0, 6)}
-                            PaddingBottom={new UDim(0, 6)}
-                            PaddingLeft={new UDim(0, 8)}
-                            PaddingRight={new UDim(0, 8)}
+                            PaddingTop={new UDim(0, 11)}
+                            PaddingBottom={new UDim(0, 11)}
+                            PaddingLeft={new UDim(0, 11)}
+                            PaddingRight={new UDim(0, 11)}
                         />
                         <uilistlayout
                             FillDirection={Enum.FillDirection.Horizontal}
                             HorizontalAlignment={Enum.HorizontalAlignment.Left}
-                            Padding={new UDim(0, 8)}
+                            Padding={new UDim(0, 16)}
+                            SortOrder={Enum.SortOrder.LayoutOrder}
                         />
 
                         {availableInstances.isEmpty() ? (
@@ -193,10 +273,10 @@ export default function CreateListingForm({
                         BorderColor3={Color3.fromRGB(100, 100, 100)}
                         BorderSizePixel={1}
                         Size={new UDim2(1, 0, 0, 26)}
-                        Text={price}
                         PlaceholderText="Enter price in Diamonds"
                         PlaceholderColor3={Color3.fromRGB(120, 140, 175)}
                         TextColor3={Color3.fromRGB(226, 238, 255)}
+                        Text=""
                         TextScaled={true}
                         TextXAlignment={Enum.TextXAlignment.Left}
                         FontFace={RobotoMono}
@@ -233,7 +313,7 @@ export default function CreateListingForm({
                         TextXAlignment={Enum.TextXAlignment.Left}
                     />
 
-                    <frame BackgroundTransparency={1} Size={new UDim2(1, 0, 0, 44)}>
+                    <frame BackgroundTransparency={1} Size={new UDim2(1, 0, 0, 26)}>
                         <uilistlayout
                             FillDirection={Enum.FillDirection.Horizontal}
                             HorizontalAlignment={Enum.HorizontalAlignment.Left}
@@ -244,14 +324,13 @@ export default function CreateListingForm({
                             const isActive = listingType === mode;
                             return (
                                 <textbutton
-                                    key={`listing-mode-${mode}`}
                                     AutoButtonColor={false}
                                     BackgroundColor3={
                                         isActive ? Color3.fromRGB(55, 189, 255) : Color3.fromRGB(29, 39, 59)
                                     }
                                     BackgroundTransparency={isActive ? 0 : 0.1}
                                     BorderSizePixel={0}
-                                    Size={new UDim2(0, 140, 1, -8)}
+                                    Size={new UDim2(0, 140, 1, 0)}
                                     Text={mode === "buyout" ? "Buyout" : "Auction"}
                                     TextColor3={isActive ? Color3.fromRGB(12, 16, 24) : Color3.fromRGB(226, 238, 255)}
                                     TextScaled={true}
@@ -261,9 +340,16 @@ export default function CreateListingForm({
                                     }}
                                 >
                                     <uistroke
+                                        ApplyStrokeMode={Enum.ApplyStrokeMode.Border}
                                         Thickness={1}
                                         Color={isActive ? Color3.fromRGB(111, 182, 255) : Color3.fromRGB(58, 86, 142)}
                                         Transparency={isActive ? 0 : 0.3}
+                                    />
+                                    <uipadding
+                                        PaddingTop={new UDim(0, 4)}
+                                        PaddingBottom={new UDim(0, 4)}
+                                        PaddingLeft={new UDim(0, 8)}
+                                        PaddingRight={new UDim(0, 8)}
                                     />
                                 </textbutton>
                             );
@@ -292,20 +378,27 @@ export default function CreateListingForm({
 
                     <textbox
                         BackgroundColor3={Color3.fromRGB(24, 32, 48)}
-                        BorderSizePixel={0}
-                        Size={new UDim2(1, 0, 0, 40)}
-                        Text={duration}
+                        BorderColor3={Color3.fromRGB(100, 100, 100)}
+                        BorderSizePixel={1}
+                        Size={new UDim2(1, 0, 0, 26)}
                         PlaceholderText="7"
                         PlaceholderColor3={Color3.fromRGB(120, 140, 175)}
+                        Text=""
                         TextColor3={Color3.fromRGB(226, 238, 255)}
                         TextScaled={true}
+                        TextXAlignment={Enum.TextXAlignment.Left}
                         FontFace={RobotoMono}
                         ClearTextOnFocus={false}
                         Event={{
                             FocusLost: (textBox) => setDuration(textBox.Text),
                         }}
                     >
-                        <uistroke Thickness={1} Color={Color3.fromRGB(74, 140, 255)} Transparency={0.35} />
+                        <uipadding
+                            PaddingTop={new UDim(0, 4)}
+                            PaddingBottom={new UDim(0, 4)}
+                            PaddingLeft={new UDim(0, 8)}
+                            PaddingRight={new UDim(0, 8)}
+                        />
                     </textbox>
                 </frame>
 

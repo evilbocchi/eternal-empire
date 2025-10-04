@@ -57,6 +57,7 @@ import RepairWindow from "client/components/item/RepairWindow";
 import { PLAYER_GUI } from "client/constants";
 import eat from "shared/hamster/eat";
 import LoadingScreen from "sharedfirst/LoadingScreen";
+import MarketplaceWindow from "client/components/marketplace/MarketplaceWindow";
 
 function setParent(instance: Instance) {
     instance.Parent = PLAYER_GUI;
@@ -112,6 +113,7 @@ export default function App() {
         addRoot(roots, createScreenGui("Copy", 0)).render(<CopyWindow />);
         addRoot(roots, createScreenGui("Inventory", 0)).render(<InventoryWindow />);
         addRoot(roots, createScreenGui("Logs", 0)).render(<LogsWindow />);
+        addRoot(roots, createScreenGui("Marketplace", 0)).render(<MarketplaceWindow />);
         addRoot(roots, createScreenGui("Purchase", 0, false)).render(<PurchaseWindow />);
         addRoot(roots, createScreenGui("PortableBeacon", 0)).render(<PortableBeaconWindow />);
         addRoot(roots, createScreenGui("Quest", 0)).render(<QuestWindow />);

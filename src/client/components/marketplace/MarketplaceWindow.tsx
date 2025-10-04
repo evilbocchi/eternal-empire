@@ -1,12 +1,15 @@
+import { simpleInterval } from "@antivivi/vrldk";
 import React, { Fragment, useEffect, useMemo, useState } from "@rbxts/react";
+import { CollectionService } from "@rbxts/services";
 import CreateListingForm from "client/components/marketplace/CreateListingForm";
 import ListingCard from "client/components/marketplace/ListingCard";
 import SearchFilters from "client/components/marketplace/SearchFilters";
-import { useDocument } from "client/components/window/DocumentManager";
+import useSingleDocument from "client/components/sidebar/useSingleDocumentWindow";
 import TechWindow from "client/components/window/TechWindow";
 import { getAsset } from "shared/asset/AssetMap";
 import { playSound } from "shared/asset/GameAssets";
 import { RobotoMono, RobotoMonoBold } from "shared/asset/GameFonts";
+import { getPlayerCharacter } from "shared/hamster/getPlayerCharacter";
 import Items from "shared/items/Items";
 import "shared/marketplace/MarketplaceListing";
 import Packets from "shared/Packets";
@@ -15,14 +18,45 @@ type TabType = "Browse" | "MyListings" | "CreateListing";
 
 // Main Marketplace Window Component
 export default function MarketplaceWindow() {
-    const { id, visible, setVisible } = useDocument({ id: "Marketplace", priority: 1 });
+    const { id, visible, openDocument, closeDocument } = useSingleDocument({ id: "Marketplace", priority: 1 });
     const [activeTab, setActiveTab] = useState<TabType>("Browse");
     const [listings, setListings] = useState<Map<string, MarketplaceListing>>(new Map());
     const [myListings, setMyListings] = useState<Map<string, MarketplaceListing>>(new Map());
     const [searchQuery, setSearchQuery] = useState("");
     const [filters, setFilters] = useState<MarketplaceFilters>({});
 
-    // Register with window manager
+    // Track whether player was previously in range to control window open/close logic
+    useEffect(() => {
+        let wasInRange = false;
+        const cleanup = simpleInterval(() => {
+            const models = CollectionService.GetTagged("MarketplaceTerminal");
+            let marketplacePosition: Vector3 | undefined;
+            for (const model of models) {
+                if (!model.IsA("Model")) continue;
+                marketplacePosition = model.GetPivot().Position;
+                break;
+            }
+            if (marketplacePosition === undefined) return;
+
+            const characterPosition = getPlayerCharacter()?.GetPivot();
+            if (characterPosition === undefined) return;
+
+            const distance = marketplacePosition.sub(characterPosition.Position).Magnitude;
+            const inRange = distance <= 15;
+
+            if (inRange && !wasInRange) {
+                openDocument();
+            }
+            if (!inRange && wasInRange) {
+                closeDocument();
+            }
+            wasInRange = inRange;
+        }, 0.5);
+
+        return () => {
+            cleanup();
+        };
+    }, []);
 
     // Load data when window becomes visible
     useEffect(() => {

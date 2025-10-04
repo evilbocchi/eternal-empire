@@ -13,27 +13,16 @@ export = new Item(script.Name)
     .persists()
 
     .onClientLoad((model) => {
+        model.AddTag("MarketplaceTerminal");
+
         // Add visual effects on client side
         const primaryPart = model.PrimaryPart;
         if (!primaryPart) return;
 
         // Create a subtle glow effect
         const pointLight = new Instance("PointLight");
-        pointLight.Color = Color3.fromRGB(0, 150, 255);
+        pointLight.Color = Color3.fromRGB(99, 255, 138);
         pointLight.Brightness = 0.5;
         pointLight.Range = 10;
         pointLight.Parent = primaryPart;
-
-        // Add particle effect
-        const attachment = new Instance("Attachment");
-        attachment.Parent = primaryPart;
-
-        const particles = new Instance("ParticleEmitter");
-        particles.Color = new ColorSequence(Color3.fromRGB(0, 150, 255));
-        particles.Size = new NumberSequence(0.2);
-        particles.Lifetime = new NumberRange(1, 2);
-        particles.Rate = 5;
-        particles.SpreadAngle = new Vector2(45, 45);
-        particles.Speed = new NumberRange(2, 4);
-        particles.Parent = attachment;
     });

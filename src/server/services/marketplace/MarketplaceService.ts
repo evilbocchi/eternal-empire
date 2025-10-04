@@ -25,6 +25,7 @@ import { DataStoreService, HttpService, RunService } from "@rbxts/services";
 import CurrencyService from "server/services/data/CurrencyService";
 import DataService from "server/services/data/DataService";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
+import { EmpireProfileManager } from "shared/data/profile/ProfileManager";
 import eat from "shared/hamster/eat";
 import MARKETPLACE_CONFIG from "shared/marketplace/MarketplaceListing";
 import Packets from "shared/Packets";
@@ -178,6 +179,10 @@ export default class MarketplaceService implements OnInit, OnStart {
 
             // Fire events
             this.listingCreated.fire(listing);
+
+            // Send individual listing update to clients
+            Packets.listingUpdated.toAllClients(listing);
+
             this.refreshMarketplaceListings();
 
             return true;
@@ -251,6 +256,10 @@ export default class MarketplaceService implements OnInit, OnStart {
 
             // Fire events
             this.listingCancelled.fire(uuid, player.UserId);
+
+            // Send listing removal to clients
+            Packets.listingRemoved.toAllClients(uuid);
+
             this.refreshMarketplaceListings();
 
             return true;
@@ -372,11 +381,17 @@ export default class MarketplaceService implements OnInit, OnStart {
 
             // Fire events
             this.itemSold.fire(transaction);
+
+            // Send transaction notification to clients
+            Packets.marketplaceTransaction.toAllClients(transaction);
+
+            // Send listing removal to clients
+            Packets.listingRemoved.toAllClients(uuid);
+
             this.refreshMarketplaceListings();
 
             // Send webhook notification
             this.sendTradeWebhook(transaction);
-
             return true;
         } catch (error) {
             warn("Error processing buyout:", error);
@@ -438,6 +453,9 @@ export default class MarketplaceService implements OnInit, OnStart {
             // Fire events
             this.listingUpdated.fire(listing);
 
+            // Send individual listing update to clients
+            Packets.listingUpdated.toAllClients(listing);
+
             return true;
         } catch (error) {
             warn("Error placing bid:", error);
@@ -450,12 +468,45 @@ export default class MarketplaceService implements OnInit, OnStart {
      */
     getMarketplaceListings(): MarketplaceListing[] {
         try {
-            // This would typically implement pagination and filtering
-            // For now, return a simplified version
             const listings: MarketplaceListing[] = [];
+            const currentTime = os.time();
 
-            // In a real implementation, you'd use DataStore:ListKeysAsync
-            // and filter/sort the results based on the filters parameter
+            // Use ListKeysAsync to iterate through all marketplace listings
+            const [success, pages] = pcall(() => this.marketplaceDataStore.ListKeysAsync());
+
+            if (!success || pages === undefined) {
+                warn("Failed to list marketplace keys:", pages);
+                return listings;
+            }
+
+            while (true) {
+                const keys = pages.GetCurrentPage();
+
+                for (const item of keys) {
+                    const keyInfo = item as DataStoreKey;
+                    const [getSuccess, result] = pcall(() => this.marketplaceDataStore.GetAsync(keyInfo.KeyName));
+
+                    if (getSuccess && result !== undefined) {
+                        const [listing] = result as LuaTuple<[MarketplaceListing | undefined]>;
+
+                        if (listing !== undefined && listing.active) {
+                            // Filter out expired listings
+                            if (listing.expires === undefined || listing.expires > currentTime) {
+                                listings.push(listing);
+                            }
+                        }
+                    }
+                }
+
+                if (pages.IsFinished) {
+                    break;
+                }
+
+                const [advanceSuccess] = pcall(() => pages.AdvanceToNextPageAsync());
+                if (!advanceSuccess) {
+                    break;
+                }
+            }
 
             return listings;
         } catch (error) {
@@ -468,8 +519,52 @@ export default class MarketplaceService implements OnInit, OnStart {
      * Gets active listings for a specific player.
      */
     private getPlayerActiveListings(userId: number): MarketplaceListing[] {
-        // Implementation would query DataStore for player's active listings
-        return [];
+        try {
+            const listings: MarketplaceListing[] = [];
+            const currentTime = os.time();
+
+            // Use ListKeysAsync to iterate through all marketplace listings
+            const [success, pages] = pcall(() => this.marketplaceDataStore.ListKeysAsync());
+
+            if (!success || pages === undefined) {
+                warn("Failed to list marketplace keys for player:", pages);
+                return listings;
+            }
+
+            while (true) {
+                const keys = pages.GetCurrentPage();
+
+                for (const item of keys) {
+                    const keyInfo = item as DataStoreKey;
+                    const [getSuccess, result] = pcall(() => this.marketplaceDataStore.GetAsync(keyInfo.KeyName));
+
+                    if (getSuccess && result !== undefined) {
+                        const [listing] = result as LuaTuple<[MarketplaceListing | undefined]>;
+
+                        if (listing !== undefined && listing.active && listing.sellerId === userId) {
+                            // Filter out expired listings
+                            if (listing.expires === undefined || listing.expires > currentTime) {
+                                listings.push(listing);
+                            }
+                        }
+                    }
+                }
+
+                if (pages.IsFinished) {
+                    break;
+                }
+
+                const [advanceSuccess] = pcall(() => pages.AdvanceToNextPageAsync());
+                if (!advanceSuccess) {
+                    break;
+                }
+            }
+
+            return listings;
+        } catch (error) {
+            warn("Error getting player active listings:", error);
+            return [];
+        }
     }
 
     /**
@@ -506,27 +601,260 @@ export default class MarketplaceService implements OnInit, OnStart {
             // This would query the external webhook system for any unresolved tokens
 
             warn("Trade recovery system initialized");
+
+            // Also recover expired listings and return items to sellers
+            this.recoverExpiredListings();
         } catch (error) {
             warn("Error during trade recovery:", error);
         }
     }
 
     /**
+     * Recovers expired listings on server startup and returns items to sellers.
+     * This method loads seller profiles temporarily to return expired items.
+     */
+    private recoverExpiredListings() {
+        task.spawn(() => {
+            try {
+                const currentTime = os.time();
+                const expiredListingsBySeller = new Map<number, { uuid: string; listing: MarketplaceListing }[]>();
+
+                warn("Starting expired listings recovery...");
+
+                // Use ListKeysAsync to find all expired listings
+                const [success, pages] = pcall(() => this.marketplaceDataStore.ListKeysAsync());
+
+                if (!success || pages === undefined) {
+                    warn("Failed to list marketplace keys for recovery:", pages);
+                    return;
+                }
+
+                // First pass: collect all expired listings grouped by seller
+                while (true) {
+                    const keys = pages.GetCurrentPage();
+
+                    for (const item of keys) {
+                        const keyInfo = item as DataStoreKey;
+                        const [getSuccess, result] = pcall(() => this.marketplaceDataStore.GetAsync(keyInfo.KeyName));
+
+                        if (getSuccess && result !== undefined) {
+                            const [listing] = result as LuaTuple<[MarketplaceListing | undefined]>;
+
+                            if (listing !== undefined && listing.active && listing.expires !== undefined) {
+                                // Check if listing has expired
+                                if (listing.expires <= currentTime) {
+                                    const sellerId = listing.sellerId;
+                                    const sellerListings = expiredListingsBySeller.get(sellerId) ?? [];
+                                    sellerListings.push({ uuid: keyInfo.KeyName, listing });
+                                    expiredListingsBySeller.set(sellerId, sellerListings);
+                                }
+                            }
+                        }
+                    }
+
+                    if (pages.IsFinished) {
+                        break;
+                    }
+
+                    const [advanceSuccess] = pcall(() => pages.AdvanceToNextPageAsync());
+                    if (!advanceSuccess) {
+                        break;
+                    }
+                }
+
+                if (expiredListingsBySeller.size() === 0) {
+                    warn("No expired listings found during recovery");
+                    return;
+                }
+
+                warn(`Found ${expiredListingsBySeller.size()} sellers with expired listings`);
+
+                // Second pass: load each seller's profile and return their items
+                for (const [sellerId, expiredListings] of expiredListingsBySeller) {
+                    task.spawn(() => {
+                        const [loadSuccess, sellerProfile] = pcall(() => {
+                            // Load seller's empire profile using their seller empire ID
+                            const sellerEmpireId = expiredListings[0].listing.sellerEmpireId;
+                            return EmpireProfileManager.load(sellerEmpireId);
+                        });
+
+                        if (!loadSuccess || sellerProfile === undefined) {
+                            warn(`Failed to load profile for seller ${sellerId}:`, sellerProfile);
+                            return;
+                        }
+
+                        // Return all expired items to this seller
+                        for (const { uuid, listing } of expiredListings) {
+                            // Mark listing as inactive in DataStore
+                            const [updateSuccess] = pcall(() => {
+                                this.marketplaceDataStore.UpdateAsync(
+                                    uuid,
+                                    (oldListing: MarketplaceListing | undefined) => {
+                                        if (oldListing === undefined || !oldListing.active) {
+                                            return $tuple(oldListing);
+                                        }
+
+                                        // Mark as inactive
+                                        const updatedListing = { ...oldListing, active: false };
+                                        return $tuple(updatedListing);
+                                    },
+                                );
+                            });
+
+                            if (!updateSuccess) {
+                                warn(`Failed to mark listing ${uuid} as inactive`);
+                                continue;
+                            }
+
+                            // Restore item to seller's inventory
+                            const listingUniqueItem = listing.uniqueItem;
+                            if (listingUniqueItem !== undefined) {
+                                const restoredPots = new Map<string, number>();
+                                for (const [potName, potValue] of listingUniqueItem.pots) {
+                                    restoredPots.set(potName, potValue);
+                                }
+
+                                const restoredUniqueItem: UniqueItemInstance = {
+                                    baseItemId: listingUniqueItem.baseItemId,
+                                    pots: restoredPots,
+                                    created: listingUniqueItem.created,
+                                };
+                                if (listingUniqueItem.placed !== undefined) {
+                                    restoredUniqueItem.placed = listingUniqueItem.placed;
+                                }
+
+                                sellerProfile.Data.items.uniqueInstances.set(uuid, restoredUniqueItem);
+                                warn(`Returned expired item ${uuid} to seller ${sellerId}`);
+                            } else {
+                                warn(`Listing ${uuid} missing unique item data during recovery`);
+                            }
+                        }
+
+                        // Unload the seller's profile to save changes
+                        const [unloadSuccess] = pcall(() => {
+                            EmpireProfileManager.unload(expiredListings[0].listing.sellerEmpireId);
+                        });
+
+                        if (!unloadSuccess) {
+                            warn(`Failed to unload profile for seller ${sellerId}`);
+                        } else {
+                            warn(`Successfully recovered ${expiredListings.size()} items for seller ${sellerId}`);
+                        }
+                    });
+                }
+
+                warn("Expired listings recovery completed");
+            } catch (error) {
+                warn("Error during expired listings recovery:", error);
+            }
+        });
+    }
+
+    /**
      * Cleans up expired listings.
+     * Note: This only marks listings as inactive. Item returns are handled by the recovery system
+     * when sellers log in or during server startup via recoverExpiredListings().
      */
     private cleanupExpiredListings(): void {
-        // This would run periodically to remove expired listings
-        // Implementation would check listing expiry times and clean up
+        task.spawn(() => {
+            try {
+                const currentTime = os.time();
+                const expiredListings: string[] = [];
+
+                // Use ListKeysAsync to find expired listings
+                const [success, pages] = pcall(() => this.marketplaceDataStore.ListKeysAsync());
+
+                if (!success || pages === undefined) {
+                    return;
+                }
+
+                while (true) {
+                    const keys = pages.GetCurrentPage();
+
+                    for (const item of keys) {
+                        const keyInfo = item as DataStoreKey;
+                        const [getSuccess, result] = pcall(() => this.marketplaceDataStore.GetAsync(keyInfo.KeyName));
+
+                        if (getSuccess && result !== undefined) {
+                            const [listing] = result as LuaTuple<[MarketplaceListing | undefined]>;
+
+                            if (listing !== undefined && listing.active && listing.expires !== undefined) {
+                                // Check if listing has expired
+                                if (listing.expires <= currentTime) {
+                                    expiredListings.push(keyInfo.KeyName);
+                                }
+                            }
+                        }
+                    }
+
+                    if (pages.IsFinished) {
+                        break;
+                    }
+
+                    const [advanceSuccess] = pcall(() => pages.AdvanceToNextPageAsync());
+                    if (!advanceSuccess) {
+                        break;
+                    }
+                }
+
+                // Clean up expired listings
+                for (const uuid of expiredListings) {
+                    const [updateSuccess, result] = pcall(() => {
+                        return this.marketplaceDataStore.UpdateAsync(
+                            uuid,
+                            (oldListing: MarketplaceListing | undefined) => {
+                                if (oldListing === undefined || !oldListing.active) {
+                                    return $tuple(oldListing);
+                                }
+
+                                // Mark as inactive
+                                const updatedListing = { ...oldListing, active: false };
+                                return $tuple(updatedListing);
+                            },
+                        );
+                    });
+
+                    if (updateSuccess && result !== undefined) {
+                        const [actualListing] = result as unknown as LuaTuple<[MarketplaceListing | undefined]>;
+                        if (actualListing !== undefined) {
+                            this.listingCancelled.fire(uuid, actualListing.sellerId);
+
+                            // Send listing removal to clients
+                            Packets.listingRemoved.toAllClients(uuid);
+                        }
+                    }
+                }
+
+                if (expiredListings.size() > 0) {
+                    this.refreshMarketplaceListings();
+                }
+            } catch (error) {
+                warn("Error cleaning up expired listings:", error);
+            }
+        });
     }
 
     /**
      * Refreshes marketplace listings for all clients.
      */
     private refreshMarketplaceListings(): void {
-        // Update the marketplace listings packet for all clients
         task.spawn(() => {
-            const listings = this.getMarketplaceListings();
-            // Packets.marketplaceListings.setAll(new Map()); // Would set actual listings
+            try {
+                const listings = this.getMarketplaceListings();
+                const listingsMap = new Map<string, MarketplaceListing>();
+
+                // Convert array to map keyed by UUID
+                for (const listing of listings) {
+                    listingsMap.set(listing.uuid, listing);
+                }
+
+                // Update the marketplace listings packet for all clients
+                Packets.marketplaceListings.set(listingsMap);
+
+                warn(`Refreshed marketplace with ${listings.size()} active listings`);
+            } catch (error) {
+                warn("Error refreshing marketplace listings:", error);
+            }
         });
     }
 
