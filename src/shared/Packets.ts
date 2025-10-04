@@ -234,6 +234,12 @@ namespace Packets {
     // world
     export const triggerProximityPrompt = packet<(path: string) => void>();
     export const damaged = packet<(damage: "Normal" | "DoubleDamage" | "HighDamage" | "Instakill") => void>();
+
+    // pillar puzzle
+    export const pillarPuzzleVisible = property<boolean>(false);
+    export const pillarPuzzleSequence = property<number[]>([]);
+    export const submitPuzzleAnswer = packet<(answer: number[]) => boolean>();
+    export const startPillarPuzzle = packet<(pillarNumber: number) => void>();
 }
 
 export = Packets;

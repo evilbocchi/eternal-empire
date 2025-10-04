@@ -26,6 +26,7 @@ import PositionManager from "client/components/position/PositionManager";
 import QuestCompletionManager from "client/components/quest/QuestCompletionManager";
 import QuestWindow from "client/components/quest/QuestWindow";
 import TrackedQuestWindow from "client/components/quest/TrackedQuestWindow";
+import PillarPuzzle from "client/components/quest/PillarPuzzle";
 import RenameWindow from "client/components/rename/RenameWindow";
 import ResetRenderer from "client/components/reset/ResetRenderer";
 import CopyWindow from "client/components/settings/CopyWindow";
@@ -114,6 +115,7 @@ export default function App() {
         addRoot(roots, createScreenGui("Inventory", 0)).render(<InventoryWindow />);
         addRoot(roots, createScreenGui("Logs", 0)).render(<LogsWindow />);
         addRoot(roots, createScreenGui("Marketplace", 0)).render(<MarketplaceWindow />);
+        addRoot(roots, createScreenGui("PillarPuzzle", 0)).render(<PillarPuzzle />);
         addRoot(roots, createScreenGui("Purchase", 0, false)).render(<PurchaseWindow />);
         addRoot(roots, createScreenGui("PortableBeacon", 0)).render(<PortableBeaconWindow />);
         addRoot(roots, createScreenGui("Quest", 0)).render(<QuestWindow />);
