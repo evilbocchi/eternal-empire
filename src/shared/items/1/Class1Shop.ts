@@ -20,6 +20,7 @@ import DropletAscender from "shared/items/1/joyful/DropletAscender";
 import GravityGrounder from "shared/items/1/joyful/GravityGrounder";
 import JoyfulPark from "shared/items/1/joyful/JoyfulPark";
 import TheAmplified from "shared/items/1/joyful/TheAmplified";
+import AntiGravityAntiClockwiseConveyor from "shared/items/1/placid/AntiGravityAntiClockwiseConveyor";
 import Baseplate from "shared/items/1/placid/Baseplate";
 import MinimalInverse from "shared/items/1/placid/MinimalInverse";
 import PlacidDropper from "shared/items/1/placid/PlacidDropper";
@@ -58,6 +59,7 @@ export = new Item(script.Name)
         Baseplate,
         PlacidDropper,
         MinimalInverse,
+        AntiGravityAntiClockwiseConveyor,
 
         AntiGravityFurnace,
         DualGravityUpgrader,

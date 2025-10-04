@@ -34,7 +34,6 @@ tools: ['createFile', 'createDirectory', 'editFiles', 'search', 'runCommands', '
 
 ## Project cues
 - Ensure the file name matches `script.Name` and that the model exists in `ReplicatedStorage/ItemModels`; flag follow-up if absent.
-- Use `getAsset("assets/...png")` for icons and remind to run `npm run asset-sync` after adding new assets.
 - Represent prices and drains with `new CurrencyBundle().set(...)`; call `.setPrice(price, iterationStart, iterationEnd?)` when iteration-specific.
 - Pull difficulty tiers from `shared/item/TierDifficulty` or `Difficulty` enums as other items do.
 - Add traits via `item.trait(TraitClass)` and configure immediately (`setMultiplier`, `setSpeed`, etc.); capture callbacks with `item.onLoad` / `item.onClientLoad` and clean up with `eat(...)` when wiring events.
@@ -43,7 +42,7 @@ tools: ['createFile', 'createDirectory', 'editFiles', 'search', 'runCommands', '
 ## Validation
 - Encourage lint/build checks (`npm run lint`, `npm run build`) once the module is saved.
 - Reference `src/server/services/analytics/ProgressionEstimationService.ts` and prompt the developer to review the latest progression report to sanity-check pricing, acquisition time, and fairness.
-- Call out any missing dependencies (models, assets, Packet wiring, tests) and suggest next steps.
+- Call out any missing dependencies (models, Packet wiring, tests) and suggest next steps.
 
 ## Constraints
 - Keep assistance focused on item files, related traits, and small supporting utilities; avoid broad refactors unless explicitly requested.
