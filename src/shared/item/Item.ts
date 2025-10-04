@@ -221,6 +221,12 @@ export default class Item {
      */
     image?: string;
 
+    /**
+     * Whether this item is immune to breakdown/durability loss.
+     * If true, the item will never randomly break and won't require repairs.
+     */
+    isUnbreakable = false;
+
     private static readonly itemPerId = new Map<string, Item>();
 
     /**
@@ -826,6 +832,17 @@ export default class Item {
      */
     setImage(image: string) {
         this.image = image;
+        return this;
+    }
+
+    /**
+     * Marks this item as unbreakable, making it immune to random breakdown and durability loss.
+     * Unbreakable items will never break and won't require repairs.
+     *
+     * @returns The item instance.
+     */
+    unbreakable() {
+        this.isUnbreakable = true;
         return this;
     }
 

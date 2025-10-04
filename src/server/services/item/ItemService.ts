@@ -887,8 +887,12 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
             }
 
             const placementIds = new Array<string>();
-            for (const [placementId] of this.worldPlaced) {
+            for (const [placementId, placedItem] of this.worldPlaced) {
                 if (this.brokenPlacedItems.has(placementId)) continue;
+
+                // Check if item is marked as unbreakable
+                const item = Items.getItem(placedItem.item);
+                if (item?.isUnbreakable) continue;
 
                 const protection = this.repairProtection.get(placementId);
                 if (protection !== undefined && protection.expiresAt > os.time()) {

@@ -24,7 +24,6 @@ import BasicWindow from "client/components/window/BasicWindow";
 import useProperty from "client/hooks/useProperty";
 import { getAsset } from "shared/asset/AssetMap";
 import { playSound } from "shared/asset/GameAssets";
-import { RobotoMono } from "shared/asset/GameFonts";
 import type Item from "shared/item/Item";
 import Items from "shared/items/Items";
 import Packets from "shared/Packets";
@@ -120,7 +119,6 @@ const NON_GEAR_ITEMS = Items.sortedItems.filter((item) => !item.findTrait("Gear"
 export default function InventoryWindow() {
     const { id, visible, closeDocument } = useSingleDocument({ id: "Inventory" });
     const { searchQuery, props: filterProps } = useBasicInventoryFilter();
-    const [queryTime, setQueryTime] = useState(0);
     const [cellSize, setCellSize] = useState(new UDim2(0, 65, 0, 65));
     const cellSizeRef = useRef(cellSize);
     useEffect(() => {
@@ -174,8 +172,6 @@ export default function InventoryWindow() {
     }, [updateCellSize]);
 
     const dataPerItem = useMemo(() => {
-        const startTime = tick();
-
         const amountsPerItem = new Map<string, number>();
         for (const [itemId, amount] of inventory) {
             amountsPerItem.set(itemId, amount);
@@ -205,8 +201,6 @@ export default function InventoryWindow() {
                 data.uuid = bestInstance;
             }
         }
-
-        setQueryTime(tick() - startTime);
         return dataPerItem;
     }, [inventory, uniqueInstances, searchQuery, filterProps.traitFilters]);
 
@@ -273,11 +267,16 @@ export default function InventoryWindow() {
         }
     }
     const isEmpty = !hasAnyItems; // Only show empty state if user has no items at all
-
     return (
         <BasicWindow
             icon={getAsset("assets/Inventory.png")}
             id={id}
+            backgroundColor={
+                new ColorSequence([
+                    new ColorSequenceKeypoint(0, Color3.fromRGB(69, 51, 36)),
+                    new ColorSequenceKeypoint(1, Color3.fromRGB(56, 28, 28)),
+                ])
+            }
             strokeColor={
                 new ColorSequence([
                     new ColorSequenceKeypoint(0, Color3.fromRGB(255, 186, 125)),
@@ -300,10 +299,11 @@ export default function InventoryWindow() {
                     AnchorPoint={new Vector2(0.5, 0)}
                     AutomaticCanvasSize={Enum.AutomaticSize.Y}
                     BackgroundTransparency={1}
+                    BorderSizePixel={0}
                     CanvasSize={new UDim2(0, 0, 0, 0)}
                     LayoutOrder={1}
                     Position={new UDim2(0.5, 0, 0, 0)}
-                    ScrollBarThickness={6}
+                    ScrollBarThickness={12}
                     Selectable={false}
                     Size={new UDim2(1, 0, 0.975, -20)}
                     Visible={dataPerItem.size() > 0}
@@ -332,14 +332,6 @@ export default function InventoryWindow() {
                     SortOrder={Enum.SortOrder.LayoutOrder}
                 />
             </frame>
-
-            <textlabel
-                AnchorPoint={new Vector2(0.5, 0)}
-                FontFace={RobotoMono}
-                Text={`Query Time: ${string.format("%.3f", queryTime * 1000)}ms`}
-                LayoutOrder={-2}
-                Position={new UDim2(0.5, 0, 0, -15)}
-            />
         </BasicWindow>
     );
 }

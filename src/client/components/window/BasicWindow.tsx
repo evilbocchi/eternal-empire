@@ -1,22 +1,9 @@
-import React, { RefObject, useEffect, useRef, useState } from "@rbxts/react";
+import React, { ReactNode, RefObject, useEffect, useRef, useState } from "@rbxts/react";
 import { TweenService } from "@rbxts/services";
-import WindowCloseButton from "client/components/window/WindowCloseButton";
 import DocumentManager from "client/components/window/DocumentManager";
+import WindowCloseButton from "client/components/window/WindowCloseButton";
 import WindowTitle from "client/components/window/WindowTitle";
-import { getAsset } from "shared/asset/AssetMap";
 import { playSound } from "shared/asset/GameAssets";
-
-declare global {
-    interface WindowProps {
-        icon: string;
-        id: string;
-        title?: string;
-        visible: boolean;
-        strokeColor?: ColorSequence;
-        children: React.ReactNode;
-        size?: UDim2; // Optional size for the window
-    }
-}
 
 export function useWindowAnimation({
     frameRef,
@@ -60,7 +47,31 @@ export function useWindowAnimation({
     }, [visible]);
 }
 
-export default function BasicWindow({ icon, id, title, visible, children, strokeColor }: WindowProps) {
+export default function BasicWindow({
+    icon,
+    id,
+    title,
+    visible,
+    children,
+    backgroundColor,
+    strokeColor,
+}: {
+    icon: string;
+    id: string;
+    title?: string;
+    visible: boolean;
+    backgroundColor?: ColorSequence;
+    strokeColor: ColorSequence;
+    children: ReactNode;
+    size?: UDim2;
+}) {
+    if (backgroundColor === undefined) {
+        const keypoints = new Array<ColorSequenceKeypoint>();
+        for (const keypoint of strokeColor.Keypoints) {
+            keypoints.push(new ColorSequenceKeypoint(keypoint.Time, keypoint.Value.Lerp(Color3.fromRGB(0, 0, 0), 0.3)));
+        }
+        backgroundColor = new ColorSequence(keypoints);
+    }
     const frameRef = useRef<Frame>();
     const initialPosition = new UDim2(0.5, 0, 1, -40);
 
@@ -75,7 +86,7 @@ export default function BasicWindow({ icon, id, title, visible, children, stroke
             ref={frameRef}
             AnchorPoint={new Vector2(0.5, 1)}
             BackgroundColor3={Color3.fromRGB(255, 255, 255)}
-            BackgroundTransparency={0.6}
+            BackgroundTransparency={0}
             BorderColor3={Color3.fromRGB(0, 0, 0)}
             BorderSizePixel={4}
             Position={initialPosition}
@@ -95,31 +106,9 @@ export default function BasicWindow({ icon, id, title, visible, children, stroke
                 {children}
             </frame>
             <uistroke ApplyStrokeMode={Enum.ApplyStrokeMode.Border} Color={Color3.fromRGB(255, 255, 255)} Thickness={2}>
-                <uigradient Color={strokeColor} Rotation={80} />
+                <uigradient Color={strokeColor} Rotation={90} />
             </uistroke>
-            <uigradient
-                Color={
-                    new ColorSequence([
-                        new ColorSequenceKeypoint(0, Color3.fromRGB(35, 35, 35)),
-                        new ColorSequenceKeypoint(1, Color3.fromRGB(89, 89, 89)),
-                    ])
-                }
-                Rotation={270}
-            />
-            <canvasgroup BackgroundTransparency={1} Size={new UDim2(1, 0, 1, 0)} ZIndex={-5}>
-                <imagelabel
-                    AnchorPoint={new Vector2(0.5, 0.5)}
-                    BackgroundTransparency={1}
-                    Image={getAsset("assets/GridHighContrast.png")}
-                    ImageColor3={Color3.fromRGB(0, 0, 0)}
-                    ImageTransparency={0.95}
-                    Position={new UDim2(0.5, 0, 0.5, 0)}
-                    Rotation={5}
-                    ScaleType={Enum.ScaleType.Tile}
-                    Size={new UDim2(1.1, 0, 1.5, 0)}
-                    TileSize={new UDim2(0, 100, 0, 100)}
-                />
-            </canvasgroup>
+            <uigradient Color={backgroundColor} Rotation={90} />
         </frame>
     );
 }

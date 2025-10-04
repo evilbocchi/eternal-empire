@@ -1,7 +1,7 @@
-import React, { useRef } from "@rbxts/react";
+import React, { ReactNode, useRef } from "@rbxts/react";
 import { useWindowAnimation } from "client/components/window/BasicWindow";
-import WindowCloseButton from "client/components/window/WindowCloseButton";
 import DocumentManager from "client/components/window/DocumentManager";
+import WindowCloseButton from "client/components/window/WindowCloseButton";
 import WindowTitle from "client/components/window/WindowTitle";
 import { getAsset } from "shared/asset/AssetMap";
 
@@ -12,7 +12,15 @@ export default function ItemWindow({
     children,
     size = new UDim2(0.45, 200, 0.4, 100),
     backgroundColor,
-}: WindowProps & { backgroundColor: Color3 }) {
+}: {
+    icon: string;
+    id: string;
+    title?: string;
+    visible: boolean;
+    backgroundColor: Color3;
+    children: ReactNode;
+    size?: UDim2;
+}) {
     const wrapperRef = useRef<ImageLabel>();
     const initialPosition = new UDim2(0.5, 0, 1, -40);
 

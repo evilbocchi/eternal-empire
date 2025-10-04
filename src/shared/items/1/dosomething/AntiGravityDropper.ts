@@ -40,19 +40,18 @@ const AntiGravityDropper = new Item(script.Name)
                     // In edit mode, always allow the dropper to work
                     isAirborne = true;
                 } else {
-                    const checkCharacter = (character?: Model) => {
-                        if (!character || !character.PrimaryPart) return;
+                    for (const player of Players.GetPlayers()) {
+                        const character = getPlayerCharacter(player);
+                        if (!character || !character.PrimaryPart) continue;
 
                         const position = character.PrimaryPart.Position;
                         const distance = modelPosition.sub(position).Magnitude;
 
                         // Check if player is within 50 studs
-                        if (distance > 50) {
-                            return;
-                        }
+                        if (distance > 50) continue;
 
                         const humanoid = character.FindFirstChildOfClass("Humanoid");
-                        if (!humanoid) return;
+                        if (!humanoid) continue;
 
                         // Check if player is jumping or in the air
                         const state = humanoid.GetState();
@@ -64,10 +63,6 @@ const AntiGravityDropper = new Item(script.Name)
                         ) {
                             isAirborne = true;
                         }
-                    };
-
-                    for (const player of Players.GetPlayers()) {
-                        checkCharacter(player.Character);
                     }
                 }
 

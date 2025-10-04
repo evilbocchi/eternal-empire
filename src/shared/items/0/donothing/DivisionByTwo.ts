@@ -5,7 +5,7 @@ import { Server } from "shared/api/APIExpose";
 import { IS_EDIT } from "shared/Context";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import { CURRENCY_CATEGORIES, CURRENCY_DETAILS } from "shared/currency/CurrencyDetails";
-import { getPlayerCharacter } from "shared/hamster/getPlayerCharacter";
+import { getAllPlayerCharacters, getPlayerCharacter } from "shared/hamster/getPlayerCharacter";
 import Item from "shared/item/Item";
 import Generator from "shared/item/traits/generator/Generator";
 
@@ -63,19 +63,9 @@ export = new Item(script.Name)
             () => {
                 const characters = new Array<Model>();
                 const filterDescendantsInstances = new Array<Instance>();
-                for (const player of Players.GetPlayers()) {
-                    const character = player.Character;
-                    if (character) {
-                        filterDescendantsInstances.push(character);
-                        characters.push(character);
-                    }
-                }
-                if (IS_EDIT && Players.LocalPlayer === undefined) {
-                    const character = getPlayerCharacter(undefined);
-                    if (character) {
-                        filterDescendantsInstances.push(character);
-                        characters.push(character);
-                    }
+                for (const character of getAllPlayerCharacters()) {
+                    filterDescendantsInstances.push(character);
+                    characters.push(character);
                 }
 
                 overlapParams.FilterDescendantsInstances = filterDescendantsInstances;

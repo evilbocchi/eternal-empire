@@ -1,4 +1,4 @@
-import React, { useRef } from "@rbxts/react";
+import React, { ReactNode, useRef } from "@rbxts/react";
 import { useWindowAnimation } from "client/components/window/BasicWindow";
 import DocumentManager from "client/components/window/DocumentManager";
 import WindowCloseButton from "client/components/window/WindowCloseButton";
@@ -11,7 +11,14 @@ export default function TechWindow({
     visible,
     children,
     size = new UDim2(0.9, 0, 0.9, -50),
-}: WindowProps) {
+}: {
+    icon: string;
+    id: string;
+    title?: string;
+    visible: boolean;
+    children: ReactNode;
+    size?: UDim2;
+}) {
     const frameRef = useRef<Frame>();
     const initialPosition = new UDim2(0.5, 0, 0.5, 0);
 

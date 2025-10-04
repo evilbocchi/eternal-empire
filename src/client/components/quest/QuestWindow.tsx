@@ -4,9 +4,9 @@ import { useQuestData } from "client/components/quest/useQuestData";
 import useSingleDocument from "client/components/sidebar/useSingleDocumentWindow";
 import BasicWindow from "client/components/window/BasicWindow";
 import ProgressBar from "client/components/window/ProgressBar";
-import { RobotoSlabHeavy } from "shared/asset/GameFonts";
 import { getAsset } from "shared/asset/AssetMap";
 import { playSound } from "shared/asset/GameAssets";
+import { RobotoSlabHeavy } from "shared/asset/GameFonts";
 import { getMaxXp } from "shared/constants";
 
 export default function QuestWindow() {
@@ -80,14 +80,20 @@ export default function QuestWindow() {
 
     return (
         <BasicWindow
-            strokeColor={
-                new ColorSequence([
-                    new ColorSequenceKeypoint(0, Color3.fromRGB(255, 94, 94)),
-                    new ColorSequenceKeypoint(1, Color3.fromRGB(255, 18, 18)),
-                ])
-            }
             id={id}
             icon={getAsset("assets/Quests.png")}
+            backgroundColor={
+                new ColorSequence([
+                    new ColorSequenceKeypoint(0, Color3.fromRGB(54, 33, 89)),
+                    new ColorSequenceKeypoint(1, Color3.fromRGB(27, 11, 56)),
+                ])
+            }
+            strokeColor={
+                new ColorSequence([
+                    new ColorSequenceKeypoint(0, Color3.fromRGB(189, 69, 219)),
+                    new ColorSequenceKeypoint(1, Color3.fromRGB(166, 46, 196)),
+                ])
+            }
             visible={visible}
         >
             <uilistlayout

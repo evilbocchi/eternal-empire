@@ -53,24 +53,21 @@ interface SidebarButtonData {
         count: number;
         color: Color3;
     };
-    glowColor?: Color3;
 }
 
 export const SidebarButtonConfiguration = [
     {
         label: "Quests",
         image: getAsset("assets/Quests.png"),
-        color: Color3.fromRGB(255, 94, 94),
+        color: Color3.fromRGB(240, 125, 255),
         visible: true,
         notification: { count: 0, color: Color3.fromRGB(255, 52, 52) },
-        glowColor: Color3.fromRGB(255, 94, 94),
     },
     {
         label: "Inventory",
         image: getAsset("assets/Inventory.png"),
         color: Color3.fromRGB(255, 186, 125),
         visible: true,
-        glowColor: Color3.fromRGB(255, 186, 125),
     },
 ] as SidebarButtonData[];
 
@@ -159,20 +156,18 @@ export function SidebarButton({ data, layoutOrder, onClick, animationsEnabled = 
             </imagebutton>
 
             {/* Glow effect */}
-            {data.glowColor && (
-                <frame
-                    AnchorPoint={new Vector2(0.5, 0.5)}
-                    BackgroundColor3={data.glowColor}
-                    BorderSizePixel={0}
-                    Position={new UDim2(0, 0, 0.5, 0)}
-                    Size={new UDim2(0.25, 0, 0.25, 0)}
-                    SizeConstraint={Enum.SizeConstraint.RelativeYY}
-                    ZIndex={0}
-                >
-                    <uistroke ApplyStrokeMode={Enum.ApplyStrokeMode.Border} Thickness={2} />
-                    <uicorner CornerRadius={new UDim(0.5, 0)} />
-                </frame>
-            )}
+            <frame
+                AnchorPoint={new Vector2(0.5, 0.5)}
+                BackgroundColor3={data.color}
+                BorderSizePixel={0}
+                Position={new UDim2(0, 0, 0.5, 0)}
+                Size={new UDim2(0.25, 0, 0.25, 0)}
+                SizeConstraint={Enum.SizeConstraint.RelativeYY}
+                ZIndex={0}
+            >
+                <uistroke ApplyStrokeMode={Enum.ApplyStrokeMode.Border} Thickness={2} />
+                <uicorner CornerRadius={new UDim(0.5, 0)} />
+            </frame>
 
             {/* Notification badge for Quests */}
             {data.notification && data.notification.count > 0 && (

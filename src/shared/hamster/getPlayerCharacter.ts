@@ -20,3 +20,24 @@ export function getPlayerCharacter(player?: Player) {
 
     return player.Character;
 }
+
+/**
+ * Gets all player characters in the game.
+ * @returns An array of character models.
+ */
+export function getAllPlayerCharacters() {
+    const characters = new Array<Model>();
+    for (const player of Players.GetPlayers()) {
+        const character = getPlayerCharacter(player);
+        if (character) {
+            characters.push(character);
+        }
+    }
+    if (IS_EDIT && Players.LocalPlayer === undefined) {
+        const character = getPlayerCharacter();
+        if (character) {
+            characters.push(character);
+        }
+    }
+    return characters;
+}

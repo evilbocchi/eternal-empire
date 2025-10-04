@@ -1,9 +1,7 @@
 import Difficulty from "@antivivi/jjt-difficulties";
 import { getAllInstanceInfo } from "@antivivi/vrldk";
-import { Players } from "@rbxts/services";
-import { IS_EDIT } from "shared/Context";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
-import { getPlayerCharacter } from "shared/hamster/getPlayerCharacter";
+import { getAllPlayerCharacters } from "shared/hamster/getPlayerCharacter";
 import Droplet from "shared/item/Droplet";
 import Item from "shared/item/Item";
 import Dropper from "shared/item/traits/dropper/Dropper";
@@ -30,13 +28,12 @@ export = new Item(script.Name)
             model,
             () => {
                 let moving = false;
-                const checkCharacter = (character?: Model) => {
-                    if (!character || !character.PrimaryPart) return;
 
-                    const position = character.PrimaryPart.Position;
-                    if (modelPosition.sub(position).Magnitude > 50) {
-                        return;
-                    }
+                for (const character of getAllPlayerCharacters()) {
+                    if (!character) continue;
+
+                    const position = character.GetPivot().Position;
+                    if (modelPosition.sub(position).Magnitude > 50) continue;
 
                     const lastPosition = lastPositions.get(character);
                     // Check for significant movement (more than 2 studs)
@@ -44,13 +41,6 @@ export = new Item(script.Name)
                         moving = true;
                         lastPositions.set(character, position);
                     }
-                };
-
-                for (const player of Players.GetPlayers()) {
-                    checkCharacter(player.Character);
-                }
-                if (IS_EDIT) {
-                    checkCharacter(getPlayerCharacter());
                 }
 
                 for (const [character] of lastPositions) {

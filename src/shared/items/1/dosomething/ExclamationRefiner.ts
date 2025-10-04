@@ -1,10 +1,11 @@
 import Difficulty from "@antivivi/jjt-difficulties";
+import { Workspace } from "@rbxts/services";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
+import { getAllPlayerCharacters } from "shared/hamster/getPlayerCharacter";
 import Item from "shared/item/Item";
 import Conveyor from "shared/item/traits/conveyor/Conveyor";
-import Upgrader from "shared/item/traits/upgrader/Upgrader";
 import Damager from "shared/item/traits/upgrader/Damager";
-import { Players, Workspace } from "@rbxts/services";
+import Upgrader from "shared/item/traits/upgrader/Upgrader";
 
 export = new Item(script.Name)
     .setName("Exclamation Refiner")
@@ -42,9 +43,8 @@ export = new Item(script.Name)
             model,
             () => {
                 const filterDescendantsInstances = new Array<Instance>();
-                for (const player of Players.GetPlayers()) {
-                    const character = player.Character;
-                    if (character) filterDescendantsInstances.push(character);
+                for (const character of getAllPlayerCharacters()) {
+                    filterDescendantsInstances.push(character);
                 }
                 overlapParams.FilterDescendantsInstances = filterDescendantsInstances;
                 const parts = Workspace.GetPartBoundsInBox(cframe, size, overlapParams);

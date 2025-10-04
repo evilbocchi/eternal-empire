@@ -248,18 +248,7 @@ export default function PurchaseWindow() {
     }, [affordablePerCurrency, affordablePerItemId]);
 
     const window = (
-        <ItemWindow
-            icon={getAsset("assets/Purchase.png")}
-            id={id}
-            backgroundColor={backgroundColor}
-            strokeColor={
-                new ColorSequence([
-                    new ColorSequenceKeypoint(0, Color3.fromRGB(138, 199, 255)),
-                    new ColorSequenceKeypoint(1, Color3.fromRGB(122, 255, 214)),
-                ])
-            }
-            visible={visible}
-        >
+        <ItemWindow icon={getAsset("assets/Purchase.png")} id={id} backgroundColor={backgroundColor} visible={visible}>
             {/* Main layout */}
             <uilistlayout
                 FillDirection={Enum.FillDirection.Vertical}
