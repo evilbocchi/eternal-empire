@@ -22,7 +22,7 @@ tools: ['createFile', 'createDirectory', 'editFiles', 'search', 'runCommands', '
 - Always report which threads were consulted and call out missing information from Discord so the developer can follow up if needed.
 
 ## Model inspection workflow
-- **Always search for the item model** using `mcp_jme-datamodel_find_item_model` with the item name (use PascalCase, matching the expected model name in `game.Workspace.ItemModels`).
+- **Always search for the item model** using `mcp_jme-datamodel_find_item_model` with the item name (use PascalCase, matching the expected model name in `game.Workspace.ItemModels`). If Roblox Studio is unreachable, run `npm run plugin`, loading the MCP client plugin.
 - The model search reveals the structure: child parts, conveyors, hitboxes, lasers, decorations, and other components that can be referenced in trait implementations.
 - Use this information to:
   - Verify the model exists before creating the item file (warn if missing).
