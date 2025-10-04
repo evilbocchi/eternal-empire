@@ -1,5 +1,8 @@
 import React, { useMemo } from "@rbxts/react";
 import { TweenService } from "@rbxts/services";
+import ItemViewport from "client/components/item/ItemViewport";
+import getDifficultyDisplayColors from "client/components/tooltip/getDifficultyDisplayColors";
+import { TooltipManager } from "client/components/tooltip/TooltipWindow";
 import useHover from "client/hooks/useHover";
 import { getAsset } from "shared/asset/AssetMap";
 import { RobotoMono, RobotoMonoBold } from "shared/asset/GameFonts";
@@ -192,25 +195,13 @@ export default function ListingCard({
     onCancel?: (uuid: string) => void;
     isOwner?: boolean;
 }) {
+    const uniqueItemInstance = listing.uniqueItem;
+    const item = Items.getItem(uniqueItemInstance.baseItemId);
+    if (item === undefined) {
+        throw `Failed to find item for listing: ${uniqueItemInstance.baseItemId}`;
+    }
+
     const uniqueDetails = useMemo<UniqueListingDetails>(() => {
-        const fallbackName = `Item ${listing.uuid.sub(1, 8)}…`;
-        const uniqueItemInstance = listing.uniqueItem;
-
-        if (uniqueItemInstance === undefined) {
-            return {
-                itemName: fallbackName,
-                potEntries: [],
-            };
-        }
-
-        const item = Items.getItem(uniqueItemInstance.baseItemId);
-        if (item === undefined) {
-            return {
-                itemName: uniqueItemInstance.baseItemId,
-                potEntries: [],
-            };
-        }
-
         const uniqueTrait = item.findTrait("Unique");
         if (uniqueTrait === undefined) {
             return {
@@ -271,35 +262,66 @@ export default function ListingCard({
         return `${hours}h`;
     };
 
-    const accentColor = Color3.fromRGB(108, 226, 255);
-    const accentGlowColor = Color3.fromRGB(61, 145, 255);
+    const { background: backgroundColor, text: textColor } = getDifficultyDisplayColors(item.difficulty);
 
     return (
-        <frame
+        <imagelabel
             AutomaticSize={Enum.AutomaticSize.Y}
-            BackgroundColor3={Color3.fromRGB(16, 19, 27)}
-            BackgroundTransparency={0}
-            BorderColor3={Color3.fromRGB(255, 255, 255)}
-            BorderSizePixel={1}
+            BackgroundColor3={backgroundColor}
+            BackgroundTransparency={0.2}
+            BorderColor3={Color3.fromRGB(0, 0, 0)}
+            BorderSizePixel={3}
+            Image={getAsset("assets/Grid.png")}
+            ImageColor3={Color3.fromRGB(126, 126, 126)}
+            ImageTransparency={0.6}
+            ScaleType={Enum.ScaleType.Tile}
             Size={new UDim2(1, 0, 0, 0)}
+            TileSize={new UDim2(0, 100, 0, 100)}
+            Event={{
+                MouseEnter: () => {
+                    const item = Items.getItem(listing.uniqueItem.baseItemId);
+                    if (item === undefined) return;
+                    TooltipManager.showTooltip({ item, uniqueInstance: listing.uniqueItem });
+                },
+                MouseLeave: () => {
+                    TooltipManager.hideTooltip();
+                },
+            }}
         >
+            <uistroke
+                ApplyStrokeMode={Enum.ApplyStrokeMode.Border}
+                Color={backgroundColor}
+                Thickness={2}
+                Transparency={0.2}
+            >
+                <uigradient
+                    Color={
+                        new ColorSequence([
+                            new ColorSequenceKeypoint(0, Color3.fromRGB(236, 236, 236)),
+                            new ColorSequenceKeypoint(0.299, Color3.fromRGB(255, 255, 255)),
+                            new ColorSequenceKeypoint(0.51, Color3.fromRGB(118, 118, 118)),
+                            new ColorSequenceKeypoint(0.822, Color3.fromRGB(255, 255, 255)),
+                            new ColorSequenceKeypoint(1, Color3.fromRGB(220, 220, 220)),
+                        ])
+                    }
+                    Rotation={35}
+                />
+            </uistroke>
             <uigradient
-                Rotation={270}
                 Color={
                     new ColorSequence([
-                        new ColorSequenceKeypoint(0, accentColor),
-                        new ColorSequenceKeypoint(1, accentGlowColor),
+                        new ColorSequenceKeypoint(0, Color3.fromRGB(39, 39, 39)),
+                        new ColorSequenceKeypoint(1, Color3.fromRGB(58, 58, 58)),
                     ])
                 }
-                Transparency={
-                    new NumberSequence([new NumberSequenceKeypoint(0, 0.1), new NumberSequenceKeypoint(1, 0.4)])
-                }
+                Rotation={270}
             />
             <uilistlayout
                 FillDirection={Enum.FillDirection.Horizontal}
-                HorizontalAlignment={Enum.HorizontalAlignment.Left}
+                HorizontalAlignment={Enum.HorizontalAlignment.Center}
+                HorizontalFlex={Enum.UIFlexAlignment.Fill}
                 VerticalAlignment={Enum.VerticalAlignment.Center}
-                Padding={new UDim(0.06, 0)}
+                Padding={new UDim(0.04, 0)}
             />
             <uipadding
                 PaddingTop={new UDim(0, 4)}
@@ -308,7 +330,16 @@ export default function ListingCard({
                 PaddingRight={new UDim(0, 12)}
             />
 
-            <frame AutomaticSize={Enum.AutomaticSize.Y} BackgroundTransparency={1} Size={new UDim2(0.62, 0, 0, 0)}>
+            <viewportframe
+                ref={(rbx) => {
+                    if (!rbx) return;
+                    ItemViewport.loadItemIntoViewport(rbx, listing.uniqueItem.baseItemId);
+                }}
+                BackgroundTransparency={1}
+                Size={new UDim2(0, 50, 0, 50)}
+            />
+
+            <frame AutomaticSize={Enum.AutomaticSize.Y} BackgroundTransparency={1} Size={new UDim2(0.45, 0, 0, 0)}>
                 <uilistlayout
                     FillDirection={Enum.FillDirection.Vertical}
                     HorizontalAlignment={Enum.HorizontalAlignment.Left}
@@ -330,10 +361,13 @@ export default function ListingCard({
                         FontFace={RobotoMonoBold}
                         Size={new UDim2(0, 0, 1, 0)}
                         Text={itemDisplayName}
-                        TextColor3={Color3.fromRGB(213, 233, 255)}
+                        TextColor3={Color3.fromRGB(255, 255, 255)}
                         TextScaled={true}
                         TextXAlignment={Enum.TextXAlignment.Left}
-                    />
+                    >
+                        <uigradient Color={new ColorSequence(Color3.fromRGB(255, 255, 255), textColor)} Rotation={90} />
+                        <uistroke Thickness={2} />
+                    </textlabel>
                 </frame>
 
                 {/** Item Description */}
@@ -354,10 +388,12 @@ export default function ListingCard({
                                 Size={new UDim2(1, 0, 0, 0)}
                                 Text={`<font color="#8EA8BD">${entry.label}:</font> <font color="#${colorToHex(entry.color)}">${entry.value}</font>`}
                                 RichText={true}
-                                TextColor3={Color3.fromRGB(213, 233, 255)}
+                                TextColor3={Color3.fromRGB(255, 255, 255)}
                                 TextSize={24}
                                 TextXAlignment={Enum.TextXAlignment.Left}
-                            />
+                            >
+                                <uistroke Thickness={2} />
+                            </textlabel>
                         ))}
                     </frame>
                 )}
@@ -367,13 +403,16 @@ export default function ListingCard({
                     FontFace={RobotoMono}
                     Size={new UDim2(1, 0, 0, 16)}
                     Text={`Expires in ${formatTimeRemaining(listing.created + MARKETPLACE_CONFIG.LISTING_DURATION)}`}
-                    TextColor3={Color3.fromRGB(79, 107, 130)}
+                    TextColor3={Color3.fromRGB(179, 179, 179)}
                     TextScaled={true}
                     TextXAlignment={Enum.TextXAlignment.Left}
-                />
+                >
+                    <uistroke Thickness={1} />
+                </textlabel>
             </frame>
 
-            <frame BackgroundTransparency={1} Size={new UDim2(0.32, 0, 0, 50)}>
+            <frame BackgroundTransparency={1} Size={new UDim2(0.25, 0, 0, 50)}>
+                <uiflexitem FlexMode={Enum.UIFlexMode.None} />
                 <uilistlayout
                     FillDirection={Enum.FillDirection.Vertical}
                     HorizontalAlignment={Enum.HorizontalAlignment.Right}
@@ -392,6 +431,6 @@ export default function ListingCard({
                     />
                 )}
             </frame>
-        </frame>
+        </imagelabel>
     );
 }

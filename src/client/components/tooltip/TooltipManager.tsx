@@ -24,8 +24,8 @@ declare global {
         message?: string;
         /** Item to display for item tooltips */
         item?: Item;
-        /** UUID for unique item instances */
-        uuid?: string;
+        /** Unique item instance */
+        uniqueInstance?: UniqueItemInstance;
         /** Position where tooltip should appear */
         position?: Vector2;
     }
@@ -60,8 +60,8 @@ export function useTooltipProps({ data, onEnter, onLeave }: UseTooltipProps): Us
  * @returns Hover data object
  */
 
-export function useItemTooltip(item: Item, uuid?: string): UseHoverReturn {
-    return useTooltipProps({ data: { item, uuid } });
+export function useItemTooltip(item: Item, uniqueInstance?: UniqueItemInstance): UseHoverReturn {
+    return useTooltipProps({ data: { item, uniqueInstance } });
 } /**
  * Convenience hook for message tooltips
  *

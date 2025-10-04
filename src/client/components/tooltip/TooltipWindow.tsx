@@ -157,7 +157,7 @@ export default function TooltipWindow() {
         if (!itemMetadata) return undefined;
 
         const description = itemMetadata.formatItemDescription(
-            data.uuid,
+            data.uniqueInstance,
             true,
             Color3.fromRGB(195, 195, 195),
             18,
@@ -168,7 +168,7 @@ export default function TooltipWindow() {
         const { background: backgroundColor, text: textColor } = getDifficultyDisplayColors(difficulty);
 
         return { item, difficulty, description, backgroundColor, textColor };
-    }, [data?.item, data?.uuid, METADATA_PER_ITEM]);
+    }, [data?.item, data?.uniqueInstance, METADATA_PER_ITEM]);
 
     const renderItemSlot = () => {
         if (!tooltipContent) return undefined;

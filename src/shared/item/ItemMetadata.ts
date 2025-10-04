@@ -183,8 +183,7 @@ export default class ItemMetadata {
 
     /**
      * Format an item's description with metadata appended.
-     * @param item The item whose description to format.
-     * @param uuid Optional UUID for unique item instances.
+     * @param uniqueInstance Optional unique item instance for trait formatting.
      * @param useTooltipDescription Whether to use the tooltip description if available.
      * @param color Optional color for the description text.
      * @param size Optional font size.
@@ -192,13 +191,13 @@ export default class ItemMetadata {
      * @returns The combined rich text string.
      */
     formatItemDescription(
-        uuid?: string,
+        uniqueInstance?: UniqueItemInstance,
         useTooltipDescription?: boolean,
         color?: Color3,
         size?: number,
         weight?: keyof typeof Enum.FontWeight | number,
     ) {
-        const description = ItemMetadata.formatDescription(this.item, uuid, useTooltipDescription);
+        const description = ItemMetadata.formatDescription(this.item, uniqueInstance, useTooltipDescription);
         return this.appendMetadata(description, color, size, weight);
     }
 
@@ -217,10 +216,10 @@ export default class ItemMetadata {
     /**
      * Formats an item's description, applying currency colors and unique instance traits if provided.
      * @param item The item whose description is to be formatted.
-     * @param uuid Optional UUID for unique item instances.
+     * @param uniqueInstance Optional unique item instance for trait formatting.
      * @returns The formatted description string.
      */
-    static formatDescription(item: Item, uuid?: string, useTooltipDescription?: boolean) {
+    static formatDescription(item: Item, uniqueInstance?: UniqueItemInstance, useTooltipDescription?: boolean) {
         if (useTooltipDescription === true) {
             const tooltipDescription = item.tooltipDescription;
             if (tooltipDescription !== undefined) return tooltipDescription;
@@ -231,11 +230,8 @@ export default class ItemMetadata {
             description = this.formatCurrencyColors(item.description);
             ItemMetadata.DESCRIPTION_PER_ITEM.set(item, description);
         }
-        if (uuid !== undefined) {
-            const uniqueInstance = Packets.uniqueInstances.get()?.get(uuid);
-            if (uniqueInstance !== undefined) {
-                description = item.trait(Unique).formatWithPots(description, uniqueInstance);
-            }
+        if (uniqueInstance !== undefined) {
+            description = item.trait(Unique).formatWithPots(description, uniqueInstance);
         }
         return item.format(description);
     }

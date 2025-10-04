@@ -7,6 +7,7 @@ import { TooltipManager } from "client/components/tooltip/TooltipWindow";
 import { getAsset } from "shared/asset/AssetMap";
 import { RobotoSlab } from "shared/asset/GameFonts";
 import type Item from "shared/item/Item";
+import Packets from "shared/Packets";
 
 export type InventorySlotHandle = {
     item: Item;
@@ -213,7 +214,13 @@ export function createInventorySlot(item: Item, options: CreateInventorySlotOpti
         connections.push(
             button.MouseEnter.Connect(() => {
                 if (!button.Visible) return;
-                TooltipManager.showTooltip({ item, uuid: handle.currentUuid });
+                const uuid = handle.currentUuid;
+                if (uuid) {
+                    const uniqueInstance = Packets.uniqueInstances.get().get(uuid);
+                    TooltipManager.showTooltip({ item, uniqueInstance });
+                } else {
+                    TooltipManager.showTooltip({ item });
+                }
             }),
         );
 
