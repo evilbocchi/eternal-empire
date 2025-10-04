@@ -59,7 +59,7 @@ export const SidebarButtonConfiguration = [
     {
         label: "Quests",
         image: getAsset("assets/Quests.png"),
-        color: Color3.fromRGB(240, 125, 255),
+        color: Color3.fromRGB(255, 94, 94),
         visible: true,
         notification: { count: 0, color: Color3.fromRGB(255, 52, 52) },
     },

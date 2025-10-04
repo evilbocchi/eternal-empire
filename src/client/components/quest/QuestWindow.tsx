@@ -84,14 +84,14 @@ export default function QuestWindow() {
             icon={getAsset("assets/Quests.png")}
             backgroundColor={
                 new ColorSequence([
-                    new ColorSequenceKeypoint(0, Color3.fromRGB(54, 33, 89)),
-                    new ColorSequenceKeypoint(1, Color3.fromRGB(27, 11, 56)),
+                    new ColorSequenceKeypoint(0, Color3.fromRGB(89, 33, 46)),
+                    new ColorSequenceKeypoint(1, Color3.fromRGB(56, 10, 10)),
                 ])
             }
             strokeColor={
                 new ColorSequence([
-                    new ColorSequenceKeypoint(0, Color3.fromRGB(189, 69, 219)),
-                    new ColorSequenceKeypoint(1, Color3.fromRGB(166, 46, 196)),
+                    new ColorSequenceKeypoint(0, Color3.fromRGB(255, 94, 94)),
+                    new ColorSequenceKeypoint(1, Color3.fromRGB(255, 18, 18)),
                 ])
             }
             visible={visible}

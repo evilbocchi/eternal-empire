@@ -86,7 +86,7 @@ export default function BasicWindow({
             ref={frameRef}
             AnchorPoint={new Vector2(0.5, 1)}
             BackgroundColor3={Color3.fromRGB(255, 255, 255)}
-            BackgroundTransparency={0}
+            BackgroundTransparency={0.6}
             BorderColor3={Color3.fromRGB(0, 0, 0)}
             BorderSizePixel={4}
             Position={initialPosition}
