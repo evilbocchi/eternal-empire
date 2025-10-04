@@ -303,34 +303,41 @@ export class ChallengeService implements OnStart {
      * Refreshes the list of available challenges and updates the UI.
      */
     refreshChallenges() {
+        // Check if the ObbyStudies quest has been completed
+        const obbyStudiesCompleted = this.dataService.empireData.quests.get("ObbyStudies") === -1;
+
         let i = 0;
         const infoPerChallenge = new Map<string, ChallengeInfo>();
-        for (const [key, challenge] of pairs(CHALLENGES)) {
-            const currentLevel = this.getChallengeLevel(key);
-            if (currentLevel > challenge.cap) continue;
-            if (currentLevel > 1) {
-                const upgradeId = REWARD_UPGRADES.get(key);
-                if (upgradeId !== undefined) this.namedUpgradeService.setUpgradeAmount(upgradeId, currentLevel - 1);
-            }
-            const title = this.getTitleLabel(challenge, key, currentLevel);
-            const colors = challenge.color.Keypoints;
-            const c1 = colors[0].Value;
-            const c2 = colors[1].Value;
 
-            infoPerChallenge.set(key, {
-                name: title,
-                r1: c1.R * 255,
-                g1: c1.G * 255,
-                b1: c1.B * 255,
-                r2: c2.R * 255,
-                g2: c2.G * 255,
-                b2: c2.B * 255,
-                description: challenge.description(currentLevel),
-                task: this.getTaskLabel(challenge),
-                notice: this.getNotice(challenge),
-                reward: this.getRewardLabel(challenge, currentLevel),
-            });
-            ++i;
+        // Only show challenges if ObbyStudies quest is completed
+        if (obbyStudiesCompleted) {
+            for (const [key, challenge] of pairs(CHALLENGES)) {
+                const currentLevel = this.getChallengeLevel(key);
+                if (currentLevel > challenge.cap) continue;
+                if (currentLevel > 1) {
+                    const upgradeId = REWARD_UPGRADES.get(key);
+                    if (upgradeId !== undefined) this.namedUpgradeService.setUpgradeAmount(upgradeId, currentLevel - 1);
+                }
+                const title = this.getTitleLabel(challenge, key, currentLevel);
+                const colors = challenge.color.Keypoints;
+                const c1 = colors[0].Value;
+                const c2 = colors[1].Value;
+
+                infoPerChallenge.set(key, {
+                    name: title,
+                    r1: c1.R * 255,
+                    g1: c1.G * 255,
+                    b1: c1.B * 255,
+                    r2: c2.R * 255,
+                    g2: c2.G * 255,
+                    b2: c2.B * 255,
+                    description: challenge.description(currentLevel),
+                    task: this.getTaskLabel(challenge),
+                    notice: this.getNotice(challenge),
+                    reward: this.getRewardLabel(challenge, currentLevel),
+                });
+                ++i;
+            }
         }
         Packets.challenges.set(infoPerChallenge);
         this.refreshCurrentChallenge();
@@ -358,6 +365,14 @@ export class ChallengeService implements OnStart {
                 `Challenge ${this.getTitleLabel(challenge, challengeId)} has been stopped by ${player.Name}.`,
             );
         });
+
+        // Listen for quest completions to refresh challenge availability
+        Packets.questCompleted.fromServer((questId) => {
+            if (questId === "ObbyStudies") {
+                this.refreshChallenges();
+            }
+        });
+
         this.refreshChallenges();
 
         const cleanup = simpleInterval(() => {
