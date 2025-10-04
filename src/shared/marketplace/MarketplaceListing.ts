@@ -20,11 +20,6 @@ declare global {
         uuid: string;
 
         /**
-         * The user ID of the player listing the item.
-         */
-        sellerId: DataType.i32;
-
-        /**
          * The empire ID where the item is being sold from.
          */
         sellerEmpireId: string;
@@ -35,49 +30,29 @@ declare global {
         price: number;
 
         /**
-         * The type of listing.
-         */
-        listingType: "buyout" | "auction";
-
-        /**
          * Unix timestamp when the listing was created.
          */
-        created: DataType.i32;
-
-        /**
-         * Unix timestamp when the listing expires (optional for auto-expiry).
-         */
-        expires?: DataType.i32;
-
-        /**
-         * Current highest bid for auction listings.
-         */
-        currentBid?: number;
-
-        /**
-         * User ID of the current highest bidder.
-         */
-        currentBidderId?: DataType.i32;
-
-        /**
-         * Empire ID of the current highest bidder.
-         */
-        currentBidderEmpireId?: string;
-
-        /**
-         * Listing fee paid (for potential refunds).
-         */
-        listingFee?: number;
+        created: DataType.f64;
 
         /**
          * Unique item instance data associated with this listing, including raw pot values.
          */
-        uniqueItem?: DataType.Packed<UniqueItemInstance>;
+        uniqueItem: DataType.Packed<UniqueItemInstance>;
 
         /**
-         * Whether the listing is active.
+         * The empire ID of the buyer that is in the process of buying this listing (if any).
          */
-        active: boolean;
+        lock?: string;
+
+        /**
+         * Unix timestamp when the listing was locked for purchase (if any).
+         */
+        lockedAt?: DataType.f64;
+
+        /**
+         * Whether the item has been bought and finalized.
+         */
+        bought: boolean;
     }
 
     /**
@@ -90,24 +65,9 @@ declare global {
         uuid: string;
 
         /**
-         * The empire key for recovery identification.
-         */
-        empireKey: string;
-
-        /**
-         * The user ID of the buyer.
-         */
-        buyerId: DataType.i32;
-
-        /**
          * The empire ID of the buyer.
          */
         buyerEmpireId: string;
-
-        /**
-         * The user ID of the seller.
-         */
-        sellerId: DataType.i32;
 
         /**
          * The empire ID of the seller.
@@ -122,47 +82,12 @@ declare global {
         /**
          * Unix timestamp when the trade was initiated.
          */
-        timestamp: DataType.i32;
+        timestamp: DataType.f64;
 
         /**
          * Current status of the trade.
          */
         status: "processing" | "completed" | "failed" | "rolled_back";
-    }
-
-    /**
-     * Marketplace search filters.
-     */
-    interface MarketplaceFilters {
-        /**
-         * Item name or ID to search for.
-         */
-        search?: string;
-
-        /**
-         * Minimum price filter.
-         */
-        minPrice?: number;
-
-        /**
-         * Maximum price filter.
-         */
-        maxPrice?: number;
-
-        /**
-         * Listing type filter.
-         */
-        listingType?: "buyout" | "auction" | "all";
-
-        /**
-         * Sort order.
-         */
-        sortBy?: "price_asc" | "price_desc" | "created_asc" | "created_desc";
-
-        /**
-         * Base item ID filter.
-         */
-        baseItemId?: string;
     }
 
     /**
@@ -180,14 +105,14 @@ declare global {
         baseItemId: string;
 
         /**
-         * The seller's user ID.
+         * The empire ID of the buyer.
          */
-        sellerId: number;
+        buyerEmpireId: string;
 
         /**
-         * The buyer's user ID.
+         * The empire ID of the seller.
          */
-        buyerId: number;
+        sellerEmpireId: string;
 
         /**
          * The final sale price.
@@ -198,11 +123,6 @@ declare global {
          * Unix timestamp of the transaction.
          */
         timestamp: DataType.f64;
-
-        /**
-         * Type of transaction.
-         */
-        type: "buyout" | "auction_win";
     }
 }
 
@@ -210,14 +130,17 @@ declare global {
  * Marketplace configuration constants.
  */
 const MARKETPLACE_CONFIG = {
-    /** Maximum number of active listings per player */
-    MAX_LISTINGS_PER_PLAYER: 10,
+    /** Whether the marketplace is enabled */
+    ENABLED: true,
+
+    /** Time in seconds before a listing lock expires */
+    LOCK_TIMEOUT: 5 * 60, // 5 minutes
+
+    /** Maximum number of active listings per empire */
+    MAX_LISTINGS_PER_EMPIRE: 5,
 
     /** Default listing duration in seconds (7 days) */
-    DEFAULT_LISTING_DURATION: 7 * 24 * 60 * 60,
-
-    /** Marketplace listing fee percentage (1%) */
-    LISTING_FEE_PERCENTAGE: 0.01,
+    LISTING_DURATION: 7 * 24 * 60 * 60,
 
     /** Transaction tax percentage (2%) */
     TRANSACTION_TAX_PERCENTAGE: 0.02,
@@ -228,16 +151,25 @@ const MARKETPLACE_CONFIG = {
     /** Minimum price for any listing */
     MIN_LISTING_PRICE: 1,
 
-    /** Time before processing tokens expire (1 hour) */
-    PROCESSING_TOKEN_TIMEOUT: 60 * 60,
-
-    /** Marketplace DataStore name */
+    /**
+     * DataStore where actual marketplace listings are stored.
+     * Keys: {@link MarketplaceListing.uuid}
+     * Values: {@link MarketplaceListing}
+     */
     DATASTORE_NAME: "MarketplaceListings",
 
-    /** Trade tokens DataStore name */
-    TOKENS_DATASTORE_NAME: "TradeTokens",
+    /**
+     * DataStore where listings can be searched.
+     * Keys: 0-indexed integers
+     * Values: {@link MarketplaceListing[]} (array of listings)
+     */
+    INDEX_DATASTORE_NAME: "MarketplaceIndex",
 
-    /** Transaction history DataStore name */
+    /**
+     * DataStore where transaction history of unique instances are stored.
+     * Keys: {@link MarketplaceTransaction.uuid}
+     * Values: {@link MarketplaceTransaction[]} (array of transactions)
+     */
     HISTORY_DATASTORE_NAME: "MarketplaceHistory",
 } as const;
 

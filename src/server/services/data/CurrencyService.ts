@@ -172,16 +172,13 @@ export default class CurrencyService implements OnStart {
      * Deducts currencies if affordable and not marked as free.
      *
      * @param price The cost of the purchase.
-     * @param isFree Whether the purchase should be free (no currency deduction).
      * @returns Whether the purchase was successful.
      */
-    purchase(price: CurrencyBundle, isFree?: boolean) {
+    purchase(price: CurrencyBundle) {
         const [isSufficient, remaining] = this.canAfford(price);
         if (isSufficient === true) {
-            if (isFree !== true) {
-                for (const [currency, amount] of remaining.amountPerCurrency) {
-                    this.set(currency, amount);
-                }
+            for (const [currency, amount] of remaining.amountPerCurrency) {
+                this.set(currency, amount);
             }
             return true;
         }

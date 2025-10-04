@@ -2,25 +2,21 @@ import React, { useEffect, useState } from "@rbxts/react";
 import { playSound } from "shared/asset/GameAssets";
 import { RobotoMono, RobotoMonoBold } from "shared/asset/GameFonts";
 
+export type MarketplaceSortOption = "price_asc" | "price_desc" | "created_asc" | "created_desc";
+
 export default function SearchFilters({
     onSearch,
-    onFilter,
+    onSort,
 }: {
     onSearch: (query: string) => void;
-    onFilter: (filters: MarketplaceFilters) => void;
+    onSort: (sortBy: MarketplaceSortOption) => void;
 }) {
     const [searchQuery, setSearchQuery] = useState("");
-    const [sortBy, setSortBy] = useState<string>("created_desc");
-    const [listingTypeFilter, setListingTypeFilter] = useState<string>("all");
+    const [sortBy, setSortBy] = useState<MarketplaceSortOption>("created_desc");
 
     useEffect(() => {
-        const filters: MarketplaceFilters = {
-            search: searchQuery !== "" ? searchQuery : undefined,
-            sortBy: sortBy as "price_asc" | "price_desc" | "created_asc" | "created_desc",
-            listingType: listingTypeFilter !== "all" ? (listingTypeFilter as "buyout" | "auction") : undefined,
-        };
-        onFilter(filters);
-    }, [sortBy, listingTypeFilter]);
+        onSort(sortBy as MarketplaceSortOption);
+    }, [sortBy]);
 
     const sortLabel = (() => {
         switch (sortBy) {
@@ -32,17 +28,6 @@ export default function SearchFilters({
                 return "Price Low to High";
             default:
                 return "Price High to Low";
-        }
-    })();
-
-    const listingTypeLabel = (() => {
-        switch (listingTypeFilter) {
-            case "buyout":
-                return "Buyout Only";
-            case "auction":
-                return "Auction Only";
-            default:
-                return "All Listings";
         }
     })();
 
@@ -82,7 +67,7 @@ export default function SearchFilters({
                 <frame
                     BackgroundTransparency={1}
                     LayoutOrder={1}
-                    Size={new UDim2(0.5, -12, 0, 0)}
+                    Size={new UDim2(0.75, -12, 0, 0)}
                     AutomaticSize={Enum.AutomaticSize.Y}
                 >
                     <uipadding
@@ -201,68 +186,15 @@ export default function SearchFilters({
                         FontFace={RobotoMono}
                         Event={{
                             Activated: () => {
-                                const options = ["created_desc", "created_asc", "price_asc", "price_desc"];
+                                const options: MarketplaceSortOption[] = [
+                                    "created_desc",
+                                    "created_asc",
+                                    "price_asc",
+                                    "price_desc",
+                                ];
                                 const currentIndex = options.indexOf(sortBy);
                                 const nextIndex = (currentIndex + 1) % options.size();
                                 setSortBy(options[nextIndex]);
-                                playSound("CheckOn.mp3");
-                            },
-                        }}
-                    >
-                        <uipadding
-                            PaddingTop={new UDim(0, 4)}
-                            PaddingBottom={new UDim(0, 4)}
-                            PaddingLeft={new UDim(0, 8)}
-                            PaddingRight={new UDim(0, 8)}
-                        />
-                    </textbutton>
-                </frame>
-
-                {/* Listing Type Filter */}
-                <frame
-                    BackgroundTransparency={1}
-                    LayoutOrder={3}
-                    Size={new UDim2(0.25, -6, 0, 0)}
-                    AutomaticSize={Enum.AutomaticSize.Y}
-                >
-                    <uipadding
-                        PaddingTop={new UDim(0, 6)}
-                        PaddingBottom={new UDim(0, 6)}
-                        PaddingLeft={new UDim(0, 6)}
-                        PaddingRight={new UDim(0, 6)}
-                    />
-                    <uilistlayout
-                        FillDirection={Enum.FillDirection.Vertical}
-                        HorizontalAlignment={Enum.HorizontalAlignment.Left}
-                        VerticalAlignment={Enum.VerticalAlignment.Top}
-                        Padding={new UDim(0, 8)}
-                    />
-
-                    <textlabel
-                        BackgroundTransparency={1}
-                        FontFace={RobotoMonoBold}
-                        Size={new UDim2(1, 0, 0, 20)}
-                        Text="Type Filter"
-                        TextColor3={Color3.fromRGB(204, 222, 255)}
-                        TextScaled={true}
-                        TextXAlignment={Enum.TextXAlignment.Left}
-                    />
-
-                    <textbutton
-                        BackgroundColor3={Color3.fromRGB(24, 32, 48)}
-                        BorderColor3={Color3.fromRGB(100, 100, 100)}
-                        BorderSizePixel={1}
-                        Size={new UDim2(1, 0, 0, 26)}
-                        Text={listingTypeLabel}
-                        TextColor3={Color3.fromRGB(226, 238, 255)}
-                        TextScaled={true}
-                        FontFace={RobotoMono}
-                        Event={{
-                            Activated: () => {
-                                const options = ["all", "buyout", "auction"];
-                                const currentIndex = options.indexOf(listingTypeFilter);
-                                const nextIndex = (currentIndex + 1) % options.size();
-                                setListingTypeFilter(options[nextIndex]);
                                 playSound("CheckOn.mp3");
                             },
                         }}

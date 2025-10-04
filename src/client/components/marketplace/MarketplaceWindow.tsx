@@ -1,16 +1,16 @@
 import { simpleInterval } from "@antivivi/vrldk";
-import React, { Fragment, useEffect, useMemo, useState } from "@rbxts/react";
+import React, { Fragment, useEffect, useState } from "@rbxts/react";
 import { CollectionService } from "@rbxts/services";
 import CreateListingForm from "client/components/marketplace/CreateListingForm";
 import ListingCard from "client/components/marketplace/ListingCard";
-import SearchFilters from "client/components/marketplace/SearchFilters";
+import SearchFilters, { MarketplaceSortOption } from "client/components/marketplace/SearchFilters";
 import useSingleDocument from "client/components/sidebar/useSingleDocumentWindow";
 import TechWindow from "client/components/window/TechWindow";
+import useProperty from "client/hooks/useProperty";
 import { getAsset } from "shared/asset/AssetMap";
 import { playSound } from "shared/asset/GameAssets";
 import { RobotoMono, RobotoMonoBold } from "shared/asset/GameFonts";
 import { getPlayerCharacter } from "shared/hamster/getPlayerCharacter";
-import Items from "shared/items/Items";
 import "shared/marketplace/MarketplaceListing";
 import Packets from "shared/Packets";
 
@@ -20,10 +20,9 @@ type TabType = "Browse" | "MyListings" | "CreateListing";
 export default function MarketplaceWindow() {
     const { id, visible, openDocument, closeDocument } = useSingleDocument({ id: "Marketplace", priority: 1 });
     const [activeTab, setActiveTab] = useState<TabType>("Browse");
-    const [listings, setListings] = useState<Map<string, MarketplaceListing>>(new Map());
-    const [myListings, setMyListings] = useState<Map<string, MarketplaceListing>>(new Map());
-    const [searchQuery, setSearchQuery] = useState("");
-    const [filters, setFilters] = useState<MarketplaceFilters>({});
+    const [listings, setListings] = useState<MarketplaceListing[]>([]);
+    const myListings = useProperty(Packets.empireActiveListings);
+    const [sort, setSort] = useState<MarketplaceSortOption>();
 
     // Track whether player was previously in range to control window open/close logic
     useEffect(() => {
@@ -62,155 +61,27 @@ export default function MarketplaceWindow() {
     useEffect(() => {
         if (visible) {
             // Get current state
-            const currentListings = Packets.marketplaceListings.get();
-            const currentMyListings = Packets.myActiveListings.get();
-
+            const currentListings = Packets.searchListings.toServer("", 1);
             if (currentListings) setListings(currentListings);
-            if (currentMyListings) setMyListings(currentMyListings);
         }
     }, [visible]);
-
-    // Set up packet listeners
-    useEffect(() => {
-        const connections: RBXScriptConnection[] = [];
-
-        connections.push(
-            Packets.marketplaceListings.observe((newListings) => {
-                setListings(newListings);
-            }),
-        );
-
-        connections.push(
-            Packets.myActiveListings.observe((newMyListings) => {
-                setMyListings(newMyListings);
-            }),
-        );
-
-        return () => {
-            connections.forEach((conn) => conn.Disconnect());
-        };
-    }, []);
 
     const handleBuyItem = (uuid: string) => {
         Packets.buyItem.toServer(uuid);
     };
 
-    const handlePlaceBid = (uuid: string, bidAmount: number) => {
-        Packets.placeBid.toServer(uuid, bidAmount);
-    };
-
     const handleCancelListing = (uuid: string) => {
-        Packets.cancelListing.toServer(uuid);
+        const success = Packets.cancelListing.toServer(uuid);
+        if (success) {
+            playSound("Success.mp3");
+        } else {
+            playSound("Error.mp3");
+        }
     };
 
-    const handleCreateListing = (uuid: string, price: number, listingType: "buyout" | "auction", duration: number) => {
-        return Packets.createListing.toServer(uuid, price, listingType, duration);
+    const handleCreateListing = (uuid: string, price: number) => {
+        return Packets.createListing.toServer(uuid, price);
     };
-
-    const handleSearch = (query: string) => {
-        setSearchQuery(query);
-        // Trigger search logic here
-    };
-
-    const handleFilter = (newFilters: MarketplaceFilters) => {
-        setFilters(newFilters);
-        // Trigger filter logic here
-    };
-
-    const filteredListings = useMemo(() => {
-        let result = new Map<string, MarketplaceListing>();
-
-        // Copy all listings first
-        for (const [uuid, listing] of listings) {
-            result.set(uuid, listing);
-        }
-
-        // Apply search filter
-        if (searchQuery !== "") {
-            const filtered = new Map<string, MarketplaceListing>();
-            const lowerQuery = searchQuery.lower();
-            for (const [uuid, listing] of result) {
-                let matches = string.find(uuid.lower(), lowerQuery)[0] !== undefined;
-
-                if (!matches && listing.uniqueItem !== undefined) {
-                    const uniqueItemInstance = listing.uniqueItem;
-                    if (string.find(uniqueItemInstance.baseItemId.lower(), lowerQuery)[0] !== undefined) {
-                        matches = true;
-                    } else {
-                        const item = Items.getItem(uniqueItemInstance.baseItemId);
-                        if (item !== undefined) {
-                            if (string.find(item.name.lower(), lowerQuery)[0] !== undefined) {
-                                matches = true;
-                            } else {
-                                const uniqueTrait = item.findTrait("Unique");
-                                if (uniqueTrait !== undefined) {
-                                    for (const [potName] of uniqueTrait.getPotConfigs()) {
-                                        if (string.find(potName.lower(), lowerQuery)[0] !== undefined) {
-                                            matches = true;
-                                            break;
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-
-                if (matches) {
-                    filtered.set(uuid, listing);
-                }
-            }
-            result = filtered;
-        }
-
-        // Apply filters
-        let appliedFilters = false;
-        for (const [key, value] of pairs(filters)) {
-            if (value === undefined || value === "") continue;
-            appliedFilters = true;
-            break;
-        }
-
-        if (filters && appliedFilters) {
-            const filtered = new Map<string, MarketplaceListing>();
-            for (const [uuid, listing] of result) {
-                let matches = true;
-                for (const [key, value] of pairs(filters)) {
-                    if (value === undefined || value === "") continue;
-                    if (key === "baseItemId" && listing.uniqueItem) {
-                        const item = Items.getItem(listing.uniqueItem.baseItemId);
-                        // Cast value to keyof ItemTraits for Map lookup
-                        if (!item || (item.types && !item.types.has(value as keyof ItemTraits))) {
-                            matches = false;
-                            break;
-                        }
-                    }
-
-                    if (key === "minPrice" && listing.price !== undefined) {
-                        const min = tonumber(value);
-                        if (min !== undefined && listing.price < min) {
-                            matches = false;
-                            break;
-                        }
-                    }
-                    if (key === "maxPrice" && listing.price !== undefined) {
-                        const max = tonumber(value);
-                        if (max !== undefined && listing.price > max) {
-                            matches = false;
-                            break;
-                        }
-                    }
-                    // Add more filter logic as needed
-                }
-                if (matches) {
-                    filtered.set(uuid, listing);
-                }
-            }
-            result = filtered;
-        }
-
-        return result;
-    }, [listings, searchQuery, filters]);
 
     const tabLabels: Record<TabType, string> = {
         Browse: "Browse",
@@ -298,7 +169,10 @@ export default function MarketplaceWindow() {
                             Padding={new UDim(0, 20)}
                         />
 
-                        <SearchFilters onSearch={handleSearch} onFilter={handleFilter} />
+                        <SearchFilters
+                            onSearch={(query) => setListings(Packets.searchListings.toServer(query, 1))}
+                            onSort={(sort) => setSort(sort)}
+                        />
 
                         <scrollingframe
                             BackgroundTransparency={1}
@@ -321,16 +195,12 @@ export default function MarketplaceWindow() {
                             />
 
                             {(() => {
-                                const listingEntries: [string, MarketplaceListing][] = [];
-                                for (const [uuid, listing] of filteredListings) {
-                                    listingEntries.push([uuid, listing]);
-                                }
-                                return listingEntries.map(([, listing]) => (
-                                    <ListingCard listing={listing} onBuy={handleBuyItem} onBid={handlePlaceBid} />
+                                return listings.map((listing) => (
+                                    <ListingCard listing={listing} onBuy={handleBuyItem} />
                                 ));
                             })()}
 
-                            {filteredListings.size() === 0 && (
+                            {listings.size() === 0 && (
                                 <textlabel
                                     BackgroundTransparency={1}
                                     FontFace={RobotoMono}
@@ -371,13 +241,13 @@ export default function MarketplaceWindow() {
                         />
 
                         {(() => {
-                            const myListingEntries: [string, MarketplaceListing][] = [];
-                            for (const [uuid, listing] of myListings) {
-                                myListingEntries.push([uuid, listing]);
+                            const elements = new Array<JSX.Element>();
+                            for (const [, listing] of myListings) {
+                                elements.push(
+                                    <ListingCard listing={listing} onCancel={handleCancelListing} isOwner={true} />,
+                                );
                             }
-                            return myListingEntries.map(([, listing]) => (
-                                <ListingCard listing={listing} onCancel={handleCancelListing} isOwner={true} />
-                            ));
+                            return elements;
                         })()}
 
                         {myListings.size() === 0 && (

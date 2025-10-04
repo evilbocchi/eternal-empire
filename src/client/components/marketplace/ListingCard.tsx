@@ -1,9 +1,10 @@
-import React, { Fragment, useMemo, useState } from "@rbxts/react";
+import React, { useMemo } from "@rbxts/react";
 import { TweenService } from "@rbxts/services";
 import useHover from "client/hooks/useHover";
 import { getAsset } from "shared/asset/AssetMap";
 import { RobotoMono, RobotoMonoBold } from "shared/asset/GameFonts";
 import Items from "shared/items/Items";
+import MARKETPLACE_CONFIG from "shared/marketplace/MarketplaceListing";
 
 const UNIQUE_MIN_POT_COLOR = Color3.fromRGB(255, 0, 0);
 const UNIQUE_MAX_POT_COLOR = Color3.fromRGB(0, 255, 255);
@@ -183,19 +184,14 @@ export function ActionButton({
 export default function ListingCard({
     listing,
     onBuy,
-    onBid,
     onCancel,
     isOwner = false,
 }: {
     listing: MarketplaceListing;
     onBuy?: (uuid: string) => void;
-    onBid?: (uuid: string, amount: number) => void;
     onCancel?: (uuid: string) => void;
     isOwner?: boolean;
 }) {
-    const [bidAmount, setBidAmount] = useState("");
-    const [showBidInput, setShowBidInput] = useState(false);
-
     const uniqueDetails = useMemo<UniqueListingDetails>(() => {
         const fallbackName = `Item ${listing.uuid.sub(1, 8)}…`;
         const uniqueItemInstance = listing.uniqueItem;
@@ -258,14 +254,6 @@ export default function ListingCard({
         if (onBuy) onBuy(listing.uuid);
     };
 
-    const handleBid = () => {
-        if (onBid && bidAmount !== "") {
-            onBid(listing.uuid, tonumber(bidAmount) ?? 0);
-            setBidAmount("");
-            setShowBidInput(false);
-        }
-    };
-
     const handleCancel = () => {
         if (onCancel) onCancel(listing.uuid);
     };
@@ -283,10 +271,8 @@ export default function ListingCard({
         return `${hours}h`;
     };
 
-    const accentColor =
-        listing.listingType === "buyout" ? Color3.fromRGB(108, 226, 255) : Color3.fromRGB(255, 133, 211);
-    const accentGlowColor =
-        listing.listingType === "buyout" ? Color3.fromRGB(61, 145, 255) : Color3.fromRGB(168, 94, 255);
+    const accentColor = Color3.fromRGB(108, 226, 255);
+    const accentGlowColor = Color3.fromRGB(61, 145, 255);
 
     return (
         <frame
@@ -348,27 +334,6 @@ export default function ListingCard({
                         TextScaled={true}
                         TextXAlignment={Enum.TextXAlignment.Left}
                     />
-
-                    <frame BackgroundColor3={accentColor} Size={new UDim2(0, 70, 0.5, 0)}>
-                        <uicorner CornerRadius={new UDim(0, 6)} />
-                        <textlabel
-                            BackgroundTransparency={1}
-                            FontFace={RobotoMono}
-                            Text={listing.listingType === "buyout" ? "BUYOUT" : "AUCTION"}
-                            TextColor3={Color3.fromRGB(255, 255, 255)}
-                            TextScaled={true}
-                            Size={new UDim2(1, 0, 1, 0)}
-                        />
-                        <uigradient
-                            Rotation={0}
-                            Color={
-                                new ColorSequence([
-                                    new ColorSequenceKeypoint(0, accentColor),
-                                    new ColorSequenceKeypoint(1, accentGlowColor),
-                                ])
-                            }
-                        />
-                    </frame>
                 </frame>
 
                 {/** Item Description */}
@@ -397,35 +362,11 @@ export default function ListingCard({
                     </frame>
                 )}
 
-                {listing.currentBid !== undefined && (
-                    <frame BackgroundTransparency={1} Size={new UDim2(1, 0, 0, 0)} AutomaticSize={Enum.AutomaticSize.Y}>
-                        <uilistlayout
-                            FillDirection={Enum.FillDirection.Horizontal}
-                            HorizontalAlignment={Enum.HorizontalAlignment.Left}
-                            VerticalAlignment={Enum.VerticalAlignment.Center}
-                            Padding={new UDim(0, 12)}
-                        />
-
-                        <textlabel
-                            BackgroundColor3={Color3.fromRGB(28, 23, 42)}
-                            FontFace={RobotoMono}
-                            Size={new UDim2(0, 120, 0, 32)}
-                            Text="Current Bid"
-                            TextColor3={Color3.fromRGB(236, 180, 255)}
-                            TextScaled={true}
-                            TextXAlignment={Enum.TextXAlignment.Center}
-                        >
-                            <uicorner CornerRadius={new UDim(0, 6)} />
-                            <uistroke Thickness={1} Color={Color3.fromRGB(199, 123, 255)} Transparency={0.45} />
-                        </textlabel>
-                    </frame>
-                )}
-
                 <textlabel
                     BackgroundTransparency={1}
                     FontFace={RobotoMono}
                     Size={new UDim2(1, 0, 0, 16)}
-                    Text={`Seller #${listing.sellerId} • Expires in ${formatTimeRemaining(listing.expires)}`}
+                    Text={`Expires in ${formatTimeRemaining(listing.created + MARKETPLACE_CONFIG.LISTING_DURATION)}`}
                     TextColor3={Color3.fromRGB(79, 107, 130)}
                     TextScaled={true}
                     TextXAlignment={Enum.TextXAlignment.Left}
@@ -443,93 +384,12 @@ export default function ListingCard({
                 {isOwner ? (
                     <ActionButton text="Cancel" backgroundColor={Color3.fromRGB(204, 67, 88)} onClick={handleCancel} />
                 ) : (
-                    <Fragment>
-                        {listing.listingType === "buyout" && (
-                            <ActionButton
-                                text="Buy Now"
-                                price={listing.price}
-                                backgroundColor={Color3.fromRGB(55, 189, 255)}
-                                onClick={handleBuy}
-                            />
-                        )}
-
-                        {listing.listingType === "auction" && (
-                            <Fragment>
-                                {!showBidInput ? (
-                                    <ActionButton
-                                        text="Place Bid"
-                                        price={listing.currentBid ?? listing.price}
-                                        backgroundColor={Color3.fromRGB(138, 104, 255)}
-                                        onClick={() => setShowBidInput(true)}
-                                    />
-                                ) : (
-                                    <frame BackgroundTransparency={1} Size={new UDim2(1, 0, 0, 92)}>
-                                        <uilistlayout
-                                            FillDirection={Enum.FillDirection.Vertical}
-                                            HorizontalAlignment={Enum.HorizontalAlignment.Left}
-                                            Padding={new UDim(0, 8)}
-                                        />
-
-                                        <textbox
-                                            BackgroundColor3={Color3.fromRGB(24, 32, 48)}
-                                            BorderSizePixel={0}
-                                            Size={new UDim2(1, 0, 0, 36)}
-                                            Text={bidAmount}
-                                            PlaceholderText="Enter bid"
-                                            TextColor3={Color3.fromRGB(213, 233, 255)}
-                                            TextScaled={true}
-                                            FontFace={RobotoMono}
-                                            ClearTextOnFocus={false}
-                                            Event={{
-                                                FocusLost: (textBox) => setBidAmount(textBox.Text),
-                                            }}
-                                        >
-                                            <uicorner CornerRadius={new UDim(0, 6)} />
-                                            <uistroke
-                                                Thickness={1}
-                                                Color={Color3.fromRGB(74, 140, 255)}
-                                                Transparency={0.4}
-                                            />
-                                        </textbox>
-
-                                        <frame BackgroundTransparency={1} Size={new UDim2(1, 0, 0, 36)}>
-                                            <uilistlayout
-                                                FillDirection={Enum.FillDirection.Horizontal}
-                                                HorizontalAlignment={Enum.HorizontalAlignment.Left}
-                                                Padding={new UDim(0, 8)}
-                                            />
-
-                                            <textbutton
-                                                BackgroundColor3={Color3.fromRGB(55, 189, 255)}
-                                                BorderSizePixel={0}
-                                                Size={new UDim2(0.5, -4, 1, 0)}
-                                                Text="Confirm"
-                                                TextColor3={Color3.fromRGB(15, 18, 24)}
-                                                TextScaled={true}
-                                                FontFace={RobotoMono}
-                                                Event={{ Activated: handleBid }}
-                                            >
-                                                <uicorner CornerRadius={new UDim(0, 6)} />
-                                            </textbutton>
-
-                                            <textbutton
-                                                BackgroundColor3={Color3.fromRGB(204, 67, 88)}
-                                                BorderSizePixel={0}
-                                                Size={new UDim2(0.5, -4, 1, 0)}
-                                                Text="Cancel"
-                                                TextColor3={Color3.fromRGB(226, 238, 255)}
-                                                TextScaled={true}
-                                                FontFace={RobotoMono}
-                                                Event={{ Activated: () => setShowBidInput(false) }}
-                                            >
-                                                <uicorner CornerRadius={new UDim(0, 6)} />
-                                            </textbutton>
-                                        </frame>
-                                    </frame>
-                                )}
-                            </Fragment>
-                        )}
-                    </Fragment>
+                    <ActionButton
+                        text="Buy Now"
+                        price={listing.price}
+                        backgroundColor={Color3.fromRGB(55, 189, 255)}
+                        onClick={handleBuy}
+                    />
                 )}
             </frame>
         </frame>

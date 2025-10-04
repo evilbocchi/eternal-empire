@@ -34,7 +34,6 @@ export interface CreateInventorySlotOptions {
 }
 
 export interface UpdateInventorySlotOptions {
-    parent?: GuiObject;
     size?: UDim2;
     layoutOrder?: number;
     visible?: boolean;
@@ -237,11 +236,7 @@ export function createInventorySlot(item: Item, options: CreateInventorySlotOpti
 export function updateInventorySlot(handle: InventorySlotHandle, options: UpdateInventorySlotOptions) {
     if (handle.destroyed) return;
 
-    const { parent, size, layoutOrder, visible, amount, uuid } = options;
-
-    if (parent && handle.button.Parent !== parent) {
-        handle.button.Parent = parent;
-    }
+    const { size, layoutOrder, visible, amount, uuid } = options;
 
     if (size) {
         handle.button.Size = size;

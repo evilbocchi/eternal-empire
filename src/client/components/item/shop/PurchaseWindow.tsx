@@ -153,7 +153,6 @@ export default function PurchaseWindow() {
         itemSlotRef.current = handle.button;
 
         updateInventorySlot(handle, {
-            parent,
             size: new UDim2(0, 0, 1, 0),
             layoutOrder: -1,
             visible: true,

@@ -1,59 +1,56 @@
-import React, { Fragment, useEffect, useMemo, useState } from "@rbxts/react";
+import React, { useEffect, useMemo, useRef, useState } from "@rbxts/react";
 import {
     createInventorySlot,
     updateInventorySlot,
     type InventorySlotHandle,
 } from "client/components/item/inventory/InventorySlot";
 import { ActionButton } from "client/components/marketplace/ListingCard";
+import { showErrorToast } from "client/components/toast/ToastService";
+import useProperty from "client/hooks/useProperty";
+import { getAsset } from "shared/asset/AssetMap";
 import { playSound } from "shared/asset/GameAssets";
 import { RobotoMono, RobotoMonoBold } from "shared/asset/GameFonts";
 import Items from "shared/items/Items";
 import Packets from "shared/Packets";
 
-export default function CreateListingForm({
-    onSubmit,
-}: {
-    onSubmit: (uuid: string, price: number, listingType: "buyout" | "auction", duration: number) => boolean;
-}) {
+export default function CreateListingForm({ onSubmit }: { onSubmit: (uuid: string, price: number) => boolean }) {
     const [selectedUuid, setSelectedUuid] = useState("");
     const [price, setPrice] = useState("");
-    const [listingType, setListingType] = useState<"buyout" | "auction">("buyout");
-    const [duration, setDuration] = useState("7"); // days
-    const [availableInstances, setAvailableInstances] = useState<Map<string, UniqueItemInstance>>(new Map());
-    const [slotHandles, setSlotHandles] = useState<Map<string, InventorySlotHandle>>(new Map());
+    const availableInstances = useProperty(Packets.uniqueInstances);
+    const slotHandlesRef = useRef(new Map<string, InventorySlotHandle>());
 
-    // Load player's available unique items
     useEffect(() => {
-        const uniqueInstances = Packets.uniqueInstances.get() ?? new Map();
-        const instances = new Map<string, UniqueItemInstance>();
-        for (const [uuid, uniqueInstance] of uniqueInstances) {
-            // Only include items that aren't placed
-            if (!uniqueInstance.placed) {
-                instances.set(uuid, uniqueInstance);
+        // Find and destroy handles for items that are no longer available
+        const toRemove = new Array<string>();
+        for (const [uuid, handle] of slotHandlesRef.current) {
+            if (!availableInstances.has(uuid)) {
+                handle.destroy();
+                toRemove.push(uuid);
             }
         }
-        setAvailableInstances(instances);
-    }, []);
-
-    // Cleanup slot handles on unmount
-    useEffect(() => {
-        return () => {
-            for (const [, handle] of slotHandles) {
-                handle.destroy();
-            }
-        };
-    }, [slotHandles]);
+    }, [availableInstances]);
 
     const handleSubmit = () => {
-        if (selectedUuid === "" || price === "") return;
+        if (selectedUuid === "") {
+            showErrorToast("Please select an item to list.");
+            playSound("Error.mp3");
+            return;
+        }
+
+        if (price === "") {
+            showErrorToast("Please enter a price.");
+            playSound("Error.mp3");
+            return;
+        }
 
         const priceNum = tonumber(price);
-        if (!priceNum || priceNum <= 0) return;
+        if (!priceNum || priceNum <= 0) {
+            showErrorToast("Please enter a valid price.");
+            playSound("Error.mp3");
+            return;
+        }
 
-        const durationNum = tonumber(duration);
-        if (!durationNum || durationNum <= 0) return;
-
-        const success = onSubmit(selectedUuid, priceNum, listingType, durationNum * 24 * 60 * 60);
+        const success = onSubmit(selectedUuid, priceNum);
         if (success) {
             playSound("Success.mp3");
         } else {
@@ -63,10 +60,7 @@ export default function CreateListingForm({
         // Reset form
         setSelectedUuid("");
         setPrice("");
-        setDuration("");
     };
-
-    const availableInstanceElements = new Array<JSX.Element>();
 
     // Memoize sorted instances by total pot value (descending)
     const sortedInstances = useMemo(() => {
@@ -88,6 +82,7 @@ export default function CreateListingForm({
         return arr;
     }, [availableInstances]);
 
+    const availableInstanceElements = new Array<JSX.Element>();
     for (const [uuid, uniqueInstance] of sortedInstances) {
         const item = Items.getItem(uniqueInstance.baseItemId);
         if (!item) continue;
@@ -95,51 +90,31 @@ export default function CreateListingForm({
         const isSelected = selectedUuid === uuid;
 
         availableInstanceElements.push(
-            <frame BackgroundTransparency={1} Size={new UDim2(0, 68, 0, 68)}>
+            <frame key={uuid} BackgroundTransparency={1} Size={new UDim2(0, 68, 0, 68)}>
                 <frame
                     BackgroundTransparency={1}
                     Size={new UDim2(1, 0, 1, 0)}
                     ref={(rbx: Frame | undefined) => {
-                        if (!rbx) return;
+                        if (!rbx || slotHandlesRef.current.has(uuid)) return;
 
-                        // Create or update slot handle
-                        const existingHandle = slotHandles.get(uuid);
-                        if (!existingHandle) {
-                            const handle = createInventorySlot(item, {
-                                parent: rbx,
-                                size: new UDim2(1, 0, 1, 0),
-                                visible: true,
-                                tooltip: true,
-                                onActivated: () => {
-                                    playSound("Click.mp3");
-                                    setSelectedUuid(uuid);
-                                },
-                            });
+                        const handle = createInventorySlot(item, {
+                            parent: rbx,
+                            size: new UDim2(1, 0, 1, 0),
+                            visible: true,
+                            tooltip: true,
+                            onActivated: () => {
+                                playSound("Click.mp3");
+                                setSelectedUuid(uuid);
+                            },
+                        });
+                        // Hide the amount label for marketplace slots
+                        handle.amountLabel.Visible = false;
+                        updateInventorySlot(handle, {
+                            amount: 1,
+                            uuid: uuid,
+                        });
 
-                            // Hide the amount label for marketplace slots
-                            handle.amountLabel.Visible = false;
-
-                            updateInventorySlot(handle, {
-                                amount: 1,
-                                uuid: uuid,
-                            });
-
-                            setSlotHandles((prev) => {
-                                const newMap = new Map<string, InventorySlotHandle>();
-                                for (const [k, v] of prev) {
-                                    newMap.set(k, v);
-                                }
-                                newMap.set(uuid, handle);
-                                return newMap;
-                            });
-                        } else {
-                            updateInventorySlot(existingHandle, {
-                                parent: rbx,
-                                visible: true,
-                                amount: 1,
-                                uuid: uuid,
-                            });
-                        }
+                        slotHandlesRef.current.set(uuid, handle);
                     }}
                 />
                 {isSelected && (
@@ -158,264 +133,145 @@ export default function CreateListingForm({
 
     return (
         <frame BackgroundTransparency={1} Size={new UDim2(1, 0, 1, 0)}>
+            <uistroke Thickness={1} Color={Color3.fromRGB(58, 86, 142)} Transparency={0} />
+            <uilistlayout
+                FillDirection={Enum.FillDirection.Vertical}
+                HorizontalAlignment={Enum.HorizontalAlignment.Center}
+                VerticalAlignment={Enum.VerticalAlignment.Top}
+                VerticalFlex={Enum.UIFlexAlignment.Fill}
+                Padding={new UDim(0, 6)}
+            />
+
+            {/* Helper to render card wrapper */}
+            <uigradient
+                Rotation={0}
+                Color={
+                    new ColorSequence([
+                        new ColorSequenceKeypoint(0, Color3.fromRGB(20, 26, 39)),
+                        new ColorSequenceKeypoint(1, Color3.fromRGB(12, 15, 24)),
+                    ])
+                }
+            />
+
+            <uipadding
+                PaddingTop={new UDim(0, 16)}
+                PaddingBottom={new UDim(0, 16)}
+                PaddingLeft={new UDim(0, 18)}
+                PaddingRight={new UDim(0, 18)}
+            />
+
+            <textlabel
+                BackgroundTransparency={1}
+                FontFace={RobotoMonoBold}
+                Size={new UDim2(1, 0, 0, 26)}
+                Text="Select Item to List"
+                TextColor3={Color3.fromRGB(204, 222, 255)}
+                TextScaled={true}
+                TextXAlignment={Enum.TextXAlignment.Left}
+            >
+                <uiflexitem FlexMode={Enum.UIFlexMode.None} />
+            </textlabel>
+
             <scrollingframe
-                BackgroundColor3={Color3.fromRGB(18, 24, 36)}
+                BackgroundColor3={Color3.fromRGB(24, 32, 48)}
                 BorderSizePixel={0}
                 AutomaticCanvasSize={Enum.AutomaticSize.Y}
-                CanvasSize={new UDim2(1, 0, 0, 0)}
+                CanvasSize={new UDim2(0, 0, 0, 0)}
                 ScrollBarThickness={6}
                 ScrollBarImageColor3={Color3.fromRGB(74, 140, 255)}
-                Size={new UDim2(1, 0, 1, 0)}
+                ScrollingDirection={Enum.ScrollingDirection.Y}
+                Size={new UDim2(1, 0.5, 0, 0)}
             >
-                <uistroke Thickness={1} Color={Color3.fromRGB(58, 86, 142)} Transparency={0} />
-                <uilistlayout
-                    FillDirection={Enum.FillDirection.Vertical}
-                    HorizontalAlignment={Enum.HorizontalAlignment.Center}
-                    VerticalAlignment={Enum.VerticalAlignment.Top}
-                    Padding={new UDim(0, 18)}
-                />
-
-                {/* Helper to render card wrapper */}
-                <uigradient
-                    Rotation={0}
-                    Color={
-                        new ColorSequence([
-                            new ColorSequenceKeypoint(0, Color3.fromRGB(20, 26, 39)),
-                            new ColorSequenceKeypoint(1, Color3.fromRGB(12, 15, 24)),
-                        ])
-                    }
-                />
-
+                <uistroke Thickness={1} Color={Color3.fromRGB(58, 86, 142)} Transparency={0.35} />
                 <uipadding
-                    PaddingTop={new UDim(0, 16)}
-                    PaddingBottom={new UDim(0, 16)}
-                    PaddingLeft={new UDim(0, 18)}
-                    PaddingRight={new UDim(0, 18)}
+                    PaddingTop={new UDim(0, 11)}
+                    PaddingBottom={new UDim(0, 11)}
+                    PaddingLeft={new UDim(0, 11)}
+                    PaddingRight={new UDim(0, 11)}
                 />
 
-                {/* Item Selection */}
-                <frame BackgroundTransparency={1} Size={new UDim2(1, 0, 0, 0)} AutomaticSize={Enum.AutomaticSize.Y}>
-                    <uilistlayout
-                        FillDirection={Enum.FillDirection.Vertical}
-                        HorizontalAlignment={Enum.HorizontalAlignment.Left}
-                        VerticalAlignment={Enum.VerticalAlignment.Top}
-                        Padding={new UDim(0, 10)}
-                    />
-
+                {availableInstances.isEmpty() ? (
                     <textlabel
                         BackgroundTransparency={1}
-                        FontFace={RobotoMonoBold}
-                        Size={new UDim2(1, 0, 0, 26)}
-                        Text="Select Item to List"
-                        TextColor3={Color3.fromRGB(204, 222, 255)}
-                        TextScaled={true}
-                        TextXAlignment={Enum.TextXAlignment.Left}
-                    />
-
-                    <scrollingframe
-                        BackgroundColor3={Color3.fromRGB(24, 32, 48)}
-                        BorderSizePixel={0}
-                        AutomaticCanvasSize={Enum.AutomaticSize.X}
-                        CanvasSize={new UDim2(0, 0, 0, 0)}
-                        ScrollBarThickness={6}
-                        ScrollBarImageColor3={Color3.fromRGB(74, 140, 255)}
-                        ScrollingDirection={Enum.ScrollingDirection.X}
-                        Size={new UDim2(1, 0, 0, 90)}
-                    >
-                        <uistroke Thickness={1} Color={Color3.fromRGB(58, 86, 142)} Transparency={0.35} />
-                        <uipadding
-                            PaddingTop={new UDim(0, 11)}
-                            PaddingBottom={new UDim(0, 11)}
-                            PaddingLeft={new UDim(0, 11)}
-                            PaddingRight={new UDim(0, 11)}
-                        />
-                        <uilistlayout
-                            FillDirection={Enum.FillDirection.Horizontal}
-                            HorizontalAlignment={Enum.HorizontalAlignment.Left}
-                            Padding={new UDim(0, 16)}
-                            SortOrder={Enum.SortOrder.LayoutOrder}
-                        />
-
-                        {availableInstances.isEmpty() ? (
-                            <textlabel
-                                BackgroundTransparency={1}
-                                FontFace={RobotoMono}
-                                Size={new UDim2(1, 0, 1, 0)}
-                                Text="No eligible items"
-                                TextColor3={Color3.fromRGB(142, 168, 189)}
-                                TextScaled={true}
-                                TextXAlignment={Enum.TextXAlignment.Center}
-                            />
-                        ) : (
-                            <Fragment />
-                        )}
-
-                        {availableInstanceElements}
-                    </scrollingframe>
-                </frame>
-
-                {/* Price Input */}
-                <frame BackgroundTransparency={1} Size={new UDim2(1, 0, 0, 0)} AutomaticSize={Enum.AutomaticSize.Y}>
-                    <uilistlayout
-                        FillDirection={Enum.FillDirection.Vertical}
-                        HorizontalAlignment={Enum.HorizontalAlignment.Left}
-                        VerticalAlignment={Enum.VerticalAlignment.Top}
-                        Padding={new UDim(0, 10)}
-                    />
-
-                    <textlabel
-                        BackgroundTransparency={1}
-                        FontFace={RobotoMonoBold}
-                        Size={new UDim2(1, 0, 0, 26)}
-                        Text="Set Price"
-                        TextColor3={Color3.fromRGB(204, 222, 255)}
-                        TextScaled={true}
-                        TextXAlignment={Enum.TextXAlignment.Left}
-                    />
-
-                    <textbox
-                        BackgroundColor3={Color3.fromRGB(24, 32, 48)}
-                        BorderColor3={Color3.fromRGB(100, 100, 100)}
-                        BorderSizePixel={1}
-                        Size={new UDim2(1, 0, 0, 26)}
-                        PlaceholderText="Enter price in Diamonds"
-                        PlaceholderColor3={Color3.fromRGB(120, 140, 175)}
-                        TextColor3={Color3.fromRGB(226, 238, 255)}
-                        Text={price}
-                        TextScaled={true}
-                        TextXAlignment={Enum.TextXAlignment.Left}
                         FontFace={RobotoMono}
-                        ClearTextOnFocus={false}
-                        Event={{
-                            FocusLost: (textBox) => setPrice(textBox.Text),
-                        }}
-                    >
-                        <uipadding
-                            PaddingTop={new UDim(0, 4)}
-                            PaddingBottom={new UDim(0, 4)}
-                            PaddingLeft={new UDim(0, 8)}
-                            PaddingRight={new UDim(0, 8)}
-                        />
-                    </textbox>
-                </frame>
-
-                {/* Listing Type Selection */}
-                <frame BackgroundTransparency={1} Size={new UDim2(1, 0, 0, 0)} AutomaticSize={Enum.AutomaticSize.Y}>
-                    <uilistlayout
-                        FillDirection={Enum.FillDirection.Vertical}
+                        Size={new UDim2(1, 0, 1, 0)}
+                        Text="No eligible items"
+                        TextColor3={Color3.fromRGB(142, 168, 189)}
+                        TextScaled={true}
+                        TextXAlignment={Enum.TextXAlignment.Center}
+                    />
+                ) : (
+                    <uigridlayout
+                        FillDirection={Enum.FillDirection.Horizontal}
                         HorizontalAlignment={Enum.HorizontalAlignment.Left}
-                        VerticalAlignment={Enum.VerticalAlignment.Top}
-                        Padding={new UDim(0, 10)}
+                        CellSize={new UDim2(0, 60, 0, 60)}
+                        CellPadding={new UDim2(0, 16, 0, 16)}
+                        SortOrder={Enum.SortOrder.LayoutOrder}
                     />
+                )}
 
-                    <textlabel
-                        BackgroundTransparency={1}
-                        FontFace={RobotoMonoBold}
-                        Size={new UDim2(1, 0, 0, 26)}
-                        Text="Listing Type"
-                        TextColor3={Color3.fromRGB(204, 222, 255)}
-                        TextScaled={true}
-                        TextXAlignment={Enum.TextXAlignment.Left}
-                    />
-
-                    <frame BackgroundTransparency={1} Size={new UDim2(1, 0, 0, 26)}>
-                        <uilistlayout
-                            FillDirection={Enum.FillDirection.Horizontal}
-                            HorizontalAlignment={Enum.HorizontalAlignment.Left}
-                            Padding={new UDim(0, 10)}
-                        />
-
-                        {(["buyout", "auction"] as ("buyout" | "auction")[]).map((mode) => {
-                            const isActive = listingType === mode;
-                            return (
-                                <textbutton
-                                    AutoButtonColor={false}
-                                    BackgroundColor3={
-                                        isActive ? Color3.fromRGB(55, 189, 255) : Color3.fromRGB(29, 39, 59)
-                                    }
-                                    BackgroundTransparency={isActive ? 0 : 0.1}
-                                    BorderSizePixel={0}
-                                    Size={new UDim2(0, 140, 1, 0)}
-                                    Text={mode === "buyout" ? "Buyout" : "Auction"}
-                                    TextColor3={isActive ? Color3.fromRGB(12, 16, 24) : Color3.fromRGB(226, 238, 255)}
-                                    TextScaled={true}
-                                    FontFace={RobotoMono}
-                                    Event={{
-                                        Activated: () => setListingType(mode),
-                                    }}
-                                >
-                                    <uistroke
-                                        ApplyStrokeMode={Enum.ApplyStrokeMode.Border}
-                                        Thickness={1}
-                                        Color={isActive ? Color3.fromRGB(111, 182, 255) : Color3.fromRGB(58, 86, 142)}
-                                        Transparency={isActive ? 0 : 0.3}
-                                    />
-                                    <uipadding
-                                        PaddingTop={new UDim(0, 4)}
-                                        PaddingBottom={new UDim(0, 4)}
-                                        PaddingLeft={new UDim(0, 8)}
-                                        PaddingRight={new UDim(0, 8)}
-                                    />
-                                </textbutton>
-                            );
-                        })}
-                    </frame>
-                </frame>
-
-                {/* Duration Input */}
-                <frame BackgroundTransparency={1} Size={new UDim2(1, 0, 0, 0)} AutomaticSize={Enum.AutomaticSize.Y}>
-                    <uilistlayout
-                        FillDirection={Enum.FillDirection.Vertical}
-                        HorizontalAlignment={Enum.HorizontalAlignment.Left}
-                        VerticalAlignment={Enum.VerticalAlignment.Top}
-                        Padding={new UDim(0, 10)}
-                    />
-
-                    <textlabel
-                        BackgroundTransparency={1}
-                        FontFace={RobotoMonoBold}
-                        Size={new UDim2(1, 0, 0, 26)}
-                        Text="Duration (Days)"
-                        TextColor3={Color3.fromRGB(204, 222, 255)}
-                        TextScaled={true}
-                        TextXAlignment={Enum.TextXAlignment.Left}
-                    />
-
-                    <textbox
-                        BackgroundColor3={Color3.fromRGB(24, 32, 48)}
-                        BorderColor3={Color3.fromRGB(100, 100, 100)}
-                        BorderSizePixel={1}
-                        Size={new UDim2(1, 0, 0, 26)}
-                        PlaceholderText="7"
-                        PlaceholderColor3={Color3.fromRGB(120, 140, 175)}
-                        Text={duration}
-                        TextColor3={Color3.fromRGB(226, 238, 255)}
-                        TextScaled={true}
-                        TextXAlignment={Enum.TextXAlignment.Left}
-                        FontFace={RobotoMono}
-                        ClearTextOnFocus={false}
-                        Event={{
-                            FocusLost: (textBox) => setDuration(textBox.Text),
-                        }}
-                    >
-                        <uipadding
-                            PaddingTop={new UDim(0, 4)}
-                            PaddingBottom={new UDim(0, 4)}
-                            PaddingLeft={new UDim(0, 8)}
-                            PaddingRight={new UDim(0, 8)}
-                        />
-                    </textbox>
-                </frame>
-
-                {/* Submit Button */}
-                <frame BackgroundTransparency={1} Size={new UDim2(0.9, 0, 0, 50)}>
-                    <ActionButton
-                        text="Create Listing"
-                        backgroundColor={Color3.fromRGB(55, 189, 255)}
-                        onClick={handleSubmit}
-                    />
-                </frame>
+                {availableInstanceElements}
             </scrollingframe>
+
+            {/* Price Input */}
+            <frame BackgroundTransparency={1} Size={new UDim2(1, 0, 0, 40)}>
+                <uipadding PaddingTop={new UDim(0, 14)} />
+                <uiflexitem FlexMode={Enum.UIFlexMode.None} />
+                <uilistlayout FillDirection={Enum.FillDirection.Horizontal} Padding={new UDim(0, 8)} />
+                <textlabel
+                    AutomaticSize={Enum.AutomaticSize.X}
+                    BackgroundTransparency={1}
+                    FontFace={RobotoMonoBold}
+                    Size={new UDim2(0, 0, 1, 0)}
+                    Text="Your Price"
+                    TextColor3={Color3.fromRGB(204, 222, 255)}
+                    TextScaled={true}
+                    TextXAlignment={Enum.TextXAlignment.Left}
+                />
+                <imagelabel
+                    BackgroundTransparency={1}
+                    Size={new UDim2(1, 0, 1, 0)}
+                    SizeConstraint={Enum.SizeConstraint.RelativeYY}
+                    Image={getAsset("assets/Diamond.png")}
+                />
+            </frame>
+
+            <textbox
+                BackgroundColor3={Color3.fromRGB(24, 32, 48)}
+                BorderColor3={Color3.fromRGB(100, 100, 100)}
+                BorderSizePixel={1}
+                Size={new UDim2(1, 0, 0, 26)}
+                PlaceholderText="Enter price in Diamonds"
+                PlaceholderColor3={Color3.fromRGB(120, 140, 175)}
+                TextColor3={Color3.fromRGB(226, 238, 255)}
+                Text={price}
+                TextScaled={true}
+                TextXAlignment={Enum.TextXAlignment.Left}
+                FontFace={RobotoMono}
+                ClearTextOnFocus={false}
+                Event={{
+                    FocusLost: (textBox) => setPrice(textBox.Text),
+                }}
+            >
+                <uiflexitem FlexMode={Enum.UIFlexMode.None} />
+                <uipadding
+                    PaddingTop={new UDim(0, 4)}
+                    PaddingBottom={new UDim(0, 4)}
+                    PaddingLeft={new UDim(0, 8)}
+                    PaddingRight={new UDim(0, 8)}
+                />
+            </textbox>
+
+            {/* Submit Button */}
+            <frame BackgroundTransparency={1} Size={new UDim2(0.7, 0, 0, 64)}>
+                <uipadding PaddingTop={new UDim(0, 14)} />
+                <uiflexitem FlexMode={Enum.UIFlexMode.None} />
+                <ActionButton
+                    text="Create Listing"
+                    backgroundColor={Color3.fromRGB(55, 189, 255)}
+                    onClick={handleSubmit}
+                />
+            </frame>
         </frame>
     );
 }

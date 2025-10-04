@@ -1,7 +1,7 @@
 import type { BaseOnoeNum } from "@antivivi/serikanum";
 import type CameraShaker from "@rbxts/camera-shaker";
 import type { DataType } from "@rbxts/flamework-binary-serializer";
-import { exactMapProperty, packet, property } from "@rbxts/fletchette";
+import { exactMapProperty, exactSetProperty, packet, property } from "@rbxts/fletchette";
 import type { LeaderboardEntry, LeaderboardType } from "client/components/world/leaderboard/Leaderboard";
 import EmpireProfileTemplate from "shared/data/profile/EmpireProfileTemplate";
 import PlayerProfileTemplate from "shared/data/profile/PlayerProfileTemplate";
@@ -108,12 +108,12 @@ namespace Packets {
     export const buyItem = packet<(itemId: string) => boolean>();
     export const buyAllItems = packet<(itemIds: string[]) => boolean>();
     export const placeItems = packet<(items: PlacingInfo[]) => number>();
-    export const uniqueInstances = property<Map<string, DataType.Packed<UniqueItemInstance>>>(
+    export const uniqueInstances = exactMapProperty<string, DataType.Packed<UniqueItemInstance>>(
         EmpireProfileTemplate.items.uniqueInstances,
     );
     export const unplaceItems = packet<(placementIds: string[]) => void>();
     export const boostChanged = packet<(boostPerItem: Map<string, BaseOnoeNum>) => void>({ isUnreliable: true });
-    export const brokenPlacedItems = property<Set<string>>(EmpireProfileTemplate.items.brokenPlacedItems);
+    export const brokenPlacedItems = exactSetProperty<string>(EmpireProfileTemplate.items.brokenPlacedItems);
     export const repairItem = packet<(placementId: string, tier: RepairResultTier) => boolean>();
     export const itemRepairCompleted =
         packet<(placementId: string, tier: RepairResultTier, protectionExpiresAt: number | undefined) => void>();
@@ -137,12 +137,12 @@ namespace Packets {
     export const rawPurifierClicks = property<DataType.u32>(0, true);
 
     // upgrade board
-    export const upgrades = property<Map<string, DataType.i32>>(EmpireProfileTemplate.upgrades);
+    export const upgrades = exactMapProperty<string, DataType.i32>(EmpireProfileTemplate.upgrades);
     export const buyUpgrade = packet<(upgradeId: string, to: DataType.i32 | undefined) => boolean>();
 
     // resets
     export const resetCountdown = packet<(layer: ResetLayerId, countdown: number) => void>();
-    export const gainPerResetLayer = property<Map<ResetLayerId, BaseOnoeNum>>(new Map());
+    export const gainPerResetLayer = exactMapProperty<ResetLayerId, BaseOnoeNum>(new Map());
     export const reset = packet<(layer: ResetLayerId, amount: BaseOnoeNum) => void>();
     export const printedSetups = property<Array<Setup>>(EmpireProfileTemplate.printedSetups);
     export const saveSetup = packet<(printerPlacementId: string, name: string) => boolean>();
@@ -159,15 +159,15 @@ namespace Packets {
     export const currentArea = property<AreaId | undefined>(undefined);
     export const tpToArea = packet<(area: AreaId) => boolean>();
     export const areaUnlocked = packet<(area: AreaId) => void>();
-    export const unlockedAreas = property<Set<AreaId>>(new Set<AreaId>());
-    export const visitedAreas = property<Set<AreaId>>(new Set<AreaId>());
+    export const unlockedAreas = exactSetProperty<AreaId>(new Set<AreaId>());
+    export const visitedAreas = exactSetProperty<AreaId>(new Set<AreaId>());
     export const dropletCountChanged = packet<(area: AreaId, current: number, max: number) => void>({
         isUnreliable: true,
     });
 
     // quests
     export const questInfo = property<Map<string, DataType.Packed<QuestInfo>>>();
-    export const stagePerQuest = property<Map<string, DataType.i32>>(new Map());
+    export const stagePerQuest = exactMapProperty<string, DataType.i32>(new Map());
     export const questCompleted = packet<(questId: string) => void>();
     export const level = property<DataType.i32>(-1);
     export const xp = property<DataType.i32>(-1);
@@ -211,7 +211,7 @@ namespace Packets {
 
     // bombs
     /** The end times for each bomb currency. e.g. "Funds Bombs": 1234567890 */
-    export const bombEndTimes = property<Map<Currency, DataType.f64>>(new Map());
+    export const bombEndTimes = exactMapProperty<Currency, DataType.f64>(new Map());
     export const useBomb = packet<(bombType: Currency) => boolean>();
 
     // tools
@@ -225,16 +225,11 @@ namespace Packets {
     export const progressEstimationRequest = packet<() => void>();
 
     // marketplace
-    export const marketplaceListings = property<Map<string, DataType.Packed<MarketplaceListing>>>(new Map());
-    export const createListing =
-        packet<(uuid: string, price: number, listingType: "buyout" | "auction", duration: DataType.i32) => boolean>();
+    export const createListing = packet<(uuid: string, price: number) => boolean>();
     export const cancelListing = packet<(uuid: string) => boolean>();
     export const buyListing = packet<(uuid: string) => boolean>();
-    export const placeBid = packet<(uuid: string, bidAmount: number) => boolean>();
-    export const marketplaceTransaction = packet<(transaction: MarketplaceTransaction) => void>();
-    export const listingUpdated = packet<(listing: MarketplaceListing) => void>();
-    export const listingRemoved = packet<(uuid: string) => void>();
-    export const myActiveListings = property<Map<string, DataType.Packed<MarketplaceListing>>>(new Map());
+    export const searchListings = packet<(query: string, page: DataType.i32) => MarketplaceListing[]>();
+    export const empireActiveListings = property<Map<string, DataType.Packed<MarketplaceListing>>>(new Map());
 
     // world
     export const triggerProximityPrompt = packet<(path: string) => void>();

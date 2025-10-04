@@ -237,6 +237,8 @@ const EmpireProfileTemplate = {
         purchase: 0,
         /** The permission level for managing resets in the empire. */
         reset: 0,
+        /** The permission level for managing the marketplace in the empire. */
+        marketplace: 0,
     },
 
     /**
@@ -334,7 +336,7 @@ const EmpireProfileTemplate = {
     challengeBestTimes: new Map<string, number>(),
 
     /**
-     * The items owned by the player.
+     * The items owned by this empire.
      */
     items: {
         inventory: new Map<string, number>(),
@@ -346,6 +348,12 @@ const EmpireProfileTemplate = {
         uniqueInstances: new Map<string, UniqueItemInstance>(),
         repairProtection: new Map<string, RepairProtectionState>(),
     } as ItemsData,
+
+    /**
+     * The cached listings this empire has created. Used for quick access
+     * to the empire's own listings without querying the datastore.
+     */
+    marketplaceListed: new Map<string, MarketplaceListing>(),
 
     /** Data that is saved before a challenge starts. */
     backup: {

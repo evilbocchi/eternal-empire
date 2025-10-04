@@ -4,8 +4,8 @@ import { CreateReactStory } from "@rbxts/ui-labs";
 import MarketplaceWindow from "client/components/marketplace/MarketplaceWindow";
 import StoryMocking from "client/components/StoryMocking";
 import { useSingleDocumentVisibility } from "client/hooks/useVisibility";
-import Packets from "shared/Packets";
 import Items from "shared/items/Items";
+import Packets from "shared/Packets";
 
 export = CreateReactStory(
     {
@@ -44,24 +44,21 @@ export = CreateReactStory(
         uniqueInstances.set(listingUuid, listingUniqueItem);
         Packets.uniqueInstances.set(uniqueInstances);
 
-        Packets.marketplaceListings.set(
-            new Map([
-                [
-                    "example-listing-id",
-                    {
-                        active: true,
-                        uuid: listingUuid,
-                        sellerId: 123456,
-                        sellerEmpireId: "example-empire-id",
-                        price: 1000,
-                        listingType: "buyout",
-                        created: os.time(),
-                        expires: os.time() + 7 * 24 * 60 * 60, // Expires in one week
-                        uniqueItem: listingUniqueItem,
-                    },
-                ],
-            ]),
-        );
+        Packets.searchListings.fromClient(() => {
+            return [
+                {
+                    bought: true,
+                    uuid: listingUuid,
+                    sellerId: 123456,
+                    sellerEmpireId: "example-empire-id",
+                    price: 1000,
+                    listingType: "buyout",
+                    created: os.time(),
+                    expires: os.time() + 7 * 24 * 60 * 60, // Expires in one week
+                    uniqueItem: listingUniqueItem,
+                },
+            ];
+        });
 
         useSingleDocumentVisibility("Marketplace", props.controls.visible);
 

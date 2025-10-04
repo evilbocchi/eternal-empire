@@ -110,7 +110,13 @@ export default class NamedUpgradeService implements OnInit {
         if (price === undefined) {
             return false;
         }
-        const success = this.currencyService.purchase(price, isFree);
+        let success: boolean;
+        if (isFree === true) {
+            [success] = this.currencyService.canAfford(price);
+        } else {
+            success = this.currencyService.purchase(price);
+        }
+
         if (success) {
             this.setUpgradeAmount(upgradeId, to);
             if (player !== undefined) {

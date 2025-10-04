@@ -76,6 +76,9 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
     private readonly brokenPlacedItems: Set<string>;
     private readonly repairProtection: Map<string, RepairProtectionState>;
     private readonly worldPlaced: Map<string, PlacedItem>;
+    private readonly bought: Map<string, number>;
+    private readonly inventory: Map<string, number>;
+    private readonly uniqueInstances: Map<string, UniqueItemInstance>;
     private hasInventoryChanged = false;
     private hasUniqueChanged = false;
     private hasBoughtChanged = false;
@@ -130,6 +133,9 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
         this.worldPlaced = dataService.empireData.items.worldPlaced;
         this.brokenPlacedItems = dataService.empireData.items.brokenPlacedItems;
         this.repairProtection = dataService.empireData.items.repairProtection;
+        this.inventory = dataService.empireData.items.inventory;
+        this.bought = dataService.empireData.items.bought;
+        this.uniqueInstances = dataService.empireData.items.uniqueInstances;
     }
 
     // Data Management Methods
@@ -141,7 +147,7 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
      * @returns The amount of the item in inventory, or 0 if not found.
      */
     getItemAmount(itemId: string) {
-        return this.dataService.empireData.items.inventory.get(itemId) ?? 0;
+        return this.inventory.get(itemId) ?? 0;
     }
 
     /**
@@ -151,7 +157,7 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
      * @param amount The new amount to set.
      */
     setItemAmount(itemId: string, amount: number) {
-        this.dataService.empireData.items.inventory.set(itemId, amount);
+        this.inventory.set(itemId, amount);
         this.hasInventoryChanged = true;
     }
 
@@ -162,7 +168,7 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
      * @returns The number of times the item has been bought, or 0 if never bought.
      */
     getBoughtAmount(itemId: string) {
-        return this.dataService.empireData.items.bought.get(itemId) ?? 0;
+        return this.bought.get(itemId) ?? 0;
     }
 
     /**
@@ -172,7 +178,7 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
      * @param amount The new bought amount.
      */
     setBoughtAmount(itemId: string, amount: number) {
-        this.dataService.empireData.items.bought.set(itemId, amount);
+        this.bought.set(itemId, amount);
         this.hasBoughtChanged = true;
     }
 
@@ -212,7 +218,7 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
 
         const instance = uniqueTrait.generateInstance(allPots);
         const uuid = HttpService.GenerateGUID(false);
-        this.dataService.empireData.items.uniqueInstances.set(uuid, instance);
+        this.uniqueInstances.set(uuid, instance);
         this.hasUniqueChanged = true;
 
         return uuid;
@@ -256,8 +262,7 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
             return undefined;
         }
         const unplacing = new Array<PlacedItem>();
-        const itemsData = this.dataService.empireData.items;
-        const placedItems = itemsData.worldPlaced;
+        const placedItems = this.worldPlaced;
 
         let somethingHappened = false;
         for (const placementId of placementIds) {
@@ -289,8 +294,7 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
             if (uuid === undefined) {
                 this.setItemAmount(item, this.getItemAmount(item) + 1);
             } else {
-                const uniqueInstances = itemsData.uniqueInstances;
-                const uniqueItem = uniqueInstances.get(uuid);
+                const uniqueItem = this.uniqueInstances.get(uuid);
                 if (uniqueItem === undefined) throw `Unique item ${uuid} not found.`;
                 uniqueItem.placed = undefined; // Clear the placement ID
                 this.hasUniqueChanged = true;
@@ -694,15 +698,15 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
      */
     private propagateChanges() {
         if (this.hasInventoryChanged) {
-            Packets.inventory.set(this.dataService.empireData.items.inventory);
+            Packets.inventory.set(this.inventory);
             this.hasInventoryChanged = false;
         }
         if (this.hasUniqueChanged) {
-            Packets.uniqueInstances.set(this.dataService.empireData.items.uniqueInstances);
+            Packets.uniqueInstances.set(this.uniqueInstances);
             this.hasUniqueChanged = false;
         }
         if (this.hasBoughtChanged) {
-            Packets.bought.set(this.dataService.empireData.items.bought);
+            Packets.bought.set(this.bought);
             this.hasBoughtChanged = false;
         }
         if (this.hasPlacedChanged) {
