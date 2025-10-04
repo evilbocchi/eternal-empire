@@ -8,7 +8,7 @@ export = new Item(script.Name)
     .setDescription("A double conveyor for both ground and raised heights.")
     .setDifficulty(Difficulty.PressAKey)
     .setPrice(new CurrencyBundle().set("Funds", 35e38), 10)
-    .addPlaceableArea("BarrenIslands", "SlamoVillage" , "SkyPavilion" )
+    .addPlaceableArea("BarrenIslands", "SlamoVillage" , "SkyPavilion")
 
     .trait(Conveyor)
     .setSpeed(5)
