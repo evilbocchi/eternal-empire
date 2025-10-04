@@ -286,10 +286,12 @@ export default class Item {
 
         // Set model attributes for identification and functionality
         const modelInfo = getAllInstanceInfo(model);
-        model.SetAttribute("Area", placedItem.area);
+        const areaId = placedItem.area;
+        model.SetAttribute("Area", areaId);
         model.SetAttribute("ItemId", this.id);
 
         modelInfo.PlacedItem = placedItem;
+        modelInfo.Area = areaId;
         modelInfo.ItemId = this.id;
         return model;
     }
