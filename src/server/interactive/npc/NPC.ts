@@ -11,7 +11,8 @@ import {
 } from "@rbxts/services";
 import { playSound } from "shared/asset/GameAssets";
 import { getDisplayName } from "shared/constants";
-import { IS_EDIT, IS_STUDIO } from "shared/Context";
+import { IS_EDIT } from "shared/Context";
+import eat from "shared/hamster/eat";
 import { Identifiable, ModuleRegistry } from "shared/hamster/ModuleRegistry";
 import Packets from "shared/Packets";
 import CustomProximityPrompt from "shared/world/CustomProximityPrompt";
@@ -22,6 +23,12 @@ import CustomProximityPrompt from "shared/world/CustomProximityPrompt";
 export type NPCAnimationType = "Default" | "Walk" | "Run" | "Jump";
 
 export const NPC_MODELS = Workspace.FindFirstChild("NPCs") as Folder | undefined;
+if (NPC_MODELS !== undefined) {
+    NPC_MODELS.Parent = ServerStorage;
+    eat(() => {
+        NPC_MODELS.Parent = Workspace;
+    });
+}
 
 /**
  * Represents a non-player character (NPC) with animations, dialogue, and interaction logic.
@@ -56,7 +63,6 @@ export default class NPC extends Identifiable {
 
     defaultName: string;
     startingCFrame = new CFrame();
-    initialModelSnapshot?: Model;
     model?: Model;
     humanoid?: Humanoid;
     rootPart?: BasePart;
@@ -73,9 +79,9 @@ export default class NPC extends Identifiable {
      * @returns The NPC instance for chaining.
      */
     override init() {
-        if (IS_EDIT || this.id === "Empty") return;
+        if (IS_EDIT || !NPC_MODELS || this.id === "Empty") return;
 
-        const model = NPC_MODELS?.FindFirstChild(this.id) as Model | undefined;
+        const model = NPC_MODELS.FindFirstChild(this.id)?.Clone() as Model | undefined;
         if (model === undefined) return;
 
         const humanoid = model.FindFirstChildOfClass("Humanoid") as Humanoid | undefined;
@@ -84,16 +90,10 @@ export default class NPC extends Identifiable {
         const rootPart = humanoid.RootPart as BasePart | undefined;
         if (rootPart === undefined) return;
 
+        model.Parent = Workspace;
         this.model = model;
         this.humanoid = humanoid;
         this.rootPart = rootPart;
-
-        // Store the starting CFrame and create an initial snapshot for recovery
-        if (IS_STUDIO) {
-            const initialModelSnapshot = model.Clone();
-            initialModelSnapshot.Parent = ServerStorage;
-            this.initialModelSnapshot = initialModelSnapshot;
-        }
         this.startingCFrame = rootPart.CFrame;
 
         CollectionService.AddTag(model, "NPC");
@@ -135,6 +135,7 @@ export default class NPC extends Identifiable {
 
         // Set up proximity prompt for NPC interaction
         const prompt = new Instance("ProximityPrompt");
+        prompt.Style = Enum.ProximityPromptStyle.Custom;
         prompt.ActionText = "Interact";
         prompt.Enabled = true;
         prompt.MaxActivationDistance = 6.5;
@@ -189,12 +190,7 @@ export default class NPC extends Identifiable {
                 animTrack.Stop();
             }
 
-            // Restore the initial model if it was replaced or removed
-            if (this.model !== undefined && this.initialModelSnapshot !== undefined && !IS_EDIT) {
-                const recovered = this.initialModelSnapshot.Clone();
-                recovered.Parent = this.model.Parent;
-                this.model.Destroy();
-            }
+            this.model?.Destroy();
             table.clear(this);
         };
     }

@@ -1,8 +1,9 @@
 import { simpleInterval } from "@antivivi/vrldk";
 import React, { Fragment, useEffect, useRef, useState } from "@rbxts/react";
-import { RunService, TextService, TweenService, UserInputService } from "@rbxts/services";
+import { ProximityPromptService, RunService, TextService, TweenService, UserInputService } from "@rbxts/services";
 import { getAsset } from "shared/asset/AssetMap";
 import { RobotoMono, RobotoMonoBold } from "shared/asset/GameFonts";
+import { IS_EDIT } from "shared/Context";
 import { getPlayerCharacter } from "shared/hamster/getPlayerCharacter";
 import CustomProximityPrompt from "shared/world/CustomProximityPrompt";
 import WorldNode from "shared/world/nodes/WorldNode";
@@ -72,16 +73,20 @@ function getKeyCodeToText(keyCode: Enum.KeyCode): string | undefined {
 export default function ProximityPromptGui({
     prompt,
     inputType,
+    fadeOut = false,
+    fadeIn = false,
 }: {
     prompt: ProximityPrompt;
     inputType: Enum.ProximityPromptInputType;
+    fadeOut?: boolean;
+    fadeIn?: boolean;
 }) {
     const [progress, setProgress] = useState(0);
     const [frameSize, setFrameSize] = useState(UDim2.fromScale(1, 1));
-    const [frameTransparency, setFrameTransparency] = useState(0.2);
-    const [inputScale, setInputScale] = useState(1);
-    const [actionTextTransparency, setActionTextTransparency] = useState(0);
-    const [objectTextTransparency, setObjectTextTransparency] = useState(0);
+    const [frameTransparency, setFrameTransparency] = useState(fadeIn ? 1 : 0.2);
+    const [inputScale, setInputScale] = useState(fadeIn ? 0 : 1);
+    const [actionTextTransparency, setActionTextTransparency] = useState(fadeIn ? 1 : 0);
+    const [objectTextTransparency, setObjectTextTransparency] = useState(fadeIn ? 1 : 0);
     const [promptSize, setPromptSize] = useState(new UDim2(0, 193, 0, 72));
     const [actionTextPosition, setActionTextPosition] = useState(new UDim2(0.5, -24, 0, 9));
     const [objectTextPosition, setObjectTextPosition] = useState(new UDim2(0.5, -24, 0, -10));
@@ -101,6 +106,74 @@ export default function ProximityPromptGui({
     // Refs for tween management
     const frameRef = useRef<ImageLabel>();
     const inputScaleRef = useRef<UIScale>();
+    const actionTextRef = useRef<TextLabel>();
+    const objectTextRef = useRef<TextLabel>();
+
+    // Handle fade in animations
+    useEffect(() => {
+        if (!fadeIn) return;
+
+        const tweenInfoFast = new TweenInfo(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out);
+
+        // Scale up and fade in
+        if (inputScaleRef.current) {
+            TweenService.Create(inputScaleRef.current, tweenInfoFast, {
+                Scale: 1,
+            }).Play();
+        }
+
+        if (frameRef.current) {
+            TweenService.Create(frameRef.current, tweenInfoFast, {
+                ImageTransparency: 0.2,
+            }).Play();
+        }
+
+        // Tween text transparency
+        if (actionTextRef.current) {
+            TweenService.Create(actionTextRef.current, tweenInfoFast, {
+                TextTransparency: 0,
+            }).Play();
+        }
+
+        if (objectTextRef.current) {
+            TweenService.Create(objectTextRef.current, tweenInfoFast, {
+                TextTransparency: 0,
+            }).Play();
+        }
+    }, [fadeIn]);
+
+    // Handle fade out animations
+    useEffect(() => {
+        if (!fadeOut) return;
+
+        const tweenInfoFast = new TweenInfo(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out);
+
+        // Scale down and fade out
+        if (inputScaleRef.current) {
+            TweenService.Create(inputScaleRef.current, tweenInfoFast, {
+                Scale: 0,
+            }).Play();
+        }
+
+        if (frameRef.current) {
+            TweenService.Create(frameRef.current, tweenInfoFast, {
+                ImageTransparency: 1,
+            }).Play();
+        }
+
+        // Tween text transparency
+        if (actionTextRef.current) {
+            TweenService.Create(actionTextRef.current, tweenInfoFast, {
+                TextTransparency: 1,
+            }).Play();
+        }
+
+        if (objectTextRef.current) {
+            TweenService.Create(objectTextRef.current, tweenInfoFast, {
+                TextTransparency: 1,
+            }).Play();
+        }
+    }, [fadeOut]);
 
     useEffect(() => {
         // Determine button display based on input type
@@ -283,6 +356,34 @@ export default function ProximityPromptGui({
         }
     };
 
+    // Handle keyboard/gamepad input for triggering prompts
+    useEffect(() => {
+        const handleInput = (input: InputObject) => {
+            if (input.KeyCode !== prompt.GamepadKeyCode && input.KeyCode !== prompt.KeyboardKeyCode) return;
+
+            if (input.UserInputState === Enum.UserInputState.Begin) {
+                if (prompt.HoldDuration > 0) {
+                    setIsHolding(true);
+                    setHoldStartTime(os.clock());
+                } else {
+                    triggerPrompt();
+                }
+                return;
+            }
+
+            if (input.UserInputState === Enum.UserInputState.End) {
+                setIsHolding(false);
+            }
+        };
+        const inputBeganConnection = UserInputService.InputBegan.Connect(handleInput);
+        const inputEndedConnection = UserInputService.InputEnded.Connect(handleInput);
+
+        return () => {
+            inputBeganConnection.Disconnect();
+            inputEndedConnection.Disconnect();
+        };
+    }, [prompt, inputType]);
+
     // Calculate gradient rotations for circular progress
     const leftGradientRotation = math.clamp(progress * 360, 180, 360);
     const rightGradientRotation = math.clamp(progress * 360, 0, 180);
@@ -327,7 +428,7 @@ export default function ProximityPromptGui({
             SizeOffset={
                 new Vector2(prompt.UIOffset.X / promptSize.Width.Offset, prompt.UIOffset.Y / promptSize.Height.Offset)
             }
-            MaxDistance={prompt.MaxActivationDistance}
+            MaxDistance={prompt.MaxActivationDistance + 50}
         >
             {isInteractive && (
                 <textbutton
@@ -477,6 +578,7 @@ export default function ProximityPromptGui({
                 </frame>
                 {/* Object Text */}
                 <textlabel
+                    ref={objectTextRef}
                     BackgroundTransparency={1}
                     FontFace={RobotoMono}
                     Position={objectTextPosition}
@@ -491,6 +593,7 @@ export default function ProximityPromptGui({
                 />
                 {/* Action Text */}
                 <textlabel
+                    ref={actionTextRef}
                     BackgroundTransparency={1}
                     FontFace={RobotoMonoBold}
                     Position={actionTextPosition}
@@ -511,6 +614,9 @@ export default function ProximityPromptGui({
 export function ProximityPromptGuiRenderer() {
     const [prompt, setPrompt] = useState<ProximityPrompt | undefined>();
     const [inputType, setInputType] = useState<Enum.ProximityPromptInputType>(Enum.ProximityPromptInputType.Keyboard);
+    const [isVisible, setIsVisible] = useState(false);
+    const [isFadingOut, setIsFadingOut] = useState(false);
+    const [shouldFadeIn, setShouldFadeIn] = useState(false);
 
     useEffect(() => {
         const prompts = new Set<ProximityPrompt>();
@@ -520,54 +626,104 @@ export function ProximityPromptGuiRenderer() {
                 if (!prompt.IsA("ProximityPrompt")) return;
                 prompts.add(prompt);
             },
-            (instance) => {
-                if (instance.IsA("ProximityPrompt")) {
-                    prompts.delete(instance);
-                }
+            (prompt) => {
+                if (!prompt.IsA("ProximityPrompt")) return;
+                prompts.delete(prompt);
             },
         );
 
-        const intervalCleanup = simpleInterval(() => {
-            const character = getPlayerCharacter();
-            if (!character) return;
+        if (IS_EDIT) {
+            const intervalCleanup = simpleInterval(() => {
+                const character = getPlayerCharacter();
+                if (!character) return;
 
-            // Find the closest prompt in range
-            let closestPrompt: ProximityPrompt | undefined;
-            let closestDistance = math.huge;
+                // Find the closest prompt in range
+                let closestPrompt: ProximityPrompt | undefined;
+                let closestDistance = math.huge;
 
-            const position = character.GetPivot().Position;
-            for (const prompt of prompts) {
-                if (!prompt.Enabled || prompt.Parent === undefined || !prompt.Parent.IsA("PVInstance")) continue;
-                const distance = position.sub(prompt.Parent.GetPivot().Position).Magnitude;
-                if (distance < prompt.MaxActivationDistance && distance < closestDistance) {
-                    closestPrompt = prompt;
-                    closestDistance = distance;
+                const position = character.GetPivot().Position;
+                for (const prompt of prompts) {
+                    if (!prompt.Enabled || prompt.Parent === undefined || !prompt.Parent.IsA("PVInstance")) continue;
+                    const distance = position.sub(prompt.Parent.GetPivot().Position).Magnitude;
+                    if (distance < prompt.MaxActivationDistance && distance < closestDistance) {
+                        closestPrompt = prompt;
+                        closestDistance = distance;
+                    }
                 }
-            }
-            setPrompt(closestPrompt);
-        }, 1);
 
-        const inputTypeChangedConnection = UserInputService.LastInputTypeChanged.Connect((newInputType) => {
-            if (newInputType === Enum.UserInputType.Touch || newInputType === Enum.UserInputType.Accelerometer) {
-                setInputType(Enum.ProximityPromptInputType.Touch);
-            } else if (
-                newInputType === Enum.UserInputType.Gamepad1 ||
-                newInputType === Enum.UserInputType.Gamepad2 ||
-                newInputType === Enum.UserInputType.Gamepad3 ||
-                newInputType === Enum.UserInputType.Gamepad4
-            ) {
-                setInputType(Enum.ProximityPromptInputType.Gamepad);
-            } else {
-                setInputType(Enum.ProximityPromptInputType.Keyboard);
-            }
+                if (closestPrompt !== prompt) {
+                    if (closestPrompt) {
+                        setPrompt(closestPrompt);
+                        setIsVisible(true);
+                        setIsFadingOut(false);
+                        setShouldFadeIn(true);
+                    } else {
+                        // Start fade out animation
+                        setIsFadingOut(true);
+                        setShouldFadeIn(false);
+                    }
+                }
+            }, 1);
+
+            const inputTypeChangedConnection = UserInputService.LastInputTypeChanged.Connect((newInputType) => {
+                if (newInputType === Enum.UserInputType.Touch || newInputType === Enum.UserInputType.Accelerometer) {
+                    setInputType(Enum.ProximityPromptInputType.Touch);
+                } else if (
+                    newInputType === Enum.UserInputType.Gamepad1 ||
+                    newInputType === Enum.UserInputType.Gamepad2 ||
+                    newInputType === Enum.UserInputType.Gamepad3 ||
+                    newInputType === Enum.UserInputType.Gamepad4
+                ) {
+                    setInputType(Enum.ProximityPromptInputType.Gamepad);
+                } else {
+                    setInputType(Enum.ProximityPromptInputType.Keyboard);
+                }
+            });
+
+            return () => {
+                proximityPromptWorldNode.cleanup();
+                intervalCleanup();
+                inputTypeChangedConnection.Disconnect();
+            };
+        }
+
+        const promptServiceConnection = ProximityPromptService.PromptShown.Connect((prompt, inputType) => {
+            setPrompt(prompt);
+            setInputType(inputType);
+            setIsVisible(true);
+            setIsFadingOut(false);
+            setShouldFadeIn(true);
+        });
+
+        const promptHiddenConnection = ProximityPromptService.PromptHidden.Connect(() => {
+            // Start fade out animation instead of immediately hiding
+            setIsFadingOut(true);
+            setShouldFadeIn(false);
         });
 
         return () => {
             proximityPromptWorldNode.cleanup();
-            intervalCleanup();
-            inputTypeChangedConnection.Disconnect();
+            promptServiceConnection.Disconnect();
+            promptHiddenConnection.Disconnect();
         };
     });
 
-    return prompt ? <ProximityPromptGui prompt={prompt} inputType={inputType} /> : <Fragment />;
+    // Handle fade out animation completion
+    useEffect(() => {
+        if (!isFadingOut) return;
+
+        // Wait for animations to complete before unmounting
+        const fadeOutDuration = 0.2; // Match the tween duration
+        task.wait(fadeOutDuration);
+
+        setPrompt(undefined);
+        setIsVisible(false);
+        setIsFadingOut(false);
+    }, [isFadingOut]);
+
+    return prompt && isVisible ? (
+        <ProximityPromptGui prompt={prompt} inputType={inputType} fadeOut={isFadingOut} fadeIn={shouldFadeIn} />
+    ) : (
+        <Fragment />
+    );
 }

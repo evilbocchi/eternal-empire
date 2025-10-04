@@ -12,12 +12,11 @@
 
 import { convertToMMSS, simpleInterval, weldModel } from "@antivivi/vrldk";
 import { OnInit, OnStart, Service } from "@flamework/core";
-import { TweenService, Workspace } from "@rbxts/services";
+import { CollectionService, TweenService, Workspace } from "@rbxts/services";
 import DataService from "server/services/data/DataService";
 import LevelService from "server/services/data/LevelService";
 import ItemService from "server/services/item/ItemService";
-import { ASSETS, getSound, SOUND_EFFECTS_GROUP } from "shared/asset/GameAssets";
-import { IS_EDIT } from "shared/Context";
+import { ASSETS, playSound } from "shared/asset/GameAssets";
 import eat from "shared/hamster/eat";
 import Item from "shared/item/Item";
 import Crystal from "shared/items/excavation/Crystal";
@@ -171,8 +170,14 @@ export default class ChestService implements OnInit, OnStart {
     /** Chest cooldown in seconds. */
     cooldown = 900;
 
-    /** Map of chest locations to chest models. */
-    chestPerChestLocation = new Map<Vector3, ChestModel>();
+    readonly chests = new Map<
+        Vector3,
+        {
+            markLastOpen: (lastOpen: number) => void;
+            model: ChestModel;
+            cleanup: () => void;
+        }
+    >();
 
     /** Tween info for chest lid animation. */
     openTweenInfo = new TweenInfo(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out);
@@ -198,11 +203,9 @@ export default class ChestService implements OnInit, OnStart {
      * @param lastOpen The last open timestamp.
      */
     markLastOpen(chestLocation: Vector3, lastOpen: number) {
-        const chest = this.chestPerChestLocation.get(chestLocation);
+        const chest = this.chests.get(chestLocation);
         if (chest === undefined) return false;
-        const bindableEvent = chest.FindFirstChild("MarkLastOpen") as BindableEvent;
-        if (bindableEvent === undefined) throw `Chest at ${chestLocation} does not have a MarkLastOpen BindableEvent`;
-        bindableEvent.Fire(lastOpen);
+        chest.markLastOpen(lastOpen);
         return true;
     }
 
@@ -308,102 +311,99 @@ export default class ChestService implements OnInit, OnStart {
      * Spawns chests in all areas, sets up chest logic, and restores previous state.
      */
     onStart() {
-        const createdChests = new Set<Model>();
-        const cleanups = new Array<() => void>();
-        for (const [_id, area] of pairs(AREAS)) {
-            const chestsFolder = area.worldNode.getInstance()?.FindFirstChild("Chests");
-            if (chestsFolder === undefined) continue;
-            const chestLocations = chestsFolder.GetChildren();
-            for (const chestLocationMarker of chestLocations) {
-                if (!chestLocationMarker.IsA("BasePart")) continue;
-                if (!IS_EDIT) {
-                    chestLocationMarker.FrontSurface = Enum.SurfaceType.Smooth;
-                    chestLocationMarker.Transparency = 1;
-                }
-                const chestModel = ASSETS.Chest.Clone();
-                chestModel.PivotTo(chestLocationMarker.CFrame);
-                const sound = getSound("ChestOpen.mp3").Clone();
-                sound.SoundGroup = SOUND_EFFECTS_GROUP;
-                sound.Parent = chestModel.PrimaryPart;
+        let i = 0;
+        for (const chestMarker of CollectionService.GetTagged("ChestMarker")) {
+            // Sanity checks
+            if (!chestMarker.IsA("BasePart")) continue;
 
-                const prompt = new Instance("ProximityPrompt");
-                prompt.ActionText = "Open";
-                prompt.ObjectText = "Chest";
-                prompt.RequiresLineOfSight = false;
-                prompt.MaxActivationDistance = 6;
-                const bp = weldModel(chestModel.Lid);
-                const originalLidPivot = bp.CFrame;
-                let lastOpen = 0;
-                let isOpened = false;
-                const markLastOpen = (lo: number) => {
-                    lastOpen = lo;
-                    isOpened = tick() - lastOpen < this.cooldown;
-                    TweenService.Create(bp, this.openTweenInfo, {
-                        CFrame: isOpened ? originalLidPivot.mul(CFrame.Angles(-1, 0, 0)) : originalLidPivot,
-                    }).Play();
-                    prompt.Enabled = !isOpened;
-                    chestModel.Hitbox.CooldownGui.Enabled = isOpened;
-                };
-                const intervalCleanup = simpleInterval(() => {
-                    const elapsed = tick() - lastOpen;
-                    if (elapsed > this.cooldown && isOpened === true) {
-                        isOpened = false;
-                        markLastOpen(lastOpen);
-                    }
-                    if (isOpened) {
-                        chestModel.Hitbox.CooldownGui.CooldownLabel.Text = convertToMMSS(
-                            math.floor(this.cooldown - elapsed),
-                        );
-                    }
-                }, 1);
-                const bindableEvent = new Instance("BindableEvent");
-                bindableEvent.Name = "MarkLastOpen";
-                const eventConnection = bindableEvent.Event.Connect((lastOpen: number) => markLastOpen(lastOpen));
-                bindableEvent.Parent = chestModel;
-                const chestLocation = this.round(chestLocationMarker.Position);
-                this.chestPerChestLocation.set(chestLocation, chestModel);
-                const triggerCleanup = CustomProximityPrompt.onTrigger(prompt, () => {
-                    if (!prompt.Enabled) return;
-                    if (this.dataService.empireData.unlockedAreas.has(area.name as AreaId)) return;
-                    sound.Play();
-                    const t = tick();
-                    const amount = lastOpen === 0 ? math.random(10, 14) : math.random(3, 7);
-                    this.dataService.empireData.openedChests.set(
-                        `${chestLocation.X}_${chestLocation.Y}_${chestLocation.Z}`,
-                        t,
+            const areaFolder = chestMarker.Parent?.Parent;
+            if (areaFolder === undefined) continue;
+
+            const area = AREAS[areaFolder.Name as AreaId];
+            if (area === undefined) {
+                warn(`Chest marker ${chestMarker.GetFullName()} is not in a valid area`);
+                continue;
+            }
+
+            const chestLocation = this.round(chestMarker.Position);
+
+            const chestModel = ASSETS.Chest.Clone();
+            chestModel.PivotTo(chestMarker.CFrame);
+            chestModel.Name = `Chest_${i++}`;
+            chestModel.Parent = Workspace;
+
+            const prompt = new Instance("ProximityPrompt");
+            prompt.Style = Enum.ProximityPromptStyle.Custom;
+            prompt.ActionText = "Open";
+            prompt.ObjectText = "Chest";
+            prompt.RequiresLineOfSight = false;
+            prompt.MaxActivationDistance = 6;
+            prompt.Parent = chestModel.PrimaryPart;
+
+            const bp = weldModel(chestModel.Lid);
+            const originalLidPivot = bp.CFrame;
+            let lastOpen = 0;
+            let isOpened = false;
+            const markLastOpen = (lo: number) => {
+                lastOpen = lo;
+                isOpened = tick() - lastOpen < this.cooldown;
+                TweenService.Create(bp, this.openTweenInfo, {
+                    CFrame: isOpened ? originalLidPivot.mul(CFrame.Angles(-1, 0, 0)) : originalLidPivot,
+                }).Play();
+                prompt.Enabled = !isOpened;
+                chestModel.Hitbox.CooldownGui.Enabled = isOpened;
+            };
+            const intervalCleanup = simpleInterval(() => {
+                const elapsed = tick() - lastOpen;
+                if (elapsed > this.cooldown && isOpened === true) {
+                    isOpened = false;
+                    markLastOpen(lastOpen);
+                }
+                if (isOpened) {
+                    chestModel.Hitbox.CooldownGui.CooldownLabel.Text = convertToMMSS(
+                        math.floor(this.cooldown - elapsed),
                     );
-                    markLastOpen(t);
-                    task.delay(0.25, () => {
-                        this.openChest(chestLocationMarker.Name, amount);
-                    });
+                }
+            }, 1);
+
+            const triggerCleanup = CustomProximityPrompt.onTrigger(prompt, () => {
+                if (!this.dataService.empireData.unlockedAreas.has(area.id)) return;
+
+                playSound("ChestOpen.mp3", chestModel.PrimaryPart);
+                const t = tick();
+                const amount = lastOpen === 0 ? math.random(10, 14) : math.random(3, 7);
+                this.dataService.empireData.openedChests.set(
+                    `${chestLocation.X}_${chestLocation.Y}_${chestLocation.Z}`,
+                    t,
+                );
+                markLastOpen(t);
+                task.delay(0.25, () => {
+                    this.openChest(chestMarker.Name, amount);
                 });
-                cleanups.push(() => {
+            });
+
+            this.chests.set(chestLocation, {
+                markLastOpen,
+                model: chestModel,
+                cleanup: () => {
+                    chestModel.Destroy();
                     intervalCleanup();
                     triggerCleanup();
-                    eventConnection.Disconnect();
-                });
-                prompt.Parent = chestModel.PrimaryPart;
-                chestModel.Parent = Workspace;
-                createdChests.add(chestModel);
-            }
+                },
+            });
         }
+
         eat(() => {
-            for (const chest of createdChests) {
-                chest.Destroy();
+            for (const [, chest] of this.chests) {
+                chest.cleanup();
             }
-            for (const cleanup of cleanups) {
-                cleanup();
-            }
-            createdChests.clear();
+            this.chests.clear();
         });
 
         const lastOpenPerLocation = this.dataService.empireData.openedChests;
         for (const [location, lastOpen] of lastOpenPerLocation) {
             const [xString, yString, zString] = location.split("_");
-            if (
-                this.markLastOpen(new Vector3(tonumber(xString), tonumber(yString), tonumber(zString)), lastOpen) ===
-                false
-            ) {
+            if (!this.markLastOpen(new Vector3(tonumber(xString), tonumber(yString), tonumber(zString)), lastOpen)) {
                 lastOpenPerLocation.delete(location);
             }
         }

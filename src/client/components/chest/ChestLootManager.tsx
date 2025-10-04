@@ -6,6 +6,7 @@
 import React, { Fragment, useEffect, useState } from "@rbxts/react";
 import ChestLootNotification from "client/components/chest/ChestLootNotification";
 import Packets from "shared/Packets";
+import WorldNode from "shared/world/nodes/WorldNode";
 
 /**
  * Manager component that handles chest loot notifications
@@ -24,8 +25,15 @@ export default function ChestLootManager() {
             });
         });
 
+        const chestMarkerWorldNode = new WorldNode<BasePart>(
+            "ChestMarker",
+            (instance) => (instance.LocalTransparencyModifier = 1),
+            (instance) => (instance.LocalTransparencyModifier = 0),
+        );
+
         return () => {
             connection.Disconnect();
+            chestMarkerWorldNode.cleanup();
         };
     }, []);
 
