@@ -1,7 +1,7 @@
 import { Profile } from "@antivivi/profileservice/globals";
 import { OnoeNum } from "@antivivi/serikanum";
 import { OnStart, Service } from "@flamework/core";
-import { HttpService, Players } from "@rbxts/services";
+import { Players } from "@rbxts/services";
 import { Environment } from "@rbxts/ui-labs";
 import { OnPlayerAdded } from "server/services/ModdingService";
 import { getNameFromUserId } from "shared/constants";
@@ -54,7 +54,7 @@ export default class DataService implements OnStart, OnPlayerAdded {
 
         // Determine empire ID based on server type and environment
         if (IS_EDIT) {
-            empireId = HttpService.GenerateGUID(false);
+            empireId = "EDIT";
         } else if (IS_STUDIO) {
             // Studio environment - get ID from value in the data model
             empireId = EmpireIdOverrideValue.waitForInstance().Value;
