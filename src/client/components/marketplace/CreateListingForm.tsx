@@ -13,7 +13,7 @@ import Packets from "shared/Packets";
 export default function CreateListingForm({
     onSubmit,
 }: {
-    onSubmit: (uuid: string, price: number, listingType: "buyout" | "auction", duration: number) => void;
+    onSubmit: (uuid: string, price: number, listingType: "buyout" | "auction", duration: number) => boolean;
 }) {
     const [selectedUuid, setSelectedUuid] = useState("");
     const [price, setPrice] = useState("");
@@ -53,12 +53,17 @@ export default function CreateListingForm({
         const durationNum = tonumber(duration);
         if (!durationNum || durationNum <= 0) return;
 
-        onSubmit(selectedUuid, priceNum, listingType, durationNum * 24 * 60 * 60);
+        const success = onSubmit(selectedUuid, priceNum, listingType, durationNum * 24 * 60 * 60);
+        if (success) {
+            playSound("Success.mp3");
+        } else {
+            playSound("Error.mp3");
+        }
 
         // Reset form
         setSelectedUuid("");
         setPrice("");
-        setDuration("7");
+        setDuration("");
     };
 
     const availableInstanceElements = new Array<JSX.Element>();
@@ -276,7 +281,7 @@ export default function CreateListingForm({
                         PlaceholderText="Enter price in Diamonds"
                         PlaceholderColor3={Color3.fromRGB(120, 140, 175)}
                         TextColor3={Color3.fromRGB(226, 238, 255)}
-                        Text=""
+                        Text={price}
                         TextScaled={true}
                         TextXAlignment={Enum.TextXAlignment.Left}
                         FontFace={RobotoMono}
@@ -383,7 +388,7 @@ export default function CreateListingForm({
                         Size={new UDim2(1, 0, 0, 26)}
                         PlaceholderText="7"
                         PlaceholderColor3={Color3.fromRGB(120, 140, 175)}
-                        Text=""
+                        Text={duration}
                         TextColor3={Color3.fromRGB(226, 238, 255)}
                         TextScaled={true}
                         TextXAlignment={Enum.TextXAlignment.Left}

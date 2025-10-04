@@ -75,9 +75,15 @@ export default class MarketplaceService implements OnInit, OnStart {
     }
 
     onStart() {
-        // Start cleanup cycle for expired listings
+        // Start cleanup cycle for expired listings every 5 minutes (300 seconds)
+        const CLEANUP_INTERVAL = 300; // seconds
+        let lastCleanup = 0;
         const connection = RunService.Heartbeat.Connect(() => {
-            this.cleanupExpiredListings();
+            const now = os.time();
+            if (now - lastCleanup >= CLEANUP_INTERVAL) {
+                lastCleanup = now;
+                this.cleanupExpiredListings();
+            }
         });
         eat(connection);
 
@@ -597,12 +603,6 @@ export default class MarketplaceService implements OnInit, OnStart {
      */
     private recoverInterruptedTrades() {
         try {
-            // Check for any processing tokens that need to be completed or rolled back
-            // This would query the external webhook system for any unresolved tokens
-
-            warn("Trade recovery system initialized");
-
-            // Also recover expired listings and return items to sellers
             this.recoverExpiredListings();
         } catch (error) {
             warn("Error during trade recovery:", error);
@@ -619,7 +619,7 @@ export default class MarketplaceService implements OnInit, OnStart {
                 const currentTime = os.time();
                 const expiredListingsBySeller = new Map<number, { uuid: string; listing: MarketplaceListing }[]>();
 
-                warn("Starting expired listings recovery...");
+                print("Starting expired listings recovery...");
 
                 // Use ListKeysAsync to find all expired listings
                 const [success, pages] = pcall(() => this.marketplaceDataStore.ListKeysAsync());
@@ -667,7 +667,7 @@ export default class MarketplaceService implements OnInit, OnStart {
                     return;
                 }
 
-                warn(`Found ${expiredListingsBySeller.size()} sellers with expired listings`);
+                print(`Found ${expiredListingsBySeller.size()} sellers with expired listings`);
 
                 // Second pass: load each seller's profile and return their items
                 for (const [sellerId, expiredListings] of expiredListingsBySeller) {

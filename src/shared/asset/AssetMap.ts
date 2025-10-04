@@ -171,6 +171,7 @@ export const assets = {
   "assets/sounds/ShopClose.mp3": "rbxassetid://133432931277700",
   "assets/sounds/ShopOpen.mp3": "rbxassetid://92451647256481",
   "assets/sounds/Splash.mp3": "rbxassetid://129669875728815",
+  "assets/sounds/Success.mp3": "rbxassetid://71789578908906",
   "assets/sounds/SwitchFlick.mp3": "rbxassetid://89314944390115",
   "assets/sounds/SwordSwing.mp3": "rbxassetid://120907869502180",
   "assets/sounds/Teleport.mp3": "rbxassetid://106444457927091",

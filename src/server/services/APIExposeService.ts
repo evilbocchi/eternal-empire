@@ -21,7 +21,7 @@ import SetupService from "server/services/data/SetupService";
 import { DonationService } from "server/services/DonationService";
 import ItemService from "server/services/item/ItemService";
 import { LeaderboardService } from "server/services/leaderboard/LeaderboardService";
-import MarketplaceService from "server/services/marketplace/MarketplaceService";
+import MarketplaceService from "server/services/item/MarketplaceService";
 import ModdingService from "server/services/ModdingService";
 import ChatHookService from "server/services/permissions/ChatHookService";
 import PermissionsService from "server/services/permissions/PermissionsService";

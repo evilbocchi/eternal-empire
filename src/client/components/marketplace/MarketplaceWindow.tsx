@@ -104,7 +104,7 @@ export default function MarketplaceWindow() {
     };
 
     const handleCreateListing = (uuid: string, price: number, listingType: "buyout" | "auction", duration: number) => {
-        Packets.createListing.toServer(uuid, price, listingType, duration);
+        return Packets.createListing.toServer(uuid, price, listingType, duration);
     };
 
     const handleSearch = (query: string) => {
