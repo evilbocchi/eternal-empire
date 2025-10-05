@@ -10,7 +10,7 @@ import React, { useEffect, useRef, useState } from "@rbxts/react";
 import { StarterGui, Workspace } from "@rbxts/services";
 import { Environment } from "@rbxts/ui-labs";
 import GearOption, { layoutOrderFromGear } from "client/components/backpack/GearOption";
-import { useDocument } from "client/components/window/DocumentManager";
+import DocumentManager, { useDocument } from "client/components/window/DocumentManager";
 import { LOCAL_PLAYER, observeCharacter } from "client/constants";
 import { playSound } from "shared/asset/GameAssets";
 import { IS_EDIT } from "shared/Context";
@@ -64,6 +64,8 @@ const equipGear = (itemId: string) => {
  */
 export default function BackpackWindow() {
     const ref = useRef<Frame>();
+    const shouldRestoreAfterBuild = useRef(false);
+    const expectingBackpackHide = useRef(false);
     const [gears, setGears] = useState<Set<Gear>>(new Set());
     const [equippedGear, setEquippedGear] = useState<Gear | undefined>(undefined);
     const { visible } = useDocument({ id: "Backpack", priority: -1 });
@@ -209,6 +211,39 @@ export default function BackpackWindow() {
             const [bestTools] = Gear.getBestGearsFromInventory(inventory, Items.itemsPerId);
             setGears(bestTools);
         });
+        return () => connection.Disconnect();
+    }, []);
+
+    useEffect(() => {
+        const connection = DocumentManager.visibilityChanged.connect((id, isVisible) => {
+            if (id === "Build") {
+                if (isVisible) {
+                    if (DocumentManager.isVisible("Backpack")) {
+                        shouldRestoreAfterBuild.current = true;
+                        expectingBackpackHide.current = true;
+                        DocumentManager.setVisible("Backpack", false);
+                    } else {
+                        shouldRestoreAfterBuild.current = false;
+                    }
+                } else {
+                    if (shouldRestoreAfterBuild.current && !DocumentManager.isVisible("Backpack")) {
+                        DocumentManager.setVisible("Backpack", true);
+                    }
+                    shouldRestoreAfterBuild.current = false;
+                }
+            } else if (id === "Backpack") {
+                if (!isVisible) {
+                    if (expectingBackpackHide.current) {
+                        expectingBackpackHide.current = false;
+                    } else {
+                        shouldRestoreAfterBuild.current = false;
+                    }
+                } else {
+                    expectingBackpackHide.current = false;
+                }
+            }
+        });
+
         return () => connection.Disconnect();
     }, []);
 
