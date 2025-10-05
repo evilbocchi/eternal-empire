@@ -47,6 +47,11 @@ local function sendInstanceTree()
             }
         }
     }
+
+    if RunService:IsRunning() then
+        return -- only send when not running
+    end
+
     local json = HttpService:JSONEncode(trees)
     pcall(function()
         HttpService:PostAsync(getEndpoint(), json, Enum.HttpContentType.ApplicationJson)

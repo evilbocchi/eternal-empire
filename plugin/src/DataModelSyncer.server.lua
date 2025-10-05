@@ -347,6 +347,10 @@ local function handleResponse(decoded, pending)
 end
 
 local function dispatch(payload, pending)
+    if RunService:IsRunning() then
+        return -- only send when not running
+    end
+
     local ok, encoded = pcall(function()
         return HttpService:JSONEncode(payload)
     end)
