@@ -1,37 +1,73 @@
 import Difficulty from "@rbxts/ejt";
-import React from "@rbxts/react";
+import { packet, request, signal } from "@rbxts/fletchette";
+import React, { Fragment } from "@rbxts/react";
 import { createRoot } from "@rbxts/react-roblox";
+import { StarterGui, TweenService } from "@rbxts/services";
 import { ITEM_PER_ID } from "shared/api/APIExpose";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
+import { perItemProperty } from "shared/item/utils/perItemPacket";
 
-function ResearchBoard({ items }: { items: Map<string, Item> }) {
+const difficultyPacket = perItemProperty(
+    signal<(placementId: string, difficultyId: string) => void>(),
+    request<(placementId: string) => string>(),
+);
+const setDifficultyPacket = packet<(placementId: string, difficultyId: string) => void>();
+
+function ResearchBoard({
+    adornee,
+    placementId,
+    items,
+}: {
+    adornee: BasePart;
+    placementId: string;
+    items: Map<string, Item>;
+}) {
     const difficulties = new Set<Difficulty>();
     for (const [, item] of items) {
         const difficulty = item.difficulty;
-        if (difficulty.class === -99) continue;
+        if (difficulty.class === -99 || difficulty === Difficulty.Bonuses || difficulty === Difficulty.Excavation)
+            continue;
         difficulties.add(difficulty);
     }
 
     const options = new Array<JSX.Element>();
     for (const difficulty of difficulties) {
         options.push(
-            <imagelabel
+            <imagebutton
                 key={difficulty.id}
+                Active={true}
+                AutoButtonColor={false}
                 BackgroundColor3={difficulty.color}
                 BorderColor3={Color3.fromRGB(0, 0, 0)}
                 BorderSizePixel={2}
                 Image={difficulty.image}
                 Size={new UDim2(1, 0, 1, 0)}
                 LayoutOrder={difficulty.layoutRating}
+                Event={{
+                    Activated: () => {
+                        setDifficultyPacket.toServer(placementId, difficulty.id);
+                    },
+                    MouseEnter: (rbx) => {
+                        TweenService.Create(rbx, new TweenInfo(0.1), {
+                            ImageTransparency: 0.5,
+                        }).Play();
+                    },
+                    MouseLeave: (rbx) => {
+                        TweenService.Create(rbx, new TweenInfo(0.1), {
+                            ImageTransparency: 0,
+                        }).Play();
+                    },
+                }}
             >
                 <uiaspectratioconstraint />
-            </imagelabel>,
+            </imagebutton>,
         );
     }
 
     return (
         <surfacegui
+            Adornee={adornee}
             ClipsDescendants={true}
             LightInfluence={1}
             MaxDistance={1000}
@@ -74,11 +110,23 @@ export = new Item(script.Name)
     .placeableEverywhere()
     .persists()
 
-    .onClientLoad((model, item) => {
-        const selectRoot = createRoot(model.WaitForChild("DifficultySelect"));
-        selectRoot.render(<ResearchBoard items={ITEM_PER_ID} />);
+    .onClientLoad((model, item, player) => {
+        const folder = new Instance("Folder");
+        folder.Name = `ResearchBoard-${model.Name}`;
+        folder.Parent = player?.FindFirstChild("PlayerGui") ?? StarterGui;
+        const root = createRoot(folder);
+
+        const selectPart = model.WaitForChild("DifficultySelect") as BasePart;
+        root.render(
+            <Fragment>
+                <ResearchBoard adornee={selectPart} placementId={model.Name} items={ITEM_PER_ID} />
+            </Fragment>,
+        );
+
+        difficultyPacket.observe(model, (difficultyId) => {});
 
         model.Destroying.Once(() => {
-            selectRoot.unmount();
+            root.unmount();
+            folder.Destroy();
         });
     });
