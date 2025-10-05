@@ -1,3 +1,4 @@
+import { ITEM_PER_ID } from "shared/api/APIExpose";
 import Command, { CommandAPI } from "shared/commands/Command";
 
 export = new Command(script.Name)
@@ -8,7 +9,7 @@ export = new Command(script.Name)
     .setExecute((_o, item, amount) => {
         const a = tonumber(amount) ?? 0;
         const giveItem = (id: string) => {
-            const item = CommandAPI.Items.itemsPerId.get(id);
+            const item = ITEM_PER_ID.get(id);
             if (!item) {
                 warn(`Item with id ${id} does not exist.`);
                 return;
@@ -21,7 +22,7 @@ export = new Command(script.Name)
             }
         };
         if (item === "all") {
-            for (const [id, _] of CommandAPI.Items.itemsPerId) {
+            for (const [id, _] of ITEM_PER_ID) {
                 giveItem(id);
             }
             return;
