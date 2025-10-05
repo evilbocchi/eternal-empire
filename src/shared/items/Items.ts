@@ -1,5 +1,6 @@
 import Difficulty from "@rbxts/ejt";
 import { ITEM_PER_ID } from "shared/api/APIExpose";
+import { getAsset } from "shared/asset/AssetMap";
 import Item from "shared/item/Item";
 import type Charm from "shared/item/traits/Charm";
 import HARVESTABLES from "shared/world/harvestable/Harvestable";
@@ -142,6 +143,11 @@ abstract class Items {
      */
     static setItem(itemId: string, item: Item) {
         this.itemsPerId.set(itemId, item);
+    }
+
+    static {
+        Difficulty.Excavation.setImage(Difficulty.Construct.image!);
+        Difficulty.Miscellaneous.setImage(getAsset("assets/MiscellaneousDifficulty.png"));
     }
 }
 
