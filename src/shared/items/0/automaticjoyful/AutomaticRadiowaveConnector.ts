@@ -1,4 +1,4 @@
-import Difficulty from "@antivivi/jjt-difficulties";
+import Difficulty from "@rbxts/ejt";
 import { simpleInterval } from "@antivivi/vrldk";
 import { ReplicatedStorage } from "@rbxts/services";
 import { Server } from "shared/api/APIExpose";

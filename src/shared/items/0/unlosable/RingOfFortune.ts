@@ -1,4 +1,4 @@
-import Difficulty from "@antivivi/jjt-difficulties";
+import Difficulty from "@rbxts/ejt";
 import { findBaseParts } from "@antivivi/vrldk";
 import { CollectionService, Workspace } from "@rbxts/services";
 import { Server } from "shared/api/APIExpose";

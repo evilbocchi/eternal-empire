@@ -1,4 +1,4 @@
-import Difficulty from "@antivivi/jjt-difficulties";
+import Difficulty from "@rbxts/ejt";
 import { OnoeNum } from "@antivivi/serikanum";
 import { Server } from "shared/api/APIExpose";
 import CurrencyBundle from "shared/currency/CurrencyBundle";

@@ -1,4 +1,4 @@
-import Difficulty from "@antivivi/jjt-difficulties";
+import Difficulty from "@rbxts/ejt";
 import { simpleInterval } from "@antivivi/vrldk";
 import { Players } from "@rbxts/services";
 import CurrencyBundle from "shared/currency/CurrencyBundle";

@@ -1,4 +1,4 @@
-import Difficulty from "@antivivi/jjt-difficulties";
+import Difficulty from "@rbxts/ejt";
 import Conveyor from "shared/item/traits/conveyor/Conveyor";
 import Furnace from "shared/item/traits/Furnace";
 import Item from "shared/item/Item";

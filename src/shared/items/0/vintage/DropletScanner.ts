@@ -1,6 +1,6 @@
 //!native
 //!optimize 2
-import Difficulty from "@antivivi/jjt-difficulties";
+import Difficulty from "@rbxts/ejt";
 import { OnoeNum } from "@antivivi/serikanum";
 import { formatRichText, getAllInstanceInfo, getInstanceInfo } from "@antivivi/vrldk";
 import { packet } from "@rbxts/fletchette";

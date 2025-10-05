@@ -1,4 +1,4 @@
-import Difficulty from "@antivivi/jjt-difficulties";
+import Difficulty from "@rbxts/ejt";
 import { setInstanceInfo } from "@antivivi/vrldk";
 import { Players, Workspace } from "@rbxts/services";
 import { Server } from "shared/api/APIExpose";

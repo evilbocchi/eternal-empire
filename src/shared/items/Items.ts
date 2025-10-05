@@ -1,4 +1,4 @@
-import Difficulty from "@antivivi/jjt-difficulties";
+import Difficulty from "@rbxts/ejt";
 import Item from "shared/item/Item";
 import type Charm from "shared/item/traits/Charm";
 import HARVESTABLES from "shared/world/harvestable/Harvestable";
@@ -88,9 +88,9 @@ abstract class Items {
             sortedItems.push(item);
         }
         sortedItems = sortedItems.sort((a, b) => {
-            if (a.difficulty.rating !== undefined && b.difficulty.rating !== undefined) {
-                if (a.difficulty.rating !== b.difficulty.rating) {
-                    return a.difficulty.rating < b.difficulty.rating!;
+            if (a.difficulty.layoutRating !== undefined && b.difficulty.layoutRating !== undefined) {
+                if (a.difficulty.layoutRating !== b.difficulty.layoutRating) {
+                    return a.difficulty.layoutRating < b.difficulty.layoutRating!;
                 }
             }
             const aIndex = indexesInShop.get(a);

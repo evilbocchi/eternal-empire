@@ -1,4 +1,4 @@
-import Difficulty from "@antivivi/jjt-difficulties";
+import Difficulty from "@rbxts/ejt";
 import { getAllInstanceInfo } from "@antivivi/vrldk";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import eat from "shared/hamster/eat";
@@ -15,7 +15,7 @@ export = new Item(script.Name)
     .setDescription(
         "Stop being lazy and start exercising. Run on the treadmill to activate the dropper, producing %val% droplets per second.",
     )
-    .setDifficulty(Difficulty.FelixTheA)
+    .setDifficulty(Difficulty.FelixTheDA)
     .setPrice(new CurrencyBundle().set("Funds", 5e12))
     .setRequiredItemAmount(WhiteGem, 18)
     .setRequiredItemAmount(StaleWood, 10)

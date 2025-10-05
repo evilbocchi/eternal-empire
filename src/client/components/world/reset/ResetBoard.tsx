@@ -1,4 +1,4 @@
-import Difficulty from "@antivivi/jjt-difficulties";
+import Difficulty from "@rbxts/ejt";
 import React, { ReactNode } from "@rbxts/react";
 import { RobotoMonoBold, RobotoSlabHeavy } from "shared/asset/GameFonts";
 
@@ -22,7 +22,7 @@ export default function BasicResetBoardFrontGui({
         >
             <imagelabel
                 BackgroundTransparency={1}
-                Image={`rbxassetid://${difficulty.image}`}
+                Image={difficulty.image}
                 ImageTransparency={0.9}
                 ScaleType={Enum.ScaleType.Crop}
                 Size={new UDim2(1, 0, 1, 0)}

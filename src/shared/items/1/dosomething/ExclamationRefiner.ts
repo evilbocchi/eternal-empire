@@ -1,4 +1,4 @@
-import Difficulty from "@antivivi/jjt-difficulties";
+import Difficulty from "@rbxts/ejt";
 import { Workspace } from "@rbxts/services";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import { getAllPlayerCharacters } from "shared/hamster/getPlayerCharacter";

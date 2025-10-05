@@ -9,7 +9,7 @@
  * @since 1.0.0
  */
 
-import Difficulty from "@antivivi/jjt-difficulties";
+import Difficulty from "@rbxts/ejt";
 import { OnStart, Service } from "@flamework/core";
 import Item from "shared/item/Item";
 import Items from "shared/items/Items";

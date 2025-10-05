@@ -1,4 +1,4 @@
-import Difficulty from "@antivivi/jjt-difficulties";
+import Difficulty from "@rbxts/ejt";
 
 export default function getDifficultyDisplayColors(difficulty?: Difficulty): { background: Color3; text: Color3 } {
     const color = difficulty?.color ?? new Color3();

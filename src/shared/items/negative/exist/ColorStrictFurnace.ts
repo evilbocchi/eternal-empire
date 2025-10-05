@@ -1,4 +1,4 @@
-import Difficulty from "@antivivi/jjt-difficulties";
+import Difficulty from "@rbxts/ejt";
 import { getInstanceInfo, setInstanceInfo } from "@antivivi/vrldk";
 import { packet } from "@rbxts/fletchette";
 import { ReplicatedStorage } from "@rbxts/services";

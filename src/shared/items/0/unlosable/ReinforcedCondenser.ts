@@ -1,4 +1,4 @@
-import Difficulty from "@antivivi/jjt-difficulties";
+import Difficulty from "@rbxts/ejt";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Condenser from "shared/item/traits/dropper/Condenser";
 import Droplet from "shared/item/Droplet";

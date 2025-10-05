@@ -13,7 +13,7 @@
  * @since 1.0.0
  */
 
-import Difficulty from "@antivivi/jjt-difficulties";
+import Difficulty from "@rbxts/ejt";
 import { OnoeNum } from "@antivivi/serikanum";
 import { getAllInstanceInfo } from "@antivivi/vrldk";
 import { OnStart, Service } from "@flamework/core";

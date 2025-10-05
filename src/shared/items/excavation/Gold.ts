@@ -1,4 +1,4 @@
-import Difficulty from "@antivivi/jjt-difficulties";
+import Difficulty from "@rbxts/ejt";
 import Item from "shared/item/Item";
 
 export = new Item(script.Name)

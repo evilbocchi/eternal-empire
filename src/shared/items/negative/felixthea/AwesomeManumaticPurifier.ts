@@ -1,4 +1,4 @@
-import Difficulty from "@antivivi/jjt-difficulties";
+import Difficulty from "@rbxts/ejt";
 import { BaseOnoeNum, OnoeNum } from "@antivivi/serikanum";
 import { packet } from "@rbxts/fletchette";
 import PartCacheModule from "@rbxts/partcache";
@@ -23,7 +23,7 @@ export = new Item(script.Name)
     .setDescription(
         "A majestic tower standing through the innumerable trials. Applies a Funds boost to raised droplets passing through it. Click the structure to increase the boost!",
     )
-    .setDifficulty(Difficulty.FelixTheA)
+    .setDifficulty(Difficulty.FelixTheDA)
     .setPrice(new CurrencyBundle().set("Funds", OnoeNum.fromSerika(158, 12)), 1)
     .addPlaceableArea("BarrenIslands")
 

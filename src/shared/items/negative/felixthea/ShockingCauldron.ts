@@ -1,4 +1,4 @@
-import Difficulty from "@antivivi/jjt-difficulties";
+import Difficulty from "@rbxts/ejt";
 import Furnace from "shared/item/traits/Furnace";
 import Item from "shared/item/Item";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
@@ -10,7 +10,7 @@ const mul = new CurrencyBundle().set("Funds", 0);
 export = new Item(script.Name)
     .setName("Shocking Cauldron")
     .setDescription("A cauldron that scales with Power. Maxes out at %cap%, but uses %drain%.")
-    .setDifficulty(Difficulty.FelixTheA)
+    .setDifficulty(Difficulty.FelixTheDA)
     .setPrice(new CurrencyBundle().set("Funds", 30.8e12), 1)
     .addPlaceableArea("BarrenIslands")
 

@@ -1,4 +1,4 @@
-import Difficulty from "@antivivi/jjt-difficulties";
+import Difficulty from "@rbxts/ejt";
 import Item from "shared/item/Item";
 import Clicker from "shared/item/traits/action/Clicker";
 import SlamoClicker from "shared/items/0/millisecondless/SlamoClicker";

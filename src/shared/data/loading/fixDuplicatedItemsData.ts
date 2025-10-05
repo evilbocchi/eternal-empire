@@ -1,4 +1,4 @@
-import Difficulty from "@antivivi/jjt-difficulties";
+import Difficulty from "@rbxts/ejt";
 import Item from "shared/item/Item";
 import countItemEverywhere from "shared/item/utils/countItemEverywhere";
 import Items from "shared/items/Items";

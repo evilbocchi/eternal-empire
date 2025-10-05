@@ -1,4 +1,4 @@
-import Difficulty from "@antivivi/jjt-difficulties";
+import Difficulty from "@rbxts/ejt";
 import { OnoeNum } from "@antivivi/serikanum";
 import { getInstanceInfo } from "@antivivi/vrldk";
 import setDropletVelocity from "shared/item/utils/setDropletVelocity";

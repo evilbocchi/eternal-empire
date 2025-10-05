@@ -243,7 +243,7 @@ export default function TooltipWindow() {
                     <imagelabel
                         AnchorPoint={new Vector2(1, 0.5)}
                         BackgroundColor3={difficulty.color ?? Color3.fromRGB(255, 255, 255)}
-                        Image={`rbxassetid://${difficulty.image}`}
+                        Image={difficulty.image}
                         LayoutOrder={-1}
                         Position={new UDim2(1, -4, 0.5, 0)}
                         Size={new UDim2(0, 20, 0, 20)}

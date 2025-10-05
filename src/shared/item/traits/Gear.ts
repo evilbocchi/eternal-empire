@@ -52,7 +52,7 @@ export default class Gear extends ItemTrait {
             }
 
             const current = bestPerType.get(gear.type);
-            if (current === undefined || current.item.difficulty.rating! < gear.item.difficulty.rating!) {
+            if (current === undefined || current.item.difficulty.layoutRating! < gear.item.difficulty.layoutRating!) {
                 bestPerType.set(gear.type, gear);
                 if (current !== undefined) worse.add(current);
             }

@@ -1,4 +1,4 @@
-import Difficulty from "@antivivi/jjt-difficulties";
+import Difficulty from "@rbxts/ejt";
 import { OnoeNum } from "@antivivi/serikanum";
 import { RESET_LAYERS } from "shared/currency/mechanics/ResetLayer";
 import CurrencyBundle from "shared/currency/CurrencyBundle";

@@ -1,4 +1,4 @@
-import Difficulty from "@antivivi/jjt-difficulties";
+import Difficulty from "@rbxts/ejt";
 import { findBaseParts } from "@antivivi/vrldk";
 import { Workspace } from "@rbxts/services";
 import { playSound } from "shared/asset/GameAssets";

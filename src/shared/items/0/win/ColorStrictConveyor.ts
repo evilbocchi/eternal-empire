@@ -1,4 +1,4 @@
-import Difficulty from "@antivivi/jjt-difficulties";
+import Difficulty from "@rbxts/ejt";
 import { OnoeNum } from "@antivivi/serikanum";
 import { packet, property } from "@rbxts/fletchette";
 import { Server } from "shared/api/APIExpose";

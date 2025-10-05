@@ -1,4 +1,4 @@
-import Difficulty from "@antivivi/jjt-difficulties";
+import Difficulty from "@rbxts/ejt";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
 import Conveyor from "shared/item/traits/conveyor/Conveyor";
@@ -11,7 +11,7 @@ export = new Item(script.Name)
     .setDescription(
         "This upgrader's structure is still being built, but is still able to boost Funds by %add% on each upgrader. However, this drains %drain%.",
     )
-    .setDifficulty(Difficulty.FelixTheA)
+    .setDifficulty(Difficulty.FelixTheDA)
     .setPrice(new CurrencyBundle().set("Funds", 20e12), 1)
     .setRequiredItemAmount(Grass, 50)
     .setRequiredItemAmount(StaleWood, 20)

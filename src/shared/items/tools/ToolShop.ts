@@ -1,4 +1,4 @@
-import Difficulty from "@antivivi/jjt-difficulties";
+import Difficulty from "@rbxts/ejt";
 import Item from "shared/item/Item";
 import Gear from "shared/item/traits/Gear";
 import Shop from "shared/item/traits/Shop";
@@ -17,8 +17,8 @@ const shop = ToolShop.trait(Shop);
 
 // sort by tier first, then by name
 tools = tools.sort((a, b) => {
-    const aRating = a.item.difficulty.rating!;
-    const bRating = b.item.difficulty.rating!;
+    const aRating = a.item.difficulty.layoutRating!;
+    const bRating = b.item.difficulty.layoutRating!;
     if (aRating !== bRating) {
         return aRating < bRating;
     }

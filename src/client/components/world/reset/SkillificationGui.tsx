@@ -1,4 +1,4 @@
-import Difficulty from "@antivivi/jjt-difficulties";
+import Difficulty from "@rbxts/ejt";
 import React, { Fragment } from "@rbxts/react";
 import BasicResetBoardFrontGui, {
     BasicResetBoardBackGui,

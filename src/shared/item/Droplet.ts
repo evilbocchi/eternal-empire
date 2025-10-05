@@ -1,7 +1,7 @@
 //!native
 //!optimize 2
 
-import Difficulty from "@antivivi/jjt-difficulties";
+import Difficulty from "@rbxts/ejt";
 import { getAllInstanceInfo, getInstanceInfo } from "@antivivi/vrldk";
 import { CollectionService, Debris, RunService, TweenService } from "@rbxts/services";
 import { Server } from "shared/api/APIExpose";
@@ -242,7 +242,7 @@ export default class Droplet {
             .setModel(() => {
                 const droplet = new Instance("Part");
                 droplet.Size = new Vector3(1.25, 1.25, 1.25);
-                droplet.Color = Difficulty.FelixTheA.color!;
+                droplet.Color = Difficulty.FelixTheDA.color!;
                 droplet.Material = Enum.Material.Basalt;
                 return droplet;
             })

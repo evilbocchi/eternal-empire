@@ -1,4 +1,4 @@
-import Difficulty from "@antivivi/jjt-difficulties";
+import Difficulty from "@rbxts/ejt";
 import Condenser from "shared/item/traits/dropper/Condenser";
 import Droplet from "shared/item/Droplet";
 import Item from "shared/item/Item";
@@ -9,7 +9,7 @@ export = new Item(script.Name)
     .setDescription(
         "The successor to the Recycling Dropper. Produces %val% droplets when %quota% of those values are processed through the attached furnace.",
     )
-    .setDifficulty(Difficulty.FelixTheA)
+    .setDifficulty(Difficulty.FelixTheDA)
     .setPrice(new CurrencyBundle().set("Funds", 256e12), 1)
     .addPlaceableArea("BarrenIslands")
 

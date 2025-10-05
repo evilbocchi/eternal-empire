@@ -1,7 +1,7 @@
 //!native
 //!optimize 2
 
-import Difficulty from "@antivivi/jjt-difficulties";
+import Difficulty from "@rbxts/ejt";
 import { OnoeNum } from "@antivivi/serikanum";
 import { getAllInstanceInfo, setInstanceInfo } from "@antivivi/vrldk";
 import { RunService } from "@rbxts/services";
@@ -48,7 +48,7 @@ declare global {
 }
 
 /** The default difficulty for items. */
-const EMPTY_DIFFICULTY = new Difficulty();
+const EMPTY_DIFFICULTY = new Difficulty("");
 
 /** A map of repeat callbacks for items. */
 const REPEATS = new Map<(dt: number) => void, { delta?: number; lastCall?: number }>();
@@ -378,7 +378,7 @@ export default class Item {
         )
             this.persists();
         if (this.layoutOrder === -100000) {
-            this.layoutOrder = difficulty.rating ?? 0;
+            this.layoutOrder = difficulty.layoutRating ?? 0;
         }
         if (this.levelReq === undefined) {
             this.calculateLevelReq();
@@ -387,18 +387,18 @@ export default class Item {
     }
 
     private calculateLevelReq() {
-        const rating = this.difficulty.rating;
+        const rating = this.difficulty.layoutRating;
         if (rating === undefined) return this;
 
-        if (rating < Difficulty.Exist.rating!) {
+        if (rating < Difficulty.Exist.layoutRating!) {
             return this.setLevelReq(0);
-        } else if (rating < Difficulty.InstantWin.rating!) {
+        } else if (rating < Difficulty.InstantWin.layoutRating!) {
             return this.setLevelReq(2);
-        } else if (rating < Difficulty.Ifinitude.rating!) {
+        } else if (rating < Difficulty.Ifinitude.layoutRating!) {
             return this.setLevelReq(4);
-        } else if (rating < Difficulty.Joyful.rating!) {
+        } else if (rating < Difficulty.Joyful.layoutRating!) {
             return this.setLevelReq(6);
-        } else if (rating < Difficulty.Easy.rating!) {
+        } else if (rating < Difficulty.Easy.layoutRating!) {
             return this.setLevelReq(8);
         } else {
             return this.setLevelReq(10); // future difficulties
