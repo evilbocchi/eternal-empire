@@ -1,8 +1,9 @@
 import { Players, TweenService } from "@rbxts/services";
 
 namespace LoadingScreen {
-    let screenGui: ScreenGui | undefined;
+    let guiContainer: ScreenGui | undefined;
     let label: TextLabel | undefined;
+    let backdrop: ImageLabel | undefined;
     let clockFrame: Frame | undefined;
     let longHand: ImageLabel | undefined;
     let shortHand: ImageLabel | undefined;
@@ -10,43 +11,53 @@ namespace LoadingScreen {
     let pulseFrame: Frame | undefined;
     let pulseTween: Tween | undefined;
 
-    function createGuiIfNeeded() {
-        if (screenGui) return;
+    function createGuiIfNeeded(screenGuiOverride?: ScreenGui) {
+        if (guiContainer) return;
 
-        const player = Players.LocalPlayer;
-        if (!player) return;
+        if (screenGuiOverride) {
+            guiContainer = screenGuiOverride;
+        } else {
+            const player = Players.LocalPlayer;
+            if (!player) return;
 
-        const playerGui = player.WaitForChild("PlayerGui") as PlayerGui;
+            const playerGui = player.WaitForChild("PlayerGui") as PlayerGui;
+            guiContainer = new Instance("ScreenGui") as ScreenGui;
+            guiContainer.Name = "LoadingScreen";
+            guiContainer.ResetOnSpawn = false;
+            guiContainer.IgnoreGuiInset = true;
+            guiContainer.DisplayOrder = 1000;
+            guiContainer.Parent = playerGui;
+        }
 
-        screenGui = new Instance("ScreenGui") as ScreenGui;
-        screenGui.Name = "LoadingScreen";
-        screenGui.ResetOnSpawn = false;
-        screenGui.IgnoreGuiInset = true;
-        screenGui.DisplayOrder = 1000;
-        screenGui.Parent = playerGui;
-
-        const backdrop = new Instance("Frame") as Frame;
-        backdrop.Name = "Backdrop";
+        backdrop = new Instance("ImageLabel");
+        backdrop.AnchorPoint = new Vector2(0.5, 0.5);
         backdrop.Size = new UDim2(1, 0, 1, 0);
-        backdrop.Position = new UDim2(0, 0, 0, 0);
+        backdrop.SizeConstraint = Enum.SizeConstraint.RelativeXX;
+        backdrop.Position = new UDim2(0.5, 0, 0.5, 0);
         backdrop.BackgroundColor3 = new Color3(0, 0, 0);
         backdrop.BorderSizePixel = 0;
         backdrop.ZIndex = 1;
-        backdrop.Parent = screenGui;
+        backdrop.Image = "rbxassetid://92129879849075";
+        backdrop.ImageTransparency = 0.925;
+        backdrop.ScaleType = Enum.ScaleType.Fit;
+        // Add UICorner for animating roundness
+        const backdropCorner = new Instance("UICorner");
+        backdropCorner.CornerRadius = new UDim(0, 0); // Start square
+        backdropCorner.Name = "BackdropCorner";
+        backdropCorner.Parent = backdrop;
+        backdrop.Parent = guiContainer;
 
         // Clock Frame (center)
-        clockFrame = new Instance("Frame") as Frame;
-        clockFrame.Name = "Clock";
+        clockFrame = new Instance("Frame");
         clockFrame.AnchorPoint = new Vector2(0.5, 0.5);
         clockFrame.Position = new UDim2(0.5, 0, 0.5, 0);
         clockFrame.Size = new UDim2(0, 192, 0, 192);
         clockFrame.BackgroundTransparency = 1;
         clockFrame.ZIndex = 3;
-        clockFrame.Parent = screenGui;
+        clockFrame.Parent = guiContainer;
 
         // Pulse Frame (center, for glow effect)
-        pulseFrame = new Instance("Frame") as Frame;
-        pulseFrame.Name = "Pulse";
+        pulseFrame = new Instance("Frame");
         pulseFrame.AnchorPoint = new Vector2(0.5, 0.5);
         pulseFrame.Position = new UDim2(0.5, 0, 0.5, 0);
         pulseFrame.Size = new UDim2(0, 32, 0, 32);
@@ -60,8 +71,7 @@ namespace LoadingScreen {
         uiCorner.Parent = pulseFrame;
 
         // Short hand (hour)
-        shortHand = new Instance("ImageLabel") as ImageLabel;
-        shortHand.Name = "ShortHand";
+        shortHand = new Instance("ImageLabel");
         shortHand.AnchorPoint = new Vector2(0.5, 0.5); // bottom center
         shortHand.Position = new UDim2(0.5, 0, 0.5, 0);
         shortHand.Size = new UDim2(0, 80, 0, 80);
@@ -72,8 +82,7 @@ namespace LoadingScreen {
         shortHand.Parent = clockFrame;
 
         // Long hand (minute)
-        longHand = new Instance("ImageLabel") as ImageLabel;
-        longHand.Name = "LongHand";
+        longHand = new Instance("ImageLabel");
         longHand.AnchorPoint = new Vector2(0.5, 0.5); // bottom center
         longHand.Position = new UDim2(0.5, 0, 0.5, 0);
         longHand.Size = new UDim2(0, 96, 0, 96);
@@ -83,24 +92,22 @@ namespace LoadingScreen {
         longHand.ZIndex = 5;
         longHand.Parent = clockFrame;
 
-        // Loading text label (to the left of the clock)
-        label = new Instance("TextLabel") as TextLabel;
-        label.Name = "LoadingText";
+        // Label
+        label = new Instance("TextLabel");
+        label.AnchorPoint = new Vector2(0.5, 0.5);
         label.BackgroundTransparency = 1;
-        // Anchor to bottom-right, but offset to the left of the clock
-        label.AnchorPoint = new Vector2(1, 1);
-        label.Position = new UDim2(1, -140, 1, -12); // 12px from edge, 128px left for clock+gap
-        label.Size = new UDim2(0.5, 0, 0.06, 0);
+        label.Position = new UDim2(0.5, 0, 0.5, 100);
+        label.Size = new UDim2(0.5, 0, 0, 24);
         label.TextColor3 = new Color3(1, 1, 1);
         label.TextScaled = true;
         label.TextWrapped = true;
-        label.TextXAlignment = Enum.TextXAlignment.Right;
-        label.TextYAlignment = Enum.TextYAlignment.Bottom;
-        label.Font = Enum.Font.SourceSans;
+        label.TextXAlignment = Enum.TextXAlignment.Center;
+        label.TextYAlignment = Enum.TextYAlignment.Center;
+        label.Font = Enum.Font.Merriweather;
         label.ZIndex = 2;
-        label.Parent = screenGui;
+        label.Parent = guiContainer;
 
-        screenGui.Enabled = false;
+        guiContainer.Enabled = false;
     }
 
     let lastIntersected = false;
@@ -146,40 +153,44 @@ namespace LoadingScreen {
         });
     }
 
-    export function showLoadingScreen(text: string) {
-        createGuiIfNeeded();
-        if (!screenGui || !label) return;
+    export function showLoadingScreen(text: string, skipTween?: boolean, screenGuiOverride?: ScreenGui) {
+        createGuiIfNeeded(screenGuiOverride);
+        if (!guiContainer || !label) return;
         label.Text = text ?? "";
-        screenGui.Enabled = true;
+        guiContainer.Enabled = true;
 
         // Fade in all children
-        if (screenGui) {
+        if (!skipTween) {
+            backdrop!.Size = new UDim2(0, 0, 0, 0);
+            // Animate UICorner to square (0) when opening
+            const backdropCorner = backdrop!.FindFirstChild("BackdropCorner") as UICorner;
+            if (backdropCorner) {
+                backdropCorner.CornerRadius = new UDim(0, 0);
+                TweenService.Create(
+                    backdropCorner,
+                    new TweenInfo(0.4, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+                    {
+                        CornerRadius: new UDim(0, 0),
+                    },
+                ).Play();
+            }
+
             const tweenInfo = new TweenInfo(0.4, Enum.EasingStyle.Quad, Enum.EasingDirection.Out);
 
-            for (const child of screenGui.GetDescendants()) {
-                if (child.IsA("Frame") && child.Name === "Backdrop") {
-                    child.BackgroundTransparency = 1;
-                    TweenService.Create(child, tweenInfo, { BackgroundTransparency: 0 }).Play();
-                }
-                if (child.IsA("TextLabel")) {
-                    child.TextTransparency = 1;
-                    child.TextStrokeTransparency = 1;
-                    TweenService.Create(child, tweenInfo, {
-                        TextTransparency: 0,
-                        TextStrokeTransparency: 0,
-                    }).Play();
-                }
-                if (child.IsA("ImageLabel")) {
-                    child.ImageTransparency = 1;
-                    TweenService.Create(child, tweenInfo, { ImageTransparency: 0 }).Play();
-                }
-            }
+            TweenService.Create(backdrop!, tweenInfo, {
+                BackgroundTransparency: 0,
+                ImageTransparency: 0.925,
+                Size: new UDim2(1, 0, 1, 0),
+            }).Play();
+            TweenService.Create(label, tweenInfo, { TextTransparency: 0, TextStrokeTransparency: 0 }).Play();
+            TweenService.Create(longHand!, tweenInfo, { ImageTransparency: 0 }).Play();
+            TweenService.Create(shortHand!, tweenInfo, { ImageTransparency: 0 }).Play();
         }
 
         // Start clock update loop
         if (!clockUpdater && clockFrame && longHand && shortHand) {
             clockUpdater = task.spawn(() => {
-                while (screenGui && screenGui.Enabled) {
+                while (guiContainer && guiContainer.Enabled) {
                     updateClock();
                     task.wait();
                 }
@@ -189,33 +200,43 @@ namespace LoadingScreen {
     }
 
     export function hideLoadingScreen() {
-        if (!screenGui) return;
+        if (!guiContainer) return;
 
         // Fade out all children
         const tweenInfo = new TweenInfo(0.4, Enum.EasingStyle.Quad, Enum.EasingDirection.In);
 
-        for (const child of screenGui.GetDescendants()) {
-            if (child.IsA("Frame") && child.Name === "Backdrop") {
-                TweenService.Create(child, tweenInfo, { BackgroundTransparency: 1 }).Play();
-            }
-            if (child.IsA("TextLabel")) {
-                TweenService.Create(child, tweenInfo, {
-                    TextTransparency: 1,
-                    TextStrokeTransparency: 1,
-                }).Play();
-            }
-            if (child.IsA("ImageLabel")) {
-                TweenService.Create(child, tweenInfo, { ImageTransparency: 1 }).Play();
-            }
+        // Animate UICorner to round (0.5) when closing
+        const backdropCorner = backdrop!.FindFirstChild("BackdropCorner") as UICorner;
+        if (backdropCorner) {
+            TweenService.Create(backdropCorner, tweenInfo, {
+                CornerRadius: new UDim(1, 0),
+            }).Play();
         }
-        // After fade out, disable
-        task.delay(1, () => {
-            if (screenGui) {
-                screenGui.Enabled = false;
+
+        const tween = TweenService.Create(backdrop!, tweenInfo, {
+            Size: new UDim2(0, 0, 0, 0),
+        });
+        tween.Play();
+        TweenService.Create(backdrop!, tweenInfo, { BackgroundTransparency: 1, ImageTransparency: 1 }).Play();
+        TweenService.Create(label!, tweenInfo, { TextTransparency: 1, TextStrokeTransparency: 1 }).Play();
+        TweenService.Create(longHand!, tweenInfo, { ImageTransparency: 1 }).Play();
+        TweenService.Create(shortHand!, tweenInfo, { ImageTransparency: 1 }).Play();
+
+        const connection = tween.Completed.Once((state) => {
+            if (state !== Enum.PlaybackState.Completed) {
+                connection.Disconnect();
+                return;
+            }
+
+            if (guiContainer) {
+                guiContainer.Enabled = false;
+            }
+
+            // Stop clock update loop
+            if (clockUpdater) {
+                clockUpdater = undefined;
             }
         });
-        // Stop clock updater
-        clockUpdater = undefined;
     }
 }
 

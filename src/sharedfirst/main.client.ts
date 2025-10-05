@@ -5,5 +5,5 @@ const loadingScreenModule = require(
 ) as typeof import("./LoadingScreen");
 const LoadingScreen = loadingScreenModule.default;
 
-LoadingScreen.showLoadingScreen("");
+LoadingScreen.showLoadingScreen("", true);
 ReplicatedFirst.RemoveDefaultLoadingScreen();

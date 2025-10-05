@@ -152,18 +152,21 @@ export default function App() {
             addRoot(roots, createFolder("World")).render(<WorldRenderer />);
         }
 
-        LoadingScreen.hideLoadingScreen();
         Workspace.SetAttribute("Start", IS_PUBLIC_SERVER);
         const cleanup = MusicManager.init();
 
         task.delay(1, () => {
-            if (IS_PUBLIC_SERVER) {
-                DocumentManager.setVisible("Start", true);
-            } else if (Sandbox.getEnabled()) {
-                setVisibilityMain(true);
-            } else {
-                performIntroSequence();
-            }
+            LoadingScreen.hideLoadingScreen();
+
+            task.delay(0.5, () => {
+                if (IS_PUBLIC_SERVER) {
+                    DocumentManager.setVisible("Start", true);
+                } else if (Sandbox.getEnabled()) {
+                    setVisibilityMain(true);
+                } else {
+                    performIntroSequence();
+                }
+            });
         });
 
         task.spawn(() => {
