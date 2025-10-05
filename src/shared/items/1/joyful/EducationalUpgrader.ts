@@ -1,14 +1,14 @@
-import Difficulty from "@antivivi/jjt-difficulties";
+import Difficulty from "@rbxts/ejt";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
 import Upgrader from "shared/item/traits/upgrader/Upgrader";
-import CorruptedGrass from "shared/items/excavation/harvestable/CorruptedGrass";
+import Stone from "shared/items/0/millisecondless/Stone";
 import EnchantedGrass from "shared/items/excavation/harvestable/EnchantedGrass";
 import Jade from "shared/items/excavation/Jade";
 
 export = new Item(script.Name)
     .setName("Educational Upgrader")
-    .setDescription(`Give your droplets an education! Allowing them to gain %add%`)
+    .setDescription(`Give your droplets an education! Allowing them to gain %add%.`)
     .setDifficulty(Difficulty.Joyful)
     .setPrice(new CurrencyBundle().set("Skill", 1), 1)
     .setRequiredItemAmount(Stone, 600)

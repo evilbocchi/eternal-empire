@@ -14,7 +14,7 @@ export = new Item(script.Name)
     .setDescription(
         "A legendary generator that harnesses the essence of victory to produce boundless skill points, growing stronger with every triumph.",
     )
-    .setDifficulty(Difficulty.Easy)
+    .setDifficulty(Difficulty.Remorseless)
     .setPrice(new CurrencyBundle().set("Wins", 2e12), 1)
     .addPlaceableArea("BarrenIslands")
     .setCreator("CoPKaDT")
