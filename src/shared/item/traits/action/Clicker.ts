@@ -23,8 +23,6 @@ export default class Clicker extends ItemTrait {
     static readonly clickingPacket = perItemPacket(packet<(placementId: string) => void>({ isUnreliable: true }));
 
     static load(model: Model, clicker: Clicker) {
-        const Items = Server.Items;
-
         const modelInfo = getAllInstanceInfo(model);
 
         const clickArea = model.WaitForChild("ClickArea") as BasePart;
@@ -40,7 +38,7 @@ export default class Clicker extends ItemTrait {
             if (target === undefined || target.Parent === undefined) {
                 if (t > 0.05) {
                     t = 0;
-                    const found = getPlacedItemsInBounds(clickArea, Items);
+                    const found = getPlacedItemsInBounds(clickArea);
                     for (const [model, item] of found)
                         if (item.isA("Clickable")) {
                             target = model;

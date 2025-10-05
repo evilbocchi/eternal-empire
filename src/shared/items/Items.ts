@@ -1,4 +1,5 @@
 import Difficulty from "@rbxts/ejt";
+import { ITEM_PER_ID } from "shared/api/APIExpose";
 import Item from "shared/item/Item";
 import type Charm from "shared/item/traits/Charm";
 import HARVESTABLES from "shared/world/harvestable/Harvestable";
@@ -7,7 +8,10 @@ import HARVESTABLES from "shared/world/harvestable/Harvestable";
  * Utility class to manage all items.
  */
 abstract class Items {
-    /** Map of item ID to Item object */
+    /**
+     * Map of item ID to Item object.
+     * If encountering circular dependency issues, use {@link ITEM_PER_ID} instead.
+     */
     static readonly itemsPerId = (function () {
         const folder = script.Parent;
         if (folder === undefined) throw "No folder specified";
@@ -31,9 +35,13 @@ abstract class Items {
                 .setDifficulty(Difficulty.Excavation);
             itemsPerId.set(id, item);
         }
+        for (const [id, item] of itemsPerId) {
+            ITEM_PER_ID.set(id, item); // Also set in the global map
+        }
         return itemsPerId;
     })();
 
+    /** Map of item name to Item object. */
     static readonly itemsPerName = (function () {
         const itemsPerName = new Map<string, Item>();
         for (const [_, item] of Items.itemsPerId) {

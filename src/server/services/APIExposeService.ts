@@ -242,13 +242,6 @@ export default class APIExposeService implements OnInit {
             Marketplace: this.marketplaceService,
 
             /**
-             * Reference to all registered items.
-             *
-             * @see {@link Items} for more details.
-             */
-            Items,
-
-            /**
              * Player data.
              */
             dataPerPlayer: AvailableEmpire.dataPerPlayer,

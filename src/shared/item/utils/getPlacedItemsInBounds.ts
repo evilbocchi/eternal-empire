@@ -1,6 +1,6 @@
 import { getInstanceInfo } from "@antivivi/vrldk";
 import { Workspace } from "@rbxts/services";
-import { Server } from "shared/api/APIExpose";
+import { ITEM_PER_ID } from "shared/api/APIExpose";
 import { PLACED_ITEMS_FOLDER } from "shared/constants";
 import Item from "shared/item/Item";
 
@@ -9,7 +9,7 @@ OVERLAP_PARAMS.CollisionGroup = "ItemHitbox";
 OVERLAP_PARAMS.FilterType = Enum.RaycastFilterType.Include;
 OVERLAP_PARAMS.FilterDescendantsInstances = [PLACED_ITEMS_FOLDER];
 
-export default function getPlacedItemsInBounds(bounds: BasePart, Items = Server.Items) {
+export default function getPlacedItemsInBounds(bounds: BasePart) {
     const array = Workspace.GetPartBoundsInBox(bounds.CFrame, bounds.Size, OVERLAP_PARAMS);
     const items = new Map<Model, Item>();
     for (const touching of array) {
@@ -18,7 +18,7 @@ export default function getPlacedItemsInBounds(bounds: BasePart, Items = Server.
         if (itemId === undefined) {
             continue;
         }
-        const item = Items.getItem(itemId);
+        const item = ITEM_PER_ID.get(itemId);
         if (item === undefined) {
             throw `Item with id ${itemId} not found in items map.`;
         }

@@ -1,5 +1,4 @@
 import { getAllInstanceInfo } from "@antivivi/vrldk";
-import { Server } from "shared/api/APIExpose";
 import Item from "shared/item/Item";
 import Operative from "shared/item/traits/Operative";
 import getPlacedItemsInBounds from "shared/item/utils/getPlacedItemsInBounds";
@@ -8,7 +7,6 @@ import isPlacedItemUnusable from "shared/item/utils/isPlacedItemUnusable";
 export default abstract class Booster extends Operative {
     observeTarget(model: Model, callback: (model: Model | undefined, item: Item | undefined) => boolean) {
         const clickArea = model.WaitForChild("ClickArea") as BasePart;
-        const Items = Server.Items;
         const whitelist = this.whitelist;
         const boosterInfo = getAllInstanceInfo(model);
 
@@ -52,7 +50,7 @@ export default abstract class Booster extends Operative {
             if (target === undefined) {
                 if (t > 0.1) {
                     t = 0;
-                    const found = getPlacedItemsInBounds(clickArea, Items);
+                    const found = getPlacedItemsInBounds(clickArea);
                     for (const [model, item] of found) {
                         if (whitelist !== undefined && !whitelist(model, item)) {
                             continue;
