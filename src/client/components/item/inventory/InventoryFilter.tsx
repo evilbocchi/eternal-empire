@@ -1,5 +1,5 @@
 import { FuzzySearch } from "@rbxts/fuzzy-search";
-import React, { useCallback, useMemo, useRef, useState } from "@rbxts/react";
+import React, { forwardRef, useCallback, useMemo, useRef, useState } from "@rbxts/react";
 import { getAsset } from "shared/asset/AssetMap";
 import { playSound } from "shared/asset/GameAssets";
 import Item from "shared/item/Item";
@@ -115,200 +115,224 @@ export function filterItems(items: Item[], searchQuery: string, traitFilters: Se
 /**
  * Inventory filter component with search and trait filtering
  */
-export default function InventoryFilter({
-    color = Color3.fromRGB(255, 186, 125),
-    traitFilters,
-    onSearchChange,
-    onTraitToggle,
-    onClear,
-}: {
-    /** Border color for the search box */
-    color?: Color3;
-    /** Currently selected trait filters */
-    traitFilters: Set<TraitFilterId>;
-    /** Callback when search query changes */
-    onSearchChange: (query: string) => void;
-    /** Callback when trait filter is toggled */
-    onTraitToggle: (traitId: TraitFilterId) => void;
-    /** Callback when clear button is pressed */
-    onClear: () => void;
-}) {
-    const textBoxRef = useRef<TextBox>();
-    const [previousText, setPreviousText] = useState("");
-
-    const handleSearchChange = useCallback(
-        (rbx: TextBox) => {
-            const text = rbx.Text;
-            onSearchChange(text);
-            if (text.size() > previousText.size()) {
-                switch (math.random(1, 4)) {
-                    case 1:
-                        playSound("KeyPress1.mp3");
-                        break;
-                    case 2:
-                        playSound("KeyPress2.mp3");
-                        break;
-                    case 3:
-                        playSound("KeyPress3.mp3");
-                        break;
-                    case 4:
-                        playSound("KeyPress4.mp3");
-                        break;
-                }
-            } else {
-                playSound("KeyDelete.mp3");
-            }
-            setPreviousText(text);
+const InventoryFilter = forwardRef<
+    Frame,
+    {
+        /** Border color for the search box */
+        color?: Color3;
+        /** Currently selected trait filters */
+        traitFilters: Set<TraitFilterId>;
+        /** Callback when search query changes */
+        onSearchChange: (query: string) => void;
+        /** Callback when trait filter is toggled */
+        onTraitToggle: (traitId: TraitFilterId) => void;
+        /** Callback when clear button is pressed */
+        onClear: () => void;
+        /** Optional ref for search textbox */
+        searchBoxRef?: React.Ref<TextBox>;
+        /** Optional ref for filter frame */
+        filterFrameRef?: React.Ref<Frame>;
+    }
+>(
+    (
+        {
+            color = Color3.fromRGB(255, 186, 125),
+            traitFilters,
+            onSearchChange,
+            onTraitToggle,
+            onClear,
+            searchBoxRef,
+            filterFrameRef,
         },
-        [onSearchChange],
-    );
+        ref,
+    ) => {
+        const textBoxRef = useRef<TextBox>();
+        const [previousText, setPreviousText] = useState("");
 
-    // Generate tooltip props for each trait at the top level
-    const tooltipPropsArray = TRAIT_OPTIONS.map((trait) => ({
-        id: trait.id,
-        props: useMessageTooltip(trait.id),
-    }));
-
-    const tooltipPropsPerTrait = useMemo(() => {
-        const tooltipProps = new Map<string, UseHoverReturn>();
-        for (const { id, props } of tooltipPropsArray) {
-            tooltipProps.set(id, props);
-        }
-        return tooltipProps;
-    }, [tooltipPropsArray]);
-
-    return (
-        <frame BackgroundTransparency={1} LayoutOrder={-1} Size={new UDim2(1, 0, 0.025, 20)}>
-            <uilistlayout
-                FillDirection={Enum.FillDirection.Horizontal}
-                HorizontalAlignment={Enum.HorizontalAlignment.Left}
-                Padding={new UDim(0, 15)}
-                SortOrder={Enum.SortOrder.LayoutOrder}
-                VerticalAlignment={Enum.VerticalAlignment.Center}
-            />
-            <uipadding PaddingLeft={new UDim(0, 10)} />
-
-            {/* Search textbox */}
-            <textbox
-                ref={textBoxRef}
-                AnchorPoint={new Vector2(1, 0.5)}
-                BackgroundColor3={Color3.fromRGB(255, 255, 255)}
-                BorderSizePixel={0}
-                ClearTextOnFocus={false}
-                Font={Enum.Font.RobotoMono}
-                LayoutOrder={2}
-                PlaceholderText="Search..."
-                Position={new UDim2(0, 0, 0, 5)}
-                Size={new UDim2(0.4, 0, 1, 0)}
-                Text={""}
-                TextColor3={Color3.fromRGB(0, 0, 0)}
-                TextScaled={true}
-                TextSize={25}
-                TextWrapped={true}
-                TextXAlignment={Enum.TextXAlignment.Left}
-                ZIndex={100}
-                Change={{
-                    Text: handleSearchChange,
-                }}
-            >
-                {/* Search box padding */}
-                <uipadding
-                    PaddingBottom={new UDim(0, 5)}
-                    PaddingLeft={new UDim(0, 10)}
-                    PaddingRight={new UDim(0, 5)}
-                    PaddingTop={new UDim(0, 5)}
-                />
-
-                {/* Search icon */}
-                <imagebutton
-                    Active={true}
-                    AnchorPoint={new Vector2(1, 0.5)}
-                    BackgroundTransparency={1}
-                    Event={{
-                        Activated: () => {
-                            setPreviousText("");
-                            textBoxRef.current!.Text = "";
-                        },
-                    }}
-                    Image={
-                        previousText === ""
-                            ? getAsset("assets/indexing/Search.png")
-                            : getAsset("assets/indexing/Clear.png")
+        const handleSearchChange = useCallback(
+            (rbx: TextBox) => {
+                const text = rbx.Text;
+                onSearchChange(text);
+                if (text.size() > previousText.size()) {
+                    switch (math.random(1, 4)) {
+                        case 1:
+                            playSound("KeyPress1.mp3");
+                            break;
+                        case 2:
+                            playSound("KeyPress2.mp3");
+                            break;
+                        case 3:
+                            playSound("KeyPress3.mp3");
+                            break;
+                        case 4:
+                            playSound("KeyPress4.mp3");
+                            break;
                     }
-                    ImageColor3={Color3.fromRGB(143, 143, 143)}
-                    ImageTransparency={0.5}
-                    Position={new UDim2(1, 0, 0.5, 0)}
-                    ScaleType={Enum.ScaleType.Fit}
-                    Selectable={false}
-                    Size={new UDim2(1, 0, 0.7, 0)}
-                    SizeConstraint={Enum.SizeConstraint.RelativeYY}
-                />
+                } else {
+                    playSound("KeyDelete.mp3");
+                }
+                setPreviousText(text);
+            },
+            [onSearchChange],
+        );
 
-                {/* Search box border */}
-                <uistroke ApplyStrokeMode={Enum.ApplyStrokeMode.Border} Color={color} Thickness={2} />
-            </textbox>
+        // Generate tooltip props for each trait at the top level
+        const tooltipPropsArray = TRAIT_OPTIONS.map((trait) => ({
+            id: trait.id,
+            props: useMessageTooltip(trait.id),
+        }));
 
-            {/* Trait filter options */}
-            <frame
-                AutomaticSize={Enum.AutomaticSize.X}
-                BackgroundTransparency={1}
-                LayoutOrder={2}
-                Size={new UDim2(0, 0, 1, 0)}
-            >
+        const tooltipPropsPerTrait = useMemo(() => {
+            const tooltipProps = new Map<string, UseHoverReturn>();
+            for (const { id, props } of tooltipPropsArray) {
+                tooltipProps.set(id, props);
+            }
+            return tooltipProps;
+        }, [tooltipPropsArray]);
+
+        return (
+            <frame ref={ref} BackgroundTransparency={1} LayoutOrder={-1} Size={new UDim2(1, 0, 0.025, 20)}>
                 <uilistlayout
                     FillDirection={Enum.FillDirection.Horizontal}
-                    Padding={new UDim(0, 6)}
+                    HorizontalAlignment={Enum.HorizontalAlignment.Left}
+                    Padding={new UDim(0, 15)}
                     SortOrder={Enum.SortOrder.LayoutOrder}
                     VerticalAlignment={Enum.VerticalAlignment.Center}
                 />
+                <uipadding PaddingLeft={new UDim(0, 10)} />
 
-                {/* Render trait filter buttons */}
-                {TRAIT_OPTIONS.map((trait, index) => (
-                    <imagebutton
-                        key={trait.id}
-                        BackgroundTransparency={1}
-                        Image={trait.image}
-                        ImageColor3={trait.color}
-                        ImageTransparency={traitFilters.has(trait.id) ? 0 : 0.6}
-                        LayoutOrder={index + 1}
-                        ScaleType={Enum.ScaleType.Fit}
+                {/* Search textbox wrapper */}
+                <frame BackgroundTransparency={1} LayoutOrder={2} Size={new UDim2(0.4, 0, 1, 0)}>
+                    <textbox
+                        ref={searchBoxRef}
+                        AnchorPoint={new Vector2(0.5, 0.5)}
+                        BackgroundColor3={Color3.fromRGB(255, 255, 255)}
+                        BorderSizePixel={0}
+                        ClearTextOnFocus={false}
+                        Font={Enum.Font.RobotoMono}
+                        PlaceholderText="Search..."
+                        Position={new UDim2(0.5, 0, 0.5, 0)}
                         Size={new UDim2(1, 0, 1, 0)}
-                        Event={{
-                            Activated: () => onTraitToggle(trait.id),
-                            ...tooltipPropsPerTrait.get(trait.id)!.events,
+                        Text={""}
+                        TextColor3={Color3.fromRGB(0, 0, 0)}
+                        TextScaled={true}
+                        TextSize={25}
+                        TextWrapped={true}
+                        TextXAlignment={Enum.TextXAlignment.Left}
+                        ZIndex={100}
+                        Change={{
+                            Text: handleSearchChange,
                         }}
                     >
+                        {/* Search box padding */}
                         <uipadding
                             PaddingBottom={new UDim(0, 5)}
-                            PaddingLeft={new UDim(0, 5)}
+                            PaddingLeft={new UDim(0, 10)}
                             PaddingRight={new UDim(0, 5)}
                             PaddingTop={new UDim(0, 5)}
                         />
-                        <uiaspectratioconstraint />
-                    </imagebutton>
-                ))}
 
-                {/* Clear button */}
-                <textbutton
-                    AutomaticSize={Enum.AutomaticSize.X}
-                    BackgroundTransparency={1}
-                    Font={Enum.Font.SourceSans}
-                    LayoutOrder={99}
-                    Size={new UDim2(0, 0, 0.5, 0)}
-                    Text="Clear"
-                    TextColor3={Color3.fromRGB(255, 255, 255)}
-                    TextScaled={true}
-                    TextSize={14}
-                    TextTransparency={0.5}
-                    TextWrapped={true}
-                    Event={{
-                        Activated: onClear,
-                    }}
-                />
+                        {/* Search icon */}
+                        <imagebutton
+                            Active={true}
+                            AnchorPoint={new Vector2(1, 0.5)}
+                            BackgroundTransparency={1}
+                            Event={{
+                                Activated: () => {
+                                    setPreviousText("");
+                                    if (searchBoxRef && "current" in searchBoxRef && searchBoxRef.current) {
+                                        searchBoxRef.current.Text = "";
+                                    } else if (textBoxRef.current) {
+                                        textBoxRef.current.Text = "";
+                                    }
+                                },
+                            }}
+                            Image={
+                                previousText === ""
+                                    ? getAsset("assets/indexing/Search.png")
+                                    : getAsset("assets/indexing/Clear.png")
+                            }
+                            ImageColor3={Color3.fromRGB(143, 143, 143)}
+                            ImageTransparency={0.5}
+                            Position={new UDim2(1, 0, 0.5, 0)}
+                            ScaleType={Enum.ScaleType.Fit}
+                            Selectable={false}
+                            Size={new UDim2(1, 0, 0.7, 0)}
+                            SizeConstraint={Enum.SizeConstraint.RelativeYY}
+                        />
+
+                        {/* Search box border */}
+                        <uistroke ApplyStrokeMode={Enum.ApplyStrokeMode.Border} Color={color} Thickness={2} />
+                    </textbox>
+                </frame>
+
+                {/* Trait filter options wrapper */}
+                <frame BackgroundTransparency={1} LayoutOrder={3} Size={new UDim2(0.6, 0, 1, 0)}>
+                    <frame
+                        ref={filterFrameRef}
+                        AnchorPoint={new Vector2(0.5, 0.5)}
+                        BackgroundTransparency={1}
+                        Position={new UDim2(0.5, 0, 0.5, 0)}
+                        Size={new UDim2(1, 0, 1, 0)}
+                    >
+                        <uilistlayout
+                            FillDirection={Enum.FillDirection.Horizontal}
+                            Padding={new UDim(0, 6)}
+                            SortOrder={Enum.SortOrder.LayoutOrder}
+                            VerticalAlignment={Enum.VerticalAlignment.Center}
+                        />
+
+                        {/* Render trait filter buttons */}
+                        {TRAIT_OPTIONS.map((trait, index) => (
+                            <imagebutton
+                                key={trait.id}
+                                BackgroundTransparency={1}
+                                Image={trait.image}
+                                ImageColor3={trait.color}
+                                ImageTransparency={traitFilters.has(trait.id) ? 0 : 0.6}
+                                LayoutOrder={index + 1}
+                                ScaleType={Enum.ScaleType.Fit}
+                                Size={new UDim2(1, 0, 1, 0)}
+                                Event={{
+                                    Activated: () => onTraitToggle(trait.id),
+                                    ...tooltipPropsPerTrait.get(trait.id)!.events,
+                                }}
+                            >
+                                <uipadding
+                                    PaddingBottom={new UDim(0, 5)}
+                                    PaddingLeft={new UDim(0, 5)}
+                                    PaddingRight={new UDim(0, 5)}
+                                    PaddingTop={new UDim(0, 5)}
+                                />
+                                <uiaspectratioconstraint />
+                            </imagebutton>
+                        ))}
+
+                        {/* Clear button */}
+                        <textbutton
+                            AutomaticSize={Enum.AutomaticSize.X}
+                            BackgroundTransparency={1}
+                            Font={Enum.Font.SourceSans}
+                            LayoutOrder={99}
+                            Size={new UDim2(0, 0, 0.5, 0)}
+                            Text="Clear"
+                            TextColor3={Color3.fromRGB(255, 255, 255)}
+                            TextScaled={true}
+                            TextSize={14}
+                            TextTransparency={0.5}
+                            TextWrapped={true}
+                            Event={{
+                                Activated: onClear,
+                            }}
+                        />
+                    </frame>
+                </frame>
             </frame>
-        </frame>
-    );
-}
+        );
+    },
+);
+
+export default InventoryFilter;
 
 export function useBasicInventoryFilter() {
     const [searchQuery, setSearchQuery] = useState("");

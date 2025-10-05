@@ -6,6 +6,7 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "@rbxts/react";
+import { TweenService } from "@rbxts/services";
 import BuildManager from "client/components/build/BuildManager";
 import InventoryEmptyState from "client/components/item/inventory/InventoryEmptyState";
 import InventoryFilter, {
@@ -125,12 +126,66 @@ export default function InventoryWindow() {
         cellSizeRef.current = cellSize;
     }, [cellSize]);
 
+    // Refs for filter animation
+    const searchBoxRef = useRef<TextBox>();
+    const filterFrameRef = useRef<Frame>();
+    const [previousVisible, setPreviousVisible] = useState(visible);
+
     // Observe inventory data from packets
     const inventory = useProperty(Packets.inventory) ?? new Map<string, number>();
     const uniqueInstances = useProperty(Packets.uniqueInstances) ?? new Map<string, UniqueItemInstance>();
 
     const scrollingFrameRef = useRef<ScrollingFrame>();
     const itemSlotsRef = useRef(new Map<string, InventorySlotHandle>());
+
+    // Cascading animation for filter elements
+    useEffect(() => {
+        const action = visible && !previousVisible ? "open" : !visible && previousVisible ? "close" : undefined;
+        if (action) {
+            const searchBox = searchBoxRef.current;
+            const filterFrame = filterFrameRef.current;
+
+            if (action === "open") {
+                // Animate search box
+                if (searchBox) {
+                    searchBox.Rotation = -5;
+                    const searchTween = TweenService.Create(
+                        searchBox,
+                        new TweenInfo(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.Out),
+                        { Rotation: 0 },
+                    );
+                    searchTween.Play();
+                }
+
+                // Animate filter frame with delay
+                if (filterFrame) {
+                    filterFrame.Rotation = -5;
+                    task.wait(0.08); // Small delay for cascade
+                    const filterTween = TweenService.Create(
+                        filterFrame,
+                        new TweenInfo(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.Out),
+                        { Rotation: 0 },
+                    );
+                    filterTween.Play();
+                }
+            } else {
+                // Reset rotation on close
+                if (searchBox) {
+                    const searchTween = TweenService.Create(searchBox, new TweenInfo(0.1, Enum.EasingStyle.Linear), {
+                        Rotation: -5,
+                    });
+                    searchTween.Play();
+                }
+                if (filterFrame) {
+                    const filterTween = TweenService.Create(filterFrame, new TweenInfo(0.1, Enum.EasingStyle.Linear), {
+                        Rotation: -5,
+                    });
+                    filterTween.Play();
+                }
+            }
+        }
+        setPreviousVisible(visible);
+    }, [visible]);
 
     // Handle item activation
     const handleItemActivated = useCallback(
@@ -291,7 +346,7 @@ export default function InventoryWindow() {
             {/* Main inventory content */}
             <frame BackgroundTransparency={1} Size={new UDim2(1, 0, 1, 0)} Visible={hasAnyItems}>
                 {/* Filter options */}
-                <InventoryFilter {...filterProps} />
+                <InventoryFilter {...filterProps} searchBoxRef={searchBoxRef} filterFrameRef={filterFrameRef} />
 
                 {/* Item list container */}
                 <scrollingframe
