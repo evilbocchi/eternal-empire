@@ -112,6 +112,7 @@ namespace Packets {
         EmpireProfileTemplate.items.uniqueInstances,
     );
     export const unplaceItems = packet<(placementIds: string[]) => void>();
+    export const setBuildPreviewTool = packet<(difficultyId: string) => void>();
     export const boostChanged = packet<(boostPerItem: Map<string, BaseOnoeNum>) => void>({ isUnreliable: true });
     export const brokenPlacedItems = exactSetProperty<string>(EmpireProfileTemplate.items.brokenPlacedItems);
     export const repairItem = packet<(placementId: string, tier: RepairResultTier) => boolean>();

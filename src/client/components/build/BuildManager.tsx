@@ -39,6 +39,7 @@ namespace BuildManager {
      */
     export const selected = new Map<Model, CFrame>();
     export let mainSelected: Model | undefined;
+    let lastPreviewDifficultyId: string | undefined;
 
     export const rotationValue = new Instance("IntValue");
 
@@ -76,10 +77,43 @@ namespace BuildManager {
     export let isShopOpen = false;
     export let isSingleDocumentOpen = false;
 
+    function getPrimarySelectedModel() {
+        if (mainSelected !== undefined) return mainSelected;
+        for (const [model] of selected) {
+            return model;
+        }
+        return undefined;
+    }
+
+    function syncPreviewTool() {
+        let difficultyId: string | undefined;
+
+        if (!selected.isEmpty()) {
+            const model = getPrimarySelectedModel();
+            if (model !== undefined) {
+                const modelInfo = getAllInstanceInfo(model);
+                const itemId = modelInfo.ItemId;
+                if (itemId !== undefined) {
+                    const item = Items.getItem(itemId);
+                    const candidate = item?.difficulty?.id;
+                    if (candidate !== undefined && candidate !== "") {
+                        difficultyId = candidate;
+                    }
+                }
+            }
+        }
+
+        if (difficultyId !== lastPreviewDifficultyId) {
+            Packets.setBuildPreviewTool.toServer(difficultyId ?? "");
+            lastPreviewDifficultyId = difficultyId;
+        }
+    }
+
     export function hasSelection(): boolean {
         return !selected.isEmpty();
     }
 
+    syncPreviewTool();
     export function rotateSelection(): void {
         const rotateSound = getSound("ItemRotate.mp3").Clone();
         const pitchDecrement = math.min(tick() - lastRotate, 0.5) * 0.25;
@@ -134,6 +168,7 @@ namespace BuildManager {
             Workspace.SetAttribute("BuildMode", true);
             DocumentManager.setVisible("Build", true);
         }
+        syncPreviewTool();
     }
 
     /**
