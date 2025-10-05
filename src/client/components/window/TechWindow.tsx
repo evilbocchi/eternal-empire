@@ -20,10 +20,20 @@ export default function TechWindow({
     size?: UDim2;
 }) {
     const frameRef = useRef<Frame>();
+    const contentRef = useRef<Frame>();
+    const titleRef = useRef<Frame>();
+    const iconRef = useRef<ImageLabel>();
+    const textRef = useRef<TextLabel>();
+    const closeButtonRef = useRef<TextButton>();
     const initialPosition = new UDim2(0.5, 0, 0.5, 0);
 
     useWindowAnimation({
         frameRef,
+        contentRef,
+        titleRef,
+        iconRef,
+        textRef,
+        closeButtonRef,
         initialPosition,
         visible,
     });
@@ -44,9 +54,10 @@ export default function TechWindow({
         >
             <uistroke ApplyStrokeMode={Enum.ApplyStrokeMode.Border} Color={Color3.fromRGB(255, 255, 255)} />
             <uisizeconstraint MaxSize={new Vector2(800, 600)} />
-            <WindowTitle icon={icon} title={title ?? id} />
-            <WindowCloseButton onClick={() => DocumentManager.setVisible(id, false)} />
+            <WindowTitle iconRef={iconRef} textRef={textRef} ref={titleRef} icon={icon} title={title ?? id} />
+            <WindowCloseButton ref={closeButtonRef} onClick={() => DocumentManager.setVisible(id, false)} />
             <frame
+                ref={contentRef}
                 key="MainWindow"
                 AnchorPoint={new Vector2(0.5, 0)}
                 BackgroundTransparency={1}

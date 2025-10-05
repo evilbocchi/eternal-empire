@@ -1,5 +1,5 @@
 import React, { ReactNode, RefObject, useEffect, useRef, useState } from "@rbxts/react";
-import { TweenService } from "@rbxts/services";
+import { Lighting, TweenService } from "@rbxts/services";
 import DocumentManager from "client/components/window/DocumentManager";
 import WindowCloseButton from "client/components/window/WindowCloseButton";
 import WindowTitle from "client/components/window/WindowTitle";
@@ -7,10 +7,20 @@ import { playSound } from "shared/asset/GameAssets";
 
 export function useWindowAnimation({
     frameRef,
+    contentRef,
+    titleRef,
+    iconRef,
+    textRef,
+    closeButtonRef,
     initialPosition,
     visible,
 }: {
     frameRef: RefObject<GuiObject>;
+    contentRef: RefObject<GuiObject>;
+    titleRef?: RefObject<GuiObject>;
+    iconRef?: RefObject<ImageLabel>;
+    textRef?: RefObject<TextLabel>;
+    closeButtonRef?: RefObject<TextButton>;
     initialPosition: UDim2;
     visible: boolean;
 }) {
@@ -21,6 +31,11 @@ export function useWindowAnimation({
         // Handle animation
         if (action) {
             const frame = frameRef.current!;
+            const content = contentRef.current;
+            const title = titleRef?.current;
+            const icon = iconRef?.current;
+            const text = textRef?.current;
+            const closeButton = closeButtonRef?.current;
 
             if (action === "open") {
                 frame.Visible = true;
@@ -33,10 +48,92 @@ export function useWindowAnimation({
             const below = middle.sub(new UDim2(0, 0, 0, 30));
             frame.Position = action === "open" ? below : middle;
 
-            const tweenInfo = action === "open" ? new TweenInfo(0.2) : new TweenInfo(0.1, Enum.EasingStyle.Linear);
+            const tweenInfo =
+                action === "open"
+                    ? new TweenInfo(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
+                    : new TweenInfo(0.1, Enum.EasingStyle.Linear);
             const tween = TweenService.Create(frame, tweenInfo, {
                 Position: action === "open" ? middle : below,
             });
+
+            // Animate title with layered effect
+            if (title) {
+                const titleInitialPos = new UDim2(0, 12, 0, 0);
+                const titleOffset = titleInitialPos.add(new UDim2(0, 0, 0, -8));
+                title.Position = action === "open" ? titleOffset : titleInitialPos;
+
+                const titleTweenInfo =
+                    action === "open"
+                        ? new TweenInfo(0.5, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
+                        : new TweenInfo(0.075, Enum.EasingStyle.Linear);
+
+                const titleTween = TweenService.Create(title, titleTweenInfo, {
+                    Position: action === "open" ? titleInitialPos : titleOffset,
+                });
+                titleTween.Play();
+            }
+
+            // Animate icon with rotation
+            if (icon) {
+                icon.Rotation = action === "open" ? -90 : 0;
+
+                const iconTweenInfo =
+                    action === "open"
+                        ? new TweenInfo(0.5, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
+                        : new TweenInfo(0.1, Enum.EasingStyle.Linear);
+
+                const iconTween = TweenService.Create(icon, iconTweenInfo, {
+                    Rotation: action === "open" ? 0 : -90,
+                });
+                iconTween.Play();
+            }
+
+            // Animate title text with slight rotation
+            if (text) {
+                text.Rotation = action === "open" ? -5 : 0;
+
+                const textTweenInfo =
+                    action === "open"
+                        ? new TweenInfo(0.45, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
+                        : new TweenInfo(0.1, Enum.EasingStyle.Linear);
+
+                const textTween = TweenService.Create(text, textTweenInfo, {
+                    Rotation: action === "open" ? 0 : -5,
+                });
+                textTween.Play();
+            }
+
+            // Animate close button with rotation
+            if (closeButton) {
+                closeButton.Rotation = action === "open" ? 90 : 0;
+
+                const closeButtonTweenInfo =
+                    action === "open"
+                        ? new TweenInfo(0.5, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
+                        : new TweenInfo(0.1, Enum.EasingStyle.Linear);
+
+                const closeButtonTween = TweenService.Create(closeButton, closeButtonTweenInfo, {
+                    Rotation: action === "open" ? 0 : 90,
+                });
+                closeButtonTween.Play();
+            }
+
+            // Animate content with layered effect
+            if (content) {
+                const contentInitialPos = new UDim2(0.5, 0, 0.075, 0);
+                const contentOffset = contentInitialPos.add(new UDim2(0, 0, 0, -10));
+                content.Position = action === "open" ? contentOffset : contentInitialPos;
+
+                const contentTweenInfo =
+                    action === "open"
+                        ? new TweenInfo(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
+                        : new TweenInfo(0.1, Enum.EasingStyle.Linear);
+
+                const contentTween = TweenService.Create(content, contentTweenInfo, {
+                    Position: action === "open" ? contentInitialPos : contentOffset,
+                });
+                contentTween.Play();
+            }
 
             tween.Play();
             tween.Completed.Connect(() => {
@@ -73,10 +170,20 @@ export default function BasicWindow({
         backgroundColor = new ColorSequence(keypoints);
     }
     const frameRef = useRef<Frame>();
+    const contentRef = useRef<Frame>();
+    const titleRef = useRef<Frame>();
+    const iconRef = useRef<ImageLabel>();
+    const textRef = useRef<TextLabel>();
+    const closeButtonRef = useRef<TextButton>();
     const initialPosition = new UDim2(0.5, 0, 1, -40);
 
     useWindowAnimation({
         frameRef,
+        contentRef,
+        titleRef,
+        iconRef,
+        textRef,
+        closeButtonRef,
         initialPosition,
         visible,
     });
@@ -94,9 +201,10 @@ export default function BasicWindow({
             ZIndex={0}
             Visible={false}
         >
-            <WindowTitle icon={icon} title={title ?? id} />
-            <WindowCloseButton onClick={() => DocumentManager.setVisible(id, false)} />
+            <WindowTitle ref={titleRef} iconRef={iconRef} textRef={textRef} icon={icon} title={title ?? id} />
+            <WindowCloseButton ref={closeButtonRef} onClick={() => DocumentManager.setVisible(id, false)} />
             <frame
+                ref={contentRef}
                 key="MainWindow"
                 AnchorPoint={new Vector2(0.5, 0)}
                 BackgroundTransparency={1}
