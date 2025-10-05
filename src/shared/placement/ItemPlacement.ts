@@ -16,6 +16,12 @@ namespace ItemPlacement {
      * @returns True if touching another placed item, false otherwise.
      */
     export function isTouchingPlacedItem(itemModel: Model) {
+        // Skip collision check if item is still in bounce animation
+        const bounceStartTime = itemModel.GetAttribute("BounceAnimationStartTime") as number | undefined;
+        if (bounceStartTime !== undefined && os.clock() - bounceStartTime < 0.4) {
+            return false;
+        }
+
         const children = itemModel.GetChildren();
         for (const hitbox of children) {
             if (hitbox.Name !== "Hitbox" || !hitbox.IsA("BasePart")) {

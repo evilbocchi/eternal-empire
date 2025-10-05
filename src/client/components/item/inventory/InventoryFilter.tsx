@@ -1,10 +1,10 @@
 import { FuzzySearch } from "@rbxts/fuzzy-search";
 import React, { forwardRef, useCallback, useMemo, useRef, useState } from "@rbxts/react";
+import { useMessageTooltip } from "client/components/tooltip/TooltipManager";
 import { getAsset } from "shared/asset/AssetMap";
 import { playSound } from "shared/asset/GameAssets";
 import Item from "shared/item/Item";
 import Items from "shared/items/Items";
-import { useMessageTooltip } from "../../tooltip/TooltipManager";
 
 declare global {
     type TraitFilterId = (typeof TRAIT_OPTIONS)[number]["id"];
@@ -132,6 +132,8 @@ const InventoryFilter = forwardRef<
         searchBoxRef?: React.Ref<TextBox>;
         /** Optional ref for filter frame */
         filterFrameRef?: React.Ref<Frame>;
+        /** Optional refs for individual filter buttons */
+        filterButtonRefs?: React.MutableRefObject<Map<string, ImageButton>>;
     }
 >(
     (
@@ -143,6 +145,7 @@ const InventoryFilter = forwardRef<
             onClear,
             searchBoxRef,
             filterFrameRef,
+            filterButtonRefs,
         },
         ref,
     ) => {
@@ -284,28 +287,37 @@ const InventoryFilter = forwardRef<
 
                         {/* Render trait filter buttons */}
                         {TRAIT_OPTIONS.map((trait, index) => (
-                            <imagebutton
-                                key={trait.id}
-                                BackgroundTransparency={1}
-                                Image={trait.image}
-                                ImageColor3={trait.color}
-                                ImageTransparency={traitFilters.has(trait.id) ? 0 : 0.6}
-                                LayoutOrder={index + 1}
-                                ScaleType={Enum.ScaleType.Fit}
-                                Size={new UDim2(1, 0, 1, 0)}
-                                Event={{
-                                    Activated: () => onTraitToggle(trait.id),
-                                    ...tooltipPropsPerTrait.get(trait.id)!.events,
-                                }}
-                            >
-                                <uipadding
-                                    PaddingBottom={new UDim(0, 5)}
-                                    PaddingLeft={new UDim(0, 5)}
-                                    PaddingRight={new UDim(0, 5)}
-                                    PaddingTop={new UDim(0, 5)}
-                                />
+                            <frame BackgroundTransparency={1} Size={new UDim2(1, 0, 1, 0)}>
+                                <imagebutton
+                                    key={trait.id}
+                                    ref={(node) => {
+                                        if (filterButtonRefs && node) {
+                                            filterButtonRefs.current.set(trait.id, node);
+                                        }
+                                    }}
+                                    AnchorPoint={new Vector2(0.5, 0.5)}
+                                    BackgroundTransparency={1}
+                                    Image={trait.image}
+                                    ImageColor3={trait.color}
+                                    ImageTransparency={traitFilters.has(trait.id) ? 0 : 0.6}
+                                    LayoutOrder={index + 1}
+                                    Position={new UDim2(0.5, 0, 0.5, 0)}
+                                    ScaleType={Enum.ScaleType.Fit}
+                                    Size={new UDim2(1, 0, 1, 0)}
+                                    Event={{
+                                        Activated: () => onTraitToggle(trait.id),
+                                        ...tooltipPropsPerTrait.get(trait.id)!.events,
+                                    }}
+                                >
+                                    <uipadding
+                                        PaddingBottom={new UDim(0, 5)}
+                                        PaddingLeft={new UDim(0, 5)}
+                                        PaddingRight={new UDim(0, 5)}
+                                        PaddingTop={new UDim(0, 5)}
+                                    />
+                                </imagebutton>
                                 <uiaspectratioconstraint />
-                            </imagebutton>
+                            </frame>
                         ))}
 
                         {/* Clear button */}

@@ -191,6 +191,44 @@ namespace BuildManager {
     }
 
     /**
+     * Applies bounce animation to a model.
+     * @param model The model to animate.
+     */
+    function applyBounceAnimation(model: Model) {
+        // Mark the time when bounce animation starts
+        model.SetAttribute("BounceAnimationStartTime", os.clock());
+
+        // Apply bounce animation after initial positioning
+        task.spawn(() => {
+            const primaryPart = model.PrimaryPart!;
+            const indicator = primaryPart.FindFirstChild("Indicator") as BasePart;
+            if (indicator === undefined) return;
+
+            const targetCFrame = indicator.CFrame;
+
+            // Set initial rotated state
+            const off = math.rad(35);
+            const randomOff = () => (math.random(0, 1) === 0 ? -off : off);
+            primaryPart.CFrame = targetCFrame.mul(CFrame.Angles(randomOff(), randomOff(), randomOff()));
+
+            // Animate to target rotation
+            const tween = TweenService.Create(
+                primaryPart,
+                new TweenInfo(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.Out),
+                {
+                    CFrame: targetCFrame,
+                },
+            );
+            tween.Play();
+
+            // Clear the bounce animation flag after animation completes
+            tween.Completed.Connect(() => {
+                model.SetAttribute("BounceAnimationStartTime", undefined);
+            });
+        });
+    }
+
+    /**
      * Selects the main model for placement.
      * @param model The model to select.
      */
@@ -205,6 +243,8 @@ namespace BuildManager {
         model.SetAttribute("Selected", true);
         refresh();
         onMouseMove(true, false);
+
+        applyBounceAnimation(model);
     }
 
     /**
@@ -492,6 +532,9 @@ namespace BuildManager {
             const main = hovering;
             if (main !== undefined) {
                 const names = new Array<string>();
+                const modelsToAnimate = new Array<Model>();
+                let selectedCount = 0;
+
                 for (const model of dragging) {
                     names.push(model.Name);
 
@@ -509,17 +552,41 @@ namespace BuildManager {
                     const placingModel = addPlacingModel(placedItem);
 
                     if (model === main) {
-                        mainSelect(placingModel);
-                    } else {
+                        // Main selection
+                        selected.set(placingModel, new CFrame());
+                        preselectCFrame = placingModel.PrimaryPart!.CFrame;
+                        mainSelected = placingModel;
+                        const modelInfo = getAllInstanceInfo(placingModel);
+                        rotationValue.Value = modelInfo.InitialRotation ?? 0;
+                        hover(undefined);
+                        placingModel.SetAttribute("Selected", true);
+                        selectedCount++;
+                        modelsToAnimate.push(placingModel);
+                    } else if (selectedCount < 10) {
+                        // Additional models (up to 10 total)
                         selected.set(placingModel, main.PrimaryPart!.CFrame.Inverse().mul(model.PrimaryPart!.CFrame));
+                        placingModel.SetAttribute("Selected", true);
+                        selectedCount++;
+                        modelsToAnimate.push(placingModel);
+                    } else {
+                        // Beyond 10 models - select but don't animate
+                        selected.set(placingModel, main.PrimaryPart!.CFrame.Inverse().mul(model.PrimaryPart!.CFrame));
+                        placingModel.SetAttribute("Selected", true);
                     }
                     model.SetAttribute("Dragging", false);
                 }
+
                 playSound("Pickup.mp3");
                 Packets.unplaceItems.toServer(names);
-                task.delay(0.05, () => {
-                    onMouseMove(true, false);
-                });
+                refresh();
+
+                // Position all models first with animations disabled
+                onMouseMove(true, false);
+
+                // Then apply bounce animations to all selected models
+                for (const model of modelsToAnimate) {
+                    applyBounceAnimation(model);
+                }
             }
 
             dragging.clear();

@@ -13,6 +13,8 @@ export default function UpgradeBoardRenderer() {
         const optionsContainer = model.FindFirstChild("UpgradeOptionsPart");
         const actionsContainer = model.FindFirstChild("UpgradeActionsPart");
         if (!optionsContainer || !actionsContainer) return;
+        optionsContainer.AddTag("Unhoverable");
+        actionsContainer.AddTag("Unhoverable");
 
         upgradeBoardGuis.push(
             <UpgradeBoardGui

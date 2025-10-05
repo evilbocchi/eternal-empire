@@ -12,6 +12,7 @@ import InventoryEmptyState from "client/components/item/inventory/InventoryEmpty
 import InventoryFilter, {
     filterItems,
     ItemFilterData,
+    TRAIT_OPTIONS,
     useBasicInventoryFilter,
 } from "client/components/item/inventory/InventoryFilter";
 import {
@@ -129,6 +130,7 @@ export default function InventoryWindow() {
     // Refs for filter animation
     const searchBoxRef = useRef<TextBox>();
     const filterFrameRef = useRef<Frame>();
+    const filterButtonRefs = useRef(new Map<string, ImageButton>());
     const [previousVisible, setPreviousVisible] = useState(visible);
 
     // Observe inventory data from packets
@@ -143,12 +145,12 @@ export default function InventoryWindow() {
         const action = visible && !previousVisible ? "open" : !visible && previousVisible ? "close" : undefined;
         if (action) {
             const searchBox = searchBoxRef.current;
-            const filterFrame = filterFrameRef.current;
+            const filterButtons = filterButtonRefs.current;
 
             if (action === "open") {
-                // Animate search box
+                // Animate search box first
                 if (searchBox) {
-                    searchBox.Rotation = -5;
+                    searchBox.Rotation = -3;
                     const searchTween = TweenService.Create(
                         searchBox,
                         new TweenInfo(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.Out),
@@ -157,30 +159,29 @@ export default function InventoryWindow() {
                     searchTween.Play();
                 }
 
-                // Animate filter frame with delay
-                if (filterFrame) {
-                    filterFrame.Rotation = -5;
-                    task.wait(0.08); // Small delay for cascade
-                    const filterTween = TweenService.Create(
-                        filterFrame,
-                        new TweenInfo(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.Out),
-                        { Rotation: 0 },
-                    );
-                    filterTween.Play();
-                }
+                // Animate each filter button individually with cascading delays
+                task.spawn(() => {
+                    for (let index = 0; index < TRAIT_OPTIONS.size(); index++) {
+                        const trait = TRAIT_OPTIONS[index];
+                        const button = filterButtons.get(trait.id);
+                        if (button) {
+                            button.Position = new UDim2(0.5, 0, 0.5, -8);
+                            const buttonTween = TweenService.Create(
+                                button,
+                                new TweenInfo(0.35 + index * 0.04, Enum.EasingStyle.Back, Enum.EasingDirection.Out),
+                                { Position: new UDim2(0.5, 0, 0.5, 0) },
+                            );
+                            buttonTween.Play();
+                        }
+                    }
+                });
             } else {
                 // Reset rotation on close
                 if (searchBox) {
                     const searchTween = TweenService.Create(searchBox, new TweenInfo(0.1, Enum.EasingStyle.Linear), {
-                        Rotation: -5,
+                        Rotation: -3,
                     });
                     searchTween.Play();
-                }
-                if (filterFrame) {
-                    const filterTween = TweenService.Create(filterFrame, new TweenInfo(0.1, Enum.EasingStyle.Linear), {
-                        Rotation: -5,
-                    });
-                    filterTween.Play();
                 }
             }
         }
@@ -346,7 +347,12 @@ export default function InventoryWindow() {
             {/* Main inventory content */}
             <frame BackgroundTransparency={1} Size={new UDim2(1, 0, 1, 0)} Visible={hasAnyItems}>
                 {/* Filter options */}
-                <InventoryFilter {...filterProps} searchBoxRef={searchBoxRef} filterFrameRef={filterFrameRef} />
+                <InventoryFilter
+                    {...filterProps}
+                    searchBoxRef={searchBoxRef}
+                    filterFrameRef={filterFrameRef}
+                    filterButtonRefs={filterButtonRefs}
+                />
 
                 {/* Item list container */}
                 <scrollingframe
