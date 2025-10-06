@@ -165,7 +165,7 @@ namespace LoadingScreen {
             // Animate UICorner to square (0) when opening
             const backdropCorner = backdrop!.FindFirstChild("BackdropCorner") as UICorner;
             if (backdropCorner) {
-                backdropCorner.CornerRadius = new UDim(0, 0);
+                backdropCorner.CornerRadius = new UDim(1, 0);
                 TweenService.Create(
                     backdropCorner,
                     new TweenInfo(0.4, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),

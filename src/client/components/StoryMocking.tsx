@@ -31,7 +31,7 @@ class StoryMocking {
         });
 
         Packets.getLogs.fromClient((player) => {
-            print(`${player.Name} is requesting logs`);
+            print(`${player?.Name} is requesting logs`);
             return [];
         });
 

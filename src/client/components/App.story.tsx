@@ -18,6 +18,7 @@ export = CreateReactStory(
     },
     (props) => {
         StoryMocking.mockData();
+        StoryMocking.mockCharacter();
         questState.setTrackedQuest("Quest1");
         if (!props.controls.hasItems) {
             Packets.inventory.set(new Map());
