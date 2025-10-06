@@ -1,6 +1,10 @@
 local HttpService = game:GetService("HttpService")
 local RunService = game:GetService("RunService")
 
+if RunService:IsRunning() then
+    return -- only run in studio
+end
+
 local INTERVAL = 2 -- seconds
 local function getEndpoint()
     local currentPort = workspace:GetAttribute("WaypointSyncPort") or 28354

@@ -1,5 +1,5 @@
 import React, { ReactNode, RefObject, useEffect, useRef, useState } from "@rbxts/react";
-import { Lighting, TweenService } from "@rbxts/services";
+import { TweenService } from "@rbxts/services";
 import DocumentManager from "client/components/window/DocumentManager";
 import WindowCloseButton from "client/components/window/WindowCloseButton";
 import WindowTitle from "client/components/window/WindowTitle";

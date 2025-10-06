@@ -26,6 +26,7 @@ import BasicWindow from "client/components/window/BasicWindow";
 import useProperty from "client/hooks/useProperty";
 import { getAsset } from "shared/asset/AssetMap";
 import { playSound } from "shared/asset/GameAssets";
+import simpleProfile from "shared/hamster/simpleProfile";
 import type Item from "shared/item/Item";
 import Items from "shared/items/Items";
 import Packets from "shared/Packets";
@@ -261,12 +262,10 @@ export default function InventoryWindow() {
     }, [inventory, uniqueInstances, searchQuery, filterProps.traitFilters]);
 
     useEffect(() => {
-        // Always regenerate slots when viewport management changes since it only changes in stories
         const frame = scrollingFrameRef.current;
         if (!frame) return;
 
         const slots = itemSlotsRef.current;
-
         for (const item of NON_GEAR_ITEMS) {
             if (slots.has(item.id)) continue;
 

@@ -1,6 +1,10 @@
 local HttpService = game:GetService("HttpService")
 local RunService = game:GetService("RunService")
 
+if RunService:IsRunning() then
+    return -- only run in Studio when not playing
+end
+
 local INTERVAL = 5 -- seconds between syncs
 local MAX_DEPTH = 6
 local MAX_NODES = 12000

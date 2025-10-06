@@ -91,6 +91,19 @@ function addRoot(roots: Set<Root>, container: Instance): Root {
     return root;
 }
 
+function waitForFrames(frameCount = 3): Promise<void> {
+    return new Promise((resolve) => {
+        let count = 0;
+        const conn = RunService.Heartbeat.Connect(() => {
+            count++;
+            if (count >= frameCount) {
+                conn.Disconnect();
+                resolve();
+            }
+        });
+    });
+}
+
 /**
  * Entry point for the app's UI.
  * This creates roots for each major UI section and manages their lifecycle, so
@@ -156,16 +169,18 @@ export default function App() {
         const cleanup = MusicManager.init();
 
         task.delay(1, () => {
-            LoadingScreen.hideLoadingScreen();
+            waitForFrames(30).then(() => {
+                LoadingScreen.hideLoadingScreen();
 
-            task.delay(0.5, () => {
-                if (IS_PUBLIC_SERVER) {
-                    DocumentManager.setVisible("Start", true);
-                } else if (Sandbox.getEnabled()) {
-                    setVisibilityMain(true);
-                } else {
-                    performIntroSequence();
-                }
+                task.delay(0.5, () => {
+                    if (IS_PUBLIC_SERVER) {
+                        DocumentManager.setVisible("Start", true);
+                    } else if (Sandbox.getEnabled()) {
+                        setVisibilityMain(true);
+                    } else {
+                        performIntroSequence();
+                    }
+                });
             });
         });
 
