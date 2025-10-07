@@ -27,6 +27,6 @@ export = new Item(script.Name)
     .setAdd(new CurrencyBundle().set("Skill", 1))
 
     .trait(Conveyor)
-    .setSpeed(6)
+    .setSpeed(1)
 
     .exit();
