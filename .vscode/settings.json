@@ -13,4 +13,5 @@
     "eslint.format.enable": true,
     "typescript.format.semicolons": "insert",
     "typescript.experimental.useTsgo": false,
+    "stylua.targetReleaseVersion": "latest",
 }

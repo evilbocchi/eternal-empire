@@ -21,7 +21,7 @@ import EmpireIdOverrideValue from "shared/world/nodes/EmpireIdOverrideValue";
 
 declare global {
     interface _G {
-        empireData: EmpireData;
+        empireData?: EmpireData;
     }
 }
 
@@ -77,16 +77,10 @@ export default class DataService implements OnStart, OnPlayerAdded {
 
         if (empireId === undefined) throw "Could not load empire ID";
 
-        let empireProfile: Profile<EmpireData> | undefined;
         if (IS_EDIT) {
-            empireProfile = EmpireProfileManager.profileManager.profileStore.Mock.LoadProfileAsync(
-                empireId,
-                "ForceLoad",
-            ); // Mock profile for CI testing
-        } else {
-            empireProfile = EmpireProfileManager.load(empireId);
+            EmpireProfileManager.unload(empireId);
         }
-
+        const empireProfile = EmpireProfileManager.load(empireId);
         if (empireProfile === undefined) throw "Could not load empire";
 
         const empireData = empireProfile.Data;
@@ -271,7 +265,12 @@ export default class DataService implements OnStart, OnPlayerAdded {
         Packets.teleportToEmpire.fromClient(AvailableEmpire.teleport);
         eat(Players.PlayerRemoving.Connect(AvailableEmpire.unregisterPlayer), "Disconnect");
 
-        if (IS_SERVER && !IS_EDIT) {
+        if (IS_EDIT) {
+            eat(() => {
+                EmpireProfileManager.unload(ThisEmpire.id);
+            });
+        } else {
+            // Force save every 60 seconds to minimize data loss
             task.spawn(() => {
                 if (IS_SINGLE_SERVER || !IS_PUBLIC_SERVER) {
                     const loop = () => {

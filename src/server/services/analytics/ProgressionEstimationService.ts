@@ -46,7 +46,7 @@ declare global {
     interface Assets {}
 
     interface _G {
-        ProgressEstimated: (message: string) => void;
+        ProgressEstimated?: (message: string) => void;
     }
 }
 

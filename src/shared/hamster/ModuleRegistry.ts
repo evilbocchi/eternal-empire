@@ -79,7 +79,10 @@ export class ModuleRegistry<T extends Identifiable> {
             const i = require(moduleScript);
             if (i !== undefined) {
                 const reloadable = i as T;
-                this.OBJECTS.set(reloadable.id, reloadable);
+                const id = reloadable.id;
+                if (id !== undefined) {
+                    this.OBJECTS.set(id, reloadable);
+                }
                 const cleanup = reloadable.init();
                 if (cleanup !== undefined) {
                     eat(cleanup);

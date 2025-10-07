@@ -15,11 +15,8 @@ export = CreateReactStory(
     () => {
         StoryMocking.mockPhysics();
         StoryMocking.mockCharacter();
+        StoryMocking.mockFlamework();
         ItemViewport.disable();
-
-        useEffect(() => {
-            StoryMocking.mockFlamework();
-        }, []);
 
         return (
             <Fragment>

@@ -69,6 +69,7 @@
         "@rbxts/flamework-binary-serializer": "^0.7.0",
         "@rbxts/fletchette": "^4.4.2",
         "@rbxts/fuzzy-search": "^1.0.4",
+        "@rbxts/janitor": "^1.18.3-ts.0",
         "@rbxts/luau-thread": "^1.0.1",
         "@rbxts/partcache": "^1.1.1",
         "@rbxts/react": "^17.2.3",

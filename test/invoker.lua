@@ -1,4 +1,5 @@
-local ServerScriptService = game:GetService("ServerScriptService")
-local target = ServerScriptService:WaitForChild("TS"):WaitForChild("tests"):WaitForChild("runTests")
+--!nocheck
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local target = ReplicatedStorage:WaitForChild("TS"):WaitForChild("hamster"):WaitForChild("runTests")
 print("Running test script from:", target:GetFullName())
-require(target)
+require(target)()

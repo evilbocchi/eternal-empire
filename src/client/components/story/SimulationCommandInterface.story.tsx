@@ -1,4 +1,4 @@
-import React, { useEffect } from "@rbxts/react";
+import React from "@rbxts/react";
 import ReactRoblox from "@rbxts/react-roblox";
 import { CreateReactStory } from "@rbxts/ui-labs";
 import StoryMocking from "client/components/StoryMocking";
@@ -12,10 +12,7 @@ export = CreateReactStory(
     },
     (props) => {
         StoryMocking.mockCharacter();
-
-        useEffect(() => {
-            StoryMocking.mockFlamework();
-        }, []);
+        StoryMocking.mockFlamework();
 
         return <SimulationCommandInterface />;
     },

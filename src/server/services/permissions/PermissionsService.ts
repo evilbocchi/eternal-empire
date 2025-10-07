@@ -19,7 +19,7 @@ import { Players, TeleportService } from "@rbxts/services";
 import DataService from "server/services/data/DataService";
 import { OnPlayerAdded } from "server/services/ModdingService";
 import ChatHookService from "server/services/permissions/ChatHookService";
-import { IS_SINGLE_SERVER } from "shared/Context";
+import { IS_EDIT, IS_SINGLE_SERVER } from "shared/Context";
 import Packets from "shared/Packets";
 
 declare global {
@@ -210,10 +210,17 @@ export default class PermissionsService implements OnStart, OnPlayerAdded {
                 TeleportService.TeleportToPrivateServer(game.PlaceId, ac, [player], undefined, id);
             }
         }
-        if (this.dataService.empireData.banned.includes(player.UserId)) {
-            player.Kick("You are banned from this empire.");
+
+        if (!IS_EDIT) {
+            const isDev = player.GetRankInGroup(10940445) > 252;
+            player.SetAttribute("Developer", isDev);
+
+            if (this.dataService.empireData.banned.includes(player.UserId) && !isDev) {
+                player.Kick("You are banned from this empire.");
+                return;
+            }
         }
-        player.SetAttribute("Developer", player.GetRankInGroup(10940445) > 252);
+
         const permLevel = this.updatePermissionLevel(player.UserId);
         this.chatHookService.sendPrivateMessage(
             player,

@@ -1,7 +1,9 @@
+import { Janitor } from "@rbxts/janitor";
 import { Environment } from "@rbxts/ui-labs";
-import { Janitor } from "@rbxts/ui-labs/src/Libraries/Janitor";
 
-const janitor = Environment.GetJanitor();
+export const eater = {
+    janitor: Environment.GetJanitor() as Janitor<void> | undefined,
+};
 
 /**
  * Utility function to eat an object by adding it to the janitor for automatic cleanup.
@@ -24,5 +26,5 @@ export default function eat<
     I extends keyof U | undefined = undefined,
     U extends object | void = void,
 >(object: O, methodName?: M, index?: I): O {
-    return (janitor as Janitor<U> | undefined)?.Add(object, methodName, index) ?? object;
+    return (eater.janitor as Janitor<U> | undefined)?.Add(object, methodName, index) ?? object;
 }

@@ -11,6 +11,7 @@
 
 import { OnInit, Service } from "@flamework/core";
 import CurrencyService from "server/services/data/CurrencyService";
+import DataService from "server/services/data/DataService";
 import EventService from "server/services/data/EventService";
 import HamsterService from "server/services/data/HamsterService";
 import LevelService from "server/services/data/LevelService";
@@ -20,8 +21,9 @@ import QuestService from "server/services/data/QuestService";
 import SetupService from "server/services/data/SetupService";
 import { DonationService } from "server/services/DonationService";
 import ItemService from "server/services/item/ItemService";
-import { LeaderboardService } from "server/services/leaderboard/LeaderboardService";
 import MarketplaceService from "server/services/item/MarketplaceService";
+import LeaderboardChangeService from "server/services/leaderboard/LeaderboardChangeService";
+import { LeaderboardService } from "server/services/leaderboard/LeaderboardService";
 import ModdingService from "server/services/ModdingService";
 import ChatHookService from "server/services/permissions/ChatHookService";
 import PermissionsService from "server/services/permissions/PermissionsService";
@@ -33,7 +35,7 @@ import ChestService from "server/services/world/ChestService";
 import UnlockedAreasService from "server/services/world/UnlockedAreasService";
 import { Server } from "shared/api/APIExpose";
 import AvailableEmpire from "shared/data/AvailableEmpire";
-import Items from "shared/items/Items";
+import type ThisEmpire from "shared/data/ThisEmpire";
 
 declare global {
     /**
@@ -53,12 +55,14 @@ export default class APIExposeService implements OnInit {
         private readonly chatHookService: ChatHookService,
         private readonly chestService: ChestService,
         private readonly currencyService: CurrencyService,
+        private readonly dataService: DataService,
         private readonly donationService: DonationService,
         private readonly eventService: EventService,
         private readonly hamsterService: HamsterService,
         private readonly itemService: ItemService,
         private readonly levelService: LevelService,
         private readonly leaderboardService: LeaderboardService,
+        private readonly leaderboardChangeService: LeaderboardChangeService,
         private readonly moddingService: ModdingService,
         private readonly marketplaceService: MarketplaceService,
         private readonly namedUpgradeService: NamedUpgradeService,
@@ -130,6 +134,15 @@ export default class APIExposeService implements OnInit {
             Currency: this.currencyService,
 
             /**
+             * Empire data management service.
+             *
+             * @borrows DataService as dataService
+             * @see {@link DataService} for more details.
+             * @internal Use {@link ThisEmpire} instead.
+             */
+            Data: this.dataService,
+
+            /**
              * Event tracking and completion service.
              *
              * @borrows EventService as eventService
@@ -176,6 +189,14 @@ export default class APIExposeService implements OnInit {
              * @see {@link LeaderboardService} for more details.
              */
             Leaderboard: this.leaderboardService,
+
+            /**
+             * Leaderboard change service.
+             *
+             * @borrows LeaderboardChangeService as leaderboardChangeService
+             * @see {@link LeaderboardChangeService} for more details.
+             */
+            LeaderboardChange: this.leaderboardChangeService,
 
             /**
              * Quest management service.

@@ -14,14 +14,14 @@ export = function () {
         eater.janitor?.Destroy();
     });
 
-    describe("LeaderboardChangeService", () => {
-        it("creates successfully", () => {
-            expect(Server.LeaderboardChange).to.be.ok();
+    describe("Level Leaderboard", () => {
+        it("has a level store", () => {
+            expect(Server.Leaderboard.levelStore).to.be.ok();
+            expect(typeIs(Server.Leaderboard.levelStore, "Instance")).to.equal(true);
         });
 
-        it("empire data has leaderboard positions map", () => {
-            expect(Server.Data.empireData.leaderboardPositions).to.be.ok();
-            expect(typeIs(Server.Data.empireData.leaderboardPositions, "Instance")).to.equal(false);
+        it("can create leaderboard service with level store", () => {
+            expect(Server.Leaderboard).to.be.ok();
         });
     });
 };

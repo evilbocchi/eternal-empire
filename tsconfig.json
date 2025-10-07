@@ -18,7 +18,7 @@
         "typeRoots": [
             "node_modules/@rbxts",
             "node_modules/@flamework",
-            "node_modules/@antivivi"
+            "node_modules/@antivivi",
         ],
         // configurable
         "rootDir": "src",
