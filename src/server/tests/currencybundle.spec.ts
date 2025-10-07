@@ -79,8 +79,8 @@ export = function () {
             expect(sufficient).to.equal(true);
 
             const remaining = new CurrencyBundle(remainingMap, true);
-            expect(remaining.get("Funds")?.equals(new OnoeNum(40))).to.equal(true);
-            expect(remaining.get("Power")?.equals(new OnoeNum(4))).to.equal(true);
+            expect(remaining.get("Funds")?.equals(40)).to.equal(true);
+            expect(remaining.get("Power")?.equals(4)).to.equal(true);
         });
 
         it("correctly identifies insufficient balance", () => {

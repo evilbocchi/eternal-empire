@@ -108,11 +108,12 @@ export default class PermissionsService implements OnStart, OnPlayerAdded {
     /**
      * Gets the permission level for a user.
      * @param userId User ID
+     * @param ignoreTest Whether to ignore test server status (default false)
      * @returns Permission level (-2 banned, -1 restricted, 0 normal, 1 trusted, 2 manager, 3 owner, 4 developer/testing)
      */
-    getPermissionLevel(userId: number) {
+    getPermissionLevel(userId: number, ignoreTest?: boolean) {
         const data = this.dataService.empireData;
-        if (game.PlaceId === 16438564807) {
+        if (game.PlaceId === 16438564807 && ignoreTest !== true) {
             return 4;
         } else {
             const p = Players.GetPlayerByUserId(userId);

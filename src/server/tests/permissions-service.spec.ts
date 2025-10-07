@@ -78,9 +78,9 @@ export = function () {
             data.trusted = [trustedId];
             data.banned = [bannedId];
 
-            expect(Server.Permissions.getPermissionLevel(ownerId)).to.equal(3);
-            expect(Server.Permissions.getPermissionLevel(trustedId)).to.equal(1);
-            expect(Server.Permissions.getPermissionLevel(bannedId)).to.equal(-2);
+            expect(Server.Permissions.getPermissionLevel(ownerId, true)).to.equal(3);
+            expect(Server.Permissions.getPermissionLevel(trustedId, true)).to.equal(1);
+            expect(Server.Permissions.getPermissionLevel(bannedId, true)).to.equal(-2);
         });
 
         it("formats access codes with the empire id", () => {

@@ -30,34 +30,25 @@ export class DonationService implements OnStart, OnPlayerAdded {
     ) {}
 
     /**
-     * Gets the amount a player has donated.
-     *
-     * @param player The player to check.
-     */
-    getDonated(player: Player) {
-        return PlayerProfileManager.load(player.UserId, true)?.Data.donated ?? 0;
-    }
-
-    /**
-     * Sets the amount a player has donated.
+     * Increases the donated amount for a player by a delta.
      *
      * @param player The player to update.
-     * @param donated The new donation amount.
+     * @param delta The amount to increase the donation by.
      */
-    setDonated(player: Player, donated: number) {
+    incrementDonated(player: Player, delta: number) {
         const playerProfile = PlayerProfileManager.load(player.UserId);
         if (playerProfile !== undefined) {
-            playerProfile.Data.donated = donated;
-            this.updateLeaderstats(player, donated);
+            const newDonated = playerProfile.Data.donated + delta;
+            playerProfile.Data.donated = newDonated;
+            Leaderstats.setLeaderstat(player, "Donated", newDonated);
         }
     }
 
-    updateLeaderstats(player: Player, donated = this.getDonated(player)) {
-        Leaderstats.setLeaderstat(player, "Donated", donated);
-    }
-
     onPlayerAdded(player: Player) {
-        this.updateLeaderstats(player);
+        const playerProfile = PlayerProfileManager.load(player.UserId);
+        if (playerProfile !== undefined) {
+            Leaderstats.setLeaderstat(player, "Donated", playerProfile.Data.donated);
+        }
     }
 
     onStart() {
@@ -71,7 +62,7 @@ export class DonationService implements OnStart, OnPlayerAdded {
         Packets.promptDonation.fromClient((player, dp) => MarketplaceService.PromptProductPurchase(player, dp));
         for (const donationProduct of DONATION_PRODUCTS) {
             this.productService.setProductFunction(donationProduct.id, (_receipt, player) => {
-                this.setDonated(player, this.getDonated(player) + donationProduct.amount);
+                this.incrementDonated(player, donationProduct.amount);
                 this.chatHookService.sendServerMessage(
                     player.Name + " JUST DONATED " + donationProduct.amount + " ROBUX!",
                 );

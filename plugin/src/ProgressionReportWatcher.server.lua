@@ -1,7 +1,7 @@
 local HttpService = game:GetService("HttpService")
 
 local function getEndpoint()
-    local currentPort = workspace:GetAttribute("WaypointSyncPort") or 28354
+    local currentPort = workspace:GetAttribute("ToolingPort") or 28354
     return `http://localhost:{currentPort}/progression-report`
 end
 

@@ -12,7 +12,7 @@ local SNAPSHOT_INLINE_LIMIT = 200000 -- maximum encoded payload size before chun
 local SNAPSHOT_CHUNK_SIZE = 200000 -- chunk size for large snapshots
 
 local function getEndpoint()
-    local currentPort = workspace:GetAttribute("WaypointSyncPort") or 28354
+    local currentPort = workspace:GetAttribute("ToolingPort") or 28354
     return `http://localhost:{currentPort}/data-model`
 end
 

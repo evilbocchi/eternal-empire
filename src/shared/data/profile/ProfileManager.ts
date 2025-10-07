@@ -50,7 +50,7 @@ export class ProfileManagerWrapper<T extends object> {
      * @param view Whether to load in view-only mode (read-only).
      * @returns The loaded profile, or undefined if not found.
      */
-    load(id: string | unknown, view?: boolean) {
+    load(id: string | unknown, view?: boolean): Profile<T, unknown> | undefined {
         const key = this.getKey(id);
 
         if (IS_EDIT) {
@@ -59,12 +59,17 @@ export class ProfileManagerWrapper<T extends object> {
                 return cached;
             }
 
-            const mockLoaded = this.profileManager.profileStore.Mock.LoadProfileAsync(key);
+            const mockLoaded = this.profileManager.profileStore.Mock.LoadProfileAsync(key, "ForceLoad");
             if (mockLoaded) {
                 this.mockLoadedProfiles.set(key, mockLoaded);
                 return mockLoaded;
             }
+
+            return {
+                Data: table.clone(this.template),
+            } as Profile<T, unknown>;
         }
+
         return view ? this.profileManager.view(key) : this.profileManager.load(key);
     }
 
