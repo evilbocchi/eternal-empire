@@ -68,6 +68,7 @@ export default class GrabbableService implements OnInit {
                 if (model) {
                     model.PivotTo(parent.CFrame);
                     model.Parent = Workspace;
+                    eat(model, "Destroy");
                 }
                 // Hide the placeholder part
                 if (!IS_EDIT) parent.Transparency = 1;

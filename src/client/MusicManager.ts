@@ -129,9 +129,8 @@ namespace MusicManager {
         connection = music.Ended.Once((soundId) => {
             if (playing?.SoundId === soundId) {
                 playing = undefined;
-                //this.currentlyPlayingLabel.Text = "Currently not playing anything";
             }
-            task.delay(math.random(5, 40), refreshMusic);
+            task.delay(math.random(2, 5), refreshMusic);
         });
     }
 
