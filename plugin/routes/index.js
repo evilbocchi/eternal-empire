@@ -65,13 +65,15 @@ export function registerRoutes(app, logger, repoRoot, outputPath, progressionOut
         }
     };
 
+    const normalizeRunMessage = (message) => (typeof message === "string" ? message : JSON.stringify(message));
+
     const appendRunLine = (message, level = "info") => {
         const run = testState.currentRun;
         if (!run || run.finished) {
             return;
         }
 
-        const normalized = typeof message === "string" ? message : JSON.stringify(message);
+        const normalized = normalizeRunMessage(message);
         const line = normalized.endsWith("\n") ? normalized : `${normalized}\n`;
         run.response.write(line);
 
@@ -474,6 +476,7 @@ export function registerRoutes(app, logger, repoRoot, outputPath, progressionOut
                 appendRunLine("Studio test run timed out after 10 minutes.", "error");
                 finalizeRun({ success: false, error: "timeout" });
             }, TEST_RUN_TIMEOUT_MS),
+            logStreamed: false,
         };
 
         if (!sendSse("run-tests", { runId })) {
@@ -495,6 +498,7 @@ export function registerRoutes(app, logger, repoRoot, outputPath, progressionOut
         acknowledgeRun();
 
         if (typeof message === "string" && message.length > 0) {
+            run.logStreamed = true;
             appendRunLine(message, level);
         }
 
@@ -512,7 +516,9 @@ export function registerRoutes(app, logger, repoRoot, outputPath, progressionOut
 
         acknowledgeRun();
 
-        if (Array.isArray(prints)) {
+        const shouldReplayBufferedOutput = !run.logStreamed;
+
+        if (shouldReplayBufferedOutput && Array.isArray(prints)) {
             for (const entry of prints) {
                 if (typeof entry === "string" && entry.length > 0) {
                     appendRunLine(entry);
@@ -520,7 +526,7 @@ export function registerRoutes(app, logger, repoRoot, outputPath, progressionOut
             }
         }
 
-        if (Array.isArray(lines)) {
+        if (shouldReplayBufferedOutput && Array.isArray(lines)) {
             for (const entry of lines) {
                 if (typeof entry === "string" && entry.length > 0) {
                     appendRunLine(entry);

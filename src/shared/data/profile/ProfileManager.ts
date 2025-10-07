@@ -3,6 +3,7 @@ import { ProfileManager } from "@antivivi/vrldk";
 import { IS_EDIT, IS_SERVER } from "shared/Context";
 import EmpireProfileTemplate from "shared/data/profile/EmpireProfileTemplate";
 import PlayerProfileTemplate from "shared/data/profile/PlayerProfileTemplate";
+import eat from "shared/hamster/eat";
 
 /**
  * Wrapper class for ProfileManager to handle key prefixing and provide utility methods.
@@ -19,6 +20,9 @@ export class ProfileManagerWrapper<T extends object> {
     ) {
         if (IS_SERVER || IS_EDIT) {
             this.profileManager = new ProfileManager(storeName, template);
+            eat(() => {
+                this.mockLoadedProfiles.clear();
+            });
         }
     }
 

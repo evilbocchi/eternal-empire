@@ -82,7 +82,13 @@ export class SingleWorldNode<T extends Instance = Instance> extends WorldNode<T>
         let instance = this.getInstance();
         const startTime = os.clock();
         let warned = false;
+        let exitEarly = false;
+        eat(() => {
+            exitEarly = true;
+        });
         while (instance === undefined) {
+            if (exitEarly) throw "Exited early while waiting for instance";
+
             task.wait();
             instance = this.getInstance();
 
@@ -98,9 +104,7 @@ export class SingleWorldNode<T extends Instance = Instance> extends WorldNode<T>
                 }
             }
         }
-        eat(() => {
-            timeout = 0; // Timeout if cleanup is called
-        });
+
         return instance;
     }
 }

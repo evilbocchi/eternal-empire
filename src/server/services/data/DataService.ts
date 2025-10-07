@@ -191,8 +191,15 @@ export default class DataService implements OnStart, OnPlayerAdded {
             }
         if (hasShop === false) {
             const inventory = items.inventory;
-            const amount = inventory.get("ClassLowerNegativeShop");
-            if (amount === undefined || amount === 0) {
+            const bought = items.bought;
+            const inventoryAmount = inventory.get("ClassLowerNegativeShop");
+            const boughtAmount = bought.get("ClassLowerNegativeShop");
+
+            // Only add shop if it's not in inventory, bought, or placed
+            if (
+                (inventoryAmount === undefined || inventoryAmount === 0) &&
+                (boughtAmount === undefined || boughtAmount === 0)
+            ) {
                 items.worldPlaced.set("STARTING", {
                     item: "ClassLowerNegativeShop",
                     posX: 16.5,

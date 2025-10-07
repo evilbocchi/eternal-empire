@@ -1,10 +1,12 @@
+import { FletchetteEnvironment } from "@rbxts/fletchette";
 import { Janitor } from "@rbxts/janitor";
 import { ServerScriptService } from "@rbxts/services";
 import TestEZ from "@rbxts/testez";
 import { eater } from "shared/hamster/eat";
+import { createFancyTextReporter } from "shared/hamster/FancyTextReporter";
 
 export = () => {
-    const root = ServerScriptService;
+    const root = ServerScriptService.WaitForChild("TS").WaitForChild("tests");
 
     const lines = new Array<string>();
     lines.push(`Running tests in: ${root.GetFullName()}`);
@@ -12,18 +14,22 @@ export = () => {
     let startClock = os.clock();
     const janitor = new Janitor();
     eater.janitor = janitor; // Tests should create their own janitors, but ensure the entire test suite is sandboxed
+    FletchetteEnvironment.setVirtualState(true);
 
-    const results = TestEZ.TestBootstrap.run([root]);
+    const reporter = createFancyTextReporter();
+    const results = TestEZ.TestBootstrap.run([root], reporter);
 
-    lines.push("Test results:");
-    const reportLines = new Array<string>();
+    const fancyLines = [...reporter.getLines()];
+    const fancyFailures = [...reporter.getFailures()];
 
-    for (const err of results.errors) {
-        reportLines.push(`    ! ERROR: ${err}`);
+    if (fancyLines.size() > 0) {
+        lines.push("");
+        for (const entry of fancyLines) {
+            lines.push(entry);
+        }
+        lines.push("");
     }
-    for (const entry of reportLines) {
-        lines.push(entry);
-    }
+
     lines.push(`${results.successCount} passed, ${results.failureCount} failed, ${results.skippedCount} skipped`);
     if (results.failureCount > 0) {
         lines.push(`${results.failureCount} test nodes reported failures.`);
@@ -40,6 +46,7 @@ export = () => {
     janitor.Destroy();
     const durationMs = math.floor((os.clock() - startClock) * 1000 * 100) / 100;
     lines.push(`Tests completed in ${durationMs}ms`);
+
     return {
         lines,
         success: results.failureCount === 0 && results.errors.size() === 0,
@@ -47,5 +54,6 @@ export = () => {
         failureCount: results.failureCount,
         skippedCount: results.skippedCount,
         durationMs,
+        failures: fancyFailures,
     };
 };

@@ -11,8 +11,7 @@ export const IS_SERVER = RunService.IsServer();
  * Whether the game is running in an "edit" environment, where the experience is not running
  * and scripts are being run directly on the development server.
  */
-export const IS_EDIT =
-    RunService.IsStudio() && (!RunService.IsRunning() || (RunService.IsServer() && RunService.IsClient()));
+export const IS_EDIT = !RunService.IsRunning() || (RunService.IsServer() && RunService.IsClient());
 
 /**
  * Whether the current context is Roblox Studio.

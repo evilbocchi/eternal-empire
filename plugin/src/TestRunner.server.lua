@@ -163,7 +163,6 @@ local function executeRun(runId)
     end
 
     local runSuccess, runOutcome = pcall(runTests)
-    print("Test run completed. Success:", tostring(runSuccess), "Outcome:", tostring(runOutcome))
     if runSuccess then
         relayPrints(runId, runOutcome.lines)
 

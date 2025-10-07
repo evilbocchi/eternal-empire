@@ -1,5 +1,0 @@
-# These are the locations of your .spec files (descendants are searched too)
-roots = ["ServerScriptService/TS/tests"]
-
-[extraOptions]
-# Optionally, an extraOptions table can be passed to TestBootstrap
