@@ -1,5 +1,5 @@
-import Difficulty from "@rbxts/ejt";
 import { getAllInstanceInfo } from "@antivivi/vrldk";
+import Difficulty from "@rbxts/ejt";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import eat from "shared/hamster/eat";
 import Droplet from "shared/item/Droplet";
@@ -9,6 +9,7 @@ import Conveyor from "shared/item/traits/conveyor/Conveyor";
 import Dropper from "shared/item/traits/dropper/Dropper";
 import StaleWood from "shared/items/excavation/harvestable/StaleWood";
 import WhiteGem from "shared/items/excavation/WhiteGem";
+import Wool from "shared/items/negative/a/Wool";
 
 export = new Item(script.Name)
     .setName("Leg Powered Dropper")
@@ -17,6 +18,7 @@ export = new Item(script.Name)
     )
     .setDifficulty(Difficulty.FelixTheDA)
     .setPrice(new CurrencyBundle().set("Funds", 5e12))
+    .setRequiredItemAmount(Wool, 5)
     .setRequiredItemAmount(WhiteGem, 18)
     .setRequiredItemAmount(StaleWood, 10)
     .setCreator("taptap71")

@@ -1,7 +1,7 @@
 import Difficulty from "@rbxts/ejt";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
-import Conveyor from "shared/item/traits/conveyor/Conveyor";
 import Item from "shared/item/Item";
+import Conveyor from "shared/item/traits/conveyor/Conveyor";
 import Upgrader from "shared/item/traits/upgrader/Upgrader";
 
 export = new Item(script.Name)

@@ -4,7 +4,6 @@ declare global {
         health: number;
         tool: GearType;
         name?: string;
-        description?: string;
         gives?: Map<string, number[]>;
     };
 }
@@ -64,19 +63,14 @@ const RawHarvestable = {
     CorruptedGrass: {
         health: 9999,
         tool: "Scythe",
-        name: "Corrupted Grass",
     },
     WinsomeSpeck: {
         health: 160,
-        name: "Winsome Speck",
         tool: "Scythe",
-        description:
-            "A common substance secreted by Slamos while they are asleep. While the Skill level of the average Slamo is generally slightly above Winsome, excess Skill released by this peculiar species usually breaks down into this exact form.",
     },
     Apple: {
         health: 10,
         tool: "Scythe",
-        description: "The Slamos' favorite past-time snack. Grows extraordinarily well in Slamo Village.",
     },
     AppleBush: {
         health: 25,

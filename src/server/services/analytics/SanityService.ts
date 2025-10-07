@@ -9,8 +9,8 @@
  * @since 1.0.0
  */
 
-import Difficulty from "@rbxts/ejt";
 import { OnStart, Service } from "@flamework/core";
+import Difficulty from "@rbxts/ejt";
 import Item from "shared/item/Item";
 import Items from "shared/items/Items";
 import HARVESTABLES from "shared/world/harvestable/Harvestable";
@@ -102,7 +102,7 @@ export default class SanityService implements OnStart {
                 craftables += 1;
             }
         }
-        if (craftables < 5) {
+        if (craftables < 5 && item.difficulty === Difficulty.Excavation) {
             warn(
                 `Harvestable ${harvestable.name} (${harvestableId}) only has ${craftables} craftables (<5), consider adding more.`,
             );

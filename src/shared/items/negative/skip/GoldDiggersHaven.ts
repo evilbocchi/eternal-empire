@@ -1,10 +1,12 @@
 import Difficulty from "@rbxts/ejt";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
-import Conveyor from "shared/item/traits/conveyor/Conveyor";
 import Item from "shared/item/Item";
+import Conveyor from "shared/item/traits/conveyor/Conveyor";
 import Upgrader from "shared/item/traits/upgrader/Upgrader";
 import Crystal from "shared/items/excavation/Crystal";
 import Gold from "shared/items/excavation/Gold";
+import ElectroshockedCoil from "shared/items/negative/a/ElectroshockedCoil";
+import EmpoweredBrick from "shared/items/negative/instantwin/EmpoweredBrick";
 
 export = new Item(script.Name)
     .setName("Gold Digger's Haven")
@@ -16,6 +18,9 @@ export = new Item(script.Name)
     .setPrice(new CurrencyBundle().set("Skill", 20), 2)
     .setRequiredItemAmount(Crystal, 15)
     .setRequiredItemAmount(Gold, 1)
+    .setRequiredItemAmount(EmpoweredBrick, 5)
+    .setRequiredItemAmount(ElectroshockedCoil, 1)
+
     .setCreator("CoPKaDT")
     .addPlaceableArea("SlamoVillage")
     .persists()

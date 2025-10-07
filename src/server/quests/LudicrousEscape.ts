@@ -20,11 +20,13 @@ import Stone from "shared/items/0/millisecondless/Stone";
 import Wood from "shared/items/0/millisecondless/Wood";
 import SlamoBoardAutomater from "shared/items/0/winsome/SlamoBoardAutomater";
 import WinsomeBucket from "shared/items/0/winsome/WinsomeBucket";
+import WinsomeSpeck from "shared/items/0/winsome/WinsomeSpeck";
 import Crystal from "shared/items/excavation/Crystal";
 import ExcavationStone from "shared/items/excavation/ExcavationStone";
 import Gold from "shared/items/excavation/Gold";
 import EnchantedGrass from "shared/items/excavation/harvestable/EnchantedGrass";
 import Iron from "shared/items/excavation/Iron";
+import Apple from "shared/items/negative/a/Apple";
 import FlimsyBars from "shared/world/nodes/FlimsyBars";
 
 Simpul.rootPart!.Anchored = true;
@@ -253,7 +255,7 @@ export = new Quest(script.Name)
                         Server.Quest.giveQuestItem(SlamoStatue.id, 1);
                         checking.remove();
                         checking2.add();
-                    } else if (dialogue === checking2 && ItemService.getItemAmount("WinsomeSpeck") >= 10) {
+                    } else if (dialogue === checking2 && ItemService.getItemAmount(WinsomeSpeck.id) >= 10) {
                         fetchBucket.talk();
                         checking2.remove();
                         checking3.add();
@@ -433,7 +435,7 @@ export = new Quest(script.Name)
             if (dialogue === Andy.defaultDialogues[0]) {
                 const last = questMetadata.get("Andy") as number | undefined;
                 if (last === undefined || last + 3600 < tick()) {
-                    if (Server.Quest.takeQuestItem("Apple", 40)) {
+                    if (Server.Quest.takeQuestItem(Apple.id, 40)) {
                         done.talk();
                     } else {
                         start.talk();

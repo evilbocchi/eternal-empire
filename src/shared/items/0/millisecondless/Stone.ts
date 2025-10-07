@@ -7,4 +7,5 @@ export = new Item(script.Name)
     .setDescription("What's better than jWood? jRock.")
     .setDifficulty(Difficulty.Millisecondless)
     .addPlaceableArea("SlamoVillage")
-    .setPrice(new CurrencyBundle().set("Power", 1e15));
+    .setPrice(new CurrencyBundle().set("Power", 1e15))
+    .persists();

@@ -1,7 +1,9 @@
 import Difficulty from "@rbxts/ejt";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
-import Charm from "shared/item/traits/Charm";
 import Item from "shared/item/Item";
+import Charm from "shared/item/traits/Charm";
+import Glass from "shared/items/0/millisecondless/Glass";
+import WinsomeCoagulate from "shared/items/0/winsome/WinsomeCoagulate";
 import EnchantedGrass from "shared/items/excavation/harvestable/EnchantedGrass";
 
 export = new Item(script.Name)
@@ -11,7 +13,8 @@ export = new Item(script.Name)
     )
     .setDifficulty(Difficulty.Winsome)
     .setPrice(new CurrencyBundle().set("Funds", 1), 1)
-    .setRequiredHarvestableAmount("WinsomeSpeck", 25)
+    .setRequiredItemAmount(WinsomeCoagulate, 2)
+    .setRequiredItemAmount(Glass, 1)
     .setRequiredItemAmount(EnchantedGrass, 10)
 
     .trait(Charm)

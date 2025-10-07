@@ -7,6 +7,7 @@ import ExcavationStone from "shared/items/excavation/ExcavationStone";
 import Iron from "shared/items/excavation/Iron";
 import WhiteGem from "shared/items/excavation/WhiteGem";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
+import Wool from "shared/items/negative/a/Wool";
 
 export = new Item(script.Name)
     .setName("Polarized Refiner")
@@ -15,6 +16,7 @@ export = new Item(script.Name)
     )
     .setDifficulty(Difficulty.A)
     .setPrice(new CurrencyBundle().set("Funds", 2e12), 1)
+    .setRequiredItemAmount(Wool, 1)
     .setRequiredItemAmount(ExcavationStone, 40)
     .setRequiredItemAmount(WhiteGem, 20)
     .setRequiredItemAmount(Crystal, 15)

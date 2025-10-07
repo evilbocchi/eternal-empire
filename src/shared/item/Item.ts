@@ -484,23 +484,6 @@ export default class Item {
     }
 
     /**
-     * Declares a requirement on a harvestable resource rather than another item.
-     *
-     * @param id Harvestable identifier as defined in the shared harvestable catalogue.
-     * @param amount Amount the player must collect before purchase is permitted.
-     * @returns The item instance.
-     *
-     * @example
-     * ```ts
-     * altar.setRequiredHarvestableAmount("dark_matter", 10);
-     * ```
-     */
-    setRequiredHarvestableAmount(id: HarvestableId, amount: number) {
-        this.requiredItems.set(id, amount);
-        return this;
-    }
-
-    /**
      * Recalculates which reset layer the item belongs to given its allowed placement areas.
      * Items outside known reset layers default to the highest tier so they persist across wipes.
      *

@@ -3,6 +3,7 @@ import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
 import Shop from "shared/item/traits/Shop";
 import AutomatedStairsConveyor from "shared/items/0/automatic/AutomatedStairsConveyor";
+import GrassDropletInfuser from "shared/items/0/automatic/GrassDropletInfuser";
 import SphericalDropper from "shared/items/0/automatic/SphericalDropper";
 import SphericalUpgrader from "shared/items/0/automatic/SphericalUpgrader";
 import ElevatedCoinKiller from "shared/items/0/automaticjoyful/ElevatedCoinKiller";
@@ -82,6 +83,7 @@ export = new Item(script.Name)
         SphericalDropper,
         SphericalUpgrader,
         AutomatedStairsConveyor,
+        GrassDropletInfuser,
 
         MossUpgrader,
 

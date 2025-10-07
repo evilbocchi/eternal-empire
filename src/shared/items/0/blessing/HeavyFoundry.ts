@@ -5,6 +5,7 @@ import Conveyor from "shared/item/traits/conveyor/Conveyor";
 import Upgrader from "shared/item/traits/upgrader/Upgrader";
 import Gold from "shared/items/excavation/Gold";
 import WhiteGem from "shared/items/excavation/WhiteGem";
+import WIPUpgrader from "shared/items/negative/felixthea/WIPUpgrader";
 
 export = new Item(script.Name)
     .setName("Heavy Foundry")
@@ -12,6 +13,7 @@ export = new Item(script.Name)
         "A large furnace that's less of a furnace and more like an oven. Has a %mul% boost, but reduces 0.1 for each blocked vent.",
     )
     .setDifficulty(Difficulty.Blessing)
+    .setRequiredItemAmount(WIPUpgrader, 1)
     .setRequiredItemAmount(WhiteGem, 20)
     .setRequiredItemAmount(Gold, 1)
     .setPrice(new CurrencyBundle().set("Funds", 10e27), 1)

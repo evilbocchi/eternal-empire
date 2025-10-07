@@ -2,6 +2,7 @@ import Difficulty from "@rbxts/ejt";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
 import OmniUpgrader from "shared/item/traits/upgrader/OmniUpgrader";
+import WinsomeSpeck from "shared/items/0/winsome/WinsomeSpeck";
 import ExcavationStone from "shared/items/excavation/ExcavationStone";
 import Gold from "shared/items/excavation/Gold";
 import MagicalWood from "shared/items/excavation/harvestable/MagicalWood";
@@ -18,7 +19,7 @@ export = new Item(script.Name)
     .setRequiredItemAmount(WhiteGem, 25)
     .setRequiredItemAmount(Gold, 1)
     .setRequiredItemAmount(MagicalWood, 2)
-    .setRequiredHarvestableAmount("WinsomeSpeck", 2)
+    .setRequiredItemAmount(WinsomeSpeck, 2)
     .addPlaceableArea("BarrenIslands")
     .setCreator("goog_als")
     .persists()

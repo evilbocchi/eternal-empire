@@ -3,7 +3,6 @@ import { ITEM_PER_ID } from "shared/api/APIExpose";
 import { getAsset } from "shared/asset/AssetMap";
 import Item from "shared/item/Item";
 import type Charm from "shared/item/traits/Charm";
-import HARVESTABLES from "shared/world/harvestable/Harvestable";
 
 /**
  * Utility class to manage all items.
@@ -26,15 +25,6 @@ abstract class Items {
                     itemsPerId.set(item.id, item);
                 }
             }
-        }
-        for (const [i, harvestable] of pairs(HARVESTABLES)) {
-            if (harvestable.description === undefined) continue;
-            const id = i as string;
-            const item = new Item(id)
-                .setName(harvestable.name ?? id)
-                .setDescription(harvestable.description)
-                .setDifficulty(Difficulty.Excavation);
-            itemsPerId.set(id, item);
         }
         for (const [id, item] of itemsPerId) {
             ITEM_PER_ID.set(id, item); // Also set in the global map

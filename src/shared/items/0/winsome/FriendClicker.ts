@@ -1,10 +1,11 @@
-import Difficulty from "@rbxts/ejt";
 import { loadAnimation } from "@antivivi/vrldk";
+import Difficulty from "@rbxts/ejt";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
 import Clicker from "shared/item/traits/action/Clicker";
 import Boostable from "shared/item/traits/boost/Boostable";
 import Generator from "shared/item/traits/generator/Generator";
+import WinsomeCoagulate from "shared/items/0/winsome/WinsomeCoagulate";
 
 export = new Item(script.Name)
     .setName("Friend Clicker")
@@ -12,7 +13,7 @@ export = new Item(script.Name)
     .setDifficulty(Difficulty.Winsome)
     .setPrice(new CurrencyBundle().set("Purifier Clicks", 1000), 1)
     .setPrice(new CurrencyBundle().set("Purifier Clicks", 3000), 2)
-    .setRequiredHarvestableAmount("WinsomeSpeck", 100)
+    .setRequiredItemAmount(WinsomeCoagulate, 5)
     .addPlaceableArea("BarrenIslands")
     .persists()
 
