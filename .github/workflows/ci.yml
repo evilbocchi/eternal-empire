@@ -25,7 +25,7 @@ jobs:
     env:
       ROBLOX_API_KEY: ${{ secrets.ROBLOX_API_KEY }}
       ROBLOX_GROUP_ID: ${{ secrets.ROBLOX_GROUP_ID }}
-      LUAU_EXECUTION_API_KEY: ${{ secrets.LUAU_EXECUTION_API_KEY }}
+      LUAU_EXECUTION_KEY: ${{ secrets.LUAU_EXECUTION_KEY }}
       LUAU_EXECUTION_UNIVERSE_ID: ${{ secrets.LUAU_EXECUTION_UNIVERSE_ID }}
       LUAU_EXECUTION_PLACE_ID: ${{ secrets.LUAU_EXECUTION_PLACE_ID }}
     

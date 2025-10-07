@@ -297,7 +297,7 @@ async function runCloudTests() {
     if (!EXECUTION_KEY || !UNIVERSE_ID || !PLACE_ID) {
         logger.warn("Skipping cloud tests: Required environment variables not set");
         logger.warn("Missing:");
-        if (!EXECUTION_KEY) logger.warn("  - LUAU_EXECUTION_API_KEY");
+        if (!EXECUTION_KEY) logger.warn("  - LUAU_EXECUTION_KEY");
         if (!UNIVERSE_ID) logger.warn("  - LUAU_EXECUTION_UNIVERSE_ID");
         if (!PLACE_ID) logger.warn("  - LUAU_EXECUTION_PLACE_ID");
         return null;

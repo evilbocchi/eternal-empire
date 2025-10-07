@@ -18,7 +18,7 @@ To run tests in CI, you need to set up these repository secrets in GitHub:
 
 1. Go to your repository Settings → Secrets and variables → Actions
 2. Add the following secrets:
-   - `LUAU_EXECUTION_API_KEY`: Your Roblox Cloud API key
+   - `LUAU_EXECUTION_KEY`: Your Roblox Cloud API key
    - `LUAU_EXECUTION_UNIVERSE_ID`: Your Roblox universe ID
    - `LUAU_EXECUTION_PLACE_ID`: Your Roblox place ID
 
