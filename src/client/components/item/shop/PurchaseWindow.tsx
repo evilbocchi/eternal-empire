@@ -352,9 +352,10 @@ export default function PurchaseWindow() {
                 Active={true}
                 AutomaticCanvasSize={Enum.AutomaticSize.Y}
                 BackgroundTransparency={1}
-                CanvasSize={new UDim2(0, 0, 0, 0)}
+                CanvasSize={new UDim2(1, 0, 0.925, -45)}
                 LayoutOrder={2}
                 ScrollBarThickness={6}
+                ScrollingDirection={Enum.ScrollingDirection.Y}
                 Selectable={false}
                 Size={new UDim2(1, 0, 0.925, -40)}
             >
@@ -382,7 +383,11 @@ export default function PurchaseWindow() {
                     TextWrapped={true}
                     TextXAlignment={Enum.TextXAlignment.Left}
                     TextYAlignment={Enum.TextYAlignment.Top}
-                />
+                >
+                    <uiflexitem FlexMode={Enum.UIFlexMode.None} />
+                </textlabel>
+
+                <frame BackgroundTransparency={1} Size={new UDim2(1, 0, 0, 40)} />
 
                 {/* Creator label */}
                 {item.creator ? (
@@ -400,6 +405,7 @@ export default function PurchaseWindow() {
                         TextXAlignment={Enum.TextXAlignment.Left}
                     >
                         <uistroke Color={Color3.fromRGB(0, 0, 0)} Thickness={2} Transparency={0.8} />
+                        <uiflexitem FlexMode={Enum.UIFlexMode.None} />
                     </textlabel>
                 ) : undefined}
 
