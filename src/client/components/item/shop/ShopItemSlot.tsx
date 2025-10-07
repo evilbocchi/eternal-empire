@@ -1,4 +1,4 @@
-import { OnoeNum } from "@antivivi/serikanum";
+import { OnoeNum } from "@rbxts/serikanum";
 import React, { Fragment, useEffect, useRef, useState } from "@rbxts/react";
 import { TweenService } from "@rbxts/services";
 import displayBalanceCurrency from "client/components/balance/displayBalanceCurrency";

@@ -1,4 +1,4 @@
-import { OnoeNum } from "@antivivi/serikanum";
+import { OnoeNum } from "@rbxts/serikanum";
 import { Debris, TweenService, Workspace } from "@rbxts/services";
 import { ASSETS, playSound } from "shared/asset/GameAssets";
 import CurrencyBundle from "shared/currency/CurrencyBundle";

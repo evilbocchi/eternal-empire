@@ -1,4 +1,4 @@
-import { OnoeNum } from "@antivivi/serikanum";
+import { OnoeNum } from "@rbxts/serikanum";
 import Command, { CommandAPI } from "shared/commands/Command";
 import { CURRENCY_DETAILS } from "shared/currency/CurrencyDetails";
 import ThisEmpire from "shared/data/ThisEmpire";

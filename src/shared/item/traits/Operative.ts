@@ -1,7 +1,7 @@
 //!native
 //!optimize 2
 
-import { OnoeNum } from "@antivivi/serikanum";
+import { OnoeNum } from "@rbxts/serikanum";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import { CURRENCIES } from "shared/currency/CurrencyDetails";
 import Item from "shared/item/Item";

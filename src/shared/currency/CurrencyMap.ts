@@ -1,7 +1,7 @@
 //!native
 //!optimize 2
 
-import { BaseOnoeNum, OnoeNum } from "@antivivi/serikanum";
+import { BaseOnoeNum, OnoeNum } from "@rbxts/serikanum";
 import { CURRENCIES } from "shared/currency/CurrencyDetails";
 
 declare global {

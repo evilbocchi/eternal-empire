@@ -15,7 +15,7 @@
  * @since 1.0.0
  */
 import Signal from "@antivivi/lemon-signal";
-import { OnoeNum } from "@antivivi/serikanum";
+import { OnoeNum } from "@rbxts/serikanum";
 import { getPlayer } from "@antivivi/vrldk";
 import { OnInit, OnStart, Service } from "@flamework/core";
 import { BadgeService, Players, RunService } from "@rbxts/services";

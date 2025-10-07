@@ -1,5 +1,5 @@
 import Difficulty from "@rbxts/ejt";
-import { BaseOnoeNum, OnoeNum } from "@antivivi/serikanum";
+import { BaseOnoeNum, OnoeNum } from "@rbxts/serikanum";
 import { packet } from "@rbxts/fletchette";
 import PartCacheModule from "@rbxts/partcache";
 import { PartCache } from "@rbxts/partcache/out/class";

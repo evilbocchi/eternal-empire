@@ -1,4 +1,4 @@
-import { OnoeNum } from "@antivivi/serikanum";
+import { OnoeNum } from "@rbxts/serikanum";
 import React, { Fragment, useEffect, useState } from "@rbxts/react";
 import { RobotoSlabBold, RobotoSlabHeavy } from "shared/asset/GameFonts";
 import DarkMatter from "shared/currency/mechanics/DarkMatter";

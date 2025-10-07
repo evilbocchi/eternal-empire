@@ -1,5 +1,5 @@
 import Difficulty from "@rbxts/ejt";
-import { OnoeNum } from "@antivivi/serikanum";
+import { OnoeNum } from "@rbxts/serikanum";
 import Generator from "shared/item/traits/generator/Generator";
 import Item from "shared/item/Item";
 import AdvancedBlankEssence from "shared/items/0/ifinitude/AdvancedBlankEssence";

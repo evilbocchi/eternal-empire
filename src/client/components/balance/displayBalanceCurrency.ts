@@ -1,6 +1,6 @@
 //!native
 //!optimize 2
-import { OnoeNum } from "@antivivi/serikanum";
+import { OnoeNum } from "@rbxts/serikanum";
 import { Workspace } from "@rbxts/services";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Packets from "shared/Packets";

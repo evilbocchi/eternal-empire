@@ -1,4 +1,4 @@
-import SerikaNum from "@antivivi/serikanum";
+import SerikaNum from "@rbxts/serikanum";
 import React, { useCallback, useEffect, useState } from "@rbxts/react";
 import HotkeyManager, { HOTKEY_BINDINGS } from "client/components/hotkeys/HotkeyManager";
 import useHotkeyWithTooltip from "client/components/hotkeys/useHotkeyWithTooltip";

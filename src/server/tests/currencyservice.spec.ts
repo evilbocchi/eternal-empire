@@ -1,5 +1,5 @@
 /// <reference types="@rbxts/testez/globals" />
-import { OnoeNum } from "@antivivi/serikanum";
+import { OnoeNum } from "@rbxts/serikanum";
 import { Janitor } from "@rbxts/janitor";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import { Server } from "shared/api/APIExpose";

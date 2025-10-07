@@ -14,7 +14,7 @@
  */
 
 import Difficulty from "@rbxts/ejt";
-import { OnoeNum } from "@antivivi/serikanum";
+import { OnoeNum } from "@rbxts/serikanum";
 import { getAllInstanceInfo } from "@antivivi/vrldk";
 import { OnStart, Service } from "@flamework/core";
 import { HttpService, RunService, Workspace } from "@rbxts/services";

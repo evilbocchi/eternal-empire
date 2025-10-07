@@ -1,4 +1,4 @@
-import { BaseOnoeNum, OnoeNum } from "@antivivi/serikanum";
+import { BaseOnoeNum, OnoeNum } from "@rbxts/serikanum";
 import React, { useEffect, useRef } from "@rbxts/react";
 import { Debris, TweenService, Workspace } from "@rbxts/services";
 import { balanceOptionImagePerCurrency } from "client/components/balance/BalanceOption";

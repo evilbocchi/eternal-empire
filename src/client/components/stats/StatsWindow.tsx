@@ -10,7 +10,7 @@
  * Replaces the old Roblox Studio UI with maintainable React components.
  */
 
-import { OnoeNum } from "@antivivi/serikanum";
+import { OnoeNum } from "@rbxts/serikanum";
 import { convertToHHMMSS } from "@antivivi/vrldk";
 import React, { Fragment, useEffect, useState } from "@rbxts/react";
 import { LOCAL_PLAYER } from "client/constants";

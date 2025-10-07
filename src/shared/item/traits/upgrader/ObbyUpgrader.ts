@@ -1,4 +1,4 @@
-import { OnoeNum } from "@antivivi/serikanum";
+import { OnoeNum } from "@rbxts/serikanum";
 import { simpleInterval } from "@antivivi/vrldk";
 import { packet } from "@rbxts/fletchette";
 import { Debris, Players } from "@rbxts/services";

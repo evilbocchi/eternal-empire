@@ -2,7 +2,7 @@
 //!optimize 2
 
 import Difficulty from "@rbxts/ejt";
-import { OnoeNum } from "@antivivi/serikanum";
+import { OnoeNum } from "@rbxts/serikanum";
 import { getAllInstanceInfo, setInstanceInfo } from "@antivivi/vrldk";
 import { RunService } from "@rbxts/services";
 import { IS_EDIT, IS_SERVER } from "shared/Context";

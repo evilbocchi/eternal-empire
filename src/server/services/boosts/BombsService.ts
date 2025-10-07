@@ -14,7 +14,7 @@
  */
 
 import Signal from "@antivivi/lemon-signal";
-import { OnoeNum } from "@antivivi/serikanum";
+import { OnoeNum } from "@rbxts/serikanum";
 import { convertToHHMMSS, simpleInterval } from "@antivivi/vrldk";
 import { OnInit, OnStart, Service } from "@flamework/core";
 import { DataStoreService, MessagingService } from "@rbxts/services";

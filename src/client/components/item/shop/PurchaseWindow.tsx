@@ -1,5 +1,5 @@
 import Signal from "@antivivi/lemon-signal";
-import { OnoeNum } from "@antivivi/serikanum";
+import { OnoeNum } from "@rbxts/serikanum";
 import React, { Fragment, useEffect, useMemo, useRef, useState } from "@rbxts/react";
 import { Debris, TweenService } from "@rbxts/services";
 import StringBuilder from "@rbxts/stringbuilder";

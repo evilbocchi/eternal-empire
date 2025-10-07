@@ -11,7 +11,7 @@
  * Replaces the old Roblox Studio UI with maintainable React components.
  */
 
-import { OnoeNum } from "@antivivi/serikanum";
+import { OnoeNum } from "@rbxts/serikanum";
 import React, { useCallback, useState } from "@rbxts/react";
 import EmpireNameInput from "client/components/rename/EmpireNameInput";
 import PurchaseButton from "client/components/rename/PurchaseButton";

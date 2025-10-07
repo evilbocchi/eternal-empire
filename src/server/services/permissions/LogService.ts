@@ -1,4 +1,4 @@
-import { BaseOnoeNum } from "@antivivi/serikanum";
+import { BaseOnoeNum } from "@rbxts/serikanum";
 import { simpleInterval } from "@antivivi/vrldk";
 import { OnStart, Service } from "@flamework/core";
 import DataService from "server/services/data/DataService";

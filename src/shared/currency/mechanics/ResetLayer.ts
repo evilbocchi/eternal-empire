@@ -1,4 +1,4 @@
-import { OnoeNum } from "@antivivi/serikanum";
+import { OnoeNum } from "@rbxts/serikanum";
 import Formula from "shared/currency/Formula";
 import SkillificationZone from "shared/world/nodes/SkillificationZone";
 import WinificationZone from "shared/world/nodes/WinificationZone";

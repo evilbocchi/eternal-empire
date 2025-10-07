@@ -2,7 +2,7 @@
  * @fileoverview Imperative helpers for creating and updating shop item slots.
  */
 
-import { OnoeNum } from "@antivivi/serikanum";
+import { OnoeNum } from "@rbxts/serikanum";
 import { TweenService } from "@rbxts/services";
 import displayBalanceCurrency from "client/components/balance/displayBalanceCurrency";
 import ItemViewport from "client/components/item/ItemViewport";

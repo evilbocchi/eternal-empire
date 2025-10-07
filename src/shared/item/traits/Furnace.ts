@@ -1,6 +1,6 @@
 //!native
 //!optimize 2
-import { OnoeNum } from "@antivivi/serikanum";
+import { OnoeNum } from "@rbxts/serikanum";
 import { findBaseParts, getAllInstanceInfo, setInstanceInfo } from "@antivivi/vrldk";
 import { Debris } from "@rbxts/services";
 import { Server } from "shared/api/APIExpose";

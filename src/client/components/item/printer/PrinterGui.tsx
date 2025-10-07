@@ -1,4 +1,4 @@
-import { OnoeNum } from "@antivivi/serikanum";
+import { OnoeNum } from "@rbxts/serikanum";
 import React from "@rbxts/react";
 import SetupOption from "client/components/item/printer/SetupOption";
 import TemplateSetup from "client/components/item/printer/TemplateSetup";

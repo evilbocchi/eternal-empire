@@ -2,7 +2,7 @@
  * @fileoverview Individual leaderboard slot component displaying a single entry.
  */
 
-import { OnoeNum } from "@antivivi/serikanum";
+import { OnoeNum } from "@rbxts/serikanum";
 import React, { useEffect, useState } from "@rbxts/react";
 import { RunService } from "@rbxts/services";
 import { LeaderboardEntry } from "client/components/world/leaderboard/Leaderboard";

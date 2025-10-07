@@ -1,4 +1,4 @@
-import { OnoeNum } from "@antivivi/serikanum";
+import { OnoeNum } from "@rbxts/serikanum";
 import { Flamework, Modding, OnInit, OnPhysics, OnRender, OnStart, OnTick, Reflect } from "@flamework/core";
 import { isConstructor } from "@flamework/core/out/utility";
 import { useEffect, useState } from "@rbxts/react";

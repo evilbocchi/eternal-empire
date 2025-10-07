@@ -1,5 +1,5 @@
 /// <reference types="@rbxts/testez/globals" />
-import { OnoeNum } from "@antivivi/serikanum";
+import { OnoeNum } from "@rbxts/serikanum";
 import { Janitor } from "@rbxts/janitor";
 import { Server } from "shared/api/APIExpose";
 import { eater } from "shared/hamster/eat";

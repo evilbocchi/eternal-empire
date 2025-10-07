@@ -10,7 +10,7 @@
  * @since 1.0.0
  */
 
-import { OnoeNum } from "@antivivi/serikanum";
+import { OnoeNum } from "@rbxts/serikanum";
 import { simpleInterval } from "@antivivi/vrldk";
 import { OnStart, Service } from "@flamework/core";
 import { CollectionService, DataStoreService, Players } from "@rbxts/services";

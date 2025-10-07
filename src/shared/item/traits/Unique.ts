@@ -1,4 +1,4 @@
-import { OnoeNum } from "@antivivi/serikanum";
+import { OnoeNum } from "@rbxts/serikanum";
 import { formatRichText } from "@antivivi/vrldk";
 import { Server } from "shared/api/APIExpose";
 import ThisEmpire from "shared/data/ThisEmpire";

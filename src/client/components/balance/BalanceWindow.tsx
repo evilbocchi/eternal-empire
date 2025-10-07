@@ -1,4 +1,4 @@
-import { BaseOnoeNum, OnoeNum } from "@antivivi/serikanum";
+import { BaseOnoeNum, OnoeNum } from "@rbxts/serikanum";
 import React, { Fragment, useEffect, useRef, useState } from "@rbxts/react";
 import BalanceOption, { balanceOptionImagePerCurrency } from "client/components/balance/BalanceOption";
 import NavigationControls from "client/components/balance/NavigationControls";

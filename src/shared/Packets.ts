@@ -1,4 +1,4 @@
-import type { BaseOnoeNum } from "@antivivi/serikanum";
+import type { BaseOnoeNum } from "@rbxts/serikanum";
 import type CameraShaker from "@rbxts/camera-shaker";
 import type { DataType } from "@rbxts/flamework-binary-serializer";
 import { exactMapProperty, exactSetProperty, packet, property } from "@rbxts/fletchette";

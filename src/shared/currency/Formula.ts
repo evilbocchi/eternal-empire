@@ -1,5 +1,5 @@
 //!native
-import { OnoeNum } from "@antivivi/serikanum";
+import { OnoeNum } from "@rbxts/serikanum";
 
 type Number = number | OnoeNum;
 type Operation = {

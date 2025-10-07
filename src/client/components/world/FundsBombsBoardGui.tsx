@@ -1,4 +1,4 @@
-import { OnoeNum } from "@antivivi/serikanum";
+import { OnoeNum } from "@rbxts/serikanum";
 import React, { useEffect } from "@rbxts/react";
 import { MarketplaceService } from "@rbxts/services";
 import { LOCAL_PLAYER } from "client/constants";

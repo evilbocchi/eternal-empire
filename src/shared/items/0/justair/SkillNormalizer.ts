@@ -1,5 +1,5 @@
 import Difficulty from "@rbxts/ejt";
-import { OnoeNum } from "@antivivi/serikanum";
+import { OnoeNum } from "@rbxts/serikanum";
 import { RESET_LAYERS } from "shared/currency/mechanics/ResetLayer";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";

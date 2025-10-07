@@ -1,4 +1,4 @@
-import { BaseOnoeNum, OnoeNum } from "@antivivi/serikanum";
+import { BaseOnoeNum, OnoeNum } from "@rbxts/serikanum";
 import { buildRichText, combineHumanReadable, formatRichText } from "@antivivi/vrldk";
 import StringBuilder from "@rbxts/stringbuilder";
 import { IS_SERVER } from "shared/Context";

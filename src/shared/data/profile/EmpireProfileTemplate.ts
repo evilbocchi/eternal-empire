@@ -1,4 +1,4 @@
-import type { BaseOnoeNum } from "@antivivi/serikanum";
+import type { BaseOnoeNum } from "@rbxts/serikanum";
 import { DataType } from "@rbxts/flamework-binary-serializer";
 import type { RepairProtectionState } from "shared/item/repair";
 

@@ -1,5 +1,5 @@
 import { Profile } from "@antivivi/profileservice/globals";
-import { OnoeNum } from "@antivivi/serikanum";
+import { OnoeNum } from "@rbxts/serikanum";
 import { OnStart, Service } from "@flamework/core";
 import { Players } from "@rbxts/services";
 import { Environment } from "@rbxts/ui-labs";

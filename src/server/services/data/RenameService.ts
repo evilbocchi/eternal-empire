@@ -21,7 +21,7 @@
  * @since 1.0.0
  */
 
-import { OnoeNum } from "@antivivi/serikanum";
+import { OnoeNum } from "@rbxts/serikanum";
 import { OnInit, Service } from "@flamework/core";
 import { MarketplaceService, TextService, Workspace } from "@rbxts/services";
 import CurrencyService from "server/services/data/CurrencyService";

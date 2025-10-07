@@ -1,4 +1,4 @@
-import { OnoeNum } from "@antivivi/serikanum";
+import { OnoeNum } from "@rbxts/serikanum";
 import { combineHumanReadable } from "@antivivi/vrldk";
 import React from "@rbxts/react";
 import { RobotoMono } from "shared/asset/GameFonts";

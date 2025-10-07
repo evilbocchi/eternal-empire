@@ -1,5 +1,5 @@
 import Difficulty from "@rbxts/ejt";
-import { OnoeNum } from "@antivivi/serikanum";
+import { OnoeNum } from "@rbxts/serikanum";
 import { packet, property } from "@rbxts/fletchette";
 import { Server } from "shared/api/APIExpose";
 import { playSound } from "shared/asset/GameAssets";

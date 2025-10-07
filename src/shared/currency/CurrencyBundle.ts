@@ -1,7 +1,7 @@
 //!native
 //!optimize 2
 
-import { BaseOnoeNum, OnoeNum } from "@antivivi/serikanum";
+import { BaseOnoeNum, OnoeNum } from "@rbxts/serikanum";
 import { buildRichText } from "@antivivi/vrldk";
 import StringBuilder from "@rbxts/stringbuilder";
 import { CURRENCIES, CURRENCY_CATEGORIES, CURRENCY_DETAILS } from "shared/currency/CurrencyDetails";

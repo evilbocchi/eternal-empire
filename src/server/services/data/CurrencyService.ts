@@ -19,7 +19,7 @@
  */
 
 import Signal from "@antivivi/lemon-signal";
-import { OnoeNum } from "@antivivi/serikanum";
+import { OnoeNum } from "@rbxts/serikanum";
 import { simpleInterval } from "@antivivi/vrldk";
 import { OnStart, Service } from "@flamework/core";
 import DataService from "server/services/data/DataService";

@@ -1,4 +1,4 @@
-import { BaseOnoeNum, OnoeNum } from "@antivivi/serikanum";
+import { BaseOnoeNum, OnoeNum } from "@rbxts/serikanum";
 import { Debris, TextService, TweenService, Workspace } from "@rbxts/services";
 import Shaker from "client/components/effect/Shaker";
 import { PLAYER_GUI } from "client/constants";

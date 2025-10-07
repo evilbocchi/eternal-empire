@@ -1,5 +1,5 @@
 import Difficulty from "@rbxts/ejt";
-import { OnoeNum } from "@antivivi/serikanum";
+import { OnoeNum } from "@rbxts/serikanum";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Charger from "shared/item/traits/generator/Charger";
 import Item from "shared/item/Item";

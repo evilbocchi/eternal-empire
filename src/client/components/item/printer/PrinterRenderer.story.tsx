@@ -3,7 +3,7 @@
  * Provides interactive controls for testing upgrade selection and purchase functionality.
  */
 
-import { OnoeNum } from "@antivivi/serikanum";
+import { OnoeNum } from "@rbxts/serikanum";
 import React, { useEffect } from "@rbxts/react";
 import ReactRoblox from "@rbxts/react-roblox";
 import { Workspace } from "@rbxts/services";
