@@ -81,5 +81,35 @@ export = function () {
                 expect(weather.timeRemaining).to.be.a("number");
             });
         });
+
+        describe("manual overrides", () => {
+            it("supports manually setting weather with custom values", () => {
+                Server.Atmosphere.setWeatherCustom(WeatherType.Rainy, 0.42, 123);
+                const weather = Server.Atmosphere.getCurrentWeather();
+
+                expect(weather.type).to.equal(WeatherType.Rainy);
+                expect(weather.intensity).to.equal(0.42);
+                expect(weather.duration).to.equal(123);
+                const state = Server.Atmosphere as unknown as { isManuallyControlled: boolean };
+                expect(state.isManuallyControlled).to.equal(true);
+            });
+
+            it("clears to sunny weather when requested", () => {
+                Server.Atmosphere.clearWeather();
+                const weather = Server.Atmosphere.getCurrentWeather();
+
+                expect(weather.type).to.equal(WeatherType.Clear);
+                expect(weather.intensity).to.equal(0);
+            });
+
+            it("resumes automatic weather generation", () => {
+                Server.Atmosphere.setWeatherManual(WeatherType.Thunderstorm);
+                const state = Server.Atmosphere as unknown as { isManuallyControlled: boolean };
+                expect(state.isManuallyControlled).to.equal(true);
+
+                Server.Atmosphere.resumeAutomaticWeather();
+                expect(state.isManuallyControlled).to.equal(false);
+            });
+        });
     });
 };

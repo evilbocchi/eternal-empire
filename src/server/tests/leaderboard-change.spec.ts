@@ -23,5 +23,11 @@ export = function () {
             expect(Server.Data.empireData.leaderboardPositions).to.be.ok();
             expect(typeIs(Server.Data.empireData.leaderboardPositions, "Instance")).to.equal(false);
         });
+
+        it("registers multiple leaderboard stores", () => {
+            const stores = Server.LeaderboardChange["leaderboardStores"] as Map<string, OrderedDataStore>;
+            expect(stores).to.be.ok();
+            expect(stores.size() >= 2).to.equal(true);
+        });
     });
 };

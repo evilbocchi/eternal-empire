@@ -153,4 +153,30 @@ export = function () {
             }
         });
     });
+
+    describe("data integrity", () => {
+        it("flags illegal challenge migration as complete", () => {
+            expect(Server.Data.empireData.completedEvents.has("RemoveIllegalChallenges")).to.equal(true);
+        });
+
+        it("ensures repair protection map is initialized", () => {
+            const protection = Server.Data.empireData.items.repairProtection;
+            expect(protection).to.be.ok();
+            expect(typeIs(protection.size(), "number")).to.equal(true);
+        });
+
+        it("keeps printed setups within the storage cap", () => {
+            expect(Server.Data.empireData.printedSetups.size()).to.be.ok();
+            expect(Server.Data.empireData.printedSetups.size() <= 50).to.equal(true);
+        });
+
+        it("keeps log history within the retention limit", () => {
+            expect(Server.Data.empireData.logs.size() <= 2000).to.equal(true);
+        });
+
+        it("tracks last session timestamp", () => {
+            expect(Server.Data.empireData.lastSession).to.be.ok();
+            expect(Server.Data.empireData.lastSession > 0).to.equal(true);
+        });
+    });
 };

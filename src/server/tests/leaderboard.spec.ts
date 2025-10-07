@@ -23,5 +23,10 @@ export = function () {
         it("can create leaderboard service with level store", () => {
             expect(Server.Leaderboard).to.be.ok();
         });
+
+        it("tracks banned user ids for filtering", () => {
+            expect(Server.Leaderboard.banned.size() > 0).to.equal(true);
+            expect(Server.Leaderboard.banned.includes(1900444407)).to.equal(true);
+        });
     });
 };
