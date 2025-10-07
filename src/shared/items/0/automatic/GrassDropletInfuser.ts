@@ -5,6 +5,7 @@ import Item from "shared/item/Item";
 import Conveyor from "shared/item/traits/conveyor/Conveyor";
 import Upgrader from "shared/item/traits/upgrader/Upgrader";
 import CorruptedGrass from "shared/items/excavation/harvestable/CorruptedGrass";
+import GrassConveyor from "shared/items/negative/friendliness/GrassConveyor";
 
 export = new Item("GrassDropletInfuser")
     .setName("Grass Droplet Infuser")
@@ -12,6 +13,7 @@ export = new Item("GrassDropletInfuser")
     .setDifficulty(Difficulty.Automatic)
     .setPrice(new CurrencyBundle().set("Funds", 5e36), 1)
     .setRequiredItemAmount(CorruptedGrass, 2)
+    .setRequiredItemAmount(GrassConveyor, 3)
     .setCreator("sanjay2133")
     .addPlaceableArea("BarrenIslands")
     .persists()
