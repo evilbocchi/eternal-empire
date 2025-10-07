@@ -8,6 +8,7 @@
  */
 
 import React, { useEffect, useRef } from "@rbxts/react";
+import { Workspace } from "@rbxts/services";
 
 interface DialogueHeadshotProps {
     /** The NPC model to display in the viewport */
@@ -18,7 +19,7 @@ export default function DialogueHeadshot({ model }: DialogueHeadshotProps) {
     const viewportRef = useRef<ViewportFrame>();
 
     useEffect(() => {
-        if (!model || !viewportRef.current) return;
+        if (!model || !viewportRef.current || model === Workspace) return;
 
         const viewport = viewportRef.current;
         viewport.ClearAllChildren();

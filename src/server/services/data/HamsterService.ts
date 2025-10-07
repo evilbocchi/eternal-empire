@@ -184,7 +184,7 @@ export default class HamsterService implements OnStart {
     onStart() {
         if (Sandbox.getEnabled()) return;
 
-        NPC.HOT_RELOADER.load();
+        NPC.REGISTRY.load();
         InteractableObject.REGISTRY.load();
         if (!IS_EDIT) {
             Quest.HOT_RELOADER.load(); // TODO: Finish quest cleanup for CI

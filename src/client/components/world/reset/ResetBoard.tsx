@@ -109,7 +109,7 @@ export function BasicZoneGui({
             Adornee={adornee}
             Active={true}
             ClipsDescendants={true}
-            MaxDistance={100}
+            MaxDistance={500}
             Size={size}
             ZIndexBehavior={Enum.ZIndexBehavior.Sibling}
         >

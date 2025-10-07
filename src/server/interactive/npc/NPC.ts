@@ -11,7 +11,6 @@ import {
 } from "@rbxts/services";
 import { playSound } from "shared/asset/GameAssets";
 import { getDisplayName } from "shared/constants";
-import { IS_EDIT } from "shared/Context";
 import eat from "shared/hamster/eat";
 import { Identifiable, ModuleRegistry } from "shared/hamster/ModuleRegistry";
 import Packets from "shared/Packets";
@@ -34,7 +33,7 @@ if (NPC_MODELS !== undefined) {
  * Represents a non-player character (NPC) with animations, dialogue, and interaction logic.
  */
 export default class NPC extends Identifiable {
-    static readonly HOT_RELOADER = new ModuleRegistry<NPC>(script.Parent!, new Set([script]));
+    static readonly REGISTRY = new ModuleRegistry<NPC>(script.Parent!, new Set([script]));
 
     /** Material costs for pathfinding calculations. Higher costs make NPCs avoid certain materials. */
     static readonly PATHFINDING_COSTS = {
@@ -79,7 +78,7 @@ export default class NPC extends Identifiable {
      * @returns The NPC instance for chaining.
      */
     override init() {
-        if (IS_EDIT || !NPC_MODELS || this.id === "Empty") return;
+        if (!NPC_MODELS || this.id === "Empty") return;
 
         const model = NPC_MODELS.FindFirstChild(this.id)?.Clone() as Model | undefined;
         if (model === undefined) return;
@@ -101,6 +100,7 @@ export default class NPC extends Identifiable {
         for (const part of parts) {
             if (part.IsA("BasePart")) {
                 part.CollisionGroup = "NPC";
+                part.Anchored = false;
             }
         }
         rootPart.CustomPhysicalProperties = new PhysicalProperties(100, 0.3, 0.5);

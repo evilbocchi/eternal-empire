@@ -10,6 +10,7 @@
  */
 
 import { OnInit, Service } from "@flamework/core";
+import { ChallengeService } from "server/services/ChallengeService";
 import CurrencyService from "server/services/data/CurrencyService";
 import DataService from "server/services/data/DataService";
 import EventService from "server/services/data/EventService";
@@ -52,6 +53,7 @@ export default class APIExposeService implements OnInit {
     constructor(
         private readonly areaService: AreaService,
         private readonly atmosphereService: AtmosphereService,
+        private readonly challengeService: ChallengeService,
         private readonly chatHookService: ChatHookService,
         private readonly chestService: ChestService,
         private readonly currencyService: CurrencyService,
@@ -108,6 +110,14 @@ export default class APIExposeService implements OnInit {
              * @see {@link DonationService} for more details.
              */
             Donation: this.donationService,
+
+            /**
+             * Challenge management service.
+             *
+             * @borrows ChallengeService as challengeService
+             * @see {@link ChallengeService} for more details.
+             */
+            Challenge: this.challengeService,
 
             /**
              * Chat hook service for sending messages and managing channels.

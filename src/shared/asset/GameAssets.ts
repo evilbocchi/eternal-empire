@@ -67,6 +67,7 @@ export function getSound(soundPath: SoundAssetSubPath) {
     sound.SoundId = assets[fullPath];
     sound.SoundGroup = SOUND_EFFECTS_GROUP;
     sound.Parent = ReplicatedStorage;
+    eat(sound, "Destroy");
     return sound;
 }
 

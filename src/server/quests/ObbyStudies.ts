@@ -176,6 +176,7 @@ export = new Quest(script.Name)
                     } else if (dialogue === resultsDialogue) {
                         // Mark that challenges are now unlocked
                         questMetadata.set("ChallengesUnlocked", true);
+                        Server.Challenge.refreshChallenges();
                         stage.complete();
                     }
                 });

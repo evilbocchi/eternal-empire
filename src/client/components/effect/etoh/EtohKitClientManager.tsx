@@ -1,8 +1,13 @@
 import React, { Fragment, useEffect } from "@rbxts/react";
 import { Debris, ReplicatedStorage, UserInputService, Workspace } from "@rbxts/services";
+import createEtohConveyor from "client/components/effect/etoh/createEtohConveyor";
+import createEtohFallingPlatform from "client/components/effect/etoh/createEtohFallingPlatform";
+import createEtohTeleporter from "client/components/effect/etoh/createEtohTeleporter";
 import { observeCharacter } from "client/constants";
+import { IS_EDIT } from "shared/Context";
 import { getPlayerCharacter } from "shared/hamster/getPlayerCharacter";
 import Packets from "shared/Packets";
+import WorldNode from "shared/world/nodes/WorldNode";
 
 /**
  * EToH Kit upstream (Client)
@@ -114,75 +119,55 @@ export default function EtohKitClientManager() {
 
     // LocalPartScript
     useEffect(() => {
-        const coFolder = ReplicatedStorage.WaitForChild("ClientSidedObjects") as Folder | undefined;
-        if (!coFolder) {
-            warn('NO FOLDER NAMED "ClientSidedObjects"!!! NO CLIENT OBJECTS WILL FUNCTION!!!');
-        }
-
-        const clientParts = new Instance("Folder");
-        clientParts.Name = "ClientParts";
-        clientParts.Parent = Workspace;
-
-        // Double client object remover
-        for (const d of coFolder?.GetDescendants() ?? []) {
-            if (d.Parent && d.Name === "ClientObject") {
-                for (const o of d.Parent.GetDescendants()) {
-                    if (o.Name === "ClientObject" && d !== o) {
-                        warn(`⚠️ Found a double client object value in: ${d.Parent.Name} ⚠️`);
-                        o.Destroy();
-                    }
+        function applyPart(part: Instance) {
+            if (part.IsA("BasePart")) {
+                if (part.FindFirstChild("Invisible")) {
+                    part.LocalTransparencyModifier = 1;
                 }
+                if (part.HasTag("ClientUnanchored")) {
+                    part.Anchored = false;
+                }
+            }
+
+            if (part.Name === "Teleporter" && part.IsA("Model")) {
+                createEtohTeleporter(part)();
+            } else if (part.Name === "Conveyor" && part.IsA("BasePart")) {
+                createEtohConveyor(part)();
+            } else if (part.Name === "Falling Platform" && part.IsA("Model")) {
+                createEtohFallingPlatform(part)();
             }
         }
 
-        function ApplyPart(w: Instance) {
-            if (w.Name === "ClientObjectScript") {
-                task.spawn(() => {
-                    (require(w as ModuleScript) as Callback)();
-                });
-            } else if (w.IsA("BasePart")) {
-                const setCollisionGroup = w.FindFirstChild("SetCollisionGroup") as StringValue | undefined;
-                if (setCollisionGroup) {
-                    task.spawn(() => {
-                        w.CollisionGroup = setCollisionGroup.Value;
-                    });
-                } else {
-                    w.CollisionGroup = "ClientObjects";
-                }
-
-                if (w.Name === "LightingChanger" || w.FindFirstChild("Invisible")) {
-                    w.Transparency = 1;
-                }
-            }
-        }
-
-        function addChildren(p: Instance, np: Instance) {
-            p.ChildAdded.Connect((v) => {
+        function addChildren(original: Instance, clone: Instance) {
+            original.ChildAdded.Connect((v) => {
                 const c = v.Clone();
-                c.Parent = np;
+                c.Parent = clone;
                 addChildren(v, c);
-                ApplyPart(p);
+                applyPart(original);
             });
         }
 
-        function addPart(v: Instance) {
-            if (v.Name === "ClientObject" && v.Parent) {
-                const c = v.Parent.Clone();
-                c.Parent = clientParts;
-                addChildren(v, c);
-                ApplyPart(c);
-                for (const w of c.GetDescendants()) {
-                    ApplyPart(w);
+        function addPart(part: Instance) {
+            if (part.Name === "ClientObject" && part.Parent) {
+                const clone = part.Parent.Clone();
+                clone.Parent = Workspace;
+                addChildren(part, clone);
+                applyPart(clone);
+                for (const descendant of clone.GetDescendants()) {
+                    applyPart(descendant);
                 }
             }
         }
 
-        for (const v of coFolder?.GetDescendants() ?? []) {
-            addPart(v);
-        }
+        const clientSidedObjectWorldNode = new WorldNode("ClientSidedObject", (instance) => {
+            addPart(instance);
+            if (!IS_EDIT) {
+                instance.Parent = ReplicatedStorage;
+            }
+        });
 
         return () => {
-            clientParts.Destroy();
+            clientSidedObjectWorldNode.cleanup();
         };
     }, []);
 

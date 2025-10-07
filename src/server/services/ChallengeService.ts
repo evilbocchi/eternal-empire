@@ -13,10 +13,10 @@
  * @since 1.0.0
  */
 
-import { OnoeNum } from "@rbxts/serikanum";
 import { simpleInterval } from "@antivivi/vrldk";
 import { OnStart, Service } from "@flamework/core";
 import { toNumeral } from "@rbxts/roman-numerals";
+import { OnoeNum } from "@rbxts/serikanum";
 import StringBuilder from "@rbxts/stringbuilder";
 import { CHALLENGE_UPGRADES, CHALLENGES, REWARD_UPGRADES } from "server/Challenges";
 import CurrencyService from "server/services/data/CurrencyService";
@@ -31,7 +31,6 @@ import { RESET_LAYERS } from "shared/currency/mechanics/ResetLayer";
 import eat from "shared/hamster/eat";
 import Item from "shared/item/Item";
 import Packets from "shared/Packets";
-import Sandbox from "shared/Sandbox";
 
 /**
  * Service that manages challenge logic, UI, and progression.
@@ -300,17 +299,21 @@ export class ChallengeService implements OnStart {
     }
 
     /**
+     * Checks if challenges are unlocked for this empire.
+     * @returns True if challenges are unlocked, otherwise false.
+     */
+    isUnlocked() {
+        return this.dataService.empireData.questMetadata.get("ChallengesUnlocked") === true;
+    }
+
+    /**
      * Refreshes the list of available challenges and updates the UI.
      */
     refreshChallenges() {
-        // Check if the ObbyStudies quest has been completed
-        const obbyStudiesCompleted = this.dataService.empireData.quests.get("ObbyStudies") === -1;
-
         let i = 0;
         const infoPerChallenge = new Map<string, ChallengeInfo>();
 
-        // Only show challenges if ObbyStudies quest is completed
-        if (obbyStudiesCompleted) {
+        if (this.isUnlocked()) {
             for (const [key, challenge] of pairs(CHALLENGES)) {
                 const currentLevel = this.getChallengeLevel(key);
                 if (currentLevel > challenge.cap) continue;
@@ -347,30 +350,27 @@ export class ChallengeService implements OnStart {
      * Starts the challenge service, sets up listeners, and begins challenge effect loop.
      */
     onStart() {
-        if (Sandbox.getEnabled()) return;
-
-        Packets.startChallenge.fromClient((player, challengeId) => {
+        const startConnection = Packets.startChallenge.fromClient((player, challengeId) => {
             if (!this.permissionsService.checkPermLevel(player, "reset")) return;
+            if (!this.isUnlocked()) return;
+
             const challenge = this.startChallenge(player, challengeId as ChallengeId);
             if (challenge === undefined) return;
+
             this.chatHookService.sendServerMessage(
                 `Challenge ${this.getTitleLabel(challenge, challengeId)} has been started by ${player.Name}. The original setup has been saved, called "Autosaved", in a printer.`,
             );
         });
-        Packets.quitChallenge.fromClient((player) => {
+
+        const quitConnection = Packets.quitChallenge.fromClient((player) => {
             if (!this.permissionsService.checkPermLevel(player, "reset")) return;
+
             const [challenge, challengeId] = this.endChallenge(false);
             if (challenge === undefined) return;
+
             this.chatHookService.sendServerMessage(
                 `Challenge ${this.getTitleLabel(challenge, challengeId)} has been stopped by ${player.Name}.`,
             );
-        });
-
-        // Listen for quest completions to refresh challenge availability
-        Packets.questCompleted.fromServer((questId) => {
-            if (questId === "ObbyStudies") {
-                this.refreshChallenges();
-            }
         });
 
         this.refreshChallenges();
@@ -378,6 +378,9 @@ export class ChallengeService implements OnStart {
         const cleanup = simpleInterval(() => {
             this.challengeEffect();
         }, 0.5);
+
+        eat(startConnection, "Disconnect");
+        eat(quitConnection, "Disconnect");
         eat(cleanup);
     }
 }

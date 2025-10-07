@@ -211,7 +211,7 @@ class StoryMocking {
 
     static mockPhysics() {
         useEffect(() => {
-            if (!IS_EDIT || !Sandbox.getEnabled()) return;
+            if (!IS_EDIT) return;
 
             const t = os.clock();
             let safeToStartPhysics = true;

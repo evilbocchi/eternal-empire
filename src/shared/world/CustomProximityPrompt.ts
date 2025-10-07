@@ -61,7 +61,6 @@ namespace CustomProximityPrompt {
     if (IS_SERVER || IS_EDIT) {
         const connection = Packets.triggerProximityPrompt.fromClient((player, path) => {
             const prompt = proximityPrompts.get(path);
-            print(prompt === undefined ? "Prompt not found!" : "Prompt found.");
             if (prompt) {
                 prompt.callback(player);
             }

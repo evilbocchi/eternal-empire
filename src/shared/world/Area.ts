@@ -10,33 +10,6 @@ import BuildBounds from "shared/placement/BuildBounds";
 import { SingleWorldNode } from "shared/world/nodes/WorldNode";
 
 declare global {
-    /**
-     * Represents a progress bar UI element with fill, stroke, and label components.
-     */
-    type Bar = Frame & {
-        UIStroke: UIStroke;
-        Fill: Frame & {
-            UIStroke: UIStroke;
-        };
-        BarLabel: TextLabel;
-    };
-
-    /**
-     * Represents the information board GUI for an area.
-     * Contains UI elements for displaying droplet limits, grid size, and item counts.
-     */
-    type BoardGui = SurfaceGui & {
-        DropletLimit: Frame & {
-            Bar: Bar;
-        };
-        GridSize: Frame & {
-            BarLabel: TextLabel;
-        };
-        ItemCount: Frame & {
-            BarLabel: TextLabel;
-        };
-    };
-
     /** Unique identifier for an area */
     type AreaId = keyof typeof AREAS;
 }

@@ -1,4 +1,4 @@
-import { Players, ReplicatedStorage, RunService, Workspace } from "@rbxts/services";
+import { Players, RunService } from "@rbxts/services";
 
 const IS_EDIT = RunService.IsStudio() && (!RunService.IsRunning() || (RunService.IsServer() && RunService.IsClient()));
 if (!IS_EDIT) {
@@ -11,8 +11,6 @@ if (!IS_EDIT) {
     const Sandbox = sandbox.default;
     if (!Sandbox.synthesise()) {
         Players.CharacterAutoLoads = false;
-        const cso = Workspace.FindFirstChild("ClientSidedObjects");
-        if (cso !== undefined) cso.Parent = ReplicatedStorage; // jtoh kit expects ClientSidedObjects to be in ReplicatedStorage
     }
 
     const [s2, context] = import("shared/Context").await();

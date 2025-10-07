@@ -134,25 +134,32 @@ namespace ClientItemReplication {
     export function useManualItemReplication() {
         useEffect(() => {
             const modelPerWaypoint = new Map<string, Model>();
-            const mapItemWorldNode = new WorldNode("MapItem", (waypoint) => {
-                if (!waypoint.IsA("BasePart")) return;
-                const item = Items.getItem(waypoint.Name);
-                if (item === undefined) throw `Item ${waypoint.Name} not found`;
-                const model = item.createModel({
-                    item: item.id,
-                    posX: waypoint.Position.X,
-                    posY: waypoint.Position.Y,
-                    posZ: waypoint.Position.Z,
-                    rotX: waypoint.Rotation.X,
-                    rotY: waypoint.Rotation.Y,
-                    rotZ: waypoint.Rotation.Z,
-                });
-                if (model !== undefined) {
-                    model.Parent = Workspace;
-                    modelPerWaypoint.set(waypoint.Name, model);
-                    load(model, undefined, false);
-                } else warn(`Model for ${item.id} not found`);
-            });
+            const mapItemWorldNode = new WorldNode(
+                "MapItem",
+                (waypoint) => {
+                    if (!waypoint.IsA("BasePart")) return;
+                    const item = Items.getItem(waypoint.Name);
+                    if (item === undefined) throw `Item ${waypoint.Name} not found`;
+                    const model = item.createModel({
+                        item: item.id,
+                        posX: waypoint.Position.X,
+                        posY: waypoint.Position.Y,
+                        posZ: waypoint.Position.Z,
+                        rotX: waypoint.Rotation.X,
+                        rotY: waypoint.Rotation.Y,
+                        rotZ: waypoint.Rotation.Z,
+                    });
+                    if (model !== undefined) {
+                        model.Parent = Workspace;
+                        modelPerWaypoint.set(waypoint.Name, model);
+                        load(model, undefined, false);
+                    } else warn(`Model for ${item.id} not found`);
+                },
+                (instance) => {
+                    modelPerWaypoint.get(instance.Name)?.Destroy();
+                    modelPerWaypoint.delete(instance.Name);
+                },
+            );
 
             if (IS_EDIT) {
                 // Client and server are on the same boundary; just load item effects.
@@ -222,16 +229,10 @@ namespace ClientItemReplication {
                 }
             });
             return () => {
-                if (!IS_EDIT) {
-                    for (const [, model] of modelPerPlacementId) {
-                        model.Destroy();
-                    }
-                }
-                for (const [, model] of modelPerWaypoint) {
+                for (const [, model] of modelPerPlacementId) {
                     model.Destroy();
                 }
                 modelPerPlacementId.clear();
-                modelPerWaypoint.clear();
                 settingsConnection.Disconnect();
                 connection.Disconnect();
                 mapItemWorldNode.cleanup();
