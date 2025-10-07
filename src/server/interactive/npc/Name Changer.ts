@@ -6,11 +6,11 @@ class NameChanger extends NPC {
     }
 
     override init() {
-        super.init();
+        const cleanup = super.init();
         if (this.rootPart) {
             this.rootPart.Anchored = true;
         }
-        return () => {};
+        return cleanup;
     }
 
     toggleAvailability(available: boolean) {

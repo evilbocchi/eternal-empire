@@ -1,12 +1,18 @@
 import { simpleInterval } from "@antivivi/vrldk";
 import React, { Fragment, useEffect, useRef, useState } from "@rbxts/react";
-import { ProximityPromptService, RunService, TextService, TweenService, UserInputService } from "@rbxts/services";
+import {
+    CollectionService,
+    ProximityPromptService,
+    RunService,
+    TextService,
+    TweenService,
+    UserInputService,
+} from "@rbxts/services";
 import { getAsset } from "shared/asset/AssetMap";
 import { RobotoMono, RobotoMonoBold } from "shared/asset/GameFonts";
 import { IS_EDIT } from "shared/Context";
 import { getPlayerCharacter } from "shared/hamster/getPlayerCharacter";
 import CustomProximityPrompt from "shared/world/CustomProximityPrompt";
-import WorldNode from "shared/world/nodes/WorldNode";
 
 // Helper functions for button image mappings
 function getGamepadButtonImage(keyCode: Enum.KeyCode): string | undefined {
@@ -619,19 +625,6 @@ export function ProximityPromptGuiRenderer() {
     const [shouldFadeIn, setShouldFadeIn] = useState(false);
 
     useEffect(() => {
-        const prompts = new Set<ProximityPrompt>();
-        const proximityPromptWorldNode = new WorldNode(
-            "ProximityPrompt",
-            (prompt) => {
-                if (!prompt.IsA("ProximityPrompt")) return;
-                prompts.add(prompt);
-            },
-            (prompt) => {
-                if (!prompt.IsA("ProximityPrompt")) return;
-                prompts.delete(prompt);
-            },
-        );
-
         if (IS_EDIT) {
             const intervalCleanup = simpleInterval(() => {
                 const character = getPlayerCharacter();
@@ -642,10 +635,11 @@ export function ProximityPromptGuiRenderer() {
                 let closestDistance = math.huge;
 
                 const position = character.GetPivot().Position;
-                for (const prompt of prompts) {
+                for (const prompt of CollectionService.GetTagged("ProximityPrompt")) {
+                    if (!prompt.IsA("ProximityPrompt")) continue;
                     if (!prompt.Enabled || prompt.Parent === undefined || !prompt.Parent.IsA("PVInstance")) continue;
                     const distance = position.sub(prompt.Parent.GetPivot().Position).Magnitude;
-                    if (distance < prompt.MaxActivationDistance && distance < closestDistance) {
+                    if (distance < closestDistance) {
                         closestPrompt = prompt;
                         closestDistance = distance;
                     }
@@ -681,7 +675,6 @@ export function ProximityPromptGuiRenderer() {
             });
 
             return () => {
-                proximityPromptWorldNode.cleanup();
                 intervalCleanup();
                 inputTypeChangedConnection.Disconnect();
             };
@@ -702,7 +695,6 @@ export function ProximityPromptGuiRenderer() {
         });
 
         return () => {
-            proximityPromptWorldNode.cleanup();
             promptServiceConnection.Disconnect();
             promptHiddenConnection.Disconnect();
         };

@@ -40,10 +40,10 @@ export default function createEtohTeleporter(model: Model) {
     }
 
     return () => {
-        const destinations: Array<Model> = [];
+        const destinations: Array<BasePart> = [];
 
         for (const tp of model.GetDescendants()) {
-            if (tp.Name === "Destination" && tp.IsA("Model")) {
+            if (tp.Name === "Destination" && tp.IsA("BasePart")) {
                 destinations.push(tp);
             } else if (tp.Name === "Teleporter" && tp.IsA("BasePart")) {
                 if (tp.FindFirstChild("ButtonActivated")) {

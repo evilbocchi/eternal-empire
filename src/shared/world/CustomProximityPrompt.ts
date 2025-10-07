@@ -27,7 +27,7 @@ namespace CustomProximityPrompt {
      * @param callback The callback to invoke when the prompt is triggered
      * @returns A function to unregister the callback
      */
-    export function onTrigger(proximityPrompt: ProximityPrompt, callback: (player: Player) => void) {
+    export function onTrigger(proximityPrompt: ProximityPrompt, callback: (player?: Player) => void) {
         const path = proximityPrompt.GetFullName();
         if (proximityPrompts.has(path)) {
             warn(`ProximityPrompt at path ${path} is already registered!`);

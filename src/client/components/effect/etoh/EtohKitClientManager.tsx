@@ -147,15 +147,17 @@ export default function EtohKitClientManager() {
             });
         }
 
+        const added = new Set<Instance>();
         function addPart(part: Instance) {
-            if (part.Name === "ClientObject" && part.Parent) {
-                const clone = part.Parent.Clone();
-                clone.Parent = Workspace;
-                addChildren(part, clone);
-                applyPart(clone);
-                for (const descendant of clone.GetDescendants()) {
-                    applyPart(descendant);
-                }
+            const clone = part?.Clone();
+            if (!clone) return;
+            clone.RemoveTag("ClientSidedObject"); // Prevent recursion
+            clone.Parent = Workspace;
+            added.add(clone);
+            addChildren(part, clone);
+            applyPart(clone);
+            for (const descendant of clone.GetDescendants()) {
+                applyPart(descendant);
             }
         }
 
@@ -167,6 +169,9 @@ export default function EtohKitClientManager() {
         });
 
         return () => {
+            for (const instance of added) {
+                instance.Destroy();
+            }
             clientSidedObjectWorldNode.cleanup();
         };
     }, []);

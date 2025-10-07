@@ -11,7 +11,9 @@ import {
 } from "@rbxts/services";
 import { playSound } from "shared/asset/GameAssets";
 import { getDisplayName } from "shared/constants";
+import { IS_EDIT } from "shared/Context";
 import eat from "shared/hamster/eat";
+import { getPlayerCharacter } from "shared/hamster/getPlayerCharacter";
 import { Identifiable, ModuleRegistry } from "shared/hamster/ModuleRegistry";
 import Packets from "shared/Packets";
 import CustomProximityPrompt from "shared/world/CustomProximityPrompt";
@@ -141,6 +143,7 @@ export default class NPC extends Identifiable {
         prompt.MaxActivationDistance = 6.5;
         prompt.RequiresLineOfSight = false;
         prompt.AddTag("NPCPrompt");
+        prompt.AddTag("ProximityPrompt");
         prompt.Parent = model;
 
         const updateDisplayName = () => {
@@ -155,7 +158,7 @@ export default class NPC extends Identifiable {
         const defaultDialoguesCount = defaultDialogues.size();
 
         const promptCleanup = CustomProximityPrompt.onTrigger(prompt, (player) => {
-            print(`${player.Name} interacted`);
+            print(`${player?.Name} interacted`);
             if (this.interact !== undefined) {
                 this.interact();
                 return;
@@ -617,20 +620,34 @@ export class Dialogue<T extends NPC = NPC> {
                 Packets.npcMessage.toAllClients(current.text, currentIndex, size, true, Workspace);
             } else {
                 let playersPrompted = 0;
-                const players = Players.GetPlayers();
                 const talkingPart = talkingModel.FindFirstChildOfClass("Humanoid")?.RootPart;
-                for (const player of players) {
-                    const rootPart = player.Character?.FindFirstChildOfClass("Humanoid")?.RootPart;
+
+                const sendInteraction = (player?: Player, character?: Model) => {
+                    const rootPart = character?.FindFirstChildOfClass("Humanoid")?.RootPart;
                     const isPrompt =
                         talkingPart !== undefined &&
                         requireInteraction !== false &&
                         rootPart !== undefined &&
                         rootPart.Position.sub(talkingPart.Position).Magnitude < 60;
+
                     if (isPrompt === true) {
                         ++playersPrompted;
                     }
-                    Packets.npcMessage.toClient(player, current.text, currentIndex, size, isPrompt, talkingModel);
+
+                    if (player !== undefined) {
+                        Packets.npcMessage.toClient(player, current.text, currentIndex, size, isPrompt, talkingModel);
+                    } else if (IS_EDIT) {
+                        Packets.npcMessage.toAllClients(current.text, currentIndex, size, isPrompt, talkingModel);
+                    }
+                };
+
+                for (const player of Players.GetPlayers()) {
+                    sendInteraction(player, player.Character);
                 }
+                if (IS_EDIT) {
+                    sendInteraction(undefined, getPlayerCharacter());
+                }
+
                 task.delay(current.text.size() / 11 + 1, () => {
                     if (i === currentIndex) nextDialogue();
                 });

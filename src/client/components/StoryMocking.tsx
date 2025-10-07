@@ -1,20 +1,16 @@
-import { OnoeNum } from "@rbxts/serikanum";
-import { Flamework, Modding, OnInit, OnPhysics, OnRender, OnStart, OnTick, Reflect } from "@flamework/core";
-import { isConstructor } from "@flamework/core/out/utility";
 import { useEffect, useState } from "@rbxts/react";
-import { HttpService, Players, ReplicatedStorage, RunService, Workspace } from "@rbxts/services";
+import { OnoeNum } from "@rbxts/serikanum";
+import { HttpService, ReplicatedStorage, RunService, Workspace } from "@rbxts/services";
 import { LOCAL_PLAYER } from "client/constants";
 import MusicManager from "client/MusicManager";
 import { IS_EDIT } from "shared/Context";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import { CURRENCY_DETAILS } from "shared/currency/CurrencyDetails";
 import PlayerProfileTemplate from "shared/data/profile/PlayerProfileTemplate";
-import eat from "shared/hamster/eat";
 import mockFlamework from "shared/hamster/FlameworkMock";
 import Unique from "shared/item/traits/Unique";
 import Items from "shared/items/Items";
 import Packets from "shared/Packets";
-import Sandbox from "shared/Sandbox";
 
 class StoryMocking {
     static mockData() {
@@ -218,6 +214,7 @@ class StoryMocking {
             for (const part of Workspace.GetDescendants()) {
                 if (part.IsA("BasePart") && !part.Anchored) {
                     if (part.HasTag("Droplet")) continue;
+                    if (part.CollisionGroup === "NPC") continue;
                     safeToStartPhysics = false;
                     print("Unanchored part found", part);
                 }

@@ -1,10 +1,9 @@
-import React, { Fragment, useEffect } from "@rbxts/react";
+import React, { Fragment } from "@rbxts/react";
 import ReactRoblox from "@rbxts/react-roblox";
 import { CreateReactStory } from "@rbxts/ui-labs";
 import App from "client/components/App";
 import StoryMocking from "client/components/StoryMocking";
 import ItemViewport from "client/components/item/ItemViewport";
-import ProximityPromptTrigger from "client/components/story/ProximityPromptTrigger";
 import SimulationCommandInterface from "client/components/story/SimulationCommandInterface";
 
 export = CreateReactStory(
@@ -22,7 +21,6 @@ export = CreateReactStory(
             <Fragment>
                 <App />
                 <SimulationCommandInterface />
-                <ProximityPromptTrigger />
             </Fragment>
         );
     },
