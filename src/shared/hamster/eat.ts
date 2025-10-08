@@ -26,5 +26,17 @@ export default function eat<
     I extends keyof U | undefined = undefined,
     U extends object | void = void,
 >(object: O, methodName?: M, index?: I): O {
-    return (eater.janitor as Janitor<U> | undefined)?.Add(object, methodName, index) ?? object;
+    const janitor = eater.janitor as Janitor<U> | undefined;
+    if (janitor === undefined) return object;
+    if (janitor.Add === undefined) {
+        // Janitor doesn't exist anymore, so create a temporary one to clean up this object immediately
+        const tempJanitor = new Janitor<U>();
+        tempJanitor.Add(object, methodName, index);
+        task.delay(1, () => {
+            tempJanitor.Destroy();
+        });
+        return object;
+    }
+
+    return janitor.Add(object, methodName, index) ?? object;
 }
