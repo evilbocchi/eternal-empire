@@ -29,10 +29,10 @@ export default function eat<
     const janitor = eater.janitor as Janitor<U> | undefined;
     if (janitor === undefined) return object;
     if (janitor.Add === undefined) {
-        // Janitor doesn't exist anymore, so create a temporary one to clean up this object immediately
+        // Janitor doesn't exist anymore, so create a temporary one to clean up this object
         const tempJanitor = new Janitor<U>();
         tempJanitor.Add(object, methodName, index);
-        task.delay(1, () => {
+        task.delay(5, () => {
             tempJanitor.Destroy();
         });
         return object;
