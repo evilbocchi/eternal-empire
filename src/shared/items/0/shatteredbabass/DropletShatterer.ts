@@ -5,7 +5,7 @@ import Item from "shared/item/Item";
 import Dropper from "shared/item/traits/dropper/Dropper";
 import Furnace from "shared/item/traits/Furnace";
 import { getInstanceInfo, setInstanceInfo } from "@antivivi/vrldk";
-import Class0Shop from "../Class0Shop";
+import Class0Shop from "shared/items/0/Class0Shop";
 
 export = new Item(script.Name)
     .setName("Droplet Shatterer")

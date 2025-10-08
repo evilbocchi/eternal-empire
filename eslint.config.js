@@ -1,5 +1,7 @@
 import eslint from "@eslint/js";
 import importPlugin from "eslint-plugin-import";
+import noRelativeImportPaths from "eslint-plugin-no-relative-import-paths";
+import prettierPlugin from "eslint-plugin-prettier";
 import prettier from "eslint-plugin-prettier/recommended";
 import robloxTs from "eslint-plugin-roblox-ts";
 import tseslint from "typescript-eslint";
@@ -17,15 +19,18 @@ export default [
                 useJSXTextNode: true,
                 ecmaVersion: 2018,
                 sourceType: "module",
-                project: true,
+                project: "./tsconfig.json",
             },
         },
         plugins: {
             "roblox-ts": robloxTs,
             import: importPlugin,
+            prettier: prettierPlugin,
+            relativeImportPaths: noRelativeImportPaths,
         },
         rules: {
             "import/no-cycle": ["error", { maxDepth: 50 }],
+            "relativeImportPaths/no-relative-import-paths": ["warn", { allowSameFolder: false, rootDir: "src" }],
             "prefer-const": "off",
             "@typescript-eslint/no-empty-object-type": "off",
             "@typescript-eslint/no-require-imports": "off",

@@ -14,7 +14,7 @@ import WeatherBoost from "shared/item/traits/boost/WeatherBoost";
 import Upgrader from "shared/item/traits/upgrader/Upgrader";
 import perItemPacket from "shared/item/utils/perItemPacket";
 import NamedUpgrades from "shared/namedupgrade/NamedUpgrades";
-import Class0Shop from "../Class0Shop";
+import Class0Shop from "shared/items/0/Class0Shop";
 
 const textChangedPacket =
     perItemPacket(packet<(placementId: string, dropletId: string, value: string, color: string) => void>());

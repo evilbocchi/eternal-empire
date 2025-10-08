@@ -4,7 +4,7 @@ import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Glass from "shared/items/0/millisecondless/Glass";
 import Quartz from "shared/items/excavation/Quartz";
 import Upgrader from "shared/item/traits/upgrader/Upgrader";
-import Class1Shop from "../Class1Shop";
+import Class1Shop from "shared/items/1/Class1Shop";
 
 export = new Item(script.Name)
     .setName("Minimal Inverse")

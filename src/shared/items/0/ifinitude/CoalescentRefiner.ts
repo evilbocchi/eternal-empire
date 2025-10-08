@@ -9,7 +9,7 @@ import ShockingRefiner from "shared/items/negative/exist/ShockingRefiner";
 import PrecisionRefiner from "shared/items/negative/relax/PrecisionRefiner";
 import LaserTunnel from "shared/items/negative/skip/LaserTunnel";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
-import Class0Shop from "../Class0Shop";
+import Class0Shop from "shared/items/0/Class0Shop";
 
 export = new Item(script.Name)
     .setName("Coalescent Refiner")

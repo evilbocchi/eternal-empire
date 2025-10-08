@@ -1,16 +1,16 @@
-import SerikaNum from "@rbxts/serikanum";
 import React, { useCallback, useEffect, useState } from "@rbxts/react";
+import SerikaNum from "@rbxts/serikanum";
 import HotkeyManager, { HOTKEY_BINDINGS } from "client/components/hotkeys/HotkeyManager";
 import useHotkeyWithTooltip from "client/components/hotkeys/useHotkeyWithTooltip";
 import IconButton from "client/components/IconButton";
 import HotkeyOption from "client/components/settings/HotkeyOption";
 import SettingSection from "client/components/settings/SettingSection";
 import SettingToggle from "client/components/settings/SettingToggle";
+import SingleDocumentManager from "client/components/sidebar/SingleDocumentManager";
 import useSingleDocument from "client/components/sidebar/useSingleDocumentWindow";
 import TechWindow from "client/components/window/TechWindow";
 import { getAsset } from "shared/asset/AssetMap";
 import Packets from "shared/Packets";
-import SingleDocumentManager from "../sidebar/SingleDocumentManager";
 
 export function SettingsButton() {
     const tooltipProps = useHotkeyWithTooltip({

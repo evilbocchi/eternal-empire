@@ -7,7 +7,7 @@ import Upgrader from "shared/item/traits/upgrader/Upgrader";
 import setDropletVelocity from "shared/item/utils/setDropletVelocity";
 import MagicalWood from "shared/items/excavation/harvestable/MagicalWood";
 import Quartz from "shared/items/excavation/Quartz";
-import Class1Shop from "../Class1Shop";
+import Class1Shop from "shared/items/1/Class1Shop";
 
 export = new Item(script.Name)
     .setName("Droplet Ascender")

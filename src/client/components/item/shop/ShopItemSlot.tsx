@@ -2,7 +2,7 @@ import { OnoeNum } from "@rbxts/serikanum";
 import React, { Fragment, useEffect, useRef, useState } from "@rbxts/react";
 import { TweenService } from "@rbxts/services";
 import displayBalanceCurrency from "client/components/balance/displayBalanceCurrency";
-import { useItemViewport } from "../ItemViewport";
+import { useItemViewport } from "client/components/item/ItemViewport";
 import { getAsset } from "shared/asset/AssetMap";
 import { RobotoSlabHeavy } from "shared/asset/GameFonts";
 import CurrencyBundle from "shared/currency/CurrencyBundle";

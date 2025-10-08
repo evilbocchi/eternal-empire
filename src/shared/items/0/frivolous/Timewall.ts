@@ -5,7 +5,7 @@ import Item from "shared/item/Item";
 import Conveyor from "shared/item/traits/conveyor/Conveyor";
 import Upgrader from "shared/item/traits/upgrader/Upgrader";
 import perItemPacket from "shared/item/utils/perItemPacket";
-import Class0Shop from "../Class0Shop";
+import Class0Shop from "shared/items/0/Class0Shop";
 
 const active = perItemPacket(packet<(placementId: string, on: boolean) => void>());
 

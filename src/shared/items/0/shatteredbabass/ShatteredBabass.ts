@@ -4,7 +4,7 @@ import Item from "shared/item/Item";
 import Upgrader from "shared/item/traits/upgrader/Upgrader";
 import Formula from "shared/currency/Formula";
 import { Server } from "shared/api/APIExpose";
-import Class0Shop from "../Class0Shop";
+import Class0Shop from "shared/items/0/Class0Shop";
 
 const mul = new CurrencyBundle().set("Funds", 0);
 

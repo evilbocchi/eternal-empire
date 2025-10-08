@@ -4,7 +4,7 @@ import Item from "shared/item/Item";
 import Conveyor from "shared/item/traits/conveyor/Conveyor";
 import Upgrader from "shared/item/traits/upgrader/Upgrader";
 import Damager from "shared/item/traits/upgrader/Damager";
-import Class0Shop from "../Class0Shop";
+import Class0Shop from "shared/items/0/Class0Shop";
 
 export = new Item(script.Name)
     .setName("Injuring Upgrader")

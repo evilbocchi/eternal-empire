@@ -2,7 +2,7 @@ import Difficulty from "@rbxts/ejt";
 import Conveyor from "shared/item/traits/conveyor/Conveyor";
 import Item from "shared/item/Item";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
-import Class0Shop from "../Class0Shop";
+import Class0Shop from "shared/items/0/Class0Shop";
 
 export = new Item(script.Name)
     .setName("Raised Funnel")

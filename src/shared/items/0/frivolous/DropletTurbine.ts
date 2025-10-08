@@ -3,7 +3,7 @@ import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
 import Conveyor from "shared/item/traits/conveyor/Conveyor";
 import LaserFan from "shared/item/traits/other/LaserFan";
-import Class0Shop from "../Class0Shop";
+import Class0Shop from "shared/items/0/Class0Shop";
 
 export = new Item(script.Name)
     .setName("Droplet Turbine")

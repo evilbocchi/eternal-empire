@@ -3,7 +3,7 @@ import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
 import Charger from "shared/item/traits/generator/Charger";
 import MiniDropletSlayer from "shared/items/negative/relax/MiniDropletSlayer";
-import Class0Shop from "../Class0Shop";
+import Class0Shop from "shared/items/0/Class0Shop";
 
 export = new Item(script.Name)
     .setName("Radio Noob")

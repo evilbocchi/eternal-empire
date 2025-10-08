@@ -5,7 +5,7 @@ import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
 import Furnace from "shared/item/traits/Furnace";
 import Packets from "shared/Packets";
-import Class0Shop from "../Class0Shop";
+import Class0Shop from "shared/items/0/Class0Shop";
 
 const isMeetsRequirement = (skill: OnoeNum) => skill !== undefined && !skill.lessThan(requirement);
 const requirement = new OnoeNum(10);

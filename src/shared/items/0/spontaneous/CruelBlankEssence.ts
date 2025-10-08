@@ -13,7 +13,7 @@ import SexdecupleCoinMiner from "shared/items/0/unlosable/SexdecupleCoinMiner";
 import AdvancedTesseract from "shared/items/0/vintage/AdvancedTesseract";
 import ImprovedTesseract from "shared/items/0/win/ImprovedTesseract";
 import BasicCoinMiner from "shared/items/0/winsome/BasicCoinMiner";
-import Class0Shop from "../Class0Shop";
+import Class0Shop from "shared/items/0/Class0Shop";
 
 export = new Item(script.Name)
     .setName("Cruel Blank Essence")

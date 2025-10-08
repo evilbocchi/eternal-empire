@@ -2,9 +2,9 @@ import Difficulty from "@rbxts/ejt";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
 import NoobDropletSlayer from "shared/item/traits/other/NoobDropletSlayer";
-import DropletSlayerMkI from "../negativity/DropletSlayerMkI";
 import Upgrader from "shared/item/traits/upgrader/Upgrader";
 import ClassLowerNegativeShop from "shared/items/negative/ClassLowerNegativeShop";
+import DropletSlayerMkI from "shared/items/negative/negativity/DropletSlayerMkI";
 
 export = new Item(script.Name)
     .setName("Droplet Slayer Mk. II")

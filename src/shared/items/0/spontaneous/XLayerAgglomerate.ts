@@ -4,7 +4,7 @@ import Item from "shared/item/Item";
 import Conveyor from "shared/item/traits/conveyor/Conveyor";
 import OmniUpgrader from "shared/item/traits/upgrader/OmniUpgrader";
 import TwoStoreyUpgrader from "shared/items/0/automatic/TwoStoreyUpgrader";
-import Class0Shop from "../Class0Shop";
+import Class0Shop from "shared/items/0/Class0Shop";
 
 export = new Item(script.Name)
     .setName("x-layer Agglomerate")

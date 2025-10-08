@@ -1,6 +1,6 @@
 import { useEffect } from "@rbxts/react";
+import SingleDocumentManager from "client/components/sidebar/SingleDocumentManager";
 import { useDocument } from "client/components/window/DocumentManager";
-import SingleDocumentManager from "./SingleDocumentManager";
 
 /**
  * A custom hook for managing window visibility state with the SingleDocumentManager.

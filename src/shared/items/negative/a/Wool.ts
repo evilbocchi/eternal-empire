@@ -1,7 +1,7 @@
 import Difficulty from "@rbxts/ejt";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
-import WoolShop from "../../bonuses/WoolShop";
+import WoolShop from "shared/items/bonuses/WoolShop";
 
 export = new Item(script.Name)
     .setName("Wool")

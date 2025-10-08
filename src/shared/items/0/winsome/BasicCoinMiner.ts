@@ -3,7 +3,7 @@ import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Droplet from "shared/item/Droplet";
 import Dropper from "shared/item/traits/dropper/Dropper";
 import Item from "shared/item/Item";
-import Class0Shop from "../Class0Shop";
+import Class0Shop from "shared/items/0/Class0Shop";
 
 export = new Item(script.Name)
     .setName("Coin Miner")

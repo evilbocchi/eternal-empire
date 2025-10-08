@@ -4,7 +4,7 @@ import Item from "shared/item/Item";
 import Conveyor from "shared/item/traits/conveyor/Conveyor";
 import Upgrader from "shared/item/traits/upgrader/Upgrader";
 import TheAmplifier from "shared/items/0/blessing/TheAmplifier";
-import Class1Shop from "../Class1Shop";
+import Class1Shop from "shared/items/1/Class1Shop";
 
 export = new Item(script.Name)
     .setName("The Amplified")

@@ -1,10 +1,10 @@
 import Difficulty from "@rbxts/ejt";
-import Conveyor from "shared/item/traits/conveyor/Conveyor";
-import Item from "shared/item/Item";
-import Upgrader from "shared/item/traits/upgrader/Upgrader";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
-import LaserFan from "../unimpossible/LaserFan";
+import Item from "shared/item/Item";
+import Conveyor from "shared/item/traits/conveyor/Conveyor";
+import Upgrader from "shared/item/traits/upgrader/Upgrader";
 import ClassLowerNegativeShop from "shared/items/negative/ClassLowerNegativeShop";
+import LaserFan from "shared/items/negative/unimpossible/LaserFan";
 
 export = new Item(script.Name)
     .setName("Laser Tunnel")

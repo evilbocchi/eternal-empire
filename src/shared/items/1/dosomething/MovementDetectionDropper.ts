@@ -5,7 +5,7 @@ import { getAllPlayerCharacters } from "shared/hamster/getPlayerCharacter";
 import Droplet from "shared/item/Droplet";
 import Item from "shared/item/Item";
 import Dropper from "shared/item/traits/dropper/Dropper";
-import Class1Shop from "../Class1Shop";
+import Class1Shop from "shared/items/1/Class1Shop";
 
 export = new Item(script.Name)
     .setName("Movement Detection Dropper")

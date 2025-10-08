@@ -3,7 +3,7 @@ import Item from "shared/item/Item";
 import Clicker from "shared/item/traits/action/Clicker";
 import SlamoClicker from "shared/items/0/millisecondless/SlamoClicker";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
-import Class0Shop from "../Class0Shop";
+import Class0Shop from "shared/items/0/Class0Shop";
 
 export = new Item(script.Name)
     .setName("Hydrogen Bomb Prototype Slamo")

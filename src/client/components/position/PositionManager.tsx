@@ -1,7 +1,7 @@
 import React from "@rbxts/react";
-import { LOCAL_PLAYER } from "client/constants";
+import PositionWindow from "client/components/position/PositionWindow";
 import { useCharacterPosition } from "client/components/position/usePlayerPosition";
-import PositionWindow from "./PositionWindow";
+import { LOCAL_PLAYER } from "client/constants";
 
 interface PositionManagerProps {
     /** The player to track position for (defaults to LocalPlayer) */

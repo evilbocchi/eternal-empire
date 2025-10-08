@@ -5,7 +5,7 @@ import Conveyor from "shared/item/traits/conveyor/Conveyor";
 import FormulaBundled from "shared/item/traits/FormulaBundled";
 import Upgrader from "shared/item/traits/upgrader/Upgrader";
 import EffervescentDropletSpray from "shared/items/negative/exist/EffervescentDropletSpray";
-import Class1Shop from "../Class1Shop";
+import Class1Shop from "shared/items/1/Class1Shop";
 
 export = new Item(script.Name)
     .setName("Industrial Droplet Spray")

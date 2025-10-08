@@ -4,7 +4,7 @@ import Conveyor from "shared/item/traits/conveyor/Conveyor";
 import Droplet from "shared/item/Droplet";
 import Dropper from "shared/item/traits/dropper/Dropper";
 import Item from "shared/item/Item";
-import Class0Shop from "../Class0Shop";
+import Class0Shop from "shared/items/0/Class0Shop";
 
 export = new Item(script.Name)
     .setName("Advanced Skill Factory")

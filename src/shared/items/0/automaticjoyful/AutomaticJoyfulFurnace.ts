@@ -5,7 +5,7 @@ import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Formula from "shared/currency/Formula";
 import { Server } from "shared/api/APIExpose";
 import RoboticCauldron from "shared/items/0/walkthrough/RoboticCauldron";
-import Class0Shop from "../Class0Shop";
+import Class0Shop from "shared/items/0/Class0Shop";
 
 const mul = new CurrencyBundle().set("Power", 1);
 

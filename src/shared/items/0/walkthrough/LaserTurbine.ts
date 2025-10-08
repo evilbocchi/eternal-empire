@@ -3,7 +3,7 @@ import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
 import LaserFan from "shared/item/traits/other/LaserFan";
 import Upgrader from "shared/item/traits/upgrader/Upgrader";
-import Class0Shop from "../Class0Shop";
+import Class0Shop from "shared/items/0/Class0Shop";
 
 export = new Item(script.Name)
     .setName("Laser Turbine")

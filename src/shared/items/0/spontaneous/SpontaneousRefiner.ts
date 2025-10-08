@@ -14,7 +14,7 @@ import ReversedUpgrader from "shared/items/negative/reversedperipherality/Revers
 import TheFirstUpgrader from "shared/items/negative/tfd/TheFirstUpgrader";
 import BasicRefiner from "shared/items/negative/tlg/BasicRefiner";
 import DropletElectronInfuser from "shared/items/negative/trueease/DropletElectronInfuser";
-import Class0Shop from "../Class0Shop";
+import Class0Shop from "shared/items/0/Class0Shop";
 
 const combining = [
     TheFirstUpgrader,

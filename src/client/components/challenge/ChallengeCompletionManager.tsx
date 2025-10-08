@@ -4,8 +4,10 @@
  */
 
 import React, { Fragment, useEffect, useState } from "@rbxts/react";
+import ChallengeCompletionNotification, {
+    ChallengeCompletionData,
+} from "client/components/challenge/ChallengeCompletionNotification";
 import Packets from "shared/Packets";
-import ChallengeCompletionNotification, { ChallengeCompletionData } from "./ChallengeCompletionNotification";
 
 interface CompletionQueueItem {
     id: string;

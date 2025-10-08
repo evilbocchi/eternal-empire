@@ -8,7 +8,7 @@ import Formula from "shared/currency/Formula";
 import Item from "shared/item/Item";
 import Upgrader from "shared/item/traits/upgrader/Upgrader";
 import { VirtualCollision } from "shared/item/utils/VirtualReplication";
-import Class0Shop from "../Class0Shop";
+import Class0Shop from "shared/items/0/Class0Shop";
 
 const mul = new CurrencyBundle().set("Funds", 0);
 

@@ -11,7 +11,7 @@ import isPlacedItemUnusable from "shared/item/utils/isPlacedItemUnusable";
 import perItemPacket from "shared/item/utils/perItemPacket";
 import Packets from "shared/Packets";
 import { AREAS } from "shared/world/Area";
-import Droplet from "../../Droplet";
+import Droplet from "shared/item/Droplet";
 
 declare global {
     interface ItemTraits {

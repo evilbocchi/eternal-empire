@@ -2,8 +2,8 @@ import Difficulty from "@rbxts/ejt";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
 import Upgrader from "shared/item/traits/upgrader/Upgrader";
+import GrassShop from "shared/items/bonuses/GrassShop";
 import Grass from "shared/items/excavation/harvestable/Grass";
-import GrassShop from "../../bonuses/GrassShop";
 
 export = new Item(script.Name)
     .setName("Enchanted Grass")

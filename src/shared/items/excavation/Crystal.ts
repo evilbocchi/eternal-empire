@@ -2,7 +2,7 @@ import Difficulty from "@rbxts/ejt";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
 import WhiteGem from "shared/items/excavation/WhiteGem";
-import ExcavationShop from "../bonuses/ExcavationShop";
+import ExcavationShop from "shared/items/bonuses/ExcavationShop";
 
 export = new Item(script.Name)
     .setName("Crystal")

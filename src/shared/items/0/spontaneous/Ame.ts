@@ -8,7 +8,7 @@ import Conveyor from "shared/item/traits/conveyor/Conveyor";
 import FormulaBundled from "shared/item/traits/FormulaBundled";
 import Upgrader from "shared/item/traits/upgrader/Upgrader";
 import CruelBlankEssence from "shared/items/0/spontaneous/CruelBlankEssence";
-import Class0Shop from "../Class0Shop";
+import Class0Shop from "shared/items/0/Class0Shop";
 
 export = new Item(script.Name)
     .setName("Ame")

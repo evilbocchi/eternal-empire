@@ -6,8 +6,8 @@
 import React, { StrictMode, useState } from "@rbxts/react";
 import ReactRoblox from "@rbxts/react-roblox";
 import { CreateReactStory } from "@rbxts/ui-labs";
-import ChallengeGui, { CurrentChallengeInfo } from "./ChallengeGui";
-import ChallengeHudDisplay from "./ChallengeHudDisplay";
+import ChallengeGui, { CurrentChallengeInfo } from "client/components/challenge/ChallengeGui";
+import ChallengeHudDisplay from "client/components/challenge/ChallengeHudDisplay";
 
 export = CreateReactStory(
     {

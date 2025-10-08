@@ -1,8 +1,8 @@
 import React from "@rbxts/react";
+import ChallengeGui, { CurrentChallengeInfo } from "client/components/challenge/ChallengeGui";
 import useProperty from "client/hooks/useProperty";
 import Packets from "shared/Packets";
 import { playSound } from "shared/asset/GameAssets";
-import ChallengeGui, { CurrentChallengeInfo } from "./ChallengeGui";
 
 /**
  * ChallengeManager component that manages challenge state and UI

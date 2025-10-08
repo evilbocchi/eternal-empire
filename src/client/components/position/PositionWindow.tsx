@@ -1,8 +1,8 @@
 import React, { useEffect, useRef } from "@rbxts/react";
-import { RobotoSlabHeavy } from "shared/asset/GameFonts";
+import { useMessageTooltip } from "client/components/tooltip/TooltipManager";
 import { useDocument } from "client/components/window/DocumentManager";
 import { getAsset } from "shared/asset/AssetMap";
-import { useMessageTooltip } from "../tooltip/TooltipManager";
+import { RobotoSlabHeavy } from "shared/asset/GameFonts";
 
 /**
  * PositionWindow displays the player's current coordinates in a styled frame.

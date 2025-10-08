@@ -7,7 +7,7 @@ import PassiveBonanza from "shared/items/negative/instantwin/PassiveBonanza";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Formula from "shared/currency/Formula";
 import { Server } from "shared/api/APIExpose";
-import Class0Shop from "../Class0Shop";
+import Class0Shop from "shared/items/0/Class0Shop";
 
 const amt = new OnoeNum(4e9);
 const base = new CurrencyBundle().set("Power", amt);

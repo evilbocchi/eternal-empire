@@ -16,4 +16,3 @@ export = new Item(script.Name)
     .setRequiredItemAmount(Stone, 50)
     .placeableEverywhere()
     .persists();
-

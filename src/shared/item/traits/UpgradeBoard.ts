@@ -1,6 +1,6 @@
 import Item from "shared/item/Item";
 import ItemTrait from "shared/item/traits/ItemTrait";
-import NamedUpgrade from "../../namedupgrade/NamedUpgrade";
+import NamedUpgrade from "shared/namedupgrade/NamedUpgrade";
 
 declare global {
     interface ItemTraits {

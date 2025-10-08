@@ -5,7 +5,7 @@ import Item from "shared/item/Item";
 import { Server } from "shared/api/APIExpose";
 import Furnace from "shared/item/traits/Furnace";
 import FormulaBundled from "shared/item/traits/FormulaBundled";
-import Class0Shop from "../Class0Shop";
+import Class0Shop from "shared/items/0/Class0Shop";
 
 export = new Item(script.Name)
     .setName("Robotic Cauldron")

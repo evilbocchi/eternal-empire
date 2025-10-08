@@ -8,7 +8,7 @@ import { CURRENCY_CATEGORIES, CURRENCY_DETAILS } from "shared/currency/CurrencyD
 import { getAllPlayerCharacters, getPlayerCharacter } from "shared/hamster/getPlayerCharacter";
 import Item from "shared/item/Item";
 import Generator from "shared/item/traits/generator/Generator";
-import Class0Shop from "../Class0Shop";
+import Class0Shop from "shared/items/0/Class0Shop";
 
 const rng = new Random();
 

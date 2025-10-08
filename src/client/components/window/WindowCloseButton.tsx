@@ -1,7 +1,7 @@
 import React, { forwardRef, useRef } from "@rbxts/react";
 import { TweenService } from "@rbxts/services";
+import { useTooltipProps } from "client/components/tooltip/TooltipManager";
 import { getAsset } from "shared/asset/AssetMap";
-import { useTooltipProps } from "../tooltip/TooltipManager";
 
 interface WindowCloseButtonProps {
     onClick: () => void;

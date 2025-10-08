@@ -1,10 +1,10 @@
 import Difficulty from "@rbxts/ejt";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Droplet from "shared/item/Droplet";
-import Dropper from "shared/item/traits/dropper/Dropper";
 import Item from "shared/item/Item";
-import DepressingDropper from "./DepressingDropper";
+import Dropper from "shared/item/traits/dropper/Dropper";
 import ClassLowerNegativeShop from "shared/items/negative/ClassLowerNegativeShop";
+import DepressingDropper from "shared/items/negative/ifinity/DepressingDropper";
 
 export = new Item(script.Name)
     .setName("Funds Compact Dropper")

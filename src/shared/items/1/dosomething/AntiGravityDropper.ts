@@ -9,7 +9,7 @@ import Item from "shared/item/Item";
 import Dropper from "shared/item/traits/dropper/Dropper";
 import Massless from "shared/item/traits/status/Massless";
 import Upgrader from "shared/item/traits/upgrader/Upgrader";
-import Class1Shop from "../Class1Shop";
+import Class1Shop from "shared/items/1/Class1Shop";
 
 const AntiGravityDropper = new Item(script.Name)
     .setName("Anti-Gravity Dropper")

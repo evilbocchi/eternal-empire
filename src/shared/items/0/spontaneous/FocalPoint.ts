@@ -20,7 +20,7 @@ import OverusedAmethystDropper from "shared/items/negative/reversedperipherality
 import TheFirstDropper from "shared/items/negative/tfd/TheFirstDropper";
 import BulkyDropper from "shared/items/negative/tlg/BulkyDropper";
 import VibrantDropper from "shared/items/negative/trueease/VibrantDropper";
-import Class0Shop from "../Class0Shop";
+import Class0Shop from "shared/items/0/Class0Shop";
 
 export = new Item(script.Name)
     .setName("Focal Point")

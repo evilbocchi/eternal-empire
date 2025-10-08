@@ -7,7 +7,7 @@ import React, { StrictMode, useState } from "@rbxts/react";
 import ReactRoblox from "@rbxts/react-roblox";
 import { CreateReactStory } from "@rbxts/ui-labs";
 import TooltipWindow from "client/components/tooltip/TooltipWindow";
-import ChestLootNotification from "./ChestLootNotification";
+import ChestLootNotification from "client/components/chest/ChestLootNotification";
 
 export = CreateReactStory(
     {

@@ -3,7 +3,7 @@ import InstantiationDelimiter from "shared/item/traits/InstantiationDelimiter";
 import Item from "shared/item/Item";
 import InstantiationDelimiterIII from "shared/items/negative/skip/InstantiationDelimiterIII";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
-import Class0Shop from "../Class0Shop";
+import Class0Shop from "shared/items/0/Class0Shop";
 
 export = new Item(script.Name)
     .setName("Instantiation Delimiter IV")

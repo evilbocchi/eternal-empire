@@ -6,7 +6,9 @@
 import React, { StrictMode, useState } from "@rbxts/react";
 import ReactRoblox from "@rbxts/react-roblox";
 import { CreateReactStory } from "@rbxts/ui-labs";
-import ChallengeCompletionNotification, { ChallengeCompletionData } from "./ChallengeCompletionNotification";
+import ChallengeCompletionNotification, {
+    ChallengeCompletionData,
+} from "client/components/challenge/ChallengeCompletionNotification";
 
 export = CreateReactStory(
     {

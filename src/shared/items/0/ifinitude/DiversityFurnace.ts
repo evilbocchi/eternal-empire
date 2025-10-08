@@ -6,7 +6,7 @@ import Upgrader from "shared/item/traits/upgrader/Upgrader";
 import AdvancedBlankEssence from "shared/items/0/ifinitude/AdvancedBlankEssence";
 import DualDropper from "shared/items/negative/a/DualDropper";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
-import Class0Shop from "../Class0Shop";
+import Class0Shop from "shared/items/0/Class0Shop";
 
 const mul = new CurrencyBundle().set("Bitcoin", 4);
 

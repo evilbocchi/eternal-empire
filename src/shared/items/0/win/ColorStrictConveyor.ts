@@ -11,7 +11,7 @@ import Conveyor from "shared/item/traits/conveyor/Conveyor";
 import setDropletVelocity from "shared/item/utils/setDropletVelocity";
 import perItemPacket from "shared/item/utils/perItemPacket";
 import { VirtualCollision } from "shared/item/utils/VirtualReplication";
-import Class0Shop from "../Class0Shop";
+import Class0Shop from "shared/items/0/Class0Shop";
 
 declare global {
     interface PlacedItem {

@@ -1,9 +1,9 @@
 import Difficulty from "@rbxts/ejt";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
-import Upgrader from "shared/item/traits/upgrader/Upgrader";
 import Damager from "shared/item/traits/upgrader/Damager";
-import Class0Shop from "../Class0Shop";
+import Upgrader from "shared/item/traits/upgrader/Upgrader";
+import Class0Shop from "shared/items/0/Class0Shop";
 
 export = new Item(script.Name)
     .setName("Automatic Arbition")

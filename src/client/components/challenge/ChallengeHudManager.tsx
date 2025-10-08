@@ -4,9 +4,9 @@
  */
 
 import React, { Fragment } from "@rbxts/react";
+import ChallengeHudDisplay from "client/components/challenge/ChallengeHudDisplay";
 import useProperty from "client/hooks/useProperty";
 import Packets from "shared/Packets";
-import ChallengeHudDisplay from "./ChallengeHudDisplay";
 /**
  * ChallengeHudManager component that manages just the HUD display for challenges
  */

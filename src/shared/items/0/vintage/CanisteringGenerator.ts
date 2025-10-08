@@ -3,7 +3,7 @@ import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
 import Generator from "shared/item/traits/generator/Generator";
 import DropperBooster from "shared/item/traits/boost/DropperBooster";
-import Class0Shop from "../Class0Shop";
+import Class0Shop from "shared/items/0/Class0Shop";
 
 export = new Item(script.Name)
     .setName("Canistering Generator")

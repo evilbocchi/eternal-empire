@@ -4,7 +4,7 @@ import Conveyor from "shared/item/traits/conveyor/Conveyor";
 import Damager from "shared/item/traits/upgrader/Damager";
 import Upgrader from "shared/item/traits/upgrader/Upgrader";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
-import Class0Shop from "../Class0Shop";
+import Class0Shop from "shared/items/0/Class0Shop";
 
 export = new Item("HeavenGarden")
     .setName("Heaven's Garden")

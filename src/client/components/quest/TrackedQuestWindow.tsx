@@ -1,12 +1,12 @@
 import React, { useEffect, useRef, useState } from "@rbxts/react";
 import { ReplicatedStorage, RunService, Workspace } from "@rbxts/services";
+import { useQuestData } from "client/components/quest/useQuestData";
 import { useDocument } from "client/components/window/DocumentManager";
 import { observeCharacter } from "client/constants";
-import { RobotoSlabBold } from "shared/asset/GameFonts";
 import { getAsset } from "shared/asset/AssetMap";
 import { playSound } from "shared/asset/GameAssets";
+import { RobotoSlabBold } from "shared/asset/GameFonts";
 import { IS_EDIT } from "shared/Context";
-import { useQuestData } from "./useQuestData";
 
 /**
  * Returns the description and position details for the current quest stage.

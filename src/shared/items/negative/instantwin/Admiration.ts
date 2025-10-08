@@ -1,12 +1,12 @@
 import Difficulty from "@rbxts/ejt";
 import { OnoeNum } from "@rbxts/serikanum";
+import { Server } from "shared/api/APIExpose";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
+import Formula from "shared/currency/Formula";
 import Item from "shared/item/Item";
 import Upgrader from "shared/item/traits/upgrader/Upgrader";
-import Formula from "shared/currency/Formula";
-import { Server } from "shared/api/APIExpose";
-import BasicBlankEssence from "./BasicBlankEssence";
 import ClassLowerNegativeShop from "shared/items/negative/ClassLowerNegativeShop";
+import BasicBlankEssence from "shared/items/negative/instantwin/BasicBlankEssence";
 
 const div = OnoeNum.fromSerika(5, 12);
 const mul = new CurrencyBundle().set("Funds", 0).set("Power", 0);

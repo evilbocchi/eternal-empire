@@ -2,7 +2,7 @@ import Difficulty from "@rbxts/ejt";
 import InstantiationDelimiter from "shared/item/traits/InstantiationDelimiter";
 import Item from "shared/item/Item";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
-import Class0Shop from "../Class0Shop";
+import Class0Shop from "shared/items/0/Class0Shop";
 
 export = new Item(script.Name)
     .setName("Instantiation Delimiter V")
