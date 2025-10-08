@@ -13,6 +13,7 @@ import Operative from "shared/item/traits/Operative";
 import Upgrader from "shared/item/traits/upgrader/Upgrader";
 import NamedUpgrades from "shared/namedupgrade/NamedUpgrades";
 import Packets from "shared/Packets";
+import ClassLowerNegativeShop from "shared/items/negative/ClassLowerNegativeShop";
 
 const clickedPacket = packet<(gain: BaseOnoeNum, total: BaseOnoeNum) => void>();
 const getFundsBoost = (amount: OnoeNum) => OnoeNum.log(amount.div(50).add(1), 8)?.pow(2).div(2).add(1);
@@ -26,6 +27,7 @@ export = new Item(script.Name)
     .setDifficulty(Difficulty.FelixTheDA)
     .setPrice(new CurrencyBundle().set("Funds", OnoeNum.fromSerika(158, 12)), 1)
     .addPlaceableArea("BarrenIslands")
+    .soldAt(ClassLowerNegativeShop)
 
     .trait(Manumatic)
     .trait(Upgrader)

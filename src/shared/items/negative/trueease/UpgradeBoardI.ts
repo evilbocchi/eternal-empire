@@ -1,8 +1,9 @@
 import Difficulty from "@rbxts/ejt";
+import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
 import UpgradeBoard from "shared/item/traits/UpgradeBoard";
+import ClassLowerNegativeShop from "shared/items/negative/ClassLowerNegativeShop";
 import NamedUpgrades from "shared/namedupgrade/NamedUpgrades";
-import CurrencyBundle from "shared/currency/CurrencyBundle";
 
 export = new Item(script.Name)
     .setName("Upgrade Board I")
@@ -10,6 +11,7 @@ export = new Item(script.Name)
     .setDifficulty(Difficulty.TrueEase)
     .setPrice(new CurrencyBundle().set("Funds", 15.5e9).set("Power", 150), 1)
     .addPlaceableArea("BarrenIslands")
+    .soldAt(ClassLowerNegativeShop)
 
     .trait(UpgradeBoard)
     .addUpgrade(NamedUpgrades.MoreFunds)

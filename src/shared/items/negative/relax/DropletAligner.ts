@@ -2,6 +2,7 @@ import Difficulty from "@rbxts/ejt";
 import Conveyor from "shared/item/traits/conveyor/Conveyor";
 import Item from "shared/item/Item";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
+import ClassLowerNegativeShop from "shared/items/negative/ClassLowerNegativeShop";
 
 export = new Item(script.Name)
     .setName("Droplet Aligner")
@@ -12,6 +13,7 @@ export = new Item(script.Name)
     .setPrice(new CurrencyBundle().set("Funds", 345e15), 1, 5)
     .setPrice(new CurrencyBundle().set("Funds", 3.45e18), 6, 10)
     .addPlaceableArea("BarrenIslands")
+    .soldAt(ClassLowerNegativeShop)
 
     .trait(Conveyor)
     .setSpeed(6)

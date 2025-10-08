@@ -2,6 +2,7 @@ import Difficulty from "@rbxts/ejt";
 import Charger from "shared/item/traits/generator/Charger";
 import Item from "shared/item/Item";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
+import ClassLowerNegativeShop from "shared/items/negative/ClassLowerNegativeShop";
 
 export = new Item(script.Name)
     .setName("Industrial Charger")
@@ -12,6 +13,7 @@ export = new Item(script.Name)
     .setPrice(new CurrencyBundle().set("Funds", 1.8e18).set("Power", 1e9), 1)
     .setPrice(new CurrencyBundle().set("Funds", 3.3e18).set("Power", 1.4e9), 2)
     .addPlaceableArea("BarrenIslands")
+    .soldAt(ClassLowerNegativeShop)
 
     .trait(Charger)
     .ignoresLimit(true)

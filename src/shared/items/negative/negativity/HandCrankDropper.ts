@@ -1,11 +1,12 @@
-import Difficulty from "@rbxts/ejt";
 import { getAllInstanceInfo, getInstanceInfo } from "@antivivi/vrldk";
+import Difficulty from "@rbxts/ejt";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Droplet from "shared/item/Droplet";
 import Item from "shared/item/Item";
 import HandCrank from "shared/item/traits/action/HandCrank";
 import Boostable from "shared/item/traits/boost/Boostable";
 import Dropper from "shared/item/traits/dropper/Dropper";
+import ClassLowerNegativeShop from "shared/items/negative/ClassLowerNegativeShop";
 
 export = new Item(script.Name)
     .setName("Hand Crank Dropper")
@@ -14,6 +15,7 @@ export = new Item(script.Name)
     .setPrice(new CurrencyBundle().set("Funds", 2500), 1, 2)
     .setPrice(new CurrencyBundle().set("Funds", 5000), 3)
     .addPlaceableArea("BarrenIslands")
+    .soldAt(ClassLowerNegativeShop)
 
     .onLoad((model) => {
         const drop = model.WaitForChild("Drop");

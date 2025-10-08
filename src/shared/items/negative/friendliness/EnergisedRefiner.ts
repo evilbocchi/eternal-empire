@@ -1,9 +1,10 @@
 import Difficulty from "@rbxts/ejt";
+import { Server } from "shared/api/APIExpose";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
+import Formula from "shared/currency/Formula";
 import Item from "shared/item/Item";
 import Upgrader from "shared/item/traits/upgrader/Upgrader";
-import Formula from "shared/currency/Formula";
-import { Server } from "shared/api/APIExpose";
+import ClassLowerNegativeShop from "shared/items/negative/ClassLowerNegativeShop";
 
 const mul = new CurrencyBundle().set("Funds", 0);
 
@@ -16,6 +17,7 @@ export = new Item(script.Name)
     .setPrice(new CurrencyBundle().set("Power", 20), 1)
     .setPrice(new CurrencyBundle().set("Power", 120), 2)
     .addPlaceableArea("BarrenIslands")
+    .soldAt(ClassLowerNegativeShop)
 
     .setFormula(new Formula().add(1).log(3).add(1))
     .setFormulaX("power")

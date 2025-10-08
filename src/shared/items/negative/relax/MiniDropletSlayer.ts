@@ -3,6 +3,7 @@ import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
 import NoobDropletSlayer from "shared/item/traits/other/NoobDropletSlayer";
 import Upgrader from "shared/item/traits/upgrader/Upgrader";
+import ClassLowerNegativeShop from "shared/items/negative/ClassLowerNegativeShop";
 
 export = new Item(script.Name)
     .setName("Mini Droplet Slayer")
@@ -11,6 +12,7 @@ export = new Item(script.Name)
     .setPrice(new CurrencyBundle().set("Funds", 6.2e18), 1)
     .setPrice(new CurrencyBundle().set("Funds", 20e18), 2)
     .addPlaceableArea("BarrenIslands")
+    .soldAt(ClassLowerNegativeShop)
 
     .trait(Upgrader)
     .setMul(new CurrencyBundle().set("Funds", 1.5))

@@ -4,6 +4,7 @@ import Droplet from "shared/item/Droplet";
 import Dropper from "shared/item/traits/dropper/Dropper";
 import Item from "shared/item/Item";
 import DepressingDropper from "./DepressingDropper";
+import ClassLowerNegativeShop from "shared/items/negative/ClassLowerNegativeShop";
 
 export = new Item(script.Name)
     .setName("Funds Compact Dropper")
@@ -14,6 +15,7 @@ export = new Item(script.Name)
     .setPrice(new CurrencyBundle().set("Funds", 1), 1)
     .setRequiredItemAmount(DepressingDropper, 1)
     .addPlaceableArea("BarrenIslands")
+    .soldAt(ClassLowerNegativeShop)
 
     .trait(Dropper)
     .setDroplet(Droplet.FundsCompactDroplet)

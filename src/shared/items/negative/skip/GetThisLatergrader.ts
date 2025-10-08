@@ -7,6 +7,7 @@ import Conveyor from "shared/item/traits/conveyor/Conveyor";
 import FormulaBundled from "shared/item/traits/FormulaBundled";
 import Damager from "shared/item/traits/upgrader/Damager";
 import Upgrader from "shared/item/traits/upgrader/Upgrader";
+import ClassLowerNegativeShop from "shared/items/negative/ClassLowerNegativeShop";
 
 export = new Item(script.Name)
     .setName("Get-This-Latergrader")
@@ -14,6 +15,7 @@ export = new Item(script.Name)
     .setDifficulty(Difficulty.Skip)
     .setPrice(new CurrencyBundle().set("Funds", 1e45), 1)
     .addPlaceableArea("BarrenIslands")
+    .soldAt(ClassLowerNegativeShop)
 
     .setFormula(new Formula().ln().ln().ln())
     .setFormulaX("funds")

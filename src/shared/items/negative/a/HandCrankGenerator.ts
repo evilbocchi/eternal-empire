@@ -4,6 +4,7 @@ import Item from "shared/item/Item";
 import HandCrank from "shared/item/traits/action/HandCrank";
 import Boostable from "shared/item/traits/boost/Boostable";
 import Generator from "shared/item/traits/generator/Generator";
+import ClassLowerNegativeShop from "shared/items/negative/ClassLowerNegativeShop";
 
 const key = "HandCrank";
 
@@ -16,6 +17,7 @@ export = new Item(script.Name)
     .setPrice(new CurrencyBundle().set("Power", 104000), 1)
     .setPrice(new CurrencyBundle().set("Power", 648100), 2)
     .addPlaceableArea("BarrenIslands")
+    .soldAt(ClassLowerNegativeShop)
 
     .trait(Generator)
     .setBounceEffectEnabled(false) // conflicts with hand crank

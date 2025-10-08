@@ -1,9 +1,10 @@
 import Difficulty from "@rbxts/ejt";
-import Furnace from "shared/item/traits/Furnace";
-import Item from "shared/item/Item";
+import { Server } from "shared/api/APIExpose";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Formula from "shared/currency/Formula";
-import { Server } from "shared/api/APIExpose";
+import Item from "shared/item/Item";
+import Furnace from "shared/item/traits/Furnace";
+import ClassLowerNegativeShop from "shared/items/negative/ClassLowerNegativeShop";
 
 const mul = new CurrencyBundle().set("Funds", 0);
 
@@ -13,6 +14,7 @@ export = new Item(script.Name)
     .setDifficulty(Difficulty.FelixTheDA)
     .setPrice(new CurrencyBundle().set("Funds", 30.8e12), 1)
     .addPlaceableArea("BarrenIslands")
+    .soldAt(ClassLowerNegativeShop)
 
     .setDrain(new CurrencyBundle().set("Power", 45))
     .setFormula(new Formula().add(1).log(10).mul(1420000).add(2000000))

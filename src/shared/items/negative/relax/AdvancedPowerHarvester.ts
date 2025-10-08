@@ -5,6 +5,7 @@ import Item from "shared/item/Item";
 import { Server } from "shared/api/APIExpose";
 import Furnace from "shared/item/traits/Furnace";
 import FormulaBundled from "shared/item/traits/FormulaBundled";
+import ClassLowerNegativeShop from "shared/items/negative/ClassLowerNegativeShop";
 
 const mul = new CurrencyBundle().set("Funds", 0).set("Power", 0);
 
@@ -14,6 +15,7 @@ export = new Item(script.Name)
     .setDifficulty(Difficulty.Relax)
     .setPrice(new CurrencyBundle().set("Power", 812e6).set("Purifier Clicks", 400), 1)
     .addPlaceableArea("BarrenIslands")
+    .soldAt(ClassLowerNegativeShop)
 
     .setFormula(new Formula().add(1).log(5).mul(0.9).add(1))
     .setFormulaX("power")

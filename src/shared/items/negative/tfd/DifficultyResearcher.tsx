@@ -8,6 +8,7 @@ import { playSound } from "shared/asset/GameAssets";
 import { RobotoMonoBold } from "shared/asset/GameFonts";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
+import ClassLowerNegativeShop from "shared/items/negative/ClassLowerNegativeShop";
 
 const difficultyPacket = property<string | undefined>();
 const setDifficultyPacket = packet<(difficultyId: string) => boolean>();
@@ -196,6 +197,7 @@ export = new Item(script.Name)
     .setDescription("Learn about the world.")
     .setPrice(new CurrencyBundle().set("Funds", 100), 1)
     .placeableEverywhere()
+    .soldAt(ClassLowerNegativeShop)
     .persists()
     .unbreakable()
 

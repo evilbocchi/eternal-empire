@@ -12,6 +12,7 @@ export = new Item(script.Name)
     .setDifficulty(Difficulty.Vibeness)
     .setPrice(new CurrencyBundle().set("Funds", 5e42).set("Bitcoin", 250e9), 1)
     .addPlaceableArea("BarrenIslands", "SlamoVillage", "SkyPavilion")
+    .soldAt(Class0Shop)
     .setCreator("sanjay2133")
     .persists()
 
@@ -23,7 +24,4 @@ export = new Item(script.Name)
     .trait(Conveyor)
     .setSpeed(3)
 
-    .soldAt(Class0Shop)
-
     .exit();
-

@@ -1,8 +1,9 @@
 import Difficulty from "@rbxts/ejt";
-import Conveyor from "shared/item/traits/conveyor/Conveyor";
-import Item from "shared/item/Item";
-import Upgrader from "shared/item/traits/upgrader/Upgrader";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
+import Item from "shared/item/Item";
+import Conveyor from "shared/item/traits/conveyor/Conveyor";
+import Upgrader from "shared/item/traits/upgrader/Upgrader";
+import ClassLowerNegativeShop from "shared/items/negative/ClassLowerNegativeShop";
 
 export = new Item(script.Name)
     .setName("Droplet Electron Infuser")
@@ -10,6 +11,7 @@ export = new Item(script.Name)
     .setDifficulty(Difficulty.TrueEase)
     .setPrice(new CurrencyBundle().set("Power", 1500), 1)
     .addPlaceableArea("BarrenIslands")
+    .soldAt(ClassLowerNegativeShop)
 
     .trait(Upgrader)
     .setAdd(new CurrencyBundle().set("Power", 2))

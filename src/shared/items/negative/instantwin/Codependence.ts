@@ -6,6 +6,7 @@ import Item from "shared/item/Item";
 import Formula from "shared/currency/Formula";
 import { Server } from "shared/api/APIExpose";
 import BasicBlankEssence from "./BasicBlankEssence";
+import ClassLowerNegativeShop from "shared/items/negative/ClassLowerNegativeShop";
 
 const div = OnoeNum.fromSerika(5, 12);
 const mul = new CurrencyBundle().set("Funds", 0).set("Power", 0);
@@ -19,6 +20,7 @@ export = new Item(script.Name)
     .setPrice(new CurrencyBundle().set("Power", 1e12), 1)
     .setRequiredItemAmount(BasicBlankEssence, 1)
     .addPlaceableArea("BarrenIslands")
+    .soldAt(ClassLowerNegativeShop)
 
     .setFormula(new Formula().div(div).add(1).log(12).pow(1.6).add(1))
     .setFormulaX("power")

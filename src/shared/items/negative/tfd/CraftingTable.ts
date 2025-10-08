@@ -18,6 +18,7 @@ import Lamp from "shared/items/negative/negativity/Lamp";
 import TeslaCharger from "shared/items/negative/relax/TeslaCharger";
 import DropletDiverger from "shared/items/negative/skip/DropletDiverger";
 import OverengineeredGenerator from "shared/items/negative/trueease/OverengineeredGenerator";
+import CrystalIngot from "shared/items/negative/unimpossible/CrystalIngot";
 
 export = new Item(script.Name)
     .setName("Crafting Table")

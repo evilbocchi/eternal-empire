@@ -4,6 +4,7 @@ import Item from "shared/item/Item";
 import Upgrader from "shared/item/traits/upgrader/Upgrader";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import LaserFan from "../unimpossible/LaserFan";
+import ClassLowerNegativeShop from "shared/items/negative/ClassLowerNegativeShop";
 
 export = new Item(script.Name)
     .setName("Laser Tunnel")
@@ -14,6 +15,7 @@ export = new Item(script.Name)
     .setPrice(new CurrencyBundle().set("Power", 3.3e9), 1)
     .setRequiredItemAmount(LaserFan, 2)
     .addPlaceableArea("BarrenIslands")
+    .soldAt(ClassLowerNegativeShop)
 
     .trait(Upgrader)
     .setMul(new CurrencyBundle().set("Funds", 10).set("Power", 3))

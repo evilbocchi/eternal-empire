@@ -3,6 +3,7 @@ import Droplet from "shared/item/Droplet";
 import Dropper from "shared/item/traits/dropper/Dropper";
 import Item from "shared/item/Item";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
+import ClassLowerNegativeShop from "shared/items/negative/ClassLowerNegativeShop";
 
 export = new Item(script.Name)
     .setName("Purifiers' Dream")
@@ -12,6 +13,7 @@ export = new Item(script.Name)
     .setDifficulty(Difficulty.InstantWin)
     .setPrice(new CurrencyBundle().set("Funds", 9.9e21).set("Purifier Clicks", 8000), 1)
     .addPlaceableArea("BarrenIslands")
+    .soldAt(ClassLowerNegativeShop)
 
     .trait(Dropper)
     .setDroplet(Droplet.PurifiersDroplet)

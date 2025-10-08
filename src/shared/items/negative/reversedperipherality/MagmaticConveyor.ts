@@ -3,6 +3,7 @@ import Droplet from "shared/item/Droplet";
 import Item from "shared/item/Item";
 import Transformer from "shared/item/traits/upgrader/Transformer";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
+import ClassLowerNegativeShop from "shared/items/negative/ClassLowerNegativeShop";
 
 export = new Item(script.Name)
     .setName("Magmatic Conveyor")
@@ -12,6 +13,7 @@ export = new Item(script.Name)
     .setDifficulty(Difficulty.ReversedPeripherality)
     .setPrice(new CurrencyBundle().set("Funds", 1e18), 1)
     .addPlaceableArea("BarrenIslands")
+    .soldAt(ClassLowerNegativeShop)
 
     .trait(Transformer)
     .setSpeed(5)

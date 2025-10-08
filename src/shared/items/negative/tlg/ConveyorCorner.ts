@@ -2,6 +2,7 @@ import Difficulty from "@rbxts/ejt";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
 import Conveyor from "shared/item/traits/conveyor/Conveyor";
+import ClassLowerNegativeShop from "shared/items/negative/ClassLowerNegativeShop";
 
 export = new Item(script.Name)
     .setName("Conveyor Corner")
@@ -12,6 +13,7 @@ Only goes clockwise, unfortunately.`,
     .setDifficulty(Difficulty.TheLowerGap)
     .setPrice(new CurrencyBundle().set("Funds", 90), 1, 5)
     .addPlaceableArea("BarrenIslands")
+    .soldAt(ClassLowerNegativeShop)
 
     .trait(Conveyor)
     .setSpeed(5)

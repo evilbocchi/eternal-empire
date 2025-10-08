@@ -1,8 +1,9 @@
 import Difficulty from "@rbxts/ejt";
-import Droplet from "shared/item/Droplet";
-import Dropper from "shared/item/traits/dropper/Dropper";
-import Item from "shared/item/Item";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
+import Droplet from "shared/item/Droplet";
+import Item from "shared/item/Item";
+import Dropper from "shared/item/traits/dropper/Dropper";
+import ClassLowerNegativeShop from "shared/items/negative/ClassLowerNegativeShop";
 
 export = new Item(script.Name)
     .setName("Dual Dropper")
@@ -13,6 +14,7 @@ export = new Item(script.Name)
     .setPrice(new CurrencyBundle().set("Funds", 2.78e12), 1)
     .setPrice(new CurrencyBundle().set("Funds", 4.1e12), 2)
     .addPlaceableArea("BarrenIslands")
+    .soldAt(ClassLowerNegativeShop)
 
     .trait(Dropper)
     .setDroplet(Droplet.CommunismFundsDroplet)

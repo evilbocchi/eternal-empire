@@ -3,10 +3,10 @@ import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
 import Conveyor from "shared/item/traits/conveyor/Conveyor";
 import Upgrader from "shared/item/traits/upgrader/Upgrader";
-import Crystal from "shared/items/excavation/Crystal";
 import Gold from "shared/items/excavation/Gold";
 import ElectroshockedCoil from "shared/items/negative/a/ElectroshockedCoil";
 import EmpoweredBrick from "shared/items/negative/instantwin/EmpoweredBrick";
+import CrystalIngot from "shared/items/negative/unimpossible/CrystalIngot";
 
 export = new Item(script.Name)
     .setName("Gold Digger's Haven")
@@ -16,7 +16,7 @@ export = new Item(script.Name)
     .setDifficulty(Difficulty.Skip)
     .setPrice(new CurrencyBundle().set("Skill", 7), 1)
     .setPrice(new CurrencyBundle().set("Skill", 20), 2)
-    .setRequiredItemAmount(Crystal, 15)
+    .setRequiredItemAmount(CrystalIngot, 3)
     .setRequiredItemAmount(Gold, 1)
     .setRequiredItemAmount(EmpoweredBrick, 5)
     .setRequiredItemAmount(ElectroshockedCoil, 1)

@@ -2,6 +2,7 @@ import Difficulty from "@rbxts/ejt";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
 import Upgrader from "shared/item/traits/upgrader/Upgrader";
+import ClassLowerNegativeShop from "shared/items/negative/ClassLowerNegativeShop";
 
 export = new Item(script.Name)
     .setName("Basic Refiner")
@@ -15,6 +16,7 @@ Increases the value of droplets passing through its laser by %add%.`,
     .setPrice(new CurrencyBundle().set("Funds", 12200), 3)
     .setPrice(new CurrencyBundle().set("Funds", 50000), 4)
     .addPlaceableArea("BarrenIslands")
+    .soldAt(ClassLowerNegativeShop)
 
     .trait(Upgrader)
     .setAdd(new CurrencyBundle().set("Funds", 10))

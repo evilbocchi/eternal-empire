@@ -3,6 +3,7 @@ import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Condenser from "shared/item/traits/dropper/Condenser";
 import Droplet from "shared/item/Droplet";
 import Item from "shared/item/Item";
+import ClassLowerNegativeShop from "shared/items/negative/ClassLowerNegativeShop";
 
 export = new Item(script.Name)
     .setName("Advanced Condenser")
@@ -12,6 +13,7 @@ export = new Item(script.Name)
     .setDifficulty(Difficulty.Skip)
     .setPrice(new CurrencyBundle().set("Funds", 19.9e18), 1)
     .addPlaceableArea("BarrenIslands")
+    .soldAt(ClassLowerNegativeShop)
 
     .trait(Condenser)
     .addDroplets(Droplet.LiquiderFundsDroplet, Droplet.LiquiderPowerDroplet)

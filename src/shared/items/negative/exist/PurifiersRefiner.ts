@@ -1,8 +1,9 @@
 import Difficulty from "@rbxts/ejt";
+import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
 import Upgrader from "shared/item/traits/upgrader/Upgrader";
 import AdvancedRefiner from "shared/items/negative/a/AdvancedRefiner";
-import CurrencyBundle from "shared/currency/CurrencyBundle";
+import ClassLowerNegativeShop from "shared/items/negative/ClassLowerNegativeShop";
 
 export = new Item(script.Name)
     .setName("Purifier's Refiner")
@@ -13,6 +14,7 @@ export = new Item(script.Name)
     .setPrice(new CurrencyBundle().set("Funds", 4e15), 1)
     .setRequiredItemAmount(AdvancedRefiner, 1)
     .addPlaceableArea("BarrenIslands")
+    .soldAt(ClassLowerNegativeShop)
 
     .trait(Upgrader)
     .setAdd(new CurrencyBundle().set("Purifier Clicks", 1))

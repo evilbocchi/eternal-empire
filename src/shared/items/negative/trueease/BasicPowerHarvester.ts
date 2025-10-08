@@ -1,12 +1,11 @@
 import Difficulty from "@rbxts/ejt";
+import { Server } from "shared/api/APIExpose";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Formula from "shared/currency/Formula";
 import Item from "shared/item/Item";
-import { Server } from "shared/api/APIExpose";
-import Furnace from "shared/item/traits/Furnace";
 import FormulaBundled from "shared/item/traits/FormulaBundled";
-
-const mul = new CurrencyBundle().set("Funds", 0).set("Power", 0);
+import Furnace from "shared/item/traits/Furnace";
+import ClassLowerNegativeShop from "shared/items/negative/ClassLowerNegativeShop";
 
 export = new Item(script.Name)
     .setName("Basic Power Harvester")
@@ -16,6 +15,7 @@ export = new Item(script.Name)
     .setDifficulty(Difficulty.TrueEase)
     .setPrice(new CurrencyBundle().set("Funds", 1.56e12).set("Power", 18000), 1)
     .addPlaceableArea("BarrenIslands")
+    .soldAt(ClassLowerNegativeShop)
 
     .setFormula(new Formula().add(1).log(3).mul(0.5).add(1))
     .setFormulaX("power")

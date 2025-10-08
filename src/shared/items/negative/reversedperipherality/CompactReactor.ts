@@ -5,6 +5,7 @@ import eat from "shared/hamster/eat";
 import Item from "shared/item/Item";
 import Conveyor from "shared/item/traits/conveyor/Conveyor";
 import Upgrader from "shared/item/traits/upgrader/Upgrader";
+import ClassLowerNegativeShop from "shared/items/negative/ClassLowerNegativeShop";
 import SmallReactor from "shared/items/negative/unimpossible/SmallReactor";
 
 export = new Item(script.Name)
@@ -16,6 +17,7 @@ export = new Item(script.Name)
     .setPrice(new CurrencyBundle().set("Funds", 40e15), 1)
     .setRequiredItemAmount(SmallReactor, 1)
     .addPlaceableArea("BarrenIslands")
+    .soldAt(ClassLowerNegativeShop)
 
     .trait(Upgrader)
     .setMul(new CurrencyBundle().set("Funds", 5.5))

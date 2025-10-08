@@ -31,6 +31,11 @@ export default class Shop extends ItemTrait {
         item.onSharedLoad((model) => Shop.sharedLoad(model));
     }
 
+    addItem(item: Item) {
+        this.items.push(item);
+        return this;
+    }
+
     setItems(items: Item[]) {
         this.items = items;
         return this;

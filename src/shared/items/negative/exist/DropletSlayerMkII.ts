@@ -4,6 +4,7 @@ import Item from "shared/item/Item";
 import NoobDropletSlayer from "shared/item/traits/other/NoobDropletSlayer";
 import DropletSlayerMkI from "../negativity/DropletSlayerMkI";
 import Upgrader from "shared/item/traits/upgrader/Upgrader";
+import ClassLowerNegativeShop from "shared/items/negative/ClassLowerNegativeShop";
 
 export = new Item(script.Name)
     .setName("Droplet Slayer Mk. II")
@@ -14,6 +15,7 @@ export = new Item(script.Name)
     .setPrice(new CurrencyBundle().set("Funds", 12.1e15), 1)
     .setRequiredItemAmount(DropletSlayerMkI, 1)
     .addPlaceableArea("BarrenIslands")
+    .soldAt(ClassLowerNegativeShop)
 
     .trait(Upgrader)
     .setMul(new CurrencyBundle().set("Funds", 4).set("Power", 2))

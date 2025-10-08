@@ -3,6 +3,7 @@ import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
 import LaserFan from "shared/item/traits/other/LaserFan";
 import Upgrader from "shared/item/traits/upgrader/Upgrader";
+import ClassLowerNegativeShop from "shared/items/negative/ClassLowerNegativeShop";
 
 export = new Item(script.Name)
     .setName("Laser Fan")
@@ -11,6 +12,7 @@ export = new Item(script.Name)
     .setPrice(new CurrencyBundle().set("Funds", 150000), 1)
     .setPrice(new CurrencyBundle().set("Funds", 350000), 2)
     .addPlaceableArea("BarrenIslands")
+    .soldAt(ClassLowerNegativeShop)
 
     .trait(Upgrader)
     .setMul(new CurrencyBundle().set("Funds", 1.3))

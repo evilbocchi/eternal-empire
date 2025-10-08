@@ -1,10 +1,11 @@
+import { getInstanceInfo, setInstanceInfo } from "@antivivi/vrldk";
 import Difficulty from "@rbxts/ejt";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Droplet from "shared/item/Droplet";
 import Item from "shared/item/Item";
 import Dropper from "shared/item/traits/dropper/Dropper";
 import Furnace from "shared/item/traits/Furnace";
-import { getInstanceInfo, setInstanceInfo } from "@antivivi/vrldk";
+import ClassLowerNegativeShop from "shared/items/negative/ClassLowerNegativeShop";
 
 export = new Item(script.Name)
     .setName("Recycling Dropper")
@@ -14,6 +15,7 @@ export = new Item(script.Name)
     .setDifficulty(Difficulty.A)
     .setPrice(new CurrencyBundle().set("Funds", 6.5e12), 1)
     .addPlaceableArea("BarrenIslands")
+    .soldAt(ClassLowerNegativeShop)
 
     .trait(Dropper)
     .setDroplet(Droplet.CommunismDroplet)

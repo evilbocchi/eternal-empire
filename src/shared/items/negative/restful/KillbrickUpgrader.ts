@@ -2,8 +2,9 @@ import Difficulty from "@rbxts/ejt";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
 import Conveyor from "shared/item/traits/conveyor/Conveyor";
-import Upgrader from "shared/item/traits/upgrader/Upgrader";
 import Damager from "shared/item/traits/upgrader/Damager";
+import Upgrader from "shared/item/traits/upgrader/Upgrader";
+import ClassLowerNegativeShop from "shared/items/negative/ClassLowerNegativeShop";
 
 export = new Item(script.Name)
     .setName("Killbrick Upgrader")
@@ -18,6 +19,7 @@ export = new Item(script.Name)
     .setPrice(new CurrencyBundle().set("Funds", 148.2e18), 5)
     .setPrice(new CurrencyBundle().set("Funds", 185.1e18), 6)
     .addPlaceableArea("BarrenIslands")
+    .soldAt(ClassLowerNegativeShop)
 
     .trait(Upgrader)
     .setMul(new CurrencyBundle().set("Funds", 1.4).set("Power", 1.4))

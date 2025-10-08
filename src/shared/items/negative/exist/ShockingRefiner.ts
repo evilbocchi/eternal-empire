@@ -4,6 +4,7 @@ import Upgrader from "shared/item/traits/upgrader/Upgrader";
 import EnergisedRefiner from "shared/items/negative/friendliness/EnergisedRefiner";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Formula from "shared/currency/Formula";
+import ClassLowerNegativeShop from "shared/items/negative/ClassLowerNegativeShop";
 import { Server } from "shared/api/APIExpose";
 
 const mul = new CurrencyBundle().set("Funds", 0);
@@ -18,6 +19,7 @@ export = new Item(script.Name)
     .setPrice(new CurrencyBundle().set("Funds", 24.6e15).set("Power", 3240000), 2)
     .setRequiredItemAmount(EnergisedRefiner, 1)
     .addPlaceableArea("BarrenIslands")
+    .soldAt(ClassLowerNegativeShop)
 
     .setFormula(new Formula().mul(2).add(1).log(3).add(1))
     .setFormulaX("power")

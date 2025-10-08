@@ -1,7 +1,8 @@
 import Difficulty from "@rbxts/ejt";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
-import InstantiationDelimiter from "shared/item/traits/InstantiationDelimiter";
 import Item from "shared/item/Item";
+import InstantiationDelimiter from "shared/item/traits/InstantiationDelimiter";
+import ClassLowerNegativeShop from "shared/items/negative/ClassLowerNegativeShop";
 import InstantiationDelimiterI from "shared/items/negative/negativity/InstantiationDelimiterI";
 
 export = new Item(script.Name)
@@ -11,6 +12,7 @@ export = new Item(script.Name)
     .setPrice(new CurrencyBundle().set("Power", 30000), 1)
     .setRequiredItemAmount(InstantiationDelimiterI, 1)
     .addPlaceableArea("BarrenIslands")
+    .soldAt(ClassLowerNegativeShop)
 
     .setDrain(new CurrencyBundle().set("Power", 15))
 

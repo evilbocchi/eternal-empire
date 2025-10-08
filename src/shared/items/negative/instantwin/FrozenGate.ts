@@ -3,6 +3,7 @@ import Conveyor from "shared/item/traits/conveyor/Conveyor";
 import Item from "shared/item/Item";
 import Upgrader from "shared/item/traits/upgrader/Upgrader";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
+import ClassLowerNegativeShop from "shared/items/negative/ClassLowerNegativeShop";
 
 export = new Item(script.Name)
     .setName("Frozen Gate")
@@ -10,6 +11,7 @@ export = new Item(script.Name)
     .setDifficulty(Difficulty.InstantWin)
     .setPrice(new CurrencyBundle().set("Funds", 1.38e21), 1)
     .addPlaceableArea("BarrenIslands")
+    .soldAt(ClassLowerNegativeShop)
 
     .trait(Upgrader)
     .setMul(new CurrencyBundle().set("Funds", 4).set("Power", 4))

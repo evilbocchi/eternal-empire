@@ -1,8 +1,9 @@
 import Difficulty from "@rbxts/ejt";
+import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Droplet from "shared/item/Droplet";
 import Item from "shared/item/Item";
 import Transformer from "shared/item/traits/upgrader/Transformer";
-import CurrencyBundle from "shared/currency/CurrencyBundle";
+import ClassLowerNegativeShop from "shared/items/negative/ClassLowerNegativeShop";
 
 export = new Item(script.Name)
     .setName("Grass Conveyor")
@@ -12,6 +13,7 @@ export = new Item(script.Name)
     .setDifficulty(Difficulty.Friendliness)
     .setPrice(new CurrencyBundle().set("Funds", 10000000), 1, 3)
     .addPlaceableArea("BarrenIslands")
+    .soldAt(ClassLowerNegativeShop)
 
     .trait(Transformer)
     .setSpeed(5)

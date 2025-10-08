@@ -2,6 +2,7 @@ import Difficulty from "@rbxts/ejt";
 import Furnace from "shared/item/traits/Furnace";
 import Item from "shared/item/Item";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
+import ClassLowerNegativeShop from "shared/items/negative/ClassLowerNegativeShop";
 
 export = new Item(script.Name)
     .setName("Volatile Cauldron")
@@ -9,6 +10,7 @@ export = new Item(script.Name)
     .setDifficulty(Difficulty.Unimpossible)
     .setPrice(new CurrencyBundle().set("Funds", 700000), 1)
     .addPlaceableArea("BarrenIslands")
+    .soldAt(ClassLowerNegativeShop)
 
     .trait(Furnace)
     .acceptsUpgrades(false)

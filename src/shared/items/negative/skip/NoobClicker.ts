@@ -5,6 +5,7 @@ import Item from "shared/item/Item";
 import Clicker from "shared/item/traits/action/Clicker";
 import Boostable from "shared/item/traits/boost/Boostable";
 import Generator from "shared/item/traits/generator/Generator";
+import ClassLowerNegativeShop from "shared/items/negative/ClassLowerNegativeShop";
 
 export = new Item(script.Name)
     .setName("Noob Clicker")
@@ -13,6 +14,7 @@ export = new Item(script.Name)
     .setPrice(new CurrencyBundle().set("Funds", 30e18).set("Purifier Clicks", 100), 1)
     .setPrice(new CurrencyBundle().set("Funds", 90e18).set("Purifier Clicks", 300), 2)
     .addPlaceableArea("BarrenIslands")
+    .soldAt(ClassLowerNegativeShop)
 
     .trait(Clicker)
     .setClickRate(3)

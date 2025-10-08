@@ -1,5 +1,5 @@
-import Difficulty from "@rbxts/ejt";
 import { getInstanceInfo, setInstanceInfo } from "@antivivi/vrldk";
+import Difficulty from "@rbxts/ejt";
 import { packet } from "@rbxts/fletchette";
 import { ReplicatedStorage } from "@rbxts/services";
 import { playSound } from "shared/asset/GameAssets";
@@ -7,6 +7,7 @@ import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
 import Furnace from "shared/item/traits/Furnace";
 import perItemPacket, { perItemProperty } from "shared/item/utils/perItemPacket";
+import ClassLowerNegativeShop from "shared/items/negative/ClassLowerNegativeShop";
 
 declare global {
     interface InstanceInfo {
@@ -54,6 +55,7 @@ export = new Item(script.Name)
     .setDifficulty(Difficulty.Exist)
     .setPrice(new CurrencyBundle().set("Funds", 2.56e15), 1)
     .addPlaceableArea("BarrenIslands")
+    .soldAt(ClassLowerNegativeShop)
 
     .onInit((item) => {
         const randomColor = () => {

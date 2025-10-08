@@ -4,6 +4,7 @@ import Item from "shared/item/Item";
 import Conveyor from "shared/item/traits/conveyor/Conveyor";
 import Damager from "shared/item/traits/upgrader/Damager";
 import Upgrader from "shared/item/traits/upgrader/Upgrader";
+import ClassLowerNegativeShop from "shared/items/negative/ClassLowerNegativeShop";
 
 export = new Item(script.Name)
     .setName("Basic Health Pack")
@@ -13,6 +14,7 @@ export = new Item(script.Name)
     .setPrice(new CurrencyBundle().set("Funds", 85.5e18), 2)
     .setPrice(new CurrencyBundle().set("Funds", 160e18), 3)
     .addPlaceableArea("BarrenIslands")
+    .soldAt(ClassLowerNegativeShop)
 
     .trait(Upgrader)
 
