@@ -116,8 +116,7 @@ namespace Packets {
     export const boostChanged = packet<(boostPerItem: Map<string, BaseOnoeNum>) => void>({ isUnreliable: true });
     export const brokenPlacedItems = exactSetProperty<string>(EmpireProfileTemplate.items.brokenPlacedItems);
     export const repairItem = packet<(placementId: string, tier: RepairResultTier) => boolean>();
-    export const itemRepairCompleted =
-        packet<(placementId: string, tier: RepairResultTier, protectionExpiresAt: number | undefined) => void>();
+    export const itemRepairCompleted = packet<(placementId: string, tier: RepairResultTier) => void>();
 
     // droplets
     export const dropletBurnt = packet<(dropletModelId: string, amountPerCurrency: BaseCurrencyMap) => void>({

@@ -21,7 +21,7 @@
 import Signal from "@antivivi/lemon-signal";
 import { getAllInstanceInfo, simpleInterval, variableInterval } from "@antivivi/vrldk";
 import { OnInit, OnStart, Service } from "@flamework/core";
-import { CollectionService, HttpService, Workspace } from "@rbxts/services";
+import { HttpService } from "@rbxts/services";
 import { CHALLENGES } from "server/Challenges";
 import CurrencyService from "server/services/data/CurrencyService";
 import DataService from "server/services/data/DataService";
@@ -778,7 +778,7 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
         }
 
         Packets.brokenPlacedItems.set(this.brokenPlacedItems);
-        Packets.itemRepairCompleted.toAllClients(placementId, tier, protectionExpiresAt);
+        Packets.itemRepairCompleted.toAllClients(placementId, tier);
         return true;
     }
 

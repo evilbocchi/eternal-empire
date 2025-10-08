@@ -494,7 +494,7 @@ export default function RepairWindow() {
     useEffect(() => {
         if (phase === "success") return;
 
-        const connection = Packets.itemRepairCompleted.fromServer((placementId, _tier) => {
+        const connection = Packets.itemRepairCompleted.fromServer((placementId) => {
             // Check if other clients repaired this item
             if (placementId === RepairManager.placementId) {
                 playSound("repair/Complete.mp3");

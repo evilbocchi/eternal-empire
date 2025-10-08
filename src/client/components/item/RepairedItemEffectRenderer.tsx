@@ -1,8 +1,8 @@
 import React, { Fragment, useEffect, useMemo, useState } from "@rbxts/react";
 import ReactRoblox from "@rbxts/react-roblox";
+import { PLACED_ITEMS_FOLDER } from "shared/constants";
 import { isProtectionTier, type RepairProtectionTier } from "shared/item/repair";
 import Packets from "shared/Packets";
-import { PLACED_ITEMS_FOLDER } from "shared/constants";
 
 const TweenService = game.GetService("TweenService");
 
@@ -36,7 +36,7 @@ export default function RepairedItemEffectRenderer() {
     const [effects, setEffects] = useState<Array<ActiveEffect>>([]);
 
     useEffect(() => {
-        const connection = Packets.itemRepairCompleted.fromServer((placementId, tier, _expiresAt) => {
+        const connection = Packets.itemRepairCompleted.fromServer((placementId, tier) => {
             if (!isProtectionTier(tier)) {
                 setEffects((current) => current.filter((effect) => effect.placementId !== placementId));
                 return;

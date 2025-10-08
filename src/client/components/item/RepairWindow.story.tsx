@@ -41,7 +41,7 @@ export = CreateReactStory(
             RepairManager.updated.fire();
 
             Packets.repairItem.fromClient(() => {
-                Packets.itemRepairCompleted.toAllClients("TestPlacementId", "Perfect", os.time() + 600);
+                Packets.itemRepairCompleted.toAllClients("TestPlacementId", "Perfect");
                 return true;
             });
         }, []);
