@@ -270,7 +270,7 @@ export default class Item {
      * model?.Parent = workspace.Items;
      * ```
      */
-    createModel(placedItem: PlacedItem) {
+    createModel(placedItem: PlacedItem): Model | undefined {
         const baseModel = this.MODEL;
         if (baseModel === undefined) {
             warn("Cannot find model for item " + placedItem.item);
@@ -316,7 +316,7 @@ export default class Item {
      *     .setDescription("Vaporises ore into pure value");
      * ```
      */
-    setName(name: string) {
+    setName(name: string): this {
         this.name = name;
         return this;
     }
@@ -333,7 +333,7 @@ export default class Item {
      * conveyor.setDescription("Doubles the speed of items that pass through it.");
      * ```
      */
-    setDescription(description: string) {
+    setDescription(description: string): this {
         this.description = description;
         return this;
     }
@@ -352,7 +352,7 @@ export default class Item {
      *     .setTooltipDescription("Consumes energy each second when enabled.");
      * ```
      */
-    setTooltipDescription(description: string) {
+    setTooltipDescription(description: string): this {
         this.tooltipDescription = description;
         return this;
     }
@@ -369,7 +369,7 @@ export default class Item {
      * item.setDifficulty(Difficulty.Miscellaneous); // pushes to persistence queues automatically
      * ```
      */
-    setDifficulty(difficulty: Difficulty) {
+    setDifficulty(difficulty: Difficulty): this {
         this.difficulty = difficulty;
         if (
             difficulty === Difficulty.Miscellaneous ||
@@ -386,7 +386,7 @@ export default class Item {
         return this;
     }
 
-    private calculateLevelReq() {
+    private calculateLevelReq(): this {
         const rating = this.difficulty.layoutRating;
         if (rating === undefined) return this;
 
@@ -403,8 +403,6 @@ export default class Item {
         } else {
             return this.setLevelReq(10); // future difficulties
         }
-
-        return this;
     }
 
     /**
@@ -420,7 +418,7 @@ export default class Item {
      * if (price !== undefined && wallet.canAfford(price)) purchase(item);
      * ```
      */
-    getPrice(iteration: number) {
+    getPrice(iteration: number): CurrencyBundle | undefined {
         return this.pricePerIteration.get(iteration) ?? this.defaultPrice;
     }
 
@@ -440,7 +438,7 @@ export default class Item {
      *     .setPrice(CurrencyBundle.fromCash(50), 1, 3); // first three purchases discounted
      * ```
      */
-    setPrice(price: CurrencyBundle, iteration?: number, endIteration?: number) {
+    setPrice(price: CurrencyBundle, iteration?: number, endIteration?: number): this {
         if (iteration === undefined) {
             this.defaultPrice = price;
             return this;
@@ -461,7 +459,7 @@ export default class Item {
      * @param required Map of dependency ids to minimum counts.
      * @returns The item instance.
      */
-    setRequiredItems(required: Map<string, number>) {
+    setRequiredItems(required: Map<string, number>): this {
         this.requiredItems = required;
         return this;
     }
@@ -478,7 +476,7 @@ export default class Item {
      * upgrader.setRequiredItemAmount(conveyor, 2); // need two conveyors first
      * ```
      */
-    setRequiredItemAmount(item: Item, amount: number) {
+    setRequiredItemAmount(item: Item, amount: number): this {
         this.requiredItems.set(item.id, amount);
         return this;
     }
@@ -492,8 +490,9 @@ export default class Item {
      * item.addPlaceableArea("starter");
      * // reset layer is recomputed automatically via updateResetLayer
      * ```
+     * @return The item instance.
      */
-    updateResetLayer() {
+    updateResetLayer(): this {
         let resetLayer = this.defaultResetLayer;
         for (const area of this.placeableAreas) {
             let layer: ResetLayer | undefined;
@@ -510,6 +509,7 @@ export default class Item {
             if (resetLayer === undefined || layer.order > resetLayer) resetLayer = layer.order;
         }
         this.defaultResetLayer = resetLayer;
+        return this;
     }
 
     /**
@@ -518,7 +518,7 @@ export default class Item {
      *
      * @returns Numeric layer ordering; higher numbers survive longer. Defaults to 999 for always-on items.
      */
-    getResetLayer() {
+    getResetLayer(): number {
         if (this.defaultResetLayer !== undefined) {
             if (this.persistingLayer !== undefined) {
                 return math.max(this.persistingLayer + 1, this.defaultResetLayer);
@@ -541,9 +541,23 @@ export default class Item {
      * item.addPlaceableArea("starter", "factory_lower");
      * ```
      */
-    addPlaceableArea(...areas: AreaId[]) {
+    addPlaceableArea(...areas: AreaId[]): this {
         for (const area of areas) this.placeableAreas.push(AREAS[area]);
         this.updateResetLayer();
+        return this;
+    }
+
+    /**
+     * Adds this item to the specified shops.
+     * @param shopItems One or more items that have the Shop trait.
+     * @returns The item instance.
+     */
+    soldAt(...shopItems: Item[]): this {
+        for (const shopItem of shopItems) {
+            const shop = shopItem.findTrait("Shop");
+            if (shop === undefined) throw `Cannot add ${this.id} to ${shopItem.id} as it does not have the Shop trait.`;
+            shop.addItem(this);
+        }
         return this;
     }
 
@@ -553,7 +567,7 @@ export default class Item {
      *
      * @returns The item instance.
      */
-    placeableEverywhere() {
+    placeableEverywhere(): this {
         for (const [_id, area] of pairs(AREAS)) {
             this.placeableAreas.push(area);
         }
@@ -568,7 +582,7 @@ export default class Item {
      * @param drain Recurring cost bundle (e.g. power, currency) debited via `maintain`.
      * @returns The item instance.
      */
-    setDrain(drain: CurrencyBundle) {
+    setDrain(drain: CurrencyBundle): this {
         this.drain = drain;
         return this;
     }
@@ -579,7 +593,7 @@ export default class Item {
      * @param creator Human-readable contributor handle.
      * @returns The item instance.
      */
-    setCreator(creator: string) {
+    setCreator(creator: string): this {
         this.creator = creator;
         return this;
     }
@@ -598,7 +612,7 @@ export default class Item {
      * });
      * ```
      */
-    onInit(initCallback: (item: this) => void) {
+    onInit(initCallback: (item: this) => void): this {
         this.INITIALIZES.push(initCallback);
         return this;
     }
@@ -617,7 +631,7 @@ export default class Item {
      * });
      * ```
      */
-    onLoad(loadCallback: (model: Model, item: this) => void) {
+    onLoad(loadCallback: (model: Model, item: this) => void): this {
         this.LOADS.push(loadCallback);
         return this;
     }
@@ -636,7 +650,7 @@ export default class Item {
      * });
      * ```
      */
-    onClientLoad(loadCallback: (model: Model, item: this, player: Player) => void) {
+    onClientLoad(loadCallback: (model: Model, item: this, player: Player) => void): this {
         this.CLIENT_LOADS.push(loadCallback);
         return this;
     }
@@ -648,7 +662,7 @@ export default class Item {
      * @param loadCallback Fired for both server and client load events.
      * @returns The item instance.
      */
-    onSharedLoad(loadCallback: (model: Model, item: this, player: Player | undefined) => void) {
+    onSharedLoad(loadCallback: (model: Model, item: this, player: Player | undefined) => void): this {
         this.onLoad((model, item) => loadCallback(model, item, undefined));
         this.onClientLoad((model, item, player) => loadCallback(model, item, player));
         return this;
@@ -662,7 +676,11 @@ export default class Item {
      * @param delta Delta time to specify the interval. If not specified, the function will be called every frame.
      * @returns An object that can be used to manage the repeat.
      */
-    repeat(instance: Instance | undefined, callback: (dt: number) => number | void, delta?: number) {
+    repeat(
+        instance: Instance | undefined,
+        callback: (dt: number) => number | void,
+        delta?: number,
+    ): { delta: number | undefined } {
         const ref = { delta: delta };
         REPEATS.set(callback, ref);
         if (instance !== undefined) instance.Destroying.Once(() => REPEATS.delete(callback));
@@ -674,9 +692,10 @@ export default class Item {
      * If the price is not affordable, the item will be disabled.
      *
      * @param model The model of the item to maintain.
+     * @returns An object that can be used to manage the repeat.
      */
     maintain(model: Model | undefined) {
-        this.repeat(
+        return this.repeat(
             model,
             () => {
                 const drain = this.drain;
@@ -698,7 +717,7 @@ export default class Item {
      * @param formula The formula to be applied to the value of {@link formulaXGet} every second.
      * @returns The item instance.
      */
-    setFormula(formula: Formula) {
+    setFormula(formula: Formula): this {
         this.formula = formula;
         return this;
     }
@@ -709,7 +728,7 @@ export default class Item {
      * @param x The variable name that will be used in the formula.
      * @returns The item instance.
      */
-    setFormulaX(x: string) {
+    setFormulaX(x: string): this {
         this.formulaX = x;
         return this;
     }
@@ -720,7 +739,7 @@ export default class Item {
      * @param cap The maximum value that {@link formulaXGet} can return.
      * @returns The item instance.
      */
-    setFormulaXCap(cap: CurrencyBundle) {
+    setFormulaXCap(cap: CurrencyBundle): this {
         this.formulaXCap = cap;
         this.formulaXCapValue = cap.getFirst()[1];
         return this;
@@ -732,7 +751,7 @@ export default class Item {
      * @param callback Called every second with the `value` parameter passed as the return of `this.formula`.
      * @param x The value to be used in the formula.
      */
-    applyFormula(callback: (value: OnoeNum, item: this) => unknown, x: () => OnoeNum) {
+    applyFormula(callback: (value: OnoeNum, item: this) => unknown, x: () => OnoeNum): this {
         this.formulaCallback = callback;
         this.formulaXGet = x;
         return this;
@@ -744,7 +763,7 @@ export default class Item {
      *
      * @returns The result of the formula. Also stored in {@link formulaResult}.
      */
-    performFormula() {
+    performFormula(): OnoeNum | undefined {
         if (this.formula === undefined || this.formulaXGet === undefined || this.formulaCallback === undefined) return;
 
         let value = this.formulaXGet();
@@ -768,7 +787,7 @@ export default class Item {
      * @param layerName The name of the {@link ResetLayer} to persist at.
      * @returns The item instance.
      */
-    persists(layerName?: ResetLayerId) {
+    persists(layerName?: ResetLayerId): this {
         this.persistingLayer = layerName === undefined ? 999 : RESET_LAYERS[layerName].order;
         this.updateResetLayer();
         return this;
@@ -780,7 +799,7 @@ export default class Item {
      * @param level The level required to purchase and use the item.
      * @returns The item instance.
      */
-    setLevelReq(level: number) {
+    setLevelReq(level: number): this {
         this.levelReq = level;
         return this;
     }
@@ -791,7 +810,7 @@ export default class Item {
      * @param layoutOrder The order in which the item will appear in the inventory.
      * @returns The item instance.
      */
-    setLayoutOrder(layoutOrder: number) {
+    setLayoutOrder(layoutOrder: number): this {
         this.layoutOrder = layoutOrder;
         return this;
     }
@@ -802,7 +821,7 @@ export default class Item {
      * @param boundId Name of BasePart which is the custom area
      * @returns The item instance.
      */
-    setBounds(boundId: string) {
+    setBounds(boundId: string): this {
         this.bounds = boundId;
         return this;
     }
@@ -813,7 +832,7 @@ export default class Item {
      * @param image The image ID of the item.
      * @returns The item instance.
      */
-    setImage(image: string) {
+    setImage(image: string): this {
         this.image = image;
         return this;
     }
@@ -824,7 +843,7 @@ export default class Item {
      *
      * @returns The item instance.
      */
-    unbreakable() {
+    unbreakable(): this {
         this.isUnbreakable = true;
         return this;
     }
@@ -836,7 +855,7 @@ export default class Item {
      * @param traitName The key name of the trait.
      * @returns Whether the item is of the specified trait.
      */
-    isA<T extends keyof ItemTraits>(traitName: T) {
+    isA<T extends keyof ItemTraits>(traitName: T): boolean {
         return this.types.has(traitName);
     }
 
@@ -888,7 +907,7 @@ export default class Item {
      * @param str The string to format.
      * @returns The formatted string.
      */
-    format(str: string) {
+    format(str: string): string {
         for (const [_, trait] of this.types) {
             str = trait.format(str);
         }

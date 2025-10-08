@@ -12,6 +12,7 @@ export const assets = {
   "assets/CopperAxe.png": "rbxassetid://100879651668612",
   "assets/CopperPickaxe.png": "rbxassetid://139407617337511",
   "assets/CopperScythe.png": "rbxassetid://117264360743994",
+  "assets/CraftingTable.png": "rbxassetid://72555818049766",
   "assets/CryptographicFunds.png": "rbxassetid://88487284322015",
   "assets/CryptographicPower.png": "rbxassetid://134471658575586",
   "assets/CrystalAxe.png": "rbxassetid://98981120857619",
