@@ -5,6 +5,7 @@ import Item from "shared/item/Item";
 import Upgrader from "shared/item/traits/upgrader/Upgrader";
 import Formula from "shared/currency/Formula";
 import { Server } from "shared/api/APIExpose";
+import Class0Shop from "../Class0Shop";
 
 const mul = new CurrencyBundle().set("Funds", 0);
 
@@ -14,6 +15,7 @@ export = new Item(script.Name)
     .setDifficulty(Difficulty.Walkthrough)
     .setPrice(new CurrencyBundle().set("Funds", 200e33).set("Skill", 1200), 1)
     .addPlaceableArea("BarrenIslands", "SlamoVillage")
+    .soldAt(Class0Shop)
     .persists("Skillification")
 
     .setFormula(new Formula().div(1e30).add(1).pow(0.1))

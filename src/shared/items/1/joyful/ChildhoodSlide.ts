@@ -3,6 +3,7 @@ import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
 import Conveyor from "shared/item/traits/conveyor/Conveyor";
 import Upgrader from "shared/item/traits/upgrader/Upgrader";
+import Class1Shop from "../Class1Shop";
 
 export = new Item(script.Name)
     .setName("Childhood Slide")
@@ -13,6 +14,7 @@ export = new Item(script.Name)
     .setPrice(new CurrencyBundle().set("Skill", 20), 1)
     .setCreator("CoPKaDT")
     .addPlaceableArea("BarrenIslands")
+    .soldAt(Class1Shop)
 
     .trait(Upgrader)
     .setMul(new CurrencyBundle().set("Funds", 2).set("Skill", 2))

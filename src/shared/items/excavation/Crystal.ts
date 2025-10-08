@@ -2,6 +2,7 @@ import Difficulty from "@rbxts/ejt";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
 import WhiteGem from "shared/items/excavation/WhiteGem";
+import ExcavationShop from "../bonuses/ExcavationShop";
 
 export = new Item(script.Name)
     .setName("Crystal")
@@ -12,4 +13,5 @@ export = new Item(script.Name)
     .setPrice(new CurrencyBundle().set("Power", 1))
     .setRequiredItemAmount(WhiteGem, 256)
     .placeableEverywhere()
+    .soldAt(ExcavationShop)
     .persists();

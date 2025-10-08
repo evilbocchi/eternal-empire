@@ -3,6 +3,7 @@ import Conveyor from "shared/item/traits/conveyor/Conveyor";
 import Item from "shared/item/Item";
 import Upgrader from "shared/item/traits/upgrader/Upgrader";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
+import Class0Shop from "../Class0Shop";
 
 export = new Item(script.Name)
     .setName("Skill Easer")
@@ -11,6 +12,7 @@ export = new Item(script.Name)
     .setPrice(new CurrencyBundle().set("Skill", 16), 1)
     .setCreator("goog_als")
     .addPlaceableArea("SlamoVillage")
+    .soldAt(Class0Shop)
 
     .trait(Upgrader)
     .setAdd(new CurrencyBundle().set("Skill", 0.02))

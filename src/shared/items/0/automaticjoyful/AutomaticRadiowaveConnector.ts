@@ -5,6 +5,7 @@ import { Server } from "shared/api/APIExpose";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
 import Upgrader from "shared/item/traits/upgrader/Upgrader";
+import Class0Shop from "../Class0Shop";
 
 function updateLaserCommon(
     laser: BasePart,
@@ -50,6 +51,7 @@ export = new Item(script.Name)
     .setPrice(new CurrencyBundle().set("Funds", 12e36).set("Skill", 10000), 1)
     .setPrice(new CurrencyBundle().set("Funds", 12e33).set("Skill", 10), 2)
     .addPlaceableArea("BarrenIslands", "SlamoVillage")
+    .soldAt(Class0Shop)
     .persists("Skillification")
 
     .trait(Upgrader)

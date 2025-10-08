@@ -3,6 +3,7 @@ import Item from "shared/item/Item";
 import Clicker from "shared/item/traits/action/Clicker";
 import SlamoClicker from "shared/items/0/millisecondless/SlamoClicker";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
+import Class0Shop from "../Class0Shop";
 
 export = new Item(script.Name)
     .setName("Hydrogen Bomb Prototype Slamo")
@@ -13,6 +14,7 @@ export = new Item(script.Name)
     .setPrice(new CurrencyBundle().set("Funds", 20e30).set("Purifier Clicks", 1000000), 1)
     .setRequiredItemAmount(SlamoClicker, 2)
     .addPlaceableArea("BarrenIslands")
+    .soldAt(Class0Shop)
 
     .trait(Clicker)
     .setClickRate(5)

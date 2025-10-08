@@ -3,6 +3,7 @@ import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
 import Upgrader from "shared/item/traits/upgrader/Upgrader";
 import Damager from "shared/item/traits/upgrader/Damager";
+import Class0Shop from "../Class0Shop";
 
 export = new Item(script.Name)
     .setName("Arbiters' Killbricks")
@@ -13,6 +14,7 @@ export = new Item(script.Name)
     .setPrice(new CurrencyBundle().set("Funds", 24.5e24).set("Bitcoin", 90), 1)
     .setPrice(new CurrencyBundle().set("Funds", 42.5e24).set("Bitcoin", 180), 2)
     .addPlaceableArea("BarrenIslands", "SlamoVillage")
+    .soldAt(Class0Shop)
     .persists("Skillification")
 
     .trait(Upgrader)

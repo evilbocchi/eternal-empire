@@ -5,6 +5,7 @@ import { getAllPlayerCharacters } from "shared/hamster/getPlayerCharacter";
 import Droplet from "shared/item/Droplet";
 import Item from "shared/item/Item";
 import Dropper from "shared/item/traits/dropper/Dropper";
+import Class1Shop from "../Class1Shop";
 
 export = new Item(script.Name)
     .setName("Movement Detection Dropper")
@@ -12,6 +13,7 @@ export = new Item(script.Name)
     .setDifficulty(Difficulty.DoSomething)
     .setPrice(new CurrencyBundle().set("Funds", 400), 1)
     .addPlaceableArea("BarrenIslands", "SlamoVillage", "SkyPavilion")
+    .soldAt(Class1Shop)
     .setCreator("BeeBoun")
 
     .trait(Dropper)

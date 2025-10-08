@@ -5,6 +5,7 @@ import Item from "shared/item/Item";
 import Conveyor from "shared/item/traits/conveyor/Conveyor";
 import Upgrader from "shared/item/traits/upgrader/Upgrader";
 import perItemPacket from "shared/item/utils/perItemPacket";
+import Class0Shop from "../Class0Shop";
 
 const active = perItemPacket(packet<(placementId: string, on: boolean) => void>());
 
@@ -14,6 +15,7 @@ export = new Item(script.Name)
     .setDifficulty(Difficulty.Frivolous)
     .setPrice(new CurrencyBundle().set("Funds", 1e39).set("Bitcoin", 1e9).set("Dark Matter", 1e21), 1)
     .addPlaceableArea("BarrenIslands", "SlamoVillage")
+    .soldAt(Class0Shop)
     .setCreator("simple13579")
 
     .trait(Upgrader)

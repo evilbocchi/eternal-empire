@@ -5,6 +5,7 @@ import Upgrader from "shared/item/traits/upgrader/Upgrader";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Formula from "shared/currency/Formula";
 import { Server } from "shared/api/APIExpose";
+import Class0Shop from "../Class0Shop";
 
 export = new Item(script.Name)
     .setName("Slamo Upgrader")
@@ -14,6 +15,7 @@ export = new Item(script.Name)
     .setDifficulty(Difficulty.Happylike)
     .setPrice(new CurrencyBundle().set("Funds", 100e30), 1)
     .addPlaceableArea("BarrenIslands", "SlamoVillage")
+    .soldAt(Class0Shop)
     .setCreator("CoPKaDT")
     .persists("Skillification")
 

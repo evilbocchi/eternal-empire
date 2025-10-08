@@ -3,6 +3,7 @@ import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
 import Conveyor from "shared/item/traits/conveyor/Conveyor";
 import Upgrader from "shared/item/traits/upgrader/Upgrader";
+import Class0Shop from "../Class0Shop";
 
 export = new Item(script.Name)
     .setName("Automatic Railgun")
@@ -10,6 +11,7 @@ export = new Item(script.Name)
     .setDifficulty(Difficulty.Automatic)
     .setPrice(new CurrencyBundle().set("Funds", 20e39).set("Bitcoin", 5e9), 1)
     .addPlaceableArea("BarrenIslands", "SlamoVillage", "SkyPavilion")
+    .soldAt(Class0Shop)
     .setCreator("simple13579")
 
     .trait(Conveyor)

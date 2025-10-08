@@ -4,6 +4,7 @@ import Conveyor from "shared/item/traits/conveyor/Conveyor";
 import Damager from "shared/item/traits/upgrader/Damager";
 import Upgrader from "shared/item/traits/upgrader/Upgrader";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
+import Class0Shop from "../Class0Shop";
 
 export = new Item("HeavenGarden")
     .setName("Heaven's Garden")
@@ -13,6 +14,7 @@ export = new Item("HeavenGarden")
     .setDifficulty(Difficulty.Sleepful)
     .setPrice(new CurrencyBundle().set("Power", 1.2e15).set("Skill", 5), 1)
     .addPlaceableArea("BarrenIslands", "SlamoVillage")
+    .soldAt(Class0Shop)
     .persists("Skillification")
     .setCreator("CoPKaDT")
 

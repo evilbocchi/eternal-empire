@@ -6,6 +6,7 @@ import ThisEmpire from "shared/data/ThisEmpire";
 import Item from "shared/item/Item";
 import { Server } from "shared/api/APIExpose";
 import Generator from "shared/item/traits/generator/Generator";
+import Class0Shop from "../Class0Shop";
 
 const amt = new OnoeNum(100e12);
 const base = new CurrencyBundle().set("Power", amt);
@@ -18,6 +19,7 @@ export = new Item(script.Name)
     .setDifficulty(Difficulty.Vibeness)
     .setPrice(new CurrencyBundle().set("Skill", 2000000), 1)
     .addPlaceableArea("BarrenIslands")
+    .soldAt(Class0Shop)
     .setCreator("CoPKaDT")
 
     .setFormula(new Formula().pow(0.25))

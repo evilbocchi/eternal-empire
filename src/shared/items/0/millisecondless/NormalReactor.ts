@@ -4,6 +4,7 @@ import Conveyor from "shared/item/traits/conveyor/Conveyor";
 import Item from "shared/item/Item";
 import Upgrader from "shared/item/traits/upgrader/Upgrader";
 import CompactReactor from "shared/items/negative/reversedperipherality/CompactReactor";
+import Class0Shop from "../Class0Shop";
 
 export = new Item(script.Name)
     .setName("Normal Reactor")
@@ -14,6 +15,7 @@ export = new Item(script.Name)
     .setPrice(new CurrencyBundle().set("Funds", 454e21), 1)
     .setRequiredItemAmount(CompactReactor, 1)
     .addPlaceableArea("BarrenIslands")
+    .soldAt(Class0Shop)
     .setCreator("simple13579")
 
     .trait(Upgrader)

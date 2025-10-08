@@ -4,6 +4,7 @@ import Item from "shared/item/Item";
 import Conveyor from "shared/item/traits/conveyor/Conveyor";
 import Damager from "shared/item/traits/upgrader/Damager";
 import Upgrader from "shared/item/traits/upgrader/Upgrader";
+import Class0Shop from "../Class0Shop";
 
 export = new Item(script.Name)
     .setName("memories...")
@@ -12,6 +13,7 @@ export = new Item(script.Name)
     .setPrice(new CurrencyBundle().set("Funds", 400e27), 1)
     .setPrice(new CurrencyBundle().set("Funds", 4e30), 2)
     .addPlaceableArea("BarrenIslands", "SlamoVillage")
+    .soldAt(Class0Shop)
     .setCreator("CoPKaDT")
 
     .trait(Upgrader)

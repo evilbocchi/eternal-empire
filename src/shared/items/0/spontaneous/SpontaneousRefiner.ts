@@ -14,6 +14,7 @@ import ReversedUpgrader from "shared/items/negative/reversedperipherality/Revers
 import TheFirstUpgrader from "shared/items/negative/tfd/TheFirstUpgrader";
 import BasicRefiner from "shared/items/negative/tlg/BasicRefiner";
 import DropletElectronInfuser from "shared/items/negative/trueease/DropletElectronInfuser";
+import Class0Shop from "../Class0Shop";
 
 const combining = [
     TheFirstUpgrader,
@@ -68,6 +69,7 @@ const SpontaneousRefiner = new Item(script.Name)
     .setPrice(new CurrencyBundle().set("Funds", 45e42).set("Power", 10e27), 1)
 
     .addPlaceableArea("BarrenIslands")
+    .soldAt(Class0Shop)
     .setCreator("simple13579")
 
     .trait(Upgrader)

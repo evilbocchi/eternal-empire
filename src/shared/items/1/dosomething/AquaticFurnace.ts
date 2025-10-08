@@ -2,6 +2,7 @@ import Difficulty from "@rbxts/ejt";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
 import Furnace from "shared/item/traits/Furnace";
+import Class1Shop from "../Class1Shop";
 
 export = new Item(script.Name)
     .setName("Aquatic Furnace")
@@ -12,6 +13,7 @@ export = new Item(script.Name)
     .setDifficulty(Difficulty.DoSomething)
     .setPrice(new CurrencyBundle().set("Skill", 400), 1)
     .addPlaceableArea("BarrenIslands", "SlamoVillage")
+    .soldAt(Class1Shop)
     .setCreator("sanjay2133")
 
     .trait(Furnace)

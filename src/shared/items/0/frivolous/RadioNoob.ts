@@ -3,6 +3,7 @@ import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
 import Charger from "shared/item/traits/generator/Charger";
 import MiniDropletSlayer from "shared/items/negative/relax/MiniDropletSlayer";
+import Class0Shop from "../Class0Shop";
 
 export = new Item(script.Name)
     .setName("Radio Noob")
@@ -13,6 +14,7 @@ export = new Item(script.Name)
     .setPrice(new CurrencyBundle().set("Funds", 5e39), 1)
     .setRequiredItemAmount(MiniDropletSlayer, 1)
     .addPlaceableArea("BarrenIslands")
+    .soldAt(Class0Shop)
     .setCreator("simple13579")
 
     .trait(Charger)

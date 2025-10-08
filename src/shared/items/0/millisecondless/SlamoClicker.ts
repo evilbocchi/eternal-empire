@@ -3,6 +3,7 @@ import { loadAnimation } from "@antivivi/vrldk";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
 import Clicker from "shared/item/traits/action/Clicker";
+import Class0Shop from "../Class0Shop";
 
 export = new Item(script.Name)
     .setName("Slamo Clicker")
@@ -11,6 +12,7 @@ export = new Item(script.Name)
     .setPrice(new CurrencyBundle().set("Funds", 1.4e24).set("Purifier Clicks", 10000), 1)
     .setPrice(new CurrencyBundle().set("Funds", 2.9e24).set("Purifier Clicks", 30000), 2)
     .addPlaceableArea("BarrenIslands")
+    .soldAt(Class0Shop)
 
     .trait(Clicker)
     .setClickRate(5)

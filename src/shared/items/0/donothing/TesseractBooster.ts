@@ -2,6 +2,7 @@ import Difficulty from "@rbxts/ejt";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Charger from "shared/item/traits/generator/Charger";
 import Item from "shared/item/Item";
+import Class0Shop from "../Class0Shop";
 
 export = new Item(script.Name)
     .setName("Tesseract Booster")
@@ -9,6 +10,7 @@ export = new Item(script.Name)
     .setDifficulty(Difficulty.DoNothing)
     .setPrice(new CurrencyBundle().set("Bitcoin", 2600), 1)
     .addPlaceableArea("BarrenIslands", "SlamoVillage")
+    .soldAt(Class0Shop)
     .persists("Skillification")
     .setCreator("emoronq2k")
 

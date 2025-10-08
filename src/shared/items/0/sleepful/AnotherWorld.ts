@@ -2,6 +2,7 @@ import Difficulty from "@rbxts/ejt";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Furnace from "shared/item/traits/Furnace";
 import Item from "shared/item/Item";
+import Class0Shop from "../Class0Shop";
 
 export = new Item(script.Name)
     .setName("Another World")
@@ -9,6 +10,7 @@ export = new Item(script.Name)
     .setDifficulty(Difficulty.Sleepful)
     .setPrice(new CurrencyBundle().set("Funds", 2.1e27).set("Skill", 5), 1)
     .addPlaceableArea("SlamoVillage")
+    .soldAt(Class0Shop)
     .setCreator("CoPKaDT")
 
     .trait(Furnace)

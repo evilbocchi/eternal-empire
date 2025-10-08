@@ -3,6 +3,7 @@ import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Droplet from "shared/item/Droplet";
 import Dropper from "shared/item/traits/dropper/Dropper";
 import Item from "shared/item/Item";
+import Class0Shop from "../Class0Shop";
 
 export = new Item(script.Name)
     .setName("Coin Miner")
@@ -10,6 +11,7 @@ export = new Item(script.Name)
     .setDifficulty(Difficulty.Winsome)
     .setPrice(new CurrencyBundle().set("Funds", 20e24).set("Power", 305e12), 1)
     .addPlaceableArea("BarrenIslands", "SlamoVillage")
+    .soldAt(Class0Shop)
     .persists("Skillification")
 
     .trait(Dropper)

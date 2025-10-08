@@ -3,6 +3,7 @@ import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
 import Conveyor from "shared/item/traits/conveyor/Conveyor";
 import Upgrader from "shared/item/traits/upgrader/Upgrader";
+import Class0Shop from "../Class0Shop";
 
 export = new Item(script.Name)
     .setName("Blessed Conveyor")
@@ -12,6 +13,7 @@ export = new Item(script.Name)
     .setDifficulty(Difficulty.Blessing)
     .setPrice(new CurrencyBundle().set("Bitcoin", 1000), 1, 5)
     .addPlaceableArea("BarrenIslands", "SlamoVillage")
+    .soldAt(Class0Shop)
     .persists("Skillification")
 
     .trait(Upgrader)

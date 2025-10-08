@@ -3,6 +3,7 @@ import Conveyor from "shared/item/traits/conveyor/Conveyor";
 import Item from "shared/item/Item";
 import Upgrader from "shared/item/traits/upgrader/Upgrader";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
+import Class0Shop from "../Class0Shop";
 
 export = new Item(script.Name)
     .setName("Void Sky Upgrader")
@@ -12,6 +13,7 @@ export = new Item(script.Name)
     .setDifficulty(Difficulty.Happylike)
     .setPrice(new CurrencyBundle().set("Funds", 35e30), 1)
     .addPlaceableArea("BarrenIslands")
+    .soldAt(Class0Shop)
     .setCreator("CoPKaDT")
 
     .trait(Upgrader)

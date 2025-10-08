@@ -7,6 +7,7 @@ import Upgrader from "shared/item/traits/upgrader/Upgrader";
 import setDropletVelocity from "shared/item/utils/setDropletVelocity";
 import MagicalWood from "shared/items/excavation/harvestable/MagicalWood";
 import Quartz from "shared/items/excavation/Quartz";
+import Class1Shop from "../Class1Shop";
 
 export = new Item(script.Name)
     .setName("Droplet Ascender")
@@ -21,6 +22,7 @@ export = new Item(script.Name)
     .setRequiredItemAmount(MagicalWood, 20)
     .setCreator("sanjay2133")
     .addPlaceableArea("BarrenIslands", "SlamoVillage", "SkyPavilion")
+    .soldAt(Class1Shop)
 
     .trait(Conveyor)
     .setSpeed(5)

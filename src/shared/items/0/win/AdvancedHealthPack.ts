@@ -4,6 +4,7 @@ import Item from "shared/item/Item";
 import Conveyor from "shared/item/traits/conveyor/Conveyor";
 import Damager from "shared/item/traits/upgrader/Damager";
 import Upgrader from "shared/item/traits/upgrader/Upgrader";
+import Class0Shop from "../Class0Shop";
 
 export = new Item("AdvancedHealthPack")
     .setName("Advanced Health Pack")
@@ -12,6 +13,7 @@ export = new Item("AdvancedHealthPack")
     .setPrice(new CurrencyBundle().set("Funds", 12.51e24), 1)
     .setPrice(new CurrencyBundle().set("Funds", 24.51e24), 2)
     .addPlaceableArea("BarrenIslands")
+    .soldAt(Class0Shop)
 
     .trait(Upgrader)
 

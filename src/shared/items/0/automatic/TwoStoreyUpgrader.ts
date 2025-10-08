@@ -3,6 +3,7 @@ import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
 import Conveyor from "shared/item/traits/conveyor/Conveyor";
 import OmniUpgrader from "shared/item/traits/upgrader/OmniUpgrader";
+import Class0Shop from "../Class0Shop";
 
 export = new Item(script.Name)
     .setName("Two-Storey Upgrader")
@@ -13,6 +14,7 @@ export = new Item(script.Name)
     .setPrice(new CurrencyBundle().set("Skill", 7000000).set("Dark Matter", 20e27), 1)
     .setCreator("fartmcfly2")
     .addPlaceableArea("BarrenIslands", "SlamoVillage")
+    .soldAt(Class0Shop)
 
     .trait(OmniUpgrader)
     .setMuls(

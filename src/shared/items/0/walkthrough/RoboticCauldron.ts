@@ -5,6 +5,7 @@ import Item from "shared/item/Item";
 import { Server } from "shared/api/APIExpose";
 import Furnace from "shared/item/traits/Furnace";
 import FormulaBundled from "shared/item/traits/FormulaBundled";
+import Class0Shop from "../Class0Shop";
 
 export = new Item(script.Name)
     .setName("Robotic Cauldron")
@@ -16,6 +17,7 @@ Scales with Power, maxing out at %cap%. Also provides a flat %flat% boost.`,
     .setDifficulty(Difficulty.Walkthrough)
     .setPrice(new CurrencyBundle().set("Funds", 600e33).set("Power", 6e18), 1)
     .addPlaceableArea("BarrenIslands")
+    .soldAt(Class0Shop)
 
     .setFormula(new Formula().add(1).log(5).mul(840).add(500))
     .setFormulaX("power")

@@ -5,6 +5,7 @@ import Item from "shared/item/Item";
 import Conveyor from "shared/item/traits/conveyor/Conveyor";
 import ObbyUpgrader from "shared/item/traits/upgrader/ObbyUpgrader";
 import NamedUpgrades from "shared/namedupgrade/NamedUpgrades";
+import Class1Shop from "../Class1Shop";
 
 export = new Item(script.Name)
     .setName("Compressed Obby Upgrader")
@@ -12,6 +13,7 @@ export = new Item(script.Name)
     .setDifficulty(Difficulty.DoSomething)
     .setPrice(new CurrencyBundle().set("Funds", 3e54), 1)
     .addPlaceableArea("BarrenIslands", "SlamoVillage", "SkyPavilion")
+    .soldAt(Class1Shop)
     .setCreator("sanjay2133")
 
     .trait(Conveyor)

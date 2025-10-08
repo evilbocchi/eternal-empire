@@ -3,6 +3,7 @@ import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Droplet from "shared/item/Droplet";
 import Dropper from "shared/item/traits/dropper/Dropper";
 import Item from "shared/item/Item";
+import Class0Shop from "../Class0Shop";
 
 export = new Item(script.Name)
     .setName("Lunary Dropper")
@@ -16,6 +17,7 @@ export = new Item(script.Name)
     .setPrice(new CurrencyBundle().set("Funds", 727e27).set("Skill", 16), 4)
     .setPrice(new CurrencyBundle().set("Funds", 4.44e30).set("Skill", 32), 5)
     .addPlaceableArea("BarrenIslands")
+    .soldAt(Class0Shop)
 
     .trait(Dropper)
     .setDroplet(Droplet.LunaryDroplet)

@@ -9,6 +9,7 @@ import ShockingRefiner from "shared/items/negative/exist/ShockingRefiner";
 import PrecisionRefiner from "shared/items/negative/relax/PrecisionRefiner";
 import LaserTunnel from "shared/items/negative/skip/LaserTunnel";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
+import Class0Shop from "../Class0Shop";
 
 export = new Item(script.Name)
     .setName("Coalescent Refiner")
@@ -25,6 +26,7 @@ export = new Item(script.Name)
     .setRequiredItemAmount(PrecisionRefiner, 2)
     .setRequiredItemAmount(LaserTunnel, 1)
     .addPlaceableArea("BarrenIslands")
+    .soldAt(Class0Shop)
 
     .trait(Upgrader)
     .setMul(new CurrencyBundle().set("Funds", 2000000).set("Power", 3000))

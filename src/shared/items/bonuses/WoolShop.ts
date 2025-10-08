@@ -1,8 +1,6 @@
 import Difficulty from "@rbxts/ejt";
 import Item from "shared/item/Item";
 import Shop from "shared/item/traits/Shop";
-import Wool from "shared/items/negative/a/Wool";
-import XLWool from "shared/items/negative/relax/XLWool";
 
 export = new Item(script.Name)
     .setName("Grass Shop")
@@ -10,6 +8,4 @@ export = new Item(script.Name)
     .setDifficulty(Difficulty.Bonuses)
 
     .trait(Shop)
-    .setItems([Wool, XLWool])
-
     .exit();

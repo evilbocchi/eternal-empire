@@ -1,6 +1,7 @@
 import Difficulty from "@rbxts/ejt";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
+import Class0Shop from "../Class0Shop";
 
 export = new Item(script.Name)
     .setName("Advanced Blank Essence")
@@ -13,4 +14,5 @@ export = new Item(script.Name)
     .setPrice(new CurrencyBundle().set("Funds", 1e36).set("Power", 1e21), 3)
     .setPrice(new CurrencyBundle().set("Funds", 1e39).set("Power", 100e21), 4)
     .setPrice(new CurrencyBundle().set("Funds", 1e42).set("Power", 10e24), 5)
-    .addPlaceableArea("BarrenIslands");
+    .addPlaceableArea("BarrenIslands")
+    .soldAt(Class0Shop);

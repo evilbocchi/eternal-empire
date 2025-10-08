@@ -6,6 +6,7 @@ import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
 import Upgrader from "shared/item/traits/upgrader/Upgrader";
 import { VirtualCollision } from "shared/item/utils/VirtualReplication";
+import Class0Shop from "../Class0Shop";
 
 export = new Item(script.Name)
     .setName("Ring Of Despair")
@@ -15,6 +16,7 @@ export = new Item(script.Name)
     .setDifficulty(Difficulty.Frivolous)
     .setPrice(new CurrencyBundle().set("Funds", 4.44e39).set("Bitcoin", 2e9), 1)
     .addPlaceableArea("BarrenIslands")
+    .soldAt(Class0Shop)
 
     .trait(Upgrader)
     .setMul(new CurrencyBundle().set("Funds", 1.15))

@@ -4,6 +4,7 @@ import Item from "shared/item/Item";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Formula from "shared/currency/Formula";
 import { Server } from "shared/api/APIExpose";
+import Class0Shop from "../Class0Shop";
 
 const mul = new CurrencyBundle();
 
@@ -15,6 +16,7 @@ export = new Item(script.Name)
     .setDifficulty(Difficulty.AutomaticJoyful)
     .setPrice(new CurrencyBundle().set("Power", 4e21).set("Skill", 6000), 1)
     .addPlaceableArea("BarrenIslands", "SlamoVillage")
+    .soldAt(Class0Shop)
     .persists("Skillification")
 
     .setFormula(new Formula().div(1e18).add(10).pow(0.12))

@@ -2,6 +2,7 @@ import Difficulty from "@rbxts/ejt";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
 import Gold from "shared/items/excavation/Gold";
+import ExcavationShop from "../bonuses/ExcavationShop";
 
 export = new Item(script.Name)
     .setName("Quartz")
@@ -12,4 +13,5 @@ export = new Item(script.Name)
     .setPrice(new CurrencyBundle().set("Wins", 1))
     .setRequiredItemAmount(Gold, 256)
     .placeableEverywhere()
+    .soldAt(ExcavationShop)
     .persists();

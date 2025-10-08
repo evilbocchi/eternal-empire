@@ -4,6 +4,7 @@ import Item from "shared/item/Item";
 import Conveyor from "shared/item/traits/conveyor/Conveyor";
 import Upgrader from "shared/item/traits/upgrader/Upgrader";
 import Damager from "shared/item/traits/upgrader/Damager";
+import Class0Shop from "../Class0Shop";
 
 export = new Item(script.Name)
     .setName("Efficient Killing Upgrader")
@@ -13,6 +14,7 @@ export = new Item(script.Name)
     .setPrice(new CurrencyBundle().set("Funds", 5.81e24), 2)
     .setPrice(new CurrencyBundle().set("Funds", 8.63e24), 3)
     .addPlaceableArea("BarrenIslands")
+    .soldAt(Class0Shop)
 
     .trait(Upgrader)
     .setMul(new CurrencyBundle().set("Funds", 1.95).set("Power", 1.95))

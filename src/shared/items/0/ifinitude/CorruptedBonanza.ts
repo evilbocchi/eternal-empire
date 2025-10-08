@@ -7,6 +7,7 @@ import PassiveBonanza from "shared/items/negative/instantwin/PassiveBonanza";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Formula from "shared/currency/Formula";
 import { Server } from "shared/api/APIExpose";
+import Class0Shop from "../Class0Shop";
 
 const amt = new OnoeNum(4e9);
 const base = new CurrencyBundle().set("Power", amt);
@@ -21,6 +22,7 @@ export = new Item(script.Name)
     .setRequiredItemAmount(PassiveBonanza, 1)
     .setPrice(new CurrencyBundle().set("Skill", 30), 1)
     .addPlaceableArea("BarrenIslands")
+    .soldAt(Class0Shop)
 
     .setFormula(new Formula().pow(0.75).div(3).add(1))
     .setFormulaX("skill")

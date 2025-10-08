@@ -4,6 +4,7 @@ import Item from "shared/item/Item";
 import Upgrader from "shared/item/traits/upgrader/Upgrader";
 import AdvancedBlankEssence from "shared/items/0/ifinitude/AdvancedBlankEssence";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
+import Class0Shop from "../Class0Shop";
 
 export = new Item(script.Name)
     .setName("Mechnical Enhancer")
@@ -14,6 +15,7 @@ export = new Item(script.Name)
     .setPrice(new CurrencyBundle().set("Funds", 4e33).set("Skill", 50), 1)
     .setRequiredItemAmount(AdvancedBlankEssence, 1)
     .addPlaceableArea("BarrenIslands")
+    .soldAt(Class0Shop)
 
     .setDrain(new CurrencyBundle().set("Skill", 0.5))
 

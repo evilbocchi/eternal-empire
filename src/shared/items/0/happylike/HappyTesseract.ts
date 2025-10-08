@@ -2,6 +2,7 @@ import Difficulty from "@rbxts/ejt";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Generator from "shared/item/traits/generator/Generator";
 import Item from "shared/item/Item";
+import Class0Shop from "../Class0Shop";
 
 export = new Item(script.Name)
     .setName("'Happy' Tesseract")
@@ -11,6 +12,7 @@ export = new Item(script.Name)
     .setDifficulty(Difficulty.Happylike)
     .setPrice(new CurrencyBundle().set("Funds", 1e33).set("Skill", 90), 1)
     .addPlaceableArea("SlamoVillage")
+    .soldAt(Class0Shop)
 
     .trait(Generator)
     .setPassiveGain(new CurrencyBundle().set("Dark Matter", 11.4e9))

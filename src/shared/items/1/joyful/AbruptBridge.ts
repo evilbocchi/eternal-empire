@@ -3,6 +3,7 @@ import Item from "shared/item/Item";
 import Conveyor from "shared/item/traits/conveyor/Conveyor";
 import Upgrader from "shared/item/traits/upgrader/Upgrader";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
+import Class1Shop from "../Class1Shop";
 
 export = new Item(script.Name)
     .setName("Abrupt Bridge")
@@ -13,6 +14,7 @@ export = new Item(script.Name)
     .setPrice(new CurrencyBundle().set("Skill", 20e9), 1)
     .setCreator("CoPKaDT")
     .addPlaceableArea("BarrenIslands", "SkyPavilion")
+    .soldAt(Class1Shop)
 
     .trait(Upgrader)
     .setMul(new CurrencyBundle().set("Skill", 3))

@@ -3,6 +3,7 @@ import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
 import Damager from "shared/item/traits/upgrader/Damager";
 import Upgrader from "shared/item/traits/upgrader/Upgrader";
+import Class0Shop from "../Class0Shop";
 
 export = new Item(script.Name)
     .setName("Heartful Spray")
@@ -13,6 +14,7 @@ export = new Item(script.Name)
     .setPrice(new CurrencyBundle().set("Skill", 11).set("Power", 20e15).set("Funds", 90e27), 3)
     .setPrice(new CurrencyBundle().set("Skill", 18).set("Power", 60e15).set("Funds", 250e27), 4)
     .addPlaceableArea("BarrenIslands", "SlamoVillage")
+    .soldAt(Class0Shop)
     .persists("Skillification")
 
     .trait(Upgrader)

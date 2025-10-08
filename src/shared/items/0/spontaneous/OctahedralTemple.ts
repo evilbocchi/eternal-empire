@@ -13,6 +13,7 @@ import HandCrankGenerator from "shared/items/negative/a/HandCrankGenerator";
 import TheFirstGenerator from "shared/items/negative/friendliness/TheFirstGenerator";
 import PeripheralGenerator from "shared/items/negative/reversedperipherality/PeripheralGenerator";
 import UpgradedGenerator from "shared/items/negative/trueease/UpgradedGenerator";
+import Class0Shop from "../Class0Shop";
 
 const amt = new OnoeNum(1e18);
 const base = new CurrencyBundle().set("Power", amt);
@@ -37,6 +38,7 @@ Produces %gain%, this amount increasing with Skill.`,
     .setRequiredItemAmount(TimelostDesert, TimelostDesert.pricePerIteration.size())
 
     .addPlaceableArea("BarrenIslands")
+    .soldAt(Class0Shop)
     .setCreator("emoronq2k")
 
     .setFormula(new Formula().pow(0.25))

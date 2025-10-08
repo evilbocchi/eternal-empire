@@ -8,6 +8,7 @@ import Conveyor from "shared/item/traits/conveyor/Conveyor";
 import FormulaBundled from "shared/item/traits/FormulaBundled";
 import Upgrader from "shared/item/traits/upgrader/Upgrader";
 import CruelBlankEssence from "shared/items/0/spontaneous/CruelBlankEssence";
+import Class0Shop from "../Class0Shop";
 
 export = new Item(script.Name)
     .setName("Ame")
@@ -16,6 +17,7 @@ export = new Item(script.Name)
     .setPrice(new CurrencyBundle().set("Purifier Clicks", 1e36), 1)
     .setRequiredItemAmount(CruelBlankEssence, 1)
     .addPlaceableArea("BarrenIslands", "SlamoVillage")
+    .soldAt(Class0Shop)
 
     .setFormula(new Formula().log(10).div(100).add(1))
     .setFormulaX("skill")

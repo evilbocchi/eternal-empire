@@ -4,6 +4,7 @@ import Item from "shared/item/Item";
 import Conveyor from "shared/item/traits/conveyor/Conveyor";
 import OmniUpgrader from "shared/item/traits/upgrader/OmniUpgrader";
 import TwoStoreyUpgrader from "shared/items/0/automatic/TwoStoreyUpgrader";
+import Class0Shop from "../Class0Shop";
 
 export = new Item(script.Name)
     .setName("x-layer Agglomerate")
@@ -16,6 +17,7 @@ Each laser boosts their respective currency by x2.2.`,
     .setPrice(new CurrencyBundle().set("Funds", 15e42).set("Skill", 15000000), 1)
     .setRequiredItemAmount(TwoStoreyUpgrader, 1)
     .addPlaceableArea("BarrenIslands", "SlamoVillage")
+    .soldAt(Class0Shop)
     .setCreator("eeeesdfew")
 
     .trait(OmniUpgrader)

@@ -2,6 +2,7 @@ import Difficulty from "@rbxts/ejt";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
 import Conveyor from "shared/item/traits/conveyor/Conveyor";
+import Class1Shop from "../Class1Shop";
 
 export = new Item(script.Name)
     .setName("Anti-Gravity Anti-Clockwise Conveyor")
@@ -11,6 +12,7 @@ export = new Item(script.Name)
     .setDifficulty(Difficulty.Placid)
     .setPrice(new CurrencyBundle().set("Wins", 1), 1, 3)
     .addPlaceableArea("BarrenIslands", "SlamoVillage")
+    .soldAt(Class1Shop)
 
     .trait(Conveyor)
     .setSpeed(4)

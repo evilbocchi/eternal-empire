@@ -4,6 +4,7 @@ import Item from "shared/item/Item";
 import Conveyor from "shared/item/traits/conveyor/Conveyor";
 import Upgrader from "shared/item/traits/upgrader/Upgrader";
 import NormalReactor from "shared/items/0/millisecondless/NormalReactor";
+import Class0Shop from "../Class0Shop";
 
 export = new Item(script.Name)
     .setName("Reinforced Reactor")
@@ -23,6 +24,7 @@ export = new Item(script.Name)
     )
     .setRequiredItemAmount(NormalReactor, 1)
     .addPlaceableArea("BarrenIslands")
+    .soldAt(Class0Shop)
     .setCreator("sanjay2133")
 
     .trait(Upgrader)

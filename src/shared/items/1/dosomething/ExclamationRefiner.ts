@@ -6,6 +6,7 @@ import Item from "shared/item/Item";
 import Conveyor from "shared/item/traits/conveyor/Conveyor";
 import Damager from "shared/item/traits/upgrader/Damager";
 import Upgrader from "shared/item/traits/upgrader/Upgrader";
+import Class1Shop from "../Class1Shop";
 
 export = new Item(script.Name)
     .setName("Exclamation Refiner")
@@ -15,6 +16,7 @@ export = new Item(script.Name)
     .setDifficulty(Difficulty.DoSomething)
     .setPrice(new CurrencyBundle().set("Funds", 1e60), 1)
     .addPlaceableArea("BarrenIslands", "SlamoVillage", "SkyPavilion")
+    .soldAt(Class1Shop)
     .setCreator("carl.npc")
 
     .trait(Conveyor)

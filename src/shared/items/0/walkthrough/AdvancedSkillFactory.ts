@@ -4,6 +4,7 @@ import Conveyor from "shared/item/traits/conveyor/Conveyor";
 import Droplet from "shared/item/Droplet";
 import Dropper from "shared/item/traits/dropper/Dropper";
 import Item from "shared/item/Item";
+import Class0Shop from "../Class0Shop";
 
 export = new Item(script.Name)
     .setName("Advanced Skill Factory")
@@ -12,6 +13,7 @@ export = new Item(script.Name)
     .setPrice(new CurrencyBundle().set("Funds", 15e33).set("Skill", 70), 1)
     .setPrice(new CurrencyBundle().set("Funds", 70e33).set("Skill", 200), 2)
     .addPlaceableArea("SlamoVillage")
+    .soldAt(Class0Shop)
 
     .trait(Dropper)
     .setDroplet(Droplet.SkillerDroplet)

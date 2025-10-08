@@ -13,6 +13,7 @@ import SexdecupleCoinMiner from "shared/items/0/unlosable/SexdecupleCoinMiner";
 import AdvancedTesseract from "shared/items/0/vintage/AdvancedTesseract";
 import ImprovedTesseract from "shared/items/0/win/ImprovedTesseract";
 import BasicCoinMiner from "shared/items/0/winsome/BasicCoinMiner";
+import Class0Shop from "../Class0Shop";
 
 export = new Item(script.Name)
     .setName("Cruel Blank Essence")
@@ -70,6 +71,7 @@ Whispering,
     .setRequiredItemAmount(ReinforcedTesseract, ReinforcedTesseract.pricePerIteration.size())
     .setRequiredItemAmount(TesseractBooster, TesseractBooster.pricePerIteration.size())
     .addPlaceableArea("BarrenIslands", "SlamoVillage")
+    .soldAt(Class0Shop)
 
     .trait(Generator)
     .setPassiveGain(new CurrencyBundle().set("Dark Matter", 999.99e21))

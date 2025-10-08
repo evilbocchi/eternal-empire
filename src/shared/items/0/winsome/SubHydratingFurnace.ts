@@ -5,6 +5,7 @@ import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
 import Furnace from "shared/item/traits/Furnace";
 import Packets from "shared/Packets";
+import Class0Shop from "../Class0Shop";
 
 const isMeetsRequirement = (skill: OnoeNum) => skill !== undefined && !skill.lessThan(requirement);
 const requirement = new OnoeNum(10);
@@ -15,6 +16,7 @@ export = new Item(script.Name)
     .setDifficulty(Difficulty.Winsome)
     .setPrice(new CurrencyBundle().set("Skill", 2).set("Funds", 10e24), 1)
     .addPlaceableArea("SlamoVillage")
+    .soldAt(Class0Shop)
 
     .trait(Furnace)
     .exit()

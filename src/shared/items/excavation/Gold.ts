@@ -2,6 +2,7 @@ import Difficulty from "@rbxts/ejt";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
 import Iron from "shared/items/excavation/Iron";
+import ExcavationShop from "../bonuses/ExcavationShop";
 
 export = new Item(script.Name)
     .setName("Gold")
@@ -12,4 +13,5 @@ export = new Item(script.Name)
     .setPrice(new CurrencyBundle().set("Skill", 1))
     .setRequiredItemAmount(Iron, 256)
     .placeableEverywhere()
+    .soldAt(ExcavationShop)
     .persists();

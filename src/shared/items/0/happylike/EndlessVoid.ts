@@ -2,6 +2,7 @@ import Difficulty from "@rbxts/ejt";
 import Furnace from "shared/item/traits/Furnace";
 import Item from "shared/item/Item";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
+import Class0Shop from "../Class0Shop";
 
 export = new Item(script.Name)
     .setName("Endless Void")
@@ -11,6 +12,7 @@ export = new Item(script.Name)
     .setDifficulty(Difficulty.Happylike)
     .setPrice(new CurrencyBundle().set("Funds", 400e30).set("Power", 400e15), 1)
     .addPlaceableArea("BarrenIslands", "SlamoVillage")
+    .soldAt(Class0Shop)
     .persists("Skillification")
     .setCreator("CoPKaDT")
 

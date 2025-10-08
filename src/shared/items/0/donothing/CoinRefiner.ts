@@ -4,6 +4,7 @@ import Item from "shared/item/Item";
 import Upgrader from "shared/item/traits/upgrader/Upgrader";
 import Formula from "shared/currency/Formula";
 import { Server } from "shared/api/APIExpose";
+import Class0Shop from "../Class0Shop";
 
 const mul = new CurrencyBundle().set("Bitcoin", 0);
 
@@ -14,6 +15,7 @@ export = new Item(script.Name)
     .setPrice(new CurrencyBundle().set("Funds", 70e24).set("Bitcoin", 360), 1)
     .setPrice(new CurrencyBundle().set("Funds", 620e24).set("Bitcoin", 1200), 2)
     .addPlaceableArea("BarrenIslands", "SlamoVillage")
+    .soldAt(Class0Shop)
     .setCreator("CoPKaDT")
     .persists("Skillification")
 

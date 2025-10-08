@@ -8,6 +8,7 @@ import { CURRENCY_CATEGORIES, CURRENCY_DETAILS } from "shared/currency/CurrencyD
 import { getAllPlayerCharacters, getPlayerCharacter } from "shared/hamster/getPlayerCharacter";
 import Item from "shared/item/Item";
 import Generator from "shared/item/traits/generator/Generator";
+import Class0Shop from "../Class0Shop";
 
 const rng = new Random();
 
@@ -19,6 +20,7 @@ export = new Item(script.Name)
     .setDifficulty(Difficulty.DoNothing)
     .setPrice(new CurrencyBundle().set("Bitcoin", 1000), 1)
     .addPlaceableArea("BarrenIslands", "SlamoVillage")
+    .soldAt(Class0Shop)
     .persists("Skillification")
 
     .trait(Generator)

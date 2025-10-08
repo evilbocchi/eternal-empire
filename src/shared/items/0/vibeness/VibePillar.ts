@@ -2,6 +2,7 @@ import Difficulty from "@rbxts/ejt";
 import Charger from "shared/item/traits/generator/Charger";
 import Item from "shared/item/Item";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
+import Class0Shop from "../Class0Shop";
 
 export = new Item(script.Name)
     .setName("Vibe Pillar")
@@ -9,6 +10,7 @@ export = new Item(script.Name)
     .setDifficulty(Difficulty.Vibeness)
     .setPrice(new CurrencyBundle().set("Funds", 10e39).set("Skill", 5500000), 1)
     .addPlaceableArea("BarrenIslands")
+    .soldAt(Class0Shop)
     .setCreator("emoronq2k")
 
     .trait(Charger)

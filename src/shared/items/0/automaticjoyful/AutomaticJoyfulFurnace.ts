@@ -5,6 +5,7 @@ import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Formula from "shared/currency/Formula";
 import { Server } from "shared/api/APIExpose";
 import RoboticCauldron from "shared/items/0/walkthrough/RoboticCauldron";
+import Class0Shop from "../Class0Shop";
 
 const mul = new CurrencyBundle().set("Power", 1);
 
@@ -16,6 +17,7 @@ export = new Item(script.Name)
     .setDifficulty(Difficulty.AutomaticJoyful)
     .setPrice(new CurrencyBundle().set("Purifier Clicks", 1e21), 1)
     .addPlaceableArea("BarrenIslands")
+    .soldAt(Class0Shop)
 
     .setFormula(new Formula().add(1).log(5).mul(32.8).add(5))
     .setFormulaX("power")

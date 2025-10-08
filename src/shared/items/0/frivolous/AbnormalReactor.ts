@@ -3,6 +3,7 @@ import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
 import Conveyor from "shared/item/traits/conveyor/Conveyor";
 import Upgrader from "shared/item/traits/upgrader/Upgrader";
+import Class0Shop from "../Class0Shop";
 
 export = new Item(script.Name)
     .setName("Abnormal Reactor")
@@ -13,6 +14,7 @@ It is said that this machine was made solely to piss off its users... but anythi
     .setDifficulty(Difficulty.Frivolous)
     .setPrice(new CurrencyBundle().set("Skill", 300000), 1)
     .addPlaceableArea("SlamoVillage")
+    .soldAt(Class0Shop)
     .setCreator("butterman_toast")
 
     .trait(Upgrader)

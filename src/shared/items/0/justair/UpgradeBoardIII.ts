@@ -3,6 +3,7 @@ import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
 import UpgradeBoard from "shared/item/traits/UpgradeBoard";
 import NamedUpgrades from "shared/namedupgrade/NamedUpgrades";
+import Class0Shop from "../Class0Shop";
 
 export = new Item(script.Name)
     .setName("Upgrade Board III")
@@ -12,6 +13,7 @@ export = new Item(script.Name)
     .setDifficulty(Difficulty.JustAir)
     .setPrice(new CurrencyBundle().set("Funds", 2.1e30).set("Bitcoin", 100000).set("Skill", 10), 1)
     .addPlaceableArea("BarrenIslands", "SlamoVillage")
+    .soldAt(Class0Shop)
 
     .trait(UpgradeBoard)
     .addUpgrade(NamedUpgrades.ArtOfPurification)

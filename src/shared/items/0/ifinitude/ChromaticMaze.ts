@@ -5,6 +5,7 @@ import AdvancedBlankEssence from "shared/items/0/ifinitude/AdvancedBlankEssence"
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Formula from "shared/currency/Formula";
 import { Server } from "shared/api/APIExpose";
+import Class0Shop from "../Class0Shop";
 
 const mul = new CurrencyBundle();
 
@@ -17,6 +18,7 @@ export = new Item(script.Name)
     .setPrice(new CurrencyBundle().set("Bitcoin", 1e6).set("Skill", 15), 1)
     .setRequiredItemAmount(AdvancedBlankEssence, 1)
     .addPlaceableArea("BarrenIslands")
+    .soldAt(Class0Shop)
 
     .setFormula(new Formula().pow(0.01))
     .setFormulaX("bitcoin")

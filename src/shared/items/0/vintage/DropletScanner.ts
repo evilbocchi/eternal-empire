@@ -14,6 +14,7 @@ import WeatherBoost from "shared/item/traits/boost/WeatherBoost";
 import Upgrader from "shared/item/traits/upgrader/Upgrader";
 import perItemPacket from "shared/item/utils/perItemPacket";
 import NamedUpgrades from "shared/namedupgrade/NamedUpgrades";
+import Class0Shop from "../Class0Shop";
 
 const textChangedPacket =
     perItemPacket(packet<(placementId: string, dropletId: string, value: string, color: string) => void>());
@@ -26,6 +27,7 @@ export = new Item(script.Name)
     .setDifficulty(Difficulty.Vintage)
     .setPrice(new CurrencyBundle().set("Power", 1e18).set("Bitcoin", 10000), 1, 5)
     .placeableEverywhere()
+    .soldAt(Class0Shop)
     .persists()
 
     .trait(Upgrader)

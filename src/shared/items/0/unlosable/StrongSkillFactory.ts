@@ -4,6 +4,7 @@ import Droplet from "shared/item/Droplet";
 import Item from "shared/item/Item";
 import Conveyor from "shared/item/traits/conveyor/Conveyor";
 import Dropper from "shared/item/traits/dropper/Dropper";
+import Class0Shop from "../Class0Shop";
 
 export = new Item(script.Name)
     .setName("Strong Skill Factory")
@@ -12,6 +13,7 @@ export = new Item(script.Name)
     .setPrice(new CurrencyBundle().set("Skill", 270000), 1)
     .setPrice(new CurrencyBundle().set("Skill", 470000), 2)
     .addPlaceableArea("SlamoVillage")
+    .soldAt(Class0Shop)
 
     .trait(Dropper)
     .setDroplet(Droplet.SkillestDroplet)

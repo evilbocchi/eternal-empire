@@ -4,6 +4,7 @@ import Item from "shared/item/Item";
 import Conveyor from "shared/item/traits/conveyor/Conveyor";
 import Massless from "shared/item/traits/status/Massless";
 import Upgrader from "shared/item/traits/upgrader/Upgrader";
+import Class1Shop from "../Class1Shop";
 
 export = new Item(script.Name)
     .setName("Anti-Gravity Converter")
@@ -18,6 +19,7 @@ export = new Item(script.Name)
     .setPrice(new CurrencyBundle().set("Funds", 20e84), 5)
     .setCreator("sanjay2133")
     .addPlaceableArea("BarrenIslands", "SlamoVillage", "SkyPavilion")
+    .soldAt(Class1Shop)
 
     .trait(Conveyor)
     .setSpeed(4)

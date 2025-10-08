@@ -2,6 +2,7 @@ import Difficulty from "@rbxts/ejt";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
 import Upgrader from "shared/item/traits/upgrader/Upgrader";
+import Class1Shop from "../Class1Shop";
 
 export = new Item(script.Name)
     .setName("Anti-Gravity Upgrader")
@@ -13,6 +14,7 @@ export = new Item(script.Name)
     .setPrice(new CurrencyBundle().set("Funds", 1000e21), 2)
     .setCreator("shooerThe")
     .addPlaceableArea("BarrenIslands", "SlamoVillage", "SkyPavilion")
+    .soldAt(Class1Shop)
 
     .trait(Upgrader)
     .setMul(new CurrencyBundle().set("Funds", 3))

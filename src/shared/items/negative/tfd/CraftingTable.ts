@@ -19,6 +19,7 @@ import TeslaCharger from "shared/items/negative/relax/TeslaCharger";
 import DropletDiverger from "shared/items/negative/skip/DropletDiverger";
 import OverengineeredGenerator from "shared/items/negative/trueease/OverengineeredGenerator";
 import CrystalIngot from "shared/items/negative/unimpossible/CrystalIngot";
+import CraftingShop from "../../bonuses/CraftingShop";
 
 export = new Item(script.Name)
     .setName("Crafting Table")
@@ -26,6 +27,7 @@ export = new Item(script.Name)
     .setDescription("A table that allows you to craft items.")
     .setPrice(new CurrencyBundle().set("Funds", 1e42), 1)
     .placeableEverywhere()
+    .soldAt(CraftingShop)
     .persists()
 
     .trait(Shop)

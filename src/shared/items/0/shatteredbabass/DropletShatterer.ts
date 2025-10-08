@@ -5,6 +5,7 @@ import Item from "shared/item/Item";
 import Dropper from "shared/item/traits/dropper/Dropper";
 import Furnace from "shared/item/traits/Furnace";
 import { getInstanceInfo, setInstanceInfo } from "@antivivi/vrldk";
+import Class0Shop from "../Class0Shop";
 
 export = new Item(script.Name)
     .setName("Droplet Shatterer")
@@ -12,6 +13,7 @@ export = new Item(script.Name)
     .setDifficulty(Difficulty.ShatteredBabass)
     .setPrice(new CurrencyBundle().set("Power", 70e24), 1)
     .addPlaceableArea("BarrenIslands")
+    .soldAt(Class0Shop)
 
     .trait(Dropper)
     .setDroplet(Droplet.ShatteredDroplet)

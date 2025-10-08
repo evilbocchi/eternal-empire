@@ -3,6 +3,7 @@ import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
 import Generator from "shared/item/traits/generator/Generator";
 import DropperBooster from "shared/item/traits/boost/DropperBooster";
+import Class0Shop from "../Class0Shop";
 
 export = new Item(script.Name)
     .setName("Canistering Generator")
@@ -12,6 +13,7 @@ export = new Item(script.Name)
     .setDifficulty(Difficulty.Vintage)
     .setPrice(new CurrencyBundle().set("Power", 200e15).set("Bitcoin", 76000), 1)
     .addPlaceableArea("BarrenIslands")
+    .soldAt(Class0Shop)
 
     .trait(Generator)
     .setPassiveGain(new CurrencyBundle().set("Power", 400e6))

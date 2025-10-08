@@ -3,6 +3,7 @@ import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Droplet from "shared/item/Droplet";
 import Dropper from "shared/item/traits/dropper/Dropper";
 import Item from "shared/item/Item";
+import Class0Shop from "../Class0Shop";
 
 export = new Item(script.Name)
     .setName("Classic Dropper")
@@ -10,6 +11,7 @@ export = new Item(script.Name)
     .setDifficulty(Difficulty.Vintage)
     .setPrice(new CurrencyBundle().set("Skill", 25), 1)
     .addPlaceableArea("SlamoVillage")
+    .soldAt(Class0Shop)
     .setCreator("emoronq2k")
 
     .trait(Dropper)

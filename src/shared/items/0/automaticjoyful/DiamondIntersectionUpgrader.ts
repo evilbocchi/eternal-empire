@@ -4,6 +4,7 @@ import Item from "shared/item/Item";
 import Conveyor from "shared/item/traits/conveyor/Conveyor";
 import Upgrader from "shared/item/traits/upgrader/Upgrader";
 import Damager from "shared/item/traits/upgrader/Damager";
+import Class0Shop from "../Class0Shop";
 
 export = new Item(script.Name)
     .setName("Diamond Intersection Upgrader")
@@ -14,6 +15,7 @@ export = new Item(script.Name)
     .setPrice(new CurrencyBundle().set("Funds", 1.8e36).set("Skill", 800), 1)
     .setPrice(new CurrencyBundle().set("Funds", 5e36).set("Skill", 2000), 2)
     .addPlaceableArea("BarrenIslands", "SlamoVillage")
+    .soldAt(Class0Shop)
     .persists("Skillification")
 
     .trait(Upgrader)

@@ -2,6 +2,7 @@ import Difficulty from "@rbxts/ejt";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Generator from "shared/item/traits/generator/Generator";
 import Item from "shared/item/Item";
+import Class0Shop from "../Class0Shop";
 
 export = new Item(script.Name)
     .setName("Reinforced Tesseract")
@@ -14,6 +15,7 @@ export = new Item(script.Name)
         1,
     )
     .addPlaceableArea("SlamoVillage")
+    .soldAt(Class0Shop)
 
     .trait(Generator)
     .setPassiveGain(new CurrencyBundle().set("Dark Matter", 1.7e15))

@@ -2,6 +2,7 @@ import Difficulty from "@rbxts/ejt";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Charger from "shared/item/traits/generator/Charger";
 import Item from "shared/item/Item";
+import Class0Shop from "../Class0Shop";
 
 export = new Item(script.Name)
     .setName("Strong Charger")
@@ -12,6 +13,7 @@ export = new Item(script.Name)
     .setPrice(new CurrencyBundle().set("Funds", 16e30).set("Power", 300e15), 1)
     .setPrice(new CurrencyBundle().set("Funds", 44e30).set("Power", 700e15), 2)
     .addPlaceableArea("BarrenIslands")
+    .soldAt(Class0Shop)
 
     .trait(Charger)
     .setRadius(12)

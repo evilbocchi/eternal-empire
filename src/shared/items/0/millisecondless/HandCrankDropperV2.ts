@@ -6,6 +6,7 @@ import Item from "shared/item/Item";
 import HandCrank from "shared/item/traits/action/HandCrank";
 import Boostable from "shared/item/traits/boost/Boostable";
 import Dropper from "shared/item/traits/dropper/Dropper";
+import Class0Shop from "../Class0Shop";
 
 export = new Item(script.Name)
     .setName("Hand Crank Dropper V2")
@@ -16,6 +17,7 @@ export = new Item(script.Name)
     .setPrice(new CurrencyBundle().set("Funds", 121e21), 1)
     .setPrice(new CurrencyBundle().set("Funds", 242e21), 2)
     .addPlaceableArea("BarrenIslands")
+    .soldAt(Class0Shop)
 
     .onLoad((model) => {
         const drop = model.WaitForChild("Drop");

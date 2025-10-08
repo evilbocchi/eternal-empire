@@ -6,6 +6,7 @@ import Upgrader from "shared/item/traits/upgrader/Upgrader";
 import AdvancedBlankEssence from "shared/items/0/ifinitude/AdvancedBlankEssence";
 import DualDropper from "shared/items/negative/a/DualDropper";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
+import Class0Shop from "../Class0Shop";
 
 const mul = new CurrencyBundle().set("Bitcoin", 4);
 
@@ -19,6 +20,7 @@ export = new Item(script.Name)
     .setPrice(new CurrencyBundle().set("Power", 500e15).set("Skill", 20), 1)
     .setCreator("CoPKaDT")
     .addPlaceableArea("BarrenIslands")
+    .soldAt(Class0Shop)
 
     .trait(Furnace)
     .setMul(mul)

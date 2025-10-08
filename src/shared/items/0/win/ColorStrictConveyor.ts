@@ -11,6 +11,7 @@ import Conveyor from "shared/item/traits/conveyor/Conveyor";
 import setDropletVelocity from "shared/item/utils/setDropletVelocity";
 import perItemPacket from "shared/item/utils/perItemPacket";
 import { VirtualCollision } from "shared/item/utils/VirtualReplication";
+import Class0Shop from "../Class0Shop";
 
 declare global {
     interface PlacedItem {
@@ -30,6 +31,7 @@ export = new Item(script.Name)
     .setDifficulty(Difficulty.Win)
     .setPrice(new CurrencyBundle().set("Power", 5e12), 1, 5)
     .addPlaceableArea("BarrenIslands", "SlamoVillage")
+    .soldAt(Class0Shop)
 
     .trait(Conveyor)
     .setSpeed(5)

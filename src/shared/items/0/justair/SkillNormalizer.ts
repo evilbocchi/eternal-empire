@@ -7,6 +7,7 @@ import Conveyor from "shared/item/traits/conveyor/Conveyor";
 import Upgrader from "shared/item/traits/upgrader/Upgrader";
 import Formula from "shared/currency/Formula";
 import { Server } from "shared/api/APIExpose";
+import Class0Shop from "../Class0Shop";
 
 const mul = new CurrencyBundle().set("Skill", 0);
 
@@ -18,6 +19,7 @@ export = new Item(script.Name)
     .setDifficulty(Difficulty.JustAir)
     .setPrice(new CurrencyBundle().set("Funds", 1.4e30).set("Power", 100e15).set("Skill", 10), 1)
     .addPlaceableArea("SlamoVillage")
+    .soldAt(Class0Shop)
 
     .setFormula(new Formula().div(6).add(1))
     .setFormulaX("skillify")

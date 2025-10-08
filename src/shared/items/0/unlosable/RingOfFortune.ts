@@ -8,6 +8,7 @@ import Formula from "shared/currency/Formula";
 import Item from "shared/item/Item";
 import Upgrader from "shared/item/traits/upgrader/Upgrader";
 import { VirtualCollision } from "shared/item/utils/VirtualReplication";
+import Class0Shop from "../Class0Shop";
 
 const mul = new CurrencyBundle().set("Funds", 0);
 
@@ -19,6 +20,7 @@ export = new Item(script.Name)
     .setDifficulty(Difficulty.Unlosable)
     .setPrice(new CurrencyBundle().set("Funds", 20e36), 1)
     .addPlaceableArea("BarrenIslands")
+    .soldAt(Class0Shop)
 
     .setFormula(new Formula().pow(0.1))
     .setFormulaX("skill")

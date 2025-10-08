@@ -2,6 +2,7 @@ import Difficulty from "@rbxts/ejt";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
 import ExcavationStone from "shared/items/excavation/ExcavationStone";
+import ExcavationShop from "../bonuses/ExcavationShop";
 
 export = new Item(script.Name)
     .setName("White Gem")
@@ -12,4 +13,5 @@ export = new Item(script.Name)
     .setPrice(new CurrencyBundle().set("Funds", 1))
     .setRequiredItemAmount(ExcavationStone, 256)
     .placeableEverywhere()
+    .soldAt(ExcavationShop)
     .persists();

@@ -5,6 +5,7 @@ import Conveyor from "shared/item/traits/conveyor/Conveyor";
 import Damager from "shared/item/traits/upgrader/Damager";
 import Upgrader from "shared/item/traits/upgrader/Upgrader";
 import ReinforcedReactor from "shared/items/0/automatic/ReinforcedReactor";
+import Class0Shop from "../Class0Shop";
 
 export = new Item(script.Name)
     .setName("Emerald Reactor")
@@ -18,6 +19,7 @@ The Emerald Reactor is a modified version of the ${ReinforcedReactor.name}, each
     .setPrice(new CurrencyBundle().set("Funds", 5e42).set("Power", 1e27), 1)
     .setRequiredItemAmount(ReinforcedReactor, 1)
     .addPlaceableArea("BarrenIslands")
+    .soldAt(Class0Shop)
     .setCreator("sanjay2133")
 
     .trait(Upgrader)

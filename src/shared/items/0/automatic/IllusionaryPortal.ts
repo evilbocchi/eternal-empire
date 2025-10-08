@@ -3,6 +3,7 @@ import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
 import Conveyor from "shared/item/traits/conveyor/Conveyor";
 import Portal from "shared/item/traits/upgrader/Portal";
+import Class0Shop from "../Class0Shop";
 
 export = new Item(script.Name)
     .setName("Illusionary Portal")
@@ -13,6 +14,7 @@ export = new Item(script.Name)
     .setPrice(new CurrencyBundle().set("Funds", 22.5e39), 1)
     .setPrice(new CurrencyBundle().set("Funds", 22.5e36), 2)
     .addPlaceableArea("BarrenIslands", "SlamoVillage", "SkyPavilion")
+    .soldAt(Class0Shop)
     .setCreator("simple13579")
 
     .trait(Portal)

@@ -4,6 +4,7 @@ import Item from "shared/item/Item";
 import Upgrader from "shared/item/traits/upgrader/Upgrader";
 import Formula from "shared/currency/Formula";
 import { Server } from "shared/api/APIExpose";
+import Class0Shop from "../Class0Shop";
 
 const mul = new CurrencyBundle().set("Funds", 0);
 
@@ -13,6 +14,7 @@ export = new Item(script.Name)
     .setDifficulty(Difficulty.ShatteredBabass)
     .setPrice(new CurrencyBundle().set("Funds", 200e36).set("Power", 10e21).set("Skill", 200000), 1)
     .addPlaceableArea("BarrenIslands")
+    .soldAt(Class0Shop)
 
     .setFormula(new Formula().div(1e21).add(1).log(10).pow(1.5).add(1))
     .setFormulaX("power")

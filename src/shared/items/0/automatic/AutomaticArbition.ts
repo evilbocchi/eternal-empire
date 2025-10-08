@@ -3,6 +3,7 @@ import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
 import Upgrader from "shared/item/traits/upgrader/Upgrader";
 import Damager from "shared/item/traits/upgrader/Damager";
+import Class0Shop from "../Class0Shop";
 
 export = new Item(script.Name)
     .setName("Automatic Arbition")
@@ -12,6 +13,7 @@ export = new Item(script.Name)
     .setCreator("GIDS214")
 
     .addPlaceableArea("BarrenIslands")
+    .soldAt(Class0Shop)
     .persists()
 
     .trait(Upgrader)

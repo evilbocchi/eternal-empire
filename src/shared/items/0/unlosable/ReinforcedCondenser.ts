@@ -3,6 +3,7 @@ import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Condenser from "shared/item/traits/dropper/Condenser";
 import Droplet from "shared/item/Droplet";
 import Item from "shared/item/Item";
+import Class0Shop from "../Class0Shop";
 
 export = new Item(script.Name)
     .setName("Reinforced Condenser")
@@ -12,6 +13,7 @@ export = new Item(script.Name)
     .setDifficulty(Difficulty.Unlosable)
     .setPrice(new CurrencyBundle().set("Funds", 30e36).set("Bitcoin", 1e9), 1)
     .addPlaceableArea("BarrenIslands")
+    .soldAt(Class0Shop)
 
     .trait(Condenser)
     .addDroplets(Droplet.LiquidesterFundsDroplet, Droplet.LiquidesterPowerDroplet, Droplet.LiquidesterBitcoinDroplet)

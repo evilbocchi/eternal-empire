@@ -20,6 +20,7 @@ import OverusedAmethystDropper from "shared/items/negative/reversedperipherality
 import TheFirstDropper from "shared/items/negative/tfd/TheFirstDropper";
 import BulkyDropper from "shared/items/negative/tlg/BulkyDropper";
 import VibrantDropper from "shared/items/negative/trueease/VibrantDropper";
+import Class0Shop from "../Class0Shop";
 
 export = new Item(script.Name)
     .setName("Focal Point")
@@ -50,6 +51,7 @@ Produces a %val% droplet every 4 seconds.`,
     .setRequiredItemAmount(HydratingDropper, HydratingDropper.pricePerIteration.size())
     .setRequiredItemAmount(LunaryDropper, LunaryDropper.pricePerIteration.size())
     .addPlaceableArea("BarrenIslands")
+    .soldAt(Class0Shop)
 
     .trait(Dropper)
     .setDroplet(Droplet.TotalityDroplet)

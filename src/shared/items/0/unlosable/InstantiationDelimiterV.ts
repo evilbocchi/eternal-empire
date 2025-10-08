@@ -2,6 +2,7 @@ import Difficulty from "@rbxts/ejt";
 import InstantiationDelimiter from "shared/item/traits/InstantiationDelimiter";
 import Item from "shared/item/Item";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
+import Class0Shop from "../Class0Shop";
 
 export = new Item(script.Name)
     .setName("Instantiation Delimiter V")
@@ -9,6 +10,7 @@ export = new Item(script.Name)
     .setDifficulty(Difficulty.Unlosable)
     .setPrice(new CurrencyBundle().set("Skill", 100000), 1)
     .addPlaceableArea("SlamoVillage")
+    .soldAt(Class0Shop)
 
     .setDrain(new CurrencyBundle().set("Skill", 50))
 

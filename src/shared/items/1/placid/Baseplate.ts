@@ -3,6 +3,7 @@ import Conveyor from "shared/item/traits/conveyor/Conveyor";
 import Item from "shared/item/Item";
 import Upgrader from "shared/item/traits/upgrader/Upgrader";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
+import Class1Shop from "../Class1Shop";
 
 export = new Item(script.Name)
     .setName("Baseplate")
@@ -13,6 +14,7 @@ export = new Item(script.Name)
     .setPrice(new CurrencyBundle().set("Wins", 1), 1, 3)
     .setCreator("CoPKaDT")
     .addPlaceableArea("BarrenIslands", "SlamoVillage")
+    .soldAt(Class1Shop)
 
     .trait(Upgrader)
     .setMul(new CurrencyBundle().set("Funds", 1.2).set("Power", 1.2).set("Skill", 1.2))

@@ -2,6 +2,7 @@ import Difficulty from "@rbxts/ejt";
 import Conveyor from "shared/item/traits/conveyor/Conveyor";
 import Item from "shared/item/Item";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
+import Class0Shop from "../Class0Shop";
 
 export = new Item(script.Name)
     .setName("Raised Funnel")
@@ -10,6 +11,7 @@ export = new Item(script.Name)
     .setPrice(new CurrencyBundle().set("Skill", 1), 1, 5)
     .setPrice(new CurrencyBundle().set("Skill", 2), 6, 10)
     .addPlaceableArea("BarrenIslands", "SlamoVillage")
+    .soldAt(Class0Shop)
     .persists("Skillification")
 
     .trait(Conveyor)

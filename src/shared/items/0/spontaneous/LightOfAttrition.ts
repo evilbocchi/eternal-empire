@@ -16,6 +16,7 @@ import ImprovedFurnace from "shared/items/negative/tlg/ImprovedFurnace";
 import BasicPowerHarvester from "shared/items/negative/trueease/BasicPowerHarvester";
 import ButtonFurnace from "shared/items/negative/unimpossible/ButtonFurnace";
 import VolatileCauldron from "shared/items/negative/unimpossible/VolatileCauldron";
+import Class0Shop from "../Class0Shop";
 
 export = new Item(script.Name)
     .setName("Light of Attrition")
@@ -41,6 +42,7 @@ Processes droplets at %mul% value.`,
     .setRequiredItemAmount(RoboticCauldron, RoboticCauldron.pricePerIteration.size())
     .setRequiredItemAmount(AutomaticJoyfulFurnace, AutomaticJoyfulFurnace.pricePerIteration.size())
     .addPlaceableArea("BarrenIslands")
+    .soldAt(Class0Shop)
     .setCreator("sanjay2133")
 
     .trait(Furnace)

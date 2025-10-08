@@ -4,6 +4,7 @@ import Item from "shared/item/Item";
 import Conveyor from "shared/item/traits/conveyor/Conveyor";
 import UnleashedConveyor from "shared/item/traits/conveyor/UnleashedConveyor";
 import Upgrader from "shared/item/traits/upgrader/Upgrader";
+import Class0Shop from "../Class0Shop";
 
 export = new Item(script.Name)
     .setName("Unleashed Sky Ramp")
@@ -14,6 +15,7 @@ export = new Item(script.Name)
     .setPrice(new CurrencyBundle().set("Skill", 6).set("Bitcoin", 20000), 1, 15)
     .setPrice(new CurrencyBundle().set("Skill", 12).set("Bitcoin", 60000), 16, 30)
     .addPlaceableArea("BarrenIslands", "SlamoVillage")
+    .soldAt(Class0Shop)
     .persists("Skillification")
 
     .trait(Upgrader)

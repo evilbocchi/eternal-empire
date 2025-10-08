@@ -3,6 +3,7 @@ import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
 import Conveyor from "shared/item/traits/conveyor/Conveyor";
 import LaserFan from "shared/item/traits/other/LaserFan";
+import Class0Shop from "../Class0Shop";
 
 export = new Item(script.Name)
     .setName("Droplet Turbine")
@@ -10,6 +11,7 @@ export = new Item(script.Name)
     .setDifficulty(Difficulty.Frivolous)
     .setPrice(new CurrencyBundle().set("Power", 20e21), 1, 5)
     .addPlaceableArea("BarrenIslands", "SlamoVillage")
+    .soldAt(Class0Shop)
     .setCreator("superGirlygamer8o")
 
     .trait(Conveyor)
