@@ -6,7 +6,7 @@ import UnleashedConveyor from "shared/item/traits/conveyor/UnleashedConveyor";
 import UnleashedElevatedConveyor from "shared/items/0/locomotion/UnleashedElevatedConveyor";
 import MagicalCraftingTable from "shared/items/0/millisecondless/MagicalCraftingTable";
 import Crystal from "shared/items/excavation/Crystal";
-import EnchantedGrass from "shared/items/excavation/harvestable/EnchantedGrass";
+import EnchantedGrass from "shared/items/negative/tlg/EnchantedGrass";
 
 export = new Item(script.Name)
     .setName("Unleashed Elevated Mini Conveyor")

@@ -7,7 +7,7 @@ import Item from "shared/item/Item";
 import Boostable from "shared/item/traits/boost/Boostable";
 import Conveyor from "shared/item/traits/conveyor/Conveyor";
 import Dropper from "shared/item/traits/dropper/Dropper";
-import StaleWood from "shared/items/excavation/harvestable/StaleWood";
+import StaleWood from "shared/items/negative/tfd/StaleWood";
 import WhiteGem from "shared/items/excavation/WhiteGem";
 import Wool from "shared/items/negative/a/Wool";
 import CraftingTable from "shared/items/negative/tfd/CraftingTable";

@@ -5,7 +5,7 @@ import Conveyor from "shared/item/traits/conveyor/Conveyor";
 import Upgrader from "shared/item/traits/upgrader/Upgrader";
 import MagicalCraftingTable from "shared/items/0/millisecondless/MagicalCraftingTable";
 import OverheadUpgrader from "shared/items/0/win/OverheadUpgrader";
-import CorruptedGrass from "shared/items/excavation/harvestable/CorruptedGrass";
+import CorruptedGrass from "shared/items/0/happylike/CorruptedGrass";
 
 export = new Item(script.Name)
     .setName("OverOverhead Upgrader")

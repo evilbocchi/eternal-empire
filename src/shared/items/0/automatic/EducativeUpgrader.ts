@@ -4,7 +4,7 @@ import Item from "shared/item/Item";
 import Conveyor from "shared/item/traits/conveyor/Conveyor";
 import Upgrader from "shared/item/traits/upgrader/Upgrader";
 import Stone from "shared/items/0/millisecondless/Stone";
-import EnchantedGrass from "shared/items/excavation/harvestable/EnchantedGrass";
+import EnchantedGrass from "shared/items/negative/tlg/EnchantedGrass";
 import Jade from "shared/items/excavation/Jade";
 import Wool from "shared/items/negative/a/Wool";
 import GoldDiggersHaven from "shared/items/negative/skip/GoldDiggersHaven";

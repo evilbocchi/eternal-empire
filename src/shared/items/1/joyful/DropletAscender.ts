@@ -5,7 +5,7 @@ import Item from "shared/item/Item";
 import Conveyor from "shared/item/traits/conveyor/Conveyor";
 import Upgrader from "shared/item/traits/upgrader/Upgrader";
 import setDropletVelocity from "shared/item/utils/setDropletVelocity";
-import MagicalWood from "shared/items/excavation/harvestable/MagicalWood";
+import MagicalWood from "shared/items/negative/tlg/MagicalWood";
 import Quartz from "shared/items/excavation/Quartz";
 import Class1Shop from "shared/items/1/Class1Shop";
 

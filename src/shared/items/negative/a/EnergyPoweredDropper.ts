@@ -5,7 +5,7 @@ import Item from "shared/item/Item";
 import Dropper from "shared/item/traits/dropper/Dropper";
 import ExcavationStone from "shared/items/excavation/ExcavationStone";
 import Gold from "shared/items/excavation/Gold";
-import Grass from "shared/items/excavation/harvestable/Grass";
+import Grass from "shared/items/negative/tfd/Grass";
 import WhiteGem from "shared/items/excavation/WhiteGem";
 import CraftingTable from "shared/items/negative/tfd/CraftingTable";
 

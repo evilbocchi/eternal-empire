@@ -6,7 +6,7 @@ import MagicalCraftingTable from "shared/items/0/millisecondless/MagicalCrafting
 import WinsomeSpeck from "shared/items/0/winsome/WinsomeSpeck";
 import ExcavationStone from "shared/items/excavation/ExcavationStone";
 import Gold from "shared/items/excavation/Gold";
-import MagicalWood from "shared/items/excavation/harvestable/MagicalWood";
+import MagicalWood from "shared/items/negative/tlg/MagicalWood";
 import WhiteGem from "shared/items/excavation/WhiteGem";
 
 export = new Item(script.Name)

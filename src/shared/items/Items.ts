@@ -1,6 +1,9 @@
+//!native
+//!optimize 2
 import Difficulty from "@rbxts/ejt";
 import { ITEM_PER_ID } from "shared/api/APIExpose";
 import { getAsset } from "shared/asset/AssetMap";
+import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
 import type Charm from "shared/item/traits/Charm";
 
@@ -73,43 +76,94 @@ abstract class Items {
      * 5. Name
      */
     static readonly sortedItems = (function () {
-        const sortedItems = new Array<Item>(Items.itemsPerId.size());
-        for (const [, item] of Items.itemsPerId) {
-            sortedItems.push(item);
+        const describePrice = (item: Item) => {
+            const price = item.getPrice(1);
+            if (price === undefined) {
+                return "<none>";
+            }
+
+            const parts = new Array<string>();
+            for (const [currency, amount] of price.amountPerCurrency) {
+                parts.push(`${currency}=${amount.toString()}`);
+            }
+            if (parts.size() === 0) {
+                return "<empty bundle>";
+            }
+            return parts.join(", ");
+        };
+
+        const describeRequirements = (item: Item) => {
+            if (item.requiredItems.size() === 0) {
+                return "<none>";
+            }
+            const parts = new Array<string>();
+            for (const [reqId, count] of item.requiredItems) {
+                parts.push(`${reqId}x${count}`);
+            }
+            return parts.join(", ");
+        };
+
+        const priceCurrencyOrder = new Array<Currency>();
+        for (const [currency] of CurrencyBundle.SORTED_DETAILS) {
+            priceCurrencyOrder.push(currency);
         }
-        table.sort(sortedItems, (a, b) => {
-            if (a.difficulty.layoutRating !== undefined && b.difficulty.layoutRating !== undefined) {
-                if (a.difficulty.layoutRating !== b.difficulty.layoutRating) {
-                    return a.difficulty.layoutRating < b.difficulty.layoutRating!;
+
+        const comparePrices = (aPrice?: CurrencyBundle, bPrice?: CurrencyBundle) => {
+            if (aPrice === undefined && bPrice === undefined) {
+                return undefined;
+            }
+            if (aPrice === undefined) {
+                return true;
+            }
+            if (bPrice === undefined) {
+                return false;
+            }
+
+            for (const currency of priceCurrencyOrder) {
+                const aAmount = aPrice.amountPerCurrency.get(currency);
+                const bAmount = bPrice.amountPerCurrency.get(currency);
+
+                if (aAmount !== undefined && bAmount !== undefined) {
+                    if (aAmount.moreThan(bAmount)) {
+                        return false;
+                    }
+                    if (bAmount.moreThan(aAmount)) {
+                        return true;
+                    }
+                } else if (aAmount !== undefined) {
+                    return false;
+                } else if (bAmount !== undefined) {
+                    return true;
                 }
             }
 
-            const aRequiresB = a.requiredItems.has(b.id);
-            const bRequiresA = b.requiredItems.has(a.id);
-            if (bRequiresA && !aRequiresB) {
-                return true; // a is required for b, so a comes first
+            const aCount = aPrice.amountPerCurrency.size();
+            const bCount = bPrice.amountPerCurrency.size();
+            if (aCount !== bCount) {
+                return aCount < bCount;
             }
-            if (aRequiresB && !bRequiresA) {
-                return false; // b is required for a, so b comes first
+
+            return undefined;
+        };
+
+        const itemsArray = new Array<Item>();
+        for (const [, item] of Items.itemsPerId) {
+            itemsArray.push(item);
+        }
+
+        // Comparison function for secondary sorting criteria
+        const compareItems = (a: Item, b: Item): boolean => {
+            if (a.difficulty.layoutRating !== undefined && b.difficulty.layoutRating !== undefined) {
+                if (a.difficulty.layoutRating !== b.difficulty.layoutRating) {
+                    return a.difficulty.layoutRating < b.difficulty.layoutRating;
+                }
             }
 
             const aPrice = a.getPrice(1);
             const bPrice = b.getPrice(1);
-            if (aPrice !== undefined && bPrice !== undefined) {
-                let aWins = 0;
-                let bWins = 0;
-                for (const [currency, amount] of aPrice.amountPerCurrency) {
-                    const bAmount = bPrice.amountPerCurrency.get(currency);
-                    if (bAmount === undefined) continue;
-                    if (amount.moreThan(bAmount)) {
-                        aWins++;
-                    } else if (bAmount.moreThan(amount)) {
-                        bWins++;
-                    }
-                }
-                if (aWins !== bWins) {
-                    return aWins < bWins;
-                }
+            const priceResult = comparePrices(aPrice, bPrice);
+            if (priceResult !== undefined) {
+                return priceResult;
             }
 
             if (a.layoutOrder !== b.layoutOrder) {
@@ -119,16 +173,118 @@ abstract class Items {
             if (a.name !== b.name) {
                 return a.name < b.name;
             }
-            return a.id < b.id; // Fallback to ID comparison
-        });
+            return a.id < b.id;
+        };
 
-        for (let i = 0; i < sortedItems.size(); i++) {
-            const item = sortedItems[i];
-            item.layoutOrder = i;
-            print(item.name, item.layoutOrder);
+        const stableSort = (array: Array<Item>, cmp: (a: Item, b: Item) => boolean) => {
+            for (let i = 1; i < array.size(); i++) {
+                const current = array[i];
+                let j = i - 1;
+
+                while (j >= 0 && cmp(current, array[j])) {
+                    array[j + 1] = array[j];
+                    j--;
+                }
+
+                array[j + 1] = current;
+            }
+        };
+
+        // Initial sort by difficulty, price, layoutOrder, name, id
+        stableSort(itemsArray, compareItems);
+
+        // Build position map for current order
+        const positionMap = new Map<string, number>();
+        for (let i = 0; i < itemsArray.size(); i++) {
+            positionMap.set(itemsArray[i].id, i);
         }
 
-        return sortedItems;
+        // Check if item A depends on item B (directly or transitively)
+        const dependsOn = (itemA: Item, itemB: Item, visited = new Set<string>()): boolean => {
+            if (visited.has(itemA.id)) return false; // Prevent infinite loops
+            visited.add(itemA.id);
+
+            for (const [requiredId] of itemA.requiredItems) {
+                if (requiredId === itemB.id) return true;
+                const requiredItem = Items.itemsPerId.get(requiredId);
+                if (requiredItem !== undefined && dependsOn(requiredItem, itemB, visited)) {
+                    return true;
+                }
+            }
+            return false;
+        };
+
+        // Iteratively fix dependency violations and sort violations
+        let changed = true;
+        let iterations = 0;
+        const maxIterations = itemsArray.size() * itemsArray.size(); // Prevent infinite loops
+
+        while (changed && iterations < maxIterations) {
+            changed = false;
+            iterations++;
+
+            // Fix dependency violations
+            for (let i = 0; i < itemsArray.size(); i++) {
+                const item = itemsArray[i];
+
+                // Find the latest position among all requirements
+                let maxRequiredPos = -1;
+                for (const [requiredId] of item.requiredItems) {
+                    const requiredPos = positionMap.get(requiredId);
+                    if (requiredPos !== undefined && requiredPos > maxRequiredPos) {
+                        maxRequiredPos = requiredPos;
+                    }
+                }
+
+                // If this item is before any of its requirements, move it after
+                if (maxRequiredPos >= i) {
+                    const movedItem = itemsArray.remove(i)!;
+                    const insertPos = math.min(maxRequiredPos + 1, itemsArray.size());
+                    itemsArray.insert(insertPos, movedItem);
+
+                    // Rebuild position map
+                    for (let j = 0; j < itemsArray.size(); j++) {
+                        positionMap.set(itemsArray[j].id, j);
+                    }
+
+                    changed = true;
+                    break;
+                }
+            }
+
+            if (changed) continue;
+
+            // Fix sort violations (bubble better items forward if dependencies allow)
+            for (let i = 1; i < itemsArray.size(); i++) {
+                const currentItem = itemsArray[i];
+                const prevItem = itemsArray[i - 1];
+
+                // If current item should come before previous item
+                if (compareItems(currentItem, prevItem)) {
+                    // Only block swaps when the current item depends on the previous item
+                    if (!dependsOn(currentItem, prevItem)) {
+                        // Safe to swap
+                        itemsArray[i] = prevItem;
+                        itemsArray[i - 1] = currentItem;
+
+                        // Update position map
+                        positionMap.set(prevItem.id, i);
+                        positionMap.set(currentItem.id, i - 1);
+
+                        changed = true;
+                        break;
+                    }
+                }
+            }
+        }
+
+        // Assign final layoutOrder
+        for (let i = 0; i < itemsArray.size(); i++) {
+            const item = itemsArray[i];
+            item.layoutOrder = i;
+        }
+
+        return itemsArray;
     })();
 
     /** Total number of items. */

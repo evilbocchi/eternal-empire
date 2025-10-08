@@ -24,7 +24,7 @@ import WinsomeSpeck from "shared/items/0/winsome/WinsomeSpeck";
 import Crystal from "shared/items/excavation/Crystal";
 import ExcavationStone from "shared/items/excavation/ExcavationStone";
 import Gold from "shared/items/excavation/Gold";
-import EnchantedGrass from "shared/items/excavation/harvestable/EnchantedGrass";
+import EnchantedGrass from "shared/items/negative/tlg/EnchantedGrass";
 import Iron from "shared/items/excavation/Iron";
 import Apple from "shared/items/negative/a/Apple";
 import FlimsyBars from "shared/world/nodes/FlimsyBars";

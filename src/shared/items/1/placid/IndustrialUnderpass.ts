@@ -2,8 +2,8 @@ import Difficulty from "@rbxts/ejt";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
 import Upgrader from "shared/item/traits/upgrader/Upgrader";
-import CorruptedGrass from "shared/items/excavation/harvestable/CorruptedGrass";
-import StaleWood from "shared/items/excavation/harvestable/StaleWood";
+import CorruptedGrass from "shared/items/0/happylike/CorruptedGrass";
+import StaleWood from "shared/items/negative/tfd/StaleWood";
 import Jade from "shared/items/excavation/Jade";
 
 export = new Item(script.Name)

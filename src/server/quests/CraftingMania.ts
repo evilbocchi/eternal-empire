@@ -8,7 +8,7 @@ import { WAYPOINTS } from "shared/constants";
 import Shop from "shared/item/traits/Shop";
 import ExcavationStone from "shared/items/excavation/ExcavationStone";
 import WhiteGem from "shared/items/excavation/WhiteGem";
-import Grass from "shared/items/excavation/harvestable/Grass";
+import Grass from "shared/items/negative/tfd/Grass";
 import Wool from "shared/items/negative/a/Wool";
 import IndustrialOverpass from "shared/items/negative/exist/IndustrialOverpass";
 import LegPoweredDropper from "shared/items/negative/felixthea/LegPoweredDropper";

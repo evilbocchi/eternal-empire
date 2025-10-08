@@ -6,6 +6,6 @@ export = new Item(script.Name)
     .setDescription(
         "A common plant that grows in many places. It can be harvested for various purposes, such as crafting or decoration.",
     )
-    .setDifficulty(Difficulty.Excavation)
+    .setDifficulty(Difficulty.TheFirstDifficulty)
     .placeableEverywhere()
     .persists();

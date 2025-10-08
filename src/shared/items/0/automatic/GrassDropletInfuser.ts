@@ -5,7 +5,7 @@ import Item from "shared/item/Item";
 import Conveyor from "shared/item/traits/conveyor/Conveyor";
 import Upgrader from "shared/item/traits/upgrader/Upgrader";
 import MagicalCraftingTable from "shared/items/0/millisecondless/MagicalCraftingTable";
-import CorruptedGrass from "shared/items/excavation/harvestable/CorruptedGrass";
+import CorruptedGrass from "shared/items/0/happylike/CorruptedGrass";
 import GrassConveyor from "shared/items/negative/friendliness/GrassConveyor";
 
 export = new Item("GrassDropletInfuser")

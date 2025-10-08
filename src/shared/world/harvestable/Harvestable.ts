@@ -22,7 +22,6 @@ const RawHarvestable = {
     MagicalWood: {
         health: 80,
         tool: "Axe",
-        name: "Magical Wood",
     },
     AppleTree: {
         health: 40,

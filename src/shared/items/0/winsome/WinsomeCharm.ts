@@ -5,7 +5,7 @@ import Charm from "shared/item/traits/Charm";
 import Glass from "shared/items/0/millisecondless/Glass";
 import MagicalCraftingTable from "shared/items/0/millisecondless/MagicalCraftingTable";
 import WinsomeCoagulate from "shared/items/0/winsome/WinsomeCoagulate";
-import EnchantedGrass from "shared/items/excavation/harvestable/EnchantedGrass";
+import EnchantedGrass from "shared/items/negative/tlg/EnchantedGrass";
 
 export = new Item(script.Name)
     .setName("Winsome Charm")

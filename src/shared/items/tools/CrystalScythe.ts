@@ -4,7 +4,7 @@ import Item from "shared/item/Item";
 import TierDifficulty from "shared/item/TierDifficulty";
 import Gear from "shared/item/traits/Gear";
 import Crystal from "shared/items/excavation/Crystal";
-import MagicalWood from "shared/items/excavation/harvestable/MagicalWood";
+import MagicalWood from "shared/items/negative/tlg/MagicalWood";
 import ReinforcedScythe from "shared/items/tools/ReinforcedScythe";
 
 export = new Item(script.Name)

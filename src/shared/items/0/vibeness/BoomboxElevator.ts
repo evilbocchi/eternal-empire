@@ -5,7 +5,7 @@ import DropperBooster from "shared/item/traits/boost/DropperBooster";
 import Conveyor from "shared/item/traits/conveyor/Conveyor";
 import MagicalCraftingTable from "shared/items/0/millisecondless/MagicalCraftingTable";
 import Gold from "shared/items/excavation/Gold";
-import CorruptedGrass from "shared/items/excavation/harvestable/CorruptedGrass";
+import CorruptedGrass from "shared/items/0/happylike/CorruptedGrass";
 import Quartz from "shared/items/excavation/Quartz";
 
 export = new Item(script.Name)

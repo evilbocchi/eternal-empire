@@ -4,8 +4,8 @@ import Item from "shared/item/Item";
 import TierDifficulty from "shared/item/TierDifficulty";
 import Gear from "shared/item/traits/Gear";
 import Crystal from "shared/items/excavation/Crystal";
-import EnchantedGrass from "shared/items/excavation/harvestable/EnchantedGrass";
-import MagicalWood from "shared/items/excavation/harvestable/MagicalWood";
+import EnchantedGrass from "shared/items/negative/tlg/EnchantedGrass";
+import MagicalWood from "shared/items/negative/tlg/MagicalWood";
 
 export = new Item(script.Name)
     .setName("Flashlight")

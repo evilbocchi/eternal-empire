@@ -4,7 +4,7 @@ import Item from "shared/item/Item";
 import TierDifficulty from "shared/item/TierDifficulty";
 import Gear from "shared/item/traits/Gear";
 import ExcavationStone from "shared/items/excavation/ExcavationStone";
-import MagicalWood from "shared/items/excavation/harvestable/MagicalWood";
+import MagicalWood from "shared/items/negative/tlg/MagicalWood";
 import WhiteGem from "shared/items/excavation/WhiteGem";
 import CopperPickaxe from "shared/items/tools/CopperPickaxe";
 
