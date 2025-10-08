@@ -37,6 +37,7 @@ import UnlockedAreasService from "server/services/world/UnlockedAreasService";
 import { Server } from "shared/api/APIExpose";
 import AvailableEmpire from "shared/data/AvailableEmpire";
 import type ThisEmpire from "shared/data/ThisEmpire";
+import Items from "shared/items/Items";
 
 declare global {
     /**
@@ -276,6 +277,13 @@ export default class APIExposeService implements OnInit {
              * Player data.
              */
             dataPerPlayer: AvailableEmpire.dataPerPlayer,
+
+            /**
+             * Exposed {@link Items} reference.
+             * Useful for avoiding circular dependencies when importing from `shared/item/`.
+             * @see {@link Items} for more details.
+             */
+            Items: Items,
         };
         type noChecking = { [k: string]: unknown };
 

@@ -18,6 +18,7 @@ import { OnInit, OnStart, Service } from "@flamework/core";
 import { CollectionService, Lighting } from "@rbxts/services";
 import DataService from "server/services/data/DataService";
 import eat from "shared/hamster/eat";
+import Dropper from "shared/item/traits/dropper/Dropper";
 import Packets from "shared/Packets";
 import { WeatherState, WeatherType } from "shared/weather/WeatherTypes";
 
@@ -32,6 +33,11 @@ declare global {
  */
 @Service()
 export default class AtmosphereService implements OnInit, OnStart {
+    /**
+     * The current weather multipliers.
+     */
+    currentMultipliers = { dropRate: 1, dropletValue: 1 };
+
     /**
      * Current weather state.
      */
@@ -172,6 +178,19 @@ export default class AtmosphereService implements OnInit, OnStart {
                 this.handleLightningStrikes();
                 break;
         }
+
+        this.currentMultipliers = this.getWeatherMultipliers();
+        const weatherBoost: ItemBoost = {
+            ignoresLimitations: false,
+            dropRateMul: this.currentMultipliers.dropRate,
+        };
+
+        // Apply to all spawned drops
+        for (const [, info] of Dropper.SPAWNED_DROPS) {
+            if (info.Boosts) {
+                info.Boosts.set("weather", weatherBoost);
+            }
+        }
     }
 
     /**
@@ -287,10 +306,9 @@ export default class AtmosphereService implements OnInit, OnStart {
 
     /**
      * Gets the weather multipliers for drop rates and droplet values.
-     *
      * @returns Object containing drop rate and value multipliers.
      */
-    getWeatherMultipliers() {
+    private getWeatherMultipliers() {
         switch (this.currentWeather.type) {
             case WeatherType.Clear:
                 return { dropRate: 1, dropletValue: 1 };

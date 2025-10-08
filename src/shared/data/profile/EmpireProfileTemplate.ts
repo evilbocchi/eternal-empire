@@ -150,6 +150,12 @@ declare global {
          * Unique items that are placed will *not* be removed from this map.
          */
         uniqueInstances: Map<string, UniqueItemInstance>;
+
+        /**
+         * The items currently being researched by the Difficulty Researcher.
+         * These items remain owned but are unavailable for placement until the research is cancelled or completed.
+         */
+        researching: Map<string, number>;
     }
     /**
      * Represents the data structure of an empire profile.
@@ -346,6 +352,7 @@ const EmpireProfileTemplate = {
         lastRepair: {},
         nextId: 0,
         uniqueInstances: new Map<string, UniqueItemInstance>(),
+        researching: new Map<string, number>(),
         repairProtection: new Map<string, RepairProtectionState>(),
     } as ItemsData,
 

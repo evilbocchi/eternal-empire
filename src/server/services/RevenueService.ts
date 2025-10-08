@@ -17,7 +17,7 @@
  * @since 1.0.0
  */
 
-import { getAllInstanceInfo } from "@antivivi/vrldk";
+import { getAllInstanceInfo, getInstanceInfo } from "@antivivi/vrldk";
 import { Service } from "@flamework/core";
 import BombsService from "server/services/boosts/BombsService";
 import CurrencyService from "server/services/data/CurrencyService";
@@ -27,7 +27,6 @@ import CurrencyBundle from "shared/currency/CurrencyBundle";
 import DarkMatter from "shared/currency/mechanics/DarkMatter";
 import { performSoftcaps } from "shared/currency/mechanics/Softcaps";
 import Droplet from "shared/item/Droplet";
-import WeatherBoost from "shared/item/traits/boost/WeatherBoost";
 import Operative from "shared/item/traits/Operative";
 import Upgrader from "shared/item/traits/upgrader/Upgrader";
 import { PriceUpgrade } from "shared/namedupgrade/NamedUpgrade";
@@ -89,6 +88,15 @@ export default class RevenueService {
                 }
             }
         }
+
+        if (this.weatherBoostEnabled === true) {
+            // Apply weather value multipliers
+            const weatherMultiplier = this.atmosphereService.currentMultipliers.dropletValue;
+            if (weatherMultiplier !== 1) {
+                mul = mul.mul(weatherMultiplier);
+            }
+        }
+
         return $tuple(add, mul, pow);
     }
 
@@ -110,6 +118,21 @@ export default class RevenueService {
     }
 
     /**
+     * Applies droplet-specific effects to the provided add, mul, and pow terms.
+     * @param add Addition term to apply
+     * @param mul Multiplication term to apply
+     * @param pow Power term to apply
+     * @param dropletInfo Instance info of the droplet
+     * @returns Tuple of (add, mul, pow) with droplet effects applied
+     */
+    applyDroplet(add: CurrencyBundle, mul: CurrencyBundle, pow: CurrencyBundle, dropletInfo: InstanceInfo) {
+        if (dropletInfo.LightningSurged === true) {
+            mul = mul.mul(10);
+        }
+        return $tuple(add, mul, pow);
+    }
+
+    /**
      * Applies softcaps to the provided value, using the current balance as context.
      *
      * @param value The value to apply softcaps to
@@ -125,20 +148,20 @@ export default class RevenueService {
      * @param dropletModel Droplet to calculate
      * @param includesGlobalBoosts Whether to include global boosts (e.g., Dark Matter, Funds bombs)
      * @param includesUpgrades Whether to include upgrades from Upgrader items
-     * @param enforce Whether to enforce the includesUpgrades parameter (for special cases)
+     * @param enforceIncludesUpgrades Whether to enforce the includesUpgrades parameter (for special cases)
      * @returns Tuple of (droplet value, nerf applied)
      */
     calculateDropletValue(
         dropletModel: BasePart,
         includesGlobalBoosts: boolean,
         includesUpgrades: boolean,
-        enforce?: boolean,
+        enforceIncludesUpgrades?: boolean,
     ) {
-        const instanceInfo = getAllInstanceInfo(dropletModel);
+        const dropletInfo = getAllInstanceInfo(dropletModel);
 
         let [totalAdd, totalMul, totalPow] = Operative.template();
-        const [nerf, isSky] = Droplet.getNerf(instanceInfo);
-        if (isSky === true && enforce !== true) {
+        const [nerf, isSky] = Droplet.getNerf(dropletInfo);
+        if (isSky === true && enforceIncludesUpgrades !== true) {
             includesUpgrades = true;
         }
 
@@ -147,20 +170,12 @@ export default class RevenueService {
         }
 
         if (includesUpgrades === true) {
-            [totalAdd, totalMul, totalPow] = Upgrader.applyUpgrades(totalAdd, totalMul, totalPow, instanceInfo);
+            [totalAdd, totalMul, totalPow] = Upgrader.applyUpgrades(totalAdd, totalMul, totalPow, dropletInfo);
         }
 
-        let worth = Droplet.getDroplet(instanceInfo.DropletId!)!.coalesce(totalAdd, totalMul, totalPow);
+        [totalAdd, totalMul, totalPow] = this.applyDroplet(totalAdd, totalMul, totalPow, dropletInfo);
 
-        if (includesGlobalBoosts === true && this.weatherBoostEnabled === true) {
-            // Apply weather value multipliers
-            const weatherMultiplier = WeatherBoost.getDropletValueMultiplier(dropletModel);
-            if (weatherMultiplier !== 1) {
-                worth = worth.mul(weatherMultiplier);
-            }
-
-            this.performSoftcaps(worth.amountPerCurrency);
-        }
+        let worth = Droplet.getDroplet(dropletInfo.DropletId!)!.coalesce(totalAdd, totalMul, totalPow);
 
         return $tuple(worth.mul(nerf), nerf);
     }

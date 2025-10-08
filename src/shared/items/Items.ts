@@ -1,7 +1,7 @@
 //!native
 //!optimize 2
 import Difficulty from "@rbxts/ejt";
-import { ITEM_PER_ID } from "shared/api/APIExpose";
+import { Server } from "shared/api/APIExpose";
 import { getAsset } from "shared/asset/AssetMap";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
@@ -28,9 +28,6 @@ abstract class Items {
                     itemsPerId.set(item.id, item);
                 }
             }
-        }
-        for (const [id, item] of itemsPerId) {
-            ITEM_PER_ID.set(id, item); // Also set in the global map
         }
         return itemsPerId;
     })();
@@ -313,6 +310,7 @@ abstract class Items {
     static {
         Difficulty.Excavation.setImage(Difficulty.Construct.image!);
         Difficulty.Miscellaneous.setImage(getAsset("assets/MiscellaneousDifficulty.png"));
+        Server.Items = this;
     }
 }
 

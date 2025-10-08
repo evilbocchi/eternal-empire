@@ -101,6 +101,7 @@ namespace Packets {
      * Some items may not be present in the inventory if they are not owned.
      */
     export const inventory = exactMapProperty<string, number>(EmpireProfileTemplate.items.inventory);
+    export const researching = exactMapProperty<string, number>(EmpireProfileTemplate.items.researching);
     export const bought = exactMapProperty<string, number>(EmpireProfileTemplate.items.bought);
     export const placedItems = exactMapProperty<string, DataType.Packed<PlacedItem>>(
         EmpireProfileTemplate.items.worldPlaced,

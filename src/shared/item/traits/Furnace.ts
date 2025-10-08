@@ -1,7 +1,7 @@
 //!native
 //!optimize 2
-import { OnoeNum } from "@rbxts/serikanum";
 import { findBaseParts, getAllInstanceInfo, setInstanceInfo } from "@antivivi/vrldk";
+import { OnoeNum } from "@rbxts/serikanum";
 import { Debris } from "@rbxts/services";
 import { Server } from "shared/api/APIExpose";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
@@ -16,18 +16,21 @@ declare global {
         Furnace: Furnace;
     }
     interface InstanceInfo {
+        /**
+         * Whether this droplet has already been incinerated by a furnace.
+         */
         Incinerated?: boolean;
 
         /**
          * Fired when a droplet is processed by this furnace model.
          * @param result The resulting value gained from processing the droplet.
-         * @param raw The raw value of the droplet before any furnace modifications.
+         * @param genericResult The value of the droplet before any furnace modifications. This still includes global boosts and upgrades if specified from {@link Furnace.includesGlobalBoosts} and {@link Furnace.includesUpgrades}.
          * @param droplet The droplet being processed.
          * @param dropletInfo The instance info of the droplet being processed.
          */
         FurnaceProcessed?: (
             result: CurrencyBundle,
-            raw: CurrencyBundle,
+            genericResult: CurrencyBundle,
             droplet: BasePart,
             dropletInfo: InstanceInfo,
         ) => void;
@@ -61,37 +64,33 @@ export default class Furnace extends Operative {
                 dropletInfo.Incinerated = true;
                 Debris.AddItem(droplet, 6);
 
-                const [worth] = RevenueService.calculateDropletValue(
+                const [genericBoostedResult] = RevenueService.calculateDropletValue(
                     droplet,
                     furnace.includesGlobalBoosts,
                     furnace.includesUpgrades,
                 );
-                let result = furnace.apply(worth);
+                let result = furnace.apply(genericBoostedResult);
 
-                if (result === worth)
-                    // furnace has no effect on droplet i.e. is a condenser
-                    result = new CurrencyBundle();
-                else {
-                    const varianceResult = furnace.varianceResult;
-                    if (varianceResult !== undefined) {
-                        result = result.mul(varianceResult);
-                    }
-
-                    const boosts = modelInfo.Boosts;
-                    if (boosts !== undefined) {
-                        for (const [_, boost] of boosts) {
-                            const mul = boost.furnaceMul;
-                            if (mul === undefined) continue;
-                            result = result.mul(mul);
-                        }
-                    }
-
-                    CurrencyService.incrementAll(result.amountPerCurrency);
+                const varianceResult = furnace.varianceResult;
+                if (varianceResult !== undefined) {
+                    result = result.mul(varianceResult);
                 }
+
+                const boosts = modelInfo.Boosts;
+                if (boosts !== undefined) {
+                    for (const [_, boost] of boosts) {
+                        const mul = boost.furnaceMul;
+                        if (mul === undefined) continue;
+                        result = result.mul(mul);
+                    }
+                }
+
+                CurrencyService.incrementAll(result.amountPerCurrency);
+
                 for (const [currency, amount] of result.amountPerCurrency) {
                     if (amount.equals(ZERO)) result.amountPerCurrency.delete(currency);
                 }
-                modelInfo.FurnaceProcessed?.(result, worth, droplet, dropletInfo);
+                modelInfo.FurnaceProcessed?.(result, genericBoostedResult, droplet, dropletInfo);
                 const amountPerCurrency = result.amountPerCurrency;
                 Packets.dropletBurnt.toAllClients(droplet.Name, amountPerCurrency);
             });

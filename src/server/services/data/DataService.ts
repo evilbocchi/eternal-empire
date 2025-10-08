@@ -1,6 +1,6 @@
 import { Profile } from "@antivivi/profileservice/globals";
-import { OnoeNum } from "@rbxts/serikanum";
 import { OnStart, Service } from "@flamework/core";
+import { OnoeNum } from "@rbxts/serikanum";
 import { Players } from "@rbxts/services";
 import { Environment } from "@rbxts/ui-labs";
 import { OnPlayerAdded } from "server/services/ModdingService";
@@ -141,6 +141,9 @@ export default class DataService implements OnStart, OnPlayerAdded {
         const items = empireData.items;
         if (items.repairProtection === undefined) {
             items.repairProtection = new Map();
+        }
+        if (items.researching === undefined) {
+            items.researching = new Map();
         }
         if (items.placed !== undefined) {
             for (const placedItem of items.placed) {

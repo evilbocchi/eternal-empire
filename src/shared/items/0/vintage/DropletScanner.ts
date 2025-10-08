@@ -10,7 +10,6 @@ import CurrencyBundle from "shared/currency/CurrencyBundle";
 import { CURRENCY_DETAILS } from "shared/currency/CurrencyDetails";
 import Droplet from "shared/item/Droplet";
 import Item from "shared/item/Item";
-import WeatherBoost from "shared/item/traits/boost/WeatherBoost";
 import Upgrader from "shared/item/traits/upgrader/Upgrader";
 import perItemPacket from "shared/item/utils/perItemPacket";
 import NamedUpgrades from "shared/namedupgrade/NamedUpgrades";
@@ -73,7 +72,6 @@ export = new Item(script.Name)
             const [total, nerf] = RevenueService.calculateDropletValue(dropletModel, true, true);
 
             // Get weather multipliers for display
-            const weatherMultiplier = WeatherBoost.getDropletValueMultiplier(dropletModel);
 
             const builder = new StringBuilder();
             builder.append("RAW WORTH: ").append(rawValue.toString(true));
@@ -83,7 +81,7 @@ export = new Item(script.Name)
             if (upgrades !== undefined) {
                 for (const [upgradeId, upgradeInfo] of upgrades) {
                     upgraded = true;
-                    const upgraderId = Server.Item.getPlacedItem(upgradeInfo.Upgrader.Name)?.item;
+                    const upgraderId = Server.Item.getPlacedItem(upgradeInfo.Upgrader.Name)?.item ?? upgradeId;
                     if (upgraderId === undefined || upgraderId === item.id) continue;
 
                     const [add, mul, pow, inverse] = Upgrader.getUpgrade(upgradeInfo);
@@ -116,14 +114,6 @@ export = new Item(script.Name)
 
             const washedPow = removeOnes(globPow);
             if (washedPow.amountPerCurrency.size() > 0) builder.append("^").append(washedPow.toString(true));
-
-            // Display weather effects
-            if (weatherMultiplier !== 1) {
-                builder.append("\nWEATHER: ");
-                builder
-                    .append("x")
-                    .append(formatRichText(OnoeNum.toString(weatherMultiplier), new Color3(0.5, 0.8, 1)));
-            }
 
             if (nerf !== 1) builder.append("\nNERF: /").append(OnoeNum.toString(1 / nerf));
 

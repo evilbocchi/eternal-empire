@@ -2,7 +2,7 @@ import { OnoeNum } from "@rbxts/serikanum";
 import { simpleInterval } from "@antivivi/vrldk";
 import { packet } from "@rbxts/fletchette";
 import { Debris, Players } from "@rbxts/services";
-import { ITEM_PER_ID, Server } from "shared/api/APIExpose";
+import { Server } from "shared/api/APIExpose";
 import { getSound } from "shared/asset/GameAssets";
 import { IS_EDIT, IS_SERVER } from "shared/Context";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
@@ -106,7 +106,7 @@ export default class ObbyUpgrader extends ItemTrait {
             let debounce = false;
             const connection = obbyCompletedPacket.fromClient((player, itemId, placementId) => {
                 if (debounce) return;
-                const item = ITEM_PER_ID.get(itemId);
+                const item = Server.Items.itemsPerId.get(itemId);
                 if (item === undefined) return;
                 const obbyUpgrader = item.trait(ObbyUpgrader);
                 if (obbyUpgrader === undefined) return;

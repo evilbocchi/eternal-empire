@@ -137,6 +137,7 @@ export default function InventoryWindow() {
 
     // Observe inventory data from packets
     const inventory = useProperty(Packets.inventory) ?? new Map<string, number>();
+    const researching = useProperty(Packets.researching) ?? new Map<string, number>();
     const uniqueInstances = useProperty(Packets.uniqueInstances) ?? new Map<string, UniqueItemInstance>();
 
     const scrollingFrameRef = useRef<ScrollingFrame>();
@@ -248,7 +249,8 @@ export default function InventoryWindow() {
 
         const bestInstancePerItem = getBestUniqueInstances(uniqueInstances);
         for (const [id, data] of dataPerItem) {
-            const amount = amountsPerItem.get(id) ?? 0;
+            const reserved = researching.get(id) ?? 0;
+            const amount = math.max((amountsPerItem.get(id) ?? 0) - reserved, 0);
             data.amount = amount;
             if (amount <= 0) {
                 data.visible = false;
@@ -260,7 +262,7 @@ export default function InventoryWindow() {
             }
         }
         return dataPerItem;
-    }, [inventory, uniqueInstances, searchQuery, filterProps.traitFilters]);
+    }, [inventory, uniqueInstances, researching, searchQuery, filterProps.traitFilters]);
 
     useEffect(() => {
         const frame = scrollingFrameRef.current;

@@ -26,7 +26,7 @@ export = function () {
                     timeRemaining: 300,
                 };
 
-                const multipliers = Server.Atmosphere.getWeatherMultipliers();
+                const multipliers = Server.Atmosphere.currentMultipliers;
                 expect(multipliers.dropRate).to.equal(1);
                 expect(multipliers.dropletValue).to.equal(1);
             });
@@ -39,7 +39,7 @@ export = function () {
                     timeRemaining: 300,
                 };
 
-                const multipliers = Server.Atmosphere.getWeatherMultipliers();
+                const multipliers = Server.Atmosphere.currentMultipliers;
                 expect(multipliers.dropRate).to.equal(0.75);
                 expect(multipliers.dropletValue).to.equal(1);
             });
@@ -52,7 +52,7 @@ export = function () {
                     timeRemaining: 240,
                 };
 
-                const multipliers = Server.Atmosphere.getWeatherMultipliers();
+                const multipliers = Server.Atmosphere.currentMultipliers;
                 expect(multipliers.dropRate).to.equal(0.5);
                 expect(multipliers.dropletValue).to.equal(2.5);
             });
@@ -65,7 +65,7 @@ export = function () {
                     timeRemaining: 180,
                 };
 
-                const multipliers = Server.Atmosphere.getWeatherMultipliers();
+                const multipliers = Server.Atmosphere.currentMultipliers;
                 expect(multipliers.dropRate).to.equal(0.5);
                 expect(multipliers.dropletValue).to.equal(2.5);
             });

@@ -96,20 +96,30 @@ export default function PurchaseWindow() {
             setAffordablePerCurrency(affordablePerCurrency);
         });
 
-        const inventoryConnection = Packets.inventory.observe((inventory) => {
+        const updateItemAffordability = () => {
             if (!price) return;
 
+            const inventory = Packets.inventory.get() ?? new Map<string, number>();
+            const researching = Packets.researching.get() ?? new Map<string, number>();
             const affordablePerItemId = new Map<string, boolean>();
             for (const [requiredItemId, amount] of item.requiredItems) {
-                const inInventory = inventory.get(requiredItemId) ?? 0;
-                affordablePerItemId.set(requiredItemId, inInventory >= amount);
+                const available = math.max(
+                    (inventory.get(requiredItemId) ?? 0) - (researching.get(requiredItemId) ?? 0),
+                    0,
+                );
+                affordablePerItemId.set(requiredItemId, available >= amount);
             }
             setAffordablePerItemId(affordablePerItemId);
-        });
+        };
+
+        const inventoryConnection = Packets.inventory.observe(updateItemAffordability);
+        const researchingConnection = Packets.researching.observe(updateItemAffordability);
+        updateItemAffordability();
 
         return () => {
             balanceConnection.disconnect();
             inventoryConnection.disconnect();
+            researchingConnection.disconnect();
         };
     }, [item, price]);
 
@@ -433,6 +443,7 @@ export default function PurchaseWindow() {
                                         if (totalAffordable) return;
                                         const balance = Packets.balance.get();
                                         const inventory = Packets.inventory.get();
+                                        const researching = Packets.researching.get();
                                         const builder = new StringBuilder("Missing:");
                                         for (const [currency] of CurrencyBundle.SORTED_DETAILS) {
                                             if (affordablePerCurrency.get(currency) ?? true) continue;
@@ -455,11 +466,16 @@ export default function PurchaseWindow() {
                                             if (affordablePerItemId.get(requiredItem.id) ?? true) continue;
                                             const color =
                                                 requiredItem.difficulty.color ?? Color3.fromRGB(255, 255, 255);
+                                            const available = math.max(
+                                                (inventory?.get(requiredItem.id) ?? 0) -
+                                                    (researching?.get(requiredItem.id) ?? 0),
+                                                0,
+                                            );
                                             builder
                                                 .append("<font size='16' color='#")
                                                 .append(color.Lerp(new Color3(1, 1, 1), 0.7).ToHex())
                                                 .append("'>\n- ")
-                                                .append(inventory.get(requiredItem.id) ?? 0)
+                                                .append(available)
                                                 .append("/")
                                                 .append(requiredItems.get(requiredItem.id))
                                                 .append(" ")

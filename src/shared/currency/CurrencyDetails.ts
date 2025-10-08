@@ -64,6 +64,13 @@ const details = {
         page: CURRENCY_CATEGORIES.Main,
     },
 
+    "Difficulty Power": {
+        description: "Your very rank in the world of Obbysia.",
+        layoutOrder: 999,
+        color: Color3.fromRGB(255, 0, 255),
+        image: getAsset("assets/DifficultyPower.png"),
+        page: CURRENCY_CATEGORIES.Misc,
+    },
     "Purifier Clicks": {
         description: "The number of times you've clicked the Awesome Manumatic Purifier.",
         layoutOrder: 1000,

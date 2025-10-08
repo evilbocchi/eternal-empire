@@ -122,7 +122,7 @@ export default class Condenser extends ItemTrait {
         const ZERO = new OnoeNum(0);
         const CurrencyService = Server.Currency;
         const RevenueService = Server.Revenue;
-        setInstanceInfo(model, "FurnaceProcessed", (result, raw, droplet) => {
+        setInstanceInfo(model, "FurnaceProcessed", (_, raw, droplet) => {
             const instanceInfo = getAllInstanceInfo(droplet);
             if (instanceInfo.DropletId === undefined || instanceInfo.Condensed === true) {
                 return;

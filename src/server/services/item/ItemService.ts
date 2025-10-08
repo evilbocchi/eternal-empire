@@ -79,10 +79,12 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
     private readonly bought: Map<string, number>;
     private readonly inventory: Map<string, number>;
     private readonly uniqueInstances: Map<string, UniqueItemInstance>;
+    private readonly researching: Map<string, number>;
     private hasInventoryChanged = false;
     private hasUniqueChanged = false;
     private hasBoughtChanged = false;
     private hasPlacedChanged = false;
+    private hasResearchingChanged = false;
 
     // Signals
 
@@ -136,6 +138,7 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
         this.inventory = dataService.empireData.items.inventory;
         this.bought = dataService.empireData.items.bought;
         this.uniqueInstances = dataService.empireData.items.uniqueInstances;
+        this.researching = dataService.empireData.items.researching;
     }
 
     // Data Management Methods
@@ -148,6 +151,101 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
      */
     getItemAmount(itemId: string) {
         return this.inventory.get(itemId) ?? 0;
+    }
+
+    /**
+     * Gets the amount of an item that is currently reserved for research.
+     *
+     * @param itemId The ID of the item to check.
+     * @returns The amount of the item currently being researched.
+     */
+    getResearchingAmount(itemId: string) {
+        return this.researching.get(itemId) ?? 0;
+    }
+
+    /**
+     * Gets the current amount of an item that is available for placement/usage.
+     * This subtracts any units currently being researched from the inventory total.
+     *
+     * @param itemId The ID of the item to check.
+     * @returns The amount of the item available for placement or consumption.
+     */
+    getAvailableItemAmount(itemId: string) {
+        const total = this.getItemAmount(itemId);
+        const researching = this.getResearchingAmount(itemId);
+        return math.max(total - researching, 0);
+    }
+
+    /**
+     * Reserves items for research if available.
+     *
+     * @param itemId The ID of the item to reserve.
+     * @param amount The amount of the item to reserve.
+     * @returns True if reservation succeeded, false otherwise.
+     */
+    reserveItemsForResearch(itemId: string, amount: number) {
+        if (amount < 1) return false;
+
+        const available = this.getAvailableItemAmount(itemId);
+        if (available < amount) return false;
+
+        const current = this.getResearchingAmount(itemId);
+        this.researching.set(itemId, current + amount);
+        this.hasResearchingChanged = true;
+        return true;
+    }
+
+    /**
+     * Releases items from research back into the available pool.
+     *
+     * @param itemId The ID of the item to release.
+     * @param amount The amount of the item to release.
+     * @returns True if release succeeded, false otherwise.
+     */
+    releaseItemsFromResearch(itemId: string, amount: number) {
+        if (amount < 1) return false;
+
+        const current = this.getResearchingAmount(itemId);
+        if (current < amount) return false;
+
+        if (current === amount) {
+            this.researching.delete(itemId);
+        } else {
+            this.researching.set(itemId, current - amount);
+        }
+        this.hasResearchingChanged = true;
+        return true;
+    }
+
+    /**
+     * Provides a read-only reference to the researching map.
+     */
+    getResearchingEntries() {
+        return this.researching;
+    }
+
+    /**
+     * Calculates the multiplier applied to difficulty power generation based on researching items.
+     * Higher difficulty ratings and quantities yield a larger multiplier with diminishing returns.
+     */
+    calculateResearchMultiplier() {
+        let weightedValue = 0;
+        for (const [itemId, amount] of this.researching) {
+            if (amount <= 0) continue;
+
+            const item = Items.getItem(itemId);
+            if (item === undefined) continue;
+
+            const difficulty = item.difficulty;
+            const layoutRating = math.max(difficulty?.layoutRating ?? 0, 0);
+            const classRating = math.max(difficulty?.class ?? 0, 0);
+
+            const perItemWeight = 1 + layoutRating / 25 + classRating / 50;
+            weightedValue += amount * perItemWeight;
+        }
+
+        if (weightedValue <= 0) return 1;
+        return 1 + math.sqrt(weightedValue) / 10;
     }
 
     /**
@@ -406,9 +504,12 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
     serverPlace(id: string, position: Vector3, rotation: number, areaId?: AreaId): LuaTuple<[IdPlacedItem?, number?]> {
         const empireData = this.dataService.empireData;
         const itemsData = empireData.items;
-        const itemAmount = itemsData.inventory.get(id);
+        const rawInventoryAmount = itemsData.inventory.get(id);
+        const inventoryAmount = rawInventoryAmount ?? 0;
+        const researchingAmount = itemsData.researching.get(id) ?? 0;
+        const availableAmount = math.max(inventoryAmount - researchingAmount, 0);
         let uniqueInstance: UniqueItemInstance | undefined;
-        if (itemAmount === undefined) {
+        if (rawInventoryAmount === undefined && availableAmount === 0) {
             uniqueInstance = itemsData.uniqueInstances.get(id);
             if (uniqueInstance === undefined) {
                 warn(`Item ${id} not found in inventory or unique items.`);
@@ -421,7 +522,7 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
                     return $tuple(undefined);
                 }
             }
-        } else if (itemAmount < 1) {
+        } else if (availableAmount < 1) {
             // Validate item requirements
             return $tuple(undefined);
         }
@@ -517,8 +618,8 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
         if (uniqueInstance !== undefined) {
             return $tuple(placedItem);
         } else {
-            this.setItemAmount(itemId, itemAmount! - 1);
-            return $tuple(placedItem, itemAmount! - 1);
+            this.setItemAmount(itemId, inventoryAmount - 1);
+            return $tuple(placedItem, inventoryAmount - 1);
         }
     }
 
@@ -676,6 +777,7 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
         this.hasUniqueChanged = true;
         this.hasBoughtChanged = true;
         this.hasPlacedChanged = true;
+        this.hasResearchingChanged = true;
     }
 
     /**
@@ -700,6 +802,10 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
         if (this.hasInventoryChanged) {
             Packets.inventory.set(this.inventory);
             this.hasInventoryChanged = false;
+        }
+        if (this.hasResearchingChanged) {
+            Packets.researching.set(this.researching);
+            this.hasResearchingChanged = false;
         }
         if (this.hasUniqueChanged) {
             Packets.uniqueInstances.set(this.uniqueInstances);
