@@ -23,10 +23,10 @@ import LogsWindow from "client/components/logs/LogsWindow";
 import DialogueWindow from "client/components/npc/DialogueWindow";
 import PlayerListContainer from "client/components/playerlist/PlayerListContainer";
 import PositionManager from "client/components/position/PositionManager";
+import PillarPuzzle from "client/components/quest/PillarPuzzle";
 import QuestCompletionManager from "client/components/quest/QuestCompletionManager";
 import QuestWindow from "client/components/quest/QuestWindow";
 import TrackedQuestWindow from "client/components/quest/TrackedQuestWindow";
-import PillarPuzzle from "client/components/quest/PillarPuzzle";
 import RenameWindow from "client/components/rename/RenameWindow";
 import ResetRenderer from "client/components/reset/ResetRenderer";
 import CopyWindow from "client/components/settings/CopyWindow";
@@ -55,10 +55,10 @@ declare global {
 import BrokenItemIndicatorRenderer from "client/components/item/BrokenItemIndicatorRenderer";
 import RepairedItemEffectRenderer from "client/components/item/RepairedItemEffectRenderer";
 import RepairWindow from "client/components/item/RepairWindow";
+import MarketplaceWindow from "client/components/marketplace/MarketplaceWindow";
 import { PLAYER_GUI } from "client/constants";
 import eat from "shared/hamster/eat";
 import LoadingScreen from "sharedfirst/LoadingScreen";
-import MarketplaceWindow from "client/components/marketplace/MarketplaceWindow";
 
 function setParent(instance: Instance) {
     instance.Parent = PLAYER_GUI;
@@ -185,19 +185,34 @@ export default function App() {
         });
 
         task.spawn(() => {
-            if (!IS_STUDIO) {
-                const priority = [
-                    getAsset("assets/sounds/FabricRustle.mp3"),
-                    getAsset("assets/sounds/JumpSwish.mp3"),
-                    getAsset("assets/sounds/DefaultText.mp3"),
-                    getAsset("assets/sounds/QuestComplete.mp3"),
-                    getAsset("assets/sounds/QuestNextStage.mp3"),
-                ];
-                for (const [_, id] of pairs(assets)) {
-                    if (!priority.includes(id)) priority.push(id);
-                }
-                ContentProvider.PreloadAsync(priority);
+            if (IS_STUDIO) {
+                eat(() => {
+                    const setWaypoint = () => {
+                        const ChangeHistoryService = game.GetService("ChangeHistoryService" as keyof Services);
+                        (ChangeHistoryService as unknown as { SetWaypoint(name: string): void }).SetWaypoint(
+                            "SimulationDone",
+                        );
+                    };
+
+                    const [success, result] = pcall(() => {
+                        task.delay(1, setWaypoint);
+                    });
+                    if (!success) warn(`[ChangeHistoryService] Failed to set waypoint: ${result}`);
+                });
+                return;
             }
+
+            const priority = [
+                getAsset("assets/sounds/FabricRustle.mp3"),
+                getAsset("assets/sounds/JumpSwish.mp3"),
+                getAsset("assets/sounds/DefaultText.mp3"),
+                getAsset("assets/sounds/QuestComplete.mp3"),
+                getAsset("assets/sounds/QuestNextStage.mp3"),
+            ];
+            for (const [_, id] of pairs(assets)) {
+                if (!priority.includes(id)) priority.push(id);
+            }
+            ContentProvider.PreloadAsync(priority);
         });
 
         return () => {
