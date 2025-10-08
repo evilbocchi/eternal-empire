@@ -3,8 +3,8 @@ import { Dialogue } from "server/interactive/npc/NPC";
 import Ricarg from "server/interactive/npc/Ricarg";
 import EarningCapital from "server/quests/EarningCapital";
 import Quest, { Stage } from "server/quests/Quest";
-import { WAYPOINTS } from "shared/constants";
 import { Server } from "shared/api/APIExpose";
+import { WAYPOINTS } from "shared/constants";
 import Shop from "shared/item/traits/Shop";
 import ExcavationStone from "shared/items/excavation/ExcavationStone";
 import WhiteGem from "shared/items/excavation/WhiteGem";
@@ -194,7 +194,7 @@ export = new Quest(script.Name)
                     for (const item of items) {
                         const craftingItems = CraftingTable.trait(Shop).items;
 
-                        if (craftingItems.includes(item)) {
+                        if (craftingItems.has(item)) {
                             stage.complete();
                         }
                     }

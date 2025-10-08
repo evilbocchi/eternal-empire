@@ -7,6 +7,7 @@ import ExcavationStone from "shared/items/excavation/ExcavationStone";
 import Gold from "shared/items/excavation/Gold";
 import Grass from "shared/items/excavation/harvestable/Grass";
 import WhiteGem from "shared/items/excavation/WhiteGem";
+import CraftingTable from "shared/items/negative/tfd/CraftingTable";
 
 export = new Item(script.Name)
     .setName("Energy Powered Dropper")
@@ -18,6 +19,7 @@ export = new Item(script.Name)
     .setRequiredItemAmount(Gold, 1)
     .setRequiredItemAmount(Grass, 25)
     .addPlaceableArea("BarrenIslands")
+    .soldAt(CraftingTable)
     .persists()
 
     .trait(Dropper)

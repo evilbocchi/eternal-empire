@@ -6,6 +6,7 @@ import Upgrader from "shared/item/traits/upgrader/Upgrader";
 import ExcavationStone from "shared/items/excavation/ExcavationStone";
 import WhiteGem from "shared/items/excavation/WhiteGem";
 import Wool from "shared/items/negative/a/Wool";
+import CraftingTable from "shared/items/negative/tfd/CraftingTable";
 
 export = new Item(script.Name)
     .setName("Industrial Overpass")
@@ -16,6 +17,7 @@ export = new Item(script.Name)
     .setRequiredItemAmount(ExcavationStone, 30)
     .setRequiredItemAmount(WhiteGem, 15)
     .addPlaceableArea("BarrenIslands")
+    .soldAt(CraftingTable)
     .setCreator("simple13579")
     .persists()
 

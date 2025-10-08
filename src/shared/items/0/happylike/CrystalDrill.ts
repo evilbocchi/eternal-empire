@@ -1,11 +1,12 @@
 import Difficulty from "@rbxts/ejt";
+import { Server } from "shared/api/APIExpose";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import ThisEmpire from "shared/data/ThisEmpire";
 import Droplet from "shared/item/Droplet";
 import Item from "shared/item/Item";
-import { Server } from "shared/api/APIExpose";
 import Conveyor from "shared/item/traits/conveyor/Conveyor";
 import Dropper from "shared/item/traits/dropper/Dropper";
+import MagicalCraftingTable from "shared/items/0/millisecondless/MagicalCraftingTable";
 import Crystal from "shared/items/excavation/Crystal";
 import WhiteGem from "shared/items/excavation/WhiteGem";
 
@@ -20,6 +21,7 @@ export = new Item(script.Name)
     .setRequiredItemAmount(Crystal, 25)
     .setCreator("CoPKaDT")
     .addPlaceableArea("BarrenIslands", "SlamoVillage")
+    .soldAt(MagicalCraftingTable)
     .persists()
 
     .trait(Dropper)

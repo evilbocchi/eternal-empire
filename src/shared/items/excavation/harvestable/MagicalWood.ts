@@ -4,6 +4,7 @@ import Item from "shared/item/Item";
 import Upgrader from "shared/item/traits/upgrader/Upgrader";
 import EnchantedGrass from "shared/items/excavation/harvestable/EnchantedGrass";
 import StaleWood from "shared/items/excavation/harvestable/StaleWood";
+import CraftingTable from "shared/items/negative/tfd/CraftingTable";
 
 export = new Item(script.Name)
     .setName("Magical Wood")
@@ -15,6 +16,7 @@ export = new Item(script.Name)
     .setRequiredItemAmount(EnchantedGrass, 1)
     .setRequiredItemAmount(StaleWood, 15)
     .addPlaceableArea("BarrenIslands")
+    .soldAt(CraftingTable)
     .setLevelReq(2)
 
     .trait(Upgrader)

@@ -4,6 +4,7 @@ import Item from "shared/item/Item";
 import Generator from "shared/item/traits/generator/Generator";
 import ExcavationStone from "shared/items/excavation/ExcavationStone";
 import WhiteGem from "shared/items/excavation/WhiteGem";
+import CraftingTable from "shared/items/negative/tfd/CraftingTable";
 
 export = new Item(script.Name)
     .setName("Over-engineered Generator")
@@ -13,6 +14,7 @@ export = new Item(script.Name)
     .setRequiredItemAmount(ExcavationStone, 40)
     .setRequiredItemAmount(WhiteGem, 8)
     .addPlaceableArea("BarrenIslands")
+    .soldAt(CraftingTable)
     .persists()
 
     .trait(Generator)

@@ -4,6 +4,7 @@ import Item from "shared/item/Item";
 import Upgrader from "shared/item/traits/upgrader/Upgrader";
 import GrassShop from "shared/items/bonuses/GrassShop";
 import Grass from "shared/items/excavation/harvestable/Grass";
+import CraftingTable from "shared/items/negative/tfd/CraftingTable";
 
 export = new Item(script.Name)
     .setName("Enchanted Grass")
@@ -14,7 +15,7 @@ export = new Item(script.Name)
     .setPrice(new CurrencyBundle().set("Funds", 100))
     .setRequiredItemAmount(Grass, 25)
     .addPlaceableArea("BarrenIslands")
-    .soldAt(GrassShop)
+    .soldAt(CraftingTable, GrassShop)
     .setLevelReq(2)
 
     .trait(Upgrader)

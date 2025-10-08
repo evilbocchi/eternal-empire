@@ -1,8 +1,9 @@
 import Difficulty from "@rbxts/ejt";
-import Droplet from "shared/item/Droplet";
-import Dropper from "shared/item/traits/dropper/Dropper";
-import Item from "shared/item/Item";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
+import Droplet from "shared/item/Droplet";
+import Item from "shared/item/Item";
+import Dropper from "shared/item/traits/dropper/Dropper";
+import MagicalCraftingTable from "shared/items/0/millisecondless/MagicalCraftingTable";
 
 export = new Item(script.Name)
     .setName("Spherical Dropper")
@@ -10,8 +11,8 @@ export = new Item(script.Name)
     .setDifficulty(Difficulty.Automatic)
     .setPrice(new CurrencyBundle().set("Skill", 4000000), 1)
     .setCreator("GIDS214")
-
     .addPlaceableArea("BarrenIslands", "SlamoVillage")
+    .soldAt(MagicalCraftingTable)
     .persists()
 
     .trait(Dropper)

@@ -1,11 +1,12 @@
 import Difficulty from "@rbxts/ejt";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
-import Conveyor from "shared/item/traits/conveyor/Conveyor";
 import Item from "shared/item/Item";
+import Conveyor from "shared/item/traits/conveyor/Conveyor";
 import Upgrader from "shared/item/traits/upgrader/Upgrader";
+import Glass from "shared/items/0/millisecondless/Glass";
+import MagicalCraftingTable from "shared/items/0/millisecondless/MagicalCraftingTable";
 import Gold from "shared/items/excavation/Gold";
 import Iron from "shared/items/excavation/Iron";
-import Glass from "shared/items/0/millisecondless/Glass";
 
 export = new Item(script.Name)
     .setName("Sacred Baptism")
@@ -16,6 +17,7 @@ export = new Item(script.Name)
     .setRequiredItemAmount(Iron, 10)
     .setRequiredItemAmount(Gold, 1)
     .addPlaceableArea("SlamoVillage")
+    .soldAt(MagicalCraftingTable)
     .setCreator("CoPKaDT")
 
     .trait(Upgrader)

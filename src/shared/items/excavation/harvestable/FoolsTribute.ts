@@ -1,10 +1,11 @@
 import Difficulty from "@rbxts/ejt";
+import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
 import Upgrader from "shared/item/traits/upgrader/Upgrader";
+import MagicalCraftingTable from "shared/items/0/millisecondless/MagicalCraftingTable";
 import Gold from "shared/items/excavation/Gold";
 import EnchantedGrass from "shared/items/excavation/harvestable/EnchantedGrass";
 import MagicalWood from "shared/items/excavation/harvestable/MagicalWood";
-import CurrencyBundle from "shared/currency/CurrencyBundle";
 
 export = new Item(script.Name)
     .setName("Fool's Tribute")
@@ -17,6 +18,7 @@ export = new Item(script.Name)
     .setRequiredItemAmount(MagicalWood, 40)
     .setRequiredItemAmount(Gold, 15)
     .addPlaceableArea("BarrenIslands")
+    .soldAt(MagicalCraftingTable)
     .setLevelReq(10)
 
     .trait(Upgrader)

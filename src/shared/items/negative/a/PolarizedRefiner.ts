@@ -1,4 +1,5 @@
 import Difficulty from "@rbxts/ejt";
+import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
 import Conveyor from "shared/item/traits/conveyor/Conveyor";
 import OmniUpgrader from "shared/item/traits/upgrader/OmniUpgrader";
@@ -6,8 +7,8 @@ import Crystal from "shared/items/excavation/Crystal";
 import ExcavationStone from "shared/items/excavation/ExcavationStone";
 import Iron from "shared/items/excavation/Iron";
 import WhiteGem from "shared/items/excavation/WhiteGem";
-import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Wool from "shared/items/negative/a/Wool";
+import CraftingTable from "shared/items/negative/tfd/CraftingTable";
 
 export = new Item(script.Name)
     .setName("Polarized Refiner")
@@ -22,6 +23,7 @@ export = new Item(script.Name)
     .setRequiredItemAmount(Crystal, 15)
     .setRequiredItemAmount(Iron, 2)
     .addPlaceableArea("BarrenIslands")
+    .soldAt(CraftingTable)
     .setCreator("simple13579")
     .persists()
 

@@ -5,6 +5,7 @@ import Item from "shared/item/Item";
 import Clicker from "shared/item/traits/action/Clicker";
 import Boostable from "shared/item/traits/boost/Boostable";
 import Generator from "shared/item/traits/generator/Generator";
+import MagicalCraftingTable from "shared/items/0/millisecondless/MagicalCraftingTable";
 import WinsomeCoagulate from "shared/items/0/winsome/WinsomeCoagulate";
 
 export = new Item(script.Name)
@@ -15,6 +16,7 @@ export = new Item(script.Name)
     .setPrice(new CurrencyBundle().set("Purifier Clicks", 3000), 2)
     .setRequiredItemAmount(WinsomeCoagulate, 5)
     .addPlaceableArea("BarrenIslands")
+    .soldAt(MagicalCraftingTable)
     .persists()
 
     .trait(Clicker)

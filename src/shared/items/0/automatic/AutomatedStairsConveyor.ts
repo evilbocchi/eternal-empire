@@ -2,6 +2,7 @@ import Difficulty from "@rbxts/ejt";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
 import Conveyor from "shared/item/traits/conveyor/Conveyor";
+import MagicalCraftingTable from "shared/items/0/millisecondless/MagicalCraftingTable";
 
 export = new Item(script.Name)
     .setName("Automated Stairs Conveyor")
@@ -10,6 +11,7 @@ export = new Item(script.Name)
     .setPrice(new CurrencyBundle().set("Skill", 500000).set("Dark Matter", 50e30), 1)
     .setCreator("superGirlygamer8o")
     .addPlaceableArea("BarrenIslands", "SlamoVillage")
+    .soldAt(MagicalCraftingTable)
     .persists()
 
     .trait(Conveyor)

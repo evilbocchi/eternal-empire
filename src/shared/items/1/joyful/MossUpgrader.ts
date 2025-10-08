@@ -3,6 +3,7 @@ import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
 import Damager from "shared/item/traits/upgrader/Damager";
 import Upgrader from "shared/item/traits/upgrader/Upgrader";
+import MagicalCraftingTable from "shared/items/0/millisecondless/MagicalCraftingTable";
 import CorruptedGrass from "shared/items/excavation/harvestable/CorruptedGrass";
 import EnchantedGrass from "shared/items/excavation/harvestable/EnchantedGrass";
 import Jade from "shared/items/excavation/Jade";
@@ -17,6 +18,7 @@ export = new Item(script.Name)
     .setRequiredItemAmount(Jade, 1)
     .setCreator("superGirlygamer8o")
     .addPlaceableArea("BarrenIslands", "SlamoVillage")
+    .soldAt(MagicalCraftingTable)
     .persists()
 
     .trait(Upgrader)

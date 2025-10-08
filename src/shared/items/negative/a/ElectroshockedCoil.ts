@@ -8,6 +8,7 @@ import Conveyor from "shared/item/traits/conveyor/Conveyor";
 import Upgrader from "shared/item/traits/upgrader/Upgrader";
 import Crystal from "shared/items/excavation/Crystal";
 import WhiteGem from "shared/items/excavation/WhiteGem";
+import CraftingTable from "shared/items/negative/tfd/CraftingTable";
 
 const modePacket = packet<number>();
 
@@ -21,6 +22,7 @@ export = new Item(script.Name)
     .setRequiredItemAmount(WhiteGem, 35)
     .setRequiredItemAmount(Crystal, 1)
     .addPlaceableArea("BarrenIslands")
+    .soldAt(CraftingTable)
     .setCreator("Trabitic")
     .persists()
 

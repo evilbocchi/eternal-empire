@@ -1,11 +1,12 @@
 import Difficulty from "@rbxts/ejt";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
-import Conveyor from "shared/item/traits/conveyor/Conveyor";
 import Item from "shared/item/Item";
+import Conveyor from "shared/item/traits/conveyor/Conveyor";
 import Upgrader from "shared/item/traits/upgrader/Upgrader";
 import Crystal from "shared/items/excavation/Crystal";
 import Iron from "shared/items/excavation/Iron";
 import WhiteGem from "shared/items/excavation/WhiteGem";
+import CraftingTable from "shared/items/negative/tfd/CraftingTable";
 
 export = new Item(script.Name)
     .setName("Fictional Upgrader")
@@ -18,6 +19,7 @@ export = new Item(script.Name)
     .setRequiredItemAmount(Crystal, 10)
     .setRequiredItemAmount(Iron, 5)
     .addPlaceableArea("BarrenIslands")
+    .soldAt(CraftingTable)
     .setCreator("CoPKaDT")
     .persists()
 

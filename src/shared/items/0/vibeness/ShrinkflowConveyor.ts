@@ -1,9 +1,10 @@
-import Difficulty from "@rbxts/ejt";
 import { getInstanceInfo } from "@antivivi/vrldk";
+import Difficulty from "@rbxts/ejt";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
 import Conveyor from "shared/item/traits/conveyor/Conveyor";
 import Upgrader from "shared/item/traits/upgrader/Upgrader";
+import MagicalCraftingTable from "shared/items/0/millisecondless/MagicalCraftingTable";
 import Jade from "shared/items/excavation/Jade";
 import Quartz from "shared/items/excavation/Quartz";
 
@@ -16,6 +17,7 @@ export = new Item(script.Name)
     .setRequiredItemAmount(Quartz, 1)
     .setCreator("superGirlygamer8o")
     .addPlaceableArea("BarrenIslands", "SlamoVillage", "SkyPavilion")
+    .soldAt(MagicalCraftingTable)
     .persists()
 
     .trait(Conveyor)

@@ -3,6 +3,7 @@ import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
 import Conveyor from "shared/item/traits/conveyor/Conveyor";
 import Upgrader from "shared/item/traits/upgrader/Upgrader";
+import MagicalCraftingTable from "shared/items/0/millisecondless/MagicalCraftingTable";
 import Crystal from "shared/items/excavation/Crystal";
 import Iron from "shared/items/excavation/Iron";
 
@@ -16,6 +17,7 @@ export = new Item(script.Name)
     .setRequiredItemAmount(Iron, 3)
     .setCreator("filipthesuperstar")
     .addPlaceableArea("SlamoVillage")
+    .soldAt(MagicalCraftingTable)
     .persists()
 
     .trait(Upgrader)

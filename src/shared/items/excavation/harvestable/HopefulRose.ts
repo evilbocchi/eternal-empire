@@ -3,6 +3,7 @@ import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
 import Upgrader from "shared/item/traits/upgrader/Upgrader";
 import Grass from "shared/items/excavation/harvestable/Grass";
+import CraftingTable from "shared/items/negative/tfd/CraftingTable";
 
 export = new Item(script.Name)
     .setName("Hopeful Rose")
@@ -13,6 +14,7 @@ export = new Item(script.Name)
     .setPrice(new CurrencyBundle().set("Funds", 99))
     .setRequiredItemAmount(Grass, 100000)
     .addPlaceableArea("BarrenIslands")
+    .soldAt(CraftingTable)
     .setLevelReq(6)
 
     .trait(Upgrader)

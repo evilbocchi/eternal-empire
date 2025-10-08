@@ -4,6 +4,7 @@ import Item from "shared/item/Item";
 import Conveyor from "shared/item/traits/conveyor/Conveyor";
 import Ablaze from "shared/item/traits/status/Ablaze";
 import Upgrader from "shared/item/traits/upgrader/Upgrader";
+import MagicalCraftingTable from "shared/items/0/millisecondless/MagicalCraftingTable";
 import Quartz from "shared/items/excavation/Quartz";
 import WhiteGem from "shared/items/excavation/WhiteGem";
 
@@ -18,6 +19,7 @@ export = new Item(script.Name)
     .setDifficulty(Difficulty.Frivolous)
     .setCreator("GIDS214")
     .addPlaceableArea("BarrenIslands", "SlamoVillage")
+    .soldAt(MagicalCraftingTable)
     .persists()
 
     .trait(Conveyor)

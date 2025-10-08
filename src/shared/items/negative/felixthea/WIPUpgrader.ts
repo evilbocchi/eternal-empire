@@ -5,6 +5,7 @@ import Conveyor from "shared/item/traits/conveyor/Conveyor";
 import Upgrader from "shared/item/traits/upgrader/Upgrader";
 import Grass from "shared/items/excavation/harvestable/Grass";
 import StaleWood from "shared/items/excavation/harvestable/StaleWood";
+import CraftingTable from "shared/items/negative/tfd/CraftingTable";
 
 export = new Item(script.Name)
     .setName("Work-In-Progress Upgrader")
@@ -16,6 +17,7 @@ export = new Item(script.Name)
     .setRequiredItemAmount(Grass, 50)
     .setRequiredItemAmount(StaleWood, 20)
     .addPlaceableArea("BarrenIslands")
+    .soldAt(CraftingTable)
     .persists()
 
     .setDrain(new CurrencyBundle().set("Funds", 400e9))

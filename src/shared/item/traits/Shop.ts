@@ -8,7 +8,7 @@ declare global {
 }
 
 export default class Shop extends ItemTrait {
-    items: Item[] = [];
+    readonly items = new Set<Item>();
 
     static sharedLoad(model: Model) {
         const touchPart = (model.FindFirstChild("TouchPart") as BasePart | undefined) ?? model.PrimaryPart;
@@ -32,12 +32,7 @@ export default class Shop extends ItemTrait {
     }
 
     addItem(item: Item) {
-        this.items.push(item);
-        return this;
-    }
-
-    setItems(items: Item[]) {
-        this.items = items;
+        this.items.add(item);
         return this;
     }
 }

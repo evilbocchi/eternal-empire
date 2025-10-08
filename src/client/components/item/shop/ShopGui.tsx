@@ -198,8 +198,7 @@ export default function ShopGui() {
     const [focusShopCamera, setFocusShopCamera] = useState(Packets.settings.get().FocusShopCamera === true);
     const ownedPerItem = useProperty(Packets.bought) ?? new Map<string, number>();
     const playerLevel = useProperty(Packets.level);
-    const shopItems = shop?.items ?? [];
-    const shopItemIds = useMemo(() => new Set(shopItems.map((item) => item.id)), [shopItems]);
+    const shopItems = shop?.items ?? new Set<Item>();
     const scrollingFrameRef = useRef<ScrollingFrame>();
     const itemSlotsRef = useRef(new Map<string, ShopSlotHandle>());
     const handleItemClick = useCallback((item: Item) => {
@@ -308,7 +307,7 @@ export default function ShopGui() {
 
             const slotData = dataPerItem.get(item.id);
             const layoutOrder = slotData?.layoutOrder ?? item.layoutOrder;
-            const baseVisible = shopItemIds.has(item.id) && slotData?.visible === true;
+            const baseVisible = shopItems.has(item) && slotData?.visible === true;
             const ownedAmount = ownedPerItem.get(item.id) ?? 0;
 
             updateShopSlot(slot, {
@@ -321,12 +320,16 @@ export default function ShopGui() {
                 playerLevel: playerLevel ?? 0,
             });
         }
-    }, [dataPerItem, shopItemIds, hideMaxedItems, ownedPerItem, handleItemClick, playerLevel]);
+    }, [dataPerItem, shopItems, hideMaxedItems, ownedPerItem, handleItemClick, playerLevel]);
 
     const { events } = useHotkeyWithTooltip({
         action: () => {
             if (!shop) return false;
-            if (Packets.buyAllItems.toServer(shop.items.map((item) => item.id))) {
+            const serialized = new Array<string>();
+            for (const item of shop.items) {
+                serialized.push(item.id);
+            }
+            if (Packets.buyAllItems.toServer(serialized)) {
                 playSound("ItemPurchase.mp3");
             } else {
                 playSound("Error.mp3");

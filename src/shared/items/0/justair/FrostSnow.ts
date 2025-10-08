@@ -2,6 +2,7 @@ import Difficulty from "@rbxts/ejt";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
 import Furnace from "shared/item/traits/Furnace";
+import MagicalCraftingTable from "shared/items/0/millisecondless/MagicalCraftingTable";
 import Crystal from "shared/items/excavation/Crystal";
 
 export = new Item(script.Name)
@@ -11,6 +12,7 @@ export = new Item(script.Name)
     .setPrice(new CurrencyBundle().set("Funds", 1e30), 1)
     .setRequiredItemAmount(Crystal, 35)
     .addPlaceableArea("BarrenIslands", "SlamoVillage")
+    .soldAt(MagicalCraftingTable)
     .setCreator("CoPKaDT")
 
     .trait(Furnace)

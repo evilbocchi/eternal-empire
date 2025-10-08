@@ -2,6 +2,7 @@ import Difficulty from "@rbxts/ejt";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
 import OmniUpgrader from "shared/item/traits/upgrader/OmniUpgrader";
+import MagicalCraftingTable from "shared/items/0/millisecondless/MagicalCraftingTable";
 import WinsomeSpeck from "shared/items/0/winsome/WinsomeSpeck";
 import ExcavationStone from "shared/items/excavation/ExcavationStone";
 import Gold from "shared/items/excavation/Gold";
@@ -21,6 +22,7 @@ export = new Item(script.Name)
     .setRequiredItemAmount(MagicalWood, 2)
     .setRequiredItemAmount(WinsomeSpeck, 2)
     .addPlaceableArea("BarrenIslands")
+    .soldAt(MagicalCraftingTable)
     .setCreator("goog_als")
     .persists()
 

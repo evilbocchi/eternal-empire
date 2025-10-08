@@ -72,16 +72,6 @@ abstract class Items {
      * 4. Name
      */
     static readonly sortedItems = (function () {
-        const indexesInShop = new Map<Item, number>();
-        for (const [_, item] of Items.itemsPerId) {
-            const shop = item.findTrait("Shop");
-            if (shop !== undefined) {
-                for (let i = 0; i < shop.items.size(); i++) {
-                    indexesInShop.set(shop.items[i], i);
-                }
-            }
-        }
-
         let sortedItems = new Array<Item>(Items.itemsPerId.size());
         for (const [_, item] of Items.itemsPerId) {
             sortedItems.push(item);
@@ -92,12 +82,10 @@ abstract class Items {
                     return a.difficulty.layoutRating < b.difficulty.layoutRating!;
                 }
             }
-            const aIndex = indexesInShop.get(a);
-            const bIndex = indexesInShop.get(b);
-            if (aIndex !== undefined && bIndex !== undefined) {
-                if (aIndex !== bIndex) {
-                    return aIndex < bIndex;
-                }
+            const aPrice = a.getPrice(1);
+            const bPrice = b.getPrice(1);
+            if (aPrice !== undefined && bPrice !== undefined) {
+                return bPrice.canAfford(aPrice.amountPerCurrency);
             }
 
             if (a.layoutOrder !== b.layoutOrder) {

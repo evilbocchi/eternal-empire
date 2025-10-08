@@ -4,6 +4,7 @@ import Item from "shared/item/Item";
 import Charger from "shared/item/traits/generator/Charger";
 import ExcavationStone from "shared/items/excavation/ExcavationStone";
 import WhiteGem from "shared/items/excavation/WhiteGem";
+import CraftingTable from "shared/items/negative/tfd/CraftingTable";
 
 export = new Item(script.Name)
     .setName("Tesla Charger")
@@ -13,6 +14,7 @@ export = new Item(script.Name)
     .setRequiredItemAmount(ExcavationStone, 20)
     .setRequiredItemAmount(WhiteGem, 15)
     .addPlaceableArea("BarrenIslands")
+    .soldAt(CraftingTable)
     .setCreator("simple13579")
     .persists()
 

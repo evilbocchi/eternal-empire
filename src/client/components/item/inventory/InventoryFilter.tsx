@@ -80,7 +80,7 @@ export type ItemFilterData = {
  * @param traitFilters The selected trait filters.
  * @returns A map of item IDs to their layout order and visibility.
  */
-export function filterItems(items: Item[], searchQuery: string, traitFilters: Set<TraitFilterId>) {
+export function filterItems(items: Set<Item>, searchQuery: string, traitFilters: Set<TraitFilterId>) {
     const processedItems = new Set<string>();
     const dataPerItem = new Map<string, ItemFilterData>();
 

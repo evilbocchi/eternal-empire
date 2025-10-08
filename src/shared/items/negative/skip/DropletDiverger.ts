@@ -1,6 +1,6 @@
-import { OnoeNum } from "@rbxts/serikanum";
 import { getInstanceInfo } from "@antivivi/vrldk";
 import Difficulty from "@rbxts/ejt";
+import { OnoeNum } from "@rbxts/serikanum";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import eat from "shared/hamster/eat";
 import Droplet from "shared/item/Droplet";
@@ -11,6 +11,7 @@ import setDropletVelocity from "shared/item/utils/setDropletVelocity";
 import ExcavationStone from "shared/items/excavation/ExcavationStone";
 import WhiteGem from "shared/items/excavation/WhiteGem";
 import XLWool from "shared/items/negative/relax/XLWool";
+import CraftingTable from "shared/items/negative/tfd/CraftingTable";
 
 export = new Item(script.Name)
     .setName("Droplet Diverger")
@@ -21,6 +22,7 @@ export = new Item(script.Name)
     .setRequiredItemAmount(ExcavationStone, 20)
     .setRequiredItemAmount(WhiteGem, 2)
     .addPlaceableArea("BarrenIslands")
+    .soldAt(CraftingTable)
     .setCreator("Alexanderloney")
     .persists()
 

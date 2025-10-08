@@ -2,6 +2,7 @@ import Difficulty from "@rbxts/ejt";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
 import Generator from "shared/item/traits/generator/Generator";
+import MagicalCraftingTable from "shared/items/0/millisecondless/MagicalCraftingTable";
 import WhiteGem from "shared/items/excavation/WhiteGem";
 
 export = new Item(script.Name)
@@ -14,6 +15,7 @@ export = new Item(script.Name)
     .setRequiredItemAmount(WhiteGem, 100)
     .setCreator("CoPKaDT")
     .addPlaceableArea("SlamoVillage")
+    .soldAt(MagicalCraftingTable)
     .persists()
 
     .trait(Generator)

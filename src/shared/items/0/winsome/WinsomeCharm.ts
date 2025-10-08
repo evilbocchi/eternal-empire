@@ -3,6 +3,7 @@ import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
 import Charm from "shared/item/traits/Charm";
 import Glass from "shared/items/0/millisecondless/Glass";
+import MagicalCraftingTable from "shared/items/0/millisecondless/MagicalCraftingTable";
 import WinsomeCoagulate from "shared/items/0/winsome/WinsomeCoagulate";
 import EnchantedGrass from "shared/items/excavation/harvestable/EnchantedGrass";
 
@@ -16,6 +17,7 @@ export = new Item(script.Name)
     .setRequiredItemAmount(WinsomeCoagulate, 2)
     .setRequiredItemAmount(Glass, 1)
     .setRequiredItemAmount(EnchantedGrass, 10)
+    .soldAt(MagicalCraftingTable)
 
     .trait(Charm)
     .setCriticalAdd(3)

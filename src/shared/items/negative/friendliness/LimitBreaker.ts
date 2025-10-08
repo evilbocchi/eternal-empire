@@ -1,9 +1,10 @@
-import Difficulty from "@rbxts/ejt";
 import { setInstanceInfo } from "@antivivi/vrldk";
+import Difficulty from "@rbxts/ejt";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
 import InstantiationDelimiter from "shared/item/traits/InstantiationDelimiter";
 import ExcavationStone from "shared/items/excavation/ExcavationStone";
+import CraftingTable from "shared/items/negative/tfd/CraftingTable";
 
 let breakerCount = 0;
 let firstBreaker: Model | undefined;
@@ -21,6 +22,7 @@ export = new Item(script.Name)
     .setPrice(new CurrencyBundle().set("Funds", 10000000))
     .setRequiredItemAmount(ExcavationStone, 50)
     .addPlaceableArea("BarrenIslands")
+    .soldAt(CraftingTable)
     .setCreator("Trabitic")
 
     .trait(InstantiationDelimiter)

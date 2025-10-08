@@ -3,6 +3,7 @@ import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
 import Crystal from "shared/items/excavation/Crystal";
 import WhiteGem from "shared/items/excavation/WhiteGem";
+import CraftingTable from "shared/items/negative/tfd/CraftingTable";
 
 export = new Item(script.Name)
     .setName("Empowered Brick")
@@ -14,4 +15,5 @@ export = new Item(script.Name)
     .setRequiredItemAmount(WhiteGem, 6)
     .setRequiredItemAmount(Crystal, 2)
     .placeableEverywhere()
+    .soldAt(CraftingTable)
     .persists();

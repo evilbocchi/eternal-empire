@@ -3,6 +3,7 @@ import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
 import Conveyor from "shared/item/traits/conveyor/Conveyor";
 import Upgrader from "shared/item/traits/upgrader/Upgrader";
+import MagicalCraftingTable from "shared/items/0/millisecondless/MagicalCraftingTable";
 import Gold from "shared/items/excavation/Gold";
 import ElectroshockedCoil from "shared/items/negative/a/ElectroshockedCoil";
 import EmpoweredBrick from "shared/items/negative/instantwin/EmpoweredBrick";
@@ -20,9 +21,9 @@ export = new Item(script.Name)
     .setRequiredItemAmount(Gold, 1)
     .setRequiredItemAmount(EmpoweredBrick, 5)
     .setRequiredItemAmount(ElectroshockedCoil, 1)
-
     .setCreator("CoPKaDT")
     .addPlaceableArea("SlamoVillage")
+    .soldAt(MagicalCraftingTable)
     .persists()
 
     .trait(Upgrader)

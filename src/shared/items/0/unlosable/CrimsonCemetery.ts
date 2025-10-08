@@ -4,6 +4,7 @@ import Item from "shared/item/Item";
 import Conveyor from "shared/item/traits/conveyor/Conveyor";
 import Damager from "shared/item/traits/upgrader/Damager";
 import Upgrader from "shared/item/traits/upgrader/Upgrader";
+import MagicalCraftingTable from "shared/items/0/millisecondless/MagicalCraftingTable";
 import ExcavationStone from "shared/items/excavation/ExcavationStone";
 import Gold from "shared/items/excavation/Gold";
 import WhiteGem from "shared/items/excavation/WhiteGem";
@@ -19,6 +20,7 @@ export = new Item(script.Name)
     .setRequiredItemAmount(WhiteGem, 150)
     .setRequiredItemAmount(Gold, 3)
     .addPlaceableArea("BarrenIslands")
+    .soldAt(MagicalCraftingTable)
     .setCreator("CoPKaDT")
     .persists()
 

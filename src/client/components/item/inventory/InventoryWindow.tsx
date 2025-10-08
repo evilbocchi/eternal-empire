@@ -115,6 +115,7 @@ export function activateItem(item: Item): boolean {
 }
 
 const NON_GEAR_ITEMS = Items.sortedItems.filter((item) => !item.findTrait("Gear"));
+const NON_GEAR_ITEMS_SET = new Set(NON_GEAR_ITEMS);
 
 /**
  * Main inventory window component following the QuestWindow pattern
@@ -240,7 +241,7 @@ export default function InventoryWindow() {
         }
 
         const dataPerItem: Map<string, InventorySlotData> = filterItems(
-            NON_GEAR_ITEMS,
+            NON_GEAR_ITEMS_SET,
             searchQuery,
             filterProps.traitFilters,
         );

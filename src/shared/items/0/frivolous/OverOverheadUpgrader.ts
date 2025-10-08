@@ -3,6 +3,7 @@ import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
 import Conveyor from "shared/item/traits/conveyor/Conveyor";
 import Upgrader from "shared/item/traits/upgrader/Upgrader";
+import MagicalCraftingTable from "shared/items/0/millisecondless/MagicalCraftingTable";
 import OverheadUpgrader from "shared/items/0/win/OverheadUpgrader";
 import CorruptedGrass from "shared/items/excavation/harvestable/CorruptedGrass";
 
@@ -17,6 +18,7 @@ export = new Item(script.Name)
     .setRequiredItemAmount(CorruptedGrass, 1)
     .setCreator("welshredbird")
     .addPlaceableArea("SlamoVillage")
+    .soldAt(MagicalCraftingTable)
     .persists()
 
     .trait(Upgrader)

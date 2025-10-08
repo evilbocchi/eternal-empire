@@ -1,9 +1,10 @@
 import Difficulty from "@rbxts/ejt";
-import Conveyor from "shared/item/traits/conveyor/Conveyor";
+import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
+import Conveyor from "shared/item/traits/conveyor/Conveyor";
+import MagicalCraftingTable from "shared/items/0/millisecondless/MagicalCraftingTable";
 import ExcavationStone from "shared/items/excavation/ExcavationStone";
 import WhiteGem from "shared/items/excavation/WhiteGem";
-import CurrencyBundle from "shared/currency/CurrencyBundle";
 
 export = new Item(script.Name)
     .setName("Sorting Conveyor")
@@ -14,6 +15,7 @@ export = new Item(script.Name)
     .setRequiredItemAmount(ExcavationStone, 20)
     .setCreator("CoPKaDT")
     .addPlaceableArea("BarrenIslands")
+    .soldAt(MagicalCraftingTable)
     .persists()
 
     .trait(Conveyor)

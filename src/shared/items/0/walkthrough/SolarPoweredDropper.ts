@@ -1,11 +1,12 @@
-import Difficulty from "@rbxts/ejt";
 import { getAllInstanceInfo } from "@antivivi/vrldk";
+import Difficulty from "@rbxts/ejt";
 import { Lighting } from "@rbxts/services";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Droplet from "shared/item/Droplet";
 import Item from "shared/item/Item";
 import Boostable from "shared/item/traits/boost/Boostable";
 import Dropper from "shared/item/traits/dropper/Dropper";
+import MagicalCraftingTable from "shared/items/0/millisecondless/MagicalCraftingTable";
 
 export = new Item(script.Name)
     .setName("Solar Powered Dropper")
@@ -14,6 +15,7 @@ export = new Item(script.Name)
     .setPrice(new CurrencyBundle().set("Funds", 1e33).set("Skill", 45), 1)
     .setCreator("superGirlygamer8o")
     .addPlaceableArea("BarrenIslands")
+    .soldAt(MagicalCraftingTable)
     .persists()
 
     .trait(Dropper)

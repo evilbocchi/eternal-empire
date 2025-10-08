@@ -4,6 +4,7 @@ import Droplet from "shared/item/Droplet";
 import Item from "shared/item/Item";
 import Conveyor from "shared/item/traits/conveyor/Conveyor";
 import Upgrader from "shared/item/traits/upgrader/Upgrader";
+import MagicalCraftingTable from "shared/items/0/millisecondless/MagicalCraftingTable";
 import CorruptedGrass from "shared/items/excavation/harvestable/CorruptedGrass";
 import GrassConveyor from "shared/items/negative/friendliness/GrassConveyor";
 
@@ -16,6 +17,7 @@ export = new Item("GrassDropletInfuser")
     .setRequiredItemAmount(GrassConveyor, 3)
     .setCreator("sanjay2133")
     .addPlaceableArea("BarrenIslands")
+    .soldAt(MagicalCraftingTable)
     .persists()
 
     .trait(Upgrader)

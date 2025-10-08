@@ -3,6 +3,7 @@ import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
 import Conveyor from "shared/item/traits/conveyor/Conveyor";
 import Upgrader from "shared/item/traits/upgrader/Upgrader";
+import MagicalCraftingTable from "shared/items/0/millisecondless/MagicalCraftingTable";
 import Gold from "shared/items/excavation/Gold";
 import WhiteGem from "shared/items/excavation/WhiteGem";
 import WIPUpgrader from "shared/items/negative/felixthea/WIPUpgrader";
@@ -18,6 +19,7 @@ export = new Item(script.Name)
     .setRequiredItemAmount(Gold, 1)
     .setPrice(new CurrencyBundle().set("Funds", 10e27), 1)
     .placeableEverywhere()
+    .soldAt(MagicalCraftingTable)
     .setCreator("simple13579")
     .persists()
 

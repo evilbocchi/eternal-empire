@@ -4,6 +4,7 @@ import Item from "shared/item/Item";
 import Conveyor from "shared/item/traits/conveyor/Conveyor";
 import UnleashedConveyor from "shared/item/traits/conveyor/UnleashedConveyor";
 import UnleashedElevatedConveyor from "shared/items/0/locomotion/UnleashedElevatedConveyor";
+import MagicalCraftingTable from "shared/items/0/millisecondless/MagicalCraftingTable";
 import Crystal from "shared/items/excavation/Crystal";
 import EnchantedGrass from "shared/items/excavation/harvestable/EnchantedGrass";
 
@@ -14,6 +15,7 @@ export = new Item(script.Name)
     .setPrice(new CurrencyBundle().set("Funds", 2e30), 1, 30)
     .setRequiredItemAmount(EnchantedGrass, 20)
     .setRequiredItemAmount(Crystal, 5)
+    .soldAt(MagicalCraftingTable)
     .addPlaceableArea("BarrenIslands", "SlamoVillage")
     .setCreator("CoPKaDT")
     .persists()
