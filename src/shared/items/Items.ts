@@ -67,25 +67,49 @@ abstract class Items {
     /**
      * Ordered list of all items by:
      * 1. Difficulty rating
-     * 2. Index in the shop they appear in
-     * 3. Layout order
-     * 4. Name
+     * 2. Requirements (items that require others come after)
+     * 3. Price (total value across all currencies)
+     * 4. Layout order
+     * 5. Name
      */
     static readonly sortedItems = (function () {
-        let sortedItems = new Array<Item>(Items.itemsPerId.size());
-        for (const [_, item] of Items.itemsPerId) {
+        const sortedItems = new Array<Item>(Items.itemsPerId.size());
+        for (const [, item] of Items.itemsPerId) {
             sortedItems.push(item);
         }
-        sortedItems = sortedItems.sort((a, b) => {
+        table.sort(sortedItems, (a, b) => {
             if (a.difficulty.layoutRating !== undefined && b.difficulty.layoutRating !== undefined) {
                 if (a.difficulty.layoutRating !== b.difficulty.layoutRating) {
                     return a.difficulty.layoutRating < b.difficulty.layoutRating!;
                 }
             }
+
+            const aRequiresB = a.requiredItems.has(b.id);
+            const bRequiresA = b.requiredItems.has(a.id);
+            if (bRequiresA && !aRequiresB) {
+                return true; // a is required for b, so a comes first
+            }
+            if (aRequiresB && !bRequiresA) {
+                return false; // b is required for a, so b comes first
+            }
+
             const aPrice = a.getPrice(1);
             const bPrice = b.getPrice(1);
             if (aPrice !== undefined && bPrice !== undefined) {
-                return bPrice.canAfford(aPrice.amountPerCurrency);
+                let aWins = 0;
+                let bWins = 0;
+                for (const [currency, amount] of aPrice.amountPerCurrency) {
+                    const bAmount = bPrice.amountPerCurrency.get(currency);
+                    if (bAmount === undefined) continue;
+                    if (amount.moreThan(bAmount)) {
+                        aWins++;
+                    } else if (bAmount.moreThan(amount)) {
+                        bWins++;
+                    }
+                }
+                if (aWins !== bWins) {
+                    return aWins < bWins;
+                }
             }
 
             if (a.layoutOrder !== b.layoutOrder) {
@@ -97,6 +121,13 @@ abstract class Items {
             }
             return a.id < b.id; // Fallback to ID comparison
         });
+
+        for (let i = 0; i < sortedItems.size(); i++) {
+            const item = sortedItems[i];
+            item.layoutOrder = i;
+            print(item.name, item.layoutOrder);
+        }
+
         return sortedItems;
     })();
 
