@@ -16,7 +16,7 @@ import DifficultyReward from "shared/difficulty/reward/DifficultyReward";
 type WalkSpeedBuffState = {
     amount: number;
     expiresAt: number;
-    connection: RBXScriptConnection;
+    connection?: RBXScriptConnection;
 };
 
 const ITEM_WEIGHTS = new Map<Item, OnoeNum>();
@@ -231,7 +231,7 @@ export default class ResearchService implements OnStart {
             }
         }
 
-        state.connection.Disconnect();
+        state.connection?.Disconnect();
         this.walkSpeedBuffs.delete(userId);
     }
 
