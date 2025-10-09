@@ -310,6 +310,7 @@ abstract class Items {
     static {
         Difficulty.Excavation.setImage(Difficulty.Construct.image!);
         Difficulty.Miscellaneous.setImage(getAsset("assets/MiscellaneousDifficulty.png"));
+        Difficulty.ReversedPeripherality.setVisualRating("-10^10");
         Server.Items = this;
     }
 }

@@ -677,6 +677,15 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
     }
 
     /**
+     * Retrieves a read-only view of all placement IDs currently marked as broken.
+     *
+     * @returns Set of placement IDs that require repairs.
+     */
+    getBrokenPlacedItems(): ReadonlySet<string> {
+        return this.brokenPlacedItems;
+    }
+
+    /**
      * Waits for the specified callback to finish before returning its value.
      * This is used to prevent race conditions when placing items.
      *
@@ -752,6 +761,15 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
         let changed = false;
         for (const placementId of placementIds) {
             if (this.brokenPlacedItems.has(placementId)) {
+                continue;
+            }
+            const placedItem = this.worldPlaced.get(placementId);
+            if (placedItem === undefined) {
+                continue;
+            }
+
+            const item = Items.getItem(placedItem.item);
+            if (item === undefined || item.isUnbreakable) {
                 continue;
             }
 

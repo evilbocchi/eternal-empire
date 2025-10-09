@@ -224,6 +224,13 @@ export default class ResearchService implements OnStart {
                 this.applyWalkSpeedBuff(player, reward.effect.amount, reward.effect.durationSeconds);
                 break;
             }
+            case "grantItem": {
+                const amount = reward.effect.amount ?? 1;
+                if (amount > 0) {
+                    this.itemService.giveItem(reward.effect.itemId, amount);
+                }
+                break;
+            }
         }
 
         this.currencyService.propagate();

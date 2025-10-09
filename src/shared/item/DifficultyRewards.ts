@@ -1,7 +1,7 @@
 import Difficulty from "@rbxts/ejt";
 import { getAsset } from "shared/asset/AssetMap";
 
-export type DifficultyRewardId = "CandyCoatedConsultation" | "GapMomentum";
+export type DifficultyRewardId = "CandyCoatedConsultation" | "GapMomentum" | "NegativityNanobot";
 
 export type DifficultyRewardCost = PercentageOfDifficultyPowerCost;
 
@@ -23,7 +23,13 @@ export interface WalkSpeedBuffEffect {
     durationSeconds: number;
 }
 
-export type DifficultyRewardEffect = CandyOfflineRevenueEffect | WalkSpeedBuffEffect;
+export interface GrantItemEffect {
+    kind: "grantItem";
+    itemId: string;
+    amount?: number;
+}
+
+export type DifficultyRewardEffect = CandyOfflineRevenueEffect | WalkSpeedBuffEffect | GrantItemEffect;
 
 export interface DifficultyRewardDefinition {
     id: DifficultyRewardId;
@@ -72,6 +78,24 @@ definitions.push({
         kind: "walkSpeedBuff",
         amount: 2,
         durationSeconds: 60,
+    },
+});
+
+definitions.push({
+    id: "NegativityNanobot",
+    difficultyId: Difficulty.Negativity.id,
+    title: "Nanobot Redeemer",
+    description: "Redeem 75% of your Difficulty Power (minimum 1,000) for a Basic Nanobot to deploy.",
+    icon: getAsset("assets/PortableBeacon.png"),
+    cooldownSeconds: 5 * 60,
+    cost: {
+        kind: "percentageOfDifficultyPower",
+        percentage: 0.75,
+        minimum: 1_000,
+    },
+    effect: {
+        kind: "grantItem",
+        itemId: "BasicNanobot",
     },
 });
 

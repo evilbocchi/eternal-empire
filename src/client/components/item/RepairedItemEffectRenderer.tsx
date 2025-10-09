@@ -1,7 +1,7 @@
 import React, { Fragment, useEffect, useMemo, useState } from "@rbxts/react";
 import ReactRoblox from "@rbxts/react-roblox";
 import { PLACED_ITEMS_FOLDER } from "shared/constants";
-import { isProtectionTier, type RepairProtectionTier } from "shared/item/repair";
+import type { RepairResultTier } from "shared/item/repair";
 import Packets from "shared/Packets";
 
 const TweenService = game.GetService("TweenService");
@@ -10,17 +10,54 @@ interface ActiveEffect {
     placementId: string;
     model: Model;
     primaryPart: BasePart;
-    tier: RepairProtectionTier;
+    tier: RepairResultTier;
     startedAt: number;
     fadingOut?: boolean;
 }
 
-const EFFECT_DURATION: Record<RepairProtectionTier, number> = {
+const EFFECT_DURATION: Record<RepairResultTier, number> = {
+    Good: 3,
     Great: 4.5,
     Perfect: 8.5,
 };
 
 const FADE_OUT_DURATION = 0.8;
+
+interface TierVisual {
+    color: Color3;
+    outline: Color3;
+    brightness: number;
+    range: number;
+    fillTransparency: number;
+    outlineTransparency: number;
+}
+
+const TIER_VISUALS: Record<RepairResultTier, TierVisual> = {
+    Good: {
+        color: Color3.fromRGB(140, 240, 180),
+        outline: Color3.fromRGB(200, 255, 220),
+        brightness: 1.8,
+        range: 16,
+        fillTransparency: 0.93,
+        outlineTransparency: 0.6,
+    },
+    Great: {
+        color: Color3.fromRGB(120, 210, 255),
+        outline: Color3.fromRGB(170, 235, 255),
+        brightness: 2.6,
+        range: 20,
+        fillTransparency: 0.85,
+        outlineTransparency: 0.45,
+    },
+    Perfect: {
+        color: Color3.fromRGB(255, 223, 62),
+        outline: Color3.fromRGB(255, 255, 200),
+        brightness: 4,
+        range: 26,
+        fillTransparency: 0.82,
+        outlineTransparency: 0.35,
+    },
+};
 
 function findPrimaryPart(model: Model) {
     const explicit = model.PrimaryPart;
@@ -37,7 +74,7 @@ export default function RepairedItemEffectRenderer() {
 
     useEffect(() => {
         const connection = Packets.itemRepairCompleted.fromServer((placementId, tier) => {
-            if (!isProtectionTier(tier)) {
+            if (TIER_VISUALS[tier] === undefined) {
                 setEffects((current) => current.filter((effect) => effect.placementId !== placementId));
                 return;
             }
@@ -88,10 +125,8 @@ export default function RepairedItemEffectRenderer() {
 
     const renderedEffects = useMemo(() => {
         return effects.map((effect) => {
-            const color = effect.tier === "Perfect" ? Color3.fromRGB(255, 223, 62) : Color3.fromRGB(120, 210, 255);
-            const outline = effect.tier === "Perfect" ? Color3.fromRGB(255, 255, 200) : Color3.fromRGB(170, 235, 255);
-            const brightness = effect.tier === "Perfect" ? 4 : 2.6;
-            const range = effect.tier === "Perfect" ? 26 : 20;
+            const visuals = TIER_VISUALS[effect.tier];
+            const { color, outline, brightness, range, fillTransparency, outlineTransparency } = visuals;
 
             const light = ReactRoblox.createPortal(
                 <pointlight
@@ -122,9 +157,9 @@ export default function RepairedItemEffectRenderer() {
                     <highlight
                         Adornee={effect.model}
                         FillColor={color}
-                        FillTransparency={0.85}
+                        FillTransparency={fillTransparency}
                         OutlineColor={outline}
-                        OutlineTransparency={0.45}
+                        OutlineTransparency={outlineTransparency}
                         ref={(rbx) => {
                             if (rbx && effect.fadingOut) {
                                 const tweenInfo = new TweenInfo(

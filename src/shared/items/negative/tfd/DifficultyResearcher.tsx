@@ -743,6 +743,13 @@ function DifficultyRewardCard({
                 const durationText = formatDurationShort(reward.effect.durationSeconds);
                 return `Effect: +${reward.effect.amount} WalkSpeed for ${durationText}.`;
             }
+            case "grantItem": {
+                const amount = reward.effect.amount ?? 1;
+                const item = Server.Items.itemsPerId.get(reward.effect.itemId);
+                const itemName = item?.name ?? reward.effect.itemId;
+                const amountSuffix = amount > 1 ? ` x${amount}` : "";
+                return `Reward: ${itemName}${amountSuffix}.`;
+            }
         }
     }, [revenuePerSecond, reward]);
 
@@ -960,9 +967,16 @@ interface DescriptionPanelProps {
     description: string;
     researchInfo: ResearchInfoProps;
     rewardInfo: DifficultyRewardsSectionProps;
+    hasDifficultySelected: boolean;
 }
 
-function DescriptionPanel({ activePage, description, researchInfo, rewardInfo }: DescriptionPanelProps) {
+function DescriptionPanel({
+    activePage,
+    description,
+    researchInfo,
+    rewardInfo,
+    hasDifficultySelected,
+}: DescriptionPanelProps) {
     return (
         <scrollingframe
             AutomaticCanvasSize={Enum.AutomaticSize.Y}
@@ -1006,29 +1020,46 @@ function DescriptionPanel({ activePage, description, researchInfo, rewardInfo }:
                     Padding={new UDim(0, 8)}
                     VerticalAlignment={Enum.VerticalAlignment.Top}
                 />
-                <textlabel
-                    AutomaticSize={Enum.AutomaticSize.Y}
-                    BackgroundTransparency={1}
-                    FontFace={RobotoMono}
-                    RichText={true}
-                    Size={new UDim2(1, 0, 0, 0)}
-                    Text={description}
-                    TextColor3={Color3.fromRGB(255, 255, 255)}
-                    TextSize={24}
-                    TextWrapped={true}
-                    TextXAlignment={Enum.TextXAlignment.Left}
-                    TextYAlignment={Enum.TextYAlignment.Top}
-                >
-                    <uistroke Thickness={3} />
-                </textlabel>
-                <DifficultyRewardsSection
-                    rewards={rewardInfo.rewards}
-                    playerDifficultyPower={rewardInfo.playerDifficultyPower}
-                    cooldowns={rewardInfo.cooldowns}
-                    now={rewardInfo.now}
-                    revenuePerSecond={rewardInfo.revenuePerSecond}
-                    onClaim={rewardInfo.onClaim}
-                />
+                {hasDifficultySelected ? (
+                    <Fragment>
+                        <textlabel
+                            AutomaticSize={Enum.AutomaticSize.Y}
+                            BackgroundTransparency={1}
+                            FontFace={RobotoMono}
+                            RichText={true}
+                            Size={new UDim2(1, 0, 0, 0)}
+                            Text={description}
+                            TextColor3={Color3.fromRGB(255, 255, 255)}
+                            TextSize={24}
+                            TextWrapped={true}
+                            TextXAlignment={Enum.TextXAlignment.Left}
+                            TextYAlignment={Enum.TextYAlignment.Top}
+                        >
+                            <uistroke Thickness={3} />
+                        </textlabel>
+                        <DifficultyRewardsSection
+                            rewards={rewardInfo.rewards}
+                            playerDifficultyPower={rewardInfo.playerDifficultyPower}
+                            cooldowns={rewardInfo.cooldowns}
+                            now={rewardInfo.now}
+                            revenuePerSecond={rewardInfo.revenuePerSecond}
+                            onClaim={rewardInfo.onClaim}
+                        />
+                    </Fragment>
+                ) : (
+                    <textlabel
+                        AutomaticSize={Enum.AutomaticSize.Y}
+                        BackgroundTransparency={1}
+                        FontFace={RobotoMonoBold}
+                        Size={new UDim2(1, 0, 0, 0)}
+                        Text="Select a difficulty to preview its rewards."
+                        TextColor3={Color3.fromRGB(220, 220, 255)}
+                        TextSize={26}
+                        TextWrapped={true}
+                        TextXAlignment={Enum.TextXAlignment.Center}
+                        TextYAlignment={Enum.TextYAlignment.Top}
+                    />
+                )}
             </frame>
         </scrollingframe>
     );
@@ -1254,6 +1285,8 @@ function DifficultyResearcherGui({
         if (desc === undefined) return "";
         [desc] = desc.gsub(`\\"`, '"'); // Escape quotes
 
+        desc += `\n\nRating: ${currentDifficulty.visualRating}`;
+
         const currentRequirement = difficultyRequirements.get(currentDifficulty.id);
         if (currentRequirement !== undefined) {
             const requirementText = OnoeNum.toString(currentRequirement);
@@ -1335,6 +1368,7 @@ function DifficultyResearcherGui({
                     description={description}
                     researchInfo={researchInfo}
                     rewardInfo={rewardInfo}
+                    hasDifficultySelected={currentDifficulty !== undefined}
                 />
             </surfacegui>
             <surfacegui
