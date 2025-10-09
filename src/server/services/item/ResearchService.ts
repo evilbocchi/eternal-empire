@@ -7,7 +7,7 @@ import DataService from "server/services/data/DataService";
 import ItemService from "server/services/item/ItemService";
 import PermissionsService from "server/services/permissions/PermissionsService";
 import { getPlayerCharacter } from "shared/hamster/getPlayerCharacter";
-import { getDifficultyRewardById } from "shared/item/DifficultyRewards";
+import { getDifficultyRewardById } from "shared/difficulty/DifficultyRewards";
 import Item from "shared/item/Item";
 import Items from "shared/items/Items";
 import Packets from "shared/Packets";

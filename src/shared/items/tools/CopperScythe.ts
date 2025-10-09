@@ -1,7 +1,7 @@
 import Gear from "shared/item/traits/Gear";
 import Item from "shared/item/Item";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
-import TierDifficulty from "shared/item/TierDifficulty";
+import TierDifficulty from "shared/difficulty/TierDifficulty";
 import { getAsset } from "shared/asset/AssetMap";
 
 export = new Item(script.Name)
