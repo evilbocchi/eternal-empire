@@ -1,13 +1,6 @@
 import Difficulty from "@rbxts/ejt";
 import { getAsset } from "shared/asset/AssetMap";
 
-export type DifficultyRewardId =
-    | "CandyCoatedConsultation"
-    | "GapMomentum"
-    | "NegativityNanobot"
-    | "UnimpossibleExcavationStone"
-    | "FriendlyDifficultySurge";
-
 export type DifficultyRewardCost = PercentageOfDifficultyPowerCost;
 
 export interface PercentageOfDifficultyPowerCost {
@@ -37,7 +30,7 @@ export interface RedeemRevenueEffect {
 export type DifficultyRewardEffect = WalkSpeedBuffEffect | GrantItemEffect | RedeemRevenueEffect;
 
 export interface DifficultyRewardDefinition {
-    id: DifficultyRewardId;
+    id: string;
     difficultyId: string;
     title: string;
     description: string;
@@ -144,7 +137,7 @@ definitions.push({
 });
 
 const perDifficulty = new Map<string, DifficultyRewardDefinition[]>();
-const byId = new Map<DifficultyRewardId, DifficultyRewardDefinition>();
+const byId = new Map<string, DifficultyRewardDefinition>();
 
 for (const definition of definitions) {
     let bucket = perDifficulty.get(definition.difficultyId);
@@ -169,7 +162,7 @@ export function getDifficultyRewards(difficulty: Difficulty | undefined) {
 }
 
 export function getDifficultyRewardById(id: string) {
-    return byId.get(id as DifficultyRewardId);
+    return byId.get(id);
 }
 
 export const DifficultyRewards = {
