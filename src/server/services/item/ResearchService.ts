@@ -281,5 +281,9 @@ export default class ResearchService implements OnStart {
             }
             return this.claimDifficultyReward(player, rewardId);
         });
+
+        this.broadcastResearchMultiplier();
+        Packets.researching.set(this.researching);
+        Packets.difficultyRewardCooldowns.set(this.difficultyRewardCooldowns);
     }
 }

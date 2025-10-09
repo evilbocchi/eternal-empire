@@ -758,7 +758,7 @@ function DifficultyRewardCard({
           ? "Ready to claim"
           : "Not enough Difficulty Power";
 
-    const buttonText = isCoolingDown ? `Cooldown: ${formatDurationShort(secondsRemaining)}` : "Claim Reward";
+    const buttonText = isCoolingDown ? formatDurationShort(secondsRemaining) : "Claim Reward";
 
     return (
         <frame
