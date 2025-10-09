@@ -7,6 +7,7 @@ export const assets = {
   "assets/Bitcoin.png": "rbxassetid://129505321077510",
   "assets/Bomb.png": "rbxassetid://101590625001359",
   "assets/Broken.png": "rbxassetid://125751564348119",
+  "assets/CandyResearchKit.png": "rbxassetid://99902616587478",
   "assets/Compass.png": "rbxassetid://100904920370270",
   "assets/ConveyorArrow.png": "rbxassetid://113705498753895",
   "assets/CopperAxe.png": "rbxassetid://100879651668612",

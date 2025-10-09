@@ -357,6 +357,11 @@ const EmpireProfileTemplate = {
     } as ItemsData,
 
     /**
+     * Tracks cooldown expirations for claimed difficulty rewards.
+     */
+    difficultyRewardCooldowns: new Map<string, number>(),
+
+    /**
      * The cached listings this empire has created. Used for quick access
      * to the empire's own listings without querying the datastore.
      */

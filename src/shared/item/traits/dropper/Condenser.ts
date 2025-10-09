@@ -147,6 +147,8 @@ export default class Condenser extends ItemTrait {
                 const lostCurrencies = RevenueService.performSoftcaps(lostValue);
                 CurrencyService.incrementAll(lostCurrencies);
                 Packets.dropletBurnt.toAllClients(droplet.Name, lostCurrencies);
+            } else {
+                Packets.dropletBurnt.toAllClients(droplet.Name, new Map());
             }
             const u = instanceInfo.Upgrades;
             if (u !== undefined) {

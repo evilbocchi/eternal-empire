@@ -59,7 +59,9 @@ export = CreateReactStory(
             };
         }, []);
 
-        Packets.useTool.fromClient((player, harvestable) => {
+        Packets.useTool.fromClient((player, payload) => {
+            const harvestable = payload?.target;
+            if (harvestable === undefined) return;
             harvestable.SetAttribute("Health", (harvestable.GetAttribute("Health") as number) - math.random(5, 100));
         });
 

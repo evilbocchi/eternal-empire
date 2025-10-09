@@ -1,4 +1,5 @@
 import type { BaseOnoeNum } from "@rbxts/serikanum";
+import { OnoeNum } from "@rbxts/serikanum";
 import type CameraShaker from "@rbxts/camera-shaker";
 import type { DataType } from "@rbxts/flamework-binary-serializer";
 import { exactMapProperty, exactSetProperty, packet, property } from "@rbxts/fletchette";
@@ -102,6 +103,10 @@ namespace Packets {
      */
     export const inventory = exactMapProperty<string, number>(EmpireProfileTemplate.items.inventory);
     export const researching = exactMapProperty<string, number>(EmpireProfileTemplate.items.researching);
+    export const difficultyRewardCooldowns = exactMapProperty<string, number>(
+        EmpireProfileTemplate.difficultyRewardCooldowns,
+    );
+    export const researchMultiplier = property<BaseOnoeNum>(new OnoeNum(1));
     export const bought = exactMapProperty<string, number>(EmpireProfileTemplate.items.bought);
     export const placedItems = exactMapProperty<string, DataType.Packed<PlacedItem>>(
         EmpireProfileTemplate.items.worldPlaced,
@@ -118,6 +123,7 @@ namespace Packets {
     export const brokenPlacedItems = exactSetProperty<string>(EmpireProfileTemplate.items.brokenPlacedItems);
     export const repairItem = packet<(placementId: string, tier: RepairResultTier) => boolean>();
     export const itemRepairCompleted = packet<(placementId: string, tier: RepairResultTier) => void>();
+    export const claimDifficultyReward = packet<(rewardId: string) => boolean>();
 
     // droplets
     export const dropletBurnt = packet<(dropletModelId: string, amountPerCurrency: BaseCurrencyMap) => void>({
@@ -216,7 +222,10 @@ namespace Packets {
     export const useBomb = packet<(bombType: Currency) => boolean>();
 
     // tools
-    export const useTool = packet<(harvestable: Instance) => void>({ isUnreliable: true });
+    export interface ToolUsePayload {
+        target?: Instance;
+    }
+    export const useTool = packet<(payload: ToolUsePayload) => void>({ isUnreliable: true });
 
     // visual
     export const shakeCamera = packet<(presetName: keyof typeof CameraShaker.Presets) => void>();

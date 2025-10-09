@@ -1,7 +1,9 @@
 import { OnStart, Service } from "@flamework/core";
+import CurrencyService from "server/services/data/CurrencyService";
 import DataService from "server/services/data/DataService";
 import ItemService from "server/services/item/ItemService";
 import eat from "shared/hamster/eat";
+import { getPlayerCharacter } from "shared/hamster/getPlayerCharacter";
 import Gear from "shared/item/traits/Gear";
 import Items from "shared/items/Items";
 import Packets from "shared/Packets";
@@ -15,6 +17,7 @@ export default class HarvestableService implements OnStart {
     constructor(
         private readonly dataService: DataService,
         private readonly itemService: ItemService,
+        private readonly currencyService: CurrencyService,
     ) {}
 
     /**
@@ -83,24 +86,51 @@ export default class HarvestableService implements OnStart {
             }
         }
         const lastUsePerPlayer = new Map<Player, number>();
-        const connection = Packets.useTool.fromClient((player, harvestable) => {
-            if (harvestable === undefined) return;
-            const character = player.Character;
+        const connection = Packets.useTool.fromClient((player, payload) => {
+            const harvestable = payload?.target;
+            const character = getPlayerCharacter(player);
             if (character === undefined) return;
             const rootPart = character.FindFirstChildOfClass("Humanoid")?.RootPart;
             if (rootPart === undefined) return;
             const tool = character.FindFirstChildOfClass("Tool");
-            if (tool === undefined || this.isWithin(tool, harvestable) !== true) return;
+            if (tool === undefined) return;
             const item = Items.getItem(tool.Name);
             if (item === undefined) return;
             const gear = item.findTrait("Gear");
             if (gear === undefined) return;
 
-            const lastUse = lastUsePerPlayer.get(player);
+            if (gear.onUse === undefined && harvestable === undefined) {
+                return;
+            }
+
+            const lastUse = player === undefined ? 0 : lastUsePerPlayer.get(player);
             const t = tick();
             if (lastUse !== undefined && t + 0.5 + 8 / (gear.speed ?? 1) < lastUse) return;
-            lastUsePerPlayer.set(player, t);
+            if (player !== undefined) {
+                lastUsePerPlayer.set(player, t);
+            }
+
+            if (gear.onUse !== undefined) {
+                const handled = gear.onUse({
+                    player,
+                    tool,
+                    gear,
+                    item,
+                    target: harvestable,
+                });
+                if (handled === true || harvestable === undefined) {
+                    return;
+                }
+            }
+
+            if (harvestable === undefined || this.isWithin(tool, harvestable) !== true) {
+                return;
+            }
+
             const harvestableData = HARVESTABLES[harvestable.Name as HarvestableId];
+            if (harvestableData === undefined) {
+                return;
+            }
             let damage = gear.type === harvestableData.tool ? gear.damage! : gear.damage! * 0.05;
             if (math.random(1, 100) / 100 <= this.getCritChance(gear)) {
                 damage *= 2;

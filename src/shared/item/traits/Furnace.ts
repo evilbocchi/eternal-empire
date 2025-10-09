@@ -23,6 +23,7 @@ declare global {
 
         /**
          * Fired when a droplet is processed by this furnace model.
+         * If this is not defined, the default packet {@link Packets.dropletBurnt} will be sent to all clients instead.
          * @param result The resulting value gained from processing the droplet.
          * @param genericResult The value of the droplet before any furnace modifications. This still includes global boosts and upgrades if specified from {@link Furnace.includesGlobalBoosts} and {@link Furnace.includesUpgrades}.
          * @param droplet The droplet being processed.
@@ -90,9 +91,13 @@ export default class Furnace extends Operative {
                 for (const [currency, amount] of result.amountPerCurrency) {
                     if (amount.equals(ZERO)) result.amountPerCurrency.delete(currency);
                 }
-                modelInfo.FurnaceProcessed?.(result, genericBoostedResult, droplet, dropletInfo);
                 const amountPerCurrency = result.amountPerCurrency;
-                Packets.dropletBurnt.toAllClients(droplet.Name, amountPerCurrency);
+                const furnaceProcessed = modelInfo.FurnaceProcessed;
+                if (furnaceProcessed !== undefined) {
+                    furnaceProcessed(result, genericBoostedResult, droplet, dropletInfo);
+                } else {
+                    Packets.dropletBurnt.toAllClients(droplet.Name, amountPerCurrency);
+                }
             });
         }
         item.maintain(model);

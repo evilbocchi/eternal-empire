@@ -1,11 +1,12 @@
+import { getInstanceInfo, setInstanceInfo } from "@antivivi/vrldk";
 import Difficulty from "@rbxts/ejt";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Droplet from "shared/item/Droplet";
 import Item from "shared/item/Item";
 import Dropper from "shared/item/traits/dropper/Dropper";
 import Furnace from "shared/item/traits/Furnace";
-import { getInstanceInfo, setInstanceInfo } from "@antivivi/vrldk";
 import Class0Shop from "shared/items/0/Class0Shop";
+import Packets from "shared/Packets";
 
 export = new Item(script.Name)
     .setName("Droplet Shatterer")
@@ -23,7 +24,8 @@ export = new Item(script.Name)
     .exit()
 
     .onLoad((model) => {
-        setInstanceInfo(model, "FurnaceProcessed", () => {
+        setInstanceInfo(model, "FurnaceProcessed", (_result, _genericResult, droplet) => {
             getInstanceInfo(model.WaitForChild("Drop"), "Instantiator")?.();
+            Packets.dropletBurnt.toAllClients(droplet.Name, new Map());
         });
     });

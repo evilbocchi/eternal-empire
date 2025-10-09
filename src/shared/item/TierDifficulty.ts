@@ -31,6 +31,8 @@ namespace TierDifficulty {
         .setColor(Color3.fromRGB(181, 245, 255))
         .setLayoutRating(4)
         .setClass(4);
+
+    export const TIERS = new Set([Tier1, Tier2, Tier3, Tier4]);
 }
 
 export = TierDifficulty;

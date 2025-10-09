@@ -6,6 +6,7 @@ import Item from "shared/item/Item";
 import Dropper from "shared/item/traits/dropper/Dropper";
 import Furnace from "shared/item/traits/Furnace";
 import ClassLowerNegativeShop from "shared/items/negative/ClassLowerNegativeShop";
+import Packets from "shared/Packets";
 
 export = new Item(script.Name)
     .setName("Recycling Dropper")
@@ -25,7 +26,8 @@ export = new Item(script.Name)
     .exit()
 
     .onLoad((model) => {
-        setInstanceInfo(model, "FurnaceProcessed", () => {
+        setInstanceInfo(model, "FurnaceProcessed", (_result, _genericResult, droplet) => {
             getInstanceInfo(model.WaitForChild("Drop"), "Instantiator")?.();
+            Packets.dropletBurnt.toAllClients(droplet.Name, new Map());
         });
     });

@@ -154,15 +154,17 @@ export default function BackpackWindow() {
                 const item = Items.getItem(currentTool.Name);
                 if (item === undefined) return;
                 const gear = item.findTrait("Gear");
-                if (gear === undefined || gear.type === "None") return;
+                if (gear === undefined) return;
+                const hasOnUse = gear.onUse !== undefined;
+                if (gear.type === "None" && !hasOnUse) return;
 
                 const t = tick();
                 if (lastUse + 8 / (gear.speed ?? 1) > t) return;
                 lastUse = t;
                 const registerHit = () => {
                     const hit = checkHarvestable(currentTool);
-                    if (hit === undefined) return;
-                    Packets.useTool.toServer(hit);
+                    if (hit === undefined && !hasOnUse) return;
+                    Packets.useTool.toServer({ target: hit });
                 };
                 if (IS_EDIT) {
                     registerHit();

@@ -1,3 +1,5 @@
+import type CurrencyService from "server/services/data/CurrencyService";
+import type ItemService from "server/services/item/ItemService";
 import Item from "shared/item/Item";
 import ItemTrait from "shared/item/traits/ItemTrait";
 
@@ -10,10 +12,21 @@ declare global {
 
 const GEAR_TYPES = ["Sword", "Pickaxe", "Axe", "Scythe", "Rod", "None"] as const;
 
+export interface GearUseContext {
+    player: Player;
+    tool: Tool;
+    gear: Gear;
+    item: Item;
+    target?: Instance;
+}
+
+export type GearOnUseHandler = (context: GearUseContext) => boolean | void;
+
 export default class Gear extends ItemTrait {
     type: GearType = "None";
     speed?: number;
     damage?: number;
+    onUse?: GearOnUseHandler;
 
     constructor(item: Item) {
         super(item);
@@ -31,6 +44,11 @@ export default class Gear extends ItemTrait {
 
     setDamage(damage: number) {
         this.damage = damage;
+        return this;
+    }
+
+    setOnUse(handler: GearOnUseHandler) {
+        this.onUse = handler;
         return this;
     }
 

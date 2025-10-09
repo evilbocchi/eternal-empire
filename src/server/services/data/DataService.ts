@@ -145,6 +145,9 @@ export default class DataService implements OnStart, OnPlayerAdded {
         if (items.researching === undefined) {
             items.researching = new Map();
         }
+        if (empireData.difficultyRewardCooldowns === undefined) {
+            empireData.difficultyRewardCooldowns = new Map();
+        }
         if (items.placed !== undefined) {
             for (const placedItem of items.placed) {
                 items.worldPlaced.set(
