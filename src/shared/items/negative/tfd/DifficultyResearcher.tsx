@@ -39,8 +39,8 @@ type OrbPart = Part & {
 
 const difficultyPacket = property<string | undefined>();
 const setDifficultyPacket = packet<(difficultyId: string) => boolean>();
-const addResearchPacket = packet<(itemId: string, amount: number) => boolean>();
-const removeResearchPacket = packet<(itemId: string, amount: number) => boolean>();
+const addResearchPacket = packet<(entries: Array<[string, number]>) => boolean>();
+const removeResearchPacket = packet<(entries: Array<[string, number]>) => boolean>();
 
 type ItemQuantityEntry = { item: Item; amount: number };
 
@@ -394,6 +394,8 @@ interface ResearchInfoProps {
     researchMultiplier: BaseOnoeNum;
     onAbsorb: (itemId: string, amount: number) => void;
     onRelease: (itemId: string, amount: number) => void;
+    onAbsorbAll: () => void;
+    onReleaseAll: () => void;
 }
 
 const ITEM_ROW_HEIGHT = 36;
@@ -725,6 +727,8 @@ function ResearchPanel({
     researchMultiplier,
     onAbsorb,
     onRelease,
+    onAbsorbAll,
+    onReleaseAll,
 }: ResearchInfoProps) {
     const availableCount = useMemo(() => {
         let count = 0;
@@ -735,20 +739,12 @@ function ResearchPanel({
     }, [availableEntries]);
 
     const handleAbsorbAll = useCallback(() => {
-        for (const entry of availableEntries) {
-            if (entry.amount > 0) {
-                onAbsorb(entry.item.id, entry.amount);
-            }
-        }
-    }, [availableEntries, onAbsorb]);
+        onAbsorbAll();
+    }, [onAbsorbAll]);
 
     const handleReleaseAll = useCallback(() => {
-        for (const entry of researchEntries) {
-            if (entry.amount > 0) {
-                onRelease(entry.item.id, entry.amount);
-            }
-        }
-    }, [researchEntries, onRelease]);
+        onReleaseAll();
+    }, [onReleaseAll]);
 
     return (
         <frame AutomaticSize={Enum.AutomaticSize.Y} BackgroundTransparency={1} Size={new UDim2(1, 0, 0, 0)}>
@@ -761,6 +757,7 @@ function ResearchPanel({
             <textlabel
                 BackgroundTransparency={1}
                 FontFace={RobotoMono}
+                LayoutOrder={0}
                 Size={new UDim2(1, 0, 0, 28)}
                 Text="Feed spare items to amplify difficulty power. Release them anytime."
                 TextColor3={Color3.fromRGB(180, 180, 220)}
@@ -772,6 +769,7 @@ function ResearchPanel({
             <textlabel
                 BackgroundTransparency={1}
                 FontFace={RobotoMonoBold}
+                LayoutOrder={1}
                 Size={new UDim2(1, 0, 0, 32)}
                 Text={`Available (${availableCount})`}
                 TextColor3={Color3.fromRGB(210, 210, 255)}
@@ -784,6 +782,7 @@ function ResearchPanel({
                 <textlabel
                     BackgroundTransparency={1}
                     FontFace={RobotoMono}
+                    LayoutOrder={2}
                     Size={new UDim2(1, 0, 0, 28)}
                     Text="No available items to research."
                     TextColor3={Color3.fromRGB(200, 200, 200)}
@@ -796,6 +795,7 @@ function ResearchPanel({
                         items={availableEntries}
                         itemHeight={ITEM_ROW_HEIGHT}
                         itemSpacing={ITEM_ROW_SPACING}
+                        layoutOrder={3}
                         maxVisibleHeight={MAX_VISIBLE_ITEM_LIST_HEIGHT}
                         renderItem={(entry, _index, context) => (
                             <AvailableEntryRow
@@ -814,6 +814,7 @@ function ResearchPanel({
                         BorderColor3={Color3.fromRGB(41, 41, 41)}
                         BorderSizePixel={3}
                         FontFace={RobotoMonoBold}
+                        LayoutOrder={3}
                         Size={new UDim2(0.5, 0, 0, 30)}
                         Text="Absorb All"
                         TextColor3={Color3.fromRGB(235, 235, 255)}
@@ -833,6 +834,7 @@ function ResearchPanel({
             <textlabel
                 BackgroundTransparency={1}
                 FontFace={RobotoMonoBold}
+                LayoutOrder={4}
                 Size={new UDim2(1, 0, 0, 40)}
                 Text={`Researching (${totalResearchCount})`}
                 TextColor3={Color3.fromRGB(210, 210, 255)}
@@ -846,6 +848,7 @@ function ResearchPanel({
                 <textlabel
                     BackgroundTransparency={1}
                     FontFace={RobotoMono}
+                    LayoutOrder={5}
                     Size={new UDim2(1, 0, 0, 28)}
                     Text="No active research."
                     TextColor3={Color3.fromRGB(200, 200, 200)}
@@ -857,6 +860,7 @@ function ResearchPanel({
                     items={researchEntries}
                     itemHeight={ITEM_ROW_HEIGHT}
                     itemSpacing={ITEM_ROW_SPACING}
+                    layoutOrder={5}
                     maxVisibleHeight={MAX_VISIBLE_ITEM_LIST_HEIGHT}
                     renderItem={(entry, _index, context) => (
                         <ActiveResearchRow
@@ -877,6 +881,7 @@ function ResearchPanel({
                     BorderColor3={Color3.fromRGB(41, 41, 41)}
                     BorderSizePixel={3}
                     FontFace={RobotoMonoBold}
+                    LayoutOrder={6}
                     Size={new UDim2(0.5, 0, 0, 30)}
                     Text="Release All"
                     TextColor3={Color3.fromRGB(255, 220, 240)}
@@ -1556,7 +1561,7 @@ function DifficultyResearcherGui({
     const handleAbsorb = useCallback(
         (itemId: string, amount: number) => {
             if (amount < 1) return;
-            const success = addResearchPacket.toServer(itemId, amount);
+            const success = addResearchPacket.toServer([[itemId, amount]]);
             playSound(success ? "ResearchStart.mp3" : "Error.mp3", selectPart);
         },
         [selectPart],
@@ -1565,11 +1570,33 @@ function DifficultyResearcherGui({
     const handleRelease = useCallback(
         (itemId: string, amount: number) => {
             if (amount < 1) return;
-            const success = removeResearchPacket.toServer(itemId, amount);
+            const success = removeResearchPacket.toServer([[itemId, amount]]);
             playSound(success ? "ResearchEnd.mp3" : "Error.mp3");
         },
         [selectPart],
     );
+
+    const handleAbsorbAll = useCallback(() => {
+        const payload = new Array<[string, number]>();
+        for (const entry of availableEntries) {
+            if (entry.amount <= 0) continue;
+            payload.push([entry.item.id, entry.amount]);
+        }
+        if (payload.isEmpty()) return;
+        const success = addResearchPacket.toServer(payload);
+        playSound(success ? "ResearchStart.mp3" : "Error.mp3", selectPart);
+    }, [availableEntries, selectPart]);
+
+    const handleReleaseAll = useCallback(() => {
+        const payload = new Array<[string, number]>();
+        for (const entry of researchEntries) {
+            if (entry.amount <= 0) continue;
+            payload.push([entry.item.id, entry.amount]);
+        }
+        if (payload.isEmpty()) return;
+        const success = removeResearchPacket.toServer(payload);
+        playSound(success ? "ResearchEnd.mp3" : "Error.mp3");
+    }, [researchEntries]);
 
     useEffect(() => {
         const label = revenueLabelRef.current;
@@ -1629,8 +1656,19 @@ function DifficultyResearcherGui({
             researchMultiplier,
             onAbsorb: handleAbsorb,
             onRelease: handleRelease,
+            onAbsorbAll: handleAbsorbAll,
+            onReleaseAll: handleReleaseAll,
         }),
-        [availableEntries, researchEntries, totalResearchCount, researchMultiplier, handleAbsorb, handleRelease],
+        [
+            availableEntries,
+            researchEntries,
+            totalResearchCount,
+            researchMultiplier,
+            handleAbsorb,
+            handleRelease,
+            handleAbsorbAll,
+            handleReleaseAll,
+        ],
     );
 
     const rewardInfo = useMemo<DifficultyRewardsSectionProps>(
@@ -1740,28 +1778,14 @@ export = new Item(script.Name)
             return true;
         });
 
-        addResearchPacket.fromClient((player, itemId, amount) => {
+        addResearchPacket.fromClient((player, entries) => {
             if (!Server.Permissions.checkPermLevel(player, "build")) return false;
-
-            const sanitizedAmount = math.floor(math.clamp(amount, 1, 1e6));
-            if (sanitizedAmount < 1) return false;
-
-            const item = Server.Items.itemsPerId.get(itemId);
-            if (item === undefined) return false;
-            if (item.isA("Unique")) return false;
-
-            return Server.Research.reserveItemsForResearch(itemId, sanitizedAmount);
+            return Server.Research.reserveItemsForResearch(entries);
         });
 
-        removeResearchPacket.fromClient((player, itemId, amount) => {
+        removeResearchPacket.fromClient((player, entries) => {
             if (!Server.Permissions.checkPermLevel(player, "build")) return false;
-
-            const sanitizedAmount = math.floor(math.clamp(amount, 1, 1e6));
-            if (sanitizedAmount < 1) return false;
-
-            if (!Server.Items.itemsPerId.has(itemId)) return false;
-
-            return Server.Research.releaseItemsFromResearch(itemId, sanitizedAmount);
+            return Server.Research.releaseItemsFromResearch(entries);
         });
     })
     .onLoad((model) => {

@@ -62,48 +62,86 @@ export default class ResearchService implements OnStart {
         return true;
     }
 
-    /**
-     * Reserves items for research if available.
-     *
-     * @param itemId The ID of the item to reserve.
-     * @param amount The amount of the item to reserve.
-     * @returns True if reservation succeeded, false otherwise.
-     */
-    reserveItemsForResearch(itemId: string, amount: number) {
-        if (amount < 1) return false;
+    reserveItemsForResearch(entries: ReadonlyArray<[string, number]>) {
+        if (entries.isEmpty()) return false;
 
-        const item = Items.getItem(itemId);
-        if (item === undefined) return false;
-        if (!this.isItemEligibleForResearch(item)) return false;
+        const aggregated = new Map<string, number>();
+        const MAX_ENTRIES = 512;
+        let processed = 0;
 
-        const available = this.itemService.getAvailableItemAmount(itemId);
-        if (available < amount) return false;
+        for (const [itemId, rawAmount] of entries) {
+            if (processed++ >= MAX_ENTRIES) break;
+            if (!typeIs(itemId, "string")) continue;
+            if (!typeIs(rawAmount, "number")) continue;
+            if (rawAmount !== rawAmount || rawAmount === math.huge || rawAmount === -math.huge) continue;
+            const sanitized = math.floor(math.clamp(rawAmount, 0, 1e6));
+            if (sanitized <= 0) continue;
+            aggregated.set(itemId, (aggregated.get(itemId) ?? 0) + sanitized);
+        }
 
-        const current = this.itemService.getResearchingAmount(itemId);
-        this.researching.set(itemId, current + amount);
+        if (aggregated.isEmpty()) return false;
+
+        let changed = false;
+        for (const [itemId, amount] of aggregated) {
+            const item = Items.getItem(itemId);
+            if (item === undefined) continue;
+            if (!this.isItemEligibleForResearch(item)) continue;
+
+            const available = this.itemService.getAvailableItemAmount(itemId);
+            if (available <= 0) continue;
+
+            const toReserve = math.min(amount, available);
+            if (toReserve <= 0) continue;
+
+            const current = this.itemService.getResearchingAmount(itemId);
+            this.researching.set(itemId, current + toReserve);
+            changed = true;
+        }
+
+        if (!changed) return false;
+
         Packets.researching.set(this.researching);
         this.broadcastResearchMultiplier();
         return true;
     }
 
-    /**
-     * Releases items from research back into the available pool.
-     *
-     * @param itemId The ID of the item to release.
-     * @param amount The amount of the item to release.
-     * @returns True if release succeeded, false otherwise.
-     */
-    releaseItemsFromResearch(itemId: string, amount: number) {
-        if (amount < 1) return false;
+    releaseItemsFromResearch(entries: ReadonlyArray<[string, number]>) {
+        if (entries.isEmpty()) return false;
 
-        const current = this.itemService.getResearchingAmount(itemId);
-        if (current < amount) return false;
+        const aggregated = new Map<string, number>();
+        const MAX_ENTRIES = 512;
+        let processed = 0;
 
-        if (current === amount) {
-            this.researching.delete(itemId);
-        } else {
-            this.researching.set(itemId, current - amount);
+        for (const [itemId, rawAmount] of entries) {
+            if (processed++ >= MAX_ENTRIES) break;
+            if (!typeIs(itemId, "string")) continue;
+            if (!typeIs(rawAmount, "number")) continue;
+            if (rawAmount !== rawAmount || rawAmount === math.huge || rawAmount === -math.huge) continue;
+            const sanitized = math.floor(math.clamp(rawAmount, 0, 1e6));
+            if (sanitized <= 0) continue;
+            aggregated.set(itemId, (aggregated.get(itemId) ?? 0) + sanitized);
         }
+
+        if (aggregated.isEmpty()) return false;
+
+        let changed = false;
+        for (const [itemId, amount] of aggregated) {
+            const current = this.itemService.getResearchingAmount(itemId);
+            if (current <= 0) continue;
+
+            const toRelease = math.min(amount, current);
+            if (toRelease <= 0) continue;
+
+            if (current === toRelease) {
+                this.researching.delete(itemId);
+            } else {
+                this.researching.set(itemId, current - toRelease);
+            }
+            changed = true;
+        }
+
+        if (!changed) return false;
+
         Packets.researching.set(this.researching);
         this.broadcastResearchMultiplier();
         return true;
