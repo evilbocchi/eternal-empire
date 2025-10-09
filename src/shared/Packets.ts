@@ -107,6 +107,9 @@ namespace Packets {
     export const difficultyRewardCooldowns = exactMapProperty<string, number>(
         EmpireProfileTemplate.difficultyRewardCooldowns,
     );
+    export const difficultyRewardPurchases = exactMapProperty<string, number>(
+        EmpireProfileTemplate.difficultyRewardPurchaseCounts,
+    );
     export const researchMultiplier = property<BaseOnoeNum>(new OnoeNum(1));
     export const bought = exactMapProperty<string, number>(EmpireProfileTemplate.items.bought);
     export const placedItems = exactMapProperty<string, DataType.Packed<PlacedItem>>(

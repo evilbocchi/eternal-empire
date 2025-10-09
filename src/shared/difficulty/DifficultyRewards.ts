@@ -1,4 +1,5 @@
 import Difficulty from "@rbxts/ejt";
+import { OnoeNum } from "@rbxts/serikanum";
 import { getAsset } from "shared/asset/AssetMap";
 
 export type DifficultyRewardCost = PercentageOfDifficultyPowerCost;
@@ -27,16 +28,22 @@ export interface RedeemRevenueEffect {
     currencies: Currency[];
 }
 
-export interface IncreaseFurnaceDifficultyPowerGainEffect {
-    kind: "increaseFurnaceDifficultyPowerGain";
-    amount: number;
+export interface IncreaseDifficultyPowerAddEffect {
+    kind: "increaseDifficultyPowerAdd";
+    amount: OnoeNum;
+}
+
+export interface IncreaseDifficultyPowerMulEffect {
+    kind: "increaseDifficultyPowerMul";
+    amount: OnoeNum;
 }
 
 export type DifficultyRewardEffect =
     | WalkSpeedBuffEffect
     | GrantItemEffect
     | RedeemRevenueEffect
-    | IncreaseFurnaceDifficultyPowerGainEffect;
+    | IncreaseDifficultyPowerAddEffect
+    | IncreaseDifficultyPowerMulEffect;
 
 export interface DifficultyRewardDefinition {
     id: string;
@@ -48,9 +55,28 @@ export interface DifficultyRewardDefinition {
     cooldownSeconds: number;
     cost: DifficultyRewardCost;
     effect: DifficultyRewardEffect;
+    maxClaims?: number;
 }
 
 const definitions = new Array<DifficultyRewardDefinition>();
+
+definitions.push({
+    id: "TheFirstResearch",
+    difficultyId: Difficulty.TheFirstDifficulty.id,
+    title: "The First Research",
+    description: "In exchange for 5% of your current Difficulty Power, increase Difficulty Power gain by 1.",
+    icon: getAsset("assets/DifficultyPower.png"),
+    cooldownSeconds: 5,
+    cost: {
+        kind: "percentageOfDifficultyPower",
+        percentage: 0.05,
+        minimum: 10,
+    },
+    effect: {
+        kind: "increaseDifficultyPowerAdd",
+        amount: new OnoeNum(1),
+    },
+});
 
 definitions.push({
     id: "CandyCoatedConsultation",
@@ -91,29 +117,29 @@ definitions.push({
 });
 
 definitions.push({
-    id: "GapAcceleration",
+    id: "GapResearchRush",
     difficultyId: Difficulty.TheLowerGap.id,
-    title: "Gap Acceleration",
-    description:
-        "In exchange for 5% of your current Difficulty Power, increase furnace Difficulty Power gain by 1 whenever a droplet is processed.",
+    title: "Gap Research Rush",
+    description: "Claim a permanent x2 Difficulty Power research boost. This reward can only be taken twice.",
     icon: getAsset("assets/DifficultyPower.png"),
-    cooldownSeconds: 5,
+    cooldownSeconds: 0,
     cost: {
         kind: "percentageOfDifficultyPower",
-        percentage: 0.05,
-        minimum: 10,
+        percentage: 0,
+        minimum: 100,
     },
     effect: {
-        kind: "increaseFurnaceDifficultyPowerGain",
-        amount: 1,
+        kind: "increaseDifficultyPowerMul",
+        amount: new OnoeNum(2),
     },
+    maxClaims: 2,
 });
 
 definitions.push({
     id: "NegativityNanobot",
     difficultyId: Difficulty.Negativity.id,
     title: "Nanobot Redeemer",
-    description: "Redeem 75% of your Difficulty Power (minimum 1,000) for a Basic Nanobot to deploy.",
+    description: "Redeem a Basic Nanobot to automatically repair your items.",
     icon: getAsset("assets/PortableBeacon.png"),
     viewportItemId: "BasicNanobot",
     cooldownSeconds: 5 * 60,
@@ -176,8 +202,8 @@ definitions.push({
         percentage: 0,
     },
     effect: {
-        kind: "increaseFurnaceDifficultyPowerGain",
-        amount: 1000,
+        kind: "increaseDifficultyPowerAdd",
+        amount: new OnoeNum(1000),
     },
 });
 

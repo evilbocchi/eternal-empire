@@ -12,6 +12,7 @@ import Item from "shared/item/Item";
 import Items from "shared/items/Items";
 import Packets from "shared/Packets";
 import DifficultyResearch from "shared/difficulty/DifficultyResearch";
+import Operative from "shared/item/traits/Operative";
 
 type WalkSpeedBuffState = {
     amount: number;
@@ -248,6 +249,13 @@ export default class ResearchService implements OnStart {
             return false;
         }
 
+        if (reward.maxClaims !== undefined) {
+            const purchaseCount = this.getRewardPurchaseCount(reward.id);
+            if (purchaseCount >= reward.maxClaims) {
+                return false;
+            }
+        }
+
         const now = os.time();
         const cooldownExpiresAt = this.difficultyRewardCooldowns.get(reward.id);
         if (cooldownExpiresAt !== undefined && cooldownExpiresAt > now) {
@@ -304,6 +312,10 @@ export default class ResearchService implements OnStart {
                 }
                 break;
             }
+            case "increaseDifficultyPowerAdd":
+            case "increaseDifficultyPowerMul": {
+                break;
+            }
         }
 
         this.incrementRewardPurchaseCount(reward.id, 1);
@@ -320,6 +332,7 @@ export default class ResearchService implements OnStart {
         if (sanitized <= 0) return;
         const current = this.difficultyRewardPurchaseCounts.get(rewardId) ?? 0;
         this.difficultyRewardPurchaseCounts.set(rewardId, current + sanitized);
+        Packets.difficultyRewardPurchases.set(this.difficultyRewardPurchaseCounts);
     }
 
     /**
@@ -333,19 +346,26 @@ export default class ResearchService implements OnStart {
     }
 
     /**
-     * Calculates the flat additive bonus to Difficulty Power generation provided by purchased rewards.
+     * Calculates the flat bonus to Difficulty Power generation provided by purchased rewards.
      * @returns The flat bonus to add to Difficulty Power generation.
      */
-    getFurnaceDifficultyPowerBonus() {
-        let bonus = 0;
+    getDifficultyPowerBonus() {
+        let totalAdd = new OnoeNum(0);
+        let totalMul = new OnoeNum(1);
         for (const [rewardId, count] of this.difficultyRewardPurchaseCounts) {
             if (count <= 0) continue;
             const definition = getDifficultyRewardById(rewardId);
             if (definition === undefined) continue;
-            if (definition.effect.kind !== "increaseFurnaceDifficultyPowerGain") continue;
-            bonus += count * definition.effect.amount;
+            if (definition.effect.kind === "increaseDifficultyPowerAdd") {
+                totalAdd = totalAdd.add(definition.effect.amount.mul(count));
+                continue;
+            }
+            if (definition.effect.kind === "increaseDifficultyPowerMul") {
+                const multiplier = definition.effect.amount;
+                totalMul = totalMul.mul(multiplier.pow(count));
+            }
         }
-        return bonus;
+        return $tuple(totalAdd, totalMul);
     }
 
     /**
@@ -410,7 +430,9 @@ export default class ResearchService implements OnStart {
 
         this.broadcastResearchMultiplier();
         this.updateUnlockedDifficulties();
+        Packets.unlockedDifficulties.set(this.unlockedDifficulties);
         Packets.researching.set(this.researching);
         Packets.difficultyRewardCooldowns.set(this.difficultyRewardCooldowns);
+        Packets.difficultyRewardPurchases.set(this.difficultyRewardPurchaseCounts);
     }
 }

@@ -106,14 +106,6 @@ function computeOrbVisualTargets(multiplier: BaseOnoeNum) {
     };
 }
 
-function cloneDifficultySet(source: ReadonlySet<string>) {
-    const clone = new Set<string>();
-    for (const difficultyId of source) {
-        clone.add(difficultyId);
-    }
-    return clone;
-}
-
 interface TabSwitcherProps {
     activePage: "difficulties" | "research";
     onChange: (page: "difficulties" | "research") => void;
@@ -178,14 +170,13 @@ interface DifficultyCarouselProps {
     selectPart: BasePart;
     requirements: Map<string, OnoeNum>;
     playerDifficultyPower: OnoeNum;
-    unlockedDifficulties: ReadonlySet<string>;
+    unlockedDifficulties: Set<string>;
 }
 
 function DifficultyCarousel({
     difficultyList,
     selectPart,
     requirements,
-    playerDifficultyPower,
     unlockedDifficulties,
 }: DifficultyCarouselProps) {
     return (
@@ -301,7 +292,7 @@ interface DifficultySelectionSurfaceProps {
     difficultyRequirements: Map<string, OnoeNum>;
     playerDifficultyPower: OnoeNum;
     nextUnlockRequirement?: OnoeNum;
-    unlockedDifficulties: ReadonlySet<string>;
+    unlockedDifficulties: Set<string>;
 }
 
 function DifficultySelectionSurface({
@@ -879,7 +870,14 @@ function getRewardCostLabel(reward: DifficultyRewardDefinition, playerDifficulty
                 cost = minimum;
             }
         }
-        return $tuple(`${OnoeNum.toString(cost)} (${math.floor(reward.cost.percentage * 100 * 100) / 100}%)`, cost);
+        if (cost.lessEquals(0)) {
+            return $tuple("Free!", cost);
+        }
+
+        return $tuple(
+            `${math.floor(reward.cost.percentage * 100 * 100) / 100}% of your Difficulty Power (${OnoeNum.toString(cost)})`,
+            cost,
+        );
     }
     return $tuple("Free!", new OnoeNum(0));
 }
@@ -900,6 +898,7 @@ interface DifficultyRewardCardProps {
     reward: DifficultyRewardDefinition;
     playerDifficultyPower: OnoeNum;
     cooldowns: Map<string, number>;
+    purchases: Map<string, number>;
     onClaim: (rewardId: string) => void;
 }
 
@@ -908,6 +907,7 @@ function DifficultyRewardCard({
     reward,
     playerDifficultyPower,
     cooldowns,
+    purchases,
     onClaim,
 }: DifficultyRewardCardProps) {
     const [costText, cost] = useMemo(
@@ -916,6 +916,10 @@ function DifficultyRewardCard({
     );
     const viewportRef = useRef<ViewportFrame>();
     useItemViewport(viewportRef, reward.viewportItemId ?? "");
+
+    const purchaseCount = purchases.get(reward.id) ?? 0;
+    const maxClaims = reward.maxClaims;
+    const hasReachedMaxClaims = maxClaims !== undefined && purchaseCount >= maxClaims;
 
     const cooldownExpiresAt = cooldowns.get(reward.id);
     const computeSecondsRemaining = useCallback(() => {
@@ -944,47 +948,52 @@ function DifficultyRewardCard({
 
     const isCoolingDown = secondsRemaining > 0;
     const isAffordable = !playerDifficultyPower.lessThan(cost);
-    const buttonDisabled = isCoolingDown || !isAffordable;
 
     const payoutText = useMemo(() => {
         switch (reward.effect.kind) {
             case "walkSpeedBuff": {
                 const durationText = formatDurationShort(reward.effect.durationSeconds);
-                return `Effect: +${reward.effect.amount} WalkSpeed for ${durationText}.`;
+                return `Effect: +${reward.effect.amount} walkspeed for ${durationText}.`;
             }
             case "grantItem": {
                 const amount = reward.effect.amount ?? 1;
                 const item = Server.Items.itemsPerId.get(reward.effect.itemId);
                 const itemName = item?.name ?? reward.effect.itemId;
-                const amountSuffix = amount > 1 ? ` x${amount}` : "";
-                return `Reward: ${itemName}${amountSuffix}.`;
+                return `Reward: ${itemName} x${amount}.`;
             }
             case "redeemRevenue": {
                 const durationText = formatDurationShort(reward.effect.seconds);
                 const currencies = combineHumanReadable(...reward.effect.currencies);
                 return `Reward: Redeem ${durationText} of ${currencies}.`;
             }
-            case "increaseFurnaceDifficultyPowerGain": {
-                const amount = math.max(reward.effect.amount, 0);
-                const formatted = amount === 1 ? "+1" : `+${amount}`;
-                return `Reward: Permanently ${formatted} Difficulty Power per furnace process.`;
+            case "increaseDifficultyPowerAdd": {
+                return `Reward: +${reward.effect.amount.toString()} Difficulty Power per furnace process.`;
+            }
+            case "increaseDifficultyPowerMul": {
+                return `Reward: x${reward.effect.amount.toString()} Difficulty Power research rate.`;
             }
         }
     }, [reward]);
 
-    const statusColor = isCoolingDown
-        ? Color3.fromRGB(255, 139, 170)
-        : isAffordable
-          ? Color3.fromRGB(165, 255, 181)
-          : Color3.fromRGB(255, 200, 150);
+    let statusColor = Color3.fromRGB(255, 200, 150);
+    if (hasReachedMaxClaims) {
+        statusColor = Color3.fromRGB(185, 205, 255);
+    } else if (isCoolingDown) {
+        statusColor = Color3.fromRGB(255, 139, 170);
+    } else if (isAffordable) {
+        statusColor = Color3.fromRGB(165, 255, 181);
+    }
 
-    const statusText = isCoolingDown
-        ? `Cooldown: ${formatDurationShort(secondsRemaining)}`
-        : isAffordable
-          ? "Ready to claim"
-          : "Not enough Difficulty Power";
+    let buttonText = "Cannot Afford";
+    if (hasReachedMaxClaims) {
+        buttonText = "Claimed";
+    } else if (isCoolingDown) {
+        buttonText = formatDurationShort(secondsRemaining);
+    } else if (isAffordable) {
+        buttonText = "Claim Reward";
+    }
 
-    const buttonText = isCoolingDown ? formatDurationShort(secondsRemaining) : "Claim Reward";
+    const buttonDisabled = hasReachedMaxClaims || isCoolingDown || !isAffordable;
 
     return (
         <frame
@@ -1069,7 +1078,7 @@ function DifficultyRewardCard({
                 FontFace={RobotoMono}
                 RichText={true}
                 Size={new UDim2(1, 0, 0, 0)}
-                Text={`Cost: <font color="#FFC0FF">${costText}</font> Difficulty Power`}
+                Text={`Cost: <font color="#FFC0FF">${costText}</font>`}
                 TextColor3={Color3.fromRGB(255, 255, 255)}
                 TextSize={20}
                 TextWrapped={true}
@@ -1087,17 +1096,21 @@ function DifficultyRewardCard({
                 TextWrapped={true}
                 TextXAlignment={Enum.TextXAlignment.Left}
             />
-            <textlabel
-                AutomaticSize={Enum.AutomaticSize.Y}
-                BackgroundTransparency={1}
-                FontFace={RobotoMonoBold}
-                Size={new UDim2(1, 0, 0, 0)}
-                Text={statusText}
-                TextColor3={statusColor}
-                TextSize={20}
-                TextWrapped={true}
-                TextXAlignment={Enum.TextXAlignment.Left}
-            />
+            {maxClaims !== undefined ? (
+                <textlabel
+                    AutomaticSize={Enum.AutomaticSize.Y}
+                    BackgroundTransparency={1}
+                    FontFace={RobotoMono}
+                    Size={new UDim2(1, 0, 0, 0)}
+                    Text={`Claims: ${math.min(purchaseCount, maxClaims)} / ${maxClaims}`}
+                    TextColor3={statusColor}
+                    TextSize={20}
+                    TextWrapped={true}
+                    TextXAlignment={Enum.TextXAlignment.Left}
+                />
+            ) : (
+                <Fragment />
+            )}
 
             <textbutton
                 Active={!buttonDisabled}
@@ -1127,6 +1140,7 @@ interface DifficultyRewardsSectionProps {
     rewards: DifficultyRewardDefinition[];
     playerDifficultyPower: OnoeNum;
     cooldowns: Map<string, number>;
+    purchases: Map<string, number>;
     onClaim: (rewardId: string) => void;
 }
 
@@ -1134,6 +1148,7 @@ function DifficultyRewardsSection({
     rewards,
     playerDifficultyPower,
     cooldowns,
+    purchases,
     onClaim,
 }: DifficultyRewardsSectionProps) {
     return (
@@ -1145,17 +1160,17 @@ function DifficultyRewardsSection({
                 VerticalAlignment={Enum.VerticalAlignment.Top}
             />
             <textlabel
-                AutomaticSize={Enum.AutomaticSize.Y}
                 BackgroundTransparency={1}
                 FontFace={RobotoMonoBold}
-                Size={new UDim2(1, 0, 0, 0)}
+                Size={new UDim2(1, 0, 0, 45)}
                 Text="Difficulty Rewards"
                 TextColor3={Color3.fromRGB(255, 255, 255)}
-                TextSize={30}
+                TextScaled={true}
                 TextWrapped={true}
                 TextXAlignment={Enum.TextXAlignment.Left}
             >
-                <uistroke Thickness={2} />
+                <uistroke Thickness={3} />
+                <uipadding PaddingTop={new UDim(0, 15)} />
             </textlabel>
             {rewards.isEmpty() ? (
                 <textlabel
@@ -1179,6 +1194,7 @@ function DifficultyRewardsSection({
                     reward={reward}
                     playerDifficultyPower={playerDifficultyPower}
                     cooldowns={cooldowns}
+                    purchases={purchases}
                     onClaim={onClaim}
                 />
             ))}
@@ -1265,6 +1281,7 @@ function DescriptionPanel({
                             rewards={rewardInfo.rewards}
                             playerDifficultyPower={rewardInfo.playerDifficultyPower}
                             cooldowns={rewardInfo.cooldowns}
+                            purchases={rewardInfo.purchases}
                             onClaim={rewardInfo.onClaim}
                         />
                     </Fragment>
@@ -1375,11 +1392,12 @@ function DifficultyResearcherGui({
     const [inventory, setInventory] = useState<Map<string, number>>(Packets.inventory.get());
     const [researchingState, setResearchingState] = useState<Map<string, number>>(Packets.researching.get());
     const [researchMultiplier, setResearchMultiplier] = useState(Packets.researchMultiplier.get());
-    const [unlockedDifficulties, setUnlockedDifficulties] = useState<Set<string>>(() =>
-        cloneDifficultySet(Packets.unlockedDifficulties.get()),
-    );
+    const [unlockedDifficulties, setUnlockedDifficulties] = useState<Set<string>>(Packets.unlockedDifficulties.get());
     const [rewardCooldowns, setRewardCooldowns] = useState<Map<string, number>>(
         Packets.difficultyRewardCooldowns.get(),
+    );
+    const [rewardPurchases, setRewardPurchases] = useState<Map<string, number>>(
+        Packets.difficultyRewardPurchases.get(),
     );
 
     const orbVisualDefaults = useMemo<OrbVisualDefaults>(() => {
@@ -1469,11 +1487,15 @@ function DifficultyResearcherGui({
             setResearchMultiplier(IS_EDIT ? table.clone(incoming) : incoming);
         });
         const unlockedDifficultiesConnection = Packets.unlockedDifficulties.observe((incoming) => {
-            setUnlockedDifficulties(cloneDifficultySet(incoming));
+            setUnlockedDifficulties(IS_EDIT ? table.clone(incoming) : incoming);
         });
         const rewardCooldownConnection = Packets.difficultyRewardCooldowns.observe((incoming) => {
             const mapped = incoming ?? new Map<string, number>();
             setRewardCooldowns(IS_EDIT ? table.clone(mapped) : mapped);
+        });
+        const rewardPurchaseConnection = Packets.difficultyRewardPurchases.observe((incoming) => {
+            const mapped = incoming ?? new Map<string, number>();
+            setRewardPurchases(IS_EDIT ? table.clone(mapped) : mapped);
         });
         return () => {
             balanceConnection.Disconnect();
@@ -1482,6 +1504,7 @@ function DifficultyResearcherGui({
             researchMultiplierConnection.Disconnect();
             unlockedDifficultiesConnection.Disconnect();
             rewardCooldownConnection.Disconnect();
+            rewardPurchaseConnection.Disconnect();
         };
     }, []);
 
@@ -1664,9 +1687,10 @@ function DifficultyResearcherGui({
             rewards: difficultyRewards,
             playerDifficultyPower,
             cooldowns: rewardCooldowns,
+            purchases: rewardPurchases,
             onClaim: handleClaimReward,
         }),
-        [difficultyRewards, playerDifficultyPower, rewardCooldowns, handleClaimReward],
+        [difficultyRewards, playerDifficultyPower, rewardCooldowns, rewardPurchases, handleClaimReward],
     );
 
     return (
@@ -1792,13 +1816,16 @@ export = new Item(script.Name)
                         delta = delta.add(amount);
                         break;
                     case CURRENCY_CATEGORIES.Misc:
-                        delta = delta.add(amount.mul(0.005).pow(0.5).log(10) ?? 0);
+                        delta = delta.add(amount.pow(0.5).log(10) ?? 0);
                         break;
                 }
             }
-            const furnaceBonus = Server.Research.getFurnaceDifficultyPowerBonus();
-            if (furnaceBonus > 0) {
-                delta = delta.add(furnaceBonus);
+            const [bonusAdd, bonusMul] = Server.Research.getDifficultyPowerBonus();
+            if (bonusAdd.moreThan(0)) {
+                delta = delta.add(bonusAdd);
+            }
+            if (bonusMul.moreThan(1)) {
+                delta = delta.mul(bonusMul);
             }
             const multiplier = Server.Research.calculateResearchMultiplier();
             if (multiplier.moreEquals(1)) {
