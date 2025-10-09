@@ -123,6 +123,7 @@ export const assets = {
   "assets/sounds/CheckOn.mp3": "rbxassetid://129001295242437",
   "assets/sounds/ChestOpen.mp3": "rbxassetid://114654897262684",
   "assets/sounds/Click.mp3": "rbxassetid://81423183430817",
+  "assets/sounds/Consume.mp3": "rbxassetid://70790964521318",
   "assets/sounds/Critical.mp3": "rbxassetid://87485517602396",
   "assets/sounds/CrystalDink.mp3": "rbxassetid://133502359334647",
   "assets/sounds/DefaultText.mp3": "rbxassetid://88345654555082",

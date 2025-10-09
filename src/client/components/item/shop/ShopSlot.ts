@@ -5,7 +5,7 @@
 import { OnoeNum } from "@rbxts/serikanum";
 import { TweenService } from "@rbxts/services";
 import displayBalanceCurrency from "client/components/balance/displayBalanceCurrency";
-import ItemViewport from "client/components/item/ItemViewport";
+import ItemViewport from "shared/item/ItemViewport";
 import { getAsset } from "shared/asset/AssetMap";
 import { RobotoSlabHeavy } from "shared/asset/GameFonts";
 import CurrencyBundle from "shared/currency/CurrencyBundle";

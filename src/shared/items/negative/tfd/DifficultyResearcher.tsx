@@ -14,6 +14,7 @@ import CurrencyBundle from "shared/currency/CurrencyBundle";
 import { CURRENCY_CATEGORIES, CURRENCY_DETAILS } from "shared/currency/CurrencyDetails";
 import { getDifficultyRewards, type DifficultyRewardDefinition } from "shared/item/DifficultyRewards";
 import Item from "shared/item/Item";
+import { useItemViewport } from "shared/item/ItemViewport";
 import TierDifficulty from "shared/item/TierDifficulty";
 import Furnace from "shared/item/traits/Furnace";
 import Generator from "shared/item/traits/generator/Generator";
@@ -715,6 +716,8 @@ function DifficultyRewardCard({
 }: DifficultyRewardCardProps) {
     const cost = useMemo(() => computeRewardCost(reward, playerDifficultyPower), [reward, playerDifficultyPower]);
     const costText = useMemo(() => OnoeNum.toString(cost), [cost]);
+    const viewportRef = useRef<ViewportFrame>();
+    useItemViewport(viewportRef, reward.viewportItemId ?? "");
 
     const cooldownExpiresAt = cooldowns.get(reward.id);
     const secondsRemaining = cooldownExpiresAt !== undefined ? math.max(cooldownExpiresAt - now, 0) : 0;
@@ -724,21 +727,6 @@ function DifficultyRewardCard({
 
     const payoutText = useMemo(() => {
         switch (reward.effect.kind) {
-            case "candyOfflineRevenue": {
-                const payout = new Map<Currency, OnoeNum>();
-                for (const [currency, amount] of revenuePerSecond) {
-                    if (amount === undefined) continue;
-                    const perSecond = new OnoeNum(amount);
-                    const total = perSecond.mul(reward.effect.revenueSeconds);
-                    if (total.lessEquals(0)) continue;
-                    payout.set(currency, total);
-                }
-                if (payout.size() === 0) {
-                    return `Est. payout (${reward.effect.revenueSeconds}s): <font color="#FF8BAA">No revenue data yet</font>.`;
-                }
-                const formatted = CurrencyBundle.currenciesToString(payout, true);
-                return `Est. payout (${reward.effect.revenueSeconds}s): ${formatted}`;
-            }
             case "walkSpeedBuff": {
                 const durationText = formatDurationShort(reward.effect.durationSeconds);
                 return `Effect: +${reward.effect.amount} WalkSpeed for ${durationText}.`;
@@ -803,12 +791,23 @@ function DifficultyRewardCard({
                     SortOrder={Enum.SortOrder.LayoutOrder}
                     HorizontalAlignment={Enum.HorizontalAlignment.Left}
                 />
-                <imagelabel
-                    BackgroundTransparency={1}
-                    Size={new UDim2(0, 26, 0, 26)}
-                    Image={reward.icon}
-                    ScaleType={Enum.ScaleType.Fit}
-                />
+                {reward.viewportItemId !== undefined ? (
+                    <viewportframe
+                        ref={viewportRef}
+                        Ambient={new Color3(0.6, 0.6, 0.6)}
+                        LightDirection={new Vector3(0, -1, -0.5)}
+                        LightColor={new Color3(1, 1, 1)}
+                        BackgroundTransparency={1}
+                        Size={new UDim2(0, 32, 0, 32)}
+                    />
+                ) : (
+                    <imagelabel
+                        BackgroundTransparency={1}
+                        Size={new UDim2(0, 26, 0, 26)}
+                        Image={reward.icon}
+                        ScaleType={Enum.ScaleType.Fit}
+                    />
+                )}
                 <textlabel
                     AutomaticSize={Enum.AutomaticSize.Y}
                     BackgroundTransparency={1}
@@ -1306,7 +1305,7 @@ function DifficultyResearcherGui({
     const handleClaimReward = useCallback(
         (rewardId: string) => {
             const success = Packets.claimDifficultyReward.toServer(rewardId);
-            playSound(success ? "Click.mp3" : "Error.mp3", selectPart);
+            playSound(success ? "UnlockItem.mp3" : "Error.mp3", selectPart);
         },
         [selectPart],
     );

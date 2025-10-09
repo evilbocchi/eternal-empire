@@ -1,6 +1,6 @@
 import React, { useMemo } from "@rbxts/react";
 import { TweenService } from "@rbxts/services";
-import ItemViewport from "client/components/item/ItemViewport";
+import ItemViewport from "shared/item/ItemViewport";
 import getDifficultyDisplayColors from "client/components/tooltip/getDifficultyDisplayColors";
 import { TooltipManager } from "client/components/tooltip/TooltipWindow";
 import useHover from "client/hooks/useHover";

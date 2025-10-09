@@ -216,10 +216,6 @@ export default class ResearchService implements OnStart {
         this.currencyService.set("Difficulty Power", newDifficultyPower);
 
         switch (reward.effect.kind) {
-            case "candyOfflineRevenue": {
-                this.itemService.giveItem(reward.effect.itemId);
-                break;
-            }
             case "walkSpeedBuff": {
                 this.applyWalkSpeedBuff(player, reward.effect.amount, reward.effect.durationSeconds);
                 break;

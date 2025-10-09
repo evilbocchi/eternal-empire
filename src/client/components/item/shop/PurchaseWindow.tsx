@@ -10,7 +10,7 @@ import {
     updateInventorySlot,
     type InventorySlotHandle,
 } from "client/components/item/inventory/InventorySlot";
-import ItemViewport from "client/components/item/ItemViewport";
+import ItemViewport from "shared/item/ItemViewport";
 import ItemWindow from "client/components/item/shop/ItemWindow";
 import { WrappingPriceOptions } from "client/components/item/shop/PriceOption";
 import useSingleDocument from "client/components/sidebar/useSingleDocumentWindow";

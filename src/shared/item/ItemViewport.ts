@@ -12,6 +12,7 @@
 
 import { RefObject, useEffect } from "@rbxts/react";
 import { RunService } from "@rbxts/services";
+import { IS_EDIT, IS_SERVER } from "shared/Context";
 import eat from "shared/hamster/eat";
 import { ITEM_MODELS } from "shared/item/ItemModels";
 
@@ -62,24 +63,34 @@ namespace ItemViewport {
     }
 
     // Animate all running item slot viewports each frame
-    RunService.BindToRenderStep(KEY, 0, (dt) => {
-        let i = 0;
-        for (const rv of runningViewports) {
-            const isHovering = rv.delta > 0;
-            if (isHovering && rv.zoom < 1) {
-                rv.zoom += dt * ((1 - rv.zoom) * 7 + 1);
-                rv.isTweening = true;
-            } else if (!isHovering && rv.zoom > 0) {
-                rv.zoom -= dt * (rv.zoom * 7 + 1);
-                rv.isTweening = true;
-            } else {
-                rv.zoom = isHovering ? 1 : 0;
-                rv.isTweening = false;
+    if (!IS_SERVER || IS_EDIT) {
+        RunService.BindToRenderStep(KEY, 0, (dt) => {
+            let i = 0;
+            for (const rv of runningViewports) {
+                const isHovering = rv.delta > 0;
+                if (isHovering && rv.zoom < 1) {
+                    rv.zoom += dt * ((1 - rv.zoom) * 7 + 1);
+                    rv.isTweening = true;
+                } else if (!isHovering && rv.zoom > 0) {
+                    rv.zoom -= dt * (rv.zoom * 7 + 1);
+                    rv.isTweening = true;
+                } else {
+                    rv.zoom = isHovering ? 1 : 0;
+                    rv.isTweening = false;
+                }
+                rv.rotateCamera(dt, true);
+                ++i;
             }
-            rv.rotateCamera(dt, true);
-            ++i;
-        }
-    });
+        });
+
+        eat(() => {
+            RunService.UnbindFromRenderStep(KEY);
+            for (const rv of runningViewports) {
+                rv.viewportFrame.ClearAllChildren();
+            }
+            runningViewports.clear();
+        });
+    }
 
     /**
      * Handles loading and displaying an item model in a ViewportFrame.
@@ -141,14 +152,6 @@ namespace ItemViewport {
         camera.Parent = viewportFrame;
         model.Parent = viewportFrame;
     }
-
-    eat(() => {
-        RunService.UnbindFromRenderStep(KEY);
-        for (const rv of runningViewports) {
-            rv.viewportFrame.ClearAllChildren();
-        }
-        runningViewports.clear();
-    });
 }
 
 export default ItemViewport;

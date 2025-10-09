@@ -1,7 +1,11 @@
 import Difficulty from "@rbxts/ejt";
 import { getAsset } from "shared/asset/AssetMap";
 
-export type DifficultyRewardId = "CandyCoatedConsultation" | "GapMomentum" | "NegativityNanobot";
+export type DifficultyRewardId =
+    | "CandyCoatedConsultation"
+    | "GapMomentum"
+    | "NegativityNanobot"
+    | "UnimpossibleExcavationStone";
 
 export type DifficultyRewardCost = PercentageOfDifficultyPowerCost;
 
@@ -9,12 +13,6 @@ export interface PercentageOfDifficultyPowerCost {
     kind: "percentageOfDifficultyPower";
     percentage: number;
     minimum?: number;
-}
-
-export interface CandyOfflineRevenueEffect {
-    kind: "candyOfflineRevenue";
-    itemId: string;
-    revenueSeconds: number;
 }
 
 export interface WalkSpeedBuffEffect {
@@ -29,7 +27,7 @@ export interface GrantItemEffect {
     amount?: number;
 }
 
-export type DifficultyRewardEffect = CandyOfflineRevenueEffect | WalkSpeedBuffEffect | GrantItemEffect;
+export type DifficultyRewardEffect = WalkSpeedBuffEffect | GrantItemEffect;
 
 export interface DifficultyRewardDefinition {
     id: DifficultyRewardId;
@@ -37,6 +35,7 @@ export interface DifficultyRewardDefinition {
     title: string;
     description: string;
     icon: string;
+    viewportItemId?: string;
     cooldownSeconds: number;
     cost: DifficultyRewardCost;
     effect: DifficultyRewardEffect;
@@ -55,11 +54,12 @@ definitions.push({
     cost: {
         kind: "percentageOfDifficultyPower",
         percentage: 0.5,
+        minimum: 1,
     },
     effect: {
-        kind: "candyOfflineRevenue",
+        kind: "grantItem",
         itemId: "CandyResearchKit",
-        revenueSeconds: 30,
+        amount: 1,
     },
 });
 
@@ -87,6 +87,7 @@ definitions.push({
     title: "Nanobot Redeemer",
     description: "Redeem 75% of your Difficulty Power (minimum 1,000) for a Basic Nanobot to deploy.",
     icon: getAsset("assets/PortableBeacon.png"),
+    viewportItemId: "BasicNanobot",
     cooldownSeconds: 5 * 60,
     cost: {
         kind: "percentageOfDifficultyPower",
@@ -96,6 +97,24 @@ definitions.push({
     effect: {
         kind: "grantItem",
         itemId: "BasicNanobot",
+    },
+});
+
+definitions.push({
+    id: "UnimpossibleExcavationStone",
+    difficultyId: Difficulty.Unimpossible.id,
+    title: "Excavation Stockpile",
+    description: "Synthesize a Stone every minute to fuel your digs.",
+    icon: getAsset("assets/MiscellaneousDifficulty.png"),
+    viewportItemId: "ExcavationStone",
+    cooldownSeconds: 60,
+    cost: {
+        kind: "percentageOfDifficultyPower",
+        percentage: 0,
+    },
+    effect: {
+        kind: "grantItem",
+        itemId: "ExcavationStone",
     },
 });
 

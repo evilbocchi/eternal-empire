@@ -1,6 +1,6 @@
 import React, { Fragment, useEffect, useRef, useState } from "@rbxts/react";
 import { TweenService } from "@rbxts/services";
-import { useItemViewport } from "client/components/item/ItemViewport";
+import { useItemViewport } from "shared/item/ItemViewport";
 import { TooltipManager } from "client/components/tooltip/TooltipWindow";
 import { getAsset } from "shared/asset/AssetMap";
 import { playSound } from "shared/asset/GameAssets";

@@ -102,6 +102,7 @@ export default class Nanobot extends ItemTrait {
     }
 
     private static createOrbs(model: Model, nanobot: Nanobot) {
+        const modelCframe = model.GetPivot();
         const folder = new Instance("Folder");
         folder.Name = "NanobotOrbs";
         folder.Parent = model;
@@ -119,6 +120,7 @@ export default class Nanobot extends ItemTrait {
             part.CanCollide = false;
             part.CanQuery = false;
             part.CanTouch = false;
+            part.CFrame = modelCframe;
             part.Parent = folder;
 
             orbs.push({
