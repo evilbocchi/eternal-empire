@@ -191,7 +191,10 @@ namespace AvailableEmpire {
         const playerData = playerProfile.Data;
 
         const ownedEmpireCount = playerData.ownedEmpires.size();
-        if (ownedEmpireCount > 3 && !MarketplaceService.UserOwnsGamePassAsync(player.UserId, 73544443675113)) {
+        if (ownedEmpireCount > 3 && !MarketplaceService.UserOwnsGamePassAsync(player.UserId, 1527189792)) {
+            return false;
+        }
+        if (ownedEmpireCount > 13) {
             return false;
         }
 

@@ -126,6 +126,13 @@ const details = {
         image: getAsset("assets/FundsBomb.png"),
         page: CURRENCY_CATEGORIES.Premium,
     },
+    "Power Bombs": {
+        description: "Redeem a Power Bomb for a GLOBAL boost!",
+        layoutOrder: 10001,
+        color: Color3.fromRGB(255, 69, 0),
+        image: getAsset("assets/PowerBomb.png"),
+        page: CURRENCY_CATEGORIES.Premium,
+    },
 };
 
 export const CURRENCY_DETAILS = details as { [currency in Currency]: CurrencyDetails };

@@ -21,8 +21,8 @@
  * @since 1.0.0
  */
 
-import { OnoeNum } from "@rbxts/serikanum";
 import { OnInit, Service } from "@flamework/core";
+import { OnoeNum } from "@rbxts/serikanum";
 import { MarketplaceService, TextService, Workspace } from "@rbxts/services";
 import CurrencyService from "server/services/data/CurrencyService";
 import DataService from "server/services/data/DataService";
@@ -33,6 +33,7 @@ import ProductService from "server/services/product/ProductService";
 import { playSound } from "shared/asset/GameAssets";
 import { getNameFromUserId } from "shared/constants";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
+import { RENAME_PRODUCT } from "shared/devproducts/RenameProduct";
 import Packets from "shared/Packets";
 
 /**
@@ -44,9 +45,6 @@ import Packets from "shared/Packets";
  */
 @Service()
 export class RenameService implements OnInit {
-    /** Roblox product ID for Robux-based name changes. */
-    readonly PRODUCT_ID = 1941029484;
-
     /** Current cost for name changes in Funds currency (escalates with each change). */
     cost = this.refreshCost();
 
@@ -168,7 +166,7 @@ export class RenameService implements OnInit {
             if (method === "robux") {
                 // Store name for Robux purchase flow
                 this.namesPerPlayer.set(player, name);
-                MarketplaceService.PromptProductPurchase(player, this.PRODUCT_ID);
+                MarketplaceService.PromptProductPurchase(player, RENAME_PRODUCT);
             } else {
                 // Handle in-game currency purchase
                 if (!this.check(name, player)) return false;
@@ -185,7 +183,7 @@ export class RenameService implements OnInit {
         });
 
         // Set up Robux product purchase handler
-        this.productService.setProductFunction(this.PRODUCT_ID, (_receiptInfo, player) => {
+        this.productService.setProductFunction(RENAME_PRODUCT, (_receiptInfo, player) => {
             const name = this.namesPerPlayer.get(player);
 
             // Validate stored name
