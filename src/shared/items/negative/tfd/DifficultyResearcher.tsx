@@ -575,7 +575,7 @@ function AvailableEntryRow({
             <textlabel
                 BackgroundTransparency={1}
                 FontFace={RobotoMonoBold}
-                Size={new UDim2(0.5, 0, 1, 0)}
+                Size={new UDim2(1, -236, 1, 0)}
                 Text={`${item.name} (${amount})`}
                 TextColor3={Color3.fromRGB(255, 255, 255)}
                 TextScaled={true}
@@ -684,7 +684,7 @@ function ActiveResearchRow({
             <textlabel
                 BackgroundTransparency={1}
                 FontFace={RobotoMonoBold}
-                Size={new UDim2(0.5, 0, 1, 0)}
+                Size={new UDim2(1, -236, 1, 0)}
                 Text={`${item.name} (${amount})`}
                 TextColor3={Color3.fromRGB(255, 255, 255)}
                 TextScaled={true}
@@ -733,6 +733,14 @@ function ResearchPanel({
         }
         return count;
     }, [availableEntries]);
+
+    const handleAbsorbAll = useCallback(() => {
+        for (const entry of availableEntries) {
+            if (entry.amount > 0) {
+                onAbsorb(entry.item.id, entry.amount);
+            }
+        }
+    }, [availableEntries, onAbsorb]);
 
     const handleReleaseAll = useCallback(() => {
         for (const entry of researchEntries) {
@@ -783,22 +791,44 @@ function ResearchPanel({
                     TextScaled={true}
                 />
             ) : (
-                <VirtualizedItemList
-                    items={availableEntries}
-                    itemHeight={ITEM_ROW_HEIGHT}
-                    itemSpacing={ITEM_ROW_SPACING}
-                    maxVisibleHeight={MAX_VISIBLE_ITEM_LIST_HEIGHT}
-                    renderItem={(entry, _index, context) => (
-                        <AvailableEntryRow
-                            key={`inventory-${entry.item.id}`}
-                            item={entry.item}
-                            amount={entry.amount}
-                            onAbsorb={onAbsorb}
-                            position={context.position}
-                            size={context.size}
+                <Fragment>
+                    <VirtualizedItemList
+                        items={availableEntries}
+                        itemHeight={ITEM_ROW_HEIGHT}
+                        itemSpacing={ITEM_ROW_SPACING}
+                        maxVisibleHeight={MAX_VISIBLE_ITEM_LIST_HEIGHT}
+                        renderItem={(entry, _index, context) => (
+                            <AvailableEntryRow
+                                key={`inventory-${entry.item.id}`}
+                                item={entry.item}
+                                amount={entry.amount}
+                                onAbsorb={onAbsorb}
+                                position={context.position}
+                                size={context.size}
+                            />
+                        )}
+                    />
+                    <textbutton
+                        BackgroundColor3={Color3.fromRGB(90, 110, 190)}
+                        BackgroundTransparency={0.2}
+                        BorderColor3={Color3.fromRGB(41, 41, 41)}
+                        BorderSizePixel={3}
+                        FontFace={RobotoMonoBold}
+                        Size={new UDim2(0.5, 0, 0, 30)}
+                        Text="Absorb All"
+                        TextColor3={Color3.fromRGB(235, 235, 255)}
+                        TextScaled={true}
+                        Event={{
+                            Activated: handleAbsorbAll,
+                        }}
+                    >
+                        <uistroke
+                            ApplyStrokeMode={Enum.ApplyStrokeMode.Border}
+                            Color={Color3.fromRGB(191, 200, 255)}
+                            Thickness={1}
                         />
-                    )}
-                />
+                    </textbutton>
+                </Fragment>
             )}
             <textlabel
                 BackgroundTransparency={1}
@@ -847,7 +877,7 @@ function ResearchPanel({
                     BorderColor3={Color3.fromRGB(41, 41, 41)}
                     BorderSizePixel={3}
                     FontFace={RobotoMonoBold}
-                    Size={new UDim2(1, 0, 0, 40)}
+                    Size={new UDim2(0.5, 0, 0, 30)}
                     Text="Release All"
                     TextColor3={Color3.fromRGB(255, 220, 240)}
                     TextScaled={true}
