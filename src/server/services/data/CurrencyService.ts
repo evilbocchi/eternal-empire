@@ -210,8 +210,9 @@ export default class CurrencyService implements OnStart {
     getOfflineRevenue() {
         const currentPlaytime = this.dataService.empireData.playtime;
         const lastResetPlaytime = this.dataService.empireData.lastResetPlaytime;
+        const diff = math.max(currentPlaytime - lastResetPlaytime, 600); // At least 10 minutes to avoid extreme values
 
-        return new CurrencyBundle(this.mostCurrenciesSinceReset).div(currentPlaytime - lastResetPlaytime);
+        return new CurrencyBundle(this.mostCurrenciesSinceReset).div(diff);
     }
 
     onStart() {
