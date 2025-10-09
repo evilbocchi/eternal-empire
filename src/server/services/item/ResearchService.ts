@@ -7,12 +7,11 @@ import DataService from "server/services/data/DataService";
 import ItemService from "server/services/item/ItemService";
 import PermissionsService from "server/services/permissions/PermissionsService";
 import { getPlayerCharacter } from "shared/hamster/getPlayerCharacter";
-import { getDifficultyRewardById } from "shared/difficulty/DifficultyRewards";
 import Item from "shared/item/Item";
 import Items from "shared/items/Items";
 import Packets from "shared/Packets";
 import DifficultyResearch from "shared/difficulty/DifficultyResearch";
-import Operative from "shared/item/traits/Operative";
+import DifficultyReward from "shared/difficulty/reward/DifficultyReward";
 
 type WalkSpeedBuffState = {
     amount: number;
@@ -39,6 +38,7 @@ for (const [, item] of Items.itemsPerId) {
     ITEM_WEIGHTS.set(item, weight);
 }
 const UNIQUE_DIFFICULTIES = DifficultyResearch.collectUniqueDifficulties();
+const { getDifficultyRewardById } = DifficultyReward.setupDifficultyRewards();
 
 @Service()
 export default class ResearchService implements OnStart {
@@ -265,11 +265,11 @@ export default class ResearchService implements OnStart {
         const currentDifficultyPower = this.currencyService.get("Difficulty Power");
         let cost: OnoeNum | undefined;
 
-        if (reward.cost.kind === "percentageOfDifficultyPower") {
-            const percentage = math.clamp(reward.cost.percentage, 0, 1);
+        if (reward.price && reward.price.kind === "percentageOfDifficultyPower") {
+            const percentage = math.clamp(reward.price.percentage, 0, 1);
             cost = currentDifficultyPower.mul(new OnoeNum(percentage));
-            if (reward.cost.minimum !== undefined) {
-                const minimum = new OnoeNum(reward.cost.minimum);
+            if (reward.price.minimum !== undefined) {
+                const minimum = new OnoeNum(reward.price.minimum);
                 if (cost.lessThan(minimum)) {
                     cost = minimum;
                 }
@@ -286,42 +286,40 @@ export default class ResearchService implements OnStart {
         const newDifficultyPower = currentDifficultyPower.sub(cost);
         this.currencyService.set("Difficulty Power", newDifficultyPower);
 
-        switch (reward.effect.kind) {
-            case "walkSpeedBuff": {
-                this.applyWalkSpeedBuff(player, reward.effect.amount, reward.effect.durationSeconds);
-                break;
-            }
-            case "grantItem": {
-                const amount = reward.effect.amount ?? 1;
-                if (amount > 0) {
-                    this.itemService.giveItem(reward.effect.itemId, amount);
+        reward.effects.forEach((effect) => {
+            switch (effect.kind) {
+                case "walkSpeedBuff": {
+                    this.applyWalkSpeedBuff(player, effect.amount, effect.durationSeconds);
+                    break;
                 }
-                break;
-            }
-            case "redeemRevenue": {
-                const offlineRevenue = this.currencyService.getOfflineRevenue().mul(reward.effect.seconds);
-                const payout = new Map<Currency, OnoeNum>();
-                for (const currency of reward.effect.currencies) {
-                    const amount = offlineRevenue.get(currency);
-                    if (amount === undefined) continue;
-                    payout.set(currency, amount);
+                case "grantItem": {
+                    const amount = effect.amount ?? 1;
+                    if (amount > 0) {
+                        this.itemService.giveItem(effect.itemId, amount);
+                    }
+                    break;
                 }
-                if (!payout.isEmpty()) {
-                    this.currencyService.incrementAll(payout);
-                    Packets.showDifference.toAllClients(payout);
+                case "redeemRevenue": {
+                    const offlineRevenue = this.currencyService.getOfflineRevenue().mul(effect.seconds);
+                    const payout = new Map<Currency, OnoeNum>();
+                    for (const currency of effect.currencies) {
+                        const amount = offlineRevenue.get(currency);
+                        if (amount === undefined) continue;
+                        payout.set(currency, amount);
+                    }
+                    if (!payout.isEmpty()) {
+                        this.currencyService.incrementAll(payout);
+                        Packets.showDifference.toAllClients(payout);
+                    }
+                    break;
                 }
-                break;
             }
-            case "increaseDifficultyPowerAdd":
-            case "increaseDifficultyPowerMul": {
-                break;
-            }
-        }
+        });
 
         this.incrementRewardPurchaseCount(reward.id, 1);
         this.currencyService.propagate();
 
-        this.difficultyRewardCooldowns.set(reward.id, now + reward.cooldownSeconds);
+        this.difficultyRewardCooldowns.set(reward.id, now + (reward.cooldownSeconds ?? 0));
         Packets.difficultyRewardCooldowns.set(this.difficultyRewardCooldowns);
         return true;
     }
@@ -356,13 +354,15 @@ export default class ResearchService implements OnStart {
             if (count <= 0) continue;
             const definition = getDifficultyRewardById(rewardId);
             if (definition === undefined) continue;
-            if (definition.effect.kind === "increaseDifficultyPowerAdd") {
-                totalAdd = totalAdd.add(definition.effect.amount.mul(count));
-                continue;
-            }
-            if (definition.effect.kind === "increaseDifficultyPowerMul") {
-                const multiplier = definition.effect.amount;
-                totalMul = totalMul.mul(multiplier.pow(count));
+            for (const effect of definition.effects) {
+                if (effect.kind === "increaseDifficultyPower") {
+                    if (effect.add !== undefined) {
+                        totalAdd = totalAdd.add(effect.add.mul(count));
+                    }
+                    if (effect.mul !== undefined) {
+                        totalMul = totalMul.mul(effect.mul.pow(count));
+                    }
+                }
             }
         }
         return $tuple(totalAdd, totalMul);

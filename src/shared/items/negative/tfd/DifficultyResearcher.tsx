@@ -1,4 +1,4 @@
-import { combineHumanReadable, getAllInstanceInfo } from "@antivivi/vrldk";
+import { getAllInstanceInfo } from "@antivivi/vrldk";
 import Difficulty from "@rbxts/ejt";
 import { packet, property } from "@rbxts/fletchette";
 import React, { Fragment, RefObject, useCallback, useEffect, useMemo, useRef, useState } from "@rbxts/react";
@@ -13,7 +13,7 @@ import { IS_EDIT } from "shared/Context";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import { CURRENCY_CATEGORIES, CURRENCY_DETAILS } from "shared/currency/CurrencyDetails";
 import DifficultyResearch from "shared/difficulty/DifficultyResearch";
-import { getDifficultyRewards, type DifficultyRewardDefinition } from "shared/difficulty/DifficultyRewards";
+import DifficultyReward from "shared/difficulty/reward/DifficultyReward";
 import Item from "shared/item/Item";
 import { useItemViewport } from "shared/item/ItemViewport";
 import Furnace from "shared/item/traits/Furnace";
@@ -861,41 +861,9 @@ function ResearchPanel({
     );
 }
 
-function getRewardCostLabel(reward: DifficultyRewardDefinition, playerDifficultyPower: OnoeNum) {
-    if (reward.cost.kind === "percentageOfDifficultyPower") {
-        let cost = playerDifficultyPower.mul(new OnoeNum(reward.cost.percentage));
-        if (reward.cost.minimum !== undefined) {
-            const minimum = new OnoeNum(reward.cost.minimum);
-            if (cost.lessThan(minimum)) {
-                cost = minimum;
-            }
-        }
-        if (cost.lessEquals(0)) {
-            return $tuple("Free!", cost);
-        }
-
-        return $tuple(
-            `${math.floor(reward.cost.percentage * 100 * 100) / 100}% of your Difficulty Power (${OnoeNum.toString(cost)})`,
-            cost,
-        );
-    }
-    return $tuple("Free!", new OnoeNum(0));
-}
-
-function formatDurationShort(seconds: number) {
-    if (seconds <= 0) return "0s";
-    const rounded = math.floor(seconds);
-    const minutes = math.floor(rounded / 60);
-    const remainder = rounded % 60;
-    if (minutes > 0) {
-        return `${minutes}m ${remainder}s`;
-    }
-    return `${remainder}s`;
-}
-
 interface DifficultyRewardCardProps {
     layoutOrder: number;
-    reward: DifficultyRewardDefinition;
+    reward: DifficultyReward;
     playerDifficultyPower: OnoeNum;
     cooldowns: Map<string, number>;
     purchases: Map<string, number>;
@@ -911,7 +879,7 @@ function DifficultyRewardCard({
     onClaim,
 }: DifficultyRewardCardProps) {
     const [costText, cost] = useMemo(
-        () => getRewardCostLabel(reward, playerDifficultyPower),
+        () => reward.getPriceLabel(playerDifficultyPower),
         [reward, playerDifficultyPower],
     );
     const viewportRef = useRef<ViewportFrame>();
@@ -949,31 +917,7 @@ function DifficultyRewardCard({
     const isCoolingDown = secondsRemaining > 0;
     const isAffordable = !playerDifficultyPower.lessThan(cost);
 
-    const payoutText = useMemo(() => {
-        switch (reward.effect.kind) {
-            case "walkSpeedBuff": {
-                const durationText = formatDurationShort(reward.effect.durationSeconds);
-                return `Effect: +${reward.effect.amount} walkspeed for ${durationText}.`;
-            }
-            case "grantItem": {
-                const amount = reward.effect.amount ?? 1;
-                const item = Server.Items.itemsPerId.get(reward.effect.itemId);
-                const itemName = item?.name ?? reward.effect.itemId;
-                return `Reward: ${itemName} x${amount}.`;
-            }
-            case "redeemRevenue": {
-                const durationText = formatDurationShort(reward.effect.seconds);
-                const currencies = combineHumanReadable(...reward.effect.currencies);
-                return `Reward: Redeem ${durationText} of ${currencies}.`;
-            }
-            case "increaseDifficultyPowerAdd": {
-                return `Reward: +${reward.effect.amount.toString()} Difficulty Power per furnace process.`;
-            }
-            case "increaseDifficultyPowerMul": {
-                return `Reward: x${reward.effect.amount.toString()} Difficulty Power research rate.`;
-            }
-        }
-    }, [reward]);
+    const payoutText = useMemo(() => reward.getEffectsLabel(), [reward]);
 
     let statusColor = Color3.fromRGB(255, 200, 150);
     if (hasReachedMaxClaims) {
@@ -988,7 +932,7 @@ function DifficultyRewardCard({
     if (hasReachedMaxClaims) {
         buttonText = "Claimed";
     } else if (isCoolingDown) {
-        buttonText = formatDurationShort(secondsRemaining);
+        buttonText = DifficultyReward.formatDurationShort(secondsRemaining);
     } else if (isAffordable) {
         buttonText = "Claim Reward";
     }
@@ -1137,7 +1081,7 @@ function DifficultyRewardCard({
 }
 
 interface DifficultyRewardsSectionProps {
-    rewards: DifficultyRewardDefinition[];
+    rewards: DifficultyReward[];
     playerDifficultyPower: OnoeNum;
     cooldowns: Map<string, number>;
     purchases: Map<string, number>;
@@ -1649,6 +1593,10 @@ function DifficultyResearcherGui({
         unlockedDifficulties,
     ]);
 
+    const getDifficultyRewards = useMemo(() => {
+        const { getDifficultyRewards } = DifficultyReward.setupDifficultyRewards();
+        return getDifficultyRewards;
+    }, []);
     const difficultyRewards = useMemo(() => getDifficultyRewards(currentDifficulty), [currentDifficulty]);
 
     const handleClaimReward = useCallback(
