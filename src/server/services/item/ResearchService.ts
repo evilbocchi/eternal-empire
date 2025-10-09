@@ -41,6 +41,7 @@ for (const [, item] of Items.itemsPerId) {
 export default class ResearchService implements OnStart {
     private readonly researching: Map<string, number>;
     private readonly difficultyRewardCooldowns: Map<string, number>;
+    private readonly difficultyRewardPurchaseCounts: Map<string, number>;
     private readonly walkSpeedBuffs = new Map<number, WalkSpeedBuffState>();
 
     constructor(
@@ -51,6 +52,7 @@ export default class ResearchService implements OnStart {
     ) {
         this.researching = dataService.empireData.items.researching;
         this.difficultyRewardCooldowns = dataService.empireData.difficultyRewardCooldowns;
+        this.difficultyRewardPurchaseCounts = dataService.empireData.difficultyRewardPurchaseCounts;
     }
 
     private isItemEligibleForResearch(item: Item) {
@@ -260,6 +262,10 @@ export default class ResearchService implements OnStart {
                 }
                 break;
             }
+            case "increaseFurnaceDifficultyPowerGain": {
+                this.incrementRewardPurchaseCount(reward.id, 1);
+                break;
+            }
         }
 
         this.currencyService.propagate();
@@ -274,6 +280,31 @@ export default class ResearchService implements OnStart {
      */
     getResearchingEntries() {
         return this.researching;
+    }
+
+    private incrementRewardPurchaseCount(rewardId: string, amount: number) {
+        if (amount !== amount || amount === math.huge || amount === -math.huge) return;
+        const sanitized = math.floor(math.max(amount, 0));
+        if (sanitized <= 0) return;
+        const current = this.difficultyRewardPurchaseCounts.get(rewardId) ?? 0;
+        this.difficultyRewardPurchaseCounts.set(rewardId, current + sanitized);
+    }
+
+    getRewardPurchaseCount(rewardId: string) {
+        const count = this.difficultyRewardPurchaseCounts.get(rewardId) ?? 0;
+        return math.max(count, 0);
+    }
+
+    getFurnaceDifficultyPowerBonus() {
+        let bonus = 0;
+        for (const [rewardId, count] of this.difficultyRewardPurchaseCounts) {
+            if (count <= 0) continue;
+            const definition = getDifficultyRewardById(rewardId);
+            if (definition === undefined) continue;
+            if (definition.effect.kind !== "increaseFurnaceDifficultyPowerGain") continue;
+            bonus += count * definition.effect.amount;
+        }
+        return bonus;
     }
 
     /**

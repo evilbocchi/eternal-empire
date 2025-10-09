@@ -990,6 +990,11 @@ function DifficultyRewardCard({
                 const currencies = combineHumanReadable(...reward.effect.currencies);
                 return `Reward: Redeem ${durationText} of ${currencies}.`;
             }
+            case "increaseFurnaceDifficultyPowerGain": {
+                const amount = math.max(reward.effect.amount, 0);
+                const formatted = amount === 1 ? "+1" : `+${amount}`;
+                return `Reward: Permanently ${formatted} Difficulty Power per furnace process.`;
+            }
         }
     }, [reward]);
 
@@ -1780,6 +1785,10 @@ export = new Item(script.Name)
             const multiplier = Server.Research.calculateResearchMultiplier();
             if (multiplier.moreEquals(1)) {
                 delta = delta.mul(multiplier);
+            }
+            const furnaceBonus = Server.Research.getFurnaceDifficultyPowerBonus?.();
+            if (furnaceBonus !== undefined && furnaceBonus > 0) {
+                delta = delta.add(new OnoeNum(furnaceBonus));
             }
             const gain = new Map<Currency, OnoeNum>([["Difficulty Power", delta]]);
             CurrencyService.incrementAll(gain);

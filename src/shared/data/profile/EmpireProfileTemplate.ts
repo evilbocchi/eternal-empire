@@ -362,6 +362,11 @@ const EmpireProfileTemplate = {
     difficultyRewardCooldowns: new Map<string, number>(),
 
     /**
+     * Tracks how many times each difficulty reward has been purchased.
+     */
+    difficultyRewardPurchaseCounts: new Map<string, number>(),
+
+    /**
      * The cached listings this empire has created. Used for quick access
      * to the empire's own listings without querying the datastore.
      */

@@ -27,7 +27,16 @@ export interface RedeemRevenueEffect {
     currencies: Currency[];
 }
 
-export type DifficultyRewardEffect = WalkSpeedBuffEffect | GrantItemEffect | RedeemRevenueEffect;
+export interface IncreaseFurnaceDifficultyPowerGainEffect {
+    kind: "increaseFurnaceDifficultyPowerGain";
+    amount: number;
+}
+
+export type DifficultyRewardEffect =
+    | WalkSpeedBuffEffect
+    | GrantItemEffect
+    | RedeemRevenueEffect
+    | IncreaseFurnaceDifficultyPowerGainEffect;
 
 export interface DifficultyRewardDefinition {
     id: string;
@@ -133,6 +142,23 @@ definitions.push({
         kind: "redeemRevenue",
         seconds: 15,
         currencies: ["Difficulty Power"],
+    },
+});
+
+definitions.push({
+    id: "EasefulIgnition",
+    difficultyId: Difficulty.TrueEase.id,
+    title: "Easeful Ignition",
+    description: "Permanently increase furnace Difficulty Power gain by 1 whenever a droplet is processed.",
+    icon: getAsset("assets/DifficultyPower.png"),
+    cooldownSeconds: 60,
+    cost: {
+        kind: "percentageOfDifficultyPower",
+        percentage: 0,
+    },
+    effect: {
+        kind: "increaseFurnaceDifficultyPowerGain",
+        amount: 1,
     },
 });
 
