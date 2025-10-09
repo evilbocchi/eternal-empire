@@ -21,6 +21,7 @@
 import Signal from "@antivivi/lemon-signal";
 import { getAllInstanceInfo, simpleInterval, variableInterval } from "@antivivi/vrldk";
 import { OnInit, OnStart, Service } from "@flamework/core";
+import { OnoeNum } from "@rbxts/serikanum";
 import { HttpService } from "@rbxts/services";
 import { CHALLENGES } from "server/Challenges";
 import CurrencyService from "server/services/data/CurrencyService";
@@ -229,7 +230,7 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
      * Higher difficulty ratings and quantities yield a larger multiplier with diminishing returns.
      */
     calculateResearchMultiplier() {
-        let weightedValue = 0;
+        let weightedValue = new OnoeNum(0);
         for (const [itemId, amount] of this.researching) {
             if (amount <= 0) continue;
 
@@ -241,11 +242,11 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
             const classRating = math.max(difficulty?.class ?? 0, 0);
 
             const perItemWeight = 1 + layoutRating / 25 + classRating / 50;
-            weightedValue += amount * perItemWeight;
+            weightedValue = weightedValue.add(amount * perItemWeight);
         }
 
-        if (weightedValue <= 0) return 1;
-        return 1 + math.sqrt(weightedValue) / 10;
+        if (weightedValue.lessEquals(0)) return new OnoeNum(1);
+        return weightedValue.pow(0.5).div(10).add(1);
     }
 
     /**

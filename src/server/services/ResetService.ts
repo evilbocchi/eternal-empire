@@ -129,6 +129,7 @@ export default class ResetService implements OnInit, OnStart {
         const inventory = this.unplaceItems(resetLayer, items);
         items.bought = this.filterExcludeInventory(items.bought, resetLayer);
         items.inventory = this.filterExcludeInventory(inventory, resetLayer);
+        items.researching = this.filterExcludeInventory(items.researching, resetLayer);
         fixDuplicatedItemsData(items);
         this.itemService.requestChanges();
     }
