@@ -23,6 +23,7 @@ import SetupService from "server/services/data/SetupService";
 import { DonationService } from "server/services/DonationService";
 import ItemService from "server/services/item/ItemService";
 import MarketplaceService from "server/services/item/MarketplaceService";
+import ResearchService from "server/services/item/ResearchService";
 import LeaderboardChangeService from "server/services/leaderboard/LeaderboardChangeService";
 import { LeaderboardService } from "server/services/leaderboard/LeaderboardService";
 import ModdingService from "server/services/ModdingService";
@@ -72,6 +73,7 @@ export default class APIExposeService implements OnInit {
         private readonly permissionsService: PermissionsService,
         private readonly playtimeService: PlaytimeService,
         private readonly questService: QuestService,
+        private readonly researchService: ResearchService,
         private readonly resetService: ResetService,
         private readonly revenueService: RevenueService,
         private readonly setupService: SetupService,
@@ -216,6 +218,13 @@ export default class APIExposeService implements OnInit {
              * @see {@link QuestService} for more details.
              */
             Quest: this.questService,
+
+            /**
+             * Research and difficulty power management service.
+             * @borrows ResearchService as researchService
+             * @see {@link ResearchService} for more details.
+             */
+            Research: this.researchService,
 
             /**
              * Handles player resets and related logic.

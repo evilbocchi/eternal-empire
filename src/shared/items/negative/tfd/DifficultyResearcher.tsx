@@ -723,22 +723,27 @@ function DifficultyRewardCard({
     const buttonDisabled = isCoolingDown || !isAffordable;
 
     const payoutText = useMemo(() => {
-        if (reward.effect.kind !== "candyOfflineRevenue") {
-            return "Reward ready.";
+        switch (reward.effect.kind) {
+            case "candyOfflineRevenue": {
+                const payout = new Map<Currency, OnoeNum>();
+                for (const [currency, amount] of revenuePerSecond) {
+                    if (amount === undefined) continue;
+                    const perSecond = new OnoeNum(amount);
+                    const total = perSecond.mul(reward.effect.revenueSeconds);
+                    if (total.lessEquals(0)) continue;
+                    payout.set(currency, total);
+                }
+                if (payout.size() === 0) {
+                    return `Est. payout (${reward.effect.revenueSeconds}s): <font color="#FF8BAA">No revenue data yet</font>.`;
+                }
+                const formatted = CurrencyBundle.currenciesToString(payout, true);
+                return `Est. payout (${reward.effect.revenueSeconds}s): ${formatted}`;
+            }
+            case "walkSpeedBuff": {
+                const durationText = formatDurationShort(reward.effect.durationSeconds);
+                return `Effect: +${reward.effect.amount} WalkSpeed for ${durationText}.`;
+            }
         }
-        const payout = new Map<Currency, OnoeNum>();
-        for (const [currency, amount] of revenuePerSecond) {
-            if (amount === undefined) continue;
-            const perSecond = new OnoeNum(amount);
-            const total = perSecond.mul(reward.effect.revenueSeconds);
-            if (total.lessEquals(0)) continue;
-            payout.set(currency, total);
-        }
-        if (payout.size() === 0) {
-            return 'Est. payout (30s): <font color="#FF8BAA">No revenue data yet</font>.';
-        }
-        const formatted = CurrencyBundle.currenciesToString(payout, true);
-        return `Est. payout (${reward.effect.revenueSeconds}s): ${formatted}`;
     }, [revenuePerSecond, reward]);
 
     const statusColor = isCoolingDown
@@ -1398,7 +1403,7 @@ export = new Item(script.Name)
             if (item === undefined) return false;
             if (item.isA("Unique")) return false;
 
-            return Server.Item.reserveItemsForResearch(itemId, sanitizedAmount);
+            return Server.Research.reserveItemsForResearch(itemId, sanitizedAmount);
         });
 
         removeResearchPacket.fromClient((player, itemId, amount) => {
@@ -1409,7 +1414,7 @@ export = new Item(script.Name)
 
             if (!Server.Items.itemsPerId.has(itemId)) return false;
 
-            return Server.Item.releaseItemsFromResearch(itemId, sanitizedAmount);
+            return Server.Research.releaseItemsFromResearch(itemId, sanitizedAmount);
         });
     })
     .onLoad((model) => {
@@ -1430,7 +1435,7 @@ export = new Item(script.Name)
                         break;
                 }
             }
-            const multiplier = Server.Item.calculateResearchMultiplier();
+            const multiplier = Server.Research.calculateResearchMultiplier();
             if (multiplier.moreEquals(1)) {
                 delta = delta.mul(multiplier);
             }

@@ -1,7 +1,7 @@
 import Difficulty from "@rbxts/ejt";
 import { getAsset } from "shared/asset/AssetMap";
 
-export type DifficultyRewardId = "CandyCoatedConsultation";
+export type DifficultyRewardId = "CandyCoatedConsultation" | "GapMomentum";
 
 export type DifficultyRewardCost = PercentageOfDifficultyPowerCost;
 
@@ -17,7 +17,13 @@ export interface CandyOfflineRevenueEffect {
     revenueSeconds: number;
 }
 
-export type DifficultyRewardEffect = CandyOfflineRevenueEffect;
+export interface WalkSpeedBuffEffect {
+    kind: "walkSpeedBuff";
+    amount: number;
+    durationSeconds: number;
+}
+
+export type DifficultyRewardEffect = CandyOfflineRevenueEffect | WalkSpeedBuffEffect;
 
 export interface DifficultyRewardDefinition {
     id: DifficultyRewardId;
@@ -48,6 +54,24 @@ definitions.push({
         kind: "candyOfflineRevenue",
         itemId: "CandyResearchKit",
         revenueSeconds: 30,
+    },
+});
+
+definitions.push({
+    id: "GapMomentum",
+    difficultyId: Difficulty.TheLowerGap.id,
+    title: "Gap Momentum",
+    description: "Gain +2 WalkSpeed for one minute to sprint through The Lower Gap.",
+    icon: getAsset("assets/Speed.png"),
+    cooldownSeconds: 80,
+    cost: {
+        kind: "percentageOfDifficultyPower",
+        percentage: 0,
+    },
+    effect: {
+        kind: "walkSpeedBuff",
+        amount: 2,
+        durationSeconds: 60,
     },
 });
 

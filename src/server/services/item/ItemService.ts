@@ -20,9 +20,7 @@
 
 import Signal from "@antivivi/lemon-signal";
 import { getAllInstanceInfo, simpleInterval, variableInterval } from "@antivivi/vrldk";
-import Difficulty from "@rbxts/ejt";
 import { OnInit, OnStart, Service } from "@flamework/core";
-import { OnoeNum } from "@rbxts/serikanum";
 import { HttpService } from "@rbxts/services";
 import { CHALLENGES } from "server/Challenges";
 import CurrencyService from "server/services/data/CurrencyService";
@@ -42,7 +40,6 @@ import {
     RepairResultTier,
 } from "shared/item/repair";
 import Items from "shared/items/Items";
-import { getDifficultyRewardById } from "shared/item/DifficultyRewards";
 import Packets from "shared/Packets";
 import BuildBounds from "shared/placement/BuildBounds";
 import ItemPlacement from "shared/placement/ItemPlacement";
@@ -83,13 +80,10 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
     private readonly inventory: Map<string, number>;
     private readonly uniqueInstances: Map<string, UniqueItemInstance>;
     private readonly researching: Map<string, number>;
-    private readonly difficultyRewardCooldowns: Map<string, number>;
     private hasInventoryChanged = false;
     private hasUniqueChanged = false;
     private hasBoughtChanged = false;
     private hasPlacedChanged = false;
-    private hasResearchingChanged = false;
-    private hasDifficultyRewardsChanged = false;
 
     // Signals
 
@@ -144,8 +138,6 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
         this.bought = dataService.empireData.items.bought;
         this.uniqueInstances = dataService.empireData.items.uniqueInstances;
         this.researching = dataService.empireData.items.researching;
-        this.difficultyRewardCooldowns = dataService.empireData.difficultyRewardCooldowns;
-        this.hasDifficultyRewardsChanged = true;
     }
 
     // Data Management Methods
@@ -181,159 +173,6 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
         const total = this.getItemAmount(itemId);
         const researching = this.getResearchingAmount(itemId);
         return math.max(total - researching, 0);
-    }
-
-    private isItemEligibleForResearch(item: Item) {
-        if (item.isA("Unique")) return false;
-        if (item.isA("Gear")) return false;
-        if (item.difficulty === Difficulty.Bonuses) return false;
-        return true;
-    }
-
-    /**
-     * Reserves items for research if available.
-     *
-     * @param itemId The ID of the item to reserve.
-     * @param amount The amount of the item to reserve.
-     * @returns True if reservation succeeded, false otherwise.
-     */
-    reserveItemsForResearch(itemId: string, amount: number) {
-        if (amount < 1) return false;
-
-        const item = Items.getItem(itemId);
-        if (item === undefined) return false;
-        if (!this.isItemEligibleForResearch(item)) return false;
-
-        const available = this.getAvailableItemAmount(itemId);
-        if (available < amount) return false;
-
-        const current = this.getResearchingAmount(itemId);
-        this.researching.set(itemId, current + amount);
-        this.hasResearchingChanged = true;
-        this.broadcastResearchMultiplier();
-        return true;
-    }
-
-    /**
-     * Releases items from research back into the available pool.
-     *
-     * @param itemId The ID of the item to release.
-     * @param amount The amount of the item to release.
-     * @returns True if release succeeded, false otherwise.
-     */
-    releaseItemsFromResearch(itemId: string, amount: number) {
-        if (amount < 1) return false;
-
-        const current = this.getResearchingAmount(itemId);
-        if (current < amount) return false;
-
-        if (current === amount) {
-            this.researching.delete(itemId);
-        } else {
-            this.researching.set(itemId, current - amount);
-        }
-        this.hasResearchingChanged = true;
-        this.broadcastResearchMultiplier();
-        return true;
-    }
-
-    /**
-     * Processes a difficulty reward claim using the configured reward definitions.
-     * Deducts Difficulty Power, grants the configured payout, and applies cooldowns.
-     *
-     * @param rewardId The identifier of the reward being claimed.
-     * @returns Whether the reward claim succeeded.
-     */
-    claimDifficultyReward(rewardId: string) {
-        const reward = getDifficultyRewardById(rewardId);
-        if (reward === undefined) {
-            return false;
-        }
-
-        const now = os.time();
-        const cooldownExpiresAt = this.difficultyRewardCooldowns.get(reward.id);
-        if (cooldownExpiresAt !== undefined && cooldownExpiresAt > now) {
-            return false;
-        }
-
-        const currentDifficultyPower = this.currencyService.get("Difficulty Power");
-        let cost: OnoeNum | undefined;
-
-        if (reward.cost.kind === "percentageOfDifficultyPower") {
-            const percentage = math.clamp(reward.cost.percentage, 0, 1);
-            cost = currentDifficultyPower.mul(new OnoeNum(percentage));
-            if (reward.cost.minimum !== undefined) {
-                const minimum = new OnoeNum(reward.cost.minimum);
-                if (cost.lessThan(minimum)) {
-                    cost = minimum;
-                }
-            }
-        }
-
-        if (cost === undefined || cost.lessEquals(0)) {
-            return false;
-        }
-        if (currentDifficultyPower.lessThan(cost)) {
-            return false;
-        }
-
-        const newDifficultyPower = currentDifficultyPower.sub(cost);
-        this.currencyService.set("Difficulty Power", newDifficultyPower);
-
-        switch (reward.effect.kind) {
-            case "candyOfflineRevenue": {
-                this.giveItem(reward.effect.itemId);
-                break;
-            }
-        }
-
-        this.currencyService.propagate();
-
-        this.difficultyRewardCooldowns.set(reward.id, now + reward.cooldownSeconds);
-        this.hasDifficultyRewardsChanged = true;
-
-        return true;
-    }
-
-    /**
-     * Provides a read-only reference to the researching map.
-     */
-    getResearchingEntries() {
-        return this.researching;
-    }
-
-    /**
-     * Calculates the multiplier applied to difficulty power generation based on researching items.
-     * Higher difficulty ratings and quantities yield a larger multiplier with diminishing returns.
-     */
-    calculateResearchMultiplier() {
-        let weightedValue = new OnoeNum(0);
-        for (const [itemId, amount] of this.researching) {
-            if (amount <= 0) continue;
-
-            const item = Items.getItem(itemId);
-            if (item === undefined) continue;
-            if (!this.isItemEligibleForResearch(item)) continue;
-
-            const difficulty = item.difficulty;
-            const layoutRating = math.max(difficulty?.layoutRating ?? 0, 0);
-            const classRating = math.max(difficulty?.class ?? 0, 0);
-
-            const perItemWeight = 1 + layoutRating / 25 + classRating / 50;
-            weightedValue = weightedValue.add(amount * perItemWeight);
-        }
-
-        if (weightedValue.lessEquals(0)) return new OnoeNum(1);
-        return weightedValue.pow(0.5).div(10).add(1);
-    }
-
-    /**
-     * Broadcasts the current research multiplier to all clients.
-     * Called whenever research reservations change.
-     */
-    private broadcastResearchMultiplier() {
-        const multiplier = this.calculateResearchMultiplier();
-        Packets.researchMultiplier.set(multiplier);
     }
 
     /**
@@ -865,8 +704,6 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
         this.hasUniqueChanged = true;
         this.hasBoughtChanged = true;
         this.hasPlacedChanged = true;
-        this.hasResearchingChanged = true;
-        this.hasDifficultyRewardsChanged = true;
     }
 
     /**
@@ -892,10 +729,6 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
             Packets.inventory.set(this.inventory);
             this.hasInventoryChanged = false;
         }
-        if (this.hasResearchingChanged) {
-            Packets.researching.set(this.researching);
-            this.hasResearchingChanged = false;
-        }
         if (this.hasUniqueChanged) {
             Packets.uniqueInstances.set(this.uniqueInstances);
             this.hasUniqueChanged = false;
@@ -907,10 +740,6 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
         if (this.hasPlacedChanged) {
             Packets.placedItems.set(this.worldPlaced);
             this.hasPlacedChanged = false;
-        }
-        if (this.hasDifficultyRewardsChanged) {
-            Packets.difficultyRewardCooldowns.set(this.difficultyRewardCooldowns);
-            this.hasDifficultyRewardsChanged = false;
         }
     }
 
@@ -1075,13 +904,6 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
         });
 
         Packets.repairItem.fromClient((_, placementId, tier) => this.completeRepair(placementId, tier));
-        Packets.claimDifficultyReward.fromClient((player, rewardId) => {
-            if (!this.permissionsService.checkPermLevel(player, "build")) {
-                return false;
-            }
-            return this.claimDifficultyReward(rewardId);
-        });
-
         this.requestChanges();
 
         // Periodically propagate changes to clients
