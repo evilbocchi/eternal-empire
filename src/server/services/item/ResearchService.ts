@@ -246,6 +246,20 @@ export default class ResearchService implements OnStart {
                 }
                 break;
             }
+            case "redeemRevenue": {
+                const offlineRevenue = this.currencyService.getOfflineRevenue().mul(reward.effect.seconds);
+                const payout = new Map<Currency, OnoeNum>();
+                for (const currency of reward.effect.currencies) {
+                    const amount = offlineRevenue.get(currency);
+                    if (amount === undefined) continue;
+                    payout.set(currency, amount);
+                }
+                if (!payout.isEmpty()) {
+                    this.currencyService.incrementAll(payout);
+                    Packets.showDifference.toAllClients(payout);
+                }
+                break;
+            }
         }
 
         this.currencyService.propagate();

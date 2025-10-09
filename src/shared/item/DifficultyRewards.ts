@@ -5,7 +5,8 @@ export type DifficultyRewardId =
     | "CandyCoatedConsultation"
     | "GapMomentum"
     | "NegativityNanobot"
-    | "UnimpossibleExcavationStone";
+    | "UnimpossibleExcavationStone"
+    | "FriendlyDifficultySurge";
 
 export type DifficultyRewardCost = PercentageOfDifficultyPowerCost;
 
@@ -27,7 +28,13 @@ export interface GrantItemEffect {
     amount?: number;
 }
 
-export type DifficultyRewardEffect = WalkSpeedBuffEffect | GrantItemEffect;
+export interface RedeemRevenueEffect {
+    kind: "redeemRevenue";
+    seconds: number;
+    currencies: Currency[];
+}
+
+export type DifficultyRewardEffect = WalkSpeedBuffEffect | GrantItemEffect | RedeemRevenueEffect;
 
 export interface DifficultyRewardDefinition {
     id: DifficultyRewardId;
@@ -115,6 +122,24 @@ definitions.push({
     effect: {
         kind: "grantItem",
         itemId: "ExcavationStone",
+    },
+});
+
+definitions.push({
+    id: "FriendlyDifficultySurge",
+    difficultyId: Difficulty.Friendliness.id,
+    title: "Friendly Difficulty Surge",
+    description: "Immediately receive 15 seconds worth of Difficulty Power.",
+    icon: getAsset("assets/DifficultyPower.png"),
+    cooldownSeconds: 45,
+    cost: {
+        kind: "percentageOfDifficultyPower",
+        percentage: 0,
+    },
+    effect: {
+        kind: "redeemRevenue",
+        seconds: 15,
+        currencies: ["Difficulty Power"],
     },
 });
 

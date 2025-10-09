@@ -1,4 +1,4 @@
-import { getAllInstanceInfo } from "@antivivi/vrldk";
+import { combineHumanReadable, getAllInstanceInfo } from "@antivivi/vrldk";
 import Difficulty from "@rbxts/ejt";
 import { packet, property } from "@rbxts/fletchette";
 import React, { Fragment, RefObject, useCallback, useEffect, useMemo, useRef, useState } from "@rbxts/react";
@@ -984,6 +984,11 @@ function DifficultyRewardCard({
                 const itemName = item?.name ?? reward.effect.itemId;
                 const amountSuffix = amount > 1 ? ` x${amount}` : "";
                 return `Reward: ${itemName}${amountSuffix}.`;
+            }
+            case "redeemRevenue": {
+                const durationText = formatDurationShort(reward.effect.seconds);
+                const currencies = combineHumanReadable(...reward.effect.currencies);
+                return `Reward: Redeem ${durationText} of ${currencies}.`;
             }
         }
     }, [reward]);
