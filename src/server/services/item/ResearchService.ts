@@ -11,6 +11,7 @@ import { getDifficultyRewardById } from "shared/difficulty/DifficultyRewards";
 import Item from "shared/item/Item";
 import Items from "shared/items/Items";
 import Packets from "shared/Packets";
+import DifficultyResearch from "shared/difficulty/DifficultyResearch";
 
 type WalkSpeedBuffState = {
     amount: number;
@@ -36,10 +37,12 @@ for (const [, item] of Items.itemsPerId) {
 
     ITEM_WEIGHTS.set(item, weight);
 }
+const UNIQUE_DIFFICULTIES = DifficultyResearch.collectUniqueDifficulties();
 
 @Service()
 export default class ResearchService implements OnStart {
     private readonly researching: Map<string, number>;
+    readonly unlockedDifficulties: Set<string>;
     private readonly difficultyRewardCooldowns: Map<string, number>;
     private readonly difficultyRewardPurchaseCounts: Map<string, number>;
     private readonly walkSpeedBuffs = new Map<number, WalkSpeedBuffState>();
@@ -51,6 +54,7 @@ export default class ResearchService implements OnStart {
         private readonly permissionsService: PermissionsService,
     ) {
         this.researching = dataService.empireData.items.researching;
+        this.unlockedDifficulties = dataService.empireData.unlockedDifficulties;
         this.difficultyRewardCooldowns = dataService.empireData.difficultyRewardCooldowns;
         this.difficultyRewardPurchaseCounts = dataService.empireData.difficultyRewardPurchaseCounts;
     }
@@ -300,24 +304,14 @@ export default class ResearchService implements OnStart {
                 }
                 break;
             }
-            case "increaseFurnaceDifficultyPowerGain": {
-                this.incrementRewardPurchaseCount(reward.id, 1);
-                break;
-            }
         }
 
+        this.incrementRewardPurchaseCount(reward.id, 1);
         this.currencyService.propagate();
 
         this.difficultyRewardCooldowns.set(reward.id, now + reward.cooldownSeconds);
         Packets.difficultyRewardCooldowns.set(this.difficultyRewardCooldowns);
         return true;
-    }
-
-    /**
-     * Provides a read-only reference to the researching map.
-     */
-    getResearchingEntries() {
-        return this.researching;
     }
 
     private incrementRewardPurchaseCount(rewardId: string, amount: number) {
@@ -328,11 +322,20 @@ export default class ResearchService implements OnStart {
         this.difficultyRewardPurchaseCounts.set(rewardId, current + sanitized);
     }
 
+    /**
+     * Gets the number of times a player has purchased a specific difficulty reward.
+     * @param rewardId The ID of the difficulty reward.
+     * @returns The number of times the reward has been purchased.
+     */
     getRewardPurchaseCount(rewardId: string) {
         const count = this.difficultyRewardPurchaseCounts.get(rewardId) ?? 0;
         return math.max(count, 0);
     }
 
+    /**
+     * Calculates the flat additive bonus to Difficulty Power generation provided by purchased rewards.
+     * @returns The flat bonus to add to Difficulty Power generation.
+     */
     getFurnaceDifficultyPowerBonus() {
         let bonus = 0;
         for (const [rewardId, count] of this.difficultyRewardPurchaseCounts) {
@@ -376,6 +379,27 @@ export default class ResearchService implements OnStart {
         Packets.researchMultiplier.set(multiplier);
     }
 
+    /**
+     * Updates the list of unlocked difficulties based on the current Difficulty Power.
+     */
+    updateUnlockedDifficulties() {
+        const currentDp = this.currencyService.get("Difficulty Power");
+
+        let changed = false;
+        for (let i = 0; i < UNIQUE_DIFFICULTIES.size(); i++) {
+            const difficulty = UNIQUE_DIFFICULTIES[i];
+            if (this.unlockedDifficulties.has(difficulty.id)) continue;
+            const requirement = DifficultyResearch.getDifficultyRequirement(i);
+            if (requirement === undefined) continue;
+            if (currentDp.lessThan(requirement)) break; // Stop checking further, as they are more expensive
+            this.unlockedDifficulties.add(difficulty.id);
+            changed = true;
+        }
+        if (changed) {
+            Packets.unlockedDifficulties.set(this.unlockedDifficulties);
+        }
+    }
+
     onStart() {
         Packets.claimDifficultyReward.fromClient((player, rewardId) => {
             if (!this.permissionsService.checkPermLevel(player, "build")) {
@@ -385,6 +409,7 @@ export default class ResearchService implements OnStart {
         });
 
         this.broadcastResearchMultiplier();
+        this.updateUnlockedDifficulties();
         Packets.researching.set(this.researching);
         Packets.difficultyRewardCooldowns.set(this.difficultyRewardCooldowns);
     }

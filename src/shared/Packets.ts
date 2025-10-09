@@ -103,6 +103,7 @@ namespace Packets {
      */
     export const inventory = exactMapProperty<string, number>(EmpireProfileTemplate.items.inventory);
     export const researching = exactMapProperty<string, number>(EmpireProfileTemplate.items.researching);
+    export const unlockedDifficulties = exactSetProperty<string>(EmpireProfileTemplate.unlockedDifficulties);
     export const difficultyRewardCooldowns = exactMapProperty<string, number>(
         EmpireProfileTemplate.difficultyRewardCooldowns,
     );

@@ -357,6 +357,11 @@ const EmpireProfileTemplate = {
     } as ItemsData,
 
     /**
+     * Tracks which difficulties have been permanently unlocked.
+     */
+    unlockedDifficulties: new Set<string>(),
+
+    /**
      * Tracks cooldown expirations for claimed difficulty rewards.
      */
     difficultyRewardCooldowns: new Map<string, number>(),

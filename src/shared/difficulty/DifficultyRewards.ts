@@ -91,6 +91,25 @@ definitions.push({
 });
 
 definitions.push({
+    id: "GapAcceleration",
+    difficultyId: Difficulty.TheLowerGap.id,
+    title: "Gap Acceleration",
+    description:
+        "In exchange for 5% of your current Difficulty Power, increase furnace Difficulty Power gain by 1 whenever a droplet is processed.",
+    icon: getAsset("assets/DifficultyPower.png"),
+    cooldownSeconds: 5,
+    cost: {
+        kind: "percentageOfDifficultyPower",
+        percentage: 0.05,
+        minimum: 10,
+    },
+    effect: {
+        kind: "increaseFurnaceDifficultyPowerGain",
+        amount: 1,
+    },
+});
+
+definitions.push({
     id: "NegativityNanobot",
     difficultyId: Difficulty.Negativity.id,
     title: "Nanobot Redeemer",
@@ -149,7 +168,7 @@ definitions.push({
     id: "EasefulIgnition",
     difficultyId: Difficulty.TrueEase.id,
     title: "Easeful Ignition",
-    description: "Permanently increase furnace Difficulty Power gain by 1 whenever a droplet is processed.",
+    description: "Permanently increase furnace Difficulty Power gain by 1000 whenever a droplet is processed.",
     icon: getAsset("assets/DifficultyPower.png"),
     cooldownSeconds: 60,
     cost: {
@@ -158,6 +177,25 @@ definitions.push({
     },
     effect: {
         kind: "increaseFurnaceDifficultyPowerGain",
+        amount: 1000,
+    },
+});
+
+definitions.push({
+    id: "GemsForAll",
+    difficultyId: Difficulty.A.id,
+    title: "Gems for All",
+    description: "Redeem 1 White Gem every 5 minutes at no cost.",
+    icon: getAsset("assets/MiscellaneousDifficulty.png"),
+    viewportItemId: "WhiteGem",
+    cooldownSeconds: 5 * 60,
+    cost: {
+        kind: "percentageOfDifficultyPower",
+        percentage: 0,
+    },
+    effect: {
+        kind: "grantItem",
+        itemId: "WhiteGem",
         amount: 1,
     },
 });

@@ -12,10 +12,10 @@ import { RobotoMono, RobotoMonoBold } from "shared/asset/GameFonts";
 import { IS_EDIT } from "shared/Context";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import { CURRENCY_CATEGORIES, CURRENCY_DETAILS } from "shared/currency/CurrencyDetails";
+import DifficultyResearch from "shared/difficulty/DifficultyResearch";
 import { getDifficultyRewards, type DifficultyRewardDefinition } from "shared/difficulty/DifficultyRewards";
 import Item from "shared/item/Item";
 import { useItemViewport } from "shared/item/ItemViewport";
-import TierDifficulty from "shared/difficulty/TierDifficulty";
 import Furnace from "shared/item/traits/Furnace";
 import Generator from "shared/item/traits/generator/Generator";
 import ClassLowerNegativeShop from "shared/items/negative/ClassLowerNegativeShop";
@@ -106,50 +106,12 @@ function computeOrbVisualTargets(multiplier: BaseOnoeNum) {
     };
 }
 
-function isResearchEligible(item: Item) {
-    if (item.isA("Unique")) return false;
-    if (item.isA("Gear")) return false;
-    if (item.isA("Shop")) return false;
-    if (item.id === "DifficultyResearcher") return false; // Self-reference
-    const difficulty = item.difficulty;
-    if (difficulty === Difficulty.Bonuses || difficulty === Difficulty.Excavation) return false;
-    return true;
-}
-
-function collectUniqueDifficulties() {
-    const unique = new Set<string>();
-    const sorted = new Array<Difficulty>();
-    for (const item of Server.Items.sortedItems) {
-        const difficulty = item.difficulty;
-        if (difficulty.class === -99 || difficulty === Difficulty.Bonuses || difficulty === Difficulty.Excavation)
-            continue;
-        if (TierDifficulty.TIERS.has(difficulty)) continue;
-        if (unique.has(difficulty.id)) continue;
-        unique.add(difficulty.id);
-        sorted.push(difficulty);
+function cloneDifficultySet(source: ReadonlySet<string>) {
+    const clone = new Set<string>();
+    for (const difficultyId of source) {
+        clone.add(difficultyId);
     }
-    sorted.sort((a, b) => (a.layoutRating ?? 0) < (b.layoutRating ?? 0));
-    return sorted;
-}
-
-function getDifficultyRequirement(index: number) {
-    if (index <= 0) {
-        return new OnoeNum(1);
-    }
-
-    if (index % 2 === 1) {
-        return OnoeNum.fromSerika(64, index - 1);
-    }
-
-    return OnoeNum.fromSerika(1, index + 1);
-}
-
-function buildDifficultyRequirements(difficulties: Difficulty[]) {
-    const requirements = new Map<string, OnoeNum>();
-    difficulties.forEach((difficulty, index) => {
-        requirements.set(difficulty.id, getDifficultyRequirement(index));
-    });
-    return requirements;
+    return clone;
 }
 
 interface TabSwitcherProps {
@@ -216,6 +178,7 @@ interface DifficultyCarouselProps {
     selectPart: BasePart;
     requirements: Map<string, OnoeNum>;
     playerDifficultyPower: OnoeNum;
+    unlockedDifficulties: ReadonlySet<string>;
 }
 
 function DifficultyCarousel({
@@ -223,6 +186,7 @@ function DifficultyCarousel({
     selectPart,
     requirements,
     playerDifficultyPower,
+    unlockedDifficulties,
 }: DifficultyCarouselProps) {
     return (
         <scrollingframe
@@ -251,7 +215,7 @@ function DifficultyCarousel({
             />
             {difficultyList.map((difficulty) => {
                 const requirement = requirements.get(difficulty.id);
-                const isUnlocked = requirement === undefined || playerDifficultyPower.moreEquals(requirement);
+                const isUnlocked = unlockedDifficulties.has(difficulty.id);
                 const baseColor = difficulty.color ?? Color3.fromRGB(50, 50, 80);
                 const displayColor = isUnlocked ? baseColor : baseColor.Lerp(Color3.fromRGB(20, 20, 30), 0.6);
                 const borderColor = displayColor.Lerp(Color3.fromRGB(0, 0, 0), 0.8);
@@ -337,6 +301,7 @@ interface DifficultySelectionSurfaceProps {
     difficultyRequirements: Map<string, OnoeNum>;
     playerDifficultyPower: OnoeNum;
     nextUnlockRequirement?: OnoeNum;
+    unlockedDifficulties: ReadonlySet<string>;
 }
 
 function DifficultySelectionSurface({
@@ -347,6 +312,7 @@ function DifficultySelectionSurface({
     difficultyRequirements,
     playerDifficultyPower,
     nextUnlockRequirement,
+    unlockedDifficulties,
 }: DifficultySelectionSurfaceProps) {
     return (
         <frame BackgroundTransparency={1} Size={new UDim2(1, 0, 1, 0)}>
@@ -382,6 +348,7 @@ function DifficultySelectionSurface({
                 selectPart={selectPart}
                 requirements={difficultyRequirements}
                 playerDifficultyPower={playerDifficultyPower}
+                unlockedDifficulties={unlockedDifficulties}
             />
         </frame>
     );
@@ -903,7 +870,7 @@ function ResearchPanel({
     );
 }
 
-function computeRewardCost(reward: DifficultyRewardDefinition, playerDifficultyPower: OnoeNum) {
+function getRewardCostLabel(reward: DifficultyRewardDefinition, playerDifficultyPower: OnoeNum) {
     if (reward.cost.kind === "percentageOfDifficultyPower") {
         let cost = playerDifficultyPower.mul(new OnoeNum(reward.cost.percentage));
         if (reward.cost.minimum !== undefined) {
@@ -912,9 +879,9 @@ function computeRewardCost(reward: DifficultyRewardDefinition, playerDifficultyP
                 cost = minimum;
             }
         }
-        return cost;
+        return $tuple(`${OnoeNum.toString(cost)} (${math.floor(reward.cost.percentage * 100 * 100) / 100}%)`, cost);
     }
-    return new OnoeNum(0);
+    return $tuple("Free!", new OnoeNum(0));
 }
 
 function formatDurationShort(seconds: number) {
@@ -943,8 +910,10 @@ function DifficultyRewardCard({
     cooldowns,
     onClaim,
 }: DifficultyRewardCardProps) {
-    const cost = useMemo(() => computeRewardCost(reward, playerDifficultyPower), [reward, playerDifficultyPower]);
-    const costText = useMemo(() => OnoeNum.toString(cost), [cost]);
+    const [costText, cost] = useMemo(
+        () => getRewardCostLabel(reward, playerDifficultyPower),
+        [reward, playerDifficultyPower],
+    );
     const viewportRef = useRef<ViewportFrame>();
     useItemViewport(viewportRef, reward.viewportItemId ?? "");
 
@@ -1406,6 +1375,9 @@ function DifficultyResearcherGui({
     const [inventory, setInventory] = useState<Map<string, number>>(Packets.inventory.get());
     const [researchingState, setResearchingState] = useState<Map<string, number>>(Packets.researching.get());
     const [researchMultiplier, setResearchMultiplier] = useState(Packets.researchMultiplier.get());
+    const [unlockedDifficulties, setUnlockedDifficulties] = useState<Set<string>>(() =>
+        cloneDifficultySet(Packets.unlockedDifficulties.get()),
+    );
     const [rewardCooldowns, setRewardCooldowns] = useState<Map<string, number>>(
         Packets.difficultyRewardCooldowns.get(),
     );
@@ -1496,6 +1468,9 @@ function DifficultyResearcherGui({
         const researchMultiplierConnection = Packets.researchMultiplier.observe((incoming) => {
             setResearchMultiplier(IS_EDIT ? table.clone(incoming) : incoming);
         });
+        const unlockedDifficultiesConnection = Packets.unlockedDifficulties.observe((incoming) => {
+            setUnlockedDifficulties(cloneDifficultySet(incoming));
+        });
         const rewardCooldownConnection = Packets.difficultyRewardCooldowns.observe((incoming) => {
             const mapped = incoming ?? new Map<string, number>();
             setRewardCooldowns(IS_EDIT ? table.clone(mapped) : mapped);
@@ -1505,31 +1480,37 @@ function DifficultyResearcherGui({
             inventoryConnection.Disconnect();
             researchingConnection.Disconnect();
             researchMultiplierConnection.Disconnect();
+            unlockedDifficultiesConnection.Disconnect();
             rewardCooldownConnection.Disconnect();
         };
     }, []);
 
-    const difficultyList = useMemo(() => collectUniqueDifficulties(), []);
+    const difficultyList = useMemo(DifficultyResearch.collectUniqueDifficulties, []);
 
-    const difficultyRequirements = useMemo(() => buildDifficultyRequirements(difficultyList), [difficultyList]);
+    const difficultyRequirements = useMemo(
+        () => DifficultyResearch.buildDifficultyRequirements(difficultyList),
+        [difficultyList],
+    );
 
     const playerDifficultyPower = useMemo(() => new OnoeNum(balance.get("Difficulty Power") ?? 0), [balance]);
 
     const nextUnlockRequirement = useMemo(() => {
         for (const difficulty of difficultyList) {
+            if (unlockedDifficulties.has(difficulty.id)) continue;
             const requirement = difficultyRequirements.get(difficulty.id);
-            if (requirement !== undefined && playerDifficultyPower.lessThan(requirement)) {
+            if (requirement === undefined) continue;
+            if (playerDifficultyPower.lessThan(requirement)) {
                 return requirement;
             }
         }
         return undefined;
-    }, [difficultyList, difficultyRequirements, playerDifficultyPower]);
+    }, [difficultyList, difficultyRequirements, playerDifficultyPower, unlockedDifficulties]);
 
     const availableEntries = useMemo(() => {
         const entries = new Array<{ item: Item; amount: number }>();
         for (const item of Server.Items.sortedItems) {
             const itemId = item.id;
-            if (!isResearchEligible(item)) continue;
+            if (!DifficultyResearch.isResearchEligible(item)) continue;
             const total = inventory.get(itemId) ?? 0;
             const reserved = researchingState.get(itemId) ?? 0;
             const available = total - reserved;
@@ -1628,15 +1609,22 @@ function DifficultyResearcherGui({
         if (currentRequirement !== undefined) {
             const requirementText = OnoeNum.toString(currentRequirement);
             const currentPowerText = OnoeNum.toString(playerDifficultyPower);
-            const locked = playerDifficultyPower.lessThan(currentRequirement);
-            const statusColor = locked ? "#FF8BAA" : "#A5FFB5";
-            const statusText = locked ? `Locked until ${requirementText} Difficulty Power` : "Unlocked";
+            const isUnlocked = unlockedDifficulties.has(currentDifficulty.id);
+            const statusColor = isUnlocked ? "#A5FFB5" : "#FF8BAA";
+            const statusText = isUnlocked ? "Unlocked" : `Locked until ${requirementText} Difficulty Power`;
             const statusLine = `<font color="${statusColor}">${statusText} — Requires ${requirementText} Difficulty Power (You have ${currentPowerText}).</font>`;
             desc = `${desc}\n\n${statusLine}`;
         }
 
         return desc;
-    }, [currentDifficulty, difficultyRequirements, playerDifficultyPower, researchMultiplier, totalResearchCount]);
+    }, [
+        currentDifficulty,
+        difficultyRequirements,
+        playerDifficultyPower,
+        researchMultiplier,
+        totalResearchCount,
+        unlockedDifficulties,
+    ]);
 
     const difficultyRewards = useMemo(() => getDifficultyRewards(currentDifficulty), [currentDifficulty]);
 
@@ -1699,6 +1687,7 @@ function DifficultyResearcherGui({
                     difficultyRequirements={difficultyRequirements}
                     playerDifficultyPower={playerDifficultyPower}
                     nextUnlockRequirement={nextUnlockRequirement}
+                    unlockedDifficulties={unlockedDifficulties}
                 />
             </surfacegui>
             <surfacegui
@@ -1756,8 +1745,8 @@ export = new Item(script.Name)
     .exit()
 
     .onInit(() => {
-        const serverDifficultyList = collectUniqueDifficulties();
-        const serverDifficultyRequirements = buildDifficultyRequirements(serverDifficultyList);
+        const serverDifficultyList = DifficultyResearch.collectUniqueDifficulties();
+        const serverDifficultyRequirements = DifficultyResearch.buildDifficultyRequirements(serverDifficultyList);
 
         setDifficultyPacket.fromClient((player, difficultyId) => {
             if (!Server.Permissions.checkPermLevel(player, "build")) return false;
@@ -1767,10 +1756,11 @@ export = new Item(script.Name)
             if (requirement === undefined) {
                 const index = serverDifficultyList.findIndex((entry) => entry.id === difficulty.id);
                 if (index === -1) return false;
-                requirement = getDifficultyRequirement(index);
+                requirement = DifficultyResearch.getDifficultyRequirement(index);
                 serverDifficultyRequirements.set(difficulty.id, requirement);
             }
-            if (requirement !== undefined) {
+            const alreadyUnlocked = Server.Research.unlockedDifficulties.has(difficulty.id);
+            if (!alreadyUnlocked && requirement !== undefined) {
                 const currentDifficultyPower = Server.Currency.get("Difficulty Power");
                 if (currentDifficultyPower.lessThan(requirement)) return false;
             }
@@ -1806,17 +1796,18 @@ export = new Item(script.Name)
                         break;
                 }
             }
+            const furnaceBonus = Server.Research.getFurnaceDifficultyPowerBonus();
+            if (furnaceBonus > 0) {
+                delta = delta.add(furnaceBonus);
+            }
             const multiplier = Server.Research.calculateResearchMultiplier();
             if (multiplier.moreEquals(1)) {
                 delta = delta.mul(multiplier);
             }
-            const furnaceBonus = Server.Research.getFurnaceDifficultyPowerBonus?.();
-            if (furnaceBonus !== undefined && furnaceBonus > 0) {
-                delta = delta.add(new OnoeNum(furnaceBonus));
-            }
             const gain = new Map<Currency, OnoeNum>([["Difficulty Power", delta]]);
             CurrencyService.incrementAll(gain);
             Packets.dropletBurnt.toAllClients(droplet.Name, gain);
+            Server.Research.updateUnlockedDifficulties();
         };
     })
     .onClientLoad((model, item, player) => {
