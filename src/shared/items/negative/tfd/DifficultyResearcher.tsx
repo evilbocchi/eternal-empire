@@ -1,7 +1,7 @@
 import { getAllInstanceInfo } from "@antivivi/vrldk";
 import Difficulty from "@rbxts/ejt";
 import { packet, property } from "@rbxts/fletchette";
-import React, { Fragment, useCallback, useEffect, useMemo, useRef, useState } from "@rbxts/react";
+import React, { Fragment, RefObject, useCallback, useEffect, useMemo, useRef, useState } from "@rbxts/react";
 import { createPortal, createRoot } from "@rbxts/react-roblox";
 import { BaseOnoeNum, OnoeNum } from "@rbxts/serikanum";
 import { StarterGui, TweenService } from "@rbxts/services";
@@ -21,12 +21,90 @@ import Generator from "shared/item/traits/generator/Generator";
 import ClassLowerNegativeShop from "shared/items/negative/ClassLowerNegativeShop";
 import Packets from "shared/Packets";
 
+type OrbPart = Part & {
+    Ground: Attachment & {
+        Rim: ParticleEmitter;
+    };
+    Attach1: Attachment & {
+        W1: ParticleEmitter;
+        Cresents: ParticleEmitter;
+        Sparks: ParticleEmitter;
+        Rim: ParticleEmitter;
+        Background: ParticleEmitter;
+        RimSparks: ParticleEmitter;
+        ["Black Ball"]: ParticleEmitter;
+        W2: ParticleEmitter;
+    };
+};
+
 const difficultyPacket = property<string | undefined>();
 const setDifficultyPacket = packet<(difficultyId: string) => boolean>();
 const addResearchPacket = packet<(itemId: string, amount: number) => boolean>();
 const removeResearchPacket = packet<(itemId: string, amount: number) => boolean>();
 
 type ItemQuantityEntry = { item: Item; amount: number };
+
+interface OrbEmitterDefaults {
+    emitter: ParticleEmitter;
+    baseSize: NumberSequence;
+    baseColor: ColorSequence;
+    baseMaxSize: number;
+}
+
+interface OrbAttachmentDefaults {
+    attachment: Attachment;
+    basePosition: Vector3;
+}
+
+interface OrbVisualDefaults {
+    emitters: OrbEmitterDefaults[];
+    maxBaseSize: number;
+    attach1?: OrbAttachmentDefaults;
+}
+
+function scaleNumberSequence(sequence: NumberSequence, scale: number) {
+    const keypoints = sequence.Keypoints.map(
+        (keypoint) => new NumberSequenceKeypoint(keypoint.Time, keypoint.Value * scale, keypoint.Envelope * scale),
+    );
+    return new NumberSequence(keypoints);
+}
+
+function computeNumberSequenceMaxRadius(sequence: NumberSequence) {
+    let maxValue = 0;
+    for (const keypoint of sequence.Keypoints) {
+        const value = keypoint.Value + keypoint.Envelope;
+        if (value > maxValue) {
+            maxValue = value;
+        }
+    }
+    return maxValue;
+}
+
+function shiftColorSequence(sequence: ColorSequence, hueShift: number) {
+    const keypoints = sequence.Keypoints.map((keypoint) => {
+        const [h, s, v] = Color3.toHSV(keypoint.Value);
+        let shiftedHue = (h + hueShift) % 1;
+        if (shiftedHue < 0) {
+            shiftedHue += 1;
+        }
+        const shiftedColor = Color3.fromHSV(shiftedHue, s, v);
+        return new ColorSequenceKeypoint(keypoint.Time, shiftedColor);
+    });
+    return new ColorSequence(keypoints);
+}
+
+function computeOrbVisualTargets(multiplier: BaseOnoeNum) {
+    const mantissa = math.max(multiplier.mantissa, 1e-6);
+    const exponent = multiplier.exponent ?? 0;
+    const magnitude = math.max(math.log10(mantissa) + exponent, 0);
+    const easedMagnitude = math.clamp(magnitude, 0, 12);
+    const sizeScale = math.clamp(1 + easedMagnitude * 0.12, 0.8, 3.5);
+    const hueShift = math.fmod(easedMagnitude * 0.08, 1);
+    return {
+        sizeScale,
+        hueShift,
+    };
+}
 
 function isResearchEligible(item: Item) {
     if (item.isA("Unique")) return false;
@@ -318,11 +396,123 @@ interface ResearchInfoProps {
     onRelease: (itemId: string, amount: number) => void;
 }
 
+const ITEM_ROW_HEIGHT = 36;
+const ITEM_ROW_SPACING = 8;
+const MAX_VISIBLE_ITEM_LIST_HEIGHT = 320;
+
+interface VirtualizedListRenderContext {
+    position: UDim2;
+    size: UDim2;
+}
+
+interface VirtualizedItemListProps<T> {
+    items: T[];
+    itemHeight: number;
+    itemSpacing?: number;
+    maxVisibleHeight: number;
+    layoutOrder?: number;
+    renderItem: (item: T, index: number, context: VirtualizedListRenderContext) => React.ReactElement;
+}
+
+function VirtualizedItemList<T>({
+    items,
+    itemHeight,
+    itemSpacing = 0,
+    maxVisibleHeight,
+    layoutOrder,
+    renderItem,
+}: VirtualizedItemListProps<T>) {
+    const scrollingRef = useRef<ScrollingFrame>();
+    const [scrollPosition, setScrollPosition] = useState(0);
+
+    const totalItemHeight = useMemo(() => {
+        const count = items.size();
+        if (count <= 0) return 0;
+        return count * itemHeight + math.max(count - 1, 0) * itemSpacing;
+    }, [items, itemHeight, itemSpacing]);
+
+    const visibleHeight = math.min(math.max(totalItemHeight, itemHeight), maxVisibleHeight);
+    const canvasHeight = math.max(totalItemHeight, visibleHeight);
+    const virtualRowHeight = itemHeight + itemSpacing;
+
+    useEffect(() => {
+        const scrollingFrame = scrollingRef.current;
+        if (!scrollingFrame) return;
+
+        const clampScroll = () => {
+            const maxScroll = math.max(canvasHeight - visibleHeight, 0);
+            if (scrollingFrame.CanvasPosition.Y > maxScroll) {
+                scrollingFrame.CanvasPosition = new Vector2(scrollingFrame.CanvasPosition.X, maxScroll);
+            }
+            setScrollPosition(scrollingFrame.CanvasPosition.Y);
+        };
+
+        clampScroll();
+
+        const canvasConnection = scrollingFrame.GetPropertyChangedSignal("CanvasPosition").Connect(() => {
+            setScrollPosition(scrollingFrame.CanvasPosition.Y);
+        });
+
+        return () => {
+            canvasConnection.Disconnect();
+        };
+    }, [canvasHeight, visibleHeight, items]);
+
+    if (items.size() <= 0) {
+        return <Fragment />;
+    }
+
+    const overscan = 6;
+    const startIndex = math.max(math.floor(scrollPosition / virtualRowHeight) - overscan, 0);
+    const endIndex = math.min(math.ceil((scrollPosition + visibleHeight) / virtualRowHeight) + overscan, items.size());
+
+    const renderedItems: React.ReactElement[] = [];
+    for (let index = startIndex; index < endIndex; index++) {
+        const item = items[index];
+        if (item === undefined) continue;
+        const offset = index * virtualRowHeight;
+        renderedItems.push(
+            renderItem(item, index, {
+                position: new UDim2(0, 0, 0, offset),
+                size: new UDim2(1, -12, 0, itemHeight),
+            }),
+        );
+    }
+
+    return (
+        <scrollingframe
+            ref={scrollingRef}
+            LayoutOrder={layoutOrder}
+            Active={true}
+            BackgroundTransparency={1}
+            BorderSizePixel={0}
+            CanvasSize={new UDim2(0, 0, 0, canvasHeight)}
+            ScrollBarThickness={6}
+            ScrollingDirection={Enum.ScrollingDirection.Y}
+            Size={new UDim2(1, 0, 0, visibleHeight)}
+        >
+            <uipadding
+                PaddingBottom={new UDim(0, 4)}
+                PaddingLeft={new UDim(0, 6)}
+                PaddingRight={new UDim(0, 6)}
+                PaddingTop={new UDim(0, 4)}
+            />
+            {renderedItems}
+        </scrollingframe>
+    );
+}
+
 function AvailableEntryRow({
     item,
     amount,
     onAbsorb,
-}: ItemQuantityEntry & { onAbsorb: (itemId: string, amount: number) => void }) {
+    position,
+    size,
+}: ItemQuantityEntry & {
+    onAbsorb: (itemId: string, amount: number) => void;
+    position: UDim2;
+    size: UDim2;
+}) {
     const color = item.difficulty.color ?? Color3.fromRGB(60, 60, 110);
     const backgroundColor = new Color3(
         math.clamp(color.R, 0.1, 0.9),
@@ -331,7 +521,6 @@ function AvailableEntryRow({
     );
     return (
         <imagelabel
-            key={`inventory-${item.id}`}
             BackgroundColor3={backgroundColor}
             BackgroundTransparency={0.2}
             BorderColor3={Color3.fromRGB(0, 0, 0)}
@@ -340,8 +529,8 @@ function AvailableEntryRow({
             ImageColor3={Color3.fromRGB(126, 126, 126)}
             ImageTransparency={0.6}
             ScaleType={Enum.ScaleType.Tile}
-            Size={new UDim2(1, 0, 0, 36)}
-            Visible={amount > 0}
+            Position={position}
+            Size={size}
             TileSize={new UDim2(0, 100, 0, 100)}
         >
             <uistroke
@@ -426,7 +615,13 @@ function ActiveResearchRow({
     item,
     amount,
     onRelease,
-}: ItemQuantityEntry & { onRelease: (itemId: string, amount: number) => void }) {
+    position,
+    size,
+}: ItemQuantityEntry & {
+    onRelease: (itemId: string, amount: number) => void;
+    position: UDim2;
+    size: UDim2;
+}) {
     const color = item.difficulty.color?.Lerp(Color3.fromRGB(0, 0, 0), 0.4) ?? Color3.fromRGB(50, 40, 90);
     const backgroundColor = new Color3(
         math.clamp(color.R, 0.1, 0.9),
@@ -435,7 +630,6 @@ function ActiveResearchRow({
     );
     return (
         <imagelabel
-            key={`research-${item.id}`}
             BackgroundColor3={backgroundColor}
             BackgroundTransparency={0.2}
             BorderColor3={Color3.fromRGB(0, 0, 0)}
@@ -444,8 +638,8 @@ function ActiveResearchRow({
             ImageColor3={Color3.fromRGB(126, 126, 126)}
             ImageTransparency={0.6}
             ScaleType={Enum.ScaleType.Tile}
-            Size={new UDim2(1, 0, 0, 36)}
-            Visible={amount > 0}
+            Position={position}
+            Size={size}
             TileSize={new UDim2(0, 100, 0, 100)}
         >
             <uistroke
@@ -569,16 +763,6 @@ function ResearchPanel({
 
             <textlabel
                 BackgroundTransparency={1}
-                FontFace={RobotoMono}
-                Size={new UDim2(1, 0, 0, 24)}
-                Text={`Current Multiplier: x${OnoeNum.toString(researchMultiplier)}`}
-                TextColor3={Color3.fromRGB(220, 220, 255)}
-                TextScaled={true}
-                TextStrokeTransparency={0}
-            />
-
-            <textlabel
-                BackgroundTransparency={1}
                 FontFace={RobotoMonoBold}
                 Size={new UDim2(1, 0, 0, 32)}
                 Text={`Available (${availableCount})`}
@@ -599,16 +783,23 @@ function ResearchPanel({
                     TextScaled={true}
                 />
             ) : (
-                <Fragment />
-            )}
-            {availableEntries.map((entry) => (
-                <AvailableEntryRow
-                    key={`inventory-${entry.item.id}`}
-                    item={entry.item}
-                    amount={entry.amount}
-                    onAbsorb={onAbsorb}
+                <VirtualizedItemList
+                    items={availableEntries}
+                    itemHeight={ITEM_ROW_HEIGHT}
+                    itemSpacing={ITEM_ROW_SPACING}
+                    maxVisibleHeight={MAX_VISIBLE_ITEM_LIST_HEIGHT}
+                    renderItem={(entry, _index, context) => (
+                        <AvailableEntryRow
+                            key={`inventory-${entry.item.id}`}
+                            item={entry.item}
+                            amount={entry.amount}
+                            onAbsorb={onAbsorb}
+                            position={context.position}
+                            size={context.size}
+                        />
+                    )}
                 />
-            ))}
+            )}
             <textlabel
                 BackgroundTransparency={1}
                 FontFace={RobotoMonoBold}
@@ -632,16 +823,23 @@ function ResearchPanel({
                     TextScaled={true}
                 />
             ) : (
-                <Fragment />
-            )}
-            {researchEntries.map((entry) => (
-                <ActiveResearchRow
-                    key={`research-${entry.item.id}`}
-                    item={entry.item}
-                    amount={entry.amount}
-                    onRelease={onRelease}
+                <VirtualizedItemList
+                    items={researchEntries}
+                    itemHeight={ITEM_ROW_HEIGHT}
+                    itemSpacing={ITEM_ROW_SPACING}
+                    maxVisibleHeight={MAX_VISIBLE_ITEM_LIST_HEIGHT}
+                    renderItem={(entry, _index, context) => (
+                        <ActiveResearchRow
+                            key={`research-${entry.item.id}`}
+                            item={entry.item}
+                            amount={entry.amount}
+                            onRelease={onRelease}
+                            position={context.position}
+                            size={context.size}
+                        />
+                    )}
                 />
-            ))}
+            )}
             {totalResearchCount > 0 ? (
                 <textbutton
                     BackgroundColor3={Color3.fromRGB(120, 60, 120)}
@@ -700,8 +898,6 @@ interface DifficultyRewardCardProps {
     reward: DifficultyRewardDefinition;
     playerDifficultyPower: OnoeNum;
     cooldowns: Map<string, number>;
-    now: number;
-    revenuePerSecond: Map<Currency, BaseOnoeNum>;
     onClaim: (rewardId: string) => void;
 }
 
@@ -710,8 +906,6 @@ function DifficultyRewardCard({
     reward,
     playerDifficultyPower,
     cooldowns,
-    now,
-    revenuePerSecond,
     onClaim,
 }: DifficultyRewardCardProps) {
     const cost = useMemo(() => computeRewardCost(reward, playerDifficultyPower), [reward, playerDifficultyPower]);
@@ -720,7 +914,30 @@ function DifficultyRewardCard({
     useItemViewport(viewportRef, reward.viewportItemId ?? "");
 
     const cooldownExpiresAt = cooldowns.get(reward.id);
-    const secondsRemaining = cooldownExpiresAt !== undefined ? math.max(cooldownExpiresAt - now, 0) : 0;
+    const computeSecondsRemaining = useCallback(() => {
+        if (cooldownExpiresAt === undefined) return 0;
+        return math.max(cooldownExpiresAt - os.time(), 0);
+    }, [cooldownExpiresAt]);
+
+    const [secondsRemaining, setSecondsRemaining] = useState(() => computeSecondsRemaining());
+
+    useEffect(() => {
+        setSecondsRemaining(computeSecondsRemaining());
+        if (cooldownExpiresAt === undefined) return;
+        let alive = true;
+        task.spawn(() => {
+            while (alive) {
+                const remaining = computeSecondsRemaining();
+                setSecondsRemaining(remaining);
+                if (remaining <= 0) break;
+                task.wait(1);
+            }
+        });
+        return () => {
+            alive = false;
+        };
+    }, [computeSecondsRemaining, cooldownExpiresAt]);
+
     const isCoolingDown = secondsRemaining > 0;
     const isAffordable = !playerDifficultyPower.lessThan(cost);
     const buttonDisabled = isCoolingDown || !isAffordable;
@@ -739,7 +956,7 @@ function DifficultyRewardCard({
                 return `Reward: ${itemName}${amountSuffix}.`;
             }
         }
-    }, [revenuePerSecond, reward]);
+    }, [reward]);
 
     const statusColor = isCoolingDown
         ? Color3.fromRGB(255, 139, 170)
@@ -896,8 +1113,6 @@ interface DifficultyRewardsSectionProps {
     rewards: DifficultyRewardDefinition[];
     playerDifficultyPower: OnoeNum;
     cooldowns: Map<string, number>;
-    now: number;
-    revenuePerSecond: Map<Currency, BaseOnoeNum>;
     onClaim: (rewardId: string) => void;
 }
 
@@ -905,8 +1120,6 @@ function DifficultyRewardsSection({
     rewards,
     playerDifficultyPower,
     cooldowns,
-    now,
-    revenuePerSecond,
     onClaim,
 }: DifficultyRewardsSectionProps) {
     return (
@@ -952,8 +1165,6 @@ function DifficultyRewardsSection({
                     reward={reward}
                     playerDifficultyPower={playerDifficultyPower}
                     cooldowns={cooldowns}
-                    now={now}
-                    revenuePerSecond={revenuePerSecond}
                     onClaim={onClaim}
                 />
             ))}
@@ -1040,8 +1251,6 @@ function DescriptionPanel({
                             rewards={rewardInfo.rewards}
                             playerDifficultyPower={rewardInfo.playerDifficultyPower}
                             cooldowns={rewardInfo.cooldowns}
-                            now={rewardInfo.now}
-                            revenuePerSecond={rewardInfo.revenuePerSecond}
                             onClaim={rewardInfo.onClaim}
                         />
                     </Fragment>
@@ -1095,12 +1304,15 @@ function DifficultyNameSurface({ currentDifficulty }: DifficultyNameSurfaceProps
 
 interface MultiplierBillboardProps {
     orbPart: BasePart;
-    revenueLabelRef: React.RefObject<TextLabel>;
+    billboardRef: RefObject<BillboardGui>;
+    revenueLabelRef: RefObject<TextLabel>;
+    gradientRef: RefObject<UIGradient>;
 }
 
-function MultiplierBillboard({ orbPart, revenueLabelRef }: MultiplierBillboardProps) {
+function MultiplierBillboard({ orbPart, billboardRef, revenueLabelRef, gradientRef }: MultiplierBillboardProps) {
     return (
         <billboardgui
+            ref={billboardRef}
             Adornee={orbPart}
             AlwaysOnTop={true}
             LightInfluence={0}
@@ -1110,16 +1322,18 @@ function MultiplierBillboard({ orbPart, revenueLabelRef }: MultiplierBillboardPr
         >
             <textlabel
                 ref={revenueLabelRef}
+                AnchorPoint={new Vector2(0.5, 0.5)}
                 BackgroundTransparency={1}
                 FontFace={RobotoMonoBold}
-                Size={new UDim2(1, 0, 1, 0)}
+                Position={new UDim2(0.5, 0, 0.5, 0)}
                 Text=""
                 TextColor3={Color3.fromRGB(255, 255, 255)}
                 TextScaled={true}
-                TextSize={14}
                 TextWrapped={true}
+                Rotation={-5}
             >
                 <uistroke StrokeSizingMode={Enum.StrokeSizingMode.ScaledSize} Thickness={3} />
+                <uigradient ref={gradientRef} Color={new ColorSequence(Color3.fromRGB(255, 255, 255))} Rotation={90} />
             </textlabel>
         </billboardgui>
     );
@@ -1136,9 +1350,11 @@ function DifficultyResearcherGui({
     descriptionPart: BasePart;
     imagePart: BasePart;
     namePart: BasePart;
-    orbPart: BasePart;
+    orbPart: OrbPart;
 }) {
+    const billboardRef = useRef<BillboardGui>();
     const revenueLabelRef = useRef<TextLabel>();
+    const labelGradientRef = useRef<UIGradient>();
     const [currentDifficulty, setCurrentDifficulty] = useState<Difficulty | undefined>(undefined);
     const [activePage, setActivePage] = useState<"difficulties" | "research">("difficulties");
     const [balance, setBalance] = useState<Map<Currency, BaseOnoeNum>>(Packets.balance.get());
@@ -1148,10 +1364,79 @@ function DifficultyResearcherGui({
     const [rewardCooldowns, setRewardCooldowns] = useState<Map<string, number>>(
         Packets.difficultyRewardCooldowns.get(),
     );
-    const [revenuePerSecond, setRevenuePerSecond] = useState<Map<Currency, BaseOnoeNum>>(
-        Packets.revenue.get() ?? new Map(),
-    );
-    const [now, setNow] = useState(os.time());
+
+    const orbVisualDefaults = useMemo<OrbVisualDefaults>(() => {
+        const emitters = new Array<OrbEmitterDefaults>();
+        let maxBaseSize = 0;
+        for (const descendant of orbPart.GetDescendants()) {
+            if (descendant.IsA("ParticleEmitter")) {
+                const baseMaxSize = computeNumberSequenceMaxRadius(descendant.Size);
+                if (baseMaxSize > maxBaseSize) {
+                    maxBaseSize = baseMaxSize;
+                }
+                emitters.push({
+                    emitter: descendant,
+                    baseSize: descendant.Size,
+                    baseColor: descendant.Color,
+                    baseMaxSize,
+                });
+            }
+        }
+
+        const attach1 = orbPart.Attach1;
+
+        return {
+            emitters,
+            maxBaseSize,
+            attach1: attach1
+                ? {
+                      attachment: attach1,
+                      basePosition: attach1.Position,
+                  }
+                : undefined,
+        };
+    }, [orbPart]);
+
+    useEffect(() => {
+        const { emitters, maxBaseSize, attach1 } = orbVisualDefaults;
+
+        const { sizeScale, hueShift } = computeOrbVisualTargets(researchMultiplier);
+        if (emitters.size() > 0) {
+            for (const emitterDefaults of emitters) {
+                emitterDefaults.emitter.Size = scaleNumberSequence(emitterDefaults.baseSize, sizeScale);
+                emitterDefaults.emitter.Color = shiftColorSequence(emitterDefaults.baseColor, hueShift);
+            }
+        }
+
+        if (attach1 !== undefined) {
+            const baseHalfHeight = maxBaseSize * 0.5;
+            const scaledHalfHeight = baseHalfHeight * sizeScale;
+            const offsetY = math.max(scaledHalfHeight - baseHalfHeight, 0);
+            const offsetVector = new Vector3(0, offsetY, 0);
+            attach1.attachment.Position = attach1.basePosition.add(offsetVector);
+            if (billboardRef.current) {
+                billboardRef.current.StudsOffset = offsetVector;
+            }
+        }
+
+        const label = revenueLabelRef.current;
+        if (label !== undefined) {
+            label.Size = new UDim2(10, 0, sizeScale - 0.8, 0);
+        }
+
+        const gradient = labelGradientRef.current;
+        if (gradient !== undefined) {
+            const startingHue = math.fmod(hueShift + 0.7, 1);
+            const primaryHue = math.fmod(startingHue + 0.02, 1);
+            const secondaryHue = math.fmod(primaryHue + 0.12, 1);
+            const primary = Color3.fromHSV(primaryHue, 0.85, 1);
+            const secondary = Color3.fromHSV(secondaryHue, 0.75, 0.9);
+            gradient.Color = new ColorSequence([
+                new ColorSequenceKeypoint(0, primary),
+                new ColorSequenceKeypoint(1, secondary),
+            ]);
+        }
+    }, [orbVisualDefaults, researchMultiplier]);
 
     useEffect(() => {
         const balanceConnection = Packets.balance.observe((incoming) => {
@@ -1170,17 +1455,12 @@ function DifficultyResearcherGui({
             const mapped = incoming ?? new Map<string, number>();
             setRewardCooldowns(IS_EDIT ? table.clone(mapped) : mapped);
         });
-        const revenueConnection = Packets.revenue.observe((incoming) => {
-            const mapped = incoming ?? new Map<Currency, BaseOnoeNum>();
-            setRevenuePerSecond(IS_EDIT ? table.clone(mapped) : mapped);
-        });
         return () => {
             balanceConnection.Disconnect();
             inventoryConnection.Disconnect();
             researchingConnection.Disconnect();
             researchMultiplierConnection.Disconnect();
             rewardCooldownConnection.Disconnect();
-            revenueConnection.Disconnect();
         };
     }, []);
 
@@ -1208,7 +1488,9 @@ function DifficultyResearcherGui({
             const total = inventory.get(itemId) ?? 0;
             const reserved = researchingState.get(itemId) ?? 0;
             const available = total - reserved;
-            entries.push({ item, amount: available });
+            if (available > 0) {
+                entries.push({ item, amount: available });
+            }
         }
         return entries;
     }, [inventory, researchingState]);
@@ -1218,7 +1500,9 @@ function DifficultyResearcherGui({
         for (const item of Server.Items.sortedItems) {
             const itemId = item.id;
             const amount = researchingState.get(itemId) ?? 0;
-            entries.push({ item, amount });
+            if (amount > 0) {
+                entries.push({ item, amount });
+            }
         }
         return entries;
     }, [researchingState]);
@@ -1233,7 +1517,7 @@ function DifficultyResearcherGui({
         (itemId: string, amount: number) => {
             if (amount < 1) return;
             const success = addResearchPacket.toServer(itemId, amount);
-            playSound(success ? "Click.mp3" : "Error.mp3", selectPart);
+            playSound(success ? "ResearchStart.mp3" : "Error.mp3", selectPart);
         },
         [selectPart],
     );
@@ -1242,7 +1526,7 @@ function DifficultyResearcherGui({
         (itemId: string, amount: number) => {
             if (amount < 1) return;
             const success = removeResearchPacket.toServer(itemId, amount);
-            playSound(success ? "Click.mp3" : "Error.mp3", selectPart);
+            playSound(success ? "ResearchEnd.mp3" : "Error.mp3");
         },
         [selectPart],
     );
@@ -1253,19 +1537,6 @@ function DifficultyResearcherGui({
             label.Text = `x${OnoeNum.toString(researchMultiplier)}`;
         }
     }, [researchMultiplier]);
-
-    useEffect(() => {
-        let alive = true;
-        const update = () => {
-            if (!alive) return;
-            setNow(os.time());
-            task.delay(1, update);
-        };
-        update();
-        return () => {
-            alive = false;
-        };
-    }, []);
 
     useEffect(() => {
         const connection = difficultyPacket.observe((id) => {
@@ -1327,11 +1598,9 @@ function DifficultyResearcherGui({
             rewards: difficultyRewards,
             playerDifficultyPower,
             cooldowns: rewardCooldowns,
-            now,
-            revenuePerSecond,
             onClaim: handleClaimReward,
         }),
-        [difficultyRewards, playerDifficultyPower, rewardCooldowns, now, revenuePerSecond, handleClaimReward],
+        [difficultyRewards, playerDifficultyPower, rewardCooldowns, handleClaimReward],
     );
 
     return (
@@ -1380,7 +1649,12 @@ function DifficultyResearcherGui({
             >
                 <DifficultyNameSurface currentDifficulty={currentDifficulty} />
             </surfacegui>
-            <MultiplierBillboard orbPart={orbPart} revenueLabelRef={revenueLabelRef} />
+            <MultiplierBillboard
+                orbPart={orbPart}
+                billboardRef={billboardRef}
+                revenueLabelRef={revenueLabelRef}
+                gradientRef={labelGradientRef}
+            />
             {portal}
         </Fragment>
     );
@@ -1487,7 +1761,7 @@ export = new Item(script.Name)
         const descriptionPart = model.WaitForChild("DifficultyDescription") as BasePart;
         const imagePart = model.WaitForChild("DifficultyImage") as BasePart;
         const namePart = model.WaitForChild("DifficultyName") as BasePart;
-        const orbPart = model.WaitForChild("Orb") as BasePart;
+        const orbPart = model.WaitForChild("Orb") as OrbPart;
         root.render(
             <DifficultyResearcherGui
                 selectPart={selectPart}

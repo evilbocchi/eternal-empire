@@ -18,6 +18,25 @@ type WalkSpeedBuffState = {
     connection: RBXScriptConnection;
 };
 
+const ITEM_WEIGHTS = new Map<Item, OnoeNum>();
+
+for (const [, item] of Items.itemsPerId) {
+    const layoutOrder = math.max(item.layoutOrder, 0);
+    let maxAmount = 100;
+    const priceSize = item.pricePerIteration.size();
+    if (priceSize > 0) {
+        maxAmount = math.min(maxAmount, priceSize);
+    }
+
+    let weight = new OnoeNum(1);
+    // Layout order factor (higher layout order = more valuable)
+    weight = weight.add(new OnoeNum(layoutOrder + 10).pow(1.5));
+    // Max amount factor (lower max amount = more valuable)
+    weight = weight.add(new OnoeNum(200 - maxAmount).pow(1.4));
+
+    ITEM_WEIGHTS.set(item, weight);
+}
+
 @Service()
 export default class ResearchService implements OnStart {
     private readonly researching: Map<string, number>;
@@ -256,16 +275,13 @@ export default class ResearchService implements OnStart {
             if (item === undefined) continue;
             if (!this.isItemEligibleForResearch(item)) continue;
 
-            const difficulty = item.difficulty;
-            const layoutRating = math.max(difficulty?.layoutRating ?? 0, 0);
-            const classRating = math.max(difficulty?.class ?? 0, 0);
-
-            const perItemWeight = 1 + layoutRating / 25 + classRating / 50;
-            weightedValue = weightedValue.add(amount * perItemWeight);
+            const perItemWeight = ITEM_WEIGHTS.get(item);
+            if (perItemWeight === undefined) continue;
+            weightedValue = weightedValue.add(perItemWeight.mul(amount));
         }
 
         if (weightedValue.lessEquals(0)) return new OnoeNum(1);
-        return weightedValue.pow(0.5).div(10).add(1);
+        return weightedValue.pow(0.5).div(10);
     }
 
     /**
