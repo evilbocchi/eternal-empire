@@ -3,6 +3,7 @@ import Difficulty from "@rbxts/ejt";
 import { OnoeNum } from "@rbxts/serikanum";
 import { Server } from "shared/api/APIExpose";
 import { Identifiable, ModuleRegistry } from "shared/hamster/ModuleRegistry";
+import Formula from "shared/currency/Formula";
 
 export type DifficultyRewardPrice = FlatDifficultyPowerCost | PercentageOfDifficultyPowerPrice;
 
@@ -41,11 +42,19 @@ export interface IncreaseDifficultyPowerEffect {
     mul?: OnoeNum;
 }
 
+export interface IncreaseDifficultyPowerFormulaEffect {
+    kind: "increaseDifficultyPowerFormula";
+    formula: Formula;
+    x: string;
+    xCap?: OnoeNum;
+}
+
 export type DifficultyRewardEffect =
     | WalkSpeedBuffEffect
     | GrantItemEffect
     | RedeemRevenueEffect
-    | IncreaseDifficultyPowerEffect;
+    | IncreaseDifficultyPowerEffect
+    | IncreaseDifficultyPowerFormulaEffect;
 
 export default class DifficultyReward extends Identifiable {
     static readonly REGISTRY = new ModuleRegistry<DifficultyReward>(script.Parent!, new Set([script]));
@@ -169,6 +178,10 @@ export default class DifficultyReward extends Identifiable {
                 const combined = combineHumanReadable(...operationLabels);
 
                 return `Reward: ${combined} Difficulty Power per furnace process.`;
+            }
+            case "increaseDifficultyPowerFormula": {
+                const formulaString = effect.formula.tostring(effect.x);
+                return `Reward: Multiply Difficulty Power by ${formulaString} per furnace process.`;
             }
             default:
                 return "Unknown effect";

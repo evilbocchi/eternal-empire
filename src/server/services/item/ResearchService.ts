@@ -4,6 +4,7 @@ import { OnoeNum } from "@rbxts/serikanum";
 import { Players, Workspace } from "@rbxts/services";
 import CurrencyService from "server/services/data/CurrencyService";
 import DataService from "server/services/data/DataService";
+import PlaytimeService from "server/services/data/PlaytimeService";
 import ItemService from "server/services/item/ItemService";
 import PermissionsService from "server/services/permissions/PermissionsService";
 import { getPlayerCharacter } from "shared/hamster/getPlayerCharacter";
@@ -53,6 +54,7 @@ export default class ResearchService implements OnStart {
         private readonly dataService: DataService,
         private readonly itemService: ItemService,
         private readonly permissionsService: PermissionsService,
+        private readonly playtimeService: PlaytimeService,
     ) {
         this.researching = dataService.empireData.items.researching;
         this.unlockedDifficulties = dataService.empireData.unlockedDifficulties;
@@ -361,6 +363,32 @@ export default class ResearchService implements OnStart {
                     }
                     if (effect.mul !== undefined) {
                         totalMul = totalMul.mul(effect.mul.pow(count));
+                    }
+                } else if (effect.kind === "increaseDifficultyPowerFormula") {
+                    // Evaluate formula based on the x parameter
+                    let xValue = new OnoeNum(0);
+                    switch (effect.x) {
+                        case "playtime":
+                            xValue = new OnoeNum(this.playtimeService.getPlaytime());
+                            break;
+                        case "difficultyPower":
+                            xValue = this.currencyService.get("Difficulty Power");
+                            break;
+                        default:
+                            // Try to get as currency
+                            xValue = this.currencyService.get(effect.x as Currency);
+                            break;
+                    }
+
+                    // Apply cap if specified
+                    if (effect.xCap !== undefined && xValue.moreThan(effect.xCap)) {
+                        xValue = effect.xCap;
+                    }
+
+                    // Evaluate the formula and apply it as a multiplier
+                    const formulaResult = effect.formula.evaluate(xValue);
+                    if (formulaResult.moreThan(0)) {
+                        totalMul = totalMul.mul(formulaResult.pow(count));
                     }
                 }
             }
