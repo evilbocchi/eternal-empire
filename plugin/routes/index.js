@@ -576,7 +576,7 @@ export function registerRoutes(app, logger, repoRoot, outputPath, progressionOut
         mcpState.streamClient = null;
 
         // Clear all pending requests
-        for (const [requestId, pending] of mcpState.pendingRequests.entries()) {
+        for (const [, pending] of mcpState.pendingRequests.entries()) {
             if (pending.timeout) {
                 globalThis.clearTimeout(pending.timeout);
             }
@@ -595,21 +595,6 @@ export function registerRoutes(app, logger, repoRoot, outputPath, progressionOut
 
         if (reason) {
             logger.warn(reason);
-        }
-    };
-
-    const sendMcpSse = (eventName, payload) => {
-        const client = mcpState.streamClient;
-        if (!client) {
-            return false;
-        }
-
-        try {
-            client.res.write(`event: ${eventName}\ndata: ${JSON.stringify(payload)}\n\n`);
-            return true;
-        } catch (error) {
-            detachMcpStream(`Failed to write to MCP stream (${error})`);
-            return false;
         }
     };
 
