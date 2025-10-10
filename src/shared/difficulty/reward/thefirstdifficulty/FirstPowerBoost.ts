@@ -5,7 +5,7 @@ import DifficultyReward from "shared/difficulty/reward/DifficultyReward";
 
 export = new DifficultyReward(script.Name, Difficulty.TheFirstDifficulty)
     .setTitle("First Power Boost")
-    .setDescription("Claim a permanent +5 Difficulty Power bonus per furnace process.")
+    .setDescription("Claim a permanent +2 Difficulty Power bonus per furnace process.")
     .setIcon(getAsset("assets/DifficultyPower.png"))
     .setCooldownSeconds(0)
     .setMaxClaims(1)
@@ -16,5 +16,5 @@ export = new DifficultyReward(script.Name, Difficulty.TheFirstDifficulty)
     })
     .addEffect({
         kind: "increaseDifficultyPower",
-        add: new OnoeNum(5),
+        add: new OnoeNum(2),
     });

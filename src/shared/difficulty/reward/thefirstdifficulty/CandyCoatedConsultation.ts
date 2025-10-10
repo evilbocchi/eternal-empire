@@ -10,7 +10,7 @@ export = new DifficultyReward(script.Name, Difficulty.TheFirstDifficulty)
     )
     .setIcon(getAsset("assets/CandyResearchKit.png"))
     .setCooldownSeconds(60)
-    .setLayoutOrder(1)
+    .setLayoutOrder(9)
     .setPrice({
         kind: "percentageOfDifficultyPower",
         percentage: 0.5,

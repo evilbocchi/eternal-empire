@@ -171,6 +171,7 @@ interface DifficultyCarouselProps {
     requirements: Map<string, OnoeNum>;
     playerDifficultyPower: OnoeNum;
     unlockedDifficulties: Set<string>;
+    claimableDifficulties: Set<string>;
 }
 
 function DifficultyCarousel({
@@ -178,6 +179,7 @@ function DifficultyCarousel({
     selectPart,
     requirements,
     unlockedDifficulties,
+    claimableDifficulties,
 }: DifficultyCarouselProps) {
     return (
         <scrollingframe
@@ -277,6 +279,30 @@ function DifficultyCarousel({
                         ) : (
                             <Fragment />
                         )}
+                        {claimableDifficulties.has(difficulty.id) ? (
+                            <frame
+                                AnchorPoint={new Vector2(1, 0)}
+                                BackgroundColor3={Color3.fromRGB(215, 60, 60)}
+                                BorderSizePixel={0}
+                                Position={new UDim2(1, -6, 0, 6)}
+                                Size={new UDim2(0, 20, 0, 20)}
+                                ZIndex={3}
+                            >
+                                <uicorner CornerRadius={new UDim(1, 0)} />
+                                <textlabel
+                                    AnchorPoint={new Vector2(0.5, 0.5)}
+                                    BackgroundTransparency={1}
+                                    FontFace={RobotoMonoBold}
+                                    Position={new UDim2(0.5, 0, 0.5, 0)}
+                                    Size={new UDim2(1, 0, 1, 0)}
+                                    Text="!"
+                                    TextColor3={Color3.fromRGB(255, 255, 255)}
+                                    TextScaled={true}
+                                />
+                            </frame>
+                        ) : (
+                            <Fragment />
+                        )}
                     </imagebutton>
                 );
             })}
@@ -293,6 +319,7 @@ interface DifficultySelectionSurfaceProps {
     playerDifficultyPower: OnoeNum;
     nextUnlockRequirement?: OnoeNum;
     unlockedDifficulties: Set<string>;
+    claimableDifficulties: Set<string>;
 }
 
 function DifficultySelectionSurface({
@@ -304,6 +331,7 @@ function DifficultySelectionSurface({
     playerDifficultyPower,
     nextUnlockRequirement,
     unlockedDifficulties,
+    claimableDifficulties,
 }: DifficultySelectionSurfaceProps) {
     return (
         <frame BackgroundTransparency={1} Size={new UDim2(1, 0, 1, 0)}>
@@ -340,6 +368,7 @@ function DifficultySelectionSurface({
                 requirements={difficultyRequirements}
                 playerDifficultyPower={playerDifficultyPower}
                 unlockedDifficulties={unlockedDifficulties}
+                claimableDifficulties={claimableDifficulties}
             />
         </frame>
     );
@@ -1593,11 +1622,35 @@ function DifficultyResearcherGui({
         unlockedDifficulties,
     ]);
 
-    const getDifficultyRewards = useMemo(() => {
-        const { getDifficultyRewards } = DifficultyReward.setupDifficultyRewards();
-        return getDifficultyRewards;
-    }, []);
-    const difficultyRewards = useMemo(() => getDifficultyRewards(currentDifficulty), [currentDifficulty]);
+    const rewardRegistry = useMemo(() => DifficultyReward.setupDifficultyRewards(), []);
+    const difficultyRewards = useMemo(
+        () => rewardRegistry.getDifficultyRewards(currentDifficulty),
+        [rewardRegistry, currentDifficulty],
+    );
+
+    const claimableDifficulties = useMemo(() => {
+        const ready = new Set<string>();
+        const now = os.time();
+        for (const difficulty of difficultyList) {
+            if (!unlockedDifficulties.has(difficulty.id)) continue;
+            const rewards = rewardRegistry.getDifficultyRewards(difficulty);
+            for (const reward of rewards) {
+                const maxClaims = reward.maxClaims;
+                const purchaseCount = rewardPurchases.get(reward.id) ?? 0;
+                if (maxClaims !== undefined && purchaseCount >= maxClaims) continue;
+
+                const cooldownExpiresAt = rewardCooldowns.get(reward.id);
+                if (cooldownExpiresAt !== undefined && cooldownExpiresAt > now) continue;
+
+                const [, cost] = reward.getPriceLabel(playerDifficultyPower);
+                if (playerDifficultyPower.lessThan(cost)) continue;
+
+                ready.add(difficulty.id);
+                break;
+            }
+        }
+        return ready;
+    }, [difficultyList, unlockedDifficulties, rewardRegistry, rewardCooldowns, rewardPurchases, playerDifficultyPower]);
 
     const handleClaimReward = useCallback(
         (rewardId: string) => {
@@ -1660,6 +1713,7 @@ function DifficultyResearcherGui({
                     playerDifficultyPower={playerDifficultyPower}
                     nextUnlockRequirement={nextUnlockRequirement}
                     unlockedDifficulties={unlockedDifficulties}
+                    claimableDifficulties={claimableDifficulties}
                 />
             </surfacegui>
             <surfacegui

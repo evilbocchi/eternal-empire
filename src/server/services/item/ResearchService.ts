@@ -353,10 +353,16 @@ export default class ResearchService implements OnStart {
     getDifficultyPowerBonus() {
         let totalAdd = new OnoeNum(0);
         let totalMul = new OnoeNum(1);
-        for (const [rewardId, count] of this.difficultyRewardPurchaseCounts) {
+        for (let [rewardId, count] of this.difficultyRewardPurchaseCounts) {
             if (count <= 0) continue;
             const definition = getDifficultyRewardById(rewardId);
             if (definition === undefined) continue;
+            // Clamp count to maximum allowed claims to avoid excessive effects
+            const maxCount = definition.maxClaims;
+            if (maxCount !== undefined) {
+                count = math.min(count, maxCount);
+            }
+
             for (const effect of definition.effects) {
                 if (effect.kind === "increaseDifficultyPower") {
                     if (effect.add !== undefined) {

@@ -8,8 +8,8 @@ export = new DifficultyReward(script.Name, Difficulty.TheFirstDifficulty)
     .setDescription("Claim a permanent x1.5 Difficulty Power multiplier.")
     .setIcon(getAsset("assets/DifficultyPower.png"))
     .setCooldownSeconds(0)
-    .setMaxClaims(3)
-    .setLayoutOrder(3)
+    .setMaxClaims(1)
+    .setLayoutOrder(1)
     .setPrice({
         kind: "flatDifficultyPower",
         amount: new OnoeNum(50),

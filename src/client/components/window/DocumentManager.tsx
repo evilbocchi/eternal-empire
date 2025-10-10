@@ -9,6 +9,7 @@
 import Signal from "@antivivi/lemon-signal";
 import { useEffect, useState } from "@rbxts/react";
 import HotkeyManager from "client/components/hotkeys/HotkeyManager";
+import ShopManager from "client/components/item/shop/ShopManager";
 import eat from "shared/hamster/eat";
 import Packets from "shared/Packets";
 
@@ -116,6 +117,9 @@ namespace DocumentManager {
     // Register global close hotkey
     HotkeyManager.bindHotkey({
         action: () => {
+            if (ShopManager.releaseCameraFocus()) {
+                return true;
+            }
             const visibleWindows = getVisibleDocuments();
             if (visibleWindows.size() > 0) {
                 // Close the highest priority visible window

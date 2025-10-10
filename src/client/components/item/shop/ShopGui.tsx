@@ -1,7 +1,6 @@
-import Signal from "@antivivi/lemon-signal";
 import { getInstanceInfo } from "@antivivi/vrldk";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "@rbxts/react";
-import { CollectionService, Debris, TweenService, Workspace } from "@rbxts/services";
+import { CollectionService } from "@rbxts/services";
 import useHotkeyWithTooltip from "client/components/hotkeys/useHotkeyWithTooltip";
 import InventoryFilter, {
     filterItems,
@@ -9,184 +8,15 @@ import InventoryFilter, {
 } from "client/components/item/inventory/InventoryFilter";
 import { PurchaseManager } from "client/components/item/shop/PurchaseWindow";
 import { createShopSlot, updateShopSlot, type ShopSlotHandle } from "client/components/item/shop/ShopSlot";
+import ShopManager, { type ShopCandidate } from "client/components/item/shop/ShopManager";
 import { showErrorToast } from "client/components/toast/ToastService";
 import useProperty from "client/hooks/useProperty";
-import { getSound, playSound } from "shared/asset/GameAssets";
+import { playSound } from "shared/asset/GameAssets";
 import { RobotoSlabHeavy } from "shared/asset/GameFonts";
-import { IS_EDIT } from "shared/Context";
-import { getPlayerCharacter } from "shared/hamster/getPlayerCharacter";
 import Item from "shared/item/Item";
 import Shop from "shared/item/traits/Shop";
 import Items from "shared/items/Items";
 import Packets from "shared/Packets";
-
-type ShopCandidate = { guiPart: Part; shop: Shop };
-
-export namespace ShopManager {
-    /** The current shop GUI part being displayed. */
-    let shopGuiPart: Part | undefined;
-
-    interface CameraState {
-        cframe: CFrame;
-        cameraType: Enum.CameraType;
-        cameraSubject?: Humanoid | BasePart;
-    }
-
-    let cameraState: CameraState | undefined;
-    let cameraTween: Tween | undefined;
-    let focusCameraEnabled = false;
-
-    function cancelCameraTween() {
-        if (cameraTween) {
-            cameraTween.Cancel();
-            cameraTween = undefined;
-        }
-    }
-
-    export function setCameraFocusEnabled(enabled: boolean) {
-        if (focusCameraEnabled === enabled) return;
-        focusCameraEnabled = enabled;
-
-        if (!enabled) {
-            restoreCamera();
-            return;
-        }
-
-        if (shopGuiPart !== undefined) {
-            focusCameraOnShop(shopGuiPart);
-        }
-    }
-
-    function focusCameraOnShop(guiPart: Part) {
-        if (IS_EDIT || focusCameraEnabled === false) return; // Don't mess with camera in edit mode or when disabled
-
-        const camera = Workspace.CurrentCamera;
-        if (camera === undefined) return;
-
-        if (cameraState === undefined) {
-            cameraState = {
-                cframe: camera.CFrame,
-                cameraType: camera.CameraType,
-                cameraSubject: camera.CameraSubject,
-            };
-        }
-
-        const forward = guiPart.CFrame.LookVector;
-        const from = guiPart.Position.add(forward.mul(10));
-
-        camera.CameraType = Enum.CameraType.Scriptable;
-        camera.CameraSubject = undefined;
-
-        const targetCFrame = CFrame.lookAt(from, guiPart.Position);
-        const tweenInfo = new TweenInfo(0.35, Enum.EasingStyle.Quad, Enum.EasingDirection.Out);
-
-        cancelCameraTween();
-        const tween = TweenService.Create(camera, tweenInfo, { CFrame: targetCFrame });
-        cameraTween = tween;
-        tween.Completed.Once(() => {
-            if (cameraTween === tween) {
-                cameraTween = undefined;
-            }
-        });
-        tween.Play();
-    }
-
-    function restoreCamera() {
-        const state = cameraState;
-        const camera = Workspace.CurrentCamera;
-        if (state === undefined || camera === undefined) {
-            cameraState = undefined;
-            cancelCameraTween();
-            return;
-        }
-
-        cancelCameraTween();
-
-        const tweenInfo = new TweenInfo(0.35, Enum.EasingStyle.Quad, Enum.EasingDirection.Out);
-        const tween = TweenService.Create(camera, tweenInfo, { CFrame: state.cframe });
-        camera.CameraType = Enum.CameraType.Scriptable;
-        camera.CameraSubject = undefined;
-        camera.Focus = state.cframe;
-        cameraTween = tween;
-        tween.Completed.Once(() => {
-            if (cameraTween === tween) {
-                cameraTween = undefined;
-            }
-            camera.CameraType = state.cameraType;
-            camera.CameraSubject = state.cameraSubject;
-        });
-
-        cameraState = undefined;
-        tween.Play();
-    }
-
-    export const opened = new Signal<(shop?: Shop, adornee?: Part) => void>();
-
-    /**
-     * Animates and hides the shop GUI part.
-     * @param shopGuiPart The shop GUI part to hide.
-     */
-    export function hideShopGuiPart(shopGuiPart: Part) {
-        TweenService.Create(shopGuiPart, new TweenInfo(0.3), { LocalTransparencyModifier: 1 }).Play();
-
-        const sound = getSound("ShopClose.mp3");
-        sound.Play();
-        sound.Parent = shopGuiPart;
-        Debris.AddItem(sound, 5);
-    }
-
-    /**
-     * Refreshes the shop interface and updates the displayed shop and items.
-     * @param guiPart The shop GUI part to display.
-     * @param shop The shop data to display.
-     */
-    export function refreshShop(guiPart?: Part, shop?: Shop) {
-        if (shopGuiPart === guiPart) return;
-
-        const previousShopGuiPart = shopGuiPart;
-        shopGuiPart = guiPart;
-
-        if (previousShopGuiPart !== undefined && previousShopGuiPart !== guiPart) {
-            hideShopGuiPart(previousShopGuiPart);
-        }
-
-        if (guiPart === undefined || shop === undefined) {
-            restoreCamera();
-            opened.fire();
-            return;
-        }
-
-        const sound = getSound("ShopOpen.mp3");
-        sound.Play();
-        sound.Parent = guiPart;
-        Debris.AddItem(sound, 5);
-
-        TweenService.Create(guiPart, new TweenInfo(0.3), { LocalTransparencyModifier: 0 }).Play();
-        focusCameraOnShop(guiPart);
-        opened.fire(shop, guiPart);
-    }
-
-    export function checkForShop(candidates: Map<BasePart, ShopCandidate>) {
-        const primaryPart = getPlayerCharacter()?.PrimaryPart;
-        if (primaryPart === undefined) return;
-
-        let shopFound = false;
-        for (const [hitbox, { guiPart, shop }] of candidates) {
-            const localPosition = hitbox.CFrame.PointToObjectSpace(primaryPart.Position);
-            if (math.abs(localPosition.X) > hitbox.Size.X / 2 || math.abs(localPosition.Z) > hitbox.Size.Z / 2)
-                continue;
-
-            refreshShop(guiPart, shop);
-            shopGuiPart = guiPart;
-            shopFound = true;
-            break;
-        }
-
-        if (shopFound === false) {
-            refreshShop();
-        }
-    }
-}
 
 /**
  * Main shop window component with integrated filtering
