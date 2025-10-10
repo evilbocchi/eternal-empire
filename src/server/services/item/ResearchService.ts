@@ -7,6 +7,7 @@ import DataService from "server/services/data/DataService";
 import PlaytimeService from "server/services/data/PlaytimeService";
 import ItemService from "server/services/item/ItemService";
 import PermissionsService from "server/services/permissions/PermissionsService";
+import CurrencyBundle from "shared/currency/CurrencyBundle";
 import { getPlayerCharacter } from "shared/hamster/getPlayerCharacter";
 import Item from "shared/item/Item";
 import Items from "shared/items/Items";
@@ -237,6 +238,58 @@ export default class ResearchService implements OnStart {
         this.walkSpeedBuffs.delete(userId);
     }
 
+    private sanitizeRewardAmount(rawAmount?: number) {
+        if (rawAmount === undefined) return 1;
+        if (rawAmount !== rawAmount || rawAmount === math.huge || rawAmount === -math.huge) return 0;
+        return math.floor(math.clamp(rawAmount, 1, 1000));
+    }
+
+    private canForgeItem(itemId: string, rawAmount: number) {
+        const amount = this.sanitizeRewardAmount(rawAmount);
+        if (amount <= 0) return false;
+
+        const item = Items.getItem(itemId);
+        if (item === undefined) return false;
+
+        for (const [requiredId, requiredAmount] of item.requiredItems) {
+            const available = this.itemService.getAvailableItemAmount(requiredId);
+            if (available < requiredAmount * amount) {
+                return false;
+            }
+        }
+
+        let totalPrice = new CurrencyBundle();
+        const alreadyBought = this.itemService.getBoughtAmount(itemId);
+        for (let iteration = 1; iteration <= amount; iteration++) {
+            const price = item.getPrice(alreadyBought + iteration);
+            if (price === undefined) {
+                return false;
+            }
+            totalPrice = totalPrice.add(price);
+        }
+
+        const [canAfford] = this.currencyService.canAfford(totalPrice);
+        return canAfford === true;
+    }
+
+    private forgeItem(itemId: string, rawAmount: number) {
+        const amount = this.sanitizeRewardAmount(rawAmount);
+        if (amount <= 0) return false;
+
+        const item = Items.getItem(itemId);
+        if (item === undefined) return false;
+
+        let forged = false;
+        for (let i = 0; i < amount; i++) {
+            if (!this.itemService.serverBuy(item)) {
+                break;
+            }
+            forged = true;
+        }
+
+        return forged;
+    }
+
     /**
      * Processes a difficulty reward claim using the configured reward definitions.
      * Deducts Difficulty Power, grants the configured payout, and applies cooldowns.
@@ -262,6 +315,15 @@ export default class ResearchService implements OnStart {
         const cooldownExpiresAt = this.difficultyRewardCooldowns.get(reward.id);
         if (cooldownExpiresAt !== undefined && cooldownExpiresAt > now) {
             return false;
+        }
+
+        for (const effect of reward.effects) {
+            if (effect.kind === "forgeItem") {
+                const amount = effect.amount ?? 1;
+                if (!this.canForgeItem(effect.itemId, amount)) {
+                    return false;
+                }
+            }
         }
 
         const currentDifficultyPower = this.currencyService.get("Difficulty Power");
@@ -300,6 +362,10 @@ export default class ResearchService implements OnStart {
                     if (amount > 0) {
                         this.itemService.giveItem(effect.itemId, amount);
                     }
+                    break;
+                }
+                case "forgeItem": {
+                    this.forgeItem(effect.itemId, effect.amount ?? 1);
                     break;
                 }
                 case "redeemRevenue": {

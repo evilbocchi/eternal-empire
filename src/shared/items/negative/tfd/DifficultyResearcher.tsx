@@ -948,6 +948,64 @@ function DifficultyRewardCard({
 
     const payoutText = useMemo(() => reward.getEffectsLabel(), [reward]);
 
+    let recipeCostText: string | undefined;
+    for (const effect of reward.effects) {
+        if (effect.kind !== "forgeItem") continue;
+
+        const item = Server.Items.itemsPerId.get(effect.itemId);
+        if (item === undefined) {
+            recipeCostText = undefined;
+            break;
+        }
+
+        const amount = math.max(effect.amount ?? 1, 1);
+        let totalPrice = new CurrencyBundle();
+        const bought = Server.Item?.getBoughtAmount?.(item.id) ?? 0;
+        for (let iteration = 1; iteration <= amount; iteration++) {
+            const price = item.getPrice(bought + iteration);
+            if (price !== undefined) {
+                totalPrice = totalPrice.add(price);
+            }
+        }
+
+        const components = new Array<string>();
+        if (totalPrice.amountPerCurrency.size() > 0) {
+            const priceString = CurrencyBundle.currenciesToString(totalPrice.amountPerCurrency, true);
+            if (priceString !== "") {
+                components.push(priceString);
+            }
+        }
+
+        const requiredLabels = new Array<string>();
+        for (const [requiredId, requiredAmount] of item.requiredItems) {
+            const requiredItem = Server.Items.itemsPerId.get(requiredId);
+            const totalRequired = requiredAmount * amount;
+            requiredLabels.push(`${requiredItem?.name ?? requiredId} x${totalRequired}`);
+        }
+        if (requiredLabels.size() > 0) {
+            components.push(requiredLabels.join(", "));
+        }
+
+        if (!components.isEmpty()) {
+            recipeCostText = components.join(" + ");
+        }
+        break;
+    }
+
+    const dpCostIsFree = costText === "Free!" && cost.lessEquals(0);
+    const costLines = new Array<string>();
+    if (!dpCostIsFree) {
+        costLines.push(`<font color="#FFC0FF">${costText}</font>`);
+    }
+    if (recipeCostText !== undefined) {
+        costLines.push(recipeCostText);
+    }
+
+    let costLabelRich = 'Cost: <font color="#FFC0FF">Free!</font>';
+    if (!costLines.isEmpty()) {
+        costLabelRich = `Cost: ${costLines.join("<br/>")}`;
+    }
+
     let statusColor = Color3.fromRGB(255, 200, 150);
     if (hasReachedMaxClaims) {
         statusColor = Color3.fromRGB(185, 205, 255);
@@ -1051,7 +1109,7 @@ function DifficultyRewardCard({
                 FontFace={RobotoMono}
                 RichText={true}
                 Size={new UDim2(1, 0, 0, 0)}
-                Text={`Cost: <font color="#FFC0FF">${costText}</font>`}
+                Text={costLabelRich}
                 TextColor3={Color3.fromRGB(255, 255, 255)}
                 TextSize={20}
                 TextWrapped={true}
@@ -1264,9 +1322,10 @@ function DescriptionPanel({
                         BackgroundTransparency={1}
                         FontFace={RobotoMonoBold}
                         Size={new UDim2(1, 0, 0, 0)}
-                        Text="Select a difficulty to preview its rewards."
+                        Text="Feed the researcher with droplets and select a difficulty to preview its rewards."
                         TextColor3={Color3.fromRGB(220, 220, 255)}
                         TextSize={26}
+                        TextStrokeTransparency={0}
                         TextWrapped={true}
                         TextXAlignment={Enum.TextXAlignment.Center}
                         TextYAlignment={Enum.TextYAlignment.Top}
@@ -1336,7 +1395,7 @@ function MultiplierBillboard({ orbPart, billboardRef, revenueLabelRef, gradientR
                 TextWrapped={true}
                 Rotation={-5}
             >
-                <uistroke StrokeSizingMode={Enum.StrokeSizingMode.ScaledSize} Thickness={3} />
+                <uistroke StrokeSizingMode={Enum.StrokeSizingMode.ScaledSize} Thickness={0.1} />
                 <uigradient ref={gradientRef} Color={new ColorSequence(Color3.fromRGB(255, 255, 255))} Rotation={90} />
             </textlabel>
         </billboardgui>

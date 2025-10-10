@@ -80,6 +80,7 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
     private readonly inventory: Map<string, number>;
     private readonly uniqueInstances: Map<string, UniqueItemInstance>;
     private readonly researching: Map<string, number>;
+    private readonly shopsPerItem = new Map<string, Item[]>();
     private hasInventoryChanged = false;
     private hasUniqueChanged = false;
     private hasBoughtChanged = false;
@@ -147,7 +148,49 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
         this.researching = dataService.empireData.items.researching;
     }
 
-    // Data Management Methods
+    private getShopsSellingItem(item: Item) {
+        let shops = this.shopsPerItem.get(item.id);
+        if (shops !== undefined) {
+            return shops;
+        }
+
+        shops = new Array<Item>();
+        for (const [, candidate] of Items.itemsPerId) {
+            const shopTrait = candidate.findTrait("Shop");
+            if (shopTrait !== undefined && shopTrait.items.has(item)) {
+                shops.push(candidate);
+            }
+        }
+
+        this.shopsPerItem.set(item.id, shops);
+        return shops;
+    }
+
+    private hasUnlockedRequiredShop(item: Item) {
+        const shops = this.getShopsSellingItem(item);
+        if (shops.size() === 0) {
+            return true;
+        }
+
+        const pricedShops = new Array<Item>();
+        for (const shop of shops) {
+            if (shop.getPrice(1) !== undefined) {
+                pricedShops.push(shop);
+            }
+        }
+
+        if (pricedShops.size() === 0 || pricedShops.size() !== shops.size()) {
+            return true;
+        }
+
+        for (const shop of pricedShops) {
+            if (this.getBoughtAmount(shop.id) > 0) {
+                return true;
+            }
+        }
+
+        return false;
+    }
 
     /**
      * Gets the current amount of an item in inventory.
@@ -632,6 +675,9 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
         }
         const item = Items.getItem(itemId);
         if (item === undefined) return false;
+        if (player !== undefined && !this.hasUnlockedRequiredShop(item)) {
+            return false;
+        }
         const success = this.serverBuy(item);
         if (success) {
             this.itemsBought.fire(player, [item]);
@@ -654,6 +700,9 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
         for (const itemId of itemIds) {
             const item = Items.getItem(itemId);
             if (item === undefined) continue;
+            if (!this.hasUnlockedRequiredShop(item)) {
+                continue;
+            }
             if (this.serverBuy(item) === true) {
                 oneSucceeded = true;
                 bought.push(item);
