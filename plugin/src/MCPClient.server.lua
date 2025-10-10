@@ -19,6 +19,7 @@
     Available Tools:
         - list_instances: List DataModel instances at a given path
         - find_item_model: Search for an item model by name in ItemModels folder
+        - estimate_item_progression: Calculate time-to-obtain details for a specific item
 ]]
 
 local HttpService = game:GetService("HttpService")
@@ -32,6 +33,7 @@ end
 local STREAM_PATH = "/mcp/stream"
 local CALL_TOOL_PATH = "/mcp/call-tool"
 local TOOLS_PATH = "/mcp/tools"
+local TOOL_RESPONSE_PATH = "/mcp/tool-response"
 
 local RECONNECT_DELAY = 5
 local streamClient
@@ -128,6 +130,32 @@ local function callTool(toolName, arguments)
     return nil, "Unknown response format"
 end
 
+local function postJson(path, payload)
+    local url = getBaseUrl() .. path
+    local encoded = HttpService:JSONEncode(payload)
+
+    local success, result = pcall(function()
+        return HttpService:RequestAsync({
+            Url = url,
+            Method = "POST",
+            Headers = {
+                ["Content-Type"] = "application/json",
+            },
+            Body = encoded,
+        })
+    end)
+
+    if not success then
+        return false, tostring(result)
+    end
+
+    if result.Success ~= true then
+        return false, string.format("HTTP %d", result.StatusCode)
+    end
+
+    return true, result
+end
+
 local function listTools()
     local url = getBaseUrl() .. TOOLS_PATH
     
@@ -158,6 +186,129 @@ local function listTools()
     end
 
     return decoded.tools
+end
+
+local function parseSsePayload(raw)
+    if type(raw) ~= "string" or raw == "" then
+        return nil
+    end
+
+    if string.find(raw, "heartbeat") then
+        return nil
+    end
+
+    local eventType = string.match(raw, "event:%s*(%S+)")
+
+    local dataLines = {}
+") do
+    for line in string.gmatch(raw, "[^\n]+") do
+        if string.sub(line, 1, 5) == "data:" then
+            table.insert(dataLines, string.sub(line, 6))
+        end
+    end
+
+    if #dataLines == 0 then
+        table.insert(dataLines, raw)
+    end
+
+    local body = table.concat(dataLines, "\n")
+    local trimmed = string.gsub(body, "^%s*(.-)%s*$", "%1")
+    if trimmed == "" then
+        return nil
+    end
+
+    local decodeSuccess, decoded = pcall(function()
+        return HttpService:JSONDecode(trimmed)
+    end)
+
+    if decodeSuccess and type(decoded) == "table" then
+        decoded.type = eventType or decoded.type
+        return decoded
+    elseif not decodeSuccess then
+        warn(string.format("[MCPClient] Failed to decode SSE payload: %s", tostring(decoded)))
+    end
+
+    return nil
+end
+
+local function handleEstimateItemTool(arguments)
+    local itemId
+    if type(arguments) == "table" then
+        local value = arguments.itemId
+        if type(value) == "string" and value ~= "" then
+            itemId = value
+        end
+    end
+
+    if not itemId then
+        return false, "itemId parameter is required"
+    end
+
+    local estimator = rawget(_G, "ProgressionEstimateItem")
+    if type(estimator) ~= "function" then
+        return false, "ProgressionEstimateItem global is not available"
+    end
+
+    local ok, result = pcall(estimator, itemId)
+    if not ok then
+        return false, tostring(result)
+    end
+
+    if result == nil then
+        return false, "Item not found or estimate unavailable"
+    end
+
+    return true, result
+end
+
+local function handleToolCommand(payload)
+    if type(payload) ~= "table" then
+        return
+    end
+
+    local requestId = payload.requestId
+    if type(requestId) ~= "string" then
+        warn("[MCPClient] Received call-tool command without requestId")
+        return
+    end
+
+    local toolName = payload.name
+    local arguments = payload.arguments
+
+    local success, resultOrError
+    if toolName == "estimate_item_progression" then
+        success, resultOrError = handleEstimateItemTool(arguments)
+    else
+        success = false
+        resultOrError = string.format("Unknown tool: %s", tostring(toolName))
+    end
+
+    local responsePayload = {
+        requestId = requestId,
+        success = success,
+    }
+
+    if success then
+        responsePayload.result = resultOrError
+    else
+        responsePayload.error = resultOrError
+    end
+
+    local ok, errorMessage = postJson(TOOL_RESPONSE_PATH, responsePayload)
+    if not ok then
+        warn(string.format("[MCPClient] Failed to send tool response: %s", tostring(errorMessage)))
+    end
+end
+
+local function handleCommand(payload)
+    if type(payload) ~= "table" then
+        return
+    end
+
+    local commandType = payload.type
+    if commandType == "call-tool" then
+        handleToolCommand(payload)
+    end
 end
 
 local function connectStream()
@@ -211,11 +362,13 @@ local function connectStream()
             payloadData = message.Data or message.data or message.Body or message.body
         end
 
-        if type(payloadData) == "string" then
-            -- Parse SSE events if needed
-            if not string.find(payloadData, "heartbeat", 1, true) then
-                print(string.format("[MCPClient] Received: %s", payloadData))
-            end
+        if type(payloadData) ~= "string" then
+            return
+        end
+
+        local payload = parseSsePayload(payloadData)
+        if payload ~= nil then
+            handleCommand(payload)
         end
     end)
 

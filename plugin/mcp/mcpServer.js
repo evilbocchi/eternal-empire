@@ -3,6 +3,10 @@ import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 import { CallToolRequestSchema, ErrorCode, ListToolsRequestSchema, McpError } from "@modelcontextprotocol/sdk/types.js";
 import { dataModelState, connectionState } from "../state/dataModelState.js";
 import { normalizePathSegments, findNodeBySegments, cloneNodeLimited } from "../datamodel/datamodelUtils.js";
+import {
+    isStreamConnected as isMcpStreamConnected,
+    requestToolExecution as requestMcpToolExecution,
+} from "./toolBridge.js";
 
 /**
  * Creates and starts the Model Context Protocol server.
@@ -59,6 +63,21 @@ export async function startMcpServer(logger) {
                     required: ["itemName"],
                 },
             },
+            {
+                name: "estimate_item_progression",
+                description:
+                    "Calculate time-to-obtain details for a single item using the ProgressionEstimationService simulation.",
+                inputSchema: {
+                    type: "object",
+                    properties: {
+                        itemId: {
+                            type: "string",
+                            description: "The unique item id from shared/items/Items to estimate progression for.",
+                        },
+                    },
+                    required: ["itemId"],
+                },
+            },
         ],
     }));
 
@@ -66,16 +85,16 @@ export async function startMcpServer(logger) {
         const { name, arguments: rawArgs } = request.params;
 
         const args = typeof rawArgs === "object" && rawArgs !== null ? rawArgs : {};
-        const snapshot = dataModelState.snapshot;
-
-        if (!snapshot) {
-            const message = connectionState.pluginConnected
-                ? "Awaiting first DataModel snapshot from the Roblox Studio plugin."
-                : "Plugin connection not detected. Launch Roblox Studio with the tooling plugin to populate the DataModel snapshot.";
-            throw new McpError(ErrorCode.FailedPrecondition, message);
-        }
 
         if (name === "list_instances") {
+            const snapshot = dataModelState.snapshot;
+            if (!snapshot) {
+                const message = connectionState.pluginConnected
+                    ? "Awaiting first DataModel snapshot from the Roblox Studio plugin."
+                    : "Plugin connection not detected. Launch Roblox Studio with the tooling plugin to populate the DataModel snapshot.";
+                throw new McpError(ErrorCode.FailedPrecondition, message);
+            }
+
             const pathArg = typeof args.path === "string" ? args.path : "game";
             const segments = normalizePathSegments(pathArg);
 
@@ -133,6 +152,14 @@ export async function startMcpServer(logger) {
                 ],
             };
         } else if (name === "find_item_model") {
+            const snapshot = dataModelState.snapshot;
+            if (!snapshot) {
+                const message = connectionState.pluginConnected
+                    ? "Awaiting first DataModel snapshot from the Roblox Studio plugin."
+                    : "Plugin connection not detected. Launch Roblox Studio with the tooling plugin to populate the DataModel snapshot.";
+                throw new McpError(ErrorCode.FailedPrecondition, message);
+            }
+
             const itemName = typeof args.itemName === "string" ? args.itemName : "";
             if (!itemName) {
                 throw new McpError(ErrorCode.InvalidRequest, "itemName parameter is required");
@@ -223,6 +250,39 @@ export async function startMcpServer(logger) {
                     },
                 ],
             };
+        } else if (name === "estimate_item_progression") {
+            const itemId = typeof args.itemId === "string" ? args.itemId : "";
+            if (!itemId) {
+                throw new McpError(ErrorCode.InvalidRequest, "itemId parameter is required");
+            }
+
+            if (!isMcpStreamConnected()) {
+                throw new McpError(
+                    ErrorCode.FailedPrecondition,
+                    "Studio MCP client is not connected. Launch Roblox Studio with the tooling plugin to enable progression estimates.",
+                );
+            }
+
+            try {
+                const result = await requestMcpToolExecution("estimate_item_progression", { itemId });
+                return {
+                    content: [
+                        {
+                            type: "text",
+                            text: JSON.stringify(result, null, 2),
+                        },
+                    ],
+                };
+            } catch (error) {
+                const message = typeof error?.message === "string" ? error.message : String(error);
+                let code = ErrorCode.InternalError;
+                if (/not connected/i.test(message)) {
+                    code = ErrorCode.FailedPrecondition;
+                } else if (/timed out/i.test(message)) {
+                    code = ErrorCode.DeadlineExceeded;
+                }
+                throw new McpError(code, message);
+            }
         } else {
             throw new McpError(ErrorCode.MethodNotFound, `Unknown tool: ${name}`);
         }

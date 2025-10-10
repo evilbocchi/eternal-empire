@@ -47,6 +47,7 @@ declare global {
 
     interface _G {
         ProgressEstimated?: (message: string) => void;
+        ProgressionEstimateItem?: (itemId: string) => ItemEstimateSummary | undefined;
     }
 }
 
@@ -56,6 +57,17 @@ type ItemProgressionStats = {
     item?: Item;
     timeToObtain?: OnoeNum;
     limitingCurrency?: Currency;
+};
+
+type ItemEstimateSummary = {
+    itemId: string;
+    itemName: string;
+    iteration: number;
+    priceLabel: string;
+    timeToObtain: string;
+    cumulativeTime: string;
+    limitingCurrency?: Currency;
+    revenuePerCurrency: Record<string, string>;
 };
 
 /**
@@ -76,6 +88,97 @@ export default class ProgressionEstimationService implements OnGameAPILoaded, On
         private dataService: DataService,
         private resetService: ResetService,
     ) {}
+
+    private serializeCurrencyBundle(bundle: CurrencyBundle) {
+        const record: Record<string, string> = {};
+        for (const [currency, amount] of bundle.amountPerCurrency) {
+            record[currency] = amount.toString();
+        }
+        return record;
+    }
+
+    private withSimulatedState<T>(callback: () => T): T {
+        const toRecoverCurrencies = this.currencyService.balance.clone();
+        const toRecoverUpgrades = table.clone(this.dataService.empireData.upgrades);
+        const previousWeatherBoost = this.revenueService.weatherBoostEnabled;
+
+        this.revenueService.weatherBoostEnabled = false;
+        this.currencyService.setAll(new Map());
+        this.namedUpgradeService.setAmountPerUpgrade(new Map());
+
+        let result: T;
+        try {
+            result = callback();
+        } finally {
+            this.revenueService.weatherBoostEnabled = previousWeatherBoost;
+            this.currencyService.setAll(toRecoverCurrencies.amountPerCurrency);
+            this.namedUpgradeService.setAmountPerUpgrade(toRecoverUpgrades);
+        }
+
+        return result;
+    }
+
+    private simulateSingleItem(target: Item): ItemEstimateSummary | undefined {
+        const inventory = new Map<Item, number>();
+        for (const [_, item] of Items.itemsPerId) {
+            const freeIterations = this.getFreeIterations(item);
+            if (freeIterations > 0) {
+                inventory.set(item, freeIterations);
+            }
+        }
+        const bought = table.clone(inventory);
+
+        let lastRevenue = new CurrencyBundle();
+        let totalTime = new OnoeNum(0);
+        let steps = 0;
+        const MAX_STEPS = 10000;
+
+        while (steps < MAX_STEPS) {
+            steps++;
+            const stats = this.getNextItem(inventory, bought, lastRevenue);
+            if (stats.item === undefined || stats.timeToObtain === undefined) {
+                break;
+            }
+
+            lastRevenue = stats.revenue;
+            totalTime = totalTime.add(stats.timeToObtain);
+
+            const purchasedItem = stats.item;
+            inventory.set(purchasedItem, (inventory.get(purchasedItem) ?? 0) + 1);
+            bought.set(purchasedItem, (bought.get(purchasedItem) ?? 0) + 1);
+
+            for (const [requiredItemId, amount] of purchasedItem.requiredItems) {
+                const requiredItem = Items.getItem(requiredItemId);
+                if (requiredItem === undefined) continue;
+                inventory.set(requiredItem, (inventory.get(requiredItem) ?? 0) - amount);
+            }
+
+            if (purchasedItem === target) {
+                const iteration = bought.get(target) ?? 0;
+                return {
+                    itemId: target.id,
+                    itemName: target.name,
+                    iteration,
+                    priceLabel: stats.priceLabel ?? "N/A",
+                    timeToObtain: stats.timeToObtain.toString(),
+                    cumulativeTime: totalTime.toString(),
+                    limitingCurrency: stats.limitingCurrency,
+                    revenuePerCurrency: this.serializeCurrencyBundle(stats.revenue),
+                } satisfies ItemEstimateSummary;
+            }
+        }
+
+        return undefined;
+    }
+
+    getSingleItemEstimate(itemId: string): ItemEstimateSummary | undefined {
+        const item = Items.getItem(itemId);
+        if (item === undefined) {
+            return undefined;
+        }
+
+        return this.withSimulatedState(() => this.simulateSingleItem(item));
+    }
 
     /**
      * Checks if a price is free (all currencies are zero).
@@ -506,94 +609,84 @@ export default class ProgressionEstimationService implements OnGameAPILoaded, On
     }
 
     estimate() {
-        // Reset state
-        const toRecoverCurrencies = this.currencyService.balance.clone();
-        const toRecoverUpgrades = table.clone(this.dataService.empireData.upgrades);
+        const dt = this.withSimulatedState(() => {
+            const t = tick();
+            const progression = this.getProgression();
+            const builder = new StringBuilder();
+            let itemIteration = 1;
+            const ttoList: Array<{ item: Item; tto: OnoeNum }> = [];
 
-        this.revenueService.weatherBoostEnabled = false;
-        this.currencyService.setAll(new Map());
-        this.namedUpgradeService.setAmountPerUpgrade(new Map());
+            for (const stats of progression) {
+                const item = stats.item;
+                const timeToObtain = stats.timeToObtain;
+                if (item === undefined || timeToObtain === undefined) continue;
+                builder.append(itemIteration);
+                builder.append(". **");
+                builder.append(item.name);
+                builder.append("** from ");
+                builder.append(item.difficulty.name);
+                builder.append("\n\t> **");
+                builder.append(timeToObtain.toString());
+                builder.append("s** TTO at price ");
+                builder.append(stats.priceLabel);
+                builder.append(". (Limiting: **");
+                builder.append(stats.limitingCurrency);
+                builder.append("**)");
+                if (timeToObtain.moreThan(1000)) {
+                    builder.append(`\n\t> **LONG**`);
+                }
 
-        const t = tick();
-        const progression = this.getProgression();
-        const builder = new StringBuilder();
-        let itemIteration = 1;
-        // Collect TTOs for summary
-        const ttoList: Array<{ item: Item; tto: OnoeNum }> = [];
+                if (item.formula !== undefined) {
+                    builder.append(`\n\t> Formula Result = ${item.formulaResult}`);
+                    const upgrader = item.findTrait("Upgrader");
+                    if (upgrader?.mul !== undefined) {
+                        builder.append(`\n\t> Upgrader = ${upgrader.mul}`);
+                    }
+                }
 
-        for (const stats of progression) {
-            const item = stats.item;
-            const timeToObtain = stats.timeToObtain;
-            if (item === undefined || timeToObtain === undefined) continue;
-            builder.append(itemIteration);
-            builder.append(". **");
-            builder.append(item.name);
-            builder.append("** from ");
-            builder.append(item.difficulty.name);
-            builder.append("\n\t> **");
-            builder.append(timeToObtain.toString());
-            builder.append("s** TTO at price ");
-            builder.append(stats.priceLabel);
-            builder.append(". (Limiting: **");
-            builder.append(stats.limitingCurrency);
-            builder.append("**)");
-            if (timeToObtain.moreThan(1000)) {
-                builder.append(`\n\t> **LONG**`);
+                builder.append("\n");
+                itemIteration++;
+                ttoList.push({ item: item, tto: timeToObtain });
             }
+            builder.append(`\n\n`);
 
-            if (item.formula !== undefined) {
-                builder.append(`\n\t> Formula Result = ${item.formulaResult}`);
-                const upgrader = item.findTrait("Upgrader");
-                if (upgrader?.mul !== undefined) {
-                    builder.append(`\n\t> Upgrader = ${upgrader.mul}`);
+            if (!ttoList.isEmpty()) {
+                ttoList.sort((a, b) => a.tto.moreThan(b.tto));
+                builder.append(`-# Top 10 Highest Time-To-Obtain (TTO) Items:\n`);
+                for (let i = 0; i < math.min(10, ttoList.size()); i++) {
+                    const entry = ttoList[i];
+                    builder.append(`  ${i + 1}. **${entry.item.name}**: ${entry.tto.toString()}s\n`);
                 }
             }
 
-            builder.append("\n");
-            itemIteration++;
-            ttoList.push({ item: item, tto: timeToObtain });
-        }
-        builder.append(`\n\n`);
-
-        // Add top 10 highest TTOs summary
-        if (!ttoList.isEmpty()) {
-            ttoList.sort((a, b) => a.tto.moreThan(b.tto));
-            builder.append(`-# Top 10 Highest Time-To-Obtain (TTO) Items:\n`);
-            for (let i = 0; i < math.min(10, ttoList.size()); i++) {
-                const entry = ttoList[i];
-                builder.append(`  ${i + 1}. **${entry.item.name}**: ${entry.tto.toString()}s\n`);
+            builder.append(
+                `-# Note that this is a rough estimate and does not account for all mechanics in the game.\n`,
+            );
+            const dtInner = math.floor((tick() - t) * 100) / 100;
+            for (const [id, amount] of this.namedUpgradeService.upgrades) {
+                builder.append(`- Simulated named upgrade: ${id} x${amount}\n`);
             }
-        }
+            for (const [id, resetLayer] of pairs(RESET_LAYERS)) {
+                const reward = this.resetService.getResetReward(resetLayer);
+                if (reward === undefined) continue;
+                builder.append(`- Simulated reset layer: ${id} (Reward: ${reward})\n`);
+            }
 
-        builder.append(`-# Note that this is a rough estimate and does not account for all mechanics in the game.\n`);
-        const dt = math.floor((tick() - t) * 100) / 100;
-        for (const [id, amount] of this.namedUpgradeService.upgrades) {
-            builder.append(`- Simulated named upgrade: ${id} x${amount}\n`);
-        }
-        for (const [id, resetLayer] of pairs(RESET_LAYERS)) {
-            const reward = this.resetService.getResetReward(resetLayer);
-            if (reward === undefined) continue;
-            builder.append(`- Simulated reset layer: ${id} (Reward: ${reward})\n`);
-        }
+            builder.append(`-# Calculated in ${dtInner} seconds.\n`);
 
-        builder.append(`-# Calculated in ${dt} seconds.\n`);
+            this.post(builder.toString());
+
+            return dtInner;
+        });
 
         print(`Calculated in ${dt} seconds.`);
-
-        this.post(builder.toString());
-
-        this.revenueService.weatherBoostEnabled = true;
-        this.currencyService.setAll(toRecoverCurrencies.amountPerCurrency);
-        this.namedUpgradeService.setAmountPerUpgrade(toRecoverUpgrades);
     }
 
     /**
      * Runs the progression estimation and posts the report if in the PROGRESSION empire.
      */
     onStart() {
-        if (this.dataService.empireId === "PROGRESSION") {
-            this.estimate();
-        }
+        Environment.OriginalG.ProgressionEstimateItem = (itemId: string) => this.getSingleItemEstimate(itemId);
         Packets.progressEstimationRequest.fromClient(() => {
             if (RunService.IsStudio()) {
                 this.estimate();

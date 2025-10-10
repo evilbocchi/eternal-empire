@@ -7,6 +7,12 @@ import { applySnapshot, applyDiff } from "../datamodel/dataModelStore.js";
 import { acceptSnapshotChunk, clearPendingSnapshot } from "../datamodel/snapshotAssembler.js";
 import { dataModelState, connectionState } from "../state/dataModelState.js";
 import { normalizePathSegments, findNodeBySegments, cloneNodeLimited } from "../datamodel/datamodelUtils.js";
+import {
+    connectStream as connectMcpStream,
+    disconnectStream as disconnectMcpStream,
+    handleToolResponse as handleMcpToolResponse,
+    requestToolExecution as requestMcpToolExecution,
+} from "../mcp/toolBridge.js";
 
 /**
  * Registers all Express route handlers.
@@ -557,48 +563,6 @@ export function registerRoutes(app, logger, repoRoot, outputPath, progressionOut
     });
 
     /**
-     * MCP streaming state
-     */
-    const mcpState = {
-        streamClient: null,
-        heartbeatTimer: null,
-        requestIdCounter: 0,
-        pendingRequests: new Map(),
-    };
-
-    const detachMcpStream = (reason) => {
-        if (mcpState.heartbeatTimer) {
-            globalThis.clearInterval(mcpState.heartbeatTimer);
-            mcpState.heartbeatTimer = null;
-        }
-
-        const client = mcpState.streamClient;
-        mcpState.streamClient = null;
-
-        // Clear all pending requests
-        for (const [, pending] of mcpState.pendingRequests.entries()) {
-            if (pending.timeout) {
-                globalThis.clearTimeout(pending.timeout);
-            }
-        }
-        mcpState.pendingRequests.clear();
-
-        if (client) {
-            try {
-                if (!client.res.writableEnded) {
-                    client.res.end();
-                }
-            } catch (error) {
-                logger.warn(`MCP stream client cleanup error: ${error}`);
-            }
-        }
-
-        if (reason) {
-            logger.warn(reason);
-        }
-    };
-
-    /**
      * GET /mcp/stream
      * SSE endpoint for MCP tool calls from Roblox Studio plugin.
      */
@@ -613,38 +577,21 @@ export function registerRoutes(app, logger, repoRoot, outputPath, progressionOut
             res.flushHeaders();
         }
 
-        if (mcpState.streamClient && mcpState.streamClient.res !== res) {
-            detachMcpStream();
-        }
-
-        mcpState.streamClient = { res };
-
-        if (mcpState.heartbeatTimer) {
-            globalThis.clearInterval(mcpState.heartbeatTimer);
-        }
-
-        mcpState.heartbeatTimer = globalThis.setInterval(() => {
-            const client = mcpState.streamClient;
-            if (!client) {
-                return;
-            }
-
-            try {
-                client.res.write(`: heartbeat ${Date.now()}\n\n`);
-            } catch (error) {
-                detachMcpStream(`MCP stream heartbeat failed (${error})`);
-            }
-        }, SSE_HEARTBEAT_INTERVAL);
-
-        logger.info("Studio MCP client connected.");
-        res.write("event: connected\ndata: {}\n\n");
+        connectMcpStream(res);
 
         req.on("close", () => {
-            if (mcpState.streamClient && mcpState.streamClient.res === res) {
-                logger.info("Studio MCP client disconnected.");
-                detachMcpStream();
-            }
+            disconnectMcpStream("Studio MCP client disconnected.", res);
         });
+    });
+
+    app.post("/mcp/tool-response", (req, res) => {
+        const body = typeof req.body === "object" && req.body !== null ? req.body : {};
+
+        if (!handleMcpToolResponse(body)) {
+            return res.status(404).json({ status: "ignored" });
+        }
+
+        return res.json({ status: "ok" });
     });
 
     /**
@@ -796,6 +743,21 @@ export function registerRoutes(app, logger, repoRoot, outputPath, progressionOut
                     pluginTruncated: Boolean(snapshot.truncated || pluginTruncated),
                     model: clone,
                 };
+            } else if (name === "estimate_item_progression") {
+                const itemId = typeof args.itemId === "string" ? args.itemId : "";
+                if (!itemId) {
+                    return res.status(400).json({ error: "itemId parameter is required" });
+                }
+
+                try {
+                    const result = await requestMcpToolExecution("estimate_item_progression", { itemId });
+                    return res.json({ success: true, result });
+                } catch (error) {
+                    const message = error?.message || "Tool execution failed";
+                    const status = /not connected/i.test(message) ? 503 : 500;
+                    logger.warn(`[MCP HTTP] estimate_item_progression failed: ${message}`);
+                    return res.status(status).json({ error: message });
+                }
             } else {
                 return res.status(404).json({ error: `Unknown tool: ${name}` });
             }
@@ -850,6 +812,21 @@ export function registerRoutes(app, logger, repoRoot, outputPath, progressionOut
                         },
                     },
                     required: ["itemName"],
+                },
+            },
+            {
+                name: "estimate_item_progression",
+                description:
+                    "Calculate time-to-obtain details for a single item using the ProgressionEstimationService simulation.",
+                inputSchema: {
+                    type: "object",
+                    properties: {
+                        itemId: {
+                            type: "string",
+                            description: "The unique item id from shared/items/Items to estimate progression for.",
+                        },
+                    },
+                    required: ["itemId"],
                 },
             },
         ];
