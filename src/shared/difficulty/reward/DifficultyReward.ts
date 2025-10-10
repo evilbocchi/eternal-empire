@@ -2,8 +2,8 @@ import { combineHumanReadable } from "@antivivi/vrldk";
 import Difficulty from "@rbxts/ejt";
 import { OnoeNum } from "@rbxts/serikanum";
 import { Server } from "shared/api/APIExpose";
-import { Identifiable, ModuleRegistry } from "shared/hamster/ModuleRegistry";
 import Formula from "shared/currency/Formula";
+import { Identifiable, ModuleRegistry } from "shared/hamster/ModuleRegistry";
 
 export type DifficultyRewardPrice = FlatDifficultyPowerCost | PercentageOfDifficultyPowerPrice;
 
@@ -146,7 +146,10 @@ export default class DifficultyReward extends Identifiable {
                 `${math.floor(this.price.percentage * 100 * 100) / 100}% of your Difficulty Power (${OnoeNum.toString(cost)})`,
                 cost,
             );
+        } else if (this.price.kind === "flatDifficultyPower") {
+            return $tuple(`${OnoeNum.toString(this.price.amount)} Difficulty Power`, this.price.amount);
         }
+
         return $tuple("Free!", new OnoeNum(0));
     }
 

@@ -267,26 +267,27 @@ export default class ResearchService implements OnStart {
         const currentDifficultyPower = this.currencyService.get("Difficulty Power");
         let cost: OnoeNum | undefined;
 
-        if (reward.price && reward.price.kind === "percentageOfDifficultyPower") {
-            const percentage = math.clamp(reward.price.percentage, 0, 1);
-            cost = currentDifficultyPower.mul(new OnoeNum(percentage));
-            if (reward.price.minimum !== undefined) {
-                const minimum = new OnoeNum(reward.price.minimum);
-                if (cost.lessThan(minimum)) {
-                    cost = minimum;
+        if (reward.price) {
+            if (reward.price.kind === "percentageOfDifficultyPower") {
+                const percentage = math.clamp(reward.price.percentage, 0, 1);
+                cost = currentDifficultyPower.mul(new OnoeNum(percentage));
+                if (reward.price.minimum !== undefined) {
+                    const minimum = new OnoeNum(reward.price.minimum);
+                    if (cost.lessThan(minimum)) {
+                        cost = minimum;
+                    }
                 }
+            } else if (reward.price.kind === "flatDifficultyPower") {
+                cost = reward.price.amount;
             }
         }
 
-        if (cost === undefined || cost.lessThan(0)) {
-            return false;
-        }
-        if (currentDifficultyPower.lessThan(cost)) {
-            return false;
-        }
+        if (cost !== undefined) {
+            if (cost.lessThan(0) || currentDifficultyPower.lessThan(cost)) return false;
 
-        const newDifficultyPower = currentDifficultyPower.sub(cost);
-        this.currencyService.set("Difficulty Power", newDifficultyPower);
+            const newDifficultyPower = currentDifficultyPower.sub(cost);
+            this.currencyService.set("Difficulty Power", newDifficultyPower);
+        }
 
         reward.effects.forEach((effect) => {
             switch (effect.kind) {
