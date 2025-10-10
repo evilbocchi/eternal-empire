@@ -57,10 +57,8 @@ export = new Quest(script.Name)
                 noob1Dialogue.add();
                 noob2Dialogue.add();
 
-                const connection = Dialogue.finished.connect((dialogue) => {
-                    if (dialogue === stage.dialogue) {
-                        stage.complete();
-                    }
+                const connection = stage.dialogue!.finished.connect(() => {
+                    stage.complete();
                 });
 
                 return () => {
@@ -98,12 +96,10 @@ export = new Quest(script.Name)
             .onReached((stage) => {
                 MoldRepresentative.rootPart!.CFrame = MoldRepresentative.startingCFrame;
 
-                const connection = Dialogue.finished.connect((dialogue) => {
-                    if (dialogue === stage.dialogue) {
-                        // Store that we "diplomatically" resolved this
-                        Server.Event.setEventCompleted("MoldDiplomacy", true);
-                        stage.complete();
-                    }
+                const connection = stage.dialogue!.finished.connect(() => {
+                    // Store that we "diplomatically" resolved this
+                    Server.Event.setEventCompleted("MoldDiplomacy", true);
+                    stage.complete();
                 });
 
                 return () => {
@@ -144,10 +140,8 @@ export = new Quest(script.Name)
                 noob1Celebration.add();
                 noob2Celebration.add();
 
-                const connection = Dialogue.finished.connect((dialogue) => {
-                    if (dialogue === stage.dialogue) {
-                        stage.complete();
-                    }
+                const connection = stage.dialogue!.finished.connect(() => {
+                    stage.complete();
                 });
 
                 return () => {

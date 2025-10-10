@@ -1,4 +1,3 @@
-import { Workspace } from "@rbxts/services";
 import { Dialogue, Soliloquy } from "server/interactive/npc/NPC";
 import SkyBureaucrat from "server/interactive/npc/Sky Bureaucrat";
 import Zane from "server/interactive/npc/Zane";
@@ -38,10 +37,8 @@ export = new Quest(script.Name)
                     ).root,
             )
             .onReached((stage) => {
-                const connection = Dialogue.finished.connect((dialogue) => {
-                    if (dialogue === stage.dialogue) {
-                        stage.complete();
-                    }
+                const connection = stage.dialogue!.finished.connect(() => {
+                    stage.complete();
                 });
                 return () => connection.disconnect();
             }),
@@ -69,20 +66,28 @@ export = new Quest(script.Name)
 
                 let answerGiven = false;
 
-                const connection = Dialogue.finished.connect((dialogue) => {
-                    if (dialogue === stage.dialogue && !answerGiven) {
+                const stageDialogueConn = stage.dialogue!.finished.connect(() => {
+                    if (!answerGiven) {
                         answerGiven = true;
                         riddleAnswer.talk();
-                    } else if (dialogue === riddleAnswer) {
-                        giveGear.talk();
-                    } else if (dialogue === giveGear) {
-                        Server.Quest.giveQuestItem(QuantumGear.id, 1);
-                        task.wait(1);
-                        stage.complete();
                     }
                 });
 
-                return () => connection.disconnect();
+                const riddleAnswerConn = riddleAnswer.finished.connect(() => {
+                    giveGear.talk();
+                });
+
+                const giveGearConn = giveGear.finished.connect(() => {
+                    Server.Quest.giveQuestItem(QuantumGear.id, 1);
+                    task.wait(1);
+                    stage.complete();
+                });
+
+                return () => {
+                    stageDialogueConn.disconnect();
+                    riddleAnswerConn.disconnect();
+                    giveGearConn.disconnect();
+                };
             }),
     )
     .addStage(
@@ -113,20 +118,26 @@ export = new Quest(script.Name)
                 task.wait(3);
                 platformChallenge.talk();
 
-                const connection = Dialogue.finished.connect((dialogue) => {
-                    if (dialogue === platformChallenge) {
-                        task.wait(2);
-                        platformSuccess.talk();
-                    } else if (dialogue === platformSuccess) {
-                        getCrystal.talk();
-                    } else if (dialogue === getCrystal) {
-                        Server.Quest.giveQuestItem(SkyCrystal.id, 1);
-                        task.wait(1);
-                        stage.complete();
-                    }
+                const platformChallengeConn = platformChallenge.finished.connect(() => {
+                    task.wait(2);
+                    platformSuccess.talk();
                 });
 
-                return () => connection.disconnect();
+                const platformSuccessConn = platformSuccess.finished.connect(() => {
+                    getCrystal.talk();
+                });
+
+                const getCrystalConn = getCrystal.finished.connect(() => {
+                    Server.Quest.giveQuestItem(SkyCrystal.id, 1);
+                    task.wait(1);
+                    stage.complete();
+                });
+
+                return () => {
+                    platformChallengeConn.disconnect();
+                    platformSuccessConn.disconnect();
+                    getCrystalConn.disconnect();
+                };
             }),
     )
     .addStage(
@@ -151,22 +162,27 @@ export = new Quest(script.Name)
                     "Bro you actually did it. Respect. Here, take this Gravity Stabilizer. The Noob dropped it. RIP legend.",
                 );
 
-                const connection = Dialogue.finished.connect((dialogue) => {
-                    if (dialogue === stage.dialogue) {
-                        task.wait(1);
-                        memeEncounter.talk();
-                    } else if (dialogue === memeEncounter) {
-                        // Simulate "vibing"
-                        task.wait(5);
-                        memeComplete.talk();
-                    } else if (dialogue === memeComplete) {
-                        Server.Quest.giveQuestItem(GravityStabilizer.id, 1);
-                        task.wait(1);
-                        stage.complete();
-                    }
+                const stageDialogueConn = stage.dialogue!.finished.connect(() => {
+                    task.wait(1);
+                    memeEncounter.talk();
                 });
 
-                return () => connection.disconnect();
+                const memeEncounterConn = memeEncounter.finished.connect(() => {
+                    task.wait(5);
+                    memeComplete.talk();
+                });
+
+                const memeCompleteConn = memeComplete.finished.connect(() => {
+                    Server.Quest.giveQuestItem(GravityStabilizer.id, 1);
+                    task.wait(1);
+                    stage.complete();
+                });
+
+                return () => {
+                    stageDialogueConn.disconnect();
+                    memeEncounterConn.disconnect();
+                    memeCompleteConn.disconnect();
+                };
             }),
     )
     .addStage(
@@ -210,31 +226,40 @@ export = new Quest(script.Name)
                     checkParts.add();
                 }
 
-                const connection = Dialogue.finished.connect((dialogue) => {
-                    if (dialogue === checkParts) {
-                        if (
-                            ItemService.getItemAmount(QuantumGear.id) >= 1 &&
-                            ItemService.getItemAmount(SkyCrystal.id) >= 1 &&
-                            ItemService.getItemAmount(GravityStabilizer.id) >= 1
-                        ) {
-                            checkParts.remove();
-                            startRepair.talk();
-                        }
-                    } else if (dialogue === stage.dialogue) {
+                const checkPartsConn = checkParts.finished.connect(() => {
+                    if (
+                        ItemService.getItemAmount(QuantumGear.id) >= 1 &&
+                        ItemService.getItemAmount(SkyCrystal.id) >= 1 &&
+                        ItemService.getItemAmount(GravityStabilizer.id) >= 1
+                    ) {
+                        checkParts.remove();
                         startRepair.talk();
-                    } else if (dialogue === startRepair) {
-                        Server.Quest.takeQuestItem(QuantumGear.id, 1);
-                        Server.Quest.takeQuestItem(SkyCrystal.id, 1);
-                        Server.Quest.takeQuestItem(GravityStabilizer.id, 1);
-                        task.wait(2);
-                        malfunction.talk();
-                    } else if (dialogue === malfunction) {
-                        task.wait(1);
-                        stage.complete();
                     }
                 });
 
-                return () => connection.disconnect();
+                const stageDialogueConn = stage.dialogue!.finished.connect(() => {
+                    startRepair.talk();
+                });
+
+                const startRepairConn = startRepair.finished.connect(() => {
+                    Server.Quest.takeQuestItem(QuantumGear.id, 1);
+                    Server.Quest.takeQuestItem(SkyCrystal.id, 1);
+                    Server.Quest.takeQuestItem(GravityStabilizer.id, 1);
+                    task.wait(2);
+                    malfunction.talk();
+                });
+
+                const malfunctionConn = malfunction.finished.connect(() => {
+                    task.wait(1);
+                    stage.complete();
+                });
+
+                return () => {
+                    checkPartsConn.disconnect();
+                    stageDialogueConn.disconnect();
+                    startRepairConn.disconnect();
+                    malfunctionConn.disconnect();
+                };
             }),
     )
     .addStage(
@@ -268,23 +293,32 @@ export = new Quest(script.Name)
                     "*Over intercom* YOU MADE IT! I knew you would! Well, I hoped. Okay I had no idea. But you're here!",
                 );
 
-                const connection = Dialogue.finished.connect((dialogue) => {
-                    if (dialogue === stage.dialogue) {
-                        task.wait(4);
-                        gauntletProgress.talk();
-                    } else if (dialogue === gauntletProgress) {
-                        task.wait(4);
-                        nearingTop.talk();
-                    } else if (dialogue === nearingTop) {
-                        task.wait(3);
-                        reachedTop.talk();
-                    } else if (dialogue === reachedTop) {
-                        task.wait(1);
-                        stage.complete();
-                    }
+                const stageDialogueConn = stage.dialogue!.finished.connect(() => {
+                    task.wait(4);
+                    gauntletProgress.talk();
                 });
 
-                return () => connection.disconnect();
+                const gauntletProgressConn = gauntletProgress.finished.connect(() => {
+                    task.wait(4);
+                    nearingTop.talk();
+                });
+
+                const nearingTopConn = nearingTop.finished.connect(() => {
+                    task.wait(3);
+                    reachedTop.talk();
+                });
+
+                const reachedTopConn = reachedTop.finished.connect(() => {
+                    task.wait(1);
+                    stage.complete();
+                });
+
+                return () => {
+                    stageDialogueConn.disconnect();
+                    gauntletProgressConn.disconnect();
+                    nearingTopConn.disconnect();
+                    reachedTopConn.disconnect();
+                };
             }),
     )
     .addStage(
@@ -314,23 +348,32 @@ export = new Quest(script.Name)
                     "ALL RESPONSES: CORRECT. CITIZENSHIP EVALUATION: PASSED. WELCOME TO SKY PAVILION.",
                 ).monologue("PLEASE PROCEED TO FINAL VERIFICATION.").root;
 
-                const connection = Dialogue.finished.connect((dialogue) => {
-                    if (dialogue === stage.dialogue) {
-                        task.wait(2);
-                        answer.talk();
-                    } else if (dialogue === answer) {
-                        task.wait(2);
-                        secondAnswer.talk();
-                    } else if (dialogue === secondAnswer) {
-                        task.wait(2);
-                        passTest.talk();
-                    } else if (dialogue === passTest) {
-                        task.wait(1);
-                        stage.complete();
-                    }
+                const stageDialogueConn = stage.dialogue!.finished.connect(() => {
+                    task.wait(2);
+                    answer.talk();
                 });
 
-                return () => connection.disconnect();
+                const answerConn = answer.finished.connect(() => {
+                    task.wait(2);
+                    secondAnswer.talk();
+                });
+
+                const secondAnswerConn = secondAnswer.finished.connect(() => {
+                    task.wait(2);
+                    passTest.talk();
+                });
+
+                const passTestConn = passTest.finished.connect(() => {
+                    task.wait(1);
+                    stage.complete();
+                });
+
+                return () => {
+                    stageDialogueConn.disconnect();
+                    answerConn.disconnect();
+                    secondAnswerConn.disconnect();
+                    passTestConn.disconnect();
+                };
             }),
     )
     .addStage(
@@ -355,20 +398,26 @@ export = new Quest(script.Name)
                     "ANSWER: ACCEPTABLE. PROCESSING... YOU HAVE PASSED ALL TESTS.",
                 ).monologue("GENERATING SKY PASS... COMPLETE. GRANTING AREA ACCESS.").root;
 
-                const connection = Dialogue.finished.connect((dialogue) => {
-                    if (dialogue === stage.dialogue) {
-                        task.wait(2);
-                        riddleHint.talk();
-                    } else if (dialogue === riddleHint) {
-                        task.wait(2);
-                        correctAnswer.talk();
-                    } else if (dialogue === correctAnswer) {
-                        task.wait(1);
-                        stage.complete();
-                    }
+                const stageDialogueConn = stage.dialogue!.finished.connect(() => {
+                    task.wait(2);
+                    riddleHint.talk();
                 });
 
-                return () => connection.disconnect();
+                const riddleHintConn = riddleHint.finished.connect(() => {
+                    task.wait(2);
+                    correctAnswer.talk();
+                });
+
+                const correctAnswerConn = correctAnswer.finished.connect(() => {
+                    task.wait(1);
+                    stage.complete();
+                });
+
+                return () => {
+                    stageDialogueConn.disconnect();
+                    riddleHintConn.disconnect();
+                    correctAnswerConn.disconnect();
+                };
             }),
     )
     .addStage(
@@ -387,31 +436,30 @@ export = new Quest(script.Name)
                     .monologue("Welcome to the sky, bestie. Try not to fall off. No pressure.").root,
             )
             .onReached((stage) => {
-                const connection = Dialogue.finished.connect((dialogue) => {
-                    if (dialogue === stage.dialogue) {
-                        // Give rewards
-                        Server.Quest.giveQuestItem(SkyPass.id, 1);
+                const stageDialogueConn = stage.dialogue!.finished.connect(() => {
+                    // Give rewards
+                    Server.Quest.giveQuestItem(SkyPass.id, 1);
 
-                        // Unlock Sky Pavilion area
-                        Server.Area.unlockArea("SkyPavilion");
+                    // Unlock Sky Pavilion area
+                    Server.Area.unlockArea("SkyPavilion");
 
-                        // Play victory sound
-                        const players = game.GetService("Players").GetPlayers();
-                        if (players[0] !== undefined) {
-                            const character = players[0].Character;
-                            if (character !== undefined) {
-                                const rootPart = character.FindFirstChild("HumanoidRootPart");
-                                if (rootPart !== undefined && rootPart.IsA("BasePart")) {
-                                    playSound("QuestComplete.mp3", rootPart);
-                                }
+                    // Play victory sound
+                    const players = game.GetService("Players").GetPlayers();
+                    if (players[0] !== undefined) {
+                        const character = players[0].Character;
+                        if (character !== undefined) {
+                            const rootPart = character.FindFirstChild("HumanoidRootPart");
+                            if (rootPart !== undefined && rootPart.IsA("BasePart")) {
+                                playSound("QuestComplete.mp3", rootPart);
                             }
                         }
-
-                        task.wait(1);
-                        stage.complete();
                     }
+
+                    task.wait(1);
+                    stage.complete();
                 });
-                return () => connection.disconnect();
+
+                return () => stageDialogueConn.disconnect();
             }),
     )
     .setCompletionDialogue(new Dialogue(Zane, "Sky Pavilion citizen? That's you now. So proud. *Wipes tear*"))

@@ -103,10 +103,8 @@ export = new Quest(script.Name)
                 OldNoob.playAnimation("Default");
                 Pasal.playAnimation("Default");
 
-                const connection = Dialogue.finished.connect((dialogue) => {
-                    if (dialogue === stage.dialogue) {
-                        stage.complete();
-                    }
+                const connection = stage.dialogue!.finished.connect(() => {
+                    stage.complete();
                 });
                 return () => connection.disconnect();
             }),
@@ -121,12 +119,13 @@ export = new Quest(script.Name)
                 OldNoob.playAnimation("Default");
                 Pasal.playAnimation("Default");
 
-                const connection = Dialogue.finished.connect((dialogue) => {
-                    if (dialogue === OldBooks1.dialogue) {
+                if (OldBooks1.dialogue) {
+                    const connection = OldBooks1.dialogue.finished.connect(() => {
                         stage.complete();
-                    }
-                });
-                return () => connection.disconnect();
+                    });
+                    return () => connection.disconnect();
+                }
+                return () => {};
             }),
     )
     .addStage(
@@ -199,24 +198,25 @@ export = new Quest(script.Name)
             }
             librarianDialogue.add();
             pasalDialogue.add();
-            const connection = Dialogue.finished.connect((dialogue) => {
-                if (dialogue === librarianDialogue) {
-                    Server.Quest.takeQuestItem(IrregularlyShapedKey.id, 1);
-                    Server.Quest.giveQuestItem(IrregularlyShapedKey.id, 1);
-                    librarianDialogue.remove();
-                } else if (
-                    dialogue === pasalDialogue &&
-                    Server.Quest.takeQuestItem(IrregularlyShapedKey.id, 1) === true
-                ) {
+            const librarianConn = librarianDialogue.finished.connect(() => {
+                Server.Quest.takeQuestItem(IrregularlyShapedKey.id, 1);
+                Server.Quest.giveQuestItem(IrregularlyShapedKey.id, 1);
+                librarianDialogue.remove();
+            });
+            const pasalConn = pasalDialogue.finished.connect(() => {
+                if (Server.Quest.takeQuestItem(IrregularlyShapedKey.id, 1) === true) {
                     continuation.talk();
-                } else if (dialogue === continuation) {
-                    stage.complete();
-                    Server.Event.setEventCompleted("PasalReveal", true);
-                    Server.Quest.giveQuestItem(IrregularlyShapedKey.id, 1);
                 }
             });
+            const continuationConn = continuation.finished.connect(() => {
+                stage.complete();
+                Server.Event.setEventCompleted("PasalReveal", true);
+                Server.Quest.giveQuestItem(IrregularlyShapedKey.id, 1);
+            });
             return () => {
-                connection.disconnect();
+                librarianConn.disconnect();
+                pasalConn.disconnect();
+                continuationConn.disconnect();
                 for (const dialogue of dialogues) {
                     dialogue.remove();
                 }
@@ -244,10 +244,8 @@ export = new Quest(script.Name)
                 OldNoob.playAnimation("Default");
                 Pasal.playAnimation("Default");
 
-                const connection = Dialogue.finished.connect((dialogue) => {
-                    if (dialogue === stage.dialogue) {
-                        stage.complete();
-                    }
+                const connection = stage.dialogue!.finished.connect(() => {
+                    stage.complete();
                 });
                 return () => connection.disconnect();
             }),
@@ -291,13 +289,13 @@ export = new Quest(script.Name)
                     OldNoob,
                     "Yup, sure do. Alright, let's get going. I won't waste either of our time.",
                 );
-                const connection = Dialogue.finished.connect((dialogue) => {
-                    if (dialogue === stage.dialogue && Server.Quest.takeQuestItem(ExcavationStone.id, 20) === true) {
+                const stageDialogueConn = stage.dialogue!.finished.connect(() => {
+                    if (Server.Quest.takeQuestItem(ExcavationStone.id, 20) === true) {
                         stage.complete();
                         continuation.talk();
                     }
                 });
-                return () => connection.disconnect();
+                return () => stageDialogueConn.disconnect();
             }),
     )
     .addStage(
@@ -339,18 +337,16 @@ export = new Quest(script.Name)
                 const oldNoobAwaiting = new Dialogue(OldNoob, "Just stick that key in and see what happens.");
                 const pasalAwaiting = new Dialogue(Pasal, "Come on, let's see something happen!");
 
-                const connection1 = Dialogue.finished.connect((dialogue) => {
-                    if (dialogue === intro) {
-                        Pasal.stopAnimation("Default");
-                        task.wait(0.5);
-                        pasalToApproachingWall().onComplete(() => {});
-                        oldNoobToApproachingWall().onComplete(() => {
-                            teaching.talk();
-                            Server.Event.setEventCompleted("IrregularlyShapedKeyUsable", true);
-                            oldNoobAwaiting.add();
-                            pasalAwaiting.add();
-                        });
-                    }
+                const introConn = intro.finished.connect(() => {
+                    Pasal.stopAnimation("Default");
+                    task.wait(0.5);
+                    pasalToApproachingWall().onComplete(() => {});
+                    oldNoobToApproachingWall().onComplete(() => {
+                        teaching.talk();
+                        Server.Event.setEventCompleted("IrregularlyShapedKeyUsable", true);
+                        oldNoobAwaiting.add();
+                        pasalAwaiting.add();
+                    });
                 });
                 const connection2 = Server.Event.addCompletionListener("SuspiciousWallOpened", (isCompleted) => {
                     if (isCompleted) {
@@ -361,7 +357,7 @@ export = new Quest(script.Name)
                 return () => {
                     oldNoobAwaiting.remove();
                     pasalAwaiting.remove();
-                    connection1.disconnect();
+                    introConn.disconnect();
                     connection2.disconnect();
                 };
             }),
@@ -432,36 +428,38 @@ export = new Quest(script.Name)
                     "There, you can hopefully get better items, which can help you progress faster than you ever would here.",
                 )
                 .monologue("I wish you the best of luck. See you again.").root;
-            const connection = Dialogue.finished.connect((dialogue) => {
-                if (dialogue === intro) {
-                    Pasal.humanoid!.MoveToFinished.Once(() => {
-                        Pasal.rootPart!.CFrame = WAYPOINTS.LearningThePastEnterCave.CFrame;
-                        task.wait(0.5);
-                        Pasal.humanoid!.MoveTo(WAYPOINTS.LearningThePastPasalEnteredCave.Position);
-                    });
-                    OldNoob.humanoid!.MoveToFinished.Once(() => {
-                        OldNoob.rootPart!.CFrame = WAYPOINTS.LearningThePastEnterCave.CFrame;
-                        task.wait(0.5);
-                        oldNoobToEnteredCave().onComplete(() => {
-                            continuation.talk(false);
-                            oldNoobToViewingLight().onComplete(() => {
-                                ending.talk();
-                            });
-                            pasalToViewingLight();
+            const introConn = intro.finished.connect(() => {
+                Pasal.humanoid!.MoveToFinished.Once(() => {
+                    Pasal.rootPart!.CFrame = WAYPOINTS.LearningThePastEnterCave.CFrame;
+                    task.wait(0.5);
+                    Pasal.humanoid!.MoveTo(WAYPOINTS.LearningThePastPasalEnteredCave.Position);
+                });
+                OldNoob.humanoid!.MoveToFinished.Once(() => {
+                    OldNoob.rootPart!.CFrame = WAYPOINTS.LearningThePastEnterCave.CFrame;
+                    task.wait(0.5);
+                    oldNoobToEnteredCave().onComplete(() => {
+                        continuation.talk(false);
+                        oldNoobToViewingLight().onComplete(() => {
+                            ending.talk();
                         });
+                        pasalToViewingLight();
                     });
-                    Pasal.humanoid!.MoveTo(suspiciousWall.Position);
-                    OldNoob.humanoid!.MoveTo(suspiciousWall.Position);
-                } else if (dialogue === ending) {
-                    oldNoobToEnterCave().onComplete(() => {
-                        OldNoob.rootPart!.CFrame = OldNoob.startingCFrame;
-                    });
-                    new Dialogue(Pasal, "What am I witnessing...").add(69);
-                    task.delay(1, () => new Dialogue(Pasal, "I'll stay back for a bit. I'm just... shocked...").talk());
-                    stage.complete();
-                }
+                });
+                Pasal.humanoid!.MoveTo(suspiciousWall.Position);
+                OldNoob.humanoid!.MoveTo(suspiciousWall.Position);
             });
-            return () => connection.disconnect();
+            const endingConn = ending.finished.connect(() => {
+                oldNoobToEnterCave().onComplete(() => {
+                    OldNoob.rootPart!.CFrame = OldNoob.startingCFrame;
+                });
+                new Dialogue(Pasal, "What am I witnessing...").add(69);
+                task.delay(1, () => new Dialogue(Pasal, "I'll stay back for a bit. I'm just... shocked...").talk());
+                stage.complete();
+            });
+            return () => {
+                introConn.disconnect();
+                endingConn.disconnect();
+            };
         }),
     )
     .setCompletionDialogue(
@@ -480,10 +478,8 @@ export = new Quest(script.Name)
             SuspiciousWall.dialogueUponInteract(keyUsed);
         });
         Server.Event.setEventCompleted("SuspiciousWallOpened", false);
-        Dialogue.finished.connect((dialogue) => {
-            if (dialogue === keyUsed) {
-                unlockWall();
-            }
+        keyUsed.finished.connect(() => {
+            unlockWall();
         });
     })
     .setReward({

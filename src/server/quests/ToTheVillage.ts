@@ -95,10 +95,8 @@ export = new Quest(script.Name)
             .onReached((stage) => {
                 SlamoRefugee.rootPart!.CFrame = SlamoRefugee.startingCFrame!;
 
-                const connection = Dialogue.finished.connect((dialogue) => {
-                    if (dialogue === stage.dialogue) {
-                        stage.complete();
-                    }
+                const connection = stage.dialogue!.finished.connect(() => {
+                    stage.complete();
                 });
                 return () => connection.disconnect();
             }),
@@ -118,15 +116,20 @@ export = new Quest(script.Name)
                     .monologue(
                         "To start, can you obtain 2 XL Wool? You can get it from that guy selling wool in the marketplace.",
                     ).root;
-                const connection = Dialogue.finished.connect((dialogue) => {
-                    if (dialogue === stage.dialogue && Server.Item.getItemAmount(EmpoweredBrick.id) >= 1) {
+                const stageDialogueConn = stage.dialogue!.finished.connect(() => {
+                    if (Server.Item.getItemAmount(EmpoweredBrick.id) >= 1) {
                         continuation.talk();
                     }
-                    if (dialogue === continuation && Server.Quest.takeQuestItem(EmpoweredBrick.id, 1)) {
+                });
+                const continuationConn = continuation.finished.connect(() => {
+                    if (Server.Quest.takeQuestItem(EmpoweredBrick.id, 1)) {
                         stage.complete();
                     }
                 });
-                return () => connection.disconnect();
+                return () => {
+                    stageDialogueConn.disconnect();
+                    continuationConn.disconnect();
+                };
             }),
     )
     .addStage(
@@ -143,15 +146,20 @@ export = new Quest(script.Name)
                     "I know Freddy has a cauldron that has a bunch of Instant Win energy, but he won't let me use it. I hope you can convince him to let us borrow it.",
                 ).root;
 
-                const connection = Dialogue.finished.connect((dialogue) => {
-                    if (dialogue === stage.dialogue && Server.Item.getItemAmount("XLWool") >= 2) {
+                const stageDialogueConn = stage.dialogue!.finished.connect(() => {
+                    if (Server.Item.getItemAmount("XLWool") >= 2) {
                         continuation.talk();
                     }
-                    if (dialogue === continuation && Server.Quest.takeQuestItem("XLWool", 2)) {
+                });
+                const continuationConn = continuation.finished.connect(() => {
+                    if (Server.Quest.takeQuestItem("XLWool", 2)) {
                         stage.complete();
                     }
                 });
-                return () => connection.disconnect();
+                return () => {
+                    stageDialogueConn.disconnect();
+                    continuationConn.disconnect();
+                };
             }),
     )
     .addStage(
@@ -179,10 +187,8 @@ export = new Quest(script.Name)
                 refugeeToWaiting();
                 continuation.add(4);
 
-                const connection = Dialogue.finished.connect((dialogue) => {
-                    if (dialogue === continuation) {
-                        stage.complete();
-                    }
+                const connection = continuation.finished.connect(() => {
+                    stage.complete();
                 });
                 return () => {
                     connection.disconnect();
@@ -275,45 +281,45 @@ export = new Quest(script.Name)
                 continuation.talk();
 
                 const empoweredBrick = EmpoweredBrick.MODEL!.Clone();
-                const connection = Dialogue.finished.connect((dialogue) => {
-                    if (dialogue === continuation) {
-                        empoweredBrick.PivotTo(WAYPOINTS.ToTheVillageEmpoweredBrick.CFrame);
-                        empoweredBrick.Parent = Workspace;
-                        // tween the empowered brick inside the instant win block
-                        for (const part of empoweredBrick.GetDescendants()) {
-                            if (part.IsA("BasePart")) {
-                                part.CanCollide = false;
-                                part.Anchored = true;
-                                task.delay(1, () => {
-                                    TweenService.Create(part, new TweenInfo(1), {
-                                        CFrame: instantWinBlock.CFrame,
-                                    }).Play();
-                                });
-                            }
+                const continuationConn = continuation.finished.connect(() => {
+                    empoweredBrick.PivotTo(WAYPOINTS.ToTheVillageEmpoweredBrick.CFrame);
+                    empoweredBrick.Parent = Workspace;
+                    // tween the empowered brick inside the instant win block
+                    for (const part of empoweredBrick.GetDescendants()) {
+                        if (part.IsA("BasePart")) {
+                            part.CanCollide = false;
+                            part.Anchored = true;
+                            task.delay(1, () => {
+                                TweenService.Create(part, new TweenInfo(1), {
+                                    CFrame: instantWinBlock.CFrame,
+                                }).Play();
+                            });
                         }
-                        task.wait(2);
-                        playSound("MagicSprinkle.mp3", instantWinBlock);
-                        const effect = explosionEffect.Clone();
-                        effect.Parent = instantWinBlock;
-                        effect.Emit(2);
-                        hideInstantWinBlock();
-
-                        const light = new Instance("PointLight");
-                        light.Color = new Color3(0, 0.27, 1);
-                        light.Brightness = 2;
-                        light.Range = 10;
-                        light.Parent = empoweredBrick.PrimaryPart;
-
-                        task.wait(1);
-                        continuation2.talk();
-                    } else if (dialogue === continuation2) {
-                        stage.complete();
-                        Server.Quest.giveQuestItem(ChargedEmpoweredBrick.id, 1);
-                        empoweredBrick.Destroy();
                     }
+                    task.wait(2);
+                    playSound("MagicSprinkle.mp3", instantWinBlock);
+                    const effect = explosionEffect.Clone();
+                    effect.Parent = instantWinBlock;
+                    effect.Emit(2);
+                    hideInstantWinBlock();
+
+                    const light = new Instance("PointLight");
+                    light.Color = new Color3(0, 0.27, 1);
+                    light.Brightness = 2;
+                    light.Range = 10;
+                    light.Parent = empoweredBrick.PrimaryPart;
+
+                    task.wait(1);
+                    continuation2.talk();
+                });
+                const continuation2Conn = continuation2.finished.connect(() => {
+                    stage.complete();
+                    Server.Quest.giveQuestItem(ChargedEmpoweredBrick.id, 1);
+                    empoweredBrick.Destroy();
                 });
                 return () => {
-                    connection.disconnect();
+                    continuationConn.disconnect();
+                    continuation2Conn.disconnect();
                 };
             }),
     )
@@ -411,11 +417,7 @@ export = new Quest(script.Name)
                 task.wait(10);
                 new Dialogue(SlamoRefugee, "...").talk(false);
 
-                const connection = Dialogue.finished.connect((dialogue) => {
-                    if (dialogue !== continuation) {
-                        return;
-                    }
-
+                const connection = continuation.finished.connect(() => {
                     SlamoRefugee.humanoid!.WalkSpeed = 30;
                     refugeeToEnteringPoliceStation(false).onComplete(() => {
                         SlamoRefugee.rootPart!.CFrame = WAYPOINTS.ToTheVillageRefugeeImprisoned.CFrame;
@@ -444,10 +446,8 @@ export = new Quest(script.Name)
             .onReached((stage) => {
                 Server.Event.setEventCompleted("ImprisonedSlamoRefugee", true);
 
-                const connection = Dialogue.finished.connect((dialogue) => {
-                    if (dialogue === stage.dialogue) {
-                        stage.complete();
-                    }
+                const connection = stage.dialogue!.finished.connect(() => {
+                    stage.complete();
                 });
                 return () => connection.disconnect();
             }),
@@ -467,10 +467,8 @@ export = new Quest(script.Name)
                     .monologue("But for now, I will wait here. I have nothing left to lose.").root,
             )
             .onReached((stage) => {
-                const connection = Dialogue.finished.connect((dialogue) => {
-                    if (dialogue === stage.dialogue) {
-                        stage.complete();
-                    }
+                const connection = stage.dialogue!.finished.connect(() => {
+                    stage.complete();
                 });
                 return () => connection.disconnect();
             }),

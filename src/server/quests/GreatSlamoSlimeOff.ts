@@ -40,12 +40,10 @@ export = new Quest(script.Name)
                     ).root,
             )
             .onReached((stage) => {
-                const connection = Dialogue.finished.connect((dialogue) => {
-                    if (dialogue === stage.dialogue) {
-                        stage.complete();
-                    }
+                const connection = stage.dialogue?.finished.connect(() => {
+                    stage.complete();
                 });
-                return () => connection.disconnect();
+                return () => connection?.disconnect();
             }),
     )
     .addStage(
@@ -233,12 +231,10 @@ export = new Quest(script.Name)
 
                 new Dialogue(SlamoMcManager, "AND THE MEGA-SLIME IS BACK! LET'S GOOOOO!").talk();
 
-                const connection = Dialogue.finished.connect((dialogue) => {
-                    if (dialogue === stage.dialogue) {
-                        stage.complete();
-                    }
+                const connection = stage.dialogue?.finished.connect(() => {
+                    stage.complete();
                 });
-                return () => connection.disconnect();
+                return () => connection?.disconnect();
             }),
     )
     .setReward({

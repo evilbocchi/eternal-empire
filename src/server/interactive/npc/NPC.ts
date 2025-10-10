@@ -524,14 +524,14 @@ export const EMPTY_NPC = new NPC("Empty");
  * Represents a dialogue node for NPCs, supporting monologues, choices, and dialogue chaining.
  */
 export class Dialogue<T extends NPC = NPC> {
-    static readonly finished = new Signal<(dialogue: Dialogue) => void>();
     static readonly proximityPrompts = new Set<ProximityPrompt>();
     static isInteractionEnabled = true;
 
+    readonly choices = new Map<string, Dialogue<T>>();
+    readonly finished = new Signal<() => void>();
     npc: T;
     text: string;
-    choices = new Map<string, Dialogue<T>>();
-    nextDialogue: Dialogue<T> | undefined = undefined;
+    nextDialogue?: Dialogue<T>;
     root: Dialogue<T>;
 
     /**
@@ -614,7 +614,7 @@ export class Dialogue<T extends NPC = NPC> {
             const current = dialogues[i];
             const currentIndex = ++i;
             if (currentIndex > size) {
-                Dialogue.finished.fire(this);
+                this.finished.fire();
                 Dialogue.enableInteraction();
                 return true;
             }

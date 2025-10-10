@@ -1,10 +1,10 @@
 import { ReplicatedStorage, RunService } from "@rbxts/services";
-import { Dialogue } from "server/interactive/npc/NPC";
 import NameChanger from "server/interactive/npc/Name Changer";
+import { Dialogue } from "server/interactive/npc/NPC";
 import Tria from "server/interactive/npc/Tria";
 import Quest, { Stage } from "server/quests/Quest";
-import { WAYPOINTS } from "shared/constants";
 import { Server } from "shared/api/APIExpose";
+import { WAYPOINTS } from "shared/constants";
 import TheFirstDropper from "shared/items/negative/tfd/TheFirstDropper";
 import TheFirstFurnace from "shared/items/negative/tfd/TheFirstFurnace";
 import Packets from "shared/Packets";
@@ -55,13 +55,17 @@ export = new Quest(script.Name)
                     Tria,
                     "Uh... I-I'm Tria... I guess. Um... if... if you want, I can... show you... how to, uh... maybe... make some money? Heh...",
                 );
-                const connection = Dialogue.finished.connect((dialogue) => {
-                    if (dialogue === stage.dialogue) {
-                        Server.Event.setEventCompleted("TriaReveal", true);
-                        continuation.talk();
-                    } else if (dialogue === continuation) stage.complete();
+                const stageDialogueConn = stage.dialogue!.finished.connect(() => {
+                    Server.Event.setEventCompleted("TriaReveal", true);
+                    continuation.talk();
                 });
-                return () => connection.disconnect();
+                const continuationConn = continuation.finished.connect(() => {
+                    stage.complete();
+                });
+                return () => {
+                    stageDialogueConn.disconnect();
+                    continuationConn.disconnect();
+                };
             }),
     )
     .addStage(
@@ -146,23 +150,24 @@ export = new Quest(script.Name)
                         "I'll... I'll see you again when... um... you've made a bit more money... maybe...",
                     ).root;
                 let completed = false;
+                let continuationConn: RBXScriptConnection;
                 const connection = Server.Currency.balanceChanged.connect((balance) => {
                     const funds = balance.get("Funds");
                     if (completed === false && funds !== undefined && !funds.lessEquals(0)) {
                         completed = true;
-                        const c2 = Dialogue.finished.connect((dialogue) => {
-                            if (dialogue === continuation) {
-                                c2.disconnect();
-                                triaToStart().onComplete(() => {
-                                    Tria.playAnimation("Default");
-                                });
-                                stage.complete();
-                            }
+                        continuationConn = continuation.finished.connect(() => {
+                            triaToStart().onComplete(() => {
+                                Tria.playAnimation("Default");
+                            });
+                            stage.complete();
                         });
                         continuation.talk();
                     }
                 });
-                return () => connection.disconnect();
+                return () => {
+                    connection.disconnect();
+                    continuationConn?.Disconnect();
+                };
             }),
     )
     .onInit(() => {
@@ -170,11 +175,11 @@ export = new Quest(script.Name)
             if (isCompleted) Tria.revealActualName();
         });
 
-        Dialogue.finished.connect((dialogue) => {
-            if (dialogue === NameChanger.defaultDialogues[0]) {
+        if (NameChanger.defaultDialogues[0]) {
+            NameChanger.defaultDialogues[0].finished.connect(() => {
                 Packets.tabOpened.toAllClients("Rename");
-            }
-        });
+            });
+        }
     })
     .setReward({
         xp: 60,

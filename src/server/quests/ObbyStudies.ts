@@ -36,12 +36,10 @@ export = new Quest(script.Name)
                 ProfAlaric.rootPart!.CFrame = ProfAlaric.startingCFrame;
                 ProfAlaric.playAnimation("Default");
 
-                const connection = Dialogue.finished.connect((dialogue) => {
-                    if (dialogue === stage.dialogue) {
-                        stage.complete();
-                    }
+                const connection = stage.dialogue?.finished.connect(() => {
+                    stage.complete();
                 });
-                return () => connection.disconnect();
+                return () => connection?.disconnect();
             }),
     )
     .addStage(
@@ -170,18 +168,21 @@ export = new Quest(script.Name)
                         ).root;
                 }
 
-                const connection = Dialogue.finished.connect((dialogue) => {
-                    if (dialogue === stage.dialogue) {
-                        resultsDialogue.talk();
-                    } else if (dialogue === resultsDialogue) {
-                        // Mark that challenges are now unlocked
-                        questMetadata.set("ChallengesUnlocked", true);
-                        Server.Challenge.refreshChallenges();
-                        stage.complete();
-                    }
+                const stageDialogueConn = stage.dialogue!.finished.connect(() => {
+                    resultsDialogue.talk();
                 });
 
-                return () => connection.disconnect();
+                const resultsDialogueConn = resultsDialogue.finished.connect(() => {
+                    // Mark that challenges are now unlocked
+                    questMetadata.set("ChallengesUnlocked", true);
+                    Server.Challenge.refreshChallenges();
+                    stage.complete();
+                });
+
+                return () => {
+                    stageDialogueConn.disconnect();
+                    resultsDialogueConn.disconnect();
+                };
             }),
     )
     .setCompletionDialogue(

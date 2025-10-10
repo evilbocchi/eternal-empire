@@ -45,8 +45,8 @@ export = new Quest(script.Name)
                     "Buy your crates and logs here! Wait, nevermind. We're out of stock.",
                 );
                 replacement.add();
-                const connection = Dialogue.finished.connect((dialogue) => {
-                    if (dialogue === stage.dialogue) stage.complete();
+                const connection = stage.dialogue!.finished.connect(() => {
+                    stage.complete();
                 });
                 return () => {
                     connection.disconnect();
@@ -83,14 +83,16 @@ export = new Quest(script.Name)
                     "I... I just... uh... wanted to say something, but... maybe I shouldn't...",
                 ).monologue("P-please... just... come back later, okay? I... I'll explain then...").root;
 
-                const connection = Dialogue.finished.connect((dialogue) => {
-                    if (dialogue === replacement) {
-                        replacement.remove();
-                        replacement2.add();
-                    } else if (dialogue === stage.dialogue) stage.complete();
+                const replacementConn = replacement.finished.connect(() => {
+                    replacement.remove();
+                    replacement2.add();
+                });
+                const stageDialogueConn = stage.dialogue!.finished.connect(() => {
+                    stage.complete();
                 });
                 return () => {
-                    connection.disconnect();
+                    replacementConn.disconnect();
+                    stageDialogueConn.disconnect();
                     replacement.remove();
                     replacement2.remove();
                 };
@@ -152,15 +154,17 @@ export = new Quest(script.Name)
                         `I know you don't have a ${SkillPod.name}, but I'm gonna be nice and hold onto your ${GrassConveyor.name} for you.`,
                     )
                     .monologue("See you again never!").root;
-                const connection = Dialogue.finished.connect((dialogue) => {
-                    if (dialogue === stage.dialogue) {
-                        continuation.talk();
-                    } else if (dialogue === continuation && Server.Quest.takeQuestItem(GrassConveyor.id, 1) === true) {
+                const stageDialogueConn = stage.dialogue!.finished.connect(() => {
+                    continuation.talk();
+                });
+                const continuationConn = continuation.finished.connect(() => {
+                    if (Server.Quest.takeQuestItem(GrassConveyor.id, 1) === true) {
                         stage.complete();
                     }
                 });
                 return () => {
-                    connection.disconnect();
+                    stageDialogueConn.disconnect();
+                    continuationConn.disconnect();
                     replacement.remove();
                 };
             }),
@@ -180,11 +184,9 @@ export = new Quest(script.Name)
             )
             .onReached((stage) => {
                 prestAnnoyance.add();
-                const connection = Dialogue.finished.connect((dialogue) => {
-                    if (dialogue === stage.dialogue) {
-                        Server.Quest.giveQuestItem(SkillPod.id, 1);
-                        stage.complete();
-                    }
+                const connection = stage.dialogue!.finished.connect(() => {
+                    Server.Quest.giveQuestItem(SkillPod.id, 1);
+                    stage.complete();
                 });
                 return () => {
                     connection.disconnect();
@@ -211,11 +213,9 @@ export = new Quest(script.Name)
                     `Uh... okay... use that ${SkillPod.name} to... help with your... negotiations... I guess.`,
                 ).monologue("I... I hope it works... fingers crossed...").root;
                 replacement.add();
-                const connection = Dialogue.finished.connect((dialogue) => {
-                    if (dialogue === stage.dialogue) {
-                        Server.Quest.takeQuestItem(SkillPod.id, 1);
-                        stage.complete();
-                    }
+                const connection = stage.dialogue!.finished.connect(() => {
+                    Server.Quest.takeQuestItem(SkillPod.id, 1);
+                    stage.complete();
                 });
                 return () => {
                     connection.disconnect();
