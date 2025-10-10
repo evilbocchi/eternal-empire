@@ -11,9 +11,14 @@ import path from "node:path";
 export async function writeFileIfChanged(filePath, content, repoRoot) {
     const relativePath = path.relative(repoRoot, filePath);
 
+    // Normalize content to LF line endings for consistent comparison
+    const normalizedContent = content.replace(/\r\n/g, "\n");
+
     try {
         const currentContent = await readFile(filePath, "utf8");
-        if (currentContent === content) {
+        const normalizedCurrentContent = currentContent.replace(/\r\n/g, "\n");
+
+        if (normalizedCurrentContent === normalizedContent) {
             return { message: `No changes detected in ${relativePath}`, changed: false };
         }
     } catch (error) {
@@ -22,6 +27,6 @@ export async function writeFileIfChanged(filePath, content, repoRoot) {
         }
     }
 
-    await writeFile(filePath, content);
+    await writeFile(filePath, normalizedContent);
     return { message: `Written to ${relativePath}`, changed: true };
 }

@@ -112,7 +112,7 @@ ${childInterface.content}
         return `    ${key}: ${name};`;
     });
 
-    return `// AUTO-GENERATED FILE
+    const content = `// AUTO-GENERATED FILE
 // Do not edit manually.
 
 // Roblox types must be available in your environment.
@@ -123,4 +123,7 @@ export type InstanceTreeType = {
 ${serviceTypeEntries.join("\n")}
 };
 `;
+
+    // Normalize line endings to LF to match git's text=auto behavior
+    return content.replace(/\r\n/g, "\n");
 }
