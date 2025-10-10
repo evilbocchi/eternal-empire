@@ -93,11 +93,9 @@ export = new Quest(script.Name)
             )
             .onReached((stage) => {
                 Simpul.rootPart!.Position = stage.position!;
-                const connection = Dialogue.finished.connect((dialogue) => {
-                    if (dialogue === stage.dialogue) {
-                        Server.Event.setEventCompleted("SimpulReveal", true);
-                        stage.complete();
-                    }
+                const connection = stage.dialogue!.finished.connect(() => {
+                    Server.Event.setEventCompleted("SimpulReveal", true);
+                    stage.complete();
                 });
                 return () => connection.disconnect();
             }),
@@ -133,12 +131,17 @@ export = new Quest(script.Name)
                         ).root,
                 ];
                 for (const dialogue of dialogues) dialogue.add();
-                const connection = Dialogue.finished.connect((dialogue) => {
-                    if (dialogue === SlamoBook.dialogue) stage.complete();
-                });
+                if (SlamoBook.dialogue) {
+                    const connection = SlamoBook.dialogue.finished.connect(() => {
+                        stage.complete();
+                    });
+                    return () => {
+                        for (const dialogue of dialogues) dialogue.remove();
+                        connection.disconnect();
+                    };
+                }
                 return () => {
                     for (const dialogue of dialogues) dialogue.remove();
-                    connection.disconnect();
                 };
             }),
     )
@@ -158,23 +161,25 @@ export = new Quest(script.Name)
                     "You thought these puny bars could stop me? Yeah, right. See you never!",
                 );
 
-                const connection = Dialogue.finished.connect((dialogue) => {
-                    if (dialogue === stage.dialogue) {
-                        Server.Event.setEventCompleted("FlimsyBarsDestroyed", true);
-                        task.delay(1, () => {
-                            simpulToOut().onComplete(() => {
-                                continuation.talk();
-                            });
+                const stageDialogueConn = stage.dialogue!.finished.connect(() => {
+                    Server.Event.setEventCompleted("FlimsyBarsDestroyed", true);
+                    task.delay(1, () => {
+                        simpulToOut().onComplete(() => {
+                            continuation.talk();
                         });
-                    } else if (dialogue === continuation) {
-                        Simpul.rootPart!.Anchored = true;
-                        TweenService.Create(Simpul.rootPart!, new TweenInfo(0.5), {
-                            CFrame: WAYPOINTS.LudicrousEscapeSimpulOut.CFrame.add(new Vector3(0, 150, 0)),
-                        }).Play();
-                        task.delay(2, () => stage.complete());
-                    }
+                    });
                 });
-                return () => connection.disconnect();
+                const continuationConn = continuation.finished.connect(() => {
+                    Simpul.rootPart!.Anchored = true;
+                    TweenService.Create(Simpul.rootPart!, new TweenInfo(0.5), {
+                        CFrame: WAYPOINTS.LudicrousEscapeSimpulOut.CFrame.add(new Vector3(0, 150, 0)),
+                    }).Play();
+                    task.delay(2, () => stage.complete());
+                });
+                return () => {
+                    stageDialogueConn.disconnect();
+                    continuationConn.disconnect();
+                };
             }),
     )
     .addStage(
@@ -241,36 +246,50 @@ export = new Quest(script.Name)
                 } else {
                     start.add();
                 }
-                const connection = Dialogue.finished.connect((dialogue) => {
-                    if (dialogue === start) {
-                        start.remove();
-                        checking.add();
-                    } else if (
-                        dialogue === checking &&
-                        ItemService.getItemAmount(Wood.id) >= 5 &&
-                        ItemService.getItemAmount(Stone.id) >= 3
-                    ) {
+                const startConn = start.finished.connect(() => {
+                    start.remove();
+                    checking.add();
+                });
+                const checkingConn = checking.finished.connect(() => {
+                    if (ItemService.getItemAmount(Wood.id) >= 5 && ItemService.getItemAmount(Stone.id) >= 3) {
                         getStatue.talk();
-                    } else if (dialogue === getStatue) {
-                        Server.Quest.takeQuestItem(Wood.id, 5);
-                        Server.Quest.takeQuestItem(Stone.id, 3);
-                        Server.Quest.giveQuestItem(SlamoStatue.id, 1);
-                        checking.remove();
-                        checking2.add();
-                    } else if (dialogue === checking2 && ItemService.getItemAmount(WinsomeSpeck.id) >= 10) {
+                    }
+                });
+                const getStatueConn = getStatue.finished.connect(() => {
+                    Server.Quest.takeQuestItem(Wood.id, 5);
+                    Server.Quest.takeQuestItem(Stone.id, 3);
+                    Server.Quest.giveQuestItem(SlamoStatue.id, 1);
+                    checking.remove();
+                    checking2.add();
+                });
+                const checking2Conn = checking2.finished.connect(() => {
+                    if (ItemService.getItemAmount(WinsomeSpeck.id) >= 10) {
                         fetchBucket.talk();
                         checking2.remove();
                         checking3.add();
-                    } else if (dialogue === fetchBucket) {
-                        Server.Quest.giveQuestItem(SkillPod.id, 1);
-                    } else if (dialogue === checking3 && ItemService.getItemAmount(WinsomeBucket.id) >= 1) {
-                        checking3.remove();
-                        ending.talk();
-                    } else if (dialogue === ending) {
-                        stage.complete();
                     }
                 });
-                return () => connection.disconnect();
+                const fetchBucketConn = fetchBucket.finished.connect(() => {
+                    Server.Quest.giveQuestItem(SkillPod.id, 1);
+                });
+                const checking3Conn = checking3.finished.connect(() => {
+                    if (ItemService.getItemAmount(WinsomeBucket.id) >= 1) {
+                        checking3.remove();
+                        ending.talk();
+                    }
+                });
+                const endingConn = ending.finished.connect(() => {
+                    stage.complete();
+                });
+                return () => {
+                    startConn.disconnect();
+                    checkingConn.disconnect();
+                    getStatueConn.disconnect();
+                    checking2Conn.disconnect();
+                    fetchBucketConn.disconnect();
+                    checking3Conn.disconnect();
+                    endingConn.disconnect();
+                };
             }),
     )
     .addStage(
@@ -334,43 +353,42 @@ export = new Quest(script.Name)
                             break;
                         }
                 });
-                const connection2 = Dialogue.finished.connect((dialogue) => {
-                    if (dialogue === poured) {
-                        const model = WinsomeBucket.MODEL?.Clone();
-                        if (model === undefined) return;
-                        const bucketCFrame = Simpul.rootPart!.CFrame.add(new Vector3(0, 4, 0));
-                        Simpul.onInteract();
+                const pouredConn = poured.finished.connect(() => {
+                    const model = WinsomeBucket.MODEL?.Clone();
+                    if (model === undefined) return;
+                    const bucketCFrame = Simpul.rootPart!.CFrame.add(new Vector3(0, 4, 0));
+                    Simpul.onInteract();
 
-                        let t = 0;
-                        const c = RunService.Heartbeat.Connect((dt) => {
-                            t += dt;
-                            if (t > 0.33) {
-                                c.Disconnect();
-                            }
-                            model.PivotTo(bucketCFrame.mul(CFrame.Angles(0, 0, t * 3 * math.pi)));
-                        });
-                        task.delay(1, () => {
-                            emitEffect("ExpandingWhirls", Simpul.rootPart!, 4);
-                            model.Destroy();
-                            playSound("Splash.mp3", Simpul.rootPart!);
-                            const trap = Simpul.model!.WaitForChild("Part") as BasePart;
-                            trap.Transparency = 0;
-                            trap.FindFirstChildOfClass("Decal")!.Transparency = 0;
-                            decal.Texture = sadDecal;
-                        });
-                        task.delay(2.5, () => simpulSad.talk());
-                        model.Parent = Workspace;
-                    } else if (dialogue === simpulSad) {
-                        const part = new Instance("Part");
-                        part.Transparency = 1;
-                        part.Anchored = true;
-                        part.CanCollide = false;
-                        part.Position = Simpul.rootPart!.Position;
-                        part.Parent = Workspace;
-                        spawnExplosion(part.Position, part);
-                        playSound("Explosion.mp3", part);
-                        Server.Event.setEventCompleted("SimpulGone", true);
-                    }
+                    let t = 0;
+                    const c = RunService.Heartbeat.Connect((dt) => {
+                        t += dt;
+                        if (t > 0.33) {
+                            c.Disconnect();
+                        }
+                        model.PivotTo(bucketCFrame.mul(CFrame.Angles(0, 0, t * 3 * math.pi)));
+                    });
+                    task.delay(1, () => {
+                        emitEffect("ExpandingWhirls", Simpul.rootPart!, 4);
+                        model.Destroy();
+                        playSound("Splash.mp3", Simpul.rootPart!);
+                        const trap = Simpul.model!.WaitForChild("Part") as BasePart;
+                        trap.Transparency = 0;
+                        trap.FindFirstChildOfClass("Decal")!.Transparency = 0;
+                        decal.Texture = sadDecal;
+                    });
+                    task.delay(2.5, () => simpulSad.talk());
+                    model.Parent = Workspace;
+                });
+                const simpulSadConn = simpulSad.finished.connect(() => {
+                    const part = new Instance("Part");
+                    part.Transparency = 1;
+                    part.Anchored = true;
+                    part.CanCollide = false;
+                    part.Position = Simpul.rootPart!.Position;
+                    part.Parent = Workspace;
+                    spawnExplosion(part.Position, part);
+                    playSound("Explosion.mp3", part);
+                    Server.Event.setEventCompleted("SimpulGone", true);
                 });
                 const connection3 = Server.Event.addCompletionListener("SimpulGone", (isCompleted) => {
                     if (!isCompleted) return;
@@ -379,7 +397,8 @@ export = new Quest(script.Name)
                 });
                 return () => {
                     connection1.disconnect();
-                    connection2.disconnect();
+                    pouredConn.disconnect();
+                    simpulSadConn.disconnect();
                     connection3.disconnect();
                 };
             }),
@@ -391,15 +410,13 @@ export = new Quest(script.Name)
             .onReached((stage) => {
                 finishing.talk();
 
-                const connection = Dialogue.finished.connect((dialogue) => {
-                    if (dialogue === finishing) {
-                        SlamoReceptionist.createPathfindingOperation(
-                            SlamoReceptionist.rootPart!.CFrame,
-                            SlamoReceptionist.startingCFrame,
-                        )();
-                        toggleRing(false);
-                        stage.complete();
-                    }
+                const connection = finishing.finished.connect(() => {
+                    SlamoReceptionist.createPathfindingOperation(
+                        SlamoReceptionist.rootPart!.CFrame,
+                        SlamoReceptionist.startingCFrame,
+                    )();
+                    toggleRing(false);
+                    stage.complete();
                 });
                 return () => connection.disconnect();
             }),
@@ -433,8 +450,8 @@ export = new Quest(script.Name)
         );
         const done = new Dialogue(Andy, "Wow! Those are some really cool looking apples. Don't mind if I do.");
 
-        Dialogue.finished.connect((dialogue) => {
-            if (dialogue === Andy.defaultDialogues[0]) {
+        if (Andy.defaultDialogues[0]) {
+            Andy.defaultDialogues[0].finished.connect(() => {
                 const last = questMetadata.get("Andy") as number | undefined;
                 if (last === undefined || last + 3600 < tick()) {
                     if (Server.Quest.takeQuestItem(Apple.id, 40)) {
@@ -450,38 +467,36 @@ export = new Quest(script.Name)
                             " to help me out again!",
                     ).talk();
                 }
-            } else if (dialogue === done) {
-                questMetadata.set("Andy", tick());
-                const rng = math.random(1, 3);
-                if (rng === 1) {
-                    new Dialogue(Andy, "As your reward, here's a Funds Bomb! Enjoy!").talk();
-                    CurrencyService.increment("Funds Bombs", new OnoeNum(1));
-                } else if (rng === 2) {
-                    const skillDelta = Server.Reset.getResetReward(RESET_LAYERS.Skillification)?.div(5)?.get("Skill");
-                    if (skillDelta === undefined || skillDelta.equals(0)) {
-                        new Dialogue(
-                            Andy,
-                            "As your reward, I wanted to give you some Skill... but I'm all out. Here's some resources instead!",
-                        ).talk();
-                        Server.Quest.giveQuestItem(EnchantedGrass.id, 3);
-                        Server.Quest.giveQuestItem(ExcavationStone.id, 15);
-                        return;
-                    }
-
+            });
+        }
+        done.finished.connect(() => {
+            questMetadata.set("Andy", tick());
+            const rng = math.random(1, 3);
+            if (rng === 1) {
+                new Dialogue(Andy, "As your reward, here's a Funds Bomb! Enjoy!").talk();
+                CurrencyService.increment("Funds Bombs", new OnoeNum(1));
+            } else if (rng === 2) {
+                const skillDelta = Server.Reset.getResetReward(RESET_LAYERS.Skillification)?.div(5)?.get("Skill");
+                if (skillDelta === undefined || skillDelta.equals(0)) {
                     new Dialogue(
                         Andy,
-                        "As your reward, I gave you a bit of my Skill. Hopefully, it'll help you out!",
+                        "As your reward, I wanted to give you some Skill... but I'm all out. Here's some resources instead!",
                     ).talk();
-                    CurrencyService.incrementAll(new CurrencyBundle().set("Skill", skillDelta).amountPerCurrency);
-                } else if (rng === 3) {
-                    new Dialogue(
-                        Andy,
-                        "As your reward, I gave you some pretty cool resources. Use them wisely!",
-                    ).talk();
-                    Server.Quest.giveQuestItem(Gold.id, 1);
-                    Server.Quest.giveQuestItem(Iron.id, 4);
-                    Server.Quest.giveQuestItem(Crystal.id, 10);
+                    Server.Quest.giveQuestItem(EnchantedGrass.id, 3);
+                    Server.Quest.giveQuestItem(ExcavationStone.id, 15);
+                    return;
                 }
+
+                new Dialogue(
+                    Andy,
+                    "As your reward, I gave you a bit of my Skill. Hopefully, it'll help you out!",
+                ).talk();
+                CurrencyService.incrementAll(new CurrencyBundle().set("Skill", skillDelta).amountPerCurrency);
+            } else if (rng === 3) {
+                new Dialogue(Andy, "As your reward, I gave you some pretty cool resources. Use them wisely!").talk();
+                Server.Quest.giveQuestItem(Gold.id, 1);
+                Server.Quest.giveQuestItem(Iron.id, 4);
+                Server.Quest.giveQuestItem(Crystal.id, 10);
             }
         });
     })

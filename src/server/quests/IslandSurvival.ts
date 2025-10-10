@@ -45,10 +45,8 @@ export = new Quest(script.Name)
                     ).root,
             )
             .onReached((stage) => {
-                const connection = Dialogue.finished.connect((dialogue) => {
-                    if (dialogue === stage.dialogue) {
-                        stage.complete();
-                    }
+                const connection = stage.dialogue!.finished.connect(() => {
+                    stage.complete();
                 });
                 return () => connection.Disconnect();
             }),
@@ -72,10 +70,8 @@ export = new Quest(script.Name)
                     checkDialogue.add();
                 });
 
-                const connection = Dialogue.finished.connect((dialogue) => {
-                    if (dialogue === checkDialogue) {
-                        stage.complete();
-                    }
+                const connection = checkDialogue.finished.connect(() => {
+                    stage.complete();
                 });
 
                 return () => {
@@ -111,14 +107,12 @@ export = new Quest(script.Name)
                     ).root,
             )
             .onReached((stage) => {
-                const connection = Dialogue.finished.connect((dialogue) => {
-                    if (dialogue === stage.dialogue) {
-                        // TODO: In full implementation, check if player placed items in subarea
-                        // For now, auto-complete after a delay
-                        task.delay(30, () => {
-                            stage.complete();
-                        });
-                    }
+                const connection = stage.dialogue!.finished.connect(() => {
+                    // TODO: In full implementation, check if player placed items in subarea
+                    // For now, auto-complete after a delay
+                    task.delay(30, () => {
+                        stage.complete();
+                    });
                 });
                 return () => connection.Disconnect();
             }),
@@ -163,10 +157,8 @@ export = new Quest(script.Name)
                     ).root,
             )
             .onReached((stage) => {
-                const connection = Dialogue.finished.connect((dialogue) => {
-                    if (dialogue === stage.dialogue) {
-                        stage.complete();
-                    }
+                const connection = stage.dialogue!.finished.connect(() => {
+                    stage.complete();
                 });
                 return () => connection.Disconnect();
             }),

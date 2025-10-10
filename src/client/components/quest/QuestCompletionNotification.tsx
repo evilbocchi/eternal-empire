@@ -419,23 +419,13 @@ export default function QuestCompletionNotification({ data, onComplete }: QuestC
                         Position={new UDim2(0, 0, 0, 0)}
                         Size={new UDim2(1, 0, 1, 0)}
                         Text="QUEST COMPLETE!"
-                        TextColor3={Color3.fromRGB(175, 255, 194)}
+                        TextColor3={data.questColor.Lerp(Color3.fromRGB(255, 255, 255), 0.3)}
                         TextScaled={true}
-                        TextStrokeColor3={Color3.fromRGB(60, 120, 60)}
+                        TextStrokeColor3={Color3.fromRGB(38, 38, 38)}
                         TextStrokeTransparency={0}
                         ZIndex={2}
                     >
                         <uistroke Thickness={2} />
-                        <uigradient
-                            Color={
-                                new ColorSequence([
-                                    new ColorSequenceKeypoint(0, Color3.fromRGB(255, 255, 255)),
-                                    new ColorSequenceKeypoint(0.5, Color3.fromRGB(175, 255, 194)),
-                                    new ColorSequenceKeypoint(1, Color3.fromRGB(100, 200, 120)),
-                                ])
-                            }
-                            Rotation={-30}
-                        />
                     </textlabel>
 
                     {/* Shine overlay */}

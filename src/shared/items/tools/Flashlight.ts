@@ -1,11 +1,12 @@
 import { getAsset } from "shared/asset/AssetMap";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
-import Item from "shared/item/Item";
 import TierDifficulty from "shared/difficulty/TierDifficulty";
+import Item from "shared/item/Item";
 import Gear from "shared/item/traits/Gear";
 import Crystal from "shared/items/excavation/Crystal";
 import EnchantedGrass from "shared/items/negative/tlg/EnchantedGrass";
 import MagicalWood from "shared/items/negative/tlg/MagicalWood";
+import ToolShop from "shared/items/tools/ToolShop";
 
 export = new Item(script.Name)
     .setName("Flashlight")
@@ -18,6 +19,7 @@ export = new Item(script.Name)
     .setLevelReq(4)
     .setImage(getAsset("assets/Flashlight.png"))
     .setLayoutOrder(5)
+    .soldAt(ToolShop)
 
     .trait(Gear)
     .exit();

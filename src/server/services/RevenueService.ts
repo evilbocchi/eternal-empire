@@ -17,7 +17,7 @@
  * @since 1.0.0
  */
 
-import { getAllInstanceInfo, getInstanceInfo } from "@antivivi/vrldk";
+import { getAllInstanceInfo } from "@antivivi/vrldk";
 import { Service } from "@flamework/core";
 import BombsService from "server/services/boosts/BombsService";
 import CurrencyService from "server/services/data/CurrencyService";
@@ -41,6 +41,9 @@ const FURNACE_UPGRADES = NamedUpgrades.getUpgrades("Furnace");
 @Service()
 export default class RevenueService {
     weatherBoostEnabled = true;
+
+    private operativeCache: { add: CurrencyBundle; mul: CurrencyBundle; pow: CurrencyBundle } | undefined;
+    private useOperativeCache = false;
 
     /**
      * Constructs the RevenueService with all required dependencies.
@@ -143,14 +146,20 @@ export default class RevenueService {
     }
 
     /**
-     * Calculates the total value of a droplet, including all relevant boosts and nerfs.
-     *
-     * @param dropletModel Droplet to calculate
-     * @param includesGlobalBoosts Whether to include global boosts (e.g., Dark Matter, Funds bombs)
-     * @param includesUpgrades Whether to include upgrades from Upgrader items
-     * @param enforceIncludesUpgrades Whether to enforce the includesUpgrades parameter (for special cases)
-     * @returns Tuple of (droplet value, nerf applied)
+     * Sets the operative cache for estimation.
      */
+    setOperativeCache(cache: { add: CurrencyBundle; mul: CurrencyBundle; pow: CurrencyBundle }) {
+        this.operativeCache = cache;
+        this.useOperativeCache = true;
+    }
+
+    /**
+     * Clears the operative cache.
+     */
+    clearOperativeCache() {
+        this.useOperativeCache = false;
+        this.operativeCache = undefined;
+    }
     calculateDropletValue(
         dropletModel: BasePart,
         includesGlobalBoosts: boolean,
@@ -170,13 +179,30 @@ export default class RevenueService {
         }
 
         if (includesUpgrades === true) {
-            [totalAdd, totalMul, totalPow] = Upgrader.applyUpgrades(totalAdd, totalMul, totalPow, dropletInfo);
+            if (this.useOperativeCache) {
+                [totalAdd, totalMul, totalPow] = [
+                    this.operativeCache!.add,
+                    this.operativeCache!.mul,
+                    this.operativeCache!.pow,
+                ];
+            } else {
+                [totalAdd, totalMul, totalPow] = Upgrader.applyUpgrades(totalAdd, totalMul, totalPow, dropletInfo);
+            }
         }
 
         [totalAdd, totalMul, totalPow] = this.applyDroplet(totalAdd, totalMul, totalPow, dropletInfo);
 
-        let worth = Droplet.getDroplet(dropletInfo.DropletId!)!.coalesce(totalAdd, totalMul, totalPow);
+        const dropletId = dropletInfo.DropletId;
+        if (dropletId === undefined) {
+            throw `DropletId not found on droplet ${dropletModel.GetFullName()}`;
+        }
 
+        const droplet = Droplet.getDroplet(dropletId);
+        if (droplet === undefined) {
+            throw `Droplet with ID ${dropletId} not found.`;
+        }
+
+        let worth = droplet.coalesce(totalAdd, totalMul, totalPow);
         return $tuple(worth.mul(nerf), nerf);
     }
 }

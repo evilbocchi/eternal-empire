@@ -34,10 +34,8 @@ export = new Quest(script.Name)
                     .monologue("Why don't you get my map for me first? It's at... uh... where is it, again?").root,
             )
             .onReached((stage) => {
-                const connection = Dialogue.finished.connect((dialogue) => {
-                    if (dialogue === stage.dialogue) {
-                        stage.complete();
-                    }
+                const connection = stage.dialogue!.finished.connect(() => {
+                    stage.complete();
                 });
                 return () => connection.Disconnect();
             }),
@@ -74,10 +72,8 @@ export = new Quest(script.Name)
                 triaActivation.add();
                 for (const dialogue of redHerrings) dialogue.add();
 
-                const connection = Dialogue.finished.connect((dialogue) => {
-                    if (dialogue === triaActivation) {
-                        stage.complete();
-                    }
+                const connection = triaActivation.finished.connect(() => {
+                    stage.complete();
                 });
                 return () => {
                     triaActivation.remove();
@@ -108,10 +104,8 @@ export = new Quest(script.Name)
                     ).root;
 
                 triaReveal.add();
-                const connection = Dialogue.finished.connect((dialogue) => {
-                    if (dialogue === triaReveal) {
-                        stage.complete();
-                    }
+                const connection = triaReveal.finished.connect(() => {
+                    stage.complete();
                 });
                 return () => {
                     triaReveal.remove();
@@ -189,10 +183,8 @@ export = new Quest(script.Name)
                     ).root,
             )
             .onReached((stage) => {
-                const connection = Dialogue.finished.connect((dialogue) => {
-                    if (dialogue === stage.dialogue) {
-                        stage.complete();
-                    }
+                const connection = stage.dialogue!.finished.connect(() => {
+                    stage.complete();
                 });
                 return () => connection.Disconnect();
             }),
@@ -214,10 +206,8 @@ export = new Quest(script.Name)
                     ).root,
             )
             .onReached((stage) => {
-                const connection = Dialogue.finished.connect((dialogue) => {
-                    if (dialogue === stage.dialogue) {
-                        stage.complete();
-                    }
+                const connection = stage.dialogue!.finished.connect(() => {
+                    stage.complete();
                 });
                 return () => connection.Disconnect();
             }),

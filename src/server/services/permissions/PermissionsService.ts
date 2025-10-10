@@ -113,7 +113,7 @@ export default class PermissionsService implements OnStart, OnPlayerAdded {
      */
     getPermissionLevel(userId: number, ignoreTest?: boolean) {
         const data = this.dataService.empireData;
-        if (game.PlaceId === 16438564807 && ignoreTest !== true) {
+        if ((game.PlaceId === 16438564807 || game.PlaceId === 77876177882408) && ignoreTest !== true) {
             return 4;
         } else {
             const p = Players.GetPlayerByUserId(userId);

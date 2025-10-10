@@ -2,8 +2,8 @@ import { combineHumanReadable } from "@antivivi/vrldk";
 import Difficulty from "@rbxts/ejt";
 import { OnoeNum } from "@rbxts/serikanum";
 import { Server } from "shared/api/APIExpose";
-import { Identifiable, ModuleRegistry } from "shared/hamster/ModuleRegistry";
 import Formula from "shared/currency/Formula";
+import { Identifiable, ModuleRegistry } from "shared/hamster/ModuleRegistry";
 
 export type DifficultyRewardPrice = FlatDifficultyPowerCost | PercentageOfDifficultyPowerPrice;
 
@@ -49,12 +49,19 @@ export interface IncreaseDifficultyPowerFormulaEffect {
     xCap?: OnoeNum;
 }
 
+export interface ForgeItemEffect {
+    kind: "forgeItem";
+    itemId: string;
+    amount?: number;
+}
+
 export type DifficultyRewardEffect =
     | WalkSpeedBuffEffect
     | GrantItemEffect
     | RedeemRevenueEffect
     | IncreaseDifficultyPowerEffect
-    | IncreaseDifficultyPowerFormulaEffect;
+    | IncreaseDifficultyPowerFormulaEffect
+    | ForgeItemEffect;
 
 export default class DifficultyReward extends Identifiable {
     static readonly REGISTRY = new ModuleRegistry<DifficultyReward>(script.Parent!, new Set([script]));
@@ -146,7 +153,10 @@ export default class DifficultyReward extends Identifiable {
                 `${math.floor(this.price.percentage * 100 * 100) / 100}% of your Difficulty Power (${OnoeNum.toString(cost)})`,
                 cost,
             );
+        } else if (this.price.kind === "flatDifficultyPower") {
+            return $tuple(`${OnoeNum.toString(this.price.amount)} Difficulty Power`, this.price.amount);
         }
+
         return $tuple("Free!", new OnoeNum(0));
     }
 
@@ -182,6 +192,13 @@ export default class DifficultyReward extends Identifiable {
             case "increaseDifficultyPowerFormula": {
                 const formulaString = effect.formula.tostring(effect.x);
                 return `Reward: Multiply Difficulty Power by ${formulaString} per furnace process.`;
+            }
+            case "forgeItem": {
+                const amount = effect.amount ?? 1;
+                const item = Server.Items.itemsPerId.get(effect.itemId);
+                const itemName = item?.name ?? effect.itemId;
+                const quantitySuffix = amount > 1 ? ` x${amount}` : "";
+                return `Reward: Forge ${itemName}${quantitySuffix} (consumes recipe cost).`;
             }
             default:
                 return "Unknown effect";

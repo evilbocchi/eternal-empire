@@ -2,7 +2,7 @@ import Freddy from "server/interactive/npc/Freddy";
 import { Dialogue } from "server/interactive/npc/NPC";
 import Quest, { Stage } from "server/quests/Quest";
 import { Server } from "shared/api/APIExpose";
-import { emitEffect, getSound, playSound } from "shared/asset/GameAssets";
+import { emitEffect, playSound } from "shared/asset/GameAssets";
 import { WAYPOINTS } from "shared/constants";
 import { eatSnapshot } from "shared/hamster/eat";
 import LostPendant from "shared/items/0/winsome/LostPendant";
@@ -47,13 +47,18 @@ export = new Quest(script.Name)
 
                 const continuation = new Dialogue(Freddy, "My name's Freddy. Follow me, I have something to show you.");
 
-                const connection = Dialogue.finished.connect((dialogue) => {
-                    if (dialogue === stage.dialogue) {
-                        Server.Event.setEventCompleted("FreddyReveal", true);
-                        continuation.talk();
-                    } else if (dialogue === continuation) stage.complete();
+                const stageDialogueConn = stage.dialogue!.finished.connect(() => {
+                    Server.Event.setEventCompleted("FreddyReveal", true);
+                    continuation.talk();
                 });
-                return () => connection.disconnect();
+                const continuationConn = continuation.finished.connect(() => {
+                    stage.complete();
+                });
+
+                return () => {
+                    stageDialogueConn.disconnect();
+                    continuationConn.disconnect();
+                };
             }),
     )
     .addStage(
@@ -96,8 +101,8 @@ export = new Quest(script.Name)
                 Freddy.rootPart!.CFrame = WAYPOINTS.AHelpingHandFreddyRequest.CFrame;
                 Freddy.stopAnimation("Default");
 
-                const connection = Dialogue.finished.connect((dialogue) => {
-                    if (stage.dialogue === dialogue) stage.complete();
+                const connection = stage.dialogue!.finished.connect(() => {
+                    stage.complete();
                 });
                 return () => connection.disconnect();
             }),
@@ -145,11 +150,14 @@ export = new Quest(script.Name)
                 Freddy.rootPart!.CFrame = WAYPOINTS.AHelpingHandFreddyRequest.CFrame;
                 Freddy.stopAnimation("Default");
 
-                const connection = Dialogue.finished.connect((dialogue) => {
+                const connection = stage.dialogue!.finished.connect(() => {
                     Server.Quest.takeQuestItem(LostPendant.id, 1);
-                    if (dialogue === stage.dialogue) stage.complete();
+                    stage.complete();
                 });
-                return () => connection.disconnect();
+
+                return () => {
+                    connection.disconnect();
+                };
             }),
     )
     .onInit(() => {

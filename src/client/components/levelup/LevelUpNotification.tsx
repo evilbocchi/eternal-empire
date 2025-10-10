@@ -126,8 +126,8 @@ export default function LevelUpNotification({ data, onComplete }: LevelUpNotific
             mainFrame,
             new TweenInfo(0.5, Enum.EasingStyle.Back, Enum.EasingDirection.Out),
             {
-                Position: new UDim2(0.5, 0, 0.3, 0),
-                Size: new UDim2(0.6, 0, 0.12, 0), // Responsive sizing: 60% width, 12% height
+                Position: new UDim2(0.5, 0, 0.05, 20),
+                Size: new UDim2(0.6, 0, 0.12, 0),
             },
         );
 
@@ -256,14 +256,7 @@ export default function LevelUpNotification({ data, onComplete }: LevelUpNotific
     }
 
     return (
-        <frame
-            ref={mainFrameRef}
-            AnchorPoint={new Vector2(0.5, 0.5)}
-            BackgroundTransparency={1}
-            Position={new UDim2(0.5, 0, 0.3, 0)}
-            Size={new UDim2(0.6, 0, 0.12, 0)} // Responsive sizing: 60% width, 12% height
-            ZIndex={3}
-        >
+        <frame ref={mainFrameRef} AnchorPoint={new Vector2(0.5, 0)} BackgroundTransparency={1} ZIndex={3}>
             {/* Size constraints for very small/large screens */}
             <uisizeconstraint
                 MaxSize={new Vector2(600, 150)} // Maximum size for large screens

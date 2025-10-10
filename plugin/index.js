@@ -6,6 +6,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import signalePkg from "signale";
 import { startMcpServer } from "./mcp/mcpServer.js";
+import { initToolBridge } from "./mcp/toolBridge.js";
 import { registerRoutes } from "./routes/index.js";
 
 const app = express();
@@ -15,6 +16,8 @@ const { Signale } = signalePkg;
 const logger = new Signale({
     stream: process.stderr,
 });
+
+initToolBridge(logger);
 
 // Configuration
 const PORT = 28354;

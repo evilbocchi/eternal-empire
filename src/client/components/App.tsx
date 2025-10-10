@@ -1,6 +1,6 @@
 import React, { Fragment, useEffect } from "@rbxts/react";
 import { createRoot, Root } from "@rbxts/react-roblox";
-import { ContentProvider, RunService, StarterGui, Workspace } from "@rbxts/services";
+import { ContentProvider, RunService, Workspace } from "@rbxts/services";
 import BackpackWindow from "client/components/backpack/BackpackWindow";
 import BalanceWindow from "client/components/balance/BalanceWindow";
 import { CurrencyGainManager } from "client/components/balance/CurrencyGain";
@@ -53,6 +53,7 @@ declare global {
 }
 
 import BrokenItemIndicatorRenderer from "client/components/item/BrokenItemIndicatorRenderer";
+import HarvestableGuiRenderer from "client/components/item/HarvestableGuiRenderer";
 import RepairedItemEffectRenderer from "client/components/item/RepairedItemEffectRenderer";
 import RepairWindow from "client/components/item/RepairWindow";
 import MarketplaceWindow from "client/components/marketplace/MarketplaceWindow";
@@ -156,6 +157,7 @@ export default function App() {
         addRoot(roots, createScreenGui("Backpack", -15)).render(<BackpackWindow />);
 
         addRoot(roots, createFolder("BrokenItemIndicators")).render(<BrokenItemIndicatorRenderer />);
+        addRoot(roots, createFolder("Harvestable")).render(<HarvestableGuiRenderer />);
         addRoot(roots, createFolder("RepairedItemEffects")).render(<RepairedItemEffectRenderer />);
         addRoot(roots, createFolder("Printer")).render(<PrinterRenderer />);
         addRoot(roots, createFolder("Shop")).render(<ShopGui />);
@@ -221,13 +223,6 @@ export default function App() {
             }
             cleanup();
         };
-    }, []);
-
-    useEffect(() => {
-        const wasEnabled = StarterGui.GetCoreGuiEnabled(Enum.CoreGuiType.PlayerList);
-        StarterGui.SetCoreGuiEnabled(Enum.CoreGuiType.PlayerList, false);
-
-        return () => StarterGui.SetCoreGuiEnabled(Enum.CoreGuiType.PlayerList, wasEnabled);
     }, []);
 
     ClientItemReplication.useManualItemReplication();

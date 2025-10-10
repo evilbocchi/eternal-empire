@@ -4,7 +4,7 @@ export = new Command(script.Name)
     .addAlias("cq")
     .setDescription("<questId> : Complete a quest.")
     .setExecute((_o, questId) => {
-        const quest = CommandAPI.Quest.Quest.HOT_RELOADER.OBJECTS.get(questId);
+        const quest = CommandAPI.Quest.Quest.REGISTRY.OBJECTS.get(questId);
         if (quest === undefined) {
             CommandAPI.ChatHook.sendPrivateMessage(_o, `Quest with ID '${questId}' not found.`);
             return;

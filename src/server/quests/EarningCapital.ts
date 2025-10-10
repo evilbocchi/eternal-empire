@@ -34,11 +34,9 @@ export = new Quest(script.Name)
                 Ricarg.rootPart!.CFrame = Ricarg.startingCFrame;
                 Ricarg.playAnimation("Default");
 
-                const connection = Dialogue.finished.connect((dialogue) => {
-                    if (dialogue === stage.dialogue) {
-                        Server.Quest.giveQuestItem(TheFirstUpgraderBooster.id, 1);
-                        stage.complete();
-                    }
+                const connection = stage.dialogue!.finished.connect(() => {
+                    Server.Quest.giveQuestItem(TheFirstUpgraderBooster.id, 1);
+                    stage.complete();
                 });
                 return () => connection.disconnect();
             }),
@@ -59,14 +57,20 @@ export = new Quest(script.Name)
                     )
                     .monologue("What are you waiting for? Go wild with it!").root;
 
-                const connection = Dialogue.finished.connect((dialogue) => {
-                    if (dialogue === stage.dialogue && Server.Currency.purchase(req)) {
+                const stageDialogueConn = stage.dialogue!.finished.connect(() => {
+                    if (Server.Currency.purchase(req)) {
                         continuation.talk();
-                    } else if (dialogue === continuation) {
-                        stage.complete();
                     }
                 });
-                return () => connection.disconnect();
+
+                const continuationConn = continuation.finished.connect(() => {
+                    stage.complete();
+                });
+
+                return () => {
+                    stageDialogueConn.disconnect();
+                    continuationConn.disconnect();
+                };
             }),
     )
     .setCompletionDialogue(
@@ -76,8 +80,8 @@ export = new Quest(script.Name)
         ),
     )
     .onInit((quest) => {
-        Dialogue.finished.connect((dialogue) => {
-            if (dialogue === quest.completionDialogue) {
+        if (quest.completionDialogue) {
+            quest.completionDialogue.finished.connect(() => {
                 const items = ThisEmpire.data.items;
                 const [invCount, placedCount] = countItemEverywhere(
                     items.inventory,
@@ -85,8 +89,8 @@ export = new Quest(script.Name)
                     RustyFactory.id,
                 );
                 if (invCount + placedCount === 0) Server.Quest.giveQuestItem(RustyFactory.id, 1);
-            }
-        });
+            });
+        }
     })
     .setReward({
         xp: 80,

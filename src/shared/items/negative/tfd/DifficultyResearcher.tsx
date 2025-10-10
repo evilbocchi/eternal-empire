@@ -171,6 +171,7 @@ interface DifficultyCarouselProps {
     requirements: Map<string, OnoeNum>;
     playerDifficultyPower: OnoeNum;
     unlockedDifficulties: Set<string>;
+    claimableDifficulties: Set<string>;
 }
 
 function DifficultyCarousel({
@@ -178,6 +179,7 @@ function DifficultyCarousel({
     selectPart,
     requirements,
     unlockedDifficulties,
+    claimableDifficulties,
 }: DifficultyCarouselProps) {
     return (
         <scrollingframe
@@ -277,6 +279,30 @@ function DifficultyCarousel({
                         ) : (
                             <Fragment />
                         )}
+                        {claimableDifficulties.has(difficulty.id) ? (
+                            <frame
+                                AnchorPoint={new Vector2(1, 0)}
+                                BackgroundColor3={Color3.fromRGB(215, 60, 60)}
+                                BorderSizePixel={0}
+                                Position={new UDim2(1, -6, 0, 6)}
+                                Size={new UDim2(0, 20, 0, 20)}
+                                ZIndex={3}
+                            >
+                                <uicorner CornerRadius={new UDim(1, 0)} />
+                                <textlabel
+                                    AnchorPoint={new Vector2(0.5, 0.5)}
+                                    BackgroundTransparency={1}
+                                    FontFace={RobotoMonoBold}
+                                    Position={new UDim2(0.5, 0, 0.5, 0)}
+                                    Size={new UDim2(1, 0, 1, 0)}
+                                    Text="!"
+                                    TextColor3={Color3.fromRGB(255, 255, 255)}
+                                    TextScaled={true}
+                                />
+                            </frame>
+                        ) : (
+                            <Fragment />
+                        )}
                     </imagebutton>
                 );
             })}
@@ -293,6 +319,7 @@ interface DifficultySelectionSurfaceProps {
     playerDifficultyPower: OnoeNum;
     nextUnlockRequirement?: OnoeNum;
     unlockedDifficulties: Set<string>;
+    claimableDifficulties: Set<string>;
 }
 
 function DifficultySelectionSurface({
@@ -304,6 +331,7 @@ function DifficultySelectionSurface({
     playerDifficultyPower,
     nextUnlockRequirement,
     unlockedDifficulties,
+    claimableDifficulties,
 }: DifficultySelectionSurfaceProps) {
     return (
         <frame BackgroundTransparency={1} Size={new UDim2(1, 0, 1, 0)}>
@@ -340,6 +368,7 @@ function DifficultySelectionSurface({
                 requirements={difficultyRequirements}
                 playerDifficultyPower={playerDifficultyPower}
                 unlockedDifficulties={unlockedDifficulties}
+                claimableDifficulties={claimableDifficulties}
             />
         </frame>
     );
@@ -919,6 +948,64 @@ function DifficultyRewardCard({
 
     const payoutText = useMemo(() => reward.getEffectsLabel(), [reward]);
 
+    let recipeCostText: string | undefined;
+    for (const effect of reward.effects) {
+        if (effect.kind !== "forgeItem") continue;
+
+        const item = Server.Items.itemsPerId.get(effect.itemId);
+        if (item === undefined) {
+            recipeCostText = undefined;
+            break;
+        }
+
+        const amount = math.max(effect.amount ?? 1, 1);
+        let totalPrice = new CurrencyBundle();
+        const bought = Server.Item?.getBoughtAmount?.(item.id) ?? 0;
+        for (let iteration = 1; iteration <= amount; iteration++) {
+            const price = item.getPrice(bought + iteration);
+            if (price !== undefined) {
+                totalPrice = totalPrice.add(price);
+            }
+        }
+
+        const components = new Array<string>();
+        if (totalPrice.amountPerCurrency.size() > 0) {
+            const priceString = CurrencyBundle.currenciesToString(totalPrice.amountPerCurrency, true);
+            if (priceString !== "") {
+                components.push(priceString);
+            }
+        }
+
+        const requiredLabels = new Array<string>();
+        for (const [requiredId, requiredAmount] of item.requiredItems) {
+            const requiredItem = Server.Items.itemsPerId.get(requiredId);
+            const totalRequired = requiredAmount * amount;
+            requiredLabels.push(`${requiredItem?.name ?? requiredId} x${totalRequired}`);
+        }
+        if (requiredLabels.size() > 0) {
+            components.push(requiredLabels.join(", "));
+        }
+
+        if (!components.isEmpty()) {
+            recipeCostText = components.join(" + ");
+        }
+        break;
+    }
+
+    const dpCostIsFree = costText === "Free!" && cost.lessEquals(0);
+    const costLines = new Array<string>();
+    if (!dpCostIsFree) {
+        costLines.push(`<font color="#FFC0FF">${costText}</font>`);
+    }
+    if (recipeCostText !== undefined) {
+        costLines.push(recipeCostText);
+    }
+
+    let costLabelRich = 'Cost: <font color="#FFC0FF">Free!</font>';
+    if (!costLines.isEmpty()) {
+        costLabelRich = `Cost: ${costLines.join("<br/>")}`;
+    }
+
     let statusColor = Color3.fromRGB(255, 200, 150);
     if (hasReachedMaxClaims) {
         statusColor = Color3.fromRGB(185, 205, 255);
@@ -1022,7 +1109,7 @@ function DifficultyRewardCard({
                 FontFace={RobotoMono}
                 RichText={true}
                 Size={new UDim2(1, 0, 0, 0)}
-                Text={`Cost: <font color="#FFC0FF">${costText}</font>`}
+                Text={costLabelRich}
                 TextColor3={Color3.fromRGB(255, 255, 255)}
                 TextSize={20}
                 TextWrapped={true}
@@ -1235,9 +1322,10 @@ function DescriptionPanel({
                         BackgroundTransparency={1}
                         FontFace={RobotoMonoBold}
                         Size={new UDim2(1, 0, 0, 0)}
-                        Text="Select a difficulty to preview its rewards."
+                        Text="Feed the researcher with droplets and select a difficulty to preview its rewards."
                         TextColor3={Color3.fromRGB(220, 220, 255)}
                         TextSize={26}
+                        TextStrokeTransparency={0}
                         TextWrapped={true}
                         TextXAlignment={Enum.TextXAlignment.Center}
                         TextYAlignment={Enum.TextYAlignment.Top}
@@ -1307,7 +1395,7 @@ function MultiplierBillboard({ orbPart, billboardRef, revenueLabelRef, gradientR
                 TextWrapped={true}
                 Rotation={-5}
             >
-                <uistroke StrokeSizingMode={Enum.StrokeSizingMode.ScaledSize} Thickness={3} />
+                <uistroke StrokeSizingMode={Enum.StrokeSizingMode.ScaledSize} Thickness={0.1} />
                 <uigradient ref={gradientRef} Color={new ColorSequence(Color3.fromRGB(255, 255, 255))} Rotation={90} />
             </textlabel>
         </billboardgui>
@@ -1593,11 +1681,35 @@ function DifficultyResearcherGui({
         unlockedDifficulties,
     ]);
 
-    const getDifficultyRewards = useMemo(() => {
-        const { getDifficultyRewards } = DifficultyReward.setupDifficultyRewards();
-        return getDifficultyRewards;
-    }, []);
-    const difficultyRewards = useMemo(() => getDifficultyRewards(currentDifficulty), [currentDifficulty]);
+    const rewardRegistry = useMemo(() => DifficultyReward.setupDifficultyRewards(), []);
+    const difficultyRewards = useMemo(
+        () => rewardRegistry.getDifficultyRewards(currentDifficulty),
+        [rewardRegistry, currentDifficulty],
+    );
+
+    const claimableDifficulties = useMemo(() => {
+        const ready = new Set<string>();
+        const now = os.time();
+        for (const difficulty of difficultyList) {
+            if (!unlockedDifficulties.has(difficulty.id)) continue;
+            const rewards = rewardRegistry.getDifficultyRewards(difficulty);
+            for (const reward of rewards) {
+                const maxClaims = reward.maxClaims;
+                const purchaseCount = rewardPurchases.get(reward.id) ?? 0;
+                if (maxClaims !== undefined && purchaseCount >= maxClaims) continue;
+
+                const cooldownExpiresAt = rewardCooldowns.get(reward.id);
+                if (cooldownExpiresAt !== undefined && cooldownExpiresAt > now) continue;
+
+                const [, cost] = reward.getPriceLabel(playerDifficultyPower);
+                if (playerDifficultyPower.lessThan(cost)) continue;
+
+                ready.add(difficulty.id);
+                break;
+            }
+        }
+        return ready;
+    }, [difficultyList, unlockedDifficulties, rewardRegistry, rewardCooldowns, rewardPurchases, playerDifficultyPower]);
 
     const handleClaimReward = useCallback(
         (rewardId: string) => {
@@ -1660,6 +1772,7 @@ function DifficultyResearcherGui({
                     playerDifficultyPower={playerDifficultyPower}
                     nextUnlockRequirement={nextUnlockRequirement}
                     unlockedDifficulties={unlockedDifficulties}
+                    claimableDifficulties={claimableDifficulties}
                 />
             </surfacegui>
             <surfacegui
@@ -1703,7 +1816,7 @@ export = new Item(script.Name)
     .setName("Difficulty Researcher")
     .setDifficulty(Difficulty.TheFirstDifficulty)
     .setDescription("Learn about the world.")
-    .setPrice(new CurrencyBundle().set("Funds", 100), 1)
+    .setPrice(new CurrencyBundle().set("Funds", 15000), 1)
     .placeableEverywhere()
     .soldAt(ClassLowerNegativeShop)
     .persists()

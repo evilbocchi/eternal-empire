@@ -15,6 +15,7 @@ import { OnStart, Service } from "@flamework/core";
 import { OnPlayerAdded } from "server/services/ModdingService";
 import { IS_EDIT } from "shared/Context";
 import { PlayerProfileManager } from "shared/data/profile/ProfileManager";
+import eat from "shared/hamster/eat";
 import Packets from "shared/Packets";
 
 /**
@@ -28,7 +29,7 @@ export default class SettingsService implements OnStart, OnPlayerAdded {
      * @param player The player who joined
      */
     onPlayerAdded(player: Player) {
-        const playerProfile = PlayerProfileManager.load(player.UserId);
+        const playerProfile = PlayerProfileManager.load(player?.UserId ?? 0);
         if (playerProfile !== undefined) {
             let loadedSettings: Settings;
             if (IS_EDIT) {
@@ -47,21 +48,37 @@ export default class SettingsService implements OnStart, OnPlayerAdded {
      * Initializes the SettingsService, setting up listeners for setting and hotkey changes.
      */
     onStart() {
-        Packets.setHotkey.fromClient((player, name, key) => {
-            const playerProfile = PlayerProfileManager.load(player.UserId);
+        const hotkeyConnection = Packets.setHotkey.fromClient((player, name, key) => {
+            if (player === undefined && !IS_EDIT) return;
+            const playerProfile = PlayerProfileManager.load(player?.UserId ?? 0);
             if (playerProfile === undefined) {
-                error("Player profile not loaded");
+                throw "Player profile not loaded";
             }
             playerProfile.Data.settings.hotkeys[name] = key;
+
+            if (player === undefined) {
+                Packets.settings.set(playerProfile.Data.settings);
+                return;
+            }
             Packets.settings.setFor(player, playerProfile.Data.settings);
         });
-        Packets.setSetting.fromClient((player, setting, value) => {
-            const playerProfile = PlayerProfileManager.load(player.UserId);
+
+        const settingConnection = Packets.setSetting.fromClient((player, setting, value) => {
+            if (player === undefined && !IS_EDIT) return;
+            const playerProfile = PlayerProfileManager.load(player?.UserId ?? 0);
             if (playerProfile === undefined) {
-                error("Player profile not loaded");
+                throw "Player profile not loaded";
             }
             (playerProfile.Data.settings as { [key: string]: unknown })[setting] = value;
+
+            if (player === undefined) {
+                Packets.settings.set(playerProfile.Data.settings);
+                return;
+            }
             Packets.settings.setFor(player, playerProfile.Data.settings);
         });
+
+        eat(hotkeyConnection, "Disconnect");
+        eat(settingConnection, "Disconnect");
     }
 }

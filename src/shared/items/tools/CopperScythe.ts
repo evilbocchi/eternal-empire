@@ -1,8 +1,9 @@
-import Gear from "shared/item/traits/Gear";
-import Item from "shared/item/Item";
+import { getAsset } from "shared/asset/AssetMap";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import TierDifficulty from "shared/difficulty/TierDifficulty";
-import { getAsset } from "shared/asset/AssetMap";
+import Item from "shared/item/Item";
+import Gear from "shared/item/traits/Gear";
+import ToolShop from "shared/items/tools/ToolShop";
 
 export = new Item(script.Name)
     .setName("Copper Scythe")
@@ -11,6 +12,7 @@ export = new Item(script.Name)
     .setPrice(new CurrencyBundle().set("Funds", 1e9), 1)
     .setLevelReq(1)
     .setImage(getAsset("assets/CopperScythe.png"))
+    .soldAt(ToolShop)
 
     .trait(Gear)
     .setType("Scythe")

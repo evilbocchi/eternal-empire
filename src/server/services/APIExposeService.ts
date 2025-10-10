@@ -34,7 +34,6 @@ import RevenueService from "server/services/RevenueService";
 import AreaService from "server/services/world/AreaService";
 import AtmosphereService from "server/services/world/AtmosphereService";
 import ChestService from "server/services/world/ChestService";
-import UnlockedAreasService from "server/services/world/UnlockedAreasService";
 import { Server } from "shared/api/APIExpose";
 import AvailableEmpire from "shared/data/AvailableEmpire";
 import type ThisEmpire from "shared/data/ThisEmpire";
@@ -77,7 +76,6 @@ export default class APIExposeService implements OnInit {
         private readonly resetService: ResetService,
         private readonly revenueService: RevenueService,
         private readonly setupService: SetupService,
-        private readonly unlockedAreasService: UnlockedAreasService,
     ) {}
 
     /**
@@ -257,14 +255,6 @@ export default class APIExposeService implements OnInit {
              * @see {@link PermissionsService} for more details.
              */
             Permissions: this.permissionsService,
-
-            /**
-             * Service for unlocking and tracking areas.
-             *
-             * @borrows UnlockedAreasService as unlockedAreasService
-             * @see {@link UnlockedAreasService} for more details.
-             */
-            UnlockedAreas: this.unlockedAreasService,
 
             /**
              * Named upgrade management service.

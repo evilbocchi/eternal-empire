@@ -9,7 +9,7 @@ import { getAllInstanceInfo, weldModel } from "@antivivi/vrldk";
 import { Debris, HttpService, ReplicatedStorage, TweenService, UserInputService, Workspace } from "@rbxts/services";
 import { Environment } from "@rbxts/ui-labs";
 import { RepairManager } from "client/components/item/RepairWindow";
-import { ShopManager } from "client/components/item/shop/ShopGui";
+import ShopManager from "client/components/item/shop/ShopManager";
 import SingleDocumentManager from "client/components/sidebar/SingleDocumentManager";
 import { showErrorToast } from "client/components/toast/ToastService";
 import DocumentManager from "client/components/window/DocumentManager";

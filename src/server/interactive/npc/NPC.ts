@@ -13,7 +13,7 @@ import { playSound } from "shared/asset/GameAssets";
 import { getDisplayName } from "shared/constants";
 import { IS_EDIT } from "shared/Context";
 import eat from "shared/hamster/eat";
-import { getPlayerCharacter } from "shared/hamster/getPlayerCharacter";
+import { getAllPlayerCharacters, getPlayerCharacter } from "shared/hamster/getPlayerCharacter";
 import { Identifiable, ModuleRegistry } from "shared/hamster/ModuleRegistry";
 import Packets from "shared/Packets";
 import CustomProximityPrompt from "shared/world/CustomProximityPrompt";
@@ -98,11 +98,13 @@ export default class NPC extends Identifiable {
         this.startingCFrame = rootPart.CFrame;
 
         CollectionService.AddTag(model, "NPC");
-        const parts = model.GetDescendants();
-        for (const part of parts) {
-            if (part.IsA("BasePart")) {
-                part.CollisionGroup = "NPC";
-                part.Anchored = false;
+        if (!model.HasTag("Anchored")) {
+            const parts = model.GetDescendants();
+            for (const part of parts) {
+                if (part.IsA("BasePart")) {
+                    part.CollisionGroup = "NPC";
+                    part.Anchored = false;
+                }
             }
         }
         rootPart.CustomPhysicalProperties = new PhysicalProperties(100, 0.3, 0.5);
@@ -192,9 +194,11 @@ export default class NPC extends Identifiable {
             for (const [, animTrack] of this.animTrackPerType) {
                 animTrack.Stop();
             }
+            for (const connection of this.runningPathfinds) {
+                connection.Disconnect();
+            }
 
             this.model?.Destroy();
-            table.clear(this);
         };
     }
 
@@ -482,11 +486,9 @@ export default class NPC extends Identifiable {
             });
 
             const connection = RunService.Heartbeat.Connect(() => {
-                const players = Players.GetPlayers();
-                for (const player of players) {
-                    const playerRootPart = getRootPart(player);
-                    if (playerRootPart === undefined) continue;
-                    if (destination.Position.sub(playerRootPart.Position).Magnitude < 10) {
+                for (const character of getAllPlayerCharacters()) {
+                    const pivot = character.GetPivot();
+                    if (destination.Position.sub(pivot.Position).Magnitude < 10) {
                         if (playTween) tween.Play();
                         toCall = true;
                         connection.Disconnect();
@@ -520,14 +522,14 @@ export const EMPTY_NPC = new NPC("Empty");
  * Represents a dialogue node for NPCs, supporting monologues, choices, and dialogue chaining.
  */
 export class Dialogue<T extends NPC = NPC> {
-    static readonly finished = new Signal<(dialogue: Dialogue) => void>();
     static readonly proximityPrompts = new Set<ProximityPrompt>();
     static isInteractionEnabled = true;
 
+    readonly choices = new Map<string, Dialogue<T>>();
+    readonly finished = new Signal<() => void>();
     npc: T;
     text: string;
-    choices = new Map<string, Dialogue<T>>();
-    nextDialogue: Dialogue<T> | undefined = undefined;
+    nextDialogue?: Dialogue<T>;
     root: Dialogue<T>;
 
     /**
@@ -606,11 +608,16 @@ export class Dialogue<T extends NPC = NPC> {
         const dialogues = this.extractDialogue();
         const size = dialogues.size();
         let i = 0;
+
+        /**
+         * Advances to the next dialogue in the sequence or ends the dialogue if complete.
+         * @returns True if the dialogue sequence is complete, false otherwise.
+         */
         const nextDialogue = () => {
             const current = dialogues[i];
             const currentIndex = ++i;
             if (currentIndex > size) {
-                Dialogue.finished.fire(this);
+                this.finished.fire();
                 Dialogue.enableInteraction();
                 return true;
             }
@@ -634,18 +641,19 @@ export class Dialogue<T extends NPC = NPC> {
                         ++playersPrompted;
                     }
 
-                    if (player !== undefined) {
-                        Packets.npcMessage.toClient(player, current.text, currentIndex, size, isPrompt, talkingModel);
-                    } else if (IS_EDIT) {
+                    if (IS_EDIT) {
                         Packets.npcMessage.toAllClients(current.text, currentIndex, size, isPrompt, talkingModel);
+                    } else if (player !== undefined) {
+                        Packets.npcMessage.toClient(player, current.text, currentIndex, size, isPrompt, talkingModel);
                     }
                 };
 
-                for (const player of Players.GetPlayers()) {
-                    sendInteraction(player, player.Character);
-                }
                 if (IS_EDIT) {
                     sendInteraction(undefined, getPlayerCharacter());
+                } else {
+                    for (const player of Players.GetPlayers()) {
+                        sendInteraction(player, player.Character);
+                    }
                 }
 
                 task.delay(current.text.size() / 11 + 1, () => {
@@ -654,7 +662,7 @@ export class Dialogue<T extends NPC = NPC> {
             }
             return false;
         };
-        Packets.nextDialogue.fromClient(() => nextDialogue());
+        Packets.nextDialogue.fromClient(nextDialogue);
         nextDialogue();
     }
 

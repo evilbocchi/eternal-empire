@@ -81,6 +81,8 @@ export default class Area {
     readonly catchAreaWorldNode?: SingleWorldNode<Part>;
     /** The reference to the the area's spawn location part. */
     readonly spawnLocationWorldNode?: SingleWorldNode<SpawnLocation>;
+    /** Whether this area is unlocked by default for new empires. */
+    readonly defaultUnlocked: boolean | undefined;
 
     private readonly boundingBox?: [CFrame, Vector3];
 
@@ -123,6 +125,7 @@ export default class Area {
         buildable,
         hidden,
         lightingConfiguration,
+        defaultUnlocked,
     }: {
         id: string;
         name?: string;
@@ -131,6 +134,7 @@ export default class Area {
         buildable: boolean;
         hidden?: boolean;
         lightingConfiguration?: Partial<Lighting>;
+        defaultUnlocked?: boolean;
     }) {
         this.id = id as AreaId;
         this.name = name ?? id;
@@ -149,6 +153,7 @@ export default class Area {
         this.hidden = hidden ?? false;
         this.defaultDropletLimit = dropletLimit;
         this.lightingConfiguration = lightingConfiguration;
+        this.defaultUnlocked = defaultUnlocked;
 
         const areaBounds = this.areaBoundsWorldNode.getInstance();
         if (areaBounds !== undefined) {
@@ -301,6 +306,7 @@ export const AREAS = {
         name: "Toxic Waterfall",
         buildable: false,
         hidden: true,
+        defaultUnlocked: true,
     }),
     MagicalHideout: new Area({
         id: "MagicalHideout",

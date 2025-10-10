@@ -1,12 +1,13 @@
 import { getAsset } from "shared/asset/AssetMap";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
-import Item from "shared/item/Item";
 import TierDifficulty from "shared/difficulty/TierDifficulty";
+import Item from "shared/item/Item";
 import Gear from "shared/item/traits/Gear";
 import ExcavationStone from "shared/items/excavation/ExcavationStone";
-import MagicalWood from "shared/items/negative/tlg/MagicalWood";
 import WhiteGem from "shared/items/excavation/WhiteGem";
+import MagicalWood from "shared/items/negative/tlg/MagicalWood";
 import CopperAxe from "shared/items/tools/CopperAxe";
+import ToolShop from "shared/items/tools/ToolShop";
 
 export = new Item(script.Name)
     .setName("Reinforced Axe")
@@ -19,6 +20,7 @@ export = new Item(script.Name)
     .setRequiredItemAmount(CopperAxe, 1)
     .setImage(getAsset("assets/ReinforcedAxe.png"))
     .setLevelReq(4)
+    .soldAt(ToolShop)
 
     .trait(Gear)
     .setType("Axe")

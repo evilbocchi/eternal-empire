@@ -364,8 +364,9 @@ export default function ProximityPromptGui({
 
     // Handle keyboard/gamepad input for triggering prompts
     useEffect(() => {
-        const handleInput = (input: InputObject) => {
+        const handleInput = (input: InputObject, gameProcessedEvent: boolean) => {
             if (input.KeyCode !== prompt.GamepadKeyCode && input.KeyCode !== prompt.KeyboardKeyCode) return;
+            if (IS_EDIT && gameProcessedEvent) return;
 
             if (input.UserInputState === Enum.UserInputState.Begin) {
                 if (prompt.HoldDuration > 0) {

@@ -1,13 +1,12 @@
 import { getAsset } from "shared/asset/AssetMap";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
-import Item from "shared/item/Item";
 import TierDifficulty from "shared/difficulty/TierDifficulty";
+import Item from "shared/item/Item";
 import Gear from "shared/item/traits/Gear";
 import Crystal from "shared/items/excavation/Crystal";
-import EnchantedGrass from "shared/items/negative/tlg/EnchantedGrass";
 import Grass from "shared/items/negative/tfd/Grass";
-import MagicalWood from "shared/items/negative/tlg/MagicalWood";
 import StaleWood from "shared/items/negative/tfd/StaleWood";
+import ToolShop from "shared/items/tools/ToolShop";
 
 export = new Item(script.Name)
     .setName("Portable Beacon")
@@ -20,6 +19,7 @@ export = new Item(script.Name)
     .setLevelReq(5)
     .setImage(getAsset("assets/PortableBeacon.png"))
     .setLayoutOrder(6)
+    .soldAt(ToolShop)
 
     .trait(Gear)
     .exit();

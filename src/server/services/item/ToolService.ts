@@ -98,7 +98,7 @@ export class ToolService implements OnInit, OnPlayerAdded, OnPlayerAdded {
      * Initializes the ToolService, sets up listeners and harvestable objects.
      */
     onInit() {
-        const connection = this.itemService.itemsBought.connect((_player, items) => {
+        const boughtConnection = this.itemService.itemsBought.connect((_player, items) => {
             for (const item of items) {
                 if (item.isA("Gear")) {
                     for (const player of Players.GetPlayers()) this.refreshTools(player);
@@ -106,6 +106,14 @@ export class ToolService implements OnInit, OnPlayerAdded, OnPlayerAdded {
                 }
             }
         });
-        eat(connection, "Disconnect");
+
+        const givenConnection = this.itemService.itemGiven.connect((item) => {
+            if (item.isA("Gear")) {
+                for (const player of Players.GetPlayers()) this.refreshTools(player);
+            }
+        });
+
+        eat(boughtConnection, "Disconnect");
+        eat(givenConnection, "Disconnect");
     }
 }

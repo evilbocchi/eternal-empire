@@ -186,8 +186,6 @@ export default class HamsterService implements OnStart {
 
         NPC.REGISTRY.load();
         InteractableObject.REGISTRY.load();
-        if (!IS_EDIT) {
-            Quest.HOT_RELOADER.load(); // TODO: Finish quest cleanup for CI
-        }
+        Quest.REGISTRY.load();
     }
 }

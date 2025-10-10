@@ -1,11 +1,12 @@
 import { getAsset } from "shared/asset/AssetMap";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
-import Item from "shared/item/Item";
 import TierDifficulty from "shared/difficulty/TierDifficulty";
+import Item from "shared/item/Item";
 import Gear from "shared/item/traits/Gear";
 import Crystal from "shared/items/excavation/Crystal";
 import MagicalWood from "shared/items/negative/tlg/MagicalWood";
 import ReinforcedScythe from "shared/items/tools/ReinforcedScythe";
+import ToolShop from "shared/items/tools/ToolShop";
 
 export = new Item(script.Name)
     .setName("Crystal Scythe")
@@ -17,6 +18,7 @@ export = new Item(script.Name)
     .setRequiredItemAmount(ReinforcedScythe, 1)
     .setLevelReq(8)
     .setImage(getAsset("assets/CrystalScythe.png"))
+    .soldAt(ToolShop)
 
     .trait(Gear)
     .setType("Scythe")

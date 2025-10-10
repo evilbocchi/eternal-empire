@@ -13,15 +13,14 @@
  * @since 1.0.0
  */
 
-import Difficulty from "@rbxts/ejt";
-import { OnoeNum } from "@rbxts/serikanum";
 import { getAllInstanceInfo } from "@antivivi/vrldk";
 import { OnStart, Service } from "@flamework/core";
+import Difficulty from "@rbxts/ejt";
+import { OnoeNum } from "@rbxts/serikanum";
 import { HttpService, RunService, Workspace } from "@rbxts/services";
 import StringBuilder from "@rbxts/stringbuilder";
 import { Environment } from "@rbxts/ui-labs";
 import { $env } from "rbxts-transform-env";
-import { OnGameAPILoaded } from "server/services/ModdingService";
 import ResetService from "server/services/ResetService";
 import RevenueService from "server/services/RevenueService";
 import CurrencyService from "server/services/data/CurrencyService";
@@ -37,16 +36,21 @@ import Item from "shared/item/Item";
 import Furnace from "shared/item/traits/Furnace";
 import Charger from "shared/item/traits/generator/Charger";
 import Generator from "shared/item/traits/generator/Generator";
+import Upgrader from "shared/item/traits/upgrader/Upgrader";
 import VoidSkyUpgrader from "shared/items/0/happylike/VoidSkyUpgrader";
 import SlamoStore from "shared/items/0/millisecondless/SlamoStore";
 import Items from "shared/items/Items";
 import AwesomeManumaticPurifier from "shared/items/negative/felixthea/AwesomeManumaticPurifier";
+import NamedUpgrades from "shared/namedupgrade/NamedUpgrades";
+
+const FURNACE_UPGRADES = NamedUpgrades.getUpgrades("Furnace");
 
 declare global {
     interface Assets {}
 
     interface _G {
         ProgressEstimated?: (message: string) => void;
+        ProgressionEstimateItem?: (itemId: string) => ItemEstimateSummary | undefined;
     }
 }
 
@@ -58,16 +62,67 @@ type ItemProgressionStats = {
     limitingCurrency?: Currency;
 };
 
+type ItemEstimateSummary = {
+    itemId: string;
+    itemName: string;
+    iteration: number;
+    priceLabel: string;
+    timeToObtain: string;
+    cumulativeTime: string;
+    limitingCurrency?: Currency;
+    revenuePerCurrency: Record<string, string>;
+};
+
+type ProfilingStats = {
+    calculateRevenueTime: number;
+    calculateRevenueCount: number;
+    getNextItemTime: number;
+    getNextItemCount: number;
+    findShopTime: number;
+    findShopCount: number;
+    // Deeper profiling for calculateRevenue
+    calcRevFirstLoopTime: number;
+    calcRevSecondLoopTime: number;
+    calcRevDropletLoopTime: number;
+    calcRevChargerTime: number;
+    calcRevOtherTime: number;
+    // Even deeper for droplet loop
+    dropletGetInstanceInfoTime: number;
+    dropletSetUpgradesTime: number;
+    dropletCalculateValueTime: number;
+    dropletApplyFurnacesTime: number;
+};
+
 /**
  * Service that estimates progression, calculates optimal paths, and posts reports.
  */
 @Service()
-export default class ProgressionEstimationService implements OnGameAPILoaded, OnStart {
+export default class ProgressionEstimationService implements OnStart {
     /**
      * Map of Droplet to their corresponding model instance in Workspace.
      * Used for simulating droplet upgrades and value calculations.
      */
     readonly MODEL_PER_DROPLET = new Map<Droplet, BasePart>();
+
+    private profilingStats: ProfilingStats = {
+        calculateRevenueTime: 0,
+        calculateRevenueCount: 0,
+        getNextItemTime: 0,
+        getNextItemCount: 0,
+        findShopTime: 0,
+        findShopCount: 0,
+        calcRevFirstLoopTime: 0,
+        calcRevSecondLoopTime: 0,
+        calcRevDropletLoopTime: 0,
+        calcRevChargerTime: 0,
+        calcRevOtherTime: 0,
+        dropletGetInstanceInfoTime: 0,
+        dropletSetUpgradesTime: 0,
+        dropletCalculateValueTime: 0,
+        dropletApplyFurnacesTime: 0,
+    };
+
+    private operativeCache: { add: CurrencyBundle; mul: CurrencyBundle; pow: CurrencyBundle } | undefined;
 
     constructor(
         private revenueService: RevenueService,
@@ -76,6 +131,133 @@ export default class ProgressionEstimationService implements OnGameAPILoaded, On
         private dataService: DataService,
         private resetService: ResetService,
     ) {}
+
+    private serializeCurrencyBundle(bundle: CurrencyBundle) {
+        const record: Record<string, string> = {};
+        for (const [currency, amount] of bundle.amountPerCurrency) {
+            record[currency] = amount.toString();
+        }
+        return record;
+    }
+
+    private withSimulatedState<T>(callback: () => T): T {
+        const toRecoverCurrencies = this.currencyService.balance.clone();
+        const toRecoverUpgrades = table.clone(this.dataService.empireData.upgrades);
+        const previousWeatherBoost = this.revenueService.weatherBoostEnabled;
+
+        this.revenueService.weatherBoostEnabled = false;
+        this.currencyService.setAll(new Map());
+        this.namedUpgradeService.setAmountPerUpgrade(new Map());
+
+        this.MODEL_PER_DROPLET.clear();
+        for (const droplet of Droplet.DROPLETS) {
+            this.MODEL_PER_DROPLET.set(droplet, droplet.getInstantiator(Workspace)());
+        }
+
+        // Reset profiling stats
+        this.profilingStats = {
+            calculateRevenueTime: 0,
+            calculateRevenueCount: 0,
+            getNextItemTime: 0,
+            getNextItemCount: 0,
+            findShopTime: 0,
+            findShopCount: 0,
+            calcRevFirstLoopTime: 0,
+            calcRevSecondLoopTime: 0,
+            calcRevDropletLoopTime: 0,
+            calcRevChargerTime: 0,
+            calcRevOtherTime: 0,
+            dropletGetInstanceInfoTime: 0,
+            dropletSetUpgradesTime: 0,
+            dropletCalculateValueTime: 0,
+            dropletApplyFurnacesTime: 0,
+        };
+
+        this.operativeCache = undefined;
+
+        let result: T;
+        try {
+            result = callback();
+        } finally {
+            this.revenueService.weatherBoostEnabled = previousWeatherBoost;
+            this.currencyService.setAll(toRecoverCurrencies.amountPerCurrency);
+            this.namedUpgradeService.setAmountPerUpgrade(toRecoverUpgrades);
+        }
+
+        for (const [, model] of this.MODEL_PER_DROPLET) {
+            model.Destroy();
+        }
+        this.MODEL_PER_DROPLET.clear();
+
+        return result;
+    }
+
+    private simulateSingleItem(target: Item): ItemEstimateSummary | undefined {
+        const inventory = new Map<Item, number>();
+        for (const [_, item] of Items.itemsPerId) {
+            const freeIterations = this.getFreeIterations(item);
+            if (freeIterations > 0) {
+                inventory.set(item, freeIterations);
+            }
+        }
+        const bought = table.clone(inventory);
+
+        let lastRevenue = new CurrencyBundle();
+        let totalTime = new OnoeNum(0);
+        let steps = 0;
+        const MAX_STEPS = 10000;
+
+        while (steps < MAX_STEPS) {
+            steps++;
+            const stats = this.getNextItem(inventory, bought, lastRevenue);
+            if (stats.item === undefined || stats.timeToObtain === undefined) {
+                break;
+            }
+
+            lastRevenue = stats.revenue;
+            totalTime = totalTime.add(stats.timeToObtain);
+
+            const purchasedItem = stats.item;
+            inventory.set(purchasedItem, (inventory.get(purchasedItem) ?? 0) + 1);
+            bought.set(purchasedItem, (bought.get(purchasedItem) ?? 0) + 1);
+
+            for (const [requiredItemId, amount] of purchasedItem.requiredItems) {
+                const requiredItem = Items.getItem(requiredItemId);
+                if (requiredItem === undefined) continue;
+                inventory.set(requiredItem, (inventory.get(requiredItem) ?? 0) - amount);
+            }
+
+            if (purchasedItem.findTrait("Upgrader") !== undefined) {
+                this.operativeCache = undefined;
+                this.revenueService.clearOperativeCache();
+            }
+
+            if (purchasedItem === target) {
+                const iteration = bought.get(target) ?? 0;
+                return {
+                    itemId: target.id,
+                    itemName: target.name,
+                    iteration,
+                    priceLabel: stats.priceLabel ?? "N/A",
+                    timeToObtain: stats.timeToObtain.toString(),
+                    cumulativeTime: totalTime.toString(),
+                    limitingCurrency: stats.limitingCurrency,
+                    revenuePerCurrency: this.serializeCurrencyBundle(stats.revenue),
+                } satisfies ItemEstimateSummary;
+            }
+        }
+
+        return undefined;
+    }
+
+    getSingleItemEstimate(itemId: string): ItemEstimateSummary | undefined {
+        const item = Items.getItem(itemId);
+        if (item === undefined) {
+            return undefined;
+        }
+
+        return this.withSimulatedState(() => this.simulateSingleItem(item));
+    }
 
     /**
      * Checks if a price is free (all currencies are zero).
@@ -139,16 +321,21 @@ export default class ProgressionEstimationService implements OnGameAPILoaded, On
      * @returns The shop item that sells the target item, or undefined if no shop is found.
      */
     findShopForItem(targetItem: Item): Item | undefined {
+        const startTime = os.clock();
         for (const [_, shopItem] of Items.itemsPerId) {
             const shop = shopItem.findTrait("Shop");
             if (shop !== undefined) {
                 for (const item of shop.items) {
                     if (item === targetItem) {
+                        this.profilingStats.findShopTime += os.clock() - startTime;
+                        this.profilingStats.findShopCount++;
                         return shopItem;
                     }
                 }
             }
         }
+        this.profilingStats.findShopTime += os.clock() - startTime;
+        this.profilingStats.findShopCount++;
         return undefined;
     }
 
@@ -164,6 +351,7 @@ export default class ProgressionEstimationService implements OnGameAPILoaded, On
         bought: Map<Item, number>,
         revenue: CurrencyBundle,
     ): ItemProgressionStats {
+        const startTime = os.clock();
         let nextItem: Item | undefined;
         let timeToObtain: OnoeNum | undefined;
         let limitingCurrency: Currency | undefined;
@@ -218,6 +406,8 @@ export default class ProgressionEstimationService implements OnGameAPILoaded, On
                 nextPrice = price;
             }
         }
+        this.profilingStats.getNextItemTime += os.clock() - startTime;
+        this.profilingStats.getNextItemCount++;
         return { revenue, priceLabel: nextPrice?.toString() ?? "N/A", item: nextItem, timeToObtain, limitingCurrency };
     }
 
@@ -273,6 +463,10 @@ export default class ProgressionEstimationService implements OnGameAPILoaded, On
                 if (requiredItem === undefined) continue;
                 inventory.set(requiredItem, inventory.get(requiredItem)! - amount);
             }
+            if (item.findTrait("Upgrader") !== undefined) {
+                this.operativeCache = undefined;
+                this.revenueService.clearOperativeCache();
+            }
             totalTime = totalTime.add(stats.timeToObtain);
 
             return progress();
@@ -288,6 +482,7 @@ export default class ProgressionEstimationService implements OnGameAPILoaded, On
      * @param balance The balance to emulate for calculations.
      */
     calculateRevenue(items: Map<Item, number>, balance: CurrencyBundle) {
+        const startTime = os.clock();
         this.currencyService.setAll(balance.amountPerCurrency);
 
         const droplets = new Map<Droplet, number>();
@@ -315,6 +510,7 @@ export default class ProgressionEstimationService implements OnGameAPILoaded, On
         }
 
         // first check
+        const firstLoopStart = os.clock();
         for (const [item, amount] of items) {
             item.performFormula();
 
@@ -422,9 +618,24 @@ export default class ProgressionEstimationService implements OnGameAPILoaded, On
                 }
             }
         }
+        this.profilingStats.calcRevFirstLoopTime += os.clock() - firstLoopStart;
         this.maxUpgradeBoard(namedUpgrades);
 
+        if (this.operativeCache === undefined) {
+            const dummyDropletInfo = { Upgrades: new Map<string, UpgradeInfo>() };
+            let i = 0;
+            for (const upgrade of upgrades) {
+                dummyDropletInfo.Upgrades.set(tostring(i), upgrade);
+                i++;
+            }
+            let [add, mul, pow] = this.revenueService.getGlobal(FURNACE_UPGRADES);
+            [add, mul, pow] = Upgrader.applyUpgrades(add, mul, pow, dummyDropletInfo);
+            this.operativeCache = { add, mul, pow };
+            this.revenueService.setOperativeCache(this.operativeCache);
+        }
+
         // second check
+        const secondLoopStart = os.clock();
         for (const [item, amount] of items) {
             const transformer = item.findTrait("Transformer");
             if (transformer !== undefined) {
@@ -440,13 +651,19 @@ export default class ProgressionEstimationService implements OnGameAPILoaded, On
                 }
             }
         }
+        this.profilingStats.calcRevSecondLoopTime += os.clock() - secondLoopStart;
 
         let revenue = new CurrencyBundle();
 
         // calculate droplets and its upgrades
+        const dropletLoopStart = os.clock();
         for (const [droplet, dropRate] of droplets) {
+            const getInstanceStart = os.clock();
             const dropletModel = this.MODEL_PER_DROPLET.get(droplet)!;
             const instanceInfo = getAllInstanceInfo(dropletModel);
+            this.profilingStats.dropletGetInstanceInfoTime += os.clock() - getInstanceStart;
+
+            const setUpgradesStart = os.clock();
             const dropletUpgrades = new Map<string, UpgradeInfo>();
             instanceInfo.Upgrades = dropletUpgrades;
             let i = 0;
@@ -455,10 +672,14 @@ export default class ProgressionEstimationService implements OnGameAPILoaded, On
                 i++;
             }
             instanceInfo.Health = 100; // override health check to make our own damage calculations
+            this.profilingStats.dropletSetUpgradesTime += os.clock() - setUpgradesStart;
 
+            const calcValueStart = os.clock();
             const [upgradedValue] = this.revenueService.calculateDropletValue(dropletModel, true, true);
             const [unupgradedValue] = this.revenueService.calculateDropletValue(dropletModel, true, false);
+            this.profilingStats.dropletCalculateValueTime += os.clock() - calcValueStart;
 
+            const applyFurnacesStart = os.clock();
             const value = new CurrencyBundle();
             for (const [currency, upgradedAmount] of upgradedValue.amountPerCurrency) {
                 const furnace = furnacePerCurrency.get(currency);
@@ -472,9 +693,12 @@ export default class ProgressionEstimationService implements OnGameAPILoaded, On
 
                 value.set(currency, OnoeNum.max(furnaceValue, cauldronValue));
             }
+            this.profilingStats.dropletApplyFurnacesTime += os.clock() - applyFurnacesStart;
 
             revenue = revenue.add(value.div(condension).mul(dropRate));
         }
+        this.profilingStats.calcRevDropletLoopTime += os.clock() - dropletLoopStart;
+        const chargerStart = os.clock();
         for (let [currency, amount] of generatorRevenue.amountPerCurrency) {
             const chargers = bestChargersPerCurrency.get(currency);
             if (chargers !== undefined) {
@@ -487,113 +711,165 @@ export default class ProgressionEstimationService implements OnGameAPILoaded, On
             }
             generatorRevenue.set(currency, amount);
         }
+        this.profilingStats.calcRevChargerTime += os.clock() - chargerStart;
         revenue = revenue.add(generatorRevenue);
 
         // lastly, account for reset layer gains
+        const otherStart = os.clock();
         for (const [_, resetLayer] of pairs(RESET_LAYERS)) {
             const reward = this.resetService.getResetReward(resetLayer);
             if (reward === undefined) continue;
             revenue = revenue.add(reward.div(500));
         }
+        this.profilingStats.calcRevOtherTime += os.clock() - otherStart;
 
+        this.profilingStats.calculateRevenueTime += os.clock() - startTime;
+        this.profilingStats.calculateRevenueCount++;
         return revenue;
     }
 
-    onGameAPILoaded() {
-        for (const droplet of Droplet.DROPLETS) {
-            this.MODEL_PER_DROPLET.set(droplet, droplet.getInstantiator(Workspace)());
-        }
-    }
-
     estimate() {
-        // Reset state
-        const toRecoverCurrencies = this.currencyService.balance.clone();
-        const toRecoverUpgrades = table.clone(this.dataService.empireData.upgrades);
+        const dt = this.withSimulatedState(() => {
+            const t = os.clock();
+            const progression = this.getProgression();
+            const builder = new StringBuilder();
+            let itemIteration = 1;
+            const ttoList: Array<{ item: Item; tto: OnoeNum }> = [];
 
-        this.revenueService.weatherBoostEnabled = false;
-        this.currencyService.setAll(new Map());
-        this.namedUpgradeService.setAmountPerUpgrade(new Map());
+            for (const stats of progression) {
+                const item = stats.item;
+                const timeToObtain = stats.timeToObtain;
+                if (item === undefined || timeToObtain === undefined) continue;
+                builder.append(itemIteration);
+                builder.append(". **");
+                builder.append(item.name);
+                builder.append("** from ");
+                builder.append(item.difficulty.name);
+                builder.append("\n\t> **");
+                builder.append(timeToObtain.toString());
+                builder.append("s** TTO at price ");
+                builder.append(stats.priceLabel);
+                builder.append(". (Limiting: **");
+                builder.append(stats.limitingCurrency);
+                builder.append("**)");
+                if (timeToObtain.moreThan(1000)) {
+                    builder.append(`\n\t> **LONG**`);
+                }
 
-        const t = tick();
-        const progression = this.getProgression();
-        const builder = new StringBuilder();
-        let itemIteration = 1;
-        // Collect TTOs for summary
-        const ttoList: Array<{ item: Item; tto: OnoeNum }> = [];
+                if (item.formula !== undefined) {
+                    builder.append(`\n\t> Formula Result = ${item.formulaResult}`);
+                    const upgrader = item.findTrait("Upgrader");
+                    if (upgrader?.mul !== undefined) {
+                        builder.append(`\n\t> Upgrader = ${upgrader.mul}`);
+                    }
+                }
 
-        for (const stats of progression) {
-            const item = stats.item;
-            const timeToObtain = stats.timeToObtain;
-            if (item === undefined || timeToObtain === undefined) continue;
-            builder.append(itemIteration);
-            builder.append(". **");
-            builder.append(item.name);
-            builder.append("** from ");
-            builder.append(item.difficulty.name);
-            builder.append("\n\t> **");
-            builder.append(timeToObtain.toString());
-            builder.append("s** TTO at price ");
-            builder.append(stats.priceLabel);
-            builder.append(". (Limiting: **");
-            builder.append(stats.limitingCurrency);
-            builder.append("**)");
-            if (timeToObtain.moreThan(1000)) {
-                builder.append(`\n\t> **LONG**`);
+                builder.append("\n");
+                itemIteration++;
+                ttoList.push({ item: item, tto: timeToObtain });
             }
+            builder.append(`\n\n`);
 
-            if (item.formula !== undefined) {
-                builder.append(`\n\t> Formula Result = ${item.formulaResult}`);
-                const upgrader = item.findTrait("Upgrader");
-                if (upgrader?.mul !== undefined) {
-                    builder.append(`\n\t> Upgrader = ${upgrader.mul}`);
+            if (!ttoList.isEmpty()) {
+                ttoList.sort((a, b) => a.tto.moreThan(b.tto));
+                builder.append(`-# Top 10 Highest Time-To-Obtain (TTO) Items:\n`);
+                for (let i = 0; i < math.min(10, ttoList.size()); i++) {
+                    const entry = ttoList[i];
+                    builder.append(`  ${i + 1}. **${entry.item.name}**: ${entry.tto.toString()}s\n`);
                 }
             }
 
-            builder.append("\n");
-            itemIteration++;
-            ttoList.push({ item: item, tto: timeToObtain });
-        }
-        builder.append(`\n\n`);
+            builder.append(
+                `-# Note that this is a rough estimate and does not account for all mechanics in the game.\n`,
+            );
+            const dtInner = math.floor((os.clock() - t) * 100) / 100;
 
-        // Add top 10 highest TTOs summary
-        if (!ttoList.isEmpty()) {
-            ttoList.sort((a, b) => a.tto.moreThan(b.tto));
-            builder.append(`-# Top 10 Highest Time-To-Obtain (TTO) Items:\n`);
-            for (let i = 0; i < math.min(10, ttoList.size()); i++) {
-                const entry = ttoList[i];
-                builder.append(`  ${i + 1}. **${entry.item.name}**: ${entry.tto.toString()}s\n`);
+            // Add profiling information
+            builder.append(`\n## Performance Profiling\n`);
+            builder.append(`- Total time: ${dtInner}s\n`);
+            builder.append(
+                `- calculateRevenue: ${math.floor(this.profilingStats.calculateRevenueTime * 100) / 100}s (${
+                    this.profilingStats.calculateRevenueCount
+                } calls, avg ${
+                    math.floor(
+                        (this.profilingStats.calculateRevenueTime / this.profilingStats.calculateRevenueCount) * 10000,
+                    ) / 10000
+                }s/call)\n`,
+            );
+            builder.append(
+                `  - First item loop: ${math.floor(this.profilingStats.calcRevFirstLoopTime * 100) / 100}s\n`,
+            );
+            builder.append(
+                `  - Second item loop: ${math.floor(this.profilingStats.calcRevSecondLoopTime * 100) / 100}s\n`,
+            );
+            builder.append(
+                `  - Droplet loop: ${math.floor(this.profilingStats.calcRevDropletLoopTime * 100) / 100}s\n`,
+            );
+            builder.append(
+                `    - Get instance info: ${math.floor(this.profilingStats.dropletGetInstanceInfoTime * 100) / 100}s\n`,
+            );
+            builder.append(
+                `    - Set upgrades: ${math.floor(this.profilingStats.dropletSetUpgradesTime * 100) / 100}s\n`,
+            );
+            builder.append(
+                `    - Calculate value: ${math.floor(this.profilingStats.dropletCalculateValueTime * 100) / 100}s\n`,
+            );
+            builder.append(
+                `    - Apply furnaces: ${math.floor(this.profilingStats.dropletApplyFurnacesTime * 100) / 100}s\n`,
+            );
+            builder.append(
+                `  - Charger application: ${math.floor(this.profilingStats.calcRevChargerTime * 100) / 100}s\n`,
+            );
+            builder.append(
+                `  - Other (reset layers): ${math.floor(this.profilingStats.calcRevOtherTime * 100) / 100}s\n`,
+            );
+            builder.append(
+                `- getNextItem: ${math.floor(this.profilingStats.getNextItemTime * 100) / 100}s (${
+                    this.profilingStats.getNextItemCount
+                } calls, avg ${
+                    math.floor((this.profilingStats.getNextItemTime / this.profilingStats.getNextItemCount) * 10000) /
+                    10000
+                }s/call)\n`,
+            );
+            builder.append(
+                `- findShopForItem: ${math.floor(this.profilingStats.findShopTime * 100) / 100}s (${
+                    this.profilingStats.findShopCount
+                } calls, avg ${
+                    math.floor((this.profilingStats.findShopTime / this.profilingStats.findShopCount) * 10000) / 10000
+                }s/call)\n`,
+            );
+            const otherTime =
+                dtInner -
+                this.profilingStats.calculateRevenueTime -
+                this.profilingStats.getNextItemTime -
+                this.profilingStats.findShopTime;
+            builder.append(`- Other operations: ${math.floor(otherTime * 100) / 100}s\n`);
+            builder.append(`\n`);
+
+            for (const [id, amount] of this.namedUpgradeService.upgrades) {
+                builder.append(`- Simulated named upgrade: ${id} x${amount}\n`);
             }
-        }
+            for (const [id, resetLayer] of pairs(RESET_LAYERS)) {
+                const reward = this.resetService.getResetReward(resetLayer);
+                if (reward === undefined) continue;
+                builder.append(`- Simulated reset layer: ${id} (Reward: ${reward})\n`);
+            }
 
-        builder.append(`-# Note that this is a rough estimate and does not account for all mechanics in the game.\n`);
-        const dt = math.floor((tick() - t) * 100) / 100;
-        for (const [id, amount] of this.namedUpgradeService.upgrades) {
-            builder.append(`- Simulated named upgrade: ${id} x${amount}\n`);
-        }
-        for (const [id, resetLayer] of pairs(RESET_LAYERS)) {
-            const reward = this.resetService.getResetReward(resetLayer);
-            if (reward === undefined) continue;
-            builder.append(`- Simulated reset layer: ${id} (Reward: ${reward})\n`);
-        }
+            builder.append(`-# Calculated in ${dtInner} seconds.\n`);
 
-        builder.append(`-# Calculated in ${dt} seconds.\n`);
+            this.post(builder.toString());
+
+            return dtInner;
+        });
 
         print(`Calculated in ${dt} seconds.`);
-
-        this.post(builder.toString());
-
-        this.revenueService.weatherBoostEnabled = true;
-        this.currencyService.setAll(toRecoverCurrencies.amountPerCurrency);
-        this.namedUpgradeService.setAmountPerUpgrade(toRecoverUpgrades);
     }
 
     /**
      * Runs the progression estimation and posts the report if in the PROGRESSION empire.
      */
     onStart() {
-        if (this.dataService.empireId === "PROGRESSION") {
-            this.estimate();
-        }
+        Environment.OriginalG.ProgressionEstimateItem = (itemId: string) => this.getSingleItemEstimate(itemId);
         Packets.progressEstimationRequest.fromClient(() => {
             if (RunService.IsStudio()) {
                 this.estimate();

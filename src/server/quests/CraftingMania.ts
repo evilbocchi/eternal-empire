@@ -8,13 +8,13 @@ import { WAYPOINTS } from "shared/constants";
 import Shop from "shared/item/traits/Shop";
 import ExcavationStone from "shared/items/excavation/ExcavationStone";
 import WhiteGem from "shared/items/excavation/WhiteGem";
-import Grass from "shared/items/negative/tfd/Grass";
 import Wool from "shared/items/negative/a/Wool";
 import IndustrialOverpass from "shared/items/negative/exist/IndustrialOverpass";
 import LegPoweredDropper from "shared/items/negative/felixthea/LegPoweredDropper";
 import LimitBreaker from "shared/items/negative/friendliness/LimitBreaker";
 import Lamp from "shared/items/negative/negativity/Lamp";
 import CraftingTable from "shared/items/negative/tfd/CraftingTable";
+import Grass from "shared/items/negative/tfd/Grass";
 import OverengineeredGenerator from "shared/items/negative/trueease/OverengineeredGenerator";
 
 const craftingTableModel = WAYPOINTS.CraftingTable;
@@ -59,16 +59,20 @@ export = new Quest(script.Name)
                     )
                     .monologue("I'll be waiting for you. Now, hurry!").root;
 
-                const connection = Dialogue.finished.connect((dialogue) => {
-                    if (dialogue === stage.dialogue) {
-                        Chuck.stopAnimation("Default");
-                        task.wait(1);
-                        continuation.talk();
-                    } else if (dialogue === continuation) {
-                        stage.complete();
-                    }
+                const stageDialogueConn = stage.dialogue!.finished.connect(() => {
+                    Chuck.stopAnimation("Default");
+                    task.wait(1);
+                    continuation.talk();
                 });
-                return () => connection.disconnect();
+
+                const continuationConn = continuation.finished.connect(() => {
+                    stage.complete();
+                });
+
+                return () => {
+                    stageDialogueConn.disconnect();
+                    continuationConn.disconnect();
+                };
             }),
     )
     .addStage(
@@ -82,11 +86,11 @@ export = new Quest(script.Name)
                 Chuck.stopAnimation("Default");
                 Chuck.rootPart!.CFrame = Chuck.startingCFrame;
 
-                const ItemService = Server.Item;
                 const ricargDialogue = new Dialogue(Ricarg, "Hahah... money... haah...").monologue(
                     "Wait, who are you again?",
                 ).root;
                 ricargDialogue.add(69);
+
                 const noHelped = new Dialogue(
                     Ricarg,
                     "I don't really remember, but that weird blacksmith Noob referred me, didn't he?",
@@ -108,38 +112,35 @@ export = new Quest(script.Name)
                         "You'll need to harvest it yourself with a Scythe. Luckily, I actually have some with me! I'll even give them to you for cheap.",
                     ).root;
 
-                const noItemed = new Dialogue(Chuck, `I need a ${Wool.id} and 3 ${Grass.id}.`);
-                const itemed = new Dialogue(
+                const insufficientDialogue = new Dialogue(Chuck, `I need a ${Wool.id} and 3 ${Grass.id}.`);
+                const sufficientDialogue = new Dialogue(
                     Chuck,
                     "Good job. You don't look like much, but clearly you tell me otherwise.",
                 ).monologue(
                     "Alright, thanks for getting me my groceries. It's about time I taught you something. Come with me.",
                 ).root;
-                const shopOpen = new Dialogue(
-                    Ricarg,
-                    "Here's what I have on me right now. You'll need to procure your own stuff for the more valuable tools.",
-                );
-                const connection = Dialogue.finished.connect((dialogue) => {
-                    if (dialogue === ricargDialogue) {
-                        ricargDialogue.remove();
-                        (EarningCapital.completed ? helped : noHelped).talk();
-                    } else if (dialogue === noHelped || dialogue === helped) {
-                        shopOpen.add();
-                        shopOpen.talk();
-                    } else if (dialogue === stage.dialogue) {
-                        (ItemService.getItemAmount(Wool.id) >= 1 && ItemService.getItemAmount(Grass.id) >= 3
-                            ? itemed
-                            : noItemed
-                        ).talk();
-                    } else if (
-                        dialogue === itemed &&
-                        Server.Quest.takeQuestItem(Wool.id, 1) &&
-                        Server.Quest.takeQuestItem(Grass.id, 3)
-                    ) {
-                        stage.complete();
-                    }
+
+                const ricargDialogueConn = ricargDialogue.finished.connect(() => {
+                    ricargDialogue.remove();
+                    (EarningCapital.completed ? helped : noHelped).talk();
                 });
-                return () => connection.disconnect();
+
+                const stageDialogueConn = stage.dialogue!.finished.connect(() => {
+                    (Server.Item.getItemAmount(Wool.id) >= 1 && Server.Item.getItemAmount(Grass.id) >= 3
+                        ? sufficientDialogue
+                        : insufficientDialogue
+                    ).talk();
+                });
+
+                const itemedConn = sufficientDialogue.finished.connect(() => {
+                    if (Server.Quest.takeQuestItem(Wool.id, 1) && Server.Quest.takeQuestItem(Grass.id, 3))
+                        stage.complete();
+                });
+                return () => {
+                    ricargDialogueConn.disconnect();
+                    stageDialogueConn.disconnect();
+                    itemedConn.disconnect();
+                };
             }),
     )
     .addStage(
@@ -171,14 +172,13 @@ export = new Quest(script.Name)
                 Chuck.stopAnimation("Default");
                 Chuck.rootPart!.CFrame = WAYPOINTS.CraftingManiaChuckCraftingAssistance.CFrame;
 
-                const connection = Dialogue.finished.connect((dialogue) => {
-                    if (dialogue === stage.dialogue) {
-                        Server.Quest.giveQuestItem(ExcavationStone.id, 50);
-                        Server.Quest.giveQuestItem(WhiteGem.id, 15);
-                        stage.complete();
-                    }
+                const stageDialogueConn = stage.dialogue!.finished.connect(() => {
+                    Server.Quest.giveQuestItem(ExcavationStone.id, 50);
+                    Server.Quest.giveQuestItem(WhiteGem.id, 15);
+                    stage.complete();
                 });
-                return () => connection.disconnect();
+
+                return () => stageDialogueConn.disconnect();
             }),
     )
     .addStage(
@@ -243,14 +243,19 @@ export = new Quest(script.Name)
                         "I'm excited to see what you can craft in the future. You should find a better Crafting Table and work your way up.",
                     )
                     .monologue("I won't charge you for those resources, so enjoy!").root;
-                const connection = Dialogue.finished.connect((dialogue) => {
-                    if (dialogue === stage.dialogue) {
-                        continuation.talk();
-                    } else if (dialogue === continuation) {
-                        stage.complete();
-                    }
+
+                const stageDialogueConn = stage.dialogue!.finished.connect(() => {
+                    continuation.talk();
                 });
-                return () => connection.disconnect();
+
+                const continuationConn = continuation.finished.connect(() => {
+                    stage.complete();
+                });
+
+                return () => {
+                    stageDialogueConn.disconnect();
+                    continuationConn.disconnect();
+                };
             }),
     )
     .setCompletionDialogue(
