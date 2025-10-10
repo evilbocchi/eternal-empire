@@ -393,7 +393,7 @@ export = new Quest(script.Name)
                         Server.Quest.giveQuestItem(SkyPass.id, 1);
 
                         // Unlock Sky Pavilion area
-                        Server.UnlockedAreas.unlockArea("SkyPavilion");
+                        Server.Area.unlockArea("SkyPavilion");
 
                         // Play victory sound
                         const players = game.GetService("Players").GetPlayers();

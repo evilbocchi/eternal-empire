@@ -370,7 +370,7 @@ export = new Quest(script.Name)
 
                     linkwayEffect.Emit(4);
                     playSoundAtPart(particlePart, getSound("LaserExplosion.mp3"), 2);
-                    Server.UnlockedAreas.unlockArea("SlamoVillage");
+                    Server.Area.unlockArea("SlamoVillage");
                     stage.complete();
                 });
 

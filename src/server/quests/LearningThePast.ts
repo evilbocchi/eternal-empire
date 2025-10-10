@@ -354,6 +354,7 @@ export = new Quest(script.Name)
                 });
                 const connection2 = Server.Event.addCompletionListener("SuspiciousWallOpened", (isCompleted) => {
                     if (isCompleted) {
+                        Server.Area.unlockArea("MagicalHideout");
                         stage.complete();
                     }
                 });
