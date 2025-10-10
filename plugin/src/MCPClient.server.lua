@@ -200,7 +200,6 @@ local function parseSsePayload(raw)
     local eventType = string.match(raw, "event:%s*(%S+)")
 
     local dataLines = {}
-") do
     for line in string.gmatch(raw, "[^\n]+") do
         if string.sub(line, 1, 5) == "data:" then
             table.insert(dataLines, string.sub(line, 6))
