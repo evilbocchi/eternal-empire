@@ -1,3 +1,26 @@
+--[[
+    MCPClient - Roblox Studio Plugin for MCP HTTP Streaming
+    
+    This plugin connects to the MCP HTTP server using the new HttpService:CreateWebStreamClient() API.
+    It provides access to Model Context Protocol tools for querying the DataModel.
+    
+    Usage:
+        local MCPClient = require(script.Parent.MCPClient)
+        
+        -- Call a tool
+        local result, error = MCPClient.callTool("list_instances", {
+            path = "game.Workspace",
+            maxDepth = 2
+        })
+        
+        -- List available tools
+        local tools = MCPClient.listTools()
+    
+    Available Tools:
+        - list_instances: List DataModel instances at a given path
+        - find_item_model: Search for an item model by name in ItemModels folder
+]]
+
 local HttpService = game:GetService("HttpService")
 local RunService = game:GetService("RunService")
 local Workspace = game:GetService("Workspace")
