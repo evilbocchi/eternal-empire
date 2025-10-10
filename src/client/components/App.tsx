@@ -53,6 +53,7 @@ declare global {
 }
 
 import BrokenItemIndicatorRenderer from "client/components/item/BrokenItemIndicatorRenderer";
+import HarvestableGuiRenderer from "client/components/item/HarvestableGuiRenderer";
 import RepairedItemEffectRenderer from "client/components/item/RepairedItemEffectRenderer";
 import RepairWindow from "client/components/item/RepairWindow";
 import MarketplaceWindow from "client/components/marketplace/MarketplaceWindow";
@@ -156,6 +157,7 @@ export default function App() {
         addRoot(roots, createScreenGui("Backpack", -15)).render(<BackpackWindow />);
 
         addRoot(roots, createFolder("BrokenItemIndicators")).render(<BrokenItemIndicatorRenderer />);
+        addRoot(roots, createFolder("Harvestable")).render(<HarvestableGuiRenderer />);
         addRoot(roots, createFolder("RepairedItemEffects")).render(<RepairedItemEffectRenderer />);
         addRoot(roots, createFolder("Printer")).render(<PrinterRenderer />);
         addRoot(roots, createFolder("Shop")).render(<ShopGui />);

@@ -1,5 +1,6 @@
 import React, { Fragment, useEffect, useMemo, useState } from "@rbxts/react";
 import { Debris, TweenService } from "@rbxts/services";
+import { getAsset } from "shared/asset/AssetMap";
 import { emitEffect, playSound } from "shared/asset/GameAssets";
 import { RobotoSlabExtraBold, RobotoSlabHeavy } from "shared/asset/GameFonts";
 import { getPlayerCharacter } from "shared/hamster/getPlayerCharacter";
@@ -96,7 +97,7 @@ export default function HarvestableGui({ enabled, model }: { enabled: boolean; m
                 valueLabel.Position = new UDim2(0.5, 0, 0.5, 0);
                 valueLabel.BackgroundTransparency = 1;
                 valueLabel.FontFace = RobotoSlabExtraBold;
-                valueLabel.Text = `-${math.floor(-drop)}`;
+                valueLabel.Text = `-${math.floor(-drop * 10) / 10}`;
                 valueLabel.TextScaled = true;
                 valueLabel.TextSize = 14;
                 valueLabel.TextWrapped = true;
@@ -147,14 +148,18 @@ export default function HarvestableGui({ enabled, model }: { enabled: boolean; m
     }, []);
 
     const accent = useMemo(() => {
+        if (model.IsA("BasePart")) {
+            return model.Color;
+        }
+
         const colors = new Array<Color3>();
+
         for (const part of model.GetChildren()) {
             if (part.IsA("BasePart")) {
                 colors.push(part.Color);
             }
         }
         if (colors.isEmpty()) return Color3.fromRGB(255, 255, 255);
-
         let r = 0;
         let g = 0;
         let b = 0;
@@ -169,6 +174,8 @@ export default function HarvestableGui({ enabled, model }: { enabled: boolean; m
 
     const changeTweenInfo = new TweenInfo(0.2, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out);
 
+    const healthText = `${math.floor(health * 10) / 10}/${maxHealth}`;
+
     return (
         <billboardgui
             Adornee={model}
@@ -176,33 +183,26 @@ export default function HarvestableGui({ enabled, model }: { enabled: boolean; m
             AlwaysOnTop={true}
             Enabled={enabled}
             MaxDistance={25}
-            Size={new UDim2(8, 0, 2.5, 0)}
+            Size={new UDim2(6, 0, 2, 0)}
             StudsOffset={new Vector3(0, 2.5, 0)}
             ZIndexBehavior={Enum.ZIndexBehavior.Sibling}
         >
-            {/* Window shadow */}
-            <frame
-                BackgroundColor3={Color3.fromRGB(0, 0, 0)}
-                BackgroundTransparency={0.3}
-                BorderSizePixel={0}
-                Position={new UDim2(0.02, 0, 0.02, 0)}
-                Size={new UDim2(1, 0, 1, 0)}
-                ZIndex={0}
-            />
-
             {/* Main window */}
-            <frame
+            <imagelabel
+                AnchorPoint={new Vector2(0.5, 0)}
                 BackgroundColor3={Color3.fromRGB(255, 255, 255)}
                 BackgroundTransparency={0}
                 BorderSizePixel={0}
-                Size={new UDim2(1, 0, 1, 0)}
-                ZIndex={1}
+                Image={getAsset("assets/HarvestableFrame.png")}
+                Position={new UDim2(0.5, 0, 0.3, 0)}
+                Size={new UDim2(1.1, 0, 0.6, 0)}
+                ZIndex={-5}
             >
                 <uigradient
                     Color={
                         new ColorSequence(
-                            accent.Lerp(Color3.fromRGB(0, 0, 0), 0.35),
-                            accent.Lerp(Color3.fromRGB(0, 0, 0), 0.75),
+                            accent.Lerp(Color3.fromRGB(0, 0, 0), 0.2),
+                            accent.Lerp(Color3.fromRGB(0, 0, 0), 0.4),
                         )
                     }
                     Rotation={90}
@@ -213,93 +213,92 @@ export default function HarvestableGui({ enabled, model }: { enabled: boolean; m
                     PaddingLeft={new UDim(0.035, 0)}
                     PaddingRight={new UDim(0.035, 0)}
                 />
+            </imagelabel>
 
-                {/* Title text container */}
-                <frame
-                    AnchorPoint={new Vector2(0.5, 0)}
+            {/* Title text container */}
+            <textlabel
+                AnchorPoint={new Vector2(0.5, 0)}
+                BackgroundTransparency={1}
+                FontFace={RobotoSlabHeavy}
+                Text={item?.name ?? harvestable?.name ?? model.Name}
+                TextColor3={accent.Lerp(Color3.fromRGB(255, 255, 255), 0.75)}
+                TextScaled={true}
+                TextSize={14}
+                TextWrapped={true}
+                TextXAlignment={Enum.TextXAlignment.Center}
+                ZIndex={2}
+                Position={new UDim2(0.5, 0, 0, 0)}
+                Size={new UDim2(2, 0, 0.5, 0)}
+            >
+                <uistroke StrokeSizingMode={Enum.StrokeSizingMode.ScaledSize} Thickness={0.07} Color={accent}>
+                    <uigradient Color={new ColorSequence(Color3.fromRGB(64, 64, 64))} />
+                </uistroke>
+                <uigradient
+                    Color={
+                        new ColorSequence([
+                            new ColorSequenceKeypoint(0, Color3.fromRGB(255, 255, 255)),
+                            new ColorSequenceKeypoint(1, Color3.fromRGB(201, 201, 201)),
+                        ])
+                    }
+                    Rotation={90}
+                />
+            </textlabel>
+
+            {/* Health bar container  */}
+            <frame
+                AnchorPoint={new Vector2(0.5, 0)}
+                BackgroundColor3={Color3.fromRGB(255, 255, 255)}
+                BorderSizePixel={0}
+                Position={new UDim2(0.5, 0, 0.55, 0)}
+                Size={new UDim2(1, 0, 0.4, 0)}
+            >
+                <uigradient
+                    Color={
+                        new ColorSequence([
+                            new ColorSequenceKeypoint(0, Color3.fromRGB(38, 38, 38)),
+                            new ColorSequenceKeypoint(1, Color3.fromRGB(23, 23, 23)),
+                        ])
+                    }
+                    Rotation={90}
+                />
+                <uistroke
+                    StrokeSizingMode={Enum.StrokeSizingMode.ScaledSize}
+                    Thickness={0.07}
+                    Color={Color3.fromRGB(28, 28, 28)}
+                />
+                {/* Health text main */}
+                <textlabel
+                    AnchorPoint={new Vector2(0.5, 0.5)}
                     BackgroundTransparency={1}
-                    Position={new UDim2(0.5, 0, 0, 0)}
-                    Size={new UDim2(1, 0, 0.5, 0)}
+                    FontFace={RobotoSlabExtraBold}
+                    Position={new UDim2(0.5, 0, 0.5, 0)}
+                    Size={new UDim2(0.9, 0, 0.95, 0)}
+                    Text={healthText}
+                    TextColor3={Color3.fromRGB(255, 255, 255)}
+                    TextScaled={true}
+                    ZIndex={2}
                 >
-                    {/* Title main */}
-                    <textlabel
-                        BackgroundTransparency={1}
-                        FontFace={RobotoSlabHeavy}
-                        Size={new UDim2(1, 0, 1, 0)}
-                        Text={item?.name ?? harvestable?.name ?? model.Name}
-                        TextColor3={Color3.fromRGB(255, 255, 255)}
-                        TextScaled={true}
-                        TextSize={14}
-                        TextWrapped={true}
-                        TextXAlignment={Enum.TextXAlignment.Left}
-                        ZIndex={2}
-                    />
-                </frame>
+                    <uistroke
+                        StrokeSizingMode={Enum.StrokeSizingMode.ScaledSize}
+                        Thickness={0.07}
+                        Color={Color3.fromRGB(82, 82, 82)}
+                    >
+                        <uigradient Color={colorSequence} />
+                    </uistroke>
+                </textlabel>
 
                 <frame
-                    AnchorPoint={new Vector2(0.5, 0)}
+                    ref={(rbx) => {
+                        if (rbx === undefined) return;
+                        TweenService.Create(rbx, changeTweenInfo, {
+                            Size: new UDim2(math.clamp(health / maxHealth, 0, 1), 0, 1, 0),
+                        }).Play();
+                    }}
                     BackgroundColor3={Color3.fromRGB(255, 255, 255)}
                     BorderSizePixel={0}
-                    Position={new UDim2(0.51, 0, 0.57, 0)}
-                    Size={new UDim2(1, 0, 0.4, 0)}
-                    ZIndex={-1}
-                />
-
-                {/* Health bar container  */}
-                <frame
-                    AnchorPoint={new Vector2(0.5, 0)}
-                    BackgroundColor3={Color3.fromRGB(0, 0, 0)}
-                    BorderSizePixel={0}
-                    Position={new UDim2(0.5, 0, 0.55, 0)}
-                    Size={new UDim2(1, 0, 0.4, 0)}
+                    ZIndex={0}
                 >
-                    {/* Health text shadows (4 corners to simulate stroke) */}
-                    {[
-                        { x: 0.507, y: 0.55 }, // Bottom-right (scaled for aspect ratio)
-                        { x: 0.493, y: 0.55 }, // Bottom-left
-                        { x: 0.507, y: 0.45 }, // Top-right
-                        { x: 0.493, y: 0.45 }, // Top-left
-                    ].map((offset, index) => (
-                        <textlabel
-                            key={index}
-                            AnchorPoint={new Vector2(0.5, 0.5)}
-                            BackgroundTransparency={1}
-                            FontFace={RobotoSlabExtraBold}
-                            Position={new UDim2(offset.x, 0, offset.y, 0)}
-                            Size={new UDim2(0.9, 0, 0.95, 0)}
-                            Text={`${health}/${maxHealth}`}
-                            TextColor3={Color3.fromRGB(0, 0, 0)}
-                            TextScaled={true}
-                            TextTransparency={0}
-                            ZIndex={1}
-                        />
-                    ))}
-                    {/* Health text main */}
-                    <textlabel
-                        AnchorPoint={new Vector2(0.5, 0.5)}
-                        BackgroundTransparency={1}
-                        FontFace={RobotoSlabExtraBold}
-                        Position={new UDim2(0.5, 0, 0.5, 0)}
-                        Size={new UDim2(0.9, 0, 0.95, 0)}
-                        Text={`${health}/${maxHealth}`}
-                        TextColor3={Color3.fromRGB(255, 255, 255)}
-                        TextScaled={true}
-                        ZIndex={2}
-                    />
-
-                    <frame
-                        ref={(rbx) => {
-                            if (rbx === undefined) return;
-                            TweenService.Create(rbx, changeTweenInfo, {
-                                Size: new UDim2(math.clamp(health / maxHealth, 0, 1), 0, 1, 0),
-                            }).Play();
-                        }}
-                        BackgroundColor3={Color3.fromRGB(255, 255, 255)}
-                        BorderSizePixel={0}
-                        ZIndex={0}
-                    >
-                        <uigradient Color={colorSequence} Rotation={90} />
-                    </frame>
+                    <uigradient Color={colorSequence} Rotation={90} />
                 </frame>
             </frame>
         </billboardgui>

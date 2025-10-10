@@ -5,7 +5,8 @@
  * Displays tool icon, hotkey number, and handles selection state visualization.
  */
 
-import React from "@rbxts/react";
+import React, { useEffect, useRef } from "@rbxts/react";
+import { TweenService } from "@rbxts/services";
 import { TooltipManager } from "client/components/tooltip/TooltipWindow";
 import { getAsset } from "shared/asset/AssetMap";
 import Gear from "shared/item/traits/Gear";
@@ -42,6 +43,32 @@ export default function GearOption({
     // Color based on equipped state
     const backgroundColor = isEquipped ? Color3.fromRGB(0, 184, 255) : Color3.fromRGB(31, 31, 31);
     const strokeColor = isEquipped ? Color3.fromRGB(0, 184, 255) : Color3.fromRGB(61, 61, 61);
+    const scaleRef = useRef<UIScale>();
+
+    useEffect(() => {
+        const scale = scaleRef.current;
+        if (!scale) return;
+
+        const expand = TweenService.Create(
+            scale,
+            new TweenInfo(0.12, Enum.EasingStyle.Back, Enum.EasingDirection.Out),
+            { Scale: 1.12 },
+        );
+        const settle = TweenService.Create(scale, new TweenInfo(0.1, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
+            Scale: 1,
+        });
+        const connection = expand.Completed.Connect(() => settle.Play());
+
+        scale.Scale = 0.92;
+        expand.Play();
+
+        return () => {
+            connection.Disconnect();
+            expand.Destroy();
+            settle.Destroy();
+            scale.Scale = 1;
+        };
+    }, [gear.item.id]);
 
     return (
         <textbutton
@@ -113,6 +140,7 @@ export default function GearOption({
                     Rotation={75}
                 />
             </uistroke>
+            <uiscale ref={scaleRef} Scale={1} />
         </textbutton>
     );
 }

@@ -641,18 +641,19 @@ export class Dialogue<T extends NPC = NPC> {
                         ++playersPrompted;
                     }
 
-                    if (player !== undefined) {
-                        Packets.npcMessage.toClient(player, current.text, currentIndex, size, isPrompt, talkingModel);
-                    } else if (IS_EDIT) {
+                    if (IS_EDIT) {
                         Packets.npcMessage.toAllClients(current.text, currentIndex, size, isPrompt, talkingModel);
+                    } else if (player !== undefined) {
+                        Packets.npcMessage.toClient(player, current.text, currentIndex, size, isPrompt, talkingModel);
                     }
                 };
 
-                for (const player of Players.GetPlayers()) {
-                    sendInteraction(player, player.Character);
-                }
                 if (IS_EDIT) {
                     sendInteraction(undefined, getPlayerCharacter());
+                } else {
+                    for (const player of Players.GetPlayers()) {
+                        sendInteraction(player, player.Character);
+                    }
                 }
 
                 task.delay(current.text.size() / 11 + 1, () => {

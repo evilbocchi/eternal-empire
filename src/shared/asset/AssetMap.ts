@@ -40,6 +40,7 @@ export const assets = {
   "assets/Grid.png": "rbxassetid://86590348393566",
   "assets/GridCheckers.png": "rbxassetid://88140653142782",
   "assets/GridHighContrast.png": "rbxassetid://103616196092052",
+  "assets/HarvestableFrame.png": "rbxassetid://128233935826928",
   "assets/Health.png": "rbxassetid://106004359076657",
   "assets/Icon.png": "rbxassetid://111108485097243",
   "assets/IndustrialDroplets.png": "rbxassetid://84046995969757",

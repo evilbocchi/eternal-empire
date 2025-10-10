@@ -419,7 +419,7 @@ export default function QuestCompletionNotification({ data, onComplete }: QuestC
                         Position={new UDim2(0, 0, 0, 0)}
                         Size={new UDim2(1, 0, 1, 0)}
                         Text="QUEST COMPLETE!"
-                        TextColor3={data.questColor}
+                        TextColor3={data.questColor.Lerp(Color3.fromRGB(255, 255, 255), 0.3)}
                         TextScaled={true}
                         TextStrokeColor3={Color3.fromRGB(38, 38, 38)}
                         TextStrokeTransparency={0}

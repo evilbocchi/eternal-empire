@@ -90,6 +90,7 @@ export = new Quest(script.Name)
                     "Wait, who are you again?",
                 ).root;
                 ricargDialogue.add(69);
+
                 const noHelped = new Dialogue(
                     Ricarg,
                     "I don't really remember, but that weird blacksmith Noob referred me, didn't he?",
@@ -118,7 +119,8 @@ export = new Quest(script.Name)
                 ).monologue(
                     "Alright, thanks for getting me my groceries. It's about time I taught you something. Come with me.",
                 ).root;
-                const ricargDialogueConn = stage.dialogue!.finished.connect(() => {
+
+                const ricargDialogueConn = ricargDialogue.finished.connect(() => {
                     ricargDialogue.remove();
                     (EarningCapital.completed ? helped : noHelped).talk();
                 });

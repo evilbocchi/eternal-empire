@@ -61,6 +61,8 @@ function getTextSound(model?: Model): Sound | undefined {
     return ASSETS.NPCTextSounds.FindFirstChild(model.Name) as Sound | undefined;
 }
 
+let currentText = "";
+
 export default function DialogueWindow() {
     const { visible, setVisible } = useDocument({ id: "Dialogue", priority: -1 });
     const [dialogueData, setDialogueData] = useState<DialogueData>();
@@ -90,6 +92,8 @@ export default function DialogueWindow() {
         const npcTagColor = Color3.fromRGB(201, 255, 13).ToHex();
         const emptyColor = Color3.fromRGB(0, 181, 28).ToHex();
         const connection = Packets.npcMessage.fromServer((message, pos, endPos, prompt, model) => {
+            currentText = message;
+            print(`Received NPC message: ${message} (pos ${pos}/${endPos})`);
             const humanoid = model?.FindFirstChildOfClass("Humanoid");
             let name = undefined as string | undefined;
 
@@ -183,7 +187,11 @@ export default function DialogueWindow() {
                         skipToEnd();
                         return;
                     }
+                    let message = currentText;
                     if (Packets.nextDialogue.toServer()) {
+                        if (currentText !== message) {
+                            return; // We have a new message, don't close yet
+                        }
                         setVisible(false);
                     }
                 },
