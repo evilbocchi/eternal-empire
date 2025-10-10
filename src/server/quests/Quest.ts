@@ -478,8 +478,6 @@ export default class Quest extends Identifiable {
      * @param level The player level to check quest reachability (defaults to current level).
      */
     static async reachStages(level?: number) {
-        if (IS_EDIT) return; // TODO: Make quests have cleanup so they can be tested in CI
-
         if (level === undefined) {
             level = ThisEmpire.data.level;
         }

@@ -13,7 +13,7 @@ import { playSound } from "shared/asset/GameAssets";
 import { getDisplayName } from "shared/constants";
 import { IS_EDIT } from "shared/Context";
 import eat from "shared/hamster/eat";
-import { getPlayerCharacter } from "shared/hamster/getPlayerCharacter";
+import { getAllPlayerCharacters, getPlayerCharacter } from "shared/hamster/getPlayerCharacter";
 import { Identifiable, ModuleRegistry } from "shared/hamster/ModuleRegistry";
 import Packets from "shared/Packets";
 import CustomProximityPrompt from "shared/world/CustomProximityPrompt";
@@ -486,11 +486,9 @@ export default class NPC extends Identifiable {
             });
 
             const connection = RunService.Heartbeat.Connect(() => {
-                const players = Players.GetPlayers();
-                for (const player of players) {
-                    const playerRootPart = getRootPart(player);
-                    if (playerRootPart === undefined) continue;
-                    if (destination.Position.sub(playerRootPart.Position).Magnitude < 10) {
+                for (const character of getAllPlayerCharacters()) {
+                    const pivot = character.GetPivot();
+                    if (destination.Position.sub(pivot.Position).Magnitude < 10) {
                         if (playTween) tween.Play();
                         toCall = true;
                         connection.Disconnect();
@@ -658,7 +656,7 @@ export class Dialogue<T extends NPC = NPC> {
             }
             return false;
         };
-        Packets.nextDialogue.fromClient(() => nextDialogue());
+        Packets.nextDialogue.fromClient(nextDialogue);
         nextDialogue();
     }
 
