@@ -109,6 +109,13 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
     readonly itemsBought = new Signal<(player: Player | undefined, items: Item[]) => void>();
 
     /**
+     * Fired when an item is given to the empire (e.g. via admin command or quest reward).
+     * @param item The item that was given.
+     * @param amount The amount of the item given.
+     */
+    readonly itemGiven = new Signal<(item: Item, amount: number) => void>();
+
+    /**
      * Fired when the placed items collection is updated.
      * @param placedItems The updated map of placed items.
      */
@@ -270,6 +277,7 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
             const currentAmount = this.getItemAmount(itemId);
             this.setItemAmount(itemId, currentAmount + amount);
         }
+        this.itemGiven.fire(item, amount);
     }
 
     // Item Placement Methods

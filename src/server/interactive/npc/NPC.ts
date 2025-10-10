@@ -608,6 +608,11 @@ export class Dialogue<T extends NPC = NPC> {
         const dialogues = this.extractDialogue();
         const size = dialogues.size();
         let i = 0;
+
+        /**
+         * Advances to the next dialogue in the sequence or ends the dialogue if complete.
+         * @returns True if the dialogue sequence is complete, false otherwise.
+         */
         const nextDialogue = () => {
             const current = dialogues[i];
             const currentIndex = ++i;

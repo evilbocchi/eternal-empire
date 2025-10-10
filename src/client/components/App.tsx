@@ -1,6 +1,6 @@
 import React, { Fragment, useEffect } from "@rbxts/react";
 import { createRoot, Root } from "@rbxts/react-roblox";
-import { ContentProvider, RunService, StarterGui, Workspace } from "@rbxts/services";
+import { ContentProvider, RunService, Workspace } from "@rbxts/services";
 import BackpackWindow from "client/components/backpack/BackpackWindow";
 import BalanceWindow from "client/components/balance/BalanceWindow";
 import { CurrencyGainManager } from "client/components/balance/CurrencyGain";
@@ -221,13 +221,6 @@ export default function App() {
             }
             cleanup();
         };
-    }, []);
-
-    useEffect(() => {
-        const wasEnabled = StarterGui.GetCoreGuiEnabled(Enum.CoreGuiType.PlayerList);
-        StarterGui.SetCoreGuiEnabled(Enum.CoreGuiType.PlayerList, false);
-
-        return () => StarterGui.SetCoreGuiEnabled(Enum.CoreGuiType.PlayerList, wasEnabled);
     }, []);
 
     ClientItemReplication.useManualItemReplication();

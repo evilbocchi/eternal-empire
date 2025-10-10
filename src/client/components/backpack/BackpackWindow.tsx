@@ -7,7 +7,7 @@
 
 import { loadAnimation } from "@antivivi/vrldk";
 import React, { useEffect, useRef, useState } from "@rbxts/react";
-import { StarterGui, Workspace } from "@rbxts/services";
+import { Workspace } from "@rbxts/services";
 import { Environment } from "@rbxts/ui-labs";
 import GearOption, { layoutOrderFromGear } from "client/components/backpack/GearOption";
 import DocumentManager, { useDocument } from "client/components/window/DocumentManager";
@@ -138,7 +138,6 @@ export default function BackpackWindow() {
             }
         };
 
-        StarterGui.SetCoreGuiEnabled("Backpack", false);
         let lastUse = 0;
         const inputBeganConnection = Environment.UserInput.InputBegan.Connect((input, gameProcessed) => {
             if (gameProcessed === true) return;
