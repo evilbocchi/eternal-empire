@@ -8,6 +8,7 @@ import Quest, { Stage } from "server/quests/Quest";
 import { Server } from "shared/api/APIExpose";
 import { getEffect, getSound, playSound } from "shared/asset/GameAssets";
 import { WAYPOINTS } from "shared/constants";
+import { eatSnapshot } from "shared/hamster/eat";
 import ChargedEmpoweredBrick from "shared/items/negative/instantwin/ChargedEmpoweredBrick";
 import EmpoweredBrick from "shared/items/negative/instantwin/EmpoweredBrick";
 import XLWool from "shared/items/negative/relax/XLWool";
@@ -199,6 +200,7 @@ export = new Quest(script.Name)
                 refugeeToBrewing();
 
                 const proximityPrompt = cauldron.WaitForChild("ProximityPrompt") as ProximityPrompt;
+                eatSnapshot(proximityPrompt);
                 proximityPrompt.Enabled = true;
                 const cleanup = CustomProximityPrompt.onTrigger(proximityPrompt, () => {
                     for (const effect of instantWinEffects) {
@@ -479,12 +481,19 @@ export = new Quest(script.Name)
         ),
     )
     .onInit(() => {
+        // Snapshot all instances that will be modified during the quest
         for (const effect of instantWinEffects) {
+            eatSnapshot(effect);
             effect.Transparency = 1;
         }
+        eatSnapshot(explosionEffect);
         explosionEffect.Enabled = false;
+
+        // Snapshot instant win block and its decals
+        eatSnapshot(instantWinBlock);
         hideInstantWinBlock();
         instantWinBlock.CanCollide = false;
+
         Server.Event.addCompletionListener("ImprisonedSlamoRefugee", () => {
             SlamoRefugee.model!.FindFirstChild("FishingRod")?.Destroy();
             SlamoRefugee.rootPart!.Anchored = true;
