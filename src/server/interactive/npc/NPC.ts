@@ -77,10 +77,10 @@ export default class NPC extends Identifiable {
     /**
      * Loads the NPC model, sets up its properties, and initializes animations and event listeners.
      * This method should be called after the NPC instance is created.
-     * @returns The NPC instance for chaining.
+     * @returns A cleanup function to remove the NPC from the world and disconnect events.
      */
     override init() {
-        if (!NPC_MODELS || this.id === "Empty") return;
+        if (!NPC_MODELS || this.id === "Empty" || !this.id) return;
 
         const model = NPC_MODELS.FindFirstChild(this.id)?.Clone() as Model | undefined;
         if (model === undefined) return;
