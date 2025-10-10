@@ -18,6 +18,8 @@ import SlamoVillageConnection from "shared/world/nodes/SlamoVillageConnection";
 
 const cauldron = FreddysCauldron.waitForInstance();
 const linkway = SlamoVillageConnection.waitForInstance();
+eatSnapshot(cauldron);
+eatSnapshot(linkway);
 
 const instantWinEffects = new Array<BasePart>();
 for (const child of cauldron.GetChildren()) {
@@ -200,7 +202,6 @@ export = new Quest(script.Name)
                 refugeeToBrewing();
 
                 const proximityPrompt = cauldron.WaitForChild("ProximityPrompt") as ProximityPrompt;
-                eatSnapshot(proximityPrompt);
                 proximityPrompt.Enabled = true;
                 const cleanup = CustomProximityPrompt.onTrigger(proximityPrompt, () => {
                     for (const effect of instantWinEffects) {
@@ -481,16 +482,11 @@ export = new Quest(script.Name)
         ),
     )
     .onInit(() => {
-        // Snapshot all instances that will be modified during the quest
         for (const effect of instantWinEffects) {
-            eatSnapshot(effect);
             effect.Transparency = 1;
         }
-        eatSnapshot(explosionEffect);
         explosionEffect.Enabled = false;
 
-        // Snapshot instant win block and its decals
-        eatSnapshot(instantWinBlock);
         hideInstantWinBlock();
         instantWinBlock.CanCollide = false;
 

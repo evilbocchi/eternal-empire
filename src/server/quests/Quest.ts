@@ -13,7 +13,6 @@ import { IS_EDIT } from "shared/Context";
 import ThisEmpire from "shared/data/ThisEmpire";
 import eat from "shared/hamster/eat";
 import { ModuleRegistry, Identifiable } from "shared/hamster/ModuleRegistry";
-import { restoreAllSnapshots } from "shared/hamster/snapshot";
 import Packets from "shared/Packets";
 
 /**
@@ -191,9 +190,6 @@ export class Stage {
 export default class Quest extends Identifiable {
     static readonly HOT_RELOADER = new ModuleRegistry<Quest>(script.Parent!, new Set([script])).setLoadCallback(
         (questPerId) => {
-            // Restore all snapshots before loading new quests
-            restoreAllSnapshots();
-
             print(`Loaded ${questPerId.size()} quests`);
 
             const questInfos = new Map<string, QuestInfo>();

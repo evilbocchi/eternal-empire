@@ -1,5 +1,5 @@
-import { OnoeNum } from "@rbxts/serikanum";
 import { convertToMMSS, spawnExplosion } from "@antivivi/vrldk";
+import { OnoeNum } from "@rbxts/serikanum";
 import { RunService, TweenService, Workspace } from "@rbxts/services";
 import Andy from "server/interactive/npc/Andy";
 import { Dialogue, EMPTY_NPC } from "server/interactive/npc/NPC";
@@ -14,6 +14,7 @@ import { WAYPOINTS } from "shared/constants";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import { RESET_LAYERS } from "shared/currency/mechanics/ResetLayer";
 import ThisEmpire from "shared/data/ThisEmpire";
+import { eatSnapshot } from "shared/hamster/eat";
 import SkillPod from "shared/items/0/millisecondless/SkillPod";
 import SlamoStatue from "shared/items/0/millisecondless/SlamoStatue";
 import Stone from "shared/items/0/millisecondless/Stone";
@@ -24,9 +25,9 @@ import WinsomeSpeck from "shared/items/0/winsome/WinsomeSpeck";
 import Crystal from "shared/items/excavation/Crystal";
 import ExcavationStone from "shared/items/excavation/ExcavationStone";
 import Gold from "shared/items/excavation/Gold";
-import EnchantedGrass from "shared/items/negative/tlg/EnchantedGrass";
 import Iron from "shared/items/excavation/Iron";
 import Apple from "shared/items/negative/a/Apple";
+import EnchantedGrass from "shared/items/negative/tlg/EnchantedGrass";
 import FlimsyBars from "shared/world/nodes/FlimsyBars";
 
 Simpul.rootPart!.Anchored = true;
@@ -45,6 +46,7 @@ const slamoReceptionistToReveal = SlamoReceptionist.createPathfindingOperation(
 );
 
 const ring = WAYPOINTS.LudicrousEscapeSlamoReceptionistHiding.LudicrousEscapeRing;
+eatSnapshot(ring);
 const toggleRing = (enabled: boolean) => {
     for (const beam of ring.GetChildren()) if (beam.IsA("Beam")) beam.Enabled = enabled;
 };
