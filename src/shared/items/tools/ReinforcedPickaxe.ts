@@ -1,12 +1,13 @@
 import { getAsset } from "shared/asset/AssetMap";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
-import Item from "shared/item/Item";
 import TierDifficulty from "shared/difficulty/TierDifficulty";
+import Item from "shared/item/Item";
 import Gear from "shared/item/traits/Gear";
 import ExcavationStone from "shared/items/excavation/ExcavationStone";
-import MagicalWood from "shared/items/negative/tlg/MagicalWood";
 import WhiteGem from "shared/items/excavation/WhiteGem";
+import MagicalWood from "shared/items/negative/tlg/MagicalWood";
 import CopperPickaxe from "shared/items/tools/CopperPickaxe";
+import ToolShop from "shared/items/tools/ToolShop";
 
 export = new Item(script.Name)
     .setName("Reinforced Pickaxe")
@@ -19,6 +20,7 @@ export = new Item(script.Name)
     .setRequiredItemAmount(CopperPickaxe, 1)
     .setLevelReq(4)
     .setImage(getAsset("assets/ReinforcedPickaxe.png"))
+    .soldAt(ToolShop)
 
     .trait(Gear)
     .setType("Pickaxe")

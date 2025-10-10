@@ -1,11 +1,12 @@
 import { getAsset } from "shared/asset/AssetMap";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
-import Item from "shared/item/Item";
 import TierDifficulty from "shared/difficulty/TierDifficulty";
+import Item from "shared/item/Item";
 import Gear from "shared/item/traits/Gear";
 import MagicalWood from "shared/items/negative/tlg/MagicalWood";
 import CrystalIngot from "shared/items/negative/unimpossible/CrystalIngot";
 import ReinforcedPickaxe from "shared/items/tools/ReinforcedPickaxe";
+import ToolShop from "shared/items/tools/ToolShop";
 
 export = new Item(script.Name)
     .setName("Crystal Pickaxe")
@@ -17,6 +18,7 @@ export = new Item(script.Name)
     .setRequiredItemAmount(ReinforcedPickaxe, 1)
     .setLevelReq(8)
     .setImage(getAsset("assets/CrystalPickaxe.png"))
+    .soldAt(ToolShop)
 
     .trait(Gear)
     .setType("Pickaxe")

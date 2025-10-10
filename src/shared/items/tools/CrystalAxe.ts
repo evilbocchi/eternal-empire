@@ -1,11 +1,12 @@
 import { getAsset } from "shared/asset/AssetMap";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
-import Item from "shared/item/Item";
 import TierDifficulty from "shared/difficulty/TierDifficulty";
+import Item from "shared/item/Item";
 import Gear from "shared/item/traits/Gear";
 import MagicalWood from "shared/items/negative/tlg/MagicalWood";
 import CrystalIngot from "shared/items/negative/unimpossible/CrystalIngot";
 import ReinforcedAxe from "shared/items/tools/ReinforcedAxe";
+import ToolShop from "shared/items/tools/ToolShop";
 
 export = new Item(script.Name)
     .setName("Crystal Axe")
@@ -17,6 +18,7 @@ export = new Item(script.Name)
     .setRequiredItemAmount(ReinforcedAxe, 1)
     .setLevelReq(8)
     .setImage(getAsset("assets/CrystalAxe.png"))
+    .soldAt(ToolShop)
 
     .trait(Gear)
     .setType("Axe")

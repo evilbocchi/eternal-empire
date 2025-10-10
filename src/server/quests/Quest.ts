@@ -12,7 +12,7 @@ import { Server } from "shared/api/APIExpose";
 import { IS_EDIT } from "shared/Context";
 import ThisEmpire from "shared/data/ThisEmpire";
 import eat from "shared/hamster/eat";
-import { ModuleRegistry, Identifiable } from "shared/hamster/ModuleRegistry";
+import { Identifiable, ModuleRegistry } from "shared/hamster/ModuleRegistry";
 import Packets from "shared/Packets";
 
 /**
@@ -188,7 +188,7 @@ export class Stage {
  * Provides methods for configuring quest properties, managing stages, and handling quest initialization.
  */
 export default class Quest extends Identifiable {
-    static readonly HOT_RELOADER = new ModuleRegistry<Quest>(script.Parent!, new Set([script])).setLoadCallback(
+    static readonly REGISTRY = new ModuleRegistry<Quest>(script.Parent!, new Set([script])).setLoadCallback(
         (questPerId) => {
             print(`Loaded ${questPerId.size()} quests`);
 
@@ -348,7 +348,7 @@ export default class Quest extends Identifiable {
      * @returns This quest instance.
      */
     createQuestRequirement(questId: string) {
-        const depModule = Quest.HOT_RELOADER.MODULES.get(questId);
+        const depModule = Quest.REGISTRY.MODULES.get(questId);
         if (!depModule) {
             throw `Quest module not found for ID: ${questId}`;
         }
@@ -359,7 +359,7 @@ export default class Quest extends Identifiable {
         const stage = new Stage()
             .setDescription(`Complete the quest "${depQuest.name}" before starting this.`)
             .onReached(() => {
-                while (!Quest.HOT_RELOADER.OBJECTS.get(questId)?.completed) {
+                while (!Quest.REGISTRY.OBJECTS.get(questId)?.completed) {
                     task.wait(2);
                 }
                 stage.complete();
@@ -405,7 +405,8 @@ export default class Quest extends Identifiable {
      * @returns This quest instance.
      */
     onInit(callback: (quest: this) => void) {
-        eat(this.initialized.connect(() => callback(this)));
+        const connection = this.initialized.connect(() => callback(this));
+        eat(connection, "Disconnect");
         return this;
     }
 
@@ -487,7 +488,7 @@ export default class Quest extends Identifiable {
             return;
         }
 
-        for (const [id, quest] of Quest.HOT_RELOADER.OBJECTS) {
+        for (const [id, quest] of Quest.REGISTRY.OBJECTS) {
             const current = stagePerQuest.get(id) ?? 0;
 
             // Clean up all other stages

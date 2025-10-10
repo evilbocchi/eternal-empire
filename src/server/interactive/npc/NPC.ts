@@ -98,11 +98,13 @@ export default class NPC extends Identifiable {
         this.startingCFrame = rootPart.CFrame;
 
         CollectionService.AddTag(model, "NPC");
-        const parts = model.GetDescendants();
-        for (const part of parts) {
-            if (part.IsA("BasePart")) {
-                part.CollisionGroup = "NPC";
-                part.Anchored = false;
+        if (!model.HasTag("Anchored")) {
+            const parts = model.GetDescendants();
+            for (const part of parts) {
+                if (part.IsA("BasePart")) {
+                    part.CollisionGroup = "NPC";
+                    part.Anchored = false;
+                }
             }
         }
         rootPart.CustomPhysicalProperties = new PhysicalProperties(100, 0.3, 0.5);
@@ -192,9 +194,11 @@ export default class NPC extends Identifiable {
             for (const [, animTrack] of this.animTrackPerType) {
                 animTrack.Stop();
             }
+            for (const connection of this.runningPathfinds) {
+                connection.Disconnect();
+            }
 
             this.model?.Destroy();
-            table.clear(this);
         };
     }
 
