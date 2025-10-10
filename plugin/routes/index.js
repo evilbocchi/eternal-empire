@@ -6,6 +6,7 @@ import { generateTypeScriptContent } from "../generators/typescriptGenerator.js"
 import { applySnapshot, applyDiff } from "../datamodel/dataModelStore.js";
 import { acceptSnapshotChunk, clearPendingSnapshot } from "../datamodel/snapshotAssembler.js";
 import { dataModelState, connectionState } from "../state/dataModelState.js";
+import { normalizePathSegments, findNodeBySegments, cloneNodeLimited } from "../datamodel/datamodelUtils.js";
 
 /**
  * Registers all Express route handlers.
@@ -687,10 +688,6 @@ export function registerRoutes(app, logger, repoRoot, outputPath, progressionOut
             let result;
 
             if (name === "list_instances") {
-                const { normalizePathSegments, findNodeBySegments, cloneNodeLimited } = await import(
-                    "../datamodel/datamodelUtils.js"
-                );
-
                 const pathArg = typeof args.path === "string" ? args.path : "game";
                 const segments = normalizePathSegments(pathArg);
 
@@ -737,10 +734,6 @@ export function registerRoutes(app, logger, repoRoot, outputPath, progressionOut
                     node: clone,
                 };
             } else if (name === "find_item_model") {
-                const { normalizePathSegments, findNodeBySegments, cloneNodeLimited } = await import(
-                    "../datamodel/datamodelUtils.js"
-                );
-
                 const itemName = typeof args.itemName === "string" ? args.itemName : "";
                 if (!itemName) {
                     return res.status(400).json({ error: "itemName parameter is required" });
