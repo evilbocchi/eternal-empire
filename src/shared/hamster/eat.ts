@@ -1,5 +1,6 @@
 import { Janitor } from "@rbxts/janitor";
 import { Environment } from "@rbxts/ui-labs";
+import { snapshotAndRestore } from "shared/hamster/snapshot";
 
 export const eater = {
     janitor: Environment.GetJanitor() as Janitor<void> | undefined,
@@ -39,4 +40,18 @@ export default function eat<
     }
 
     return janitor.Add(object, methodName, index) ?? object;
+}
+
+/**
+ * Takes a snapshot of an instance and registers it with the janitor for automatic restoration.
+ * When the janitor is cleaned up (e.g., during hot reload), the instance will be restored to its original state.
+ *
+ * @param instance The instance to snapshot
+ * @param properties Optional array of properties to snapshot. If not provided, defaults are used based on instance type.
+ * @returns The original instance for convenience
+ */
+export function eatSnapshot<T extends Instance>(instance: T, properties?: ReadonlyArray<string>): () => void {
+    const cleanup = snapshotAndRestore(instance, properties);
+    eat(cleanup, true);
+    return cleanup;
 }
