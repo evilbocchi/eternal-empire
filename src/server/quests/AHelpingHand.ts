@@ -1,9 +1,10 @@
 import Freddy from "server/interactive/npc/Freddy";
 import { Dialogue } from "server/interactive/npc/NPC";
 import Quest, { Stage } from "server/quests/Quest";
-import { emitEffect, getSound } from "shared/asset/GameAssets";
-import { WAYPOINTS } from "shared/constants";
 import { Server } from "shared/api/APIExpose";
+import { emitEffect, getSound, playSound } from "shared/asset/GameAssets";
+import { WAYPOINTS } from "shared/constants";
+import { eatSnapshot } from "shared/hamster/eat";
 import LostPendant from "shared/items/0/winsome/LostPendant";
 import FreddysUpgrader from "shared/items/negative/friendliness/FreddysUpgrader";
 import BasicObstacleCourse from "shared/world/nodes/BasicObstacleCourse";
@@ -14,6 +15,7 @@ const freddyToRequest = Freddy.createPathfindingOperation(
 );
 
 const obstacleCourse = BasicObstacleCourse.waitForInstance();
+eatSnapshot(obstacleCourse);
 const ladder = obstacleCourse.WaitForChild("Ladder");
 const ladderHandles = new Array<BasePart>();
 for (let i = 1; i < 9; i++) {
@@ -109,18 +111,14 @@ export = new Quest(script.Name)
                 Freddy.rootPart!.CFrame = WAYPOINTS.AHelpingHandFreddyRequest.CFrame;
                 Freddy.stopAnimation("Default");
 
-                const hitSound = getSound("QuestConstruct.mp3");
                 for (const handle of ladderHandles) {
                     emitEffect("Strike", handle, 2);
                     handle.Transparency = 0;
                     handle.CanCollide = true;
-                    const hs = hitSound.Clone();
-                    hs.Parent = handle;
-                    hs.Play();
+                    playSound("QuestConstruct.mp3", handle);
                     task.wait(0.25);
                 }
                 new Dialogue(Freddy, "Off you go!").talk();
-                task.wait(1);
 
                 const connection = Server.Event.addCompletionListener("AHelpingHandPendant", (isCompleted) => {
                     if (isCompleted) stage.complete();

@@ -9,13 +9,15 @@ import Pasal from "server/interactive/npc/Pasal";
 import OldBooks1 from "server/interactive/object/OldBooks1";
 import SuspiciousWall from "server/interactive/object/SuspiciousWall";
 import Quest, { Stage } from "server/quests/Quest";
+import { Server } from "shared/api/APIExpose";
 import { emitEffect, playSound } from "shared/asset/GameAssets";
 import { WAYPOINTS } from "shared/constants";
-import { Server } from "shared/api/APIExpose";
+import { eatSnapshot } from "shared/hamster/eat";
 import ExcavationStone from "shared/items/excavation/ExcavationStone";
 import IrregularlyShapedKey from "shared/items/negative/skip/IrregularlyShapedKey";
 
 const suspiciousWall = SuspiciousWall.getWorldNode().waitForInstance() as BasePart;
+eatSnapshot(suspiciousWall);
 
 const oldNoobToApproachingPasal = OldNoob.createPathfindingOperation(
     OldNoob.startingCFrame,

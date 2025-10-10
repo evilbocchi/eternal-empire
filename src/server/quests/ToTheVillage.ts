@@ -8,6 +8,7 @@ import Quest, { Stage } from "server/quests/Quest";
 import { Server } from "shared/api/APIExpose";
 import { getEffect, getSound, playSound } from "shared/asset/GameAssets";
 import { WAYPOINTS } from "shared/constants";
+import { eatSnapshot } from "shared/hamster/eat";
 import ChargedEmpoweredBrick from "shared/items/negative/instantwin/ChargedEmpoweredBrick";
 import EmpoweredBrick from "shared/items/negative/instantwin/EmpoweredBrick";
 import XLWool from "shared/items/negative/relax/XLWool";
@@ -17,6 +18,8 @@ import SlamoVillageConnection from "shared/world/nodes/SlamoVillageConnection";
 
 const cauldron = FreddysCauldron.waitForInstance();
 const linkway = SlamoVillageConnection.waitForInstance();
+eatSnapshot(cauldron);
+eatSnapshot(linkway);
 
 const instantWinEffects = new Array<BasePart>();
 for (const child of cauldron.GetChildren()) {
@@ -483,8 +486,10 @@ export = new Quest(script.Name)
             effect.Transparency = 1;
         }
         explosionEffect.Enabled = false;
+
         hideInstantWinBlock();
         instantWinBlock.CanCollide = false;
+
         Server.Event.addCompletionListener("ImprisonedSlamoRefugee", () => {
             SlamoRefugee.model!.FindFirstChild("FishingRod")?.Destroy();
             SlamoRefugee.rootPart!.Anchored = true;

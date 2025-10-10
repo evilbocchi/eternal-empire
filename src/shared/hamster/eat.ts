@@ -40,3 +40,23 @@ export default function eat<
 
     return janitor.Add(object, methodName, index) ?? object;
 }
+
+/**
+ * Takes a snapshot of an instance and registers it with the janitor for automatic restoration.
+ * When the janitor is cleaned up, the instance will be restored to its original state.
+ *
+ * @param instance The instance to snapshot
+ * @returns The original instance for convenience
+ */
+export function eatSnapshot<T extends Instance>(instance: T): T {
+    const snapshot = instance.Clone() as T;
+    const parent = instance.Parent;
+    if (parent === undefined) return instance; // Cannot snapshot an instance without a parent
+
+    eat(() => {
+        instance.Destroy();
+        snapshot.Parent = parent;
+    });
+
+    return instance;
+}
