@@ -162,10 +162,7 @@ export default function App() {
         addRoot(roots, createFolder("Printer")).render(<PrinterRenderer />);
         addRoot(roots, createFolder("Shop")).render(<ShopGui />);
         addRoot(roots, createFolder("UpgradeBoard")).render(<UpgradeBoardRenderer />);
-
-        if (!Sandbox.getEnabled()) {
-            addRoot(roots, createFolder("World")).render(<WorldRenderer />);
-        }
+        addRoot(roots, createFolder("World")).render(<WorldRenderer />);
 
         Workspace.SetAttribute("Start", IS_PUBLIC_SERVER);
         const cleanup = MusicManager.init();

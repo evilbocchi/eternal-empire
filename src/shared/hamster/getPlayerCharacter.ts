@@ -2,7 +2,8 @@ import { Players, Workspace } from "@rbxts/services";
 import { IS_EDIT } from "shared/Context";
 
 /**
- * Reference to the local player's character.
+ * Equivalent to `player.Character`, but handles edge cases in Edit mode and when player is undefined.
+ * @param player The player whose character to get. If undefined, gets the local player's character.
  * @returns The character model, or undefined if not loaded.
  */
 export function getPlayerCharacter(player?: Player) {
