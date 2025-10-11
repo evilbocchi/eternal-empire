@@ -1,4 +1,3 @@
-
 import Difficulty from "@rbxts/ejt";
 import { OnoeNum } from "@rbxts/serikanum";
 import Droplet from "shared/item/Droplet";
@@ -18,10 +17,6 @@ export = new Item(script.Name)
     .setPrice(new CurrencyBundle().set("Funds", 9.9e21).set("Purifier Clicks", 8000), 1)
     .addPlaceableArea("BarrenIslands")
     .soldAt(ClassLowerNegativeShop)
-
-    .trait(Dropper)
-    .setDroplet(Droplet.PurifiersDroplet)
-    .setDropRate(0.5)
     .onLoad((model: Model, item: Item) => {
         const dropper = item.trait(Dropper);
         dropper.onDropletProduced((droplet: BasePart, _dropperItem: Dropper) => {
@@ -43,4 +38,7 @@ export = new Item(script.Name)
             }
         });
     })
+    .trait(Dropper)
+    .setDroplet(Droplet.PurifiersDroplet)
+    .setDropRate(0.5)
     .exit();
