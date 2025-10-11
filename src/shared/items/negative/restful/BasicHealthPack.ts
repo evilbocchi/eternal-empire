@@ -19,7 +19,7 @@ export = new Item(script.Name)
     .trait(Upgrader)
 
     .trait(Damager)
-    .setDamage(-50)
+    .setDamage(-9999)
 
     .trait(Conveyor)
     .setSpeed(2)
