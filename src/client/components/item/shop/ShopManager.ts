@@ -4,10 +4,12 @@ import { getSound } from "shared/asset/GameAssets";
 import { IS_EDIT } from "shared/Context";
 import { getPlayerCharacter } from "shared/hamster/getPlayerCharacter";
 import Shop from "shared/item/traits/Shop";
+import Packets from "shared/Packets";
 
 export interface ShopCandidate {
     guiPart: Part;
     shop: Shop;
+    placementId?: string;
 }
 
 interface CameraState {
@@ -27,6 +29,18 @@ let focusRequestToken = 0;
 let lastFocusRequest = 0;
 
 const opened = new Signal<(shop?: Shop, adornee?: Part) => void>();
+let brokenPlacementIds: ReadonlySet<string> = Packets.brokenPlacedItems.get() ?? new Set<string>();
+
+Packets.brokenPlacedItems.observe((value) => {
+    brokenPlacementIds = value ?? new Set<string>();
+
+    if (shopGuiPart === undefined) return;
+
+    const currentPlacementId = shopGuiPart.Parent?.Name;
+    if (currentPlacementId !== undefined && brokenPlacementIds.has(currentPlacementId)) {
+        refreshShop();
+    }
+});
 
 function cancelCameraTween() {
     if (cameraTween) {
@@ -198,12 +212,20 @@ function refreshShop(guiPart?: Part, shop?: Shop) {
     opened.fire(shop, guiPart);
 }
 
+function isCandidateBroken(candidate: ShopCandidate): boolean {
+    const { placementId } = candidate;
+    return placementId !== undefined && brokenPlacementIds.has(placementId);
+}
+
 function checkForShop(candidates: Map<BasePart, ShopCandidate>) {
     const primaryPart = getPlayerCharacter()?.PrimaryPart;
     if (primaryPart === undefined) return;
 
     let shopFound = false;
-    for (const [hitbox, { guiPart, shop }] of candidates) {
+    for (const [hitbox, candidate] of candidates) {
+        if (isCandidateBroken(candidate)) continue;
+
+        const { guiPart, shop } = candidate;
         const localPosition = hitbox.CFrame.PointToObjectSpace(primaryPart.Position);
         if (math.abs(localPosition.X) > hitbox.Size.X / 2 || math.abs(localPosition.Z) > hitbox.Size.Z / 2) continue;
 

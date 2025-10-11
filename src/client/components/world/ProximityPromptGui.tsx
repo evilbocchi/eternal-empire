@@ -1,5 +1,5 @@
 import { simpleInterval } from "@antivivi/vrldk";
-import React, { Fragment, useEffect, useRef, useState } from "@rbxts/react";
+import React, { Fragment, useCallback, useEffect, useRef, useState } from "@rbxts/react";
 import {
     CollectionService,
     ProximityPromptService,
@@ -76,6 +76,9 @@ function getKeyCodeToText(keyCode: Enum.KeyCode): string | undefined {
     return map.get(keyCode);
 }
 
+const PRESS_ANIMATION_DURATION = 0.12;
+const FADE_OUT_DURATION = 0.2;
+
 export default function ProximityPromptGui({
     prompt,
     inputType,
@@ -100,6 +103,7 @@ export default function ProximityPromptGui({
     const [objectText, setObjectText] = useState(prompt.ObjectText);
     const [isHolding, setIsHolding] = useState(false);
     const [holdStartTime, setHoldStartTime] = useState(0);
+    const [isPressAnimating, setIsPressAnimating] = useState(false);
 
     // Determine button visuals based on input type
     const [buttonImage, setButtonImage] = useState<string | undefined>();
@@ -114,6 +118,7 @@ export default function ProximityPromptGui({
     const inputScaleRef = useRef<UIScale>();
     const actionTextRef = useRef<TextLabel>();
     const objectTextRef = useRef<TextLabel>();
+    const previousPromptRef = useRef<ProximityPrompt | undefined>(prompt);
 
     // Handle fade in animations
     useEffect(() => {
@@ -278,6 +283,14 @@ export default function ProximityPromptGui({
         };
     }, [prompt]);
 
+    useEffect(() => {
+        if (previousPromptRef.current === prompt) return;
+
+        previousPromptRef.current = prompt;
+        setIsPressAnimating(false);
+        setIsHolding(false);
+    }, [prompt]);
+
     // Manage hold progress with React state
     useEffect(() => {
         if (!isHolding) return;
@@ -348,18 +361,71 @@ export default function ProximityPromptGui({
         };
     }, [isHolding, prompt, inputType]);
 
+    useEffect(() => {
+        if (!isPressAnimating) return;
+
+        const pressTweenInfo = new TweenInfo(0.08, Enum.EasingStyle.Quad, Enum.EasingDirection.Out);
+        const releaseTweenInfo = new TweenInfo(0.12, Enum.EasingStyle.Quad, Enum.EasingDirection.Out);
+        const activeTweens = new Array<Tween>();
+
+        if (inputScaleRef.current) {
+            const tween = TweenService.Create(inputScaleRef.current, pressTweenInfo, {
+                Scale: 0.92,
+            });
+            tween.Play();
+            activeTweens.push(tween);
+        }
+
+        if (frameRef.current) {
+            const tween = TweenService.Create(frameRef.current, pressTweenInfo, {
+                Size: new UDim2(1, -18, 1, -18),
+                ImageTransparency: 0.35,
+            });
+            tween.Play();
+            activeTweens.push(tween);
+        }
+
+        setActionTextTransparency(0.15);
+        setObjectTextTransparency(0.15);
+
+        const animationThread = task.delay(PRESS_ANIMATION_DURATION, () => {
+            setIsPressAnimating(false);
+        });
+
+        return () => {
+            task.cancel(animationThread);
+
+            for (const tween of activeTweens) {
+                tween.Cancel();
+            }
+
+            if (inputScaleRef.current) {
+                TweenService.Create(inputScaleRef.current, releaseTweenInfo, {
+                    Scale: 1,
+                }).Play();
+            }
+
+            if (frameRef.current) {
+                TweenService.Create(frameRef.current, releaseTweenInfo, {
+                    Size: new UDim2(1, 0, 1, 0),
+                    ImageTransparency: 0.2,
+                }).Play();
+            }
+
+            setActionTextTransparency(0);
+            setObjectTextTransparency(0);
+        };
+    }, [isPressAnimating, prompt]);
+
+    const startInstantPressAnimation = useCallback(() => {
+        if (isPressAnimating) return;
+
+        setHoldStartTime(os.clock());
+        setIsPressAnimating(true);
+    }, [isPressAnimating]);
+
     const triggerPrompt = () => {
         CustomProximityPrompt.trigger(prompt);
-
-        const tweenInfoFast = new TweenInfo(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out);
-        setActionTextTransparency(0);
-        setObjectTextTransparency(0);
-        if (frameRef.current) {
-            TweenService.Create(frameRef.current, tweenInfoFast, {
-                Size: UDim2.fromScale(1, 1),
-                ImageTransparency: 0.2,
-            }).Play();
-        }
     };
 
     // Handle keyboard/gamepad input for triggering prompts
@@ -373,13 +439,16 @@ export default function ProximityPromptGui({
                     setIsHolding(true);
                     setHoldStartTime(os.clock());
                 } else {
+                    startInstantPressAnimation();
                     triggerPrompt();
                 }
                 return;
             }
 
             if (input.UserInputState === Enum.UserInputState.End) {
-                setIsHolding(false);
+                if (prompt.HoldDuration > 0) {
+                    setIsHolding(false);
+                }
             }
         };
         const inputBeganConnection = UserInputService.InputBegan.Connect(handleInput);
@@ -389,7 +458,7 @@ export default function ProximityPromptGui({
             inputBeganConnection.Disconnect();
             inputEndedConnection.Disconnect();
         };
-    }, [prompt, inputType]);
+    }, [prompt, inputType, startInstantPressAnimation]);
 
     // Calculate gradient rotations for circular progress
     const leftGradientRotation = math.clamp(progress * 360, 180, 360);
@@ -408,6 +477,7 @@ export default function ProximityPromptGui({
                 setHoldStartTime(os.clock());
             } else {
                 // Instant trigger
+                startInstantPressAnimation();
                 triggerPrompt();
             }
         }
@@ -419,7 +489,9 @@ export default function ProximityPromptGui({
             input.UserInputType === Enum.UserInputType.MouseButton1
         ) {
             // Stop holding
-            setIsHolding(false);
+            if (prompt.HoldDuration > 0) {
+                setIsHolding(false);
+            }
         }
     };
 
@@ -439,8 +511,10 @@ export default function ProximityPromptGui({
         >
             {isInteractive && (
                 <textbutton
+                    AnchorPoint={new Vector2(0.5, 0.5)}
                     BackgroundTransparency={1}
                     Selectable={false}
+                    Position={new UDim2(0.5, 0, 0.5, 0)}
                     Size={new UDim2(1, 0, 1, 0)}
                     TextTransparency={1}
                     Event={{
@@ -451,9 +525,11 @@ export default function ProximityPromptGui({
             )}
             <imagelabel
                 ref={frameRef}
+                AnchorPoint={new Vector2(0.5, 0.5)}
                 BackgroundTransparency={1}
                 Image={getAsset("assets/ProximityPromptFrame.png")}
                 ImageTransparency={frameTransparency}
+                Position={new UDim2(0.5, 0, 0.5, 0)}
                 Size={frameSize}
             >
                 <frame
@@ -647,7 +723,7 @@ export function ProximityPromptGuiRenderer() {
                 }
 
                 if (closestPrompt !== prompt) {
-                    if (closestPrompt) {
+                    if (closestPrompt && closestDistance <= closestPrompt.MaxActivationDistance + 15) {
                         setPrompt(closestPrompt);
                         setIsVisible(true);
                         setIsFadingOut(false);
@@ -705,13 +781,15 @@ export function ProximityPromptGuiRenderer() {
     useEffect(() => {
         if (!isFadingOut) return;
 
-        // Wait for animations to complete before unmounting
-        const fadeOutDuration = 0.2; // Match the tween duration
-        task.wait(fadeOutDuration);
+        const fadeOutThread = task.delay(FADE_OUT_DURATION, () => {
+            setPrompt(undefined);
+            setIsVisible(false);
+            setIsFadingOut(false);
+        });
 
-        setPrompt(undefined);
-        setIsVisible(false);
-        setIsFadingOut(false);
+        return () => {
+            task.cancel(fadeOutThread);
+        };
     }, [isFadingOut]);
 
     return prompt && isVisible ? (
