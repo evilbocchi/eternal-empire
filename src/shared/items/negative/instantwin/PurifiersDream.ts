@@ -8,6 +8,7 @@ import CurrencyBundle from "shared/currency/CurrencyBundle";
 import ClassLowerNegativeShop from "shared/items/negative/ClassLowerNegativeShop";
 import { Server } from "shared/api/APIExpose";
 import Packets from "shared/Packets";
+import { Workspace } from "@rbxts/services";
 
 export = new Item(script.Name)
     .setName("Purifiers' Dream")
@@ -21,30 +22,35 @@ export = new Item(script.Name)
     .onLoad((model: Model, item: Item) => {
         const dropper = item.trait(Dropper);
         dropper.onDropletProduced((droplet: BasePart, _dropperItem: Dropper) => {
-            // Set FurnaceProcessed callback so when this droplet is processed in a furnace, it increments Purifier Clicks
-            const empireOwnerId = model.GetAttribute("EmpireOwner") as number | undefined;
-            if (empireOwnerId !== undefined && empireOwnerId !== 0) {
-                const player = game.GetService("Players").GetPlayerByUserId(empireOwnerId);
-                if (player !== undefined) {
-                    const info = getAllInstanceInfo(droplet);
-                    if (info) {
-                        info.FurnaceProcessed = (
-                            _result: CurrencyBundle,
-                            _genericResult: CurrencyBundle,
-                            _droplet: BasePart,
-                            _dropletInfo: InstanceInfo,
-                        ) => {
-                            const CurrencyService = Server.Currency;
-                            const data = Server.dataPerPlayer.get(player.UserId);
-                            if (data !== undefined) {
-                                const newRawClicks = ++data.rawPurifierClicks;
-                                Packets.rawPurifierClicks.setFor(player, newRawClicks);
-                                CurrencyService.increment("Purifier Clicks", new OnoeNum(1));
-                            }
-                        };
+            // Wait for the droplet to be parented to Workspace, then set FurnaceProcessed
+            task.defer(() => {
+                if (droplet.Parent !== Workspace) return; // Only set on world droplet
+                // Only set for PurifiersDroplet
+                if (droplet.Name !== "PurifiersDroplet") return;
+                const empireOwnerId = model.GetAttribute("EmpireOwner") as number | undefined;
+                if (empireOwnerId !== undefined && empireOwnerId !== 0) {
+                    const player = game.GetService("Players").GetPlayerByUserId(empireOwnerId);
+                    if (player !== undefined) {
+                        const info = getAllInstanceInfo(droplet);
+                        if (info) {
+                            info.FurnaceProcessed = (
+                                _result: CurrencyBundle,
+                                _genericResult: CurrencyBundle,
+                                _droplet: BasePart,
+                                _dropletInfo: InstanceInfo,
+                            ) => {
+                                const CurrencyService = Server.Currency;
+                                const data = Server.dataPerPlayer.get(player.UserId);
+                                if (data !== undefined) {
+                                    const newRawClicks = ++data.rawPurifierClicks;
+                                    Packets.rawPurifierClicks.setFor(player, newRawClicks);
+                                    CurrencyService.increment("Purifier Clicks", new OnoeNum(1));
+                                }
+                            };
+                        }
                     }
                 }
-            }
+            });
         });
     })
     .trait(Dropper)
