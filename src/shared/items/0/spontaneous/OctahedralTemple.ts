@@ -27,7 +27,7 @@ Now, it has been reduced to a mere generator, corrupted by the greed of those wh
 Produces %gain%, this amount increasing with Skill.`,
     )
     .setDifficulty(Difficulty.Spontaneous)
-    .setPrice(new CurrencyBundle().set("Funds", 2e45).set("Power", 1e30).set("Purifier Clicks", 1e30), 1)
+    .setPrice(new CurrencyBundle().set("Funds", 2.5e45).set("Power", 1e27).set("Purifier Clicks", 10e24), 1)
     .setRequiredItemAmount(TheFirstGenerator, TheFirstGenerator.pricePerIteration.size())
     .setRequiredItemAmount(UpgradedGenerator, UpgradedGenerator.pricePerIteration.size())
     .setRequiredItemAmount(HandCrankGenerator, HandCrankGenerator.pricePerIteration.size())

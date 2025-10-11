@@ -26,7 +26,7 @@ export = new Item(script.Name)
 Processes droplets at %mul% value.`,
     )
     .setDifficulty(Difficulty.Spontaneous)
-    .setPrice(new CurrencyBundle().set("Funds", 100e42).set("Bitcoin", 1e12), 1)
+    .setPrice(new CurrencyBundle().set("Funds", 100e42).set("Bitcoin", 25e9), 1)
     .setRequiredItemAmount(TheFirstFurnace, TheFirstFurnace.pricePerIteration.size())
     .setRequiredItemAmount(ImprovedFurnace, ImprovedFurnace.pricePerIteration.size())
     .setRequiredItemAmount(BasicCauldron, BasicCauldron.pricePerIteration.size())

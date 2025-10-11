@@ -16,7 +16,7 @@ Expect to spend a lot of time here, and good luck clearing Spontaneous.
 The Emerald Reactor is a modified version of the ${ReinforcedReactor.name}, each entrance giving a %mul% boost but deals %hp_add% to droplets.`,
     )
     .setDifficulty(Difficulty.Spontaneous)
-    .setPrice(new CurrencyBundle().set("Funds", 5e42).set("Power", 1e27), 1)
+    .setPrice(new CurrencyBundle().set("Funds", 25e42).set("Power", 100e24), 1)
     .setRequiredItemAmount(ReinforcedReactor, 1)
     .addPlaceableArea("BarrenIslands")
     .soldAt(Class0Shop)
