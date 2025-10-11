@@ -1,4 +1,4 @@
-import React, { InstanceProps, useEffect, useRef } from "@rbxts/react";
+import React, { InstanceProps, memo, useEffect, useRef } from "@rbxts/react";
 import { TweenService } from "@rbxts/services";
 import useHover from "client/hooks/useHover";
 
@@ -10,7 +10,7 @@ interface IconButtonProps {
     buttonProps?: InstanceProps<ImageButton>;
 }
 
-export default function IconButton(props: IconButtonProps) {
+function IconButton(props: IconButtonProps) {
     const buttonRef = useRef<ImageButton>();
     const scaleRef = useRef<UIScale>();
 
@@ -45,3 +45,5 @@ export default function IconButton(props: IconButtonProps) {
         </imagebutton>
     );
 }
+
+export default memo(IconButton);

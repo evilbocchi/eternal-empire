@@ -3,7 +3,7 @@ import { createRoot, Root } from "@rbxts/react-roblox";
 import { ContentProvider, RunService, Workspace } from "@rbxts/services";
 import BackpackWindow from "client/components/backpack/BackpackWindow";
 import BalanceWindow from "client/components/balance/BalanceWindow";
-import { CurrencyGainManager } from "client/components/balance/CurrencyGain";
+import CurrencyGainManager from "client/components/balance/CurrencyGainManager";
 import BuildWindow from "client/components/build/BuildWindow";
 import ChallengeCompletionManager from "client/components/challenge/ChallengeCompletionManager";
 import ChallengeHudManager from "client/components/challenge/ChallengeHudManager";

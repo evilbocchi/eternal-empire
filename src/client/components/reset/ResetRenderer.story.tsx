@@ -1,9 +1,9 @@
-import { OnoeNum } from "@rbxts/serikanum";
 import React, { Fragment } from "@rbxts/react";
 import ReactRoblox from "@rbxts/react-roblox";
+import { OnoeNum } from "@rbxts/serikanum";
 import { CreateReactStory } from "@rbxts/ui-labs";
 import BalanceWindow from "client/components/balance/BalanceWindow";
-import { CurrencyGainManager } from "client/components/balance/CurrencyGain";
+import CurrencyGainManager from "client/components/balance/CurrencyGainManager";
 import playSkillificationSequence from "client/components/reset/playSkillificationSequence";
 import ResetRenderer from "client/components/reset/ResetRenderer";
 import useVisibility from "client/hooks/useVisibility";

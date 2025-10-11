@@ -2,8 +2,8 @@
  * @fileoverview Individual leaderboard slot component displaying a single entry.
  */
 
+import React, { memo, useEffect } from "@rbxts/react";
 import { OnoeNum } from "@rbxts/serikanum";
-import React, { useEffect } from "@rbxts/react";
 import { RunService } from "@rbxts/services";
 import { LeaderboardEntry } from "client/components/world/leaderboard/Leaderboard";
 import { RobotoMono } from "shared/asset/GameFonts";
@@ -50,7 +50,7 @@ export interface LeaderboardSlotProps {
 /**
  * A single leaderboard entry displaying place, name, and amount.
  */
-export default function LeaderboardSlot({ entry, isHighlighted = false }: LeaderboardSlotProps) {
+function LeaderboardSlot({ entry, isHighlighted = false }: LeaderboardSlotProps) {
     // Animation state for top 3 places gradients (binding to avoid full re-renders every frame)
     const [gradientOffset, setGradientOffset] = React.useBinding(0);
     const gradientOffsetVector = gradientOffset.map((value) => new Vector2(value, 0));
@@ -184,3 +184,5 @@ export default function LeaderboardSlot({ entry, isHighlighted = false }: Leader
         </frame>
     );
 }
+
+export default memo(LeaderboardSlot);

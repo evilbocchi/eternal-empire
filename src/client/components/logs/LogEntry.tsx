@@ -1,12 +1,12 @@
-import { OnoeNum } from "@rbxts/serikanum";
 import { combineHumanReadable } from "@antivivi/vrldk";
-import React from "@rbxts/react";
+import React, { memo } from "@rbxts/react";
+import { OnoeNum } from "@rbxts/serikanum";
 import { RobotoMono } from "shared/asset/GameFonts";
-import { AREAS } from "shared/world/Area";
 import { getNameFromUserId } from "shared/constants";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Items from "shared/items/Items";
 import NamedUpgrades from "shared/namedupgrade/NamedUpgrades";
+import { AREAS } from "shared/world/Area";
 
 interface LogEntryProps {
     log: Log;
@@ -52,7 +52,7 @@ function formatLogDetails(log: Log): string {
 /**
  * Individual log entry component with timestamp and formatted details
  */
-export default function LogEntry({ log, layoutOrder }: LogEntryProps) {
+function LogEntry({ log, layoutOrder }: LogEntryProps) {
     const timestamp = os.date("%c", log.time);
     const details = formatLogDetails(log);
 
@@ -99,3 +99,5 @@ export default function LogEntry({ log, layoutOrder }: LogEntryProps) {
         </frame>
     );
 }
+
+export default memo(LogEntry);

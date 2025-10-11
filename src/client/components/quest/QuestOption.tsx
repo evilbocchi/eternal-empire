@@ -1,9 +1,9 @@
-import React, { useEffect, useRef } from "@rbxts/react";
+import React, { memo, useEffect, useRef } from "@rbxts/react";
 import { TweenService } from "@rbxts/services";
 import { getPositionDetails } from "client/components/quest/TrackedQuestWindow";
 import { getLengthColor, getLengthName, getRewardLabel } from "client/components/quest/useQuestData";
-import { RobotoSlabBold, RobotoSlabExtraBold, RobotoSlabHeavy, RobotoSlabMedium } from "shared/asset/GameFonts";
 import { getAsset } from "shared/asset/AssetMap";
+import { RobotoSlabBold, RobotoSlabExtraBold, RobotoSlabHeavy, RobotoSlabMedium } from "shared/asset/GameFonts";
 
 interface QuestOptionProps {
     questId: string;
@@ -16,7 +16,7 @@ interface QuestOptionProps {
     onTrack: () => void;
 }
 
-export default function QuestOption({
+function QuestOption({
     questId,
     quest,
     currentStage,
@@ -335,3 +335,5 @@ export default function QuestOption({
         </frame>
     );
 }
+
+export default memo(QuestOption);

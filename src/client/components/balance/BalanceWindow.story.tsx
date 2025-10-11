@@ -1,10 +1,10 @@
-import { OnoeNum } from "@rbxts/serikanum";
 import React, { StrictMode, useEffect } from "@rbxts/react";
 import ReactRoblox from "@rbxts/react-roblox";
+import { OnoeNum } from "@rbxts/serikanum";
 import { Debris, Workspace } from "@rbxts/services";
 import { CreateReactStory, Number } from "@rbxts/ui-labs";
 import BalanceWindow from "client/components/balance/BalanceWindow";
-import { CurrencyGainManager } from "client/components/balance/CurrencyGain";
+import CurrencyGainManager from "client/components/balance/CurrencyGainManager";
 import StoryMocking from "client/components/StoryMocking";
 import TooltipWindow from "client/components/tooltip/TooltipWindow";
 import useVisibility from "client/hooks/useVisibility";

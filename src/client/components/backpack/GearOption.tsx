@@ -5,7 +5,7 @@
  * Displays tool icon, hotkey number, and handles selection state visualization.
  */
 
-import React, { useEffect, useRef } from "@rbxts/react";
+import React, { memo, useEffect, useRef } from "@rbxts/react";
 import { TweenService } from "@rbxts/services";
 import { TooltipManager } from "client/components/tooltip/TooltipWindow";
 import { getAsset } from "shared/asset/AssetMap";
@@ -31,15 +31,7 @@ export function layoutOrderFromGear(gear: Gear): number {
 /**
  * Individual tool option button component
  */
-export default function GearOption({
-    gear,
-    isEquipped,
-    onClick,
-}: {
-    gear: Gear;
-    isEquipped: boolean;
-    onClick: () => void;
-}) {
+function GearOption({ gear, isEquipped, onClick }: { gear: Gear; isEquipped: boolean; onClick: () => void }) {
     // Color based on equipped state
     const backgroundColor = isEquipped ? Color3.fromRGB(0, 184, 255) : Color3.fromRGB(31, 31, 31);
     const strokeColor = isEquipped ? Color3.fromRGB(0, 184, 255) : Color3.fromRGB(61, 61, 61);
@@ -144,3 +136,5 @@ export default function GearOption({
         </textbutton>
     );
 }
+
+export default memo(GearOption);
