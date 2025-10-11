@@ -35,6 +35,7 @@ declare global {
 
 const generatedPacket = perItemPacket(packet<(id: string, amountPerCurrency: BaseCurrencyMap) => void>());
 const GENERATOR_UPGRADES = NamedUpgrades.getUpgrades("Generator");
+const loadTime = os.clock();
 
 /**
  * A generator is an item that generates currency over time, which can be boosted by {@link Charger}s.
@@ -125,7 +126,7 @@ export default class Generator extends Boostable {
                     if (character === undefined) continue;
                     const pivot = character.GetPivot();
 
-                    if (pivot.Position.sub(centre).Magnitude < 50 && os.clock() > 10) {
+                    if (pivot.Position.sub(centre).Magnitude < 50 && os.clock() - loadTime > 10) {
                         generatedPacket.toClient(model, player, amountPerCurrency);
                     }
                 }

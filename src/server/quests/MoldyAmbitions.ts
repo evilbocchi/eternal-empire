@@ -36,6 +36,8 @@ export = new Quest(script.Name)
                     ).root,
             )
             .onReached((stage) => {
+                return () => {}; // TODO unimplemented
+
                 CrustyBunkerLeader.rootPart!.CFrame = CrustyBunkerLeader.startingCFrame;
                 BunkerNoob1.rootPart!.CFrame = BunkerNoob1.startingCFrame;
                 BunkerNoob2.rootPart!.CFrame = BunkerNoob2.startingCFrame;

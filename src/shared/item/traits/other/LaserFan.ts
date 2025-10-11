@@ -18,6 +18,7 @@ const tweenInfo = new TweenInfo(0.1, Enum.EasingStyle.Linear);
 export default class LaserFan extends ItemTrait {
     static readonly laserFanChanged = perItemPacket(
         packet<(placementId: string, cframe: CFrame) => void>({ isUnreliable: true }),
+        { slowStart: true },
     );
 
     static load(model: Model, laserFan: LaserFan) {

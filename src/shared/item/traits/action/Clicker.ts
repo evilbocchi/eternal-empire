@@ -20,7 +20,9 @@ declare global {
 }
 
 export default class Clicker extends ItemTrait {
-    static readonly clickingPacket = perItemPacket(packet<(placementId: string) => void>({ isUnreliable: true }));
+    static readonly clickingPacket = perItemPacket(packet<(placementId: string) => void>({ isUnreliable: true }), {
+        slowStart: true,
+    });
 
     static load(model: Model, clicker: Clicker) {
         const modelInfo = getAllInstanceInfo(model);

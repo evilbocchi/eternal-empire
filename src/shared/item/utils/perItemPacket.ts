@@ -9,6 +9,8 @@ function isRequestPacket(packet: SignalOrRequestPacket): packet is RequestPacket
     return packet.className === "RequestPacket";
 }
 
+let startTime = os.clock();
+
 /**
  * Creates a packet that can send and receive messages tied to specific item placements.
  * This allows for item-specific communication between the server and clients.
@@ -17,6 +19,7 @@ function isRequestPacket(packet: SignalOrRequestPacket): packet is RequestPacket
  */
 export default function perItemPacket<Args extends unknown[], Return>(
     packet: SignalOrRequestPacket<(placementId: string, ...args: Args) => Return | undefined>,
+    options: { slowStart?: boolean } = {},
 ) {
     const isRequest = isRequestPacket(packet);
     const clientHandlers = new Map<string, (...args: Args) => Return | undefined>();
@@ -51,9 +54,17 @@ export default function perItemPacket<Args extends unknown[], Return>(
             if (isRequest) {
                 throw "Cannot use toAllClients with a RequestPacket. Use toClient instead.";
             }
+            if (options.slowStart && os.clock() - startTime < 10) {
+                return;
+            }
+
             packet.toAllClients(model.Name, ...args);
         },
         toClient: (model: Model, player: Player, ...args: Args): Return | undefined => {
+            if (options.slowStart && os.clock() - startTime < 10) {
+                return;
+            }
+
             return packet.toClient(player, model.Name, ...args) as Return | undefined;
         },
         toServer: (model: Model, ...args: Args): Return | undefined => {

@@ -1,6 +1,6 @@
 import { simpleInterval } from "@antivivi/vrldk";
 import React, { Fragment, useEffect, useRef } from "@rbxts/react";
-import { Workspace } from "@rbxts/services";
+import { CollectionService, Workspace } from "@rbxts/services";
 import Sandbox from "shared/Sandbox";
 import WorldNode from "shared/world/nodes/WorldNode";
 
@@ -33,7 +33,7 @@ export default function EyeContactManager() {
                 return undefined;
             }
 
-            for (const candidate of Workspace.GetChildren()) {
+            for (const candidate of CollectionService.GetTagged("NPC")) {
                 if (!candidate.IsA("Model") || !candidate.FindFirstChild("Humanoid")) {
                     continue;
                 }
