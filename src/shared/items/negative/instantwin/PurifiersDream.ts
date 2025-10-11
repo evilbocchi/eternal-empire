@@ -45,6 +45,7 @@ export = new Item(script.Name)
                                     const newRawClicks = ++data.rawPurifierClicks;
                                     Packets.rawPurifierClicks.setFor(player, newRawClicks);
                                     CurrencyService.increment("Purifier Clicks", new OnoeNum(1));
+                                    CurrencyService.propagate();
                                 }
                             };
                         }
