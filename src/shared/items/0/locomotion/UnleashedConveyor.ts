@@ -15,7 +15,7 @@ export = new Item(script.Name)
     .persists("Skillification")
 
     .trait(Conveyor)
-    .setSpeed(9)
+    .setSpeed(4)
 
     .trait(UnleashedConveyor)
     .exit();
