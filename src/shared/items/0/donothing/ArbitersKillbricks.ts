@@ -18,7 +18,7 @@ export = new Item(script.Name)
     .persists("Skillification")
 
     .trait(Upgrader)
-    .setMul(new CurrencyBundle().set("Bitcoin", 1.15).set("Power", 1.15))
+    .setMul(new CurrencyBundle().set("Bitcoin", 777).set("Funds", 999).set("Power", 666))
 
     .trait(Damager)
     .setDamage(10)
