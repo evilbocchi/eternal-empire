@@ -97,7 +97,13 @@ export = new Item(script.Name)
                 cpcLabel.Text = `${getClickMultiplier(amount)?.toString()}x Purifier Clicks/click`;
             }
         };
+        // Initial update
         update(Packets.balance.get().get("Purifier Clicks") ?? new OnoeNum(0));
+
+        // Listen for balance changes to update UI
+        const balanceConnection = Packets.balance.observe((newBalance) => {
+            update(newBalance.get("Purifier Clicks") ?? new OnoeNum(0));
+        });
 
         const tweenInfo = new TweenInfo(0.2);
         let shadow: BasePart | undefined;
@@ -131,6 +137,7 @@ export = new Item(script.Name)
         });
         model.Destroying.Once(() => {
             connection.Disconnect();
+            balanceConnection.Disconnect();
             task.delay(2, () => {
                 // wait for any tweens to finish
                 partCache?.Dispose();
