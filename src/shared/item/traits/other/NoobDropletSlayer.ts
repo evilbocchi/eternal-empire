@@ -37,7 +37,7 @@ export default class NoobDropletSlayer extends BaseDropletSlayer {
         slash.Transparency = 1;
         const slashOriginalCFrame = slash.CFrame;
 
-        this.activatePacket.fromServer(model, () => {
+        BaseDropletSlayer.activatePacket.fromServer(model, () => {
             if (slash === undefined) return;
             slash.Transparency = 0.011;
             slash.CFrame = slashOriginalCFrame;
