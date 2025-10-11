@@ -1,15 +1,11 @@
 import { getAllInstanceInfo, loadAnimation } from "@antivivi/vrldk";
-import { packet } from "@rbxts/fletchette";
 import { TweenService } from "@rbxts/services";
 import { playSound } from "shared/asset/GameAssets";
 import Item from "shared/item/Item";
 import Generator from "shared/item/traits/generator/Generator";
 import BaseDropletSlayer from "shared/item/traits/other/BaseDropletSlayer";
-import perItemPacket from "shared/item/utils/perItemPacket";
 
 export default class NoobDropletSlayer extends BaseDropletSlayer {
-    static readonly activatePacket = perItemPacket(packet<(placementId: string) => void>());
-
     static load(model: Model, slayer: NoobDropletSlayer) {
         const modelInfo = getAllInstanceInfo(model);
 
@@ -34,8 +30,7 @@ export default class NoobDropletSlayer extends BaseDropletSlayer {
 
     static clientLoad(model: Model) {
         const noob = model.WaitForChild("Noob") as Model;
-        const animationController = noob.FindFirstChildOfClass("AnimationController");
-        if (animationController === undefined) return;
+        const animationController = noob.WaitForChild("AnimationController") as AnimationController;
         const animTrack = loadAnimation(animationController, 16920778613);
 
         const slash = model.WaitForChild("Slash") as BasePart;

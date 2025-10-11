@@ -85,6 +85,7 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
     private hasUniqueChanged = false;
     private hasBoughtChanged = false;
     private hasPlacedChanged = false;
+    breakdownsEnabled = true;
 
     // Signals
 
@@ -988,7 +989,7 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
         const ref = { interval: 10 };
         const rng = new Random();
         const cleanup = variableInterval(() => {
-            if (this.dataService.empireData.playtime < 300) {
+            if (this.dataService.empireData.playtime < 300 || this.breakdownsEnabled === false) {
                 return; // don't break items in first 5 minutes
             }
 
