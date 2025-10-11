@@ -63,7 +63,7 @@ export default function ShopGui() {
             const shopGuiPart = model.FindFirstChild("ShopGuiPart") as Part;
             if (shopGuiPart === undefined) return;
             shopGuiPart.LocalTransparencyModifier = 1;
-            candidates.set(hitbox, { guiPart: shopGuiPart, shop });
+            candidates.set(hitbox, { guiPart: shopGuiPart, shop, placementId: model.Name });
         };
         for (const hitbox of CollectionService.GetTagged("Shop")) {
             addCandidate(hitbox as BasePart);

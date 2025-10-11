@@ -1408,16 +1408,21 @@ function DifficultyResearcherGui({
     imagePart,
     namePart,
     orbPart,
+    vortexPart,
 }: {
     selectPart: BasePart;
     descriptionPart: BasePart;
     imagePart: BasePart;
     namePart: BasePart;
     orbPart: OrbPart;
+    vortexPart: BasePart;
 }) {
     const billboardRef = useRef<BillboardGui>();
     const revenueLabelRef = useRef<TextLabel>();
     const labelGradientRef = useRef<UIGradient>();
+    const orbLightRef = useRef<PointLight>();
+    const vortexLightRef = useRef<PointLight>();
+    const activeLightTweens = useRef<Set<Tween>>(new Set());
     const [currentDifficulty, setCurrentDifficulty] = useState<Difficulty | undefined>(undefined);
     const [activePage, setActivePage] = useState<"difficulties" | "research">("difficulties");
     const [balance, setBalance] = useState<Map<Currency, BaseOnoeNum>>(Packets.balance.get());
@@ -1504,6 +1509,72 @@ function DifficultyResearcherGui({
             ]);
         }
     }, [orbVisualDefaults, researchMultiplier]);
+
+    const stopLightTweens = useCallback(() => {
+        for (const tween of activeLightTweens.current) {
+            tween.Cancel();
+            tween.Destroy();
+        }
+        activeLightTweens.current.clear();
+    }, []);
+
+    useEffect(() => {
+        const orbLight = new Instance("PointLight");
+        orbLight.Brightness = 0;
+        orbLight.Range = 0;
+        orbLight.Color = Color3.fromRGB(255, 205, 255);
+        orbLight.Parent = orbPart;
+        orbLightRef.current = orbLight;
+
+        const vortexLight = new Instance("PointLight");
+        vortexLight.Brightness = 0;
+        vortexLight.Range = 0;
+        vortexLight.Color = Color3.fromRGB(255, 180, 255);
+        vortexLight.Parent = vortexPart;
+        vortexLightRef.current = vortexLight;
+
+        return () => {
+            stopLightTweens();
+            orbLight.Destroy();
+            vortexLight.Destroy();
+        };
+    }, [orbPart, vortexPart, stopLightTweens]);
+
+    const triggerLightFlash = useCallback(() => {
+        const orbLight = orbLightRef.current;
+        const vortexLight = vortexLightRef.current;
+        if (orbLight === undefined || vortexLight === undefined) return;
+
+        stopLightTweens();
+
+        const targets: Array<[PointLight, number, number]> = [
+            [orbLight, 7, 18],
+            [vortexLight, 9, 16],
+        ];
+
+        for (const [light, peakBrightness, peakRange] of targets) {
+            light.Brightness = peakBrightness;
+            light.Range = peakRange;
+            const tween = TweenService.Create(
+                light,
+                new TweenInfo(1.1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+                {
+                    Brightness: 0,
+                    Range: math.max(peakRange * 0.35, 0),
+                },
+            );
+            activeLightTweens.current.add(tween);
+            tween.Completed.Once(() => {
+                light.Brightness = 0;
+                light.Range = 0;
+                if (activeLightTweens.current.has(tween)) {
+                    activeLightTweens.current.delete(tween);
+                }
+                tween.Destroy();
+            });
+            tween.Play();
+        }
+    }, [stopLightTweens]);
 
     useEffect(() => {
         const balanceConnection = Packets.balance.observe((incoming) => {
@@ -1715,8 +1786,11 @@ function DifficultyResearcherGui({
         (rewardId: string) => {
             const success = Packets.claimDifficultyReward.toServer(rewardId);
             playSound(success ? "UnlockItem.mp3" : "Error.mp3", selectPart);
+            if (success) {
+                triggerLightFlash();
+            }
         },
-        [selectPart],
+        [selectPart, triggerLightFlash],
     );
 
     const researchInfo = useMemo<ResearchInfoProps>(
@@ -1909,6 +1983,7 @@ export = new Item(script.Name)
         const imagePart = model.WaitForChild("DifficultyImage") as BasePart;
         const namePart = model.WaitForChild("DifficultyName") as BasePart;
         const orbPart = model.WaitForChild("Orb") as OrbPart;
+        const vortex = orbPart.WaitForChild("Vortex") as Part;
         root.render(
             <DifficultyResearcherGui
                 selectPart={selectPart}
@@ -1916,6 +1991,7 @@ export = new Item(script.Name)
                 imagePart={imagePart}
                 namePart={namePart}
                 orbPart={orbPart}
+                vortexPart={vortex}
             />,
         );
 

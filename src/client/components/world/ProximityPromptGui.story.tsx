@@ -13,7 +13,7 @@ export = CreateReactStory(
             fundsBombs: 100,
         },
     },
-    (props) => {
+    () => {
         const [prompt, setPrompt] = useState<ProximityPrompt>();
 
         useEffect(() => {
