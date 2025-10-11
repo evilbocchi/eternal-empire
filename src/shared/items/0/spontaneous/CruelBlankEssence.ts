@@ -51,7 +51,7 @@ Whispering,
     .setDifficulty(Difficulty.Spontaneous)
     .setPrice(
         new CurrencyBundle()
-            .set("Funds", 25e45)
+            .set("Funds", 2.5e48)
             .set("Power", 25e27)
             .set("Bitcoin", 250e9)
             .set("Skill", 2.5e9)
