@@ -20,13 +20,13 @@ export = new Item(script.Name)
     .persists()
 
     .setFormula(new Formula().pow(0.01))
-        .setFormulaX("Dark Matter")
-        .setFormulaXCap(new CurrencyBundle().set("Dark Matter", 1e42))
-    
-        .trait(Upgrader)
-        .applyFormula(
-            (v, item) => item.setMul(mul.set("Bitcoin", v)),
-            () => Server.Currency.get("Dark Matter"),
-        )
+    .setFormulaX("Dark Matter")
+    .setFormulaXCap(new CurrencyBundle().set("Dark Matter", 1e42))
+
+    .trait(Upgrader)
+    .applyFormula(
+        (v, item) => item.setMul(mul.set("Bitcoin", v)),
+        () => Server.Currency.get("Dark Matter"),
+    )
 
     .exit();
