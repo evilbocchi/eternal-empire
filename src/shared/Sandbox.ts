@@ -53,6 +53,10 @@ export default class Sandbox {
         return true;
     }
 
+    static getId() {
+        return this.sandboxValue?.GetAttribute("Id") as string | undefined;
+    }
+
     static {
         if (this.sandboxValue !== undefined && this.sandboxValue.Value) {
             this.setEnabled(true);
