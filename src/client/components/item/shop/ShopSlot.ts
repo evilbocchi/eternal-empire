@@ -507,9 +507,10 @@ export function updateShopSlot(handle: ShopSlotHandle, options: UpdateShopSlotOp
     }
 
     const price = handle.item.getPrice(ownedAmount + 1);
-    const optionsList = buildPriceOptions(handle.item, price);
+    const isMaxed = price === undefined;
+    const optionsList = isMaxed ? new Array<CurrencyOption | ItemOption>() : buildPriceOptions(handle.item, price);
 
-    const shouldHide = hideMaxedItems && price === undefined;
+    const shouldHide = hideMaxedItems && isMaxed;
     const finalVisible = baseVisible && !shouldHide;
 
     if (levelRequirement !== undefined && isLocked) {
@@ -536,7 +537,7 @@ export function updateShopSlot(handle: ShopSlotHandle, options: UpdateShopSlotOp
         }
     }
 
-    if (optionsList.size() === 0) {
+    if (isMaxed || optionsList.size() === 0) {
         applyPriceOption(handle, { kind: "maxed" });
         handle.rotationToken++;
         return;

@@ -3,10 +3,41 @@
  */
 
 import { OnoeNum } from "@rbxts/serikanum";
-import React, { useEffect, useState } from "@rbxts/react";
+import React, { useEffect } from "@rbxts/react";
 import { RunService } from "@rbxts/services";
 import { LeaderboardEntry } from "client/components/world/leaderboard/Leaderboard";
 import { RobotoMono } from "shared/asset/GameFonts";
+
+const DEFAULT_BACKGROUND = Color3.fromRGB(255, 255, 255);
+const DEFAULT_TEXT = Color3.fromRGB(0, 0, 0);
+const DEFAULT_STROKE = Color3.fromRGB(255, 255, 255);
+
+const TOP_PLACE_COLORS: Record<number, Color3> = {
+    1: Color3.fromRGB(255, 215, 0),
+    2: Color3.fromRGB(192, 192, 192),
+    3: Color3.fromRGB(205, 127, 50),
+};
+
+const TOP_PLACE_GRADIENTS: Record<number, ColorSequence> = {
+    1: new ColorSequence([
+        new ColorSequenceKeypoint(0, Color3.fromRGB(255, 215, 0)), // Gold
+        new ColorSequenceKeypoint(0.3, Color3.fromRGB(255, 255, 0)), // Bright Yellow
+        new ColorSequenceKeypoint(0.6, Color3.fromRGB(255, 140, 0)), // Orange
+        new ColorSequenceKeypoint(1, Color3.fromRGB(255, 215, 0)), // Gold
+    ]),
+    2: new ColorSequence([
+        new ColorSequenceKeypoint(0, Color3.fromRGB(192, 192, 192)), // Silver
+        new ColorSequenceKeypoint(0.3, Color3.fromRGB(220, 220, 220)), // Bright Silver
+        new ColorSequenceKeypoint(0.6, Color3.fromRGB(169, 169, 169)), // Dark Silver
+        new ColorSequenceKeypoint(1, Color3.fromRGB(192, 192, 192)), // Silver
+    ]),
+    3: new ColorSequence([
+        new ColorSequenceKeypoint(0, Color3.fromRGB(205, 127, 50)), // Bronze
+        new ColorSequenceKeypoint(0.3, Color3.fromRGB(255, 165, 79)), // Bright Bronze
+        new ColorSequenceKeypoint(0.6, Color3.fromRGB(184, 115, 51)), // Dark Bronze
+        new ColorSequenceKeypoint(1, Color3.fromRGB(205, 127, 50)), // Bronze
+    ]),
+};
 
 /** Props for individual leaderboard slots */
 export interface LeaderboardSlotProps {
@@ -20,29 +51,35 @@ export interface LeaderboardSlotProps {
  * A single leaderboard entry displaying place, name, and amount.
  */
 export default function LeaderboardSlot({ entry, isHighlighted = false }: LeaderboardSlotProps) {
-    // Animation state for top 3 places gradients
-    const [gradientOffset, setGradientOffset] = useState(0);
+    // Animation state for top 3 places gradients (binding to avoid full re-renders every frame)
+    const [gradientOffset, setGradientOffset] = React.useBinding(0);
+    const gradientOffsetVector = gradientOffset.map((value) => new Vector2(value, 0));
 
     // Animate gradient movement for top 3 places
     useEffect(() => {
-        if (entry.place > 3) return;
+        if (entry.place > 3) {
+            setGradientOffset(0);
+            return;
+        }
 
-        let t = 0;
+        let offset = -1;
+        let cooldown = 0;
+        setGradientOffset(offset);
+
+        const speed = entry.place === 1 ? 0.004 : entry.place === 2 ? 0.003 : 0.002;
         const connection = RunService.Heartbeat.Connect((dt) => {
-            setGradientOffset((prev) => {
-                if (prev >= 1) {
-                    prev = -1;
-                    t = 0;
-                    return prev;
-                }
-                t += dt;
-                if (t < 1.5) {
-                    return prev;
-                }
-                // Different animation speeds for each place
-                const speed = entry.place === 1 ? 0.004 : entry.place === 2 ? 0.003 : 0.002;
-                return prev + speed;
-            });
+            cooldown += dt;
+            if (cooldown < 1.5) {
+                return;
+            }
+
+            offset += speed;
+            if (offset >= 1) {
+                offset = -1;
+                cooldown = 0;
+            }
+
+            setGradientOffset(offset);
         });
 
         return () => connection.Disconnect();
@@ -56,24 +93,12 @@ export default function LeaderboardSlot({ entry, isHighlighted = false }: Leader
 
     if (entry.place > 3) {
         // Default styling for other places
-        backgroundColor = isHighlighted ? Color3.fromRGB(255, 255, 170) : Color3.fromRGB(255, 255, 255);
-        textColor = Color3.fromRGB(0, 0, 0);
-        strokeColor = Color3.fromRGB(255, 255, 255);
+        backgroundColor = isHighlighted ? Color3.fromRGB(255, 255, 170) : DEFAULT_BACKGROUND;
+        textColor = DEFAULT_TEXT;
+        strokeColor = DEFAULT_STROKE;
         strokeTransparency = 0.9;
     } else {
-        switch (entry.place) {
-            case 1:
-                backgroundColor = Color3.fromRGB(255, 215, 0);
-                break;
-            case 2:
-                backgroundColor = Color3.fromRGB(192, 192, 192);
-                break;
-            case 3:
-                backgroundColor = Color3.fromRGB(205, 127, 50);
-                break;
-            default:
-                backgroundColor = Color3.fromRGB(255, 255, 255);
-        }
+        backgroundColor = TOP_PLACE_COLORS[entry.place] || DEFAULT_BACKGROUND;
         textColor = backgroundColor.Lerp(new Color3(0, 0, 0), 0.7);
         strokeColor = backgroundColor.Lerp(Color3.fromRGB(255, 255, 255), 0.4);
         strokeTransparency = 0.3;
@@ -91,64 +116,16 @@ export default function LeaderboardSlot({ entry, isHighlighted = false }: Leader
             LayoutOrder={entry.place}
         >
             {/* Add a subtle glow effect for top 3 places */}
-            {entry.place <= 3 && (
-                <uistroke
-                    Color={
-                        entry.place === 1
-                            ? Color3.fromRGB(255, 215, 0)
-                            : entry.place === 2
-                              ? Color3.fromRGB(192, 192, 192)
-                              : Color3.fromRGB(205, 127, 50)
-                    }
-                    Thickness={2}
-                    Transparency={0.3}
-                />
-            )}
+            {entry.place <= 3 && <uistroke Color={TOP_PLACE_COLORS[entry.place]} Thickness={2} Transparency={0.3} />}
 
             {/* Animated gradient for 1st place */}
-            {entry.place === 1 && (
-                <uigradient
-                    Color={
-                        new ColorSequence([
-                            new ColorSequenceKeypoint(0, Color3.fromRGB(255, 215, 0)), // Gold
-                            new ColorSequenceKeypoint(0.3, Color3.fromRGB(255, 255, 0)), // Bright Yellow
-                            new ColorSequenceKeypoint(0.6, Color3.fromRGB(255, 140, 0)), // Orange
-                            new ColorSequenceKeypoint(1, Color3.fromRGB(255, 215, 0)), // Gold
-                        ])
-                    }
-                    Offset={new Vector2(gradientOffset, 0)}
-                />
-            )}
+            {entry.place === 1 && <uigradient Color={TOP_PLACE_GRADIENTS[1]} Offset={gradientOffsetVector} />}
 
             {/* Animated gradient for 2nd place */}
-            {entry.place === 2 && (
-                <uigradient
-                    Color={
-                        new ColorSequence([
-                            new ColorSequenceKeypoint(0, Color3.fromRGB(192, 192, 192)), // Silver
-                            new ColorSequenceKeypoint(0.3, Color3.fromRGB(220, 220, 220)), // Bright Silver
-                            new ColorSequenceKeypoint(0.6, Color3.fromRGB(169, 169, 169)), // Dark Silver
-                            new ColorSequenceKeypoint(1, Color3.fromRGB(192, 192, 192)), // Silver
-                        ])
-                    }
-                    Offset={new Vector2(gradientOffset, 0)}
-                />
-            )}
+            {entry.place === 2 && <uigradient Color={TOP_PLACE_GRADIENTS[2]} Offset={gradientOffsetVector} />}
 
             {/* Animated gradient for 3rd place */}
-            {entry.place === 3 && (
-                <uigradient
-                    Color={
-                        new ColorSequence([
-                            new ColorSequenceKeypoint(0, Color3.fromRGB(205, 127, 50)), // Bronze
-                            new ColorSequenceKeypoint(0.3, Color3.fromRGB(255, 165, 79)), // Bright Bronze
-                            new ColorSequenceKeypoint(0.6, Color3.fromRGB(184, 115, 51)), // Dark Bronze
-                            new ColorSequenceKeypoint(1, Color3.fromRGB(205, 127, 50)), // Bronze
-                        ])
-                    }
-                    Offset={new Vector2(gradientOffset, 0)}
-                />
-            )}
+            {entry.place === 3 && <uigradient Color={TOP_PLACE_GRADIENTS[3]} Offset={gradientOffsetVector} />}
             <textlabel
                 key="PlaceLabel"
                 BackgroundTransparency={1}

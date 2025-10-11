@@ -89,6 +89,7 @@ export default class Nanobot extends ItemTrait {
     );
 
     private static readonly clientEntries = new Map<Model, NanobotClientEntry>();
+    private static readonly claimedPlacements = new Map<string, Model>();
     private static heartbeatConnection?: RBXScriptConnection;
 
     constructor(item: Item) {
@@ -126,6 +127,14 @@ export default class Nanobot extends ItemTrait {
         const orbs = Nanobot.createOrbStates(nanobot);
         Nanobot.animateServerOrbs(model, anchor, orbs, nanobot);
         Nanobot.startRepairLoop(model, anchor, orbs, nanobot);
+
+        model.Destroying.Once(() => {
+            for (const orb of orbs) {
+                if (orb.assignment !== undefined) {
+                    Nanobot.releasePlacement(orb.assignment.placementId, model);
+                }
+            }
+        });
     }
 
     private static clientLoad(model: Model, nanobot: Nanobot) {
@@ -329,6 +338,7 @@ export default class Nanobot extends ItemTrait {
             for (const orb of orbs) {
                 const assignment = orb.assignment;
                 if (assignment !== undefined && assignment.target.Parent === undefined) {
+                    Nanobot.releasePlacement(assignment.placementId, model);
                     orb.assignment = undefined;
                 }
 
@@ -363,7 +373,14 @@ export default class Nanobot extends ItemTrait {
                     }
                 }
                 const candidates = nanobot.collectNearbyBroken(anchor.Position);
-                if (candidates.size() === 0) {
+                const filteredCandidates = new Array<{ placementId: string; target: BasePart }>();
+                for (const info of candidates) {
+                    if (Nanobot.canTargetPlacement(info.placementId, model)) {
+                        filteredCandidates.push(info);
+                    }
+                }
+                const activeCandidates = filteredCandidates;
+                if (activeCandidates.size() === 0) {
                     for (let index = 0; index < orbs.size(); index++) {
                         const orb = orbs[index];
                         if (orb.assignment !== undefined) {
@@ -374,7 +391,7 @@ export default class Nanobot extends ItemTrait {
                 }
 
                 const infoById = new Map<string, { placementId: string; target: BasePart }>();
-                for (const info of candidates) {
+                for (const info of activeCandidates) {
                     infoById.set(info.placementId, info);
                 }
 
@@ -417,7 +434,9 @@ export default class Nanobot extends ItemTrait {
                     unclaimed[pickIndex] = unclaimed[unclaimed.size() - 1];
                     unclaimed.pop();
 
-                    Nanobot.dispatchOrb(model, anchor, orb, info, nanobot, index);
+                    if (!Nanobot.dispatchOrb(model, anchor, orb, info, nanobot, index)) {
+                        continue;
+                    }
                 }
             },
             1,
@@ -461,7 +480,16 @@ export default class Nanobot extends ItemTrait {
     ) {
         if (orb.assignment?.placementId === info.placementId) {
             orb.assignment.target = info.target;
-            return;
+            return true;
+        }
+
+        if (!Nanobot.claimPlacement(info.placementId, model)) {
+            return false;
+        }
+
+        const previous = orb.assignment;
+        if (previous !== undefined) {
+            Nanobot.releasePlacement(previous.placementId, model);
         }
 
         orb.assignment = { placementId: info.placementId, target: info.target };
@@ -469,6 +497,7 @@ export default class Nanobot extends ItemTrait {
         orb.travelDeadline = os.clock() + RETURN_TWEEN_INFO.Time;
 
         Nanobot.orbPacket.toAllClients(model, { type: "dispatch", index, targetPlacementId: info.placementId });
+        return true;
     }
 
     format(str: string) {
@@ -487,6 +516,10 @@ export default class Nanobot extends ItemTrait {
     private static releaseOrb(model: Model, orb: NanobotOrbState, anchor: BasePart, nanobot: Nanobot, index: number) {
         if (orb.assignment === undefined && !orb.traveling) return;
 
+        const previous = orb.assignment;
+        if (previous !== undefined) {
+            Nanobot.releasePlacement(previous.placementId, model);
+        }
         orb.assignment = undefined;
         orb.traveling = true;
         orb.travelDeadline = os.clock() + RETURN_TWEEN_INFO.Time;
@@ -616,5 +649,26 @@ export default class Nanobot extends ItemTrait {
         const instance = parent.FindFirstChild(placementId);
         if (instance === undefined || !instance.IsA("Model")) return undefined;
         return instance;
+    }
+
+    private static canTargetPlacement(placementId: string, owner: Model) {
+        const current = Nanobot.claimedPlacements.get(placementId);
+        return current === undefined || current === owner;
+    }
+
+    private static claimPlacement(placementId: string, owner: Model) {
+        const current = Nanobot.claimedPlacements.get(placementId);
+        if (current !== undefined && current !== owner) {
+            return false;
+        }
+        Nanobot.claimedPlacements.set(placementId, owner);
+        return true;
+    }
+
+    private static releasePlacement(placementId: string, owner: Model) {
+        const current = Nanobot.claimedPlacements.get(placementId);
+        if (current === owner) {
+            Nanobot.claimedPlacements.delete(placementId);
+        }
     }
 }
