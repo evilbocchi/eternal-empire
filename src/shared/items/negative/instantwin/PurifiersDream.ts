@@ -1,5 +1,6 @@
 import Difficulty from "@rbxts/ejt";
 import { OnoeNum } from "@rbxts/serikanum";
+import { getAllInstanceInfo } from "@antivivi/vrldk";
 import Droplet from "shared/item/Droplet";
 import Dropper from "shared/item/traits/dropper/Dropper";
 import Item from "shared/item/Item";
@@ -20,19 +21,27 @@ export = new Item(script.Name)
     .onLoad((model: Model, item: Item) => {
         const dropper = item.trait(Dropper);
         dropper.onDropletProduced((droplet: BasePart, _dropperItem: Dropper) => {
-            // Find the owner of the dropper
+            // Set FurnaceProcessed callback so when this droplet is processed in a furnace, it increments Purifier Clicks
             const empireOwnerId = model.GetAttribute("EmpireOwner") as number | undefined;
             if (empireOwnerId !== undefined && empireOwnerId !== 0) {
                 const player = game.GetService("Players").GetPlayerByUserId(empireOwnerId);
                 if (player !== undefined) {
-                    // Increment Purifier Clicks for the player
-                    const CurrencyService = Server.Currency;
-                    const data = Server.dataPerPlayer.get(player.UserId);
-                    if (data !== undefined) {
-                        const newRawClicks = ++data.rawPurifierClicks;
-                        Packets.rawPurifierClicks.setFor(player, newRawClicks);
-                        // Optionally, update balance as well
-                        CurrencyService.increment("Purifier Clicks", new OnoeNum(1));
+                    const info = getAllInstanceInfo(droplet);
+                    if (info) {
+                        info.FurnaceProcessed = (
+                            _result: CurrencyBundle,
+                            _genericResult: CurrencyBundle,
+                            _droplet: BasePart,
+                            _dropletInfo: InstanceInfo,
+                        ) => {
+                            const CurrencyService = Server.Currency;
+                            const data = Server.dataPerPlayer.get(player.UserId);
+                            if (data !== undefined) {
+                                const newRawClicks = ++data.rawPurifierClicks;
+                                Packets.rawPurifierClicks.setFor(player, newRawClicks);
+                                CurrencyService.increment("Purifier Clicks", new OnoeNum(1));
+                            }
+                        };
                     }
                 }
             }
