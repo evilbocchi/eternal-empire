@@ -36,7 +36,7 @@ export default class HandCrank extends ItemTrait {
             if (distance > 15) return;
 
             t = os.clock();
-            this.crankedPacket.toAllClients(model);
+            HandCrank.crankedPacket.toAllClients(model);
         };
 
         const proximityPrompt = crankPrimaryPart.FindFirstChildOfClass("ProximityPrompt");
@@ -51,7 +51,7 @@ export default class HandCrank extends ItemTrait {
         const crankPrimaryPart = weldModel(crank);
         const crankPrimaryPartOriginal = crankPrimaryPart.CFrame;
 
-        this.crankedPacket.fromServer(model, () => {
+        HandCrank.crankedPacket.fromServer(model, () => {
             const update = (rotation: number) => {
                 return (crankPrimaryPart.CFrame = crankPrimaryPartOriginal.mul(
                     CFrame.Angles(0, 0, math.rad(rotation)),

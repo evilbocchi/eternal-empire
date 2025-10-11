@@ -32,7 +32,7 @@ export default class LaserFan extends ItemTrait {
             () => {
                 v += (direction ? 1 : -1) * laserFan.speed;
                 const newCframe = original.mul(CFrame.Angles(math.rad(v), 0, 0));
-                this.laserFanChanged.toAllClients(model, newCframe);
+                LaserFan.laserFanChanged.toAllClients(model, newCframe);
                 TweenService.Create(primaryPart, tweenInfo, {
                     CFrame: newCframe,
                 }).Play();
@@ -56,7 +56,7 @@ export default class LaserFan extends ItemTrait {
     static clientLoad(model: Model, laserFan: LaserFan) {
         const motor = model.WaitForChild("Motor") as Model;
         const primaryPart = weldModel(motor);
-        this.laserFanChanged.fromServer(model, (cframe) => {
+        LaserFan.laserFanChanged.fromServer(model, (cframe) => {
             TweenService.Create(primaryPart, tweenInfo, { CFrame: cframe }).Play();
         });
     }

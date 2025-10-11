@@ -197,7 +197,11 @@ export default class Nanobot extends ItemTrait {
 
             orbs.push({ ...state, part });
         }
-        model.Destroying.Once(() => folder.Destroy());
+
+        model.Destroying.Once(() => {
+            folder.Destroy();
+            Nanobot.clientEntries.delete(model);
+        });
         return orbs;
     }
 
