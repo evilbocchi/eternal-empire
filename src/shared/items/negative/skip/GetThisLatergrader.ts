@@ -21,6 +21,7 @@ export = new Item(script.Name)
     .setFormulaX("funds")
     .setFormulaXCap(new CurrencyBundle().set("Funds", 1e50))
 
+    .trait(Upgrader)
     .trait(Damager)
     .setDamage(400)
 

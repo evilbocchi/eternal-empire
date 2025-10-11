@@ -19,7 +19,7 @@ import { Players, TeleportService } from "@rbxts/services";
 import DataService from "server/services/data/DataService";
 import { OnPlayerAdded } from "server/services/ModdingService";
 import ChatHookService from "server/services/permissions/ChatHookService";
-import { IS_EDIT, IS_SINGLE_SERVER } from "shared/Context";
+import { IS_EDIT, IS_SINGLE_SERVER, IS_STUDIO } from "shared/Context";
 import Packets from "shared/Packets";
 
 declare global {
@@ -113,7 +113,8 @@ export default class PermissionsService implements OnStart, OnPlayerAdded {
      */
     getPermissionLevel(userId: number, ignoreTest?: boolean) {
         const data = this.dataService.empireData;
-        if ((game.PlaceId === 16438564807 || game.PlaceId === 77876177882408) && ignoreTest !== true) {
+        const placeId = game.PlaceId;
+        if ((placeId === 16438564807 || placeId === 77876177882408 || IS_STUDIO) && ignoreTest !== true) {
             return 4;
         } else {
             const p = Players.GetPlayerByUserId(userId);
