@@ -22,7 +22,7 @@ export = new Item(script.Name)
     .setMul(new CurrencyBundle().set("Funds", 3.5).set("Power", 3.5))
 
     .trait(Conveyor)
-    .setSpeed(10)
+    .setSpeed(0.5)
     .exit()
 
     .onLoad((model, item) => {
