@@ -1,8 +1,8 @@
+import { formatRichText, getInstanceInfo, setInstanceInfo } from "@antivivi/vrldk";
 import { CURRENCY_DETAILS } from "shared/currency/CurrencyDetails";
 import Item from "shared/item/Item";
 import ItemTrait from "shared/item/traits/ItemTrait";
-import { getInstanceInfo, setInstanceInfo } from "@antivivi/vrldk";
-import { formatRichText } from "@antivivi/vrldk";
+import Upgrader from "shared/item/traits/upgrader/Upgrader";
 
 declare global {
     interface ItemTraits {
@@ -15,7 +15,9 @@ export default class Damager extends ItemTrait {
     variance = 0;
 
     static load(model: Model, damager: Damager) {
-        getInstanceInfo(model, "OnUpgraded")!.connect((droplet) => {
+        const onUpgraded = getInstanceInfo(model, "OnUpgraded");
+        if (!onUpgraded) throw `Damager trait requires OnUpgraded to be present on item ${damager.item.id}`;
+        onUpgraded.connect((droplet) => {
             const health = getInstanceInfo(droplet, "Health") as number | undefined;
             if (health === undefined) {
                 return;
@@ -33,6 +35,7 @@ export default class Damager extends ItemTrait {
     constructor(item: Item) {
         super(item);
         item.onLoad((model) => Damager.load(model, this));
+        item.trait(Upgrader);
     }
 
     setDamage(damage: number) {
