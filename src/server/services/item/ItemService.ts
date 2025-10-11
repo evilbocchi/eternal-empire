@@ -60,6 +60,10 @@ const baseplateBounds = Sandbox.createBaseplateBounds();
 /** Queue for serializing item placement operations to prevent race conditions. */
 const queue = new Array<() => void>();
 
+type ItemInstanceInfo = InstanceInfo & {
+    PlacementId?: string;
+};
+
 /**
  * Core service for managing items, inventory, and item placement in the game world.
  *
@@ -85,6 +89,7 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
     private hasUniqueChanged = false;
     private hasBoughtChanged = false;
     private hasPlacedChanged = false;
+    breakdownsEnabled = true;
 
     // Signals
 
@@ -168,7 +173,7 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
 
     private hasUnlockedRequiredShop(item: Item) {
         const shops = this.getShopsSellingItem(item);
-        if (shops.size() === 0) {
+        if (shops.isEmpty()) {
             return true;
         }
 
@@ -179,7 +184,7 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
             }
         }
 
-        if (pricedShops.size() === 0 || pricedShops.size() !== shops.size()) {
+        if (pricedShops.isEmpty() || pricedShops.isEmpty() !== shops.isEmpty()) {
             return true;
         }
 
@@ -189,6 +194,7 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
             }
         }
 
+        print(`Item ${item.id} requires a shop to be unlocked.`);
         return false;
     }
 
@@ -388,6 +394,14 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
      * @param placedItem Placed item to add an item model for
      * @returns The model that was added, or undefined if it already exists.
      */
+    private getPlacementInstanceInfo(placementId: string, model: Model) {
+        const modelInfo = getAllInstanceInfo(model) as ItemInstanceInfo;
+        if (modelInfo.PlacementId === undefined) {
+            modelInfo.PlacementId = placementId;
+        }
+        return modelInfo;
+    }
+
     private addItemModel(placementId: string, placedItem: PlacedItem) {
         if (this.modelPerPlacementId.has(placementId) || this.IS_RENDERING === true) return;
 
@@ -405,7 +419,7 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
         model.Parent = PLACED_ITEMS_FOLDER;
         this.modelPerPlacementId.set(placementId, model);
 
-        const modelInfo = getAllInstanceInfo(model);
+        const modelInfo = this.getPlacementInstanceInfo(placementId, model);
         if (this.brokenPlacedItems.has(placementId)) {
             modelInfo.Broken = true;
         }
@@ -832,7 +846,7 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
 
             const model = this.modelPerPlacementId.get(placementId);
             if (model) {
-                const modelInfo = getAllInstanceInfo(model);
+                const modelInfo = this.getPlacementInstanceInfo(placementId, model);
                 modelInfo.Broken = true;
                 clearRepairBoostFromModel(modelInfo);
             }
@@ -860,14 +874,12 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
         const model = this.modelPerPlacementId.get(placementId);
         if (!model) return false;
 
-        const modelInfo = getAllInstanceInfo(model);
+        const modelInfo = this.getPlacementInstanceInfo(placementId, model);
         modelInfo.Broken = false;
 
-        let protectionExpiresAt: number | undefined;
         if (isProtectionTier(tier)) {
             const expiresAt = os.time() + REPAIR_PROTECTION_DURATIONS[tier];
             this.repairProtection.set(placementId, { tier, expiresAt });
-            protectionExpiresAt = expiresAt;
 
             const itemId = this.worldPlaced.get(placementId)?.item;
             if (itemId === undefined) return false;
@@ -988,7 +1000,7 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
         const ref = { interval: 10 };
         const rng = new Random();
         const cleanup = variableInterval(() => {
-            if (this.dataService.empireData.playtime < 300) {
+            if (this.dataService.empireData.playtime < 300 || this.breakdownsEnabled === false) {
                 return; // don't break items in first 5 minutes
             }
 

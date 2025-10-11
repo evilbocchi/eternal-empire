@@ -1,5 +1,5 @@
-import { BaseOnoeNum, OnoeNum } from "@rbxts/serikanum";
 import React, { Fragment, useEffect, useRef, useState } from "@rbxts/react";
+import { OnoeNum } from "@rbxts/serikanum";
 import BalanceOption, { balanceOptionImagePerCurrency } from "client/components/balance/BalanceOption";
 import NavigationControls from "client/components/balance/NavigationControls";
 import { useDocument } from "client/components/window/DocumentManager";
@@ -170,12 +170,16 @@ export default function BalanceWindow() {
                 const currencyBalance = balance.get(currency);
                 const incomeAmount = revenue.get(currency);
                 const differenceAmount = difference.get(currency);
+                let amount = currencyBalance === undefined ? undefined : new OnoeNum(currencyBalance);
+                if (amount === undefined || amount.lessEquals(0)) {
+                    amount = new OnoeNum(0);
+                }
 
                 return (
                     <BalanceOption
                         key={currency}
                         currency={currency}
-                        amount={new OnoeNum(currencyBalance ?? 0)}
+                        amount={amount}
                         income={incomeAmount ? new OnoeNum(incomeAmount) : undefined}
                         difference={differenceAmount ? new OnoeNum(differenceAmount) : undefined}
                         bombBoost={bombBoosts?.get(currency)}

@@ -17,5 +17,6 @@ export = new Command(script.Name)
         CommandAPI.Level.setLevel(1);
         CommandAPI.Level.setXp(0);
         CommandAPI.ChatHook.sendServerMessage("True reset complete. The shop is in your inventory.");
+        CommandAPI.Item.requestChanges();
     })
     .setPermissionLevel(4);
