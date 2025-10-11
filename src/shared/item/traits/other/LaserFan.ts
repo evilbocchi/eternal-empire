@@ -31,10 +31,10 @@ export default class LaserFan extends ItemTrait {
             model,
             () => {
                 v += (direction ? 1 : -1) * laserFan.speed;
-                const newCframe = original.mul(CFrame.Angles(math.rad(v), 0, 0));
-                LaserFan.laserFanChanged.toAllClients(model, newCframe);
+                const newCFrame = original.mul(CFrame.Angles(math.rad(v), 0, 0));
+                LaserFan.laserFanChanged.toAllClients(model, newCFrame);
                 TweenService.Create(primaryPart, tweenInfo, {
-                    CFrame: newCframe,
+                    CFrame: newCFrame,
                 }).Play();
             },
             0.1,

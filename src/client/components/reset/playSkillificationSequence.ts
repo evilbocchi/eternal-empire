@@ -203,9 +203,9 @@ async function fadeOutBlackScreenAndStartCameraSequence(
     // Start the original camera sequence
     currentCamera.CameraType = Enum.CameraType.Scriptable;
     const instance = AREAS.BarrenIslands.worldNode.waitForInstance().WaitForChild("ResetCamera");
-    const toCframe = (instance as BasePart).CFrame;
+    const toCFrame = (instance as BasePart).CFrame;
     TweenService.Create(currentCamera, new TweenInfo(1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-        CFrame: toCframe,
+        CFrame: toCFrame,
     }).Play();
 
     // Clean up the dramatic intro GUI after 1 second

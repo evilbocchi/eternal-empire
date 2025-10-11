@@ -172,11 +172,11 @@ class StoryMocking {
             if (pivotAroundCamera) {
                 connection = RunService.Heartbeat.Connect(() => {
                     if (!newRig || !newRig.Parent || !newRig.PrimaryPart) return;
-                    const cameraCframe = Workspace.CurrentCamera?.CFrame;
-                    if (!cameraCframe) return;
-                    const modelPosition = cameraCframe.Position.sub(new Vector3(0, 10, 0));
+                    const cameraCFrame = Workspace.CurrentCamera?.CFrame;
+                    if (!cameraCFrame) return;
+                    const modelPosition = cameraCFrame.Position.sub(new Vector3(0, 10, 0));
                     // Offset the model forward a bit so it faces the camera
-                    newRig.PivotTo(new CFrame(modelPosition.add(cameraCframe.LookVector.mul(10))));
+                    newRig.PivotTo(new CFrame(modelPosition.add(cameraCFrame.LookVector.mul(10))));
                 });
             }
 
