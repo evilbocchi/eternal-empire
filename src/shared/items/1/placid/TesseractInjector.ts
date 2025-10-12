@@ -11,13 +11,13 @@ const mul = new CurrencyBundle();
 export = new Item(script.Name)
     .setName("Tesseract Injector")
     .setDescription(
-        "A device used to inject Tesseract energy into objects, enhancing their properties and capabilities.",
+        "An upgrader that uses the energy of Tesseracts, allowing it to boost Bitcoin at an extremely small rate.",
     )
     .setDifficulty(Difficulty.Placid)
     .setPrice(new CurrencyBundle().set("Bitcoin", 100e27))
     .addPlaceableArea("SlamoVillage")
     .setCreator("WelshRedBird")
-    .persists()
+    .persists("Winification")
 
     .setFormula(new Formula().pow(0.01))
     .setFormulaX("Dark Matter")
