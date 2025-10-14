@@ -39,6 +39,7 @@ import ToastManager from "client/components/toast/ToastManager";
 import TooltipWindow from "client/components/tooltip/TooltipWindow";
 import DocumentManager from "client/components/window/DocumentManager";
 import WorldRenderer from "client/components/world/WorldRenderer";
+import DebugOverlay from "client/components/debug/DebugOverlay";
 import { setVisibilityMain } from "client/hooks/useVisibility";
 import MusicManager from "client/MusicManager";
 import { assets, getAsset } from "shared/asset/AssetMap";
@@ -113,6 +114,8 @@ function waitForFrames(frameCount = 3): Promise<void> {
 export default function App() {
     useEffect(() => {
         const roots = new Set<Root>();
+        addRoot(roots, createScreenGui("DebugOverlay", 100, false)).render(<DebugOverlay />);
+
         addRoot(roots, createScreenGui("Start", 20)).render(<StartWindow />);
 
         addRoot(roots, createScreenGui("PlayerList", 15)).render(<PlayerListContainer />);

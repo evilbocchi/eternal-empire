@@ -57,6 +57,15 @@ declare global {
 const unloadedSettings = table.clone(PlayerProfileTemplate.settings);
 unloadedSettings.Music = false; // disable music until we load settings
 
+type DebugStatsPayload = {
+    serverTps: number;
+    entityCount: number;
+    playerCount: number;
+    uptimeSeconds: number;
+    jobId: string;
+    lastUpdated: number;
+};
+
 namespace Packets {
     // data management
 
@@ -254,6 +263,17 @@ namespace Packets {
     export const pillarPuzzleSequence = property<number[]>([]);
     export const submitPuzzleAnswer = packet<(answer: number[]) => boolean>();
     export const startPillarPuzzle = packet<(pillarNumber: number) => void>();
+
+    // debug
+    export const debugStats = property<DebugStatsPayload>({
+        serverTps: 0,
+        entityCount: 0,
+        playerCount: 0,
+        uptimeSeconds: 0,
+        jobId: "",
+        lastUpdated: 0,
+    });
+    export const debugPing = packet<() => void>({ isUnreliable: true });
 }
 
 export = Packets;
