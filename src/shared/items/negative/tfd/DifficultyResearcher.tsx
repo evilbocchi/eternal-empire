@@ -1983,7 +1983,7 @@ export = new Item(script.Name)
         const imagePart = model.WaitForChild("DifficultyImage") as BasePart;
         const namePart = model.WaitForChild("DifficultyName") as BasePart;
         const orbPart = model.WaitForChild("Orb") as OrbPart;
-        const vortex = orbPart.WaitForChild("Vortex") as Part;
+        const vortex = model.WaitForChild("Vortex") as Part;
         root.render(
             <DifficultyResearcherGui
                 selectPart={selectPart}
