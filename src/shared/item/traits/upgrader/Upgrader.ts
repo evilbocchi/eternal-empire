@@ -1,3 +1,5 @@
+//!native
+//!optimize 2
 import Signal from "@antivivi/lemon-signal";
 import { findBaseParts, getAllInstanceInfo, setInstanceInfo, simpleInterval } from "@antivivi/vrldk";
 import { exactSetProperty } from "@rbxts/fletchette";
