@@ -1,7 +1,7 @@
 import ComputeNameColor from "@antivivi/rbxnamecolor";
 import { convertToHHMMSS } from "@antivivi/vrldk";
 import React, { useCallback, useEffect, useRef, useState } from "@rbxts/react";
-import { Players } from "@rbxts/services";
+import { Players, StarterGui } from "@rbxts/services";
 import { showErrorToast } from "client/components/toast/ToastService";
 import MenuOption, { BaseMenuOption } from "client/components/start/MenuOption";
 import { RobotoSlab, RobotoSlabBold, RobotoSlabHeavy } from "shared/asset/GameFonts";
@@ -9,6 +9,10 @@ import useProperty from "client/hooks/useProperty";
 import { playSound } from "shared/asset/GameAssets";
 import { getNameFromUserId } from "shared/constants";
 import Packets from "shared/Packets";
+import LoadingScreen from "sharedfirst/LoadingScreen";
+import { PLAYER_GUI } from "client/constants";
+import { IS_EDIT } from "shared/Context";
+import eat from "shared/hamster/eat";
 
 /**
  * Individual empire option component
@@ -49,7 +53,22 @@ function EmpireOption({ empireId, empireInfo }: { empireId: string; empireInfo: 
             size={new UDim2(0.12, 500, 0, 120)}
             onClick={() => {
                 playSound("MenuClick.mp3");
-                Packets.teleportToEmpire.toServer(empireId);
+                let screenGui: ScreenGui | undefined;
+                if (IS_EDIT) {
+                    screenGui = new Instance("ScreenGui");
+                    screenGui.IgnoreGuiInset = true;
+                    screenGui.ResetOnSpawn = false;
+                    screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling;
+                    screenGui.Parent = StarterGui;
+                    eat(screenGui, "Destroy");
+                }
+                LoadingScreen.showLoadingScreen("", false, screenGui);
+                const [success, result] = pcall(() => Packets.teleportToEmpire.toServer(empireId));
+                if (!success || !result) {
+                    LoadingScreen.hideLoadingScreen();
+                    showErrorToast(`Failed to join empire: ${result ?? "Unknown error"}`);
+                    playSound("Error.mp3");
+                }
             }}
             fast={true}
         >
