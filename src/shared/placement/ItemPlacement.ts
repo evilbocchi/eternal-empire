@@ -91,7 +91,10 @@ namespace ItemPlacement {
         if (item.bounds === undefined) {
             return ItemPlacement.getArea(itemModel, item.placeableAreas) !== undefined;
         } else {
-            const primaryPart = itemModel.PrimaryPart!;
+            const primaryPart = itemModel.PrimaryPart;
+            if (primaryPart === undefined) {
+                return false;
+            }
             for (const touching of Workspace.GetPartBoundsInBox(
                 primaryPart.CFrame,
                 primaryPart.Size.add(new Vector3(1, 10, 1)),
