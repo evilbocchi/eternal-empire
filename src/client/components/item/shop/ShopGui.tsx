@@ -27,7 +27,7 @@ export default function ShopGui() {
     const [hideMaxedItems, setHideMaxedItems] = useState(Packets.settings.get().HideMaxedItems);
     const [focusShopCamera, setFocusShopCamera] = useState(Packets.settings.get().FocusShopCamera === true);
     const ownedPerItem = useProperty(Packets.bought) ?? new Map<string, number>();
-    const playerLevel = useProperty(Packets.level);
+    const empireLevel = useProperty(Packets.level);
     const shopItems = shop?.items ?? new Set<Item>();
     const scrollingFrameRef = useRef<ScrollingFrame>();
     const itemSlotsRef = useRef(new Map<string, ShopSlotHandle>());
@@ -147,10 +147,10 @@ export default function ShopGui() {
                 hideMaxedItems,
                 ownedAmount,
                 onActivated: handleItemClick,
-                playerLevel: playerLevel ?? 0,
+                empireLevel: empireLevel ?? 0,
             });
         }
-    }, [dataPerItem, shopItems, hideMaxedItems, ownedPerItem, handleItemClick, playerLevel]);
+    }, [dataPerItem, shopItems, hideMaxedItems, ownedPerItem, handleItemClick, empireLevel]);
 
     const { events } = useHotkeyWithTooltip({
         action: () => {

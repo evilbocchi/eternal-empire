@@ -262,7 +262,7 @@ const EmpireProfileTemplate = {
     /**
      * The current empire's level.
      */
-    level: 1,
+    level: 0,
 
     /**
      * The current experience points of the empire. This value resets after every level up.

@@ -4,6 +4,7 @@ import { questState } from "client/components/quest/QuestState";
 import { PLAYER_GUI } from "client/constants";
 import { setVisibilityMain } from "client/hooks/useVisibility";
 import MusicManager from "client/MusicManager";
+import type NewBeginnings from "server/quests/NewBeginnings";
 import { playSound } from "shared/asset/GameAssets";
 import { WAYPOINTS } from "shared/constants";
 import { IS_EDIT } from "shared/Context";
@@ -20,15 +21,15 @@ function exit() {
 }
 
 /**
- * Plays the intro cutscene sequence, including camera, animation, and UI transitions.
+ * Plays the cutscene sequence that happens in the {@link NewBeginnings} quest.
  */
-export default function performIntroSequence() {
-    Workspace.SetAttribute("Start", false);
-    if (ReplicatedStorage.GetAttribute("Intro") !== true) return exit();
+export default function performNewBeginningsWakeUp() {
+    Workspace.SetAttribute("Title", false);
+    if (ReplicatedStorage.GetAttribute("NewBeginningsWakingUp") !== true) return exit();
     if (isIntroSequenceDone === true) return exit();
 
-    const connection = ReplicatedStorage.GetAttributeChangedSignal("Intro").Connect(() => {
-        if (ReplicatedStorage.GetAttribute("Intro") === false) {
+    const connection = ReplicatedStorage.GetAttributeChangedSignal("NewBeginningsWakingUp").Connect(() => {
+        if (ReplicatedStorage.GetAttribute("NewBeginningsWakingUp") === false) {
             connection.Disconnect();
             exit();
         }
@@ -39,7 +40,7 @@ export default function performIntroSequence() {
     screenGui.IgnoreGuiInset = true;
     screenGui.ResetOnSpawn = false;
     screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling;
-    screenGui.Name = "Intro";
+    screenGui.Name = "NewBeginningsWakingUp";
     screenGui.DisplayOrder = 30;
     screenGui.Parent = PLAYER_GUI;
     if (IS_EDIT) {

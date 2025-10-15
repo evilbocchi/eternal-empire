@@ -49,7 +49,7 @@ export = new Quest(script.Name)
             .onReached((stage) => {
                 Tria.rootPart!.CFrame = Tria.startingCFrame;
                 Tria.playAnimation("Default");
-                ReplicatedStorage.SetAttribute("Intro", true);
+                ReplicatedStorage.SetAttribute("NewBeginningsWakingUp", true);
 
                 const continuation = new Dialogue(
                     Tria,
@@ -77,7 +77,7 @@ export = new Quest(script.Name)
             .onReached((stage) => {
                 Tria.rootPart!.CFrame = Tria.startingCFrame;
                 Tria.stopAnimation("Default");
-                ReplicatedStorage.SetAttribute("Intro", false);
+                ReplicatedStorage.SetAttribute("NewBeginningsWakingUp", false);
 
                 task.wait(1);
 

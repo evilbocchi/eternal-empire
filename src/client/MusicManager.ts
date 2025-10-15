@@ -14,8 +14,8 @@ namespace MusicManager {
     MUSIC_GROUP.Volume = 1;
     MUSIC_GROUP.Parent = IS_EDIT ? Environment.PluginWidget : SoundService;
 
-    export const START_MUSIC = (ASSETS.WaitForChild("JJT Money Empire!") as Sound).Clone();
-    START_MUSIC.Parent = MUSIC_GROUP;
+    export const TITLE_SCREEN_MUSIC = (ASSETS.WaitForChild("Eternal Empire") as Sound).Clone();
+    TITLE_SCREEN_MUSIC.Parent = MUSIC_GROUP;
 
     for (const [id, area] of pairs(AREAS)) {
         const areaBounds = area.areaBoundsWorldNode?.getInstance();
@@ -91,7 +91,7 @@ namespace MusicManager {
             sound.Play();
         }
         TweenService.Create(sound, new TweenInfo(1), {
-            Volume: (sound.GetAttribute("OriginalVolume") as number) ?? 0.5,
+            Volume: (sound.GetAttribute("OriginalVolume") as number) ?? 1,
         }).Play();
         playing = sound;
         return sound;
@@ -100,8 +100,8 @@ namespace MusicManager {
     export function refreshMusic(force?: boolean) {
         let retrieved: Sound | undefined;
         let area: AreaId | undefined;
-        if (Workspace.GetAttribute("Start") === true) {
-            retrieved = START_MUSIC;
+        if (Workspace.GetAttribute("Title") === true) {
+            retrieved = TITLE_SCREEN_MUSIC;
         }
         area = Packets.currentArea.get();
 
@@ -114,7 +114,7 @@ namespace MusicManager {
         }
 
         if (retrieved === undefined) {
-            if (area === undefined || ReplicatedStorage.GetAttribute("Intro")) return;
+            if (area === undefined || ReplicatedStorage.GetAttribute("NewBeginningsWakingUp")) return;
             retrieved = getRandomMusic(area);
         }
 

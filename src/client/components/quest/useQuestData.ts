@@ -21,7 +21,7 @@ export interface QuestActions {
 export function useQuestData(): QuestHookData & QuestActions & { trackedQuest: string | undefined } {
     const [questInfo, setQuestInfo] = useState(Packets.questInfo.get() || new Map<string, QuestInfo>());
     const [stagePerQuest, setStagePerQuest] = useState(Packets.stagePerQuest.get() || new Map<string, number>());
-    const [level, setLevel] = useState(Packets.level.get() || 0);
+    const [level, setLevel] = useState(Packets.level.get());
     const [xp, setXp] = useState(Packets.xp.get() || 0);
     const [trackedQuest, setTrackedQuest] = useState<string | undefined>(questState.getTrackedQuest());
 

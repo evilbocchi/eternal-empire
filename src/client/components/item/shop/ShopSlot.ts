@@ -218,7 +218,7 @@ export interface UpdateShopSlotOptions {
     hideMaxedItems?: boolean;
     ownedAmount: number;
     onActivated?: (item: Item) => void;
-    playerLevel?: number;
+    empireLevel?: number;
 }
 
 export type ShopSlotHandle = {
@@ -466,7 +466,7 @@ export function updateShopSlot(handle: ShopSlotHandle, options: UpdateShopSlotOp
         hideMaxedItems = false,
         ownedAmount,
         onActivated,
-        playerLevel,
+        empireLevel,
     } = options;
 
     if (parent && handle.root.Parent !== parent) {
@@ -494,7 +494,7 @@ export function updateShopSlot(handle: ShopSlotHandle, options: UpdateShopSlotOp
     }
 
     const levelRequirement = handle.item.levelReq;
-    const currentLevel = playerLevel ?? 0;
+    const currentLevel = empireLevel ?? 0;
     const isLocked = levelRequirement !== undefined && currentLevel < levelRequirement;
     handle.isLocked = isLocked;
     handle.button.AutoButtonColor = !isLocked;

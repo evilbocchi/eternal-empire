@@ -3,7 +3,7 @@ import ReactRoblox from "@rbxts/react-roblox";
 import { ReplicatedStorage } from "@rbxts/services";
 import { CreateReactStory } from "@rbxts/ui-labs";
 import App from "client/components/App";
-import performIntroSequence from "client/components/start/performIntroSequence";
+import performNewBeginningsWakeUp from "client/components/start/performNewBeginningsWakeUp";
 import StoryMocking from "client/components/StoryMocking";
 import Packets from "shared/Packets";
 /**
@@ -16,11 +16,11 @@ export = CreateReactStory(
     },
     () => {
         Packets.getLogs.toServer = () => [];
-        ReplicatedStorage.SetAttribute("Intro", undefined);
+        ReplicatedStorage.SetAttribute("NewBeginningsWakingUp", undefined);
         StoryMocking.mockCharacter(false);
 
         useEffect(() => {
-            return () => ReplicatedStorage.SetAttribute("Intro", undefined);
+            return () => ReplicatedStorage.SetAttribute("NewBeginningsWakingUp", undefined);
         }, []);
 
         return (
@@ -32,8 +32,8 @@ export = CreateReactStory(
                     Position={new UDim2(0.5, 0, 0, 0)}
                     Event={{
                         MouseButton1Click: () => {
-                            ReplicatedStorage.SetAttribute("Intro", true);
-                            performIntroSequence();
+                            ReplicatedStorage.SetAttribute("NewBeginningsWakingUp", true);
+                            performNewBeginningsWakeUp();
                         },
                     }}
                 />

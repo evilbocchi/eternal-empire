@@ -108,7 +108,7 @@ export default function AboutWindow({
             <imagelabel
                 AnchorPoint={new Vector2(0.5, 0)}
                 BackgroundTransparency={1}
-                Image={getAsset("assets/LogoSmall.png")}
+                Image={getAsset("assets/brand/Wordmark.png")}
                 Position={new UDim2(0.15, 0, 0, 0)}
                 ScaleType={Enum.ScaleType.Fit}
                 Size={new UDim2(1, 0, 0.25, 0)}
@@ -123,6 +123,7 @@ export default function AboutWindow({
                 TextColor3={Color3.fromRGB(199, 199, 199)}
                 TextSize={20}
             >
+                <uistroke Thickness={1.5} />
                 <uipadding PaddingTop={new UDim(0, -25)} />
             </textlabel>
 
@@ -133,7 +134,7 @@ export default function AboutWindow({
                 BackgroundTransparency={1}
                 FontFace={RobotoSlabMedium}
                 Size={new UDim2(0.65, 0, 0, 0)}
-                Text="JME is an incremental-style tycoon building game designed off the EToH Joke Towers Difficulty Chart. Containing various MMO, RPG and Clicker aspects, how will you rise to the top of this capitalistic world?"
+                Text="Eternal Empire is an incremental-style tycoon building game designed off the EToH Joke Towers Difficulty Chart. Containing various MMO, RPG and Clicker aspects, how will you rise to the top of this capitalistic world?"
                 TextColor3={Color3.fromRGB(255, 255, 255)}
                 TextSize={30}
                 TextWrapped={true}
@@ -182,7 +183,7 @@ export default function AboutWindow({
                         FontFace={RobotoSlabBold}
                         LayoutOrder={2}
                         Size={new UDim2(1, 0, 0.35, 0)}
-                        Text="Creator & Developer of JJT Money Empire"
+                        Text="Creator & Developer"
                         TextColor3={Color3.fromRGB(255, 255, 255)}
                         TextScaled={true}
                         TextSize={50}

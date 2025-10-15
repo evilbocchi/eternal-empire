@@ -11,7 +11,7 @@ import Packets from "shared/Packets";
 
 export default function LevelUpManager() {
     const [levelUpData, setLevelUpData] = useState<LevelUpData>({
-        level: 1,
+        level: 0,
         visible: false,
     });
     const [previousLevel, setPreviousLevel] = useState<number | undefined>(undefined);

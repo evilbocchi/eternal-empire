@@ -1,7 +1,7 @@
 /**
  * @fileoverview Broadcasts lightweight server metrics for the client debug overlay.
  */
-import { OnStart, Service } from "@flamework/core";
+import { OnInit, OnStart, Service } from "@flamework/core";
 import { Players, RunService, Workspace } from "@rbxts/services";
 import Packets from "shared/Packets";
 import eat from "shared/hamster/eat";
@@ -14,20 +14,11 @@ interface RollingHeartbeat {
 const INITIAL_STATS = Packets.debugStats.get();
 
 @Service()
-export default class DebugStatsService implements OnStart {
+export default class DebugStatsService implements OnInit, OnStart {
     private heartbeat: RollingHeartbeat = { samples: 0, elapsed: 0 };
     private readonly jobId = game.JobId;
 
-    onStart() {
-        Packets.debugStats.set({
-            ...INITIAL_STATS,
-            jobId: this.jobId,
-            uptimeSeconds: Workspace.GetServerTimeNow(),
-            playerCount: Players.GetPlayers().size(),
-            entityCount: Workspace.GetDescendants().size(),
-            lastUpdated: DateTime.now().UnixTimestampMillis,
-        });
-
+    onInit() {
         const heartbeatConnection = RunService.Heartbeat.Connect((deltaTime) => {
             this.heartbeat.samples += 1;
             this.heartbeat.elapsed += deltaTime;
@@ -57,5 +48,16 @@ export default class DebugStatsService implements OnStart {
             return;
         });
         eat(pingConnection, "Disconnect");
+    }
+
+    onStart() {
+        Packets.debugStats.set({
+            ...INITIAL_STATS,
+            jobId: this.jobId,
+            uptimeSeconds: Workspace.GetServerTimeNow(),
+            playerCount: Players.GetPlayers().size(),
+            entityCount: Workspace.GetDescendants().size(),
+            lastUpdated: DateTime.now().UnixTimestampMillis,
+        });
     }
 }

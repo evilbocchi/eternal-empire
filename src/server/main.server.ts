@@ -1,4 +1,5 @@
 import { Players, RunService } from "@rbxts/services";
+import { IS_PUBLIC_SERVER } from "shared/Context";
 
 const IS_EDIT = RunService.IsStudio() && (!RunService.IsRunning() || (RunService.IsServer() && RunService.IsClient()));
 if (!IS_EDIT) {
@@ -19,7 +20,7 @@ if (!IS_EDIT) {
     }
     context.igniteFlameworkServer();
 
-    if (!Sandbox.getEnabled()) {
+    if (!Sandbox.getEnabled() && !IS_PUBLIC_SERVER) {
         Players.CharacterAutoLoads = true;
         for (const player of Players.GetPlayers()) {
             player.LoadCharacter();

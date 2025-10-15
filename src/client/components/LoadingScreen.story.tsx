@@ -28,6 +28,8 @@ export = CreateReactStory(
             };
         }, []);
 
+        if (!screenGui) return <Fragment />;
+
         if (props.controls.visible) {
             LoadingScreen.showLoadingScreen(props.controls.text, false, screenGui);
         } else {

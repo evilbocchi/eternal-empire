@@ -32,8 +32,8 @@ import ResetRenderer from "client/components/reset/ResetRenderer";
 import CopyWindow from "client/components/settings/CopyWindow";
 import SettingsManager from "client/components/settings/SettingsManager";
 import SidebarButtons from "client/components/sidebar/SidebarButtons";
-import performIntroSequence from "client/components/start/performIntroSequence";
-import StartWindow from "client/components/start/StartWindow";
+import performNewBeginningsWakeUp from "client/components/start/performNewBeginningsWakeUp";
+import TitleScreen from "client/components/start/TitleScreen";
 import StatsWindow from "client/components/stats/StatsWindow";
 import ToastManager from "client/components/toast/ToastManager";
 import TooltipWindow from "client/components/tooltip/TooltipWindow";
@@ -116,7 +116,7 @@ export default function App() {
         const roots = new Set<Root>();
         addRoot(roots, createScreenGui("DebugOverlay", 100, false)).render(<DebugOverlay />);
 
-        addRoot(roots, createScreenGui("Start", 20)).render(<StartWindow />);
+        addRoot(roots, createScreenGui("Title", 20)).render(<TitleScreen />);
 
         addRoot(roots, createScreenGui("PlayerList", 15)).render(<PlayerListContainer />);
 
@@ -167,7 +167,7 @@ export default function App() {
         addRoot(roots, createFolder("UpgradeBoard")).render(<UpgradeBoardRenderer />);
         addRoot(roots, createFolder("World")).render(<WorldRenderer />);
 
-        Workspace.SetAttribute("Start", IS_PUBLIC_SERVER);
+        Workspace.SetAttribute("Title", IS_PUBLIC_SERVER);
         const cleanup = MusicManager.init();
 
         task.delay(1, () => {
@@ -176,11 +176,11 @@ export default function App() {
 
                 task.delay(0.5, () => {
                     if (IS_PUBLIC_SERVER) {
-                        DocumentManager.setVisible("Start", true);
+                        DocumentManager.setVisible("Title", true);
                     } else if (Sandbox.getEnabled()) {
                         setVisibilityMain(true);
                     } else {
-                        performIntroSequence();
+                        performNewBeginningsWakeUp();
                     }
                 });
             });

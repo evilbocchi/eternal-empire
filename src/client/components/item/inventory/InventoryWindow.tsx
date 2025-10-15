@@ -74,7 +74,7 @@ export function getBestUniqueInstances(uniqueInstances: Map<string, UniqueItemIn
  */
 export function activateItem(item: Item): boolean {
     const isPlaceable = item.placeableAreas.size() > 0 || item.bounds !== undefined;
-    const level = Packets.level.get() ?? 0;
+    const level = Packets.level.get();
 
     // Check restrictions
     if (BuildManager.getRestricted() === true || BuildManager.hasSelection() === true || isPlaceable === false) {

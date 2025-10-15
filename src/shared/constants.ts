@@ -14,7 +14,7 @@ export function getDisplayName(humanoid: Humanoid) {
 
 /**
  * Calculates the XP needed to reach the next level based on the current level.
- * @see https://www.desmos.com/calculator/sqm2qsz4en for the formula graph
+ * @see https://www.desmos.com/calculator/dukqdmjbas for the formula graph
  * @param currentLevel The player's current level.
  * @returns The maximum XP required to reach the next level.
  */
