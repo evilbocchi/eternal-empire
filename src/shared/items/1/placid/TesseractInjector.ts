@@ -1,10 +1,10 @@
 import Difficulty from "@rbxts/ejt";
+import { Server } from "shared/api/APIExpose";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
+import Formula from "shared/currency/Formula";
 import Item from "shared/item/Item";
 import Upgrader from "shared/item/traits/upgrader/Upgrader";
-import Formula from "shared/currency/Formula";
-import { Server } from "shared/api/APIExpose";
-import Class1Shop from "../Class1Shop";
+import Class1Shop from "shared/items/1/Class1Shop";
 
 const mul = new CurrencyBundle();
 
@@ -18,6 +18,7 @@ export = new Item(script.Name)
     .addPlaceableArea("SlamoVillage")
     .setCreator("WelshRedBird")
     .persists("Winification")
+    .soldAt(Class1Shop)
 
     .setFormula(new Formula().pow(0.01))
     .setFormulaX("Dark Matter")
