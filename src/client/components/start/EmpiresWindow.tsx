@@ -313,7 +313,7 @@ export default function EmpiresWindow({ exitStart, onClose }: { exitStart: () =>
                     TextXAlignment={Enum.TextXAlignment.Left}
                     ZIndex={2}
                 >
-                    <uistroke key={"UIStroke"} Thickness={3} />
+                    <uistroke Thickness={3} />
                 </textlabel>
                 <textlabel
                     Active={true}
@@ -329,7 +329,7 @@ export default function EmpiresWindow({ exitStart, onClose }: { exitStart: () =>
                     TextWrapped={true}
                     TextXAlignment={Enum.TextXAlignment.Left}
                 >
-                    <uistroke key={"UIStroke"} Thickness={2} />
+                    <uistroke Thickness={2} />
                 </textlabel>
             </BaseMenuOption>
         </frame>

@@ -1,12 +1,13 @@
 import React, { Fragment, useCallback, useEffect, useRef, useState } from "@rbxts/react";
-import { TweenService, Workspace } from "@rbxts/services";
+import { RunService, TweenService } from "@rbxts/services";
 import SingleDocumentManager from "client/components/sidebar/SingleDocumentManager";
 import AboutWindow from "client/components/start/AboutWindow";
 import EmpiresWindow from "client/components/start/EmpiresWindow";
 import MenuOption from "client/components/start/MenuOption";
-import performNewBeginningsWakeUp from "client/components/start/performNewBeginningsWakeUp";
+import { showErrorToast } from "client/components/toast/ToastService";
 import DocumentManager, { useDocument } from "client/components/window/DocumentManager";
 import { LOCAL_PLAYER } from "client/constants";
+import { setVisibilityMain } from "client/hooks/useVisibility";
 import { getAsset } from "shared/asset/AssetMap";
 import { playSound } from "shared/asset/GameAssets";
 import { RobotoMonoBold } from "shared/asset/GameFonts";
@@ -20,17 +21,15 @@ import StartCamera from "shared/world/nodes/StartCamera";
  */
 export default function TitleScreen({ fastTransitions = false }: { fastTransitions?: boolean }) {
     const logoRef = useRef<ImageLabel>();
-    const mainMenuRef = useRef<Frame>();
     const { visible, setVisible } = useDocument({ id: "Title" });
     const [currentView, setCurrentView] = useState<"main" | "empires" | "about" | "none">("main");
-    const [isAnimating, setIsAnimating] = useState(false);
     const [hasEnteredScreen, setHasEnteredScreen] = useState(false);
     const firstRenderTime = useRef<number>(fastTransitions ? 0 : os.clock());
 
     // Helper function to determine if we should use fast animations
     const shouldUseFastAnimations = useCallback(() => {
         const timeSinceFirstRender = os.clock() - firstRenderTime.current;
-        return timeSinceFirstRender > 5; // Fast mode after 5 seconds
+        return timeSinceFirstRender > 1;
     }, []);
 
     const logoTweenInInfo = new TweenInfo(1, Enum.EasingStyle.Back, Enum.EasingDirection.Out);
@@ -72,40 +71,25 @@ export default function TitleScreen({ fastTransitions = false }: { fastTransitio
     // Handle smooth transitions between views
     const transitionToView = useCallback(
         (view: "main" | "empires" | "about" | "none") => {
-            if (isAnimating) return;
-
             setCurrentView(view);
-            setIsAnimating(true);
 
-            // If transitioning away from main, hide title screen with animation
-            if (currentView === "main" && view !== "main") {
+            const logo = logoRef.current;
+            if (!logo) return;
+
+            if (view === "none" || view === "about") {
                 const tweenInfo = new TweenInfo(1, Enum.EasingStyle.Circular, Enum.EasingDirection.Out);
-                if (logoRef.current) {
-                    TweenService.Create(logoRef.current, tweenInfo, {
-                        Position: new UDim2(1.25, -50, 0.5, 0),
-                        Rotation: 40,
-                    }).Play();
-                }
+                TweenService.Create(logo, tweenInfo, {
+                    Position: new UDim2(1.25, -50, 0.5, 0),
+                    Rotation: 40,
+                }).Play();
+            } else if (view === "main" || view === "empires") {
+                TweenService.Create(logo, logoTweenInInfo, {
+                    Position: new UDim2(1, 0, 0.5, 0),
+                    Rotation: 0,
+                }).Play();
             }
-
-            // If transitioning back to main, show title screen with animation
-            if (view === "main" && currentView !== "main") {
-                if (logoRef.current) {
-                    TweenService.Create(logoRef.current, logoTweenInInfo, {
-                        Position: new UDim2(1, 0, 0.5, 0),
-                        Rotation: 0,
-                    }).Play();
-                }
-
-                // Only reset the entrance state if NOT coming from empires (to prevent menu re-animation)
-                if (currentView !== "empires") {
-                    setHasEnteredScreen(false);
-                }
-            }
-
-            task.delay(0.5, () => setIsAnimating(false));
         },
-        [isAnimating, currentView],
+        [currentView],
     );
 
     useEffect(() => {
@@ -130,10 +114,6 @@ export default function TitleScreen({ fastTransitions = false }: { fastTransitio
             CAMERA.CameraType = Enum.CameraType.Custom;
         }
     }, [visible]);
-
-    const handleBackToMain = useCallback(() => {
-        transitionToView("main");
-    }, [transitionToView]);
 
     if (!visible) {
         return <Fragment />;
@@ -193,12 +173,7 @@ export default function TitleScreen({ fastTransitions = false }: { fastTransitio
 
             {/* Main Menu View */}
             {currentView === "main" && (
-                <frame
-                    ref={mainMenuRef}
-                    BackgroundTransparency={1}
-                    Position={new UDim2(0, 0, 0.4, 0)}
-                    Size={new UDim2(1, 0, 0.55, 0)}
-                >
+                <frame BackgroundTransparency={1} Position={new UDim2(0, 0, 0.4, 0)} Size={new UDim2(1, 0, 0.55, 0)}>
                     <uilistlayout
                         HorizontalAlignment={Enum.HorizontalAlignment.Center}
                         SortOrder={Enum.SortOrder.LayoutOrder}
@@ -252,20 +227,41 @@ export default function TitleScreen({ fastTransitions = false }: { fastTransitio
             {/* Empires Selection View */}
             {currentView === "empires" && (
                 <EmpiresWindow
-                    onClose={handleBackToMain}
+                    onClose={() => transitionToView("main")}
                     exitStart={() => {
-                        setCurrentView("none");
-                        setVisible(false);
-                        const camera = Workspace.CurrentCamera;
-                        if (camera) {
-                            camera.CameraType = Enum.CameraType.Custom;
+                        const success = Packets.loadCharacter.toServer();
+                        if (!success) {
+                            showErrorToast("Failed to load character");
+                            return;
                         }
+
+                        transitionToView("none");
+                        // Tween the camera to the player's character
+                        const character = LOCAL_PLAYER?.Character;
+
+                        let tween: Tween;
+                        const heartbeat = RunService.Heartbeat.Connect(() => {
+                            if (character) {
+                                const targetCFrame = character.GetPivot().mul(new CFrame(0, 5, 15));
+                                const tweenInfo = new TweenInfo(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out);
+                                tween = TweenService.Create(CAMERA, tweenInfo, { CFrame: targetCFrame });
+                                tween.Play();
+                            }
+                        });
+
+                        task.delay(2, () => {
+                            heartbeat.Disconnect();
+                            tween?.Cancel();
+                            CAMERA.CameraType = Enum.CameraType.Custom;
+                            setVisible(false);
+                            setVisibilityMain(true);
+                        });
                     }}
                 />
             )}
 
             {/* About View */}
-            {currentView === "about" && <AboutWindow onClose={handleBackToMain} />}
+            {currentView === "about" && <AboutWindow onClose={() => transitionToView("main")} />}
         </Fragment>
     );
 }

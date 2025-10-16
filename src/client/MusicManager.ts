@@ -11,7 +11,6 @@ namespace MusicManager {
 
     export const MUSIC_GROUP = new Instance("SoundGroup");
     MUSIC_GROUP.Name = "Music";
-    MUSIC_GROUP.Volume = 1;
     MUSIC_GROUP.Parent = IS_EDIT ? Environment.PluginWidget : SoundService;
 
     export const TITLE_SCREEN_MUSIC = (ASSETS.WaitForChild("Eternal Empire") as Sound).Clone();
@@ -134,31 +133,32 @@ namespace MusicManager {
         });
     }
 
+    export function isEnabled() {
+        return Packets.settings.get().Music && Packets.serverMusicEnabled.get();
+    }
+
     export function init() {
-        let ready = false;
-        let oldMusicEnabled = false;
         const settingsConnection = Packets.settings.observe((value) => {
-            const musicEnabled = value.Music;
-            MUSIC_GROUP.Volume = musicEnabled ? 0.5 : 0;
+            MUSIC_GROUP.Volume = isEnabled() ? 0.4 : 0;
             SOUND_EFFECTS_GROUP.Volume = value.SoundEffects ? 1 : 0;
-            if (!musicEnabled) {
-                oldMusicEnabled = false;
-                playing?.Stop();
-                playing = undefined;
-                return;
-            }
-            if (oldMusicEnabled !== musicEnabled) {
-                oldMusicEnabled = musicEnabled;
-                ready = true;
-                refreshMusic();
+        });
+
+        const serverMusicConnection = Packets.serverMusicEnabled.observe(() => {
+            const musicEnabled = isEnabled();
+
+            if (!musicEnabled && playing) {
+                fadeOut(playing);
+            } else if (musicEnabled && Packets.settings.get().Music) {
+                refreshMusic(true);
             }
         });
+
         const challengeConnection = Packets.currentChallenge.observe((challenge) => {
             inChallenge = challenge !== "" && challenge !== undefined;
-            if (ready === true) refreshMusic(true);
+            refreshMusic(true);
         });
         const areaConnection = Packets.currentArea.observe(() => {
-            if (ready === true) refreshMusic();
+            refreshMusic();
         });
 
         const oceanWaves = getSound("OceanWaves.mp3");
@@ -173,6 +173,7 @@ namespace MusicManager {
 
         return () => {
             playing?.Stop();
+            serverMusicConnection.Disconnect();
             settingsConnection.Disconnect();
             challengeConnection.Disconnect();
             areaConnection.Disconnect();

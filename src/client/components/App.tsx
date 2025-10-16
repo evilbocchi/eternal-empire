@@ -177,10 +177,8 @@ export default function App() {
                 task.delay(0.5, () => {
                     if (IS_PUBLIC_SERVER) {
                         DocumentManager.setVisible("Title", true);
-                    } else if (Sandbox.getEnabled()) {
-                        setVisibilityMain(true);
                     } else {
-                        performNewBeginningsWakeUp();
+                        setVisibilityMain(true);
                     }
                 });
             });

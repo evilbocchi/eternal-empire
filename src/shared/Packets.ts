@@ -191,6 +191,7 @@ namespace Packets {
     export const questCompleted = packet<(questId: string) => void>();
     export const level = property<DataType.i32>(-1);
     export const xp = property<DataType.i32>(-1);
+    export const trackQuest = packet<(questId: string) => void>();
 
     // playtime
     export const longestSessionTime = property<DataType.i32>(EmpireProfileTemplate.longestSession, true);
@@ -214,6 +215,7 @@ namespace Packets {
     export const settings = property<DataType.Packed<typeof PlayerProfileTemplate.settings>>(unloadedSettings);
     export const setSetting = packet<<T extends keyof Settings>(setting: T, value: Settings[T]) => void>();
     export const setHotkey = packet<(name: string, key: DataType.i32) => void>();
+    export const serverMusicEnabled = property<boolean>(false);
 
     // npcs
     export const nextDialogue = packet<() => boolean>();
@@ -257,6 +259,7 @@ namespace Packets {
     // world
     export const triggerProximityPrompt = packet<(path: string) => void>();
     export const damaged = packet<(damage: "Normal" | "DoubleDamage" | "HighDamage" | "Instakill") => void>();
+    export const loadCharacter = packet<() => boolean>();
 
     // pillar puzzle
     export const pillarPuzzleVisible = property<boolean>(false);

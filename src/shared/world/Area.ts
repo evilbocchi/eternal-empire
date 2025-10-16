@@ -333,6 +333,13 @@ export const AREAS = {
     }),
 
     // Secondary areas
+    MinerHaven: new Area({
+        id: "MinerHaven",
+        name: "Miner Haven",
+        dropletLimit: 50,
+        buildable: true,
+        hidden: false,
+    }),
     IntermittentIsles: new Area({
         id: "IntermittentIsles",
         name: "Intermittent Isles",
