@@ -337,7 +337,7 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
      *
      * @param player Player that performed the unplacing
      * @param placementIds List of placement ids
-     * @returns List of unplaced items. If nothing happened, this will be undefined.
+     * @returns Set of unplaced items. If nothing happened, this will be undefined.
      */
     unplaceItems(player: Player | undefined, placementIds: Set<string>): Set<PlacedItem> | undefined {
         if (player !== undefined && !this.permissionsService.checkPermLevel(player, "build")) {
@@ -384,6 +384,19 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
         }
         this.itemsUnplaced.fire(player, unplacing);
         return unplacing;
+    }
+
+    /**
+     * Unplaces all items in the specified area.
+     * @param player The player performing the unplacement (undefined for system actions).
+     * @param areaId The area ID to unplace items from, or undefined to unplace from all areas.
+     * @returns Set of unplaced items, or undefined if nothing was unplaced.
+     */
+    unplaceItemsInArea(player: Player | undefined, areaId: AreaId | undefined) {
+        const toRemove = new Set<string>();
+        for (const [id, placedItem] of this.worldPlaced)
+            if (areaId === undefined || placedItem.area === areaId) toRemove.add(id);
+        return this.unplaceItems(player, toRemove);
     }
 
     /**

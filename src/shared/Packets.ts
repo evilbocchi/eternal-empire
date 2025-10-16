@@ -215,7 +215,7 @@ namespace Packets {
     export const settings = property<DataType.Packed<typeof PlayerProfileTemplate.settings>>(unloadedSettings);
     export const setSetting = packet<<T extends keyof Settings>(setting: T, value: Settings[T]) => void>();
     export const setHotkey = packet<(name: string, key: DataType.i32) => void>();
-    export const serverMusicEnabled = property<boolean>(false);
+    export const serverMusicEnabled = property<boolean>(true);
 
     // npcs
     export const nextDialogue = packet<() => boolean>();

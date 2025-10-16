@@ -147,8 +147,9 @@ namespace MusicManager {
             const musicEnabled = isEnabled();
 
             if (!musicEnabled && playing) {
-                fadeOut(playing);
-            } else if (musicEnabled && Packets.settings.get().Music) {
+                playing.Stop();
+                playing = undefined;
+            } else if (musicEnabled) {
                 refreshMusic(true);
             }
         });

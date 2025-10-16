@@ -1,31 +1,70 @@
 import { OnStart, Service } from "@flamework/core";
-import { Players } from "@rbxts/services";
-import MinerHaven from "server/quests/MinerHaven";
+import { Players, Workspace } from "@rbxts/services";
 import DataService from "server/services/data/DataService";
+import { OnPlayerAdded } from "server/services/ModdingService";
+import { WAYPOINTS } from "shared/constants";
 import { IS_EDIT, IS_PUBLIC_SERVER } from "shared/Context";
+import eat from "shared/hamster/eat";
 import Packets from "shared/Packets";
 import Sandbox from "shared/Sandbox";
 import { AREAS } from "shared/world/Area";
 
 @Service()
-export default class CharacterSpawnService implements OnStart {
-    constructor(private dataService: DataService) {}
+export default class CharacterSpawnService implements OnStart, OnPlayerAdded {
+    readonly spawnLocation: SpawnLocation;
+
+    constructor(private readonly dataService: DataService) {
+        if (IS_EDIT) {
+            this.spawnLocation = undefined as never;
+            return;
+        }
+
+        const spawnLocation = new Instance("SpawnLocation");
+        spawnLocation.Name = "CharacterSpawnService";
+        spawnLocation.Size = new Vector3(0.1, 0.1, 0.1);
+        spawnLocation.Transparency = 1;
+        spawnLocation.Anchored = true;
+        spawnLocation.CanCollide = false;
+        spawnLocation.CFrame = new CFrame(0, -1000, 0);
+        spawnLocation.Parent = Workspace;
+        this.spawnLocation = spawnLocation;
+        this.refreshSpawn();
+    }
+
+    getSpawnPosition() {
+        // const isMinerHaven = this.dataService.empireData.quests.get(MinerHaven.id) >= 0;
+        const isMinerHaven = false;
+        if (isMinerHaven) {
+            return AREAS.MinerHaven.spawnLocationWorldNode?.getInstance()?.Position;
+        }
+
+        const newBeginningsStageIndex = this.dataService.empireData.quests.get("NewBeginnings");
+        if (newBeginningsStageIndex === undefined || newBeginningsStageIndex === 0) {
+            return WAYPOINTS.NewBeginningsPlayerPos.Position;
+        }
+
+        return AREAS.BarrenIslands.spawnLocationWorldNode?.getInstance()?.Position;
+    }
 
     refreshSpawn() {
-        const isBarrenIslands = this.dataService.empireData.quests.get(MinerHaven.id) === -1;
+        if (IS_EDIT) return;
 
-        for (const [, area] of pairs(AREAS)) {
-            const spawnLocation = area.spawnLocationWorldNode?.getInstance();
-            if (!spawnLocation) continue;
-            if (isBarrenIslands) {
-                spawnLocation.Enabled = area.id === AREAS.BarrenIslands.id;
-            } else {
-                spawnLocation.Enabled = area.id === AREAS.MinerHaven.id;
-            }
+        const position = this.getSpawnPosition();
+        if (position) {
+            this.spawnLocation.CFrame = new CFrame(position);
         }
     }
 
+    onPlayerAdded(player: Player) {
+        const connection = player.CharacterRemoving.Connect(() => {
+            this.refreshSpawn();
+        });
+
+        eat(connection, "Disconnect");
+    }
+
     onStart() {
+        Players.RespawnTime = 0.5;
         if (IS_EDIT) return;
 
         Packets.loadCharacter.fromClient((player) => {

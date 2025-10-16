@@ -10,6 +10,7 @@ import ChallengeHudManager from "client/components/challenge/ChallengeHudManager
 import ChallengeManager from "client/components/challenge/ChallengeManager";
 import ChestLootManager from "client/components/chest/ChestLootManager";
 import CommandsWindow from "client/components/commands/CommandsWindow";
+import DebugOverlay from "client/components/debug/DebugOverlay";
 import EffectManager from "client/components/effect/EffectManager";
 import ClientItemReplication from "client/components/item/ClientItemReplication";
 import InventoryWindow from "client/components/item/inventory/InventoryWindow";
@@ -32,19 +33,16 @@ import ResetRenderer from "client/components/reset/ResetRenderer";
 import CopyWindow from "client/components/settings/CopyWindow";
 import SettingsManager from "client/components/settings/SettingsManager";
 import SidebarButtons from "client/components/sidebar/SidebarButtons";
-import performNewBeginningsWakeUp from "client/components/start/performNewBeginningsWakeUp";
 import TitleScreen from "client/components/start/TitleScreen";
 import StatsWindow from "client/components/stats/StatsWindow";
 import ToastManager from "client/components/toast/ToastManager";
 import TooltipWindow from "client/components/tooltip/TooltipWindow";
 import DocumentManager from "client/components/window/DocumentManager";
 import WorldRenderer from "client/components/world/WorldRenderer";
-import DebugOverlay from "client/components/debug/DebugOverlay";
 import { setVisibilityMain } from "client/hooks/useVisibility";
 import MusicManager from "client/MusicManager";
 import { assets, getAsset } from "shared/asset/AssetMap";
 import { IS_EDIT, IS_PUBLIC_SERVER, IS_STUDIO } from "shared/Context";
-import Sandbox from "shared/Sandbox";
 
 declare global {
     interface RunService {
@@ -58,8 +56,10 @@ import HarvestableGuiRenderer from "client/components/item/HarvestableGuiRendere
 import RepairedItemEffectRenderer from "client/components/item/RepairedItemEffectRenderer";
 import RepairWindow from "client/components/item/RepairWindow";
 import MarketplaceWindow from "client/components/marketplace/MarketplaceWindow";
+import performNewBeginningsWakeUp from "client/components/start/performNewBeginningsWakeUp";
 import { PLAYER_GUI } from "client/constants";
 import eat from "shared/hamster/eat";
+import Sandbox from "shared/Sandbox";
 import LoadingScreen from "sharedfirst/LoadingScreen";
 
 function setParent(instance: Instance) {
@@ -174,13 +174,13 @@ export default function App() {
             waitForFrames(30).then(() => {
                 LoadingScreen.hideLoadingScreen();
 
-                task.delay(0.5, () => {
-                    if (IS_PUBLIC_SERVER) {
-                        DocumentManager.setVisible("Title", true);
-                    } else {
-                        setVisibilityMain(true);
-                    }
-                });
+                if (IS_PUBLIC_SERVER) {
+                    DocumentManager.setVisible("Title", true);
+                } else if (Sandbox.getEnabled()) {
+                    setVisibilityMain(true);
+                } else {
+                    performNewBeginningsWakeUp();
+                }
             });
         });
 

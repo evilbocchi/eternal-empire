@@ -75,7 +75,6 @@ export default function performNewBeginningsWakeUp() {
     isIntroSequenceDone = true;
     isCurrentlyInIntroSequence = true;
     MusicManager.refreshMusic(true);
-    humanoid.RootPart!.CFrame = WAYPOINTS.NewBeginningsPlayerPos.CFrame;
     const head = humanoid.Parent?.WaitForChild("Head") as BasePart;
     const transparencyParts = [head];
     for (const transparencyPart of head.GetDescendants()) {

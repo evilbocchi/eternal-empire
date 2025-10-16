@@ -19,7 +19,7 @@ export default function LevelUpManager() {
     // Listen to level changes from the server
     useEffect(() => {
         const connection = Packets.level.observe((newLevel) => {
-            if (previousLevel !== undefined && newLevel > previousLevel) {
+            if (previousLevel !== undefined && newLevel > previousLevel && newLevel !== 1) {
                 // Player leveled up! Show notification
                 setLevelUpData({
                     level: newLevel,
