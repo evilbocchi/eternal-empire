@@ -24,7 +24,6 @@ export = function () {
             items.worldPlaced.clear();
             items.brokenPlacedItems.clear();
             items.repairProtection.clear();
-            Server.Item.setPlacedItems(items.worldPlaced);
             Server.Item.setItemAmount("TheFirstDropper", 0);
             Server.Item.setItemAmount("BulkyDropper", 0);
             Server.Item.setBoughtAmount("TheFirstDropper", 0);
@@ -87,7 +86,6 @@ export = function () {
             };
 
             Server.Data.empireData.items.worldPlaced.set(placementId, placedItem);
-            Server.Item.setPlacedItems(Server.Data.empireData.items.worldPlaced);
             Server.Item.setItemAmount("TheFirstDropper", 0);
 
             const unplaced = Server.Item.unplaceItems(undefined, new Set([placementId]));

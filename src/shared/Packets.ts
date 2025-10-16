@@ -1,8 +1,8 @@
-import type { BaseOnoeNum } from "@rbxts/serikanum";
-import { OnoeNum } from "@rbxts/serikanum";
 import type CameraShaker from "@rbxts/camera-shaker";
 import type { DataType } from "@rbxts/flamework-binary-serializer";
-import { exactMapProperty, exactSetProperty, packet, property } from "@rbxts/fletchette";
+import { exactMapProperty, exactSetProperty, packet, property, shallowMapProperty } from "@rbxts/fletchette";
+import type { BaseOnoeNum } from "@rbxts/serikanum";
+import { OnoeNum } from "@rbxts/serikanum";
 import type { LeaderboardEntry, LeaderboardType } from "client/components/world/leaderboard/Leaderboard";
 import EmpireProfileTemplate from "shared/data/profile/EmpireProfileTemplate";
 import PlayerProfileTemplate from "shared/data/profile/PlayerProfileTemplate";
@@ -127,7 +127,7 @@ namespace Packets {
     export const buyItem = packet<(itemId: string) => boolean>();
     export const buyAllItems = packet<(itemIds: Set<string>) => boolean>();
     export const placeItems = packet<(items: Set<PlacingInfo>) => number>();
-    export const uniqueInstances = exactMapProperty<string, DataType.Packed<UniqueItemInstance>>(
+    export const uniqueInstances = exactMapProperty<string, UniqueItemInstance>(
         EmpireProfileTemplate.items.uniqueInstances,
     );
     export const unplaceItems = packet<(placementIds: Set<string>) => void>();
