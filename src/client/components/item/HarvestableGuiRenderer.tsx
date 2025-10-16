@@ -10,7 +10,7 @@ export default function HarvestableGuiRenderer({ overrideModels }: { overrideMod
     const harvestableModels =
         overrideModels ??
         useMemo(() => {
-            const models = new Array<Instance>();
+            const models = new Array<PVInstance>();
             for (const [, area] of pairs(AREAS)) {
                 const folder = area.worldNode.getInstance()?.FindFirstChild("Harvestable");
                 if (folder === undefined) continue;
