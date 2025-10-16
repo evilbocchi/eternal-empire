@@ -98,21 +98,21 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
      * @param player The player who placed the items.
      * @param placedItems Array of items that were placed with their IDs.
      */
-    readonly itemsPlaced = new Signal<(player: Player | undefined, placedItems: IdPlacedItem[]) => void>();
+    readonly itemsPlaced = new Signal<(player: Player | undefined, placedItems: Set<IdPlacedItem>) => void>();
 
     /**
      * Fired when items are removed from the world.
      * @param player The player who removed the items.
      * @param placedItems Array of items that were removed.
      */
-    readonly itemsUnplaced = new Signal<(player: Player | undefined, placedItems: PlacedItem[]) => void>();
+    readonly itemsUnplaced = new Signal<(player: Player | undefined, placedItems: Set<PlacedItem>) => void>();
 
     /**
      * Fired when items are purchased from the shop.
      * @param player The player who bought the items (undefined for system purchases).
      * @param items Array of items that were bought.
      */
-    readonly itemsBought = new Signal<(player: Player | undefined, items: Item[]) => void>();
+    readonly itemsBought = new Signal<(player: Player | undefined, items: Set<Item>) => void>();
 
     /**
      * Fired when an item is given to the empire (e.g. via admin command or quest reward).
@@ -339,11 +339,11 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
      * @param placementIds List of placement ids
      * @returns List of unplaced items. If nothing happened, this will be undefined.
      */
-    unplaceItems(player: Player | undefined, placementIds: string[]): PlacedItem[] | undefined {
+    unplaceItems(player: Player | undefined, placementIds: Set<string>): Set<PlacedItem> | undefined {
         if (player !== undefined && !this.permissionsService.checkPermLevel(player, "build")) {
             return undefined;
         }
-        const unplacing = new Array<PlacedItem>();
+        const unplacing = new Set<PlacedItem>();
         const placedItems = this.worldPlaced;
 
         let somethingHappened = false;
@@ -362,7 +362,7 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
                 model.Destroy();
                 this.modelPerPlacementId.delete(placementId);
             }
-            unplacing.push(placedItem);
+            unplacing.add(placedItem);
             placedItems.delete(placementId);
             this.repairProtection.delete(placementId);
         }
@@ -435,10 +435,10 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
      * Checks for permissions and area validity.
      *
      * @param player Player that performed the placing
-     * @param items List of items to place
+     * @param placingInfoSet List of items to place
      * @returns 0 if no items were placed, 1 if items were placed, 2 if items were placed and is allowed to place the same item again
      */
-    placeItems(player: Player | undefined, items: PlacingInfo[]) {
+    placeItems(player: Player | undefined, placingInfoSet: Set<PlacingInfo>) {
         if (player !== undefined && !this.permissionsService.checkPermLevel(player, "build")) {
             return 0;
         }
@@ -451,10 +451,15 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
         }
 
         let totalAmount = 0;
-        const placedItems = new Array<IdPlacedItem>();
-        const placementIds = new Array<string>();
-        for (const item of items) {
-            const [placedItem, amount] = this.serverPlace(item.id, item.position, item.rotation, area);
+        const placedItems = new Set<IdPlacedItem>();
+        const placementIds = new Set<string>();
+        for (const placingInfo of placingInfoSet) {
+            const [placedItem, amount] = this.serverPlace(
+                placingInfo.id,
+                placingInfo.position,
+                placingInfo.rotation,
+                area,
+            );
             if (placedItem === undefined) {
                 if (placementIds.size() > 0) {
                     this.unplaceItems(player, placementIds);
@@ -466,8 +471,8 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
                 // if this is a normal item
                 totalAmount += amount;
             }
-            placedItems.push(placedItem);
-            placementIds.push(placedItem.id);
+            placedItems.add(placedItem);
+            placementIds.add(placedItem.id);
         }
         const placedCount = placedItems.size();
         if (placedCount === 0) {
@@ -694,7 +699,7 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
         }
         const success = this.serverBuy(item);
         if (success) {
-            this.itemsBought.fire(player, [item]);
+            this.itemsBought.fire(player, new Set([item]));
         }
         return success;
     }
@@ -703,14 +708,14 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
      * Handles bulk item purchases for a player.
      *
      * @param player The player making the purchases.
-     * @param itemIds Array of item IDs to attempt to buy.
+     * @param itemIds Set of item IDs to attempt to buy.
      * @returns Whether at least one purchase was successful.
      */
-    buyAllItems(player: Player, itemIds: string[]) {
+    buyAllItems(player: Player, itemIds: Set<string>) {
         if (!this.permissionsService.checkPermLevel(player, "purchase")) return false;
 
         let oneSucceeded = false;
-        const bought = new Array<Item>();
+        const bought = new Set<Item>();
         for (const itemId of itemIds) {
             const item = Items.getItem(itemId);
             if (item === undefined) continue;
@@ -719,7 +724,7 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
             }
             if (this.serverBuy(item) === true) {
                 oneSucceeded = true;
-                bought.push(item);
+                bought.add(item);
             }
         }
         this.itemsBought.fire(player, bought);
@@ -906,14 +911,18 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
         });
 
         // Set up logging for item actions
-        const itemsBoughtConnection = this.itemsBought.connect((player, items) =>
+        const itemsBoughtConnection = this.itemsBought.connect((player, items) => {
+            const serialized = new Array<string>();
+            for (const item of items) {
+                serialized.push(item.id);
+            }
             log({
                 time: tick(),
                 type: "Purchase",
                 player: player?.UserId,
-                items: items.map((item) => item.id),
-            }),
-        );
+                items: serialized,
+            });
+        });
 
         const itemsPlacedConnection = this.itemsPlaced.connect((player, placedItems) => {
             const time = tick();

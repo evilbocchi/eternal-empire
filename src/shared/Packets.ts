@@ -125,12 +125,12 @@ namespace Packets {
         EmpireProfileTemplate.items.worldPlaced,
     );
     export const buyItem = packet<(itemId: string) => boolean>();
-    export const buyAllItems = packet<(itemIds: string[]) => boolean>();
-    export const placeItems = packet<(items: PlacingInfo[]) => number>();
+    export const buyAllItems = packet<(itemIds: Set<string>) => boolean>();
+    export const placeItems = packet<(items: Set<PlacingInfo>) => number>();
     export const uniqueInstances = exactMapProperty<string, DataType.Packed<UniqueItemInstance>>(
         EmpireProfileTemplate.items.uniqueInstances,
     );
-    export const unplaceItems = packet<(placementIds: string[]) => void>();
+    export const unplaceItems = packet<(placementIds: Set<string>) => void>();
     export const setBuildPreviewTool = packet<(difficultyId: string) => void>();
     export const boostChanged = packet<(boostPerItem: Map<string, BaseOnoeNum>) => void>({ isUnreliable: true });
     export const brokenPlacedItems = exactSetProperty<string>(EmpireProfileTemplate.items.brokenPlacedItems);

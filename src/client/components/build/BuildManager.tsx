@@ -271,7 +271,7 @@ namespace BuildManager {
      * Reverts selected items to their initial positions and rotations.
      */
     export function revertSelected() {
-        const data = new Array<PlacingInfo>();
+        const data = new Set<PlacingInfo>();
         let hasAnyItems = false;
         for (const [selectedModel] of selected) {
             const modelInfo = getAllInstanceInfo(selectedModel);
@@ -289,7 +289,7 @@ namespace BuildManager {
             if (id === undefined) continue;
 
             hasAnyItems = true;
-            data.push({
+            data.add({
                 id,
                 position,
                 rotation,
@@ -358,7 +358,7 @@ namespace BuildManager {
     export function placeSelected() {
         if (mainSelected === undefined) return "Nothing selected.";
 
-        const data = new Array<PlacingInfo>();
+        const data = new Set<PlacingInfo>();
 
         const areaId = Packets.currentArea.get();
         let buildBounds = baseplateBounds;
@@ -397,7 +397,7 @@ namespace BuildManager {
 
             const id = modelInfo.PlacedItem?.uniqueItemId ?? item.id;
 
-            data.push({ id, position, rotation });
+            data.add({ id, position, rotation });
         }
         debounce = tick();
 
@@ -531,12 +531,12 @@ namespace BuildManager {
             // nothing to place, select dragged items
             const main = hovering;
             if (main !== undefined) {
-                const names = new Array<string>();
+                const names = new Set<string>();
                 const modelsToAnimate = new Array<Model>();
                 let selectedCount = 0;
 
                 for (const model of dragging) {
-                    names.push(model.Name);
+                    names.add(model.Name);
 
                     const modelInfo = getAllInstanceInfo(model);
                     if (modelInfo.Broken === true) {

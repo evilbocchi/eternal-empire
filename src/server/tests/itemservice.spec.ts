@@ -54,7 +54,11 @@ export = function () {
             let fired = false;
             const connection = Server.Item.itemsBought.connect((player, items) => {
                 expect(player).to.equal(undefined);
-                fired = items.size() === 1 && items[0].id === "BulkyDropper";
+                let hasBulkyDropper = false;
+                for (const item of items) {
+                    hasBulkyDropper = item.id === "BulkyDropper";
+                }
+                fired = hasBulkyDropper && items.size() === 1;
             });
 
             Server.Item.setItemAmount("BulkyDropper", 0);
@@ -86,7 +90,7 @@ export = function () {
             Server.Item.setPlacedItems(Server.Data.empireData.items.worldPlaced);
             Server.Item.setItemAmount("TheFirstDropper", 0);
 
-            const unplaced = Server.Item.unplaceItems(undefined, [placementId]);
+            const unplaced = Server.Item.unplaceItems(undefined, new Set([placementId]));
 
             expect(unplaced).to.be.ok();
             expect(unplaced?.size()).to.equal(1);

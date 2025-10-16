@@ -9,10 +9,10 @@ export = new Command(script.Name)
     .setDescription("Unplace all items in the area you are currently in.")
     .setExecute((o) => {
         const placedItems = ThisEmpire.data.items.worldPlaced;
-        const toRemove = new Array<string>();
+        const toRemove = new Set<string>();
         const area = Sandbox.getEnabled() ? undefined : Packets.currentArea.get(o);
         for (const [id, placedItem] of placedItems)
-            if (area === undefined || placedItem.area === area) toRemove.push(id);
+            if (area === undefined || placedItem.area === area) toRemove.add(id);
 
         CommandAPI.Item.unplaceItems(o, toRemove);
         CommandAPI.ChatHook.sendPrivateMessage(

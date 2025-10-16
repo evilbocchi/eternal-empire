@@ -155,9 +155,9 @@ export default function ShopGui() {
     const { events } = useHotkeyWithTooltip({
         action: () => {
             if (!shop) return false;
-            const serialized = new Array<string>();
+            const serialized = new Set<string>();
             for (const item of shop.items) {
-                serialized.push(item.id);
+                serialized.add(item.id);
             }
             if (Packets.buyAllItems.toServer(serialized)) {
                 playSound("ItemPurchase.mp3");
