@@ -212,7 +212,6 @@ export interface CreateShopSlotOptions {
 }
 
 export interface UpdateShopSlotOptions {
-    parent?: GuiObject;
     layoutOrder?: number;
     baseVisible?: boolean;
     hideMaxedItems?: boolean;
@@ -459,19 +458,7 @@ export function createShopSlot(item: Item, options: CreateShopSlotOptions): Shop
 export function updateShopSlot(handle: ShopSlotHandle, options: UpdateShopSlotOptions) {
     if (handle.destroyed) return;
 
-    const {
-        parent,
-        layoutOrder,
-        baseVisible = false,
-        hideMaxedItems = false,
-        ownedAmount,
-        onActivated,
-        empireLevel,
-    } = options;
-
-    if (parent && handle.root.Parent !== parent) {
-        handle.root.Parent = parent;
-    }
+    const { layoutOrder, baseVisible = false, hideMaxedItems = false, ownedAmount, onActivated, empireLevel } = options;
 
     if (layoutOrder !== undefined) {
         handle.root.LayoutOrder = layoutOrder;

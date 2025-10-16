@@ -32,6 +32,7 @@ export default function DarkMatterGui() {
             ClipsDescendants={true}
             LightInfluence={1}
             MaxDistance={300}
+            ResetOnSpawn={false}
             SizingMode={Enum.SurfaceGuiSizingMode.PixelsPerStud}
             ZIndexBehavior={Enum.ZIndexBehavior.Sibling}
         >

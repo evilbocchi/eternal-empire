@@ -1834,6 +1834,7 @@ function DifficultyResearcherGui({
                 ClipsDescendants={true}
                 LightInfluence={1}
                 MaxDistance={1000}
+                ResetOnSpawn={false}
                 SizingMode={Enum.SurfaceGuiSizingMode.PixelsPerStud}
                 ZIndexBehavior={Enum.ZIndexBehavior.Sibling}
             >
@@ -1854,6 +1855,7 @@ function DifficultyResearcherGui({
                 ClipsDescendants={true}
                 LightInfluence={1}
                 MaxDistance={1000}
+                ResetOnSpawn={false}
                 SizingMode={Enum.SurfaceGuiSizingMode.PixelsPerStud}
                 ZIndexBehavior={Enum.ZIndexBehavior.Sibling}
             >
@@ -1870,6 +1872,7 @@ function DifficultyResearcherGui({
                 ClipsDescendants={true}
                 LightInfluence={1}
                 MaxDistance={1000}
+                ResetOnSpawn={false}
                 SizingMode={Enum.SurfaceGuiSizingMode.PixelsPerStud}
                 ZIndexBehavior={Enum.ZIndexBehavior.Sibling}
             >

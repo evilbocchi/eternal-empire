@@ -129,6 +129,7 @@ export default function TitleScreen({ fastTransitions = false }: { fastTransitio
                 Face={Enum.NormalId.Top}
                 LightInfluence={1}
                 MaxDistance={1000}
+                ResetOnSpawn={false}
                 SizingMode={Enum.SurfaceGuiSizingMode.PixelsPerStud}
                 ZIndexBehavior={Enum.ZIndexBehavior.Sibling}
             >

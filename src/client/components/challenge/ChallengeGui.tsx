@@ -382,6 +382,7 @@ export default function ChallengeGui({
             Adornee={ChallengesBoard.waitForInstance()}
             ClipsDescendants={true}
             MaxDistance={30}
+            ResetOnSpawn={false}
             SizingMode={Enum.SurfaceGuiSizingMode.PixelsPerStud}
             ZIndexBehavior={Enum.ZIndexBehavior.Sibling}
         >

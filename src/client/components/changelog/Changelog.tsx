@@ -130,6 +130,7 @@ export function ChangelogGui() {
             ClipsDescendants={true}
             LightInfluence={1}
             MaxDistance={200}
+            ResetOnSpawn={false}
             SizingMode={Enum.SurfaceGuiSizingMode.PixelsPerStud}
             ZIndexBehavior={Enum.ZIndexBehavior.Sibling}
         >

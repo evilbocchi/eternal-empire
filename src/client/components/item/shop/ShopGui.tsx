@@ -141,7 +141,6 @@ export default function ShopGui() {
             const ownedAmount = ownedPerItem.get(item.id) ?? 0;
 
             updateShopSlot(slot, {
-                parent: frame,
                 layoutOrder,
                 baseVisible,
                 hideMaxedItems,
@@ -180,9 +179,9 @@ export default function ShopGui() {
             Face={Enum.NormalId.Front}
             LightInfluence={0}
             PixelsPerStud={50}
+            ResetOnSpawn={false}
             SizingMode={Enum.SurfaceGuiSizingMode.PixelsPerStud}
             ZIndexBehavior={Enum.ZIndexBehavior.Sibling}
-            ResetOnSpawn={false}
         >
             {/* Main container */}
             <uipadding

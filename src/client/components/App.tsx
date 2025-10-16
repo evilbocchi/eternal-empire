@@ -1,6 +1,6 @@
 import React, { Fragment, useEffect } from "@rbxts/react";
 import { createRoot, Root } from "@rbxts/react-roblox";
-import { ContentProvider, RunService, Workspace } from "@rbxts/services";
+import { ContentProvider, RunService, StarterGui, Workspace } from "@rbxts/services";
 import BackpackWindow from "client/components/backpack/BackpackWindow";
 import BalanceWindow from "client/components/balance/BalanceWindow";
 import CurrencyGainManager from "client/components/balance/CurrencyGainManager";
@@ -113,6 +113,8 @@ function waitForFrames(frameCount = 3): Promise<void> {
  */
 export default function App() {
     useEffect(() => {
+        StarterGui.ResetPlayerGuiOnSpawn = false; // Not having this deletes folders in PlayerGui
+
         const roots = new Set<Root>();
         addRoot(roots, createScreenGui("DebugOverlay", 100, false)).render(<DebugOverlay />);
 
