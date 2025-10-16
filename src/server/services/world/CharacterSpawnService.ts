@@ -14,7 +14,7 @@ export default class CharacterSpawnService implements OnStart, OnPlayerAdded {
     readonly spawnLocation: SpawnLocation;
 
     constructor(private readonly dataService: DataService) {
-        if (IS_EDIT) {
+        if (IS_EDIT || Sandbox.getEnabled()) {
             this.spawnLocation = undefined as never;
             return;
         }
@@ -56,6 +56,8 @@ export default class CharacterSpawnService implements OnStart, OnPlayerAdded {
     }
 
     onPlayerAdded(player: Player) {
+        if (IS_EDIT || Sandbox.getEnabled()) return;
+
         const connection = player.CharacterRemoving.Connect(() => {
             this.refreshSpawn();
         });
@@ -65,7 +67,7 @@ export default class CharacterSpawnService implements OnStart, OnPlayerAdded {
 
     onStart() {
         Players.RespawnTime = 0.5;
-        if (IS_EDIT) return;
+        if (IS_EDIT || Sandbox.getEnabled()) return;
 
         Packets.loadCharacter.fromClient((player) => {
             this.refreshSpawn();
@@ -73,7 +75,7 @@ export default class CharacterSpawnService implements OnStart, OnPlayerAdded {
             return true;
         });
 
-        if (!Sandbox.getEnabled() && !IS_PUBLIC_SERVER) {
+        if (!IS_PUBLIC_SERVER) {
             Players.CharacterAutoLoads = true;
             this.refreshSpawn();
             for (const player of Players.GetPlayers()) {

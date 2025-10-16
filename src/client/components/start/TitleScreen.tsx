@@ -1,13 +1,13 @@
 import React, { Fragment, useCallback, useEffect, useRef, useState } from "@rbxts/react";
-import { RunService, TweenService } from "@rbxts/services";
+import { TweenService } from "@rbxts/services";
 import SingleDocumentManager from "client/components/sidebar/SingleDocumentManager";
 import AboutWindow from "client/components/start/AboutWindow";
 import EmpiresWindow from "client/components/start/EmpiresWindow";
 import MenuOption from "client/components/start/MenuOption";
+import performNewBeginningsWakeUp from "client/components/start/performNewBeginningsWakeUp";
 import { showErrorToast } from "client/components/toast/ToastService";
 import DocumentManager, { useDocument } from "client/components/window/DocumentManager";
 import { LOCAL_PLAYER } from "client/constants";
-import { setVisibilityMain } from "client/hooks/useVisibility";
 import { getAsset } from "shared/asset/AssetMap";
 import { playSound } from "shared/asset/GameAssets";
 import { RobotoMonoBold } from "shared/asset/GameFonts";
@@ -235,28 +235,9 @@ export default function TitleScreen({ fastTransitions = false }: { fastTransitio
                             showErrorToast("Failed to load character");
                             return;
                         }
-
-                        transitionToView("none");
-                        // Tween the camera to the player's character
-                        const character = LOCAL_PLAYER?.Character;
-
-                        let tween: Tween;
-                        const heartbeat = RunService.Heartbeat.Connect(() => {
-                            if (character) {
-                                const targetCFrame = character.GetPivot().mul(new CFrame(0, 5, 15));
-                                const tweenInfo = new TweenInfo(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out);
-                                tween = TweenService.Create(CAMERA, tweenInfo, { CFrame: targetCFrame });
-                                tween.Play();
-                            }
-                        });
-
-                        task.delay(2, () => {
-                            heartbeat.Disconnect();
-                            tween?.Cancel();
-                            CAMERA.CameraType = Enum.CameraType.Custom;
-                            setVisible(false);
-                            setVisibilityMain(true);
-                        });
+                        CAMERA.CameraType = Enum.CameraType.Custom;
+                        setVisible(false);
+                        performNewBeginningsWakeUp();
                     }}
                 />
             )}
