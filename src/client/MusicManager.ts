@@ -6,8 +6,33 @@ import Packets from "shared/Packets";
 import { AREAS } from "shared/world/Area";
 
 namespace MusicManager {
-    let inChallenge = false;
+    class MusicState {
+        public musicEnabled = false;
+        public soundEffectsEnabled = false;
+        public inChallenge = false;
+        public currentArea: AreaId | undefined = undefined;
+        public isTitleScreen = false;
+        public isNight = false;
+
+        public shouldPlayMusic(): boolean {
+            return this.musicEnabled && (this.isTitleScreen || this.currentArea !== undefined);
+        }
+
+        public getMusicKey(): string | undefined {
+            if (this.isTitleScreen) {
+                return "title";
+            }
+            if (this.currentArea) {
+                return `${this.currentArea}_${this.inChallenge}_${this.isNight}`;
+            }
+            return undefined;
+        }
+    }
+
+    const state = new MusicState();
     let connection: RBXScriptConnection | undefined = undefined;
+
+    export let playing: Sound | undefined = undefined;
 
     export const MUSIC_GROUP = new Instance("SoundGroup");
     MUSIC_GROUP.Name = "Music";
@@ -42,21 +67,23 @@ namespace MusicManager {
     /**
      * Selects a random music track for a given area, considering challenge and time of day.
      * @param id The AreaId to select music for.
+     * @param inChallenge Whether the player is in a challenge.
+     * @param isNight Whether it's night time.
      * @returns The selected Sound instance, or undefined.
      */
-    function getRandomMusic(id: AreaId): Sound | undefined {
+    function getRandomMusic(id: AreaId, inChallenge: boolean, isNight: boolean): Sound | undefined {
         const areaMusicFolder = MUSIC_GROUP.FindFirstChild(id);
         if (areaMusicFolder === undefined) return undefined;
         let folder = inChallenge
             ? ASSETS.WaitForChild("ChallengeMusic")
-            : areaMusicFolder.FindFirstChild(isNight() ? "Night" : "Day");
+            : areaMusicFolder.FindFirstChild(isNight ? "Night" : "Day");
         if (folder === undefined) folder = areaMusicFolder;
         const current = folder.GetAttribute("Current");
         const sounds = folder.GetChildren();
         const s = sounds.size() - 1;
         const newCurrent = math.random(0, s);
         if (current === newCurrent && s > 0) {
-            return getRandomMusic(id);
+            return getRandomMusic(id, inChallenge, isNight);
         }
         folder.SetAttribute("Current", newCurrent);
         return sounds[newCurrent] as Sound;
@@ -67,8 +94,6 @@ namespace MusicManager {
         return math.abs(Lighting.ClockTime - 12) / 12 > 0.5;
     }
 
-    export let playing: Sound | undefined = undefined;
-
     export function fadeOut(sound: Sound) {
         const tween = TweenService.Create(sound, new TweenInfo(1), { Volume: 0 });
         tween.Completed.Once(() => {
@@ -78,9 +103,14 @@ namespace MusicManager {
             playing = undefined;
         }
         tween.Play();
+        connection?.Disconnect();
     }
 
     export function fadeIn(sound: Sound) {
+        if (playing) {
+            fadeOut(playing);
+        }
+
         if (sound.SoundGroup === undefined) sound.SoundGroup = MUSIC_GROUP;
         sound.Volume = 0;
         sound.RollOffMinDistance = math.huge;
@@ -96,70 +126,96 @@ namespace MusicManager {
         return sound;
     }
 
-    export function refreshMusic(force?: boolean) {
+    export function loopMusic() {
         let retrieved: Sound | undefined;
-        let area: AreaId | undefined;
-        if (Workspace.GetAttribute("Title") === true) {
+        if (state.isTitleScreen) {
             retrieved = TITLE_SCREEN_MUSIC;
+        } else if (state.currentArea) {
+            retrieved = getRandomMusic(state.currentArea, state.inChallenge, state.isNight);
         }
-        area = Packets.currentArea.get();
 
         if (retrieved === playing && retrieved !== undefined) return;
 
-        if (playing !== undefined) {
-            if (force !== true && (inChallenge || playing.GetAttribute("Area") === area)) return;
-
-            fadeOut(playing);
-        }
-
         if (retrieved === undefined) {
-            if (area === undefined || ReplicatedStorage.GetAttribute("NewBeginningsWakingUp")) return;
-            retrieved = getRandomMusic(area);
-        }
-
-        if (retrieved === undefined) {
-            warn("No music found for area " + area);
+            warn("No music found for current state");
             return;
         }
 
         const music = fadeIn(retrieved);
-        music.SetAttribute("Area", area);
-        if (connection !== undefined) connection.Disconnect();
+        music.SetAttribute("Area", state.currentArea);
+
+        connection?.Disconnect();
         connection = music.Ended.Once((soundId) => {
             if (playing?.SoundId === soundId) {
                 playing = undefined;
             }
-            task.delay(math.random(2, 5), refreshMusic);
+            task.delay(math.random(2, 5), loopMusic);
         });
+    }
+
+    let lastMusicKey: string | undefined = undefined;
+
+    function updateMusic() {
+        if (state.shouldPlayMusic()) {
+            const currentKey = state.getMusicKey();
+            if (currentKey !== lastMusicKey || !playing) {
+                lastMusicKey = currentKey;
+                loopMusic();
+            }
+        } else {
+            if (playing) {
+                playing.Stop();
+                playing = undefined;
+                lastMusicKey = undefined;
+            }
+        }
     }
 
     export function isEnabled() {
-        return Packets.settings.get().Music && Packets.serverMusicEnabled.get();
+        return state.musicEnabled;
     }
 
     export function init() {
+        // Initialize state
+        const settings = Packets.settings.get();
+        state.musicEnabled = settings.Music && Packets.serverMusicEnabled.get();
+        state.soundEffectsEnabled = settings.SoundEffects;
+        state.inChallenge = Packets.currentChallenge.get() !== "" && Packets.currentChallenge.get() !== undefined;
+        state.currentArea = Packets.currentArea.get();
+        state.isTitleScreen = Workspace.GetAttribute("Title") === true;
+        state.isNight = math.abs(Lighting.ClockTime - 12) / 12 > 0.5;
+
         const settingsConnection = Packets.settings.observe((value) => {
-            MUSIC_GROUP.Volume = isEnabled() ? 0.4 : 0;
-            SOUND_EFFECTS_GROUP.Volume = value.SoundEffects ? 1 : 0;
+            state.musicEnabled = value.Music && Packets.serverMusicEnabled.get();
+            state.soundEffectsEnabled = value.SoundEffects;
+            MUSIC_GROUP.Volume = state.musicEnabled ? 0.4 : 0;
+            SOUND_EFFECTS_GROUP.Volume = state.soundEffectsEnabled ? 1 : 0;
+            updateMusic();
         });
 
         const serverMusicConnection = Packets.serverMusicEnabled.observe(() => {
-            const musicEnabled = isEnabled();
-
-            if (!musicEnabled && playing) {
-                playing.Stop();
-                playing = undefined;
-            } else if (musicEnabled) {
-                refreshMusic(true);
-            }
+            state.musicEnabled = Packets.settings.get().Music && Packets.serverMusicEnabled.get();
+            updateMusic();
         });
 
         const challengeConnection = Packets.currentChallenge.observe((challenge) => {
-            inChallenge = challenge !== "" && challenge !== undefined;
-            refreshMusic(true);
+            state.inChallenge = challenge !== "" && challenge !== undefined;
+            updateMusic();
         });
+
         const areaConnection = Packets.currentArea.observe(() => {
-            refreshMusic();
+            state.currentArea = Packets.currentArea.get();
+            updateMusic();
+        });
+
+        const titleConnection = Workspace.GetAttributeChangedSignal("Title").Connect(() => {
+            state.isTitleScreen = Workspace.GetAttribute("Title") === true;
+            updateMusic();
+        });
+
+        const timeConnection = Lighting.GetPropertyChangedSignal("ClockTime").Connect(() => {
+            state.isNight = math.abs(Lighting.ClockTime - 12) / 12 > 0.5;
+            updateMusic();
         });
 
         const oceanWaves = getSound("OceanWaves.mp3");
@@ -172,12 +228,17 @@ namespace MusicManager {
             oceanWaves.Volume = (1 - math.abs(dist) / 100) / 10;
         });
 
+        // Initial music update
+        updateMusic();
+
         return () => {
             playing?.Stop();
             serverMusicConnection.Disconnect();
             settingsConnection.Disconnect();
             challengeConnection.Disconnect();
             areaConnection.Disconnect();
+            titleConnection.Disconnect();
+            timeConnection.Disconnect();
             cameraConnection.Disconnect();
             connection?.Disconnect();
             MUSIC_GROUP.Destroy();

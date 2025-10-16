@@ -16,7 +16,7 @@ let isCurrentlyInIntroSequence = false;
 
 function exit() {
     setVisibilityMain(true);
-    MusicManager.refreshMusic(true);
+    MusicManager.loopMusic();
     return false;
 }
 
@@ -74,7 +74,7 @@ export default function performNewBeginningsWakeUp() {
 
     isIntroSequenceDone = true;
     isCurrentlyInIntroSequence = true;
-    MusicManager.refreshMusic(true);
+    MusicManager.loopMusic();
     const head = humanoid.Parent?.WaitForChild("Head") as BasePart;
     const transparencyParts = [head];
     for (const transparencyPart of head.GetDescendants()) {
