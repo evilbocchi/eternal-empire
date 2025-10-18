@@ -1,4 +1,5 @@
 //!native
+//!optimize 2
 import { OnoeNum } from "@rbxts/serikanum";
 
 type Number = number | OnoeNum;

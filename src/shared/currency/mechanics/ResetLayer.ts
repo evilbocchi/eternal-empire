@@ -19,7 +19,7 @@ export const RESET_LAYERS = {
         resettingCurrencies: ["Funds", "Power", "Purifier Clicks"] as Currency[],
         resettingUpgrades: ["MoreFunds", "MorePower"],
         touchPart: SkillificationZone,
-        badgeId: 1485187140296844, // TODO: change badge
+        badgeId: 2011792716581358, // TODO: change badge
     },
     Winification: {
         order: 2,
@@ -38,6 +38,6 @@ export const RESET_LAYERS = {
             "EfficientLearning",
         ],
         touchPart: WinificationZone,
-        badgeId: 645025346348557, // TODO: change badge
+        badgeId: 838386835884859, // TODO: change badge
     },
 };

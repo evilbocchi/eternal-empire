@@ -1,6 +1,6 @@
-import React, { useRef } from "@rbxts/react";
-import { RobotoSlabBold, RobotoSlabMedium } from "shared/asset/GameFonts";
+import React, { memo, useRef } from "@rbxts/react";
 import useHover from "client/hooks/useHover";
+import { RobotoSlabBold, RobotoSlabMedium } from "shared/asset/GameFonts";
 
 interface StatItemProps {
     label: string;
@@ -13,7 +13,7 @@ interface StatItemProps {
 /**
  * Enhanced reusable component for displaying individual stat items with label and value
  */
-export default function StatItem({ label, value, image, layoutOrder, accent = false }: StatItemProps) {
+function StatItem({ label, value, image, layoutOrder, accent = false }: StatItemProps) {
     const frameRef = useRef<Frame>();
     const { hovering, events } = useHover({});
 
@@ -134,3 +134,5 @@ export default function StatItem({ label, value, image, layoutOrder, accent = fa
         </frame>
     );
 }
+
+export default memo(StatItem);

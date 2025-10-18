@@ -271,7 +271,7 @@ namespace AvailableEmpire {
         });
         pcall(() => {
             if (IS_EDIT) return;
-            BadgeService.AwardBadge(player.UserId, 3498765777753358); // join badge // TODO: change badge
+            BadgeService.AwardBadge(player.UserId, 938343607591069); // join badge
         });
 
         const playerProfile = PlayerProfileManager.load(player.UserId);

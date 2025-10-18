@@ -26,6 +26,7 @@ export default function FundsBombsBoardGui() {
             ClipsDescendants={true}
             LightInfluence={1}
             MaxDistance={150}
+            ResetOnSpawn={false}
             SizingMode={Enum.SurfaceGuiSizingMode.PixelsPerStud}
             ZIndexBehavior={Enum.ZIndexBehavior.Sibling}
         >

@@ -1,6 +1,5 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "@rbxts/react";
+import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from "@rbxts/react";
 import { TweenService, Workspace } from "@rbxts/services";
-import { RobotoMono, RobotoSlabBold } from "shared/asset/GameFonts";
 import {
     DEFAULT_TOAST_DURATION,
     MAX_TOAST_QUEUE,
@@ -8,6 +7,7 @@ import {
     type ToastRequest,
     type ToastVariant,
 } from "client/components/toast/ToastService";
+import { RobotoMono, RobotoSlabBold } from "shared/asset/GameFonts";
 
 const VARIANT_STYLES: Record<ToastVariant, { background: Color3; border: Color3; text: Color3 }> = {
     info: {
@@ -179,7 +179,7 @@ export default function ToastManager() {
             const style = VARIANT_STYLES[toast.variant];
 
             return (
-                <ToastItem
+                <MemoizedToastItem
                     key={toast.id}
                     toast={toast}
                     style={style}
@@ -418,3 +418,5 @@ function ToastItem({ toast, style, width, onDismiss, onEnterComplete, onExitComp
         </textbutton>
     );
 }
+
+const MemoizedToastItem = memo(ToastItem);

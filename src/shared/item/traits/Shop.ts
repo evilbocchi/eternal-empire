@@ -27,7 +27,7 @@ export default class Shop extends ItemTrait {
 
     constructor(item: Item) {
         super(item);
-        item.persists();
+        item.persists().unbreakable();
         item.onSharedLoad((model) => Shop.sharedLoad(model));
     }
 

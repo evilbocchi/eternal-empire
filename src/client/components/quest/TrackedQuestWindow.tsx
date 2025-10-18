@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from "@rbxts/react";
 import { ReplicatedStorage, RunService, Workspace } from "@rbxts/services";
+import { questState } from "client/components/quest/QuestState";
 import { useQuestData } from "client/components/quest/useQuestData";
 import { useDocument } from "client/components/window/DocumentManager";
 import { observeCharacter } from "client/constants";
@@ -7,6 +8,7 @@ import { getAsset } from "shared/asset/AssetMap";
 import { playSound } from "shared/asset/GameAssets";
 import { RobotoSlabBold } from "shared/asset/GameFonts";
 import { IS_EDIT } from "shared/Context";
+import Packets from "shared/Packets";
 
 /**
  * Returns the description and position details for the current quest stage.
@@ -156,11 +158,16 @@ export default function TrackedQuestWindow() {
         setTrackerBeam(beam);
         setTrackerPart(beamContainer);
 
+        const connection = Packets.trackQuest.fromServer((questId) => {
+            questState.setTrackedQuest(questId);
+        });
+
         return () => {
             beam.Destroy();
             beamContainer.Destroy();
             dummyCharacter?.Destroy();
             cleanup();
+            connection.Disconnect();
         };
     }, []);
 

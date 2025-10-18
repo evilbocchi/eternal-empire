@@ -18,6 +18,7 @@ const tweenInfo = new TweenInfo(0.1, Enum.EasingStyle.Linear);
 export default class LaserFan extends ItemTrait {
     static readonly laserFanChanged = perItemPacket(
         packet<(placementId: string, cframe: CFrame) => void>({ isUnreliable: true }),
+        { slowStart: true },
     );
 
     static load(model: Model, laserFan: LaserFan) {
@@ -31,10 +32,10 @@ export default class LaserFan extends ItemTrait {
             model,
             () => {
                 v += (direction ? 1 : -1) * laserFan.speed;
-                const newCframe = original.mul(CFrame.Angles(math.rad(v), 0, 0));
-                LaserFan.laserFanChanged.toAllClients(model, newCframe);
+                const newCFrame = original.mul(CFrame.Angles(math.rad(v), 0, 0));
+                LaserFan.laserFanChanged.toAllClients(model, newCFrame);
                 TweenService.Create(primaryPart, tweenInfo, {
-                    CFrame: newCframe,
+                    CFrame: newCFrame,
                 }).Play();
             },
             0.1,

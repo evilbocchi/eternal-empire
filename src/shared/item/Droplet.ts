@@ -755,6 +755,18 @@ export default class Droplet {
             .setValue(new CurrencyBundle().set("Skill", 1)),
     );
 
+    static UnrealDroplet = Droplet.registerDroplet(
+        new Droplet("UnrealDroplet")
+            .setModel(() => {
+                const droplet = new Instance("Part");
+                droplet.Size = new Vector3(1, 1, 1);
+                droplet.Color = Difficulty.Unreal.color!;
+                droplet.Material = Enum.Material.Slate;
+                return droplet;
+            })
+            .setValue(new CurrencyBundle().set("Time", 1)),
+    );
+
     /**
      * Registers a droplet to the droplet list.
      *

@@ -18,11 +18,4 @@ if (!IS_EDIT) {
         throw "Failed to load context";
     }
     context.igniteFlameworkServer();
-
-    if (!Sandbox.getEnabled()) {
-        Players.CharacterAutoLoads = true;
-        for (const player of Players.GetPlayers()) {
-            player.LoadCharacter();
-        }
-    }
 }

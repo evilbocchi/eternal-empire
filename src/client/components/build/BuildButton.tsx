@@ -5,7 +5,7 @@
  * hover effects, and scaling transitions.
  */
 
-import React, { useCallback, useRef, useState } from "@rbxts/react";
+import React, { memo, useCallback, useRef, useState } from "@rbxts/react";
 import { TweenService } from "@rbxts/services";
 import BuildManager from "client/components/build/BuildManager";
 import { RobotoSlabMedium } from "shared/asset/GameFonts";
@@ -42,7 +42,7 @@ const SCALE_TWEEN_INFO = new TweenInfo(0.3, Enum.EasingStyle.Cubic, Enum.EasingD
 /**
  * Styled button component for the build system with animations and hover effects
  */
-export default function BuildButton({
+function BuildButton({
     anchorPoint,
     text,
     icon,
@@ -204,3 +204,5 @@ export default function BuildButton({
         </textbutton>
     );
 }
+
+export default memo(BuildButton);

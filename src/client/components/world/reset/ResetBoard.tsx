@@ -17,6 +17,7 @@ export default function BasicResetBoardFrontGui({
             ClipsDescendants={true}
             Face={Enum.NormalId.Front}
             MaxDistance={200}
+            ResetOnSpawn={false}
             SizingMode={Enum.SurfaceGuiSizingMode.PixelsPerStud}
             ZIndexBehavior={Enum.ZIndexBehavior.Sibling}
         >
@@ -69,6 +70,7 @@ export function BasicResetBoardBackGui({
             ClipsDescendants={true}
             Face={Enum.NormalId.Back}
             MaxDistance={200}
+            ResetOnSpawn={false}
             SizingMode={Enum.SurfaceGuiSizingMode.PixelsPerStud}
             ZIndexBehavior={Enum.ZIndexBehavior.Sibling}
         >

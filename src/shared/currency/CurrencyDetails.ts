@@ -24,6 +24,13 @@ export const CURRENCY_CATEGORIES = {
  * Metadata about each currency.
  */
 const details = {
+    Time: {
+        description: "The time you own.",
+        layoutOrder: 0,
+        color: Color3.fromRGB(170, 0, 255),
+        image: getAsset("assets/Time.png"),
+        page: CURRENCY_CATEGORIES.Main,
+    },
     Funds: {
         description: "The main currency used for most purchases and transactions.",
         layoutOrder: 1,

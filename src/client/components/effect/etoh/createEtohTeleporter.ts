@@ -76,7 +76,7 @@ export default function createEtohTeleporter(model: Model) {
                     const teleportPlayers = (model.FindFirstChild("TeleportPlayers") as BoolValue | undefined)?.Value;
                     const player = Players.GetPlayerFromCharacter(t.Parent);
                     if (teleportPlayers && player === Players.LocalPlayer) {
-                        playSound("Teleport.mp3");
+                        playSound("Teleport.mp3", undefined, (sound) => (sound.Volume = 0.25));
                         const primaryPart = (t.Parent as Model).PrimaryPart;
                         if (primaryPart) {
                             teleport(primaryPart, d.GetPivot()!.add(new Vector3(0, 5, 0)));

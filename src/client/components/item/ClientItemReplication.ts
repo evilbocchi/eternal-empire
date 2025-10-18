@@ -111,18 +111,19 @@ namespace ClientItemReplication {
         sparkles.Emit(10);
 
         // Create pulse
-        const highlight = new Instance("Highlight");
-        highlight.Adornee = model;
-        highlight.FillColor = Color3.fromRGB(255, 255, 255);
-        highlight.FillTransparency = 0.8;
-        highlight.OutlineTransparency = 1;
-        highlight.Parent = Workspace;
+        // Disabled for performance reasons
+        // const highlight = new Instance("Highlight");
+        // highlight.Adornee = model;
+        // highlight.FillColor = Color3.fromRGB(255, 255, 255);
+        // highlight.FillTransparency = 0.8;
+        // highlight.OutlineTransparency = 1;
+        // highlight.Parent = Workspace;
 
-        TweenService.Create(highlight, new TweenInfo(1), {
-            FillTransparency: 1,
-        }).Play();
-        eat(highlight, "Destroy");
-        Debris.AddItem(highlight, 1);
+        // TweenService.Create(highlight, new TweenInfo(1), {
+        //     FillTransparency: 1,
+        // }).Play();
+        // eat(highlight, "Destroy");
+        // Debris.AddItem(highlight, 1);
 
         // Tween model size like 0.85 -> 1.05 -> 1.0 would also be nice, but performance issues need addressing.
     }

@@ -1,11 +1,11 @@
-import React, { useMemo } from "@rbxts/react";
+import React, { memo, useMemo } from "@rbxts/react";
 import { TweenService } from "@rbxts/services";
-import ItemViewport from "shared/item/ItemViewport";
 import getDifficultyDisplayColors from "client/components/tooltip/getDifficultyDisplayColors";
 import { TooltipManager } from "client/components/tooltip/TooltipWindow";
 import useHover from "client/hooks/useHover";
 import { getAsset } from "shared/asset/AssetMap";
 import { RobotoMono, RobotoMonoBold } from "shared/asset/GameFonts";
+import ItemViewport from "shared/item/ItemViewport";
 import Items from "shared/items/Items";
 import MARKETPLACE_CONFIG from "shared/marketplace/MarketplaceListing";
 
@@ -184,7 +184,7 @@ export function ActionButton({
     );
 }
 
-export default function ListingCard({
+function ListingCard({
     listing,
     onBuy,
     onCancel,
@@ -434,3 +434,5 @@ export default function ListingCard({
         </imagelabel>
     );
 }
+
+export default memo(ListingCard);

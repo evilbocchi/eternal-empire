@@ -173,7 +173,7 @@ export default function BalanceOption({
 
     const showIncome = income && !income.lessEquals(0);
 
-    const isFunds = currency === "Funds";
+    const isMajor = currency === "Funds" || currency === "Time";
     return (
         <frame
             ref={wrapperRef}
@@ -220,7 +220,7 @@ export default function BalanceOption({
                 },
             }}
             LayoutOrder={details.layoutOrder}
-            Size={new UDim2(1, 0, 0.045, isFunds ? 30 : 21)}
+            Size={new UDim2(1, 0, 0.045, isMajor ? 30 : 21)}
         >
             <frame
                 BackgroundColor3={details.color}
@@ -250,7 +250,7 @@ export default function BalanceOption({
                     BackgroundTransparency={1}
                     FontFace={RobotoSlabBold}
                     Position={new UDim2(0, 24, 0.5, 0)}
-                    Size={new UDim2(1, -30, isFunds ? 0.7 : 0.75, 0)}
+                    Size={new UDim2(1, -30, isMajor ? 0.7 : 0.75, 0)}
                     Text={displayBalanceCurrency(currency, amount)}
                     TextColor3={Color3.fromRGB(255, 255, 255)}
                     TextScaled={true}

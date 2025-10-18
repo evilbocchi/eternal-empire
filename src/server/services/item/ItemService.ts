@@ -86,9 +86,11 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
     private readonly researching: Map<string, number>;
     private readonly shopsPerItem = new Map<string, Item[]>();
     private hasInventoryChanged = false;
-    private hasUniqueChanged = false;
     private hasBoughtChanged = false;
-    private hasPlacedChanged = false;
+    private readonly changedPlacedItems = new Map<string, PlacedItem>();
+    private readonly deletedPlacedItems = new Set<string>();
+    private readonly changedUniqueInstances = new Map<string, UniqueItemInstance>();
+    private readonly deletedUniqueInstances = new Set<string>();
     breakdownsEnabled = true;
 
     // Signals
@@ -98,21 +100,21 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
      * @param player The player who placed the items.
      * @param placedItems Array of items that were placed with their IDs.
      */
-    readonly itemsPlaced = new Signal<(player: Player | undefined, placedItems: IdPlacedItem[]) => void>();
+    readonly itemsPlaced = new Signal<(player: Player | undefined, placedItems: Set<IdPlacedItem>) => void>();
 
     /**
      * Fired when items are removed from the world.
      * @param player The player who removed the items.
      * @param placedItems Array of items that were removed.
      */
-    readonly itemsUnplaced = new Signal<(player: Player | undefined, placedItems: PlacedItem[]) => void>();
+    readonly itemsUnplaced = new Signal<(player: Player | undefined, placedItems: Set<PlacedItem>) => void>();
 
     /**
      * Fired when items are purchased from the shop.
      * @param player The player who bought the items (undefined for system purchases).
      * @param items Array of items that were bought.
      */
-    readonly itemsBought = new Signal<(player: Player | undefined, items: Item[]) => void>();
+    readonly itemsBought = new Signal<(player: Player | undefined, items: Set<Item>) => void>();
 
     /**
      * Fired when an item is given to the empire (e.g. via admin command or quest reward).
@@ -140,9 +142,9 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
     })();
 
     constructor(
-        private dataService: DataService,
-        private currencyService: CurrencyService,
-        private permissionsService: PermissionsService,
+        private readonly currencyService: CurrencyService,
+        private readonly dataService: DataService,
+        private readonly permissionsService: PermissionsService,
     ) {
         this.worldPlaced = dataService.empireData.items.worldPlaced;
         this.brokenPlacedItems = dataService.empireData.items.brokenPlacedItems;
@@ -264,20 +266,6 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
     }
 
     /**
-     * Updates the placed items collection and syncs to clients.
-     *
-     * @param placedItems The new placed items map to set.
-     */
-    setPlacedItems(placedItems: Map<string, PlacedItem>) {
-        if (placedItems !== this.worldPlaced) {
-            // only set if different reference
-            this.worldPlaced.clear();
-            for (const [k, v] of placedItems) this.worldPlaced.set(k, v);
-        }
-        this.hasPlacedChanged = true;
-    }
-
-    /**
      * Creates a new unique item instance from the given base item.
      *
      * @param baseItemId The ID of the base item to create a unique instance from.
@@ -300,8 +288,7 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
         const instance = uniqueTrait.generateInstance(allPots);
         const uuid = HttpService.GenerateGUID(false);
         this.uniqueInstances.set(uuid, instance);
-        this.hasUniqueChanged = true;
-
+        this.changedUniqueInstances.set(uuid, instance);
         return uuid;
     }
 
@@ -337,13 +324,13 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
      *
      * @param player Player that performed the unplacing
      * @param placementIds List of placement ids
-     * @returns List of unplaced items. If nothing happened, this will be undefined.
+     * @returns Set of unplaced items. If nothing happened, this will be undefined.
      */
-    unplaceItems(player: Player | undefined, placementIds: string[]): PlacedItem[] | undefined {
+    unplaceItems(player: Player | undefined, placementIds: Set<string>): Set<PlacedItem> | undefined {
         if (player !== undefined && !this.permissionsService.checkPermLevel(player, "build")) {
             return undefined;
         }
-        const unplacing = new Array<PlacedItem>();
+        const unplacing = new Set<PlacedItem>();
         const placedItems = this.worldPlaced;
 
         let somethingHappened = false;
@@ -362,14 +349,14 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
                 model.Destroy();
                 this.modelPerPlacementId.delete(placementId);
             }
-            unplacing.push(placedItem);
+            unplacing.add(placedItem);
             placedItems.delete(placementId);
             this.repairProtection.delete(placementId);
+            this.deletedPlacedItems.add(placementId);
         }
         if (somethingHappened === false) {
             return undefined;
         }
-        this.setPlacedItems(placedItems);
         for (const placedItem of unplacing) {
             const item = placedItem.item;
             const uuid = placedItem.uniqueItemId;
@@ -379,11 +366,25 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
                 const uniqueItem = this.uniqueInstances.get(uuid);
                 if (uniqueItem === undefined) throw `Unique item ${uuid} not found.`;
                 uniqueItem.placed = undefined; // Clear the placement ID
-                this.hasUniqueChanged = true;
+                this.changedUniqueInstances.set(uuid, uniqueItem);
             }
         }
+
         this.itemsUnplaced.fire(player, unplacing);
         return unplacing;
+    }
+
+    /**
+     * Unplaces all items in the specified area.
+     * @param player The player performing the unplacement (undefined for system actions).
+     * @param areaId The area ID to unplace items from, or undefined to unplace from all areas.
+     * @returns Set of unplaced items, or undefined if nothing was unplaced.
+     */
+    unplaceItemsInArea(player: Player | undefined, areaId: AreaId | undefined) {
+        const toRemove = new Set<string>();
+        for (const [id, placedItem] of this.worldPlaced)
+            if (areaId === undefined || placedItem.area === areaId) toRemove.add(id);
+        return this.unplaceItems(player, toRemove);
     }
 
     /**
@@ -435,10 +436,10 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
      * Checks for permissions and area validity.
      *
      * @param player Player that performed the placing
-     * @param items List of items to place
+     * @param placingInfoSet List of items to place
      * @returns 0 if no items were placed, 1 if items were placed, 2 if items were placed and is allowed to place the same item again
      */
-    placeItems(player: Player | undefined, items: PlacingInfo[]) {
+    placeItems(player: Player | undefined, placingInfoSet: Set<PlacingInfo>) {
         if (player !== undefined && !this.permissionsService.checkPermLevel(player, "build")) {
             return 0;
         }
@@ -451,10 +452,15 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
         }
 
         let totalAmount = 0;
-        const placedItems = new Array<IdPlacedItem>();
-        const placementIds = new Array<string>();
-        for (const item of items) {
-            const [placedItem, amount] = this.serverPlace(item.id, item.position, item.rotation, area);
+        const placedItems = new Set<IdPlacedItem>();
+        const placementIds = new Set<string>();
+        for (const placingInfo of placingInfoSet) {
+            const [placedItem, amount] = this.serverPlace(
+                placingInfo.id,
+                placingInfo.position,
+                placingInfo.rotation,
+                area,
+            );
             if (placedItem === undefined) {
                 if (placementIds.size() > 0) {
                     this.unplaceItems(player, placementIds);
@@ -466,8 +472,8 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
                 // if this is a normal item
                 totalAmount += amount;
             }
-            placedItems.push(placedItem);
-            placementIds.push(placedItem.id);
+            placedItems.add(placedItem);
+            placementIds.add(placedItem.id);
         }
         const placedCount = placedItems.size();
         if (placedCount === 0) {
@@ -523,7 +529,6 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
         rotation = math.round(rotation / 90) * 90;
         rotation %= 360;
 
-        const placedItems = itemsData.worldPlaced;
         const itemId = uniqueInstance?.baseItemId ?? id;
         const item = Items.getItem(itemId);
         if (item === undefined) throw "How did this happen?";
@@ -600,13 +605,14 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
         if (uniqueInstance !== undefined) {
             placedItem.uniqueItemId = id; // Link unique item UUID
             uniqueInstance.placed = nextId; // Set the placement ID for the unique item
-            this.hasUniqueChanged = true;
+            this.uniqueInstances.set(id, uniqueInstance);
+            this.changedUniqueInstances.set(id, uniqueInstance);
         }
 
         // Update data and create model
-        placedItems.set(nextId, placedItem);
+        this.worldPlaced.set(nextId, placedItem);
         this.addItemModel(nextId, placedItem);
-        this.setPlacedItems(placedItems);
+        this.changedPlacedItems.set(nextId, placedItem);
         if (uniqueInstance !== undefined) {
             return $tuple(placedItem);
         } else {
@@ -622,19 +628,19 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
      * If any models belong in the workspace but no placed item corresponds, remove them.
      */
     fullUpdatePlacedItemsModels() {
-        const placedItems = this.worldPlaced;
-
         // Remove orphaned models
         for (const model of PLACED_ITEMS_FOLDER.GetChildren()) {
-            if (!placedItems.has(model.Name)) {
+            if (!this.worldPlaced.has(model.Name)) {
                 model.Destroy();
                 this.repairProtection.delete(model.Name);
+                this.modelPerPlacementId.delete(model.Name);
             }
         }
-        this.modelPerPlacementId.clear();
 
         // Add missing models
-        for (const [placementId, placedItem] of placedItems) this.addItemModel(placementId, placedItem);
+        for (const [placementId, placedItem] of this.worldPlaced) {
+            this.addItemModel(placementId, placedItem);
+        }
     }
 
     // Purchase Methods
@@ -694,7 +700,7 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
         }
         const success = this.serverBuy(item);
         if (success) {
-            this.itemsBought.fire(player, [item]);
+            this.itemsBought.fire(player, new Set([item]));
         }
         return success;
     }
@@ -703,14 +709,14 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
      * Handles bulk item purchases for a player.
      *
      * @param player The player making the purchases.
-     * @param itemIds Array of item IDs to attempt to buy.
+     * @param itemIds Set of item IDs to attempt to buy.
      * @returns Whether at least one purchase was successful.
      */
-    buyAllItems(player: Player, itemIds: string[]) {
+    buyAllItems(player: Player, itemIds: Set<string>) {
         if (!this.permissionsService.checkPermLevel(player, "purchase")) return false;
 
         let oneSucceeded = false;
-        const bought = new Array<Item>();
+        const bought = new Set<Item>();
         for (const itemId of itemIds) {
             const item = Items.getItem(itemId);
             if (item === undefined) continue;
@@ -719,7 +725,7 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
             }
             if (this.serverBuy(item) === true) {
                 oneSucceeded = true;
-                bought.push(item);
+                bought.add(item);
             }
         }
         this.itemsBought.fire(player, bought);
@@ -776,50 +782,42 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
     // Lifecycle Methods
 
     /**
-     * Requests changes to be propagated to clients.
+     * Requests changes to be broadcasted to clients.
      * Marks all change flags as true to ensure data is sent in the next update cycle.
      */
     requestChanges() {
         this.hasInventoryChanged = true;
-        this.hasUniqueChanged = true;
         this.hasBoughtChanged = true;
-        this.hasPlacedChanged = true;
-    }
-
-    /**
-     * Forces propagation of specific placed items to clients.
-     * @param placementIds Array of placement IDs to propagate.
-     */
-    propagatePlacedItems(placementIds: string[]) {
-        const entries = new Map<string, PlacedItem>();
-        for (const placementId of placementIds) {
-            const placedItem = this.getPlacedItem(placementId);
-            if (placedItem === undefined) continue;
-            entries.set(placementId, placedItem);
+        for (const [k, v] of this.worldPlaced) {
+            this.changedPlacedItems.set(k, v);
         }
-        Packets.placedItems.setEntries(entries);
+        for (const [k, v] of this.uniqueInstances) {
+            this.changedUniqueInstances.set(k, v);
+        }
     }
 
     /**
-     * Propagates changes to clients by sending updated data packets.
+     * Broadcasts changes to clients by sending updated data packets.
      * This is called periodically to ensure all changes are synchronized.
      */
-    private propagateChanges() {
+    private broadcastChanges() {
         if (this.hasInventoryChanged) {
             Packets.inventory.set(this.inventory);
             this.hasInventoryChanged = false;
         }
-        if (this.hasUniqueChanged) {
-            Packets.uniqueInstances.set(this.uniqueInstances);
-            this.hasUniqueChanged = false;
+        if (!this.changedUniqueInstances.isEmpty() || !this.deletedUniqueInstances.isEmpty()) {
+            Packets.uniqueInstances.setAndDeleteEntries(this.changedUniqueInstances, this.deletedUniqueInstances);
+            this.changedUniqueInstances.clear();
+            this.deletedUniqueInstances.clear();
+        }
+        if (!this.changedPlacedItems.isEmpty() || !this.deletedPlacedItems.isEmpty()) {
+            Packets.placedItems.setAndDeleteEntries(this.changedPlacedItems, this.deletedPlacedItems);
+            this.changedPlacedItems.clear();
+            this.deletedPlacedItems.clear();
         }
         if (this.hasBoughtChanged) {
             Packets.bought.set(this.bought);
             this.hasBoughtChanged = false;
-        }
-        if (this.hasPlacedChanged) {
-            Packets.placedItems.set(this.worldPlaced);
-            this.hasPlacedChanged = false;
         }
     }
 
@@ -906,14 +904,18 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
         });
 
         // Set up logging for item actions
-        const itemsBoughtConnection = this.itemsBought.connect((player, items) =>
+        const itemsBoughtConnection = this.itemsBought.connect((player, items) => {
+            const serialized = new Array<string>();
+            for (const item of items) {
+                serialized.push(item.id);
+            }
             log({
                 time: tick(),
                 type: "Purchase",
                 player: player?.UserId,
-                items: items.map((item) => item.id),
-            }),
-        );
+                items: serialized,
+            });
+        });
 
         const itemsPlacedConnection = this.itemsPlaced.connect((player, placedItems) => {
             const time = tick();
@@ -994,7 +996,7 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
         this.requestChanges();
 
         // Periodically propagate changes to clients
-        eat(simpleInterval(() => this.propagateChanges(), 0.1));
+        eat(simpleInterval(() => this.broadcastChanges(), 0.1));
 
         // Periodically check for items to break down
         const ref = { interval: 10 };

@@ -74,7 +74,7 @@ export function getBestUniqueInstances(uniqueInstances: Map<string, UniqueItemIn
  */
 export function activateItem(item: Item): boolean {
     const isPlaceable = item.placeableAreas.size() > 0 || item.bounds !== undefined;
-    const level = Packets.level.get() ?? 0;
+    const level = Packets.level.get();
 
     // Check restrictions
     if (BuildManager.getRestricted() === true || BuildManager.hasSelection() === true || isPlaceable === false) {
@@ -230,7 +230,7 @@ export default function InventoryWindow() {
         }
     }, [updateCellSize]);
 
-    const dataPerItem = useMemo(() => {
+    const { dataPerItem, hasOwnedItems, hasFilteredItems } = useMemo(() => {
         const amountsPerItem = new Map<string, number>();
         for (const [itemId, amount] of inventory) {
             amountsPerItem.set(itemId, amount);
@@ -241,6 +241,14 @@ export default function InventoryWindow() {
             amountsPerItem.set(itemId, (amountsPerItem.get(itemId) ?? 0) + 1);
         }
 
+        let ownsAnyItems = false;
+        for (const [, amount] of amountsPerItem) {
+            if (amount > 0) {
+                ownsAnyItems = true;
+                break;
+            }
+        }
+
         const dataPerItem: Map<string, InventorySlotData> = filterItems(
             NON_GEAR_ITEMS_SET,
             searchQuery,
@@ -248,6 +256,7 @@ export default function InventoryWindow() {
         );
 
         const bestInstancePerItem = getBestUniqueInstances(uniqueInstances);
+        let anyFilteredVisible = false;
         for (const [id, data] of dataPerItem) {
             const reserved = researching.get(id) ?? 0;
             const amount = math.max((amountsPerItem.get(id) ?? 0) - reserved, 0);
@@ -256,12 +265,16 @@ export default function InventoryWindow() {
                 data.visible = false;
             }
 
+            if (data.visible === true) {
+                anyFilteredVisible = true;
+            }
+
             const bestInstance = bestInstancePerItem.get(id);
             if (bestInstance !== undefined) {
                 data.uuid = bestInstance;
             }
         }
-        return dataPerItem;
+        return { dataPerItem, hasOwnedItems: ownsAnyItems, hasFilteredItems: anyFilteredVisible };
     }, [inventory, uniqueInstances, researching, searchQuery, filterProps.traitFilters]);
 
     useEffect(() => {
@@ -316,15 +329,8 @@ export default function InventoryWindow() {
         }
     }, [dataPerItem]);
 
-    // Check if user has any items at all (for empty state)
-    let hasAnyItems = false;
-    for (const [, { amount }] of dataPerItem) {
-        if (amount !== undefined && amount > 0) {
-            hasAnyItems = true;
-            break;
-        }
-    }
-    const isEmpty = !hasAnyItems; // Only show empty state if user has no items at all
+    const isEmpty = !hasOwnedItems; // Only show empty state if user has no items at all
+
     return (
         <BasicWindow
             icon={getAsset("assets/Inventory.png")}
@@ -347,7 +353,7 @@ export default function InventoryWindow() {
             <InventoryEmptyState visible={isEmpty} />
 
             {/* Main inventory content */}
-            <frame BackgroundTransparency={1} Size={new UDim2(1, 0, 1, 0)} Visible={hasAnyItems}>
+            <frame BackgroundTransparency={1} Size={new UDim2(1, 0, 1, 0)}>
                 {/* Filter options */}
                 <InventoryFilter
                     {...filterProps}
@@ -369,7 +375,7 @@ export default function InventoryWindow() {
                     ScrollBarThickness={12}
                     Selectable={false}
                     Size={new UDim2(1, 0, 0.975, -20)}
-                    Visible={dataPerItem.size() > 0}
+                    Visible={hasFilteredItems}
                 >
                     <uipadding
                         PaddingBottom={new UDim(0, 5)}

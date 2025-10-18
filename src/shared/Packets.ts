@@ -1,8 +1,8 @@
-import type { BaseOnoeNum } from "@rbxts/serikanum";
-import { OnoeNum } from "@rbxts/serikanum";
 import type CameraShaker from "@rbxts/camera-shaker";
 import type { DataType } from "@rbxts/flamework-binary-serializer";
-import { exactMapProperty, exactSetProperty, packet, property } from "@rbxts/fletchette";
+import { exactMapProperty, exactSetProperty, packet, property, shallowMapProperty } from "@rbxts/fletchette";
+import type { BaseOnoeNum } from "@rbxts/serikanum";
+import { OnoeNum } from "@rbxts/serikanum";
 import type { LeaderboardEntry, LeaderboardType } from "client/components/world/leaderboard/Leaderboard";
 import EmpireProfileTemplate from "shared/data/profile/EmpireProfileTemplate";
 import PlayerProfileTemplate from "shared/data/profile/PlayerProfileTemplate";
@@ -56,6 +56,15 @@ declare global {
 
 const unloadedSettings = table.clone(PlayerProfileTemplate.settings);
 unloadedSettings.Music = false; // disable music until we load settings
+
+type DebugStatsPayload = {
+    serverTps: number;
+    entityCount: number;
+    playerCount: number;
+    uptimeSeconds: number;
+    jobId: string;
+    lastUpdated: number;
+};
 
 namespace Packets {
     // data management
@@ -116,12 +125,12 @@ namespace Packets {
         EmpireProfileTemplate.items.worldPlaced,
     );
     export const buyItem = packet<(itemId: string) => boolean>();
-    export const buyAllItems = packet<(itemIds: string[]) => boolean>();
-    export const placeItems = packet<(items: PlacingInfo[]) => number>();
-    export const uniqueInstances = exactMapProperty<string, DataType.Packed<UniqueItemInstance>>(
+    export const buyAllItems = packet<(itemIds: Set<string>) => boolean>();
+    export const placeItems = packet<(items: Set<PlacingInfo>) => number>();
+    export const uniqueInstances = exactMapProperty<string, UniqueItemInstance>(
         EmpireProfileTemplate.items.uniqueInstances,
     );
-    export const unplaceItems = packet<(placementIds: string[]) => void>();
+    export const unplaceItems = packet<(placementIds: Set<string>) => void>();
     export const setBuildPreviewTool = packet<(difficultyId: string) => void>();
     export const boostChanged = packet<(boostPerItem: Map<string, BaseOnoeNum>) => void>({ isUnreliable: true });
     export const brokenPlacedItems = exactSetProperty<string>(EmpireProfileTemplate.items.brokenPlacedItems);
@@ -182,6 +191,7 @@ namespace Packets {
     export const questCompleted = packet<(questId: string) => void>();
     export const level = property<DataType.i32>(-1);
     export const xp = property<DataType.i32>(-1);
+    export const trackQuest = packet<(questId: string) => void>();
 
     // playtime
     export const longestSessionTime = property<DataType.i32>(EmpireProfileTemplate.longestSession, true);
@@ -205,6 +215,7 @@ namespace Packets {
     export const settings = property<DataType.Packed<typeof PlayerProfileTemplate.settings>>(unloadedSettings);
     export const setSetting = packet<<T extends keyof Settings>(setting: T, value: Settings[T]) => void>();
     export const setHotkey = packet<(name: string, key: DataType.i32) => void>();
+    export const serverMusicEnabled = property<boolean>(true);
 
     // npcs
     export const nextDialogue = packet<() => boolean>();
@@ -248,12 +259,24 @@ namespace Packets {
     // world
     export const triggerProximityPrompt = packet<(path: string) => void>();
     export const damaged = packet<(damage: "Normal" | "DoubleDamage" | "HighDamage" | "Instakill") => void>();
+    export const loadCharacter = packet<() => boolean>();
 
     // pillar puzzle
     export const pillarPuzzleVisible = property<boolean>(false);
     export const pillarPuzzleSequence = property<number[]>([]);
     export const submitPuzzleAnswer = packet<(answer: number[]) => boolean>();
     export const startPillarPuzzle = packet<(pillarNumber: number) => void>();
+
+    // debug
+    export const debugStats = property<DebugStatsPayload>({
+        serverTps: 0,
+        entityCount: 0,
+        playerCount: 0,
+        uptimeSeconds: 0,
+        jobId: "",
+        lastUpdated: 0,
+    });
+    export const debugPing = packet<() => void>({ isUnreliable: true });
 }
 
 export = Packets;

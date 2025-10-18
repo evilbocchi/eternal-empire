@@ -34,14 +34,14 @@ export default abstract class BaseDropletSlayer extends ItemTrait {
 
         const overlapParams = new OverlapParams();
         overlapParams.CollisionGroup = "DropletInquirer";
-        const laserCframe = laser.CFrame;
+        const laserCFrame = laser.CFrame;
         const laserSize = laser.Size;
 
         const ref = item.repeat(
             model,
             () => {
                 laserInfo.Maintained = true;
-                for (const droplet of Workspace.GetPartBoundsInBox(laserCframe, laserSize, overlapParams)) {
+                for (const droplet of Workspace.GetPartBoundsInBox(laserCFrame, laserSize, overlapParams)) {
                     Upgrader.upgrade({
                         model,
                         modelInfo,

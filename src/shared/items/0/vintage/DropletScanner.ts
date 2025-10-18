@@ -43,6 +43,73 @@ export = new Item(script.Name)
             }
             return newPrice;
         };
+        const ONE = new OnoeNum(1);
+        const formatGlobalMultiplier = (bundle: CurrencyBundle) => {
+            if (!bundle.hasAll()) {
+                return undefined;
+            }
+
+            const amounts = new Map<Currency, OnoeNum>();
+            const counts = new Map<string, { amount: OnoeNum; count: number }>();
+            for (const [currency] of CurrencyBundle.SORTED_DETAILS) {
+                const amount = bundle.get(currency);
+                if (amount === undefined) {
+                    return undefined;
+                }
+                amounts.set(currency, amount);
+                const key = amount.toString();
+                const entry = counts.get(key);
+                if (entry === undefined) {
+                    counts.set(key, { amount, count: 1 });
+                } else {
+                    entry.count++;
+                }
+            }
+
+            let baseEntry: { amount: OnoeNum; count: number } | undefined;
+            for (const [, entry] of counts) {
+                if (baseEntry === undefined) {
+                    baseEntry = entry;
+                    continue;
+                }
+                if (entry.count > baseEntry.count) {
+                    baseEntry = entry;
+                    continue;
+                }
+                if (entry.count === baseEntry.count && baseEntry.amount.equals(ONE) && !entry.amount.equals(ONE)) {
+                    baseEntry = entry;
+                }
+            }
+
+            if (baseEntry === undefined) {
+                return undefined;
+            }
+
+            const baseAmount = baseEntry.amount;
+            if (baseAmount.equals(ONE)) {
+                return undefined;
+            }
+
+            const parts = new Array<string>();
+            parts.push(`x${OnoeNum.toString(baseAmount)}`);
+
+            let hasVariation = false;
+            for (const [currency] of CurrencyBundle.SORTED_DETAILS) {
+                const amount = amounts.get(currency)!;
+                if (!amount.equals(baseAmount)) {
+                    hasVariation = true;
+                    const formatted = CurrencyBundle.getFormatted(currency, amount);
+                    const color = CURRENCY_DETAILS[currency].color;
+                    parts.push(formatRichText(`x${formatted}`, color));
+                }
+            }
+
+            if (hasVariation === false) {
+                return parts[0];
+            }
+
+            return parts.join(", ");
+        };
         const FURNACE_UPGRADES = NamedUpgrades.getUpgrades("Furnace");
 
         const addOperationToBuilder = (
@@ -110,7 +177,12 @@ export = new Item(script.Name)
             if (globAdd.amountPerCurrency.size() > 0) builder.append("+").append(globAdd.toString(true));
 
             const washedMul = removeOnes(globMul);
-            if (washedMul.amountPerCurrency.size() > 0) builder.append("x").append(washedMul.toString(true));
+            const globalMultiplierText = formatGlobalMultiplier(globMul);
+            if (globalMultiplierText !== undefined) {
+                builder.append(globalMultiplierText);
+            } else if (washedMul.amountPerCurrency.size() > 0) {
+                builder.append("x").append(washedMul.toString(true));
+            }
 
             const washedPow = removeOnes(globPow);
             if (washedPow.amountPerCurrency.size() > 0) builder.append("^").append(washedPow.toString(true));

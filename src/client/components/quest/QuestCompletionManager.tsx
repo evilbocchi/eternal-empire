@@ -34,6 +34,8 @@ export default function QuestCompletionManager() {
                     return;
                 }
 
+                if (questInfo.level === 0) return;
+
                 // Create quest completion data
                 const completionData: QuestCompletionData = {
                     questName: questInfo.name,

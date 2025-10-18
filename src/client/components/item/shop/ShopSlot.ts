@@ -212,13 +212,12 @@ export interface CreateShopSlotOptions {
 }
 
 export interface UpdateShopSlotOptions {
-    parent?: GuiObject;
     layoutOrder?: number;
     baseVisible?: boolean;
     hideMaxedItems?: boolean;
     ownedAmount: number;
     onActivated?: (item: Item) => void;
-    playerLevel?: number;
+    empireLevel?: number;
 }
 
 export type ShopSlotHandle = {
@@ -459,19 +458,7 @@ export function createShopSlot(item: Item, options: CreateShopSlotOptions): Shop
 export function updateShopSlot(handle: ShopSlotHandle, options: UpdateShopSlotOptions) {
     if (handle.destroyed) return;
 
-    const {
-        parent,
-        layoutOrder,
-        baseVisible = false,
-        hideMaxedItems = false,
-        ownedAmount,
-        onActivated,
-        playerLevel,
-    } = options;
-
-    if (parent && handle.root.Parent !== parent) {
-        handle.root.Parent = parent;
-    }
+    const { layoutOrder, baseVisible = false, hideMaxedItems = false, ownedAmount, onActivated, empireLevel } = options;
 
     if (layoutOrder !== undefined) {
         handle.root.LayoutOrder = layoutOrder;
@@ -494,7 +481,7 @@ export function updateShopSlot(handle: ShopSlotHandle, options: UpdateShopSlotOp
     }
 
     const levelRequirement = handle.item.levelReq;
-    const currentLevel = playerLevel ?? 0;
+    const currentLevel = empireLevel ?? 0;
     const isLocked = levelRequirement !== undefined && currentLevel < levelRequirement;
     handle.isLocked = isLocked;
     handle.button.AutoButtonColor = !isLocked;
@@ -507,9 +494,10 @@ export function updateShopSlot(handle: ShopSlotHandle, options: UpdateShopSlotOp
     }
 
     const price = handle.item.getPrice(ownedAmount + 1);
-    const optionsList = buildPriceOptions(handle.item, price);
+    const isMaxed = price === undefined;
+    const optionsList = isMaxed ? new Array<CurrencyOption | ItemOption>() : buildPriceOptions(handle.item, price);
 
-    const shouldHide = hideMaxedItems && price === undefined;
+    const shouldHide = hideMaxedItems && isMaxed;
     const finalVisible = baseVisible && !shouldHide;
 
     if (levelRequirement !== undefined && isLocked) {
@@ -536,7 +524,7 @@ export function updateShopSlot(handle: ShopSlotHandle, options: UpdateShopSlotOp
         }
     }
 
-    if (optionsList.size() === 0) {
+    if (isMaxed || optionsList.size() === 0) {
         applyPriceOption(handle, { kind: "maxed" });
         handle.rotationToken++;
         return;

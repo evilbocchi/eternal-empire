@@ -3,6 +3,7 @@ import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Droplet from "shared/item/Droplet";
 import Item from "shared/item/Item";
 import Dropper from "shared/item/traits/dropper/Dropper";
+import Class0Shop from "shared/items/0/Class0Shop";
 import HandCrankDropperV2 from "shared/items/0/millisecondless/HandCrankDropperV2";
 import StrongCondenser from "shared/items/0/millisecondless/StrongCondenser";
 import LunaryDropper from "shared/items/0/vintage/LunaryDropper";
@@ -20,7 +21,6 @@ import OverusedAmethystDropper from "shared/items/negative/reversedperipherality
 import TheFirstDropper from "shared/items/negative/tfd/TheFirstDropper";
 import BulkyDropper from "shared/items/negative/tlg/BulkyDropper";
 import VibrantDropper from "shared/items/negative/trueease/VibrantDropper";
-import Class0Shop from "shared/items/0/Class0Shop";
 
 export = new Item(script.Name)
     .setName("Focal Point")
@@ -45,7 +45,7 @@ Produces a %val% droplet every 4 seconds.`,
     .setRequiredItemAmount(BasicCondenser, BasicCondenser.pricePerIteration.size())
     .setRequiredItemAmount(RapidDropper, RapidDropper.pricePerIteration.size())
     .setRequiredItemAmount(OverusedAmethystDropper, OverusedAmethystDropper.pricePerIteration.size())
-    .setRequiredItemAmount(VitalizedDropper, VibrantDropper.pricePerIteration.size())
+    .setRequiredItemAmount(VitalizedDropper, VitalizedDropper.pricePerIteration.size())
     .setRequiredItemAmount(StrongCondenser, StrongCondenser.pricePerIteration.size())
     .setRequiredItemAmount(HandCrankDropperV2, HandCrankDropperV2.pricePerIteration.size())
     .setRequiredItemAmount(HydratingDropper, HydratingDropper.pricePerIteration.size())

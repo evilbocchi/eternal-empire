@@ -921,13 +921,14 @@ export default class Item {
 
     static {
         if (IS_SERVER || IS_EDIT) {
+            const startTime = os.clock();
             REPEATS.set(
                 () => {
                     const formulaResults = new Map<string, OnoeNum>();
                     for (const [id, item] of Item.itemPerId) {
                         formulaResults.set(id, item.performFormula()!);
                     }
-                    if (os.clock() > 15) {
+                    if (os.clock() - startTime > 10) {
                         // simple delay to ensure clients are ready
                         Packets.boostChanged.toAllClients(formulaResults);
                     }
