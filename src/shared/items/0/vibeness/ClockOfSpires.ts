@@ -10,9 +10,7 @@ import Class0Shop from "shared/items/0/Class0Shop";
 
 export = new Item(script.Name)
     .setName("Clock Of Spires")
-    .setDescription(
-        ". Upgrades Funds by 4x during the day, and Power by 4x at night.",
-    )
+    .setDescription("The chime of endless growth. Upgrades Funds by 4x during the day, and Power by 4x at night.")
     .setDifficulty(Difficulty.Vibeness)
     .setPrice(new CurrencyBundle().set("Funds", 2.5e42), 1)
     .addPlaceableArea("BarrenIslands")
