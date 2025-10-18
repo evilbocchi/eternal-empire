@@ -5,9 +5,11 @@ export = new Command(script.Name)
     .addAlias("truewipedata")
     .setDescription("Reset all data like no progress was ever made.")
     .setExecute((_o) => {
-        CommandAPI.Item.setPlacedItems(new Map());
         ThisEmpire.data.items.bought.clear();
         ThisEmpire.data.items.inventory.clear();
+        ThisEmpire.data.items.uniqueInstances.clear();
+        ThisEmpire.data.items.worldPlaced.clear();
+        ThisEmpire.data.items.brokenPlacedItems.clear();
         ThisEmpire.data.items.inventory.set("ClassLowerNegativeShop", 1);
         ThisEmpire.data.quests.clear();
         CommandAPI.Item.fullUpdatePlacedItemsModels();

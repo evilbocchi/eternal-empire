@@ -27,7 +27,7 @@ export default function ShopGui() {
     const [hideMaxedItems, setHideMaxedItems] = useState(Packets.settings.get().HideMaxedItems);
     const [focusShopCamera, setFocusShopCamera] = useState(Packets.settings.get().FocusShopCamera === true);
     const ownedPerItem = useProperty(Packets.bought) ?? new Map<string, number>();
-    const playerLevel = useProperty(Packets.level);
+    const empireLevel = useProperty(Packets.level);
     const shopItems = shop?.items ?? new Set<Item>();
     const scrollingFrameRef = useRef<ScrollingFrame>();
     const itemSlotsRef = useRef(new Map<string, ShopSlotHandle>());
@@ -63,7 +63,7 @@ export default function ShopGui() {
             const shopGuiPart = model.FindFirstChild("ShopGuiPart") as Part;
             if (shopGuiPart === undefined) return;
             shopGuiPart.LocalTransparencyModifier = 1;
-            candidates.set(hitbox, { guiPart: shopGuiPart, shop });
+            candidates.set(hitbox, { guiPart: shopGuiPart, shop, placementId: model.Name });
         };
         for (const hitbox of CollectionService.GetTagged("Shop")) {
             addCandidate(hitbox as BasePart);
@@ -141,23 +141,22 @@ export default function ShopGui() {
             const ownedAmount = ownedPerItem.get(item.id) ?? 0;
 
             updateShopSlot(slot, {
-                parent: frame,
                 layoutOrder,
                 baseVisible,
                 hideMaxedItems,
                 ownedAmount,
                 onActivated: handleItemClick,
-                playerLevel: playerLevel ?? 0,
+                empireLevel: empireLevel ?? 0,
             });
         }
-    }, [dataPerItem, shopItems, hideMaxedItems, ownedPerItem, handleItemClick, playerLevel]);
+    }, [dataPerItem, shopItems, hideMaxedItems, ownedPerItem, handleItemClick, empireLevel]);
 
     const { events } = useHotkeyWithTooltip({
         action: () => {
             if (!shop) return false;
-            const serialized = new Array<string>();
+            const serialized = new Set<string>();
             for (const item of shop.items) {
-                serialized.push(item.id);
+                serialized.add(item.id);
             }
             if (Packets.buyAllItems.toServer(serialized)) {
                 playSound("ItemPurchase.mp3");
@@ -180,9 +179,9 @@ export default function ShopGui() {
             Face={Enum.NormalId.Front}
             LightInfluence={0}
             PixelsPerStud={50}
+            ResetOnSpawn={false}
             SizingMode={Enum.SurfaceGuiSizingMode.PixelsPerStud}
             ZIndexBehavior={Enum.ZIndexBehavior.Sibling}
-            ResetOnSpawn={false}
         >
             {/* Main container */}
             <uipadding

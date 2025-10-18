@@ -1,15 +1,16 @@
 import React, { Fragment, useEffect } from "@rbxts/react";
 import { createRoot, Root } from "@rbxts/react-roblox";
-import { ContentProvider, RunService, Workspace } from "@rbxts/services";
+import { ContentProvider, RunService, StarterGui, Workspace } from "@rbxts/services";
 import BackpackWindow from "client/components/backpack/BackpackWindow";
 import BalanceWindow from "client/components/balance/BalanceWindow";
-import { CurrencyGainManager } from "client/components/balance/CurrencyGain";
+import CurrencyGainManager from "client/components/balance/CurrencyGainManager";
 import BuildWindow from "client/components/build/BuildWindow";
 import ChallengeCompletionManager from "client/components/challenge/ChallengeCompletionManager";
 import ChallengeHudManager from "client/components/challenge/ChallengeHudManager";
 import ChallengeManager from "client/components/challenge/ChallengeManager";
 import ChestLootManager from "client/components/chest/ChestLootManager";
 import CommandsWindow from "client/components/commands/CommandsWindow";
+import DebugOverlay from "client/components/debug/DebugOverlay";
 import EffectManager from "client/components/effect/EffectManager";
 import ClientItemReplication from "client/components/item/ClientItemReplication";
 import InventoryWindow from "client/components/item/inventory/InventoryWindow";
@@ -32,8 +33,7 @@ import ResetRenderer from "client/components/reset/ResetRenderer";
 import CopyWindow from "client/components/settings/CopyWindow";
 import SettingsManager from "client/components/settings/SettingsManager";
 import SidebarButtons from "client/components/sidebar/SidebarButtons";
-import performIntroSequence from "client/components/start/performIntroSequence";
-import StartWindow from "client/components/start/StartWindow";
+import TitleScreen from "client/components/start/TitleScreen";
 import StatsWindow from "client/components/stats/StatsWindow";
 import ToastManager from "client/components/toast/ToastManager";
 import TooltipWindow from "client/components/tooltip/TooltipWindow";
@@ -43,7 +43,6 @@ import { setVisibilityMain } from "client/hooks/useVisibility";
 import MusicManager from "client/MusicManager";
 import { assets, getAsset } from "shared/asset/AssetMap";
 import { IS_EDIT, IS_PUBLIC_SERVER, IS_STUDIO } from "shared/Context";
-import Sandbox from "shared/Sandbox";
 
 declare global {
     interface RunService {
@@ -57,8 +56,10 @@ import HarvestableGuiRenderer from "client/components/item/HarvestableGuiRendere
 import RepairedItemEffectRenderer from "client/components/item/RepairedItemEffectRenderer";
 import RepairWindow from "client/components/item/RepairWindow";
 import MarketplaceWindow from "client/components/marketplace/MarketplaceWindow";
+import performNewBeginningsWakeUp from "client/components/start/performNewBeginningsWakeUp";
 import { PLAYER_GUI } from "client/constants";
 import eat from "shared/hamster/eat";
+import Sandbox from "shared/Sandbox";
 import LoadingScreen from "sharedfirst/LoadingScreen";
 
 function setParent(instance: Instance) {
@@ -112,8 +113,12 @@ function waitForFrames(frameCount = 3): Promise<void> {
  */
 export default function App() {
     useEffect(() => {
+        StarterGui.ResetPlayerGuiOnSpawn = false; // Not having this deletes folders in PlayerGui
+
         const roots = new Set<Root>();
-        addRoot(roots, createScreenGui("Start", 20)).render(<StartWindow />);
+        addRoot(roots, createScreenGui("DebugOverlay", 100, false)).render(<DebugOverlay />);
+
+        addRoot(roots, createScreenGui("Title", 20)).render(<TitleScreen />);
 
         addRoot(roots, createScreenGui("PlayerList", 15)).render(<PlayerListContainer />);
 
@@ -162,27 +167,22 @@ export default function App() {
         addRoot(roots, createFolder("Printer")).render(<PrinterRenderer />);
         addRoot(roots, createFolder("Shop")).render(<ShopGui />);
         addRoot(roots, createFolder("UpgradeBoard")).render(<UpgradeBoardRenderer />);
+        addRoot(roots, createFolder("World")).render(<WorldRenderer />);
 
-        if (!Sandbox.getEnabled()) {
-            addRoot(roots, createFolder("World")).render(<WorldRenderer />);
-        }
-
-        Workspace.SetAttribute("Start", IS_PUBLIC_SERVER);
+        Workspace.SetAttribute("Title", IS_PUBLIC_SERVER);
         const cleanup = MusicManager.init();
 
         task.delay(1, () => {
             waitForFrames(30).then(() => {
                 LoadingScreen.hideLoadingScreen();
 
-                task.delay(0.5, () => {
-                    if (IS_PUBLIC_SERVER) {
-                        DocumentManager.setVisible("Start", true);
-                    } else if (Sandbox.getEnabled()) {
-                        setVisibilityMain(true);
-                    } else {
-                        performIntroSequence();
-                    }
-                });
+                if (IS_PUBLIC_SERVER) {
+                    DocumentManager.setVisible("Title", true);
+                } else if (Sandbox.getEnabled()) {
+                    setVisibilityMain(true);
+                } else {
+                    performNewBeginningsWakeUp();
+                }
             });
         });
 

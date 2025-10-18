@@ -17,7 +17,7 @@ export = new Item(script.Name)
             const player = Players.GetPlayerFromCharacter(other.Parent);
             if (!player) return;
             try {
-                BadgeService.AwardBadge(player.UserId, 1016244328118331); // TODO: change badge
+                BadgeService.AwardBadge(player.UserId, 1077478080869672); // TODO: change badge
             } catch {
                 print("Failed to award badge");
             }

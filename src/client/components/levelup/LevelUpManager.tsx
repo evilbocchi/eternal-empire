@@ -11,7 +11,7 @@ import Packets from "shared/Packets";
 
 export default function LevelUpManager() {
     const [levelUpData, setLevelUpData] = useState<LevelUpData>({
-        level: 1,
+        level: 0,
         visible: false,
     });
     const [previousLevel, setPreviousLevel] = useState<number | undefined>(undefined);
@@ -19,7 +19,7 @@ export default function LevelUpManager() {
     // Listen to level changes from the server
     useEffect(() => {
         const connection = Packets.level.observe((newLevel) => {
-            if (previousLevel !== undefined && newLevel > previousLevel) {
+            if (previousLevel !== undefined && newLevel > previousLevel && newLevel !== 1) {
                 // Player leveled up! Show notification
                 setLevelUpData({
                     level: newLevel,

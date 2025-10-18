@@ -131,13 +131,13 @@ namespace ItemViewport {
                 }
                 const pos = cframe.add(adjust);
                 camera.Focus = pos;
-                const newCframe = CFrame.lookAt(
+                const newCFrame = CFrame.lookAt(
                     pos.mul(CFrame.Angles(0, math.rad(currentAngle), 0).mul(new CFrame(0, 3, rel - this.zoom)))
                         .Position,
                     pos.Position,
                 );
-                if (camera.CFrame !== newCframe) {
-                    camera.CFrame = newCframe;
+                if (camera.CFrame !== newCFrame) {
+                    camera.CFrame = newCFrame;
                     currentAngle = currentAngle + this.delta * 60 * dt;
                 }
             },

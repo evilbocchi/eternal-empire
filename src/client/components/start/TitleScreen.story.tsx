@@ -3,7 +3,7 @@ import ReactRoblox from "@rbxts/react-roblox";
 import { Workspace } from "@rbxts/services";
 import { CreateReactStory } from "@rbxts/ui-labs";
 import SettingsWindow from "client/components/settings/SettingsWindow";
-import StartWindow from "client/components/start/StartWindow";
+import TitleScreen from "client/components/start/TitleScreen";
 import useVisibility from "client/hooks/useVisibility";
 import MusicManager from "client/MusicManager";
 import Packets from "shared/Packets";
@@ -18,7 +18,7 @@ export = CreateReactStory(
         },
     },
     (props) => {
-        useVisibility("Start", props.controls.visible);
+        useVisibility("Title", props.controls.visible);
 
         Packets.availableEmpires.set(
             new Map([
@@ -46,7 +46,7 @@ export = CreateReactStory(
         );
 
         useEffect(() => {
-            Workspace.SetAttribute("Start", true);
+            Workspace.SetAttribute("Title", true);
             const settings = table.clone(Packets.settings.get());
             settings.Music = true;
             Packets.settings.set(settings);
@@ -55,7 +55,7 @@ export = CreateReactStory(
 
         return (
             <Fragment>
-                <StartWindow fastTransitions={props.controls.fastTransitions} />
+                <TitleScreen fastTransitions={props.controls.fastTransitions} />
                 <SettingsWindow />
             </Fragment>
         );

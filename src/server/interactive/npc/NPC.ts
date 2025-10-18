@@ -1,5 +1,5 @@
 import Signal from "@antivivi/lemon-signal";
-import { getRootPart, loadAnimation, simpleInterval } from "@antivivi/vrldk";
+import { loadAnimation, simpleInterval } from "@antivivi/vrldk";
 import {
     CollectionService,
     PathfindingService,
@@ -604,7 +604,7 @@ export class Dialogue<T extends NPC = NPC> {
      * @param dialogue The starting dialogue.
      * @param requireInteraction If true, requires proximity for prompt.
      */
-    talk(requireInteraction?: boolean) {
+    talk(requireInteraction?: boolean, players?: Player[]) {
         const dialogues = this.extractDialogue();
         const size = dialogues.size();
         let i = 0;
@@ -626,6 +626,13 @@ export class Dialogue<T extends NPC = NPC> {
             if (talkingModel === undefined) {
                 Packets.npcMessage.toAllClients(current.text, currentIndex, size, true, Workspace);
             } else {
+                if (players !== undefined) {
+                    for (const player of players) {
+                        Packets.npcMessage.toClient(player, current.text, currentIndex, size, true, talkingModel);
+                    }
+                    return false;
+                }
+
                 let playersPrompted = 0;
                 const talkingPart = talkingModel.FindFirstChildOfClass("Humanoid")?.RootPart;
 

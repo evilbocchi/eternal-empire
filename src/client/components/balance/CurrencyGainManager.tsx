@@ -1,5 +1,5 @@
+import React, { memo, useEffect, useRef } from "@rbxts/react";
 import { BaseOnoeNum, OnoeNum } from "@rbxts/serikanum";
-import React, { useEffect, useRef } from "@rbxts/react";
 import { Debris, TweenService, Workspace } from "@rbxts/services";
 import { balanceOptionImagePerCurrency } from "client/components/balance/BalanceOption";
 import displayBalanceCurrency from "client/components/balance/displayBalanceCurrency";
@@ -96,7 +96,7 @@ function createCurrencyGain(
     }
 }
 
-export function CurrencyGainManager() {
+function CurrencyGainManager() {
     const containerRef = useRef<Frame>();
 
     useEffect(() => {
@@ -177,3 +177,5 @@ export function CurrencyGainManager() {
 
     return <frame ref={containerRef} BackgroundTransparency={1} Size={new UDim2(1, 0, 1, 0)} ZIndex={1000} />;
 }
+
+export default memo(CurrencyGainManager);

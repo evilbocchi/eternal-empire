@@ -252,9 +252,10 @@ export default class Area {
         });
     }
 
+    private loadClockTime = os.clock();
     private propagateDropletCountChange() {
         // Prevent network spam during server initialization
-        if (os.clock() < 15 || Sandbox.getEnabled()) {
+        if (os.clock() - this.loadClockTime < 15 || Sandbox.getEnabled()) {
             return;
         }
         // Broadcast the change to all connected clients
@@ -332,6 +333,13 @@ export const AREAS = {
     }),
 
     // Secondary areas
+    MinerHaven: new Area({
+        id: "MinerHaven",
+        name: "Miner Haven",
+        dropletLimit: 50,
+        buildable: true,
+        hidden: false,
+    }),
     IntermittentIsles: new Area({
         id: "IntermittentIsles",
         name: "Intermittent Isles",

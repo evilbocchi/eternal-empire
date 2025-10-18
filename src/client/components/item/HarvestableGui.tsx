@@ -1,4 +1,4 @@
-import React, { Fragment, useEffect, useMemo, useState } from "@rbxts/react";
+import React, { Fragment, memo, useEffect, useMemo, useState } from "@rbxts/react";
 import { Debris, TweenService } from "@rbxts/services";
 import { getAsset } from "shared/asset/AssetMap";
 import { emitEffect, playSound } from "shared/asset/GameAssets";
@@ -7,9 +7,10 @@ import { getPlayerCharacter } from "shared/hamster/getPlayerCharacter";
 import Items from "shared/items/Items";
 import HARVESTABLES from "shared/world/harvestable/Harvestable";
 
-export default function HarvestableGui({ enabled, model }: { enabled: boolean; model: PVInstance }) {
+function HarvestableGui({ enabled, model }: { enabled: boolean; model: PVInstance }) {
     const harvestable = HARVESTABLES[model.Name as HarvestableId] as HarvestableData | undefined;
     if (harvestable === undefined) return <Fragment />;
+    const key = useMemo(() => tostring(model.GetPivot()), [model]);
 
     const [health, setHealth] = useState(harvestable.health);
     const maxHealth = harvestable.health;
@@ -178,6 +179,7 @@ export default function HarvestableGui({ enabled, model }: { enabled: boolean; m
 
     return (
         <billboardgui
+            key={key}
             Adornee={model}
             Active={true}
             AlwaysOnTop={true}
@@ -304,3 +306,5 @@ export default function HarvestableGui({ enabled, model }: { enabled: boolean; m
         </billboardgui>
     );
 }
+
+export default memo(HarvestableGui);

@@ -1,3 +1,5 @@
+//!native
+//!optimize 2
 import Signal from "@antivivi/lemon-signal";
 import { findBaseParts, getAllInstanceInfo, setInstanceInfo, simpleInterval } from "@antivivi/vrldk";
 import { exactSetProperty } from "@rbxts/fletchette";
@@ -256,8 +258,8 @@ export default class Upgrader extends Operative {
 
         const omni = upgradeInfo.Omni;
         const isNotOmni = omni === undefined;
-        const toAdd = isNotOmni ? boost.add : (boost as OmniUpgrader).addsPerLaser.get(omni);
-        const toMul = isNotOmni ? boost.mul : (boost as OmniUpgrader).mulsPerLaser.get(omni);
+        const toAdd = isNotOmni ? boost.add : (boost as OmniUpgrader).addsPerLaser?.get(omni);
+        const toMul = isNotOmni ? boost.mul : (boost as OmniUpgrader).mulsPerLaser?.get(omni);
         const toPow = boost.pow;
         const isGone = upgradeInfo.Upgrader === undefined || upgradeInfo.Upgrader.Parent === undefined;
         const isEmpty = upgradeInfo.EmptyUpgrade === true;

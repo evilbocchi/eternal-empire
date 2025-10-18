@@ -284,11 +284,11 @@ export default class ResetService implements OnInit, OnStart {
                         if (amount === undefined) return;
                         Packets.reset.toAllClients(name, amount);
                         let p: Player | undefined;
-                        const spawnCframe = AREAS[resetLayer.area].spawnLocationWorldNode?.getInstance()?.CFrame;
+                        const spawnCFrame = AREAS[resetLayer.area].spawnLocationWorldNode?.getInstance()?.CFrame;
                         for (const player of players) {
                             p = player;
-                            if (player.Character !== undefined && spawnCframe !== undefined) {
-                                player.Character.PivotTo(spawnCframe);
+                            if (player.Character !== undefined && spawnCFrame !== undefined) {
+                                player.Character.PivotTo(spawnCFrame);
                             }
                         }
                         if (p === undefined) {

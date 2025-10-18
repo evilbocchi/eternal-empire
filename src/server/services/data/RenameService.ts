@@ -1,6 +1,3 @@
-//!native
-//!optimize 2
-
 /**
  * @fileoverview Empire name change management system.
  *
@@ -21,7 +18,7 @@
  * @since 1.0.0
  */
 
-import { OnInit, Service } from "@flamework/core";
+import { OnInit, OnStart, Service } from "@flamework/core";
 import { OnoeNum } from "@rbxts/serikanum";
 import { MarketplaceService, TextService, Workspace } from "@rbxts/services";
 import CurrencyService from "server/services/data/CurrencyService";
@@ -44,7 +41,7 @@ import Packets from "shared/Packets";
  * including effects and notifications.
  */
 @Service()
-export class RenameService implements OnInit {
+export class RenameService implements OnInit, OnStart {
     /** Current cost for name changes in Funds currency (escalates with each change). */
     cost = this.refreshCost();
 
@@ -141,14 +138,7 @@ export class RenameService implements OnInit {
 
     // Service Lifecycle
 
-    /**
-     * Initializes the RenameService.
-     * Sets up packet handlers for rename requests and product purchase processing.
-     */
     onInit() {
-        // Send initial empire name to clients
-        Packets.empireName.set(this.dataService.empireData.name);
-
         // Handle rename requests
         Packets.promptRename.fromClient((player, name, method) => {
             // Check permissions
@@ -193,5 +183,10 @@ export class RenameService implements OnInit {
             this.rename(name);
             return Enum.ProductPurchaseDecision.PurchaseGranted;
         });
+    }
+
+    onStart() {
+        // Send initial empire name to clients
+        Packets.empireName.set(this.dataService.empireData.name);
     }
 }

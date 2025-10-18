@@ -46,7 +46,7 @@ export default class NoobDropletSlayer extends BaseDropletSlayer {
                 Transparency: 1,
             }).Play();
             animTrack?.Play();
-            playSound("SwordSwing.mp3", noob);
+            playSound("SwordSwing.mp3", noob.PrimaryPart);
         });
     }
 

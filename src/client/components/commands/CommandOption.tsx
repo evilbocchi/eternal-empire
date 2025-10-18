@@ -1,6 +1,6 @@
-import React from "@rbxts/react";
-import { RobotoSlab, RobotoSlabBold, RobotoSlabMedium } from "shared/asset/GameFonts";
+import React, { memo } from "@rbxts/react";
 import useHover from "client/hooks/useHover";
+import { RobotoSlab, RobotoSlabBold, RobotoSlabMedium } from "shared/asset/GameFonts";
 
 interface CommandOptionProps {
     alias: string;
@@ -10,7 +10,7 @@ interface CommandOptionProps {
     layoutOrder?: number;
 }
 
-export default function CommandOption({
+function CommandOption({
     alias,
     description,
     permissionLevel,
@@ -163,3 +163,5 @@ export default function CommandOption({
         </frame>
     );
 }
+
+export default memo(CommandOption);

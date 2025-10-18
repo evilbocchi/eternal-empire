@@ -94,8 +94,7 @@ export default function BalanceWindow() {
             const currencyBalance = balance.get(currency);
             const amount = new OnoeNum(currencyBalance ?? 0);
 
-            // Show if currency has balance or is Funds (always shown) and is on current page
-            const shouldShow = (!amount.lessEquals(0) || currency === "Funds") && currentPage === details.page;
+            const shouldShow = !amount.lessEquals(0) && currentPage === details.page;
 
             if (shouldShow) {
                 currencies.push(currency);

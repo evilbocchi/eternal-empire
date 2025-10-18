@@ -143,7 +143,7 @@ export default class SetupService implements OnInit, OnStart {
             return false;
         }
 
-        const items = new Array<PlacingInfo>();
+        const items = new Set<PlacingInfo>();
         for (const savedItem of savedItems) {
             const itemId = savedItem.item;
             if (
@@ -153,7 +153,7 @@ export default class SetupService implements OnInit, OnStart {
                 continue;
             }
             const id = savedItem.uniqueItemId ?? itemId;
-            items.push({
+            items.add({
                 id,
                 position: new Vector3(savedItem.posX, savedItem.posY, savedItem.posZ),
                 rotation: savedItem.rawRotation ?? 0,
