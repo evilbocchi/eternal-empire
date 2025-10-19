@@ -1,7 +1,7 @@
 //!native
 //!optimize 2
 import Signal from "@antivivi/lemon-signal";
-import { findBaseParts, getAllInstanceInfo, setInstanceInfo, simpleInterval } from "@antivivi/vrldk";
+import { getAllInstanceInfo, setInstanceInfo, simpleInterval } from "@antivivi/vrldk";
 import { exactSetProperty } from "@rbxts/fletchette";
 import { Server } from "shared/api/APIExpose";
 import { IS_EDIT, IS_SERVER } from "shared/Context";
@@ -162,8 +162,8 @@ export default class Upgrader extends Operative {
     }
 
     /**
-     * Hooks a laser to an upgrader.
-     *
+     * Hooks a laser to an upgrader, registering the necessary events to upgrade droplets passing through it.
+     * This function needs to be called on both the server and client.
      * @param model The item model where the laser is located.
      * @param upgrader The upgrader instance that will manage the laser.
      * @param laser The laser part being hooked.
@@ -171,44 +171,48 @@ export default class Upgrader extends Operative {
      * @param deco Optional decoration function to modify the upgrade info.
      */
     static hookLaser(model: Model, upgrader: Upgrader, laser: BasePart, deco?: (upgrade: UpgradeInfo) => void) {
-        const modelInfo = getAllInstanceInfo(model);
-        const laserInfo = getAllInstanceInfo(laser);
-        VirtualCollision.onDropletTouched(model, laser, (droplet, dropletInfo) => {
-            this.upgrade({ model, modelInfo, upgrader, dropletInfo, laserInfo, droplet, deco });
-        });
-        laserInfo.ItemModelInfo = modelInfo;
-        model.Destroying.Once(() => {
-            modelInfo.OnUpgraded?.destroy();
-        });
-    }
-
-    static load(model: Model, upgrader: Upgrader) {
-        setInstanceInfo(model, "OnUpgraded", new Signal());
-        const item = upgrader.item;
-        let i = 0;
-        for (const laser of findBaseParts(model, "Laser")) {
+        if (IS_SERVER) {
+            const modelInfo = getAllInstanceInfo(model);
             const laserInfo = getAllInstanceInfo(laser);
-            laserInfo.LaserId = tostring(i);
-            laserInfo.Sky = upgrader.sky;
-            Upgrader.hookLaser(model, upgrader, laser);
-            i++;
+            VirtualCollision.onDropletTouched(model, laser, (droplet, dropletInfo) => {
+                this.upgrade({ model, modelInfo, upgrader, dropletInfo, laserInfo, droplet, deco });
+            });
+            laserInfo.ItemModelInfo = modelInfo;
+            model.Destroying.Once(() => {
+                modelInfo.OnUpgraded?.destroy();
+            });
         }
-        item.maintain(model);
+
+        const spawnedLasers = this.SPAWNED_LASERS.get(model.Name);
+        if (spawnedLasers !== undefined) {
+            spawnedLasers.add(laser);
+        } else {
+            this.SPAWNED_LASERS.set(model.Name, new Set([laser]));
+        }
     }
 
     static sharedLoad(model: Model, upgrader: Upgrader) {
-        const set = new Set<BasePart>();
-        for (const laser of findBaseParts(model, "Laser")) {
-            set.add(laser);
+        setInstanceInfo(model, "OnUpgraded", new Signal());
+
+        let i = 0;
+        for (const laser of model.GetDescendants()) {
+            if (!laser.HasTag("Laser") || !laser.IsA("BasePart")) continue;
+
+            const laserInfo = getAllInstanceInfo(laser);
+            laserInfo.LaserId = tostring(i++);
+            laserInfo.Sky = upgrader.sky;
+            Upgrader.hookLaser(model, upgrader, laser);
         }
-        this.SPAWNED_LASERS.set(model.Name, set);
+        if (IS_SERVER || IS_EDIT) {
+            upgrader.item.maintain(model);
+        }
+
         model.Destroying.Once(() => this.SPAWNED_LASERS.delete(model.Name));
     }
 
     constructor(item: Item) {
         super(item);
         item.onSharedLoad((model) => Upgrader.sharedLoad(model, this));
-        item.onLoad((model) => Upgrader.load(model, this));
     }
 
     /**

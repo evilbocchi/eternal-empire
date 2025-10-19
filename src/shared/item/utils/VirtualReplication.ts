@@ -360,7 +360,7 @@ export namespace VirtualCollision {
 
     /**
      * Registers a callback to be invoked when a droplet touches the specified part.
-     * This does not register the callback on the client; use {@link toServerDropletTouched} for that.
+     * Use this on the server; this automatically sets up client-side listening.
      * @param model The item model containing the part.
      * @param part The part to monitor for droplet touches.
      * @param callback The function to call when a droplet touches the part.
@@ -522,7 +522,7 @@ export namespace VirtualCollision {
         const handleRequest = (placementId: string, partUid: DataType.u16) => {
             const part = resolvePart(placementId, partUid);
             if (part === undefined) return;
-            const model = part.Parent;
+            const model = getModelForPlacement(placementId);
             if (model === undefined || !model.IsA("Model")) return;
 
             const [reference] = trackInstance(model, part);

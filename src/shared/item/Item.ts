@@ -1,9 +1,9 @@
 //!native
 //!optimize 2
 
+import { getAllInstanceInfo, setInstanceInfo } from "@antivivi/vrldk";
 import Difficulty from "@rbxts/ejt";
 import { OnoeNum } from "@rbxts/serikanum";
-import { getAllInstanceInfo, setInstanceInfo } from "@antivivi/vrldk";
 import { RunService } from "@rbxts/services";
 import { IS_EDIT, IS_SERVER } from "shared/Context";
 import GameSpeed from "shared/GameSpeed";
@@ -670,6 +670,7 @@ export default class Item {
 
     /**
      * Calls the callback function every specified delta time.
+     * If delta time is not specified, the function will be called every frame.
      *
      * @param instance Stops the repeat when the instance is destroyed. If undefined, the repeat will continue indefinitely.
      * @param callback The function to be called every delta time. If the function returns a number, the repeat will be updated to that delta time.
@@ -681,6 +682,8 @@ export default class Item {
         callback: (dt: number) => number | void,
         delta?: number,
     ): { delta: number | undefined } {
+        if (!IS_SERVER && !IS_EDIT) throw "Item.repeat can only be called on the server.";
+
         const ref = { delta: delta };
         REPEATS.set(callback, ref);
         if (instance !== undefined) instance.Destroying.Once(() => REPEATS.delete(callback));
@@ -695,6 +698,8 @@ export default class Item {
      * @returns An object that can be used to manage the repeat.
      */
     maintain(model: Model | undefined) {
+        if (!IS_SERVER && !IS_EDIT) throw "Item.maintain can only be called on the server.";
+
         return this.repeat(
             model,
             () => {
