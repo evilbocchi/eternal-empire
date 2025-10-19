@@ -4,6 +4,7 @@ import { TweenService } from "@rbxts/services";
 import { Server } from "shared/api/APIExpose";
 import Item from "shared/item/Item";
 import ItemTrait from "shared/item/traits/ItemTrait";
+import Upgrader from "shared/item/traits/upgrader/Upgrader";
 import perItemPacket from "shared/item/utils/perItemPacket";
 import CustomProximityPrompt from "shared/world/CustomProximityPrompt";
 
@@ -40,6 +41,7 @@ export default class LaserFan extends ItemTrait {
             },
             0.1,
         );
+
         const proximityPrompt = primaryPart.FindFirstChild("ProximityPrompt") as ProximityPrompt | undefined;
         if (proximityPrompt !== undefined) {
             const cleanup = CustomProximityPrompt.onTrigger(proximityPrompt, () => {
