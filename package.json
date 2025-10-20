@@ -27,7 +27,7 @@
         "@modelcontextprotocol/sdk": "^1.19.1",
         "@rbxts/compiler-types": "^3.0.0-types.0",
         "@rbxts/types": "^1.0.885",
-        "@types/node": "^24.3.0",
+        "@types/node": "^24.8.1",
         "@typescript-eslint/eslint-plugin": "^8.40.0",
         "@typescript-eslint/parser": "^8.40.0",
         "axios": "^1.12.2",
