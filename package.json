@@ -38,7 +38,7 @@
         "eslint-plugin-import": "^2.32.0",
         "eslint-plugin-no-relative-import-paths": "^1.6.1",
         "eslint-plugin-prettier": "^5.5.4",
-        "eslint-plugin-roblox-ts": "^1.1.0",
+        "eslint-plugin-roblox-ts": "^1.2.1",
         "express": "^5.1.0",
         "prettier": "^3.6.2",
         "rbxts-asset-sync": "^0.3.3",
