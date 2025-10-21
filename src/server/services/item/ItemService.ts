@@ -806,15 +806,12 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
             this.hasInventoryChanged = false;
         }
         if (!this.changedUniqueInstances.isEmpty() || !this.deletedUniqueInstances.isEmpty()) {
-            // fletchette's exactMapProperty doesn't expose a setAndDeleteEntries helper here,
-            // so send the full current map instead. This updates clients with the authoritative state.
-            Packets.uniqueInstances.set(this.uniqueInstances);
+            Packets.uniqueInstances.setAndDeleteEntries(this.changedUniqueInstances, this.deletedUniqueInstances);
             this.changedUniqueInstances.clear();
             this.deletedUniqueInstances.clear();
         }
         if (!this.changedPlacedItems.isEmpty() || !this.deletedPlacedItems.isEmpty()) {
-            // Send authoritative placed items map to clients since there is no atomic set/delete helper.
-            Packets.placedItems.set(this.worldPlaced);
+            Packets.placedItems.setAndDeleteEntries(this.changedPlacedItems, this.deletedPlacedItems);
             this.changedPlacedItems.clear();
             this.deletedPlacedItems.clear();
         }

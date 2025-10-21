@@ -9,9 +9,7 @@ if (!IS_EDIT) {
         throw "Failed to load sandbox";
     }
     const Sandbox = sandbox.default;
-    // If sandbox was synthesized (we're running a sandboxed simulation), disable
-    // automatic character loading so simulation stories can control character spawn.
-    if (Sandbox.synthesise()) {
+    if (!Sandbox.synthesise()) {
         Players.CharacterAutoLoads = false;
     }
 
