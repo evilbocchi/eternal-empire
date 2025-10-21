@@ -3,7 +3,7 @@ import { Janitor } from "@rbxts/janitor";
 import { Server } from "shared/api/APIExpose";
 import { eater } from "shared/hamster/eat";
 import mockFlamework from "shared/hamster/FlameworkMock";
-import { WeatherType } from "shared/weather/WeatherTypes";
+import { WeatherState, WeatherType } from "shared/weather/WeatherTypes";
 
 export = function () {
     beforeAll(() => {
@@ -16,15 +16,28 @@ export = function () {
     });
 
     describe("AtmosphereService", () => {
+        const setWeatherAndRecalculate = (weather: WeatherState) => {
+            Server.Atmosphere.currentWeather = weather;
+            Server.Atmosphere.applyWeatherEffects();
+        };
+
+        afterEach(() => {
+            setWeatherAndRecalculate({
+                type: WeatherType.Clear,
+                intensity: 0,
+                duration: 300,
+                timeRemaining: 300,
+            });
+        });
+
         describe("getWeatherMultipliers", () => {
             it("returns correct multipliers for clear weather", () => {
-                // Mock clear weather by setting private property using type assertion
-                Server.Atmosphere.currentWeather = {
+                setWeatherAndRecalculate({
                     type: WeatherType.Clear,
                     intensity: 0,
                     duration: 300,
                     timeRemaining: 300,
-                };
+                });
 
                 const multipliers = Server.Atmosphere.currentMultipliers;
                 expect(multipliers.dropRate).to.equal(1);
@@ -32,12 +45,12 @@ export = function () {
             });
 
             it("returns correct multipliers for cloudy weather", () => {
-                Server.Atmosphere.currentWeather = {
+                setWeatherAndRecalculate({
                     type: WeatherType.Cloudy,
                     intensity: 0.6,
                     duration: 300,
                     timeRemaining: 300,
-                };
+                });
 
                 const multipliers = Server.Atmosphere.currentMultipliers;
                 expect(multipliers.dropRate).to.equal(0.75);
@@ -45,12 +58,12 @@ export = function () {
             });
 
             it("returns correct multipliers for rainy weather", () => {
-                Server.Atmosphere.currentWeather = {
+                setWeatherAndRecalculate({
                     type: WeatherType.Rainy,
                     intensity: 0.8,
                     duration: 240,
                     timeRemaining: 240,
-                };
+                });
 
                 const multipliers = Server.Atmosphere.currentMultipliers;
                 expect(multipliers.dropRate).to.equal(0.5);
@@ -58,12 +71,12 @@ export = function () {
             });
 
             it("returns correct multipliers for thunderstorm weather", () => {
-                Server.Atmosphere.currentWeather = {
+                setWeatherAndRecalculate({
                     type: WeatherType.Thunderstorm,
                     intensity: 1,
                     duration: 180,
                     timeRemaining: 180,
-                };
+                });
 
                 const multipliers = Server.Atmosphere.currentMultipliers;
                 expect(multipliers.dropRate).to.equal(0.5);
@@ -90,8 +103,7 @@ export = function () {
                 expect(weather.type).to.equal(WeatherType.Rainy);
                 expect(weather.intensity).to.equal(0.42);
                 expect(weather.duration).to.equal(123);
-                const state = Server.Atmosphere as unknown as { isManuallyControlled: boolean };
-                expect(state.isManuallyControlled).to.equal(true);
+                expect(Server.Atmosphere.isManuallyControlled).to.equal(true);
             });
 
             it("clears to sunny weather when requested", () => {
@@ -104,11 +116,10 @@ export = function () {
 
             it("resumes automatic weather generation", () => {
                 Server.Atmosphere.setWeatherManual(WeatherType.Thunderstorm);
-                const state = Server.Atmosphere as unknown as { isManuallyControlled: boolean };
-                expect(state.isManuallyControlled).to.equal(true);
+                expect(Server.Atmosphere.isManuallyControlled).to.equal(true);
 
                 Server.Atmosphere.resumeAutomaticWeather();
-                expect(state.isManuallyControlled).to.equal(false);
+                expect(Server.Atmosphere.isManuallyControlled).to.equal(false);
             });
         });
     });
