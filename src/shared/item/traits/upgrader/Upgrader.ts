@@ -170,7 +170,7 @@ export default class Upgrader extends Operative {
      * @param upgradedEvent The event fired when the laser is upgraded.
      * @param deco Optional decoration function to modify the upgrade info.
      */
-    static hookLaser(model: Model, upgrader: Upgrader, laser: BasePart, deco?: (upgrade: UpgradeInfo) => void) {
+    static hookLaser(model: Model, upgrader: Upgrader, laser: BasePart, deco?: (upgradeInfo: UpgradeInfo) => void) {
         if (IS_SERVER) {
             const modelInfo = getAllInstanceInfo(model);
             const laserInfo = getAllInstanceInfo(laser);
@@ -260,10 +260,8 @@ export default class Upgrader extends Operative {
         const boost = upgradeInfo.Boost;
         if (boost === undefined) return $tuple();
 
-        const omni = upgradeInfo.Omni;
-        const isNotOmni = omni === undefined;
-        const toAdd = isNotOmni ? boost.add : (boost as OmniUpgrader).addsPerLaser?.get(omni);
-        const toMul = isNotOmni ? boost.mul : (boost as OmniUpgrader).mulsPerLaser?.get(omni);
+        const toAdd = boost.add;
+        const toMul = boost.mul;
         const toPow = boost.pow;
         const isGone = upgradeInfo.Model === undefined || upgradeInfo.Model.Parent === undefined;
         const isEmpty = upgradeInfo.EmptyUpgrade === true;
