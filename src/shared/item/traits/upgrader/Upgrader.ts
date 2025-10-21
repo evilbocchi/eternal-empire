@@ -24,7 +24,7 @@ declare global {
          * The upgrader model that applied this upgrade. If the model is destroyed,
          * the upgrade is considered inactive.
          */
-        Upgrader: Model;
+        Model: Model;
         /**
          * The upgrade's boost stats.
          */
@@ -148,7 +148,7 @@ export default class Upgrader extends Operative {
         }
 
         const upgrade: UpgradeInfo = {
-            Upgrader: model,
+            Model: model,
             Boost: {
                 add: totalAdd,
                 mul: totalMul,
@@ -265,11 +265,10 @@ export default class Upgrader extends Operative {
         const toAdd = isNotOmni ? boost.add : (boost as OmniUpgrader).addsPerLaser?.get(omni);
         const toMul = isNotOmni ? boost.mul : (boost as OmniUpgrader).mulsPerLaser?.get(omni);
         const toPow = boost.pow;
-        const isGone = upgradeInfo.Upgrader === undefined || upgradeInfo.Upgrader.Parent === undefined;
+        const isGone = upgradeInfo.Model === undefined || upgradeInfo.Model.Parent === undefined;
         const isEmpty = upgradeInfo.EmptyUpgrade === true;
         if (isGone || isEmpty) {
             if (isGone && isEmpty) return $tuple(toAdd, toMul, toPow, true);
-
             return $tuple();
         }
 

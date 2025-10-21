@@ -541,7 +541,7 @@ export default class ProgressionEstimationService implements OnStart {
             if (upgrader !== undefined) {
                 for (let i = 0; i < amount; i++) {
                     upgrades.add({
-                        Upgrader: Workspace,
+                        Model: Workspace,
                         Boost: upgrader,
                     });
                 }
