@@ -64,7 +64,7 @@ export default class AtmosphereService implements OnInit, OnStart {
      * Whether weather is manually controlled by commands.
      * When true, automatic weather generation is disabled.
      */
-    private isManuallyControlled = false;
+    isManuallyControlled = false;
 
     /**
      * Weather probabilities for each type.
@@ -172,7 +172,7 @@ export default class AtmosphereService implements OnInit, OnStart {
     /**
      * Applies current weather effects to the game world.
      */
-    private applyWeatherEffects() {
+    applyWeatherEffects() {
         switch (this.currentWeather.type) {
             case WeatherType.Thunderstorm:
                 this.handleLightningStrikes();

@@ -35,7 +35,7 @@ export default class Massless extends StatusEffect {
         const dropletInfo = getAllInstanceInfo(dropletModel);
         dropletModel.CustomPhysicalProperties = new PhysicalProperties(0.0001, 2, 0.15);
         dropletInfo.Upgrades!.set("Massless", {
-            Upgrader: Workspace,
+            Model: Workspace,
             Boost: {
                 mul: Massless.BOOST,
             },

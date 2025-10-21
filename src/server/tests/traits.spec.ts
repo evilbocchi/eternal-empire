@@ -1,0 +1,609 @@
+/// <reference types="@rbxts/testez/globals" />
+import { getAllInstanceInfo } from "@antivivi/vrldk";
+import { Janitor } from "@rbxts/janitor";
+import { OnoeNum } from "@rbxts/serikanum";
+import { HttpService, Workspace } from "@rbxts/services";
+import { Server } from "shared/api/APIExpose";
+import { PLACED_ITEMS_FOLDER } from "shared/constants";
+import CurrencyBundle from "shared/currency/CurrencyBundle";
+import { eater } from "shared/hamster/eat";
+import mockFlamework from "shared/hamster/FlameworkMock";
+import Droplet from "shared/item/Droplet";
+import Item from "shared/item/Item";
+import Condenser from "shared/item/traits/dropper/Condenser";
+import Dropper from "shared/item/traits/dropper/Dropper";
+import Generator from "shared/item/traits/generator/Generator";
+import Operative from "shared/item/traits/Operative";
+import Upgrader from "shared/item/traits/upgrader/Upgrader";
+import Sideswiper from "shared/items/0/winsome/Sideswiper";
+import JoyfulPark from "shared/items/1/joyful/JoyfulPark";
+import Items from "shared/items/Items";
+import TheFirstGenerator from "shared/items/negative/friendliness/TheFirstGenerator";
+import TheFirstDropper from "shared/items/negative/tfd/TheFirstDropper";
+import TheFirstUpgrader from "shared/items/negative/tfd/TheFirstUpgrader";
+import ImprovedFurnace from "shared/items/negative/tlg/ImprovedFurnace";
+import SmallReactor from "shared/items/negative/unimpossible/SmallReactor";
+
+export = function () {
+    type TouchHandle = {
+        part: BasePart;
+        touch: (droplet: BasePart, dropletInfo: InstanceInfo) => void;
+    };
+
+    type SpawnedModel = {
+        item: Item;
+        model: Model;
+        modelInfo: InstanceInfo;
+        placementId: string;
+        cleanup: () => void;
+    };
+
+    type SpawnedDroplet = {
+        droplet: BasePart;
+        dropletInfo: InstanceInfo;
+        cleanup: () => void;
+    };
+
+    function withWeatherDisabled<T>(callback: () => T) {
+        const revenue = Server.Revenue;
+        const previous = revenue.weatherBoostEnabled;
+        revenue.weatherBoostEnabled = false;
+        try {
+            return callback();
+        } finally {
+            revenue.weatherBoostEnabled = previous;
+        }
+    }
+
+    function spawnItemModel(itemId: string): SpawnedModel {
+        const item = Items.getItem(itemId);
+        expect(item === undefined).to.equal(false);
+
+        const placementId = `${itemId}_${HttpService.GenerateGUID(false)}`;
+        const placedItem: PlacedItem = {
+            item: item!.id,
+            posX: 0,
+            posY: 0,
+            posZ: 0,
+            rotX: 0,
+            rotY: 0,
+            rotZ: 0,
+        };
+
+        const model = item!.createModel(placedItem);
+        expect(model === undefined).to.equal(false);
+
+        model!.Name = placementId;
+        model!.Parent = PLACED_ITEMS_FOLDER;
+        const modelInfo = getAllInstanceInfo(model!);
+        modelInfo.Maintained = true;
+        Server.Item.modelPerPlacementId.set(placementId, model!);
+
+        for (const callback of item!.LOADS) {
+            callback(model!, item!);
+        }
+
+        return {
+            item: item!,
+            model: model!,
+            modelInfo,
+            placementId,
+            cleanup: () => {
+                model!.Destroy();
+                Server.Item.modelPerPlacementId.delete(placementId);
+            },
+        };
+    }
+
+    function spawnDroplet(template: Droplet): SpawnedDroplet {
+        const dropperModel = new Instance("Model") as Model;
+        dropperModel.Name = `TestDropper_${HttpService.GenerateGUID(false)}`;
+        dropperModel.Parent = PLACED_ITEMS_FOLDER;
+        const dropperInfo = getAllInstanceInfo(dropperModel);
+        dropperInfo.ItemId = "TestDropper";
+
+        const instantiator = template.getInstantiator(dropperModel);
+        const droplet = instantiator() as BasePart;
+        droplet.Parent = Workspace;
+
+        const dropletInfo = Droplet.SPAWNED_DROPLETS.get(droplet);
+        expect(dropletInfo === undefined).to.equal(false);
+
+        return {
+            droplet,
+            dropletInfo: dropletInfo!,
+            cleanup: () => {
+                droplet.Destroy();
+                dropperModel.Destroy();
+            },
+        };
+    }
+
+    function getTouchByTag(model: Model, tagName: string): TouchHandle {
+        for (const descendant of model.GetDescendants()) {
+            if (!descendant.IsA("BasePart") || !descendant.HasTag(tagName)) continue;
+            const info = getAllInstanceInfo(descendant);
+            const dropletTouched = info.DropletTouched;
+            expect(dropletTouched).to.be.ok();
+            return {
+                part: descendant,
+                touch: dropletTouched!,
+            };
+        }
+        throw `No part with tag ${tagName} found in model ${model.Name}`;
+    }
+
+    function getTouchByName(model: Model, partName: string): TouchHandle {
+        for (const descendant of model.GetDescendants()) {
+            if (!descendant.IsA("BasePart") || descendant.Name !== partName) continue;
+            const info = getAllInstanceInfo(descendant);
+            const dropletTouched = info.DropletTouched;
+            expect(dropletTouched).to.be.ok();
+
+            return {
+                part: descendant,
+                touch: dropletTouched!,
+            };
+        }
+        throw `Part ${partName} not found in model ${model.Name}`;
+    }
+
+    function setupTestCondenser() {
+        const itemId = `TestCondenser_${HttpService.GenerateGUID(false)}`;
+        const item = new Item(itemId).addPlaceableArea("BarrenIslands");
+        const condenser = item.trait(Condenser).setQuota(1);
+        condenser.addDroplets(Droplet.TheFirstDroplet);
+        const dropperTrait = item.trait(Dropper);
+        dropperTrait.setDroplet(Droplet.TheFirstDroplet);
+
+        const placementId = `${itemId}_${HttpService.GenerateGUID(false)}`;
+        const placedItem: PlacedItem = {
+            item: itemId,
+            posX: 0,
+            posY: 0,
+            posZ: 0,
+            rotX: 0,
+            rotY: 0,
+            rotZ: 0,
+            area: "BarrenIslands",
+        };
+
+        Server.Data.empireData.items.worldPlaced.set(placementId, placedItem);
+
+        const model = new Instance("Model") as Model;
+        model.Name = placementId;
+        model.Parent = PLACED_ITEMS_FOLDER;
+
+        const drop = new Instance("Part") as BasePart;
+        drop.Name = "Drop";
+        drop.Size = new Vector3(1, 1, 1);
+        drop.Anchored = true;
+        drop.Parent = model;
+        model.PrimaryPart = drop;
+
+        Server.Item.modelPerPlacementId.set(placementId, model);
+
+        const info = getAllInstanceInfo(model);
+        info.Maintained = true;
+
+        for (const callback of item.LOADS) {
+            callback(model, item);
+        }
+
+        const furnaceProcessed = getAllInstanceInfo(model).FurnaceProcessed;
+        expect(furnaceProcessed).to.be.ok();
+
+        return {
+            item,
+            placementId,
+            model,
+            furnaceProcessed: furnaceProcessed!,
+            cleanup: () => {
+                model.Destroy();
+                Server.Item.modelPerPlacementId.delete(placementId);
+                Server.Data.empireData.items.worldPlaced.delete(placementId);
+            },
+        };
+    }
+
+    beforeAll(() => {
+        eater.janitor = new Janitor();
+        mockFlamework();
+    });
+
+    afterAll(() => {
+        eater.janitor?.Destroy();
+    });
+
+    describe("Upgrader", () => {
+        it("applies additive boosts to droplets when lasers are touched", () => {
+            const spawned = spawnItemModel(TheFirstUpgrader.id);
+            const handle = getTouchByTag(spawned.model, "Laser");
+            const dropletData = spawnDroplet(Droplet.TheFirstDroplet);
+
+            const firstDropletFunds = Droplet.TheFirstDroplet.value.get("Funds");
+            expect(firstDropletFunds).to.be.ok();
+            if (firstDropletFunds === undefined) return;
+
+            withWeatherDisabled(() => {
+                const [beforeValue] = Server.Revenue.calculateDropletValue(dropletData.droplet, false, true);
+                expect(beforeValue.get("Funds")?.equals(firstDropletFunds)).to.equal(true);
+                handle.touch(dropletData.droplet, dropletData.dropletInfo);
+            });
+
+            const [afterValue] = Server.Revenue.calculateDropletValue(dropletData.droplet, false, true);
+            const upgraderFundsAdd = TheFirstUpgrader.findTrait("Upgrader")?.add?.get("Funds");
+            if (upgraderFundsAdd === undefined) throw "Upgrader add Funds is undefined";
+
+            expect(afterValue.get("Funds")?.equals(firstDropletFunds.add(upgraderFundsAdd))).to.equal(true);
+            expect(dropletData.dropletInfo.Upgrades?.size()).to.equal(1);
+
+            dropletData.cleanup();
+            spawned.cleanup();
+        });
+
+        it("applies multiplicative boosts to droplets", () => {
+            const spawned = spawnItemModel(SmallReactor.id);
+            const handle = getTouchByTag(spawned.model, "Laser");
+            const dropletData = spawnDroplet(Droplet.TheFirstDroplet);
+
+            const firstDropletFunds = Droplet.TheFirstDroplet.value.get("Funds");
+            expect(firstDropletFunds).to.be.ok();
+            if (firstDropletFunds === undefined) return;
+
+            withWeatherDisabled(() => {
+                const [beforeValue] = Server.Revenue.calculateDropletValue(dropletData.droplet, false, true);
+                expect(beforeValue.get("Funds")?.equals(firstDropletFunds)).to.equal(true);
+                handle.touch(dropletData.droplet, dropletData.dropletInfo);
+            });
+
+            const [afterValue] = Server.Revenue.calculateDropletValue(dropletData.droplet, false, true);
+            const upgraderFundsMul = SmallReactor.findTrait("Upgrader")?.mul?.get("Funds");
+            if (upgraderFundsMul === undefined) throw "Upgrader mul Funds is undefined";
+
+            expect(afterValue.get("Funds")?.equals(firstDropletFunds.mul(upgraderFundsMul))).to.equal(true);
+            expect(dropletData.dropletInfo.Upgrades?.size()).to.equal(1);
+
+            dropletData.cleanup();
+            spawned.cleanup();
+        });
+
+        it("combines additive and multiplicative boosts from different upgraders", () => {
+            const additive = spawnItemModel(TheFirstUpgrader.id);
+            const multiplicative = spawnItemModel(SmallReactor.id);
+            const additiveHandle = getTouchByTag(additive.model, "Laser");
+            const multiplicativeHandle = getTouchByTag(multiplicative.model, "Laser");
+            const dropletData = spawnDroplet(Droplet.TheFirstDroplet);
+
+            const firstDropletFunds = Droplet.TheFirstDroplet.value.get("Funds");
+            expect(firstDropletFunds).to.be.ok();
+            if (firstDropletFunds === undefined) return;
+
+            withWeatherDisabled(() => {
+                const [beforeValue] = Server.Revenue.calculateDropletValue(dropletData.droplet, false, true);
+                expect(beforeValue.get("Funds")?.equals(firstDropletFunds)).to.equal(true);
+                additiveHandle.touch(dropletData.droplet, dropletData.dropletInfo);
+                multiplicativeHandle.touch(dropletData.droplet, dropletData.dropletInfo);
+            });
+
+            const [afterValue] = Server.Revenue.calculateDropletValue(dropletData.droplet, false, true);
+
+            const upgraderAdd = TheFirstUpgrader.findTrait("Upgrader")?.add?.get("Funds");
+            if (upgraderAdd === undefined) throw "Additive Upgrader add Funds is undefined";
+            const upgraderMul = SmallReactor.findTrait("Upgrader")?.mul?.get("Funds");
+            if (upgraderMul === undefined) throw "Multiplicative Upgrader mul Funds is undefined";
+
+            expect(afterValue.get("Funds")?.equals(firstDropletFunds.add(upgraderAdd).mul(upgraderMul))).to.equal(true);
+            expect(dropletData.dropletInfo.Upgrades?.size()).to.equal(2);
+
+            dropletData.cleanup();
+            additive.cleanup();
+            multiplicative.cleanup();
+        });
+
+        it("applies power boosts alongside other multipliers across currencies", () => {
+            const spawned = spawnItemModel(JoyfulPark.id);
+            const handle = getTouchByTag(spawned.model, "Laser");
+            const dropletData = spawnDroplet(Droplet.HappyDroplet);
+
+            const initialValue = withWeatherDisabled(() => {
+                const [beforeValue] = Server.Revenue.calculateDropletValue(dropletData.droplet, false, true);
+                return beforeValue;
+            });
+
+            const fundsBefore = initialValue.get("Funds")!;
+            const powerBefore = initialValue.get("Power")!;
+            const skillBefore = initialValue.get("Skill")!;
+
+            withWeatherDisabled(() => handle.touch(dropletData.droplet, dropletData.dropletInfo));
+
+            const [afterValue] = Server.Revenue.calculateDropletValue(dropletData.droplet, false, true);
+
+            const [templateAdd, templateMul, templatePow] = Operative.template();
+            const [effectiveAdd, effectiveMul, effectivePow] = Upgrader.applyUpgrades(
+                templateAdd,
+                templateMul,
+                templatePow,
+                dropletData.dropletInfo,
+            );
+            const expected = Droplet.HappyDroplet.coalesce(effectiveAdd, effectiveMul, effectivePow);
+
+            expect(afterValue.get("Funds")?.equals(expected.get("Funds")!)).to.equal(true);
+            expect(afterValue.get("Power")?.equals(expected.get("Power")!)).to.equal(true);
+            expect(afterValue.get("Skill")?.equals(expected.get("Skill")!)).to.equal(true);
+            expect(afterValue.get("Funds")?.moreThan(fundsBefore)).to.equal(true);
+            expect(afterValue.get("Power")?.moreThan(powerBefore)).to.equal(true);
+            expect(afterValue.get("Skill")?.moreThan(skillBefore)).to.equal(true);
+
+            dropletData.cleanup();
+            spawned.cleanup();
+        });
+
+        it("drops upgrades if the source model is destroyed before incineration", () => {
+            const upgrader = spawnItemModel(TheFirstUpgrader.id);
+            const furnace = spawnItemModel(ImprovedFurnace.id);
+            const upgraderHandle = getTouchByTag(upgrader.model, "Laser");
+            const furnaceHandle = getTouchByTag(furnace.model, "Lava");
+            const dropletData = spawnDroplet(Droplet.TheFirstDroplet);
+
+            const firstDropletFunds = Droplet.TheFirstDroplet.value.get("Funds");
+            expect(firstDropletFunds).to.be.ok();
+            if (firstDropletFunds === undefined) return;
+
+            const furnaceMul = ImprovedFurnace.findTrait("Furnace")?.mul?.get("Funds");
+            if (furnaceMul === undefined) throw "Furnace mul Funds is undefined";
+
+            withWeatherDisabled(() => upgraderHandle.touch(dropletData.droplet, dropletData.dropletInfo));
+            expect(dropletData.dropletInfo.Upgrades?.size()).to.equal(1);
+
+            upgrader.cleanup();
+            Server.Currency.set("Funds", new OnoeNum(0));
+
+            withWeatherDisabled(() => furnaceHandle.touch(dropletData.droplet, dropletData.dropletInfo));
+
+            expect(Server.Currency.get("Funds").equals(furnaceMul.mul(firstDropletFunds))).to.equal(true);
+
+            dropletData.cleanup();
+            furnace.cleanup();
+        });
+
+        it("ignores duplicate touches from the same laser", () => {
+            const spawned = spawnItemModel(TheFirstUpgrader.id);
+            const handle = getTouchByTag(spawned.model, "Laser");
+            const dropletData = spawnDroplet(Droplet.TheFirstDroplet);
+
+            const firstDropletFunds = Droplet.TheFirstDroplet.value.get("Funds");
+            expect(firstDropletFunds).to.be.ok();
+            if (firstDropletFunds === undefined) return;
+
+            const upgraderAdd = TheFirstUpgrader.findTrait("Upgrader")?.add?.get("Funds");
+            if (upgraderAdd === undefined) throw "Upgrader add Funds is undefined";
+
+            withWeatherDisabled(() => {
+                handle.touch(dropletData.droplet, dropletData.dropletInfo);
+                handle.touch(dropletData.droplet, dropletData.dropletInfo);
+            });
+
+            const [afterValue] = Server.Revenue.calculateDropletValue(dropletData.droplet, false, true);
+            expect(afterValue.get("Funds")?.equals(firstDropletFunds.add(upgraderAdd))).to.equal(true);
+            expect(dropletData.dropletInfo.Upgrades?.size()).to.equal(1);
+
+            dropletData.cleanup();
+            spawned.cleanup();
+        });
+    });
+
+    describe("Furnace", () => {
+        it("burns droplets and credits furnace rewards", () => {
+            const spawned = spawnItemModel(ImprovedFurnace.id);
+            const handle = getTouchByTag(spawned.model, "Lava");
+            const dropletData = spawnDroplet(Droplet.TheFirstDroplet);
+
+            const firstDropletFunds = Droplet.TheFirstDroplet.value.get("Funds");
+            expect(firstDropletFunds).to.be.ok();
+            if (firstDropletFunds === undefined) return;
+
+            Server.Currency.set("Funds", new OnoeNum(0));
+
+            withWeatherDisabled(() => handle.touch(dropletData.droplet, dropletData.dropletInfo));
+
+            const furnaceMul = ImprovedFurnace.findTrait("Furnace")?.mul?.get("Funds");
+            if (furnaceMul === undefined) throw "Furnace mul Funds is undefined";
+
+            expect(Server.Currency.get("Funds").equals(furnaceMul.mul(firstDropletFunds))).to.equal(true);
+            expect(dropletData.dropletInfo.Incinerated).to.equal(true);
+
+            dropletData.cleanup();
+            spawned.cleanup();
+        });
+    });
+
+    describe("Generator", () => {
+        it("applies generator boosts when computing passive gain", () => {
+            const generatorTrait = TheFirstGenerator.findTrait("Generator");
+            expect(generatorTrait === undefined).to.equal(false);
+            const passiveGain = generatorTrait!.passiveGain!;
+
+            const spawned = spawnItemModel(TheFirstGenerator.id);
+            expect(spawned.modelInfo.Boosts === undefined).to.equal(false);
+
+            const originalGain = generatorTrait!.passiveGain;
+            generatorTrait!.passiveGain = undefined;
+
+            const boost = {
+                ignoresLimitations: false,
+                generatorCompound: {
+                    mul: new CurrencyBundle().set("Power", 2),
+                },
+            } as ItemBoost;
+            spawned.modelInfo.Boosts!.set("test", boost);
+
+            const amountPerCurrency = withWeatherDisabled(() =>
+                Generator.getValue(1, passiveGain, spawned.modelInfo.Boosts!),
+            );
+            const power = amountPerCurrency.get("Power");
+            expect(power === undefined).to.equal(false);
+            expect(power!.equals(new OnoeNum(2))).to.equal(true);
+
+            spawned.modelInfo.Boosts!.clear();
+            generatorTrait!.passiveGain = originalGain;
+            spawned.cleanup();
+        });
+    });
+
+    describe("Dropper", () => {
+        it("produces droplets through the instantiator", () => {
+            const spawned = spawnItemModel(TheFirstDropper.id);
+            const entries = new Array<[BasePart, InstanceInfo]>();
+            for (const [drop, info] of Dropper.SPAWNED_DROPS) {
+                if (drop.IsDescendantOf(spawned.model)) entries.push([drop, info]);
+            }
+            expect(entries.size() === 0).to.equal(false);
+
+            const [dropPart, info] = entries[0];
+            info.DropRate = 0;
+            const instantiator = info.Instantiator;
+            expect(instantiator === undefined).to.equal(false);
+
+            Dropper.hasLuckyWindow = false;
+
+            const droplet = instantiator!();
+            expect(droplet === undefined).to.equal(false);
+            const dropletPart = droplet as unknown as BasePart;
+            expect(dropletPart.Parent === Workspace).to.equal(true);
+
+            const dropletInfo = Droplet.SPAWNED_DROPLETS.get(dropletPart);
+            expect(dropletInfo === undefined).to.equal(false);
+            expect(dropletInfo!.DropletId).to.equal(Droplet.TheFirstDroplet.id);
+            expect(dropPart.HasTag("Drop")).to.equal(true);
+
+            dropletPart.Destroy();
+            spawned.cleanup();
+        });
+    });
+
+    describe("OmniUpgrader", () => {
+        it("assigns per-laser upgrades tagged with omni identifiers", () => {
+            const spawned = spawnItemModel(Sideswiper.id);
+            const bitcoinHandle = getTouchByName(spawned.model, "BitcoinLaser");
+            const powerHandle = getTouchByName(spawned.model, "PowerLaser");
+            const dropletData = spawnDroplet(Droplet.TheFirstDroplet);
+
+            withWeatherDisabled(() => {
+                bitcoinHandle.touch(dropletData.droplet, dropletData.dropletInfo);
+                powerHandle.touch(dropletData.droplet, dropletData.dropletInfo);
+            });
+
+            const upgrades = dropletData.dropletInfo.Upgrades;
+            expect(upgrades).to.be.ok();
+            if (upgrades === undefined) return;
+
+            expect(upgrades.size()).to.equal(2);
+            for (const [name, upgrade] of upgrades) {
+                const [add] = Upgrader.getUpgrade(upgrade);
+                expect(add).to.be.ok();
+
+                let laserId: string;
+                if (name.find("BitcoinLaser")[0] !== undefined) {
+                    laserId = "BitcoinLaser";
+                } else if (name.find("PowerLaser")[0] !== undefined) {
+                    laserId = "PowerLaser";
+                } else {
+                    throw `Unexpected upgrade name ${name}`;
+                }
+
+                const actual = Sideswiper.findTrait("OmniUpgrader")?.addsPerLaser.get(laserId);
+                expect(actual).to.be.ok();
+                if (actual === undefined) return;
+
+                expect(add?.equals(actual)).to.equal(true);
+            }
+
+            dropletData.cleanup();
+            spawned.cleanup();
+        });
+    });
+
+    describe("Condenser", () => {
+        it("produces condensed droplets from fresh contributions", () => {
+            const { furnaceProcessed, model, cleanup } = setupTestCondenser();
+            const beforeDroplets = new Set<BasePart>();
+            for (const [droplet] of Droplet.SPAWNED_DROPLETS) beforeDroplets.add(droplet);
+
+            const raw = Droplet.TheFirstDroplet.value;
+            const inputDroplet = new Instance("Part") as BasePart;
+            inputDroplet.Name = "InputDroplet";
+            inputDroplet.Parent = Workspace;
+            const inputInfo = getAllInstanceInfo(inputDroplet);
+            inputInfo.DropletId = Droplet.TheFirstDroplet.id;
+            inputInfo.Upgrades = new Map();
+
+            furnaceProcessed(new CurrencyBundle(), raw, inputDroplet, inputInfo);
+
+            let produced: BasePart | undefined;
+            for (const [droplet] of Droplet.SPAWNED_DROPLETS) {
+                if (!beforeDroplets.has(droplet)) {
+                    produced = droplet;
+                    break;
+                }
+            }
+
+            expect(produced).to.be.ok();
+            if (produced === undefined) {
+                inputDroplet.Destroy();
+                cleanup();
+                return;
+            }
+
+            const producedInfo = Droplet.SPAWNED_DROPLETS.get(produced);
+            expect(producedInfo).to.be.ok();
+            expect(producedInfo?.Condensed).to.equal(true);
+
+            produced.Destroy();
+            inputDroplet.Destroy();
+            cleanup();
+        });
+
+        it("ignores condensed droplets fed back into the same condenser", () => {
+            const { furnaceProcessed, model, cleanup } = setupTestCondenser();
+            const raw = Droplet.TheFirstDroplet.value;
+            const inputDroplet = new Instance("Part") as BasePart;
+            inputDroplet.Name = "InputDroplet";
+            inputDroplet.Parent = Workspace;
+            const inputInfo = getAllInstanceInfo(inputDroplet);
+            inputInfo.DropletId = Droplet.TheFirstDroplet.id;
+            inputInfo.Upgrades = new Map();
+
+            const beforeDroplets = new Set<BasePart>();
+            for (const [droplet] of Droplet.SPAWNED_DROPLETS) beforeDroplets.add(droplet);
+
+            furnaceProcessed(new CurrencyBundle(), raw, inputDroplet, inputInfo);
+
+            let produced: BasePart | undefined;
+            for (const [droplet] of Droplet.SPAWNED_DROPLETS) {
+                if (!beforeDroplets.has(droplet)) {
+                    produced = droplet;
+                    break;
+                }
+            }
+
+            expect(produced).to.be.ok();
+            if (produced === undefined) {
+                inputDroplet.Destroy();
+                cleanup();
+                return;
+            }
+
+            const producedInfo = Droplet.SPAWNED_DROPLETS.get(produced);
+            expect(producedInfo).to.be.ok();
+
+            const dropletCountBefore = Droplet.SPAWNED_DROPLETS.size();
+            furnaceProcessed(new CurrencyBundle(), raw, produced, producedInfo!);
+            expect(Droplet.SPAWNED_DROPLETS.size()).to.equal(dropletCountBefore);
+
+            produced.Destroy();
+            inputDroplet.Destroy();
+            cleanup();
+        });
+    });
+};
