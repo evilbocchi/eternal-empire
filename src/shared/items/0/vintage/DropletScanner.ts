@@ -7,7 +7,7 @@ import { packet } from "@rbxts/fletchette";
 import StringBuilder from "@rbxts/stringbuilder";
 import { Server } from "shared/api/APIExpose";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
-import { CURRENCY_DETAILS } from "shared/currency/CurrencyDetails";
+import { CURRENCY_CATEGORIES, CURRENCY_DETAILS } from "shared/currency/CurrencyDetails";
 import Droplet from "shared/item/Droplet";
 import Item from "shared/item/Item";
 import Upgrader from "shared/item/traits/upgrader/Upgrader";
@@ -94,7 +94,9 @@ export = new Item(script.Name)
             parts.push(`x${OnoeNum.toString(baseAmount)}`);
 
             let hasVariation = false;
-            for (const [currency] of CurrencyBundle.SORTED_DETAILS) {
+            for (const [currency, details] of CurrencyBundle.SORTED_DETAILS) {
+                if (details.page === CURRENCY_CATEGORIES.Internal) continue;
+
                 const amount = amounts.get(currency)!;
                 if (!amount.equals(baseAmount)) {
                     hasVariation = true;
@@ -148,7 +150,7 @@ export = new Item(script.Name)
             if (upgrades !== undefined) {
                 for (const [upgradeId, upgradeInfo] of upgrades) {
                     upgraded = true;
-                    const upgraderId = Server.Item.getPlacedItem(upgradeInfo.Upgrader.Name)?.item ?? upgradeId;
+                    const upgraderId = Server.Item.getPlacedItem(upgradeInfo.Model.Name)?.item ?? upgradeId;
                     if (upgraderId === undefined || upgraderId === item.id) continue;
 
                     const [add, mul, pow, inverse] = Upgrader.getUpgrade(upgradeInfo);

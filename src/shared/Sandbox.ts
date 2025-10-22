@@ -6,7 +6,13 @@ import BuildBounds from "shared/placement/BuildBounds";
  * including toggling sandbox mode, creating baseplate bounds, and synthesizing workspace objects.
  */
 export default class Sandbox {
-    static readonly sandboxValue = Workspace.FindFirstChild("SANDBOX") as BoolValue | undefined;
+    static readonly sandboxValue = (() => {
+        const value = Workspace.FindFirstChild("SANDBOX") as BoolValue | undefined;
+        if (value?.Value === true) {
+            Workspace.SetAttribute("Sandbox", true);
+        }
+        return value;
+    })();
 
     /**
      * Creates BuildBounds for the baseplate if sandbox mode is enabled.
@@ -31,14 +37,6 @@ export default class Sandbox {
     }
 
     /**
-     * Sets the sandbox mode enabled or disabled.
-     * @param value True to enable sandbox mode, false to disable.
-     */
-    static setEnabled(value: boolean) {
-        Workspace.SetAttribute("Sandbox", value);
-    }
-
-    /**
      * Synthesizes and sets up sandbox workspace objects if sandbox mode is enabled.
      * @returns True if synthesis occurred, false otherwise.
      */
@@ -55,11 +53,5 @@ export default class Sandbox {
 
     static getId() {
         return this.sandboxValue?.GetAttribute("Id") as string | undefined;
-    }
-
-    static {
-        if (this.sandboxValue !== undefined && this.sandboxValue.Value) {
-            this.setEnabled(true);
-        }
     }
 }
