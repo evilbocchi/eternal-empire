@@ -160,7 +160,7 @@ export default class Dropper extends ItemTrait {
      * Whether there is a lucky droplet window open.
      * This window changes every second, and if it is open, only one lucky droplet can spawn.
      */
-    private static hasLuckyWindow = false;
+    static hasLuckyWindow = false;
 
     /**
      * Chance to spawn a lucky droplet every second.

@@ -1,7 +1,11 @@
 /// <reference types="@rbxts/testez/globals" />
-import { OnoeNum } from "@rbxts/serikanum";
+import { getAllInstanceInfo } from "@antivivi/vrldk";
 import { Janitor } from "@rbxts/janitor";
+import { OnoeNum } from "@rbxts/serikanum";
+import { PLACED_ITEMS_FOLDER } from "shared/constants";
 import { Server } from "shared/api/APIExpose";
+import { REPAIR_BOOST_KEY, REPAIR_BOOST_MULTIPLIERS, REPAIR_PROTECTION_DURATIONS } from "shared/item/repair";
+import type { RepairProtectionState } from "shared/item/repair";
 import { eater } from "shared/hamster/eat";
 import mockFlamework from "shared/hamster/FlameworkMock";
 
@@ -24,6 +28,9 @@ export = function () {
             items.worldPlaced.clear();
             items.brokenPlacedItems.clear();
             items.repairProtection.clear();
+            Server.Item.modelPerPlacementId.clear();
+            for (const child of PLACED_ITEMS_FOLDER.GetChildren()) child.Destroy();
+            Server.Item.breakdownsEnabled = true;
             Server.Item.setItemAmount("TheFirstDropper", 0);
             Server.Item.setItemAmount("BulkyDropper", 0);
             Server.Item.setBoughtAmount("TheFirstDropper", 0);
@@ -93,6 +100,97 @@ export = function () {
             expect(unplaced).to.be.ok();
             expect(unplaced?.size()).to.equal(1);
             expect(Server.Item.getItemAmount("TheFirstDropper")).to.equal(1);
+        });
+
+        it("marks items as broken and clears boosts when a breakdown begins", () => {
+            const items = Server.Data.empireData.items;
+            const placementId = "TestBreakdown";
+
+            const placedItem: PlacedItem = {
+                item: "TheFirstDropper",
+                posX: 0,
+                posY: 0,
+                posZ: 0,
+                rotX: 0,
+                rotY: 0,
+                rotZ: 0,
+                area: "BarrenIslands",
+            };
+            items.worldPlaced.set(placementId, placedItem);
+
+            const model = new Instance("Model") as Model;
+            model.Name = placementId;
+            model.Parent = PLACED_ITEMS_FOLDER;
+
+            const modelInfo = getAllInstanceInfo(model);
+            modelInfo.Boosts = new Map([[REPAIR_BOOST_KEY, { ignoresLimitations: true } as ItemBoost]]);
+
+            const protection: RepairProtectionState = {
+                tier: "Great",
+                expiresAt: os.time() + 10,
+            };
+            items.repairProtection.set(placementId, protection);
+
+            Server.Item.modelPerPlacementId.set(placementId, model);
+
+            Server.Item.beginBreakdown([placementId]);
+
+            expect(Server.Item.getBrokenPlacedItems().has(placementId)).to.equal(true);
+            expect(modelInfo.Broken).to.equal(true);
+            expect(modelInfo.Boosts?.has(REPAIR_BOOST_KEY)).to.equal(false);
+            expect(items.repairProtection.has(placementId)).to.equal(false);
+
+            model.Destroy();
+        });
+
+        it("repairs broken items and applies protection tiers", () => {
+            const items = Server.Data.empireData.items;
+            const placementId = "TestRepair";
+
+            const placedItem: PlacedItem = {
+                item: "TheFirstDropper",
+                posX: 0,
+                posY: 0,
+                posZ: 0,
+                rotX: 0,
+                rotY: 0,
+                rotZ: 0,
+                area: "BarrenIslands",
+            };
+            items.worldPlaced.set(placementId, placedItem);
+
+            const model = new Instance("Model") as Model;
+            model.Name = placementId;
+            model.Parent = PLACED_ITEMS_FOLDER;
+
+            const modelInfo = getAllInstanceInfo(model);
+
+            Server.Item.modelPerPlacementId.set(placementId, model);
+            Server.Item.beginBreakdown([placementId]);
+
+            const before = os.time();
+            const success = Server.Item.completeRepair(placementId, "Great");
+            const after = os.time();
+
+            expect(success).to.equal(true);
+            expect(Server.Item.getBrokenPlacedItems().has(placementId)).to.equal(false);
+            expect(modelInfo.Broken).to.equal(false);
+
+            const protection = items.repairProtection.get(placementId);
+            expect(protection).to.be.ok();
+            if (protection !== undefined) {
+                expect(protection.tier).to.equal("Great");
+                expect(protection.expiresAt >= before + REPAIR_PROTECTION_DURATIONS.Great).to.equal(true);
+                expect(protection.expiresAt <= after + REPAIR_PROTECTION_DURATIONS.Great).to.equal(true);
+            }
+
+            const boost = modelInfo.Boosts?.get(REPAIR_BOOST_KEY);
+            expect(boost).to.be.ok();
+            if (boost !== undefined) {
+                expect(boost.dropRateMul).to.equal(REPAIR_BOOST_MULTIPLIERS.Great);
+            }
+
+            model.Destroy();
         });
     });
 };

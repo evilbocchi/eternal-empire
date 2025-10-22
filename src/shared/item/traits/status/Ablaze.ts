@@ -34,7 +34,7 @@ export default class Ablaze extends StatusEffect {
             0.5,
         );
         dropletInfo.Upgrades!.set("Ablaze", {
-            Upgrader: Workspace,
+            Model: Workspace,
             Boost: {
                 mul: Ablaze.BOOST,
             },

@@ -1,8 +1,8 @@
 //!native
 //!optimize 2
 
-import { BaseOnoeNum, OnoeNum } from "@rbxts/serikanum";
 import { buildRichText } from "@antivivi/vrldk";
+import { BaseOnoeNum, OnoeNum } from "@rbxts/serikanum";
 import StringBuilder from "@rbxts/stringbuilder";
 import { CURRENCIES, CURRENCY_CATEGORIES, CURRENCY_DETAILS } from "shared/currency/CurrencyDetails";
 import CurrencyMap from "shared/currency/CurrencyMap";
@@ -81,6 +81,8 @@ class CurrencyBundle {
     /**
      * Concatenates all formatted amounts in the instance to a human-readable string that can be used in displaying the prices of items, droplet boosts, etc.
      *
+     * Skips currencies that belong to the Internal category.
+     *
      * @param amountPerCurrency A map of currency to amount
      * @param isColored Whether to color the output based on currency details
      * @param prefix A string to add before each amount
@@ -98,6 +100,8 @@ class CurrencyBundle {
         const size = amountPerCurrency.size();
         const last = size - 1;
         for (const [name, details] of CurrencyBundle.SORTED_DETAILS) {
+            if (details.page === CURRENCY_CATEGORIES.Internal) continue;
+
             const amount = amountPerCurrency.get(name);
             if (amount !== undefined) {
                 let text = CurrencyBundle.getFormatted(name, amount);
