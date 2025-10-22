@@ -75,8 +75,8 @@ export = function () {
             Server.Data.empireData.mostCurrenciesSinceReset.set("Funds", new OnoeNum(500));
 
             const revenue = Server.Currency.getOfflineRevenue();
-
-            expect(revenue.get("Funds")?.equals(new OnoeNum(5))).to.equal(true);
+            // CurrencyService uses a minimum diff of 600 seconds, so revenue = 500 / 600
+            expect(revenue.get("Funds")?.equals(new OnoeNum(500).div(new OnoeNum(600)))).to.equal(true);
         });
     });
 };

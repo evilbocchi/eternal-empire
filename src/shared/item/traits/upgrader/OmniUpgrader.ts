@@ -7,13 +7,6 @@ declare global {
     interface ItemTraits {
         OmniUpgrader: OmniUpgrader;
     }
-    interface UpgradeInfo {
-        /**
-         * Defined if the upgrade comes from an {@link OmniUpgrader}.
-         * This is used to determine the laser of the upgrade.
-         */
-        Omni?: string;
-    }
 }
 
 export default class OmniUpgrader extends Upgrader {
@@ -27,9 +20,15 @@ export default class OmniUpgrader extends Upgrader {
             const laser = model.WaitForChild(laserName) as BasePart;
             laser.CanTouch = true;
             const laserInfo = getAllInstanceInfo(laser);
-            laserInfo.LaserId = laser.Name;
-            laserInfo.Sky = omniUpgrader.skysPerLaser.get(laser.Name) ?? omniUpgrader.sky;
-            super.hookLaser(model, omniUpgrader, laser, (indicator) => (indicator.Omni = laserName));
+            laserInfo.LaserId = laserName;
+            laserInfo.Sky = omniUpgrader.skysPerLaser.get(laserName) ?? omniUpgrader.sky;
+            super.hookLaser(model, omniUpgrader, laser, (upgradeInfo) => {
+                upgradeInfo.Boost = {
+                    add: omniUpgrader.addsPerLaser.get(laserName) ?? omniUpgrader.add,
+                    mul: omniUpgrader.mulsPerLaser.get(laserName) ?? omniUpgrader.mul,
+                    pow: omniUpgrader.pow,
+                };
+            });
         }
     }
 
