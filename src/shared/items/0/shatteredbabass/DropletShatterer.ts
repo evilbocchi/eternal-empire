@@ -20,11 +20,11 @@ export = new Item(script.Name)
     .setDroplet(Droplet.ShatteredDroplet)
 
     .trait(Furnace)
-    .setMul(CurrencyBundle.ones().mul(0))
+    .calculatesFurnace(false)
     .exit()
 
     .onLoad((model) => {
-        setInstanceInfo(model, "FurnaceProcessed", (_result, _genericResult, droplet) => {
+        setInstanceInfo(model, "FurnaceProcessed", (_result, droplet) => {
             getInstanceInfo(model.WaitForChild("Drop"), "Instantiator")?.();
             Packets.dropletBurnt.toAllClients(droplet.Name, new Map());
         });

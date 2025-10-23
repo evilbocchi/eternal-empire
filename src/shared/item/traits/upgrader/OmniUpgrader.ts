@@ -23,7 +23,7 @@ export default class OmniUpgrader extends Upgrader {
             laserInfo.LaserId = laserName;
             laserInfo.Sky = omniUpgrader.skysPerLaser.get(laserName) ?? omniUpgrader.sky;
             super.hookLaser(model, omniUpgrader, laser, (upgradeInfo) => {
-                upgradeInfo.Boost = {
+                upgradeInfo.boost = {
                     add: omniUpgrader.addsPerLaser.get(laserName) ?? omniUpgrader.add,
                     mul: omniUpgrader.mulsPerLaser.get(laserName) ?? omniUpgrader.mul,
                     pow: omniUpgrader.pow,

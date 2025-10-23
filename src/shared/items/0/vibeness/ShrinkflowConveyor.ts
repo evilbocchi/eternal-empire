@@ -24,7 +24,7 @@ export = new Item(script.Name)
     .setSpeed(5)
 
     .trait(Upgrader)
-    .setMul(CurrencyBundle.ones().mul(0.9))
+    .setMul(CurrencyBundle.ones().mulConstant(0.9))
     .exit()
 
     .onLoad((model) => {

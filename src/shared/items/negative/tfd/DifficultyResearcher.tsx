@@ -1900,9 +1900,9 @@ export = new Item(script.Name)
     .unbreakable()
 
     .trait(Furnace)
-    .setMul(CurrencyBundle.ones().mul(0))
-    .acceptsGlobalBoosts(true)
-    .acceptsUpgrades(true)
+    .calculatesFinal(true)
+    .calculatesFurnace(false)
+    .setIsCauldron(true)
     .trait(Generator)
     .exit()
 
@@ -1944,9 +1944,9 @@ export = new Item(script.Name)
         const modelInfo = getAllInstanceInfo(model);
         const CurrencyService = Server.Currency;
 
-        modelInfo.FurnaceProcessed = (_, raw, droplet) => {
+        modelInfo.FurnaceProcessed = (value, droplet) => {
             let delta = new OnoeNum(0);
-            for (const [currency, amount] of raw.amountPerCurrency) {
+            for (const [currency, amount] of value.amountPerCurrency) {
                 const details = CURRENCY_DETAILS[currency];
                 if (details === undefined) throw `Unknown currency ${currency}`;
                 switch (details.page) {

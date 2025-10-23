@@ -144,7 +144,7 @@ export default class NamedUpgradeService implements OnInit {
         const onUpgradesChanged = (data: Map<string, number>) => {
             const oldWs = Workspace.GetAttribute("WalkSpeed") as number | undefined;
             let ws = 16;
-            WALKSPEED_UPGRADES.forEach((value, key) => (ws = value.apply(ws, data.get(key)!)));
+            WALKSPEED_UPGRADES.forEach((value, key) => (ws = value.apply(ws, data.get(key) ?? 0)));
             Workspace.SetAttribute("WalkSpeed", ws);
             StarterPlayer.CharacterWalkSpeed = ws;
             for (const player of Players.GetPlayers()) {
@@ -167,7 +167,9 @@ export default class NamedUpgradeService implements OnInit {
                 let size = gridWorldNode.originalSize;
                 if (size === undefined) continue;
                 GRID_SIZE_UPGRADES.forEach((upgrade, upgradeId) => {
-                    if (upgrade.area === id) size = upgrade.apply(size!, data.get(upgradeId));
+                    const amount = data.get(upgradeId);
+                    if (amount === undefined || size === undefined) return;
+                    if (upgrade.area === id) size = upgrade.apply(size, amount);
                 });
 
                 // Update the grid size if it has changed

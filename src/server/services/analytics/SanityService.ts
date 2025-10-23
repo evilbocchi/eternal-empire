@@ -11,6 +11,8 @@
 
 import { OnStart, Service } from "@flamework/core";
 import Difficulty from "@rbxts/ejt";
+import { Environment } from "@rbxts/ui-labs";
+import { IS_EDIT } from "shared/Context";
 import Item from "shared/item/Item";
 import Items from "shared/items/Items";
 import HARVESTABLES from "shared/world/harvestable/Harvestable";
@@ -109,10 +111,7 @@ export default class SanityService implements OnStart {
         }
     }
 
-    /**
-     * Runs all sanity checks on items and harvestables at startup.
-     */
-    onStart() {
+    check() {
         // Check all items for configuration issues
         for (const [_, item] of Items.itemsPerId) {
             this.checkItem(item);
@@ -122,5 +121,14 @@ export default class SanityService implements OnStart {
         for (const [id] of pairs(HARVESTABLES)) {
             this.checkHarvestable(id as string);
         }
+    }
+
+    /**
+     * Runs all sanity checks on items and harvestables at startup.
+     */
+    onStart() {
+        if (IS_EDIT) return;
+
+        this.check();
     }
 }

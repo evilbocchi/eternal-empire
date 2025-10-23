@@ -16,7 +16,7 @@ declare global {
 }
 
 export default class Ablaze extends StatusEffect {
-    static BOOST = CurrencyBundle.ones().mul(2);
+    static BOOST = CurrencyBundle.ones().mulConstant(2);
 
     constructor(item: Item) {
         super(item);
@@ -34,8 +34,8 @@ export default class Ablaze extends StatusEffect {
             0.5,
         );
         dropletInfo.Upgrades!.set("Ablaze", {
-            Model: Workspace,
-            Boost: {
+            model: Workspace,
+            boost: {
                 mul: Ablaze.BOOST,
             },
         });

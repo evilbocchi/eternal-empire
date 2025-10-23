@@ -29,6 +29,6 @@ Scales with Power, maxing out at %cap%. Also provides a flat %flat% boost.`,
     .setFlat("Skill", 5)
     .setX(() => Server.Currency.get("Power"))
     .apply(Furnace)
-    .acceptsUpgrades(false)
+    .setIsCauldron(true)
 
     .exit();

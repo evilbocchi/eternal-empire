@@ -29,6 +29,7 @@ import { OnGameAPILoaded } from "server/services/ModdingService";
 import { log } from "server/services/permissions/LogService";
 import PermissionsService from "server/services/permissions/PermissionsService";
 import { PLACED_ITEMS_FOLDER } from "shared/constants";
+import { IS_EDIT } from "shared/Context";
 import eat from "shared/hamster/eat";
 import Item from "shared/item/Item";
 import {
@@ -426,7 +427,7 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
         }
 
         // Execute item-specific load callbacks
-        item.LOADS.forEach((callback) => callback(model, item));
+        item.load(model);
         return model;
     }
 
@@ -966,7 +967,7 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
             }
             ++itemCount;
         });
-        print(`Initialized ${itemCount} items.`);
+        if (!IS_EDIT) print(`Initialized ${itemCount} items.`);
 
         // Ensure all placed items have models
         this.fullUpdatePlacedItemsModels();

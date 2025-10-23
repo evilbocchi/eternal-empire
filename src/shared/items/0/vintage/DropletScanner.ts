@@ -1,22 +1,79 @@
 //!native
 //!optimize 2
+import { buildRichText, formatRichText, getInstanceInfo } from "@antivivi/vrldk";
 import Difficulty from "@rbxts/ejt";
-import { OnoeNum } from "@rbxts/serikanum";
-import { formatRichText, getAllInstanceInfo, getInstanceInfo } from "@antivivi/vrldk";
 import { packet } from "@rbxts/fletchette";
+import { OnoeNum } from "@rbxts/serikanum";
 import StringBuilder from "@rbxts/stringbuilder";
 import { Server } from "shared/api/APIExpose";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import { CURRENCY_CATEGORIES, CURRENCY_DETAILS } from "shared/currency/CurrencyDetails";
-import Droplet from "shared/item/Droplet";
 import Item from "shared/item/Item";
 import Upgrader from "shared/item/traits/upgrader/Upgrader";
 import perItemPacket from "shared/item/utils/perItemPacket";
-import NamedUpgrades from "shared/namedupgrade/NamedUpgrades";
 import Class0Shop from "shared/items/0/Class0Shop";
 
 const textChangedPacket =
     perItemPacket(packet<(placementId: string, dropletId: string, value: string, color: string) => void>());
+
+const ALL_CURRENCIES_COLOR = new Color3(0.3, 0.37, 1);
+
+function getOperationString(constant: OnoeNum, operation: "add" | "mul" | "pow") {
+    switch (operation) {
+        case "add":
+            if (constant.moreThan(0)) {
+                return $tuple("+", constant);
+            } else if (constant.lessThan(0)) {
+                return $tuple("-", constant.abs());
+            }
+            return $tuple("", constant);
+        case "mul":
+            if (constant.moreThan(1)) {
+                return $tuple("x", constant);
+            } else if (constant.lessThan(1)) {
+                return $tuple("÷", constant.reciprocal());
+            }
+            return $tuple("", constant);
+        case "pow":
+            if (constant.moreThan(1)) {
+                return $tuple("^", constant);
+            } else if (constant.lessThan(1)) {
+                return $tuple("√", constant.reciprocal());
+            }
+            return $tuple("", constant);
+    }
+}
+
+function valueToString(builder: StringBuilder, constant: OnoeNum | CurrencyBundle, operation: "add" | "mul" | "pow") {
+    if ("mantissa" in constant) {
+        const [opString, opValue] = getOperationString(constant, operation);
+        buildRichText(builder, opString + opValue.toString(), ALL_CURRENCIES_COLOR, undefined, "Bold");
+        return;
+    }
+
+    currenciesToString(builder, constant.amountPerCurrency, "mul");
+}
+
+function currenciesToString(builder: StringBuilder, amountPerCurrency: CurrencyMap, operation: "add" | "mul" | "pow") {
+    let i = 1;
+    const size = amountPerCurrency.size();
+    const last = size - 1;
+    for (const [name, details] of CurrencyBundle.SORTED_DETAILS) {
+        if (details.page === CURRENCY_CATEGORIES.Internal) continue;
+
+        let amount = amountPerCurrency.get(name);
+        if (amount === undefined) continue;
+
+        const [opString, opValue] = getOperationString(amount, operation);
+
+        buildRichText(builder, opString + CurrencyBundle.getFormatted(name, opValue), details.color, undefined, "Bold");
+
+        if (i < size) {
+            builder.append(i === last ? " and " : ", ");
+        }
+        i++;
+    }
+}
 
 export = new Item(script.Name)
     .setName("Droplet Scanner")
@@ -34,167 +91,42 @@ export = new Item(script.Name)
 
     .onLoad((model, item) => {
         const RevenueService = Server.Revenue;
-        const removeOnes = (price: CurrencyBundle) => {
-            const newPrice = new CurrencyBundle();
-            for (const [currency, amount] of price.amountPerCurrency) {
-                if (!amount.equals(1)) {
-                    newPrice.set(currency, amount);
-                }
-            }
-            return newPrice;
-        };
-        const ONE = new OnoeNum(1);
-        const formatGlobalMultiplier = (bundle: CurrencyBundle) => {
-            if (!bundle.hasAll()) {
-                return undefined;
-            }
-
-            const amounts = new Map<Currency, OnoeNum>();
-            const counts = new Map<string, { amount: OnoeNum; count: number }>();
-            for (const [currency] of CurrencyBundle.SORTED_DETAILS) {
-                const amount = bundle.get(currency);
-                if (amount === undefined) {
-                    return undefined;
-                }
-                amounts.set(currency, amount);
-                const key = amount.toString();
-                const entry = counts.get(key);
-                if (entry === undefined) {
-                    counts.set(key, { amount, count: 1 });
-                } else {
-                    entry.count++;
-                }
-            }
-
-            let baseEntry: { amount: OnoeNum; count: number } | undefined;
-            for (const [, entry] of counts) {
-                if (baseEntry === undefined) {
-                    baseEntry = entry;
-                    continue;
-                }
-                if (entry.count > baseEntry.count) {
-                    baseEntry = entry;
-                    continue;
-                }
-                if (entry.count === baseEntry.count && baseEntry.amount.equals(ONE) && !entry.amount.equals(ONE)) {
-                    baseEntry = entry;
-                }
-            }
-
-            if (baseEntry === undefined) {
-                return undefined;
-            }
-
-            const baseAmount = baseEntry.amount;
-            if (baseAmount.equals(ONE)) {
-                return undefined;
-            }
-
-            const parts = new Array<string>();
-            parts.push(`x${OnoeNum.toString(baseAmount)}`);
-
-            let hasVariation = false;
-            for (const [currency, details] of CurrencyBundle.SORTED_DETAILS) {
-                if (details.page === CURRENCY_CATEGORIES.Internal) continue;
-
-                const amount = amounts.get(currency)!;
-                if (!amount.equals(baseAmount)) {
-                    hasVariation = true;
-                    const formatted = CurrencyBundle.getFormatted(currency, amount);
-                    const color = CURRENCY_DETAILS[currency].color;
-                    parts.push(formatRichText(`x${formatted}`, color));
-                }
-            }
-
-            if (hasVariation === false) {
-                return parts[0];
-            }
-
-            return parts.join(", ");
-        };
-        const FURNACE_UPGRADES = NamedUpgrades.getUpgrades("Furnace");
-
-        const addOperationToBuilder = (
-            builder: StringBuilder,
-            normal: string,
-            inverted: string,
-            operation?: CurrencyBundle,
-            inverse?: boolean,
-        ) => {
-            if (operation !== undefined) {
-                if (operation.hasAll()) {
-                    const all = OnoeNum.toString(operation.getFirst()[1]!);
-                    builder.append(inverse ? inverted : normal).append(formatRichText(all, new Color3(0.3, 0.37, 1)));
-                    return;
-                }
-                builder.append(inverse ? inverted : normal).append(operation.toString(true));
-            }
-        };
 
         getInstanceInfo(model, "OnUpgraded")!.connect((dropletModel) => {
-            const dropletInfo = getAllInstanceInfo(dropletModel);
-            const dropletId = dropletInfo.DropletId!;
-            const droplet = Droplet.getDroplet(dropletId)!;
-            const rawValue = droplet.value;
-
-            const [globAdd, globMul, globPow] = RevenueService.getGlobal(FURNACE_UPGRADES);
-            const [total, nerf] = RevenueService.calculateDropletValue(dropletModel, true, true);
-
-            // Get weather multipliers for display
+            const dropletValue = RevenueService.calculateDropletValue(dropletModel, true);
+            dropletValue.applyFinal();
+            dropletValue.applySource();
 
             const builder = new StringBuilder();
-            builder.append("RAW WORTH: ").append(rawValue.toString(true));
-            const upgrades = dropletInfo.Upgrades;
+            builder.append("RAW WORTH: ").append(dropletValue.baseValue.toString(true));
 
-            let upgraded = false;
-            if (upgrades !== undefined) {
-                for (const [upgradeId, upgradeInfo] of upgrades) {
-                    upgraded = true;
-                    const upgraderId = Server.Item.getPlacedItem(upgradeInfo.Model.Name)?.item ?? upgradeId;
-                    if (upgraderId === undefined || upgraderId === item.id) continue;
+            for (const [name, operative] of dropletValue.factors) {
+                builder.append("\n").append(name.upper()).append(": ");
 
-                    const [add, mul, pow, inverse] = Upgrader.getUpgrade(upgradeInfo);
-                    if (
-                        (upgradeInfo.EmptyUpgrade && !inverse) ||
-                        (add === undefined && mul === undefined && pow === undefined)
-                    )
-                        continue;
+                if (operative.add !== undefined) {
+                    valueToString(builder, operative.add, "add");
+                }
 
-                    builder.append("\n").append(upgraderId.upper()).append(": ");
-                    addOperationToBuilder(builder, "+", "-", add, inverse);
-                    addOperationToBuilder(builder, "x", "/", mul, inverse);
-                    addOperationToBuilder(builder, "^", "rt", pow, inverse);
+                if (operative.mul !== undefined) {
+                    valueToString(builder, operative.mul, "mul");
+                }
+
+                if (operative.pow !== undefined) {
+                    valueToString(builder, operative.pow, "pow");
                 }
             }
-            if (upgraded === false) {
-                builder.append("\nNO UPGRADES");
-            }
+
             const health = getInstanceInfo(dropletModel, "Health")!;
             if (health !== 100) {
                 builder
                     .append("\nHEALTH: ")
                     .append(formatRichText(OnoeNum.toString(health), CURRENCY_DETAILS.Health.color));
             }
-            builder.append("\nGLOBAL BOOSTS: ");
-            if (globAdd.amountPerCurrency.size() > 0) builder.append("+").append(globAdd.toString(true));
 
-            const washedMul = removeOnes(globMul);
-            const globalMultiplierText = formatGlobalMultiplier(globMul);
-            if (globalMultiplierText !== undefined) {
-                builder.append(globalMultiplierText);
-            } else if (washedMul.amountPerCurrency.size() > 0) {
-                builder.append("x").append(washedMul.toString(true));
-            }
-
-            const washedPow = removeOnes(globPow);
-            if (washedPow.amountPerCurrency.size() > 0) builder.append("^").append(washedPow.toString(true));
-
-            if (nerf !== 1) builder.append("\nNERF: /").append(OnoeNum.toString(1 / nerf));
-
-            builder.append("\nTOTAL: ").append(total.toString(true));
+            builder.append("\nTOTAL: ").append(dropletValue.coalesce().toString(true));
             textChangedPacket.toAllClients(
                 model,
-                dropletId,
+                dropletValue.instanceInfo.DropletId!,
                 builder.toString(),
                 dropletModel.Color.Lerp(new Color3(1, 1, 1), 0.2).ToHex(),
             );

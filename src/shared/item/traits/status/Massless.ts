@@ -24,7 +24,7 @@ const format = (str: string) => {
 };
 
 export default class Massless extends StatusEffect {
-    static BOOST = CurrencyBundle.ones().mul(1.2);
+    static BOOST = CurrencyBundle.ones().mulConstant(1.2);
 
     constructor(item: Item) {
         super(item);
@@ -35,8 +35,8 @@ export default class Massless extends StatusEffect {
         const dropletInfo = getAllInstanceInfo(dropletModel);
         dropletModel.CustomPhysicalProperties = new PhysicalProperties(0.0001, 2, 0.15);
         dropletInfo.Upgrades!.set("Massless", {
-            Model: Workspace,
-            Boost: {
+            model: Workspace,
+            boost: {
                 mul: Massless.BOOST,
             },
         });

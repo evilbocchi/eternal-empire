@@ -369,7 +369,7 @@ export default class ResearchService implements OnStart {
                     break;
                 }
                 case "redeemRevenue": {
-                    const offlineRevenue = this.currencyService.getOfflineRevenue().mul(effect.seconds);
+                    const offlineRevenue = this.currencyService.getOfflineRevenue().mulConstant(effect.seconds);
                     const payout = new Map<Currency, OnoeNum>();
                     for (const currency of effect.currencies) {
                         const amount = offlineRevenue.get(currency);

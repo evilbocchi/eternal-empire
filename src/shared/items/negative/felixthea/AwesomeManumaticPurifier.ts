@@ -55,19 +55,13 @@ export = new Item(script.Name)
                 const newRawClicks = ++data.rawPurifierClicks;
                 Packets.rawPurifierClicks.setFor(player, newRawClicks);
             }
-            let [totalAdd, totalMul, totalPow] = Operative.template();
-            [totalAdd, totalMul, totalPow] = RevenueService.applyGlobal(
-                totalAdd,
-                totalMul,
-                totalPow,
-                PURIFIER_UPGRADES,
-            );
             const purifierClicks = CurrencyService.balance.get("Purifier Clicks");
             const cpc = purifierClicks ? getClickMultiplier(purifierClicks) : undefined;
-            const valuePrice = new CurrencyBundle().set("Purifier Clicks", cpc ? cpc.mul(value) : value);
-            const worth = Operative.coalesce(valuePrice, totalAdd, totalMul, totalPow);
-            const final = RevenueService.performSoftcaps(worth.amountPerCurrency);
-            CurrencyService.incrementAll(final);
+            const baseValue = new CurrencyBundle().set("Purifier Clicks", cpc ? cpc.mul(value) : value);
+
+            const final = RevenueService.calculateSingleRevenue(baseValue, undefined, PURIFIER_UPGRADES);
+
+            CurrencyService.incrementAll(final.amountPerCurrency);
             clickedPacket.toAllClients(
                 final.get("Purifier Clicks") ?? new OnoeNum(0),
                 CurrencyService.balance.get("Purifier Clicks") ?? new OnoeNum(0),

@@ -623,13 +623,6 @@ export default class Item {
      *
      * @param loadCallback Receives the spawned model and item reference.
      * @returns The item instance.
-     *
-     * @example
-     * ```ts
-     * item.onLoad((model) => {
-     *     model.SetAttribute("IsInteractive", true);
-     * });
-     * ```
      */
     onLoad(loadCallback: (model: Model, item: this) => void): this {
         this.LOADS.push(loadCallback);
@@ -642,13 +635,6 @@ export default class Item {
      *
      * @param loadCallback Receives the client-side clone, the item, and the owning player.
      * @returns The item instance.
-     *
-     * @example
-     * ```ts
-     * item.onClientLoad((model, _item, player) => {
-     *     MusicManager.playAmbientLoopFor(player, model);
-     * });
-     * ```
      */
     onClientLoad(loadCallback: (model: Model, item: this, player: Player) => void): this {
         this.CLIENT_LOADS.push(loadCallback);
@@ -666,6 +652,27 @@ export default class Item {
         this.onLoad((model, item) => loadCallback(model, item, undefined));
         this.onClientLoad((model, item, player) => loadCallback(model, item, player));
         return this;
+    }
+
+    /**
+     * Calls load callbacks from {@link onLoad}.
+     * @param model The model of the item to load.
+     */
+    load(model: Model) {
+        for (const callback of this.LOADS) {
+            callback(model, this);
+        }
+    }
+
+    /**
+     * Calls client load callbacks from {@link onClientLoad}.
+     * @param model The model of the item to load.
+     * @param player The player for whom the item is being loaded.
+     */
+    clientLoad(model: Model, player: Player) {
+        for (const callback of this.CLIENT_LOADS) {
+            callback(model, this, player);
+        }
     }
 
     /**

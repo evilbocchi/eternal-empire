@@ -43,7 +43,7 @@ export function applyRepairBoostToItem(modelInfo: InstanceInfo, item: Item, tier
     }
     if (item.findTrait("Upgrader")) {
         boost.upgradeCompound = {
-            mul: CurrencyBundle.ones().mul(multiplier),
+            mul: CurrencyBundle.ones().mulConstant(multiplier),
         };
     }
     if (item.findTrait("Furnace")) {

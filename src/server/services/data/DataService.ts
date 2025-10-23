@@ -10,6 +10,7 @@ import CurrencyBundle from "shared/currency/CurrencyBundle";
 import { CURRENCY_DETAILS } from "shared/currency/CurrencyDetails";
 import AvailableEmpire from "shared/data/AvailableEmpire";
 import fixDuplicatedItemsData from "shared/data/loading/fixDuplicatedItemsData";
+import EmpireProfileTemplate from "shared/data/profile/EmpireProfileTemplate";
 import { EmpireProfileManager } from "shared/data/profile/ProfileManager";
 import ThisEmpire from "shared/data/ThisEmpire";
 import eat from "shared/hamster/eat";
@@ -273,6 +274,32 @@ export default class DataService implements OnStart, OnPlayerAdded {
         const data = { empireProfile, empireData, empireId };
         ThisEmpire.loadWith(data);
         return data;
+    }
+
+    /**
+     * Resets the empire data to default values while retaining ownership and basic info.
+     */
+    softWipe() {
+        this.empireData.items.bought.clear();
+        this.empireData.items.inventory.clear();
+        this.empireData.items.uniqueInstances.clear();
+        this.empireData.items.worldPlaced.clear();
+        this.empireData.items.brokenPlacedItems.clear();
+        this.empireData.items.inventory.set("ClassLowerNegativeShop", 1);
+        this.empireData.quests.clear();
+        this.empireData.currencies.clear();
+        this.empireData.mostCurrencies.clear();
+        this.empireData.mostCurrenciesSinceReset.clear();
+        this.empireData.upgrades.clear();
+        this.empireData.challenges.clear();
+        this.empireData.printedSetups = [];
+        this.empireData.completedEvents.clear();
+        this.empireData.questMetadata.clear();
+        this.empireData.lastSession = EmpireProfileTemplate.lastSession;
+        this.empireData.longestSession = EmpireProfileTemplate.longestSession;
+        this.empireData.playtime = EmpireProfileTemplate.playtime;
+        this.empireData.level = EmpireProfileTemplate.level;
+        this.empireData.xp = EmpireProfileTemplate.xp;
     }
 
     onPlayerAdded(player: Player) {

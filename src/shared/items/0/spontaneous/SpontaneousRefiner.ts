@@ -38,10 +38,10 @@ for (const item of combining) {
     const upgrader = item.findTrait("Upgrader");
     if (upgrader !== undefined) {
         if (upgrader.add !== undefined) {
-            totalAdd = totalAdd.add(upgrader.add.mul(laserCount));
+            totalAdd = totalAdd.add(upgrader.add.mulConstant(laserCount));
         }
         if (upgrader.mul !== undefined) {
-            totalMul = totalMul.mul(upgrader.mul.pow(laserCount));
+            totalMul = totalMul.mul(upgrader.mul.powConstant(laserCount));
         }
     }
     const damager = item.findTrait("Damager");

@@ -924,18 +924,6 @@ export default class Droplet {
     }
 
     /**
-     * Coalesce operative terms and the value of the droplet into a single currency bundle.
-     *
-     * @param totalAdd Total addition term.
-     * @param totalMul Total multiplication term.
-     * @param totalPow Total power term.
-     * @returns The coalesced worth of the droplet.
-     */
-    coalesce(totalAdd: CurrencyBundle, totalMul: CurrencyBundle, totalPow: CurrencyBundle) {
-        return Operative.coalesce(this.value, totalAdd, totalMul, totalPow);
-    }
-
-    /**
      * Gets the droplet at the given ID.
      *
      * @param dropletId The ID of the droplet to get.
@@ -946,23 +934,6 @@ export default class Droplet {
             if (droplet.id === dropletId) return droplet;
         }
         return undefined;
-    }
-
-    /**
-     * Calculates negative status effects applied to the droplet.
-     *
-     * @param instanceInfo The instance info of the droplet.
-     * @returns A tuple containing the nerf value and a boolean indicating if the droplet had reached the skyline.
-     */
-    static getNerf(instanceInfo: InstanceInfo) {
-        let nerf = 1;
-        const isSky = instanceInfo.Sky;
-        if (isSky === true) {
-            nerf /= 250;
-        }
-
-        nerf *= math.min(100, instanceInfo.Health!) / 100;
-        return $tuple(nerf, isSky);
     }
 
     static {

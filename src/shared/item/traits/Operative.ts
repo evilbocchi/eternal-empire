@@ -133,6 +133,7 @@ export default class Operative extends ItemTrait implements IOperative {
      * @param pow Power term.
      * @param inverse Whether to apply the inverse of the operations.
      * @param repeats Number of times to repeat the operations. Default is 1, which means no repetition.
+     * @param inplace Whether to perform operations in-place.
      * @returns The resulting addition, multiplication, and power terms.
      */
     static applySpreadOperative(
@@ -144,21 +145,22 @@ export default class Operative extends ItemTrait implements IOperative {
         pow?: CurrencyBundle,
         inverse?: boolean,
         repeats?: number,
+        inplace?: boolean,
     ) {
         if (repeats !== undefined) {
-            if (add !== undefined) add = add.mul(repeats);
-            if (mul !== undefined) mul = mul.pow(repeats);
-            if (pow !== undefined) pow = pow.pow(repeats);
+            if (add !== undefined) add = add.mulConstant(repeats, inplace);
+            if (mul !== undefined) mul = mul.powConstant(repeats, inplace);
+            if (pow !== undefined) pow = pow.powConstant(repeats, inplace);
         }
 
         if (inverse === true) {
-            if (add !== undefined) totalAdd = totalAdd?.sub(add);
-            if (mul !== undefined) totalMul = totalMul?.div(mul);
-            if (pow !== undefined) totalPow = totalPow?.mul(ONES.div(pow));
+            if (add !== undefined) totalAdd = totalAdd?.sub(add, inplace);
+            if (mul !== undefined) totalMul = totalMul?.div(mul, inplace);
+            if (pow !== undefined) totalPow = totalPow?.mul(ONES.div(pow), inplace);
         } else {
-            if (add !== undefined) totalAdd = totalAdd?.add(add);
-            if (mul !== undefined) totalMul = totalMul?.mul(mul);
-            if (pow !== undefined) totalPow = totalPow?.mul(pow);
+            if (add !== undefined) totalAdd = totalAdd?.add(add, inplace);
+            if (mul !== undefined) totalMul = totalMul?.mul(mul, inplace);
+            if (pow !== undefined) totalPow = totalPow?.mul(pow, inplace);
         }
         return $tuple(totalAdd, totalMul, totalPow);
     }
@@ -171,6 +173,7 @@ export default class Operative extends ItemTrait implements IOperative {
      * @param operative The operative to apply.
      * @param inverse Whether to apply the inverse of the operations.
      * @param repeats Number of times to repeat the operations. Default is 1, which means no repetition.
+     * @param inplace Whether to perform operations in-place.
      * @returns The resulting addition, multiplication, and power terms.
      */
     static applyOperative(
@@ -180,7 +183,8 @@ export default class Operative extends ItemTrait implements IOperative {
         operative: IOperative,
         inverse?: boolean,
         repeats?: number,
-    ) {
+        inplace?: boolean,
+    ): LuaTuple<[CurrencyBundle, CurrencyBundle, CurrencyBundle]> {
         return Operative.applySpreadOperative(
             totalAdd,
             totalMul,
@@ -190,7 +194,8 @@ export default class Operative extends ItemTrait implements IOperative {
             operative.pow,
             inverse,
             repeats,
-        );
+            inplace,
+        ) as LuaTuple<[CurrencyBundle, CurrencyBundle, CurrencyBundle]>;
     }
 
     /**
@@ -222,23 +227,11 @@ export default class Operative extends ItemTrait implements IOperative {
         let totalMul = this.mul;
         let totalPow = this.pow;
         if (repeats !== undefined) {
-            if (totalAdd !== undefined) totalAdd = totalAdd.mul(repeats);
-            if (totalMul !== undefined) totalMul = totalMul.pow(repeats);
-            if (totalPow !== undefined) totalPow = totalPow.pow(repeats);
+            if (totalAdd !== undefined) totalAdd = totalAdd.mulConstant(repeats);
+            if (totalMul !== undefined) totalMul = totalMul.powConstant(repeats);
+            if (totalPow !== undefined) totalPow = totalPow.powConstant(repeats);
         }
         return Operative.coalesce(add, totalAdd, totalMul, totalPow);
-    }
-
-    /**
-     * Generate `totalAdd`, `totalMul`, and `totalPow` for calculation.
-     * - `totalAdd` is a zeroed {@link CurrencyBundle}.
-     * - `totalMul` is a `CurrencyBundle` with all currencies set to 1.
-     * - `totalPow` is a `CurrencyBundle` with all currencies set to 1.
-     *
-     * @returns A tuple containing `totalAdd`, `totalMul`, and `totalPow`.
-     */
-    static template() {
-        return $tuple(new CurrencyBundle(), ONES, ONES);
     }
 
     /**

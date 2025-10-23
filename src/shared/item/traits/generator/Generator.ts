@@ -56,34 +56,23 @@ export default class Generator extends Boostable {
      * @param dt The delta time since the last calculation, in seconds.
      * @param value The base value of the generator, per second.
      * @param boost A map of boost keys to their respective boosts.
-     * @return The amount of currency generated, per currency type.
+     * @return The calculated value generated over the given delta time.
      */
     static getValue(dt: number, value: CurrencyBundle, boosts: Map<string, ItemBoost>) {
-        let [totalAdd, totalMul, totalPow] = Operative.template();
-
+        const operatives = new Map<string, IOperative>();
         for (const [id, boost] of boosts) {
-            // apply basic generator boosts first
             const generatorCompound = boost.generatorCompound;
             if (generatorCompound !== undefined) {
-                let [add, mul, pow] = Operative.applyOperative(totalAdd, totalMul, totalPow, generatorCompound);
-                totalAdd = add ?? totalAdd;
-                totalMul = mul ?? totalMul;
-                totalPow = pow ?? totalPow;
+                operatives.set(id, generatorCompound);
             }
 
             const charger = boost.chargedBy;
             if (charger !== undefined && Server.Item.getPlacedItem(id) !== undefined) {
-                let [add, mul, pow] = Operative.applyOperative(totalAdd, totalMul, totalPow, charger);
-                totalAdd = add ?? totalAdd;
-                totalMul = mul ?? totalMul;
-                totalPow = pow ?? totalPow;
+                operatives.set(id, charger);
             }
         }
 
-        [totalAdd, totalMul, totalPow] = Server.Revenue.applyGlobal(totalAdd, totalMul, totalPow, GENERATOR_UPGRADES);
-        const worth = Operative.coalesce(value, totalAdd, totalMul, totalPow).mul(dt);
-        const amountPerCurrency = Server.Revenue.performSoftcaps(worth.amountPerCurrency);
-        return amountPerCurrency;
+        return Server.Revenue.calculateSingleRevenue(value.mulConstant(dt), operatives, GENERATOR_UPGRADES);
     }
 
     static load(model: Model, generator: Generator) {
@@ -111,9 +100,9 @@ export default class Generator extends Boostable {
 
                 let value = passiveGain;
                 if (tick() - lastClicked < 1) {
-                    value = value.mul(1.5);
+                    value = value.mulConstant(1.5);
                 }
-                const amountPerCurrency = this.getValue(dt, value, boosts);
+                const amountPerCurrency = this.getValue(dt, value, boosts).amountPerCurrency;
                 Server.Currency.incrementAll(amountPerCurrency);
 
                 if (IS_EDIT && Players.LocalPlayer === undefined) {

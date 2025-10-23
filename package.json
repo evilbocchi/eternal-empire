@@ -60,7 +60,7 @@
     },
     "dependencies": {
         "@antivivi/lemon-signal": "^1.2.4",
-        "@antivivi/profileservice": "^1.4.5",
+        "@antivivi/profileservice": "^1.5.2",
         "@antivivi/rbxnamecolor": "^1.0.1",
         "@antivivi/unnamespaced-keyed": "^1.0.5",
         "@antivivi/vrldk": "^1.1.0",
@@ -79,7 +79,7 @@
         "@rbxts/react-roblox": "^17.2.3",
         "@rbxts/roman-numerals": "^1.0.2",
         "@rbxts/rparticle": "^1.0.0",
-        "@rbxts/serikanum": "^1.5.0",
+        "@rbxts/serikanum": "^1.6.0",
         "@rbxts/services": "^1.5.1",
         "@rbxts/stringbuilder": "^1.1.0",
         "@rbxts/testez": "^0.4.2-ts.0",

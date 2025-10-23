@@ -476,7 +476,9 @@ export = new Quest(script.Name)
                 new Dialogue(Andy, "As your reward, here's a Funds Bomb! Enjoy!").talk();
                 CurrencyService.increment("Funds Bombs", new OnoeNum(1));
             } else if (rng === 2) {
-                const skillDelta = Server.Reset.getResetReward(RESET_LAYERS.Skillification)?.div(5)?.get("Skill");
+                const skillDelta = Server.Reset.getResetReward(RESET_LAYERS.Skillification)
+                    ?.divConstant(5)
+                    ?.get("Skill");
                 if (skillDelta === undefined || skillDelta.equals(0)) {
                     new Dialogue(
                         Andy,

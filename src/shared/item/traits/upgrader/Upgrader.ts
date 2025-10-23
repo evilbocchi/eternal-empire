@@ -5,12 +5,10 @@ import { getAllInstanceInfo, setInstanceInfo, simpleInterval } from "@antivivi/v
 import { exactSetProperty } from "@rbxts/fletchette";
 import { Server } from "shared/api/APIExpose";
 import { IS_EDIT, IS_SERVER } from "shared/Context";
-import CurrencyBundle from "shared/currency/CurrencyBundle";
 import eat from "shared/hamster/eat";
 import Item from "shared/item/Item";
 import type Condenser from "shared/item/traits/dropper/Condenser";
 import Operative, { IOperative } from "shared/item/traits/Operative";
-import type OmniUpgrader from "shared/item/traits/upgrader/OmniUpgrader";
 import isPlacedItemUnusable from "shared/item/utils/isPlacedItemUnusable";
 import { VirtualCollision } from "shared/item/utils/VirtualReplication";
 
@@ -24,15 +22,19 @@ declare global {
          * The upgrader model that applied this upgrade. If the model is destroyed,
          * the upgrade is considered inactive.
          */
-        Model: Model;
+        model: Model;
+        /**
+         * The upgrader item that applied this upgrade.
+         */
+        item?: Item;
         /**
          * The upgrade's boost stats.
          */
-        Boost?: IOperative;
+        boost?: IOperative;
         /**
          * An upgrade that effectively does nothing. Toggled by {@link Condenser}.
          */
-        EmptyUpgrade?: boolean;
+        empty?: boolean;
     }
 
     interface InstanceInfo {
@@ -118,9 +120,10 @@ export default class Upgrader extends Operative {
 
         if (laserInfo.Sky === true) dropletInfo.Sky = true;
         let upgrades = dropletInfo.Upgrades;
+        const item = upgrader.item;
 
         if (laserId === undefined) {
-            laserId ??= upgrader.isStacks === false ? upgrader.item.id : model.Name + "_" + laserInfo.LaserId;
+            laserId ??= upgrader.isStacks === false ? item.id : model.Name + "_" + laserInfo.LaserId;
         }
 
         if (upgrades === undefined) upgrades = new Map();
@@ -148,8 +151,9 @@ export default class Upgrader extends Operative {
         }
 
         const upgrade: UpgradeInfo = {
-            Model: model,
-            Boost: {
+            model,
+            item,
+            boost: {
                 add: totalAdd,
                 mul: totalMul,
                 pow: totalPow,
@@ -252,50 +256,20 @@ export default class Upgrader extends Operative {
      * Gets the boosts an upgrade from an Upgrader would give.
      *
      * @param upgradeInfo Upgrade information
-     * @returns Boosts
+     * @returns A tuple containing the operative boosts and whether the upgrade should be reversed.
      */
-    static getUpgrade(
-        upgradeInfo: UpgradeInfo,
-    ): LuaTuple<[CurrencyBundle?, CurrencyBundle?, CurrencyBundle?, boolean?]> {
-        const boost = upgradeInfo.Boost;
+    static getUpgrade(upgradeInfo: UpgradeInfo): LuaTuple<[IOperative?, boolean?]> {
+        const boost = upgradeInfo.boost;
         if (boost === undefined) return $tuple();
 
-        const toAdd = boost.add;
-        const toMul = boost.mul;
-        const toPow = boost.pow;
-        const isGone = upgradeInfo.Model === undefined || upgradeInfo.Model.Parent === undefined;
-        const isEmpty = upgradeInfo.EmptyUpgrade === true;
+        const isGone = upgradeInfo.model === undefined || upgradeInfo.model.Parent === undefined;
+        const isEmpty = upgradeInfo.empty === true;
         if (isGone || isEmpty) {
-            if (isGone && isEmpty) return $tuple(toAdd, toMul, toPow, true);
+            if (isGone && isEmpty) return $tuple(boost, true);
             return $tuple();
         }
 
-        return $tuple(toAdd, toMul, toPow, false);
-    }
-
-    /**
-     * Apply boosts from Upgraders to a revenue source.
-     *
-     * @param totalAdd Addition term to apply.
-     * @param totalMul Multiplication term to apply.
-     * @param totalPow Power term to apply.
-     * @param instanceInfo Instance information of the revenue source. Usually a droplet.
-     * @returns The resulting boosts.
-     */
-    static applyUpgrades(
-        totalAdd: CurrencyBundle,
-        totalMul: CurrencyBundle,
-        totalPow: CurrencyBundle,
-        instanceInfo: InstanceInfo,
-    ) {
-        for (const [_id, upgradeInfo] of instanceInfo.Upgrades!) {
-            let [add, mul, pow, inverse] = this.getUpgrade(upgradeInfo);
-            [add, mul, pow] = this.applySpreadOperative(totalAdd, totalMul, totalPow, add, mul, pow, inverse);
-            totalAdd = add ?? totalAdd;
-            totalMul = mul ?? totalMul;
-            totalPow = pow ?? totalPow;
-        }
-        return $tuple(totalAdd, totalMul, totalPow);
+        return $tuple(boost, false);
     }
 
     static {

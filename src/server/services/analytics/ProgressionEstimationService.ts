@@ -34,6 +34,7 @@ import { RESET_LAYERS } from "shared/currency/mechanics/ResetLayer";
 import Droplet from "shared/item/Droplet";
 import Item from "shared/item/Item";
 import Furnace from "shared/item/traits/Furnace";
+import { IOperative } from "shared/item/traits/Operative";
 import Charger from "shared/item/traits/generator/Charger";
 import Generator from "shared/item/traits/generator/Generator";
 import Upgrader from "shared/item/traits/upgrader/Upgrader";
@@ -91,6 +92,24 @@ type ProfilingStats = {
     dropletSetUpgradesTime: number;
     dropletCalculateValueTime: number;
     dropletApplyFurnacesTime: number;
+};
+
+const stripOperativeToOneCurrency = (operative: IOperative, currency: Currency) => {
+    const newOperative = {} as IOperative;
+    const addValue = operative.add?.get(currency);
+    if (addValue !== undefined) {
+        newOperative.add = new CurrencyBundle().set(currency, addValue);
+    }
+    const mulValue = operative.mul?.get(currency);
+    if (mulValue !== undefined) {
+        newOperative.mul = new CurrencyBundle().set(currency, mulValue);
+    }
+    const powValue = operative.pow?.get(currency);
+    if (powValue !== undefined) {
+        newOperative.pow = new CurrencyBundle().set(currency, powValue);
+    }
+
+    return newOperative;
 };
 
 /**
@@ -229,7 +248,7 @@ export default class ProgressionEstimationService implements OnStart {
 
             if (purchasedItem.findTrait("Upgrader") !== undefined) {
                 this.operativeCache = undefined;
-                this.revenueService.clearOperativeCache();
+                this.revenueService.clearUpgraderCache();
             }
 
             if (purchasedItem === target) {
@@ -356,7 +375,7 @@ export default class ProgressionEstimationService implements OnStart {
         let timeToObtain: OnoeNum | undefined;
         let limitingCurrency: Currency | undefined;
         let nextPrice: CurrencyBundle | undefined;
-        revenue = this.calculateRevenue(inventory, revenue.mul(500));
+        revenue = this.calculateRevenue(inventory, revenue.mulConstant(500));
 
         // find time to obtain other items
         for (const [_, item] of Items.itemsPerId) {
@@ -465,7 +484,7 @@ export default class ProgressionEstimationService implements OnStart {
             }
             if (item.findTrait("Upgrader") !== undefined) {
                 this.operativeCache = undefined;
-                this.revenueService.clearOperativeCache();
+                this.revenueService.clearUpgraderCache();
             }
             totalTime = totalTime.add(stats.timeToObtain);
 
@@ -541,8 +560,8 @@ export default class ProgressionEstimationService implements OnStart {
             if (upgrader !== undefined) {
                 for (let i = 0; i < amount; i++) {
                     upgrades.add({
-                        Model: Workspace,
-                        Boost: upgrader,
+                        model: Workspace,
+                        boost: upgrader,
                     });
                 }
             }
@@ -551,7 +570,7 @@ export default class ProgressionEstimationService implements OnStart {
             if (furnace !== undefined) {
                 for (const currency of furnace.getCurrencies()) {
                     const toModify: Map<Currency, Furnace> =
-                        furnace.includesUpgrades === false ? cauldronPerCurrency : furnacePerCurrency;
+                        furnace.isCauldron === false ? cauldronPerCurrency : furnacePerCurrency;
                     const previous = toModify.get(currency);
                     if (previous === undefined || previous.lessThan(furnace, currency)) {
                         toModify.set(currency, furnace);
@@ -564,8 +583,8 @@ export default class ProgressionEstimationService implements OnStart {
                 const passiveGain = generator.passiveGain;
                 if (passiveGain !== undefined) {
                     const value = Generator.getValue(1, passiveGain, new Map());
-                    CurrencyMap.mulConstant(value, amount, true);
-                    CurrencyMap.add(generatorRevenue.amountPerCurrency, value, true);
+                    CurrencyMap.mulConstant(value.amountPerCurrency, amount, true);
+                    CurrencyMap.add(generatorRevenue.amountPerCurrency, value.amountPerCurrency, true);
                 }
             }
 
@@ -621,19 +640,6 @@ export default class ProgressionEstimationService implements OnStart {
         this.profilingStats.calcRevFirstLoopTime += os.clock() - firstLoopStart;
         this.maxUpgradeBoard(namedUpgrades);
 
-        if (this.operativeCache === undefined) {
-            const dummyDropletInfo = { Upgrades: new Map<string, UpgradeInfo>() };
-            let i = 0;
-            for (const upgrade of upgrades) {
-                dummyDropletInfo.Upgrades.set(tostring(i), upgrade);
-                i++;
-            }
-            let [add, mul, pow] = this.revenueService.getGlobal(FURNACE_UPGRADES);
-            [add, mul, pow] = Upgrader.applyUpgrades(add, mul, pow, dummyDropletInfo);
-            this.operativeCache = { add, mul, pow };
-            this.revenueService.setOperativeCache(this.operativeCache);
-        }
-
         // second check
         const secondLoopStart = os.clock();
         for (const [item, amount] of items) {
@@ -675,27 +681,60 @@ export default class ProgressionEstimationService implements OnStart {
             this.profilingStats.dropletSetUpgradesTime += os.clock() - setUpgradesStart;
 
             const calcValueStart = os.clock();
-            const [upgradedValue] = this.revenueService.calculateDropletValue(dropletModel, true, true);
-            const [unupgradedValue] = this.revenueService.calculateDropletValue(dropletModel, true, false);
+            const resultWithUpgraders = this.revenueService.calculateDropletValue(dropletModel);
+            const resultWithoutUpgraders = this.revenueService.calculateDropletValue(dropletModel);
+            resultWithUpgraders.markAsCauldron();
+
+            resultWithUpgraders.applySource();
+            resultWithoutUpgraders.applySource();
+
             this.profilingStats.dropletCalculateValueTime += os.clock() - calcValueStart;
 
             const applyFurnacesStart = os.clock();
-            const value = new CurrencyBundle();
-            for (const [currency, upgradedAmount] of upgradedValue.amountPerCurrency) {
+            for (const [currency] of CurrencyBundle.SORTED_DETAILS) {
                 const furnace = furnacePerCurrency.get(currency);
                 const cauldron = cauldronPerCurrency.get(currency);
-                const furnaceValue =
-                    furnace?.apply(new CurrencyBundle().set(currency, upgradedAmount)).get(currency) ?? upgradedAmount;
-                const unupgradedAmount = canUpgradeInCauldrons ? upgradedAmount : unupgradedValue.get(currency)!;
-                const cauldronValue =
-                    cauldron?.apply(new CurrencyBundle().set(currency, unupgradedAmount)).get(currency) ??
-                    unupgradedAmount;
 
-                value.set(currency, OnoeNum.max(furnaceValue, cauldronValue));
+                if (furnace) {
+                    resultWithUpgraders.applyOperative(stripOperativeToOneCurrency(furnace, currency));
+                }
+
+                if (cauldron) {
+                    resultWithoutUpgraders.applyOperative(stripOperativeToOneCurrency(cauldron, currency));
+                }
             }
+
+            resultWithUpgraders.applyFinal();
+            resultWithoutUpgraders.applyFinal();
+
+            const amountWithUpgraders = resultWithUpgraders.coalesce();
+            const amountWithoutUpgraders = resultWithoutUpgraders.coalesce();
+
+            const value = new CurrencyBundle();
+            for (const [currency] of CurrencyBundle.SORTED_DETAILS) {
+                const withUpgraders = amountWithUpgraders.get(currency);
+                const withoutUpgraders = amountWithoutUpgraders.get(currency);
+
+                if (withUpgraders === undefined) {
+                    if (withoutUpgraders !== undefined) {
+                        value.set(currency, withoutUpgraders);
+                    }
+                    continue;
+                }
+
+                if (withoutUpgraders === undefined) {
+                    if (withUpgraders !== undefined) {
+                        value.set(currency, withUpgraders);
+                    }
+                    continue;
+                }
+
+                value.set(currency, OnoeNum.max(withUpgraders, withoutUpgraders));
+            }
+
             this.profilingStats.dropletApplyFurnacesTime += os.clock() - applyFurnacesStart;
 
-            revenue = revenue.add(value.div(condension).mul(dropRate));
+            revenue = revenue.add(value.div(condension).mulConstant(dropRate));
         }
         this.profilingStats.calcRevDropletLoopTime += os.clock() - dropletLoopStart;
         const chargerStart = os.clock();
@@ -719,7 +758,7 @@ export default class ProgressionEstimationService implements OnStart {
         for (const [_, resetLayer] of pairs(RESET_LAYERS)) {
             const reward = this.resetService.getResetReward(resetLayer);
             if (reward === undefined) continue;
-            revenue = revenue.add(reward.div(500));
+            revenue = revenue.add(reward.divConstant(500));
         }
         this.profilingStats.calcRevOtherTime += os.clock() - otherStart;
 
