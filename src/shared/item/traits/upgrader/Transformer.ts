@@ -21,9 +21,9 @@ class Transformer extends Conveyor {
                 if (isPlacedItemUnusable(modelInfo)) return;
 
                 const instanceInfo = getAllInstanceInfo(otherPart);
-                if (instanceInfo.Incinerated === true) return;
+                if (instanceInfo.incinerated === true) return;
 
-                const dropletId = instanceInfo.DropletId;
+                const dropletId = instanceInfo.dropletId;
                 if (dropletId === item.id) return;
 
                 const droplet = Droplet.getDroplet(dropletId!);
@@ -39,7 +39,7 @@ class Transformer extends Conveyor {
                 otherPart.Material = resultingDropletModel.Material;
                 otherPart.Size = resultingDropletModel.Size;
                 for (const tag of resultingDropletModel.GetTags()) otherPart.AddTag(tag);
-                instanceInfo.DropletId = resultingDroplet.id;
+                instanceInfo.dropletId = resultingDroplet.id;
             });
         }
     }

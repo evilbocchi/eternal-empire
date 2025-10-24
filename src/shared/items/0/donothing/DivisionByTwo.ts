@@ -1,11 +1,10 @@
+import { getAllInstanceInfo } from "@antivivi/vrldk";
 import Difficulty from "@rbxts/ejt";
-import { setInstanceInfo } from "@antivivi/vrldk";
-import { Players, Workspace } from "@rbxts/services";
+import { Workspace } from "@rbxts/services";
 import { Server } from "shared/api/APIExpose";
-import { IS_EDIT } from "shared/Context";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import { CURRENCY_CATEGORIES, CURRENCY_DETAILS } from "shared/currency/CurrencyDetails";
-import { getAllPlayerCharacters, getPlayerCharacter } from "shared/hamster/getPlayerCharacter";
+import { getAllPlayerCharacters } from "shared/hamster/getPlayerCharacter";
 import Item from "shared/item/Item";
 import Generator from "shared/item/traits/generator/Generator";
 import Class0Shop from "shared/items/0/Class0Shop";
@@ -49,6 +48,7 @@ export = new Item(script.Name)
     .exit()
 
     .onLoad((model, item) => {
+        const modelInfo = getAllInstanceInfo(model);
         const button = model.WaitForChild("Button") as BasePart;
         const cframe = button.CFrame.add(new Vector3(0, 4.5, 0));
         const size = button.Size.add(new Vector3(0, 9, 0));
@@ -59,7 +59,7 @@ export = new Item(script.Name)
         const REQUIRED_STILL_TIME = 2; // seconds
         const MOVEMENT_THRESHOLD = 0.5; // studs
 
-        setInstanceInfo(model, "Maintained", false);
+        modelInfo.maintained = false;
         item.repeat(
             model,
             () => {
@@ -108,7 +108,7 @@ export = new Item(script.Name)
                     }
                 }
 
-                setInstanceInfo(model, "Maintained", anyPlayerStillEnough);
+                modelInfo.maintained = anyPlayerStillEnough;
             },
             0.5,
         );

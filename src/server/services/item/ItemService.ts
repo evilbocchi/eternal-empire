@@ -423,7 +423,7 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
 
         const modelInfo = this.getPlacementInstanceInfo(placementId, model);
         if (this.brokenPlacedItems.has(placementId)) {
-            modelInfo.Broken = true;
+            modelInfo.broken = true;
         }
 
         // Execute item-specific load callbacks
@@ -846,7 +846,7 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
             const model = this.modelPerPlacementId.get(placementId);
             if (model) {
                 const modelInfo = this.getPlacementInstanceInfo(placementId, model);
-                modelInfo.Broken = true;
+                modelInfo.broken = true;
                 clearRepairBoostFromModel(modelInfo);
             }
             this.brokenPlacedItems.add(placementId);
@@ -874,7 +874,7 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
         if (!model) return false;
 
         const modelInfo = this.getPlacementInstanceInfo(placementId, model);
-        modelInfo.Broken = false;
+        modelInfo.broken = false;
 
         if (isProtectionTier(tier)) {
             const expiresAt = os.time() + REPAIR_PROTECTION_DURATIONS[tier];

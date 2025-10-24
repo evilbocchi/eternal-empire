@@ -68,9 +68,9 @@ const AntiGravityDropper = new Item(script.Name)
                     }
                 }
 
-                dropInfo.DropRate = isAirborne ? 0.5 : 0; // 0.5 = every 2 seconds
-                if (dropInfo.DropRate === 0) {
-                    dropInfo.LastDrop = tick(); // Reset timer when no one is airborne
+                dropInfo.dropRate = isAirborne ? 0.5 : 0; // 0.5 = every 2 seconds
+                if (dropInfo.dropRate === 0) {
+                    dropInfo.lastDrop = tick(); // Reset timer when no one is airborne
                 }
             },
             0.5,

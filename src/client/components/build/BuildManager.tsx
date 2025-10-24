@@ -26,9 +26,9 @@ import BuildGrid from "shared/world/nodes/BuildGrid";
 declare global {
     interface InstanceInfo {
         /** The initial position of the model when it was selected for placement. Client-side only. */
-        InitialPosition?: Vector3;
+        initialPosition?: Vector3;
         /** The initial rotation of the model when it was selected for placement. Client-side only. */
-        InitialRotation?: number;
+        initialRotation?: number;
     }
 }
 
@@ -92,7 +92,7 @@ namespace BuildManager {
             const model = getPrimarySelectedModel();
             if (model !== undefined) {
                 const modelInfo = getAllInstanceInfo(model);
-                const itemId = modelInfo.ItemId;
+                const itemId = modelInfo.itemId;
                 if (itemId !== undefined) {
                     const item = Items.getItem(itemId);
                     const candidate = item?.difficulty?.id;
@@ -237,7 +237,7 @@ namespace BuildManager {
         preselectCFrame = model.PrimaryPart!.CFrame;
         mainSelected = model;
         const modelInfo = getAllInstanceInfo(model);
-        rotationValue.Value = modelInfo.InitialRotation ?? 0;
+        rotationValue.Value = modelInfo.initialRotation ?? 0;
 
         hover(undefined);
         model.SetAttribute("Selected", true);
@@ -276,16 +276,16 @@ namespace BuildManager {
         for (const [selectedModel] of selected) {
             const modelInfo = getAllInstanceInfo(selectedModel);
 
-            const placedItem = modelInfo.PlacedItem;
+            const placedItem = modelInfo.placedItem;
             if (placedItem === undefined) continue;
 
-            const position = modelInfo.InitialPosition;
+            const position = modelInfo.initialPosition;
             if (position === undefined) continue;
 
-            const rotation = modelInfo.InitialRotation;
+            const rotation = modelInfo.initialRotation;
             if (rotation === undefined) continue;
 
-            const id = placedItem.uniqueItemId ?? modelInfo.ItemId;
+            const id = placedItem.uniqueItemId ?? modelInfo.itemId;
             if (id === undefined) continue;
 
             hasAnyItems = true;
@@ -320,8 +320,8 @@ namespace BuildManager {
         }
 
         const modelInfo = getAllInstanceInfo(itemModel);
-        modelInfo.InitialPosition = new Vector3(placedItem.posX, placedItem.posY, placedItem.posZ);
-        modelInfo.InitialRotation = placedItem.rawRotation;
+        modelInfo.initialPosition = new Vector3(placedItem.posX, placedItem.posY, placedItem.posZ);
+        modelInfo.initialRotation = placedItem.rawRotation;
 
         itemModel.Name = HttpService.GenerateGUID(false);
         itemModel.AddTag("Placing");
@@ -374,7 +374,7 @@ namespace BuildManager {
         for (const [selectedModel] of selected) {
             const modelInfo = getAllInstanceInfo(selectedModel);
 
-            const itemId = modelInfo.ItemId;
+            const itemId = modelInfo.itemId;
             if (itemId === undefined) return "Item ID missing.";
 
             const item = Items.getItem(itemId);
@@ -395,7 +395,7 @@ namespace BuildManager {
             let rotation = math.floor(math.deg(math.atan2(-lookVector.X, -lookVector.Z)) - gridRotation + 180); // angle of look vector in xz plane (0-360)
             rotation %= 360;
 
-            const id = modelInfo.PlacedItem?.uniqueItemId ?? item.id;
+            const id = modelInfo.placedItem?.uniqueItemId ?? item.id;
 
             data.add({ id, position, rotation });
         }
@@ -539,14 +539,14 @@ namespace BuildManager {
                     names.add(model.Name);
 
                     const modelInfo = getAllInstanceInfo(model);
-                    if (modelInfo.Broken === true) {
+                    if (modelInfo.broken === true) {
                         RepairManager.setRepairing(model);
                         for (const model of dragging) model.SetAttribute("Dragging", false);
                         dragging.clear();
                         return;
                     }
 
-                    const placedItem = modelInfo.PlacedItem;
+                    const placedItem = modelInfo.placedItem;
                     if (placedItem === undefined) continue;
 
                     const placingModel = addPlacingModel(placedItem);
@@ -557,7 +557,7 @@ namespace BuildManager {
                         preselectCFrame = placingModel.PrimaryPart!.CFrame;
                         mainSelected = placingModel;
                         const modelInfo = getAllInstanceInfo(placingModel);
-                        rotationValue.Value = modelInfo.InitialRotation ?? 0;
+                        rotationValue.Value = modelInfo.initialRotation ?? 0;
                         hover(undefined);
                         placingModel.SetAttribute("Selected", true);
                         selectedCount++;

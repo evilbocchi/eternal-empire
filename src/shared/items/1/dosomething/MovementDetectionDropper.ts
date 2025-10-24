@@ -52,9 +52,9 @@ export = new Item(script.Name)
                     }
                 }
 
-                dropInfo.DropRate = moving ? 0.5 : 0; // Set drop rate based on movement
-                if (dropInfo.DropRate === 0) {
-                    dropInfo.LastDrop = tick(); // Make them wait the full 2 seconds
+                dropInfo.dropRate = moving ? 0.5 : 0; // Set drop rate based on movement
+                if (dropInfo.dropRate === 0) {
+                    dropInfo.lastDrop = tick(); // Make them wait the full 2 seconds
                 }
             },
             0.5,

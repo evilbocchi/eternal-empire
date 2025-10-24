@@ -20,7 +20,10 @@ declare global {
     }
 
     interface InstanceInfo {
-        Generator?: Generator;
+        /**
+         * The generator trait associated with this model.
+         */
+        generator?: Generator;
     }
 
     interface ItemBoost {
@@ -81,9 +84,9 @@ export default class Generator extends Boostable {
         const centre = model.PrimaryPart!.Position;
 
         const modelInfo = getAllInstanceInfo(model);
-        modelInfo.Generator = generator;
-        modelInfo.Chargeable = true;
-        const boosts = modelInfo.Boosts!;
+        modelInfo.generator = generator;
+        modelInfo.chargeable = true;
+        const boosts = modelInfo.boosts!;
 
         let lastClicked = 0;
         generatedPacket.fromClient(model, () => {

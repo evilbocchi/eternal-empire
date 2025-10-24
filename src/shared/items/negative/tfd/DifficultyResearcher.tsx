@@ -1944,7 +1944,7 @@ export = new Item(script.Name)
         const modelInfo = getAllInstanceInfo(model);
         const CurrencyService = Server.Currency;
 
-        modelInfo.FurnaceProcessed = (value, droplet) => {
+        modelInfo.furnaceProcessed = (value, droplet) => {
             let delta = new OnoeNum(0);
             for (const [currency, amount] of value.amountPerCurrency) {
                 const details = CURRENCY_DETAILS[currency];

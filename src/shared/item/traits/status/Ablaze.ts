@@ -28,12 +28,12 @@ export default class Ablaze extends StatusEffect {
         this.item.repeat(
             dropletModel,
             (dt) => {
-                if (dropletInfo.Incinerated === true) return;
-                dropletInfo.Health! -= 10 * dt;
+                if (dropletInfo.incinerated === true) return;
+                dropletInfo.health! -= 10 * dt;
             },
             0.5,
         );
-        dropletInfo.Upgrades!.set("Ablaze", {
+        dropletInfo.upgrades!.set("Ablaze", {
             model: Workspace,
             boost: {
                 mul: Ablaze.BOOST,

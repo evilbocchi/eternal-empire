@@ -12,8 +12,8 @@ export default class NoobDropletSlayer extends BaseDropletSlayer {
         let i = 0;
         super.baseLoad(model, slayer, () => {
             let hasRadioNoob = false;
-            if (modelInfo.Boosts !== undefined) {
-                for (const [, boost] of modelInfo.Boosts) {
+            if (modelInfo.boosts !== undefined) {
+                for (const [, boost] of modelInfo.boosts) {
                     if (boost.chargedBy?.item.id === "RadioNoob") {
                         hasRadioNoob = true;
                         break;

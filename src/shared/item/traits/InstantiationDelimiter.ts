@@ -14,7 +14,7 @@ declare global {
          * The amount that the item model increases the droplet limit, overriding
          * the {@link InstantiationDelimiter}'s value if set.
          */
-        DropletIncrease?: number;
+        dropletIncrease?: number;
     }
 }
 
@@ -23,13 +23,13 @@ export default class InstantiationDelimiter extends ItemTrait {
         const item = delimiter.item;
 
         const modelInfo = getAllInstanceInfo(model);
-        const area = modelInfo.Area;
+        const area = modelInfo.area;
         if (area === undefined) throw `InstantiationDelimiter ${model.Name} is not in an area`;
 
         item.repeat(
             model,
             () => {
-                const baseIncrease = modelInfo.DropletIncrease ?? delimiter.dropletIncrease;
+                const baseIncrease = modelInfo.dropletIncrease ?? delimiter.dropletIncrease;
                 const actual = isPlacedItemUnusable(modelInfo) ? 0 : baseIncrease;
                 AREAS[area].boostDropletLimit(model.Name, actual);
             },

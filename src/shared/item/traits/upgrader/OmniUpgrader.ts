@@ -20,8 +20,8 @@ export default class OmniUpgrader extends Upgrader {
             const laser = model.WaitForChild(laserName) as BasePart;
             laser.CanTouch = true;
             const laserInfo = getAllInstanceInfo(laser);
-            laserInfo.LaserId = laserName;
-            laserInfo.Sky = omniUpgrader.skysPerLaser.get(laserName) ?? omniUpgrader.sky;
+            laserInfo.laserId = laserName;
+            laserInfo.sky = omniUpgrader.skysPerLaser.get(laserName) ?? omniUpgrader.sky;
             super.hookLaser(model, omniUpgrader, laser, (upgradeInfo) => {
                 upgradeInfo.boost = {
                     add: omniUpgrader.addsPerLaser.get(laserName) ?? omniUpgrader.add,

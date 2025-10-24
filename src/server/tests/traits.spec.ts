@@ -79,7 +79,7 @@ export = function () {
         model!.Name = placementId;
         model!.Parent = PLACED_ITEMS_FOLDER;
         const modelInfo = getAllInstanceInfo(model!);
-        modelInfo.Maintained = true;
+        modelInfo.maintained = true;
         Server.Item.modelPerPlacementId.set(placementId, model!);
 
         item!.load(model!);
@@ -101,7 +101,7 @@ export = function () {
         dropperModel.Name = `TestDropper_${HttpService.GenerateGUID(false)}`;
         dropperModel.Parent = PLACED_ITEMS_FOLDER;
         const dropperInfo = getAllInstanceInfo(dropperModel);
-        dropperInfo.ItemId = "TestDropper";
+        dropperInfo.itemId = "TestDropper";
 
         const instantiator = template.getInstantiator(dropperModel);
         const droplet = instantiator() as BasePart;
@@ -124,7 +124,7 @@ export = function () {
         for (const descendant of model.GetDescendants()) {
             if (!descendant.IsA("BasePart") || !descendant.HasTag(tagName)) continue;
             const info = getAllInstanceInfo(descendant);
-            const dropletTouched = info.DropletTouched;
+            const dropletTouched = info.dropletTouched;
             expect(dropletTouched).to.be.ok();
             return {
                 part: descendant,
@@ -138,7 +138,7 @@ export = function () {
         for (const descendant of model.GetDescendants()) {
             if (!descendant.IsA("BasePart") || descendant.Name !== partName) continue;
             const info = getAllInstanceInfo(descendant);
-            const dropletTouched = info.DropletTouched;
+            const dropletTouched = info.dropletTouched;
             expect(dropletTouched).to.be.ok();
 
             return {
@@ -184,11 +184,11 @@ export = function () {
         Server.Item.modelPerPlacementId.set(placementId, model);
 
         const info = getAllInstanceInfo(model);
-        info.Maintained = true;
+        info.maintained = true;
 
         item.load(model);
 
-        const furnaceProcessed = getAllInstanceInfo(model).FurnaceProcessed;
+        const furnaceProcessed = getAllInstanceInfo(model).furnaceProcessed;
         expect(furnaceProcessed).to.be.ok();
 
         return {
@@ -240,7 +240,7 @@ export = function () {
             if (upgraderFundsAdd === undefined) throw "Upgrader add Funds is undefined";
 
             expect(afterValue.get("Funds")?.equals(firstDropletFunds.add(upgraderFundsAdd))).to.equal(true);
-            expect(dropletData.dropletInfo.Upgrades?.size()).to.equal(1);
+            expect(dropletData.dropletInfo.upgrades?.size()).to.equal(1);
 
             dropletData.cleanup();
             spawned.cleanup();
@@ -267,7 +267,7 @@ export = function () {
             if (upgraderFundsMul === undefined) throw "Upgrader mul Funds is undefined";
 
             expect(afterValue.get("Funds")?.equals(firstDropletFunds.mul(upgraderFundsMul))).to.equal(true);
-            expect(dropletData.dropletInfo.Upgrades?.size()).to.equal(1);
+            expect(dropletData.dropletInfo.upgrades?.size()).to.equal(1);
 
             dropletData.cleanup();
             spawned.cleanup();
@@ -299,7 +299,7 @@ export = function () {
             if (upgraderMul === undefined) throw "Multiplicative Upgrader mul Funds is undefined";
 
             expect(afterValue.get("Funds")?.equals(firstDropletFunds.add(upgraderAdd).mul(upgraderMul))).to.equal(true);
-            expect(dropletData.dropletInfo.Upgrades?.size()).to.equal(2);
+            expect(dropletData.dropletInfo.upgrades?.size()).to.equal(2);
 
             dropletData.cleanup();
             additive.cleanup();
@@ -356,7 +356,7 @@ export = function () {
             if (furnaceMul === undefined) throw "Furnace mul Funds is undefined";
 
             withWeatherDisabled(() => upgraderHandle.touch(dropletData.droplet, dropletData.dropletInfo));
-            expect(dropletData.dropletInfo.Upgrades?.size()).to.equal(1);
+            expect(dropletData.dropletInfo.upgrades?.size()).to.equal(1);
 
             upgrader.cleanup();
             Server.Currency.set("Funds", new OnoeNum(0));
@@ -388,7 +388,7 @@ export = function () {
 
             const afterValue = Server.Revenue.calculateSingleDropletValue(dropletData.droplet);
             expect(afterValue.get("Funds")?.equals(firstDropletFunds.add(upgraderAdd))).to.equal(true);
-            expect(dropletData.dropletInfo.Upgrades?.size()).to.equal(1);
+            expect(dropletData.dropletInfo.upgrades?.size()).to.equal(1);
 
             dropletData.cleanup();
             spawned.cleanup();
@@ -413,7 +413,7 @@ export = function () {
             if (furnaceMul === undefined) throw "Furnace mul Funds is undefined";
 
             expect(Server.Currency.get("Funds").equals(furnaceMul.mul(firstDropletFunds))).to.equal(true);
-            expect(dropletData.dropletInfo.Incinerated).to.equal(true);
+            expect(dropletData.dropletInfo.incinerated).to.equal(true);
 
             dropletData.cleanup();
             spawned.cleanup();
@@ -424,8 +424,8 @@ export = function () {
             const handle = getTouchByTag(furnace.model, "Lava");
             const dropletData = spawnDroplet(Droplet.FatDroplet);
 
-            dropletData.dropletInfo.Upgrades ??= new Map();
-            dropletData.dropletInfo.Upgrades.set("TestBoost", {
+            dropletData.dropletInfo.upgrades ??= new Map();
+            dropletData.dropletInfo.upgrades.set("TestBoost", {
                 model: furnace.model,
                 boost: {
                     mul: new CurrencyBundle().set("Funds", 1e308),
@@ -507,8 +507,8 @@ export = function () {
             Server.Currency.set("Funds", new OnoeNum(0));
 
             withWeatherDisabled(() => laserHandle.touch(dropletData.droplet, dropletData.dropletInfo));
-            expect(dropletData.dropletInfo.Upgrades?.size()).to.equal(1);
-            expect(dropletData.dropletInfo.Sky).to.equal(undefined);
+            expect(dropletData.dropletInfo.upgrades?.size()).to.equal(1);
+            expect(dropletData.dropletInfo.sky).to.equal(undefined);
 
             withWeatherDisabled(() => lavaHandle.touch(dropletData.droplet, dropletData.dropletInfo));
 
@@ -519,7 +519,7 @@ export = function () {
             const upgradedValue = firstDropletFunds.add(upgraderFundsAdd);
             const expectedWithUpgrade = furnaceMul.mul(upgradedValue);
             expect(credited.equals(expectedWithUpgrade)).to.equal(false);
-            expect(dropletData.dropletInfo.Incinerated).to.equal(true);
+            expect(dropletData.dropletInfo.incinerated).to.equal(true);
 
             dropletData.cleanup();
             upgrader.cleanup();
@@ -546,8 +546,8 @@ export = function () {
             Server.Currency.set("Funds", new OnoeNum(0));
 
             withWeatherDisabled(() => laserHandle.touch(dropletData.droplet, dropletData.dropletInfo));
-            expect(dropletData.dropletInfo.Upgrades?.size()).to.equal(1);
-            expect(dropletData.dropletInfo.Sky).to.equal(true);
+            expect(dropletData.dropletInfo.upgrades?.size()).to.equal(1);
+            expect(dropletData.dropletInfo.sky).to.equal(true);
 
             withWeatherDisabled(() => lavaHandle.touch(dropletData.droplet, dropletData.dropletInfo));
 
@@ -555,7 +555,7 @@ export = function () {
             const expected = furnaceMul.mul(firstDropletFunds.mul(skyMul)).div(250);
 
             expect(credited.equals(expected)).to.equal(true);
-            expect(dropletData.dropletInfo.Incinerated).to.equal(true);
+            expect(dropletData.dropletInfo.incinerated).to.equal(true);
 
             dropletData.cleanup();
             upgrader.cleanup();
@@ -570,7 +570,7 @@ export = function () {
             const passiveGain = generatorTrait!.passiveGain!;
 
             const spawned = spawnItemModel(TheFirstGenerator.id);
-            expect(spawned.modelInfo.Boosts === undefined).to.equal(false);
+            expect(spawned.modelInfo.boosts === undefined).to.equal(false);
 
             const originalGain = generatorTrait!.passiveGain;
             generatorTrait!.passiveGain = undefined;
@@ -581,16 +581,16 @@ export = function () {
                     mul: new CurrencyBundle().set("Power", 2),
                 },
             } as ItemBoost;
-            spawned.modelInfo.Boosts!.set("test", boost);
+            spawned.modelInfo.boosts!.set("test", boost);
 
             const amountPerCurrency = withWeatherDisabled(() =>
-                Generator.getValue(1, passiveGain, spawned.modelInfo.Boosts!),
+                Generator.getValue(1, passiveGain, spawned.modelInfo.boosts!),
             );
             const power = amountPerCurrency.get("Power");
             expect(power === undefined).to.equal(false);
             expect(power!.equals(new OnoeNum(2))).to.equal(true);
 
-            spawned.modelInfo.Boosts!.clear();
+            spawned.modelInfo.boosts!.clear();
             generatorTrait!.passiveGain = originalGain;
             spawned.cleanup();
         });
@@ -606,8 +606,8 @@ export = function () {
             expect(entries.size() === 0).to.equal(false);
 
             const [dropPart, info] = entries[0];
-            info.DropRate = 0;
-            const instantiator = info.Instantiator;
+            info.dropRate = 0;
+            const instantiator = info.instantiator;
             expect(instantiator === undefined).to.equal(false);
 
             Dropper.hasLuckyWindow = false;
@@ -619,7 +619,7 @@ export = function () {
 
             const dropletInfo = Droplet.SPAWNED_DROPLETS.get(dropletPart);
             expect(dropletInfo === undefined).to.equal(false);
-            expect(dropletInfo!.DropletId).to.equal(Droplet.TheFirstDroplet.id);
+            expect(dropletInfo!.dropletId).to.equal(Droplet.TheFirstDroplet.id);
             expect(dropPart.HasTag("Drop")).to.equal(true);
 
             dropletPart.Destroy();
@@ -678,7 +678,7 @@ export = function () {
                 expect(beforeValue.get("Funds")?.equals(firstDropletFunds)).to.equal(true);
             });
 
-            dropletData.dropletInfo.Health = 40;
+            dropletData.dropletInfo.health = 40;
             const afterValue = Server.Revenue.calculateSingleDropletValue(dropletData.droplet);
 
             const funds = afterValue.get("Funds");
@@ -703,7 +703,7 @@ export = function () {
                 powerHandle.touch(dropletData.droplet, dropletData.dropletInfo);
             });
 
-            const upgrades = dropletData.dropletInfo.Upgrades;
+            const upgrades = dropletData.dropletInfo.upgrades;
             expect(upgrades).to.be.ok();
             if (upgrades === undefined) return;
 
@@ -748,8 +748,8 @@ export = function () {
             inputDroplet.Name = "InputDroplet";
             inputDroplet.Parent = Workspace;
             const inputInfo = getAllInstanceInfo(inputDroplet);
-            inputInfo.DropletId = Droplet.TheFirstDroplet.id;
-            inputInfo.Upgrades = new Map();
+            inputInfo.dropletId = Droplet.TheFirstDroplet.id;
+            inputInfo.upgrades = new Map();
 
             furnaceProcessed(raw, inputDroplet, inputInfo);
 
@@ -770,7 +770,7 @@ export = function () {
 
             const producedInfo = Droplet.SPAWNED_DROPLETS.get(produced);
             expect(producedInfo).to.be.ok();
-            expect(producedInfo?.Condensed).to.equal(true);
+            expect(producedInfo?.condensed).to.equal(true);
 
             produced.Destroy();
             inputDroplet.Destroy();
@@ -784,8 +784,8 @@ export = function () {
             inputDroplet.Name = "InputDroplet";
             inputDroplet.Parent = Workspace;
             const inputInfo = getAllInstanceInfo(inputDroplet);
-            inputInfo.DropletId = Droplet.TheFirstDroplet.id;
-            inputInfo.Upgrades = new Map();
+            inputInfo.dropletId = Droplet.TheFirstDroplet.id;
+            inputInfo.upgrades = new Map();
 
             const beforeDroplets = new Set<BasePart>();
             for (const [droplet] of Droplet.SPAWNED_DROPLETS) beforeDroplets.add(droplet);
@@ -826,7 +826,7 @@ export = function () {
             const highBalance = new OnoeNum(1e308);
             Server.Currency.set("Funds", highBalance);
 
-            dropletData.dropletInfo.Upgrades = dropletData.dropletInfo.Upgrades ?? new Map();
+            dropletData.dropletInfo.upgrades = dropletData.dropletInfo.upgrades ?? new Map();
 
             const rawValue = withWeatherDisabled(() => {
                 const result = Server.Revenue.calculateDropletValue(dropletData.droplet, true);
@@ -926,8 +926,8 @@ export = function () {
                 return;
             }
 
-            expect(condensedInfo.Condensed).to.equal(true);
-            const placeholderUpgrades = condensedInfo.Upgrades;
+            expect(condensedInfo.condensed).to.equal(true);
+            const placeholderUpgrades = condensedInfo.upgrades;
             expect(placeholderUpgrades).to.be.ok();
             if (placeholderUpgrades === undefined) {
                 condensedDropletModel.Destroy();
@@ -944,7 +944,7 @@ export = function () {
 
             withWeatherDisabled(() => repositionedHandle.touch(condensedDropletModel!, condensedInfo!));
 
-            expect(condensedInfo?.Upgrades?.size()).to.equal(2);
+            expect(condensedInfo?.upgrades?.size()).to.equal(2);
 
             Server.Currency.set("Funds", new OnoeNum(0));
             Server.Currency.set("Power", new OnoeNum(0));

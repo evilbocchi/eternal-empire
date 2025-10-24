@@ -109,7 +109,7 @@ export default class RevenueService {
     calculateDropletValue(instance: BasePart, verbose?: boolean) {
         const instanceInfo = getAllInstanceInfo(instance);
 
-        const dropletId = instanceInfo.DropletId;
+        const dropletId = instanceInfo.dropletId;
         if (dropletId === undefined) {
             throw `DropletId not found on droplet ${instance.GetFullName()}`;
         }
@@ -399,7 +399,7 @@ export default class RevenueService {
             }
 
             // Sky Droplet Nerf
-            if (this.instanceInfo.Sky === true) {
+            if (this.instanceInfo.sky === true) {
                 const skyDivNerf = new OnoeNum(250);
                 mul.divConstant(skyDivNerf, true);
                 if (verbose === true) {
@@ -422,7 +422,7 @@ export default class RevenueService {
                 if (cache !== undefined) return $tuple(cache.add, cache.mul, cache.pow);
             }
 
-            const dropletUpgrades = this.instanceInfo.Upgrades;
+            const dropletUpgrades = this.instanceInfo.upgrades;
             if (dropletUpgrades === undefined) {
                 throw `Droplet upgrades not found on droplet ${this.instance.GetFullName()}`;
             }
@@ -455,7 +455,7 @@ export default class RevenueService {
 
             // Upgraders
             let upgradersEnabled = true;
-            if (this.isCauldron === true && instanceInfo.Sky !== true) {
+            if (this.isCauldron === true && instanceInfo.sky !== true) {
                 upgradersEnabled = false;
             }
             if (upgradersEnabled === true) {
@@ -463,7 +463,7 @@ export default class RevenueService {
             }
 
             // Lightning Surge
-            if (instanceInfo.LightningSurged === true) {
+            if (instanceInfo.lightningSurged === true) {
                 mul.mulConstant(10, true);
                 if (verbose === true) {
                     this.factors.push(["LIGHTNINGSURGE", { mul: new OnoeNum(10) }]);
@@ -471,7 +471,7 @@ export default class RevenueService {
             }
 
             // Health Nerf
-            const health = instanceInfo.Health;
+            const health = instanceInfo.health;
             if (health === undefined || health <= 0) {
                 throw `Droplet health is undefined or zero on droplet ${this.instance.GetFullName()}`;
             }

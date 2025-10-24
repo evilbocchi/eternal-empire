@@ -1,4 +1,4 @@
-import { getInstanceInfo, setInstanceInfo } from "@antivivi/vrldk";
+import { getAllInstanceInfo } from "@antivivi/vrldk";
 import Difficulty from "@rbxts/ejt";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Droplet from "shared/item/Droplet";
@@ -24,8 +24,12 @@ export = new Item(script.Name)
     .exit()
 
     .onLoad((model) => {
-        setInstanceInfo(model, "FurnaceProcessed", (_result, droplet) => {
-            getInstanceInfo(model.WaitForChild("Drop"), "Instantiator")?.();
+        const modelInfo = getAllInstanceInfo(model);
+
+        modelInfo.furnaceProcessed = (_result, droplet) => {
+            const dropInfo = getAllInstanceInfo(model.WaitForChild("Drop"));
+
+            dropInfo.instantiator?.();
             Packets.dropletBurnt.toAllClients(droplet.Name, new Map());
-        });
+        };
     });

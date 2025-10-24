@@ -1,4 +1,4 @@
-import { getInstanceInfo } from "@antivivi/vrldk";
+import { getAllInstanceInfo } from "@antivivi/vrldk";
 import { useEffect } from "@rbxts/react";
 import { Debris, Workspace } from "@rbxts/services";
 import { LOCAL_PLAYER } from "client/constants";
@@ -24,8 +24,9 @@ namespace ClientItemReplication {
     export function load(model: Instance, placementId?: string, showEffects = true) {
         if (!model.IsA("Model") || model.GetAttribute("Selected") === true) return;
         if (placementId !== undefined && modelPerPlacementId.has(placementId)) return;
+        const modelInfo = getAllInstanceInfo(model);
 
-        const itemId = getInstanceInfo(model, "ItemId");
+        const itemId = modelInfo.itemId;
         if (itemId === undefined) return;
         const item = Items.getItem(itemId);
         if (item === undefined) return;

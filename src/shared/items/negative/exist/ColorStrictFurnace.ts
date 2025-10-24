@@ -1,4 +1,4 @@
-import { getInstanceInfo, setInstanceInfo } from "@antivivi/vrldk";
+import { getAllInstanceInfo } from "@antivivi/vrldk";
 import Difficulty from "@rbxts/ejt";
 import { packet } from "@rbxts/fletchette";
 import { ReplicatedStorage } from "@rbxts/services";
@@ -11,8 +11,8 @@ import ClassLowerNegativeShop from "shared/items/negative/ClassLowerNegativeShop
 
 declare global {
     interface InstanceInfo {
-        ColorStrictColor?: number;
-        ColorStrictTime?: number;
+        colorStrictColor?: number;
+        colorStrictTime?: number;
     }
 }
 
@@ -58,18 +58,21 @@ export = new Item(script.Name)
     .soldAt(ClassLowerNegativeShop)
 
     .onInit((item) => {
+        const replicatedStorageInfo = getAllInstanceInfo(ReplicatedStorage);
+
         const randomColor = () => {
-            setInstanceInfo(ReplicatedStorage, "ColorStrictColor", math.random(1, 5));
-            setInstanceInfo(ReplicatedStorage, "ColorStrictTime", tick());
+            replicatedStorageInfo.colorStrictColor = math.random(1, 5);
+            replicatedStorageInfo.colorStrictTime = tick();
         };
         randomColor();
         item.repeat(undefined, randomColor, 300);
     })
     .onLoad((model, item) => {
+        const replicatedStorageInfo = getAllInstanceInfo(ReplicatedStorage);
         const furnace = item.trait(Furnace);
         let selectedColor = 0;
-        let lastStrictColor = getInstanceInfo(ReplicatedStorage, "ColorStrictColor") as number | undefined;
-        let lastStrictTime = (getInstanceInfo(ReplicatedStorage, "ColorStrictTime") as number | undefined) ?? 0;
+        let lastStrictColor = replicatedStorageInfo.colorStrictColor;
+        let lastStrictTime = replicatedStorageInfo.colorStrictTime ?? 0;
 
         const applyFurnace = (strictColor?: number) => {
             if (strictColor === undefined) {
@@ -95,8 +98,10 @@ export = new Item(script.Name)
         };
 
         const refreshState = () => {
-            const strictColor = getInstanceInfo(ReplicatedStorage, "ColorStrictColor") as number | undefined;
-            const strictTime = (getInstanceInfo(ReplicatedStorage, "ColorStrictTime") as number | undefined) ?? 0;
+            const replicatedStorageInfo = getAllInstanceInfo(ReplicatedStorage);
+
+            const strictColor = replicatedStorageInfo.colorStrictColor;
+            const strictTime = replicatedStorageInfo.colorStrictTime ?? 0;
             lastStrictColor = strictColor;
             lastStrictTime = strictTime;
             applyFurnace(strictColor);
@@ -113,8 +118,8 @@ export = new Item(script.Name)
         item.repeat(
             model,
             () => {
-                const strictColor = getInstanceInfo(ReplicatedStorage, "ColorStrictColor") as number | undefined;
-                const strictTime = (getInstanceInfo(ReplicatedStorage, "ColorStrictTime") as number | undefined) ?? 0;
+                const strictColor = replicatedStorageInfo.colorStrictColor;
+                const strictTime = replicatedStorageInfo.colorStrictTime ?? 0;
                 let shouldBroadcast = false;
 
                 if (strictColor !== lastStrictColor) {

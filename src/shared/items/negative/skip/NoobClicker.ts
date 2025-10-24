@@ -1,5 +1,5 @@
+import { getAllInstanceInfo, loadAnimation } from "@antivivi/vrldk";
 import Difficulty from "@rbxts/ejt";
-import { loadAnimation, setInstanceInfo } from "@antivivi/vrldk";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
 import Clicker from "shared/item/traits/action/Clicker";
@@ -26,7 +26,10 @@ export = new Item(script.Name)
     .exit()
 
     // radio noob effect
-    .onLoad((model) => setInstanceInfo(model, "Chargeable", true))
+    .onLoad((model) => {
+        const modelInfo = getAllInstanceInfo(model);
+        modelInfo.chargeable = true;
+    })
     .onClientLoad((model, item) => {
         const noob = model.WaitForChild("Noob") as Model;
         const animationController = noob.FindFirstChildOfClass("AnimationController");

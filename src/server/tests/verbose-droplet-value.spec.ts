@@ -61,7 +61,7 @@ export = function () {
         model!.Name = placementId;
         model!.Parent = PLACED_ITEMS_FOLDER;
         const modelInfo = getAllInstanceInfo(model!);
-        modelInfo.Maintained = true;
+        modelInfo.maintained = true;
         Server.Item.modelPerPlacementId.set(placementId, model!);
 
         item!.load(model!);
@@ -83,7 +83,7 @@ export = function () {
         dropperModel.Name = `TestDropper_${HttpService.GenerateGUID(false)}`;
         dropperModel.Parent = PLACED_ITEMS_FOLDER;
         const dropperInfo = getAllInstanceInfo(dropperModel);
-        dropperInfo.ItemId = "TestDropper";
+        dropperInfo.itemId = "TestDropper";
 
         const instantiator = template.getInstantiator(dropperModel);
         const droplet = instantiator() as BasePart;
@@ -106,7 +106,7 @@ export = function () {
         for (const descendant of model.GetDescendants()) {
             if (!descendant.IsA("BasePart") || !descendant.HasTag(tagName)) continue;
             const info = getAllInstanceInfo(descendant);
-            const dropletTouched = info.DropletTouched;
+            const dropletTouched = info.dropletTouched;
             expect(dropletTouched).to.be.ok();
             return {
                 part: descendant,
@@ -219,7 +219,7 @@ export = function () {
             const dropletData = spawnDroplet(Droplet.TheFirstDroplet);
 
             // Set health to 40%
-            dropletData.dropletInfo.Health = 40;
+            dropletData.dropletInfo.health = 40;
 
             const result = withWeatherDisabled(() => {
                 const r = Server.Revenue.calculateDropletValue(dropletData.droplet, true);
@@ -244,7 +244,7 @@ export = function () {
             const dropletData = spawnDroplet(Droplet.TheFirstDroplet);
 
             // Ensure health is 100
-            dropletData.dropletInfo.Health = 100;
+            dropletData.dropletInfo.health = 100;
 
             const result = withWeatherDisabled(() => {
                 const r = Server.Revenue.calculateDropletValue(dropletData.droplet, true);
@@ -262,7 +262,7 @@ export = function () {
             const dropletData = spawnDroplet(Droplet.TheFirstDroplet);
 
             // Mark droplet as lightning surged
-            dropletData.dropletInfo.LightningSurged = true;
+            dropletData.dropletInfo.lightningSurged = true;
 
             const result = withWeatherDisabled(() => {
                 const r = Server.Revenue.calculateDropletValue(dropletData.droplet, true);
@@ -317,7 +317,7 @@ export = function () {
             const dropletData = spawnDroplet(Droplet.TheFirstDroplet);
 
             // Mark as sky droplet
-            dropletData.dropletInfo.Sky = true;
+            dropletData.dropletInfo.sky = true;
 
             const result = withWeatherDisabled(() => {
                 const r = Server.Revenue.calculateDropletValue(dropletData.droplet, true);
@@ -370,8 +370,8 @@ export = function () {
 
             // Set extremely high balance and boost to trigger softcaps
             Server.Currency.set("Funds", new OnoeNum(1e308));
-            dropletData.dropletInfo.Upgrades = new Map();
-            dropletData.dropletInfo.Upgrades.set("TestMassiveBoost", {
+            dropletData.dropletInfo.upgrades = new Map();
+            dropletData.dropletInfo.upgrades.set("TestMassiveBoost", {
                 model: undefined as unknown as Model,
                 boost: {
                     mul: new CurrencyBundle().set("Funds", 1e308),
@@ -408,7 +408,7 @@ export = function () {
             withWeatherDisabled(() => handle.touch(dropletData.droplet, dropletData.dropletInfo));
 
             // Set health to trigger nerf
-            dropletData.dropletInfo.Health = 50;
+            dropletData.dropletInfo.health = 50;
 
             // Calculate with all steps
             const result = withWeatherDisabled(() => {
@@ -463,8 +463,8 @@ export = function () {
             const dropletData1 = spawnDroplet(Droplet.TheFirstDroplet);
             const dropletData2 = spawnDroplet(Droplet.TheFirstDroplet);
 
-            dropletData1.dropletInfo.Health = 75;
-            dropletData2.dropletInfo.Health = 75;
+            dropletData1.dropletInfo.health = 75;
+            dropletData2.dropletInfo.health = 75;
 
             const result1 = withWeatherDisabled(() => {
                 const r = Server.Revenue.calculateDropletValue(dropletData1.droplet, true);
@@ -516,7 +516,7 @@ export = function () {
             const baseValue = Droplet.TheFirstDroplet.value.get("Funds")!;
 
             // Simple case: no modifiers except health at 50%
-            dropletData.dropletInfo.Health = 50;
+            dropletData.dropletInfo.health = 50;
 
             const result = withWeatherDisabled(() => {
                 const r = Server.Revenue.calculateDropletValue(dropletData.droplet, true);

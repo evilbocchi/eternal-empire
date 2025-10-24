@@ -6,7 +6,7 @@ type ItemInstanceInfo = InstanceInfo & {
 };
 
 export default function isPlacedItemUnusable(modelInfo: ItemInstanceInfo): boolean {
-    if (modelInfo.Broken === true || modelInfo.Maintained === false) {
+    if (modelInfo.broken === true || modelInfo.maintained === false) {
         return true;
     }
 

@@ -1,13 +1,13 @@
+import { getAllInstanceInfo } from "@antivivi/vrldk";
 import Difficulty from "@rbxts/ejt";
-import { getInstanceInfo } from "@antivivi/vrldk";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
 import Conveyor from "shared/item/traits/conveyor/Conveyor";
 import Upgrader from "shared/item/traits/upgrader/Upgrader";
 import setDropletVelocity from "shared/item/utils/setDropletVelocity";
-import MagicalWood from "shared/items/negative/tlg/MagicalWood";
-import Quartz from "shared/items/excavation/Quartz";
 import Class1Shop from "shared/items/1/Class1Shop";
+import Quartz from "shared/items/excavation/Quartz";
+import MagicalWood from "shared/items/negative/tlg/MagicalWood";
 
 export = new Item(script.Name)
     .setName("Droplet Ascender")
@@ -34,7 +34,12 @@ export = new Item(script.Name)
 
     .onLoad((model) => {
         const forward = model.GetPivot().LookVector.Unit;
-        getInstanceInfo(model, "OnUpgraded")!.connect((droplet) => {
+        const modelInfo = getAllInstanceInfo(model);
+        const onUpgraded = modelInfo.upgraderTriggered;
+        if (onUpgraded === undefined)
+            throw `Tried to load Droplet Ascender on model without OnUpgraded event: ${model.GetFullName()}`;
+
+        onUpgraded.connect((droplet) => {
             const baseDirection = forward.mul(12).add(new Vector3(0, 49, 0)).Unit;
             setDropletVelocity(droplet, baseDirection.mul(50));
         });

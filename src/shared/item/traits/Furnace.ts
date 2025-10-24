@@ -1,6 +1,6 @@
 //!native
 //!optimize 2
-import { findBaseParts, getAllInstanceInfo, setInstanceInfo } from "@antivivi/vrldk";
+import { findBaseParts, getAllInstanceInfo } from "@antivivi/vrldk";
 import { OnoeNum } from "@rbxts/serikanum";
 import { Debris } from "@rbxts/services";
 import { Server } from "shared/api/APIExpose";
@@ -20,7 +20,7 @@ declare global {
         /**
          * Whether this droplet has already been incinerated by a furnace.
          */
-        Incinerated?: boolean;
+        incinerated?: boolean;
 
         /**
          * Fired when a droplet is processed by this furnace model.
@@ -29,7 +29,7 @@ declare global {
          * @param droplet The droplet being processed.
          * @param dropletInfo The instance info of the droplet being processed.
          */
-        FurnaceProcessed?: (result: CurrencyBundle, droplet: BasePart, dropletInfo: InstanceInfo) => void;
+        furnaceProcessed?: (result: CurrencyBundle, droplet: BasePart, dropletInfo: InstanceInfo) => void;
     }
 
     interface ItemBoost {
@@ -45,21 +45,23 @@ export default class Furnace extends Operative {
         const item = furnace.item;
 
         for (const lava of findBaseParts(model, "Lava")) {
-            setInstanceInfo(lava, "ItemId", item.id);
-            VirtualCollision.onDropletTouched(model, lava, (dropletModel, dropletInfo) => {
-                if (dropletInfo.Incinerated === true) return;
+            const lavaInfo = getAllInstanceInfo(lava);
+            lavaInfo.itemId = item.id;
 
-                const modelArea = modelInfo.Area;
+            VirtualCollision.onDropletTouched(model, lava, (dropletModel, dropletInfo) => {
+                if (dropletInfo.incinerated === true) return;
+
+                const modelArea = modelInfo.area;
                 if (modelArea === undefined) {
                     if (!IS_EDIT) throw `Furnace model ${model.GetFullName()} is missing Area info`;
-                } else if (modelArea !== dropletInfo.Area && dropletInfo.LastTeleport === undefined) {
+                } else if (modelArea !== dropletInfo.area && dropletInfo.lastTeleport === undefined) {
                     // Sanity check: droplet should be in the same area as the furnace unless it was teleported
                     return;
                 }
 
                 if (isPlacedItemUnusable(modelInfo)) return;
 
-                dropletInfo.Incinerated = true;
+                dropletInfo.incinerated = true;
                 Debris.AddItem(dropletModel, 6);
 
                 const result = Server.Revenue.calculateDropletValue(dropletModel);
@@ -74,7 +76,7 @@ export default class Furnace extends Operative {
                 if (furnace.isCalculatesFurnace === true) {
                     result.applyOperative(furnace);
 
-                    const boosts = modelInfo.Boosts;
+                    const boosts = modelInfo.boosts;
                     if (boosts !== undefined) {
                         for (const [_, boost] of boosts) {
                             const mul = boost.furnaceMul;
@@ -107,7 +109,7 @@ export default class Furnace extends Operative {
                     Server.Currency.incrementAll(finalAmountPerCurrency);
                 }
 
-                const furnaceProcessed = modelInfo.FurnaceProcessed;
+                const furnaceProcessed = modelInfo.furnaceProcessed;
                 if (furnaceProcessed !== undefined) {
                     furnaceProcessed(final, dropletModel, dropletInfo);
                 } else {

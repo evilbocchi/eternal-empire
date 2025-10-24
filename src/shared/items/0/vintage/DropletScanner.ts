@@ -1,6 +1,6 @@
 //!native
 //!optimize 2
-import { buildRichText, formatRichText, getInstanceInfo } from "@antivivi/vrldk";
+import { buildRichText, formatRichText, getAllInstanceInfo } from "@antivivi/vrldk";
 import Difficulty from "@rbxts/ejt";
 import { packet } from "@rbxts/fletchette";
 import { OnoeNum } from "@rbxts/serikanum";
@@ -115,10 +115,14 @@ export = new Item(script.Name)
     .exit()
 
     .onLoad((model, item) => {
-        const RevenueService = Server.Revenue;
+        const modelInfo = getAllInstanceInfo(model);
 
-        getInstanceInfo(model, "OnUpgraded")!.connect((dropletModel) => {
-            const dropletValue = RevenueService.calculateDropletValue(dropletModel, true);
+        const onUpgraded = modelInfo.upgraderTriggered;
+        if (onUpgraded === undefined)
+            throw `Tried to load Droplet Scanner on model without OnUpgraded event: ${model.GetFullName()}`;
+
+        onUpgraded.connect((dropletModel) => {
+            const dropletValue = Server.Revenue.calculateDropletValue(dropletModel, true);
             dropletValue.applyFinal();
             dropletValue.applySource();
 
@@ -142,8 +146,9 @@ export = new Item(script.Name)
                 }
             }
 
-            const health = getInstanceInfo(dropletModel, "Health")!;
-            if (health !== 100) {
+            const dropletModelInfo = getAllInstanceInfo(dropletModel);
+            const health = dropletModelInfo.health;
+            if (health !== 100 && health !== undefined) {
                 builder
                     .append("\nHEALTH: ")
                     .append(formatRichText(OnoeNum.toString(health), CURRENCY_DETAILS.Health.color));
@@ -152,7 +157,7 @@ export = new Item(script.Name)
             builder.append("\nTOTAL: ").append(dropletValue.coalesce().toString(true));
             textChangedPacket.toAllClients(
                 model,
-                dropletValue.instanceInfo.DropletId!,
+                dropletValue.instanceInfo.dropletId!,
                 builder.toString(),
                 dropletModel.Color.Lerp(new Color3(1, 1, 1), 0.2).ToHex(),
             );

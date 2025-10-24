@@ -1,7 +1,7 @@
 //!native
 //!optimize 2
 import Signal from "@antivivi/lemon-signal";
-import { getAllInstanceInfo, setInstanceInfo, simpleInterval } from "@antivivi/vrldk";
+import { getAllInstanceInfo, simpleInterval } from "@antivivi/vrldk";
 import { exactSetProperty } from "@rbxts/fletchette";
 import { Server } from "shared/api/APIExpose";
 import { IS_EDIT, IS_SERVER } from "shared/Context";
@@ -39,19 +39,19 @@ declare global {
 
     interface InstanceInfo {
         /** The ID of the laser that this instance is associated with. */
-        LaserId?: string;
-        /** The upgrades applied to this instance, keyed by laser ID. */
-        Upgrades?: Map<string, UpgradeInfo>;
-        OnUpgraded?: Signal<BasePart>;
+        laserId?: string;
+        /** The upgrades applied to this instance, keyed by a unique identifier. */
+        upgrades?: Map<string, UpgradeInfo>;
+        /** A signal that fires when the upgrader has upgraded a droplet. */
+        upgraderTriggered?: Signal<(dropletModel: BasePart) => void>;
 
         /**
          * Whether the droplet has reached the skyline.
-         * The skyline is located at the at the level in which droplets are high to fall into cauldrons.
-         * This allows the droplets to be upgraded before being dropped into cauldrons.
+         * The skyline is located at the level in which droplets are legally elevated high enough to fall into cauldrons.
          *
          * This property exists to prevent exploits in which droplets that have not reached the skyline are dropped into cauldrons.
          */
-        Sky?: boolean;
+        sky?: boolean;
     }
 
     interface ItemBoost {
@@ -115,26 +115,26 @@ export default class Upgrader extends Operative {
         /** An optional decoration function to modify the upgrade info. */
         deco?: (upgrade: UpgradeInfo) => void;
     }) {
-        if (dropletInfo.Incinerated === true) return;
+        if (dropletInfo.incinerated === true) return;
         if (upgrader.requirement !== undefined && !upgrader.requirement(dropletInfo)) return;
 
-        if (laserInfo.Sky === true) dropletInfo.Sky = true;
-        let upgrades = dropletInfo.Upgrades;
+        if (laserInfo.sky === true) dropletInfo.sky = true;
+        let upgrades = dropletInfo.upgrades;
         const item = upgrader.item;
 
         if (laserId === undefined) {
-            laserId ??= upgrader.isStacks === false ? item.id : model.Name + "_" + laserInfo.LaserId;
+            laserId ??= upgrader.isStacks === false ? item.id : model.Name + "_" + laserInfo.laserId;
         }
 
         if (upgrades === undefined) upgrades = new Map();
         else if (upgrades.has(laserId)) return;
 
-        if (isPlacedItemUnusable(modelInfo) || laserInfo.Maintained === false) return;
+        if (isPlacedItemUnusable(modelInfo) || laserInfo.maintained === false) return;
 
         if (upgrades === undefined) upgrades = new Map();
         let [totalAdd, totalMul, totalPow] = [upgrader.add, upgrader.mul, upgrader.pow];
 
-        const boosts = modelInfo.Boosts;
+        const boosts = modelInfo.boosts;
         if (boosts !== undefined) {
             for (const [_, boost] of boosts) {
                 const stats = boost.upgradeCompound;
@@ -161,8 +161,8 @@ export default class Upgrader extends Operative {
         };
         if (deco !== undefined) deco(upgrade);
         upgrades.set(laserId, upgrade);
-        dropletInfo.Upgrades = upgrades;
-        modelInfo.OnUpgraded?.fire(droplet);
+        dropletInfo.upgrades = upgrades;
+        modelInfo.upgraderTriggered?.fire(droplet);
     }
 
     /**
@@ -171,7 +171,6 @@ export default class Upgrader extends Operative {
      * @param model The item model where the laser is located.
      * @param upgrader The upgrader instance that will manage the laser.
      * @param laser The laser part being hooked.
-     * @param upgradedEvent The event fired when the laser is upgraded.
      * @param deco Optional decoration function to modify the upgrade info.
      */
     static hookLaser(model: Model, upgrader: Upgrader, laser: BasePart, deco?: (upgradeInfo: UpgradeInfo) => void) {
@@ -181,9 +180,9 @@ export default class Upgrader extends Operative {
             VirtualCollision.onDropletTouched(model, laser, (droplet, dropletInfo) => {
                 this.upgrade({ model, modelInfo, upgrader, dropletInfo, laserInfo, droplet, deco });
             });
-            laserInfo.ItemModelInfo = modelInfo;
+            laserInfo.itemModelInfo = modelInfo;
             model.Destroying.Once(() => {
-                modelInfo.OnUpgraded?.destroy();
+                modelInfo.upgraderTriggered?.destroy();
             });
         }
 
@@ -196,15 +195,16 @@ export default class Upgrader extends Operative {
     }
 
     static sharedLoad(model: Model, upgrader: Upgrader) {
-        setInstanceInfo(model, "OnUpgraded", new Signal());
+        const modelInfo = getAllInstanceInfo(model);
+        modelInfo.upgraderTriggered ??= new Signal();
 
         let i = 0;
         for (const laser of model.GetDescendants()) {
             if (!laser.HasTag("Laser") || !laser.IsA("BasePart")) continue;
 
             const laserInfo = getAllInstanceInfo(laser);
-            laserInfo.LaserId = tostring(i++);
-            laserInfo.Sky = upgrader.sky;
+            laserInfo.laserId = tostring(i++);
+            laserInfo.sky = upgrader.sky;
             Upgrader.hookLaser(model, upgrader, laser);
         }
         if (IS_SERVER || IS_EDIT) {

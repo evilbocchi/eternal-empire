@@ -56,8 +56,8 @@ export default class Clicker extends ItemTrait {
                 if (isPlacedItemUnusable(modelInfo)) return;
 
                 let rate = 1;
-                if (modelInfo.Boosts !== undefined) {
-                    for (const [, boost] of modelInfo.Boosts) {
+                if (modelInfo.boosts !== undefined) {
+                    for (const [, boost] of modelInfo.boosts) {
                         rate *= boost.clickValueMul ?? 1;
                     }
                 }

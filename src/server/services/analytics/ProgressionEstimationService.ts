@@ -671,13 +671,13 @@ export default class ProgressionEstimationService implements OnStart {
 
             const setUpgradesStart = os.clock();
             const dropletUpgrades = new Map<string, UpgradeInfo>();
-            instanceInfo.Upgrades = dropletUpgrades;
+            instanceInfo.upgrades = dropletUpgrades;
             let i = 0;
             for (const upgrade of upgrades) {
                 dropletUpgrades.set(tostring(i), upgrade);
                 i++;
             }
-            instanceInfo.Health = 100; // override health check to make our own damage calculations
+            instanceInfo.health = 100; // override health check to make our own damage calculations
             this.profilingStats.dropletSetUpgradesTime += os.clock() - setUpgradesStart;
 
             const calcValueStart = os.clock();
