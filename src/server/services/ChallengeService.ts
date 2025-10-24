@@ -25,7 +25,7 @@ import NamedUpgradeService from "server/services/data/NamedUpgradeService";
 import SetupService from "server/services/data/SetupService";
 import ItemService from "server/services/item/ItemService";
 import ChatHookService from "server/services/permissions/ChatHookService";
-import PermissionsService from "server/services/permissions/PermissionsService";
+import PermissionService from "server/services/permissions/PermissionService";
 import ResetService from "server/services/ResetService";
 import { RESET_LAYERS } from "shared/currency/mechanics/ResetLayer";
 import eat from "shared/hamster/eat";
@@ -60,7 +60,7 @@ export class ChallengeService implements OnStart {
         private currencyService: CurrencyService,
         private namedUpgradeService: NamedUpgradeService,
         private setupService: SetupService,
-        private permissionsService: PermissionsService,
+        private permissionsService: PermissionService,
         private chatHookService: ChatHookService,
     ) {}
 

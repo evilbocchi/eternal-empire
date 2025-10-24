@@ -19,7 +19,7 @@ import { Players, StarterPlayer, Workspace } from "@rbxts/services";
 import CurrencyService from "server/services/data/CurrencyService";
 import DataService from "server/services/data/DataService";
 import { log } from "server/services/permissions/LogService";
-import PermissionsService from "server/services/permissions/PermissionsService";
+import PermissionService from "server/services/permissions/PermissionService";
 import eat from "shared/hamster/eat";
 import NamedUpgrades from "shared/namedupgrade/NamedUpgrades";
 import Packets from "shared/Packets";
@@ -42,7 +42,7 @@ export default class NamedUpgradeService implements OnInit {
     constructor(
         private dataService: DataService,
         private currencyService: CurrencyService,
-        private permissionsService: PermissionsService,
+        private permissionsService: PermissionService,
     ) {
         this.upgrades = this.dataService.empireData.upgrades;
     }

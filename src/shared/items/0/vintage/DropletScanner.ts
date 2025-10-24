@@ -18,43 +18,68 @@ const textChangedPacket =
 
 const ALL_CURRENCIES_COLOR = new Color3(0.3, 0.37, 1);
 
-function getOperationString(constant: OnoeNum, operation: "add" | "mul" | "pow") {
+function getOperationString(constant: OnoeNum, operation: "add" | "mul" | "pow", inverse: boolean) {
     switch (operation) {
         case "add":
+            if (inverse) {
+                constant = constant.unary();
+            }
             if (constant.moreThan(0)) {
                 return $tuple("+", constant);
             } else if (constant.lessThan(0)) {
                 return $tuple("-", constant.abs());
             }
-            return $tuple("", constant);
+            return $tuple("", constant.abs());
         case "mul":
             if (constant.moreThan(1)) {
+                if (inverse) {
+                    return $tuple("÷", constant);
+                }
                 return $tuple("x", constant);
             } else if (constant.lessThan(1)) {
+                if (inverse) {
+                    return $tuple("x", constant.reciprocal());
+                }
                 return $tuple("÷", constant.reciprocal());
             }
             return $tuple("", constant);
         case "pow":
             if (constant.moreThan(1)) {
+                if (inverse) {
+                    return $tuple("√", constant);
+                }
                 return $tuple("^", constant);
             } else if (constant.lessThan(1)) {
+                if (inverse) {
+                    return $tuple("^", constant.reciprocal());
+                }
                 return $tuple("√", constant.reciprocal());
             }
             return $tuple("", constant);
     }
 }
 
-function valueToString(builder: StringBuilder, constant: OnoeNum | CurrencyBundle, operation: "add" | "mul" | "pow") {
+function valueToString(
+    builder: StringBuilder,
+    constant: OnoeNum | CurrencyBundle,
+    operation: "add" | "mul" | "pow",
+    inverse: boolean,
+) {
     if ("mantissa" in constant) {
-        const [opString, opValue] = getOperationString(constant, operation);
+        const [opString, opValue] = getOperationString(constant, operation, inverse);
         buildRichText(builder, opString + opValue.toString(), ALL_CURRENCIES_COLOR, undefined, "Bold");
         return;
     }
 
-    currenciesToString(builder, constant.amountPerCurrency, "mul");
+    currenciesToString(builder, constant.amountPerCurrency, operation, inverse);
 }
 
-function currenciesToString(builder: StringBuilder, amountPerCurrency: CurrencyMap, operation: "add" | "mul" | "pow") {
+function currenciesToString(
+    builder: StringBuilder,
+    amountPerCurrency: CurrencyMap,
+    operation: "add" | "mul" | "pow",
+    inverse: boolean,
+) {
     let i = 1;
     const size = amountPerCurrency.size();
     const last = size - 1;
@@ -64,7 +89,7 @@ function currenciesToString(builder: StringBuilder, amountPerCurrency: CurrencyM
         let amount = amountPerCurrency.get(name);
         if (amount === undefined) continue;
 
-        const [opString, opValue] = getOperationString(amount, operation);
+        const [opString, opValue] = getOperationString(amount, operation, inverse);
 
         buildRichText(builder, opString + CurrencyBundle.getFormatted(name, opValue), details.color, undefined, "Bold");
 
@@ -102,17 +127,18 @@ export = new Item(script.Name)
 
             for (const [name, operative] of dropletValue.factors) {
                 builder.append("\n").append(name.upper()).append(": ");
+                const inverse = operative.inverse === true;
 
                 if (operative.add !== undefined) {
-                    valueToString(builder, operative.add, "add");
+                    valueToString(builder, operative.add, "add", inverse);
                 }
 
                 if (operative.mul !== undefined) {
-                    valueToString(builder, operative.mul, "mul");
+                    valueToString(builder, operative.mul, "mul", inverse);
                 }
 
                 if (operative.pow !== undefined) {
-                    valueToString(builder, operative.pow, "pow");
+                    valueToString(builder, operative.pow, "pow", inverse);
                 }
             }
 

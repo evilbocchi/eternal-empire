@@ -24,7 +24,7 @@ import { $env } from "rbxts-transform-env";
 import CurrencyService from "server/services/data/CurrencyService";
 import DataService from "server/services/data/DataService";
 import ItemService from "server/services/item/ItemService";
-import PermissionsService from "server/services/permissions/PermissionsService";
+import PermissionService from "server/services/permissions/PermissionService";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import eat from "shared/hamster/eat";
 import MARKETPLACE_CONFIG from "shared/marketplace/MarketplaceListing";
@@ -48,7 +48,7 @@ export default class MarketplaceService implements OnInit, OnStart {
         private readonly currencyService: CurrencyService,
         private readonly dataService: DataService,
         private readonly itemService: ItemService,
-        private readonly permissionsService: PermissionsService,
+        private readonly permissionsService: PermissionService,
     ) {
         this.empireData = this.dataService.empireData;
         this.empireId = this.dataService.empireId;

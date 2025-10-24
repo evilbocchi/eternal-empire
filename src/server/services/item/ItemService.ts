@@ -27,7 +27,7 @@ import CurrencyService from "server/services/data/CurrencyService";
 import DataService from "server/services/data/DataService";
 import { OnGameAPILoaded } from "server/services/ModdingService";
 import { log } from "server/services/permissions/LogService";
-import PermissionsService from "server/services/permissions/PermissionsService";
+import PermissionService from "server/services/permissions/PermissionService";
 import { PLACED_ITEMS_FOLDER } from "shared/constants";
 import { IS_EDIT } from "shared/Context";
 import eat from "shared/hamster/eat";
@@ -145,7 +145,7 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
     constructor(
         private readonly currencyService: CurrencyService,
         private readonly dataService: DataService,
-        private readonly permissionsService: PermissionsService,
+        private readonly permissionsService: PermissionService,
     ) {
         this.worldPlaced = dataService.empireData.items.worldPlaced;
         this.brokenPlacedItems = dataService.empireData.items.brokenPlacedItems;

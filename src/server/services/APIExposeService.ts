@@ -28,7 +28,7 @@ import LeaderboardChangeService from "server/services/leaderboard/LeaderboardCha
 import { LeaderboardService } from "server/services/leaderboard/LeaderboardService";
 import ModdingService from "server/services/ModdingService";
 import ChatHookService from "server/services/permissions/ChatHookService";
-import PermissionsService from "server/services/permissions/PermissionsService";
+import PermissionService from "server/services/permissions/PermissionService";
 import ResetService from "server/services/ResetService";
 import RevenueService from "server/services/RevenueService";
 import AreaService from "server/services/world/AreaService";
@@ -69,7 +69,7 @@ export default class APIExposeService implements OnInit {
         private readonly moddingService: ModdingService,
         private readonly marketplaceService: MarketplaceService,
         private readonly namedUpgradeService: NamedUpgradeService,
-        private readonly permissionsService: PermissionsService,
+        private readonly permissionsService: PermissionService,
         private readonly playtimeService: PlaytimeService,
         private readonly questService: QuestService,
         private readonly researchService: ResearchService,
@@ -252,7 +252,7 @@ export default class APIExposeService implements OnInit {
              * Permissions management service.
              *
              * @borrows PermissionsService as permissionsService
-             * @see {@link PermissionsService} for more details.
+             * @see {@link PermissionService} for more details.
              */
             Permissions: this.permissionsService,
 

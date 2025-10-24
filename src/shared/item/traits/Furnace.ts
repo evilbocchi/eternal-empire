@@ -4,6 +4,7 @@ import { findBaseParts, getAllInstanceInfo, setInstanceInfo } from "@antivivi/vr
 import { OnoeNum } from "@rbxts/serikanum";
 import { Debris } from "@rbxts/services";
 import { Server } from "shared/api/APIExpose";
+import { IS_EDIT } from "shared/Context";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
 import Operative from "shared/item/traits/Operative";
@@ -40,8 +41,6 @@ const ZERO = new OnoeNum(0);
 
 export default class Furnace extends Operative {
     static load(model: Model, furnace: Furnace) {
-        const RevenueService = Server.Revenue;
-        const CurrencyService = Server.Currency;
         const modelInfo = getAllInstanceInfo(model);
         const item = furnace.item;
 
@@ -49,7 +48,11 @@ export default class Furnace extends Operative {
             setInstanceInfo(lava, "ItemId", item.id);
             VirtualCollision.onDropletTouched(model, lava, (dropletModel, dropletInfo) => {
                 if (dropletInfo.Incinerated === true) return;
-                if (modelInfo.Area !== dropletInfo.Area && dropletInfo.LastTeleport === undefined) {
+
+                const modelArea = modelInfo.Area;
+                if (modelArea === undefined) {
+                    if (!IS_EDIT) throw `Furnace model ${model.GetFullName()} is missing Area info`;
+                } else if (modelArea !== dropletInfo.Area && dropletInfo.LastTeleport === undefined) {
                     // Sanity check: droplet should be in the same area as the furnace unless it was teleported
                     return;
                 }
@@ -59,7 +62,7 @@ export default class Furnace extends Operative {
                 dropletInfo.Incinerated = true;
                 Debris.AddItem(dropletModel, 6);
 
-                const result = RevenueService.calculateDropletValue(dropletModel);
+                const result = Server.Revenue.calculateDropletValue(dropletModel);
                 if (furnace.isCauldron) {
                     result.markAsCauldron();
                 }
@@ -101,7 +104,7 @@ export default class Furnace extends Operative {
 
                 // Grant currencies
                 if (furnace.isCalculatesFurnace === true) {
-                    CurrencyService.incrementAll(finalAmountPerCurrency);
+                    Server.Currency.incrementAll(finalAmountPerCurrency);
                 }
 
                 const furnaceProcessed = modelInfo.FurnaceProcessed;
@@ -120,7 +123,7 @@ export default class Furnace extends Operative {
 
     isCalculatesFurnace = true;
     isCalculatesFinal = true;
-    isCauldron = true;
+    isCauldron = false;
 
     constructor(item: Item) {
         super(item);

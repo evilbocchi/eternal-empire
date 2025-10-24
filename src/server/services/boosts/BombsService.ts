@@ -22,7 +22,7 @@ import CurrencyService from "server/services/data/CurrencyService";
 import DataService from "server/services/data/DataService";
 import ChatHookService from "server/services/permissions/ChatHookService";
 import { log } from "server/services/permissions/LogService";
-import PermissionsService from "server/services/permissions/PermissionsService";
+import PermissionService from "server/services/permissions/PermissionService";
 import ProductService from "server/services/product/ProductService";
 import { IS_EDIT } from "shared/Context";
 import Packets from "shared/Packets";
@@ -73,7 +73,7 @@ export default class BombsService implements OnInit, OnStart {
         private chatHookService: ChatHookService,
         private currencyService: CurrencyService,
         private dataService: DataService,
-        private permissionsService: PermissionsService,
+        private permissionsService: PermissionService,
         private productService: ProductService,
     ) {}
 

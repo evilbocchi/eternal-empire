@@ -25,7 +25,7 @@ import NamedUpgradeService from "server/services/data/NamedUpgradeService";
 import ItemService from "server/services/item/ItemService";
 import ChatHookService from "server/services/permissions/ChatHookService";
 import { log } from "server/services/permissions/LogService";
-import PermissionsService from "server/services/permissions/PermissionsService";
+import PermissionService from "server/services/permissions/PermissionService";
 import RevenueService from "server/services/RevenueService";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import { CURRENCY_DETAILS } from "shared/currency/CurrencyDetails";
@@ -64,7 +64,7 @@ export default class ResetService implements OnInit, OnStart {
         private readonly currencyService: CurrencyService,
         private readonly namedUpgradeService: NamedUpgradeService,
         private readonly revenueService: RevenueService,
-        private readonly permissionsService: PermissionsService,
+        private readonly permissionsService: PermissionService,
     ) {}
 
     /**

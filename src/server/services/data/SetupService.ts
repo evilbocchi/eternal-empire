@@ -22,7 +22,7 @@ import DataService from "server/services/data/DataService";
 import ItemService from "server/services/item/ItemService";
 import ChatHookService from "server/services/permissions/ChatHookService";
 import { log } from "server/services/permissions/LogService";
-import PermissionsService from "server/services/permissions/PermissionsService";
+import PermissionService from "server/services/permissions/PermissionService";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import eat from "shared/hamster/eat";
 import Item from "shared/item/Item";
@@ -45,7 +45,7 @@ export default class SetupService implements OnInit, OnStart {
         private chatHookService: ChatHookService,
         private currencyService: CurrencyService,
         private itemService: ItemService,
-        private permissionsService: PermissionsService,
+        private permissionsService: PermissionService,
     ) {}
 
     /**

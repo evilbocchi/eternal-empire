@@ -100,6 +100,12 @@ export default class RevenueService {
         this.upgraderCache = undefined;
     }
 
+    /**
+     * Calculates the value of a droplet instance, applying all relevant boosts and factors.
+     * @param instance The droplet instance to calculate the value for.
+     * @param verbose Whether to enable verbose logging of factors.
+     * @returns The detailed droplet value result.
+     */
     calculateDropletValue(instance: BasePart, verbose?: boolean) {
         const instanceInfo = getAllInstanceInfo(instance);
 
@@ -122,6 +128,11 @@ export default class RevenueService {
         });
     }
 
+    /**
+     * Calculates the final value of a single droplet after applying all relevant boosts and factors.
+     * @param instance The droplet instance to calculate the value for.
+     * @returns The final calculated value of the droplet as a coalesced CurrencyBundle.
+     */
     calculateSingleDropletValue(instance: BasePart) {
         const result = this.calculateDropletValue(instance);
         result.applySource();
@@ -168,6 +179,7 @@ export default class RevenueService {
                     add?: CurrencyBundle;
                     mul?: CurrencyBundle | OnoeNum;
                     pow?: CurrencyBundle | OnoeNum;
+                    inverse?: boolean;
                 },
             ]
         >();
@@ -250,21 +262,33 @@ export default class RevenueService {
 
                 const [divSoftcapValue] = calculateSoftcap(highest, softcaps.div);
                 if (divSoftcapValue !== undefined) {
-                    const mulSoftcap = new CurrencyBundle().set(currency, divSoftcapValue.reciprocal());
-                    mul.mul(mulSoftcap, true);
+                    const mulAmountPerCurrency = mul.amountPerCurrency;
+                    const currentMul = mulAmountPerCurrency.get(currency);
+                    if (currentMul !== undefined) {
+                        mulAmountPerCurrency.set(currency, currentMul.div(divSoftcapValue));
+                    }
 
                     if (verbose === true) {
-                        this.factors.push(["SOFTCAP_DIV", { mul: mulSoftcap }]);
+                        this.factors.push([
+                            "SOFTCAPDIV",
+                            { mul: new CurrencyBundle().set(currency, divSoftcapValue), inverse: true },
+                        ]);
                     }
                 }
 
                 const [rootSoftcapValue] = calculateSoftcap(highest, softcaps.recippow);
                 if (rootSoftcapValue !== undefined) {
-                    const powSoftcap = new CurrencyBundle().set(currency, rootSoftcapValue.reciprocal());
-                    pow.mul(powSoftcap, true);
+                    const powAmountPerCurrency = pow.amountPerCurrency;
+                    const currentPow = powAmountPerCurrency.get(currency);
+                    if (currentPow !== undefined) {
+                        powAmountPerCurrency.set(currency, currentPow.div(rootSoftcapValue));
+                    }
 
                     if (verbose === true) {
-                        this.factors.push(["SOFTCAP_RECIPPOW", { pow: powSoftcap }]);
+                        this.factors.push([
+                            "SOFTCAPROOT",
+                            { pow: new CurrencyBundle().set(currency, rootSoftcapValue), inverse: true },
+                        ]);
                     }
                 }
             }
@@ -281,25 +305,34 @@ export default class RevenueService {
 
         /**
          * Applies an operative to the current revenue calculation.
-         * Does not log the application in verbose mode.
          * @param operative The operative to apply.
          * @param inverse Whether to apply the inverse of the operative.
+         * @param label An optional label for verbose logging.
          */
-        public applyOperative(operative: IOperative, inverse?: boolean) {
+        public applyOperative(operative: IOperative, inverse?: boolean, label?: string) {
             Operative.applyOperative(this.add, this.mul, this.pow, operative, inverse, undefined, true);
+            if (this.verbose === true) {
+                this.factors.push([label ?? "OPERATIVE", operative]);
+            }
         }
 
         /**
          * Applies a constant to the current revenue calculation.
-         * Does not log the application in verbose mode.
          * @param constant The constant to apply.
          * @param operation The operation to perform: "mul" or "pow".
+         * @param label An optional label for verbose logging.
          */
-        public applyConstant(constant: number | BaseOnoeNum, operation: "mul" | "pow") {
+        public applyConstant(constant: number | BaseOnoeNum, operation: "mul" | "pow", label?: string) {
             if (operation === "mul") {
                 this.mul.mulConstant(constant, true);
             } else if (operation === "pow") {
                 this.pow.mulConstant(constant, true);
+            }
+            if (this.verbose === true) {
+                this.factors.push([
+                    label ?? operation.upper(),
+                    operation === "mul" ? { mul: new OnoeNum(constant) } : { pow: new OnoeNum(constant) },
+                ]);
             }
         }
 
@@ -367,9 +400,10 @@ export default class RevenueService {
 
             // Sky Droplet Nerf
             if (this.instanceInfo.Sky === true) {
-                mul.divConstant(250, true);
+                const skyDivNerf = new OnoeNum(250);
+                mul.divConstant(skyDivNerf, true);
                 if (verbose === true) {
-                    this.factors.push(["SKYDROPLET", { mul: new OnoeNum(1 / 250) }]);
+                    this.factors.push(["SKYDROPLET", { mul: skyDivNerf, inverse: true }]);
                 }
             }
         }
@@ -424,7 +458,6 @@ export default class RevenueService {
             if (this.isCauldron === true && instanceInfo.Sky !== true) {
                 upgradersEnabled = false;
             }
-
             if (upgradersEnabled === true) {
                 this.applyUpgraders(add, mul, pow);
             }

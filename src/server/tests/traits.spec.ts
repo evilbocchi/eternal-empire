@@ -14,6 +14,8 @@ import Condenser from "shared/item/traits/dropper/Condenser";
 import Dropper from "shared/item/traits/dropper/Dropper";
 import Generator from "shared/item/traits/generator/Generator";
 import Upgrader from "shared/item/traits/upgrader/Upgrader";
+import VoidSkyUpgrader from "shared/items/0/happylike/VoidSkyUpgrader";
+import CoalescentRefiner from "shared/items/0/ifinitude/CoalescentRefiner";
 import Sideswiper from "shared/items/0/winsome/Sideswiper";
 import JoyfulPark from "shared/items/1/joyful/JoyfulPark";
 import Items from "shared/items/Items";
@@ -21,6 +23,7 @@ import TheFirstGenerator from "shared/items/negative/friendliness/TheFirstGenera
 import TheFirstConveyor from "shared/items/negative/tfd/TheFirstConveyor";
 import TheFirstDropper from "shared/items/negative/tfd/TheFirstDropper";
 import TheFirstUpgrader from "shared/items/negative/tfd/TheFirstUpgrader";
+import BasicCauldron from "shared/items/negative/tlg/BasicCauldron";
 import ImprovedFurnace from "shared/items/negative/tlg/ImprovedFurnace";
 import SmallReactor from "shared/items/negative/unimpossible/SmallReactor";
 
@@ -150,9 +153,8 @@ export = function () {
         const itemId = `TestCondenser_${HttpService.GenerateGUID(false)}`;
         const item = new Item(itemId).addPlaceableArea("BarrenIslands");
         const condenser = item.trait(Condenser).setQuota(1);
-        condenser.addDroplets(Droplet.TheFirstDroplet);
-        const dropperTrait = item.trait(Dropper);
-        dropperTrait.setDroplet(Droplet.TheFirstDroplet);
+        const droplet = Droplet.FundsCompactDroplet;
+        condenser.addDroplets(droplet);
 
         const placementId = `${itemId}_${HttpService.GenerateGUID(false)}`;
         const placedItem: PlacedItem = {
@@ -193,6 +195,7 @@ export = function () {
             item,
             placementId,
             model,
+            droplet,
             furnaceProcessed: furnaceProcessed!,
             cleanup: () => {
                 model.Destroy();
@@ -415,6 +418,149 @@ export = function () {
             dropletData.cleanup();
             spawned.cleanup();
         });
+
+        it("applies div and root softcaps when droplet value exceeds thresholds", () => {
+            const furnace = spawnItemModel(ImprovedFurnace.id);
+            const handle = getTouchByTag(furnace.model, "Lava");
+            const dropletData = spawnDroplet(Droplet.FatDroplet);
+
+            dropletData.dropletInfo.Upgrades ??= new Map();
+            dropletData.dropletInfo.Upgrades.set("TestBoost", {
+                model: furnace.model,
+                boost: {
+                    mul: new CurrencyBundle().set("Funds", 1e308),
+                },
+            });
+
+            Server.Currency.set("Funds", new OnoeNum(0));
+
+            const furnaceTrait = ImprovedFurnace.findTrait("Furnace");
+            expect(furnaceTrait).to.be.ok();
+            if (furnaceTrait === undefined) {
+                dropletData.cleanup();
+                furnace.cleanup();
+                throw "Furnace trait is undefined";
+            }
+
+            const naiveResult = withWeatherDisabled(() => {
+                const result = Server.Revenue.calculateDropletValue(dropletData.droplet);
+                result.applySource();
+                result.applyOperative(furnaceTrait);
+                return result.coalesce();
+            });
+            const naiveFunds = naiveResult.get("Funds");
+            expect(naiveFunds).to.be.ok();
+            if (naiveFunds === undefined) {
+                dropletData.cleanup();
+                furnace.cleanup();
+                throw "Naive furnace funds is undefined";
+            }
+
+            const expectedResult = withWeatherDisabled(() => {
+                const result = Server.Revenue.calculateDropletValue(dropletData.droplet, true);
+                result.applySource();
+                result.applyOperative(furnaceTrait);
+                result.applyFinal();
+                return result;
+            });
+            const expectedFunds = expectedResult.coalesce().get("Funds");
+            expect(expectedFunds).to.be.ok();
+            if (expectedFunds === undefined) {
+                dropletData.cleanup();
+                furnace.cleanup();
+                throw "Expected furnace funds is undefined";
+            }
+
+            expect(expectedResult.factors.some(([label]) => label === "SOFTCAPDIV")).to.equal(true);
+            expect(expectedResult.factors.some(([label]) => label === "SOFTCAPROOT")).to.equal(true);
+            expect(expectedFunds.lessThan(naiveFunds)).to.equal(true);
+
+            withWeatherDisabled(() => handle.touch(dropletData.droplet, dropletData.dropletInfo));
+
+            const afterFunds = Server.Currency.get("Funds");
+
+            expect(afterFunds.equals(expectedFunds)).to.equal(true);
+            expect(afterFunds.equals(naiveFunds)).to.equal(false);
+
+            Server.Currency.set("Funds", new OnoeNum(0));
+            dropletData.cleanup();
+            furnace.cleanup();
+        });
+
+        it("ignores upgrader boosts for non-sky droplets in cauldrons", () => {
+            const upgrader = spawnItemModel(TheFirstUpgrader.id);
+            const furnace = spawnItemModel(BasicCauldron.id);
+            const laserHandle = getTouchByTag(upgrader.model, "Laser");
+            const lavaHandle = getTouchByTag(furnace.model, "Lava");
+            const dropletData = spawnDroplet(Droplet.TheFirstDroplet);
+
+            const firstDropletFunds = Droplet.TheFirstDroplet.value.get("Funds");
+            expect(firstDropletFunds).to.be.ok();
+            if (firstDropletFunds === undefined) return;
+
+            const upgraderFundsAdd = TheFirstUpgrader.findTrait("Upgrader")?.add?.get("Funds");
+            if (upgraderFundsAdd === undefined) throw "Upgrader add Funds is undefined";
+
+            const furnaceMul = BasicCauldron.findTrait("Furnace")?.mul?.get("Funds");
+            if (furnaceMul === undefined) throw "Furnace mul Funds is undefined";
+
+            Server.Currency.set("Funds", new OnoeNum(0));
+
+            withWeatherDisabled(() => laserHandle.touch(dropletData.droplet, dropletData.dropletInfo));
+            expect(dropletData.dropletInfo.Upgrades?.size()).to.equal(1);
+            expect(dropletData.dropletInfo.Sky).to.equal(undefined);
+
+            withWeatherDisabled(() => lavaHandle.touch(dropletData.droplet, dropletData.dropletInfo));
+
+            const credited = Server.Currency.get("Funds");
+            const expectedBase = furnaceMul.mul(firstDropletFunds);
+            expect(credited.equals(expectedBase)).to.equal(true);
+
+            const upgradedValue = firstDropletFunds.add(upgraderFundsAdd);
+            const expectedWithUpgrade = furnaceMul.mul(upgradedValue);
+            expect(credited.equals(expectedWithUpgrade)).to.equal(false);
+            expect(dropletData.dropletInfo.Incinerated).to.equal(true);
+
+            dropletData.cleanup();
+            upgrader.cleanup();
+            furnace.cleanup();
+        });
+
+        it("applies upgrader boosts for sky droplets in cauldrons", () => {
+            const upgrader = spawnItemModel(VoidSkyUpgrader.id);
+            const furnace = spawnItemModel(ImprovedFurnace.id);
+            const laserHandle = getTouchByTag(upgrader.model, "Laser");
+            const lavaHandle = getTouchByTag(furnace.model, "Lava");
+            const dropletData = spawnDroplet(Droplet.TheFirstDroplet);
+
+            const firstDropletFunds = Droplet.TheFirstDroplet.value.get("Funds");
+            expect(firstDropletFunds).to.be.ok();
+            if (firstDropletFunds === undefined) return;
+
+            const skyMul = VoidSkyUpgrader.findTrait("Upgrader")?.mul?.get("Funds");
+            if (skyMul === undefined) throw "Sky upgrader mul Funds is undefined";
+
+            const furnaceMul = ImprovedFurnace.findTrait("Furnace")?.mul?.get("Funds");
+            if (furnaceMul === undefined) throw "Furnace mul Funds is undefined";
+
+            Server.Currency.set("Funds", new OnoeNum(0));
+
+            withWeatherDisabled(() => laserHandle.touch(dropletData.droplet, dropletData.dropletInfo));
+            expect(dropletData.dropletInfo.Upgrades?.size()).to.equal(1);
+            expect(dropletData.dropletInfo.Sky).to.equal(true);
+
+            withWeatherDisabled(() => lavaHandle.touch(dropletData.droplet, dropletData.dropletInfo));
+
+            const credited = Server.Currency.get("Funds");
+            const expected = furnaceMul.mul(firstDropletFunds.mul(skyMul)).div(250);
+
+            expect(credited.equals(expected)).to.equal(true);
+            expect(dropletData.dropletInfo.Incinerated).to.equal(true);
+
+            dropletData.cleanup();
+            upgrader.cleanup();
+            furnace.cleanup();
+        });
     });
 
     describe("Generator", () => {
@@ -593,11 +739,11 @@ export = function () {
 
     describe("Condenser", () => {
         it("produces condensed droplets from fresh contributions", () => {
-            const { furnaceProcessed, model, cleanup } = setupTestCondenser();
+            const { furnaceProcessed, droplet, cleanup } = setupTestCondenser();
             const beforeDroplets = new Set<BasePart>();
             for (const [droplet] of Droplet.SPAWNED_DROPLETS) beforeDroplets.add(droplet);
 
-            const raw = Droplet.TheFirstDroplet.value;
+            const raw = droplet.value;
             const inputDroplet = new Instance("Part") as BasePart;
             inputDroplet.Name = "InputDroplet";
             inputDroplet.Parent = Workspace;
@@ -632,8 +778,8 @@ export = function () {
         });
 
         it("ignores condensed droplets fed back into the same condenser", () => {
-            const { furnaceProcessed, model, cleanup } = setupTestCondenser();
-            const raw = Droplet.TheFirstDroplet.value;
+            const { furnaceProcessed, droplet, cleanup } = setupTestCondenser();
+            const raw = droplet.value;
             const inputDroplet = new Instance("Part") as BasePart;
             inputDroplet.Name = "InputDroplet";
             inputDroplet.Parent = Workspace;
@@ -670,6 +816,161 @@ export = function () {
 
             produced.Destroy();
             inputDroplet.Destroy();
+            cleanup();
+        });
+
+        it("does not apply softcaps when collecting contributions", () => {
+            const { furnaceProcessed, droplet, cleanup } = setupTestCondenser();
+            const dropletData = spawnDroplet(droplet);
+
+            const highBalance = new OnoeNum(1e308);
+            Server.Currency.set("Funds", highBalance);
+
+            dropletData.dropletInfo.Upgrades = dropletData.dropletInfo.Upgrades ?? new Map();
+
+            const rawValue = withWeatherDisabled(() => {
+                const result = Server.Revenue.calculateDropletValue(dropletData.droplet, true);
+                result.applySource();
+                return result.coalesce();
+            });
+            const softcappedValue = withWeatherDisabled(() => {
+                const result = Server.Revenue.calculateDropletValue(dropletData.droplet, true);
+                result.applySource();
+                result.applyFinal();
+                return result.coalesce();
+            });
+
+            const rawFunds = rawValue.get("Funds");
+            const softFunds = softcappedValue.get("Funds");
+            expect(rawFunds).to.be.ok();
+            expect(softFunds).to.be.ok();
+            if (rawFunds === undefined || softFunds === undefined) {
+                dropletData.cleanup();
+                cleanup();
+                throw "Condenser comparison funds are undefined";
+            }
+            expect(softFunds.lessThan(rawFunds)).to.equal(true);
+
+            const beforeDroplets = new Set<BasePart>();
+            for (const [existing] of Droplet.SPAWNED_DROPLETS) beforeDroplets.add(existing);
+
+            withWeatherDisabled(() => furnaceProcessed(rawValue, dropletData.droplet, dropletData.dropletInfo));
+
+            let produced: BasePart | undefined;
+            for (const [current] of Droplet.SPAWNED_DROPLETS) {
+                if (!beforeDroplets.has(current)) {
+                    produced = current;
+                    break;
+                }
+            }
+
+            expect(produced).to.be.ok();
+            if (produced === undefined) {
+                dropletData.cleanup();
+                cleanup();
+                throw "Condenser failed to produce a droplet";
+            }
+
+            expect(Server.Currency.get("Funds").equals(highBalance)).to.equal(true);
+
+            produced.Destroy();
+            dropletData.cleanup();
+            cleanup();
+            Server.Currency.set("Funds", new OnoeNum(0));
+        });
+
+        it("does not double-apply upgrader boosts after condenser reprocessing", () => {
+            const { furnaceProcessed, droplet: condensedDroplet, cleanup } = setupTestCondenser();
+            const firstUpgrader = spawnItemModel(CoalescentRefiner.id);
+            const laserHandle = getTouchByTag(firstUpgrader.model, "Laser");
+            const dropletData = spawnDroplet(Droplet.TheFirstDroplet);
+
+            const baseFunds = Droplet.TheFirstDroplet.value.get("Funds");
+            expect(baseFunds).to.be.ok();
+            if (baseFunds === undefined) {
+                dropletData.cleanup();
+                firstUpgrader.cleanup();
+                cleanup();
+                throw "Base funds is undefined";
+            }
+
+            const beforeDroplets = new Set<BasePart>();
+            for (const [droplet] of Droplet.SPAWNED_DROPLETS) beforeDroplets.add(droplet);
+
+            withWeatherDisabled(() => laserHandle.touch(dropletData.droplet, dropletData.dropletInfo));
+
+            const contributionValue = withWeatherDisabled(() => {
+                return Server.Revenue.calculateSingleDropletValue(dropletData.droplet);
+            });
+
+            withWeatherDisabled(() =>
+                furnaceProcessed(contributionValue, dropletData.droplet, dropletData.dropletInfo),
+            );
+
+            dropletData.cleanup();
+
+            let condensedDropletModel: BasePart | undefined;
+            let condensedInfo: InstanceInfo | undefined;
+            for (const [droplet, info] of Droplet.SPAWNED_DROPLETS) {
+                if (!beforeDroplets.has(droplet)) {
+                    condensedDropletModel = droplet;
+                    condensedInfo = info;
+                    break;
+                }
+            }
+
+            expect(condensedDropletModel).to.be.ok();
+            if (condensedDropletModel === undefined || condensedInfo === undefined) {
+                firstUpgrader.cleanup();
+                cleanup();
+                return;
+            }
+
+            expect(condensedInfo.Condensed).to.equal(true);
+            const placeholderUpgrades = condensedInfo.Upgrades;
+            expect(placeholderUpgrades).to.be.ok();
+            if (placeholderUpgrades === undefined) {
+                condensedDropletModel.Destroy();
+                firstUpgrader.cleanup();
+                cleanup();
+                return;
+            }
+            expect(placeholderUpgrades.size()).to.equal(1);
+
+            firstUpgrader.cleanup();
+
+            const repositionedUpgrader = spawnItemModel(CoalescentRefiner.id);
+            const repositionedHandle = getTouchByTag(repositionedUpgrader.model, "Laser");
+
+            withWeatherDisabled(() => repositionedHandle.touch(condensedDropletModel!, condensedInfo!));
+
+            expect(condensedInfo?.Upgrades?.size()).to.equal(2);
+
+            Server.Currency.set("Funds", new OnoeNum(0));
+            Server.Currency.set("Power", new OnoeNum(0));
+
+            const furnace = spawnItemModel(ImprovedFurnace.id);
+            const lavaHandle = getTouchByTag(furnace.model, "Lava");
+
+            withWeatherDisabled(() => lavaHandle.touch(condensedDropletModel!, condensedInfo!));
+
+            const furnaceMul = ImprovedFurnace.findTrait("Furnace")?.mul?.get("Funds");
+            expect(furnaceMul).to.be.ok();
+            if (furnaceMul === undefined) {
+                if (condensedDropletModel.Parent !== undefined) condensedDropletModel.Destroy();
+                repositionedUpgrader.cleanup();
+                furnace.cleanup();
+                cleanup();
+                return;
+            }
+
+            const expectedFunds = condensedDroplet.value.get("Funds")!.mul(furnaceMul);
+            const credited = Server.Currency.get("Funds");
+            expect(credited.equals(expectedFunds)).to.equal(true);
+
+            if (condensedDropletModel.Parent !== undefined) condensedDropletModel.Destroy();
+            repositionedUpgrader.cleanup();
+            furnace.cleanup();
             cleanup();
         });
     });

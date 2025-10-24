@@ -25,7 +25,7 @@ import CurrencyService from "server/services/data/CurrencyService";
 import DataService from "server/services/data/DataService";
 import { LeaderboardService } from "server/services/leaderboard/LeaderboardService";
 import ChatHookService from "server/services/permissions/ChatHookService";
-import PermissionsService from "server/services/permissions/PermissionsService";
+import PermissionService from "server/services/permissions/PermissionService";
 import ProductService from "server/services/product/ProductService";
 import { playSound } from "shared/asset/GameAssets";
 import { getNameFromUserId } from "shared/constants";
@@ -54,7 +54,7 @@ export class RenameService implements OnInit, OnStart {
         private leaderboardService: LeaderboardService,
         private currencyService: CurrencyService,
         private chatHookService: ChatHookService,
-        private permissionsService: PermissionsService,
+        private permissionsService: PermissionService,
     ) {}
 
     // Cost Management
