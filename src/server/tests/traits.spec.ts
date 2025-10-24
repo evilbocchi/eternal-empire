@@ -393,6 +393,64 @@ export = function () {
             dropletData.cleanup();
             spawned.cleanup();
         });
+
+        it("does not upgrade droplets when the item is not maintained", () => {
+            const spawned = spawnItemModel(TheFirstUpgrader.id);
+            const handle = getTouchByTag(spawned.model, "Laser");
+            const dropletData = spawnDroplet(Droplet.TheFirstDroplet);
+
+            const firstDropletFunds = Droplet.TheFirstDroplet.value.get("Funds");
+            expect(firstDropletFunds).to.be.ok();
+            if (firstDropletFunds === undefined) return;
+
+            spawned.modelInfo.maintained = false;
+            const laserInfo = getAllInstanceInfo(handle.part);
+            laserInfo.maintained = false;
+
+            withWeatherDisabled(() => handle.touch(dropletData.droplet, dropletData.dropletInfo));
+
+            expect(dropletData.dropletInfo.upgrades?.size()).to.equal(0);
+            const afterValue = Server.Revenue.calculateSingleDropletValue(dropletData.droplet);
+            expect(afterValue.get("Funds")?.equals(firstDropletFunds)).to.equal(true);
+
+            dropletData.cleanup();
+            spawned.cleanup();
+        });
+
+        it("ignores upgrades when the source upgrader is destroyed", () => {
+            const spawned = spawnItemModel(TheFirstUpgrader.id);
+            const handle = getTouchByTag(spawned.model, "Laser");
+            const dropletData = spawnDroplet(Droplet.TheFirstDroplet);
+
+            const firstDropletFunds = Droplet.TheFirstDroplet.value.get("Funds");
+            expect(firstDropletFunds).to.be.ok();
+            if (firstDropletFunds === undefined) {
+                dropletData.cleanup();
+                spawned.cleanup();
+                throw "First droplet Funds is undefined";
+            }
+
+            const upgraderAdd = TheFirstUpgrader.findTrait("Upgrader")?.add?.get("Funds");
+            if (upgraderAdd === undefined) {
+                dropletData.cleanup();
+                spawned.cleanup();
+                throw "Upgrader add Funds is undefined";
+            }
+
+            withWeatherDisabled(() => {
+                const beforeValue = Server.Revenue.calculateSingleDropletValue(dropletData.droplet);
+                expect(beforeValue.get("Funds")?.equals(firstDropletFunds)).to.equal(true);
+                handle.touch(dropletData.droplet, dropletData.dropletInfo);
+            });
+
+            const boostedValue = Server.Revenue.calculateSingleDropletValue(dropletData.droplet);
+            expect(boostedValue.get("Funds")?.equals(firstDropletFunds.add(upgraderAdd))).to.equal(true);
+            spawned.cleanup();
+
+            const afterCleanup = Server.Revenue.calculateSingleDropletValue(dropletData.droplet);
+            expect(afterCleanup.get("Funds")?.equals(firstDropletFunds)).to.equal(true);
+            dropletData.cleanup();
+        });
     });
 
     describe("Furnace", () => {
@@ -422,7 +480,7 @@ export = function () {
         it("applies div and root softcaps when droplet value exceeds thresholds", () => {
             const furnace = spawnItemModel(ImprovedFurnace.id);
             const handle = getTouchByTag(furnace.model, "Lava");
-            const dropletData = spawnDroplet(Droplet.FatDroplet);
+            const dropletData = spawnDroplet(Droplet.TheFirstDroplet);
 
             dropletData.dropletInfo.upgrades ??= new Map();
             dropletData.dropletInfo.upgrades.set("TestBoost", {
@@ -481,6 +539,99 @@ export = function () {
 
             expect(afterFunds.equals(expectedFunds)).to.equal(true);
             expect(afterFunds.equals(naiveFunds)).to.equal(false);
+
+            Server.Currency.set("Funds", new OnoeNum(0));
+            dropletData.cleanup();
+            furnace.cleanup();
+        });
+
+        it("applies div and root softcaps when balance exceeds thresholds", () => {
+            const furnace = spawnItemModel(ImprovedFurnace.id);
+            const handle = getTouchByTag(furnace.model, "Lava");
+            const dropletData = spawnDroplet(Droplet.TheFirstDroplet);
+
+            dropletData.dropletInfo.upgrades ??= new Map();
+            dropletData.dropletInfo.upgrades.set("TestBoost", {
+                model: furnace.model,
+                boost: {
+                    mul: new CurrencyBundle().set("Funds", 1e307),
+                },
+            });
+
+            const furnaceTrait = ImprovedFurnace.findTrait("Furnace");
+            expect(furnaceTrait).to.be.ok();
+            if (furnaceTrait === undefined) {
+                dropletData.cleanup();
+                furnace.cleanup();
+                throw "Furnace trait is undefined";
+            }
+
+            const highBalance = new OnoeNum(1e308);
+            Server.Currency.set("Funds", highBalance);
+
+            const naiveResult = withWeatherDisabled(() => {
+                const result = Server.Revenue.calculateDropletValue(dropletData.droplet, true);
+                result.applySource();
+                result.applyOperative(furnaceTrait);
+                return result.coalesce();
+            });
+            const naiveFunds = naiveResult.get("Funds");
+            expect(naiveFunds).to.be.ok();
+            if (naiveFunds === undefined) {
+                dropletData.cleanup();
+                furnace.cleanup();
+                Server.Currency.set("Funds", new OnoeNum(0));
+                throw "Naive furnace funds is undefined";
+            }
+
+            const expectedResult = withWeatherDisabled(() => {
+                const result = Server.Revenue.calculateDropletValue(dropletData.droplet, true);
+                result.applySource();
+                result.applyOperative(furnaceTrait);
+                result.applyFinal();
+                return result;
+            });
+            const expectedBundle = expectedResult.coalesce();
+            const expectedFunds = expectedBundle.get("Funds");
+            expect(expectedFunds).to.be.ok();
+            if (expectedFunds === undefined) {
+                dropletData.cleanup();
+                furnace.cleanup();
+                Server.Currency.set("Funds", new OnoeNum(0));
+                throw "Expected furnace funds is undefined";
+            }
+
+            expect(expectedFunds.lessThan(naiveFunds)).to.equal(true);
+            expect(expectedResult.factors.some(([label]) => label === "SOFTCAPDIV")).to.equal(true);
+            expect(expectedResult.factors.some(([label]) => label === "SOFTCAPROOT")).to.equal(true);
+
+            const beforeFunds = Server.Currency.get("Funds");
+            expect(beforeFunds.equals(highBalance)).to.equal(true);
+
+            withWeatherDisabled(() => handle.touch(dropletData.droplet, dropletData.dropletInfo));
+
+            const afterFunds = Server.Currency.get("Funds");
+            const expectedFinalFunds = new CurrencyBundle().set("Funds", highBalance).add(expectedBundle).get("Funds");
+            expect(expectedFinalFunds).to.be.ok();
+            if (expectedFinalFunds === undefined) {
+                dropletData.cleanup();
+                furnace.cleanup();
+                Server.Currency.set("Funds", new OnoeNum(0));
+                throw "Expected final funds is undefined";
+            }
+
+            const naiveFinalFunds = new CurrencyBundle().set("Funds", highBalance).add(naiveResult).get("Funds");
+            expect(naiveFinalFunds).to.be.ok();
+            if (naiveFinalFunds === undefined) {
+                dropletData.cleanup();
+                furnace.cleanup();
+                Server.Currency.set("Funds", new OnoeNum(0));
+                throw "Naive final funds is undefined";
+            }
+
+            expect(afterFunds.equals(expectedFinalFunds)).to.equal(true);
+            expect(afterFunds.equals(naiveFinalFunds)).to.equal(false);
+            expect(dropletData.dropletInfo.incinerated).to.equal(true);
 
             Server.Currency.set("Funds", new OnoeNum(0));
             dropletData.cleanup();
