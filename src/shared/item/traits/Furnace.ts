@@ -11,6 +11,7 @@ import Operative from "shared/item/traits/Operative";
 import isPlacedItemUnusable from "shared/item/utils/isPlacedItemUnusable";
 import { VirtualCollision } from "shared/item/utils/VirtualReplication";
 import Packets from "shared/Packets";
+import Sandbox from "shared/Sandbox";
 
 declare global {
     interface ItemTraits {
@@ -43,6 +44,7 @@ export default class Furnace extends Operative {
     static load(model: Model, furnace: Furnace) {
         const modelInfo = getAllInstanceInfo(model);
         const item = furnace.item;
+        const isSandbox = Sandbox.getEnabled();
 
         for (const lava of findBaseParts(model, "Lava")) {
             const lavaInfo = getAllInstanceInfo(lava);
@@ -53,7 +55,7 @@ export default class Furnace extends Operative {
 
                 const modelArea = modelInfo.area;
                 if (modelArea === undefined) {
-                    if (!IS_EDIT) throw `Furnace model ${model.GetFullName()} is missing Area info`;
+                    if (!IS_EDIT && !isSandbox) throw `Furnace model ${model.GetFullName()} is missing Area info`;
                 } else if (modelArea !== dropletInfo.area && dropletInfo.lastTeleport === undefined) {
                     // Sanity check: droplet should be in the same area as the furnace unless it was teleported
                     return;
