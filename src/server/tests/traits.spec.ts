@@ -18,6 +18,7 @@ import VoidSkyUpgrader from "shared/items/0/happylike/VoidSkyUpgrader";
 import CoalescentRefiner from "shared/items/0/ifinitude/CoalescentRefiner";
 import Sideswiper from "shared/items/0/winsome/Sideswiper";
 import JoyfulPark from "shared/items/1/joyful/JoyfulPark";
+import IllusionaryPortal from "shared/items/0/automatic/IllusionaryPortal";
 import Items from "shared/items/Items";
 import TheFirstGenerator from "shared/items/negative/friendliness/TheFirstGenerator";
 import TheFirstConveyor from "shared/items/negative/tfd/TheFirstConveyor";
@@ -417,6 +418,27 @@ export = function () {
             spawned.cleanup();
         });
 
+        it("does not upgrade droplets when the source model is broken", () => {
+            const spawned = spawnItemModel(TheFirstUpgrader.id);
+            const handle = getTouchByTag(spawned.model, "Laser");
+            const dropletData = spawnDroplet(Droplet.TheFirstDroplet);
+
+            const firstDropletFunds = Droplet.TheFirstDroplet.value.get("Funds");
+            expect(firstDropletFunds).to.be.ok();
+            if (firstDropletFunds === undefined) return;
+
+            spawned.modelInfo.broken = true;
+
+            withWeatherDisabled(() => handle.touch(dropletData.droplet, dropletData.dropletInfo));
+
+            expect(dropletData.dropletInfo.upgrades?.size()).to.equal(0);
+            const afterValue = Server.Revenue.calculateSingleDropletValue(dropletData.droplet);
+            expect(afterValue.get("Funds")?.equals(firstDropletFunds)).to.equal(true);
+
+            dropletData.cleanup();
+            spawned.cleanup();
+        });
+
         it("ignores upgrades when the source upgrader is destroyed", () => {
             const spawned = spawnItemModel(TheFirstUpgrader.id);
             const handle = getTouchByTag(spawned.model, "Laser");
@@ -472,6 +494,24 @@ export = function () {
 
             expect(Server.Currency.get("Funds").equals(furnaceMul.mul(firstDropletFunds))).to.equal(true);
             expect(dropletData.dropletInfo.incinerated).to.equal(true);
+
+            dropletData.cleanup();
+            spawned.cleanup();
+        });
+
+        it("skips processing when the furnace is broken", () => {
+            const spawned = spawnItemModel(ImprovedFurnace.id);
+            const handle = getTouchByTag(spawned.model, "Lava");
+            const dropletData = spawnDroplet(Droplet.TheFirstDroplet);
+
+            spawned.modelInfo.broken = true;
+            const zero = new OnoeNum(0);
+            Server.Currency.set("Funds", zero);
+
+            withWeatherDisabled(() => handle.touch(dropletData.droplet, dropletData.dropletInfo));
+
+            expect(Server.Currency.get("Funds").equals(zero)).to.equal(true);
+            expect(dropletData.dropletInfo.incinerated).to.equal(undefined);
 
             dropletData.cleanup();
             spawned.cleanup();
@@ -711,6 +751,54 @@ export = function () {
             dropletData.cleanup();
             upgrader.cleanup();
             furnace.cleanup();
+        });
+    });
+
+    describe("Portal", () => {
+        it("teleports droplets between linked exits", () => {
+            const first = spawnItemModel(IllusionaryPortal.id);
+            const second = spawnItemModel(IllusionaryPortal.id);
+            const handle = getTouchByName(first.model, "In");
+            const outPart = second.model.FindFirstChild("Out") as BasePart | undefined;
+            expect(outPart).to.be.ok();
+            if (outPart === undefined) {
+                first.cleanup();
+                second.cleanup();
+                throw "Portal out part is undefined";
+            }
+
+            const dropletData = spawnDroplet(Droplet.TheFirstDroplet);
+            const beforePosition = dropletData.droplet.Position;
+
+            withWeatherDisabled(() => handle.touch(dropletData.droplet, dropletData.dropletInfo));
+
+            expect(dropletData.droplet.Position).never.to.equal(beforePosition);
+            expect(dropletData.droplet.Position).to.equal(outPart.Position);
+            expect(dropletData.dropletInfo.lastTeleport).to.be.ok();
+
+            dropletData.cleanup();
+            first.cleanup();
+            second.cleanup();
+        });
+
+        it("does not teleport droplets when the portal is broken", () => {
+            const first = spawnItemModel(IllusionaryPortal.id);
+            const second = spawnItemModel(IllusionaryPortal.id);
+            const handle = getTouchByName(first.model, "In");
+
+            const dropletData = spawnDroplet(Droplet.TheFirstDroplet);
+            const beforePosition = dropletData.droplet.Position;
+
+            first.modelInfo.broken = true;
+
+            withWeatherDisabled(() => handle.touch(dropletData.droplet, dropletData.dropletInfo));
+
+            expect(dropletData.droplet.Position).to.equal(beforePosition);
+            expect(dropletData.dropletInfo.lastTeleport).to.equal(undefined);
+
+            dropletData.cleanup();
+            first.cleanup();
+            second.cleanup();
         });
     });
 
