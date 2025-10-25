@@ -192,5 +192,66 @@ export = function () {
 
             model.Destroy();
         });
+
+        it("ensures all placed item models and their descendants are anchored", () => {
+            const items = Server.Data.empireData.items;
+
+            const placedItems: Array<[string, PlacedItem]> = [
+                [
+                    "TestAnchored1",
+                    {
+                        item: "TheFirstDropper",
+                        posX: 0,
+                        posY: 5,
+                        posZ: 0,
+                        rotX: 0,
+                        rotY: 0,
+                        rotZ: 0,
+                        area: "BarrenIslands",
+                    },
+                ],
+                [
+                    "TestAnchored2",
+                    {
+                        item: "BulkyDropper",
+                        posX: 10,
+                        posY: 5,
+                        posZ: 10,
+                        rotX: 0,
+                        rotY: 90,
+                        rotZ: 0,
+                        area: "BarrenIslands",
+                    },
+                ],
+            ];
+
+            for (const [placementId, placedItem] of placedItems) {
+                items.worldPlaced.set(placementId, placedItem);
+            }
+
+            Server.Item.fullUpdatePlacedItemsModels();
+
+            for (const [placementId] of placedItems) {
+                const model = Server.Item.modelPerPlacementId.get(placementId);
+                expect(model).to.be.ok();
+
+                if (model !== undefined) {
+                    for (const descendant of model.GetDescendants()) {
+                        if (descendant.IsA("BasePart")) {
+                            expect(descendant.Anchored).to.equal(true);
+                        }
+                    }
+                }
+            }
+
+            for (const [placementId] of placedItems) {
+                items.worldPlaced.delete(placementId);
+                const model = Server.Item.modelPerPlacementId.get(placementId);
+                if (model !== undefined) {
+                    model.Destroy();
+                    Server.Item.modelPerPlacementId.delete(placementId);
+                }
+            }
+        });
     });
 };

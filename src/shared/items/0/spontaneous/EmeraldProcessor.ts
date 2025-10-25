@@ -23,6 +23,7 @@ The Emerald Reactor is a modified version of the ${ReinforcedReactor.name}, each
     .setCreator("sanjay2133")
 
     .trait(Upgrader)
+    .setSky(true)
     .setMul(new CurrencyBundle().set("Funds", 7).set("Power", 2))
 
     .trait(Damager)
