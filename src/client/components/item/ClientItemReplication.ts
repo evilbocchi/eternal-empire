@@ -35,11 +35,7 @@ namespace ClientItemReplication {
             modelPerPlacementId.set(placementId, model);
         }
 
-        if (LOCAL_PLAYER !== undefined) {
-            item.clientLoad(model, LOCAL_PLAYER);
-        } else {
-            warn("LOCAL_PLAYER is undefined in ClientItemReplication.load");
-        }
+        item.clientLoad(model, LOCAL_PLAYER!);
 
         const cleanups = new Set<() => void>();
         for (const callback of callbacks) {
