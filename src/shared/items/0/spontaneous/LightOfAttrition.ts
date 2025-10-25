@@ -46,7 +46,7 @@ Processes droplets at %mul% value.`,
     .setCreator("sanjay2133")
 
     .trait(Furnace)
-    .acceptsUpgrades(false)
+    .setIsCauldron(true)
     .setMul(new CurrencyBundle().set("Funds", 1e9).set("Power", 1e6).set("Skill", 1e3).set("Purifier Clicks", 1e6))
 
     .exit();

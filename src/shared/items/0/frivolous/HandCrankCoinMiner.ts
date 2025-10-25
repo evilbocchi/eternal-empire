@@ -1,5 +1,5 @@
+import { getAllInstanceInfo } from "@antivivi/vrldk";
 import Difficulty from "@rbxts/ejt";
-import { getAllInstanceInfo, getInstanceInfo } from "@antivivi/vrldk";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Droplet from "shared/item/Droplet";
 import Item from "shared/item/Item";
@@ -34,7 +34,9 @@ export = new Item(script.Name)
     .trait(HandCrank)
     .setCallback((t, model) => {
         const drop = model.WaitForChild("Drop");
-        const modifier = getInstanceInfo(drop, "Boosts")?.get(key);
+        const dropInfo = getAllInstanceInfo(drop);
+
+        const modifier = dropInfo.boosts?.get(key);
         if (modifier === undefined) return;
 
         modifier.dropRateMul = t < 5 ? 3 : 1;

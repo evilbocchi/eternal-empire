@@ -18,7 +18,7 @@ namespace DarkMatter {
      * Calculates the boost values for Funds and Power based on Dark Matter.
      * Uses logarithmic scaling for diminishing returns.
      * @param balance The currency bundle to use (defaults to current balance).
-     * @returns Tuple of (boost bundle, dark matter amount).
+     * @returns Tuple of (multiplicative boost bundle, dark matter amount).
      */
     export function getBoost(balance: BaseCurrencyMap) {
         const darkMatter = balance.get("Dark Matter");

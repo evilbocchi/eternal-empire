@@ -13,7 +13,7 @@
  * @since 1.0.0
  */
 
-import { setInstanceInfo, simpleInterval } from "@antivivi/vrldk";
+import { getAllInstanceInfo, simpleInterval } from "@antivivi/vrldk";
 import { OnInit, OnStart, Service } from "@flamework/core";
 import { CollectionService, Lighting } from "@rbxts/services";
 import DataService from "server/services/data/DataService";
@@ -24,7 +24,7 @@ import { WeatherState, WeatherType } from "shared/weather/WeatherTypes";
 
 declare global {
     interface InstanceInfo {
-        LightningSurged?: boolean;
+        lightningSurged?: boolean;
     }
 }
 
@@ -187,8 +187,8 @@ export default class AtmosphereService implements OnInit, OnStart {
 
         // Apply to all spawned drops
         for (const [, info] of Dropper.SPAWNED_DROPS) {
-            if (info.Boosts) {
-                info.Boosts.set("weather", weatherBoost);
+            if (info.boosts) {
+                info.boosts.set("weather", weatherBoost);
             }
         }
     }
@@ -228,10 +228,12 @@ export default class AtmosphereService implements OnInit, OnStart {
      */
     private surgeDroplet(droplet: BasePart) {
         // Add a surge attribute that can be read by the value calculation system
-        setInstanceInfo(droplet, "LightningSurged", true);
+        const dropletInfo = getAllInstanceInfo(droplet);
+        dropletInfo.lightningSurged = true;
+
         task.delay(2, () => {
             if (droplet && droplet.Parent) {
-                setInstanceInfo(droplet, "LightningSurged", undefined);
+                dropletInfo.lightningSurged = undefined;
             }
         });
 

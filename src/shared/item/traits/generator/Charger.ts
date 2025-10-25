@@ -27,7 +27,7 @@ declare global {
 
     interface InstanceInfo {
         /** Whether the item model can be charged by a charger. */
-        Chargeable?: boolean;
+        chargeable?: boolean;
     }
 }
 
@@ -63,7 +63,7 @@ export default class Charger extends Operative {
 
         const charging = new Set<Instance>();
         const chargerInfo = getAllInstanceInfo(model);
-        const chargerArea = chargerInfo.Area;
+        const chargerArea = chargerInfo.area;
         let isDisabled = false;
 
         const checkAdd = (generatorModel: Instance) => {
@@ -76,30 +76,30 @@ export default class Charger extends Operative {
 
             // can be charged
             const generatorInfo = getAllInstanceInfo(generatorModel);
-            if (generatorInfo.Chargeable !== true) return;
+            if (generatorInfo.chargeable !== true) return;
 
             // in the same area
             const generatorHitbox = generatorModel.PrimaryPart;
             if (
                 generatorHitbox === undefined ||
-                generatorInfo.Area !== chargerArea ||
+                generatorInfo.area !== chargerArea ||
                 !this.isInRange(charger, chargerHitbox, generatorHitbox)
             )
                 return;
 
             // not already being charged by this charger
-            const boosts = generatorInfo.Boosts;
+            const boosts = generatorInfo.boosts;
             if (boosts === undefined || boosts.has(placementId)) return;
 
             // has valid item IDs
-            const generatorItemId = generatorInfo.ItemId;
+            const generatorItemId = generatorInfo.itemId;
             if (generatorItemId === undefined) return;
 
             // is whitelisted
             const chargerWhitelist = charger.whitelist;
             if (!chargerWhitelist.isEmpty() && !chargerWhitelist.has(generatorItemId)) return;
 
-            const generatorWhitelist = generatorInfo.Generator?.whitelist;
+            const generatorWhitelist = generatorInfo.generator?.whitelist;
             if (generatorWhitelist !== undefined && !generatorWhitelist.isEmpty() && !generatorWhitelist.has(chargerId))
                 return;
 
@@ -125,7 +125,7 @@ export default class Charger extends Operative {
                 }
 
                 if (existing > 1) {
-                    generatorInfo.BoostRemoved!.add(() => checkAdd(generatorModel));
+                    generatorInfo.boostRemoved!.add(() => checkAdd(generatorModel));
                     return;
                 }
             }

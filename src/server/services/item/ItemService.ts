@@ -27,8 +27,9 @@ import CurrencyService from "server/services/data/CurrencyService";
 import DataService from "server/services/data/DataService";
 import { OnGameAPILoaded } from "server/services/ModdingService";
 import { log } from "server/services/permissions/LogService";
-import PermissionsService from "server/services/permissions/PermissionsService";
+import PermissionService from "server/services/permissions/PermissionService";
 import { PLACED_ITEMS_FOLDER } from "shared/constants";
+import { IS_EDIT } from "shared/Context";
 import eat from "shared/hamster/eat";
 import Item from "shared/item/Item";
 import {
@@ -144,7 +145,7 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
     constructor(
         private readonly currencyService: CurrencyService,
         private readonly dataService: DataService,
-        private readonly permissionsService: PermissionsService,
+        private readonly permissionsService: PermissionService,
     ) {
         this.worldPlaced = dataService.empireData.items.worldPlaced;
         this.brokenPlacedItems = dataService.empireData.items.brokenPlacedItems;
@@ -422,11 +423,11 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
 
         const modelInfo = this.getPlacementInstanceInfo(placementId, model);
         if (this.brokenPlacedItems.has(placementId)) {
-            modelInfo.Broken = true;
+            modelInfo.broken = true;
         }
 
         // Execute item-specific load callbacks
-        item.LOADS.forEach((callback) => callback(model, item));
+        item.load(model);
         return model;
     }
 
@@ -845,7 +846,7 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
             const model = this.modelPerPlacementId.get(placementId);
             if (model) {
                 const modelInfo = this.getPlacementInstanceInfo(placementId, model);
-                modelInfo.Broken = true;
+                modelInfo.broken = true;
                 clearRepairBoostFromModel(modelInfo);
             }
             this.brokenPlacedItems.add(placementId);
@@ -873,7 +874,7 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
         if (!model) return false;
 
         const modelInfo = this.getPlacementInstanceInfo(placementId, model);
-        modelInfo.Broken = false;
+        modelInfo.broken = false;
 
         if (isProtectionTier(tier)) {
             const expiresAt = os.time() + REPAIR_PROTECTION_DURATIONS[tier];
@@ -966,7 +967,7 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
             }
             ++itemCount;
         });
-        print(`Initialized ${itemCount} items.`);
+        if (!IS_EDIT) print(`Initialized ${itemCount} items.`);
 
         // Ensure all placed items have models
         this.fullUpdatePlacedItemsModels();

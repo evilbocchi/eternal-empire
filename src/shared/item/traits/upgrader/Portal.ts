@@ -9,7 +9,10 @@ declare global {
         Portal: Portal;
     }
     interface InstanceInfo {
-        LastTeleport?: Portal;
+        /**
+         * The last portal this droplet was teleported through.
+         */
+        lastTeleport?: Portal;
     }
 }
 
@@ -23,7 +26,7 @@ export default class Portal extends ItemTrait {
 
         inLaser.CanTouch = true;
         VirtualCollision.onDropletTouched(model, inLaser, (droplet, dropletInfo) => {
-            if (dropletInfo.LastTeleport === portal || isPlacedItemUnusable(modelInfo)) {
+            if (dropletInfo.lastTeleport === portal || isPlacedItemUnusable(modelInfo)) {
                 return;
             }
 
@@ -39,7 +42,7 @@ export default class Portal extends ItemTrait {
                 return;
             }
 
-            dropletInfo.LastTeleport = portal;
+            dropletInfo.lastTeleport = portal;
             droplet.CFrame = out.CFrame;
         });
 

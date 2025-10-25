@@ -6,7 +6,7 @@ import CurrencyService from "server/services/data/CurrencyService";
 import DataService from "server/services/data/DataService";
 import PlaytimeService from "server/services/data/PlaytimeService";
 import ItemService from "server/services/item/ItemService";
-import PermissionsService from "server/services/permissions/PermissionsService";
+import PermissionService from "server/services/permissions/PermissionService";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import { getPlayerCharacter } from "shared/hamster/getPlayerCharacter";
 import Item from "shared/item/Item";
@@ -54,7 +54,7 @@ export default class ResearchService implements OnStart {
         private readonly currencyService: CurrencyService,
         private readonly dataService: DataService,
         private readonly itemService: ItemService,
-        private readonly permissionsService: PermissionsService,
+        private readonly permissionsService: PermissionService,
         private readonly playtimeService: PlaytimeService,
     ) {
         this.researching = dataService.empireData.items.researching;
@@ -369,7 +369,7 @@ export default class ResearchService implements OnStart {
                     break;
                 }
                 case "redeemRevenue": {
-                    const offlineRevenue = this.currencyService.getOfflineRevenue().mul(effect.seconds);
+                    const offlineRevenue = this.currencyService.getOfflineRevenue().mulConstant(effect.seconds);
                     const payout = new Map<Currency, OnoeNum>();
                     for (const currency of effect.currencies) {
                         const amount = offlineRevenue.get(currency);

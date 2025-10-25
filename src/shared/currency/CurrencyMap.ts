@@ -158,7 +158,7 @@ namespace CurrencyMap {
      * // ["Power", new OnoeNum(600)],
      * // ["Bitcoin", new OnoeNum(1)]
      * // ]);
-     *
+     *```
      * @param this The map to multiply.
      * @param other  The map to multiply by.
      * @param inplace If true, the result will be stored in this map. Otherwise, a new map will be created.

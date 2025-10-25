@@ -1,8 +1,7 @@
-import { getInstanceInfo } from "@antivivi/vrldk";
+import { getAllInstanceInfo } from "@antivivi/vrldk";
 import Difficulty from "@rbxts/ejt";
 import { OnoeNum } from "@rbxts/serikanum";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
-import eat from "shared/hamster/eat";
 import Droplet from "shared/item/Droplet";
 import Item from "shared/item/Item";
 import Conveyor from "shared/item/traits/conveyor/Conveyor";
@@ -35,8 +34,16 @@ export = new Item(script.Name)
     .onLoad((model) => {
         const right = model.GetPivot().mul(CFrame.Angles(0, math.pi / 2, 0)).LookVector.Unit;
 
-        const connection = getInstanceInfo(model, "OnUpgraded")?.connect((dropletModel) => {
-            const dropletId = getInstanceInfo(dropletModel, "DropletId");
+        const modelInfo = getAllInstanceInfo(model);
+        const onUpgraded = modelInfo.upgraderTriggered;
+
+        if (onUpgraded === undefined)
+            throw `Tried to load Droplet Diverger on model without OnUpgraded event: ${model.GetFullName()}`;
+
+        onUpgraded.connect((dropletModel) => {
+            const dropletInfo = getAllInstanceInfo(dropletModel);
+
+            const dropletId = dropletInfo.dropletId;
             if (dropletId === undefined) return;
             const droplet = Droplet.getDroplet(dropletId);
             if (droplet === undefined) throw "Droplet not found for id: " + dropletId;
@@ -70,8 +77,5 @@ export = new Item(script.Name)
 
             const impulse = right.mul(side).mul(dropletModel.Mass).mul(25);
             setDropletVelocity(dropletModel, impulse);
-        });
-        eat(() => {
-            connection?.Disconnect();
         });
     });

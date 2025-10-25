@@ -23,9 +23,9 @@ export = new Item("GrassDropletInfuser")
     .trait(Upgrader)
     .setRequirement(
         (dropletInfo) =>
-            dropletInfo.DropletId === Droplet.GrassDroplet.id ||
-            dropletInfo.DropletId === Droplet.NativeGrassDroplet.id ||
-            dropletInfo.DropletId === Droplet.MassiveGrassDroplet.id,
+            dropletInfo.dropletId === Droplet.GrassDroplet.id ||
+            dropletInfo.dropletId === Droplet.NativeGrassDroplet.id ||
+            dropletInfo.dropletId === Droplet.MassiveGrassDroplet.id,
     )
     .setMul(new CurrencyBundle().set("Funds", 2000))
 

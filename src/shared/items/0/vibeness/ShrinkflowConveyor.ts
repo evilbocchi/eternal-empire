@@ -1,4 +1,4 @@
-import { getInstanceInfo } from "@antivivi/vrldk";
+import { getAllInstanceInfo } from "@antivivi/vrldk";
 import Difficulty from "@rbxts/ejt";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
@@ -24,11 +24,17 @@ export = new Item(script.Name)
     .setSpeed(5)
 
     .trait(Upgrader)
-    .setMul(CurrencyBundle.ones().mul(0.9))
+    .setMul(CurrencyBundle.ones().mulConstant(0.9))
     .exit()
 
     .onLoad((model) => {
-        getInstanceInfo(model, "OnUpgraded")!.connect((droplet) => {
+        const modelInfo = getAllInstanceInfo(model);
+
+        const onUpgraded = modelInfo.upgraderTriggered;
+        if (onUpgraded === undefined)
+            throw `Tried to load Shrinkflow Conveyor on model without OnUpgraded event: ${model.GetFullName()}`;
+
+        onUpgraded.connect((droplet) => {
             droplet.Size = droplet.Size.mul(0.75);
         });
     });

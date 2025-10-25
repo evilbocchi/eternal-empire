@@ -1,4 +1,4 @@
-import { getInstanceInfo } from "@antivivi/vrldk";
+import { getAllInstanceInfo } from "@antivivi/vrldk";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "@rbxts/react";
 import { CollectionService } from "@rbxts/services";
 import useHotkeyWithTooltip from "client/components/hotkeys/useHotkeyWithTooltip";
@@ -7,8 +7,8 @@ import InventoryFilter, {
     useBasicInventoryFilter,
 } from "client/components/item/inventory/InventoryFilter";
 import { PurchaseManager } from "client/components/item/shop/PurchaseWindow";
-import { createShopSlot, updateShopSlot, type ShopSlotHandle } from "client/components/item/shop/ShopSlot";
 import ShopManager, { type ShopCandidate } from "client/components/item/shop/ShopManager";
+import { createShopSlot, updateShopSlot, type ShopSlotHandle } from "client/components/item/shop/ShopSlot";
 import { showErrorToast } from "client/components/toast/ToastService";
 import useProperty from "client/hooks/useProperty";
 import { playSound } from "shared/asset/GameAssets";
@@ -54,7 +54,9 @@ export default function ShopGui() {
         const addCandidate = (hitbox: BasePart) => {
             const model = hitbox.Parent;
             if (model === undefined) return;
-            const itemId = getInstanceInfo(model, "ItemId");
+            const modelInfo = getAllInstanceInfo(model);
+
+            const itemId = modelInfo.itemId;
             if (itemId === undefined) return;
             const item = Items.getItem(itemId);
             if (item === undefined) return;

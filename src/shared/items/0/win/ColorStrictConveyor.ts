@@ -65,9 +65,9 @@ export = new Item(script.Name)
         const touched = new Set<BasePart>();
 
         VirtualCollision.onDropletTouched(model, getSortingPoint(model), (part, instanceInfo) => {
-            if (instanceInfo.DropletId === undefined || touched.has(part)) return;
-            const droplet = Droplet.getDroplet(instanceInfo.DropletId);
-            if (droplet === undefined) throw "Unknown droplet ID: " + instanceInfo.DropletId;
+            if (instanceInfo.dropletId === undefined || touched.has(part)) return;
+            const droplet = Droplet.getDroplet(instanceInfo.dropletId);
+            if (droplet === undefined) throw "Unknown droplet ID: " + instanceInfo.dropletId;
 
             touched.add(part);
             task.delay(0.5, () => touched.delete(part));

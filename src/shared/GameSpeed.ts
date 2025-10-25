@@ -1,4 +1,4 @@
-import { getInstanceInfo } from "@antivivi/vrldk";
+import { getAllInstanceInfo } from "@antivivi/vrldk";
 import { RunService, Workspace } from "@rbxts/services";
 import { PLACED_ITEMS_FOLDER } from "shared/constants";
 import eat from "shared/hamster/eat";
@@ -16,7 +16,8 @@ class GameSpeed {
 
                 // Update all placed items with new speed
                 for (const model of PLACED_ITEMS_FOLDER.GetChildren()) {
-                    getInstanceInfo(model, "UpdateSpeed")?.();
+                    const modelInfo = getAllInstanceInfo(model);
+                    modelInfo.updateSpeed?.();
                 }
             }
         });

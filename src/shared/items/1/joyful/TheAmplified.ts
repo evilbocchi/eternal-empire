@@ -20,7 +20,7 @@ export = new Item(script.Name)
     .soldAt(Class1Shop)
 
     .trait(Upgrader)
-    .setMul(TheAmplifier.trait(Upgrader).mul!.pow(4))
+    .setMul(TheAmplifier.trait(Upgrader).mul!.powConstant(4))
 
     .trait(Conveyor)
     .setSpeed(5)

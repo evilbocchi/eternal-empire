@@ -1,7 +1,7 @@
 //!native
 //!optimize 2
 
-import { getAllInstanceInfo, setInstanceInfo } from "@antivivi/vrldk";
+import { getAllInstanceInfo } from "@antivivi/vrldk";
 import Difficulty from "@rbxts/ejt";
 import { OnoeNum } from "@rbxts/serikanum";
 import { RunService } from "@rbxts/services";
@@ -23,24 +23,23 @@ declare global {
      * Additionally, this data is not replicated to the client, improving performance.
      *
      * @see {@link getAllInstanceInfo} to retrieve the metadata for an instance.
-     * @see {@link setInstanceInfo} to set the metadata for an instance.
      */
     interface InstanceInfo {
         /**
          * Whether the item is actively maintained.
          * If {@link Item.drain} is set, this value will be `false` if the price is not affordable.
          */
-        Maintained?: boolean;
+        maintained?: boolean;
 
         /**
          * Whether the item is currently broken. Broken items should not perform their usual behaviour.
          */
-        Broken?: boolean;
+        broken?: boolean;
 
         /**
          * The placed item data associated with the item model.
          */
-        PlacedItem?: PlacedItem;
+        placedItem?: PlacedItem;
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -296,9 +295,9 @@ export default class Item {
         model.SetAttribute("Area", areaId);
         model.SetAttribute("ItemId", this.id);
 
-        modelInfo.PlacedItem = placedItem;
-        modelInfo.Area = areaId;
-        modelInfo.ItemId = this.id;
+        modelInfo.placedItem = placedItem;
+        modelInfo.area = areaId;
+        modelInfo.itemId = this.id;
         return model;
     }
 
@@ -623,13 +622,6 @@ export default class Item {
      *
      * @param loadCallback Receives the spawned model and item reference.
      * @returns The item instance.
-     *
-     * @example
-     * ```ts
-     * item.onLoad((model) => {
-     *     model.SetAttribute("IsInteractive", true);
-     * });
-     * ```
      */
     onLoad(loadCallback: (model: Model, item: this) => void): this {
         this.LOADS.push(loadCallback);
@@ -642,13 +634,6 @@ export default class Item {
      *
      * @param loadCallback Receives the client-side clone, the item, and the owning player.
      * @returns The item instance.
-     *
-     * @example
-     * ```ts
-     * item.onClientLoad((model, _item, player) => {
-     *     MusicManager.playAmbientLoopFor(player, model);
-     * });
-     * ```
      */
     onClientLoad(loadCallback: (model: Model, item: this, player: Player) => void): this {
         this.CLIENT_LOADS.push(loadCallback);
@@ -666,6 +651,27 @@ export default class Item {
         this.onLoad((model, item) => loadCallback(model, item, undefined));
         this.onClientLoad((model, item, player) => loadCallback(model, item, player));
         return this;
+    }
+
+    /**
+     * Calls load callbacks from {@link onLoad}.
+     * @param model The model of the item to load.
+     */
+    load(model: Model) {
+        for (const callback of this.LOADS) {
+            callback(model, this);
+        }
+    }
+
+    /**
+     * Calls client load callbacks from {@link onClientLoad}.
+     * @param model The model of the item to load.
+     * @param player The player for whom the item is being loaded.
+     */
+    clientLoad(model: Model, player: Player) {
+        for (const callback of this.CLIENT_LOADS) {
+            callback(model, this, player);
+        }
     }
 
     /**
@@ -710,7 +716,7 @@ export default class Item {
 
                 if (model === undefined) return;
                 const instanceInfo = getAllInstanceInfo(model);
-                instanceInfo.Maintained = affordable;
+                instanceInfo.maintained = affordable;
             },
             1,
         );

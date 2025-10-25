@@ -7,7 +7,7 @@ import { TooltipManager } from "client/components/tooltip/TooltipWindow";
 import { RobotoMono, RobotoSlab, RobotoSlabBold } from "shared/asset/GameFonts";
 import { getAsset } from "shared/asset/AssetMap";
 import { CURRENCY_DETAILS } from "shared/currency/CurrencyDetails";
-import Softcaps, { performSoftcap } from "shared/currency/mechanics/Softcaps";
+import Softcaps, { calculateSoftcap } from "shared/currency/mechanics/Softcaps";
 
 export function BalanceOptionStyling({ details }: { details: CurrencyDetails }) {
     return (
@@ -114,7 +114,7 @@ export default function BalanceOption({
         const builder = new StringBuilder();
         const starts = new Array<OnoeNum>();
 
-        const [recippow, recippowStarts] = performSoftcap(amount, softcap.recippow);
+        const [recippow, recippowStarts] = calculateSoftcap(amount, softcap.recippow);
         if (recippow !== undefined) {
             capped = true;
             builder.append("^(1/").append(recippow.toString()).append(")");
@@ -124,7 +124,7 @@ export default function BalanceOption({
         }
 
         // Check division softcap
-        const [div, divStarts] = performSoftcap(amount, softcap.div);
+        const [div, divStarts] = calculateSoftcap(amount, softcap.div);
         if (div !== undefined) {
             capped = true;
             builder.append("/").append(div.toString());

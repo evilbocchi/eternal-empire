@@ -9,7 +9,7 @@ import eat from "shared/hamster/eat";
 import Droplet from "shared/item/Droplet";
 import type Item from "shared/item/Item";
 
-type DropletTouchedCallback = NonNullable<InstanceInfo["DropletTouched"]>;
+type DropletTouchedCallback = NonNullable<InstanceInfo["dropletTouched"]>;
 
 function uid(instance: Instance) {
     return instance.GetAttribute("uid") as number;
@@ -368,7 +368,7 @@ export namespace VirtualCollision {
     export function onDropletTouched(model: Model, part: BasePart, callback: DropletTouchedCallback) {
         part.CanTouch = true;
         const instanceInfo = getAllInstanceInfo(part);
-        instanceInfo.DropletTouched = callback;
+        instanceInfo.dropletTouched = callback;
         const [reference, partUid] = trackInstance(model, part);
         if (callback !== undefined) {
             reference.set("DropletTouched", callback);

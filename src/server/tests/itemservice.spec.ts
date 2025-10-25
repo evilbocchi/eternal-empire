@@ -123,7 +123,7 @@ export = function () {
             model.Parent = PLACED_ITEMS_FOLDER;
 
             const modelInfo = getAllInstanceInfo(model);
-            modelInfo.Boosts = new Map([[REPAIR_BOOST_KEY, { ignoresLimitations: true } as ItemBoost]]);
+            modelInfo.boosts = new Map([[REPAIR_BOOST_KEY, { ignoresLimitations: true } as ItemBoost]]);
 
             const protection: RepairProtectionState = {
                 tier: "Great",
@@ -136,8 +136,8 @@ export = function () {
             Server.Item.beginBreakdown([placementId]);
 
             expect(Server.Item.getBrokenPlacedItems().has(placementId)).to.equal(true);
-            expect(modelInfo.Broken).to.equal(true);
-            expect(modelInfo.Boosts?.has(REPAIR_BOOST_KEY)).to.equal(false);
+            expect(modelInfo.broken).to.equal(true);
+            expect(modelInfo.boosts?.has(REPAIR_BOOST_KEY)).to.equal(false);
             expect(items.repairProtection.has(placementId)).to.equal(false);
 
             model.Destroy();
@@ -174,7 +174,7 @@ export = function () {
 
             expect(success).to.equal(true);
             expect(Server.Item.getBrokenPlacedItems().has(placementId)).to.equal(false);
-            expect(modelInfo.Broken).to.equal(false);
+            expect(modelInfo.broken).to.equal(false);
 
             const protection = items.repairProtection.get(placementId);
             expect(protection).to.be.ok();
@@ -184,7 +184,7 @@ export = function () {
                 expect(protection.expiresAt <= after + REPAIR_PROTECTION_DURATIONS.Great).to.equal(true);
             }
 
-            const boost = modelInfo.Boosts?.get(REPAIR_BOOST_KEY);
+            const boost = modelInfo.boosts?.get(REPAIR_BOOST_KEY);
             expect(boost).to.be.ok();
             if (boost !== undefined) {
                 expect(boost.dropRateMul).to.equal(REPAIR_BOOST_MULTIPLIERS.Great);

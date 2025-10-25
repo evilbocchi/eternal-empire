@@ -17,7 +17,7 @@ export = new Item(script.Name)
     .setLayoutOrder(99)
     .trait(Gear)
     .setOnUse(({ item, tool }) => {
-        const fundsGain = Server.Currency.getOfflineRevenue().mul(REWARD_SECONDS).get("Funds");
+        const fundsGain = Server.Currency.getOfflineRevenue().mulConstant(REWARD_SECONDS).get("Funds");
         if (fundsGain === undefined || fundsGain.lessEquals(0)) {
             return false;
         }

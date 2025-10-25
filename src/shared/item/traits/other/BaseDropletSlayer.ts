@@ -25,12 +25,12 @@ export default abstract class BaseDropletSlayer extends ItemTrait {
         const item = slayer.item;
         const upgrader = item.trait(Upgrader);
         const modelInfo = getAllInstanceInfo(model);
-        modelInfo.Boosts ??= new Map();
-        const boosts = modelInfo.Boosts;
+        modelInfo.boosts ??= new Map();
+        const boosts = modelInfo.boosts;
 
         const laser = model.WaitForChild("PulsatingLaser") as BasePart;
         const laserInfo = getAllInstanceInfo(laser);
-        laserInfo.Maintained = false;
+        laserInfo.maintained = false;
 
         const overlapParams = new OverlapParams();
         overlapParams.CollisionGroup = "DropletInquirer";
@@ -40,7 +40,7 @@ export default abstract class BaseDropletSlayer extends ItemTrait {
         const ref = item.repeat(
             model,
             () => {
-                laserInfo.Maintained = true;
+                laserInfo.maintained = true;
                 for (const droplet of Workspace.GetPartBoundsInBox(laserCFrame, laserSize, overlapParams)) {
                     Upgrader.upgrade({
                         model,
@@ -52,7 +52,7 @@ export default abstract class BaseDropletSlayer extends ItemTrait {
                         laserId: laserIdFactory?.(),
                     });
                 }
-                laserInfo.Maintained = false;
+                laserInfo.maintained = false;
                 this.activatePacket.toAllClients(model);
 
                 let newCooldown = slayer.cooldown;

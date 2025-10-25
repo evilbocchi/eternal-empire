@@ -13,6 +13,6 @@ export = new Item(script.Name)
     .soldAt(ClassLowerNegativeShop)
 
     .trait(Furnace)
-    .acceptsUpgrades(false)
+    .setIsCauldron(true)
     .setMul(new CurrencyBundle().set("Funds", 25))
     .exit();

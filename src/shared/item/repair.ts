@@ -43,7 +43,7 @@ export function applyRepairBoostToItem(modelInfo: InstanceInfo, item: Item, tier
     }
     if (item.findTrait("Upgrader")) {
         boost.upgradeCompound = {
-            mul: CurrencyBundle.ones().mul(multiplier),
+            mul: CurrencyBundle.ones().mulConstant(multiplier),
         };
     }
     if (item.findTrait("Furnace")) {
@@ -55,14 +55,14 @@ export function applyRepairBoostToItem(modelInfo: InstanceInfo, item: Item, tier
 }
 
 export function clearRepairBoostFromModel(modelInfo: InstanceInfo) {
-    if (modelInfo.Boosts?.has(REPAIR_BOOST_KEY)) {
+    if (modelInfo.boosts?.has(REPAIR_BOOST_KEY)) {
         Boostable.removeBoost(modelInfo, REPAIR_BOOST_KEY);
-        modelInfo.UpdateSpeed?.();
+        modelInfo.updateSpeed?.();
     }
 
     for (const [_drop, dropInfo] of Dropper.SPAWNED_DROPS) {
-        if (dropInfo.ItemModelInfo !== modelInfo) continue;
-        if (dropInfo.Boosts?.has(REPAIR_BOOST_KEY)) {
+        if (dropInfo.itemModelInfo !== modelInfo) continue;
+        if (dropInfo.boosts?.has(REPAIR_BOOST_KEY)) {
             Boostable.removeBoost(dropInfo, REPAIR_BOOST_KEY);
         }
     }

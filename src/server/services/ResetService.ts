@@ -15,9 +15,9 @@
  * @since 1.0.0
  */
 import Signal from "@antivivi/lemon-signal";
-import { OnoeNum } from "@rbxts/serikanum";
 import { getPlayer } from "@antivivi/vrldk";
 import { OnInit, OnStart, Service } from "@flamework/core";
+import { OnoeNum } from "@rbxts/serikanum";
 import { BadgeService, Players, RunService } from "@rbxts/services";
 import CurrencyService from "server/services/data/CurrencyService";
 import DataService from "server/services/data/DataService";
@@ -25,14 +25,13 @@ import NamedUpgradeService from "server/services/data/NamedUpgradeService";
 import ItemService from "server/services/item/ItemService";
 import ChatHookService from "server/services/permissions/ChatHookService";
 import { log } from "server/services/permissions/LogService";
-import PermissionsService from "server/services/permissions/PermissionsService";
+import PermissionService from "server/services/permissions/PermissionService";
 import RevenueService from "server/services/RevenueService";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import { CURRENCY_DETAILS } from "shared/currency/CurrencyDetails";
 import { RESET_LAYERS } from "shared/currency/mechanics/ResetLayer";
 import fixDuplicatedItemsData from "shared/data/loading/fixDuplicatedItemsData";
 import eat from "shared/hamster/eat";
-import Operative from "shared/item/traits/Operative";
 import Items from "shared/items/Items";
 import NamedUpgrades from "shared/namedupgrade/NamedUpgrades";
 import Packets from "shared/Packets";
@@ -59,13 +58,13 @@ export default class ResetService implements OnInit, OnStart {
      * Constructs the ResetService with all required dependencies.
      */
     constructor(
-        private chatHookService: ChatHookService,
-        private dataService: DataService,
-        private itemService: ItemService,
-        private currencyService: CurrencyService,
-        private namedUpgradeService: NamedUpgradeService,
-        private revenueService: RevenueService,
-        private permissionsService: PermissionsService,
+        private readonly chatHookService: ChatHookService,
+        private readonly dataService: DataService,
+        private readonly itemService: ItemService,
+        private readonly currencyService: CurrencyService,
+        private readonly namedUpgradeService: NamedUpgradeService,
+        private readonly revenueService: RevenueService,
+        private readonly permissionsService: PermissionService,
     ) {}
 
     /**
@@ -222,13 +221,9 @@ export default class ResetService implements OnInit, OnStart {
         const amount = balance.get(resetLayer.scalesWith);
         if (amount === undefined || resetLayer.minimum.moreThan(amount)) return;
 
-        let value = new CurrencyBundle().set(resetLayer.gives, resetLayer.formula.evaluate(amount));
+        const baseValue = new CurrencyBundle().set(resetLayer.gives, resetLayer.formula.evaluate(amount));
 
-        let [totalAdd, totalMul, totalPow] = Operative.template();
-        [totalAdd, totalMul, totalPow] = this.revenueService.applyGlobal(totalAdd, totalMul, totalPow, RESET_UPGRADES);
-        value = Operative.coalesce(value, totalAdd, totalMul, totalPow);
-        this.revenueService.performSoftcaps(value.amountPerCurrency);
-        return value;
+        return this.revenueService.calculateSingleRevenue(baseValue, undefined, RESET_UPGRADES);
     }
 
     /**

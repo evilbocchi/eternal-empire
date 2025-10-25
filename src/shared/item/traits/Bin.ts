@@ -39,7 +39,7 @@ export default class Bin extends Operative {
             if (lastCollection === undefined) return;
             const diff = math.min(tick() - lastCollection, bin.limit);
             placedItem.lastCollection = tick();
-            const revenue = bin.mul?.mul(CurrencyService.getOfflineRevenue()).mul(diff);
+            const revenue = bin.mul?.mul(CurrencyService.getOfflineRevenue()).mulConstant(diff);
             if (revenue === undefined) return;
             lastCollectionPacket.set(model, placedItem.lastCollection);
             print(`Collected ${revenue} from ${item.name}`);

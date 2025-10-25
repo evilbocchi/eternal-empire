@@ -27,7 +27,7 @@ export = new Item(script.Name)
 
     .trait(Upgrader)
     .setAdd(new CurrencyBundle().set("Purifier Clicks", 2).set("Dark Matter", 0.05))
-    .setRequirement((dropletInfo) => dropletInfo.Upgrades?.has("Ablaze") ?? false)
+    .setRequirement((dropletInfo) => dropletInfo.upgrades?.has("Ablaze") ?? false)
     .setSky(true)
 
     .trait(Ablaze)

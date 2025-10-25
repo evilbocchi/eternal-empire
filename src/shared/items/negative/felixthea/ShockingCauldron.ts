@@ -22,7 +22,7 @@ export = new Item(script.Name)
     .setFormulaXCap(new CurrencyBundle().set("Power", 500e6))
 
     .trait(Furnace)
-    .acceptsUpgrades(false)
+    .setIsCauldron(true)
     .applyFormula(
         (v, item) => item.setMul(mul.set("Funds", v)),
         () => Server.Currency.get("Power"),

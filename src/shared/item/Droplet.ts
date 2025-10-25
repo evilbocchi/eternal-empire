@@ -1,15 +1,14 @@
 //!native
 //!optimize 2
 
+import { getAllInstanceInfo } from "@antivivi/vrldk";
 import Difficulty from "@rbxts/ejt";
-import { getAllInstanceInfo, getInstanceInfo } from "@antivivi/vrldk";
 import { CollectionService, Debris, RunService, TweenService } from "@rbxts/services";
 import { Server } from "shared/api/APIExpose";
 import { ASSETS } from "shared/asset/GameAssets";
 import { IS_EDIT, IS_SERVER } from "shared/Context";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import eat from "shared/hamster/eat";
-import Operative from "shared/item/traits/Operative";
 import Packets from "shared/Packets";
 
 declare global {
@@ -17,31 +16,31 @@ declare global {
         /**
          * The health of this droplet instance.
          */
-        Health?: number;
+        health?: number;
 
         /**
          * The unique ID of this droplet instance.
          */
-        DropletId?: string;
+        dropletId?: string;
 
         /**
          * The item ID this instance represents.
          *
          * If the instance is a droplet model, this will be the item that spawned it.
          */
-        ItemId?: string;
+        itemId?: string;
 
         /**
          * The area this instance belongs to.
          */
-        Area?: AreaId;
+        area?: AreaId;
 
         /**
-         * Fired when a droplet is touched by something.
+         * Fired when this instance has been touched by a droplet.
          * @param droplet The droplet that was touched.
          * @param dropletInfo The information about the droplet.
          */
-        DropletTouched?: (droplet: BasePart, dropletInfo: InstanceInfo) => void;
+        dropletTouched?: (droplet: BasePart, dropletInfo: InstanceInfo) => void;
     }
 
     interface DropletAssets extends Folder {
@@ -834,7 +833,8 @@ export default class Droplet {
             model.CFrame = cframe;
         }
         const health = this.health;
-        const itemId = getInstanceInfo(dropperModel, "ItemId");
+        const dropperModelInfo = getAllInstanceInfo(dropperModel);
+        const itemId = dropperModelInfo.itemId;
         const areaId = Server.Item.getPlacedItem(dropperModel.Name)?.area as AreaId | undefined;
 
         return () => {
@@ -842,14 +842,14 @@ export default class Droplet {
             spawned.CustomPhysicalProperties = Droplet.PHYSICAL_PROPERTIES;
 
             const instanceInfo = getAllInstanceInfo(spawned);
-            instanceInfo.Upgrades = new Map();
-            instanceInfo.Health = health;
-            instanceInfo.DropletId = this.id;
-            instanceInfo.ItemId = itemId;
-            instanceInfo.Area = areaId;
+            instanceInfo.upgrades = new Map();
+            instanceInfo.health = health;
+            instanceInfo.dropletId = this.id;
+            instanceInfo.itemId = itemId;
+            instanceInfo.area = areaId;
 
             spawned.Touched.Connect((part) => {
-                getInstanceInfo(part, "DropletTouched")?.(spawned, instanceInfo);
+                getAllInstanceInfo(part).dropletTouched?.(spawned, instanceInfo);
             });
 
             const spawnId = tostring(++Droplet.instatiationCount);
@@ -924,18 +924,6 @@ export default class Droplet {
     }
 
     /**
-     * Coalesce operative terms and the value of the droplet into a single currency bundle.
-     *
-     * @param totalAdd Total addition term.
-     * @param totalMul Total multiplication term.
-     * @param totalPow Total power term.
-     * @returns The coalesced worth of the droplet.
-     */
-    coalesce(totalAdd: CurrencyBundle, totalMul: CurrencyBundle, totalPow: CurrencyBundle) {
-        return Operative.coalesce(this.value, totalAdd, totalMul, totalPow);
-    }
-
-    /**
      * Gets the droplet at the given ID.
      *
      * @param dropletId The ID of the droplet to get.
@@ -948,29 +936,12 @@ export default class Droplet {
         return undefined;
     }
 
-    /**
-     * Calculates negative status effects applied to the droplet.
-     *
-     * @param instanceInfo The instance info of the droplet.
-     * @returns A tuple containing the nerf value and a boolean indicating if the droplet had reached the skyline.
-     */
-    static getNerf(instanceInfo: InstanceInfo) {
-        let nerf = 1;
-        const isSky = instanceInfo.Sky;
-        if (isSky === true) {
-            nerf /= 250;
-        }
-
-        nerf *= math.min(100, instanceInfo.Health!) / 100;
-        return $tuple(nerf, isSky);
-    }
-
     static {
         const heartbeatConnection = RunService.Heartbeat.Connect(() => {
             for (const [dropletModel, instanceInfo] of this.SPAWNED_DROPLETS) {
-                if (instanceInfo.Health === undefined) continue;
+                if (instanceInfo.health === undefined) continue;
 
-                if (instanceInfo.Health <= 0 || dropletModel.Position.Y > 1000) {
+                if (instanceInfo.health <= 0 || dropletModel.Position.Y > 1000) {
                     this.SPAWNED_DROPLETS.delete(dropletModel);
                     this.MODEL_PER_SPAWN_ID.delete(dropletModel.Name);
                     dropletModel.Anchored = true;

@@ -42,10 +42,7 @@ type PermissionList = "banned" | "trusted" | "managers";
  * Integrates with other services for data, items, upgrades, and messaging.
  */
 @Service()
-export default class PermissionsService implements OnStart, OnPlayerAdded {
-    /**
-     * Constructs the PermissionsService with all required dependencies.
-     */
+export default class PermissionService implements OnStart, OnPlayerAdded {
     constructor(
         private dataService: DataService,
         private chatHookService: ChatHookService,

@@ -25,19 +25,19 @@ declare global {
         /**
          * The number of droplets that can be dropped per second from this drop location.
          */
-        DropRate?: number;
+        dropRate?: number;
         /**
          * The last time a droplet was dropped from this drop location.
          */
-        LastDrop?: number;
+        lastDrop?: number;
         /**
          * The instance information of the item model that this instance is a part of.
          */
-        ItemModelInfo?: InstanceInfo;
+        itemModelInfo?: InstanceInfo;
         /**
          * A function that instantiates a droplet at this drop location.
          */
-        Instantiator?: () => void;
+        instantiator?: () => void;
     }
 }
 
@@ -128,21 +128,21 @@ export default class Dropper extends ItemTrait {
             const instantiator = dropper.getDroplet(drop.Name)?.getInstantiator(model, drop);
             const areaId = Server.Item.getPlacedItem(model.Name)?.area as AreaId | undefined;
             const info = getAllInstanceInfo(drop);
-            info.Area = areaId;
-            if (info.Boosts === undefined) {
-                info.Boosts = new Map<string, ItemBoost>();
+            info.area = areaId;
+            if (info.boosts === undefined) {
+                info.boosts = new Map<string, ItemBoost>();
             }
-            if (info.BoostAdded === undefined) {
-                info.BoostAdded = new Set<(boost: ItemBoost) => void>();
+            if (info.boostAdded === undefined) {
+                info.boostAdded = new Set<(boost: ItemBoost) => void>();
             }
-            if (info.BoostRemoved === undefined) {
-                info.BoostRemoved = new Set<(boost: ItemBoost) => void>();
+            if (info.boostRemoved === undefined) {
+                info.boostRemoved = new Set<(boost: ItemBoost) => void>();
             }
-            info.DropRate = dropper.dropRate;
-            info.ItemModelInfo = modelInfo;
+            info.dropRate = dropper.dropRate;
+            info.itemModelInfo = modelInfo;
 
             if (instantiator !== undefined) {
-                info.Instantiator = Dropper.wrapInstantiator(instantiator, dropper, model, drop);
+                info.instantiator = Dropper.wrapInstantiator(instantiator, dropper, model, drop);
             }
 
             Dropper.SPAWNED_DROPS.set(drop, info);
@@ -273,19 +273,19 @@ export default class Dropper extends ItemTrait {
             const t = tick();
             for (const [_d, info] of this.SPAWNED_DROPS) {
                 // Sanity check: drop must have boosts and a dropper model
-                const boosts = info.Boosts;
+                const boosts = info.boosts;
                 if (boosts === undefined) continue;
-                const dropperInfo = info.ItemModelInfo;
+                const dropperInfo = info.itemModelInfo;
                 if (dropperInfo === undefined || isPlacedItemUnusable(dropperInfo)) continue;
 
                 // First drop, just wait for next opportunity
-                if (info.LastDrop === undefined) {
-                    info.LastDrop = t;
+                if (info.lastDrop === undefined) {
+                    info.lastDrop = t;
                     continue;
                 }
 
                 // No drop rate, no droplets
-                let dropRate = info.DropRate;
+                let dropRate = info.dropRate;
                 if (dropRate === undefined) continue;
 
                 // Apply weather multipliers
@@ -300,11 +300,11 @@ export default class Dropper extends ItemTrait {
                 if (dropRate === 0) continue;
 
                 // Drop a droplet if enough time has passed
-                if (t > info.LastDrop + 1 / dropRate / speed) {
-                    const area = AREAS[info.Area!];
+                if (t > info.lastDrop + 1 / dropRate / speed) {
+                    const area = AREAS[info.area!];
                     if (area !== undefined && area.dropletCount > area.getDropletLimit()) continue;
-                    info.LastDrop = t;
-                    info.Instantiator!();
+                    info.lastDrop = t;
+                    info.instantiator!();
                 }
             }
         });

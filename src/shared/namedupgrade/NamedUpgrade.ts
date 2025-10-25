@@ -1,6 +1,7 @@
 //!native
 //!optimize 2
 import CurrencyBundle from "shared/currency/CurrencyBundle";
+import { IOperative } from "shared/item/traits/Operative";
 
 /**
  * Abstract base class for named upgrades, supporting configuration of name, description, cap, image, price, and formulas.
@@ -118,26 +119,25 @@ export default abstract class NamedUpgrade<T = any> {
     /**
      * Applies the upgrade effect to a value, given the upgrade amount.
      * @param value The base value.
-     * @param amount The upgrade amount (optional).
+     * @param amount The upgrade amount.
      * @returns The upgraded value.
      */
-    apply(value: T, amount?: number) {
-        if (amount === 0 || amount === undefined) return value;
+    apply(value: T, amount: number) {
         if (this.step !== undefined && this.stepFormula !== undefined)
             value = this.stepFormula(value, math.floor(amount / this.step));
+
         if (this.mainFormula !== undefined) value = this.mainFormula(value, amount);
+
         return value;
     }
 }
 
-type PriceAmountFunction = (arg: number) => CurrencyBundle;
-
 /**
- * Upgrade class for price-related upgrades, supporting multiplicative and power operations.
+ * Upgrade class for {@link CurrencyBundle}-related upgrades, supporting multiplicative and power operations.
  */
-export class PriceUpgrade extends NamedUpgrade<CurrencyBundle> {
-    operative?: "add" | "mul" | "pow";
-    operationFormula?: PriceAmountFunction;
+export class CurrencyBundleUpgrade extends NamedUpgrade<CurrencyBundle> {
+    mulFormula?: (upgradeAmount: number) => CurrencyBundle;
+    powFormula?: (upgradeAmount: number) => CurrencyBundle;
 
     /**
      * Sets a step-based multiplicative formula for the upgrade.
@@ -145,9 +145,9 @@ export class PriceUpgrade extends NamedUpgrade<CurrencyBundle> {
      * @param formula The formula function.
      * @returns This upgrade instance.
      */
-    setStepMul(step: number, formula: PriceAmountFunction) {
+    setStepMul(step: number, formula: (steps: number) => CurrencyBundle) {
         this.step = step;
-        this.stepFormula = (y, x) => y.mul(formula(x));
+        this.stepFormula = (value, steps) => value.mul(formula(steps));
         return this;
     }
 
@@ -156,10 +156,8 @@ export class PriceUpgrade extends NamedUpgrade<CurrencyBundle> {
      * @param formula The formula function.
      * @returns This upgrade instance.
      */
-    setMul(formula: PriceAmountFunction) {
-        this.operative = "mul";
-        this.operationFormula = formula;
-        this.mainFormula = (y, x) => y.mul(formula(x));
+    setMul(formula: (upgradeAmount: number) => CurrencyBundle) {
+        this.mulFormula = formula;
         return this;
     }
 
@@ -168,11 +166,25 @@ export class PriceUpgrade extends NamedUpgrade<CurrencyBundle> {
      * @param formula The formula function.
      * @returns This upgrade instance.
      */
-    setPow(formula: PriceAmountFunction) {
-        this.operative = "pow";
-        this.operationFormula = formula;
-        this.mainFormula = (y, x) => y.pow(formula(x));
+    setPow(formula: (upgradeAmount: number) => CurrencyBundle) {
+        this.powFormula = formula;
         return this;
+    }
+
+    getOperative(amount: number): IOperative {
+        return {
+            mul: this.mulFormula?.(amount),
+            pow: this.powFormula?.(amount),
+        };
+    }
+
+    override apply(value: CurrencyBundle, amount: number) {
+        if (this.step !== undefined && this.stepFormula !== undefined)
+            value = this.stepFormula(value, math.floor(amount / this.step));
+
+        if (this.mulFormula !== undefined) value = value.mul(this.mulFormula(amount));
+        if (this.powFormula !== undefined) value = value.pow(this.powFormula(amount));
+        return value;
     }
 
     /**
@@ -181,30 +193,21 @@ export class PriceUpgrade extends NamedUpgrade<CurrencyBundle> {
      * @returns The effect as a string.
      */
     toString(level: number) {
-        if (this.operationFormula === undefined) return "";
-        let prefix: string;
-        switch (this.operative) {
-            case "add":
-                prefix = "+";
-                break;
-            case "mul":
-                prefix = "x";
-                break;
-            case "pow":
-                prefix = "^";
-                break;
-            default:
-                prefix = "";
-                break;
+        let str = "";
+        if (this.mulFormula !== undefined) {
+            str += `x${this.mulFormula(level).toString()}`;
         }
-        return prefix + this.operationFormula(level).toString();
+        if (this.powFormula !== undefined) {
+            str += `^${this.powFormula(level).toString()}`;
+        }
+        return str;
     }
 }
 
 /**
  * Upgrade for furnace-type objects.
  */
-export class FurnaceUpgrade extends PriceUpgrade {
+export class FurnaceUpgrade extends CurrencyBundleUpgrade {
     constructor() {
         super();
         this.types.add("Furnace");
@@ -214,7 +217,7 @@ export class FurnaceUpgrade extends PriceUpgrade {
 /**
  * Upgrade for generator-type objects.
  */
-export class GeneratorUpgrade extends PriceUpgrade {
+export class GeneratorUpgrade extends CurrencyBundleUpgrade {
     constructor() {
         super();
         this.types.add("Generator");
@@ -224,7 +227,7 @@ export class GeneratorUpgrade extends PriceUpgrade {
 /**
  * Upgrade for reset-type objects.
  */
-export class ResetUpgrade extends PriceUpgrade {
+export class ResetUpgrade extends CurrencyBundleUpgrade {
     constructor() {
         super();
         this.types.add("Reset");
@@ -234,7 +237,7 @@ export class ResetUpgrade extends PriceUpgrade {
 /**
  * Upgrade that applies to both furnace and generator types.
  */
-export class GainUpgrade extends PriceUpgrade {
+export class GainUpgrade extends CurrencyBundleUpgrade {
     constructor() {
         super();
         this.types.add("Furnace");

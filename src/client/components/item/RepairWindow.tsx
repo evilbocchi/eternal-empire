@@ -106,7 +106,7 @@ export class RepairManager {
         this.model = toRepair;
         this.modelInfo = toRepair ? getAllInstanceInfo(toRepair) : undefined;
         this.placementId = toRepair ? toRepair.Name : undefined;
-        const itemId = this.modelInfo ? this.modelInfo.ItemId : undefined;
+        const itemId = this.modelInfo ? this.modelInfo.itemId : undefined;
         if (itemId) {
             this.item = Items.getItem(itemId);
         }

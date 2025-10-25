@@ -1,4 +1,4 @@
-import { setInstanceInfo } from "@antivivi/vrldk";
+import { getAllInstanceInfo } from "@antivivi/vrldk";
 import Difficulty from "@rbxts/ejt";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
@@ -10,7 +10,9 @@ let breakerCount = 0;
 let firstBreaker: Model | undefined;
 const update = () => {
     if (firstBreaker === undefined) return;
-    setInstanceInfo(firstBreaker, "DropletIncrease", 10 + 15 * math.pow(breakerCount, 0.75));
+    const firstBreakerInfo = getAllInstanceInfo(firstBreaker);
+    // Diminishing from 25 increase to 10 increase as more breakers are added
+    firstBreakerInfo.dropletIncrease = 10 + 15 * math.pow(breakerCount, 0.75);
 };
 
 export = new Item(script.Name)

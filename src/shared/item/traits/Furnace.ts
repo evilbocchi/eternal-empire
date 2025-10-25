@@ -1,15 +1,17 @@
 //!native
 //!optimize 2
-import { findBaseParts, getAllInstanceInfo, setInstanceInfo } from "@antivivi/vrldk";
+import { findBaseParts, getAllInstanceInfo } from "@antivivi/vrldk";
 import { OnoeNum } from "@rbxts/serikanum";
 import { Debris } from "@rbxts/services";
 import { Server } from "shared/api/APIExpose";
+import { IS_EDIT } from "shared/Context";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
 import Operative from "shared/item/traits/Operative";
 import isPlacedItemUnusable from "shared/item/utils/isPlacedItemUnusable";
 import { VirtualCollision } from "shared/item/utils/VirtualReplication";
 import Packets from "shared/Packets";
+import Sandbox from "shared/Sandbox";
 
 declare global {
     interface ItemTraits {
@@ -19,22 +21,16 @@ declare global {
         /**
          * Whether this droplet has already been incinerated by a furnace.
          */
-        Incinerated?: boolean;
+        incinerated?: boolean;
 
         /**
          * Fired when a droplet is processed by this furnace model.
          * If this is not defined, the default packet {@link Packets.dropletBurnt} will be sent to all clients instead.
          * @param result The resulting value gained from processing the droplet.
-         * @param genericResult The value of the droplet before any furnace modifications. This still includes global boosts and upgrades if specified from {@link Furnace.includesGlobalBoosts} and {@link Furnace.includesUpgrades}.
          * @param droplet The droplet being processed.
          * @param dropletInfo The instance info of the droplet being processed.
          */
-        FurnaceProcessed?: (
-            result: CurrencyBundle,
-            genericResult: CurrencyBundle,
-            droplet: BasePart,
-            dropletInfo: InstanceInfo,
-        ) => void;
+        furnaceProcessed?: (result: CurrencyBundle, droplet: BasePart, dropletInfo: InstanceInfo) => void;
     }
 
     interface ItemBoost {
@@ -46,57 +42,80 @@ const ZERO = new OnoeNum(0);
 
 export default class Furnace extends Operative {
     static load(model: Model, furnace: Furnace) {
-        const RevenueService = Server.Revenue;
-        const CurrencyService = Server.Currency;
         const modelInfo = getAllInstanceInfo(model);
         const item = furnace.item;
+        const isSandbox = Sandbox.getEnabled();
 
         for (const lava of findBaseParts(model, "Lava")) {
-            setInstanceInfo(lava, "ItemId", item.id);
-            VirtualCollision.onDropletTouched(model, lava, (droplet, dropletInfo) => {
-                if (dropletInfo.Incinerated === true) return;
-                if (modelInfo.Area !== dropletInfo.Area && dropletInfo.LastTeleport === undefined) {
+            const lavaInfo = getAllInstanceInfo(lava);
+            lavaInfo.itemId = item.id;
+
+            VirtualCollision.onDropletTouched(model, lava, (dropletModel, dropletInfo) => {
+                if (dropletInfo.incinerated === true) return;
+
+                const modelArea = modelInfo.area;
+                if (modelArea === undefined) {
+                    if (!IS_EDIT && !isSandbox) throw `Furnace model ${model.GetFullName()} is missing Area info`;
+                } else if (modelArea !== dropletInfo.area && dropletInfo.lastTeleport === undefined) {
                     // Sanity check: droplet should be in the same area as the furnace unless it was teleported
                     return;
                 }
 
                 if (isPlacedItemUnusable(modelInfo)) return;
 
-                dropletInfo.Incinerated = true;
-                Debris.AddItem(droplet, 6);
+                dropletInfo.incinerated = true;
+                Debris.AddItem(dropletModel, 6);
 
-                const [genericBoostedResult] = RevenueService.calculateDropletValue(
-                    droplet,
-                    furnace.includesGlobalBoosts,
-                    furnace.includesUpgrades,
-                );
-                let result = furnace.apply(genericBoostedResult);
-
-                const varianceResult = furnace.varianceResult;
-                if (varianceResult !== undefined) {
-                    result = result.mul(varianceResult);
+                const result = Server.Revenue.calculateDropletValue(dropletModel);
+                if (furnace.isCauldron) {
+                    result.markAsCauldron();
                 }
 
-                const boosts = modelInfo.Boosts;
-                if (boosts !== undefined) {
-                    for (const [_, boost] of boosts) {
-                        const mul = boost.furnaceMul;
-                        if (mul === undefined) continue;
-                        result = result.mul(mul);
+                // Upgrader boosts, lightning surge, etc.
+                result.applySource();
+
+                // Furnace
+                if (furnace.isCalculatesFurnace === true) {
+                    result.applyOperative(furnace);
+
+                    const boosts = modelInfo.boosts;
+                    if (boosts !== undefined) {
+                        for (const [_, boost] of boosts) {
+                            const mul = boost.furnaceMul;
+                            if (mul === undefined) continue;
+                            result.applyConstant(mul, "mul");
+                        }
+                    }
+
+                    // Furnace variance
+                    const varianceResult = furnace.varianceResult;
+                    if (varianceResult !== undefined) {
+                        result.applyConstant(varianceResult, "mul");
                     }
                 }
 
-                CurrencyService.incrementAll(result.amountPerCurrency);
-
-                for (const [currency, amount] of result.amountPerCurrency) {
-                    if (amount.equals(ZERO)) result.amountPerCurrency.delete(currency);
+                // Dark Matter, Bombs, etc.
+                if (furnace.isCalculatesFinal === true) {
+                    result.applyFinal();
                 }
-                const amountPerCurrency = result.amountPerCurrency;
-                const furnaceProcessed = modelInfo.FurnaceProcessed;
+
+                const final = result.coalesce();
+                const finalAmountPerCurrency = final.amountPerCurrency;
+
+                for (const [currency, amount] of finalAmountPerCurrency) {
+                    if (amount.equals(ZERO)) finalAmountPerCurrency.delete(currency);
+                }
+
+                // Grant currencies
+                if (furnace.isCalculatesFurnace === true) {
+                    Server.Currency.incrementAll(finalAmountPerCurrency);
+                }
+
+                const furnaceProcessed = modelInfo.furnaceProcessed;
                 if (furnaceProcessed !== undefined) {
-                    furnaceProcessed(result, genericBoostedResult, droplet, dropletInfo);
+                    furnaceProcessed(final, dropletModel, dropletInfo);
                 } else {
-                    Packets.dropletBurnt.toAllClients(droplet.Name, amountPerCurrency);
+                    Packets.dropletBurnt.toAllClients(dropletModel.Name, finalAmountPerCurrency);
                 }
             });
         }
@@ -105,17 +124,10 @@ export default class Furnace extends Operative {
 
     variance?: number;
     varianceResult?: number;
-    includesGlobalBoosts = true;
 
-    /**
-     * Whether the furnace will process upgrades in droplets.
-     * This should be false for cauldrons, where droplets are expected to be directly dropped into.
-     *
-     * The only exception is when droplets are marked as sky droplets, in which case they will be processed.
-     *
-     * @see {@link InstanceInfo.Sky} for more information on sky droplets.
-     */
-    includesUpgrades = true;
+    isCalculatesFurnace = true;
+    isCalculatesFinal = true;
+    isCauldron = false;
 
     constructor(item: Item) {
         super(item);
@@ -135,18 +147,46 @@ export default class Furnace extends Operative {
         item.onLoad((model) => Furnace.load(model, this));
     }
 
+    /**
+     * Sets the factor of random variance applied to droplet values when processed by this furnace.
+     * @param variance The variance factor (0 = no variance, 1 = ±50% variance, 2 = ±100% variance).
+     * @returns The furnace trait.
+     */
     setVariance(variance: number) {
+        if (variance > 2) throw `Furnace variance cannot be greater than 2 (received ${variance})`;
+        if (variance < 0) throw `Furnace variance cannot be less than 0 (received ${variance})`;
+
         this.variance = variance;
         return this;
     }
 
-    acceptsGlobalBoosts(includesGlobalBoosts: boolean) {
-        this.includesGlobalBoosts = includesGlobalBoosts;
+    /**
+     * Whether the furnace will process its boost and grant currencies.
+     * @param includesFurnace Whether to include furnace boosts and currency grants.
+     * @returns The furnace trait.
+     */
+    calculatesFurnace(includesFurnace: boolean) {
+        this.isCalculatesFurnace = includesFurnace;
         return this;
     }
 
-    acceptsUpgrades(includesUpgrades: boolean) {
-        this.includesUpgrades = includesUpgrades;
+    /**
+     * Whether the furnace will process final boosts such as Dark Matter and Bombs.
+     * @param includesFinalBoosts Whether to include final boosts.
+     * @returns The furnace trait.
+     */
+    calculatesFinal(includesFinalBoosts: boolean) {
+        this.isCalculatesFinal = includesFinalBoosts;
+        return this;
+    }
+
+    /**
+     * Whether this furnace is a cauldron, disabling upgrader boosts if processed droplets are not sky droplets.
+     * @param isCauldron Whether this furnace is a cauldron.
+     * @returns The furnace trait.
+     */
+    setIsCauldron(isCauldron: boolean) {
+        this.isCauldron = isCauldron;
         return this;
     }
 }

@@ -12,9 +12,9 @@ declare global {
 export default class UnleashedConveyor extends ItemTrait {
     static load(model: Model, _conveyor: UnleashedConveyor) {
         const instanceInfo = getAllInstanceInfo(model);
-        instanceInfo.Chargeable = true;
-        instanceInfo.BoostAdded?.add(() => instanceInfo.UpdateSpeed?.());
-        instanceInfo.BoostRemoved?.add(() => instanceInfo.UpdateSpeed?.());
+        instanceInfo.chargeable = true;
+        instanceInfo.boostAdded?.add(() => instanceInfo.updateSpeed?.());
+        instanceInfo.boostRemoved?.add(() => instanceInfo.updateSpeed?.());
     }
 
     constructor(item: Item) {

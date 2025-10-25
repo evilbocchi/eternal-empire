@@ -1,4 +1,4 @@
-import { getAllInstanceInfo, getInstanceInfo } from "@antivivi/vrldk";
+import { getAllInstanceInfo } from "@antivivi/vrldk";
 import Item from "shared/item/Item";
 import ItemTrait from "shared/item/traits/ItemTrait";
 
@@ -12,7 +12,10 @@ declare global {
     interface StatusEffectInfo {}
 
     interface InstanceInfo {
-        StatusEffects?: Map<StatusEffect, StatusEffectInfo>;
+        /**
+         * The status effects applied to this droplet.
+         */
+        statusEffects?: Map<StatusEffect, StatusEffectInfo>;
     }
 }
 
@@ -23,18 +26,23 @@ export default abstract class StatusEffect extends ItemTrait {
     active = true;
 
     static load(model: Model, statusEffect: StatusEffect) {
-        getInstanceInfo(model, "OnUpgraded")!.connect((dropletModel) => {
+        const modelInfo = getAllInstanceInfo(model);
+        const onUpgraded = modelInfo.upgraderTriggered;
+        if (onUpgraded === undefined)
+            throw `Tried to load StatusEffect on model without OnUpgraded event: ${model.GetFullName()}`;
+
+        onUpgraded.connect((dropletModel) => {
             if (statusEffect.active === false) {
                 return;
             }
             const dropletInfo = getAllInstanceInfo(dropletModel);
-            const statusEffects = dropletInfo.StatusEffects ?? new Map<StatusEffect, StatusEffectInfo>();
+            const statusEffects = dropletInfo.statusEffects ?? new Map<StatusEffect, StatusEffectInfo>();
             if (statusEffects.has(statusEffect)) {
                 return;
             }
 
             statusEffects.set(statusEffect, statusEffect.decorate(dropletModel));
-            dropletInfo.StatusEffects = statusEffects;
+            dropletInfo.statusEffects = statusEffects;
         });
     }
 

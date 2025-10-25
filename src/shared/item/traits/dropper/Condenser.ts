@@ -1,8 +1,9 @@
-import { OnoeNum } from "@rbxts/serikanum";
-import { getAllInstanceInfo, setInstanceInfo } from "@antivivi/vrldk";
+import { getAllInstanceInfo } from "@antivivi/vrldk";
 import { packet } from "@rbxts/fletchette";
+import { OnoeNum } from "@rbxts/serikanum";
 import { Server } from "shared/api/APIExpose";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
+import Droplet from "shared/item/Droplet";
 import Item from "shared/item/Item";
 import Dropper from "shared/item/traits/dropper/Dropper";
 import Furnace from "shared/item/traits/Furnace";
@@ -11,7 +12,6 @@ import isPlacedItemUnusable from "shared/item/utils/isPlacedItemUnusable";
 import perItemPacket from "shared/item/utils/perItemPacket";
 import Packets from "shared/Packets";
 import { AREAS } from "shared/world/Area";
-import Droplet from "shared/item/Droplet";
 
 declare global {
     interface ItemTraits {
@@ -23,7 +23,7 @@ declare global {
          * Whether the droplet has been produced by a condenser.
          * Used to prevent condensers from feeding into each other.
          */
-        Condensed?: boolean;
+        condensed?: boolean;
     }
 }
 
@@ -43,7 +43,7 @@ export default class Condenser extends ItemTrait {
         for (const droplet of condenser.droplets) {
             const value = droplet.value;
             if (value === undefined) continue;
-            const price = value.mul(condenser.quota);
+            const price = value.mulConstant(condenser.quota);
             pricePerDroplet.set(droplet, price);
         }
         return pricePerDroplet;
@@ -103,15 +103,15 @@ export default class Condenser extends ItemTrait {
                 if (instantiator !== undefined) {
                     const droplet = instantiator();
                     const instanceInfo = getAllInstanceInfo(droplet);
-                    const replacingUpgrades = instanceInfo.Upgrades ?? new Map();
+                    const replacingUpgrades = instanceInfo.upgrades ?? new Map();
                     for (const [id, upgradeInfo] of upgrades) {
                         const pointer = table.clone(upgradeInfo);
-                        pointer.EmptyUpgrade = true;
+                        pointer.empty = true;
                         replacingUpgrades.set(id, pointer);
                     }
                     if (!dontResetUpgrades) upgrades.clear();
-                    instanceInfo.Upgrades = replacingUpgrades;
-                    instanceInfo.Condensed = true;
+                    instanceInfo.upgrades = replacingUpgrades;
+                    instanceInfo.condensed = true;
                 }
             });
             if (changed || force === true) {
@@ -119,23 +119,20 @@ export default class Condenser extends ItemTrait {
             }
         };
 
-        const ZERO = new OnoeNum(0);
-        const CurrencyService = Server.Currency;
-        const RevenueService = Server.Revenue;
-        setInstanceInfo(model, "FurnaceProcessed", (_, raw, droplet) => {
+        modelInfo.furnaceProcessed = (value, droplet) => {
             const instanceInfo = getAllInstanceInfo(droplet);
-            if (instanceInfo.DropletId === undefined || instanceInfo.Condensed === true) {
+            if (instanceInfo.dropletId === undefined || instanceInfo.condensed === true) {
                 return;
             }
 
             const currentMap = current.amountPerCurrency;
             const lostValue = new Map<Currency, OnoeNum>();
-            for (const [currency, amount] of raw.amountPerCurrency) {
+            for (const [currency, amount] of value.amountPerCurrency) {
                 const prev = currentMap.get(currency);
                 const newCost = prev === undefined ? amount : prev.add(amount);
                 const limit = maxCosts.get(currency);
                 if (limit === undefined) {
-                    if (ZERO.lessThan(amount)) {
+                    if (amount.moreThan(0)) {
                         lostValue.set(currency, amount);
                     }
                 } else {
@@ -144,13 +141,12 @@ export default class Condenser extends ItemTrait {
             }
 
             if (!lostValue.isEmpty()) {
-                const lostCurrencies = RevenueService.performSoftcaps(lostValue);
-                CurrencyService.incrementAll(lostCurrencies);
-                Packets.dropletBurnt.toAllClients(droplet.Name, lostCurrencies);
+                Server.Currency.incrementAll(lostValue);
+                Packets.dropletBurnt.toAllClients(droplet.Name, lostValue);
             } else {
                 Packets.dropletBurnt.toAllClients(droplet.Name, new Map());
             }
-            const u = instanceInfo.Upgrades;
+            const u = instanceInfo.upgrades;
             if (u !== undefined) {
                 for (const [id, upgrade] of u) {
                     upgrades.set(id, upgrade);
@@ -158,7 +154,7 @@ export default class Condenser extends ItemTrait {
             }
 
             check(true);
-        });
+        };
 
         item.repeat(model, () => check(), 0.5);
     }
@@ -196,8 +192,7 @@ export default class Condenser extends ItemTrait {
         super(item);
         const furnace = item.trait(Furnace);
         const dropper = item.trait(Dropper);
-        furnace.acceptsGlobalBoosts(false);
-        furnace.setMul(CurrencyBundle.ones().mul(0));
+        furnace.calculatesFinal(false).calculatesFurnace(false);
         dropper.dropRate = 0;
         item.onLoad((model) => Condenser.load(model, this));
         item.onClientLoad((model) => Condenser.clientLoad(model, this));

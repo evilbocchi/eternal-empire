@@ -45,7 +45,7 @@ export = function () {
             expect(subtracted.get("Funds")?.equals(new OnoeNum(10))).to.equal(true);
             expect(subtracted.get("Power")?.equals(new OnoeNum(5))).to.equal(true);
 
-            const multiplied = base.mul(2);
+            const multiplied = base.mulConstant(2);
             expect(multiplied.get("Funds")?.equals(new OnoeNum(24))).to.equal(true);
             expect(multiplied.get("Power")?.equals(new OnoeNum(16))).to.equal(true);
         });
@@ -61,7 +61,7 @@ export = function () {
 
         it("raises currencies to a power", () => {
             const base = new CurrencyBundle().set("Funds", 2).set("Power", 3);
-            const powered = base.pow(3);
+            const powered = base.powConstant(3);
 
             expect(powered.get("Funds")?.equals(new OnoeNum(8))).to.equal(true);
             expect(powered.get("Power")?.equals(new OnoeNum(27))).to.equal(true);

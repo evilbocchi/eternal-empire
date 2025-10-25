@@ -14,7 +14,10 @@ declare global {
     }
 
     interface InstanceInfo {
-        UpdateSpeed?: () => void;
+        /**
+         * Updates the speed of all conveyor parts in the model.
+         */
+        updateSpeed?: () => void;
     }
 
     interface ItemBoost {
@@ -106,21 +109,21 @@ export default class Conveyor extends ItemTrait {
      */
     static load(model: Model, conveyor: Conveyor) {
         const modelInfo = getAllInstanceInfo(model);
-        if (modelInfo.Boosts === undefined) {
-            modelInfo.Boosts = new Map<string, ItemBoost>();
+        if (modelInfo.boosts === undefined) {
+            modelInfo.boosts = new Map<string, ItemBoost>();
         }
-        if (modelInfo.BoostAdded === undefined) {
-            modelInfo.BoostAdded = new Set<(boost: ItemBoost) => void>();
+        if (modelInfo.boostAdded === undefined) {
+            modelInfo.boostAdded = new Set<(boost: ItemBoost) => void>();
         }
-        if (modelInfo.BoostRemoved === undefined) {
-            modelInfo.BoostRemoved = new Set<(boost: ItemBoost) => void>();
+        if (modelInfo.boostRemoved === undefined) {
+            modelInfo.boostRemoved = new Set<(boost: ItemBoost) => void>();
         }
         const statsPerPart = this.getStats(model, conveyor);
 
         const updateSpeed = () => {
             let speedBoost = 0;
             let speedMultiplier = 1;
-            const boosts = modelInfo.Boosts;
+            const boosts = modelInfo.boosts;
             if (boosts !== undefined) {
                 for (const [_, boost] of boosts) {
                     const chargerInfo = boost.chargerInfo;
@@ -144,9 +147,9 @@ export default class Conveyor extends ItemTrait {
             }
         };
         updateSpeed();
-        modelInfo.UpdateSpeed = updateSpeed;
-        modelInfo.BoostAdded?.add(() => updateSpeed());
-        modelInfo.BoostRemoved?.add(() => updateSpeed());
+        modelInfo.updateSpeed = updateSpeed;
+        modelInfo.boostAdded?.add(() => updateSpeed());
+        modelInfo.boostRemoved?.add(() => updateSpeed());
         this.infoPerModel.set(model, modelInfo);
     }
 
@@ -200,10 +203,10 @@ export default class Conveyor extends ItemTrait {
                     const previousUnusable = disabled.has(model);
                     if (isUnusable && !previousUnusable) {
                         disabled.add(model);
-                        info.UpdateSpeed?.();
+                        info.updateSpeed?.();
                     } else if (!isUnusable && previousUnusable) {
                         disabled.delete(model);
-                        info.UpdateSpeed?.();
+                        info.updateSpeed?.();
                     }
                 }
             }, 0.5);

@@ -271,51 +271,83 @@ class CurrencyBundle {
     /**
      * Multiplies the instance by the specified value.
      *
-     * @param value The value to multiply by, can be a CurrencyBundle instance or a number.
+     * @param value The value to multiply by.
      * @param inplace Whether to multiply the amounts in the instance itself.
      * @returns A new CurrencyBundle instance with the multiplied amounts.
      */
-    mul(value: CurrencyBundle | number, inplace?: boolean) {
-        let result: CurrencyMap;
-        if (typeIs(value, "number")) {
-            result = CurrencyMap.mulConstant(this.amountPerCurrency, new OnoeNum(value as number), inplace);
-        } else {
-            result = CurrencyMap.mul(this.amountPerCurrency, (value as CurrencyBundle).amountPerCurrency, inplace);
-        }
+    mul(value: CurrencyBundle, inplace?: boolean) {
+        const result = CurrencyMap.mul(this.amountPerCurrency, value.amountPerCurrency, inplace);
+        return inplace === true ? this : new CurrencyBundle(result, true);
+    }
+
+    /**
+     * Multiplies the instance by a constant value.
+     * @example
+     * ```ts
+     * let bundle = new CurrencyBundle().set("Funds", 100).set("Power", 5);
+     * bundle = bundle.mulConstant(2); // Now bundle has 200 Funds and 10 Power
+     * ```
+     * @param value The constant value to multiply by.
+     * @param inplace Whether to multiply the amounts in the instance itself.
+     * @returns A new CurrencyBundle instance with the multiplied amounts.
+     */
+    mulConstant(value: number | BaseOnoeNum, inplace?: boolean) {
+        const result = CurrencyMap.mulConstant(this.amountPerCurrency, new OnoeNum(value), inplace);
         return inplace === true ? this : new CurrencyBundle(result, true);
     }
 
     /**
      * Divides the instance by the specified value.
      *
-     * @param value The value to divide by, can be a CurrencyBundle instance or a number.
+     * @param value The value to divide by.
      * @param inplace Whether to divide the amounts in the instance itself.
      * @returns A new CurrencyBundle instance with the divided amounts.
      */
-    div(value: CurrencyBundle | number, inplace?: boolean) {
-        let result: CurrencyMap;
-        if (typeIs(value, "number")) {
-            result = CurrencyMap.divConstant(this.amountPerCurrency, new OnoeNum(value as number), inplace);
-        } else {
-            result = CurrencyMap.div(this.amountPerCurrency, (value as CurrencyBundle).amountPerCurrency, inplace);
-        }
+    div(value: CurrencyBundle, inplace?: boolean) {
+        const result = CurrencyMap.div(this.amountPerCurrency, value.amountPerCurrency, inplace);
+        return inplace === true ? this : new CurrencyBundle(result, true);
+    }
+
+    /**
+     * Divides the instance by a constant value.
+     * @example
+     * ```ts
+     * let bundle = new CurrencyBundle().set("Funds", 100).set("Power", 5);
+     * bundle = bundle.divConstant(2); // Now bundle has 50 Funds and 2.5 Power
+     * ```
+     * @param value The constant value to divide by.
+     * @param inplace Whether to divide the amounts in the instance itself.
+     * @returns A new CurrencyBundle instance with the divided amounts.
+     */
+    divConstant(value: number | BaseOnoeNum, inplace?: boolean) {
+        const result = CurrencyMap.divConstant(this.amountPerCurrency, new OnoeNum(value), inplace);
         return inplace === true ? this : new CurrencyBundle(result, true);
     }
 
     /**
      * Raises the instance to the power of the specified value.
-     *
-     * @param value The value to raise to, can be a CurrencyBundle instance or a number.
+     * @param value The value to raise to.
      * @param inplace Whether to raise the amounts in the instance itself.
      * @returns A new CurrencyBundle instance with the powered amounts.
      */
-    pow(value: CurrencyBundle | number, inplace?: boolean) {
-        let result: CurrencyMap;
-        if (typeIs(value, "number")) {
-            result = CurrencyMap.powConstant(this.amountPerCurrency, new OnoeNum(value as number), inplace);
-        } else {
-            result = CurrencyMap.pow(this.amountPerCurrency, (value as CurrencyBundle).amountPerCurrency, inplace);
-        }
+    pow(value: CurrencyBundle, inplace?: boolean) {
+        const result = CurrencyMap.pow(this.amountPerCurrency, value.amountPerCurrency, inplace);
+        return inplace === true ? this : new CurrencyBundle(result, true);
+    }
+
+    /**
+     * Raises the instance to the power of a constant value.
+     * @example
+     * ```ts
+     * let bundle = new CurrencyBundle().set("Funds", 100).set("Power", 5);
+     * bundle = bundle.powConstant(2); // Now bundle has 10000 Funds and 25 Power
+     * ```
+     * @param value The constant value to raise to.
+     * @param inplace Whether to raise the amounts in the instance itself.
+     * @returns A new CurrencyBundle instance with the powered amounts.
+     */
+    powConstant(value: number | BaseOnoeNum, inplace?: boolean) {
+        const result = CurrencyMap.powConstant(this.amountPerCurrency, new OnoeNum(value), inplace);
         return inplace === true ? this : new CurrencyBundle(result, true);
     }
 

@@ -1,4 +1,4 @@
-import { getInstanceInfo } from "@antivivi/vrldk";
+import { getAllInstanceInfo } from "@antivivi/vrldk";
 import { Workspace } from "@rbxts/services";
 import { Server } from "shared/api/APIExpose";
 import { PLACED_ITEMS_FOLDER } from "shared/constants";
@@ -15,14 +15,14 @@ export default function getPlacedItemsInBounds(bounds: BasePart) {
     const itemsPerId = Server.Items.itemsPerId;
     for (const touching of array) {
         const target = touching.Parent as Model;
-        const itemId = getInstanceInfo(target, "ItemId");
-        if (itemId === undefined) {
-            continue;
-        }
+        const targetInfo = getAllInstanceInfo(target);
+
+        const itemId = targetInfo.itemId;
+        if (itemId === undefined) continue;
+
         const item = itemsPerId.get(itemId);
-        if (item === undefined) {
-            throw `Item with id ${itemId} not found in items map.`;
-        }
+        if (item === undefined) throw `Placed item model has invalid itemId: ${itemId}`;
+
         items.set(target, item);
     }
     return items;

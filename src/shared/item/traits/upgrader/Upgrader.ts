@@ -1,16 +1,14 @@
 //!native
 //!optimize 2
 import Signal from "@antivivi/lemon-signal";
-import { getAllInstanceInfo, setInstanceInfo, simpleInterval } from "@antivivi/vrldk";
+import { getAllInstanceInfo, simpleInterval } from "@antivivi/vrldk";
 import { exactSetProperty } from "@rbxts/fletchette";
 import { Server } from "shared/api/APIExpose";
 import { IS_EDIT, IS_SERVER } from "shared/Context";
-import CurrencyBundle from "shared/currency/CurrencyBundle";
 import eat from "shared/hamster/eat";
 import Item from "shared/item/Item";
 import type Condenser from "shared/item/traits/dropper/Condenser";
 import Operative, { IOperative } from "shared/item/traits/Operative";
-import type OmniUpgrader from "shared/item/traits/upgrader/OmniUpgrader";
 import isPlacedItemUnusable from "shared/item/utils/isPlacedItemUnusable";
 import { VirtualCollision } from "shared/item/utils/VirtualReplication";
 
@@ -24,32 +22,36 @@ declare global {
          * The upgrader model that applied this upgrade. If the model is destroyed,
          * the upgrade is considered inactive.
          */
-        Model: Model;
+        model: Model;
+        /**
+         * The upgrader item that applied this upgrade.
+         */
+        item?: Item;
         /**
          * The upgrade's boost stats.
          */
-        Boost?: IOperative;
+        boost?: IOperative;
         /**
          * An upgrade that effectively does nothing. Toggled by {@link Condenser}.
          */
-        EmptyUpgrade?: boolean;
+        empty?: boolean;
     }
 
     interface InstanceInfo {
         /** The ID of the laser that this instance is associated with. */
-        LaserId?: string;
-        /** The upgrades applied to this instance, keyed by laser ID. */
-        Upgrades?: Map<string, UpgradeInfo>;
-        OnUpgraded?: Signal<BasePart>;
+        laserId?: string;
+        /** The upgrades applied to this instance, keyed by a unique identifier. */
+        upgrades?: Map<string, UpgradeInfo>;
+        /** A signal that fires when the upgrader has upgraded a droplet. */
+        upgraderTriggered?: Signal<(dropletModel: BasePart) => void>;
 
         /**
          * Whether the droplet has reached the skyline.
-         * The skyline is located at the at the level in which droplets are high to fall into cauldrons.
-         * This allows the droplets to be upgraded before being dropped into cauldrons.
+         * The skyline is located at the level in which droplets are legally elevated high enough to fall into cauldrons.
          *
          * This property exists to prevent exploits in which droplets that have not reached the skyline are dropped into cauldrons.
          */
-        Sky?: boolean;
+        sky?: boolean;
     }
 
     interface ItemBoost {
@@ -113,25 +115,26 @@ export default class Upgrader extends Operative {
         /** An optional decoration function to modify the upgrade info. */
         deco?: (upgrade: UpgradeInfo) => void;
     }) {
-        if (dropletInfo.Incinerated === true) return;
+        if (dropletInfo.incinerated === true) return;
         if (upgrader.requirement !== undefined && !upgrader.requirement(dropletInfo)) return;
 
-        if (laserInfo.Sky === true) dropletInfo.Sky = true;
-        let upgrades = dropletInfo.Upgrades;
+        if (laserInfo.sky === true) dropletInfo.sky = true;
+        let upgrades = dropletInfo.upgrades;
+        const item = upgrader.item;
 
         if (laserId === undefined) {
-            laserId ??= upgrader.isStacks === false ? upgrader.item.id : model.Name + "_" + laserInfo.LaserId;
+            laserId ??= upgrader.isStacks === false ? item.id : model.Name + "_" + laserInfo.laserId;
         }
 
         if (upgrades === undefined) upgrades = new Map();
         else if (upgrades.has(laserId)) return;
 
-        if (isPlacedItemUnusable(modelInfo) || laserInfo.Maintained === false) return;
+        if (isPlacedItemUnusable(modelInfo) || laserInfo.maintained === false) return;
 
         if (upgrades === undefined) upgrades = new Map();
         let [totalAdd, totalMul, totalPow] = [upgrader.add, upgrader.mul, upgrader.pow];
 
-        const boosts = modelInfo.Boosts;
+        const boosts = modelInfo.boosts;
         if (boosts !== undefined) {
             for (const [_, boost] of boosts) {
                 const stats = boost.upgradeCompound;
@@ -148,8 +151,9 @@ export default class Upgrader extends Operative {
         }
 
         const upgrade: UpgradeInfo = {
-            Model: model,
-            Boost: {
+            model,
+            item,
+            boost: {
                 add: totalAdd,
                 mul: totalMul,
                 pow: totalPow,
@@ -157,8 +161,8 @@ export default class Upgrader extends Operative {
         };
         if (deco !== undefined) deco(upgrade);
         upgrades.set(laserId, upgrade);
-        dropletInfo.Upgrades = upgrades;
-        modelInfo.OnUpgraded?.fire(droplet);
+        dropletInfo.upgrades = upgrades;
+        modelInfo.upgraderTriggered?.fire(droplet);
     }
 
     /**
@@ -167,7 +171,6 @@ export default class Upgrader extends Operative {
      * @param model The item model where the laser is located.
      * @param upgrader The upgrader instance that will manage the laser.
      * @param laser The laser part being hooked.
-     * @param upgradedEvent The event fired when the laser is upgraded.
      * @param deco Optional decoration function to modify the upgrade info.
      */
     static hookLaser(model: Model, upgrader: Upgrader, laser: BasePart, deco?: (upgradeInfo: UpgradeInfo) => void) {
@@ -177,9 +180,9 @@ export default class Upgrader extends Operative {
             VirtualCollision.onDropletTouched(model, laser, (droplet, dropletInfo) => {
                 this.upgrade({ model, modelInfo, upgrader, dropletInfo, laserInfo, droplet, deco });
             });
-            laserInfo.ItemModelInfo = modelInfo;
+            laserInfo.itemModelInfo = modelInfo;
             model.Destroying.Once(() => {
-                modelInfo.OnUpgraded?.destroy();
+                modelInfo.upgraderTriggered?.destroy();
             });
         }
 
@@ -192,15 +195,16 @@ export default class Upgrader extends Operative {
     }
 
     static sharedLoad(model: Model, upgrader: Upgrader) {
-        setInstanceInfo(model, "OnUpgraded", new Signal());
+        const modelInfo = getAllInstanceInfo(model);
+        modelInfo.upgraderTriggered ??= new Signal();
 
         let i = 0;
         for (const laser of model.GetDescendants()) {
             if (!laser.HasTag("Laser") || !laser.IsA("BasePart")) continue;
 
             const laserInfo = getAllInstanceInfo(laser);
-            laserInfo.LaserId = tostring(i++);
-            laserInfo.Sky = upgrader.sky;
+            laserInfo.laserId = tostring(i++);
+            laserInfo.sky = upgrader.sky;
             Upgrader.hookLaser(model, upgrader, laser);
         }
         if (IS_SERVER || IS_EDIT) {
@@ -252,50 +256,20 @@ export default class Upgrader extends Operative {
      * Gets the boosts an upgrade from an Upgrader would give.
      *
      * @param upgradeInfo Upgrade information
-     * @returns Boosts
+     * @returns A tuple containing the operative boosts and whether the upgrade should be reversed.
      */
-    static getUpgrade(
-        upgradeInfo: UpgradeInfo,
-    ): LuaTuple<[CurrencyBundle?, CurrencyBundle?, CurrencyBundle?, boolean?]> {
-        const boost = upgradeInfo.Boost;
+    static getUpgrade(upgradeInfo: UpgradeInfo): LuaTuple<[IOperative?, boolean?]> {
+        const boost = upgradeInfo.boost;
         if (boost === undefined) return $tuple();
 
-        const toAdd = boost.add;
-        const toMul = boost.mul;
-        const toPow = boost.pow;
-        const isGone = upgradeInfo.Model === undefined || upgradeInfo.Model.Parent === undefined;
-        const isEmpty = upgradeInfo.EmptyUpgrade === true;
+        const isGone = upgradeInfo.model === undefined || upgradeInfo.model.Parent === undefined;
+        const isEmpty = upgradeInfo.empty === true;
         if (isGone || isEmpty) {
-            if (isGone && isEmpty) return $tuple(toAdd, toMul, toPow, true);
+            if (isGone && isEmpty) return $tuple(boost, true);
             return $tuple();
         }
 
-        return $tuple(toAdd, toMul, toPow, false);
-    }
-
-    /**
-     * Apply boosts from Upgraders to a revenue source.
-     *
-     * @param totalAdd Addition term to apply.
-     * @param totalMul Multiplication term to apply.
-     * @param totalPow Power term to apply.
-     * @param instanceInfo Instance information of the revenue source. Usually a droplet.
-     * @returns The resulting boosts.
-     */
-    static applyUpgrades(
-        totalAdd: CurrencyBundle,
-        totalMul: CurrencyBundle,
-        totalPow: CurrencyBundle,
-        instanceInfo: InstanceInfo,
-    ) {
-        for (const [_id, upgradeInfo] of instanceInfo.Upgrades!) {
-            let [add, mul, pow, inverse] = this.getUpgrade(upgradeInfo);
-            [add, mul, pow] = this.applySpreadOperative(totalAdd, totalMul, totalPow, add, mul, pow, inverse);
-            totalAdd = add ?? totalAdd;
-            totalMul = mul ?? totalMul;
-            totalPow = pow ?? totalPow;
-        }
-        return $tuple(totalAdd, totalMul, totalPow);
+        return $tuple(boost, false);
     }
 
     static {

@@ -1,4 +1,4 @@
-import { setInstanceInfo } from "@antivivi/vrldk";
+import { getAllInstanceInfo } from "@antivivi/vrldk";
 import React, { Fragment, useEffect, useRef, useState } from "@rbxts/react";
 import { TweenService } from "@rbxts/services";
 import Packets from "shared/Packets";
@@ -75,7 +75,8 @@ export default function BrokenItemIndicatorRenderer() {
         const connection = Packets.brokenPlacedItems.observe((brokenPlacedItems) => {
             for (const model of brokenModels) {
                 if (!brokenPlacedItems.has(model.Name)) {
-                    setInstanceInfo(model, "Broken", false);
+                    const modelInfo = getAllInstanceInfo(model);
+                    modelInfo.broken = false;
                     brokenModels.delete(model);
                 }
             }
@@ -87,7 +88,8 @@ export default function BrokenItemIndicatorRenderer() {
 
                 newModels.add(model as Model);
                 brokenModels.add(model as Model);
-                setInstanceInfo(model, "Broken", true);
+                const modelInfo = getAllInstanceInfo(model);
+                modelInfo.broken = true;
             }
             setModels(newModels);
         });

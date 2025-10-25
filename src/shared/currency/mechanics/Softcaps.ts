@@ -42,7 +42,7 @@ const Softcaps = {
  * @param softcap The softcap to apply
  * @returns A tuple with the resulting coefficient and the softcap starting point. If the softcap is not applicable, this will be undefined.
  */
-export const performSoftcap = (amount?: OnoeNum, softcap?: Softcap) => {
+export const calculateSoftcap = (amount?: OnoeNum, softcap?: Softcap) => {
     if (softcap === undefined || amount === undefined) return $tuple(undefined, undefined);
     const starts = softcap.requirement;
     if (starts.moreThan(amount)) return $tuple(undefined, starts);
@@ -62,12 +62,12 @@ export function performSoftcaps(balance: CurrencyMap, value: CurrencyMap) {
         const inBal = balance.get(currency);
         const highest = inBal === undefined || inBal.lessThan(amount) ? amount : inBal;
 
-        const [divSoftcap] = performSoftcap(highest, softcaps.div);
+        const [divSoftcap] = calculateSoftcap(highest, softcaps.div);
         if (divSoftcap !== undefined) {
             value.set(currency, amount.div(divSoftcap));
         }
 
-        const [recippowSoftcap] = performSoftcap(highest, softcaps.recippow);
+        const [recippowSoftcap] = calculateSoftcap(highest, softcaps.recippow);
         if (recippowSoftcap !== undefined) {
             value.set(currency, amount.pow(new OnoeNum(1).div(recippowSoftcap)));
         }
