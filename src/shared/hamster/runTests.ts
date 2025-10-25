@@ -1,9 +1,9 @@
+/// <reference types="@rbxts/types/plugin" />
 import { FletchetteEnvironment } from "@rbxts/fletchette";
 import { Janitor } from "@rbxts/janitor";
+import { runCLI } from "@rbxts/jest";
 import { ServerScriptService } from "@rbxts/services";
-import TestEZ from "@rbxts/testez";
 import { eater } from "shared/hamster/eat";
-import { createFancyTextReporter } from "shared/hamster/FancyTextReporter";
 
 export = () => {
     const root = ServerScriptService.WaitForChild("tests");
@@ -16,32 +16,30 @@ export = () => {
     eater.janitor = janitor; // Tests should create their own janitors, but ensure the entire test suite is sandboxed
     FletchetteEnvironment.setVirtualState(true);
 
-    const reporter = createFancyTextReporter();
-    const results = TestEZ.TestBootstrap.run([root], reporter);
+    const [success, output] = runCLI(
+        root,
+        {
+            verbose: false,
+            ci: false,
+        },
+        [root],
+    ).await();
 
-    const fancyLines = [...reporter.getLines()];
-    const fancyFailures = [...reporter.getFailures()];
-
-    if (fancyLines.size() > 0) {
-        lines.push("");
-        for (const entry of fancyLines) {
-            lines.push(entry);
-        }
-        lines.push("");
+    if (!success) {
+        lines.push("Failed to run tests:");
+        lines.push(tostring(output));
+        return {
+            lines,
+            success: false,
+            successCount: 0,
+            failureCount: 0,
+            skippedCount: 0,
+            durationMs: 0,
+            failures: [],
+        };
     }
 
-    lines.push(`${results.successCount} passed, ${results.failureCount} failed, ${results.skippedCount} skipped`);
-    if (results.failureCount > 0) {
-        lines.push(`${results.failureCount} test nodes reported failures.`);
-    }
-    if (results.errors.size() > 0) {
-        lines.push("Errors reported by tests:");
-        lines.push("");
-        for (const message of results.errors) {
-            lines.push(message);
-            lines.push("");
-        }
-    }
+    const results = output.results;
 
     janitor.Destroy();
     const durationMs = math.floor((os.clock() - startClock) * 1000 * 100) / 100;
@@ -49,11 +47,10 @@ export = () => {
 
     return {
         lines,
-        success: results.failureCount === 0 && results.errors.size() === 0,
-        successCount: results.successCount,
-        failureCount: results.failureCount,
-        skippedCount: results.skippedCount,
+        success: results.numFailedTests === 0 && results.wasInterrupted === false,
+        successCount: results.numPassedTests,
+        failureCount: results.numFailedTests,
+        skippedCount: results.numPendingTests,
         durationMs,
-        failures: fancyFailures,
     };
 };

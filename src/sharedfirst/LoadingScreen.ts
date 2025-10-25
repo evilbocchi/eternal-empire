@@ -238,6 +238,19 @@ namespace LoadingScreen {
             }
         });
     }
+
+    export function destroy() {
+        guiContainer?.Destroy();
+        backdrop = undefined;
+        label = undefined;
+        clockFrame = undefined;
+        longHand = undefined;
+        shortHand = undefined;
+        clockUpdater = undefined;
+        pulseFrame = undefined;
+        pulseTween = undefined;
+        guiContainer = undefined;
+    }
 }
 
 export default LoadingScreen;

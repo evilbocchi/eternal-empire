@@ -115,7 +115,7 @@ export function observeCharacter(callback: (character: Model) => void) {
  * *This constant should not be used on the server side.*
  */
 export const PLAYER_GUI = (() => {
-    if (IS_SERVER) {
+    if (IS_SERVER && !IS_EDIT) {
         return undefined as never;
     }
     return (IS_EDIT ? StarterGui : LOCAL_PLAYER!.WaitForChild("PlayerGui")) as StarterGui;

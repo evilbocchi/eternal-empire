@@ -181,11 +181,14 @@ export default function App() {
 
         task.spawn(() => {
             if (IS_STUDIO) {
-                eat(() => {
-                    const setWaypoint = (key: string) => {
-                        game.GetService("ChangeHistoryService").SetWaypoint(key);
-                    };
+                const setWaypoint = (key: string) => {
+                    game.GetService("ChangeHistoryService").SetWaypoint(key);
+                };
 
+                const [success, result] = pcall(() => setWaypoint("SimulationOpen"));
+                if (!success) warn(`[ChangeHistoryService] Failed to set waypoint: ${result}`);
+
+                eat(() => {
                     const [success, result] = pcall(() => {
                         setWaypoint("SimulationClosing");
                         task.delay(1, () => setWaypoint("SimulationDone"));
@@ -213,6 +216,7 @@ export default function App() {
                 root.unmount();
             }
             cleanup();
+            LoadingScreen.destroy();
         };
     }, []);
 
