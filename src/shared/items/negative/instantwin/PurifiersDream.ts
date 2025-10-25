@@ -33,9 +33,9 @@ export = new Item(script.Name)
                     if (player !== undefined) {
                         const info = getAllInstanceInfo(droplet);
                         if (info) {
-                            info.FurnaceProcessed = (
-                                _result: CurrencyBundle,
-                                _genericResult: CurrencyBundle,
+                            // Furnace trait expects `furnaceProcessed(result, droplet, dropletInfo)`
+                            info.furnaceProcessed = (
+                                result: CurrencyBundle,
                                 _droplet: BasePart,
                                 _dropletInfo: InstanceInfo,
                             ) => {
