@@ -1,7 +1,7 @@
 import { BaseOnoeNum, OnoeNum } from "@rbxts/serikanum";
 import { Debris, TextService, TweenService, Workspace } from "@rbxts/services";
 import Shaker from "client/components/effect/Shaker";
-import { PLAYER_GUI } from "client/constants";
+import { PLAYER_GUI } from "shared/constants";
 import MusicManager from "client/MusicManager";
 import { UISignals } from "shared/api/APIExpose";
 import { ASSETS, playSound } from "shared/asset/GameAssets";

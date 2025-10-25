@@ -13,7 +13,6 @@ import ShopManager from "client/components/item/shop/ShopManager";
 import SingleDocumentManager from "client/components/sidebar/SingleDocumentManager";
 import { showErrorToast } from "client/components/toast/ToastService";
 import DocumentManager from "client/components/window/DocumentManager";
-import { NONCOLLISION_COLOR } from "client/constants";
 import { getSound, playSound } from "shared/asset/GameAssets";
 import { CAMERA, PLACED_ITEMS_FOLDER } from "shared/constants";
 import Items from "shared/items/Items";
@@ -33,6 +32,9 @@ declare global {
 }
 
 namespace BuildManager {
+    export const COLLISION_COLOR = new Color3(1, 0, 0);
+    export const NONCOLLISION_COLOR = Color3.fromRGB(35, 120, 172);
+
     /**
      * Offset of the selected models from the mouse.
      * The main selection has a blank identity CFrame.

@@ -1,7 +1,7 @@
 import { getAllInstanceInfo } from "@antivivi/vrldk";
 import { useEffect } from "@rbxts/react";
 import { Debris, Workspace } from "@rbxts/services";
-import { LOCAL_PLAYER } from "client/constants";
+import { LOCAL_PLAYER } from "shared/constants";
 import { getAsset } from "shared/asset/AssetMap";
 import { PLACED_ITEMS_FOLDER } from "shared/constants";
 import { IS_EDIT } from "shared/Context";

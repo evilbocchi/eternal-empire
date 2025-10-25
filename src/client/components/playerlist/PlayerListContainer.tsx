@@ -4,7 +4,7 @@ import PlayerListPanel from "client/components/playerlist/PlayerListPanel";
 import { PlayerRosterEntry } from "client/components/playerlist/PlayerListRow";
 import { useHotkey } from "client/components/hotkeys/HotkeyManager";
 import { useDocument } from "client/components/window/DocumentManager";
-import { LOCAL_PLAYER } from "client/constants";
+import { LOCAL_PLAYER } from "shared/constants";
 
 const THUMBNAIL_CACHE = new Map<number, string>();
 const DEFAULT_PANEL_SIZE = new UDim2(0, 410, 0, 420);

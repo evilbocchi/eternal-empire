@@ -7,7 +7,7 @@ import MenuOption from "client/components/start/MenuOption";
 import performNewBeginningsWakeUp from "client/components/start/performNewBeginningsWakeUp";
 import { showErrorToast } from "client/components/toast/ToastService";
 import DocumentManager, { useDocument } from "client/components/window/DocumentManager";
-import { LOCAL_PLAYER } from "client/constants";
+import { LOCAL_PLAYER } from "shared/constants";
 import { getAsset } from "shared/asset/AssetMap";
 import { playSound } from "shared/asset/GameAssets";
 import { RobotoMonoBold } from "shared/asset/GameFonts";

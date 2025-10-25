@@ -1,4 +1,4 @@
-import { Lighting, ReplicatedStorage, SoundService, TweenService, Workspace } from "@rbxts/services";
+import { Lighting, SoundService, TweenService, Workspace } from "@rbxts/services";
 import { Environment } from "@rbxts/ui-labs";
 import { ASSETS, SOUND_EFFECTS_GROUP, getSound } from "shared/asset/GameAssets";
 import { IS_EDIT } from "shared/Context";
@@ -87,11 +87,6 @@ namespace MusicManager {
         }
         folder.SetAttribute("Current", newCurrent);
         return sounds[newCurrent] as Sound;
-    }
-
-    /** Checks if night music should be played based on the current time. */
-    function isNight() {
-        return math.abs(Lighting.ClockTime - 12) / 12 > 0.5;
     }
 
     export function fadeOut(sound: Sound) {

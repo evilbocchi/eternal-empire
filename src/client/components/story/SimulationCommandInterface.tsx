@@ -1,7 +1,7 @@
 import { FuzzySearch } from "@rbxts/fuzzy-search";
 import React, { Fragment, useCallback, useEffect, useMemo, useRef, useState } from "@rbxts/react";
 import { Environment } from "@rbxts/ui-labs";
-import { LOCAL_PLAYER } from "client/constants";
+import { LOCAL_PLAYER } from "shared/constants";
 import { RobotoMono, RobotoSlab, RobotoSlabMedium } from "shared/asset/GameFonts";
 import Command from "shared/commands/Command";
 import Packets from "shared/Packets";

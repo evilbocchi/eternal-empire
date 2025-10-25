@@ -1,7 +1,7 @@
 import { OnoeNum } from "@rbxts/serikanum";
 import React, { useEffect } from "@rbxts/react";
 import { MarketplaceService } from "@rbxts/services";
-import { LOCAL_PLAYER } from "client/constants";
+import { LOCAL_PLAYER } from "shared/constants";
 import { showErrorToast } from "client/components/toast/ToastService";
 import { RobotoSlabBold, RobotoSlabHeavy, RobotoSlabMedium } from "shared/asset/GameFonts";
 import { getAsset } from "shared/asset/AssetMap";

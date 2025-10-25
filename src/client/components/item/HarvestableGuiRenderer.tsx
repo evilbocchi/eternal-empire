@@ -1,6 +1,6 @@
 import React, { Fragment, useEffect, useMemo, useState } from "@rbxts/react";
 import HarvestableGui from "client/components/item/HarvestableGui";
-import { observeCharacter } from "client/constants";
+import { observeCharacter } from "shared/constants";
 import { AREAS } from "shared/world/Area";
 import HARVESTABLES from "shared/world/harvestable/Harvestable";
 

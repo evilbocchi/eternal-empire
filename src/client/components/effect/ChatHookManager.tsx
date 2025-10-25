@@ -1,7 +1,7 @@
 import ComputeNameColor from "@antivivi/rbxnamecolor";
 import { simpleInterval } from "@antivivi/vrldk";
 import React, { Fragment, useEffect, useRef } from "@rbxts/react";
-import { LOCAL_PLAYER } from "client/constants";
+import { LOCAL_PLAYER } from "shared/constants";
 import { getTextChannels } from "shared/constants";
 import { IS_EDIT } from "shared/Context";
 import Packets from "shared/Packets";

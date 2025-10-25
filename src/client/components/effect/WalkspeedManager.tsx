@@ -1,5 +1,5 @@
 import React, { Fragment, useEffect, useRef } from "@rbxts/react";
-import { observeCharacter } from "client/constants";
+import { observeCharacter } from "shared/constants";
 import { showToast } from "client/components/toast/ToastService";
 import Sandbox from "shared/Sandbox";
 

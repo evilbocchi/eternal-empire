@@ -3,7 +3,7 @@ import { Debris, ReplicatedStorage, UserInputService, Workspace } from "@rbxts/s
 import createEtohConveyor from "client/components/effect/etoh/createEtohConveyor";
 import createEtohFallingPlatform from "client/components/effect/etoh/createEtohFallingPlatform";
 import createEtohTeleporter from "client/components/effect/etoh/createEtohTeleporter";
-import { observeCharacter } from "client/constants";
+import { observeCharacter } from "shared/constants";
 import { IS_EDIT } from "shared/Context";
 import { getPlayerCharacter } from "shared/hamster/getPlayerCharacter";
 import Packets from "shared/Packets";
