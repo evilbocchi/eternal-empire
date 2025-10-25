@@ -5,19 +5,19 @@
         "$className": "DataModel",
         "ServerScriptService": {
             "$className": "ServerScriptService",
-            "TS": {
-                "$className": "Actor",
-                "$path": "out/server"
-            }
+            "$path": "out/server",
+            "$ignoreUnknownInstances": true
         },
         "ReplicatedFirst": {
             "$className": "ReplicatedFirst",
-            "$path": "out/sharedfirst"
+            "$path": "out/sharedfirst",
+            "$ignoreUnknownInstances": true
         },
         "ReplicatedStorage": {
             "$className": "ReplicatedStorage",
             "rbxts_include": {
                 "$path": "include",
+                "$ignoreUnknownInstances": true,
                 "node_modules": {
                     "$className": "Folder",
                     "@rbxts": {
@@ -31,16 +31,22 @@
                     }
                 }
             },
-            "TS": {
-                "$path": "out/shared"
+            "shared": {
+                "$path": "out/shared",
+                "$ignoreUnknownInstances": true
+            },
+            "client": {
+                "$path": "out/client",
+                "$ignoreUnknownInstances": true
             }
         },
         "StarterPlayer": {
             "$className": "StarterPlayer",
             "StarterPlayerScripts": {
                 "$className": "StarterPlayerScripts",
-                "TS": {
-                    "$path": "out/client"
+                "$ignoreUnknownInstances": true,
+                "main": {
+                    "$path": "out/main.client.luau"
                 }
             }
         },

@@ -5,11 +5,11 @@ import React, { Fragment, RefObject, useCallback, useEffect, useMemo, useRef, us
 import { createPortal, createRoot } from "@rbxts/react-roblox";
 import { BaseOnoeNum, OnoeNum } from "@rbxts/serikanum";
 import { StarterGui, TweenService } from "@rbxts/services";
+import useProperty from "client/hooks/useProperty";
 import { Server } from "shared/api/APIExpose";
 import { getAsset } from "shared/asset/AssetMap";
 import { playSound } from "shared/asset/GameAssets";
 import { RobotoMono, RobotoMonoBold } from "shared/asset/GameFonts";
-import { IS_EDIT } from "shared/Context";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import { CURRENCY_CATEGORIES, CURRENCY_DETAILS } from "shared/currency/CurrencyDetails";
 import DifficultyResearch from "shared/difficulty/DifficultyResearch";
@@ -1425,17 +1425,13 @@ function DifficultyResearcherGui({
     const activeLightTweens = useRef<Set<Tween>>(new Set());
     const [currentDifficulty, setCurrentDifficulty] = useState<Difficulty | undefined>(undefined);
     const [activePage, setActivePage] = useState<"difficulties" | "research">("difficulties");
-    const [balance, setBalance] = useState<Map<Currency, BaseOnoeNum>>(Packets.balance.get());
-    const [inventory, setInventory] = useState<Map<string, number>>(Packets.inventory.get());
-    const [researchingState, setResearchingState] = useState<Map<string, number>>(Packets.researching.get());
-    const [researchMultiplier, setResearchMultiplier] = useState(Packets.researchMultiplier.get());
-    const [unlockedDifficulties, setUnlockedDifficulties] = useState<Set<string>>(Packets.unlockedDifficulties.get());
-    const [rewardCooldowns, setRewardCooldowns] = useState<Map<string, number>>(
-        Packets.difficultyRewardCooldowns.get(),
-    );
-    const [rewardPurchases, setRewardPurchases] = useState<Map<string, number>>(
-        Packets.difficultyRewardPurchases.get(),
-    );
+    const balance = useProperty(Packets.balance);
+    const inventory = useProperty(Packets.inventory);
+    const researchingState = useProperty(Packets.researching);
+    const researchMultiplier = useProperty(Packets.researchMultiplier);
+    const unlockedDifficulties = useProperty(Packets.unlockedDifficulties);
+    const rewardCooldowns = useProperty(Packets.difficultyRewardCooldowns);
+    const rewardPurchases = useProperty(Packets.difficultyRewardPurchases);
 
     const orbVisualDefaults = useMemo<OrbVisualDefaults>(() => {
         const emitters = new Array<OrbEmitterDefaults>();
@@ -1548,8 +1544,8 @@ function DifficultyResearcherGui({
         stopLightTweens();
 
         const targets: Array<[PointLight, number, number]> = [
-            [orbLight, 7, 18],
-            [vortexLight, 9, 16],
+            [orbLight, 3, 10],
+            [vortexLight, 5, 14],
         ];
 
         for (const [light, peakBrightness, peakRange] of targets) {
@@ -1576,43 +1572,7 @@ function DifficultyResearcherGui({
         }
     }, [stopLightTweens]);
 
-    useEffect(() => {
-        const balanceConnection = Packets.balance.observe((incoming) => {
-            setBalance(IS_EDIT ? table.clone(incoming) : incoming);
-        });
-        const inventoryConnection = Packets.inventory.observe((incoming) => {
-            setInventory(IS_EDIT ? table.clone(incoming) : incoming);
-        });
-        const researchingConnection = Packets.researching.observe((incoming) => {
-            setResearchingState(IS_EDIT ? table.clone(incoming) : incoming);
-        });
-        const researchMultiplierConnection = Packets.researchMultiplier.observe((incoming) => {
-            setResearchMultiplier(IS_EDIT ? table.clone(incoming) : incoming);
-        });
-        const unlockedDifficultiesConnection = Packets.unlockedDifficulties.observe((incoming) => {
-            setUnlockedDifficulties(IS_EDIT ? table.clone(incoming) : incoming);
-        });
-        const rewardCooldownConnection = Packets.difficultyRewardCooldowns.observe((incoming) => {
-            const mapped = incoming ?? new Map<string, number>();
-            setRewardCooldowns(IS_EDIT ? table.clone(mapped) : mapped);
-        });
-        const rewardPurchaseConnection = Packets.difficultyRewardPurchases.observe((incoming) => {
-            const mapped = incoming ?? new Map<string, number>();
-            setRewardPurchases(IS_EDIT ? table.clone(mapped) : mapped);
-        });
-        return () => {
-            balanceConnection.Disconnect();
-            inventoryConnection.Disconnect();
-            researchingConnection.Disconnect();
-            researchMultiplierConnection.Disconnect();
-            unlockedDifficultiesConnection.Disconnect();
-            rewardCooldownConnection.Disconnect();
-            rewardPurchaseConnection.Disconnect();
-        };
-    }, []);
-
     const difficultyList = useMemo(DifficultyResearch.collectUniqueDifficulties, []);
-
     const difficultyRequirements = useMemo(
         () => DifficultyResearch.buildDifficultyRequirements(difficultyList),
         [difficultyList],

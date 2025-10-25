@@ -6,7 +6,7 @@ import { eater } from "shared/hamster/eat";
 import { createFancyTextReporter } from "shared/hamster/FancyTextReporter";
 
 export = () => {
-    const root = ServerScriptService.WaitForChild("TS").WaitForChild("tests");
+    const root = ServerScriptService.WaitForChild("tests");
 
     const lines = new Array<string>();
     lines.push(`Running tests in: ${root.GetFullName()}`);

@@ -141,7 +141,7 @@ local function executeRun(runId)
     sendStatus(runId, "starting", "Studio received test run command.")
 
     local ReplicatedStorage = game:GetService("ReplicatedStorage")
-    local target = ReplicatedStorage:WaitForChild("TS"):WaitForChild("hamster"):WaitForChild("runTests")
+    local target = ReplicatedStorage:WaitForChild("shared"):WaitForChild("hamster"):WaitForChild("runTests")
     print("Running test script from:", target:GetFullName())
     local success, runTests = pcall(require, target)
     if not success or type(runTests) ~= "function" then

@@ -38,9 +38,7 @@ local function captureDataModel()
         Players = true,
         Lighting = true,
         MaterialService = true,
-        ReplicatedFirst = true,
         ReplicatedStorage = true,
-        ServerScriptService = true,
         ServerStorage = true,
         StarterGui = true,
         StarterPack = true,
@@ -49,6 +47,7 @@ local function captureDataModel()
         SoundService = true,
         TextChatService = true,
     }
+    local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
     local function serialize(instance, depth, path)
         if nodeCount >= MAX_NODES then
@@ -88,10 +87,11 @@ local function captureDataModel()
 
         local serializedChildren = {}
         for _, child in ipairs(children) do
-            -- Ignore any folders named "TS"
-            if (child.ClassName == "Folder" or child.ClassName == "Actor") and child.Name == "TS" then
+            -- if we are in ReplicatedStorage, ONLY include 'Assets' folder
+            if instance == ReplicatedStorage and child.Name ~= "Assets" then
                 continue
             end
+
             if nodeCount >= MAX_NODES then
                 truncated = true
                 break
