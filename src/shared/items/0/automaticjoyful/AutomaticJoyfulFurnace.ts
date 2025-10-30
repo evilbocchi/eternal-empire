@@ -15,7 +15,7 @@ export = new Item(script.Name)
         `Processes Power at a higher value, boost increasing with Power. Could be better than the ${RoboticCauldron.name} depending on your use case.`,
     )
     .setDifficulty(Difficulty.AutomaticJoyful)
-    .setPrice(new CurrencyBundle().set("Purifier Clicks", 1e21), 1)
+    .setPrice(new CurrencyBundle().set("Purifier Clicks", 1e15), 1)
     .addPlaceableArea("BarrenIslands")
     .soldAt(Class0Shop)
 

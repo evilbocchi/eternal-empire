@@ -11,8 +11,8 @@ export = new Item(script.Name)
         "Applies %ablaze% to droplets hit by the flamethrower, providing a flat x2 boost to ALL currencies. Deals damage over time.",
     )
     .setDifficulty(Difficulty.Frivolous)
-    .setPrice(new CurrencyBundle().set("Purifier Clicks", 1e24), 1)
-    .setPrice(new CurrencyBundle().set("Purifier Clicks", 1e27), 2)
+    .setPrice(new CurrencyBundle().set("Purifier Clicks", 1e22), 1)
+    .setPrice(new CurrencyBundle().set("Purifier Clicks", 1e24), 2)
     .addPlaceableArea("BarrenIslands")
     .soldAt(Class0Shop)
 
