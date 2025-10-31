@@ -10,9 +10,9 @@
  * @since 1.0.0
  */
 
-import { OnoeNum } from "@rbxts/serikanum";
 import { simpleInterval } from "@antivivi/vrldk";
 import { OnStart, Service } from "@flamework/core";
+import { OnoeNum } from "@rbxts/serikanum";
 import { CollectionService, DataStoreService, Players } from "@rbxts/services";
 import type { LeaderboardEntry, LeaderboardType } from "client/components/world/leaderboard/Leaderboard";
 import DataService from "server/services/data/DataService";
@@ -30,13 +30,37 @@ import Sandbox from "shared/Sandbox";
 @Service()
 export class LeaderboardService implements OnStart {
     /** OrderedDataStore for total time leaderboard. */
-    totalTimeStore = DataStoreService.GetOrderedDataStore("TotalTime");
+    readonly totalTimeStore = (() => {
+        try {
+            const store = DataStoreService.GetOrderedDataStore("TotalTime");
+            return store;
+        } catch (err) {
+            if (!IS_STUDIO) warn("Failed to get TotalTime OrderedDataStore:", err);
+            return undefined;
+        }
+    })();
 
     /** OrderedDataStore for donations leaderboard. */
-    donatedStore = DataStoreService.GetOrderedDataStore("Donated");
+    readonly donatedStore = (() => {
+        try {
+            const store = DataStoreService.GetOrderedDataStore("Donated");
+            return store;
+        } catch (err) {
+            if (!IS_STUDIO) warn("Failed to get Donated OrderedDataStore:", err);
+            return undefined;
+        }
+    })();
 
     /** OrderedDataStore for level leaderboard. */
-    levelStore = DataStoreService.GetOrderedDataStore("Level");
+    readonly levelStore = (() => {
+        try {
+            const store = DataStoreService.GetOrderedDataStore("Level");
+            return store;
+        } catch (err) {
+            if (!IS_STUDIO) warn("Failed to get Level OrderedDataStore:", err);
+            return undefined;
+        }
+    })();
 
     /** List of banned user IDs (excluded from leaderboards). */
     banned = [1900444407];
@@ -112,6 +136,10 @@ export class LeaderboardService implements OnStart {
      * @param deleteEntries The name to delete (optional)
      */
     updateLeaderboards(deleteEntries?: string) {
+        if (this.totalTimeStore === undefined || this.levelStore === undefined || this.donatedStore === undefined) {
+            return;
+        }
+
         const profile = this.dataService.empireData;
         if (this.banned.includes(profile.owner)) {
             return;

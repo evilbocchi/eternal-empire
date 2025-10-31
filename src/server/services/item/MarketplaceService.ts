@@ -1,6 +1,3 @@
-//!native
-//!optimize 2
-
 /**
  * @fileoverview Core marketplace service for managing item listings and transactions.
  *
@@ -25,6 +22,7 @@ import CurrencyService from "server/services/data/CurrencyService";
 import DataService from "server/services/data/DataService";
 import ItemService from "server/services/item/ItemService";
 import PermissionService from "server/services/permissions/PermissionService";
+import { IS_STUDIO } from "shared/Context";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import eat from "shared/hamster/eat";
 import MARKETPLACE_CONFIG from "shared/marketplace/MarketplaceListing";
@@ -40,9 +38,35 @@ export default class MarketplaceService implements OnInit, OnStart {
     private readonly empireData: EmpireData;
     private readonly empireId: string;
 
-    private readonly MARKETPLACE_STORE = DataStoreService.GetDataStore(MARKETPLACE_CONFIG.DATASTORE_NAME);
-    private readonly INDEX_STORE = DataStoreService.GetDataStore(MARKETPLACE_CONFIG.INDEX_DATASTORE_NAME);
-    private readonly HISTORY_STORE = DataStoreService.GetDataStore(MARKETPLACE_CONFIG.HISTORY_DATASTORE_NAME);
+    private readonly MARKETPLACE_STORE = (() => {
+        try {
+            const store = DataStoreService.GetDataStore(MARKETPLACE_CONFIG.DATASTORE_NAME);
+            return store;
+        } catch (err) {
+            if (!IS_STUDIO) warn(`Failed to get Marketplace DataStore: ${err}`);
+            return undefined;
+        }
+    })();
+
+    private readonly INDEX_STORE = (() => {
+        try {
+            const store = DataStoreService.GetDataStore(MARKETPLACE_CONFIG.INDEX_DATASTORE_NAME);
+            return store;
+        } catch (err) {
+            if (!IS_STUDIO) warn(`Failed to get Marketplace Index DataStore: ${err}`);
+            return undefined;
+        }
+    })();
+
+    private readonly HISTORY_STORE = (() => {
+        try {
+            const store = DataStoreService.GetDataStore(MARKETPLACE_CONFIG.HISTORY_DATASTORE_NAME);
+            return store;
+        } catch (err) {
+            if (!IS_STUDIO) warn(`Failed to get Marketplace History DataStore: ${err}`);
+            return undefined;
+        }
+    })();
 
     constructor(
         private readonly currencyService: CurrencyService,
@@ -132,7 +156,7 @@ export default class MarketplaceService implements OnInit, OnStart {
         // Create the listing
         let listing: MarketplaceListing | undefined;
         try {
-            [listing] = this.MARKETPLACE_STORE.UpdateAsync(uuid, (oldListing: MarketplaceListing | undefined) => {
+            [listing] = this.MARKETPLACE_STORE!.UpdateAsync(uuid, (oldListing: MarketplaceListing | undefined) => {
                 if (oldListing !== undefined && oldListing.bought === false) {
                     warn("Listing creation failed - duplicate UUID");
                     // Listing already exists for this UUID and is still active
@@ -179,7 +203,7 @@ export default class MarketplaceService implements OnInit, OnStart {
         // Use UpdateAsync to atomically mark listing as inactive and return item
         let listing: MarketplaceListing | undefined;
         try {
-            [listing] = this.MARKETPLACE_STORE.UpdateAsync(uuid, (oldListing: MarketplaceListing | undefined) => {
+            [listing] = this.MARKETPLACE_STORE!.UpdateAsync(uuid, (oldListing: MarketplaceListing | undefined) => {
                 if (oldListing === undefined) {
                     print("Cannot cancel listing - does not exist:", uuid);
                     return $tuple(undefined);
@@ -249,7 +273,7 @@ export default class MarketplaceService implements OnInit, OnStart {
 
         try {
             // Validate listing and lock it for processing
-            const [listing] = this.MARKETPLACE_STORE.UpdateAsync(uuid, (listing: MarketplaceListing | undefined) => {
+            const [listing] = this.MARKETPLACE_STORE!.UpdateAsync(uuid, (listing: MarketplaceListing | undefined) => {
                 if (listing === undefined || listing.lock !== undefined || listing.sellerEmpireId === this.empireId) {
                     return $tuple(undefined);
                 }
@@ -283,7 +307,7 @@ export default class MarketplaceService implements OnInit, OnStart {
                 this.uploadTradeToken(uuid, token);
 
                 // Reactivate listing if payment failed
-                this.MARKETPLACE_STORE.UpdateAsync(uuid, (listing: MarketplaceListing | undefined) => {
+                this.MARKETPLACE_STORE!.UpdateAsync(uuid, (listing: MarketplaceListing | undefined) => {
                     if (
                         listing === undefined ||
                         listing.sellerEmpireId === this.empireId ||
@@ -302,7 +326,7 @@ export default class MarketplaceService implements OnInit, OnStart {
             }
 
             // Mark listing as sold
-            let [newListing] = this.MARKETPLACE_STORE.UpdateAsync(uuid, (listing: MarketplaceListing | undefined) => {
+            let [newListing] = this.MARKETPLACE_STORE!.UpdateAsync(uuid, (listing: MarketplaceListing | undefined) => {
                 if (
                     listing === undefined ||
                     listing.sellerEmpireId === this.empireId ||
@@ -340,7 +364,7 @@ export default class MarketplaceService implements OnInit, OnStart {
                 timestamp: os.time(),
             };
 
-            this.HISTORY_STORE.UpdateAsync(uuid, (history: MarketplaceTransaction[] | undefined) => {
+            this.HISTORY_STORE!.UpdateAsync(uuid, (history: MarketplaceTransaction[] | undefined) => {
                 return $tuple(history ? [...history, transaction] : [transaction]);
             });
 
@@ -391,7 +415,7 @@ export default class MarketplaceService implements OnInit, OnStart {
             }
 
             try {
-                let [newListing] = this.MARKETPLACE_STORE.UpdateAsync(
+                let [newListing] = this.MARKETPLACE_STORE!.UpdateAsync(
                     uuid,
                     (oldListing: MarketplaceListing | undefined) => {
                         if (oldListing === undefined) {
@@ -457,7 +481,8 @@ export default class MarketplaceService implements OnInit, OnStart {
      * @returns True if operational, false otherwise.
      */
     private isOperational(player?: Player) {
-        if (!MARKETPLACE_CONFIG.ENABLED) return false;
+        if (!MARKETPLACE_CONFIG.ENABLED || !this.MARKETPLACE_STORE || !this.INDEX_STORE || !this.HISTORY_STORE)
+            return false;
         if (player !== undefined && !this.permissionsService.checkPermLevel(player, "marketplace")) return false;
         return true;
     }

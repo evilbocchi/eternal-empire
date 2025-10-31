@@ -27,12 +27,6 @@ import eat from "shared/hamster/eat";
 @Service()
 export default class DiagnosticService implements OnStart {
     /**
-     * Initializes the DiagnosticService.
-     * Currently unused but required by the OnStart interface.
-     */
-    onInit() {}
-
-    /**
      * Starts the DiagnosticService and begins performance monitoring.
      *
      * Spawns a continuous monitoring task that checks physics throttling

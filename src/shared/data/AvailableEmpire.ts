@@ -44,7 +44,18 @@ namespace AvailableEmpire {
     /**
      * DataStore for tracking which empires each player has access to.
      */
-    const availableEmpiresStore = IS_SERVER || IS_EDIT ? DataStoreService.GetDataStore("AvailableEmpires") : undefined;
+    const DATA_STORE =
+        IS_SERVER || IS_EDIT
+            ? (() => {
+                  try {
+                      const store = DataStoreService.GetDataStore("AvailableEmpires");
+                      return store;
+                  } catch (error) {
+                      if (!IS_STUDIO) warn("Failed to get AvailableEmpires DataStore:", error);
+                      return undefined;
+                  }
+              })()
+            : undefined;
 
     /**
      * Cache of available empires per player to reduce DataStore calls.
@@ -92,8 +103,8 @@ namespace AvailableEmpire {
      * @returns Map of empire IDs to empire information.
      */
     export function get(userId: number): Map<string, EmpireInfo> {
-        if (availableEmpiresStore === undefined) {
-            throw "Cannot get available empires on client";
+        if (DATA_STORE === undefined) {
+            return new Map<string, EmpireInfo>();
         }
 
         const cached = availableEmpiresPerPlayer.get(userId);
@@ -101,14 +112,14 @@ namespace AvailableEmpire {
             return cached;
         }
         const key = "Player_" + userId;
-        const result = availableEmpiresStore.GetAsync(key);
+        const result = DATA_STORE.GetAsync(key);
         let data = result === undefined ? undefined : result[0];
         data ??= new Map<string, EmpireInfo>();
 
         if ((data as string[])[0] !== undefined) {
             const mapped = new Map<string, EmpireInfo>();
             for (const empireId of data as string[]) mapped.set(empireId, getInfo(empireId));
-            task.spawn(() => availableEmpiresStore.SetAsync(key, mapped));
+            task.spawn(() => DATA_STORE.SetAsync(key, mapped));
             availableEmpiresPerPlayer.set(userId, mapped);
             return mapped;
         }
@@ -124,11 +135,11 @@ namespace AvailableEmpire {
      * @param empire The empire ID to add.
      */
     export function add(userId: number, empire: string) {
-        if (availableEmpiresStore === undefined) {
+        if (DATA_STORE === undefined) {
             throw "Cannot add available empires on client";
         }
 
-        const [availableEmpires] = availableEmpiresStore.UpdateAsync(
+        const [availableEmpires] = DATA_STORE.UpdateAsync(
             "Player_" + userId,
             (oldValue: Map<string, EmpireInfo> | undefined) => {
                 if (oldValue === undefined) {
@@ -153,11 +164,11 @@ namespace AvailableEmpire {
      * @param empire The empire ID to remove.
      */
     export function remove(userId: number, empire: string) {
-        if (availableEmpiresStore === undefined) {
+        if (DATA_STORE === undefined) {
             throw "Cannot remove available empires on client";
         }
 
-        const [availableEmpires] = availableEmpiresStore.UpdateAsync(
+        const [availableEmpires] = DATA_STORE.UpdateAsync(
             "Player_" + userId,
             (oldValue: Map<string, EmpireInfo> | undefined) => {
                 if (oldValue === undefined) {
@@ -182,10 +193,10 @@ namespace AvailableEmpire {
      * @returns Whether the empire was successfully created.
      */
     export function create(player: Player) {
-        if (tick() - debounce < 0.5 || IS_SINGLE_SERVER) {
+        if (os.clock() - debounce < 0.5 || IS_SINGLE_SERVER) {
             return false;
         }
-        debounce = tick();
+        debounce = os.clock();
         const playerProfile = PlayerProfileManager.load(player.UserId);
         if (playerProfile === undefined) throw "wtf";
         const playerData = playerProfile.Data;
@@ -253,10 +264,6 @@ namespace AvailableEmpire {
     }
 
     export function registerPlayer(player: Player) {
-        if (availableEmpiresStore === undefined) {
-            throw "Cannot register player on client";
-        }
-
         const availableEmpires = get(player.UserId);
         pcall(() => {
             for (const [id, empire] of availableEmpires) {
@@ -296,7 +303,7 @@ namespace AvailableEmpire {
             }
         }
         if (changed === true) {
-            availableEmpiresStore.SetAsync("Player_" + player.UserId, availableEmpires);
+            DATA_STORE?.SetAsync("Player_" + player.UserId, availableEmpires);
             update(player.UserId, availableEmpires);
             print(availableEmpires);
             warn("Player data was modified to fix lossy and old data");

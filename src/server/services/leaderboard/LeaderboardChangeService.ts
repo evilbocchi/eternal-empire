@@ -15,6 +15,7 @@ import { OnStart, Service } from "@flamework/core";
 import { CollectionService, DataStoreService, HttpService } from "@rbxts/services";
 import { $env } from "rbxts-transform-env";
 import DataService from "server/services/data/DataService";
+import { LeaderboardService } from "server/services/leaderboard/LeaderboardService";
 import { IS_EDIT } from "shared/Context";
 import Sandbox from "shared/Sandbox";
 import { getNameFromUserId } from "shared/constants";
@@ -26,22 +27,26 @@ import eat from "shared/hamster/eat";
  */
 @Service()
 export default class LeaderboardChangeService implements OnStart {
-    /** OrderedDataStore for total time leaderboard. */
-    private totalTimeStore = DataStoreService.GetOrderedDataStore("TotalTime");
-
-    /** OrderedDataStore for donations leaderboard. */
-    private donatedStore = DataStoreService.GetOrderedDataStore("Donated");
-
     /** Map of leaderboard names to their corresponding DataStores. */
     private leaderboardStores = new Map<string, OrderedDataStore>();
 
     /** List of banned user IDs (excluded from leaderboards). */
     private banned = [1900444407];
 
-    constructor(private dataService: DataService) {
+    constructor(
+        private readonly dataService: DataService,
+        private readonly leaderboardService: LeaderboardService,
+    ) {
+        if (
+            this.leaderboardService.totalTimeStore === undefined ||
+            this.leaderboardService.donatedStore === undefined
+        ) {
+            return;
+        }
+
         // Initialize currency leaderboard stores
-        this.leaderboardStores.set("TimePlayed", this.totalTimeStore);
-        this.leaderboardStores.set("Donated", this.donatedStore);
+        this.leaderboardStores.set("TimePlayed", this.leaderboardService.totalTimeStore);
+        this.leaderboardStores.set("Donated", this.leaderboardService.donatedStore);
 
         for (const lb of CollectionService.GetTagged("Leaderboard")) {
             const currency = lb.Name as Currency;

@@ -14,17 +14,16 @@
  */
 
 import Signal from "@antivivi/lemon-signal";
-import { OnoeNum } from "@rbxts/serikanum";
 import { convertToHHMMSS, simpleInterval } from "@antivivi/vrldk";
 import { OnInit, OnStart, Service } from "@flamework/core";
+import { OnoeNum } from "@rbxts/serikanum";
 import { DataStoreService, MessagingService } from "@rbxts/services";
 import CurrencyService from "server/services/data/CurrencyService";
-import DataService from "server/services/data/DataService";
 import ChatHookService from "server/services/permissions/ChatHookService";
 import { log } from "server/services/permissions/LogService";
 import PermissionService from "server/services/permissions/PermissionService";
 import ProductService from "server/services/product/ProductService";
-import { IS_EDIT } from "shared/Context";
+import { IS_EDIT, IS_STUDIO } from "shared/Context";
 import Packets from "shared/Packets";
 import { getNameFromUserId } from "shared/constants";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
@@ -58,7 +57,14 @@ interface BombMessage {
 @Service()
 export default class BombsService implements OnInit, OnStart {
     /** Global DataStore for bomb timing. */
-    globalDataStore = DataStoreService.GetGlobalDataStore();
+    readonly GLOBAL_DATA_STORE = (() => {
+        try {
+            return DataStoreService.GetGlobalDataStore();
+        } catch (err) {
+            if (!IS_STUDIO) warn(`Failed to get Global DataStore: ${err}`);
+            return undefined;
+        }
+    })();
 
     /** Signal fired when a bomb is used. */
     bombUsed = new Signal<(player: Player, bombType: Currency) => void>();
@@ -72,7 +78,6 @@ export default class BombsService implements OnInit, OnStart {
     constructor(
         private chatHookService: ChatHookService,
         private currencyService: CurrencyService,
-        private dataService: DataService,
         private permissionsService: PermissionService,
         private productService: ProductService,
     ) {}
@@ -108,7 +113,7 @@ export default class BombsService implements OnInit, OnStart {
         const bombs: Currency[] = ["Funds Bombs"];
 
         for (const bomb of bombs) {
-            const endTime = this.globalDataStore.GetAsync(bomb)[0] as number | undefined;
+            const endTime = this.GLOBAL_DATA_STORE?.GetAsync(bomb)[0] as number | undefined;
             if (endTime !== undefined) {
                 bombEndTimes.set(bomb, endTime);
             }
@@ -122,7 +127,7 @@ export default class BombsService implements OnInit, OnStart {
      */
     onInit() {
         Packets.useBomb.fromClient((player, bombType) => {
-            if (!this.permissionsService.checkPermLevel(player, "purchase")) {
+            if (!this.permissionsService.checkPermLevel(player, "purchase") || !this.GLOBAL_DATA_STORE) {
                 return false;
             }
 
@@ -139,7 +144,7 @@ export default class BombsService implements OnInit, OnStart {
                     currency: bombType,
                     amount: 1,
                 });
-                this.globalDataStore.UpdateAsync(bombType, (oldValue: number | undefined) => {
+                this.GLOBAL_DATA_STORE.UpdateAsync(bombType, (oldValue: number | undefined) => {
                     let base = os.time();
                     let value: number;
 
@@ -175,13 +180,13 @@ export default class BombsService implements OnInit, OnStart {
                 return Enum.ProductPurchaseDecision.PurchaseGranted;
             });
         }
-
-        if (!IS_EDIT) {
-            MessagingService.SubscribeAsync("Bomb", (message) => this.activateBomb(message.Data as BombMessage));
-        }
     }
 
     onStart() {
+        if (!IS_EDIT) {
+            MessagingService.SubscribeAsync("Bomb", (message) => this.activateBomb(message.Data as BombMessage));
+        }
+
         const cleanup = simpleInterval(() => {
             this.boost = CurrencyBomb.getBombBoosts(Packets.bombEndTimes.get(), os.time());
         }, 1);
