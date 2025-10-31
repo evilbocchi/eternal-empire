@@ -29,29 +29,31 @@ However, note that we strive to maintain things in a stable state. As such, chan
 
 To set up the development environment for Eternal Empire, follow these steps:
 
-1. Clone the repository:
+1. Download the development place file from the [sandbox repository](https://github.com/evilbocchi/eternal-empire-sandbox). You will need this to test the game in Roblox Studio.
+
+2. Clone the repository:
     ```sh
     git clone https://github.com/evilbocchi/eternal-empire.git
     cd eternal-empire
     ```
 
-2. Install dependencies:
+3. Install dependencies:
     ```sh
     npm install
     ```
 
-3. Install Rojo:
+4. Install Rojo:
     - Rojo is bundled with this project, accessible with `npx rojo`. For operating systems that do not support the existing pre-built binaries, follow the [crates.io installation](https://rojo.space/docs/v7/getting-started/installation/) of Rojo.
     - However, you will need to install the Roblox Studio plugin for Rojo yourself. To do so, either try running `npx rojo plugin install` or follow the [official documentation](https://rojo.space/docs/v7/getting-started/installation/).
 
-4. Run the environment:
+5. Run the environment:
     ```sh
     npm run dev
     ```
 
-5. Connect to the Rojo server with the Roblox Studio plugin. Changes made to files in your code editor should now sync with Roblox Studio.
+6. Connect to the Rojo server with the Roblox Studio plugin. Changes made to files in your code editor should now sync with Roblox Studio.
 
-6. You may consider installing the internal tooling plugin for easier development. To build and install the plugin, run:
+7. You may consider installing the internal tooling plugin for easier development. To build and install the plugin, run:
     ```sh
     npm run plugin
     ```
