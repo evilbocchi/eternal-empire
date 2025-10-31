@@ -27,7 +27,7 @@
     "skipErrorChecking": true,
     "excludeExternals": true,
 
-    "favicon": "assets/LogoSmall.png",
+    "favicon": "assets/brand/Cover.png",
     
     "customTitle": "eternal empire",
     "customDescription": "Build your money-making empire. Uncover the world of Obbysia.",
