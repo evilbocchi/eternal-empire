@@ -1,5 +1,5 @@
 {
-    "name": "jme",
+    "name": "eternal-empire",
     "globIgnorePaths": ["**/package.json", "**/tsconfig.json"],
     "tree": {
         "$className": "DataModel",

@@ -10,7 +10,7 @@ import { MCP_TOOL_DEFINITIONS, executeMcpTool } from "./toolHandlers.js";
  */
 export async function startMcpServer(logger) {
     const server = new Server(
-        { name: "jme-roblox-datamodel", version: "0.1.0" },
+        { name: "ee-roblox-datamodel", version: "0.1.0" },
         {
             capabilities: {
                 tools: {},

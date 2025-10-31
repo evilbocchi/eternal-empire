@@ -1,12 +1,12 @@
 <p align="center">
-  <img width="350" src="assets/Logo.png" href="https://www.roblox.com/games/16438564807/JJT-Money-Empire">
+  <img width="350" src="assets/brand/Wordmark.png">
 </p>
 
-# jme
+# eternal empire
 
-[![Continuous Integration](https://github.com/evilbocchi/jme/actions/workflows/ci.yml/badge.svg?branch=main&event=push)](https://github.com/evilbocchi/jme/actions/workflows/ci.yml)
-[![GitHub](https://img.shields.io/github/release/evilbocchi/jme.svg)](https://github.com/evilbocchi/jme/releases/latest)
-[![CodeFactor](https://www.codefactor.io/repository/github/evilbocchi/jme/badge)](https://www.codefactor.io/repository/github/evilbocchi/jme)
+[![Continuous Integration](https://github.com/evilbocchi/eternal-empire/actions/workflows/ci.yml/badge.svg?branch=main&event=push)](https://github.com/evilbocchi/eternal-empire/actions/workflows/ci.yml)
+[![GitHub](https://img.shields.io/github/release/evilbocchi/eternal-empire.svg)](https://github.com/evilbocchi/eternal-empire/releases/latest)
+[![CodeFactor](https://www.codefactor.io/repository/github/evilbocchi/eternal-empire/badge)](https://www.codefactor.io/repository/github/evilbocchi/eternal-empire)
 [![Discord](https://dcbadge.limes.pink/api/server/https://discord.gg/haPBmCSvXt?style=flat)](https://discord.gg/https://discord.gg/haPBmCSvXt)
 
 Build your money-making empire. Uncover the world of Obbysia.
@@ -27,12 +27,12 @@ However, note that we strive to maintain things in a stable state. As such, chan
 
 > If you are using VS Code, an [automatic task](.vscode/tasks.json) is run when opening the project folder that sets up the development environment for you.
 
-To set up the development environment for jme, follow these steps:
+To set up the development environment for Eternal Empire, follow these steps:
 
 1. Clone the repository:
     ```sh
-    git clone https://github.com/evilbocchi/jme.git
-    cd jme
+    git clone https://github.com/evilbocchi/eternal-empire.git
+    cd eternal-empire
     ```
 
 2. Install dependencies:
@@ -51,9 +51,14 @@ To set up the development environment for jme, follow these steps:
 
 5. Connect to the Rojo server with the Roblox Studio plugin. Changes made to files in your code editor should now sync with Roblox Studio.
 
+6. You may consider installing the internal tooling plugin for easier development. To build and install the plugin, run:
+    ```sh
+    npm run plugin
+    ```
+
 ## Contributing
 
-We warmly welcome contributions to improve jme! To contribute:
+We warmly welcome contributions to improve Eternal Empire! To contribute:
 
 1. Fork the repository.
 2. Create a new branch for your feature or bugfix.

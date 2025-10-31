@@ -73,7 +73,7 @@ jobs:
     - name: Package project files
       run: |
         # Create a zip file with all necessary files
-        zip -r build-artifacts/jme-${{ steps.version.outputs.release_version }}.zip \
+        zip -r build-artifacts/ee-${{ steps.version.outputs.release_version }}.zip \
           out/ \
           assets/ \
           include/ \
@@ -85,7 +85,7 @@ jobs:
       if: ${{ inputs.create_release }}
       uses: softprops/action-gh-release@v1
       with:
-        files: build-artifacts/jme-${{ steps.version.outputs.release_version }}.zip
+        files: build-artifacts/ee-${{ steps.version.outputs.release_version }}.zip
         tag_name: v${{ steps.version.outputs.release_version }}
         name: v${{ steps.version.outputs.release_version }}
         body: |          

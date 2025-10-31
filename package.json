@@ -1,5 +1,5 @@
 {
-    "name": "jme",
+    "name": "eternal-empire",
     "version": "1.0.0",
     "private": true,
     "type": "module",
@@ -10,19 +10,19 @@
         "asset-sync": "npx rbxts-asset-sync --output=src/shared/asset/AssetMap.ts",
         "asset-watch": "npx rbxts-asset-sync --watch --output=src/shared/asset/AssetMap.ts",
         "build": "npm run asset-sync & rbxtsc",
-        "plugin": "cd ./plugin && npx rojo build --plugin jme-tooling.rbxmx",
+        "plugin": "cd ./plugin && npx rojo build --plugin ee-tooling.rbxmx",
         "docs": "npx typedoc",
         "dev": "concurrently --prefix none \"rbxtsc -w --optimizedLoops\" \"npx rojo serve\"",
         "plugin:test": "node --test plugin/datamodel/*.test.js"
     },
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/evilbocchi/jme.git"
+        "url": "git+https://github.com/evilbocchi/eternal-empire.git"
     },
     "bugs": {
-        "url": "https://github.com/evilbocchi/jme/issues"
+        "url": "https://github.com/evilbocchi/eternal-empire/issues"
     },
-    "homepage": "https://github.com/evilbocchi/jme#readme",
+    "homepage": "https://github.com/evilbocchi/eternal-empire#readme",
     "devDependencies": {
         "@eslint/js": "^9.34.0",
         "@modelcontextprotocol/sdk": "^1.19.1",
