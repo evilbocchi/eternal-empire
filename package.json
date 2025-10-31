@@ -51,7 +51,7 @@
         "rokit-npm": "^1.0.1",
         "signale": "^1.4.0",
         "tsx": "^4.20.6",
-        "typedoc": "^0.28.13",
+        "typedoc": "^0.28.14",
         "typedoc-material-theme": "^1.4.0",
         "typedoc-plugin-extras": "^4.0.1",
         "typedoc-plugin-missing-exports": "^4.1.2",
