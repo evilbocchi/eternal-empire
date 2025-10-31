@@ -33,6 +33,6 @@
 - Use `shared/asset/GameAssets.ts` (`getSound`, `emitEffect`) when playing sounds or particles; ensure `AssetMap` contains the asset id before referencing it.
 
 ## Testing & diagnostics
-- Luau specs reside in `src/server/tests/*.spec.ts` and execute via Roblox Cloud through `npm test`, which calls `test/runTests.js`; set `LUAU_EXECUTION_KEY`, `LUAU_EXECUTION_UNIVERSE_ID`, and `LUAU_EXECUTION_PLACE_ID` locally or the task will no-op.
+- Luau specs reside in `src/server/tests/*.spec.ts` and execute via the local machine or Roblox Cloud in CI through `npm test`, which calls `test/runTests.js`.
 - Cloud runs stream logs line-by-line; scan the task summary for `X passed, Y failed` and raise meaningful errors in those messages.
 - Auto-generated typings (`include/`, `services.d.ts`) come from the Rojo place—regenerate them if the Roblox hierarchy changes before compiling.

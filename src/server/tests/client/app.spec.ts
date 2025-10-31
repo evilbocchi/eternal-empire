@@ -6,6 +6,7 @@ import { ReplicatedStorage, RunService, StarterGui } from "@rbxts/services";
 import App from "client/components/App";
 import { eater } from "shared/hamster/eat";
 import mockFlamework from "shared/hamster/FlameworkMock";
+import LoadingScreen from "sharedfirst/LoadingScreen";
 
 type MountContext = {
     root: Root;
@@ -65,47 +66,48 @@ describe("App", () => {
         expect(mount.container).toBeDefined();
     });
 
-    // it("creates expected roots in PlayerGui", () => {
-    //     const expectedRoots: Array<[string, keyof Instances]> = [
-    //         ["DebugOverlay", "ScreenGui"],
-    //         ["Title", "ScreenGui"],
-    //         ["PlayerList", "ScreenGui"],
-    //         ["Tooltips", "ScreenGui"],
-    //         ["Effects", "ScreenGui"],
-    //         ["Dialogue", "ScreenGui"],
-    //         ["Build", "ScreenGui"],
-    //         ["Inventory", "ScreenGui"],
-    //         ["Marketplace", "ScreenGui"],
-    //         ["Purchase", "ScreenGui"],
-    //         ["Quest", "ScreenGui"],
-    //         ["Sidebar", "ScreenGui"],
-    //         ["Backpack", "ScreenGui"],
-    //         ["World", "Folder"],
-    //         ["BrokenItemIndicators", "Folder"],
-    //     ];
+    it("creates expected roots in PlayerGui", () => {
+        const expectedRoots: Array<[string, keyof Instances]> = [
+            ["DebugOverlay", "ScreenGui"],
+            ["Title", "ScreenGui"],
+            ["PlayerList", "ScreenGui"],
+            ["Tooltips", "ScreenGui"],
+            ["Effects", "ScreenGui"],
+            ["Dialogue", "ScreenGui"],
+            ["Build", "ScreenGui"],
+            ["Inventory", "ScreenGui"],
+            ["Marketplace", "ScreenGui"],
+            ["Purchase", "ScreenGui"],
+            ["Quest", "ScreenGui"],
+            ["Sidebar", "ScreenGui"],
+            ["Backpack", "ScreenGui"],
+            ["World", "Folder"],
+            ["BrokenItemIndicators", "Folder"],
+        ];
 
-    //     for (const [name, className] of expectedRoots) {
-    //         const instance = StarterGui.FindFirstChild(name);
-    //         expect(instance).toBeDefined();
-    //         if (!instance) continue;
-    //         expect(instance!.IsA(className)).toBe(true);
-    //     }
-    // });
+        for (const [name, className] of expectedRoots) {
+            const instance = StarterGui.FindFirstChild(name);
+            expect(instance).toBeDefined();
+            if (!instance) continue;
+            expect(instance!.IsA(className)).toBe(true);
+        }
+    });
 
-    // it("hides the loading screen after initialization completes", () => {
-    //     const loadingGui = new Instance("ScreenGui") as ScreenGui;
-    //     loadingGui.Name = "LoadingScreen";
-    //     loadingGui.ResetOnSpawn = false;
-    //     loadingGui.IgnoreGuiInset = true;
-    //     loadingGui.Parent = StarterGui;
+    it("hides the loading screen after initialization completes", () => {
+        const loadingGui = new Instance("ScreenGui") as ScreenGui;
+        loadingGui.Name = "LoadingScreen";
+        loadingGui.ResetOnSpawn = false;
+        loadingGui.IgnoreGuiInset = true;
+        loadingGui.Parent = StarterGui;
 
-    //     LoadingScreen.showLoadingScreen("Integration Test", true, loadingGui);
-    //     expect(loadingGui.Enabled).toBe(true);
+        LoadingScreen.showLoadingScreen("Integration Test", true, loadingGui);
+        expect(loadingGui.Enabled).toBe(true);
 
-    //     const hidden = waitUntil(() => loadingGui.Enabled === false);
-    //     expect(hidden).toBe(true);
+        LoadingScreen.hideLoadingScreen();
+        const hidden = waitUntil(() => loadingGui.Enabled === false);
+        expect(hidden).toBe(true);
 
-    //     cleanupMount(mount);
-    //     loadingGui.Destroy();
-    // });
+        cleanupMount(mount);
+        loadingGui.Destroy();
+    });
 });
