@@ -180,7 +180,7 @@ export default function App() {
         });
 
         task.spawn(() => {
-            if (IS_STUDIO) {
+            if (IS_STUDIO && IS_EDIT) {
                 const setWaypoint = (key: string) => {
                     game.GetService("ChangeHistoryService").SetWaypoint(key);
                 };
