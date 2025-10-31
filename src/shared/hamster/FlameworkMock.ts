@@ -6,7 +6,7 @@ import eat from "shared/hamster/eat";
 export default function mockFlamework() {
     // preload
     let isPreloading = false;
-    const paths = [["ServerScriptService", "TS", "services"]];
+    const paths = [["ServerScriptService", "services"]];
     const preloadPaths = new Array<Instance>();
     for (const arg of paths) {
         const service = arg.shift();

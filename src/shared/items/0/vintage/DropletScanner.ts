@@ -6,6 +6,7 @@ import { packet } from "@rbxts/fletchette";
 import { OnoeNum } from "@rbxts/serikanum";
 import StringBuilder from "@rbxts/stringbuilder";
 import { Server } from "shared/api/APIExpose";
+import { IS_EDIT } from "shared/Context";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import { CURRENCY_CATEGORIES, CURRENCY_DETAILS } from "shared/currency/CurrencyDetails";
 import Item from "shared/item/Item";
@@ -13,10 +14,31 @@ import Upgrader from "shared/item/traits/upgrader/Upgrader";
 import perItemPacket from "shared/item/utils/perItemPacket";
 import Class0Shop from "shared/items/0/Class0Shop";
 
+declare global {
+    interface InstanceInfo {
+        /**
+         * The last scanned droplet text output (only populated in edit mode for testing).
+         */
+        scannerOutput?: string;
+    }
+}
+
 const textChangedPacket =
     perItemPacket(packet<(placementId: string, dropletId: string, value: string, color: string) => void>());
 
 const ALL_CURRENCIES_COLOR = new Color3(0.3, 0.37, 1);
+const ZERO = new OnoeNum(0);
+const ONE = new OnoeNum(1);
+
+function isNeutralValue(constant: OnoeNum, operation: "add" | "mul" | "pow") {
+    switch (operation) {
+        case "add":
+            return constant.equals(ZERO);
+        case "mul":
+        case "pow":
+            return constant.equals(ONE);
+    }
+}
 
 function getOperationString(constant: OnoeNum, operation: "add" | "mul" | "pow", inverse: boolean) {
     switch (operation) {
@@ -66,12 +88,13 @@ function valueToString(
     inverse: boolean,
 ) {
     if ("mantissa" in constant) {
+        if (isNeutralValue(constant, operation)) return false;
         const [opString, opValue] = getOperationString(constant, operation, inverse);
         buildRichText(builder, opString + opValue.toString(), ALL_CURRENCIES_COLOR, undefined, "Bold");
-        return;
+        return true;
     }
 
-    currenciesToString(builder, constant.amountPerCurrency, operation, inverse);
+    return currenciesToString(builder, constant.amountPerCurrency, operation, inverse);
 }
 
 function currenciesToString(
@@ -80,24 +103,33 @@ function currenciesToString(
     operation: "add" | "mul" | "pow",
     inverse: boolean,
 ) {
-    let i = 1;
-    const size = amountPerCurrency.size();
-    const last = size - 1;
+    let hasAnyValues = false;
+    const entries = new Array<{ name: Currency; details: CurrencyDetails; amount: OnoeNum }>();
+
     for (const [name, details] of CurrencyBundle.SORTED_DETAILS) {
         if (details.page === CURRENCY_CATEGORIES.Internal) continue;
 
         let amount = amountPerCurrency.get(name);
-        if (amount === undefined) continue;
+        if (amount === undefined || isNeutralValue(amount, operation)) continue;
 
+        entries.push({ name, details, amount });
+        hasAnyValues = true;
+    }
+
+    if (!hasAnyValues) return false;
+
+    for (let i = 0; i < entries.size(); i++) {
+        const { name, details, amount } = entries[i];
         const [opString, opValue] = getOperationString(amount, operation, inverse);
 
         buildRichText(builder, opString + CurrencyBundle.getFormatted(name, opValue), details.color, undefined, "Bold");
 
-        if (i < size) {
-            builder.append(i === last ? " and " : ", ");
+        if (i < entries.size() - 1) {
+            builder.append(i === entries.size() - 2 ? " and " : ", ");
         }
-        i++;
     }
+
+    return true;
 }
 
 export = new Item(script.Name)
@@ -130,19 +162,32 @@ export = new Item(script.Name)
             builder.append("RAW WORTH: ").append(dropletValue.baseValue.toString(true));
 
             for (const [name, operative] of dropletValue.factors) {
-                builder.append("\n").append(name.upper()).append(": ");
                 const inverse = operative.inverse === true;
+                let hasAnyContent = false;
+                const contentBuilder = new StringBuilder();
 
                 if (operative.add !== undefined) {
-                    valueToString(builder, operative.add, "add", inverse);
+                    if (valueToString(contentBuilder, operative.add, "add", inverse)) {
+                        hasAnyContent = true;
+                    }
                 }
 
                 if (operative.mul !== undefined) {
-                    valueToString(builder, operative.mul, "mul", inverse);
+                    if (hasAnyContent) contentBuilder.append(" ");
+                    if (valueToString(contentBuilder, operative.mul, "mul", inverse)) {
+                        hasAnyContent = true;
+                    }
                 }
 
                 if (operative.pow !== undefined) {
-                    valueToString(builder, operative.pow, "pow", inverse);
+                    if (hasAnyContent) contentBuilder.append(" ");
+                    if (valueToString(contentBuilder, operative.pow, "pow", inverse)) {
+                        hasAnyContent = true;
+                    }
+                }
+
+                if (hasAnyContent) {
+                    builder.append("\n").append(name.upper()).append(": ").append(contentBuilder.toString());
                 }
             }
 
@@ -155,10 +200,18 @@ export = new Item(script.Name)
             }
 
             builder.append("\nTOTAL: ").append(dropletValue.coalesce().toString(true));
+
+            const outputText = builder.toString();
+
+            // Expose output in edit mode for testing
+            if (IS_EDIT) {
+                modelInfo.scannerOutput = outputText;
+            }
+
             textChangedPacket.toAllClients(
                 model,
                 dropletValue.instanceInfo.dropletId!,
-                builder.toString(),
+                outputText,
                 dropletModel.Color.Lerp(new Color3(1, 1, 1), 0.2).ToHex(),
             );
         });

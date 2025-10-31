@@ -1,6 +1,6 @@
-# Contributing to jme
+# Contribution Guide
 
-Thank you for your interest in contributing! We welcome all contributions that help improve jme.
+Thank you for your interest in contributing! We welcome all contributions that help improve Eternal Empire.
 
 ## Getting Started
 
@@ -35,7 +35,7 @@ See the [README](README.md) for local setup instructions.
 
 ## Communication
 
-- For questions or discussions, use [GitHub Issues](https://github.com/evilbocchi/jme/issues) or our [Discord server](https://discord.gg/haPBmCSvXt).
+- For questions or discussions, use [GitHub Issues](https://github.com/evilbocchi/eternal-empire/issues) or our [Discord server](https://discord.gg/haPBmCSvXt).
 
 ## Code of Conduct
 
@@ -43,4 +43,4 @@ Please be respectful and follow our [Code of Conduct](CODE_OF_CONDUCT.md).
 
 ---
 
-Thank you for helping make jme better!
+Thank you for helping make Eternal Empire better!

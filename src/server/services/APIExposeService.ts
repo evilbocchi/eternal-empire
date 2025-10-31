@@ -9,7 +9,7 @@
  * @since 1.0.0
  */
 
-import { OnInit, Service } from "@flamework/core";
+import { Service } from "@flamework/core";
 import { ChallengeService } from "server/services/ChallengeService";
 import CurrencyService from "server/services/data/CurrencyService";
 import DataService from "server/services/data/DataService";
@@ -50,7 +50,7 @@ declare global {
  * Service that exposes a unified Server for use by game content and modding.
  */
 @Service()
-export default class APIExposeService implements OnInit {
+export default class APIExposeService {
     constructor(
         private readonly areaService: AreaService,
         private readonly atmosphereService: AtmosphereService,
@@ -292,6 +292,4 @@ export default class APIExposeService implements OnInit {
 
         return t;
     })();
-
-    onInit() {}
 }

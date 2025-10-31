@@ -896,6 +896,37 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
         return true;
     }
 
+    /**
+     * Removes the broken state from all placed items currently marked as broken.
+     * @returns The number of items restored.
+     */
+    repairAllBrokenItems() {
+        let restored = 0;
+        const remaining = new Array<string>();
+        for (const placementId of this.brokenPlacedItems) remaining.push(placementId);
+
+        for (const placementId of remaining) {
+            if (!this.brokenPlacedItems.delete(placementId)) continue;
+
+            this.repairProtection.delete(placementId);
+
+            const model = this.modelPerPlacementId.get(placementId);
+            if (model) {
+                const modelInfo = this.getPlacementInstanceInfo(placementId, model);
+                modelInfo.broken = false;
+                clearRepairBoostFromModel(modelInfo);
+            }
+
+            restored++;
+        }
+
+        if (restored > 0) {
+            Packets.brokenPlacedItems.set(this.brokenPlacedItems);
+        }
+
+        return restored;
+    }
+
     onInit() {
         // Set up automatic model creation for new placed items
         const placedItemsUpdatedConnection = this.placedItemsUpdated.connect((placedItems) => {

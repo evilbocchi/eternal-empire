@@ -8,6 +8,7 @@ import signalePkg from "signale";
 import { startMcpServer } from "./mcp/mcpServer.js";
 import { initToolBridge } from "./mcp/toolBridge.js";
 import { registerRoutes } from "./routes/index.js";
+import { attachDataModelSocket } from "./routes/dataModelSocket.js";
 
 const app = express();
 app.use(express.json({ limit: "10mb" }));
@@ -31,9 +32,12 @@ const PROGRESSION_OUTPUT = path.resolve(REPO_ROOT, "PROGRESS_ESTIMATION.md");
 registerRoutes(app, logger, REPO_ROOT, OUTPUT, PROGRESSION_OUTPUT);
 
 // Start Express server
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
     logger.info(`Plugin server running at http://localhost:${PORT}`);
 });
+
+// Attach WebSocket bridge for DataModel sync
+attachDataModelSocket(server, logger);
 
 // Start MCP server
 startMcpServer(logger).catch((error) => {

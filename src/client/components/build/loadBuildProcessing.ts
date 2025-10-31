@@ -1,9 +1,8 @@
-//!optimize 2
 //!native
 //!optimize 2
 import { CollectionService, RunService, Workspace } from "@rbxts/services";
 import { Environment } from "@rbxts/ui-labs";
-import { COLLISION_COLOR, NONCOLLISION_COLOR } from "client/constants";
+import BuildManager from "client/components/build/BuildManager";
 import { cancelCollision, requestCollision } from "client/parallel/build/PlacementCollisionWorker";
 import { ASSETS } from "shared/asset/GameAssets";
 import { CAMERA, PLACED_ITEMS_FOLDER } from "shared/constants";
@@ -18,6 +17,9 @@ declare global {
         ChargerRing: Beam;
     }
 }
+
+const COLLISION_COLOR = BuildManager.COLLISION_COLOR;
+const NONCOLLISION_COLOR = BuildManager.NONCOLLISION_COLOR;
 
 /**
  * Retrieves an instance of a given class and name from a parent, or creates it if missing.

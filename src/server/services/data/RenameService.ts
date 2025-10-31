@@ -96,7 +96,7 @@ export class RenameService implements OnInit, OnStart {
         }
 
         // Check uniqueness via leaderboard
-        if (this.leaderboardService.totalTimeStore.GetAsync(name) !== undefined) {
+        if (this.leaderboardService.totalTimeStore?.GetAsync(name) !== undefined) {
             this.chatHookService.sendPrivateMessage(player, "This name is already in use.");
             return false;
         }

@@ -1,3 +1,4 @@
+/// <reference types="@rbxts/types/plugin" />
 import React, { Fragment, useEffect } from "@rbxts/react";
 import { createRoot, Root } from "@rbxts/react-roblox";
 import { ContentProvider, RunService, StarterGui, Workspace } from "@rbxts/services";
@@ -12,15 +13,20 @@ import ChestLootManager from "client/components/chest/ChestLootManager";
 import CommandsWindow from "client/components/commands/CommandsWindow";
 import DebugOverlay from "client/components/debug/DebugOverlay";
 import EffectManager from "client/components/effect/EffectManager";
+import BrokenItemIndicatorRenderer from "client/components/item/BrokenItemIndicatorRenderer";
 import ClientItemReplication from "client/components/item/ClientItemReplication";
+import HarvestableGuiRenderer from "client/components/item/HarvestableGuiRenderer";
 import InventoryWindow from "client/components/item/inventory/InventoryWindow";
 import PortableBeaconWindow from "client/components/item/PortableBeaconWindow";
 import PrinterRenderer from "client/components/item/printer/PrinterRenderer";
+import RepairedItemEffectRenderer from "client/components/item/RepairedItemEffectRenderer";
+import RepairWindow from "client/components/item/RepairWindow";
 import PurchaseWindow from "client/components/item/shop/PurchaseWindow";
 import ShopGui from "client/components/item/shop/ShopGui";
 import UpgradeBoardRenderer from "client/components/item/upgrade/UpgradeBoardRenderer";
 import LevelUpManager from "client/components/levelup/LevelUpManager";
 import LogsWindow from "client/components/logs/LogsWindow";
+import MarketplaceWindow from "client/components/marketplace/MarketplaceWindow";
 import DialogueWindow from "client/components/npc/DialogueWindow";
 import PlayerListContainer from "client/components/playerlist/PlayerListContainer";
 import PositionManager from "client/components/position/PositionManager";
@@ -33,6 +39,7 @@ import ResetRenderer from "client/components/reset/ResetRenderer";
 import CopyWindow from "client/components/settings/CopyWindow";
 import SettingsManager from "client/components/settings/SettingsManager";
 import SidebarButtons from "client/components/sidebar/SidebarButtons";
+import performNewBeginningsWakeUp from "client/components/start/performNewBeginningsWakeUp";
 import TitleScreen from "client/components/start/TitleScreen";
 import StatsWindow from "client/components/stats/StatsWindow";
 import ToastManager from "client/components/toast/ToastManager";
@@ -42,22 +49,8 @@ import WorldRenderer from "client/components/world/WorldRenderer";
 import { setVisibilityMain } from "client/hooks/useVisibility";
 import MusicManager from "client/MusicManager";
 import { assets, getAsset } from "shared/asset/AssetMap";
+import { PLAYER_GUI } from "shared/constants";
 import { IS_EDIT, IS_PUBLIC_SERVER, IS_STUDIO } from "shared/Context";
-
-declare global {
-    interface RunService {
-        Run: (this: RunService) => void;
-        Stop: (this: RunService) => void;
-    }
-}
-
-import BrokenItemIndicatorRenderer from "client/components/item/BrokenItemIndicatorRenderer";
-import HarvestableGuiRenderer from "client/components/item/HarvestableGuiRenderer";
-import RepairedItemEffectRenderer from "client/components/item/RepairedItemEffectRenderer";
-import RepairWindow from "client/components/item/RepairWindow";
-import MarketplaceWindow from "client/components/marketplace/MarketplaceWindow";
-import performNewBeginningsWakeUp from "client/components/start/performNewBeginningsWakeUp";
-import { PLAYER_GUI } from "client/constants";
 import eat from "shared/hamster/eat";
 import Sandbox from "shared/Sandbox";
 import LoadingScreen from "sharedfirst/LoadingScreen";
@@ -187,17 +180,18 @@ export default function App() {
         });
 
         task.spawn(() => {
-            if (IS_STUDIO) {
-                eat(() => {
-                    const setWaypoint = () => {
-                        const ChangeHistoryService = game.GetService("ChangeHistoryService" as keyof Services);
-                        (ChangeHistoryService as unknown as { SetWaypoint(name: string): void }).SetWaypoint(
-                            "SimulationDone",
-                        );
-                    };
+            if (IS_STUDIO && IS_EDIT) {
+                const setWaypoint = (key: string) => {
+                    game.GetService("ChangeHistoryService").SetWaypoint(key);
+                };
 
+                const [success, result] = pcall(() => setWaypoint("SimulationOpen"));
+                if (!success) warn(`[ChangeHistoryService] Failed to set waypoint: ${result}`);
+
+                eat(() => {
                     const [success, result] = pcall(() => {
-                        task.delay(1, setWaypoint);
+                        setWaypoint("SimulationClosing");
+                        task.delay(1, () => setWaypoint("SimulationDone"));
                     });
                     if (!success) warn(`[ChangeHistoryService] Failed to set waypoint: ${result}`);
                 });
@@ -222,6 +216,7 @@ export default function App() {
                 root.unmount();
             }
             cleanup();
+            LoadingScreen.destroy();
         };
     }, []);
 

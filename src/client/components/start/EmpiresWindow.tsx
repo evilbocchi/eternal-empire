@@ -10,7 +10,7 @@ import { playSound } from "shared/asset/GameAssets";
 import { getNameFromUserId } from "shared/constants";
 import Packets from "shared/Packets";
 import LoadingScreen from "sharedfirst/LoadingScreen";
-import { PLAYER_GUI } from "client/constants";
+import { PLAYER_GUI } from "shared/constants";
 import { IS_EDIT } from "shared/Context";
 import eat from "shared/hamster/eat";
 

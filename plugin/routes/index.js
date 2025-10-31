@@ -1,18 +1,17 @@
 import { appendFile, writeFile } from "node:fs/promises";
 import { randomUUID } from "node:crypto";
 import path from "node:path";
+import { McpError } from "@modelcontextprotocol/sdk/types.js";
 import { writeFileIfChanged } from "../utils/fileUtils.js";
 import { generateTypeScriptContent } from "../generators/typescriptGenerator.js";
-import { applySnapshot, applyDiff } from "../datamodel/dataModelStore.js";
-import { acceptSnapshotChunk, clearPendingSnapshot } from "../datamodel/snapshotAssembler.js";
-import { dataModelState, connectionState } from "../state/dataModelState.js";
-import { normalizePathSegments, findNodeBySegments, cloneNodeLimited } from "../datamodel/datamodelUtils.js";
+import { connectionState } from "../state/dataModelState.js";
+import { processDataModelPayload } from "../datamodel/dataModelController.js";
 import {
     connectStream as connectMcpStream,
     disconnectStream as disconnectMcpStream,
     handleToolResponse as handleMcpToolResponse,
-    requestToolExecution as requestMcpToolExecution,
 } from "../mcp/toolBridge.js";
+import { MCP_TOOL_DEFINITIONS, executeMcpTool, statusForMcpErrorCode } from "../mcp/toolHandlers.js";
 
 /**
  * Registers all Express route handlers.
@@ -139,57 +138,6 @@ export function registerRoutes(app, logger, repoRoot, outputPath, progressionOut
         }
     };
 
-    function normalizePayload(raw) {
-        if (!raw || typeof raw !== "object") {
-            return null;
-        }
-
-        if (typeof raw.type === "string") {
-            if (raw.type === "snapshot" && !raw.snapshot && raw.root) {
-                return { ...raw, snapshot: raw.root };
-            }
-
-            return raw;
-        }
-
-        if (raw.root) {
-            return { ...raw, type: "snapshot", snapshot: raw.root };
-        }
-
-        return raw;
-    }
-
-    function updateTruncationStatus(snapshot) {
-        if (!snapshot || typeof snapshot !== "object") {
-            return;
-        }
-
-        const truncated = snapshot.truncated === true;
-        if (truncated === connectionState.lastTruncatedFlag) {
-            return;
-        }
-
-        const scope = truncated ? logger.warn : logger.info;
-        scope(
-            `DataModel snapshot ${truncated ? "is" : "is no longer"} truncated (maxDepth=${snapshot.maxDepth ?? "?"}, maxNodes=${snapshot.maxNodes ?? "?"}).`,
-        );
-        connectionState.lastTruncatedFlag = truncated;
-    }
-
-    function commitSnapshotPayload(payload) {
-        applySnapshot(dataModelState, payload);
-        dataModelState.version = (Number(dataModelState.version) || 0) + 1;
-
-        if (!connectionState.hasLoggedInitialSnapshot) {
-            logger.success("Received initial DataModel snapshot from Roblox Studio.");
-            connectionState.hasLoggedInitialSnapshot = true;
-        }
-
-        updateTruncationStatus(dataModelState.snapshot);
-
-        return { status: "ok", version: dataModelState.version };
-    }
-
     /**
      * POST /waypointsync
      * Receives DataModel trees and generates TypeScript service definitions.
@@ -222,110 +170,17 @@ export function registerRoutes(app, logger, repoRoot, outputPath, progressionOut
             return res.status(400).json({ status: "error", message: "Missing data model payload." });
         }
 
-        const payload = normalizePayload(body);
-        const type = typeof payload?.type === "string" ? payload.type : "snapshot";
+        const response = processDataModelPayload(body, logger);
 
-        connectionState.pluginConnected = true;
-
-        if (type === "snapshot") {
-            try {
-                const response = commitSnapshotPayload(payload);
-                clearPendingSnapshot(dataModelState);
-                return res.json(response);
-            } catch (error) {
-                logger.error(error);
-                clearPendingSnapshot(dataModelState);
-                return res.status(400).json({
-                    status: "error",
-                    message: error?.message || "Failed to process data model snapshot.",
-                });
-            }
+        if (response.status === "error") {
+            return res.status(400).json(response);
         }
 
-        if (type === "snapshot-chunk") {
-            try {
-                const chunkResult = acceptSnapshotChunk(dataModelState, payload);
-
-                if (!chunkResult.complete) {
-                    return res.json({
-                        status: "chunk-ack",
-                        nextChunk: chunkResult.nextIndex,
-                        chunkCount: chunkResult.chunkCount,
-                    });
-                }
-
-                const normalizedPayload = normalizePayload(chunkResult.snapshotPayload);
-                const response = commitSnapshotPayload(normalizedPayload);
-
-                if (typeof chunkResult.totalBytes === "number" && typeof chunkResult.chunkCount === "number") {
-                    logger.info(
-                        `Assembled chunked DataModel snapshot (${chunkResult.totalBytes} bytes across ${chunkResult.chunkCount} chunks).`,
-                    );
-                }
-
-                return res.json(response);
-            } catch (error) {
-                logger.warn(error);
-                clearPendingSnapshot(dataModelState);
-                return res.status(409).json({
-                    status: "resync",
-                    version: dataModelState.version || null,
-                    message: error?.message || "Failed to assemble chunked snapshot.",
-                });
-            }
+        if (response.status === "resync") {
+            return res.status(409).json(response);
         }
 
-        if (type === "diff") {
-            if (!dataModelState.snapshot || !dataModelState.snapshot.root || !dataModelState.index) {
-                return res.status(409).json({
-                    status: "resync",
-                    version: dataModelState.version || null,
-                    message: "Server is missing a baseline snapshot.",
-                });
-            }
-
-            const baseVersion = payload.baseVersion;
-            if (typeof baseVersion !== "number") {
-                return res.status(400).json({
-                    status: "error",
-                    message: "Diff payload is missing baseVersion.",
-                });
-            }
-
-            if (baseVersion !== dataModelState.version) {
-                return res.status(409).json({
-                    status: "resync",
-                    version: dataModelState.version,
-                    message: `Version mismatch (expected ${dataModelState.version}, received ${baseVersion}).`,
-                });
-            }
-
-            if (payload.truncated) {
-                return res.status(409).json({
-                    status: "resync",
-                    version: dataModelState.version,
-                    message: "Diff payload reported truncation.",
-                });
-            }
-
-            try {
-                applyDiff(dataModelState, payload);
-            } catch (error) {
-                logger.warn(error);
-                return res.status(409).json({
-                    status: "resync",
-                    version: dataModelState.version,
-                    message: error?.message || "Failed to apply diff; resync required.",
-                });
-            }
-
-            dataModelState.version += 1;
-            updateTruncationStatus(dataModelState.snapshot);
-
-            return res.json({ status: "ok", version: dataModelState.version });
-        }
-
-        return res.status(400).json({ status: "error", message: `Unknown payload type: ${type}` });
+        return res.json(response);
     });
 
     /**
@@ -607,166 +462,26 @@ export function registerRoutes(app, logger, repoRoot, outputPath, progressionOut
         }
 
         const args = typeof rawArgs === "object" && rawArgs !== null ? rawArgs : {};
-        const snapshot = dataModelState.snapshot;
-
         try {
-            if (!snapshot) {
-                const message = connectionState.pluginConnected
-                    ? "Awaiting first DataModel snapshot from the Roblox Studio plugin."
-                    : "Plugin connection not detected. Launch Roblox Studio with the tooling plugin to populate the DataModel snapshot.";
-                return res.status(503).json({ error: message });
-            }
-
-            let result;
-
-            if (name === "list_instances") {
-                const pathArg = typeof args.path === "string" ? args.path : "game";
-                const segments = normalizePathSegments(pathArg);
-
-                const maxDepthArg = Number(args.maxDepth);
-                let maxDepth = 3;
-                if (Number.isFinite(maxDepthArg)) {
-                    maxDepth = Math.max(0, Math.min(Math.floor(maxDepthArg), 10));
-                }
-
-                const lookup = findNodeBySegments(snapshot.root, segments);
-
-                if (!lookup.node) {
-                    const attemptedPath = segments.slice(0, lookup.missingIndex + 1).join(".");
-                    let message = `No instance found at path ${attemptedPath}.`;
-
-                    if (lookup.parent) {
-                        const parentDisplay = lookup.parent.path ?? lookup.parent.name ?? "parent";
-                        const parentTruncated = Boolean(
-                            lookup.parent.truncated ||
-                                (typeof lookup.parent.childCount === "number" &&
-                                    typeof lookup.parent.totalChildren === "number" &&
-                                    lookup.parent.childCount < lookup.parent.totalChildren),
-                        );
-
-                        if (parentTruncated) {
-                            message += ` The parent node (${parentDisplay}) was truncated in the last snapshot; try requesting a shallower path or waiting for the next sync.`;
-                        }
-                    }
-
-                    logger.warn(`[MCP HTTP] Lookup failed: ${message}`);
-                    return res.status(404).json({ error: message });
-                }
-
-                const { clone, depthTruncated, pluginTruncated } = cloneNodeLimited(lookup.node, maxDepth);
-
-                result = {
-                    path: segments.join("."),
-                    maxDepth,
-                    version: dataModelState.version ?? null,
-                    receivedAt: dataModelState.updatedAt,
-                    generatedAt: snapshot.generatedAt ?? null,
-                    depthTruncated,
-                    pluginTruncated: Boolean(snapshot.truncated || pluginTruncated),
-                    node: clone,
-                };
-            } else if (name === "find_item_model") {
-                const itemName = typeof args.itemName === "string" ? args.itemName : "";
-                if (!itemName) {
-                    return res.status(400).json({ error: "itemName parameter is required" });
-                }
-
-                const maxDepthArg = Number(args.maxDepth);
-                let maxDepth = 5;
-                if (Number.isFinite(maxDepthArg)) {
-                    maxDepth = Math.max(0, Math.min(Math.floor(maxDepthArg), 10));
-                }
-
-                // Try to find ItemModels folder in Workspace or ReplicatedStorage
-                const workspaceSegments = normalizePathSegments("game.Workspace.ItemModels");
-                const replicatedSegments = normalizePathSegments("game.ReplicatedStorage.ItemModels");
-
-                let itemModelsFolder = null;
-                let itemModelsFolderPath = "";
-
-                const workspaceLookup = findNodeBySegments(snapshot.root, workspaceSegments);
-                if (workspaceLookup.node) {
-                    itemModelsFolder = workspaceLookup.node;
-                    itemModelsFolderPath = "game.Workspace.ItemModels";
-                } else {
-                    const replicatedLookup = findNodeBySegments(snapshot.root, replicatedSegments);
-                    if (replicatedLookup.node) {
-                        itemModelsFolder = replicatedLookup.node;
-                        itemModelsFolderPath = "game.ReplicatedStorage.ItemModels";
-                    }
-                }
-
-                if (!itemModelsFolder) {
-                    return res
-                        .status(404)
-                        .json({ error: "ItemModels folder not found in Workspace or ReplicatedStorage" });
-                }
-
-                // Search for the item model by name
-                function findModelRecursive(node, targetName) {
-                    if (!node) return null;
-
-                    // Check if current node is the model we're looking for
-                    if (node.name === targetName && (node.className === "Model" || node.className === "Folder")) {
-                        return node;
-                    }
-
-                    // Search children
-                    if (Array.isArray(node.children)) {
-                        for (const child of node.children) {
-                            const foundResult = findModelRecursive(child, targetName);
-                            if (foundResult) return foundResult;
-                        }
-                    }
-
-                    return null;
-                }
-
-                const foundModel = findModelRecursive(itemModelsFolder, itemName);
-
-                if (!foundModel) {
-                    return res
-                        .status(404)
-                        .json({ error: `Item model "${itemName}" not found in ${itemModelsFolderPath}` });
-                }
-
-                const { clone, depthTruncated, pluginTruncated } = cloneNodeLimited(foundModel, maxDepth);
-
-                result = {
-                    itemName,
-                    path: foundModel.path ?? `${itemModelsFolderPath}.${itemName}`,
-                    maxDepth,
-                    version: dataModelState.version ?? null,
-                    receivedAt: dataModelState.updatedAt,
-                    generatedAt: snapshot.generatedAt ?? null,
-                    depthTruncated,
-                    pluginTruncated: Boolean(snapshot.truncated || pluginTruncated),
-                    model: clone,
-                };
-            } else if (name === "estimate_item_progression") {
-                const itemId = typeof args.itemId === "string" ? args.itemId : "";
-                if (!itemId) {
-                    return res.status(400).json({ error: "itemId parameter is required" });
-                }
-
-                try {
-                    const result = await requestMcpToolExecution("estimate_item_progression", { itemId });
-                    return res.json({ success: true, result });
-                } catch (error) {
-                    const message = error?.message || "Tool execution failed";
-                    const status = /not connected/i.test(message) ? 503 : 500;
-                    logger.warn(`[MCP HTTP] estimate_item_progression failed: ${message}`);
-                    return res.status(status).json({ error: message });
-                }
-            } else {
-                return res.status(404).json({ error: `Unknown tool: ${name}` });
-            }
-
-            // Send result back
+            const result = await executeMcpTool(name, args, { logger, logPrefix: "[MCP HTTP]" });
             return res.json({ success: true, result });
         } catch (error) {
-            logger.error(`MCP tool call error: ${error}`);
-            return res.status(500).json({ error: error.message || "Internal server error" });
+            if (error instanceof McpError) {
+                const status =
+                    typeof error.data?.httpStatus === "number"
+                        ? error.data.httpStatus
+                        : statusForMcpErrorCode(error.code);
+
+                if (status >= 500) {
+                    logger.error(`[MCP HTTP] ${error.message}`);
+                }
+
+                return res.status(status).json({ error: error.message });
+            }
+
+            const message = typeof error?.message === "string" ? error.message : String(error);
+            logger.error(`[MCP HTTP] Unexpected error: ${message}`);
+            return res.status(500).json({ error: message });
         }
     });
 
@@ -774,63 +489,7 @@ export function registerRoutes(app, logger, repoRoot, outputPath, progressionOut
      * GET /mcp/tools
      * List available MCP tools.
      */
-    app.get("/mcp/tools", (req, res) => {
-        const tools = [
-            {
-                name: "list_instances",
-                description: "List Roblox Studio DataModel instances captured by the companion plugin.",
-                inputSchema: {
-                    type: "object",
-                    properties: {
-                        path: {
-                            type: "string",
-                            description:
-                                "Dot path to the starting instance (e.g. game.Workspace.MyFolder). " +
-                                "Defaults to the DataModel root.",
-                        },
-                        maxDepth: {
-                            type: "number",
-                            description: "Number of descendant levels to include (0 = node only). Defaults to 3.",
-                        },
-                    },
-                },
-            },
-            {
-                name: "find_item_model",
-                description:
-                    "Search for an item model by name in the ItemModels folder and return its structure with children.",
-                inputSchema: {
-                    type: "object",
-                    properties: {
-                        itemName: {
-                            type: "string",
-                            description: "The name of the item model to search for (e.g. 'Conveyor', 'BasicDropper').",
-                        },
-                        maxDepth: {
-                            type: "number",
-                            description: "Number of descendant levels to include (0 = model only). Defaults to 5.",
-                        },
-                    },
-                    required: ["itemName"],
-                },
-            },
-            {
-                name: "estimate_item_progression",
-                description:
-                    "Calculate time-to-obtain details for a single item using the ProgressionEstimationService simulation.",
-                inputSchema: {
-                    type: "object",
-                    properties: {
-                        itemId: {
-                            type: "string",
-                            description: "The unique item id from shared/items/Items to estimate progression for.",
-                        },
-                    },
-                    required: ["itemId"],
-                },
-            },
-        ];
-
-        res.json({ tools });
+    app.get("/mcp/tools", (_req, res) => {
+        res.json({ tools: MCP_TOOL_DEFINITIONS });
     });
 }

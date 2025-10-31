@@ -1,8 +1,9 @@
+/// <reference types="@rbxts/types/plugin" />
 import { useEffect, useState } from "@rbxts/react";
 import { OnoeNum } from "@rbxts/serikanum";
 import { HttpService, ReplicatedStorage, RunService, Workspace } from "@rbxts/services";
-import { LOCAL_PLAYER } from "client/constants";
 import MusicManager from "client/MusicManager";
+import { LOCAL_PLAYER } from "shared/constants";
 import { IS_EDIT } from "shared/Context";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import { CURRENCY_DETAILS } from "shared/currency/CurrencyDetails";

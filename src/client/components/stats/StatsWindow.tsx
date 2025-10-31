@@ -13,7 +13,7 @@
 import { OnoeNum } from "@rbxts/serikanum";
 import { convertToHHMMSS } from "@antivivi/vrldk";
 import React, { Fragment, useEffect, useState } from "@rbxts/react";
-import { LOCAL_PLAYER } from "client/constants";
+import { LOCAL_PLAYER } from "shared/constants";
 import useSingleDocument from "client/components/sidebar/useSingleDocumentWindow";
 import SectionHeader from "client/components/stats/SectionHeader";
 import StatItem from "client/components/stats/StatItem";

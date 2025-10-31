@@ -1,7 +1,7 @@
 import { loadAnimation } from "@antivivi/vrldk";
 import { ReplicatedStorage, TweenService, Workspace } from "@rbxts/services";
 import { questState } from "client/components/quest/QuestState";
-import { PLAYER_GUI } from "client/constants";
+import { PLAYER_GUI } from "shared/constants";
 import { setVisibilityMain } from "client/hooks/useVisibility";
 import MusicManager from "client/MusicManager";
 import type NewBeginnings from "server/quests/NewBeginnings";

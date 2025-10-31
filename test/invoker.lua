@@ -1,10 +1,13 @@
 --!nocheck
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
-local target = ReplicatedStorage:WaitForChild("TS"):WaitForChild("hamster"):WaitForChild("runTests")
+local target = ReplicatedStorage.shared.hamster.runTests
 print("Running test script from:", target:GetFullName())
 print("IsRunning:", RunService:IsRunning())
 print("IsStudio:", RunService:IsStudio())
 print("IsServer:", RunService:IsServer())
 print("IsClient:", RunService:IsClient())
+
+table.clear(_G)
+
 require(target)()

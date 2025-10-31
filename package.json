@@ -1,27 +1,28 @@
 {
-    "name": "jme",
+    "name": "eternal-empire",
     "version": "1.0.0",
     "private": true,
     "type": "module",
     "scripts": {
         "test": "node test/runTests.js",
+        "test:studio": "node test/runTests.js --mode=studio",
         "lint": "npx eslint src --no-error-on-unmatched-pattern",
         "asset-sync": "npx rbxts-asset-sync --output=src/shared/asset/AssetMap.ts",
         "asset-watch": "npx rbxts-asset-sync --watch --output=src/shared/asset/AssetMap.ts",
         "build": "npm run asset-sync & rbxtsc",
-        "plugin": "cd ./plugin && npx rojo build --plugin jme-tooling.rbxmx",
+        "plugin": "cd ./plugin && npx rojo build --plugin ee-tooling.rbxmx",
         "docs": "npx typedoc",
         "dev": "concurrently --prefix none \"rbxtsc -w --optimizedLoops\" \"npx rojo serve\"",
         "plugin:test": "node --test plugin/datamodel/*.test.js"
     },
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/evilbocchi/jme.git"
+        "url": "git+https://github.com/evilbocchi/eternal-empire.git"
     },
     "bugs": {
-        "url": "https://github.com/evilbocchi/jme/issues"
+        "url": "https://github.com/evilbocchi/eternal-empire/issues"
     },
-    "homepage": "https://github.com/evilbocchi/jme#readme",
+    "homepage": "https://github.com/evilbocchi/eternal-empire#readme",
     "devDependencies": {
         "@eslint/js": "^9.34.0",
         "@modelcontextprotocol/sdk": "^1.19.1",
@@ -56,7 +57,8 @@
         "typedoc-plugin-missing-exports": "^4.1.2",
         "typedoc-plugin-rename-defaults": "^0.7.3",
         "typescript": "^5.5.3",
-        "typescript-eslint": "^8.40.0"
+        "typescript-eslint": "^8.40.0",
+        "ws": "^8.18.3"
     },
     "dependencies": {
         "@antivivi/lemon-signal": "^1.2.4",
@@ -73,6 +75,7 @@
         "@rbxts/fletchette": "^4.5.0",
         "@rbxts/fuzzy-search": "^1.0.4",
         "@rbxts/janitor": "^1.18.3-ts.0",
+        "@rbxts/jest": "^3.13.3-alpha.1",
         "@rbxts/luau-thread": "^1.0.1",
         "@rbxts/partcache": "^1.1.1",
         "@rbxts/react": "^17.2.3",
@@ -82,7 +85,6 @@
         "@rbxts/serikanum": "^1.6.0",
         "@rbxts/services": "^1.5.1",
         "@rbxts/stringbuilder": "^1.1.0",
-        "@rbxts/testez": "^0.4.2-ts.0",
         "@rbxts/ui-labs": "^2.4.1"
     }
 }

@@ -22,6 +22,8 @@ const STUDIO_TEST_MODE = (cliMode ?? process.env.STUDIO_TEST_MODE ?? "auto").toL
 const STUDIO_TEST_SERVER = process.env.STUDIO_TEST_SERVER ?? "http://localhost:28354";
 const parsedTimeout = Number.parseInt(process.env.STUDIO_REQUEST_TIMEOUT ?? "5000", 10);
 const STUDIO_REQUEST_TIMEOUT = Number.isFinite(parsedTimeout) ? parsedTimeout : 5000;
+const parsedStudioToolTimeout = Number.parseInt(process.env.STUDIO_TOOL_TIMEOUT_MS ?? "120000", 10);
+const STUDIO_TOOL_TIMEOUT_MS = Number.isFinite(parsedStudioToolTimeout) ? parsedStudioToolTimeout : 120000;
 
 const EXECUTION_KEY = process.env.LUAU_EXECUTION_KEY;
 const UNIVERSE_ID = process.env.LUAU_EXECUTION_UNIVERSE_ID;
@@ -32,138 +34,169 @@ const scriptPath = path.join(import.meta.dirname, "invoker.lua");
 console.log(`Reading Luau script from: ${scriptPath}`);
 const luauScript = fs.readFileSync(scriptPath, "utf8");
 
+function transformLuauPath(line) {
+    // Transform Luau stack trace paths to source TypeScript paths for clickability
+    // e.g., [string "ServerScriptService.tests.weather.spec"]:15 -> src/server/tests/weather.spec.ts:15
+    const match = line.match(/\[string "ServerScriptService\.tests\.([^"]+)"\]:\s*(\d+)/);
+    if (match) {
+        const file = match[1];
+        const lineNum = match[2];
+        return line.replace(/\[string "ServerScriptService\.tests\.[^"]+"\]:\s*\d+/, `out/server/tests/${file}.luau:${lineNum}`);
+    }
+    return line;
+}
+
 async function runStudioTests() {
-    logger.info(`Checking Studio plugin server at ${STUDIO_TEST_SERVER}`);
+    logger.info(`Checking Studio MCP server at ${STUDIO_TEST_SERVER}`);
 
-    let statusResponse;
+    let response;
     try {
-        statusResponse = await axios.get(`${STUDIO_TEST_SERVER}/test/status`, { timeout: STUDIO_REQUEST_TIMEOUT });
-    } catch (error) {
-        const reason = error.code ?? error.message ?? String(error);
-        logger.warn(`Studio plugin server not reachable (${reason}).`);
-        return null;
-    }
-
-    const statusData = statusResponse.data ?? {};
-    if (!statusData.streamConnected) {
-        logger.warn("Studio plugin server reachable but no Studio instance is connected.");
-        return null;
-    }
-
-    try {
-        const response = await axios.post(
-            `${STUDIO_TEST_SERVER}/test/run`,
-            {},
+        response = await axios.post(
+            `${STUDIO_TEST_SERVER}/mcp/call-tool`,
             {
-                responseType: "stream",
-                timeout: 0,
+                name: "run_tests",
+                arguments: {
+                    timeoutMs: STUDIO_TOOL_TIMEOUT_MS,
+                },
+            },
+            {
+                timeout: STUDIO_TOOL_TIMEOUT_MS + 5000,
                 maxBodyLength: Infinity,
                 maxContentLength: Infinity,
             },
         );
-
-        return await new Promise((resolve, reject) => {
-            const stream = response.data;
-            let buffer = "";
-            let finalPayload = null;
-            let resolved = false;
-
-            const handleLine = (line) => {
-                const trimmed = line.trim();
-                if (!trimmed.startsWith("__RESULT__")) {
-                    return;
-                }
-
-                const jsonText = trimmed.slice("__RESULT__".length).trim();
-                if (jsonText.length === 0) {
-                    return;
-                }
-
-                try {
-                    finalPayload = JSON.parse(jsonText);
-                } catch (jsonError) {
-                    if (!resolved) {
-                        resolved = true;
-                        reject(new Error(`Failed to parse Studio test result JSON: ${jsonError.message}`));
-                    }
-                }
-            };
-
-            stream.on("data", (chunk) => {
-                if (resolved) {
-                    return;
-                }
-
-                const text = chunk.toString();
-                process.stdout.write(text);
-                buffer += text;
-
-                let newlineIndex = buffer.indexOf("\n");
-                while (newlineIndex !== -1) {
-                    const line = buffer.slice(0, newlineIndex);
-                    buffer = buffer.slice(newlineIndex + 1);
-                    handleLine(line);
-                    newlineIndex = buffer.indexOf("\n");
-                }
-            });
-
-            stream.on("end", () => {
-                if (resolved) {
-                    return;
-                }
-
-                if (buffer.length > 0) {
-                    handleLine(buffer);
-                }
-
-                if (finalPayload) {
-                    resolved = true;
-                    resolve(finalPayload);
-                } else {
-                    resolved = true;
-                    reject(new Error("Studio stream ended without emitting a result payload."));
-                }
-            });
-
-            stream.on("error", (streamError) => {
-                if (!resolved) {
-                    resolved = true;
-                    reject(streamError);
-                }
-            });
-        });
     } catch (error) {
-        if (error.response) {
-            const status = error.response.status;
-            const statusText = error.response.statusText || "Unknown";
+        const status = error.response?.status;
+        const statusText = error.response?.statusText;
 
-            if (status === 503) {
-                logger.warn("Studio plugin server reports no connected Studio instance.");
-                return null;
-            }
-
-            if (status === 409) {
-                return {
-                    success: false,
-                    summary: null,
-                    error: "Studio refused the test run because another run is already in progress.",
-                };
-            }
-
-            return {
-                success: false,
-                summary: null,
-                error: `Studio server responded with status ${status} (${statusText}).`,
-            };
+        if (status === 503) {
+            logger.warn("Studio MCP server reachable but plugin is not connected; skipping Studio tests.");
+            return null;
         }
 
-        const reason = error.message ?? String(error);
+        if (error.code === "ECONNREFUSED" || error.code === "ENOTFOUND") {
+            logger.warn(`Studio MCP server not reachable (${error.code}); skipping Studio tests.`);
+            return null;
+        }
+
+        if (status === 404) {
+            logger.warn("Studio MCP server does not expose the run_tests tool yet; skipping Studio tests.");
+            return null;
+        }
+
+        const message =
+            error.response?.data?.error ||
+            (status ? `HTTP ${status} ${statusText ?? ""}`.trim() : (error.message ?? String(error)));
+
         return {
             success: false,
             summary: null,
-            error: `Failed to request Studio test run: ${reason}`,
+            error: message,
         };
     }
+
+    const body = response?.data;
+    if (!body || body.success !== true) {
+        const errorMessage =
+            body && typeof body.error === "string" && body.error.length > 0
+                ? body.error
+                : "Studio test runner returned an unexpected response.";
+        return {
+            success: false,
+            summary: null,
+            error: errorMessage,
+        };
+    }
+
+    const result = body.result ?? {};
+
+    let detectedFailures = false;
+    if (Array.isArray(result.stdout)) {
+        for (const line of result.stdout) {
+            console.log(transformLuauPath(line));
+            
+            // Parse Jest summary line for failures
+            if (typeof line === "string" && line.includes("Test Suites:")) {
+                const failedMatch = line.match(/(\d+)\s+failed/);
+                if (failedMatch) {
+                    const failedCount = parseInt(failedMatch[1]);
+                    if (failedCount > 0) {
+                        detectedFailures = true;
+                    }
+                }
+            }
+        }
+    }
+
+    const summary = result.summary ?? null;
+    const failureMessages = [];
+
+    if (Array.isArray(result.failedSuites)) {
+        for (const suite of result.failedSuites) {
+            if (!suite || typeof suite !== "object") {
+                continue;
+            }
+            const header = suite.path ? `Suite: ${suite.path}` : "Suite";
+            const messages = Array.isArray(suite.messages)
+                ? suite.messages.filter((message) => typeof message === "string" && message.length > 0).map(transformLuauPath)
+                : [];
+            if (messages.length > 0) {
+                failureMessages.push(`${header}\n${messages.join("\n")}`);
+            }
+        }
+    }
+
+    if (Array.isArray(result.failedTests)) {
+        for (const test of result.failedTests) {
+            if (!test || typeof test !== "object") {
+                continue;
+            }
+
+            const path = typeof test.path === "string" ? test.path : "(unknown file)";
+            const title =
+                typeof test.fullName === "string" && test.fullName.length > 0
+                    ? test.fullName
+                    : typeof test.title === "string"
+                      ? test.title
+                      : "(unknown test)";
+            const messages = Array.isArray(test.failureMessages)
+                ? test.failureMessages.filter((message) => typeof message === "string" && message.length > 0).map(transformLuauPath)
+                : [];
+
+            if (messages.length > 0) {
+                failureMessages.push(`Test: ${title}\nFile: ${path}\n${messages.join("\n")}`);
+            }
+        }
+    }
+
+    const success = result.success === true;
+
+    if (summary) {
+        const passed = summary.successCount ?? summary.passedSuites ?? 0;
+        const failed = summary.failureCount ?? summary.failedSuites ?? 0;
+        const skipped = summary.skippedCount ?? summary.pendingSuites ?? 0;
+        logger.info(
+            `Studio summary: ${passed} passed, ${failed} failed, ${skipped} skipped over ${summary.totalTests ?? "?"} tests.`,
+        );
+    }
+
+    // Override success if we detected failures in stdout
+    const actualSuccess = success && !detectedFailures;
+
+    if (!actualSuccess) {
+        const combined = failureMessages.join("\n\n");
+        return {
+            success: false,
+            summary,
+            error: combined.length > 0 ? combined : "Studio tests reported failures.",
+        };
+    }
+
+    return {
+        success: true,
+        summary,
+        error: null,
+    };
 }
 
 async function createTask(apiKey, scriptContents, universeId, placeId) {
@@ -260,7 +293,7 @@ async function runLuauTask(universeId, placeId, scriptContents) {
         for (const taskLogs of logs.luauExecutionSessionTaskLogs) {
             const messages = taskLogs.messages;
             for (const message of messages) {
-                logger.info(message);
+                logger.info(transformLuauPath(message));
 
                 // Check for test result summary line (e.g., "36 passed, 0 failed, 0 skipped")
                 const testResultMatch = message.match(/(\d+)\s+passed,\s+(\d+)\s+failed,\s+(\d+)\s+skipped/);
@@ -330,19 +363,7 @@ async function main() {
         }
 
         if (studioResult) {
-            const summary = studioResult.summary;
-            if (summary) {
-                const passCount = summary.successCount ?? 0;
-                const failCount = summary.failureCount ?? 0;
-                const skipCount = summary.skippedCount ?? 0;
-                const duration = summary.durationMs ?? 0;
-                logger.info(
-                    `Studio summary: ${passCount} passed, ${failCount} failed, ${skipCount} skipped (${duration}ms).`,
-                );
-            }
-
             if (studioResult.success) {
-                logger.success("Studio tests passed successfully.");
                 process.exit(0);
             } else {
                 const reason = studioResult.error ? ` (${studioResult.error})` : "";
