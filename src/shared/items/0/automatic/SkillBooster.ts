@@ -11,7 +11,7 @@ export = new Item(script.Name)
         "A convoluted piece of machinery that has one purpose: to boost droplets by %mul%. We must continue pushing Skill.",
     )
     .setDifficulty(Difficulty.Automatic)
-    .setPrice(new CurrencyBundle().set("Funds", 100e39).set("Power", 100e24).set("Skill", 6000000), 1)
+    .setPrice(new CurrencyBundle().set("Funds", 10e42).set("Power", 25e24).set("Skill", 100000000), 1)
     .addPlaceableArea("BarrenIslands", "SlamoVillage")
     .soldAt(Class0Shop)
     .setCreator("CoPKaDT")

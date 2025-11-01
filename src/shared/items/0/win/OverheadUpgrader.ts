@@ -21,7 +21,7 @@ export = new Item(script.Name)
     .persists()
 
     .trait(Upgrader)
-    .setMul(new CurrencyBundle().set("Skill", 2))
+    .setMul(new CurrencyBundle().set("Skill", 1.5))
 
     .trait(Conveyor)
     .setSpeed(5)

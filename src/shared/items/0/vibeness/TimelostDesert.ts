@@ -17,7 +17,7 @@ export = new Item(script.Name)
         "The hands of time are frozen for you, allowing you to produce unparalled amounts of Power. Produces %gain%, this amount increasing with Skill and Total Playtime.",
     )
     .setDifficulty(Difficulty.Vibeness)
-    .setPrice(new CurrencyBundle().set("Skill", 2000000), 1)
+    .setPrice(new CurrencyBundle().set("Skill", 10000000), 1)
     .addPlaceableArea("BarrenIslands")
     .soldAt(Class0Shop)
     .setCreator("CoPKaDT")

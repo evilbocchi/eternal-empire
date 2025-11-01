@@ -14,12 +14,12 @@ export = new Item(script.Name)
     .setDifficulty(Difficulty.Automatic)
     .setPrice(
         new CurrencyBundle()
-            .set("Funds", 100e3)
-            .set("Power", 100e3)
-            .set("Bitcoin", 100e3)
-            .set("Skill", 100e3)
-            .set("Purifier Clicks", 10)
-            .set("Dark Matter", 10),
+            .set("Funds", 10e42)
+            .set("Power", 25e24)
+            .set("Bitcoin", 10e9)
+            .set("Skill", 50e6)
+            .set("Purifier Clicks", 2.5e21)
+            .set("Dark Matter", 100e24),
         1,
     )
     .setRequiredItemAmount(NormalReactor, 1)
