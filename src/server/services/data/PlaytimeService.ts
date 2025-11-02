@@ -17,9 +17,10 @@
  * @since 1.0.0
  */
 
-import { OnInit, Service } from "@flamework/core";
+import { OnInit, OnStart, Service } from "@flamework/core";
 import { RunService } from "@rbxts/services";
 import DataService from "server/services/data/DataService";
+import eat from "shared/hamster/eat";
 import Packets from "shared/Packets";
 
 /**
@@ -29,7 +30,7 @@ import Packets from "shared/Packets";
  * all sessions, with automatic persistence and client synchronization.
  */
 @Service()
-export default class PlaytimeService implements OnInit {
+export default class PlaytimeService implements OnInit, OnStart {
     /**
      * Current session time in seconds.
      * Tracks how long the current play session has been active.
@@ -73,13 +74,15 @@ export default class PlaytimeService implements OnInit {
     onInit() {
         // Send initial longest session data to clients
         Packets.longestSessionTime.set(this.dataService.empireData.longestSession);
+    }
 
+    onStart() {
         // Start the playtime tracking system
         task.spawn(() => {
             let t = 0; // Time accumulator for batching updates
 
             // Use heartbeat for precise time tracking
-            RunService.Heartbeat.Connect((dt) => {
+            const conn = RunService.Heartbeat.Connect((dt) => {
                 t += dt;
 
                 // Update every second for performance optimization
@@ -103,6 +106,7 @@ export default class PlaytimeService implements OnInit {
                     t = 0;
                 }
             });
+            eat(conn, "Disconnect");
         });
     }
 }

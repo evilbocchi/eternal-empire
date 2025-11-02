@@ -1,20 +1,11 @@
-import { Janitor } from "@rbxts/janitor";
-import { afterAll, beforeAll, beforeEach, describe, expect, it } from "@rbxts/jest-globals";
+import { beforeAll, beforeEach, describe, expect, it } from "@rbxts/jest-globals";
 import { OnoeNum } from "@rbxts/serikanum";
 import { Server } from "shared/api/APIExpose";
 import fixDuplicatedItemsData from "shared/data/loading/fixDuplicatedItemsData";
-import { eater } from "shared/hamster/eat";
-import mockFlamework from "shared/hamster/FlameworkMock";
 import type { RepairProtectionState } from "shared/item/repair";
 
 beforeAll(() => {
-    eater.janitor = new Janitor();
     _G.empireData = undefined;
-    mockFlamework();
-});
-
-afterAll(() => {
-    eater.janitor?.Destroy();
 });
 
 describe("loading", () => {

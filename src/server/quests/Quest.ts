@@ -9,7 +9,6 @@ import Signal from "@antivivi/lemon-signal";
 import { AnalyticsService, Players, ReplicatedStorage } from "@rbxts/services";
 import NPC, { Dialogue } from "server/interactive/npc/NPC";
 import { Server } from "shared/api/APIExpose";
-import { IS_EDIT } from "shared/Context";
 import ThisEmpire from "shared/data/ThisEmpire";
 import eat from "shared/hamster/eat";
 import { Identifiable, ModuleRegistry } from "shared/hamster/ModuleRegistry";
@@ -44,6 +43,7 @@ export class Stage {
 
     private reached = false;
     private completed = false;
+    private cframeChangedConnection: RBXScriptConnection | undefined;
 
     constructor() {}
 
@@ -66,7 +66,10 @@ export class Stage {
         if (instance !== undefined && instance.IsA("BasePart")) {
             this.focus = instance;
             this.setPosition(instance.Position);
-            instance.GetPropertyChangedSignal("CFrame").Connect(() => this.setPosition(instance.Position));
+            this.cframeChangedConnection?.Disconnect();
+            this.cframeChangedConnection = instance
+                .GetPropertyChangedSignal("CFrame")
+                .Connect(() => this.setPosition(instance.Position));
         }
         return this;
     }
@@ -179,6 +182,7 @@ export class Stage {
      */
     unload() {
         this.dialogue?.remove();
+        this.cframeChangedConnection?.Disconnect();
         table.clear(this);
     }
 }

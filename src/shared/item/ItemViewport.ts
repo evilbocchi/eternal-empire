@@ -64,6 +64,15 @@ namespace ItemViewport {
 
     // Animate all running item slot viewports each frame
     if (!IS_SERVER || IS_EDIT) {
+        const cleanup = () => {
+            RunService.UnbindFromRenderStep(KEY);
+            for (const rv of runningViewports) {
+                rv.viewportFrame.ClearAllChildren();
+            }
+            runningViewports.clear();
+        };
+        cleanup();
+
         RunService.BindToRenderStep(KEY, 0, (dt) => {
             let i = 0;
             for (const rv of runningViewports) {
@@ -83,13 +92,7 @@ namespace ItemViewport {
             }
         });
 
-        eat(() => {
-            RunService.UnbindFromRenderStep(KEY);
-            for (const rv of runningViewports) {
-                rv.viewportFrame.ClearAllChildren();
-            }
-            runningViewports.clear();
-        });
+        eat(cleanup);
     }
 
     /**

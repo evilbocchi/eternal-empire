@@ -35,6 +35,7 @@ local STREAM_PATH = "/mcp/stream"
 local CALL_TOOL_PATH = "/mcp/call-tool"
 local TOOLS_PATH = "/mcp/tools"
 local TOOL_RESPONSE_PATH = "/mcp/tool-response"
+local TOOL_PROGRESS_PATH = "/mcp/tool-progress"
 
 local RECONNECT_DELAY = 5
 local streamClient
@@ -42,6 +43,9 @@ local streamConnections = {}
 _G.mcpLogs = _G.mcpLogs or {}
 
 local function log(...)
+    if _G.mcpLogs == nil then
+        _G.mcpLogs = {}
+    end
     table.insert(_G.mcpLogs, ...)
 end
 
@@ -240,7 +244,7 @@ local function packValues(...)
     return { n = select("#", ...), ... }
 end
 
-local function runLuauCode(code, chunkName)
+local function runLuauCode(code, chunkName, options)
     if type(code) ~= "string" or code == "" then
         return false, "code parameter is required"
     end
@@ -277,6 +281,13 @@ local function runLuauCode(code, chunkName)
     end
 
     local startClock = os.clock()
+    local requestId
+    if type(options) == "table" then
+        local value = options.requestId
+        if type(value) == "string" and value ~= "" then
+            requestId = value
+        end
+    end
 
     local function errorHandler(message)
         local text = tostring(message)
@@ -289,29 +300,89 @@ local function runLuauCode(code, chunkName)
     local LogService = game:GetService("LogService")
     LogService:ClearOutput()
 
+    local stdout = {}
+
+    local function streamLog(level, line)
+        if not requestId or type(line) ~= "string" or line == "" then
+            return
+        end
+
+        task.spawn(function()
+            local ok, errorMessage = postJson(TOOL_PROGRESS_PATH, {
+                requestId = requestId,
+                message = line,
+                level = level,
+                timestamp = os.clock(),
+            })
+
+            if not ok and errorMessage then
+                log(string.format("[MCPClient] Failed to send tool progress: %s", tostring(errorMessage)))
+            end
+        end)
+    end
+
+    local function appendLog(message, messageType)
+        if message == nil then
+            return
+        end
+
+        local text = tostring(message)
+        local level = "info"
+        local prefix = ""
+
+        if messageType == Enum.MessageType.MessageWarning then
+            level = "warn"
+            prefix = "[WARN] "
+        elseif messageType == Enum.MessageType.MessageError then
+            level = "error"
+            prefix = "[ERROR] "
+        end
+
+        local line = prefix .. text
+        table.insert(stdout, line)
+        streamLog(level, line)
+    end
+
+    local logConnection
+    local success, connectionError = pcall(function()
+        logConnection = LogService.MessageOut:Connect(function(message, messageType)
+            appendLog(message, messageType)
+        end)
+    end)
+
+    if not success then
+        log(string.format("[MCPClient] Failed to connect MessageOut listener: %s", tostring(connectionError)))
+    end
+
     local ok, packedOrError = xpcall(function()
         return packValues(chunk())
     end, errorHandler)
 
     task.wait(0.25) -- Allow LogService to flush logs before inspection
-    local stdout = {}
-    for _, log in pairs(LogService:GetLogHistory()) do
-        local t = log.messageType or Enum.MessageType.MessageOutput
 
-        local prefix
-        if t == Enum.MessageType.MessageOutput then
-            prefix = ""
-        elseif t == Enum.MessageType.MessageWarning then
-            prefix = "[WARN] "
-        elseif t == Enum.MessageType.MessageError then
-            prefix = "[ERROR] "
+    if logConnection then
+        logConnection:Disconnect()
+    end
+
+    local history = LogService:GetLogHistory()
+    if type(history) == "table" then
+        local capturedCount = #stdout
+        local totalCount = #history
+
+        if totalCount > capturedCount then
+            for index = capturedCount + 1, totalCount do
+                local entry = history[index]
+                if type(entry) == "table" then
+                    appendLog(entry.message, entry.messageType)
+                end
+            end
         end
-
-        table.insert(stdout, `{prefix}{log.message}`)
     end
 
     if not ok then
-        return false, tostring(packedOrError)
+        local errorText = tostring(packedOrError)
+        appendLog(errorText, Enum.MessageType.MessageError)
+        return false, errorText
     end
 
     local packedResults = packedOrError
@@ -381,15 +452,17 @@ local function handleEstimateItemTool(arguments)
     return true, result
 end
 
-local function handleExecuteLuauTool(arguments)
+local function handleExecuteLuauTool(arguments, requestId)
     if type(arguments) ~= "table" then
         return false, "Arguments table is required"
     end
 
-    return runLuauCode(arguments.code, "MCP.ExecuteLuau")
+    return runLuauCode(arguments.code, "MCP.ExecuteLuau", {
+        requestId = requestId,
+    })
 end
 
-local function handleRunTestsTool(arguments)
+local function handleRunTestsTool(arguments, requestId)
     local code
     if type(arguments) == "table" then
         local value = arguments.code
@@ -402,7 +475,9 @@ local function handleRunTestsTool(arguments)
         return false, "code parameter is required"
     end
 
-    local success, payloadOrError = runLuauCode(code, "MCP.RunTests")
+    local success, payloadOrError = runLuauCode(code, "MCP.RunTests", {
+        requestId = requestId,
+    })
     if not success then
         return false, payloadOrError
     end
@@ -581,9 +656,9 @@ local function handleToolCommand(payload)
     if toolName == "estimate_item_progression" then
         success, resultOrError = handleEstimateItemTool(arguments)
     elseif toolName == "execute_luau" then
-        success, resultOrError = handleExecuteLuauTool(arguments)
+        success, resultOrError = handleExecuteLuauTool(arguments, requestId)
     elseif toolName == "run_tests" then
-        success, resultOrError = handleRunTestsTool(arguments)
+        success, resultOrError = handleRunTestsTool(arguments, requestId)
     else
         success = false
         resultOrError = string.format("Unknown tool: %s", tostring(toolName))

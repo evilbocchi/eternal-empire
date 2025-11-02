@@ -1,6 +1,6 @@
-import { Reflect, Modding, OnStart, OnInit, OnTick, OnRender, OnPhysics, Flamework } from "@flamework/core";
+import { Flamework, Modding, OnInit, OnPhysics, OnRender, OnStart, OnTick, Reflect } from "@flamework/core";
 import { isConstructor } from "@flamework/core/out/utility";
-import { RunService, Players } from "@rbxts/services";
+import { Players, RunService } from "@rbxts/services";
 import eat from "shared/hamster/eat";
 
 export default function mockFlamework() {
@@ -167,25 +167,26 @@ export default function mockFlamework() {
 
     debug.resetmemorycategory();
 
-    eat(
-        RunService.Heartbeat.Connect((dt) => {
-            for (const [dependency, identifier] of tick) {
-                reuseThread(profileYielding(() => dependency.onTick(dt), identifier));
-            }
-        }),
-        "Disconnect",
-    );
+    const heartbeatConn = RunService.Heartbeat.Connect((dt) => {
+        for (const [dependency, identifier] of tick) {
+            reuseThread(profileYielding(() => dependency.onTick(dt), identifier));
+        }
+    });
 
-    eat(
-        RunService.Stepped.Connect((time, dt) => {
-            for (const [dependency, identifier] of physics) {
-                reuseThread(profileYielding(() => dependency.onPhysics(dt, time), identifier));
-            }
-        }),
-        "Disconnect",
-    );
+    const steppedConn = RunService.Stepped.Connect((time, dt) => {
+        for (const [dependency, identifier] of physics) {
+            reuseThread(profileYielding(() => dependency.onPhysics(dt, time), identifier));
+        }
+    });
 
     for (const [dependency, identifier] of start) {
         reuseThread(profileYielding(() => dependency.onStart(), identifier));
     }
+
+    const cleanup = () => {
+        heartbeatConn.Disconnect();
+        steppedConn.Disconnect();
+        dependencies.clear();
+    };
+    eat(cleanup);
 }

@@ -136,6 +136,7 @@ export function requestToolExecution(name, args = {}, options = {}) {
 
     const requestId = `req-${++state.requestIdCounter}`;
     const timeoutMs = Number.isFinite(options.timeoutMs) ? Number(options.timeoutMs) : DEFAULT_TOOL_TIMEOUT_MS;
+    const onProgress = typeof options.onProgress === "function" ? options.onProgress : null;
 
     return new Promise((resolve, reject) => {
         const timeout = globalThis.setTimeout(() => {
@@ -143,7 +144,7 @@ export function requestToolExecution(name, args = {}, options = {}) {
             reject(new Error(`Tool request timed out after ${timeoutMs} ms`));
         }, timeoutMs);
 
-        state.pendingRequests.set(requestId, { resolve, reject, timeout });
+        state.pendingRequests.set(requestId, { resolve, reject, timeout, onProgress });
 
         try {
             sendEvent("call-tool", {
@@ -157,6 +158,36 @@ export function requestToolExecution(name, args = {}, options = {}) {
             reject(error instanceof Error ? error : new Error(String(error)));
         }
     });
+}
+
+/**
+ * Handle a tool progress message from Studio.
+ * @param {{ requestId?: string; message?: string; level?: string; timestamp?: number }} payload
+ * @returns {boolean}
+ */
+export function handleToolProgress(payload) {
+    if (!payload || typeof payload !== "object") {
+        return false;
+    }
+
+    const { requestId } = payload;
+    if (typeof requestId !== "string") {
+        return false;
+    }
+
+    const pending = state.pendingRequests.get(requestId);
+    if (!pending || typeof pending.onProgress !== "function") {
+        return false;
+    }
+
+    try {
+        pending.onProgress(payload);
+    } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        state.logger?.warn?.(`[MCP] Progress handler error for ${requestId}: ${message}`);
+    }
+
+    return true;
 }
 
 /**

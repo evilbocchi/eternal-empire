@@ -21,10 +21,10 @@ describe("arithmetic", () => {
 
         const result = base.add(other);
 
-        expect(result.get("Funds")?.equals(new OnoeNum(15))).toBe(true);
-        expect(result.get("Power")?.equals(new OnoeNum(7))).toBe(true);
-        expect(base.get("Funds")?.equals(new OnoeNum(10))).toBe(true);
-        expect(base.get("Power")?.equals(new OnoeNum(5))).toBe(true);
+        expect(result.get("Funds"))?.toEqualOnoeNum(new OnoeNum(15));
+        expect(result.get("Power"))?.toEqualOnoeNum(new OnoeNum(7));
+        expect(base.get("Funds"))?.toEqualOnoeNum(new OnoeNum(10));
+        expect(base.get("Power"))?.toEqualOnoeNum(new OnoeNum(5));
     });
 
     it("adds bundles in place when requested", () => {
@@ -33,7 +33,7 @@ describe("arithmetic", () => {
 
         base.add(other, true);
 
-        expect(base.get("Funds")?.equals(new OnoeNum(14))).toBe(true);
+        expect(base.get("Funds"))?.toEqualOnoeNum(new OnoeNum(14));
     });
 
     it("supports subtraction and multiplication", () => {
@@ -41,12 +41,12 @@ describe("arithmetic", () => {
         const other = new CurrencyBundle().set("Funds", 2).set("Power", 3);
 
         const subtracted = base.sub(other);
-        expect(subtracted.get("Funds")?.equals(new OnoeNum(10))).toBe(true);
-        expect(subtracted.get("Power")?.equals(new OnoeNum(5))).toBe(true);
+        expect(subtracted.get("Funds"))?.toEqualOnoeNum(new OnoeNum(10));
+        expect(subtracted.get("Power"))?.toEqualOnoeNum(new OnoeNum(5));
 
         const multiplied = base.mulConstant(2);
-        expect(multiplied.get("Funds")?.equals(new OnoeNum(24))).toBe(true);
-        expect(multiplied.get("Power")?.equals(new OnoeNum(16))).toBe(true);
+        expect(multiplied.get("Funds"))?.toEqualOnoeNum(new OnoeNum(24));
+        expect(multiplied.get("Power"))?.toEqualOnoeNum(new OnoeNum(16));
     });
 
     it("divides by another bundle", () => {
@@ -54,16 +54,16 @@ describe("arithmetic", () => {
         const divisor = new CurrencyBundle().set("Funds", 4).set("Power", 5);
 
         const divided = base.div(divisor);
-        expect(divided.get("Funds")?.equals(new OnoeNum(25))).toBe(true);
-        expect(divided.get("Power")?.equals(new OnoeNum(10))).toBe(true);
+        expect(divided.get("Funds"))?.toEqualOnoeNum(new OnoeNum(25));
+        expect(divided.get("Power"))?.toEqualOnoeNum(new OnoeNum(10));
     });
 
     it("raises currencies to a power", () => {
         const base = new CurrencyBundle().set("Funds", 2).set("Power", 3);
         const powered = base.powConstant(3);
 
-        expect(powered.get("Funds")?.equals(new OnoeNum(8))).toBe(true);
-        expect(powered.get("Power")?.equals(new OnoeNum(27))).toBe(true);
+        expect(powered.get("Funds"))?.toEqualOnoeNum(new OnoeNum(8));
+        expect(powered.get("Power"))?.toEqualOnoeNum(new OnoeNum(27));
     });
 });
 
@@ -78,8 +78,8 @@ describe("affordability", () => {
         expect(sufficient).toBe(true);
 
         const remaining = new CurrencyBundle(remainingMap, true);
-        expect(remaining.get("Funds")?.equals(40)).toBe(true);
-        expect(remaining.get("Power")?.equals(4)).toBe(true);
+        expect(remaining.get("Funds"))?.toEqualOnoeNum(new OnoeNum(40));
+        expect(remaining.get("Power"))?.toEqualOnoeNum(new OnoeNum(4));
     });
 
     it("correctly identifies insufficient balance", () => {

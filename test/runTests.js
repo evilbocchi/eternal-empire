@@ -1,6 +1,7 @@
 import axios from "axios";
 import dotenv from "dotenv";
 import fs from "fs";
+import readline from "readline";
 import path from "path";
 import signale from "signale";
 
@@ -46,25 +47,233 @@ function transformLuauPath(line) {
     return line;
 }
 
+function updateFailureDetection(line, tracker) {
+    if (!tracker || typeof line !== "string" || !line.includes("Test Suites:")) {
+        return;
+    }
+
+    const failedMatch = line.match(/(\d+)\s+failed/);
+    if (!failedMatch) {
+        return;
+    }
+
+    const failedCount = Number.parseInt(failedMatch[1], 10);
+    if (Number.isFinite(failedCount) && failedCount > 0) {
+        tracker.detectedFailures = true;
+    }
+}
+
+function analyzeStudioResultPayload(result, detectedFailures) {
+    if (!result || typeof result !== "object") {
+        return {
+            success: false,
+            summary: null,
+            error: "Studio test runner returned an unexpected response.",
+        };
+    }
+
+    const failureMessages = [];
+
+    if (Array.isArray(result.failedSuites)) {
+        for (const suite of result.failedSuites) {
+            if (!suite || typeof suite !== "object") {
+                continue;
+            }
+
+            const header = typeof suite.path === "string" && suite.path.length > 0 ? `Suite: ${suite.path}` : "Suite";
+            const messages = Array.isArray(suite.messages)
+                ? suite.messages
+                      .filter((message) => typeof message === "string" && message.length > 0)
+                      .map(transformLuauPath)
+                : [];
+
+            if (messages.length > 0) {
+                failureMessages.push(`${header}\n${messages.join("\n")}`);
+            }
+        }
+    }
+
+    if (Array.isArray(result.failedTests)) {
+        for (const test of result.failedTests) {
+            if (!test || typeof test !== "object") {
+                continue;
+            }
+
+            const path = typeof test.path === "string" && test.path.length > 0 ? test.path : "(unknown file)";
+            const title =
+                typeof test.fullName === "string" && test.fullName.length > 0
+                    ? test.fullName
+                    : typeof test.title === "string" && test.title.length > 0
+                      ? test.title
+                      : "(unknown test)";
+            const messages = Array.isArray(test.failureMessages)
+                ? test.failureMessages
+                      .filter((message) => typeof message === "string" && message.length > 0)
+                      .map(transformLuauPath)
+                : [];
+
+            if (messages.length > 0) {
+                failureMessages.push(`Test: ${title}\nFile: ${path}\n${messages.join("\n")}`);
+            }
+        }
+    }
+
+    const summary = result.summary ?? null;
+    if (summary) {
+        const passed = summary.successCount ?? summary.passedSuites ?? 0;
+        const failed = summary.failureCount ?? summary.failedSuites ?? 0;
+        const skipped = summary.skippedCount ?? summary.pendingSuites ?? 0;
+        logger.info(
+            `Studio summary: ${passed} passed, ${failed} failed, ${skipped} skipped over ${summary.totalTests ?? "?"} tests.`,
+        );
+    }
+
+    const baseError =
+        typeof result.error === "string" && result.error.length > 0 ? transformLuauPath(result.error) : null;
+    const combinedFailures = failureMessages.join("\n\n");
+    const baseSuccess = result.success === true;
+    const actualSuccess = baseSuccess && !detectedFailures;
+
+    if (!actualSuccess) {
+        return {
+            success: false,
+            summary,
+            error: combinedFailures.length > 0 ? combinedFailures : baseError ?? "Studio tests reported failures.",
+        };
+    }
+
+    return {
+        success: true,
+        summary,
+        error: null,
+    };
+}
+
+function readStreamToString(stream) {
+    return new Promise((resolve, reject) => {
+        const chunks = [];
+
+        stream.on("data", (chunk) => {
+            if (chunk === undefined) {
+                return;
+            }
+
+            if (Buffer.isBuffer(chunk)) {
+                chunks.push(chunk);
+            } else {
+                chunks.push(Buffer.from(String(chunk)));
+            }
+        });
+
+        stream.on("end", () => {
+            resolve(Buffer.concat(chunks).toString("utf8"));
+        });
+
+        stream.on("error", (error) => {
+            reject(error);
+        });
+    });
+}
+
+async function consumeNdjsonStream(stream) {
+    const tracker = { detectedFailures: false };
+
+    return new Promise((resolve, reject) => {
+        const lineReader = readline.createInterface({ input: stream, crlfDelay: Infinity });
+        let finalResult = null;
+
+        lineReader.on("line", (rawLine) => {
+            const trimmed = typeof rawLine === "string" ? rawLine.trim() : "";
+            if (trimmed.length === 0) {
+                return;
+            }
+
+            let event;
+            try {
+                event = JSON.parse(trimmed);
+            } catch {
+                console.log(transformLuauPath(trimmed));
+                return;
+            }
+
+            if (event.type === "log") {
+                const message = typeof event.message === "string" ? event.message : "";
+                const level = typeof event.level === "string" ? event.level : "info";
+
+                if (message.length === 0) {
+                    return;
+                }
+
+                updateFailureDetection(message, tracker);
+                const transformed = transformLuauPath(message);
+
+                if (level === "error") {
+                    console.error(transformed);
+                } else if (level === "warn") {
+                    console.warn(transformed);
+                } else {
+                    console.log(transformed);
+                }
+            } else if (event.type === "result") {
+                if (event.result && typeof event.result === "object") {
+                    finalResult = event.result;
+                } else {
+                    finalResult = {
+                        success: event.success === true,
+                        summary: event.summary ?? null,
+                        error: typeof event.error === "string" ? event.error : null,
+                    };
+                }
+            } else if (event.type === "error") {
+                finalResult = {
+                    success: false,
+                    summary: null,
+                    error: typeof event.error === "string" ? transformLuauPath(event.error) : "Studio tests failed.",
+                };
+            }
+        });
+
+        const finalize = () => {
+            if (!finalResult) {
+                resolve({
+                    success: false,
+                    summary: null,
+                    error: "Studio test runner ended without providing a result.",
+                });
+                return;
+            }
+
+            resolve(analyzeStudioResultPayload(finalResult, tracker.detectedFailures));
+        };
+
+        lineReader.once("close", finalize);
+        lineReader.once("error", reject);
+        stream.once("error", (error) => {
+            lineReader.close();
+            reject(error);
+        });
+    });
+}
+
 async function runStudioTests() {
     logger.info(`Checking Studio MCP server at ${STUDIO_TEST_SERVER}`);
 
     let response;
     try {
-        response = await axios.post(
-            `${STUDIO_TEST_SERVER}/mcp/call-tool`,
-            {
+        response = await axios({
+            method: "post",
+            url: `${STUDIO_TEST_SERVER}/mcp/call-tool?stream=1`,
+            data: {
                 name: "run_tests",
                 arguments: {
                     timeoutMs: STUDIO_TOOL_TIMEOUT_MS,
                 },
             },
-            {
-                timeout: STUDIO_TOOL_TIMEOUT_MS + 5000,
-                maxBodyLength: Infinity,
-                maxContentLength: Infinity,
-            },
-        );
+            responseType: "stream",
+            timeout: STUDIO_TOOL_TIMEOUT_MS + 5000,
+            maxBodyLength: Infinity,
+            maxContentLength: Infinity,
+        });
     } catch (error) {
         const status = error.response?.status;
         const statusText = error.response?.statusText;
@@ -95,7 +304,37 @@ async function runStudioTests() {
         };
     }
 
-    const body = response?.data;
+    const contentType = String(response.headers?.["content-type"] ?? "").toLowerCase();
+    if (contentType.includes("application/x-ndjson")) {
+        return consumeNdjsonStream(response.data);
+    }
+
+    let rawBody;
+    try {
+        rawBody = await readStreamToString(response.data);
+    } catch (streamError) {
+        const message =
+            streamError instanceof Error && streamError.message
+                ? streamError.message
+                : "Failed to read Studio test runner response stream.";
+        return {
+            success: false,
+            summary: null,
+            error: message,
+        };
+    }
+
+    let body;
+    try {
+        body = JSON.parse(rawBody);
+    } catch {
+        return {
+            success: false,
+            summary: null,
+            error: "Studio test runner returned an unexpected response format.",
+        };
+    }
+
     if (!body || body.success !== true) {
         const errorMessage =
             body && typeof body.error === "string" && body.error.length > 0
@@ -109,94 +348,20 @@ async function runStudioTests() {
     }
 
     const result = body.result ?? {};
+    const tracker = { detectedFailures: false };
 
-    let detectedFailures = false;
     if (Array.isArray(result.stdout)) {
         for (const line of result.stdout) {
+            if (typeof line !== "string") {
+                continue;
+            }
+
             console.log(transformLuauPath(line));
-            
-            // Parse Jest summary line for failures
-            if (typeof line === "string" && line.includes("Test Suites:")) {
-                const failedMatch = line.match(/(\d+)\s+failed/);
-                if (failedMatch) {
-                    const failedCount = parseInt(failedMatch[1]);
-                    if (failedCount > 0) {
-                        detectedFailures = true;
-                    }
-                }
-            }
+            updateFailureDetection(line, tracker);
         }
     }
 
-    const summary = result.summary ?? null;
-    const failureMessages = [];
-
-    if (Array.isArray(result.failedSuites)) {
-        for (const suite of result.failedSuites) {
-            if (!suite || typeof suite !== "object") {
-                continue;
-            }
-            const header = suite.path ? `Suite: ${suite.path}` : "Suite";
-            const messages = Array.isArray(suite.messages)
-                ? suite.messages.filter((message) => typeof message === "string" && message.length > 0).map(transformLuauPath)
-                : [];
-            if (messages.length > 0) {
-                failureMessages.push(`${header}\n${messages.join("\n")}`);
-            }
-        }
-    }
-
-    if (Array.isArray(result.failedTests)) {
-        for (const test of result.failedTests) {
-            if (!test || typeof test !== "object") {
-                continue;
-            }
-
-            const path = typeof test.path === "string" ? test.path : "(unknown file)";
-            const title =
-                typeof test.fullName === "string" && test.fullName.length > 0
-                    ? test.fullName
-                    : typeof test.title === "string"
-                      ? test.title
-                      : "(unknown test)";
-            const messages = Array.isArray(test.failureMessages)
-                ? test.failureMessages.filter((message) => typeof message === "string" && message.length > 0).map(transformLuauPath)
-                : [];
-
-            if (messages.length > 0) {
-                failureMessages.push(`Test: ${title}\nFile: ${path}\n${messages.join("\n")}`);
-            }
-        }
-    }
-
-    const success = result.success === true;
-
-    if (summary) {
-        const passed = summary.successCount ?? summary.passedSuites ?? 0;
-        const failed = summary.failureCount ?? summary.failedSuites ?? 0;
-        const skipped = summary.skippedCount ?? summary.pendingSuites ?? 0;
-        logger.info(
-            `Studio summary: ${passed} passed, ${failed} failed, ${skipped} skipped over ${summary.totalTests ?? "?"} tests.`,
-        );
-    }
-
-    // Override success if we detected failures in stdout
-    const actualSuccess = success && !detectedFailures;
-
-    if (!actualSuccess) {
-        const combined = failureMessages.join("\n\n");
-        return {
-            success: false,
-            summary,
-            error: combined.length > 0 ? combined : "Studio tests reported failures.",
-        };
-    }
-
-    return {
-        success: true,
-        summary,
-        error: null,
-    };
+    return analyzeStudioResultPayload(result, tracker.detectedFailures);
 }
 
 async function createTask(apiKey, scriptContents, universeId, placeId) {

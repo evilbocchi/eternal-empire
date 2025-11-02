@@ -1,19 +1,7 @@
-import { Janitor } from "@rbxts/janitor";
-import { afterAll, beforeAll, beforeEach, describe, expect, it } from "@rbxts/jest-globals";
+import { beforeEach, describe, expect, it } from "@rbxts/jest-globals";
 import { OnoeNum } from "@rbxts/serikanum";
 import { Server } from "shared/api/APIExpose";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
-import { eater } from "shared/hamster/eat";
-import mockFlamework from "shared/hamster/FlameworkMock";
-
-beforeAll(() => {
-    eater.janitor = new Janitor();
-    mockFlamework();
-});
-
-afterAll(() => {
-    eater.janitor?.Destroy();
-});
 
 describe("CurrencyService", () => {
     beforeEach(() => {

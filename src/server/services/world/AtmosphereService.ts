@@ -17,6 +17,7 @@ import { getAllInstanceInfo, simpleInterval } from "@antivivi/vrldk";
 import { OnInit, OnStart, Service } from "@flamework/core";
 import { CollectionService, Lighting } from "@rbxts/services";
 import DataService from "server/services/data/DataService";
+import { IS_EDIT } from "shared/Context";
 import eat from "shared/hamster/eat";
 import Dropper from "shared/item/traits/dropper/Dropper";
 import Packets from "shared/Packets";
@@ -163,7 +164,7 @@ export default class AtmosphereService implements OnInit, OnStart {
             timeRemaining: duration,
         };
 
-        print(`Weather changed to: ${weatherType} for ${duration} seconds`);
+        if (!IS_EDIT) print(`Weather changed to: ${weatherType} for ${duration} seconds`);
 
         // Notify clients of weather change
         Packets.weatherChanged.toAllClients(this.currentWeather);
