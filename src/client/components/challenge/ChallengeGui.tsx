@@ -1,6 +1,6 @@
-import React, { Fragment } from "@rbxts/react";
-import { RobotoSlabBold, RobotoSlabExtraBold, RobotoSlabHeavy, RobotoSlabMedium } from "shared/asset/GameFonts";
+import React, { Fragment, JSX } from "@rbxts/react";
 import { getAsset } from "shared/asset/AssetMap";
+import { RobotoSlabBold, RobotoSlabExtraBold, RobotoSlabHeavy, RobotoSlabMedium } from "shared/asset/GameFonts";
 import ChallengesBoard from "shared/world/nodes/ChallengesBoard";
 
 export interface CurrentChallengeInfo {

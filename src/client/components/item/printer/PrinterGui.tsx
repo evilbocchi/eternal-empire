@@ -1,5 +1,5 @@
+import React, { JSX } from "@rbxts/react";
 import { OnoeNum } from "@rbxts/serikanum";
-import React from "@rbxts/react";
 import SetupOption from "client/components/item/printer/SetupOption";
 import TemplateSetup from "client/components/item/printer/TemplateSetup";
 import useProperty from "client/hooks/useProperty";

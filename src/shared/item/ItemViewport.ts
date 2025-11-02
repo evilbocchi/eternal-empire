@@ -1,3 +1,5 @@
+//!native
+
 /**
  * @fileoverview Script for rendering item viewports in UI slots.
  *

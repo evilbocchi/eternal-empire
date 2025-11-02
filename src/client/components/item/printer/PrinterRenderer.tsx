@@ -1,4 +1,4 @@
-import React, { Fragment } from "@rbxts/react";
+import React, { Fragment, JSX } from "@rbxts/react";
 import PrinterGui from "client/components/item/printer/PrinterGui";
 import useTaggedItemModels from "client/components/world/useTaggedItemModels";
 

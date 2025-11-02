@@ -1,5 +1,7 @@
 /// <reference types="@rbxts/types/plugin" />
 import React, { Fragment, useEffect } from "@rbxts/react";
+import { backend } from "@rbxts/react-devtools-core";
+import ReactGlobals from "@rbxts/react-globals";
 import { createRoot, Root } from "@rbxts/react-roblox";
 import { ContentProvider, RunService, StarterGui, Workspace } from "@rbxts/services";
 import BackpackWindow from "client/components/backpack/BackpackWindow";

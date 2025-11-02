@@ -1,18 +1,17 @@
 import ComputeNameColor from "@antivivi/rbxnamecolor";
 import { convertToHHMMSS } from "@antivivi/vrldk";
-import React, { useCallback, useEffect, useRef, useState } from "@rbxts/react";
+import React, { JSX, useCallback, useEffect, useRef, useState } from "@rbxts/react";
 import { Players, StarterGui } from "@rbxts/services";
-import { showErrorToast } from "client/components/toast/ToastService";
 import MenuOption, { BaseMenuOption } from "client/components/start/MenuOption";
-import { RobotoSlab, RobotoSlabBold, RobotoSlabHeavy } from "shared/asset/GameFonts";
+import { showErrorToast } from "client/components/toast/ToastService";
 import useProperty from "client/hooks/useProperty";
 import { playSound } from "shared/asset/GameAssets";
+import { RobotoSlab, RobotoSlabBold, RobotoSlabHeavy } from "shared/asset/GameFonts";
 import { getNameFromUserId } from "shared/constants";
-import Packets from "shared/Packets";
-import LoadingScreen from "sharedfirst/LoadingScreen";
-import { PLAYER_GUI } from "shared/constants";
 import { IS_EDIT } from "shared/Context";
 import eat from "shared/hamster/eat";
+import Packets from "shared/Packets";
+import LoadingScreen from "sharedfirst/LoadingScreen";
 
 /**
  * Individual empire option component
