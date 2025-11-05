@@ -1,3 +1,5 @@
+//!native
+
 /**
  * @fileoverview Script for rendering item viewports in UI slots.
  *
@@ -64,32 +66,32 @@ namespace ItemViewport {
 
     // Animate all running item slot viewports each frame
     if (!IS_SERVER || IS_EDIT) {
+        const cleanup = () => {
+            RunService.UnbindFromRenderStep(KEY);
+            for (const rv of runningViewports) {
+                rv.viewportFrame.ClearAllChildren();
+            }
+            runningViewports.clear();
+        };
+
         RunService.BindToRenderStep(KEY, 0, (dt) => {
-            let i = 0;
             for (const rv of runningViewports) {
                 const isHovering = rv.delta > 0;
                 if (isHovering && rv.zoom < 1) {
-                    rv.zoom += dt * ((1 - rv.zoom) * 7 + 1);
+                    rv.zoom = math.min(1, rv.zoom + dt * ((1 - rv.zoom) * 7 + 1));
                     rv.isTweening = true;
                 } else if (!isHovering && rv.zoom > 0) {
-                    rv.zoom -= dt * (rv.zoom * 7 + 1);
+                    rv.zoom = math.max(0, rv.zoom - dt * (rv.zoom * 7 + 1));
                     rv.isTweening = true;
                 } else {
                     rv.zoom = isHovering ? 1 : 0;
                     rv.isTweening = false;
                 }
                 rv.rotateCamera(dt, true);
-                ++i;
             }
         });
 
-        eat(() => {
-            RunService.UnbindFromRenderStep(KEY);
-            for (const rv of runningViewports) {
-                rv.viewportFrame.ClearAllChildren();
-            }
-            runningViewports.clear();
-        });
+        eat(cleanup);
     }
 
     /**
@@ -103,17 +105,21 @@ namespace ItemViewport {
 
         viewportFrame.ClearAllChildren();
 
+        const m = ITEM_MODELS.get(itemId);
+        if (m === undefined) return;
+
         const camera = new Instance("Camera");
         camera.CameraType = Enum.CameraType.Scriptable;
         viewportFrame.CurrentCamera = camera;
 
-        const m = ITEM_MODELS.get(itemId);
-        if (m === undefined) return;
         const model = m.Clone();
-        let cframe = VIEWPORT_WORLD_POSITION;
+        const cframe = VIEWPORT_WORLD_POSITION;
         model.TranslateBy(cframe.Position.sub(model.GetPivot().Position));
         const [adjust, rel] = relsPerItem.get(itemId)!;
+        const pos = cframe.add(adjust);
         let currentAngle = 220;
+        const parent = viewportFrame.Parent as GuiObject;
+
         const runningViewport: RunningViewport = {
             viewportFrame: viewportFrame,
             isTweening: false,
@@ -123,22 +129,17 @@ namespace ItemViewport {
                 if (
                     care === true &&
                     this.isTweening === false &&
-                    (this.delta === 0 ||
-                        viewportFrame.Visible === false ||
-                        (viewportFrame.Parent as GuiObject).Visible === false)
+                    (this.delta === 0 || viewportFrame.Visible === false || parent.Visible === false)
                 ) {
                     return;
                 }
-                const pos = cframe.add(adjust);
                 camera.Focus = pos;
-                const newCFrame = CFrame.lookAt(
-                    pos.mul(CFrame.Angles(0, math.rad(currentAngle), 0).mul(new CFrame(0, 3, rel - this.zoom)))
-                        .Position,
-                    pos.Position,
-                );
+                const angleRad = math.rad(currentAngle);
+                const offset = CFrame.Angles(0, angleRad, 0).mul(new CFrame(0, 3, rel - this.zoom));
+                const newCFrame = CFrame.lookAt(pos.mul(offset).Position, pos.Position);
                 if (camera.CFrame !== newCFrame) {
                     camera.CFrame = newCFrame;
-                    currentAngle = currentAngle + this.delta * 60 * dt;
+                    currentAngle += this.delta * 60 * dt;
                 }
             },
         };

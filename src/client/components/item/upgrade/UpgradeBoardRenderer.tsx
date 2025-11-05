@@ -1,4 +1,4 @@
-import React, { Fragment } from "@rbxts/react";
+import React, { Fragment, JSX } from "@rbxts/react";
 import UpgradeBoardGui from "client/components/item/upgrade/UpgradeBoardGui";
 import useTaggedItemModels from "client/components/world/useTaggedItemModels";
 

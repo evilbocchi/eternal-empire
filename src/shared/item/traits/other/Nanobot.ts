@@ -29,6 +29,7 @@ interface NanobotClientOrbState extends NanobotOrbState {
     part: BasePart;
     activeTween?: Tween;
     pendingPlacementId?: string;
+    lastCFrame?: CFrame;
 }
 
 interface NanobotClientEntry {
@@ -37,6 +38,8 @@ interface NanobotClientEntry {
     orbs: NanobotClientOrbState[];
     nanobot: Nanobot;
     elapsed: number;
+    cachedAnchorCFrame?: CFrame;
+    lastAnchorCheck: number;
 }
 
 type NanobotOrbEvent =
@@ -217,51 +220,87 @@ export default class Nanobot extends ItemTrait {
     private static ensureClientHeartbeat() {
         if (Nanobot.heartbeatConnection !== undefined) return;
         Nanobot.heartbeatConnection = RunService.Heartbeat.Connect((dt) => {
+            const now = os.clock();
+
             for (const [, entry] of Nanobot.clientEntries) {
-                const { orbs, nanobot } = entry;
+                const { orbs, nanobot, anchor } = entry;
 
-                entry.elapsed += dt * nanobot.bobSpeed;
-
-                if (entry.anchor.Parent === undefined) {
-                    const replacement = Nanobot.findAnchor(entry.model);
-                    if (replacement === undefined) {
-                        Nanobot.unregisterClientEntry(entry.model);
-                        continue;
+                // Skip if all orbs are idle and not traveling
+                let hasActiveOrbs = false;
+                for (const orb of orbs) {
+                    if (orb.traveling || orb.assignment !== undefined) {
+                        hasActiveOrbs = true;
+                        break;
                     }
-                    entry.anchor = replacement;
                 }
 
-                const anchorCf = entry.anchor.CFrame;
+                // Check anchor every 0.5 seconds instead of every frame
+                if (now - entry.lastAnchorCheck > 0.5) {
+                    entry.lastAnchorCheck = now;
+                    if (anchor.Parent === undefined) {
+                        const replacement = Nanobot.findAnchor(entry.model);
+                        if (replacement === undefined) {
+                            Nanobot.unregisterClientEntry(entry.model);
+                            continue;
+                        }
+                        entry.anchor = replacement;
+                        entry.cachedAnchorCFrame = replacement.CFrame;
+                    } else {
+                        entry.cachedAnchorCFrame = anchor.CFrame;
+                    }
+                }
+
+                const anchorCf = entry.cachedAnchorCFrame ?? anchor.CFrame;
+                entry.elapsed += dt * nanobot.bobSpeed;
+
+                // Pre-calculate common values
+                const bobValue = math.sin(entry.elapsed) * nanobot.bobAmplitude;
+                const angleIncrement = nanobot.orbitSpeed * dt;
+                const blendFactor = math.clamp(1 - math.exp(-nanobot.orbitSmoothing * dt), 0, 1);
 
                 for (const orb of orbs) {
+                    // Check assignment validity only when needed
                     if (orb.assignment !== undefined && orb.assignment.target.Parent === undefined) {
                         orb.pendingPlacementId = orb.assignment.placementId;
                         orb.assignment = undefined;
                     }
 
+                    // Resolve pending assignments
                     if (orb.assignment === undefined && orb.pendingPlacementId !== undefined) {
                         const targetModel = Nanobot.findTargetModel(entry.model, orb.pendingPlacementId);
-                        const targetAnchor = targetModel !== undefined ? Nanobot.findAnchor(targetModel) : undefined;
-                        if (targetAnchor !== undefined) {
-                            orb.assignment = { placementId: orb.pendingPlacementId, target: targetAnchor };
-                            orb.pendingPlacementId = undefined;
+                        if (targetModel !== undefined) {
+                            const targetAnchor = Nanobot.findAnchor(targetModel);
+                            if (targetAnchor !== undefined) {
+                                orb.assignment = { placementId: orb.pendingPlacementId, target: targetAnchor };
+                                orb.pendingPlacementId = undefined;
+                            }
                         }
                     }
 
-                    orb.angle = (orb.angle + nanobot.orbitSpeed * dt) % TAU;
-                    const bob = math.sin(entry.elapsed + orb.phase) * nanobot.bobAmplitude;
-                    const pivotCf = orb.assignment !== undefined ? orb.assignment.target.CFrame : anchorCf;
-                    const offset = Nanobot.computeOrbitOffset(
-                        orb.angle,
-                        nanobot.orbitRadius,
-                        nanobot.orbitHeight + bob,
-                    );
-                    const desired = pivotCf.mul(offset);
-                    orb.desiredCFrame = desired;
+                    // Update angle
+                    orb.angle = (orb.angle + angleIncrement) % TAU;
+
+                    // Only update position if not traveling
                     if (!orb.traveling) {
-                        const current = orb.part.CFrame;
-                        const blend = math.clamp(1 - math.exp(-nanobot.orbitSmoothing * dt), 0, 1);
-                        orb.part.CFrame = current.Lerp(desired, blend);
+                        const bob = math.sin(entry.elapsed + orb.phase) * nanobot.bobAmplitude;
+                        const pivotCf = orb.assignment !== undefined ? orb.assignment.target.CFrame : anchorCf;
+                        const height = nanobot.orbitHeight + bob;
+
+                        // Inline orbit offset calculation to avoid function call overhead
+                        const offset = CFrame.Angles(0, orb.angle, 0).mul(new CFrame(0, height, nanobot.orbitRadius));
+                        const desired = pivotCf.mul(offset);
+
+                        orb.desiredCFrame = desired;
+                        const newCFrame = orb.part.CFrame.Lerp(desired, blendFactor);
+
+                        // Only update if CFrame actually changed significantly
+                        if (
+                            orb.lastCFrame === undefined ||
+                            orb.lastCFrame.Position.sub(newCFrame.Position).Magnitude > 0.001
+                        ) {
+                            orb.part.CFrame = newCFrame;
+                            orb.lastCFrame = newCFrame;
+                        }
                     }
                 }
             }
@@ -291,6 +330,8 @@ export default class Nanobot extends ItemTrait {
             orbs,
             nanobot,
             elapsed: 0,
+            cachedAnchorCFrame: anchor.CFrame,
+            lastAnchorCheck: os.clock(),
         };
         Nanobot.clientEntries.set(model, entry);
         Nanobot.ensureClientHeartbeat();
@@ -545,7 +586,14 @@ export default class Nanobot extends ItemTrait {
         }
 
         const targetModel = Nanobot.findTargetModel(model, event.targetPlacementId);
-        const targetAnchor = targetModel !== undefined ? Nanobot.findAnchor(targetModel) : undefined;
+        if (targetModel === undefined) {
+            orb.assignment = undefined;
+            orb.pendingPlacementId = event.targetPlacementId;
+            orb.traveling = false;
+            return;
+        }
+
+        const targetAnchor = Nanobot.findAnchor(targetModel);
         if (targetAnchor === undefined) {
             orb.assignment = undefined;
             orb.pendingPlacementId = event.targetPlacementId;
@@ -555,9 +603,10 @@ export default class Nanobot extends ItemTrait {
 
         orb.assignment = { placementId: event.targetPlacementId, target: targetAnchor };
         orb.pendingPlacementId = undefined;
-        const targetCFrame = targetAnchor.CFrame.mul(
-            Nanobot.computeOrbitOffset(orb.angle, nanobot.orbitRadius, nanobot.orbitHeight),
-        );
+
+        // Inline orbit offset calculation
+        const offset = CFrame.Angles(0, orb.angle, 0).mul(new CFrame(0, nanobot.orbitHeight, nanobot.orbitRadius));
+        const targetCFrame = targetAnchor.CFrame.mul(offset);
 
         const tween = TweenService.Create(orb.part, RETURN_TWEEN_INFO, { CFrame: targetCFrame });
         orb.activeTween = tween;
@@ -587,9 +636,9 @@ export default class Nanobot extends ItemTrait {
         orb.assignment = undefined;
         orb.pendingPlacementId = undefined;
 
-        const destination = anchor.CFrame.mul(
-            Nanobot.computeOrbitOffset(orb.angle, nanobot.orbitRadius, nanobot.orbitHeight),
-        );
+        // Inline orbit offset calculation
+        const offset = CFrame.Angles(0, orb.angle, 0).mul(new CFrame(0, nanobot.orbitHeight, nanobot.orbitRadius));
+        const destination = anchor.CFrame.mul(offset);
 
         const tween = TweenService.Create(orb.part, RETURN_TWEEN_INFO, { CFrame: destination });
         orb.activeTween = tween;

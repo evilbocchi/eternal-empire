@@ -1,17 +1,5 @@
-import { Janitor } from "@rbxts/janitor";
-import { afterAll, beforeAll, describe, expect, it } from "@rbxts/jest-globals";
+import { describe, expect, it } from "@rbxts/jest-globals";
 import { Server } from "shared/api/APIExpose";
-import { eater } from "shared/hamster/eat";
-import mockFlamework from "shared/hamster/FlameworkMock";
-
-beforeAll(() => {
-    eater.janitor = new Janitor();
-    mockFlamework();
-});
-
-afterAll(() => {
-    eater.janitor?.Destroy();
-});
 
 describe("Level Leaderboard", () => {
     it("has a level store", () => {

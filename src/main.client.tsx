@@ -1,3 +1,5 @@
+import "client/react-config";
+
 import React from "@rbxts/react";
 import { createRoot } from "@rbxts/react-roblox";
 import { ReplicatedStorage } from "@rbxts/services";

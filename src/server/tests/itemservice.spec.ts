@@ -1,22 +1,10 @@
 import { getAllInstanceInfo } from "@antivivi/vrldk";
-import { Janitor } from "@rbxts/janitor";
-import { afterAll, beforeAll, beforeEach, describe, expect, it } from "@rbxts/jest-globals";
+import { beforeEach, describe, expect, it } from "@rbxts/jest-globals";
 import { OnoeNum } from "@rbxts/serikanum";
 import { Server } from "shared/api/APIExpose";
 import { PLACED_ITEMS_FOLDER } from "shared/constants";
-import { eater } from "shared/hamster/eat";
-import mockFlamework from "shared/hamster/FlameworkMock";
 import type { RepairProtectionState } from "shared/item/repair";
 import { REPAIR_BOOST_KEY, REPAIR_BOOST_MULTIPLIERS, REPAIR_PROTECTION_DURATIONS } from "shared/item/repair";
-
-beforeAll(() => {
-    eater.janitor = new Janitor();
-    mockFlamework();
-});
-
-afterAll(() => {
-    eater.janitor?.Destroy();
-});
 
 describe("ItemService", () => {
     beforeEach(() => {

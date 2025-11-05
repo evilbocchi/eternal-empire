@@ -1,4 +1,4 @@
-import React, { Fragment, useEffect, useState } from "@rbxts/react";
+import React, { Fragment, JSX, useEffect, useState } from "@rbxts/react";
 import Shaker from "client/components/effect/Shaker";
 import Leaderboard, { LeaderboardType } from "client/components/world/leaderboard/Leaderboard";
 import useProperty from "client/hooks/useProperty";

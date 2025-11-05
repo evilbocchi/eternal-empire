@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from "@rbxts/react";
+import React, { JSX, useEffect, useMemo, useRef, useState } from "@rbxts/react";
 import {
     createInventorySlot,
     updateInventorySlot,

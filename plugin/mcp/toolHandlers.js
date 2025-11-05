@@ -213,7 +213,7 @@ function findModelRecursive(node, targetName) {
 
 export async function executeMcpTool(name, rawArgs, options = {}) {
     const args = typeof rawArgs === "object" && rawArgs !== null ? rawArgs : {};
-    const { logger, logPrefix = "[MCP]" } = options;
+    const { logger, logPrefix = "[MCP]", onProgress } = options;
 
     switch (name) {
         case "list_instances": {
@@ -345,6 +345,10 @@ export async function executeMcpTool(name, rawArgs, options = {}) {
                 executionOptions.timeoutMs = Math.min(Math.floor(timeoutArg), 120000);
             }
 
+            if (typeof onProgress === "function") {
+                executionOptions.onProgress = onProgress;
+            }
+
             try {
                 return await requestMcpToolExecution("execute_luau", requestArgs, executionOptions);
             } catch (error) {
@@ -374,6 +378,10 @@ export async function executeMcpTool(name, rawArgs, options = {}) {
                 executionOptions.timeoutMs = Math.min(Math.floor(timeoutArg), 120000);
             }
 
+            if (typeof onProgress === "function") {
+                executionOptions.onProgress = onProgress;
+            }
+
             try {
                 return await requestMcpToolExecution("run_tests", { code: invokerCode }, executionOptions);
             } catch (error) {
@@ -392,8 +400,13 @@ export async function executeMcpTool(name, rawArgs, options = {}) {
                 "Launch Roblox Studio with the tooling plugin to enable progression estimates.",
             );
 
+            const executionOptions = {};
+            if (typeof onProgress === "function") {
+                executionOptions.onProgress = onProgress;
+            }
+
             try {
-                return await requestMcpToolExecution("estimate_item_progression", { itemId });
+                return await requestMcpToolExecution("estimate_item_progression", { itemId }, executionOptions);
             } catch (error) {
                 wrapToolExecutionError(error);
             }

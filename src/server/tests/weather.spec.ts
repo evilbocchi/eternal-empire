@@ -1,18 +1,6 @@
-import { Janitor } from "@rbxts/janitor";
-import { afterAll, afterEach, beforeAll, describe, expect, it } from "@rbxts/jest-globals";
+import { afterEach, describe, expect, it } from "@rbxts/jest-globals";
 import { Server } from "shared/api/APIExpose";
-import { eater } from "shared/hamster/eat";
-import mockFlamework from "shared/hamster/FlameworkMock";
 import { WeatherState, WeatherType } from "shared/weather/WeatherTypes";
-
-beforeAll(() => {
-    eater.janitor = new Janitor();
-    mockFlamework();
-});
-
-afterAll(() => {
-    eater.janitor?.Destroy();
-});
 
 describe("AtmosphereService", () => {
     const setWeatherAndRecalculate = (weather: WeatherState) => {

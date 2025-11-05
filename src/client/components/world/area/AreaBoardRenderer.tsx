@@ -1,4 +1,4 @@
-import React, { Fragment, useEffect, useState } from "@rbxts/react";
+import React, { Fragment, JSX, useEffect, useState } from "@rbxts/react";
 import {
     EmphasizedHeaderAreaBoardGui,
     OminousAreaBoardGui,

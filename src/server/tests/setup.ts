@@ -1,52 +1,62 @@
-// declare module "@rbxts/jest-globals" {
-//     namespace jest {
-//         interface Matchers<R, T = {}> {
-//             /**
-//              * Custom matcher to check if an OnoeNum equals the expected value.
-//              * @param expected The expected value (can be a number or OnoeNum)
-//              */
-//             toEqualOnoeNum(expected: number | OnoeNum): R;
-//         }
-//     }
-// }
+import { Janitor } from "@rbxts/janitor";
+import { afterAll, beforeAll, expect } from "@rbxts/jest-globals";
+import { OnoeNum } from "@rbxts/serikanum";
+import { eater } from "shared/hamster/eat";
+import mockFlamework from "shared/hamster/FlameworkMock";
 
-// Clear registered modules to reset the roblox-ts runtime
-for (const [key] of pairs(_G)) {
-    if (typeIs(key, "Instance") && key.IsA("ModuleScript")) {
-        _G[key as never] = undefined as never;
+declare module "@rbxts/jest-globals" {
+    namespace jest {
+        interface Matchers<R, T = {}> {
+            /**
+             * Custom matcher to check if an OnoeNum equals the expected value.
+             * @param expected The expected value (can be a number or OnoeNum)
+             */
+            toEqualOnoeNum: (expected: number | OnoeNum) => R;
+        }
     }
 }
 
-// expect.extend({
-//     toEqualOnoeNum(received: OnoeNum | undefined, expected: number | OnoeNum) {
-//         const expectedNum = typeIs(expected, "number") ? new OnoeNum(expected) : expected;
+expect.extend({
+    toEqualOnoeNum(received: OnoeNum | undefined, expected: number | OnoeNum) {
+        const expectedNum = new OnoeNum(expected);
 
-//         if (received === undefined) {
-//             return {
-//                 pass: false,
-//                 message: () => `expected OnoeNum but received undefined`,
-//             };
-//         }
+        if (received === undefined) {
+            return {
+                pass: false,
+                message: () => `expected OnoeNum but received undefined`,
+            };
+        }
 
-//         if (!typeIs(received, "table") || !("equals" in received)) {
-//             return {
-//                 pass: false,
-//                 message: () => `expected OnoeNum but received ${typeOf(received)}`,
-//             };
-//         }
+        if (!typeIs(received, "table") || !("equals" in received)) {
+            return {
+                pass: false,
+                message: () => `expected OnoeNum but received ${typeOf(received)}`,
+            };
+        }
 
-//         const pass = received.equals(expectedNum);
+        received = new OnoeNum(received);
 
-//         if (pass) {
-//             return {
-//                 pass: true,
-//                 message: () => `expected ${received.toString()} not to equal ${expectedNum.toString()}`,
-//             };
-//         } else {
-//             return {
-//                 pass: false,
-//                 message: () => `expected ${received.toString()} to equal ${expectedNum.toString()}`,
-//             };
-//         }
-//     },
-// });
+        const pass = received.equals(expectedNum);
+
+        if (pass) {
+            return {
+                pass: true,
+                message: () => `expected ${tostring(received)} not to equal ${tostring(expectedNum)}`,
+            };
+        } else {
+            return {
+                pass: false,
+                message: () => `expected ${tostring(received)} to equal ${tostring(expectedNum)}`,
+            };
+        }
+    },
+});
+
+beforeAll(() => {
+    eater.janitor = new Janitor();
+    mockFlamework();
+});
+
+afterAll(() => {
+    eater.janitor?.Destroy();
+});

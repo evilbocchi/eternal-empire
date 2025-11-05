@@ -1,6 +1,5 @@
-import React, { Fragment } from "@rbxts/react";
+import React, { JSX } from "@rbxts/react";
 import { RobotoMono, RobotoMonoBold, RobotoSlabHeavy } from "shared/asset/GameFonts";
-import Sandbox from "shared/Sandbox";
 import ChangelogPart from "shared/world/nodes/ChangelogPart";
 
 class Changelog {

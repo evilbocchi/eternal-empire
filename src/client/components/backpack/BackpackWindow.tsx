@@ -6,13 +6,13 @@
  */
 
 import { loadAnimation } from "@antivivi/vrldk";
-import React, { useEffect, useRef, useState } from "@rbxts/react";
+import React, { JSX, useEffect, useRef, useState } from "@rbxts/react";
 import { Workspace } from "@rbxts/services";
 import { Environment } from "@rbxts/ui-labs";
 import GearOption, { layoutOrderFromGear } from "client/components/backpack/GearOption";
 import DocumentManager, { useDocument } from "client/components/window/DocumentManager";
-import { LOCAL_PLAYER, observeCharacter } from "shared/constants";
 import { playSound } from "shared/asset/GameAssets";
+import { LOCAL_PLAYER, observeCharacter } from "shared/constants";
 import { IS_EDIT } from "shared/Context";
 import { getPlayerCharacter } from "shared/hamster/getPlayerCharacter";
 import Gear from "shared/item/traits/Gear";

@@ -1,13 +1,10 @@
 import { getAllInstanceInfo } from "@antivivi/vrldk";
-import { Janitor } from "@rbxts/janitor";
-import { afterAll, beforeAll, beforeEach, describe, expect, it } from "@rbxts/jest-globals";
+import { beforeEach, describe, expect, it } from "@rbxts/jest-globals";
 import { OnoeNum } from "@rbxts/serikanum";
 import { HttpService, Workspace } from "@rbxts/services";
 import { Server } from "shared/api/APIExpose";
 import { PLACED_ITEMS_FOLDER } from "shared/constants";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
-import { eater } from "shared/hamster/eat";
-import mockFlamework from "shared/hamster/FlameworkMock";
 import Droplet from "shared/item/Droplet";
 import Item from "shared/item/Item";
 import Condenser from "shared/item/traits/dropper/Condenser";
@@ -205,17 +202,8 @@ function setupTestCondenser() {
     };
 }
 
-beforeAll(() => {
-    eater.janitor = new Janitor();
-    mockFlamework();
-});
-
 beforeEach(() => {
     Server.Data.softWipe();
-});
-
-afterAll(() => {
-    eater.janitor?.Destroy();
 });
 
 describe("Upgrader", () => {

@@ -589,6 +589,11 @@ namespace BuildManager {
                 for (const model of modelsToAnimate) {
                     applyBounceAnimation(model);
                 }
+            } else {
+                // Clear dragging state if mouse up happened away from any item
+                for (const model of dragging) {
+                    model.SetAttribute("Dragging", false);
+                }
             }
 
             dragging.clear();

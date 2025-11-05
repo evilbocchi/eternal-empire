@@ -11,14 +11,7 @@ export = () => {
     eater.janitor = janitor; // Tests should create their own janitors, but ensure the entire test suite is sandboxed
     FletchetteEnvironment.setVirtualState(true);
 
-    const [success, output] = runCLI(
-        root,
-        {
-            ci: false,
-            verbose: false,
-        },
-        [root],
-    ).await();
+    const [success, output] = runCLI(root, {}, [root]).await();
 
     janitor.Destroy();
     return $tuple(success, output);

@@ -10,6 +10,7 @@ import {
     connectStream as connectMcpStream,
     disconnectStream as disconnectMcpStream,
     handleToolResponse as handleMcpToolResponse,
+    handleToolProgress as handleMcpToolProgress,
 } from "../mcp/toolBridge.js";
 import { MCP_TOOL_DEFINITIONS, executeMcpTool, statusForMcpErrorCode } from "../mcp/toolHandlers.js";
 
@@ -449,6 +450,16 @@ export function registerRoutes(app, logger, repoRoot, outputPath, progressionOut
         return res.json({ status: "ok" });
     });
 
+    app.post("/mcp/tool-progress", (req, res) => {
+        const body = typeof req.body === "object" && req.body !== null ? req.body : {};
+
+        if (!handleMcpToolProgress(body)) {
+            return res.json({ status: "ignored" });
+        }
+
+        return res.json({ status: "ok" });
+    });
+
     /**
      * POST /mcp/call-tool
      * Handle MCP tool call from Studio plugin.
@@ -462,6 +473,105 @@ export function registerRoutes(app, logger, repoRoot, outputPath, progressionOut
         }
 
         const args = typeof rawArgs === "object" && rawArgs !== null ? rawArgs : {};
+        const streamQuery = typeof req.query?.stream === "string" ? req.query.stream.toLowerCase() : "";
+        const streamHeader =
+            typeof req.headers["x-mcp-stream-logs"] === "string"
+                ? String(req.headers["x-mcp-stream-logs"]).toLowerCase()
+                : "";
+
+        const wantsStream =
+            streamQuery === "1" || streamQuery === "true" || streamHeader === "1" || streamHeader === "true";
+
+        if (wantsStream) {
+            let closed = false;
+
+            res.status(200);
+            res.set({
+                "Content-Type": "application/x-ndjson; charset=utf-8",
+                "Cache-Control": "no-cache",
+                Connection: "keep-alive",
+                "Transfer-Encoding": "chunked",
+            });
+
+            if (typeof res.flushHeaders === "function") {
+                res.flushHeaders();
+            }
+
+            res.on("close", () => {
+                closed = true;
+            });
+
+            let sequence = 0;
+            const onProgress = (payload) => {
+                if (closed) {
+                    return;
+                }
+
+                const message = typeof payload.message === "string" ? payload.message : "";
+                if (message.length === 0) {
+                    return;
+                }
+
+                const level = typeof payload.level === "string" ? payload.level : "info";
+                const timestamp = Number.isFinite(payload.timestamp) ? payload.timestamp : Date.now();
+
+                const event = {
+                    type: "log",
+                    seq: ++sequence,
+                    level,
+                    message,
+                    timestamp,
+                };
+
+                try {
+                    res.write(`${JSON.stringify(event)}\n`);
+                } catch (error) {
+                    closed = true;
+                    logger.warn(`[MCP HTTP] Failed to stream log event: ${error}`);
+                }
+            };
+
+            try {
+                const result = await executeMcpTool(name, args, {
+                    logger,
+                    logPrefix: "[MCP HTTP]",
+                    onProgress,
+                });
+
+                if (!closed) {
+                    res.write(`${JSON.stringify({ type: "result", result })}\n`);
+                    res.end();
+                }
+            } catch (error) {
+                let status = 500;
+                let message = typeof error?.message === "string" ? error.message : String(error);
+
+                if (error instanceof McpError) {
+                    status =
+                        typeof error.data?.httpStatus === "number"
+                            ? error.data.httpStatus
+                            : statusForMcpErrorCode(error.code);
+                    message = error.message;
+
+                    if (status >= 500) {
+                        logger.error(`[MCP HTTP] ${message}`);
+                    }
+                } else {
+                    logger.error(`[MCP HTTP] Unexpected error: ${message}`);
+                }
+
+                if (!closed) {
+                    if (!res.headersSent || res.statusCode === 200) {
+                        res.status(status);
+                    }
+                    res.write(`${JSON.stringify({ type: "error", error: message, status })}\n`);
+                    res.end();
+                }
+            }
+
+            return;
+        }
+
         try {
             const result = await executeMcpTool(name, args, { logger, logPrefix: "[MCP HTTP]" });
             return res.json({ success: true, result });

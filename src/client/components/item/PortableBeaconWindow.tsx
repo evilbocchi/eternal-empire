@@ -1,14 +1,14 @@
-import React, { useEffect, useRef, useState } from "@rbxts/react";
+import React, { JSX, useEffect, useRef, useState } from "@rbxts/react";
 import { TweenService } from "@rbxts/services";
 import useSingleDocument from "client/components/sidebar/useSingleDocumentWindow";
+import { showErrorToast } from "client/components/toast/ToastService";
 import TechWindow from "client/components/window/TechWindow";
 import { COLOR_SEQUENCE_PER_AREA } from "client/components/world/area/AreaBoardRenderer";
-import { observeCharacter } from "shared/constants";
-import { getPlayerCharacter } from "shared/hamster/getPlayerCharacter";
-import { RobotoMono, RobotoMonoBold } from "shared/asset/GameFonts";
-import { showErrorToast } from "client/components/toast/ToastService";
 import { getAsset } from "shared/asset/AssetMap";
 import { playSound } from "shared/asset/GameAssets";
+import { RobotoMono, RobotoMonoBold } from "shared/asset/GameFonts";
+import { observeCharacter } from "shared/constants";
+import { getPlayerCharacter } from "shared/hamster/getPlayerCharacter";
 import PortableBeacon from "shared/items/tools/PortableBeacon";
 import Packets from "shared/Packets";
 

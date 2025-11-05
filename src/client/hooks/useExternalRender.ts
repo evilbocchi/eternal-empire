@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from "@rbxts/react";
+import { JSX, useEffect, useMemo } from "@rbxts/react";
 import { createRoot } from "@rbxts/react-roblox";
 import { IS_EDIT } from "shared/Context";
 

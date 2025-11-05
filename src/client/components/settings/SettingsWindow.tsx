@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "@rbxts/react";
+import React, { JSX, useCallback, useEffect, useState } from "@rbxts/react";
 import SerikaNum from "@rbxts/serikanum";
 import HotkeyManager, { HOTKEY_BINDINGS } from "client/components/hotkeys/HotkeyManager";
 import useHotkeyWithTooltip from "client/components/hotkeys/useHotkeyWithTooltip";

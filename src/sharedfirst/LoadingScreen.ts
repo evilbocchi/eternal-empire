@@ -199,11 +199,11 @@ namespace LoadingScreen {
         }
     }
 
-    export function hideLoadingScreen() {
+    export function hideLoadingScreen(tweenDuration = 0.4) {
         if (!guiContainer) return;
 
         // Fade out all children
-        const tweenInfo = new TweenInfo(0.4, Enum.EasingStyle.Quad, Enum.EasingDirection.In);
+        const tweenInfo = new TweenInfo(tweenDuration, Enum.EasingStyle.Quad, Enum.EasingDirection.In);
 
         // Animate UICorner to round (0.5) when closing
         const backdropCorner = backdrop!.FindFirstChild("BackdropCorner") as UICorner;

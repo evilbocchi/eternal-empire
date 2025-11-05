@@ -1,17 +1,5 @@
-import { Janitor } from "@rbxts/janitor";
-import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from "@rbxts/jest-globals";
+import { afterEach, beforeEach, describe, expect, it } from "@rbxts/jest-globals";
 import { Server } from "shared/api/APIExpose";
-import { eater } from "shared/hamster/eat";
-import mockFlamework from "shared/hamster/FlameworkMock";
-
-beforeAll(() => {
-    eater.janitor = new Janitor();
-    mockFlamework();
-});
-
-afterAll(() => {
-    eater.janitor?.Destroy();
-});
 
 describe("PermissionsService", () => {
     let snapshot: {

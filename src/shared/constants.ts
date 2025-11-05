@@ -64,7 +64,7 @@ export const PLACED_ITEMS_FOLDER = (() => {
         folder.Name = key;
         folder.Parent = CAMERA;
     }
-    eat(folder);
+    eat(folder, "Destroy");
     return folder;
 })();
 

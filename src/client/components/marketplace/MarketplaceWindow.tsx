@@ -1,5 +1,5 @@
 import { simpleInterval } from "@antivivi/vrldk";
-import React, { Fragment, useEffect, useState } from "@rbxts/react";
+import React, { Fragment, JSX, useEffect, useState } from "@rbxts/react";
 import { CollectionService } from "@rbxts/services";
 import CreateListingForm from "client/components/marketplace/CreateListingForm";
 import ListingCard from "client/components/marketplace/ListingCard";

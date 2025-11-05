@@ -1,4 +1,12 @@
+import { Config } from "@rbxts/jest";
+
 export = {
+    ci: false,
+    verbose: false,
+    passWithNoTests: true,
     testMatch: ["**/*.spec"],
-    setupFiles: [script.Parent!.WaitForChild("setup")],
-};
+    setupFilesAfterEnv: [
+        script.Parent!.WaitForChild("setupRbxts") as ModuleScript,
+        script.Parent!.WaitForChild("setup") as ModuleScript,
+    ],
+} satisfies Config;

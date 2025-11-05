@@ -89,6 +89,10 @@ export class ModuleRegistry<T extends Identifiable> {
                 }
             }
         }
+        eat(() => {
+            this.OBJECTS.clear();
+            this.MODULES.clear();
+        });
         this.loadCallback?.(this.OBJECTS);
         return this.OBJECTS;
     }
