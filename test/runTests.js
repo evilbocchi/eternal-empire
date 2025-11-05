@@ -470,6 +470,13 @@ async function runLuauTask(universeId, placeId, scriptContents) {
                     failedTests += failed;
                     totalTests += passed + failed + skipped;
                 }
+
+                // Also check for Jest suite summary format (e.g., "Test Suites: 13 failed, 13 total")
+                const suiteSummaryMatch = message.match(/Test Suites:\s+(\d+)\s+failed/);
+                if (suiteSummaryMatch) {
+                    const failed = parseInt(suiteSummaryMatch[1]);
+                    failedTests += failed;
+                }
             }
         }
 
