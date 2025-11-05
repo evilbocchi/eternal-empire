@@ -34,6 +34,9 @@ import Packets from "shared/Packets";
  */
 @Service()
 export default class SetupService implements OnInit, OnStart {
+    /** Maximum allowed length for setup names. */
+    private static readonly MAX_SETUP_NAME_LENGTH = 32;
+
     /** Signal fired when a setup is saved. */
     setupSaved = new Signal<(player: Player, area: AreaId) => void>();
 
@@ -55,9 +58,8 @@ export default class SetupService implements OnInit, OnStart {
      * @returns The truncated name.
      */
     private truncateSetupName(name: string): string {
-        const MAX_SETUP_NAME_LENGTH = 32;
-        if (name.size() > MAX_SETUP_NAME_LENGTH) {
-            return name.sub(1, MAX_SETUP_NAME_LENGTH);
+        if (name.size() > SetupService.MAX_SETUP_NAME_LENGTH) {
+            return name.sub(1, SetupService.MAX_SETUP_NAME_LENGTH);
         }
         return name;
     }
