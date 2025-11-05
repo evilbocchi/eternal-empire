@@ -49,6 +49,20 @@ export default class SetupService implements OnInit, OnStart {
     ) {}
 
     /**
+     * Truncates a setup name to the maximum allowed length (32 characters).
+     *
+     * @param name The name to truncate.
+     * @returns The truncated name.
+     */
+    private truncateSetupName(name: string): string {
+        const MAX_SETUP_NAME_LENGTH = 32;
+        if (name.size() > MAX_SETUP_NAME_LENGTH) {
+            return name.sub(1, MAX_SETUP_NAME_LENGTH);
+        }
+        return name;
+    }
+
+    /**
      * Saves the current placed items in an area as a setup with the given name.
      * Updates or creates the setup, calculates total price, and syncs with clients.
      *
@@ -86,10 +100,7 @@ export default class SetupService implements OnInit, OnStart {
             existingSetup.items = items;
             existingSetup.calculatedPrice = totalPrice.amountPerCurrency;
         } else {
-            // truncate name to 32 characters
-            if (name.size() > 32) {
-                name = name.sub(1, 32);
-            }
+            name = this.truncateSetupName(name);
 
             data.printedSetups.push({
                 name: name,
@@ -212,10 +223,7 @@ export default class SetupService implements OnInit, OnStart {
         Packets.renameSetup.fromClient((player, currentName, renameTo) => {
             if (!this.permissionsService.checkPermLevel(player, "build")) return;
             renameTo = TextService.FilterStringAsync(renameTo, player.UserId).GetNonChatStringForBroadcastAsync();
-            // truncate name to 32 characters
-            if (renameTo.size() > 32) {
-                renameTo = renameTo.sub(1, 32);
-            }
+            renameTo = this.truncateSetupName(renameTo);
             const setups = this.dataService.empireData.printedSetups;
             for (const setup of setups) {
                 if (setup.name === currentName) {
