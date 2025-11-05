@@ -482,10 +482,17 @@ export default class Quest extends Identifiable {
      * @param level The player level to check quest reachability (defaults to current level).
      */
     static async reachStages(level?: number) {
-        if (level === undefined) {
-            level = ThisEmpire.data.level;
+        const empireData = ThisEmpire.data;
+        if (empireData === undefined) {
+            // Defer stage reach logic until empire data is available to prevent quests from stalling on load.
+            ThisEmpire.observe(() => this.reachStages(level));
+            return;
         }
-        const stagePerQuest = ThisEmpire.data.quests;
+
+        if (level === undefined) {
+            level = empireData.level;
+        }
+        const stagePerQuest = empireData.quests;
         if (stagePerQuest === undefined) {
             return;
         }

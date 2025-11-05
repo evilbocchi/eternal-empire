@@ -19,6 +19,7 @@ interface Workspace_Waypoints_LudicrousEscapeSlamoReceptionistHiding extends Par
 }
 
 interface Workspace_Waypoints extends Folder {
+    PackageLink: PackageLink;
     AHelpingHandFreddyRequest: Part;
     CraftingManiaChuckCraftingAssistance: Part;
     NewBeginningsTriaMineGuiding: Part;
@@ -56,7 +57,8 @@ interface Workspace_Waypoints extends Folder {
     ToTheVillageRefugeeIntermittentIsles: Part;
     LudicrousEscapeSimpulOut: Part;
     ToTheVillageRefugeeEnteringPoliceStation: Part;
-    PackageLink: PackageLink;
+    StartCamera: Part;
+    TimeShop: Part;
 }
 
 export type InstanceTreeType = {
