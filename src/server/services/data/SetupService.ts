@@ -212,6 +212,10 @@ export default class SetupService implements OnInit, OnStart {
         Packets.renameSetup.fromClient((player, currentName, renameTo) => {
             if (!this.permissionsService.checkPermLevel(player, "build")) return;
             renameTo = TextService.FilterStringAsync(renameTo, player.UserId).GetNonChatStringForBroadcastAsync();
+            // truncate name to 32 characters
+            if (renameTo.size() > 32) {
+                renameTo = renameTo.sub(1, 32);
+            }
             const setups = this.dataService.empireData.printedSetups;
             for (const setup of setups) {
                 if (setup.name === currentName) {
