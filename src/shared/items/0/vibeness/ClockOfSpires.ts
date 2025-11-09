@@ -1,11 +1,11 @@
 import Difficulty from "@rbxts/ejt";
-import { getAllInstanceInfo } from "@antivivi/vrldk";
+import { getAllInstanceInfo, InstanceInfo } from "@antivivi/vrldk";
 import { Lighting } from "@rbxts/services";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
 import Conveyor from "shared/item/traits/conveyor/Conveyor";
 import Upgrader from "shared/item/traits/upgrader/Upgrader";
-import Boostable from "shared/item/traits/boost/Boostable";
+import Boostable, { ItemBoost } from "shared/item/traits/boost/Boostable";
 import Class0Shop from "shared/items/0/Class0Shop";
 
 export = new Item(script.Name)
@@ -16,15 +16,8 @@ export = new Item(script.Name)
     .addPlaceableArea("BarrenIslands")
     .soldAt(Class0Shop)
 
-    .trait(Upgrader)
-
-    .trait(Conveyor)
-    .setSpeed(5)
-
-    .exit()
-
-    .onLoad((model, item) => {
-        const modelInfo = getAllInstanceInfo(model);
+    .onLoad((model: Model, item: Item) => {
+        const modelInfo: InstanceInfo = getAllInstanceInfo(model);
         const modifier: ItemBoost = {
             ignoresLimitations: false,
             upgradeCompound: {
@@ -44,4 +37,9 @@ export = new Item(script.Name)
 
         updateMultiplier();
         item.repeat(model, updateMultiplier, 1);
-    });
+    })
+
+    .trait(Upgrader)
+    .trait(Conveyor)
+    .setSpeed(5)
+    .exit();
