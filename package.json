@@ -25,7 +25,7 @@
     "homepage": "https://github.com/evilbocchi/eternal-empire#readme",
     "devDependencies": {
         "@eslint/js": "^9.39.0",
-        "@modelcontextprotocol/sdk": "^1.20.2",
+        "@modelcontextprotocol/sdk": "^1.21.1",
         "@rbxts/compiler-types": "^3.0.0-types.0",
         "@rbxts/types": "^1.0.888",
         "@types/node": "^24.9.2",
