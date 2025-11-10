@@ -27,7 +27,7 @@
         "@eslint/js": "^9.39.0",
         "@modelcontextprotocol/sdk": "^1.20.2",
         "@rbxts/compiler-types": "^3.0.0-types.0",
-        "@rbxts/types": "^1.0.888",
+        "@rbxts/types": "^1.0.889",
         "@types/node": "^24.9.2",
         "axios": "^1.13.1",
         "concurrently": "^9.2.1",
