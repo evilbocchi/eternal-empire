@@ -34,6 +34,9 @@ import Packets from "shared/Packets";
  */
 @Service()
 export default class SetupService implements OnInit, OnStart {
+    /** Maximum allowed length for setup names. */
+    private static readonly MAX_SETUP_NAME_LENGTH = 32;
+
     /** Signal fired when a setup is saved. */
     setupSaved = new Signal<(player: Player, area: AreaId) => void>();
 
@@ -47,6 +50,19 @@ export default class SetupService implements OnInit, OnStart {
         private itemService: ItemService,
         private permissionsService: PermissionService,
     ) {}
+
+    /**
+     * Truncates a setup name to the maximum allowed length (32 characters).
+     *
+     * @param name The name to truncate.
+     * @returns The truncated name.
+     */
+    private truncateSetupName(name: string): string {
+        if (name.size() > SetupService.MAX_SETUP_NAME_LENGTH) {
+            return name.sub(1, SetupService.MAX_SETUP_NAME_LENGTH);
+        }
+        return name;
+    }
 
     /**
      * Saves the current placed items in an area as a setup with the given name.
@@ -86,10 +102,7 @@ export default class SetupService implements OnInit, OnStart {
             existingSetup.items = items;
             existingSetup.calculatedPrice = totalPrice.amountPerCurrency;
         } else {
-            // truncate name to 32 characters
-            if (name.size() > 32) {
-                name = name.sub(1, 32);
-            }
+            name = this.truncateSetupName(name);
 
             data.printedSetups.push({
                 name: name,
@@ -212,6 +225,7 @@ export default class SetupService implements OnInit, OnStart {
         Packets.renameSetup.fromClient((player, currentName, renameTo) => {
             if (!this.permissionsService.checkPermLevel(player, "build")) return;
             renameTo = TextService.FilterStringAsync(renameTo, player.UserId).GetNonChatStringForBroadcastAsync();
+            renameTo = this.truncateSetupName(renameTo);
             const setups = this.dataService.empireData.printedSetups;
             for (const setup of setups) {
                 if (setup.name === currentName) {
