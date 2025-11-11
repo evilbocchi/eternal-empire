@@ -1,7 +1,6 @@
 import { Flamework, Modding, OnInit, OnPhysics, OnRender, OnStart, OnTick, Reflect } from "@flamework/core";
 import { isConstructor } from "@flamework/core/out/utility";
 import { Players, RunService } from "@rbxts/services";
-import eat from "shared/hamster/eat";
 
 export default function mockFlamework() {
     // preload
@@ -183,10 +182,22 @@ export default function mockFlamework() {
         reuseThread(profileYielding(() => dependency.onStart(), identifier));
     }
 
-    const cleanup = () => {
+    return () => {
         heartbeatConn.Disconnect();
         steppedConn.Disconnect();
-        dependencies.clear();
+
+        task.delay(5, () => {
+            for (const [, ctor] of idToObj) {
+                if (!isConstructor(ctor)) continue;
+                table.clear(ctor);
+            }
+            idToObj.clear();
+
+            for (const [dependency] of dependencies) {
+                table.clear(dependency);
+            }
+            dependencies.clear();
+            sortedDependencies.clear();
+        });
     };
-    eat(cleanup);
 }

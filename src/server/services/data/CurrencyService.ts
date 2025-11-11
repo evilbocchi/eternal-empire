@@ -19,9 +19,9 @@
  */
 
 import Signal from "@antivivi/lemon-signal";
-import { OnoeNum } from "@rbxts/serikanum";
 import { simpleInterval } from "@antivivi/vrldk";
 import { OnStart, Service } from "@flamework/core";
+import { OnoeNum } from "@rbxts/serikanum";
 import DataService from "server/services/data/DataService";
 import Packets from "shared/Packets";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
@@ -264,6 +264,8 @@ export default class CurrencyService implements OnStart {
         const importantCleanup = simpleInterval(() => {
             this.propagate();
         }, 0.1);
+
+        Packets.balance.setEntries(this.currencies);
 
         eat(importantCleanup);
         eat(unimportantCleanup);

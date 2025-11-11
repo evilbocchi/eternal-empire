@@ -4,6 +4,7 @@ import BalanceOption, { balanceOptionImagePerCurrency } from "client/components/
 import NavigationControls from "client/components/balance/NavigationControls";
 import { useDocument } from "client/components/window/DocumentManager";
 import useInterval from "client/hooks/useInterval";
+import useProperty from "client/hooks/useProperty";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import { CURRENCY_DETAILS } from "shared/currency/CurrencyDetails";
 import CurrencyBomb from "shared/currency/mechanics/CurrencyBomb";
@@ -24,8 +25,8 @@ const ZERO = new OnoeNum(0);
 export default function BalanceWindow() {
     const wrapperRef = useRef<Frame>();
     const navigationRef = useRef<Frame>();
-    const [balance, setBalance] = useState<BaseCurrencyMap>(new Map());
-    const [revenue, setRevenue] = useState<BaseCurrencyMap>(new Map());
+    const balance = useProperty(Packets.balance);
+    const revenue = useProperty(Packets.revenue);
     const [difference, setDifference] = useState<BaseCurrencyMap>(new Map());
     const [currentPage, setCurrentPage] = useState(1);
     const [maxPage, setMaxPage] = useState(1);
@@ -42,30 +43,18 @@ export default function BalanceWindow() {
         }
     }, [visible]);
 
-    // Subscribe to balance and revenue updates
-    useEffect(() => {
-        const balanceConnection = Packets.balance.observe((newBalance) => {
-            setBalance(newBalance);
-        });
-
-        const revenueConnection = Packets.revenue.observe((newRevenue) => {
-            setRevenue(newRevenue);
-        });
-
-        const differenceConnection = Packets.showDifference.fromServer((diffPerCurrency) =>
-            setDifference(diffPerCurrency),
-        );
-
-        return () => {
-            balanceConnection.Disconnect();
-            revenueConnection.Disconnect();
-            differenceConnection.Disconnect();
-        };
-    }, []);
-
     useInterval(() => {
         setBombBoosts(CurrencyBomb.getBombBoosts(Packets.bombEndTimes.get(), os.time()));
         return 1;
+    }, []);
+
+    // Subscribe to revenue updates
+    useEffect(() => {
+        const differenceConnection = Packets.showDifference.fromServer(setDifference);
+
+        return () => {
+            differenceConnection.Disconnect();
+        };
     }, []);
 
     // Calculate max pages and filter currencies

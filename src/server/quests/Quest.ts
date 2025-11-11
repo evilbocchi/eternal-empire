@@ -9,6 +9,7 @@ import Signal from "@antivivi/lemon-signal";
 import { AnalyticsService, Players, ReplicatedStorage } from "@rbxts/services";
 import NPC, { Dialogue } from "server/interactive/npc/NPC";
 import { Server } from "shared/api/APIExpose";
+import { IS_EDIT } from "shared/Context";
 import ThisEmpire from "shared/data/ThisEmpire";
 import eat from "shared/hamster/eat";
 import { Identifiable, ModuleRegistry } from "shared/hamster/ModuleRegistry";
@@ -194,7 +195,9 @@ export class Stage {
 export default class Quest extends Identifiable {
     static readonly REGISTRY = new ModuleRegistry<Quest>(script.Parent!, new Set([script])).setLoadCallback(
         (questPerId) => {
-            print(`Loaded ${questPerId.size()} quests`);
+            if (!IS_EDIT) {
+                print(`Loaded ${questPerId.size()} quests`);
+            }
 
             const questInfos = new Map<string, QuestInfo>();
 
@@ -223,9 +226,9 @@ export default class Quest extends Identifiable {
             this.reachStages();
         },
     );
-    private static readonly CLEANUP_PER_STAGE = new Map<Stage, () => void>();
+    static readonly CLEANUP_PER_STAGE = new Map<Stage, () => void>();
 
-    static colors = [
+    static readonly COLORS = [
         Color3.fromRGB(253, 41, 67),
         Color3.fromRGB(1, 162, 255),
         Color3.fromRGB(2, 184, 87),
@@ -258,7 +261,7 @@ export default class Quest extends Identifiable {
      */
     constructor(public readonly id: string) {
         super(id);
-        this.color = Quest.colors[string.byte(id)[0] % Quest.colors.size()];
+        this.color = Quest.COLORS[string.byte(id)[0] % Quest.COLORS.size()];
     }
 
     override init() {

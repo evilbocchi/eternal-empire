@@ -174,7 +174,7 @@ export default class Upgrader extends Operative {
      * @param deco Optional decoration function to modify the upgrade info.
      */
     static hookLaser(model: Model, upgrader: Upgrader, laser: BasePart, deco?: (upgradeInfo: UpgradeInfo) => void) {
-        if (IS_SERVER) {
+        if (IS_SERVER || IS_EDIT) {
             const modelInfo = getAllInstanceInfo(model);
             const laserInfo = getAllInstanceInfo(laser);
             VirtualCollision.onDropletTouched(model, laser, (droplet, dropletInfo) => {

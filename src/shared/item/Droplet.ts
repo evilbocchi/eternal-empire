@@ -33,7 +33,7 @@ declare global {
         /**
          * The area this instance belongs to.
          */
-        area?: AreaId;
+        areaId?: AreaId;
 
         /**
          * Fired when this instance has been touched by a droplet.
@@ -846,7 +846,7 @@ export default class Droplet {
             instanceInfo.health = health;
             instanceInfo.dropletId = this.id;
             instanceInfo.itemId = itemId;
-            instanceInfo.area = areaId;
+            instanceInfo.areaId = areaId;
 
             spawned.Touched.Connect((part) => {
                 getAllInstanceInfo(part).dropletTouched?.(spawned, instanceInfo);

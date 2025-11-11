@@ -1,9 +1,13 @@
 import { Janitor } from "@rbxts/janitor";
+import { RunService } from "@rbxts/services";
 import { Environment } from "@rbxts/ui-labs";
 
 export const eater = {
     janitor: Environment.GetJanitor() as Janitor<void> | undefined,
+    isEdit: !RunService.IsRunning() || (RunService.IsServer() && RunService.IsClient()),
 };
+
+const IS_EDIT = eater.isEdit;
 
 /**
  * Utility function to eat an object by adding it to the janitor for automatic cleanup.
@@ -27,11 +31,14 @@ export default function eat<
     U extends object | void = void,
 >(object: O, methodName?: M, index?: I): O {
     const janitor = eater.janitor as Janitor<U> | undefined;
-    if (janitor === undefined) return object;
-    if (janitor.Add === undefined) {
+
+    if (janitor === undefined || janitor.Add === undefined) {
+        if (!IS_EDIT) return object;
+
         // Janitor doesn't exist anymore, so create a temporary one to clean up this object
         const tempJanitor = new Janitor<U>();
         tempJanitor.Add(object, methodName, index);
+        eater.janitor = tempJanitor;
         task.delay(5, () => {
             tempJanitor.Destroy();
         });

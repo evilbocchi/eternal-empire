@@ -5,6 +5,7 @@ import { PLAYER_GUI } from "shared/constants";
 import { setVisibilityMain } from "client/hooks/useVisibility";
 import MusicManager from "client/MusicManager";
 import type NewBeginnings from "server/quests/NewBeginnings";
+import Packets from "shared/Packets";
 import { playSound } from "shared/asset/GameAssets";
 import { WAYPOINTS } from "shared/constants";
 import { IS_EDIT } from "shared/Context";
@@ -25,6 +26,9 @@ function exit() {
  */
 export default function performNewBeginningsWakeUp() {
     Workspace.SetAttribute("Title", false);
+    const stagePerQuest = Packets.stagePerQuest.get();
+    const newBeginningsStage = stagePerQuest?.get("NewBeginnings");
+    if (newBeginningsStage !== undefined && newBeginningsStage !== 0) return exit();
     if (ReplicatedStorage.GetAttribute("NewBeginningsWakingUp") !== true) return exit();
     if (isIntroSequenceDone === true) return exit();
 

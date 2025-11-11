@@ -63,7 +63,7 @@ export default class Charger extends Operative {
 
         const charging = new Set<Instance>();
         const chargerInfo = getAllInstanceInfo(model);
-        const chargerArea = chargerInfo.area;
+        const chargerArea = chargerInfo.areaId;
         let isDisabled = false;
 
         const checkAdd = (generatorModel: Instance) => {
@@ -82,7 +82,7 @@ export default class Charger extends Operative {
             const generatorHitbox = generatorModel.PrimaryPart;
             if (
                 generatorHitbox === undefined ||
-                generatorInfo.area !== chargerArea ||
+                generatorInfo.areaId !== chargerArea ||
                 !this.isInRange(charger, chargerHitbox, generatorHitbox)
             )
                 return;

@@ -296,7 +296,7 @@ export default class Item {
         model.SetAttribute("ItemId", this.id);
 
         modelInfo.placedItem = placedItem;
-        modelInfo.area = areaId;
+        modelInfo.areaId = areaId;
         modelInfo.itemId = this.id;
         return model;
     }
@@ -970,5 +970,8 @@ export default class Item {
             });
             eat(connection, "Disconnect");
         }
+        eat(() => {
+            REPEATS.clear();
+        });
     }
 }

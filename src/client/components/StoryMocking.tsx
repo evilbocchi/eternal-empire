@@ -8,7 +8,7 @@ import { IS_EDIT } from "shared/Context";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import { CURRENCY_DETAILS } from "shared/currency/CurrencyDetails";
 import PlayerProfileTemplate from "shared/data/profile/PlayerProfileTemplate";
-import mockFlamework from "shared/hamster/FlameworkMock";
+import mockFlamework from "shared/hamster/mockFlamework";
 import Unique from "shared/item/traits/Unique";
 import Items from "shared/items/Items";
 import Packets from "shared/Packets";

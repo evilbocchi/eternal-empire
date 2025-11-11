@@ -28,10 +28,10 @@ import eat from "shared/hamster/eat";
 @Service()
 export default class LeaderboardChangeService implements OnStart {
     /** Map of leaderboard names to their corresponding DataStores. */
-    private leaderboardStores = new Map<string, OrderedDataStore>();
+    readonly leaderboardStores = new Map<string, OrderedDataStore>();
 
     /** List of banned user IDs (excluded from leaderboards). */
-    private banned = [1900444407];
+    readonly banned = [1900444407];
 
     constructor(
         private readonly dataService: DataService,

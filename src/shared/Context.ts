@@ -1,5 +1,6 @@
 import { Flamework } from "@flamework/core";
 import { RunService, Workspace } from "@rbxts/services";
+import { eater } from "shared/hamster/eat";
 import StartScreenValue from "shared/world/nodes/StartScreenValue";
 
 /**
@@ -11,7 +12,7 @@ export const IS_SERVER = RunService.IsServer();
  * Whether the game is running in an "edit" environment, where the experience is not running
  * and scripts are being run directly on the development server.
  */
-export const IS_EDIT = !RunService.IsRunning() || (RunService.IsServer() && RunService.IsClient());
+export const IS_EDIT = eater.isEdit;
 
 /**
  * Whether the current context is Roblox Studio.

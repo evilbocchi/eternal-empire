@@ -221,11 +221,14 @@ export default class PermissionService implements OnStart, OnPlayerAdded {
         }
 
         const permLevel = this.updatePermissionLevel(player.UserId);
-        this.chatHookService.sendPrivateMessage(
-            player,
-            `Your permission level is ${permLevel}. Type /help for a list of available commands.`,
-            "color:138,255,138",
-        );
+
+        if (!IS_EDIT) {
+            this.chatHookService.sendPrivateMessage(
+                player,
+                `Your permission level is ${permLevel}. Type /help for a list of available commands.`,
+                "color:138,255,138",
+            );
+        }
     }
 
     onStart() {

@@ -23,7 +23,7 @@ export default class InstantiationDelimiter extends ItemTrait {
         const item = delimiter.item;
 
         const modelInfo = getAllInstanceInfo(model);
-        const area = modelInfo.area;
+        const area = modelInfo.areaId;
         if (area === undefined) throw `InstantiationDelimiter ${model.Name} is not in an area`;
 
         item.repeat(

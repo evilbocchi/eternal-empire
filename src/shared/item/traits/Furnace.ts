@@ -53,10 +53,13 @@ export default class Furnace extends Operative {
             VirtualCollision.onDropletTouched(model, lava, (dropletModel, dropletInfo) => {
                 if (dropletInfo.incinerated === true) return;
 
-                const modelArea = modelInfo.area;
+                const modelArea = modelInfo.areaId;
                 if (modelArea === undefined) {
                     if (!IS_EDIT && !isSandbox) throw `Furnace model ${model.GetFullName()} is missing Area info`;
-                } else if (modelArea !== dropletInfo.area && dropletInfo.lastTeleport === undefined) {
+                } else if (modelArea !== dropletInfo.areaId && dropletInfo.lastTeleport === undefined) {
+                    warn(
+                        `Droplet ${dropletModel.Name} in area ${dropletInfo.areaId} tried to enter furnace in area ${modelArea}`,
+                    );
                     // Sanity check: droplet should be in the same area as the furnace unless it was teleported
                     return;
                 }

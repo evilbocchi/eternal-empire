@@ -1,8 +1,10 @@
 import { Janitor } from "@rbxts/janitor";
 import { afterAll, beforeAll, expect } from "@rbxts/jest-globals";
 import { OnoeNum } from "@rbxts/serikanum";
+import cleanupSimulation from "shared/hamster/cleanupSimulation";
 import { eater } from "shared/hamster/eat";
-import mockFlamework from "shared/hamster/FlameworkMock";
+import mockFlamework from "shared/hamster/mockFlamework";
+import Items from "shared/items/Items";
 
 declare module "@rbxts/jest-globals" {
     namespace jest {
@@ -54,9 +56,18 @@ expect.extend({
 
 beforeAll(() => {
     eater.janitor = new Janitor();
-    mockFlamework();
+    const cleanup = mockFlamework();
+    eater.janitor.Add(cleanup);
+    eater.janitor.Add(cleanupSimulation);
 });
 
 afterAll(() => {
     eater.janitor?.Destroy();
+
+    task.delay(10, () => {
+        for (const item of Items.sortedItems) {
+            table.clear(item);
+        }
+        table.clear(Items);
+    });
 });

@@ -280,7 +280,7 @@ export default class Area {
             const addedConnection = CollectionService.GetInstanceAddedSignal("Droplet").Connect((instance) => {
                 const info = getAllInstanceInfo(instance);
                 if (info.incinerated) return;
-                const areaId = info.area;
+                const areaId = info.areaId;
                 if (areaId === undefined) return;
                 const area = AREAS[areaId];
                 if (area === undefined) return;

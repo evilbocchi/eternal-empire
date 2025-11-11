@@ -1,13 +1,18 @@
 import { getAllInstanceInfo } from "@antivivi/vrldk";
 import { beforeEach, describe, expect, it } from "@rbxts/jest-globals";
 import { OnoeNum } from "@rbxts/serikanum";
-import { HttpService, Workspace } from "@rbxts/services";
+import { Workspace } from "@rbxts/services";
+import {
+    getTouchByName,
+    getTouchByTag,
+    setupTestCondenser,
+    spawnDroplet,
+    spawnItemModel,
+    withWeatherDisabled,
+} from "server/tests/utils";
 import { Server } from "shared/api/APIExpose";
-import { PLACED_ITEMS_FOLDER } from "shared/constants";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Droplet from "shared/item/Droplet";
-import Item from "shared/item/Item";
-import Condenser from "shared/item/traits/dropper/Condenser";
 import Dropper from "shared/item/traits/dropper/Dropper";
 import Generator from "shared/item/traits/generator/Generator";
 import Upgrader from "shared/item/traits/upgrader/Upgrader";
@@ -16,7 +21,6 @@ import VoidSkyUpgrader from "shared/items/0/happylike/VoidSkyUpgrader";
 import CoalescentRefiner from "shared/items/0/ifinitude/CoalescentRefiner";
 import Sideswiper from "shared/items/0/winsome/Sideswiper";
 import JoyfulPark from "shared/items/1/joyful/JoyfulPark";
-import Items from "shared/items/Items";
 import TheFirstGenerator from "shared/items/negative/friendliness/TheFirstGenerator";
 import TheFirstConveyor from "shared/items/negative/tfd/TheFirstConveyor";
 import TheFirstDropper from "shared/items/negative/tfd/TheFirstDropper";
@@ -24,183 +28,6 @@ import TheFirstUpgrader from "shared/items/negative/tfd/TheFirstUpgrader";
 import BasicCauldron from "shared/items/negative/tlg/BasicCauldron";
 import ImprovedFurnace from "shared/items/negative/tlg/ImprovedFurnace";
 import SmallReactor from "shared/items/negative/unimpossible/SmallReactor";
-
-type TouchHandle = {
-    part: BasePart;
-    touch: (droplet: BasePart, dropletInfo: InstanceInfo) => void;
-};
-
-type SpawnedModel = {
-    item: Item;
-    model: Model;
-    modelInfo: InstanceInfo;
-    placementId: string;
-    cleanup: () => void;
-};
-
-type SpawnedDroplet = {
-    droplet: BasePart;
-    dropletInfo: InstanceInfo;
-    cleanup: () => void;
-};
-
-function withWeatherDisabled<T>(callback: () => T) {
-    const revenue = Server.Revenue;
-    const previous = revenue.weatherBoostEnabled;
-    revenue.weatherBoostEnabled = false;
-    try {
-        return callback();
-    } finally {
-        revenue.weatherBoostEnabled = previous;
-    }
-}
-
-function spawnItemModel(itemId: string): SpawnedModel {
-    const item = Items.getItem(itemId);
-    expect(item === undefined).toBe(false);
-
-    const placementId = `${itemId}_${HttpService.GenerateGUID(false)}`;
-    const placedItem: PlacedItem = {
-        item: item!.id,
-        posX: 0,
-        posY: 0,
-        posZ: 0,
-        rotX: 0,
-        rotY: 0,
-        rotZ: 0,
-    };
-
-    const model = item!.createModel(placedItem);
-    expect(model === undefined).toBe(false);
-
-    model!.Name = placementId;
-    model!.Parent = PLACED_ITEMS_FOLDER;
-    const modelInfo = getAllInstanceInfo(model!);
-    modelInfo.maintained = true;
-    Server.Item.modelPerPlacementId.set(placementId, model!);
-
-    item!.load(model!);
-
-    return {
-        item: item!,
-        model: model!,
-        modelInfo,
-        placementId,
-        cleanup: () => {
-            model!.Destroy();
-            Server.Item.modelPerPlacementId.delete(placementId);
-        },
-    };
-}
-
-function spawnDroplet(template: Droplet): SpawnedDroplet {
-    const dropperModel = new Instance("Model") as Model;
-    dropperModel.Name = `TestDropper_${HttpService.GenerateGUID(false)}`;
-    dropperModel.Parent = PLACED_ITEMS_FOLDER;
-    const dropperInfo = getAllInstanceInfo(dropperModel);
-    dropperInfo.itemId = "TestDropper";
-
-    const instantiator = template.getInstantiator(dropperModel);
-    const droplet = instantiator() as BasePart;
-    droplet.Parent = Workspace;
-
-    const dropletInfo = Droplet.SPAWNED_DROPLETS.get(droplet);
-    expect(dropletInfo === undefined).toBe(false);
-
-    return {
-        droplet,
-        dropletInfo: dropletInfo!,
-        cleanup: () => {
-            droplet.Destroy();
-            dropperModel.Destroy();
-        },
-    };
-}
-
-function getTouchByTag(model: Model, tagName: string): TouchHandle {
-    for (const descendant of model.GetDescendants()) {
-        if (!descendant.IsA("BasePart") || !descendant.HasTag(tagName)) continue;
-        const info = getAllInstanceInfo(descendant);
-        const dropletTouched = info.dropletTouched;
-        expect(dropletTouched).toBeDefined();
-        return {
-            part: descendant,
-            touch: dropletTouched!,
-        };
-    }
-    throw `No part with tag ${tagName} found in model ${model.Name}`;
-}
-
-function getTouchByName(model: Model, partName: string): TouchHandle {
-    for (const descendant of model.GetDescendants()) {
-        if (!descendant.IsA("BasePart") || descendant.Name !== partName) continue;
-        const info = getAllInstanceInfo(descendant);
-        const dropletTouched = info.dropletTouched;
-        expect(dropletTouched).toBeDefined();
-
-        return {
-            part: descendant,
-            touch: dropletTouched!,
-        };
-    }
-    throw `Part ${partName} not found in model ${model.Name}`;
-}
-
-function setupTestCondenser() {
-    const itemId = `TestCondenser_${HttpService.GenerateGUID(false)}`;
-    const item = new Item(itemId).addPlaceableArea("BarrenIslands");
-    const condenser = item.trait(Condenser).setQuota(1);
-    const droplet = Droplet.FundsCompactDroplet;
-    condenser.addDroplets(droplet);
-
-    const placementId = `${itemId}_${HttpService.GenerateGUID(false)}`;
-    const placedItem: PlacedItem = {
-        item: itemId,
-        posX: 0,
-        posY: 0,
-        posZ: 0,
-        rotX: 0,
-        rotY: 0,
-        rotZ: 0,
-        area: "BarrenIslands",
-    };
-
-    Server.Data.empireData.items.worldPlaced.set(placementId, placedItem);
-
-    const model = new Instance("Model") as Model;
-    model.Name = placementId;
-    model.Parent = PLACED_ITEMS_FOLDER;
-
-    const drop = new Instance("Part") as BasePart;
-    drop.Name = "Drop";
-    drop.Size = new Vector3(1, 1, 1);
-    drop.Anchored = true;
-    drop.Parent = model;
-    model.PrimaryPart = drop;
-
-    Server.Item.modelPerPlacementId.set(placementId, model);
-
-    const info = getAllInstanceInfo(model);
-    info.maintained = true;
-
-    item.load(model);
-
-    const furnaceProcessed = getAllInstanceInfo(model).furnaceProcessed;
-    expect(furnaceProcessed).toBeDefined();
-
-    return {
-        item,
-        placementId,
-        model,
-        droplet,
-        furnaceProcessed: furnaceProcessed!,
-        cleanup: () => {
-            model.Destroy();
-            Server.Item.modelPerPlacementId.delete(placementId);
-            Server.Data.empireData.items.worldPlaced.delete(placementId);
-        },
-    };
-}
 
 beforeEach(() => {
     Server.Data.softWipe();
@@ -351,7 +178,7 @@ describe("Upgrader", () => {
 
         withWeatherDisabled(() => furnaceHandle.touch(dropletData.droplet, dropletData.dropletInfo));
 
-        expect(Server.Currency.get("Funds").equals(furnaceMul.mul(firstDropletFunds))).toBe(true);
+        expect(Server.Currency.get("Funds")).toEqualOnoeNum(furnaceMul.mul(firstDropletFunds));
 
         dropletData.cleanup();
         furnace.cleanup();

@@ -128,7 +128,7 @@ export default class Dropper extends ItemTrait {
             const instantiator = dropper.getDroplet(drop.Name)?.getInstantiator(model, drop);
             const areaId = Server.Item.getPlacedItem(model.Name)?.area as AreaId | undefined;
             const info = getAllInstanceInfo(drop);
-            info.area = areaId;
+            info.areaId = areaId;
             if (info.boosts === undefined) {
                 info.boosts = new Map<string, ItemBoost>();
             }
@@ -301,7 +301,7 @@ export default class Dropper extends ItemTrait {
 
                 // Drop a droplet if enough time has passed
                 if (t > info.lastDrop + 1 / dropRate / speed) {
-                    const area = AREAS[info.area!];
+                    const area = AREAS[info.areaId!];
                     if (area !== undefined && area.dropletCount > area.getDropletLimit()) continue;
                     info.lastDrop = t;
                     info.instantiator!();
