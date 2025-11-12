@@ -47,6 +47,15 @@ namespace ItemViewport {
         enabled = false;
     }
 
+    /**
+     * Clears all cached viewport data and running viewports.
+     * Used for cleanup during tests and story reloads.
+     */
+    export function cleanup() {
+        runningViewports.clear();
+        relsPerItem.clear();
+    }
+
     // Precompute model bounding info for each item
     for (const [id, model] of ITEM_MODELS) {
         let cframe: CFrame;
@@ -144,10 +153,12 @@ namespace ItemViewport {
             },
         };
         runningViewports.push(runningViewport);
-        viewportFrame.MouseEnter.Connect(() => (runningViewport.delta = 0.5));
-        viewportFrame.MouseLeave.Connect(() => (runningViewport.delta = 0));
+        const mouseEnterConnection = viewportFrame.MouseEnter.Connect(() => (runningViewport.delta = 0.5));
+        const mouseLeaveConnection = viewportFrame.MouseLeave.Connect(() => (runningViewport.delta = 0));
         viewportFrame.Destroying.Connect(() => {
             runningViewports.remove(runningViewports.indexOf(runningViewport));
+            mouseEnterConnection.Disconnect();
+            mouseLeaveConnection.Disconnect();
         });
         runningViewport.rotateCamera(0, false);
         camera.Parent = viewportFrame;

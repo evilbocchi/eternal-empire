@@ -1,3 +1,4 @@
+import ItemViewport from "shared/item/ItemViewport";
 import Items from "shared/items/Items";
 
 export default function cleanupSimulation() {
@@ -5,4 +6,5 @@ export default function cleanupSimulation() {
         table.clear(item);
     }
     table.clear(Items);
+    ItemViewport.cleanup();
 }

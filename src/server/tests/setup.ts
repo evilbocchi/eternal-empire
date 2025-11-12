@@ -65,10 +65,8 @@ beforeAll(() => {
 afterAll(() => {
     eater.janitor?.Destroy();
 
-    task.delay(10, () => {
-        for (const item of Items.sortedItems) {
-            table.clear(item);
-        }
-        table.clear(Items);
-    });
+    for (const item of Items.sortedItems) {
+        table.clear(item);
+    }
+    table.clear(Items);
 });
