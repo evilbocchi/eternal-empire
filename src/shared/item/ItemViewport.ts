@@ -48,12 +48,12 @@ namespace ItemViewport {
     }
 
     /**
-     * Clears all cached viewport data and running viewports.
+     * Clears all running viewports.
      * Used for cleanup during tests and story reloads.
+     * Note: relsPerItem cache is preserved as it contains static computed values.
      */
     export function cleanup() {
         runningViewports.clear();
-        relsPerItem.clear();
     }
 
     // Precompute model bounding info for each item
