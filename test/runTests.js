@@ -42,7 +42,10 @@ function transformLuauPath(line) {
     if (match) {
         const file = match[1];
         const lineNum = match[2];
-        return line.replace(/\[string "ServerScriptService\.tests\.[^"]+"\]:\s*\d+/, `out/server/tests/${file}.luau:${lineNum}`);
+        return line.replace(
+            /\[string "ServerScriptService\.tests\.[^"]+"\]:\s*\d+/,
+            `out/server/tests/${file}.luau:${lineNum}`,
+        );
     }
     return line;
 }
@@ -138,7 +141,7 @@ function analyzeStudioResultPayload(result, detectedFailures) {
         return {
             success: false,
             summary,
-            error: combinedFailures.length > 0 ? combinedFailures : baseError ?? "Studio tests reported failures.",
+            error: combinedFailures.length > 0 ? combinedFailures : (baseError ?? "Studio tests reported failures."),
         };
     }
 
@@ -371,7 +374,7 @@ async function createTask(apiKey, scriptContents, universeId, placeId) {
             url: `https://apis.roblox.com/cloud/v2/universes/${universeId}/places/${placeId}/luau-execution-session-tasks`,
             data: {
                 script: scriptContents,
-                timeout: "3s",
+                timeout: "60s",
             },
             headers: {
                 "x-api-key": apiKey,
@@ -396,11 +399,12 @@ async function createTask(apiKey, scriptContents, universeId, placeId) {
 async function pollForTaskCompletion(apiKey, taskPath) {
     let task = null;
 
+    logger.info(`Polling task status at: https://apis.roblox.com/${taskPath}`);
+
     while (!task || (task.state !== "COMPLETE" && task.state !== "FAILED")) {
         await new Promise((resolve) => setTimeout(resolve, 2000));
 
         try {
-            logger.info(`Polling task status at: https://apis.roblox.com/${taskPath}`);
             const response = await axios.get(`https://apis.roblox.com/cloud/v2/${taskPath}`, {
                 headers: {
                     "x-api-key": apiKey,
@@ -489,6 +493,7 @@ async function runLuauTask(universeId, placeId, scriptContents) {
                 return true;
             }
         } else {
+            logger.error(completedTask.error.code, completedTask.error.message);
             logger.error("Luau task failed");
             return false;
         }

@@ -80,17 +80,21 @@ export class SingleWorldNode<T extends Instance = Instance> extends WorldNode<T>
      */
     waitForInstance(timeout?: number): T {
         let instance = this.getInstance();
+        if (instance !== undefined) return instance;
+
         const startTime = os.clock();
         let warned = false;
         let exitEarly = false;
         eat(() => {
             exitEarly = true;
         });
+
         while (instance === undefined) {
             if (exitEarly) throw "Exited early while waiting for instance";
 
             task.wait();
             instance = this.getInstance();
+            if (instance !== undefined) return instance;
 
             const elapsed = os.clock() - startTime;
             if (timeout) {

@@ -1,9 +1,10 @@
 import type CameraShaker from "@rbxts/camera-shaker";
 import type { DataType } from "@rbxts/flamework-binary-serializer";
-import { exactMapProperty, exactSetProperty, packet, property, shallowMapProperty } from "@rbxts/fletchette";
+import { exactMapProperty, exactSetProperty, FletchetteEnvironment, packet, property } from "@rbxts/fletchette";
 import type { BaseOnoeNum } from "@rbxts/serikanum";
 import { OnoeNum } from "@rbxts/serikanum";
 import type { LeaderboardEntry, LeaderboardType } from "client/components/world/leaderboard/Leaderboard";
+import { IS_EDIT } from "shared/Context";
 import EmpireProfileTemplate from "shared/data/profile/EmpireProfileTemplate";
 import PlayerProfileTemplate from "shared/data/profile/PlayerProfileTemplate";
 import type { RepairResultTier } from "shared/item/repair";
@@ -65,6 +66,8 @@ type DebugStatsPayload = {
     jobId: string;
     lastUpdated: number;
 };
+
+FletchetteEnvironment.setVirtualState(IS_EDIT);
 
 namespace Packets {
     // data management

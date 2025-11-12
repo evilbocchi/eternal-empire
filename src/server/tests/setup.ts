@@ -1,3 +1,4 @@
+import { FletchetteEnvironment } from "@rbxts/fletchette";
 import { Janitor } from "@rbxts/janitor";
 import { afterAll, beforeAll, expect } from "@rbxts/jest-globals";
 import { OnoeNum } from "@rbxts/serikanum";

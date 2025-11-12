@@ -32,7 +32,7 @@ export default function DebugOverlay() {
     useEffect(() => {
         let frames = 0;
         let elapsed = 0;
-        const connection = RunService.RenderStepped.Connect((deltaTime) => {
+        const connection = RunService.Heartbeat.Connect((deltaTime) => {
             frames += 1;
             elapsed += deltaTime;
 

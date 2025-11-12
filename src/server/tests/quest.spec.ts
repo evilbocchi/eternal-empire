@@ -1,21 +1,9 @@
 import type { Profile } from "@antivivi/profileservice/globals";
 import { afterEach, beforeEach, describe, expect, it } from "@rbxts/jest-globals";
 import Quest, { Stage } from "server/quests/Quest";
-import { Server } from "shared/api/APIExpose";
 import ThisEmpire from "shared/data/ThisEmpire";
 
-type WritableThisEmpire = {
-    profile?: Profile<EmpireData>;
-    data?: EmpireData;
-    id?: string;
-    loadWith: typeof ThisEmpire.loadWith;
-};
-
-const writableEmpire = ThisEmpire as unknown as WritableThisEmpire;
-const questsAvailable = Server.Quest !== undefined && writableEmpire.data !== undefined;
-const describeQuests = questsAvailable ? describe : describe.skip;
-
-describeQuests("quest progression", () => {
+describe("quest progression", () => {
     let originalProfile: Profile<EmpireData>;
     let originalEmpireId: string;
     let originalQuestMap: Map<string, number>;
@@ -26,9 +14,9 @@ describeQuests("quest progression", () => {
     let empireData: EmpireData;
 
     beforeEach(() => {
-        originalProfile = writableEmpire.profile!;
-        empireData = writableEmpire.data!;
-        originalEmpireId = writableEmpire.id!;
+        originalProfile = ThisEmpire.profile;
+        empireData = ThisEmpire.data;
+        originalEmpireId = ThisEmpire.id;
 
         originalQuestMap = empireData.quests;
         empireData.quests = new Map();
@@ -67,7 +55,7 @@ describeQuests("quest progression", () => {
         cleanupMap.delete(stage);
 
         empireData.quests = originalQuestMap;
-        writableEmpire.loadWith({
+        ThisEmpire.loadWith({
             empireProfile: originalProfile,
             empireData,
             empireId: originalEmpireId,
@@ -83,15 +71,15 @@ describeQuests("quest progression", () => {
     });
 
     it("defers stage reach until data becomes available", () => {
-        writableEmpire.data = undefined;
-        writableEmpire.profile = undefined;
-        writableEmpire.id = undefined;
+        ThisEmpire.data = undefined as never;
+        ThisEmpire.profile = undefined as never;
+        ThisEmpire.id = undefined as never;
 
         Quest.reachStages();
 
         expect(reachedCount).toBe(0);
 
-        writableEmpire.loadWith({
+        ThisEmpire.loadWith({
             empireProfile: originalProfile,
             empireData,
             empireId: originalEmpireId,
