@@ -6,6 +6,9 @@
         "ServerScriptService": {
             "$className": "ServerScriptService",
             "$path": "out/server",
+            "$properties": {
+                "LoadStringEnabled": true
+            },
             "$ignoreUnknownInstances": true
         },
         "ReplicatedFirst": {
@@ -45,6 +48,9 @@
         },
         "StarterPlayer": {
             "$className": "StarterPlayer",
+            "$properties": {
+                "GameSettingsAvatar": "R6"
+            },
             "StarterPlayerScripts": {
                 "$className": "StarterPlayerScripts",
                 "$ignoreUnknownInstances": true,
@@ -59,6 +65,101 @@
                 "FilteringEnabled": true
             }
         },
+        "Players": {
+            "$className": "Players",
+            "$properties": {
+                "BanningEnabled": true,
+                "CharacterAutoLoads": true
+            }
+        },
+        "Lighting": {
+            "$className": "Lighting",
+            "$ignoreUnknownInstances": true,
+            "$properties": {
+                "Ambient": [0.275, 0.275, 0.275],
+                "Brightness": 2,
+                "ColorShift_Bottom": [0, 0, 0],
+                "ColorShift_Top": [0.17254902, 0.156862745, 0],
+                "EnvironmentDiffuseScale": 0.3,
+                "EnvironmentSpecularScale": 1,
+                "GlobalShadows": true,
+                "Technology": "Future",
+                "LightingStyle": "Realistic",
+                "OutdoorAmbient": [0.392, 0.392, 0.392],
+                "PrioritizeLightingQuality": true,
+                "ShadowSoftness": 0.125,
+                "ClockTime": 10.5,
+                "GeographicLatitude": 0,
+                "ExposureCompensation": 0.334
+            },
+            "Atmosphere": {
+                "$className": "Atmosphere",
+                "$properties": {
+                    "Density": 0.3,
+                    "Offset": 0.25,
+                    "Color": [0.78, 0.78, 0.78],
+                    "Decay": [0.415686275, 0.439215686, 0.490196078],
+                    "Glare": 0,
+                    "Haze": 0
+                }
+            },
+            "Sky": {
+                "$className": "Sky",
+                "$properties": {
+                    "CelestialBodiesShown": true,
+                    "MoonAngularSize": 11,
+                    "MoonTextureId": "rbxassetid://6444320592",
+                    "SkyboxBk": "rbxassetid://6444884337",
+                    "SkyboxDn": "rbxassetid://6444884785",
+                    "SkyboxFt": "rbxassetid://6444884337",
+                    "SkyboxLf": "rbxassetid://6444884337",
+                    "SkyboxRt": "rbxassetid://6444884337",
+                    "SkyboxUp": "rbxassetid://6412503613",
+                    "SkyboxOrientation": {
+                        "Vector3": [0, 0, 0]
+                    },
+                    "StarCount": 3000,
+                    "SunAngularSize": 11,
+                    "SunTextureId": "rbxassetid://6196665106"
+                }
+            },
+            "Bloom": {
+                "$className": "BloomEffect",
+                "$properties": {
+                    "Intensity": 1,
+                    "Size": 24,
+                    "Threshold": 2
+                }
+            },
+            "DepthOfField": {
+                "$className": "DepthOfFieldEffect",
+                "$properties": {
+                    "Enabled": true,
+                    "FocusDistance": 0.05,
+                    "InFocusRadius": 30,
+                    "FarIntensity": 0.05,
+                    "NearIntensity": 0.35
+                }
+            },
+            "SunRays": {
+                "$className": "SunRaysEffect",
+                "$properties": {
+                    "Enabled": true,
+                    "Intensity": 0.25,
+                    "Spread": 0.7
+                }
+            },
+            "ColorCorrection": {
+                "$className": "ColorCorrectionEffect",
+                "$properties": {
+                    "Enabled": true,
+                    "Brightness": 0,
+                    "Contrast": 0.025,
+                    "Saturation": 0.1,
+                    "TintColor": [1, 1, 1]
+                }
+            }
+        },
         "HttpService": {
             "$className": "HttpService",
             "$properties": {
@@ -69,6 +170,15 @@
             "$className": "SoundService",
             "$properties": {
                 "RespectFilteringEnabled": true
+            }
+        },
+        "TextChatService": {
+            "$className": "TextChatService",
+            "$properties": {
+                "ChatTranslationEnabled": true,
+                "ChatVersion": "TextChatService",
+                "CreateDefaultCommands": true,
+                "CreateDefaultTextChannels": true
             }
         }
     }

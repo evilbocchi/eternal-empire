@@ -12,17 +12,19 @@ dotenv.config();
 // Add default headers to all axios requests to help avoid WAF blocks
 axios.defaults.headers.common["User-Agent"] = "Node.js/Roblox-Test-Runner";
 
-// Accept mode from command-line argument, fallback to env var
+// Accept mode and version from command-line arguments, fallback to env var
 let cliMode = null;
+let cliVersion = null;
 for (const arg of process.argv.slice(2)) {
     if (arg.startsWith("--mode=")) {
         cliMode = arg.slice("--mode=".length).toLowerCase();
+    } else if (arg.startsWith("--version=")) {
+        cliVersion = arg.slice("--version=".length);
     }
 }
 const STUDIO_TEST_MODE = (cliMode ?? process.env.STUDIO_TEST_MODE ?? "auto").toLowerCase();
+const PLACE_VERSION = cliVersion ?? process.env.PLACE_VERSION ?? null;
 const STUDIO_TEST_SERVER = process.env.STUDIO_TEST_SERVER ?? "http://localhost:28354";
-const parsedTimeout = Number.parseInt(process.env.STUDIO_REQUEST_TIMEOUT ?? "5000", 10);
-const STUDIO_REQUEST_TIMEOUT = Number.isFinite(parsedTimeout) ? parsedTimeout : 5000;
 const parsedStudioToolTimeout = Number.parseInt(process.env.STUDIO_TOOL_TIMEOUT_MS ?? "120000", 10);
 const STUDIO_TOOL_TIMEOUT_MS = Number.isFinite(parsedStudioToolTimeout) ? parsedStudioToolTimeout : 120000;
 
@@ -367,11 +369,15 @@ async function runStudioTests() {
     return analyzeStudioResultPayload(result, tracker.detectedFailures);
 }
 
-async function createTask(apiKey, scriptContents, universeId, placeId) {
+async function createTask(apiKey, scriptContents, universeId, placeId, version = null) {
     try {
+        const url = version
+            ? `https://apis.roblox.com/cloud/v2/universes/${universeId}/places/${placeId}/versions/${version}/luau-execution-session-tasks`
+            : `https://apis.roblox.com/cloud/v2/universes/${universeId}/places/${placeId}/luau-execution-session-tasks`;
+        
         const response = await axios({
             method: "post",
-            url: `https://apis.roblox.com/cloud/v2/universes/${universeId}/places/${placeId}/luau-execution-session-tasks`,
+            url: url,
             data: {
                 script: scriptContents,
                 timeout: "60s",
@@ -446,11 +452,15 @@ async function getTaskLogs(apiKey, taskPath) {
     }
 }
 
-async function runLuauTask(universeId, placeId, scriptContents) {
-    logger.info("Executing Luau task");
+async function runLuauTask(universeId, placeId, scriptContents, version = null) {
+    if (version) {
+        logger.info(`Executing Luau task on version ${version}`);
+    } else {
+        logger.info("Executing Luau task on latest published version");
+    }
 
     try {
-        const task = await createTask(EXECUTION_KEY, scriptContents, universeId, placeId);
+        const task = await createTask(EXECUTION_KEY, scriptContents, universeId, placeId, version);
         logger.info(`Created task: ${task.path}`);
 
         const completedTask = await pollForTaskCompletion(EXECUTION_KEY, task.path);
@@ -462,7 +472,7 @@ async function runLuauTask(universeId, placeId, scriptContents) {
         for (const taskLogs of logs.luauExecutionSessionTaskLogs) {
             const messages = taskLogs.messages;
             for (const message of messages) {
-                logger.info(transformLuauPath(message));
+                logger.log(transformLuauPath(message));
 
                 // Check for test result summary line (e.g., "36 passed, 0 failed, 0 skipped")
                 const testResultMatch = message.match(/(\d+)\s+passed,\s+(\d+)\s+failed,\s+(\d+)\s+skipped/);
@@ -514,7 +524,7 @@ async function runCloudTests() {
     }
 
     try {
-        const success = await runLuauTask(UNIVERSE_ID, PLACE_ID, luauScript);
+        const success = await runLuauTask(UNIVERSE_ID, PLACE_ID, luauScript, PLACE_VERSION);
         return success;
     } catch (error) {
         logger.error("Error in cloud test execution:", error.response?.data || error.message || error);

@@ -49,7 +49,7 @@ export default [
             "include/**",
             "test/**",
             "roact_exported/**",
-            "scripts/**",
+            "sandbox/**",
             "src/shared/asset/AssetMap.ts",
         ],
     },

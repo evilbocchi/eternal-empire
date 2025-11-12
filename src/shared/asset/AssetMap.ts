@@ -110,7 +110,6 @@ export const assets = {
   "assets/brand/Cover.png": "rbxassetid://134402783665409",
   "assets/brand/UnrealWorks.png": "rbxassetid://129563601251323",
   "assets/brand/Wordmark.png": "rbxassetid://97286129899557",
-  "assets/brand/WordmarkBold.png": "rbxassetid://116698143441186",
   "assets/building/Delete.png": "rbxassetid://78832465726314",
   "assets/building/Place.png": "rbxassetid://97453743813641",
   "assets/building/Rotate.png": "rbxassetid://105414794306095",

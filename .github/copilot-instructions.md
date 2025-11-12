@@ -1,38 +1,35 @@
-## Project snapshot
-- Roblox tycoon built with `roblox-ts`, Flamework DI, and React UI under `src/client/components`; entry scripts are `src/server/main.server.ts` and `src/client/main.client.tsx`.
-- `shared/Context.ts` exposes runtime flags (`IS_SERVER`, `IS_EDIT`, `IS_PUBLIC_SERVER`, `IS_SINGLE_SERVER`); use them to guard persistence, teleporting, and other side-effects.
-- `shared/Sandbox.ts` toggles Studio-safe execution. Many services bail early when `Sandbox.getEnabled()` is true, so respect it when adding gameplay code.
-- Shared gameplay modules live in `src/shared/**` (`currency`, `data`, `items`, `placement`, `world`); prefer reusing these helpers over reimplementing logic.
+## Project Snapshot
+- Roblox tycoon using `roblox-ts`, Flamework, and React; entry points `src/server/main.server.ts` (ignites services outside edit mode) and `src/main.client.tsx` (mounts `client/components/App.tsx` into `ReplicatedStorage`).
+- Shared gameplay logic lives in `src/shared/**`; prefer currency, data, items, placement, and world helpers over one-off implementations.
+- `shared/Context.ts` is the single source for environment flags (`IS_EDIT`, `IS_PUBLIC_SERVER`, `IS_SINGLE_SERVER`, etc.); route persistence, teleports, and live mutations through it.
 
-## Daily workflow
-- Install deps with `npm install`.
-- `npm run dev` runs `rbxtsc -w --optimizedLoops` alongside `npx rojo serve`; attach Roblox Studio with the Rojo plugin for live sync.
-- Asset ids live in `shared/asset/AssetMap.ts`; keep it fresh with `npm run asset-sync` or watch with `npm run asset-watch` whenever files in `assets/` change.
-- `npm run build` performs asset sync then a one-off `rbxtsc`. `npm run lint` runs ESLint over `src`, and `npm run docs` builds TypeDoc.
+## Build & Tooling
+- `npm run dev` drives `rbxtsc -w --optimizedLoops` alongside `npx rojo serve`; attach Studio with the Rojo plugin for live sync.
+- `npm run build:src` regenerates assets then compiles; `npm run build:place` rebuilds the sandbox place (`sandbox/local.rbxl`) via Rojo and `sandbox/pull.js`.
+- `npm run plugin` rebuilds the internal tooling plugin in `plugin/`; install it locally for custom dev workflows.
+- Asset ids live in `src/shared/asset/AssetMap.ts`; keep them current with `npm run asset-sync` or `npm run asset-watch` when touching `assets/`.
 
-## Architecture touchpoints
-- Server services sit under `src/server/services`, each an `@Service()` resolved through Flamework DI. `main.server.ts` skips heavy imports when Sandbox mode is active and only ignites Flamework when safe.
-- `server/services/data/DataService.ts` loads empire profiles via `EmpireProfileManager`, runs migrations (currency conversion, item dedupe), and schedules saves based on environment flags—mirror its patterns when touching persisted data.
-- `src/shared/data` defines profile helpers such as `ThisEmpire`, migrations, and currency bundles that both client and server consume.
-- Lightweight per-player logic for streaming lives in `src/client/parallel`; keep additions stateless and janitor-friendly.
+## Server Architecture
+- Flamework services live under `src/server/services`; annotate with `@Service()` and rely on `Context.preloadFlameworkServer()` for discovery.
+- `server/services/data/DataService.ts` is the canonical persistence layer: resolves empire IDs per environment, migrates currencies with `OnoeNum`, deduplicates items, and schedules saves based on `IS_PUBLIC_SERVER` / `IS_SINGLE_SERVER`.
+- Lean on `shared/data/profile` (`EmpireProfileManager`, `EmpireProfileTemplate`, `ThisEmpire`) when reading or mutating profiles instead of manual table edits.
 
-## Networking & reactive state
-- `shared/Packets.ts` centralises all `@rbxts/fletchette` packet/property definitions. Add RPCs and replicated properties here with explicit payload types.
-- Services and clients subscribe via `Packets.X.fromClient(...)`, `Packets.Y.fromServer(...)`, and `Packets.Z.observe(...)`; always wrap connections and threads with `eat(...)` (`shared/hamster/eat`) for cleanup.
-- Environment-driven behaviour (public/private, edit, single-server) flows from `shared/Context.ts` and workspace attributes. Check these before mutating data, spawning players, or firing broadcasts.
+## Networking & Cleanup
+- `shared/Packets.ts` centralises `@rbxts/fletchette` RPCs/properties; declare new network traffic there with explicit payloads.
+- Always wrap connections, threads, and callbacks in `eat(...)` (`shared/hamster/eat`) so Studio edit mode and stories clean up via Janitor; `eatSnapshot` restores instances after temporary edits.
+- Respect `shared/Sandbox.ts`: when sandbox mode is on it moves `Workspace.ItemModels` into `ReplicatedStorage` and many services short-circuit, so gate destructive logic behind `Sandbox.getEnabled()` checks.
 
-## Items, traits, and placement
-- Item modules in `src/shared/items/**` export configured `Item` instances using builder helpers (`setName`, `setPrice`, `setDifficulty`, etc.) and attach behaviour with `item.trait(TraitCtor)`.
-- Traits extend `shared/item/traits/ItemTrait.ts`, hooking into `item.onLoad`/`item.onClientLoad`. Keep constructors minimal and leverage shared helpers like `Boostable`, `Upgrader`, and `CurrencyBundle`.
-- Placement bounds and world metadata live under `shared/placement` and `shared/world/nodes`; reuse these when validating positions or spawning world parts.
+## Items & World
+- Modules under `src/shared/items/**` export configured `Item` instances; `Items.ts` auto-requires descendants and builds sorted registries, so keep modules side-effect-free beyond item configuration.
+- Traits extend `shared/item/traits/ItemTrait.ts` and hook via `item.onLoad` / `item.onClientLoad`; reuse helpers like `Boostable`, `Upgrader`, and `CurrencyBundle`.
+- Placement bounds/world metadata live under `shared/placement` and `shared/world/nodes`; use existing validators before spawning parts or accepting placement payloads.
 
-## UI, assets, and simulations
-- React UI mounts from `client/components/App.tsx` via `main.client.tsx`; organise new features alongside existing domain folders (sidebar, quests, marketplace, etc.).
-- Hooks in `client/hooks` (`useProperty`, `useInterval`, `useDraggable`, etc.) wrap Roblox primitives and packet subscriptions—prefer them over imperative loops.
-- Story-driven simulations live in `client/components/*/*.story.tsx` and `client/qa`; they assume Sandbox/studio contexts, so avoid importing server-only services in those files.
-- Use `shared/asset/GameAssets.ts` (`getSound`, `emitEffect`) when playing sounds or particles; ensure `AssetMap` contains the asset id before referencing it.
+## Client Patterns
+- React UI sits in `src/client/components`; group features by domain (quests, marketplace, leaderboard) and prefer hooks in `src/client/hooks` (`useProperty`, `useInterval`, `useDraggable`) over imperative connections.
+- Lightweight streaming code belongs in `src/client/parallel`; keep it stateless and cleanup-driven for parallel Luau execution.
+- For sounds and particles, call `shared/asset/GameAssets.ts` (`getSound`, `emitEffect`) after ensuring the asset exists in `AssetMap`.
 
-## Testing & diagnostics
-- Luau specs reside in `src/server/tests/*.spec.ts` and execute via the local machine or Roblox Cloud in CI through `npm test`, which calls `test/runTests.js`.
-- Cloud runs stream logs line-by-line; scan the task summary for `X passed, Y failed` and raise meaningful errors in those messages.
-- Auto-generated typings (`include/`, `services.d.ts`) come from the Rojo place—regenerate them if the Roblox hierarchy changes before compiling.
+## Testing & Diagnostics
+- Server specs live in `src/server/tests/*.spec.ts`; run via `npm run test`.
+- CI calls `sandbox/publishAndTest.js`, publishing to the sandbox place then running tests—watch the `X passed, Y failed` log.
+- Generated typings (`include/`, `src/services.d.ts`) mirror the Rojo place; rebuild them after hierarchy changes before compiling.
