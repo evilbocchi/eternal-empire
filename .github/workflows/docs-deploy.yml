@@ -30,9 +30,6 @@ jobs:
       - name: Install Dependencies
         run: npm ci
       
-      - name: Build
-        run: npm run build
-      
       - name: Generate Documentation
         run: npm run docs
       
