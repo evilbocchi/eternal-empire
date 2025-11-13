@@ -31,5 +31,3 @@
 
 ## Testing & Diagnostics
 - Server specs live in `src/server/tests/*.spec.ts`; run via `npm run test`.
-- CI calls `sandbox/publishAndTest.js`, publishing to the sandbox place then running tests—watch the `X passed, Y failed` log.
-- Generated typings (`include/`, `src/services.d.ts`) mirror the Rojo place; rebuild them after hierarchy changes before compiling.

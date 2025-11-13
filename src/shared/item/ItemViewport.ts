@@ -23,6 +23,7 @@ import { ITEM_MODELS } from "shared/item/ItemModels";
  */
 type RunningViewport = {
     viewportFrame: ViewportFrame;
+    cleanup: () => void;
     delta: number;
     isTweening: boolean;
     zoom: number;
@@ -45,6 +46,18 @@ namespace ItemViewport {
 
     export function disable() {
         enabled = false;
+    }
+
+    /**
+     * Clears all running viewports.
+     * Used for cleanup during tests and story reloads.
+     * Note: relsPerItem cache is preserved as it contains static computed values.
+     */
+    export function cleanup() {
+        for (const rv of runningViewports) {
+            rv.cleanup();
+        }
+        runningViewports.clear();
     }
 
     // Precompute model bounding info for each item
@@ -120,8 +133,22 @@ namespace ItemViewport {
         let currentAngle = 220;
         const parent = viewportFrame.Parent as GuiObject;
 
+        const mouseEnterConnection = viewportFrame.MouseEnter.Connect(() => (runningViewport.delta = 0.5));
+        const mouseLeaveConnection = viewportFrame.MouseLeave.Connect(() => (runningViewport.delta = 0));
+
+        const cleanup = () => {
+            runningViewports.remove(runningViewports.indexOf(runningViewport));
+            mouseEnterConnection.Disconnect();
+            mouseLeaveConnection.Disconnect();
+            viewportFrame.ClearAllChildren();
+            destroyConnection.Disconnect();
+        };
+
+        const destroyConnection = viewportFrame.Destroying.Connect(cleanup);
+
         const runningViewport: RunningViewport = {
-            viewportFrame: viewportFrame,
+            viewportFrame,
+            cleanup,
             isTweening: false,
             delta: 0,
             zoom: 0,
@@ -144,11 +171,7 @@ namespace ItemViewport {
             },
         };
         runningViewports.push(runningViewport);
-        viewportFrame.MouseEnter.Connect(() => (runningViewport.delta = 0.5));
-        viewportFrame.MouseLeave.Connect(() => (runningViewport.delta = 0));
-        viewportFrame.Destroying.Connect(() => {
-            runningViewports.remove(runningViewports.indexOf(runningViewport));
-        });
+
         runningViewport.rotateCamera(0, false);
         camera.Parent = viewportFrame;
         model.Parent = viewportFrame;
