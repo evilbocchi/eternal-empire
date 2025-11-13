@@ -11,7 +11,7 @@
         "asset-sync": "npx rbxts-asset-sync --output=src/shared/asset/AssetMap.ts",
         "asset-watch": "npx rbxts-asset-sync --watch --output=src/shared/asset/AssetMap.ts",
         "build:src": "npm run asset-sync && rbxtsc",
-        "build:place": "npx rojo build --output=sandbox/local.rbxl && node sandbox/pull.js && npx lune run sandbox/injectWorkspace.luau",
+        "build:place": "npx rojo build --output=sandbox/local.rbxl && node sandbox/pull.js && npx lune run sandbox/inject.luau",
         "build": "npm run build:src && npm run build:place",
         "plugin": "cd ./plugin && npx rojo build --plugin ee-tooling.rbxmx",
         "docs": "npx typedoc",
