@@ -80,12 +80,26 @@ jobs:
           default.project.json \
           README.md \
           LICENSE
+        
+        # Copy place file to artifacts with versioned name
+        cp sandbox/local.rbxl build-artifacts/ee-${{ steps.version.outputs.release_version }}.rbxl
+
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: ee-build-${{ steps.version.outputs.release_version }}
+        path: |
+          build-artifacts/*.zip
+          build-artifacts/*.rbxl
+        retention-days: 30
 
     - name: Create GitHub Release
       if: ${{ inputs.create_release }}
       uses: softprops/action-gh-release@v1
       with:
-        files: build-artifacts/ee-${{ steps.version.outputs.release_version }}.zip
+        files: |
+          build-artifacts/ee-${{ steps.version.outputs.release_version }}.zip
+          build-artifacts/ee-${{ steps.version.outputs.release_version }}.rbxl
         tag_name: v${{ steps.version.outputs.release_version }}
         name: v${{ steps.version.outputs.release_version }}
         body: |          
@@ -94,6 +108,11 @@ jobs:
           ## Changes
           
           _Please manually update this section with the relevant changes._
+          
+          ## Files
+          
+          - `ee-${{ steps.version.outputs.release_version }}.zip` - Complete source and assets
+          - `ee-${{ steps.version.outputs.release_version }}.rbxl` - Built Roblox place file
         draft: true
         prerelease: false
         token: ${{ github.token }}
