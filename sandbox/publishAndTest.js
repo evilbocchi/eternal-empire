@@ -101,7 +101,7 @@ async function main() {
 
         process.exit(0);
     } catch (error) {
-        logger.error("An error occurred during publish and test process:", error.message);
+        logger.error("An error occurred during publish and test process:", error);
         process.exit(1);
     }
 }
