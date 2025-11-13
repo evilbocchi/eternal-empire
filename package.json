@@ -13,6 +13,7 @@
         "build:src": "npm run asset-sync && rbxtsc",
         "build:place": "npx rojo build --output=sandbox/local.rbxl && node sandbox/pull.js && npx lune run sandbox/inject.luau",
         "build": "npm run build:src && npm run build:place",
+        "open": "node sandbox/open.js",
         "plugin": "cd ./plugin && npx rojo build --plugin ee-tooling.rbxmx",
         "plugin:test": "node --test plugin/datamodel/*.test.js",
         "docs": "npx typedoc",
