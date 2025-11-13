@@ -1,17 +1,22 @@
+import Difficulty from "@rbxts/ejt";
 import React, { Fragment, JSX, useEffect, useState } from "@rbxts/react";
+import { createRoot } from "@rbxts/react-roblox";
 import useProperty from "client/hooks/useProperty";
+import { Server } from "shared/api/APIExpose";
 import { getAsset } from "shared/asset/AssetMap";
 import { playSound } from "shared/asset/GameAssets";
 import { RobotoSlabBold, RobotoSlabExtraBold, RobotoSlabHeavy, RobotoSlabMedium } from "shared/asset/GameFonts";
 import { Challenge, CHALLENGE_PER_ID } from "shared/Challenge";
+import ThisEmpire from "shared/data/ThisEmpire";
+import Item from "shared/item/Item";
 import Packets from "shared/Packets";
-import ChallengesBoard from "shared/world/nodes/ChallengesBoard";
+import Sandbox from "shared/Sandbox";
 
 /**
  * Individual challenge option component
  */
 function ChallengeOption({ challenge, currentLevel }: { challenge: Challenge; currentLevel: number }) {
-    const [confirmationState, setConfirmationState] = React.useState<{
+    const [confirmationState, setConfirmationState] = useState<{
         showConfirmation: boolean;
         lastClickTime: number;
     }>({ showConfirmation: false, lastClickTime: 0 });
@@ -362,10 +367,10 @@ function CurrentChallenge({ challengeId, currentLevel = 0 }: { challengeId?: str
 /**
  * Main Challenge GUI component
  */
-export default function ChallengeGui() {
+function ChallengeGui({ adornee }: { adornee: BasePart }) {
     const currentChallengeId = useProperty(Packets.currentChallenge);
     const currentLevelPerChallenge = useProperty(Packets.currentLevelPerChallenge);
-    const isInChallenge = currentChallengeId !== undefined;
+    const isInChallenge = currentChallengeId !== undefined && currentChallengeId !== "";
     const challengeOptions = new Array<JSX.Element>();
     for (const [id, challenge] of CHALLENGE_PER_ID) {
         const currentLevel = currentLevelPerChallenge.get(id) ?? 0;
@@ -386,7 +391,7 @@ export default function ChallengeGui() {
 
     return (
         <surfacegui
-            Adornee={ChallengesBoard.waitForInstance()}
+            Adornee={adornee}
             ClipsDescendants={true}
             MaxDistance={30}
             ResetOnSpawn={false}
@@ -441,3 +446,31 @@ export default function ChallengeGui() {
         </surfacegui>
     );
 }
+
+export = new Item(script.Name)
+    .setName("Challenges Board")
+    .setDescription("A board that offers various challenges to complete.")
+    .setDifficulty(Difficulty.Bonuses)
+    .placeableEverywhere()
+    .onLoad((model) => {
+        if (Sandbox.getEnabled()) {
+            const questMetadata = ThisEmpire.data.questMetadata;
+
+            questMetadata.set("ChallengesUnlocked", true);
+            Server.Challenge.refreshChallenges();
+
+            model.Destroying.Connect(() => {
+                questMetadata.set("ChallengesUnlocked", false);
+            });
+        }
+    })
+    .onClientLoad((model) => {
+        const board = model.WaitForChild("ChallengesBoard") as BasePart;
+
+        const root = createRoot(board);
+        root.render(<ChallengeGui adornee={board} />);
+
+        model.Destroying.Connect(() => {
+            root.unmount();
+        });
+    });

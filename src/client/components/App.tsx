@@ -7,7 +7,6 @@ import BalanceWindow from "client/components/balance/BalanceWindow";
 import CurrencyGainManager from "client/components/balance/CurrencyGainManager";
 import BuildWindow from "client/components/build/BuildWindow";
 import ChallengeCompletionManager from "client/components/challenge/ChallengeCompletionManager";
-import ChallengeGui from "client/components/challenge/ChallengeGui";
 import ChallengeHudWindow from "client/components/challenge/ChallengeHudWindow";
 import ChestLootManager from "client/components/chest/ChestLootManager";
 import CommandsWindow from "client/components/commands/CommandsWindow";
@@ -121,7 +120,6 @@ export default function App() {
 
         // Single document windows
         addRoot(roots, createScreenGui("Build", 0)).render(<BuildWindow />);
-        addRoot(roots, createScreenGui("Challenge", 0)).render(<ChallengeGui />);
         addRoot(roots, createScreenGui("Commands", 0)).render(<CommandsWindow />);
         addRoot(roots, createScreenGui("Copy", 0)).render(<CopyWindow />);
         addRoot(roots, createScreenGui("Inventory", 0)).render(<InventoryWindow />);

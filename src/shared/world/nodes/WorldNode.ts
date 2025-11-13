@@ -90,7 +90,7 @@ export class SingleWorldNode<T extends Instance = Instance> extends WorldNode<T>
         });
 
         while (instance === undefined) {
-            if (exitEarly) throw "Exited early while waiting for instance";
+            if (exitEarly) throw `Exited early while waiting for instance ${this.tag}`;
 
             task.wait();
             instance = this.getInstance();
