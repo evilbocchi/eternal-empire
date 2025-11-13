@@ -11,15 +11,6 @@
             }
         },
         {
-            "label": "npm: build",
-            "type": "shell",
-            "command": "npm run build",
-            "problemMatcher": "$tsc",
-            "presentation": {
-                "reveal": "never"
-            }
-        },
-        {
             "label": "npm: dev",
             "type": "shell",
             "command": "npm run dev",
