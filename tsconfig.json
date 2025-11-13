@@ -17,6 +17,7 @@
         "target": "ESNext",
         "typeRoots": [
             "node_modules/@rbxts",
+            "node_modules/@rbxts-js",
             "node_modules/@flamework",
             "node_modules/@antivivi",
         ],

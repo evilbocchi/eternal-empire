@@ -499,7 +499,6 @@ async function runLuauTask(universeId, placeId, scriptContents, version = null) 
                 logger.error(`Luau task completed but ${failedTests} test(s) failed`);
                 return false;
             } else {
-                logger.info("Luau task completed successfully with all tests passing");
                 return true;
             }
         } else {
@@ -567,7 +566,6 @@ async function main() {
         const cloudResult = await runCloudTests();
 
         if (cloudResult === true) {
-            logger.success("Cloud tests passed successfully.");
             process.exit(0);
         } else if (cloudResult === false) {
             logger.error("Cloud tests failed.");

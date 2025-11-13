@@ -17,7 +17,8 @@
         "plugin": "cd ./plugin && npx rojo build --plugin ee-tooling.rbxmx",
         "plugin:test": "node --test plugin/datamodel/*.test.js",
         "docs": "npx typedoc",
-        "dev": "concurrently --prefix none \"rbxtsc -w --optimizedLoops\" \"npx rojo serve\""
+        "dev": "concurrently --prefix none \"rbxtsc -w --optimizedLoops\" \"npx rojo serve\"",
+        "dev:test": "npm run build:place && npm run test:cloud"
     },
     "repository": {
         "type": "git",

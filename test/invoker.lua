@@ -10,4 +10,4 @@ print("IsClient:", RunService:IsClient())
 
 table.clear(_G)
 
-require(target)()
+require(target)(true)
