@@ -7,7 +7,7 @@
 [![Continuous Integration](https://github.com/evilbocchi/eternal-empire/actions/workflows/ci.yml/badge.svg?branch=main&event=push)](https://github.com/evilbocchi/eternal-empire/actions/workflows/ci.yml)
 [![GitHub](https://img.shields.io/github/release/evilbocchi/eternal-empire.svg)](https://github.com/evilbocchi/eternal-empire/releases/latest)
 [![CodeFactor](https://www.codefactor.io/repository/github/evilbocchi/eternal-empire/badge)](https://www.codefactor.io/repository/github/evilbocchi/eternal-empire)
-[![Discord](https://dcbadge.limes.pink/api/server/https://discord.gg/haPBmCSvXt?style=flat)](https://discord.gg/https://discord.gg/haPBmCSvXt)
+[![Discord](https://discordapp.com/api/guilds/1217488177862938654/widget.png?style=shield)](https://discord.gg/https://discord.gg/haPBmCSvXt)
 
 Build your money-making empire. Uncover the world of Obbysia.
 
