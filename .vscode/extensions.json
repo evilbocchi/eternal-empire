@@ -1,6 +1,9 @@
 {
     "recommendations": [
         "dbaeumer.vscode-eslint",
-        "esbenp.prettier-vscode"
+        "esbenp.prettier-vscode",
+        "johnnymorganz.luau-lsp",
+        "evilbocchi.rbxtsasvs",
+        "roblox-ts.vscode-roblox-ts",
     ]
 }
