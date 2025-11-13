@@ -1,29 +1,16 @@
-import React, { Fragment, JSX } from "@rbxts/react";
+import React, { Fragment, JSX, useEffect, useState } from "@rbxts/react";
+import useProperty from "client/hooks/useProperty";
 import { getAsset } from "shared/asset/AssetMap";
+import { playSound } from "shared/asset/GameAssets";
 import { RobotoSlabBold, RobotoSlabExtraBold, RobotoSlabHeavy, RobotoSlabMedium } from "shared/asset/GameFonts";
+import { Challenge, CHALLENGE_PER_ID } from "shared/Challenge";
+import Packets from "shared/Packets";
 import ChallengesBoard from "shared/world/nodes/ChallengesBoard";
-
-export interface CurrentChallengeInfo {
-    name: string;
-    description: string;
-    colors: {
-        primary: Color3;
-        secondary: Color3;
-    };
-}
 
 /**
  * Individual challenge option component
  */
-function ChallengeOption({
-    key,
-    challenge,
-    onStart,
-}: {
-    key: string;
-    challenge: ChallengeInfo;
-    onStart: (id: string) => void;
-}) {
+function ChallengeOption({ challenge, currentLevel }: { challenge: Challenge; currentLevel: number }) {
     const [confirmationState, setConfirmationState] = React.useState<{
         showConfirmation: boolean;
         lastClickTime: number;
@@ -33,17 +20,17 @@ function ChallengeOption({
         const currentTime = tick();
 
         if (confirmationState.showConfirmation && currentTime - confirmationState.lastClickTime < 3) {
-            // Confirmed start
-            onStart(key);
+            // Play confirmation sound
+            playSound("MagicCast.mp3");
+
+            // Send challenge start packet to server
+            Packets.startChallenge.toServer(challenge.id);
             setConfirmationState({ showConfirmation: false, lastClickTime: currentTime });
         } else {
             // Show confirmation
             setConfirmationState({ showConfirmation: true, lastClickTime: currentTime });
         }
     };
-
-    const primaryColor = Color3.fromRGB(challenge.r1, challenge.g1, challenge.b1);
-    const secondaryColor = Color3.fromRGB(challenge.r2, challenge.g2, challenge.b2);
 
     return (
         <frame BackgroundTransparency={1} Size={new UDim2(1, 0, 0, 150)}>
@@ -63,8 +50,8 @@ function ChallengeOption({
                 <uigradient
                     Color={
                         new ColorSequence([
-                            new ColorSequenceKeypoint(0, primaryColor),
-                            new ColorSequenceKeypoint(1, secondaryColor),
+                            new ColorSequenceKeypoint(0, challenge.colors.primary),
+                            new ColorSequenceKeypoint(1, challenge.colors.secondary),
                         ])
                     }
                 />
@@ -151,7 +138,7 @@ function ChallengeOption({
                     BackgroundTransparency={1}
                     FontFace={RobotoSlabMedium}
                     Size={new UDim2(1, 0, 0, 0)}
-                    Text={challenge.description}
+                    Text={challenge.description(currentLevel)}
                     TextColor3={Color3.fromRGB(209, 209, 209)}
                     TextScaled={true}
                     TextStrokeTransparency={0}
@@ -170,7 +157,7 @@ function ChallengeOption({
                     FontFace={RobotoSlabMedium}
                     LayoutOrder={1}
                     Size={new UDim2(1, 0, 0, 0)}
-                    Text={challenge.notice}
+                    Text={challenge.getNotice()}
                     TextColor3={Color3.fromRGB(172, 172, 172)}
                     TextScaled={true}
                     TextStrokeTransparency={0}
@@ -189,7 +176,7 @@ function ChallengeOption({
                     FontFace={RobotoSlabMedium}
                     LayoutOrder={99}
                     Size={new UDim2(1, 0, 0, 0)}
-                    Text={`Task: ${challenge.task}`}
+                    Text={`Task: ${challenge.getTaskLabel()}`}
                     TextColor3={Color3.fromRGB(126, 255, 145)}
                     TextScaled={true}
                     TextStrokeTransparency={0}
@@ -213,12 +200,26 @@ function ChallengeOption({
                 FontFace={RobotoSlabBold}
                 Position={new UDim2(0.55, 0, 0.25, 0)}
                 Size={new UDim2(0.35, 0, 0.175, 0)}
-                Text={challenge.reward}
+                Text={challenge.getRewardLabel(currentLevel)}
                 TextColor3={Color3.fromRGB(126, 255, 145)}
                 TextScaled={true}
                 TextWrapped={true}
             >
                 <uistroke Thickness={2} />
+            </textlabel>
+
+            <textlabel
+                BackgroundTransparency={1}
+                FontFace={RobotoSlabMedium}
+                Position={new UDim2(0.55, 0, 0.45, 0)}
+                Size={new UDim2(0.35, 0, 0.15, 0)}
+                Text={`Entry Fee: ${challenge.entryFee.toString()}`}
+                TextColor3={Color3.fromRGB(255, 223, 171)}
+                TextScaled={true}
+                TextWrapped={true}
+                TextXAlignment={Enum.TextXAlignment.Left}
+            >
+                <uitextsizeconstraint MaxTextSize={18} />
             </textlabel>
         </frame>
     );
@@ -227,15 +228,21 @@ function ChallengeOption({
 /**
  * Current challenge display component
  */
-function CurrentChallenge({ challenge, onQuit }: { challenge: CurrentChallengeInfo; onQuit: () => void }) {
-    const [debounce, setDebounce] = React.useState(0);
+function CurrentChallenge({ challengeId, currentLevel = 0 }: { challengeId?: string; currentLevel?: number }) {
+    const challenge = challengeId ? CHALLENGE_PER_ID.get(challengeId) : undefined;
+    if (challenge === undefined || challengeId === undefined) {
+        return <Fragment />;
+    }
+
+    const [debounce, setDebounce] = useState(0);
 
     const handleQuitClick = () => {
-        const currentTime = tick();
+        const currentTime = os.clock();
         if (currentTime - debounce < 1) return;
-
         setDebounce(currentTime);
-        onQuit();
+
+        playSound("MagicCast.mp3");
+        Packets.quitChallenge.toServer();
     };
 
     return (
@@ -290,7 +297,7 @@ function CurrentChallenge({ challenge, onQuit }: { challenge: CurrentChallengeIn
                 FontFace={RobotoSlabBold}
                 LayoutOrder={2}
                 Size={new UDim2(0.9, 0, 0.1, 0)}
-                Text={challenge.description}
+                Text={challenge.description(currentLevel)}
                 TextColor3={Color3.fromRGB(255, 255, 255)}
                 TextScaled={true}
                 TextWrapped={true}
@@ -355,27 +362,27 @@ function CurrentChallenge({ challenge, onQuit }: { challenge: CurrentChallengeIn
 /**
  * Main Challenge GUI component
  */
-export default function ChallengeGui({
-    challenges,
-    currentChallenge,
-    onStartChallenge,
-    onQuitChallenge,
-}: {
-    challenges: Map<string, ChallengeInfo>;
-    currentChallenge?: CurrentChallengeInfo;
-    onStartChallenge: (challengeId: string) => void;
-    onQuitChallenge: () => void;
-}) {
-    const isInChallenge = currentChallenge !== undefined;
-
-    if (!isInChallenge && challenges.size() === 0) {
-        return <Fragment />;
-    }
-
+export default function ChallengeGui() {
+    const currentChallengeId = useProperty(Packets.currentChallenge);
+    const currentLevelPerChallenge = useProperty(Packets.currentLevelPerChallenge);
+    const isInChallenge = currentChallengeId !== undefined;
     const challengeOptions = new Array<JSX.Element>();
-    for (const [key, challenge] of challenges) {
-        challengeOptions.push(<ChallengeOption key={key} challenge={challenge} onStart={onStartChallenge} />);
+    for (const [id, challenge] of CHALLENGE_PER_ID) {
+        const currentLevel = currentLevelPerChallenge.get(id) ?? 0;
+        challengeOptions.push(<ChallengeOption challenge={challenge} currentLevel={currentLevel} />);
     }
+
+    useEffect(() => {
+        const connection = Packets.challengeCompleted.fromServer((challenge, rewardLabel) => {
+            // Play completion sound
+            playSound("MagicCast.mp3");
+
+            // Could show a completion notification here
+            print(`Challenge completed: ${challenge} - Rewards: ${rewardLabel}`);
+        });
+
+        return () => connection.Disconnect();
+    }, []);
 
     return (
         <surfacegui
@@ -427,10 +434,10 @@ export default function ChallengeGui({
                 </scrollingframe>
             )}
 
-            {/* Current Challenge (when in challenge) */}
-            {isInChallenge && currentChallenge && (
-                <CurrentChallenge challenge={currentChallenge} onQuit={onQuitChallenge} />
-            )}
+            <CurrentChallenge
+                challengeId={currentChallengeId}
+                currentLevel={currentLevelPerChallenge.get(currentChallengeId) ?? 0}
+            />
         </surfacegui>
     );
 }

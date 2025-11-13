@@ -1,21 +1,21 @@
-import React from "@rbxts/react";
+import React, { Fragment } from "@rbxts/react";
+import useProperty from "client/hooks/useProperty";
 import { RobotoSlabBold } from "shared/asset/GameFonts";
+import { CHALLENGE_PER_ID } from "shared/Challenge";
+import Packets from "shared/Packets";
 
 /**
  * Displays current challenge information as a HUD overlay
  */
-export default function ChallengeHudDisplay({
-    challengeName,
-    challengeDescription,
-    challengeColors,
-}: {
-    challengeName: string;
-    challengeDescription: string;
-    challengeColors: {
-        primary: Color3;
-        secondary: Color3;
-    };
-}) {
+export default function ChallengeHudWindow() {
+    const currentChallengeId = useProperty(Packets.currentChallenge);
+    const currentLevel = useProperty(Packets.currentLevelPerChallenge).get(currentChallengeId) ?? 0;
+    const currentChallenge = CHALLENGE_PER_ID.get(currentChallengeId);
+
+    if (!currentChallenge) {
+        return <Fragment />;
+    }
+
     return (
         <frame
             AnchorPoint={new Vector2(0.5, 0)}
@@ -49,7 +49,7 @@ export default function ChallengeHudDisplay({
                 FontFace={RobotoSlabBold}
                 LayoutOrder={2}
                 Size={new UDim2(1, 0, 0, 0)}
-                Text={challengeName}
+                Text={currentChallenge.name}
                 TextColor3={Color3.fromRGB(255, 255, 255)}
                 TextSize={30}
                 TextWrapped={true}
@@ -58,8 +58,8 @@ export default function ChallengeHudDisplay({
                 <uigradient
                     Color={
                         new ColorSequence([
-                            new ColorSequenceKeypoint(0, challengeColors.primary),
-                            new ColorSequenceKeypoint(1, challengeColors.secondary),
+                            new ColorSequenceKeypoint(0, currentChallenge.colors.primary),
+                            new ColorSequenceKeypoint(1, currentChallenge.colors.secondary),
                         ])
                     }
                 />
@@ -72,7 +72,7 @@ export default function ChallengeHudDisplay({
                 FontFace={RobotoSlabBold}
                 LayoutOrder={3}
                 Size={new UDim2(0.9, 0, 0, 0)}
-                Text={challengeDescription}
+                Text={currentChallenge.description(currentLevel)}
                 TextColor3={Color3.fromRGB(255, 103, 103)}
                 TextSize={20}
                 TextWrapped={true}

@@ -1,7 +1,5 @@
 /// <reference types="@rbxts/types/plugin" />
 import React, { Fragment, useEffect } from "@rbxts/react";
-import { backend } from "@rbxts/react-devtools-core";
-import ReactGlobals from "@rbxts/react-globals";
 import { createRoot, Root } from "@rbxts/react-roblox";
 import { ContentProvider, RunService, StarterGui, Workspace } from "@rbxts/services";
 import BackpackWindow from "client/components/backpack/BackpackWindow";
@@ -9,8 +7,8 @@ import BalanceWindow from "client/components/balance/BalanceWindow";
 import CurrencyGainManager from "client/components/balance/CurrencyGainManager";
 import BuildWindow from "client/components/build/BuildWindow";
 import ChallengeCompletionManager from "client/components/challenge/ChallengeCompletionManager";
-import ChallengeHudManager from "client/components/challenge/ChallengeHudManager";
-import ChallengeManager from "client/components/challenge/ChallengeManager";
+import ChallengeGui from "client/components/challenge/ChallengeGui";
+import ChallengeHudWindow from "client/components/challenge/ChallengeHudWindow";
 import ChestLootManager from "client/components/chest/ChestLootManager";
 import CommandsWindow from "client/components/commands/CommandsWindow";
 import DebugOverlay from "client/components/debug/DebugOverlay";
@@ -123,7 +121,7 @@ export default function App() {
 
         // Single document windows
         addRoot(roots, createScreenGui("Build", 0)).render(<BuildWindow />);
-        addRoot(roots, createScreenGui("Challenge", 0)).render(<ChallengeManager />);
+        addRoot(roots, createScreenGui("Challenge", 0)).render(<ChallengeGui />);
         addRoot(roots, createScreenGui("Commands", 0)).render(<CommandsWindow />);
         addRoot(roots, createScreenGui("Copy", 0)).render(<CopyWindow />);
         addRoot(roots, createScreenGui("Inventory", 0)).render(<InventoryWindow />);
@@ -152,7 +150,7 @@ export default function App() {
         addRoot(roots, createScreenGui("Position", -5)).render(<PositionManager />);
         addRoot(roots, createScreenGui("Sidebar", -5)).render(<SidebarButtons />);
 
-        addRoot(roots, createScreenGui("ChallengeHud", -10)).render(<ChallengeHudManager />);
+        addRoot(roots, createScreenGui("ChallengeHud", -10)).render(<ChallengeHudWindow />);
 
         addRoot(roots, createScreenGui("Backpack", -15)).render(<BackpackWindow />);
 

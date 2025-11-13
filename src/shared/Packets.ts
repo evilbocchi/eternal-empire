@@ -38,20 +38,6 @@ declare global {
         rotation: DataType.u16;
     };
 
-    type ChallengeInfo = {
-        name: string;
-        r1: DataType.u8;
-        g1: DataType.u8;
-        b1: DataType.u8;
-        r2: DataType.u8;
-        g2: DataType.u8;
-        b2: DataType.u8;
-        description: string;
-        task: string;
-        notice: string;
-        reward: string;
-    };
-
     type LootInfo = { id: string | "xp"; amount: number };
 }
 
@@ -174,7 +160,7 @@ namespace Packets {
     export const autoloadSetup = packet<(name: string) => boolean>();
     export const startChallenge = packet<(challenge: string) => void>();
     export const quitChallenge = packet<() => void>();
-    export const challenges = property<Map<string, ChallengeInfo>>(new Map());
+    export const currentLevelPerChallenge = exactMapProperty<string, DataType.u8>(new Map());
     export const currentChallenge = property<string>();
     export const challengeCompleted = packet<(challenge: string, rewardLabel: string) => void>();
 

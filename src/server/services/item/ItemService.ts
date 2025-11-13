@@ -22,12 +22,12 @@ import Signal from "@antivivi/lemon-signal";
 import { getAllInstanceInfo, simpleInterval, variableInterval } from "@antivivi/vrldk";
 import { OnInit, OnStart, Service } from "@flamework/core";
 import { HttpService } from "@rbxts/services";
-import { CHALLENGES } from "server/Challenges";
 import CurrencyService from "server/services/data/CurrencyService";
 import DataService from "server/services/data/DataService";
 import { OnGameAPILoaded } from "server/services/ModdingService";
 import { log } from "server/services/permissions/LogService";
 import PermissionService from "server/services/permissions/PermissionService";
+import { CHALLENGE_PER_ID } from "shared/Challenge";
 import { PLACED_ITEMS_FOLDER } from "shared/constants";
 import { IS_EDIT } from "shared/Context";
 import eat from "shared/hamster/eat";
@@ -539,8 +539,12 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
 
         // Check challenge restrictions
         if (empireData.currentChallenge !== undefined) {
-            const challenge = CHALLENGES[empireData.currentChallenge as ChallengeId];
-            if (challenge !== undefined && challenge.restrictItems !== undefined && challenge.restrictItems(item)) {
+            const challenge = CHALLENGE_PER_ID.get(empireData.currentChallenge);
+            if (
+                challenge !== undefined &&
+                challenge.itemRestrictionFilter !== undefined &&
+                challenge.itemRestrictionFilter(item)
+            ) {
                 return $tuple(undefined);
             }
         }
