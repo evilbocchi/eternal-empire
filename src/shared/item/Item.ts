@@ -651,6 +651,15 @@ export default class Item {
     }
 
     /**
+     * Calls init callbacks from {@link onInit}.
+     */
+    init() {
+        for (const callback of this.INITIALIZES) {
+            callback(this);
+        }
+    }
+
+    /**
      * Calls load callbacks from {@link onLoad}.
      * @param model The model of the item to load.
      */

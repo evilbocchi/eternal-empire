@@ -297,6 +297,7 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
      *
      * @param itemId The ID of the item to give.
      * @param amount The amount of the item to give (default is 1).
+     * @returns An array of UUIDs for unique item instances if applicable, otherwise undefined.
      */
     giveItem(itemId: string, amount = 1) {
         const item = Items.getItem(itemId);
@@ -305,15 +306,21 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
             return;
         }
 
+        let uuids: string[] | undefined;
         if (item.isA("Unique")) {
+            uuids = [];
             for (let i = 0; i < amount; i++) {
-                this.createUniqueInstance(itemId);
+                const uuid = this.createUniqueInstance(itemId);
+                if (uuid !== undefined) {
+                    uuids.push(uuid);
+                }
             }
         } else {
             const currentAmount = this.getItemAmount(itemId);
             this.setItemAmount(itemId, currentAmount + amount);
         }
         this.itemGiven.fire(item, amount);
+        return uuids;
     }
 
     // Item Placement Methods
@@ -493,7 +500,7 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
      *
      * This does *not* replicate the changes to the client, nor fires the {@link itemsPlaced} signal.
      *
-     * @param id Item id to place.
+     * @param id Item id or unique item UUID to place.
      * @param position Position of the PrimaryPart of the item model to place in.
      * @param rotation Rotation, in degrees, to rotate the item.
      * @param areaId The area to place the item in.
@@ -996,9 +1003,7 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
         // Initialize all items and their callbacks
         let itemCount = 0;
         Items.itemsPerId.forEach((item) => {
-            for (const callback of item.INITIALIZES) {
-                callback(item);
-            }
+            item.init();
             ++itemCount;
         });
         print(`Initialized ${itemCount} items.`);
