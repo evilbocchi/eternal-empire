@@ -54,6 +54,7 @@ namespace ItemViewport {
      * Note: relsPerItem cache is preserved as it contains static computed values.
      */
     export function cleanup() {
+        RunService.UnbindFromRenderStep(KEY);
         for (const rv of runningViewports) {
             rv.cleanup();
         }
@@ -79,14 +80,6 @@ namespace ItemViewport {
 
     // Animate all running item slot viewports each frame
     if (!IS_SERVER || IS_EDIT) {
-        const cleanup = () => {
-            RunService.UnbindFromRenderStep(KEY);
-            for (const rv of runningViewports) {
-                rv.viewportFrame.ClearAllChildren();
-            }
-            runningViewports.clear();
-        };
-
         RunService.BindToRenderStep(KEY, 0, (dt) => {
             for (const rv of runningViewports) {
                 const isHovering = rv.delta > 0;
@@ -103,9 +96,8 @@ namespace ItemViewport {
                 rv.rotateCamera(dt, true);
             }
         });
-
-        eat(cleanup);
     }
+    eat(cleanup);
 
     /**
      * Handles loading and displaying an item model in a ViewportFrame.
