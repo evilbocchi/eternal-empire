@@ -4,11 +4,11 @@
     "private": true,
     "type": "module",
     "scripts": {
-        "test": "npm run build && npm run test:cloud",
+        "test": "npm run build --silent && npm run test:cloud --silent",
         "test:studio": "node test/runTests.js --mode=studio",
         "test:cloud": "node sandbox/publishAndTest.js",
         "lint": "npx eslint src --no-error-on-unmatched-pattern",
-        "asset-sync": "npx rbxts-asset-sync --output=src/shared/asset/AssetMap.ts",
+        "asset-sync": "npx rbxts-asset-sync --log-level=warn --output=src/shared/asset/AssetMap.ts",
         "asset-watch": "npx rbxts-asset-sync --watch --output=src/shared/asset/AssetMap.ts",
         "build:src": "npm run asset-sync && rbxtsc",
         "build:place": "npx rojo build --output=sandbox/local.rbxl && node sandbox/pull.js && npx lune run sandbox/inject.luau",
@@ -18,7 +18,7 @@
         "plugin:test": "node --test plugin/datamodel/*.test.js",
         "docs": "npx typedoc",
         "dev": "concurrently --prefix none \"rbxtsc -w --optimizedLoops\" \"npx rojo serve\"",
-        "dev:test": "npm run build:place && npm run test:cloud"
+        "dev:test": "npm run build:place --silent && npm run test:cloud --silent"
     },
     "repository": {
         "type": "git",
@@ -46,7 +46,7 @@
         "express": "^5.1.0",
         "prettier": "^3.6.2",
         "rbx-lune": "^1.0.0",
-        "rbxts-asset-sync": "^0.4.1",
+        "rbxts-asset-sync": "^0.4.2",
         "rbxts-transform-env": "^3.0.0",
         "rbxts-transformer-flamework": "^1.3.2",
         "rbxts-transformer-services": "^1.1.1",
