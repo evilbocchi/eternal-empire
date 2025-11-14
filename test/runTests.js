@@ -545,7 +545,7 @@ async function runLuauTask(universeId, placeId, scriptContents, version = null) 
         log("Executing Luau task on latest published version", "debug");
     }
 
-    if (placeId === 16438564807) {
+    if (parseInt(placeId) === 16438564807) {
         log("Detected protected place ID; skipping Luau cloud tests. Please use your own place ID for testing.", "error");
         return false;   
     }
