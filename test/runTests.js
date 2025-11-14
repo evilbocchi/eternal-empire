@@ -174,7 +174,8 @@ function transformLuauPath(line) {
         return resolved ?? fullMatch;
     });
 
-    const moduleRootPattern = /(ServerScriptService|ReplicatedStorage\.shared|ReplicatedStorage\.client|ReplicatedFirst)(?:\.[^\s:\]]+)+/g;
+    const moduleRootPattern =
+        /(ServerScriptService|ReplicatedStorage\.shared|ReplicatedStorage\.client|ReplicatedFirst)(?:\.[^\s:\]]+)+/g;
 
     transformed = transformed.replace(moduleRootPattern, (fullMatch) => {
         const resolved = resolveModulePath(fullMatch);
@@ -568,6 +569,7 @@ async function pollForTaskCompletion(apiKey, taskPath) {
     const start = Date.now();
     let lastLoggedState = null;
 
+    let i = 0;
     while (!task || (task.state !== "COMPLETE" && task.state !== "FAILED")) {
         await new Promise((resolve) => setTimeout(resolve, 300));
 
@@ -588,8 +590,11 @@ async function pollForTaskCompletion(apiKey, taskPath) {
             }
 
             // Show live status on console only (not in file log)
-            const statusLine = `Task state: ${task.state} (after ${elapsed}s)`;
-            process.stdout.write(`\r${statusLine}${" ".repeat(Math.max(0, 80 - statusLine.length))}`);
+            if (i++ >= 3) {
+                const statusLine = `Task state: ${task.state} (after ${elapsed}s)`;
+                process.stdout.write(`\r${statusLine}${" ".repeat(Math.max(0, 80 - statusLine.length))}`);
+                i = 0;
+            }
         } catch (error) {
             log("Error polling task completion:", "warn");
             log(`Status: ${error.response?.status}`, "warn");
@@ -636,8 +641,11 @@ async function runLuauTask(universeId, placeId, scriptContents, version = null) 
     }
 
     if (parseInt(placeId) === 16438564807) {
-        log("Detected protected place ID; skipping Luau cloud tests. Please use your own place ID for testing.", "error");
-        return false;   
+        log(
+            "Detected protected place ID; skipping Luau cloud tests. Please use your own place ID for testing.",
+            "error",
+        );
+        return false;
     }
 
     try {

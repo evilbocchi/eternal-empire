@@ -1,5 +1,7 @@
-import { afterEach, beforeEach, describe, expect, it } from "@rbxts/jest-globals";
+import { afterEach, beforeEach, describe, expect, it, jest } from "@rbxts/jest-globals";
+import { HttpService } from "@rbxts/services";
 import { Server } from "shared/api/APIExpose";
+import Command, { CommandAPI } from "shared/commands/Command";
 
 describe("PermissionsService", () => {
     let snapshot: {
@@ -76,5 +78,58 @@ describe("PermissionsService", () => {
 
         expect(parts.size()).toBe(2);
         expect(parts[1]).toBe(Server.Data.empireId);
+    });
+
+    describe("command permission access", () => {
+        let player: Player;
+        let userIdSeed = 1000;
+
+        beforeEach(() => {
+            const userId = userIdSeed++;
+            player = {
+                Name: `PermissionTester_${HttpService.GenerateGUID(false)}`,
+                UserId: userId,
+            } as unknown as Player;
+        });
+
+        it("denies command execution when permission level is too low", () => {
+            const empireData = Server.Data.empireData;
+            empireData.trusted = [player.UserId];
+            empireData.managers = [];
+            empireData.owner = -1;
+
+            let count = 0;
+            const command = new Command("permtest1").setExecute(() => count++).setPermissionLevel(2);
+
+            jest.spyOn(jest.globalEnv, "print").mockImplementation((data) => {
+                expect(data).toBe("You do not have access to this command.");
+            });
+
+            CommandAPI.Command.parseCommandInvocation(command, player, `/permtest1 arg1 arg2`);
+
+            expect(count).toBe(0);
+        });
+
+        it("executes command when permission level is sufficient", () => {
+            const empireData = Server.Data.empireData;
+            empireData.owner = player.UserId;
+
+            let calledPlayer: Player | undefined;
+            let calledArgs: string[] | undefined;
+            let count = 0;
+            const command = new Command("permtest2")
+                .setExecute((player, ...args) => {
+                    calledPlayer = player;
+                    calledArgs = args;
+                    count++;
+                })
+                .setPermissionLevel(2);
+
+            CommandAPI.Command.parseCommandInvocation(command, player, `/permtest2 arg1 arg2`);
+
+            expect(count).toBe(1);
+            expect(calledPlayer).toBe(player);
+            expect(calledArgs).toEqual(["arg1", "arg2"]);
+        });
     });
 });

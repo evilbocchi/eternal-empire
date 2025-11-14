@@ -51,29 +51,36 @@ export default class CommandsService implements OnInit {
         }
     }
 
+    parseCommandInvocation(command: Command, player: Player, unfilteredText: string) {
+        const params = unfilteredText.split(" ");
+        params.remove(0);
+        const pLevel = CommandAPI.Permissions.getPermissionLevel(player.UserId);
+        if (pLevel < command.permissionLevel) {
+            CommandAPI.ChatHook.sendPrivateMessage(
+                player,
+                "You do not have access to this command.",
+                "color:255,43,43",
+            );
+            return;
+        }
+        command.execute(player, ...params);
+    }
+
     /**
      * Registers a new chat command.
      *
      * @param command The command to register
      */
-    registerCommand(command: Command) {
+    private registerCommand(command: Command) {
         if (IS_EDIT) return;
 
         const textChatCommand = new Instance("TextChatCommand");
         textChatCommand.PrimaryAlias = "/" + command.id;
         textChatCommand.SecondaryAlias = "/" + command.aliases[0] || "";
         textChatCommand.Name = command.id + "Command";
-        const connection = textChatCommand.Triggered.Connect((o, u) => {
-            const params = u.split(" ");
-            params.remove(0);
-            const p = Players.WaitForChild(o.Name) as Player;
-            const pLevel = CommandAPI.Permissions.getPermissionLevel(p.UserId);
-            if (pLevel < command.permissionLevel) {
-                CommandAPI.ChatHook.sendPrivateMessage(p, "You do not have access to this command.", "color:255,43,43");
-                return;
-            }
-            command.execute(p, ...params);
-        });
+        const connection = textChatCommand.Triggered.Connect((origin, text) =>
+            this.parseCommandInvocation(command, Players.WaitForChild(origin.Name) as Player, text),
+        );
         eat(connection, "Disconnect");
         textChatCommand.Parent = TextChatService.WaitForChild("TextChatCommands");
     }
