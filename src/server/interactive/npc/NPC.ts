@@ -68,10 +68,41 @@ export default class NPC extends Identifiable {
     humanoid?: Humanoid;
     rootPart?: BasePart;
     interact?: () => void;
+    prompt?: ProximityPrompt;
+    private readonly movementLocks = new Map<number, true>();
+    private nextMovementLockId = 0;
 
     constructor(public readonly id: string) {
         super(id);
         this.defaultName = id;
+    }
+
+    private updateMovementLockState() {
+        const prompt = this.prompt;
+        if (prompt === undefined) return;
+        const isLocked = !this.movementLocks.isEmpty();
+        prompt.SetAttribute("MovementLocked", isLocked);
+        if (isLocked) {
+            prompt.Enabled = false;
+        } else if (Dialogue.isInteractionEnabled) {
+            prompt.Enabled = true;
+        }
+    }
+
+    private acquireMovementLock() {
+        const token = ++this.nextMovementLockId;
+        this.movementLocks.set(token, true);
+        this.updateMovementLockState();
+        return token;
+    }
+
+    private releaseMovementLock(token?: number) {
+        if (token !== undefined) {
+            this.movementLocks.delete(token);
+        } else {
+            this.movementLocks.clear();
+        }
+        this.updateMovementLockState();
     }
 
     /**
@@ -147,6 +178,8 @@ export default class NPC extends Identifiable {
         prompt.AddTag("NPCPrompt");
         prompt.AddTag("ProximityPrompt");
         prompt.Parent = model;
+        prompt.SetAttribute("MovementLocked", false);
+        this.prompt = prompt;
 
         const updateDisplayName = () => {
             prompt.ObjectText = getDisplayName(humanoid);
@@ -189,6 +222,8 @@ export default class NPC extends Identifiable {
             jumpingConnection.Disconnect();
             displayNameConnection.Disconnect();
             Dialogue.proximityPrompts.delete(prompt);
+            this.releaseMovementLock();
+            this.prompt = undefined;
             prompt.Destroy();
 
             for (const [, animTrack] of this.animTrackPerType) {
@@ -444,6 +479,7 @@ export default class NPC extends Identifiable {
             connection.Disconnect();
         }
         this.runningPathfinds.clear();
+        this.releaseMovementLock();
 
         // Load waypoints and tweens
         let waypoints: PathWaypoint[] | undefined;
@@ -478,12 +514,19 @@ export default class NPC extends Identifiable {
                 },
             };
 
-            this.pathfind(waypoints, () => {
+            const movementLockToken = this.acquireMovementLock();
+
+            const pathConnection = this.pathfind(waypoints, () => {
                 if (playTween) tween.Play();
                 if (requiresPlayer === false) {
                     toCall = true;
                 }
             });
+
+            if (pathConnection === undefined) {
+                this.releaseMovementLock(movementLockToken);
+                return body;
+            }
 
             const connection = RunService.Heartbeat.Connect(() => {
                 for (const character of getAllPlayerCharacters()) {
@@ -505,6 +548,7 @@ export default class NPC extends Identifiable {
                     callback();
                 }
                 connection.Disconnect();
+                this.releaseMovementLock(movementLockToken);
             });
             this.runningPathfinds.add(connection);
             return body;
@@ -678,6 +722,7 @@ export class Dialogue<T extends NPC = NPC> {
      */
     static enableInteraction() {
         for (const proximityPrompt of this.proximityPrompts) {
+            if (proximityPrompt.GetAttribute("MovementLocked") === true) continue;
             proximityPrompt.Enabled = true;
         }
         this.isInteractionEnabled = true;
