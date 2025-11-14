@@ -236,7 +236,6 @@ namespace Packets {
 
     // admin
     export const modifyGame = packet<(param: string) => void>();
-    export const progressEstimationRequest = packet<() => void>();
 
     // marketplace
     export const createListing = packet<(uuid: string, price: number) => boolean>();

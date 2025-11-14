@@ -1,18 +1,17 @@
-import { appendFile, writeFile } from "node:fs/promises";
+import { McpError } from "@modelcontextprotocol/sdk/types.js";
 import { randomUUID } from "node:crypto";
 import path from "node:path";
-import { McpError } from "@modelcontextprotocol/sdk/types.js";
-import { writeFileIfChanged } from "../utils/fileUtils.js";
-import { generateTypeScriptContent } from "../generators/typescriptGenerator.js";
-import { connectionState } from "../state/dataModelState.js";
 import { processDataModelPayload } from "../datamodel/dataModelController.js";
+import { generateTypeScriptContent } from "../generators/typescriptGenerator.js";
 import {
     connectStream as connectMcpStream,
     disconnectStream as disconnectMcpStream,
-    handleToolResponse as handleMcpToolResponse,
     handleToolProgress as handleMcpToolProgress,
+    handleToolResponse as handleMcpToolResponse,
 } from "../mcp/toolBridge.js";
 import { MCP_TOOL_DEFINITIONS, executeMcpTool, statusForMcpErrorCode } from "../mcp/toolHandlers.js";
+import { connectionState } from "../state/dataModelState.js";
+import { writeFileIfChanged } from "../utils/fileUtils.js";
 
 /**
  * Registers all Express route handlers.
@@ -20,9 +19,8 @@ import { MCP_TOOL_DEFINITIONS, executeMcpTool, statusForMcpErrorCode } from "../
  * @param {object} logger - Logger instance (signale)
  * @param {string} repoRoot - Repository root path
  * @param {string} outputPath - Path to services.d.ts output file
- * @param {string} progressionOutputPath - Path to progression markdown output file
  */
-export function registerRoutes(app, logger, repoRoot, outputPath, progressionOutputPath) {
+export function registerRoutes(app, logger, repoRoot, outputPath) {
     const SSE_HEARTBEAT_INTERVAL = 15000;
     const TEST_ACK_TIMEOUT_MS = 10000;
     const TEST_RUN_TIMEOUT_MS = 10 * 60 * 1000;
@@ -182,49 +180,6 @@ export function registerRoutes(app, logger, repoRoot, outputPath, progressionOut
         }
 
         return res.json(response);
-    });
-
-    /**
-     * POST /progression-report
-     * Receives progression reports from the plugin (full content or chunked).
-     */
-    app.post("/progression-report", async (req, res) => {
-        const body = typeof req.body === "object" && req.body !== null ? req.body : {};
-        const { content, chunk, isFirst, isLast } = body;
-
-        const relativePath = path.relative(repoRoot, progressionOutputPath);
-
-        if (typeof content === "string" && content.length > 0) {
-            const normalizedContent = content.endsWith("\n") ? content : `${content}\n`;
-            try {
-                const result = await writeFileIfChanged(progressionOutputPath, normalizedContent, repoRoot);
-                return res.send(result.message);
-            } catch (error) {
-                logger.error(error);
-                return res.status(500).send(`Failed to write to ${relativePath}.`);
-            }
-        }
-
-        if (typeof chunk === "string" && chunk.length > 0) {
-            try {
-                if (isFirst) {
-                    await writeFile(progressionOutputPath, chunk);
-                } else {
-                    await appendFile(progressionOutputPath, chunk);
-                }
-
-                if (isLast && !chunk.endsWith("\n")) {
-                    await appendFile(progressionOutputPath, "\n");
-                }
-
-                return res.send(`Chunk received for ${relativePath}`);
-            } catch (error) {
-                logger.error(error);
-                return res.status(500).send(`Failed to write chunk to ${relativePath}.`);
-            }
-        }
-
-        return res.status(400).send("Missing progression report content.");
     });
 
     app.get("/test/stream", (req, res) => {

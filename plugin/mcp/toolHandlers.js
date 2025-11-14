@@ -1,9 +1,6 @@
-import fs from "node:fs/promises";
-import path from "node:path";
-import { fileURLToPath } from "node:url";
 import { ErrorCode, McpError } from "@modelcontextprotocol/sdk/types.js";
-import { dataModelState, connectionState } from "../state/dataModelState.js";
-import { normalizePathSegments, findNodeBySegments, cloneNodeLimited } from "../datamodel/datamodelUtils.js";
+import { cloneNodeLimited, findNodeBySegments, normalizePathSegments } from "../datamodel/datamodelUtils.js";
+import { connectionState, dataModelState } from "../state/dataModelState.js";
 import {
     isStreamConnected as isMcpStreamConnected,
     requestToolExecution as requestMcpToolExecution,
@@ -12,11 +9,6 @@ import {
 export const WAIT_FOR_PLUGIN_TIMEOUT_MS = 4000;
 export const WAIT_FOR_PLUGIN_TIMEOUT_SECONDS = WAIT_FOR_PLUGIN_TIMEOUT_MS / 1000;
 const WAIT_FOR_PLUGIN_POLL_MS = 200;
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const REPO_ROOT = path.resolve(__dirname, "..", "..");
-const INVOKER_PATH = path.resolve(REPO_ROOT, "test", "invoker.lua");
 
 export const MCP_TOOL_DEFINITIONS = [
     {
@@ -76,35 +68,6 @@ export const MCP_TOOL_DEFINITIONS = [
             required: ["code"],
         },
     },
-    {
-        name: "run_tests",
-        description: "Run tests using `shared/hamster/runTests`.",
-        inputSchema: {
-            type: "object",
-            properties: {
-                timeoutMs: {
-                    type: "number",
-                    description:
-                        "Optional timeout in milliseconds for the plugin execution request (defaults to 30000, max 120000).",
-                },
-            },
-        },
-    },
-    {
-        name: "estimate_item_progression",
-        description:
-            "Calculate time-to-obtain details for a single item using the ProgressionEstimationService simulation.",
-        inputSchema: {
-            type: "object",
-            properties: {
-                itemId: {
-                    type: "string",
-                    description: "The unique item id from shared/items/Items to estimate progression for.",
-                },
-            },
-            required: ["itemId"],
-        },
-    },
 ];
 
 export function statusForMcpErrorCode(code) {
@@ -125,15 +88,6 @@ export function statusForMcpErrorCode(code) {
 function createMcpError(code, message, overrideStatus) {
     const httpStatus = overrideStatus ?? statusForMcpErrorCode(code);
     return new McpError(code, message, { httpStatus });
-}
-
-async function readInvokerScript() {
-    try {
-        return await fs.readFile(INVOKER_PATH, "utf8");
-    } catch (error) {
-        const message = typeof error?.message === "string" ? error.message : String(error);
-        throw createMcpError(ErrorCode.InternalError, `Failed to read invoker.lua: ${message}`);
-    }
 }
 
 export async function waitForPluginConnection(timeoutMs = WAIT_FOR_PLUGIN_TIMEOUT_MS) {
@@ -351,62 +305,6 @@ export async function executeMcpTool(name, rawArgs, options = {}) {
 
             try {
                 return await requestMcpToolExecution("execute_luau", requestArgs, executionOptions);
-            } catch (error) {
-                wrapToolExecutionError(error);
-            }
-
-            return null;
-        }
-        case "run_tests": {
-            await ensureMcpConnectionOrThrow("Launch Roblox Studio with the tooling plugin to run invoker.lua.");
-
-            let invokerCode;
-            try {
-                invokerCode = await readInvokerScript();
-            } catch (error) {
-                if (error instanceof McpError) {
-                    throw error;
-                }
-
-                const message = typeof error?.message === "string" ? error.message : String(error);
-                throw createMcpError(ErrorCode.InternalError, `Failed to read invoker.lua: ${message}`);
-            }
-
-            const timeoutArg = Number(args.timeoutMs);
-            const executionOptions = {};
-            if (Number.isFinite(timeoutArg) && timeoutArg > 0) {
-                executionOptions.timeoutMs = Math.min(Math.floor(timeoutArg), 120000);
-            }
-
-            if (typeof onProgress === "function") {
-                executionOptions.onProgress = onProgress;
-            }
-
-            try {
-                return await requestMcpToolExecution("run_tests", { code: invokerCode }, executionOptions);
-            } catch (error) {
-                wrapToolExecutionError(error);
-            }
-
-            return null;
-        }
-        case "estimate_item_progression": {
-            const itemId = typeof args.itemId === "string" ? args.itemId : "";
-            if (!itemId) {
-                throw createMcpError(ErrorCode.InvalidRequest, "itemId parameter is required", 400);
-            }
-
-            await ensureMcpConnectionOrThrow(
-                "Launch Roblox Studio with the tooling plugin to enable progression estimates.",
-            );
-
-            const executionOptions = {};
-            if (typeof onProgress === "function") {
-                executionOptions.onProgress = onProgress;
-            }
-
-            try {
-                return await requestMcpToolExecution("estimate_item_progression", { itemId }, executionOptions);
             } catch (error) {
                 wrapToolExecutionError(error);
             }

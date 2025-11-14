@@ -153,18 +153,6 @@ export default function SimulationCommandInterface() {
                 }
             }
 
-            // Check for Shift+K shortcut to run Packets.progressEstimationRequest.toServer()
-            if (input.KeyCode === Enum.KeyCode.K) {
-                if (
-                    Environment.UserInput.IsKeyDown(Enum.KeyCode.LeftShift) ||
-                    Environment.UserInput.IsKeyDown(Enum.KeyCode.RightShift)
-                ) {
-                    Packets.progressEstimationRequest.toServer();
-                    print("Executed Packets.progressEstimationRequest.toServer() (Shift+K shortcut)");
-                    return;
-                }
-            }
-
             // Toggle with F12 or backtick key
             if (input.KeyCode === Enum.KeyCode.F12 || input.KeyCode === Enum.KeyCode.Backquote) {
                 setIsVisible((prev) => {

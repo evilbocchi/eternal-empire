@@ -422,36 +422,6 @@ local function runLuauCode(code, chunkName, options)
     }
 end
 
-local function handleEstimateItemTool(arguments)
-    local itemId
-    if type(arguments) == "table" then
-        local value = arguments.itemId
-        if type(value) == "string" and value ~= "" then
-            itemId = value
-        end
-    end
-
-    if not itemId then
-        return false, "itemId parameter is required"
-    end
-
-    local estimator = rawget(_G, "ProgressionEstimateItem")
-    if type(estimator) ~= "function" then
-        return false, "ProgressionEstimateItem global is not available"
-    end
-
-    local ok, result = pcall(estimator, itemId)
-    if not ok then
-        return false, tostring(result)
-    end
-
-    if result == nil then
-        return false, "Item not found or estimate unavailable"
-    end
-
-    return true, result
-end
-
 local function handleExecuteLuauTool(arguments, requestId)
     if type(arguments) ~= "table" then
         return false, "Arguments table is required"
@@ -617,21 +587,13 @@ local function handleRunTestsTool(arguments, requestId)
         end
     end
 
-    if #failedSuites == 0 then
-        failedSuites = nil
-    end
-
-    if #failedTests == 0 then
-        failedTests = nil
-    end
-
     local enriched = {
         durationSeconds = payload.durationSeconds,
         stdout = payload.stdout,
         success = overallSuccess == nil and true or overallSuccess == true,
         summary = summary,
-        failedSuites = failedSuites,
-        failedTests = failedTests,
+        failedSuites = #failedSuites > 0 and failedSuites or nil,
+        failedTests = #failedTests > 0 and failedTests or nil,
         rawResultJson = rawResultJson,
     }
 
@@ -653,9 +615,7 @@ local function handleToolCommand(payload)
     local arguments = payload.arguments
 
     local success, resultOrError
-    if toolName == "estimate_item_progression" then
-        success, resultOrError = handleEstimateItemTool(arguments)
-    elseif toolName == "execute_luau" then
+    if toolName == "execute_luau" then
         success, resultOrError = handleExecuteLuauTool(arguments, requestId)
     elseif toolName == "run_tests" then
         success, resultOrError = handleRunTestsTool(arguments, requestId)

@@ -14,10 +14,10 @@
  */
 
 import { getAllInstanceInfo } from "@antivivi/vrldk";
-import { OnStart, Service } from "@flamework/core";
+import { Service } from "@flamework/core";
 import Difficulty from "@rbxts/ejt";
 import { OnoeNum } from "@rbxts/serikanum";
-import { HttpService, RunService, Workspace } from "@rbxts/services";
+import { HttpService, Workspace } from "@rbxts/services";
 import StringBuilder from "@rbxts/stringbuilder";
 import { Environment } from "@rbxts/ui-labs";
 import { $env } from "rbxts-transform-env";
@@ -26,7 +26,6 @@ import RevenueService from "server/services/RevenueService";
 import CurrencyService from "server/services/data/CurrencyService";
 import DataService from "server/services/data/DataService";
 import NamedUpgradeService from "server/services/data/NamedUpgradeService";
-import Packets from "shared/Packets";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import { CURRENCIES } from "shared/currency/CurrencyDetails";
 import CurrencyMap from "shared/currency/CurrencyMap";
@@ -37,21 +36,16 @@ import Furnace from "shared/item/traits/Furnace";
 import { IOperative } from "shared/item/traits/Operative";
 import Charger from "shared/item/traits/generator/Charger";
 import Generator from "shared/item/traits/generator/Generator";
-import Upgrader from "shared/item/traits/upgrader/Upgrader";
 import VoidSkyUpgrader from "shared/items/0/happylike/VoidSkyUpgrader";
 import SlamoStore from "shared/items/0/millisecondless/SlamoStore";
 import Items from "shared/items/Items";
 import AwesomeManumaticPurifier from "shared/items/negative/felixthea/AwesomeManumaticPurifier";
-import NamedUpgrades from "shared/namedupgrade/NamedUpgrades";
-
-const FURNACE_UPGRADES = NamedUpgrades.getUpgrades("Furnace");
 
 declare global {
     interface Assets {}
 
     interface _G {
         ProgressEstimated?: (message: string) => void;
-        ProgressionEstimateItem?: (itemId: string) => ItemEstimateSummary | undefined;
     }
 }
 
@@ -116,7 +110,7 @@ const stripOperativeToOneCurrency = (operative: IOperative, currency: Currency) 
  * Service that estimates progression, calculates optimal paths, and posts reports.
  */
 @Service()
-export default class ProgressionEstimationService implements OnStart {
+export default class ProgressionEstimationService {
     /**
      * Map of Droplet to their corresponding model instance in Workspace.
      * Used for simulating droplet upgrades and value calculations.
@@ -902,18 +896,6 @@ export default class ProgressionEstimationService implements OnStart {
         });
 
         print(`Calculated in ${dt} seconds.`);
-    }
-
-    /**
-     * Runs the progression estimation and posts the report if in the PROGRESSION empire.
-     */
-    onStart() {
-        Environment.OriginalG.ProgressionEstimateItem = (itemId: string) => this.getSingleItemEstimate(itemId);
-        Packets.progressEstimationRequest.fromClient(() => {
-            if (RunService.IsStudio()) {
-                this.estimate();
-            }
-        });
     }
 
     /**

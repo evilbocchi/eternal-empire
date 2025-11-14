@@ -26,10 +26,9 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const REPO_ROOT = path.resolve(__dirname, "..");
 const OUTPUT = path.resolve(REPO_ROOT, "src/services.d.ts");
-const PROGRESSION_OUTPUT = path.resolve(REPO_ROOT, "PROGRESS_ESTIMATION.md");
 
 // Register Express routes
-registerRoutes(app, logger, REPO_ROOT, OUTPUT, PROGRESSION_OUTPUT);
+registerRoutes(app, logger, REPO_ROOT, OUTPUT);
 
 // Start Express server
 const server = app.listen(PORT, () => {
