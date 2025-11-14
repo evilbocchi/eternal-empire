@@ -185,6 +185,41 @@ describe("ItemService", () => {
         model.Destroy();
     });
 
+    it("does not break excavation or bonus difficulty items", () => {
+        const items = Server.Data.empireData.items;
+        const testCases = [
+            { placementId: "ExcavationRepair", itemId: "Iron" },
+            { placementId: "BonusRepair", itemId: "CraftingShop" },
+        ];
+
+        for (const { placementId, itemId } of testCases) {
+            const placedItem: PlacedItem = {
+                item: itemId,
+                posX: 0,
+                posY: 0,
+                posZ: 0,
+                rotX: 0,
+                rotY: 0,
+                rotZ: 0,
+                area: "BarrenIslands",
+            };
+            items.worldPlaced.set(placementId, placedItem);
+
+            const model = new Instance("Model") as Model;
+            model.Name = placementId;
+            model.Parent = PLACED_ITEMS_FOLDER;
+
+            const modelInfo = getAllInstanceInfo(model);
+            Server.Item.modelPerPlacementId.set(placementId, model);
+
+            Server.Item.beginBreakdown([placementId]);
+            expect(Server.Item.getBrokenPlacedItems().has(placementId)).toBeFalsy();
+            expect(modelInfo.broken).toBeFalsy();
+
+            model.Destroy();
+        }
+    });
+
     it("ensures all placed item models and their descendants are anchored", () => {
         const items = Server.Data.empireData.items;
 

@@ -358,15 +358,11 @@ export default class Item {
 
     /**
      * Tags the item with its intended progression tier. Difficulty influences default
-     * inventory ordering and which reset layer it persists through.
+     * inventory ordering, and special difficulties (Miscellaneous, Excavation, Bonuses) auto-apply
+     * persistence and unbreakable traits.
      *
      * @param difficulty A `Difficulty` enum value describing the recommended stage.
      * @returns The item instance.
-     *
-     * @example
-     * ```ts
-     * item.setDifficulty(Difficulty.Miscellaneous); // pushes to persistence queues automatically
-     * ```
      */
     setDifficulty(difficulty: Difficulty): this {
         this.difficulty = difficulty;
@@ -374,8 +370,9 @@ export default class Item {
             difficulty === Difficulty.Miscellaneous ||
             difficulty === Difficulty.Excavation ||
             difficulty === Difficulty.Bonuses
-        )
-            this.persists();
+        ) {
+            this.persists().unbreakable();
+        }
         if (this.layoutOrder === -100000) {
             this.layoutOrder = difficulty.layoutRating ?? 0;
         }
