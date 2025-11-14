@@ -60,6 +60,7 @@ const suppressedPatterns = [
     "Initialized ",
     "Weather manually set to:",
     "Automatic weather generation resumed",
+    "gave shop",
 ];
 jest.spyOn(jest.globalEnv, "print").mockImplementation((...args: unknown[]) => {
     const message = tostring(args[0]);

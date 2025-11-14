@@ -223,7 +223,7 @@ export default class DataService implements OnStart, OnPlayerAdded {
                     rotZ: 0,
                     area: "BarrenIslands",
                 });
-                warn("gave shop");
+                print("gave shop");
             }
         }
 

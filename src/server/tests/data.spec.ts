@@ -9,39 +9,6 @@ beforeAll(() => {
 });
 
 describe("loading", () => {
-    beforeEach(() => {
-        // Ensure shop exists for tests that depend on it
-        // This handles the case where profile state persists between test runs
-        const items = Server.Data.empireData.items;
-        const inventoryAmount = items.inventory.get("ClassLowerNegativeShop");
-        const boughtAmount = items.bought.get("ClassLowerNegativeShop");
-        let hasShop =
-            (inventoryAmount !== undefined && inventoryAmount > 0) || (boughtAmount !== undefined && boughtAmount > 0);
-
-        if (!hasShop) {
-            for (const [_, placedItem] of items.worldPlaced) {
-                if (placedItem.item === "ClassLowerNegativeShop") {
-                    hasShop = true;
-                    break;
-                }
-            }
-        }
-
-        // If still no shop, add it to worldPlaced
-        if (!hasShop) {
-            items.worldPlaced.set("STARTING", {
-                item: "ClassLowerNegativeShop",
-                posX: 16.5,
-                posY: 3.5,
-                posZ: 0,
-                rotX: 0,
-                rotY: 0,
-                rotZ: 0,
-                area: "BarrenIslands",
-            });
-        }
-    });
-
     it("loads data", () => {
         expect(Server.Data).toBeDefined();
         expect(Server.Data.empireData).toBeDefined();
