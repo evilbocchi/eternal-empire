@@ -29,7 +29,6 @@ import { log } from "server/services/permissions/LogService";
 import PermissionService from "server/services/permissions/PermissionService";
 import { CHALLENGE_PER_ID } from "shared/Challenge";
 import { PLACED_ITEMS_FOLDER } from "shared/constants";
-import { IS_EDIT } from "shared/Context";
 import eat from "shared/hamster/eat";
 import Item from "shared/item/Item";
 import {
@@ -1002,7 +1001,7 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
             }
             ++itemCount;
         });
-        if (!IS_EDIT) print(`Initialized ${itemCount} items.`);
+        print(`Initialized ${itemCount} items.`);
 
         // Ensure all placed items have models
         this.fullUpdatePlacedItemsModels();

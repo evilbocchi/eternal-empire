@@ -5,9 +5,68 @@ import readline from "readline";
 import path from "path";
 import signale from "signale";
 
-const logger = new signale.Signale();
+// Configure logger with suppressed debug messages
+const logger = new signale.Signale({
+    logLevel: "info",
+});
 
-dotenv.config();
+// Setup file logging
+const logsDir = path.join(import.meta.dirname, "..", "logs");
+if (!fs.existsSync(logsDir)) {
+    fs.mkdirSync(logsDir, { recursive: true });
+}
+
+let fileLogger = null;
+function initFileLogger(version) {
+    const logFileName = version ? `test_${version}.log` : `test_latest.log`;
+    const logFilePath = path.join(logsDir, logFileName);
+    const logFd = fs.openSync(logFilePath, "a");
+
+    fileLogger = {
+        write: (message, level = "info") => {
+            const timestamp = new Date().toISOString();
+            const logLine = `[${timestamp}] [${level.toUpperCase()}] ${message}\n`;
+            // Use synchronous write to ensure immediate flush
+            fs.writeSync(logFd, logLine);
+        },
+        fd: logFd,
+        close: () => {
+            fs.closeSync(logFd);
+        },
+    };
+
+    fileLogger.write(`Test run started (mode: ${STUDIO_TEST_MODE})`, "info");
+    return fileLogger;
+}
+
+function log(message, level = "info") {
+    if (fileLogger) {
+        fileLogger.write(message, level);
+    }
+
+    switch (level) {
+        case "debug":
+            // Debug messages only go to file, not console
+            break;
+        case "error":
+            logger.error(message);
+            break;
+        case "warn":
+            logger.warn(message);
+            break;
+        case "info":
+            logger.info(message);
+            break;
+        case "log":
+            console.log(message);
+            break;
+        default:
+            logger.log(message);
+            break;
+    }
+}
+
+dotenv.config({ quiet: true });
 
 // Add default headers to all axios requests to help avoid WAF blocks
 axios.defaults.headers.common["User-Agent"] = "Node.js/Roblox-Test-Runner";
@@ -34,7 +93,7 @@ const PLACE_ID = process.env.LUAU_EXECUTION_PLACE_ID;
 
 const scriptPath = path.join(import.meta.dirname, "invoker.lua");
 
-console.log(`Reading Luau script from: ${scriptPath}`);
+log(`Reading Luau script from: ${scriptPath}`, "debug");
 const luauScript = fs.readFileSync(scriptPath, "utf8");
 
 function transformLuauPath(line) {
@@ -128,9 +187,8 @@ function analyzeStudioResultPayload(result, detectedFailures) {
         const passed = summary.successCount ?? summary.passedSuites ?? 0;
         const failed = summary.failureCount ?? summary.failedSuites ?? 0;
         const skipped = summary.skippedCount ?? summary.pendingSuites ?? 0;
-        logger.info(
-            `Studio summary: ${passed} passed, ${failed} failed, ${skipped} skipped over ${summary.totalTests ?? "?"} tests.`,
-        );
+        const summaryMsg = `Studio summary: ${passed} passed, ${failed} failed, ${skipped} skipped over ${summary.totalTests ?? "?"} tests.`;
+        log(summaryMsg, "info");
     }
 
     const baseError =
@@ -197,7 +255,9 @@ async function consumeNdjsonStream(stream) {
             try {
                 event = JSON.parse(trimmed);
             } catch {
-                console.log(transformLuauPath(trimmed));
+                const transformed = transformLuauPath(trimmed);
+                console.log(transformed);
+                log(transformed, "info");
                 return;
             }
 
@@ -214,10 +274,13 @@ async function consumeNdjsonStream(stream) {
 
                 if (level === "error") {
                     console.error(transformed);
+                    log(transformed, "error");
                 } else if (level === "warn") {
                     console.warn(transformed);
+                    log(transformed, "warn");
                 } else {
                     console.log(transformed);
+                    log(transformed, "info");
                 }
             } else if (event.type === "result") {
                 if (event.result && typeof event.result === "object") {
@@ -261,7 +324,7 @@ async function consumeNdjsonStream(stream) {
 }
 
 async function runStudioTests() {
-    logger.info(`Checking Studio MCP server at ${STUDIO_TEST_SERVER}`);
+    log(`Checking Studio MCP server at ${STUDIO_TEST_SERVER}`, "info");
 
     let response;
     try {
@@ -284,17 +347,17 @@ async function runStudioTests() {
         const statusText = error.response?.statusText;
 
         if (status === 503) {
-            logger.warn("Studio MCP server reachable but plugin is not connected; skipping Studio tests.");
+            log("Studio MCP server reachable but plugin is not connected; skipping Studio tests.", "warn");
             return null;
         }
 
         if (error.code === "ECONNREFUSED" || error.code === "ENOTFOUND") {
-            logger.warn(`Studio MCP server not reachable (${error.code}); skipping Studio tests.`);
+            log(`Studio MCP server not reachable (${error.code}); skipping Studio tests.`, "warn");
             return null;
         }
 
         if (status === 404) {
-            logger.warn("Studio MCP server does not expose the run_tests tool yet; skipping Studio tests.");
+            log("Studio MCP server does not expose the run_tests tool yet; skipping Studio tests.", "warn");
             return null;
         }
 
@@ -361,7 +424,8 @@ async function runStudioTests() {
                 continue;
             }
 
-            console.log(transformLuauPath(line));
+            const transformed = transformLuauPath(line);
+            log(transformed, "log");
             updateFailureDetection(line, tracker);
         }
     }
@@ -370,11 +434,15 @@ async function runStudioTests() {
 }
 
 async function createTask(apiKey, scriptContents, universeId, placeId, version = null) {
+    log(
+        `Creating task for place ${placeId} in universe ${universeId}${version ? ` (version ${version})` : ""}`,
+        "debug",
+    );
     try {
         const url = version
             ? `https://apis.roblox.com/cloud/v2/universes/${universeId}/places/${placeId}/versions/${version}/luau-execution-session-tasks`
             : `https://apis.roblox.com/cloud/v2/universes/${universeId}/places/${placeId}/luau-execution-session-tasks`;
-        
+
         const response = await axios({
             method: "post",
             url: url,
@@ -390,13 +458,13 @@ async function createTask(apiKey, scriptContents, universeId, placeId, version =
 
         return response.data;
     } catch (error) {
-        logger.error("Error creating task:");
-        logger.error("Status:", error.response?.status);
-        logger.error("Status Text:", error.response?.statusText);
-        logger.error("Data:", error.response?.data);
-        logger.error("Request URL:", error.config?.url);
+        log("Error creating task:", "error");
+        log(`Status: ${error.response?.status}`, "error");
+        log(`Status Text: ${error.response?.statusText}`, "error");
+        log(`Data: ${JSON.stringify(error.response?.data)}`, "error");
+        log(`Request URL: ${error.config?.url}`, "error");
         if (error.response?.status === 403) {
-            logger.error("This may be a WAF blocked request or authentication issue");
+            log("This may be a WAF blocked request or authentication issue", "error");
         }
         throw error;
     }
@@ -405,10 +473,13 @@ async function createTask(apiKey, scriptContents, universeId, placeId, version =
 async function pollForTaskCompletion(apiKey, taskPath) {
     let task = null;
 
-    logger.info(`Polling task status at: https://apis.roblox.com/${taskPath}`);
+    log(`Polling task status at: https://apis.roblox.com/${taskPath}`, "debug");
+
+    const start = Date.now();
+    let lastLoggedState = null;
 
     while (!task || (task.state !== "COMPLETE" && task.state !== "FAILED")) {
-        await new Promise((resolve) => setTimeout(resolve, 2000));
+        await new Promise((resolve) => setTimeout(resolve, 300));
 
         try {
             const response = await axios.get(`https://apis.roblox.com/cloud/v2/${taskPath}`, {
@@ -418,16 +489,31 @@ async function pollForTaskCompletion(apiKey, taskPath) {
             });
 
             task = response.data;
-            console.log(`Task state: ${task.state}`);
+            const elapsed = ((Date.now() - start) / 1000).toFixed(1);
+
+            // Only log state changes to file, not every poll
+            if (task.state !== lastLoggedState) {
+                log(`Task state: ${task.state} (after ${elapsed}s)`, "debug");
+                lastLoggedState = task.state;
+            }
+
+            // Show live status on console only (not in file log)
+            const statusLine = `Task state: ${task.state} (after ${elapsed}s)`;
+            process.stdout.write(`\r${statusLine}${" ".repeat(Math.max(0, 80 - statusLine.length))}`);
         } catch (error) {
-            logger.warn("Error polling task completion:");
-            logger.warn("Status:", error.response?.status);
-            logger.warn("Data:", error.response?.data);
+            log("Error polling task completion:", "warn");
+            log(`Status: ${error.response?.status}`, "warn");
+            log(`Data: ${JSON.stringify(error.response?.data)}`, "warn");
             if (error.response?.status === 403) {
-                logger.warn("WAF may be blocking polling requests");
+                log("WAF may be blocking polling requests", "warn");
             }
         }
     }
+
+    // Clear polling status line and print newline to console
+    process.stdout.write("\r" + " ".repeat(80) + "\r");
+
+    log(`Task ${task.state.toLowerCase()}: ${task.path}`, "debug");
 
     return task;
 }
@@ -442,11 +528,11 @@ async function getTaskLogs(apiKey, taskPath) {
 
         return response.data;
     } catch (error) {
-        logger.error("Error getting task logs:");
-        logger.error("Status:", error.response?.status);
-        logger.error("Data:", error.response?.data);
+        log("Error getting task logs:", "error");
+        log(`Status: ${error.response?.status}`, "error");
+        log(`Data: ${JSON.stringify(error.response?.data)}`, "error");
         if (error.response?.status === 403) {
-            logger.error("WAF may be blocking log retrieval requests");
+            log("WAF may be blocking log retrieval requests", "error");
         }
         throw error;
     }
@@ -454,14 +540,14 @@ async function getTaskLogs(apiKey, taskPath) {
 
 async function runLuauTask(universeId, placeId, scriptContents, version = null) {
     if (version) {
-        logger.info(`Executing Luau task on version ${version}`);
+        log(`Executing Luau task on version ${version}`, "debug");
     } else {
-        logger.info("Executing Luau task on latest published version");
+        log("Executing Luau task on latest published version", "debug");
     }
 
     try {
         const task = await createTask(EXECUTION_KEY, scriptContents, universeId, placeId, version);
-        logger.info(`Created task: ${task.path}`);
+        log(`Created task: ${task.path}`, "debug");
 
         const completedTask = await pollForTaskCompletion(EXECUTION_KEY, task.path);
         const logs = await getTaskLogs(EXECUTION_KEY, task.path);
@@ -472,7 +558,8 @@ async function runLuauTask(universeId, placeId, scriptContents, version = null) 
         for (const taskLogs of logs.luauExecutionSessionTaskLogs) {
             const messages = taskLogs.messages;
             for (const message of messages) {
-                logger.log(transformLuauPath(message));
+                const transformed = transformLuauPath(message);
+                log(transformed, "log");
 
                 // Check for test result summary line (e.g., "36 passed, 0 failed, 0 skipped")
                 const testResultMatch = message.match(/(\d+)\s+passed,\s+(\d+)\s+failed,\s+(\d+)\s+skipped/);
@@ -496,29 +583,30 @@ async function runLuauTask(universeId, placeId, scriptContents, version = null) 
 
         if (completedTask.state === "COMPLETE") {
             if (failedTests > 0) {
-                logger.error(`Luau task completed but ${failedTests} test(s) failed`);
+                log(`Luau task completed but ${failedTests} test(s) failed`, "error");
                 return false;
             } else {
+                log("Luau task completed successfully", "debug");
                 return true;
             }
         } else {
-            logger.error(completedTask.error.code, completedTask.error.message);
-            logger.error("Luau task failed");
+            log(`${completedTask.error.code} ${completedTask.error.message}`, "error");
+            log("Luau task failed", "error");
             return false;
         }
     } catch (error) {
-        logger.error("Error executing Luau task:", error.response?.data || error.message);
+        log(`Error executing Luau task: ${error.response?.data || error.message}`, "error");
         return false;
     }
 }
 
 async function runCloudTests() {
     if (!EXECUTION_KEY || !UNIVERSE_ID || !PLACE_ID) {
-        logger.warn("Skipping cloud tests: Required environment variables not set");
-        logger.warn("Missing:");
-        if (!EXECUTION_KEY) logger.warn("  - LUAU_EXECUTION_KEY");
-        if (!UNIVERSE_ID) logger.warn("  - LUAU_EXECUTION_UNIVERSE_ID");
-        if (!PLACE_ID) logger.warn("  - LUAU_EXECUTION_PLACE_ID");
+        log("Skipping cloud tests: Required environment variables not set", "warn");
+        log("Missing:", "warn");
+        if (!EXECUTION_KEY) log("  - LUAU_EXECUTION_KEY", "warn");
+        if (!UNIVERSE_ID) log("  - LUAU_EXECUTION_UNIVERSE_ID", "warn");
+        if (!PLACE_ID) log("  - LUAU_EXECUTION_PLACE_ID", "warn");
         return null;
     }
 
@@ -526,13 +614,14 @@ async function runCloudTests() {
         const success = await runLuauTask(UNIVERSE_ID, PLACE_ID, luauScript, PLACE_VERSION);
         return success;
     } catch (error) {
-        logger.error("Error in cloud test execution:", error.response?.data || error.message || error);
+        log(`Error in cloud test execution: ${error.response?.data || error.message || error}`, "error");
         return false;
     }
 }
 
 async function main() {
-    logger.info(`Test mode: ${STUDIO_TEST_MODE}`);
+    initFileLogger(PLACE_VERSION);
+    log(`Test mode: ${STUDIO_TEST_MODE}`, "info");
     let studioResult = null;
 
     if (STUDIO_TEST_MODE !== "cloud") {
@@ -540,7 +629,7 @@ async function main() {
             studioResult = await runStudioTests();
         } catch (error) {
             const message = error?.message ?? String(error);
-            logger.error(`Studio test runner encountered an error: ${message}`);
+            log(`Studio test runner encountered an error: ${message}`, "error");
             studioResult = {
                 success: false,
                 summary: null,
@@ -550,14 +639,18 @@ async function main() {
 
         if (studioResult) {
             if (studioResult.success) {
+                log("Studio tests passed", "debug");
+                if (fileLogger) fileLogger.close();
                 process.exit(0);
             } else {
                 const reason = studioResult.error ? ` (${studioResult.error})` : "";
-                logger.error(`Studio tests failed${reason}`);
+                log(`Studio tests failed${reason}`, "error");
+                if (fileLogger) fileLogger.close();
                 process.exit(1);
             }
         } else if (STUDIO_TEST_MODE === "studio") {
-            logger.error("Studio test runner was requested (STUDIO_TEST_MODE=studio) but is unavailable.");
+            log("Studio test runner was requested (STUDIO_TEST_MODE=studio) but is unavailable.", "error");
+            if (fileLogger) fileLogger.close();
             process.exit(1);
         }
     }
@@ -566,21 +659,27 @@ async function main() {
         const cloudResult = await runCloudTests();
 
         if (cloudResult === true) {
+            log("Cloud tests passed", "debug");
+            if (fileLogger) fileLogger.close();
             process.exit(0);
         } else if (cloudResult === false) {
-            logger.error("Cloud tests failed.");
+            log("Cloud tests failed.", "error");
+            if (fileLogger) fileLogger.close();
             process.exit(1);
         } else if (STUDIO_TEST_MODE === "cloud") {
-            logger.warn("Cloud tests requested, but environment variables are missing; skipping.");
+            log("Cloud tests requested, but environment variables are missing; skipping.", "warn");
+            if (fileLogger) fileLogger.close();
             process.exit(0);
         }
     }
 
-    logger.warn("No test runner executed; skipping tests.");
+    log("No test runner executed; skipping tests.", "warn");
+    if (fileLogger) fileLogger.close();
     process.exit(0);
 }
 
 main().catch((error) => {
-    logger.error("Unhandled error during test execution:", error);
+    log(`Unhandled error during test execution: ${error}`, "error");
+    if (fileLogger) fileLogger.close();
     process.exit(1);
 });

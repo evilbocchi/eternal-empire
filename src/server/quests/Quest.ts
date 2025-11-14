@@ -9,7 +9,6 @@ import Signal from "@antivivi/lemon-signal";
 import { AnalyticsService, Players, ReplicatedStorage } from "@rbxts/services";
 import NPC, { Dialogue } from "server/interactive/npc/NPC";
 import { Server } from "shared/api/APIExpose";
-import { IS_EDIT } from "shared/Context";
 import ThisEmpire from "shared/data/ThisEmpire";
 import eat from "shared/hamster/eat";
 import { Identifiable, ModuleRegistry } from "shared/hamster/ModuleRegistry";
@@ -195,9 +194,7 @@ export class Stage {
 export default class Quest extends Identifiable {
     static readonly REGISTRY = new ModuleRegistry<Quest>(script.Parent!, new Set([script])).setLoadCallback(
         (questPerId) => {
-            if (!IS_EDIT) {
-                print(`Loaded ${questPerId.size()} quests`);
-            }
+            print(`Loaded ${questPerId.size()} quests`);
 
             const questInfos = new Map<string, QuestInfo>();
 

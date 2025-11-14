@@ -1,4 +1,4 @@
-import { beforeAll, beforeEach, describe, expect, it } from "@rbxts/jest-globals";
+import { beforeAll, beforeEach, describe, expect, it, jest } from "@rbxts/jest-globals";
 import { OnoeNum } from "@rbxts/serikanum";
 import { Server } from "shared/api/APIExpose";
 import fixDuplicatedItemsData from "shared/data/loading/fixDuplicatedItemsData";
@@ -65,6 +65,8 @@ describe("loading", () => {
 });
 describe("duplication", () => {
     it("removes excess in inventory", () => {
+        jest.spyOn(jest.globalEnv, "warn").mockImplementation(() => {});
+
         const duped = {
             inventory: new Map<string, number>([
                 ["ClassLowerNegativeShop", 1],
@@ -101,6 +103,8 @@ describe("duplication", () => {
     });
 
     it("removes excess in bought", () => {
+        jest.spyOn(jest.globalEnv, "warn").mockImplementation(() => {});
+
         const duped = {
             inventory: new Map<string, number>([
                 ["ClassLowerNegativeShop", 1],

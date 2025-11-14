@@ -10,7 +10,7 @@ const logger = new signale.Signale();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-dotenv.config();
+dotenv.config({ quiet: true });
 
 // Environment variables
 const API_KEY = process.env.LUAU_EXECUTION_KEY;

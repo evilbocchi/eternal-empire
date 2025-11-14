@@ -1,6 +1,5 @@
-import { FletchetteEnvironment } from "@rbxts/fletchette";
 import { Janitor } from "@rbxts/janitor";
-import { afterAll, beforeAll, expect } from "@rbxts/jest-globals";
+import { afterAll, beforeAll, expect, jest } from "@rbxts/jest-globals";
 import { OnoeNum } from "@rbxts/serikanum";
 import cleanupSimulation from "shared/hamster/cleanupSimulation";
 import { eater } from "shared/hamster/eat";
@@ -53,6 +52,21 @@ expect.extend({
             };
         }
     },
+});
+
+// Suppress noisy console output during tests
+const suppressedPatterns = [
+    "Weather changed to:",
+    "Initialized ",
+    "Weather manually set to:",
+    "Automatic weather generation resumed",
+];
+jest.spyOn(jest.globalEnv, "print").mockImplementation((...args: unknown[]) => {
+    const message = tostring(args[0]);
+    const shouldSuppress = suppressedPatterns.some((pattern) => message.find(pattern)[0] !== undefined);
+    if (!shouldSuppress) {
+        print(...args);
+    }
 });
 
 beforeAll(() => {

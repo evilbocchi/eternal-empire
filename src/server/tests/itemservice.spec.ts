@@ -1,5 +1,5 @@
 import { getAllInstanceInfo } from "@antivivi/vrldk";
-import { beforeEach, describe, expect, it } from "@rbxts/jest-globals";
+import { beforeEach, describe, expect, it, jest } from "@rbxts/jest-globals";
 import { OnoeNum } from "@rbxts/serikanum";
 import { Server } from "shared/api/APIExpose";
 import { PLACED_ITEMS_FOLDER } from "shared/constants";
@@ -131,6 +131,11 @@ describe("ItemService", () => {
     });
 
     it("repairs broken items and applies protection tiers", () => {
+        const mockPrint = jest.spyOn(jest.globalEnv, "print");
+        mockPrint.mockImplementation((msg) => {
+            expect(msg).toMatch("Applying repair boost to item");
+        });
+
         const items = Server.Data.empireData.items;
         const placementId = "TestRepair";
 
