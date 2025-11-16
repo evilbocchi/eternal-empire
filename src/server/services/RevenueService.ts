@@ -298,6 +298,11 @@ export default class RevenueService {
             this.droplet = droplet;
         }
 
+        /**
+         * Whether to treat this droplet as being in a Cauldron for upgrade purposes.
+         *
+         * Cauldrons disable droplet Upgraders unless the droplet is a Sky Droplet.
+         */
         public markAsCauldron() {
             this.isCauldron = true;
         }

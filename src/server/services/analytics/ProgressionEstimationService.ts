@@ -823,6 +823,128 @@ export default class ProgressionEstimationService {
             resetLayersSimulated,
         };
 
-        Environment.OriginalG.ProgressEstimated?.(HttpService.JSONEncode(report));
+        const compactReport = this.buildCompactReport(report);
+        Environment.OriginalG.ProgressEstimated?.(HttpService.JSONEncode(compactReport));
+    }
+
+    private buildCompactReport(report: {
+        generatedAt: string;
+        runDurationSeconds: number;
+        summary: {
+            totalItems: number;
+            longItems: number;
+            longItemThresholdSeconds: number;
+            totalSimulatedTimeSeconds: number;
+            totalSimulatedTimeLabel: string;
+            averageTimeSeconds: number;
+            averageTimeLabel: string;
+            limitingCurrencyCounts: Record<string, number>;
+        };
+        progression: ProgressionReportEntry[];
+        topLongest: Array<{ rank: number; itemName: string; timeLabel: string; timeSeconds: number }>;
+        profiling: ProfilingReport;
+        upgradesSimulated: Array<{ id: string; amount: number }>;
+        resetLayersSimulated: Array<{ id: string; rewardLabel: string; rewardBreakdown: SerializedCurrencyAmount[] }>;
+    }): Record<string, unknown> {
+        const compactSummary = {
+            ti: report.summary.totalItems,
+            li: report.summary.longItems,
+            lt: report.summary.longItemThresholdSeconds,
+            ts: report.summary.totalSimulatedTimeSeconds,
+            tl: report.summary.totalSimulatedTimeLabel,
+            as: report.summary.averageTimeSeconds,
+            al: report.summary.averageTimeLabel,
+            lc: report.summary.limitingCurrencyCounts,
+        };
+
+        const compactProgression = report.progression.map((entry) => {
+            const compactEntry: Record<string, unknown> = {
+                o: entry.order,
+                n: entry.itemName,
+                d: entry.difficulty,
+                ts: entry.timeToObtainSeconds,
+                tl: entry.timeToObtainLabel,
+                cs: entry.cumulativeTimeSeconds,
+                cl: entry.cumulativeTimeLabel,
+                ll: entry.limitingCurrencyLabel,
+                l: entry.isLong,
+                rb: entry.revenueBreakdown.map((amount) => ({
+                    c: amount.currency,
+                    f: amount.formatted,
+                    s: amount.single,
+                })),
+            };
+
+            if (entry.priceLabel !== undefined) {
+                compactEntry.p = entry.priceLabel;
+            }
+
+            if (entry.limitingCurrency !== undefined) {
+                compactEntry.lc = entry.limitingCurrency;
+            }
+
+            if (entry.formulaResult !== undefined) {
+                compactEntry.fr = entry.formulaResult;
+            }
+
+            if (entry.upgraderDetails !== undefined) {
+                compactEntry.ud = entry.upgraderDetails;
+            }
+
+            return compactEntry;
+        });
+
+        const compactTopLongest = report.topLongest.map((entry) => ({
+            r: entry.rank,
+            n: entry.itemName,
+            l: entry.timeLabel,
+            s: entry.timeSeconds,
+        }));
+
+        const compactProfiling: Record<string, unknown> = {
+            te: report.profiling.totalExecutionTime,
+            oo: report.profiling.otherOperationsTime,
+            cr: report.profiling.calculateRevenueTime,
+            cc: report.profiling.calculateRevenueCount,
+            gn: report.profiling.getNextItemTime,
+            gc: report.profiling.getNextItemCount,
+            fs: report.profiling.findShopTime,
+            fc: report.profiling.findShopCount,
+            c1: report.profiling.calcRevFirstLoopTime,
+            c2: report.profiling.calcRevSecondLoopTime,
+            cd: report.profiling.calcRevDropletLoopTime,
+            ch: report.profiling.calcRevChargerTime,
+            co: report.profiling.calcRevOtherTime,
+            di: report.profiling.dropletGetInstanceInfoTime,
+            su: report.profiling.dropletSetUpgradesTime,
+            cv: report.profiling.dropletCalculateValueTime,
+            af: report.profiling.dropletApplyFurnacesTime,
+        };
+
+        const compactUpgrades = report.upgradesSimulated.map((entry) => ({
+            i: entry.id,
+            a: entry.amount,
+        }));
+
+        const compactResetLayers = report.resetLayersSimulated.map((entry) => ({
+            i: entry.id,
+            l: entry.rewardLabel,
+            rb: entry.rewardBreakdown.map((amount) => ({
+                c: amount.currency,
+                f: amount.formatted,
+                s: amount.single,
+            })),
+        }));
+
+        return {
+            g: report.generatedAt,
+            d: report.runDurationSeconds,
+            s: compactSummary,
+            p: compactProgression,
+            l: compactTopLongest,
+            f: compactProfiling,
+            u: compactUpgrades,
+            r: compactResetLayers,
+        };
     }
 }
