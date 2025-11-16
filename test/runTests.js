@@ -1,9 +1,15 @@
 import axios from "axios";
 import dotenv from "dotenv";
 import fs from "fs";
-import readline from "readline";
 import path from "path";
+import readline from "readline";
 import signale from "signale";
+import { runCloudLuau } from "./cloudLuauRunner.js";
+import {
+    buildModulePathLookup,
+    createLuauPathTransformer,
+    createModulePathResolver,
+} from "./luauPathUtils.js";
 
 // Configure logger with suppressed debug messages
 const logger = new signale.Signale({
@@ -87,120 +93,15 @@ const STUDIO_TEST_SERVER = process.env.STUDIO_TEST_SERVER ?? "http://localhost:2
 const parsedStudioToolTimeout = Number.parseInt(process.env.STUDIO_TOOL_TIMEOUT_MS ?? "120000", 10);
 const STUDIO_TOOL_TIMEOUT_MS = Number.isFinite(parsedStudioToolTimeout) ? parsedStudioToolTimeout : 120000;
 
-const EXECUTION_KEY = process.env.LUAU_EXECUTION_KEY;
-const UNIVERSE_ID = process.env.LUAU_EXECUTION_UNIVERSE_ID;
-const PLACE_ID = process.env.LUAU_EXECUTION_PLACE_ID;
-
-const scriptPath = path.join(import.meta.dirname, "invoker.lua");
+const scriptPath = path.join(import.meta.dirname, "scripts", "invokeTestRunner.luau");
 
 log(`Reading Luau script from: ${scriptPath}`, "debug");
 const luauScript = fs.readFileSync(scriptPath, "utf8");
 
-const modulePathLookup = buildModulePathLookup();
-
-function buildModulePathLookup() {
-    const repoRoot = path.join(import.meta.dirname, "..");
-    const lookup = new Map();
-    const moduleRoots = [
-        { moduleRoot: "ServerScriptService", dir: path.join(repoRoot, "out", "server") },
-        { moduleRoot: "ReplicatedStorage.shared", dir: path.join(repoRoot, "out", "shared") },
-        { moduleRoot: "ReplicatedStorage.client", dir: path.join(repoRoot, "out", "client") },
-        { moduleRoot: "ReplicatedFirst", dir: path.join(repoRoot, "out", "sharedfirst") },
-    ];
-
-    const moduleFileSuffixes = [".luau", ".lua"];
-
-    for (const { moduleRoot, dir } of moduleRoots) {
-        if (!dir || !fs.existsSync(dir)) {
-            continue;
-        }
-
-        const stack = [{ dir, segments: [] }];
-
-        while (stack.length > 0) {
-            const { dir: activeDir, segments } = stack.pop();
-            let entries;
-
-            try {
-                entries = fs.readdirSync(activeDir, { withFileTypes: true });
-            } catch {
-                continue;
-            }
-
-            for (const entry of entries) {
-                const entryPath = path.join(activeDir, entry.name);
-
-                if (entry.isDirectory()) {
-                    stack.push({ dir: entryPath, segments: [...segments, entry.name] });
-                    continue;
-                }
-
-                if (!entry.isFile()) {
-                    continue;
-                }
-
-                const suffix = moduleFileSuffixes.find((ext) => entry.name.endsWith(ext));
-                if (!suffix) {
-                    continue;
-                }
-
-                const baseName = entry.name.slice(0, -suffix.length);
-                const moduleSegments = [...segments, baseName];
-                const modulePath = [moduleRoot, ...moduleSegments.filter((segment) => segment.length > 0)].join(".");
-                const relativePath = path.relative(repoRoot, entryPath).split(path.sep).join("/");
-
-                lookup.set(modulePath, relativePath);
-
-                if (baseName === "init" && segments.length > 0) {
-                    const initModulePath = [moduleRoot, ...segments].join(".");
-                    lookup.set(initModulePath, relativePath);
-                }
-            }
-        }
-    }
-
-    return lookup;
-}
-
-function transformLuauPath(line) {
-    // Transform Luau stack trace paths to compiled out/ files for clickability
-    // e.g., [string "ServerScriptService.tests.weather.spec"]:15 -> out/server/tests/weather.spec.luau:15
-    if (typeof line !== "string" || line.length === 0) {
-        return line;
-    }
-
-    let transformed = line.replace(/\[string "([^\"]+)"\]/g, (fullMatch, modulePath) => {
-        const resolved = resolveModulePath(modulePath);
-        return resolved ?? fullMatch;
-    });
-
-    const moduleRootPattern =
-        /(ServerScriptService|ReplicatedStorage\.shared|ReplicatedStorage\.client|ReplicatedFirst)(?:\.[^\s:\]]+)+/g;
-
-    transformed = transformed.replace(moduleRootPattern, (fullMatch) => {
-        const resolved = resolveModulePath(fullMatch);
-        return resolved ?? fullMatch;
-    });
-
-    return transformed;
-}
-
-function resolveModulePath(modulePath) {
-    if (!modulePath || modulePathLookup.size === 0) {
-        return null;
-    }
-
-    if (modulePathLookup.has(modulePath)) {
-        return modulePathLookup.get(modulePath);
-    }
-
-    const sanitized = modulePath.replace(/["'\[\]]/g, "");
-    if (modulePathLookup.has(sanitized)) {
-        return modulePathLookup.get(sanitized);
-    }
-
-    return null;
-}
+const repoRoot = path.join(import.meta.dirname, "..");
+const modulePathLookup = buildModulePathLookup(repoRoot);
+const resolveModulePath = createModulePathResolver(modulePathLookup);
+const transformLuauPath = createLuauPathTransformer(resolveModulePath);
 
 function updateFailureDetection(line, tracker) {
     if (!tracker || typeof line !== "string" || !line.includes("Test Suites:")) {
@@ -524,204 +425,6 @@ async function runStudioTests() {
     return analyzeStudioResultPayload(result, tracker.detectedFailures);
 }
 
-async function createTask(apiKey, scriptContents, universeId, placeId, version = null) {
-    log(
-        `Creating task for place ${placeId} in universe ${universeId}${version ? ` (version ${version})` : ""}`,
-        "debug",
-    );
-    try {
-        const url = version
-            ? `https://apis.roblox.com/cloud/v2/universes/${universeId}/places/${placeId}/versions/${version}/luau-execution-session-tasks`
-            : `https://apis.roblox.com/cloud/v2/universes/${universeId}/places/${placeId}/luau-execution-session-tasks`;
-
-        const response = await axios({
-            method: "post",
-            url: url,
-            data: {
-                script: scriptContents,
-                timeout: "60s",
-            },
-            headers: {
-                "x-api-key": apiKey,
-                "Content-Type": "application/json",
-            },
-        });
-
-        return response.data;
-    } catch (error) {
-        log("Error creating task:", "error");
-        log(`Status: ${error.response?.status}`, "error");
-        log(`Status Text: ${error.response?.statusText}`, "error");
-        log(`Data: ${JSON.stringify(error.response?.data)}`, "error");
-        log(`Request URL: ${error.config?.url}`, "error");
-        if (error.response?.status === 403) {
-            log("This may be a WAF blocked request or authentication issue", "error");
-        }
-        throw error;
-    }
-}
-
-async function pollForTaskCompletion(apiKey, taskPath) {
-    let task = null;
-
-    log(`Polling task status at: https://apis.roblox.com/${taskPath}`, "debug");
-
-    const start = Date.now();
-    let lastLoggedState = null;
-
-    let i = 0;
-    while (!task || (task.state !== "COMPLETE" && task.state !== "FAILED")) {
-        await new Promise((resolve) => setTimeout(resolve, 300));
-
-        try {
-            const response = await axios.get(`https://apis.roblox.com/cloud/v2/${taskPath}`, {
-                headers: {
-                    "x-api-key": apiKey,
-                },
-            });
-
-            task = response.data;
-            const elapsed = ((Date.now() - start) / 1000).toFixed(1);
-
-            // Only log state changes to file, not every poll
-            if (task.state !== lastLoggedState) {
-                log(`Task state: ${task.state} (after ${elapsed}s)`, "debug");
-                lastLoggedState = task.state;
-            }
-
-            // Show live status on console only (not in file log)
-            if (i++ >= 3) {
-                const statusLine = `Task state: ${task.state} (after ${elapsed}s)`;
-                process.stdout.write(`\r${statusLine}${" ".repeat(Math.max(0, 80 - statusLine.length))}`);
-                i = 0;
-            }
-        } catch (error) {
-            log("Error polling task completion:", "warn");
-            log(`Status: ${error.response?.status}`, "warn");
-            log(`Data: ${JSON.stringify(error.response?.data)}`, "warn");
-            if (error.response?.status === 403) {
-                log("WAF may be blocking polling requests", "warn");
-            }
-        }
-    }
-
-    // Clear polling status line and print newline to console
-    process.stdout.write("\r" + " ".repeat(80) + "\r");
-
-    log(`Task ${task.state.toLowerCase()}: ${task.path}`, "debug");
-
-    return task;
-}
-
-async function getTaskLogs(apiKey, taskPath) {
-    try {
-        const response = await axios.get(`https://apis.roblox.com/cloud/v2/${taskPath}/logs`, {
-            headers: {
-                "x-api-key": apiKey,
-            },
-        });
-
-        return response.data;
-    } catch (error) {
-        log("Error getting task logs:", "error");
-        log(`Status: ${error.response?.status}`, "error");
-        log(`Data: ${JSON.stringify(error.response?.data)}`, "error");
-        if (error.response?.status === 403) {
-            log("WAF may be blocking log retrieval requests", "error");
-        }
-        throw error;
-    }
-}
-
-async function runLuauTask(universeId, placeId, scriptContents, version = null) {
-    if (version) {
-        log(`Executing Luau task on version ${version}`, "debug");
-    } else {
-        log("Executing Luau task on latest published version", "debug");
-    }
-
-    if (parseInt(placeId) === 16438564807) {
-        log(
-            "Detected protected place ID; skipping Luau cloud tests. Please use your own place ID for testing.",
-            "error",
-        );
-        return false;
-    }
-
-    try {
-        const task = await createTask(EXECUTION_KEY, scriptContents, universeId, placeId, version);
-        log(`Created task: ${task.path}`, "debug");
-
-        const completedTask = await pollForTaskCompletion(EXECUTION_KEY, task.path);
-        const logs = await getTaskLogs(EXECUTION_KEY, task.path);
-
-        let failedTests = 0;
-        let totalTests = 0;
-
-        for (const taskLogs of logs.luauExecutionSessionTaskLogs) {
-            const messages = taskLogs.messages;
-            for (const message of messages) {
-                const transformed = transformLuauPath(message);
-                log(transformed, "log");
-
-                // Check for test result summary line (e.g., "36 passed, 0 failed, 0 skipped")
-                const testResultMatch = message.match(/(\d+)\s+passed,\s+(\d+)\s+failed,\s+(\d+)\s+skipped/);
-                if (testResultMatch) {
-                    const passed = parseInt(testResultMatch[1]);
-                    const failed = parseInt(testResultMatch[2]);
-                    const skipped = parseInt(testResultMatch[3]);
-
-                    failedTests += failed;
-                    totalTests += passed + failed + skipped;
-                }
-
-                // Also check for Jest suite summary format (e.g., "Test Suites: 13 failed, 13 total")
-                const suiteSummaryMatch = message.match(/Test Suites:\s+(\d+)\s+failed/);
-                if (suiteSummaryMatch) {
-                    const failed = parseInt(suiteSummaryMatch[1]);
-                    failedTests += failed;
-                }
-            }
-        }
-
-        if (completedTask.state === "COMPLETE") {
-            if (failedTests > 0) {
-                log(`Luau task completed but ${failedTests} test(s) failed`, "error");
-                return false;
-            } else {
-                log("Luau task completed successfully", "debug");
-                return true;
-            }
-        } else {
-            log(`${completedTask.error.code} ${completedTask.error.message}`, "error");
-            log("Luau task failed", "error");
-            return false;
-        }
-    } catch (error) {
-        log(`Error executing Luau task: ${error.response?.data || error.message}`, "error");
-        return false;
-    }
-}
-
-async function runCloudTests() {
-    if (!EXECUTION_KEY || !UNIVERSE_ID || !PLACE_ID) {
-        log("Skipping cloud tests: Required environment variables not set", "warn");
-        log("Missing:", "warn");
-        if (!EXECUTION_KEY) log("  - LUAU_EXECUTION_KEY", "warn");
-        if (!UNIVERSE_ID) log("  - LUAU_EXECUTION_UNIVERSE_ID", "warn");
-        if (!PLACE_ID) log("  - LUAU_EXECUTION_PLACE_ID", "warn");
-        return null;
-    }
-
-    try {
-        const success = await runLuauTask(UNIVERSE_ID, PLACE_ID, luauScript, PLACE_VERSION);
-        return success;
-    } catch (error) {
-        log(`Error in cloud test execution: ${error.response?.data || error.message || error}`, "error");
-        return false;
-    }
-}
-
 async function main() {
     initFileLogger(PLACE_VERSION);
     log(`Test mode: ${STUDIO_TEST_MODE}`, "info");
@@ -759,7 +462,12 @@ async function main() {
     }
 
     if (STUDIO_TEST_MODE !== "studio") {
-        const cloudResult = await runCloudTests();
+        const cloudResult = await runCloudLuau(scriptPath, {
+            scriptContents: luauScript,
+            placeVersion: PLACE_VERSION,
+            log,
+            transform: transformLuauPath,
+        });
 
         if (cloudResult === true) {
             log("Cloud tests passed", "debug");

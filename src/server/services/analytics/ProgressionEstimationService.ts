@@ -45,6 +45,7 @@ declare global {
     interface Assets {}
 
     interface _G {
+        EstimateProgress?: () => void;
         ProgressEstimated?: (message: string) => void;
     }
 }
@@ -135,15 +136,15 @@ export default class ProgressionEstimationService {
         dropletApplyFurnacesTime: 0,
     };
 
-    private operativeCache: { add: CurrencyBundle; mul: CurrencyBundle; pow: CurrencyBundle } | undefined;
-
     constructor(
         private revenueService: RevenueService,
         private currencyService: CurrencyService,
         private namedUpgradeService: NamedUpgradeService,
         private dataService: DataService,
         private resetService: ResetService,
-    ) {}
+    ) {
+        Environment.OriginalG.EstimateProgress = () => this.estimate();
+    }
 
     private serializeCurrencyBundle(bundle: CurrencyBundle) {
         const record: Record<string, string> = {};
@@ -185,8 +186,6 @@ export default class ProgressionEstimationService {
             dropletCalculateValueTime: 0,
             dropletApplyFurnacesTime: 0,
         };
-
-        this.operativeCache = undefined;
 
         let result: T;
         try {
@@ -241,7 +240,6 @@ export default class ProgressionEstimationService {
             }
 
             if (purchasedItem.findTrait("Upgrader") !== undefined) {
-                this.operativeCache = undefined;
                 this.revenueService.clearUpgraderCache();
             }
 
@@ -477,7 +475,6 @@ export default class ProgressionEstimationService {
                 inventory.set(requiredItem, inventory.get(requiredItem)! - amount);
             }
             if (item.findTrait("Upgrader") !== undefined) {
-                this.operativeCache = undefined;
                 this.revenueService.clearUpgraderCache();
             }
             totalTime = totalTime.add(stats.timeToObtain);
@@ -890,80 +887,9 @@ export default class ProgressionEstimationService {
 
             builder.append(`-# Calculated in ${dtInner} seconds.\n`);
 
-            this.post(builder.toString());
+            Environment.OriginalG.ProgressEstimated?.(builder.toString());
 
             return dtInner;
         });
-
-        print(`Calculated in ${dt} seconds.`);
-    }
-
-    /**
-     * Encodes a record as a URL-encoded string for HTTP POST.
-     *
-     * @param data The data to encode.
-     */
-    private encode(data: Record<string, unknown>): string {
-        let str = "";
-        for (const [key, value] of pairs(data)) {
-            if (!value) continue;
-            str += `&${HttpService.UrlEncode(key)}=${HttpService.UrlEncode(`${value}`)}`;
-        }
-        return str.sub(2);
-    }
-
-    /**
-     * Posts a progression report to Discord and Workspace.
-     *
-     * @param message The report message.
-     */
-    post(message: string) {
-        Environment.OriginalG.ProgressEstimated?.(message);
-
-        const webhookUrl = $env.string("PROGRESSION_WEBHOOK");
-        if (webhookUrl === undefined) {
-            warn("PROGRESSION_WEBHOOK is not set, skipping posting to Discord.");
-            return;
-        }
-
-        const timestamp = os.date("%Y-%m-%dT%H:%M:%S");
-        const pasteUrl = `https://dpaste.com/api/v2/`;
-        const data = {
-            content: message,
-            syntax: "md",
-            title: `Progression Estimation Report ${timestamp}`,
-            expiry_days: 7,
-        };
-
-        const response = HttpService.PostAsync(pasteUrl, this.encode(data), Enum.HttpContentType.ApplicationUrlEncoded);
-        print(`Progression estimation report posted to ${response}`);
-
-        const quotes = [
-            `i love boxing`,
-            `i glove boxing`,
-            `eye of oxen`,
-            `aisle of bo xing`,
-            `high glove locks in`,
-            `i loaf oxen`,
-            `isle of poxing`,
-            `i shove docks in`,
-            `i love socks in`,
-            `i love bach sing`,
-        ];
-
-        HttpService.PostAsync(
-            webhookUrl,
-            HttpService.JSONEncode({
-                content: `${quotes[math.random(0, quotes.size() - 1)]}\n${response.sub(1, -2)}-preview`,
-                embeds: [
-                    {
-                        title: "Progression Estimation Report",
-                        description: `Report dumped at ${response}`,
-                        color: 0xff0000,
-                        timestamp: timestamp,
-                    },
-                ],
-            }),
-        );
     }
 }

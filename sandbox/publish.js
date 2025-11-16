@@ -1,5 +1,4 @@
 import axios from "axios";
-import { spawn } from "child_process";
 import dotenv from "dotenv";
 import fs from "fs";
 import path from "path";
@@ -67,43 +66,4 @@ async function publish(production = false) {
     return response.data.versionNumber;
 }
 
-function runTests(versionNumber) {
-    return new Promise((resolve, reject) => {
-        const testProcess = spawn("node", ["test/runTests.js", `--version=${versionNumber}`, "--mode=cloud"], {
-            stdio: "inherit",
-            shell: true,
-        });
-
-        testProcess.on("close", (code) => {
-            if (code === 0) {
-                resolve();
-            } else {
-                reject();
-            }
-        });
-
-        testProcess.on("error", reject);
-    });
-}
-
-async function main() {
-    try {
-        // Publish the place and get the version number
-        const versionNumber = await publish();
-
-        if (!versionNumber) {
-            logger.error("Failed to get version number from publish");
-            process.exit(1);
-        }
-
-        // Run tests on the published version
-        await runTests(versionNumber);
-
-        process.exit(0);
-    } catch (error) {
-        console.error(error);
-        process.exit(1);
-    }
-}
-
-main();
+export default publish;

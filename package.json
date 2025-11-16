@@ -6,7 +6,7 @@
     "scripts": {
         "test": "npm run build --silent && npm run test:cloud --silent",
         "test:studio": "node test/runTests.js --mode=studio",
-        "test:cloud": "node sandbox/publishAndTest.js",
+        "test:cloud": "node sandbox/test.js",
         "lint": "npx eslint src --no-error-on-unmatched-pattern",
         "asset-sync": "npx rbxts-asset-sync --log-level=warn --output=src/shared/asset/AssetMap.ts",
         "asset-watch": "npx rbxts-asset-sync --watch --output=src/shared/asset/AssetMap.ts",
