@@ -5,6 +5,8 @@ local mockFlamework = require(ReplicatedStorage.shared.hamster.mockFlamework).de
 local cleanup = mockFlamework()
 
 local PRINT_CHUNK_SIZE = 7000
+local REPORT_BEGIN_MARKER = "__PROGRESSION_ESTIMATE_BEGIN__"
+local REPORT_END_MARKER = "__PROGRESSION_ESTIMATE_END__"
 
 local function chunkedPrint(message)
     local text = (typeof(message) == "string") and message or tostring(message)
@@ -19,7 +21,9 @@ local function chunkedPrint(message)
 end
 
 rawset(_G, "ProgressEstimated", function(message)
+    chunkedPrint(REPORT_BEGIN_MARKER)
     chunkedPrint(message)
+    chunkedPrint(REPORT_END_MARKER)
 end)
 
 

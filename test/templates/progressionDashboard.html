@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>Progression Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+        :root {
+            color-scheme: dark;
+        }
+
+        body {
+            margin: 0;
+            font-family: "Segoe UI", "Inter", system-ui, -apple-system, sans-serif;
+            background: radial-gradient(circle at top, #1d1d2f 0%, #0b0b14 55%, #050508 100%);
+            color: #f9fafb;
+        }
+
+        header {
+            padding: 1.5rem 2rem;
+            background: rgba(10, 10, 25, 0.9);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+            box-shadow: 0 18px 30px rgba(10, 10, 25, 0.35);
+            position: sticky;
+            top: 0;
+            backdrop-filter: blur(18px);
+            z-index: 10;
+        }
+
+        header h1 {
+            margin: 0 0 0.5rem;
+            font-size: 1.85rem;
+            font-weight: 600;
+        }
+
+        header .meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            align-items: center;
+            font-size: 0.95rem;
+            color: #d1d8e6;
+        }
+
+        .status-badge {
+            padding: 0.35rem 0.75rem;
+            border-radius: 999px;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            text-transform: uppercase;
+            font-size: 0.78rem;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .status-badge.success {
+            background: rgba(46, 213, 115, 0.12);
+            color: #2ed573;
+            border-color: rgba(46, 213, 115, 0.35);
+        }
+
+        .status-badge.failure {
+            background: rgba(255, 71, 87, 0.12);
+            color: #ff4757;
+            border-color: rgba(255, 71, 87, 0.35);
+        }
+
+        .status-badge.skipped {
+            background: rgba(255, 196, 0, 0.12);
+            color: #ffc400;
+            border-color: rgba(255, 196, 0, 0.35);
+        }
+
+        .status-badge.error {
+            background: rgba(255, 107, 129, 0.12);
+            color: #ff6b81;
+            border-color: rgba(255, 107, 129, 0.35);
+        }
+
+        .status-badge.default {
+            background: rgba(255, 255, 255, 0.08);
+            color: #f5f6fa;
+        }
+
+        .status-detail {
+            margin-top: 0.6rem;
+            color: rgba(220, 224, 236, 0.85);
+        }
+
+        main {
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        section {
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+        }
+
+        section h2 {
+            margin: 0;
+            font-size: 1.35rem;
+            font-weight: 600;
+            letter-spacing: 0.01em;
+        }
+
+        .notice {
+            padding: 0.85rem 1rem;
+            border-radius: 12px;
+            border: 1px solid transparent;
+            font-size: 0.95rem;
+        }
+
+        .notice.warning {
+            background: rgba(255, 196, 0, 0.12);
+            border-color: rgba(255, 196, 0, 0.35);
+            color: #ffd86b;
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1rem;
+        }
+
+        .summary-card {
+            background: linear-gradient(135deg, rgba(32, 32, 52, 0.85), rgba(20, 20, 32, 0.95));
+            padding: 1.1rem 1.25rem;
+            border-radius: 14px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 12px 24px rgba(7, 7, 15, 0.4);
+            display: flex;
+            flex-direction: column;
+            gap: 0.45rem;
+        }
+
+        .summary-card h3 {
+            margin: 0;
+            font-size: 0.95rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: rgba(203, 210, 230, 0.78);
+        }
+
+        .summary-card .primary-value {
+            font-size: 1.7rem;
+            font-weight: 600;
+            color: #ffffff;
+        }
+
+        .summary-card .secondary-value {
+            margin: 0;
+            font-size: 0.9rem;
+            color: rgba(203, 210, 230, 0.7);
+        }
+
+        .limiting-currencies ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 0.6rem 1.25rem;
+            font-size: 0.95rem;
+            color: rgba(215, 219, 233, 0.85);
+        }
+
+        .chart-deck {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .chart-card {
+            background: linear-gradient(145deg, rgba(18, 18, 30, 0.92), rgba(11, 11, 22, 0.9));
+            border-radius: 16px;
+            padding: 1rem 1.2rem;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            box-shadow: 0 18px 30px rgba(5, 5, 14, 0.55);
+            display: flex;
+            flex-direction: column;
+            gap: 0.6rem;
+        }
+
+        .chart {
+            min-height: 360px;
+            width: 100%;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: rgba(12, 12, 22, 0.92);
+            border-radius: 14px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 18px 36px rgba(7, 7, 14, 0.55);
+        }
+
+        thead {
+            background: rgba(30, 30, 48, 0.95);
+        }
+
+        th, td {
+            padding: 0.85rem 1.1rem;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        tbody tr:hover {
+            background: rgba(140, 148, 255, 0.08);
+        }
+
+        pre {
+            background: rgba(10, 10, 22, 0.9);
+            border-radius: 12px;
+            padding: 1rem 1.25rem;
+            overflow-x: auto;
+            max-height: 320px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            font-size: 0.85rem;
+            color: #d0d6f2;
+        }
+
+        a {
+            color: #74b9ff;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Progression Estimation Dashboard</h1>
+        <div class="meta">
+            <span id="status-badge" class="status-badge default">Loading…</span>
+            <span>Generated: <strong id="generated-at">—</strong></span>
+            <span>Exported: <strong id="exported-at">—</strong></span>
+        </div>
+        <p id="status-detail" class="status-detail hidden"></p>
+    </header>
+    <main>
+        <section id="notice-container" class="hidden">
+            <div id="notice-message" class="notice warning"></div>
+        </section>
+
+        <section aria-labelledby="summary-title">
+            <h2 id="summary-title">Run Summary</h2>
+            <div class="summary-grid" id="summary-grid"></div>
+            <div class="limiting-currencies">
+                <h3>Limiting Currency Distribution</h3>
+                <ul id="limiting-list"></ul>
+            </div>
+        </section>
+
+        <section aria-labelledby="charts-title">
+            <h2 id="charts-title">Visual Analytics</h2>
+            <div class="chart-deck">
+                <article class="chart-card">
+                    <h3>Time To Obtain</h3>
+                    <div class="chart" id="tto-chart"><em>Loading…</em></div>
+                </article>
+                <article class="chart-card">
+                    <h3>Cumulative Progress</h3>
+                    <div class="chart" id="cumulative-chart"><em>Loading…</em></div>
+                </article>
+                <article class="chart-card">
+                    <h3>Profiling Breakdown</h3>
+                    <div class="chart" id="profiling-chart"><em>Loading…</em></div>
+                </article>
+            </div>
+        </section>
+
+        <section aria-labelledby="longest-title">
+            <h2 id="longest-title">Longest Time-To-Obtain Items</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Item</th>
+                        <th>Time To Obtain</th>
+                        <th>Approximate Seconds</th>
+                    </tr>
+                </thead>
+                <tbody id="top-longest-body"></tbody>
+            </table>
+        </section>
+
+        <section aria-labelledby="logs-title">
+            <h2 id="logs-title">Execution Logs</h2>
+            <pre id="logs-output">Loading…</pre>
+        </section>
+    </main>
+
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+    <script>
+        (function () {
+            const statusBadge = document.getElementById("status-badge");
+            const statusDetail = document.getElementById("status-detail");
+            const generatedAtEl = document.getElementById("generated-at");
+            const exportedAtEl = document.getElementById("exported-at");
+            const noticeContainer = document.getElementById("notice-container");
+            const noticeMessage = document.getElementById("notice-message");
+            const summaryGrid = document.getElementById("summary-grid");
+            const limitingList = document.getElementById("limiting-list");
+            const longestBody = document.getElementById("top-longest-body");
+            const logsOutput = document.getElementById("logs-output");
+            const ttoChart = document.getElementById("tto-chart");
+            const cumulativeChart = document.getElementById("cumulative-chart");
+            const profilingChart = document.getElementById("profiling-chart");
+
+            const statusClassMap = {
+                success: "status-badge success",
+                failure: "status-badge failure",
+                skipped: "status-badge skipped",
+                error: "status-badge error",
+                default: "status-badge default",
+            };
+
+            const statusLabelMap = {
+                success: "Success",
+                failure: "Failure",
+                skipped: "Skipped",
+                error: "Error",
+            };
+
+            const summaryConfig = [
+                { key: "totalItems", label: "Progression Steps" },
+                { key: "totalSimulatedTimeLabel", label: "Total Simulated Time", secondaryKey: "totalSimulatedTimeSeconds" },
+                { key: "averageTimeLabel", label: "Average TTO", secondaryKey: "averageTimeSeconds" },
+                { key: "longItems", label: "Items Above Threshold", secondaryTemplate: (map) => {
+                    const threshold = map.longItemThresholdSeconds;
+                    return threshold ? `${threshold}s+` : null;
+                } },
+            ];
+
+            function showWarning(message) {
+                noticeContainer.classList.remove("hidden");
+                const existing = noticeMessage.textContent.trim();
+                noticeMessage.textContent = existing ? `${existing}\n${message}` : message;
+            }
+
+            async function loadCsv(path) {
+                const response = await fetch(path);
+                if (!response.ok) {
+                    throw new Error(`Failed to fetch ${path}: ${response.status} ${response.statusText}`);
+                }
+                const text = await response.text();
+                const parsed = Papa.parse(text, { header: true, skipEmptyLines: true });
+                return parsed.data;
+            }
+
+            async function loadText(path) {
+                const response = await fetch(path);
+                if (!response.ok) {
+                    throw new Error(`Failed to fetch ${path}: ${response.status} ${response.statusText}`);
+                }
+                return response.text();
+            }
+
+            function csvRowsToMap(rows) {
+                const map = {};
+                for (const row of rows) {
+                    const key = row.key ?? row.metric;
+                    if (!key) continue;
+                    map[key] = row.value ?? row.count ?? row[key];
+                }
+                return map;
+            }
+
+            function formatNumber(value) {
+                const num = Number.parseFloat(value);
+                if (!Number.isFinite(num)) {
+                    return value ?? "—";
+                }
+                const abs = Math.abs(num);
+                const fractionDigits = abs < 10 ? 2 : abs < 100 ? 1 : 0;
+                return num.toLocaleString(undefined, { maximumFractionDigits: fractionDigits });
+            }
+
+            function formatDuration(seconds) {
+                const num = Number.parseFloat(seconds);
+                if (!Number.isFinite(num)) {
+                    return "";
+                }
+                if (num >= 3_600_000) {
+                    return `${num.toExponential(2)}s`;
+                }
+                if (num < 1) {
+                    return `${num.toFixed(3)}s`;
+                }
+                const hrs = Math.floor(num / 3600);
+                const mins = Math.floor((num % 3600) / 60);
+                const secs = num % 60;
+                if (hrs > 0) {
+                    return `${hrs}h ${mins}m ${Math.round(secs)}s`;
+                }
+                if (mins > 0) {
+                    return `${mins}m ${secs.toFixed(1)}s`;
+                }
+                return `${secs.toFixed(num < 10 ? 2 : 1)}s`;
+            }
+
+            function applyStatus(meta) {
+                const statusRaw = (meta.status ?? "unknown").toString();
+                const statusKey = statusRaw.toLowerCase();
+                statusBadge.textContent = statusLabelMap[statusKey] ?? statusRaw;
+                statusBadge.className = statusClassMap[statusKey] ?? statusClassMap.default;
+
+                const detail = meta.detail;
+                if (detail && detail.trim().length > 0) {
+                    statusDetail.textContent = detail;
+                    statusDetail.classList.remove("hidden");
+                } else {
+                    statusDetail.textContent = "";
+                    statusDetail.classList.add("hidden");
+                }
+
+                if (meta.generatedAt) {
+                    const date = new Date(meta.generatedAt);
+                    generatedAtEl.textContent = Number.isNaN(date.getTime()) ? meta.generatedAt : date.toLocaleString();
+                }
+
+                if (meta.exportedAt) {
+                    const date = new Date(meta.exportedAt);
+                    exportedAtEl.textContent = Number.isNaN(date.getTime()) ? meta.exportedAt : date.toLocaleString();
+                }
+            }
+
+            function populateSummary(summaryMap) {
+                summaryGrid.innerHTML = "";
+                for (const card of summaryConfig) {
+                    const value = summaryMap[card.key];
+                    const hasPrimary = value !== undefined && value !== "";
+                    let secondary = null;
+                    if (card.secondaryKey) {
+                        secondary = formatDuration(summaryMap[card.secondaryKey]);
+                    } else if (typeof card.secondaryTemplate === "function") {
+                        secondary = card.secondaryTemplate(summaryMap);
+                    }
+
+                    if (!hasPrimary && !secondary) {
+                        continue;
+                    }
+
+                    const article = document.createElement("article");
+                    article.className = "summary-card";
+
+                    const title = document.createElement("h3");
+                    title.textContent = card.label;
+                    article.appendChild(title);
+
+                    if (hasPrimary) {
+                        const primary = document.createElement("p");
+                        primary.className = "primary-value";
+                        primary.textContent = typeof value === "string" ? value : formatNumber(value);
+                        article.appendChild(primary);
+                    }
+
+                    if (secondary) {
+                        const secondaryEl = document.createElement("p");
+                        secondaryEl.className = "secondary-value";
+                        secondaryEl.textContent = secondary;
+                        article.appendChild(secondaryEl);
+                    }
+
+                    summaryGrid.appendChild(article);
+                }
+            }
+
+            function populateLimiting(rows) {
+                limitingList.innerHTML = "";
+                if (!rows || rows.length === 0) {
+                    const li = document.createElement("li");
+                    li.textContent = "No limiting currency data.";
+                    limitingList.appendChild(li);
+                    return;
+                }
+
+                const ordered = rows
+                    .map((row) => ({
+                        currency: row.currency ?? "Unknown",
+                        count: Number.parseFloat(row.count ?? row.value ?? "0") || 0,
+                    }))
+                    .sort((a, b) => b.count - a.count);
+
+                for (const { currency, count } of ordered) {
+                    const li = document.createElement("li");
+                    li.textContent = `${currency}: ${formatNumber(count)}`;
+                    limitingList.appendChild(li);
+                }
+            }
+
+            function populateLongest(rows) {
+                longestBody.innerHTML = "";
+                if (!rows || rows.length === 0) {
+                    const tr = document.createElement("tr");
+                    const td = document.createElement("td");
+                    td.colSpan = 4;
+                    td.textContent = "No items exceeded the threshold.";
+                    tr.appendChild(td);
+                    longestBody.appendChild(tr);
+                    return;
+                }
+
+                for (const row of rows) {
+                    const tr = document.createElement("tr");
+                    const values = [
+                        row.rank ?? "",
+                        row.itemName ?? "Unknown item",
+                        row.timeLabel ?? "—",
+                        formatNumber(row.timeSeconds ?? row.value ?? ""),
+                    ];
+                    for (const value of values) {
+                        const td = document.createElement("td");
+                        td.textContent = value;
+                        tr.appendChild(td);
+                    }
+                    longestBody.appendChild(tr);
+                }
+            }
+
+            function populateLogs(text) {
+                logsOutput.textContent = text ?? "No Roblox log entries captured.";
+            }
+
+            function buildProgressionPoints(rows) {
+                if (!rows) return [];
+                const points = [];
+                rows.forEach((row, index) => {
+                    const seconds = Number.parseFloat(row.timeToObtainSeconds ?? row.seconds ?? "");
+                    if (!Number.isFinite(seconds) || seconds < 0) {
+                        return;
+                    }
+                    const cumulative = Number.parseFloat(row.cumulativeTimeSeconds ?? row.cumulative ?? "");
+                    points.push({
+                        step: Number.parseInt(row.order ?? row.step ?? String(index + 1), 10) || index + 1,
+                        itemName: row.itemName ?? "Unknown item",
+                        seconds,
+                        ttoLabel: row.timeToObtainLabel ?? row.ttoLabel ?? "—",
+                        limiting: row.limitingCurrencyLabel ?? row.limitingCurrency ?? "None",
+                        isLong: String(row.isLong ?? "").toLowerCase() === "true",
+                        cumulative: Number.isFinite(cumulative) && cumulative >= 0 ? cumulative : null,
+                    });
+                });
+                return points.sort((a, b) => a.step - b.step);
+            }
+
+            function renderTimeToObtain(points) {
+                if (!window.Plotly) {
+                    ttoChart.innerHTML = "<em>Plotly not available.</em>";
+                    return;
+                }
+                if (!points || points.length === 0) {
+                    ttoChart.innerHTML = "<em>No progression data available.</em>";
+                    return;
+                }
+
+                const dtick = Math.max(1, Math.floor(points.length / 12));
+
+                Plotly.newPlot(
+                    ttoChart,
+                    [
+                        {
+                            type: "scattergl",
+                            mode: "markers",
+                            x: points.map((point) => point.step),
+                            y: points.map((point) => point.seconds),
+                            marker: {
+                                color: points.map((point) => (point.isLong ? "#E17055" : "#6C5CE7")),
+                                size: 6,
+                            },
+                            text: points.map(
+                                (point) =>
+                                    `${point.step}. ${point.itemName}<br>TTO: ${point.ttoLabel}<br>Seconds (est): ${formatNumber(point.seconds)}<br>Limiting: ${point.limiting}`,
+                            ),
+                            hovertemplate: "%{text}<extra></extra>",
+                        },
+                    ],
+                    {
+                        title: "Time to Obtain per Step (seconds)",
+                        margin: { t: 40, l: 60, r: 20, b: 60 },
+                        xaxis: {
+                            title: "Progression Step",
+                            tickmode: "linear",
+                            dtick,
+                            rangeslider: { visible: true },
+                        },
+                        yaxis: {
+                            title: "Seconds",
+                            type: "log",
+                            rangemode: "tozero",
+                        },
+                    },
+                    { responsive: true },
+                );
+
+                window.addEventListener("resize", () => {
+                    Plotly.Plots.resize(ttoChart);
+                });
+            }
+
+            function renderCumulative(points) {
+                if (!window.Plotly) {
+                    cumulativeChart.innerHTML = "<em>Plotly not available.</em>";
+                    return;
+                }
+                if (!points || points.length === 0) {
+                    cumulativeChart.innerHTML = "<em>No progression data available.</em>";
+                    return;
+                }
+
+                const usable = points.filter((point) => Number.isFinite(point.cumulative));
+                if (usable.length === 0) {
+                    cumulativeChart.innerHTML = "<em>No cumulative data available.</em>";
+                    return;
+                }
+
+                Plotly.newPlot(
+                    cumulativeChart,
+                    [
+                        {
+                            type: "scatter",
+                            mode: "lines+markers",
+                            x: usable.map((point) => point.step),
+                            y: usable.map((point) => point.cumulative),
+                            line: { shape: "hv", color: "#00B894" },
+                            marker: { size: 6 },
+                            hovertemplate: "Step %{x}<br>Cumulative: %{y:.2f}s<extra></extra>",
+                        },
+                    ],
+                    {
+                        title: "Cumulative Time to Progression (seconds)",
+                        margin: { t: 40, l: 60, r: 20, b: 60 },
+                        xaxis: { title: "Step" },
+                        yaxis: { title: "Seconds" },
+                    },
+                    { responsive: true },
+                );
+
+                window.addEventListener("resize", () => {
+                    Plotly.Plots.resize(cumulativeChart);
+                });
+            }
+
+            function renderProfiling(rows) {
+                if (!window.Plotly) {
+                    profilingChart.innerHTML = "<em>Plotly not available.</em>";
+                    return;
+                }
+                if (!rows || rows.length === 0) {
+                    profilingChart.innerHTML = "<em>No profiling data available.</em>";
+                    return;
+                }
+
+                const points = rows
+                    .map((row) => ({
+                        metric: row.metric ?? row.key ?? "", 
+                        value: Number.parseFloat(row.value ?? row.seconds ?? ""),
+                    }))
+                    .filter((entry) => entry.metric && Number.isFinite(entry.value) && entry.value >= 0);
+
+                if (points.length === 0) {
+                    profilingChart.innerHTML = "<em>No profiling data available.</em>";
+                    return;
+                }
+
+                Plotly.newPlot(
+                    profilingChart,
+                    [
+                        {
+                            type: "bar",
+                            orientation: "h",
+                            x: points.map((entry) => entry.value),
+                            y: points.map((entry) => entry.metric),
+                            marker: { color: "#0984E3" },
+                            hovertemplate: "%{y}: %{x:.2f}s<extra></extra>",
+                        },
+                    ],
+                    {
+                        title: "Profiling Breakdown (seconds)",
+                        margin: { t: 40, l: 180, r: 20, b: 40 },
+                        xaxis: { title: "Seconds" },
+                    },
+                    { responsive: true },
+                );
+
+                window.addEventListener("resize", () => {
+                    Plotly.Plots.resize(profilingChart);
+                });
+            }
+
+            async function init() {
+                try {
+                    const metaRows = await loadCsv("PROGRESS_ESTIMATION_meta.csv");
+                    const metaMap = csvRowsToMap(metaRows);
+                    applyStatus(metaMap);
+
+                    if (metaMap.payloadError) {
+                        showWarning(`Report payload parse error: ${metaMap.payloadError}`);
+                    }
+
+                    const [summaryRows, limitingRows, progressionRows, longestRows, profilingRows, logsText] = await Promise.all([
+                        loadCsv("PROGRESS_ESTIMATION_summary.csv").catch((error) => {
+                            showWarning(error.message);
+                            return null;
+                        }),
+                        loadCsv("PROGRESS_ESTIMATION_limiting.csv").catch(() => null),
+                        loadCsv("PROGRESS_ESTIMATION_progression.csv").catch((error) => {
+                            showWarning(error.message);
+                            return null;
+                        }),
+                        loadCsv("PROGRESS_ESTIMATION_top_longest.csv").catch(() => null),
+                        loadCsv("PROGRESS_ESTIMATION_profiling.csv").catch(() => null),
+                        loadText("PROGRESS_ESTIMATION_logs.txt").catch(() => null),
+                    ]);
+
+                    if (summaryRows) {
+                        populateSummary(csvRowsToMap(summaryRows));
+                    }
+
+                    populateLimiting(limitingRows ?? []);
+                    populateLongest(longestRows ?? []);
+                    populateLogs(logsText);
+
+                    const progressionPoints = buildProgressionPoints(progressionRows ?? []);
+                    renderTimeToObtain(progressionPoints);
+                    renderCumulative(progressionPoints);
+                    renderProfiling(profilingRows ?? []);
+                } catch (error) {
+                    console.error("Failed to initialise dashboard", error);
+                    showWarning(error.message ?? "Unable to load dashboard data.");
+                    statusBadge.textContent = "Error";
+                    statusBadge.className = statusClassMap.error;
+                }
+            }
+
+            init();
+        })();
+    </script>
+</body>
+</html>

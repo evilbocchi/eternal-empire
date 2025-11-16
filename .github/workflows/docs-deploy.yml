@@ -17,6 +17,15 @@ concurrency:
 jobs:
     build:
         runs-on: ubuntu-latest
+        environment: ci
+
+        env:
+            ROBLOX_API_KEY: ${{ secrets.ROBLOX_API_KEY }}
+            ROBLOX_GROUP_ID: ${{ secrets.ROBLOX_GROUP_ID }}
+            LUAU_EXECUTION_KEY: ${{ secrets.LUAU_EXECUTION_KEY }}
+            LUAU_EXECUTION_UNIVERSE_ID: ${{ secrets.LUAU_EXECUTION_UNIVERSE_ID }}
+            LUAU_EXECUTION_PLACE_ID: ${{ secrets.LUAU_EXECUTION_PLACE_ID }}
+
         steps:
             - name: Checkout
               uses: actions/checkout@v4
@@ -29,6 +38,9 @@ jobs:
 
             - name: Install Dependencies
               run: npm ci
+
+            - name: Build Project
+              run: npm run build
 
             - name: Generate Documentation
               run: npm run docs

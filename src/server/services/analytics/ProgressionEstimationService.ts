@@ -16,8 +16,7 @@
 import { getAllInstanceInfo } from "@antivivi/vrldk";
 import { Service } from "@flamework/core";
 import { OnoeNum } from "@rbxts/serikanum";
-import { Workspace } from "@rbxts/services";
-import StringBuilder from "@rbxts/stringbuilder";
+import { HttpService, Workspace } from "@rbxts/services";
 import { Environment } from "@rbxts/ui-labs";
 import ResetService from "server/services/ResetService";
 import RevenueService from "server/services/RevenueService";
@@ -73,6 +72,35 @@ type ProfilingStats = {
     dropletSetUpgradesTime: number;
     dropletCalculateValueTime: number;
     dropletApplyFurnacesTime: number;
+};
+
+type SerializedCurrencyAmount = {
+    currency: string;
+    formatted: string;
+    single: number;
+};
+
+type ProgressionReportEntry = {
+    order: number;
+    itemId: string;
+    itemName: string;
+    difficulty: string;
+    timeToObtainSeconds: number;
+    timeToObtainLabel: string;
+    cumulativeTimeSeconds: number;
+    cumulativeTimeLabel: string;
+    priceLabel?: string;
+    limitingCurrency?: Currency;
+    limitingCurrencyLabel: string;
+    isLong: boolean;
+    revenueBreakdown: SerializedCurrencyAmount[];
+    formulaResult?: string;
+    upgraderDetails?: string;
+};
+
+type ProfilingReport = ProfilingStats & {
+    otherOperationsTime: number;
+    totalExecutionTime: number;
 };
 
 const stripOperativeToOneCurrency = (operative: IOperative, currency: Currency) => {
@@ -612,6 +640,21 @@ export default class ProgressionEstimationService {
         return revenue;
     }
 
+    private serializeCurrencyBundle(bundle: CurrencyBundle) {
+        const amounts = new Array<SerializedCurrencyAmount>();
+        for (const [currency] of CurrencyBundle.SORTED_DETAILS) {
+            const amount = bundle.amountPerCurrency.get(currency);
+            if (amount === undefined) continue;
+
+            amounts.push({
+                currency,
+                formatted: CurrencyBundle.getFormatted(currency, amount),
+                single: amount.toSingle(),
+            });
+        }
+        return amounts;
+    }
+
     estimate() {
         // Reset profiling stats
         this.profilingStats = {
@@ -634,116 +677,152 @@ export default class ProgressionEstimationService {
 
         const startClock = os.clock();
         const progression = this.getProgression();
-        const builder = new StringBuilder();
-        let itemIteration = 1;
-        const ttoList: Array<{ item: Item; tto: OnoeNum }> = [];
+
+        const entries = new Array<ProgressionReportEntry>();
+
+        const longestTracker = new Array<{
+            itemName: string;
+            itemId: string;
+            time: OnoeNum;
+            timeLabel: string;
+            timeSeconds: number;
+        }>();
+
+        const limitingCounts: Record<string, number> = {};
+        const longThreshold = new OnoeNum(1000);
+        let longCount = 0;
+        let iteration = 1;
+        let runningSimulatedTime = new OnoeNum(0);
 
         for (const stats of progression) {
             const item = stats.item;
             const timeToObtain = stats.timeToObtain;
             if (item === undefined || timeToObtain === undefined) continue;
-            builder.append(itemIteration);
-            builder.append(". **");
-            builder.append(item.name);
-            builder.append("** from ");
-            builder.append(item.difficulty.name);
-            builder.append("\n\t> **");
-            builder.append(timeToObtain.toString());
-            builder.append("s** TTO at price ");
-            builder.append(stats.priceLabel);
-            builder.append(". (Limiting: **");
-            builder.append(stats.limitingCurrency);
-            builder.append("**)");
-            if (timeToObtain.moreThan(1000)) {
-                builder.append(`\n\t> **LONG**`);
+
+            const limiting = stats.limitingCurrency;
+            const limitingKey = limiting ?? "None";
+            limitingCounts[limitingKey] = (limitingCounts[limitingKey] ?? 0) + 1;
+
+            const isLong = timeToObtain.moreThan(longThreshold);
+            if (isLong) {
+                longCount++;
             }
 
-            if (item.formula !== undefined) {
-                builder.append(`\n\t> Formula Result = ${item.formulaResult}`);
-                const upgrader = item.findTrait("Upgrader");
-                if (upgrader?.mul !== undefined) {
-                    builder.append(`\n\t> Upgrader = ${upgrader.mul}`);
-                }
+            runningSimulatedTime = runningSimulatedTime.add(timeToObtain);
+
+            const difficultyName = item.difficulty?.name ?? "Unknown";
+
+            const entry: ProgressionReportEntry = {
+                order: iteration,
+                itemId: item.id,
+                itemName: item.name,
+                difficulty: difficultyName,
+                timeToObtainSeconds: math.round(timeToObtain.revert()),
+                timeToObtainLabel: timeToObtain.toString(),
+                cumulativeTimeSeconds: math.round(runningSimulatedTime.revert()),
+                cumulativeTimeLabel: runningSimulatedTime.toString(),
+                priceLabel: stats.priceLabel,
+                limitingCurrency: limiting,
+                limitingCurrencyLabel: limitingKey,
+                isLong,
+                revenueBreakdown: this.serializeCurrencyBundle(stats.revenue),
+            };
+
+            if (item.formula !== undefined && item.formulaResult !== undefined) {
+                entry.formulaResult = tostring(item.formulaResult);
             }
 
-            builder.append("\n");
-            itemIteration++;
-            ttoList.push({ item: item, tto: timeToObtain });
+            const upgrader = item.findTrait("Upgrader");
+            if (upgrader !== undefined && upgrader.mul !== undefined) {
+                entry.upgraderDetails = tostring(upgrader.mul);
+            }
+
+            entries.push(entry);
+            longestTracker.push({
+                itemName: item.name,
+                itemId: item.id,
+                time: timeToObtain,
+                timeLabel: entry.timeToObtainLabel,
+                timeSeconds: entry.timeToObtainSeconds,
+            });
+
+            iteration++;
         }
-        builder.append(`\n\n`);
 
-        if (!ttoList.isEmpty()) {
-            ttoList.sort((a, b) => a.tto.moreThan(b.tto));
-            builder.append(`-# Top 10 Highest Time-To-Obtain (TTO) Items:\n`);
-            for (let i = 0; i < math.min(10, ttoList.size()); i++) {
-                const entry = ttoList[i];
-                builder.append(`  ${i + 1}. **${entry.item.name}**: ${entry.tto.toString()}s\n`);
-            }
-        }
+        const itemCount = entries.size();
+        const totalSimulatedTime = runningSimulatedTime;
+        const averageTime = itemCount > 0 ? totalSimulatedTime.div(itemCount) : new OnoeNum(0);
 
-        builder.append(`-# Note that this is a rough estimate and does not account for all mechanics in the game.\n`);
         const dtInner = math.floor((os.clock() - startClock) * 100) / 100;
 
-        // Add profiling information
-        builder.append(`\n## Performance Profiling\n`);
-        builder.append(`- Total time: ${dtInner}s\n`);
-        builder.append(
-            `- calculateRevenue: ${math.floor(this.profilingStats.calculateRevenueTime * 100) / 100}s (${
-                this.profilingStats.calculateRevenueCount
-            } calls, avg ${
-                math.floor(
-                    (this.profilingStats.calculateRevenueTime / this.profilingStats.calculateRevenueCount) * 10000,
-                ) / 10000
-            }s/call)\n`,
-        );
-        builder.append(`  - First item loop: ${math.floor(this.profilingStats.calcRevFirstLoopTime * 100) / 100}s\n`);
-        builder.append(`  - Second item loop: ${math.floor(this.profilingStats.calcRevSecondLoopTime * 100) / 100}s\n`);
-        builder.append(`  - Droplet loop: ${math.floor(this.profilingStats.calcRevDropletLoopTime * 100) / 100}s\n`);
-        builder.append(
-            `    - Get instance info: ${math.floor(this.profilingStats.dropletGetInstanceInfoTime * 100) / 100}s\n`,
-        );
-        builder.append(`    - Set upgrades: ${math.floor(this.profilingStats.dropletSetUpgradesTime * 100) / 100}s\n`);
-        builder.append(
-            `    - Calculate value: ${math.floor(this.profilingStats.dropletCalculateValueTime * 100) / 100}s\n`,
-        );
-        builder.append(
-            `    - Apply furnaces: ${math.floor(this.profilingStats.dropletApplyFurnacesTime * 100) / 100}s\n`,
-        );
-        builder.append(`  - Charger application: ${math.floor(this.profilingStats.calcRevChargerTime * 100) / 100}s\n`);
-        builder.append(`  - Other (reset layers): ${math.floor(this.profilingStats.calcRevOtherTime * 100) / 100}s\n`);
-        builder.append(
-            `- getNextItem: ${math.floor(this.profilingStats.getNextItemTime * 100) / 100}s (${
-                this.profilingStats.getNextItemCount
-            } calls, avg ${
-                math.floor((this.profilingStats.getNextItemTime / this.profilingStats.getNextItemCount) * 10000) / 10000
-            }s/call)\n`,
-        );
-        builder.append(
-            `- findShopForItem: ${math.floor(this.profilingStats.findShopTime * 100) / 100}s (${
-                this.profilingStats.findShopCount
-            } calls, avg ${
-                math.floor((this.profilingStats.findShopTime / this.profilingStats.findShopCount) * 10000) / 10000
-            }s/call)\n`,
-        );
+        longestTracker.sort((a, b) => a.time.moreThan(b.time));
+        const topLongest = new Array<{
+            rank: number;
+            itemName: string;
+            timeLabel: string;
+            timeSeconds: number;
+        }>();
+        for (let i = 0; i < math.min(10, longestTracker.size()); i++) {
+            const entry = longestTracker[i];
+            topLongest.push({
+                rank: i + 1,
+                itemName: entry.itemName,
+                timeLabel: entry.timeLabel,
+                timeSeconds: entry.timeSeconds,
+            });
+        }
+
         const otherTime =
             dtInner -
             this.profilingStats.calculateRevenueTime -
             this.profilingStats.getNextItemTime -
             this.profilingStats.findShopTime;
-        builder.append(`- Other operations: ${math.floor(otherTime * 100) / 100}s\n`);
-        builder.append(`\n`);
+        const profiling: ProfilingReport = {
+            ...this.profilingStats,
+            otherOperationsTime: otherTime,
+            totalExecutionTime: dtInner,
+        };
 
+        const upgradesSimulated = new Array<{ id: string; amount: number }>();
         for (const [id, amount] of this.namedUpgradeService.upgrades) {
-            builder.append(`- Simulated named upgrade: ${id} x${amount}\n`);
+            upgradesSimulated.push({ id, amount });
         }
+
+        const resetLayersSimulated = new Array<{
+            id: string;
+            rewardLabel: string;
+            rewardBreakdown: SerializedCurrencyAmount[];
+        }>();
         for (const [id, resetLayer] of pairs(RESET_LAYERS)) {
             const reward = this.resetService.getResetReward(resetLayer);
             if (reward === undefined) continue;
-            builder.append(`- Simulated reset layer: ${id} (Reward: ${reward})\n`);
+            resetLayersSimulated.push({
+                id,
+                rewardLabel: reward.toString(),
+                rewardBreakdown: this.serializeCurrencyBundle(reward),
+            });
         }
 
-        builder.append(`-# Calculated in ${dtInner} seconds.\n`);
+        const report = {
+            generatedAt: DateTime.now().ToIsoDate(),
+            runDurationSeconds: dtInner,
+            summary: {
+                totalItems: itemCount,
+                longItems: longCount,
+                longItemThresholdSeconds: 1000,
+                totalSimulatedTimeSeconds: math.round(totalSimulatedTime.revert()),
+                totalSimulatedTimeLabel: totalSimulatedTime.toString(),
+                averageTimeSeconds: math.round(averageTime.revert()),
+                averageTimeLabel: averageTime.toString(),
+                limitingCurrencyCounts: limitingCounts,
+            },
+            progression: entries,
+            topLongest,
+            profiling,
+            upgradesSimulated,
+            resetLayersSimulated,
+        };
 
-        Environment.OriginalG.ProgressEstimated?.(builder.toString());
+        Environment.OriginalG.ProgressEstimated?.(HttpService.JSONEncode(report));
     }
 }
