@@ -155,50 +155,23 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
         this.researching = dataService.empireData.items.researching;
     }
 
-    private getShopsSellingItem(item: Item) {
-        let shops = this.shopsPerItem.get(item.id);
-        if (shops !== undefined) {
-            return shops;
-        }
-
-        shops = new Array<Item>();
-        for (const [, candidate] of Items.itemsPerId) {
-            const shopTrait = candidate.findTrait("Shop");
-            if (shopTrait !== undefined && shopTrait.items.has(item)) {
-                shops.push(candidate);
-            }
-        }
-
-        this.shopsPerItem.set(item.id, shops);
-        return shops;
-    }
-
+    /**
+     * Checks if the empire has unlocked any required shops to purchase the given item.
+     * @param item The item to check shop requirements for.
+     * @returns True if the empire has unlocked a required shop, false otherwise.
+     */
     private hasUnlockedRequiredShop(item: Item) {
-        const shops = this.getShopsSellingItem(item);
+        const shops = item.shopsSoldIn;
         if (shops.isEmpty()) {
-            return true;
+            print(`Item ${item.id} requires a shop to be unlocked.`);
+            return false;
         }
 
-        const pricedShops = new Array<Item>();
         for (const shop of shops) {
-            if (shop.getPrice(1) !== undefined) {
-                pricedShops.push(shop);
-            } else {
-                return true; // If it's free, consider it unlocked
-            }
+            if (shop.pricePerIteration.isEmpty()) return true;
+            if (this.getBoughtAmount(shop.id) > 0) return true;
         }
 
-        if (pricedShops.isEmpty() || pricedShops.isEmpty() !== shops.isEmpty()) {
-            return true;
-        }
-
-        for (const shop of pricedShops) {
-            if (this.getBoughtAmount(shop.id) > 0) {
-                return true;
-            }
-        }
-
-        print(`Item ${item.id} requires a shop to be unlocked.`);
         return false;
     }
 

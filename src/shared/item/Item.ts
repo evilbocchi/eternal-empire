@@ -103,6 +103,11 @@ export default class Item {
     readonly placeableAreas = new Set<Area>();
 
     /**
+     * The shops that sell this item.
+     */
+    readonly shopsSoldIn = new Set<Item>();
+
+    /**
      * The price of the item per iteration.
      * The next iteration is the number of times the item has been purchased.
      */
@@ -552,7 +557,8 @@ export default class Item {
         for (const shopItem of shopItems) {
             const shop = shopItem.findTrait("Shop");
             if (shop === undefined) throw `Cannot add ${this.id} to ${shopItem.id} as it does not have the Shop trait.`;
-            shop.addItem(this);
+            shop.items.add(this);
+            this.shopsSoldIn.add(shopItem);
         }
         return this;
     }

@@ -8,6 +8,9 @@ declare global {
 }
 
 export default class Shop extends ItemTrait {
+    /**
+     * The items sold in this shop. Do not modify this set directly; instead, use {@link Item.soldAt}.
+     */
     readonly items = new Set<Item>();
 
     static sharedLoad(model: Model) {
@@ -29,10 +32,5 @@ export default class Shop extends ItemTrait {
         super(item);
         item.persists().unbreakable();
         item.onSharedLoad((model) => Shop.sharedLoad(model));
-    }
-
-    addItem(item: Item) {
-        this.items.add(item);
-        return this;
     }
 }
