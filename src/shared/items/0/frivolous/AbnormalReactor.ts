@@ -12,7 +12,7 @@ export = new Item(script.Name)
 It is said that this machine was made solely to piss off its users... but anything for that sweet, sweet Skill, right?`,
     )
     .setDifficulty(Difficulty.Frivolous)
-    .setPrice(new CurrencyBundle().set("Skill", 300000), 1)
+    .setPrice(new CurrencyBundle().set("Skill", 370000), 1)
     .addPlaceableArea("SlamoVillage")
     .soldAt(Class0Shop)
     .setCreator("butterman_toast")

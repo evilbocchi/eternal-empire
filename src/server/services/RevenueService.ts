@@ -8,7 +8,6 @@
  * - Global and upgrade-based revenue multipliers (e.g., Dark Matter, Funds Bombs, named upgrades)
  * - Application of additive, multiplicative, and exponential boosts to all revenue sources
  * - Calculation of droplet values, including all relevant boosts and nerfs
- * - Integration with softcap logic and currency balancing
  *
  * RevenueService acts as the central authority for all value and boost calculations
  * related to item and droplet revenue, ensuring consistent and extensible logic for
@@ -26,7 +25,6 @@ import DataService from "server/services/data/DataService";
 import AtmosphereService from "server/services/world/AtmosphereService";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import DarkMatter from "shared/currency/mechanics/DarkMatter";
-import Softcaps, { calculateSoftcap } from "shared/currency/mechanics/Softcaps";
 import Droplet from "shared/item/Droplet";
 import type Condenser from "shared/item/traits/dropper/Condenser";
 import Operative, { IOperative } from "shared/item/traits/Operative";
@@ -38,7 +36,7 @@ const FURNACE_UPGRADES = NamedUpgrades.getUpgrades("Furnace");
 
 /**
  * Service for managing all revenue, value, and boost calculations for items and droplets.
- * Handles global and upgrade-based multipliers, softcaps, and value computation.
+ * Handles global and upgrade-based multipliers and value computation.
  */
 @Service()
 export default class RevenueService {
@@ -217,49 +215,6 @@ export default class RevenueService {
                     Operative.applyOperative(add, mul, pow, operative, undefined, undefined, true);
                     if (verbose === true) {
                         this.factors.push([id.upper(), operative]);
-                    }
-                }
-            }
-
-            // Softcaps
-            const preSoftcapValue = this.coalesce();
-            const balance = this.revenueService.currencyService.balance.amountPerCurrency;
-            for (const [currency, amount] of preSoftcapValue.amountPerCurrency) {
-                const softcaps = Softcaps[currency];
-                if (softcaps === undefined) continue;
-
-                const inBal = balance.get(currency);
-                const highest = inBal === undefined || inBal.lessThan(amount) ? amount : inBal;
-
-                const [divSoftcapValue] = calculateSoftcap(highest, softcaps.div);
-                if (divSoftcapValue !== undefined) {
-                    const mulAmountPerCurrency = mul.amountPerCurrency;
-                    const currentMul = mulAmountPerCurrency.get(currency);
-                    if (currentMul !== undefined) {
-                        mulAmountPerCurrency.set(currency, currentMul.div(divSoftcapValue));
-                    }
-
-                    if (verbose === true) {
-                        this.factors.push([
-                            "SOFTCAPDIV",
-                            { mul: new CurrencyBundle().set(currency, divSoftcapValue), inverse: true },
-                        ]);
-                    }
-                }
-
-                const [rootSoftcapValue] = calculateSoftcap(highest, softcaps.recippow);
-                if (rootSoftcapValue !== undefined) {
-                    const powAmountPerCurrency = pow.amountPerCurrency;
-                    const currentPow = powAmountPerCurrency.get(currency);
-                    if (currentPow !== undefined) {
-                        powAmountPerCurrency.set(currency, currentPow.div(rootSoftcapValue));
-                    }
-
-                    if (verbose === true) {
-                        this.factors.push([
-                            "SOFTCAPROOT",
-                            { pow: new CurrencyBundle().set(currency, rootSoftcapValue), inverse: true },
-                        ]);
                     }
                 }
             }

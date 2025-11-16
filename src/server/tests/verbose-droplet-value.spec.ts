@@ -247,40 +247,6 @@ describe("Verbose Droplet Value Calculation", () => {
         dropletData.cleanup();
     });
 
-    it("tracks softcap application with very high values", () => {
-        const dropletData = spawnDroplet(Droplet.TheFirstDroplet);
-
-        // Set extremely high balance and boost to trigger softcaps
-        Server.Currency.set("Funds", new OnoeNum(1e308));
-        dropletData.dropletInfo.upgrades = new Map();
-        dropletData.dropletInfo.upgrades.set("TestMassiveBoost", {
-            model: undefined as unknown as Model,
-            boost: {
-                mul: new CurrencyBundle().set("Funds", 1e308),
-            },
-        });
-
-        const result = withWeatherDisabled(() => {
-            const r = Server.Revenue.calculateDropletValue(dropletData.droplet, true);
-            r.applySource();
-            r.applyFinal();
-            return r;
-        });
-
-        const softcapDivFactors = result.factors.filter(([label]) => label === "SOFTCAPDIV");
-        const softcapRootFactors = result.factors.filter(([label]) => label === "SOFTCAPROOT");
-
-        expect(softcapDivFactors.size() > 0).toBe(true);
-        expect(softcapRootFactors.size() > 0).toBe(true);
-
-        // Verify inverse flag is set
-        expect(softcapDivFactors[0][1].inverse).toBe(true);
-        expect(softcapRootFactors[0][1].inverse).toBe(true);
-
-        Server.Currency.set("Funds", new OnoeNum(0));
-        dropletData.cleanup();
-    });
-
     it("tracks all factors in correct order through full calculation pipeline", () => {
         const upgrader = spawnItemModel(TheFirstUpgrader.id);
         const handle = getTouchByTag(upgrader.model, "Laser");

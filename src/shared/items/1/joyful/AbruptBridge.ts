@@ -11,7 +11,7 @@ export = new Item(script.Name)
         "A bridge in the sky and a river, cutting off like nothing was ever there. %mul% for droplets passing underneath the bridge.",
     )
     .setDifficulty(Difficulty.Joyful)
-    .setPrice(new CurrencyBundle().set("Skill", 20e9), 1)
+    .setPrice(new CurrencyBundle().set("Skill", 230e9), 1)
     .setCreator("CoPKaDT")
     .addPlaceableArea("BarrenIslands", "SkyPavilion")
     .soldAt(Class1Shop)

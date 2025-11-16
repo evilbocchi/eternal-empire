@@ -9,7 +9,7 @@ export = new Item(script.Name)
         "A minimalistic, deceptive upgrader. The boosts? Calculate them yourself, the lasers' colors represent the statistics that they boost. Get out that calculator!",
     )
     .setDifficulty(Difficulty.Placid)
-    .setPrice(new CurrencyBundle().set("Skill", 2e12), 1)
+    .setPrice(new CurrencyBundle().set("Skill", 50e12), 1)
     .setCreator("sanjay2133")
     .addPlaceableArea("BarrenIslands")
     .trait(OmniUpgrader)

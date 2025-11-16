@@ -18,7 +18,7 @@ export = new Item(script.Name)
         "It's fate! You were destined to boost Funds gain, with that multiplier increasing by Skill. Just pass droplets through the correct ring. Or else...",
     )
     .setDifficulty(Difficulty.Unlosable)
-    .setPrice(new CurrencyBundle().set("Funds", 20e36), 1)
+    .setPrice(new CurrencyBundle().set("Funds", 90e36), 1)
     .addPlaceableArea("BarrenIslands")
     .soldAt(Class0Shop)
 

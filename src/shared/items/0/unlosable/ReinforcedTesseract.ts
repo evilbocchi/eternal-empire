@@ -11,7 +11,7 @@ export = new Item(script.Name)
     )
     .setDifficulty(Difficulty.Unlosable)
     .setPrice(
-        new CurrencyBundle().set("Funds", 60e36).set("Power", 10e21).set("Skill", 90000).set("Dark Matter", 70e9),
+        new CurrencyBundle().set("Funds", 300e36).set("Power", 10e21).set("Skill", 90000).set("Dark Matter", 70e9),
         1,
     )
     .addPlaceableArea("SlamoVillage")

@@ -14,7 +14,7 @@ export = new Item(script.Name)
         "Elevate your droplets while listening to some vibey tunes! If you place droppers in front of the boombox, they might also enjoy these tunes and have better production as well...",
     )
     .setDifficulty(Difficulty.Vibeness)
-    .setPrice(new CurrencyBundle().set("Skill", 6000000).set("Power", 250e24).set("Dark Matter", 25e27), 1)
+    .setPrice(new CurrencyBundle().set("Skill", 10000000).set("Power", 250e24).set("Dark Matter", 25e27), 1)
     .setRequiredItemAmount(Quartz, 2)
     .setRequiredItemAmount(Gold, 6)
     .setRequiredItemAmount(CorruptedGrass, 2)

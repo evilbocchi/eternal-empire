@@ -9,7 +9,7 @@ export = new Item(script.Name)
     .setDescription(
         "A variant of the Crafting Table with more latent power, allowing you to craft more powerful items.",
     )
-    .setPrice(new CurrencyBundle().set("Funds", 1e60), 1)
+    .setPrice(new CurrencyBundle().set("Funds", 10e63), 1)
     .placeableEverywhere()
     .persists()
 

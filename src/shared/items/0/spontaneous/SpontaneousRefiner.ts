@@ -66,7 +66,7 @@ const SpontaneousRefiner = new Item(script.Name)
 %add%, %mul%, %hp_add%.`,
     )
     .setDifficulty(Difficulty.Spontaneous)
-    .setPrice(new CurrencyBundle().set("Funds", 45e42).set("Power", 10e27), 1)
+    .setPrice(new CurrencyBundle().set("Funds", 1.8e45).set("Power", 10e27), 1)
 
     .addPlaceableArea("BarrenIslands")
     .soldAt(Class0Shop)

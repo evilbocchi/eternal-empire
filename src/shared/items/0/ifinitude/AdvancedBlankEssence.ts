@@ -6,7 +6,7 @@ import Class0Shop from "shared/items/0/Class0Shop";
 export = new Item(script.Name)
     .setName("Advanced Blank Essence")
     .setDescription(
-        "Didn't expect another one of these to pop up so soon, did you? Each purchase of this item will raise the price of the next by 1000x Funds and 100x Power.",
+        "Another. Each purchase of this item will raise the price of the next by 1000x Funds and 100x Power.",
     )
     .setDifficulty(Difficulty.Ifinitude)
     .setPrice(new CurrencyBundle().set("Funds", 1e30).set("Power", 100e15), 1)

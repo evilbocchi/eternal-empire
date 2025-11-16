@@ -12,7 +12,7 @@ export = new Item(script.Name)
     .setName(Difficulty.ShatteredBabass.name!)
     .setDescription("Shattered Babass is here to charge up your setup. Boosts Funds with Power.")
     .setDifficulty(Difficulty.ShatteredBabass)
-    .setPrice(new CurrencyBundle().set("Funds", 200e36).set("Power", 10e21).set("Skill", 200000), 1)
+    .setPrice(new CurrencyBundle().set("Funds", 1.25e39).set("Power", 10e21).set("Skill", 220000), 1)
     .addPlaceableArea("BarrenIslands")
     .soldAt(Class0Shop)
 

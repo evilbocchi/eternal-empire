@@ -212,7 +212,7 @@ export default class ResetService implements OnInit, OnStart {
 
     /**
      * Calculates the reward for resetting at the specified layer.
-     * Applies all relevant upgrades and softcaps.
+     * Applies all relevant upgrades.
      * @param resetLayer Reset layer to get the reward for
      * @param balance Balance to use for the reward calculation. Defaults to the current balance
      * @returns Reward for resetting at the specified layer

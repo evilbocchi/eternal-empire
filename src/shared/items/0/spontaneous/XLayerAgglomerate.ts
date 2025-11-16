@@ -14,7 +14,7 @@ export = new Item(script.Name)
 Each laser boosts their respective currency by x2.2.`,
     )
     .setDifficulty(Difficulty.Spontaneous)
-    .setPrice(new CurrencyBundle().set("Funds", 15e42).set("Skill", 15000000), 1)
+    .setPrice(new CurrencyBundle().set("Funds", 500e42).set("Skill", 40000000), 1)
     .setRequiredItemAmount(TwoStoreyUpgrader, 1)
     .addPlaceableArea("BarrenIslands", "SlamoVillage")
     .soldAt(Class0Shop)

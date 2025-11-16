@@ -15,7 +15,6 @@
 
 import { getAllInstanceInfo } from "@antivivi/vrldk";
 import { Service } from "@flamework/core";
-import Difficulty from "@rbxts/ejt";
 import { OnoeNum } from "@rbxts/serikanum";
 import { Workspace } from "@rbxts/services";
 import StringBuilder from "@rbxts/stringbuilder";

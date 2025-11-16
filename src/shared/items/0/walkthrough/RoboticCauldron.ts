@@ -15,7 +15,7 @@ Their final creation before going back to their ways was this abomination of a c
 Scales with Power, maxing out at %cap%. Also provides a flat %flat% boost.`,
     )
     .setDifficulty(Difficulty.Walkthrough)
-    .setPrice(new CurrencyBundle().set("Funds", 600e33).set("Power", 6e18), 1)
+    .setPrice(new CurrencyBundle().set("Funds", 1.5e36).set("Power", 6e18), 1)
     .addPlaceableArea("BarrenIslands")
     .soldAt(Class0Shop)
 

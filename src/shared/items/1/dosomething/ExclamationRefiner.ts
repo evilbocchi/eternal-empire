@@ -14,7 +14,7 @@ export = new Item(script.Name)
         "This will make you say '!!!' for sure. Droplets passing through the neon part get a %mul% boost. The part deals 25 damage but gives a 2x Power, Funds boost. Standing on the exclamation mark powers up the killbrick: x1.5 damage, x2.5 boost.",
     )
     .setDifficulty(Difficulty.DoSomething)
-    .setPrice(new CurrencyBundle().set("Funds", 1e60), 1)
+    .setPrice(new CurrencyBundle().set("Funds", 11e63), 1)
     .addPlaceableArea("BarrenIslands", "SlamoVillage", "SkyPavilion")
     .soldAt(Class1Shop)
     .setCreator("carl.npc")

@@ -13,7 +13,7 @@ export = new Item(script.Name)
     .setName("Get-This-Latergrader")
     .setDescription("Welcome to Skip! Now skip this item. You're not getting this yet.")
     .setDifficulty(Difficulty.Skip)
-    .setPrice(new CurrencyBundle().set("Funds", 1e45), 1)
+    .setPrice(new CurrencyBundle().set("Funds", 100e45), 1)
     .addPlaceableArea("BarrenIslands")
     .soldAt(ClassLowerNegativeShop)
 

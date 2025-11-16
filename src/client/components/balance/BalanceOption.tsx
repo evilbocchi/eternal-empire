@@ -1,13 +1,12 @@
-import { OnoeNum } from "@rbxts/serikanum";
 import React, { Fragment, useEffect, useMemo, useRef } from "@rbxts/react";
+import { OnoeNum } from "@rbxts/serikanum";
 import { Debris, TweenService } from "@rbxts/services";
 import StringBuilder from "@rbxts/stringbuilder";
 import displayBalanceCurrency from "client/components/balance/displayBalanceCurrency";
 import { TooltipManager } from "client/components/tooltip/TooltipWindow";
-import { RobotoMono, RobotoSlab, RobotoSlabBold } from "shared/asset/GameFonts";
 import { getAsset } from "shared/asset/AssetMap";
+import { RobotoSlab, RobotoSlabBold } from "shared/asset/GameFonts";
 import { CURRENCY_DETAILS } from "shared/currency/CurrencyDetails";
-import Softcaps, { calculateSoftcap } from "shared/currency/mechanics/Softcaps";
 
 export function BalanceOptionStyling({ details }: { details: CurrencyDetails }) {
     return (
@@ -67,7 +66,7 @@ export const balanceOptionImagePerCurrency = new Map<Currency | "none", GuiObjec
 
 /**
  * Individual currency balance display component.
- * Shows currency icon, amount, income rate, and softcap information.
+ * Shows currency icon, amount and income rate information.
  */
 export default function BalanceOption({
     currency,
@@ -87,7 +86,6 @@ export default function BalanceOption({
     const wrapperRef = useRef<Frame>();
     const incomeRef = useRef<TextLabel>();
     const details = CURRENCY_DETAILS[currency];
-    const softcapColor = Color3.fromRGB(255, 77, 33);
 
     const tooltipCurrencyColor = useMemo(() => {
         return details.color.Lerp(Color3.fromRGB(255, 255, 255), 0.8).ToHex();
@@ -104,38 +102,6 @@ export default function BalanceOption({
             }
         };
     }, []);
-
-    // Calculate softcap information
-    const { capped, softcapText, softcapStart } = useMemo(() => {
-        const softcap = Softcaps[currency];
-        if (!softcap) return { capped: false };
-
-        let capped = false;
-        const builder = new StringBuilder();
-        const starts = new Array<OnoeNum>();
-
-        const [recippow, recippowStarts] = calculateSoftcap(amount, softcap.recippow);
-        if (recippow !== undefined) {
-            capped = true;
-            builder.append("^(1/").append(recippow.toString()).append(")");
-            if (recippowStarts) {
-                starts.push(recippowStarts);
-            }
-        }
-
-        // Check division softcap
-        const [div, divStarts] = calculateSoftcap(amount, softcap.div);
-        if (div !== undefined) {
-            capped = true;
-            builder.append("/").append(div.toString());
-            if (divStarts) {
-                starts.push(divStarts);
-            }
-        }
-        const softcapText = builder.toString();
-
-        return { capped, softcapText, softcapStart: OnoeNum.min(...starts) };
-    }, [currency, amount]);
 
     useEffect(() => {
         if (difference === undefined || difference.equals(0)) return;
@@ -190,18 +156,6 @@ export default function BalanceOption({
                         .append(") ")
                         .append(currency)
                         .append(".</font>");
-                    if (capped === true) {
-                        tooltipBuilder
-                            .append("\n<font color='#")
-                            .append(softcapColor.ToHex())
-                            .append("' size='16'>")
-                            .append(currency)
-                            .append(" gain is currently softcapped by ")
-                            .append(softcapText)
-                            .append(" as it exceeds ")
-                            .append(displayBalanceCurrency(currency, softcapStart!))
-                            .append(".</font>");
-                    }
 
                     if (bombBoost) {
                         tooltipBuilder
@@ -291,7 +245,7 @@ export default function BalanceOption({
                 LayoutOrder={2}
                 Position={new UDim2(0, 24, 1, 0)}
                 Size={new UDim2(1, -30, 0.35, 0)}
-                Visible={showIncome || capped}
+                Visible={showIncome}
             >
                 {/* Income Label */}
                 <textlabel
@@ -320,25 +274,6 @@ export default function BalanceOption({
                         />
                     </uistroke>
                 </textlabel>
-                {/* Softcap Label */}
-                {capped && (
-                    <textlabel
-                        Active={true}
-                        AutomaticSize={Enum.AutomaticSize.X}
-                        BackgroundTransparency={1}
-                        FontFace={RobotoMono}
-                        LayoutOrder={2}
-                        Position={new UDim2(0, 0, 1, 0)}
-                        Size={new UDim2(0, 0, 0.6, 0)}
-                        Text={softcapText}
-                        TextColor3={softcapColor}
-                        TextScaled={true}
-                        TextWrapped={true}
-                        TextXAlignment={Enum.TextXAlignment.Left}
-                    >
-                        <uistroke Color={details.color.Lerp(Color3.fromRGB(0, 0, 0), 0.9)} Thickness={2} />
-                    </textlabel>
-                )}
 
                 <uilistlayout
                     FillDirection={Enum.FillDirection.Horizontal}
