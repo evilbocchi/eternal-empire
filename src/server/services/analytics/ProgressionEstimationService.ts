@@ -17,10 +17,9 @@ import { getAllInstanceInfo } from "@antivivi/vrldk";
 import { Service } from "@flamework/core";
 import Difficulty from "@rbxts/ejt";
 import { OnoeNum } from "@rbxts/serikanum";
-import { HttpService, Workspace } from "@rbxts/services";
+import { Workspace } from "@rbxts/services";
 import StringBuilder from "@rbxts/stringbuilder";
 import { Environment } from "@rbxts/ui-labs";
-import { $env } from "rbxts-transform-env";
 import ResetService from "server/services/ResetService";
 import RevenueService from "server/services/RevenueService";
 import CurrencyService from "server/services/data/CurrencyService";
@@ -237,10 +236,6 @@ export default class ProgressionEstimationService {
                 const requiredItem = Items.getItem(requiredItemId);
                 if (requiredItem === undefined) continue;
                 inventory.set(requiredItem, (inventory.get(requiredItem) ?? 0) - amount);
-            }
-
-            if (purchasedItem.findTrait("Upgrader") !== undefined) {
-                this.revenueService.clearUpgraderCache();
             }
 
             if (purchasedItem === target) {
@@ -473,9 +468,6 @@ export default class ProgressionEstimationService {
                 const requiredItem = Items.getItem(requiredItemId);
                 if (requiredItem === undefined) continue;
                 inventory.set(requiredItem, inventory.get(requiredItem)! - amount);
-            }
-            if (item.findTrait("Upgrader") !== undefined) {
-                this.revenueService.clearUpgraderCache();
             }
             totalTime = totalTime.add(stats.timeToObtain);
 

@@ -58,7 +58,7 @@ namespace ItemPlacement {
      * @param placeableAreas The list of placeable areas.
      * @returns The Area containing the position, or undefined.
      */
-    export function getAreaOfPosition(position: Vector3, placeableAreas: Area[]) {
+    export function getAreaOfPosition(position: Vector3, placeableAreas: Set<Area>) {
         for (const area of placeableAreas) {
             if (area.buildBounds?.isInside(position)) return area;
         }
@@ -71,7 +71,7 @@ namespace ItemPlacement {
      * @param placeableAreas The list of placeable areas.
      * @returns The Area containing the item, or undefined.
      */
-    export function getArea(itemModel: Model, placeableAreas: Area[]) {
+    export function getArea(itemModel: Model, placeableAreas: Set<Area>) {
         const hitbox = itemModel.PrimaryPart;
         if (hitbox !== undefined) {
             for (const area of placeableAreas) {

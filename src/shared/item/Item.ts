@@ -100,7 +100,7 @@ export default class Item {
     /**
      * The areas where the item can be placed.
      */
-    readonly placeableAreas = new Array<Area>();
+    readonly placeableAreas = new Set<Area>();
 
     /**
      * The price of the item per iteration.
@@ -538,7 +538,7 @@ export default class Item {
      * ```
      */
     addPlaceableArea(...areas: AreaId[]): this {
-        for (const area of areas) this.placeableAreas.push(AREAS[area]);
+        for (const area of areas) this.placeableAreas.add(AREAS[area]);
         this.updateResetLayer();
         return this;
     }
@@ -565,7 +565,7 @@ export default class Item {
      */
     placeableEverywhere(): this {
         for (const [_id, area] of pairs(AREAS)) {
-            this.placeableAreas.push(area);
+            this.placeableAreas.add(area);
         }
         this.updateResetLayer();
         return this;

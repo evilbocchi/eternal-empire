@@ -183,6 +183,8 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
         for (const shop of shops) {
             if (shop.getPrice(1) !== undefined) {
                 pricedShops.push(shop);
+            } else {
+                return true; // If it's free, consider it unlocked
             }
         }
 

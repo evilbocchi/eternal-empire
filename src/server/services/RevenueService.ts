@@ -26,7 +26,7 @@ import DataService from "server/services/data/DataService";
 import AtmosphereService from "server/services/world/AtmosphereService";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import DarkMatter from "shared/currency/mechanics/DarkMatter";
-import Softcaps, { calculateSoftcap, performSoftcaps } from "shared/currency/mechanics/Softcaps";
+import Softcaps, { calculateSoftcap } from "shared/currency/mechanics/Softcaps";
 import Droplet from "shared/item/Droplet";
 import type Condenser from "shared/item/traits/dropper/Condenser";
 import Operative, { IOperative } from "shared/item/traits/Operative";
@@ -43,9 +43,6 @@ const FURNACE_UPGRADES = NamedUpgrades.getUpgrades("Furnace");
 @Service()
 export default class RevenueService {
     weatherBoostEnabled = true;
-
-    private upgraderCache: { add: CurrencyBundle; mul: CurrencyBundle; pow: CurrencyBundle } | undefined;
-    private useUpgraderCache = false;
 
     /**
      * Constructs the RevenueService with all required dependencies.
@@ -72,32 +69,6 @@ export default class RevenueService {
         }
 
         return $tuple(add, mul, pow);
-    }
-
-    /**
-     * Applies softcaps to the provided value, using the current balance as context.
-     *
-     * @param value The value to apply softcaps to
-     * @returns The softcapped value
-     */
-    private performSoftcaps(value: CurrencyMap) {
-        return performSoftcaps(this.currencyService.balance.amountPerCurrency, value);
-    }
-
-    /**
-     * Sets the operative cache for estimation.
-     */
-    setUpgraderCache(cache: { add: CurrencyBundle; mul: CurrencyBundle; pow: CurrencyBundle }) {
-        this.upgraderCache = cache;
-        this.useUpgraderCache = true;
-    }
-
-    /**
-     * Clears the operative cache.
-     */
-    clearUpgraderCache() {
-        this.useUpgraderCache = false;
-        this.upgraderCache = undefined;
     }
 
     /**
@@ -416,12 +387,6 @@ export default class RevenueService {
          * @param pow The power term to modify.
          */
         private applyUpgraders(add: CurrencyBundle, mul: CurrencyBundle, pow: CurrencyBundle) {
-            const useCache = this.revenueService.useUpgraderCache;
-            if (useCache === true) {
-                const cache = this.revenueService.upgraderCache;
-                if (cache !== undefined) return $tuple(cache.add, cache.mul, cache.pow);
-            }
-
             const dropletUpgrades = this.instanceInfo.upgrades;
             if (dropletUpgrades === undefined) {
                 throw `Droplet upgrades not found on droplet ${this.instance.GetFullName()}`;
@@ -434,10 +399,6 @@ export default class RevenueService {
                 if (this.verbose === true) {
                     this.factors.push([(upgradeInfo.item?.id ?? upgradeId).upper(), operative]);
                 }
-            }
-
-            if (useCache === true) {
-                this.revenueService.setUpgraderCache({ add, mul, pow });
             }
         }
 

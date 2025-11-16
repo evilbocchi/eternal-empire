@@ -116,7 +116,7 @@ export default function loadBuildProcessing() {
 
         if (isPlacing === true) {
             // Snap model to mouse if in a valid area
-            if (area !== undefined && item.placeableAreas.includes(area)) {
+            if (area !== undefined && item.placeableAreas.has(area)) {
                 const mouseLocation = Environment.UserInput.GetMouseLocation();
                 const viewRay = CAMERA.ViewportPointToRay(mouseLocation.X, mouseLocation.Y);
                 const ray = Workspace.Raycast(viewRay.Origin, viewRay.Direction.mul(1000));
