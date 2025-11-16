@@ -121,6 +121,44 @@ jobs:
                   prerelease: false
                   token: ${{ github.token }}
 
+    estimate-progress:
+        runs-on: ubuntu-latest
+        environment: ci
+
+        env:
+            ROBLOX_API_KEY: ${{ secrets.ROBLOX_API_KEY }}
+            ROBLOX_GROUP_ID: ${{ secrets.ROBLOX_GROUP_ID }}
+            LUAU_EXECUTION_KEY: ${{ secrets.LUAU_EXECUTION_KEY }}
+            LUAU_EXECUTION_UNIVERSE_ID: ${{ secrets.LUAU_EXECUTION_UNIVERSE_ID }}
+            LUAU_EXECUTION_PLACE_ID: ${{ secrets.LUAU_EXECUTION_PLACE_ID }}
+
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+
+            - name: Setup Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: 20
+                  cache: "npm"
+
+            - name: Install dependencies
+              run: npm ci
+
+            - name: Build project
+              run: npm run build
+
+            - name: Run progress estimation
+              run: node test/runProgressionEstimate.js
+              continue-on-error: false
+
+            - name: Upload artifacts
+              uses: actions/upload-artifact@v4
+              with:
+                  name: ee-progress-estimation
+                  path: PROGRESS_ESTIMATION.md
+                  retention-days: 30
+
     security:
         runs-on: ubuntu-latest
 
