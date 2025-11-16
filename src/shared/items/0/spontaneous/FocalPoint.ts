@@ -32,7 +32,7 @@ The structure of the Focal Point is said to be the exoskeleton of what was once 
 Produces a %val% droplet every 4 seconds.`,
     )
     .setDifficulty(Difficulty.Spontaneous)
-    .setPrice(new CurrencyBundle().set("Funds", 600e42).set("Skill", 20000000).set("Dark Matter", 1e30), 1)
+    .setPrice(new CurrencyBundle().set("Funds", 1e48).set("Skill", 1000000000).set("Dark Matter", 1e30), 1)
     .setRequiredItemAmount(TheFirstDropper, TheFirstDropper.pricePerIteration.size())
     .setRequiredItemAmount(BulkyDropper, BulkyDropper.pricePerIteration.size())
     .setRequiredItemAmount(HeavyweightDropper, HeavyweightDropper.pricePerIteration.size())

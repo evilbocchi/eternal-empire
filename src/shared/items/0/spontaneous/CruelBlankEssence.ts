@@ -51,12 +51,12 @@ Whispering,
     .setDifficulty(Difficulty.Spontaneous)
     .setPrice(
         new CurrencyBundle()
-            .set("Funds", 1e48)
-            .set("Power", 1e33)
-            .set("Bitcoin", 1e15)
-            .set("Skill", 1e9)
-            .set("Purifier Clicks", 1e33)
-            .set("Dark Matter", 1e33),
+            .set("Funds", 2.5e48)
+            .set("Power", 25e27)
+            .set("Bitcoin", 250e9)
+            .set("Skill", 2.5e9)
+            .set("Purifier Clicks", 25e24)
+            .set("Dark Matter", 250e24),
         1,
     )
     .setRequiredItemAmount(BasicCoinMiner, BasicCoinMiner.pricePerIteration.size())
