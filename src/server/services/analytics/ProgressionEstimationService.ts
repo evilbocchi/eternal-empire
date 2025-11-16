@@ -554,12 +554,12 @@ export default class ProgressionEstimationService {
             this.profilingStats.dropletSetUpgradesTime += os.clock() - setUpgradesStart;
 
             const calcValueStart = os.clock();
-            const resultWithUpgraders = this.revenueService.calculateDropletValue(dropletModel);
-            const resultWithoutUpgraders = this.revenueService.calculateDropletValue(dropletModel);
-            resultWithUpgraders.markAsCauldron();
+            const resultInFurnace = this.revenueService.calculateDropletValue(dropletModel);
+            const resultInCauldron = this.revenueService.calculateDropletValue(dropletModel);
+            resultInCauldron.markAsCauldron();
 
-            resultWithUpgraders.applySource();
-            resultWithoutUpgraders.applySource();
+            resultInFurnace.applySource();
+            resultInCauldron.applySource();
 
             this.profilingStats.dropletCalculateValueTime += os.clock() - calcValueStart;
 
@@ -569,19 +569,19 @@ export default class ProgressionEstimationService {
                 const cauldron = cauldronPerCurrency.get(currency);
 
                 if (furnace) {
-                    resultWithUpgraders.applyOperative(stripOperativeToOneCurrency(furnace, currency));
+                    resultInFurnace.applyOperative(stripOperativeToOneCurrency(furnace, currency));
                 }
 
                 if (cauldron) {
-                    resultWithoutUpgraders.applyOperative(stripOperativeToOneCurrency(cauldron, currency));
+                    resultInCauldron.applyOperative(stripOperativeToOneCurrency(cauldron, currency));
                 }
             }
 
-            resultWithUpgraders.applyFinal();
-            resultWithoutUpgraders.applyFinal();
+            resultInFurnace.applyFinal();
+            resultInCauldron.applyFinal();
 
-            const amountWithUpgraders = resultWithUpgraders.coalesce();
-            const amountWithoutUpgraders = resultWithoutUpgraders.coalesce();
+            const amountWithUpgraders = resultInFurnace.coalesce();
+            const amountWithoutUpgraders = resultInCauldron.coalesce();
 
             const value = new CurrencyBundle();
             for (const [currency] of CurrencyBundle.SORTED_DETAILS) {
