@@ -11,6 +11,13 @@
             },
             "$ignoreUnknownInstances": true
         },
+        "ServerStorage": {
+            "$className": "ServerStorage",
+            "tests": {
+                "$path": "out/tests",
+                "$ignoreUnknownInstances": true
+            }
+        },
         "ReplicatedFirst": {
             "$className": "ReplicatedFirst",
             "$path": "out/sharedfirst",

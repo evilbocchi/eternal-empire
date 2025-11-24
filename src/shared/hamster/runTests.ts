@@ -1,5 +1,5 @@
 import { runCLI } from "@rbxts/jest";
-import { ServerScriptService } from "@rbxts/services";
+import { ServerStorage } from "@rbxts/services";
 
 /**
  * Execute the test suite in `src/server/tests`.
@@ -7,7 +7,7 @@ import { ServerScriptService } from "@rbxts/services";
  * @returns A tuple containing a boolean indicating success and an object representing Jest output.
  */
 export = (color = false) => {
-    const root = ServerScriptService.WaitForChild("tests");
+    const root = ServerStorage.WaitForChild("tests");
 
     // force chalk to load with the right color level
     const [chalkSuccess, Chalk] = import("@rbxts-js/chalk-lua").await();

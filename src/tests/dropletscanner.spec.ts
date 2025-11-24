@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from "@rbxts/jest-globals";
-import { getTouchByTag, spawnDroplet, spawnItemModel, withWeatherDisabled } from "server/tests/utils";
+import { getTouchByTag, spawnDroplet, spawnItemModel, withWeatherDisabled } from "tests/utils";
 import { Server } from "shared/api/APIExpose";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Droplet from "shared/item/Droplet";
