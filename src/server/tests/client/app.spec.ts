@@ -1,8 +1,9 @@
-import { afterAll, beforeAll, describe, expect, it } from "@rbxts/jest-globals";
+import { afterAll, afterEach, describe, expect, it, jest } from "@rbxts/jest-globals";
 import React from "@rbxts/react";
 import { Root, createRoot } from "@rbxts/react-roblox";
 import { ReplicatedStorage, RunService, StarterGui, Workspace } from "@rbxts/services";
 import App from "client/components/App";
+import DocumentManager from "client/components/window/DocumentManager";
 import { SOUND_EFFECTS_GROUP } from "shared/asset/GameAssets";
 import { PLACED_ITEMS_FOLDER } from "shared/constants";
 import getPlayerBackpack from "shared/hamster/getPlayerBackpack";
@@ -11,6 +12,7 @@ import LoadingScreen from "sharedfirst/LoadingScreen";
 type MountContext = {
     root: Root;
     container: Folder;
+    previousSandbox: boolean | undefined;
 };
 
 function waitUntil(condition: () => boolean, timeout = 5) {
@@ -24,8 +26,8 @@ function waitUntil(condition: () => boolean, timeout = 5) {
     return condition();
 }
 
-let mount: MountContext | undefined;
-beforeAll(() => {
+function mountApp(): MountContext {
+    const previousSandbox = Workspace.GetAttribute("Sandbox") as boolean | undefined;
     // Enable Sandbox mode to prevent the intro sequence from starting
     Workspace.SetAttribute("Sandbox", true);
 
@@ -37,12 +39,24 @@ beforeAll(() => {
     for (let i = 0; i < 30; i++) {
         RunService.Heartbeat.Wait();
     }
-    mount = { root, container };
+    return { root, container, previousSandbox };
+}
+
+function cleanupMount(mount?: MountContext) {
+    if (!mount) return;
+    mount?.root.unmount();
+    mount?.container.Destroy();
+    Workspace.SetAttribute("Sandbox", mount.previousSandbox);
+}
+
+let mount: MountContext | undefined;
+
+afterEach(() => {
+    cleanupMount(mount);
+    mount = undefined;
 });
 
 afterAll(() => {
-    mount?.root.unmount();
-    mount?.container.Destroy();
     PLACED_ITEMS_FOLDER.Destroy();
     SOUND_EFFECTS_GROUP.Destroy();
     getPlayerBackpack()?.Destroy();
@@ -53,10 +67,12 @@ afterAll(() => {
 
 describe("App", () => {
     it("loads", () => {
+        mount = mountApp();
         expect(mount?.container).toBeDefined();
     });
 
     it("creates expected roots in PlayerGui", () => {
+        mount = mountApp();
         const expectedRoots: Array<[string, keyof Instances]> = [
             ["DebugOverlay", "ScreenGui"],
             ["Title", "ScreenGui"],
@@ -84,6 +100,7 @@ describe("App", () => {
     });
 
     it("hides the loading screen after initialization completes", () => {
+        mount = mountApp();
         const loadingGui = new Instance("ScreenGui") as ScreenGui;
         loadingGui.Name = "LoadingScreen";
         loadingGui.ResetOnSpawn = false;
@@ -98,5 +115,21 @@ describe("App", () => {
         expect(hidden).toBe(true);
 
         loadingGui.Destroy();
+    });
+
+    it("only shows main UI after documents register", () => {
+        const originalSetVisible = DocumentManager.setVisible;
+        const setVisibleSpy = jest.spyOn(DocumentManager, "setVisible").mockImplementation((id, visible) => {
+            expect(DocumentManager.INFO_PER_DOCUMENT.has(id)).toBe(true);
+            return originalSetVisible(id, visible);
+        });
+
+        try {
+            mount = mountApp();
+            const callsObserved = waitUntil(() => setVisibleSpy.mock.calls.size() >= 1, 8);
+            expect(callsObserved).toBe(true);
+        } finally {
+            setVisibleSpy.mockRestore();
+        }
     });
 });

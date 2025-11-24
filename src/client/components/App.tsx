@@ -85,13 +85,65 @@ function addRoot(roots: Set<Root>, container: Instance): Root {
     return root;
 }
 
-function waitForFrames(frameCount = 3): Promise<void> {
+function delay(seconds: number): Promise<void> {
     return new Promise((resolve) => {
-        let count = 0;
-        const conn = RunService.Heartbeat.Connect(() => {
-            count++;
-            if (count >= frameCount) {
-                conn.Disconnect();
+        task.delay(seconds, () => resolve());
+    });
+}
+
+// Documents that must register before we reveal the main UI.
+const DOCUMENT_IDS_TO_WAIT_FOR = ["Title", "Backpack", "Balance", "Sidebar", "Position", "TrackedQuest"] as const;
+const INITIAL_DOCUMENT_WAIT_DELAY = RunService.IsRunning() ? 1 : 0;
+
+function waitForDocuments(
+    documentIds: ReadonlyArray<string>,
+    timeoutSeconds = 10,
+    isCancelled?: () => boolean,
+): Promise<void> {
+    const pending = new Set<string>();
+    for (const id of documentIds) {
+        if (!DocumentManager.INFO_PER_DOCUMENT.has(id)) {
+            pending.add(id);
+        }
+    }
+
+    if (pending.size() === 0) {
+        return Promise.resolve();
+    }
+
+    return new Promise((resolve) => {
+        const startedAt = os.clock();
+        const connection = RunService.Heartbeat.Connect(() => {
+            if (isCancelled?.() === true) {
+                connection.Disconnect();
+                resolve();
+                return;
+            }
+
+            const currentPending = new Array<string>();
+            for (const id of pending) {
+                if (DocumentManager.INFO_PER_DOCUMENT.has(id)) {
+                    pending.delete(id);
+                } else {
+                    currentPending.push(id);
+                }
+            }
+
+            if (pending.size() === 0) {
+                connection.Disconnect();
+                resolve();
+                return;
+            }
+
+            if (timeoutSeconds > 0 && os.clock() - startedAt >= timeoutSeconds) {
+                connection.Disconnect();
+                let outstandingList = "";
+                for (const id of currentPending) {
+                    outstandingList = outstandingList === "" ? id : `${outstandingList}, ${id}`;
+                }
+                if (outstandingList !== "") {
+                    warn(`[App] Timed out waiting for documents: ${outstandingList}`);
+                }
                 resolve();
             }
         });
@@ -163,8 +215,15 @@ export default function App() {
         Workspace.SetAttribute("Title", IS_PUBLIC_SERVER);
         const cleanup = MusicManager.init();
 
-        task.delay(1, () => {
-            waitForFrames(30).then(() => {
+        let disposed = false;
+
+        Promise.all([
+            delay(INITIAL_DOCUMENT_WAIT_DELAY),
+            waitForDocuments(DOCUMENT_IDS_TO_WAIT_FOR, 10, () => disposed),
+        ])
+            .then(() => {
+                if (disposed) return;
+
                 LoadingScreen.hideLoadingScreen();
 
                 if (IS_PUBLIC_SERVER) {
@@ -174,8 +233,10 @@ export default function App() {
                 } else {
                     performNewBeginningsWakeUp();
                 }
+            })
+            .catch((err) => {
+                warn(`[App] Failed while waiting for initial UI readiness: ${tostring(err)}`);
             });
-        });
 
         task.spawn(() => {
             if (IS_STUDIO && IS_EDIT) {
@@ -210,6 +271,7 @@ export default function App() {
         });
 
         return () => {
+            disposed = true;
             for (const root of roots) {
                 root.unmount();
             }
