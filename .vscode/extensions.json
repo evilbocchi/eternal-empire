@@ -5,5 +5,6 @@
         "johnnymorganz.luau-lsp",
         "evilbocchi.rbxtsasvs",
         "roblox-ts.vscode-roblox-ts",
+        "evilbocchi.vscode-rbxts-jest",
     ]
 }
