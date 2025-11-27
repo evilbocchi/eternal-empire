@@ -24,7 +24,8 @@ if (!fs.existsSync(logsDir)) {
 
 let fileLogger = null;
 function initFileLogger(version) {
-    const logFileName = version ? `test_${version}.log` : `test_latest.log`;
+    //const logFileName = version ? `test_${version}.log` : `test_latest.log`;
+    const logFileName = `test_run.log`;
     const logFilePath = path.join(logsDir, logFileName);
     const logFd = fs.openSync(logFilePath, "a");
 
