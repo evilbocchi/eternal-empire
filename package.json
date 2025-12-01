@@ -78,7 +78,7 @@
         "@rbxts/jest": "^3.13.3-alpha.2",
         "@rbxts/jest-globals": "^3.13.3-alpha.2",
         "@rbxts/partcache": "^1.1.1",
-        "@rbxts/react": "^17.3.7-alpha.1",
+        "@rbxts/react": "^17.3.7-ts.1",
         "@rbxts/react-devtools-core": "^17.3.7-alpha.1",
         "@rbxts/react-globals": "^17.3.7-alpha.1",
         "@rbxts/react-roblox": "^17.3.7-alpha.1",
