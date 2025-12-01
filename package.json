@@ -80,7 +80,7 @@
         "@rbxts/partcache": "^1.1.1",
         "@rbxts/react": "^17.3.7-alpha.1",
         "@rbxts/react-devtools-core": "^17.3.7-alpha.1",
-        "@rbxts/react-globals": "^17.3.7-alpha.1",
+        "@rbxts/react-globals": "^17.3.7-ts.1",
         "@rbxts/react-roblox": "^17.3.7-alpha.1",
         "@rbxts/roman-numerals": "^1.0.2",
         "@rbxts/rparticle": "^1.0.0",
