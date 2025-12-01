@@ -53,7 +53,7 @@
         "roblox-ts": "^3.0.0",
         "rojo": "^1.0.3-rojo7.6.1",
         "signale": "^1.4.0",
-        "typedoc": "^0.28.14",
+        "typedoc": "^0.28.15",
         "typedoc-material-theme": "^1.4.1",
         "typedoc-plugin-extras": "^4.0.1",
         "typedoc-plugin-missing-exports": "^4.1.2",
