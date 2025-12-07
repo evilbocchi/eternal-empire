@@ -5,7 +5,6 @@ export = {
     clearMocks: true,
     maxWorkers: 1,
     verbose: false,
-    passWithNoTests: true,
     testMatch: ["**/*.spec"],
     setupFilesAfterEnv: [
         script.Parent!.WaitForChild("setupRbxts") as ModuleScript,

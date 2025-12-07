@@ -2,26 +2,36 @@ import { runCLI } from "@rbxts/jest";
 import { ServerStorage } from "@rbxts/services";
 
 /**
- * Execute the test suite in `src/server/tests`.
- * @param color Whether to enable colored output.
- * @returns A tuple containing a boolean indicating success and an object representing Jest output.
+ *  Runs the test suite with optional filtering by test name pattern.
+ *  @param testNamePattern Optional pattern to filter test names.
+ *  @returns Exit code: 0 if all tests pass, 1 if any test fails.
  */
-export = (color = false) => {
-    const root = ServerStorage.WaitForChild("tests");
-
+export = (testNamePattern?: string) => {
     // force chalk to load with the right color level
     const [chalkSuccess, Chalk] = import("@rbxts-js/chalk-lua").await();
     if (chalkSuccess) {
-        (Chalk as unknown as { level: number }).level = color ? 3 : 0;
+        (Chalk as unknown as { level: number }).level = 3;
     }
 
-    // run jest
-    const [success, output] = runCLI(
-        root,
-        {
-            runInBand: true,
-        },
-        [root],
-    ).await();
-    return $tuple(success, output);
+    const cwd = ServerStorage.WaitForChild("tests");
+
+    // Build Jest options
+    const jestOptions: { testNamePattern?: string } = {};
+
+    // Add test name filter if provided
+    if (testNamePattern !== undefined && testNamePattern !== "") {
+        jestOptions.testNamePattern = testNamePattern;
+    }
+
+    // run jest and capture results
+    const [success, resolved] = runCLI(cwd, jestOptions, [cwd]).await();
+
+    if (!success) {
+        warn("Jest CLI failed to run.");
+        return 1;
+    }
+
+    const results = resolved.results;
+    const hasFailures = !results.success || results.numFailedTests > 0 || results.numFailedTestSuites > 0;
+    return hasFailures ? 1 : 0;
 };

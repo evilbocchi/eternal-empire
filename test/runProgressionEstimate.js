@@ -1,23 +1,15 @@
 import dotenv from "dotenv";
 import fs from "fs";
 import path from "path";
-import publish from "../sandbox/publish.js";
-import { runCloudLuau } from "./cloudLuauRunner.js";
-import { buildModulePathLookup, createLuauPathTransformer, createModulePathResolver } from "./luauPathUtils.js";
+import * as rbxluau from "rbxluau";
 
 dotenv.config({ quiet: true });
 
 const REPORT_BEGIN_MARKER = "__PROGRESSION_ESTIMATE_BEGIN__";
 const REPORT_END_MARKER = "__PROGRESSION_ESTIMATE_END__";
 
-const robloxLogs = [];
-
-function log(message, level = "info") {
-    const entry = { message: String(message), level };
-    if (level === "log") {
-        robloxLogs.push(entry);
-    }
-}
+let robloxLog = "";
+let runResult = { state: "unknown", detail: "", exitCode: 0 };
 
 const repoRoot = path.join(import.meta.dirname, "..");
 const paths = {
@@ -47,9 +39,6 @@ const dataFilePaths = [
     paths.rawJson,
 ];
 
-const modulePathLookup = buildModulePathLookup(repoRoot);
-const resolveModulePath = createModulePathResolver(modulePathLookup);
-const transformLuauPath = createLuauPathTransformer(resolveModulePath);
 const scriptPath = path.join(import.meta.dirname, "scripts", "estimateProgress.luau");
 
 function expandCompactReport(report) {
@@ -340,14 +329,16 @@ function writeArtifacts({ state, detail, report, logs, rawJson, jsonError, expor
     writeCsv(paths.profilingCsv, ["metric", "value"], profilingRows);
 }
 
-function extractReportPayload() {
-    console.log(`\nAttempting to extract JSON payload from Roblox logs...`);
-    console.log(`Total log entries: ${robloxLogs.length}`);
+function extractReportPayload(logText) {
+    const logEntries = logText ? logText.split(/\r?\n/) : [];
 
-    const beginIndex = robloxLogs.findIndex((entry) => entry.message.trim() === REPORT_BEGIN_MARKER);
+    console.log(`Attempting to extract JSON payload from Roblox logs...`);
+    console.log(`Total log entries: ${logEntries.length}`);
+
+    const beginIndex = logEntries.findIndex((entry) => entry.trim() === REPORT_BEGIN_MARKER);
     const endIndex = beginIndex === -1
-        ? robloxLogs.findIndex((entry) => entry.message.trim() === REPORT_END_MARKER)
-        : robloxLogs.findIndex((entry, index) => index > beginIndex && entry.message.trim() === REPORT_END_MARKER);
+        ? logEntries.findIndex((entry) => entry.trim() === REPORT_END_MARKER)
+        : logEntries.findIndex((entry, index) => index > beginIndex && entry.trim() === REPORT_END_MARKER);
 
     console.log(`BEGIN marker found at index: ${beginIndex}`);
     console.log(`END marker found at index: ${endIndex}`);
@@ -359,7 +350,7 @@ function extractReportPayload() {
     // Strategy 1: Marker-based extraction (ideal)
     if (beginIndex !== -1 && endIndex !== -1 && endIndex > beginIndex) {
         console.log("Using marker-based extraction...");
-        const chunks = robloxLogs.slice(beginIndex + 1, endIndex).map((entry) => entry.message);
+        const chunks = logEntries.slice(beginIndex + 1, endIndex);
         rawJson = chunks.join("");
         try {
             report = JSON.parse(rawJson);
@@ -376,7 +367,7 @@ function extractReportPayload() {
         console.log("BEGIN marker missing, attempting fallback extraction...");
         
         // Join all logs before END marker
-        const logsBeforeEnd = robloxLogs.slice(0, endIndex).map((entry) => entry.message).join("");
+        const logsBeforeEnd = logEntries.slice(0, endIndex).join("");
         
         // The first captured item starts mid-array; match the progression item key ("order" or compact "o")
         // Look for the pattern `"order":` or `"o":` which identifies progression items
@@ -495,21 +486,21 @@ function extractReportPayload() {
 
     const logs =
         beginIndex !== -1 && endIndex !== -1 && endIndex > beginIndex
-            ? [...robloxLogs.slice(0, beginIndex), ...robloxLogs.slice(endIndex + 1)].map((entry) => entry.message)
+            ? [...logEntries.slice(0, beginIndex), ...logEntries.slice(endIndex + 1)]
             : beginIndex === -1 && endIndex !== -1
-            ? robloxLogs.slice(endIndex + 1).map((entry) => entry.message) // Fallback: skip everything before END marker
-            : robloxLogs.map((entry) => entry.message);
+            ? logEntries.slice(endIndex + 1) // Fallback: skip everything before END marker
+            : logEntries;
 
     return { report, logs, rawJson, jsonError };
 }
 
-function finalize({ state, detail, exitCode }) {
+function finalize(logText) {
     const exportedAt = new Date().toISOString();
     try {
-        const payload = extractReportPayload();
+        const payload = extractReportPayload(logText);
         writeArtifacts({
-            state,
-            detail,
+            state: runResult.state,
+            detail: runResult.detail,
             report: payload.report,
             logs: payload.logs,
             rawJson: payload.rawJson,
@@ -519,44 +510,40 @@ function finalize({ state, detail, exitCode }) {
     } catch (error) {
         console.error("Failed to generate progression artifacts:", error);
     }
-    process.exit(exitCode);
+    process.exit(runResult.exitCode);
 }
 
 async function main() {
-    const originalStdoutWrite =
-        typeof process?.stdout?.write === "function" ? process.stdout.write.bind(process.stdout) : null;
+    const outputPath = path.join(repoRoot, "test", "output", "progressEstimate.log");
+    const luauContent = fs.readFileSync(scriptPath, "utf8");
 
-    let result;
+    const exitCode = await rbxluau.executeLuau(luauContent, {
+        place: path.join(repoRoot, "sandbox", "local.rbxl"),
+        out: outputPath,
+        silent: true,
+        exit: false
+    });
 
-    try {
-        if (originalStdoutWrite) {
-            process.stdout.write = () => true;
-        }
-
-        const PLACE_VERSION = await publish();
-
-        result = await runCloudLuau(scriptPath, {
-            placeVersion: PLACE_VERSION,
-            log,
-            transform: transformLuauPath,
-        });
-    } finally {
-        if (originalStdoutWrite) {
-            process.stdout.write = originalStdoutWrite;
-        }
+    // Capture Roblox logs
+    if (fs.existsSync(outputPath)) {
+        robloxLog = fs.readFileSync(outputPath, "utf8");
     }
 
-    if (result === true) {
-        finalize({ state: "success", detail: "Luau task completed successfully.", exitCode: 0 });
-    } else if (result === false) {
-        finalize({ state: "failure", detail: "Luau task reported failure.", exitCode: 1 });
+    if (exitCode === 0) {
+        runResult = { state: "success", detail: "Luau task completed successfully.", exitCode: 0 };
+        finalize(robloxLog);
+    } else if (exitCode === 1) {
+        runResult = { state: "failure", detail: "Luau task reported failure.", exitCode: 1 };
+        finalize(robloxLog);
     } else {
-        log("Cloud execution skipped (missing configuration).", "warn");
-        finalize({ state: "skipped", detail: "Cloud execution skipped (missing configuration).", exitCode: 0 });
+        console.warn("Cloud execution skipped (missing configuration).");
+        runResult = { state: "skipped", detail: "Cloud execution skipped (missing configuration).", exitCode: 0 };
+        finalize(robloxLog);
     }
 }
 
 main().catch((error) => {
     console.log(`Progression estimation runner encountered an error: ${error?.message ?? String(error)}`);
-    finalize({ state: "error", detail: error?.message ?? String(error), exitCode: 1 });
+    runResult = { state: "error", detail: error?.message ?? String(error), exitCode: 1 };
+    finalize(robloxLog);
 });

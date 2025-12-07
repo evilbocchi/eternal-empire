@@ -14,6 +14,6 @@ describe("LeaderboardChangeService", () => {
     it("registers multiple leaderboard stores", () => {
         const stores = Server.LeaderboardChange.leaderboardStores;
         expect(stores).toBeDefined();
-        expect(stores.size() >= 2).toBe(true);
+        expect(stores.size()).toBeGreaterThanOrEqual(2);
     });
 });
