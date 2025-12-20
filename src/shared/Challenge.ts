@@ -148,7 +148,7 @@ export class Challenge {
     getRewardLabel(currentLevel: number) {
         const upgrade = this.rewardUpgrade;
         if (upgrade !== undefined) {
-            return upgrade.toString(currentLevel - 1) + " -> " + upgrade.toString(currentLevel);
+            return upgrade.toString(currentLevel) + " -> " + upgrade.toString(currentLevel + 1);
         }
         return "No reward";
     }

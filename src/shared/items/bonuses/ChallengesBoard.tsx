@@ -372,8 +372,8 @@ function ChallengeGui({ adornee }: { adornee: BasePart }) {
     const currentLevelPerChallenge = useProperty(Packets.currentLevelPerChallenge);
     const isInChallenge = currentChallengeId !== undefined && currentChallengeId !== "";
     const challengeOptions = new Array<JSX.Element>();
-    for (const [id, challenge] of CHALLENGE_PER_ID) {
-        const currentLevel = currentLevelPerChallenge.get(id) ?? 0;
+    for (const challenge of Challenge.CHALLENGES) {
+        const currentLevel = currentLevelPerChallenge.get(challenge.id) ?? 0;
         challengeOptions.push(<ChallengeOption challenge={challenge} currentLevel={currentLevel} />);
     }
 
