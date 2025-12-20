@@ -23,10 +23,6 @@ import { IS_EDIT, IS_SINGLE_SERVER, IS_STUDIO } from "shared/Context";
 import Packets from "shared/Packets";
 
 declare global {
-    interface Assets {
-        ClassicSword: Tool;
-    }
-
     /**
      * Represents the keys for each permission to manage an empire.
      */
