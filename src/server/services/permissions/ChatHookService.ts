@@ -58,7 +58,10 @@ export default class ChatHookService implements OnStart, OnPlayerAdded {
      * @param metadata Optional message metadata
      */
     sendServerMessage(message: string, metadata?: string, channel?: TextChannel) {
-        if (IS_EDIT) return;
+        if (IS_EDIT) {
+            print(message);
+            return;
+        }
 
         channel ??= getTextChannels().WaitForChild("RBXGeneral") as TextChannel;
         Packets.systemMessageSent.toAllClients(channel.Name, message, metadata ?? "");

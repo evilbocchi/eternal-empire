@@ -5,6 +5,7 @@ import type { BaseOnoeNum } from "@rbxts/serikanum";
 import { OnoeNum } from "@rbxts/serikanum";
 import type { LeaderboardEntry, LeaderboardType } from "client/components/world/leaderboard/Leaderboard";
 import { IS_EDIT } from "shared/Context";
+import CurrencyBundle from "shared/currency/CurrencyBundle";
 import EmpireProfileTemplate from "shared/data/profile/EmpireProfileTemplate";
 import PlayerProfileTemplate from "shared/data/profile/PlayerProfileTemplate";
 import type { RepairResultTier } from "shared/item/repair";

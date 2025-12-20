@@ -931,8 +931,10 @@ export default class Item {
      * @returns The formatted string.
      */
     format(str: string): string {
-        for (const [_, trait] of this.types) {
-            str = trait.format(str);
+        if (this.types !== undefined) {
+            for (const [_, trait] of this.types) {
+                str = trait.format(str);
+            }
         }
 
         if (this.drain !== undefined) str = str.gsub("%%drain%%", this.drain.toString(true, undefined, "/s"))[0];

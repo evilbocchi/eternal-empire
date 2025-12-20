@@ -92,7 +92,8 @@ export function filterItems(items: Set<Item>, searchQuery: string, traitFilters:
         }
         const sorted = FuzzySearch.Sorting.FuzzyScore(terms, searchQuery);
         for (const [index, name] of sorted) {
-            const item = Items.itemsPerName.get(name)!;
+            const item = Items.itemsPerName.get(name);
+            if (item === undefined) continue; // Skip if item not found
             if (processedItems.has(item.id)) continue; // Skip duplicates
             processedItems.add(item.id);
             dataPerItem.set(item.id, {

@@ -10,6 +10,7 @@
  */
 
 import { Service } from "@flamework/core";
+import ProgressionEstimationService from "server/services/analytics/ProgressionEstimationService";
 import { ChallengeService } from "server/services/ChallengeService";
 import CurrencyService from "server/services/data/CurrencyService";
 import DataService from "server/services/data/DataService";
@@ -70,6 +71,7 @@ export default class APIExposeService {
         private readonly marketplaceService: MarketplaceService,
         private readonly namedUpgradeService: NamedUpgradeService,
         private readonly permissionsService: PermissionService,
+        private readonly progressionEstimationService: ProgressionEstimationService,
         private readonly playtimeService: PlaytimeService,
         private readonly questService: QuestService,
         private readonly researchService: ResearchService,
@@ -255,6 +257,13 @@ export default class APIExposeService {
              * @see {@link PermissionService} for more details.
              */
             Permissions: this.permissionsService,
+
+            /**
+             * Progression estimation and analytics service.
+             * @borrows ProgressionEstimationService as progressionEstimationService
+             * @see {@link ProgressionEstimationService} for more details.
+             */
+            ProgressEstimation: this.progressionEstimationService,
 
             /**
              * Named upgrade management service.
