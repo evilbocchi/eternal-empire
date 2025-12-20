@@ -74,7 +74,7 @@ export default class SetupService implements OnInit, OnStart {
      * @returns Map of items and their counts in the setup.
      */
     saveSetup(player: Player, area: AreaId, name: string) {
-        if (!this.permissionsService.checkPermLevel(player, "build")) {
+        if (!this.permissionsService.hasPermission(player, "build")) {
             return;
         }
         const data = this.dataService.empireData;
@@ -129,8 +129,8 @@ export default class SetupService implements OnInit, OnStart {
      */
     loadSetup(player: Player, area: AreaId | undefined, name: string) {
         if (
-            !this.permissionsService.checkPermLevel(player, "build") ||
-            !this.permissionsService.checkPermLevel(player, "purchase")
+            !this.permissionsService.hasPermission(player, "build") ||
+            !this.permissionsService.hasPermission(player, "purchase")
         ) {
             return false;
         }
@@ -223,7 +223,7 @@ export default class SetupService implements OnInit, OnStart {
         });
 
         Packets.renameSetup.fromClient((player, currentName, renameTo) => {
-            if (!this.permissionsService.checkPermLevel(player, "build")) return;
+            if (!this.permissionsService.hasPermission(player, "build")) return;
             renameTo = TextService.FilterStringAsync(renameTo, player.UserId).GetNonChatStringForBroadcastAsync();
             renameTo = this.truncateSetupName(renameTo);
             const setups = this.dataService.empireData.printedSetups;
@@ -236,7 +236,7 @@ export default class SetupService implements OnInit, OnStart {
             Packets.printedSetups.set(setups);
         });
         Packets.autoloadSetup.fromClient((player, name) => {
-            if (!this.permissionsService.checkPermLevel(player, "build")) return false;
+            if (!this.permissionsService.hasPermission(player, "build")) return false;
             const setups = this.dataService.empireData.printedSetups;
             let newState: boolean | undefined;
             for (const setup of setups) {

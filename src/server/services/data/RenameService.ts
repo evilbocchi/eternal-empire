@@ -142,7 +142,7 @@ export class RenameService implements OnInit, OnStart {
         // Handle rename requests
         Packets.promptRename.fromClient((player, name, method) => {
             // Check permissions
-            if (this.permissionsService.checkPermLevel(player, "purchase") === false) {
+            if (this.permissionsService.hasPermission(player, "purchase") === false) {
                 return false;
             }
 

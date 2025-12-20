@@ -160,7 +160,7 @@ export default class ResetService implements OnInit, OnStart {
         touchPart.CanTouch = true;
         const touchBeganConnection = touchPart.Touched.Connect((otherPart) => {
             const player = getPlayer(otherPart);
-            if (player === undefined || !this.permissionsService.checkPermLevel(player, "reset")) return;
+            if (player === undefined || !this.permissionsService.hasPermission(player, "reset")) return;
             const [affordable] = this.currencyService.canAfford(required);
             if (affordable === true) {
                 players.add(player);
@@ -169,7 +169,7 @@ export default class ResetService implements OnInit, OnStart {
         });
         const touchEndedConnection = touchPart.TouchEnded.Connect((otherPart) => {
             const player = getPlayer(otherPart);
-            if (player === undefined || !this.permissionsService.checkPermLevel(player, "reset")) return;
+            if (player === undefined || !this.permissionsService.hasPermission(player, "reset")) return;
             const changed = players.delete(player);
             if (changed === true) {
                 update();

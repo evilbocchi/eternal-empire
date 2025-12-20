@@ -265,7 +265,7 @@ export class ChallengeService implements OnStart {
      */
     onStart() {
         const startConnection = Packets.startChallenge.fromClient((player, challengeId) => {
-            if (!this.permissionsService.checkPermLevel(player, "reset")) return;
+            if (!this.permissionsService.hasPermission(player, "reset")) return;
             if (this.dataService.empireData.questMetadata.get("ChallengesUnlocked") !== true) return;
 
             const challenge = this.startChallenge(player, challengeId);
@@ -277,7 +277,7 @@ export class ChallengeService implements OnStart {
         });
 
         const quitConnection = Packets.quitChallenge.fromClient((player) => {
-            if (!this.permissionsService.checkPermLevel(player, "reset")) return;
+            if (!this.permissionsService.hasPermission(player, "reset")) return;
 
             const [challenge] = this.endChallenge(false);
             if (challenge === undefined) return;

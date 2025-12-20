@@ -132,7 +132,7 @@ export default class NamedUpgradeService implements OnInit {
     onInit() {
         Packets.upgrades.set(this.upgrades);
         Packets.buyUpgrade.fromClient((player, upgradeId, to) => {
-            if (!this.permissionsService.checkPermLevel(player, "purchase") || to === undefined) {
+            if (!this.permissionsService.hasPermission(player, "purchase") || to === undefined) {
                 return false;
             }
             return this.buyUpgrade(upgradeId, to, player);

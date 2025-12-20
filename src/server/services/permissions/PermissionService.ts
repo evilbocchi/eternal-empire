@@ -166,7 +166,7 @@ export default class PermissionService implements OnStart, OnPlayerAdded {
      * @param action The action requiring permission.
      * @returns Whether the player has sufficient permissions.
      */
-    checkPermLevel(player: Player, action: PermissionKey) {
+    hasPermission(player: Player, action: PermissionKey) {
         const minimumPerm = this.dataService.empireData.permLevels[action];
         const permLevel = Packets.permLevel.get(player);
         if (permLevel === undefined || permLevel < minimumPerm) {

@@ -46,7 +46,7 @@ export = new Item(script.Name)
         modePacket.set(placedItem.currency);
 
         clickedPacket.fromClient(model, (player) => {
-            if (!Server.Permissions.checkPermLevel(player, "build")) return;
+            if (!Server.Permissions.hasPermission(player, "build")) return;
 
             let currentIndex = 0;
             for (let i = 0; i < modes.size(); i++) {

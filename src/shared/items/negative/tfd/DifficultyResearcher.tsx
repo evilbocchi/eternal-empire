@@ -1871,7 +1871,7 @@ export = new Item(script.Name)
         const serverDifficultyRequirements = DifficultyResearch.buildDifficultyRequirements(serverDifficultyList);
 
         setDifficultyPacket.fromClient((player, difficultyId) => {
-            if (!Server.Permissions.checkPermLevel(player, "build")) return false;
+            if (!Server.Permissions.hasPermission(player, "build")) return false;
             const difficulty = Difficulty.get(difficultyId);
             if (difficulty === undefined) return false;
             let requirement = serverDifficultyRequirements.get(difficulty.id);
@@ -1891,12 +1891,12 @@ export = new Item(script.Name)
         });
 
         addResearchPacket.fromClient((player, entries) => {
-            if (!Server.Permissions.checkPermLevel(player, "build")) return false;
+            if (!Server.Permissions.hasPermission(player, "build")) return false;
             return Server.Research.reserveItemsForResearch(entries);
         });
 
         removeResearchPacket.fromClient((player, entries) => {
-            if (!Server.Permissions.checkPermLevel(player, "build")) return false;
+            if (!Server.Permissions.hasPermission(player, "build")) return false;
             return Server.Research.releaseItemsFromResearch(entries);
         });
     })

@@ -523,7 +523,7 @@ export default class ResearchService implements OnStart {
 
     onStart() {
         Packets.claimDifficultyReward.fromClient((player, rewardId) => {
-            if (!this.permissionsService.checkPermLevel(player, "build")) {
+            if (!this.permissionsService.hasPermission(player, "build")) {
                 return false;
             }
             return this.claimDifficultyReward(player, rewardId);

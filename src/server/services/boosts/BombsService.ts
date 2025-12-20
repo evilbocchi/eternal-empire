@@ -127,7 +127,7 @@ export default class BombsService implements OnInit, OnStart {
      */
     onInit() {
         Packets.useBomb.fromClient((player, bombType) => {
-            if (!this.permissionsService.checkPermLevel(player, "purchase") || !this.GLOBAL_DATA_STORE) {
+            if (!this.permissionsService.hasPermission(player, "purchase") || !this.GLOBAL_DATA_STORE) {
                 return false;
             }
 

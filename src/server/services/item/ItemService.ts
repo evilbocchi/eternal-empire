@@ -309,7 +309,7 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
      * @returns Set of unplaced items. If nothing happened, this will be undefined.
      */
     unplaceItems(player: Player | undefined, placementIds: Set<string>): Set<PlacedItem> | undefined {
-        if (player !== undefined && !this.permissionsService.checkPermLevel(player, "build")) {
+        if (player !== undefined && !this.permissionsService.hasPermission(player, "build")) {
             return undefined;
         }
         const unplacing = new Set<PlacedItem>();
@@ -422,7 +422,7 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
      * @returns 0 if no items were placed, 1 if items were placed, 2 if items were placed and is allowed to place the same item again
      */
     placeItems(player: Player | undefined, placingInfoSet: Set<PlacingInfo>) {
-        if (player !== undefined && !this.permissionsService.checkPermLevel(player, "build")) {
+        if (player !== undefined && !this.permissionsService.hasPermission(player, "build")) {
             return 0;
         }
 
@@ -676,7 +676,7 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
      * @returns Whether the purchase was successful.
      */
     buyItem(player: Player | undefined, itemId: string) {
-        if (player !== undefined && !this.permissionsService.checkPermLevel(player, "purchase")) {
+        if (player !== undefined && !this.permissionsService.hasPermission(player, "purchase")) {
             return false;
         }
         const item = Items.getItem(itemId);
@@ -699,7 +699,7 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
      * @returns Whether at least one purchase was successful.
      */
     buyAllItems(player: Player, itemIds: Set<string>) {
-        if (!this.permissionsService.checkPermLevel(player, "purchase")) return false;
+        if (!this.permissionsService.hasPermission(player, "purchase")) return false;
 
         let oneSucceeded = false;
         const bought = new Set<Item>();

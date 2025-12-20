@@ -483,7 +483,7 @@ export default class MarketplaceService implements OnInit, OnStart {
     private isOperational(player?: Player) {
         if (!MARKETPLACE_CONFIG.ENABLED || !this.MARKETPLACE_STORE || !this.INDEX_STORE || !this.HISTORY_STORE)
             return false;
-        if (player !== undefined && !this.permissionsService.checkPermLevel(player, "marketplace")) return false;
+        if (player !== undefined && !this.permissionsService.hasPermission(player, "marketplace")) return false;
         return true;
     }
 
