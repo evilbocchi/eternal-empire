@@ -145,6 +145,7 @@ function restoreCamera() {
 
 function hideShopGuiPart(guiPart: Part) {
     TweenService.Create(guiPart, new TweenInfo(0.3), { LocalTransparencyModifier: 1 }).Play();
+    guiPart.CanQuery = false;
 
     const sound = getSound("ShopClose.mp3");
     sound.Play();
@@ -159,6 +160,7 @@ function playOpenEffects(guiPart: Part) {
     Debris.AddItem(sound, 5);
 
     TweenService.Create(guiPart, new TweenInfo(0.3), { LocalTransparencyModifier: 0 }).Play();
+    guiPart.CanQuery = true;
 }
 
 function setCameraFocusEnabled(enabled: boolean) {
@@ -246,6 +248,7 @@ const ShopManager = {
     releaseCameraFocus,
     refreshShop,
     checkForShop,
+    hideShopGuiPart,
 };
 
 export default ShopManager;
