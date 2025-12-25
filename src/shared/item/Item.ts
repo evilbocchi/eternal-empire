@@ -154,7 +154,7 @@ export default class Item {
     /**
      * The items required to purchase this item.
      */
-    requiredItems = new Map<string, number>();
+    readonly requiredItems = new Map<string, number>();
 
     /**
      * A formula that will be applied to the value of {@link formulaXGet} every second.
@@ -454,18 +454,6 @@ export default class Item {
     }
 
     /**
-     * Replaces the prerequisite map used during purchasing.
-     * Each entry maps an item/harvestable id to the amount already owned in order to unlock this item.
-     *
-     * @param required Map of dependency ids to minimum counts.
-     * @returns The item instance.
-     */
-    setRequiredItems(required: Map<string, number>): this {
-        this.requiredItems = required;
-        return this;
-    }
-
-    /**
      * Adds or updates a prerequisite on another built item.
      *
      * @param item The dependency item whose ownership count is checked.
@@ -478,6 +466,7 @@ export default class Item {
      * ```
      */
     setRequiredItemAmount(item: Item, amount: number): this {
+        if (item.isA("Unique")) throw "Cannot use unique items as a requirement.";
         this.requiredItems.set(item.id, amount);
         return this;
     }

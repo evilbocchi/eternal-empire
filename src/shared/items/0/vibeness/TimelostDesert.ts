@@ -1,10 +1,9 @@
 import Difficulty from "@rbxts/ejt";
 import { OnoeNum } from "@rbxts/serikanum";
+import { Server } from "shared/api/APIExpose";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Formula from "shared/currency/Formula";
-import ThisEmpire from "shared/data/ThisEmpire";
 import Item from "shared/item/Item";
-import { Server } from "shared/api/APIExpose";
 import Generator from "shared/item/traits/generator/Generator";
 import Class0Shop from "shared/items/0/Class0Shop";
 
@@ -31,7 +30,7 @@ export = new Item(script.Name)
         (v, item) => {
             return item.setPassiveGain(base.set("Power", amt.mul(v)));
         },
-        () => Server.Currency.get("Skill").mul(ThisEmpire.data.playtime),
+        () => Server.Currency.get("Skill").mul(Server.empireData.playtime),
     )
 
     .exit();

@@ -6,10 +6,10 @@ import {
     Players,
     TeleportService,
 } from "@rbxts/services";
+import { Server } from "shared/api/APIExpose";
 import { IS_EDIT, IS_PUBLIC_SERVER, IS_SERVER, IS_SINGLE_SERVER, IS_STUDIO } from "shared/Context";
 import PlayerProfileTemplate from "shared/data/profile/PlayerProfileTemplate";
 import { EmpireProfileManager, PlayerProfileManager } from "shared/data/profile/ProfileManager";
-import ThisEmpire from "shared/data/ThisEmpire";
 import Packets from "shared/Packets";
 
 declare global {
@@ -273,7 +273,7 @@ namespace AvailableEmpire {
                 }
             }
             if (!IS_PUBLIC_SERVER) {
-                availableEmpires.set(ThisEmpire.id, getInfo(ThisEmpire.id));
+                availableEmpires.set(Server.Data.empireId, getInfo(Server.Data.empireId));
             }
         });
         pcall(() => {
@@ -313,10 +313,10 @@ namespace AvailableEmpire {
         const ownedEmpires = playerProfile?.Data.ownedEmpires;
         if (
             ownedEmpires !== undefined &&
-            !ownedEmpires.includes(ThisEmpire.id) &&
-            ThisEmpire.data.owner === player.UserId
+            !ownedEmpires.includes(Server.Data.empireId) &&
+            Server.empireData.owner === player.UserId
         ) {
-            ownedEmpires.push(ThisEmpire.id);
+            ownedEmpires.push(Server.Data.empireId);
         }
         if (IS_PUBLIC_SERVER) {
             Packets.availableEmpires.setFor(player, availableEmpires);

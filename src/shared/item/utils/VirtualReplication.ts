@@ -2,9 +2,9 @@ import { getAllInstanceInfo } from "@antivivi/vrldk";
 import { DataType } from "@rbxts/flamework-binary-serializer";
 import { request, RequestPacket, signal, SignalPacket } from "@rbxts/fletchette";
 import { Players } from "@rbxts/services";
+import { Server } from "shared/api/APIExpose";
 import { PLACED_ITEMS_FOLDER } from "shared/constants";
 import { IS_EDIT, IS_SERVER } from "shared/Context";
-import ThisEmpire from "shared/data/ThisEmpire";
 import eat from "shared/hamster/eat";
 import Droplet from "shared/item/Droplet";
 import type Item from "shared/item/Item";
@@ -237,7 +237,7 @@ export namespace VirtualCollision {
         if (players.size() === 0) return undefined;
 
         if (IS_SERVER) {
-            const ownerUserId = ThisEmpire.data?.owner;
+            const ownerUserId = Server.empireData?.owner;
             if (ownerUserId !== undefined && ownerUserId !== 0) {
                 const ownerPlayer = Players.GetPlayerByUserId(ownerUserId);
                 if (ownerPlayer !== undefined) return ownerPlayer;
@@ -269,7 +269,14 @@ export namespace VirtualCollision {
     }
 
     if (IS_SERVER) {
-        ThisEmpire.observe(updateCollisionOwner);
+        task.spawn(() => {
+            let halted = false;
+            eat(() => (halted = true));
+            while (!Server.ready && !halted) {
+                task.wait(1);
+            }
+            updateCollisionOwner();
+        });
 
         eat(
             Players.PlayerAdded.Connect(() => task.defer(updateCollisionOwner)),

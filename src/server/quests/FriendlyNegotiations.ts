@@ -1,12 +1,12 @@
 import { RunService } from "@rbxts/services";
-import Quest, { Stage } from "server/quests/Quest";
-import SkillPod from "shared/items/0/millisecondless/SkillPod";
-import GrassConveyor from "shared/items/negative/friendliness/GrassConveyor";
 import { Dialogue } from "server/interactive/npc/NPC";
 import Prest from "server/interactive/npc/Prest";
 import Tria from "server/interactive/npc/Tria";
-import CurrencyBundle from "shared/currency/CurrencyBundle";
+import Quest, { Stage } from "server/quests/Quest";
 import { Server } from "shared/api/APIExpose";
+import CurrencyBundle from "shared/currency/CurrencyBundle";
+import SkillPod from "shared/items/0/millisecondless/SkillPod";
+import GrassConveyor from "shared/items/negative/friendliness/GrassConveyor";
 
 const prestAnnoyance = new Dialogue(
     Prest,
@@ -118,7 +118,7 @@ export = new Quest(script.Name)
                     t += dt;
                     if (t < 0.5) return;
                     t = 0;
-                    if (ItemService.getBoughtAmount(GrassConveyor.id) > 0) {
+                    if (ItemService.getBoughtAmount(GrassConveyor) > 0) {
                         stage.complete();
                     }
                 });
@@ -158,7 +158,7 @@ export = new Quest(script.Name)
                     continuation.talk();
                 });
                 const continuationConn = continuation.finished.connect(() => {
-                    if (Server.Quest.takeQuestItem(GrassConveyor.id, 1) === true) {
+                    if (Server.Quest.takeQuestItem(GrassConveyor, 1) === true) {
                         stage.complete();
                     }
                 });
@@ -185,7 +185,7 @@ export = new Quest(script.Name)
             .onReached((stage) => {
                 prestAnnoyance.add();
                 const connection = stage.dialogue!.finished.connect(() => {
-                    Server.Quest.giveQuestItem(SkillPod.id, 1);
+                    Server.Quest.giveQuestItem(SkillPod, 1);
                     stage.complete();
                 });
                 return () => {
@@ -214,7 +214,7 @@ export = new Quest(script.Name)
                 ).monologue("I... I hope it works... fingers crossed...").root;
                 replacement.add();
                 const connection = stage.dialogue!.finished.connect(() => {
-                    Server.Quest.takeQuestItem(SkillPod.id, 1);
+                    Server.Quest.takeQuestItem(SkillPod, 1);
                     stage.complete();
                 });
                 return () => {

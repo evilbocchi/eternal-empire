@@ -57,9 +57,9 @@ describe("CurrencyService", () => {
     });
 
     it("computes offline revenue from recent gains", () => {
-        Server.Data.empireData.playtime = 200;
-        Server.Data.empireData.lastResetPlaytime = 100;
-        Server.Data.empireData.mostCurrenciesSinceReset.set("Funds", new OnoeNum(500));
+        Server.empireData.playtime = 200;
+        Server.empireData.lastResetPlaytime = 100;
+        Server.empireData.mostCurrenciesSinceReset.set("Funds", new OnoeNum(500));
 
         const revenue = Server.Currency.getOfflineRevenue();
         // CurrencyService uses a minimum diff of 600 seconds, so revenue = 500 / 600

@@ -13,7 +13,7 @@ describe("PermissionsService", () => {
     };
 
     beforeEach(() => {
-        const data = Server.Data.empireData;
+        const data = Server.empireData;
         snapshot = {
             banned: [...data.banned],
             trusted: [...data.trusted],
@@ -30,7 +30,7 @@ describe("PermissionsService", () => {
     });
 
     afterEach(() => {
-        const data = Server.Data.empireData;
+        const data = Server.empireData;
         data.banned = snapshot.banned;
         data.trusted = snapshot.trusted;
         data.managers = snapshot.managers;
@@ -62,7 +62,7 @@ describe("PermissionsService", () => {
         const trustedId = 112233;
         const bannedId = 556677;
 
-        const data = Server.Data.empireData;
+        const data = Server.empireData;
         data.owner = ownerId;
         data.trusted = [trustedId];
         data.banned = [bannedId];
@@ -93,7 +93,7 @@ describe("PermissionsService", () => {
         });
 
         it("denies command execution when permission level is too low", () => {
-            const empireData = Server.Data.empireData;
+            const empireData = Server.empireData;
             empireData.trusted = [player.UserId];
             empireData.managers = [];
             empireData.owner = -1;
@@ -111,7 +111,7 @@ describe("PermissionsService", () => {
         });
 
         it("executes command when permission level is sufficient", () => {
-            const empireData = Server.Data.empireData;
+            const empireData = Server.empireData;
             empireData.owner = player.UserId;
 
             let calledPlayer: Player | undefined;

@@ -13,7 +13,6 @@ import { emitEffect, playSound } from "shared/asset/GameAssets";
 import { WAYPOINTS } from "shared/constants";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import { RESET_LAYERS } from "shared/currency/mechanics/ResetLayer";
-import ThisEmpire from "shared/data/ThisEmpire";
 import { eatSnapshot } from "shared/hamster/eat";
 import SkillPod from "shared/items/0/millisecondless/SkillPod";
 import SlamoStatue from "shared/items/0/millisecondless/SlamoStatue";
@@ -237,8 +236,8 @@ export = new Quest(script.Name)
                     SlamoReceptionist,
                     "Now that is actually perfect. Well, let's head to the village centre and try to catch that monster!",
                 );
-                if (ItemService.getItemAmount(SlamoStatue.id) > 0) {
-                    if (ItemService.getItemAmount(WinsomeBucket.id) > 0) {
+                if (ItemService.getAvailableAmount(SlamoStatue) > 0) {
+                    if (ItemService.getAvailableAmount(WinsomeBucket) > 0) {
                         ending.talk();
                     } else {
                         checking2.add();
@@ -251,29 +250,29 @@ export = new Quest(script.Name)
                     checking.add();
                 });
                 const checkingConn = checking.finished.connect(() => {
-                    if (ItemService.getItemAmount(Wood.id) >= 5 && ItemService.getItemAmount(Stone.id) >= 3) {
+                    if (ItemService.getAvailableAmount(Wood) >= 5 && ItemService.getAvailableAmount(Stone) >= 3) {
                         getStatue.talk();
                     }
                 });
                 const getStatueConn = getStatue.finished.connect(() => {
-                    Server.Quest.takeQuestItem(Wood.id, 5);
-                    Server.Quest.takeQuestItem(Stone.id, 3);
-                    Server.Quest.giveQuestItem(SlamoStatue.id, 1);
+                    Server.Quest.takeQuestItem(Wood, 5);
+                    Server.Quest.takeQuestItem(Stone, 3);
+                    Server.Quest.giveQuestItem(SlamoStatue, 1);
                     checking.remove();
                     checking2.add();
                 });
                 const checking2Conn = checking2.finished.connect(() => {
-                    if (ItemService.getItemAmount(WinsomeSpeck.id) >= 10) {
+                    if (ItemService.getAvailableAmount(WinsomeSpeck) >= 10) {
                         fetchBucket.talk();
                         checking2.remove();
                         checking3.add();
                     }
                 });
                 const fetchBucketConn = fetchBucket.finished.connect(() => {
-                    Server.Quest.giveQuestItem(SkillPod.id, 1);
+                    Server.Quest.giveQuestItem(SkillPod, 1);
                 });
                 const checking3Conn = checking3.finished.connect(() => {
-                    if (ItemService.getItemAmount(WinsomeBucket.id) >= 1) {
+                    if (ItemService.getAvailableAmount(WinsomeBucket) >= 1) {
                         checking3.remove();
                         ending.talk();
                     }
@@ -339,7 +338,7 @@ export = new Quest(script.Name)
                         new Dialogue(SlamoReceptionist, "Alright, pour the bucket on him!").talk(false),
                     );
                 };
-                const placedItems = ThisEmpire.data.items.worldPlaced;
+                const placedItems = Server.empireData.items.worldPlaced;
                 for (const [placementId, placedItem] of placedItems)
                     if (placedItem.item === SlamoStatue.id) {
                         update(placementId);
@@ -442,7 +441,7 @@ export = new Quest(script.Name)
             Simpul.rootPart!.CFrame = new CFrame(0, -200, 0);
         });
 
-        const questMetadata = ThisEmpire.data.questMetadata;
+        const questMetadata = Server.empireData.questMetadata;
 
         const start = new Dialogue(
             Andy,
@@ -454,7 +453,7 @@ export = new Quest(script.Name)
             Andy.defaultDialogues[0].finished.connect(() => {
                 const last = questMetadata.get("Andy") as number | undefined;
                 if (last === undefined || last + 3600 < tick()) {
-                    if (Server.Quest.takeQuestItem(Apple.id, 40)) {
+                    if (Server.Quest.takeQuestItem(Apple, 40)) {
                         done.talk();
                     } else {
                         start.talk();
@@ -484,8 +483,8 @@ export = new Quest(script.Name)
                         Andy,
                         "As your reward, I wanted to give you some Skill... but I'm all out. Here's some resources instead!",
                     ).talk();
-                    Server.Quest.giveQuestItem(EnchantedGrass.id, 3);
-                    Server.Quest.giveQuestItem(ExcavationStone.id, 15);
+                    Server.Quest.giveQuestItem(EnchantedGrass, 3);
+                    Server.Quest.giveQuestItem(ExcavationStone, 15);
                     return;
                 }
 
@@ -496,9 +495,9 @@ export = new Quest(script.Name)
                 CurrencyService.incrementAll(new CurrencyBundle().set("Skill", skillDelta).amountPerCurrency);
             } else if (rng === 3) {
                 new Dialogue(Andy, "As your reward, I gave you some pretty cool resources. Use them wisely!").talk();
-                Server.Quest.giveQuestItem(Gold.id, 1);
-                Server.Quest.giveQuestItem(Iron.id, 4);
-                Server.Quest.giveQuestItem(Crystal.id, 10);
+                Server.Quest.giveQuestItem(Gold, 1);
+                Server.Quest.giveQuestItem(Iron, 4);
+                Server.Quest.giveQuestItem(Crystal, 10);
             }
         });
     })

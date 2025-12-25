@@ -6,7 +6,6 @@ import { Players, RunService, Workspace } from "@rbxts/services";
 import { Server } from "shared/api/APIExpose";
 import { IS_EDIT } from "shared/Context";
 import { CURRENCY_DETAILS } from "shared/currency/CurrencyDetails";
-import ThisEmpire from "shared/data/ThisEmpire";
 import GameSpeed from "shared/GameSpeed";
 import eat from "shared/hamster/eat";
 import Droplet from "shared/item/Droplet";
@@ -65,7 +64,7 @@ export default class Dropper extends ItemTrait {
                 return collisionOwner;
             }
 
-            const empireOwnerId = ThisEmpire.data?.owner;
+            const empireOwnerId = Server.empireData?.owner;
             if (empireOwnerId !== undefined && empireOwnerId !== 0) {
                 const empireOwner = Players.GetPlayerByUserId(empireOwnerId);
                 if (empireOwner !== undefined) {

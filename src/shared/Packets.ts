@@ -159,7 +159,7 @@ namespace Packets {
     export const loadSetup = packet<(printerPlacementId: string, name: string) => boolean>();
     export const renameSetup = packet<(currentName: string, renameTo: string) => void>();
     export const autoloadSetup = packet<(name: string) => boolean>();
-    export const startChallenge = packet<(challenge: string) => void>();
+    export const startChallenge = packet<(challenge: string) => boolean>();
     export const quitChallenge = packet<() => void>();
     export const currentLevelPerChallenge = exactMapProperty<string, DataType.u8>(new Map());
     export const currentChallenge = property<string>();

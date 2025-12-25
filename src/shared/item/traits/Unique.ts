@@ -1,7 +1,6 @@
-import { OnoeNum } from "@rbxts/serikanum";
 import { formatRichText } from "@antivivi/vrldk";
+import { OnoeNum } from "@rbxts/serikanum";
 import { Server } from "shared/api/APIExpose";
-import ThisEmpire from "shared/data/ThisEmpire";
 import Item from "shared/item/Item";
 import ItemTrait from "shared/item/traits/ItemTrait";
 import { VirtualAttribute } from "shared/item/utils/VirtualReplication";
@@ -71,7 +70,7 @@ export default class Unique extends ItemTrait {
             throw `Unique item model ${model.Name} does not have a unique item UUID.`;
         }
 
-        const uniqueInstance = ThisEmpire.data.items.uniqueInstances.get(uuid);
+        const uniqueInstance = Server.empireData.items.uniqueInstances.get(uuid);
         if (uniqueInstance === undefined) {
             throw `Unique item instance for UUID ${uuid} not found.`;
         }

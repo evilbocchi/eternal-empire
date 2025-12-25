@@ -1,5 +1,4 @@
 import Command, { CommandAPI } from "shared/commands/Command";
-import ThisEmpire from "shared/data/ThisEmpire";
 
 export = new Command(script.Name)
     .addAlias("ur")
@@ -10,7 +9,7 @@ export = new Command(script.Name)
             CommandAPI.ChatHook.sendPrivateMessage(o, `Could not find matching players ${p}`, "color:255,43,43");
             return;
         }
-        const data = ThisEmpire.data;
+        const data = CommandAPI.empireData;
         for (const target of targets) {
             const userId = target.UserId;
             if (data.restricted.delete(userId)) {

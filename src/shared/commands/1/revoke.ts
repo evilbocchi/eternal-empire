@@ -1,6 +1,5 @@
 import Command, { CommandAPI } from "shared/commands/Command";
 import AvailableEmpire from "shared/data/AvailableEmpire";
-import ThisEmpire from "shared/data/ThisEmpire";
 
 const debounce = new Map<number, number>();
 
@@ -33,7 +32,7 @@ export = new Command(script.Name)
                 );
                 return;
             }
-            const empireId = ThisEmpire.id;
+            const empireId = CommandAPI.Data.empireId;
             AvailableEmpire.remove(userId, empireId);
             CommandAPI.ChatHook.sendPrivateMessage(
                 sender,

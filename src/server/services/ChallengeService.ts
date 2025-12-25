@@ -73,18 +73,8 @@ export class ChallengeService implements OnStart {
         const currentLevel = this.getChallengeLevel(challengeId);
         if (currentLevel > challengeDetails.cap) return;
 
-        const entryFee = challengeDetails.entryFee;
-        if (entryFee !== undefined && entryFee.amountPerCurrency.size() > 0) {
-            const hasPaid = this.currencyService.purchase(entryFee);
-            if (hasPaid !== true) {
-                this.chatHookService.sendPrivateMessage(
-                    player,
-                    `You need ${entryFee.toString()} to enter ${challengeDetails.name}.`,
-                );
-                return;
-            }
-            this.currencyService.propagate();
-        }
+        const requiredEmpireLevel = challengeDetails.requiredEmpireLevel(currentLevel + 1);
+        if (empireData.level < requiredEmpireLevel) return;
 
         if (challengeDetails.resets !== undefined) {
             const resetLayer = RESET_LAYERS[challengeDetails.resets as ResetLayerId];
@@ -264,16 +254,17 @@ export class ChallengeService implements OnStart {
      * Starts the challenge service, sets up listeners, and begins challenge effect loop.
      */
     onStart() {
-        const startConnection = Packets.startChallenge.fromClient((player, challengeId) => {
-            if (!this.permissionsService.hasPermission(player, "reset")) return;
-            if (this.dataService.empireData.questMetadata.get("ChallengesUnlocked") !== true) return;
+        Packets.startChallenge.fromClient((player, challengeId) => {
+            if (!this.permissionsService.hasPermission(player, "reset")) return false;
+            if (this.dataService.empireData.questMetadata.get("ChallengesUnlocked") !== true) return false;
 
             const challenge = this.startChallenge(player, challengeId);
-            if (challenge === undefined) return;
+            if (challenge === undefined) return false;
 
             this.chatHookService.sendServerMessage(
                 `Challenge ${challenge.getTitleLabel(this.getChallengeLevel(challenge.id))} has been started by ${player.Name}. The original setup has been saved, called "Autosaved", in a printer.`,
             );
+            return true;
         });
 
         const quitConnection = Packets.quitChallenge.fromClient((player) => {
@@ -293,7 +284,6 @@ export class ChallengeService implements OnStart {
             this.challengeEffect();
         }, 0.5);
 
-        eat(startConnection, "Disconnect");
         eat(quitConnection, "Disconnect");
         eat(cleanup);
     }

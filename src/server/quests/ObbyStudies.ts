@@ -4,7 +4,6 @@ import { Dialogue } from "server/interactive/npc/NPC";
 import ProfAlaric from "server/interactive/npc/Prof. Alaric";
 import Quest, { Stage } from "server/quests/Quest";
 import { Server } from "shared/api/APIExpose";
-import ThisEmpire from "shared/data/ThisEmpire";
 
 const OBBY_TIME_LIMIT = 300; // 5 minutes in seconds
 
@@ -74,8 +73,8 @@ export = new Quest(script.Name)
                 ProfAlaric.stopAnimation("Default");
 
                 // Initialize obby tracking in quest metadata
-                const questMetadata = ThisEmpire.data.questMetadata;
-                questMetadata.set("ObbyStudiesStartTime", ThisEmpire.data.playtime);
+                const questMetadata = Server.empireData.questMetadata;
+                questMetadata.set("ObbyStudiesStartTime", Server.empireData.playtime);
                 questMetadata.set("ObbyStudiesCheckpoints", 0);
                 questMetadata.set("ObbyStudiesMaxCheckpoint", 0);
 
@@ -131,7 +130,7 @@ export = new Quest(script.Name)
                 ProfAlaric.rootPart!.CFrame = ProfAlaric.startingCFrame;
                 ProfAlaric.playAnimation("Default");
 
-                const questMetadata = ThisEmpire.data.questMetadata;
+                const questMetadata = Server.empireData.questMetadata;
                 const checkpointsReached = (questMetadata.get("ObbyStudiesCheckpoints") as number | undefined) ?? 0;
 
                 let resultsDialogue: Dialogue;

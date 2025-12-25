@@ -7,10 +7,10 @@ export = new Command(script.Name)
     .setExecute(() => {
         for (const [id, item] of Server.Items.itemsPerId) {
             if (item.findTrait("Unique")) {
-                CommandAPI.Item.giveItem(id, 1);
+                CommandAPI.Item.giveItem(item, 1);
             } else {
-                CommandAPI.Item.setBoughtAmount(id, 0);
-                CommandAPI.Item.setItemAmount(id, 99);
+                CommandAPI.Item.setBoughtAmount(item, 0);
+                CommandAPI.Item.giveItem(item, 99);
             }
 
             const primaryPart = item.MODEL?.PrimaryPart;

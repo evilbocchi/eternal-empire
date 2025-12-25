@@ -9,9 +9,9 @@ import Signal from "@antivivi/lemon-signal";
 import { AnalyticsService, Players, ReplicatedStorage } from "@rbxts/services";
 import NPC, { Dialogue } from "server/interactive/npc/NPC";
 import { Server } from "shared/api/APIExpose";
-import ThisEmpire from "shared/data/ThisEmpire";
 import eat from "shared/hamster/eat";
 import { Identifiable, ModuleRegistry } from "shared/hamster/ModuleRegistry";
+import Items from "shared/items/Items";
 import Packets from "shared/Packets";
 
 /**
@@ -423,7 +423,7 @@ export default class Quest extends Identifiable {
      * @returns The new stage number, or undefined if advancement failed.
      *          Returns -1 if the quest is now completed.
      */
-    advance(current: number, stagePerQuest = ThisEmpire.data.quests) {
+    advance(current: number, stagePerQuest = Server.empireData.quests) {
         const currentStage = stagePerQuest.get(this.id);
 
         // Skip if quest is already completed
@@ -470,8 +470,13 @@ export default class Quest extends Identifiable {
 
         // Award items
         if (reward.items !== undefined) {
-            for (const [item, amount] of reward.items) {
-                Server.Item.setItemAmount(item, Server.Item.getItemAmount(item) + amount);
+            for (const [itemId, amount] of reward.items) {
+                const item = Items.getItem(itemId);
+                if (item === undefined) {
+                    warn(`Could not find item with id ${itemId} to reward for quest ${this.id}`);
+                    continue;
+                }
+                Server.Item.giveItem(item, amount);
             }
         }
     }
@@ -482,10 +487,17 @@ export default class Quest extends Identifiable {
      * @param level The player level to check quest reachability (defaults to current level).
      */
     static async reachStages(level?: number) {
-        const empireData = ThisEmpire.data;
+        const empireData = Server.empireData;
         if (empireData === undefined) {
             // Defer stage reach logic until empire data is available to prevent quests from stalling on load.
-            ThisEmpire.observe(() => this.reachStages(level));
+            task.spawn(() => {
+                let halted = false;
+                eat(() => (halted = true));
+                while (Server.empireData === undefined && !halted) {
+                    task.wait();
+                }
+                Quest.reachStages(level);
+            });
             return;
         }
 

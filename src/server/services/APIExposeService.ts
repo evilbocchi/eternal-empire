@@ -37,7 +37,6 @@ import AtmosphereService from "server/services/world/AtmosphereService";
 import ChestService from "server/services/world/ChestService";
 import { Server } from "shared/api/APIExpose";
 import AvailableEmpire from "shared/data/AvailableEmpire";
-import type ThisEmpire from "shared/data/ThisEmpire";
 import Items from "shared/items/Items";
 
 declare global {
@@ -89,6 +88,7 @@ export default class APIExposeService {
         const t = {
             /** Whether the Server object is ready for use */
             ready: true,
+            empireData: this.dataService.empireData,
 
             /**
              * Area management service.

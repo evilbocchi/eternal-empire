@@ -5,10 +5,13 @@ import { Server } from "shared/api/APIExpose";
 import { PLACED_ITEMS_FOLDER } from "shared/constants";
 import type { RepairProtectionState } from "shared/item/repair";
 import { REPAIR_BOOST_KEY, REPAIR_BOOST_MULTIPLIERS, REPAIR_PROTECTION_DURATIONS } from "shared/item/repair";
+import TheFirstDropper from "shared/items/negative/tfd/TheFirstDropper";
+import TheFirstDropperBooster from "shared/items/negative/tfd/TheFirstDropperBooster";
+import BulkyDropper from "shared/items/negative/tlg/BulkyDropper";
 
 describe("ItemService", () => {
     beforeEach(() => {
-        const items = Server.Data.empireData.items;
+        const items = Server.empireData.items;
         items.inventory.set("TheFirstDropper", 0);
         items.inventory.set("BulkyDropper", 0);
         items.uniqueInstances.clear();
@@ -18,27 +21,25 @@ describe("ItemService", () => {
         Server.Item.modelPerPlacementId.clear();
         for (const child of PLACED_ITEMS_FOLDER.GetChildren()) child.Destroy();
         Server.Item.breakdownsEnabled = true;
-        Server.Item.setItemAmount("TheFirstDropper", 0);
-        Server.Item.setItemAmount("BulkyDropper", 0);
-        Server.Item.setBoughtAmount("TheFirstDropper", 0);
-        Server.Item.setBoughtAmount("BulkyDropper", 0);
+        Server.Item.setBoughtAmount(TheFirstDropper, 0);
+        Server.Item.setBoughtAmount(BulkyDropper, 0);
         Server.Currency.set("Funds", new OnoeNum(1e6));
     });
 
     it("gives non-unique items directly into the inventory", () => {
-        Server.Item.giveItem("TheFirstDropper", 2);
-        expect(Server.Item.getItemAmount("TheFirstDropper")).toBe(2);
+        Server.Item.giveItem(TheFirstDropper, 2);
+        expect(Server.empireData.items.inventory.get(TheFirstDropper.id)).toBe(2);
     });
 
     it("creates unique item instances when giving unique items", () => {
-        const uniqueInstances = Server.Data.empireData.items.uniqueInstances;
+        const uniqueInstances = Server.empireData.items.uniqueInstances;
         expect(uniqueInstances.size()).toBe(0);
 
-        Server.Item.giveItem("TheFirstDropperBooster", 1);
+        Server.Item.giveItem(TheFirstDropperBooster, 1);
 
         expect(uniqueInstances.size()).toBe(1);
         for (const [, instance] of uniqueInstances) {
-            expect(instance.baseItemId).toBe("TheFirstDropperBooster");
+            expect(instance.baseItemId).toBe(TheFirstDropperBooster.id);
             expect(instance.pots.size() > 0).toBe(true);
         }
     });
@@ -49,21 +50,22 @@ describe("ItemService", () => {
             expect(player).toBe(undefined);
             let hasBulkyDropper = false;
             for (const item of items) {
-                hasBulkyDropper = item.id === "BulkyDropper";
+                hasBulkyDropper = item.id === BulkyDropper.id;
             }
             fired = hasBulkyDropper && items.size() === 1;
         });
 
-        Server.Item.setItemAmount("BulkyDropper", 0);
-        Server.Item.setBoughtAmount("BulkyDropper", 0);
+        Server.Data.empireData.items.inventory.set(BulkyDropper.id, 0);
+        Server.Data.empireData.items.bought.set(BulkyDropper.id, 0);
         Server.Currency.set("Funds", new OnoeNum(1e6));
 
-        const success = Server.Item.buyItem(undefined, "BulkyDropper");
+        const success = Server.Item.buyItem(undefined, BulkyDropper.id);
         connection.Disconnect();
 
         expect(success).toBe(true);
         expect(fired).toBe(true);
-        expect(Server.Item.getItemAmount("BulkyDropper") > 0).toBe(true);
+        const amount = Server.Data.empireData.items.inventory.get(BulkyDropper.id);
+        expect(amount).toBe(1);
     });
 
     it("returns items to inventory when unplaced", () => {
@@ -80,17 +82,17 @@ describe("ItemService", () => {
         };
 
         Server.Data.empireData.items.worldPlaced.set(placementId, placedItem);
-        Server.Item.setItemAmount("TheFirstDropper", 0);
+        Server.Data.empireData.items.inventory.set(TheFirstDropper.id, 0);
 
         const unplaced = Server.Item.unplaceItems(undefined, new Set([placementId]));
 
         expect(unplaced).toBeDefined();
         expect(unplaced?.size()).toBe(1);
-        expect(Server.Item.getItemAmount("TheFirstDropper")).toBe(1);
+        expect(Server.Data.empireData.items.inventory.get(TheFirstDropper.id)).toBe(1);
     });
 
     it("marks items as broken and clears boosts when a breakdown begins", () => {
-        const items = Server.Data.empireData.items;
+        const items = Server.empireData.items;
         const placementId = "TestBreakdown";
 
         const placedItem: PlacedItem = {
@@ -136,7 +138,7 @@ describe("ItemService", () => {
             expect(msg).toMatch("Applying repair boost to item");
         });
 
-        const items = Server.Data.empireData.items;
+        const items = Server.empireData.items;
         const placementId = "TestRepair";
 
         const placedItem: PlacedItem = {
@@ -186,7 +188,7 @@ describe("ItemService", () => {
     });
 
     it("does not break excavation or bonus difficulty items", () => {
-        const items = Server.Data.empireData.items;
+        const items = Server.empireData.items;
         const testCases = [
             { placementId: "ExcavationRepair", itemId: "Iron" },
             { placementId: "BonusRepair", itemId: "CraftingShop" },
@@ -221,7 +223,7 @@ describe("ItemService", () => {
     });
 
     it("ensures all placed item models and their descendants are anchored", () => {
-        const items = Server.Data.empireData.items;
+        const items = Server.empireData.items;
 
         const placedItems: Array<[string, PlacedItem]> = [
             [

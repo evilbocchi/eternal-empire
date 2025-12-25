@@ -2,11 +2,11 @@ import { toNumeral } from "@rbxts/roman-numerals";
 import { OnoeNum } from "@rbxts/serikanum";
 import { Debris, TweenService, Workspace } from "@rbxts/services";
 import StringBuilder from "@rbxts/stringbuilder";
+import { Server } from "shared/api/APIExpose";
 import { ASSETS, playSound } from "shared/asset/GameAssets";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
-import ThisEmpire from "shared/data/ThisEmpire";
 import Item from "shared/item/Item";
-import Upgrader from "shared/item/traits/upgrader/Upgrader";
+import AdvancedRefiner from "shared/items/negative/a/AdvancedRefiner";
 import Admiration from "shared/items/negative/instantwin/Admiration";
 import Codependence from "shared/items/negative/instantwin/Codependence";
 import { GainUpgrade } from "shared/namedupgrade/NamedUpgrade";
@@ -22,15 +22,37 @@ declare global {
 
 export class Challenge {
     static readonly CHALLENGES = new Array<Challenge>();
+
+    /** The name of the challenge. */
     name: string;
+
+    /**
+     * Gets the description for the challenge at a given level.
+     * @param level The challenge description at the given level.
+     * @returns The description.
+     */
     description = (level: number) => "No description provided.";
+
+    /**
+     * The colors used for the challenge UI.
+     */
     colors = { primary: new Color3(), secondary: new Color3() };
+
+    /** The maximum level for the challenge. */
     cap = 1;
-    entryFee = new CurrencyBundle();
+
+    /**
+     * Minimum empire level required to start the challenge at a given level.
+     * @param level The challenge level to start.
+     * @return The required empire level.
+     */
+    requiredEmpireLevel = (level: number) => 0;
+
     challengeEffectInterval = -1;
     challengeEffect?: (dt: number, level: number, forceEnd: (message: string) => void) => void;
     challengeUpgrade?: GainUpgrade;
     rewardUpgrade?: GainUpgrade;
+    itemRewards?: Map<number, { item: Item; count: number }>;
     resets?: ResetLayerId;
     goal: Item[] | string = "No goal provided.";
     itemRestrictionFilter?: (item: Item) => boolean;
@@ -60,8 +82,8 @@ export class Challenge {
         return this;
     }
 
-    setEntryFee(entryFee: CurrencyBundle) {
-        this.entryFee = entryFee;
+    setRequiredEmpireLevel(empireLevel: (level: number) => number) {
+        this.requiredEmpireLevel = empireLevel;
         return this;
     }
 
@@ -89,6 +111,11 @@ export class Challenge {
         return this;
     }
 
+    setItemRewards(rewards: Map<number, { item: Item; count: number }>) {
+        this.itemRewards = rewards;
+        return this;
+    }
+
     setResets(layerId: ResetLayerId) {
         this.resets = layerId;
         return this;
@@ -102,22 +129,6 @@ export class Challenge {
     setItemRestrictionFilter(filter: (item: Item) => boolean) {
         this.itemRestrictionFilter = filter;
         return this;
-    }
-
-    /**
-     * Returns a notice string for the given challenge.
-     *
-     * @param challenge The challenge details.
-     */
-    getNotice() {
-        switch (this.resets) {
-            case "Skillification":
-                return "A Skillification will be simulated. You will lose your items.";
-            case "Winification":
-                return "A Winification will be simulated. You will lose your items.";
-            default:
-                return "";
-        }
     }
 
     /**
@@ -146,6 +157,10 @@ export class Challenge {
      * @param currentLevel The current challenge level.
      */
     getRewardLabel(currentLevel: number) {
+        const itemReward = this.itemRewards?.get(currentLevel + 1);
+        if (itemReward !== undefined) {
+            return `${itemReward.count}x ${itemReward.item.name}`;
+        }
         const upgrade = this.rewardUpgrade;
         if (upgrade !== undefined) {
             return upgrade.toString(currentLevel) + " -> " + upgrade.toString(currentLevel + 1);
@@ -162,16 +177,21 @@ export class Challenge {
             }
         };
 
+        const itemRewards = new Map<number, { item: Item; count: number }>();
+        itemRewards.set(1, { item: AdvancedRefiner, count: 1 });
+        itemRewards.set(2, { item: AdvancedRefiner, count: 2 });
+        itemRewards.set(3, { item: AdvancedRefiner, count: 3 });
+        itemRewards.set(4, { item: AdvancedRefiner, count: 4 });
+        itemRewards.set(5, { item: AdvancedRefiner, count: 5 });
+
         return new Challenge("MeltingEconomy")
             .setName("Melting Economy")
             .setDescription((level) => `Funds gain is heavily nerfed by ^${getNerf(level)}.`)
             .setColors(Color3.fromRGB(170, 255, 151), Color3.fromRGB(0, 170, 255))
             .setCap(5)
-            .setEntryFee(new CurrencyBundle().set("Funds", new OnoeNum(250000)))
+            .setRequiredEmpireLevel((level) => level + 5)
             .setChallengeUpgrade(new GainUpgrade().setPow((x) => new CurrencyBundle().set("Funds", getNerf(x))))
-            .setRewardUpgrade(
-                new GainUpgrade().setMul((x) => new CurrencyBundle().set("Funds", new OnoeNum(1.75).pow(x))),
-            )
+            .setItemRewards(itemRewards)
             .setResets("Skillification" as ResetLayerId)
             .setGoal([Admiration, Codependence]);
     })();
@@ -239,13 +259,13 @@ export class Challenge {
             )
             .setColors(Color3.fromRGB(234, 7, 255), Color3.fromRGB(255, 85, 127))
             .setCap(3)
-            .setEntryFee(new CurrencyBundle().set("Funds", new OnoeNum(750000)))
+            .setRequiredEmpireLevel((level) => level + 6)
             .setChallengeEffect((dt: number, level: number, forceEnd: (message: string) => void) => {
-                const challengeStart = ThisEmpire.data.currentChallengeStartTime;
-                const questMetadata = ThisEmpire.data.questMetadata;
+                const challengeStart = Server.empireData.currentChallengeStartTime;
+                const questMetadata = Server.empireData.questMetadata;
                 let meteorCooldown = questMetadata.get("CataclysmicWorldCooldown") as number | undefined;
                 if (meteorCooldown === undefined || meteorCooldown <= 0) {
-                    const elapsed = math.floor((ThisEmpire.data.playtime - challengeStart) / 240);
+                    const elapsed = math.floor((Server.empireData.playtime - challengeStart) / 240);
                     meteorCooldown = cataclysicWorldCd(level) / math.pow(2, elapsed);
                     if (meteorCooldown < 0.5) {
                         forceEnd(
@@ -268,37 +288,14 @@ export class Challenge {
     })();
 
     static readonly PinnedProgress = (() => {
-        const getNerf = (level: number) => 1 - level * 0.08;
         return new Challenge("PinnedProgress")
             .setName("Pinned Progress")
-            .setDescription(
-                (level) =>
-                    `You cannot place Conveyors down, and an additional ^${getNerf(level)} Funds and Power nerf is applied.`,
-            )
+            .setDescription(() => `You cannot place Conveyors down.`)
             .setColors(Color3.fromRGB(29, 67, 80), Color3.fromRGB(164, 57, 49))
             .setCap(3)
-            .setEntryFee(new CurrencyBundle().set("Funds", new OnoeNum(1000000)))
-            .setChallengeUpgrade(
-                new GainUpgrade().setPow((x) => {
-                    const res = getNerf(x);
-                    return new CurrencyBundle().set("Funds", res).set("Power", res);
-                }),
-            )
+            .setRequiredEmpireLevel((level) => level * 2 + 6)
             .setItemRestrictionFilter((item: Item) => {
-                const types = item.types;
-                let count = 0;
-                for (const [name, builder] of types) {
-                    if (name === "Conveyor" || name === "Operative") {
-                        ++count;
-                    } else if (name === "Upgrader") {
-                        const upgrader = builder as Upgrader;
-                        if (upgrader.add !== undefined || upgrader.mul !== undefined || upgrader.pow !== undefined)
-                            return false;
-                    } else {
-                        return false;
-                    }
-                }
-                return count === 2;
+                return !item.isA("Conveyor");
             })
             .setRewardUpgrade(new GainUpgrade().setMul((x) => new CurrencyBundle().set("Power", new OnoeNum(2).pow(x))))
             .setResets("Skillification" as ResetLayerId)

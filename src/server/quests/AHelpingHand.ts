@@ -151,7 +151,7 @@ export = new Quest(script.Name)
                 Freddy.stopAnimation("Default");
 
                 const connection = stage.dialogue!.finished.connect(() => {
-                    Server.Quest.takeQuestItem(LostPendant.id, 1);
+                    Server.Quest.takeQuestItem(LostPendant, 1);
                     stage.complete();
                 });
 

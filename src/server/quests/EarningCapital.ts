@@ -1,10 +1,9 @@
 import { Dialogue } from "server/interactive/npc/NPC";
 import Ricarg from "server/interactive/npc/Ricarg";
 import Quest, { Stage } from "server/quests/Quest";
-import CurrencyBundle from "shared/currency/CurrencyBundle";
-import ThisEmpire from "shared/data/ThisEmpire";
-import countItemEverywhere from "shared/item/utils/countItemEverywhere";
 import { Server } from "shared/api/APIExpose";
+import CurrencyBundle from "shared/currency/CurrencyBundle";
+import countItemEverywhere from "shared/item/utils/countItemEverywhere";
 import RustyFactory from "shared/items/negative/negativity/RustyFactory";
 import TheFirstUpgraderBooster from "shared/items/negative/tfd/TheFirstUpgraderBooster";
 
@@ -35,7 +34,7 @@ export = new Quest(script.Name)
                 Ricarg.playAnimation("Default");
 
                 const connection = stage.dialogue!.finished.connect(() => {
-                    Server.Quest.giveQuestItem(TheFirstUpgraderBooster.id, 1);
+                    Server.Quest.giveQuestItem(TheFirstUpgraderBooster, 1);
                     stage.complete();
                 });
                 return () => connection.disconnect();
@@ -82,13 +81,13 @@ export = new Quest(script.Name)
     .onInit((quest) => {
         if (quest.completionDialogue) {
             quest.completionDialogue.finished.connect(() => {
-                const items = ThisEmpire.data.items;
+                const items = Server.empireData.items;
                 const [invCount, placedCount] = countItemEverywhere(
                     items.inventory,
                     items.worldPlaced,
                     RustyFactory.id,
                 );
-                if (invCount + placedCount === 0) Server.Quest.giveQuestItem(RustyFactory.id, 1);
+                if (invCount + placedCount === 0) Server.Quest.giveQuestItem(RustyFactory, 1);
             });
         }
     })

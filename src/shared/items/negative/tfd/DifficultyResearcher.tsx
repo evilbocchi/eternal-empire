@@ -960,7 +960,7 @@ function DifficultyRewardCard({
 
         const amount = math.max(effect.amount ?? 1, 1);
         let totalPrice = new CurrencyBundle();
-        const bought = Server.Item?.getBoughtAmount?.(item.id) ?? 0;
+        const bought = Server.Item?.getBoughtAmount?.(item) ?? 0;
         for (let iteration = 1; iteration <= amount; iteration++) {
             const price = item.getPrice(bought + iteration);
             if (price !== undefined) {

@@ -149,7 +149,9 @@ export default class HarvestableService implements OnStart {
 
                 const serialized = new Array<LootInfo>();
                 for (const [id, amount] of receiving) {
-                    this.itemService.giveItem(id, amount);
+                    const item = Items.getItem(id);
+                    if (item === undefined) continue;
+                    this.itemService.giveItem(item, amount);
                     serialized.push({ id, amount });
                 }
                 Packets.showLoot.toAllClients(serialized);

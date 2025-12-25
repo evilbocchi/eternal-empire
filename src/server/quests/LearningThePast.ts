@@ -199,19 +199,19 @@ export = new Quest(script.Name)
             librarianDialogue.add();
             pasalDialogue.add();
             const librarianConn = librarianDialogue.finished.connect(() => {
-                Server.Quest.takeQuestItem(IrregularlyShapedKey.id, 1);
-                Server.Quest.giveQuestItem(IrregularlyShapedKey.id, 1);
+                Server.Quest.takeQuestItem(IrregularlyShapedKey, 1);
+                Server.Quest.giveQuestItem(IrregularlyShapedKey, 1);
                 librarianDialogue.remove();
             });
             const pasalConn = pasalDialogue.finished.connect(() => {
-                if (Server.Quest.takeQuestItem(IrregularlyShapedKey.id, 1) === true) {
+                if (Server.Quest.takeQuestItem(IrregularlyShapedKey, 1) === true) {
                     continuation.talk();
                 }
             });
             const continuationConn = continuation.finished.connect(() => {
                 stage.complete();
                 Server.Event.setEventCompleted("PasalReveal", true);
-                Server.Quest.giveQuestItem(IrregularlyShapedKey.id, 1);
+                Server.Quest.giveQuestItem(IrregularlyShapedKey, 1);
             });
             return () => {
                 librarianConn.disconnect();
@@ -265,7 +265,7 @@ export = new Quest(script.Name)
                     t += dt;
                     if (t < 0.5) return;
                     t = 0;
-                    if (Server.Item.getItemAmount(ExcavationStone.id) >= 15) {
+                    if (Server.Item.getAvailableAmount(ExcavationStone) >= 15) {
                         stage.complete();
                     }
                 });
@@ -290,7 +290,7 @@ export = new Quest(script.Name)
                     "Yup, sure do. Alright, let's get going. I won't waste either of our time.",
                 );
                 const stageDialogueConn = stage.dialogue!.finished.connect(() => {
-                    if (Server.Quest.takeQuestItem(ExcavationStone.id, 20) === true) {
+                    if (Server.Quest.takeQuestItem(ExcavationStone, 20) === true) {
                         stage.complete();
                         continuation.talk();
                     }

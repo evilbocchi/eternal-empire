@@ -219,7 +219,7 @@ export default class ChestService implements OnInit, OnStart {
         const items = new Map<string, number>();
         const addItem = (item: Item) => {
             const itemId = item.id;
-            this.itemService.giveItem(itemId, 1);
+            this.itemService.giveItem(item, 1);
             items.set(itemId, (items.get(itemId) ?? 0) + 1);
         };
         for (const loot of loots) {

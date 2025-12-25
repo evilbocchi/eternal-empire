@@ -1,11 +1,11 @@
 import { Server } from "shared/api/APIExpose";
 import { getAsset } from "shared/asset/AssetMap";
 import { playSound } from "shared/asset/GameAssets";
-import Item from "shared/item/Item";
+import CurrencyBundle from "shared/currency/CurrencyBundle";
 import TierDifficulty from "shared/difficulty/TierDifficulty";
+import Item from "shared/item/Item";
 import Gear from "shared/item/traits/Gear";
 import Packets from "shared/Packets";
-import CurrencyBundle from "shared/currency/CurrencyBundle";
 
 const REWARD_SECONDS = 30;
 
@@ -27,7 +27,8 @@ export = new Item(script.Name)
         Packets.showDifference.toAllClients(revenue.amountPerCurrency);
         Server.Currency.propagate();
 
-        Server.Item.setItemAmount(item.id, 0);
+        Server.empireData.items.inventory.set(item.id, 0);
+        Server.Item.requestChanges();
         playSound("Consume.mp3");
 
         tool.Destroy();

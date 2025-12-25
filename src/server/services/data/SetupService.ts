@@ -159,12 +159,16 @@ export default class SetupService implements OnInit, OnStart {
         const items = new Set<PlacingInfo>();
         for (const savedItem of savedItems) {
             const itemId = savedItem.item;
-            if (
-                this.itemService.getItemAmount(itemId) === 0 &&
-                this.itemService.serverBuy(Items.getItem(itemId)!) === false
-            ) {
+            const item = Items.getItem(itemId);
+            if (item === undefined) {
+                warn("No such item", itemId);
                 continue;
             }
+
+            if (this.itemService.getAvailableAmount(item) <= 0 && this.itemService.serverBuy(item) === false) {
+                continue;
+            }
+
             const id = savedItem.uniqueItemId ?? itemId;
             items.add({
                 id,

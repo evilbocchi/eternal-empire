@@ -126,15 +126,14 @@ export = new Quest(script.Name)
                 });
 
                 const stageDialogueConn = stage.dialogue!.finished.connect(() => {
-                    (Server.Item.getItemAmount(Wool.id) >= 1 && Server.Item.getItemAmount(Grass.id) >= 3
+                    (Server.Item.getAvailableAmount(Wool) >= 1 && Server.Item.getAvailableAmount(Grass) >= 3
                         ? sufficientDialogue
                         : insufficientDialogue
                     ).talk();
                 });
 
                 const itemedConn = sufficientDialogue.finished.connect(() => {
-                    if (Server.Quest.takeQuestItem(Wool.id, 1) && Server.Quest.takeQuestItem(Grass.id, 3))
-                        stage.complete();
+                    if (Server.Quest.takeQuestItem(Wool, 1) && Server.Quest.takeQuestItem(Grass, 3)) stage.complete();
                 });
                 return () => {
                     ricargDialogueConn.disconnect();
@@ -173,8 +172,8 @@ export = new Quest(script.Name)
                 Chuck.rootPart!.CFrame = WAYPOINTS.CraftingManiaChuckCraftingAssistance.CFrame;
 
                 const stageDialogueConn = stage.dialogue!.finished.connect(() => {
-                    Server.Quest.giveQuestItem(ExcavationStone.id, 50);
-                    Server.Quest.giveQuestItem(WhiteGem.id, 15);
+                    Server.Quest.giveQuestItem(ExcavationStone, 50);
+                    Server.Quest.giveQuestItem(WhiteGem, 15);
                     stage.complete();
                 });
 
@@ -214,23 +213,23 @@ export = new Quest(script.Name)
                 Chuck.rootPart!.CFrame = WAYPOINTS.CraftingManiaChuckCraftingAssistance.CFrame;
 
                 let continuation: Dialogue;
-                if (ItemService.getBoughtAmount(Lamp.id) > 0)
+                if (ItemService.getBoughtAmount(Lamp) > 0)
                     continuation = new Dialogue(Chuck, "You made a high-luminosity lamp!").monologue(
                         "How much did you hate the night?",
                     ).root;
-                else if (ItemService.getBoughtAmount(OverengineeredGenerator.id) > 0)
+                else if (ItemService.getBoughtAmount(OverengineeredGenerator) > 0)
                     continuation = new Dialogue(Chuck, "You made a really massive generator!").monologue(
                         "Were you that starved for Power?",
                     ).root;
-                else if (ItemService.getBoughtAmount(LegPoweredDropper.id) > 0)
+                else if (ItemService.getBoughtAmount(LegPoweredDropper) > 0)
                     continuation = new Dialogue(Chuck, "You made a dropper attached to a treadmill!").monologue(
                         "Why? Why do you want to torture yourself?",
                     ).root;
-                else if (ItemService.getBoughtAmount(IndustrialOverpass.id) > 0)
+                else if (ItemService.getBoughtAmount(IndustrialOverpass) > 0)
                     continuation = new Dialogue(Chuck, "You made an unnecessarily intricated upgrader!").monologue(
                         "Do you love rearranging your setup that much?",
                     ).root;
-                else if (ItemService.getBoughtAmount(LimitBreaker.id) > 0)
+                else if (ItemService.getBoughtAmount(LimitBreaker) > 0)
                     continuation = new Dialogue(Chuck, "You made a space-intrusive instantiation delimiter!").monologue(
                         "You really have that much space, huh?",
                     ).root;

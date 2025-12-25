@@ -1,5 +1,4 @@
 import Command, { CommandAPI } from "shared/commands/Command";
-import ThisEmpire from "shared/data/ThisEmpire";
 
 export = new Command(script.Name)
     .addAlias("breakallitems")
@@ -7,7 +6,7 @@ export = new Command(script.Name)
     .setPermissionLevel(4)
     .setExecute((sender) => {
         const placementIds = new Array<string>();
-        for (const [placementId] of ThisEmpire.data.items.worldPlaced) {
+        for (const [placementId] of CommandAPI.empireData.items.worldPlaced) {
             placementIds.push(placementId);
         }
         CommandAPI.Item.beginBreakdown(placementIds);

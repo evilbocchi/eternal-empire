@@ -27,6 +27,7 @@ import DataService from "server/services/data/DataService";
 import ItemService from "server/services/item/ItemService";
 import ChatHookService from "server/services/permissions/ChatHookService";
 import eat from "shared/hamster/eat";
+import Item from "shared/item/Item";
 import Items from "shared/items/Items";
 import Packets from "shared/Packets";
 
@@ -48,33 +49,31 @@ export default class QuestService implements OnStart {
     ) {}
 
     /**
-     * Gives a quest item and notifies the player.
-     * @param itemId The item ID.
+     * Gives a quest item using {@link ItemService.giveItem} and notifies the player.
+     * @param item The item.
      * @param amount The amount to give.
      */
-    giveQuestItem(itemId: string, amount: number) {
-        this.itemService.giveItem(itemId, amount);
-        this.chatHookService.sendServerMessage(
-            `[+${amount} ${Items.getItem(itemId)?.name}]`,
-            "tag:hidden;color:255,170,255",
-        );
+    giveQuestItem(item: Item, amount: number) {
+        this.itemService.giveItem(item, amount);
+        this.chatHookService.sendServerMessage(`[+${amount} ${item.name}]`, "tag:hidden;color:255,170,255");
     }
 
     /**
      * Takes a quest item if available and notifies the player.
      *
-     * @param itemId The item ID. Unique items are not accepted.
+     * @param item The item. Unique items are not accepted.
      * @param amount The amount to take.
      * @returns True if successful, false otherwise.
      */
-    takeQuestItem(itemId: string, amount: number) {
-        const currentAmount = this.itemService.getItemAmount(itemId);
+    takeQuestItem(item: Item, amount: number) {
+        if (item.isA("Unique")) throw `Cannot take unique item '${item.id}' as a quest item.`;
+
+        const currentAmount = this.dataService.empireData.items.inventory.get(item.id) ?? 0;
         if (currentAmount < amount) return false;
-        this.itemService.setItemAmount(itemId, currentAmount - amount);
-        this.chatHookService.sendServerMessage(
-            `[-${amount} ${Items.getItem(itemId)?.name}]`,
-            "tag:hidden;color:255,170,255",
-        );
+
+        this.dataService.empireData.items.inventory.set(item.id, currentAmount - amount);
+
+        this.chatHookService.sendServerMessage(`[-${amount} ${item.name}]`, "tag:hidden;color:255,170,255");
         return true;
     }
 

@@ -1,11 +1,10 @@
-import Command from "shared/commands/Command";
-import ThisEmpire from "shared/data/ThisEmpire";
+import Command, { CommandAPI } from "shared/commands/Command";
 
 export = new Command(script.Name)
     .addAlias("sset")
     .setDescription("<questId> <stage> : Set the stage number for the quest.")
     .setExecute((_o, questId, stage) => {
-        const stagePerQuest = ThisEmpire.data.quests;
+        const stagePerQuest = CommandAPI.empireData.quests;
         if (stagePerQuest === undefined) {
             return;
         }

@@ -6,8 +6,8 @@ export = new Command(script.Name)
     .setDescription(
         "<item> <amount> : Set the quantity for an item. If item is 'all', sets all items. If item is a unique item, gives the specified amount.",
     )
-    .setExecute((_o, item, amount) => {
-        const a = tonumber(amount) ?? 0;
+    .setExecute((_o, itemId, inputAmount) => {
+        const amount = tonumber(inputAmount) ?? 0;
         const giveItem = (id: string) => {
             const item = Server.Items.itemsPerId.get(id);
             if (!item) {
@@ -15,18 +15,19 @@ export = new Command(script.Name)
                 return;
             }
             if (item.findTrait("Unique")) {
-                CommandAPI.Item.giveItem(id, a);
+                CommandAPI.Item.giveItem(item, amount);
             } else {
-                CommandAPI.Item.setItemAmount(id, a);
-                CommandAPI.Item.setBoughtAmount(id, a);
+                CommandAPI.empireData.items.inventory.set(id, amount);
+                CommandAPI.empireData.items.bought.set(id, amount);
+                CommandAPI.Item.requestChanges();
             }
         };
-        if (item === "all") {
+        if (itemId === "all") {
             for (const [id, _] of Server.Items.itemsPerId) {
                 giveItem(id);
             }
             return;
         }
-        giveItem(item);
+        giveItem(itemId);
     })
     .setPermissionLevel(4);

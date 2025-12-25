@@ -1,6 +1,5 @@
 import { describe, expect, it, jest } from "@rbxts/jest-globals";
 import { Server } from "shared/api/APIExpose";
-import ThisEmpire from "shared/data/ThisEmpire";
 import Items from "shared/items/Items";
 import ItemPlacement from "shared/placement/ItemPlacement";
 
@@ -13,7 +12,7 @@ describe("items", () => {
     });
 
     it("loads all items", () => {
-        ThisEmpire.data.level = math.huge;
+        Server.empireData.level = math.huge;
         jest.spyOn(ItemPlacement, "isTouchingPlacedItem").mockReturnValue(false);
 
         const suppressedPatterns = ["InstantiationDelimiter"];
@@ -26,28 +25,26 @@ describe("items", () => {
             }
         });
 
-        for (const [id, item] of Items.itemsPerId) {
+        for (const [itemId, item] of Items.itemsPerId) {
             if (item.MODEL === undefined) continue;
 
-            const uuids = Server.Item.giveItem(id, 1);
+            const uuids = Server.Item.giveItem(item, 1);
 
-            let placingId = uuids === undefined ? id : uuids[0];
+            let placingId = uuids === undefined ? itemId : uuids[0];
             const [placedItem] = Server.Item.serverPlace(placingId, new Vector3(), 0);
 
             if (placedItem === undefined) {
-                warn(`Failed to place item with id ${id} for loading test.`);
+                warn(`Failed to place item with id ${itemId} for loading test.`);
                 continue;
             }
 
             const model = Server.Item.modelPerPlacementId.get(placedItem.id);
-            expect(model).toBeDefined();
-            if (model === undefined) continue;
-
+            if (model === undefined) warn(`No model found for placed item with id ${itemId} in loading test.`);
             expect(model).toBeDefined();
 
             Server.Item.unplaceItemsInArea(undefined, undefined);
         }
 
-        ThisEmpire.data.level = 1;
+        Server.empireData.level = 1;
     });
 });

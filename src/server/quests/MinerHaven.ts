@@ -16,8 +16,9 @@ export = new Quest(script.Name)
     .addStage(
         new Stage().setDescription(`...`).onReached((stage) => {
             Packets.serverMusicEnabled.set(false);
-            Server.Item.setItemAmount(PurpleSyringe.id, 1);
-            Server.Item.setItemAmount(AllConsumingTub.id, 1);
+            Server.empireData.items.inventory.set(PurpleSyringe.id, 1);
+            Server.empireData.items.inventory.set(AllConsumingTub.id, 1);
+            Server.Item.requestChanges();
 
             const dialogue = new Soliloquy("...my mine.").monologue(
                 "I haven't checked my inventory in a while. I wonder if I have any new items...",
@@ -113,12 +114,13 @@ export = new Quest(script.Name)
             const finishedConnection = dialogue.finished.connect(() => {
                 stage.complete();
                 Server.Item.unplaceItemsInArea(undefined, "MinerHaven");
-                Server.Item.setItemAmount(PurpleSyringe.id, 0);
-                Server.Item.setItemAmount(AllConsumingTub.id, 0);
-                Server.Item.setItemAmount(TimeAccelerator.id, 0);
-                Server.Item.setBoughtAmount(PurpleSyringe.id, 0);
-                Server.Item.setBoughtAmount(AllConsumingTub.id, 0);
-                Server.Item.setBoughtAmount(TimeAccelerator.id, 0);
+                Server.Data.empireData.items.inventory.set(PurpleSyringe.id, 0);
+                Server.Data.empireData.items.inventory.set(AllConsumingTub.id, 0);
+                Server.Data.empireData.items.inventory.set(TimeAccelerator.id, 0);
+                Server.Item.setBoughtAmount(PurpleSyringe, 0);
+                Server.Item.setBoughtAmount(AllConsumingTub, 0);
+                Server.Item.setBoughtAmount(TimeAccelerator, 0);
+                Server.Item.requestChanges();
             });
 
             return () => {

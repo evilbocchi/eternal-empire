@@ -84,7 +84,7 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
     private readonly inventory: Map<string, number>;
     private readonly uniqueInstances: Map<string, UniqueItemInstance>;
     private readonly researching: Map<string, number>;
-    private readonly shopsPerItem = new Map<string, Item[]>();
+    private readonly additionalInventory = new Map<string, number>();
     private hasInventoryChanged = false;
     private hasBoughtChanged = false;
     private readonly changedPlacedItems = new Map<string, PlacedItem>();
@@ -169,74 +169,46 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
 
         for (const shop of shops) {
             if (shop.pricePerIteration.isEmpty()) return true;
-            if (this.getBoughtAmount(shop.id) > 0) return true;
+            if (this.getBoughtAmount(shop) > 0) return true;
         }
 
         return false;
     }
 
     /**
-     * Gets the current amount of an item in inventory.
-     *
-     * @param itemId The ID of the item to check.
-     * @returns The amount of the item in inventory, or 0 if not found.
-     */
-    getItemAmount(itemId: string) {
-        return this.inventory.get(itemId) ?? 0;
-    }
-
-    /**
-     * Gets the amount of an item that is currently reserved for research.
-     *
-     * @param itemId The ID of the item to check.
-     * @returns The amount of the item currently being researched.
-     */
-    getResearchingAmount(itemId: string) {
-        return this.researching.get(itemId) ?? 0;
-    }
-
-    /**
      * Gets the current amount of an item that is available for placement/usage.
      * This subtracts any units currently being researched from the inventory total.
      *
-     * @param itemId The ID of the item to check.
+     * @param item The item to check.
      * @returns The amount of the item available for placement or consumption.
      */
-    getAvailableItemAmount(itemId: string) {
-        const total = this.getItemAmount(itemId);
-        const researching = this.getResearchingAmount(itemId);
-        return math.max(total - researching, 0);
-    }
-
-    /**
-     * Sets the amount of a specific item in inventory.
-     *
-     * @param itemId The ID of the item to set.
-     * @param amount The new amount to set.
-     */
-    setItemAmount(itemId: string, amount: number) {
-        this.inventory.set(itemId, amount);
-        this.hasInventoryChanged = true;
+    getAvailableAmount(item: Item) {
+        if (item.isA("Unique")) throw "Unsupported for unique items.";
+        const itemId = item.id;
+        const regularCount = this.inventory.get(itemId) ?? 0;
+        const additionalCount = this.additionalInventory.get(itemId) ?? 0;
+        const researchingCount = this.researching.get(itemId) ?? 0;
+        return math.max(regularCount + additionalCount - researchingCount, 0);
     }
 
     /**
      * Gets the number of times an item has been bought.
      *
-     * @param itemId The ID of the item to check.
+     * @param item The item to check.
      * @returns The number of times the item has been bought, or 0 if never bought.
      */
-    getBoughtAmount(itemId: string) {
-        return this.bought.get(itemId) ?? 0;
+    getBoughtAmount(item: Item) {
+        return this.bought.get(item.id) ?? 0;
     }
 
     /**
      * Sets the number of times an item has been bought.
      *
-     * @param itemId The ID of the item to set.
+     * @param item The the item to set.
      * @param amount The new bought amount.
      */
-    setBoughtAmount(itemId: string, amount: number) {
-        this.bought.set(itemId, amount);
+    setBoughtAmount(item: Item, amount: number) {
+        this.bought.set(item.id, amount);
         this.hasBoughtChanged = true;
     }
 
@@ -270,29 +242,24 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
     /**
      * Gives an item to the empire, either as a unique instance or as a normal item.
      *
-     * @param itemId The ID of the item to give.
+     * @param item The item to give.
      * @param amount The amount of the item to give (default is 1).
      * @returns An array of UUIDs for unique item instances if applicable, otherwise undefined.
      */
-    giveItem(itemId: string, amount = 1) {
-        const item = Items.getItem(itemId);
-        if (item === undefined) {
-            warn(`Item ${itemId} not found.`);
-            return;
-        }
-
+    giveItem(item: Item, amount = 1) {
+        if (amount <= 0) throw "Amount must be positive.";
+        const itemId = item.id;
         let uuids: string[] | undefined;
         if (item.isA("Unique")) {
             uuids = [];
             for (let i = 0; i < amount; i++) {
                 const uuid = this.createUniqueInstance(itemId);
-                if (uuid !== undefined) {
-                    uuids.push(uuid);
-                }
+                if (uuid === undefined) throw `Failed to create unique instance for item ${itemId}.`;
+                uuids.push(uuid);
             }
         } else {
-            const currentAmount = this.getItemAmount(itemId);
-            this.setItemAmount(itemId, currentAmount + amount);
+            this.inventory.set(itemId, (this.inventory.get(itemId) ?? 0) + amount);
+            this.hasInventoryChanged = true;
         }
         this.itemGiven.fire(item, amount);
         return uuids;
@@ -340,10 +307,12 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
             return undefined;
         }
         for (const placedItem of unplacing) {
-            const item = placedItem.item;
+            const itemId = placedItem.item;
             const uuid = placedItem.uniqueItemId;
             if (uuid === undefined) {
-                this.setItemAmount(item, this.getItemAmount(item) + 1);
+                const item = Items.getItem(itemId);
+                if (item === undefined) throw `Item ${itemId} not found.`;
+                this.giveItem(item, 1);
             } else {
                 const uniqueItem = this.uniqueInstances.get(uuid);
                 if (uniqueItem === undefined) throw `Unique item ${uuid} not found.`;
@@ -470,10 +439,10 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
     }
 
     /**
-     * Places an item into the setup. At least 1 of this item needs to exist in the inventory.
-     * This also automatically adds the item model into the setup.
+     * Adds an item to {@link worldPlaced}, updates {@link inventory}/{@link uniqueInstances} accordingly,
+     * and calls {@link addItemModel} to create the 3D model in the world.
      *
-     * This does *not* replicate the changes to the client, nor fires the {@link itemsPlaced} signal.
+     * Does *not* replicate the changes to the client, nor fires the {@link itemsPlaced} signal.
      *
      * @param id Item id or unique item UUID to place.
      * @param position Position of the PrimaryPart of the item model to place in.
@@ -484,36 +453,32 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
     serverPlace(id: string, position: Vector3, rotation: number, areaId?: AreaId): LuaTuple<[IdPlacedItem?, number?]> {
         const empireData = this.dataService.empireData;
         const itemsData = empireData.items;
-        const rawInventoryAmount = itemsData.inventory.get(id);
-        const inventoryAmount = rawInventoryAmount ?? 0;
-        const researchingAmount = itemsData.researching.get(id) ?? 0;
-        const availableAmount = math.max(inventoryAmount - researchingAmount, 0);
-        let uniqueInstance: UniqueItemInstance | undefined;
-        if (rawInventoryAmount === undefined && availableAmount === 0) {
-            uniqueInstance = itemsData.uniqueInstances.get(id);
-            if (uniqueInstance === undefined) {
-                warn(`Item ${id} not found in inventory or unique items.`);
-                return $tuple(undefined);
-            }
-            const itemId = uniqueInstance.baseItemId;
+
+        // Determine item and availability
+        const uniqueInstance = itemsData.uniqueInstances.get(id);
+        const item = Items.getItem(uniqueInstance?.baseItemId ?? id);
+        if (item === undefined) {
+            warn(`Item ${id} not found in inventory or unique items.`);
+            return $tuple(undefined);
+        }
+
+        const itemId = item.id;
+
+        if (uniqueInstance !== undefined) {
             for (const [uuid, instance] of itemsData.uniqueInstances) {
                 if (instance.baseItemId === itemId && instance.placed !== undefined) {
                     warn(`${itemId} is already placed under ${uuid}. Cannot place again.`);
                     return $tuple(undefined);
                 }
             }
-        } else if (availableAmount < 1) {
-            // Validate item requirements
+        } else if (this.getAvailableAmount(item) <= 0) {
+            warn(`Not enough of item ${itemId} to place.`);
             return $tuple(undefined);
         }
 
         // Round rotation to nearest 90 degrees
         rotation = math.round(rotation / 90) * 90;
         rotation %= 360;
-
-        const itemId = uniqueInstance?.baseItemId ?? id;
-        const item = Items.getItem(itemId);
-        if (item === undefined) throw "How did this happen?";
 
         // Check level requirements
         if (item.levelReq !== undefined && item.levelReq > empireData.level) return $tuple(undefined);
@@ -551,9 +516,10 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
         }
 
         const model = item.MODEL?.Clone();
-        if (model === undefined) throw "No model found for " + id;
+        if (model === undefined) throw `No model found for ${id}`;
 
-        const primaryPart = model.PrimaryPart!;
+        const primaryPart = model.PrimaryPart;
+        if (primaryPart === undefined) throw `No PrimaryPart found for ${id}`;
 
         // Calculate final position with snapping
         let cframe = buildBounds.snap(primaryPart.Size, position, math.rad(rotation));
@@ -588,23 +554,24 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
             area: areaId,
             id: nextId,
         };
+
+        let newAmount: number | undefined;
         if (uniqueInstance !== undefined) {
             placedItem.uniqueItemId = id; // Link unique item UUID
             uniqueInstance.placed = nextId; // Set the placement ID for the unique item
             this.uniqueInstances.set(id, uniqueInstance);
             this.changedUniqueInstances.set(id, uniqueInstance);
+        } else {
+            newAmount = (this.inventory.get(itemId) ?? 0) - 1;
+            this.inventory.set(itemId, newAmount);
         }
 
         // Update data and create model
         this.worldPlaced.set(nextId, placedItem);
-        this.addItemModel(nextId, placedItem);
         this.changedPlacedItems.set(nextId, placedItem);
-        if (uniqueInstance !== undefined) {
-            return $tuple(placedItem);
-        } else {
-            this.setItemAmount(itemId, inventoryAmount - 1);
-            return $tuple(placedItem, inventoryAmount - 1);
-        }
+        this.addItemModel(nextId, placedItem);
+
+        return $tuple(placedItem, newAmount);
     }
 
     // Model Management Methods
@@ -632,15 +599,20 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
     // Purchase Methods
 
     /**
-     * Purchases the item, spending currency.
+     * Checks for purchase requirements and attempts to buy the specified item for the empire.
      *
      * @param item Item to purchase.
      * @returns Whether the purchase was successful.
      */
     serverBuy(item: Item) {
         // Check required items
-        for (const [required, amount] of item.requiredItems) {
-            if (this.getItemAmount(required) < amount) {
+        for (const [requiredItemId, amount] of item.requiredItems) {
+            const requiredItem = Items.getItem(requiredItemId);
+            if (requiredItem === undefined) {
+                warn(`Required item ${requiredItemId} for purchasing ${item.id} not found.`);
+                return false;
+            }
+            if (this.getAvailableAmount(requiredItem) < amount) {
                 return false;
             }
         }
@@ -649,8 +621,7 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
         if (item.isA("Gear") && item.levelReq !== undefined && item.levelReq > this.dataService.empireData.level)
             return false;
 
-        const itemId = item.id;
-        const nextBought = this.getBoughtAmount(itemId) + 1;
+        const nextBought = this.getBoughtAmount(item) + 1;
         const price = item.getPrice(nextBought);
         if (price === undefined) return false;
 
@@ -658,12 +629,13 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
         const success = this.currencyService.purchase(price);
         if (success === true) {
             // Consume required items
-            for (const [required, amount] of item.requiredItems) {
-                this.setItemAmount(required, this.getItemAmount(required) - amount);
+            for (const [requiredItemId, amount] of item.requiredItems) {
+                this.inventory.set(requiredItemId, (this.inventory.get(requiredItemId) ?? 0) - amount);
+                this.hasInventoryChanged = true;
             }
-            this.setBoughtAmount(itemId, nextBought);
+            this.setBoughtAmount(item, nextBought);
             // Add item to inventory
-            this.setItemAmount(itemId, this.getItemAmount(itemId) + 1);
+            this.giveItem(item, 1);
         }
         return success;
     }
@@ -791,6 +763,10 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
             Packets.inventory.set(this.inventory);
             this.hasInventoryChanged = false;
         }
+        if (this.hasBoughtChanged) {
+            Packets.bought.set(this.bought);
+            this.hasBoughtChanged = false;
+        }
         if (!this.changedUniqueInstances.isEmpty() || !this.deletedUniqueInstances.isEmpty()) {
             Packets.uniqueInstances.setAndDeleteEntries(this.changedUniqueInstances, this.deletedUniqueInstances);
             this.changedUniqueInstances.clear();
@@ -800,10 +776,6 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
             Packets.placedItems.setAndDeleteEntries(this.changedPlacedItems, this.deletedPlacedItems);
             this.changedPlacedItems.clear();
             this.deletedPlacedItems.clear();
-        }
-        if (this.hasBoughtChanged) {
-            Packets.bought.set(this.bought);
-            this.hasBoughtChanged = false;
         }
     }
 

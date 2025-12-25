@@ -162,7 +162,5 @@ describe("ShopManager", () => {
         // Verify CanQuery is now false
         expect(shopGuiPart.CanQuery).toBe(false);
         jest.useRealTimers();
-
-        print("Test completed successfully.");
     });
 });

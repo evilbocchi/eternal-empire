@@ -116,8 +116,8 @@ export = new Quest(script.Name)
                     if (t < 0.5) return;
                     t = 0;
                     if (
-                        ItemService.getBoughtAmount(TheFirstDropper.id) > 0 &&
-                        ItemService.getBoughtAmount(TheFirstFurnace.id) > 0
+                        ItemService.getBoughtAmount(TheFirstDropper) > 0 &&
+                        ItemService.getBoughtAmount(TheFirstFurnace) > 0
                     ) {
                         stage.complete();
                         new Dialogue(Tria, "Oh! You did it... wow, nice job!")

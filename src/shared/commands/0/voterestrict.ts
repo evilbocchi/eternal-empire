@@ -1,6 +1,5 @@
 import { Debris, Players } from "@rbxts/services";
 import Command, { CommandAPI } from "shared/commands/Command";
-import ThisEmpire from "shared/data/ThisEmpire";
 
 export = new Command(script.Name)
     .addAlias("vr")
@@ -16,7 +15,7 @@ export = new Command(script.Name)
             CommandAPI.ChatHook.sendPrivateMessage(sender, `Could not find matching players ${p}`, "color:255,43,43");
             return;
         }
-        const data = ThisEmpire.data;
+        const data = CommandAPI.empireData;
         const playerCount = Players.GetPlayers()
             .filter((player) => CommandAPI.Permissions.getPermissionLevel(player.UserId) > -1)
             .size();

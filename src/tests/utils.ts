@@ -150,7 +150,7 @@ export function setupTestCondenser() {
         area: "BarrenIslands",
     };
 
-    Server.Data.empireData.items.worldPlaced.set(placementId, placedItem);
+    Server.empireData.items.worldPlaced.set(placementId, placedItem);
 
     const model = new Instance("Model") as Model;
     model.Name = placementId;
@@ -182,7 +182,7 @@ export function setupTestCondenser() {
         cleanup: () => {
             model.Destroy();
             Server.Item.modelPerPlacementId.delete(placementId);
-            Server.Data.empireData.items.worldPlaced.delete(placementId);
+            Server.empireData.items.worldPlaced.delete(placementId);
         },
     };
 }

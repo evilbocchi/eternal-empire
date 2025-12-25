@@ -78,7 +78,7 @@ export = new Quest(script.Name)
                 });
 
                 const giveGearConn = giveGear.finished.connect(() => {
-                    Server.Quest.giveQuestItem(QuantumGear.id, 1);
+                    Server.Quest.giveQuestItem(QuantumGear, 1);
                     task.wait(1);
                     stage.complete();
                 });
@@ -128,7 +128,7 @@ export = new Quest(script.Name)
                 });
 
                 const getCrystalConn = getCrystal.finished.connect(() => {
-                    Server.Quest.giveQuestItem(SkyCrystal.id, 1);
+                    Server.Quest.giveQuestItem(SkyCrystal, 1);
                     task.wait(1);
                     stage.complete();
                 });
@@ -173,7 +173,7 @@ export = new Quest(script.Name)
                 });
 
                 const memeCompleteConn = memeComplete.finished.connect(() => {
-                    Server.Quest.giveQuestItem(GravityStabilizer.id, 1);
+                    Server.Quest.giveQuestItem(GravityStabilizer, 1);
                     task.wait(1);
                     stage.complete();
                 });
@@ -217,9 +217,9 @@ export = new Quest(script.Name)
                 ).root;
 
                 if (
-                    ItemService.getItemAmount(QuantumGear.id) >= 1 &&
-                    ItemService.getItemAmount(SkyCrystal.id) >= 1 &&
-                    ItemService.getItemAmount(GravityStabilizer.id) >= 1
+                    ItemService.getAvailableAmount(QuantumGear) >= 1 &&
+                    ItemService.getAvailableAmount(SkyCrystal) >= 1 &&
+                    ItemService.getAvailableAmount(GravityStabilizer) >= 1
                 ) {
                     stage.dialogue?.talk();
                 } else {
@@ -228,9 +228,9 @@ export = new Quest(script.Name)
 
                 const checkPartsConn = checkParts.finished.connect(() => {
                     if (
-                        ItemService.getItemAmount(QuantumGear.id) >= 1 &&
-                        ItemService.getItemAmount(SkyCrystal.id) >= 1 &&
-                        ItemService.getItemAmount(GravityStabilizer.id) >= 1
+                        ItemService.getAvailableAmount(QuantumGear) >= 1 &&
+                        ItemService.getAvailableAmount(SkyCrystal) >= 1 &&
+                        ItemService.getAvailableAmount(GravityStabilizer) >= 1
                     ) {
                         checkParts.remove();
                         startRepair.talk();
@@ -242,9 +242,9 @@ export = new Quest(script.Name)
                 });
 
                 const startRepairConn = startRepair.finished.connect(() => {
-                    Server.Quest.takeQuestItem(QuantumGear.id, 1);
-                    Server.Quest.takeQuestItem(SkyCrystal.id, 1);
-                    Server.Quest.takeQuestItem(GravityStabilizer.id, 1);
+                    Server.Quest.takeQuestItem(QuantumGear, 1);
+                    Server.Quest.takeQuestItem(SkyCrystal, 1);
+                    Server.Quest.takeQuestItem(GravityStabilizer, 1);
                     task.wait(2);
                     malfunction.talk();
                 });
@@ -438,7 +438,7 @@ export = new Quest(script.Name)
             .onReached((stage) => {
                 const stageDialogueConn = stage.dialogue!.finished.connect(() => {
                     // Give rewards
-                    Server.Quest.giveQuestItem(SkyPass.id, 1);
+                    Server.Quest.giveQuestItem(SkyPass, 1);
 
                     // Unlock Sky Pavilion area
                     Server.Area.unlockArea("SkyPavilion");

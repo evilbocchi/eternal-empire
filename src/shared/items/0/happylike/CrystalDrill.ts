@@ -1,7 +1,6 @@
 import Difficulty from "@rbxts/ejt";
 import { Server } from "shared/api/APIExpose";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
-import ThisEmpire from "shared/data/ThisEmpire";
 import Droplet from "shared/item/Droplet";
 import Item from "shared/item/Item";
 import Conveyor from "shared/item/traits/conveyor/Conveyor";
@@ -28,12 +27,11 @@ export = new Item(script.Name)
     .setDroplet(Droplet.CrystalDroplet)
     .setDropRate(1)
     .onDropletProduced(() => {
-        const questMetadata = ThisEmpire.data.questMetadata;
+        const questMetadata = Server.empireData.questMetadata;
         let prevCount = (questMetadata.get("CrystalDrillCount") as number) ?? 0;
         prevCount += 1;
         if (math.random(1, 60 * math.pow(prevCount, 2)) === 1) {
-            // XD
-            Server.Quest.giveQuestItem(Crystal.id, 1);
+            Server.Quest.giveQuestItem(Crystal, 1);
             questMetadata.set("CrystalDrillCount", prevCount);
         }
     })

@@ -1,5 +1,4 @@
 import Command, { CommandAPI } from "shared/commands/Command";
-import ThisEmpire from "shared/data/ThisEmpire";
 
 export = new Command(script.Name)
     .addAlias("er")
@@ -10,7 +9,7 @@ export = new Command(script.Name)
         const cleanup = CommandAPI.ProgressEstimation.populateDropletModels();
 
         const itemsToUse = new Map<string, number>();
-        const worldPlaced = ThisEmpire.data.items.worldPlaced;
+        const worldPlaced = CommandAPI.empireData.items.worldPlaced;
         for (const [, placedItem] of worldPlaced) {
             const itemsCount = itemsToUse.get(placedItem.item) ?? 0;
             itemsToUse.set(placedItem.item, itemsCount + 1);

@@ -11,12 +11,12 @@ beforeAll(() => {
 describe("loading", () => {
     it("loads data", () => {
         expect(Server.Data).toBeDefined();
-        expect(Server.Data.empireData).toBeDefined();
+        expect(Server.empireData).toBeDefined();
         expect(Server.Data.empireId).toBeDefined();
     });
 
     it("has a shop", () => {
-        const items = Server.Data.empireData.items;
+        const items = Server.empireData.items;
         const amount = items.inventory.get("ClassLowerNegativeShop");
         let hasShop = amount !== undefined && amount > 0;
         if (!hasShop) {
@@ -96,28 +96,28 @@ describe("duplication", () => {
 describe("items", () => {
     it("should buy a free item", () => {
         const itemId = "TheFirstDropper";
-        Server.Item.setItemAmount(itemId, 0);
-        Server.Item.setBoughtAmount(itemId, 0);
+        Server.Data.empireData.items.inventory.set(itemId, 0);
+        Server.Data.empireData.items.bought.set(itemId, 0);
         expect(Server.Item.buyItem(undefined, itemId)).toBe(true);
-        expect(Server.Item.getItemAmount(itemId)).toBe(1);
+        expect(Server.Data.empireData.items.inventory.get(itemId)).toBe(1);
     });
 
     it("should buy a non-free item", () => {
         const itemId = "BulkyDropper";
-        Server.Item.setItemAmount(itemId, 1);
-        Server.Item.setBoughtAmount(itemId, 0);
+        Server.Data.empireData.items.inventory.set(itemId, 1);
+        Server.Data.empireData.items.bought.set(itemId, 0);
         Server.Currency.set("Funds", new OnoeNum(1e6));
         expect(Server.Item.buyItem(undefined, itemId)).toBe(true);
-        expect(Server.Item.getItemAmount(itemId)).toBe(2);
+        expect(Server.Data.empireData.items.inventory.get(itemId)).toBe(2);
     });
 
     it("should not buy an item with insufficient funds", () => {
         const itemId = "BulkyDropper";
-        Server.Item.setItemAmount(itemId, 1);
-        Server.Item.setBoughtAmount(itemId, 0);
+        Server.Data.empireData.items.inventory.set(itemId, 1);
+        Server.Data.empireData.items.bought.set(itemId, 0);
         Server.Currency.set("Funds", new OnoeNum(0));
         expect(Server.Item.buyItem(undefined, itemId)).toBe(false);
-        expect(Server.Item.getItemAmount(itemId)).toBe(1);
+        expect(Server.Data.empireData.items.inventory.get(itemId)).toBe(1);
     });
 });
 
@@ -127,7 +127,7 @@ describe("unique items", () => {
         const uuid = Server.Item.createUniqueInstance(itemId);
         expect(uuid).toBeDefined();
 
-        const instance = Server.Data.empireData.items.uniqueInstances.get(uuid!);
+        const instance = Server.empireData.items.uniqueInstances.get(uuid!);
         expect(instance).toBeDefined();
         expect(instance!.baseItemId).toBe(itemId);
         expect(instance!.pots.size() > 0).toBe(true);
@@ -136,7 +136,7 @@ describe("unique items", () => {
     it("should validate pot values are within range", () => {
         const itemId = "TheFirstDropperBooster";
         const uuid = Server.Item.createUniqueInstance(itemId);
-        const instance = Server.Data.empireData.items.uniqueInstances.get(uuid!);
+        const instance = Server.empireData.items.uniqueInstances.get(uuid!);
 
         expect(instance).toBeDefined();
 
@@ -150,26 +150,26 @@ describe("unique items", () => {
 
 describe("data integrity", () => {
     it("flags illegal challenge migration as complete", () => {
-        expect(Server.Data.empireData.completedEvents.has("RemoveIllegalChallenges")).toBe(true);
+        expect(Server.empireData.completedEvents.has("RemoveIllegalChallenges")).toBe(true);
     });
 
     it("ensures repair protection map is initialized", () => {
-        const protection = Server.Data.empireData.items.repairProtection;
+        const protection = Server.empireData.items.repairProtection;
         expect(protection).toBeDefined();
         expect(typeIs(protection.size(), "number")).toBe(true);
     });
 
     it("keeps printed setups within the storage cap", () => {
-        expect(Server.Data.empireData.printedSetups.size()).toBeDefined();
-        expect(Server.Data.empireData.printedSetups.size() <= 50).toBe(true);
+        expect(Server.empireData.printedSetups.size()).toBeDefined();
+        expect(Server.empireData.printedSetups.size() <= 50).toBe(true);
     });
 
     it("keeps log history within the retention limit", () => {
-        expect(Server.Data.empireData.logs.size() <= 2000).toBe(true);
+        expect(Server.empireData.logs.size() <= 2000).toBe(true);
     });
 
     it("tracks last session timestamp", () => {
-        expect(Server.Data.empireData.lastSession).toBeDefined();
-        expect(Server.Data.empireData.lastSession > 0).toBe(true);
+        expect(Server.empireData.lastSession).toBeDefined();
+        expect(Server.empireData.lastSession > 0).toBe(true);
     });
 });

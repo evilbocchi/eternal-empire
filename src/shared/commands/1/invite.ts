@@ -1,7 +1,6 @@
 import Command, { CommandAPI } from "shared/commands/Command";
 import { IS_STUDIO } from "shared/Context";
 import AvailableEmpire from "shared/data/AvailableEmpire";
-import ThisEmpire from "shared/data/ThisEmpire";
 
 const debounce = new Map<number, number>();
 
@@ -34,7 +33,7 @@ export = new Command(script.Name)
                 );
                 return;
             }
-            AvailableEmpire.add(userId, ThisEmpire.id);
+            AvailableEmpire.add(userId, CommandAPI.Data.empireId);
             CommandAPI.ChatHook.sendPrivateMessage(
                 sender,
                 "Invited " + CommandAPI.Command.fp(target, userId),

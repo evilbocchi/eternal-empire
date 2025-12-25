@@ -7,8 +7,8 @@ describe("LeaderboardChangeService", () => {
     });
 
     it("empire data has leaderboard positions map", () => {
-        expect(Server.Data.empireData.leaderboardPositions).toBeDefined();
-        expect(typeIs(Server.Data.empireData.leaderboardPositions, "Instance")).toBe(false);
+        expect(Server.empireData.leaderboardPositions).toBeDefined();
+        expect(typeIs(Server.empireData.leaderboardPositions, "Instance")).toBe(false);
     });
 
     it("registers multiple leaderboard stores", () => {

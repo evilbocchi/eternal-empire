@@ -8,12 +8,12 @@ import PlaytimeService from "server/services/data/PlaytimeService";
 import ItemService from "server/services/item/ItemService";
 import PermissionService from "server/services/permissions/PermissionService";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
+import DifficultyResearch from "shared/difficulty/DifficultyResearch";
+import DifficultyReward from "shared/difficulty/reward/DifficultyReward";
 import { getPlayerCharacter } from "shared/hamster/getPlayerCharacter";
 import Item from "shared/item/Item";
 import Items from "shared/items/Items";
 import Packets from "shared/Packets";
-import DifficultyResearch from "shared/difficulty/DifficultyResearch";
-import DifficultyReward from "shared/difficulty/reward/DifficultyReward";
 
 type WalkSpeedBuffState = {
     amount: number;
@@ -95,14 +95,13 @@ export default class ResearchService implements OnStart {
             if (item === undefined) continue;
             if (!this.isItemEligibleForResearch(item)) continue;
 
-            const available = this.itemService.getAvailableItemAmount(itemId);
+            const available = this.itemService.getAvailableAmount(item);
             if (available <= 0) continue;
 
             const toReserve = math.min(amount, available);
             if (toReserve <= 0) continue;
 
-            const current = this.itemService.getResearchingAmount(itemId);
-            this.researching.set(itemId, current + toReserve);
+            this.researching.set(itemId, (this.researching.get(itemId) ?? 0) + toReserve);
             changed = true;
         }
 
@@ -134,7 +133,7 @@ export default class ResearchService implements OnStart {
 
         let changed = false;
         for (const [itemId, amount] of aggregated) {
-            const current = this.itemService.getResearchingAmount(itemId);
+            const current = this.researching.get(itemId) ?? 0;
             if (current <= 0) continue;
 
             const toRelease = math.min(amount, current);
@@ -244,6 +243,12 @@ export default class ResearchService implements OnStart {
         return math.floor(math.clamp(rawAmount, 1, 1000));
     }
 
+    /**
+     * Checks if the player can forge the specified item in the given amount.
+     * @param itemId The ID of the item to forge.
+     * @param rawAmount The raw amount of the item to forge.
+     * @returns Whether the player can forge the item in the given amount.
+     */
     private canForgeItem(itemId: string, rawAmount: number) {
         const amount = this.sanitizeRewardAmount(rawAmount);
         if (amount <= 0) return false;
@@ -251,15 +256,17 @@ export default class ResearchService implements OnStart {
         const item = Items.getItem(itemId);
         if (item === undefined) return false;
 
-        for (const [requiredId, requiredAmount] of item.requiredItems) {
-            const available = this.itemService.getAvailableItemAmount(requiredId);
+        for (const [requiredItemId, requiredAmount] of item.requiredItems) {
+            const requiredItem = Items.getItem(requiredItemId);
+            if (requiredItem === undefined) return false;
+            const available = this.itemService.getAvailableAmount(requiredItem);
             if (available < requiredAmount * amount) {
                 return false;
             }
         }
 
         let totalPrice = new CurrencyBundle();
-        const alreadyBought = this.itemService.getBoughtAmount(itemId);
+        const alreadyBought = this.itemService.getBoughtAmount(item);
         for (let iteration = 1; iteration <= amount; iteration++) {
             const price = item.getPrice(alreadyBought + iteration);
             if (price === undefined) {
@@ -360,7 +367,9 @@ export default class ResearchService implements OnStart {
                 case "grantItem": {
                     const amount = effect.amount ?? 1;
                     if (amount > 0) {
-                        this.itemService.giveItem(effect.itemId, amount);
+                        const itemToGrant = Items.getItem(effect.itemId);
+                        if (itemToGrant === undefined) throw `Invalid item ID in difficulty reward: ${effect.itemId}`;
+                        this.itemService.giveItem(itemToGrant, amount);
                     }
                     break;
                 }

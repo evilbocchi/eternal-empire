@@ -12,7 +12,6 @@ import AvailableEmpire from "shared/data/AvailableEmpire";
 import fixDuplicatedItemsData from "shared/data/loading/fixDuplicatedItemsData";
 import EmpireProfileTemplate from "shared/data/profile/EmpireProfileTemplate";
 import { EmpireProfileManager } from "shared/data/profile/ProfileManager";
-import ThisEmpire from "shared/data/ThisEmpire";
 import eat from "shared/hamster/eat";
 import Item from "shared/item/Item";
 import Items from "shared/items/Items";
@@ -271,9 +270,7 @@ export default class DataService implements OnStart, OnPlayerAdded {
             empireData.logs = [];
         }
         empireData.lastSession = tick();
-        const data = { empireProfile, empireData, empireId };
-        ThisEmpire.loadWith(data);
-        return data;
+        return { empireProfile, empireData, empireId };
     }
 
     /**
@@ -313,14 +310,14 @@ export default class DataService implements OnStart, OnPlayerAdded {
 
         if (IS_EDIT) {
             eat(() => {
-                EmpireProfileManager.unload(ThisEmpire.id);
+                EmpireProfileManager.unload(this.empireId);
             });
         } else {
             // Force save every 60 seconds to minimize data loss
             task.spawn(() => {
                 if (IS_SINGLE_SERVER || !IS_PUBLIC_SERVER) {
                     const loop = () => {
-                        EmpireProfileManager.save(ThisEmpire.id);
+                        EmpireProfileManager.save(this.empireId);
                         task.delay(60, loop);
                     };
                     task.delay(60, loop);
@@ -328,7 +325,7 @@ export default class DataService implements OnStart, OnPlayerAdded {
             });
 
             // check for no testing environment
-            game.BindToClose(() => EmpireProfileManager.unload(ThisEmpire.id));
+            game.BindToClose(() => EmpireProfileManager.unload(this.empireId));
         }
     }
 }

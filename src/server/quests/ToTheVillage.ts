@@ -117,12 +117,12 @@ export = new Quest(script.Name)
                         "To start, can you obtain 2 XL Wool? You can get it from that guy selling wool in the marketplace.",
                     ).root;
                 const stageDialogueConn = stage.dialogue!.finished.connect(() => {
-                    if (Server.Item.getItemAmount(EmpoweredBrick.id) >= 1) {
+                    if (Server.Item.getAvailableAmount(EmpoweredBrick) >= 1) {
                         continuation.talk();
                     }
                 });
                 const continuationConn = continuation.finished.connect(() => {
-                    if (Server.Quest.takeQuestItem(EmpoweredBrick.id, 1)) {
+                    if (Server.Quest.takeQuestItem(EmpoweredBrick, 1)) {
                         stage.complete();
                     }
                 });
@@ -147,12 +147,12 @@ export = new Quest(script.Name)
                 ).root;
 
                 const stageDialogueConn = stage.dialogue!.finished.connect(() => {
-                    if (Server.Item.getItemAmount("XLWool") >= 2) {
+                    if (Server.Item.getAvailableAmount(XLWool) >= 2) {
                         continuation.talk();
                     }
                 });
                 const continuationConn = continuation.finished.connect(() => {
-                    if (Server.Quest.takeQuestItem("XLWool", 2)) {
+                    if (Server.Quest.takeQuestItem(XLWool, 2)) {
                         stage.complete();
                     }
                 });
@@ -314,7 +314,7 @@ export = new Quest(script.Name)
                 });
                 const continuation2Conn = continuation2.finished.connect(() => {
                     stage.complete();
-                    Server.Quest.giveQuestItem(ChargedEmpoweredBrick.id, 1);
+                    Server.Quest.giveQuestItem(ChargedEmpoweredBrick, 1);
                     empoweredBrick.Destroy();
                 });
                 return () => {
