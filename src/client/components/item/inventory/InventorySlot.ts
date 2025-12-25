@@ -39,6 +39,7 @@ export interface UpdateInventorySlotOptions {
     layoutOrder?: number;
     visible?: boolean;
     amount?: number;
+    bonusAmount?: number;
     uuid?: string;
 }
 
@@ -262,8 +263,11 @@ export function updateInventorySlot(handle: InventorySlotHandle, options: Update
     }
 
     if (amount !== undefined) {
-        handle.amountLabel.Text = tostring(amount);
-        handle.amountLabel.TextColor3 = amount > 0 ? Color3.fromRGB(255, 255, 255) : Color3.fromRGB(150, 150, 150);
+        const bonusAmount = options.bonusAmount ?? 0;
+        const displayText = bonusAmount > 0 ? `${amount}+${bonusAmount}` : tostring(amount);
+        handle.amountLabel.Text = displayText;
+        const totalAmount = amount + bonusAmount;
+        handle.amountLabel.TextColor3 = totalAmount > 0 ? Color3.fromRGB(255, 255, 255) : Color3.fromRGB(150, 150, 150);
     }
 
     handle.currentUuid = uuid;

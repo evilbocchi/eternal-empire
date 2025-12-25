@@ -6,9 +6,10 @@ import { Server } from "shared/api/APIExpose";
 import { ASSETS, playSound } from "shared/asset/GameAssets";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Item from "shared/item/Item";
-import AdvancedRefiner from "shared/items/negative/a/AdvancedRefiner";
+import EfficientKillingUpgrader from "shared/items/0/win/EfficientKillingUpgrader";
 import Admiration from "shared/items/negative/instantwin/Admiration";
 import Codependence from "shared/items/negative/instantwin/Codependence";
+import KillbrickUpgrader from "shared/items/negative/restful/KillbrickUpgrader";
 import { GainUpgrade } from "shared/namedupgrade/NamedUpgrade";
 import NamedUpgrades from "shared/namedupgrade/NamedUpgrades";
 import Packets from "shared/Packets";
@@ -178,11 +179,11 @@ export class Challenge {
         };
 
         const itemRewards = new Map<number, { item: Item; count: number }>();
-        itemRewards.set(1, { item: AdvancedRefiner, count: 1 });
-        itemRewards.set(2, { item: AdvancedRefiner, count: 2 });
-        itemRewards.set(3, { item: AdvancedRefiner, count: 3 });
-        itemRewards.set(4, { item: AdvancedRefiner, count: 4 });
-        itemRewards.set(5, { item: AdvancedRefiner, count: 5 });
+        itemRewards.set(1, { item: KillbrickUpgrader, count: 1 });
+        itemRewards.set(2, { item: KillbrickUpgrader, count: 1 });
+        itemRewards.set(3, { item: KillbrickUpgrader, count: 1 });
+        itemRewards.set(4, { item: KillbrickUpgrader, count: 1 });
+        itemRewards.set(5, { item: EfficientKillingUpgrader, count: 1 });
 
         return new Challenge("MeltingEconomy")
             .setName("Melting Economy")

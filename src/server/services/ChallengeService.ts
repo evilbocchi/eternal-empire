@@ -171,6 +171,15 @@ export class ChallengeService implements OnStart {
             if (bestClear === undefined || dt > bestClear) {
                 data.challengeBestTimes.set(challengeId, dt);
             }
+
+            // Grant item rewards for this challenge level
+            const itemReward = challenge.itemRewards?.get(newClears);
+            if (itemReward !== undefined) {
+                const itemId = itemReward.item.id;
+                const currentRewards = data.challengeItemRewards.get(itemId) ?? 0;
+                data.challengeItemRewards.set(itemId, currentRewards + itemReward.count);
+                Packets.challengeItemBonuses.set(data.challengeItemRewards);
+            }
         }
         this.refreshChallenges();
         return $tuple(challenge, newClears);
@@ -248,6 +257,45 @@ export class ChallengeService implements OnStart {
         }
         Packets.currentLevelPerChallenge.set(currentLevelPerChallenge);
         this.refreshCurrentChallenge();
+        this.initializeChallengeRewards();
+    }
+
+    /**
+     * Initializes challenge item rewards tracker based on completed challenges.
+     * This ensures players who completed challenges before this feature receive their rewards retroactively.
+     */
+    private initializeChallengeRewards() {
+        const data = this.dataService.empireData;
+        const rewardMap = new Map<string, number>();
+
+        // Calculate all item rewards based on completed challenge levels
+        for (const [challengeId, clears] of data.challenges) {
+            const challenge = CHALLENGE_PER_ID.get(challengeId);
+            if (challenge === undefined || challenge.itemRewards === undefined) continue;
+
+            // Sum up rewards for all completed levels
+            for (let level = 1; level <= clears; level++) {
+                const itemReward = challenge.itemRewards.get(level);
+                if (itemReward !== undefined) {
+                    const itemId = itemReward.item.id;
+                    rewardMap.set(itemId, (rewardMap.get(itemId) ?? 0) + itemReward.count);
+                }
+            }
+        }
+
+        // Update the data if there are any discrepancies
+        let hasChanges = false;
+        for (const [itemId, expectedAmount] of rewardMap) {
+            const currentAmount = data.challengeItemRewards.get(itemId) ?? 0;
+            if (currentAmount !== expectedAmount) {
+                data.challengeItemRewards.set(itemId, expectedAmount);
+                hasChanges = true;
+            }
+        }
+
+        if (hasChanges) {
+            Packets.challengeItemBonuses.set(data.challengeItemRewards);
+        }
     }
 
     /**

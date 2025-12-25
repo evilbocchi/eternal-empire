@@ -327,6 +327,13 @@ const EmpireProfileTemplate = {
     challenges: new Map<string, number>(),
 
     /**
+     * Cumulative item rewards earned from completing challenges.
+     * Key is item ID, value is total amount of that item earned across all challenge completions.
+     * These items are permanent and survive resets.
+     */
+    challengeItemRewards: new Map<string, number>(),
+
+    /**
      * The ID of the current challenge.
      */
     currentChallenge: undefined as string | undefined,

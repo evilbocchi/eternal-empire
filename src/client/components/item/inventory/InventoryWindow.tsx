@@ -40,6 +40,7 @@ function calculateOptimalCellCount(containerX: number): number {
 
 type InventorySlotData = ItemFilterData & {
     amount?: number;
+    bonusAmount?: number;
     uuid?: string;
 };
 
@@ -139,6 +140,7 @@ export default function InventoryWindow() {
     const inventory = useProperty(Packets.inventory) ?? new Map<string, number>();
     const researching = useProperty(Packets.researching) ?? new Map<string, number>();
     const uniqueInstances = useProperty(Packets.uniqueInstances) ?? new Map<string, UniqueItemInstance>();
+    const challengeItemBonuses = useProperty(Packets.challengeItemBonuses) ?? new Map<string, number>();
 
     const scrollingFrameRef = useRef<ScrollingFrame>();
     const itemSlotsRef = useRef(new Map<string, InventorySlotHandle>());
@@ -260,8 +262,10 @@ export default function InventoryWindow() {
         for (const [id, data] of dataPerItem) {
             const reserved = researching.get(id) ?? 0;
             const amount = math.max((amountsPerItem.get(id) ?? 0) - reserved, 0);
+            const bonusAmount = challengeItemBonuses.get(id) ?? 0;
             data.amount = amount;
-            if (amount <= 0) {
+            data.bonusAmount = bonusAmount;
+            if (amount + bonusAmount <= 0) {
                 data.visible = false;
             }
 
@@ -275,7 +279,7 @@ export default function InventoryWindow() {
             }
         }
         return { dataPerItem, hasOwnedItems: ownsAnyItems, hasFilteredItems: anyFilteredVisible };
-    }, [inventory, uniqueInstances, researching, searchQuery, filterProps.traitFilters]);
+    }, [inventory, uniqueInstances, researching, challengeItemBonuses, searchQuery, filterProps.traitFilters]);
 
     useEffect(() => {
         const frame = scrollingFrameRef.current;
@@ -324,6 +328,7 @@ export default function InventoryWindow() {
                 layoutOrder,
                 visible: slotData?.visible === true,
                 amount: slotData?.amount ?? 0,
+                bonusAmount: slotData?.bonusAmount ?? 0,
                 uuid: slotData?.uuid,
             });
         }

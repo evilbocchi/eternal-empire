@@ -84,7 +84,6 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
     private readonly inventory: Map<string, number>;
     private readonly uniqueInstances: Map<string, UniqueItemInstance>;
     private readonly researching: Map<string, number>;
-    private readonly additionalInventory = new Map<string, number>();
     private hasInventoryChanged = false;
     private hasBoughtChanged = false;
     private readonly changedPlacedItems = new Map<string, PlacedItem>();
@@ -176,8 +175,18 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
     }
 
     /**
+     * Gets the challenge bonus items for a given item ID.
+     * @param itemId The item ID to check.
+     * @returns The number of bonus items from challenge rewards, or 0 if none.
+     */
+    private getChallengeBonusItems(itemId: string) {
+        return this.dataService.empireData.challengeItemRewards.get(itemId) ?? 0;
+    }
+
+    /**
      * Gets the current amount of an item that is available for placement/usage.
      * This subtracts any units currently being researched from the inventory total.
+     * Includes challenge bonus items.
      *
      * @param item The item to check.
      * @returns The amount of the item available for placement or consumption.
@@ -186,9 +195,9 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
         if (item.isA("Unique")) throw "Unsupported for unique items.";
         const itemId = item.id;
         const regularCount = this.inventory.get(itemId) ?? 0;
-        const additionalCount = this.additionalInventory.get(itemId) ?? 0;
+        const challengeBonusCount = this.getChallengeBonusItems(itemId);
         const researchingCount = this.researching.get(itemId) ?? 0;
-        return math.max(regularCount + additionalCount - researchingCount, 0);
+        return math.max(regularCount + challengeBonusCount - researchingCount, 0);
     }
 
     /**
@@ -562,8 +571,15 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
             this.uniqueInstances.set(id, uniqueInstance);
             this.changedUniqueInstances.set(id, uniqueInstance);
         } else {
-            newAmount = (this.inventory.get(itemId) ?? 0) - 1;
-            this.inventory.set(itemId, newAmount);
+            // Only consume from regular inventory, not challenge rewards
+            const inventoryAmount = this.inventory.get(itemId) ?? 0;
+            if (inventoryAmount > 0) {
+                newAmount = inventoryAmount - 1;
+                this.inventory.set(itemId, newAmount);
+            } else {
+                // Placing from challenge rewards - don't decrement anything
+                newAmount = 0;
+            }
         }
 
         // Update data and create model
