@@ -475,6 +475,55 @@ describe("Printer and SetupService", () => {
     });
 
     describe("SetupService edge cases", () => {
+        it("prevents item duplication through spam load/unplace cycles", () => {
+            const initialItemCount = 3;
+
+            // Give exactly 3 items
+            Server.Item.giveItem(TheFirstDropper, initialItemCount);
+
+            // Verify starting inventory
+            const startingInventory = Server.empireData.items.inventory.get(TheFirstDropper.id) ?? 0;
+            expect(startingInventory).toBe(initialItemCount);
+
+            // Place all items and save setup
+            const placed1 = Server.Item.serverPlace(TheFirstDropper.id, new Vector3(0, 0, 0), 0, "BarrenIslands");
+            const placed2 = Server.Item.serverPlace(TheFirstDropper.id, new Vector3(5, 0, 0), 0, "BarrenIslands");
+            const placed3 = Server.Item.serverPlace(TheFirstDropper.id, new Vector3(10, 0, 0), 0, "BarrenIslands");
+
+            Server.Setup.saveSetup(mockPlayer, "BarrenIslands", "DupeTest");
+
+            // Now attempt the duplication exploit:
+            // Repeatedly load setup and unplace items
+            for (let i = 0; i < 5; i++) {
+                // Unplace all items (return to inventory)
+                const placedItems = Server.empireData.items.worldPlaced;
+                const placedIds = new Set<string>();
+                for (const [id] of placedItems) {
+                    placedIds.add(id);
+                }
+                Server.Item.unplaceItems(undefined, placedIds);
+
+                // Load setup again (should place items from existing inventory)
+                Server.Setup.loadSetup(mockPlayer, "BarrenIslands", "DupeTest");
+            }
+
+            // Final check: unplace everything one more time
+            const finalPlacedIds = new Set<string>();
+            for (const [id] of Server.empireData.items.worldPlaced) {
+                finalPlacedIds.add(id);
+            }
+            Server.Item.unplaceItems(undefined, finalPlacedIds);
+
+            // Count total items (inventory + placed)
+            const finalInventory = Server.empireData.items.inventory.get(TheFirstDropper.id) ?? 0;
+            const finalPlaced = Server.empireData.items.worldPlaced.size();
+            const totalItems = finalInventory + finalPlaced;
+
+            // CRITICAL: Total items should never exceed what we started with
+            expect(totalItems).toBe(initialItemCount);
+            expect(finalInventory).toBe(initialItemCount);
+        });
+
         it("handles empty setups", () => {
             // Save a setup with no items
             Server.Setup.saveSetup(mockPlayer, "BarrenIslands", "EmptySetup");
