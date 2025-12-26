@@ -563,6 +563,49 @@ describe("ChallengeRewards", () => {
             expect(Server.empireData.challengeItemRewards.get(KillbrickUpgrader.id)).toBe(3);
         });
 
+        it("allows buying up to max shop purchases even with challenge rewards, exceeding normal max", () => {
+            // Give challenge rewards
+            const challengeRewardCount = 5;
+            Server.empireData.challengeItemRewards.set(KillbrickUpgrader.id, challengeRewardCount);
+            Server.empireData.items.inventory.set(KillbrickUpgrader.id, 0);
+            Server.empireData.items.bought.set(KillbrickUpgrader.id, 0);
+
+            // Get the max purchases allowed from shop
+            const maxPurchases = KillbrickUpgrader.pricePerIteration.size();
+            expect(maxPurchases).toBeGreaterThan(0); // Ensure item has a purchase limit
+
+            // Give enough currency to buy max amount
+            Server.Currency.set("Funds", new OnoeNum(1e50));
+
+            // Buy items up to the maximum
+            for (let i = 0; i < maxPurchases; i++) {
+                const success = Server.Item.buyItem(undefined, KillbrickUpgrader.id);
+                expect(success).toBe(true);
+            }
+
+            // Should have challenge rewards + max purchases
+            const expectedTotal = challengeRewardCount + maxPurchases;
+            expect(Server.Item.getAvailableAmount(KillbrickUpgrader)).toBe(expectedTotal);
+
+            // Verify bought count is at max
+            expect(Server.empireData.items.bought.get(KillbrickUpgrader.id)).toBe(maxPurchases);
+
+            // Verify inventory has the purchased items
+            expect(Server.empireData.items.inventory.get(KillbrickUpgrader.id)).toBe(maxPurchases);
+
+            // Challenge rewards should be unchanged
+            expect(Server.empireData.challengeItemRewards.get(KillbrickUpgrader.id)).toBe(challengeRewardCount);
+
+            // Attempt to buy one more should fail (at max purchases)
+            const beforeExtraBuy = Server.empireData.items.inventory.get(KillbrickUpgrader.id);
+            Server.Item.buyItem(undefined, KillbrickUpgrader.id);
+            const afterExtraBuy = Server.empireData.items.inventory.get(KillbrickUpgrader.id);
+
+            // Should not have increased
+            expect(afterExtraBuy).toBe(beforeExtraBuy);
+            expect(Server.Item.getAvailableAmount(KillbrickUpgrader)).toBe(expectedTotal);
+        });
+
         it("prevents overflow from excessive challenge completions", () => {
             // Simulate many challenge completions
             const challenge = CHALLENGE_PER_ID.get("MeltingEconomy");
