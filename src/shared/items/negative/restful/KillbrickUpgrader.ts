@@ -22,7 +22,7 @@ export = new Item(script.Name)
     .soldAt(ClassLowerNegativeShop)
 
     .trait(Upgrader)
-    .setMul(new CurrencyBundle().set("Funds", 1.4).set("Power", 1.4))
+    .setMul(new CurrencyBundle().set("Funds", 1.35).set("Power", 1.4))
 
     .trait(Damager)
     .setDamage(20)
