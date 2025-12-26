@@ -1,4 +1,4 @@
-import { Players, TweenService } from "@rbxts/services";
+import { ContentProvider, Players, TweenService } from "@rbxts/services";
 
 namespace LoadingScreen {
     let guiContainer: ScreenGui | undefined;
@@ -177,11 +177,23 @@ namespace LoadingScreen {
 
             const tweenInfo = new TweenInfo(0.4, Enum.EasingStyle.Quad, Enum.EasingDirection.Out);
 
-            TweenService.Create(backdrop!, tweenInfo, {
-                BackgroundTransparency: 0,
-                ImageTransparency: 0.925,
-                Size: new UDim2(1, 0, 1, 0),
-            }).Play();
+            // Preload the backdrop image before fading it in
+            task.spawn(() => {
+                if (!backdrop) return;
+                const imageAsset = backdrop.Image;
+                if (imageAsset && imageAsset !== "") {
+                    ContentProvider.PreloadAsync([backdrop]);
+                }
+
+                if (!backdrop || !guiContainer || !guiContainer.Enabled) return;
+
+                TweenService.Create(backdrop, tweenInfo, {
+                    BackgroundTransparency: 0,
+                    ImageTransparency: 0.925,
+                    Size: new UDim2(1, 0, 1, 0),
+                }).Play();
+            });
+
             TweenService.Create(label, tweenInfo, { TextTransparency: 0, TextStrokeTransparency: 0 }).Play();
             TweenService.Create(longHand!, tweenInfo, { ImageTransparency: 0 }).Play();
             TweenService.Create(shortHand!, tweenInfo, { ImageTransparency: 0 }).Play();
@@ -199,11 +211,15 @@ namespace LoadingScreen {
         }
     }
 
-    export function hideLoadingScreen(tweenDuration = 0.4) {
+    export function getHidingTween() {
+        return new TweenInfo(0.4, Enum.EasingStyle.Quad, Enum.EasingDirection.In);
+    }
+
+    export function hideLoadingScreen() {
         if (!guiContainer) return;
 
         // Fade out all children
-        const tweenInfo = new TweenInfo(tweenDuration, Enum.EasingStyle.Quad, Enum.EasingDirection.In);
+        const tweenInfo = getHidingTween();
 
         // Animate UICorner to round (0.5) when closing
         const backdropCorner = backdrop!.FindFirstChild("BackdropCorner") as UICorner;

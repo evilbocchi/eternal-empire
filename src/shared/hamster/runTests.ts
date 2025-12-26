@@ -15,16 +15,15 @@ export = (testNamePattern?: string) => {
 
     const cwd = ServerStorage.WaitForChild("tests");
 
-    // Build Jest options
-    const jestOptions: { testNamePattern?: string } = {};
-
-    // Add test name filter if provided
-    if (testNamePattern !== undefined && testNamePattern !== "") {
-        jestOptions.testNamePattern = testNamePattern;
-    }
-
     // run jest and capture results
-    const [success, resolved] = runCLI(cwd, jestOptions, [cwd]).await();
+    const [success, resolved] = runCLI(
+        cwd,
+        {
+            testNamePattern: testNamePattern !== undefined && testNamePattern !== "" ? testNamePattern : undefined,
+            coverage: true,
+        },
+        [cwd],
+    ).await();
 
     if (!success) {
         warn("Jest CLI failed to run.");

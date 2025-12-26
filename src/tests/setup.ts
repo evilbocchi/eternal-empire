@@ -5,7 +5,6 @@ import { Workspace } from "@rbxts/services";
 import cleanupSimulation from "shared/hamster/cleanupSimulation";
 import { eater } from "shared/hamster/eat";
 import mockFlamework from "shared/hamster/mockFlamework";
-import Items from "shared/items/Items";
 
 declare module "@rbxts/jest-globals" {
     namespace jest {
@@ -56,7 +55,7 @@ expect.extend({
 });
 
 // Suppress noisy console output during tests
-const suppressedPatterns = [
+const suppressedPrintPatterns = [
     "Weather changed to:",
     "Initialized ",
     "Weather manually set to:",
@@ -67,7 +66,7 @@ const suppressedPatterns = [
 const originalPrint = jest.globalEnv.print as unknown as (...args: unknown[]) => void;
 jest.spyOn(jest.globalEnv, "print").mockImplementation((...args: unknown[]) => {
     const message = tostring(args[0]);
-    const shouldSuppress = suppressedPatterns.some((pattern) => message.find(pattern)[0] !== undefined);
+    const shouldSuppress = suppressedPrintPatterns.some((pattern) => message.find(pattern)[0] !== undefined);
     if (!shouldSuppress) {
         originalPrint(...args);
     }
@@ -87,13 +86,4 @@ beforeAll(() => {
     eater.janitor.Add(cleanupSimulation);
 });
 
-afterAll(() => {
-    eater.janitor?.Destroy();
-
-    task.delay(10, () => {
-        for (const item of Items.sortedItems) {
-            table.clear(item);
-        }
-        table.clear(Items);
-    });
-});
+afterAll(() => eater.janitor?.Destroy());

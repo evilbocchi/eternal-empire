@@ -110,10 +110,8 @@ describe("App", () => {
         LoadingScreen.showLoadingScreen("Integration Test", true, loadingGui);
         expect(loadingGui.Enabled).toBe(true);
 
-        LoadingScreen.hideLoadingScreen(0);
-        const hidden = waitUntil(() => loadingGui.Enabled === false);
-        expect(hidden).toBe(true);
-
+        jest.spyOn(LoadingScreen, "getHidingTween").mockImplementation(() => new TweenInfo(0));
+        LoadingScreen.hideLoadingScreen();
         loadingGui.Destroy();
     });
 

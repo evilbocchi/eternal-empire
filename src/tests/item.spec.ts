@@ -1,7 +1,6 @@
 import { describe, expect, it, jest } from "@rbxts/jest-globals";
 import { OnoeNum } from "@rbxts/serikanum";
 import { Server } from "shared/api/APIExpose";
-import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Items from "shared/items/Items";
 import ItemPlacement from "shared/placement/ItemPlacement";
 
@@ -100,6 +99,7 @@ describe("items", () => {
             Server.empireData.items.researching.set(testItem.id, 4);
 
             // Should not be able to place another item
+            jest.spyOn(jest.globalEnv, "warn").mockImplementation(() => {}); // Suppress expected warning
             const [placedItem2] = Server.Item.serverPlace(testItem.id, new Vector3(5, 0, 0), 0);
             expect(placedItem2).toBeUndefined();
 
