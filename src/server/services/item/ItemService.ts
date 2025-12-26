@@ -54,8 +54,7 @@ declare global {
     }
 }
 
-/** Cached baseplate bounds for performance optimization in sandbox mode. */
-const baseplateBounds = Sandbox.createBaseplateBounds();
+const baseplateBounds = Sandbox.baseplateBounds;
 
 /** Queue for serializing item placement operations to prevent race conditions. */
 const queue = new Array<() => void>();
@@ -415,23 +414,17 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
         const placedItems = new Set<IdPlacedItem>();
         const placementIds = new Set<string>();
         for (const placingInfo of placingInfoSet) {
-            const [placedItem, amount] = this.serverPlace(
-                placingInfo.id,
-                placingInfo.position,
-                placingInfo.rotation,
-                area,
-            );
+            const placedItem = this.serverPlace(placingInfo.id, placingInfo.position, placingInfo.rotation, area);
             if (placedItem === undefined) {
                 if (placementIds.size() > 0) {
                     this.unplaceItems(player, placementIds);
                 }
                 return 0;
             }
+            const item = Items.getItem(placingInfo.id);
+            if (item === undefined) throw `Item ${placingInfo.id} not found.`;
+            if (!item.isA("Unique")) totalAmount += this.getAvailableAmount(item);
 
-            if (amount !== undefined) {
-                // if this is a normal item
-                totalAmount += amount;
-            }
             placedItems.add(placedItem);
             placementIds.add(placedItem.id);
         }
@@ -457,9 +450,9 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
      * @param position Position of the PrimaryPart of the item model to place in.
      * @param rotation Rotation, in degrees, to rotate the item.
      * @param areaId The area to place the item in.
-     * @returns A tuple for the placed item and the remaining item count in the inventory
+     * @returns The placed item.
      */
-    serverPlace(id: string, position: Vector3, rotation: number, areaId?: AreaId): LuaTuple<[IdPlacedItem?, number?]> {
+    serverPlace(id: string, position: Vector3, rotation: number, areaId?: AreaId): IdPlacedItem | undefined {
         const empireData = this.dataService.empireData;
         const itemsData = empireData.items;
 
@@ -468,7 +461,7 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
         const item = Items.getItem(uniqueInstance?.baseItemId ?? id);
         if (item === undefined) {
             warn(`Item ${id} not found in inventory or unique items.`);
-            return $tuple(undefined);
+            return;
         }
 
         const itemId = item.id;
@@ -477,12 +470,12 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
             for (const [uuid, instance] of itemsData.uniqueInstances) {
                 if (instance.baseItemId === itemId && instance.placed !== undefined) {
                     warn(`${itemId} is already placed under ${uuid}. Cannot place again.`);
-                    return $tuple(undefined);
+                    return;
                 }
             }
         } else if (this.getAvailableAmount(item) <= 0) {
             warn(`Not enough of item ${itemId} to place.`);
-            return $tuple(undefined);
+            return;
         }
 
         // Round rotation to nearest 90 degrees
@@ -490,7 +483,12 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
         rotation %= 360;
 
         // Check level requirements
-        if (item.levelReq !== undefined && item.levelReq > empireData.level) return $tuple(undefined);
+        if (item.levelReq !== undefined && item.levelReq > empireData.level) {
+            print(
+                `Empire level too low to place item ${itemId}. Required: ${item.levelReq}, Current: ${empireData.level}`,
+            );
+            return;
+        }
 
         // Check challenge restrictions
         if (empireData.currentChallenge !== undefined) {
@@ -500,7 +498,8 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
                 challenge.itemRestrictionFilter !== undefined &&
                 challenge.itemRestrictionFilter(item)
             ) {
-                return $tuple(undefined);
+                print(`Item ${itemId} is restricted in the current challenge and cannot be placed.`);
+                return;
             }
         }
 
@@ -509,13 +508,19 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
         // Determine build bounds based on placement mode
         if (baseplateBounds === undefined) {
             // normal placement
-            if (areaId === undefined) return $tuple(undefined);
+            if (areaId === undefined) {
+                print("No area specified for item placement in normal mode.");
+                return;
+            }
 
             const area =
                 item.bounds === undefined
                     ? ItemPlacement.getAreaOfPosition(position, item.placeableAreas)
                     : AREAS[areaId];
-            if (area === undefined || area.buildBounds === undefined) return $tuple(undefined);
+            if (area === undefined || area.buildBounds === undefined) {
+                print(`Position ${position} is not in a valid placeable area for item ${itemId}.`);
+                return;
+            }
 
             areaId = area.id;
             buildBounds = area.buildBounds;
@@ -532,7 +537,10 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
 
         // Calculate final position with snapping
         let cframe = buildBounds.snap(primaryPart.Size, position, math.rad(rotation));
-        if (cframe === undefined) return $tuple(undefined);
+        if (cframe === undefined) {
+            print(`Failed to snap item ${itemId} at position ${position}.`);
+            return;
+        }
 
         // Adjust position if not inside build bounds
         if (!buildBounds.isInside(cframe.Position)) {
@@ -542,10 +550,16 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
         model.PivotTo(cframe);
 
         // Check for collisions with existing items
-        if (ItemPlacement.isTouchingPlacedItem(model)) return $tuple(undefined);
+        if (ItemPlacement.isTouchingPlacedItem(model)) {
+            print(`Item ${itemId} placement collides with existing items.`);
+            return;
+        }
 
         // Check if placement is in valid area
-        if (baseplateBounds === undefined && !ItemPlacement.isInPlaceableArea(model, item)) return $tuple(undefined);
+        if (baseplateBounds === undefined && !ItemPlacement.isInPlaceableArea(model, item)) {
+            print(`Item ${itemId} placement is not in a valid placeable area.`);
+            return;
+        }
 
         // Create placed item data
         const [rotX, rotY, rotZ] = cframe.ToOrientation();
@@ -564,22 +578,13 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
             id: nextId,
         };
 
-        let newAmount: number | undefined;
         if (uniqueInstance !== undefined) {
             placedItem.uniqueItemId = id; // Link unique item UUID
             uniqueInstance.placed = nextId; // Set the placement ID for the unique item
             this.uniqueInstances.set(id, uniqueInstance);
             this.changedUniqueInstances.set(id, uniqueInstance);
         } else {
-            // Only consume from regular inventory, not challenge rewards
-            const inventoryAmount = this.inventory.get(itemId) ?? 0;
-            if (inventoryAmount > 0) {
-                newAmount = inventoryAmount - 1;
-                this.inventory.set(itemId, newAmount);
-            } else {
-                // Placing from challenge rewards - don't decrement anything
-                newAmount = 0;
-            }
+            this.inventory.set(itemId, (this.inventory.get(itemId) ?? 0) - 1);
         }
 
         // Update data and create model
@@ -587,7 +592,7 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
         this.changedPlacedItems.set(nextId, placedItem);
         this.addItemModel(nextId, placedItem);
 
-        return $tuple(placedItem, newAmount);
+        return placedItem;
     }
 
     // Model Management Methods

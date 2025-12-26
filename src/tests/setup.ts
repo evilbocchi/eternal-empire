@@ -5,6 +5,7 @@ import { Workspace } from "@rbxts/services";
 import cleanupSimulation from "shared/hamster/cleanupSimulation";
 import { eater } from "shared/hamster/eat";
 import mockFlamework from "shared/hamster/mockFlamework";
+import Sandbox from "shared/Sandbox";
 
 declare module "@rbxts/jest-globals" {
     namespace jest {
@@ -80,10 +81,23 @@ beforeAll(() => {
         npcFolder.Parent = Workspace;
     }
 
+    // Start game
     eater.janitor = new Janitor();
     const cleanup = mockFlamework();
     eater.janitor.Add(cleanup);
     eater.janitor.Add(cleanupSimulation);
+
+    // Relocate baseplate to somewhere without other items
+    if (Sandbox.baseplate && Sandbox.baseplateBounds) {
+        const originalCFrame = Sandbox.baseplate.CFrame;
+        Sandbox.baseplate.Position = new Vector3(0, -500, 0);
+        Sandbox.baseplateBounds.draw(Sandbox.baseplate);
+
+        eater.janitor.Add(() => {
+            if (!Sandbox.baseplate || !Sandbox.baseplate.Parent) return;
+            Sandbox.baseplate.CFrame = originalCFrame;
+        });
+    }
 });
 
 afterAll(() => eater.janitor?.Destroy());

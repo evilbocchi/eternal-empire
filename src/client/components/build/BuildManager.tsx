@@ -57,7 +57,7 @@ namespace BuildManager {
 
     export let clicking = false;
 
-    export const baseplateBounds = Sandbox.createBaseplateBounds();
+    export const baseplateBounds = Sandbox.baseplateBounds;
 
     export const dragging = new Set<Model>();
 

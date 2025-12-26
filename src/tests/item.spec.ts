@@ -32,7 +32,7 @@ describe("items", () => {
             const uuids = Server.Item.giveItem(item, 1);
 
             let placingId = uuids === undefined ? itemId : uuids[0];
-            const [placedItem] = Server.Item.serverPlace(placingId, new Vector3(), 0);
+            const placedItem = Server.Item.serverPlace(placingId, new Vector3(), 0);
 
             if (placedItem === undefined) {
                 warn(`Failed to place item with id ${itemId} for loading test.`);
@@ -92,7 +92,7 @@ describe("items", () => {
             Server.empireData.items.researching.clear();
 
             // Place one item successfully
-            const [placedItem1] = Server.Item.serverPlace(testItem.id, new Vector3(0, 0, 0), 0);
+            const placedItem1 = Server.Item.serverPlace(testItem.id, new Vector3(0, 0, 0), 0);
             expect(placedItem1).toBeDefined();
 
             // Reserve 4 items for research (leaving 0 available since 1 is placed)
@@ -100,7 +100,7 @@ describe("items", () => {
 
             // Should not be able to place another item
             jest.spyOn(jest.globalEnv, "warn").mockImplementation(() => {}); // Suppress expected warning
-            const [placedItem2] = Server.Item.serverPlace(testItem.id, new Vector3(5, 0, 0), 0);
+            const placedItem2 = Server.Item.serverPlace(testItem.id, new Vector3(5, 0, 0), 0);
             expect(placedItem2).toBeUndefined();
 
             // Clean up

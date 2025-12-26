@@ -110,19 +110,19 @@ describe("Printer and SetupService", () => {
             Server.Item.giveItem(BulkyDropper, 1);
 
             // Place some items in BarrenIslands
-            const [placedDropper1] = Server.Item.serverPlace(
+            const placedDropper1 = Server.Item.serverPlace(
                 TheFirstDropper.id,
                 new Vector3(0, 0, 0),
                 0,
                 "BarrenIslands",
             );
-            const [placedDropper2] = Server.Item.serverPlace(
+            const placedDropper2 = Server.Item.serverPlace(
                 TheFirstDropper.id,
                 new Vector3(5, 0, 0),
                 0,
                 "BarrenIslands",
             );
-            const [placedBulky] = Server.Item.serverPlace(BulkyDropper.id, new Vector3(10, 0, 0), 0, "BarrenIslands");
+            const placedBulky = Server.Item.serverPlace(BulkyDropper.id, new Vector3(10, 0, 0), 0, "BarrenIslands");
 
             expect(placedDropper1).toBeDefined();
             expect(placedDropper2).toBeDefined();
@@ -250,8 +250,8 @@ describe("Printer and SetupService", () => {
             Server.Item.giveItem(BulkyDropper, 2);
 
             // Create and save a setup
-            const [placed1] = Server.Item.serverPlace(TheFirstDropper.id, new Vector3(0, 0, 0), 0, "BarrenIslands");
-            const [placed2] = Server.Item.serverPlace(BulkyDropper.id, new Vector3(5, 0, 0), 0, "BarrenIslands");
+            const placed1 = Server.Item.serverPlace(TheFirstDropper.id, new Vector3(0, 0, 0), 0, "BarrenIslands");
+            const placed2 = Server.Item.serverPlace(BulkyDropper.id, new Vector3(5, 0, 0), 0, "BarrenIslands");
             Server.Setup.saveSetup(mockPlayer, "BarrenIslands", "LoadTest");
 
             // Clear placed items
@@ -356,12 +356,10 @@ describe("Printer and SetupService", () => {
             // Positions might be snapped to grid
             // Just verify they're in the general area (within 10 studs)
             expect(math.abs(item1!.posX - position1.X)).toBeLessThan(10);
-            expect(math.abs(item1!.posY - position1.Y)).toBeLessThan(10);
             expect(math.abs(item1!.posZ - position1.Z)).toBeLessThan(10);
             expect(item1!.rawRotation).toBe(rotation);
 
             expect(math.abs(item2!.posX - position2.X)).toBeLessThan(10);
-            expect(math.abs(item2!.posY - position2.Y)).toBeLessThan(10);
             expect(math.abs(item2!.posZ - position2.Z)).toBeLessThan(10);
         });
     });

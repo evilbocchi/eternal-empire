@@ -16,7 +16,7 @@ namespace ItemPlacement {
      * @returns True if touching another placed item, false otherwise.
      */
     export function isTouchingPlacedItem(itemModel: Model) {
-        // Skip collision check if item is still in bounce animation
+        // client-side attribute - skip collision check if item is still in bounce animation
         const bounceStartTime = itemModel.GetAttribute("BounceAnimationStartTime") as number | undefined;
         if (bounceStartTime !== undefined && os.clock() - bounceStartTime < 0.4) {
             return false;
@@ -44,7 +44,6 @@ namespace ItemPlacement {
                         // Server can see item previews, ignore them
                         continue;
                     }
-
                     return true;
                 }
             }

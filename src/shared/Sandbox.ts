@@ -15,18 +15,17 @@ export default class Sandbox {
     })();
 
     /**
-     * Creates BuildBounds for the baseplate if sandbox mode is enabled.
-     * @returns The BuildBounds instance or undefined if not available.
+     * The `Workspace.Baseplate` part if sandbox mode is enabled.
      */
-    static createBaseplateBounds() {
+    static readonly baseplate = (() => {
         if (!this.getEnabled()) return undefined;
+        return Workspace.FindFirstChild("Baseplate") as Part;
+    })();
 
-        const baseplate = Workspace.FindFirstChild("Baseplate") as Part;
-        if (baseplate === undefined) {
-            return undefined;
-        }
-        return new BuildBounds(baseplate);
-    }
+    /**
+     * BuildBounds for the baseplate if sandbox mode is enabled.
+     */
+    static readonly baseplateBounds = (() => (this.baseplate ? new BuildBounds(this.baseplate) : undefined))();
 
     /**
      * Checks if sandbox mode is enabled.
