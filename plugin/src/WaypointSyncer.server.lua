@@ -8,8 +8,6 @@ local INTERVAL = 2 -- seconds
 local RECONNECT_DELAY = 5 -- seconds
 
 local streamClient = nil
-local heartbeatConnection = nil
-local lastSend = 0
 
 local function serializeInstanceTree(instance)
     local node = {
@@ -103,28 +101,11 @@ local function connectStream()
     streamClient:connect()
 end
 
--- Heartbeat to periodically send updates when connected
-task.spawn(function()
-    if RunService:IsRunning() then
-        return
-    end
-
-    heartbeatConnection = RunService.Heartbeat:Connect(function()
-        if streamClient and tick() - lastSend >= INTERVAL then
-            sendWaypointUpdate()
-            lastSend = tick()
-        end
-    end)
-end)
-
 -- Connect to stream on load
 connectStream()
 
 -- Cleanup on plugin unload
 plugin.Unloading:Connect(function()
-    if heartbeatConnection then
-        heartbeatConnection:Disconnect()
-    end
     if streamClient then
         streamClient:dispose()
     end

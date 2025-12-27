@@ -1,6 +1,6 @@
 import { ErrorCode, McpError } from "@modelcontextprotocol/sdk/types.js";
-import { cloneNodeLimited, findNodeBySegments, normalizePathSegments } from "../live/datamodel/datamodelUtils.js";
-import { connectionState, dataModelState } from "../live/state/dataModelState.js";
+import { cloneNodeLimited, findNodeBySegments, normalizePathSegments } from "./datamodel/datamodelUtils.js";
+import { connectionState, dataModelState } from "./state/dataModelState.js";
 import {
     isStreamConnected as isMcpStreamConnected,
     requestToolExecution as requestMcpToolExecution,
@@ -191,9 +191,9 @@ export async function executeMcpTool(name, rawArgs, options = {}) {
                     const parentDisplay = lookup.parent.path ?? lookup.parent.name ?? "parent";
                     const parentTruncated = Boolean(
                         lookup.parent.truncated ||
-                            (typeof lookup.parent.childCount === "number" &&
-                                typeof lookup.parent.totalChildren === "number" &&
-                                lookup.parent.childCount < lookup.parent.totalChildren),
+                        (typeof lookup.parent.childCount === "number" &&
+                            typeof lookup.parent.totalChildren === "number" &&
+                            lookup.parent.childCount < lookup.parent.totalChildren),
                     );
 
                     if (parentTruncated) {
