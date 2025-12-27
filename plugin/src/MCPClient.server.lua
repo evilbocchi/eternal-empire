@@ -7,10 +7,10 @@
     - execute_luau: Run arbitrary Luau source within the plugin context and capture its output
 ]]
 local HttpService = game:GetService("HttpService")
-local getBaseUrl = require(script.Parent.getBaseUrl)
 local log = require(script.Parent.log)
 local StreamClient = require(script.Parent.StreamClient)
 
+local BASE_URL = "http://localhost:28355"
 local STREAM_PATH = "/mcp/stream"
 local CALL_TOOL_PATH = "/mcp/call-tool"
 local TOOLS_PATH = "/mcp/tools"
@@ -21,7 +21,7 @@ local RECONNECT_DELAY = 5
 local streamClient
 
 local function callTool(toolName, arguments)
-    local url = getBaseUrl() .. CALL_TOOL_PATH
+    local url = BASE_URL .. CALL_TOOL_PATH
     local payload = {
         name = toolName,
         arguments = arguments or {},
@@ -76,7 +76,7 @@ local function callTool(toolName, arguments)
 end
 
 local function postJson(path, payload)
-    local url = getBaseUrl() .. path
+    local url = BASE_URL .. path
     local encoded = HttpService:JSONEncode(payload)
 
     local success, result = pcall(function()
@@ -102,7 +102,7 @@ local function postJson(path, payload)
 end
 
 local function listTools()
-    local url = getBaseUrl() .. TOOLS_PATH
+    local url = BASE_URL .. TOOLS_PATH
 
     local success, result = pcall(function()
         return HttpService:RequestAsync({
@@ -594,7 +594,7 @@ local function connectStream()
     end
 
     streamClient = StreamClient.new({
-        url = getBaseUrl() .. STREAM_PATH,
+        url = BASE_URL .. STREAM_PATH,
         method = "GET",
         headers = {
             ["Accept"] = "text/event-stream",
