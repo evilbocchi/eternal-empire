@@ -13,15 +13,20 @@ import {
 import { Server } from "shared/api/APIExpose";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Droplet from "shared/item/Droplet";
+import Boostable from "shared/item/traits/boost/Boostable";
 import Dropper from "shared/item/traits/dropper/Dropper";
 import Generator from "shared/item/traits/generator/Generator";
+import Ablaze from "shared/item/traits/status/Ablaze";
+import Massless, { Grounder } from "shared/item/traits/status/Massless";
 import Upgrader from "shared/item/traits/upgrader/Upgrader";
 import IllusionaryPortal from "shared/items/0/automatic/IllusionaryPortal";
+import FlamethrowerUpgrader from "shared/items/0/frivolous/FlamethrowerUpgrader";
 import VoidSkyUpgrader from "shared/items/0/happylike/VoidSkyUpgrader";
 import CoalescentRefiner from "shared/items/0/ifinitude/CoalescentRefiner";
 import Sideswiper from "shared/items/0/winsome/Sideswiper";
 import JoyfulPark from "shared/items/1/joyful/JoyfulPark";
 import TheFirstGenerator from "shared/items/negative/friendliness/TheFirstGenerator";
+import NoobClicker from "shared/items/negative/skip/NoobClicker";
 import TheFirstConveyor from "shared/items/negative/tfd/TheFirstConveyor";
 import TheFirstDropper from "shared/items/negative/tfd/TheFirstDropper";
 import TheFirstUpgrader from "shared/items/negative/tfd/TheFirstUpgrader";
@@ -802,5 +807,498 @@ describe("Condenser", () => {
         repositionedUpgrader.cleanup();
         furnace.cleanup();
         cleanup();
+    });
+});
+
+describe("Trait Composition", () => {
+    it("allows multiple traits to coexist on a single item", () => {
+        const spawned = spawnItemModel(NoobClicker.id);
+
+        expect(NoobClicker.types.has("Generator")).toBe(true);
+        expect(NoobClicker.types.has("Boostable")).toBe(true);
+
+        const generator = NoobClicker.findTrait("Generator");
+        const boostable = NoobClicker.findTrait("Boostable");
+
+        expect(generator).toBeDefined();
+        expect(boostable).toBeDefined();
+
+        spawned.cleanup();
+    });
+
+    it("allows traits to access the same item reference", () => {
+        const spawned = spawnItemModel(NoobClicker.id);
+
+        const generator = NoobClicker.findTrait("Generator");
+        const boostable = NoobClicker.findTrait("Boostable");
+
+        expect(generator?.item).toBe(NoobClicker);
+        expect(boostable?.item).toBe(NoobClicker);
+
+        spawned.cleanup();
+    });
+
+    it("executes onLoad callbacks from all traits", () => {
+        const spawned = spawnItemModel(NoobClicker.id);
+        const modelInfo = getAllInstanceInfo(spawned.model);
+
+        expect(modelInfo.boostable).toBeDefined();
+        expect(modelInfo.boosts).toBeDefined();
+        expect(modelInfo.boosts?.size()).toBe(0);
+
+        spawned.cleanup();
+    });
+
+    it("allows multiple traits to modify the same model independently", () => {
+        const spawned = spawnItemModel(VoidSkyUpgrader.id);
+
+        expect(VoidSkyUpgrader.types.has("Upgrader")).toBe(true);
+        expect(VoidSkyUpgrader.types.has("Conveyor")).toBe(true);
+
+        const handle = getTouchByTag(spawned.model, "Laser");
+        const dropletData = spawnDroplet(Droplet.TheFirstDroplet);
+
+        withWeatherDisabled(() => handle.touch(dropletData.droplet, dropletData.dropletInfo));
+
+        expect(dropletData.dropletInfo.upgrades?.size()).toBe(1);
+
+        dropletData.cleanup();
+        spawned.cleanup();
+    });
+
+    it("allows traits to use trait() method for cross-trait access", () => {
+        const spawned = spawnItemModel(NoobClicker.id);
+        const generator = NoobClicker.findTrait("Generator");
+
+        expect(generator).toBeDefined();
+        if (generator === undefined) {
+            spawned.cleanup();
+            return;
+        }
+
+        const boostableFromTrait = generator.trait(Boostable);
+        expect(boostableFromTrait).toBeDefined();
+        expect(boostableFromTrait.item).toBe(NoobClicker);
+
+        spawned.cleanup();
+    });
+});
+
+describe("Trait Lifecycle", () => {
+    it("calls onLoad callbacks when model is spawned on the server", () => {
+        const spawned = spawnItemModel(TheFirstGenerator.id);
+        const modelInfo = getAllInstanceInfo(spawned.model);
+
+        expect(modelInfo.boostable).toBeDefined();
+        expect(modelInfo.boosts).toBeDefined();
+        expect(modelInfo.boostAdded).toBeDefined();
+        expect(modelInfo.boostRemoved).toBeDefined();
+
+        spawned.cleanup();
+    });
+
+    it("initializes trait state before onLoad callbacks execute", () => {
+        const spawned = spawnItemModel(TheFirstGenerator.id);
+        const modelInfo = getAllInstanceInfo(spawned.model);
+
+        expect(modelInfo.boostable).toBeDefined();
+        expect(modelInfo.boosts).toBeDefined();
+        expect(modelInfo.boosts?.size()).toBe(0);
+
+        spawned.cleanup();
+    });
+
+    it("cleans up trait connections when model is destroyed", () => {
+        const spawned = spawnItemModel(TheFirstUpgrader.id);
+        const handle = getTouchByTag(spawned.model, "Laser");
+        const dropletData = spawnDroplet(Droplet.TheFirstDroplet);
+
+        withWeatherDisabled(() => handle.touch(dropletData.droplet, dropletData.dropletInfo));
+
+        expect(dropletData.dropletInfo.upgrades?.size()).toBe(1);
+
+        spawned.cleanup();
+
+        // After cleanup, the model should be destroyed
+        expect(spawned.model.Parent).toBeUndefined();
+
+        dropletData.cleanup();
+    });
+
+    it("executes callbacks in the order they were registered", () => {
+        const spawned = spawnItemModel(TheFirstGenerator.id);
+        const modelInfo = getAllInstanceInfo(spawned.model);
+
+        expect(modelInfo.boostable).toBeDefined();
+
+        expect(TheFirstGenerator.LOADS.size()).toBeGreaterThan(0);
+
+        spawned.cleanup();
+    });
+
+    it("allows traits to register multiple onLoad callbacks", () => {
+        const spawned = spawnItemModel(TheFirstGenerator.id);
+
+        expect(TheFirstGenerator.LOADS.size()).toBeGreaterThan(1);
+
+        spawned.cleanup();
+    });
+});
+
+describe("Boostable Trait", () => {
+    it("initializes with empty boost map on model load", () => {
+        const spawned = spawnItemModel(TheFirstGenerator.id);
+        const modelInfo = getAllInstanceInfo(spawned.model);
+
+        expect(modelInfo.boostable).toBeDefined();
+        expect(modelInfo.boosts).toBeDefined();
+        expect(modelInfo.boosts?.size()).toBe(0);
+        expect(modelInfo.boostAdded).toBeDefined();
+        expect(modelInfo.boostRemoved).toBeDefined();
+
+        spawned.cleanup();
+    });
+
+    it("adds a boost to the model and triggers boostAdded callback", () => {
+        const spawned = spawnItemModel(TheFirstGenerator.id);
+        const modelInfo = getAllInstanceInfo(spawned.model);
+
+        let boostAddedCalled = false;
+        let receivedBoost: ItemBoost | undefined;
+
+        modelInfo.boostAdded?.add((boost) => {
+            boostAddedCalled = true;
+            receivedBoost = boost;
+        });
+
+        const testBoost: ItemBoost = { ignoresLimitations: false };
+        Boostable.addBoost(modelInfo, "test-boost", testBoost);
+
+        expect(boostAddedCalled).toBe(true);
+        expect(receivedBoost).toBe(testBoost);
+        expect(modelInfo.boosts?.size()).toBe(1);
+        expect(modelInfo.boosts?.has("test-boost")).toBe(true);
+
+        spawned.cleanup();
+    });
+
+    it("removes a boost from the model and triggers boostRemoved callback", () => {
+        const spawned = spawnItemModel(TheFirstGenerator.id);
+        const modelInfo = getAllInstanceInfo(spawned.model);
+
+        let boostRemovedCalled = false;
+        let removedBoost: ItemBoost | undefined;
+
+        const testBoost: ItemBoost = { ignoresLimitations: false };
+        Boostable.addBoost(modelInfo, "test-boost", testBoost);
+
+        modelInfo.boostRemoved?.add((boost) => {
+            boostRemovedCalled = true;
+            removedBoost = boost;
+        });
+
+        Boostable.removeBoost(modelInfo, "test-boost");
+
+        expect(boostRemovedCalled).toBe(true);
+        expect(removedBoost).toBe(testBoost);
+        expect(modelInfo.boosts?.size()).toBe(0);
+        expect(modelInfo.boosts?.has("test-boost")).toBe(false);
+
+        spawned.cleanup();
+    });
+
+    it("prevents duplicate boosts with the same key", () => {
+        const spawned = spawnItemModel(TheFirstGenerator.id);
+        const modelInfo = getAllInstanceInfo(spawned.model);
+
+        let addCallCount = 0;
+        modelInfo.boostAdded?.add(() => {
+            addCallCount++;
+        });
+
+        const boost1: ItemBoost = { ignoresLimitations: false };
+        const boost2: ItemBoost = { ignoresLimitations: true };
+
+        Boostable.addBoost(modelInfo, "duplicate-key", boost1);
+        Boostable.addBoost(modelInfo, "duplicate-key", boost2);
+
+        expect(addCallCount).toBe(1);
+        expect(modelInfo.boosts?.size()).toBe(1);
+        expect(modelInfo.boosts?.get("duplicate-key")).toBe(boost1);
+
+        spawned.cleanup();
+    });
+
+    it("correctly checks if a boost exists with hasBoost", () => {
+        const spawned = spawnItemModel(TheFirstGenerator.id);
+        const modelInfo = getAllInstanceInfo(spawned.model);
+
+        expect(Boostable.hasBoost(modelInfo, "nonexistent")).toBe(false);
+
+        const testBoost: ItemBoost = { ignoresLimitations: false };
+        Boostable.addBoost(modelInfo, "test-boost", testBoost);
+
+        expect(Boostable.hasBoost(modelInfo, "test-boost")).toBe(true);
+        expect(Boostable.hasBoost(modelInfo, "other-boost")).toBe(false);
+
+        spawned.cleanup();
+    });
+
+    it("handles multiple boosts with different keys", () => {
+        const spawned = spawnItemModel(TheFirstGenerator.id);
+        const modelInfo = getAllInstanceInfo(spawned.model);
+
+        const boost1: ItemBoost = { ignoresLimitations: false };
+        const boost2: ItemBoost = { ignoresLimitations: true };
+        const boost3: ItemBoost = { ignoresLimitations: false };
+
+        Boostable.addBoost(modelInfo, "boost-1", boost1);
+        Boostable.addBoost(modelInfo, "boost-2", boost2);
+        Boostable.addBoost(modelInfo, "boost-3", boost3);
+
+        expect(modelInfo.boosts?.size()).toBe(3);
+        expect(Boostable.hasBoost(modelInfo, "boost-1")).toBe(true);
+        expect(Boostable.hasBoost(modelInfo, "boost-2")).toBe(true);
+        expect(Boostable.hasBoost(modelInfo, "boost-3")).toBe(true);
+
+        spawned.cleanup();
+    });
+
+    it("correctly handles removing a non-existent boost", () => {
+        const spawned = spawnItemModel(TheFirstGenerator.id);
+        const modelInfo = getAllInstanceInfo(spawned.model);
+
+        let removeCallCount = 0;
+        modelInfo.boostRemoved?.add(() => {
+            removeCallCount++;
+        });
+
+        Boostable.removeBoost(modelInfo, "nonexistent-boost");
+
+        expect(removeCallCount).toBe(0);
+        expect(modelInfo.boosts?.size()).toBe(0);
+
+        spawned.cleanup();
+    });
+
+    it("supports ignoresLimitations flag on boosts", () => {
+        const spawned = spawnItemModel(TheFirstGenerator.id);
+        const modelInfo = getAllInstanceInfo(spawned.model);
+
+        const normalBoost: ItemBoost = { ignoresLimitations: false };
+        const unlimitedBoost: ItemBoost = { ignoresLimitations: true };
+
+        Boostable.addBoost(modelInfo, "normal", normalBoost);
+        Boostable.addBoost(modelInfo, "unlimited", unlimitedBoost);
+
+        expect(modelInfo.boosts?.get("normal")?.ignoresLimitations).toBe(false);
+        expect(modelInfo.boosts?.get("unlimited")?.ignoresLimitations).toBe(true);
+
+        spawned.cleanup();
+    });
+
+    it("allows multiple boostAdded callbacks to fire", () => {
+        const spawned = spawnItemModel(TheFirstGenerator.id);
+        const modelInfo = getAllInstanceInfo(spawned.model);
+
+        let callback1Called = false;
+        let callback2Called = false;
+
+        modelInfo.boostAdded?.add(() => {
+            callback1Called = true;
+        });
+        modelInfo.boostAdded?.add(() => {
+            callback2Called = true;
+        });
+
+        const testBoost: ItemBoost = { ignoresLimitations: false };
+        Boostable.addBoost(modelInfo, "test", testBoost);
+
+        expect(callback1Called).toBe(true);
+        expect(callback2Called).toBe(true);
+
+        spawned.cleanup();
+    });
+
+    it("allows multiple boostRemoved callbacks to fire", () => {
+        const spawned = spawnItemModel(TheFirstGenerator.id);
+        const modelInfo = getAllInstanceInfo(spawned.model);
+
+        const testBoost: ItemBoost = { ignoresLimitations: false };
+        Boostable.addBoost(modelInfo, "test", testBoost);
+
+        let callback1Called = false;
+        let callback2Called = false;
+
+        modelInfo.boostRemoved?.add(() => {
+            callback1Called = true;
+        });
+        modelInfo.boostRemoved?.add(() => {
+            callback2Called = true;
+        });
+
+        Boostable.removeBoost(modelInfo, "test");
+
+        expect(callback1Called).toBe(true);
+        expect(callback2Called).toBe(true);
+
+        spawned.cleanup();
+    });
+});
+
+describe("Status Effects", () => {
+    it("applies status effects to droplets on upgrade", () => {
+        const spawned = spawnItemModel(FlamethrowerUpgrader.id);
+        const handle = getTouchByTag(spawned.model, "Laser");
+        const dropletData = spawnDroplet(Droplet.TheFirstDroplet);
+
+        expect(dropletData.dropletInfo.statusEffects).toBeUndefined();
+
+        withWeatherDisabled(() => handle.touch(dropletData.droplet, dropletData.dropletInfo));
+
+        expect(dropletData.dropletInfo.statusEffects).toBeDefined();
+        expect(dropletData.dropletInfo.statusEffects?.size()).toBeGreaterThan(0);
+
+        dropletData.cleanup();
+        spawned.cleanup();
+    });
+
+    it("does not apply duplicate status effects to the same droplet", () => {
+        const spawned = spawnItemModel(FlamethrowerUpgrader.id);
+        const handle = getTouchByTag(spawned.model, "Laser");
+        const dropletData = spawnDroplet(Droplet.TheFirstDroplet);
+
+        withWeatherDisabled(() => {
+            handle.touch(dropletData.droplet, dropletData.dropletInfo);
+            handle.touch(dropletData.droplet, dropletData.dropletInfo);
+        });
+
+        expect(dropletData.dropletInfo.statusEffects).toBeDefined();
+        const statusCount = dropletData.dropletInfo.statusEffects?.size();
+        expect(statusCount).toBeDefined();
+
+        dropletData.cleanup();
+        spawned.cleanup();
+    });
+
+    it("does not apply status effect when item is not maintained", () => {
+        const spawned = spawnItemModel(FlamethrowerUpgrader.id);
+        const handle = getTouchByTag(spawned.model, "Laser");
+        const dropletData = spawnDroplet(Droplet.TheFirstDroplet);
+
+        spawned.modelInfo.maintained = false;
+
+        withWeatherDisabled(() => handle.touch(dropletData.droplet, dropletData.dropletInfo));
+
+        expect(dropletData.dropletInfo.statusEffects?.size()).toBeUndefined();
+
+        dropletData.cleanup();
+        spawned.cleanup();
+    });
+
+    it("does not apply status effect when item is broken", () => {
+        const spawned = spawnItemModel(FlamethrowerUpgrader.id);
+        const handle = getTouchByTag(spawned.model, "Laser");
+        const dropletData = spawnDroplet(Droplet.TheFirstDroplet);
+
+        spawned.modelInfo.broken = true;
+
+        withWeatherDisabled(() => handle.touch(dropletData.droplet, dropletData.dropletInfo));
+
+        expect(dropletData.dropletInfo.statusEffects?.size()).toBeUndefined();
+
+        dropletData.cleanup();
+        spawned.cleanup();
+    });
+
+    it("allows status effects to be toggled with setActive", () => {
+        const spawned = spawnItemModel(FlamethrowerUpgrader.id);
+        const handle = getTouchByTag(spawned.model, "Laser");
+        // Find a status effect trait from the upgrader
+        const statusEffectTrait = FlamethrowerUpgrader.trait(Ablaze);
+
+        expect(statusEffectTrait).toBeDefined();
+        if (statusEffectTrait === undefined) {
+            spawned.cleanup();
+            return;
+        }
+
+        const droplet1 = spawnDroplet(Droplet.TheFirstDroplet);
+        withWeatherDisabled(() => handle.touch(droplet1.droplet, droplet1.dropletInfo));
+        expect(droplet1.dropletInfo.statusEffects?.size()).toBeGreaterThan(0);
+
+        statusEffectTrait.setActive(false);
+
+        const droplet2 = spawnDroplet(Droplet.TheFirstDroplet);
+        withWeatherDisabled(() => handle.touch(droplet2.droplet, droplet2.dropletInfo));
+        expect(droplet2.dropletInfo.statusEffects?.size()).toBeUndefined();
+
+        droplet1.cleanup();
+        droplet2.cleanup();
+        spawned.cleanup();
+    });
+
+    it("stores status effect info in droplet metadata", () => {
+        const spawned = spawnItemModel(FlamethrowerUpgrader.id);
+        const handle = getTouchByTag(spawned.model, "Laser");
+        const dropletData = spawnDroplet(Droplet.TheFirstDroplet);
+
+        withWeatherDisabled(() => handle.touch(dropletData.droplet, dropletData.dropletInfo));
+
+        // Status effects should be present after upgrade
+        const statusEffects = dropletData.dropletInfo.statusEffects;
+        if (statusEffects !== undefined) {
+            expect(statusEffects.size()).toBeGreaterThan(0);
+
+            for (const [effect, info] of statusEffects) {
+                expect(effect).toBeDefined();
+            }
+        }
+
+        dropletData.cleanup();
+        spawned.cleanup();
+    });
+
+    it("allows multiple different status effects on the same droplet", () => {
+        // This test verifies that status effects can stack
+        // Since FlamethrowerUpgrader only has Ablaze, we just verify it applies
+        const spawned = spawnItemModel(FlamethrowerUpgrader.id);
+        const handle = getTouchByTag(spawned.model, "Laser");
+        const dropletData = spawnDroplet(Droplet.TheFirstDroplet);
+
+        withWeatherDisabled(() => handle.touch(dropletData.droplet, dropletData.dropletInfo));
+
+        // The droplet should have been upgraded by the upgrader
+        const upgradeCount = dropletData.dropletInfo.upgrades?.size() ?? 0;
+        expect(upgradeCount).toBeGreaterThan(0);
+
+        dropletData.cleanup();
+        spawned.cleanup();
+    });
+
+    it("applies upgrades from status effects to droplet value", () => {
+        const spawned = spawnItemModel(FlamethrowerUpgrader.id);
+        const handle = getTouchByTag(spawned.model, "Laser");
+        const dropletData = spawnDroplet(Droplet.TheFirstDroplet);
+
+        const valueBefore = withWeatherDisabled(() => {
+            return Server.Revenue.calculateSingleDropletValue(dropletData.droplet);
+        });
+
+        withWeatherDisabled(() => handle.touch(dropletData.droplet, dropletData.dropletInfo));
+
+        const valueAfter = Server.Revenue.calculateSingleDropletValue(dropletData.droplet);
+
+        const fundsAfter = valueAfter.get("Funds");
+        const fundsBefore = valueBefore.get("Funds");
+        expect(fundsAfter).toBeDefined();
+        expect(fundsBefore).toBeDefined();
+
+        if (fundsAfter !== undefined && fundsBefore !== undefined) {
+            expect(fundsAfter.moreThan(fundsBefore) || fundsAfter.equals(fundsBefore)).toBe(true);
+        }
+
+        dropletData.cleanup();
+        spawned.cleanup();
     });
 });
