@@ -358,6 +358,119 @@ local function runLuauCode(code, chunkName, options)
         }
 end
 
+local function serializeInstance(instance, maxDepth, currentDepth)
+    if not instance or not typeof(instance) == "Instance" then
+        return nil
+    end
+
+    currentDepth = currentDepth or 0
+    maxDepth = maxDepth or 3
+
+    local data = {
+        Name = instance.Name,
+        ClassName = instance.ClassName,
+        Path = instance:GetFullName(),
+    }
+
+    if currentDepth < maxDepth then
+        local children = {}
+        for _, child in ipairs(instance:GetChildren()) do
+            table.insert(children, serializeInstance(child, maxDepth, currentDepth + 1))
+        end
+        if #children > 0 then
+            data.Children = children
+        end
+    end
+
+    return data
+end
+
+local function resolveInstancePath(path)
+    if not path or path == "" then
+        return game
+    end
+
+    local segments = {}
+    for segment in string.gmatch(path, "[^%.]+") do
+        table.insert(segments, segment)
+    end
+
+    if #segments == 0 then
+        return game
+    end
+
+    local current = game
+    local startIndex = 1
+
+    if segments[1] == "game" then
+        startIndex = 2
+    end
+
+    for i = startIndex, #segments do
+        local segment = segments[i]
+        local found = current:FindFirstChild(segment)
+        if not found then
+            return nil, string.format("Could not find '%s' in path '%s'", segment, path)
+        end
+        current = found
+    end
+
+    return current
+end
+
+local function handleListInstancesTool(arguments)
+    if type(arguments) ~= "table" then
+        arguments = {}
+    end
+
+    local path = arguments.path
+    local maxDepth = tonumber(arguments.maxDepth) or 3
+
+    local instance, errorMessage = resolveInstancePath(path)
+    if not instance then
+        return false, errorMessage or "Failed to resolve instance path"
+    end
+
+    local data = serializeInstance(instance, maxDepth, 0)
+    return true, data
+end
+
+local function handleFindItemModelTool(arguments)
+    if type(arguments) ~= "table" then
+        return false, "Arguments table is required"
+    end
+
+    local itemName = arguments.itemName
+    if type(itemName) ~= "string" or itemName == "" then
+        return false, "itemName parameter is required"
+    end
+
+    local maxDepth = tonumber(arguments.maxDepth) or 5
+
+    -- Search in Workspace.ItemModels first
+    local itemModels = game:GetService("Workspace"):FindFirstChild("ItemModels")
+    if itemModels then
+        local model = itemModels:FindFirstChild(itemName, true)
+        if model then
+            local data = serializeInstance(model, maxDepth, 0)
+            return true, data
+        end
+    end
+
+    -- Search in ReplicatedStorage.ItemModels as fallback
+    local replicatedStorage = game:GetService("ReplicatedStorage")
+    itemModels = replicatedStorage:FindFirstChild("ItemModels")
+    if itemModels then
+        local model = itemModels:FindFirstChild(itemName, true)
+        if model then
+            local data = serializeInstance(model, maxDepth, 0)
+            return true, data
+        end
+    end
+
+    return false, string.format("Could not find item model '%s' in ItemModels folders", itemName)
+end
+
 local function handleExecuteLuauTool(arguments, requestId)
     if type(arguments) ~= "table" then
         return false, "Arguments table is required"
@@ -366,174 +479,6 @@ local function handleExecuteLuauTool(arguments, requestId)
     return runLuauCode(arguments.code, "MCP.ExecuteLuau", {
         requestId = requestId,
     })
-end
-
-local function handleRunTestsTool(arguments, requestId)
-    local code
-    if type(arguments) == "table" then
-        local value = arguments.code
-        if type(value) == "string" then
-            code = value
-        end
-    end
-
-    if not code or code == "" then
-        return false, "code parameter is required"
-    end
-
-    local success, payloadOrError = runLuauCode(code, "MCP.RunTests", {
-        requestId = requestId,
-    })
-    if not success then
-        return false, payloadOrError
-    end
-
-    local payload = payloadOrError
-    local suiteSuccess
-    local rawResultJson
-    local decodedResult
-
-    local returnValues = payload.returnValues
-    if type(returnValues) == "table" then
-        for _, entry in ipairs(returnValues) do
-            if type(entry) ~= "table" then
-                continue
-            end
-
-            if entry.index == 1 and entry.type == "boolean" then
-                suiteSuccess = entry.literal
-            elseif entry.index == 2 then
-                local jsonCandidate
-
-                if type(entry.json) == "string" and entry.json ~= "" then
-                    jsonCandidate = entry.json
-                elseif entry.type == "string" and type(entry.literal) == "string" then
-                    jsonCandidate = entry.literal
-                end
-
-                if jsonCandidate then
-                    rawResultJson = jsonCandidate
-                    local decodeOk, decoded = pcall(HttpService.JSONDecode, HttpService, jsonCandidate)
-                    if decodeOk and type(decoded) == "table" then
-                        decodedResult = decoded
-                    end
-                end
-            end
-        end
-    end
-
-    local results = decodedResult and decodedResult.results
-    local summary
-    local failedSuites = {}
-    local failedTests = {}
-
-    if type(results) == "table" then
-        local function numberOrDefault(value)
-            return typeof(value) == "number" and value or 0
-        end
-
-        summary = {
-            totalSuites = numberOrDefault(results.numTotalTestSuites),
-            passedSuites = numberOrDefault(results.numPassedTestSuites),
-            failedSuites = numberOrDefault(results.numFailedTestSuites),
-            pendingSuites = numberOrDefault(results.numPendingTestSuites),
-            totalTests = numberOrDefault(results.numTotalTests),
-            successCount = numberOrDefault(results.numPassedTests),
-            failureCount = numberOrDefault(results.numFailedTests),
-            skippedCount = numberOrDefault(results.numPendingTests),
-            todoCount = numberOrDefault(results.numTodoTests),
-        }
-
-        local totalRuntimeMs = 0
-        local testResults = results.testResults
-        if type(testResults) == "table" then
-            for _, suite in ipairs(testResults) do
-                if type(suite) ~= "table" then
-                    continue
-                end
-
-                local messages = {}
-                if type(suite.failureMessage) == "string" and suite.failureMessage ~= "" then
-                    table.insert(messages, suite.failureMessage)
-                end
-
-                if type(suite.failureMessages) == "table" then
-                    for _, message in ipairs(suite.failureMessages) do
-                        if type(message) == "string" and message ~= "" then
-                            table.insert(messages, message)
-                        end
-                    end
-                end
-
-                local perfStats = suite.perfStats
-                if type(perfStats) == "table" then
-                    local runtimeMs = perfStats.runtime
-                    if typeof(runtimeMs) == "number" then
-                        totalRuntimeMs += runtimeMs
-                    end
-                end
-
-                if #messages > 0 then
-                    table.insert(failedSuites, {
-                        path = suite.testFilePath or suite.name or suite.displayName,
-                        messages = messages,
-                    })
-                end
-
-                local assertionResults = suite.assertionResults
-                if type(assertionResults) == "table" then
-                    for _, assertion in ipairs(assertionResults) do
-                        if type(assertion) ~= "table" then
-                            continue
-                        end
-
-                        local status = assertion.status
-                        if status ~= "passed" then
-                            table.insert(failedTests, {
-                                path = suite.testFilePath or suite.name or suite.displayName,
-                                title = assertion.title,
-                                fullName = assertion.fullName,
-                                status = status,
-                                ancestorTitles = assertion.ancestorTitles,
-                                failureMessages = assertion.failureMessages,
-                            })
-                        end
-                    end
-                end
-            end
-        end
-
-        if totalRuntimeMs > 0 then
-            summary.runtimeSeconds = totalRuntimeMs / 1000
-        elseif typeof(results.runtime) == "number" then
-            summary.runtimeSeconds = results.runtime
-        end
-
-        if typeof(results.startTime) == "number" then
-            summary.startTimeEpochMs = results.startTime
-        end
-    end
-
-    local overallSuccess = suiteSuccess
-    if overallSuccess == nil then
-        if type(summary) == "table" and summary.failureCount ~= nil then
-            overallSuccess = summary.failureCount == 0
-        elseif type(results) == "table" and typeof(results.success) == "boolean" then
-            overallSuccess = results.success
-        end
-    end
-
-    local enriched = {
-        durationSeconds = payload.durationSeconds,
-        stdout = payload.stdout,
-        success = overallSuccess == nil and true or overallSuccess == true,
-        summary = summary,
-        failedSuites = #failedSuites > 0 and failedSuites or nil,
-        failedTests = #failedTests > 0 and failedTests or nil,
-        rawResultJson = rawResultJson,
-    }
-
-    return true, enriched
 end
 
 local function handleToolCommand(payload)
@@ -553,8 +498,10 @@ local function handleToolCommand(payload)
     local success, resultOrError
     if toolName == "execute_luau" then
         success, resultOrError = handleExecuteLuauTool(arguments, requestId)
-    elseif toolName == "run_tests" then
-        success, resultOrError = handleRunTestsTool(arguments, requestId)
+    elseif toolName == "list_instances" then
+        success, resultOrError = handleListInstancesTool(arguments)
+    elseif toolName == "find_item_model" then
+        success, resultOrError = handleFindItemModelTool(arguments)
     else
         success = false
         resultOrError = string.format("Unknown tool: %s", tostring(toolName))

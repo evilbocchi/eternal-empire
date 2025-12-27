@@ -2,7 +2,6 @@ import { McpError } from "@modelcontextprotocol/sdk/types.js";
 import express from "express";
 import process from "node:process";
 import signalePkg from "signale";
-import { attachDataModelSocket } from "./datamodel/dataModelSocket.js";
 import { startMcpServer } from "./mcpServer.js";
 import {
     connectStream as connectMcpStream,
@@ -208,19 +207,16 @@ app.get("/mcp/tools", (_req, res) => {
 
 // Start Express server
 const PORT = 28355;
-const server = app.listen(PORT, () => {
+app.listen(PORT, () => {
     logger.info(`plugin.mcp server running at http://localhost:${PORT}`);
-
-    // Start MCP server
-    startMcpServer(logger)
-        .then((tools) => {
-            logger.info(`Tools: ${tools.map((tool) => tool.name).join(", ")}`);
-        })
-        .catch((error) => {
-            logger.error("Failed to start MCP server:", error);
-            process.exit(1);
-        });
 });
 
-// Attach WebSocket bridge for DataModel sync
-attachDataModelSocket(server, logger);
+// Start MCP server
+startMcpServer(logger)
+    .then((tools) => {
+        logger.info(`Tools: ${tools.map((tool) => tool.name).join(", ")}`);
+    })
+    .catch((error) => {
+        logger.error("Failed to start MCP server:", error);
+        process.exit(1);
+    });

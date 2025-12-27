@@ -17,7 +17,7 @@
         "open": "node sandbox/open.js",
         "docs": "npx typedoc && node test/runProgressionEstimate.js",
         "dev": "concurrently --prefix none \"rbxtsc -w --optimizedLoops\" \"npx rojo serve\"",
-        "dev:plugin": "concurrently --prefix none \"cd ./plugin && npx rojo build --plugin ee-tooling.rbxmx --watch\" \"nodemon --watch plugin ./plugin/live/index.js\""
+        "dev:plugin": "concurrently --prefix none \"cd ./plugin && npx rojo build --plugin ee-tooling.rbxmx --watch\" \"nodemon --watch ./plugin/live ./plugin/live/index.js\""
     },
     "repository": {
         "type": "git",

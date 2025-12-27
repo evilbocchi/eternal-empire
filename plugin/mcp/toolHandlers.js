@@ -1,6 +1,4 @@
 import { ErrorCode, McpError } from "@modelcontextprotocol/sdk/types.js";
-import { cloneNodeLimited, findNodeBySegments, normalizePathSegments } from "./datamodel/datamodelUtils.js";
-import { connectionState, dataModelState } from "./state/dataModelState.js";
 import {
     isStreamConnected as isMcpStreamConnected,
     requestToolExecution as requestMcpToolExecution,
@@ -119,18 +117,6 @@ async function ensureMcpConnectionOrThrow(reason) {
     }
 }
 
-function getSnapshotOrThrow() {
-    const snapshot = dataModelState.snapshot;
-    if (!snapshot) {
-        const message = connectionState.pluginConnected
-            ? "Awaiting first DataModel snapshot from the Roblox Studio plugin."
-            : "Plugin connection not detected. Launch Roblox Studio with the tooling plugin to populate the DataModel snapshot.";
-        throw createMcpError(ErrorCode.FailedPrecondition, message, 503);
-    }
-
-    return snapshot;
-}
-
 function wrapToolExecutionError(error) {
     const message = typeof error?.message === "string" ? error.message : String(error);
     let code = ErrorCode.InternalError;
@@ -144,145 +130,53 @@ function wrapToolExecutionError(error) {
     throw createMcpError(code, message);
 }
 
-function findModelRecursive(node, targetName) {
-    if (!node) {
-        return null;
-    }
-
-    if (node.name === targetName && (node.className === "Model" || node.className === "Folder")) {
-        return node;
-    }
-
-    if (Array.isArray(node.children)) {
-        for (const child of node.children) {
-            const result = findModelRecursive(child, targetName);
-            if (result) {
-                return result;
-            }
-        }
-    }
-
-    return null;
-}
-
 export async function executeMcpTool(name, rawArgs, options = {}) {
     const args = typeof rawArgs === "object" && rawArgs !== null ? rawArgs : {};
-    const { logger, logPrefix = "[MCP]", onProgress } = options;
+    const { onProgress } = options;
 
     switch (name) {
         case "list_instances": {
-            const snapshot = getSnapshotOrThrow();
-            const pathArg = typeof args.path === "string" ? args.path : "game";
-            const segments = normalizePathSegments(pathArg);
+            await ensureMcpConnectionOrThrow("Launch Roblox Studio with the tooling plugin to list instances.");
+
+            const requestArgs = {};
+            if (typeof args.path === "string" && args.path.trim().length > 0) {
+                requestArgs.path = args.path.trim();
+            }
 
             const maxDepthArg = Number(args.maxDepth);
-            let maxDepth = 3;
-            if (Number.isFinite(maxDepthArg)) {
-                maxDepth = Math.max(0, Math.min(Math.floor(maxDepthArg), 10));
+            if (Number.isFinite(maxDepthArg) && maxDepthArg >= 0) {
+                requestArgs.maxDepth = Math.floor(maxDepthArg);
             }
 
-            const lookup = findNodeBySegments(snapshot.root, segments);
-
-            if (!lookup.node) {
-                const attemptedPath = segments.slice(0, lookup.missingIndex + 1).join(".");
-                let message = `No instance found at path ${attemptedPath}.`;
-
-                if (lookup.parent) {
-                    const parentDisplay = lookup.parent.path ?? lookup.parent.name ?? "parent";
-                    const parentTruncated = Boolean(
-                        lookup.parent.truncated ||
-                        (typeof lookup.parent.childCount === "number" &&
-                            typeof lookup.parent.totalChildren === "number" &&
-                            lookup.parent.childCount < lookup.parent.totalChildren),
-                    );
-
-                    if (parentTruncated) {
-                        message += ` The parent node (${parentDisplay}) was truncated in the last snapshot; try requesting a shallower path or waiting for the next sync.`;
-                    }
-                }
-
-                if (logger?.warn) {
-                    logger.warn(`${logPrefix} Lookup failed: ${message}`);
-                }
-
-                throw createMcpError(ErrorCode.InvalidRequest, message, 404);
+            try {
+                return await requestMcpToolExecution("list_instances", requestArgs);
+            } catch (error) {
+                wrapToolExecutionError(error);
             }
 
-            const { clone, depthTruncated, pluginTruncated } = cloneNodeLimited(lookup.node, maxDepth);
-
-            return {
-                path: segments.join("."),
-                maxDepth,
-                version: dataModelState.version ?? null,
-                receivedAt: dataModelState.updatedAt,
-                generatedAt: snapshot.generatedAt ?? null,
-                depthTruncated,
-                pluginTruncated: Boolean(snapshot.truncated || pluginTruncated),
-                node: clone,
-            };
+            return null;
         }
         case "find_item_model": {
-            const snapshot = getSnapshotOrThrow();
-            const itemName = typeof args.itemName === "string" ? args.itemName : "";
-            if (!itemName) {
-                throw createMcpError(ErrorCode.InvalidRequest, "itemName parameter is required", 400);
+            const itemName = typeof args.itemName === "string" ? args.itemName.trim() : "";
+            if (itemName.length === 0) {
+                throw createMcpError(ErrorCode.InvalidRequest, "itemName parameter must be a non-empty string", 400);
             }
 
+            await ensureMcpConnectionOrThrow("Launch Roblox Studio with the tooling plugin to search for item models.");
+
+            const requestArgs = { itemName };
             const maxDepthArg = Number(args.maxDepth);
-            let maxDepth = 5;
-            if (Number.isFinite(maxDepthArg)) {
-                maxDepth = Math.max(0, Math.min(Math.floor(maxDepthArg), 10));
+            if (Number.isFinite(maxDepthArg) && maxDepthArg >= 0) {
+                requestArgs.maxDepth = Math.floor(maxDepthArg);
             }
 
-            const workspaceSegments = normalizePathSegments("game.Workspace.ItemModels");
-            const replicatedSegments = normalizePathSegments("game.ReplicatedStorage.ItemModels");
-
-            let itemModelsFolder = null;
-            let itemModelsFolderPath = "";
-
-            const workspaceLookup = findNodeBySegments(snapshot.root, workspaceSegments);
-            if (workspaceLookup.node) {
-                itemModelsFolder = workspaceLookup.node;
-                itemModelsFolderPath = "game.Workspace.ItemModels";
-            } else {
-                const replicatedLookup = findNodeBySegments(snapshot.root, replicatedSegments);
-                if (replicatedLookup.node) {
-                    itemModelsFolder = replicatedLookup.node;
-                    itemModelsFolderPath = "game.ReplicatedStorage.ItemModels";
-                }
+            try {
+                return await requestMcpToolExecution("find_item_model", requestArgs);
+            } catch (error) {
+                wrapToolExecutionError(error);
             }
 
-            if (!itemModelsFolder) {
-                throw createMcpError(
-                    ErrorCode.InvalidRequest,
-                    "ItemModels folder not found in Workspace or ReplicatedStorage",
-                    404,
-                );
-            }
-
-            const foundModel = findModelRecursive(itemModelsFolder, itemName);
-
-            if (!foundModel) {
-                throw createMcpError(
-                    ErrorCode.InvalidRequest,
-                    `Item model "${itemName}" not found in ${itemModelsFolderPath}`,
-                    404,
-                );
-            }
-
-            const { clone, depthTruncated, pluginTruncated } = cloneNodeLimited(foundModel, maxDepth);
-
-            return {
-                itemName,
-                path: foundModel.path ?? `${itemModelsFolderPath}.${itemName}`,
-                maxDepth,
-                version: dataModelState.version ?? null,
-                receivedAt: dataModelState.updatedAt,
-                generatedAt: snapshot.generatedAt ?? null,
-                depthTruncated,
-                pluginTruncated: Boolean(snapshot.truncated || pluginTruncated),
-                model: clone,
-            };
+            return null;
         }
         case "execute_luau": {
             const code = typeof args.code === "string" ? args.code : "";
