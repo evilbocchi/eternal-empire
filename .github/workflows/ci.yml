@@ -49,11 +49,11 @@ jobs:
               run: npm run lint
 
             - name: Run tests
-              run: npm run test:cloud
+              run: npm run test:src
               continue-on-error: false
 
             - name: Run plugin tests
-              run: npm run plugin:test
+              run: npm run test:plugin
               continue-on-error: false
 
             - name: Create build artifact directory

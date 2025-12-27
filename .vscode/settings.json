@@ -14,7 +14,7 @@
     "typescript.format.semicolons": "insert",
     "typescript.experimental.useTsgo": false,
     "stylua.targetReleaseVersion": "latest",
-    "rbxts-jest.testCommandInWatch": "npm run dev:test",
+    "rbxts-jest.testCommandInWatch": "npm run test:dev",
     "rbxts-jest.watchPatterns": [
         "out/**/*.luau"
     ],

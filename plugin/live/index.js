@@ -5,8 +5,6 @@ import process from "node:process";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import signalePkg from "signale";
-import { startMcpServer } from "./mcp/mcpServer.js";
-import { initToolBridge } from "./mcp/toolBridge.js";
 import { registerRoutes } from "./routes/index.js";
 import { attachDataModelSocket } from "./routes/dataModelSocket.js";
 
@@ -17,8 +15,6 @@ const { Signale } = signalePkg;
 const logger = new Signale({
     stream: process.stderr,
 });
-
-initToolBridge(logger);
 
 // Configuration
 const PORT = 28354;
@@ -32,14 +28,8 @@ registerRoutes(app, logger, REPO_ROOT, OUTPUT);
 
 // Start Express server
 const server = app.listen(PORT, () => {
-    logger.info(`Plugin server running at http://localhost:${PORT}`);
+    logger.info(`plugin.live server running at http://localhost:${PORT}`);
 });
 
 // Attach WebSocket bridge for DataModel sync
 attachDataModelSocket(server, logger);
-
-// Start MCP server
-startMcpServer(logger).catch((error) => {
-    logger.error("Failed to start MCP server:", error);
-    process.exit(1);
-});

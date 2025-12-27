@@ -4,7 +4,7 @@
         "eemcp": {
             "command": "node",
             "args": [
-                "./plugin/index.js"
+                "./plugin/mcp/index.js"
             ]
         }
     }

@@ -7,11 +7,14 @@
             "command": "npm install",
             "problemMatcher": [],
             "presentation": {
-                "reveal": "never"
+                "reveal": "never",
+                "close": true
             }
         },
         {
             "label": "npm: dev",
+            "dependsOn": "npm: install",
+            "dependsOrder": "sequence",
             "type": "shell",
             "command": "npm run dev",
             "isBackground": true,
@@ -19,7 +22,10 @@
                 "$tsc-watch",
                 {
                     "owner": "typescript",
-                    "fileLocation": ["relative", "${workspaceFolder}"],
+                    "fileLocation": [
+                        "relative",
+                        "${workspaceFolder}"
+                    ],
                     "pattern": {
                         "regexp": "^(.+\\.ts):(\\d+):(\\d+) - error TS roblox-ts: (.*)$",
                         "file": 1,
@@ -31,20 +37,23 @@
             ],
             "presentation": {
                 "reveal": "never",
-                "group": "watchers",
                 "panel": "dedicated"
+            },
+            "runOptions": {
+                "runOn": "folderOpen"
             }
         },
         {
-            "label": "npm: install and dev",
-            "dependsOn": [
-                "npm: install",
-                "npm: dev"
-            ],
+            "label": "npm: plugin dev",
+            "dependsOn": "npm: install",
             "dependsOrder": "sequence",
-            "group": {
-                "kind": "build",
-                "isDefault": true
+            "type": "shell",
+            "command": "npm run dev:plugin",
+            "isBackground": true,
+            "problemMatcher": [],
+            "presentation": {
+                "reveal": "never",
+                "panel": "dedicated"
             },
             "runOptions": {
                 "runOn": "folderOpen"

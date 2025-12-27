@@ -1,5 +1,5 @@
-import { applyDiff, applySnapshot } from "../datamodel/dataModelStore.js";
-import { acceptSnapshotChunk, clearPendingSnapshot } from "../datamodel/snapshotAssembler.js";
+import { applyDiff, applySnapshot } from "./dataModelStore.js";
+import { acceptSnapshotChunk, clearPendingSnapshot } from "./snapshotAssembler.js";
 import { connectionState, dataModelState } from "../state/dataModelState.js";
 
 function normalizePayload(raw) {

@@ -6,7 +6,7 @@ import { MCP_TOOL_DEFINITIONS, executeMcpTool } from "./toolHandlers.js";
 /**
  * Creates and starts the Model Context Protocol server.
  * @param {object} logger - Logger instance (signale)
- * @returns {Promise<void>}
+ * @returns {Promise<Array>} - Resolves to the list of MCP tool definitions
  */
 export async function startMcpServer(logger) {
     const server = new Server(
@@ -49,5 +49,5 @@ export async function startMcpServer(logger) {
 
     const transport = new StdioServerTransport();
     await server.connect(transport);
-    logger.info(`MCP server ready (${MCP_TOOL_DEFINITIONS.map((tool) => tool.name).join(", ")}).`);
+    return MCP_TOOL_DEFINITIONS;
 }

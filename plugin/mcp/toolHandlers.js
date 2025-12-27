@@ -1,6 +1,6 @@
 import { ErrorCode, McpError } from "@modelcontextprotocol/sdk/types.js";
-import { cloneNodeLimited, findNodeBySegments, normalizePathSegments } from "../datamodel/datamodelUtils.js";
-import { connectionState, dataModelState } from "../state/dataModelState.js";
+import { cloneNodeLimited, findNodeBySegments, normalizePathSegments } from "../live/datamodel/datamodelUtils.js";
+import { connectionState, dataModelState } from "../live/state/dataModelState.js";
 import {
     isStreamConnected as isMcpStreamConnected,
     requestToolExecution as requestMcpToolExecution,
