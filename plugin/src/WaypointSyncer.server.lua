@@ -4,8 +4,6 @@ local getBaseUrl = require(script.Parent.getBaseUrl)
 
 local INTERVAL = 2 -- seconds
 
-local connection = nil
-
 local function serializeInstanceTree(instance)
     local node = {
         name = instance.Name,
@@ -56,11 +54,12 @@ local function sendInstanceTree()
 end
 
 local lastSend = tick() + 5 -- small delay after connecting to dev server
+local connection = nil
 task.spawn(function()
     if RunService:IsRunning() then
         return -- only run in studio
     end
-	connection = RunService.Heartbeat:Connect(function(dt)
+	connection = RunService.Heartbeat:Connect(function()
 		if  tick() - lastSend >= INTERVAL then
 			sendInstanceTree()
 			lastSend = tick()

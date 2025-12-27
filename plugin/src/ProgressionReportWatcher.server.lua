@@ -16,7 +16,8 @@ local function postPayload(payloadTable)
     return ok
 end
 
-local function postReport(content)
+-- Global function to report back estimated progression content to the requesting server.
+_G.ProgressEstimated = function(content)
     if content == nil or content == "" then
         return
     end
@@ -58,5 +59,3 @@ local function postReport(content)
         end
     end)
 end
-
-_G.ProgressEstimated = postReport

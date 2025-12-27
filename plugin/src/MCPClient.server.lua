@@ -65,7 +65,7 @@ local function callTool(toolName, arguments)
         arguments = arguments or {},
     }
     local encoded = HttpService:JSONEncode(payload)
-    
+
     local success, result = pcall(function()
         return HttpService:RequestAsync({
             Url = url,
@@ -141,7 +141,7 @@ end
 
 local function listTools()
     local url = getBaseUrl() .. TOOLS_PATH
-    
+
     local success, result = pcall(function()
         return HttpService:RequestAsync({
             Url = url,
@@ -387,12 +387,13 @@ local function runLuauCode(code, chunkName, options)
         adjustedDuration = 0
     end
 
-    return true, {
-        durationSeconds = adjustedDuration,
-        stdout = stdout,
-        returnCount = packedResults.n,
-        returnValues = returnValues,
-    }
+    return true,
+        {
+            durationSeconds = adjustedDuration,
+            stdout = stdout,
+            returnCount = packedResults.n,
+            returnValues = returnValues,
+        }
 end
 
 local function handleExecuteLuauTool(arguments, requestId)
@@ -694,7 +695,8 @@ local function connectStream()
     end)
 
     addConnection(client.Error, function(responseStatusCode, errorMessage)
-        local statusText = responseStatusCode and string.format("status %s", tostring(responseStatusCode)) or "unknown status"
+        local statusText = responseStatusCode and string.format("status %s", tostring(responseStatusCode))
+            or "unknown status"
         local message = string.format("Stream error (%s): %s", statusText, tostring(errorMessage))
         log(message)
     end)
