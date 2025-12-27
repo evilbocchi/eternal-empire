@@ -5,7 +5,7 @@ import path from "node:path";
 import process from "node:process";
 import { fileURLToPath } from "node:url";
 import signalePkg from "signale";
-import { generateTypeScriptContent } from "./typeGenerators/waypointTypeGenerator.js";
+import { generateTypeScriptContent } from "./generators/typescriptGenerator.js";
 import { writeFileIfChanged } from "./utils/fileUtils.js";
 
 const app = express();
