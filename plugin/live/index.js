@@ -69,6 +69,20 @@ app.get("/live/stream", (req, res) => {
 });
 
 /**
+ * GET /saves/latest.json
+ * Serves the latest save file for loading in Studio.
+ */
+app.get("/saves/latest.json", async (req, res) => {
+    const savePath = path.resolve(REPO_ROOT, "saves", "latest.json");
+    try {
+        res.sendFile(savePath);
+    } catch (error) {
+        logger.error(error);
+        res.status(404).send("Save file not found");
+    }
+});
+
+/**
  * POST /live/data
  * Receives live data from Studio plugin.
  */

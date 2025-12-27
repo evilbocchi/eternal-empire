@@ -1,8 +1,7 @@
 import { Profile } from "@antivivi/profileservice/globals";
-import { simpleInterval } from "@antivivi/vrldk";
 import { OnStart, Service } from "@flamework/core";
 import { OnoeNum } from "@rbxts/serikanum";
-import { Players } from "@rbxts/services";
+import { HttpService, Players } from "@rbxts/services";
 import { Environment } from "@rbxts/ui-labs";
 import { OnPlayerAdded } from "server/services/ModdingService";
 import { getNameFromUserId } from "shared/constants";
@@ -94,6 +93,22 @@ export default class DataService implements OnStart, OnPlayerAdded {
                     (empireData as unknown as { [key: string]: unknown })[key] = value;
                 }
             }
+        }
+
+        // Load from saves/latest.json if starting fresh in Studio
+        if (IS_STUDIO && empireData.playtime === 0) {
+            pcall(() => {
+                const response = HttpService.GetAsync("http://localhost:28354/saves/latest.json");
+                const parsed = HttpService.JSONDecode(response) as { empireData?: EmpireData };
+
+                if (parsed.empireData !== undefined) {
+                    // Merge all fields from latest.json into current empireData
+                    for (const [key, value] of pairs(parsed.empireData)) {
+                        (empireData as unknown as Record<string, unknown>)[key] = value;
+                    }
+                    print("Loaded empire data from saves/latest.json");
+                }
+            });
         }
 
         // Give access to empire data to plugins for easy debugging
@@ -274,6 +289,7 @@ export default class DataService implements OnStart, OnPlayerAdded {
         if (empireData.logs.size() > 2000) {
             empireData.logs = [];
         }
+
         empireData.lastSession = tick();
         return { empireProfile, empireData, empireId };
     }
