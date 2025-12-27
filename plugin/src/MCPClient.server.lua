@@ -20,7 +20,6 @@
         - list_instances: List DataModel instances at a given path
         - find_item_model: Search for an item model by name in ItemModels folder
         - execute_luau: Run arbitrary Luau source within the plugin context and capture its output
-        - estimate_item_progression: Calculate time-to-obtain details for a specific item
 ]]
 
 local HttpService = game:GetService("HttpService")
