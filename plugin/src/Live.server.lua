@@ -1,10 +1,11 @@
 local HttpService = game:GetService("HttpService")
 local RunService = game:GetService("RunService")
-local getBaseUrl = require(script.Parent.getBaseUrl)
 local log = require(script.Parent.log)
 local StreamClient = require(script.Parent.StreamClient)
 
+local BASE_URL = "http://localhost:28354"
 local streamClient = nil
+local lastSentWaypoints = nil
 
 local function serializeInstanceTree(instance)
     local node = {
@@ -45,35 +46,42 @@ local function getWaypointData()
         }
 end
 
+local DATA_URL = BASE_URL .. "/live/data"
+
 local function sendUpdate()
     if not streamClient or not streamClient:isConnected() then
         return
     end
 
+    local currentWaypoints = getWaypointData()
+
+    -- Compare with last sent waypoints
+    local currentJson = HttpService:JSONEncode(currentWaypoints)
+    local lastJson = HttpService:JSONEncode(lastSentWaypoints)
+
+    if currentJson == lastJson then
+        return -- No change, skip sending
+    end
+
     local json = HttpService:JSONEncode({
-        waypoints = getWaypointData(),
-        save = {
-            player = game.Players.LocalPlayer.Name,
-            empireData = _G.empireData,
-            playerData = _G.playerData,
-        },
+        waypoints = currentWaypoints,
     })
 
-    -- Send via POST request instead of over the stream
-    local endpoint = getBaseUrl() .. "/live/data"
-
     local success, result = pcall(function()
-        return HttpService:PostAsync(endpoint, json, Enum.HttpContentType.ApplicationJson)
+        return HttpService:PostAsync(DATA_URL, json, Enum.HttpContentType.ApplicationJson)
     end)
 
     if not success then
-        log(string.format(`Failed to post {endpoint}: {result}`))
+        log(`Failed to post {DATA_URL}: {result}`)
+    else
+        -- Update last sent waypoints only on successful post
+        lastSentWaypoints = currentWaypoints
     end
 end
 
-local streamUrl = getBaseUrl() .. "/live/stream"
+local STREAM_URL = BASE_URL .. "/live/stream"
 streamClient = StreamClient.new({
-    url = streamUrl,
+    url = STREAM_URL,
     method = "GET",
     headers = {
         ["Accept"] = "text/event-stream",
@@ -81,13 +89,17 @@ streamClient = StreamClient.new({
     reconnectDelay = 5,
     log = log,
     onOpened = function(responseStatusCode)
-        log(string.format(`Connected to stream {streamUrl} (status: {responseStatusCode})`))
+        log(string.format(`Connected to stream {STREAM_URL} (status: {responseStatusCode})`))
         -- Send initial update on connection
         task.delay(0.5, sendUpdate)
     end,
     onMessage = function(message)
         -- Server can send refresh commands
         if type(message) == "string" and string.find(message, "refresh") then
+            local remote = workspace:FindFirstChild("LiveRemote")
+            if remote and remote:IsA("RemoteEvent") then
+                remote:FireAllClients(DATA_URL)
+            end
             sendUpdate()
         end
     end,
@@ -95,7 +107,7 @@ streamClient = StreamClient.new({
         log("Stream closed, reconnecting...")
     end,
     onError = function(responseStatusCode, errorMessage)
-        log(string.format(`Stream {streamUrl} error (status: {responseStatusCode}): {errorMessage}`))
+        log(string.format(`Stream {STREAM_URL} error (status: {responseStatusCode}): {errorMessage}`))
     end,
 })
 

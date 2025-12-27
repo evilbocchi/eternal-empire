@@ -1,4 +1,5 @@
 import { Profile } from "@antivivi/profileservice/globals";
+import { simpleInterval } from "@antivivi/vrldk";
 import { OnStart, Service } from "@flamework/core";
 import { OnoeNum } from "@rbxts/serikanum";
 import { Players } from "@rbxts/services";

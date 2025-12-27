@@ -534,8 +534,9 @@ local function handleCommand(payload)
     end
 end
 
+local STREAM_URL = BASE_URL .. STREAM_PATH
 streamClient = StreamClient.new({
-    url = BASE_URL .. STREAM_PATH,
+    url = STREAM_URL,
     method = "GET",
     headers = {
         ["Accept"] = "text/event-stream",
@@ -543,11 +544,7 @@ streamClient = StreamClient.new({
     reconnectDelay = 5,
     log = log,
     onOpened = function(responseStatusCode)
-        local message = "MCP stream opened"
-        if responseStatusCode ~= nil then
-            message = string.format("MCP stream opened (status %s)", tostring(responseStatusCode))
-        end
-        log(message)
+        log(`Connected to stream {STREAM_URL} (status: {responseStatusCode})`)
     end,
     onMessage = function(message)
         local payloadData = message

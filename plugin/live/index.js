@@ -48,7 +48,7 @@ app.get("/live/stream", (req, res) => {
     }, 500);
 
     // Periodically request updates from plugin
-    const REFRESH_INTERVAL = 2000; // 2 seconds
+    const REFRESH_INTERVAL = 7000; // 7 seconds
     const refreshInterval = setInterval(() => {
         if (res.writableEnded) {
             clearInterval(refreshInterval);

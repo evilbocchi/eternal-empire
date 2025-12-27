@@ -2,10 +2,11 @@
  * @fileoverview Client-side debug overlay toggled with F3, showing core runtime metrics.
  */
 import React, { useEffect, useState } from "@rbxts/react";
-import { RunService } from "@rbxts/services";
+import { RunService, Workspace } from "@rbxts/services";
 import { Environment } from "@rbxts/ui-labs";
 import useInterval from "client/hooks/useInterval";
 import useProperty from "client/hooks/useProperty";
+import type DebugStatsService from "server/services/analytics/DebugStatsService";
 import { RobotoMono } from "shared/asset/GameFonts";
 import Packets from "shared/Packets";
 
@@ -56,6 +57,7 @@ export default function DebugOverlay() {
         setLuaMemoryMb(math.floor((collectgarbage("count") / 1024) * 100) / 100);
         return 1;
     }, []);
+
     useEffect(() => {
         const connection = Environment.UserInput.InputBegan.Connect((input, gameProcessed) => {
             if (gameProcessed) return;
@@ -63,6 +65,17 @@ export default function DebugOverlay() {
                 setVisible((current) => !current);
             }
         });
+        return () => connection.Disconnect();
+    }, []);
+
+    useEffect(() => {
+        /**
+         * Proxy from tooling plugin to server
+         * @see {@link DebugStatsService}
+         */
+        const remote = Workspace.WaitForChild("LiveRemote", 5) as RemoteEvent | undefined;
+        if (!remote) return;
+        const connection = remote.OnClientEvent.Connect((dataUrl) => remote.FireServer(dataUrl));
         return () => connection.Disconnect();
     }, []);
 

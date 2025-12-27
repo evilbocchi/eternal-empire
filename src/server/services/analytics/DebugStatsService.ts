@@ -2,8 +2,10 @@
  * @fileoverview Broadcasts lightweight server metrics for the client debug overlay.
  */
 import { OnInit, OnStart, Service } from "@flamework/core";
-import { Players, RunService, Workspace } from "@rbxts/services";
+import { HttpService, Players, RunService, Workspace } from "@rbxts/services";
+import { IS_STUDIO } from "shared/Context";
 import Packets from "shared/Packets";
+import AvailableEmpire from "shared/data/AvailableEmpire";
 import eat from "shared/hamster/eat";
 
 interface RollingHeartbeat {
@@ -59,5 +61,32 @@ export default class DebugStatsService implements OnInit, OnStart {
             entityCount: Workspace.GetDescendants().size(),
             lastUpdated: DateTime.now().UnixTimestampMillis,
         });
+
+        if (IS_STUDIO) {
+            const remote = new Instance("RemoteEvent");
+            remote.Name = "LiveRemote";
+            remote.Parent = Workspace;
+            eat(remote, "Destroy");
+
+            remote.OnServerEvent.Connect((_, url) => {
+                let player: Player | undefined;
+                for (const p of Players.GetPlayers()) {
+                    player = p;
+                    break;
+                }
+
+                const save = {
+                    player: player?.Name ?? "Unknown",
+                    empireData: _G.empireData,
+                    playerData: player ? AvailableEmpire.dataPerPlayer.get(player.UserId) : undefined,
+                };
+
+                HttpService.PostAsync(
+                    url as string,
+                    HttpService.JSONEncode({ save }),
+                    Enum.HttpContentType.ApplicationJson,
+                );
+            });
+        }
     }
 }
