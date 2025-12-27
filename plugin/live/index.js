@@ -19,14 +19,14 @@ const logger = new Signale({
 // Configuration
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const REPO_ROOT = path.resolve(__dirname, "..");
+const REPO_ROOT = path.resolve(__dirname, "..", "..");
 const OUTPUT = path.resolve(REPO_ROOT, "src/services.d.ts");
 
 /**
- * GET /waypoint/stream
- * SSE endpoint for waypoint syncer - server sends refresh commands to client.
+ * GET /live/stream
+ * SSE endpoint for live syncer - server sends refresh commands to client.
  */
-app.get("/waypoint/stream", (req, res) => {
+app.get("/live/stream", (req, res) => {
     res.set({
         "Content-Type": "text/event-stream",
         "Cache-Control": "no-cache",
@@ -37,7 +37,7 @@ app.get("/waypoint/stream", (req, res) => {
         res.flushHeaders();
     }
 
-    logger.info("Waypoint syncer connected.");
+    logger.info("plugin.live connected to Roblox Studio");
 
     // Send initial connection confirmation
     res.write(": connected\n\n");
@@ -59,32 +59,43 @@ app.get("/waypoint/stream", (req, res) => {
 
     req.on("close", () => {
         clearInterval(refreshInterval);
-        logger.info("Waypoint syncer disconnected.");
+        logger.info("plugin.live disconnected from Roblox Studio");
     });
 
     req.on("error", (error) => {
         clearInterval(refreshInterval);
-        logger.error(`Waypoint stream error: ${error}`);
+        logger.error(`plugin.live stream error: ${error}`);
     });
 });
 
 /**
- * POST /waypoint/data
- * Receives waypoint data from Studio plugin.
+ * POST /live/data
+ * Receives live data from Studio plugin.
  */
-app.post("/waypoint/data", async (req, res) => {
-    const body = Array.isArray(req.body) ? req.body : null;
-    if (!body) {
-        return res.status(400).send("Missing or invalid JSON body.");
+app.post("/live/data", async (req, res) => {
+    const waypoints = req.body.waypoints;
+    if (waypoints) {
+        // Save TypeScript definitions
+        try {
+            const result = await writeFileIfChanged(OUTPUT, generateTypeScriptContent(waypoints), REPO_ROOT);
+            res.send(result.message);
+        } catch (error) {
+            logger.error(error);
+            res.status(500).send(`Failed to write to ${path.relative(REPO_ROOT, OUTPUT)}.`);
+        }
     }
 
-    const content = generateTypeScriptContent(body);
-    try {
-        const result = await writeFileIfChanged(OUTPUT, content, REPO_ROOT);
-        res.send(result.message);
-    } catch (error) {
-        logger.error(error);
-        res.status(500).send(`Failed to write to ${path.relative(REPO_ROOT, OUTPUT)}.`);
+    const save = req.body.save;
+    if (save) {
+        // Save to json
+        const savePath = path.resolve(REPO_ROOT, "saves", "latest.json");
+        try {
+            const result = await writeFileIfChanged(savePath, JSON.stringify(save, null, 4), REPO_ROOT);
+            res.send(result.message);
+        } catch (error) {
+            logger.error(error);
+            res.status(500).send(`Failed to write to ${path.relative(REPO_ROOT, savePath)}.`);
+        }
     }
 });
 

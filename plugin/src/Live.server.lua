@@ -22,14 +22,10 @@ local function serializeInstanceTree(instance)
     return node
 end
 
-local function sendWaypointUpdate()
-    if not streamClient or not streamClient:isConnected() or RunService:IsRunning() then
-        return
-    end
-
+local function getWaypointData()
     local waypoints = game:GetService("Workspace"):FindFirstChild("Waypoints")
     if not waypoints then
-        return
+        return nil
     end
 
     local waypointChildren = waypoints:GetChildren()
@@ -37,30 +33,47 @@ local function sendWaypointUpdate()
         return
     end
 
-    local trees = {
-        {
-            name = "Workspace",
-            className = "Workspace",
-            children = {
-                serializeInstanceTree(waypoints),
+    return RunService:IsRunning() and nil
+        or {
+            {
+                name = "Workspace",
+                className = "Workspace",
+                children = {
+                    serializeInstanceTree(waypoints),
+                },
             },
-        },
-    }
+        }
+end
 
-    local json = HttpService:JSONEncode(trees)
+local function sendUpdate()
+    if not streamClient or not streamClient:isConnected() then
+        return
+    end
+
+    local json = HttpService:JSONEncode({
+        waypoints = getWaypointData(),
+        save = {
+            player = game.Players.LocalPlayer.Name,
+            empireData = _G.empireData,
+            playerData = _G.playerData,
+        },
+    })
 
     -- Send via POST request instead of over the stream
+    local endpoint = getBaseUrl() .. "/live/data"
+
     local success, result = pcall(function()
-        return HttpService:PostAsync(getBaseUrl() .. "/waypoint/data", json, Enum.HttpContentType.ApplicationJson)
+        return HttpService:PostAsync(endpoint, json, Enum.HttpContentType.ApplicationJson)
     end)
 
     if not success then
-        log(string.format("Failed to send waypoint update: %s", tostring(result)))
+        log(string.format(`Failed to post {endpoint}: {result}`))
     end
 end
 
+local streamUrl = getBaseUrl() .. "/live/stream"
 streamClient = StreamClient.new({
-    url = getBaseUrl() .. "/waypoint/stream",
+    url = streamUrl,
     method = "GET",
     headers = {
         ["Accept"] = "text/event-stream",
@@ -68,21 +81,21 @@ streamClient = StreamClient.new({
     reconnectDelay = 5,
     log = log,
     onOpened = function(responseStatusCode)
-        log(string.format("Connected to waypoint stream (status: %s)", tostring(responseStatusCode)))
+        log(string.format(`Connected to stream {streamUrl} (status: {responseStatusCode})`))
         -- Send initial update on connection
-        task.delay(0.5, sendWaypointUpdate)
+        task.delay(0.5, sendUpdate)
     end,
     onMessage = function(message)
         -- Server can send refresh commands
         if type(message) == "string" and string.find(message, "refresh") then
-            sendWaypointUpdate()
+            sendUpdate()
         end
     end,
     onClosed = function()
-        log("Waypoint stream closed, reconnecting...")
+        log("Stream closed, reconnecting...")
     end,
     onError = function(responseStatusCode, errorMessage)
-        log(string.format("Stream error (status: %s): %s", tostring(responseStatusCode), tostring(errorMessage)))
+        log(string.format(`Stream {streamUrl} error (status: {responseStatusCode}): {errorMessage}`))
     end,
 })
 
