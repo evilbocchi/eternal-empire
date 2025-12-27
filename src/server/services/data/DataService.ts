@@ -93,6 +93,10 @@ export default class DataService implements OnStart, OnPlayerAdded {
                     (empireData as unknown as { [key: string]: unknown })[key] = value;
                 }
             }
+        }
+
+        // Give access to empire data to plugins for easy debugging
+        if (IS_STUDIO || IS_EDIT) {
             Environment.OriginalG.empireData = empireData;
         }
 
