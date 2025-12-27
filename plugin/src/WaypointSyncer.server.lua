@@ -59,43 +59,34 @@ local function sendWaypointUpdate()
     end
 end
 
-local function connectStream()
-    if streamClient then
-        return
-    end
+streamClient = StreamClient.new({
+    url = getBaseUrl() .. "/waypoint/stream",
+    method = "GET",
+    headers = {
+        ["Accept"] = "text/event-stream",
+    },
+    reconnectDelay = 5,
+    log = log,
+    onOpened = function(responseStatusCode)
+        log(string.format("Connected to waypoint stream (status: %s)", tostring(responseStatusCode)))
+        -- Send initial update on connection
+        task.delay(0.5, sendWaypointUpdate)
+    end,
+    onMessage = function(message)
+        -- Server can send refresh commands
+        if type(message) == "string" and string.find(message, "refresh") then
+            sendWaypointUpdate()
+        end
+    end,
+    onClosed = function()
+        log("Waypoint stream closed, reconnecting...")
+    end,
+    onError = function(responseStatusCode, errorMessage)
+        log(string.format("Stream error (status: %s): %s", tostring(responseStatusCode), tostring(errorMessage)))
+    end,
+})
 
-    streamClient = StreamClient.new({
-        url = getBaseUrl() .. "/waypoint/stream",
-        method = "GET",
-        headers = {
-            ["Accept"] = "text/event-stream",
-        },
-        reconnectDelay = 5,
-        log = log,
-        onOpened = function(responseStatusCode)
-            log(string.format("Connected to waypoint stream (status: %s)", tostring(responseStatusCode)))
-            -- Send initial update on connection
-            task.delay(0.5, sendWaypointUpdate)
-        end,
-        onMessage = function(message)
-            -- Server can send refresh commands
-            if type(message) == "string" and string.find(message, "refresh") then
-                sendWaypointUpdate()
-            end
-        end,
-        onClosed = function()
-            log("Waypoint stream closed, reconnecting...")
-        end,
-        onError = function(responseStatusCode, errorMessage)
-            log(string.format("Stream error (status: %s): %s", tostring(responseStatusCode), tostring(errorMessage)))
-        end,
-    })
-
-    streamClient:connect()
-end
-
--- Connect to stream on load
-connectStream()
+streamClient:connect()
 
 -- Cleanup on plugin unload
 plugin.Unloading:Connect(function()

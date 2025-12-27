@@ -534,69 +534,55 @@ local function handleCommand(payload)
     end
 end
 
-local function connectStream()
+streamClient = StreamClient.new({
+    url = BASE_URL .. STREAM_PATH,
+    method = "GET",
+    headers = {
+        ["Accept"] = "text/event-stream",
+    },
+    reconnectDelay = 5,
+    log = log,
+    onOpened = function(responseStatusCode)
+        local message = "MCP stream opened"
+        if responseStatusCode ~= nil then
+            message = string.format("MCP stream opened (status %s)", tostring(responseStatusCode))
+        end
+        log(message)
+    end,
+    onMessage = function(message)
+        local payloadData = message
+        if type(message) == "table" then
+            payloadData = message.Data or message.data or message.Body or message.body
+        end
+
+        if type(payloadData) ~= "string" then
+            return
+        end
+
+        local payload = parseSsePayload(payloadData)
+        if payload ~= nil then
+            handleCommand(payload)
+        end
+    end,
+    onClosed = function()
+        log("MCP stream closed, reconnecting...")
+    end,
+    onError = function(responseStatusCode, errorMessage)
+        local statusText = responseStatusCode and string.format("status %s", tostring(responseStatusCode))
+            or "unknown status"
+        log(string.format("Stream error (%s): %s", statusText, tostring(errorMessage)))
+    end,
+})
+
+streamClient:connect()
+
+plugin.Unloading:Connect(function()
     if streamClient then
-        return
+        streamClient:dispose()
     end
+end)
 
-    streamClient = StreamClient.new({
-        url = BASE_URL .. STREAM_PATH,
-        method = "GET",
-        headers = {
-            ["Accept"] = "text/event-stream",
-        },
-        reconnectDelay = 5,
-        log = log,
-        onOpened = function(responseStatusCode)
-            local message = "MCP stream opened"
-            if responseStatusCode ~= nil then
-                message = string.format("MCP stream opened (status %s)", tostring(responseStatusCode))
-            end
-            log(message)
-        end,
-        onMessage = function(message)
-            local payloadData = message
-            if type(message) == "table" then
-                payloadData = message.Data or message.data or message.Body or message.body
-            end
-
-            if type(payloadData) ~= "string" then
-                return
-            end
-
-            local payload = parseSsePayload(payloadData)
-            if payload ~= nil then
-                handleCommand(payload)
-            end
-        end,
-        onClosed = function()
-            log("MCP stream closed, reconnecting...")
-        end,
-        onError = function(responseStatusCode, errorMessage)
-            local statusText = responseStatusCode and string.format("status %s", tostring(responseStatusCode))
-                or "unknown status"
-            log(string.format("Stream error (%s): %s", statusText, tostring(errorMessage)))
-        end,
-    })
-
-    streamClient:connect()
-end
-
--- Public API
-local MCPClient = {
+_G.MCPClient = {
     callTool = callTool,
     listTools = listTools,
 }
-
--- Connect to stream on load
-connectStream()
-
-if plugin and plugin.Unloading then
-    plugin.Unloading:Connect(function()
-        if streamClient then
-            streamClient:dispose()
-        end
-    end)
-end
-
-return MCPClient
