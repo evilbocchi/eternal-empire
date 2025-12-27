@@ -1,15 +1,8 @@
 local HttpService = game:GetService("HttpService")
 local RunService = game:GetService("RunService")
-
-if RunService:IsRunning() then
-    return -- only run in studio
-end
+local getBaseUrl = require(script.Parent.getBaseUrl)
 
 local INTERVAL = 2 -- seconds
-local function getEndpoint()
-    local currentPort = workspace:GetAttribute("ToolingPort") or 28354
-    return `http://localhost:{currentPort}/waypointsync`
-end
 
 local connection = nil
 
@@ -58,12 +51,15 @@ local function sendInstanceTree()
 
     local json = HttpService:JSONEncode(trees)
     pcall(function()
-        HttpService:PostAsync(getEndpoint(), json, Enum.HttpContentType.ApplicationJson)
+        HttpService:PostAsync(getBaseUrl() .. "/waypointsync", json, Enum.HttpContentType.ApplicationJson)
     end)
 end
 
 local lastSend = tick() + 5 -- small delay after connecting to dev server
 task.spawn(function()
+    if RunService:IsRunning() then
+        return -- only run in studio
+    end
 	connection = RunService.Heartbeat:Connect(function(dt)
 		if  tick() - lastSend >= INTERVAL then
 			sendInstanceTree()

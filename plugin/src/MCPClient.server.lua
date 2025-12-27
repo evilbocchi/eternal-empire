@@ -1,34 +1,13 @@
 --[[
-    MCPClient - Roblox Studio Plugin for MCP HTTP Streaming
-    
-    This plugin connects to the MCP HTTP server using the new HttpService:CreateWebStreamClient() API.
-    It provides access to Model Context Protocol tools for querying the DataModel.
-    
-    Usage:
-        local MCPClient = require(script.Parent.MCPClient)
-        
-        -- Call a tool
-        local result, error = MCPClient.callTool("list_instances", {
-            path = "game.Workspace",
-            maxDepth = 2
-        })
-        
-        -- List available tools
-        local tools = MCPClient.listTools()
-    
+    MCP Client for Roblox Studio
+
     Available Tools:
-        - list_instances: List DataModel instances at a given path
-        - find_item_model: Search for an item model by name in ItemModels folder
-        - execute_luau: Run arbitrary Luau source within the plugin context and capture its output
+    - list_instances: List DataModel instances at a given path
+    - find_item_model: Search for an item model by name in ItemModels folder
+    - execute_luau: Run arbitrary Luau source within the plugin context and capture its output
 ]]
-
 local HttpService = game:GetService("HttpService")
-local RunService = game:GetService("RunService")
-local Workspace = game:GetService("Workspace")
-
-if RunService:IsRunning() then
-    return
-end
+local getBaseUrl = require(script.Parent.getBaseUrl)
 
 local STREAM_PATH = "/mcp/stream"
 local CALL_TOOL_PATH = "/mcp/call-tool"
@@ -73,15 +52,10 @@ local function closeStreamClient()
     end)
 
     if not success then
-        log(string.format("[MCPClient] Failed to close stream client: %s", tostring(result)))
+        log(string.format("Failed to close stream client: %s", tostring(result)))
     end
 
     streamClient = nil
-end
-
-local function getBaseUrl()
-    local port = Workspace:GetAttribute("ToolingPort") or 28354
-    return string.format("http://localhost:%d", port)
 end
 
 local function callTool(toolName, arguments)
@@ -104,12 +78,12 @@ local function callTool(toolName, arguments)
     end)
 
     if not success then
-        log(string.format("[MCPClient] Request to %s failed: %s", CALL_TOOL_PATH, tostring(result)))
+        log(string.format("Request to %s failed: %s", CALL_TOOL_PATH, tostring(result)))
         return nil, tostring(result)
     end
 
     if result.Success ~= true then
-        log(string.format("[MCPClient] Request to %s returned status %d", CALL_TOOL_PATH, result.StatusCode))
+        log(string.format("Request to %s returned status %d", CALL_TOOL_PATH, result.StatusCode))
         if result.Body then
             local decodeSuccess, decoded = pcall(function()
                 return HttpService:JSONDecode(result.Body)
@@ -126,7 +100,7 @@ local function callTool(toolName, arguments)
     end)
 
     if not decodeSuccess then
-        log(string.format("[MCPClient] Failed to decode response: %s", tostring(decoded)))
+        log(string.format("Failed to decode response: %s", tostring(decoded)))
         return nil, "Failed to decode response"
     end
 
@@ -176,12 +150,12 @@ local function listTools()
     end)
 
     if not success then
-        log(string.format("[MCPClient] Failed to list tools: %s", tostring(result)))
+        log(string.format("Failed to list tools: %s", tostring(result)))
         return nil
     end
 
     if result.Success ~= true then
-        log(string.format("[MCPClient] List tools returned status %d", result.StatusCode))
+        log(string.format("List tools returned status %d", result.StatusCode))
         return nil
     end
 
@@ -190,7 +164,7 @@ local function listTools()
     end)
 
     if not decodeSuccess then
-        log(string.format("[MCPClient] Failed to decode tools: %s", tostring(decoded)))
+        log(string.format("Failed to decode tools: %s", tostring(decoded)))
         return nil
     end
 
@@ -233,7 +207,7 @@ local function parseSsePayload(raw)
         decoded.type = eventType or decoded.type
         return decoded
     elseif not decodeSuccess then
-        log(string.format("[MCPClient] Failed to decode SSE payload: %s", tostring(decoded)))
+        log(string.format("Failed to decode SSE payload: %s", tostring(decoded)))
     end
 
     return nil
@@ -315,7 +289,7 @@ local function runLuauCode(code, chunkName, options)
             })
 
             if not ok and errorMessage then
-                log(string.format("[MCPClient] Failed to send tool progress: %s", tostring(errorMessage)))
+                log(string.format("Failed to send tool progress: %s", tostring(errorMessage)))
             end
         end)
     end
@@ -350,7 +324,7 @@ local function runLuauCode(code, chunkName, options)
     end)
 
     if not success then
-        log(string.format("[MCPClient] Failed to connect MessageOut listener: %s", tostring(connectionError)))
+        log(string.format("Failed to connect MessageOut listener: %s", tostring(connectionError)))
     end
 
     local ok, packedOrError = xpcall(function()
@@ -606,7 +580,7 @@ local function handleToolCommand(payload)
 
     local requestId = payload.requestId
     if type(requestId) ~= "string" then
-        log("[MCPClient] Received call-tool command without requestId")
+        log("Received call-tool command without requestId")
         return
     end
 
@@ -636,7 +610,7 @@ local function handleToolCommand(payload)
 
     local ok, errorMessage = postJson(TOOL_RESPONSE_PATH, responsePayload)
     if not ok then
-        log(string.format("[MCPClient] Failed to send tool response: %s", tostring(errorMessage)))
+        log(string.format("Failed to send tool response: %s", tostring(errorMessage)))
     end
 end
 
@@ -657,7 +631,7 @@ local function connectStream()
     end
 
     local url = getBaseUrl() .. STREAM_PATH
-    log(string.format("[MCPClient] Connecting to %s", url))
+    log(string.format("Connecting to %s", url))
 
     local success, clientOrError = pcall(function()
         return HttpService:CreateWebStreamClient(Enum.WebStreamClientType.RawStream, {
@@ -670,7 +644,7 @@ local function connectStream()
     end)
 
     if not success then
-        log(string.format("[MCPClient] Failed to create WebStream client: %s", tostring(clientOrError)))
+        log(string.format("Failed to create WebStream client: %s", tostring(clientOrError)))
         task.delay(RECONNECT_DELAY, connectStream)
         return
     end
@@ -693,7 +667,7 @@ local function connectStream()
         if responseStatusCode ~= nil then
             message = string.format("MCP stream opened (status %s)", tostring(responseStatusCode))
         end
-        log(string.format("[MCPClient] %s", message))
+        log(string.format("%s", message))
     end)
 
     addConnection(client.MessageReceived, function(message)
@@ -721,7 +695,7 @@ local function connectStream()
 
     addConnection(client.Error, function(responseStatusCode, errorMessage)
         local statusText = responseStatusCode and string.format("status %s", tostring(responseStatusCode)) or "unknown status"
-        local message = string.format("[MCPClient] Stream error (%s): %s", statusText, tostring(errorMessage))
+        local message = string.format("Stream error (%s): %s", statusText, tostring(errorMessage))
         log(message)
     end)
 end

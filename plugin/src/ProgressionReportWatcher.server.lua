@@ -1,20 +1,16 @@
 local HttpService = game:GetService("HttpService")
-
-local function getEndpoint()
-    local currentPort = workspace:GetAttribute("ToolingPort") or 28354
-    return `http://localhost:{currentPort}/progression-report`
-end
+local getBaseUrl = require(script.Parent.getBaseUrl)
 
 local MAX_CHUNK_SIZE = 50000
 
 local function postPayload(payloadTable)
     local payload = HttpService:JSONEncode(payloadTable)
     local ok, err = pcall(function()
-        HttpService:PostAsync(getEndpoint(), payload, Enum.HttpContentType.ApplicationJson)
+        HttpService:PostAsync(getBaseUrl() .. "/progression-report", payload, Enum.HttpContentType.ApplicationJson)
     end)
 
     if not ok then
-        warn(`[ProgressionReportWatcher] failed to post progression report: {err}`)
+        warn(`Failed to post progression report: {err}`)
     end
 
     return ok
