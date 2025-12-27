@@ -1,5 +1,6 @@
 local HttpService = game:GetService("HttpService")
 local getBaseUrl = require(script.Parent.getBaseUrl)
+local log = require(script.Parent.log)
 
 local MAX_CHUNK_SIZE = 50000
 
@@ -10,7 +11,7 @@ local function postPayload(payloadTable)
     end)
 
     if not ok then
-        warn(`Failed to post progression report: {err}`)
+        log(`Failed to post progression report: {err}`)
     end
 
     return ok

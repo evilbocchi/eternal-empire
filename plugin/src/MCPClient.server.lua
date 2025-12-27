@@ -8,6 +8,8 @@
 ]]
 local HttpService = game:GetService("HttpService")
 local getBaseUrl = require(script.Parent.getBaseUrl)
+local log = require(script.Parent.log)
+local StreamClient = require(script.Parent.StreamClient)
 
 local STREAM_PATH = "/mcp/stream"
 local CALL_TOOL_PATH = "/mcp/call-tool"
@@ -17,46 +19,6 @@ local TOOL_PROGRESS_PATH = "/mcp/tool-progress"
 
 local RECONNECT_DELAY = 5
 local streamClient
-local streamConnections = {}
-_G.mcpLogs = _G.mcpLogs or {}
-
-local function log(...)
-    if _G.mcpLogs == nil then
-        _G.mcpLogs = {}
-    end
-    table.insert(_G.mcpLogs, ...)
-end
-
-local function disconnectClientConnections()
-    for _, connection in ipairs(streamConnections) do
-        if connection and connection.Disconnect then
-            connection:Disconnect()
-        end
-    end
-    table.clear(streamConnections)
-end
-
-local function closeStreamClient()
-    if not streamClient then
-        return
-    end
-
-    disconnectClientConnections()
-
-    local success, result = pcall(function()
-        if typeof(streamClient.Close) == "function" then
-            streamClient:Close()
-        elseif typeof(streamClient.close) == "function" then
-            streamClient:close()
-        end
-    end)
-
-    if not success then
-        log(string.format("Failed to close stream client: %s", tostring(result)))
-    end
-
-    streamClient = nil
-end
 
 local function callTool(toolName, arguments)
     local url = getBaseUrl() .. CALL_TOOL_PATH
@@ -631,75 +593,47 @@ local function connectStream()
         return
     end
 
-    local url = getBaseUrl() .. STREAM_PATH
-    log(string.format("Connecting to %s", url))
+    streamClient = StreamClient.new({
+        url = getBaseUrl() .. STREAM_PATH,
+        method = "GET",
+        headers = {
+            ["Accept"] = "text/event-stream",
+        },
+        reconnectDelay = RECONNECT_DELAY,
+        log = log,
+        onOpened = function(responseStatusCode)
+            local message = "MCP stream opened"
+            if responseStatusCode ~= nil then
+                message = string.format("MCP stream opened (status %s)", tostring(responseStatusCode))
+            end
+            log(message)
+        end,
+        onMessage = function(message)
+            local payloadData = message
+            if type(message) == "table" then
+                payloadData = message.Data or message.data or message.Body or message.body
+            end
 
-    local success, clientOrError = pcall(function()
-        return HttpService:CreateWebStreamClient(Enum.WebStreamClientType.RawStream, {
-            Url = url,
-            Method = "GET",
-            Headers = {
-                ["Accept"] = "text/event-stream",
-            },
-        })
-    end)
+            if type(payloadData) ~= "string" then
+                return
+            end
 
-    if not success then
-        log(string.format("Failed to create WebStream client: %s", tostring(clientOrError)))
-        task.delay(RECONNECT_DELAY, connectStream)
-        return
-    end
+            local payload = parseSsePayload(payloadData)
+            if payload ~= nil then
+                handleCommand(payload)
+            end
+        end,
+        onClosed = function()
+            log("MCP stream closed, reconnecting...")
+        end,
+        onError = function(responseStatusCode, errorMessage)
+            local statusText = responseStatusCode and string.format("status %s", tostring(responseStatusCode))
+                or "unknown status"
+            log(string.format("Stream error (%s): %s", statusText, tostring(errorMessage)))
+        end,
+    })
 
-    local client = clientOrError
-    disconnectClientConnections()
-    streamClient = client
-
-    local function addConnection(signal, handler)
-        if not signal then
-            return
-        end
-
-        local connection = signal:Connect(handler)
-        table.insert(streamConnections, connection)
-    end
-
-    addConnection(client.Opened, function(responseStatusCode)
-        local message = "MCP stream opened"
-        if responseStatusCode ~= nil then
-            message = string.format("MCP stream opened (status %s)", tostring(responseStatusCode))
-        end
-        log(string.format("%s", message))
-    end)
-
-    addConnection(client.MessageReceived, function(message)
-        local payloadData = message
-        if type(message) == "table" then
-            payloadData = message.Data or message.data or message.Body or message.body
-        end
-
-        if type(payloadData) ~= "string" then
-            return
-        end
-
-        local payload = parseSsePayload(payloadData)
-        if payload ~= nil then
-            handleCommand(payload)
-        end
-    end)
-
-    addConnection(client.Closed, function()
-        if streamClient == client then
-            closeStreamClient()
-            task.delay(RECONNECT_DELAY, connectStream)
-        end
-    end)
-
-    addConnection(client.Error, function(responseStatusCode, errorMessage)
-        local statusText = responseStatusCode and string.format("status %s", tostring(responseStatusCode))
-            or "unknown status"
-        local message = string.format("Stream error (%s): %s", statusText, tostring(errorMessage))
-        log(message)
-    end)
+    streamClient:connect()
 end
 
 -- Public API
@@ -713,7 +647,9 @@ connectStream()
 
 if plugin and plugin.Unloading then
     plugin.Unloading:Connect(function()
-        closeStreamClient()
+        if streamClient then
+            streamClient:dispose()
+        end
     end)
 end
 
