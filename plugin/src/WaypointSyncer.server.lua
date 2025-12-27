@@ -4,9 +4,6 @@ local getBaseUrl = require(script.Parent.getBaseUrl)
 local log = require(script.Parent.log)
 local StreamClient = require(script.Parent.StreamClient)
 
-local INTERVAL = 2 -- seconds
-local RECONNECT_DELAY = 5 -- seconds
-
 local streamClient = nil
 
 local function serializeInstanceTree(instance)
@@ -26,7 +23,7 @@ local function serializeInstanceTree(instance)
 end
 
 local function sendWaypointUpdate()
-    if not streamClient or not streamClient:isConnected() then
+    if not streamClient or not streamClient:isConnected() or RunService:IsRunning() then
         return
     end
 
@@ -51,14 +48,10 @@ local function sendWaypointUpdate()
     }
 
     local json = HttpService:JSONEncode(trees)
-    
+
     -- Send via POST request instead of over the stream
     local success, result = pcall(function()
-        return HttpService:PostAsync(
-            getBaseUrl() .. "/waypoint/data",
-            json,
-            Enum.HttpContentType.ApplicationJson
-        )
+        return HttpService:PostAsync(getBaseUrl() .. "/waypoint/data", json, Enum.HttpContentType.ApplicationJson)
     end)
 
     if not success then
@@ -67,7 +60,7 @@ local function sendWaypointUpdate()
 end
 
 local function connectStream()
-    if streamClient or RunService:IsRunning() then
+    if streamClient then
         return
     end
 
@@ -77,7 +70,7 @@ local function connectStream()
         headers = {
             ["Accept"] = "text/event-stream",
         },
-        reconnectDelay = RECONNECT_DELAY,
+        reconnectDelay = 5,
         log = log,
         onOpened = function(responseStatusCode)
             log(string.format("Connected to waypoint stream (status: %s)", tostring(responseStatusCode)))

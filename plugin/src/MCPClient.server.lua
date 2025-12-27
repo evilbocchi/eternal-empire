@@ -17,7 +17,6 @@ local TOOLS_PATH = "/mcp/tools"
 local TOOL_RESPONSE_PATH = "/mcp/tool-response"
 local TOOL_PROGRESS_PATH = "/mcp/tool-progress"
 
-local RECONNECT_DELAY = 5
 local streamClient
 
 local function callTool(toolName, arguments)
@@ -546,7 +545,7 @@ local function connectStream()
         headers = {
             ["Accept"] = "text/event-stream",
         },
-        reconnectDelay = RECONNECT_DELAY,
+        reconnectDelay = 5,
         log = log,
         onOpened = function(responseStatusCode)
             local message = "MCP stream opened"
