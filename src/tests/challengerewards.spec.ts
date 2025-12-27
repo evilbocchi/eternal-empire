@@ -394,7 +394,6 @@ describe("ChallengeRewards", () => {
                     0,
                     "BarrenIslands",
                 );
-                print(i, placed?.posX, placed?.posY, placed?.posZ);
                 expect(placed).toBeDefined();
                 if (placed) placements.push(placed.id);
             }
