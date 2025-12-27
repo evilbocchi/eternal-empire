@@ -3,7 +3,7 @@
  */
 import { OnInit, OnStart, Service } from "@flamework/core";
 import { HttpService, Players, RunService, Workspace } from "@rbxts/services";
-import { IS_STUDIO } from "shared/Context";
+import { IS_EDIT, IS_STUDIO } from "shared/Context";
 import Packets from "shared/Packets";
 import AvailableEmpire from "shared/data/AvailableEmpire";
 import eat from "shared/hamster/eat";
@@ -68,7 +68,8 @@ export default class DebugStatsService implements OnInit, OnStart {
             remote.Parent = Workspace;
             eat(remote, "Destroy");
 
-            remote.OnServerEvent.Connect((_, url) => {
+            let lastUrl: string | undefined;
+            const sendSave = (url: string) => {
                 let player: Player | undefined;
                 for (const p of Players.GetPlayers()) {
                     player = p;
@@ -86,7 +87,20 @@ export default class DebugStatsService implements OnInit, OnStart {
                     HttpService.JSONEncode({ save }),
                     Enum.HttpContentType.ApplicationJson,
                 );
+            };
+
+            remote.OnServerEvent.Connect((_, url) => {
+                lastUrl = url as string;
+                sendSave(url as string);
             });
+
+            if (!IS_EDIT) {
+                game.BindToClose(() => {
+                    if (lastUrl) {
+                        sendSave(lastUrl);
+                    }
+                });
+            }
         }
     }
 }
