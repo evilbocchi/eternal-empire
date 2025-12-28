@@ -284,6 +284,7 @@ export default function App() {
 
     return (
         <Fragment>
+            <boolvalue key="mounted" Value={true} />
             <ResetRenderer />
         </Fragment>
     );

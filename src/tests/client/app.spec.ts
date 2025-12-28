@@ -36,9 +36,6 @@ function mountApp(): MountContext {
     container.Parent = ReplicatedStorage;
     const root = createRoot(container);
     root.render(React.createElement(App, {}));
-    for (let i = 0; i < 30; i++) {
-        RunService.Heartbeat.Wait();
-    }
     return { root, container, previousSandbox };
 }
 
@@ -60,19 +57,18 @@ afterAll(() => {
     PLACED_ITEMS_FOLDER.Destroy();
     SOUND_EFFECTS_GROUP.Destroy();
     getPlayerBackpack()?.Destroy();
-
-    // Clean up Sandbox attribute
-    Workspace.SetAttribute("Sandbox", undefined);
 });
 
 describe("App", () => {
     it("loads", () => {
         mount = mountApp();
         expect(mount?.container).toBeDefined();
+        expect(mount?.container.WaitForChild("mounted", 5)).toBeDefined();
     });
 
     it("creates expected roots in PlayerGui", () => {
         mount = mountApp();
+        mount.container.WaitForChild("mounted");
         const expectedRoots: Array<[string, keyof Instances]> = [
             ["DebugOverlay", "ScreenGui"],
             ["Title", "ScreenGui"],
@@ -100,7 +96,6 @@ describe("App", () => {
     });
 
     it("hides the loading screen after initialization completes", () => {
-        mount = mountApp();
         const loadingGui = new Instance("ScreenGui") as ScreenGui;
         loadingGui.Name = "LoadingScreen";
         loadingGui.ResetOnSpawn = false;

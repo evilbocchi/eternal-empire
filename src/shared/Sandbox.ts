@@ -6,7 +6,7 @@ import BuildBounds from "shared/placement/BuildBounds";
  * including toggling sandbox mode, creating baseplate bounds, and synthesizing workspace objects.
  */
 export default class Sandbox {
-    static readonly sandboxValue = (() => {
+    private static readonly sandboxValue = (() => {
         const value = Workspace.FindFirstChild("SANDBOX") as BoolValue | undefined;
         if (value?.Value === true) {
             Workspace.SetAttribute("Sandbox", true);
@@ -23,7 +23,7 @@ export default class Sandbox {
     })();
 
     /**
-     * BuildBounds for the baseplate if sandbox mode is enabled.
+     * BuildBounds for {@link baseplate} if sandbox mode is enabled.
      */
     static readonly baseplateBounds = (() => (this.baseplate ? new BuildBounds(this.baseplate) : undefined))();
 
