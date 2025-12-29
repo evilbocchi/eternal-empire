@@ -44,7 +44,7 @@
         "express": "^5.2.1",
         "prettier": "^3.7.4",
         "rbx-lune": "^1.0.0",
-        "rbxluau": "^1.5.0",
+        "rbxluau": "^1.7.0",
         "rbxts-asset-sync": "^0.4.2",
         "rbxts-transform-env": "^3.0.0",
         "rbxts-transformer-flamework": "^1.3.2",
