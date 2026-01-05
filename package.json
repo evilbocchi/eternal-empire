@@ -65,7 +65,7 @@
         "@antivivi/lemon-signal": "^1.2.4",
         "@antivivi/profileservice": "^1.5.2",
         "@antivivi/rbxnamecolor": "^1.0.1",
-        "@antivivi/vrldk": "^1.1.0",
+        "@antivivi/vrldk": "^1.2.0",
         "@flamework/components": "^1.3.2",
         "@flamework/core": "^1.3.2",
         "@rbxts/camera-shaker": "^1.0.8",
