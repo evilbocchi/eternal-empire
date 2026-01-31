@@ -67,6 +67,9 @@ const CHANGELOGS = [
         "Added level leaderboard",
         "Updated leaderboards to look cleaner",
         "Revamped UI",
+        "Removed Miscellaneous, changed all misc items to have their own respective difficulties",
+        "Added new quests",
+        "Added new materials for crafting",
     ]),
 ];
 
