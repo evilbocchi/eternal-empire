@@ -1,22 +1,19 @@
-import Command, { CommandAPI } from "shared/commands/Command";
+import { Server } from "shared/api/APIExpose";
+import Command from "shared/commands/Command";
 
 export = new Command(script.Name)
     .addAlias("ub")
     .setDescription("<player> <useId: boolean> : Unbans a player from the server.")
     .setExecute((o, p, useId) => {
-        const userId = CommandAPI.Command.id(p, useId);
+        const userId = Server.Command.id(p, useId);
         if (userId !== undefined) {
-            const success = CommandAPI.Permissions.remove("banned", userId);
+            const success = Server.Permissions.remove("banned", userId);
             if (success) {
-                CommandAPI.ChatHook.sendPrivateMessage(
-                    o,
-                    `Unbanned ${CommandAPI.Command.fp(p, userId)}`,
-                    "color:138,255,138",
-                );
+                Server.ChatHook.sendPrivateMessage(o, `Unbanned ${Server.Command.fp(p, userId)}`, "color:138,255,138");
             } else {
-                CommandAPI.ChatHook.sendPrivateMessage(
+                Server.ChatHook.sendPrivateMessage(
                     o,
-                    `${CommandAPI.Command.fp(p, userId)} is not banned`,
+                    `${Server.Command.fp(p, userId)} is not banned`,
                     "color:255,43,43",
                 );
             }

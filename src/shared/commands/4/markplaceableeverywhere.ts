@@ -1,4 +1,5 @@
-import Command, { CommandAPI } from "shared/commands/Command";
+import { Server } from "shared/api/APIExpose";
+import Command from "shared/commands/Command";
 import Items from "shared/items/Items";
 import Packets from "shared/Packets";
 

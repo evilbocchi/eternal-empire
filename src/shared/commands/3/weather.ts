@@ -1,4 +1,5 @@
-import Command, { CommandAPI } from "shared/commands/Command";
+import { Server } from "shared/api/APIExpose";
+import Command from "shared/commands/Command";
 import { WeatherType } from "shared/weather/WeatherTypes";
 
 export = new Command(script.Name)
@@ -6,7 +7,7 @@ export = new Command(script.Name)
     .setDescription("<type> : Set weather type. Options: clear, cloudy, rainy, thunderstorm")
     .setExecute((sender, weatherTypeStr) => {
         if (!weatherTypeStr) {
-            CommandAPI.ChatHook.sendPrivateMessage(
+            Server.ChatHook.sendPrivateMessage(
                 sender,
                 "Usage: /weather <type> - Options: clear, cloudy, rainy, thunderstorm",
                 "color:255,200,100",
@@ -34,7 +35,7 @@ export = new Command(script.Name)
                 targetWeather = WeatherType.Thunderstorm;
                 break;
             default:
-                CommandAPI.ChatHook.sendPrivateMessage(
+                Server.ChatHook.sendPrivateMessage(
                     sender,
                     `Invalid weather type: ${weatherTypeStr}. Options: clear, cloudy, rainy, thunderstorm`,
                     "color:255,43,43",
@@ -42,12 +43,12 @@ export = new Command(script.Name)
                 return;
         }
 
-        const atmosphereService = CommandAPI.Atmosphere;
+        const atmosphereService = Server.Atmosphere;
         if (atmosphereService && atmosphereService.setWeatherManual) {
             atmosphereService.setWeatherManual(targetWeather);
-            CommandAPI.ChatHook.sendPrivateMessage(sender, `Weather set to: ${targetWeather}`, "color:138,255,138");
+            Server.ChatHook.sendPrivateMessage(sender, `Weather set to: ${targetWeather}`, "color:138,255,138");
         } else {
-            CommandAPI.ChatHook.sendPrivateMessage(sender, "Weather system not available", "color:255,43,43");
+            Server.ChatHook.sendPrivateMessage(sender, "Weather system not available", "color:255,43,43");
         }
     })
     .setPermissionLevel(3);

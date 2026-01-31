@@ -1,4 +1,5 @@
-import Command, { CommandAPI } from "shared/commands/Command";
+import { Server } from "shared/api/APIExpose";
+import Command from "shared/commands/Command";
 import AvailableEmpire from "shared/data/AvailableEmpire";
 
 const debounce = new Map<number, number>();
@@ -12,7 +13,7 @@ export = new Command(script.Name)
             const now = os.clock();
             const last = debounce.get(sender.UserId) ?? 0;
             if (now - last < 5) {
-                CommandAPI.ChatHook.sendPrivateMessage(
+                Server.ChatHook.sendPrivateMessage(
                     sender,
                     `Please wait ${math.round(5 - (now - last))}s before inviting again.`,
                     "color:255,200,43",
@@ -22,21 +23,21 @@ export = new Command(script.Name)
             debounce.set(sender.UserId, now);
         }
 
-        const userId = CommandAPI.Command.id(target, useId);
+        const userId = Server.Command.id(target, useId);
         if (userId !== undefined) {
-            if (CommandAPI.Permissions.isLowerLevel(sender, userId)) {
-                CommandAPI.ChatHook.sendPrivateMessage(
+            if (Server.Permissions.isLowerLevel(sender, userId)) {
+                Server.ChatHook.sendPrivateMessage(
                     sender,
                     "You can't revoke someone with an equal/higher permission level.",
                     "color:255,43,43",
                 );
                 return;
             }
-            const empireId = CommandAPI.Data.empireId;
+            const empireId = Server.Data.empireId;
             AvailableEmpire.remove(userId, empireId);
-            CommandAPI.ChatHook.sendPrivateMessage(
+            Server.ChatHook.sendPrivateMessage(
                 sender,
-                `Revoked ${CommandAPI.Command.fp(target, userId)}`,
+                `Revoked ${Server.Command.fp(target, userId)}`,
                 "color:138,255,138",
             );
         }

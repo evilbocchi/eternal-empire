@@ -63,5 +63,3 @@ export default class Command {
         return commands;
     }
 }
-
-export const CommandAPI = {} as unknown as CommandAPI;

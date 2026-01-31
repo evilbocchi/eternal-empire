@@ -1,4 +1,5 @@
-import Command, { CommandAPI } from "shared/commands/Command";
+import { Server } from "shared/api/APIExpose";
+import Command from "shared/commands/Command";
 
 export = new Command(script.Name)
     .addAlias("breakallitems")
@@ -6,13 +7,13 @@ export = new Command(script.Name)
     .setPermissionLevel(4)
     .setExecute((sender) => {
         const placementIds = new Array<string>();
-        for (const [placementId] of CommandAPI.empireData.items.worldPlaced) {
+        for (const [placementId] of Server.empireData.items.worldPlaced) {
             placementIds.push(placementId);
         }
-        CommandAPI.Item.beginBreakdown(placementIds);
+        Server.Item.beginBreakdown(placementIds);
         const count = placementIds.size();
 
-        CommandAPI.ChatHook.sendPrivateMessage(
+        Server.ChatHook.sendPrivateMessage(
             sender,
             `Forced ${count} item${count === 1 ? "" : "s"} to break.`,
             "color:255,200,70",

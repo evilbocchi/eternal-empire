@@ -1,10 +1,11 @@
-import Command, { CommandAPI } from "shared/commands/Command";
+import { Server } from "shared/api/APIExpose";
+import Command from "shared/commands/Command";
 
 export = new Command(script.Name)
     .addAlias("cmc")
     .setDescription("Clears all most currencies and leaderboard data of the server.")
     .setExecute(() => {
-        CommandAPI.empireData.mostCurrencies.clear();
-        CommandAPI.Leaderboard.updateLeaderboards();
+        Server.empireData.mostCurrencies.clear();
+        Server.Leaderboard.updateLeaderboards();
     })
     .setPermissionLevel(4);

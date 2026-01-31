@@ -1,5 +1,6 @@
 import { AssetService } from "@rbxts/services";
-import Command, { CommandAPI } from "shared/commands/Command";
+import { Server } from "shared/api/APIExpose";
+import Command from "shared/commands/Command";
 import getPlayerBackpack from "shared/hamster/getPlayerBackpack";
 import { getPlayerCharacter } from "shared/hamster/getPlayerCharacter";
 
@@ -18,7 +19,7 @@ export = new Command(script.Name)
             return;
         }
 
-        const players = CommandAPI.Command.findPlayers(sender, target);
+        const players = Server.Command.findPlayers(sender, target);
         for (const player of players) {
             for (const child of asset.GetChildren()) {
                 child.Clone().Parent = getPlayerCharacter(player);

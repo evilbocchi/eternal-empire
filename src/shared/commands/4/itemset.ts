@@ -1,5 +1,5 @@
 import { Server } from "shared/api/APIExpose";
-import Command, { CommandAPI } from "shared/commands/Command";
+import Command from "shared/commands/Command";
 
 export = new Command(script.Name)
     .addAlias("iset")
@@ -15,11 +15,11 @@ export = new Command(script.Name)
                 return;
             }
             if (item.findTrait("Unique")) {
-                CommandAPI.Item.giveItem(item, amount);
+                Server.Item.giveItem(item, amount);
             } else {
-                CommandAPI.empireData.items.inventory.set(id, amount);
-                CommandAPI.empireData.items.bought.set(id, amount);
-                CommandAPI.Item.requestChanges();
+                Server.empireData.items.inventory.set(id, amount);
+                Server.empireData.items.bought.set(id, amount);
+                Server.Item.requestChanges();
             }
         };
         if (itemId === "all") {

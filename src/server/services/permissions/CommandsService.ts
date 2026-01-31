@@ -25,15 +25,11 @@
 import { OnInit, Service } from "@flamework/core";
 import { Players, TextChatService } from "@rbxts/services";
 import APIExposeService from "server/services/APIExposeService";
-import Command, { CommandAPI } from "shared/commands/Command";
+import ChatHookService from "server/services/permissions/ChatHookService";
+import PermissionService from "server/services/permissions/PermissionService";
+import Command from "shared/commands/Command";
 import { IS_EDIT } from "shared/Context";
 import eat from "shared/hamster/eat";
-
-declare global {
-    type CommandAPI = APIExposeService["Server"] & {
-        Command: CommandsService;
-    };
-}
 
 /**
  * Service that provides comprehensive chat command functionality with permission-based access control.
@@ -43,20 +39,17 @@ declare global {
  */
 @Service()
 export default class CommandsService implements OnInit {
-    constructor(private readonly apiExposeService: APIExposeService) {
-        const server = this.apiExposeService.Server as CommandAPI;
-        server.Command = this;
-        for (const [key, value] of pairs(server)) {
-            (CommandAPI as { [key: string]: unknown })[key] = value;
-        }
-    }
+    constructor(
+        private readonly chatHookService: ChatHookService,
+        private readonly permissionService: PermissionService,
+    ) {}
 
     parseCommandInvocation(command: Command, player: Player, unfilteredText: string) {
         const params = unfilteredText.split(" ");
         params.remove(0);
-        const pLevel = CommandAPI.Permissions.getPermissionLevel(player.UserId);
+        const pLevel = this.permissionService.getPermissionLevel(player.UserId);
         if (pLevel < command.permissionLevel) {
-            CommandAPI.ChatHook.sendPrivateMessage(
+            this.chatHookService.sendPrivateMessage(
                 player,
                 "You do not have access to this command.",
                 "color:255,43,43",

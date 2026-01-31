@@ -1,4 +1,5 @@
-import Command, { CommandAPI } from "shared/commands/Command";
+import { Server } from "shared/api/APIExpose";
+import Command from "shared/commands/Command";
 import Packets from "shared/Packets";
 
 export = new Command(script.Name)
@@ -10,9 +11,9 @@ export = new Command(script.Name)
             return;
         }
 
-        CommandAPI.ChatHook.sendPrivateMessage(
+        Server.ChatHook.sendPrivateMessage(
             sender,
-            `Your permission level is ${CommandAPI.Permissions.getPermissionLevel(sender.UserId)}`,
+            `Your permission level is ${Server.Permissions.getPermissionLevel(sender.UserId)}`,
             "color:138,255,138",
         );
         Packets.tabOpened.toClient(sender, "Commands");

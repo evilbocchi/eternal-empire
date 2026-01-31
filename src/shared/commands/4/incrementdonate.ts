@@ -1,4 +1,5 @@
-import Command, { CommandAPI } from "shared/commands/Command";
+import { Server } from "shared/api/APIExpose";
+import Command from "shared/commands/Command";
 
 export = new Command(script.Name)
     .addAlias("changedonate")
@@ -8,6 +9,6 @@ export = new Command(script.Name)
             warn("incrementdonate command can only be run by a player.");
             return;
         }
-        CommandAPI.Donation.incrementDonated(sender, tonumber(delta) ?? 0);
+        Server.Donation.incrementDonated(sender, tonumber(delta) ?? 0);
     })
     .setPermissionLevel(4);

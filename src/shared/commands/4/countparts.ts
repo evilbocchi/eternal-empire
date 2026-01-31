@@ -1,5 +1,6 @@
 import { Workspace } from "@rbxts/services";
-import Command, { CommandAPI } from "shared/commands/Command";
+import { Server } from "shared/api/APIExpose";
+import Command from "shared/commands/Command";
 
 export = new Command(script.Name)
     .addAlias("getpartcount")
@@ -7,6 +8,6 @@ export = new Command(script.Name)
     .setExecute(() => {
         let i = 0;
         for (const part of Workspace.GetDescendants()) if (part.IsA("BasePart")) i++;
-        CommandAPI.ChatHook.sendServerMessage("Part count: " + i);
+        Server.ChatHook.sendServerMessage("Part count: " + i);
     })
     .setPermissionLevel(4);

@@ -1,4 +1,5 @@
-import Command, { CommandAPI } from "shared/commands/Command";
+import { Server } from "shared/api/APIExpose";
+import Command from "shared/commands/Command";
 import { IS_STUDIO } from "shared/Context";
 import Packets from "shared/Packets";
 
@@ -9,19 +10,15 @@ export = new Command(script.Name)
     )
     .setExecute((sender) => {
         if (IS_STUDIO || (game.PrivateServerOwnerId === 0 && game.PrivateServerId !== "")) {
-            const joinLink = `https://www.roblox.com/games/start?placeId=${game.PlaceId}&launchData=${CommandAPI.Permissions.getAccessCode()}`;
-            CommandAPI.ChatHook.sendPrivateMessage(sender, "Join link: " + joinLink);
+            const joinLink = `https://www.roblox.com/games/start?placeId=${game.PlaceId}&launchData=${Server.Permissions.getAccessCode()}`;
+            Server.ChatHook.sendPrivateMessage(sender, "Join link: " + joinLink);
             if (sender !== undefined) {
                 Packets.codeReceived.toClient(sender, joinLink);
             } else {
                 Packets.codeReceived.toAllClients(joinLink);
             }
         } else {
-            CommandAPI.ChatHook.sendPrivateMessage(
-                sender,
-                "You cannot use this command on this server",
-                "color:255,43,43",
-            );
+            Server.ChatHook.sendPrivateMessage(sender, "You cannot use this command on this server", "color:255,43,43");
         }
     })
     .setPermissionLevel(1);

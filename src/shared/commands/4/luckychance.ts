@@ -1,4 +1,5 @@
-import Command, { CommandAPI } from "shared/commands/Command";
+import { Server } from "shared/api/APIExpose";
+import Command from "shared/commands/Command";
 import Dropper from "shared/item/traits/dropper/Dropper";
 
 export = new Command(script.Name)
@@ -9,10 +10,10 @@ export = new Command(script.Name)
     .setExecute((_player, newChance) => {
         const chance = tonumber(newChance) ?? 1000;
         if (chance < 0) {
-            CommandAPI.ChatHook.sendServerMessage("Lucky droplet chance cannot be negative. Use 0 to disable.");
+            Server.ChatHook.sendServerMessage("Lucky droplet chance cannot be negative. Use 0 to disable.");
             return;
         }
-        CommandAPI.ChatHook.sendServerMessage(
+        Server.ChatHook.sendServerMessage(
             `Changed lucky droplet chance to 1/${chance === 0 ? "disabled" : chance}. Old chance: 1/${Dropper.luckyChance === 0 ? "disabled" : Dropper.luckyChance}`,
         );
         Dropper.luckyChance = chance;

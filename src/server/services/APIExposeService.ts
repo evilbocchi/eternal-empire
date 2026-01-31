@@ -29,6 +29,7 @@ import LeaderboardChangeService from "server/services/leaderboard/LeaderboardCha
 import { LeaderboardService } from "server/services/leaderboard/LeaderboardService";
 import ModdingService from "server/services/ModdingService";
 import ChatHookService from "server/services/permissions/ChatHookService";
+import CommandsService from "server/services/permissions/CommandsService";
 import PermissionService from "server/services/permissions/PermissionService";
 import ResetService from "server/services/ResetService";
 import RevenueService from "server/services/RevenueService";
@@ -57,6 +58,7 @@ export default class APIExposeService {
         private readonly challengeService: ChallengeService,
         private readonly chatHookService: ChatHookService,
         private readonly chestService: ChestService,
+        private readonly commandsService: CommandsService,
         private readonly currencyService: CurrencyService,
         private readonly dataService: DataService,
         private readonly donationService: DonationService,
@@ -137,6 +139,13 @@ export default class APIExposeService {
              * @see {@link ChestService} for more details.
              */
             Chest: this.chestService,
+
+            /**
+             * Command management service.
+             * @borrows CommandsService as commandsService
+             * @see {@link CommandsService} for more details.
+             */
+            Command: this.commandsService,
 
             /**
              * Currency and balance management service.

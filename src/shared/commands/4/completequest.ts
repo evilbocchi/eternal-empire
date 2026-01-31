@@ -1,17 +1,18 @@
-import Command, { CommandAPI } from "shared/commands/Command";
+import { Server } from "shared/api/APIExpose";
+import Command from "shared/commands/Command";
 
 export = new Command(script.Name)
     .addAlias("cq")
     .setDescription("<questId> : Complete a quest.")
     .setExecute((_o, questId) => {
-        const quest = CommandAPI.Quest.Quest.REGISTRY.OBJECTS.get(questId);
+        const quest = Server.Quest.Quest.REGISTRY.OBJECTS.get(questId);
         if (quest === undefined) {
-            CommandAPI.ChatHook.sendPrivateMessage(_o, `Quest with ID '${questId}' not found.`);
+            Server.ChatHook.sendPrivateMessage(_o, `Quest with ID '${questId}' not found.`);
             return;
         }
         quest.completed = false; // Reset quest completion status
         quest.complete();
-        CommandAPI.Quest.Quest.reachStages();
-        CommandAPI.ChatHook.sendPrivateMessage(_o, `Quest '${questId}' marked as complete.`);
+        Server.Quest.Quest.reachStages();
+        Server.ChatHook.sendPrivateMessage(_o, `Quest '${questId}' marked as complete.`);
     })
     .setPermissionLevel(4);

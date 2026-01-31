@@ -1,5 +1,6 @@
 import { Workspace } from "@rbxts/services";
-import Command, { CommandAPI } from "shared/commands/Command";
+import { Server } from "shared/api/APIExpose";
+import Command from "shared/commands/Command";
 import { getPlayerCharacter } from "shared/hamster/getPlayerCharacter";
 
 export = new Command(script.Name)
@@ -10,13 +11,13 @@ export = new Command(script.Name)
     .setExecute((sender, amount) => {
         let walkspeed = tonumber(amount);
         if (walkspeed !== undefined && walkspeed < 0) {
-            CommandAPI.ChatHook.sendPrivateMessage(sender, "Walk speed cannot be negative.", "color:255,43,43");
+            Server.ChatHook.sendPrivateMessage(sender, "Walk speed cannot be negative.", "color:255,43,43");
             return;
         }
         const maxWalkSpeed = (Workspace.GetAttribute("WalkSpeed") as number) ?? 16;
         walkspeed ??= 16;
         if (walkspeed > maxWalkSpeed) {
-            CommandAPI.ChatHook.sendPrivateMessage(sender, `Walk speed capped at ${maxWalkSpeed}.`, "color:255,43,43");
+            Server.ChatHook.sendPrivateMessage(sender, `Walk speed capped at ${maxWalkSpeed}.`, "color:255,43,43");
         }
         walkspeed = math.min(walkspeed, maxWalkSpeed);
         const humanoid = getPlayerCharacter(sender)?.FindFirstChildOfClass("Humanoid");
@@ -24,6 +25,6 @@ export = new Command(script.Name)
             return;
         }
         humanoid.WalkSpeed = walkspeed;
-        CommandAPI.ChatHook.sendPrivateMessage(sender, `Walk speed set to ${walkspeed}.`, "color:138,255,138");
+        Server.ChatHook.sendPrivateMessage(sender, `Walk speed set to ${walkspeed}.`, "color:138,255,138");
     })
     .setPermissionLevel(0);

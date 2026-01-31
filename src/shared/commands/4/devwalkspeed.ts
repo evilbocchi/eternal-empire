@@ -1,11 +1,12 @@
-import Command, { CommandAPI } from "shared/commands/Command";
+import { Server } from "shared/api/APIExpose";
+import Command from "shared/commands/Command";
 
 export = new Command(script.Name)
     .addAlias("dws")
     .setDescription("<player> <amount> : Speeeeed.")
     .setExecute((o, p, a) => {
         const walkspeed = tonumber(a) ?? 0;
-        const players = CommandAPI.Command.findPlayers(o, p);
+        const players = Server.Command.findPlayers(o, p);
         for (const player of players) {
             const humanoid = player.Character?.FindFirstChildOfClass("Humanoid");
             if (humanoid !== undefined) {
