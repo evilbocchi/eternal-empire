@@ -108,7 +108,7 @@ describe("ChallengeRewards", () => {
             // Attempt to place an item
             expect(
                 Server.Item.serverPlace(KillbrickUpgrader.id, new Vector3(0, 5, 0), 0, "BarrenIslands"),
-            ).toBeDefined();
+            ).toBeSuccessful();
 
             // Should still have 1 available
             expect(Server.Item.getAvailableAmount(KillbrickUpgrader)).toBe(1);
@@ -116,7 +116,7 @@ describe("ChallengeRewards", () => {
             // Place another item
             expect(
                 Server.Item.serverPlace(KillbrickUpgrader.id, new Vector3(5, 5, 0), 0, "BarrenIslands"),
-            ).toBeDefined();
+            ).toBeSuccessful();
 
             // Now should have 0 available
             expect(Server.Item.getAvailableAmount(KillbrickUpgrader)).toBe(0);
@@ -125,7 +125,7 @@ describe("ChallengeRewards", () => {
             jest.spyOn(jest.globalEnv, "warn").mockImplementation(() => {}); // Suppress expected warning
             expect(
                 Server.Item.serverPlace(KillbrickUpgrader.id, new Vector3(10, 5, 0), 0, "BarrenIslands"),
-            ).toBeUndefined();
+            ).never.toBeSuccessful();
             expect(Server.Item.getAvailableAmount(KillbrickUpgrader)).toBe(0);
         });
 
@@ -178,10 +178,10 @@ describe("ChallengeRewards", () => {
             const availableBefore = Server.Item.getAvailableAmount(KillbrickUpgrader);
             expect(availableBefore).toBe(4);
 
-            const placedItem = Server.Item.serverPlace(KillbrickUpgrader.id, new Vector3(0, 5, 0), 0, "BarrenIslands");
+            const response = Server.Item.serverPlace(KillbrickUpgrader.id, new Vector3(0, 5, 0), 0, "BarrenIslands");
 
-            expect(placedItem).toBeDefined();
-            expect(placedItem?.item).toBe(KillbrickUpgrader.id);
+            expect(response).toBeSuccessful();
+            expect(response.placedItem?.item).toBe(KillbrickUpgrader.id);
 
             // Available should decrease by 1
             const availableAfter = Server.Item.getAvailableAmount(KillbrickUpgrader);
@@ -354,24 +354,24 @@ describe("ChallengeRewards", () => {
             expect(Server.Item.getAvailableAmount(KillbrickUpgrader)).toBe(3);
 
             // Place an item
-            const placed1 = Server.Item.serverPlace(KillbrickUpgrader.id, new Vector3(0, 5, 0), 0, "BarrenIslands");
-            expect(placed1).toBeDefined();
+            const response1 = Server.Item.serverPlace(KillbrickUpgrader.id, new Vector3(0, 5, 0), 0, "BarrenIslands");
+            expect(response1).toBeSuccessful();
             expect(Server.Item.getAvailableAmount(KillbrickUpgrader)).toBe(2);
 
             // Remove it
-            if (placed1) {
-                Server.Item.unplaceItems(undefined, new Set([placed1.id]));
+            if (response1.placedItem) {
+                Server.Item.unplaceItems(undefined, new Set([response1.placedItem.id]));
                 expect(Server.Item.getAvailableAmount(KillbrickUpgrader)).toBe(3);
             }
 
             // Place again
-            const placed2 = Server.Item.serverPlace(KillbrickUpgrader.id, new Vector3(5, 5, 0), 0, "BarrenIslands");
-            expect(placed2).toBeDefined();
+            const response2 = Server.Item.serverPlace(KillbrickUpgrader.id, new Vector3(5, 5, 0), 0, "BarrenIslands");
+            expect(response2).toBeSuccessful();
             expect(Server.Item.getAvailableAmount(KillbrickUpgrader)).toBe(2);
 
             // Remove again
-            if (placed2) {
-                Server.Item.unplaceItems(undefined, new Set([placed2.id]));
+            if (response2.placedItem) {
+                Server.Item.unplaceItems(undefined, new Set([response2.placedItem.id]));
                 expect(Server.Item.getAvailableAmount(KillbrickUpgrader)).toBe(3);
             }
 
@@ -388,14 +388,14 @@ describe("ChallengeRewards", () => {
             // Place all 5 items
             const placements = [];
             for (let i = 0; i < 5; i++) {
-                const placed = Server.Item.serverPlace(
+                const response = Server.Item.serverPlace(
                     KillbrickUpgrader.id,
                     new Vector3(i * 9, 0, 0),
                     0,
                     "BarrenIslands",
                 );
-                expect(placed).toBeDefined();
-                if (placed) placements.push(placed.id);
+                expect(response).toBeSuccessful();
+                if (response.placedItem) placements.push(response.placedItem.id);
             }
 
             expect(Server.Item.getAvailableAmount(KillbrickUpgrader)).toBe(0);
@@ -461,14 +461,14 @@ describe("ChallengeRewards", () => {
             expect(Server.Item.getAvailableAmount(KillbrickUpgrader)).toBe(1);
 
             // First placement should succeed
-            const placed1 = Server.Item.serverPlace(KillbrickUpgrader.id, new Vector3(0, 5, 0), 0, "BarrenIslands");
-            expect(placed1).toBeDefined();
+            const response1 = Server.Item.serverPlace(KillbrickUpgrader.id, new Vector3(0, 5, 0), 0, "BarrenIslands");
+            expect(response1).toBeSuccessful();
             expect(Server.Item.getAvailableAmount(KillbrickUpgrader)).toBe(0);
 
             // Second placement should fail (no items available)
             jest.spyOn(jest.globalEnv, "warn").mockImplementation(() => {});
-            const placed2 = Server.Item.serverPlace(KillbrickUpgrader.id, new Vector3(5, 5, 0), 0, "BarrenIslands");
-            expect(placed2).toBeUndefined();
+            const response2 = Server.Item.serverPlace(KillbrickUpgrader.id, new Vector3(5, 5, 0), 0, "BarrenIslands");
+            expect(response2).never.toBeSuccessful();
             expect(Server.Item.getAvailableAmount(KillbrickUpgrader)).toBe(0);
 
             // Challenge rewards should remain at 1
@@ -477,18 +477,19 @@ describe("ChallengeRewards", () => {
 
         it("does not create negative counts when removing more than placed", () => {
             Server.empireData.challengeItemRewards.set(KillbrickUpgrader.id, 2);
-            const placed = Server.Item.serverPlace(KillbrickUpgrader.id, new Vector3(0, 5, 0), 0, "BarrenIslands");
-            expect(placed).toBeDefined();
-            if (!placed) return;
+            const response = Server.Item.serverPlace(KillbrickUpgrader.id, new Vector3(0, 5, 0), 0, "BarrenIslands");
+            expect(response).toBeSuccessful();
+            if (!response.placedItem) return;
 
             expect(Server.Item.getAvailableAmount(KillbrickUpgrader)).toBe(1);
 
             // Remove the item
-            Server.Item.unplaceItems(undefined, new Set([placed.id]));
+            Server.Item.unplaceItems(undefined, new Set([response.placedItem.id]));
             expect(Server.Item.getAvailableAmount(KillbrickUpgrader)).toBe(2);
 
-            // Attempt to remove again with same ID (should be no-op or error)
-            Server.Item.unplaceItems(undefined, new Set([placed.id]));
+            // Attempt to remove again with same ID (should no-op)
+            Server.Item.unplaceItems(undefined, new Set([response.placedItem.id]));
+
             // Should still be 2, not 3
             expect(Server.Item.getAvailableAmount(KillbrickUpgrader)).toBe(2);
             expect(Server.empireData.challengeItemRewards.get(KillbrickUpgrader.id)).toBe(2);
@@ -499,16 +500,16 @@ describe("ChallengeRewards", () => {
             Server.empireData.items.inventory.set(KillbrickUpgrader.id, 3);
 
             // Place some items
-            const placed1 = Server.Item.serverPlace(KillbrickUpgrader.id, new Vector3(0, 5, 0), 0, "BarrenIslands");
-            const placed2 = Server.Item.serverPlace(KillbrickUpgrader.id, new Vector3(5, 5, 0), 0, "BarrenIslands");
-            expect(placed1).toBeDefined();
-            expect(placed2).toBeDefined();
+            const response1 = Server.Item.serverPlace(KillbrickUpgrader.id, new Vector3(0, 5, 0), 0, "BarrenIslands");
+            const response2 = Server.Item.serverPlace(KillbrickUpgrader.id, new Vector3(5, 5, 0), 0, "BarrenIslands");
+            expect(response1).toBeSuccessful();
+            expect(response2).toBeSuccessful();
 
             expect(Server.Item.getAvailableAmount(KillbrickUpgrader)).toBe(6); // 5 + 3 - 2 = 6
 
             // Break one placed item
-            if (placed1) {
-                Server.Item.beginBreakdown([placed1.id]);
+            if (response1.placedItem) {
+                Server.Item.beginBreakdown([response1.placedItem.id]);
                 expect(Server.Item.getAvailableAmount(KillbrickUpgrader)).toBe(6); // Still 6
             }
 
@@ -517,19 +518,19 @@ describe("ChallengeRewards", () => {
             expect(Server.Item.getAvailableAmount(KillbrickUpgrader)).toBe(4); // 5 + 3 - 2 - 2 = 4
 
             // Repair broken item
-            if (placed1) {
+            if (response1.placedItem) {
                 Server.Item.repairAllBrokenItems();
                 expect(Server.Item.getAvailableAmount(KillbrickUpgrader)).toBe(4); // Still 4 (item still placed)
             }
 
             // Remove placed items
-            if (placed2) {
-                Server.Item.unplaceItems(undefined, new Set([placed2.id]));
+            if (response2.placedItem) {
+                Server.Item.unplaceItems(undefined, new Set([response2.placedItem.id]));
                 expect(Server.Item.getAvailableAmount(KillbrickUpgrader)).toBe(5); // 5 + 3 - 1 - 2 = 5
             }
 
-            if (placed1) {
-                Server.Item.unplaceItems(undefined, new Set([placed1.id]));
+            if (response1.placedItem) {
+                Server.Item.unplaceItems(undefined, new Set([response1.placedItem.id]));
                 expect(Server.Item.getAvailableAmount(KillbrickUpgrader)).toBe(6); // 5 + 3 - 0 - 2 = 6
             }
 

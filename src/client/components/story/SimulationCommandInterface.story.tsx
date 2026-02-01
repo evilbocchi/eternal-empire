@@ -3,7 +3,8 @@ import ReactRoblox from "@rbxts/react-roblox";
 import { CreateReactStory } from "@rbxts/ui-labs";
 import StoryMocking from "client/components/StoryMocking";
 import SimulationCommandInterface from "client/components/story/SimulationCommandInterface";
-import cleanupSimulation from "shared/hamster/cleanupSimulation";
+import manuallyIgniteFlamework from "shared/hamster/manuallyIgniteFlamework";
+import ItemViewport from "shared/item/ItemViewport";
 
 export = CreateReactStory(
     {
@@ -13,11 +14,13 @@ export = CreateReactStory(
     },
     () => {
         StoryMocking.mockCharacter();
-        StoryMocking.mockFlamework();
-
         useEffect(() => {
-            return cleanupSimulation();
-        });
+            const flameworkContext = manuallyIgniteFlamework();
+            return () => {
+                flameworkContext.cleanup();
+                ItemViewport.cleanup();
+            };
+        }, []);
 
         return <SimulationCommandInterface />;
     },

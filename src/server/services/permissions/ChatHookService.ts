@@ -71,6 +71,12 @@ export default class ChatHookService implements OnStart, OnPlayerAdded {
         if (IS_EDIT) return;
 
         this.GLOBAL_CHANNEL?.AddUserAsync(player.UserId);
+
+        // Send join message to server chat
+        this.sendServerMessage(
+            `${player.DisplayName} (@${player.Name}) joined the empire!`,
+            "color:100,255,100", // Light green color
+        );
     }
 
     onStart() {
@@ -136,6 +142,16 @@ export default class ChatHookService implements OnStart, OnPlayerAdded {
 
             eat(connection, "Disconnect");
             eat(globalMessageConnection, "Disconnect");
+
+            // Handle player leaving
+            const playerLeavingConnection = Players.PlayerRemoving.Connect((player) => {
+                this.sendServerMessage(
+                    `${player.DisplayName} (@${player.Name}) left the empire.`,
+                    "color:255,150,150", // Light red color
+                );
+            });
+
+            eat(playerLeavingConnection, "Disconnect");
         }
     }
 }

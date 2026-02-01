@@ -1,11 +1,37 @@
-import { Janitor } from "@rbxts/janitor";
-import { afterAll, beforeAll, expect, jest } from "@rbxts/jest-globals";
+import { infoPerInstance, setInfoPerInstanceMap } from "@antivivi/vrldk";
+import { beforeAll, beforeEach, expect, jest } from "@rbxts/jest-globals";
 import { OnoeNum } from "@rbxts/serikanum";
 import { Workspace } from "@rbxts/services";
-import cleanupSimulation from "shared/hamster/cleanupSimulation";
-import { eater } from "shared/hamster/eat";
-import mockFlamework from "shared/hamster/mockFlamework";
+import { Server } from "shared/api/APIExpose";
+import manuallyIgniteFlamework from "shared/hamster/manuallyIgniteFlamework";
 import Sandbox from "shared/Sandbox";
+
+declare global {
+    interface _G {
+        /**
+         * To cut on test startup time, we only want to start up the game context once per test run.
+         * We store the game context here to reuse between test suites.
+         */
+        testGameContext?: {
+            server: Server;
+            infoPerInstance: Map<Instance, InstanceInfo>;
+        };
+    }
+
+    /**
+     * A standard response structure for API calls.
+     */
+    interface APIResponse {
+        /**
+         * Indicates whether the API call was successful.
+         */
+        success: boolean;
+        /**
+         * Optional reason for failure if the call was not successful, or additional info if needed.
+         */
+        message?: string;
+    }
+}
 
 declare module "@rbxts/jest-globals" {
     namespace jest {
@@ -15,6 +41,11 @@ declare module "@rbxts/jest-globals" {
              * @param expected The expected value (can be a number or OnoeNum)
              */
             toEqualOnoeNum: (expected: number | OnoeNum) => R;
+
+            /**
+             * Custom matcher to check if a response indicates success.
+             */
+            toBeSuccessful: () => R;
         }
     }
 }
@@ -53,6 +84,16 @@ expect.extend({
             };
         }
     },
+    toBeSuccessful(response: APIResponse) {
+        const pass = response.success === true;
+        return {
+            pass,
+            message: () =>
+                pass
+                    ? "Expected call to fail but it succeeded"
+                    : `Expected call to succeed but failed: ${response.message}`,
+        };
+    },
 });
 
 // Suppress noisy console output during tests
@@ -73,7 +114,7 @@ jest.spyOn(jest.globalEnv, "print").mockImplementation((...args: unknown[]) => {
     }
 });
 
-beforeAll(() => {
+beforeEach(() => {
     const existingNpcFolder = Workspace.FindFirstChild("NPCs") as Folder | undefined;
     if (existingNpcFolder === undefined) {
         const npcFolder = new Instance("Folder") as Folder;
@@ -81,23 +122,29 @@ beforeAll(() => {
         npcFolder.Parent = Workspace;
     }
 
-    // Start game
-    eater.janitor = new Janitor();
-    const cleanup = mockFlamework();
-    eater.janitor.Add(cleanup);
-    eater.janitor.Add(cleanupSimulation);
-
-    // Relocate baseplate to somewhere without other items
+    // The sandbox has items placed around y=0 by default, so to avoid interference
+    // we relocate baseplate to somewhere far below the sandbox items.
     if (Sandbox.baseplate && Sandbox.baseplateBounds) {
-        const originalCFrame = Sandbox.baseplate.CFrame;
         Sandbox.baseplate.Position = new Vector3(0, -500, 0);
         Sandbox.baseplateBounds.draw(Sandbox.baseplate);
-
-        eater.janitor.Add(() => {
-            if (!Sandbox.baseplate || !Sandbox.baseplate.Parent) return;
-            Sandbox.baseplate.CFrame = originalCFrame;
-        });
     }
 });
 
-afterAll(() => eater.janitor?.Destroy());
+beforeAll(async () => {
+    if (_G.testGameContext) {
+        // Recover from previous suite
+        for (const [key, value] of pairs(_G.testGameContext.server)) {
+            (Server as unknown as { [key: string]: unknown })[key] = value;
+        }
+        setInfoPerInstanceMap(_G.testGameContext.infoPerInstance);
+    } else {
+        // Start game
+        manuallyIgniteFlamework();
+        _G.testGameContext = {
+            server: Server,
+            infoPerInstance: infoPerInstance,
+        };
+    }
+
+    Server.Data.softWipe();
+});

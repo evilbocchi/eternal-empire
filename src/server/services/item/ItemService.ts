@@ -394,6 +394,8 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
      * This is a wrapper for {@link serverPlace}, additionally handling replication and firing the {@link itemsPlaced} signal.
      * Checks for permissions and area validity.
      *
+     * This method is preferred over {@link serverPlace} when placing items from player actions.
+     *
      * @param player Player that performed the placing
      * @param placingInfoSet List of items to place
      * @returns 0 if no items were placed, 1 if items were placed, 2 if items were placed and is allowed to place the same item again
@@ -414,7 +416,12 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
         const placedItems = new Set<IdPlacedItem>();
         const placementIds = new Set<string>();
         for (const placingInfo of placingInfoSet) {
-            const placedItem = this.serverPlace(placingInfo.id, placingInfo.position, placingInfo.rotation, area);
+            const placedItem = this.serverPlace(
+                placingInfo.id,
+                placingInfo.position,
+                placingInfo.rotation,
+                area,
+            ).placedItem;
             if (placedItem === undefined) {
                 if (placementIds.size() > 0) {
                     this.unplaceItems(player, placementIds);
@@ -450,9 +457,17 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
      * @param position Position of the PrimaryPart of the item model to place in.
      * @param rotation Rotation, in degrees, to rotate the item.
      * @param areaId The area to place the item in.
-     * @returns The placed item.
+     * @returns An object indicating success or failure, with the placed item and optional reason and delta from requirements.
      */
-    serverPlace(id: string, position: Vector3, rotation: number, areaId?: AreaId): IdPlacedItem | undefined {
+    serverPlace(
+        id: string,
+        position: Vector3,
+        rotation: number,
+        areaId?: AreaId,
+    ): APIResponse & {
+        placedItem?: IdPlacedItem;
+        delta?: number;
+    } {
         const empireData = this.dataService.empireData;
         const itemsData = empireData.items;
 
@@ -460,8 +475,10 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
         const uniqueInstance = itemsData.uniqueInstances.get(id);
         const item = Items.getItem(uniqueInstance?.baseItemId ?? id);
         if (item === undefined) {
-            warn(`Item ${id} not found in inventory or unique items.`);
-            return;
+            return {
+                success: false,
+                message: `Item ${id} not found in inventory or unique items.`,
+            };
         }
 
         const itemId = item.id;
@@ -469,13 +486,17 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
         if (uniqueInstance !== undefined) {
             for (const [uuid, instance] of itemsData.uniqueInstances) {
                 if (instance.baseItemId === itemId && instance.placed !== undefined) {
-                    warn(`${itemId} is already placed under ${uuid}. Cannot place again.`);
-                    return;
+                    return {
+                        success: false,
+                        message: `${itemId} is already placed under ${uuid}. Cannot place again.`,
+                    };
                 }
             }
         } else if (this.getAvailableAmount(item) <= 0) {
-            warn(`Not enough of item ${itemId} to place.`);
-            return;
+            return {
+                success: false,
+                message: `Not enough of item ${itemId} to place.`,
+            };
         }
 
         // Round rotation to nearest 90 degrees
@@ -484,10 +505,11 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
 
         // Check level requirements
         if (item.levelReq !== undefined && item.levelReq > empireData.level) {
-            print(
-                `Empire level too low to place item ${itemId}. Required: ${item.levelReq}, Current: ${empireData.level}`,
-            );
-            return;
+            return {
+                success: false,
+                message: `Empire level too low to place item ${itemId}. Required: ${item.levelReq}, Current: ${empireData.level}`,
+                delta: empireData.level - item.levelReq,
+            };
         }
 
         // Check challenge restrictions
@@ -498,8 +520,10 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
                 challenge.itemRestrictionFilter !== undefined &&
                 challenge.itemRestrictionFilter(item)
             ) {
-                print(`Item ${itemId} is restricted in the current challenge and cannot be placed.`);
-                return;
+                return {
+                    success: false,
+                    message: `Item ${itemId} is restricted in the current challenge and cannot be placed.`,
+                };
             }
         }
 
@@ -509,8 +533,10 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
         if (baseplateBounds === undefined) {
             // normal placement
             if (areaId === undefined) {
-                print("No area specified for item placement in normal mode.");
-                return;
+                return {
+                    success: false,
+                    message: "No area specified for item placement in normal mode.",
+                };
             }
 
             const area =
@@ -518,8 +544,10 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
                     ? ItemPlacement.getAreaOfPosition(position, item.placeableAreas)
                     : AREAS[areaId];
             if (area === undefined || area.buildBounds === undefined) {
-                print(`Position ${position} is not in a valid placeable area for item ${itemId}.`);
-                return;
+                return {
+                    success: false,
+                    message: `Position ${position} is not in a valid placeable area for item ${itemId}.`,
+                };
             }
 
             areaId = area.id;
@@ -538,8 +566,10 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
         // Calculate final position with snapping
         let cframe = buildBounds.snap(primaryPart.Size, position, math.rad(rotation));
         if (cframe === undefined) {
-            print(`Failed to snap item ${itemId} at position ${position}.`);
-            return;
+            return {
+                success: false,
+                message: `Failed to snap item ${itemId} at position ${position}.`,
+            };
         }
 
         // Adjust position if not inside build bounds
@@ -551,14 +581,18 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
 
         // Check for collisions with existing items
         if (ItemPlacement.isTouchingPlacedItem(model)) {
-            print(`Item ${itemId} placement collides with existing items.`);
-            return;
+            return {
+                success: false,
+                message: `Item ${itemId} placement collides with existing placed items.`,
+            };
         }
 
         // Check if placement is in valid area
         if (baseplateBounds === undefined && !ItemPlacement.isInPlaceableArea(model, item)) {
-            print(`Item ${itemId} placement is not in a valid placeable area.`);
-            return;
+            return {
+                success: false,
+                message: `Item ${itemId} placement is not in a valid placeable area.`,
+            };
         }
 
         // Create placed item data
@@ -592,7 +626,10 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
         this.changedPlacedItems.set(nextId, placedItem);
         this.addItemModel(nextId, placedItem);
 
-        return placedItem;
+        return {
+            success: true,
+            placedItem,
+        };
     }
 
     // Model Management Methods
@@ -623,28 +660,45 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
      * Checks for purchase requirements and attempts to buy the specified item for the empire.
      *
      * @param item Item to purchase.
-     * @returns Whether the purchase was successful.
+     * @returns Object indicating success or failure, with optional reason and delta from requirements.
      */
-    serverBuy(item: Item) {
+    serverBuy(item: Item): APIResponse & { delta?: number } {
         // Check required items
         for (const [requiredItemId, amount] of item.requiredItems) {
             const requiredItem = Items.getItem(requiredItemId);
             if (requiredItem === undefined) {
-                warn(`Required item ${requiredItemId} for purchasing ${item.id} not found.`);
-                return false;
+                return {
+                    success: false,
+                    message: `Required item ${requiredItemId} for purchasing ${item.id} not found.`,
+                };
             }
-            if (this.getAvailableAmount(requiredItem) < amount) {
-                return false;
+            const available = this.getAvailableAmount(requiredItem);
+            if (available < amount) {
+                return {
+                    success: false,
+                    message: `Not enough of required item ${requiredItemId} to purchase ${item.id}.`,
+                    delta: available - amount,
+                };
             }
         }
 
         // Check level requirements for harvesting tools
-        if (item.isA("Gear") && item.levelReq !== undefined && item.levelReq > this.dataService.empireData.level)
-            return false;
+        if (item.isA("Gear") && item.levelReq !== undefined && item.levelReq > this.dataService.empireData.level) {
+            return {
+                success: false,
+                message: `Player level too low to purchase item ${item.id}.`,
+                delta: this.dataService.empireData.level - item.levelReq,
+            };
+        }
 
         const nextBought = this.getBoughtAmount(item) + 1;
         const price = item.getPrice(nextBought);
-        if (price === undefined) return false;
+        if (price === undefined) {
+            return {
+                success: false,
+                message: `Item ${item.id} cannot be purchased anymore.`,
+            };
+        }
 
         // Attempt currency purchase
         const success = this.currencyService.purchase(price);
@@ -658,7 +712,7 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
             // Add item to inventory
             this.giveItem(item, 1);
         }
-        return success;
+        return { success };
     }
 
     /**
@@ -668,7 +722,7 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
      * @param itemId The ID of the item to buy.
      * @returns Whether the purchase was successful.
      */
-    buyItem(player: Player | undefined, itemId: string) {
+    buyItem(player: Player | undefined, itemId: string): boolean {
         if (player !== undefined && !this.permissionsService.hasPermission(player, "purchase")) {
             return false;
         }
@@ -677,7 +731,7 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
         if (player !== undefined && !this.hasUnlockedRequiredShop(item)) {
             return false;
         }
-        const success = this.serverBuy(item);
+        const success = this.serverBuy(item).success;
         if (success) {
             this.itemsBought.fire(player, new Set([item]));
         }
@@ -702,7 +756,7 @@ export default class ItemService implements OnInit, OnStart, OnGameAPILoaded {
             if (!this.hasUnlockedRequiredShop(item)) {
                 continue;
             }
-            if (this.serverBuy(item) === true) {
+            if (this.serverBuy(item).success === true) {
                 oneSucceeded = true;
                 bought.add(item);
             }

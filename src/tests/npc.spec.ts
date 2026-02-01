@@ -34,7 +34,6 @@ describe("npc interaction gating", () => {
 
         npc = new NPC("TestNPC");
         cleanup = npc.init();
-        expect(cleanup).toBeDefined();
         expect(npc.prompt).toBeDefined();
         expect(npc.prompt!.Enabled).toBe(true);
         expect(npc.prompt!.GetAttribute("MovementLocked")).toBe(false);

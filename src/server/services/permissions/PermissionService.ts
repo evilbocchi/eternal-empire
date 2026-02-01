@@ -39,6 +39,11 @@ type PermissionList = "banned" | "trusted" | "managers";
  */
 @Service()
 export default class PermissionService implements OnStart, OnPlayerAdded {
+    /**
+     * If true, development permission level checks are ignored and standard permission levels are used.
+     */
+    ignoreDevelopment = false;
+
     constructor(
         private dataService: DataService,
         private chatHookService: ChatHookService,
@@ -101,13 +106,12 @@ export default class PermissionService implements OnStart, OnPlayerAdded {
     /**
      * Gets the permission level for a user.
      * @param userId User ID
-     * @param ignoreTest Whether to ignore test server status (default false)
      * @returns Permission level (-2 banned, -1 restricted, 0 normal, 1 trusted, 2 manager, 3 owner, 4 developer/testing)
      */
-    getPermissionLevel(userId: number, ignoreTest?: boolean) {
+    getPermissionLevel(userId: number) {
         const data = this.dataService.empireData;
         const placeId = game.PlaceId;
-        if ((placeId === 16438564807 || placeId === 77876177882408 || IS_STUDIO) && ignoreTest !== true) {
+        if ((placeId === 16438564807 || placeId === 77876177882408 || IS_STUDIO) && !this.ignoreDevelopment) {
             return 4;
         } else {
             const p = Players.GetPlayerByUserId(userId);

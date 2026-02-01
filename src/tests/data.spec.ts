@@ -222,6 +222,8 @@ describe("profile migration", () => {
 
 describe("save/load cycles", () => {
     it("preserves currency values through serialization", () => {
+        Server.Currency.set("Funds", new OnoeNum(1.23e45));
+
         const originalFunds = Server.empireData.currencies.get("Funds");
         expect(originalFunds).toBeDefined();
 

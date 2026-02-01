@@ -162,9 +162,7 @@ describe("Marketplace & Shop Logic", () => {
                 Server.Currency.set("Funds", new OnoeNum(1e12));
                 Server.Currency.set("Time", new OnoeNum(1e12));
 
-                const success = Server.Item.serverBuy(BulkyDropper);
-
-                expect(success).toBe(true);
+                expect(Server.Item.serverBuy(BulkyDropper)).toBeSuccessful();
             });
 
             it("should allow purchase without player when shop check is bypassed", () => {
@@ -172,9 +170,7 @@ describe("Marketplace & Shop Logic", () => {
                 Server.Currency.set("Funds", new OnoeNum(1e12));
                 Server.Currency.set("Time", new OnoeNum(1e12));
 
-                const success = Server.Item.serverBuy(BulkyDropper);
-
-                expect(success).toBe(true);
+                expect(Server.Item.serverBuy(BulkyDropper)).toBeSuccessful();
             });
         });
 
@@ -535,9 +531,7 @@ describe("Marketplace & Shop Logic", () => {
                 Server.Currency.set("Funds", new OnoeNum(1e12));
                 Server.Currency.set("Time", new OnoeNum(1e12));
 
-                const success = Server.Item.serverBuy(TheFirstDropper);
-
-                expect(success).toBe(true);
+                expect(Server.Item.serverBuy(TheFirstDropper)).toBeSuccessful();
             });
 
             it("should handle multiple shops selling same item", () => {
@@ -568,11 +562,8 @@ describe("Marketplace & Shop Logic", () => {
                         }
                     }
 
-                    // Use serverBuy to bypass permission checks
-                    const success = Server.Item.serverBuy(itemInMultipleShops);
-
                     // Should succeed because at least one shop is unlocked
-                    expect(success).toBe(true);
+                    expect(Server.Item.serverBuy(itemInMultipleShops)).toBeSuccessful();
                 }
             });
         });

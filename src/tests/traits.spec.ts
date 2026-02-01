@@ -2,14 +2,6 @@ import { getAllInstanceInfo } from "@antivivi/vrldk";
 import { beforeEach, describe, expect, it } from "@rbxts/jest-globals";
 import { OnoeNum } from "@rbxts/serikanum";
 import { Workspace } from "@rbxts/services";
-import {
-    getTouchByName,
-    getTouchByTag,
-    setupTestCondenser,
-    spawnDroplet,
-    spawnItemModel,
-    withWeatherDisabled,
-} from "tests/utils";
 import { Server } from "shared/api/APIExpose";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import Droplet from "shared/item/Droplet";
@@ -17,7 +9,6 @@ import Boostable from "shared/item/traits/boost/Boostable";
 import Dropper from "shared/item/traits/dropper/Dropper";
 import Generator from "shared/item/traits/generator/Generator";
 import Ablaze from "shared/item/traits/status/Ablaze";
-import Massless, { Grounder } from "shared/item/traits/status/Massless";
 import Upgrader from "shared/item/traits/upgrader/Upgrader";
 import IllusionaryPortal from "shared/items/0/automatic/IllusionaryPortal";
 import FlamethrowerUpgrader from "shared/items/0/frivolous/FlamethrowerUpgrader";
@@ -33,6 +24,14 @@ import TheFirstUpgrader from "shared/items/negative/tfd/TheFirstUpgrader";
 import BasicCauldron from "shared/items/negative/tlg/BasicCauldron";
 import ImprovedFurnace from "shared/items/negative/tlg/ImprovedFurnace";
 import SmallReactor from "shared/items/negative/unimpossible/SmallReactor";
+import {
+    getTouchByName,
+    getTouchByTag,
+    setupTestCondenser,
+    spawnDroplet,
+    spawnItemModel,
+    withWeatherDisabled,
+} from "tests/utils";
 
 beforeEach(() => {
     Server.Data.softWipe();

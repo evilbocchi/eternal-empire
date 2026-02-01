@@ -1,7 +1,7 @@
 local fs = require("@lune/fs")
 local roblox = require("@lune/roblox")
 
-local localGame = roblox.deserializePlace(fs.readFile("sandbox/local.rbxl"))
+local localGame = roblox.deserializePlace(fs.readFile("out/place.rbxl"))
 local upstreamGame = roblox.deserializePlace(fs.readFile("sandbox/upstream.rbxl"))
 
 for _, item in ipairs(upstreamGame.Workspace:GetChildren()) do

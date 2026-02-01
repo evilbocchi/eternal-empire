@@ -71,9 +71,9 @@ export default class SetupService implements OnInit, OnStart {
      * @param player The player saving the setup.
      * @param area The area ID for the setup.
      * @param name The name of the setup.
-     * @returns Map of items and their counts in the setup.
+     * @returns Map of item IDs and their counts in the setup.
      */
-    saveSetup(player: Player, area: AreaId, name: string) {
+    saveSetup(player: Player, area: AreaId, name: string): Map<string, number> | undefined {
         if (!this.permissionsService.hasPermission(player, "build")) {
             return;
         }
@@ -81,16 +81,16 @@ export default class SetupService implements OnInit, OnStart {
         const items = new Array<PlacedItem>();
         for (const [_, placedItem] of data.items.worldPlaced) if (placedItem.area === area) items.push(placedItem);
         let totalPrice = new CurrencyBundle();
-        const itemCount = new Map<Item, number>();
+        const itemCount = new Map<string, number>();
         for (const placedItem of items) {
             const item = Items.getItem(placedItem.item);
             if (item === undefined) continue;
-            const currentItemCount = (itemCount.get(item) ?? 0) + 1;
+            const currentItemCount = (itemCount.get(item.id) ?? 0) + 1;
             const price = item.pricePerIteration.get(currentItemCount);
             if (price !== undefined && item.getResetLayer() < 100) {
                 totalPrice = totalPrice.add(price);
             }
-            itemCount.set(item, currentItemCount);
+            itemCount.set(item.id, currentItemCount);
         }
         let existingSetup: Setup | undefined;
         for (const setup of data.printedSetups)
@@ -125,15 +125,16 @@ export default class SetupService implements OnInit, OnStart {
      * @param player The player loading the setup.
      * @param area The area ID of the setup.
      * @param name The name of the setup to load.
-     * @returns True if loaded successfully, false otherwise.
+     * @returns An object indicating success or failure with an optional reason.
      */
-    loadSetup(player: Player, area: AreaId | undefined, name: string) {
+    loadSetup(player: Player, area: AreaId | undefined, name: string): APIResponse {
         if (
             !this.permissionsService.hasPermission(player, "build") ||
             !this.permissionsService.hasPermission(player, "purchase")
         ) {
-            return false;
+            return { success: false, message: "Insufficient permissions" };
         }
+
         let setup: Setup | undefined;
         const empireData = this.dataService.empireData;
         for (const s of empireData.printedSetups)
@@ -142,18 +143,15 @@ export default class SetupService implements OnInit, OnStart {
                 break;
             }
         if (setup === undefined) {
-            warn("No such setup", name);
-            return false;
+            return { success: false, message: `No such setup "${name}"` };
         }
         if (setup.area !== area) {
-            warn("Setup area mismatch", setup.area, area);
-            return false;
+            return { success: false, message: `Setup area mismatch. Expected ${area}, got ${setup.area}` };
         }
 
         const savedItems = setup.items;
         if (savedItems === undefined) {
-            warn(setup);
-            return false;
+            return { success: false, message: `No saved items in setup "${setup.name}"` };
         }
 
         const items = new Set<PlacingInfo>();
@@ -165,7 +163,7 @@ export default class SetupService implements OnInit, OnStart {
                 continue;
             }
 
-            if (this.itemService.getAvailableAmount(item) <= 0 && this.itemService.serverBuy(item) === false) {
+            if (this.itemService.getAvailableAmount(item) <= 0 && this.itemService.serverBuy(item).success === false) {
                 continue;
             }
 
@@ -177,11 +175,15 @@ export default class SetupService implements OnInit, OnStart {
             });
         }
         this.setupLoaded.fire(player, setup.area);
-        return (
+        const success =
             this.itemService.waitInQueue(() => {
                 return this.itemService.placeItems(player, items);
-            }) !== 0
-        );
+            }) !== 0;
+
+        if (!success) {
+            return { success: false, message: "Failed to place some or all items" };
+        }
+        return { success: true };
     }
 
     /**
@@ -223,7 +225,11 @@ export default class SetupService implements OnInit, OnStart {
             }
             debounce = tick();
 
-            return this.loadSetup(player, printer.area, name);
+            const response = this.loadSetup(player, printer.area, name);
+            if (!response.success && response.message !== undefined) {
+                print(`Setup load failed: ${response.message}`);
+            }
+            return response.success;
         });
 
         Packets.renameSetup.fromClient((player, currentName, renameTo) => {

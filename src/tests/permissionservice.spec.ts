@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, jest } from "@rbxts/jest-globals";
 import { HttpService } from "@rbxts/services";
 import { Server } from "shared/api/APIExpose";
-import Command, { CommandAPI } from "shared/commands/Command";
+import Command from "shared/commands/Command";
 
 describe("PermissionsService", () => {
     let snapshot: {
@@ -27,6 +27,8 @@ describe("PermissionsService", () => {
         data.managers = [];
         data.owner = snapshot.owner;
         data.permLevels = { ...snapshot.permLevels };
+
+        Server.Permissions.ignoreDevelopment = true;
     });
 
     afterEach(() => {
@@ -36,6 +38,8 @@ describe("PermissionsService", () => {
         data.managers = snapshot.managers;
         data.owner = snapshot.owner;
         data.permLevels = snapshot.permLevels;
+
+        Server.Permissions.ignoreDevelopment = false;
     });
 
     it("adds and avoids duplicating permission list entries", () => {
@@ -67,9 +71,9 @@ describe("PermissionsService", () => {
         data.trusted = [trustedId];
         data.banned = [bannedId];
 
-        expect(Server.Permissions.getPermissionLevel(ownerId, true)).toBe(3);
-        expect(Server.Permissions.getPermissionLevel(trustedId, true)).toBe(1);
-        expect(Server.Permissions.getPermissionLevel(bannedId, true)).toBe(-2);
+        expect(Server.Permissions.getPermissionLevel(ownerId)).toBe(3);
+        expect(Server.Permissions.getPermissionLevel(trustedId)).toBe(1);
+        expect(Server.Permissions.getPermissionLevel(bannedId)).toBe(-2);
     });
 
     it("formats access codes with the empire id", () => {
@@ -105,7 +109,7 @@ describe("PermissionsService", () => {
                 expect(data).toBe("You do not have access to this command.");
             });
 
-            CommandAPI.Command.parseCommandInvocation(command, player, `/permtest1 arg1 arg2`);
+            Server.Command.parseCommandInvocation(command, player, `/permtest1 arg1 arg2`);
 
             expect(count).toBe(0);
         });
@@ -125,7 +129,7 @@ describe("PermissionsService", () => {
                 })
                 .setPermissionLevel(2);
 
-            CommandAPI.Command.parseCommandInvocation(command, player, `/permtest2 arg1 arg2`);
+            Server.Command.parseCommandInvocation(command, player, `/permtest2 arg1 arg2`);
 
             expect(count).toBe(1);
             expect(calledPlayer).toBe(player);

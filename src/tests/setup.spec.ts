@@ -28,6 +28,7 @@ describe("Printer and SetupService", () => {
         items.worldPlaced.clear();
         items.brokenPlacedItems.clear();
         items.repairProtection.clear();
+        Server.empireData.printedSetups.clear();
         Server.Item.modelPerPlacementId.clear();
         for (const child of PLACED_ITEMS_FOLDER.GetChildren()) child.Destroy();
 
@@ -110,23 +111,12 @@ describe("Printer and SetupService", () => {
             Server.Item.giveItem(BulkyDropper, 1);
 
             // Place some items in BarrenIslands
-            const placedDropper1 = Server.Item.serverPlace(
-                TheFirstDropper.id,
-                new Vector3(0, 0, 0),
-                0,
-                "BarrenIslands",
-            );
-            const placedDropper2 = Server.Item.serverPlace(
-                TheFirstDropper.id,
-                new Vector3(5, 0, 0),
-                0,
-                "BarrenIslands",
-            );
-            const placedBulky = Server.Item.serverPlace(BulkyDropper.id, new Vector3(10, 0, 0), 0, "BarrenIslands");
-
-            expect(placedDropper1).toBeDefined();
-            expect(placedDropper2).toBeDefined();
-            expect(placedBulky).toBeDefined();
+            const response1 = Server.Item.serverPlace(TheFirstDropper.id, new Vector3(0, -490, 0), 0, "BarrenIslands");
+            const response2 = Server.Item.serverPlace(TheFirstDropper.id, new Vector3(5, -490, 0), 0, "BarrenIslands");
+            const response3 = Server.Item.serverPlace(BulkyDropper.id, new Vector3(50, -490, 0), 0, "BarrenIslands");
+            expect(response1).toBeSuccessful();
+            expect(response2).toBeSuccessful();
+            expect(response3).toBeSuccessful();
 
             // Save the setup
             const itemCount = Server.Setup.saveSetup(mockPlayer, "BarrenIslands", "TestSetup1");
@@ -143,8 +133,12 @@ describe("Printer and SetupService", () => {
 
             // Verify item count
             expect(itemCount).toBeDefined();
-            expect(itemCount!.get(TheFirstDropper)).toBe(2);
-            expect(itemCount!.get(BulkyDropper)).toBe(1);
+            for (const [itemId, count] of itemCount!) {
+                print(`Item ID: ${itemId}, Count: ${count}`);
+            }
+
+            expect(itemCount!.get(TheFirstDropper.id)).toBe(2);
+            expect(itemCount!.get(BulkyDropper.id)).toBe(1);
         });
 
         it("updates existing setup when saving with same name", () => {
@@ -250,18 +244,16 @@ describe("Printer and SetupService", () => {
             Server.Item.giveItem(BulkyDropper, 2);
 
             // Create and save a setup
-            const placed1 = Server.Item.serverPlace(TheFirstDropper.id, new Vector3(0, 0, 0), 0, "BarrenIslands");
-            const placed2 = Server.Item.serverPlace(BulkyDropper.id, new Vector3(5, 0, 0), 0, "BarrenIslands");
+            const response1 = Server.Item.serverPlace(TheFirstDropper.id, new Vector3(0, 0, 0), 0, "BarrenIslands");
+            const response2 = Server.Item.serverPlace(BulkyDropper.id, new Vector3(5, 0, 0), 0, "BarrenIslands");
             Server.Setup.saveSetup(mockPlayer, "BarrenIslands", "LoadTest");
 
             // Clear placed items
-            Server.Item.unplaceItems(undefined, new Set([placed1!.id, placed2!.id]));
+            Server.Item.unplaceItems(undefined, new Set([response1.placedItem!.id, response2.placedItem!.id]));
             expect(Server.empireData.items.worldPlaced.size()).toBe(0);
 
             // Load the setup
-            const success = Server.Setup.loadSetup(mockPlayer, "BarrenIslands", "LoadTest");
-
-            expect(success).toBe(true);
+            expect(Server.Setup.loadSetup(mockPlayer, "BarrenIslands", "LoadTest")).toBeSuccessful();
             expect(Server.empireData.items.worldPlaced.size()).toBe(2);
         });
 
@@ -270,7 +262,10 @@ describe("Printer and SetupService", () => {
             let capturedArea: AreaId | undefined;
 
             Server.Item.giveItem(TheFirstDropper, 2);
-            Server.Item.serverPlace(TheFirstDropper.id, new Vector3(0, 0, 0), 0, "BarrenIslands");
+            expect(
+                Server.Item.serverPlace(TheFirstDropper.id, new Vector3(0, 0, 0), 0, "BarrenIslands"),
+            ).toBeSuccessful();
+
             Server.Setup.saveSetup(mockPlayer, "BarrenIslands", "SignalTest");
 
             const connection = Server.Setup.setupLoaded.connect((player, area) => {
@@ -288,8 +283,7 @@ describe("Printer and SetupService", () => {
 
         it("returns false for non-existent setup", () => {
             jest.spyOn(jest.globalEnv, "warn").mockImplementation(() => {});
-            const success = Server.Setup.loadSetup(mockPlayer, "BarrenIslands", "NonExistentSetup");
-            expect(success).toBe(false);
+            expect(Server.Setup.loadSetup(mockPlayer, "BarrenIslands", "NonExistentSetup")).never.toBeSuccessful();
         });
 
         it("returns false for area mismatch", () => {
@@ -300,8 +294,7 @@ describe("Printer and SetupService", () => {
 
             // Try to load with wrong area
             Server.empireData.items.worldPlaced.clear();
-            const success = Server.Setup.loadSetup(mockPlayer, "SlamoVillage", "AreaTest");
-            expect(success).toBe(false);
+            expect(Server.Setup.loadSetup(mockPlayer, "SlamoVillage", "AreaTest")).never.toBeSuccessful();
 
             // No items should be placed
             expect(Server.empireData.items.worldPlaced.size()).toBe(0);
@@ -339,8 +332,11 @@ describe("Printer and SetupService", () => {
             Server.Item.giveItem(BulkyDropper, 1);
 
             // Place items at specific positions
-            Server.Item.serverPlace(TheFirstDropper.id, position1, rotation, "BarrenIslands");
-            Server.Item.serverPlace(BulkyDropper.id, position2, 0, "BarrenIslands");
+            const response1 = Server.Item.serverPlace(TheFirstDropper.id, position1, rotation, "BarrenIslands");
+            const response2 = Server.Item.serverPlace(BulkyDropper.id, position2, 0, "BarrenIslands");
+            expect(response1).toBeSuccessful();
+            expect(response2).toBeSuccessful();
+
             Server.Setup.saveSetup(mockPlayer, "BarrenIslands", "PositionTest");
 
             const setup = Server.empireData.printedSetups[0];
@@ -532,14 +528,15 @@ describe("Printer and SetupService", () => {
             expect(setup.calculatedPrice).toBeDefined();
 
             // Loading empty setup should succeed without errors
-            const success = Server.Setup.loadSetup(mockPlayer, "BarrenIslands", "EmptySetup");
             // Empty setups return false because no items were placed (0 !== 0)
-            expect(success).toBe(false);
+            expect(Server.Setup.loadSetup(mockPlayer, "BarrenIslands", "EmptySetup")).never.toBeSuccessful();
         });
 
         it("handles setup name with special characters", () => {
             Server.Item.giveItem(TheFirstDropper, 2);
-            Server.Item.serverPlace(TheFirstDropper.id, new Vector3(0, 0, 0), 0, "BarrenIslands");
+            expect(
+                Server.Item.serverPlace(TheFirstDropper.id, new Vector3(0, 0, 0), 0, "BarrenIslands"),
+            ).toBeSuccessful();
 
             // Note: In production, names would be filtered by TextService
             // For testing, we use a name with common special chars
@@ -550,8 +547,7 @@ describe("Printer and SetupService", () => {
             expect(setup.name).toBe(specialName);
 
             // Should be able to load by the same name
-            const success = Server.Setup.loadSetup(mockPlayer, "BarrenIslands", specialName);
-            expect(success).toBe(true);
+            expect(Server.Setup.loadSetup(mockPlayer, "BarrenIslands", specialName)).toBeSuccessful();
         });
 
         it("preserves setup data across multiple saves and loads", () => {
@@ -567,7 +563,7 @@ describe("Printer and SetupService", () => {
             const originalFundsCost = originalSetup.calculatedPrice.get("Funds");
 
             // Load it
-            const loadSuccess = Server.Setup.loadSetup(mockPlayer, "BarrenIslands", "PersistTest");
+            const loadSuccess = Server.Setup.loadSetup(mockPlayer, "BarrenIslands", "PersistTest").success;
             // Load may succeed or fail depending on item availability
             expect(typeOf(loadSuccess)).toBe("boolean");
 
@@ -579,6 +575,7 @@ describe("Printer and SetupService", () => {
 
             // Price should be similar (may differ due to iteration counts)
             const updatedFundsCost = updatedSetup.calculatedPrice.get("Funds");
+
             // Just verify the setup was updated without erroring
             expect(updatedFundsCost !== undefined || updatedSetup.items.size() === 0).toBe(true);
         });

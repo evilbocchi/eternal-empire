@@ -1,6 +1,7 @@
 import { describe, expect, it, jest } from "@rbxts/jest-globals";
 import { OnoeNum } from "@rbxts/serikanum";
 import { Server } from "shared/api/APIExpose";
+import { CURRENCY_DETAILS } from "shared/currency/CurrencyDetails";
 import Items from "shared/items/Items";
 import ItemPlacement from "shared/placement/ItemPlacement";
 
@@ -32,14 +33,14 @@ describe("items", () => {
             const uuids = Server.Item.giveItem(item, 1);
 
             let placingId = uuids === undefined ? itemId : uuids[0];
-            const placedItem = Server.Item.serverPlace(placingId, new Vector3(), 0);
+            const response = Server.Item.serverPlace(placingId, new Vector3(), 0);
 
-            if (placedItem === undefined) {
+            if (response.placedItem === undefined) {
                 warn(`Failed to place item with id ${itemId} for loading test.`);
                 continue;
             }
 
-            const model = Server.Item.modelPerPlacementId.get(placedItem.id);
+            const model = Server.Item.modelPerPlacementId.get(response.placedItem.id);
             if (model === undefined) warn(`No model found for placed item with id ${itemId} in loading test.`);
             expect(model).toBeDefined();
 
@@ -92,16 +93,16 @@ describe("items", () => {
             Server.empireData.items.researching.clear();
 
             // Place one item successfully
-            const placedItem1 = Server.Item.serverPlace(testItem.id, new Vector3(0, 0, 0), 0);
-            expect(placedItem1).toBeDefined();
+            const response1 = Server.Item.serverPlace(testItem.id, new Vector3(0, 0, 0), 0);
+            expect(response1).toBeSuccessful();
 
             // Reserve 4 items for research (leaving 0 available since 1 is placed)
             Server.empireData.items.researching.set(testItem.id, 4);
 
             // Should not be able to place another item
             jest.spyOn(jest.globalEnv, "warn").mockImplementation(() => {}); // Suppress expected warning
-            const placedItem2 = Server.Item.serverPlace(testItem.id, new Vector3(5, 0, 0), 0);
-            expect(placedItem2).toBeUndefined();
+            const response2 = Server.Item.serverPlace(testItem.id, new Vector3(5, 0, 0), 0);
+            expect(response2).never.toBeSuccessful();
 
             // Clean up
             Server.Item.unplaceItemsInArea(undefined, undefined);
@@ -134,7 +135,7 @@ describe("items", () => {
             // Set up: give enough currency and required items
             Server.empireData.level = math.huge;
             // Set all currencies to huge amounts
-            for (const [currency] of Server.Currency.balance.amountPerCurrency) {
+            for (const [currency] of pairs(CURRENCY_DETAILS)) {
                 Server.empireData.currencies.set(currency, new OnoeNum(1e100));
             }
 
@@ -142,16 +143,14 @@ describe("items", () => {
             Server.empireData.items.researching.clear();
 
             // Should be able to buy when items are available
-            const canBuy1 = Server.Item.serverBuy(itemWithRequirements);
-            expect(canBuy1).toBe(true);
+            expect(Server.Item.serverBuy(itemWithRequirements)).toBeSuccessful();
 
             // Reserve all required items for research
             Server.empireData.items.inventory.set(requiredItem.id, requiredAmount);
             Server.empireData.items.researching.set(requiredItem.id, requiredAmount);
 
             // Should not be able to buy when required items are being researched
-            const canBuy2 = Server.Item.serverBuy(itemWithRequirements);
-            expect(canBuy2).toBe(false);
+            expect(Server.Item.serverBuy(itemWithRequirements)).never.toBeSuccessful();
 
             // Clean up
             for (const [currency] of Server.Currency.balance.amountPerCurrency) {

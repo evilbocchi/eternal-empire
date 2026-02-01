@@ -6,7 +6,7 @@ import { CreateReactStory } from "@rbxts/ui-labs";
 import App from "client/components/App";
 import SimulationCommandInterface from "client/components/story/SimulationCommandInterface";
 import StoryMocking from "client/components/StoryMocking";
-import cleanupSimulation from "shared/hamster/cleanupSimulation";
+import manuallyIgniteFlamework from "shared/hamster/manuallyIgniteFlamework";
 import ItemViewport from "shared/item/ItemViewport";
 
 export = CreateReactStory(
@@ -17,12 +17,15 @@ export = CreateReactStory(
     () => {
         StoryMocking.mockPhysics();
         StoryMocking.mockCharacter();
-        StoryMocking.mockFlamework();
         ItemViewport.disable();
 
         useEffect(() => {
-            return cleanupSimulation();
-        });
+            const flameworkContext = manuallyIgniteFlamework();
+            return () => {
+                flameworkContext.cleanup();
+                ItemViewport.cleanup();
+            };
+        }, []);
 
         return (
             <Fragment>

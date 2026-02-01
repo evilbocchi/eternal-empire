@@ -69,7 +69,7 @@ export class LeaderboardService implements OnStart {
     debug = false;
 
     /** Set of DataStores that have been flushed (for deletion). */
-    flushed = new Set<OrderedDataStore>();
+    readonly flushed = new Set<OrderedDataStore>();
 
     /** Cached leaderboard data for React components */
     private readonly leaderboardData = new Map<LeaderboardType, LeaderboardEntry[]>();

@@ -7,10 +7,6 @@ import Droplet from "shared/item/Droplet";
 import TheFirstUpgrader from "shared/items/negative/tfd/TheFirstUpgrader";
 import SmallReactor from "shared/items/negative/unimpossible/SmallReactor";
 
-beforeEach(() => {
-    Server.Data.softWipe();
-});
-
 describe("Verbose Droplet Value Calculation", () => {
     it("tracks base droplet value without any modifiers", () => {
         const dropletData = spawnDroplet(Droplet.TheFirstDroplet);

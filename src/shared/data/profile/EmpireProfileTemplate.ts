@@ -206,6 +206,16 @@ const EmpireProfileTemplate = {
      */
     accessCode: "",
 
+    /**
+     * The number of times the empire has changed its name.
+     */
+    nameChanges: 0,
+
+    /**
+     * The previous names of the empire.
+     */
+    previousNames: new Set<string>(),
+
     // Management
 
     /**
@@ -399,16 +409,6 @@ const EmpireProfileTemplate = {
      * A list of setups (arrangement of placed items) that the empire has saved.
      */
     printedSetups: new Array<Setup>(),
-
-    /**
-     * The number of times the empire has changed its name.
-     */
-    nameChanges: 0,
-
-    /**
-     * The previous names of the empire.
-     */
-    previousNames: new Set<string>(),
 
     /**
      * The current leaderboard positions of this empire.

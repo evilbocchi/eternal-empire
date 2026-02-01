@@ -358,7 +358,7 @@ local function runLuauCode(code, chunkName, options)
 end
 
 local function serializeInstance(instance, maxDepth, currentDepth)
-    if not instance or not typeof(instance) == "Instance" then
+    if not instance or not (typeof(instance) == "Instance") then
         return nil
     end
 

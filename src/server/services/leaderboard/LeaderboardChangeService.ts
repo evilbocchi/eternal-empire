@@ -28,7 +28,26 @@ import eat from "shared/hamster/eat";
 @Service()
 export default class LeaderboardChangeService implements OnStart {
     /** Map of leaderboard names to their corresponding DataStores. */
-    readonly leaderboardStores = new Map<string, OrderedDataStore>();
+    readonly leaderboardStores = (() => {
+        const leaderboardStores = new Map<string, OrderedDataStore>();
+        if (
+            this.leaderboardService.totalTimeStore === undefined ||
+            this.leaderboardService.donatedStore === undefined
+        ) {
+            return leaderboardStores;
+        }
+
+        // Initialize currency leaderboard stores
+        leaderboardStores.set("TimePlayed", this.leaderboardService.totalTimeStore);
+        leaderboardStores.set("Donated", this.leaderboardService.donatedStore);
+
+        for (const lb of CollectionService.GetTagged("Leaderboard")) {
+            const currency = lb.Name as Currency;
+            if (CURRENCY_DETAILS[currency] === undefined) continue;
+            leaderboardStores.set(currency, DataStoreService.GetOrderedDataStore(lb.Name));
+        }
+        return leaderboardStores;
+    })();
 
     /** List of banned user IDs (excluded from leaderboards). */
     readonly banned = [1900444407];
@@ -36,24 +55,7 @@ export default class LeaderboardChangeService implements OnStart {
     constructor(
         private readonly dataService: DataService,
         private readonly leaderboardService: LeaderboardService,
-    ) {
-        if (
-            this.leaderboardService.totalTimeStore === undefined ||
-            this.leaderboardService.donatedStore === undefined
-        ) {
-            return;
-        }
-
-        // Initialize currency leaderboard stores
-        this.leaderboardStores.set("TimePlayed", this.leaderboardService.totalTimeStore);
-        this.leaderboardStores.set("Donated", this.leaderboardService.donatedStore);
-
-        for (const lb of CollectionService.GetTagged("Leaderboard")) {
-            const currency = lb.Name as Currency;
-            if (CURRENCY_DETAILS[currency] === undefined) continue;
-            this.leaderboardStores.set(currency, DataStoreService.GetOrderedDataStore(lb.Name));
-        }
-    }
+    ) {}
 
     /**
      * Gets the position of the current empire in a specific leaderboard.

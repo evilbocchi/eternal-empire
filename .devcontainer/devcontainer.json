@@ -1,6 +1,6 @@
 {
     "name": "rojo-roblox-ts-devcontainer",
-    "image": "mcr.microsoft.com/devcontainers/node:18",
+    "image": "mcr.microsoft.com/devcontainers/node:24",
     "customizations": {
         "vscode": {
             "extensions": [

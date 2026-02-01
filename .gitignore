@@ -2,6 +2,7 @@
 /out
 /include
 /docsout
+/coverage
 *.tsbuildinfo
 flamework.build
 *.build
@@ -12,4 +13,3 @@ local.rbxl
 upstream.rbxl
 *.lock
 *.log
-.robloxluauexecute

@@ -116,6 +116,12 @@ export default class DataService implements OnStart, OnPlayerAdded {
             Environment.OriginalG.empireData = empireData;
         }
 
+        this.initializeEmpireData(empireData);
+
+        return { empireProfile, empireData, empireId };
+    }
+
+    private initializeEmpireData(empireData: EmpireData) {
         // Set default names for public servers
         if (IS_PUBLIC_SERVER) empireData.name = IS_SINGLE_SERVER ? "Single Server" : "Public Server";
 
@@ -291,33 +297,42 @@ export default class DataService implements OnStart, OnPlayerAdded {
         }
 
         empireData.lastSession = tick();
-        return { empireProfile, empireData, empireId };
     }
 
     /**
      * Resets the empire data to default values while retaining ownership and basic info.
      */
     softWipe() {
-        this.empireData.items.bought.clear();
-        this.empireData.items.inventory.clear();
-        this.empireData.items.uniqueInstances.clear();
-        this.empireData.items.worldPlaced.clear();
-        this.empireData.items.brokenPlacedItems.clear();
-        this.empireData.items.inventory.set("ClassLowerNegativeShop", 1);
-        this.empireData.quests.clear();
-        this.empireData.currencies.clear();
-        this.empireData.mostCurrencies.clear();
-        this.empireData.mostCurrenciesSinceReset.clear();
-        this.empireData.upgrades.clear();
-        this.empireData.challenges.clear();
-        this.empireData.printedSetups = [];
-        this.empireData.completedEvents.clear();
-        this.empireData.questMetadata.clear();
-        this.empireData.lastSession = EmpireProfileTemplate.lastSession;
-        this.empireData.longestSession = EmpireProfileTemplate.longestSession;
-        this.empireData.playtime = EmpireProfileTemplate.playtime;
-        this.empireData.level = EmpireProfileTemplate.level;
-        this.empireData.xp = EmpireProfileTemplate.xp;
+        const toPreserve = ["name", "owner", "created", "accessCode", "nameChanges", "previousNames"];
+
+        const preservedData: Partial<EmpireData> = {};
+        for (const key of toPreserve) {
+            (preservedData as unknown as { [key: string]: unknown })[key] = (
+                this.empireData as unknown as { [key: string]: unknown }
+            )[key];
+        }
+
+        // Recursively copy default template values
+        const copyDefaults = (source: { [key: string]: unknown }, target: { [key: string]: unknown }) => {
+            for (const [key, oldValue] of pairs(target)) {
+                if (typeOf(oldValue) === "table") {
+                    const newValue = (source as { [key: string]: unknown })[key];
+                    if (typeOf(newValue) === "table") {
+                        copyDefaults(newValue as { [key: string]: unknown }, oldValue as { [key: string]: unknown });
+                    } else {
+                        (target as { [key: string]: unknown })[key] = newValue;
+                    }
+                } else {
+                    const newValue = (source as { [key: string]: unknown })[key];
+                    if (newValue !== undefined) {
+                        (target as { [key: string]: unknown })[key] = newValue;
+                    }
+                }
+            }
+        };
+        copyDefaults(EmpireProfileTemplate, this.empireData as { [key: string]: unknown });
+
+        this.initializeEmpireData(this.empireData);
     }
 
     onPlayerAdded(player: Player) {

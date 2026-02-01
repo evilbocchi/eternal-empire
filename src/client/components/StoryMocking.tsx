@@ -8,7 +8,6 @@ import { IS_EDIT } from "shared/Context";
 import CurrencyBundle from "shared/currency/CurrencyBundle";
 import { CURRENCY_DETAILS } from "shared/currency/CurrencyDetails";
 import PlayerProfileTemplate from "shared/data/profile/PlayerProfileTemplate";
-import mockFlamework from "shared/hamster/mockFlamework";
 import Unique from "shared/item/traits/Unique";
 import Items from "shared/items/Items";
 import Packets from "shared/Packets";
@@ -200,10 +199,6 @@ class StoryMocking {
             balance.set(currency, OnoeNum.fromSerika(math.random(1, 100), math.random(1, 500)));
         }
         return balance;
-    }
-
-    static mockFlamework() {
-        useEffect(mockFlamework, []);
     }
 
     static mockPhysics() {

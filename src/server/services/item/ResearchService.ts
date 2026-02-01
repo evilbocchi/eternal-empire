@@ -288,7 +288,7 @@ export default class ResearchService implements OnStart {
 
         let forged = false;
         for (let i = 0; i < amount; i++) {
-            if (!this.itemService.serverBuy(item)) {
+            if (!this.itemService.serverBuy(item).success) {
                 break;
             }
             forged = true;

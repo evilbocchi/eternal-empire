@@ -30,4 +30,4 @@
 - For sounds and particles, call `shared/asset/GameAssets.ts` (`getSound`, `emitEffect`) after ensuring the asset exists in `AssetMap`.
 
 ## Testing & Diagnostics
-- Server specs live in `src/server/tests/*.spec.ts`; run via `npm run test`. Do not prompt the user to run tests manually, just execute them yourself.
+- Server specs live in `src/tests/*.spec.ts`; build prior with `npm run build` then run via `npm run test` to test your changes.

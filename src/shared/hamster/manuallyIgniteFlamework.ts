@@ -2,7 +2,7 @@ import { Flamework, Modding, OnInit, OnPhysics, OnRender, OnStart, OnTick, Refle
 import { isConstructor } from "@flamework/core/out/utility";
 import { Players, RunService } from "@rbxts/services";
 
-export default function mockFlamework() {
+export default function manuallyIgniteFlamework() {
     // preload
     let isPreloading = false;
     const paths = [["ServerScriptService", "services"]];
@@ -182,22 +182,30 @@ export default function mockFlamework() {
         reuseThread(profileYielding(() => dependency.onStart(), identifier));
     }
 
-    return () => {
-        heartbeatConn.Disconnect();
-        steppedConn.Disconnect();
+    return {
+        cleanup: () => {
+            heartbeatConn.Disconnect();
+            steppedConn.Disconnect();
 
-        task.delay(5, () => {
-            for (const [, ctor] of idToObj) {
-                if (!isConstructor(ctor)) continue;
-                table.clear(ctor);
-            }
-            idToObj.clear();
+            task.delay(5, () => {
+                for (const [, ctor] of idToObj) {
+                    if (!isConstructor(ctor)) continue;
+                    table.clear(ctor);
+                }
+                idToObj.clear();
 
-            for (const [dependency] of dependencies) {
-                table.clear(dependency);
-            }
-            dependencies.clear();
-            sortedDependencies.clear();
-        });
+                for (const [dependency] of dependencies) {
+                    table.clear(dependency);
+                }
+                dependencies.clear();
+                sortedDependencies.clear();
+            });
+        },
+        dependencies,
+        init,
+        start,
+        tick,
+        render,
+        physics,
     };
 }
