@@ -22,7 +22,7 @@ jobs:
         env:
             ROBLOX_API_KEY: ${{ secrets.ROBLOX_API_KEY }}
             ROBLOX_GROUP_ID: ${{ secrets.ROBLOX_GROUP_ID }}
-            ROBLOSECURITY: ${{ secrets.ROBLOSECURITY }}
+            RBXLUAU_CREDENTIALS: ${{ secrets.RBXLUAU_CREDENTIALS }}
 
         steps:
             - name: Checkout
