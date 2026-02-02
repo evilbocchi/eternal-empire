@@ -22,9 +22,7 @@ jobs:
         env:
             ROBLOX_API_KEY: ${{ secrets.ROBLOX_API_KEY }}
             ROBLOX_GROUP_ID: ${{ secrets.ROBLOX_GROUP_ID }}
-            LUAU_EXECUTION_KEY: ${{ secrets.LUAU_EXECUTION_KEY }}
-            LUAU_EXECUTION_UNIVERSE_ID: ${{ secrets.LUAU_EXECUTION_UNIVERSE_ID }}
-            LUAU_EXECUTION_PLACE_ID: ${{ secrets.LUAU_EXECUTION_PLACE_ID }}
+            ROBLOSECURITY: ${{ secrets.ROBLOSECURITY }}
 
         steps:
             - name: Checkout
@@ -33,7 +31,7 @@ jobs:
             - name: Setup Node.js
               uses: actions/setup-node@v4
               with:
-                  node-version: "20"
+                  node-version: 22
                   cache: "npm"
 
             - name: Install Dependencies

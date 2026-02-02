@@ -1,8 +1,8 @@
 --!nocheck
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local mockFlamework = require(ReplicatedStorage.shared.hamster.mockFlamework).default
+local manuallyIgniteFlamework = require(ReplicatedStorage.shared.hamster.manuallyIgniteFlamework).default
 
-local cleanup = mockFlamework()
+local cleanup = manuallyIgniteFlamework().cleanup
 
 local PRINT_CHUNK_SIZE = 7000
 local REPORT_BEGIN_MARKER = "__PROGRESSION_ESTIMATE_BEGIN__"
