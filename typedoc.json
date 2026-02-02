@@ -12,7 +12,10 @@
     "placeInternalsInOwningModule": true,
     "highlightLanguages": [
         "lua",
+        "luau",
         "typescript",
+        "tsx",
+        "jsx",
         "sh"
     ],
     "entryPoints": [
@@ -26,6 +29,40 @@
     "out": "./docsout",
     "skipErrorChecking": true,
     "excludeExternals": true,
+    "suppressCommentWarningsInDeclarationFiles": true,
+    "validation": {
+        "notExported": false,
+        "invalidLink": false,
+        "notDocumented": false
+    },
+    "blockTags": [
+        "@fileoverview",
+        "@borrows",
+        "@since",
+        "@return",
+        "@public",
+        "@private",
+        "@remarks",
+        "@module",
+        "@moduleoverview",
+        "@packageDocumentation",
+        "@param",
+        "@returns",
+        "@template",
+        "@typeParam",
+        "@see",
+        "@link",
+        "@deprecated",
+        "@example",
+        "@throws",
+        "@defaultValue",
+        "@event",
+        "@inheritDoc",
+        "@internal",
+        "@override",
+        "@property",
+        "@virtual"
+    ],
 
     "favicon": "assets/brand/Cover.png",
     

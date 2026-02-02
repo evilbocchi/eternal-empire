@@ -2,7 +2,7 @@
 //!optimize 2
 
 /**
- * @fileoverviewrelated game events and boosts.
+ * @fileoverview Game events and boosts.
  *
  * This service handles:
  * - Bomb activation and timing

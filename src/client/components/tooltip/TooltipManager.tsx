@@ -56,7 +56,7 @@ export function useTooltipProps({ data, onEnter, onLeave }: UseTooltipProps): Us
  * Convenience hook for item tooltips
  *
  * @param item The item to display in the tooltip
- * @param uuid Unique item identifier
+ * @param uniqueInstance Unique item identifier
  * @returns Hover data object
  */
 
