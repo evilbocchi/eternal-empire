@@ -20,7 +20,7 @@ However, note that we strive to maintain things in a stable state. As such, chan
 ## Setup
 
 ### Prerequisities
-- [Node.js 19+](https://nodejs.org/en/download)
+- [Node.js 22+](https://nodejs.org/en/download)
 - [UI Labs (recommended)](https://ui-labs.luau.page/docs/installation)
 - React DevTools 4.9.0 (optional): `npm i -g react-devtools@4.9.0`
 
