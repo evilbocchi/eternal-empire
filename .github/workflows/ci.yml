@@ -20,8 +20,6 @@ on:
 jobs:
     test:
         runs-on: ubuntu-latest
-        environment: ci
-
         env:
             ROBLOX_API_KEY: ${{ secrets.ROBLOX_API_KEY }}
             ROBLOX_GROUP_ID: ${{ secrets.ROBLOX_GROUP_ID }}
