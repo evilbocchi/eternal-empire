@@ -1,7 +1,10 @@
 import { infoPerInstance, setInfoPerInstanceMap } from "@antivivi/vrldk";
 import { beforeAll, beforeEach, expect, jest } from "@rbxts/jest-globals";
+import React from "@rbxts/react";
+import { createRoot, Root } from "@rbxts/react-roblox";
 import { OnoeNum } from "@rbxts/serikanum";
-import { Workspace } from "@rbxts/services";
+import { ReplicatedStorage, Workspace } from "@rbxts/services";
+import App from "client/components/App";
 import { Server } from "shared/api/APIExpose";
 import manuallyIgniteFlamework from "shared/hamster/manuallyIgniteFlamework";
 import Sandbox from "shared/Sandbox";
@@ -14,8 +17,14 @@ declare global {
          */
         testGameContext?: {
             server: Server;
+            client: TestClientMount;
             infoPerInstance: Map<Instance, InstanceInfo>;
         };
+    }
+
+    interface TestClientMount {
+        root: Root;
+        container: Folder;
     }
 
     /**
@@ -130,7 +139,7 @@ beforeEach(() => {
     }
 });
 
-beforeAll(async () => {
+beforeAll(() => {
     if (_G.testGameContext) {
         // Recover from previous suite
         for (const [key, value] of pairs(_G.testGameContext.server)) {
@@ -138,10 +147,21 @@ beforeAll(async () => {
         }
         setInfoPerInstanceMap(_G.testGameContext.infoPerInstance);
     } else {
-        // Start game
+        // Start game server
         manuallyIgniteFlamework();
+
+        // Start game client
+        Workspace.SetAttribute("Sandbox", true);
+        const container = new Instance("Folder") as Folder;
+        container.Name = "AppContainer";
+        container.Parent = ReplicatedStorage;
+        const root = createRoot(container);
+        root.render(React.createElement(App, {}));
+        container.WaitForChild("mounted", 5);
+
         _G.testGameContext = {
             server: Server,
+            client: { root, container },
             infoPerInstance: infoPerInstance,
         };
     }
